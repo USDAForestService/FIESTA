@@ -1,0 +1,17 @@
+\name{WYtree}
+\docType{data}
+\alias{WYtree}
+\title{ FIA data. Tree-level data from FIA public database. }
+\description{ FIA tree-level data for the state of Wyoming, inventory years 2011-2012
+	and was downloaded Sept 8, 2017 from FIADB_1.7.0.00. }
+\usage{ WYtree }
+\format{ A dataframe with 45 columns and 37312 rows. }
+\source{ FIA Database. }
+
+\references{
+	O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer, D.; Wilson, A.M.; Waddell, K.L.;
+	Christensen, G.; Conkling, B.L. 2012. The Forest Inventory and Analysis Database: Database
+	Description and Users Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture. 
+	(http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user manual_5-1-2_p2_07_2012.pdf)
+}
+\keyword{ datasets }

@@ -1,0 +1,17 @@
+\name{WYunitarea}
+\docType{data}
+\alias{WYunitarea}
+\title{ FIA data. Acres data from FIA public database. }
+\description{ FIA acres by estimation unit for the state of Wyoming, inventory years 2011-2012
+	and was downloaded Sept 8, 2017 from FIADB_1.7.0.00. }
+\usage{ WYunitarea }
+\format{ A data table with 4 columns and 23 rows. }
+\source{ FIA Database. }
+
+\references{
+	O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer, D.; Wilson, A.M.; Waddell, K.L.;
+	Christensen, G.; Conkling, B.L. 2012. The Forest Inventory and Analysis Database: Database
+	Description and Users Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture. 
+	(http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user manual_5-1-2_p2_07_2012.pdf)
+}
+\keyword{ datasets }

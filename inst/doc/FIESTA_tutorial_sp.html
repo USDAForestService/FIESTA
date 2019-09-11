@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>FIESTA - Spatial Tools</title>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">FIESTA - Spatial Tools</h1>
+
+
+
+<div id="fiesta-overview" class="section level2">
+<h2>FIESTA Overview</h2>
+<p>The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R’s library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors.</p>
+<p>Functions are organized by type or objective and are named with a corresponding prefix:</p>
+<p><strong>Core Functions</strong></p>
+<ul>
+<li>Database tools (DB) - functions for querying and extracting data from FIA’s national database.</li>
+<li>Data tools (dat) - functions for summarizing and exploring FIA data.</li>
+<li>Spatial tools (sp) - functions for manipulating and summarizing spatial data.</li>
+</ul>
+<p><strong>Estimation Modules</strong></p>
+<ul>
+<li>Green-Book (GB) - functions for FIA’s standard ‘Green-Book’ estimators.</li>
+<li>Photo-Based (PB) - functions for supplementary photo-based estimators.</li>
+<li>Small Area (SA) - functions for integration with available small area estimators (SAE).</li>
+<li>Model-Assisted (MA) - functions for integration with available Model-Assisted estimators.</li>
+</ul>
+<p><strong>Analysis Tools</strong></p>
+<ul>
+<li>Analysis tools (an) - wrapper functions for steam-lining estimation processes.</li>
+</ul>
+<div id="overview-of-fiesta-spatial-sp-tools" class="section level3">
+<h3>Overview of FIESTA spatial (sp) tools</h3>
+<p>FIESTA’s spatial tools allow for summarizing and manipulating spatial data for use in FIESTA’s estimation modules.</p>
+<table>
+<colgroup>
+<col width="18%"></col>
+<col width="81%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>FUNCTION</th>
+<th>DESCRIPTION</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#spImportShape">spImportShape()</a></td>
+<td>Imports an Esri shapefile (*.shp) to an S4 Spatial object.</td>
+</tr>
+<tr class="even">
+<td><a href="#spExportShape">spExportShape()</a></td>
+<td>Exports an S4 Spatial object to an Esri shapefile (*.shp).</td>
+</tr>
+<tr class="odd">
+<td><a href="#spMakeSpatialPoints">spMakeSpatialPoints()</a></td>
+<td>Generates an S4 SpatialPoints object from X/Y coordinates.</td>
+</tr>
+<tr class="even">
+<td><a href="#spReprojectShape">spReprojectShape()</a></td>
+<td>Reprojects an Esri shapefile (*shp) or S4 Spatial object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#spClipPoint">spClipPoint()</a></td>
+<td>Subset points with a Spatial polygon layer.</td>
+</tr>
+<tr class="even">
+<td><a href="#spClipPoly">spClipPoly()</a></td>
+<td>Subset Spatial polygons layer with another Spatial polygons layer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#spClipRast">spClipRast()</a></td>
+<td>Subset raster layer with a Spatial polygons layer.</td>
+</tr>
+<tr class="even">
+<td><a href="#spExtractPoly">spExtractPoly()</a></td>
+<td>Extracts point attribute values from Spatial polygons layer(s).</td>
+</tr>
+<tr class="odd">
+<td><a href="#spExtractRast">spExtractRast()</a></td>
+<td>Extracts point attribute values from raster layer(s).</td>
+</tr>
+<tr class="even">
+<td><a href="#spStrata">spStrata()</a></td>
+<td>Extracts point attribute values and pixel counts for strata spatial layers.</td>
+</tr>
+<tr class="odd">
+<td><a href="#spUnionPoly">spUnionPoly()</a></td>
+<td>Generates one Spatial polygons object from two Spatial polygons layers.</td>
+</tr>
+<tr class="even">
+<td><a href="#spZonalRast">spZonalRast()</a></td>
+<td>Extracts summary statistics by polygon (i.e., zone) for a raster.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="objective-of-tutorial" class="section level3">
+<h3>Objective of tutorial</h3>
+<p>The objective of this tutorial is to demonstrate how to use FIESTA’s spatial tools for manipulating and summarizing spatial data. The examples use data from two inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.</p>
+</div>
+</div>
+<div id="example-data---wyoming-wy-inventory-years-2011-2012" class="section level2">
+<h2>Example data - Wyoming (WY), Inventory Years 2011-2012</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Data Frame</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>WYplt</td>
+<td>WY plot-level data</td>
+</tr>
+<tr class="even">
+<td>WYcond</td>
+<td>WY condition-level data</td>
+</tr>
+<tr class="odd">
+<td>WYtree</td>
+<td>WY tree-level data</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col width="27%"></col>
+<col width="72%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>External data</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>WYbighorn_adminbnd.shp</td>
+<td>Polygon shapefile of WY Bighorn National Forest Administrative boundary*</td>
+</tr>
+<tr class="even">
+<td>WYbighorn_districtbnd.shp</td>
+<td>Polygon shapefile of WY Bighorn National Forest District boundaries**</td>
+</tr>
+<tr class="odd">
+<td>WYbighorn_forest_nonforest_250m.tif</td>
+<td>GeoTIFF raster of predicted forest/nonforest (1/0) for stratification***</td>
+</tr>
+<tr class="even">
+<td>WYbighorn_dem_250m.img</td>
+<td>Erdas Imagine raster of elevation change, in meters****</td>
+</tr>
+</tbody>
+</table>
+<p>*USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.AdministrativeForest (). Description: An area encompassing all the National Forest System lands administered by an administrative unit. The area encompasses private lands, other governmental agency lands, and may contain National Forest System lands within the proclaimed boundaries of another administrative unit. All National Forest System lands fall within one and only one Administrative Forest Area.</p>
+<p>**USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (<a href="http://data.fs.usda.gov/geodata/edw" class="uri">http://data.fs.usda.gov/geodata/edw</a>). Description: A depiction of the boundary that encompasses a Ranger District.</p>
+<p>***Based on MODIS-based classified map resampled from 250m to 500m resolution and reclassified from 3 to 2 classes: 1:forest; 2:nonforest. Projected in Albers Conical Equal Area, Datum NAD27 (Ruefenacht et al. 2008). Clipped to extent of WYbighorn_adminbnd.shp.</p>
+<p>****USGS National Elevation Dataset (NED), resampled from 30m resolution to 250m. Projected in Albers Conical Equal Area, Datum NAD27 (U.S. Geological Survey 2017). Clipped to boundary of WYbighorn_adminbnd.shp.</p>
+<div id="examples" class="section level3">
+<h3>EXAMPLES</h3>
+<p>Set up for examples</p>
+<pre><code># Load library
+library(FIESTA)
+
+
+# Set workspace to FIESTA folder (create if doesn't exist)
+if (!file.exists(&quot;C:/FIESTA&quot;))  dir.create(&quot;C:/FIESTA&quot;)
+setwd(&quot;C:/FIESTA&quot;)
+
+# Create 2 subfolders under the FIESTA folder, 'data' and 'outfolder' and set path to objects 
+if (!file.exists(&quot;data&quot;))  dir.create(&quot;data&quot;)
+datfolder &lt;- &quot;data&quot; 
+
+if (!file.exists(&quot;outfolder&quot;)) dir.create(&quot;outfolder&quot;)
+outfolder &lt;- &quot;outfolder&quot;
+
+# File names for external spatial data
+WYbhfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_adminbnd.shp&quot;, package=&quot;FIESTA&quot;)
+WYbhdistfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_districtbnd.shp&quot;, package=&quot;FIESTA&quot;)
+WYbhdist.att &lt;- &quot;DISTRICTNA&quot;
+
+fornffn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_forest_nonforest_250m.tif&quot;, package=&quot;FIESTA&quot;)
+demfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_dem_250m.img&quot;, package=&quot;FIESTA&quot;)
+
+
+# Other spatial layers used for examples, extracted using the raster package, getData function.
+# County-level boundaries for USA and subset for Wyoming (Note: must have internet connection)
+USAco &lt;- raster::getData('GADM', country=&quot;USA&quot;, level=2)    
+head(USAco@data)
+WYco &lt;- USAco[USAco$NAME_1 == &quot;Wyoming&quot;,]
+
+</code></pre>
+<div id="spimportshape" class="section level4">
+<h4><a name="spImportShape"></a>spImportShape()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spImportShape(shpfn, shpfolder = NULL) 
+# 
+# Description:
+# Imports an Esri shapefile (*.shp) to an S4 Spatial object.
+######################################################################################
+
+## Import external data shapefiles
+WYbh &lt;- spImportSpatial(WYbhfn)
+WYbhdist &lt;- spImportSpatial(WYbhdistfn)
+
+## Display boundary
+sp::plot(WYbh)
+sp::plot(WYbhdist, add=TRUE)
+</code></pre>
+</div>
+<div id="spexportshape" class="section level4">
+<h4><a name="spExportShape"></a>spExportShape()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spExportShape(spobj, outfolder = NULL, outshpnm = NULL, overwrite = FALSE,
+#       uniqueid = NULL) 
+# 
+# Description:
+# Exports an S4 Spatial object to an Esri shapefile (*.shp).
+######################################################################################
+
+## Export Spatial Polygons layer to a shapefile
+spExportShape(WYbh, outfolder=outfolder, outshpnm=&quot;WYbh&quot;)
+
+## Check outfolder and display in ArcMap
+</code></pre>
+</div>
+<div id="spmakespatialpoints" class="section level4">
+<h4><a name="spMakeSpatialPoints"></a>spMakeSpatialPoints()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spMakeSpatialPoints(xyplt = NULL, uniqueid = NULL, x = NULL, y = NULL, EPSGCD = NULL,
+#       prj4str = NULL, prj = NULL, datum = NULL, zone = NULL, zoneS = FALSE, 
+#       aea.param = &quot;USGS&quot;, exportshp = FALSE, outfolder = NULL, outshpnm = NULL.
+#     outfn.date = TRUE, overwrite = FALSE) 
+# 
+# Description:
+# Generates an S4 SpatialPoints object from X/Y coordinates.
+######################################################################################
+
+## Generate a SpatialPoints object from the WY plot data (x=LON_PUBLIC, y=LAT_PUBLIC) 
+## Note: The coordinate system projection information is: prj=longlat, datum=NAD83.
+head(WYplt)
+WYspplt &lt;- spMakeSpatialPoints(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;,
+        prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;)
+        
+## Check and display output
+WYspplt
+sp::plot(WYbhdist)
+sp::plot(WYspplt, add=TRUE)
+
+## NOTE: To display multiple layers, all layers must be in the same coordinate system.
+lapply(list(WYbh, WYbhdist, WYspplt), sp::proj4string)
+</code></pre>
+</div>
+<div id="spreprojectshape" class="section level4">
+<h4><a name="spReprojectShape"></a>spReprojectShape()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spReprojectShape(shp, EPSGCD.new=NULL, prj4str.new = NULL, prj.new = NULL, 
+#       datum.new = NULL, zone.new = NULL, zoneS.new = FALSE, aea.param.new = &quot;USGS&quot;,
+#       exportshp = FALSE, outfolder = NULL, outshpnm = NULL) 
+# 
+# Description:
+# Reprojects an Esri shapefile (*shp) or S4 Spatial object. 
+# NOTE: The shp must have a defined coordinate reference system. Test using sp::proj4string(shp).
+######################################################################################
+
+## Reproject a vector Spatial object or file. 
+sp::proj4string(WYspplt)
+WYspplt.utm12 &lt;- spReprojectShape(splayer=WYspplt, prj.new=&quot;utm&quot;, datum.new=&quot;NAD83&quot;, zone.new=12)
+        
+## Check results
+sp::proj4string(WYspplt.utm12)
+
+</code></pre>
+</div>
+<div id="spclippoint" class="section level4">
+<h4><a name="spClipPoint"></a>spClipPoint()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spClipPoint(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, 
+#     clippolyv_layer, clippolyv_dsn = NULL, showext = FALSE, keepnull = FALSE, 
+#     savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,
+#     outfn.date = FALSE, overwrite = FALSE, othertabnms = NULL, ...) 
+# 
+# Description:
+# Subset SpatialPoints or point file with a Spatial polygon boundary.
+######################################################################################
+
+## Generate a SpatialPoints object from the WY plot data (x=LON_PUBLIC, y=LAT_PUBLIC) 
+WYspplt &lt;- spMakeSpatialPoints(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;,
+        prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;)
+ 
+## Subset the WYpts output from the previous example with the WYbighorn SpatialPolygons
+WYbhptslst &lt;- spClipPoint(spplt=WYspplt, uniqueid=&quot;CN&quot;, clippolyv_layer=WYbh)
+names(WYbhptslst)
+WYbhspplt &lt;- WYbhptslst$clip_spplt
+WYbhprj &lt;- WYbhptslst$clip_poly
+
+## Check and display output
+WYbhspplt
+sp::plot(WYbhspplt)
+sp::plot(WYbhprj, add=TRUE, border=&quot;red&quot;, lwd=2)
+
+spExportShape(WYbhspplt, &quot;WYbhpts&quot;, outfolder=outfolder)
+
+## NOTE: If the projection of spplt is not the same as the Spatial Points, the Spatial 
+##   Points layer will be reprojected to the same projection as clippolyv before the 
+##   evaluation points (See note in help file for more details).
+</code></pre>
+</div>
+<div id="spclippoly" class="section level4">
+<h4><a name="spClipPoly"></a>spClipPoly()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spClipPoly(polyv_layer, polyv_dsn = NULL, clippolyv_layer, clippolyv_dsn = NULL, 
+#     showext = FALSE, areacalc = FALSE, exportshp = FALSE, outfolder = NULL, 
+#       outshpnm = NULL, outfn.date = TRUE, overwrite = FALSE) 
+# 
+# Description:
+# Subset Spatial polygons layer with another Spatial polygons layer.
+######################################################################################
+
+## Subset the USAco SpatialPolygons layer with WYbighorn
+## NOTE: must download USAco from raster package. See above Example set up.
+WYbhco &lt;- spClipPoly(polyv_layer=USAco, clippolyv_layer=WYbh)
+
+## Check and display WYbighorn_co with labels
+head(WYbhco@data)
+sp::plot(WYbhco)
+raster::text(WYbhco, WYbhco@data$NAME_2, cex=0.75, pos=3)
+
+</code></pre>
+</div>
+<div id="spcliprast" class="section level4">
+<h4><a name="spClipRast"></a>spClipRast()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spClipRast(polyv_layer, polyv_dsn = NULL, rast, rastfolder = NULL,  
+#       bands = NULL, NODATA = NULL, buffdist = NULL, maskByPolygons = TRUE, 
+#     showext = FALSE, setNODATA = FALSE, fmt = &quot;HFA&quot;, outfolder = NULL, 
+#     outfn = NULL, overwrite = FALSE) 
+# 
+# Description:
+# Subset Spatial polygons layer with another Spatial polygons layer.
+######################################################################################
+
+## Subset the strata layer with the Medicine Wheel district boundary.
+WYbhdist@data
+WYbhMW &lt;- WYbhdist[WYbhdist$DISTRICTNA == &quot;Medicine Wheel Ranger District&quot;,]
+
+sp::plot(WYbhdist)
+sp::plot(WYbhMW, border=&quot;red&quot;, add=TRUE)
+
+WYbhMW.fornf &lt;- spClipRast(WYbhMW, rast=fornffn, outfolder=outfolder)
+
+## Display results
+sp::plot(WYbhMW.fornf)
+
+
+## NOTE: If the projection of polyv is not the same as rast, polyv will by reprojected
+##   to the same projection as rast before clipping (See note in help file for more details).
+</code></pre>
+</div>
+<div id="spextractpoly" class="section level4">
+<h4><a name="spExtractPoly"></a>spExtractPoly()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spExtractPoly(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, 
+#     polylst = NULL, poly_dsn = NULL, polyvarlst = NULL, polyvarnmlst = NULL,
+#       keepnull = TRUE, showext = FALSE, savedata = FALSE, exportshp = FALSE,
+#       outfolder = NULL, outfn = NULL, outfn.date = TRUE, overwrite = FALSE, ...) 
+# 
+# Description:
+# Subset Spatial polygons layer with another Spatial polygons layer. 
+######################################################################################
+
+## Extract polygon attributes from WYbighorn to WYpts, keeping NULL values
+extpolylst &lt;- spExtractPoly(WYspplt, uniqueid=&quot;CN&quot;, polylst=WYbh, keepnull=TRUE)
+WYspplt_bh &lt;- extpolylst$pltdat
+
+dim(WYspplt)
+dim(WYspplt_bh)
+
+head(WYspplt_bh)
+
+
+## NOTE: If the projection of spplt is not the same as the Spatial Points, the Spatial 
+##   Points layer will be reprojected to the same projection as clippolyv before the 
+##   evaluation points (See note in help file for more details).
+
+
+## Extract a subset of polygon attributes from WYbighorn to WYpts, not keeping NULL values
+extpolylst &lt;- spExtractPoly(WYspplt, uniqueid=&quot;CN&quot;, polylst=WYbh, 
+          polyvarlst=c(&quot;FORESTNUMB&quot;, &quot;FORESTNAME&quot;), keepnull=FALSE)
+WYspplt_bh2 &lt;- extpolylst$spplt
+
+dim(WYspplt)
+dim(WYspplt_bh2)
+
+head(WYspplt_bh2)
+sp::plot(WYspplt_bh2)
+</code></pre>
+</div>
+<div id="spextractrast" class="section level4">
+<h4><a name="spExtractRast"></a>spExtractRast()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spExtractRast(spplt = NULL, spplt_dsn = NULL, xyplt=NULL, uniqueid = &quot;PLT_CN&quot;, 
+#     rastlst = NULL, rastfolder = NULL, rast.prjstr = NULL, bandlst = NULL,
+#       var.name = NULL, interpolate = FALSE, windowsize = 1, windowstat = NULL,
+#       keepnull = TRUE, showext = TRUE, savedata = FALSE, exportshp = FALSE, 
+#       exportna = FALSE, outfolder = NULL, outfn = NULL, outfn.date = TRUE, 
+#     overwrite=FALSE, ...) 
+# 
+# Description:
+# Subset Spatial polygons layer with another Spatial polygons layer.
+######################################################################################
+
+## Extract raster values from WYdem to WYpts, not keeping NULL values
+extrastlst &lt;- spExtractRast(WYspplt, rastlst=c(fornffn, demfn), uniqueid=&quot;CN&quot;, keepnull=FALSE)
+WYspplt_dem &lt;- extrastlst$spplt
+
+dim(WYspplt)
+dim(WYspplt_dem)
+
+head(WYspplt_dem)
+
+</code></pre>
+</div>
+<div id="spgetdbbnd" class="section level4">
+<h4><a name="spGetDBbnd"></a>spGetDBbnd()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spGetDBbnd(bnd_layer, bnd_dsn = NULL, stbnd = NULL, states = NULL,  
+#       RMRSonly = TRUE, datsource = &quot;ORACLE&quot;, SQLitefn = NULL, actual = FALSE, 
+#       istree = TRUE, coordsfn = NULL, coordsfn.uniqueid = NULL, 
+#       coordsfn.x = NULL, coordsfn.y = NULL, coordsfn.prj = NULL, 
+#     coordsfn.datum = NULL, savedata = FALSE, outfolder = NULL, outfn = NULL, 
+#       outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE) 
+# 
+# Description:
+# Subset Spatial polygons layer with another Spatial polygons layer.
+######################################################################################
+
+## Extract actual coordinates within WY Bighorn NF boundary
+WYbhdat &lt;- spGetDBbnd(bnd_layer=WYbhfn, states=&quot;Wyoming&quot;, datsource=&quot;ORACLE&quot;, 
+  FS_FIADB=TRUE, actual=TRUE)
+names(WYbhdat)
+
+</code></pre>
+</div>
+<div id="spgetmodeldat" class="section level4">
+<h4><a name="spGetModeldat"></a>spGetModeldat()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spGetModeldat(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, 
+#     module = &quot;SA&quot;, domtype = &quot;POLY&quot;, dom_layer = NULL, dom_dsn = NULL, 
+#       domvar = &quot;DOMAIN&quot;, rastlst.cont = NULL, rastlst.cont.name = NULL, 
+#     rastlst.cont.stat = &quot;MEAN&quot;, rastlst.cat = NULL, rastlst.cat.name = NULL,
+#       rastfolder = NULL, rast.NODATA = NULL, asptransform = FALSE, rast.asp = NULL, 
+#     rast.lut = NULL, rastlut = NULL, areacalc = TRUE, areaunits = &quot;ACRES&quot;, 
+#     keepnull = FALSE, showext = TRUE, savedata = FALSE, exportshp = FALSE, 
+#     outfolder = NULL, outfn = NULL, outfn.date = TRUE, overwrite = FALSE,
+#     vars2keep = NULL, ...) 
+# 
+# Description:
+# Get data extraction and zonal statistics for Model-assisted or
+#       Model-based (Small Area) Estimation. The major steps are as follows:
+#   1) Check parameters 
+#   2) Extract point values from domlayer
+#   3) Set up output data structures
+#   4) Extract point values and get zonal statistics from continuous raster layers
+#   5) Extract point values and get zonal statistics from categorical raster layers
+#   6) Get total acres from domlayer (if areacalc=TRUE)
+######################################################################################
+
+## Generate a SpatialPoints object from the WY plot data, public coordinates 
+## (x=LON_PUBLIC, y=LAT_PUBLIC) 
+## Note: The public coordinate projection information is: prj=longlat, datum=NAD83.
+WYspplt &lt;- spMakeSpatialPoints(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;,
+        prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;)
+        
+## Derive new layers from dem
+library(raster)
+dem &lt;- raster(demfn)
+slp &lt;- terrain(dem, opt=&quot;slope&quot;, unit=&quot;degrees&quot;, 
+  filename=paste0(outfolder, &quot;/WYbh_slp.img&quot;), overwrite=TRUE)
+asp &lt;- terrain(dem, opt=&quot;aspect&quot;, unit=&quot;degrees&quot;, 
+  filename=paste0(outfolder, &quot;/WYbh_asp.img&quot;), overwrite=TRUE)
+
+
+## Extract estimation unit and zonal raster statistics (i.e., mean) 
+rastlst.cont &lt;- c(demfn, slp, asp)
+rastlst.cont.name &lt;- c(&quot;dem&quot;, &quot;slp&quot;, &quot;asp&quot;)
+rastlst.cat &lt;- fornffn
+rastlst.cat.name=&quot;fornf&quot;
+
+modeldat &lt;- spGetModeldat(spplt=WYspplt, uniqueid=&quot;CN&quot;, dom_layer=WYbhfn, 
+  domvar=NULL, rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
+  rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat=&quot;mean&quot;,
+  rast.NODATA=0, asptransform=TRUE, rast.asp=asp, keepnull=FALSE, showext=FALSE, 
+  savedata=FALSE)
+names(modeldat)
+
+sppltmodel &lt;- modeldat$sppltmodel
+pltmodel &lt;- modeldat$pltmodel
+unitmodel &lt;- modeldat$unitmodel
+unitarea &lt;- modeldat$unitarea
+unitvar &lt;- modeldat$unitvar
+areavar &lt;- modeldat$areavar
+inputdf &lt;- modeldat$inputdf
+prednames &lt;- modeldat$prednames
+zonalnames &lt;- modeldat$zonalnames
+
+unitvar
+areavar
+unitmodel
+unitarea
+head(pltmodel)
+
+prednames
+zonalnames
+
+</code></pre>
+</div>
+<div id="spstrata" class="section level4">
+<h4><a name="spStrata"></a>spStrata()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spStrata(spplt = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, unittype = &quot;POLY&quot;, 
+#       unit_dsn, unit_layer = NULL, unitvar = NULL, strattype = &quot;RASTER&quot;,  
+#       strat_layer = NULL, strat_dsn = NULL, rast.NODATA = NULL, strvar = NULL, 
+#     keepnull = FALSE, showext = TRUE, savedata = FALSE, exportshp = FALSE, 
+#     outfolder = NULL, outfn = NULL, overwrite = FALSE, ...) 
+# 
+# Description:
+# Subset Spatial polygons layer with another Spatial polygons layer.
+######################################################################################
+
+## Generate a SpatialPoints object from the WY plot data, public coordinates 
+## (x=LON_PUBLIC, y=LAT_PUBLIC) 
+## Note: The public coordinate projection information is: prj=longlat, datum=NAD83.
+WYspplt &lt;- spMakeSpatialPoints(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;,
+        prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;)
+
+## Extract polygon attributes from WYbighorn to WYpts, keeping NULL values
+stratlst &lt;- spGetStrata(WYspplt, uniqueid=&quot;CN&quot;, unittype=&quot;POLY&quot;, unit_dsn=WYbhfn,
+     strattype=&quot;RASTER&quot;, strat_layer=fornffn) 
+names(stratlst) 
+
+pltstrat &lt;- stratlst$pltstrat
+unitarea &lt;- stratlst$unitarea
+stratalut &lt;- stratlst$stratalut
+
+head(pltstrat)
+unitarea
+head(stratalut)
+stratlst$strvar
+stratlst$unitvar
+
+</code></pre>
+</div>
+<div id="spunionpoly" class="section level4">
+<h4><a name="spUnionPoly"></a>spUnionPoly()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spUnionPoly(poly1_dsn, poly1_layer = NULL, poly2_dsn, poly2_layer = NULL, 
+#     clip = FALSE, showext = TRUE, areacalc = FALSE, exportshp = FALSE, 
+#       outfolder = NULL, outshpnm = NULL, overwrite = FALSE) 
+# 
+# Description:
+# Generates one polygon from two SpatialPolygonsDataFrame objects, including
+#   features and attributes from both polygons.
+######################################################################################
+
+## Extract polygon attributes from WYbighorn to WYpts, keeping NULL values
+polyUnion &lt;- spUnionPoly(poly1_dsn=USAco[USAco$NAME_1 == &quot;Wyoming&quot;,], poly2_dsn=WYbh, 
+      areacalc=TRUE)
+polyUnion
+
+sp::plot(polyUnion)
+head(polyUnion)
+
+</code></pre>
+</div>
+<div id="spzonalrast" class="section level4">
+<h4><a name="spZonalRast"></a>spZonalRast()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spZonalRast(polyv, rast, rastfolder = NULL, polyatt = NULL, bands = NULL, 
+#       zonalstat = NULL, pixelfun = NULL, outname = NULL, showext = FALSE, 
+#       rastlut = NULL, savedata = FALSE, outfolder = NULL, outfn = NULL, 
+#       overwrite = FALSE) 
+# 
+# Description:
+# Extracts summary statistics by polygon (i.e., zone).
+######################################################################################
+
+## Extract polygon attributes from WYbighorn to WYpts, keeping NULL values
+zonallst &lt;- spZonalRast(polyv=WYbhdist, rast=demfn, polyatt=&quot;DISTRICTNA&quot;,
+      zonalstat=c(&quot;mean&quot;, &quot;sum&quot;)) 
+names(zonallst) 
+
+zonalext &lt;- zonallst$zonalext
+outname &lt;- zonallst$outname
+rasterfile &lt;- zonallst$rasterfile
+
+head(zonalext)
+outname
+rasterfile
+
+</code></pre>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

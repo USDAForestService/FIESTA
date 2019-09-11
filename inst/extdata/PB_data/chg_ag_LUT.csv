@@ -1,0 +1,12 @@
+chg_ag_2,chg_ag_2_nm
+0,No Change
+11,Development
+21,Harvest (Forested: >10% canopy cover visible on T2)
+22,Harvest (Forested: <10% canopy cover visible on T2)
+31,Regeneration of Vegetation
+33,Removal or Loss of Vegetation
+34,Stress or Mortality
+41,Fire
+90,Expected Change
+91,Other Change
+99,Uninterpretable

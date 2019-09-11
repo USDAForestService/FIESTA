@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>FIESTA - Green-book Estimators - custom</title>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">FIESTA - Green-book Estimators - custom</h1>
+
+
+
+<div id="fiesta-overview" class="section level2">
+<h2>FIESTA Overview</h2>
+<p>The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R’s library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors.</p>
+<p>Functions are organized by type or objective and are named with a corresponding prefix:</p>
+<p><strong>Core Functions</strong></p>
+<ul>
+<li>Database tools (DB) - functions for querying and extracting data from FIA’s national database.</li>
+<li>Data tools (dat) - functions for summarizing and exploring FIA data.</li>
+<li>Spatial tools (sp) - functions for manipulating and summarizing spatial data.</li>
+</ul>
+<p><strong>Estimation Modules (mod)</strong></p>
+<ul>
+<li>Green-Book (modGB) - functions for FIA’s standard Green-Book estimators.</li>
+<li>Photo-Based (modPB) - functions for supplementary photo-based estimators.</li>
+<li>Small Area (modSA) - functions for integration with available small area estimators (SAE).</li>
+<li>Model-Assisted (modMA) - functions for integration with available Model-Assisted estimators.</li>
+</ul>
+<p><strong>Analysis Tools</strong></p>
+<ul>
+<li>Analysis tools (an) - wrapper functions for steam-lining estimation processes.</li>
+</ul>
+<div id="green-book-gb-module-overview" class="section level3">
+<h3>Green-Book (GB) module overview</h3>
+<p>FIESTA’s Green-Book (GB) module calculates population estimates and their sampling errors based on Bechtold and Patterson’s (2005), ‘Green-Book’ for FIA’s nationally-consistent, systematic annual sample design, chapter 4 (Scott et al. 2005). FIA’s sample design is based on 2 phases: the first phase uses remotely-sensed data to stratify the land area to increase precision of estimates; while the 2nd phase obtains photo and ground observations and measurements for a suite of information across a hexagonal grid, each approximately 6000 acres in size. The associated estimators and variance estimators are used for area and tree attribute totals with the assumption of a simple random, stratified design and double sampling for stratification. Adjustment factors are calculated by estimation unit and strata to account for nonsampled (nonresponse) conditions.</p>
+<p>FIESTA includes non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, FIESTA adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA’s publically-available online tool (EVALIDator - <a href="https://apps.fs.usda.gov/Evalidator/evalidator.jsp" class="uri">https://apps.fs.usda.gov/Evalidator/evalidator.jsp</a>) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).</p>
+</div>
+<div id="objective-of-tutorial" class="section level3">
+<h3>Objective of tutorial</h3>
+<p>The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates using estimators from FIA’s ‘Green Book’. The following examples are for generating estimates and estimated variances using standard FIA Evaluation plot data from FIA’s National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA. Estimates can be compared with EVALIDator estimates, using the 2013 evaluation (<a href="https://apps.fs.usda.gov/Evalidator/evalidator.jsp" class="uri">https://apps.fs.usda.gov/Evalidator/evalidator.jsp</a>).</p>
+</div>
+</div>
+<div id="example-data---wyoming-wy-inventory-years-2011-2013" class="section level2">
+<h2>Example data - Wyoming (WY), Inventory Years 2011-2013</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Data Frame</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>WYplt</td>
+<td>WY plot-level data</td>
+</tr>
+<tr class="even">
+<td>WYcond</td>
+<td>WY condition-level data</td>
+</tr>
+<tr class="odd">
+<td>WYtree</td>
+<td>WY tree-level data</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col width="27%"></col>
+<col width="72%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>External data</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>WYbighorn_adminbnd.shp</td>
+<td>Polygon shapefile of WY Bighorn National Forest Administrative boundary*</td>
+</tr>
+<tr class="even">
+<td>WYbighorn_districtbnd.shp</td>
+<td>Polygon shapefile of WY Bighorn National Forest District boundaries**</td>
+</tr>
+<tr class="odd">
+<td>WYbighorn_forest_nonforest_250m.img</td>
+<td>Erdas Imagine raster of predicted forest/nonforest (1/0)***</td>
+</tr>
+<tr class="even">
+<td>WYbighorn_dem_250m.img</td>
+<td>Erdas Imagine raster of elevation change, in meters****</td>
+</tr>
+</tbody>
+</table>
+<p>*USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.AdministrativeForest (<a href="http://data.fs.usda.gov/geodata/edw" class="uri">http://data.fs.usda.gov/geodata/edw</a>). Description: An area encompassing all the National Forest System lands administered by an administrative unit. The area encompasses private lands, other governmental agency lands, and may contain National Forest System lands within the proclaimed boundaries of another administrative unit. All National Forest System lands fall within one and only one Administrative Forest Area.</p>
+<p>**USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (<a href="http://data.fs.usda.gov/geodata/edw" class="uri">http://data.fs.usda.gov/geodata/edw</a>). Description: A depiction of the boundary that encompasses a Ranger District.</p>
+<p>***Based on 250m resolution, Moderate Resolution Imaging Spectroradiometer (MODIS), classified map, reclassified from 3 to 2 classes: 1:forest; 2:nonforest. Projected in Albers Conical Equal Area, Datum NAD27 (Ruefenacht et al. 2008).</p>
+<p>****USGS National Elevation Dataset (NED), resampled from 30m resolution to 250m. Projected in Albers Conical Equal Area, Datum NAD27 (U.S. Geological Survey 2017).</p>
+<table>
+<colgroup>
+<col width="18%"></col>
+<col width="81%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>FUNCTION</th>
+<th>DESCRIPTION</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#spGetEstUnit">spGetEstUnit()</a></td>
+<td>Estimation unit information for customized estimates.</td>
+</tr>
+<tr class="even">
+<td><a href="#spGetStrata">spGetStrata()</a></td>
+<td>Strata/estimation unit information for customized estimates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#modGBarea">modGBarea()</a></td>
+<td>Green-book estimates of area using customized strata/estimation unit.</td>
+</tr>
+<tr class="even">
+<td><a href="#modGBtree">modGBtree()</a></td>
+<td>Green-book estimates of trees using customized strata/estimation unit.</td>
+</tr>
+<tr class="odd">
+<td><a href="#modGBratio">modGBratio()</a></td>
+<td>Green-book ratio estimates of trees using customized strata/estimation unit.</td>
+</tr>
+</tbody>
+</table>
+<div id="examples" class="section level3">
+<h3>EXAMPLES</h3>
+<p>Set up for examples</p>
+<pre><code># Load library
+library(FIESTA)
+
+# Set workspace to FIESTA folder (create if doesn't exist)
+if (!file.exists(&quot;C:/FIESTA&quot;))  dir.create(&quot;C:/FIESTA&quot;)
+setwd(&quot;C:/FIESTA&quot;)
+
+# Create 2 subfolders under the FIESTA folder, 'data' and 'outfolder' and set path to objects 
+if (!file.exists(&quot;data&quot;))  dir.create(&quot;data&quot;)
+datfolder &lt;- &quot;data&quot; 
+
+if (!file.exists(&quot;outfolder&quot;)) dir.create(&quot;outfolder&quot;)
+outfolder &lt;- &quot;outfolder&quot;
+
+# File names for external spatial data
+WYbhfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_adminbnd.shp&quot;, package=&quot;FIESTA&quot;)
+WYbhdistfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_districtbnd.shp&quot;, package=&quot;FIESTA&quot;)
+WYbhdist.att &lt;- &quot;DISTRICTNA&quot;
+
+fornffn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_forest_nonforest_250m.tif&quot;, package=&quot;FIESTA&quot;)
+demfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_dem_250m.img&quot;, package=&quot;FIESTA&quot;)
+</code></pre>
+<p><a name="ref"></a></p>
+</div>
+</div>
+<div id="reference-tables-in-fiesta" class="section level2">
+<h2>Reference Tables in FIESTA</h2>
+<p>There are several reference tables stored in FIESTA, including table variable descriptions, code definitions, and estimation categories.</p>
+<ul>
+<li>Table variable descriptions - ref_plt, ref_cond, ref_tree</li>
+<li>Code definitions - ref_codes</li>
+</ul>
+<p><a name="custom.estunit"></a></p>
+<div id="spgetestunit" class="section level4">
+<h4><a name="spGetEstUnit"></a>spGetEstUnit()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spGetEstUnit(spplt = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, unittype = &quot;POLY&quot;, 
+#       unit_dsn = NULL, unit_layer = NULL, unitvar = NULL, areavar= NULL, 
+#     areaunits = &quot;ACRES&quot;, rast.NODATA = NULL, keepnull = FALSE, showext = TRUE, 
+#     savedata = FALSE, exportshp = FALSE, outfolder = NULL, outfn = NULL, 
+#     overwrite = FALSE, ...) 
+# 
+# Description:
+# Extract estimation unit values to plots and calculate area by estimation unit.
+######################################################################################
+
+
+## By Bighorn National Forest ##
+# Get estimation unit acres for Bighorn National Forest.
+######################################################################################
+unitdat.bh &lt;- spGetEstUnit(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
+    prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhfn)
+
+names(unitdat.bh)
+pltunit.bh &lt;- unitdat.bh$pltstrat
+unitarea.bh &lt;- unitdat.bh$unitarea
+unitvar.bh &lt;- unitdat.bh$unitvar
+areavar.bh &lt;- unitdat.bh$areavar
+
+unitarea.bh
+unitvar.bh
+areavar.bh
+
+
+## By Bighorn National Forest District ##
+# Get estimation unit acres and strata information for Bighorn National Forest.
+######################################################################################
+unitdat.bhdist &lt;- spGetEstUnit(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
+    prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhdistfn, unitvar=&quot;DISTRICTNA&quot;)
+
+names(unitdat.bhdist)
+pltunit.bhdist &lt;- unitdat.bhdist$pltstrat
+unitarea.bhdist &lt;- unitdat.bhdist$unitarea
+unitvar.bhdist &lt;- unitdat.bhdist$unitvar
+areavar.bhdist &lt;- unitdat.bhdist$areavar
+
+unitarea.bhdist
+unitvar.bhdist
+areavar.bhdist
+</code></pre>
+<p><a name="custom.strata"></a></p>
+</div>
+<div id="spgetstrata" class="section level4">
+<h4><a name="spGetStrata"></a>spGetStrata()</h4>
+<pre><code>######################################################################################
+# Usage:
+# spGetStrata(spplt = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, unittype = &quot;POLY&quot;, 
+#       unit_dsn = NULL, unit_layer = NULL, unitvar = NULL, strattype = &quot;RASTER&quot;, 
+#     stratlayer = NULL, strvar = NULL, areaunits = &quot;ACRES&quot;, rast.NODATA = NULL, 
+#     keepnull = FALSE, showext = TRUE, savedata = FALSE, exportshp = FALSE, 
+#     outfolder = NULL, outfn = NULL, overwrite = FALSE, ...) 
+# 
+# Description:
+# Subset Spatial polygons layer with another Spatial polygons layer.
+######################################################################################
+
+## By Bighorn National Forest ##
+# Get estimation unit acres and strata information for Bighorn National Forest.
+######################################################################################
+stratdat.bh &lt;- spGetStrata(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
+    prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhfn, stratlayer=fornffn)
+
+names(stratdat.bh)
+pltstrat.bh &lt;- stratdat.bh$pltstrat
+unitarea.bh &lt;- stratdat.bh$unitarea
+stratalut.bh &lt;- stratdat.bh$stratalut
+strvar.bh &lt;- stratdat.bh$strvar
+unitvar.bh &lt;- stratdat.bh$unitvar
+areavar.bh &lt;- stratdat.bh$areavar
+
+unitarea.bh
+stratalut.bh
+
+unitvar.bh
+strvar.bh
+areavar.bh
+
+
+## By Bighorn National Forest District ##
+# Get estimation unit acres and strata information for Bighorn National Forest Districts.
+######################################################################################
+stratdat.bhdist &lt;- spGetStrata(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
+    prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhdistfn, unitvar=&quot;DISTRICTNA&quot;,
+    stratlayer=fornffn, rast.NODATA=0)
+
+names(stratdat.bhdist)
+pltstrat.bhdist &lt;- stratdat.bhdist$pltstrat
+unitarea.bhdist &lt;- stratdat.bhdist$unitarea
+stratalut.bhdist &lt;- stratdat.bhdist$stratalut
+strvar.bhdist &lt;- stratdat.bhdist$strvar
+unitvar.bhdist &lt;- stratdat.bhdist$unitvar
+areavar.bhdist &lt;- stratdat.bhdist$areavar
+
+unitarea.bhdist
+stratalut.bhdist
+
+unitvar.bhdist
+strvar.bhdist
+areavar.bhdist
+</code></pre>
+<p><a name="GBfun"></a></p>
+</div>
+</div>
+<div id="gb-functions" class="section level2">
+<h2>GB Functions</h2>
+<div id="modgbarea" class="section level4">
+<h4>modGBarea</h4>
+<pre><code>######################################################################################
+# Usage:
+# modGBarea(cond = NULL, pltstrat = NULL, cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, 
+#       sumunits = FALSE, adjsamp = TRUE, strata = TRUE, landarea = &quot;ALL&quot;, ACI = FALSE, 
+#       nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL,  
+#       unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
+#     strvar = &quot;STRATA&quot;, getwt = TRUE, getwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE, 
+#     substrvar = NULL, autocombine = TRUE, rowvar = NULL, rowvar.filter = NULL, 
+#     colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, col.FIAname = FALSE,
+#     row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
+#     rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 0, pseround = 3, 
+#     savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#     outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#     title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
+#     title.filter = NULL, gui = FALSE)
+# 
+# Description:
+# Generates acre estimates by domain (and estimation unit). Calculations are based 
+#   on Scott et al. 2005 ('the green-book') for mapped forest inventory plots. The 
+#   non-ratio estimator for estimating area by stratum and domain is used. Plots that 
+#   are totally nonsampled are excluded from estimation dataset. Next, an adjustment 
+#   factor is calculated by strata to adjust for nonsampled (nonresponse) conditions 
+#   that have proportion less than 1. The attribute is the proportion of the plot which 
+#   is divided by the adjustment factor, and averaged by stratum. Strata means are 
+#   combined using the strata weights and then expanded to acres using the total land 
+#   area in the population.  
+######################################################################################
+
+help(modGBarea)
+
+
+## Area estimates for a customized population (e.g., Bighorn National Forest)
+######################################################################################
+
+## By Bighorn National Forest ##
+# Area by forest type and stand-size class for Bighorn National Forest
+area.bh &lt;- modGBarea(cond=WYcond, pltstrat=pltstrat.bh, rowvar=&quot;FORTYPCD&quot;, 
+    colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, unitarea=unitarea.bh,
+    stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, rawdata=TRUE, 
+    returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;)
+names(area.bh)
+area.bh$est
+area.bh$pse
+area.bh$titlelst
+
+area.bh.raw &lt;- area.bh$raw
+names(area.bh.raw)
+area.bh$raw$stratdat
+
+
+## By Bighorn National Forest District ##
+# Area by forest type and stand-size class for Bighorn National Forest by district
+area.bhdist &lt;- modGBarea(cond=WYcond, pltstrat=pltstrat.bhdist, sumunits=FALSE, 
+    rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, col.FIAname=TRUE, unitvar=unitvar.bhdist,
+    strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist,
+    areavar=areavar.bhdist, getwt=FALSE, rawdata=TRUE, returntitle=TRUE, 
+    title.ref=&quot;Bighorn National Forest&quot;, autocombine=FALSE)
+names(area.bhdist)
+area.bhdist$est
+area.bhdist$pse
+area.bhdist$titlelst
+
+area.bhdist.raw &lt;- area.bhdist$raw
+names(area.bhdist.raw)
+area.bhdist.raw$stratdat
+</code></pre>
+</div>
+<div id="modgbtree" class="section level4">
+<h4>modGBtree</h4>
+<pre><code>######################################################################################
+# Usage:
+# modGBtree(tree = NULL, cond = NULL, pltstrat = NULL, seed = NULL, 
+#     tuniqueid = &quot;PLT_CN&quot;, cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, sumunits = FALSE, 
+#     adjsamp = TRUE, strata = TRUE, landarea=&quot;FOREST&quot;, ACI = FALSE, 
+#     nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL,  
+#     unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
+#     strvar = &quot;STRATA&quot;, getwt = TRUE, strwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE,
+#     substrvar = NULL, estvar = NULL, estvar.filter = NULL, estvar.name = NULL, 
+#     rowvar = NULL, rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL,
+#     row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,
+#     row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE,
+#     estround = 0, pseround = 3, savedata = FALSE, rawdata = FALSE, outfolder = NULL,
+#     outfn = NULL, outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, 
+#     title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
+#     title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, gui = FALSE)
+# 
+# Description:
+#   Generates tree estimates by domain and/or tree domain (and estimation unit). 
+#   Calculations are based on Scott et al. 2005 ('the green-book') for mapped forest 
+#   inventory plots. The non-ratio estimator for estimating tree attributes
+#   by stratum and domain is used. Plots that are totally nonsampled are excluded from 
+#   estimation dataset. Next, an adjustment factor is calculated by strata to adjust for 
+#   nonsampled (nonresponse) conditions that have proportion less than 1. Attributes 
+#   adjusted to a per-acre value are summed by plot, divided by the adjustment factor, 
+#   and averaged by stratum. Strata means are combined using the strata weights and then 
+#   expanded to using the total land area in the population. 
+######################################################################################
+
+help(modGBtree)
+
+## Tree estimates for a customized population (e.g., Bighorn National Forest)
+######################################################################################
+
+## By Bighorn National Forest ##
+# Live tree basal area by forest type for Bighorn National Forest
+balive.bh &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bh, 
+  sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, unitvar=unitvar.bh, 
+  strvar=strvar.bh, unitarea=unitarea.bh, stratalut=stratalut.bh, 
+  areavar=areavar.bh, getwt=FALSE, estvar=&quot;BA&quot;, estvar.filter=&quot;STATUSCD==1&quot;, 
+  rawdata=TRUE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;, 
+  autocombine=FALSE, savedata=TRUE, outfolder=outfolder)
+names(balive.bh)
+balive.bh$est
+balive.bh$titlelst
+
+
+## By Bighorn National Forest District ##
+# Live tree basal area by forest type for Bighorn National Forest districts
+balive.bhdist &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bhdist, 
+  sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, unitvar=unitvar.bhdist, 
+  strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist, 
+  areavar=areavar.bhdist, getwt=FALSE, estvar=&quot;BA&quot;, estvar.filter=&quot;STATUSCD==1&quot;,
+  rawdata=TRUE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;, 
+  autocombine=FALSE)
+names(balive.bhdist)
+balive.bhdist$est
+balive.bhdist$pse
+balive.bhdist$titlelst
+
+
+## By Bighorn National Forest District ##
+## Add title for estimation units
+balive.bhdist &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bhdist, 
+  sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, unitvar=unitvar.bhdist, 
+  strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist, 
+  areavar=areavar.bhdist, getwt=FALSE, estvar=&quot;BA&quot;, estvar.filter=&quot;STATUSCD==1&quot;,
+  rawdata=FALSE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;, 
+  autocombine=FALSE, title.unitvar=&quot;District&quot;)
+names(balive.bhdist)
+balive.bhdist$est
+balive.bhdist$pse
+balive.bhdist$titlelst
+
+
+## By Bighorn National Forest ##
+# Volume of live trees by forest type and stand-size class for Bighorn National Forest
+tree.bh &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bh, rowvar=&quot;FORTYPCD&quot;, 
+  colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, unitarea=unitarea.bh, 
+  stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, estvar=&quot;VOLCFNET&quot;,
+  estvar.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
+  title.ref=&quot;Bighorn National Forest&quot;)
+names(tree.bh)
+tree.bh$est
+tree.bh$pse
+tree.bh$titlelst
+
+## Look at raw data
+tree.bh.raw &lt;- tree.bh$raw
+names(tree.bh.raw)
+tree.bh$raw$stratdat
+head(tree.bh$raw$unit.grpest)
+</code></pre>
+</div>
+<div id="modgbratio" class="section level4">
+<h4>modGBratio</h4>
+<pre><code>######################################################################################
+# Usage:
+# modGBratio(tree = NULL, cond = NULL, pltstrat = NULL, tuniqueid = &quot;PLT_CN&quot;, 
+#     cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, sumunits = FALSE, adjsamp = TRUE, 
+#     strata = TRUE, ratiotype = &quot;PERACRE&quot;, landarea=&quot;FOREST&quot;, ACI = FALSE, 
+#     nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL, 
+#     unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
+#     strvar = &quot;STRATA&quot;, getwt = TRUE, strwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE, 
+#     substrvar = NULL, estvarn = NULL, estvarn.filter = NULL, estvarn.name = NULL, 
+#     estvard = NULL, estvard.filter = NULL, estvard.name = NULL, rowvar = NULL, 
+#     rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, 
+#     col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
+#     col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 3, 
+#     pseround = 3, savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#     outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#     title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+#     title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE)
+# 
+# Description:
+#   Generates per-acre and per-tree estimates by domain and/or tree domain (and estimation 
+#   unit). Calculations are based on chapter 4 of Scott et al. 2005 ('the green-book') for 
+#   mapped forest inventory plots. The ratio estimator for estimating per-acre or per-tree
+#   by stratum and domain is used, referred to as Ratio of Means (ROM).  
+######################################################################################
+
+help(modGBratio)
+
+
+## By Bighorn National Forest ##
+## Tree ratio estimates for a customized population (e.g., Bighorn National Forest)
+######################################################################################
+
+# Volume per acre of live trees by forest type and stand-size class for Bighorn National Forest
+rat.bh &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bh, rowvar=&quot;FORTYPCD&quot;, 
+  colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, unitarea=unitarea.bh, 
+  stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, estvarn=&quot;VOLCFNET&quot;,
+  estvarn.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
+  title.ref=&quot;Bighorn National Forest&quot;)
+names(rat.bh)
+rat.bh$est
+rat.bh$pse
+rat.bh$titlelst
+
+## Look at raw data
+rat.bh.raw &lt;- rat.bh$raw
+names(rat.bh.raw)
+rat.bh$raw$stratdat
+head(rat.bh$raw$unit.grpest)
+
+    
+## By Bighorn National Forest District ##
+# Area by forest type and stand-size class for Bighorn National Forest by district
+rat.bhdist &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bhdist, 
+  sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bhdist, 
+  strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist, 
+  areavar=areavar.bhdist, getwt=FALSE, estvarn=&quot;VOLCFNET&quot;, 
+  estvarn.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
+  title.ref=&quot;Bighorn National Forest&quot;, title.unitvar=&quot;District&quot;, autocombine=FALSE)
+names(rat.bhdist)
+rat.bhdist$est
+rat.bhdist$pse
+rat.bhdist$titlelst
+
+## Look at raw data
+rat.bhdist.raw &lt;- rat.bhdist$raw
+names(rat.bhdist.raw)
+rat.bhdist.raw$stratdat
+head(rat.bhdist$raw$unit.grpest)
+
+</code></pre>
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Bechtold, William A.; Patterson, Paul L., Editors. 2005. The enhanced Forest Inventory and Analysis program—national sampling design and estimation procedures. Gen. Tech. Rep. SRS-80. Asheville, NC: U.S. Department of Agriculture, Forest Service, Southern Research Station. 85 p.</p>
+<p>Patterson, Paul L. 2012. Photo-based estimators for the Nevada photo-based inventory. Res. Pap. RMRS-RP-92. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.</p>
+<p>Ruefenacht, B.; Finco, M.V.; Nelson, M.D.; Czaplewski, R.; Helmer, E.H.; Blackard, J. A.; Holden, G.R.; Lister, A.J.; Salajanu, D.; Weyermann, D.; Winterberger, K. 2008. Conterminous U.S. and Alaska Forest Type Mapping Using Forest Inventory and Analysis Data. Photogrammetric Engineering &amp; Remote Sensing Vol. 74, No. 11, November 2008, pp. 1379-1388.}</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

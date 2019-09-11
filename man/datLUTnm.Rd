@@ -1,0 +1,73 @@
+\name{datLUTnm}
+\alias{datLUTnm}
+\title{
+	Data - Gets variable description or class.
+}
+\description{
+	Merge a look-up table to append new variables, names, or categories to x.
+}
+\usage{
+datLUTnm(x, xvar = NULL, LUT = NULL, LUTvar = NULL, LUTnewvar = NULL, LUTnewvarnm = NULL,
+	FIAname = FALSE, NAequal0 = TRUE, group=FALSE, add0 = FALSE, savedata = FALSE, 
+	outfolder = NULL, outfn = NULL, xtxt = NULL)
+}
+\arguments{
+  \item{x}{ Data frame or comma-delimited file (*.csv). The data table with variable to classify. }
+  \item{xvar}{ String. Name of variable in the data table to join to. }
+  \item{LUT}{ Data frame or comma-delimited file (*.csv). Name of the file with collapsed 
+	classes (If FIAname=FALSE). }
+  \item{LUTvar}{ String. Matching variable name in the look-up table. If LUTvar=NULL,
+	LUTvar=xvar. }
+  \item{LUTnewvar}{ String. Name(s) of other variable(s) in the look-up table to include in 
+	join. If NULL, all other variables in table will be included. }
+  \item{LUTnewvarnm}{ String. Name(s) for LUTnewvar. If NULL, names will default to LUTnewvar. }
+  \item{FIAname}{ Logical. If TRUE, get FIA reference name based on (ref_codes) within FIESTA. }
+  \item{NAequal0}{ Logical. If TRUE, any NA values in xvar will be changed to 0 after merging 
+	with look-up table. }
+  \item{group}{ Logical. If TRUE, the group variables in reference table (ref_codes) 
+	are merged to data table (GROUPCD, GROUPNM). }
+  \item{add0}{ Logical. IF TRUE, keep all codes in look up table. If FALSE, only include 
+	codes that are in x. }
+  \item{savedata}{ Logical. If TRUE, saves data to outfolder as comma-delimited file (*.csv). }
+  \item{outfolder}{ String.* The output folder path. If NULL and savedata=TRUE, the 
+	outfolder is the working directory. }
+  \item{outfn}{ String.* Output file name. If NULL and savedata=TRUE, outfn = datlut_'date'.csv. }
+  \item{xtxt}{ String.* Name of x table for more useful information in warnings. }
+
+}
+\details{
+	Use datLUTclass() to prompt for input.
+}
+\value{
+ 	\item{xLUT}{ The input data table with look-up table variable(s). }
+	\item{xLUTnm}{ Name of the new variable(s). }
+	\item{LUT}{ Look up table with categories. }
+
+	If savedata = TRUE, a comma-delimited file is output to the outfolder as outfn. 
+	If outfn = NULL, the name of the file will be datlut_'date'.csv.
+}
+\author{
+	Tracey S. Frescino
+}
+\note{ 
+	For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE))
+	
+}
+\examples{
+	## Append forest type names using the reference table above
+	ref_fortypcd <- ref_codes[ref_codes$VARIABLE == "FORTYPCD",]
+	WYcondlut <- datLUTnm(WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, LUTvar="VALUE",
+      	LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
+	names(WYcondlut)
+	WYcond2 <- WYcondlut$xLUT
+	head(WYcond2[WYcond2$FORTYPCD > 0, ])
+
+	## Append forest type names the FIAname parameter. If the xvar is in the stored 
+	##    reference table, the name and values will automatically be appended.
+	WYcondlut2 <- datLUTnm(WYcond, xvar="FORTYPCD", FIAname=TRUE)
+	names(WYcondlut2)
+	WYcond3 <- WYcondlut2$xLUT
+	head(WYcond3[WYcond3$FORTYPCD > 0, ])
+}
+
+\keyword{ data }

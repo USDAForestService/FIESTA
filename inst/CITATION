@@ -1,0 +1,16 @@
+citHeader("To cite package 'FIESTA' in publications use:")
+
+citEntry(	entry="Manual",
+  		title = "FIESTA: A Forest Inventory Estimation and Analysis R Package",
+  		author = personList(as.person("Tracey S. Frescino"),as.person("Paul L. Patterson"),as.person("Gretchen G. Moisen"),
+				as.person("Chris Toney"), as.person("Elizabeth A. Freeman")),
+ 	 	year = "2009",
+  		organization = "USDA Forest Service, Rocky Mountain Research Station",
+  		address      = "507 25th street, Ogden, UT, USA",
+  		note         = "tfrescino@fs.fed.us",
+  		textVersion =  paste(	"Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Toney, Chris;
+					Freeman, Elizabeth A. (2018). ",
+					"FIESTA: A Forest Inventory Estimation and Analysis R Package. ",
+					"USDA Forest Service, Rocky Mountain Research Station, ",
+					"507 25th street, Ogden, UT, USA. ",
+   					sep=""))

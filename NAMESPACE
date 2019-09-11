@@ -1,0 +1,37 @@
+# Export all names
+exportPattern(".")
+#exportPattern("^[[:alpha:]]+")
+
+# importFrom("packagename", "functionname")
+
+# Import all packages listed as Imports or Depends
+import("data.table")
+#import("methods")
+importFrom("grDevices", "colors", "dev.new", "dev.off", "jpeg", "pdf",
+	"png", "postscript", "rainbow", "terrain.colors", "is.raster")
+importFrom("graphics", "arrows", "legend", "mtext", "par", "pie", "plot", "barplot",
+	"segments", "title", "lines", "text", "hist", "split.screen", "screen",
+	"axis", "abline", "box", "close.screen")
+importFrom("stats", "as.formula", "na.omit", "rnorm", "sd", "xtabs", "aggregate",
+		"median", "var", "complete.cases", "ave", "model.matrix")
+importFrom("utils", "download.file", "read.csv", "select.list", "unzip",
+	"write.csv", "write.table", "head", "tail", "setTxtProgressBar", 
+	"txtProgressBar", "installed.packages")
+if(.Platform$OS.type == "windows"){importFrom("utils", "choose.dir", "choose.files")}
+importFrom("methods", "as", "new", "slot")
+#importFrom("sqldf", "sqldf")
+importFrom("sp", "SpatialPolygonsDataFrame", "coordinates", "over", "geometry", "CRS",
+	"proj4string", "spTransform", "SpatialPointsDataFrame")
+importFrom("raster", "projection", "dataType", "stack", "nlayers", "res", "nbands", 
+	"crop", "mask", "resample", "extension", "raster", "compareCRS",
+	"compareRaster", "extract", "setMinMax", "isLonLat", "xres", "extent",
+	"projectRaster")
+importFrom("rgdal", "readOGR", "writeOGR", "readGDAL", "GDALinfo", "GDAL.open",
+	"GDAL.close", "getDriver", "getRasterBand", "saveDataset", "getRasterData", 
+	"getDriverName", "putRasterData")
+importFrom("rgeos", "gIntersection", "gUnaryUnion", "gArea", "gIsValid")
+#importFrom("httr", "http_error")
+
+useDynLib(FIESTA) 
+#importFrom(Rcpp, sourceCpp)
+import(Rcpp)

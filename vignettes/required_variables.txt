@@ -1,0 +1,17 @@
+Table	Variable	Description
+tree	tuniqueid	"Unique identifier for each plot, for joining tables (ex. PLT_CN)"
+	CONDID	"Unique identifier for each condition on plot, for joining tables. Optional if only 1 condition (record) per plot"
+	TPA_UNADJ	Number of trees per acre each sample tree represents (ex. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on microplot)
+cond	cuniqueid	"Unique identifier for each plot, for joining tables (ex. PLT_CN)"
+	CONDID	"Unique identifier for each condition on plot, for joining tables. Optional if only 1 condition (record) per plot"
+	CONDPROP_UNADJ	Unadjusted proportion of condition on each plot. Optional if only 1 condition (record) per plot
+	COND_STATUS_CD	"Status of each forested condition on plot (i.e. accessible forest, nonforest, water, etc.)"
+	NF_COND_STATUS_CD	"Only if ACI=TRUE. Status of each nonforest condition plot (i.e. accessible nonforest, nonsampled nonforest)"
+	SITECLCD	Only if landarea=TIMBERLAND. Measure of site productivity
+	RESERVCD	If landarea=TIMBERLAND. Reserved status
+	SUBPROP_UNADJ	Unadjusted proportion of subplot conditions on each plot. Optional if only 1 condition (record) per plot
+	MICRPROP_UNADJ	If microplot tree attributes. Unadjusted proportion of microplot conditions on each plot. Optional if only 1 condition (record) per plot
+	MACRPROP_UNADJ	If macroplot tree attributes. Unadjusted proportion of macroplot conditions on each plot. Optional if only 1 condition (record) per plot
+plot	puniqueid	"Unique identifier for each plot, for joining tables (ex. CN)"
+	STATECD	Identifies state each plot is located in. Optional if only 1 state
+	INVYR	Identifies inventory year of each plot. Optional. Assumes estimation time span is less than inventory cycle

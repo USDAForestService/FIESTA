@@ -1,0 +1,167 @@
+\name{datSumTreeDom}
+\alias{datSumTreeDom}
+\title{
+	Data - Aggregates numeric tree data by tree domain (i.e. species) to plot or 
+	condition-level.
+}
+\description{
+	Aggregates numeric tree domain data (e.g., SPCD) to plot or condition, 
+	including options for filtering tree data or extrapolating to plot acre by 
+	multiplying by TPA. Includes options for generating barplots, proportion
+	data, and cover data.
+}
+\usage{
+datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
+	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", 
+	bycond = FALSE, condid = "CONDID", tsumvar = NULL, TPA = FALSE, 
+	tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, 
+	tdomvar = "SPCD", tdomvarlst = NULL, tdomvar2 = NULL, tdomvar2lst = NULL, 
+	tdomprefix = NULL, tdombarplot = FALSE, tdomtot = FALSE, tdomtotnm = NULL, 
+	FIAname = FALSE, addseed = FALSE, presence = FALSE, proportion = FALSE, 
+	cover = FALSE, getadjplot = FALSE, adjtree = FALSE, adjTPA = 1, 
+	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.date = TRUE, 
+	overwrite = FALSE, tround = 16, checkNA = FALSE)
+}
+%- maybe also 'usage' for other objects documented here.
+\arguments{
+  \item{tree}{ Data frame or comma-delimited file (*.csv). The tree-level table with tree 
+	domain data. }
+  \item{seed}{ Data frame or comma-delimited file (*.csv). The seedling table with tree 
+	seedling counts. Only applicable for counts (tsumvar="PLT_CN"). }
+  \item{cond}{ Data frame or comma-delimited file (*.csv). Condition-level table to join 
+	the aggregated tree data to, if bycond=TRUE. This table also may be used for condition 
+	proportion or strata variables used if adjcond or adjstrata = TRUE (See details below). 
+	This table is optional. If included, CONDID must be present in table. }
+  \item{plt}{ Data frame, comma-delimited file (*.csv), shapefile (*.shp), or 
+	database file. Plot-level table to join the aggregated tree data to 
+	(if bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional. }
+  \item{plt_dsn}{ String. The data source name (dsn; i.e., folder or database name)
+	of plt. The dsn varies by driver. See gdal OGR vector formats 
+	(https://www.gdal.org/ogr_formats.html). Optional. } 
+  \item{tuniqueid}{ String. Unique identifier of the tree table. 
+	If including seedling table, this should be the same for seed. }
+  \item{cuniqueid}{ String. Unique identifier of the cond table if cond is NOT NULL. }
+  \item{puniqueid}{ String. Unique identifier of the plt table if plt is NOT NULL. }
+  \item{bycond}{ Logical. If TRUE, the data are aggregated to the condition level 
+	(by: uniqueid, CONDID). If FALSE, The data are aggregated to the plot level 
+	(by: uniqueid). }
+  \item{condid}{ String. Unique identifier for conditions. }
+  \item{presence}{ Logical. If TRUE, an additional table is output with tree domain values
+	as presence/absence (1/0). }
+  \item{tsumvar}{ String. Name of the variable to aggregate (e.g., "BA"). For summing  
+	number of trees, use tsumvar="PLT_CN" with tfun=sum. }
+  \item{TPA}{ Logical. If TRUE, tsumvarlst variable(s) are multiplied by the respective 
+	trees-per-acre variable (see details) to get per-acre measurements. }
+  \item{tfun}{ Function. Name of the function to use to aggregate the data 
+	(e.g., sum, mean, max). }
+  \item{ACI}{ Logical. If TRUE, if ACI (All Condition Inventory) plots exist, any trees 
+	on these plots will be included in summary. If FALSE, you must include condition table. }
+  \item{tfilter}{ String. A filter to subset the tree data before aggregating 
+	(e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is prompted. 
+	Use tfilter="NONE" if no filters. }
+  \item{lbs2tons}{ Logical. If TRUE, converts biomass or carbon variables from pounds to tons. }
+  \item{tdomvar}{ String. The tree domain (tdom) variable used to aggregate by 
+	(e.g., "SPCD", "SPGRPCD").  }
+  \item{tdomvarlst}{ String (vector). List of specific tree domains of tdomvar to aggregate 
+	(ex. c(108, 202)). If NULL, all domains of tdomvar are used. }
+  \item{tdomvar2}{ String. A second tree domain variable to use to aggregate by (ex. "DIACL"). 
+	The variables, tdomvar and tdomvar2 will be concatenated before summed.  }
+  \item{tdomvar2lst}{ String (vector). List of specific tree domains of tdomvar2 to aggregate. 
+	If NULL, all domains of tdomvar2 are used. }
+  \item{tdomprefix}{ String. The prefix used for naming the aggregated tree data, before 
+	numeric codes (e.g., "SP" = SP102, SP746). }
+  \item{tdombarplot}{ Logical. If TRUE, calls datBarplot() and outputs a barplot of tdom 
+	distributions. If savedata=TRUE, barplots are written to outfolder. }
+  \item{tdomtot}{ Logical. If TRUE, a total of all tree domains in tdomvarlst is calculated
+	and added to output data frame. }
+  \item{tdomtotnm}{ String. If tdomtot=TRUE, the variable name for the total column in output 
+	data frame. If NULL, the default will be tdomvar + 'TOT'. }
+  \item{FIAname}{ Logical. If TRUE, changes names of columns for SPCD and SPGRPCD from code 
+	to FIA names. }
+  \item{addseed}{Logical. If TRUE, add seedling counts to tree counts. }
+  \item{proportion}{ Logical. If TRUE, an additional table will be output with tree domain 
+	data as proportions of total tsumvar. }
+  \item{cover}{ Logical. If TRUE, an additional table will be output with tree domain 
+	data as percent cover, based on proportions of tsumvar (see proportion) and tree
+	canopy cover variable in cond (LIVE_CANOPY_CVR_PCT) or in plt (CCLIVEPLT). Does
+	not include seedlings. }
+  \item{getadjplot}{ Logical. If TRUE, adjustments are calculated for nonsampled 
+	conditions on plot. }
+  \item{adjtree}{ Logical. If TRUE, trees are individually adjusted by adjustment factors.
+	Adjustment factors must be included in tree table (tadjfac). }
+  \item{adjTPA}{ Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1 (annual inventory),
+	if using less than 4 subplots. If using only 1 sublot for estimate, adjTPA=4. The 
+	default is 1. }
+  \item{savedata}{ Logical. If TRUE, writes output data to outfolder. }
+  \item{outfolder}{ String. The name of the output folder. If savedata=TRUE, all output 
+	saved to the outfolder. If savedata=FALSE, only a text file of input parameters is saved. }
+  \item{outfn}{ String. The name of the output file if savedata=TRUE (*.csv). Do not include 
+	extension. If NULL, the file will be named outfn_tdomsum_tsumvar_'date'.csv }
+  \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
+  \item{overwrite}{ Logical. If TRUE, overwrite output file. }
+  \item{tround}{ Number. The number of digits to round to. If NULL, default=6. }
+  \item{checkNA}{ Logical. If TRUE, checks if NA values exist in necessary variables. }
+}
+\details{ If variable = NULL, then it will prompt user for input. 
+
+  If you want to get trees-per-acre information aggregated to plot or condition level, 
+	you need to include a TPA variable in tree table. \cr
+  For tsumvars = GROWCFGS, GROWBFSL, GROWCFAL, FGROWCFGS, FGROWBFSL, or FGROWCFAL, 
+	you must have TPAGROW_UNADJ \cr
+  For tsumvars = MORTCFGS, MORTBFSL, MORTCFAL, FMORTCFGS, FMORTBFSL, or FMORTCFAL, 
+	you must have TPAMORT_UNADJ \cr
+  For tsumvars = REMVCFGS, REMVBFSL, REMVCFAL, FREMVCFGS, FREMVBFSL, or FREMVCFAL, 
+	you must have TPAREMV_UNADJ \cr
+
+
+  If you want to adjust plot-level information by condition proportions, you need to 
+	include CONDID & CONDPROP_UNADJ in cond or tree table. \cr
+
+
+  If you want to adjust the aggregated tree data by the area of the strata (estimation unit), 
+	you need to either have a variable in your tree data named adjfact or you need to 
+	included the following variables in your datasets: \cr
+	Condition table: STATECD, CONDID, STRATA, ESTUNIT, SUBPPROP_UNADJ, MICRPROP_UNADJ 
+	(if microplot trees) MACRPROP_UNADJ (if macroplot trees). \cr
+	Tree table: TPA_UNADJ
+
+  All trees where DIA=NA are removed from analysis. These are trees that were remeasured 
+	but are no longer in inventory (ex. a tree that is dead and not standing in the 
+	current inventory).
+
+}
+
+\value{
+ tdomdata - a list of the following objects:
+
+  \item{tdomdat}{ Data frame. Plot or condition-level table with aggregated tree 
+	domain (tdom) attributes (filtered). }
+  \item{tdomsum}{ Data frame. The tdom look-up table with data aggregated by species. }
+  \item{tdomvar}{ String. Name of the tdom variable used to aggregate by. }
+  \item{tsumvar}{ String. Name of the aggregated output variable. }
+  \item{tdomlst}{ Vector. List of the aggregated tree data in tdomdat. }
+  \item{tdomdat.pres}{ Data frame. Plot or condition-level table with aggregated tree
+	domain attributes represented as presence/absence (1/0). }
+  \item{tdomdat.prop}{ Data frame. Plot or condition-level table with aggregated tree
+	domain attributes represented as proportion of total by plot. }
+  \item{tdomdat.cov}{ Data frame. Plot or condition-level table with aggregated tree
+	domain attributes represented as percent cover, multipying cover attribute by
+	tdom proportion by plot. }
+
+   If savedata=TRUE\cr
+	- tdomdat will be saved to the outfolder ('tdomprefix'_DAT.csv). \cr
+	- a text file of input parameters is saved to outfolder ('outfn'_parameters_'date'.txt). \cr
+   	- if presence=TRUE, tdomdat.prop is saved to outfolder ('tdomprefix'_PRESDAT.csv)
+   	- if proportion=TRUE, tdomdat.prop is saved to outfolder ('tdomprefix'_PROPDAT.csv)
+   	- if cover=TRUE, tdomdat.prop is saved to outfolder ('tdomprefix'_COVDAT.csv)
+
+}
+\author{
+	Tracey S. Frescino
+}
+\note{
+	This function can be used to get tree domain data. This data can be used for mapping 
+	tree domain distributions.
+}
+
+\keyword{ data }

@@ -1,0 +1,10 @@
+Variable,Description
+ESTUNIT,Estimation unit
+STRATA,Strata value
+strwt,Strata weight - proportion of area or number of plots by strata and/or estimation unit
+n.strata,Number of plots in strata (and estimation unit)
+n.total,Number of plots for estimation unit
+TOTACRES,Total acres for estimation unit
+ACRES,Acres by strata for estimation unit
+CONDPROP_UNADJ_SUM,Sum of condition proportions by strata and/or estimation unit
+CONDPROP_ADJFAC,Adjustment factor for nonsampled plots by strata and/or estimation unit (CONDPROP_UNADJ_SUM/n.strata)

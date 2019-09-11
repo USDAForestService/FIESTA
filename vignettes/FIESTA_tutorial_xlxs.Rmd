@@ -1,0 +1,639 @@
+---
+title: "FIESTA - xlsx Tools"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FIESTA Tutorial - xlxs Tools}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+## FIESTA Overview
+The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+
+
+Functions are organized by type or objective and are named with a corresponding prefix: 
+
+**Core Functions**
+
+* Database tools (DB) - functions for querying and extracting data from FIA's national database.
+* Data tools (dat) - functions for summarizing and exploring FIA data.
+* Spatial tools (sp) - functions for manipulating and summarizing spatial data.
+
+**Estimation Modules**
+
+* Green-Book (GB) - functions for FIA’s standard ‘Green-Book’ estimators.
+* Photo-Based (PB) - functions for supplementary photo-based estimators.
+* Small Area (SA) - functions for integration with available small area estimators (SAE).
+* Model-Assisted (MA) - functions for integration with available Model-Assisted estimators.
+
+**Analysis Tools**
+
+* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
+
+
+
+### Export to xlsx overview
+Estimates generated from FIESTA are typically exported to comma-delimited files which can be opened as an Excel Spreadsheet. The write2xlsx function allows capability to output directly to an Excel Spreadsheet in a format ready for publication. 
+
+The main objective of this tutorial is to demonstrate the use of the xlsx function for outputting FIESTA tables. 
+
+
+* [base](#base) No row groups or column groups
+    + [base_noSE](#base_noSE) Table with no standard errors
+    + [base_SEnext](#base_SEnext) Standard errors in next cell
+    + [base_SEcell](#base_SEcell) Standard errors in same cell
+
+* [rowgrp](#rowgrp) Row group and no column groups, no subtitles
+    + [rowgrp_noSE](#rowgrp_noSE) Table with no standard errors
+    + [rowgrp_SEnext](#rowgrp_SEnext) Standard errors in next cell
+    + [rowgrp_SEcell](#rowgrp_SEcell) Standard errors in same cell
+
+* [rowgrpsub](#rowgrpsub) Row group and no column groups, with subtitles
+    + [rowgrpsub_noSE](#rowgrpsub_noSE) Table with no standard errors
+    + [rowgrpsub_SEnext](#rowgrpsub_SEnext) Standard errors in next cell
+    + [rowgrpsub_SEcell](#rowgrpsub_SEcell) Standard errors in same cell
+
+* [colgrpsub](#colgrpsub) Row group and column groups, with subtitles
+    + [colgrpsub_noSE](#colgrpsub_noSE) Table with no standard errors
+    + [colgrpsub_SEnext](#colgrpsub_SEnext) Standard errors in next cell
+    + [colgrpsub_SEcell](#colgrpsub_SEcell) Standard errors in same cell
+
+```
+
+# Load library
+library(FIESTA)
+if (Sys.getenv("JAVA_HOME")!="") 
+  Sys.setenv(JAVA_HOME="") 
+library(rJava)
+library(xlsx)
+
+setwd("C:/_tsf/workspace/AutoReports")
+outfolder <- "outfolder/table3"
+
+library(FIESTA)
+if (!file.exists("C:/FIESTA"))  dir.create("C:/FIESTA")
+setwd("C:/FIESTA")
+
+# Create 2 subfolders under the FIESTA folder, 'outfolder' and 'tables' and set path to objects 
+if (!file.exists("outfolder")) dir.create("outfolder")
+if (!file.exists("outfolder/tables"))  dir.create("outfolder/tables")
+outfolder <- "outfolder/tables"
+
+```
+
+Main datasets
+```
+cond <- WYcond 
+pltstrat <- WYpltstrat
+tree <- WYtree
+
+## From FIESTA objects
+stratalut <- WYstrlut
+unitarea <- WYunitarea
+
+wbnm <- paste(outfolder, "tab3.xlsx", sep="/") 
+
+
+```
+
+
+### <a name="base"/>No row groups or column groups
+
+#### <a name="base_noSE"/>Table with no standard errors
+```
+#########################################################################################
+## Table B3 - Area by forest type group and site class code
+#########################################################################################
+tabnm <- "B3"
+rowvar <- "FORTYPGRPCD"
+colvar <- "SITECLCD"
+landarea <- "FOREST"
+
+row.FIAname=TRUE
+col.FIAname=TRUE
+col.add0=TRUE
+estround=1
+divideby="thousand"
+
+estdat <- modGBarea(cond=cond, pltstrat=pltstrat, sumunits=TRUE, landarea=landarea,
+		unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+		colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+		col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby)
+esttab <- estdat$est
+psetab <- estdat$pse
+tabtitle <- estdat$titlelst$title.est
+title.colvar <- estdat$titlelst$title.colvar
+title.rowvar <- estdat$titlelst$title.rowvar
+#outfn <- paste0("table", tabnm)
+ 
+
+fill=FALSE
+sheetnm=tabnm
+
+## NO FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		fill=FALSE, wbnm=wbnm,	sheetnm=paste0(tabnm,".1"))
+
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		fill=TRUE, wbnm=wbnm,	sheetnm=paste0(tabnm,".2"))
+
+```
+
+#### <a name="base_SEnext"/>Standard errors in next cell
+```
+tabnm <- "B3"
+rowvar="FORTYPGRPCD"
+colvar <- "SITECLCD"
+landarea <- "FOREST"
+
+row.FIAname=TRUE
+col.FIAname=TRUE
+col.add0=TRUE
+estround=1
+divideby="thousand"
+
+estdat <- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
+		unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+		colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+		col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby)
+esttab <- estdat$est
+psetab <- estdat$pse
+tabtitle <- estdat$titlelst$title.est
+title.colvar <- estdat$titlelst$title.colvar
+title.rowvar <- estdat$titlelst$title.rowvar
+outfn <- paste0("table", tabnm)
+
+fill=FALSE
+addSEcol=TRUE
+
+## NO FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		fill=FALSE, psetab=psetab, addSEcol=TRUE, wbnm=wbnm,	
+		sheetnm=paste0(tabnm,".3"))
+
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		fill=TRUE, psetab=psetab, addSEcol=TRUE, wbnm=wbnm,	
+		sheetnm=paste0(tabnm,".4"))
+
+```
+
+#### <a name="base_SEcell"/>Standard errors in same cell
+```
+tabnm <- "B3"
+rowvar="FORTYPGRPCD"
+colvar <- "SITECLCD"
+landarea <- "FOREST"
+
+row.FIAname=TRUE
+col.FIAname=TRUE
+col.add0=TRUE
+estround=1
+divideby="thousand"
+
+estdat <- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
+		unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+		colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+		col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby,
+		allin1=TRUE)
+esttab <- estdat$est
+psetab <- estdat$pse
+tabtitle <- estdat$titlelst$title.est
+title.colvar <- estdat$titlelst$title.colvar
+title.rowvar <- estdat$titlelst$title.rowvar
+outfn <- paste0("table", tabnm)
+
+## NO FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		fill=FALSE, allin1=TRUE, wbnm=wbnm, sheetnm=paste0(tabnm,".5"))
+
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		fill=TRUE, allin1=TRUE, wbnm=wbnm,sheetnm=paste0(tabnm,".6"))
+
+```
+
+### <a name="rowgrp"/>Row groups with no column groups
+
+#### <a name="rowgrp_noSE"/>Table with row groups, no subtotals, and no standard errors
+```
+#########################################################################################
+## Table B3 - Area by forest type and forest type group and site class code
+#########################################################################################
+tabnm <- "B3"
+rowvar="FORTYPCD"
+colvar <- "SITECLCD"
+landarea <- "FOREST"
+
+row.FIAname=TRUE
+col.FIAname=TRUE
+col.add0=TRUE
+estround=1
+divideby="thousand"
+returntitle=TRUE
+
+rowgrp=TRUE
+
+estdat <- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
+		unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+		colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+		col.add0=TRUE, returntitle=TRUE, estround=estround, divideby=divideby,
+		rowgrp=rowgrp)
+esttab <- estdat$est
+psetab <- estdat$pse
+tabtitle <- estdat$titlelst$title.est
+title.colvar <- estdat$titlelst$title.colvar
+title.rowvar <- estdat$titlelst$title.rowvar
+title.rowgrp <- estdat$titlelst$title.rowgrp
+outfn <- paste0("table", tabnm)
+
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=rowgrp, fill=FALSE, wbnm=wbnm, 
+		sheetnm=paste0(tabnm,".7"))
+		
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=rowgrp, fill=TRUE, wbnm=wbnm,	
+		sheetnm=paste0(tabnm,".8"))
+
+```
+
+#### <a name="rowgrp_SEnext"/>Standard errors in next cell
+```
+tabnm <- "B3"
+rowvar="FORTYPCD"
+colvar <- "SITECLCD"
+landarea <- "FOREST"
+
+row.FIAname=TRUE
+col.FIAname=TRUE
+col.add0=TRUE
+estround=1
+divideby="thousand"
+returntitle=TRUE
+
+rowgrp=TRUE
+
+estdat <- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
+		unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+		colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+		col.add0=TRUE, returntitle=TRUE, estround=estround, divideby=divideby,
+		rowgrp=rowgrp)
+esttab <- estdat$est
+psetab <- estdat$pse
+tabtitle <- estdat$titlelst$title.est
+title.colvar <- estdat$titlelst$title.colvar
+title.rowvar <- estdat$titlelst$title.rowvar
+title.rowgrp <- estdat$titlelst$title.rowgrp
+outfn <- paste0("table", tabnm)
+
+## NO FILL
+###########################################################
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=rowgrp, psetab=psetab, addSEcol=TRUE, 
+		fill=FALSE, wbnm=wbnm, sheetnm=paste0(tabnm,".9"))
+
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=rowgrp, psetab=psetab, addSEcol=TRUE, 
+		fill=TRUE, wbnm=wbnm,	sheetnm=paste0(tabnm,".10"))
+
+```
+
+#### <a name="rowgrp_SEsame"/>Standard errors in same cell
+```
+tabnm <- "B3"
+rowvar="FORTYPCD"
+colvar <- "SITECLCD"
+landarea <- "FOREST"
+
+row.FIAname=TRUE
+col.FIAname=TRUE
+col.add0=TRUE
+estround=1
+divideby="thousand"
+rowgrp=TRUE
+
+estdat <- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
+		unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+		colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+		col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby,
+		rowgrp=rowgrp, allin1=TRUE)
+esttab <- estdat$est
+tabtitle <- estdat$titlelst$title.est
+title.colvar <- estdat$titlelst$title.colvar
+title.rowvar <- estdat$titlelst$title.rowvar
+title.rowgrp <- estdat$titlelst$title.rowgrp
+outfn <- paste0("table", tabnm)
+
+
+## NO FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=rowgrp, allin1=TRUE, fill=FALSE, 
+		wbnm=wbnm,	sheetnm=paste0(tabnm,".11"))
+
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=rowgrp, allin1=TRUE, fill=TRUE, 
+		wbnm=wbnm,	sheetnm=paste0(tabnm,".12"))
+
+```
+
+### <a name="rowgrpsub"/>Row groups, including subtotals, with no column groups
+
+#### <a name="rowgrpsub_noSE"/>Table with row groups, including subtotals, and no standard errors
+```
+#########################################################################################
+## Table B3 - Area by forest type and forest type group and site class code
+#########################################################################################
+esttype <- "AREA"
+cond <- WYcond
+pltstrat <- WYpltstrat
+rowvar <- "FORTYPCD"
+colvar="SITECLCD"
+title.rgrp <- "Forest type group"
+row.FIAname <- TRUE
+col.FIAname <- TRUE
+landarea <- "FOREST"
+
+rowgrp=TRUE
+col.add0=TRUE
+
+estdat2 <- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
+	rowvar=rowvar, colvar=colvar, title.rgrp=title.rgrp, FIA=TRUE, landarea=landarea,
+ 	unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+	col.FIAname=col.FIAname, rowgrp=TRUE, col.add0=TRUE) 
+esttab <- estdat2$esttab
+psetab <- estdat2$psetab
+title.rowvar <- estdat2$title.rowvar
+title.colvar <- estdat2$title.colvar
+title.rowgrp <- estdat2$title.rgrp
+esttab.title <- estdat2$esttab.title
+psetab.title <- estdat2$psetab.title
+
+rowgrp=TRUE
+subtotal=TRUE
+fill=FALSE
+#wbnm=NULL
+sheetnm=paste0(tabnm,".13")
+
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		fill=FALSE, wbnm=wbnm,	sheetnm=paste0(tabnm,".13"))
+
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		fill=TRUE, wbnm=wbnm,	sheetnm=paste0(tabnm,".14"))
+
+```
+
+
+#### <a name="rowgrpsub_SEnext"/>Standard errors in next cell
+```
+esttype <- "AREA"
+cond <- WYcond
+pltstrat <- WYpltstrat
+rowvar <- "FORTYPCD"
+colvar="SITECLCD"
+title.rgrp <- "Forest type group"
+row.FIAname <- TRUE
+col.FIAname <- TRUE
+landarea <- "FOREST"
+
+estdat2 <- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
+	rowvar=rowvar, colvar=colvar, title.rgrp=title.rgrp, FIA=TRUE, landarea=landarea,
+ 	unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+	col.FIAname=col.FIAname, rowgrp=TRUE, col.add0=TRUE) 
+esttab <- estdat2$esttab
+psetab <- estdat2$psetab
+title.rowvar <- estdat2$title.rowvar
+title.colvar <- estdat2$title.colvar
+title.rowgrp <- estdat2$title.rgrp
+esttab.title <- estdat2$esttab.title
+psetab.title <- estdat2$psetab.title
+
+
+## NO FILL
+###########################################################
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar,
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		addSEcol=TRUE, fill=FALSE, wbnm=wbnm,	sheetnm=paste0(tabnm,".15"))
+
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		addSEcol=TRUE, fill=TRUE, wbnm=wbnm, sheetnm=paste0(tabnm,".16"))
+
+```
+
+#### <a name="rowgrpsub_SEsame"/>Standard errors in same cell
+```
+esttype <- "AREA"
+cond <- WYcond
+pltstrat <- WYpltstrat
+rowvar <- "FORTYPCD"
+colvar="SITECLCD"
+title.rgrp <- "Forest type group"
+row.FIAname <- TRUE
+col.FIAname <- TRUE
+landarea <- "FOREST"
+
+estdat2 <- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
+	rowvar=rowvar, colvar=colvar, title.rgrp=title.rgrp, FIA=TRUE, landarea=landarea,
+ 	unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+	col.FIAname=col.FIAname, allin1=TRUE, rowgrp=TRUE, col.add0=TRUE) 
+esttab <- estdat2$esttab
+esttab.title <- estdat2$esttab.title
+
+
+## NO FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar,
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, subtotal=TRUE, allin1=TRUE, 
+		fill=FALSE, wbnm=wbnm, sheetnm=paste0(tabnm,".17"))
+
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar,
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, subtotal=TRUE, allin1=TRUE, 
+		fill=TRUE, wbnm=wbnm, sheetnm=paste0(tabnm,".18"))
+
+```
+
+### <a name="colgrpsub"/>Row groups, including subtotals, with column groups
+
+#### <a name="colgrpsub_noSE"/>Table with row groups, including subtotals, and no standard errors
+```
+esttype <- "AREA"
+cond <- WYcond
+pltstrat <- WYpltstrat
+rowvar <- "FORTYPCD"
+rowgrp <- TRUE
+
+colvar <- "SITECLCD"
+cgrpcdvar <- "OWNGRPCD"
+title.cgrp <- "Owner group"
+row.FIAname <- TRUE
+col.FIAname <- TRUE
+landarea <- "FOREST"
+
+estdat2 <- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
+	rowvar=rowvar, colvar=colvar, title.rgrp=NULL, FIA=TRUE, landarea=landarea,
+ 	unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+	col.FIAname=col.FIAname, colgrp=TRUE, cgrpcdvar=cgrpcdvar, rowgrp=rowgrp,
+	colgrptot=FALSE) 
+esttab <- estdat2$esttab
+psetab <- estdat2$psetab
+title.rowvar <- estdat2$title.rowvar
+title.colvar <- estdat2$title.colvar
+title.rowgrp <- estdat2$title.rgrp
+esttab.title <- estdat2$esttab.title
+psetab.title <- estdat2$psetab.title
+cnames <- estdat2$cnames
+
+
+## NO FILL
+############################
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		addSEcol=FALSE, fill=FALSE, colgrp=TRUE, cnames=cnames, coltotal=FALSE,
+		wbnm=wbnm, sheetnm=paste0(tabnm,".19"))
+		
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		addSEcol=FALSE, fill=TRUE, colgrp=TRUE, cnames=cnames, coltotal=FALSE,
+		wbnm=wbnm, sheetnm=paste0(tabnm,".20"))
+
+```
+
+
+#### <a name="colgrpsub_noSE"/>Table with row groups, including subtotals, and no standard errors, with column group total
+```
+esttype <- "AREA"
+cond <- WYcond
+pltstrat <- WYpltstrat
+rowvar <- "FORTYPCD"
+rowgrp <- TRUE
+
+colvar <- "SITECLCD"
+cgrpcdvar <- "OWNGRPCD"
+title.cgrp <- "Owner group"
+row.FIAname <- TRUE
+col.FIAname <- TRUE
+landarea <- "FOREST"
+
+colgrp=TRUE
+colgrptot=TRUE
+
+estdat2 <- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
+	rowvar=rowvar, colvar=colvar, title.rgrp=NULL, FIA=TRUE, landarea=landarea,
+ 	unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+	col.FIAname=col.FIAname, colgrp=TRUE, cgrpcdvar=cgrpcdvar, rowgrp=rowgrp,
+	colgrptot=TRUE) 
+esttab <- estdat2$esttab
+psetab <- estdat2$psetab
+title.rowvar <- estdat2$title.rowvar
+title.colvar <- estdat2$title.colvar
+title.rowgrp <- estdat2$title.rgrp
+esttab.title <- estdat2$esttab.title
+psetab.title <- estdat2$psetab.title
+cnames <- estdat2$cnames
+
+
+## NO FILL
+############################
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		addSEcol=FALSE, fill=FALSE, colgrp=TRUE, cnames=cnames, coltotal=TRUE,
+		wbnm=wbnm, sheetnm=paste0(tabnm,".21"))
+		
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
+		title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
+		addSEcol=FALSE, fill=TRUE, colgrp=TRUE, cnames=cnames, coltotal=TRUE,
+		wbnm=wbnm, sheetnm=paste0(tabnm,".22"))
+
+```
+
+```
+## Needs work
+
+esttype <- "AREA"
+cond <- WYcond
+pltstrat <- WYpltstrat
+rowvar <- "FORTYPCD"
+rowgrp <- FALSE
+
+colvar <- "SITECLCD"
+cgrpcdvar <- "OWNGRPCD"
+title.cgrp <- "Owner group"
+row.FIAname <- TRUE
+col.FIAname <- TRUE
+landarea <- "FOREST"
+
+FIA=TRUE
+colgrp=TRUE
+stratalut <- WYstrlut
+unitarea <- WYunitarea
+cond <- WYcond 
+pltstrat <- WYpltstrat
+
+estdat2 <- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
+	rowvar=rowvar, colvar=colvar, title.rgrp=NULL, FIA=TRUE, landarea=landarea,
+ 	unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+	col.FIAname=col.FIAname, colgrp=TRUE, cgrpcdvar=cgrpcdvar, rowgrp=rowgrp) 
+esttab <- estdat2$esttab
+psetab <- estdat2$psetab
+title.rowvar <- estdat2$title.rowvar
+title.colvar <- estdat2$title.colvar
+title.rowgrp <- estdat2$title.rgrp
+esttab.title <- estdat2$esttab.title
+psetab.title <- estdat2$psetab.title
+cnames <- estdat2$cnames
+
+rowgrp=FALSE
+subtotal=FALSE
+addSEcol=FALSE
+fill=FALSE
+colgrp=TRUE
+cnames=cnames
+coltotal=FALSE
+
+## NO FILL
+############################
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar,
+		title.rowgrp=title.rowgrp, rowgrp=FALSE, psetab=psetab, subtotal=FALSE,
+		addSEcol=FALSE, fill=FALSE, colgrp=TRUE, cnames=cnames, coltotal=FALSE,
+		wbnm=wbnm, sheetnm=paste0(tabnm,".23"))
+		
+## WITH FILL
+write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar,
+		title.rowgrp=title.rowgrp, rowgrp=FALSE, psetab=psetab, subtotal=FALSE,
+		addSEcol=FALSE, fill=TRUE, colgrp=TRUE, cnames=cnames, coltotal=FALSE,
+		wbnm=wbnm, sheetnm=paste0(tabnm,".24"))
+		
+```

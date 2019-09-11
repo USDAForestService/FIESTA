@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>FIESTA - Green-book Estimators</title>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">FIESTA - Green-book Estimators</h1>
+
+
+
+<div id="fiesta-overview" class="section level2">
+<h2>FIESTA Overview</h2>
+<p>The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R’s library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors.</p>
+<p>Functions are organized by type or objective and are named with a corresponding prefix:</p>
+<p><strong>Core Functions</strong></p>
+<ul>
+<li>Database tools (DB) - functions for querying and extracting data from FIA’s national database.</li>
+<li>Data tools (dat) - functions for summarizing and exploring FIA data.</li>
+<li>Spatial tools (sp) - functions for manipulating and summarizing spatial data.</li>
+</ul>
+<p><strong>Estimation Modules (mod) </strong></p>
+<ul>
+<li>Green-Book (modGB) - functions for FIA’s standard Green-Book estimators.</li>
+<li>Photo-Based (modPB) - functions for supplementary photo-based estimators.</li>
+<li>Small Area (modSA) - functions for integration with available small area estimators (SAE).</li>
+<li>Model-Assisted (modMA) - functions for integration with available Model-Assisted estimators.</li>
+</ul>
+<p><strong>Analysis Tools</strong></p>
+<ul>
+<li>Analysis tools (an) - wrapper functions for steam-lining estimation processes.</li>
+</ul>
+<div id="green-book-gb-module-overview" class="section level3">
+<h3>Green-Book (GB) module overview</h3>
+<p>FIESTA’s Green-Book (GB) module calculates population estimates and their sampling errors based on Bechtold and Patterson’s (2005), ‘Green-Book’ for FIA’s nationally-consistent, systematic annual sample design, chapter 4 (Scott et al. 2005). FIA’s sample design is based on 2 phases: the first phase uses remotely-sensed data to stratify the land area to increase precision of estimates; while the 2nd phase obtains photo and ground observations and measurements for a suite of information across a hexagonal grid, each approximately 6000 acres in size. The associated estimators and variance estimators are used for area and tree attribute totals with the assumption of a simple random, stratified design and double sampling for stratification. Adjustment factors are calculated by estimation unit and strata to account for nonsampled (nonresponse) conditions.</p>
+<p>Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, FIESTA adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA’s publically-available online tool (EVALIDator - <a href="https://apps.fs.usda.gov/Evalidator/evalidator.jsp" class="uri">https://apps.fs.usda.gov/Evalidator/evalidator.jsp</a>) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).</p>
+</div>
+<div id="objective-of-tutorial" class="section level3">
+<h3>Objective of tutorial</h3>
+<p>The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates and estimated variances using FIA’s standard estimation data and ‘Green Book’ estimators from the FIA database (FIADB). There are several important topics to understand and are outlined in this tutorial as follows:</p>
+<ul>
+<li><a href="#input">FIESTA parameters</a></li>
+<li><a href="#required">Required variables for input tables</a></li>
+<li><a href="#output">FIESTA output from Green-Book module</a></li>
+<li><a href="#ref">Reference tables</a></li>
+<li><a href="#GBfun">GB Functions and Examples</a></li>
+</ul>
+<p><a name="input"></a></p>
+</div>
+</div>
+<div id="fiesta-green-book-parameters---modgbarea-modgbtree-modgbratio" class="section level2">
+<h2>FIESTA Green-Book Parameters - modGBarea(), modGBtree(), modGBratio()</h2>
+<p>The parameters for GB functions can be organized into categories defined by specific requirements and needs, as follows:</p>
+<ol style="list-style-type: decimal">
+<li><a href="#dtab">Data tables and unique identifier of plot</a><br />
+</li>
+<li><a href="#etyp">Estimation type</a><br />
+</li>
+<li><a href="#filt">Filters to subset table records</a></li>
+<li><a href="#estunit">Estimation unit information</a></li>
+<li><a href="#strat">Stratification information</a></li>
+<li><a href="#tree">Tree information for tree estimates - modGBtree()</a></li>
+<li><a href="#rat">Tree information for ratio estimates - modGBratio()</a></li>
+<li><a href="#out1">Output table information</a></li>
+<li><a href="#out2">Output table specifications</a></li>
+<li><a href="#title">Output table title(s)</a></li>
+</ol>
+<p><a name="dtab"></a> <strong>Data tables and unique identifiers</strong></p>
+<p>The required data tables are from the FIA national database. Plot-level information, such as: state, county, or strata assignment, may be included in the pltstrat table or cond table, with pltstrat=NULL. The data table parameter inputs can be the name of a comma-delimited file (*.csv) or an R data frame or data table object already loaded into R. The pltstrat table can also be a point shapefile (*.shp) or a SpatialDataFrame object with one point per plot. The unique identifier for a plot must be provided in the corresponding parameter for each input table. See required variables section for a list of variables necessary to include for estimation.</p>
+<ul>
+<li><strong>tree</strong> - Tree-level data, with 1 record per tree - <em>required for modGBtree() or modGBratio() tree estimates</em>.</li>
+<li><strong>cond</strong> - Condition-level data, with 1 record per condition, including nonsampled conditions - <em>required for all estimates</em>.</li>
+<li><strong>pltstrat</strong> - Plot-level data, with 1 record per plot and strata/estimation unit variable(s) if applying stratification. Include nonsampled plots (PLOT_STATUS_CD = 3) only if PLOT_STATUS_CD variable is in table. These plots are excluded from the analysis. - <em>optional for all estimates</em>.</li>
+<li><strong>seed</strong> - Seedling data - <em>required for modGBtree() or modGBratio() seedling estimates</em>.</li>
+<li><strong>tuniqueid</strong> - Unique identifier for a plot in tree or seed.</li>
+<li><strong>cuniqueid</strong> - Unique identifier for a plot in cond.</li>
+<li><strong>puniqueid</strong> - Unique identifier for a plot in pltstrat, if pltstrat is included.</li>
+</ul>
+<p><a name="etyp"></a> <strong>Estimation type</strong></p>
+<p>Define the type of estimation: summed estimation units; adjust for nonsampled conditions; post-stratify; if ratio estimate, what type of ratio.</p>
+<ul>
+<li><strong>sumunits</strong> - TRUE, sum estimates by estimation units (subpopulations) into one estimate (e.g., Counties to State).</li>
+<li><strong>adjsamp</strong> - TRUE, adjustment factors are calculated for nonsampled (nonresponse) conditions based on summed proportions for sampled conditions divided by the total plots in the strata/estimation unit. Adjustments are only calculated for annual inventory plots (designcd=1).</li>
+<li><strong>strata</strong> - TRUE, use stratification for variance reduction.</li>
+<li><strong>ratiotype</strong> - If ratio estimate, the ratio type (“PERACRE”, “PERTREE”).</li>
+</ul>
+<p><a name="filt"></a> <strong>Filters</strong></p>
+<p>Filters subset the area of the sample population. Some filters are defined internally, depending on the dataset, such as land area of interest (landarea) or inclusion of ACI (All Condition Inventory) data. Others are specified according to the input table, such as plt.filter or cond.filter. The nonsamp.filter is for removing nonsampled conditions and is applied, internally, unless otherwise stated. <em>All filter expressions must be in R syntax</em>.</p>
+<ul>
+<li><strong>landarea</strong> - A predefined cond filter depending on desired sample land area {ALL, FOREST (COND_STATUS_CD=1), TIMBERLAND (SITECLCD in(1:6) &amp; RESERVCD=0)}.</li>
+<li><strong>ACI</strong> - FALSE. A predefined cond filter to include All Condition Inventory (ACI) conditions and associated tree data in estimates. If FALSE, a filter, COND_STATUS_CD == 1, is applied.</li>
+<li><strong>nonsamp.filter</strong> - A predefined cond filter for nonsampled (nonresponse) conditions (COND_STATUS != 5; or if ACI=TRUE: is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5). If a different filter is needed, define the filter to remove conditions that are nonsampled.</li>
+<li><strong>plt.filter</strong> - Plot-level filter.</li>
+<li><strong>cond.filter</strong> - Condition-level filter.</li>
+</ul>
+<p><a name="estunit"></a> <strong>Estimation unit information</strong></p>
+<p>An estimation unit is a population, or area of interest, with known area and number of plots. As an example, in Interior-West FIA, an estimation unit is generally an individual county. An estimation unit may be a subpopulation of a larger population (e.g., Counties within a State). Subpopulations are mutually exclusive and independent within a population, therefore estimated totals and variances are additive. Each plot is assigned to only one estimation unit based on plot center and can be stored in either pltstrat or cond.</p>
+<ul>
+<li><strong>unitvar</strong> - Name of the estimation unit variable in cond or pltstrat with assignment for each plot (e.g., ‘ESTN_UNIT’).</li>
+<li><strong>unitvar2</strong> - Name of a second estimation unit variable in cond or pltstrat with assignment for each plot (e.g., ‘STATECD’).</li>
+<li><strong>unitarea</strong> - Total acres by estimation unit. If only 1 estimation unit, include a number representing total acreage for the area of interest. If more than one estimation unit, provide a data frame/data table of total acres by estimation unit, with variables defined by unitvar and areavar.</li>
+<li><strong>areavar</strong> - Name of acre variable in unitarea (Default = “ACRES”).</li>
+</ul>
+<p><a name="strat"></a> <strong>Strata information</strong></p>
+<p>Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltstrat or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.</p>
+<ul>
+<li><strong>stratalut</strong> - Look-up table with pixel counts, area, or proportions (strwt) by strata (and estimation unit).</li>
+<li><strong>strvar</strong> - Name of strata variable in stratalut and pltstrat or cond table with strata assignment for each plot.</li>
+<li><strong>getwt</strong> - If TRUE, calculates strata weights from getwtvar in stratalut.</li>
+<li><strong>getwtvar</strong> - Name of variable in stratalut to calculate weights (e.g., pixels counts). Default=“P1POINTCNT”.</li>
+<li><strong>nonresp</strong> - TRUE, if substrata are used to minimize bias of nonresponse.</li>
+<li><strong>substrvar</strong> - Name of substrata variable in stratalut and table with substrata assignment for each plot.</li>
+<li><strong>autocombine</strong> - TRUE, an automated procedure occurs to combine strata and/or estimation units if less than 2 plots (See note below for more details).</li>
+</ul>
+<p>Note: A minimum of 2 plots per strata is necessary for stratification. If there are less than 2 plots in any strata/estimation combination, an error occurs with a message to collapse classes. If the number of plots per strata with less than 2 plots is more than 50 percent of the number of strata, strata are collapse to one strata. If autocombine=TRUE, an automated procedure occurs to collapse all strata/estimation unit combinations that have 10 or less plots (Paul ref). The procedure collapses classes based on the order of estimation units in stratalut. If an estimation unit has 10 or less plots, it is grouped with the estimation unit following in the table. If it is the last estimation unit in the table, it is grouped with the estimation unit prededing in the table.</p>
+<p><a name="tree"></a> <strong>Tree information for tree estimates - modGBtree()</strong></p>
+<p>Tree information is used for calculating estimates for derived tree data, such as basal area (BA), volume (e.g., VOLCFNET), or number of trees (i.e., TPA_UNADJ). All variables except number of tree variables are extrapolated to the acre plot size by multiplying by TPA_*).</p>
+<ul>
+<li><strong>estvar</strong> - Name of estimate variable in tree (e.g., VOLCFNET, TPA_UNADJ).</li>
+<li><strong>estvar.filter</strong> - Tree-level filter (e.g., ‘STATUS_CD == 1 &amp; DIA &gt;= 5.0’).</li>
+<li><strong>estvar.name</strong> - A name for aggregated estvar (Default = estvar’_SUM’).</li>
+</ul>
+<p><a name="rat"></a> <strong>Tree information for ratio estimates - modGBratio()</strong></p>
+<p>Tree information is used for calculating per-acre ratio estimates (numerator) and per-tree ratio estimates (numerator and denominator) from derived tree data, such as basal area (BA), volume (e.g., VOLCFNET), or number of trees (i.e., TPA_UNADJ). All variables except number of tree variables are extrapolated to the acre plot size by multiplying by TPA_*).</p>
+<ul>
+<li><strong>estvar(n)</strong> - Numerator - Name of estimate variable (e.g., VOLCFNET, TPA_UNADJ)</li>
+<li><strong>estvar(n).filter</strong> - Numerator - Tree-level filter(s).</li>
+<li><strong>estvar(n).name</strong> - Numerator - A name for aggregated estvar (Default = estvar(n)’_SUM’).</li>
+<li><strong>estvard</strong> - Denominator - Name of estimate variable (e.g., VOLCFNET, TPA_UNADJ)</li>
+<li><strong>estvard.filter</strong> - Denominator - Tree-level filter(s).</li>
+<li><strong>estvard.name</strong> - Denominator - A name for aggregated estvar (Default = estvard’_SUM’).</li>
+</ul>
+<p><a name="out1"></a> <strong>Output table information</strong></p>
+<p>The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the rowvar must be populated, leaving the colvar=NULL. Row and columns may be filtered to display specific values (rowvar.filter/colvar.filter) and may be ordered in a particular way, defined by row.orderby and col.orderby variables. A default set of code names are stored internally (FIESTA::ref_codes). If row.FIAname/col.FIAname = TRUE and the respective rowvar/colvar is in ref_codes, the default code description is used in output tables.</p>
+<ul>
+<li><strong>rowvar</strong> - Name of row variable (domain). If area estimate, rowvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, rowvar can be from cond or tree (e.g., SPCD).</li>
+<li><strong>rowvar.filter</strong> - Row filter. Must be R syntax (e.g., FORTYPCD %in% 200:300).</li>
+<li><strong>colvar</strong> - Name of column variable (domain). If area estimate, colvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, colvar can be from cond or tree (e.g, SPCD).</li>
+<li><strong>colvar.filter</strong> - Column filter. Must be R syntax (e.g., STDSZCD == 3).</li>
+<li><strong>row.FIAname</strong> - TRUE, gets FIA reference name for rowvar, if available.</li>
+<li><strong>col.FIAname</strong> - TRUE, gets FIA reference name for colvar, if available.</li>
+<li><strong>row.orderby</strong> - Name of variable to order values of rowvar (if row.FIAname=FALSE).</li>
+<li><strong>col.orderby</strong> - Name of variable to order values of colvar (if col.FIAname=FALSE).</li>
+<li><strong>row.add0</strong> - TRUE, add 0 values in table for row values that occur in input dataset or in rowlut, but are not in final estimate.</li>
+<li><strong>col.add0</strong> - TRUE, add 0 values in table for column values that occur in input dataset or in rowlut, but are not in final estimate.</li>
+<li><strong>rowlut</strong> - A lookup table with variable codes and descriptions to include in rows of output table (See note following for more details).</li>
+<li><strong>collut</strong> - A lookup table with specific variable codes and descriptions to include in columns of output table (See note following for more details).</li>
+</ul>
+<p>Note: rowlut/collut - There are several objectives for including rowlut/collut look-up tables: 1) to include descriptive names that match row/column codes in the input table; 2) to use number codes that match row/column names in the input table for ordering rows; 3) to add rows and/or columns with 0 values for consistency. No duplicate names are allowed.</p>
+<p>Include 2 columns in the table: 1-the merging variable with same name as the variable in the input merge table; 2-the ordering or descriptive variable. If the ordering variable is the rowvar/colvar in the input table and the descriptive variable is in rowlut/collut, set row.orderby/col.orderby equal to rowvar/colvar. If the descriptive variable is the rowvar/colvar in the input table, and the ordering code variable is in rowlut/collut, set row.orderby/col.orderby equal to the variable name of the code variable in rowlut/collut.</p>
+<p><a name="out2"></a> <strong>Output table specifications</strong></p>
+<p>The final parameters dictate what the output will look like, such as: how to display the sample error; how many digits to round values to; whether to include a title; and whether to write the output to a folder or only return as R objects.</p>
+<ul>
+<li><strong>allin1</strong> - TRUE, table cells include: estimates (% sample error).</li>
+<li><strong>estround</strong> - Number of digits to round estimates to (for modGBarea and modGBtree, default=0; for modGBratio, default=3).</li>
+<li><strong>cvround</strong> - Number of digits to round % sample error to (for modGBarea and modGBtree, default=3; for modGBratio, default=3).</li>
+<li><strong>savedata</strong> - TRUE, save data to outfolder.</li>
+<li><strong>rawdata</strong> - TRUE, if output of raw data information is desired. See output values for details.</li>
+<li><strong>outfolder</strong> - Name of folder to output data to (Default = working directory or window to browse).</li>
+<li><strong>outfn</strong> - Name of file for output data (Default = ‘esttype_’estvar.name’<em>‘rowvar’</em>’date’.csv’).</li>
+<li><strong>outfn.pre</strong> - Add a prefix to output name (e.g., “01”).</li>
+<li><strong>addtitle</strong> - TRUE, add title to tables (Default = TRUE).</li>
+<li><strong>returntitle</strong> - TRUE, return full table title (Default = FALSE).</li>
+</ul>
+<p><a name="title"></a> <strong>Title parameters</strong></p>
+<p>If saving to a folder, and a title is desired, there are parameters for including a specific title or for generating a title based on pieces of information.</p>
+<ul>
+<li><strong>title.main</strong> - Full title for table.</li>
+<li><strong>title.ref</strong> - The ending text for table title. If not NULL, included with title.main.</li>
+<li><strong>title.rowvar</strong> - Pretty name for rowvar for table title (If NULL, default = rowvar).</li>
+<li><strong>title.colvar</strong> - Pretty name for colvar for table title (If NULL, default = colvar).</li>
+<li><strong>title.unitvar</strong> - Pretty name for unitvar for table title (If NULL and sumunits=FALSE, default = unitvar).</li>
+<li><strong>title.estvar</strong> - Pretty name for estvar for table title (If NULL, default = estvar). For ratio estimates, title.estvarn (default = estvarn) and title.estvard (default = estvard).</li>
+<li><strong>title.filter</strong> - Pretty name for any filters for table title.</li>
+</ul>
+<p><a name="required"></a></p>
+</div>
+<div id="required-variables-in-input-data-tables" class="section level2">
+<h2>Required variables in input data tables</h2>
+<p>The following variables by data table are required for successful FIESTA output.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Table</th>
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">tree</td>
+<td align="left"><em>tuniqueid</em></td>
+<td align="left">Unique identifier for each plot, for joining tables (ex. PLT_CN)</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">CONDID</td>
+<td align="left">Unique identifier for each condition on plot, for joining tables. Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">TPA_UNADJ</td>
+<td align="left">Number of trees per acre each sample tree represents (ex. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on microplot)</td>
+</tr>
+<tr class="even">
+<td align="left">cond</td>
+<td align="left"><em>cuniqueid</em></td>
+<td align="left">Unique identifier for each plot, for joining tables (ex. PLT_CN)</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">CONDID</td>
+<td align="left">Unique identifier for each condition on plot, for joining tables. Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">CONDPROP_UNADJ</td>
+<td align="left">Unadjusted proportion of condition on each plot. Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">COND_STATUS_CD</td>
+<td align="left">Status of each forested condition on plot (i.e. accessible forest, nonforest, water, etc.)</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">NF_COND_STATUS_CD</td>
+<td align="left">Only if ACI=TRUE. Status of each nonforest condition plot (i.e. accessible nonforest, nonsampled nonforest)</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">SITECLCD</td>
+<td align="left">Only if landarea=TIMBERLAND. Measure of site productivity</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">RESERVCD</td>
+<td align="left">If landarea=TIMBERLAND. Reserved status</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">SUBPROP_UNADJ</td>
+<td align="left">Unadjusted proportion of subplot conditions on each plot. Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">MICRPROP_UNADJ</td>
+<td align="left">If microplot tree attributes. Unadjusted proportion of microplot conditions on each plot. Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">MACRPROP_UNADJ</td>
+<td align="left">If macroplot tree attributes. Unadjusted proportion of macroplot conditions on each plot. Optional if only 1 condition (record) per plot</td>
+</tr>
+<tr class="even">
+<td align="left">plot</td>
+<td align="left"><em>puniqueid</em></td>
+<td align="left">Unique identifier for each plot, for joining tables (ex. CN)</td>
+</tr>
+<tr class="odd">
+<td align="left"></td>
+<td align="left">STATECD</td>
+<td align="left">Identifies state each plot is located in. Optional if only 1 state</td>
+</tr>
+<tr class="even">
+<td align="left"></td>
+<td align="left">INVYR</td>
+<td align="left">Identifies inventory year of each plot. Optional. Assumes estimation time span is less than inventory cycle</td>
+</tr>
+</tbody>
+</table>
+<p><a name="output"></a></p>
+</div>
+<div id="output-values-from-fiesta-green-book-module" class="section level2">
+<h2>Output values from FIESTA Green-Book module</h2>
+<p>Estimates with percent sampling error for the row domain (and column domain) specified by the input parameters. This can be in the form of one table or two separate tables, depending on the number of domains and on allin1 parameter.</p>
+<p>A list object with one or more of the following components. If savedata=TRUE, all output data frames are written to outfolder.</p>
+<ul>
+<li><strong>$est</strong> - Data frame with estimates by rowvar, colvar (and estimation unit). If sumunits=TRUE or one estimation unit and colvar=NULL, estimates and percent sampling error (confidence level 68%) are all in est. For 95% percent confidence level multiply percent sampling error by 1.96.</li>
+<li><strong>$pse</strong> - Data frame with percent sampling errors corresponding to est.</li>
+<li><strong>$titlelst</strong> - If returntitle=TRUE, a list with one or two titles for est and pse, depending on number of output data frames.</li>
+<li><strong>$raw</strong> - If rawdata=TRUE, a list of raw data used in the estimation process.</li>
+</ul>
+<div id="raw-data-used-for-producing-estimates-if-rawdatatrue" class="section level3">
+<h3>Raw data used for producing estimates (If rawdata=TRUE):</h3>
+<ul>
+<li><strong>raw$plotsampcnt</strong> - Number of plots by plot status.</li>
+<li><strong>raw$condsampcnt</strong> - Number of conditions by condition status.</li>
+<li><strong>raw$unitarea</strong> - Area by estimation unit.</li>
+<li><strong>raw$stratdat</strong> - Data frame of strata information by estimation unit. See below for variable descriptions.</li>
+<li><strong>raw$expcondtab</strong> - Condition-level area expansion factors.</li>
+<li><strong>raw$domdat</strong> - Plot domain data used for estimation.</li>
+</ul>
+<table>
+<caption>Description of variables in stratdat.</caption>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ESTN_UNIT</td>
+<td align="left">Estimation unit</td>
+</tr>
+<tr class="even">
+<td align="left">STRATUMCD</td>
+<td align="left">Strata value</td>
+</tr>
+<tr class="odd">
+<td align="left">P1POINTCNT</td>
+<td align="left">Number of pixels by strata and estimation unit</td>
+</tr>
+<tr class="even">
+<td align="left">n.strata</td>
+<td align="left">Number of plots in strata (and estimation unit)</td>
+</tr>
+<tr class="odd">
+<td align="left">n.total</td>
+<td align="left">Number of plots for estimation unit</td>
+</tr>
+<tr class="even">
+<td align="left">strwt</td>
+<td align="left">Total acres for estimation unit</td>
+</tr>
+<tr class="odd">
+<td align="left">CONDPROP_UNADJ_SUM</td>
+<td align="left">Summed condition proportion by strata and estimation unit</td>
+</tr>
+<tr class="even">
+<td align="left">CONDPROP_ADJFAC</td>
+<td align="left">Adjustment factor for nonsampled plots by strata and/or estimation unit (CONDPROP_UNADJ_SUM/n.strata)</td>
+</tr>
+</tbody>
+</table>
+<div id="processing-data-if-rawdatatrue" class="section level4">
+<h4>Processing data (If rawdata=TRUE)</h4>
+<p>Separate data frames with calculated variables used in estimation process. The number of processing tables depends on the input parameters. The tables include:</p>
+<ul>
+<li><strong>raw$unit.totest</strong> - Total by estimation unit</li>
+<li><strong>raw$unit.rowest</strong> - If rowvar != NULL, rowvar totals</li>
+<li><strong>raw$unit.colvar</strong> - If colvar != NULL, colvar totals</li>
+<li><strong>raw$unit.grpvar</strong> - If colvar != NULL, a combination of rowvar and colvar</li>
+<li>If sumunits=TRUE, the raw data for the summed estimation units are also included: (totest, rowest, colest, grpest, respectively). These tables do not included estimate proportions (nhat and nhat.var). See below for variable descriptions.</li>
+</ul>
+<table>
+<caption>Description of variables in nonratio tables.</caption>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">nhat</td>
+<td align="left">Estimated proportion</td>
+</tr>
+<tr class="even">
+<td align="left">nhat.var</td>
+<td align="left">Variance estimate of estimated proportion</td>
+</tr>
+<tr class="odd">
+<td align="left">est</td>
+<td align="left">Estimated acres { nhat * ACRES }</td>
+</tr>
+<tr class="even">
+<td align="left">est.var</td>
+<td align="left">Variance estimate of estimated acres { nhat * ACRES^2 }</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Description of variables in nonratio tables.</caption>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">nhat</td>
+<td align="left">Estimated proportion of land, for numerator</td>
+</tr>
+<tr class="even">
+<td align="left">nhat.var</td>
+<td align="left">Variance estimate of estimated proportion of land, for numerator</td>
+</tr>
+<tr class="odd">
+<td align="left">dhat</td>
+<td align="left">Estimated proportion of land, for denominator</td>
+</tr>
+<tr class="even">
+<td align="left">dhat.var</td>
+<td align="left">Variance estimate of estimated proportion of land, for denominator</td>
+</tr>
+<tr class="odd">
+<td align="left">covar</td>
+<td align="left">Covariance of estimated proportion of numerator and denominator</td>
+</tr>
+<tr class="even">
+<td align="left">estn</td>
+<td align="left">Estimated acres, for numerator</td>
+</tr>
+<tr class="odd">
+<td align="left">estd</td>
+<td align="left">Estimated acres, for denominator</td>
+</tr>
+<tr class="even">
+<td align="left">estn.var</td>
+<td align="left">Variance estimate of estimate acres, for numerator</td>
+</tr>
+<tr class="odd">
+<td align="left">estn.se</td>
+<td align="left">Standard error estimated acres, for numerator</td>
+</tr>
+<tr class="even">
+<td align="left">estn.cv</td>
+<td align="left">Coeffiecient of variation of estimated acres, for numerator</td>
+</tr>
+<tr class="odd">
+<td align="left">estn.pse</td>
+<td align="left">Percent sampling error of estimate, for numerator</td>
+</tr>
+<tr class="even">
+<td align="left">estd.var</td>
+<td align="left">Variance estimate of estimate acres, for denominator</td>
+</tr>
+<tr class="odd">
+<td align="left">estd.se</td>
+<td align="left">Standard error estimated acres, for denominator</td>
+</tr>
+<tr class="even">
+<td align="left">estd.cv</td>
+<td align="left">Coefficient of variation of estimated acres, for denominator</td>
+</tr>
+<tr class="odd">
+<td align="left">estd.pse</td>
+<td align="left">Percent sampling error of estimate, for denominator</td>
+</tr>
+<tr class="even">
+<td align="left">est.covar</td>
+<td align="left">Covariance of estimated acres of numerator and denominator</td>
+</tr>
+<tr class="odd">
+<td align="left">rhat</td>
+<td align="left">Ratio of estimated proportions (numerator/denominator)</td>
+</tr>
+<tr class="even">
+<td align="left">rhat.var</td>
+<td align="left">Variance of ratio of estimated proportions</td>
+</tr>
+<tr class="odd">
+<td align="left">rhat.se</td>
+<td align="left">Standard error of ratio of estimated proportions { rhat.se/rhat }</td>
+</tr>
+<tr class="even">
+<td align="left">rhat.cv</td>
+<td align="left">Coefficient of variation of ratio of estimated proportions { sqrt(rhat.var) }</td>
+</tr>
+<tr class="odd">
+<td align="left">est</td>
+<td align="left">Estimated percent cover of land { rhat*100 }</td>
+</tr>
+<tr class="even">
+<td align="left">est.var</td>
+<td align="left">Variance of estimated percent cover of land { rhat.var*100^2 }</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Description of variables in nonratio and ratio tables.</caption>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">NBRPLT</td>
+<td align="left">Number of total plots used in estimate</td>
+</tr>
+<tr class="even">
+<td align="left">NBRPLT.gt0</td>
+<td align="left">Number of nonzero plots used in estimate</td>
+</tr>
+<tr class="odd">
+<td align="left">ACRES</td>
+<td align="left">Total acres for estimation unit</td>
+</tr>
+<tr class="even">
+<td align="left">est.se</td>
+<td align="left">Standard error of estimated acres { sqrt(est.var) }</td>
+</tr>
+<tr class="odd">
+<td align="left">est.cv</td>
+<td align="left">Coefficient of variation of estimated acres { est.se/est }</td>
+</tr>
+<tr class="even">
+<td align="left">pse</td>
+<td align="left">Percent sampling error of estimate { est.cv * 100 }</td>
+</tr>
+<tr class="odd">
+<td align="left">CI99left</td>
+<td align="left">Left tail of 99% confidence interval for estimate { est - (2.58*est.se) }</td>
+</tr>
+<tr class="even">
+<td align="left">CI99right</td>
+<td align="left">Right tail of 99% confidence interval for estimate { est + (2.58*est.se) }</td>
+</tr>
+<tr class="odd">
+<td align="left">CI95left</td>
+<td align="left">Left tail of 95% confidence interval for estimate { est - (1.96*est.se) }</td>
+</tr>
+<tr class="even">
+<td align="left">CI95right</td>
+<td align="left">Right tail of 95% confidence interval for estimate { est + (1.96*est.se) }</td>
+</tr>
+<tr class="odd">
+<td align="left">CI68left</td>
+<td align="left">Left tail of 68% confidence interval for estimate { est - (0.97*est.se) }</td>
+</tr>
+<tr class="even">
+<td align="left">CI68right</td>
+<td align="left">Right tail of 68% confidence interval for estimate { est + (0.97*est.se) }</td>
+</tr>
+</tbody>
+</table>
+<p><a name="ref"></a></p>
+</div>
+</div>
+</div>
+<div id="reference-tables-in-fiesta" class="section level2">
+<h2>Reference Tables in FIESTA</h2>
+<p>There are several reference tables stored in FIESTA, including table variable descriptions, code definitions, and estimation categories.</p>
+<ul>
+<li>Table variable descriptions - ref_plt, ref_cond, ref_tree</li>
+<li>Code definitions - ref_codes</li>
+<li>Domain variables - ref_domain</li>
+<li>Estimation variables - ref_estvar</li>
+</ul>
+<p>getdomain() getestvar()</p>
+<p><a name="GBfun"></a></p>
+</div>
+<div id="gb-functions-and-examples" class="section level2">
+<h2>GB Functions and Examples</h2>
+<p>The following examples are for generating FIA’s traditional, state-level estimate, using standard FIA Evaluation data from FIA’s National database, including associated Estimation unit and Stratification information. The examples use data from two inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.</p>
+</div>
+<div id="example-data---wyoming-wy-inventory-years-2011-2013" class="section level2">
+<h2>Example data - Wyoming (WY), Inventory Years 2011-2013</h2>
+<table>
+<colgroup>
+<col width="12%"></col>
+<col width="87%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Data Frame</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">WYpltstrat</td>
+<td align="left">WY plot-level data with strata and estimation unit assignments</td>
+</tr>
+<tr class="even">
+<td align="left">WYcond</td>
+<td align="left">WY condition-level data</td>
+</tr>
+<tr class="odd">
+<td align="left">WYtree</td>
+<td align="left">WY tree-level data</td>
+</tr>
+<tr class="even">
+<td align="left">WYunitarea</td>
+<td align="left">WY estimation unit look-up table with total acres by estimation unit (ESTUNIT)</td>
+</tr>
+<tr class="odd">
+<td align="left">WYstrlut</td>
+<td align="left">WY strata look-up table with pixel counts (P1POINTCNT) by strata and estimation unit</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col width="26%"></col>
+<col width="73%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">External data</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">WYbighorn_adminbnd.shp</td>
+<td align="left">Polygon shapefile of WY Bighorn National Forest Administrative boundary<sup>1</sup></td>
+</tr>
+<tr class="even">
+<td align="left">WYbighorn_districtbnd.shp</td>
+<td align="left">Polygon shapefile of WY Bighorn National Forest District boundaries<sup>2</sup></td>
+</tr>
+</tbody>
+</table>
+<p><sup>1</sup>USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.AdministrativeForest (<a href="http://data.fs.usda.gov/geodata/edw" class="uri">http://data.fs.usda.gov/geodata/edw</a>). Description: An area encompassing all the National Forest System lands administered by an administrative unit. The area encompasses private lands, other governmental agency lands, and may contain National Forest System lands within the proclaimed boundaries of another administrative unit. All National Forest System lands fall within one and only one Administrative Forest Area.</p>
+<p><sup>2</sup>USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (<a href="http://data.fs.usda.gov/geodata/edw" class="uri">http://data.fs.usda.gov/geodata/edw</a>). Description: A depiction of the boundary that encompasses a Ranger District.</p>
+<div id="set-up-for-examples" class="section level4">
+<h4>Set up for examples</h4>
+<pre><code># Load library
+library(FIESTA)
+
+# Set workspace to FIESTA folder (create if doesn't exist)
+if (!file.exists(&quot;C:/FIESTA&quot;))  dir.create(&quot;C:/FIESTA&quot;)
+setwd(&quot;C:/FIESTA&quot;)
+
+# Create 2 subfolders under the FIESTA folder, 'data' and 'outfolder' and set path to objects 
+if (!file.exists(&quot;data&quot;))  dir.create(&quot;data&quot;)
+datfolder &lt;- &quot;data&quot; 
+
+if (!file.exists(&quot;outfolder&quot;)) dir.create(&quot;outfolder&quot;)
+outfolder &lt;- &quot;outfolder&quot;
+</code></pre>
+</div>
+<div id="gb-functions" class="section level4">
+<h4>GB Functions</h4>
+<ul>
+<li><a href="#modGBarea">modGBarea()</a></li>
+<li><a href="#modGBtree">modGBtree()</a></li>
+<li><a href="#modGBratio">modGBratio()</a></li>
+</ul>
+<p><a name="modGBarea"></a></p>
+</div>
+<div id="modgbarea" class="section level4">
+<h4>modGBarea</h4>
+<pre><code>######################################################################################
+# Usage:
+# modGBarea(cond = NULL, pltstrat = NULL, cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, 
+#   sumunits = FALSE, adjsamp = TRUE, strata = TRUE, landarea = &quot;ALL&quot;, ACI = FALSE, 
+#   nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL, 
+#   unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
+#   strvar = &quot;STRATA&quot;, getwt = TRUE, getwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE, 
+#   substrvar = NULL, autocombine = TRUE, rowvar = NULL, rowvar.filter = NULL, 
+#   colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, col.FIAname = FALSE,
+#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
+#   rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 0, pseround = 3, 
+#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#   outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+#   title.filter = NULL, gui = FALSE)
+# 
+# Description:
+# Generates acre estimates by domain (and estimation unit). Calculations are based on 
+# Scott et al. 2005 ('the green-book') for mapped forest inventory plots. The non-ratio 
+# estimator for estimating area by stratum and domain is used. Plots that are totally 
+# nonsampled are excluded from estimation dataset. Next, an adjustment factor is 
+# calculated by strata to adjust for nonsampled (nonresponse) conditions that have 
+# proportion less than 1. The attribute is the proportion of the plot which is divided 
+# by the adjustment factor, and averaged by stratum. Strata means are combined using the
+# strata weights and then expanded to acres using the total land area in the population.  
+########################################################################################
+
+help(modGBarea)
+
+
+## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
+########################################################################################
+area1 &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, landarea=&quot;FOREST&quot;, 
+  unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut)
+area1
+
+## Get names of list components
+names(area1)
+
+## Look at estimate table from area1 list
+area1$est
+
+
+## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
+## Add raw data and return title
+#######################################################################################
+area1 &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, landarea=&quot;FOREST&quot;, 
+  unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, rawdata=TRUE,
+  returntitle=TRUE)
+
+## Get names of list components
+names(area1)
+
+## Look at estimate table from est.tot list
+area1$est
+
+## Get list of raw data from area1 list components and look at names
+raw.tot &lt;- area1$raw
+names(raw.tot)
+
+## Look at raw data
+raw.tot$plotsampcnt # Number of plots after plot filter
+raw.tot$condsampcnt # Number of conditions after plot filter, before cond filters
+raw.tot$stratdat    # Strata information and adjustment factors
+raw.tot$unit.totest # Raw data for total estimates by estimation unit
+raw.tot$totest      # Raw data for total estimates by estimation unit summed to one estimate
+
+
+## Add table rows:
+## Area of forest land and % sampling error by forest type, Wyoming, 2011-2013
+####################################################################################
+
+## Rows only; combine estimation units (sumunits=TRUE)
+area2a &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, savedata=TRUE, returntitle=TRUE, 
+  outfolder=&quot;outfolder&quot;)
+area2a
+
+## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
+area2b &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, allin1=TRUE)
+area2b
+
+
+## Add row and columns to table
+## Area of forest land and % sampling error by forest type and stand-size class, 
+##    Wyoming, 2011-2013
+######################################################################################
+
+## Rows and columns; combine estimation units (sumunits=TRUE)
+area3a &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, strata=TRUE, 
+  stratalut=WYstrlut, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, row.FIAname=TRUE, 
+  col.FIAname=TRUE)
+area3a$est
+area3a$pse
+
+## Rows and columns; combine estimation units (sumunits=TRUE; allin1=TRUE)
+area3b &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, landarea=&quot;FOREST&quot;,
+    unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, rowvar=&quot;FORTYPCD&quot;, 
+    colvar=&quot;OWNGRPCD&quot;, row.FIAname=TRUE, col.FIAname=TRUE, allin1=TRUE)
+area3b
+
+## Rows and columns; combine estimation units (sumunits=TRUE; rawdata=TRUE; returntitle=TRUE)
+area3c &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, landarea=&quot;FOREST&quot;,
+    unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, rowvar=&quot;FORTYPCD&quot;, 
+    colvar=&quot;STDSZCD&quot;, row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE, returntitle=TRUE)
+names(area3c)
+area3c$est
+area3c$pse
+
+## Get list of raw data from area3c list components and look at names
+raw.rowcol &lt;- area3c$raw
+names(raw.rowcol)
+
+head(raw.rowcol$unit.grpest)
+head(raw.rowcol$grpest)
+head(raw.rowcol$stratdat)
+raw.rowcol$condsampcnt
+
+## Get list of titles from area3c list components
+area3c$titlelst
+
+
+## No strata
+## Rows and columns; combine estimation units (sumunits=TRUE); no strata (strata=FALSE)
+area4 &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, strata=FALSE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, rowvar=&quot;FORTYPCD&quot;,
+  colvar=&quot;STDSZCD&quot;, row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE)
+area4$est
+area4$pse
+
+raw.nostrat &lt;- area4$raw
+names(raw.nostrat)
+raw.nostrat$stratdat
+
+
+## By estimation unit
+## Area of forest land and % sampling error by forest type and stand-size class
+##    and Estimation Unit, Wyoming, 2011-2013
+##################################################################################
+
+## Rows and columns; by estimation unit (sumunits=FALSE); no strata (strata=FALSE)
+area5a &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=FALSE, strata=FALSE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, rowvar=&quot;FORTYPCD&quot;,
+  colvar=&quot;STDSZCD&quot;, row.FIAname=TRUE, col.FIAname=TRUE)
+area5a$est
+area5a$pse
+
+## Rows and columns; 1 estimation unit; get raw data and savedata and title info
+area5b &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, landarea=&quot;FOREST&quot;, unitvar=NULL,
+  unitarea=sum(WYunitarea$ACRES), stratalut=WYstrlut, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;,  
+  row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE, savedata=TRUE, returntitle=TRUE, 
+  outfolder=outfolder)
+names(area5b)
+area5b$est
+area5b$pse
+area5b$titlelst
+area5b.raw &lt;- area5b$raw
+names(area5b.raw)
+</code></pre>
+<p><a name="modGBtree"></a></p>
+</div>
+<div id="modgbtree" class="section level4">
+<h4>modGBtree</h4>
+<pre><code>######################################################################################
+# Usage:
+# modGBtree(tree = NULL, cond = NULL, pltstrat = NULL, seed = NULL, 
+#   tuniqueid = &quot;PLT_CN&quot;, cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, sumunits = FALSE, 
+#   adjsamp = TRUE, strata = TRUE, landarea=&quot;FOREST&quot;, ACI = FALSE, nonsamp.filter = NULL, 
+#   plt.filter = NULL, cond.filter = NULL, unitarea = NULL, unitvar = NULL, 
+#   unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, strvar = &quot;STRATA&quot;, 
+#   getwt = TRUE, strwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE, substrvar = NULL, 
+#   estvar = NULL, estvar.filter = NULL, estvar.name = NULL, rowvar = NULL, 
+#   rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, 
+#   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE,  
+#   col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 0, 
+#   pseround = 3, savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#   outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+#   title.estvar = NULL, title.filter = NULL, gui = FALSE)
+# 
+# Description:
+#   Generates tree estimates by domain and/or tree domain (and estimation unit). 
+#   Calculations are based on Scott et al. 2005 ('the green-book') for mapped forest 
+#   inventory plots. The non-ratio estimator for estimating tree attributes
+#   by stratum and domain is used. Plots that are totally nonsampled are excluded from 
+#   estimation dataset. Next, an adjustment factor is calculated by strata to adjust for 
+#   nonsampled (nonresponse) conditions that have proportion less than 1. Attributes 
+#   adjusted to a per-acre value are summed by plot, divided by the adjustment factor, 
+#   and averaged by stratum. Strata means are combined using the strata weights and then 
+#   expanded to using the total land area in the population. 
+######################################################################################
+
+help(modGBtree)
+
+
+## Reference table for tree estimates
+ref_estvar
+
+## Total net volume of live trees (at least 5 inches), Wyoming, 2011-2013
+######################################################################################
+tree1 &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD == 1&quot;, rawdata=TRUE)
+
+## Get names of list components
+names(tree1)
+
+## Look at estimate table from est.tot list
+tree1$est
+
+## Get list of raw data from area1 list components and look at names
+raw.tot &lt;- tree1$raw
+names(raw.tot)
+
+## Look at raw data
+raw.tot$plotsampcnt # Number of plots after plot filter
+raw.tot$condsampcnt # Number of conditions after plot filter, before cond filters
+raw.tot$stratdat        # Strata information and adjustment factors
+raw.tot$unit.totest # Raw data for total estimates by estimation unit
+raw.tot$totest      # Raw data for total estimates by estimation unit summed to one estimate
+
+
+## Add table rows:
+## Net volume of live trees (at least 5 inches) by forest type, Wyoming, 2011-2013
+######################################################################################
+
+## Rows only; combine estimation units (sumunits=TRUE)
+tree2a &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, 
+  savedata=TRUE, returntitle=TRUE, outfolder=&quot;outfolder&quot;)
+tree2a
+
+## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
+tree2b &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;, 
+  row.FIAname=TRUE, allin1=TRUE)
+tree2b
+
+
+## Add row and columns to table
+## Net volume of live trees (at least 5 inches) by forest type and stand-size class, 
+##    Wyoming, 2011-2013
+######################################################################################
+
+## Rows and columns; combine estimation units (sumunits=TRUE)
+tree3a &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, strata=TRUE, 
+  stratalut=WYstrlut, estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD == 1&quot;, 
+    rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, row.FIAname=TRUE, col.FIAname=TRUE)
+tree3a$est
+tree3a$pse
+
+## Rows and columns; combine estimation units (sumunits=TRUE; allin1=TRUE)
+tree3b &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;OWNGRPCD&quot;,
+  row.FIAname=TRUE, col.FIAname=TRUE, allin1=TRUE)
+tree3b
+
+## Rows and columns; combine estimation units (sumunits=TRUE; rawdata=TRUE; returntitle=TRUE)
+tree3c &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;,colvar=&quot;STDSZCD&quot;,
+  row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE, returntitle=TRUE)
+names(tree3c)
+tree3c$est
+tree3c$pse
+
+## Get list of raw data from area3c list components and look at names
+raw.rowcol &lt;- tree3c$raw
+names(raw.rowcol)
+
+head(raw.rowcol$unit.grpest)
+head(raw.rowcol$grpest)
+head(raw.rowcol$stratdat)
+raw.rowcol$condsampcnt
+
+## Get list of titles from area3c list components
+tree3c$titlelst
+
+
+## No strata
+## Rows and columns; combine estimation units (sumunits=TRUE); no strata (strata=FALSE)
+tree4 &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, 
+  strata=FALSE, landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, 
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD ==1 &quot;, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, 
+  row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE)
+tree4$est
+tree4$pse
+
+raw.nostrat &lt;- tree4$raw
+names(raw.nostrat)
+raw.nostrat$stratdat
+
+
+## By estimation unit
+## Net volume of live trees (at least 5 inches) by forest type and stand-size class
+##    and Estimation Unit, Wyoming, 2011-2013
+#######################################################################################
+
+## Rows and columns; by estimation unit (sumunits=FALSE); no strata (strata=FALSE)
+tree5a &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=FALSE, 
+  strata=FALSE, landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, 
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;,colvar=&quot;STDSZCD&quot;, 
+  row.FIAname=TRUE, col.FIAname=TRUE)
+tree5a$est
+tree5a$pse
+
+## Rows and columns; 1 estimation unit; get raw data and savedata and title info
+tree5b &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, landarea=&quot;FOREST&quot;, 
+  unitvar=NULL, unitarea=sum(WYunitarea$ACRES), stratalut=WYstrlut, estvar=&quot;VOLCFNET&quot;,
+  estvar.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;,   
+  row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE, savedata=TRUE, returntitle=TRUE, 
+  outfolder=outfolder)
+names(tree5b)
+tree5b$est
+tree5b$pse
+tree5b$titlelst
+tree5b.raw &lt;- tree5b$raw
+names(tree5b.raw)
+
+
+## Add species for rows
+## Net volume of live trees (at least 5 inches) by species; by estimation units (allin1=TRUE)
+tree6 &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,    
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvar=&quot;TPA_UNADJ&quot;, estvar.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;SPCD&quot;, row.FIAname=TRUE)
+tree6
+
+## Add species for columns
+## Net volume of live trees (at least 5 inches) by forest type and species
+## State-level population with combined estimation unit (sumunits=TRUE)
+## Including stratification for by estimation unit (strata=TRUE)
+## Get raw data and title info and save data to outfolder
+tree7 &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,    
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;SPCD&quot;, 
+  row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE, returntitle=TRUE)
+names(tree7)
+tree7$est
+
+
+## Add diameter classes
+## Net volume of live trees (at least 5 inches) by species and diameter class
+dat &lt;- datLUTclass(x=WYtree, xvar=&quot;DIA&quot;, LUT=ref_diacl2in, LUTclassnm=&quot;DIACL2IN&quot;)
+WYtree &lt;- dat$xLUT
+LUT &lt;- dat$LUT
+
+tree8 &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,    
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvar=&quot;TPA_UNADJ&quot;, estvar.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;SPCD&quot;, colvar=&quot;DIACL2IN&quot;, 
+  row.FIAname=TRUE, rawdata=TRUE)
+names(tree8)
+tree8$est
+tree8$pse
+raw8 &lt;- tree8$raw
+names(raw8)
+head(raw8$grpest)
+
+
+
+## Another way to add diameter classes
+## First, create a new variable using cut function
+WYtree$DIA2 &lt;- cut(WYtree$DIA, c(5, 20, 100))
+
+tree9 &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,
+    estvar=&quot;TPA_UNADJ&quot;, estvar.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;DIA2&quot;, rawdata=TRUE)
+names(tree9)
+tree9$est
+raw9 &lt;- tree9$raw
+names(raw9)
+head(raw9$rowest)
+
+</code></pre>
+<p><a name="modGBratio"></a></p>
+</div>
+<div id="modgbratio" class="section level4">
+<h4>modGBratio</h4>
+<pre><code>####################################################################################
+# Usage:
+# modGBratio(tree = NULL, cond = NULL, pltstrat = NULL, tuniqueid = &quot;PLT_CN&quot;, 
+#   cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, sumunits = FALSE, adjsamp = TRUE, 
+#   strata = TRUE, ratiotype = &quot;PERACRE&quot;, landarea=&quot;FOREST&quot;, ACI = FALSE, 
+#   nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL, 
+#   unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
+#   strvar = &quot;STRATA&quot;, getwt = TRUE, strwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE, 
+#   substrvar = NULL, estvarn = NULL, estvarn.filter = NULL, estvarn.name = NULL, 
+#   estvard = NULL, estvard.filter = NULL, estvard.name = NULL, rowvar = NULL, 
+#   rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, 
+#   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
+#   col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 3, 
+#   pseround = 3, savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#   outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE)
+# 
+# Description:
+#   Generates per-acre and per-tree estimates by domain and/or tree domain (and 
+# estimation unit). Calculations are based on chapter 4 of Scott et al. 2005 
+# ('the green-book') for mapped forest inventory plots. The ratio estimator for 
+# estimating per-acre or per-tree by stratum and domain is used, referred to as 
+# Ratio of Means (ROM).  
+####################################################################################
+
+help(modGBratio)
+
+
+## Total net volume per acre of live trees (at least 5 inches), Wyoming, 2011-2013
+####################################################################################
+rat1 &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD == 1&quot;, rawdata=TRUE)
+
+## Get names of list components
+names(rat1)
+
+## Look at estimate table from est.tot list
+rat1$est
+
+## Get list of raw data from area1 list components and look at names
+raw.tot &lt;- rat1$raw
+names(raw.tot)
+
+## Look at raw data
+raw.tot$plotsampcnt # Number of plots after plot filter
+raw.tot$condsampcnt # Number of conditions after plot filter, before cond filters
+raw.tot$stratdat        # Strata information and adjustment factors
+raw.tot$unit.totest # Raw data for total estimates by estimation unit
+raw.tot$totest      # Raw data for total estimates by estimation unit summed to one estimate
+
+
+## Add table rows:
+## Net volume per acre of live trees (at least 5 inches) by forest type, Wyoming, 2011-2013
+####################################################################################
+
+## Rows only; combine estimation units (sumunits=TRUE)
+rat2a &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;, 
+  row.FIAname=TRUE, savedata=TRUE, returntitle=TRUE, outfolder=&quot;outfolder&quot;)
+rat2a
+
+## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
+rat2b &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD == 1&quot;, rowvar=&quot;FORTYPCD&quot;, 
+  row.FIAname=TRUE, allin1=TRUE)
+rat2b
+
+
+## Add table rows and columns:
+## Net volume per acre of live trees (at least 5 inches) by forest type and stand size class, 
+##    Wyoming, 2011-2013
+rat3 &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,    
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,  
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, 
+  row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE, returntitle=TRUE)
+rat3
+
+names(rat3)
+rat3$est
+rat3$pse
+names(rat3$raw)
+head(rat3$raw$unit.grpest)
+head(rat3$raw$grpest)
+head(rat3$raw$stratdat)
+rat3$raw$condsampcnt
+rat3$titlelst
+
+
+## Rows only - Species per acre; combine estimation units (sumunits=TRUE)
+rat4 &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,    
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE)
+rat4
+
+## Rows only - Species per acre; by estimation units (allin1=TRUE)
+rat5 &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,    
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;SPCD&quot;, 
+  row.FIAname=TRUE, col.FIAname=TRUE)
+rat5
+
+
+## Add diameter classes
+## Net volume per acre of live trees (at least 5 inches) by species and diameter class
+dat &lt;- datLUTclass(x=WYtree, xvar=&quot;DIA&quot;, LUT=ref_diacl2in, LUTclassnm=&quot;DIACL2IN&quot;)
+WYtree &lt;- dat$xLUT
+LUT &lt;- dat$LUT
+
+rat6 &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,    
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
+  estvarn=&quot;TPA_UNADJ&quot;, estvarn.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;SPCD&quot;, colvar=&quot;DIACL2IN&quot;, 
+  row.FIAname=TRUE, rawdata=TRUE)
+rat12
+
+names(rat6)
+rat6$est
+rat6$pse
+raw6 &lt;- rat6$raw
+names(raw6)
+raw6$grpest
+
+
+## Tree ratio
+## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
+rat7 &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
+  landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut,
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD == 1&quot;, estvard=&quot;VOLCFNET&quot;, 
+  rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, allin1=TRUE)
+rat7
+
+
+rat7b &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
+  landarea=&quot;FOREST&quot;, ratiotype=&quot;PERTREE&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;,
+  stratalut=WYstrlut, estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD == 1&quot;, 
+  estvard=&quot;VOLCFNET&quot;, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, allin1=TRUE)
+rat7b
+
+head(rat7$est)
+head(rat7b$est)
+</code></pre>
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Bechtold, William A.; Patterson, Paul L., Editors. 2005. The enhanced Forest Inventory and Analysis program national sampling design and estimation procedures. Gen. Tech. Rep. SRS-80. Asheville, NC: U.S. Department of Agriculture, Forest Service, Southern Research Station. 85 p.</p>
+<p>Patterson, Paul L. 2012. Photo-based estimators for the Nevada photo-based inventory. Res. Pap. RMRS-RP-92. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

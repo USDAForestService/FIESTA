@@ -1,0 +1,127 @@
+check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", 
+	gui=FALSE) {
+
+  ## DESCRIPTION: Checks unitarea
+  ## Check acres by estimation unit
+  ## If 1 estimation unit, unitarea can be a number of a data frame with areavar.
+  ## Check if variables match variables in pltx
+
+  ## Set global variables
+  MATCH <- NULL
+
+
+  ## Get pltx names
+  pltx <- FIESTA::pcheck.table(pltx, gui=gui, tabnm="plt", returnshp=FALSE)
+  pltnames <- names(pltx)
+
+  ## Check estimation unit variables
+  if (is.null(unitvars)) {
+    stop("no unitvars")
+  } else if (!is.character(unitvars)) {
+    stop("unitvars must be a character vector")
+  } else if (any(!unitvars %in% pltnames)) {
+    missvars <- unitvars[which(!unitvars %in% pltnames)]
+    stop("missing unitvars: ", paste(missvars, collapse=", "))
+  } 
+
+  ## Get unique values of unitvars in pltx
+  unit.vals <- unique(do.call(paste, pltx[, unitvars, with=FALSE]))
+  nbrunits <- length(unit.vals)  
+
+  ## Check unitarea and areavar
+  ######################################################################
+  if (nbrunits == 1) { 
+    if (!any(class(unitarea) %in% c("data.table", "data.frame"))) {
+      if (is.null(unitarea)) stop("unitarea is invalid")
+      if (is.character(unitarea) && is.vector(unitarea) && length(unitarea) == 1) {
+        if (sum(grepl(",", unitarea)) > 0) {
+          unitarea <- as.numeric(gsub(",", "", unitarea))
+        } else {
+          ## Check unitarea
+          unitarea <- pcheck.table(unitarea, gui=gui, tabnm="unitarea", 
+			nullcheck=TRUE, stopifnull=TRUE)
+        }
+      }        
+
+      if (is.vector(unitarea) && length(unitarea) == 1) {
+        if (is.na(unitarea)) stop("invalid unitarea.. must be a number") 
+        unitarea <- unitarea
+      } else {
+        stop("need a numeric vector of length 1 with unitarea")
+      }
+
+      unitarea <- data.table(unique(pltx[, unitvars, with=FALSE]), AREA=unitarea)
+      areavar <- "AREA"
+      setnames(unitarea, "AREA", areavar)
+      setkeyv(unitarea, unitvars)
+    } else {
+      ## Check unitarea
+      unitarea <- pcheck.table(unitarea, gui=gui, tabnm="unitarea", 
+			nullcheck=TRUE, stopifnull=TRUE)
+
+      if (nrow(unitarea) >  1) {
+        if (length(unitvars) == 1) {
+          unitarea <- unitarea[unitarea[[unitvars]] %in% unit.vals,]
+          if (nrow(unitarea) != 1) stop("invalid unitarea")
+        }
+      }
+      if (is.null(areavar) || !areavar %in% names(unitarea)) 
+        stop("invalid areavar")
+    }     
+
+  } else {   ## nbrunits > 1
+    if (!is.data.frame(unitarea) && is.numeric(unitarea))
+      stop("plots have more than one estimation unit with no acres specified")
+ 
+    ## Check unitarea
+    unitarea <- FIESTA::pcheck.table(unitarea, gui=gui, tabnm="unitarea", 
+		nullcheck=TRUE, stopifnull=TRUE)
+
+    ## Check areavar from strata table.
+    areavar <- FIESTA::pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
+		checklst=names(unitarea), caption="Area variable?", stopifnull=TRUE)
+
+    ## Check if areavar column is numeric
+    if (!is.numeric(unitarea[[areavar]])) {
+      if(sum(grepl(",", unitarea[[areavar]])) > 0)
+        unitarea[[areavar]] <- as.numeric(gsub(",", "", unitarea[[areavar]]))
+      if (!is.na(unitarea[[areavar]])) 
+        stop("invalid areavar in unitarea.. must be a number") 
+    }
+
+    ## Check for NA values in areavar
+    if (any(is.na(unitarea[[areavar]]))) {
+      navals <- unitarea[is.na(get(areavar)), ]
+      message("there are NA values in area.. removing from table")
+      print(navals)
+      unitarea <- unitarea[!is.na(get(areavar)), ]
+    }
+      
+    ## Check that the values of unitvars in unitarea are all in pltx
+    missval <- FIESTA::check.matchval(unitarea, pltx, unitvars, 
+		tab1txt="unitarea", tab2txt="plt", returnvals=TRUE)
+    if (!is.null(missval) && length(missval) > 0) {
+      unitarea[, MATCH := do.call(paste, .SD), .SDcols=unitvars]
+      pltx[, MATCH := do.call(paste, .SD), .SDcols=unitvars]
+      unitarea <- unitarea[MATCH %in% pltx$MATCH,]
+      unitarea[, MATCH := NULL]
+      message("subsetting unitarea to match plt")
+    }
+
+    ## Check if class of unitvars in totacres matches class of unitvars in pltx
+    tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
+    pltx <- tabs$tab1
+    unitarea <- tabs$tab2
+
+    unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), by=unitvars, 
+		.SDcols=areavar]
+
+    ## Check the class of unitvars in unitarea matches unitvars in pltx
+    tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
+    pltx <- tabs$tab1
+    unitarea <- tabs$tab2
+
+  }
+  return(list(unitarea=unitarea, areavar=areavar))
+}
+

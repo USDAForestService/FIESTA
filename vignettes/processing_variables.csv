@@ -1,0 +1,16 @@
+Variable,Description
+nhat,Estimated proportion
+nhat.var,Estimated variance of estimated proportion
+NBRPLT,Number of nonzero plots used in estimate
+ACRES,Total acres for estimation unit
+est,Estimated acres of trees { nhat * ACRES }
+est.var,Estimated variance of estimated acres { nhat * ACRES^2 }
+est.se,Standard error of estimated acres { sqrt(est.var) }
+est.cv,Coefficient of variation of estimated acres { est.se/est }
+pse,Percent sampling error of estimate { est.cv * 100 }
+CI99left,Left tail of 99% confidence interval for estimate { est - (2.58 * est.se) }
+CI99right,Right tail of 99% confidence interval for estimate { est + (2.58 * est.se) }
+CI95left,Left tail of 95% confidence interval for estimate { est - (1.96 * est.se) }
+CI95right,Right tail of 95% confidence interval for estimate { est + (1.96 * est.se) }
+CI67left,Left tail of 67% confidence interval for estimate { est - (0.97 * est.se) }
+CI67right,Right tail of 67% confidence interval for estimate { est + (0.97 * est.se) }

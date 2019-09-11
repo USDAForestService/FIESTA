@@ -1,0 +1,39 @@
+\name{FIESTA-package}
+\alias{FIESTA-package}
+\alias{FIESTA}
+\docType{package}
+\title{
+	FIESTA - Forest Inventory Estimation for Analysis
+}
+\description{
+	This package will extract data from Forest Inventory and Analysis Oracle database. 	 
+}
+\details{
+	The users are intended to be FIA analysts (for now) with personal access to the database. The package 
+	will extract plot, condition, tree, and seedling information from the NIMS database for public or 
+	regional variables with user-defined filters of plot and/or condition data. The Tree and Seedling 
+	table will include variables multiplied by trees per acre.
+
+	Most functions can be used independently with external FIA mapped-plot datasets, but check function
+	descriptions to determine necessary variables. 
+}
+\author{
+	Tracey S. Frescino
+	Maintainer: Tracey S. Frescino
+}
+\references{
+
+	Bechtold, William A.; Patterson, Paul L.; [Editors] 2005. The enhanced forest inventory and analysis 
+	program - national sampling design and estimation procedures. Gen. Tech. Rep. SRS-80. Asheville, NC: 
+	U.S. Department of Agriculture, Forest Service, Southern Research Station. 85p.
+
+	R Development Core Team (2011). R: A language and environment for statistical computing. R Foundation 
+	for Statistical Computing, Vienna, Austria. ISBN 3-900051-07-0, URL http://www.R-project.org/.
+
+	Woudenberg, S.W.; Conkling, B.L.; O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Waddell, K.L.;
+	Boyer, D.; Christensen, G.; Ridley, T. 2011. The Forest Inventory and Analysis Database: Database
+	Description and Users Manual Version 5.1 for Phase 2. U.S. Department of Agriculture. 	
+	(http://fia.fs.fed.us/library/database-documentation/current/ver5/FIADB_user%20manual_5-1_p2_10_2011.pdf)
+
+}
+\keyword{ package }
