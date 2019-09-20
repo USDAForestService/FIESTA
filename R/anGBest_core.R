@@ -1,5 +1,5 @@
 anGBest_core <- function(state, datsource="ORACLE", FS_FIADB=FALSE, evalCur=TRUE, 
-	evalEndyr=NULL, evalType=c("all", "areavol", "grm"), fill=TRUE, 
+	evalEndyr=NULL, evalType=c("ALL", "AREAVOL", "GRM"), fill=TRUE, 
 	addSEcol=FALSE, allin1=FALSE, outfolder=NULL, datPlots=NULL, datStrata=NULL, 
 	ref_countycd=NULL, ref_unitcd=NULL, returndata=FALSE, savedata=FALSE, ...) {
 

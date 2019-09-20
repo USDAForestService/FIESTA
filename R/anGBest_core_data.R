@@ -1,5 +1,5 @@
 anGBest_core_data <- function(state, datsource="ORACLE", FS_FIADB=TRUE, evalCur=TRUE, 
-	evalEndyr=NULL, evalType=c("all", "areavol", "grm"), outfolder=NULL) {
+	evalEndyr=NULL, evalType=c("ALL", "AREAVOL", "GRM"), outfolder=NULL) {
 
 
   stcd <- FIESTA::ref_statecd[FIESTA::ref_statecd$MEANING == state, "VALUE"]
