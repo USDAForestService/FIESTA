@@ -373,7 +373,7 @@ getestvar()
 
 ## GB Functions and Examples
 
-The following examples are for generating FIA's traditional, state-level estimate, using standard FIA Evaluation data from FIA's National database, including associated Estimation unit and Stratification information. The examples use data from two inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
+The following examples are for generating FIA's traditional, state-level estimate, using standard FIA Evaluation data from FIA's National database, including associated Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
 
 
 ## Example data - Wyoming (WY), Inventory Years 2011-2013
