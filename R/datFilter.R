@@ -13,6 +13,11 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   if (.Platform$OS.type == "windows")
     Filters = rbind(Filters,csv = c("Comma-delimited files (*.csv)", "*.csv"))
 
+  isdt <- FALSE
+  if (is.data.table(x) && !is.null(key(x))) {
+    isdt <- TRUE
+    xkey <- key(x)
+  }
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -180,7 +185,13 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
     write.csv(indat, xfout, row.names = FALSE, overwrite=overwrite, 
 		outfn.date=outfn.date)  
 
-  if (!returnDT) indat <- setDF(indat)  
+  if (!returnDT) {
+    indat <- setDF(indat)  
+  } else {
+    if (isdt && !is.null(xkey)) 
+      setkeyv(indat, xkey)
+  }
+    
   returnlst <- list(xf = indat, xfilter = xfilters)
   if (!is.null(intabs)) returnlst$cliptabs <- intabs
   

@@ -705,11 +705,17 @@ check.data <- function(gui, esttype, module="GB", method="GREG", SApackage=NULL,
       stop("missing necessary variables from tree: ", paste(tmissvars, collapse=", "))
 
     ## Check for NA values in tvars2keep variables
-    treex.na <- sapply(c(tuniqueid, condid, tvars2keep), 
+    ## TPA_UNADJ=NA, but trees have a DIA - these are down dead trees that only count in growth and mortality, 
+          ## but wouldn't be measured if they hadn't been alive at the previous inventory
+
+    tvars2keep2 <- tvars2keep[tvars2keep != "TPA_UNADJ"]
+    if (length(tvars2keep) > 0) {
+      treex.na <- sapply(c(tuniqueid, condid, tvars2keep2), 
 		function(x, treex){ sum(is.na(treex[,x, with=FALSE])) }, treex)
-    if (any(treex.na) > 0) 
-      stop(treex.na[treex.na > 0], " NA values in variable: ", 
+      if (any(treex.na) > 0) 
+        stop(treex.na[treex.na > 0], " NA values in variable: ", 
 		paste(names(treex.na[treex.na > 0]), collapse=", "))
+    }
 
     ## Add necessary variables to cvars2keep depending on data in tree
     ###################################################################

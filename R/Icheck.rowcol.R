@@ -1,5 +1,5 @@
 check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN", 
-	condid="CONDID", rowvar=NULL, rowvar.filter=NULL, colvar=NULL, 
+	tuniqueid="PLT_CN", condid="CONDID", rowvar=NULL, rowvar.filter=NULL, colvar=NULL, 
 	colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
 	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, domvarlst=NULL, 
 	domlut=NULL, title.rowvar=NULL, title.colvar=NULL, rowlut=NULL, collut=NULL, 
@@ -37,6 +37,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   ## Check for condid
   if (!is.null(condid) && !condid %in% c(names(treef), names(condf))) condid <- NULL
   if (!is.null(cuniqueid) && !cuniqueid %in% names(condf)) stop("invalid cuniqueid")
+  if (!is.null(treef) && !is.null(tuniqueid) && !tuniqueid %in% names(treef)) 
+    stop("invalid tuniqueid")
   ref_titles <- FIESTA::ref_titles
 
   ##################################################################
@@ -119,7 +121,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       row.FIAname <- FALSE
     }
   }
-
 
   ##############################################################
   ### ROW VARIABLE
@@ -815,7 +816,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 
   if (esttype %in% c("TREE", "RATIO")) {
     ## Filter tree data for any cond filters
-    treef <- treef[paste(get(cuniqueid), get(condid), sep="_") %in% 
+    treef <- treef[paste(get(tuniqueid), get(condid), sep="_") %in% 
 		condf[,paste(get(cuniqueid), get(condid), sep="_")]]
  
     returnlst <- append(list(treef=treef), returnlst)

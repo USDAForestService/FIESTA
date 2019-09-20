@@ -33,10 +33,10 @@ check.tree <- function(gui, treef, condall=NULL, plt=NULL, bycond=TRUE, bytdom,
      stop("invalid estvarn.name.. must be a string")  
 
   ## CHECK FOR NA VALUES IN TPA_UNADJ
-  if (sum(is.na(unique(treef$TPA_UNADJ))) > 0) {
-    nbrna <- nrow(treef[is.na(treef$TPA_UNADJ),])
-    stop(paste("check tree table.. there are", nbrna, "NA values in TPA_UNADJ variable"))
-  }
+#  if (sum(is.na(unique(treef$TPA_UNADJ))) > 0) {
+#    nbrna <- nrow(treef[is.na(treef$TPA_UNADJ),])
+#    stop(paste("check tree table.. there are", nbrna, "NA values in TPA_UNADJ variable"))
+#  }
 
   ## TO INCREASE TREES PER ACRE IF ONLY USING 1 SUBPLOT
   if (adjtpa && "SUBP" %in% names(treef)) {

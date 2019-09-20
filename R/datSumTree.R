@@ -366,7 +366,7 @@ datSumTree <- function(tree=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 
   
   ## Tree filter
-  tdat <- FIESTA::datFilter(x=treex, xfilter=tfilter, title.filter="tfilter", 
+  tdat <- datFilter(x=treex, xfilter=tfilter, title.filter="tfilter", 
 		stopifnull=TRUE, gui=gui)
   treef <- tdat$xf
   tfilter <- tdat$xfilter
@@ -465,14 +465,17 @@ datSumTree <- function(tree=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   }
   
   if (bycond) {
+    setkeyv(treef, c(tuniqueid, condid))
+
  #   tsumvarnmlst2 <- sapply(tsumvarnmlst, FIESTA::checknm, names(treef))
-    datvars <- treef[, lapply(.SD, function(x) round(tfun(x), tround) ), by=key(treef), 
-		.SDcols=tsumvarlst2]
+    datvars <- treef[, lapply(.SD, function(x) round(tfun(x), tround) ), 
+		by=key(treef), .SDcols=tsumvarlst2]
     setnames(datvars, c(uniqueid, condid, tsumvarnmlst2))
 
     ## MERGE to cond
     if (!is.null(condx)) {
-      sumdat <- merge(condx, datvars, all.x=TRUE)
+      sumdat <- merge(condx, datvars, by.x=c(cuniqueid, condid),
+		by.y=c(tuniqueid, condid), all.x=TRUE)
     } else {
       sumdat <- datvars
     }
@@ -484,8 +487,8 @@ datSumTree <- function(tree=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 
     setkeyv(treef, tuniqueid)
  #   tsumvarnmlst2 <- sapply(tsumvarnmlst, FIESTA::checknm, names(treef))
-    datvars <- treef[, lapply(.SD, function(x) round(tfun(x), tround) ), by=key(treef), 
-		.SDcols=tsumvarlst2]
+    datvars <- treef[, lapply(.SD, function(x) round(tfun(x), tround) ), 
+		by=c(uniqueid, condid), .SDcols=tsumvarlst2]
     setnames(datvars, c(treeid, tsumvarnmlst2))
 
     ## MERGE to plt

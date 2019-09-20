@@ -28,11 +28,9 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
   ## Check outfolder 
   ########################################################
-  if (savedata) {
+  if (savedata) 
     outfolder <- FIESTA::pcheck.outfolder(outfolder)
-    if (rawdata && !file.exists(paste(outfolder, "rawdata", sep="/"))) 
-      dir.create(paste(outfolder, "rawdata", sep="/"))
-  }
+  
 
 
   if (calc) {

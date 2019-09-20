@@ -9,7 +9,7 @@
 	estimation tool. 
 }
 \usage{
-anFIA2CollectCalc(pltstrat, cond, tree, seed, unitarea, strlut, 
+anFIA2OpenForis(pltstrat, cond, tree, seed, unitarea, strlut, 
 	level_1_code, level_1_label = NULL, level_2_code = NULL, level_2_label = NULL,
 	calc = TRUE, collect = TRUE, savedata = FALSE, outfolder = NULL)
 }

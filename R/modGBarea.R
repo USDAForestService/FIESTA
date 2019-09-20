@@ -178,12 +178,12 @@ modGBarea <- function(cond, pltstrat=NULL, cuniqueid="PLT_CN", puniqueid="CN",
   ###################################################################################
   if (sumunits) col.add0 <- TRUE
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, condf=condf, 
-	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, colvar=colvar,
- 	colvar.filter=colvar.filter, row.FIAname=row.FIAname, col.FIAname=col.FIAname,
- 	row.orderby=row.orderby, col.orderby=col.orderby, row.add0=row.add0, 
-	col.add0=col.add0, title.rowvar=title.rowvar, title.colvar=title.colvar, 
-	rowlut=rowlut, collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-	rowgrpord=rowgrpord, landarea=landarea)
+	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
+	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
+	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby, 
+	row.add0=row.add0, col.add0=col.add0, title.rowvar=title.rowvar, 
+	title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
+	rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol

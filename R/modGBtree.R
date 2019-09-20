@@ -181,12 +181,13 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
   ###################################################################################
   if (sumunits) col.add0 <- TRUE
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, 
-	condf=condf, cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter,
- 	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname,
- 	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby,
- 	row.add0=row.add0, col.add0=col.add0, title.rowvar=title.rowvar, 
-	title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-	rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea) 
+	condf=condf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, rowvar=rowvar, 
+	rowvar.filter=rowvar.filter, colvar=colvar, colvar.filter=colvar.filter, 
+	row.FIAname=row.FIAname, col.FIAname=col.FIAname, row.orderby=row.orderby, 
+	col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0, 
+	title.rowvar=title.rowvar, title.colvar=title.colvar, rowlut=rowlut, 
+	collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+	landarea=landarea) 
   treef <- rowcolinfo$treef
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
@@ -287,9 +288,9 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
 
     ## STRATA/PLOT/DOMAIN LEVEL: Aggregate response by strata/plot/domain
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, "TOTAL"), .SDcols=estvar.name]
+		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
     unit.totest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdattot, 
-		esttype=esttype, bytdom=bytdom, strlut=strlut, uniqueid=tuniqueid,
+		esttype=esttype, bytdom=bytdom, strlut=strlut, uniqueid=cuniqueid,
  		strunitvars=strunitvars, unitvars=unitvars, unitvar=unitvar,
 		domain="TOTAL")
     tabs <- FIESTA::check.matchclass(unit.totest, unitarea, unitvar)
@@ -305,9 +306,9 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
     tdomvarlst2 <- c(sort(tdomvarlst), estvar.name)
 
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, domain), .SDcols=tdomvarlst2]
+		by=c(strunitvars, cuniqueid, domain), .SDcols=tdomvarlst2]
     unit.tdomest <- do.call(rbind, lapply(tdomvarlst2, GBest.pbar, 
-		ysum=tdomdatsum, esttype=esttype, bytdom=bytdom, uniqueid=tuniqueid, 
+		ysum=tdomdatsum, esttype=esttype, bytdom=bytdom, uniqueid=cuniqueid, 
 		strlut=strlut, strunitvars=strunitvars, unitvars=unitvars, 
 		unitvar=unitvar, domain=domain))
     if ("TOTAL" %in% names(unit.tdomest)) unit.tdomest[, TOTAL := NULL]
@@ -315,13 +316,13 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
     if (domain != "TOTAL") {
 
       tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, "TOTAL"), .SDcols=tdomvarlst2]
+		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=tdomvarlst2]
 
       if (domain == rowvar) {
         unit.rowest <- unit.tdomest[unit.tdomest$tdom == estvar.name,]
 
         unit.colest <- do.call(rbind, lapply(tdomvarlst, GBest.pbar, 
-		ysum=tdomdattot, esttype=esttype, bytdom=bytdom, uniqueid=tuniqueid, 
+		ysum=tdomdattot, esttype=esttype, bytdom=bytdom, uniqueid=cuniqueid, 
 		strlut=strlut, strunitvars=strunitvars, unitvars=unitvars, 
 		unitvar=unitvar, domain="TOTAL"))
         setnames(unit.colest, "tdom", colvar)
@@ -334,7 +335,7 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
         unit.colest <- subset(unit.tdomest, tdom == estvar.name) 
 
         unit.rowest <- do.call(rbind, lapply(tdomvarlst, GBest.pbar, 
-		ysum=tdomdattot, esttype=esttype, bytdom=bytdom, uniqueid=tuniqueid, 
+		ysum=tdomdattot, esttype=esttype, bytdom=bytdom, uniqueid=cuniqueid, 
 		strlut=strlut, strunitvars=strunitvars, unitvars=unitvars, 
 		unitvar=unitvar, domain="TOTAL"))
         setnames(unit.rowest, 'tdom', rowvar)
@@ -347,18 +348,18 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
 
       if (colvar != "NONE") {
         row.tdomdatsum <- row.tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, domain), .SDcols=row.tdomvarlst]
+		by=c(strunitvars, cuniqueid, domain), .SDcols=row.tdomvarlst]
 
         unit.rowest <- do.call(rbind, lapply(row.tdomvarlst, GBest.pbar, 
-		ysum=row.tdomdatsum, esttype=esttype, bytdom=bytdom, uniqueid=tuniqueid, 
+		ysum=row.tdomdatsum, esttype=esttype, bytdom=bytdom, uniqueid=cuniqueid, 
 		strlut=strlut, strunitvars=strunitvars, unitvars=unitvars, 
 		unitvar=unitvar, domain=domain))
         setnames(unit.rowest, "tdom", rowvar)
 
         col.tdomdatsum <- col.tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, domain), .SDcols=col.tdomvarlst]
+		by=c(strunitvars, cuniqueid, domain), .SDcols=col.tdomvarlst]
         unit.colest <- do.call(rbind, lapply(col.tdomvarlst, GBest.pbar, 
-		ysum=col.tdomdatsum, esttype=esttype, bytdom=bytdom, uniqueid=tuniqueid, 
+		ysum=col.tdomdatsum, esttype=esttype, bytdom=bytdom, uniqueid=cuniqueid, 
 		strlut=strlut, strunitvars=strunitvars, unitvars=unitvars, 
 		unitvar=unitvar, domain=domain))
         setnames(unit.colest, "tdom", colvar)
@@ -379,24 +380,24 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
     ## Get row, column, cell estimate and merge area if row or column in cond table 
     if (domain != "TOTAL") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, domain), .SDcols=estvar.name]
+		by=c(strunitvars, cuniqueid, domain), .SDcols=estvar.name]
       unit.domest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, bytdom=bytdom, 
-		uniqueid=tuniqueid, strlut=strlut, strunitvars=strunitvars, 
+		uniqueid=cuniqueid, strlut=strlut, strunitvars=strunitvars, 
 		unitvars=unitvars, unitvar=unitvar, domain=domain)
 
       if (colvar != "NONE") {
         unit.grpest <- unit.domest
 
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, rowvar), .SDcols=estvar.name]
+		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
         unit.rowest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		bytdom=bytdom, uniqueid=tuniqueid, strlut=strlut, strunitvars=strunitvars, 
+		bytdom=bytdom, uniqueid=cuniqueid, strlut=strlut, strunitvars=strunitvars, 
 		unitvars=unitvars, unitvar=unitvar, domain=rowvar)
 
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, tuniqueid, colvar), .SDcols=estvar.name]
+		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
         unit.colest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		bytdom=bytdom, uniqueid=tuniqueid, strlut=strlut, strunitvars=strunitvars, 
+		bytdom=bytdom, uniqueid=cuniqueid, strlut=strlut, strunitvars=strunitvars, 
 		unitvars=unitvars, unitvar=unitvar, domain=colvar)
 
         domvar2 <- colvar
