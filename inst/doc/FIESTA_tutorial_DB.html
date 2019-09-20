@@ -440,7 +440,7 @@ DBqryORACLE(sql=sql3.ora, dbconn=dbconn)
 # Usage:
 # DBgetEvalid(states = NULL, rs = NULL, datsource = &quot;CSV&quot;, ZIP = TRUE, FS_FIADB = TRUE,  
 #   invyrtab = NULL, invtype = &quot;ANNUAL&quot;, evalCur = TRUE, evalEndyr = NULL, evalid = NULL, 
-#   evalType = &quot;all&quot;, dbconn = NULL, dbconnopen = FALSE, gui = FALSE)
+#   evalType = &quot;ALL&quot;, dbconn = NULL, dbconnopen = FALSE, gui = FALSE)
 # 
 # Description:
 # Extracts an evalid for identifying an estimation group of plots. If evalCur=TRUE, 
@@ -494,6 +494,12 @@ eval.cur &lt;- DBgetEvalid(rs=c(&quot;RMRS&quot;, &quot;NCRS&quot;))
 names(eval.cur)
 eval.cur$evalidlist
 
+
+## Get most current evaluation for Oregon and Texas for areavol and grm evalTypes
+ORTXeval.cur &lt;- DBgetEvalid(states=c(&quot;Oregon&quot;, &quot;Texas&quot;), evalType=c(&quot;AREAVOL&quot;, &quot;GRM&quot;))
+names(ORTXeval.cur)
+ORTXeval.cur$evalidlist
+ORTXeval.cur$evalTypelist
 </code></pre>
 </div>
 <div id="dbgetplots" class="section level4">
@@ -502,7 +508,7 @@ eval.cur$evalidlist
 # Usage:
 # DBgetPlots(datsource = &quot;ORACLE&quot;, ZIP = TRUE, FS_FIADB = TRUE, states = NULL, 
 #   rs = NULL, invtype = &quot;ANNUAL&quot;, evalid = NULL, evalCur = FALSE, evalEndyr = NULL, 
-#   evalType = &quot;all&quot;, allyrs = FALSE, invyrs = NULL, actual = FALSE, istree = FALSE, 
+#   evalType = &quot;AREAVOL&quot;, allyrs = FALSE, invyrs = NULL, actual = FALSE, istree = FALSE, 
 #   isseed = FALSE, isveg = FALSE, issp = FALSE, spcoords = NULL, 
 #   spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE,
 #   subcycle99 = FALSE, intensity1 = TRUE, allFilter = NULL, savedata = FALSE, 
@@ -586,7 +592,7 @@ head(WYtree1)
 # evalTypes - all, areavol, and growmort
 ##################################################################################
 WYdat1a &lt;- DBgetPlots(datsource=&quot;CSV&quot;, states=&quot;Wyoming&quot;, evalCur=TRUE,
-                    issp=TRUE, evalType=c(&quot;all&quot;, &quot;areavol&quot;, &quot;growmort&quot;))
+                    issp=TRUE, evalType=c(&quot;ALL&quot;, &quot;AREAVOL&quot;, &quot;GRM&quot;))
 names(WYdat1a)
 WYplt1a &lt;- WYdat1a$plt
 WYcond1a &lt;- WYdat1a$cond
@@ -597,7 +603,7 @@ dim(WYplt1a)
 head(WYplt1a)
 table(WYplt1a$EVALID)
 
-WYplt00 &lt;- WYplt1a[WYplt1a$EVALID == 561700,]
+WYplt00 &lt;- WYplt1a[endsWith(as.character(WYplt1a$EVALID), &quot;00&quot;),]
 dim(WYplt00)
 
 
@@ -611,7 +617,6 @@ names(WYdat2)
 WYplt2 &lt;- WYdat2$plt
 WYcond2 &lt;- WYdat2$cond
 WYspplt_PUBLIC2 &lt;- WYdat2$spplt_PUBLIC
-WYdat2$evalid
 WYdat2$pltcnt
 
 # Look at output
@@ -670,51 +675,48 @@ WYdata.periodic2$pltcnt
 ## From CSV files ##
 # Most current evaluation of Utah and Wyoming filtered for OWNCD=11
 ##################################################################################
-UTWYdata.nfs &lt;- DBgetPlots(datsource=&quot;CSV&quot;, states=c(&quot;Utah&quot;, &quot;Wyoming&quot;), evalEndyr=2017,
-    allFilter=&quot;OWNCD == 11&quot;, evalType=&quot;ALL&quot;)
+UTWYdata.nfs &lt;- DBgetPlots(datsource=&quot;CSV&quot;, states=c(&quot;Utah&quot;, &quot;Wyoming&quot;), 
+    evalEndyr=2017, allFilter=&quot;OWNCD == 11&quot;, evalType=&quot;ALL&quot;)
 names(UTWYdata.nfs)
 UTWYdata.nfs$pltcnt
 table(UTWYdata.nfs$cond$ADFORCD)
 
 
 ## From CSV files ##
-# Most current inventory years of Utah, filtered for OWNCD=11, include tree data
+# Most current inventory years for Idaho/Montana, R1, filtered for OWNGRPCD=10
+# Include tree data
 ##################################################################################
-UTdata.nfs &lt;- DBgetPlots(datsource=&quot;CSV&quot;, states=&quot;Utah&quot;, invyrs=2008:2017,
-    allFilter=&quot;OWNCD == 11&quot;, istree=TRUE)
+UTdata.nfs &lt;- DBgetPlots(datsource=&quot;CSV&quot;, states=c(&quot;Idaho&quot;, &quot;Montana&quot;), 
+    invyrs=2008:2017, istree=TRUE, 
+    allFilter=&quot;OWNGRPCD == 10 &amp; (ADFORCD &gt; 100 &amp; ADFORCD &lt; 200)&quot;)
 names(UTdata.nfs)
 UTdata.nfs$pltcnt
 table(UTdata.nfs$cond$ADFORCD)
 
 
-## Compare FIA Utah 2017 Evaluation and 2008-2017 Utah Inventory years
-UTnfs.plt &lt;- UTWYdata.nfs$plt[UTWYdata.nfs$plt$STATECD == 49,]
-table(UTnfs.plt$PLOT_STATUS_CD)
-dim(UTdata.nfs$tree[UTdata.nfs$tree$PLT_CN %in% UTnfs.plt$CN, ])
-
-table(UTdata.nfs$plt$PLOT_STATUS_CD)
-dim(UTdata.nfs$tree)
-
 
 ################## All Condition Inventory (ACI) data
 
 ## From CSV files ##
-# Most current inventory years of Utah, filtered for OWNCD=11, include tree data with ACI
+# Region 1 plots, filtered for OWNGRPCD=10, include tree data with ACI
 # Note: ACI data are not included in FIA evaluations, must specify inventory years
 ##################################################################################
-UTdata.nfsACI &lt;- DBgetPlots(datsource=&quot;CSV&quot;, states=&quot;Utah&quot;, invyrs=2008:2017,
-    allFilter=&quot;OWNCD == 11&quot;, istree=TRUE, ACI=TRUE)
+UTdata.nfsACI &lt;- DBgetPlots(datsource=&quot;CSV&quot;, states=c(&quot;Idaho&quot;, &quot;Montana&quot;), 
+    invyrs=2008:2017, istree=TRUE, ACI=TRUE,
+    allFilter=&quot;OWNGRPCD == 10 &amp; (ADFORCD &gt; 100 &amp; ADFORCD &lt; 200)&quot;)
 names(UTdata.nfsACI)
 UTdata.nfsACI$pltcnt
 table(UTdata.nfsACI$cond$ADFORCD)
 
 
-## Compare FIA 2008-2017 Utah Inventory years, not including and including ACI data
-table(UTdata.nfs$plt$PLOT_STATUS_CD)
+
+## Compare with FIA 2008-2017 Inventory years, not including ACI data
+table(UTdata.nfs$plt$NF_PLOT_STATUS_CD)
 dim(UTdata.nfs$tree)
 
-table(UTdata.nfsACI$plt$PLOT_STATUS_CD)
+table(UTdata.nfsACI$plt$NF_PLOT_STATUS_CD)
 dim(UTdata.nfsACI$tree)
+
 
 
 ## From CSV files ##
@@ -770,7 +772,7 @@ sp::plot(WYspplt_ACTUAL, add=TRUE, col=&quot;red&quot;)
 # Usage:
 # DBgetStrata(dat = NULL, datsource = &quot;ORACLE&quot;, ZIP = TRUE, FS_FIADB = TRUE, 
 #   uniqueid = &quot;CN&quot;, states = NULL, evalid = NULL, evalCur = FALSE, evalEndyr = NULL,
-#   evalType = &quot;areavol&quot;, savedata = FALSE, outfolder = NULL, outfn.pre = NULL,   
+#   evalType = &quot;AREAVOL&quot;, savedata = FALSE, outfolder = NULL, outfn.pre = NULL,   
 #   outfn.date = FALSE, overwrite = FALSE, dbconn = NULL, dbconnopen=FALSE,
 #   POP_PLOT_STRATUM_ASSGN = NULL)
 # 
@@ -896,7 +898,7 @@ names(UTdat.all)
 UTplt.all &lt;- UTdat.all$plt
 table(UTplt.all$INVYR)
 
-UTstrat.all &lt;- DBgetStrata(dat=UTplt.all, evalType=&quot;all&quot;, datsource=&quot;CSV&quot;)
+UTstrat.all &lt;- DBgetStrata(dat=UTplt.all, evalType=&quot;ALL&quot;, datsource=&quot;CSV&quot;)
 names(UTstrat.all)
 dim(UTplt.all)
 pltstrat &lt;- UTstrat.all$pltstrat
@@ -904,8 +906,6 @@ dim(pltstrat)
 
 UTstrat.all$unitarea
 UTstrat.all$strlut
-
-UTplt.all[!UTplt.all$CN %in% pltstrat$CN, &quot;PLOT_STATUS_CD&quot;]
 
 </code></pre>
 </div>
