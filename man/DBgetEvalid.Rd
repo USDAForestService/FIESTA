@@ -11,14 +11,14 @@
 \usage{
 DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = TRUE, 
 	invyrtab = NULL, invtype = "ANNUAL", evalCur = TRUE, evalEndyr = NULL, 
-	evalid = NULL, evalType = "all", dbconn = NULL, dbconnopen = FALSE, 
+	evalid = NULL, evalType = "AREAVOL", dbconn = NULL, dbconnopen = FALSE, 
 	isdwm = FALSE, gui = FALSE)
 }
 \arguments{
-  \item{states}{ String or numeric vector. Name(s) (e.g., "Arizona","New Mexico") or 
+  \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
 	code(s) (e.g., 4, 35) of states for evalid. }
-  \item{rs}{ String vector. Name of research station(s) ("RMRS","SRS","NCRS","NERS","PNWRS"). }
-  \item{datsource}{ String. Source of FIA data ("ORACLE", "CSV"). 
+  \item{rs}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS'). }
+  \item{datsource}{ String. Source of FIA data ('ORACLE', 'CSV'). 
 	If datsource="ORACLE", select permission of FIA Oracle tables must be granted to 
 	user and an ODBC connection set up on computer. Use DBtestORACLE function to 
 	test connection to ORACLE. If datsource="CSV", *.csv or *.zip (if ZIP=TRUE) files 
@@ -32,7 +32,7 @@ DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = 
 	FIADB (Oracle FS_NIMS_FIADB_'NIMS_UNIT' schema). }
   \item{invyrtab}{ Data frame. A data frame including inventory years by state. If NULL,
 	it is generated from SURVEY table from FIA database based on states and invtype. }
-  \item{invtype}{ String. The type of FIA data to extract ("PERIODIC", "ANNUAL").  
+  \item{invtype}{ String. The type of FIA data to extract ('PERIODIC', 'ANNUAL').  
 	See further details below. }
   \item{evalCur}{ Logical. If TRUE, the most current evalidation is extracted for state(s). }
   \item{evalEndyr}{ Number. The last year of the evaluation period of interest. Selects
@@ -40,12 +40,13 @@ DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = 
 	year. If more than one state, create a named list object with evalEndyr
 	labeled for each state (ex. list(Utah=2014, Colorado=2013). }
   \item{evalid}{ Integer. To check an already existing evalid. }
-  \item{evalType}{ String vector. The type(s) of evaluation of interest ("all", "areavol", 
-	"grm", "dwm"). 'all' includes nonsampled plots (*00); 'areavol' includes 
-	plots used for area and volume estimates (*01); 'growmort' includes plots used 
-	for growth/mortality/removal estimates or change in all FIA research stations 
-	except RMRS (*03); 'dwm' includes plots used for down woody material estimates (*07). 
-	Multiple types accepted. }
+  \item{evalType}{ String vector. The type(s) of evaluation of interest 
+	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
+	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
+	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
+	includes plots used for growth, removals, mortality, and change estimates
+	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
+	See FIA database manual for regional availability and/or differences. }
   \item{dbconn}{ Database connection. The connection information to the FIA Oracle database. }
   \item{dbconnopen}{ Logical. If TRUE, the dbconn connection is not closed. }
   \item{isdwm}{ Logical. If TRUE, summarized down woody debris data are extracted from 
@@ -60,7 +61,7 @@ DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = 
   \item{evalidlist}{ Named list. evalid by state. }
   \item{invtype}{ String. Inventory type for states(s) (ANNUAL/PERIODIC). }
   \item{invyrtab}{ Data frame. Inventory years by state for evalidlist. }
-  \item{evalType}{ String vector. Evaluation type(s) included in query. }
+  \item{evalTypelist}{ Named list. Evaluation type(s) by state. }
   \item{invyrs}{ Named list. Inventory years by state for evalidlist. }
   \item{datsource}{ String. The datsource used for query (ORACLE or CSV). }
   \item{FS_FIADB}{ Logical. TRUE, if datsource=ORACLE and FS_FIADB schema is used. }

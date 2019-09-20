@@ -8,15 +8,15 @@
 }
 \usage{
 anGBest_core(state, datsource = "ORACLE", FS_FIADB = FALSE, evalCur = TRUE,
-	evalEndyr = NULL, evalType=c("all", "areavol", "grm"), fill = TRUE, 
+	evalEndyr = NULL, evalType=c("ALL", "AREAVOL", "GRM"), fill = TRUE, 
 	addSEcol = FALSE, allin1 = FALSE, outfolder=NULL, datPlots = NULL, 
 	datStrata = NULL, ref_countycd = NULL, ref_unitcd = NULL, 
 	returndata = FALSE, savedata = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{state}{ String. The name of state for tables (ex. "Vermont", "Utah", etc.) }
-  \item{datsource}{ String. Source of FIA data ("ORACLE", "CSV"). 
+  \item{state}{ String. The name of state for tables (e.g., 'Vermont', 'Utah') }
+  \item{datsource}{ String. Source of FIA data ('ORACLE', 'CSV'). 
 	If datsource="ORACLE", select permission of FIA Oracle tables must be granted to 
 	user and an ODBC connection set up on computer. Use DBtestORACLE function to 
 	test connection to ORACLE. If datsource="CSV", *.csv or *.zip (if ZIP=TRUE) files 
@@ -30,13 +30,15 @@ anGBest_core(state, datsource = "ORACLE", FS_FIADB = FALSE, evalCur = TRUE,
   \item{evalEndyr}{ Integer. The last year of the evaluation period of interest. Selects
 	only sampled plots and conditions for the evalidation period ending in the specified 
 	year. If more than one state, create a named list object with years labeled
-	by state (ex. list(Utah=2014, Colorado=2013). }
-  \item{evalType}{ String. The type of evaluation of interest ("all", "area/vol", 
-	"grow/mort", "dwm"). 'all' includes nonsampled plots (*00); 'area/vol' includes 
-	plots used for area and volume estimates (*01); 'grow/mort' includes plots used 
-	for growth/mortality/removal estimates or change in all FIA research stations 
-	except RMRS (*03); 'dwm' includes plots used for down woody material estimates (*07). 
-	Multiple types accepted. See notes for more information on evalType. }
+	by state (e.g, list(Utah=2014, Colorado=2013). }
+  \item{evalType}{ String vector. The type(s) of evaluation of interest 
+	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
+	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
+	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
+	includes plots used for growth, removals, mortality, and change estimates
+	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
+	See FIA database manual for regional availability and/or differences.
+	See notes for more information on evalType. }
   \item{fill}{ Logical. If TRUE, color fill is applied to all tables. }
   \item{addSEcol}{ Logical. If TRUE, percent standard error values are added to
 		columns side-by-side. }

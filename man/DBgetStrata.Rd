@@ -12,7 +12,7 @@
 \usage{
 DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, 
 	uniqueid = "CN", states = NULL, evalid = NULL, evalCur = FALSE, 
-	evalEndyr = NULL, evalType = "areavol", savedata = FALSE, outfolder = NULL, 
+	evalEndyr = NULL, evalType = "AREAVOL", savedata = FALSE, outfolder = NULL, 
 	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, dbconn = NULL, 	
 	dbconnopen = FALSE, POP_PLOT_STRATUM_ASSGN = NULL)
 }
@@ -20,7 +20,7 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
   \item{dat}{ Data frame, comma-delimited file (*.csv), or shapefile (*.shp). The strata 
 	value is merged to this table and returned as a data frame. See details for necessary
 	variables. }
-  \item{datsource}{ String. Source of FIA data ("ORACLE", "CSV"). 	
+  \item{datsource}{ String. Source of FIA data ('ORACLE', 'CSV'). 	
 	If datsource="ORACLE", select permission of FIA Oracle tables must be granted to 
 	user and an ODBC connection set up on computer. Use DBtestORACLE function to 
 	test connection to ORACLE. If datsource="CSV", *.csv or *.zip (if ZIP=TRUE) files 
@@ -31,21 +31,23 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
 	files (*.zip) are downloaded from FIA DataMart; saved to a temporary space;
 	extracted; and deleted from temporary space. If FALSE, CSV files are directly
 	downloaded. }
-  \item{FS_FIADB}{ Logical. If datsource="ORACLE". If TRUE, data are extracted from FIA's 
+  \item{FS_FIADB}{ Logical. If datsource='ORACLE'. If TRUE, data are extracted from FIA's 
 	national public database (Oracle - FS_FIADB schema). If FALSE, data are extracted 
 	from the regional FIADB (Oracle FS_NIMS_FIADB_RMRS schema). This is currently only 
 	available for RMRS. }
-  \item{uniqueid}{ String. The unique plot identifier of dat (ex. "CN"). }
-  \item{states}{ String or numeric vector. Name(s) (e.g., "Arizona","New Mexico") or 
+  \item{uniqueid}{ String. The unique plot identifier of dat (e.g., 'CN'). }
+  \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
 	code(s) (e.g., 4, 35) of states for strata if dat=NULL. }
   \item{evalid}{ Integer. The evaluation if dat=NULL. }
   \item{evalCur}{ Logical. If TRUE, the most current evalidation for state(s). }
   \item{evalEndyr}{ Number. The end year of evalidation time period for state(s). }
-  \item{evalType}{ String. The type of evaluation of interest ("all", "areavol", 
-	"grm", "dwm"). 'all' includes nonsampled plots (*00); 'areavol' includes 
-	plots used for area and volume estimates (*01); 'grm' includes plots used 
-	for growth/mortality/removal estimates or change in all FIA research stations 
-	except RMRS (*03); 'dwm' includes plots used for down woody material estimates (*07). 
+  \item{evalType}{ String vector. The type(s) of evaluation of interest 
+	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
+	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
+	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
+	includes plots used for growth, removals, mortality, and change estimates
+	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
+	See FIA database manual for regional availability and/or differences. 
 	See notes for more information on evalType. }
   \item{savedata}{ Logical. If TRUE, writes output to outfolder. }
   \item{outfolder}{ String.* If savedata=TRUE, name of the output folder. If NULL, 

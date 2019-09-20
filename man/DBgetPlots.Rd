@@ -12,7 +12,7 @@
 \usage{
 DBgetPlots(datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, states = NULL, 
 	rs = NULL, invtype = "ANNUAL", evalid = NULL, evalCur = FALSE, 
-	evalEndyr = NULL, evalType = "areavol", allyrs = FALSE, invyrs = NULL, 
+	evalEndyr = NULL, evalType = "ALL", allyrs = FALSE, invyrs = NULL, 
 	actual = FALSE, istree = FALSE, isseed = FALSE, isveg = FALSE, isdwm = FALSE, 
 	issp = FALSE, spcoords = NULL, spcond = TRUE, spcondid1 = FALSE, 
 	defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, subcycle99 = FALSE, 
@@ -22,7 +22,7 @@ DBgetPlots(datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, states = NULL,
 	gui = FALSE)
 }
 \arguments{
-  \item{datsource}{ String. Source of FIA data ("ORACLE", "CSV"). 
+  \item{datsource}{ String. Source of FIA data ('ORACLE', 'CSV'). 
 	If datsource="ORACLE", select permission of FIA Oracle tables must be granted to 
 	user and an ODBC connection set up on computer. Use DBtestORACLE function to 
 	test connection to ORACLE. If datsource="CSV", *.csv or *.zip (if ZIP=TRUE) files 
@@ -36,10 +36,10 @@ DBgetPlots(datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, states = NULL,
   \item{FS_FIADB}{ Logical. If datsource="ORACLE". If TRUE, data are extracted from FIA's 
 	national public database (Oracle - FS_FIADB schema). If FALSE, data are extracted 
 	from the regional FIADB (Oracle FS_NIMS_FIADB_'NIMS_UNIT' schema). }
-  \item{states}{ String or numeric vector. Name(s) (e.g., "Arizona","New Mexico") or 
+  \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
 	code(s) (e.g., 4, 35) of states. }
-  \item{rs}{ String vector. Name of research station(s) ("RMRS","SRS","NCRS","NERS","PNWRS"). }
-  \item{invtype}{ String. The type of data to extract ("PERIODIC", "ANNUAL").  
+  \item{rs}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS'). }
+  \item{invtype}{ String. The type of data to extract ('PERIODIC', 'ANNUAL').  
 	See further details below. }
   \item{evalid}{ Integer. To extract data for a specific evaluation period. See notes 
 	for more information about FIA Evaluations. }
@@ -48,12 +48,13 @@ DBgetPlots(datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, states = NULL,
 	only sampled plots and conditions for the evalidation period ending in the specified 
 	year. If more than one state, create a named list object with years labeled
 	by state (e.g., list(Utah=2014, Colorado=2013). }
-  \item{evalType}{ String. The type of evaluation of interest ("all", "areavol", 
-	"grm", "dwm"). 'all' includes nonsampled plots (*00); 'areavol' includes 
-	plots used for area and volume estimates (*01); 'growmort' includes plots used 
-	for growth/mortality/removal estimates or change in all FIA research stations 
-	except RMRS (*03); 'dwm' includes plots used for down woody material estimates (*07). 
-	Multiple types accepted. See notes for more information on evalType. }
+  \item{evalType}{ String vector. The type(s) of evaluation of interest 
+	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
+	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
+	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
+	includes plots used for growth, removals, mortality, and change estimates
+	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
+	See FIA database manual for regional availability and/or differences. }
   \item{allyrs}{ Logical. If TRUE, all annual inventory years in database are returned for 
 	each state. }
   \item{invyrs}{ Integer vector. Inventory year(s) (ex. c(2000, 2001, 2002)). If more than 
@@ -336,7 +337,7 @@ DBgetPlots(datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, states = NULL,
 
 	\bold{FIA Evaluation Types}
 
-	If evaltype="all", the evaluation includes all sampled and nonsampled plots or 
+	If evaltype="ALL", the evaluation includes all sampled and nonsampled plots or 
 	plots that were missed in an inventory year. Regional differences may occur on how
 	missed plots are represented in an evaluation. For example, in the RMRS Research 
 	Station, evaluations in the database are static; missed plots are added as 
