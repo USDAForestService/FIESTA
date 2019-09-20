@@ -11,26 +11,32 @@ check.data <- function(gui, esttype, module="GB", method="GREG", SApackage=NULL,
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
   ## Define necessary plot and condition-level variables: 
-  ## - plt (pvars2keep) - unitvars, auxvars
   ## - plt domains to add to cond (pdoms2keep) - STATECD, UNITCD, COUNTYCD, 
   ##		INVYR, MEASYEAR, PLOT_STATUS_CD, RDDISTCD, WATERCD, ELEV, ELEV_PUBLIC, 
   ##		ECOSUBCD, CONGCD
+  ## - plt (pvars2keep) - unitvars, auxvars
   ## - cond (cvars2keep) - CONDPROP_UNADJ, COND_STATUS_CD 
   ## Check esttype, module, method, adj
   ## - esttype in("TREE", "RATIO")
   ## - module in("GB", "MA", "SA")
   ## - if (module="MA") method in("HT", "PS", "GREG")
-  ## Check logical parameters: sumunits, strata, ACI, adjsamp, adjplot
+  ## - if (module="SA") SApackage <- c("JoSAE", "sae"); method <- c("unit", "area")
+  ## Check logical parameters: sumunits, autocombine, strata, ACI, adjsamp, adjplot
   ## - If sumunits=TRUE, estimation units are summed to 1 estimate
+  ## - If sumunits=TRUE and autocombine=TRUE, 
+  ##		if < 2 plots, combine strata; if < 10 plots, combine estimation units
   ## - If strata, only 1 auxvar allowed
   ## - If ACI, add NF_PLOT_STATUS_CD to pvars2keep and NF_COND_STATUS_CD to cvars2keep
   ## - If adjsamp, adj="samp", nonsample adjustment factors calculated at strata level
   ## - If adjplot, adj="plot", nonsample adjustment factors calculated at plot level
-  ## Check landarea
+  ## Check landarea ("FOREST", "ALL", "TIMBERLAND")
   ## Import and check cond and plt tables and check unique identifiers
   ## Check plt table (if NULL, plt=cond[, pvars2keep])
+  ## - Check for NA values
   ## - Apply plt filter, if plt exists.
-  ## Create pltx with puniqueid and pvars2keep only 
+  ## - Check missing pdoms2keep variables
+  ## - Check predfac variable(s) and strvar - for factor status
+  ## Subset pltx with puniqueid and pvars2keep only 
   ## Create condx with cuniqueid, pdoms2keep and cvars2keep 
   ## - Check for missing NA values in pvars2keep variables in pltx
   ## - if unitvar=NULL, add ONEUNIT=1 to pltx
@@ -96,6 +102,11 @@ check.data <- function(gui, esttype, module="GB", method="GREG", SApackage=NULL,
   pvars2keep <- unique(c(unitvar, unitvar2))
   cvars2keep <- unique(c(cvars2keep, "CONDPROP_UNADJ", "COND_STATUS_CD"))
 
+
+  ###################################################################################
+  ## Check esttype, module, method, adj
+  ###################################################################################
+
   ## Check esttype 
   ########################################################
   esttypelst <- c("AREA", "TREE", "RATIO")
@@ -127,7 +138,6 @@ check.data <- function(gui, esttype, module="GB", method="GREG", SApackage=NULL,
       stop("must include pltmodel for unit-level estimates")
   }
 
-
   ## Check adjsamp
   ########################################################
   adjplot <- FIESTA::pcheck.logical(adjplot, varnm = "adjplot", 
@@ -137,18 +147,21 @@ check.data <- function(gui, esttype, module="GB", method="GREG", SApackage=NULL,
         title = "Adjust area for nonsampled?", first = "YES", 
         gui = gui, stopifnull = TRUE)
 
-  adj <- ifelse((!is.null(adjplot) & adjplot), "plot", 
-			ifelse((!is.null(adjsamp) & adjsamp), "samp", "none"))
-  
+  adj <- ifelse((!is.null(adjplot) && adjplot), "plot", 
+			ifelse((!is.null(adjsamp) && adjsamp), "samp", "none"))
 
-  ## Check logical parameters
+
   ###################################################################################
-
+  ## Check logical parameters: sumunits, strata, ACI, adjsamp, adjplot
+  ###################################################################################
+  
   ## Check sumunits 
+  ########################################################
   sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
 		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check autocombine
+  ########################################################
   if (sumunits) {
     autocombine <- FIESTA::pcheck.logical(autocombine, varnm="autocombine", 
 		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
@@ -157,11 +170,11 @@ check.data <- function(gui, esttype, module="GB", method="GREG", SApackage=NULL,
   }   
 
   ## Check adj
+  ########################################################
   if (adj == "samp" && module == "SA")  {
     message("adj='samp' is currently invalid for SA module... adjusting for plot")
     adj <- "plot"
   }
-
   if (adj == "plot" && module == "GB") 
     message("adj='plot' is not typical for GA modules")
       

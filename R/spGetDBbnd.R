@@ -18,7 +18,7 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
   ##############################################################################
 
   ## Set global variables
-  CTcoverfn=NULL
+  CTcoverfn=othertabnms=NULL
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -74,19 +74,18 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
   ########################################################################
 
   if (datsource != "SQLite") {
-    if (is.null(stbnd))
-      ## Get state boundary and reproject polygon boundary
-      stbnd <- raster::getData('GADM', country="USA", level=1)
-
-    ## Reproject stbnd to bnd projection
-    prjdat <- FIESTA::CRScompare(bndx, stbnd, nolonglat=TRUE)
-    bndx <- prjdat$layer1
-    stbnd <- prjdat$layer2
-
-  
     ## Get intersecting states
     #############################################################################
     if (is.null(states)) {
+      if (is.null(stbnd))
+      ## Get state boundary and reproject polygon boundary
+        stbnd <- raster::getData('GADM', country="USA", level=1)
+
+      ## Reproject stbnd to bnd projection
+      prjdat <- FIESTA::CRScompare(bndx, stbnd, nolonglat=TRUE)
+      bndx <- prjdat$layer1
+      stbnd <- prjdat$layer2
+
       ## Check intersecting states
       states <- as.vector(na.omit(stbnd[["NAME_1"]][!is.na(sp::over(stbnd, bndx))]))
 
@@ -188,6 +187,13 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
   spplt_ACTUAL <- datPlots$spplt_ACTUAL
   evalid <- datPlots$evalid
 
+  for (nm in names(datPlots)) {
+    assign(nm, datPlots[[nm]])
+    if (is.data.frame(get(nm)) && nm != "pltcnt") 
+      othertabnms <- c(othertabnms, nm)
+  }
+
+
 
   #############################################################################
   ## Merge coordsfn to plt and create plt shapefile
@@ -210,24 +216,17 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
     spcoords <- FIESTA::spMakeSpatialPoints(xyplt=coords, uniqueid=coordsfn.uniqueid,
 		x=coordsfn.x, y=coordsfn.y, prj=coordsfn.prj, datum=coordsfn.datum)
     uniqueid <- coordsfn.uniqueid  
-    othertabnms <- c("plt", "cond", "spplt_PUBLIC")
   } else if (!is.null(spplt_ACTUAL)) {
     coordtype <- "ACTUAL"
     uniqueid <- "PLT_CN"
     spcoords <- spplt_ACTUAL
-    othertabnms <- c("plt", "cond", "spplt_PUBLIC")    
   } else if (!is.null(spplt_PUBLIC)) {
     coordtype <- "PUBLIC"
     uniqueid <- "PLT_CN"
     spcoords <- spplt_PUBLIC
-    othertabnms <- c("plt", "cond")
   } else {
     stop("no coordinates")
   }
-  if (istree) othertabnms <- c(othertabnms, "tree")
-  if (actual) othertabnms <- c(othertabnms, "actualp", "actualc")
-  if (!is.null(spplt_ACTUAL)) othertabnms <- c(othertabnms, "spplt_ACTUAL") 
-  if (!is.null(spplt_PUBLIC)) othertabnms <- c(othertabnms, "spplt_PUBLIC") 
 
 
   #############################################################################
@@ -257,7 +256,7 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
   ## Subset other tables
   ###################################
   if (!is.null(othertabnms)) {
-    othertabs <- lapply(othertabnms, function(x) get(x, envir=environment()))
+    othertabs <- lapply(unique(othertabnms), function(x) get(x, envir=environment()))
     clip_tabs <- FIESTA::clip.othertables(clip_xyplt[[uniqueid]], othertabnms=othertabnms,
 		othertabs=othertabs, savedata=savedata, outfn.pre=outfn.pre, 
 		outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite)

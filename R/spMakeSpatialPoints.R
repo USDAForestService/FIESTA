@@ -91,7 +91,9 @@ spMakeSpatialPoints <- function(xyplt=NULL, uniqueid=NULL, x=NULL, y=NULL,
   xypltx[[uniqueid]] <- as.character(xypltx[[uniqueid]])
 
   ## Generate SpatialPoints object
-  sp::coordinates(xypltx) <- c(x, y)
+  xypltx$x <- xypltx[[x]]
+  xypltx$y <- xypltx[[y]]
+  sp::coordinates(xypltx) <- c("x", "y")
   sp::proj4string(xypltx) <- sp::CRS(prj4str)
 
 

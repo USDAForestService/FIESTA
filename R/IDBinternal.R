@@ -17,7 +17,7 @@ DBgetvars <- function(invtype, defaultVars, istree, isseed, isveg, isdwm,
   #tpavars <- c("TPA_UNADJ", "TPAGROW_UNADJ", "TPAMORT_UNADJ", "TPAREMV_UNADJ")
 
   # Excluding board-foot volumes
-  volvars <- c("VOLCFNET", "VOLCFGRS", "VOLBFNET", "VOLBFGRS")
+  volvars <- c("VOLCFNET", "VOLCFGRS", "VOLBFNET", "VOLBFGRS", "VOLCSNET", "VOLCSGRS")
   growvars <- c("GROWCFGS", "GROWCFAL", "FGROWCFGS", "FGROWCFAL")
   mortvars <- c("MORTCFGS", "MORTCFAL", "FMORTCFGS", "FMORTCFAL")
   remvars <- c("REMVCFGS", "REMVCFAL", "FREMVCFGS", "FREMVCFAL")

@@ -248,13 +248,14 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, caption=NULL, checkonly=FALSE,
         stop(layer, " is invalid")
       }
     } else if (!file.exists(dsn)) {
-      stop(layer, " is invalid")
+      stop(dsn, " is invalid")
     }
 
-    if (!checkonly) 
+    if (!checkonly) {
+      layer <- FIESTA::basename.NoExt(layer)
       splayer <- rgdal::readOGR(dsn=dsn, layer=layer, stringsAsFactors=FALSE, 
 			drop_unsupported_fields=TRUE)
-
+    }
   }
         
 

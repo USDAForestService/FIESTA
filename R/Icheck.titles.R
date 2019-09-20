@@ -235,7 +235,7 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
     if (!is.null(outfn.pre))
       pretitle <- paste(outfn.pre, pretitle, sep="_")
 
-    if (esttype == "TREE") {
+    if (esttype %in% c("TREE", "RATIO")) {
       pretitle <- paste0(pretitle, "_", estvarn)
       if (esttype == "RATIO") {
         if (is.null(estvard)) estvard <- "ACRE"
