@@ -1,6 +1,6 @@
 DBgetStrata <- function(dat=NULL, datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, 
 	uniqueid="CN", states=NULL, evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
-	evalType="areavol", savedata=FALSE, outfolder=NULL, outfn.pre=NULL, 
+	evalType="AREAVOL", savedata=FALSE, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date = FALSE, overwrite=FALSE, dbconn=NULL, dbconnopen=FALSE, 
 	POP_PLOT_STRATUM_ASSGN=NULL){
   ######################################################################################

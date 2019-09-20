@@ -1,6 +1,6 @@
 DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE, 
 	FS_FIADB=TRUE, invyrtab=NULL, invtype="ANNUAL", evalCur=TRUE, evalEndyr=NULL, 
-	evalid=NULL, evalType="all", dbconn=NULL, dbconnopen=FALSE, isdwm=FALSE,
+	evalid=NULL, evalType="AREAVOL", dbconn=NULL, dbconnopen=FALSE, isdwm=FALSE,
 	gui=FALSE) {
 
   ###############################################################################
@@ -27,7 +27,7 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
   on.exit(options(options.old), add=TRUE) 
 
   ## Set global variables
-  EVALID=evalidlist <- NULL
+  EVALID=evalidlist=evalTypelist <- NULL
 
   if (gui) {
     if (!is.null(dbconn)) {
@@ -44,11 +44,6 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
   }
   invyrs <- NULL
   evalresp <- FALSE
-#  evalTypelst <- c(all="0", areavol="1", grm="3", dwm="7", removals="5", 
-#		change="3", regen="8")
-  evalTypelst <- c(all="ALL", areavol="VOLUME", grm="GROWTH", dwm="DWM", 
-		change="CHANGE", regen="REGENERATION", invasive="INVASIVE", vegprofile="VEG PROFILE")
-
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -105,7 +100,10 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
   rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
   rslst <- unique(rslst)
 
+  
+  ## Get database connection, if datsource=ORACLE, and define SCHEMA for queries
   if (datsource == "ORACLE") {
+
     if (is.null(dbconn)) {
       ## CONNECT TO ORACLE DATABASE
       dbconn <- DBtestORACLE(dbconnopen=TRUE)
@@ -129,24 +127,33 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
       SCHEMA <- "FS_FIADB"
     }
     SCHEMA. <- paste0(SCHEMA, ".")
+  } else {
+    SCHEMA. <- ""
+  }
 
-    ## Query POP_EVAL table
-    popevalqry <- paste0("select * from ", SCHEMA., "POP_EVAL where STATECD in ", 
-		FIESTA::addcommas(stcdlst, paren=TRUE))
-    tryCatch( POP_EVAL <- DBqryORACLE(popevalqry, dbconn, dbconnopen=TRUE), 
+  ## Define query POP_EVAL, POP_EVAL_TYP table
+  popevaltypqry <- paste0("select pev.*, pet.eval_typ from ", SCHEMA., 
+		"POP_EVAL_TYP pet join ", SCHEMA., "POP_EVAL pev on (pev.cn = pet.eval_cn) ",
+		"where pev.STATECD in ", FIESTA::addcommas(stcdlst, paren=TRUE))
+
+  if (datsource == "ORACLE") {
+    ## Get POP_EVAL table with POP_EVAL_TYP
+    tryCatch( POP_EVAL <- DBqryORACLE(popevaltypqry, dbconn, dbconnopen=TRUE), 
 		error=function(e) stop("pop_eval query is invalid"))
 
-    ## Query POP_EVAL table
+    ## Get SURVEY table
     surveyqry <- paste0("select * from ", SCHEMA., "SURVEY where STATECD in ", 
 		FIESTA::addcommas(stcdlst, paren=TRUE))
     tryCatch( SURVEY <- DBqryORACLE(surveyqry, dbconn, dbconnopen=TRUE), 
 		error=function(e) stop("survey query is invalid"))
+
   } else if (datsource == "CSV") {
  
     POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, ZIP=ZIP)
+    POP_EVAL_TYP <- FIESTA::DBgetCSV("POP_EVAL_TYP", stcdlst, ZIP=ZIP)
     SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE)
 
-    SCHEMA. <- ""
+    POP_EVAL <- sqldf::sqldf(popevaltypqry)
   }
 
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
@@ -172,24 +179,27 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
       } else {
         invyrtab <- tryCatch( SURVEY <- DBqryORACLE(invyrqry, dbconn, dbconnopen=TRUE), 
 		error=function(e) stop("invyr query is invalid"))
-
       }
 
       invyrs <- list()
       evalidlist <- list()
-      evalTypecd <- NULL
+      evalTypelist <- list()
       for (i in 1:length(evalid)) { 
         eval <- evalid[[i]]
         st <- substr(eval, nchar(evalid)-5, nchar(evalid)-4)
         etypcd <- substr(eval, nchar(evalid)-1, nchar(evalid))
         state <- FIESTA::pcheck.states(st, "MEANING")
-        startyr <- POP_EVAL[POP_EVAL$EVALID == eval, c("START_INVYR")]
-        endyr <- POP_EVAL[POP_EVAL$EVALID == eval, c("END_INVYR")]
+        startyr <- unique(min(POP_EVAL[POP_EVAL$EVALID == eval, c("START_INVYR")]))
+        endyr <- unique(max(POP_EVAL[POP_EVAL$EVALID == eval, c("END_INVYR")]))
  
         ann_inventory <- SURVEY[SURVEY$STATECD == st & SURVEY$INVYR == endyr, 
 		"ANN_INVENTORY"][[1]]
         invtype <- ifelse(ann_inventory == "Y", "ANNUAL", "PERIODIC")
         stinvyr <- startyr:endyr
+        evalTypecd <- unique(POP_EVAL$EVALID[endsWith(as.character(POP_EVAL$EVALID), 
+			paste0(substr(endyr, nchar(endyr)-1, nchar(endyr)), etypcd))])
+        evalTypelist[[state]] <- POP_EVAL[POP_EVAL$EVALID %in% evalTypecd, "EVAL_TYP"][[1]]
+
         if (state %in% names(invyrs)) {
           invyrs[[state]] <- sort(unique(c(invyrs[[state]], stinvyr)))
           evalidlist[[state]] <- sort(unique(c(evalidlist[[state]], eval)))
@@ -197,13 +207,11 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
           invyrs[[state]] <- stinvyr
           evalidlist[[state]] <- eval
         }
-        evalTypecd <- c(evalTypecd, etypcd)
         invyrtab <- invyrtab[invyrtab$ANN_INVENTORY == ann_inventory,]
       }
     }
-    evalType <- names(evalTypelst)[match(evalTypecd, names(evalTypelst))]
     return(returnlst <- list(states=states, evalidlist=evalidlist, invtype=invtype,
- 		invyrtab=invyrtab, invyrs=invyrs, evalType=evalType, datsource=datsource, 
+ 		invyrtab=invyrtab, invyrs=invyrs, evalType=evalTypelist, datsource=datsource, 
 		FS_FIADB=FS_FIADB, ZIP=ZIP, dbconn=dbconn))
   }
  
@@ -344,26 +352,36 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
     evalidlist <- sapply(states, function(x) NULL)
 
     ## Get the evalidation type - areavol or grm)
+    evalSelectlst <- c("AREAVOL", "GRM", "DWM")
+    if (invtype == "ANNUAL") evalSelectlst <- c("ALL", evalSelectlst)
     evalType <- FIESTA::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
-		checklst=names(evalTypelst), caption="Evaluation type", multiple=TRUE, 
-		preselect="areavol")
-    if (is.null(evalType)) evalType <- "areavol"
+		checklst=evalSelectlst, caption="Evaluation type", multiple=TRUE, 
+		preselect="AREAVOL")
+    if (is.null(evalType)) evalType <- "ALL"
+
+    ## check evalType
+    if (length(grep("AREAVOL", evalType, ignore.case=TRUE)) > 0) 
+      evalType[grep("AREAVOL", evalType, ignore.case=TRUE)] <- "VOL"  
+    if (length(grep("GRM", evalType, ignore.case=TRUE)) > 0) 
+      evalType[grep("GRM", evalType, ignore.case=TRUE)] <- "GROW"  
 
     if (isdwm) {
       message("adding dwm to evalType")
-      evalType <- c(evalType, "dwm")
+      evalType <- c(evalType, "DWM")
     }
-    evalType <- sapply(states, function(x) list(evalType))
+    evalTypelist <- sapply(states, function(x) list(evalType))
+    evalTypelist <- lapply(evalTypelist, function(x) paste0("EXP", x))
 
-    for (stcd in stcdlst) { 
+    for (stcd in stcdlst) {
       state <- FIESTA::pcheck.states(stcd, "MEANING")
       stabbr <- FIESTA::pcheck.states(stcd, "ABBR")
       stinvyrs <- unique(stinvyr.vals[[state]])
 
-      message(state)
-
-      POP_EVAL_endyrs <- sort(unique(POP_EVAL[POP_EVAL$STATECD == stcd, "END_INVYR"]),
-			decreasing=TRUE)
+      POP_EVAL_endyrs <- unique(POP_EVAL[POP_EVAL$STATECD == stcd, "END_INVYR"])
+      if (any(is.na(POP_EVAL_endyrs))) 
+        POP_EVAL_endyrs <- unique(c(POP_EVAL_endyrs, 
+          POP_EVAL[POP_EVAL$STATECD == stcd & is.na(POP_EVAL$END_INVYR), "REPORT_YEAR_NM"]))
+      POP_EVAL_endyrs <- sort(POP_EVAL_endyrs)
       POP_EVAL_endyrs <- POP_EVAL_endyrs[POP_EVAL_endyrs %in% invyrtab$INVYR]
       if (!is.null(evalEndyr)) {
         Endyr <- evalEndyr[[state]]
@@ -372,7 +390,7 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
           popevalcols <- c("CN", "EVAL_GRP_CN", "EVALID", "EVAL_DESCR", 
 			"REPORT_YEAR_NM", "START_INVYR", "END_INVYR", "LAND_ONLY", 
 			"TIMBERLAND_ONLY", "GROWTH_ACCT", "ESTN_METHOD")
-          print(POP_EVAL[POP_EVAL$STATECD == stcd, popevalcols])
+          message(POP_EVAL[POP_EVAL$STATECD == stcd, popevalcols])
           stop(paste0(Endyr, " is not in ", stabbr, "_", "POP_EVAL table"))
 
 #          msg <- paste(Endyr, "is not in POP_EVAL...")
@@ -399,42 +417,50 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
       }
  
       ## Get evalid and inventory years from POP_EVAL table
-      popevaltab <- POP_EVAL[POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR == Endyr,]
+      pop_endyr <- POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR == Endyr
+      if (all(is.na(pop_endyr[pop_endyr != FALSE])))
+        stop("invalid invtype for ", state)
+      popevaltab <- POP_EVAL[POP_EVAL$STATECD == stcd & !is.na(POP_EVAL$END_INVYR) & 
+		POP_EVAL$END_INVYR == Endyr,]
+
       if (is.null(invtype)) {
         Startyr <- unique(POP_EVAL[POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR == Endyr, 
 		"START_INVYR"])
+        #invtype <- ifelse(is.na(Startyr) || Endyr == Startyr, "PERIODIC", "ANNUAL")
         invtype <- ifelse(Endyr == Startyr, "PERIODIC", "ANNUAL")
       }
+
+      ## Check evalType with evalType in database for state
+      evalType.chklst <- unique(popevaltab$EVAL_TYP)
+
       if (invtype == "ANNUAL") {
-        evalidlst <- NULL
+        if (!all(evalTypelist[[state]] %in% evalType.chklst)) 
+          stop(paste("invalid evalType for", state))
+
         evalidall <- popevaltab$EVALID[!is.na(popevaltab$EVALID)]
-        evaldesc <- evalTypelst[names(evalTypelst) %in% evalType[[state]]]
-        evalidlist[[state]] <- popevaltab$EVALID[sapply(evaldesc, grep, popevaltab$EVAL_DESCR)]
+        evalidlist[[state]] <- 
+		popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]
         invyrs[[state]]  <- 
 		min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
-        
+     
       } else {
-        findnm <- ifelse(evalType[[state]] == "all", "area", "grow")      
-        popevaltab.row <- popevaltab[grep(findnm, popevaltab$EVAL_DESCR, ignore.case=TRUE), ]
-        if (nrow(popevaltab.row) == 0) {
-          if (gui) {
-            evalidlst <- as.character(popevaltab[["EVALID"]])
-            evalid <- select.list(evalidlst, title="select evaltype", multiple=FALSE)
-            popevaltab.row <- popevaltab[popevaltab$EVALID == evalid, ]
-          } else {
-            findnm <- "area"
-            popevaltab.row <- popevaltab[grep(findnm, popevaltab$EVAL_DESCR, ignore.case=TRUE), ]
-            message("there is no evalid for ", findnm, "... using area evalid")
-          }
-        }     
-        evalidlist[[state]] <- popevaltab.row$EVALID
-        invyrs[[state]]  <- popevaltab.row$START_INVYR:popevaltab.row$END_INVYR
+        if (!all(evalTypelist[[state]] %in% evalType.chklst)) { 
+          evalid.min <- min(popevaltab$EVALID)
+          evalTypelist[[state]] <- popevaltab[popevaltab$EVALID == min(popevaltab$EVALID),
+			"EVAL_TYP"][1]
+          message(paste("invalid evalType for", state, "...using", evalTypelist[[state]]))
+        }
+        evalidlist[[state]] <- 
+		popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]
+        invyrs[[state]]  <- ifelse (any(is.na(popevaltab$END_INVYR)), 
+		unique(as.numeric(popevaltab$REPORT_YEAR_NM)),
+		min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE))
       }
     }
   } 
     
   returnlst <- list(states=states, rslst=rslst, evalidlist=evalidlist, 
-		invtype=invtype, invyrtab=invyrtab, evalType=evalType[[1]])
+		invtype=invtype, invyrtab=invyrtab, evalTypelist=evalTypelist)
   if (!is.null(invyrs)) returnlst$invyrs <- invyrs
   returnlst$datsource <- datsource
   

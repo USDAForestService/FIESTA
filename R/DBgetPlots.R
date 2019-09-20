@@ -1,6 +1,6 @@
 DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL, 
 	rs=NULL, invtype="ANNUAL", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
-	evalType="areavol", allyrs=FALSE, invyrs=NULL, actual=FALSE, istree=FALSE, 
+	evalType="ALL", allyrs=FALSE, invyrs=NULL, actual=FALSE, istree=FALSE, 
 	isseed=FALSE, isveg=FALSE, isdwm=FALSE, issp=FALSE, spcoords=NULL, 
 	spcond=TRUE, spcondid1=FALSE, defaultVars=TRUE, regionVars=FALSE, ACI=FALSE, 
 	subcycle99=FALSE, intensity1=TRUE, allFilter=NULL, savedata=FALSE, 
@@ -13,10 +13,10 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
     gui <- ifelse(nargs() == 0 || (nargs() == 1 & !is.null(dbconn)) ||
 		(nargs() == 2 & !is.null(dbconn) & dbconnopen), TRUE, FALSE)
   if (gui) 
-    ZIP=invtype=evalCur=allyrs=evalType=istree=isseed=isveg=isdwm=issp=
+    ZIP=invtype=evalCur=allyrs=evalType=istree=isseed=isveg=issp=
 	shpcondid=defaultVars=regionVars=ACI=actual=subcycle99=intensity1=
 	allFilter=savedata=saveqry=parameters=BIOJENK_kg=BIOJENK_lb=PREV_PLTCN <- NULL
-  
+
   ## Set global variables  
   CN=CONDID=COND_STATUS_CD=PLT_CN=FORTYPCD=cvars=pvars=tvars=treenavars=svars=seednavars=
 	vspsppvars=vspstrvars=dvars=tsvars=vars=filtervarlst=filterpvarlst=
@@ -118,7 +118,6 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
     if (actual) {
       if (length(rslst) > 1) {
         message("cannot get coordinates for more than one state... setting actual=FALSE")
-
         actual <- FALSE
       } else {
         if (!isRMRS)
@@ -133,7 +132,6 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
         SDSCa <- "SDSc"
       }
     }
-
   } else {
     actual <- FALSE
     SCHEMA <- ""
@@ -239,25 +237,8 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
   if (invtype == "PERIODIC") isveg <- FALSE 
   if (all(!rslst %in% c("RMRS", "PNWRS"))) isveg <- FALSE
 
-  datatablst <- {}
-  if (is.null(istree)) { 
-    datatablst <- c(datatablst, "tree") 
-  } else if(!is.logical(istree)) { 
-    stop("invalid istree")}
-  if (is.null(isseed)) { 
-    datatablst <- c(datatablst, "seed") 
-  } else if (!is.logical(isseed)) { 
-    stop("invalid isseed")}
-  if (is.null(isveg)) { 
-    datatablst <- c(datatablst, "veg") 
-  } else if (!is.logical(isveg)) { 
-    stop("invalid isveg")}
-  if (is.null(isdwm)) { 
-    datatablst <- c(datatablst, "dwm") 
-  } else if (!is.logical(isdwm)) { 
-    stop("invalid isdwm")}
-
-  if (length(datatablst > 0)) {
+  if (gui) {
+    datatablst <- c("tree", "seed", "veg", "dwm")
     datatabs <- select.list(c("NONE", datatablst), title="Other tables??", preselect="NONE", 
 		multiple=TRUE)
     if (length(datatabs)==0) datatabs <- "NONE"
@@ -265,7 +246,16 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
     isseed <- ifelse(any(datatabs == "seed"), TRUE, FALSE)
     isveg <- ifelse(any(datatabs == "veg"), TRUE, FALSE)
     isdwm <- ifelse(any(datatabs == "dwm"), TRUE, FALSE)
-  }  
+  } else {
+    istree <- FIESTA::pcheck.logical(istree, varnm="istree", 
+		title="Tree variables?", first="YES", gui=gui)
+    isseed <- FIESTA::pcheck.logical(isseed, varnm="isseed", 
+		title="Seedling variables?", first="YES", gui=gui)
+    isveg <- FIESTA::pcheck.logical(isveg, varnm="isveg", 
+		title="Understory veg variables?", first="YES", gui=gui)
+    isdwm <- FIESTA::pcheck.logical(isdwm, varnm="isdwm", 
+		title="DWM variables?", first="YES", gui=gui)
+  }
 
   ## Check defaultVars
   ###########################################################
@@ -450,7 +440,6 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
   ## Cond from/join query
   fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., "COND c ON (c.PLT_CN = p.CN)")
 
-  
   ## ACTUAL query
   ################################################
   if (actual) 
@@ -465,7 +454,9 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
 		"TREE t ON (t.PLT_CN = ppsa.PLT_CN)")
     } else {
       #tfromqry <- paste0(SCHEMA., "TREE t")
-      tfromqry <- "PLOT p JOIN TREE t ON (t.PLT_CN = p.CN)"
+      tfromqry <- paste0(SCHEMA., "PLOT p JOIN ", SCHEMA., "TREE t ON (t.PLT_CN = p.CN)")
+      if (datsource == "CSV") 
+        tfromqry <- sub(SCHEMA., "", tfromqry)
    }
   }
 
@@ -476,15 +467,19 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
       sfromqry <- paste0(ppsatab, " JOIN ", SCHEMA., 
 		"SEEDLING s ON (s.PLT_CN = ppsa.PLT_CN)")
     } else {
-      sfromqry <- paste0(SCHEMA., "SEEDLING s")
+      sfromqry <- paste0(SCHEMA., "PLOT p JOIN ", SCHEMA., "SEEDLING s ON (s.PLT_CN = p.CN)")
+      if (datsource == "CSV") 
+        sfromqry <- sub(SCHEMA., "", sfromqry)
     }
   }
 
   ## DWM query
   ################################################
-  if (isdwm) 
-    dfromqry <- paste0(SCHEMA., "COND_DWM_CALC d")
-  
+  if (isdwm) {
+    dfromqry <- paste0(SCHEMA., "PLOT p JOIN ", SCHEMA., "COND_DWM_CALC d ON (d.PLT_CN = p.CN)")
+    if (datsource == "CSV") 
+      dfromqry <- sub(SCHEMA., "", dfromqry)
+  }
 
   ## VEG query
   ################################################
@@ -493,10 +488,14 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
 		"P2VEG_SUBPLOT_SPP v ON v.PLT_CN = p.CN")
     vstrfromqry <- paste0(fromqry, " JOIN ", SCHEMA., 
 		"P2VEG_SUBP_STRUCTURE v ON v.PLT_CN = p.CN")
+
+    if (datsource == "CSV") {
+      vfromqry <- sub(SCHEMA., "", vfromqry)
+      vstrfromqry <- sub(SCHEMA., "", vstrfromqry)
+    }
   }
 
 
-  
   #####################################################################################
   #############################      SET OUTFILE NAMES    #############################
   #####################################################################################
@@ -613,10 +612,8 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
   stateFilters <- {}
   filtervarlst <- as.vector(do.call(c, filtervarlst))
 
-
   for(shpcoord in spcoords)
     assign(paste("shpdat", shpcoord, sep="_"), {})
-
 
   if (iseval) {
     vars <- paste0(vars, ",EVALID")
@@ -633,7 +630,6 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
     COND <- FIESTA::DBgetCSV("COND", stabbrlst, ZIP=TRUE, returnDT=TRUE)
 
     if (iseval) 
-
       ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
       ## To get estimation unit & stratum assignment for each plot. 
       POP_PLOT_STRATUM_ASSGN <- FIESTA::DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
@@ -661,7 +657,6 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
     state <- states[i]
     stcd <- FIESTA::pcheck.states(state, "VALUE")
     stabbr <- FIESTA::pcheck.states(state, "ABBR")
-
 
     if (length(invyrs) > 1){
       invyr <- invyrs[[state]]
@@ -794,7 +789,7 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
     ## SET QUERY FILTER
     xfilter <- paste0(evalFilter, stateFilters)
     xfilter.min <- paste0(evalFilter.min, stateFilters)
-    message(xfilter)  
+    
 
     #####################################################################################
     ###################################    RUN QUERIES   ################################
@@ -828,9 +823,13 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
 
       ## Filter pltcond with allFilter      
       ###########################################
-      pltcondx <- FIESTA::datFilter(x=pltcondx, xfilter=allFilter)$xf
-
-      if (!is.null(pltcondx)) {
+      if (!is.null(pltcondx) && nrow(pltcondx) > 0) {
+        pltcondx <- FIESTA::datFilter(x=pltcondx, xfilter=allFilter)$xf
+      } else {
+        message("no plots in database for ", state)
+      }
+ 
+      if (!is.null(pltcondx) && nrow(pltcondx) > 0) {
         ## Tag ACI plots
         ###########################################
         if (ACI) {
@@ -1318,13 +1317,12 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
     ##############################################################
     if (isseed && !is.null(pltx)) {
       ## GENERATE AND RUN QUERY AND WRITE TO OUTFOLDER
-      ssfromqry <- paste0(fromqry, ", ", sfromqry)
 
       if (is.null(svars)) {
         seedx <- NULL
         isseed <- NULL
       } else {
-        seedqry <- paste("select", svars, "from", ssfromqry, "where", evalFilter.min)
+        seedqry <- paste("select", svars, "from", sfromqry, "where", evalFilter.min)
         if (datsource == "CSV") {
           seedx <- sqldf::sqldf(seedqry, stringsAsFactors=FALSE)
         } else {
@@ -1520,6 +1518,7 @@ DBgetPlots <- function (datsource="ORACLE", ZIP=TRUE, FS_FIADB=TRUE, states=NULL
       } else {
         xfilter.dwm <- sub("ppsa.", "", xfilter.min)
         dwmqry <- paste("select", dvars, "from", dfromqry, "where", xfilter.dwm)
+ 
         if (datsource == "CSV") {
           dwmx <- sqldf::sqldf(dwmqry, stringsAsFactors=FALSE)
         } else {
