@@ -190,7 +190,7 @@ areavar.bhdist
 # Get estimation unit acres and strata information for Bighorn National Forest.
 ######################################################################################
 stratdat.bh <- spGetStrata(xyplt=WYplt, uniqueid="CN", x="LON_PUBLIC", y="LAT_PUBLIC", 
-    prj="longlat", datum="NAD83", unit_layer=WYbhfn, stratlayer=fornffn)
+    prj="longlat", datum="NAD83", unit_layer=WYbhfn, strat_layer=fornffn)
 
 names(stratdat.bh)
 pltstrat.bh <- stratdat.bh$pltstrat
@@ -213,7 +213,7 @@ areavar.bh
 ######################################################################################
 stratdat.bhdist <- spGetStrata(xyplt=WYplt, uniqueid="CN", x="LON_PUBLIC", y="LAT_PUBLIC", 
     prj="longlat", datum="NAD83", unit_layer=WYbhdistfn, unitvar="DISTRICTNA",
-    stratlayer=fornffn, rast.NODATA=0)
+    strat_layer=fornffn, rast.NODATA=0)
 
 names(stratdat.bhdist)
 pltstrat.bhdist <- stratdat.bhdist$pltstrat

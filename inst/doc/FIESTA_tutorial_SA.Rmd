@@ -179,6 +179,15 @@ FS_FIADB=TRUE
 states="Wyoming"
 datsource="CSV"
 
+layer=SAdoms
+dsn=NULL
+caption=NULL
+checkonly=FALSE
+stopifnull=FALSE
+gui=FALSE
+
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetDBbnd.R")
 SAdata <- spGetDBbnd(bnd_layer=SAdoms, FS_FIADB=TRUE, states="Wyoming", datsource="CSV",
       invyrs=2011:2013)
 names(SAdata)

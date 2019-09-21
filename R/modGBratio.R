@@ -1,7 +1,7 @@
 modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
-	cuniqueid="PLT_CN", puniqueid="CN", sumunits=FALSE, adjsamp=TRUE, strata=TRUE, 
+	cuniqueid="PLT_CN", puniqueid="CN", sumunits=TRUE, adjsamp=TRUE, strata=TRUE, 
 	ratiotype="PERACRE", landarea="FOREST", ACI=FALSE, nonsamp.filter=NULL, 
-	plt.filter=NULL, cond.filter=NULL, unitvar="ESTN_UNIT", unitvar2=NULL, 
+	plt.filter=NULL, cond.filter=NULL, unitvar=NULL, unitvar2=NULL, 
 	autocombine=TRUE, unitarea=NULL, areavar="ACRES", stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", estvarn=NULL, 
 	estvarn.filter=NULL, estvarn.name=NULL, estvard=NULL, estvard.filter=NULL, 
@@ -101,6 +101,7 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
 	unitvars=unitvars, areavar=areavar, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
+  if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
 
   ###################################################################################
@@ -180,7 +181,6 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
   ###################################################################################
   ### GET ROW AND COLUMN INFO
   ###################################################################################
-  if (sumunits) col.add0 <- TRUE
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, 
 	condf=condf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, rowvar=rowvar, 
 	rowvar.filter=rowvar.filter, colvar=colvar, colvar.filter=colvar.filter, 
@@ -259,7 +259,12 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
  		esttotn=TRUE, esttotd=TRUE, adjtree=adjsamp)
       row.tdomdat <- setDT(row.treedat$tdomdat)
       row.tdomvarlstn <- row.treedat$tdomvarlstn
-      if (ratiotype == "PERTREE") row.tdomvarlstd <- row.treedat$tdomvarlstd
+      if (ratiotype == "PERTREE") {
+        row.tdomvarlstd <- row.treedat$tdomvarlstd
+      } else {
+        row.tdomvarlstd <- NULL
+      }
+
 
       col.tdomvar <- strsplit(tdomvar, "#")[[1]][2]
       col.treedat <- check.tree(gui=gui, treef=treef, condall=condall, 
@@ -269,7 +274,11 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
  		esttotn=TRUE, esttotd=TRUE, adjtree=adjsamp)
       col.tdomdat <- setDT(col.treedat$tdomdat)
       col.tdomvarlstn <- col.treedat$tdomvarlstn
-      if (ratiotype == "PERTREE") col.tdomvarlstd <- col.treedat$tdomvarlstd
+      if (ratiotype == "PERTREE") {
+        col.tdomvarlstd <- col.treedat$tdomvarlstd
+      } else {
+        col.tdomvarlstd <- NULL
+      }
     }
   }
 
@@ -348,7 +357,7 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
         unit.rowest <- unit.tdomest[tdom == estvarn.name,]
 
         unit.colest <- do.call(rbind, lapply(tdomvarlstn, GBest.pbar, 
-		sumyd=tdomvarlstd2, ysum=tdomdattotn, esttype=esttype, ratiotype=ratiotype,
+		ysum=tdomdattotn, sumyd=tdomvarlstd2, esttype=esttype, ratiotype=ratiotype,
 		bytdom=bytdom, uniqueid=cuniqueid, strlut=strlut, strunitvars=strunitvars, 
 		unitvars=unitvars, unitvar=unitvar, domain="TOTAL"))
         setnames(unit.colest, "tdom", colvar)
@@ -361,7 +370,7 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
         unit.colest <- unit.tdomest[tdom == estvarn.name,]
 
         unit.rowest <- do.call(rbind, lapply(tdomvarlstn, GBest.pbar, 
-		sumyd=tdomvarlstd2, ysum=tdomdattotn, esttype=esttype, ratiotype=ratiotype, 
+		ysum=tdomdattotn, sumyd=tdomvarlstd2, esttype=esttype, ratiotype=ratiotype, 
 		bytdom=bytdom, uniqueid=cuniqueid, strlut=strlut, strunitvars=strunitvars, 
 		unitvars=unitvars, unitvar=unitvar, domain="TOTAL"))
         setnames(unit.rowest, 'tdom', rowvar)
@@ -372,21 +381,25 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
       }
     } else {  ## domain == "TOTAL"  
       if (colvar != "NONE") {
+        row.tdomvarlstn2 <- c(sort(row.tdomvarlstn), estvarn.name)
+        row.tdomvarlstd2 <- c(sort(row.tdomvarlstd), estvard.name)
+        col.tdomvarlstn2 <- c(sort(col.tdomvarlstn), estvarn.name)
+        col.tdomvarlstd2 <- c(sort(col.tdomvarlstd), estvard.name)
 
         row.tdomdatsum <- row.tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, domain), .SDcols=c(row.tdomvarlstn, row.tdomvarlstd)]
+		by=c(strunitvars, cuniqueid, domain), .SDcols=c(row.tdomvarlstn2, row.tdomvarlstd2)]
         col.tdomdatsum <- col.tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, domain), .SDcols=c(col.tdomvarlstn, col.tdomvarlstd)]
+		by=c(strunitvars, cuniqueid, domain), .SDcols=c(col.tdomvarlstn2, col.tdomvarlstd2)]
 
         if (rowcol.total) {
           unit.rowest <- do.call(rbind, lapply(row.tdomvarlstn, GBest.pbar, 
-			sumyd=row.tdomvarlstd, ysum=row.tdomdatsum, esttype=esttype, ratiotype=ratiotype,
+			ysum=row.tdomdatsum, sumyd=row.tdomvarlstd2, esttype=esttype, ratiotype=ratiotype,
 			bytdom=bytdom, uniqueid=cuniqueid, strlut=strlut, strunitvars=strunitvars, 
 			unitvars=unitvars, unitvar=unitvar, domain=domain))
           setnames(unit.rowest, "tdom", rowvar)
 
           unit.colest <- do.call(rbind, lapply(col.tdomvarlstn, GBest.pbar, 
-			sumyd=col.tdomvarlstd, ysum=col.tdomdatsum, esttype=esttype, ratiotype=ratiotype,
+			ysum=col.tdomdatsum, sumyd=col.tdomvarlstd2, esttype=esttype, ratiotype=ratiotype,
 			bytdom=bytdom, uniqueid=cuniqueid, strlut=strlut, strunitvars=strunitvars, 
 			unitvars=unitvars, unitvar=unitvar, domain=domain))
           setnames(unit.colest, "tdom", colvar)
@@ -444,6 +457,7 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
+  if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
     unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
     tabs <- FIESTA::check.matchclass(unit.rowest, unitarea, unitvar)
@@ -552,7 +566,7 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
     setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
   }
 
-
+print("TEST1")
   if (rowcol.total) {
 
   ## For sumunits=FALSE, get estimation unit totals
@@ -602,6 +616,7 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
     rowunit <- rowunit[unitacres2, nomatch=0]
     rowunit <- FIESTA::getarea(rowunit, areavar=areavar, esttype=esttype)
     setkeyv(rowunit, c("ONEUNIT", rowvar))
+print("TEST2")
 
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -620,6 +635,7 @@ modGBratio <- function(tree, cond=NULL, pltstrat=NULL, tuniqueid="PLT_CN",
   }          
 
   }
+print("TEST3")
 
   ###################################################################
   ## GENERATE OUTPUT TABLES

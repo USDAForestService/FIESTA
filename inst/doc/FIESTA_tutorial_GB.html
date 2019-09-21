@@ -991,7 +991,7 @@ raw.nostrat$stratdat
 ##################################################################################
 
 ## Rows and columns; by estimation unit (sumunits=FALSE); no strata (strata=FALSE)
-area5a &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=FALSE, strata=FALSE,
+area5a &lt;- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, strata=FALSE,
   landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, rowvar=&quot;FORTYPCD&quot;,
   colvar=&quot;STDSZCD&quot;, row.FIAname=TRUE, col.FIAname=TRUE)
 area5a$est
@@ -1347,7 +1347,7 @@ rat6 &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TR
   landarea=&quot;FOREST&quot;, unitarea=WYunitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=WYstrlut, 
   estvarn=&quot;TPA_UNADJ&quot;, estvarn.filter=&quot;STATUSCD==1&quot;, rowvar=&quot;SPCD&quot;, colvar=&quot;DIACL2IN&quot;, 
   row.FIAname=TRUE, rawdata=TRUE)
-rat12
+rat6
 
 names(rat6)
 rat6$est

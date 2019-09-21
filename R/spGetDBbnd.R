@@ -29,7 +29,6 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
   #############################################################################
   bndx <- pcheck.spatial(layer=bnd_layer, dsn=bnd_dsn, caption="boundary")
 
-
   ## Check RMRSonly 
   ########################################################
   RMRSonly <- FIESTA::pcheck.logical(RMRSonly, varnm="RMRSonly", 
@@ -68,18 +67,18 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
   datsource <- FIESTA::pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
 
-
   ########################################################################
   ### DO THE WORK
   ########################################################################
 
   if (datsource != "SQLite") {
+    if (is.null(stbnd))
+    ## Get state boundary and reproject polygon boundary
+      stbnd <- raster::getData('GADM', country="USA", level=1)
+    
     ## Get intersecting states
     #############################################################################
     if (is.null(states)) {
-      if (is.null(stbnd))
-      ## Get state boundary and reproject polygon boundary
-        stbnd <- raster::getData('GADM', country="USA", level=1)
 
       ## Reproject stbnd to bnd projection
       prjdat <- FIESTA::CRScompare(bndx, stbnd, nolonglat=TRUE)
@@ -95,7 +94,6 @@ spGetDBbnd <- function(bnd_layer, bnd_dsn=NULL, stbnd=NULL, states=NULL,
 
       states <- FIESTA::pcheck.states(states, "MEANING")
     }
-  
 
     #############################################################################
     ## NOTE: Maybe add percent overlap here

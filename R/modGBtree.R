@@ -1,7 +1,7 @@
 modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_CN", 
-	cuniqueid="PLT_CN", puniqueid="CN", sumunits=FALSE, adjsamp=TRUE, strata=TRUE, 
+	cuniqueid="PLT_CN", puniqueid="CN", sumunits=TRUE, adjsamp=TRUE, strata=TRUE, 
 	landarea="FOREST", ACI=FALSE, nonsamp.filter=NULL, plt.filter=NULL, cond.filter=NULL, 
-	unitvar="ESTN_UNIT", unitvar2=NULL, autocombine=TRUE, unitarea=NULL, areavar="ACRES", 
+	unitvar=NULL, unitvar2=NULL, autocombine=TRUE, unitarea=NULL, areavar="ACRES", 
 	stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", estvar=NULL,
  	estvar.filter=NULL, estvar.name=NULL, rowvar=NULL, rowvar.filter=NULL, colvar=NULL,
  	colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
@@ -100,6 +100,7 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
 	unitvars=unitvars, areavar=areavar, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
+  if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
 
   ###################################################################################
@@ -179,7 +180,6 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
   ###################################################################################
   ### GET ROW AND COLUMN INFO
   ###################################################################################
-  if (sumunits) col.add0 <- TRUE
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, 
 	condf=condf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, rowvar=rowvar, 
 	rowvar.filter=rowvar.filter, colvar=colvar, colvar.filter=colvar.filter, 
@@ -412,6 +412,7 @@ modGBtree <- function(tree, cond=NULL, pltstrat=NULL, seed=NULL, tuniqueid="PLT_
   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
+  if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
     unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
     tabs <- FIESTA::check.matchclass(unit.rowest, unitarea, unitvar)

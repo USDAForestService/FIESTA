@@ -17,9 +17,9 @@
 }
 \usage{
 modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN", 
-	sumunits = FALSE, adjsamp = TRUE, strata = TRUE, landarea = "ALL", 
+	sumunits = TRUE, adjsamp = TRUE, strata = TRUE, landarea = "ALL", 
 	ACI = FALSE, nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, 
-	unitvar = "ESTN_UNIT", unitvar2 = NULL, autocombine = TRUE, unitarea = NULL, 
+	unitvar = NULL, unitvar2 = NULL, autocombine = TRUE, unitarea = NULL, 
 	areavar = "ACRES", stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
 	getwtvar = "P1POINTCNT", rowvar = NULL, rowvar.filter = NULL, colvar = NULL, 
 	colvar.filter = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 

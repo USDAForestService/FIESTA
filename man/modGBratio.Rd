@@ -12,10 +12,10 @@
 }
 \usage{
 modGBratio(tree, cond = NULL, pltstrat = NULL, tuniqueid = "PLT_CN", 
-	cuniqueid = "PLT_CN", puniqueid = "CN", sumunits = FALSE, adjsamp = TRUE, 
+	cuniqueid = "PLT_CN", puniqueid = "CN", sumunits = TRUE, adjsamp = TRUE, 
 	strata = TRUE, ratiotype = "PERACRE", landarea="FOREST", ACI = FALSE, 
 	nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, 
-	unitvar = "ESTN_UNIT", unitvar2 = NULL, autocombine = TRUE, unitarea = NULL, 
+	unitvar = NULL, unitvar2 = NULL, autocombine = TRUE, unitarea = NULL, 
 	areavar = "ACRES", stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
 	getwtvar = "P1POINTCNT", estvarn = NULL, estvarn.filter = NULL, 
 	estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, estvard.name = NULL, 

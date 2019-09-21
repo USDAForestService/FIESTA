@@ -1,6 +1,6 @@
 modGBarea <- function(cond, pltstrat=NULL, cuniqueid="PLT_CN", puniqueid="CN", 
-	sumunits=FALSE, adjsamp=TRUE, strata=TRUE, landarea="ALL", ACI=FALSE, 
-	nonsamp.filter=NULL, plt.filter=NULL, cond.filter=NULL, unitvar="ESTN_UNIT", 
+	sumunits=TRUE, adjsamp=TRUE, strata=TRUE, landarea="ALL", ACI=FALSE, 
+	nonsamp.filter=NULL, plt.filter=NULL, cond.filter=NULL, unitvar=NULL, 
 	unitvar2=NULL, autocombine=TRUE, unitarea=NULL, areavar="ACRES", stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", rowvar=NULL, 
 	rowvar.filter=NULL, colvar=NULL, colvar.filter=NULL, row.FIAname=FALSE, 
@@ -99,6 +99,8 @@ modGBarea <- function(cond, pltstrat=NULL, cuniqueid="PLT_CN", puniqueid="CN",
 	unitvars=unitvars, areavar=areavar, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
+  if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
+
 
   ###################################################################################
   ## CHECK STRATA
@@ -176,7 +178,6 @@ modGBarea <- function(cond, pltstrat=NULL, cuniqueid="PLT_CN", puniqueid="CN",
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
-  if (sumunits) col.add0 <- TRUE
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, condf=condf, 
 	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
 	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
@@ -286,6 +287,7 @@ modGBarea <- function(cond, pltstrat=NULL, cuniqueid="PLT_CN", puniqueid="CN",
   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
+  if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
     unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)

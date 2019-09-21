@@ -186,7 +186,6 @@ modMAtree <- function(tree, cond=NULL, pltmodel=NULL, seed=NULL, tuniqueid="PLT_
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
-  if (!sumunits) col.add0 <- TRUE
   rowcolinfo <- FIESTA::check.rowcol(gui=gui, esttype=esttype, treef=treef, 
 	condf=condf, cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
 	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
@@ -393,6 +392,7 @@ modMAtree <- function(tree, cond=NULL, pltmodel=NULL, seed=NULL, tuniqueid="PLT_
   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
+  if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
     unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
     tabs <- FIESTA::check.matchclass(unit.rowest, unitarea, unitvar)

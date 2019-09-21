@@ -113,6 +113,7 @@ modMAarea <- function(cond, pltmodel=NULL, cuniqueid="PLT_CN", puniqueid="CN",
 		unitvars=unitvars, areavar=areavar, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
+  if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
 
   ###################################################################################
@@ -184,7 +185,6 @@ modMAarea <- function(cond, pltmodel=NULL, cuniqueid="PLT_CN", puniqueid="CN",
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
-  if (!sumunits) col.add0 <- TRUE
   rowcolinfo <- FIESTA::check.rowcol(gui=gui, esttype=esttype, condf=condf, 
 	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, colvar=colvar,
  	colvar.filter=colvar.filter, row.FIAname=row.FIAname, col.FIAname=col.FIAname,
@@ -339,6 +339,7 @@ modMAarea <- function(cond, pltmodel=NULL, cuniqueid="PLT_CN", puniqueid="CN",
   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
+  if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
     unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
     tabs <- FIESTA::check.matchclass(unit.rowest, unitarea, unitvar)

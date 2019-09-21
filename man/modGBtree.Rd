@@ -16,11 +16,11 @@
 }
 \usage{    
 modGBtree(tree, cond = NULL, pltstrat = NULL, seed = NULL, tuniqueid = "PLT_CN", 
-	cuniqueid = "PLT_CN", puniqueid = "CN", sumunits = FALSE, adjsamp = TRUE, 
+	cuniqueid = "PLT_CN", puniqueid = "CN", sumunits = TRUE, adjsamp = TRUE, 
 	strata = TRUE, landarea = "FOREST", ACI = FALSE, nonsamp.filter = NULL, 
-	plt.filter = NULL, cond.filter = NULL, unitvar = "ESTN_UNIT", 
-	unitvar2 = NULL, autocombine = TRUE, unitarea = NULL, areavar = "ACRES", 
-	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
+	plt.filter = NULL, cond.filter = NULL, unitvar = NULL, unitvar2 = NULL, 
+	autocombine = TRUE, unitarea = NULL, areavar = "ACRES", stratalut = NULL, 
+	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
 	estvar = NULL, estvar.filter = NULL, estvar.name = NULL, rowvar = NULL, 
 	rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, 
 	col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 

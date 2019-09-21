@@ -577,7 +577,7 @@ raw.nostrat$stratdat
 ##################################################################################
 
 ## Rows and columns; by estimation unit (sumunits=FALSE); no strata (strata=FALSE)
-area5a <- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=FALSE, strata=FALSE,
+area5a <- modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, strata=FALSE,
   landarea="FOREST", unitarea=WYunitarea, unitvar="ESTN_UNIT", rowvar="FORTYPCD",
   colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE)
 area5a$est
@@ -937,7 +937,7 @@ rat6 <- modGBratio(tree=WYtree, cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE,
   landarea="FOREST", unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, 
   estvarn="TPA_UNADJ", estvarn.filter="STATUSCD==1", rowvar="SPCD", colvar="DIACL2IN", 
   row.FIAname=TRUE, rawdata=TRUE)
-rat12
+rat6
 
 names(rat6)
 rat6$est
