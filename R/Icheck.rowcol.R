@@ -538,10 +538,10 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 		  title.filter=colvar)$xf
       if (nrow(condf) < cnrows) isfilter <- TRUE
 
-      if (sum(is.na(condf[[colvar]])) > 0) {
-        colvar.na.filter <- paste0("!is.na(", colvar, ")")
-        condf <- subset(condf, eval(parse(text = colvar.na.filter)))
-      }
+#      if (sum(is.na(condf[[colvar]])) > 0) {
+#        colvar.na.filter <- paste0("!is.na(", colvar, ")")
+#        condf <- subset(condf, eval(parse(text = colvar.na.filter)))
+#      }
        
     } else if (colvar %in% names(treef)) {
 
@@ -622,7 +622,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       }
     }
   }
- 
+
   ###################################################################################
   ## GET DOMAIN. CONCATENATE ROWVAR & COLVAR VARIABLES IF THEY ARE IN THE SAME TABLE.
   ###################################################################################
@@ -781,6 +781,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       uniquecol <- uniquecol[!uniquecol[[colvar]] %in% c(0, "Nonforest"),]
     }
   } 
+ 
   ## Define cvars2keep
   cvars2keep <- unique(c(cuniqueid, condid, domainlst, cvars2keep))
   condf <- condf[,cvars2keep, with=FALSE]
