@@ -39,9 +39,9 @@ modMAtree(tree, cond = NULL, pltmodel = NULL, seed = NULL, tuniqueid = "PLT_CN",
 	estimation unit. Include nonsampled plots only if PLOT_STATUS_CD variable 
 	is in table. Optional. }
   \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
-  \item{tuniqueid}{ String. Unique identifier for tree and seed. }
-  \item{cuniqueid}{ String. Unique identifier for cond. }
-  \item{puniqueid}{ String. Unique identifier for pltstrat. }
+  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
+  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
+  \item{puniqueid}{ String. Unique identifier of plot in pltstrat. }
   \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
 	one table. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 

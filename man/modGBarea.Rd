@@ -42,8 +42,8 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 	shapefile(*.shp) with one record per plot and strata/estimation unit variable(s)
 	if post-stratification. Include nonsampled plots only if PLOT_STATUS_CD variable 
 	is in table. Optional. }
-  \item{cuniqueid}{ String. Unique identifier in cond. }
-  \item{puniqueid}{ String. Unique identifier in pltstrat. }
+  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
+  \item{puniqueid}{ String. Unique identifier of plot in pltstrat. }
   \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
 	one table. }
   \item{adjsamp}{ Logical. If TRUE, adjustment factors are calculated for nonsampled 
