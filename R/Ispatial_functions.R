@@ -1,6 +1,7 @@
-## getrastlst - verifies a list of raster or raster files.
+## getext - get extent of filename
+## getrastlst.rgdal - verifies a list of raster or raster files.
+## polyfix.sf
 ## pcheck.spatial - checks or gets Vector layer from file name or spatial object
-## getRaster - checks or gets Raster layer from file name or spatial object
 ## build.prj4str	- builds PROJ.4 projections string from input parameters
 ## trunc10shp - truncates all variables in Spatial object to 10 characters of less
 ## getESPG - gets table of ESPG codes, filtering with input parameters
@@ -11,11 +12,25 @@
 ## aspect_transform - transforms aspect, in degrees, to easting and northing units.
 ## spPlotRastcl - plot raster discrete classes
 ## writeESRIprj - Adds *.prj file to folder with *.bil file. 
-## CRScompare - compares projections, if different, projects layer2 layer1 projection.
+## checksf.longlat
+## checkrast.longlat
+## crsCompare - compares projections, if different projects 
+## sf_dissolve - dissolve vector polygons
+## closest_poly - get polygon of y with closest polygon to x (slower than centroid)
+## getIntersect - get intersection of layer1 with layer2
+## clip.othertables 
+## spGetSates - get intersecting states
 
 
-getrastlst <- function(rastnmlst, rastfolder=NULL, filenames=FALSE, rast.prjstr=NULL, 
-	stopifnofn=FALSE, stopifLonLat=FALSE, gui=TRUE, nlayers=FALSE){
+
+getext <- function(x) { 
+  xbasename <- basename(x)
+  strsplit(xbasename, paste0(basename.NoExt(xbasename), "."))[[1]][2] 
+}
+  
+
+getrastlst.rgdal <- function(rastnmlst, rastfolder=NULL, stopifLonLat=FALSE,
+	stopifnull=FALSE, gui=TRUE){
 
   #########################################################################
   ## DESCRIPTION: 
@@ -26,22 +41,19 @@ getrastlst <- function(rastnmlst, rastfolder=NULL, filenames=FALSE, rast.prjstr=
   ## rastnmlst   RasterLayer, RasterStack, RasterBrick, or String vector. 
   ##		List of raster names. Extensions included.
   ## rastfolder  String. The name of the folder where rasters are. Optional.
-  ## filenames	Logical. If TRUE, the raster filenames are returned.
   ##
   ## VALUE: 
-  ## rastlst  String vector. List of rasters.
+  ## rastfnlst  String vector. List of raster file names.
   ##########################################################################
-
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type == "windows") {
-    Filters <- rbind(Filters,img=c("Erdas Imagine Images (*.img)", "*.img"))
-    Filters <- rbind(Filters,img=c("GeoTiff (*.tif)", "*.tif"))
+    Filters <- rbind(Filters,img=c("Erdas Image (*.img)", "*.img"))
+    Filters <- rbind(Filters,tif=c("GeoTIFF (*.tif)", "*.tif"))
+    Filters <- rbind(Filters,bil=c("Binary (*.bil)", "*.bil"))
   }
 
   rastfnlst <- {}
-  rastlst <- {}
-#  nlayer <- 0
   if (is.null(rastnmlst)) {
     if (gui) {
       if (is.null(rastfolder)) {
@@ -52,152 +64,133 @@ getrastlst <- function(rastnmlst, rastfolder=NULL, filenames=FALSE, rast.prjstr=
           rastfolder <- getwd()
         }
       }
-    } else {
-      if (stopifnofn) {
-        stop("rastlst is NULL")
-      } else {
-        return(NULL)        
-      }
-    }
         
-    rasts <- TRUE
-    while (rasts) {
-      rasttype <- select.list(c("Erdas Imagine Image", "GeoTIFF", "Arc/Info GRID"), 
-		title="Raster Type")
+      rasts <- TRUE
+      while (rasts) {
+        rasttype <- select.list(c("Erdas Image (*.img)", "GeoTIFF (*.tif)", "binary (*.bil)"),
+		"Arc/Info GRID", title="Raster Type")
+        rastext <- row.names(Filters)[Filters[,1] == rasttype]
 
-      if (rasttype %in% c("Erdas Imagine Image", "GeoTIFF") && .Platform$OS.type=="windows") {
-        rastnm <- choose.files(default=rastfolder, caption="Select raster image(s)", 
-                filters=Filters[c("img", "tif"),], multi=TRUE)
-        if (length(rastnm) == 0) {
-          stop("")
-        } else {
-          if (raster::nbands(raster(rastnm)) > 1) { 
-            rast <- raster::stack(rastnm)
+        if (rasttype != "Arc/Info GRID" && .Platform$OS.type=="windows") {
+          rastnm <- choose.files(default="", caption="Select raster image(s)", 
+                filters=Filters[rastext,], multi=TRUE)
+          if (length(rastnm) == 0) {
+            stop("")
           } else {
-            rast <- raster(rastnm)
+            rastfnlst <- c(rastfnlst, rastnm) 
           }
-          rastlst <- c(rastlst, rast)
-          rastfnlst <- c(rastfnlst, rastnm) 
-        }
-      } else if (rasttype == "Arc/Info GRID" && .Platform$OS.type=="windows") {
-        rastnm <- choose.dir(default=rastfolder, caption="Select raster grid")
-        if (is.na(rastnm)) { 
-          stop("")
-        } else {
-          if (nbands(raster(rastnm)) > 1) { 
-            rast <- raster::stack(rastnm)
+        } else if (rasttype == "Arc/Info GRID" && .Platform$OS.type=="windows") {
+          rastnm <- choose.dir(default=rastfolder, caption="Select raster grid")
+          if (is.na(rastnm)) { 
+            stop("")
           } else {
-            rast <- raster(rastnm)
+            rastfnlst <- c(rastfnlst, rastnm) 
           }
-          rastlst <- c(rastlst, rast)
-          rastfnlst <- c(rastfnlst, rastnm) 
+        } else {
+          stop("")
         }
-      } else {
-        stop("")
+        rasts <- select.list(c("Yes", "No"), title="Another raster")
+        rasts <- ifelse(rasts == "Yes", TRUE, FALSE)
       }
-      rastfolder <- dirname(rastnm)
+    } else {
+      if (stopifnull) {
+        stop("rastnmlst is NULL")
+      } else {
+        return(NULL)
+      }
     }
-  } else {  ## !is.null(rastnmlst)
-
-    if (isS4(rastnmlst)) {
-      if (!class(rastnmlst) %in% c("RasterLayer", "RasterStack", "RasterBrick")) {
-        stop("rastnmlst must be RasterLayer, RasterStack, or RasterBrick")
-      } else {
-        if (filenames || stopifnofn) {
-          rastfnlst <- rastnmlst[[1]]@file@name
-          #nofn <- rastnmlst[which(rastfnlst == "")]
-          if (any(rastfnlst == "")) {
-            if (raster::inMemory(rastnm)) {
-              msg <- "check raster... must be written to file, not in memory"
-            } else {
-              msg <- "no filename for raster"
-            }
-            if (stopifnofn) {
-              stop(msg)
-            } else {
-              message(msg)
-            }
-          }
-        } 
-        rastlst <- c(rastlst, rastnmlst)
-      }
-      rastLonLat <- lapply(rastlst, raster::isLonLat)
-      if (sum(unlist(rastLonLat)) > 0 && stopifLonLat) 
-        stop("check for projected rasters... cannot be in longlat")
-    } else { 
-      if (class(rastnmlst) != "list") rastnmlst <- as.list(rastnmlst)
-      for (i in 1:length(rastnmlst)) {
-        rastnm <- rastnmlst[[i]]
-        if (isS4(rastnm)) {
-          if (!class(rastnm) %in% c("RasterLayer", "RasterStack", "RasterBrick")) {
-            stop("rastnm must be RasterLayer, RasterStack, or RasterBrick")
-          } else {
-            if (filenames || stopifnofn) {
-              rastfn <- rastnm[[1]]@file@name
-              if (any(rastfn == "")) {
-                if (raster::inMemory(rastnm)) {
-                  msg <- "check raster... must be written to file, not in memory"
-                } else {
-                  msg <- "no filename for raster"
-                }
-                if (stopifnofn) {
-                  stop(msg)
-                } else {
-                  message(msg)
-                }
-              } else {
-                rastfnlst <- c(rastfnlst, rastfn)
-              }
-            } 
-            rastlst <- c(rastlst, rastnm)
- #           nlayer <- nlayers + raster::nbands(rastnm)
-          }
-          rastLonLat <- lapply(rastlst, raster::isLonLat)
-          if (sum(unlist(rastLonLat)) > 0 && stopifLonLat) stop("check for projected rasters")
-        } else if (is.character(rastnm)) {
-          if (!is.null(rastfolder))
-            rastnm <- paste(rastfolder, rastnm, sep="/")          
-          if (!file.exists(rastnm)) 
-            stop("file does not exist: ", rastnm)
-           
-#          nlayer <- nlayer + raster::nbands(raster(rastnm))
-          if (raster::nbands(raster(rastnm)) > 1) { 
-            rast <- stack(rastnm)
-          } else {
-            rast <- raster(rastnm)
-          }
-          rastlst <- c(rastlst, rast)
+  } else if (class(rastnmlst) %in% c("RasterLayer", "RasterStack", "RasterBrick")) {
+    rastfn <- rastnmlst[[1]]@file@name
+    if (file.exists(rastfn)) {
+      rastfnlst <- c(rastfnlst, rastfn)
+    } else {
+      stop(rastfn, "is invalid")
+    }
+  } else if (any(sapply(rastnmlst, isS4))) {
+    for (rastnm in rastnmlst) {
+      if (!class(rastnm) %in% c("RasterLayer", "RasterStack", "RasterBrick")) {
+        if (file.exists(rastnm[[1]])) {
           rastfnlst <- c(rastfnlst, rastnm)
         } else {
-          stop("invalid raster name")
+          print(rastnm[[1]], "is invaid")
+        }
+      } else {
+        rastfn <- rastnm[[1]]@file@name
+        if (file.exists(rastfn)) {
+         rastfnlst <- c(rastfnlst, rastfn)
+        } else {
+         stop(rastfn, "is invalid")
         }
       }
     }
-  }
-  proj.na <- is.na(lapply(rastlst, sp::proj4string))
-  if (any(proj.na)) {
-    if (!is.null(rast.prjstr)) {
-      rastnames <- unlist(lapply(rastlst[proj.na], names))
-      lapply(rastlst[proj.na], function(x, prjstr) {sp::proj4string(x) <- rast.prjstr}, rast.prjstr)
-      message("setting projection of ", paste(rastnames, collapse=", "), " to: ", rast.prjstr)
+  } else {  ## !is.null(rastnmlst)
+    if (!is.null(rastfolder)) {
+      if (file.exists(rastfolder) && rastfolder != "") {
+        rastfnlst <- paste(rastfolder, rastnmlst, sep="/")
+      } else {
+        stop("rastfolder is not valid")
+      }
+    } else {
+      rastfnlst <- rastnmlst
+    }
+    if (sum(sapply(rastfnlst, file.exists) == FALSE) > 0) {
+       notexist <- rastfnlst[sapply(rastfnlst, file.exists) == FALSE]
+       message("invalid rastnm in rastmlst:")
+       print(paste(unlist(notexist), collapse=", "))
     }
   }
-  
-  if (filenames) {
-#    if (nlayers) return(list(rastfnlst=rastfnlst, nlayer=nlayer))
-    return(rastfnlst)
-  } else {
-#    if (nlayers) return(list(rastfnlst=rastlst, nlayer=nlayer))
-    return(rastlst)
+
+  ## Check each raster for projection information
+  for (rastfn in rastfnlst) {
+    print(rastfn)
+    rast.info <- rasterInfo(rastfn)
+    if (is.null(rast.info)) stop("invalid raster: ", rastfn)
+    rast.prj <- rast.info$crs
+
+    if (is.null(rast.prj))
+      message(paste("raster has undefined projection:", rastfn))    
+
+    if (sf::st_is_longlat(rast.prj)) {
+      message(paste("rast is longlat:", rastfn))
+      if (stopifLonLat) stop("")
+    }
   }
+  return(rastfnlst) 
 }
 
 
-pcheck.spatial <- function(layer=NULL, dsn=NULL, caption=NULL, checkonly=FALSE,
-		stopifnull=FALSE, gui=FALSE) {
+polyfix.sf <- function(x) {
+  # any bad polys?
+
+  valid <- NULL
+  message("checking polygons...")
+  if (suppressWarnings(sum(sf::st_is_valid(x) == FALSE)) > 0) {
+    message("poly invalid")
+
+    if (sf::st_is_longlat(x))
+      stop("polygons layer must be projected")
+
+    # this is a well known R / GEOS hack (usually combined with the above) to 
+    # deal with "bad" polygons
+    message("buffering poly with 0 width...")
+    x <- sf::st_buffer(x[!is.na(valid)], 0.0)
+
+    message("checking polygons after buffer...")
+    if (sum(sf::st_is_valid(x) == FALSE) > 0)
+      stop("bad polys")
+  }
+  return(x)
+}
+
+
+pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL, 
+	caption=NULL, stopifnull=FALSE, gui=FALSE, polyfix=FALSE, asSpatial=FALSE, 
+	dropgeom=FALSE, stopifnoCRS=TRUE, checkonly=FALSE) {
   ## DESCRIPTION: checks or gets Vector layer from file name or spatial object.
   ## ARGUMENTS:
-  ## layernm  	String. The name of the spatial layer file. 
+  ## dsn		String. The name of the database or path of shapefile (data source name)
+  ##				or R Spatial Object.
+  ## layer  	String. The name of layer in database or R Spatial Object.
   ## caption  	String. The text to add for gui window caption.
   ## checkonly	Logical. If TRUE, check layer only, do not return.
 
@@ -205,139 +198,133 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, caption=NULL, checkonly=FALSE,
   if (.Platform$OS.type == "windows") {
     Filters <- rbind(Filters,shp=c("Shapefiles (*.shp)", "*.shp"))
     Filters <- rbind(Filters,gpkg=c("GeoPackages (*.gpkg)", "*.gpkg"))
+    Filters <- rbind(Filters,gdb=c("Esri file geodatabase (*.gdb)", "*.gdb"))
+    Filters <- rbind(Filters,sqlite=c("SQLite/Spatialite (*.sqlite)", "*.sqlite"))
   }
 
-  if (is.null(caption)) caption <- ""
- 
-  if (is.null(layer)) {
-    if (gui && .Platform$OS.type=="windows") {
-      ## Need to fix this part
-      layertypelst <- c("ESRI Shapefile", "ESRI File Geodatabase", "GeoPackage") 
-      stop("invalid layer")
+  ## Check for installed packages
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("importing spatial layers requires package sf")
+  if (!is.null(fmt)) {
+    if (fmt == "gdb") {
+      if (!"arcgisbinding" %in% rownames(installed.packages()))
+        stop("importing spatial layers from *gdb requires package arcgisbinding")
+    }
+  } 
+  fmtlst <- c("shp", "sqlite", "gpkg", "gdb")
+  stringsAsFactors <- FALSE 
 
-      if (gui && .Platform$OS.type=="windows") {
-        layernm <- choose.files(caption=paste("Select shapefile.", 
-		caption), filters=Filters[c("shp", "gpkg")], multi=FALSE)
-        if (length(layernm) == 0) stop("invalid shapefile") 
-      } else if (stopifnull) {
-        stop("invalid shapefile") 
-      } else {
-        return(NULL)
-      } 
-      layer <- rgdal::readOGR(dsn=dsn, layer=FIESTA::basename.NoExt(dsn),
-		stringsAsFactors=FALSE, drop_unsupported_fields=TRUE)
-    } else {
-      return(NULL)
+  if (is.null(tabnm)) tabnm <- "layer" 
+  if (is.null(caption)) caption <- ""
+
+  ## Return NULL
+  if (is.null(layer) && is.null(dsn)) 
+    return(NULL)
+
+  ## Check layer - if sf object
+  if (!is.null(layer)) {
+    if ("sf" %in% class(layer)) {
+      return(layer)
+    } else if (methods::canCoerce(layer, "sf")) {
+      return(sf::st_as_sf(layer, stringsAsFactors=stringsAsFactors))
+    } else if (is.character(layer) && file.exists(layer)) {
+      dsn <- layer
+    } else if (is.data.frame(layer)) {
+      return(layer)
     }
-  } else if (isS4(layer)) {
-    if (!grepl("Spatial", class(layer))) {
-      stop(paste(layer, "is not a Spatial layer")) 
-    } else {
-      splayer <- layer
+  }
+
+  if (!is.null(dsn)) {
+    ext.dsn <- getext(dsn)
+    if (!file.exists(dsn) && (is.na(ext.dsn) || ext.dsn == "NA")) {
+      if (!is.null(fmt) && fmt %in% fmtlst) 
+        dsn <- paste(dsn, fmt, sep=".")
+      if (!file.exists(dsn)) dsn <- NULL
     }
-#  } else if (grepl("Raster", class(dsn))) {
-#    stop("raster is an invalid dsn")
-#    message("using extent of raster layer")
-#    dsn <- as(extent(dsn), "SpatialPolygonsDataFrame")
-  } else if (is.character(layer)) {
+    if (ext.dsn == "shp")
+      layer <- basename.NoExt(dsn)
+  }
+ 
+  ######################################################
+  ## Check dsn
+  ######################################################
+  if (gui && .Platform$OS.type=="windows") {
     if (is.null(dsn)) {
-      if (file.exists(layer)) {
-        dsn <- dirname(layer)
-        layer <- FIESTA::basename.NoExt(layer)
+      fmt <- select.list(fmtlst, title="dsn format?", multiple=FALSE)
+      if (fmt == "gdb") {
+        dsn <- choose.dir(default=getwd(), caption="Select database")
+      } else if (fmt %in% c("sqlite", "gpkg")) {
+        dsn <- choose.files(default=getwd(), caption="Select database")
+      } else if (fmt == "shp") {
+        dsn <- choose.files(default=getwd(), caption="Select database")
       } else {
-        stop(layer, " is invalid")
-      }
-    } else if (!file.exists(dsn)) {
-      stop(dsn, " is invalid")
-    }
-
-    if (!checkonly) {
-      layer <- FIESTA::basename.NoExt(layer)
-      splayer <- rgdal::readOGR(dsn=dsn, layer=layer, stringsAsFactors=FALSE, 
-			drop_unsupported_fields=TRUE)
-    }
-  }
-        
-
-  if (!checkonly) {
-    if (is.na(sp::proj4string(splayer))) 
-      warning("projection is not defined for: ", dsn)
-    return(layer=splayer)
-
-  } else {
-    return(list(layer=layer, dsn=dsn))
-  }
-}
-
-getRaster <- function(layernm=NULL, isgrid=FALSE, caption=NULL, checkonly=FALSE, gui=FALSE){
-  ## DESCRIPTION: checks or gets Raster layer from file name or spatial object.
-  ## ARGUMENTS:
-  ## layernm  String. The name of the spatial layer file. 
-  ## caption  String. The text to add for gui window caption.
-  ## checkonly	Logical. If TRUE, check layer only, do not return.
-
-  ## Adds to file filters to Cran R Filters table.
-  if (.Platform$OS.type == "windows")
-    Filters <- rbind(Filters,img=c("Erdas Imagine Images (*.img)", "*.img"))
- 
-
-  if (is.null(caption)) caption <- ""
-
-  if (class(layernm) %in% c("RasterLayer", "RasterStack", "RasterBrick")) {
-    layer <- layernm      
-  } else if (isgrid) {
-    if (is.null(layernm) && .Platform$OS.type=="windows") {
-      layernm <- choose.dir(getwd(), paste("Select raster grid.", caption))
-      if (is.na(layernm)) stop("invalid grid name")
-    } else if (is.character(layernm) && .Platform$OS.type=="windows") {
-      if (!file.exists(layernm)) {
-        layernm <- choose.dir(getwd(), 
-			paste("Raster grid does not exist. Select raster grid.", caption))
-        if (is.na(layernm)) stop("invalid grid name")
-      } else {
-        stop("grid file does not exist")
+        stop("format not currently supported")
       }
     } else {
-      stop("invalid grid")
+      fmt <- ext.dsn
     }
-    if (!checkonly) layer <- raster::raster(layernm)
+    if (fmt == "shp") {
+      layer <- basename.NoExt(dsn)    
+    } else {    
+      layerlst <- sf::st_layers(dsn)$name
+      layer <- select.list(layerlst, title="Select layer", multiple=FALSE)
+    }    
+  } 
+  if (is.null(dsn))
+    stop("dsn is NULL")
+  
+  ######################################################
+  ## Check layer
+  ######################################################
+  layerlst <- sf::st_layers(dsn)
 
+  ## Note: if dsn is a SpatiaLite database, only spatial layers are listed
+  if (!layer %in% layerlst$name) 
+    return(pcheck.table(tab=layer, tab_dsn=dsn))
+
+  geomtype <- layerlst$geomtype[layerlst$name == layer][[1]]
+  if (is.na(geomtype)) {
+    return(pcheck.table(tab=layer, tab_dsn=dsn))
   } else {
-    if (is.null(layernm) && .Platform$OS.type=="windows") {
-      layernm <- choose.files(default=getwd(), caption=paste("Select raster image", 
-		caption), filters=Filters["img",], multi=FALSE)
-      if (layernm == "") stop("invalid image name")
-    } else if (.Platform$OS.type=="windows") { 
-      if (is.character(layernm)) {
-        if (!file.exists(layernm)) {
-          if (file.exists(dirname(layernm))) { 
-            warning("check layer name") 
-            layerwd <- dirname(layernm)
-          } else {
-            warning("check path")
-            layerwd <- getwd()
-          }
-          layernm <- choose.files(default=layerwd, caption=paste("Invalid layer name. Select", 
-            caption, "image."), filters=Filters["img",], multi=FALSE)
-          if (layernm == "") stop("")  
-        }
-      }
-    }
-    if (!checkonly) layer <- raster::raster(layernm)
+    splayer <- sf::st_read(dsn=dsn, layer=layer, query=sql, 
+				stringsAsFactors=stringsAsFactors, quiet=FALSE)
   }
 
-  if (!checkonly) {
-    if (is.na(sp::proj4string(layer))) 
-      stop("must define projection for", layernm)
-    return(layer)
+  if ("sf" %in% class(splayer)) {
+        
+    ## Check if projection
+    ############################################################
+    if (is.na(sf::st_crs(splayer))) {
+      msg <- paste("projection is not defined for:", dsn)
+      if (stopifnoCRS) {
+        stop(msg)
+      } else {
+        message(msg)
+      }
+    }
 
+    ## If polyfix
+    ############################################################
+    if (polyfix)
+      splayer <- polyfix.sf(splayer)
+
+    ## Drop geometry in table
+    ############################################################
+    if (dropgeom)
+      splayer <- sf::st_drop_geometry(splayer)
+  }
+
+
+  if (checkonly) {
+    return(list(dsn=dsn, layer=layer))
   } else {
-    return(layernm)
+    return(splayer)
   }
 }
 
-build.prj4str <- function(prj, datum, zone=NULL, zoneS=FALSE, aea.param="USGS",
-	gui=FALSE) {
+
+build.prj4str <- function(prj, datum=NULL, ellps=NULL, zone=NULL, zoneS=FALSE, 
+	aea.param="USGS", gui=FALSE) {
 
   #######################################################################
   ## DESCRIPTION: 
@@ -353,7 +340,7 @@ build.prj4str <- function(prj, datum, zone=NULL, zoneS=FALSE, aea.param="USGS",
 
   ## Set variable lists
   prjlst <- as.character(rgdal::projInfo(type="proj")$name)
-  datumlst <- as.character(rgdal::projInfo(type="datum")$name)
+  #datumlst <- as.character(rgdal::projInfo(type="datum")$name)
   ellpslst <- as.character(rgdal::projInfo(type="ellps")$name)
   zonelst <- c(1:60)
 
@@ -362,8 +349,13 @@ build.prj4str <- function(prj, datum, zone=NULL, zoneS=FALSE, aea.param="USGS",
 		caption="Projection?", gui=gui, stopifnull=TRUE)
   if (prj == "latlong") prj <- "longlat"
 
-  datum <- FIESTA::pcheck.varchar(var2check=datum, varnm="datum", checklst=datumlst, 
-		caption="Datum?", gui=gui, stopifnull=TRUE)
+#  datum <- FIESTA::pcheck.varchar(var2check=datum, varnm="datum", checklst=datumlst, 
+#		caption="Datum?", gui=gui)
+  ellps.gui <- ifelse(is.null(datum), TRUE, FALSE)
+  ellps <- FIESTA::pcheck.varchar(var2check=ellps, varnm="ellps", checklst=ellpslst, 
+		caption="Ellipse?", gui=ellps.gui)
+  if (is.null(ellps)) 
+    stop("both datum and ellpse are NULL.. cannot reproject")
 
   if (prj == "utm") {
     zone <- FIESTA::pcheck.varchar(var2check=as.character(zone), varnm="zone", 
@@ -378,14 +370,26 @@ build.prj4str <- function(prj, datum, zone=NULL, zoneS=FALSE, aea.param="USGS",
   prj4str <- paste0("+proj=", prj) 
 
   if (prj == "longlat") {
-    prj4str = paste0(prj4str, " +datum=", datum, " +no_defs")
+    if (!is.null(datum)) {
+      prj4str = paste0(prj4str, " +datum=", datum, " +no_defs")
+    } else {
+      prj4str = paste0(prj4str, " +ellps=", ellps, " +no_defs")
+    }
   } else if (prj == "utm") {
     prj4str <- paste0(prj4str, " +zone=", zone, " +datum=", datum)
     if (zoneS) prj4str <- paste(prj4str, "+south")
   } else if (prj == "aea") {
     if (aea.param == "USGS") {
-      param <- " +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0" 
-      prj4str <- paste0(prj4str, param, " +datum=", datum, " +units=m +no_defs")
+      prj4str <- paste("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0",
+			"+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs")
+    } else {
+      param <- " +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0" 
+
+      if (!is.null(datum)) {
+        prj4str <- paste0(prj4str, param, " +datum=", datum, " +units=m +no_defs")
+      } else {
+        prj4str = paste0(prj4str, param, " +ellps=", ellps, " +no_defs")
+      }
     }
   }
 
@@ -460,41 +464,52 @@ getEPSG <- function(prj=NULL, datum=NULL, zone=NULL) {
 
 
 
-check.extents <- function(layer1, layer2, showext=FALSE, layer1nm=NULL, 
-	layer2nm=NULL, layer2allin=FALSE, stopifnotin=FALSE) {
+check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL, 
+	layer2nm=NULL, stopifnotin=FALSE) {
 
   ##########################################################################
   ## DESCRIPTION
   ## Check extents of layer1 and layer2
-
-  ## Check extents
-  ext.poly1 <- as(raster::extent(layer1), "SpatialPolygons")
-  ext.poly2 <- as(raster::extent(layer2), "SpatialPolygons")
+  ## stopifnotin	- stop if bbox2 is not all in bbox1
 
   if (is.null(layer1nm)) layer1nm <- "layer1"
   if (is.null(layer2nm)) layer2nm <- "layer2"
 
-  if (layer2allin && !rgeos::gContains(ext.poly1, ext.poly2)) {
-    msg <- paste(layer2nm, "is not completely contained within", layer1nm)
-    if (stopifnotin) stop(msg)
-  } else {
-    msg <- ifelse(rgeos::gContainsProperly(ext.poly1, ext.poly2), 
-					paste(layer2nm, "is fully within", layer1nm),
-		 ifelse(rgeos::gContainsProperly(ext.poly2, ext.poly1), 
-					paste(layer1nm, "is fully within", layer2nm),
-			ifelse(rgeos::gIntersects(ext.poly1, ext.poly2), "overlapping extents",
-			 		"non-overlapping extents")))
+  if (sum(is.na(as.vector(bbox1))) == length(bbox1)) {
+    warning(layer1nm, " bbox is invalid")
+    return()
   }
-  message(msg)
+  if (sum(is.na(as.vector(bbox2))) == length(bbox2)) {
+    warning(layer2nm, " bbox is invalid")
+    return()
+  }
+  
+  ## Check extents
+  bbox1sfc <- sf::st_as_sfc(bbox1)
+  bbox2sfc <- sf::st_as_sfc(bbox2)
+
+  bbox1sf <- sf::st_as_sf(bbox1sfc)
+  bbox2sf <- sf::st_as_sf(bbox2sfc)
+
+  bbox1sf$fld <- 1
+  intpct <- suppressWarnings(tabulateIntersections(layer1=bbox1sf, 
+			layer1fld="fld", layer2=bbox2sf))$int.pct
 
   if (showext) {
-    ext.both <- raster::bind(ext.poly1, ext.poly2)
-    sp::plot(ext.both)
+    bbox12sfc <- append(bbox1sfc, bbox2sfc)
+    plot(sf::st_geometry(bbox12sfc))
 
-    sp::plot(ext.poly1, add=TRUE)
-    sp::plot(ext.poly2, border="red", add=TRUE)
+    plot(sf::st_geometry(bbox2sfc), add=TRUE)
+    plot(sf::st_geometry(bbox1sfc), add=TRUE, border="red")
   }
-  return(msg)
+
+  if (intpct == 0) {
+    msg <- paste(layer1nm, "does not overlap", layer2nm)
+    if (stopifnotin) stop(msg)
+  } else if (intpct < 100) {
+    message(layer1nm, " is not completely contained within ", layer2nm)
+    message("...intersection of ", intpct, "%")
+  } 
 }
 
 
@@ -503,7 +518,7 @@ getprjatt <- function(prj4str, prjatt, stopifnull=FALSE) {
   ## DESCRIPTION:
   ## Gets the desired attribute from the proj4string.
 
-  if (prjatt == "units" && raster::isLonLat(prj4str)) 
+  if (prjatt == "units" && sf::st_is_longlat(prj4str)) 
     stop("must be a projected coordinate system")
   prjatt2 <- paste0("+", prjatt, "=")
 
@@ -528,7 +543,7 @@ getprjatt <- function(prj4str, prjatt, stopifnull=FALSE) {
   
 
 areacalc.poly <- function(polyv, polyv_dsn=NULL, areaprj="aea", zone=NULL, 
-	units="ACRES", areavar=NULL) {
+	unit="ACRES", areavar=NULL) {
  
   ## DESCRIPTION:
   ## Calculates area of polygons, appending the new variable (AREA_*), 
@@ -536,93 +551,99 @@ areacalc.poly <- function(polyv, polyv_dsn=NULL, areaprj="aea", zone=NULL,
   ## to Albers Equal Area projection before calculating area, then 
   ## reprojected back to longlat to return.
 
-  polyv <- FIESTA::pcheck.spatial(layer=polyv, dsn=polyv_dsn)
+  ## Set global variables
+  acre=hectare=km <- NULL
 
-  unitslst <- c("ACRES", "HECTARES", "SQMETERS")
-  units <- FIESTA::pcheck.varchar(var2check=units, varnm="units", 
-		checklst=unitslst, caption="area units?", stopifnull=TRUE)
-  if (is.null(areavar)) areavar <- paste0(units, "_GIS")
+  polyv <- pcheck.spatial(layer=polyv, dsn=polyv_dsn)
 
-  ## Check if polyv is projected
+  unitlst <- c("ACRES", "HECTARES", "SQMETERS", "SQKM")
+  unit <- FIESTA::pcheck.varchar(var2check=unit, varnm="unit", 
+		checklst=unitlst, caption="area units?", stopifnull=TRUE)
+  if (is.null(areavar)) areavar <- paste0(unit, "_GIS")
+
+
   isll <- FALSE
-  if (raster::isLonLat(polyv)) {
-    if (is.null(areaprj)) stop("must project polyv")
 
+  if (sf::st_is_longlat(polyv)) {
     isll <- TRUE
-    message("area can only be calculated with projected coordinate system")
-      
-    datum <- FIESTA::getprjatt(sp::proj4string(polyv), "datum")
-    if (is.null(datum)) datum == "NAD83"
-    message(paste("projecting to", areaprj, "with", datum, "datum to calculate area"))
-      
-    if (areaprj == "utm") {
-      if (is.null(zone)) stop("must specify zone with utm projection")
-      if (!zone %in% 1:22) stop("utm zone out of range for conterminous U.S.")
-    }   
-      
-    polyv <- spReprojectShape(polyv, prj.new=areaprj, datum.new=datum, zone.new=zone) 
+    message("area can only be calculated with projected coordinate system... projecting layer")
+
+    #prj4str <- sf::st_crs(polyv)$proj4string
+
+    ## Get longlat crs
+    crs.longlat <- sf::st_crs(polyv)
+
+    ## Check if polyv is projected
+    polyv <- checksf.longlat(polyv)
   }
 
   ## Calculate area
-  polyv@data[[areavar]] <- sapply(polyv@polygons, function(x) methods::slot(x, "area"))
+  polyv[["AREA_GIS"]] <- sf::st_area(polyv)
 
   ## Get polygon units
-  polyv.units <- getprjatt(sp::proj4string(polyv), "units")
-  if (is.null(polyv.units)) {
-    message("no units defined in proj4string... assuming meters")
-    units <- "m"
-  }
-  if (polyv.units %in% c("m", "meters")) {
-    cfactor.ac <- 0.00024711
-    cfactor.ha <- 0.0001
-  } else if (polyv.units %in% c("ft", "us-ft")) {
-    cfactor.ac <- 0.00002296
-    cfactor.ha <- 0.0000092903
-  } else {
-    stop("no conversion factor defined")
-  }
+#  polyv.units <- unique(units(polyv[["AREA_GIS"]])$numerator)
+#  if (polyv.units %in% c("m", "meters")) {
+#    cfactor.ac <- 0.00024711
+#    cfactor.ha <- 0.0001
+#  } else if (polyv.units %in% c("ft", "us-ft")) {
+#    cfactor.ac <- 0.00002296
+#    cfactor.ha <- 0.0000092903
+#  } else {
+#    stop("no conversion factor defined")
+#  }
 
   ## Convert square meters to area unit
-  if (units == "ACRES") {
-    polyv@data$ACRES_GIS <- round(polyv@data[[areavar]] * cfactor.ac, 6)
-    areavar <- "ACRES_GIS"
-  } else if (units == "HECTARES") {
-    polyv@data$HECTARES_GIS <- round(polyv@data[[areavar]] * cfactor.ha, 6)
+#  if (units == "ACRES") {
+#    polyv[["ACRES_GIS"]] <- round(polyv[["AREA_GIS"]] * cfactor.ac, 6)
+#    areavar <- "ACRES_GIS"
+#  } else if (units == "HECTARES") {
+#    polyv[["HECTARES_GIS"]] <- round(polyv[["AREA_GIS"]] * cfactor.ha, 6)
+#    areavar <- "HECTARES_GIS"
+#  } else {
+#    areavar <- "SQMETERS_GIS"
+#  }
+
+  if (unit == "ACRES") {
+    polyv[["ACRES_GIS"]] <- units::set_units(x=polyv[["AREA_GIS"]], value=acre)
+  } else if (unit == "HECTARES") {
+    polyv[["HECTARES_GIS"]] <- units::set_units(x=polyv[["AREA_GIS"]], value=hectare)
     areavar <- "HECTARES_GIS"
+  } else if (unit == "SQKM") {
+    polyv[["SQKM_GIS"]] <- units::set_units(x=polyv[["AREA_GIS"]], value=km^2)
+    areavar <- "SQKM_GIS"
   } else {
+    polyv[["SQMETERS_GIS"]] <- polyv[["AREA_GIS"]]
     areavar <- "SQMETERS_GIS"
   }
 
   if (isll) 
-    polyv <- spReprojectShape(polyv, prj.new="longlat", datum.new=datum)
+    polyv <- sf::st_transform(polyv, crs.longlat, quiet=TRUE)
 
-  return(polyv)     
+  return(units::drop_units(polyv))     
 }
 
 
-areacalc.pixel <- function(rast, units="ACRES") {
+areacalc.pixel <- function(rastfn, unit="ACRES", rast.NODATA=NULL, na.rm=TRUE) {
 
   ## DESCRIPTION:
   ## Calculates and returns area of a raster pixel. If rast is longlat 
-  ## projection, then stop to reproject.
+  ## projection, reproject to default, Albers NAD83.
 
   unitlst <- c("ACRES", "HECTARES", "SQMETERS")
-  if (!units %in% unitlst) stop("must be 'ACRES', 'HECTARES', or 'SQMETERS'")
+  if (!unit %in% unitlst) stop("must be 'ACRES', 'HECTARES', or 'SQMETERS'")
 
-  ## Check if raster is projected
-  if (raster::isLonLat(rast)) {
-    prj4str = build.prj4str(prj="aea", datum="NAD83")
-    #stop("area can only be calculated with projected coordinate system")
-    message("the coordinate system is Long/Lat, projecting raster to albers for area calculation...")
-    rast <- raster::projectRaster(rast, crs=sp::CRS(prj4str))
-  }
-  isll <- ifelse(raster::isLonLat(rast), TRUE, FALSE)
+
+  ## Check if raster is not projected
+  rastfn <- checkrast.longlat(rastfn)
+
+  ## Check if rastfn is long/lat
+  rast_info <- rasterInfo(rastfn)
+  rast.prj <- rast_info$crs
+  rast.res <- rast_info$cellsize
+
        
-  ## Get pixel size 
-  rast.res <- raster::res(rast)
-
   ## Get raster units
-  rast.units <- FIESTA::getprjatt(sp::proj4string(rast), "units")
+  rast.units <- FIESTA::getprjatt(rast.prj, "units")
   if (is.null(rast.units)) {
     message("no units defined in proj4string... assuming meters")
     rast.units <- "m"
@@ -636,24 +657,25 @@ areacalc.pixel <- function(rast, units="ACRES") {
   } else {
     stop("no conversion factor defined")
   }
+  cfactor <- ifelse(unit == "ACRES", cfactor.ac, ifelse(unit == "HECTARES", cfactor.ha, 1))
 
-  ## Get datum
-  datum <- FIESTA::getprjatt(sp::proj4string(rast), "datum")
-  if (is.null(datum)) {
-    ellps <- FIESTA::getprjatt(sp::proj4string(rast), "ellps")
-    if (is.null(ellps)) {
-      message("no datum defined in proj4string... assuming NAD83")
-      datum <- "NAD83"
-    }
-  }
 
-  if (units == "ACRES") {
-    area.pixel <- rast.res[1] * rast.res[2] * cfactor.ac
-  } else if (units == "HECTARES") {
-    area.pixel <- rast.res[1] * rast.res[2] * cfactor.ha
-  }
+  ## Calculate pixel counts by raster value
+  pixelarea <- pixelCount(rastfn)
 
-  return(area.pixel)     
+  ## Calculate area based on number of pixels
+  pixelarea$area <- pixelarea$count * rast.res[1] * rast.res[2] * cfactor
+
+
+  ## Remove values that equal NA
+  if (na.rm)
+    pixelarea <- pixelarea[!is.na(pixelarea$value), ]
+
+  ## Remove values that equal rast.NODATA
+  if (!is.null(rast.NODATA))
+    pixelarea <- pixelarea[pixelarea$value != rast.NODATA, ]
+
+  return(pixelarea)     
 }
 
 
@@ -673,15 +695,18 @@ aspect_transform <- function(df, asp) {
 } 
 
 
-spPlotRastcl <- function(rastcl, bks=NULL, col=NULL, col.palette=NULL, ext=NULL, 
+spPlotRastcl <- function(rastcl, bks=NULL, col.bks=NULL, col.palette=NULL, ext=NULL, 
 	labels=NULL, ...){
   ## DESCRIPTION: Plots a classified raster with legend for breaks. 
+  ## ARGUMENTS:  
+  ##  rastcl	- classified raster
+  ##  bks		- raster breaks
 
   if (class(rastcl) != "RasterLayer") stop("rastcl must be a Rasterlayer")
   
   ## Define class breaks of rastcl
   if (is.null(bks))
-    bks <- sort(unique(na.omit(rastcl)))
+    bks <- sort(raster::unique(rastcl, na.last=NA))
   
   if (min(bks) == 0) {
     bks <- c(-1, bks)
@@ -698,29 +723,29 @@ spPlotRastcl <- function(rastcl, bks=NULL, col=NULL, col.palette=NULL, ext=NULL,
     stop("col.palette must be a function")
 
   ## Define colors for plotting rastcl
-  if (is.null(col)) {
+  if (is.null(col.bks)) {
     if (!is.null(col.palette)) {
       if (!is.function(col.palette)) {
         stop("col.palette must be a function")
       } else {
-        col <- col.palette(nbrbks)
+        col.bks <- col.palette(nbrbks)
       }
     } else {
-      col <- terrain.colors(nbrbks)
+      col.bks <- terrain.colors(nbrbks)
     }
   } else {
-    if (length(col) != nbrbks-1)
+    if (length(col.bks) != nbrbks-1)
       stop(paste("you must have", nbrbks, "colors defined"))
   }
   if (is.null(labels))
     labels <- as.character(bks[-1])
   
-  sp::plot(rastcl, ext=ext, col=col,
+  plot(sf::st_geometry(rastcl), ext=ext, col=col.bks,
 	axis.args=list(at=labpts, labels=labels), breaks=bks, ...)
 }
 
 
-writeESRIprj <- function(x) {
+#writeESRIprj <- function(x) {
   ## Adds *.prj file to folder with *.bil file. 
   ## Note: when using raster getData(), the files are written the working 
   ## 		working directory as *.bil files. When read back into R, GDAL 
@@ -728,114 +753,458 @@ writeESRIprj <- function(x) {
   ##		So, if you want to read from file, you must write a *.prj file 
   ##		to the same directory.
   
-  p4s <- proj4string(x)
-  xfn <- x@file@name
+#  p4s <- sp::proj4string(x)
+#  xfn <- x@file@name
   
-  rgdal::showWKT(p4s, morphToESRI = TRUE, 
-      file=paste0(dirname(xfn), "/", basename.NoExt(xfn), ".prj"))
-}  
+#  rgdal::showWKT(p4s, morphToESRI = TRUE, 
+#      file=paste0(dirname(xfn), "/", basename.NoExt(xfn), ".prj"))
+#}  
 
 
-CRScompare <- function(layer1prj, layer2, prj4str=NULL, nolonglat=TRUE){
+checksf.longlat <- function(x, nolonglat=TRUE, crs.default=NULL) {
   ##################################################################################
-  ## DESCRIPTION: Compare Coordinate Reference System. If not the same, 
-  ##		project layer2 to Coordinate System of layer1 and return both layers.
+  ## DESCRIPTION: Check for longlat Geodetic coordinate system.
+  ## 
+  ## Default projection: NAD83 - Conus Albers
+  ## +proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96,
+  ##		+x_0=0 +y_0=0", "+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs")
+  ##################################################################################
+  crs.albersUS <- 5070
+
+  if (canCoerce(x, "sf"))
+    x <- sf::st_as_sf(x, stringsAsFactors=FALSE)
+  
+  ## Define default coordinate System
+  if (is.null(crs.default))
+    crs.default <- crs.albersUS
+  crs.default <- sf::st_crs(crs.default)
+  prj4str.default <- crs.default$proj4string
+
+  ## Check if projection defined
+  if (is.na(sf::st_crs(x))) stop("no projection defined")
+
+
+  ## Reproject coordinate system
+  if (sf::st_is_longlat(x) && nolonglat)
+    x <- sf::st_transform(x, crs.default, quiet=TRUE)
+
+  return(x)
+}
+
+
+checkrast.longlat <- function(rastfn, dstfile=NULL, nolonglat=TRUE, crs.default=NULL) {
+  ##################################################################################
+  ## DESCRIPTION: Check for longlat Geodetic coordinate system.
+  ## 
+  ## Default projection: NAD83 - Conus Albers
+  ## +proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96,
+  ##		+x_0=0 +y_0=0", "+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs")
+  ##################################################################################
+  crs.albersUS <- 5070
+  
+  ## Define default coordinate System
+  if (is.null(crs.default))
+    crs.default <- crs.albersUS
+  crs.default <- sf::st_crs(crs.default)
+
+  rastfn <- getrastlst.rgdal(rastfn)
+  rast.prj <- rasterInfo(rastfn)$crs
+  rast.name <- basename.NoExt(rastfn)
+  #rast.dirname <- dirname(nlcdfn)
+
+
+  ## Reproject coordinate system
+  if (sf::st_is_longlat(rast.prj) && nolonglat) {
+    if (is.null(dstfile)) {
+      dstfile <- paste0(getwd(), "/rastprj.img")
+      message("saving projected raster to: ", dstfile)
+    }
+    rastprjfn <- reprojectRaster(rastfn, dstfile=dstfile, t_srs=crs.default, of="HFA")
+    return(rastprjfn)
+  } else {
+    return(rastfn)
+  }
+}
+
+
+  
+crsCompare <- function(x, ycrs=NULL, x.crs=NULL, nolonglat=FALSE,
+	checkonly=FALSE, crs.default=NULL){
+  ##################################################################################
+  ## DESCRIPTION: Compare Coordinate Reference System (CRS) of x to y CRS
+  ##		string. If not the same, project x to y CRS.
   ## ARGUMENTS:
-  ##   layer1prj - the name of layer1 or layer1's proj4string
-  ##   layer2 - the name of layer2 or layer2's proj4string  
-  ##   prj4str - A PROJ.4 projection string. Include if nolonglat=TRUE and a 
-  ##			projection other than default albers projection is desired.
-  ##   nolonglat - If TRUE and both layers are in Geographic Coordinate System,
-  ## 			project both layers to default projection (albers) or other 
-  ##			projection if prjstr is NOT NULL.
+  ##   x - sf object or crs. CRS to check.
+  ##   ycrs - sf object or crs. CRS to compare to x.
+  ##   x.crs - CRS. If x has no defined projection info, use x.CRS to define it
+  ##   nolonglat - Logical. If TRUE, stop if both layers are in Geographic 
+  ##			Coordinate System.
   ## VALUE:
-  ## 	  list	layer1 	layer1prj
-  ##			layer2	layer2prj
+  ## 	 xprj - x object, in original format 
+  ##	 crs	- crs object, in original format 
   ###################################################################################
-  reprj <- FALSE
+  ## Default projection: NAD83 - Conus Albers
+  ## +proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96,
+  ##		+x_0=0 +y_0=0", "+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs")
+  ## EPSG:5070 NAD83/Conus Albers
+  crs.albersUS <- paste("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5",
+			"+x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs")
+
+  if (canCoerce(x, "sf"))
+    x <- sf::st_as_sf(x, stringsAsFactors=FALSE)
+  if (canCoerce(ycrs, "sf"))
+    ycrs <- sf::st_as_sf(ycrs, stringsAsFactors=FALSE)
  
-  if (is.null(prj4str)) {
-    ## Define default Coordinate System as USGS albers
-    prj4.default <- paste("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0",
-			"+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs")
+  ## Define default Coordinate System as USGS albers
+  if (is.null(crs.default) || is.na(crs.default) || crs.default=="")
+    crs.default <- crs.albersUS
+
+  ## Check x
+  #############################
+  crs.x <- sf::st_crs(x)
+
+  if (is.na(crs.x)) {
+    if (is.null(x.crs)) {
+      stop("x has no projection defined... must include projection in x.crs")
+    } else {
+      crs.x <- x.crs
+      if ("sf" %in% class(x))
+        sf::st_crs(x) <- crs.x
+    }
+  }
+
+  ## Check ycrs
+  #############################
+  if (is.null(ycrs)) {
+    warning("ycrs is NULL...  using default projection:")
+    message(print("EPSG:5070 - NAD83/Conus Albers"))
+    ycrs <- crs.default
+  }
+  crs.y <- sf::st_crs(ycrs)
+  if (is.na(crs.y)) 
+    stop("ycrs must have defined projection")
+  if ("sf" %in% class(ycrs)) 
+    ycrs <- sf::st_transform(ycrs, crs.y, quiet=TRUE)
+    
+  ## Check if longlat
+  #############################
+  if (nolonglat && sf::st_is_longlat(crs.y)) {
+    if (!sf::st_is_longlat(crs.x)) {
+      crs.y <- crs.x
+    } else {
+      message("crs.default must be in a projected CRS... using US albers")
+      print(crs.albersUS)
+      crs.y <- crs.albersUS
+    }
+    if ("sf" %in% class(ycrs)) 
+      ycrs <- sf::st_transform(ycrs, crs.y, quiet=TRUE)
+  } 
+
+  prj4str.x <- sf::st_crs(x)$input
+  prj4str.y <- sf::st_crs(ycrs)$input
+ 
+
+  ## if projection is not the same, reproject layer1 to prj4crs
+  if (!checkonly) {
+    if (crs.x != crs.y) {
+      xprj <- sf::st_transform(x, crs=crs.y, quiet=TRUE)
+      message(paste("reprojecting layer... \n", "from:", prj4str.x, 
+		"\n to:", prj4str.y))
+      returnlst <- list(x=xprj)
+    } else {
+      returnlst <- list(x=x)
+    }
+    returnlst$ycrs <- ycrs
+
+    return(returnlst)
   } else {
-    rgdal::checkCRSArgs(prj4str)
-    prj4.default <- prj4str
-    reprj <- TRUE
+    return(NULL)
   }
-  prj <- FIESTA::getprjatt(prj4.default, "proj")
+}
 
-  ################################################################################
-  ## Check layers
-  ################################################################################
+sf_dissolve <- function(sflayer, col=NULL, areacalc=TRUE) {
+  if (is.null(col)) {
+    col <- "tmp"
+    sflayer[[col]] <- 1
+  }
+  
+  ## Dissolve polygons
+  geocol <- attr(sflayer, "sf_column")
+  sfd <- aggregate(sflayer[, geocol], by=sf::st_drop_geometry(sflayer[, col, drop=FALSE]), sum)
+  names(sfd) <- c(col, "geometry")
 
-  ## Get projection - layer1prj
-  if (isS4(layer1prj)) {
-    layer1prj.prj <- sp::proj4string(layer1prj)
-  } else if (is.character(layer1prj)) {
-    if (!rgdal::checkCRSArgs(layer1prj)) stop("invalid layer1prj")
-    layer1prj.prj <- layer1prj
+  if (areacalc)
+    sfd <- areacalc.poly(sfd)
+  return(sf::st_cast(sfd))
+}
+
+
+closest_poly <- function(x.centroid, ypoly, ypoly.att=NULL, nbr=NULL, returnsf=TRUE) {
+  ## DESCRIPTION: Get polygon(s) in y closest to x (centroid or polygon)
+
+  a<- sf::st_distance(x.centroid, ypoly, by_element=TRUE) 
+
+
+  ypoly$dist <- units::drop_units(sf::st_distance(x.centroid, ypoly, by_element=TRUE)) 
+  ypoly <- ypoly[order(ypoly$dist, decreasing=FALSE),]
+  if (is.null(nbr)) nbr <- nrow(ypoly)
+  ypoly.near <- ypoly[1:nbr,]
+
+  if (returnsf) {
+    return(ypoly.near)
   } else {
-    stop("invalid layer1prj")
+    dist <- ypoly.near$dist
+    if (is.null(ypoly.att)) {
+      names(dist) <- row.names(ypoly.near)
+    } else {
+      names(dist) <- ypoly.near[[ypoly.att]]
+    }
+    return(dist)
   }
-  ## If layer1prj has no defined projection and prjstr 
-  if (is.na(layer1prj.prj)) stop("layer1prj does not have a defined projection")
+}
 
-  ## Get projection - layer2
-  if (isS4(layer2)) {
-    layer2.prj <- sp::proj4string(layer2)
-  } else if (is.character(layer2)) {
-    if (!rgdal::checkCRSArgs(layer2)) stop("invalid layer2")
-    layer2.prj <- layer2
-  } else {
-    stop("invalid layer2")
+
+getIntersect <- function(layer1, layer2, layer1.unique, layer2fld, overlapThreshold=0) {
+
+  ## get intersection of layer1 with layer2
+  layer1.int <- sf::st_join(layer1, layer2, left=FALSE)
+  layer1.intlst <- unique(layer1.int[[layer1.unique]]) 
+  layer1.int <- layer1[layer1[[layer1.unique]] %in% layer1.intlst,]
+  layer1.intd <- sf_dissolve(layer1.int, layer1.unique, areacalc=FALSE)
+
+  layer1.pct <- suppressWarnings(tabulateIntersections(layer1=layer2,
+ 		layer1fld=layer2fld, layer2=layer1.intd, layer2fld=layer1.unique))
+  layer1.intd <- layer1.intd[layer1.intd[[layer1.unique]] %in% 
+		layer1.pct[layer1.pct$int.pct != 0, layer1.unique],]
+  return (layer1.intd)
+}
+
+
+clip.othertables <- function(inids, othertabnms, othertabs=NULL, uniqueid="PLT_CN", 
+	savedata=FALSE, outfn.pre=NULL, outfolder=NULL, out_fmt="csv",
+	out_dsn=NULL, outfn.date=FALSE, overwrite=FALSE, gui=FALSE) {
+
+  ## Adds to file filters to Cran R Filters table.
+  if (.Platform$OS.type=="windows")
+    Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
+
+ 
+  #if (is.null(outfn.pre)) outfn.pre <- "clip"
+
+  ## Check savedata
+  #############################################################################
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data?", first="NO", gui=gui) 
+  if (savedata && out_fmt %in% c("sqlite", "gpkg")) {
+    gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
+    out_dsn <- DBtestSQLite(out_dsn)
   }
-  if (is.na(layer2.prj)) stop("layer2 does not have defined projection")
-
-
-  ################################################################################
-  ## Check if layers are Geographic if nolonglat=TRUE
-  ## If both layers are in Geographic Coordinate System and nolonglat=TRUE, 
-  ## or if reprj=TRUE, project both layers to default projection (prj4.default)
-  ################################################################################
-  if (reprj || (nolonglat && raster::isLonLat(layer1prj) && raster::isLonLat(layer2))) {
-    message("projecting both layers to ", prj)
-    layer1prj.prj <- prj4.default
-    layer1prj <- sp::spTransform(layer1prj, CRSobj = CRS(layer1prj.prj))
-  }
-
-  ## Checks if projection is same
-  if (!raster::compareCRS(layer1prj.prj, layer2.prj)) {	
-    if (is.raster(layer2)) {
-      stop("cannot reproject a raster")
-    } else if (is.raster(layer1prj)) {
-      ## Check number of features
-      if (is.raster(layer2) && is.raster(layer1prj)) {
-        if (length(layer2@polygons) > length(layer1prj@polygons))
-          if (nolonglat && raster::isLonLat(layer2))
-            message("layer2 has more features than layer1... consider switching projection")
+   
+  # GET A LIST AND CHECK THE OTHER TABLES
+  if (is.null(othertabnms)) {
+    if (gui) {
+      othertabnms.resp <- select.list(c("NO", "YES"), title = "Other tables to subset?", 
+		    multiple = FALSE)
+      if (othertabnms.resp == "") stop("")
+      while (othertabnms.resp == "YES") {
+        tabresp <- select.list(c("RObject", "CSV"), title = "RObject or CSV?", 
+          multiple = FALSE)
+        if (tabresp == "RObject") { 
+          otabnmlst <- c(ls(pos=1, all.names = TRUE), 
+			ls(envir = as.environment("package:FIESTA"), pattern = "WY"))
+          otabnm <- select.list(otabnmlst, title = "Other table", multiple = TRUE)
+          if (length(otabnm) == 0) stop("")
+          for (tabnm in otabnm)
+            otablst[[tabnm]] <- get(tabnm) 
+        } else if (tabresp == "CSV" && .Platform$OS.type == "windows") {
+          otabnm <- choose.files(default = getwd(), caption = "Other table", 
+                filters = Filters["csv",], multi = TRUE)
+          if (length(otabnm) == 0) stop("")
+          for (tabnm in otabnm) {
+            nm <- unlist(strsplit(basename(tabnm), "\\.shp"))[1]
+            otablst[[nm]] <- fread(tabnm)
+          }
+        }
+        othertabnms.resp <- select.list(c("NO", "YES"), title = "Other tables to clip?", 
+		      multiple = FALSE)
+        if (othertabnms.resp == "") stop("")
       }
     }
+  } 
+  if (length(othertabnms) > 0 && length(othertabs) == 0) {
+    othertabs <- list()
+    for (othertabnm in othertabnms) {
+      if (exists(othertabnm)) {
+        othertabs[[othertabnm]] <- get(othertabnm)
+      } else {
+        stop(othertabnm, " is invalid")  
+      }
+    }
+  }
+ 
+  # Clips tables in othertabs to inids
+  if (class(othertabs) != "list") stop("othertabs must be a list")
+  if (length(othertabs) > 0) {
+    intablst <- list()
+    namesintablst <- {}
 
-    ## if projection is not the same, reproject layer2 to layer1prj
-    layer2prj <- sp::spTransform(layer2, CRSobj = CRS(layer1prj.prj))
+    for (i in 1:length(othertabs)) {
+      otab <- othertabs[[i]]
+      otabnm <- othertabnms[i]
+      message(paste("Clipping", otabnm, ".."))
 
-    message(paste("reprojecting layer... \n", "from:", layer2.prj, 
-		"\n to:", layer1prj.prj))
+      # Set new name of return table
+      returnnm <- paste("clip", otabnm, sep="_")
+      outnm <- otabnm
+      if (!is.null(outfn.pre)) outnm <- paste(outfn.pre, otabnm, sep="_") 
+ 
+      if (substr(returnnm, nchar(returnnm) - 3, nchar(returnnm)) == ".csv")
+        returnnm <- strsplit(returnnm, ".csv")[[1]]
+      
+      namesintablst <- c(namesintablst, returnnm)
+      if (!is.null(otab)) {
+        if (!"data.frame" %in% class(otab))
+          stop(otabnm, " must be a data.frame")
+        # Check uniqueid of other table.. change if PLT_CN/CN conflict
+        otabvars <- names(otab)
+        if (!uniqueid %in% otabvars) {
+          if (uniqueid == "PLT_CN" && "CN" %in% otabvars) {
+            otabid <- "CN"
+          } else if (uniqueid == "CN" && "PLT_CN" %in% otabvars) {
+            otabid <- "PLT_CN"
+          } else {
+            stop("uniqueid not in", otabnm)
+          }
+        } else {
+          otabid <- uniqueid
+        }
+        if (otabnm == "cond" && "CONDID" %in% names(otab)) {
+          idx.unique <- c(otabid, "CONDID")
+        } else if (otabnm == "tree" && all(c("CONDID", "SUBP", "TREE") %in% names(otab))) {
+          idx.unique <- c(otabid, "CONDID", "SUBP", "TREE")
+        } else {
+          idx.unique <- otabid
+        }
+        ## Subset data frame
+        assign(returnnm, otab[otab[[otabid]] %in% inids, ])
+        if (savedata) {
+          datExportData(get(returnnm), out_fmt=out_fmt, outfolder=outfolder, 
+			out_dsn=out_dsn, out_layer=outnm, overwrite_layer=overwrite,
+			index.unique=idx.unique)
+        }
+        intablst[[returnnm]] <- get(returnnm)
 
+      } else {
+          intablst[returnnm] <- otab
+      }
+    }
   } else {
-#    ## if projection is the same, but not identical text, redefine projection 
-#    ## of layer2 to match layer1prj
-#    message(paste("layer1prj:", layer1prj.prj))
-#    message(paste("layer2:", layer2.prj))
-#
-#    message(paste("projections are the same but not identical...",
-#		"setting projection of layer2 to match layer1prj: \n", layer1prj.prj))
-#    suppressWarnings(sp::proj4string(layer2) <- layer1prj.prj)
-    layer2prj <- layer2
+    intablst <- NULL
+  }
+  return(intablst)
+}
+
+
+spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL, 
+	stbnd=NULL, stbnd_dsn=NULL, stbnd.att=NULL, RS=NULL, states=NULL, 
+	showsteps=FALSE, savebnd=FALSE, outfolder=NULL, ...) {
+
+  ##############################################################################
+  ## DESCRIPTION
+  ## Get states that intersect a boundary. If RS != NULL, boundary is 
+  ## clipped to RS states.
+  ##############################################################################
+
+ 
+  ##################################################################
+  ## CHECK INPUT PARAMETERS
+  ##################################################################
+  gui <- FALSE
+
+  #############################################################################
+  ## Import boundary
+  #############################################################################
+  bndx <- pcheck.spatial(layer=bnd_layer, dsn=bnd_dsn, caption="boundary")
+ 
+  ## bnd.filter
+  bndx <- datFilter(bndx, xfilter=bnd.filter)$xf
+
+ 
+  ########################################################################
+  ### DO THE WORK
+  ########################################################################
+  RSlst <- unique(FIESTA::ref_statecd$RS)
+  RS <- FIESTA::pcheck.varchar(var2check=RS, varnm="RS", 
+		checklst=RSlst, gui=gui, caption="Research Station extent?") 
+
+  ## Get intersecting states
+  #############################################################################
+  if (!is.null(stbnd) || !is.null(stbnd_dsn)) {
+    stbnd <- pcheck.spatial(layer=stbnd, dsn=stbnd_dsn)
+    stbnd.att<- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
+		gui=gui, checklst=names(stbnd), caption="State name attribute", 
+		warn=paste(stbnd.att, "not in stbnd"))
+    if (is.null(stbnd.att) && "NAME" %in% names(stbnd)) {
+      stbnd.att <- "NAME"
+    } else if (is.null(stbnd.att) && "STATENM" %in% names(stbnd)) {
+      stbnd.att <- "STATENM"
+    } else {
+      stop("include attribute in stbnd with state names - stbnd.att")
+    }
+  } else if (exists("stunitco")) {
+    stbnd <- FIESTA::stunitco			## longlat-NAD83 projection
+
+    stbnd.att<- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
+		gui=gui, checklst=names(stbnd), caption="State name attribute", 
+		warn=paste(stbnd.att, "not in stunitco"))
+    if (is.null(stbnd.att)) stbnd.att <- "STATENM"
+  } else if (is.null(states)) {
+    stop("must include state names (states) or state boundary (stbnd) for bnd intersect")
   }
 
-  returnlst <- list(layer1=layer1prj, layer2=layer2prj)
-  return(returnlst)
-}  
+  if (!is.null(stbnd)) {
+    ## Reproject stbnd to bnd projection
+    prjdat <- crsCompare(stbnd, ycrs=bndx, nolonglat=TRUE)
+    stbnd <- prjdat$x
+    bndx <- prjdat$ycrs
+
+    ## Check intersecting states
+    stbnd <- suppressWarnings(sf::st_crop(stbnd, sf::st_bbox(bndx)))
+    stated <- sf_dissolve(stbnd, stbnd.att)
+    stateint <- suppressWarnings(selectByIntersects(stated, sf::st_make_valid(bndx), 
+				overlapThreshold=0))
+    states <- stateint[[stbnd.att]]
+
+    if (showsteps) {
+      mar <-  par("mar")
+      par(mar=c(1,1,1,1))
+
+      plot(sf::st_geometry(stateint))
+      plot(sf::st_geometry(bndx), add=TRUE, border="blue")
+      par(mar=mar)
+    }
+  } else {
+    stop("stbnd invalid... must include states")
+  }
+
+  if (!is.null(RS) && 
+	length(states[!states %in% FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, 
+		"MEANING"]]) > 0) {
+    statesout <- states[!states %in% FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]]
+    states <- states[states %in% FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]]
+
+    message(paste0("states are outside ", RS, " region: ", toString(statesout)))
+    message("clipping boundary to ", RS, " states: ", toString(states))
+
+    bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[[stbnd.att]] %in% states, ])
+  }
+
+  ## Save boundary
+  if (savebnd)
+    spExportSpatial(bndx, outfolder=outfolder, out_layer="bnd", ...)
+
+  return(list(states=states, bndx=bndx))
+
+}
+
 

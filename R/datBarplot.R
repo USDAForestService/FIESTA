@@ -1,9 +1,10 @@
 datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE, 
 	x.order=NULL, sevar=NULL, psevar=NULL, device.type="dev.new", jpeg.res=300, 
-	device.height=5, device.width=8, horiz=FALSE, toplabels=NULL, ylim=NULL, 
-	yscale=NULL, ylabel=NULL, xlabel=NULL, mar=NULL, addlegend=FALSE, main=NULL, 
-	cex.main=1, cex.label=1, cex.names=0.8, las.xnames=0, savedata=FALSE, 
-	outfolder=NULL, outfn=NULL, ...){ 
+	device.height=5, device.width=8, horiz=FALSE, toplabelvar=NULL, 
+	ylim=NULL, divideby=NULL, ylabel=NULL, xlabel=NULL, mar=NULL, addlegend=FALSE, 
+	main=NULL, cex.main=1, cex.label=1, cex.names=0.8, las.xnames=0, las.ynames=1, 
+	savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, 
+	overwrite=FALSE, ...){ 
   ####################################################################################
   ## DESCRIPTION: Function to generate a barplot of frequencies ordered from most
   ##        to least.
@@ -30,7 +31,6 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   datx <- setDF(FIESTA::pcheck.table(x, caption="Frequency table?", stopifnull=TRUE))
   datnmlst <- names(datx)
 
-  
   ## Automatically set xvar to variable not called FREQ if all conditions are met
   if (is.null(xvar) && ncol(datx) == 2 && length(yvar) == 1 && yvar == "FREQ") 
     xvar <- datnmlst[which(datnmlst != "FREQ")]
@@ -68,6 +68,18 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     datx[is.na(datx)] <- 0
   }  
 
+  ## Check divideby
+  ########################################################
+  dividebylst <- c("hundred", "thousand", "million")
+  divideby <- FIESTA::pcheck.varchar(var2check=divideby, varnm="divideby", 
+		gui=gui, checklst=dividebylst, caption="Divide estimates?")
+
+  if (!is.null(divideby))
+    dividebynum <- ifelse(divideby == "hundred", 100, 
+				ifelse(divideby == "thousand", 1000, 
+					ifelse(divideby == "million", 1000000, 1)))
+  
+
   ## Check errbars 
   errbars <- FIESTA::pcheck.logical(errbars, "Error bars?", "NO")
     
@@ -77,79 +89,27 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
 
   ## Check psevar or sevar if errbars = TRUE
   if (errbars) {
-    if (is.null(psevar) && is.null(sevar)) {
-      resp <- select.list(c("psevar", "sevar", "none"), title="Which variable in table", 
-		multiple=FALSE)
-      if (resp == "sevar") {
-        ispsevar <- FALSE
-      } else if (resp == "psevar") {
-        ispsevar <- TRUE
-      } else if (resp == "none") {
-        errbars <- FALSE
-      } else {
-        stop("") 
-      }
-    
-      if (ispsevar) {
-        if (length(yvar) > 1) {
-          psevar <- {}
-          for (var in yvar) {
-            cvvarresp <- select.list(newvarlst, title=paste("Select psevar for:", var), 
-			multiple=FALSE)
-            psevar <- c(psevar, cvvarresp)
+    ## Check sevar
+    sevar <- FIESTA::pcheck.varchar(var2check=sevar, varnm="sevar", checklst=newvarlst, 
+		caption="se variable", warn="sevar not in data table", multiple=TRUE)
 
-            ## Modify list of possible variables to check or select from
-            newvarlst <- newvarlst[which(!newvarlst %in% psevar)]
-          }
-        }
-        ## Change any NULL values in Percent Standard Error variable(s) to 0
-        if (!is.null(psevar)) {
-          if (sum(is.na(datx[,psevar])) >= 1) {
-            message("na values in psevar are invalid.. changing to 0")
-            datx[[psevar]][is.na(datx[[psevar]])] <- 0
-          }  
-        }
-      }
-    } else {
-      if (!is.null(psevar)) {
-        if (length(psevar) != length(yvar)) 
-          stop("the number of psevar must match number of yvar") 
-        if (all(!psevar %in% newvarlst)) {
-          not <- psevar[which(!psevar %in% newvarlst)]
-          message("invalid psevar: ", addcommas(not))
-        }
-        ## Change any NULL values in cv variable(s) to 0
-        if (!is.null(psevar)) {
-          if (sum(is.na(datx[[psevar]])) >= 1) {
-            warning("na values in psevar are invalid.. changing to 0")
-            datx[[psevar]][is.na(datx[[psevar]])] <- 0
-          }  
-        }
-        if (!is.null(sevar))
-          message("only psevar is necessary to get error bars") 
-      } else if (!is.null(sevar)) {
-        if (length(sevar) != length(yvar))
-          stop("the number of sevar must match number of yvar")
-        if (all(!sevar %in% newvarlst)) {
-          not <- sevar[which(!sevar %in% newvarlst)]
-          message("invalid sevar: ", addcommas(not))
-        }
-        ## Change any NULL values in se variable(s) to 0
-        if (!is.null(sevar)) {
-          if (sum(is.na(datx[[sevar]])) >= 1) {
-            warning("na values in sevar are invalid.. changing to 0")
-            datx[[sevar]][is.na(datx[[sevar]])] <- 0
-          }  
-        }
-        if (!is.null(psevar))
-          message("only sevar is necessary to get error bars")
-      }
+    if (is.null(psevar)) { 
+      psevar <- FIESTA::pcheck.varchar(var2check=psevar, varnm="psevar", checklst=newvarlst, 
+		caption="pse variable", warn="psevar not in data table", multiple=TRUE)
     }
+    if (is.null(psevar) && is.null(sevar))
+      stop("must include sevar(s) or psevar(s) for adding error bars")
   }
 
   ## GET addlegend 
   addlegend <- FIESTA::pcheck.logical(addlegend, "Add legend?", "NO")
 
+
+  ## Top labels
+  topvarlst <- datnmlst[which(!datnmlst %in% c(xvar,yvar))] 
+  toplabelvar <- FIESTA::pcheck.varchar(var2check=toplabelvar, varnm="toplabelvar", 
+		checklst=topvarlst, caption="Top label variable", 
+		warn="toplabelvar not in data table", multiple=FALSE) 
 
   ## Check grpvar
   grpvarlst <- datnmlst[which(!datnmlst %in% c(xvar,yvar))]
@@ -196,13 +156,13 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   savedata <- FIESTA::pcheck.logical(savedata, "Save bar plot?", "NO")
 
   if (savedata) {
+    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="Overwrite files?", first="NO", gui=gui)  
+    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+		title="Add date to outfiles?", first="YES", gui=gui)  
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-  
-    if (is.null(outfn)) { 
-      outfn <- paste0("BARPLOT_", yvar)
-    } else if (!is.character(outfn)) {
-      stop("outfn must be character")
-    }
+
+    if (is.null(outfn)) outfn <- paste0("BARPLOT_", yvar)
 
     if (!any(device.type %in% device.typelst)) {  
       message("no export device specified..  adding jpg format")
@@ -210,44 +170,42 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     }
   }
 
+
   ################################################################################  
   ### DO WORK
   ################################################################################  
-
   ## Check if yvar is numeric
-  for (y in yvar) 
+  for (y in yvar) {
     if (!is.numeric(datx[[y]])) datx[[y]] <- as.numeric(datx[[y]])
     
-  ## Check yscale
-  yscalelst <- c("million", "thousand", "hundred")
-  yscale <- FIESTA::pcheck.varchar(var2check=yscale, varnm="yscale", checklst=yscalelst, 
-	caption="Y value scale", warn=paste(yscale, "not in list"), multiple=FALSE) 
+    if (!is.null(divideby))
+      datx[[y]] <- datx[[y]] / dividebynum
+  }
 
-  divide <- FALSE
-  if (!is.null(yscale)) {
-    divide <- TRUE
-    dlabel <- paste0("(", yscale, "s)")	
-    if (yscale == "million") {
-      datx[[yvar]] <- datx[[yvar]] / 1000000
-    } else if (yscale == "thousand") {
-      datx[[yvar]] <- datx[[yvar]] / 1000
-    } else if (yscale == "hundred") {
-      datx[[yvar]] <- datx[[yvar]] / 100
-    }   
-  }
-   
-  if (is.null(sevar) && is.null(psevar)) {
-    ## Aggregate table with selected variables
-    if (is.null(grpvar)) {
-      datxbp <- aggregate(datx[[yvar]], list(datx[[xvar]]), sum)
+  ## sevar/psevar
+  ######################
+  if (errbars) {
+    if (is.null(sevar)) {
+      if (!is.null(psevar)) {
+        sevar <- {}
+        for (j in 1:length(psevar)) {
+          jvar <- paste0("sevar", j) 
+          datx[[psevar[j]]] <- suppressWarnings(as.numeric(datx[[psevar[j]]]))
+          datx[[jvar]] <- datx[[psevar[j]]] * datx[[yvar[j]]] / 100
+          sevar <- c(sevar, jvar)
+        }
+      }
     } else {
-      datxbp <- aggregate(datx[[yvar]], list(datx[[xvar]], datx[[grpvar]]), sum, 
-		stringsAsFactors=FALSE)
+      if (!is.null(divideby)) {
+        datx[[sevar]] <- datx[[sevar]] / dividebynum
+      }	
     }
-    names(datxbp) <- c(xvar, grpvar, yvar)
-  } else {
-    datxbp <- datx[,c(xvar, yvar, grpvar, sevar, psevar)]
   }
+
+  ## Aggregate table with selected variables
+  datxbp <- aggregate(datx[,yvar, drop=FALSE], 
+		datx[, c(xvar, grpvar, sevar, toplabelvar), drop=FALSE], sum, 
+		stringsAsFactors=FALSE)
 
   if (!is.null(order.d)) {
     if (is.null(grpvar)) {
@@ -266,18 +224,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   } else {
     datxbp <- datxbp
   }
-
-  ## sevar/psevar
-  ######################
-  if (is.null(sevar) && !is.null(psevar)) {
-    sevar <- {}
-    for (j in 1:length(psevar)) {
-      var <- paste0("sevar", j) 
-      datxbp[[var]] <- as.numeric(datxbp[[psevar[j]]]) * as.numeric(datxbp[[yvar[j]]]) / 100
-      sevar <- c(sevar, var)
-    }
-  }
-
+ 
   ## ylim
   ######################
   if (is.null(ylim)) {
@@ -367,12 +314,19 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     xlim <- NULL
   }
 
+  if (any(is.na(x[[xvar]]))) {
+    print(x)
+    message("xvar has NA values... removing")
+    x <- x[!is.na(x[[xvar]]),]
+  }
+ 
   ## SET UP MAR and TEXT PLACEMENT AND ADD TEXT
   ######################################################
   maxattnum <- 15
   xmaxnum <- max(nchar(x[[xvar]]))
-  ymaxnum <- max(sapply(round(datx[[yvar]]), nchar)) 
-    
+
+  ymaxnum <- max(sapply(round(na.omit(datxbp[[yvar]])), nchar)) 
+ 
   ## las.xnames
   ######################
   if (is.null(las.xnames)) {
@@ -386,9 +340,16 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       }
     }
   }
+ 
   srt <- ifelse(las.xnames == 1, 0, ifelse(las.xnames == 3, 90, 60))
   ## ylabel
   ######################
+  if (is.null(ylabel) & !is.null(divideby)) {
+    ylabel <- paste0(divideby, "s")
+  } else if (!is.null(ylabel) && !is.null(divideby)) {
+    ylabel <- paste0(ylabel, " (", divideby, "s)")
+  }
+ 
   if (!is.null(ylabel)) { 
     if (horiz) {
       yside <- 1
@@ -398,10 +359,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       yside <- 2
       ylasnum <- 0
       ylinenum <- ymaxnum * cex.names/2 + 2
-    }
-    if (divide)
-      ylabel <- paste(ylabel, dlabel)
-    
+    }    
   } else {
     ylinenum <- ymaxnum * cex.names/2 + 1
   }
@@ -416,7 +374,6 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       xlinenum <- .36 * xmaxnum + linenum 
     } else {
       if (las.xnames %in% c(0,2)) {
-        #xlinenum <- .36 * (xmaxnum * cex.names) + linenum 
         xlinenum <- .36 * xmaxnum + linenum 
       } else {
         xlinenum <- 4
@@ -424,9 +381,10 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     }
   } else {
     if (horiz) {
-      xlinenum <- (xmaxnum * cex.names)/2 - 1
+     xlinenum <- (xmaxnum * cex.names)/2 - 1
     } else {
-      xlinenum <- .45 * xmaxnum + 1 
+      xlinenum <- ifelse(las.xnames==0, xmaxnum/3, xmaxnum/4)
+      #xlinenum = 8
     }
   }
 
@@ -434,14 +392,13 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   if (is.null(mar)) {
     mar <-  par("mar")
     mar[3] <- ifelse(!is.null(main), 3, 2)		## top mar
-
     if (horiz) {
       mar[1] <- ylinenum + 2.0				## bottom mar
       mar[2] <- xlinenum + (10/xlinenum)		## left mar
       mar[4] <- 2.5						## right mar
     } else {
-      mar[1] <- xlinenum * cex.names + 2		## bottom mar
-      mar[2] <- ylinenum + 1.5				## left mar
+      mar[1] <- xlinenum * cex.names + 3.5		## bottom mar
+      mar[2] <- ylinenum + 1.6				## left mar
       mar[4] <- 0.5						## right mar
     }
   }
@@ -452,14 +409,16 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     ### Output filenames ###
     #################################################
     if (device.type[i] == "dev.new") {
-      dev.new(width=device.width, height=device.height, record=TRUE)
-      #dev.new()
+#      dev.new(width=device.width, height=device.height)
+#      dev.new()
 
     } else {
       if (savedata) {
-        OUTPUTfn <- fileexistsnm(outfolder, outfn, device.type[i])
-        OUTPUTfn <- paste0(outfolder, "/", OUTPUTfn, ".", device.type[i])
-
+        ext <- device.type[i]
+ 
+        OUTPUTfn <- getoutfn(outfn, outfolder=outfolder, outfn.pre=outfn.pre, 
+		outfn.date=outfn.date, overwrite=overwrite, ext=ext)
+ 
         switch(device.type[i], 
           jpg = {jpeg(filename=OUTPUTfn, width=device.width, height=device.height, 
 			res=jpeg.res, units="in")},
@@ -472,28 +431,31 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       }
     }
 
-        
     ## GENERATE BARPLOT
     ###########################################
     op <- par(xpd=NA, cex=par("cex"), mar=mar, las=las.xnames, mgp=c(3,0.5,0))
 
     if (is.null(grpvar)) {
-      if (length(yvar) == 1) {  
-         bp <- barplot(datxbp[[yvar]], xlim=xlim, ylim=ylim, horiz=horiz, ...)
+      if (length(yvar) == 1) {
+         bp <- barplot(as.vector(datxbp[[yvar]]), xlim=xlim, ylim=ylim, horiz=horiz, 
+			las=las.ynames, ...)
 #         bp <- barplot(datxbp[[yvar]], names.arg=datxbp[[xvar]], xlim=xlim, ylim=ylim, 
-#          cex.names=cex.names, horiz=horiz, las=las.xnames, ...)
+#          cex.names=cex.names, horiz=horiz, las=las.ynames, ...)
       } else {
         xmat <- as.matrix(t(datxbp[[yvar]]))
         if (addlegend) {
            bp <- barplot(xmat, beside=TRUE, names.arg=datxbp[[xvar]], xlim=xlim, ylim=ylim, 
             cex.names=cex.names, cex.axis=cex.names, horiz=horiz, legend=rownames(xmat), 
-            las=las.xnames, ...)
+            las=las.ynames, ...)
         } else {
            bp <- barplot(xmat, beside=TRUE, names.arg=datxbp[[xvar]], xlim=xlim, ylim=ylim, 
-            cex.names=cex.names, cex.axis=cex.names, horiz=horiz, las=las.xnames, ...)
+            cex.names=cex.names, cex.axis=cex.names, horiz=horiz, las=las.ynames, ...)
         }
       }
-      text(bp, par("usr")[3]-0.25, adj=1, xpd=TRUE, labels=datxbp[[xvar]], cex=cex.names, srt=srt)
+      #text(bp, par("usr")[3]-0.25, adj=1, xpd=TRUE, labels=datxbp[[xvar]], cex=cex.names, srt=srt)
+      text(bp, par("usr")[3], adj = c(1, 1), xpd=TRUE, labels=datxbp[[xvar]], 
+			cex=cex.names, srt=srt)
+
      
     } else {
       xmat <- tapply(datxbp[[yvar]], list(datxbp[[xvar]], datxbp[[grpvar]]), I)
@@ -516,14 +478,16 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     if (!is.null(main))
       title(main=main, cex.main=cex.main)
 
-
     ## ADD TOP LABELS
     ####################################
-    if (!is.null(toplabels)) {
+    if (!is.null(toplabelvar)) {
+      toplabels <- datxbp[[toplabelvar]]
       ## Labels on top
-      up <- max(datxbp[[yvar]]) * 0.025
-      ypos <- datxbp[[yvar]] + up
-      text(bp, ypos, toplabels, cex=.75)
+      #up <- max(datxbp[[yvar]]) * 0.05
+      #ypos <- datxbp[[yvar]] + up
+      ypos <- datxbp[[yvar]]
+      xpos <- bp + .15
+      text(xpos, ypos, toplabels, cex=.75, pos=3)
     }
  
     ## ADD ERROR BARS
@@ -545,11 +509,10 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     }
 
     if (savedata && !device.type[i] %in% c("default", "dev.new")) {
-      cat(
-      " ##########################################################################", 
-      "\n", paste("Barplot written to: "), OUTPUTfn, "\n", 
-      "##########################################################################",
-      "\n" )
+
+      message("###################################\n", 
+			"Barplot written to: ", OUTPUTfn, 
+		"\n###################################")
 
       dev.off()
     }

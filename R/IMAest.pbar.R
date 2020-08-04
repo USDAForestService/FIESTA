@@ -1,4 +1,4 @@
-MAest.ht <- function(y, N) {
+MAest.ht <- function(y, N, FIA=TRUE) {
 
   ## Set global variables
   nhat.var <- NULL
@@ -10,20 +10,24 @@ MAest.ht <- function(y, N) {
 						var_est = TRUE, var_method = var_method, 
 						B = 1000, strata = NULL)
 
-  estht <- data.table(estht$pop_mean, estht$pop_mean_var, NBRPLT=NBRPLT, NBRPLT.gt0=NBRPLT.gt0)
+  estht <- data.table(estht$pop_mean, estht$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estht, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
 
-  ## This takes out the finite population correction term (to estimated variance from FIA)
-  estht[, nhat.var := nhat.var / (1 - length(y) / N)]
+  if (FIA) {
+    ## This takes out the finite population correction term (to estimated variance from FIA)
+    estht[, nhat.var := nhat.var / (1 - length(y) / N)]
+  }
+  return(estht)
 }
 
 
-MAest.ps <- function(y, N, x_sample, x_pop) {
+MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 
   ## Set global variables
   nhat.var <- NULL
 
-  NBRPLT <- sum(y > 0)
+  NBRPLT <- length(y)
+  NBRPLT.gt0 <- sum(y > 0)
   var_method <- "lin_HTSRS"
   estps <- mase::postStrat(	  y = y, 
 					   x_sample = x_sample, 
@@ -33,21 +37,24 @@ MAest.ps <- function(y, N, x_sample, x_pop) {
 					   data_type = "means", 
 					   B = 1000, strata = NULL)
 
-  estps <- data.table(estps$pop_mean, estps$pop_mean_var, NBRPLT=NBRPLT)
-  setnames(estps, c("nhat", "nhat.var", "NBRPLT"))
+  estps <- data.table(estps$pop_mean, estps$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estps, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
 
-
-  ## This takes out the finite population correction term (to estimated variance from FIA)
-  #estps[, nhat.var := nhat.var / (1 - length(y) / N)]
+  if (FIA) {
+    ## This takes out the finite population correction term (to estimated variance from FIA)
+    estps[, nhat.var := nhat.var / (1 - length(y) / N)]
+  }
+  return(estps)
 }
 
 
-MAest.greg <- function(y, N, x_sample, x_pop) {
+MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 
   ## Set global variables
-  #nhat.var <- NULL
+  nhat.var <- NULL
 
-  NBRPLT <- sum(y > 0)
+  NBRPLT <- length(y)
+  NBRPLT.gt0 <- sum(y > 0)
   var_method <- "lin_HTSRS"
   estgreg <- mase::greg(	y = y, 
 					x_sample = x_sample, 
@@ -60,18 +67,24 @@ MAest.greg <- function(y, N, x_sample, x_pop) {
 					lambda = "lambda.min", 
 					B = 1000, strata = NULL)
 
-  estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT=NBRPLT)
-  setnames(estgreg, c("nhat", "nhat.var", "NBRPLT"))
-
-
-  ## This takes out the finite population correction term (to estimated variance from FIA)
-  #estgreg[, nhat.var := nhat.var / (1 - length(y) / N)]
+  estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+ 
+  if (FIA) {
+    ## This takes out the finite population correction term (to estimated variance from FIA)
+    estgreg[, nhat.var := nhat.var / (1 - length(y) / N)]
+  }
+  return(estgreg)
 }
 
 
-MAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid=cuniqueid, pltmodelx, 
-	puniqueid=puniqueid, unitlut=NULL, esttype="ACRES", bytdom=FALSE, MAmethod, 
-	PSstrvar=NULL, prednames=NULL, yd=NULL, ratiotype="PERACRE", N) {
+
+########################################################################
+## Get estimates
+########################################################################
+MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL, 
+	pltassgn, esttype="ACRES", MAmethod, PSstrvar=NULL, prednames=NULL, 
+	yd=NULL, ratiotype="PERACRE", N, FIA=TRUE) {
 
   ########################################################################################
   ## DESCRIPTION: Gets estimates from mase::horvitzThompson
@@ -90,97 +103,109 @@ MAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid=cuniqueid, pltmodelx,
   ## covar		- covariance of numerator and denominator
   ########################################################################################
 
-  ## Sum response to domain and merge to pltmodelx
-  dat.dom <- dat[, sum(get(yn)), by=cuniqueid]
-  setnames(dat.dom, "V1", yn)
-  dat.dom <- merge(pltmodelx[, c(puniqueid, PSstrvar, prednames), with=FALSE], 
-				dat.dom, by.x=puniqueid, by.y=cuniqueid, all.x=TRUE)
-  dat.dom <- DT_NAto0(dat.dom, yn, 0)
-  yn.vect <- dat.dom[[yn]]
+  ## Merge dat.dom to pltassgn
+  pltdat.dom <- dat.dom[pltassgn]
+
+  ## Subset response vector and change NA values of response to 0
+  yn.vect <- pltdat.dom[[yn]]
+  yn.vect[is.na(yn.vect)] <- 0
 
   if (MAmethod == "HT") {
-    estht <- MAest.ht(yn.vect, N)
-    if (bytdom)
-      estht <- data.table(tdom=yn, estht)
-    est <- estht
+    est <- MAest.ht(yn.vect, N)
 
   } else if (MAmethod == "PS") {
-    x_sample <- dat.dom[, PSstrvar, with=FALSE][[1]]
+    x_sample <- pltdat.dom[, PSstrvar, with=FALSE][[1]]
     x_pop <- unitlut[, c(PSstrvar, "Prop"), with=FALSE]
-
-    estps <- MAest.ps(yn.vect, N, x_sample, x_pop)
-    if (bytdom)
-      estps <- data.table(tdom=yn, estps)
-    est <- estps
+    est <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
   } else if (MAmethod == "GREG") {
 
-    x_sample <- setDF(dat.dom[, prednames, with=FALSE])
+    x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
     x_pop <- setDF(unitlut[, prednames, with=FALSE])
-
-    estgreg <- MAest.greg(yn.vect, N, x_sample, x_pop)
-    if (bytdom)
-      estgreg <- data.table(tdom=yn, estgreg)
-    est <- estgreg
+    est <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA)
   }
   return(est)
 }
 
 
-## Define functions
-MAest.dom <- function(dom, dat, cuniqueid, pltmodelx, puniqueid, 
-		unitlut, esttype, bytdom=FALSE, MAmethod, PSstrvar=NULL, prednames=NULL, 
-		domain, N, response=NULL, tdomvarlst=NULL) {
-
+########################################################################
+## By domain
+########################################################################
+MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod, 
+		PSstrvar=NULL, prednames=NULL, domain, N, response=NULL, FIA=TRUE) {
+#dom <- doms[1]
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
 
 #yn=response
 #dat=dat.dom
 
-  ## If tdom (e.g., SPCD), apply function to each tdom in tdomvarlst
-  if (bytdom) {
-    domest <- data.table(dom, 
-		do.call(rbind, lapply(tdomvarlst, MAest, dat=dat.dom, cuniqueid=cuniqueid, 
-			pltmodelx=pltmodelx, puniqueid=puniqueid, esttype=esttype, bytdom=bytdom, 
-			unitlut=unitlut, PSstrvar=PSstrvar, prednames=prednames, 
- 			MAmethod=MAmethod, N=N)))
-  } else {
-    domest <- data.table(dom, MAest(yn=response, dat=dat.dom, cuniqueid=cuniqueid, 
- 		pltmodelx=pltmodelx, puniqueid=puniqueid, esttype=esttype, bytdom=bytdom, 
-		unitlut=unitlut, PSstrvar=PSstrvar, prednames=prednames, 
-		MAmethod=MAmethod, N=N))
-  }
+  ## Apply function to each dom
+  domest <- data.table(dom, MAest(yn=response, dat.dom=dat.dom, 
+		cuniqueid=cuniqueid, esttype=esttype, unitlut=unitlut, 
+		pltassgn=pltassgn, PSstrvar=PSstrvar, prednames=prednames, 
+		MAmethod=MAmethod, N=N, FIA=FIA))
   setnames(domest, "dom", domain)
   return(domest)
 }
 
-MAest.unit <- function(unit, dat, cuniqueid, pltmodelx, puniqueid, 
-		unitlut, unitvar, esttype, bytdom=FALSE, MAmethod="HT",  
-		PSstrvar=NULL, prednames=NULL, domain, response, npixels,
-		tdomvarlst=NULL) {
-  dat.unit <- dat[dat[[unitvar]] == unit, ]
+
+
+########################################################################
+## By estimation unit
+########################################################################
+MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar, 
+		esttype, MAmethod="HT", PSstrvar=NULL, prednames=NULL, 
+		domain, response, npixels, FIA=TRUE) {
+## testing
+#unit=estunits[i]
+#domain="TOTAL"
+#print(unit)
+
+  dat.unit <- dat[dat[[unitvar]] == unit, c(cuniqueid, domain, response),
+			with=FALSE]
+  setkeyv(dat.unit, cuniqueid)
+  pltassgn.unit <- unique(dat[dat[[unitvar]] == unit, c(cuniqueid, PSstrvar, prednames),
+			with=FALSE])
+  setkeyv(pltassgn.unit, cuniqueid)
+
+  if (nrow(dat.unit) == 0) {
+    if (domain == "TOTAL") {
+      unitest <- data.table(unit=unit, domain=1, nhat=0, nhat.var=0, 
+		NBRPLT=0, NBRPLT.gt0=0)
+    } else {
+      unitest <- data.table(unit=unit, domain="TOTAL", nhat=0, nhat.var=0, 
+		NBRPLT=0, NBRPLT.gt0=0)
+    }  
+    setnames(unitest, c("unit", "domain"), c(unitvar, domain)) 
+    return(unitest)
+  }
+
   unitlut.unit <- unitlut[unitlut[[unitvar]] == unit, ]
-  pltmodelx.unit <- pltmodelx[pltmodelx[[unitvar]] == unit, ]
   N.unit <-  npixels[["npixels"]][npixels[[unitvar]] == unit]
+
+  if (!MAmethod %in% c("HT", "PS")) {
+    if (any(pltassgn.unit[, colSums(.SD), .SDcols=prednames] < 3)) {
+      prednames <- prednames[pltassgn.unit[, colSums(.SD), .SDcols=prednames] >= 3]
+      if (length(prednames) == 0) MAmethod <- "HT"
+    }
+  }
 
   doms <- as.character(unique(dat.unit[[domain]]))
 
-
 #dat=dat.unit
-#pltmodelx=pltmodelx.unit
 #unitlut=unitlut.unit
+#pltassgn=pltassgn.unit
 #N=N.unit
+#prednames="fnf"
 
   unitest <- do.call(rbind, lapply(doms, MAest.dom, 
 			dat=dat.unit, cuniqueid=cuniqueid, 
-			pltmodelx=pltmodelx.unit, puniqueid=puniqueid,
-     			unitlut=unitlut.unit,
-			esttype=esttype, bytdom=bytdom,
-			MAmethod=MAmethod, PSstrvar=PSstrvar, 
-			prednames=prednames, 
-			domain=domain, N=N.unit, 
-			response=response, tdomvarlst=tdomvarlst))        
+			unitlut=unitlut.unit, pltassgn=pltassgn.unit,
+			esttype=esttype, MAmethod=MAmethod, 
+			PSstrvar=PSstrvar, prednames=prednames, 
+			domain=domain, N=N.unit, response=response,
+			FIA=FIA))        
   unitest <- data.table(unit=unit, unitest)
   setnames(unitest, "unit", unitvar)
   return(unitest)

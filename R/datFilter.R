@@ -1,13 +1,17 @@
 datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL, 
 	uniqueid="PLT_CN", vardelete=NULL, title.filter=NULL, savedata=FALSE, 
-	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
-	filternm=NULL, stopifnull=FALSE, returnDT=TRUE, gui=FALSE) {
+	outfolder=NULL, outfn="datf", outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite=FALSE, filternm=NULL, stopifnull=FALSE, returnDT=TRUE, gui=FALSE) {
 
   ## DESCRIPTION: subsets data table x with filter(s), and other tables if specified.
   ## VALUE: Return:
   ##		xf - data table with applied filter
   ##		xfilter - filter
   ## If gui and 
+
+  ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  gui <- ifelse(nargs() == 0 | gui, TRUE, FALSE)
+  if (gui) {uniqueid=savedata <- NULL}
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type == "windows")
@@ -24,30 +28,21 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   ##################################################################
   intabs <- NULL
 
-  ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0 | gui, TRUE, FALSE)
-  if (gui) {uniqueid=savedata <- NULL}
-
   ## CHECK INPUTS
   ##############################################
-  datx <- FIESTA::pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE)
+  datx <- pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE)
 
   ## Check filternm
   if (is.null(filternm)) filternm <- "filter"
 
+  ## Check title.filter
+  if (is.null(title.filter)) title.filter <- filternm
 
   ### GET savedata 
   savedata <- FIESTA::pcheck.logical(savedata, "Save data tables?", "NO")
-  if (savedata) {
+  if (savedata) 
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
   
-    ## outfn
-    if (is.null(outfn) || gsub(" ", "", outfn) == "") 
-      outfn <- "xfiltered"
-    
-    xffn <- fileexistsnm(outfolder, outfn, "csv")
-    xfout <- paste0(outfolder, "/", xffn, ".csv")
-  }
 
   ################################################################################  
   ### DO WORK
@@ -55,6 +50,7 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   xfilters <- {}
 
   if (!is.null(xfilter)) {
+    if (!is.character(xfilter)) stop("xfilter must be a character string")
     ## Check logical statement
     xfilter <- FIESTA::check.logic(datx, xfilter, filternm=filternm)
 
@@ -182,8 +178,7 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   #### WRITE TO FILE 
   #############################################################
   if (savedata)
-    write.csv(indat, xfout, row.names = FALSE, overwrite=overwrite, 
-		outfn.date=outfn.date)  
+    write2csv(indat, outfilenm=outfn, overwrite=overwrite, outfn.date=outfn.date)
 
   if (!returnDT) {
     indat <- setDF(indat)  

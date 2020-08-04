@@ -1,18 +1,17 @@
-spImportSpatial <- function(layer, dsn=NULL){
+spImportSpatial <- function(layer=NULL, dsn=NULL, sql=NULL, polyfix=FALSE, gui=FALSE){
   ###################################################################################
-  ## PURPOSE: Import a shapefile.  
+  ## PURPOSE: Import a spatial layer (e.g., ESRI shapefile, feature layer).  
   ##
   ## OUTPUTS:
-  ## spobj  Spatial object
+  ## spobj  simple feature (sf) object
   ####################################################################################
 
-  ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  if (is.null(sql)) sql <- NA
 
-  spobj <- pcheck.spatial(layer=layer, dsn=dsn)
+  ## Check sql
+  spobj <- pcheck.spatial(dsn=dsn, layer=layer, polyfix=polyfix, sql=sql, gui=gui)
 
   return(spobj)
 }
-
 
 

@@ -1,11 +1,11 @@
-\name{WYpltstrat}
+\name{WYpltassgn}
 \docType{data}
-\alias{WYpltstrat}
+\alias{WYpltassgn}
 \title{ FIA data. Plot-level data from FIA public database. }
 \description{ FIA plot-level data for the state of Wyoming, inventory years 2011-2012
 	and was downloaded Sept 8, 2017 from FIADB_1.7.0.00. It includes strata assignments 
 	for FIA plot center location (1:GREEN; 2:BROWN). }
-\usage{ WYpltstrat }
+\usage{ WYpltassgn }
 \format{ A dataframe with 26 columns and 6336 rows. }
 \source{ FIA Database. }
 

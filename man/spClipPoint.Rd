@@ -1,71 +1,68 @@
 \name{spClipPoint}
 \alias{spClipPoint}
 \title{
-	Spatial - Subsets an S4 SpatialPoints layer with a SpatialPolygon layer.
+	Spatial - Clip (intersect) point vector layer with polygon vector layer.
 }
 \description{
-	Subsets an S4 SpatialPoints or point file with a SpatialPolygon layer with
-	option to export the clipped SpatialPoints layer to a shapefile (*.shp). 
+	Wrapper for sf::st_intersection, to clip (intersect) point vector layer 
+	with a polygon vector layer. 
 }				
 
 \usage{
-spClipPoint(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN", 
-	clippolyv_layer, clippolyv_dsn = NULL, showext = FALSE, keepnull = FALSE, 
-	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = FALSE, othertabnms = NULL, ...)
+spClipPoint(xyplt, xyplt_dsn = NULL, xy.uniqueid = "PLT_CN", clippolyv,
+	clippolyv_dsn = NULL, clippolyv.filter = NULL, showext = FALSE, 
+	keepNA = FALSE, savedata = FALSE, returnsp = TRUE, exportsp = FALSE, 
+	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer="pnt", 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
+	othertabnms = NULL, ...)
 }
 
 \arguments{
-  \item{spplt}{ S4 SpatialPoints object or shapefile filename (*.shp), including 
-	full path and extension. The spatial layer must have a defined projection.
-	If NULL, include xyplt. }
-  \item{spplt_dsn}{ String. The data source name (dsn; i.e., folder or database name)
-	of spplt. The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{xyplt}{ Data frame, data.table, matrix, or comma-delimited file (*.csv). 
-	Includes unique identifier of rows (uniqueid) and x and y coordinates. 	
-	If spplt=NULL, x/y coordinates are used for data extraction. Must include 
-	projection information in respective parameters. }
-  \item{uniqueid}{ String.* Unique identifier of xyplt rows. }
-  \item{clippolyv_layer}{ String or S4 object. The name of the polygon layer 
-	to use for clipping. The layer name may be a full pathname to a file, the 
-	basename to a file, a spatial layer name from a database, or a SpatialPolygons 
-	object with a defined projection. }
-  \item{clippolyv_dsn}{ String. The data source name (dsn; i.e., folder or database name)
-	of clippolyv_layer. The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). Optional. } 
+  \item{xyplt}{ sf R object or String. Point data to clip. Can be a spatial 
+	points object, full pathname to a shapefile, or name of a layer within 
+	a database. }
+  \item{xyplt_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of layer to clip. The dsn varies by driver. See gdal OGR 
+	vector formats (https://www.gdal.org/ogr_formats.html). }
+  \item{xy.uniqueid}{ String.* Unique identifier of xyplt rows. }
+  \item{clippolyv}{ sf R object or String. Name of clipping polygon spatial
+	polygon object, full path to shapefile, or name of a layer within a 
+	database. } 
+  \item{clippolyv_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of clipping polygon. The dsn varies by driver. See gdal OGR 
+	vector formats (https://www.gdal.org/ogr_formats.html). }
+  \item{clippolyv.filter}{ String. Filter to subset clippolyv spatial layer. }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
-  \item{keepnull}{ Logical. If TRUE, keep values that do not intersect clippolyv. }
-  \item{savedata}{ Logical. If TRUE, the input data clipped to clippolyv are
-	saved to outfolder. The spatial object is exported as an ArcGIS shapefile (*.shp)
-	with variable names truncated to 10 characters or less (See note below). }
-  \item{outfolder}{ String. Name of output folder. }
-  \item{outfn}{ String. Name of output file name. Default="pntclip". } 
-  \item{outfn.pre}{ String. A prefix for output table names. }
-  \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE, overwrites file if exists. }
-  \item{othertabnms}{ String vector. The names of the objects or comma-delimited files to subset.
-	 The names must be in quotes (ex. othertables=c("tree", "cond")). }
-  \item{...}{ Other parameters for spMakeSpatialPoints. }
+  \item{keepNA}{ Logical. If TRUE, keep NA values after data intersection. }
+  \item{savedata}{ Logical. If TRUE, save data to outfolder. }
+  \item{returnsp}{ Logical. If TRUE, returns sf object of points. If FALSE, returns 
+	data frame of points (i.e., drops sf geometry). }
+  \item{exportsp}{ Logical. If TRUE, the clipped spatial point data are exported. }
+  \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
+	If NULL, the working directory is used. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
+  \item{out_layer}{ String. Name of layer in out_dsn if database. }
+  \item{outfn.pre}{ String. A prefix for output dsn. }
+  \item{outfn.date}{ Logical. If TRUE, adds current date to out_dsn. }
+  \item{overwrite}{ Logical. If TRUE, overwrites out_layer, if exists. }
+  \item{othertabnms}{ String vector. Name(s) of R objects, comma-delimited files,
+	or database layers to subset. Must include quotes (e.g., 
+	othertabnms=c("tree", "cond")). }
+  \item{...}{ Arguments to be passed to spMakeSpatialPoints. }
 
 }
 \value{
   A list of the following objects:
 
-  \item{clip_spplt}{ SpatialPointsDataFrame. The input SpatialPoints or xyplt
-	data frame converted to SpatialPoints, clipped to polygon boundary layer. 
+  \item{clip_xyplt}{ sf object. The input xyplt, clipped to polygon boundary layer. 
       The projection will be same as clippolyv projection. }
-  \item{clip_xyplt}{ Data frame. The input Spatialpoints data or xyplt data frame, 
-	clipped to polygon boundary layer. }
-  \item{clip_poly}{ SpatialPolygonsDataFrame. The polygon boundary layer used for 
+  \item{xy.uniqueid}{ String. Unique identifier of clip_xy. }
+  \item{clip_polyv}{ SpatialPolygonsDataFrame. The polygon boundary layer used for 
 	clipping. }
-  \item{sppltnull}{ SpatialPointsDataFrame. Non-intersecting points. Only 
-	included if keepnull=TRUE. }
   \item{clip_tabs}{ Data frame(s). Other tables in intabs clipped to boundary. }
   
-  If savedata=TRUE, point data will be written to outfolder.\cr
-  If exportshp=TRUE, the Spatial points will be written to outfolder. Variable
-	name will be truncated to 10 characters or less. 
+  If exportsp=TRUE, the sf object will be written to out_dsn (See note). 
 }
 
 \author{
@@ -73,24 +70,31 @@ spClipPoint(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
 }
 
 \details{
-	The rgeos gCovers function is used to return intersecting points. \cr 
+	The sf::st_intersection function is used to clip points. \cr 
 
-	If the projection of clippoly is not the same as the Spatial Points, the Spatial 
-	Points layer will be reprojected to the same projection as the clippoly before the 
-	evaluation points.
+	If the projection of clippolyv is not the same as the xyplt, the xyplt layer
+	layer will be reprojected to the same projection as the clippoly before 
+	intersection.
 }
 
 
 \note{
-  	The spTransform (rgdal) method is used for on-the-fly map projection conversion and 
+  On-the-fly projection conversion\cr 
+  The spTransform (rgdal) method is used for on-the-fly map projection conversion and 
 	datum transformation using PROJ.4 arguments. Datum transformation only occurs if 
 	the +datum tag is present in the both the from and to PROJ.4 strings. The +towgs84 
 	tag is used when no datum transformation is needed. PROJ.4 transformations assume 
 	NAD83 and WGS84 are identical unless other transformation parameters are specified. 
 	Be aware, providing inaccurate or incomplete CRS 	information may lead to erroneous 
 	data shifts when reprojecting. See spTransform help documentation for more details.
+
+  ESRI Shapefile Driver\cr 
+  If exportsp=TRUE:\cr
+ 	The writeOGR (rgdal) function is called. If out_fmt="shp", the ESRI Shapefile 
+	driver truncates variable names to 10 characters or less. Variable names are 
+	changed before export using an internal function (trunc10shp). If sf object 
+	has more than 1 record, it will be returned but not exported. 
+
 }
-
-
 
 \keyword{ data }

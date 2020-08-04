@@ -11,7 +11,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
 
 
   ## Get pltx names
-  pltx <- FIESTA::pcheck.table(pltx, gui=gui, tabnm="plt", returnshp=FALSE)
+  pltx <- FIESTA::pcheck.table(pltx, gui=gui, tabnm="plt", returnsf=FALSE)
   pltnames <- names(pltx)
 
   ## Check estimation unit variables
@@ -97,29 +97,29 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
       unitarea <- unitarea[!is.na(get(areavar)), ]
     }
       
-    ## Check that the values of unitvars in unitarea are all in pltx
-    missval <- FIESTA::check.matchval(unitarea, pltx, unitvars, 
-		tab1txt="unitarea", tab2txt="plt", returnvals=TRUE)
-    if (!is.null(missval) && length(missval) > 0) {
-      unitarea[, MATCH := do.call(paste, .SD), .SDcols=unitvars]
-      pltx[, MATCH := do.call(paste, .SD), .SDcols=unitvars]
-      unitarea <- unitarea[MATCH %in% pltx$MATCH,]
-      unitarea[, MATCH := NULL]
-      message("subsetting unitarea to match plt")
-    }
-
     ## Check if class of unitvars in totacres matches class of unitvars in pltx
     tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
     pltx <- tabs$tab1
     unitarea <- tabs$tab2
 
-    unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), by=unitvars, 
-		.SDcols=areavar]
-
     ## Check the class of unitvars in unitarea matches unitvars in pltx
     tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
     pltx <- tabs$tab1
     unitarea <- tabs$tab2
+
+
+    ## Check that the values of unitvars in pltx are all in unitarea
+    pltx <- check.matchval(tab1=pltx, tab2=unitarea, var1=unitvars, 
+		tab1txt="plt", tab2txt="unitarea", stopifmiss=FALSE)
+
+    ## Check that the values of unitvars in unitarea are all in pltx
+    unitarea <- check.matchval(unitarea, pltx, unitvars, 
+		tab1txt="unitarea", tab2txt="plt")
+
+    ## Sum area by unitvars
+    unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), by=unitvars, 
+		.SDcols=areavar]
+    setkeyv(unitarea, unitvars)
 
   }
   return(list(unitarea=unitarea, areavar=areavar))

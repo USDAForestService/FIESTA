@@ -9,12 +9,13 @@
 \usage{
 datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL, 
 	uniqueid = "PLT_CN", vardelete = NULL, title.filter = NULL, savedata = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	outfolder = NULL, outfn = "datf", outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite = FALSE, filternm = NULL, stopifnull = FALSE, returnDT = TRUE, 
 	gui = FALSE)
 }
 \arguments{
-  \item{x}{ Data frame or comma-delimited file (*.csv). A data table to filter. }
+  \item{x}{ Data frame Spatial*Dataframe or comma-delimited file (*.csv). A data 
+	frame to filter. }
   \item{xfilter}{ String. A filter expression. Must be R syntax. 
 	(e.g., "STATUSCD == 1", "INVYR %in% 2002:2005"). Use single quotes for strings 
 	within double quotes (e.g., "SPP == 'Lodgepole'"). If NULL, a window pops up to 

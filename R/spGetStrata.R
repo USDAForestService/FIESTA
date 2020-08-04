@@ -1,17 +1,28 @@
-spGetStrata <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_CN", 
-	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, strattype="RASTER", 
-	strat_layer=NULL, strat_dsn=NULL, strvar=NULL, areaunits="ACRES", rast.NODATA=NULL,
- 	keepnull=FALSE, showext=FALSE, savedata=FALSE, exportshp=FALSE, outfolder=NULL,
- 	outfn=NULL, overwrite=FALSE, ...){
+spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
+	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
+	unit.filter = NULL, strattype="RASTER", strat_layer=NULL, 
+	strat_dsn=NULL, strvar=NULL, strat_lut=NULL, areaunits="ACRES", 
+	rast.NODATA=NULL, keepNA=FALSE, keepxy=TRUE, showext=FALSE, 
+	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, 
+	out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
+	outfn.date=TRUE, outfn.pre=NULL, overwrite=FALSE, ...){
+
+  ## Check for necessary packages
+  ###########################################################
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("sf package is required for spGetStrata()")
+  
+  if (!"rgdal" %in% rownames(installed.packages()))
+    stop("rgdal package is required for spGetStrata()")
+
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
-  if (gui) {dat=xytable=uniqueid=unionshpnm=stratclip=savedata=parameters=unitarea <- NULL}
+  if (gui) {uniqueid=stratclip=unitarea <- NULL}
 
   ## Set global variables
-  value=count=ACRES_GIS=TOTPIXELCNT <- NULL
-
+  value=count=strwt=polyv.lut=NAlst <- NULL
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
@@ -21,33 +32,26 @@ spGetStrata <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_CN
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
 
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
 
-  ## Spatial Points: shp or xytable for data extraction.. 
+  ## Spatial points for data extraction.. 
   ##################################################################################
-  if (is.null(spplt)) {
-    ## Check parameters
-    if (is.null(xyplt)) stop("either include spplt or xyplt for data extraction")
-         
+  sppltx <- pcheck.table(tab=xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
+			caption="XY coordinates?", stopifnull=TRUE)
+ 
+  if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- FIESTA::spMakeSpatialPoints(xyplt=xyplt, uniqueid=uniqueid, ...)
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=uniqueid, 
+		exportsp=FALSE, ...)
   } else {
-    ## Check spplt
-    sppltx <- pcheck.spatial(layer=spplt, dsn=spplt_dsn, gui=gui,
-		caption="Spatial points with XY coords?")
-    if (is.null(sp::proj4string(sppltx))) stop("spplt must have defined projection")
-
     ## GET uniqueid
-    sppltnames <- names(sppltx@data)
+    sppltnames <- names(sppltx)
     uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
-
-    if (sum(is.na(sppltx@data[[uniqueid]])) > 0) stop("NA values in ", uniqueid)
-    if (length(unique(sppltx@data[[uniqueid]])) < nrow(sppltx@data)) 
-      stop("spplt records are not unique")
   }
 
   ## Spatial Layers: strattype and unittype
@@ -56,67 +60,119 @@ spGetStrata <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_CN
 
   ## Check strattype
   ###################################################################
-  strattype <- FIESTA::pcheck.varchar(var2check=strattype, varnm="strattype", gui=gui,
-	checklst=typelst, caption="Strata type?", stopifnull=TRUE)
+  strattype <- FIESTA::pcheck.varchar(var2check=strattype, varnm="strattype", 
+	gui=gui, checklst=typelst, caption="Strata type?", stopifnull=TRUE)
 
   ## Check unittype
   ###################################################################
-  unittype <- FIESTA::pcheck.varchar(var2check=unittype, varnm="unittype", gui=gui,
-	checklst=typelst, caption="Estimation unit type?", stopifnull=TRUE)
+  unittype <- FIESTA::pcheck.varchar(var2check=unittype, varnm="unittype", 
+	gui=gui, checklst=typelst, caption="Estimation unit type?")
 
   ## Check showext    
   showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
 
-  ## Check keepnull    
-  keepnull <- FIESTA::pcheck.logical(keepnull, varnm="keepnull", 
-		title="Keep NULL values?", first="YES", gui=gui)
+  ## Check keepNA    
+  keepNA <- FIESTA::pcheck.logical(keepNA, varnm="keepNA", 
+		title="Keep NA values?", first="YES", gui=gui)
+
+  ## Check exportNA    
+  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+		title="Export NA values?", first="YES", gui=gui)
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
+  ## Check exportsp 
+  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+		title="Export spatial?", first="NO", gui=gui)  
 
-  ## Check outfolder 
+
+  ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata || exportshp) {
-    ## Check overwrite 
+  if (savedata || exportsp || exportNA) {
+    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
     overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite files?", first="NO", gui=gui)  
+    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+		title="Add date to outfiles?", first="NO", gui=gui) 
 
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    out_fmtlst <- c("sqlite", "gpkg", "shp")
+    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
+		checklst=out_fmtlst, gui=gui, caption="Output format?") 
 
-    if (is.null(outfn)) {
-      outfn <- "stratext"
-    } else if (!is.character(outfn)) {
-      stop("outfn must be character")
-    }      
-    outfncsvbase <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
-    if (!overwrite)
-      outfncsvbase <- FIESTA::fileexistsnm(outfolder, outfncsvbase, "csv") 
+    if (out_fmt %in% c("sqlite", "gpkg")) {
+      gpkg <- ifelse(out_dsn == "gpkg", TRUE, FALSE)        
+      out_dsn <- DBcreateSQLite(out_dsn, outfolder=outfolder, outfn.date=outfn.date, 
+				overwrite=overwrite, dbconnopen=FALSE)
+    } else {
+      if (!is.null(outfn.pre)) {
+        outfolder <- file.path(outfolder, outfn.pre)
+        if (!dir.exists(outfolder)) dir.create(outfolder)
+      }
+    } 
   }
 
   ##################################################################
   ## DO WORK
   ##################################################################
   unitarea=stratalut <- NULL
- 
+
   ## Check unitlayer
-  unitlayerx <- FIESTA::pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
+  unitlayerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
 	caption="Estimation unit layer?")
   nounit <- ifelse (is.null(unitlayerx), TRUE, FALSE)
-  
-  if (unittype == "POLY" || nounit) {
 
-    if (strattype == "RASTER") {
-      ## Check strat_layer
-      stratlayerx <- getrastlst(strat_layer, rastfolder=strat_dsn, stopifnofn=TRUE,
- 		stopifLonLat=TRUE)[[1]]
-      strvar <- "STRATUM"
-      stratlayer.res <- raster::res(stratlayerx)
- 
-      ## Get number of bands in each raster and set names
-      nbands <- raster::nbands(stratlayerx)
+  ## unit.filter
+  if (!nounit)
+    unitlayerx <- datFilter(unitlayerx, xfilter=unit.filter)$xf
+
+
+  ##################################################################
+  ## if unittype == "RASTER"
+  ## Note: still working on combo... until then, covert to polygon
+  ##################################################################
+  if (unittype == "RASTER" && !nounit) {
+    message("converting unit_layer to polygon...")
+
+    unitlayerx <- polygonizeRaster(unitlayerx)
+    unitvar <- "value"
+    unittype == "POLY"
+  }
+
+  ##################################################################
+  ## if unittype == "POLY"
+  ##################################################################
+  if (unittype == "POLY" || nounit) {
+    if (strattype == "POLY") {
+      message("converting strat_layer to raster...")
+
+      polyrast <- spPoly2Rast(polyv=strat_layer, polyv_dsn=strat_dsn, 
+		polyv.att=strvar, outfolder=outfolder)
+      strat_layer <- polyrast$rastfn
+      polyv.lut <- polyrast$polyv.lut
+      strat_dsn <- NULL
+      strvar <- polyrast$polyv.att
+
+      rast.NODATA <- 0
+    } else {
+      strvar <- "STRATUMCD"
+    }
+
+    ##################################################################
+    ## if strattype == "RASTER"
+    ##################################################################
+    ## Check strat_layer
+    stratlayerfn <- getrastlst.rgdal(strat_layer, rastfolder=strat_dsn,
+ 		stopifLonLat=TRUE)
+
+    ## Get raster info
+    rast_info <- rasterInfo(stratlayerfn)
+    stratlayer.res <- rast_info$cellsize
+    nbands <- rast_info$nbands
+    rast.prj <- rast_info$crs
+    rast.bbox <- rast_info$bbox
 
       ## Check band
 #      if (!is.null(band) && nbands > 1) {
@@ -124,128 +180,118 @@ spGetStrata <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_CN
 #        if (band > nbands) stop("invalid band, outside of range")
 #      } 
     
-      if (!nounit) {
-        ## Check unitvar
-        unitvar <- FIESTA::pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
+    if (!nounit) {
+
+      ## Check unitvar
+      unitvar <- FIESTA::pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		checklst=names(unitlayerx), caption="Estimation unit variable", 
 		warn=paste(unitvar, "not in unitlayer"))
-        if (is.null(unitvar)) {
-          unitlayerx@data$ONEUNIT <- 1
-          unitvar <- "ONEUNIT"
-        }
-  
-        ## Check projection
-        prjdat <- CRScompare(stratlayerx, unitlayerx, nolonglat=TRUE)
-        stratlayerx <- prjdat$layer1
-        unitlayerprj <- prjdat$layer2
-
-        ## Check extents of unitlayer and stratlayer
-        msg <- FIESTA::check.extents(stratlayerx, unitlayerprj, showext, 
-		layer1nm="stratlayer", layer2nm="unitlayer")
-        if (msg == "non-overlapping extents") stop("msg")
-
-        ## Extract values of polygon unitlayer to points
-        extpoly <- spExtractPoly(sppltx, polylst=unitlayerprj, uniqueid=uniqueid, 
-		polyvarlst=unitvar)
-        sppltx <- extpoly$spplt
-
-        if (!keepnull) 
-          sppltx <- sppltx[!is.na(sppltx[[unitvar]]), ]
- 
-        ## Extract values of raster layer to points
-        extrast <- spExtractRast(sppltx, rastlst=stratlayerx, var.name=strvar, 
-			uniqueid=uniqueid, exportna=exportshp, outfolder=outfolder,
-			overwrite=overwrite)
-        sppltx <- extrast$spplt
-        pltdat <- extrast$pltdat
-        rastfnlst <- extrast$rastfnlst
- 
-        ## Get pixel counts by estimation unit
-        stratalut <- setDT(zonalFreq(src=unitlayerprj, attribute=unitvar, 
-			rasterfile=rastfnlst, band=1))
-        stratalut.NA <- stratalut[is.na(value), ]
-      
-        if (!is.null(rast.NODATA)) {
-          if (!is.numeric(rast.NODATA)) {
-            message("rast.NODATA must be numeric")
-          } else {
-            stratalut <- stratalut[value != rast.NODATA,]
-          }
-        }
-        stratalut <- stratalut[!is.na(value), ]
-        setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
-
-        ## Get unitarea 
-        unitlayerprj <- FIESTA::areacalc.poly(unitlayerprj, units=areaunits)
-        areavar <- paste0(areaunits, "_GIS")  
-        unitarea <- aggregate(unitlayerprj[[areavar]], list(unitlayerprj[[unitvar]]), sum)
-        names(unitarea) <- c(unitvar, areavar)
-        
-      } else {
-        stop("under construction...  no unitlayer")
-
-        ## Calculate area
-        pixelarea <- areacalc.pixel(stratlayerx, units=areaunits) 
-
-      }
-  
-    } else if (strattype == "POLY") {
-      ## Check stratlayer
-      stratlayerx <- FIESTA::pcheck.spatial(layer=strat_layer, dsn=strat_dsn,
-		gui=gui, caption="Strata polygons?")
-
-      ## Check strvar
-      strvar <- FIESTA::pcheck.varchar(var2check=strvar, varnm="strvar", gui=gui, 
-		checklst=names(stratlayerx), caption="Strata variable", 
-		warn=paste(strvar, "not in stratlayer"), stopifnull=FALSE)
-      if (is.null(strvar)) {
-        print(names(stratlayerx))
-        stop("must include strvar")
-      }
-
-      if (nounit) {
-        message("no unitlayer... using stratlayer for estimation unit layer")
-        stratlayerx@data$ONEUNIT <- 1
+      if (is.null(unitvar)) {
+        unitlayerx$ONEUNIT <- 1
         unitvar <- "ONEUNIT"
-        polyvarlst <- c(unitvar, strvar)
-        ## Calculate area
-        stratpoly <- FIESTA::areacalc.poly(stratlayerx)
-      } else {
-        polyvarlst <- strvar
-        ## Calculate area
-        stratpoly <- FIESTA::spUnionPoly(stratlayerx, unitlayerx, areacalc=TRUE)
       }
-      stratalut <- aggregate(stratpoly@data$ACRES_GIS, 
-				stratpoly@data[, polyvarlst, drop=FALSE], sum)
-      names(stratalut) <- c(polyvarlst, "ACRES_GIS")
 
-      areavar <- paste0(areaunits, "_GIS")
-      unitarea <- aggregate(stratalut[[areavar]], stratalut[, unitvar, drop=FALSE], sum)
-      names(unitarea) <- c(unitvar, areavar)
+      ## Check projection and reproject spobj if different than rast
+      unitlayerprj <- crsCompare(unitlayerx, rast.prj)$x
 
-      ## Extract values of polygon layer to points
-      extpoly <- spExtractPoly(sppltx, polylst=stratpoly, uniqueid=uniqueid, 
-		polyvarlst=polyvarlst)
-      sppltx <- extpoly$spplt
+      ## Check extents
+      names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
+      bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
+      bbox2 <- sf::st_bbox(unitlayerprj)
+      check.extents(bbox1, bbox2, showext=showext, layer1nm="rast", layer2nm="unitlayer",
+			stopifnotin=TRUE)
+
+      ## Extract values of polygon unitlayer to points
+      ## Note: removing all NA values
+      extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, uniqueid=uniqueid, 
+		polyvarlst=unitvar, keepNA=FALSE, exportNA=exportNA)
+      sppltx <- extpoly$sppltext
+      unitNA <- sppltx$NAlst[[1]]
  
-      if (!keepnull) 
-        sppltx <- sppltx[!is.na(sppltx[[unitvar]]), ]
-      pltdat <- sppltx@data
+      ## Get pixel counts by estimation unit
+      stratalut <- setDT(zonalFreq(src=unitlayerprj, attribute=unitvar, 
+			rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA))
+      setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
+      strataNA <- stratalut[is.na(get(strvar)), ]
+      stratalut <- stratalut[!is.na(get(strvar)), ]
+
+      ## Get unitarea 
+      unitlayerprj <- areacalc.poly(unitlayerx, unit=areaunits)
+      areavar <- paste0(areaunits, "_GIS")  
+      unitarea <- aggregate(unitlayerprj[[areavar]], list(unitlayerprj[[unitvar]]), sum)
+      names(unitarea) <- c(unitvar, areavar)
+        
+    } else {  ## if nounit == TRUE
+
+      stratalut <- areacalc.pixel(stratlayerfn, rast.NODATA=rast.NODATA)
+      stratalut$strwt <- stratalut$count / sum(stratalut$count)
+      strvar <- "value"
+
+      unitarea <- sum(stratalut$area)
+      unitvar <- NULL
+      areavar <- NULL 
     }
-  } else {
-    stop("under construction")
+
+    ## Extract values of raster layer to points
+    extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, var.name=strvar, 
+			uniqueid=uniqueid, exportna=exportsp, keepNA=keepNA, 
+			exportNA=exportNA, outfolder=outfolder, overwrite=overwrite)
+
+    sppltx <- extrast$spplt
+    pltdat <- extrast$sppltext
+    rastfnlst <- extrast$rastfnlst
+    outname <- extrast$outnames
+    NAlst <- extrast$NAlst[[1]]
+
+    if (!is.null(NAlst)) {
+      message("NA values shown in red... ")
+      plot(sf::st_geometry(sppltx), pch=16, cex=.5)
+      plot(sf::st_geometry(NAlst), add=TRUE, col="red", cex=1, pch=16)
+    }
   }
 
-  if (exportshp) 
-    spExportShape(sppltx, outshpnm=outfn, outfolder=outfolder, overwrite=overwrite)
+  ## Write data frames to CSV files
+  #######################################
+  pltassgn <- sf::st_drop_geometry(sppltx)
+
+  if (!keepxy) 
+    pltassgn2 <- pltassgn[, c(uniqueid, unitvar, strvar)]
+
+  if (savedata) {
+    datExportData(pltassgn, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    datExportData(unitarea, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    datExportData(stratalut, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+  }
 
   if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
   setkeyv(stratalut, c(unitvar, strvar))
 
+
+  ## If lookup table, merge and aggregate
+  #######################################
+  if (!is.null(strat_lut)) {
+    stratalut <- merge(stratalut, strat_lut, by=strvar)
+    sppltx <- merge(sppltx, strat_lut, by=strvar)
+    stratalut <- stratalut[, list(strwt=sum(strwt)), by=c(unitvar, strvar)]
+  }
+
+
+  ## Export to shapefile
+  if (exportsp)
+    spExportSpatial(sppltx, out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer,
+ 		outfolder=outfolder, outfn.pre=NULL, 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    
   
-  returnlst <- list(pltstrat=sppltx@data, sppltstrat=sppltx, unitarea=setDF(unitarea), 
-		unitvar=unitvar, areavar=areavar, stratalut=setDF(stratalut), strvar=strvar)
-  if (keepnull) returnlst$stratalut.NA <- stratalut.NA
+  returnlst <- list(pltassgn=pltassgn, unitarea=unitarea, unitvar=unitvar, 
+		areavar=areavar, stratalut=stratalut, strvar=strvar,
+		pltassgnid=uniqueid, getwt=FALSE, strwtvar="strwt")
  
   return(returnlst)
 }

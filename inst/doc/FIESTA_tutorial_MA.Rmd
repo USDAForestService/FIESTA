@@ -87,7 +87,7 @@ setwd("C:/FIESTA")
 if (!file.exists("data"))  dir.create("data")
 datfolder <- "data" 
 
-if (!file.exists("outfolder")) dir.create("outfolder")
+if (!dir.exists("outfolder")) dir.create("outfolder")
 outfolder <- "outfolder"
 
 # File names for external spatial data
@@ -123,13 +123,15 @@ There are several reference tables stored in FIESTA, including table variable de
 ```
 ######################################################################################
 # Usage:
-# spGetModeldat(spplt = NULL, xyplt = NULL, uniqueid = "PLT_CN", domtype = "POLY", 
-#   	dom_dsn, dom_layer = NULL, unitvar = NULL, rastlst.cont = NULL,  
-# 	  rastlst.cont.name = NULL, rastlst.cont.stat = "MEAN", rastlst.cat = NULL, 
-#	    rastlst.cat.name = NULL, rastfolder = NULL, rast.NODATA = NULL,  
-#     asptransform = FALSE, asprast = NULL, keepnull = FALSE, showext = TRUE,   
-#   	savedata = FALSE, exportshp = FALSE, outfolder = NULL, outfn = NULL, 
-#     overwrite = FALSE, ...) 
+# spGetModeldat(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN", 
+#     module = "SA", domtype = "POLY", dom_layer = NULL, dom_dsn = NULL, 
+#   	domvar = "DOMAIN", rastlst.cont = NULL, rastlst.cont.name = NULL, 
+#     rastlst.cont.stat = "MEAN", rastlst.cat = NULL, rastlst.cat.name = NULL,
+#	    rastfolder = NULL, rast.NODATA = NULL, asptransform = FALSE, rast.asp = NULL, 
+#     rast.lut = NULL, rastlut = NULL, areacalc = TRUE, areaunits = "ACRES", 
+#     keepnull = FALSE, showext = TRUE, savedata = FALSE, exportshp = FALSE, 
+#     outfolder = NULL, outfn = NULL, outfn.date = TRUE, overwrite = FALSE,
+#     vars2keep = NULL, ...) 
 # 
 # Description:
 # Get data extraction and zonal statistics for Model-assisted or
@@ -146,7 +148,7 @@ There are several reference tables stored in FIESTA, including table variable de
 ## Generate a SpatialPoints object from the WY plot data, public coordinates 
 ## (x=LON_PUBLIC, y=LAT_PUBLIC) 
 ## Note: The public coordinate projection information is: prj=longlat, datum=NAD83.
-WYspplt <- spMakeSpatialPoints(xyplt=WYplt, uniqueid="CN", x="LON_PUBLIC", y="LAT_PUBLIC",
+WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC",
         prj="longlat", datum="NAD83")
 
 rastlst.cont <- c(demfn, slp, asp)
@@ -154,16 +156,14 @@ rastlst.cont.name <- c("dem", "slp", "asp")
 rastlst.cat <- fornffn
 rastlst.cat.name="fornf"
 
-modeldat <- spGetModeldat(spplt=WYspplt, uniqueid="CN", module="MA", 
+modeldat <- spGetModeldat(xyplt=WYspplt, uniqueid="CN", module="MA", 
   dom_layer=WYbhfn, domvar=NULL,
   rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, rastlst.cat=rastlst.cat,
-  rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean", rast.NODATA=0,
+  rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
   asptransform=TRUE, rast.asp=asp, keepnull=FALSE, showext=FALSE, savedata=FALSE)
 names(modeldat)
 
-
-sppltmodel <- modeldat$sppltmodel
-pltmodel <- modeldat$pltmodel
+pltassgn <- modeldat$pltassgn
 unitlut <- modeldat$domzonal
 unitarea <- modeldat$domarea
 unitvar <- modeldat$domvar
@@ -175,7 +175,7 @@ unitlut
 unitarea
 unitvar
 areavar
-head(pltmodel)
+head(pltassgn)
 prednames
 zonalnames
 
@@ -187,21 +187,21 @@ zonalnames
 ```
 ######################################################################################
 # Usage:
-# modMAarea(cond=NULL, pltmodel=NULL, cuniqueid="PLT_CN", puniqueid="CN", 
-#   sumunits=FALSE, adj="samp", MAmethod="GREG", landarea="ALL", ACI=FALSE, 
-#   nonsamp.filter=NULL, plt.filter=NULL, cond.filter=NULL,
-#   unitvar=NULL, unitvar2=NULL, autocombine=FALSE, unitarea=NULL, 
-#   areavar="ACRES", unitlut=NULL, npixelvar=NULL, prednames=NULL, 
-#   predfac=NULL, PSstrvar=NULL, rowvar=NULL, rowvar.filter=NULL, 
-#   colvar=NULL, colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-# 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE,
-# 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-#   allin1=FALSE, estround=0, pseround=3, estnull=0, psenull="--", divideby=NULL, 
-#   savedata=FALSE, rawdata=FALSE, outfolder=NULL, outfn=NULL, 
-#   outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, addtitle=TRUE, 
-#   returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
-#   title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, gui=FALSE)
-# 
+# modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN",  
+#    condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", ACI = FALSE, adj = "samp", 
+#    MAmethod = "GREG", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL,  
+#    unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
+#    unitlut = NULL, unitcombine = FALSE, npixelvar = "npixels", prednames = NULL, 
+#    predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, landarea="ALL", 
+#    plt.filter=NULL, cond.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, 
+#    col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, 
+#    col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, 
+# 	  rowgrpord=NULL, sumunits = FALSE, allin1=FALSE, estround=0, pseround=3,  
+# 	  estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
+#    outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, 
+#    addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
+#    title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, gui=FALSE)
+#   
 # Description:
 # Generates model-assisted estimates by estimation unit
 ######################################################################################
@@ -212,13 +212,27 @@ zonalnames
 
 # Live tree basal area for Bighorn National Forest
 # - MAmethod='HT'
+
 ###############################################################################
-balive.ht <- modMAarea(cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  	sumunits=FALSE, adj="samp", MAmethod="HT", landarea="FOREST", ACI=FALSE, 
-  	plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  	unitlut=unitlut, areavar=areavar, rawdata=TRUE)
+balive.ht <- modMAarea(cond=WYcond, pltassgn=pltassgn, puniqueid="CN",
+  	ACI=FALSE, adj="samp", MAmethod="HT", unitarea=unitarea, unitvar=unitvar, 
+  	unitlut=unitlut, areavar=areavar, landarea="FOREST", plt.filter=NULL, 
+  	cond.filter=NULL, sumunits=FALSE, rawdata=TRUE)
 names(balive.ht)
 balive.ht$est
+
+
+## Test with Green-book estimates
+stratalut <- data.frame(unitlut[[unitvar]], c(1,2),
+      t(unitlut[, names(unitlut)[startsWith(names(unitlut), "fornf")]]), row.names=NULL)
+names(stratalut) <- c(unitvar, "fornf", "strwt")
+stratalut
+
+modGBarea(cond=WYcond, pltassgn=pltassgn, puniqueid="CN",
+  	ACI=FALSE, adj="samp", strata=FALSE, unitarea=unitarea, unitvar=unitvar, 
+  	stratalut=stratalut, landarea="FOREST", plt.filter=NULL, cond.filter=NULL, 
+  	areavar=areavar, sumunits=FALSE)
+
 
 ```
 
@@ -227,20 +241,23 @@ balive.ht$est
 ```
 ######################################################################################
 # Usage:
-# modMAtree(tree, cond=NULL, pltmodel=NULL, seed=NULL, tuniqueid="PLT_CN", 
-#	  cuniqueid="PLT_CN", puniqueid="CN", sumunits=FALSE, adj="samp", MAmethod="GREG", 
-#	  landarea="ALL", ACI=FALSE, nonsamp.filter=NULL, plt.filter=NULL, cond.filter=NULL, 
-#		unitvar=NULL, unitvar2=NULL, autocombine=FALSE, unitarea=NULL, areavar="ACRES", 
-#		unitlut=NULL, npixelvar=NULL, prednames=NULL, predfac=NULL, PSstrvar=NULL, 
-#		estvar=NULL, estvar.filter=NULL, estvar.name=NULL, rowvar=NULL, rowvar.filter=NULL, 
-#		colvar=NULL, colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-#		row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, 
-#		collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, allin1=FALSE, 
-#		estround=1, pseround=2, estnull=0, psenull="--", divideby=NULL, savedata=FALSE,
-#		rawdata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE,
-#	 	overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
-#		title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL,
-#	 	title.filter=NULL, gui=FALSE)
+# modMAtree(tree, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, dsn = NULL,  
+#	  tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", puniqueid = "CN", 
+#    pltassgnid = "CN", ACI = FALSE, adj = "samp", MAmethod = "GREG", 
+#	  plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
+#    unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitlut = NULL, 
+#    unitcombine = FALSE, npixelvar = "npixels", prednames = NULL, predfac = NULL,
+#    PSstrvar = NULL, stratcombine = TRUE, landarea = "ALL", plt.filter=NULL,  
+#	  cond.filter=NULL, estvar=NULL, estvar.filter=NULL, estvar.name=NULL, 
+#    rowvar=NULL, colvar=NULL, row.FIAname=FALSE,col.FIAname=FALSE,   
+#    row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
+#    rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
+#    sumunits = FALSE, allin1=FALSE, estround=1, pseround=2, estnull=0,   
+#	  psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, outfolder=NULL,  
+#	  outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, 
+#	  addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
+#	  title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL,
+#	  title.filter=NULL, gui=FALSE)
 # 
 # Description:
 # Generates model-assisted estimates by estimation unit
@@ -253,41 +270,63 @@ balive.ht$est
 estvar <- "BA"
 estvar.filter <- "STATUSCD == 1"
 
+
 # Live tree basal area for Bighorn National Forest
 # - MAmethod='HT'
 ###############################################################################
-balive.ht <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  	sumunits=FALSE, adj="samp", MAmethod="HT", landarea="FOREST", ACI=FALSE, 
-  	plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  	unitlut=unitlut, areavar=areavar, estvar=estvar, estvar.filter=estvar.filter)
+balive.ht <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, puniqueid="CN",
+  	ACI=FALSE, adj="samp", MAmethod="HT", unitvar=unitvar, unitarea=unitarea, 
+  	unitlut=unitlut, areavar=areavar, landarea="FOREST", plt.filter=NULL, 
+  	cond.filter=NULL, estvar=estvar, estvar.filter=estvar.filter, sumunits=FALSE)
 names(balive.ht)
 balive.ht$est
+
+## Check with GB estimates
+modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, puniqueid="CN",
+  	ACI=FALSE, adj="samp", strata=FALSE, unitarea=unitarea, unitvar=unitvar,  
+  	stratalut=stratalut, areavar=areavar, 	landarea="FOREST", plt.filter=NULL, 
+  cond.filter=NULL, estvar=estvar, estvar.filter=estvar.filter, sumunits=FALSE)$est
 
 
 
 # Live tree basal area by forest type for Bighorn National Forest 
 # - MAmethod='HT'
 ###############################################################################
-balive.ht <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  	sumunits=FALSE, adj="samp", MAmethod="HT", landarea="FOREST", ACI=FALSE, 
-  	plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  	areavar=areavar, unitlut=unitlut, prednames=prednames, predfac="fornf", 
-  	estvar=estvar, estvar.filter=estvar.filter,
-  	rowvar="FORTYPCD", row.FIAname=TRUE)
+balive.ht <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+   puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="HT", unitvar=unitvar,   
+  	unitarea=unitarea, areavar=areavar, unitlut=unitlut, prednames=prednames, 
+  	predfac="fornf", landarea="FOREST", plt.filter=NULL, cond.filter=NULL, 
+  	estvar=estvar, estvar.filter=estvar.filter, rowvar="FORTYPCD", row.FIAname=TRUE, 
+  	sumunits=FALSE, returntitle=TRUE)
 names(balive.ht)
 balive.ht$est
+
+## Get list of raw data from balive.ht list components and look at names
+raw.ht <- balive.ht$raw
+names(raw.ht)
+raw.ht$unit.rowest  # Raw data for row estimates by estimation unit
+
+## Look at population data
+MApopdat <- balive.ht$MApopdat
+names(MApopdat)
+MApopdat$plotsampcnt	# Number of plots after plot filter
+MApopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
+MApopdat$unitlut    # Strata information and adjustment factors
+
+## Look at titles
+balive.ht$titlelst
+
 
 
 # Live tree basal area by forest type and stand-size class for Bighorn National Forest 
 # - MAmethod='HT'
 ###############################################################################
-balive.ht <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  	sumunits=FALSE, adj="samp", MAmethod="HT", landarea="FOREST", ACI=FALSE, 
-  	plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  	areavar=areavar, unitlut=unitlut, prednames=prednames, predfac="fornf", 
-  	estvar=estvar, estvar.filter=estvar.filter,
-  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
-  	rawdata=TRUE)
+balive.ht <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  	puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="HT", unitvar=unitvar,  
+  	unitarea=unitarea, areavar=areavar, unitlut=unitlut, prednames=prednames, 
+  	predfac="fornf", landarea="FOREST", plt.filter=NULL, cond.filter=NULL,  
+  	estvar=estvar, estvar.filter=estvar.filter, rowvar="FORTYPCD", row.FIAname=TRUE, 
+  	colvar="STDSZCD", col.FIAname=TRUE, sumunits=FALSE, rawdata=TRUE)
 names(balive.ht)
 balive.ht$est
 
@@ -305,24 +344,55 @@ estvar.filter <- "STATUSCD == 1"
 # Live tree basal area for Bighorn National Forest
 # - MAmethod='PS'
 ###############################################################################
-balive.ps <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  	sumunits=FALSE, adj="samp", MAmethod="PS", landarea="FOREST", ACI=FALSE, 
-  	plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  	areavar=areavar, unitlut=unitlut, PSstrvar="fornf", 
-  	estvar=estvar, estvar.filter=estvar.filter)
+balive.ps <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  	puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="PS", unitvar=unitvar,   
+  	unitarea=unitarea, areavar=areavar, unitlut=unitlut, PSstrvar="fornf", 
+   landarea="FOREST", plt.filter=NULL, cond.filter=NULL, estvar=estvar, 
+   estvar.filter=estvar.filter, sumunits=FALSE, rawdata=TRUE)
 names(balive.ps)
 balive.ps$est
+
+raw.ps <- balive.ps$raw
+names(raw.ps)
+raw.ps$unit.totest  # Raw data for row estimates by estimation unit
+
+
+## Check with GB estimates
+modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, puniqueid="CN",
+  	adj="samp", strata=TRUE, ACI=FALSE, plt.filter=NULL, cond.filter=NULL, 
+  	unitvar=unitvar, unitarea=unitarea, stratalut=stratalut, strvar="fornf", 
+  	areavar=areavar, sumunits=FALSE, landarea="FOREST", estvar=estvar,
+  	estvar.filter=estvar.filter)$est
+  	
+  	
+# Live tree basal area for Bighorn National Forest - forest type
+# - MAmethod='PS'
+###############################################################################
+balive.ps <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  	puniqueid="CN", adj="samp", ACI=FALSE, MAmethod="PS", unitvar=unitvar, 
+  	unitarea=unitarea, areavar=areavar, unitlut=unitlut, PSstrvar="fornf", 
+  	landarea="FOREST", plt.filter=NULL, cond.filter=NULL, rowvar="FORTYPCD",
+  	estvar=estvar, estvar.filter=estvar.filter, sumunits=FALSE)
+names(balive.ps)
+balive.ps$est
+
+
+## Check with GB estimates
+modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, puniqueid="CN",
+  	ACI=FALSE, adj="samp", strata=TRUE, unitvar=unitvar, unitarea=unitarea,  
+  	areavar=areavar, stratalut=stratalut, strvar="fornf",  
+  	landarea="FOREST", plt.filter=NULL, cond.filter=NULL, estvar=estvar,
+  	estvar.filter=estvar.filter, rowvar="FORTYPCD", sumunits=FALSE)$est
 
 
 # Live tree basal area by forest type for Bighorn National Forest 
 # - MAmethod='PS'
 ###############################################################################
-balive.ps <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  	sumunits=FALSE, adj="samp", MAmethod="PS", landarea="FOREST", ACI=FALSE, 
-  	plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  	areavar=areavar, unitlut=unitlut, PSstrvar="fornf", 
-  	estvar=estvar, estvar.filter=estvar.filter,
-	  rowvar="FORTYPCD", row.FIAname=TRUE)
+balive.ps <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  	puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="PS", unitvar=unitvar,  
+  	unitarea=unitarea, areavar=areavar, unitlut=unitlut, PSstrvar="fornf",   
+  	landarea="FOREST", plt.filter=NULL, cond.filter=NULL, estvar=estvar,  
+  	estvar.filter=estvar.filter, rowvar="FORTYPCD", row.FIAname=TRUE, sumunits=FALSE)
 names(balive.ps)
 balive.ps$est
 
@@ -335,34 +405,37 @@ estvar <- "BA"
 estvar.filter <- "STATUSCD == 1"
 
 ## Model-assisted, GREG method
-balive.greg <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  sumunits=FALSE, adj="samp", MAmethod="GREG", landarea="FOREST", ACI=FALSE, 
-  plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  areavar=areavar, unitlut=unitlut, prednames=prednames, predfac="fornf", 
-  estvar=estvar, estvar.filter=estvar.filter)
-balive.greg
-
+balive.greg <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="GREG", unitvar=unitvar,  
+  unitarea=unitarea, areavar=areavar, unitlut=unitlut, prednames=prednames, 
+  predfac="fornf", landarea="FOREST", plt.filter=NULL, cond.filter=NULL,  
+  estvar=estvar, estvar.filter=estvar.filter, sumunits=FALSE)
+balive.greg$est
 
 
 ## Model-assisted, GREG method - add rawdata
-balive.greg <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  sumunits=FALSE, adj="samp", MAmethod="GREG", landarea="FOREST", ACI=FALSE, 
-  plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  areavar=areavar, unitlut=unitlut, prednames=prednames, predfac="fornf", 
-  estvar=estvar, estvar.filter=estvar.filter, rawdata=TRUE)
+balive.greg <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="GREG", unitvar=unitvar,  
+  unitarea=unitarea, areavar=areavar, unitlut=unitlut, prednames=prednames, 
+  predfac="fornf", landarea="FOREST", plt.filter=NULL, cond.filter=NULL,  
+  estvar=estvar, estvar.filter=estvar.filter, sumunits=FALSE, rawdata=TRUE)
 names(balive.greg)
 
-balive.greg.raw <- balive.greg$raw
-names(balive.greg.raw)
+raw.greg <- balive.greg$raw
+names(raw.greg)
 
-balive.greg.raw$plotsampcnt
-balive.greg.raw$condsampcnt
-balive.greg.raw$unitlut
-balive.greg.raw$unitarea
-head(balive.greg.raw$pltmodel)
-head(balive.greg.raw$dat)
-balive.greg.raw$estvar
-balive.greg.raw$unit.totest
+raw.greg$unit.totest  # Raw data for total estimates by estimation unit
+head(raw.greg$domdat)
+raw.greg$estvar
+
+
+MApopdat <- balive.greg$MApopdat
+names(MApopdat)
+
+MApopdat$plotsampcnt
+MApopdat$condsampcnt
+MApopdat$unitlut
+MApopdat$unitarea
 
 
 ## By Bighorn National Forest ##
@@ -370,29 +443,34 @@ balive.greg.raw$unit.totest
 ######################################################################################
 
 ## Get estimates for model-assisted, GREG method - add rawdata
-balive_ftyp.greg <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  sumunits=FALSE, adj="samp", MAmethod="GREG", landarea="FOREST", ACI=FALSE, 
-  plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  areavar=areavar, unitlut=unitlut, prednames=prednames, predfac="fornf", 
-  estvar=estvar, estvar.filter=estvar.filter, rawdata=TRUE,
-  rowvar="FORTYPCD", row.FIAname=TRUE)
-names(balive_ftyp.greg)
+balive2.greg <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn,   
+  puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="GREG", unitvar=unitvar,     
+  unitarea=unitarea, areavar=areavar, unitlut=unitlut, prednames=prednames,   
+  predfac="fornf", landarea="FOREST", plt.filter=NULL, cond.filter=NULL,   
+  estvar=estvar, estvar.filter=estvar.filter, rowvar="FORTYPCD", row.FIAname=TRUE,
+  sumunits=FALSE, rawdata=TRUE)
+names(balive2.greg)
 
-balive_ftyp.greg$est
+balive2.greg$est
 
 
-balive_ftyp.greg.raw <- balive_ftyp.greg$raw
-names(balive_ftyp.greg.raw)
+raw2.greg <- balive2.greg$raw
+names(raw2.greg)
 
-balive_ftyp.greg.raw$plotsampcnt
-balive_ftyp.greg.raw$condsampcnt
-balive_ftyp.greg.raw$unitlut
-balive_ftyp.greg.raw$unitarea
-head(balive_ftyp.greg.raw$pltmodel)
-head(balive_ftyp.greg.raw$dat)
-balive_ftyp.greg.raw$estvar
-balive_ftyp.greg.raw$unit.totest
-balive_ftyp.greg.raw$unit.rowest
+raw2.greg$unit.totest  # Raw data for total estimates by estimation unit
+raw2.greg$unit.rowest  # Raw data for row estimates by estimation unit
+head(raw2.greg$domdat)
+raw2.greg$estvar
+
+MApopdat <- balive2.greg$MApopdat
+names(MApopdat)
+
+MApopdat$plotsampcnt
+MApopdat$condsampcnt
+MApopdat$unitlut
+MApopdat$unitarea
+
+
 
 
 
@@ -401,86 +479,97 @@ balive_ftyp.greg.raw$unit.rowest
 ######################################################################################
 
 ## Get estimates for model-assisted, GREG method - add rawdata
-balive_ftyp_stdsz.greg <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  sumunits=FALSE, adj="samp", MAmethod="GREG", landarea="FOREST", ACI=FALSE, 
-  plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  areavar=areavar, unitlut=unitlut, prednames=prednames, predfac="fornf", 
-  estvar=estvar, estvar.filter=estvar.filter, rawdata=TRUE,
-  rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE)
-names(balive_ftyp_stdsz.greg)
+balive3.greg <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="GREG", unitvar=unitvar,   
+  unitarea=unitarea, areavar=areavar, unitlut=unitlut, prednames=prednames, predfac="fornf", 
+  landarea="FOREST", plt.filter=NULL, cond.filter=NULL, estvar=estvar, 
+  estvar.filter=estvar.filter, rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", 
+  col.FIAname=TRUE, sumunits=FALSE, rawdata=TRUE)
+names(balive3.greg)
 
-balive_ftyp_stdsz.greg$est
-balive_ftyp_stdsz.greg$pse
+balive3.greg$est
+balive3.greg$pse
 
-balive_ftyp_stdsz.greg.raw <- balive_ftyp_stdsz.greg$raw
-names(balive_ftyp_stdsz.greg.raw)
+raw3.greg <- balive3.greg$raw
+names(raw3.greg)
 
-balive_ftyp_stdsz.greg.raw$plotsampcnt
-balive_ftyp_stdsz.greg.raw$condsampcnt
-balive_ftyp_stdsz.greg.raw$unitlut
-balive_ftyp_stdsz.greg.raw$unitarea
-head(balive_ftyp_stdsz.greg.raw$pltmodel)
-head(balive_ftyp_stdsz.greg.raw$dat)
-balive_ftyp_stdsz.greg.raw$estvar
-balive_ftyp_stdsz.greg.raw$unit.totest
-balive_ftyp_stdsz.greg.raw$unit.rowest
-balive_ftyp_stdsz.greg.raw$unit.colest
+head(raw3.greg$domdat)
+raw3.greg$estvar
+raw3.greg$unit.totest
+raw3.greg$unit.rowest
+raw3.greg$unit.colest
+
+
+MApopdat.greg <- balive3.greg$MApopdat
+names(MApopdat.greg)
+
+MApopdat.greg$plotsampcnt
+MApopdat.greg$condsampcnt
+MApopdat.greg$unitlut
+MApopdat.greg$unitarea
+
+
 
 
 ## Get estimates for model-assisted, PS method - add rawdata
-balive_ftyp_stdsz.ps <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  sumunits=FALSE, adj="samp", MAmethod="PS", landarea="FOREST", ACI=FALSE, 
-  plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  areavar=areavar, unitlut=unitlut, PSstrvar="fornf", 
-  estvar=estvar, estvar.filter=estvar.filter, rawdata=TRUE,
-  rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE)
-names(balive_ftyp_stdsz.ps)
+balive3.ps <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+  puniqueid="CN", ACI=FALSE, adj="samp", MAmethod="PS",  unitvar=unitvar,  
+  unitarea=unitarea, areavar=areavar, unitlut=unitlut, PSstrvar="fornf",  
+  landarea="FOREST", plt.filter=NULL, cond.filter=NULL, estvar=estvar, 
+  estvar.filter=estvar.filter, rowvar="FORTYPCD", row.FIAname=TRUE,  
+  colvar="STDSZCD", col.FIAname=TRUE, sumunits=FALSE, rawdata=TRUE)
+names(balive3.ps)
 
-balive_ftyp_stdsz.ps$est
-balive_ftyp_stdsz.ps$pse
+balive3.ps$est
+balive3.ps$pse
 
-balive_ftyp_stdsz.ps.raw <- balive_ftyp_stdsz.ps$raw
-names(balive_ftyp_stdsz.ps.raw)
+raw3.ps <- balive3.ps$raw
+names(raw3.ps)
 
-balive_ftyp_stdsz.ps.raw$plotsampcnt
-balive_ftyp_stdsz.ps.raw$condsampcnt
-balive_ftyp_stdsz.ps.raw$unitlut
-balive_ftyp_stdsz.ps.raw$unitarea
-head(balive_ftyp_stdsz.ps.raw$pltmodel)
-head(balive_ftyp_stdsz.ps.raw$tdomdat)
-balive_ftyp_stdsz.ps.raw$estvar
-balive_ftyp_stdsz.ps.raw$unit.totest
-balive_ftyp_stdsz.ps.raw$unit.rowest
-balive_ftyp_stdsz.ps.raw$unit.colest
+head(raw3.ps$domdat)
+raw3.ps$estvar
+raw3.ps$unit.totest
+raw3.ps$unit.rowest
+raw3.ps$unit.colest
 
+MApopdat.ps <- balive3.ps$MApopdat
+names(MApopdat.ps)
+
+MApopdat.ps$plotsampcnt
+MApopdat.ps$condsampcnt
+MApopdat.ps$unitlut
+MApopdat.ps$unitarea
 
 
 
 ## Get estimates for model-assisted, HT method - add rawdata
-balive_ftyp_stdsz.ht <- modMAtree(tree=WYtree, cond=WYcond, pltmodel=pltmodel, puniqueid="CN",
-  sumunits=FALSE, adj="samp", MAmethod="HT", landarea="FOREST", ACI=FALSE, 
-  plt.filter=NULL, cond.filter=NULL, unitarea=unitarea, unitvar=unitvar, 
-  areavar=areavar, unitlut=unitlut, , 
-  estvar=estvar, estvar.filter=estvar.filter, rawdata=TRUE,
-  rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE)
-names(balive_ftyp_stdsz.ht)
+balive3.ht <- modMAtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn,  
+  puniqueid="CN", adj="samp", MAmethod="HT", ACI=FALSE, unitvar=unitvar, 
+  unitarea=unitarea, areavar=areavar, unitlut=unitlut, landarea="FOREST", 
+  plt.filter=NULL, cond.filter=NULL, estvar=estvar, estvar.filter=estvar.filter, 
+  sumunits=FALSE, rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", 
+  col.FIAname=TRUE, rawdata=TRUE)
+names(balive3.ht)
 
-balive_ftyp_stdsz.ht$est
-balive_ftyp_stdsz.ht$pse
+balive3.ht$est
+balive3.ht$pse
 
-balive_ftyp_stdsz.ht.raw <- balive_ftyp_stdsz.ht$raw
-names(balive_ftyp_stdsz.ht.raw)
+raw3.ht <- balive3.ht$raw
+names(raw3.ht)
 
-balive_ftyp_stdsz.ht.raw$plotsampcnt
-balive_ftyp_stdsz.ht.raw$condsampcnt
-balive_ftyp_stdsz.ht.raw$unitlut
-balive_ftyp_stdsz.ht.raw$unitarea
-head(balive_ftyp_stdsz.ht.raw$pltmodel)
-head(balive_ftyp_stdsz.ht.raw$tdomdat)
-balive_ftyp_stdsz.ht.raw$estvar
-balive_ftyp_stdsz.ht.raw$unit.totest
-balive_ftyp_stdsz.ht.raw$unit.rowest
-balive_ftyp_stdsz.ht.raw$unit.colest
+head(raw3.ht$domdat)
+raw3.ht$estvar
+raw3.ht$unit.totest
+raw3.ht$unit.rowest
+raw3.ht$unit.colest
+
+MApopdat.ht <- balive3.ht$MApopdat
+names(MApopdat.ht)
+
+MApopdat.ht$plotsampcnt
+MApopdat.ht$condsampcnt
+MApopdat.ht$unitlut
+MApopdat.ht$unitarea
 
 
 ```

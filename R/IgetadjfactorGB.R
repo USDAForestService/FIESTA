@@ -1,4 +1,4 @@
-getadjfactorGB <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN", 
+getadjfactorGB <- function(condx=NULL, treex=NULL, tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", unitlut=NULL, unitvars=NULL, strvars=NULL, 
 	unitarea=NULL, areavar=NULL, cvars2keep=NULL){
 
@@ -24,28 +24,28 @@ getadjfactorGB <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN",
   ####################################################################################
  
   ## Set global variables
-  CONDPROP_ADJ=CONDPROP_UNADJ=CONDPROP_ADJFAC=tadjfac=TPA_UNADJ=MICRPROP_ADJFAC=
-   	MACRPROP_ADJFAC=SUBPPROP_ADJFAC=expfac=expcond=n.strata=PROP_BASIS=EXPNS=strwt <- NULL
+  CONDPROP_ADJ=CONDPROP_UNADJ=ADJ_FACTOR_COND=cadjfac=tadjfac=TPAGROW_UNADJ=
+	ADJ_FACTOR_MICR=ADJ_FACTOR_MACR=ADJ_FACTOR_SUBP=expfac=expcond=expcondtab=
+	n.strata=PROP_BASIS=EXPNS=strwt=Prop <- NULL
     
   strunitvars <- c(unitvars, strvars)
   keycondx <- key(condx)
 
+  ## Condition proportion variable
   varlst <- "CONDPROP_UNADJ"
-  varlstadj <- sapply(varlst, function(x) sub("UNADJ", "ADJFAC", x) )
 
   ## Get list of condition-level variables to calculate adjustments for
-  if (esttype %in% c("TREE", "RATIO")) {  
+  if (!is.null(treex)) {  
     tvarlst <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
     tvarlst2 <- tvarlst[which(tvarlst%in% names(condx))]
     if (length(tvarlst2) == 0) stop("must include *PROP_UNADJ variables in cond")
     varlst <- c(varlst, tvarlst2)
-
-    ## Names for new, condition-level adjusted variables (_UNADJ to _ADJ) 
-    tvarlstadj <- sapply(tvarlst2, function(x){sub("UNADJ", "ADJFAC", x) })
-    varlstadj <- c(varlstadj, tvarlstadj)
   }
   varsumlst <- paste0(varlst, "_SUM")
 
+  ## Names for new, condition-level adjusted variables (_UNADJ to _ADJ) 
+  varlstadj <- sapply(varlst, function(x) sub("PROP_UNADJ", "", x) )
+  varlstadj <- paste0("ADJ_FACTOR_", varlstadj)
 
   ###############################################################################
   ## Calculate adjustment factors by strata (and estimation unit) for variable list
@@ -56,50 +56,52 @@ getadjfactorGB <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN",
   cndadj <- condx[, lapply(.SD, sum, na.rm=TRUE), by=strunitvars, .SDcols=varlst]
   setnames(cndadj, varlst, varsumlst)
   setkeyv(cndadj, strunitvars)
+  setkeyv(unitlut, strunitvars)
 
   ## Merge condition adjustment factors to strata table.
   unitlut <- unitlut[cndadj]
   n <- ifelse(is.null(strvars), "n.total", "n.strata")
 
-  ## Divide summed conditions by total number of plots in strata
-  unitlut[, (varlstadj) := lapply(.SD, function(x) get(n)/x), .SDcols=varsumlst]
+  ## Calculate adjustment factor for conditions
+  ## (divide summed conditions by total number of plots in strata)
+  unitlut[, (varlstadj) := lapply(.SD, 
+	function(x) ifelse((is.na(x) | x==0), 0, get(n)/x)), .SDcols=varsumlst]
 
   ## Merge condition adjustment factors to cond table to get plot identifiers.
   setkeyv(condx, strunitvars)
   condx <- condx[unitlut[,c(strunitvars, varlstadj), with=FALSE]]
 
+  ## Change name of condition adjustment factor to cadjfac
+  setnames(condx, "ADJ_FACTOR_COND", "cadjfac")
+  setnames(unitlut, "ADJ_FACTOR_COND", "cadjfac")
+
   ## Calculate adjusted condition proportion for plots
-  condx[, CONDPROP_ADJ := CONDPROP_UNADJ * CONDPROP_ADJFAC]
+  condx[, CONDPROP_ADJ := CONDPROP_UNADJ * cadjfac]
+  setkeyv(condx, c(cuniqueid, condid))
 
   ## Calculate adjusted condition proportions for different size plots for trees
-  if (esttype %in% c("TREE", "RATIO")) {
-    setkeyv(condx, c(cuniqueid, condid))
+  if (!is.null(treex)) {
     setkeyv(treex, c(tuniqueid, condid))
 
     ## Merge condition adjustment factors to tree table to get plot identifiers.
     ## Define a column in tree table, adjfact, to specify adjustment factor based on
     ##	the size of the plot it was measure on (identified by TPA_UNADJ)
-    ## (SUBPLOT: TPA_UNADJ=6.018046; MICROPLOT: TPA_UNADJ=74.965282; MACROPLOT: TPA_UNADJ=0.999188
+    ## (SUBPLOT: TPA_UNADJ=6.018046; MICROPLOT: TPA_UNADJ=74.965282; MACROPLOT: TPA_UNADJ>6
 
-    if ("PROP_BASIS" %in% names(condx)) {
-      treex[condx, tadjfac := ifelse(PROP_BASIS == "MICR", MICRPROP_ADJFAC, 
-		ifelse(PROP_BASIS == "MACR", MACRPROP_ADJFAC,
-		SUBPPROP_ADJFAC))]
-    } else if ("PROP_BASIS" %in% names(treex)) {
-      treex[condx, tadjfac := ifelse(PROP_BASIS == "MICR", MICRPROP_ADJFAC, 
-		ifelse(PROP_BASIS == "MACR", MACRPROP_ADJFAC,
-		SUBPPROP_ADJFAC))]
+#    if ("PROP_BASIS" %in% names(condx)) {
+#      treex[condx, tadjfac := ifelse(PROP_BASIS == "MICR", ADJ_FACTOR_MICR, 
+#		ifelse(PROP_BASIS == "MACR", ADJ_FACTOR_MACR,
+#		ADJ_FACTOR_SUBP))]
+    if ("PROP_BASIS" %in% names(treex)) {
+      treex[condx, tadjfac := ifelse(PROP_BASIS == "MICR", ADJ_FACTOR_MICR, 
+		ifelse(PROP_BASIS == "MACR", ADJ_FACTOR_MACR,
+		ADJ_FACTOR_SUBP))]
     } else {
-      treex[condx, tadjfac := ifelse(TPA_UNADJ > 50, MICRPROP_ADJFAC, 
- 		ifelse(TPA_UNADJ > 0 & TPA_UNADJ < 5, MACRPROP_ADJFAC,
- 		SUBPPROP_ADJFAC))]
+      treex[condx, tadjfac := ifelse(TPAGROW_UNADJ > 50, ADJ_FACTOR_MICR, 
+ 		ifelse(TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, ADJ_FACTOR_MACR,
+ 		ADJ_FACTOR_SUBP))]
     }
-  }
-
-  ## Remove *_ADJFAC and *_UNADJ columns in condx 
-  condx[, names(condx)[grep("_ADJFAC", names(condx))]:= NULL] 
-  condx[, names(condx)[grep("_UNADJ", names(condx))]:= NULL] 
-  
+  }  
 
   ## Calculate expansion factors (strata-level and cond-level)
   if (!is.null(unitarea)) {
@@ -110,24 +112,32 @@ getadjfactorGB <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN",
     unitlut <- unitlut[unitarea]
 
     ## Expansion factors - average area by strata
-    unitlut[, expfac:= get(areavar)/get(n)][, EXPNS := expfac * strwt]
+    if (any(c("strwt", "Prop") %in% names(unitlut))) {
+      if ("strwt" %in% names(unitlut)) {
+        unitlut[, expfac:= get(areavar)/get(n)][, EXPNS := expfac * strwt]
+      } else {
+        unitlut[, expfac:= get(areavar)/get(n)][, EXPNS := expfac * Prop]
+      } 
 
-    ## Condition-level expansion factors
-    setkeyv(condx, strunitvars)
-    expcondtab <- merge(condx, unitlut[,c(strunitvars, "expfac"), with=FALSE])
-    expcondtab <- expcondtab[, expcond:=(CONDPROP_ADJ * expfac)][order(get(cuniqueid))][
-    , expfac := NULL][, (strunitvars) := NULL]
-    setkeyv(condx, c(cuniqueid, condid))
-    setkeyv(expcondtab, c(cuniqueid, condid))
-    unitlut[, expfac := NULL]
-  } else {
-    expcondtab <- NULL
-  }
+      ## Condition-level expansion factors
+      setkeyv(condx, strunitvars)
+      expcondtab <- merge(condx, unitlut[,c(strunitvars, "EXPNS"), with=FALSE],
+			by=strunitvars)
+      expcondtab <- expcondtab[, expcond:=(CONDPROP_ADJ * EXPNS)][order(get(cuniqueid))][
+    		, EXPNS := NULL][, (strunitvars) := NULL]
+      setkeyv(condx, c(cuniqueid, condid))
+      setkeyv(expcondtab, c(cuniqueid, condid))
+    }
+  } 
 
-  setkeyv(condx, keycondx)
+  ## Remove *_ADJFAC and *_UNADJ columns in condx 
+  #condx[, names(condx)[grep("ADJ_FACTOR_", names(condx))]:= NULL] 
+  #condx[, names(condx)[grep("_UNADJ", names(condx))]:= NULL] 
+
+ 
   adjfacdata <- list(condx=condx, unitlut=unitlut)
   adjfacdata$expcondtab <- expcondtab
-  if (esttype %in% c("TREE", "RATIO")) adjfacdata$treex <- treex 
+  if (!is.null(treex)) adjfacdata$treex <- treex 
   adjfacdata$cvars2keep <- names(condx)[names(condx) != "CONDPROP_ADJ"]
 
   return(adjfacdata)

@@ -1,67 +1,56 @@
 \name{spClipPoly}
 \alias{spClipPoly}
 \title{
-	Spatial - Subsets an S4 SpatialPolygons layer with another SpatialPolygons layer.
+	Spatial - Clip (intersect) polygon vector layer with polygon vector layer.
 }
 \description{
-	Subsets an S4 SpatialPolygons object(s) or shapefile(s) with another 
-	SpatialPolygons object or polygon shapefile (*.shp), with option to export 
-	the clipped SpatialPolygons layer to a shapefile (*.shp).
+	Wrapper for sf::st_intersection, to clip (intersect) polygon vector layer  
+	with another polygon vector layer. 
 }				
 
 \usage{
-spClipPoly(polyv_layer, polyv_dsn = NULL, clippolyv_layer, clippolyv_dsn = NULL, 
-	showext = FALSE, areacalc = FALSE, exportshp = FALSE, outfolder = NULL, 
-	outshpnm = NULL, outfn.date = TRUE, overwrite = FALSE)
+spClipPoly(polyv, polyv_dsn = NULL, clippolyv, clippolyv_dsn = NULL, 
+	clippolyv.filter = NULL, showext = FALSE, areacalc = FALSE, 
+	areaunits = "ACRES", exportsp = FALSE, ...)
 }
 
 \arguments{
-  \item{polyv_layer}{ String or S4 object. The name of the polygon layer 
-	to be clipped. The layer name may be a full pathname to a file, the basename 
-	to a file, a spatial layer name from a database, or a SpatialPolygons object 
-	with a defined projection. }
-  \item{polyv_dsn}{ String. The data source name (dsn; i.e., folder or database name)
-	of poly_layer. The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{clippolyv_layer}{ String or S4 object. The name of the polygon layer 
-	to use for clipping. The layer name may be a full pathname to a file, the 
-	basename to a file, a spatial layer name from a database, or a SpatialPolygons 
-	object with a defined projection. }
-  \item{clippolyv_dsn}{ String. The data source name (dsn; i.e., folder or database name)
+  \item{polyv}{ sf R object or String. Polygon data to clip. Can be a spatial 
+	polygon object, full pathname to a shapefile, or name of a layer within 
+	a database. }
+  \item{polyv_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of layer to clip. The dsn varies by driver. See gdal OGR vector
+	formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf object. }
+  \item{clippolyv}{ SpatialPolygons class R object or String. Name of the
+	polygon spatial layer to use for clipping. }
+  \item{clippolyv_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
 	of clippolyv_layer. The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). Optional. } 
+	(https://www.gdal.org/ogr_formats.html). Optional if clippolyv_layer is an R object. }
+  \item{clippolyv.filter}{ String. Filter to subset clippolyv spatial layer. } 
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
-  \item{areacalc}{ Logical. If TRUE, calculate area of unioned polygons and append
+  \item{areacalc}{ Logical. If TRUE, calculate area of clipped polygons and append
 	to attribute table (See details). }
-  \item{exportshp}{ Logical. If TRUE, exports Spatial object to outfolder as an 
-	ArcGIS shapefile (*.shp). Variable names are truncated to 10 characters or less
-	(See note below). }
-  \item{outfolder}{ String. If exportshp=TRUE, name of output folder. If NULL,
-	the working directory is used. }
-  \item{outshpnm}{ String. Name of output clipped polygon. If NULL, default is 
-	'polyclip.shp'. }
-  \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE, overwrite files in outfolder. }
+  \item{areaunits}{ String. If TRUE, calculate area of clipped polygons and append
+	to attribute table ("ACRES", "HECTARES", "SQKM"). If NULL, units of polyv.}
+  \item{exportsp}{ Logical. If TRUE, the spatial clipped object is exported to 
+	outfolder (see spExportSpatial for details). }
+  \item{...}{ Parameters for spExportSpatial. }
 }
 \details{
-  Uses raster::crop to merge two polygons.
-  Generates a new ID for each polygon and appends attributes from both polygons.
+  The sf::st_intersection function is used to clip polygons. \cr 
 
   areacalc\cr
-  If areacalc = TRUE and the unioned SpatialPolygon object is not in a projected 
+  If areacalc = TRUE and the clipped spatial object is not in a projected 
 	coordinate system (i.e., longlat), the object will be reprojected to the 
 	Albers Equal Area projection before area is calculated.  
 
 }
 \value{
-  SpatialPolygonsDataframe object of clipped polygon. If polyv and clippolyv have 
-	different projections, the projection of returned object will have the same projection
-	as polyv (See note about on-the-fly projection conversion). 
+  sf object of clipped polygon. If polyv and clippolyv have different projections,
+	the projection of returned object will have the same projection as
+	polyv (See note about on-the-fly projection conversion). 
 
-  If exportshp=TRUE, the SpatialPolygons object is exported to outfolder
-	(Default name: datext_'date'.shp). Variable names are truncated to 10 characters or 
-	less (See note below). Name changes are output to 'outfn'_newnames_'data'.csv in
-	outfolder.
+  If exportsp=TRUE, the sf object will be written to outfolder (See note). 
 }
 \author{
 	Tracey S. Frescino
@@ -77,11 +66,12 @@ spClipPoly(polyv_layer, polyv_dsn = NULL, clippolyv_layer, clippolyv_dsn = NULL,
 	Be aware, providing inaccurate or incomplete CRS 	information may lead to erroneous 
 	data shifts when reprojecting. See spTransform help documentation for more details.
 
-  If exportshp=TRUE:\cr
- 	The writeOGR (rgdal) function is called. The ArcGIS driver truncates variable 
-	names to 10 characters or less. Variable names are changed before export using 
-	an internal function (trunc10shp). If Spatial object has more than 1 record, 
-	it will be returned but not exported. 
+  ESRI Shapefile Driver\cr 
+  If exportsp=TRUE:\cr
+ 	The writeOGR (rgdal) function is called. If out_fmt="shp", the ESRI Shapefile 
+	driver truncates variable names to 10 characters or less. Variable names are 
+	changed before export using an internal function (trunc10shp). If sf object 
+	has more than 1 record, it will be returned but not exported. 
 }
 
 \keyword{ data }

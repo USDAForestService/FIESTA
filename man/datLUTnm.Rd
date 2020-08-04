@@ -8,24 +8,25 @@
 }
 \usage{
 datLUTnm(x, xvar = NULL, LUT = NULL, LUTvar = NULL, LUTnewvar = NULL, LUTnewvarnm = NULL,
-	FIAname = FALSE, NAequal0 = TRUE, group=FALSE, add0 = FALSE, savedata = FALSE, 
-	outfolder = NULL, outfn = NULL, xtxt = NULL)
+	FIAname = FALSE, NAclass = "OtherNA", group=FALSE, add0 = FALSE, stopifmiss = FALSE,
+	savedata = FALSE, outfolder = NULL, outfn = "datlut", xtxt = NULL)
 }
 \arguments{
   \item{x}{ Data frame or comma-delimited file (*.csv). The data table with variable to classify. }
   \item{xvar}{ String. Name of variable in the data table to join to. }
   \item{LUT}{ Data frame or comma-delimited file (*.csv). Name of the file with collapsed 
 	classes (If FIAname=FALSE). }
-  \item{LUTvar}{ String. Matching variable name in the look-up table. If LUTvar=NULL,
+  \item{LUTvar}{ String. Name of variable in LUT with values matching that xvar. If LUTvar=NULL,
 	LUTvar=xvar. }
   \item{LUTnewvar}{ String. Name(s) of other variable(s) in the look-up table to include in 
 	join. If NULL, all other variables in table will be included. }
-  \item{LUTnewvarnm}{ String. Name(s) for LUTnewvar. If NULL, names will default to LUTnewvar. }
+  \item{LUTnewvarnm}{ String. Different name(s) for LUTnewvar. If NULL, names will default to 
+	LUTnewvar. The length of LUTnewvarnm must equal the length for LUTnewvar. }
   \item{FIAname}{ Logical. If TRUE, get FIA reference name based on (ref_codes) within FIESTA. }
-  \item{NAequal0}{ Logical. If TRUE, any NA values in xvar will be changed to 0 after merging 
-	with look-up table. }
+  \item{NAclass}{ String. NA values in xvar will be changed to NAclass. }
   \item{group}{ Logical. If TRUE, the group variables in reference table (ref_codes) 
 	are merged to data table (GROUPCD, GROUPNM). }
+  \item{stopifmiss}{ Logical. IF TRUE, stops function if missing codes in LUTx. }
   \item{add0}{ Logical. IF TRUE, keep all codes in look up table. If FALSE, only include 
 	codes that are in x. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder as comma-delimited file (*.csv). }
@@ -55,19 +56,19 @@ datLUTnm(x, xvar = NULL, LUT = NULL, LUTvar = NULL, LUTnewvar = NULL, LUTnewvarn
 }
 \examples{
 	## Append forest type names using the reference table above
-	ref_fortypcd <- ref_codes[ref_codes$VARIABLE == "FORTYPCD",]
-	WYcondlut <- datLUTnm(WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, LUTvar="VALUE",
-      	LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
-	names(WYcondlut)
-	WYcond2 <- WYcondlut$xLUT
-	head(WYcond2[WYcond2$FORTYPCD > 0, ])
+#	ref_fortypcd <- ref_codes[ref_codes$VARIABLE == "FORTYPCD",]
+#	WYcondlut <- datLUTnm(WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, LUTvar="VALUE",
+#      	LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
+#	names(WYcondlut)
+#	WYcond2 <- WYcondlut$xLUT
+#	head(WYcond2[WYcond2$FORTYPCD > 0, ])
 
 	## Append forest type names the FIAname parameter. If the xvar is in the stored 
 	##    reference table, the name and values will automatically be appended.
-	WYcondlut2 <- datLUTnm(WYcond, xvar="FORTYPCD", FIAname=TRUE)
-	names(WYcondlut2)
-	WYcond3 <- WYcondlut2$xLUT
-	head(WYcond3[WYcond3$FORTYPCD > 0, ])
+#	WYcondlut2 <- datLUTnm(WYcond, xvar="FORTYPCD", FIAname=TRUE)
+#	names(WYcondlut2)
+#	WYcond3 <- WYcondlut2$xLUT
+#	head(WYcond3[WYcond3$FORTYPCD > 0, ])
 }
 
 \keyword{ data }

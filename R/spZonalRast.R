@@ -1,52 +1,60 @@
-spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast, 
-	rastfolder=NULL, bands=NULL, zonalstat=NULL, pixelfun=NULL, outname=NULL, 
-	showext=FALSE, rastlut=NULL, rast.NODATA=0, savedata=FALSE, outfolder=NULL, 
-	outfn=NULL, overwrite=FALSE) { 
+spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast, 
+	rastfolder=NULL, bands=NULL, zonalstat, pixelfun=NULL, outname=NULL, 
+	showext=FALSE, rastlut=NULL, rast.NODATA=NULL, na.rm=TRUE, savedata=FALSE, 
+	outfolder=NULL, outfn="zonalext", outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite=FALSE) { 
   ##################################################################################### 
   ## DESCRIPTION:  
   ## Extracts summary statistics by polygon (i.e., zone).  
   ##################################################################################### 
 
-  if (!"rgeos" %in% rownames(installed.packages()))
-    stop("spZonalRast function requires package rgeos")
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("spZonalRast function requires package sf")
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE 
   gui <- ifelse(nargs() == 0, TRUE, FALSE)  
 
   if (gui) showext=savedata=overwrite <- NULL 
  
+  ## Set global variables
+  count <- NULL
 
   ################################################################## 
   ## CHECK INPUT PARAMETERS 
   ################################################################## 
   ## Check dsn, layer 
-  spobj <- pcheck.spatial(layer=polyv_layer, dsn=polyv_dsn, gui=gui, 
+  spobj <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, 
 		caption="Polygon zones?") 
  
-  ## Check attribute 
-  attribute <- FIESTA::pcheck.varchar(var2check=attribute, varnm="attribute", 
+  ## Check polyv.att 
+  polyv.att <- FIESTA::pcheck.varchar(var2check=polyv.att, varnm="polyv.att", 
 		gui=gui, checklst=names(spobj), caption="Zonal attribute",  
-		warn=paste(attribute, "not in polyv_layer"), stopifnull=TRUE) 
+		warn=paste(polyv.att, "not in polyv"), stopifnull=TRUE) 
     
   ## Get raster info 
   ########################################################  
 
   ## Verify rasters 
-  rastfn <- FIESTA::getrastlst(rast, rastfolder, filenames=TRUE, stopifnofn=TRUE)  
+  rastfn <- getrastlst.rgdal(rast, rastfolder, stopifLonLat=TRUE, gui=gui)
 
   ## Get names of raster 
-  rastnm <- sub(raster::extension(basename(rastfn)), "", basename(rastfn)) 
+  rastnm <- basename.NoExt(rastfn) 
  
   ## Import rasters 
-  rastx <- raster(rastfn)  
+  #rastx <- raster(rastfn)  
 
   ## Get number of bands in each raster and set names 
-  rast.nbands <- raster::nbands(rastx)  
+  rast.nbands <- rasterInfo(rastfn)$nbands
+
+  ## Get number of bands in each raster and set names 
+  rast.prj <- rasterInfo(rastfn)$crs
 
   ## Check zonalstat     
-  zonalstatlst <- c("mean", "sum", "majority", "minority", "variety", "npixels", "count", "proportion") 
-  zonalstat <- FIESTA::pcheck.varchar(var2check=zonalstat, varnm="zonalstat", gui=gui,  
- 		checklst=zonalstatlst, caption="Zonal statistic(s)", stopifnull=TRUE, multiple=TRUE) 
+  zonalstatlst <- c("mean", "sum", "majority", "minority", "variety", 
+	"npixels", "count", "proportion") 
+  zonalstat <- FIESTA::pcheck.varchar(var2check=zonalstat, varnm="zonalstat", 
+	gui=gui, checklst=zonalstatlst, caption="Zonal statistic(s)", 
+	stopifnull=TRUE, multiple=TRUE) 
     
   ## Check bands 
   if (!is.null(bands)) { 
@@ -61,7 +69,13 @@ spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast,
     } else { 
       bands <- 1 
     } 
-  }  
+  } 
+
+  ## Check rast.NODATA
+  if (!is.null(rast.NODATA)) {
+    if (!is.numeric(rast.NODATA))
+      stop("raster.NODATA must be numeric")
+  }
 
   ## Check outnames 
   if (!is.null(outname)) { 
@@ -80,60 +94,53 @@ spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast,
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata",  
 		title="Save data extraction?", first="NO", gui=gui)    
 
-  ## Check overwrite 
-  overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite",  
-		title="Overwrite files?", first="NO", gui=gui)    
 
-  ## GET outfolder  
-  ######################################################## 
-  if (savedata) { 
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui) 
- 
-    if (is.null(outfn)) { 
-      outfn <- "zonalext" 
-    } else if (!is.character(outfn)) { 
-      stop("outfn must be character") 
-    }       
-    outfnbase <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d")) 
-    if (!overwrite) 
-      outfnbase <- FIESTA::fileexistsnm(outfolder, outfnbase, "csv")  
-  }   
+  ## Check overwrite, outfn.date, outfolder, outfn 
+  ########################################################
+  if (savedata) {
+    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="Overwrite files?", first="NO", gui=gui)  
+    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+		title="Add date to outfiles?", first="YES", gui=gui)  
+    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+  }
  
   ######################################################################## 
   ### DO THE WORK 
   ######################################################################## 
-  #out <- setDT(unique(polyvx@data[,attribute, drop=FALSE])) 
-  #setkeyv(out, attribute) 
+  #out <- setDT(unique(polyvx@data[,polyv.att, drop=FALSE])) 
+  #setkeyv(out, polyv.att) 
   #if (nrow(out) > nrow(unique(out))) warning("there are polygons with duplicate ids") 
 
-  ## Check projection 
-  prj <- FIESTA::CRScompare(rastx, spobj, nolonglat=TRUE) 
-  rastx <- prj$layer1
-  spobjprj <- prj$layer2
-  #if (!rgeos::gIsValid(spobjprj)) stop("layer is not valid") 
- 
-  ## Check extents 
-  msg <- FIESTA::check.extents(rastx, spobjprj, showext, layer1nm=rastnm, 
-	layer2nm="zonal polygon layer", layer2allin=TRUE, stopifnotin=TRUE) 
- 
-  zonalext <- data.table(unique(spobjprj[[attribute]])) 
-  setnames(zonalext, attribute) 
-  setkeyv(zonalext, attribute) 
+  ## Check projection and reproject spobj if different than rast
+  spobjprj <- crsCompare(spobj, rast.prj)$x
+
+  ## Check extents
+  rast.bbox <- rasterInfo(rastfn)$bbox
+  names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
+  bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
+  bbox2 <- sf::st_bbox(spobjprj)
+  check.extents(bbox1, bbox2, showext, layer1nm=rastnm, layer2nm="polv",
+			stopifnotin=TRUE)
+  dtype <- rasterInfo(rastfn)$datatype
+  NODATAval <- rasterInfo(rastfn)$nodata_value
+
+  zonalext <- data.table(unique(spobjprj[[polyv.att]])) 
+  setnames(zonalext, polyv.att) 
+  setkeyv(zonalext, polyv.att) 
   
   outnames <- {}   
   for (b in bands) { 
      
     prename <- outname 
     if (!is.null(prename) && rast.nbands > 1)  
-      prename <- paste(prename, b, sep="_")  
-
+      prename <- paste(prename, b, sep="_") 
     if (any(zonalstat %in% c("mean", "sum", "npixels"))) { 
       atts <- zonalstat[which(zonalstat %in% c("mean", "sum", "npixels"))] 
 #      atts[atts == "sum"] <- "sumvalues" 
       atts[atts == "count"] <- "npixels"  
-
-      zstats <- setDT(zonalStats(src=spobjprj, attribute=attribute, rasterfile=rastfn,  
- 		pixelfun=pixelfun, band=b)) 
+      zstats <- setDT(zonalStats(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,  
+ 		pixelfun=pixelfun, band=b, na.rm=TRUE, ignoreValue=rast.NODATA)) 
       zstats <- zstats[, c("zoneid", atts), with=FALSE] 
       var.name <- paste(prename, atts, sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -149,8 +156,8 @@ spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast,
     }  
 
     if (any(zonalstat == "majority")) { 
-      zstats <- setDT(zonalMajority(src=spobjprj, attribute=attribute, rasterfile=rastfn,
-		band=b)) 
+      zstats <- setDT(zonalMajority(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,
+		band=b, na.rm=TRUE, ignoreValue=rast.NODATA)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "majority", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -166,8 +173,8 @@ spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast,
     }  
 
     if (any(zonalstat == "minority")) { 
-      zstats <- setDT(zonalMinority(src=spobjprj, attribute=attribute, rasterfile=rastfn,
-		band=b)) 
+      zstats <- setDT(zonalMinority(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,
+		band=b, na.rm=TRUE, ignoreValue=rast.NODATA)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "minority", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -183,8 +190,8 @@ spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast,
     }  
 
     if (any(zonalstat == "variety")) { 
-      zstats <- setDT(zonalVariety(src=spobjprj, attribute=attribute, rasterfile=rastfn,
-		band=b)) 
+      zstats <- setDT(zonalVariety(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,
+		band=b, na.rm=TRUE, ignoreValue=rast.NODATA)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "variety", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -198,29 +205,21 @@ spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast,
       zonalext <- zonalext[zstats] 
       outnames <- c(outnames, var.name) 
     }  
-
-    
+  
     if (any(zonalstat %in% c("count", "proportion"))) { 
-      zstats <- setDT(zonalFreq(src=spobjprj, attribute=attribute, rasterfile=rastfn,
-		band=b)) 
+      zstats <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att, 
+		rasterfile=rastfn, band=b, na.rm=na.rm, ignoreValue=rast.NODATA)) 
       newvar <- "value" 
-
-      if (!is.null(rast.NODATA)) {
-        if (!is.numeric(rast.NODATA)) {
-          message("raster.NODATA must be numeric")
-        } else {
-          zstats <- zstats[zstats$value != rast.NODATA,]
-        }
-      }
 
       if (!is.null(rastlut)) { 
         LUTvar <- names(rastlut)[1] 
         newvar <- names(rastlut)[2]  
 
         ## Check that all values are in table and that class of merging variable matches 
-        check.matchval(zstats, rastlut, "value", LUTvar, tab1txt="zstats", tab2txt="rastlut") 
+        check.matchval(zstats, rastlut, "value", LUTvar, tab1txt="zstats", 
+			tab2txt="rastlut") 
         tabs <- check.matchclass(zstats, rastlut, "value", LUTvar,  
- 				tab1txt="zstats", tab2txt="rastlut") 
+ 			tab1txt="zstats", tab2txt="rastlut") 
         zstats <- tabs$tab1 
         rastlut <- tabs$tab2 
                   
@@ -282,19 +281,10 @@ spZonalRast <- function(polyv_layer, polyv_dsn=NULL, attribute=NULL, rast,
     } 
   }  
 
-  if (savedata) { 
-
-    outfncsv <- fileexistsnm(outfolder, outfnbase, "csv")   
-    write.csv(zonalext, paste0(outfolder, "/", outfncsv, ".csv"), row.names=FALSE)   
-
-    cat( 
-    " ###################################################################################",  
-    "\n", paste("Saved data to: "), "\n", paste0(outfolder, "/", outfncsv, ".csv"), "\n",  
-    "###################################################################################", 
-    "\n" ) 
-  }  
-
-  #print(as.list(environment()))  
+  if (savedata)
+    write2csv(zonalext, outfolder=outfolder, outfilenm=outfn, outfn.pre=outfn.pre,
+		outfn.date=outfn.date, overwrite=overwrite)
+ 
 
   returnlst <- list(zonalext=setDF(zonalext), outname=outnames,  
 					rasterfile=rep(rastfn, length(outnames))) 

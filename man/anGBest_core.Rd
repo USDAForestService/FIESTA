@@ -7,51 +7,22 @@
 	Generates a set of core tables based on state of interest.
 }
 \usage{
-anGBest_core(state, datsource = "ORACLE", FS_FIADB = FALSE, evalCur = TRUE,
-	evalEndyr = NULL, evalType=c("ALL", "AREAVOL", "GRM"), fill = TRUE, 
-	addSEcol = FALSE, allin1 = FALSE, outfolder=NULL, datPlots = NULL, 
-	datStrata = NULL, ref_countycd = NULL, ref_unitcd = NULL, 
-	returndata = FALSE, savedata = FALSE, ...)
+anGBest_core(datCore, fill = TRUE, addSEcol = FALSE, allin1 = FALSE, 
+	savedata = FALSE, outfolder = NULL, divideby.vol = "million")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{state}{ String. The name of state for tables (e.g., 'Vermont', 'Utah') }
-  \item{datsource}{ String. Source of FIA data ('ORACLE', 'CSV'). 
-	If datsource="ORACLE", select permission of FIA Oracle tables must be granted to 
-	user and an ODBC connection set up on computer. Use DBtestORACLE function to 
-	test connection to ORACLE. If datsource="CSV", *.csv or *.zip (if ZIP=TRUE) files 
-	are downloaded and extracted from FIA DataMart 
-	(http://apps.fs.usda.gov/fia/datamart/datamart.html). If datsource is equal to 
-	CSV, the actual coordinates are not available. }
-  \item{FS_FIADB}{ Logical. If datsource="ORACLE". If TRUE, data are extracted from FIA's 
-	national public database (Oracle - FS_FIADB schema). If FALSE, data are extracted 
-	from the regional FIADB (Oracle FS_NIMS_FIADB_'NIMS_UNIT' schema). }
-  \item{evalCur}{ Logical. If TRUE, the most current FIA Evalidation for state(s). }
-  \item{evalEndyr}{ Integer. The last year of the evaluation period of interest. Selects
-	only sampled plots and conditions for the evalidation period ending in the specified 
-	year. If more than one state, create a named list object with years labeled
-	by state (e.g, list(Utah=2014, Colorado=2013). }
-  \item{evalType}{ String vector. The type(s) of evaluation of interest 
-	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
-	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
-	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
-	includes plots used for growth, removals, mortality, and change estimates
-	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
-	See FIA database manual for regional availability and/or differences.
-	See notes for more information on evalType. }
+  \item{datCore}{ R object. FIA data from database, returned from anGBest_core_data.
+	Includes datPlots, datStrata, ref_countycd, and ref_unitcd. }
   \item{fill}{ Logical. If TRUE, color fill is applied to all tables. }
   \item{addSEcol}{ Logical. If TRUE, percent standard error values are added to
 		columns side-by-side. }
   \item{allin1}{ Logical. If TRUE, percent standard error values are added to
 		same cell as estimates. }
-  \item{outfolder}{ String. The path of folder to output tables. }
-  \item{datPlots}{ R object. Plot data. }
-  \item{datStrata}{ R object. Strata data. }
-  \item{ref_countycd}{ R object. Reference names for counties. }
-  \item{ref_unitcd}{ R object. Reference names for survey units. }
-  \item{returndata}{ Logical. If TRUE, returns data objects. }
   \item{savedata}{ Logical. If TRUE, saves data objects to outfolder (*.rda) }
-  \item{...}{ Other parameters to DBgetPlots. }
+  \item{outfolder}{ String. The path of folder to output tables. }
+  \item{divideby.vol}{ String. divideby for volume tables 
+		('hundred', 'thousand', 'million'). }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

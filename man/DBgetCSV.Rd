@@ -7,7 +7,8 @@
 	Downloads comma-delimited file (*.csv) or downloads and extracts a compressed csv file (*.zip) from FIA DataMart. Only 1 table can be specified, but multiple states may be included.
 }
 \usage{
-	DBgetCSV(DBtable, states = NULL, ZIP = TRUE, returnDT = FALSE, gui = FALSE)
+	DBgetCSV(DBtable, states = NULL, ZIP = TRUE, returnDT = FALSE, 
+		stopifnull = TRUE, gui = FALSE)
 }
  
 \arguments{
@@ -19,6 +20,7 @@
 	extracted; and deleted from temporary space. If FALSE, CSV files are directly
 	downloaded. }
   \item{returnDT}{ Logical. If TRUE, a data table is returned, else, a data frame. }
+  \item{stopifnull}{ Logical. If TRUE, stop if table is NULL. }
   \item{gui}{ Logical. If TRUE, gui windows pop up for parameter selection. }
 }
 \details{

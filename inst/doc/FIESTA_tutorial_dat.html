@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
 
@@ -30,9 +29,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -201,7 +197,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -322,6 +319,7 @@ datfolder &lt;- &quot;data&quot;
 
 if (!file.exists(&quot;outfolder&quot;)) dir.create(&quot;outfolder&quot;)
 outfolder &lt;- &quot;outfolder&quot;
+
 </code></pre>
 <p>The following examples use FIA data from Wyoming for inventory years 2011-2012.</p>
 <div id="datfilter" class="section level4">
@@ -405,7 +403,6 @@ datFreq(WYplt, xvar=c(&quot;COUNTYCD&quot;, &quot;PLOT_STATUS_CD&quot;), subtota
 # 
 #   Generates a pivot table. 
 ######################################################################################
-
 ## Get summed basal area by forest type class and stand size class
 datPivot(WYcond, pvar=&quot;BALIVE&quot;, xvar=&quot;FORTYPCD&quot;, yvar=&quot;STDSZCD&quot;)
 
@@ -449,6 +446,16 @@ WYtree2 &lt;- WYtreelut2$xLUT
 head(WYtree2)
 dim(WYtree)
 dim(WYtree2)
+
+
+## Use cutbreaks to classify LIVE_CANOPY_CVR_PCT variable from WYcond table
+cutbreaks &lt;- c(0,25,50,100)
+WYcondlut &lt;- datLUTclass(x=WYcond, xvar=&quot;LIVE_CANOPY_CVR_PCT&quot;, cutbreaks=cutbreaks)
+names(WYcondlut)
+
+head(WYcondlut$xLUT)
+WYcondlut$LUT
+
 </code></pre>
 </div>
 <div id="datlutnm" class="section level4">
@@ -484,6 +491,7 @@ WYcondlut2 &lt;- datLUTnm(WYcond, xvar=&quot;DSTRBCD1&quot;, FIAname=TRUE)
 names(WYcondlut2)
 WYcond3 &lt;- WYcondlut2$xLUT
 head(WYcond3[WYcond3$DSTRBCD1 &gt; 0, ])
+
 </code></pre>
 </div>
 <div id="datsumcond" class="section level4">
@@ -526,14 +534,14 @@ condsum &lt;- datSumCond(cond=WYcond, plt=WYplt, csumvar=&quot;LIVE_CANOPY_CVR_P
 head(condsum)
 
 ## Check results
-condsum[condsum$PLT_CN == 40405596010690,]
+condsum[condsum$CN == 40405596010690,]
 WYcond[WYcond$PLT_CN == 40405596010690,]
 
 
 ## Summed nonforest condition proportions by plot
 condnf &lt;- datSumCond(cond=WYcond, plt=WYplt, csumvar=&quot;CONDPROP_UNADJ&quot;, 
         csumvarnm=&quot;cond_nf&quot;, cfilter=&quot;COND_STATUS_CD %in% c(2,3)&quot;)$condsum
-condnf[condnf$PLT_CN == 40404737010690,]
+condnf[condnf$CN == 40404737010690,]
 WYcond[WYcond$PLT_CN == 40404737010690,]
 
 
@@ -541,20 +549,21 @@ WYcond[WYcond$PLT_CN == 40404737010690,]
 condres &lt;- datSumCond(cond=WYcond, plt=WYplt, csumvar=&quot;CONDPROP_UNADJ&quot;, 
         csumvarnm=&quot;cond_reserved&quot;, cfilter=&quot;RESERVCD == 1&quot;)$condsum
 WYcond[WYcond$PLT_CN == 46792188020004,]
+
 </code></pre>
 </div>
 <div id="datsumtree" class="section level4">
 <h4><a name="datSumTree"></a>datSumTree()</h4>
 <pre><code>######################################################################################
 # Usage:
-# datSumTree(tree=NULL, plt=NULL, cond=NULL, 
-#     tuniqueid=&quot;PLT_CN&quot;, puniqueid=&quot;CN&quot;, cuniqueid=&quot;PLT_CN&quot;, 
-#     bycond=FALSE, condid=&quot;CONDID&quot;, 
+# datSumTree(tree=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
+#     tuniqueid=&quot;PLT_CN&quot;, cuniqueid=&quot;PLT_CN&quot;, puniqueid=&quot;CN&quot;, 
+#     bycond=FALSE, condid=&quot;CONDID&quot;, bysubp=FALSE, subpid=&quot;SUBP&quot; 
 #     tsumvarlst=NULL, tsumvarnmlst=NULL, TPA=TRUE, tfun=sum,   
-#     ACI=FALSE, tfilter=NULL, lbs2tons=TRUE, 
-#     adjtree=FALSE, adjTPA=1,  
-#     savedata=FALSE, outfolder=NULL, 
-#     outfn=NULL, outfn.date=TRUE, overwrite=TRUE, tround=6) 
+#     ACI=FALSE, tfilter=NULL, lbs2tons=TRUE, getadjplot=FALSE,
+#     adjtree=FALSE, adjTPA=1, NAto0=TRUE, savedata=FALSE,
+#     outfolder=NULL, outfn=NULL, outfn.date=TRUE, overwrite=TRUE,
+#     tround=6, checkNA=FALSE) 
 # 
 # Description:
 # Aggregates tree-level data to plot or condition, including options for
@@ -592,8 +601,8 @@ testplt
 sum(testplt[testplt$STATUSCD == 1, &quot;BA&quot;], na.rm=TRUE)
 sum(testplt[testplt$STATUSCD == 1, &quot;BA&quot;] * testplt[testplt$STATUSCD == 1, &quot;TPA_UNADJ&quot;], na.rm=TRUE)
 
-treesum1[treesum1$PLT_CN == 40404758010690,]
-treesum2[treesum2$PLT_CN == 40404758010690,]
+treesum1[treesum1$CN == 40404758010690,]
+treesum2[treesum2$CN == 40404758010690,]
 
 
 ## Average diameter and height of live trees by plot
@@ -609,7 +618,7 @@ testplt
 mean(testplt[testplt$STATUSCD == 1, &quot;DIA&quot;], na.rm=TRUE)
 mean(testplt[testplt$STATUSCD == 1, &quot;HT&quot;], na.rm=TRUE)
 
-treesum3[treesum3$PLT_CN == 40404758010690,]
+treesum3[treesum3$CN == 40404758010690,]
 
 
 ## Number of live trees by plot (TPA=TRUE)
@@ -637,22 +646,24 @@ treesum4b &lt;- treesumdat4b$treedat
 
 WYcond[WYcond$PLT_CN == 40404746010690, ]
 WYtree[WYtree$PLT_CN == 40404746010690, ]
-treesum4a[treesum4a$PLT_CN == 40404746010690, ]
-treesum4b[treesum4b$PLT_CN == 40404746010690, ]
+treesum4a[treesum4a$CN == 40404746010690, ]
+treesum4b[treesum4b$CN == 40404746010690, ]
+
 </code></pre>
 </div>
 <div id="datsumtreedom" class="section level4">
 <h4><a name="datSumTreeDom"></a>datSumTreeDom()</h4>
 <pre><code>######################################################################################
 # Usage:
-# datSumTreeDom(tree=NULL, seed=NULL, plt=NULL, cond=NULL, tuniqueid=&quot;PLT_CN&quot;, 
-#     puniqueid=&quot;CN&quot;, cuniqueid=&quot;PLT_CN&quot;, bycond=FALSE, condid=&quot;CONDID&quot;, 
-#     tsumvar=NULL, TPA=FALSE, tfun=sum, ACI=FALSE, tfilter=NULL, lbs2tons=TRUE, 
-#     tdomvar=&quot;SPCD&quot;, tdomvarlst=NULL, tdomvar2=NULL, tdomvarl2lst=NULL, 
-#     tdomprefix=NULL, tdombarplot=FALSE, tdomtot=FALSE, tdomtotnm=NULL, 
-#     FIAname=FALSE, addseed=FALSE, presence=FALSE, proportion=FALSE, cover=FALSE, 
-#     adjplot=&quot;NONE&quot;, adjsamp=FALSE, adjTPA=1, savedata=FALSE, outfolder=NULL, 
-#     outfn=NULL, outfn.date=TRUE, overwrite=FALSE, tround=6) 
+# datSumTreeDom(tree=NULL, seed=NULL, plt=NULL, plt_dsn=NULL, tuniqueid=&quot;PLT_CN&quot;,
+#     cond=NULL, cuniqueid=&quot;PLT_CN&quot;, puniqueid=&quot;CN&quot;, bycond=FALSE, condid=&quot;CONDID&quot;,  
+#     bysubp=FALSE, subpid=&quot;SUBP&quot;, tsumvar=NULL, TPA=FALSE, tfun=sum, ACI=FALSE, 
+#     tfilter=NULL, lbs2tons=TRUE, tdomvar=&quot;SPCD&quot;, tdomvarlst=NULL, tdomvar2=NULL,
+#     tdomvarl2lst=NULL, tdomprefix=NULL, tdombarplot=FALSE, tdomtot=FALSE,
+#     tdomtotnm=NULL, FIAname=FALSE, addseed=FALSE, presence=FALSE, proportion=FALSE,
+#     cover=FALSE, getadjplot=FALSE, adjtree=FALSE, NAto0=TRUE, adjtpa=1,
+#     savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.date=TRUE, overwrite=FALSE,
+#     tround=6, checkNA=FALSE) 
 # 
 # Description:
 # Aggregates tree-level data to plot or condition, including options for
@@ -703,7 +714,6 @@ tdomtotnm &lt;- treedomCNT$tdomtotnm
 
 head(tdomdat.tree)
 
-
 ## Number of live trees by species - seedlings
 treedomCNTs &lt;- datSumTreeDom(cond=WYcond, plt=WYplt, seed=WYseed, 
         puniqueid=&quot;CN&quot;, bycond=FALSE, tsumvar=&quot;PLT_CN&quot;, TPA=TRUE, tdomtot=TRUE,
@@ -730,7 +740,7 @@ tdomtotnm &lt;- treedomCNTs$tdomtotnm
 
 head(tdomdat.treeseed)
 
-
+#####
 ## Presence of live trees by species, including seedlings
 treedomCNTs &lt;- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, seed=WYseed, 
         puniqueid=&quot;CN&quot;, bycond=FALSE, tsumvar=&quot;PLT_CN&quot;, TPA=TRUE, tdomtot=TRUE,
@@ -764,12 +774,12 @@ tdomdat.pres &lt;- treedomCNTs$tdomdat.pres
 tdomdat.prop &lt;- treedomCNTs$tdomdat.prop
 tdomdat.cov &lt;- treedomCNTs$tdomdat.cov
 
-tdomdat.tree[tdomdat.tree$PLT_CN == 40404742010690,]
-tdomdat.seed[tdomdat.seed$PLT_CN == 40404742010690,]
-tdomdat.treeseed[tdomdat.treeseed$PLT_CN == 40404742010690,]
-tdomdat.pres[tdomdat.pres$PLT_CN == 40404742010690,]
-tdomdat.prop[tdomdat.prop$PLT_CN == 40404742010690,]
-tdomdat.cov[tdomdat.cov$PLT_CN == 40404742010690,]
+tdomdat.tree[tdomdat.tree$CN == 40404742010690,]
+tdomdat.seed[tdomdat.seed$CN == 40404742010690,]
+tdomdat.treeseed[tdomdat.treeseed$CN == 40404742010690,]
+tdomdat.pres[tdomdat.pres$CN == 40404742010690,]
+tdomdat.prop[tdomdat.prop$CN == 40404742010690,]
+tdomdat.cov[tdomdat.cov$CN == 40404742010690,]
 
 
 ## Presence and proportion of live trees by species, including seedlings. Add barplot.

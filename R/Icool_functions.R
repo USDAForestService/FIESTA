@@ -1,3 +1,7 @@
+# getoutfn
+# addcommas
+# pastevars
+# stopQ
 # removecols
 # DT_NAto0
 # changeNull
@@ -7,8 +11,159 @@
 # checknm			If nm exists, changes to nm_*
 # check.namedlist 
 # capfirst
+# nbrdecimals
+# nbrdigits
+# getfilter
+# wrapit
 
 
+getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
+		outfn.date=FALSE, overwrite=FALSE, ext=NULL, baseonly=FALSE, 
+		noext=FALSE, outfn.default="outfile", gui=FALSE, append=FALSE) {
+  ## DESCRIPTION: get full pathname 
+
+  ## Check outfn
+  if (is.null(outfn)) {
+    if (!is.null(outfn.default)) {
+      outfn <- outfn.default
+    } else {
+      stop("outfn and outfn.default is null")
+    }
+  }
+
+  if (!is.character(outfn))
+    stop("outfn must be a character string")
+
+  ## get extension of outfn
+  extfn <- getext(outfn) 
+  if ((is.na(extfn) || extfn=="NA") && dir.exists(outfn)) {
+    message("outfn is folder name... must be a file name")
+    return(outfn)
+  }
+
+  if (!dir.exists(dirname(outfn))) stop(outfn, " does not exist")
+  if (dirname(outfn) != "." && !baseonly) {
+    if (is.null(outfolder)) {
+      outfolder <- dirname(outfn)
+    } else {
+      if (dir.exists(file.path(outfolder, dirname(outfn))))
+        outfolder <- file.path(outfolder, dirname(outfn))
+    }
+  }
+
+  ## Get basename 
+  outfn.base <- basename.NoExt(outfn)
+  extfn <- getext(outfn) 
+  if (is.null(ext)) {
+    if (!is.na(extfn) && extfn != "NA") {
+      ext <- extfn
+    } else {
+      stop("include ext")
+    }
+  } else {
+    if ((!is.na(extfn) && extfn != "NA") && ext != extfn)
+      message(paste0("ext (", ext, ") does not match file extension (", extfn, 
+		")... using ", ext))
+  }
+ 
+  ## Check outfn.pre
+  if (!is.null(outfn.pre) && is.character(outfn.pre))
+    outfn.base <- paste(outfn.pre, outfn.base, sep="_")
+
+  ## DESCRIPTION: gets outfile name
+  if (outfn.date)
+    outfn.base <- paste0(outfn.base, "_", format(Sys.time(), "%Y%m%d"))
+
+  ## Get full path filename
+  outfolder <- pcheck.outfolder(outfolder, gui=gui)  
+  outfilenm <- file.path(outfolder, outfn.base)
+
+  if (overwrite && !append) {
+    nm <- paste0(outfilenm, ".", ext)
+    if (file.exists(nm)) {
+      file.remove(nm)  
+      message("removing ", nm)
+    } 
+  } else if (!append) {
+    outfn.base <- FIESTA::fileexistsnm(outfolder, outfn.base, ext)
+  }
+
+  if (!baseonly) {
+    ## Check outfolder
+    outfolder <- pcheck.outfolder(outfolder, gui=gui)  
+    outfilenm <- file.path(outfolder, outfn.base)
+  } else {
+    outfilenm <- outfn.base
+  }
+ 
+  if (!noext) {
+    if (substring(ext, 1, 1) == ".") {
+      outfilenm <- paste0(outfilenm, ext)
+    } else {
+      outfilenm <- paste0(outfilenm, ".", ext)
+    }
+  }
+  return(outfilenm)
+}
+
+
+addcommas <- function(vars, ALIAS=NULL, sepchar=",", quotes=FALSE, paren=FALSE){
+  ## DESCRIPTION:
+  ## Internal function to input a vector of string variables and outputs a string of  
+  ##  variables separated by commas. If an alias is included, the function will 
+  ##   concatenate the alias before each variable before a dot. 
+  ## ARGUMENTS:
+  ##   vars - Sring vector. 
+  ##  ALIAS -String. A shortname to put in front of variable before a dot (ex. ALIAS.var)
+  ## VALUE:
+  ##  A string of variables separated by commas and with or without alias.
+  ## EXAMPLE:
+  ##   avector <- c("CAT", "DOG", "MOUSE")
+  ##  addcommas(avector)
+  ##  addcommas(avector, "a")
+
+  if (is.null(vars)) return(NULL)
+
+  if (!is.null(ALIAS)) {
+    xvars <- paste(ALIAS, vars, sep=".")
+  } else {
+    xvars <- vars
+  }
+  if (quotes) {
+    newvars <- paste0("'", xvars[1], "'")
+    if (length(xvars) > 1)
+      for (j in 2:length(xvars)) newvars <- paste0(newvars, sepchar, "'", xvars[j], "'") 
+
+  } else {
+    newvars <- paste(xvars, collapse=sepchar)
+
+    #newvars <- xvars[1]
+    #if(length(xvars) > 1){
+    #  for(j in 2:length(xvars)) { newvars <- paste(newvars, sepchar, xvars[j], sep=" ") }
+    #}
+  }
+  if (paren) newvars <- paste0("(", newvars, ")")
+
+  return(newvars)
+}
+
+pastevars <- function(vars1, vars2, sep=",") {
+  if (is.null(vars1) && is.null(vars2)) {
+    return(NULL)
+  } else if (is.null(vars1)) { 
+    return(vars2)
+  } else if (is.null(vars2)) {
+    return(vars1)
+  } else {
+    paste(vars1, vars2, sep=sep)
+  }
+}
+
+stopQ <- function() {
+  opt <- options(show.error.messages = FALSE)
+  on.exit(options(opt))
+  stop()
+}
 
 removecols <- function (x, vars) {
   ## DESCRIPTION: Removes columns by name from data frame
@@ -76,21 +231,6 @@ changeNULL <- function(x, xvar, changeto=NULL){
 
   return(x)
 }
-
-check.numeric <- function(x, cols) {
-  for (col in cols) {
-    if (!is.numeric(x[[col]])) {
-      message(paste(col, "is not numeric, converting..."))
-      if (is.factor(x[[col]])) {
-        x[[col]] <- as.character(x[[col]])
-        x[[col]] <- as.numeric(x[[col]])
-      } else {
-        x[[col]] <- as.numeric(x[[col]])
-      }
-    }
-  }
-  return(x)
-}
  
 
 getdups <- function(cx, cuniqueid="PLT_CN", varnm, fun) {
@@ -143,7 +283,7 @@ checknm <- function(nm, nmlst) {
   while (nm %in% nmlst) {
     i <- i + 1
     nm <- paste(nm, i, sep="_")
-    message("name exists... changed name to ", nm)
+    warning("name exists... changed name to ", nm)
   } 
   return(nm)
 }
@@ -197,4 +337,42 @@ capfirst <- function(x, allwords=FALSE){
 }
 
 
+nbrdecimals <- function(x) {
+#  if ((x %% 1) != 0) {
+#    strs <- strsplit(as.character(format(x, scientific = F)), "\\.")
+#    n <- nchar(strs[[1]][2])
+#  } else {
+#    n <- 0
+#  }
+  strs <- strsplit(as.character(format(x, scientific = F)), "\\.")
+  n <- nchar(strs[[1]][2])
+  if (is.na(n)) n <- 0
+  return(n) 
+}
 
+nbrdigits <- function(x) {
+  ## DESCRIPTION: get max number of digits in front of decimal point
+  ## x - vector of numbers
+
+  max(nchar(sapply(strsplit(as.character(x), "\\."), "[[", 1)), na.rm=TRUE) 
+}
+
+
+
+getfilter <- function(att, val, syntax="R") {
+## DESCRIPTION: create filter string from att and val
+## syntax - ('R', 'sql')
+  if (is.character(val)) 
+    val <- encodeString(val, quote="'")
+  filter <- paste0(att, " %in% c(", toString(val), ")")
+
+  if (syntax == 'sql')
+    filter <- gsub("%in% c", "in", filter)
+  return(filter)
+}
+
+
+wraptitle <- function(x, len) {
+  sapply(x, function(y) paste(strwrap(y, len), 
+         collapse = "\n"), USE.NAMES = FALSE)
+}

@@ -9,22 +9,22 @@
 }
 
 \usage{
-spZonalRast(polyv_layer, polyv_dsn = NULL, attribute = NULL, rast, 
-	rastfolder = NULL, bands = NULL, zonalstat = NULL, pixelfun = NULL, 
-	outname = NULL, showext = FALSE, rastlut = NULL, rast.NODATA = 0, 
-	savedata = FALSE, outfolder = NULL, outfn = NULL, overwrite = FALSE)
+spZonalRast(polyv, polyv_dsn = NULL, polyv.att = NULL, rast, 
+	rastfolder = NULL, bands = NULL, zonalstat, pixelfun = NULL, 
+	outname = NULL, showext = FALSE, rastlut = NULL, rast.NODATA = NULL, 
+	na.rm = TRUE, savedata = FALSE, outfolder = NULL, outfn = "zonalext", 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE)
 }
 
 \arguments{
-  \item{polyv_layer}{ String or S4 object. The name of the zonal
-	spatial polygons layer. The layer name may be a full pathname to a file, 
-	the basename to a file, a spatial layer name from a database, or a 
-	SpatialPolygons object with a defined projection. }
-  \item{polyv_dsn}{ String. The data source name (dsn; i.e., folder or database name)
-	of polyv_layer. The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{attribute}{ String. Name of attribute in polyv to identify polygons to 
-	summarize statistics for. }
+  \item{polyv}{ sf R object or String. Polygon data to identify zones. Can be 
+	a spatial polygon object, full pathname to a shapefile, or name of a layer 
+	within a database. }
+  \item{polyv_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of zonal layer. The dsn varies by driver. See gdal OGR vector
+	formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf object. }
+  \item{polyv.att}{ String. Name of attribute in polyv to identify zones for 
+	summarizing raster statistics. }
   \item{rast}{ String or Raster. File name(s) with extensions, or raster object(s). 
 	Note: raster objects must be written to file. }
   \item{rastfolder}{ String. Name of the folder with raster layers. Optional. 
@@ -43,11 +43,15 @@ spZonalRast(polyv_layer, polyv_dsn = NULL, attribute = NULL, rast,
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
   \item{rastlut}{ Data frame. A look up table to recode raster values. Must be
 	2 columns: Column 1 with raster values and column 2 with recode values.  }
-  \item{rast.NODATA}{ Numeric. NODATA value if stratlayer is raster. These
-	values will be removed from output strata table, assuming outside boundary. }
+  \item{rast.NODATA}{ Numeric. NODATA value or other values to ignore. These values 
+	will be removed from output zonal table. See notes below. }
+  \item{na.rm}{ Logical. If TRUE, Null values are removed before zonal statistic
+	calculations. }
   \item{savedata}{ Logical. If TRUE, the zonal data are saved to outfolder. }
   \item{outfolder}{ String. The output folder. }
   \item{outfn}{ String. Name of output data file. If NULL, default is 'zonalext.csv'. }
+  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
+  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
 }
 \details{
@@ -69,6 +73,17 @@ spZonalRast(polyv_layer, polyv_dsn = NULL, attribute = NULL, rast,
    
 }
 \note{
+  rast.NODATA\cr
+  NODATA values are raster pixel values that have no data of interest, including pixels 
+	within the extent of the layer, but outside the area of interest. Sometimes these 
+	pixels have been defined previously. The defined NODATA pixels are imported to R 
+	as NULL values. When not previously defined, the pixels outside the area of interest 
+	will be the minimum or maximum value depending on the data type 
+	(e.g., 16-bit signed: min=-32,768; max=32,768) or byte size (1 byte: min=0; max=255).
+      These NODATA values will be added to the zonal statistic calculations if not
+	specified in rast.NODATA. 
+
+
   On-the-fly projection conversion\cr 
   The spTransform (rgdal) method is used for on-the-fly map projection conversion and 
 	datum transformation using PROJ.4 arguments. Datum transformation only occurs if 
@@ -79,7 +94,7 @@ spZonalRast(polyv_layer, polyv_dsn = NULL, attribute = NULL, rast,
 	data shifts when reprojecting. See spTransform help documentation for more details.
 }
 \author{
-	Tracey S. Frescino, Chris Toney
+	Tracey S. Frescino
 }
 
 \keyword{ data }

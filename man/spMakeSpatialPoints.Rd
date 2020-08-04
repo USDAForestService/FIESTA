@@ -9,52 +9,47 @@
 	ArcGIS shapefile (*.shp).
 }
 \usage{
-spMakeSpatialPoints(xyplt = NULL, uniqueid = NULL, x = NULL, y = NULL, EPSGCD = NULL,
-	prj4str = NULL, prj = NULL, datum = NULL, zone = NULL, zoneS = FALSE, 
-	aea.param = "USGS", exportshp = FALSE, outfolder = NULL, outshpnm = NULL,
-	outfn.date = TRUE, overwrite = FALSE)
+spMakeSpatialPoints(xyplt, xyplt_dsn = NULL, xy.uniqueid = NULL, xvar = NULL, 
+	yvar = NULL, xy.crs = 4269, prj = NULL, datum = NULL, zone = NULL, 
+	zoneS = FALSE, aea.param = "USGS", addxy = FALSE, exportsp = FALSE, ...)
 }
 \arguments{
-  \item{xyplt}{ Data frame, data.table, matrix, or comma-delimited file (*.csv). 
-	Includes unique identifier of rows (uniqueid) and x and y coordinates. }
-  \item{uniqueid}{ String.* Unique identifier of xyplt rows. }
-  \item{x}{ String.* Name of variable in xyplt defining x coordinate. }
-  \item{y}{ String.* Name of variable in xyplt defining y coordinate. }
-  \item{EPSGCD}{ Integer. International Association of Oil and Gas Producers
-	(IOGP), EPSG Geodetic Parameter Dataset definition of a coordinate system. }  
-  \item{prj4str}{ String. PROJ.4 string identifying spatial reference system 
-	(e.g., "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"). }
-  \item{prj}{ String.* Projection, or coordinate system of the X/Y coordinates 
+  \item{xyplt}{ Data frame object or String. Name of layer with xy coordinates
+	and unique identifier. Can be layer with xy_dsn, full pathname, including 
+	extension, or file name (with extension) in xy_dsn folder. }
+  \item{xyplt_dsn}{ String. Name of database or folder were xyplt is. The dsn 
+	varies by driver. See gdal OGR vector formats
+	(https://www.gdal.org/ogr_formats.html).}
+  \item{xy.uniqueid}{ String. Unique identifier of xyplt rows. }
+  \item{xvar}{ String. Name of variable in xyplt defining x coordinate. }
+  \item{yvar}{ String. Name of variable in xyplt defining y coordinate. }
+  \item{xy.crs}{ PROJ.4 String or CRS object or Integer EPSG code defining Coordinate 
+	Reference System. (e.g., EPSG:4269-Geodetic coordinate system for 
+	North America, NAD83). }  
+  \item{prj}{ String. Projection, or coordinate system of the X/Y coordinates 
 	("longlat", "utm", "aea"). If other, include PROJ.4 string in prj4str. }
-  \item{datum}{ String.* Datum of projection ("WGS84", "NAD83", "NAD27"). }
+  \item{datum}{ String. Datum of projection ("WGS84", "NAD83", "NAD27"). }
   \item{zone}{ Integer. If prj="utm", the UTM zone. }
   \item{zoneS}{ Logical. If prj="utm", if the UTM zone is in the Southern hemisphere. }
   \item{aea.param}{ String. If prj="aea", the associated lat/lon parameters 
 	(USGS: " +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0").
 	If other, include PROJ.4 string in prj4str. }
-  \item{exportshp}{ Logical. If TRUE, exports Spatial object to outfolder as an 
-	ArcGIS shapefile (*.shp). }
-  \item{outfolder}{ String. Name of output folder (if exportshp=TRUE). If NULL, 
-	the working directory is used. }
-  \item{outshpnm}{ String. Name of output shapefile (if exportshp=TRUE), the
-	extension is optional. If outshpnm=NULL, default is outshp_'date'.shp. }
-  \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE, overwrites file if exists. }
+  \item{addxy}{ Logical. If TRUE, adds x and y variables to spatial sf object. }
+  \item{exportsp}{ Logical. If TRUE, exports spatial object. }
+  \item{...}{ Parameters for spExportSpatial. }
 }
-\details{
-	If exportshp=TRUE, uses rgdal writeOGR function.
-}
+ 
 \value{
-  \item{shp}{ S4 SpatialPoints or SpatialPointsDataFrame object. }
+  \item{spplt}{ sf obect with spatial points and defined CRS. }
 
-  If exportshp = TRUE, a shapefile is written to the specified outfolder or working directory. 
+  If exportsp = TRUE, the sf object is written to specified output. 
 }
 \author{
 	Tracey S. Frescino
 }
 \note{
-  If exportshp=TRUE:\cr
- 	The ArcGIS driver truncates variable names to 10 characters or less.
+  If exportsp=TRUE and a shp output format is specified:\cr
+ 	The ESRI shapefile driver truncates variable names to 10 characters or less.
 	Variable names are changed before export using an internal function
 	(trunc10shp). Name changes are output to the outfolder, 'outshpnm'_newnames.csv.
 	The returned Spatial object will have original names, before truncating.

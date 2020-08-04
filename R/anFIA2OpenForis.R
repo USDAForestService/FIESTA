@@ -70,7 +70,7 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     calcdat$calc.aois.level2 <- setDF(calc.aois.level2)
     if (savedata)
-      write.csv(calc.aois.level2, "calc/calc-aois_level2.csv", row.names=FALSE)
+      write2csv(calc.aois.level2, outfolder=calcfolder, outfilenm="calc-aois_level2")
 
     ## level 1 - by state
     calc.aois.level1 <- aggregate(unitarea[[areavar.fia]], unitarea[, level1.vars.fia], sum)
@@ -79,7 +79,7 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     calcdat$calc.aois.level1 <- setDF(calc.aois.level1)
     if (savedata)
-      write.csv(calc.aois.level1, paste0(calcfolder, "/calc-aois_level1.csv"), row.names=FALSE)
+      write2csv(calc.aois.level1, outfolder=calcfolder, outfilenm="calc-aois_level1")
 
 
     #####################################################################################
@@ -108,7 +108,7 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     calcdat$calc.stratum.level1 <- setDF(calc.stratum.level1)
     if (savedata)
-      write.csv(calc.stratum.level1, paste0(calcfolder, "/calc-stratum_level1.csv"), row.names=FALSE)
+      write2csv(calc.stratum.level1, outfolder=calcfolder, outfilenm="calc-stratum_level1")
 
 
     ## level2 (by county)
@@ -128,7 +128,8 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     calcdat$calc.stratum.level2 <- setDF(calc.stratum.level2)
     if (savedata)
-      write.csv(calc.stratum.level2, paste0(calcfolder, "/calc-stratum_level2.csv"), row.names=FALSE)
+      write2csv(calc.stratum.level2, outfolder=calcfolder, outfilenm="calc-stratum_level2")
+
 
     returnlst$calcdat <- calcdat
   }
@@ -158,7 +159,7 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     collectdat$sampdesign <- setDF(sampdesign)
     if (savedata)
-      write.csv(sampdesign, paste0(collectfolder, "/sampdesign.csv"), row.names=FALSE)
+      write2csv(sampdesign, outfolder=collectfolder, outfilenm="sampdesign")
 
  
     ## Create cluster table for stand table - COLLECT
@@ -177,7 +178,8 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     collectdat$plot <- setDF(plt)
     if (savedata)
-      write.csv(plt, paste0(collectfolder, "/plot.csv"), row.names=FALSE)
+      write2csv(plt, outfolder=collectfolder, outfilenm="plot")
+
 
     ## Create stand table for stand table - COLLECT
     ####################################################################
@@ -203,7 +205,8 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     collectdat$cond <- setDF(cond)
     if (savedata)
-      write.csv(cond, paste0(collectfolder, "/cond.csv"), row.names=FALSE)
+      write2csv(cond, outfolder=collectfolder, outfilenm="cond")
+
 
     ## Create tree data for tree table - COLLECT
     ####################################################################
@@ -224,7 +227,8 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     collectdat$tree <- setDF(tree)
     if (savedata) 
-      write.csv(tree, paste0(collectfolder, "/tree.csv"), row.names=FALSE)
+      write2csv(tree, outfolder=collectfolder, outfilenm="tree")
+
 
     ## Create seed data for seed table - COLLECT
     ####################################################################
@@ -238,7 +242,8 @@ anFIA2OpenForis <- function(pltstrat, cond, tree, seed, unitarea, strlut,
 
     collectdat$seed <- setDF(seed)
     if (savedata)
-      write.csv(seed, paste0(collectfolder, "/seed.csv"), row.names=FALSE)
+      write2csv(seed, outfolder=collectfolder, outfilenm="seed")
+
 
     returnlst$collectdat <- collectdat
   }

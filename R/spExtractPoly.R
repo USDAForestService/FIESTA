@@ -1,7 +1,8 @@
-spExtractPoly <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_CN", 
-	polylst, poly_dsn=NULL, polyvarlst=NULL, polyvarnmlst=NULL, keepnull=TRUE, 
-	showext=FALSE, savedata=FALSE, exportshp=FALSE, outfolder=NULL, outfn=NULL, 
-	outfn.date=TRUE, overwrite=FALSE, ...){
+spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst, 
+	polyv_dsn=NULL, polyvarlst=NULL, polyvarnmlst=NULL, keepNA=FALSE, 
+	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, out_fmt="shp", 
+	out_dsn=NULL, out_layer="polyext", outfolder=NULL, outfn.pre=NULL, 
+ 	outfn.date=FALSE, overwrite=TRUE, ...){
   ######################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more polygon layers and appends to input spatial layer 
@@ -11,97 +12,71 @@ spExtractPoly <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
   ## a specified statistic.
   #########################################################################################
 
-  if (!"rgeos" %in% rownames(installed.packages()))
-    stop("spExtractPoly function requires package rgeos")
-
+  ## Check for necessary packages
+  ###########################################################
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("sf package is required for spExtractPoly()")
+  
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-
-  if (gui) shp=xytable=bfun=focalrast=ffun=focalsave=extrtype=db <- NULL
-
-
-  ## Adds to file filters to Cran R Filters table.
-  if (.Platform$OS.type=="windows")
-    Filters <- rbind(Filters, shp=c("Shapefiles (*.shp)", "*.shp"))
-
-
+  if (gui) showext=savedata=exportsp <- NULL
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
 
-  ### POINTS: shp or xytable for data extraction.. 
+  ## Spatial points for data extraction.. 
   ##################################################################################
-  if (is.null(spplt)) {
-    ## Check parameters
-    if (is.null(xyplt)) stop("either include spplt or xyplt for data extraction")
-         
+#  sppltx <- pcheck.table(xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
+#			caption="XY coordinates?", stopifnull=TRUE)
+  sppltx <- pcheck.spatial(xyplt, dsn=xyplt_dsn, tabnm="xyplt", 
+			caption="XY coordinates?", stopifnull=TRUE)
+ 
+  if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- FIESTA::spMakeSpatialPoints(xyplt=xyplt, uniqueid=uniqueid, ...)
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, uniqueid=uniqueid, 
+		exportsp=FALSE, ...)
   } else {
-    ## Check spplt
-    sppltx <- pcheck.spatial(layer=spplt, dsn=spplt_dsn, gui=gui,
-		caption="Spatial points with XY coords?")
-    if (is.null(sp::proj4string(sppltx))) stop("spplt must have defined projection")
-
     ## GET uniqueid
-    sppltnames <- names(sppltx@data)
+    sppltnames <- names(sppltx)
     uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
-
-    ## Check for NA or duplicate values in uniqueid
-    if (sum(is.na(sppltx@data[[uniqueid]])) > 0) stop("NA values in ", uniqueid)
-    if (length(unique(sppltx@data[[uniqueid]])) < nrow(sppltx@data)) 
-      stop("spplt records are not unique")
   }
 
   ## Verify polygons
   ########################################################
-  if (is.null(polylst) && .Platform$OS.type=="windows") {
-    db <- FIESTA::pcheck.logical(db, title = "Database?", first = "YES", gui=TRUE)
-    if (db) {
-      poly_dsn <- choose.files(default=getwd(), caption="Select database")
-      layerlst <- rgdal::ogrListLayers(poly_dsn)
-      layers <- select.list(layerlst, title="Polygon layers", multiple=TRUE)
-      polylst <- lapply(layers, function(x, poly_dsn) pcheck.spatial(x, dsn=poly_dsn),
- 			poly_dsn)
+  if (!is.null(polyvlst) && class(polyvlst) != "list") {
+    if ("sf" %in% class(polyvlst) || (methods::canCoerce(polyvlst, "sf"))) {
+      polyvlst <- list(polyvlst)
+    } else if (is.character(polyvlst)) {
+      polyvlst <- as.list(polyvlst) 
     } else {
-      polys <- TRUE
-      polyfnlst <- {}
-      while (polys) {
-        polyfnlst <- choose.files(default=poly_dsn, caption="Select polygon layer", 
-                filters=Filters["shp",], multi=TRUE)
-        if (length(polyfnlst) == 0) stop("")
-
-        polysq <- select.list(c("YES", "NO"), title="More polygon shapefiles?")
-        polys <- ifelse(polysq == "YES", TRUE, ifelse(polysq == "NO", FALSE, NULL)) 
-        if (is.null(polys)) stop("")
-      }
+      stop("polyvlst must be a list object")
     }
-  } else {
-    if (class(polylst) != "list" && isS4(polylst)) 
-      polylst <- list(polylst)
-    polylst <- lapply(polylst, function(x, poly_dsn) pcheck.spatial(x, dsn=poly_dsn),
- 		poly_dsn)
+  } else if (!"sf" %in% unlist(lapply(polyvlst, class))) {
+    stop("invalid list object")
   }
+  polyvlst <- lapply(polyvlst, 
+		function(layer, polyv_dsn, gui) pcheck.spatial(layer, dsn=polyv_dsn, gui=gui),
+ 		polyv_dsn, gui)
+
 
   ## Check polyvarlst
   if (!is.null(polyvarlst)) {
-
     if (is.list(polyvarlst)) {
-      if (length(polylst) != length(polyvarlst))
-        stop("the length of polyvarlst must correspond with the length of polylst") 
+      if (length(polyvlst) != length(polyvarlst))
+        stop("the length of polyvarlst must correspond with the length of polyvlst") 
     } else {
-      if (length(polylst) > 1) {
-        stop("polyvarlst must be a list corresponding to the length of polylst") 
+      if (length(polyvlst) > 1) {
+        stop("polyvarlst must be a list corresponding to the length of polyvlst") 
       } else {  
         polyvarlst <- list(polyvarlst)
       }
     }
   } else {
-    polyvarlst <- lapply(polylst, function(x) names(x@data))
-    names(polyvarlst) <- names(polylst)
+    polyvarlst <- lapply(polyvlst, function(x) names(x)[!names(x) %in% attr(x, "sf_column")])
+    names(polyvarlst) <- names(polyvlst)
   } 
 
   if (!is.null(polyvarnmlst)) {
@@ -115,134 +90,138 @@ spExtractPoly <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
     polyvarnmlst <- polyvarlst
   }
 
-  ## Check for NULL elements in list
-  polylst <- polylst[unlist(lapply(polylst, function(x) !is.null(x)))]
-  polyvarlst <- polyvarlst[unlist(lapply(polylst, function(x) !is.null(x)))]
-  polyvarnmlst <- polyvarnmlst[unlist(lapply(polylst, function(x) !is.null(x)))]
 
    ## Check showext    
   showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
-
-  ## Check keepnull
-  keepnull <- FIESTA::pcheck.logical(keepnull, varnm="keepnull", 
-		title="Keep NULL values?", first="YES", gui=gui)
  
-  ### GET savedata 
+  ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data extraction?", first="NO", gui=gui)  
+		title="Save data extraction?", first="NO", gui=gui) 
 
-  ## GET outfolder 
-  ########################################################
-  if (savedata || exportshp) {
+  ## Check exportsp 
+  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+		title="Export spatial layer?", first="NO", gui=gui)  
+
+  ## Check keepNA
+  keepNA <- FIESTA::pcheck.logical(keepNA, varnm="keepNA", 
+		title="Keep NA values?", first="YES", gui=gui)
+
+  ## Check exportNA
+  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+		title="Export NA values?", first="YES", gui=gui)
+
+
+  ## Check outfolder
+  if (savedata || exportsp || exportNA) {
+    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="Overwrite files?", first="NO", gui=gui)  
+    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+		title="Add date to outfiles?", first="YES", gui=gui)  
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-
-    if (is.null(outfn)) {
-      outfn <- "dataext"
-    } else if (!is.character(outfn)) {
-      stop("outfn must be character")
-    } 
-  }     
-
+  }
+ 
   ########################################################################
   ### DO THE WORK
   ########################################################################
-  polyext <- sppltx@data[, uniqueid, drop=FALSE]
-  for (i in 1:length(polylst)) {
-    polyv <- polylst[[i]]
-    sppltext <- sppltx
+  NAlst <- list()
+  for (i in 1:length(polyvlst)) {
+    polyv <- polyvlst[[i]]
+    polyvnm <- names(polyvlst)[i]
+    if (is.null(polyvnm)) 
+      polyvnm <- paste0("poly", i)
  
     ## Check projections of inlayer point layer vs. polygon layer. 
-    ## If different, reproject inlayer to polygon projection.
-    prj <- CRScompare(polyv, sppltext, nolonglat=TRUE) 
-    polyv <- prj$layer1
-    sppltext <- prj$layer2
+    ## If different, reproject sppltx to polygon projection.
+    prjdat <- crsCompare(sppltx, polyv, nolonglat=TRUE) 
+    sppltx <- prjdat$x
+    polyv <- prjdat$ycrs
+
 
     ## Check extents
-    msg <- FIESTA::check.extents(polyv, sppltext, showext, layer1nm="poly", layer2nm="spplt")
-    if (msg == "non-overlapping extents") stop("msg")
+    bbox1 <- sf::st_bbox(polyv)
+    bbox2 <- sf::st_bbox(sppltx)
+    check.extents(bbox1, bbox2, showext=showext, layer1nm="polyv", layer2nm="xyplt",
+			stopifnotin=TRUE)
 
-    ## Extract data from polygon
-    vlst <- sp::over(sppltext, polyv, returnList=TRUE)
-    names(vlst) <- sppltext[[uniqueid]]
-
-    vals <- do.call(rbind, vlst)
-    ids <- unlist(lapply(strsplit(row.names(vals), "\\."), '[[', 1))
-    vals <- data.frame(ids, vals, stringsAsFactors=FALSE)
-    names(vals)[names(vals) == "ids"] <- uniqueid
-
-    ## Check for NULL values
-    navals <- sppltext[!sppltext[[uniqueid]] %in% unique(ids),]
-
-    if (is.vector(navals)) { 
-      nulln <- length(navals) 
-    } else { 
-      nulln <- nrow(navals) 
-    }
-    if (nulln != 0)
-      warning(paste("there are", nulln, "null values for poly", i))
 
     ## Check polyvarlst
+    ########################################################  
     polyvars <- polyvarlst[[i]]
-    if (all(polyvars %in% names(vals))) {
-      vals <- vals[, c(uniqueid, polyvars)]
-    } else {
-      notin <- polyvars[!polyvars %in% names(vals)]
-      message("polyvarlst names, ", paste(notin, collapse=", "), 
-			", do not match data...  extracting all variables")
-      polyvars <- names(vals)
+    vars2remove <- names(polyv)[!names(polyv) %in% polyvars]
+    if (length(vars2remove) == length(names(polyv))) {
+       message("polyvarlst is invalid... extracting all variables")
+       polyvars <- names(polyv)
     }
 
-#    if (!keepnull && nulln > 0) {
-#      polyext <-  merge(polyext, vals, by=uniqueid)
-#    } else {
-      polyext <-  merge(polyext, vals, by=uniqueid, all.x=TRUE)
-#    }
+    ## Change names in polyvars that are the same as sppltx
+    ########################################################  
+    polyvars <- suppressWarnings(sapply(polyvars, checknm, names(sppltx)))
 
-    if (nrow(polyext) == 0) {
-      pname <- ifelse(is.null(names(polylst[i])), paste("poly", i), names(polylst)[i])
-      stop("check ", pname)
-    } else {
+    ## Subset polyv to polyvars
+    ########################################################  
+    polyv <- polyv[, polyvars]
 
-      ## Set polyvarnm
-      polyvarnm <- polyvarnmlst[[i]]
-      if (length(polyvarnm) != length(polyvars)) {
-        message("number of names does not match number of attributes... using attribute names")
-        polyvarnm <- polyvars
-        polyvarnmlst[[i]] <- polyvarnm
-      }
-      names(polyext)[names(polyext) %in% polyvars] <- polyvarnm
+    ## Extract data from polygon
+    ######################################################## 
+    #sppltext <- sf::st_intersection(sppltx, polyv[, polyvars])
+    sppltext <- sf::st_join(sppltx, polyv)
+
+    ## Set polyvarnm
+    ########################################################  
+    polyvarnm <- polyvarnmlst[[i]]
+    if (length(polyvarnm) != length(polyvars)) {
+      message("number of names does not match number of attributes... using attribute names")
+      polyvarnm <- polyvars
+      polyvarnmlst[[i]] <- polyvarnm
     }
-  }
+    names(sppltext)[names(sppltext) %in% polyvars] <- polyvarnm 
+
+
+    ## Check points outside poly
+    ########################################################  
+    #sppltout <- sppltx[!sppltx[[uniqueid]] %in% sppltext[[uniqueid]],]
+
+    ## Check null values
+    ######################################################## 
+    geocol <- attr(polyv, "sf_column")
+    polyvcols <- names(polyv)[names(polyv) != geocol]
+    sppltout <- sppltext[apply(st_drop_geometry(sppltext[, polyvcols]), 1, 
+				function(x) all(is.na(x))),]
+    nulln <- nrow(sppltout)
+
+    if (nulln > 0) {
+      warning(paste("there are", nulln, "null values for", polyvnm))
+      NAlst[[polyvnm]] <- sppltout
+    }
+
+    if (exportNA)
+      spExportSpatial(sppltout, out_dsn=out_dsn, 
+		out_layer=paste0(out_layer, "_", polyvnm, "_NAvals"), 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_layer=overwrite)
  
-  ## Subset sppltx and merge sppltx to polyext
-  sppltx <- sp::merge(sppltx, polyext, by=uniqueid)
-
-  if (!keepnull) {
-    if (!polyvarlst[[1]][1] %in% names(sppltx)) {
-      print(names(sppltx))
-      stop(polyvarlst[[1]][1], " not in spplt") 
+    if (!keepNA) {
+      ## Subset points inside boundary
+      sppltext <- sppltext[!apply(st_drop_geometry(sppltext[, polyvcols]), 1, 
+		function(x) all(is.na(x))),]
     }
-    sppltx <- sppltx[!is.na(sppltx[[polyvarlst[[1]][1]]]), ]
   }
 
-  if (savedata)
-    write2csv(polyext, outfolder=outfolder, outfilenm=outfn, outfn.date=outfn.date,
-		overwrite=overwrite)
-
-  if (exportshp)
-    ## Output shapefile to outfolder
-    FIESTA::spExportShape(sppltx, outshpnm=outfn, outfolder=outfolder, 
+  if (savedata) 
+    write2csv(sppltext, outfolder=outfolder, outfilenm=out_layer, outfn.pre=outfn.pre, 
 		outfn.date=outfn.date, overwrite=overwrite)
 
-  returnlst <- list(spplt=sppltx, pltdat=sppltx@data, outnames=unlist(polyvarnmlst))
- 
-  #if (length(polyvarnmlst) == 1) {
-  #  returnlst$outnames <- polyvarnmlst[[1]]
-  #} else { 
-  #  returnlst$outnames <- polyvarnmlst 
-  #}
-  #returnlst$outnames <- unlist(polyvarnmlst)
+  ## Export to shapefile
+  if (exportsp) 
+    spExportSpatial(sppltout, out_dsn=out_dsn, out_layer=out_layer, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_layer=overwrite)
+  
+  returnlst <- list(sppltext=sppltext, outnames=unlist(polyvarnmlst))
+
+  if (length(NAlst) > 0) 
+    returnlst$NAlst <- NAlst
 
   return(returnlst)
 }

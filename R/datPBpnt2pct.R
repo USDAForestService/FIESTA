@@ -11,7 +11,7 @@ datPBpnt2pct <- function(pnt, uniqueid, tvar, othervars=NULL) {
   ## Check inputs
   ###################################################################################
   pntx <- FIESTA::pcheck.table(pnt, gui=gui, tabnm="pnt", caption="point table?", 
-		nullcheck=TRUE, returnshp=FALSE)
+		nullcheck=TRUE, returnsf=FALSE)
 
   pntvars <- names(pntx)
   uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 

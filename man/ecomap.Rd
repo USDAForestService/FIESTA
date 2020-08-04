@@ -1,0 +1,28 @@
+\name{ecomap}
+\docType{data}
+\alias{ecomap}
+\title{ EcoMap SpatialPolygonsDataFrame}
+\description{ 
+Contains regional geographic delineations for analysis of ecological relationships across ecological units. ECOMAP is the term used for a USDA Forest Service initiative to map ecological units and encourage their use in ecosystem-based approaches to forest land conservation and management. It is coordinated at the national and regional levels by USDA Forest Service staff and implemented in cooperation with State forestry agencies and others. ECOMAP mapping criteria are outlined in the National Hierarchical Framework of Ecological Units (https://www.ncrs.fs.fed.us/gla/reports/hierarch-
+y.htm). The framework systematically divides the country into progressively smaller areas of land and water that have similar physical and biological characteristics and ecological processes.
+
+The EcoMap Provinces feature class contains ecological province polygons attributed with names and descriptions. The EcomapSections 2007 data set describes the ecological sections within the conterminous United States. The EcomapSubections 2007 data set describes the ecological subsections within the conterminous United States.
+}
+\usage{ ecomap}
+
+\format{ 
+A SpatialPolygonsDataFrame with 1233 features and 3 attributes 
+	PROVINCE - Ecomap Province
+	SECTION - EcoMap Section
+   	SUBSECTION - Ecomap Subsection
+}
+\source{ 
+Downloaded from the FSGeodata Clearinghouse on 2019 October 30, format ESRI geodatabase
+(https://data.fs.usda.gov/geodata/edw/datasets.php) 
+Converted to SpatialPolygonsDataFrame R object
+}
+\references{
+Cleland, D.T.; Freeouf, J.A.; Keys, J.E., Jr.; Nowacki, G.J.; Carpenter, C; McNab, W.H. 2007. Ecological Subregions: Sections and Subsections of the Conterminous United States [1:3,500,000] [CD-ROM]. Sloan, A.M., cartog. Gen. Tech. Report WO-76. Washington, DC: U.S. Department of Agriculture, Forest Service.
+}
+\keyword{ datasets }
+

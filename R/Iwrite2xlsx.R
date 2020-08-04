@@ -929,7 +929,7 @@ write2xlsx <- function(esttab, psetab=NULL, wbnm=NULL, sheetnm=NULL, tabtitle=NU
     ## SAVE EXCEL WORKBOOK
     ###############################################################
     #xlsx::saveWorkbook(wb, outfilenm)  
-    xlsx::saveWorkbook(wb, wbnm)  
+    xlsx::saveWorkbook(wb, wbnm)
     
     cat(
     " ###############################################################################", 

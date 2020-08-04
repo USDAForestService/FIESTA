@@ -1,5 +1,7 @@
 datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX", 
-	LUTclassnm=NULL, savedata=FALSE, outfolder=NULL, outfn=NULL){
+	cutbreaks=NULL, cutlabels=NULL, LUTclassnm=NULL, label.dec=1, 
+	NAto0=FALSE, vars2keep=NULL, keepcutbreaks = FALSE, savedata=FALSE, 
+	outfolder=NULL, outfn="datlut"){
   #################################################################################
   ## DESCRIPTION: Function to get variable name from a table stored within FIESTA 
   ##      or a look-up table (*.csv FILE).
@@ -14,28 +16,27 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
   if (.Platform$OS.type=="windows") 
     Filters <- rbind(Filters, csv=c("Comma-delimited files (*.csv)", "*.csv"))
 
-
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
 
   ## Check datx
   ########################################################
-  dat <- FIESTA::pcheck.table(x, gui=gui, caption="Data table?", returnDT=TRUE)
-  isshp <- FALSE
-  if (typeof(dat) == "S4") {
-    isshp <- TRUE
-    datsp <- datx
-    datx <- data.table(datx@data)
-  } else {
-    datx <- dat
-  }
+  datx <- FIESTA::pcheck.table(x, gui=gui, caption="Data table?", returnDT=TRUE)
+  issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
+  if (issf) datx <- setDT(datx)    
 
   ## Check xvar
   ##########################################
   datnmlst <- names(datx)
   xvar <- FIESTA::pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
 		caption="Join variable in dat", stopifnull=TRUE)
+  if (!is.numeric(datx[[xvar]])) stop("xvar must be a numeric vector in x")
+
+  ## Get min and max values for xvar in dat
+  xvar.min <- min(datx[[xvar]], na.rm=TRUE)
+  xvar.max <- max(datx[[xvar]], na.rm=TRUE)
+
 
   ## Check LUT
   ########################################################
@@ -43,31 +44,78 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
     LUTx <- data.table(LUT)
     setnames(LUTx, xvar)
   } else {
-    LUTx <- FIESTA::pcheck.table(LUT, gui=gui, tabnm="LUT", caption="Look up table?")
+    LUTx <- pcheck.table(LUT, gui=gui, tabnm="LUT", caption="Look up table?")
   }
 
+  if (is.null(LUTx)) {
+    if (is.null(cutbreaks)) {
+      stop("must include LUTx or cutbreaks")
+    } else if (!is.vector(cutbreaks) || !is.numeric(cutbreaks)) {
+      stop("cutbreaks must be a numeric vector")
+    } else if (all(cutbreaks < xvar.min) || all(cutbreaks > xvar.max)) {
+      stop("all cutbreaks values are outside range of xvar values")
+    } else {
+      if (is.null(cutlabels)) {
+        val <- as.numeric(ifelse(label.dec == 0, 0, 
+		ifelse(label.dec == 1, 0.1, paste0(".", rep(0, label.dec-1), 1))))
+        maxbreaks <- c(cutbreaks[-1] - val) 
+        cutlabels <- paste(cutbreaks[-length(cutbreaks)], maxbreaks, sep="-")
+        cutlabels[length(cutlabels)] <- paste0(cutbreaks[length(cutbreaks)-1],"+")
+      } else {
+        if (length(cutlabels) != length(cutbreaks)-1)
+          stop("cutlabels must be length ", length(cutbreaks)-1)
+      }
+    }
+    if (!is.null(LUTclassnm))
+      if (!is.character(LUTclassnm)) stop("LUTclassnm must be character")
 
-  ## Check minvar and maxvar
-  ########################################################
-  LUTnmlst <- names(LUTx)
-  minvar <- FIESTA::pcheck.varchar(minvar, "minvar", LUTnmlst, gui=gui,
+  } else {
+
+    ## Check minvar and maxvar
+    ########################################################
+    LUTnmlst <- names(LUTx)
+    minvar <- FIESTA::pcheck.varchar(minvar, "minvar", LUTnmlst, gui=gui,
 		caption="LUT min variable", stopifnull=TRUE)
-  LUTnmlst <- LUTnmlst[LUTnmlst != minvar]
-  maxvar <- FIESTA::pcheck.varchar(maxvar, "maxvar", LUTnmlst, gui=gui,
-		caption="LUT max variable", stopifnull=TRUE)
+    if (all(LUTx[[minvar]] > xvar.max)) 
+      stop("all minvar values are greter than max xvar value")
 
-  ## Check LUTclassnm
-  ########################################################
-  LUTnmlst <- LUTnmlst[LUTnmlst != maxvar]
-  LUTclassnm <- FIESTA::pcheck.varchar(LUTclassnm, "LUTclassnm", LUTnmlst, gui=gui,
+    LUTnmlst <- LUTnmlst[LUTnmlst != minvar]
+    maxvar <- FIESTA::pcheck.varchar(maxvar, "maxvar", LUTnmlst, gui=gui,
+		caption="LUT max variable")
+    if (!is.null(maxvar)) {
+      if (all(LUTx[[maxvar]] < xvar.min)) 
+        stop("all maxvar values are greater than min xvar value")
+    } else {
+      val <- as.numeric(ifelse(label.dec == 0, 0, 
+		ifelse(label.dec == 1, 0.1, paste0(".", rep(0, label.dec-1), 1))))
+      maxvar <- c(LUTx[[minvar]][-1] - val, round(xvar.max + 1, label.dec)) 
+    }  
+    cutbreaks <- c(LUTx[[minvar]], LUTx[[maxvar]][nrow(LUTx)])
+
+    ## Check LUTclassnm - get cutlabels
+    ########################################################
+    LUTnmlst <- LUTnmlst[LUTnmlst != maxvar]
+    LUTclassnm <- FIESTA::pcheck.varchar(LUTclassnm, "LUTclassnm", LUTnmlst, gui=gui,
 		caption="LUT class name")
 
-  ## If LUTclassnm=NULL, create a class
-  if (is.null(LUTclassnm)) {
-    LUTclassnm <- paste0(xvar, "CL")
-    LUTclassnm <- checknm(LUTclassnm, datnmlst)
+    ## If LUTclassnm=NULL, create a class
+    if (is.null(LUTclassnm)) {
+      cutlabels <- paste(LUTx[[minvar]], LUTx[[maxvar]], sep="-")
+    } else {
+      cutlabels <- LUTx[[LUTclassnm]]
+    }
+  }
 
-    LUTx[[LUTclassnm]] <- paste(LUTx[[minvar]], LUTx[[maxvar]], sep="-")
+  ### Check NAto0
+  NAto0 <- FIESTA::pcheck.logical(NAto0, varnm="NAequal10", 
+		title="Change NA values to 0?", first="YES", gui=gui)
+
+  ## Check vars2keep
+  if (!is.null(vars2keep)) {
+    if (!is.character(vars2keep)) stop("vars2keep must be character")
+    missvar <- vars2keep[!vars2keep %in% names(LUTx)]
+    if (length(missvar) > 0) 
+      stop("vars2keep variables invalid: ", toString(vars2keep))
   }
 
   ### Check savedata 
@@ -75,76 +123,66 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
 		first="NO", gui=gui)
 
   ## GET OUTFOLDER IF NULL
-  if (savedata) {
+  if (savedata) 
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-
-    if (is.null(outfn) || gsub(" ", "", outfn) == "") { 
-      outfn <- "datlut"
-    } else if (!is.character(outfn)) {
-      stop("outfn must be character")
-    }
-
-    outdatfnbase <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
-    outdatfn <- fileexistsnm(outfolder, outdatfnbase, "csv")
-    outfilenm <- paste0(outfolder, "/", outdatfn, ".csv")
-  }
 
 
   ############################################################################
   ## DO THE WORK 
   ############################################################################
+  if (NAto0)
+     datx[is.na(datx[[xvar]]), (xvar) := 0] 
 
-  ### SELECT RELEVANT COLUMNS FROM LUT & MERGE TO x (xvar >= MIN & xvar <= MAX)
-  if (!is.factor(LUTx[[LUTclassnm]])) 
-    LUTx[[LUTclassnm]] <- factor(LUTx[[LUTclassnm]], levels=LUTx[[LUTclassnm]])
-  datx[[LUTclassnm]] <- as.character(datx[[xvar]]) 
-  for (i in 1:nrow(LUTx))
-    datx[[LUTclassnm]][datx[[xvar]] >= LUTx[i, minvar, with=FALSE][[1]] & 
-		datx[[xvar]] <= LUTx[i, maxvar, with=FALSE][[1]] ] <- 
-			as.character(LUTx[i, LUTclassnm, with=FALSE][[1]])
-  if (is.factor(LUTx[[LUTclassnm]]))
-    datx[[LUTclassnm]] <- factor(datx[[LUTclassnm]], levels=LUTx[[LUTclassnm]])
-  xvar <- LUTclassnm
-
-  
-  if (isshp) {
-    for (nm in names(datx)) {
-      if (nchar(nm) > 10){
-        newnm <- substr(nm, 0, 10)
-        names(datx)[names(datx) == nm] <- newnm
-      }
-    }
-    coordvars <- names(data.frame(sp::coordinates(x)))
-    xvar <- coordvars[1]
-    yvar <- coordvars[2]
-    prj4str <- sp::proj4string(x)
-    datxsp <- sp::SpatialPointsDataFrame(datx[,c(xvar,yvar)], datx, 
-				proj4string=sp::CRS(prj4str))
-    datx <- datxsp
+  ## Test values
+  vals <- unique(na.omit(datx[[xvar]]))
+  if (any(vals < min(cutbreaks)) || any(vals >= max(cutbreaks))) {
+      gtvals <- sort(unique(vals[which(vals < min(cutbreaks) | vals >= max(cutbreaks))]))
+      message(paste("values are outside of cutbreaks range:", paste(gtvals, collapse=", ")))
   }
 
+  if (is.null(LUTclassnm)) LUTclassnm <- paste0(xvar, "CL")
+  datxnames <- names(datx) 
+  datx[, (LUTclassnm) := cut(datx[[xvar]], breaks=cutbreaks, labels=cutlabels, 
+		right=FALSE)]  
+  LUTx2 <- data.table(cutbreaks[-length(cutbreaks)], cutlabels)
+  names(LUTx2) <- c(paste0(xvar, "_cutbreaks"), LUTclassnm)  
+
+  if (!is.null(vars2keep)) {
+    datx <- merge(datx, LUTx[, c(LUTclassnm, vars2keep), with=FALSE], by=LUTclassnm,
+			all.x=TRUE)
+    setcolorder(datx, c(datxnames, vars2keep))
+
+    navals <- sum(is.na(datx[[LUTclassnm]]))
+    if (length(navals) > 0)
+      message("there are ", navals, " NA values in ", xvar, " that did not get classified")
+  
+    LUTx2 <- merge(LUTx2, LUTx[, c(LUTclassnm, vars2keep), with=FALSE], by=LUTclassnm)
+  } 
+  if (keepcutbreaks) {
+    datx <- merge(datx, LUTx2, by=LUTclassnm, all.x=TRUE)
+    setcolorder(datx, c(datxnames, paste0(xvar, "_cutbreaks")))
+  }    
+
+       
   ## Output list
   ########################################################
-  if (isshp) {
-    xLUTlst <- list(xLUT = methods::as(datx, "SpatialPointsDataFrame"))
+  if (issf) {
+    datx <- sf::st_as_sf(datx, stringsAsFactors=FALSE)
   } else {
-    xLUTlst <- list(xLUT=datx)
+    datx <- setDF(datx)
   }
+
+  xLUTlst <- list(xLUT=datx)
   xLUTlst$LUTclassnm <- LUTclassnm
-  xLUTlst$LUT <- LUTx 
+  xLUTlst$LUT <- LUTx2
 
   
   if (savedata) {
-    if (isshp) {
-      FIESTA::spExportShape(datxsp, outfolder=outfolder, outshpnm=outfn)
+    if ("sf" %in% class(datx)) {
+      spExportSpatial(datx, outfolder=outfolder, out_layer=outfn)
     } else {
       ## WRITE DATA TO OUTFOLDER
-      write.csv(xLUT, outfilenm, row.names=TRUE)
-      cat(
-      " #################################################################################", 
-      "\n", paste("Table written to: "), "\n", paste(" ", outfilenm), "\n", 
-      "#################################################################################",
-      "\n" )
+      write2csv(datx, outfilenm=outfn, outfolder=outfolder)
     }
   }
 

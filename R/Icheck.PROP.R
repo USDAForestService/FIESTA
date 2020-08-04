@@ -8,15 +8,17 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
   ## DESCRIPTION: Check for necessary proportion variables.
   ## VALUE: Vector of PROPORTION variables in dataset.
   ###################################################################################
-  if (!"TPA_UNADJ" %in% names(treex)) stop("must include TPA_UNADJ in tree table")
+  if (!"TPAGROW_UNADJ" %in% names(treex)) stop("must include TPAGROW_UNADJ in tree table")
   condnmlst <- names(condx)
-  PROPvars <- NULL
+  PROPvars=TPAGROW_UNADJ <- NULL
 
   ## Check if TPA values exist for SUBPLOT, MICROPLOT, AND MACROPLOT
-  TPAvals <- unique(treex$TPA_UNADJ)[!is.na(unique(treex$TPA_UNADJ))]
-  subadj <- ifelse(any(TPAvals > 5 & TPAvals < 10), TRUE, FALSE)
-  micadj <- ifelse(any(TPAvals > 50), TRUE, FALSE)
-  macadj <- ifelse(any(TPAvals > 0 & TPAvals < 5), TRUE, FALSE)
+#  TPAvals <- unique(treex$TPA_UNADJ)[!is.na(unique(treex$TPA_UNADJ))]
+#  subadj <- ifelse(any(TPAvals > 5 & TPAvals < 10), TRUE, FALSE)
+#  micadj <- ifelse(any(TPAvals > 50), TRUE, FALSE)
+#  macadj <- ifelse(any(TPAvals > 0 & TPAvals < 5), TRUE, FALSE)
+
+  subadj=micadj=macadj <- TRUE
 
   treex[, PROP_BASIS := "SUBP"]
   if (subadj) {
@@ -41,7 +43,7 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
         stop("MICRPROP_UNADJ must be in cond table")
       }
     }
-    treex[TPA_UNADJ > 50, PROP_BASIS := "MICR"]
+    treex[TPAGROW_UNADJ > 50, PROP_BASIS := "MICR"]
     PROPvars <- c(PROPvars, "MICRPROP_UNADJ")
   }
   if (macadj) {
@@ -54,7 +56,7 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
         stop("MACRPROP_UNADJ must be in cond table")
       }
     }
-    treex[TPA_UNADJ > 0 & TPA_UNADJ < 5, PROP_BASIS := "MACR"]
+    treex[TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, PROP_BASIS := "MACR"]
     PROPvars <- c(PROPvars, "MACRPROP_UNADJ")
   }
 
@@ -65,11 +67,16 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
       stop("missing necessary variables in cond: ", paste(cmissvars, collapse=", "))
 
     ## Check for NA values in necessary variables in cond table
-    condx.na <- sapply(PROPvars, function(x, condx){ sum(is.na(condx[,x, with=FALSE])) }, condx)
+    condx.na <- sapply(PROPvars, 
+		function(x, condx){ sum(is.na(condx[,x, with=FALSE])) }, condx)
     if (any(condx.na) > 0) 
       warning(condx.na[condx.na > 0], " NA values in variable: ", 
 		paste(names(condx.na[condx.na > 0]), collapse=", "))
   }
 
-  return(PROPvars)
+  ## check for numeric
+  condx[, (PROPvars) := lapply(.SD, check.numeric), .SDcols=PROPvars]
+
+
+  return(list(condx=condx, treex=treex, propvars=PROPvars))
 }

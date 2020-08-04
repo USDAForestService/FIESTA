@@ -1,15 +1,15 @@
-anPBestICE <- function(icedat, pltstrat=NULL, state, T1, T2, puniqueid="CN", 
+anPBestICE <- function(icedat, pltassgn=NULL, state, T1, T2, puniqueid="CN", 
 	plotid="plot_id", pntid="dot_id", tabtype="PCT", sumunits=FALSE, strata=FALSE, 
 	ratio=FALSE, landarea="ALL", pnt.filter=NULL, plt.filter=NULL, unitvar=NULL, 
-	unitvar2=NULL, unitarea=NULL, areavar="ACRES", stratalut=NULL, strvar="STRATA", 
-	getwt=TRUE, getwtvar="P1POINTCNT", autocombine=FALSE, rowvar=NULL, colvar=NULL, 
-	row.add0=FALSE, col.add0=FALSE, domlut=NULL, ratioden="ROWVAR", lutfolder=NULL, 
-	allin1=FALSE, savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, 
-	outfn.date=TRUE, overwrite=FALSE, addtitle=TRUE, title.main=NULL, title.ref=NULL, 
-	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, 
-	returntitle=FALSE, estround=NULL, pseround=NULL, estnull=0, psenull="--", 
-	rowlut=NULL, collut=NULL, rawdata=FALSE, gainloss=FALSE, gainloss.vals=NULL,
-	stabbr=NULL){
+	unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, stratalut=NULL, 
+	strvar="STRATA", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=FALSE, 
+	rowvar=NULL, colvar=NULL, row.add0=FALSE, col.add0=FALSE, domlut=NULL, 
+	ratioden="ROWVAR", lutfolder=NULL, allin1=FALSE, savedata=FALSE, 
+	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, 
+	addtitle=TRUE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
+	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, returntitle=FALSE, 
+	estround=NULL, pseround=NULL, estnull=0, psenull="--", rowlut=NULL, 
+	collut=NULL, rawdata=FALSE, gainloss=FALSE, gainloss.vals=NULL, stabbr=NULL){
  
   #####################################################################################
   ## Requirements:
@@ -25,7 +25,7 @@ anPBestICE <- function(icedat, pltstrat=NULL, state, T1, T2, puniqueid="CN",
   ## 1. Import ICE data (and plot-level data, with strata info)
   ## 2. Import NAIP schedule from lutfolder and generate title.ref
   ## 3. Import domlut
-  ## 4. Set nonsamp.filter, excluding codes that are uninterpretable (ex. chg_ag_2 != 99)
+  ## 4. Set pnt.nonsamp.filter, excluding codes that are uninterpretable (ex. chg_ag_2 != 99)
   ## 5. Create 3 new variables, concatenating T1 and T2: 
   ##		use_1_2_NEW, cover_1_2_NEW, use_1_2_FOR) and add names to domlut, if not NULL.
   ## 6. Set domain variable list (domvarlst), if domlut is not NULL, set domvarlst as
@@ -90,7 +90,7 @@ anPBestICE <- function(icedat, pltstrat=NULL, state, T1, T2, puniqueid="CN",
   ice <- FIESTA::pcheck.table(icedat)
   setkeyv(ice, c(plotid, pntid))
 
-  pltstratx <- FIESTA::pcheck.table(pltstrat, tabnm="pltstrat", nullcheck=TRUE, 
+  pltassgnx <- FIESTA::pcheck.table(pltassgn, tabnm="pltassgn", nullcheck=TRUE, 
 	gui=gui)
 
 
@@ -121,22 +121,22 @@ anPBestICE <- function(icedat, pltstrat=NULL, state, T1, T2, puniqueid="CN",
   }
 
   #########################################################################
-  ## 4. SET nonsamp.filter
+  ## 4. SET pnt.nonsamp.filter
   #########################################################################
-  nonsamp.filter <- NULL
+  pnt.nonsamp.filter <- NULL
   if (!is.null(rowvar) && rowvar %in% names(ice)) {
     if (rowvar == "change_pnt" | length(grep("chg_ag_2", rowvar)) > 0) {
-      nonsamp.filter <- paste(rowvar, "!= 99")
+      pnt.nonsamp.filter <- paste(rowvar, "!= 99")
     } else {
-      nonsamp.filter <- paste(rowvar, "!= 999")
+      pnt.nonsamp.filter <- paste(rowvar, "!= 999")
     }
     if (!is.null(colvar) && colvar %in% names(ice)) {
       if (colvar == "change_pnt" | length(grep("chg_ag_2", colvar)) > 0) {
-        nonsamp.filter2 <- paste(colvar, "!= 99")
+        pnt.nonsamp.filter2 <- paste(colvar, "!= 99")
       } else {
-        nonsamp.filter2 <- paste(colvar, "!= 999")
+        pnt.nonsamp.filter2 <- paste(colvar, "!= 999")
       }
-      nonsamp.filter <- paste(nonsamp.filter, "&", nonsamp.filter2)
+      pnt.nonsamp.filter <- paste(pnt.nonsamp.filter, "&", pnt.nonsamp.filter2)
     }
   }
 
@@ -224,15 +224,15 @@ anPBestICE <- function(icedat, pltstrat=NULL, state, T1, T2, puniqueid="CN",
   #########################################################################
   ## GET ESTIMATE AND RAW DATA
   #########################################################################
-  est <- modPB(pnt=ice, pltstrat=pltstratx, pntid=pntid, plotid=plotid, 
+  est <- modPB(pnt=ice, pltassgn=pltassgnx, pntid=pntid, plotid=plotid, 
 	sumunits=sumunits, puniqueid=puniqueid, tabtype=tabtype, strata=strata, 
 	ratio=ratio, landarea=landarea, landarea.filter=landarea.filter, 
-	pnt.filter=pnt.filter, nonsamp.filter=nonsamp.filter, plt.filter=plt.filter, 
-	unitvar=unitvar, unitarea=unitarea, areavar=areavar, stratalut=stratalut, 
-	strvar=strvar, getwt=getwt, getwtvar=getwtvar, autocombine=autocombine,
-	rowvar=rowvar, colvar=colvar, row.orderby=NULL, col.orderby=NULL, 
-	row.add0=row.add0, col.add0=col.add0, rowlut=rowlut, collut=collut, 
-	domlut=domlut, domvarlst=domvarlst, allin1=allin1, savedata=savedata, 
+	pnt.filter=pnt.filter, pnt.nonsamp.filter=pnt.nonsamp.filter, plt.filter=plt.filter, 
+	unitvar=unitvar, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine,
+	stratalut=stratalut, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, row.orderby=NULL, 
+	col.orderby=NULL, row.add0=row.add0, col.add0=col.add0, rowlut=rowlut, 
+	collut=collut, domlut=domlut, domvarlst=domvarlst, allin1=allin1, savedata=savedata, 
 	outfolder=outfolder, outfn=outfn, outfn.pre=outfn.pre, outfn.date=outfn.date,
 	overwrite=overwrite, addtitle=addtitle, title.main=title.main, title.ref=title.ref, 
 	title.rowvar=title.rowvar, title.colvar=title.colvar, title.unitvar=title.unitvar, 

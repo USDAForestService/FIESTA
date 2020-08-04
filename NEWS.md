@@ -30,3 +30,38 @@ FIESTA_2.4.2 (Release date: 2019-09-09)
 
 3. Fixed bugs in anGBest_core()
 
+
+
+FIESTA_3.0.0 (Release date: 2019-04-09)
+==============
+
+1. Removed default connection to Oracle database (creating FIESTAO for FIA use only)
+
+2. Removed RODBC from package Suggests (in DESCRIPTION file)
+
+3. Added capability of writing tables and spatial layers to a SQLite database or geopackage,
+	or geodatabase (if arcgisbinding package is installed).
+
+3. Converted sp* functions from using class Spatial* to class sf objects.
+
+4. Switched input of spatial object to dsn instead of layer and switched order of parameters.
+
+4. Changed name of spReprojectSpatial function to spReprojectVector.
+
+5. Changed pltstrat to pltassgn
+
+
+Changes to functions:
+spMakeSpatialPoints 
+	- changed parameters: x to xvar; y to yvar
+	- removed parameters: EPSGCD and prj4str
+	- added parameter: crs (for EPSG or PROJ.4 string inputs) 
+
+DBgetPlots - 
+	- spconddat 	- plot-level, condition data (for displaying condition attributes)
+	- spxy		- spatial xy coordinates (PLT_CN, x, y)
+
+
+
+FIESTA_3.0.0 (Release date: 2019-04-09)
+==============

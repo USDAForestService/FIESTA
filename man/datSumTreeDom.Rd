@@ -13,14 +13,15 @@
 \usage{
 datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
 	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", 
-	bycond = FALSE, condid = "CONDID", tsumvar = NULL, TPA = FALSE, 
-	tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, 
-	tdomvar = "SPCD", tdomvarlst = NULL, tdomvar2 = NULL, tdomvar2lst = NULL, 
-	tdomprefix = NULL, tdombarplot = FALSE, tdomtot = FALSE, tdomtotnm = NULL, 
-	FIAname = FALSE, addseed = FALSE, presence = FALSE, proportion = FALSE, 
-	cover = FALSE, getadjplot = FALSE, adjtree = FALSE, adjTPA = 1, 
-	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.date = TRUE, 
-	overwrite = FALSE, tround = 16, checkNA = FALSE)
+	bycond = FALSE, condid = "CONDID", bysubp = FALSE, subpid = "SUBP", 
+	tsumvar = NULL, TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, 
+	lbs2tons = TRUE, tdomvar = "SPCD", tdomvarlst = NULL, tdomvar2 = NULL, 
+	tdomvar2lst = NULL, tdomprefix = NULL, tdombarplot = FALSE, tdomtot = FALSE, 
+	tdomtotnm = NULL, FIAname = FALSE, addseed = FALSE, pivot = TRUE, 
+	presence = FALSE, proportion = FALSE, cover = FALSE, getadjplot = FALSE, 
+	adjtree = FALSE, NAto0 = FALSE, adjTPA = 1, savedata = FALSE, 
+	outfolder = NULL, out_layer = NULL, outfn.date = TRUE, overwrite = FALSE, 
+	tround = 16, checkNA = FALSE, returnDT = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,10 +43,12 @@ datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
 	If including seedling table, this should be the same for seed. }
   \item{cuniqueid}{ String. Unique identifier of the cond table if cond is NOT NULL. }
   \item{puniqueid}{ String. Unique identifier of the plt table if plt is NOT NULL. }
-  \item{bycond}{ Logical. If TRUE, the data are aggregated to the condition level 
-	(by: uniqueid, CONDID). If FALSE, The data are aggregated to the plot level 
+  \item{bycond}{ Logical. If TRUE, data are aggregated to the condition level 
+	(by: uniqueid, CONDID). If FALSE, data are aggregated to the plot level 
 	(by: uniqueid). }
   \item{condid}{ String. Unique identifier for conditions. }
+  \item{bysubp}{ Logical. If TRUE, data are aggregated to the subplot level. }
+  \item{subpid}{ String. Unique identifier of each subplot. }
   \item{presence}{ Logical. If TRUE, an additional table is output with tree domain values
 	as presence/absence (1/0). }
   \item{tsumvar}{ String. Name of the variable to aggregate (e.g., "BA"). For summing  
@@ -70,21 +73,23 @@ datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
 	If NULL, all domains of tdomvar2 are used. }
   \item{tdomprefix}{ String. The prefix used for naming the aggregated tree data, before 
 	numeric codes (e.g., "SP" = SP102, SP746). }
-  \item{tdombarplot}{ Logical. If TRUE, calls datBarplot() and outputs a barplot of tdom 
-	distributions. If savedata=TRUE, barplots are written to outfolder. }
-  \item{tdomtot}{ Logical. If TRUE, a total of all tree domains in tdomvarlst is calculated
-	and added to output data frame. }
-  \item{tdomtotnm}{ String. If tdomtot=TRUE, the variable name for the total column in output 
-	data frame. If NULL, the default will be tdomvar + 'TOT'. }
+  \item{tdombarplot}{ Logical. If TRUE and pivot=TRUE, calls datBarplot() and outputs a 
+	barplot of tdom distributions. If savedata=TRUE, barplots are written to outfolder. }
+  \item{tdomtot}{ Logical. If TRUE and pivot=TRUE a total of all tree domains in tdomvarlst 
+	is calculated and added to output data frame. }
+  \item{tdomtotnm}{ String. If tdomtot=TRUE, the variable name for the total column in
+	output data frame. If NULL, the default will be tdomvar + 'TOT'. }
   \item{FIAname}{ Logical. If TRUE, changes names of columns for SPCD and SPGRPCD from code 
 	to FIA names. }
-  \item{addseed}{Logical. If TRUE, add seedling counts to tree counts. }
-  \item{proportion}{ Logical. If TRUE, an additional table will be output with tree domain 
-	data as proportions of total tsumvar. }
-  \item{cover}{ Logical. If TRUE, an additional table will be output with tree domain 
-	data as percent cover, based on proportions of tsumvar (see proportion) and tree
-	canopy cover variable in cond (LIVE_CANOPY_CVR_PCT) or in plt (CCLIVEPLT). Does
-	not include seedlings. }
+  \item{addseed}{Logical. If TRUE, add seedling counts to tree counts. Note: tdomvar must
+	be 'SPCD' or 'SPGRPCD'. }
+  \item{pivot}{Logical. If TRUE, tdomvar data are transposed (pivoted) to separate columns. }
+  \item{proportion}{ Logical. If TRUE and pivot=TRUE, an additional table will be output 
+	with tree domain data as proportions of total tsumvar. }
+  \item{cover}{ Logical. If TRUE and pivot=TRUE, , an additional table will be output 
+	with tree domain data as percent cover, based on proportions of tsumvar (see proportion) 
+	and tree canopy cover variable in cond (LIVE_CANOPY_CVR_PCT) or in plt (CCLIVEPLT). 
+	Does not include seedlings. }
   \item{getadjplot}{ Logical. If TRUE, adjustments are calculated for nonsampled 
 	conditions on plot. }
   \item{adjtree}{ Logical. If TRUE, trees are individually adjusted by adjustment factors.
@@ -92,15 +97,18 @@ datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
   \item{adjTPA}{ Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1 (annual inventory),
 	if using less than 4 subplots. If using only 1 sublot for estimate, adjTPA=4. The 
 	default is 1. }
+  \item{NAto0}{ Logical. If TRUE, convert NA values to 0. }
   \item{savedata}{ Logical. If TRUE, writes output data to outfolder. }
   \item{outfolder}{ String. The name of the output folder. If savedata=TRUE, all output 
 	saved to the outfolder. If savedata=FALSE, only a text file of input parameters is saved. }
-  \item{outfn}{ String. The name of the output file if savedata=TRUE (*.csv). Do not include 
-	extension. If NULL, the file will be named outfn_tdomsum_tsumvar_'date'.csv }
+  \item{out_layer}{ String. Name of output layer if savedata=TRUE. Do not 
+	include extension. If NULL, the file will be named tsum_'date'.csv }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
   \item{overwrite}{ Logical. If TRUE, overwrite output file. }
   \item{tround}{ Number. The number of digits to round to. If NULL, default=6. }
   \item{checkNA}{ Logical. If TRUE, checks if NA values exist in necessary variables. }
+  \item{returnDT}{ Logical. If TRUE, returns data.table object(s). If FALSE, returns 
+	data.frame object(s). }
 }
 \details{ If variable = NULL, then it will prompt user for input. 
 

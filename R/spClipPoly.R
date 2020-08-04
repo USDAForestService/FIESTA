@@ -1,22 +1,21 @@
-spClipPoly <- function(polyv_layer=NULL, polyv_dsn=NULL, clippolyv_layer, clippolyv_dsn=NULL, 
-	showext=FALSE, areacalc=FALSE, exportshp=FALSE, outfolder=NULL, outshpnm=NULL, 
-	outfn.date=TRUE, overwrite=FALSE) {
+spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL, 
+	clippolyv.filter=NULL, showext=FALSE, areacalc=FALSE, areaunits="ACRES",
+ 	exportsp=FALSE, ...) {
 
   #####################################################################################
   ## DESCRIPTION: 
-  ## Clips, or intersects a polygon vector with another polygon vector with option 
-  ## to export to an ArcGIS shapefile.
+  ## Clip (intersect) a polygon vector layer with another polygon vector layer. 
+  ## Arguments:
+  ## areaunits - area calculation units ("ACRES", "HECTARES", "SQKM")
   #####################################################################################
-
-  if (!"rgeos" %in% rownames(installed.packages()))
-    stop("spClipPoly function requires package rgeos")
-
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("spClipPoint function requires package sf")
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## If gui.. set variables to NULL
-  if(gui){poly=clippoly=unionpoly=savedata <- NULL}
+  if(gui){polyv=clippolyv=exportsp=areacalc <- NULL}
 
 
   ##################################################################
@@ -24,31 +23,21 @@ spClipPoly <- function(polyv_layer=NULL, polyv_dsn=NULL, clippolyv_layer, clippo
   ##################################################################
 
   ## Get poly and clippoly layers
-  polyvx <- FIESTA::pcheck.spatial(layer=polyv_layer, dsn=polyv_dsn, gui=gui, 
+  polyvx <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, 
 	caption="Poly to clip?")
 
-  clippolyvx <- FIESTA::pcheck.spatial(layer=clippolyv_layer, dsn=clippolyv_dsn, 
+  clippolyvx <- pcheck.spatial(layer=clippolyv, dsn=clippolyv_dsn, 
 	gui=gui, caption="Clipping poly?")
+
+  ## clippolyv.filter
+  clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter)$xf
+
 
   ## Check areacalc
   areacalc <- FIESTA::pcheck.logical(areacalc, "Calculate area?", "YES")
 
-  ## Check exportshp
-  exportshp <- FIESTA::pcheck.logical(exportshp, "Export to shapefile?", "YES")
-
-
-  ## Check outfolder
-  if (exportshp) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-
-    ## Check outfn
-    if (is.null(outshpnm)) {
-      outshpnm <- "polyclip"
-    } else {
-      if (raster::extension(outshpnm) == ".shp")
-        outshpnm <- substr(outshpnm, nchar(outshpnm)-3, nchar(outshpnm))
-    }
-  }
+  ## Check exportsp
+  exportsp <- FIESTA::pcheck.logical(exportsp, "Export sf?", "YES")
 
 
   ##################################################################
@@ -56,29 +45,28 @@ spClipPoly <- function(polyv_layer=NULL, polyv_dsn=NULL, clippolyv_layer, clippo
   ##################################################################
 
   ## Check projections of polygons 
-  prjdat <- FIESTA::CRScompare(polyvx, clippolyvx, nolonglat=TRUE)
-  polyvx <- prjdat$layer1
-  clippolyprj <- prjdat$layer2
+  prjdat <- crsCompare(clippolyvx, polyvx, nolonglat=TRUE)
+  clippolyvx <- prjdat$x
+  polyvx <- prjdat$ycrs
 
 
   ## Check extents
-  msg <- FIESTA::check.extents(polyvx, clippolyprj, showext, layer1nm="polyv", 
-		layer2nm="clippolyv")
-  if (msg == "non-overlapping extents") stop("msg")
+  bbox1 <- sf::st_bbox(clippolyvx)
+  bbox2 <- sf::st_bbox(polyvx)
+  check.extents(bbox1, bbox2, showext, layer1nm="polyv", layer2nm="clippoly",
+			stopifnotin=TRUE)
 
   ## Clip poly
-  ipoly <- raster::crop(polyvx, clippolyprj)
+  ipoly <- suppressWarnings(sf::st_intersection(polyvx, sf::st_union(clippolyvx)))
 
 
   ## Calculate area
   if (areacalc) 
-    ipoly <- FIESTA::areacalc.poly(ipoly)
+    ipoly <- areacalc.poly(ipoly, unit=areaunits)
 
-
-  if (exportshp) 
-    ## Output shapefile to outfolder
-    FIESTA::spExportShape(ipoly, outshpnm=outshpnm, outfolder=outfolder, 
-		outfn.date=outfn.date, overwrite=overwrite)
+  ## Export clipped poly
+  if (exportsp) 
+    spExportSpatial(ipoly, ...)
   
 
   return(ipoly)    

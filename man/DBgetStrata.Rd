@@ -10,37 +10,22 @@
 	of plots, states, or evaluation information.}
 
 \usage{
-DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, 
-	uniqueid = "CN", states = NULL, evalid = NULL, evalCur = FALSE, 
-	evalEndyr = NULL, evalType = "AREAVOL", savedata = FALSE, outfolder = NULL, 
-	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, dbconn = NULL, 	
-	dbconnopen = FALSE, POP_PLOT_STRATUM_ASSGN = NULL)
+DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL, 
+	evalCur = TRUE, evalEndyr = NULL, evalAll = FALSE, evalType = "AREAVOL", 
+	savedata = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite = FALSE, getassgn = TRUE, POP_PLOT_STRATUM_ASSGN = NULL)
 }
 \arguments{
   \item{dat}{ Data frame, comma-delimited file (*.csv), or shapefile (*.shp). The strata 
 	value is merged to this table and returned as a data frame. See details for necessary
 	variables. }
-  \item{datsource}{ String. Source of FIA data ('ORACLE', 'CSV'). 	
-	If datsource="ORACLE", select permission of FIA Oracle tables must be granted to 
-	user and an ODBC connection set up on computer. Use DBtestORACLE function to 
-	test connection to ORACLE. If datsource="CSV", *.csv or *.zip (if ZIP=TRUE) files 
-	are downloaded and extracted from FIA DataMart 
-	(http://apps.fs.usda.gov/fia/datamart/datamart.html). If datsource is equal to 
-	CSV, the actual coordinates are not available. }
-  \item{ZIP}{ Logical. If datsource="CSV". If TRUE, compressed comma-separated values (CSV) 
-	files (*.zip) are downloaded from FIA DataMart; saved to a temporary space;
-	extracted; and deleted from temporary space. If FALSE, CSV files are directly
-	downloaded. }
-  \item{FS_FIADB}{ Logical. If datsource='ORACLE'. If TRUE, data are extracted from FIA's 
-	national public database (Oracle - FS_FIADB schema). If FALSE, data are extracted 
-	from the regional FIADB (Oracle FS_NIMS_FIADB_RMRS schema). This is currently only 
-	available for RMRS. }
   \item{uniqueid}{ String. The unique plot identifier of dat (e.g., 'CN'). }
   \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
 	code(s) (e.g., 4, 35) of states for strata if dat=NULL. }
   \item{evalid}{ Integer. The evaluation if dat=NULL. }
   \item{evalCur}{ Logical. If TRUE, the most current evalidation for state(s). }
   \item{evalEndyr}{ Number. The end year of evalidation time period for state(s). }
+  \item{evalAll}{ Logical. If TRUE, gets all EVALIDs for invtype. }
   \item{evalType}{ String vector. The type(s) of evaluation of interest 
 	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
 	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
@@ -55,8 +40,8 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'.) }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE, if savedata=TRUE, overwrites files. }
-  \item{dbconn}{ Database connection. The connection information to the FIA Oracle database. }
-  \item{dbconnopen}{ Logical. If TRUE, the dbconn connection is not closed. }
+  \item{getassgn}{ Logical. If TRUE, extracts plot assignments from POP_PLOT_STRATUM_ASSGN 
+	table in database. }
   \item{POP_PLOT_STRATUM_ASSGN}{ Data frame. The POP_PLOT_STRATUM_ASSGN for state(s). }
 
 }
@@ -82,8 +67,9 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
 }
 \value{
   FIAstrata - a list of the following objects:
-  \item{pltstrat}{ Data frame. Plot-level strata/estimation unit assignment. 
+  \item{pltassgn}{ Data frame. Plot-level strata/estimation unit assignment. 
 		If dat is not NULL, strata/estimation unit variables are appended to dat. }
+  \item{pltassgnid}{ String. Name of unique identifier of plot in pltassgn. }
   \item{unitarea}{ Data frame. Total acres by estimation unit. }
   \item{unitvar}{ String. Name of the estimation unit variable (ESTN_UNIT). }
   \item{areavar}{ String. Name of the acre variable (ACRES). }
@@ -95,7 +81,7 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
 
   Outputs to outfolder (if savedata=TRUE):
 	\tabular{ll}{
-	\tab	- CSV file of pltstrat (*'date'.csv).\cr
+	\tab	- CSV file of pltassgn (*'date'.csv).\cr
 	\tab	- CSV file of unitarea (*'date'.csv).\cr
 	\tab	- CSV file of stratalut (*'date'.csv).\cr
 	\tab	- If collapsed, a CSV file of original classes and new collapsed classes.\cr
@@ -111,8 +97,8 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
     	  \item Get EVALID and EVALID years by state - DBgetEvalid().
 	  \item unitarea: get total area by estimation unit for EVALID (POP_ESTN_UNIT).
 	  \item stratalut: get pixel counts by estimation unit and stratum for EVALID (POP_STRATUM).
-	  \item pltstrat: get estimation unit and stratum assignment for each plot for EVALID. 									(POP_PLOT_STRATUM_ASSGN).
-	  \item If dat is not NULL, merge pltstrat assignment to dat.
+	  \item pltassgn: get estimation unit and stratum assignment for each plot for EVALID. 									(POP_PLOT_STRATUM_ASSGN).
+	  \item If dat is not NULL, merge pltassgn assignment to dat.
 	  \item Merge number of plots to stratalut
  	  \item Check for only 1 MEASYEAR or 1 INVYR and number of plots by strata/estimation unit.
 		If less than minimumnum plots per strata/estimation unit collapse using the following 
@@ -144,7 +130,7 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
 #  WYstrat1 <- DBgetStrata(states="Wyoming", evalCur=TRUE)
 #  names(WYstrat1)
 
-#  head(WYstrat1$pltstrat)
+#  head(WYstrat1$pltassgn)
 #  WYstrat1$unitarea
 #  WYstrat1$unitvar
 #  WYstrat1$areavar
@@ -158,7 +144,7 @@ DBgetStrata(dat = NULL,  datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE,
 #  WYstrat4 <- DBgetStrata(dat=WYplt, datsource="CSV")
 #  names(WYstrat4)
 
-#  head(WYstrat4$pltstrat)
+#  head(WYstrat4$pltassgn)
 #  WYstrat4$unitarea
 #  WYstrat4$strlut
 #  WYstrat4$evalid

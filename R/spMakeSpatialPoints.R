@@ -1,50 +1,46 @@
-spMakeSpatialPoints <- function(xyplt=NULL, uniqueid=NULL, x=NULL, y=NULL, 
-	EPSGCD=NULL, prj4str=NULL, prj=NULL, datum=NULL, zone=NULL, zoneS=FALSE, 
-	aea.param="USGS", exportshp=FALSE, outfolder=NULL, outshpnm=NULL,
-	outfn.date=TRUE, overwrite=FALSE){
+spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL, 
+	xvar=NULL, yvar=NULL, xy.crs=4269, prj=NULL, datum=NULL, zone=NULL, 
+	zoneS=FALSE, aea.param="USGS", addxy=FALSE, exportsp=FALSE, ...){
   ##############################################################################
   ## DESCRIPTION:
-  ## Generates an S4 SpatialPoints or SpatialPointsDataFrame object with defined 
-  ## projection from a data table or matrix including X and Y coordinates, with 
-  ## option to export as an ArcGIS shapefile (*.shp).
+  ## Generates sf points object with defined projection.
+  ## Arguments
+  ## crs - can be EPSG or PROJ.4 string
+  ## ... - Arguments passed to spExportSpatial
   ##############################################################################
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("spMakeSpatialPoints function requires package sf")
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
-
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
-
   ## check xyplt
-  xypltx <- FIESTA::pcheck.table(xyplt, tabnm="xyplt", "XY data table")
-  if (is.null(xypltx))
-    stop("must include data table with X and Y coordinates")
-  if (!is.data.table(xypltx)) stop("xyplt is invalid")
+  xypltx <- pcheck.table(xyplt, xyplt_dsn, tabnm="xyplt", 
+		caption="XY data table", stopifnull=TRUE, returnDT=FALSE)
 
-  ## check uniqueid
+
+  ## check xy.uniqueid
   xypltnmlst <- names(xypltx)
-
-  uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", 
+  xy.uniqueid <- FIESTA::pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 		checklst=xypltnmlst, caption="UniqueID variable - xyplt", 
-		warn="uniqueid not in xyplt", gui=gui, stopifnull=TRUE)
+		warn="xy.uniqueid not in xyplt", gui=gui, stopifnull=TRUE)
 
   ## check for NA or duplicate values
-  if (sum(is.na(xypltx[[uniqueid]])) > 0) stop("NA values in ", uniqueid)
-  if (length(unique(xypltx[[uniqueid]])) < nrow(xypltx)) 
+  if (sum(is.na(xypltx[[xy.uniqueid]])) > 0) stop("NA values in ", xy.uniqueid)
+  if (length(unique(xypltx[[xy.uniqueid]])) < nrow(xypltx)) 
     warning("plt records are not unique")
 
-
   ## check xvar and yvar
-  x <- FIESTA::pcheck.varchar(x, varnm="x", checklst=xypltnmlst, 
-		caption="X variable", gui=gui)
-  y <- FIESTA::pcheck.varchar(y, varnm="y", checklst=xypltnmlst, 
-		caption="Y variable", gui=gui)
+  x <- FIESTA::pcheck.varchar(xvar, varnm="xvar", checklst=xypltnmlst, 
+		caption="X variable", gui=gui, stopifnull=TRUE)
+  y <- FIESTA::pcheck.varchar(yvar, varnm="yvar", checklst=xypltnmlst, 
+		caption="Y variable", gui=gui, stopifnull=TRUE)
 
   ## check if x = y
   if (x == y) stop("x and y are the same value")
-
 
   ## set x and y variables to numeric
   if (!is.numeric(xypltx[[x]])) xypltx[[x]] <- as.numeric(xypltx[[x]])
@@ -59,49 +55,43 @@ spMakeSpatialPoints <- function(xyplt=NULL, uniqueid=NULL, x=NULL, y=NULL,
     xypltx <- xypltx[!list(NA,NA), on=c(x,y)]
   }
 
-  ## check EPSGCD
-  if (!is.null(EPSGCD)) {
-    EPSG <- rgdal::make_EPSG()
-    if (!EPSGCD %in% EPSG[["code"]]) stop("EPSGCD is invalid")
-
-    prj4str <- na.omit(EPSG[EPSG[["code"]] == EPSGCD, "prj4"])[[1]]
-  }
-
-  ## check prj4str   
-  if (is.null(prj4str)) {
-    prj4str <- FIESTA::build.prj4str(prj=prj, datum=datum, zone=zone, 
-		zoneS=zoneS, aea.param=aea.param, gui=gui)
-  } else {
-    #if (!grepl("+proj", prj4str)) stop("prj4str missing +proj")
-
-    if (!rgdal::checkCRSArgs(prj4str)[[1]]) stop("invalid prj4str")
-    if (!grepl("+datum", prj4str)) warning("prj4str missing +datum")
-  }
+  ## check xy.crs   
+  if (is.null(xy.crs))
+    xy.crs <- build.prj4str(prj=prj, datum=datum, zone=zone, 
+		zoneS=zoneS, aea.param=aea.param, gui=gui) 
     
-  ### GET savedata 
-  exportshp <- FIESTA::pcheck.logical(exportshp, varnm="exportshp", 
-		title="Export shapefile?", first="NO", gui=gui)
+  ### check exportsp
+  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+		title="Export spatial layer?", first="NO", gui=gui)
 
+  ### check addxy
+  addxy <- FIESTA::pcheck.logical(addxy, varnm="addxy", 
+		title="Add xy variables?", first="NO", gui=gui)
 
   ##################################################################
   ## DO WORK
   ##################################################################
 
-  ## Make uniqueid a character
-  xypltx[[uniqueid]] <- as.character(xypltx[[uniqueid]])
+  ## Make xy.uniqueid a character
+  xypltx[[xy.uniqueid]] <- as.character(xypltx[[xy.uniqueid]])
+ 
 
-  ## Generate SpatialPoints object
-  xypltx$x <- xypltx[[x]]
-  xypltx$y <- xypltx[[y]]
-  sp::coordinates(xypltx) <- c("x", "y")
-  sp::proj4string(xypltx) <- sp::CRS(prj4str)
+  ## Generate sf layer  
+  spplt <- sf::st_as_sf(xypltx, coords=c(x,y), crs=xy.crs, 
+		stringsAsFactors=FALSE, agr="identity")
+  if (is.na(sf::st_crs(spplt))) stop("invalid crs: ", xy.crs) 
+  
 
+  ## Add coordinates
+  if (addxy) {
+    xy.coords <- data.frame(sf::st_coordinates(spplt))
+    names(xy.coords) <- c(x,y)
+    spplt <- sf::st_sf(data.frame(spplt, xy.coords)) 
+  }
 
-  if (exportshp) 
-    FIESTA::spExportShape(xypltx, uniqueid=uniqueid, outfolder=outfolder, 
-		outshpnm=outshpnm, outfn.date=outfn.date, overwrite=overwrite)
-    
-  return(xypltx)
+  if (exportsp) 
+    spExportSpatial(spplt, ...)    
+  return(spplt)
 }
 
 

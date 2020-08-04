@@ -12,8 +12,9 @@
 \usage{
 datSumCond(cond = NULL, plt = NULL, plt_dsn = NULL, cuniqueid = "PLT_CN", 
 	puniqueid = "CN", csumvar = NULL, csumvarnm = NULL, cfilter = NULL, 
-	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.date = TRUE, 
-	overwrite = FALSE)
+	getadjplot = FALSE, adjcond = FALSE, NAto0 = FALSE, savedata = FALSE, 
+	outfolder = NULL, out_layer = NULL, outfn.date = TRUE, overwrite = FALSE,
+	returnDT = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,14 +32,21 @@ datSumCond(cond = NULL, plt = NULL, plt_dsn = NULL, cuniqueid = "PLT_CN",
   \item{csumvarnm}{ String. Name of the resulting aggregated plot-level variable(s).
 	Default = csumvar + '_PLT'. }
   \item{cfilter}{ String. A filter to subset the cond data before aggregating 
-	(ex. "COND_STATUS_CD == 1"). Must be R syntax. }
+	(e.g., "COND_STATUS_CD == 1"). Must be R syntax. }
+  \item{getadjplot}{ Logical. If TRUE, adjustments are calculated for nonsampled 
+	conditions on plot. }
+  \item{adjcond}{ Logical. If TRUE, csumvar condition variables are adjusted 
+	for nonsampled conditions by plot. }
+  \item{NAto0}{ Logical. If TRUE, convert NA values to 0. }
   \item{savedata}{ Logical. If TRUE, writes output data to outfolder. }
   \item{outfolder}{ String. Name of the output folder. If savedata=TRUE, output is
 	saved to the outfolder. }
-  \item{outfn}{ String. Name of output file if savedata=TRUE (*.csv). Do not 
-	include extension. If NULL, the file will be named sumdat.csv. }
+  \item{out_layer}{ String. Name of output layer if savedata=TRUE. Do not 
+	include extension. If NULL, the file will be named tsum_'date'.csv }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
   \item{overwrite}{ Logical. If TRUE, overwrite output file. }
+  \item{returnDT}{ Logical. If TRUE, returns data.table object(s). If FALSE, returns 
+	data.frame object(s). }
 }
 \details{ 
 	If variable = NULL, then it will prompt user for input. 

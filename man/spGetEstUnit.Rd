@@ -16,22 +16,20 @@
 }
 
 \usage{
-spGetEstUnit(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN", 
-	unittype = "POLY", unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, 
-	areavar = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepnull = FALSE, 
-	showext = FALSE, savedata = FALSE, exportshp = FALSE, outfolder = NULL, 
-	outfn = NULL, overwrite = FALSE, ...)
+spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
+	unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
+	areavar = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
+	showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE, 
+	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "unit_assgn", 
+	outfn.date = TRUE, outfn.pre = NULL, overwrite = FALSE, ...)
 }
 
 \arguments{
-  \item{spplt}{ S4 SpatialPoints object or shapefile filename (*.shp), including 
-	full path and extension. The spatial layer must have a defined projection.
-	If NULL, include xyplt. }
-  \item{spplt_dsn}{ String. Name of the folder or database with spplt. }
-  \item{xyplt}{ Data frame, data.table, matrix, or comma-delimited file (*.csv). 
-	Includes unique identifier of rows (uniqueid) and x and y coordinates. 	
-	If spplt=NULL, x/y coordinates are used for data extraction. Must include 
-	projection information in respective parameters. }
+  \item{xyplt}{ Data frame object or String. Name of layer with xy coordinates
+	and unique identifier. Can be layer with xy_dsn, full pathname, including 
+	extension, or file name (with extension) in xy_dsn folder. }
+  \item{xyplt_dsn}{ String. Name of database where xyplt is. The dsn varies by
+	driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
   \item{uniqueid}{ String.* Unique identifier of xyplt rows. }
   \item{unittype}{ String. Spatial layer type of unitlayer ("POLY", "RASTER"). }
   \item{unit_layer}{ String or S4 object. The name of the estimation unit 
@@ -42,22 +40,27 @@ spGetEstUnit(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
 	of unit_layer. The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). Optional. } 
   \item{unitvar}{ String. Name of estimation unit variable in unitlayer. }
+  \item{unit.filter}{ String. Filter to subset unit_layer spatial layer. }
   \item{areavar}{ String. Name of area variable unit variable in unitlayer. If 
 	NULL, calculates area by unitvar. }
   \item{areaunits}{ String. Output area units ("ACRES", "HECTARES", "SQMETERS"). }
   \item{rast.NODATA}{ Numeric. NODATA value if stratlayer is raster. These
 	values will be removed from output strata table, assuming outside boundary. }
-  \item{keepnull}{ Logical. If TRUE, returns data frame of NULL values. }
+  \item{keepNA}{ Logical. If TRUE, returns data frame of NA values. }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
   \item{savedata}{ Logical. If TRUE, the input data with extracted values are
 	saved to outfolder. }
-  \item{exportshp}{ Logical. If TRUE, exports Spatial object to outfolder as an 
-	ArcGIS shapefile (*.shp). Variable names are truncated to 10 characters or less
-	(See note below). }
+  \item{exportsp}{ Logical. If TRUE, the extracted strata point data are 
+	exported to outfolder. }
+  \item{exportNA}{ Logical. If TRUE, NA values are exported to outfolder. }
   \item{outfolder}{ String. If savedata=TRUE or exportshp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
-  \item{outfn}{ String. Name of the output shapefile/.csv file (Do not include 
-	extension). If NULL, default name is datext_'date'. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
+  \item{out_layer}{ String. Name of layer in out_dsn if database.}
+  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
+	(e.g., outfn_'date'.csv). }
+  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }
@@ -78,6 +81,7 @@ spGetEstUnit(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
   \item{unitarea}{ Data frame. Area by estimation unit. }
   \item{unitvar}{ Data frame. Variable name for estimation unit in unitarea. }
   \item{acrevar}{ Data frame. Variable name for area in unitarea. }
+  \item{pltassgnid}{ String. Unique identifier of plot. }
 
   If savedata=TRUE, pltstrat and unitarea are saved to outfolder (Default name: *_'date'.csv).
   If exportshp=TRUE, the SpatialPointsDataFrame object is exported to outfolder
@@ -91,11 +95,11 @@ spGetEstUnit(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
 }
 \note{
 
-  If exportshp=TRUE:\cr
- 	The writeOGR (rgdal) function is called. The ArcGIS driver truncates variable 
-	names to 10 characters or less. Variable names are changed before export using 
-	an internal function (trunc10shp). If Spatial object has more than 1 record, 
-	it will be returned but not exported. 
+  If exportsp=TRUE:\cr
+ 	If out_fmt="shp", the writeOGR (rgdal) function is called. The ArcGIS driver 
+	truncates variable names to 10 characters or less. Variable names are changed 
+	before export using an internal function (trunc10shp). If Spatial object has 
+	more than 1 record, it will be returned but not exported. 
 
   
   On-the-fly projection conversion\cr 
@@ -106,6 +110,13 @@ spGetEstUnit(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
 	NAD83 and WGS84 are identical unless other transformation parameters are specified. 
 	Be aware, providing inaccurate or incomplete CRS 	information may lead to erroneous 
 	data shifts when reprojecting. See spTransform help documentation for more details.
+
+
+  unitarea\cr
+  Area by estimation unit is calculated and returned as object named unitarea. 
+	Area is based on the projection of unit_layer. If no unit_layer input, than area 
+	is calculated from pixel counts.
+
 }
 
 \keyword{ data }

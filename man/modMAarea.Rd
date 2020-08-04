@@ -8,65 +8,70 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAarea(cond, pltmodel = NULL, cuniqueid = "PLT_CN", puniqueid = "CN", 
-	sumunits = FALSE, adj = "samp", MAmethod = "GREG", landarea = "ALL", 
-	ACI = FALSE, nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, 
-	unitvar = NULL, unitvar2 = NULL, autocombine = FALSE, unitarea = NULL, 
-	areavar = "ACRES", unitlut = NULL, npixelvar = NULL, prednames = NULL, 
-	predfac = NULL, PSstrvar = NULL, rowvar=NULL, rowvar.filter=NULL, 
-	colvar=NULL, colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
-	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = "--", 
-	divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, 
-	outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, 
-	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.filter = NULL, gui = FALSE)
+modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
+	condid="CONDID", puniqueid = "CN", pltassgnid = "CN", ACI = FALSE, 
+	adj = "samp", MAmethod = "GREG", plt.nonsamp.filter = NULL, 
+	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+	areavar = "ACRES", unitcombine = FALSE, unitlut = NULL, npixelvar = "npixels", 
+	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
+	landarea = "ALL", plt.filter = NULL, cond.filter = NULL, sumunits = FALSE, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, 
+	collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, allin1 = FALSE, 
+	estround = 0, pseround = 3, estnull = "--", psenull = "--", divideby = NULL, 
+	savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+	outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, addtitle = TRUE, 
+	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
+	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, 
+	MApopdat = NULL, gui = FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
+ 
 \arguments{
-  \item{cond}{ DF/DT or comma-delimited file (*.csv). The condition-level table with one 
-	record per condtions and including nonsampled conditions. 
-	Plot variables and strata/estimation unit variable(s) may be included for 
-	post-stratification. See details for necessary variables to include. }
-  \item{pltmodel}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
+  \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
+	The condition-level variables with one record per condition, including or 
+	excluding nonsampled conditions. Plot variables and strata variable(s)
+	may be included for post-stratification if plt and pltassgn=NULL. See details 
+	for necessary variables to include. }
+  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
+	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
+	or a sf R object. Plot-level variables. If nonsampled plots are included, 
+	PLOT_STATUS_CD variable must be in table. Optional. }
+  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
 	shapefile(*.shp) with one record per plot, estimation unit variable(s) and 
 	mean (continuous rasters) or proportions (categorical rasters) by 
-	estimation unit. Include nonsampled plots only if PLOT_STATUS_CD variable 
-	is in table. Optional. }
+	estimation unit. Optional. }
+  \item{dsn}{ String. Name of database where cond and pltassgn tables reside. 
+	The dsn varies by driver. See gdal OGR vector formats 	
+	(https://www.gdal.org/ogr_formats.html). }
   \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{puniqueid}{ String. Unique identifier of plot in pltstrat. }
-  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
-	one table. }
+  \item{condid}{ String. Unique identifier of plot conditions. If no condid in 
+	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
+  \item{puniqueid}{ String. Unique identifier of plot. }
+  \item{pltassgnid}{ String. Unique identifier of plot. }
+  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
+	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 
 	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (designcd=1). } 
   \item{MAmethod}{ String. mase (i.e., model-assisted) method to use ('HT', 'PS', 'GREG') }
-  \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
-	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
-	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
-	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
-  \item{nonsamp.filter}{ String. An logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If NULL and COND_STATUS_CD is in cond table, the filter is: 
-	'COND_STATUS_CD != 5' and if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. 
-	Only populate if something different. }
-  \item{plt.filter}{ String. A filter for the pltstrat. Must be R syntax. }
-  \item{cond.filter}{ String. A filter for the cond. Must be R syntax. }
+  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
+	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
+  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
+	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
+	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
   \item{unitvar}{ String. Name of the estimation unit variable in cond or pltstrat 
 	with estimation unit assignment for each plot. If FIA, default="ESTUNIT". }
   \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
 	pltstrat with assignment for each plot (e.g., 'STATECD'). }
-  \item{autocombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
   \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
 	unit, include number of total acreage for the area of interest or a data frame
 	with areavar. If more than one estimation unit, provide a data frame of total 
 	area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
+  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
+	than 2 plots in any one estimation unit. See notes for more info. }
   \item{unitlut}{ DF/DT. Table with ancillary information by estimation 
 	unit. For continuous data, means by estimation unit; for categorical data, 
 	proportion of class by estimation unit. }
@@ -76,12 +81,19 @@ modMAarea(cond, pltmodel = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
   \item{predfac}{ String vector. Name(s) of factor predictor variables to use in model. }
   \item{PSstrvar}{ String. Name of strata variable in stratalut and table with strata
 	assignment for each plot. Default="STRATUMCD". }
+  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
+	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
+	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
+	to SITECLCD in(1:6) and RESERVCD = 0. }
+  \item{plt.filter}{ String. A filter for the pltstrat. Must be R syntax. }
+  \item{cond.filter}{ String. A filter for the cond. Must be R syntax. }
+  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
+	one table. }
   \item{rowvar}{ String. Name of the row domain variable in cond or tree. If only one 
 	domain, rowvar = domain variable. If more than one domain, include colvar. If no 
 	domain, rowvar = NULL. }
-  \item{rowvar.filter}{ String. Filter for row variable. Must be R syntax. }
   \item{colvar}{ String. Name of the column domain variable in cond or tree. }
-  \item{colvar.filter}{ String. Filter for column variable. Must be R syntax. }
   \item{row.FIAname}{ Logical. If TRUE, gets FIA reference names for row variable based on 
 	ref_codes. Only available for certain variables. }
   \item{col.FIAname}{ Logical. If TRUE, gets FIA reference names for column variable based
@@ -137,6 +149,7 @@ modMAarea(cond, pltmodel = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
+  \item{MApopdat}{ List. Population data objects returned from modMApop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

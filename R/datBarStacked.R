@@ -5,7 +5,7 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 	legend.fit=NULL, legend.cex=0.8, legend.x=NULL, legend.y=NULL, legend.title=NULL, 
 	legend.bty="o", legend.bg=par("bg"), legend.inset=0, legend.xpd=par("xpd"), 
 	main=NULL, cex.main=1, cex.label=1, cex.names=0.8, savedata=FALSE, outfolder=NULL, 
-    	outfn=NULL, ...){
+    	outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, ...){
 
 ### Arguments ###
 
@@ -199,13 +199,16 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
   savedata <- pcheck.logical(savedata, "Save bar plot?", "NO")
 
   if (savedata) {
-    ## The outfolder
+    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="Overwrite files?", first="NO", gui=gui)  
+    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+		title="Add date to outfiles?", first="YES", gui=gui)  
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
   
     ## outfn
-    if(is.null(outfn)){
-      outfn <- paste("BARSTACKED_", main.attribute, "_", sub.attribute, sep="")
-    }
+    if(is.null(outfn))
+      outfn <- paste0("BARSTACKED_", main.attribute, "_", sub.attribute)
+    
     if(!any(device.type %in% device.typelst)){  
       warning("no export device specified..  using jpg format")
       device.type <- c(device.type, "jpg")
@@ -304,8 +307,9 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
     ### Output filenames ###
     #################################################
     if(device.type[i] != "default"){ 
-      OUTPUTfn <- fileexistsnm(outfolder, outfn, device.type[i])
-      OUTPUTfn <- paste(outfolder, "/", OUTPUTfn, ".", device.type[i], sep="")
+      ext <- device.type[i]
+      OUTPUTfn <- getoutfn(outfn, outfolder=outfolder, outfn.pre=outfn.pre, 
+		outfn.date=outfn.date, overwrite=overwrite, ext=ext)
     }
 
     if(device.type[i] == "default"){
@@ -633,11 +637,9 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 
     if(savedata & device.type[i]!="default"){
 
-      cat(
-      " ####################################################################################", 
-      "\n", paste("Stacked barplot written to: "), OUTPUTfn, "\n", 
-      "####################################################################################",
-      "\n" )
+      message("###################################\n", 
+			"Stacked barplot written to: ", OUTPUTfn, 
+		"\n###################################")
     dev.off()}
   }
 }

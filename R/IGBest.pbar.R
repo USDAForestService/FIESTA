@@ -1,6 +1,5 @@
 GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="ACRES",
- 	ratiotype="PERACRE", bytdom=FALSE, strlut, uniqueid, strunitvars, unitvars, 
-	domain, unitvar="ESTUNIT"){
+ 	ratiotype="PERACRE", bytdom=FALSE, strlut, uniqueid, unitvar, strvar=NULL, domain){
 
 
   ########################################################################################
@@ -11,6 +10,7 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="ACRES",
   ## dhat.var	- variance of estimated proportion, for denominator
   ## covar		- covariance of numerator and denominator
   ########################################################################################
+  strunitvars <- c(unitvar, strvar)
 
   ## Set global variables
   sumyn.pltdom=sumyd.pltdom=sumynsq.pltdom=sumydsq.pltdom=sumnd.pltdom=
@@ -58,6 +58,7 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="ACRES",
   setkeyv(strlut, strunitvars)
   ybardat <- strlut[ysum.strata]
 
+
   ## Calculate estimate weights by estimation unit and strata for numerator
   ybardat[, nhat.strwt := sumyn.dom/n.strata * strwt]
 
@@ -67,7 +68,7 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="ACRES",
 	( strwt * n.strata / n.total + (1 - strwt) * n.strata / n.total^2 ) * 
 	( sumynsq.dom - 1 / n.strata * sumyn.dom^2 ) / ( n.strata * (n.strata - 1) ) ]
 
-  unit.agvars <- c("nhat.strwt", "nhat.var.strwt", "n.strata")
+  unit.agvars <- c("nhat.strwt", "nhat.var.strwt")
  
   if (esttype == "RATIO") {
     ## Calculate estimate weights by estimation unit and strata for denominator
@@ -83,26 +84,25 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="ACRES",
 		( strwt * n.strata / n.total + (1 - strwt) * n.strata / n.total^2 ) * 
 		( sumnd.dom - 1 / n.strata * sumyn.dom * sumyd.dom ) / ( n.strata * (n.strata - 1) ) ]
 
-    unit.agvars <- c(unit.agvars, "dhat.strwt", "dhat.var.strwt", "covar.strwt", "n.strata")
+    unit.agvars <- unique(c(unit.agvars, "dhat.strwt", "dhat.var.strwt", "covar.strwt"))
   }
 
-
   ## Aggregate strata-level weights to estimation unit
-  est.unit <- ybardat[, lapply(.SD, sum, na.rm=TRUE), by=c(unitvars, domain), 
+  est.unit <- ybardat[, lapply(.SD, sum, na.rm=TRUE), by=c(unitvar, domain), 
 		.SDcols=unit.agvars]
-  setkeyv(est.unit, unitvars)
+  setkeyv(est.unit, unitvar)
+
 
   names(est.unit) <- sub(".strwt", "", names(est.unit))
-  setnames(est.unit, "n.strata", "NBRPLT")
+  #setnames(est.unit, "n.strata", "NBRPLT")
 
   ## Add number of non-zero plots and merge to est.unit
-  NBRPLT.gt0 <- ysum[, sum(sumyn.pltdom != 0, na.rm=TRUE), by=c(unitvars, domain)] 
+  NBRPLT.gt0 <- ysum[, sum(sumyn.pltdom != 0, na.rm=TRUE), by=c(unitvar, domain)] 
   setnames(NBRPLT.gt0, "V1", "NBRPLT.gt0")
-  setkeyv(NBRPLT.gt0, unitvars)
+  setkeyv(NBRPLT.gt0, unitvar)
 
-  est.unit <- merge(est.unit, NBRPLT.gt0, by=c(unitvars, domain))
+  est.unit <- merge(est.unit, NBRPLT.gt0, by=c(unitvar, domain))
   
-
   if (bytdom) est.unit$tdom <- sumyn
 
   return(est.unit)

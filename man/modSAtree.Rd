@@ -7,109 +7,119 @@
 	Generates small area estimates by domain and/or tree domain (and estimation unit). 	 
 }
 \usage{    
-modSAtree(tree, cond = NULL, pltmodel = NULL, tuniqueid = "PLT_CN", 
-	cuniqueid = "PLT_CN", puniqueid = "CN", sumunits = FALSE, 
-	adjplot = TRUE, SApackage = "JoSAE", SAmethod = "unit", landarea = "ALL", 
-	ACI = FALSE, nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, 
-	dunitvar = "DOMAIN", dunitarea = NULL, areavar = NULL, dunitlut = NULL, 
-	prednames = NULL, predfac = NULL, largebnd.att = NULL, estvar = NULL, 
-	estvar.filter = NULL, rowvar=NULL, rowvar.filter=NULL, colvar=NULL, 
-	colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL,
- 	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
-	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, allin1 = FALSE, estround = 0, 
-	pseround = 3, divideby = NULL, savedata = FALSE, rawdata = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
-	overwrite = FALSE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
-	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, gui = FALSE)
+modSAtree(SApopdat = NULL, SAdomsdf = NULL, tree = NULL, cond = NULL, plt = NULL, 
+	pltassgn = NULL, seed = NULL, dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
+	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", measCur = FALSE, 
+	measEndyr = NULL, invyrs = NULL, ACI=FALSE, adj = "plot", plt.nonsamp.filter = NULL, 
+	cond.nonsamp.filter = NULL, dunitvar = "DOMAIN", dunitvar2 = NULL, 
+	dunitarea = NULL, areavar = NULL, dunitlut = NULL, prednames = NULL, 
+	predfac = NULL, SApackage = "JoSAE", SAmethod = "unit", largebnd.att = NULL, 
+	landarea = "ALL", plt.filter = NULL, cond.filter = NULL, estvar = NULL, 
+	estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, estround = 0, 
+	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
+	rawdata = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
+	outfolder = NULL, outfn.pre = NULL, raw_fmt = "csv", raw_dsn = "rawdata", 
+	multest_fmt = "csv", multest_outfolder = NULL, multest_dsn = NULL, multest_layer = NULL, 
+	multest.append = FALSE, multest.AOIonly = FALSE, outfn.date = FALSE, overwrite = FALSE, 
+	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
+	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
+  \item{SAdomsdf}{ DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
+	with attributes from smallbnd to add to estimation table. }
   \item{tree}{ DF/DT or comma-delimited file(*.csv). The tree table with tree data to 
 	aggregate to condition-level. See details for necessary variables to include. }
   \item{cond}{ DF/DT or comma-delimited file (*.csv). The condition-level table with one 
 	record per condtions and including nonsampled conditions. 
 	Plot variables and strata/estimation unit variable(s) may be included for 
 	post-stratification. See details for necessary variables to include. }
-  \item{pltmodel}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
+  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
+	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
+	or a sf R object. Plot-level variables. If nonsampled plots are included, 
+	PLOT_STATUS_CD variable must be in table. Optional. }
+  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
 	shapefile(*.shp) with one record per plot, estimation unit variable(s) and 
 	mean (continuous rasters) or proportions (categorical rasters) by 
-	estimation unit. Include nonsampled plots only if PLOT_STATUS_CD variable 
-	is in table. Optional. }
+	estimation unit. Optional. }
+  \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
+  \item{dsn}{ Sting. Data Source name of database with tree, cond, pltassgn. }
   \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
   \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{puniqueid}{ String. Unique identifier of plot in pltstrat. }
-  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
-	one table. }
-  \item{adjplot}{ Logical. If TRUE, adjustment factors are calculated for nonsampled 
-	(nonresponse) conditions based on summed proportions for by plot. Adjustments 
-	are only calculated for annual inventory plots (designcd=1). }
+  \item{condid}{ String. Unique identifier of plot conditions. If no condid in 
+	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
+  \item{puniqueid}{ String. Unique identifier of plot. }
+  \item{pltassgnid}{ String. Unique identifier of plot. }
+  \item{measCur}{ Logical. If TRUE, extract plots with most current measurement for 
+	state(s). }
+  \item{measEndyr}{ Logical. If TRUE, extract plots with most current measurement for 
+	state(s) for years measured before measEndyr. }
+  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
+  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
+	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
+  \item{adj}{ String. How to calculate adjustment factors for nonsampled 
+	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
+	'samp' - adjustments are calculated at strata/estimation unit (i.e., domain unit) level; 
+	'plot' - adjustments are calculated at plot-level. Adjustments 
+	are only calculated for annual inventory plots (designcd=1). } 
+  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
+	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
+  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
+	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
+	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
+  \item{dunitvar}{ String. Name of the domain unit variable in cond, plt, or pltassgn 
+	with domain unit assignment for each plot. }
+  \item{dunitvar2}{ String. Name of a second domain unit variable in cond or 
+	pltassgn with assignment for each plot (e.g., 'STATECD'). }
+  \item{dunitarea}{ Numeric or DF. Total area by domain unit. }
+  \item{areavar}{ String. Name of acre variable in unitacres. Default="ACRES". }
+  \item{dunitlut}{ DF/DT. Data frame with auxiliary information by domain unit. For 
+	continuous data, means by domain unit; for categorical data, proportion of 
+	class by domain unit. }
+  \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
+  \item{predfac}{ String vector. Name(s) of factor predictor variables to use in model. }
   \item{SApackage}{ String. small area package to use ('JoSAE', 'sae') }
   \item{SAmethod}{ String. small area method to use ('unit', 'area') }
+  \item{largebnd.att}{ String. Name of the large boundary attribute to define plots
+	within a model extent. If NULL, all plots are used for model extent. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
-	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
-  \item{nonsamp.filter}{ String. An logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If NULL and COND_STATUS_CD is in cond table, the filter is: 
-	'COND_STATUS_CD != 5' and if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. 
-	Only populate if something different. }
-  \item{plt.filter}{ String. A filter for the pltstrat. Must be R syntax. }
-  \item{cond.filter}{ String. A filter for the cond. Must be R syntax. }
-  \item{dunitvar}{ String. Name of the domain variable in cond or pltstrat. }
-  \item{dunitarea}{ Numeric or DF. Total area by domain. }
-  \item{areavar}{ String. Name of acre variable in unitacres. Default="ACRES". }
-  \item{dunitlut}{ DF/DT. Table with ancillary information by domain. For 
-	continuous data, means by estimation unit; for categorical data, 
-	proportion of class by estimation unit. }
-  \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
-  \item{predfac}{ String vector. Name(s) of factor predictor variables to use in model. }
-  \item{largebnd.att}{ String. Name of the large boundary attribute to define plots
-	within a model extent. If NULL, all plots are used for model extent. }
+  \item{plt.filter}{ String. A filter for plt. Must be R syntax. }
+  \item{cond.filter}{ String. A filter for cond. Must be R syntax. }
   \item{estvar}{ String. Name of the tree estimate variable. }
-  \item{estvar.filter}{ String. A tree filter for the estimate variable. Must be R syntax 
-	(Ex. "STATUSCD == 1"). }
-  \item{rowvar}{ String. Name of the row domain variable in cond or tree. If only one 
-	domain, rowvar = domain variable. If more than one domain, include colvar. If no 
-	domain, rowvar = NULL. }
-  \item{rowvar.filter}{ String. Filter for row variable. Must be R syntax. }
-  \item{colvar}{ String. Name of the column domain variable in cond or tree. }
-  \item{colvar.filter}{ String. Filter for column variable. Must be R syntax. }
-  \item{row.FIAname}{ Logical. If TRUE, gets FIA reference names for row variable based on 
-	ref_codes. Only available for certain variables. }
-  \item{col.FIAname}{ Logical. If TRUE, gets FIA reference names for column variable based
-	on ref_codes. Only available for certain variables. }
-  \item{row.orderby}{ String. Name of variable to sort table rows. If row.FIAname=TRUE 
-	and a ref_* exists for rowvar, the rowvar code is used to sort. If NULL, the 
-	table is sorted by rowvar.}    
-  \item{col.orderby}{ String. Name of variable to sort table columns. If col.FIAname=TRUE 
-	and a ref_* exists for colvar, the colvar code is used to sort. If NULL, the 
-	table is sorted by colvar.}    
-  \item{row.add0}{ Logical. If TRUE, add the rows that have 0 values. }
-  \item{col.add0}{ Logical. If TRUE, add the columns that have 0 values. }  
-  \item{rowlut}{ Data frame. A lookup table with variable codes and descriptions to
-	include in rows of output table (See notes for more information and format). }
-  \item{collut}{ Data frame. A lookup table with variable codes and descriptions to
-	include in columns of output table (See notes for more information and format). }
-  \item{rowgrp}{ Logical. If TRUE, appends row groups to first column of table. 
-	Only available if group category exists in ref_codes table (e.g., FORTYPGRPCD, OWNGRPCD). }   
-  \item{rowgrpnm}{ String. Name of row group variable. }  
-  \item{rowgrpord}{ String. Name of row group variable to sort table rows. }  
+  \item{estvar.filter}{ String. A tree filter for estimate variable. Must be R syntax 
+	(e.g., "STATUSCD == 1"). }
+  \item{smallbnd.att}{ String. Attribute in smallbnd, alternative to DOMAIN, to output
+	in estimation table. }
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
   \item{pseround}{ Integer. Number of decimal places for percent sampling error. }
+  \item{estnull}{ Number or character. The number or symbol to use to indicate 'not sampled'
+	for estimate. }
+  \item{psenull}{ Number or character. The number or symbol to use to indicate 'not sampled'
+	for percent standard errror. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
+  \item{multest}{ Logical. If TRUE, returns a data frame of SA estimates using both
+	unit-level and area-level estimates. }
+  \item{addSAdomsdf}{ Logical. If TRUE, sppends SAdomdf to unit.multest table for output. }
+  \item{SAdomvars}{ String vector. List of attributes from SAdoms to include in multest output. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs 
-	(e.g., tree_'estvar.name'_'rowvar'_'date') }
-  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
+  \item{outfn.pre}{ String. A prefix for outfile name, if savedata=TRUE. }
+  \item{raw_fmt}{ String. Format for raw output tables ('csv', 'sqlite', 'gpkg').}
+  \item{raw_dsn}{ String. Name of database if raw_fmt = c('sqlite', 'gpkg'). }
+  \item{multest_fmt}{ String. Format for multest output tables ('csv', 'sqlite', 'gpkg').}
+  \item{multest_outfolder}{ String. Outfolder for multest. If NULL, same as outfolder.}
+  \item{multest_dsn}{ String. Name of database if multest_fmt = c('sqlite', 'gpkg'). }
+  \item{multest_layer}{ String. Name of database layer if multest_fmt = c('sqlite', 'gpkg'). }
+  \item{multest.append}{ Logical. If TRUE, appends multest dataframe to output. }
+  \item{multest.AOIonly}{ Logical. If TRUE, appends multest dataframe (AOI=1) to output. }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
@@ -119,17 +129,12 @@ modSAtree(tree, cond = NULL, pltmodel = NULL, tuniqueid = "PLT_CN",
 	generate title string. Note: if title.ref is not NULL, it is added to title.main. }
   \item{title.ref}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: the ending 
 	text of the table title (e.g., Nevada, 2004-2005). If NULL, = "". }
-  \item{title.rowvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for the row domain variable. If NULL, = rowvar. }
-  \item{title.colvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for the column domain variable. If NULL, = colvar. }
   \item{title.dunitvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty  
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.estvar}{ String. TITLE: if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for the estimate variable. If NULL, title.estvar = estvar.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
-  \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

@@ -74,7 +74,7 @@ WYbighorn_dem_250m.img   | Erdas Imagine raster of elevation change, in meters**
 FUNCTION  | DESCRIPTION
 -------------- | ---------------------------------------------------------------
 [spGetSAdoms()](#spGetSAdoms) | Gets small area domains for estimation.
-[spGetDBbnd()](#spGetDBbnd)| Gets data from FIA database for plots within a given boundary.
+[spGetPlots()](#spGetPlots)| Gets data from FIA database for plots within a given boundary.
 [spGetModeldat()](#spGetModeldat)| Gets plot and spatial data for small area models.
 [modSAtree()](#modSAtree)| Generate tree estimates using Small Area Estimation (SAE) methods.
 
@@ -118,7 +118,6 @@ asp <- terrain(dem, opt="aspect", unit="degrees", filename=paste0(outfolder, "/W
 
 ```
 
-
 <a name="ref"></a>
 
 ## Reference Tables in FIESTA
@@ -136,13 +135,16 @@ There are several reference tables stored in FIESTA, including table variable de
 ```
 ######################################################################################
 # Usage:
-# spGetSAdoms(smallbnd_layer, smallbnd_dsn = NULL, smallbnd.att, 
-#	  smallbnd.name = NULL, smallbnd.filter = NULL, helperbnd_layer = NULL, 
-#	  helperbnd_dsn = NULL, helperbnd.att = NULL, helperbnd.name = NULL, 
-#	  helperbnd.filter = NULL, largebnd_layer = NULL, largebnd_dsn = NULL, 
-#	  largebnd.att = NULL, largebnd.name = NULL, largebnd.filter = NULL, 
-#	  exportshp = FALSE, outfolder = NULL, outfn = NULL, outfn.date = TRUE, 
-#	  overwrite = FALSE)
+# spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,  
+#	  smallbnd.att = NULL, smallbnd.filter = NULL, smallbnd.stfilter = NULL,
+#   smallbnd.ecofilter = NULL, helperbnd = NULL, helperbnd_dsn = NULL, 
+#	  helperbnd.unique = NULL, helperbnd.filter = NULL, largebnd = NULL, 
+#	  largebnd_dsn = NULL, largebnd.unique = NULL, largebnd.filter = NULL, 
+#   maxbnd = NULL, maxbnd_dsn = NULL, maxbnd.unique = NULL, maxbnd.filter = NULL,
+#   helper_autoselect = FALSE, nbrdom_min = NULL, threshold=30, 
+#	  multiSAdoms = TRUE, showsteps = TRUE, savedata = FALSE, savesteps = FALSE, 
+# 	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL,  
+# 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE)
 # 
 # Description:
 # Get spatial domains for small area estimation.
@@ -150,62 +152,52 @@ There are several reference tables stored in FIESTA, including table variable de
 help(spGetSAdoms)
 
 WYbhdist <- spImportSpatial(WYbhdistfn)
-head(WYbhdist@data)
+head(WYbhdist)
 
 ## Get spatial domains for small area estimation
-SAdoms <- spGetSAdoms(smallbnd_layer=WYbhdistfn, smallbnd.att="DISTRICTNA")
-SAdoms@data
-sp::plot(SAdoms)
+SAdomdat <- spGetSAdoms(smallbnd=WYbhdistfn, smallbnd.unique="DISTRICTNA")
+SAdoms <- SAdomdat$SAdomlst$SAdoms
+
+plot(st_geometry(SAdoms))
 
 
 ```
 
-#### <a name="spGetDBbnd"/>spGetDBbnd()
+#### <a name="spGetPlots"/>spGetPlots()
 ```
 ######################################################################################
 # Usage:
-# spGetDBbnd(bnd_layer, bnd_dsn = NULL, stbnd = NULL, states = NULL,  
-#	    RMRSonly = TRUE, datsource = "ORACLE", FS_FIADB = FALSE, SQLitefn = NULL,  
-#	    evalCur = TRUE, evalEndyr = NULL, evalType = "all", actual = FALSE,  
-#	    coordsfn = NULL, coordsfn.uniqueid = NULL, savedata = FALSE,  
-#	    exportshp = FALSE, outfolder = NULL, overwrite = FALSE, outfn = NULL,  
-#	    outfn.pre = NULL, datPlots = NULL, CTcoverfn = NULL, ...) 
+# spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL, 
+#	    stbnd_dsn = NULL, stbnd.att = NULL, RS = NULL, xy = NULL, xy_dsn = NULL, 
+#     xy.uniqueid = "PLT_CN", xvar = "LON_PUBLIC", yvar = "LAT_PUBLIC", crs = 4269, 
+#	    clipxy = TRUE, datsource = "datamart", data_dsn = NULL, istree = TRUE, 
+#	    plot_layer= "plot", cond_layer = "cond", tree_layer = "tree", puniqueid = "CN", 
+#	    intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, savexy = FALSE,
+#	    outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, 
+#	    outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
 # 
 # Description:
 # Extract data from FIA database for plots within a given boundary.
 ######################################################################################
-bnd_layer=SAdoms
-FS_FIADB=TRUE
-states="Wyoming"
-datsource="CSV"
-
-layer=SAdoms
-dsn=NULL
-caption=NULL
-checkonly=FALSE
-stopifnull=FALSE
-gui=FALSE
-
-
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetDBbnd.R")
-SAdata <- spGetDBbnd(bnd_layer=SAdoms, FS_FIADB=TRUE, states="Wyoming", datsource="CSV",
-      invyrs=2011:2013)
+SAdata <- spGetPlots(bnd=SAdoms, states="Wyoming", datsource="datamart", 
+      invyrs=2011:2013, showsteps=TRUE)
 names(SAdata)
-SAbnd <- SAdata$clip_poly
-SAspplt <- SAdata$clip_spplt
-SAdata$coordtype
+SAbnd <- SAdata$clip_polyv
+SAspplt <- SAdata$clip_pnts
 
 SAtabs <- SAdata$clip_tabs
 names(SAtabs)
 SAplt <- SAtabs$clip_plt
 SAcond <- SAtabs$clip_cond
 SAtree <- SAtabs$clip_tree
-SAshp_PUBLIC <- SAtabs$clip_shp_PUBLIC
+puniqueid <- SAdata$puniqueid
+xy.uniqueid <- SAdata$xy.uniqueid
 
-sp::plot(SAspplt)
-sp::plot(SAbnd, add=TRUE)
+plot(st_geometry(SAbnd))
+plot(st_geometry(SAspplt), add=TRUE)
 
 table(SAplt$INVYR)
+
 
 ```
 
@@ -214,16 +206,19 @@ table(SAplt$INVYR)
 ```
 ######################################################################################
 # Usage:
-# spGetModeldat(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",  
-#   	domtype = "POLY", dom_dsn, dom_layer = NULL, unitvar = NULL, rastlst.cont = NULL,  
-# 	  rastlst.cont.name = NULL, rastlst.cont.stat = "MEAN", rastlst.cat = NULL, 
-#	    rastlst.cat.name = NULL, rastfolder = NULL, rast.NODATA = NULL,  
-#     asptransform = FALSE, asprast = NULL, keepnull = FALSE, showext = TRUE,   
-#   	savedata = FALSE, exportshp = FALSE, outfolder = NULL, outfn = NULL, 
-#     overwrite = FALSE, ...) 
+# spGetModeldat(xyplt, xyplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN", 
+#     module = "SA", domtype = "POLY", dom_layer = NULL, dom_dsn = NULL, 
+#   	domvar = "DOMAIN", rastlst.cont = NULL, rastlst.cont.name = NULL, 
+#     rastlst.cont.stat = "MEAN", rastlst.cont.NODATA = NULL, rastlst.cat = NULL, 
+#     rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, rastfolder = NULL,
+#	    asptransform = FALSE, rast.asp = NULL, rast.lut = NULL, rastlut = NULL,
+#     areacalc = TRUE, areaunits = "ACRES", keepNA = FALSE, NAto0 = TRUE,
+#     showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA =  FALSE,
+#     outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
+#     outfn.date = TRUE, overwrite = FALSE, vars2keep = NULL, ...) 
 # 
 # Description:
-# Get data extraction and zonal statistics for Model-assisted or
+# Wrapper function to get data extraction and zonal statistics for Model-assisted or
 #		Model-based (Small Area) Estimation. The major steps are as follows:
 #   1) Check parameters 
 #   2) Extract point values from domlayer
@@ -240,15 +235,14 @@ rastlst.cont.name <- c("dem", "slp", "asp")
 rastlst.cat <- fornffn
 rastlst.cat.name="fornf"
 
-modeldat <- spGetModeldat(spplt=SAspplt, uniqueid="PLT_CN", dom_layer=SAbnd,
+modeldat <- spGetModeldat(xyplt=SAspplt, uniqueid=xy.uniqueid, dom_layer=SAbnd,
   domvar="DOMAIN", rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
   rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
   rast.NODATA=0, asptransform=TRUE, rast.asp=asp, keepnull=FALSE, showext=FALSE,
   savedata=FALSE, vars2keep="AOI")
 names(modeldat)
 
-sppltmodel <- modeldat$sppltmodel
-pltmodel <- modeldat$pltmodel
+pltassgn <- modeldat$pltassgn
 dunitlut <- modeldat$domzonal
 dunitarea <- modeldat$domarea
 dunitvar <- modeldat$domvar
@@ -257,15 +251,16 @@ inputdf <- modeldat$inputdf
 prednames <- modeldat$prednames
 dunitnames <- modeldat$zonalnames
 predfac <- modeldat$predfac
+pltassgnid <- modeldat$pltassgnid
 
 dunitlut
 dunitvar
 areavar
-head(pltmodel)
+head(pltassgn)
 prednames
 dunitnames
 dunitarea
-
+pltassgnid
 
 ```
 
@@ -273,37 +268,34 @@ dunitarea
 ```
 ######################################################################################
 # Usage:
-# modSAtree(tree, cond=NULL, pltmodel=NULL, tuniqueid="PLT_CN", 
-#	  cuniqueid="PLT_CN", puniqueid="PLT_CN", sumunits=FALSE, adjplot=TRUE, 
-#	  SApackage="JoSAE", SAmethod="unit", landarea="ALL", ACI=FALSE, 
-#	  nonsamp.filter=NULL, plt.filter=NULL, cond.filter=NULL, domarea=NULL, 
-#	  domvar="DOMAIN", areavar=NULL, domzonal=NULL, npixelvar="npixels",  
-#	  prednames=NULL, predfac=NULL, estvar=NULL, estvar.filter=NULL, 
-#   allin1=FALSE, estround=0, pseround=3, divideby=NULL, savedata=FALSE, 
-#   rawdata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, 
-#   outfn.date=TRUE, overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, 
-#   title.main=NULL, title.ref=NULL, title.unitvar=NULL, title.estvar=NULL,
-#   title.filter=NULL, gui=FALSE) 
+# modSAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,   
+#	  dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID",   
+#	  puniqueid = "PLT_CN", pltassgnid = "CN", measCur = FALSE, measEndyr = NULL,  
+#   invyrs = NULL, ACI = FALSE, adj = "plot", plt.nonsamp.filter = NULL,  
+#   cond.nonsamp.filter = NULL, dunitvar = "DOMAIN", dunitvar2 = NULL, 
+#   dunitarea = NULL, areavar = NULL, dunitlut = NULL, prednames = NULL, predfac= NULL,
+#   SApackage = "JoSAE", SAmethod = "unit", largebnd.att = NULL, landarea = "ALL", 
+#   plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL,  
+#   allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = "--", 
+#   divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, 
+#   outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, 
+#   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL,
+#   title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, SApopdat = NULL) 
 # 
 # Description:
 # Generate estimates for area of interest, or small boundary.
 ######################################################################################
 
-
 ## Estimates of live basal area (sq cuft) by Bighorn National Forest district
 estvar <- "BA"
-#prednames <- prednames[1:3]   ## Note: not yet working with factor variables
 estvar.filter <- "STATUSCD == 1"
-tree=SAtree
-cond=SAcond
-pltmodel=sppltmodel
 adjplot=TRUE
 SAmethod="area"
 SApackage="JoSAE"
 
-SAdat <- modSAtree(tree=SAtree, cond=SAcond, pltmodel=sppltmodel,
-  dunitarea=dunitarea, areavar=areavar, dunitlut=dunitlut, 
-  prednames=prednames, predfac=predfac,
+SAdat <- modSAtree(tree=SAtree, cond=SAcond, pltassgn=pltassgn,
+  pltassgnid=pltassgnid, dunitarea=dunitarea, areavar=areavar, 
+  dunitlut=dunitlut, prednames=prednames, predfac=predfac,
   estvar=estvar, estvar.filter=estvar.filter, rawdata=TRUE)
 
 names(SAdat)
@@ -315,13 +307,13 @@ names(SAdat.raw)
 SAdat.raw$plotsampcnt
 SAdat.raw$condsampcnt
 
-SAdat.raw$domzonal
-SAdat.raw$domarea
-head(SAdat.raw$tdomdat)
+SAdat.raw$dunitlut
+SAdat.raw$dunitarea
+head(SAdat.raw$dat)
 SAdat.raw$estvar
 
-SAdat.raw$JoSAE.unit
-SAdat.raw$JoSAE.unit.lme
+SAdat.raw$dunit.multest
+SAdat.raw$dunit.totest
 
 
 ```

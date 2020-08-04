@@ -1,16 +1,18 @@
 datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL, 
-	pvar.round=2, savedata=FALSE, outfolder=NULL, outfn=NULL){
+	NAto0=TRUE, dropNAxvar=TRUE, dropNAyvar=TRUE, pvar.round=2, 
+	savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.date=FALSE,
+	overwrite=TRUE){
 
   #####################################################################################
   ## DESCRIPTION: Generates a pivot table.   
   #####################################################################################
 
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
-  if (gui) savedata <- NULL
 
+  if (gui) savedata <- NULL
+  concatx <- NULL
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -27,7 +29,8 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
 
   ## Check xvar
   xvar <- FIESTA::pcheck.varchar(var2check=xvar, varnm="xvar", checklst=xnamelst, 
-	caption="X variable", warn="xvar not in data table", stopifnull=TRUE) 
+	caption="X variable", warn="xvar not in data table", multiple=TRUE, 
+	stopifnull=TRUE) 
 
   ## Check yvar
   yvar <- FIESTA::pcheck.varchar(var2check=yvar, varnm="yvar", checklst=xnamelst, 
@@ -59,21 +62,39 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui=gui)
     if (is.null(outfn) || gsub(" ", "", outfn) == "") 
       outfn <- "pivot"
-
-    pivotfn <- FIESTA::fileexistsnm(outfolder, outfn, "csv")
-    pivotfnout <- paste0(outfolder, "/", pivotfn, ".csv")
   }
 
 
   ################################################################################	
   ## DO WORK
-  ################################################################################	
+  ################################################################################
+  if (dropNAyvar)
+    datxf <- na.omit(datxf, cols=yvar)
+  if (dropNAxvar)
+    datxf <- na.omit(datxf, cols=xvar)
+  datxf[, concatx := do.call(paste, c(.SD, sep="-")), .SDcols=xvar]
+  
+  pfill <- ifelse(NAto0, 0, NA)
+  ptab <- dcast(datxf, concatx ~ get(yvar), value.var=pvar, fun.aggregate=pfun,
+		fill=pfill) 
+  ptab[, (xvar) := tstrsplit(concatx, "-", fixed=TRUE)][][, concatx :=NULL]
 
-  ## Generate pivot table
-  ptab <- tapply(datxf[[pvar]], datxf[,c(xvar, yvar), with=FALSE], pfun)
-  ptab[is.na(ptab)] <- 0
-  ptab <- round(ptab, pvar.round)
+   
+  cols <- names(ptab)[!names(ptab) %in% xvar]
+  setcolorder(ptab, c(xvar, cols))
+  ptab[, (cols) := round(.SD, pvar.round), .SDcols=cols]
+  setkeyv(ptab, xvar)
+
+  ## Match class of new table xvar to xvar of x
+  tabs <- suppressWarnings(check.matchclass(datxf, ptab, xvar))
+  ptab <- tabs$tab2
 
 
+  if (savedata)
+    FIESTA::write2csv(ptab, outfolder=outfolder, outfilenm=outfn, 
+		outfn.date=outfn.date, overwrite=overwrite)
+
+
+    
   return(ptab)
 }

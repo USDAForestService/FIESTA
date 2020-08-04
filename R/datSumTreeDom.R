@@ -1,11 +1,12 @@
 datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", puniqueid="CN", bycond=FALSE, 
-	condid="CONDID", tsumvar=NULL, TPA=FALSE, tfun=sum, ACI=FALSE, tfilter=NULL, 
-	lbs2tons=TRUE, tdomvar="SPCD", tdomvarlst=NULL, tdomvar2=NULL, 
-	tdomvar2lst=NULL, tdomprefix=NULL, tdombarplot=FALSE, tdomtot=FALSE, tdomtotnm=NULL, 
-	FIAname=FALSE, addseed=FALSE, presence=FALSE, proportion=FALSE, cover=FALSE, 
-	getadjplot=FALSE, adjtree=FALSE, adjTPA=1, savedata=FALSE, outfolder=NULL, 
-	outfn=NULL, outfn.date=TRUE, overwrite=FALSE, tround=16, checkNA=FALSE){
+	condid="CONDID", bysubp=FALSE, subpid="SUBP", tsumvar=NULL, TPA=TRUE, tfun=sum, 
+	ACI=FALSE, tfilter=NULL, lbs2tons=TRUE, tdomvar="SPCD", tdomvarlst=NULL, 
+	tdomvar2=NULL, tdomvar2lst=NULL, tdomprefix=NULL, tdombarplot=FALSE, 
+	tdomtot=FALSE, tdomtotnm=NULL, FIAname=FALSE, addseed=FALSE, pivot=TRUE, 
+	presence=FALSE, proportion=FALSE, cover=FALSE, getadjplot=FALSE, adjtree=FALSE, 
+	NAto0=FALSE, adjTPA=1, savedata=FALSE, outfolder=NULL, out_layer=NULL, 
+	outfn.date=TRUE, overwrite=FALSE, tround=16, checkNA=FALSE, returnDT=TRUE){
 
   ####################################################################################
   ## DESCRIPTION: Aggregates tree domain data (ex. species) to condition or plot level  
@@ -28,8 +29,8 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   checkNAtvars <- {}
 
   ## If gui.. set variables to NULL
-  if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=tdombarplot=
-	FIAname=addseed=proportion=presence=tdomtot=adjtree <- NULL
+  if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
+	tdombarplot=FIAname=addseed=proportion=presence=tdomtot=adjtree=tmp <- NULL
 
   ## SET OPTIONS
   options.old <- options()
@@ -68,40 +69,18 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
   ### CHECK tables
   ###########################################################  
+  noplt=nocond <- TRUE
+  pltsp <- FALSE
 
   ## Check tree  
   treex <- FIESTA::pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
 
-  ## Check cond 
-  condx <- FIESTA::pcheck.table(cond, gui=gui, tabnm="cond", caption="Condition table?")
-
-  ## Check plt
-  noplt <- TRUE
-  pltshp <- FALSE
-  plt <- FIESTA::pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
-  if (!is.null(plt)) {
-    noplt <- FALSE
-
-    ## Remove totally nonsampled plots
-    if ("PLOT_STATUS_CD" %in% names(plt)) {
-      if (3 %in% unique(plt[["PLOT_STATUS_CD"]]))
-        warning(paste("There are", sum(plt[["PLOT_STATUS_CD"]] == 3), 
-		"nonsampled plots"))
-      plt <- plt[plt$PLOT_STATUS_CD != 3,]
-    }
-
-    if (typeof(plt) == "S4") {
-      pltshp <- TRUE
-      pltx <- data.table(plt@data)
-    } else {
-      pltx <- plt
-    }
-  } else {
-    pltx <- plt
-  }
-
   ## Check seed 
   seedx <- FIESTA::pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
+  if (is.null(treex) && is.null(seedx)) stop("you must include a tree or seed table")
+
+  ## Check cond 
+  condx <- FIESTA::pcheck.table(cond, gui=gui, tabnm="cond", caption="Condition table?")
 
   ## Check addseed
   addseed <- FIESTA::pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
@@ -119,7 +98,17 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ###################################################################################
   bycond <- FIESTA::pcheck.logical(bycond, varnm="bycond", title="By condition?", 
 		first="YES", gui=gui, stopifnull=TRUE)
-  if (bycond) noplt <- TRUE
+
+  ## Check bysubp
+  ###################################################################################
+  bysubp <- FIESTA::pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
+		first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check checkNA
+  ###################################################################################
+  NAto0 <- FIESTA::pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
+		first="YES", gui=gui)
+  if (is.null(NAto0)) NAto0 <- FALSE
 
   ## Check checkNA
   ###################################################################################
@@ -142,6 +131,9 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
   ## If bycond, check condid in tree table and setkey to tuniqueid, condid
   if (bycond) {
+    pltsp <- FALSE
+    noplt <- TRUE
+
     ## Check condid in tree table
     condid <- FIESTA::pcheck.varchar(var2check=condid, varnm="condid", 
 		checklst=treenmlst, caption="Cond ID - tree", 
@@ -151,46 +143,89 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       treex$CONDID <- 1
       condid <- "CONDID"
     }
-    setkeyv(treex, c(tuniqueid, condid))
+    tsumuniqueid <- c(tuniqueid, condid)
+    setkeyv(treex, tsumuniqueid)
     checkNAtvars <- c(checkNAtvars, condid)
-  }
 
-  if (!is.null(condx)) {
-    ## Check cuniqueid and condid in cond table
-    condnmlst <- names(condx)
-    cuniqueid <- FIESTA::pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
+    if (!is.null(condx)) {
+      nocond <- FALSE
+
+      ## Check cuniqueid and condid in cond table
+      condnmlst <- names(condx)
+      cuniqueid <- FIESTA::pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
 		checklst=condnmlst, caption="UniqueID variable - cond", 
 		warn=paste(cuniqueid, "not in cond table"))
-    if (is.null(cuniqueid)) {
-      if (tuniqueid %in% condnmlst) {
-        cuniqueid <- tuniqueid
-      } else {
-        stop("cuniqueid is invalid")
+      if (is.null(cuniqueid)) {
+        if (tuniqueid %in% condnmlst) {
+          cuniqueid <- tuniqueid
+        } else {
+          stop("cuniqueid is invalid")
+        }
       }
+
+      ## Check if class of tuniqueid matches class of cuniqueid
+      tabs <- FIESTA::check.matchclass(treex, condx, tuniqueid, cuniqueid)
+      treex <- tabs$tab1
+      condx <- tabs$tab2
+
+      if (!condid %in% names(condx)) stop("condid must be in condx")
+      csumuniqueid <- c(cuniqueid, condid)
+      setkeyv(condx, csumuniqueid)
+      checkNAcvars <- c(checkNAcvars, csumuniqueid)
+
+      ## Check that values of tuniqueid in treex are all in puniqueid in pltx
+      FIESTA::check.matchval(treex, condx, tsumuniqueid, csumuniqueid)
     }
-    if (!condid %in% names(condx)) stop("condid must be in condx")
-    setkeyv(condx, c(cuniqueid, condid))
-    checkNAcvars <- c(checkNAcvars, cuniqueid, condid)
-
-    ## Check that values of tuniqueid in treex are all in puniqueid in pltx
-    FIESTA::check.matchval(treex, condx, c(tuniqueid, condid), c(cuniqueid, condid))
-
-    ## Check if class of tuniqueid matches class of cuniqueid
-    tabs <- FIESTA::check.matchclass(treex, condx, tuniqueid, cuniqueid)
-    treex <- tabs$tab1
-    condx <- tabs$tab2
+  } else {   ## byplt
+    tsumuniqueid <- tuniqueid
   }
 
-  if (!noplt) {
+  if (bysubp) {
+    pltshp <- FALSE
+    noplt <- TRUE
+    nocond <- TRUE
+
+    ## Check condid in tree table and setkey to tuniqueid, condid
+    subpid <- FIESTA::pcheck.varchar(var2check=subpid, varnm="subpid", 
+		checklst=treenmlst, caption="subplot ID - tree", 
+		warn=paste(subpid, "not in tree table"))
+    if (is.null(subpid)) {
+      warning("assuming only 1 subplot")
+      treex$SUBPID <- 1
+      subpid <- "SUBPID"
+    }
+    tsumuniqueid <- c(tsumuniqueid, subpid)
+    setkeyv(treex, tsumuniqueid)
+    checkNAtvars <- c(checkNAtvars, subpid)
+  }
+ 
+  ## Check plt
+  pltx <- FIESTA::pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
+
+  if (!is.null(pltx)) {
+    noplt <- FALSE
+
+    ## Remove totally nonsampled plots
+    if ("PLOT_STATUS_CD" %in% names(pltx)) {
+      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]]))
+        warning(paste("There are", sum(pltx[["PLOT_STATUS_CD"]] == 3), "nonsampled plots"))
+      pltx <- pltx[pltx$PLOT_STATUS_CD != 3,]
+    }
+
+    if ("sf" %in% class(pltx))
+      pltsp <- TRUE
+
     ## Check puniqueid
     pltnmlst <- names(pltx)
     puniqueid <- FIESTA::pcheck.varchar(var2check=puniqueid, varnm="puniqueid", 
 		checklst=pltnmlst, caption="UniqueID variable - plt", 
 		warn=paste(puniqueid, "not in plot table"), stopifnull=TRUE)
 
-    ## Remove totally nonsampled plots
-    #if ("PLOT_STATUS_CD" %in% pltnmlst)
-    #  pltx <- pltx[PLOT_STATUS_CD != 3,]
+    ## Check for unique plot records
+    if (nrow(pltx) > length(unique(pltx[[puniqueid]]))) {
+      message("plt table has > 1 record per uniqueid... will not be merged to plt.")
+      noplt <- TRUE
+    }
 
     ## Check that the values of tuniqueid in treex are all in puniqueid in pltx
     FIESTA::check.matchval(treex, pltx, tuniqueid, puniqueid)
@@ -206,10 +241,10 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       FIESTA::check.matchval(condx, pltx, cuniqueid, puniqueid)
 
     ## Change uniqueid in plt table to match tree uniqueid
-    if (puniqueid == "CN" && tuniqueid == "PLT_CN") {
-      names(pltx)[names(pltx) == puniqueid] <- tuniqueid
-      puniqueid <- tuniqueid
-    }
+#    if (puniqueid == "CN" && tuniqueid == "PLT_CN") {
+#      names(pltx)[names(pltx) == puniqueid] <- tuniqueid
+#      puniqueid <- tuniqueid
+#    }
     setkeyv(pltx, puniqueid)
     checkNApvars <- c(checkNApvars, puniqueid)
   } 
@@ -226,7 +261,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 		first="NO", gui=gui)
   if (!ACI) {
     if (is.null(condx) || (!"COND_STATUS_CD" %in% names(condx))) {
-      message("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
+      warning("COND_STATUS_CD not in table, assuming forested plots with no ACI plots")
     } else {
       cond.ids <- na.omit(condx[COND_STATUS_CD == 1, 
 		do.call(paste, .SD), .SDcols=c(cuniqueid, condid)])
@@ -258,35 +293,17 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ## Check getadjplot
   getadjplot <- FIESTA::pcheck.logical(getadjplot, varnm="getadjplot", 
 		title="Get plot adjustment?", first="NO", gui=gui)
+  if (getadjplot && is.null(condx)) 
+    stop("must include condx to adjust to plot")
 
   ## Check adjtree
-  adjtree - FIESTA::pcheck.logical(adjtree, varnm="adjtree", title="Area adjustment", 
+  adjtree <- FIESTA::pcheck.logical(adjtree, varnm="adjtree", title="Area adjustment", 
 		first="NO", gui=gui)
   if (is.null(adjtree)) adjtree <- FALSE
 
 
-  ## By plot / By cond
-  ######################################################################################
-  if (bycond) {
-    pltshp <- FALSE
-    noplt <- TRUE
-
-    if (is.null(condx)) {
-      ## Check if CONDID is in the tree table.
-      if (!condid %in% names(treex)) 
-        stop(paste(condid, "must be in tree table")) 
-    } else {
-      ## Check if CONDID is in the cond table.
-      if (!condid %in% names(condx) | (!condid %in% names(treex)))
-        stop(paste(condid, "must be in COND and TREE table")) 
-    }
-    treeid <- c(uniqueid, condid)
-  } else {   	# by plot
-    treeid <- uniqueid
-  } 
-
-
-  ### CHECK tsumvar 
+  ###########################################################  
+  ### Check tsumvar 
   ###########################################################  
   notdomdat <- ifelse(is.null(tsumvar) && presence, TRUE, FALSE)
   if (is.null(tsumvar)) {
@@ -364,7 +381,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       }
     }
   }
-   
 
   ### GET tfun USED FOR AGGREGATION
   tfunlst <- c("sum", "mean", "max", "min", "length", "median")
@@ -410,7 +426,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 #  }
 
   ## Check tfilter and filter tree data
-  tdat <- FIESTA::datFilter(x=treex, xfilter=tfilter, title.filter="tfilter", 
+  tdat <- datFilter(x=treex, xfilter=tfilter, title.filter="tfilter", 
 			stopifnull=TRUE, gui=gui)
   treef <- tdat$xf
   tree.filter <- tdat$xfilter
@@ -426,6 +442,12 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     tdoms <- levels(treef[[tdomvar]])[levels(treef[[tdomvar]]) %in% unique(treef[[tdomvar]])]
   } else {
     tdoms <- sort(unique(treef[[tdomvar]]))
+  }
+
+  ## check seed table
+  if (addseed && !tdomvar %in% names(seedx)) {
+    message("tdomvar not in seedx: ", tdomvar, "... no seeds included")
+    addseed <- FALSE
   }
 
   nbrtdoms <- length(tdoms)
@@ -446,8 +468,8 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       if (length(tdomvarlst) == 0) stop("")
       if (is.numeric(tdoms)) tdomvarlst <- as.numeric(tdomvarlst) 
     }  
+    treef <- treef[treef[[tdomvar]] %in% tdomvarlst,]
   }
-
 
   ## Check if want to include totals (tdomtot) and check for a totals name
   ## Check tdomtot
@@ -458,7 +480,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   if (tdomtot) 
     if (!is.null(tdomtotnm) & !is.character(tdomtotnm)) 
       warning("tdomtotnm is not valid... using default")
-
     
   ## GETS name for tdomvar
   #####################################################################
@@ -475,15 +496,19 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   if (FIAname) {
     tdomdata <- FIESTA::datLUTnm(treef, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
     treef <- tdomdata$xLUT
-    tdomvarlut <- unique(treef[,c(tdomvar, tdomdata$xLUTnm)])  
+    tdomvarnm <- tdomdata$xLUTnm
+    setkeyv(treef, tsumuniqueid) 
+    tdomvarlut <- unique(treef[,c(tdomvar, tdomvarnm), with=FALSE]) 
 
     if (addseed) {
       sdomdata <- FIESTA::datLUTnm(seedx, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
       seedx <- sdomdata$xLUT
     }
-    tdomvarlst2 <- tdomvarlut[match(tdomvarlst, tdomvarlut[,tdomvar]), tdomdata$xLUTnm]
-    tdomvarnm <- tdomdata$xLUTnm
+    tdomvarlst2 <- tdomvarlut[match(tdomvarlst, tdomvarlut[[tdomvar]]), 
+		tdomvarnm, with=FALSE][[1]]
+
   } else if (is.numeric(treef[[tdomvar]]) && !is.null(tdomprefix)) {
+
     tdomvarnm <- paste0(tdomvar, "NM") 
     maxchar <- max(sapply(tdomvarlst, function(x) {nchar(x)}))
 
@@ -493,10 +518,10 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     #treef[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
     #tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
 
-    if (addseed) 
-      seedx[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
-			width=maxchar, flag="0"))]
-      #seedx[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
+#    if (addseed) 
+#      seedx[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
+#			width=maxchar, flag="0"))]
+#      #seedx[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
 
     tdomvarlut <- data.frame(tdomvarlst, tdomvarlst2, stringsAsFactors=FALSE)
     names(tdomvarlut) <- c(tdomvar, tdomvarnm) 
@@ -523,7 +548,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     } else { 
       if (sum(sapply(tdomvar2lst, 
 		function(x,y,z){x %in% unique(y[,z])}, treef, tdomvar2)) == 0) {
-        warning("check tdomvar2lst: a tree domain value not in tree table")
+        message("check tdomvar2lst: a tree domain value not in tree table")
         tdomvar2lst <- select.list(as.character(tdoms2), title="Tree domain(s)", 
 		multiple=TRUE)
         if (length(tdomvar2lst) == 0) stop("")
@@ -559,18 +584,26 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     tdomvarlut <- tdomvarlut[order(tdomvarlut[[tdomvar]], tdomvarlut[[tdomvar2]]), ] 
   }
 
-  ### GET presence
-  presence <- FIESTA::pcheck.logical(presence, varnm="presence", title="Presence only?", 
+  ## Check pivot
+  pivot <- FIESTA::pcheck.logical(pivot, varnm="pivot", title="Pivot columns?", 
+		first="NO", gui=gui)
+  if (!pivot) {
+    presence=proportion=cover <- FALSE
+
+  } else {
+    ## Check presence
+    presence <- FIESTA::pcheck.logical(presence, varnm="presence", title="Presence only?", 
 		first="NO", gui=gui)
 
-  ## Check proportion (proportion of all tree domains, values 0-1)
-  proportion <- FIESTA::pcheck.logical(proportion, varnm="proportion", title="Proportions?", 
+    ## Check proportion (proportion of all tree domains, values 0-1)
+    proportion <- FIESTA::pcheck.logical(proportion, varnm="proportion", title="Proportions?", 
 		first="NO", gui=gui)
 
-  ## Check cover (proportion of LIVE_CANOPY_CVR_PCT per tree domain)
-  ## Note: total of all tree domains will equal LIVE_CANOPY_CVR_PCT for plot/condition
-  cover <- FIESTA::pcheck.logical(cover, varnm="cover", title="As Cover?", 
+    ## Check cover (proportion of LIVE_CANOPY_CVR_PCT per tree domain)
+    ## Note: total of all tree domains will equal LIVE_CANOPY_CVR_PCT for plot/condition
+    cover <- FIESTA::pcheck.logical(cover, varnm="cover", title="As Cover?", 
 		first="NO", gui=gui)
+  }
 
   if (cover) {
     covervar <- ifelse(bycond, "LIVE_CANOPY_CVR_PCT", "CCLIVEPLT")
@@ -592,7 +625,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   tdombarplot <- FIESTA::pcheck.logical(tdombarplot, varnm="tdombarplot", 
 	title="Barplot of tdomains?", first="NO", gui=gui)
 
-
   ## Check tround
   if (is.null(tround) | !is.numeric(tround)) {
     warning("tround is invalid.. rounding to 6 digits")
@@ -613,15 +645,20 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     outfn.param <- paste(outfn, "param", sep="_")
   }
 
+
+  ################################################################################  
   ################################################################################  
   ### DO WORK
   ################################################################################ 
+  ################################################################################  
 
   if (getadjplot) {
-    adjfacdata <- getadjfactorPLOT(esttype="TREE", treex=treef, condx=condx, 
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
+    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, tuniqueid=tuniqueid,
+ 		cuniqueid=cuniqueid)
     condx <- adjfacdata$condadj
     treef <- adjfacdata$treeadj
+
+    adjtree <- TRUE
   }
  
   if (adjtree && !"tadjfac" %in% names(treef))
@@ -634,24 +671,24 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
   ## AGGREGATE THE TREE SUM VARIABLE TO PLOT LEVEL USING THE SPECIFIED FUNCTION
   if (adjtree) {
-    newname <- ifelse(TPA, "TPA_ADJ", paste0(tsumvar, "_ADJ"))
+    newname <- ifelse(TPA, paste0(tsumvar, "_TPA_ADJ"), paste0(tsumvar, "_ADJ"))
     if (TPA) {
       treef[, (newname) := get(eval(tsumvar)) * get(eval(tpavar)) * tadjfac]
     } else {
       treef[, (newname) := get(eval(tsumvar)) * tadjfac]
     }
   } else {
-    newname <- ifelse(TPA, paste0(tsumvar, "TPA"), tsumvar)
+    newname <- ifelse(TPA, paste0(tsumvar, "_TPA"), tsumvar)
     if (TPA) {
       treef[, (newname) := get(eval(tsumvar)) * get(eval(tpavar))]
     } else {
       treef[, (newname) := get(eval(tsumvar))]
     }
   }
-  treef <- treef[, c(key(treef), tdomvar, tdomvarnm, newname), with=FALSE]
+  treef <- treef[, unique(c(key(treef), tdomvar, tdomvarnm, newname)), with=FALSE]
 
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
-  if (is.null(tdomtotnm)) {
+  if (is.null(tdomtotnm) && pivot) {
     if (is.null(tdomprefix)) {
       tdomtotnm <- paste0(newname, "TOT")
     } else {
@@ -662,115 +699,107 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ## GET NAME FOR SUMMED TREE VARIABLE FOR ALL TREE DOMAINS (IF PROPORTION = TRUE)
   if (proportion) denomvar <- paste0(newname, "_ALL")
 
-  ## Filter tree table with only tdoms in tdomvarlst
+  ## Apply filters to tree (and seed) table with only tdoms in tdomvarlst
   #####################################################################
   tdomtreef <- treef[treef[[tdomvar]] %in% tdomvarlst]
 
-  ## Filter seed table with only tdoms in tdomvarlst
-  #####################################################################
-  if (addseed) 
-    #if (newname != "COUNT") stop("seeds can only be added to counts (PLT_CN)")
+  if (addseed)
     tdomseedf <- seedx[seedx[[tdomvar]] %in% tdomvarlst]
 
 
-  #############################################################################
-  if (!bycond) {  ### SUM BY PLOT
-    ### AGGREGATE TREE DOMAIN DATA
-    treeid <- tuniqueid
-    tdoms <- tdomtreef[, list(TSUM=tfun(get(eval(newname)))), by=c(tuniqueid, 
-			tdomvarnm)]
-    tdoms <- dcast(tdoms, get(eval(tuniqueid)) ~ get(eval(tdomvarnm)), 
-			value.var="TSUM", fill=0)
-    setnames(tdoms, "tuniqueid", treeid)
+  ## Sum tree (and seed) by tdomvarnm
+  #####################################################################
+  tdomtreef <- tdomtreef[, tfun(.SD, na.rm=TRUE), by=c(tsumuniqueid, tdomvarnm), 
+			.SDcols=newname]
+  setnames(tdomtreef, "V1", newname)
+  setkeyv(tdomtreef, c(tsumuniqueid, tdomvarnm))
 
-    if (addseed) {
-      seedname <- ifelse(TPA, "TPA_UNADJ", "TREECOUNT_CALC")
-      sdoms <- tdomseedf[, list(TSUM=sum(get(eval(seedname)))), by=c(tuniqueid, 
-			tdomvarnm)]
-      sdoms <- dcast(sdoms, get(eval(tuniqueid)) ~ get(eval(tdomvarnm)), 
-			value.var="TSUM", fill=0)
-      setnames(sdoms, "tuniqueid", treeid)
-      setkeyv(sdoms, treeid)
-    }
+  if (addseed) { 
+    seedname <- ifelse(TPA, "TPA_UNADJ", "TREECOUNT_CALC")
+    tdomseedf <- tdomseedf[, tfun(.SD, na.rm=TRUE), by=c(tsumuniqueid, tdomvarnm), 
+		.SDcols=seedname]
+    setnames(tdomseedf, "V1", seedname)
+    setkeyv(tdomseedf, c(tsumuniqueid, tdomvarnm))
 
-  } else {   ### SUM BY CONDITION
-    treeid <- c(tuniqueid, condid)
-    ### AGGREGATE TREE DOMAIN DATA
-    tdoms <- tdomtreef[, list(TSUM=tfun(get(eval(newname)))), 
-			by=c(key(tdomtreef), tdomvarnm)]
-    tdoms <- dcast(tdoms, get(eval(tuniqueid)) + get(eval(condid)) ~ get(eval(tdomvarnm)), 
-			value.var="TSUM", fill=0)
-    setnames(tdoms, c("tuniqueid", "condid"), treeid)
 
-    if (addseed) {
-      seedname <- ifelse(TPA, "TPA_UNADJ", "TREECOUNT_CALC")
-      sdoms <- tdomseedf[, list(TSUM=sum(get(eval(seedname)))), 
-			by=c(key(tdomseedf), tdomvarnm)]
-      sdoms <- dcast(sdoms, get(eval(tuniqueid)) + get(eval(condid)) ~ get(eval(tdomvarnm)), 
-			value.var="TSUM", fill=0)
-      setnames(sdoms, c("tuniqueid", "condid"), treeid)
-    }
+    tdomtreef <- merge(tdomtreef, tdomseedf, all.x=TRUE, all.y=TRUE)
+    tdomtreef[, tmp := get(newname) + get(seedname)]
+    tdomtreef[, c(newname, seedname) := NULL]
+    setnames(tdomtreef, "tmp", newname)
 
+    ## Set 0 to NA values
+    tdomtreef[is.na(tdomtreef)] <- 0
   }
-  #setkeyv(tdoms, treeid)
+  setkeyv(tdomtreef, tsumuniqueid)
 
-  ## CHECKS IF TREE DOMAIN IN tdomlst EXISTS. IF NOT, CREATES COLUMN WITH ALL 0 VALUES.
-  tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% treeid] 
-  UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
-  if (length(UNMATCH) > 0) {
-    for (col in UNMATCH) {
-      tdoms[,(col) := 0]
-      tdomvarlst2 <- c(tdomvarlst2, col)       
-    } 
-  }
-  if (addseed) {
-    sdomscols <- colnames(sdoms)[!colnames(sdoms) %in% treeid]
-    UNMATCHs <- tdomvarlst2[is.na(match(tdomvarlst2, sdomscols))] 
-    if (length(UNMATCHs) > 0)
-      for (col in UNMATCHs) sdoms[,(col) := 0]
-      
-    tmp <- sdoms[tdoms]
-    tmp[is.na(tmp)] <- 0
 
-    tdoms <- data.table(tdoms[,treeid, with=FALSE], 
-		sapply(tdomscols, 
-		function(x, tmp) {tmp[[x]] <- tmp[[x]] + tmp[[paste("i", x, sep=".")]]}, tmp))
-    names(tdoms)[1:length(treeid)] <- treeid
-  }
- 
-  ## ADD TOTAL OF TREE DOMAINS IN tdomvarlst 
-  if ((tdomtot || proportion || cover)) {
-    ## Sum the total tree domains in tdomvarlst after any filtering by plot
-    tdoms[, (tdomtotnm) := rowSums(.SD, na.rm=TRUE), .SDcols=tdomvarlst2]
-    tdomscolstot <- c(tdomvarlst2, tdomtotnm)
+  ######################################################################## 
+  ## If pivot=FALSE
+  ######################################################################## 
+
+  if (!pivot) {
+    tdoms <- tdomtreef
+    tdomscolstot <- newname
+    tdomtotnm <- newname
+    tdomscols <- sort(unique(tdomtreef[[tdomvar]]))
+
   } else {
-    tdomscolstot <- tdomvarlst2
-  }
 
-  ## Create a table of proportions for each tdom by total by plot
-  if (proportion) {
-    tdoms.prop <- tdoms[, lapply(.SD, function(x, tdomtotnm) x / get(eval(tdomtotnm)), 
+    ######################################################################## 
+    ## If pivot=TRUE, aggregate tree domain data
+    ######################################################################## 
+    tdoms <- datPivot(tdomtreef, pvar=newname, xvar=tsumuniqueid,
+			yvar=tdomvarnm, pvar.round=tround)
+
+
+    ## check if tree domain in tdomlst.. if not, create column with all 0 values
+    tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% tsumuniqueid]
+    UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
+    tdoms[, (UNMATCH) := 0]
+    tdomvarlst2 <- c(tdomvarlst2, UNMATCH)
+
+
+    ## ADD TOTAL OF TREE DOMAINS IN tdomvarlst 
+    if ((tdomtot || proportion || cover)) {
+      ## Sum the total tree domains in tdomvarlst after any filtering by plot
+      tdoms[, (tdomtotnm) := round(rowSums(.SD, na.rm=TRUE), tround), .SDcols=tdomvarlst2]
+      tdomscolstot <- c(tdomvarlst2, tdomtotnm)
+    } else {
+      tdomscolstot <- tdomvarlst2
+    }
+
+    ## Create a table of proportions for each tdom by total by plot
+    if (proportion) {
+      tdoms.prop <- tdoms[, lapply(.SD, function(x, tdomtotnm) round(x / get(eval(tdomtotnm))), 
 			tdomtotnm), by=key(tdoms), .SDcols=tdomscolstot]
-    setcolorder(tdoms.prop, c(key(tdoms.prop), tdomscolstot))
-  }
+      setcolorder(tdoms.prop, c(key(tdoms.prop), tdomscolstot))
+    }
 
-  ## Create a table of presence/absence (1/0) by plot
-  if (presence) {
-    tdoms.pres <- tdoms[, lapply(.SD, function(x) x / x), by=key(tdoms), 
+    ## Create a table of presence/absence (1/0) by plot
+    if (presence) {
+      tdoms.pres <- tdoms[, lapply(.SD, function(x) x / x), by=key(tdoms), 
 		.SDcols=tdomscolstot]
-    tdoms.pres[is.na(tdoms.pres)] <- 0        
-    setcolorder(tdoms.pres, c(key(tdoms.pres), tdomscolstot))
-  }
+      tdoms.pres[is.na(tdoms.pres)] <- 0        
+      setcolorder(tdoms.pres, c(key(tdoms.pres), tdomscolstot))
+    }
 
-  ## GENERATE TREE DOMAIN LOOK-UP TABLE (tdomvarlut)
-  ## GET TOTAL tsumvar AND NUMBER OF CONDITIONS by tdom and add to tdomvarlut
+    ## GENERATE TREE DOMAIN LOOK-UP TABLE (tdomvarlut)
+    ## get total tsumvar and number of conditions by tdom and add to tdomvarlut
+#    nvar <- ifelse(bycond, "NBRCONDS", "NBRPLOTS")
+#    sumnm <- ifelse(is.null(tdomprefix) || tdomprefix=="", paste(tsumvar, "SUM", sep="_"),
+#		paste(tdomprefix, "SUM", sep = "_")) 
+#
+#    sumtdomvar <- sapply(tdoms[, tdomvarlst2, with=FALSE], tfun)
+#    tdomvarlut[[sumnm]] <- sumtdomvar[match(tdomvarlut[[tdomvarnm]], names(sumtdomvar))]
+#    tdomvarlut[[nvar]] <- sapply(tdoms[, tdomvarlst2, with=FALSE], 
+#		function(x) sum(x > 0))
+  } 
+
+  ## Generate tree domain look-up table (tdomvarlut)
   nvar <- ifelse(bycond, "NBRCONDS", "NBRPLOTS")
-  sumnm <- ifelse(is.null(tdomprefix) || tdomprefix=="", paste(tsumvar, "SUM", sep="_"),
-		paste(tdomprefix, "SUM", sep = "_")) 
-  sumtdomvar <- sapply(tdoms[, tdomvarlst2, with=FALSE], tfun)
-  tdomvarlut[[sumnm]] <- sumtdomvar[match(tdomvarlut[[tdomvarnm]], names(sumtdomvar))]
-  tdomvarlut[, nvar] <- sapply(tdoms[, tdomvarlst2, with=FALSE], 
-		function(x) sum(x > 0))
+  tdomvarlut <- tdomtreef[, list(sum(get(newname), na.rm=TRUE), .N), by=tdomvarnm]
+  names(tdomvarlut) <- c(tdomvarnm, newname, nvar)
+
   if (tdomvar == "SPCD") {
     ref_spcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPCD",]
     tdomvarlut <- merge(ref_spcd, tdomvarlut, by.x="VALUE", by.y="SPCD")
@@ -781,201 +810,123 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPGRPCD", "SPGRPNM")
   }        
 
-  ## BARPLOT
-  ylabel <- ifelse(bycond, "Number of Conditions", "Number of Plots")
+  ## Generate barplot
   if (tdombarplot) {
     ## Frequency
- 
-    datBarplot(x=setDF(tdomvarlut), xvar=tdomvarnm, yvar=nvar, savedata=savedata, 
-		outfolder=outfolder, ylabel=ylabel)
+    ylabel <- ifelse(bycond, "Number of Conditions", "Number of Plots")
+    datBarplot(x=setDF(tdomvarlut), xvar=tdomvarnm, yvar=newname, savedata=savedata, 
+		outfolder=outfolder, ylabel=newname)
 
     ## Summed variable
-    datBarplot(x=setDF(tdomvarlut), xvar=tdomvarnm, yvar=sumnm, savedata=savedata, 
-		outfolder=outfolder, ylabel=sumnm) 
+    datBarplot(x=setDF(tdomvarlut), xvar=tdomvarnm, yvar=newname, savedata=savedata, 
+		outfolder=outfolder, ylabel=newname) 
   }
 
+  ## Merge to cond or plot
+  ###################################
+  if (bycond && !nocond) {
 
-  ## Filter tree table with only tdoms in tdomvarlst
-  #####################################################################
-
-  if (bycond) {
-    ### MERGE TREE DOMAIN DATA TO COND TABLE 
-    if (!is.null(condx)) {
-      matchnames <- tdomscolstot[!is.na(match(tdomscolstot, names(condx)))] 
-      if (length(matchnames) != 0) {
-        setnames(tdoms, tdomscolstot, paste0(tdomscolstot, "2"))
-        warning(paste0("Duplicate name. Changed ", samenm, " to ", samenm, "2"))
-      }
-
-      ## Merge summed data to cond table
-      sumtreef <- merge(condx, tdoms, all.x=TRUE)
-      for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
-
-      ## Merge proportion table to cond table
-      if (proportion) {
-        sumtreef.prop <- merge(condx, tdoms.prop, all.x=TRUE)
-        for (col in tdomscolstot) set(sumtreef.prop, which(is.na(sumtreef.prop[[col]])), col, 0)
-      }
-      ## Merge presence table to cond table
-      if (presence) {
-        sumtreef.pres <- merge(condx, tdoms.pres, all.x=TRUE)
-        for (col in tdomscolstot) set(sumtreef.pres, which(is.na(sumtreef.pres[[col]])), col, 0)
-      }
-
-      ## Create a table of cover (absolute) based on proportion table and live canopy cover for cond
-      if (cover) {
-        sumtreef.cov <- copy(sumtreef.prop)
-        for (col in tdomscolstot) {set(sumtreef.cov, i=NULL, j=col, 
-				value=sumtreef.cov[[col]] * sumtreef.cov[[covervar]]) }
-      }
-
-    } else {
-      sumtreef <- tdoms
-
-      if(proportion) sumtreef.prop <- tdoms.prop      
-      if(presence) sumtreef.pres <- tdoms.pres
-    }
-    ## Round data and rename columns
-    sumtreef <- sumtreef[, (tdomscolstot) := round(.SD, tround), .SDcols=tdomscolstot] 
-    if (proportion) {
-      sumtreef.prop <- sumtreef.prop[, (tdomscolstot) := round(.SD, tround), .SDcols=tdomscolstot] 
-      #setnames(sumtreef.prop, tdomscolstot, paste(tdomscolstot, "PROP", sep="_"))  
-    }
-    if (presence)  
-      #setnames(sumtreef.pres, tdomscolstot, paste(tdomscolstot, "PRES", sep="_"))    
-    if (cover) {
-      sumtreef.cov <- sumtreef.cov[, (tdomscolstot) := round(.SD, tround), .SDcols=tdomscolstot] 
-      #setnames(sumtreef.cov, tdomscolstot, paste(tdomscolstot, "COV", sep="_")) 
-    }   
-
-  } else {  ## Plot-level
-
-    ## MERGE TREE DOMAIN DATA TO THE TOTAL AGGREGATED tsumvar 
-    ## Check unique records of plt table.. 
-    if (!noplt) {
-      pltx <- unique(pltx)
-      if (nrow(pltx) > length(unique(pltx[[puniqueid]]))) {
-        warning("plt table has > 1 record per uniqueid... will not be merged to plt.")
-        noplt <- TRUE
-      }
-      setkeyv(pltx, puniqueid)
-    } else if (!is.null(condx)) {
-      pltx <- unique(condx[,cuniqueid, with=FALSE])
-      setkeyv(pltx, cuniqueid)
-      noplt <- FALSE
-      pltshp <- FALSE
-    }
-
-    if (!noplt) {
-      matchnames <- tdomscolstot[!is.na(match(tdomscolstot, names(pltx)))] 
-      if (length(matchnames) != 0) {
-        setnames(tdoms, tdomscolstot, paste0(tdomscolstot, "2"))
-        warning(paste0("Duplicate name. Changed ", samenm, " to ", samenm, "2"))
-      }
-
-      ## Merge summed data to plt table
-      sumtreef <- merge(pltx, tdoms, by.x=key(pltx), by.y=key(tdoms), all.x=TRUE)
-      for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
- 
-      ## Merge proportion table to plt table
-      if (proportion) {
-        sumtreef.prop <- merge(pltx, tdoms.prop, by.x=key(pltx), by.y=key(tdoms), 
-			all.x=TRUE)
-        for (col in tdomscolstot) set(sumtreef.prop, which(is.na(sumtreef.prop[[col]])), col, 0)
-      }
-
-      ## Merge presence table to plt table
-      if (presence) {
-        sumtreef.pres <- merge(pltx, tdoms.pres, by.x=key(pltx), by.y=key(tdoms), 
-			all.x=TRUE)
-        for (col in tdomscolstot) set(sumtreef.pres, which(is.na(sumtreef.pres[[col]])), col, 0)
-      }
-
-      ## Create a table of cover (absolute) based on proportion table and live canopy cover for plot
-      if (cover) {
-        sumtreef.cov <- copy(sumtreef.prop)
-        for (col in tdomscolstot) {set(sumtreef.cov, i=NULL, j=col, 
-				value=sumtreef.cov[[col]] * sumtreef.cov[[covervar]]) }
-      }
-
-    } else {
-      sumtreef <- tdoms
-
-      if (proportion) sumtreef.prop <- tdoms.prop 
-      if (presence) sumtreef.pres <- tdoms.pres
-     }
-
-    ## Round data and rename columns
-    sumtreef <- sumtreef[, (tdomscolstot) := round(.SD, tround), .SDcols=tdomscolstot] 
-
-    if (proportion) 
-      sumtreef.prop <- sumtreef.prop[, (tdomscolstot) := round(.SD, tround), .SDcols=tdomscolstot] 
-      #setnames(sumtreef.prop, tdomscolstot, paste(tdomscolstot, "PROP", sep="_"))
+    ## Check for duplicate names
+    matchnames <- sapply(tdomscolstot, checknm, names(condx)) 
+    setnames(tdoms, tdomscolstot, matchnames)
       
-    if (presence)     
-      #setnames(sumtreef.pres, tdomscolstot, paste(tdomscols, "PRES", sep="_")) 
-    if (cover) {
-      sumtreef.cov <- sumtreef.cov[, (tdomscolstot) := round(.SD, tround), .SDcols=tdomscolstot] 
-      #setnames(sumtreef.cov, tdomscolstot, paste(tdomscolstot, "COV", sep="_"))
-    }    
-  
-    if (pltshp) {
-      ## Truncate names that are greater than 10 characters long
-      for (nm in names(sumtreef)) {
-        if (nchar(nm) > 10) {
-          newnm <- substr(nm, 0, 10)
-          names(sumtreef)[names(sumtreef) == nm] <- newnm
-        }
-      }
+    ## Merge summed data to cond table
+    sumtreef <- merge(condx, tdoms, all.x=TRUE)
+    for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
 
-      if (!notdomdat) 
-        ## GENERATE SHAPE
-        sumtreefsp <- sp::merge(plt[, puniqueid], sumtreef, by=puniqueid, all.x=TRUE)
-      if (proportion)
-        sumtreefsp.prop <- sp::merge(plt[, puniqueid], sumtreef.prop, by=puniqueid, all.x=TRUE)
-      if (presence)
-        sumtreefsp.pres <- sp::merge(plt[, puniqueid], sumtreef.pres, by=puniqueid, all.x=TRUE)
-      if (cover)
-        sumtreefsp.cov <- sp::merge(plt[, puniqueid], sumtreef.cov, by=puniqueid, all.x=TRUE)
+    ## Merge proportion table to cond table
+    if (proportion) {
+      sumtreef.prop <- merge(condx, tdoms.prop, all.x=TRUE)
+      for (col in tdomscolstot) set(sumtreef.prop, which(is.na(sumtreef.prop[[col]])), col, 0)
     }
-  }
+    ## Merge presence table to cond table
+    if (presence) {
+      sumtreef.pres <- merge(condx, tdoms.pres, all.x=TRUE)
+      for (col in tdomscolstot) set(sumtreef.pres, which(is.na(sumtreef.pres[[col]])), col, 0)
+    }
+    ## Create a table of cover (absolute) based on proportion table and live canopy cover for cond
+    if (cover) {
+      sumtreef.cov <- copy(sumtreef.prop)
+      for (col in tdomscolstot) {set(sumtreef.cov, i=NULL, j=col, 
+				value=round(sumtreef.cov[[col]] * sumtreef.cov[[covervar]])) }
+    }
 
+  } else if (!noplt) {  ## Plot-level
+    setkeyv(pltx, puniqueid)
+
+    ## Check for duplicate names
+    matchnames <- sapply(tdomscolstot, checknm, names(pltx)) 
+    setnames(tdoms, tdomscolstot, matchnames)
+
+    ## Merge summed data to plt table
+    setkeyv(tdoms, tuniqueid)
+    sumtreef <- merge(pltx, tdoms, by.x=puniqueid, by.y=tuniqueid, all.x=TRUE)
+    for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
+ 
+    ## Merge proportion table to plt table
+    if (proportion) {
+      setkeyv(tdoms.prop, tuniqueid)
+      sumtreef.prop <- merge(pltx, tdoms.prop, by.x=puniqueid, by.y=tuniqueid, all.x=TRUE)
+      for (col in tdomscolstot) set(sumtreef.prop, which(is.na(sumtreef.prop[[col]])), col, 0)
+    }
+
+    ## Merge presence table to plt table
+    if (presence) {
+      setkeyv(tdoms.pres, tuniqueid)
+      sumtreef.pres <- merge(pltx, tdoms.pres, by.x=puniqueid, by.y=tuniqueid, all.x=TRUE)
+      for (col in tdomscolstot) set(sumtreef.pres, which(is.na(sumtreef.pres[[col]])), col, 0)
+    }
+
+    ## Create a table of cover (absolute) based on proportion table and live canopy cover for plot
+    if (cover) {
+      sumtreef.cov <- copy(sumtreef.prop)
+      for (col in tdomscolstot) {set(sumtreef.cov, i=NULL, j=col, 
+				value=sumtreef.cov[[col]] * sumtreef.cov[[covervar]]) }
+    }
+
+  } else {
+    sumtreef <- tdoms
+
+    if (proportion) sumtreef.prop <- tdoms.prop 
+    if (presence) sumtreef.pres <- tdoms.pres
+  }
+  
   if (savedata) {
-    if (pltshp) {
-      spExportShape(sumtreefsp, outshpnm=paste0(outfn, "_DAT"), outfolder=outfolder, 
-		outfn.date=outfn.date, overwrite=overwrite)
+    if (pltsp) {
+      spExportSpatial(sumtreef, out_layer=paste0(out_layer, "_DAT"), outfolder=outfolder, 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
     } else {
-      write2csv(sumtreef, outfolder=outfolder, outfilenm=paste0(outfn, "_DAT"), 
+      write2csv(sumtreef, outfolder=outfolder, outfilenm=paste0(out_layer, "_DAT"), 
 		outfn.date=outfn.date, overwrite=overwrite)
     }
     if (proportion) {
-      if (pltshp) {
-        spExportShape(sumtreefsp.prop, outshpnm=paste0(outfn, "_PROP"), 
-		outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite)
+      if (pltsp) {
+        spExportSpatial(sumtreef.prop, out_layer=paste0(out_layer, "_PROP"), 
+		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite)
       } else {
-        write2csv(sumtreef.prop, outfolder=outfolder, outfilenm=paste0(outfn, "_PROP"), 
+        write2csv(sumtreef.prop, outfolder=outfolder, outfilenm=paste0(out_layer, "_PROP"), 
 		outfn.date=outfn.date, overwrite=overwrite)
       }
     }
     if (presence) {
-      if (pltshp) {
-        spExportShape(sumtreefsp.pres, outshpnm=paste0(outfn, "_PRES"), outfolder=outfolder, 
-		outfn.date=outfn.date, overwrite=overwrite)
+      if (pltsp) {
+        spExportSpatial(sumtreef.pres, out_layer=paste0(out_layer, "_PRES"), 
+		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite)
       } else {
-        write2csv(sumtreef.pres, outfolder=outfolder, outfilenm=paste0(outfn, "_PRES"), 
+        write2csv(sumtreef.pres, outfolder=outfolder, outfilenm=paste0(out_layer, "_PRES"), 
 		outfn.date=outfn.date, overwrite=overwrite)
       }
     }
     if (cover) {
-      if (pltshp) {
-        spExportShape(sumtreefsp.cov, outshpnm=paste0(outfn, "_COV"), outfolder=outfolder,
- 		outfn.date=outfn.date, overwrite=overwrite)
+      if (pltsp) {
+        spExportSpatial(sumtreef.cov, out_layer=paste0(out_layer, "_COV"), 
+		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite)
       } else {
-        write2csv(sumtreef.cov, outfolder=outfolder, outfilenm=paste0(outfn, "_COV"), 
+        write2csv(sumtreef.cov, outfolder=outfolder, outfilenm=paste0(out_layer, "_COV"), 
 		outfn.date=outfn.date, overwrite=overwrite)
       }
     }
-    write2csv(tdomvarlut, outfolder=outfolder, outfilenm=paste0(outfn, "_LUT"), 
+    write2csv(tdomvarlut, outfolder=outfolder, outfilenm=paste0(out_layer, "_LUT"), 
 		outfn.date=outfn.date, overwrite=overwrite)
   
 
@@ -990,20 +941,23 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
     outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
     cat(  "tree = ", as.character(bquote(tree)), "\n",
-      "plt = ", as.character(bquote(plt)), "\n",
+      "seed = ", as.character(bquote(seed)), "\n",
       "cond = ", as.character(bquote(cond)), "\n",
-      "ACI = ", ACI, "\n",
+      "plt = ", as.character(bquote(plt)), "\n",
+      "plt_dsn = \"", plt_dsn, "\"", "\n",
       "tuniqueid = \"", tuniqueid, "\"", "\n",
-      "puniqueid = \"", puniqueid, "\"", "\n",
       "cuniqueid = \"", cuniqueid, "\"", "\n",
+      "puniqueid = \"", puniqueid, "\"", "\n",
       "bycond = ", bycond, "\n",
       "condid = \"", condid, "\"", "\n",
-      "presence = ", presence, "\n",
+      "bysubp = ", bysubp, "\n",
+      "subpid = \"", subpid, "\"", "\n",
       "tsumvar = \"", tsumvar, "\"", "\n",
       "TPA = ", TPA, "\n",
-      "adjTPA = ", adjTPA, "\n",
       "tfun = ", noquote(tfunstr), "\n",
+      "ACI = ", ACI, "\n",
       "tfilter = \"", tfilter, "\"", "\n",
+      "lbs2tons = ", lbs2tons, "\n",
       "tdomvar = \"", tdomvar, "\"", "\n",
       "tdomvarlst = c(", tdomvarlstout, ")", "\n", 
       "tdomvar2 = \"", tdomvar2, "\"", "\n",
@@ -1013,50 +967,61 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       "tdomtot = ", tdomtot, "\n",
       "tdomtotnm = \"", tdomtotnm, "\"", "\n",
       "FIAname = ", FIAname, "\n",
+      "addseed = ", addseed, "\n",
+      "presence = ", presence, "\n",
       "proportion = ", proportion, "\n",
-      "lbs2tons = ", lbs2tons, "\n",
+      "cover = ", cover, "\n",
+      "getadjplot = ", getadjplot, "\n",
       "adjtree = ", adjtree, "\n",
+      "NAto0 = ", NAto0, "\n",
+      "adjTPA = ", adjTPA, "\n",
       "savedata = ", savedata, "\n",
       "outfolder = \"", outfolder, "\"", "\n",
-      "outfn = ", outfn, "\n",
+      "out_layer = ", out_layer, "\n",
+      "outfn.date = ", outfn.date, "\n",
+      "overwrite = ", overwrite, "\n",
       "tround = \"", tround, "\"", "\n", "\n",
     file = outfile, sep="")
 
-    cat(  "tdomdat <- datSumTreeDom(tree=tree, plt=plt, cond=cond, ACI=ACI,  
-		tuniqueid=tuniqueid, puniqueid=puniqueid, cuniqueid=cuniqueid, bycond=bycond,
-		condid=condid, presence=presence, tsumvar=tsumvar, TPA=TPA, adjTPA=adjTPA, 
-		tfun=tfun, tfilter=tfilter, tdomvar=tdomvar, tdomvarlst=tdomvarlst, 
-		tdomvar2=tdomvar2, tdomvar2lst=tdomvar2lst, tdomprefix=tdomprefix, 
-		tdombarplot=tdombarplot, tdomtot=tdomtot, tdomtotnm=tdomtotnm, FIAname=FIAname,
- 		proportion=proportion, lbs2tons=lbs2tons, adjtree=adjtree,
- 		savedata=savedata, outfolder=outfolder, outfn=outfn, tround=tround)",
+    cat(  "tdomdat <- datSumTreeDom(tree=tree, seed=seed, cond=cond, plt=plt, 
+		plt_dsn=plt_dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid,
+ 		bycond=bycond, condid=condid, bysubp=bysubp, subpid=subpid, tsumvar=tsumvar,
+		TPA=TPA, tfun=tfun, ACI=ACI, tfilter=tfilter, lbs2tons=lbs2tons, tdomvar=tdomvar,
+ 		tdomvarlst=tdomvarlst, tdomvar2=tdomvar2, tdomvar2lst=tdomvar2lst, 
+		tdomprefix=tdomprefix, tdombarplot=tdombarplot, tdomtot=tdomtot, 
+		tdomtotnm=tdomtotnm, FIAname=FIAname, addseed=addseed, presence=presence,
+ 		proportion=proportion, cover=cover, getadjplot=getadjplot, adjtree=adjtree,
+		NAto0=NAto0, adjTPA=adjTPA, savedata=savedata, outfolder=outfolder, 
+		out_layer=out_layer, outfn.date=outfn.date, overwrite=overwrite, tround=tround)",
     file = outfile, sep="")
     close(outfile)
   }
 
   tdomdata <- list()
-  if (pltshp) {
-    if (!notdomdat)
-      tdomdata$sptdomdat <- methods::as(sumtreefsp, "SpatialPointsDataFrame")
-    if (proportion)
-      tdomdata$sptdomdat.prop <- methods::as(sumtreefsp.prop, "SpatialPointsDataFrame")
-    if (presence)
-      tdomdata$sptdomdat.pres <- methods::as(sumtreefsp.pres, "SpatialPointsDataFrame")
-    if (cover)
-      tdomdata$sptdomdat.cov <- methods::as(sumtreefsp.cov, "SpatialPointsDataFrame")
-  } 
-  if (!notdomdat)
-    tdomdata$tdomdat <- setDF(sumtreef)
-  if (proportion)
-    tdomdata$tdomdat.prop <- setDF(sumtreef.prop)
-  if (presence)
+  if (!notdomdat) {
+    if (returnDT)
+      sumtreef <- setDF(sumtreef)
+    tdomdata$tdomdat <- sumtreef
+  }
+  if (proportion) {
+    if (returnDT)
+      sumtreef.prop <- setDF(sumtreef.prop)
+    tdomdata$tdomdat.prop <- sumtreef.prop
+  }
+  if (presence) {
+    if (returnDT)
+      sumtreef.pres <- setDF(sumtreef.pres)
     tdomdata$tdomdat.pres <- setDF(sumtreef.pres)
-  if (cover)
+  }
+  if (cover) {
+    if (returnDT)
+      sumtreef.cov <- setDF(sumtreef.cov)
     tdomdata$tdomdat.cov <- setDF(sumtreef.cov)
+  }
   if (!notdomdat) tdomdata$tdomvarlut <- tdomvarlut
 
   tdomdata$tdomlst <- tdomscols
-  if (tdomtot) tdomdata$tdomtotnm <- tdomtotnm
+  if (!is.null(tdomtotnm)) tdomdata$tdomtotnm <- tdomtotnm
     
   return(tdomdata)
 } 

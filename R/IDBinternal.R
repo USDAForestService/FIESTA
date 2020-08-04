@@ -1,22 +1,22 @@
-## DBgetvars
-## DBgetfn			Gets file name for Plot and Strata files.
-## clip.othertables 
+## DBvars.default	## Set default variable lists for extracting data from database
+## DBgetfn			## Gets file name for Plot and Strata files.
+## getspconddat
+## getpfromqry      	## Get pfromqry for extracting data
+## getplotCur
+## getEvalid		## Get evalid from a SQLite database
 
 
-DBgetvars <- function(invtype, defaultVars, istree, isseed, isveg, isdwm, 
-	regionVars, isRMRS, FS_FIADB, NIMS_UNIT, datsource, dbconn) {
+DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALSE) {
+
+  ## Set global variables
+  treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=dwmlst <- NULL
+
+
+  ## DESCRIPTION: Set default variables for FIA plot data extraction
+
   ########################################################################
   ##  DEFINE VARIABLES
   ########################################################################
- 
-  # Including board-foot volumes
-  #volvars <- c("VOLCFNET", "VOLCFGRS", "VOLCSNET", "VOLCSGRS", "VOLBFNET", "VOLBFGRS")
-  #growvars <- c("GROWCFGS", "GROWBFSL", "GROWCFAL", "FGROWCFGS", "FGROWBFSL", "FGROWCFAL")
-  #mortvars <- c("MORTCFGS", "MORTBFSL", "MORTCFAL", "FMORTCFGS", "FMORTBFSL", "FMORTCFAL")
-  #remvars <- c("REMVCFGS", "REMVBFSL", "REMVCFAL", "FREMVCFGS", "FREMVBFSL", "FREMVCFAL")
-  #tpavars <- c("TPA_UNADJ", "TPAGROW_UNADJ", "TPAMORT_UNADJ", "TPAREMV_UNADJ")
-
-  # Excluding board-foot volumes
   volvars <- c("VOLCFNET", "VOLCFGRS", "VOLBFNET", "VOLBFGRS", "VOLCSNET", "VOLCSGRS")
   growvars <- c("GROWCFGS", "GROWCFAL", "FGROWCFGS", "FGROWCFAL")
   mortvars <- c("MORTCFGS", "MORTCFAL", "FMORTCFGS", "FMORTCFAL")
@@ -26,25 +26,10 @@ DBgetvars <- function(invtype, defaultVars, istree, isseed, isveg, isdwm,
 		"DRYBIO_WDLD_SPP", "DRYBIO_BG", "DRYBIO_AG")
   carbonvars <- c("CARBON_BG", "CARBON_AG")
 
-  ## TREE summary variables
-  tsumvarlst <- c(volvars, growvars, mortvars, remvars, tpavars, biovars, carbonvars)
-  #tsumvarlst <- c(volvars, growvars, mortvars, remvars, biovars, carbonvars)    
 
-  ## SEED summary variables
-  ssumvarlst <- c("TREECOUNT", "TREECOUNT_CALC")
-
-
-  filterpvarlst <- {}
-  filterpvarflst <- {}
-  filtercvarlst <- {}
-  filtercvarflst <- {}
-  filterpvar10lst <- {}
-  filtercvar10lst <- {}
-
-  if (defaultVars) {
-    ################################  PLOT VARIABLES ##################################
-    ## Variables from FIADB.PLOT 
-    pvarFIADBlst <- c("CN", "PREV_PLT_CN", "INVYR", "STATECD", "CYCLE", "SUBCYCLE", 
+  ################################  PLOT VARIABLES ##################################
+  ## Variables from FIADB.PLOT 
+  pltvarlst <- c("CN", "PREV_PLT_CN", "INVYR", "STATECD", "CYCLE", "SUBCYCLE", 
 	"UNITCD", "COUNTYCD", "PLOT", "PLOT_STATUS_CD", "PLOT_NONSAMPLE_REASN_CD", 
 	"SAMP_METHOD_CD", "SUBP_EXAMINE_CD", "MANUAL", "MACRO_BREAKPOINT_DIA", 
 	"INTENSITY", "MEASYEAR", "MEASMON", "MEASDAY", "REMPER", "KINDCD", "DESIGNCD", 
@@ -53,123 +38,93 @@ DBgetvars <- function(invtype, defaultVars, istree, isseed, isveg, isdwm,
 	"NF_PLOT_STATUS_CD", "NF_PLOT_NONSAMPLE_REASN_CD", "NF_SAMPLING_STATUS_CD",
  	"P2VEG_SAMPLING_STATUS_CD", "QA_STATUS")
 
-    if (isRMRS && regionVars)
-      pvarFIADBlst <- c(pvarFIADBlst, "COLOCATED_CD_RMRS", "CONDCHNGCD_RMRS", 
+  if (isRMRS && regionVars)
+    pltvarlst <- c(pltvarlst, "COLOCATED_CD_RMRS", "CONDCHNGCD_RMRS", 
 		"FUTFORCD_RMRS", "MANUAL_RMRS", "PREV_PLOT_STATUS_CD_RMRS")
 
 
-    ################################  COND VARIABLES  ##################################
-    ## Variables from FS_NIMS_FIADB_RMRS.COND
-    cvarFIADBlst <- c("PLT_CN", "CONDID", "COND_STATUS_CD", "COND_NONSAMPLE_REASN_CD", 
+  ################################  COND VARIABLES  ##################################
+  ## Variables from FS_NIMS_FIADB_RMRS.COND
+  condvarlst <- c("PLT_CN", "CONDID", "COND_STATUS_CD", "COND_NONSAMPLE_REASN_CD", 
 	"RESERVCD", "OWNCD", "OWNGRPCD", "ADFORCD", "FORTYPCD", "FLDTYPCD", "MAPDEN", 
 	"STDAGE", "STDSZCD", "FLDSZCD", "SITECLCD", "SICOND", "SIBASE", "SISP", 
-	"STDORGCD", "STDORGSP", "CONDPROP_UNADJ", "MICRPROP_UNADJ", "SUBPPROP_UNADJ", 
-	"MACRPROP_UNADJ", "SLOPE", "ASPECT", "GSSTKCD", "ALSTKCD", "DSTRBCD1", "DSTRBYR1", 
-	"DSTRBCD2", "DSTRBYR2", "DSTRBCD3", "DSTRBYR3", "TRTCD1", "TRTYR1", "TRTCD2", 
-	"TRTYR2", "TRTCD3", "TRTYR3", "PRESNFCD", "BALIVE", "FLDAGE", "FORTYPCDCALC", 
-	"HABTYPCD1", "HABTYPCD2", "LIVE_CANOPY_CVR_PCT", "LIVE_MISSING_CANOPY_CVR_PCT", 
-	"CANOPY_CVR_SAMPLE_METHOD_CD", "CARBON_DOWN_DEAD", "CARBON_LITTER", 
-	"CARBON_SOIL_ORG", "CARBON_STANDING_DEAD", "CARBON_UNDERSTORY_AG",
-	"CARBON_UNDERSTORY_BG", "NF_COND_STATUS_CD", "NF_COND_NONSAMPLE_REASN_CD",
-	"LAND_COVER_CLASS_CD") 
+	"STDORGCD", "STDORGSP", "PROP_BASIS", "CONDPROP_UNADJ", "MICRPROP_UNADJ", 
+	"SUBPPROP_UNADJ", "MACRPROP_UNADJ", "SLOPE", "ASPECT", "GSSTKCD", "ALSTKCD", 
+	"DSTRBCD1", "DSTRBYR1", "DSTRBCD2", "DSTRBYR2", "DSTRBCD3", "DSTRBYR3", 
+	"TRTCD1", "TRTYR1", "TRTCD2", "TRTYR2", "TRTCD3", "TRTYR3", "PRESNFCD", 
+	"BALIVE", "FLDAGE", "FORTYPCDCALC", "HABTYPCD1", "HABTYPCD2", "LIVE_CANOPY_CVR_PCT", 
+	"LIVE_MISSING_CANOPY_CVR_PCT", "CANOPY_CVR_SAMPLE_METHOD_CD", 
+	"CARBON_DOWN_DEAD", "CARBON_LITTER", "CARBON_SOIL_ORG", "CARBON_STANDING_DEAD", 
+	"CARBON_UNDERSTORY_AG", "CARBON_UNDERSTORY_BG", "NF_COND_STATUS_CD", 
+	"NF_COND_NONSAMPLE_REASN_CD","LAND_COVER_CLASS_CD") 
 	
-    if (isRMRS && regionVars)
-      cvarFIADBlst <- c(cvarFIADBlst, "LAND_USECD_RMRS", "PCTBARE_RMRS", 
+  if (isRMRS && regionVars)
+    condvarlst <- c(condvarlst, "LAND_USECD_RMRS", "PCTBARE_RMRS", 
 		"CRCOVPCT_RMRS", "COND_STATUS_CHNG_CD_RMRS", "QMD_RMRS", 
 		"RANGETYPCD_RMRS", "SDIMAX_RMRS", "SDIPCT_RMRS", "SDI_RMRS") 
     
 
-    if (istree) {
-      ################################  TREE VARIABLES  ##################################
-      ### Variables from FS_NIMS_FIADB_RMRS.TREE (these variables change from NIMSf to FIADB)
-      tvarFIADBlst <- c("CN", "PLT_CN", "PREV_TRE_CN", "SUBP", "TREE", "CONDID", 
+  returnlst <- list(pltvarlst=pltvarlst, condvarlst=condvarlst)
+
+
+  ################################  TREE VARIABLES  ##################################
+  if (istree) {
+    ### Variables from FS_NIMS_FIADB_RMRS.TREE (these variables change from NIMSf to FIADB)
+    treevarlst <- c("CN", "PLT_CN", "PREV_TRE_CN", "SUBP", "TREE", "CONDID", 
 		"AZIMUTH", "DIST", "STATUSCD", "SPCD", "SPGRPCD", "DIA", "HT", "ACTUALHT", 
 		"HTCD", "TREECLCD", "CR", "CCLCD", "AGENTCD", "CULL", "DECAYCD", "STOCKING", 
 		"WDLDSTEM", "MORTYR", "UNCRCD", "BHAGE", "TOTAGE", "MORTCD", "MIST_CL_CD", 
 		"STANDING_DEAD_CD", "PREV_STATUS_CD", "PREV_WDLDSTEM", "RECONCILECD", "PREVDIA")
 
-      ### Tree sum variables list
-      tsumvarFIADBlst <- tsumvarlst
+    ## Tree summary variables
+    tsumvarlst <- c(volvars, growvars, mortvars, remvars, tpavars, biovars, carbonvars)
 
     if (isRMRS && regionVars)
-        tvarFIADBlst <- c(tvarFIADBlst, "TREECLCD_RMRS", "DAMAGE_AGENT_CD1",
+      treevarlst <- c(treevarlst, "TREECLCD_RMRS", "DAMAGE_AGENT_CD1",
 		"DAMAGE_AGENT_CD2", "DAMAGE_AGENT_CD3", "RADGRW_RMRS", "DIA_1YRAGO_RMRS", 
 		"HT_1YRAGO_RMRS", "PREV_ACTUALHT_RMRS", "PREV_TREECLCD_RMRS")
-      
-    }
 
-    if (isseed) 
-      ################################  SEED VARIABLES  ##################################
-      ### Variables from FS_NIMS_RMRS.SEEDLING
-      svarFIADBlst <- c("PLT_CN", "SUBP", "CONDID", "SPCD", "SPGRPCD", "TREECOUNT_CALC", 
-		"TOTAGE", "TPA_UNADJ")
-    
+    ## Variables to convert from NA to 0
+#    treenavars <- c(tsumvarlst, "TOTAGE", "BHAGE", "CULLDEAD", "CULLFORM", "CFSND", 
+#		"CULLCF", "MIST_CL_CD", "DAMLOC1", "DAMTYP1", "DAMSEV1", "DAMLOC2", "DAMTYP2", 
+#		"DAMSEV2", "STOCKING", "RADGRW_RMRS")
 
-  } else {
 
-    ## Define unique identifiers
-    puniqueid <- "CN"
-    cuniqueid <- c("PLT_CN", "CONDID")
-    tuniqueid <- c("PLT_CN", "CONDID", "SUBP", "TREE")
-    suniqueid <- c("PLT_CN", "CONDID", "SUBP")
- 
-    ## Define variables to delete and variables to keep          
-    FIADBvar2delete <- c("STATECD", "COUNTYCD", "PLOT", "UNITCD", "INVYR", "CYCLE", 
-	"SUBCYCLE", "CN")
-    FIADBcvar2keep <- c(cuniqueid, "CONDPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ", 
-	"COND_STATUS_CD")
-    FIADBpvar2keep <- c(puniqueid, "STATECD", "INVYR")
-    FIADBtvar2keep <- tuniqueid
-    FIADBsvar2keep <- suniqueid
-
-    vardelete <- c("STATECD", "COUNTYCD", "PLOT", "UNITCD", "INVYR", "CN", "CYCLE", 
-	"SUBCYCLE")
+    returnlst$treevarlst <- treevarlst
+    returnlst$tsumvarlst <- tsumvarlst     
   }
 
+  ################################  SEED VARIABLES  ##################################
+  if (isseed) {
+    ### Variables from FS_NIMS_RMRS.SEEDLING
+    seedvarlst <- c("PLT_CN", "SUBP", "CONDID", "SPCD", "SPGRPCD", "TOTAGE", "TPA_UNADJ")
+
+    ## SEED summary variables
+    ssumvarlst <- c("TREECOUNT", "TREECOUNT_CALC")
+
+    ## Variables to convert from NA to 0    
+#    seednavars <- c(ssumvarlst, "TOTAGE", "STOCKING")
+
+    returnlst$seedvarlst <- seedvarlst
+    returnlst$ssumvarlst <- ssumvarlst     
+
+  }
+    
   ############################  UNDERSTORY VEG VARIABLES  ############################
   if (isveg) {    ## FS_NIMS_FIADB_RMRS or FS_FIADB
-
     ### Variables from P2VEG_SUBPLOT_SPP
-    vspsppvarFIADBlst <- c("PLT_CN", "SUBP", "CONDID", "VEG_FLDSPCD", "UNIQUE_SP_NBR", 
+    vspsppvarlst <- c("PLT_CN", "SUBP", "CONDID", "VEG_FLDSPCD", "UNIQUE_SP_NBR", 
 	"VEG_SPCD", "GROWTH_HABIT_CD", "LAYER", "COVER_PCT")
 
     ### Variables from P2VEG_SUBP_STRUCTURE
-    vspstrvarFIADBlst <- c("PLT_CN", "SUBP", "CONDID", "GROWTH_HABIT_CD", "LAYER", 
+    vspstrvarlst <- c("PLT_CN", "SUBP", "CONDID", "GROWTH_HABIT_CD", "LAYER", 
 	"COVER_PCT")
+
+    returnlst$vspsppvarlst <- vspsppvarlst
+    returnlst$vspstrvarlst <- vspstrvarlst
   }
 
   ##############################  DOWN WOODY MATERIAL  ###############################
-  isdwm.fhm <- FALSE
-  if (isdwm.fhm) {
-    ### Variables from FS_FIADB.DWM_COARSE_WOODY_DEBRIS
-    cwdvarFIADBlst <- c("PLT_CN", "SUBP", "CONDID", "TRANSECT", "CWDID", "SLOPDIST", 
-	"HORIZ_DIST", "SPCD", "DECAYCD", "TRANSDIA", "SMALLDIA", "LARGEDIA", "LENGTH", "HOLLOWCD", 
-	"CWDHSTCD", "VOLCF", "DRYBIO", "CARBON", "COVER_PCT", "LPA_UNADJ", "LPA_PLOT", "LPA_COND",
-	"LPA_UNADJ_RGN", "LPA_PLOT_RGN", "LPA_COND_RGN", "VOLCF_AC_UNADJ", "VOLCF_AC_PLOT",
-	"VOLCF_AC_COND", "DRYBIO_AC_UNADJ", "DRYBIO_AC_PLOT", "DRYBIO_AC_COND", "CARBON_AC_UNADJ",
-	"CARBON_AC_PLOT", "CARBON_AC_COND")
-    #fhmcwdvars <- addcommas(cwdvarFIADBlst, "dN")
-
-    ### Variables from FS_FIADB.DUFF_LITTER_FUEL
-    dlvarFIADBlst <- c("PLT_CN", "SUBP", "CONDID", "TRANSECT", "SMPLOCCD", "DUFFDEP",
-	"LITTDEP", "FUELDEP", "DLF_SAMPLE_METHOD", "DUFF_METHOD", "DUFF_NONSAMPLE_REASN_CD",
-	"LITTER_METHOD", "LITTER_NONSAMPLE_REASN_CD", "FUELBED_METHOD", 
-	"FUELBED_NONSAMPLE_REASN_CD")
-    #fhmdlvars <- addcommas(dlvarFIADBlst, "dN")
-
-    ### Variables from FS_FIADB.FINE_WOODY_DEBRIS
-    fwdvarlst <- c("PLT_CN", "SUBP", "CONDID", "TRANSECT", "SMALLCT", "MEDIUMCT", 
-	"LARGECT", "RSNCTCD", "PILESCD", "SMALL_TL_COND", "SMALL_TL_PLOT", "SMALL_TL_UNADJ", 
-	"MEDIUM_TL_COND", "MEDIUM_TL_PLOT", "MEDIUM_TL_UNADJ", "LARGE_TL_COND", "LARGE_TL_PLOT",
-	"LARGE_TL_UNADJ", "FWD_STATUS_CD", "FWD_NONSAMPLE_REASN_CD", "FWD_SAMPLE_METHOD", "SLOPE")
-    #fhmfwdvars <- addcommas(fwdvarFIADBlst, "dN")
-
-    ### Variables from FS_FIADB.MICROPLOT_FUEL
-    micvarFIADBlst <- c("PLT_CN", "SUBP", "LVSHRBCD", "DSHRBCD", "LVHRBCD", "DHRBCD", 
-	"LITTERCD", "LVSHRBHT", "DSHRBHT", "LVHRBHT", "DHRBHT", "MICR_SAMPLE_METHOD")
-    #fhmmicvars <- addcommas(micvarFIADBlst, "dN")
-  }
-
   if (isdwm) {
     ### Variables from COND_DWM_CALC
     dwmlst <- c("PLT_CN", "CONDID", "CONDPROP_CWD", "CONDPROP_FWD_SM", "CONDPROP_FWD_MD", 
@@ -193,192 +148,24 @@ DBgetvars <- function(invtype, defaultVars, istree, isseed, isveg, isdwm,
 	"FUEL_DEPTH", "FUEL_BIOMASS", "FUEL_CARBON", "DUFF_DEPTH", "DUFF_BIOMASS", 
 	"DUFF_CARBON", "LITTER_DEPTH", "LITTER_BIOMASS", "LITTER_CARBON", "DUFF_TC_COND", 
 	"DUFF_TC_UNADJ", "DUFF_TC_ADJ", "AVG_WOOD_DENSITY")
-    dvars <- addcommas(dwmlst, "d")
+
+    returnlst$dwmlst <- dwmlst
   }
 
-  ## Variables to convert from NA to 0
-  ########################################################################
-    
-  ## SEED table
-  seednavars <- c(ssumvarlst, "TOTAGE", "STOCKING")
-  treenavars <- c(tsumvarlst, "TOTAGE", "BHAGE", "CULLDEAD", "CULLFORM", "CFSND", 
-	"CULLCF", "MIST_CL_CD", "DAMLOC1", "DAMTYP1", "DAMSEV1", "DAMLOC2", "DAMTYP2", 
-	"DAMSEV2", "STOCKING", "RADGRW_RMRS")
-
-  #####################################################################################
-  #############################      VARIABLE LISTS     ###############################
-  #####################################################################################
-
-  ### GET FS_FIADB
-  ###########################################################
-  if (datsource == "ORACLE") {
-    if (!FS_FIADB) {
-      SCHEMA <- paste0("FS_NIMS_FIADB_", NIMS_UNIT)	## NIMS FIADB REGIONAL TABLES
-    } else {
-      SCHEMA <- "FS_FIADB"          	## FIADB NATIONAL TABLES
-    }
-    SCHEMA. <- paste0(SCHEMA, ".")
-  } else {
-    SCHEMA <- "" 
-    SCHEMA. <- ""
-    FIADBa <- NULL
-  }
-
-  ##########################################
-  ## NO REGION VARIABLES; ANNUAL OR PERIODIC
-  ##########################################
-
-  if (defaultVars) {
-
-    #########################################################
-    ## DEFINE VARIABLES
-    #########################################################
-
-    ## PLOT and COND variables
-    pltvarlst <- pvarFIADBlst
-    condvarlst <- cvarFIADBlst
-
-    ## PLOT and COND filter list
-    filtervarlst <- list(filterpvarlst=pltvarlst, filtercvarlst=condvarlst)
-
-    ## TREE AND SEEDLING VARIABLES
-    if (istree) {
-      treevarlst <- tvarFIADBlst
-
-      ## FOR TPA CALCULATIONS
-      tsumvarTPAlst <- tsumvarFIADBlst
-    } 
-    if (isseed)
-      seedvarlst <- svarFIADBlst
-
-  } else {
-
-    #########################################################
-    ## SELECT VARIABLES
-    #########################################################
-
-    ## PLOT variables
-    #####################################
-    pvarkeep <- FIADBpvar2keep
-    FIADBpltvarlst <- FIESTA::selectvars(dbconn, schema=SCHEMA, 
-			tabnm="PLOT", 
-			varkeep=pvarkeep, titletab="plot")
-    pltvarlst <- FIADBpltvarlst$vars
-    pfiltvarlst <- FIADBpltvarlst$filtervarlst
-    filterpvarlst <- c(pvarkeep, pfiltvarlst)
-
-    ## COND variables
-    #####################################
-    cvarkeep <- FIADBcvar2keep
-    if (!"INVYR" %in% pltvarlst) cvarkeep <- unique(c(cvarkeep, "INVYR"))
-    cvardelete <- FIADBvar2delete
-    FIADBcondvarlst <- FIESTA::selectvars(dbconn, schema=SCHEMA, 
-			tabnm="COND",
-              	varkeep=cvarkeep, vardelete=cvardelete, titletab="cond")
-    condvarlst <- FIADBcondvarlst$vars
-    cfiltvarlst <- FIADBcondvarlst$filtervarlst
-    filtercvarlst <- c(cvarkeep, cfiltvarlst)
-
-    ## PLOT and COND filter list
-    filtervarlst <- list(filterpvarlst=filterpvarlst, filtercvarlst=condvarlst)
- 
-    ## TREE variables
-    #####################################
-    if (istree) {
-      tvarkeep <- FIADBtvar2keep
-      tvardelete <- FIADBvar2delete
-      FIADBtreevarlst <- FIESTA::selectvars(dbconn, schema=SCHEMA, 		
-			tabnm="TREE", 
-              	varkeep=tvarkeep, vardelete=tvardelete, titletab="tree")
-      treevarlst <- FIADBtreevarlst$vars
-      tfiltvarlst <- FIADBtreevarlst$filtervarlst
-      filtertvarlst <- c(tvarkeep, tfiltvarlst)
-
-      ## FOR TPA CALCULATIONS
-      tsumvarTPAlst <- treevarlst[treevarlst %in% tsumvarlst]
-      if (length(tsumvarTPAlst >= 1))
-        treevarlst <- treevarlst[-which(treevarlst %in% tsumvarTPAlst)]
-    }
-
-    ## SEED variables
-    #####################################
-    if (isseed) {
-      svarkeep <- FIADBsvar2keep
-      svardelete <- FIADBvar2delete
-      FIADBseedvarlst <- FIESTA::selectvars(dbconn, schema=SCHEMA, 
-			tabnm="SEEDLING", 
-              	varkeep=svarkeep, vardelete=svardelete, titletab="seed")
-      seedvarlst <- FIADBseedvarlst$vars
-      sfiltvarlst <- FIADBseedvarlst$filtervarlst
-
-      filtersvarlst <- c(svarkeep, sfiltvarlst)
-    }
-  }
-
-  ## Variable lists
-  plotvars <- pltvarlst
-  condvars <- condvarlst
-
-  #########################################################
-  ## ADD COMMAS
-  #########################################################
-
-  ## PLOT and COND variables
-  pvars <- addcommas(pltvarlst, "p")
-  cvars <- addcommas(condvarlst, "c")
- 
-  ## Append pvars and cvars
-  vars <- pastevars(pvars, cvars)
-
-  ## TREE and SEED and ACTUAL variables
-  if (istree) {
-    tvars <- addcommas(treevarlst, "t")
-    tsumvars <- addcommas(tsumvarlst, "t")
-  }
-  if (isseed)
-    svars <- addcommas(seedvarlst, "s")
-  if (isveg) {
-    vspsppvars <- addcommas(vspsppvarFIADBlst, "v")
-    vspstrvars <- addcommas(vspstrvarFIADBlst, "v")
-  }
-
-
-  varlst <- list(plotvars=plotvars, condvars=condvars, pvars=pvars, cvars=cvars, vars=vars)
-  if (istree) {
-    varlst$tvars <- tvars
-    varlst$tsumvars <- tsumvars
-    varlst$tsumvarlst <- tsumvarlst
-    varlst$treenavars <- treenavars
-  } 
-  if (isseed) {
-    varlst$svars <- svars
-    varlst$seednavars <- seednavars
-  }
-  if (isveg) {
-    varlst$vspsppvars <- vspsppvars
-    varlst$vspstrvars <- vspstrvars
-  }
-  if (isdwm) {
-    varlst$dvars <- dvars
-#    varlst$dlvars <- dlvars
-#    varlst$fwdvars <- fwdvars
-#    varlst$tsvars <- tsvars
-  }
-
-  varlst$filtervarlst <- filtervarlst
-
-  return(varlst)
+  return(returnlst)
 }
 
 
-DBgetfn <- function(tab, invtype, outfn.pre, stabbrlst, evalid=NULL, qry=FALSE, 
-	othertxt=NULL, outfn.date=FALSE, addslash=FALSE) {
+DBgetfn <- function(tab, invtype, outfn.pre, stabbrlst=NULL, evalid=NULL, qry=FALSE, 
+	othertxt=NULL, outfn.date=FALSE, addslash=FALSE, outfolder=NULL, overwrite=FALSE) {
 
   invtypenm <- substr(invtype, 1, 3)
 
   fn <- ifelse(addslash, "/", "")
   if (!is.null(outfn.pre) && outfn.pre != "") fn <- paste0(fn, outfn.pre, "_")
-  fn <- paste0(fn, tab, "_", invtypenm, "_", paste(stabbrlst, collapse=""))
+  fn <- paste0(fn, tab, "_", invtypenm)
+  if (!is.null(stabbrlst))
+    fn <- paste0(fn, "_", paste(stabbrlst, collapse=""))  
   if (!is.null(evalid) && length(evalid) > 0 && length(stabbrlst == 1)) {
     if (length((unique(unlist(evalid)))) == 1) {   
       if (class(evalid) == "list") {
@@ -396,111 +183,340 @@ DBgetfn <- function(tab, invtype, outfn.pre, stabbrlst, evalid=NULL, qry=FALSE,
   if (outfn.date) 
     fn <- paste0(fn, "_", format(Sys.time(), "%Y%m%d"))
 
-  return(fn)
+  if (!overwrite)
+    fn <- FIESTA::fileexistsnm(outfolder, fn, "csv")
+  
+  path.fn <- paste0(outfolder, "/", fn, ".csv")
+  return(path.fn)
 }
 
+getspconddat <- function(cond=NULL, ACTUALcond=NULL, cuniqueid="PLT_CN", condid1=FALSE, 
+	ACI=FALSE){
 
-clip.othertables <- function(inids, othertabnms, othertabs, uniqueid="PLT_CN", 
-	savedata=FALSE, outfn.pre=NULL, outfolder=NULL, outfn.date=FALSE, 
-	overwrite=FALSE, gui=FALSE) {
+  ## NOTE: The shapefile is generated from coordinates specified from the variable 
+  ##	'spcoords' which will identify what type of coordinates to use ("ACTUAL", "PUBLIC"). 
+  ##	The shapefile will be in GEOGRAPHIC projection with NAD83 datum. 
+  ##	The attributes of the shapefile will include all the plot-level variables and some 
+  ##	condition-level variables (depending on whether they were selected by the user).
+  ##    
+  ## The following criteria is used to determine which condition is included with plots.
+  ## (1) MIN COND_STATUS_CD; (2) MAX CONDPROP_UNADJ; (3)MAX CRCOV;  
+  ##  		(4)MIN STDSZCD; (5)MIN CONDID
+  ## If no plot or condition data are included, returns NULL
+  #####################################################################################
+  CONDMETHOD <- NULL
+  cndvarlst <- c(cuniqueid, "CONDPROP_UNADJ", "CONDID", "COND_STATUS_CD", "OWNCD", "OWNGRPCD",
+		"FORTYPCD", "FLDTYPCD", "FORTYPCDCALC", "FORTYPGRP", "STDSZCD", "FLDSZCD", "STDAGE", 
+		"ADFORCD", "RESERVCD", "DSTRBCD1", "DSTRBYR1", "ASPECT", "SLOPE", "LIVE_CANOPY_CVR_PCT")
+  if (ACI) cndvarlst <- c(cndvarlst, "NF_COND_STATUS_CD")
 
-  ## Adds to file filters to Cran R Filters table.
-  if (.Platform$OS.type=="windows")
-    Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
-
- 
-  if (is.null(outfn.pre)) outfn.pre <- "clip"
-
-  # GET A LIST AND CHECK THE OTHER TABLES
-  if (is.null(othertabnms)) {
-    if (gui) {
-      othertabnms.resp <- select.list(c("NO", "YES"), title = "Other tables to subset?", 
-		    multiple = FALSE)
-      if (othertabnms.resp == "") stop("")
-      while (othertabnms.resp == "YES") {
-        tabresp <- select.list(c("RObject", "CSV"), title = "RObject or CSV?", 
-          multiple = FALSE)
-        if (tabresp == "RObject") { 
-          otabnmlst <- c(ls(pos=1, all.names = TRUE), 
-			ls(envir = as.environment("package:FIESTA"), pattern = "WY"))
-          otabnm <- select.list(otabnmlst, title = "Other table", multiple = TRUE)
-          if (length(otabnm) == 0) stop("")
-          for (tabnm in otabnm)
-            otablst[[tabnm]] <- get(tabnm) 
-        } else if (tabresp == "CSV" && .Platform$OS.type == "windows") {
-          otabnm <- choose.files(default = getwd(), caption = "Other table", 
-                filters = Filters["csv",], multi = TRUE)
-          if (length(otabnm) == 0) stop("")
-          for (tabnm in otabnm) {
-            nm <- unlist(strsplit(basename(tabnm), "\\.shp"))[1]
-            otablst[[nm]] <- read.csv(tabnm, header=TRUE, stringsAsFactors = FALSE)
-          }
-        }
-        othertabnms.resp <- select.list(c("NO", "YES"), title = "Other tables to clip?", 
-		      multiple = FALSE)
-        if (othertabnms.resp == "") stop("")
-      }
-    }
-  } 
-  if (length(othertabnms) > 0 && length(othertabs) == 0) stop("othertabs is invalid")
- 
-  # Clips tables in othertabs to inids
-  if (class(othertabs) != "list") stop("othertabs must be a list")
-  if (length(othertabs) > 0) {
-    intablst <- list()
-    namesintablst <- {}
-
-    for (i in 1:length(othertabs)) {
-      otab <- othertabs[[i]]
-      otabnm <- othertabnms[i]
-      message(paste("Clipping", otabnm, ".."))
-
-      # Set new name of return table
-      returnnm <- paste("clip", otabnm, sep="_")
-      outnm <- paste(outfn.pre, otabnm, sep="_")
-      if (substr(returnnm, nchar(returnnm) - 3, nchar(returnnm)) == ".csv")
-        returnnm <- strsplit(returnnm, ".csv")[[1]]
-      
-      namesintablst <- c(namesintablst, returnnm)
-      if (!is.null(otab)) {
-        # Check uniqueid of other table.. change if PLT_CN/CN conflict
-        otabnmlst <- names(otab)
-        if (!uniqueid %in% otabnmlst) {
-          if (uniqueid == "PLT_CN" && "CN" %in% otabnmlst) {
-            otabid <- "CN"
-          } else if (uniqueid == "CN" && "PLT_CN" %in% otabnmlst) {
-            otabid <- "PLT_CN"
-          } else {
-            stop("uniqueid not in", otabnm)
-          }
-        } else {
-          otabid <- uniqueid
-        }
-        ## SUBSET DATA TABLE 
-        if (isS4(otab)) {
-          assign(returnnm, otab[otab@data[,otabid] %in% inids, ])
-          if (savedata) {
-            intabfn <- FIESTA::fileexistsnm(outfolder, returnnm, "shp")
-            FIESTA::spExportShape(otab, outfolder=outfolder, outshpnm=outnm,
-			overwrite=overwrite, outfn.date=outfn.date)
-          }
-        } else {
-          assign(returnnm, otab[otab[[otabid]] %in% inids, ])
-          if (savedata)
-            FIESTA::write2csv(otab, outfolder=outfolder, outfilenm=outnm,
-			outfn.date=outfn.date, overwrite=overwrite)
-        }
-        intablst[[returnnm]] <- get(returnnm)
-
-      } else {
-          intablst[returnnm] <- otab
-      }
-    }
-  } else {
-    intablst <- NULL
+  if (!any(cndvarlst %in% names(cond))) {
+    message("no condition variables in cond")
+    return(NULL)
   }
-  return(intablst)
+
+  cndvars <- names(cond)[which(names(cond) %in% cndvarlst)]
+  conddt <- cond[, cndvars, with=FALSE]
+
+  if (!is.null(ACTUALcond)) {
+    acndvarlst <- c("ACTUAL_OWNCD", "ACTUAL_FORINDCD")
+    conddt <- merge(conddt, ACTUALcond[, c(cuniqueid, acndvarlst), with=FALSE])
+  }
+
+  if (!condid1) { 
+    cndorddf <- data.frame(
+		cndordvar=c("PLT_CN", "COND_STATUS_CD", "CONDPROP_UNADJ", 
+		"LIVE_CANOPY_CVR_PCT", "STDSZCD", "CONDID"), 
+		cndord=c(1,1,-1,-1,1,1), stringsAsFactors=FALSE)
+    cndordvars <- cndorddf$cndordvar[cndorddf$cndordvar %in% names(cond)]
+    cndord <- cndorddf$cndord[cndorddf$cndordvar %in% cndordvars]
+
+    ## Order rows of conddt
+    setorderv(conddt, cndordvars, cndord)
+    onecond <- conddt[, .SD[1], "PLT_CN"] 
+
+    onecond[, CONDMETHOD := "CS_CP_CC_SZ_C1"]
+    #onecond[is.na(onecond)] <- 0
+    
+    cat("\n", "CONDMETHOD added to attribute table: ",
+		"Describes which condition-level variables were used to select 1 condition per plot",
+        	"  CS - the minimum condition status, emphasizing forested conditions", 
+        	"  CP - the highest proportion", 
+        	"  CC - the greatest live percent canopy cover", 
+        	"  SZ - the largest stand size class",
+        	"  C1 - the minimum CONDID", sep="\n", "\n")
+
+  } else {  ## if condid1 = TRUE
+      
+    onecond <- conddt[conddt$CONDID == 1, ]
+    onecond[, CONDMETHOD := "CONDID1"]
+  }
+  setkeyv(onecond, "PLT_CN")
+     
+  return(onecond)
 }
+
+
+getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE, 
+	varCur="MEASYEAR", Endyr=NULL, invyrs=NULL, allyrs=FALSE, SCHEMA.=NULL, 
+	subcycle99=NULL, designcd1=TRUE, intensity1=NULL, popSURVEY=FALSE, chk=FALSE,
+	syntax="sql") {
+  ## DESCRIPTION: gets from statement for database query
+  ## syntax - ('sql', 'R')
+
+  ## set global variables
+  where.qry <- ""
+
+  if (!is.null(dsn)) {
+    dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE)
+    tablst <- DBI::dbListTables(dbconn)
+  }
+
+  if (!is.null(evalid)) {
+    if (chk) {
+      ppsanm <- pcheck.varchar("pop_plot_stratum_assgn", varnm="pop_plot_stratum_assgn",
+			checklst=tablst, stopifnull=TRUE)
+
+      evalidlst.qry <- paste("select distinct EVALID from ", ppsanm, "order by EVALID")
+      evalidlst <- DBI::dbGetQuery(dbconn, evalidlst.qry)[[1]]
+      if (!all(evalid %in% evalidlst)) stop("invalid evalid")
+    }
+    pfromqry <- paste0(SCHEMA., "pop_plot_stratum_assgn ppsa JOIN ", 
+			SCHEMA., "plot p ON (p.CN = ppsa.PLT_CN)")
+    return(pfromqry)
+  }
+
+  ## CHeck for plot table in dsn
+  if (chk) {
+    pltnm <- pcheck.varchar("plot", varnm="plot", checklst=tablst, stopifnull=TRUE)
+    pltflds <- DBI::dbListFields(dbconn, pltnm)
+
+    if (!all(c(varCur, "PLOT_STATUS_CD") %in% pltflds)) 
+      stop(paste("must include", toString(c(varCur, "PLOT_STATUS_CD")), "in plot table"))
+  }
+
+  if (plotCur) {
+    if (!is.null(subcycle99) && !subcycle99) {
+      subcycle.filter <- "SUBCYCLE <> 99"
+      if (syntax == 'R') gsub("<>", "!=", subcycle.filter)
+      if (where.qry == "") {
+        where.qry <- subcycle.filter
+      } else {
+        where.qry <- paste(paste(where.qry, subcycle.filter, sep=" and "))
+      }
+    }
+    if (!is.null(intensity1) && intensity1) {
+      intensity1.filter <- "INTENSITY = '1'"
+      if (syntax == 'R') gsub("=", "==", intensity1.filter)
+      if (where.qry == "") {
+        where.qry <- intensity1.filter
+      } else {
+        where.qry <- paste(paste(where.qry, intensity1.filter, sep=" and "))
+      }
+    }
+
+    if (!is.null(designcd1) && designcd1) {
+      designcd1.filter <- "DESIGNCD = 1"
+      if (syntax == 'R') gsub("=", "==", designcd1.filter)
+      if (where.qry == "") {
+        where.qry <- designcd1.filter
+      } else {
+        where.qry <- paste(paste(where.qry, designcd1.filter, sep=" and "))
+      }
+    }
+
+
+    ## Check Endyr
+    if (!is.null(Endyr)) {
+      #if (!is.numeric(Endyr)) stop("Endyr must be numeric year")
+      if (chk) {
+        yrlst.qry <- paste("select distinct", varCur, "from", pltnm, "order by INVYR")
+        pltyrs <- DBI::dbGetQuery(dbconn, yrlst.qry)
+
+        if (Endyr <= min(pltyrs, na.rm=TRUE))
+          stop(Endyr, " is less than minimum year in dataset")
+      }
+      Endyr.filter <- paste(varCur, "<=", Endyr)
+      if (where.qry == "") {
+        where.qry <- Endyr.filter
+      } else {
+        where.qry <- paste(paste(where.qry, Endyr.filter, sep=" and "))
+      }
+    } 
+ 
+    if (!is.null(where.qry) && where.qry != "")
+      where.qry <- paste(" where", where.qry)
+
+    ## create pfromqry
+    pfromqry <- paste0(SCHEMA., "plot p
+		INNER JOIN 
+		(select statecd, unitcd, countycd, plot, max(", varCur, ") maxyr
+		from ", SCHEMA., "plot", where.qry,
+		" group by statecd, unitcd, countycd, plot) pp
+		ON p.statecd = pp.statecd and 
+			p.unitcd = pp.unitcd and 
+				p.countycd = pp.countycd and 
+					p.plot = pp.plot and p.", varCur, " = pp.maxyr") 
+
+    if (popSURVEY)
+      pfromqry <- paste(pfromqry, "join survey s on (s.CN = p.SRV_CN and s.ANN_INVENTORY = 'Y')")
+   
+ 
+  } else if (allyrs) {  
+    pfromqry <- paste0(SCHEMA., "plot p")
+
+  } else if (!is.null(invyrs)) {  
+ 
+    if (chk) {
+      invyrlst.qry <- paste("select distinct INVYRS from", pltnm, "order by INVYR")
+      pltyrs <- DBI::dbGetQuery(dbconn, invyrlst.qry)
+
+      invyrs.miss <- invyrs[which(!invyrs %in% pltyrs)]
+      message("invyrs not in dataset: ", paste(invyrs.miss, collapse=", "))
+      if (length(invyrs.miss) == length(invyrs)) stop("")
+      invyrs <- invyrs[!invyrs %in% invyrs.miss]
+    }
+    pfromqry <- paste0(SCHEMA., "plot p")
+
+  } else {
+    return(NULL)
+  }
+   return(pfromqry)
+}
+
+
+getEvalid <- function(dbconn, SCHEMA.=NULL, states, evalAll=FALSE, 
+		evalCur=FALSE, evalEndyr=NULL, evalType="01", chk=FALSE,
+		dbconnopen=TRUE) {
+  ## DESCRIPTION: gets evalid in database by state from
+  ##			POP_PLOT_STRATUM_ASSGN table
+  ## ARGUMENTS:
+  ## chk - Logical. If TRUE, checks if data tables and variables exist
+
+  ## set global variables
+  Endyr=EVALID=evaltyp=STATECD <- NULL
+
+  ## Check database connection
+  if (!DBI::dbIsValid(dbconn)) stop("invalid database connection")
+
+  ## Get list of tables in dbconn
+  tablst <- DBI::dbListTables(dbconn)
+  
+
+  ## create state filter
+  stcd <- pcheck.states(states, statereturn="VALUE")
+  stfilter <- getfilter("STATECD", stcd, syntax='sql')
+
+  if (chk) {
+    ppsanm <- pcheck.varchar("pop_plot_stratum_assgn", varnm="pop_plot_stratum_assgn",
+			checklst=tablst, stopifnull=TRUE)
+  }
+
+  eval.qry <- paste("select distinct STATECD, EVALID 
+			from pop_plot_stratum_assgn 
+			where", stfilter, "order by STATECD, EVALID")
+  evaldt <- setDT(DBI::dbGetQuery(dbconn, eval.qry))
+
+
+  ## add endyr and evaltyp columns to dataframe
+  evaldt[, Endyr := substr(EVALID, nchar(EVALID) - 3, nchar(EVALID)-2)]
+  evaldt[, evaltyp := substr(EVALID, nchar(EVALID)-1, nchar(EVALID))]
+
+  if (is.null(evalType)) evalType <- "00"
+  if (!is.null(evalType)) {
+    if (!is.character(evalType)) stop("evalType must be 2 character string")
+    if (!all(sapply(evalType, nchar) == 2)) stop("evalType must be 2 character string")
+    if (!all(evalType %in% unique(evaldt$evaltyp))) 
+      stop("invalid evalType... must be in following list: ", sort(unique(evaldt$evaltyp))) 
+
+    evaldt <- evaldt[evaltyp %in% evalType, ]
+  }
+
+  if (evalAll) {
+    evalidlst <- sort(unique(evaldt$EVALID))
+  } else {
+    if (!is.null(evalEndyr)) {
+      if (!is.numeric(evalEndyr))  stop("evalEndyr must be numeric yyyy")
+      if (nchar(evalEndyr) != 4) stop("evalEndyr must be numeric yyyy")
+      yr <- substr(evalEndyr, 3, 4)
+
+      Endyr.max <- evaldt[Endyr <= yr, max(Endyr), by="STATECD"]
+    } else {
+      Endyr.max <- evaldt[, max(Endyr), by="STATECD"]
+    }
+    setnames(Endyr.max, "V1", "Endyr")
+    evalidlst <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))$EVALID
+  }
+  if (!dbconnopen) 
+    DBI::dbDisconnect(dbconn)
+
+  return(evalidlst)
+}
+
+
+
+getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL) {
+  ## DESCRIPTION: get plots with most current measurement before endyr (if not null)
+
+  ## Set global variables
+  PLOT_STATUS_CD=pltf <- NULL
+
+  ## Set data.table
+  if (!"data.table" %in% class(pltx))
+    pltx <- setDT(pltx)
+
+
+  ## Get unique identifier for plot location in data table
+  if ("ZSTUNCOPLOT" %in% names(pltx)) {
+    uniqueloc <- "ZSTUNCOPLOT"
+  } else {
+    uniqueloc <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
+    uniqueloc <- uniqueloc[which(uniqueloc %in% names(pltx))]
+  }
+ 
+  ## Check varCur
+  if (!varCur %in% names(pltx)) stop(varCur, " not in pltx")
+
+  ## Remove nonsampled plots (PLOT_STATUS_CD == 3)
+  if ("PLOT_STATUS_CD" %in% names(pltx)) 
+    pltx <- pltx[PLOT_STATUS_CD < 3,]
+
+  ## Check Endyr
+  if (!is.null(Endyr) && is.numeric(Endyr) && Endyr > min(as.numeric(pltx[[varCur]]), na.rm=TRUE)) {
+    endyr.filter <- paste(varCur, "<", Endyr)
+
+    if (!is.null(Endyr.filter)) {
+      npltx <- nrow(pltx)
+      pltf <- datFilter(pltx, Endyr.filter, stopifnull=TRUE)$xf
+      if (nrow(pltf) == 0) {
+        pltf <- NULL
+      } else {
+        maxyrf <- pltf[eval(parse(text=endyr.filter)), max(get(varCur)), by=uniqueloc]
+        setnames(maxyrf, c(uniqueloc, "maxyr"))
+        setkeyv(maxyrf, c(uniqueloc, "maxyr"))
+        setkeyv(pltf, c(uniqueloc, varCur))
+        plotCurf <- pltf[maxyrf]
+
+        pltx <- datFilter(pltx, paste0("!", Endyr.filter), stopifnull=TRUE)$xf
+        if ((nrow(pltx) + nrow(pltf)) != npltx) stop("invalid Endyr.filter")
+      }
+    }
+  }
+
+  maxyr <- pltx[, max(get(varCur)), by=uniqueloc]
+  setnames(maxyr, c(uniqueloc, "maxyr"))
+  setkeyv(maxyr, c(uniqueloc, "maxyr"))
+  setkeyv(pltx, c(uniqueloc, varCur))
+  plotCur <- pltx[maxyr]
+
+
+  if (!is.null(pltf)) 
+    plotCur <- rbindlist(list(plotCur, plotCurf))
+  
+  return(plotCur)
+}
+
+
 
 
 

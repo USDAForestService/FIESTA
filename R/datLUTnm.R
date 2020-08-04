@@ -1,6 +1,6 @@
 datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL, 
-	LUTnewvarnm=NULL, FIAname=FALSE, NAequal0=TRUE, group=FALSE, add0=FALSE, 
-	savedata=FALSE, outfolder=NULL, outfn=NULL, xtxt=NULL){
+	LUTnewvarnm=NULL, FIAname=FALSE, NAclass="OtherNA", group=FALSE, add0=FALSE, 
+	stopifmiss=FALSE, savedata=FALSE, outfolder=NULL, outfn="datlut", xtxt=NULL){
   #################################################################################
   ## DESCRIPTION: Merge variable(s) from a reference table stored within FIESTA  
   ##      (ref_codes) or a comma-delimited file (*.csv).
@@ -22,14 +22,12 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
 
   ## Check datx
   ########################################################
-  dat <- FIESTA::pcheck.table(x, gui=gui, caption="Data table?", returnDT=TRUE)
-  isshp <- FALSE
-  if (typeof(dat) == "S4") {
-    isshp <- TRUE
-    datsp <- datx
-    datx <- data.table(datx@data)
-  } else {
-    datx <- dat
+  isdatatable <- FALSE
+  datx <- FIESTA::pcheck.table(x, gui=gui, caption="Data table?")
+  if ("data.table" %in% class(datx)) {
+    isdatatable <- TRUE
+    datkey <- key(datx)
+    datx <- setDF(datx)
   }
 
   ## Check xvar
@@ -198,7 +196,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
       }
 
       ## Subset LUT values to only those in datx
-      if (sum(LUTx[[LUTvar]] %in% datx[[LUTvar]]) == 0) {
+      if (sum(LUTx[[LUTvar]] %in% datx[[LUTvar]], na.rm=TRUE) == 0) {
         message(paste("no rows exist for", LUTvar))
         return(NULL)
       }
@@ -208,9 +206,10 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
     LUTnewvarlst <- LUTnmlst[which(LUTnmlst != LUTvar)]
   } 
 
-  ### GET NAequal0
-  NAequal0 <- FIESTA::pcheck.logical(NAequal0, varnm="NAequal10", 
-		title="Change NA values to 0?", first="YES", gui=gui)
+  ### Check NAclass
+  if (!is.character(NAclass) && length(NAclass) != 1) 
+    stop("NAclass must be a character string of length 1")
+
 
   ### GET LUTnewvar
   ###########################################
@@ -241,19 +240,8 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
 		first="NO", gui=gui)
 
   ## GET OUTFOLDER IF NULL
-  if (savedata){
+  if (savedata)
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-
-    if (is.null(outfn)) { 
-      outfn <- "datlut"
-    } else if (!is.character(outfn)) {
-      stop("outfn must be character")
-    }
-
-    outdatfnbase <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
-    outdatfn <- fileexistsnm(outfolder, outdatfnbase, "csv")
-    outfilenm <- paste0(outfolder, "/", outdatfn, ".csv")
-  }
 
 
   ############################################################################
@@ -263,7 +251,8 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   if (!is.null(LUTnewvar) && length(LUTnewvar) != 0) {
 
     ## Check that the all values of LUTvar in datx are all in xvar in LUTx
-    FIESTA::check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt)
+    check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, 
+		stopifmiss=stopifmiss)
  
     ## Check if class of xvar in datx matches class of xvar in LUTx
     tabs <- FIESTA::check.matchclass(datx, LUTx, xvar, LUTvar, tab1txt=xtxt)
@@ -279,7 +268,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
     datx.names <- names(datx)
     xLUT <- merge(datx, LUTx[,c(LUTvar, LUTnewvar), with=FALSE], 
 			by.x=xvar, by.y=LUTvar, all.x=TRUE)
-    xLUTvals <- unique(xLUT[!is.na(get(xvar)), LUTnewvar[1], with=FALSE])
+    xLUTvals <- unique(as.character(xLUT[[LUTnewvar[1]]][!is.na(xLUT[[xvar]])]))
     if (any(is.na(xLUTvals))) {
       xLUTmiss <- unique(xLUT[!is.na(get(xvar)) & is.na(get(LUTnewvar[1])), xvar, 
 		with=FALSE])
@@ -287,40 +276,68 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
     }
     setcolorder(xLUT, c(datx.names, LUTnewvar))
     if (!is.null(LUTnewvarnm)) 
-      setnames(xLUT, LUTnewvar, LUTnewvarnm)
-    
-    ## Change NULL values to 0
-    #if (NAequal0) xLUT[is.na(xLUT[[LUTvar]]), LUTvar] <- 0 
+      setnames(xLUT, LUTnewvar, LUTnewvarnm)    
   } else {
     xLUT <- datx
   } 
 
-  if (isshp) {
-    for (nm in names(xLUT)) {
-      if (nchar(nm) > 10) {
-        newnm <- substr(nm, 0, 10)
-        names(xLUT)[names(xLUT) == nm] <- newnm
+ 
+  ## Only include xvar values that exist in x
+  if (!add0) 
+    LUTx <-LUTx[LUTx[[LUTvar]] %in% unique(xLUT[[xvar]]), ]
+
+  ## Get all values of LUTx newvars
+  LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTnewvar, with=FALSE], as.character)))
+
+  ## If NA values and NAclass != NULL, add NA to LUT
+  if (!is.null(NAclass) && sum(is.na(datx[[xvar]])) > 0 && all(!is.na(LUTx[[LUTvar]]))) {
+    NAclass <- checknm(NAclass, LUTnewvar.vals) 
+
+    LUTxrow <- rep(NA, ncol(LUTx))
+    for (v in LUTnewvar) {
+      if (!is.numeric(LUTx[[v]])) {
+         if (is.factor(LUTx[[v]]))
+           levels(LUTx[[v]]) <- c(levels(LUTx[[v]]), NAclass)
+         LUTxrow[which(names(LUTx) == v)] <- NAclass
       }
     }
-    coordvars <- names(data.frame(sp::coordinates(x)))
-    xvar <- coordvars[1]
-    yvar <- coordvars[2]
-    prj4str <- sp::proj4string(x)
-    xLUTsp <- sp::SpatialPointsDataFrame(xLUT[,c(xvar,yvar)], xLUT, 
-				proj4string=sp::CRS(prj4str))
-    xLUT <- xLUTsp
+    LUTx <- rbind(LUTx, as.list(LUTxrow))
   }
- 
-  ## Remove records if not add0=FALSE
-  if (!add0) LUTx <-LUTx[LUTx[[xvar]] %in% unique(xLUT[[xvar]]), ]
 
+  ## Add records if not other values exist in xLUT
+  if (!all(unique(xLUT[[xvar]]) %in% LUTx[[xvar]])) {
+    xvals <- unique(na.omit(xLUT[[xvar]]))
+    missvals <- xvals[which(!xvals %in% unique(LUTx[[LUTvar]]))]
+
+    if (length(missvals) > 0) {
+      otherx <- checknm("Other", LUTnewvar.vals) 
+      #otherx <- "Other"
+      message("adding unclassified values to class ", otherx)
+
+      LUTxrow <- data.table(matrix(data=NA, nrow=length(missvals), ncol=ncol(LUTx)))
+      names(LUTxrow) <- names(LUTx)
+      LUTxrow[[LUTvar]] <- missvals
+
+      for (v in names(LUTx)[which(names(LUTx) != LUTvar)]) {
+        if (!is.numeric(LUTx[[v]])) {
+          if (is.factor(LUTx[[v]]))
+             levels(LUTx[[v]]) <- c(levels(LUTx[[v]]), otherx)
+          LUTxrow[[v]] <- rep(otherx, nrow(LUTxrow))
+        } else {
+          LUTxrow[[v]] <- rep(9999, nrow(LUTxrow))
+        }        
+      }
+      LUTx <- rbind(LUTx, as.list(LUTxrow))
+    }
+  }  
+          
   ## Return list
   ########################################################
-  if (isshp) {
-    xLUTlst <- list(xLUT = methods::as(xLUT, "SpatialPointsDataFrame"))
-  } else {
-    xLUTlst <- list(xLUT=xLUT)
+  if (isdatatable) {
+    xLUT <- setDT(xLUT)
+    setkeyv(xLUT, datkey)
   }
+  xLUTlst <- list(xLUT=xLUT)
 
   if (!is.null(LUTnewvarnm) || !is.null(LUTnewvar)) {
     xLUTlst$xLUTnm <- ifelse (is.null(LUTnewvarnm), LUTnewvar, LUTnewvarnm)
@@ -335,16 +352,11 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   }  
   
   if (savedata) {
-    if (isshp) {
-      FIESTA::spExportShape(xLUTsp, outfolder=outfolder, outshpnm=outfn)
+    if ("sf" %in% class(xLUT)) {
+      spExportSpatial(xLUT, outfolder=outfolder, out_layer=outfn)
     } else {
       ## WRITE DATA TO OUTFOLDER
-      write.csv(xLUT, outfilenm, row.names=TRUE)
-      cat(
-      " #################################################################################", 
-      "\n", paste("Table written to: "), "\n", paste(" ", outfilenm), "\n", 
-      "#################################################################################",
-      "\n" )
+      write2csv(xLUT, outfilenm=outfn, outfolder=outfolder)
     }
   }
 

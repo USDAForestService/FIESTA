@@ -10,7 +10,7 @@
 #########################################################################
 ## DEFINE FUNCTIONS
 #########################################################################
-PBgetest <- function(xdat, areavar=NULL, tabtype="AREA", phat="phat", phat.var="phat.var"){
+PBgetest <- function(xdat, areavar=NULL, tabtype="AREA", phatcol="phat", phatcol.var="phat.var"){
 
   ########################################################################################
   ## DESCRIPTION: Calculates the following estimation variables
@@ -30,22 +30,16 @@ PBgetest <- function(xdat, areavar=NULL, tabtype="AREA", phat="phat", phat.var="
 
   ## Set global variables
   est=est.var=est.se=est.cv=pse <- NULL
-
-  quote.convert <- function(x) eval(parse(text = paste0('quote(', x, ')')))
-  phat <- quote.convert(phat)
-  phat.var <- quote.convert(phat.var)
-
   
   if (tabtype == "AREA" && !is.null(areavar)) {
-    areavar <- quote.convert(areavar)
 
     ## Estimated acres
-    xdat[,	est := eval(phat) * eval(areavar)][,
-		est.var := eval(phat.var) * eval(areavar)^2]
+    xdat[,	est := get(phatcol) * get(areavar)][,
+		est.var := get(phatcol.var) * get(areavar)^2]
   } else {
     ## Estimated percent cover
-    xdat[,	est := eval(phat) * 100][,
-		est.var := eval(phat.var) * 100^2]
+    xdat[,	est := get(phatcol) * 100][,
+		est.var := get(phatcol.var) * 100^2]
   }
 
   ## Calculate standard error (se), coefficient of variation (cv), and

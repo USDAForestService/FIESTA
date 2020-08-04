@@ -1,6 +1,7 @@
 datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN", 
-	puniqueid="CN", csumvar=NULL, csumvarnm=NULL, cfilter=NULL, savedata=FALSE, 
-	outfolder=NULL, outfn=NULL, outfn.date=TRUE, overwrite=FALSE){
+	puniqueid="CN", csumvar=NULL, csumvarnm=NULL, cfilter=NULL, getadjplot=FALSE, 
+	adjcond=FALSE, NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_layer=NULL,
+ 	outfn.date=TRUE, overwrite=FALSE, returnDT=TRUE){
   #####################################################################################
   ## DESCRIPTION: Aggregates CONDPROP_UNADJ variable or other continuous condition 
   ##	variables to plot level with option to apply condition filters. If condition 
@@ -18,6 +19,9 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   options(scipen = 6) # bias against scientific notation
   options(stringsAsFactors=FALSE)
 
+  ## SET glopbal variables
+  CONDPROP_ADJ=CONDPROP_UNADJ <- NULL
+
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -31,7 +35,6 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   cuniqueid <- FIESTA::pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
 	checklst=condnmlst, caption="UniqueID variable - cond", 
 	warn="cuniqueid not in cond table", stopifnull=TRUE)
-  setkeyv(condx, cuniqueid) 
 
   ## Check for CONDPROP_UNADJ
   if (!"CONDPROP_UNADJ" %in% condnmlst) stop("CONDPROP_UNADJ not in cond")
@@ -39,39 +42,34 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
 
   ## Check plt table
   noplt <- TRUE
-  pltshp <- FALSE
-  plt <- FIESTA::pcheck.table(plt, gui=gui, caption="Plot table?")
-  if (!is.null(plt)) {
+  pltsp <- FALSE
+  pltx <- pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
+  if (!is.null(pltx)) {
     noplt <- FALSE
 
     ## Remove totally nonsampled plots
-    if ("PLOT_STATUS_CD" %in% names(plt)) {
-      if (3 %in% unique(plt[["PLOT_STATUS_CD"]]))
-        warning(paste("There are", sum(plt[["PLOT_STATUS_CD"]] == 3), 
+    if ("PLOT_STATUS_CD" %in% names(pltx)) {
+      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]]))
+        warning(paste("There are", sum(pltx[["PLOT_STATUS_CD"]] == 3), 
 		"nonsampled plots"))
-      plt <- plt[plt$PLOT_STATUS_CD != 3,]
+      pltx <- pltx[pltx$PLOT_STATUS_CD != 3,]
     } 
 
-    if (typeof(plt) == "S4") {
-      pltshp <- TRUE
-      pltx <- data.table(plt@data)
-    } else {
-      pltx <- plt
-    }
-
+    if ("sf" %in% class(pltx))
+      pltsp <- TRUE
+      
     ## Check puniqueid
     pltnmlst <- names(pltx)
     nmlst <- names(pltx)
     puniqueid <- FIESTA::pcheck.varchar(var2check=puniqueid, varnm="puniqueid", 
 		checklst=pltnmlst, caption="UniqueID variable - plt", 
 		warn="puniqueid not in plot table", stopifnull=TRUE)
-    setkeyv(pltx, puniqueid)
 
-    ## Check that the values of tuniqueid in treex are all in puniqueid in pltx
-    FIESTA::check.matchval(condx, pltx, cuniqueid, puniqueid)
+    ## Check that the values of cuniqueid in condx are all in puniqueid in pltx
+    check.matchval(condx, pltx, cuniqueid, puniqueid)
 
     ## Check if class of cuniqueid matches class of puniqueid
-    tabs <- FIESTA::check.matchclass(condx, pltx, cuniqueid, puniqueid)
+    tabs <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
     condx <- tabs$tab1
     pltx <- tabs$tab2  
   }
@@ -85,6 +83,16 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   if (is.null(csumvarnm)) csumvarnm <- paste(csumvar, "PLT", sep="_")
   condnmlst <- sapply(csumvarnm, checknm, condnmlst)
 
+  ## Check getadjplot
+  getadjplot <- FIESTA::pcheck.logical(getadjplot, varnm="getadjplot", 
+		title="Get plot adjustment?", first="NO", gui=gui)
+  if (getadjplot && is.null(condx)) 
+    stop("must include condx to adjust to plot")
+
+  ## Check adjcond
+  adjcond <- FIESTA::pcheck.logical(adjcond, varnm="adjcond", 
+		title="Adjust conditions?", first="NO", gui=gui)
+
   ### Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, "Save data tables?", "NO")
 
@@ -95,10 +103,9 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   if (savedata) {
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
 
-    ## outfn
-    if (is.null(outfn) || gsub(" ", "", outfn) == "") 
-      outfn <- paste("condsum", sep="_")
-    #outfn.param <- paste(outfn, "param", sep="_")
+    ## out_layer
+    if (is.null(out_layer))
+      out_layer <- "condsum"
   }
 
 
@@ -106,49 +113,61 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   ### DO WORK
   ################################################################################  
 
+  if (getadjplot) {
+    adjfacdata <- getadjfactorPLOT(condx=condx, cuniqueid=cuniqueid)
+    condx <- adjfacdata$condadj
+  }
+
   ## Filter cond
   cdat <- FIESTA::datFilter(x=condx, xfilter=cfilter, title.filter="tfilter",
 			 stopifnull=TRUE, gui=gui)
   condf <- cdat$xf
   cfilter <- cdat$xfilter
 
-
-  ## Multiply variables by CONDPROP_UNADJ
-  csumvar2 <- csumvar[csumvar != "CONDPROP_UNADJ"] 
-  #indx <- which(names(condf) %in% csumvar2)
-  #for (i in indx) {set(condf, i=NULL, j=i, value=condf[[i]]*condf[["CONDPROP_UNADJ"]]) }
-  newcols <- paste(csumvar2, "new", sep="_")
-  condf[, (newcols) := lapply(.SD, function(x) x * condf[["CONDPROP_UNADJ"]]), .SDcols=csumvar2] 
-
-  ## Sum variables to plot
-  csumvar[csumvar != "CONDPROP_UNADJ"] <- newcols
-  condf.sum <- condf[, lapply(.SD, sum, na.rm=TRUE), by=cuniqueid, .SDcols=csumvar] 
+  if (adjcond) {
+    if ("cadjcnd" %in% names(condf))
+      stop("cadjcnd not in cond... must get adjustment factor")
+    csumvarnm <- paste0(csumvarnm, "_ADJ")
+    condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_ADJ, na.rm=TRUE)),
+ 		by=cuniqueid, .SDcols=csumvar]
+  } else {
+    csumvar2 <- csumvar[csumvar != "CONDPROP_UNADJ"] 
+    condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_UNADJ, na.rm=TRUE)),
+ 		by=cuniqueid, .SDcols=csumvar]
+  }
   names(condf.sum) <- c(cuniqueid, csumvarnm)
 
-  ## MERGE to plt
+  ## Merge to plt
   if (!noplt) {
-    condf.sum <- condf.sum[pltx]
-    setcolorder(condf.sum, c(cuniqueid, pltnmlst[pltnmlst != puniqueid], csumvarnm))
-    condf.sum <- FIESTA::DT_NAto0(condf.sum, csumvarnm)
+    if (is.data.table(pltx)) {
+      setkeyv(condf.sum, cuniqueid)
+      setkeyv(pltx, puniqueid)
+    }
+    condf.sum <- merge(pltx, condf.sum, by.x=puniqueid, by.y=cuniqueid)
+    if (NAto0)
+      for (col in csumvarnm) set(condf.sum, which(is.na(condf.sum[[col]])), col, 0)
   }
- 
+
+
   #### WRITE TO FILE 
   #############################################################
   if (savedata) {
-    if (pltshp) {
-      spcondf.sum <- sp::merge(plt[, puniqueid], condf.sum, by=puniqueid, all.x=TRUE)
-      FIESTA::spExportShape(spcondf.sum, outshpnm=outfn, outfolder=outfolder, 
-			outfn.date=outfn.date, overwrite=overwrite)
+    if (pltsp) {
+      spExportSpatial(condf.sum, out_dsn=plt_dsn, out_layer=out_layer,
+			outfolder=outfolder, outfn.date=outfn.date, 
+			overwrite_layer=overwrite)
     } else {
-      FIESTA::write2csv(condf.sum, outfolder=outfolder, outfilenm=outfn, 
+      FIESTA::write2csv(condf.sum, outfolder=outfolder, outfilenm=out_layer, 
 		outfn.date=outfn.date, overwrite=overwrite)
     }
-  }   
+  }  
+
+  if (!returnDT)      
+    condf.sum <- setDF(condf.sum)
  
-  sumcondlst <- list(condsum=condf.sum)
-  if (pltshp) 
-    sumcondlst$spcondsum <- methods::as(spcondf.sum, "SpatialPointsDataFrame")
-  sumcondlst$cfilter <- cfilter
+  sumcondlst <- list(condsum=condf.sum, csumvarnm=csumvarnm)
+  if (!is.null(cfilter))
+    sumcondlst$cfilter <- cfilter
 
   return(sumcondlst)
 } 

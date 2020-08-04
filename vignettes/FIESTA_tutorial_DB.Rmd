@@ -26,19 +26,16 @@ Functions are organized by type or objective and are named with a corresponding 
 
 
 
-FIESTA's DB tools extract data from FIA's internal Oracle database or FIA's online publically-available comma-delimited files (\*.csv or \*.zip). In order to access FIA's internal Oracle database, you must have select permission to the necessary tables. Typically, permission is only granted to FIA employees (check with the regional FIA Oracle administrator for granted permissions). FIA's CSV files are publically available. CSV files are available by state from the FIA DataMart at the following link: https://apps.fs.usda.gov/fia/datamart/datamart.html. Because of FIA's confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA's sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA's Spatial Data Services (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
+FIESTA's DB tools extract data from FIA's online publically-available comma-delimited files (\*.csv or \*.zip). FIA's CSV files are available by state from the FIA DataMart at the following link: https://apps.fs.usda.gov/fia/datamart/datamart.html. Because of FIA's confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA's sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA's Spatial Data Services (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
 
-For accessing the FIA Oracle database, it is also necessary to have ODBC (Open DataBase Connectivity) compliancy. ODBC refers to a database driver on the client's computer which translates queries from client applications into commands the database understands. Check your local IT service for compliancy, setup, and availability of 32- vs 64-bit drivers.
 
 ### Objective of tutorial
 The objective of this tutorial is to demonstrate the use of FIESTA's DB tools for accessing FIA data. These tools extract data from FIADB using FIA's standard evaluations as well as customized evaluations (DBgetPlots and DBgetStrata). An FIA Evaluation is a group of plots within the FIA database that is used for population estimates, representing different inventory spans of data with different stratification or area adjustments. Each Evaluation is determined by the type of estimation (evalType) including: area and tree estimates, growth and mortality estimates, and area change estimates (evalType). These plots are identified by an evalid, which is a unique identifier in the format of a 2-digit State code, a 2-digit year code, and a 2-digit evaluation type code. For example, EVALID '491601' represents the Utah 2016 evaluation for current area estimates. 
 
 FUNCTION  | DESCRIPTION
 -------------- | ---------------------------------------------------------------
-[DBtestORACLE()](#DBtestORACLE) | Tests connection to FIA's ORACLE database.
 [DBgetCSV()](#DBgetCSV) | Downloads comma-delimited file (.csv) or downloads and extracts a compressed csv file (.zip) from FIA's online DataMart.
 [DBqryCSV()](#DBqryCSV) | Extracts and queries data from FIA's online DataMart, either CSV or ZIP files.
-[DBqryORACLE()](#DBqryORACLE) | Queries and extracts data from FIA's Oracle Database.
 [DBgetEvalid()](#DBgetEvalid) | Gets evalid for identifying an estimation group of plots for state or checks evalid.
 [DBgetPlots()](#DBgetPlots) | Extracts inventory plot data from FIA database.
 [DBgetStrata()](#DBgetStrata) | Extracts strata information and total acres by estimation unit from FIA database, including plot-level assignment and a data frame with strata weights by estimation unit.
@@ -62,36 +59,16 @@ datfolder <- "data"
 if (!file.exists("outfolder")) dir.create("outfolder")
 outfolder <- "outfolder"
 
+
+## Load SQLite database from FIESTAdata package
+library(FIESTAdata)
+SQLitefn <- FIESTAdata::get_sqlite()
+
+
 ```
 
-The following examples show how to use the publically-available, online zipfiles and FIA's Oracle database, if permissions allow. There are a few differences to note:
+The following examples show how to use FIA's publically-available, online zipfiles or a custom-built SQLite database that is stored internal to FIESTA. The plot coordinates have been altered for privacy (See https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php for details). The zip files are extracted on-the-fly from the online website. Web server connections will affect download speeds.
 
-1. If datsource=ORACLE, you must have select permission to SDS_PLOT and SDS_COND tables to get actual coordinates. This is currently only available for FIA employees, and only within the individual's FIA research unit of employment. The data extraction process may take several minutes, depending on what you are extracting and the server connections. Please be patient. Check if a 64-bit driver is available for ODBC connection using 64-bit R.
-
-2. For datsource=CSV (default), the plot coordinates have been altered for privacy (See https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php for details). The zip files are extracted on-the-fly from the online website. Web server connections will affect download speeds.
-
-
-
-#### <a name="DBtestORACLE"/>DBtestORACLE()
-```
-######################################################################################
-# Usage:
-# DBtestORACLE(dbconnout = FALSE) 
-#  
-# Description:
-# Tests the FIA Oracle database connection and return an open database connection. 
-# If you do not get the following response, "Oracle connection successful", 
-# check your ODBC connection.
-######################################################################################
-
-# Test connection.
-DBtestORACLE()
-
-# Test connection and return an open database connection
-dbconn <- DBtestORACLE(dbconnopen=TRUE)
-dbconn
-
-```
 
 
 #### <a name="DBgetCSV"/>DBgetCSV()
@@ -123,6 +100,7 @@ WYsurvey
 ref_research_station <- DBgetCSV("ref_research_station")
 head(ref_research_station)
 
+
 ```
 
 
@@ -147,13 +125,6 @@ sql1.csv <- "select INVYR, count(*) AS NBRPLOTS
 DBqryCSV(sql=sql1.csv, states="Wyoming", sqltables="plot")
 
 # QUERY2: min, mean, max height by FORTYPCD in Wyoming
-sql2a.csv <- "select c.FORTYPCD, min(HT) HTmin, round(avg(HT)) HTmean, max(HT) maxHT 
-			        from cond c, tree t
-			        where c.statecd = 56 and c.PLT_CN = t.PLT_CN 
-			        group by c.FORTYPCD order by c.FORTYPCD"
-DBqryCSV(sql=sql2a.csv, states="Wyoming", sqltables=c("cond", "tree"))
-
-# Using different SQL syntax (e.g., INNER JOIN)
 sql2b.csv <- "select c.FORTYPCD, min(HT) HTmin, round(avg(HT)) HTmean, max(HT) maxHT 
 			        from cond c INNER JOIN tree t ON c.PLT_CN = t.PLT_CN 
 			        where c.statecd = 56 
@@ -166,58 +137,15 @@ sql3.csv <- "select STATECD, INVYR, count(*) NBRPLOTS
           where statecd in(49,56) group by STATECD, INVYR"
 DBqryCSV(sql=sql3.csv, states=c("Utah", "Wyoming"), sqltables="plot")
 
-```
-
-#### <a name="DBqryORACLE"/>DBqryORACLE()
-```
-######################################################################################
-# Usage:
-# DBqryORACLE(sql, dbconn = NULL, dbconnopen = TRUE) 
-# 
-# Description:
-# Queries and extracts data from FIA's Oracle Database. (Note: must use SQL syntax).
-# You must have select permission for the tables in the query. The tables must
-# include the ORACLE schema as a prefix to each table.
-#
-# Value:
-# Returns a data frame from resulting query
-######################################################################################
-
-# QUERY1: Number of plots by inventory year for the state of Wyoming
-sql1.ora <- "select INVYR, count(*) NBRPLOTS 
-          from FS_FIADB.plot 
-          where statecd=56 group by INVYR"
-DBqryORACLE(sql=sql1.ora)
-
-# QUERY2: min, mean, max height by FORTYPCD in Wyoming
-sql2a.ora <- "select c.FORTYPCD, min(HT) HTmin, round(avg(HT)) HTmean, max(HT) maxHT 
-              from FS_FIADB.cond c, FS_FIADB.tree t
-              where c.statecd = 56 and c.PLT_CN = t.PLT_CN 
-              group by c.FORTYPCD order by c.FORTYPCD"
-DBqryORACLE(sql=sql2a.ora)
-
-# With different SQL syntax
-sql2b.ora <- "select c.FORTYPCD, min(HT) HTmin, round(avg(HT)) HTmean, max(HT) maxHT 
-              from FS_FIADB.cond c INNER 
-              JOIN FS_FIADB.tree t ON c.PLT_CN = t.PLT_CN
-              where c.statecd = 56 
-              group by c.FORTYPCD order by c.FORTYPCD"
-DBqryORACLE(sql=sql2b.ora)
-
-# QUERY3: Number of plots by inventory year for Utah and Wyoming, including dbconn.
-dbconn <- DBtestORACLE(dbconnout=TRUE)
-sql3.ora <- "select STATECD, INVYR, count(*) NBRPLOTS 
-          from FS_FIADB.plot 
-          where statecd in(49,56) group by STATECD, INVYR"
-DBqryORACLE(sql=sql3.ora, dbconn=dbconn)
 
 ```
+
 
 #### <a name="DBgetEvalid"/>DBgetEvalid()
 ```
 ######################################################################################
 # Usage:
-# DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = TRUE,  
+# DBgetEvalid(states = NULL, RS = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = TRUE,  
 #   invyrtab = NULL, invtype = "ANNUAL", evalCur = TRUE, evalEndyr = NULL, evalid = NULL, 
 #   evalType = "ALL", dbconn = NULL, dbconnopen = FALSE, gui = FALSE)
 # 
@@ -235,8 +163,6 @@ DBqryORACLE(sql=sql3.ora, dbconn=dbconn)
 #   $invyrtab    - a data frame with inventory years by state corresponding to evalid
 #   $evalType    - Evaluation type(s) included in query
 #   $invyrs      - a list of inventory years by state corresponding to evalid
-#   $datsource   - the datsource used for query (ORALCE or CSV)
-#   $FS_FIADB    - TRUE, if datsource=ORACLE and FS_FIADB schema is used
 ######################################################################################
 
 help(DBgetEvalid)
@@ -246,7 +172,7 @@ eval <- DBgetEvalid()
 names(eval)
 eval
 
-## Get evalid and inventory years for Wyoming (from CSV files)
+## Get evalid and inventory years for Wyoming
 WYeval <- DBgetEvalid(states="Wyoming")
 names(WYeval)
 WYeval$evalidlist
@@ -254,31 +180,25 @@ WYeval$invyrs
 WYeval$invyrtab
 WYeval$invtype
 
-## Get evalid for Utah and Wyoming (from CSV files)
-UTWYeval <- DBgetEvalid(states=c("Wyoming", "Utah"), datsource="CSV")
-UTWYeval$evalidlist
-UTWYeval$invyrs
-UTWYeval$invyrtab
-UTWYeval$invtype
-
-## Get evalid for Utah and Wyoming (from Oracle - must have select permission)
-UTWYeval <- DBgetEvalid(states=c("Wyoming", "Utah"), datsource="ORACLE")
+## Get evalid for Utah and Wyoming
+UTWYeval <- DBgetEvalid(states=c("Wyoming", "Utah"))
 UTWYeval$evalidlist
 UTWYeval$invyrs
 UTWYeval$invyrtab
 UTWYeval$invtype
 
 ## Get most current evaluation for all states in RMRS and NCRS FIA research units
-eval.cur <- DBgetEvalid(rs=c("RMRS", "NCRS"))
+eval.cur <- DBgetEvalid(RS=c("RMRS", "NCRS"))
 names(eval.cur)
 eval.cur$evalidlist
 
 
-## Get most current evaluation for Oregon and Texas for areavol and grm evalTypes
-ORTXeval.cur <- DBgetEvalid(states=c("Oregon", "Texas"), evalType=c("AREAVOL", "GRM"))
-names(ORTXeval.cur)
-ORTXeval.cur$evalidlist
-ORTXeval.cur$evalTypelist
+## Get most current evaluation for New York and Texas for areavol and grm evalTypes
+NYTXeval.cur <- DBgetEvalid(states=c("New York", "Texas"), evalType=c("AREAVOL", "GRM"))
+names(NYTXeval.cur)
+NYTXeval.cur$evalidlist
+NYTXeval.cur$evalTypelist
+
 
 ```
 
@@ -286,38 +206,32 @@ ORTXeval.cur$evalTypelist
 ```
 ######################################################################################
 # Usage:
-# DBgetPlots(datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, states = NULL, 
-#   rs = NULL, invtype = "ANNUAL", evalid = NULL, evalCur = FALSE, evalEndyr = NULL, 
-#   evalType = "AREAVOL", allyrs = FALSE, invyrs = NULL, actual = FALSE, istree = FALSE, 
-#   isseed = FALSE, isveg = FALSE, issp = FALSE, spcoords = NULL, 
+# DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL, 
+#   evalCur = FALSE, evalEndyr = NULL, evalType = "AREAVOL", allyrs = FALSE, 
+#   invyrs = NULL, istree = FALSE, isseed = FALSE, isveg = FALSE, issp = FALSE, 
 #   spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE,
-#   subcycle99 = FALSE, intensity1 = TRUE, allFilter = NULL, savedata = FALSE, 
-#   saveqry = FALSE, parameters = FALSE, outfolder = NULL, outfn.pre = NULL, 
-#   outfn.date = FALSE, overwrite = FALSE, dbconn = NULL, dbconnopen = FALSE, 
-#   returnPOP=FALSE, gui = FALSE)
+#   subcycle99 = FALSE, intensity1 = TRUE, stateFilter = NULL, allFilter = NULL,  
+#   savedata = FALSE, saveqry = FALSE, parameters = FALSE, outfolder = NULL, 
+#   outSQLitern = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
+#   returnPOP = FALSE)
 # 
 # Description:
-# Extracts field, calculated, and derived data from FIA's internal, permission-controlled,
-#   Oracle database, or from FIA's publically-accessible online DataMart
-#   (https://apps.fs.usda.gov/fia/datamart/datamart.html), in the form of comma-delimited
-#   (*.csv) files, or compressed comma-delimited files (*.zip).
+# Extracts field, calculated, and derived data from FIA's publically-accessible 
+#   online DataMart (https://apps.fs.usda.gov/fia/datamart/datamart.html).
 # 
 # Value:
 # A list of data objects:
 #   $states   - state names
 #   $plt		  - Plot variables from PLOT table
 #   $cond		  - Cond variables from COND table
-#   $actualc	- If actual=TRUE, actual condition-level variables
-#   $actualp	- If actual=TRUE, actual plot-level variables
 #   $tree		  - If istree=TRUE, tree variables from TREE table
 #   $seed 		- If isseed=TRUE, seedling variables from SEEDLING table
-#   $spplt_*		- if issp=TRUE, SpatialPoints object with plot and some cond attributes represented 
-#              at plot-level (see help for details).
+#   $spplt_*	- if issp=TRUE, SpatialPoints object with plot and some cond attributes  
+#              represented at plot-level (see help for details).
 #   $vspspp  - if isveg=TRUE, subplot understory vegetation from P2VEG_SUBPLOT_SPP
 #   $vspstr  - if isveg=TRUE, subplot cover and layer understory vegetation from P2VEG_SUBP_STRUCTURE
 #   $evalid  - if evalCur=TRUE or evalEndyr is not NULL, evalidation ID by state
 #   $pltcnt  - number of plots by state, cycle, inventory year, and plot status
-#   $dbconn - if datsource=ORACLE and dbconnopen=TRUE, the open ODBC dbconn
 #
 # If savedata=TRUE:
 #	- If saveqry=TRUE, text file(s) of SQL queries used to extract data from database (*.txt),
@@ -326,11 +240,11 @@ ORTXeval.cur$evalTypelist
 #   (DBgetPlots_parameters_'date'.txt).
 #	- If text file of plot and condition counts (pltcnt_*'date'.txt).
 #	- If comma-delimited files of data frame objects (*'date'.csv).
-#	- If issp=TRUE, an ESRI shapefile of plot and some condition attributes (shp_'spcooords'_'date'.shp).
+#	- If issp=TRUE, an ESRI shapefile of plot and some condition attributes (shp_PUBLIC_'date'.shp).
 #   Variable names are truncated to 10 characters or less. 
-#	- If issp=TRUE, a comma-delimited file of the SpatialPoints data frame (shpdat_'spcooords'_'date'.csv).
+#	- If issp=TRUE, a comma-delimited file of the SpatialPoints data frame (shpdat_PUBLIC_'date'.csv).
 #	- If issp=TRUE, a comma-delimited file of truncated names for conversion to shapefile
-#   (shp_'spcooords'_'date'_newnames.shp). See notes for more info.
+#   (shp_PUBLIC_newnames_'date'.shp). See notes for more info.
 ######################################################################################
 
 help(DBgetPlots)
@@ -340,39 +254,64 @@ dat <- DBgetPlots()
 names(dat)
 save(dat, file=paste(outfolder, "dat.rda"), sep="/")
 
-######################################################################################
-# From CSV files
-######################################################################################
 
 # Most current evaluation and shapefile with public coordinates
-WYdat1 <- DBgetPlots(datsource="CSV", states="Wyoming", evalCur=TRUE,
-                    issp=TRUE)
+WYdat1 <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE)
 names(WYdat1)
 WYplt1 <- WYdat1$plt
 WYcond1 <- WYdat1$cond
-WYspplt_PUBLIC1 <- WYdat1$spplt_PUBLIC
+WYspxy_PUBLIC1 <- WYdat1$spxy_PUBLIC
 WYdat1$evalid
 WYdat1$pltcnt
 
+dim(WYplt1)
+
 # Look at output
 head(WYcond1)
-sp::plot(WYspplt_PUBLIC1, col=WYspplt_PUBLIC1$PLOT_STATUS_CD)
+plot(st_geometry(WYspxy_PUBLIC1))
 table(WYplt1$INVYR)
 
+
+# Add stateFilter (NOTE: only plot-level filters)
+WYdat1b <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, stateFilter="p.COUNTYCD == 1")
+dim(WYdat1b$plt)
+
+
+
 # Include tree data
-WYdat1 <- DBgetPlots(datsource="CSV", states="Wyoming", evalCur=TRUE,
-                    issp=TRUE, istree=TRUE)
+WYdat1 <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, istree=TRUE)
 names(WYdat1)
 WYtree1 <- WYdat1$tree
 head(WYtree1)
 
+## Save to SQLite database ("C:/FIESTA/data.sqlite")
+WYdat1 <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, istree=FALSE,
+              savedata=TRUE, outfolder=outfolder, 
+              outSQLitefn="data.sqlite", overwrite=TRUE)
 
-## From CSV files ##
+sqlitefn <- file.path(outfolder, "data.sqlite")
+
+## Connect to database and list tables
+conn <- DBI::dbConnect(RSQLite::SQLite(), sqlitefn)
+DBI::dbListTables(conn)
+sf::st_layers(sqlitefn)
+
+## Read in plot table
+plt <- DBI::dbReadTable(conn, "plot")
+dim(plt)
+
+## Read in spatial xy coordinates
+spxy_public <- sf::st_read(sqlitefn, layer="spxy_public")
+dim(spxy_public)
+
+plot(sf::st_geometry(spxy_public))
+
+
 # Most current evaluation and shapefile with public coordinates, 
 # evalTypes - all, areavol, and growmort
 ##################################################################################
-WYdat1a <- DBgetPlots(datsource="CSV", states="Wyoming", evalCur=TRUE,
-                    issp=TRUE, evalType=c("ALL", "AREAVOL", "GRM"))
+WYdat1a <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, 
+                    evalType=c("ALL", "AREAVOL", "GRM"))
 names(WYdat1a)
 WYplt1a <- WYdat1a$plt
 WYcond1a <- WYdat1a$cond
@@ -383,92 +322,83 @@ dim(WYplt1a)
 head(WYplt1a)
 table(WYplt1a$EVALID)
 
+
+## Get WYplt, evalid ending in 00 
 WYplt00 <- WYplt1a[endsWith(as.character(WYplt1a$EVALID), "00"),]
 dim(WYplt00)
 
 
-
-## From CSV files ##
 # Inventory years 2012:2014 and shapefile with public coordinates
 ##################################################################################
-WYdat2 <- DBgetPlots(datsource="CSV", states="Wyoming", invyrs=2012:2014,
-                    issp=TRUE)
+WYdat2 <- DBgetPlots(states="Wyoming", invyrs=2012:2014, issp=TRUE)
 names(WYdat2)
 WYplt2 <- WYdat2$plt
 WYcond2 <- WYdat2$cond
-WYspplt_PUBLIC2 <- WYdat2$spplt_PUBLIC
+WYspplt_PUBLIC2 <- WYdat2$spxy_PUBLIC
 WYdat2$pltcnt
 
 # Look at output
 head(WYcond2)
-sp::plot(WYspplt_PUBLIC2, col=WYspplt_PUBLIC2$PLOT_STATUS_CD)
+plot(sf::st_geometry(WYspplt_PUBLIC2))
 table(WYplt2$INVYR)
 
 
-## From CSV files ##
 # Two different states, most current evaluation
 ##################################################################################
-UTWYdata <- DBgetPlots(datsource="CSV", states=c("Utah", "Wyoming"), evalCur=TRUE)
+UTWYdata <- DBgetPlots(states=c("Utah", "Wyoming"), evalCur=TRUE)
 names(UTWYdata)
 UTWYdata$pltcnt
 UTWYplt <- UTWYdata$plt
 table(UTWYplt$STATECD, UTWYplt$INVYR)
 
 
-## From CSV files ##
 # Two different states, one inventory year
 ##################################################################################
-UTWY15data <- DBgetPlots(datsource="CSV", states=c("Utah", "Wyoming"), invyrs=2015)
+UTWY15data <- DBgetPlots(states=c("Utah", "Wyoming"), invyrs=2015)
 names(UTWY15data)
 UTWY15data$pltcnt
 UTWY15plt <- UTWY15data$plt
 table(UTWY15plt$STATECD, UTWY15plt$INVYR)
 
 
-## From CSV files ##
 # Two different states, different inventory years
 ##################################################################################
-UTWYdata2 <- DBgetPlots(datsource="CSV", states=c("Utah", "Wyoming"), 
-    invyrs=list(Utah=2010, Wyoming=2015))
+UTWYdata2 <- DBgetPlots(states=c("Utah", "Wyoming"), invyrs=list(Utah=2010, Wyoming=2015))
 names(UTWYdata2)
 UTWYdata2$pltcnt
 
 
-## From CSV files ##
 # All years of periodic data for Wyoming
 ##################################################################################
-WYdata.periodic <- DBgetPlots(datsource="CSV", states="Wyoming", invtype="PERIODIC", 
+WYdata.periodic <- DBgetPlots(states="Wyoming", invtype="PERIODIC", 
     allyrs=TRUE)
 names(WYdata.periodic)
 WYdata.periodic$pltcnt
 
 
-## From CSV files ##
 # Most current evaluation of periodic data for Wyoming
+# Note: the periodic inventory did not have evalType="ALL"
 ##################################################################################
-WYdata.periodic2 <- DBgetPlots(datsource="CSV", states="Wyoming", invtype="PERIODIC", 
-    evalCur=TRUE)
+WYdata.periodic2 <- DBgetPlots(states="Wyoming", invtype="PERIODIC", evalCur=TRUE,
+      evalType="AREAVOL")
 names(WYdata.periodic2)
 WYdata.periodic2$pltcnt
 
 
-## From CSV files ##
 # Most current evaluation of Utah and Wyoming filtered for OWNCD=11
 ##################################################################################
-UTWYdata.nfs <- DBgetPlots(datsource="CSV", states=c("Utah", "Wyoming"), 
-    evalEndyr=2017, allFilter="OWNCD == 11", evalType="ALL")
+UTWYdata.nfs <- DBgetPlots(states=c("Utah", "Wyoming"), evalEndyr=2017, 
+                  allFilter="OWNCD == 11", evalType="ALL")
 names(UTWYdata.nfs)
 UTWYdata.nfs$pltcnt
 table(UTWYdata.nfs$cond$ADFORCD)
 
 
-## From CSV files ##
 # Most current inventory years for Idaho/Montana, R1, filtered for OWNGRPCD=10
 # Include tree data
 ##################################################################################
-UTdata.nfs <- DBgetPlots(datsource="CSV", states=c("Idaho", "Montana"), 
-    invyrs=2008:2017, istree=TRUE, 
-    allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
+UTdata.nfs <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017, istree=TRUE,
+                  allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
 names(UTdata.nfs)
 UTdata.nfs$pltcnt
 table(UTdata.nfs$cond$ADFORCD)
@@ -477,13 +407,12 @@ table(UTdata.nfs$cond$ADFORCD)
 
 ################## All Condition Inventory (ACI) data
 
-## From CSV files ##
 # Region 1 plots, filtered for OWNGRPCD=10, include tree data with ACI
 # Note: ACI data are not included in FIA evaluations, must specify inventory years
 ##################################################################################
-UTdata.nfsACI <- DBgetPlots(datsource="CSV", states=c("Idaho", "Montana"), 
-    invyrs=2008:2017, istree=TRUE, ACI=TRUE,
-    allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
+UTdata.nfsACI <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017, 
+                  istree=TRUE, ACI=TRUE, 
+                  allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
 names(UTdata.nfsACI)
 UTdata.nfsACI$pltcnt
 table(UTdata.nfsACI$cond$ADFORCD)
@@ -499,7 +428,6 @@ dim(UTdata.nfsACI$tree)
 
 
 
-## From CSV files ##
 # All inventory years for Utah
 ##################################################################################
 UTdat.all <- DBgetPlots(states="Utah", allyrs=TRUE)
@@ -509,64 +437,53 @@ table(UTplt.all$INVYR)
 
 
 
-######################################################################################
-# From ORACLE database
-######################################################################################
+################## Save to SQLite database
 
-WYdat <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, dbconnopen=TRUE)
+# Wyoming - most current evaluation - save to SQLite database
+##################################################################################
+WYdat <- DBgetPlots(states="Wyoming", evalCur=TRUE, istree=TRUE, 
+          savedata=TRUE, outfolder=outfolder, outSQLitefn="WYdat",
+          overwrite=TRUE)
 names(WYdat)
 WYplt <- WYdat$plt
 WYcond <- WYdat$cond
-WYspplt_PUBLIC <- WYdat$spplt_PUBLIC
+WYtree <- WYdat$tree
 WYpltcnt <- WYdat$pltcnt
-dbconn <- WYdat$dbconn
 
 head(WYplt)
 head(WYcond)
-sp::plot(WYspplt_PUBLIC)
+head(WYtree)
 WYpltcnt
 
-
-## From ORACLE database ##
-# Actual data and SpatialPoints of public and actual coordinates
-# Note: must have select permission to SDS tables.
-##################################################################################
-WYdat.actual <- DBgetPlots(states="Wyoming", actual=TRUE, issp=TRUE, invyrs=2015, 
-                    spcoords=c("PUBLIC", "ACTUAL"), savedata=TRUE)
-names(WYdat.actual)
-WYactualp <- WYdat.actual$actualp
-WYactualc <- WYdat.actual$actualc
-head(WYactualp)
-head(WYactualc)
-
-WYspplt_PUBLIC <- WYdat.actual$spplt_PUBLIC
-WYspplt_ACTUAL <- WYdat.actual$spplt_ACTUAL
-sp::plot(WYspplt_PUBLIC)
-sp::plot(WYspplt_ACTUAL, add=TRUE, col="red")
+## Read SQLite database
+dsn <- file.path(outfolder, "WYdat.sqlite")
+conn <- dbConnect(RSQLite::SQLite(), dsn)
+dbListTables(conn)
+WYplt <- dbGetQuery(conn, "select * from plot")
+dbDisconnect(conn)
 
 
 ```
-
 
 #### <a name="DBgetStrata"/>DBgetStrata()
 ```
 ######################################################################################
 # Usage:
-# DBgetStrata(dat = NULL, datsource = "ORACLE", ZIP = TRUE, FS_FIADB = TRUE, 
-#   uniqueid = "CN", states = NULL, evalid = NULL, evalCur = FALSE, evalEndyr = NULL,
-#   evalType = "AREAVOL", savedata = FALSE, outfolder = NULL, outfn.pre = NULL,   
-#   outfn.date = FALSE, overwrite = FALSE, dbconn = NULL, dbconnopen=FALSE,
+# DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL, 
+#   evalCur = FALSE, evalEndyr = NULL, evalType = "AREAVOL", savedata = FALSE, 
+#   outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
 #   POP_PLOT_STRATUM_ASSGN = NULL)
 # 
 # Description:
-# Gets strata information from FIA's Oracle database or FIA DataMart, including:
+# Gets strata information from FIA DataMart, including:
 # (1) strata and estimation unit assignment per plot; (2) total area by estimation unit;
 # (3) pixel counts and number plots by strata/estimation unit. 
 # 
 # Value:
 # A list of data objects:
-#   $datstrat    - plot-level strata/estimation unit assignment  
-#   $unitarea   - total acres by estimation unit
+#   $pltassgn    - plot-level strata/estimation unit assignment
+#   $pltassgnid  - name of unique identifier for plot in pltassgn
+#   $unitarea    - total acres by estimation unit
 #   $unitvar     - name of estimation unit variable (ESTN_UNIT)
 #   $areavar     - name acre variable (ACRES)
 #   $strlut      - strata look-up table with summarized pixel counts (P1POINTCNT)
@@ -583,18 +500,14 @@ sp::plot(WYspplt_ACTUAL, add=TRUE, col="red")
 
 help(DBgetStrata)
 
-# Using GUI interface.
-datstrat <- DBgetStrata()
-names(datstrat)
-
 
 ## From CSV files ##
 # Get strata for the most current evaluation for Wyoming
-WYstrat1 <- DBgetStrata(states="Wyoming", evalCur=TRUE, datsource="CSV")
+WYstrat1 <- DBgetStrata(states="Wyoming", evalCur=TRUE)
 names(WYstrat1)
 
-WYdatstrat <- WYstrat1$pltstrat
-head(WYpltstrat)
+WYpltassgn <- WYstrat1$pltassgn
+head(WYpltassgn)
 WYstrat1$unitarea
 WYstrat1$unitvar
 WYstrat1$areavar
@@ -604,36 +517,33 @@ WYstrat1$strwtvar
 WYstrat1$evalid
 
 
-## From ORACLE database ##
 # Get strata information for a specific evaluation for Wyoming
 WYstrat2 <- DBgetStrata(evalid=561200, savedata=TRUE, outfolder=outfolder)
 names(WYstrat2)
-WYpltstrat2 <- WYstrat2$pltstrat
-head(WYpltstrat2)
+WYpltassgn2 <- WYstrat2$pltassgn
+head(WYpltassgn2)
 WYstrat2$unitarea
 WYstrat2$strlut
 WYstrat2$strwtvar
 WYstrat2$evalid
 
 
-## From CSV files ##
 # Get strata information for Wyoming, evaluation ending in 2014
-WYstrat3 <- DBgetStrata(states="Wyoming", evalEndyr=2014, datsource="CSV")
+WYstrat3 <- DBgetStrata(states="Wyoming", evalEndyr=2014)
 names(WYstrat3)
-WYpltstrat3 <- WYstrat3$pltstrat
-head(WYpltstrat3)
+WYpltassgn3 <- WYstrat3$pltassgn
+head(WYpltassgn3)
 WYstrat3$unitarea
 WYstrat3$strlut
 WYstrat3$strwtvar
 WYstrat3$evalid
 
 
-## From CSV files ##
 # Get strata information for a specific set of Wyoming plots
-WYstrat4 <- DBgetStrata(dat=WYplt, datsource="CSV")
+WYstrat4 <- DBgetStrata(dat=WYplt)
 names(WYstrat4)
-WYpltstrat4 <- WYstrat4$pltstrat
-head(WYpltstrat4)
+WYpltassgn4 <- WYstrat4$pltassgn
+head(WYpltassgn4)
 WYstrat4$unitarea
 WYstrat4$strlut
 WYstrat4$evalid
@@ -642,8 +552,8 @@ WYstrat4$evalid
 ## Get strata information for Wyoming plots, 1 inventory year
 WY2013strat <- DBgetStrata(dat=WYplt[WYplt$INVYR == 2013, ])
 names(WY2013strat)
-WY2013pltstrat <- WY2013strat$pltstrat
-head(WY2013pltstrat)
+WY2013pltassgn <- WY2013strat$pltassgn
+head(WY2013pltassgn)
 WY2013strat$unitarea
 WY2013strat$strlut
 WY2013strat$strwtvar
@@ -653,8 +563,8 @@ WY2013strat$evalid
 ## Get strata information for Utah and Wyoming, most current evaluations
 UTWYstrat <- DBgetStrata(states=c("Utah", "Wyoming"), evalCur=TRUE)
 names(UTWYstrat)
-UTWYpltstrat <- UTWYstrat$pltstrat
-table(UTWYpltstrat$STATECD)
+UTWYpltassgn <- UTWYstrat$pltassgn
+table(UTWYpltassgn$STATECD)
 UTWYstrat$unitarea
 UTWYstrat$strlut
 UTWYstrat$evalid
@@ -663,8 +573,8 @@ UTWYstrat$evalid
 ## Get strata information for Utah, evalid 491500 and Wyoming, evalid 561500
 UTWYstrat2 <- DBgetStrata(evalid = list(Utah=491500, Wyoming=561500))
 names(UTWYstrat2)
-UTWYpltstrat2 <- UTWYstrat2$pltstrat
-table(UTWYpltstrat2$STATECD)
+UTWYpltassgn2 <- UTWYstrat2$pltassgn
+table(UTWYpltassgn2$STATECD)
 UTWYstrat2$unitarea
 UTWYstrat2$strlut
 UTWYstrat2$strwtvar
@@ -675,16 +585,16 @@ UTWYstrat2$evalid
 ## Note: For plots locations that have been visited more than once: all 
 #   plots are assigned an estimation unit and strata value, but area and 
 #   strata proportions are from the most current evaluation.
-UTdat.all <- DBgetPlots(states="Utah", allyrs=TRUE, datsource="CSV")
+UTdat.all <- DBgetPlots(states="Utah", allyrs=TRUE)
 names(UTdat.all)
 UTplt.all <- UTdat.all$plt
 table(UTplt.all$INVYR)
 
-UTstrat.all <- DBgetStrata(dat=UTplt.all, evalType="ALL", datsource="CSV")
+UTstrat.all <- DBgetStrata(dat=UTplt.all, evalType="ALL")
 names(UTstrat.all)
 dim(UTplt.all)
-pltstrat <- UTstrat.all$pltstrat
-dim(pltstrat)
+pltassgn <- UTstrat.all$pltassgn
+dim(pltassgn)
 
 UTstrat.all$unitarea
 UTstrat.all$strlut

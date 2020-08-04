@@ -1,16 +1,14 @@
-SAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid, pltmodelx, puniqueid,
-	dunitlut=NULL, esttype="ACRES", bytdom=FALSE, 
-	SApackage="JoSAE", SAmethod="unit", 
+SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL, 
+	dunitvar="DOMAIN", esttype="ACRES", SAmethod="unit", SApackage="JoSAE", 
 	prednames=NULL, fmla, yd=NULL, ratiotype="PERACRE") {
 
   ########################################################################################
-  ## DESCRIPTION: Gets estimates from mase::horvitzThompson
+  ## DESCRIPTION: Gets estimates from JoSAE
   ## PARAMETERS:
   ## yn 		- response (numerator)
-  ## dat 		- domain-level data set
-  ## yd		- response (denominator)
-  ## N		- Number of pixels in estimation unit
-  ## n		- Number of total plots in estimation unit
+  ## plt.dom 	- plt/domain-level data set
+  ## dunitlut	- predictor summaries
+  ## prednames	- predictor variable names to use in model
   ## 
   ## VALUES:
   ## nhat		- estimate proportion of land covered by condition, for numerator
@@ -19,26 +17,29 @@ SAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid, pltmodelx, puniqueid,
   ## dhat.var	- variance of estimated proportion, for denominator
   ## covar		- covariance of numerator and denominator
   ########################################################################################
-  dunitvar <- "DOMAIN"
-
-  ## Sum response to domain and merge to pltmodelx
-  dat.dom <- dat[, sum(get(yn)), by=cuniqueid]
-  setnames(dat.dom, "V1", yn)
-  dat.dom <- merge(pltmodelx[, c(puniqueid, dunitvar, prednames), with=FALSE], 
-				dat.dom, by.x=puniqueid, by.y=cuniqueid, all.x=TRUE)
-  dat.dom <- DT_NAto0(dat.dom, yn, 0)
+  #dunitvar <- "DOMAIN"
 
   ## get mean response by domain and append to dunitlut
-  yn.dunit <- dat.dom[, lapply(.SD, mean), by=dunitvar, .SDcols=yn]
-  setkey(yn.dunit, "DOMAIN")
+  yn.dunit <- plt.dom[, lapply(.SD, mean), by=dunitvar, .SDcols=yn]
+  setkeyv(yn.dunit, dunitvar)
   dunitlut.dom <- merge(dunitlut, yn.dunit, all.x=TRUE)
-  DT_NAto0(dunitlut.dom, yn, 0)
+  #DT_NAto0(dunitlut.dom, yn, 0)
 
-  NBRPLT.gt0 <- dat.dom[, sum(get(yn) > 0), by=dunitvar]
+  ## Kick out domains (in dunitlut and plt.dom) that have less than 2 plots
+  if (any(dunitlut.dom$n.total < 2)) {
+    lt2 <- dunitlut.dom$DOMAIN[dunitlut.dom$n.total < 2]
+    dunitlut.dom <- dunitlut.dom[dunitlut.dom$n.total >= 2,]
+    message("removing domain(s) with less than 2 plots: ", toString(lt2))
+
+    plt.dom <- plt.dom[!plt.dom[[dunitvar]] %in% lt2,]
+  }
+
+  ## Calculate number of non-zero plots
+  NBRPLT.gt0 <- plt.dom[, sum(get(yn) > 0), by=dunitvar]
   setnames(NBRPLT.gt0, "V1", "NBRPLT.gt0")
-
+ 
   # variable selection for unit-level model for largebnd value
-  mod.dom <- stats::lm(fmla, data=dat.dom)
+  mod.dom <- stats::lm(fmla, data=plt.dom)
   mod.dom.step <- stats::step(mod.dom)
   mod.summary <- summary(mod.dom.step)
   preds.dom <- names(mod.dom.step$model[-1])
@@ -46,13 +47,12 @@ SAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid, pltmodelx, puniqueid,
   ## create new model formula with variables selected from step procedure
   ## note: the variables selected can change depending on the order in original formula (fmla)
   fmla.dom <- stats::as.formula(paste(yn, paste(preds.dom, collapse= "+"), sep="~"))
-
+ 
   if (SAmethod == "unit") {
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
-    dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=dat.dom, random=~1|DOMAIN)))
+    dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=plt.dom, random=~1|DOMAIN)))
     
-
     ## calculate the variance of the EBLUP estimate
     est.unit <- JoSAE::eblup.mse.f.wrap(domain.data = dunitlut.dom, lme.obj = dom.lme, debug=FALSE)
 
@@ -63,20 +63,25 @@ SAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid, pltmodelx, puniqueid,
 					"EBLUP","EBLUP.se.1", "n.i.sample"), with=FALSE]
     names(est) <- c("DOMAIN", "DIR", "DIR.se", "JU.Synth", "JU.GREG",
 			       "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", "NBRPLT")
+
+    ## Merge AOI and number of plots greater than 0
+    est <- merge(est, NBRPLT.gt0, by="DOMAIN")
   }
 
   if (SAmethod == "area") {
     xpop.dom <- paste0(preds.dom, ".X.pop")
     fmla.dom2 <- as.formula(paste(paste0(yn, ".ybar.i"), 
 				paste(xpop.dom, collapse= "+"), sep="~"))
+#save(plt.dom, file=paste0("outfolder/RAVGyr2018/341/plt.dom_", yn, ".rda"))
+#save(dunitlut.dom, file=paste0("outfolder/RAVGyr2018/341/dunitlut.dom_", yn, ".rda"))
 
     res <-
-    JoSAE::sae.ul.f(samp.data = dat.dom,
+    JoSAE::sae.ul.f(samp.data = plt.dom,
              population.data = dunitlut.dom,
-             k.ij = rep(1,nrow(dat.dom)),
+             k.ij = rep(1,nrow(plt.dom)),
              formula = fmla.dom,
              domain.col = "DOMAIN",
-             sample.id.col = puniqueid,
+             sample.id.col = cuniqueid,
              neg.sfrac = TRUE)
 
     #building pieces		
@@ -86,9 +91,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid, pltmodelx, puniqueid,
     partB <- res$est$se[,c("domain.id","se.srs")]
     dat.al <- merge(partA, partB)
 
-    ## eliminating where plot size < 2
-    tmp <- dat.al$n.i
-    dat.al <- dat.al[tmp > 1,]
+    ## eliminating where non-zero plot size < 2
+    dat.al <- merge(dat.al, NBRPLT.gt0, by.x="domain.id", by.y="DOMAIN")
+    dat.al <- dat.al[dat.al$NBRPLT.gt0 > 1,]
 
     est.area <- JoSAE::sae.al.f(
     		domain.id=dat.al$domain.id , n.i=dat.al$n.i , psi.i=dat.al$se.srs^2,
@@ -96,88 +101,74 @@ SAest <- function(yn="CONDPROP_ADJ", dat, cuniqueid, pltmodelx, puniqueid,
     		b.i=rep(1, nrow(dat.al)),
     		type="RE")
     est <- est.area$results[,1:7]
-    names(est) <- c("DOMAIN","y.sam", "direct.se", "JFH", "JFH.se", 
-				"JA.synth",  "JA.synth.se")  
+    names(est) <- c("DOMAIN","DIR", "DIR.se", "JFH", "JFH.se", 
+				"JA.synth",  "JA.synth.se") 
 
-    ## Get number of plots by domain
-    NBRPLT <- dat.dom[, length(get(yn)), by=dunitvar]
-    setnames(NBRPLT, "V1", "NBRPLT")
-
-    est <- merge(est, NBRPLT, by="DOMAIN")
+    est <- merge(est, dat.al[, c("domain.id", "n.i", "NBRPLT.gt0")], 
+		by.x="DOMAIN", by.y="domain.id") 
+    names(est)[names(est) == "n.i"] <- "NBRPLT"
   }
 
-  ## Merge AOI and number of plots greater than 0
-  if ("AOI" %in% names(est)) 
-    est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")])
-  est <- merge(est, NBRPLT.gt0, by="DOMAIN")
+  ## Merge AOI
+  if (!"AOI" %in% names(est))
+    est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
+ 
 }
 
 
-## Define functions
-SAest.dom <- function(dom, dat, cuniqueid, pltmodelx, puniqueid, 
-		dunitlut, esttype, bytdom=FALSE, SApackage, SAmethod, 
-		prednames=NULL, fmla, domain, response=NULL, tdomvarlst=NULL) {
+########################################################################
+## By domain
+########################################################################
+SAest.dom <- function(dom, plt.dom, cuniqueid, dunitlut, dunitvar="DOMAIN", 
+		esttype, SApackage, SAmethod, prednames=NULL, fmla, 
+		domain, response=NULL) {
 
   ## Subset tomdat to domain=dom
-  dat.dom <- dat[dat[[domain]] == dom,] 
+  plt.dom <- plt.dom[plt.dom[[domain]] == dom,] 
 
 #yn=response
-#dat <- dat.dom
 
-  ## If tdom (e.g., SPCD), apply function to each tdom in tdomvarlst
-  if (bytdom) {
-    domest <- data.table(dom, 
-		do.call(rbind, lapply(tdomvarlst, SAest, 	
-			dat=dat.dom, cuniqueid=cuniqueid, 
-			pltmodelx=pltmodelx, puniqueid=puniqueid, 
-			esttype=esttype, bytdom=bytdom, 
-			dunitlut=dunitlut, prednames=prednames, fmla=fmla,
- 			SApackage=SApackage, SAmethod=SAmethod)))
-  } else {
-    domest <- data.table(dom, SAest(yn=response, 
-			dat=dat.dom, cuniqueid=cuniqueid, 
- 			pltmodelx=pltmodelx, puniqueid=puniqueid, 
-			esttype=esttype, bytdom=bytdom, 
-			dunitlut=dunitlut, prednames=prednames, fmla=fmla,
+  ## Apply function to each dom
+  domest <- data.table(dom, SAest(yn=response, plt.dom=plt.dom, 
+			cuniqueid=cuniqueid, esttype=esttype, dunitlut=dunitlut, 
+			dunitvar=dunitvar, prednames=prednames, fmla=fmla, 
 			SApackage=SApackage, SAmethod=SAmethod))
-  }
   setnames(domest, "dom", domain)
   return(domest)
 }
 
-SAest.large <- function(largebnd.val, dat, cuniqueid, pltmodelx, puniqueid, 
-		largebnd.att, dunitlut, esttype, bytdom=FALSE,
- 		SApackage="JoSAE", SAmethod="unit", prednames=NULL, 
-		fmla, domain, response, tdomvarlst=NULL) {
 
+########################################################################
+## By largebnd
+########################################################################
+SAest.large <- function(largebnd.val, plt.dom, cuniqueid, largebnd.att, 
+		dunitlut, dunitvar="DOMAIN", esttype, SApackage="JoSAE", 
+		SAmethod="unit", fmla, domain, response, prednames=NULL) {
   message("generating estimate for: ", largebnd.val)
 
+
   ## subset datasets by largebnd value (e.g., ecosection)
-  pltmodelx.large <- pltmodelx[pltmodelx[[largebnd.att]] == largebnd.val]
-  if (nrow(pltmodelx.large) == 0) stop("invalid largebnd.val")
-  dat.large <- dat[dat[[cuniqueid]] %in% pltmodelx.large[[puniqueid]], ]
+  plt.dom.large <- plt.dom[plt.dom[[largebnd.att]] == largebnd.val, ]
+  if (nrow(plt.dom.large) == 0) stop("invalid largebnd.val")
+  setkeyv(plt.dom.large, cuniqueid)
 
   ## get unique domain units and subset domain lut for largebnd value
-  dunits <- sort(unique(pltmodelx.large[["DOMAIN"]]))
-  dunitlut.large <- dunitlut[dunitlut[["DOMAIN"]] %in% dunits,]
+  dunits <- sort(unique(plt.dom.large[[dunitvar]]))
+  dunitlut.large <- dunitlut[dunitlut[[dunitvar]] %in% dunits,]
      
   ## get unique domains
-  doms <- as.character(unique(dat.large[[domain]]))
+  doms <- as.character(unique(plt.dom.large[[domain]]))
 
-#dat=dat.large
-#pltmodelx=pltmodelx.large
+#plt.dom=plt.dom.large
 #dunitlut=dunitlut.large
 #dom=doms
 
   domest <- do.call(rbind, lapply(doms, SAest.dom, 
-			dat=dat.large, cuniqueid=cuniqueid, 
-			pltmodelx=pltmodelx.large, puniqueid=puniqueid,
-     			dunitlut=dunitlut.large,
-			esttype=esttype, bytdom=bytdom,
+			plt.dom=plt.dom.large, cuniqueid=cuniqueid, 
+     			dunitlut=dunitlut.large, dunitvar=dunitvar,
 			SApackage=SApackage, SAmethod=SAmethod, 
-			prednames=prednames, fmla=fmla,
-			domain=domain, 
-			response=response, tdomvarlst=tdomvarlst)) 
-  setkey(domest, "DOMAIN")
+			esttype=esttype, prednames=prednames, fmla=fmla,
+			domain=domain, response=response)) 
+  setkeyv(domest, dunitvar)
 }       
 

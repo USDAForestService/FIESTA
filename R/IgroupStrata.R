@@ -1,5 +1,5 @@
 groupEstunit <- function(x, unitvar, unitvarnew, minplotnum, unitgrpnm=TRUE,
-	n="n.strata") {
+	n="n.total") {
   ## DESCRIPTION: Groups estimation units with total plots <= minplotnum.
   ## Estimation units that have total plots <= minplotnum are combined with the 
   ## estimation unit next in order (numeric or alphabetical). If there are no

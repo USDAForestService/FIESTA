@@ -49,14 +49,10 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
     colnames(tab2) <- c(rep(" ", rnbr), coltitle, rep(" ", ncol(tab2)- (rnbr+1)))
   }
 
-  ext <- "csv"
-  if (outfn.date) 
-    outfn.estpse <- paste0(outfn.estpse, "_", format(Sys.time(), "%Y%m%d"))
+  ## Get outfile name
+  outfilenm <- getoutfn(outfn=outfn.estpse, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, ext="csv") 
 
-  if (!overwrite)
-    outfn.estpse <- fileexistsnm(outfolder, outfn.estpse, ext)
-
-  outfilenm <- paste0(outfolder, "/", outfn.estpse, ".", ext)
 
   ## WRITE BOTH TABLES TO ONE FILE, SKIPPING 1 space.
   outfile <- file(outfilenm, "w")
@@ -79,10 +75,8 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
   outfile <- write2csv(tab=tab2, outfile=outfile, appendfile=TRUE, closefn=FALSE)
   close(outfile)
   
-  cat(
-  " ###########################################################################################", 
-  "\n", paste("Table written to: "), "\n", paste(" ", outfilenm), "\n", 
-  "###########################################################################################",
-  "\n" )
+    message("###################################\n", 
+			"Table written to: ", outfilenm, 
+		"\n###################################")
 }
 

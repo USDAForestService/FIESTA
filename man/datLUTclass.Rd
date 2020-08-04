@@ -1,25 +1,42 @@
 \name{datLUTclass}
 \alias{datLUTclass}
 \title{
-	Data - Append variable description or class.
+	Data - Create a variable with classified values.
 }
 \description{
-	Merge a look-up table to define categories of continuous data in x (e.g., DIACL).
-	Adds a variable to x, setting the variable to VARCLNM where: xvar >= MIN and xvar < MAX.
+	Merge a look-up table to define categories of continuous data in x (e.g., DIA).
+	Adds a variable (LUTclassnm) to x, defining as: xvar >= MIN (and xvar <= MAX).
 }
 \usage{
 datLUTclass(x, xvar = NULL, LUT = NULL, minvar = "MIN", maxvar = "MAX", 
-	LUTclassnm = NULL, savedata = FALSE, outfolder = NULL, outfn = NULL)
+	cutbreaks = NULL, cutlabels = NULL, LUTclassnm = NULL, label.dec = 1, 
+	NAto0 = FALSE, vars2keep = NULL, keepcutbreaks = FALSE, savedata = FALSE, 
+	outfolder = NULL, outfn = "datlut")
 }
 \arguments{
-  \item{x}{ Data frame or comma-delimited file (*.csv). The data table with variable to classify. }
+  \item{x}{ Data frame or comma-delimited file (*.csv). The data table with variable 
+	to classify. }
   \item{xvar}{ String. Name of variable in the data table to join to. }
-  \item{LUT}{ Data frame or comma-delimited file (*.csv). Name of the look-up table with collapsed 
-	classes. }
-  \item{minvar}{ String. Name of variable with minimimum class value (>= minvar). }
-  \item{maxvar}{ String. Name of variable with maximun class value (<= maxvar). }  
-  \item{LUTclassnm}{ String. Name of variable in LUT with class names. If NULL, a class 
-	name is generated from minvar and maxvar with default name equal to 'xvar'CL. }
+  \item{LUT}{ Data frame or comma-delimited file (*.csv). Name of the look-up table 
+	with collapsed classes. Lookup table should include minimum values for classes, 
+	maximum values for classes, and a name of class (i.e., LUTclassnm). Maximum 
+	values and names are optional. }
+  \item{minvar}{ String. If LUT is not null, name of variable with minimimum class 
+	value (>= minvar). }
+  \item{maxvar}{ String. Optional. If LUT is not null, name of variable with maximun 
+	class value (<= maxvar). }  
+  \item{cutbreaks}{ Numeric vector. Vector of numbers for minimum class values. }  
+  \item{cutlabels}{ String vector. Optional. Vector of names for classes. If NULL,
+	class names are generated from cutbreaks. }  
+  \item{LUTclassnm}{ String. Optional. Name of classified variable in x. If LUT is 
+	not null and class names are included, this is the name of variable with 
+	class names. If NULL, a class names are generated from minvar or minvar and 
+	maxvar with default name equal to 'xvar'CL. }
+  \item{label.dec}{ Integer. Number of decimals to include in label. }
+  \item{NAto0}{ Logical. If TRUE, converts NA values to 0 before classification. }
+  \item{vars2keep}{ String vector. Variable names from LUT to keep (append) to x. }
+  \item{keepcutbreaks}{ Logical. If TRUE, the cutbreaks used for creating classes 
+	are appended to dataset. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder as comma-delimited file (*.csv). }
   \item{outfolder}{ String.* The output folder path. If NULL and savedata=TRUE, the 
 	outfolder is the working directory. }
@@ -43,16 +60,16 @@ datLUTclass(x, xvar = NULL, LUT = NULL, minvar = "MIN", maxvar = "MAX",
 }
 \note{ 
 	The look-up table format must be similar to the following table 
-	Set LUTclassnm = VARCLNM.
+	Set LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.
 
 	\tabular{llll}{
 	 	\tab \bold{MIN}	\tab	\bold{MAX} \tab \bold{VARCLNM}  \cr
-	 	\tab 1.1	\tab	5.0			\tab 1   	\cr	
-	 	\tab 5.1	\tab	10.0			\tab 2 	\cr
-	 	\tab 10.1	\tab	15.0			\tab 3 	\cr
-	 	\tab 15.1	\tab	20.0 			\tab 4 	\cr
-	 	\tab 20.1	\tab	25.0 			\tab 5 	\cr
-	 	\tab 25.1	\tab	50.0 			\tab 6 	\cr
+	 	\tab 1.0	\tab	4.9			\tab 1   	\cr	
+	 	\tab 5.0	\tab	9.9			\tab 2 	\cr
+	 	\tab 10.0	\tab	15.0			\tab 3 	\cr
+	 	\tab 15.0	\tab	19.9 			\tab 4 	\cr
+	 	\tab 20.0	\tab	24.9 			\tab 5 	\cr
+	 	\tab 25.0	\tab	49.9 			\tab 6 	\cr
 	}
 	
 }
@@ -62,4 +79,10 @@ datLUTclass(x, xvar = NULL, LUT = NULL, minvar = "MIN", maxvar = "MAX",
 	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=ref_diacl2in, LUTclassnm="DIACL2IN")
 	names(WYtreelut)
 	head(WYtreelut$xLUT)
+	table(WYtreelut$xLUT$DIACL2IN)
+
+	WYtreelut2 <- datLUTclass(WYtree, xvar="DIA", cutbreaks=c(1,5,25,50,100), LUTclassnm="DIACL2IN")
+	names(WYtreelut2)
+	head(WYtreelut2$xLUT)
+	table(WYtreelut2$xLUT$DIACL2IN)
 }

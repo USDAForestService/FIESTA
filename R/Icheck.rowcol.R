@@ -32,7 +32,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   ####################################################################################
 
   ## Set global variables
-  SITECLCD=GSSTKCD=domainlst <- NULL
+  SITECLCD=GSSTKCD=domainlst=tdomvar=grpvar <- NULL
 
   ## Check for condid
   if (!is.null(condid) && !condid %in% c(names(treef), names(condf))) condid <- NULL
@@ -40,7 +40,9 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   if (!is.null(treef) && !is.null(tuniqueid) && !tuniqueid %in% names(treef)) 
     stop("invalid tuniqueid")
   ref_titles <- FIESTA::ref_titles
-
+  concat <- FALSE
+  bytdom <- FALSE
+ 
   ##################################################################
   ## SET UP VARIABLE LISTS
   ##################################################################
@@ -68,7 +70,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 
   ## DEFINE other variables
   varlst <- sort(domvarlst)
-  grpvar <- NULL
 
 
   if(esttype %in% c("TREE", "RATIO")){
@@ -113,14 +114,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   if (rowgrp && is.null(rowgrpnm) && !row.FIAname) 
      stop("either row.FIAname must be TRUE or rowgrpnm != NULL to add row groups")
 
-  if (row.FIAname) {
-    ## Get FIA reference table for xvar
-    xvar.ref <- FIESTA::getRefobject(toupper(rowvar))
-    if (is.null(xvar.ref)) {
-      message(paste("no reference name for", rowvar))
-      row.FIAname <- FALSE
-    }
-  }
 
   ##############################################################
   ### ROW VARIABLE
@@ -129,8 +122,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   rowvar <- FIESTA::pcheck.varchar(var2check=rowvar, varnm="rowvar", gui=gui, 
 		checklst=c("NONE", varlst), caption="Row variable", 
 		warn=paste(rowvar, "not found"))
-  if (is.null(rowvar)) rowvar <- "TOTAL"
-  
+  if (is.null(rowvar)) rowvar <- "NONE"
 
   ## If rowvar == "NONE", set rowvar = "TOTAL" and exit, returning short list
   if (rowvar == "NONE") {
@@ -141,13 +133,24 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
     domainlst <- rowvar
     row.add0 <- FALSE
     col.add0 <- FALSE
+    row.FIAname <- FALSE
 
-    returnlst <- list(treef=treef, condf=condf[,c(cuniqueid, condid, domainlst), with=FALSE], 
-		uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, rowvar=rowvar, colvar=colvar,
-		row.orderby=row.orderby, col.orderby=col.orderby, row.add0=row.add0, 
-		col.add0=col.add0,title.rowvar=title.rowvar, title.colvar=title.colvar, 
-		bytdom=FALSE, domain=rowvar, dom.orderby=NULL, tdomvar=NULL)
+    returnlst <- list(treef=treef, condf=condf[,c(cuniqueid, condid), with=FALSE], 
+		uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
+		rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, 
+		col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0,
+ 		title.rowvar=title.rowvar, title.colvar=title.colvar, tdomvar=tdomvar, 
+		concat=concat)
     return(returnlst)
+  }
+
+  if (row.FIAname) {
+    ## Get FIA reference table for xvar
+    xvar.ref <- FIESTA::getRefobject(toupper(rowvar))
+    if (is.null(xvar.ref)) {
+      message(paste("no reference name for", rowvar))
+      row.FIAname <- FALSE
+    }
   }
 
   if (rowvar != "NONE") {
@@ -302,9 +305,12 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
         rowvar.na.filter <- paste0("!is.na(", rowvar, ")")
         condf <- subset(condf, eval(parse(text = rowvar.na.filter)))
       }
+      
+      ## add rowvar to cvars2keep
+      cvars2keep <- c(cvars2keep, rowvar, row.orderby)
 
     } else if (rowvar %in% names(treef)) {
-
+      bytdom <- TRUE
       if (row.FIAname || !is.null(rowlut)) {
         if (!is.null(rowlut) && ncol(rowlut) > 1 && all(names(rowlut) %in% names(treef))) {
           if (is.null(row.orderby) || row.orderby == "NONE") {
@@ -543,8 +549,11 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 #        condf <- subset(condf, eval(parse(text = colvar.na.filter)))
 #      }
        
-    } else if (colvar %in% names(treef)) {
+      ## add colvar to cvars2keep
+      cvars2keep <- c(cvars2keep, colvar, col.orderby)
 
+    } else if (colvar %in% names(treef)) {
+      bytdom <- TRUE
       if (col.FIAname || !is.null(collut)) {
         if (!is.null(collut) && ncol(collut) > 1) {
           if (is.null(col.orderby) || col.orderby == "NONE") {
@@ -626,84 +635,45 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   ###################################################################################
   ## GET DOMAIN. CONCATENATE ROWVAR & COLVAR VARIABLES IF THEY ARE IN THE SAME TABLE.
   ###################################################################################
-  ## If rowvar and colvar both in cond table, concatenate columns for calculation.
-  if (all(c(rowvar, colvar) %in% names(condf))) {
-    setkeyv(condf, c(rowvar, colvar))   
+  if (colvar == "NONE") {
+    if (rowvar %in% names(treef))
+      tdomvar <- rowvar
+  } else {
+    concat <- TRUE
+
+    ## If rowvar and colvar both in cond table, concatenate columns for calculation.
+    if (all(c(rowvar, colvar) %in% names(condf))) {
+      grpvar <- paste(rowvar, colvar, sep="#")
+      condf[, (grpvar) := paste(condf[[rowvar]], condf[[colvar]], sep="#")]
+      cvars2keep <- c(cvars2keep, grpvar)
+    }
+
+    if (esttype %in% c("TREE", "RATIO")) {
+      ## If rowvar and colvar both in tree table, concatenate columns for calculation.
+      if (all(c(rowvar, colvar) %in% names(treef))) {
+        concat <- TRUE
+        setkeyv(treef, c(rowvar, colvar))   
  
-    ## CONCATENATE THE 2 INPUT COLUMNS (tcol, trow)
-    grpvar <- paste(rowvar, colvar, sep="#")
-    condf[, (grpvar) := paste(condf[[rowvar]], condf[[colvar]], sep="#")]
-  }
-
-  domainlst <- "TOTAL"
-  if (esttype %in% c("TREE", "RATIO")) {
-    bytdom <- FALSE
-    tnames <- names(treef)
-
-    if (colvar != "NONE") {
-      if (rowvar %in% tnames) {
-        bytdom <- TRUE
-        if (colvar %in% tnames) {
-          ## CONCATENATE THE 2 INPUT COLUMNS (rowvar, colvar)
-          grpvar <- paste(rowvar, colvar, sep="#")
-          treef[, (grpvar) := paste(treef[[rowvar]], treef[[colvar]], sep="#")]
-          tdomvar <- grpvar
-          domain <- NULL
-          dom.orderby <- NULL
-        } else {
-          domain <- colvar
-          dom.orderby <- col.orderby
+        ## CONCATENATE THE 2 INPUT COLUMNS (tcol, trow)
+        grpvar <- paste(rowvar, colvar, sep="#")
+        treef[, (grpvar) := paste(treef[[rowvar]], treef[[colvar]], sep="#")]
+        tdomvar <- grpvar
+      } else if (any(c(rowvar, colvar) %in% names(treef))) {
+        if (rowvar %in% names(treef)) {
           tdomvar <- rowvar
-          domainlst <- c(domainlst, colvar)
-        }
-      } else if (colvar %in% tnames) {
-        if (length(unique(treef[[colvar]])) > 1) {
-          bytdom <- TRUE
-          domain <- rowvar
-          dom.orderby <- row.orderby
-          tdomvar <- colvar
         } else {
-          colvar <- "NONE"
-          domain <- rowvar
-          dom.orderby <- row.orderby
           tdomvar <- colvar
         }
-        domainlst <- c(domainlst, rowvar)
-      } else {
-        ## Domain is concatenated variable (grpvar)
-        domain <- grpvar
-        dom.orderby <- NULL
-        tdomvar <- NULL
-        domainlst <- c(domainlst, rowvar, colvar, grpvar)
-      }
-    } else {  ## colvar == "NONE"
-      if (rowvar == "TOTAL") {
-        domain <- NULL
-        condf$DOMAIN <- 1
-        dom.orderby <- row.orderby
-        tdomvar <- colvar
-      } else if (rowvar %in% tnames) {
-        bytdom <- TRUE
-        domain <- NULL
-        dom.orderby <- NULL
-        tdomvar <- rowvar
-      } else {
-        domain <- rowvar
-        dom.orderby <- row.orderby
-        tdomvar <- colvar
-        domainlst <- c(domainlst, rowvar)
       }
     }
-  } else {
-    domainlst <- unique(c(domainlst, rowvar, colvar, grpvar))
   }
+  domainlst <- unique(c(domainlst, rowvar, colvar, grpvar))
   domainlst <- domainlst[domainlst != "NONE"]
 
 
   ############################################################################
   ## Get uniquerow and uniquecol
   ############################################################################
-
        
   ## uniquerow
   #########################################################
@@ -783,8 +753,9 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   } 
  
   ## Define cvars2keep
-  cvars2keep <- unique(c(cuniqueid, condid, domainlst, cvars2keep))
-  condf <- condf[,cvars2keep, with=FALSE]
+  cvars2keep <- unique(c(cuniqueid, condid, cvars2keep))
+  cvars2keep <- cvars2keep[cvars2keep %in% names(condf)]
+  condf <- condf[, cvars2keep, with=FALSE]
   setkeyv(condf, c(cuniqueid, condid))
 
   ## Create factors for ordering tables
@@ -796,8 +767,10 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
     if (row.FIAname && "GSSTKCD" %in% names(uniquerow)) 
       uniquerow <- setorder(uniquerow, -GSSTKCD)
     if (!is.null(rowgrpnm))
-      uniquerow[[rowgrpnm]] <- factor(uniquerow[[rowgrpnm]], levels=unique(uniquerow[[rowgrpnm]]))
-    uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=unique(uniquerow[[rowvar]]))
+      uniquerow[[rowgrpnm]] <- factor(uniquerow[[rowgrpnm]], 
+			levels=unique(uniquerow[[rowgrpnm]]))
+    uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], 
+			levels=unique(uniquerow[[rowvar]]))
   }
 
   if (!is.null(uniquecol)) {
@@ -806,14 +779,16 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       uniquecol <- setorder(uniquecol, -SITECLCD)
     if (col.FIAname && "GSSTKCD" %in% names(uniquecol)) 
       uniquecol <- setorder(uniquecol, -GSSTKCD)
-    uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=unique(uniquecol[[colvar]]))
+    uniquecol[[colvar]] <- factor(uniquecol[[colvar]], 
+			levels=unique(uniquecol[[colvar]]))
   }  
  
   returnlst <- list(condf=condf, uniquerow=uniquerow, uniquecol=uniquecol, 
-	domainlst=domainlst, rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, 
-	col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0, 
-	title.rowvar=title.rowvar, title.colvar=title.colvar, rowgrpnm=rowgrpnm,
-	title.rowgrp=title.rowgrp)
+	domainlst=domainlst, bytdom=bytdom, rowvar=rowvar, colvar=colvar, 
+	row.orderby=row.orderby, col.orderby=col.orderby, row.add0=row.add0, 
+	col.add0=col.add0, title.rowvar=title.rowvar, title.colvar=title.colvar, 
+	rowgrpnm=rowgrpnm, title.rowgrp=title.rowgrp, tdomvar=tdomvar, 
+	concat=concat, grpvar=grpvar)
 
   if (esttype %in% c("TREE", "RATIO")) {
     ## Filter tree data for any cond filters
@@ -821,11 +796,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 		condf[,paste(get(cuniqueid), get(condid), sep="_")]]
  
     returnlst <- append(list(treef=treef), returnlst)
-    returnlst <- append(returnlst, list(bytdom=bytdom, domain=domain, 
-		dom.orderby=dom.orderby, tdomvar=tdomvar))
-  } else {
-    returnlst <- append(returnlst, list(grpvar=grpvar))
-  }
+  } 
 
   return(returnlst)
 }

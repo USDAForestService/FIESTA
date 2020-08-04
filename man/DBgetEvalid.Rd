@@ -9,27 +9,14 @@
 	evalEndyr. Otherwise checks an evalid and returns states and inventory years. 
 }
 \usage{
-DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = TRUE, 
-	invyrtab = NULL, invtype = "ANNUAL", evalCur = TRUE, evalEndyr = NULL, 
-	evalid = NULL, evalType = "AREAVOL", dbconn = NULL, dbconnopen = FALSE, 
-	isdwm = FALSE, gui = FALSE)
+DBgetEvalid(states = NULL, RS = NULL, invyrtab = NULL, invtype = "ANNUAL", 
+	evalCur = TRUE, evalEndyr = NULL, evalid = NULL, evalAll = FALSE, 
+	evalType = "AREAVOL", isdwm = FALSE, gui = FALSE, returnPOP = TRUE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
 	code(s) (e.g., 4, 35) of states for evalid. }
-  \item{rs}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS'). }
-  \item{datsource}{ String. Source of FIA data ('ORACLE', 'CSV'). 
-	If datsource="ORACLE", select permission of FIA Oracle tables must be granted to 
-	user and an ODBC connection set up on computer. Use DBtestORACLE function to 
-	test connection to ORACLE. If datsource="CSV", *.csv or *.zip (if ZIP=TRUE) files 
-	are downloaded and extracted from FIA DataMart 
-	(http://apps.fs.usda.gov/fia/datamart/datamart.html). If datsource is equal to 
-	CSV, the actual coordinates are not available. }
-  \item{ZIP}{ Logical. If TRUE, Zip files (*.zip) are downloaded from FIA DataMart, 
-	saved to a temporary space, extracted, and deleted from temporary space. }
-  \item{FS_FIADB}{ Logical. If TRUE, data are extracted from FIA's national public 
-	database (Oracle - FS_FIADB schema). If FALSE, data are extracted from the regional 
-	FIADB (Oracle FS_NIMS_FIADB_'NIMS_UNIT' schema). }
+  \item{RS}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS'). }
   \item{invyrtab}{ Data frame. A data frame including inventory years by state. If NULL,
 	it is generated from SURVEY table from FIA database based on states and invtype. }
   \item{invtype}{ String. The type of FIA data to extract ('PERIODIC', 'ANNUAL').  
@@ -40,6 +27,7 @@ DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = 
 	year. If more than one state, create a named list object with evalEndyr
 	labeled for each state (ex. list(Utah=2014, Colorado=2013). }
   \item{evalid}{ Integer. To check an already existing evalid. }
+  \item{evalAll}{ Logical. If TRUE, gets all EVALIDs for invtype. }
   \item{evalType}{ String vector. The type(s) of evaluation of interest 
 	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
 	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
@@ -47,11 +35,10 @@ DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = 
 	includes plots used for growth, removals, mortality, and change estimates
 	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
 	See FIA database manual for regional availability and/or differences. }
-  \item{dbconn}{ Database connection. The connection information to the FIA Oracle database. }
-  \item{dbconnopen}{ Logical. If TRUE, the dbconn connection is not closed. }
   \item{isdwm}{ Logical. If TRUE, summarized down woody debris data are extracted from 
 	FIA database (COND_DWM_CALC). }
   \item{gui}{ Logical. If TRUE, gui windows pop up for parameter selection. }
+  \item{returnPOP}{ Logical. If TRUE, returns population table (SURVEY, POP_PLOT_STRATUM_ASSGN). }
 }
 
 \value{
@@ -63,8 +50,6 @@ DBgetEvalid(states = NULL, rs = NULL, datsource = "CSV", ZIP = TRUE, FS_FIADB = 
   \item{invyrtab}{ Data frame. Inventory years by state for evalidlist. }
   \item{evalTypelist}{ Named list. Evaluation type(s) by state. }
   \item{invyrs}{ Named list. Inventory years by state for evalidlist. }
-  \item{datsource}{ String. The datsource used for query (ORACLE or CSV). }
-  \item{FS_FIADB}{ Logical. TRUE, if datsource=ORACLE and FS_FIADB schema is used. }
 }
 
 \note{

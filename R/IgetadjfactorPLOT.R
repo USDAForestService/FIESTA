@@ -1,5 +1,5 @@
-getadjfactorPLOT <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN", 
-	cuniqueid="PLT_CN", checkNA=TRUE){
+getadjfactorPLOT <- function(condx=NULL, treex=NULL, cuniqueid="PLT_CN", 
+	tuniqueid="PLT_CN", checkNA=TRUE){
 
   ####################################################################################
   ## DESCRIPTION: 
@@ -23,33 +23,28 @@ getadjfactorPLOT <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN",
 	MACRPROP_ADJFAC_SUM=SUBPPROP_ADJFAC_SUM=CONDPROP_UNADJ_SUM=PROP_BASIS <- NULL    
   keycondx <- key(condx)
 
-  if ("COND_STATUS_CD" %in% names(condx)) {
-    if (any(condx$COND_STATUS_CD == 5)) {
-      message("removing nonsampled plots (COND_STATUS_CD == 5) from cond")
-      condx <- condx[condx$COND_STATUS_CD != 5, ]
-    } 
-  } else {
-    message("COND_STATUS_CD not in dataset... assuming all conditions are sampled")
-  }
-
+  ## Condition proportion variable
   varlst <- "CONDPROP_UNADJ"
-  varlstadj <- sapply(varlst, function(x) sub("UNADJ", "ADJFAC", x) )
 
   ## Get list of condition-level variables to calculate adjustments for
-  if (esttype %in% c("TREE", "RATIO")) {  
-    tvarlst <- check.PROP(treex, condx, checkNA=checkNA)
-    varlst <- c(varlst, tvarlst)
-
-    ## Names for new, condition-level adjusted variables (_UNADJ to _ADJ) 
-    tvarlstadj <- sapply(tvarlst, function(x){sub("UNADJ", "ADJFAC", x) })
-    varlstadj <- c(varlstadj, tvarlstadj)
+  if (!is.null(treex)) {  
+    tvarlst <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
+    tvarlst2 <- tvarlst[which(tvarlst%in% names(condx))]
+    if (length(tvarlst2) == 0) stop("must include *PROP_UNADJ variables in cond")
+    varlst <- c(varlst, tvarlst2)
   }
   varsumlst <- paste0(varlst, "_SUM")
+
+  ## Names for new, condition-level adjusted variables (_UNADJ to _ADJ) 
+  varlstadj <- sapply(varlst, function(x) sub("PROP_UNADJ", "", x) )
+  varlstadj <- paste0("ADJ_FACTOR_", varlstadj)
+
 
   ###############################################################################
   ## Calculate adjustment factors by plot
   ## Sum condition variable(s) in varlst by plot
   ###############################################################################
+  setkeyv(condx, cuniqueid)
 
   ## Sum condition variable(s) in varlst by plot and rename varlst to *_sum
   pltadj <- condx[, lapply(.SD, sum, na.rm=TRUE), by=cuniqueid, .SDcols=varlst]
@@ -62,8 +57,11 @@ getadjfactorPLOT <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN",
 #  setkeyv(pltx, cuniqueid)
 
 
-  ## Calculate adjusted condition proportions for different size plots for trees
-  if (esttype %in% c("TREE", "RATIO")) {
+  ## Calculate adjustment factor for conditions
+  condx[pltadj, cadjfac := 1/CONDPROP_UNADJ_SUM]
+
+  ## Calculate adjustment factors for different size plots for trees
+  if (!is.null(treex)) {
     ## Merge condition adjustment factors to tree table to get plot identifiers.
     ## Define a column in tree table, adjfact, to specify adjustment factor based on
     ##	the size of the plot it was measure on (identified by TPA_UNADJ)
@@ -79,16 +77,14 @@ getadjfactorPLOT <- function(esttype, treex, condx=NULL, tuniqueid="PLT_CN",
  		ifelse(TPA_UNADJ > 0 & TPA_UNADJ < 5, MACRPROP_UNADJ_SUM,
  		SUBPPROP_UNADJ_SUM))]
     }
-    treex[, tadjfac := 1 / tadjfac]
+    treex[, tadjfac := ifelse(tadjfac > 0, tadjfac, 1)]
   } 
 
   ## Calculate adjusted condition proportions 
-  condx[pltadj, cadjfac := 1/CONDPROP_UNADJ_SUM]
   condx[, CONDPROP_ADJ := CONDPROP_UNADJ * cadjfac]
 
-
-  adjfacdata <- list(condadj = condx[, c(cuniqueid, "CONDPROP_ADJ"), with=FALSE])
-  if (esttype %in% c("TREE", "RATIO")) adjfacdata$treeadj <- treex 
+  adjfacdata <- list(condadj = condx)
+  if (!is.null(treex)) adjfacdata$treeadj <- treex 
 
   return(adjfacdata)
 }

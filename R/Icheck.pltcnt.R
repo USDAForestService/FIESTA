@@ -1,6 +1,7 @@
 check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL, 
-	strvars=NULL, savedata=FALSE, outfolder=NULL, outfn=NULL, gui=FALSE,
-	stopiferror=FALSE, showwarnings=TRUE) {
+	strvars=NULL, savedata=FALSE, outfolder=NULL, outfn=NULL, overwrite=FALSE,
+	outfn.date=TRUE, outfn.pre=NULL, minplotnum.unit=10, minplotnum.strat=2, 
+	gui=FALSE, stopiferror=FALSE, showwarnings=TRUE) {
 
   ####################################################################################
   ## CHECKS NUMBER OF PLOTS BY ESTIMATION UNIT/STRATA 
@@ -19,10 +20,10 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   if (nargs() == 0) gui <- TRUE 
 
   ## If gui.. set variables to NULL
-  if (gui) getwt=savedata <- NULL
+  if (gui) getwt=savedata=nostrata <- NULL
 
   ## Set global variables
-  NBRPLOTS=NBRSTRATA=n.strata=n.total=TOTACRES=strwt <- NULL
+  NBRPLOTS=NBRSTRATA=n.strata=n.total=TOTACRES=strwt=errtab=joinvars <- NULL
 
   ###############################################################
   ## Parameter checks
@@ -59,7 +60,6 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   pltcnt <- pltx[, list(NBRPLOTS=.N), joinvars]
   setkeyv(pltcnt, strunitvars)
 
-
   ## Get number of potential combinations of strata from unitlut
   unitlutcnt <- unitlut[, list(NBRSTRATA=.N), strunitvars]
   setkeyv(unitlutcnt, strunitvars)
@@ -68,30 +68,19 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   pltcnt <- merge(pltcnt, unitlutcnt, all.x=TRUE, all.y=TRUE)
   pltcnt[is.na(pltcnt)] <- 0
 
+  ## Add number of plots by unit
+  pltcnt[, n.total := sum(NBRPLOTS, na.rm=TRUE), by=unitvars]
+
   nostrata <- subset(pltcnt, NBRPLOTS > 0 & NBRSTRATA == 0)
-  lt2plots <- subset(pltcnt, NBRPLOTS < 2 & NBRSTRATA > 0)
-  lt10plots <- subset(pltcnt, NBRPLOTS >= 2 & NBRPLOTS < 10 & NBRSTRATA > 0)
 
-  errtab <- {}
-  errmsg <- {}
-  errtyp <- {}
-  if (nrow(lt10plots) > 0) { 
-    errtyp <- "warn"
-    errtab <- rbind(errtab, cbind(lt10plots, errtyp))
-    errmsg <- c(errmsg, "there is acerage present for a class with < 10 plots") } 
-  if (nrow(nostrata) > 0) {
-    errtyp <- "stop" 
-    errtab <- rbind(errtab, cbind(nostrata, errtyp))
-    errmsg <- c(errmsg, "there is plot(s) in a class with zero acerage") } 
-  if (nrow(lt2plots) > 0) { 
-    errtyp <- "stop"
-    errtab <- rbind(errtab, cbind(lt2plots, errtyp))
-    errmsg <- c(errmsg, "there is acerage present for a class with < 2 plots.. must collapse")
-  }
+  pltcnt$errtyp <- "none"
+  pltcnt[pltcnt$n.total >= minplotnum.strat & pltcnt$n.total < minplotnum.unit 
+		& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
+  pltcnt[pltcnt$NBRPLOTS < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
+  pltcnt[, NBRSTRATA := NULL]
 
-  
-  if (!is.null(errtab) && showwarnings) { 
-    errtab[, NBRSTRATA := NULL]
+
+  if (showwarnings && any(pltcnt$errtyp == "warn")) { 
 
     cat(
     "\n \n", 
@@ -103,61 +92,38 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     print(pltcnt)
     cat("\n")
 
-    cat(errmsg, sep="\n")
-    print(errtab)
-
-    if (stopiferror && any(errtab[["errtyp"]] == "stop"))
-      stop("not enough plots in estimation unit (domain)")
+    if (stopiferror && any(errtab[["errtyp"]] == "warn"))
+      stop("not enough plots in strata")
 
     ###############################################################
     ## If savedata, write to file
     ###############################################################
-    if (savedata) {
-      acrelutfnbase <- paste(outfn, format(Sys.time(), "%Y%m%d"), sep="_")
-      acrelutfn <- fileexistsnm(outfolder, acrelutfnbase, "csv")
-      acrelutoutfn <- paste0(outfolder, "/", acrelutfn, ".csv")
-      write.csv(pltcnt, acrelutoutfn, row.names=FALSE)
-
-      if (any(errtab$errtyp == "stop")) {
-        cat(
-      "\n", 
-      "########################################################################################", 
-      "\n", paste("Table written to:", acrelutoutfn), "\n", "\n", 
-	   "Collapse classes and join back to table with estimation unit/strata values.", "\n", 
-        "Use datLUTnm FIESTA function.", "\n",
-      "########################################################################################",
-      "\n" )
-      }else{
-        cat(
-      "\n", 
-      "########################################################################################", 
-      "\n", paste("Table written to:", acrelutoutfn), "\n",
-      "########################################################################################",
-      "\n" )
-      }
-    }
+    if (savedata)
+      write2csv(pltcnt, outfolder=outfolder, outfilenm=outfn, outfn.date=outfn.date,
+		outfn.pre=outfn.pre, overwrite=overwrite)
   }
-
    
   if (!is.null(strunitvars)) {
     ## Change name of NBRPLOTS
     setnames(pltcnt, "NBRPLOTS", "n.strata")
 
     ## ## Remove NBRSTRATA and merge to unitlut
-    pltcnt[, NBRSTRATA := NULL]
-    unitlut <- merge(unitlut, pltcnt, by=joinvars)
+    unitlut <- merge(unitlut, pltcnt[, c(joinvars, "n.strata", "n.total"), with=FALSE], 
+		by=joinvars)
     pvars <- pvars[pvars %in% names(unitlut)]
     othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, strunitvars))]
     setcolorder(unitlut, c(unique(c(pvars, strunitvars)), othervars))
     setorderv(unitlut, unique(c(pvars, strunitvars)))
   }
 
-  ## Add total number of plots by estimation unit to acrelut (n.total)
-  unitlut[, n.total := sum(n.strata, na.rm=TRUE), by=unitvars]
 
-
-  if (is.null(strvars)) 
+  if (is.null(strvars) && "n.strata" %in% unitlut) 
     unitlut[, n.strata := NULL]
 
-  return(list(unitlut=unitlut, errtab=errtab))
+  returnlst <- list(unitlut=unitlut, errtab=pltcnt)
+
+  if (!is.null(nostrata) && nrow(nostrata) > 0)       
+    returnlst$nostrat <- nostrata
+
+  return(returnlst)
 }

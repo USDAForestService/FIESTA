@@ -1,12 +1,99 @@
+#pcheck.xlsx
 #wrapSE
 #tabgrp
 #setCells		Populates Excel spreadsheets with table data.
 
-#tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar, 
+#tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar, 
 #	colvar=NULL, cond.filter=NULL, title.rowvar=NULL, title.colvar=NULL, 
 #	title.rowgrp=NULL, row.FIAname=FALSE, col.FIAname=FALSE, estvar=NULL, 
 #	estvar.filter=NULL, sumunits=TRUE, landarea=NULL, unitacres=NULL, stratalut=NULL,
 #	allin1=FALSE, row.add0=FALSE, col.add0=FALSE) { 
+
+
+
+pcheck.xlsx <- function(wbnm, savewb=TRUE, outfn=NULL, outfolder=NULL,
+	outfn.date=TRUE, overwrite=FALSE)  {
+  ## CREATE EXCEL WORKBOOK AND SHEET
+  ###############################################################
+  if (is.null(outfn)) outfn <- "WORKBOOK"
+
+  newwb <- FALSE
+  if (is.null(wbnm)) {
+    wb <- xlsx::createWorkbook(type="xlsx")
+    newwb <- TRUE
+  } else {
+    if (!file.exists(wbnm)) {
+ 
+      if (!file.exists(dirname(wbnm))) stop("invalid directory")
+      wb.basenm <- basename(wbnm)
+      outfolder <- dirname(wbnm)
+
+      ## Check if there is an extension
+      if (is.na(getext(wbnm)) || getext(wbnm) == "NA") {
+        message("wbnm must end in xlsx.. adding to wbnm")
+        wbnm <- paste0(wbnm, ".xlsx")
+        if (file.exists(wbnm)) {
+          message(paste("creating workbook:", wbnm))
+          wb <- xlsx::loadWorkbook(file=wbnm)
+          outfn <- wb.basenm
+        }        
+      } else {  
+        message(paste(wbnm, "does not exist... creating new workbook"))
+        wb <- xlsx::createWorkbook(type="xlsx")
+        outfn <- FIESTA::basename.NoExt(wb.basenm)
+        newwb <- TRUE
+      } 
+    } else {     
+      wb <- xlsx::loadWorkbook(file=wbnm)
+    }
+  }
+  if (savewb) {
+ 
+    ## GET NAME FOR WORKBOOK
+    ###############################################################
+    if (newwb) {
+
+      ## Check outfn.date
+      outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date", 
+		title="Add date to filenm?", first="YES")
+      if (outfn.date)
+        outfn <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
+
+      ## Check overwrite
+      overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="Overwrite file?", first="YES")
+
+      if (!overwrite) {
+        outfn <- FIESTA::fileexistsnm(outfolder, outfn, "xlsx")
+        if (!is.null(outfolder))
+          outfn <- paste(outfolder, outfn, sep="/")
+      } else {
+        if (is.null(outfolder)) outfolder <- dirname(outfn)
+        outfn <- paste(outfolder, outfn, sep="/")
+      }
+      outfilenm <- paste0(outfn, ".xlsx")
+
+      #outallin1base <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
+      #outallin1fn <- fileexistsnm(outfolder, outfn, "xlsx")
+      #outfilenm <- paste0(outfolder, "/", outallin1fn, ".xlsx")
+    } else {
+      outfilenm <- wbnm
+    }
+
+    ## SAVE EXCEL WORKBOOK
+    ###############################################################
+    xlsx::saveWorkbook(wb, outfilenm)  
+    
+    cat(
+    " ###############################################################################", 
+    "\n", paste("Table written to: "), "\n", paste(" ", outfilenm), "\n", 
+    "###############################################################################",
+    "\n" )
+  }
+
+  return(wbnm=outfilenm)
+}
+
 
 wrapSE <- function(x) {
   xsplit <- strsplit(as.character(x), " \\(")[[1]]
@@ -14,14 +101,14 @@ wrapSE <- function(x) {
 }
 
 
-tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar, 
+tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar, 
 	colvar=NULL, cond.filter=NULL, rowgrp=FALSE, colgrp=FALSE, collut=NULL,
 	colgrpcd=NULL, rowgrpnm=NULL, rowgrpord=NULL, estvar.filter=NULL, 
 	title.rowvar=NULL, title.rowgrp=NULL, row.FIAname=FALSE, allin1=FALSE, 
 	row.add0=FALSE, col.add0=FALSE, rowgrptot=TRUE, colgrptot=TRUE, sumunits=TRUE,
  	unitvar="ESTN_UNIT", rowgrp.subtot=TRUE, rowgrp2.subtot=FALSE, row.orderby=NULL, 
 	title.colvar=NULL, title.colgrp=NULL, landarea="ALL", col.orderby=NULL, 
-	estnull=0, psenull="--", ...) {
+	estnull="--", psenull="--", GBpopdat=NULL, ...) {
 
   ## Arguments
   # esttype - String. Type of estimate ("AREA", "TREE", "RATIO").  
@@ -41,12 +128,21 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
   ## Set global variables
   rowlutvars=collut2 <- NULL
 
-  ## COND TABLE
-  condx <- pcheck.table(cond, caption="Condition table?")
-  if(is.null(condx)){ stop("you must include a cond table")}
+  if (!is.null(GBpopdat)) {
+    ## check cond table
+    pltcondx <- pcheck.table(GBpopdat$pltcondx, caption="Condition table?", stopifnull=TRUE)
 
-  ## TREE TABLE
-  treex <- pcheck.table(tree, caption="Tree table?", gui=FALSE)
+    ## check tree table
+    treex <- pcheck.table(GBpopdat$treex, caption="Tree table?", gui=FALSE, stopifnull=TRUE)
+
+  } else {
+
+    ## check cond table
+    pltcondx <- pcheck.table(cond, caption="Condition table?", stopifnull=TRUE)
+
+    ## check tree table
+    treex <- pcheck.table(tree, caption="Tree table?", gui=FALSE, stopifnull=TRUE)
+  }
 
   rowgrp <- FIESTA::pcheck.logical(rowgrp, varnm="rowgrp", title="Row groups?", 
 		first="NO")
@@ -75,34 +171,35 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
       title.rowvar <- rowvar
     }
   }
-
+ 
   ## Get column domain look-up table with rowvar and rowgrpcd
   ##############################################################################
-  if (rowvar %in% names(condx)) {
+  if (rowvar %in% names(pltcondx)) {
     rowLUTgrp <- FALSE
     if (rowgrp) {
       if (!is.null(rowgrpord)) {
-        if (!rowgrpord %in% names(condx)) stop(paste(rowgrpord, "not in cond"))
+        if (!rowgrpord %in% names(pltcondx)) stop(paste(rowgrpord, "not in cond"))
         if (!is.null(rowgrpnm))
-          if (!rowgrpnm %in% names(condx)) stop(paste(rowgrpnm, "not in cond"))
+          if (!rowgrpnm %in% names(pltcondx)) stop(paste(rowgrpnm, "not in cond"))
       } else {
         rowLUTgrp <- TRUE
       }
     } 
  
     if (row.FIAname) {
-      dat <- datLUTnm(x=condx, xvar=rowvar, FIAname=row.FIAname, group=rowLUTgrp, 
+      dat <- datLUTnm(x=pltcondx, xvar=rowvar, FIAname=row.FIAname, group=rowLUTgrp, 
 		add0=row.add0)
+
       if (is.null(dat)) stop("")
       row.orderby <- rowvar
-      condx <- dat$xLUT
+      pltcondx <- dat$xLUT
       rowvar <- dat$xLUTnm
       ref_row <- setDF(dat$LUT)
       if (rowgrp) {
         rowgrpord <- dat$grpcode
         if (is.null(rowgrpord)) stop("")
         rowgrpnm <- dat$grpname
-        ref_rowgrp <- unique(condx[!is.na(condx[[rowvar]]), c(rowgrpord, rowgrpnm),
+        ref_rowgrp <- unique(pltcondx[!is.na(pltcondx[[rowvar]]), c(rowgrpord, rowgrpnm),
  			with=FALSE])
         setkeyv(ref_rowgrp, rowgrpord)
         rgrpcds <- ref_rowgrp[[rowgrpord]]
@@ -118,7 +215,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
       rowlutvars <- c(rowgrpord, rowgrpnm, row.orderby, rowvar)
 
       if (rowgrp) {
-        ref_rowgrp <- unique(condx[!is.na(condx[[rowvar]]), c(rowgrpord, rowgrpnm),
+        ref_rowgrp <- unique(pltcondx[!is.na(pltcondx[[rowvar]]), c(rowgrpord, rowgrpnm),
  			with=FALSE])
         setkeyv(ref_rowgrp, rowgrpord)
         rgrpcds <- ref_rowgrp[[rowgrpord]]
@@ -126,7 +223,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
           stop("duplicated row groups in cond: ", rgrpcds[duplicated(rgrpcds)])
       }
     }    
-    rowlut <- unique(condx[!is.na(get(rowvar)), rowlutvars, with=FALSE])
+    rowlut <- unique(pltcondx[!is.na(get(rowvar)), rowlutvars, with=FALSE])
     setkeyv(rowlut, c(rowlutvars))
 
   } else if (rowvar %in% names(treex)) {
@@ -180,7 +277,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
   } else {
     stop("rowvar not in tables")
   }
-
   if (!is.null(rowgrpnm)) {
     if (is.null(title.rowgrp)) {
       if (rowgrpord %in% ref_titles$DOMVARNM) {
@@ -200,7 +296,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
   ## Get rowlut names
   rnbr <- length(rnames)
   totals <- rep("Total", rnbr)
-
+ 
   ## Get column domain look-up table with colvar and colgrpcd (if colgrp=TRUE)
   ##############################################################################
   cgrpcds <- 9999 
@@ -221,10 +317,12 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
           stop(paste(colvar, "not in ref_codes"))
         } 
       } else {
-        if (colvar %in% names(condx)) {
-          ref_col <- unique(condx[, c(col.orderby, colvar), with=FALSE])
+        if (colvar %in% names(pltcondx)) {
+          ref_col <- unique(pltcondx[, c(col.orderby, colvar), with=FALSE])
         } else if (colvar %in% names(treex)) {
           ref_col <- unique(treex[, c(col.orderby, colvar), with=FALSE])
+        } else {
+          stop(colvar, " not in cond")
         }
         collut <- ref_col
         setcolorder(collut, col.orderby)        
@@ -258,10 +356,10 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
     } 
 
 #   if (!col.add0) {
-      if (colvar %in% names(condx)) {
-        ref_col <- ref_col[ref_col[["VALUE"]] %in% unique(condx[[colvar]]),]
+      if (colvar %in% names(pltcondx)) {
+        ref_col <- ref_col[ref_col[["VALUE"]] %in% unique(pltcondx[[colvar]]),]
         if (colgrp) 
-          ref_colgrp <- ref_colgrp[ref_colgrp[["VALUE"]] %in% unique(condx[[colgrpcd]]),]
+          ref_colgrp <- ref_colgrp[ref_colgrp[["VALUE"]] %in% unique(pltcondx[[colgrpcd]]),]
       } else if (colvar %in% names(treex)) {
         ref_col <- ref_col[ref_col[["VALUE"]] %in% unique(treex[[colvar]]),]
         if (colgrp) 
@@ -282,6 +380,15 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
     }
   }
 
+  ###############################################################
+  ## Replace filtered tables
+  ###############################################################
+  if (!is.null(GBpopdat)) {
+    GBpopdat$pltcondx <- pltcondx
+    if (esttype != "AREA")
+      GBpopdat$treex <- treex
+  }
+
   esttabcol <- {}
   psetabcol <- {}
   pse <- NULL
@@ -292,22 +399,12 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
   for (i in 1:length(cgrpcds)) {
     cgrp <- cgrpcds[i]
 
+#print("cgrp")
+#print(cgrp)
+ 
     if (cgrp != 9999) 
       colgrpnm <- ref_colgrp[ref_colgrp$VALUE == cgrp, "MEANING"]
-
-#      if (colvar == "TIMBERCD.PROD") {
-#        col.FIAname <- FALSE
-
-#        if (colgrpnm == "Reserved") {
-#          collut <- data.frame(c(1,2), c("Productive", "Nonproductive"))
-#        } else {
-#          collut <- data.frame(c(1,2), c("Timberland", "Nonproductive"))
-#        }
-#        names(collut) <- c(colvar, "MEANING")
-#        col.orderby <- colvar   
-#        colvar <- "MEANING"
-#      }            
-#    }
+   
     if (cgrp == 9999) {
       cond2.filter <- cond.filter
     } else if (!is.null(cond.filter)) {
@@ -323,12 +420,15 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
     for (j in 1:length(rgrpcds)) {
       rgrp <- rgrpcds[j]
 
+#print("rgrp")
+#print(rgrp)
+
       if (rgrp == 9999) {
         cond3.filter <- cond2.filter
         estvar2.filter <- estvar.filter
         rowlut2 <- rowlut
       } else {
-        if (rowgrpord %in% names(condx)) {
+        if (rowgrpord %in% names(pltcondx)) {
           if (!is.null(cond2.filter)) {
             cond3.filter <- paste(cond2.filter, "&", rowgrpord, "==", rgrp)
           } else {
@@ -346,10 +446,10 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
         if (!rowgrp) stop("rowgrp is FALSE")
         grpnm <- ref_rowgrp[ref_rowgrp[[rowgrpord]] == rgrp, rowgrpnm, with=FALSE]
         rowlut2 <- rowlut[rowlut[[rowgrpord]] == rgrp, ]
-      } 
+      }
       if (colgrptot && i == 1) {
         if (rgrp != 9999) {
-          if (rowgrpord %in% names(condx)) {
+          if (rowgrpord %in% names(pltcondx)) {
             if (!is.null(cond.filter)) {
               condtot.filter <- paste(cond.filter, "&", rowgrpord, "==", rgrp)
             } else {
@@ -362,18 +462,18 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
           condtot.filter <- cond.filter
         }
         if (esttype == "AREA") { 
-          coltottab <- modGBarea(cond=condx, pltstrat=pltstrat, sumunits=sumunits,
+          coltottab <- modGBarea(cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits,
 			cond.filter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby, 
 			title.rowvar=title.rowvar, allin1=allin1, row.add0=TRUE, unitvar=unitvar, 
 			rowlut=rowlut2, landarea=landarea, col.orderby=col.orderby, 
-			estnull=estnull, psenull=psenull, ...)$est
-
+			estnull=estnull, psenull=psenull, GBpopdat=GBpopdat, ...)$est
         } else if (esttype == "TREE") {
-          coltottab <- modGBtree(tree=treex, cond=condx, pltstrat=pltstrat, sumunits=sumunits, 
+          coltottab <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
 			cond.filter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby,
  			title.rowvar=title.rowvar, allin1=allin1, row.add0=TRUE, unitvar=unitvar, 
 			rowlut=rowlut2, estvar.filter=estvar.filter, landarea=landarea, 
-			col.orderby=col.orderby, estnull=estnull, psenull=psenull, ...)$est
+			col.orderby=col.orderby, estnull=estnull, psenull=psenull, 
+			GBpopdat=GBpopdat, ...)$est
         }
         if (!subtotal && rgrp != 9999 && nrow(coltottab) > 1) {
           coltottab <- coltottab[-nrow(coltottab),]
@@ -382,29 +482,27 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
         } 
         coltot <- rbind(coltot, setDF(coltottab))
       }
- 
       if (esttype == "AREA") {
-        estdat <- modGBarea(cond=condx, pltstrat=pltstrat, cond.filter=cond3.filter, 
+        estdat <- modGBarea(cond=pltcondx, pltassgn=pltassgn, cond.filter=cond3.filter, 
 		rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, returntitle=TRUE, 
 		col.add0=TRUE, collut=collut, row.add0=TRUE, rowlut=rowlut2, allin1=allin1, 
 		title.rowvar=title.rowvar, sumunits=sumunits, unitvar=unitvar, 
 		title.filter="", landarea=landarea, title.colvar=title.colvar, 
-		col.orderby=col.orderby, estnull=estnull, psenull=psenull, ...)
- 
+		col.orderby=col.orderby, estnull=estnull, psenull=psenull, 
+		GBpopdat=GBpopdat, ...)
       } else if (esttype == "TREE") { 
-        estdat <- modGBtree(tree=treex, cond=condx, pltstrat=pltstrat, sumunits=sumunits, 
+        estdat <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
 		unitvar=unitvar, cond.filter=cond3.filter, rowvar=rowvar, colvar=colvar,
  		row.orderby=row.orderby, returntitle=TRUE, col.add0=TRUE, collut=collut, 
 		row.add0=TRUE, rowlut=rowlut2, title.rowvar=title.rowvar, allin1=allin1, 
 		title.filter="", estvar.filter=estvar2.filter, landarea=landarea, 
 		title.colvar=title.colvar, col.orderby=col.orderby, estnull=estnull, 
-		psenull=psenull, ... )
+		psenull=psenull, GBpopdat=GBpopdat, rawdata=TRUE, ... ) 
       }
- 
       if (!is.null(estdat)) {
         est <- estdat$est
         est.titlelst <- estdat$titlelst
-        title.est <- est.titlelst$title.est
+        title.est <- ifelse(allin1, est.titlelst$title.estpse, est.titlelst$title.est)
         title.colvar <- est.titlelst$title.colvar
         title.rowvar <- est.titlelst$title.rowvar
         if (!subtotal && rgrp != 9999) est <- est[-nrow(est),]
@@ -416,6 +514,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
         }
       } else {
         est <- setDF(rowlut2[, rowvar, with=FALSE])
+
         names(est)[names(est) == rowvar] <- title.rowvar
         if (subtotal) est <- rbind(est, "Subtotal")
 
@@ -427,15 +526,18 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
           pse <- est
           pse[pse == 0] <- "--"
         } else {
+
           char.width <- max(sapply(esttabrow, function(x) { 
 			begin <- gregexpr(pattern='\\(', x)[[1]][1]
 			end <- gregexpr(pattern='\\)', x)[[1]][1]
 			end - begin - 1}))
+
           est <- cbind(est, 
 			as.data.frame(matrix(allin1f(estnull, psenull, char.width=char.width), 
 			nrow(est), estncols)))
         }
       }
+
       if (rgrp != 9999) {
         est[est[[title.rowvar]] == "Total", title.rowvar] <- "Subtotal"
         est <- cbind(grpnm, est)
@@ -461,31 +563,29 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
         } 
       }
     }    ## end for loop
- 
 #    if (rowgrp && rowgrptot) {
+ 
     if (rowgrp) {
       rowvar2 <- rowgrpnm
       row2.orderby <- rowgrpord
 
       if (esttype == "AREA") {
-        estdat2 <- modGBarea(cond=condx, pltstrat=pltstrat, cond.filter=cond2.filter, 
+        estdat2 <- modGBarea(cond=pltcondx, pltassgn=pltassgn, cond.filter=cond2.filter, 
 		rowvar=rowvar2, row.orderby=row2.orderby, colvar=colvar, row.FIAname=FALSE,
 		col.add0=TRUE, collut=collut, row.add0=TRUE, allin1=allin1, 
 		title.rowvar=title.rowvar, title.colvar=title.colvar, sumunits=sumunits, 
 		unitvar=unitvar, landarea=landarea, col.orderby=col.orderby, estnull=estnull,
- 		psenull=psenull, ...)
-
+ 		psenull=psenull, GBpopdat=GBpopdat, ...)
       } else if (esttype == "TREE") {
-        estdat2 <- modGBtree(tree=treex, cond=condx, pltstrat=pltstrat, sumunits=sumunits, 
+        estdat2 <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
 		unitvar=unitvar, cond.filter=cond2.filter, rowvar=rowvar2, row.orderby=row2.orderby, 
 		colvar=colvar, row.FIAname=FALSE, title.rowvar=title.rowvar, col.add0=TRUE, 
 		collut=collut, row.add0=TRUE, allin1=allin1, estvar.filter=estvar.filter, 
 		landarea=landarea, title.colvar=title.colvar, col.orderby=col.orderby, 
-		estnull=estnull, psenull=psenull, ...)
-
+		estnull=estnull, psenull=psenull, GBpopdat=GBpopdat, ...)
       }
-
       est2 <- estdat2$est
+
       if (!allin1) pse2 <- estdat2$pse
       
       if (is.null(est2)) {
@@ -498,7 +598,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
         if (!allin1) {
           pse.totalrow <- est.totalrow
           pse.totalrow[pse.totalrow == 0] <- "--"
-        }
+        }           
       } else {
         est.totalrow <- cbind(rgrp="Total", est2[est2[[title.rowvar]] == "Total",])
         names(est.totalrow)[names(est.totalrow) == "rgrp"] <- title.rowgrp
@@ -518,17 +618,21 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
     } 
       if (colvar == "TIMBERCD.PROD") {
         if (colgrpnm == "Reserved") {
-          names(esttabrow)[names(esttabrow) %in% c(1,2)] <- c("Productive", "Nonproductive")
-          if (!allin1) 
-            names(psetabrow)[names(psetabrow) %in% c(1,2)] <- c("Productive", "Nonproductive")
+          names(esttabrow)[names(esttabrow) %in% c(1,2)] <- c("Productive", "Unproductive")
+          if (!allin1)
+            names(psetabrow)[names(psetabrow) %in% c(1,2)] <- c("Productive", "Unproductive")
         } else {
-          names(esttabrow)[names(esttabrow) %in% c(1,2)] <- c("Timberland", "Nonproductive")
-          if (!allin1) 
-            names(psetabrow)[names(psetabrow) %in% c(1,2)] <- c("Timberland", "Nonproductive")
+          names(esttabrow)[names(esttabrow) %in% c(1,2)] <- c("Timberland", "Unproductive")
+          names(esttabrow)[names(esttabrow) %in% c("Productive", "Unproductive")] <- 
+			c("Timberland", "Unproductive")
+          if (!allin1) {
+            names(psetabrow)[names(psetabrow) %in% c(1,2)] <- c("Timberland", "Unproductive")
+            names(psetabrow)[names(psetabrow) %in% c("Productive", "Unproductive")] <- 
+			c("Timberland", "Unproductive")
+          }
         }
      }
 
- 
     if (cgrp != 9999) {
       ## Change names to concatenate column group name 
       varnms <- paste(colgrpnm, names(esttabrow)[-(1:rnbr)], sep="#")
@@ -562,15 +666,14 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
   if (colgrptot) {
     if (rowgrptot) {
       if (esttype == "AREA") {
-        coltottab2 <- modGBarea(cond=condx, pltstrat=pltstrat, sumunits=sumunits,
+        coltottab2 <- modGBarea(cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits,
 		unitvar=unitvar, landarea=landarea, cond.filter=cond.filter, allin1=allin1, 
-		...)$est
-
+		GBpopdat=GBpopdat, ...)$est
       } else if (esttype == "TREE") {
-        coltottab2 <- modGBtree(cond=condx, pltstrat=pltstrat, tree=treex, 
+        coltottab2 <- modGBtree(cond=pltcondx, pltassgn=pltassgn, tree=treex, 
 			sumunits=sumunits, unitvar=unitvar, landarea=landarea, 
 			cond.filter=cond.filter, estvar.filter=estvar.filter, allin1=allin1, 
-			...)$est
+			GBpopdat=GBpopdat, ...)$est
 
       }
       names(coltottab2)[names(coltottab2) == "TOTAL"] <- title.rowvar
@@ -582,7 +685,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
     } else {
       esttabcol <- cbind(esttabcol, Total=coltot[, "Estimate"], stringsAsFactors=FALSE)
     }
-
     if (!is.null(pse))     
       psetabcol <- cbind(psetabcol, Total=coltot[, "Percent Sampling Error"],
 		stringsAsFactors=FALSE)
@@ -593,7 +695,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
   if (rowgrp) {
     if (colgrp) {
       esttab.title <- sub(tolower(title.rowvar), 
-		tolower(paste0(title.rowgrp, ", ", title.rowvar, ", ", title.colgrp, ", ")), 
+		tolower(paste0(title.rowgrp, ", ", title.rowvar, ", ", title.colgrp, ",")), 
 		title.est)
     } else {
       esttab.title <- sub(tolower(title.rowvar), 
@@ -602,7 +704,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
     if (!allin1) {
       if (colgrp) {
         psetab.title <- sub(tolower(title.rowvar), 
-		tolower(paste0(title.rowgrp, ", ", title.rowvar, ", ", title.colgrp, ", ")), 
+		tolower(paste0(title.rowgrp, ", ", title.rowvar, ", ", title.colgrp, ",")), 
 		title.pse)
       } else {
         psetab.title <- sub(tolower(title.rowvar), 
@@ -633,6 +735,10 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltstrat=NULL, rowvar,
     names(cnamesdf) <- "COLVAR"
   }
 
+  if (!row.add0)
+    esttabcol <- esttabcol[!apply(esttabcol[,cnames], 1, function(x) sum(sapply(x, 
+		function(xx) length(strsplit(xx, "--")[[1]]) > 2)) == length(x)),]
+  
 
   returnlst <- list(esttab=esttabcol, esttab.title=esttab.title, 
 		title.rowvar=title.rowvar, title.colvar=title.colvar, cnames=cnamesdf)
@@ -717,8 +823,7 @@ setCells <- function(datsheet, estgrp, psegrp, nbrgrps=1, startrow=1, endrow=NUL
     if (addSEcol) {
       psegrp.cells <- xlsx::getCells(tab.rows, colIndex=psecols)
       psegrp <- data.frame(lapply(psegrp, function(x) gsub("--", 0, x)), stringsAsFactors=FALSE)
-      psegrp <- suppressMessages(FIESTA::check.numeric(psegrp, tabcols))
-
+      psegrp[, (tabcols) := lapply(.SD, suppressMessages(FIESTA::check.numeric)), .SDcols=tabcols]
       value.cells <- mapply(xlsx::setCellValue, psegrp.cells, 
 			t(as.matrix(psegrp[, tabcols])))
       style.cells <- lapply(psegrp.cells, 

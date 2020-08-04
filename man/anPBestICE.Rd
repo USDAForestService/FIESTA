@@ -7,31 +7,31 @@
 	Generates percent or acre estimates by domain (and estimation unit).
 }
 \usage{
-anPBestICE(icedat, pltstrat = NULL, state, T1, T2, puniqueid = "CN", 
+anPBestICE(icedat, pltassgn = NULL, state, T1, T2, puniqueid = "CN", 
 	plotid = "plot_id", pntid = "dot_id", tabtype = "PCT", sumunits = FALSE, 
 	strata = FALSE, ratio = FALSE, landarea = "ALL", pnt.filter = NULL, 
 	plt.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", stratalut = NULL, strvar = "STRATA", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", autocombine = FALSE, rowvar = NULL, colvar = NULL, 
-	row.add0 = FALSE, col.add0 = FALSE, domlut = NULL, ratioden = "ROWVAR", 
-	lutfolder = NULL, allin1 = FALSE, savedata = FALSE, outfolder = NULL, 
-	outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, 
-	addtitle = TRUE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
-	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, 
-	returntitle = FALSE, estround = NULL, pseround = NULL, estnull = 0, 
-	psenull = "--", rowlut = NULL, collut = NULL, rawdata = FALSE, 
+	areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATA", 
+	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = FALSE, rowvar = NULL, 
+	colvar = NULL, row.add0 = FALSE, col.add0 = FALSE, domlut = NULL, 
+	ratioden = "ROWVAR", lutfolder = NULL, allin1 = FALSE, savedata = FALSE, 
+	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
+	overwrite = FALSE, addtitle = TRUE, title.main = NULL, title.ref = NULL, 
+	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+	title.filter = NULL, returntitle = FALSE, estround = NULL, pseround = NULL, 
+	estnull = 0, psenull = "--", rowlut = NULL, collut = NULL, rawdata = FALSE, 
 	gainloss = FALSE, gainloss.vals = NULL, stabbr = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{icedat}{ DF/DT or comma-delimited file (*.csv). The point-level 
 	table (may contain condition-level info). }
-  \item{pltstrat}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
+  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
 	shapefile(*.shp) with strata/estimation unit variables. Optional. }
   \item{state}{ String. The name of state for area of interest (e.g., "Vermont", "Utah"). }
   \item{T1}{ Integer. Year of Time 1 imagery. }
   \item{T2}{ Interger. Year of Time 2 imagery. }
-  \item{puniqueid}{ String. Name of unique identifier for pltstrat. }
+  \item{puniqueid}{ String. Name of unique identifier for pltassgn. }
   \item{plotid}{ String. Name of unique identifier for ice45 plots. }
   \item{pntid}{ String. Name of unique identifier for the points. }
   \item{tabtype}{ String. Type of units for the table ("AREA", "PCT"). }
@@ -44,14 +44,16 @@ anPBestICE(icedat, pltstrat = NULL, state, T1, T2, puniqueid = "CN",
   \item{pnt.filter}{ String. A global filter for the pnt file. Must be R syntax. }
   \item{plt.filter}{ String. A plot-level filter. Must be R syntax. }
   \item{unitvar}{ String. Name of the estimation unit variable in stratalut and cond  
-	or pltstrat tables. }
+	or pltassgn tables. }
   \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
-	pltstrat with assignment for each plot (e.g., 'STATECD'). }
+	pltassgn with assignment for each plot (e.g., 'STATECD'). }
   \item{unitarea}{ Numeric or DF. Total acres by estimation unit. If only 1 estimation 
 	unit, include number of total acreage for the area of interest or a data frame
 	with areavar. If more than one estimation unit, provide a data frame of total 
 	acres by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of the acre variable in stratalut. Default="ACRES". }
+  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
+	than 2 plots in any one estimation unit. See notes for more info. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 
@@ -61,7 +63,7 @@ anPBestICE(icedat, pltstrat = NULL, state, T1, T2, puniqueid = "CN",
   \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut areavar. }
   \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt).
  	Default="P1POINTCNT". }
-  \item{autocombine}{ Logical. If TRUE, automatically combines estimation units if less 
+  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
   \item{rowvar}{ String. Name of domain variable in pnt used for output estimation table 
 	rows. If only 1 domain, must be rowvar. }

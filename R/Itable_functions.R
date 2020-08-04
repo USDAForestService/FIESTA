@@ -7,28 +7,41 @@
 ## getestvar
 
 
-allin1f <- function(x, y, char.width=NULL, estnull=0, psenull="--") {
+allin1f <- function(x, y, char.width=NULL, estnull="--", psenull="--",
+	estround=NULL, pseround=NULL) {
   ## DESCRIPTION: Gets estimate (% standard error)
 
-  if (is.null(char.width)) char.width <- max(nchar(y))
-
   if (all(is.na(x))) x <- estnull
-  if (all(x == 0)) x <- estnull
+  if (all(x == 0) && (all(y == 0) || all(y == psenull))) x <- estnull
   if (all(y == 0)) y <- psenull
+
+  if (is.numeric(estnull) || !all(x == estnull)) {
+    x <- as.numeric(x)  
+    if (!is.null(estround))
+      x <- round(x, estround)
+  }
  
-  if (is.numeric(estnull) || !all(x == estnull))
-    x <- as.numeric(x)
-  if (is.numeric(psenull) || !all(y == psenull))
+  if (is.numeric(psenull) || !all(y == psenull)) {
     y <- as.numeric(y)
- 
-  paste0(format(x, big.mark=","), " (", 
-	 format(y, width=char.width, justify="right"), ")")
+    if (!is.null(pseround))
+      y <- round(y, pseround)
+  }
+
+  if (is.null(char.width)) char.width <- max(nchar(y))  
+
+  x.nsmall <- ifelse(!is.null(estround), estround, nbrdecimals(x))
+  y.nsmall <- ifelse(!is.null(pseround), pseround, nbrdecimals(x))
+
+
+  paste0(format(x, big.mark=",", digits=nbrdigits(x), nsmall=x.nsmall), " (", 
+	format(y, width=char.width, justify="right", digits=nbrdigits(y), 
+	nsmall=y.nsmall), ")")
 }
 
 
 
 crosstabx <- function(x, xvar, estnm, psenm, allin1=FALSE, char.width=NULL,
-		estround=NULL, pseround=NULL, estnull=0, psenull="--") {
+		estround=0, pseround=0, estnull="--", psenull="--") {
   
   ## Set global variable
   NBRPLT.gt0 <- NULL
@@ -36,7 +49,7 @@ crosstabx <- function(x, xvar, estnm, psenm, allin1=FALSE, char.width=NULL,
   if (!is.null(estround) && is.numeric(x[[estnm]]))
     x[[estnm]] <- round(x[[estnm]], estround)
   if (!is.null(pseround) && is.numeric(x[[psenm]]))
-    x[[psenm]] <- round(x[[psenm]], estround)
+    x[[psenm]] <- round(x[[psenm]], pseround)
 
   if (is.character(estnull))
     x[[estnm]] <- as.character(x[[estnm]])
@@ -51,7 +64,7 @@ crosstabx <- function(x, xvar, estnm, psenm, allin1=FALSE, char.width=NULL,
       char.width <- max(nchar(na.omit(x[[psenm]])))
 
     estpse <- mapply(allin1f, x=x[[estnm]], y=x[[psenm]], char.width=char.width,
-		estnull=estnull, psenull=psenull)
+		estnull=estnull, psenull=psenull, estround=estround, pseround=pseround)
     names(estpse) <- x[[xvar]]
     return (estpse)
   
@@ -84,32 +97,36 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, add0, xvar2=NULL,
     byvars <- c(byvars, xvar2)
   }
 
-  if (!is.null(unitvar)) {
-    unit.uniquex <- lapply(unique(x[[unitvar]]), function(x, uniquex) { 
-			data.table(ESTUNIT=rep(x, nrow(uniquex)), uniquex) }, uniquex)
-    unit.uniquex <- do.call(rbind, unit.uniquex)
-    names(unit.uniquex)[names(unit.uniquex) == "ESTUNIT"] <- unitvar
-    byvars <- c(unitvar, byvars)
-  } else {
-    unit.uniquex <- uniquex
-  }
-  
-  xchk <- FIESTA::check.matchclass(unit.uniquex, x, byvars)
-  unit.uniquex <- xchk$tab1
-  x <- xchk$tab2
+  addfactors <- function(x, lutx, unitvar=NULL, add0) {
+	## DESCRIPTION: to merge lookup table of factor names
+	## If add0=TRUE, replaces classes with NA with 0 values
+	byvars <- names(lutx)[names(lutx) %in% names(x)]
+ 	xchk <- FIESTA::check.matchclass(lutx, x, byvars)
+	lutx <- xchk$tab1
+	x <- xchk$tab2
 
-  if (add0) {
-    x <- merge(unit.uniquex, x, by=byvars, all.x=TRUE)
-    x[is.na(x)] <- 0
-  } else {
-    if (length(names(unit.uniquex)) > length(byvars))
-      x <- merge(unit.uniquex, x, by=byvars)
-  }
+	if (!is.null(unitvar)) {
+        byvars <- c(unitvar, byvars)
+        lutx <- data.table(unit=unique(x[[unitvar]]), lutx)
+        setnames(lutx, "unit", unitvar)
+      } 
  
-  setorderv(x, byvars)
-  #setkeyv(x, xvar)
-
-  return(x)
+	setkeyv(lutx, byvars)
+	setkeyv(x, byvars)
+ 
+	x <- merge(lutx, x, by=byvars, all.x=add0)
+	if (add0) x[is.na(x)] <- 0
+	setorderv(x, byvars)
+     return(x)
+   }
+ 
+   if (!is.null(unitvar)) {
+     tab2return <- do.call(rbind, lapply(split(x, by=unitvar), 
+		addfactors, lutx=uniquex, unitvar, add0))
+   } else {
+     tab2return <- addfactors(x, lutx=uniquex, add0=add0)
+   }
+   return(tab2return)   
 }
 
 
@@ -137,7 +154,6 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   rnbr <- length(title.rnames)
   totals <- rep("Total", rnbr)
 
-
   ##############################################################################
   ## Round values and get character width for table
   ## Note: If NBRPLT.gt0 = 0, it is replaced by null value (i.e., estnull, psenull)
@@ -149,7 +165,6 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
     group.est[[psenm]] <- round(group.est[[psenm]], pseround)
   if (is.null(char.width))
     char.width <- max(nchar(na.omit(group.est[[psenm]])))
-
   if (is.character(estnull)) 
     group.est[[estnm]] <- as.character(group.est[[estnm]])
   if (is.character(psenull))
@@ -238,13 +253,14 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   ## Convert factors to characters
   est[, (title.rnames) := lapply(.SD, as.character), .SDcols=title.rnames]
   pse[, (title.rnames) := lapply(.SD, as.character), .SDcols=title.rnames]
-  
+ 
   if (allin1) {
     estmat <- as.matrix(est[, -(1:rnbr)])
     psemat <- as.matrix(pse[, -(1:rnbr)])
     
     estall1 <- mapply(allin1f, estmat, psemat, char.width=char.width, estnull=estnull,
-		psenull=psenull)
+		psenull=psenull, estround=estround, pseround=pseround)
+
     estpse <- data.table(cbind(est[, 1:rnbr], matrix(estall1, nrow(est), ncol(est)-rnbr)))
     names(estpse) <- cnames
   }    
@@ -252,7 +268,8 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   if (is.null(colvar.est) || is.null(rowvar.est)) {
     if (!is.null(colvar.est)) {
       estpse.col <- crosstabx(colvar.est, colvar, estnm, psenm, allin1=allin1,
-		char.width=char.width, estnull=estnull, psenull=psenull)
+		char.width=char.width, estnull=estnull, psenull=psenull, 
+		estround=estround, pseround=pseround)
 
       if (allin1) {
         estpse <- rbind(setDF(estpse), c(totals, estpse.col))
@@ -262,7 +279,8 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
       }
     } else if (!is.null(rowvar.est)) { 
       estpse.row <- crosstabx(rowvar.est, rowvar, estnm, psenm, allin1=allin1,
-		char.width=char.width, estnull=estnull, psenull=psenull)
+		char.width=char.width, estnull=estnull, psenull=psenull,
+		estround=estround, pseround=pseround)
 
       if (allin1) {
         estpse$Total <- estpse.row
@@ -276,7 +294,8 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
     ## colvar.est
     ##############################################################
     estpse.col <- crosstabx(colvar.est, colvar, estnm, psenm, allin1=allin1,
-		char.width=char.width, estnull=estnull, psenull=psenull)
+		char.width=char.width, estnull=estnull, psenull=psenull,
+		estround=estround, pseround=pseround)
  
     if (allin1) {
       estpse <- rbind(setDF(estpse), c(totals, estpse.col))
@@ -287,12 +306,13 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
     ## rowvar.est
     ##############################################################
     estpse.row <- crosstabx(rowvar.est, rowvar, estnm, psenm, allin1=allin1,
-		char.width=char.width, estnull=estnull, psenull=psenull)
+		char.width=char.width, estnull=estnull, psenull=psenull,
+		estround=estround, pseround=pseround)
     if (!allin1) {
       est.row <- estpse.row$est
       pse.row <- estpse.row$pse
     }
- 
+
     ## total.est
     ##############################################################
     if (gtotal) {
@@ -301,15 +321,16 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
           est.tot <- sum(as.numeric(est.row), na.rm=TRUE)
           pse.tot <- psenull
         } else {
-          estpse.tot <- paste0(format(psenull, big.mark=","), " (", format(psenull, 
-			justify="right", width=char.width), ")")
+          estpse.tot <- paste0(format(psenull, big.mark=","), " (", 
+			format(psenull, justify="right", width=char.width), ")")
         }
       } else {
         est.tot <- total.est[[estnm]]
         pse.tot <- total.est[[psenm]]
         if (allin1) 
           estpse.tot <- mapply(allin1f, est.tot, pse.tot, char.width=char.width,
-			estnull=estnull, psenull=psenull)
+			estnull=estnull, psenull=psenull, estround=estround,
+			pseround=pseround)
       }
     } else {
       if (allin1) {
@@ -330,7 +351,6 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
     } else {
       est.row <- c(est.row, est.tot)
       pse.row <- c(pse.row, pse.tot)
-
       est$Total <- est.row
       pse$Total <- pse.row
     }

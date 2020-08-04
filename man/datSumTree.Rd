@@ -11,10 +11,11 @@
 \usage{
 datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PLT_CN", 
 	cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE, condid = "CONDID", 
-	tsumvarlst = NULL, tsumvarnmlst = NULL, TPA = TRUE, tfun = sum, 
-	ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, getadjplot = FALSE, 
-	adjtree = FALSE, adjTPA = 1, savedata = FALSE, outfolder = NULL, outfn = NULL, 
-	outfn.date = TRUE, overwrite = FALSE, tround = 16, checkNA = FALSE)
+	bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, tsumvarnmlst = NULL, 
+	TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, 
+	getadjplot = FALSE, adjtree = FALSE, adjTPA = 1, NAto0 = FALSE, 
+	savedata = FALSE, outfolder = NULL, out_layer = NULL, outfn.date = TRUE, 
+	overwrite = FALSE, tround = 16, checkNA = FALSE, returnDT = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,13 +29,15 @@ datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PL
   \item{plt_dsn}{ String. The data source name (dsn; i.e., folder or database name)
 	of plt. The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{tuniqueid}{ String. Unique identifier of the tree table. }
-  \item{cuniqueid}{ String. Unique identifier of the cond table if cond is NOT NULL. }
-  \item{puniqueid}{ String. Unique identifier of the plt table if plt is NOT NULL. }
+  \item{tuniqueid}{ String. Unique identifier of plt in tree table. }
+  \item{cuniqueid}{ String. Unique identifier of plt in cond table if cond is NOT NULL. }
+  \item{puniqueid}{ String. Unique identifier of plt table if plt is NOT NULL. }
   \item{bycond}{ Logical. If TRUE, the data are aggregated to the condition level 
-	(by: uniqueid, condid). If FALSE, the data are aggregated to the plot level 
-	(by: uniqueid). }
+	(by: cuniqueid, condid). If FALSE, the data are aggregated to the plot level 
+	(by: puniqueid). }
   \item{condid}{ String. Unique identifier for conditions. }
+  \item{bysubp}{ Logical. If TRUE, data are aggregated to the subplot level. }
+  \item{subpid}{ String. Unique identifier of each subplot. }
   \item{tsumvarlst}{ String (vector). Tree-level variable(s) to aggregate 
 	(e.g., "TPA_UNADJ", "BA"). Use tsumvar="PLT_CN" (tfun=sum) for summed tree count. }
   \item{tsumvarnmlst}{ String (vector). Name of the tree-level variable(s) to aggregate 
@@ -47,7 +50,7 @@ datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PL
 	(e.g., sum, mean, max). }
   \item{ACI}{ Logical. If TRUE, if ACI (All Condition Inventory) plots exist, any trees on 
 	these plots will be included in summary. If FALSE, you must include condition table. }
-  \item{tfilter}{ String. A filter to subset the tree data before aggregating 
+  \item{tfilter}{ String. Filter to subset the tree data before aggregating 
 	(e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is prompted. 
 	Use tfilter="NONE" if no filters. }
   \item{lbs2tons}{ Logical. If TRUE, converts biomass or carbon variables from pounds to tons. }
@@ -58,15 +61,18 @@ datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PL
   \item{adjTPA}{ Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1 (annual inventory),
 	if using less than 4 subplots. If using only 1 sublot for estimate, adjTPA=4. The 
 	default is 1. }
+  \item{NAto0}{ Logical. If TRUE, convert NA values to 0. }
   \item{savedata}{ Logical. If TRUE, writes output data to outfolder. }
-  \item{outfolder}{ String. The name of the output folder. If savedata=TRUE, all output 
+  \item{outfolder}{ String. Name of the output folder. If savedata=TRUE, all output 
 	saved to the outfolder. If savedata=FALSE, only a text file of input parameters is saved. }
-  \item{outfn}{ String. The name of the output file if savedata=TRUE (*.csv). Do not 
+  \item{out_layer}{ String. Name of output layer if savedata=TRUE. Do not 
 	include extension. If NULL, the file will be named tsum_'date'.csv }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
   \item{overwrite}{ Logical. If TRUE, overwrite output file. }
   \item{tround}{ Number. The number of digits to round to. If NULL, default=6. }
   \item{checkNA}{ Logical. If TRUE, checks if NA values exist in necessary variables. }
+  \item{returnDT}{ Logical. If TRUE, returns data.table object(s). If FALSE, returns 
+	data.frame object(s). }
 }
 \details{ If variable = NULL, then it will prompt user for input. 
 

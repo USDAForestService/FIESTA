@@ -1,7 +1,7 @@
-anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid="CN", 
+anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltassgn=NULL, puniqueid="CN", 
 	plotid="plot_id", pntid="dot_id", tabtype="PCT", sumunits=FALSE, strata=FALSE, 
-	stratalut=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, strvar=NULL, 
-	getwt=TRUE, getwtvar="P1POINTCNT", autocombine=TRUE, lutfolder="_luts", 
+	stratalut=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, unitcombine=FALSE, 
+	strvar=NULL, getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, lutfolder="_luts", 
 	savedata=TRUE, returntitle=TRUE, outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, 
 	rawdata=TRUE, pnt1=FALSE, estname=NULL, stabbr=NULL){
 
@@ -69,10 +69,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  est.change_pnt <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, 
+  est.change_pnt <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
 	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	sumunits=sumunits, stabbr=stabbr)
@@ -92,10 +92,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  est.chg_ag_2grp <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,
+  est.chg_ag_2grp <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata,
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata,
  	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
 	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, pnt.filter=pnt.filter, 
 	row.add0=TRUE, rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, 
@@ -117,10 +117,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  use_1 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,
+  use_1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
 	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, 
 	rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
@@ -141,10 +141,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  use_2 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,
+  use_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre, 
 	rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, rowlut=rowlut, 
 	returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
@@ -165,10 +165,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  cover_1 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,
+  cover_1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
 	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, 
 	rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
@@ -189,10 +189,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  cover_2 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,
+  cover_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, 
 	rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
@@ -209,10 +209,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  use_1_2_FOR <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,  
+  use_1_2_FOR <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,  
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.date=outfn.date, 
 	overwrite=overwrite, outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, 
 	returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, gainloss=TRUE, 
@@ -243,10 +243,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
  			with=FALSE])
   names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
 
-  cover_1_2_NEWGRP <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, 
+  cover_1_2_NEWGRP <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, pnt.filter=pnt.filter, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, pnt.filter=pnt.filter, 
 	lutfolder=lutfolder, savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
 	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, 
 	returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, gainloss=TRUE, 
@@ -277,10 +277,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  use_1_2_NEW <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,  
+  use_1_2_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,  
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
 	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, 
 	returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, gainloss=TRUE, 
@@ -310,10 +310,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  cover_1_2_NEW <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state,  
+  cover_1_2_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,  
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
 	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, 
 	title.ref=title.ref, returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, 
@@ -343,10 +343,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  use_1_cover_1_NEW <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, 
+  use_1_cover_1_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
 	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, 
 	title.ref=title.ref, returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, 
@@ -376,10 +376,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  use_2_cover_2_NEW <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, 
+  use_2_cover_2_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
@@ -409,10 +409,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  rat1 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, ratio=TRUE, 
+  rat1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
@@ -445,10 +445,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  rat1 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, ratio=TRUE, 
+  rat1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
@@ -494,10 +494,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  rat2 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, ratio=TRUE, 
+  rat2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
@@ -525,10 +525,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  rat3 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, ratio=TRUE, 
+  rat3 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	pnt.filter=pnt.filter, row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, 
@@ -557,10 +557,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  rat4 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, ratio=TRUE, 
+  rat4 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
+	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
 	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	pnt.filter=pnt.filter, row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, 
@@ -579,10 +579,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  est.use_1_2 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, 
+  est.use_1_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, 
 	returntitle=returntitle, sumunits=sumunits, pnt.filter=pnt.filter, stabbr=stabbr)
@@ -600,10 +600,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  est.cover_1_2 <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, 
+  est.cover_1_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	sumunits=sumunits, pnt.filter=pnt.filter, stabbr=stabbr)
@@ -621,10 +621,10 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltstrat=NULL, puniqueid
   if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
   outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  est.use_1_2_FOR <- anPBestICE(icedat=icedat, pltstrat=pltstrat, state=state, 
+  est.use_1_2_FOR <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
 	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
 	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	autocombine=autocombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
+	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
 	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	sumunits=sumunits, pnt.filter=pnt.filter, stabbr=stabbr)

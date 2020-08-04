@@ -12,68 +12,76 @@
 	that have proportion less than 1. The attribute is the proportion of the plot which 
 	is divided by the adjustment factor, and averaged by stratum. Strata means are 
 	combined using the strata weights and then expanded to area using the total land 
-	area in the population. 
-	  
+	area in the population.   
 }
 \usage{
-modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN", 
-	sumunits = TRUE, adjsamp = TRUE, strata = TRUE, landarea = "ALL", 
-	ACI = FALSE, nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, 
-	unitvar = NULL, unitvar2 = NULL, autocombine = TRUE, unitarea = NULL, 
-	areavar = "ACRES", stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", rowvar = NULL, rowvar.filter = NULL, colvar = NULL, 
-	colvar.filter = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
+modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
+	condid = "CONDID", puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
+	evalid = NULL, invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, 
+	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
+	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
+	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
+	stratcombine = TRUE, landarea = "FOREST", plt.filter = NULL, cond.filter = NULL, 
+	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
 	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
 	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	allin1 = FALSE, estround = 1, pseround = 2, estnull = 0, psenull = "--", 
-	divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, 
-	outfn = NULL, outfn.pre=NULL, outfn.date = TRUE, overwrite = FALSE, 
-	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.filter = NULL, gui = FALSE)
+	sumunits = TRUE, allin1 = FALSE, estround = 1, pseround = 2, 
+	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
+	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre=NULL, outfn.date = TRUE, 
+	overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+	title.filter = NULL, GBpopdat = NULL, gui = FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
+ 
 \arguments{
-  \item{cond}{ DF/DT or comma-separated values (CSV) file (*.csv). The condition-level 
-	table with one record per condtions and including nonsampled conditions. 
-	Plot variables and strata/estimation unit variable(s) may be included for 
-	post-stratification. See details for necessary variables to include. }
-  \item{pltstrat}{ DF/DT, comma-separated values (CSV) file(*.csv), SpatialDataFrame, or 
-	shapefile(*.shp) with one record per plot and strata/estimation unit variable(s)
-	if post-stratification. Include nonsampled plots only if PLOT_STATUS_CD variable 
-	is in table. Optional. }
+  \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
+	The condition-level variables with one record per condition, including or 
+	excluding nonsampled conditions. Plot variables and strata/estimation unit 
+	variable(s) may be included if plt and pltassgn=NULL. See details for necessary 
+	variables to include. }
+  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
+	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
+	or a sf R object. Plot-level variables. If nonsampled plots are included, 
+	PLOT_STATUS_CD variable must be in table. Optional. }
+  \item{pltassgn}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
+	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
+	or a sf R object. Plot-level assignment of estimation unit and/or strata. Optional. }
+  \item{dsn}{ String. Name of database where cond and pltassgn tables reside. 
+	The dsn varies by driver. See gdal OGR vector formats 	(https://www.gdal.org/ogr_formats.html). }
   \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{puniqueid}{ String. Unique identifier of plot in pltstrat. }
-  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
-	one table. }
-  \item{adjsamp}{ Logical. If TRUE, adjustment factors are calculated for nonsampled 
-	(nonresponse) conditions based on summed proportions for sampled conditions
-	divided by the total plots in the strata/estimation unit. Adjustments are only 
-	calculated for annual inventory plots (designcd=1). }
-  \item{strata}{ Logical. If TRUE, add data information for stratification. }
-  \item{landarea}{ String. The sample area filter for estimates ("ALL", "FOREST", "TIMBERLAND"). 
-	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, 
-	filtered to SITECLCD in(1:6) and RESERVCD = 0. }
+  \item{condid}{ String. Unique identifier of plot conditions. If no condid in 
+	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
+  \item{puniqueid}{ String. Unique identifier of plot. }
+  \item{pltassgnid}{ String. Unique identifier of plot. }
+  \item{pjoinid}{ String. Join variable in plot to match pltassgnid. Does not need to
+	be uniqueid. }
+  \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
+  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
   \item{ACI}{ Logical. If TRUE, includes All Condition Inventory (ACI) plots. Removes 
 	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). }
-  \item{nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. 
-	Set nonsamp.filter="NONE" to keep nonsampled plots and conditions in analysis. }
-  \item{plt.filter}{ String. A filter for the pltstrat. Must be R logical syntax. }
-  \item{cond.filter}{ String. A filter for the cond. Must be R logical syntax. }
-  \item{unitvar}{ String. Name of the estimation unit variable in cond or pltstrat 
+  \item{adj}{ String. How to calculate adjustment factors for nonsampled 
+	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
+	'samp' - adjustments are calculated at strata/estimation unit level; 
+	'plot' - adjustments are calculated at plot-level. Adjustments 
+	are only calculated for annual inventory plots (designcd=1). } 
+  \item{strata}{ Logical. If TRUE, add data information for stratification. }
+  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
+	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
+  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
+	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
+	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
+  \item{unitvar}{ String. Name of the estimation unit variable in cond or pltassgn 
 	with estimation unit assignment for each plot (e.g., 'ESTN_UNIT'). 
 	If one estimation unit, set unitvar=NULL. }
   \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
-	pltstrat with assignment for each plot (e.g., 'STATECD'). }
-  \item{autocombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
+	pltassgn with assignment for each plot (e.g., 'STATECD'). }
   \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
 	unit, include a number of total acreage for the area of interest or a data frame
 	with areavar. If more than one estimation unit, provide a data frame of total 
 	area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
+  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
+	than 2 plots in any one estimation unit. See notes for more info. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 
@@ -84,12 +92,17 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 	If FALSE, 'strwt' variable must be in stratalut. }
   \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt).
  	Default="P1POINTCNT". }
+  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
+	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{landarea}{ String. The sample area filter for estimates ("ALL", "FOREST", "TIMBERLAND"). 
+	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, 
+	filtered to SITECLCD in(1:6) and RESERVCD = 0. }
+  \item{plt.filter}{ String. A filter for the pltassgn. Must be R logical syntax. }
+  \item{cond.filter}{ String. A filter for the cond. Must be R logical syntax. }
   \item{rowvar}{ String. Name of row domain variable in cond. If only one domain, 
 	rowvar = domain variable. If more than one domain, include colvar. If no domain,
 	rowvar = NULL. }
-  \item{rowvar.filter}{ String. Filter for row variable. Must be R syntax. }
   \item{colvar}{ String. Name of column domain variable in cond. }
-  \item{colvar.filter}{ String. Filter for column variable. Must be R syntax. }
   \item{row.FIAname}{ Logical. If TRUE, gets FIA reference names for row variable based on 
 	ref_codes. Only available for certain variables. }
   \item{col.FIAname}{ Logical. If TRUE, gets FIA reference names for column variable based
@@ -110,6 +123,8 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 	Only available if group category exists in ref_codes table (e.g., FORTYPGRPCD, OWNGRPCD). }
   \item{rowgrpnm}{ String. Name of row group variable. }  
   \item{rowgrpord}{ String. Name of row group variable to sort table rows. }  
+  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
+	one table. }
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
@@ -144,6 +159,7 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
+  \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
   \item{gui}{ Logical. If TRUE, user is prompted for parameters. }
 }
 \details{
@@ -152,7 +168,7 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
      	Necessary variables:\cr
 	\tabular{llll}{
 		\tab \bold{Data} \tab \bold{Variable}	\tab \bold{Description}\cr
-	 	\tab cond \tab cuniqueid	\tab Unique identifier for each plot, to link to pltstrat 
+	 	\tab cond \tab cuniqueid	\tab Unique identifier for each plot, to link to pltassgn 
 								(ex. PLT_CN).\cr
 		\tab  \tab CONDID		\tab Unique identfier of each condition on plot. 
 								Set CONDID=1, if only 1 condition per plot.\cr
@@ -165,7 +181,7 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
   		\tab  \tab SITECLCD		\tab If landarea=TIMBERLAND. Measure of site productivity.\cr
   		\tab  \tab RESERVCD		\tab If landarea=TIMBERLAND. Reserved status.\cr
 
-	 	\tab pltstrat \tab puniqueid	\tab Unique identifier for each plot, to link to cond 
+	 	\tab pltassgn \tab puniqueid	\tab Unique identifier for each plot, to link to cond 
 								(ex. CN).\cr
 	 	\tab  \tab STATECD		\tab Identifies state each plot is located in.\cr
 	 	\tab  \tab INVYR		\tab Identifies inventory year of each plot.\cr
@@ -234,6 +250,7 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 		\tab \bold{Variable}	\tab \bold{Description}\cr
 	 	\tab nhat		\tab estimate proportion of land \cr
 	 	\tab nhat.var	\tab variance estimate of estimated proportion of land \cr
+	 	\tab NBRPLT.gt0	\tab Number of non-zero plots used in estimates \cr
 	 	\tab AREA		\tab total area for estimation unit \cr
 	 	\tab est		\tab estimated area of land { nhat*areavar } \cr
 	 	\tab est.var	\tab variance estimate of estimate acres of land { nhat.var*areavar^2 } \cr
@@ -281,7 +298,7 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 	estimated. Remotely-sensed data is often used to generate strata weights with 
 	proporation of pixels by strata. If stratification is desired (strata=TRUE), the 
 	required data include: stratum assignment for the center location of each plot, 
-	stored in either pltstrat or cond; and a look-up table with the area or proportion 
+	stored in either pltassgn or cond; and a look-up table with the area or proportion 
 	of the total area of each strata value by estimation unit, making sure the name of 
 	the strata (and estimation unit) variable and values match the plot assignment name(s) 
 	and value(s).
@@ -305,7 +322,7 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
 	data frame. If savedata=TRUE, a separate file is written for each estimation unit.
 
 
-	autocombine:\cr
+	stratcombine:\cr
 	If TRUE and less than 2 plots in any one estimation unit, all estimation units with 
 	10 or less plots are combined. The current method for combining is to group the
 	estimation unit with less than 10 plots with the estimation unit following in 
@@ -336,13 +353,13 @@ modGBarea(cond, pltstrat = NULL, cuniqueid = "PLT_CN", puniqueid = "CN",
   \dontrun{
 
   ## Rows only; combine estimation units (sumunits=TRUE)
-  modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, landarea="FOREST",
+  modGBarea(cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, landarea="FOREST",
 	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, rowvar="FORTYPCD", 
  	row.FIAname=TRUE)
   
 
   ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
-  modGBarea(cond=WYcond, pltstrat=WYpltstrat, sumunits=TRUE, landarea="FOREST",
+  modGBarea(cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, landarea="FOREST",
 	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, rowvar="FORTYPCD", 
  	row.FIAname=TRUE, allin1=TRUE)
   }

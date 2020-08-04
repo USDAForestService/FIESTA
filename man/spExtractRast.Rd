@@ -12,32 +12,30 @@
 }
 
 \usage{
-spExtractRast(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN", 
-	rastlst = NULL, rastfolder = NULL, rast.prjstr = NULL, bandlst = NULL, 
-	var.name = NULL, interpolate = FALSE, windowsize = 1, windowstat = NULL, 
-	keepnull = TRUE, showext = FALSE, savedata = FALSE, exportshp = FALSE, 
-	exportna = FALSE, outfolder = NULL, outfn = NULL, outfn.date = TRUE, 
+spExtractRast(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", rastlst, 
+	rastfolder = NULL, rast.crs = NULL, bandlst = NULL, var.name = NULL, 
+	interpolate = FALSE, windowsize = 1, windowstat = NULL, 
+	rast.NODATA = NULL, keepNA = TRUE, showext = FALSE, savedata = FALSE, 
+	exportsp = FALSE, exportNA = FALSE, outfolder = NULL, out_fmt = "shp", 
+	out_dsn = NULL, out_layer = "rastext", outfn.pre = NULL, outfn.date = TRUE, 
 	overwrite = FALSE, ...)
 }
 
 \arguments{
-  \item{spplt}{ S4 SpatialPoints object or shapefile filename (*.shp), including 
-	full path and extension. The spatial layer must have a defined projection.
-	If NULL, include xyplt. }
-  \item{spplt_dsn}{ String. Name of the folder or database with spplt. }
-  \item{xyplt}{ Data frame, data.table, matrix, or comma-delimited file (*.csv). 
-	Includes unique identifier of rows (uniqueid) and x and y coordinates. 	
-	If spplt=NULL, x/y coordinates are used for data extraction. Must include 
-	projection information in respective parameters. }
-  \item{uniqueid}{ String.* Unique identifier of xyplt rows. }
+  \item{xyplt}{ Data frame object or String. Name of layer with xy coordinates
+	and unique identifier. Can be layer with xy_dsn, full pathname, including 
+	extension, or file name (with extension) in xy_dsn folder. }
+  \item{xyplt_dsn}{ String. Name of database where xyplt is. The dsn varies by
+	driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
+  \item{uniqueid}{ String. Unique identifier of xyplt rows. }
   \item{rastlst}{ String vector or list or strings and/or rasters. File name(s)
 	with extensions, or raster object(s). Note: raster objects must be written 
 	to file. }
   \item{rastfolder}{ String. Name of the folder with raster layers. Optional. 
 	Useful if all raster layers are in same folder. }
-  \item{rast.prjstr}{ PRJ4STRING. Name of projection string for rasters with no
-	projection defined. If more than one raster has no projection defined, the
-	same proj4string will be used. }
+  \item{rast.crs}{ EPSG code or PROJ.4 String. Name of coordinate reference 
+	system for rasters with no projection defined. If more than one raster has 
+	no projection defined, the same crs will be used. }
   \item{bandlst}{ Numeric named list. If rastfnlst includes a multi-layer raster 
 	and only 1 or some layers are desired, specify layer numbers in a named list 
 	format with names matching the base names in rastfnlst (e.g., list(rast1=5, 
@@ -51,20 +49,27 @@ spExtractRast(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
 	statistic to use for summarizing data ("mean", "min", "max", "median", 
 	"sum", "range", "var", "sd", "rsd", "mode", "value"). If windowstat="value",
 	all pixel values are returned, otherwise 1 value per row in xyplt is returned. }
-  \item{keepnull}{ Logical. If TRUE, keep null values. }
+  \item{rast.NODATA}{ Numeric vector. NODATA value(s) of raster if not predefined
+	(See notes below). This value will be converted to NA and removed if keepNA=FALSE. 
+	If rastfnlst includes more than one raster, the rast.NODATA value should coincide 
+	with number of rasters in rastfnlst. If only one rast.NODATA, the same NODATA 
+	value is used for all rasters. }
+  \item{keepNA}{ Logical. If TRUE, keeps NA values after data extraction. }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
   \item{savedata}{ Logical. If TRUE, the input data with extracted values are
 	saved to outfolder. }
-  \item{exportshp}{ Logical. If TRUE, exports Spatial object to outfolder as an 
-	ArcGIS shapefile (*.shp). Variable names are truncated to 10 characters or less
-	(See note below). }
-  \item{exportna}{ Logical. If TRUE, exports Spatial object of NA values to outfolder. }
-  \item{outfolder}{ String. If savedata=TRUE or exportshp=TRUE, name of output folder. 
+  \item{exportsp}{ Logical. If TRUE, the extracted raster point data are 
+	exported to outfolder. }
+  \item{exportNA}{ Logical. If TRUE, NA values are exported to outfolder. }
+  \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
-  \item{outfn}{ String. Name of the output shapefile/.csv file (Do not include 
-	extension). If NULL, default name is datext_'date'. }
-  \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE, overwrite files in outfolder. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
+  \item{out_layer}{ String. Name of layer in out_dsn if database. }
+  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
+	(e.g., outfn_'date'.csv). }
+  \item{overwrite}{ Logical. If TRUE and exportsp=TRUE, overwrite files in outfolder. }
+  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }
 \details{
@@ -72,27 +77,34 @@ spExtractRast(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
 
 }
 \value{
-  \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input point data with
-	extracted raster values appended. }
-  \item{var.name}{ String vector. Variable names of extracted variables. }
+  \item{sppltext}{ sf object or data frame. Input xyplt data with extracted raster 
+	values appended. }
+  \item{outnames}{ String vector. Raster output names. }
+  \item{rastfnlst}{ String vector. Raster pathnames. }
+  \item{inputdf}{ Data frame. Raster information input to zonal summaries. }
+  \item{NAlst}{ sf List. If NA values exist after data extraction, the spatial NA
+	points are returned. }
 
-  If savedata=TRUE, outdat data frame is saved to outfolder (Default name: datext_'date'.csv).
-  If exportshp=TRUE, the SpatialPointsDataFrame object is exported to outfolder
-	(Default name: datext_'date'.shp). Variable names are truncated to 10 characters or 
-	less (See note below). Name changes are output to 'outfn'_newnames_'data'.csv in
-	outfolder.
+  If savedata=TRUE, pltassgn and unitarea are saved to outfolder.\cr
+  If exportsp=TRUE, the spatial sf points object is exported to outfolder.\cr.
+  If exportNA=TRUE and NA values exist after data extraction, the spatial NA points
+	are exported to outfolder.
    
 }
 \author{
-	Tracey S. Frescino, Chris Toney
+	Tracey S. Frescino
 }
 \note{
 
-  If exportshp=TRUE:\cr
- 	The writeOGR (rgdal) function is called. The ArcGIS driver truncates variable 
-	names to 10 characters or less. Variable names are changed before export using 
-	an internal function (trunc10shp). If Spatial object has more than 1 record, 
-	it will be returned but not exported. 
+  rast.NODATA\cr
+  NODATA values are raster pixel values that have no data of interest, including pixels 
+	within the extent of the layer, but outside the area of interest. Sometimes these 
+	pixels have been defined previously. The defined NODATA pixels are imported to R 
+	as NULL values. When not previously defined, the pixels outside the area of interest 
+	will be the minimum or maximum value depending on the data type 
+	(e.g., 16-bit signed: min=-32,768; max=32,768) or byte size (1 byte: min=0; max=255).
+      These NODATA values will be added to the zonal statistic calculations if not
+	specified in rast.NODATA. 
 
   
   The spTransform (rgdal) method is used for on-the-fly map projection conversion and 

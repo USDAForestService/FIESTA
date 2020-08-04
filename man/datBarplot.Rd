@@ -10,10 +10,11 @@
 datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE, 
 	x.order = NULL, sevar = NULL, psevar = NULL, device.type = "dev.new", 
 	jpeg.res = 300, device.height = 5, device.width = 8, horiz = FALSE, 
-	toplabels = NULL, ylim = NULL, yscale = NULL, ylabel = NULL, xlabel = NULL, 
-	mar = NULL, addlegend = FALSE, main = NULL, cex.main = 1, cex.label = 1, 
-	cex.names = 0.8, las.xnames = 0, savedata = FALSE, outfolder = NULL, 
-	outfn = NULL, ...)
+	toplabelvar = NULL, ylim = NULL, divideby = NULL, ylabel = NULL, 
+	xlabel = NULL, mar = NULL, addlegend = FALSE, main = NULL, cex.main = 1, 
+	cex.label = 1, cex.names = 0.8, las.xnames = 0, las.ynames = 1, 
+	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
+	outfn.date = TRUE, overwrite = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,7 +25,8 @@ datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE,
   \item{errbars}{ Logical. If TRUE, error bars are added to bar plot (sevar or psevar must 
 	also be populated). }
   \item{x.order}{ String or Vector. Define order of xvar: descending ("DESC") or 
-	ascending ("ASC"). Use vector for more than one xvar. }
+	ascending ("ASC"). Use vector for more than one xvar. If NULL, the default order of
+	table is used. }
   \item{sevar}{ String. Name of the variable with standard error values. }
   \item{psevar}{ String. Name of the variable with percent standard error. }
   \item{device.type}{ String. Type(s) of device for plotting ("dev.new", "jpg", "pdf", or "ps"). }
@@ -33,12 +35,12 @@ datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE,
   \item{device.width}{ Integer. Width (in inches) of barplot, if writing to file. }
   \item{horiz}{ Logical. If TRUE, bars are drawn horizontally with first bar at the bottom. 
 	If FALSE, bars are drawn vertically with first bar to the left (barplot parameter).  }
-  \item{toplabels}{ String vector. A vector of labels to place above each bar. }
+  \item{toplabelvar}{ String. Name of variable in x for adding labels to place above each bar
+	(e.g., NBRPLOTS.gt0). }
   \item{ylim}{ Number. A vector of min and max values, c(min,max) for the y axis (or x axis 
 	if horiz=TRUE). If NULL, defaults to maximum y value. If errbars=TRUE, the ylim defaults 
 	to the maximum y value plus the standard error. }
-  \item{yscale}{ String. The amount to rescale data values ('hundred', 'thousand', 'million'). 
-	The respective label will be added to the ylabel. }
+  \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{ylabel}{ String. Label for the y axis (same as ylab). }
   \item{xlabel}{ String. Label for the x axis (same as xlab). }
   \item{mar}{ See par.. A numerical vector representing number of lines for margins 
@@ -47,15 +49,20 @@ datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE,
   \item{main}{ String. Title for plot. }
   \item{cex.main}{ Number. Expansion factor for title. } 
   \item{cex.label}{ Number. A number representing cex in barplot (size expansion of x and/or ylabels. }
-  \item{cex.names}{ Number. Expansion factor for axis names (bar labels). Ex. 0.5 represents 
+  \item{cex.names}{ Number. Expansion factor for axis names (bar labels) (e.g., 0.5 represents 
 	half the size. } 
   \item{las.xnames}{ Number. The direction of x variable names (0,1,3). 0:diagonal (Default), 
+	1:horizontal; 3:vertical. } 
+  \item{las.ynames}{ Number. The direction of y variable names (0,1,3). 0:diagonal (Default), 
 	1:horizontal; 3:vertical. } 
   \item{savedata}{ Logical. If TRUE, writes output data to outfolder (jpg and pdf). }
   \item{outfolder}{ String. The name of the output folder. If savedata=TRUE, all output 
 	saved to the outfolder. If savedata=FALSE, only a text file of input parameters is saved. }
   \item{outfn}{ String. The name of the output file if savedata=TRUE (*.csv). Do not 
 	include extension. If NULL, the file will be named BARPLOT_'yvar_date'.csv }
+  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
+  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
+  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{...}{ list of additional arguments to pass to barplot(); names of the list are used 
 	as argument names. }
 

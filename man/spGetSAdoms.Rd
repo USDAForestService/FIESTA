@@ -11,77 +11,118 @@
 	attribute table to indicate the area of interest, or small area polygons.	
 }
 \usage{
-spGetSAdoms(smallbnd_layer, smallbnd_dsn = NULL, smallbnd.att, 
-	smallbnd.name = NULL, smallbnd.filter = NULL, helperbnd_layer = NULL, 
-	helperbnd_dsn = NULL, helperbnd.att = NULL, helperbnd.name = NULL, 
-	helperbnd.filter = NULL, largebnd_layer = NULL, largebnd_dsn = NULL, 
-	largebnd.att = NULL, largebnd.name = NULL, largebnd.filter = NULL, 
-	exportshp = FALSE, outfolder = NULL, outfn = NULL, outfn.date = TRUE, 
-	overwrite = FALSE)
+spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique, 
+	smallbnd.domain = NULL, smallbnd.filter = NULL, smallbnd.stfilter = NULL, 
+	smallbnd.ecofilter = NULL, helperbnd = NULL, helperbnd_dsn = NULL, 
+	helperbnd.unique = NULL, helperbnd.filter = NULL, largebnd = NULL, 
+	largebnd_dsn = NULL, largebnd.unique = NULL, largebnd.filter = NULL, 
+	maxbnd = NULL, maxbnd_dsn = NULL, maxbnd.unique = NULL, 
+	maxbnd.filter = NULL, helper_autoselect = TRUE, nbrdom.min = NULL, 
+	maxbnd.threshold = 30, largebnd.threshold = 20, multiSAdoms = TRUE, 
+	showsteps = TRUE, savedata = FALSE, savesteps = FALSE, outfolder = NULL, 
+	out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE)
 }
 \arguments{
-  \item{smallbnd_layer}{ String or S4 object. The name of the smallbnd 
-	spatial polygons layer. The layer name may be a full pathname to a file, 
-	the basename to a file, a spatial layer name from a database, or a 
-	SpatialPolygons object with a defined projection. }
-  \item{smallbnd_dsn}{ String. The data source name (dsn; i.e., folder or 
-	database name) of smallbnd_layer. The dsn varies by driver. See gdal OGR 
-	vector formats (https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{smallbnd.att}{ String. The atribute in smallbnd polygon layer that defines
-	small area(s). } 
-  \item{smallbnd.name}{ String. The output name for the atribute in smallbnd polygon 
-	layer that defines small area(s). If NULL, smallbnd.att is default. } 
+  \item{smallbnd}{ sf R object or String. Small area of interest boundary. 
+	Can be a spatial polygon object, full pathname to a shapefile, or name 
+	of a layer within a database. }
+  \item{smallbnd_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of smallbnd. The dsn varies by driver. See gdal OGR 
+	vector formats (https://www.gdal.org/ogr_formats.html). Optional if smallbnd
+	is an R object. } 
+  \item{smallbnd.unique}{ String. The attribute in smallbnd that defines unique 
+	identifier in smallbnd that defines the unique small area(s). If NULL,
+	an attribute is appended to smallbnd attribute table and used as smallbnd.unique, 
+	defining one polygon (SMALLAREA="SMALLAREA"). } 
+  \item{smallbnd.domain}{ String. A different attribute to use as for modeling domains.
+	If NULL, smallbnd.domain=smallbnd.unique. }
   \item{smallbnd.filter}{ String. A filter for smallbnd. Must be R syntax. } 
-  \item{helperbnd_layer}{ String or S4 object. The name of the helperbnd 
-	spatial polygons layer. The layer name may be a full pathname to a file, 
-	the basename to a file, a spatial layer name from a database, or a 
-	SpatialPolygons object with a defined projection. }
-  \item{helperbnd_dsn}{ String. The data source name (dsn; i.e., folder or 
-	database name) of helperbnd_layer. The dsn varies by driver. See gdal OGR 
-	vector formats (https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{helperbnd.att}{ String. The atribute in helperbnd polygon layer that defines
-	helper areas. } 
-  \item{helperbnd.name}{ String. The output name for the atribute in helperbnd polygon 
-	layer that defines helper area(s). If NULL, helperbnd.att is default. } 
-  \item{helperbnd.filter}{ String. A filter for helperbnd. Must be R syntax. } 
-  \item{largebnd_layer}{ String or S4 object. The name of the largebnd 
-	spatial polygons layer. The layer name may be a full pathname to a file, 
-	the basename to a file, a spatial layer name from a database, or a 
-	SpatialPolygons object with a defined projection. }
-  \item{largebnd_dsn}{ String. The data source name (dsn; i.e., folder or 
-	database name) of largebnd_layer. The dsn varies by driver. See gdal OGR 
-	vector formats (https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{largebnd.att}{ String. The atribute in largebnd polygon layer that defines
-	large area(s). } 
-  \item{largebnd.name}{ String. The output name for the atribute in largebnd polygon 
-	layer that defines large area(s). If NULL, largebnd.att is default. } 
+  \item{smallbnd.stfilter}{ String. A spatial filter for smallbnd to include
+	only smallbnd polygons that intersect (or overlap >= 30%) the filter 
+	boundary. The filter is based on the stunitco internal R object, with 
+	attributes: STATECD, STATENM, UNITCD, UNITNM, COUNTYCD, COUNTYNM. The 
+	filter should include one of these attributes and must be R syntax. } 
+  \item{smallbnd.ecofilter}{ String. A spatial filter for smallbnd to include
+	only smallbnd polygons that intersect (or overlap >= 30%) the filter 
+	boundary. The filter is based on the ecomap internal R object, with 
+	attributes: PROVINCE, SECTION, SUBSECTION. The filter should include 
+	one of these attributes and must be R syntax. } 
+  \item{helperbnd}{ sf R object or String. Name of polygon spatial layer 
+	delineating helper polygons for small area models. Can be a spatial 
+	polygon object, full pathname to a shapefile, or name of a layer within 
+	a database. }
+  \item{helperbnd_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of helperbnd. The dsn varies by driver. See gdal OGR 
+	vector formats (https://www.gdal.org/ogr_formats.html). Optional if helperbnd
+	is an R object. } 
+  \item{helperbnd.unique}{ String. The attribute in helper polygon layer that 
+	defines unique helper polygons. } 
+  \item{helperbnd.filter}{ String. A filter for helperbnd. Must be R syntax. }
+  \item{largebnd}{ sf R object or String. Name of large area polygon spatial 
+	layer, defining the model data extent for building small are models. 
+	Can be a spatial polygon object, full pathname to a shapefile, or name of 
+	a layer within a database. }
+  \item{largebnd_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of largebnd. The dsn varies by driver. See gdal OGR 
+	vector formats (https://www.gdal.org/ogr_formats.html). Optional if largebnd
+	is an R object. } 
+  \item{largebnd.unique}{ String. The attribute in largebnd polygon layer that 
+	defines unique large area polygon(s). } 
   \item{largebnd.filter}{ String. A filter for largebnd. Must be R syntax. } 
-  \item{exportshp}{ Logical. If TRUE, exports Spatial object to outfolder as an 
-	ArcGIS shapefile (*.shp). Variable names are truncated to 10 characters or less
-	(See note below). }
-  \item{outfolder}{ String. If savedata=TRUE or exportshp=TRUE, name of output folder. 
+  \item{maxbnd}{ sf R object or String. Name of polygon spatial layer, 
+	defining the maximum model data restraint for adding more helper polygons for 
+	building small are models. Can be a spatial polygon object, full pathname 
+	to a shapefile, or name of a layer within a database. }
+  \item{maxbnd_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of maxbnd. The dsn varies by driver. See gdal OGR 
+	vector formats (https://www.gdal.org/ogr_formats.html). Optional if maxbnd
+	is an R object. } 
+  \item{maxbnd.unique}{ String. The attribute in maxbnd polygon layer that 
+	defines unique max restraint area(s). } 
+  \item{maxbnd.filter}{ String. A filter for maxbnd. Must be R syntax. } 
+  \item{helper_autoselect}{ Logical. If TRUE, the helper boundaries are automatically
+	selected based on intersection with maxbnd and/or largebnd and number of
+	helperbnds defined by nbrdom.min. } 
+  \item{nbrdom.min}{ Integer. Set number for minimum domains for modeling. If NULL,
+	all domains within largebnd are selected. }
+  \item{maxbnd.threshold}{ Integer. Percent for including additional maxbnds for 
+	selecting helperbnds. If multiSAdoms=FALSE, the maxbnd with greatest 
+	percentage over the maxbnd.threshold is selected. }
+  \item{largebnd.threshold}{ Integer. Percent for including additional largebnds
+	for selecting helperbnds. }
+  \item{multiSAdoms}{ Logical. If TRUE, and the percent intersect of smallbnd
+	with maxbnd is greater than maxbnd.threshold, more than 1 SAdoms will be 
+	output in list. }
+  \item{showsteps}{ Logical. If TRUE, intermediate steps of selection process are
+	displayed. }
+  \item{savedata}{ Logical. If TRUE, save SAdoms spatial layer to outfolder. }
+  \item{savesteps}{ Logical. If TRUE, save steps spatial intermediate layers. }
+  \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
-  \item{outfn}{ String. Name of the output shapefile/.csv file (Do not include 
-	extension). If NULL, default name is datext_'date'. }
+  \item{out_fmt}{ String. Format for output tables ('shp', 'sqlite', 'gpkg', 'gdb').
+	If out_fmt='gdb', must install arcgisbinding package and ArcGIS R-Bridge. }
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg', 'gdb'). }
+  \item{outfn.pre}{ String. If out_fmt = "shp", a new folder is created within outfolder
+	named outfn.pre. If out_fmt != "shp", a prefix is concatenated to out_dsn, using
+	an underscore as separator. }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrite dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
 }
  
 \value{
-  A SpatialPolygonsDataFrame object with smallbnd and helperbnd unioned and clipped to 
-	extent of largebnd. Attributes with DOMAIN and SMALLAREA included.
+  A list object with small area domains. 
 
-  If exportshp=TRUE, the SpatialPointsDataFrame object is exported to outfolder
-	(Default name: datext_'date'.shp). Variable names are truncated to 10 characters or 
-	less (See note below). Name changes are output to 'outfn'_newnames_'data'.csv in
-	outfolder.
+  If exportsp=TRUE, the SAdoms spatial object(s) is exported to outfolder, with format
+	specified by out_fmt.
 }
 \author{
 	Tracey S. Frescino
 }
 \note{
 
-  If exportshp=TRUE:\cr
+  If exportsp=TRUE and out_fmt="shp":\cr
  	The writeOGR (rgdal) function is called. The ArcGIS driver truncates variable 
 	names to 10 characters or less. Variable names are changed before export using 
 	an internal function (trunc10shp). If Spatial object has more than 1 record, 

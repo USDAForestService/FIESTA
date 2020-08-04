@@ -7,18 +7,18 @@
 	Imports a spatial vector layer to an S4 Spatial object.
 }
 \usage{
-spImportSpatial(layer, dsn = NULL)
+spImportSpatial(layer = NULL, dsn = NULL, sql = NULL, polyfix = FALSE, gui = FALSE)
 }
 \arguments{
-  \item{layer}{ S4 SpatialPoints object or shapefile filename (*.shp), including 
-	full path and extension. The spatial layer must have a defined projection.
-	If NULL, include xyplt. }
-  \item{dsn}{ String. The data source name (dsn; i.e., folder or database name)
-	of layer. The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). Optional. } 
-}
-\details{
-	The layer can be a point, line, or polygon. 
+  \item{layer}{ Data frame object or String. Name of spatial layer. Can be 
+	layer with dsn, full pathname, including extension, or file name 
+	(with extension) in xy_dsn folder. }
+  \item{dsn}{ String. Name of database where layer is. The dsn varies by
+	driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
+  \item{sql}{ String. A sql syntax query to subset spatial layer. }
+  \item{polyfix}{ Logical. If polyfix=TRUE, uses buffer with 0 width to clean
+	up polygons. }
+  \item{gui}{ Logical. If TRUE, search for layer within dsn. }
 }
 \value{
   	A spatial object
@@ -27,6 +27,6 @@ spImportSpatial(layer, dsn = NULL)
 	Tracey S. Frescino
 }
 \note{
-  	Wrapper for rgdal package... readOGR function. GUI option available - spImportSpatial() 
+  	Wrapper for sf package... st_read function. 
 }
 \keyword{ data }

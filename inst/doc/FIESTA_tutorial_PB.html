@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
 
@@ -30,9 +29,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -201,7 +197,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -268,15 +265,15 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><a href="#title">Output table title(s)</a></li>
 </ol>
 <p><a name="dtab"></a> <strong>Data tables, unique identifiers, number of points</strong></p>
-<p>A data table of individual or aggregated point data is required input to the modPB function. Plot-level information, such as: state, county, or strata assignment, may be included in pltstrat or in pnt, or pltpct with pltstrat=NULL. The parameter input can be the name of a comma-delimited file (*.csv) or an R data frame or data table object already loaded into R. The pltstrat table can also be a point shapefile (*.shp) or a SpatialDataFrame object with one point per plot. The unique identifier for the plots must be provided in pltstrat and pnt and the unique identifier for the points must additionally in pnt. See the required variables section for a list of variables necessary to include for estimation.</p>
+<p>A data table of individual or aggregated point data is required input to the modPB function. Plot-level information, such as: state, county, or strata assignment, may be included in pltassgn or in pnt, or pltpct with pltassgn=NULL. The parameter input can be the name of a comma-delimited file (*.csv) or an R data frame or data table object already loaded into R. The pltassgn table can also be a point shapefile (*.shp) or a SpatialDataFrame object with one point per plot. The unique identifier for the plots must be provided in pltassgn and pnt and the unique identifier for the points must additionally in pnt. See the required variables section for a list of variables necessary to include for estimation.</p>
 <ul>
 <li><strong>pnt</strong> - Point-level data, with 1 record per point. If NULL, aggregated point counts must be in pntcnt.</li>
 <li><strong>pltpct</strong> - Plot-domain-level data, with 1 record per domain per plot.</li>
-<li><strong>plotid</strong> - Unique identifier for a plot in pnt or pntcnt. Values match puniqueid values in pltstrat.</li>
+<li><strong>plotid</strong> - Unique identifier for a plot in pnt or pntcnt. Values match puniqueid values in pltassgn.</li>
 <li><strong>pntid</strong> - Unique identifier for a point in pnt.</li>
 <li><strong>pltpctvars</strong> - Variables in pltpct for estimation. If NULL, all variables are used except plotid in pltpct.</li>
-<li><strong>pltstrat</strong> - Plot-level data, with 1 record per plot, including estimation unit and/or strata information. Optional.</li>
-<li><strong>puniqueid</strong> - Unique identifier for a plot in pltstrat, if pltstrat is not NULL.</li>
+<li><strong>pltassgn</strong> - Plot-level data, with 1 record per plot, including estimation unit and/or strata information. Optional.</li>
+<li><strong>puniqueid</strong> - Unique identifier for a plot in pltassgn, if pltassgn is not NULL.</li>
 </ul>
 <p><a name="etyp"></a> <strong>Estimation type</strong></p>
 <p>Define the type of estimation: output units (PCT, AREA); summed estimation units; post-stratify; if ratio estimate, what type of ratio.</p>
@@ -296,17 +293,17 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><strong>plt.filter</strong> - Plot-level filter(s)</li>
 </ul>
 <p><a name="estunit"></a> <strong>Estimation unit information</strong></p>
-<p>An estimation unit is a population, or area of interest, with known area and number of plots. As an example, in Interior-West FIA, an estimation unit is generally an individual county. An estimation unit may be a subpopulation of a larger population (e.g., Counties within a State). Subpopulations are mutually exclusive and independent within a population, therefore estimated totals and variances are additive. Each plot is assigned to only one estimation unit based on plot center and can be stored in either pltstrat or cond.</p>
+<p>An estimation unit is a population, or area of interest, with known area and number of plots. As an example, in Interior-West FIA, an estimation unit is generally an individual county. An estimation unit may be a subpopulation of a larger population (e.g., Counties within a State). Subpopulations are mutually exclusive and independent within a population, therefore estimated totals and variances are additive. Each plot is assigned to only one estimation unit based on plot center and can be stored in either pltassgn or cond.</p>
 <ul>
-<li><strong>unitvar</strong> - Name of the estimation unit variable in cond or pltstrat with assignment for each plot (e.g., ‘ESTN_UNIT’).</li>
+<li><strong>unitvar</strong> - Name of the estimation unit variable in cond or pltassgn with assignment for each plot (e.g., ‘ESTN_UNIT’).</li>
 <li><strong>unitarea</strong> - Total acres by estimation unit. If only 1 estimation unit, include a number representing total acreage for the area of interest. If more than one estimation unit, provide a data frame/data table of total acres by estimation unit, with variables defined by unitvar and areavar.</li>
 <li><strong>areavar</strong> - Name of acre variable in unitarea (Default = “ACRES”).</li>
 </ul>
 <p><a name="strat"></a> <strong>Strata information</strong></p>
-<p>Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltstrat or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.</p>
+<p>Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.</p>
 <ul>
 <li><strong>stratalut</strong> - Look-up table with pixel counts, area, or proportions (strwt) by strata (and estimation unit).</li>
-<li><strong>strvar</strong> - Name of strata variable in stratalut and pltstrat or cond table with strata assignment for each plot.</li>
+<li><strong>strvar</strong> - Name of strata variable in stratalut and pltassgn or cond table with strata assignment for each plot.</li>
 <li><strong>getwt</strong> - If TRUE, calculates strata weights from getwtvar in stratalut.</li>
 <li><strong>getwtvar</strong> - Name of variable in stratalut to calculate weights (e.g., pixels counts). Default=“P1POINTCNT”.</li>
 <li><strong>autocombine</strong> - TRUE, an automated procedure occurs to combine strata and/or estimation units if less than 2 plots (See note below for more details).</li>
@@ -657,7 +654,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td align="left">ICE plot-level percentages of land cover</td>
 </tr>
 <tr class="odd">
-<td align="left">icepltstrat_utco1135.csv</td>
+<td align="left">icepltassgn_utco1135.csv</td>
 <td align="left">ICE plot-level data, including estimation unit and strata variables</td>
 </tr>
 <tr class="even">
@@ -701,7 +698,7 @@ library(FIESTA)
 
 ## Get external data file names
 icepntfn &lt;- system.file(&quot;extdata&quot;, &quot;PB_data/icepnt_utco1135.csv&quot;, package=&quot;FIESTA&quot;)
-icepltfn &lt;- system.file(&quot;extdata&quot;, &quot;PB_data/icepltstrat_utco1135.csv&quot;, package=&quot;FIESTA&quot;)
+icepltfn &lt;- system.file(&quot;extdata&quot;, &quot;PB_data/icepltassgn_utco1135.csv&quot;, package=&quot;FIESTA&quot;)
 icepctcoverfn &lt;- system.file(&quot;extdata&quot;, &quot;PB_data/icepctcover_utco1135.csv&quot;, package=&quot;FIESTA&quot;)
 icechg_agfn &lt;- system.file(&quot;extdata&quot;, &quot;PB_data/chg_ag_LUT.csv&quot;, package=&quot;FIESTA&quot;)
 icecoverfn &lt;- system.file(&quot;extdata&quot;, &quot;PB_data/cover_LUT.csv&quot;, package=&quot;FIESTA&quot;)
@@ -715,9 +712,9 @@ icepctcover &lt;- read.csv(icepctcoverfn)
 ## Check variable descriptions for icepnt
 
 ## Look at spatial distribution by county (ESTN_UNIT)
-icepltsp &lt;- spMakeSpatialPoints(iceplt, uniqueid=&quot;plot_id&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
+icepltsp &lt;- spMakeSpatialPoints(iceplt, xy.uniqueid=&quot;plot_id&quot;, xvar=&quot;LON_PUBLIC&quot;, yvar=&quot;LAT_PUBLIC&quot;, 
               prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;)
-sp::plot(icepltsp, col=factor(icepltsp$ESTN_UNIT))
+plot(icepltsp[&quot;ESTN_UNIT&quot;])
 
 
 icecover &lt;- read.csv(icecoverfn)
@@ -760,18 +757,19 @@ icecover_2
 <pre><code>#######################################################################################
 # Usage:
 # modPB(pnt = NULL, pltpct = NULL, plotid = &quot;plot_id&quot;, pntid = NULL, pltpctvars = NULL,
-#   pltstrat = NULL, puniqueid = &quot;CN&quot;, ratio = FALSE, tabtype = &quot;PCT&quot;, sumunits = FALSE, 
-#   strata = FALSE, landarea = &quot;ALL&quot;, landarea.filter = NULL, nonsamp.filter = NULL,
-#   pnt.filter = NULL, plt.filter = NULL, unitarea = NULL, unitvar = NULL,   
-#   areavar = &quot;ACRES&quot;, stratalut = NULL, strvar = &quot;STRATA&quot;, getwt = TRUE, 
-#   getwtvar = &quot;P1POINTCNT&quot;, autocombine = TRUE, rowvar = NULL, colvar = NULL, 
-#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
+#   plt = NULL, pltassgn = NULL, puniqueid = &quot;CN&quot;, pltassgnid = &quot;CN&quot;, ratio = FALSE, 
+#   tabtype = &quot;PCT&quot;, sumunits = FALSE, strata = FALSE, plt.nonsamp.filter = NULL,
+#   unitarea = NULL, unitvar = NULL, unitarea = NULL, areavar = &quot;ACRES&quot;, 
+#   unitcombine = FALSE, stratalut = NULL, strvar = &quot;STRATUMCD&quot;, getwt = TRUE, 
+#   getwtvar = &quot;P1POINTCNT&quot;, stratcombine = TRUE, landarea = &quot;ALL&quot;, landarea.filter = NULL, 
+#   pnt.nonsamp.filter = NULL, pnt.filter = NULL, plt.filter = NULL, rowvar = NULL,    
+#   colvar = NULL, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
 #   rowlut = NULL, collut = NULL, domlut = NULL, domvarlst = NULL, ratioden = &quot;ROWVAR&quot;, 
 #   allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = &quot;--&quot;, 
-#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
-#   addtitle = TRUE, savetitle = FALSE, title.main = NULL, title.ref = NULL, 
+#   divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#   outfn.pre = NULL, addtitle = TRUE, savetitle = FALSE, title.main = NULL, title.ref = NULL, 
 #   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, title.filter = NULL,
-#   overwrite = FALSE, gui = FALSE)
+#   overwrite = FALSE, PBpopdat = NULL, gui = FALSE)
 # 
 # Description:
 # Generates percent or acre estimates by domain (and estimation unit).   
@@ -784,12 +782,12 @@ help(modPB)
 <h4>Point-level data - Totals</h4>
 <pre><code>## Percent ##
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-cover1 &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover1 &lt;- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, title.rowvar=&quot;Land Cover (2011)&quot;)
 names(cover1)
 cover1$est
 
-# Note: pltstrat is not necessary for this estimate
+# Note: pltassgn is not necessary for this estimate
 cover1 &lt;- modPB(pnt=icepnt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;, 
     rowvar=&quot;cover_1&quot;, rowlut=icecover_1, title.rowvar=&quot;Land Cover (2011)&quot;)
 names(cover1)
@@ -870,7 +868,7 @@ netchg
 
 ## Percent ##
 # Percent land by agent of change in Davis and Salt Lake Counties, UT
-chg_ag &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+chg_ag &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;chg_ag_2&quot;, rowlut=icechg_ag, rawdata=TRUE, title.rowvar=&quot;Agent of Change&quot;,
         returntitle=TRUE)
 names(chg_ag)
@@ -880,7 +878,7 @@ chg_ag$titlelst
 
 ## Area ##
 # Area, in acres, of land by agent of change in Davis and Salt Lake Counties, UT
-chg_ag.area &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+chg_ag.area &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;chg_ag_2&quot;, rowlut=icechg_ag, rawdata=TRUE, title.rowvar=&quot;Agent of Change&quot;,
         returntitle=TRUE, tabtype=&quot;AREA&quot;, unitarea=sum(unitarea$ACRES), title.units=&quot;hectares&quot;)
 names(chg_ag.area)
@@ -894,7 +892,7 @@ chg_ag.area$titlelst
 # Percent land with observed change by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a landarea filter to subset dataset to only plots with observed change.
 landarea.filter &lt;- &quot;change_1_2 == 1&quot;
-chg_ag.plts &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+chg_ag.plts &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;chg_ag_2&quot;, rowlut=icechg_ag, rawdata=TRUE, title.rowvar=&quot;Agent of Change&quot;,
         landarea=&quot;CHANGE&quot;, landarea.filter=landarea.filter, returntitle=TRUE)
 names(chg_ag.plts)
@@ -906,7 +904,7 @@ chg_ag.plts$titlelst
 # Percent land changed by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a point filter to include observed change on points
 pnt.filter &lt;- &quot;chg_ag_2 &gt; 0&quot;
-chg_ag.pnts &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+chg_ag.pnts &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;chg_ag_2&quot;, rowlut=icechg_ag, rawdata=TRUE, title.rowvar=&quot;Agent of Change&quot;,
         pnt.filter=pnt.filter, returntitle=TRUE, title.filter=&quot;observed changed&quot;)
 names(chg_ag.pnts)
@@ -926,7 +924,7 @@ chg_ag.pnts$est
 # Area, in acres, of land with observed change by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a landarea filter to subset dataset to only plots with observed change.
 landarea.filter &lt;- &quot;change_1_2 == 1&quot;
-chg_ag.plts.area &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+chg_ag.plts.area &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;chg_ag_2&quot;, rowlut=icechg_ag, rawdata=TRUE, title.rowvar=&quot;Agent of Change&quot;,
         landarea=&quot;CHANGE&quot;, landarea.filter=landarea.filter, returntitle=TRUE, tabtype=&quot;AREA&quot;, 
         unitarea=sum(unitarea$ACRES))
@@ -939,7 +937,7 @@ chg_ag.plts.area$titlelst
 # Area, in acres, of land changed by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a point filter to include observed change on points
 pnt.filter &lt;- &quot;chg_ag_2 &gt; 0&quot;
-chg_ag.pnts.area &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+chg_ag.pnts.area &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;chg_ag_2&quot;, rowlut=icechg_ag, rawdata=TRUE, title.rowvar=&quot;Agent of Change&quot;,
         pnt.filter=pnt.filter, returntitle=TRUE, title.filter=&quot;observed changed&quot;, 
         tabtype=&quot;AREA&quot;, unitarea=sum(unitarea$ACRES))
@@ -993,7 +991,7 @@ chg_ag_cover2$titlelst
 
 ## Area by Estimation Unit ##
 # Area, in acres, of land cover at Time 1 (2011) by County for all land in Davis and Salt Lake Counties, UT
-cover1.unit.area &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, 
+cover1.unit.area &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, 
     pntid=&quot;dot_cnt&quot;, rowvar=&quot;cover_1&quot;, rowlut=icecover_1, title.rowvar=&quot;Land Cover (2011)&quot;, 
     nonsamp.filter=&quot;cover_1 != 999&quot;, tabtype=&quot;AREA&quot;, unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, 
     areavar=&quot;ACRES&quot;)
@@ -1005,7 +1003,7 @@ cover1.unit.area$pse
 ## Area by Estimation Unit ##
 # Area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 # Note: Estimates are generated by ESTN_UNIT and summed to the population.
-cover1.unitsum &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover1.unitsum &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, title.rowvar=&quot;Land Cover (2011)&quot;, 
         nonsamp.filter=&quot;cover_1 != 999&quot;, tabtype=&quot;AREA&quot;, unitarea=unitarea, 
         unitvar=&quot;ESTN_UNIT&quot;, areavar=&quot;ACRES&quot;, sumunits=TRUE)
@@ -1017,7 +1015,7 @@ cover1.unitsum$est
 # Area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 # Return raw data
 # Note: Estimates are generated by ESTN_UNIT and summed to the population.
-cover1.unitsum.area &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover1.unitsum.area &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, title.rowvar=&quot;Land Cover (2011)&quot;, 
         nonsamp.filter=&quot;cover_1 != 999&quot;, tabtype=&quot;AREA&quot;, unitarea=unitarea, 
         unitvar=&quot;ESTN_UNIT&quot;, areavar=&quot;ACRES&quot;, sumunits=TRUE, rawdata=TRUE)
@@ -1036,7 +1034,7 @@ cover1.unitsum.raw$unit.rowest
 <h4>Point-level transition data (T1 Cover - T2 Cover)</h4>
 <pre><code>## Percent ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover12 &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12 &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
         rawdata=TRUE, title.rowvar=&quot;Land Cover (2011)&quot;, title.colvar=&quot;Land Cover (2012)&quot;, 
         nonsamp.filter=&quot;cover_1 != 999&quot;, returntitle=TRUE)
@@ -1057,7 +1055,7 @@ cover12$titlelst
 
 ## Area ##
 # Area, in acres, of land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover12.acres &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12.acres &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
         rawdata=TRUE, title.rowvar=&quot;Land Cover (2011)&quot;, title.colvar=&quot;Land Cover (2012)&quot;, 
         nonsamp.filter=&quot;cover_1 != 999&quot;, tabtype=&quot;AREA&quot;, unitarea=sum(unitarea$ACRES))
@@ -1075,7 +1073,7 @@ icepnt2 &lt;- merge(icepnt, icecover_1, by=&quot;cover_1&quot;)
 icepnt2 &lt;- merge(icepnt2, icecover_2, by=&quot;cover_2&quot;)
 
 icepnt2$cover_12_nm &lt;- paste(icepnt2$cover_1_nm, icepnt2$cover_2_nm, sep=&quot;-&quot;)
-cover12nm &lt;- modPB(pnt=icepnt2, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12nm &lt;- modPB(pnt=icepnt2, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_12_nm&quot;, rawdata=TRUE, title.rowvar=&quot;Land Cover (2011-2014)&quot;,  
         nonsamp.filter=&quot;cover_1 != 999&quot;, returntitle=TRUE)
 names(cover12nm)
@@ -1094,7 +1092,7 @@ cover12$pse
 ## Percent ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Filter for only categories of cover_1 &lt; 200
-cover12.lt200 &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12.lt200 &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
         rawdata=TRUE, title.rowvar=&quot;Land Cover (2011)&quot;, title.colvar=&quot;Land Cover (2012)&quot;, 
         nonsamp.filter=&quot;cover_1 != 999&quot;, pnt.filter=&quot;cover_1 &lt; 200&quot;, 
@@ -1110,7 +1108,7 @@ cover12.lt200$titlelst
 ## Percent ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Return gain/loss estimates for each category in rawdata tables
-cover12b &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12b &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
         rawdata=TRUE, title.rowvar=&quot;Land Cover (2011)&quot;, title.colvar=&quot;Land Cover (2014)&quot;, 
         nonsamp.filter=&quot;cover_1 != 999&quot;, gainloss=TRUE)
@@ -1331,7 +1329,7 @@ pltpct1.trans$titlelst
 <pre><code>## Percent
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # With post-stratification
-cover12ps &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12ps &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
         rawdata=TRUE, title.rowvar=&quot;Land Cover&quot;, strvar=&quot;STRATUMCD&quot;, stratalut=strlutfn,
         strata=TRUE)
@@ -1361,7 +1359,7 @@ cover12ps$pse
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # With post-stratification
 icepnt$cover_12 &lt;- paste(icepnt$cover_1, icepnt$cover_2)
-cover12ps &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12ps &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
         rawdata=TRUE, title.rowvar=&quot;Land Cover&quot;, strvar=&quot;STRATUMCD&quot;, stratalut=strlutfn,
         strata=TRUE)
@@ -1404,7 +1402,7 @@ datBarStacked(x=x, main.attribute=&quot;cover_1_nm&quot;, sub.attribute=&quot;co
 ## Gain / Loss ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Return gain/loss estimates for each category in rawdata tables
-cover12b &lt;- modPB(pnt=icepnt, pltstrat=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+cover12b &lt;- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
         rawdata=TRUE, title.rowvar=&quot;Land Cover (2011)&quot;, title.colvar=&quot;Land Cover (2014)&quot;, 
         nonsamp.filter=&quot;cover_1 != 999&quot;, gainloss=TRUE)

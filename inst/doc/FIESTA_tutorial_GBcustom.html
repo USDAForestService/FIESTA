@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
 
@@ -30,9 +29,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -201,7 +197,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -294,8 +291,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td>Polygon shapefile of WY Bighorn National Forest District boundaries**</td>
 </tr>
 <tr class="odd">
-<td>WYbighorn_forest_nonforest_250m.img</td>
-<td>Erdas Imagine raster of predicted forest/nonforest (1/0)***</td>
+<td>WYbighorn_forest_nonforest_250m.tif</td>
+<td>GeoTIFF raster of predicted forest/nonforest (1/0)***</td>
 </tr>
 <tr class="even">
 <td>WYbighorn_dem_250m.img</td>
@@ -365,6 +362,7 @@ WYbhdist.att &lt;- &quot;DISTRICTNA&quot;
 
 fornffn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_forest_nonforest_250m.tif&quot;, package=&quot;FIESTA&quot;)
 demfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_dem_250m.img&quot;, package=&quot;FIESTA&quot;)
+
 </code></pre>
 <p><a name="ref"></a></p>
 </div>
@@ -381,25 +379,31 @@ demfn &lt;- system.file(&quot;extdata&quot;, &quot;sp_data/WYbighorn_dem_250m.im
 <h4><a name="spGetEstUnit"></a>spGetEstUnit()</h4>
 <pre><code>######################################################################################
 # Usage:
-# spGetEstUnit(spplt = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, unittype = &quot;POLY&quot;, 
-#       unit_dsn = NULL, unit_layer = NULL, unitvar = NULL, areavar= NULL, 
-#     areaunits = &quot;ACRES&quot;, rast.NODATA = NULL, keepnull = FALSE, showext = TRUE, 
-#     savedata = FALSE, exportshp = FALSE, outfolder = NULL, outfn = NULL, 
-#     overwrite = FALSE, ...) 
+# spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = &quot;PLT_CN&quot;, unittype = &quot;POLY&quot;, 
+#       unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, areavar= NULL, 
+#     areaunits = &quot;ACRES&quot;, rast.NODATA = NULL, keepNA = FALSE, showext = TRUE, 
+#     savedata = FALSE, exportsp = FALSE, exportNA = FALSE, outfolder = NULL, 
+#     out_fmt = &quot;shp&quot;, out_dsn = NULL, out_layer = &quot;unit_assgn&quot;, outfn.date = TRUE,
+#     outfn.pre = NULL, overwrite = FALSE, ...) 
 # 
 # Description:
 # Extract estimation unit values to plots and calculate area by estimation unit.
 ######################################################################################
 
+## Create spatial points from WYplt
+WYspplt &lt;- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid=&quot;CN&quot;, xvar=&quot;LON_PUBLIC&quot;, 
+        yvar=&quot;LAT_PUBLIC&quot;, crs=4269)
+xyplt=WYspplt
+
 
 ## By Bighorn National Forest ##
 # Get estimation unit acres for Bighorn National Forest.
 ######################################################################################
-unitdat.bh &lt;- spGetEstUnit(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
-    prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhfn)
+unitdat.bh &lt;- spGetEstUnit(xyplt=WYplt, uniqueid=&quot;CN&quot;, xvar=&quot;LON_PUBLIC&quot;, yvar=&quot;LAT_PUBLIC&quot;, 
+    crs=4269, unit_layer=WYbhfn)
 
 names(unitdat.bh)
-pltunit.bh &lt;- unitdat.bh$pltstrat
+sppltunit.bh &lt;- unitdat.bh$sppltassgn
 unitarea.bh &lt;- unitdat.bh$unitarea
 unitvar.bh &lt;- unitdat.bh$unitvar
 areavar.bh &lt;- unitdat.bh$areavar
@@ -412,11 +416,11 @@ areavar.bh
 ## By Bighorn National Forest District ##
 # Get estimation unit acres and strata information for Bighorn National Forest.
 ######################################################################################
-unitdat.bhdist &lt;- spGetEstUnit(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
-    prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhdistfn, unitvar=&quot;DISTRICTNA&quot;)
+unitdat.bhdist &lt;- spGetEstUnit(xyplt=WYplt, uniqueid=&quot;CN&quot;, xvar=&quot;LON_PUBLIC&quot;, yvar=&quot;LAT_PUBLIC&quot;, 
+    crs=4269, unit_layer=WYbhdistfn, unitvar=&quot;DISTRICTNA&quot;)
 
 names(unitdat.bhdist)
-pltunit.bhdist &lt;- unitdat.bhdist$pltstrat
+sppltunit.bhdist &lt;- unitdat.bhdist$sppltassgn
 unitarea.bhdist &lt;- unitdat.bhdist$unitarea
 unitvar.bhdist &lt;- unitdat.bhdist$unitvar
 areavar.bhdist &lt;- unitdat.bhdist$areavar
@@ -424,6 +428,7 @@ areavar.bhdist &lt;- unitdat.bhdist$areavar
 unitarea.bhdist
 unitvar.bhdist
 areavar.bhdist
+
 </code></pre>
 <p><a name="custom.strata"></a></p>
 </div>
@@ -431,24 +436,27 @@ areavar.bhdist
 <h4><a name="spGetStrata"></a>spGetStrata()</h4>
 <pre><code>######################################################################################
 # Usage:
-# spGetStrata(spplt = NULL, xyplt = NULL, uniqueid = &quot;PLT_CN&quot;, unittype = &quot;POLY&quot;, 
-#       unit_dsn = NULL, unit_layer = NULL, unitvar = NULL, strattype = &quot;RASTER&quot;, 
-#     stratlayer = NULL, strvar = NULL, areaunits = &quot;ACRES&quot;, rast.NODATA = NULL, 
-#     keepnull = FALSE, showext = TRUE, savedata = FALSE, exportshp = FALSE, 
-#     outfolder = NULL, outfn = NULL, overwrite = FALSE, ...) 
+# spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = &quot;PLT_CN&quot;, unittype = &quot;POLY&quot;,
+#     unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, strattype = &quot;RASTER&quot;, 
+#     strat_layer = NULL, strat_dsn = NULL, strvar = NULL, strat_lut = NULL,
+#       areaunits = &quot;ACRES&quot;, rast.NODATA = NULL, keepNA = FALSE, showext = TRUE,
+#     savedata = FALSE, exportsp = FALSE, exportNA = FALSE, outfolder = NULL,
+#     out_fmt = &quot;shp&quot;, out_dsn = NULL, out_layer = &quot;strat_assgn&quot;, outfn.date = TRUE,
+#     outfn.pre = NULL, overwrite = FALSE, ...) 
 # 
 # Description:
-# Subset Spatial polygons layer with another Spatial polygons layer.
+# Wrapper to extract attribute and area from a polygon or raster estimation 
+#   unit laer and a polygon or raster layer with strata pixel categories.
 ######################################################################################
 
 ## By Bighorn National Forest ##
 # Get estimation unit acres and strata information for Bighorn National Forest.
 ######################################################################################
-stratdat.bh &lt;- spGetStrata(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
+stratdat.bh &lt;- spGetStrata(xyplt=WYplt, uniqueid=&quot;CN&quot;, xvar=&quot;LON_PUBLIC&quot;, yvar=&quot;LAT_PUBLIC&quot;, 
     prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhfn, strat_layer=fornffn)
 
 names(stratdat.bh)
-pltstrat.bh &lt;- stratdat.bh$pltstrat
+pltassgn.bh &lt;- stratdat.bh$pltassgn
 unitarea.bh &lt;- stratdat.bh$unitarea
 stratalut.bh &lt;- stratdat.bh$stratalut
 strvar.bh &lt;- stratdat.bh$strvar
@@ -466,12 +474,12 @@ areavar.bh
 ## By Bighorn National Forest District ##
 # Get estimation unit acres and strata information for Bighorn National Forest Districts.
 ######################################################################################
-stratdat.bhdist &lt;- spGetStrata(xyplt=WYplt, uniqueid=&quot;CN&quot;, x=&quot;LON_PUBLIC&quot;, y=&quot;LAT_PUBLIC&quot;, 
+stratdat.bhdist &lt;- spGetStrata(xyplt=WYplt, uniqueid=&quot;CN&quot;, xvar=&quot;LON_PUBLIC&quot;, yvar=&quot;LAT_PUBLIC&quot;, 
     prj=&quot;longlat&quot;, datum=&quot;NAD83&quot;, unit_layer=WYbhdistfn, unitvar=&quot;DISTRICTNA&quot;,
     strat_layer=fornffn, rast.NODATA=0)
 
 names(stratdat.bhdist)
-pltstrat.bhdist &lt;- stratdat.bhdist$pltstrat
+pltassgn.bhdist &lt;- stratdat.bhdist$pltassgn
 unitarea.bhdist &lt;- stratdat.bhdist$unitarea
 stratalut.bhdist &lt;- stratdat.bhdist$stratalut
 strvar.bhdist &lt;- stratdat.bhdist$strvar
@@ -484,6 +492,7 @@ stratalut.bhdist
 unitvar.bhdist
 strvar.bhdist
 areavar.bhdist
+
 </code></pre>
 <p><a name="GBfun"></a></p>
 </div>
@@ -494,31 +503,32 @@ areavar.bhdist
 <h4>modGBarea</h4>
 <pre><code>######################################################################################
 # Usage:
-# modGBarea(cond = NULL, pltstrat = NULL, cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, 
-#       sumunits = FALSE, adjsamp = TRUE, strata = TRUE, landarea = &quot;ALL&quot;, ACI = FALSE, 
-#       nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL,  
-#       unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
-#     strvar = &quot;STRATA&quot;, getwt = TRUE, getwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE, 
-#     substrvar = NULL, autocombine = TRUE, rowvar = NULL, rowvar.filter = NULL, 
-#     colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, col.FIAname = FALSE,
-#     row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
-#     rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 0, pseround = 3, 
-#     savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
-#     outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-#     title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#     title.filter = NULL, gui = FALSE)
+# modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = &quot;PLT_CN&quot;, 
+#   condid = &quot;CONDID&quot;, puniqueid = &quot;CN&quot;, pltassgnid = &quot;CN&quot;, sumunits = FALSE, 
+#   adjsamp = TRUE, strata = TRUE, landarea = &quot;ALL&quot;, ACI = FALSE, 
+#   plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, plt.filter = NULL, 
+#   cond.filter = NULL, unitarea = NULL, unitvar = NULL, unitvar2 = NULL,
+#   autocombine = TRUE, unitarea = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
+#   strvar = &quot;STRATUMCD&quot;, getwt = TRUE, getwtvar = &quot;P1POINTCNT&quot;, rowvar = NULL,
+#   rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE,
+#   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
+#   col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 0, 
+#   pseround = 2, estnull = 0, psenull = &quot;--&quot;, divideby = NULL, savedata = FALSE, 
+#   rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,
+#   outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE,
+#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
+#   title.unitvar = NULL, title.filter = NULL, gui = FALSE)
 # 
 # Description:
-# Generates acre estimates by domain (and estimation unit). Calculations are based 
-#   on Scott et al. 2005 ('the green-book') for mapped forest inventory plots. The 
-#   non-ratio estimator for estimating area by stratum and domain is used. Plots that 
-#   are totally nonsampled are excluded from estimation dataset. Next, an adjustment 
-#   factor is calculated by strata to adjust for nonsampled (nonresponse) conditions 
-#   that have proportion less than 1. The attribute is the proportion of the plot which 
-#   is divided by the adjustment factor, and averaged by stratum. Strata means are 
-#   combined using the strata weights and then expanded to acres using the total land 
-#   area in the population.  
-######################################################################################
+# Generates acre estimates by domain (and estimation unit). Calculations are based on 
+# Scott et al. 2005 ('the green-book') for mapped forest inventory plots. The non-ratio 
+# estimator for estimating area by stratum and domain is used. Plots that are totally 
+# nonsampled are excluded from estimation dataset. Next, an adjustment factor is 
+# calculated by strata to adjust for nonsampled (nonresponse) conditions that have 
+# proportion less than 1. The attribute is the proportion of the plot which is divided 
+# by the adjustment factor, and averaged by stratum. Strata means are combined using the
+# strata weights and then expanded to acres using the total land area in the population.  
+########################################################################################
 
 help(modGBarea)
 
@@ -528,55 +538,75 @@ help(modGBarea)
 
 ## By Bighorn National Forest ##
 # Area by forest type and stand-size class for Bighorn National Forest
-area.bh &lt;- modGBarea(cond=WYcond, pltstrat=pltstrat.bh, rowvar=&quot;FORTYPCD&quot;, 
-    colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, unitarea=unitarea.bh,
-    stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, rawdata=TRUE, 
-    returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;)
+area.bh &lt;- modGBarea(cond=WYcond, pltassgn=pltassgn.bh, pltassgnid=&quot;CN&quot;, 
+    rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, 
+    unitarea=unitarea.bh, stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, 
+    rawdata=TRUE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;)
 names(area.bh)
 area.bh$est
 area.bh$pse
 area.bh$titlelst
 
+## population data
+area.bh.GBpopdat &lt;- area.bh$GBpopdat
+names(area.bh.GBpopdat)
+
+area.bh.GBpopdat$strlut
+
+## raw data tables
 area.bh.raw &lt;- area.bh$raw
 names(area.bh.raw)
-area.bh$raw$stratdat
+area.bh$raw$unit.grpest
 
 
 ## By Bighorn National Forest District ##
 # Area by forest type and stand-size class for Bighorn National Forest by district
-area.bhdist &lt;- modGBarea(cond=WYcond, pltstrat=pltstrat.bhdist, sumunits=FALSE, 
-    rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, col.FIAname=TRUE, unitvar=unitvar.bhdist,
-    strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist,
-    areavar=areavar.bhdist, getwt=FALSE, rawdata=TRUE, returntitle=TRUE, 
-    title.ref=&quot;Bighorn National Forest&quot;, autocombine=FALSE)
+area.bhdist &lt;- modGBarea(cond=WYcond, pltassgn=pltassgn.bhdist, pltassgnid=&quot;CN&quot;,
+    sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, col.FIAname=TRUE, 
+    unitvar=unitvar.bhdist, strvar=strvar.bhdist, unitarea=unitarea.bhdist, 
+    stratalut=stratalut.bhdist, areavar=areavar.bhdist, getwt=FALSE, 
+    rawdata=TRUE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;)
 names(area.bhdist)
 area.bhdist$est
 area.bhdist$pse
 area.bhdist$titlelst
 
+
+## population data
+area.bh.GBpopdat &lt;- area.bh$GBpopdat
+names(area.bh.GBpopdat)
+
+area.bh.GBpopdat$strlut
+
+
+## raw data tables
 area.bhdist.raw &lt;- area.bhdist$raw
 names(area.bhdist.raw)
-area.bhdist.raw$stratdat
+head(area.bhdist.raw$unit.grpest)
+
 </code></pre>
 </div>
 <div id="modgbtree" class="section level4">
 <h4>modGBtree</h4>
 <pre><code>######################################################################################
 # Usage:
-# modGBtree(tree = NULL, cond = NULL, pltstrat = NULL, seed = NULL, 
-#     tuniqueid = &quot;PLT_CN&quot;, cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, sumunits = FALSE, 
-#     adjsamp = TRUE, strata = TRUE, landarea=&quot;FOREST&quot;, ACI = FALSE, 
-#     nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL,  
-#     unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
-#     strvar = &quot;STRATA&quot;, getwt = TRUE, strwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE,
-#     substrvar = NULL, estvar = NULL, estvar.filter = NULL, estvar.name = NULL, 
-#     rowvar = NULL, rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL,
-#     row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,
-#     row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE,
-#     estround = 0, pseround = 3, savedata = FALSE, rawdata = FALSE, outfolder = NULL,
-#     outfn = NULL, outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, 
-#     title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
-#     title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, gui = FALSE)
+# modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
+#   dsn = NULL, tuniqueid = &quot;PLT_CN&quot;, cuniqueid = &quot;PLT_CN&quot;, condid = &quot;CONDID&quot;, 
+#   puniqueid = &quot;CN&quot;, pltassgnid = &quot;CN&quot;, sumunits = FALSE, adjsamp = TRUE, 
+#   strata = TRUE, landarea=&quot;FOREST&quot;, ACI = FALSE, plt.nonsamp.filter = NULL, 
+#   cond.nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, 
+#   unitvar = NULL, unitvar2 = NULL, autocombine = TRUE, unitarea = NULL,
+#   areavar = &quot;ACRES&quot;, stratalut = NULL, strvar = &quot;STRATUMCD&quot;, getwt = TRUE,
+#   strwtvar = &quot;P1POINTCNT&quot;, estvar = NULL, estvar.filter = NULL, estvar.name = NULL, 
+#   rowvar = NULL, rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, 
+#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
+#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, 
+#   estround = 0, pseround = 2, estnull = 0, psenull = &quot;--&quot;, divideby = NULL, 
+#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, 
+#   returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
+#   title.colvar = NULL, title.unitvar = NULL, title.estvar = NULL, 
+#   title.filter = NULL, gui = FALSE)
 # 
 # Description:
 #   Generates tree estimates by domain and/or tree domain (and estimation unit). 
@@ -590,6 +620,7 @@ area.bhdist.raw$stratdat
 #   expanded to using the total land area in the population. 
 ######################################################################################
 
+
 help(modGBtree)
 
 ## Tree estimates for a customized population (e.g., Bighorn National Forest)
@@ -597,12 +628,12 @@ help(modGBtree)
 
 ## By Bighorn National Forest ##
 # Live tree basal area by forest type for Bighorn National Forest
-balive.bh &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bh, 
+balive.bh &lt;- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn.bh, pltassgnid=&quot;CN&quot;,
   sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, unitvar=unitvar.bh, 
-  strvar=strvar.bh, unitarea=unitarea.bh, stratalut=stratalut.bh, 
-  areavar=areavar.bh, getwt=FALSE, estvar=&quot;BA&quot;, estvar.filter=&quot;STATUSCD==1&quot;, 
-  rawdata=TRUE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;, 
-  autocombine=FALSE, savedata=TRUE, outfolder=outfolder)
+  strvar=strvar.bh, unitarea=unitarea.bh, stratalut=stratalut.bh, areavar=areavar.bh, 
+  getwt=FALSE, estvar=&quot;BA&quot;, estvar.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, 
+  returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;, savedata=TRUE, 
+  outfolder=outfolder)
 names(balive.bh)
 balive.bh$est
 balive.bh$titlelst
@@ -610,7 +641,7 @@ balive.bh$titlelst
 
 ## By Bighorn National Forest District ##
 # Live tree basal area by forest type for Bighorn National Forest districts
-balive.bhdist &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bhdist, 
+balive.bhdist &lt;- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn.bhdist, 
   sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, unitvar=unitvar.bhdist, 
   strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist, 
   areavar=areavar.bhdist, getwt=FALSE, estvar=&quot;BA&quot;, estvar.filter=&quot;STATUSCD==1&quot;,
@@ -624,12 +655,12 @@ balive.bhdist$titlelst
 
 ## By Bighorn National Forest District ##
 ## Add title for estimation units
-balive.bhdist &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bhdist, 
-  sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, unitvar=unitvar.bhdist, 
-  strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist, 
-  areavar=areavar.bhdist, getwt=FALSE, estvar=&quot;BA&quot;, estvar.filter=&quot;STATUSCD==1&quot;,
-  rawdata=FALSE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;, 
-  autocombine=FALSE, title.unitvar=&quot;District&quot;)
+balive.bhdist &lt;- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn.bhdist, 
+  pltassgnid=&quot;CN&quot;, sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, row.FIAname=TRUE, 
+  unitvar=unitvar.bhdist, strvar=strvar.bhdist, unitarea=unitarea.bhdist, 
+  stratalut=stratalut.bhdist, areavar=areavar.bhdist, getwt=FALSE, estvar=&quot;BA&quot;, 
+  estvar.filter=&quot;STATUSCD==1&quot;, rawdata=FALSE, returntitle=TRUE, 
+  title.ref=&quot;Bighorn National Forest&quot;, title.unitvar=&quot;District&quot;)
 names(balive.bhdist)
 balive.bhdist$est
 balive.bhdist$pse
@@ -638,49 +669,62 @@ balive.bhdist$titlelst
 
 ## By Bighorn National Forest ##
 # Volume of live trees by forest type and stand-size class for Bighorn National Forest
-tree.bh &lt;- modGBtree(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bh, rowvar=&quot;FORTYPCD&quot;, 
-  colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, unitarea=unitarea.bh, 
-  stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, estvar=&quot;VOLCFNET&quot;,
-  estvar.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
+tree.bh &lt;- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn.bh, pltassgnid=&quot;CN&quot;,
+  rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, 
+  unitarea=unitarea.bh, stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, 
+  estvar=&quot;VOLCFNET&quot;, estvar.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
   title.ref=&quot;Bighorn National Forest&quot;)
 names(tree.bh)
 tree.bh$est
 tree.bh$pse
 tree.bh$titlelst
 
+
+## population data
+tree.bh.GBpopdat &lt;- tree.bh$GBpopdat
+names(tree.bh.GBpopdat)
+
+tree.bh.GBpopdat$strlut
+
+
 ## Look at raw data
 tree.bh.raw &lt;- tree.bh$raw
 names(tree.bh.raw)
-tree.bh$raw$stratdat
 head(tree.bh$raw$unit.grpest)
+
 </code></pre>
 </div>
 <div id="modgbratio" class="section level4">
 <h4>modGBratio</h4>
-<pre><code>######################################################################################
+<pre><code>####################################################################################
 # Usage:
-# modGBratio(tree = NULL, cond = NULL, pltstrat = NULL, tuniqueid = &quot;PLT_CN&quot;, 
-#     cuniqueid = &quot;PLT_CN&quot;, puniqueid = &quot;CN&quot;, sumunits = FALSE, adjsamp = TRUE, 
-#     strata = TRUE, ratiotype = &quot;PERACRE&quot;, landarea=&quot;FOREST&quot;, ACI = FALSE, 
-#     nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, unitarea = NULL, 
-#     unitvar = NULL, unitvar2 = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, 
-#     strvar = &quot;STRATA&quot;, getwt = TRUE, strwtvar = &quot;P1POINTCNT&quot;, nonresp = FALSE, 
-#     substrvar = NULL, estvarn = NULL, estvarn.filter = NULL, estvarn.name = NULL, 
-#     estvard = NULL, estvard.filter = NULL, estvard.name = NULL, rowvar = NULL, 
-#     rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE, 
-#     col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
-#     col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 3, 
-#     pseround = 3, savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
-#     outfn.pre = NULL, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-#     title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-#     title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE)
+# modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
+#   dsn = NULL, tuniqueid = &quot;PLT_CN&quot;, cuniqueid = &quot;PLT_CN&quot;, condid = &quot;CONDID&quot;, 
+#   puniqueid = &quot;CN&quot;, pltassgnid = &quot;CN&quot;, sumunits = FALSE, adjsamp = TRUE, 
+#   strata = TRUE, ratiotype = &quot;PERACRE&quot;, landarea=&quot;FOREST&quot;, ACI = FALSE, 
+#   plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, plt.filter = NULL, 
+#   cond.filter = NULL, unitvar = NULL, unitvar2 = NULL, autocombine = TRUE, 
+#   unitarea = NULL, areavar = &quot;ACRES&quot;, stratalut = NULL, strvar = &quot;STRATUMCD&quot;,
+#   getwt = TRUE, strwtvar = &quot;P1POINTCNT&quot;, estvarn = NULL, estvarn.filter = NULL, 
+#   estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, estvard.name = NULL, 
+#   rowvar = NULL, rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, 
+#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
+#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, 
+#   estround = 3, pseround = 2, estnull = 0, psenull = &quot;--&quot;, divideby = NULL,
+#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, 
+#   returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
+#   title.colvar = NULL, title.unitvar = NULL, title.estvarn = NULL, 
+#   title.estvard = NULL, title.filter = NULL, gui = FALSE)
 # 
 # Description:
-#   Generates per-acre and per-tree estimates by domain and/or tree domain (and estimation 
-#   unit). Calculations are based on chapter 4 of Scott et al. 2005 ('the green-book') for 
-#   mapped forest inventory plots. The ratio estimator for estimating per-acre or per-tree
-#   by stratum and domain is used, referred to as Ratio of Means (ROM).  
-######################################################################################
+#   Generates per-acre and per-tree estimates by domain and/or tree domain (and 
+# estimation unit). Calculations are based on chapter 4 of Scott et al. 2005 
+# ('the green-book') for mapped forest inventory plots. The ratio estimator for 
+# estimating per-acre or per-tree by stratum and domain is used, referred to as 
+# Ratio of Means (ROM).  
+####################################################################################
+
 
 help(modGBratio)
 
@@ -690,17 +734,24 @@ help(modGBratio)
 ######################################################################################
 
 # Volume per acre of live trees by forest type and stand-size class for Bighorn National Forest
-rat.bh &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bh, rowvar=&quot;FORTYPCD&quot;, 
-  colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, unitarea=unitarea.bh, 
-  stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, estvarn=&quot;VOLCFNET&quot;,
-  estvarn.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
+rat.bh &lt;- modGBratio(tree=WYtree, cond=WYcond, pltassgn=pltassgn.bh, pltassgnid=&quot;CN&quot;, 
+  rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bh, strvar=strvar.bh, 
+  unitarea=unitarea.bh, stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, 
+  estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
   title.ref=&quot;Bighorn National Forest&quot;)
 names(rat.bh)
 rat.bh$est
 rat.bh$pse
 rat.bh$titlelst
 
-## Look at raw data
+## population data
+rat.bh.GBpopdat &lt;- rat.bh$GBpopdat
+names(rat.bh.GBpopdat)
+
+rat.bh.GBpopdat$strlut
+
+
+## Look at raw data table
 rat.bh.raw &lt;- rat.bh$raw
 names(rat.bh.raw)
 rat.bh$raw$stratdat
@@ -709,21 +760,26 @@ head(rat.bh$raw$unit.grpest)
     
 ## By Bighorn National Forest District ##
 # Area by forest type and stand-size class for Bighorn National Forest by district
-rat.bhdist &lt;- modGBratio(tree=WYtree, cond=WYcond, pltstrat=pltstrat.bhdist, 
+rat.bhdist &lt;- modGBratio(tree=WYtree, cond=WYcond, pltassgn=pltassgn.bhdist, pltassgnid=&quot;CN&quot;,
   sumunits=FALSE, rowvar=&quot;FORTYPCD&quot;, colvar=&quot;STDSZCD&quot;, unitvar=unitvar.bhdist, 
   strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist, 
-  areavar=areavar.bhdist, getwt=FALSE, estvarn=&quot;VOLCFNET&quot;, 
-  estvarn.filter=&quot;STATUSCD==1&quot;, rawdata=TRUE, returntitle=TRUE, 
-  title.ref=&quot;Bighorn National Forest&quot;, title.unitvar=&quot;District&quot;, autocombine=FALSE)
+  areavar=areavar.bhdist, getwt=FALSE, estvarn=&quot;VOLCFNET&quot;, estvarn.filter=&quot;STATUSCD==1&quot;, 
+  rawdata=TRUE, returntitle=TRUE, title.ref=&quot;Bighorn National Forest&quot;, title.unitvar=&quot;District&quot;)
 names(rat.bhdist)
 rat.bhdist$est
 rat.bhdist$pse
 rat.bhdist$titlelst
 
-## Look at raw data
+## population data
+rat.bh.GBpopdat &lt;- rat.bh$GBpopdat
+names(rat.bh.GBpopdat)
+
+rat.bh.GBpopdat$strlut
+
+
+## Look at raw data table
 rat.bhdist.raw &lt;- rat.bhdist$raw
 names(rat.bhdist.raw)
-rat.bhdist.raw$stratdat
 head(rat.bhdist$raw$unit.grpest)
 
 </code></pre>

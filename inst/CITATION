@@ -7,7 +7,7 @@ citEntry(	entry="Manual",
  	 	year = "2009",
   		organization = "USDA Forest Service, Rocky Mountain Research Station",
   		address      = "507 25th street, Ogden, UT, USA",
-  		note         = "tfrescino@fs.fed.us",
+  		note         = "tracey.frescino@usda.gov",
   		textVersion =  paste(	"Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Toney, Chris;
 					Freeman, Elizabeth A. (2018). ",
 					"FIESTA: A Forest Inventory Estimation and Analysis R Package. ",

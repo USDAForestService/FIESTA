@@ -15,7 +15,8 @@ datBarStacked(x, main.attribute, sub.attribute, response = "phat",
 	legend.x = NULL, legend.y = NULL, legend.title = NULL, legend.bty = "o", 
 	legend.bg = par("bg"), legend.inset = 0, legend.xpd = par("xpd"), main = NULL, 
 	cex.main = 1.0, cex.label = 1, cex.names = 0.8, savedata = FALSE, 
-	outfolder = NULL, outfn = NULL, ...)
+	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
+	overwrite = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -78,6 +79,9 @@ datBarStacked(x, main.attribute, sub.attribute, response = "phat",
 	is saved. }
   \item{outfn}{ String. The name of the output file if savedata=TRUE (*.csv). Do not 
 	include extension. If NULL, the file will be named BARPLOT_'yvar_date'.csv }
+  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
+  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
+  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{...}{ list of additional arguments to pass to barplot(); names of the list are 
 	used as argument names. }
 

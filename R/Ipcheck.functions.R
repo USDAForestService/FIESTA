@@ -3,8 +3,6 @@
 #pcheck.table
 #pcheck.outfolder
 #pcheck.states
-#pcheck.DBtabs	- Checks for existing database tables
-#pcheck.xlsx
 
 
 pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", gui=FALSE,
@@ -33,21 +31,22 @@ pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", gui=
 
 
 pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=NULL, 
-	warn=NULL, stopifnull=FALSE, multiple=FALSE, ...){
+	warn=NULL, stopifnull=FALSE, stopifinvalid=TRUE, multiple=FALSE, ...){
   ## DESCRIPTION: Checks string variable parameter
-  
+
   if (is.null(varnm)) { 
     varnm <- "varnm" 
   } else {
     if (!is.character(varnm)) warning("varnm must be a string")
   } 
+  #if (is.null(var2check) && stopifnull) stop(paste(varnm, "is NULL"))
   if (is.null(caption)) caption <- paste0(varnm, "?") 
   if (is.null(warn)) 
     warn <- ifelse(!is.null(checklst) && length(checklst) < 6, 
 		paste(varnm, "must be in following list:", paste(checklst, collapse=", ")),
 		paste(varnm, "is invalid"))
 
-  if (is.null(var2check) || gsub(" ", "", var2check) == "") {
+  if (is.null(var2check) || is.na(var2check) || gsub(" ", "", var2check) == "") {
     if (gui) {
       var2check <- select.list(checklst, title=caption, multiple=multiple, ...)
       if (length(var2check) == 0 || var2check == "") stop("NULL")
@@ -76,16 +75,12 @@ pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=N
       var2check <- select.list(checklst, title=caption, multiple=multiple, ...)
       if (length(var2check) == 0 || var2check == "") stop("")
     } else {
-      if (stopifnull) { 
+      if (stopifinvalid) { 
         if (multiple)
           warn <- message("invalid variable: ", 
 				paste(var2check[which(!var2check %in% checklst)], collapse=", "))
         stop(warn)
       } else {
-        if (multiple) 
-          warn <- message("invalid variable: ", 
-				paste(var2check[which(!var2check %in% checklst)], collapse=", "))
-        message(warn)
         return(NULL)
       }
     }
@@ -94,51 +89,74 @@ pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=N
 }
 
 
+pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
+  if (is.null(dsn)) stop("dsn is null")
+  if (!file.exists(dsn)) {
+    extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb")
+    ext <- extlst[sapply(extlst, function(x, dsn) 
+				file.exists(paste(dsn, x, sep=".")), dsn)]
+    if (length(ext) == 1)
+      dsn <- paste(dsn, ext, sep=".")
+  }
+  tabext <- getext(dsn)
+  if (is.na(tabext) || tabext == "NA")
+    stop("dsn must include extension")
 
-pcheck.table <- function(tab, gui=TRUE, tabnm=NULL, caption=NULL, returnshp=TRUE, 
-	factors=FALSE, returnDT=TRUE, selectlst=NULL, nullcheck=FALSE, warn=NULL,
-	stopifnull=FALSE){
+  if (tabext %in% c("sqlite", "gpkg")) {
+    return(DBtestSQLite(dsn, dbconnopen=dbconnopen))
+  } else if (tabext == "shp") {
+    return(dsn) 
+  } else {
+    stop("file format currently not supported")
+  }
+}
+
+
+pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL, 
+	caption=NULL, returnsf=TRUE, factors=FALSE, returnDT=TRUE, warn=NULL, 
+	stopifnull=FALSE, nullcheck=FALSE, obj=FALSE, gui=FALSE){
 
   ## DESCRIPTION: This function checks the table parameter..  if NULL, it prompts the 
   ##      user with gui options to select the table of interest.
   ## ARGUMENTS: 
-  ## tab  Dataframe. Table parameter to check.
+  ## tab - Dataframe or layer name in tab_dsn
+  ## tab_dsn - String. data source name where tab resides
+  ## tabqry - Database query for extracting tab (if tab_dsn != NULL)
   ## caption  String. Caption 
   ## shp  Logical. If TRUE and tab is a shapefile, return a shapefile.
+
+  ## Set global variables
+  x <- NULL
 
   if (!factors) {
     options.old <- options()
     options(stringsAsFactors=FALSE)
     on.exit(options(options.old), add=TRUE)
   } 
-  
 
-  ## Define function
-#  checkrows <- function(x) {
-#    check <- apply(x, 1, function(x){all(x == "" | x == " " | is.na(x))})
-#    if (sum(check) > 0) {
-#      writeLines(paste("removed NA rows: ", sum(check)))
-#      x <- x[-which(check),] }
-#    return(x)
-#  }
+  ## Check for installed packages
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("importing spatial layers requires package sf")
 
+ 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
     Filters=rbind(Filters,shp=c("Shapefiles (*.shp)", "*.shp"))
-    Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
+    Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
+    Filters=rbind(Filters,sqlite=c("Comma-delimited files (*.sqlite)", "*.sqlite"))
+    Filters=rbind(Filters,gpkg=c("Comma-delimited files (*.gpkg)", "*.gpkg")) }
+  tabdblst <- c("sqlite", "gpkg")
 
   if (is.null(tabnm)) tabnm <- "tab" 
   if (is.null(caption)) caption <- "Table?" 
    
-  if (is.null(selectlst)) {
-    selectlst <- c("NONE", "R Object", "*.csv")
-  } else if (!is.character(selectlst)) {
-    stop("invalid selectlst")
-  }
+  selectlst <- c("NONE", "R Object", "csv", "database")
+  if (returnsf) selectlst <- c(selectlst, "*.shp" ) 
 
-  if (returnshp) selectlst <- c(selectlst, "*.shp" ) 
-
-  if (is.null(tab)) {
+  ## Check gui
+  if (gui && !.Platform$OS.type=="windows") 
+    stop("gui not supported")
+  if (is.null(tab) && is.null(tab_dsn)) {
     if (gui) {
       tabresp <- select.list(selectlst, title=caption, multiple=FALSE)
       if (tabresp=="") {
@@ -151,111 +169,172 @@ pcheck.table <- function(tab, gui=TRUE, tabnm=NULL, caption=NULL, returnshp=TRUE
         objlst <- objlst[sapply(objlst, function(x) is.data.frame(get(x)))]
         tabobj <- select.list(objlst, title=caption, multiple=FALSE)
         if (tabobj == "") stop("") 
-        tab <- get(tabobj, pos=1)
-        if (isS4(tab)) {
-          tabx <- if (returnshp) { tabx <- tab } else { tabx <- data.table(tab@data) }
-        } else {
-          tabx <- setDT(tab)
-          rm(tab)
-        }
-      } else if (tabresp == "*.csv" && .Platform$OS.type=="windows") {
-        tabfn <- choose.files(default=getwd(), caption=caption, filters=Filters["csv",], 
-		multi=FALSE)
+        tabx <- get(tabobj, pos=1)
+        if (sum(grepl("Spatial", class(tab)) > 0))
+          if (!returnsf) tabx <- tabx$data
+      } else if (tabresp == "csv") {
+        tabfn <- choose.files(default=getwd(), caption=caption, 
+			filters=Filters[c("csv", "All"),], multi=FALSE)
         if (tabfn == "") stop("")
-        tabx <- fread(tabfn, integer64="numeric")
-      } else if (tabresp == "*.shp" && .Platform$OS.type=="windows") {
+      } else if (tabresp == "shp") {
         shpfn <- choose.files(default=getwd(), caption="Select point shapefile", 
-            filters=Filters["shp",], multi=FALSE)
+            filters=Filters[c("shp", "All"),], multi=FALSE)
         if (is.null(shpfn)) stop("")
-        shpx <- readOGR(dirname(shpfn), FIESTA::basename.NoExt(tab))
-        tabx <- if (returnshp) { tabx <- shpx } else { tabx <- data.table(shpx@data) }
+      } else if (tabresp == "database") {
+        tab_dsn <- choose.files(default=getwd(), caption="Select database file", 
+            filters=Filters[c(tabdblst, "All"),], multi=FALSE)
+        if (tab_dsn == "") stop("")
       } else {
         tabx <- NULL
       }
     } else {
-      tabx <- NULL
-    }  
-  } else if (is.data.frame(tab)) {
-    if (nrow(tab) == 0) {
-      warn <- ifelse (!is.null(warn), warn, paste(tabnm, "is a data frame with 0 rows"))
-      stop(warn)
-    } else {
-      tabx <- data.table(tab)
-
-      ## Check for NULL rows or rows with ""
-      if (nullcheck) {
-        tabx <- tabx[!apply(is.na(tabx) | tabx == "", 1, all),]
-        tabx <- tabx[, names(tabx)[!apply(is.na(tabx), 2, all)], with=FALSE]
-      }
-    }
-  } else if (isS4(tab)) {
-    if (!returnshp) { tabx <- data.table(tab@data) } else { tabx <- tab }
-  } else if (!is.character(tab)) {
-    stop(tabnm, " must be a data frame/data table object, Spatialdataframe, or file name") 
-  } else if (file.exists(tab)) {
-    if (raster::extension(tab) == ".shp") {
-      shpx <- readOGR(dirname(tab), FIESTA::basename.NoExt(tab))
-      if (!returnshp) { tabx <- data.table(shpx@data) } else { tabx <- shpx }
-    } else if (raster::extension(tab) == ".csv") {
-      tabx <- data.table::fread(tab, integer64="numeric")
-
-      ## Check for NULL rows or rows with ""
-      #if (nullcheck) if (!is.null(tabx)) tabx <- checkrows(tabx)
-      if (nullcheck) {
-        tabx <- tabx[!apply(is.na(tabx) | tabx == "", 1, all),]
-        tabx <- tabx[, names(tabx)[!apply(is.na(tabx), 2, all)], with=FALSE]
+      if (stopifnull) stop(paste(tabnm, "is NULL"))
+      return(NULL)
+    } 
+  } 
+ 
+  if (!is.null(tab)) {
+    if (is.character(tab)) {
+      if (obj && exists(tab, envir=.GlobalEnv) && is.data.frame(get(tab))) {
+        #message(tab, " exists in Global Environment")
+        return(get(tab))  
+      } else if (file.exists(tab)) {
+        tab_dsn <- tab
       }
     } 
-  } else if (file.exists(paste0(tab, ".csv"))) {
-      tabx <- data.table::fread(tab, integer64="numeric")
-
-      ## Check for NULL rows or rows with ""
-      #if (nullcheck) if (!is.null(tabx)) tabx <- checkrows(tabx)
-      if (nullcheck) {
-        tabx <- tabx[!apply(is.na(tabx) | tabx == "", 1, all),]
-        tabx <- tabx[, names(tabx)[!apply(is.na(tabx), 2, all)], with=FALSE]
+    if ("sf" %in% class(tab)) {
+      if (returnsf) {
+        return(tab)
+      } else {
+        return(sf::st_drop_geometry(tab))
       }
-  } else if (file.exists(paste0(tab, ".shp"))) {
-      shpx <- readOGR(dirname(tab), FIESTA::basename.NoExt(tab))
-      if (!returnshp) { tabx <- data.table(shpx@data) } else { tabx <- shpx }
-  } else if (exists(tab, envir=.GlobalEnv)) {
-    tabx <- get(tab)
-  } else {
-      stop(paste(tabnm, "does not exist"))
+    } else if (canCoerce(tab, "sf")) {
+      tabx <- sf::st_as_sf(tab)
+      if (returnsf) {
+        return(tabx)
+      } else {
+        return(sf::st_drop_geometry(tabx))
+      }
+    } else if (is.data.frame(tab)) {
+      if (nrow(tab) == 0) {
+        warn <- ifelse (!is.null(warn), warn, paste(tabnm, "is a data frame with 0 rows"))
+        if (stopifnull) stop(warn)
+        message(warn)
+        return(NULL)
+      } else {
+        if (returnDT) {
+          if (!"data.table" %in% class(tab)) tab <- data.table(tab)
+        } else { 
+          if ("data.table" %in% class(tab)) tab <- setDF(tab)
+        }
+        return(tab)
+      }
+    } else if (!is.character(tab)) {
+      stop(tabnm, " must be an sf object or character layer name") 
+    } 
   }
-  if (is.null(tabx) && stopifnull) stop(paste(tabnm, "is NULL"))
+  if (!is.null(tab_dsn)) {
+    if (!file.exists(tab_dsn)) {
+      extlst <- c("shp", "csv", "sqlite", "gpkg")
+      ext <- extlst[sapply(extlst, function(x, tab_dsn) 
+				file.exists(paste(tab_dsn, x, sep=".")), tab_dsn)]
+      if (length(ext) == 1)
+        tab_dsn <- paste(tab_dsn, ext, sep=".")
+    }
+    tabext <- getext(tab_dsn)
+    if (is.na(tabext) || tabext == "NA") {
+      if (dir.exists(tab_dsn) && file.exists(paste(tab_dsn, tab, sep="/"))) {
+        tab_dsn <- paste(tab_dsn, tab, sep="/")
+        tabext <- getext(tab_dsn)
+      } 
+    }
+    if (tabext == "shp") {
+      tabx <- sf::st_read(tab_dsn, quiet=TRUE)
+    } else if (tabext == "gdb") {
+      tabx <- data.table(pcheck.spatial(tab, dsn=tab_dsn, dropgeom=TRUE))
+    } else if (tabext %in% tabdblst) {
+      if (is.null(tab) || !is.character(tab)) 
+        stop("tab is invalid")
+      if (tabext %in% c("sqlite", "gpkg")) {
+        if (!"RSQLite" %in% rownames(installed.packages()))
+          stop("importing spatial layers requires package RSQLite")
+        dbconn <- DBtestSQLite(tab_dsn, dbconnopen=TRUE, showlist=FALSE) 
+        tablst <- DBI::dbListTables(dbconn)
+        if (!tab %in% tablst) {
+          if (tolower(tab) %in% tablst) {
+            tab <- tolower(tab)
+          } else {
+            stop(tab, " not in ", tab_dsn)
+          }
+        }
+        if (!is.null(tabqry)) {
+          tabx <- setDT(DBI::dbGetQuery(dbconn, tabqry))
+        } else {
+          tabx <- setDT(DBI::dbReadTable(dbconn, tab))
+        }
+        DBI::dbDisconnect(dbconn)
+      } else {
+        stop("file format currently not supported")
+      }
+    } else {
+      tabx <- tryCatch(data.table::fread(tab_dsn, integer64="numeric"),
+			error=function(e) {
+			print(e)
+			return(NULL)})
+      if (is.null(tabx)) stop("file format is currently not supported")
+    }
+  } else {
+    if (stopifnull) {
+      stop(paste(tabnm, "is NULL"))
+    } else {
+      return(NULL)
+    }
+  }
 
-  if (!is.null(tabx) && !returnDT) {
-    return(setDF(tabx))
+  if (nullcheck) { 
+    if (sum(apply(tabx, 1, function(x) sum(is.na(x) | x=="NA" | x=="")) == ncol(x)) > 0)
+      tabx <- tabx[apply(tabx, 1, function(x) sum(is.na(x) | x=="NA" | x=="")) != ncol(x),]
+  }
+
+  if (!returnsf) {
+    if (!is.data.table(tabx)) tabx <- data.table(tabx)
+  
+    if (returnDT) {
+      if (!is.data.table(tabx)) 
+        return(setDT(tabx))
+    } else {
+      return(setDF(tabx))
+    }
   } else {
     return(tabx)
   }
 }
 
 
-pcheck.outfolder <- function(outfolder, gui=FALSE){
-
+pcheck.outfolder <- function(outfolder, default=getwd(), gui=FALSE) {
   if (is.null(outfolder)) {
     if (gui && .Platform$OS.type=="windows") {
       outfolder <- choose.dir(default=getwd(), caption="Select folder")
       if (is.na(outfolder)) stop("")
     } else {
-      message("outfolder is NULL, files will be written to working directory")
-      outfolder <- getwd()
+      if (is.null(default)) return(NULL)
+      if (default == getwd()) {
+        message("outfolder is NULL, files will be written to working directory")
+        outfolder <- getwd()
+      }
     }
-  }else if (!file.exists(outfolder)) {
-    stop("outfolder does not exist")
-    if (gui && .Platform$OS.type=="windows") {
-      outfolder <- choose.dir(default=getwd(), caption="Select output folder")
-      if (is.na(outfolder)) stop("")
+  } else {
+    if (!is.character(outfolder)) {
+      stop("outfolder must be character string")
+    } else if (!dir.exists(outfolder)) {
+      stop("invalid outfolder")
     }
   }
   return(outfolder)
 }
 
 
-
-pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, rs=NULL, 
+pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL, 
 	stopifnull=FALSE, ...) {
   ## DESCRIPTION: 
   ## Check states and return in proper format
@@ -264,17 +343,17 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, rs=NULL,
   ## states		String or Numeric Vector: Name or code of states
   ## statereturn	String. Format to return state in ("VALUE", "MEANING", "ABBR", "RSCD", "RS")
   ## gui		Logical. TRUE, if gui is allowed.
-  ## rs		String Vector: Research unit (optional).
+  ## RS		String Vector: Research unit (optional).
   ## ...		Other parameters to select.list
 
   ref_state <- FIESTA::ref_statecd
   if (!statereturn %in% names(ref_state)) stop("statereturn is invalid")
 
-  if (!is.null(rs)) {
-    if (all(rs %in% ref_state$RS)) {
-      ref_state <- ref_state[ref_state$RS %in% rs, ]
+  if (!is.null(RS)) {
+    if (all(RS %in% ref_state$RS)) {
+      ref_state <- ref_state[ref_state$RS %in% RS, ]
     } else {
-      warning("rs is invalid")
+      warning("RS is invalid")
     }
   } 
 
@@ -284,9 +363,9 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, rs=NULL,
       states <- select.list(ref_state[[statereturn]], title="States", multiple=TRUE, ...)
       if (length(states) == 0) stop("")
     } else {
-      if (!is.null(rs)) { 
+      if (!is.null(RS)) { 
         states <- ref_state[[statereturn]]
-        message(paste("returning all states in", paste(rs, collapse=",")))
+        message(paste("returning all states in", paste(RS, collapse=",")))
       } else {
         if (stopifnull) stop("invalid state")
         return(NULL)
@@ -337,111 +416,3 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, rs=NULL,
 
   return(states2return)
 }
-
-
-pcheck.DBtabs <- function(stcd, tables) {
-  ## DESCRIPTION: Checks for existing database tables
-  texist <- tables[which(sapply(tables, exists))]
-  texist <- texist[sapply(texist, function(x) !is.null(get(x)))]
-  tnoexist <- tables[!tables %in% texist]
-  
-  ## Check if existing table has correct state
-  for (tab in texist) {
-    tabobj <- get(tab)
-    if ("STATECD" %in% names(tabobj)) {
-      if (!all(stcd %in% unique(tabobj[["STATECD"]]))) {
-        message(tab, " does not include data for state")
-        tnoexist <- c(tnoexist, tab)
-      }
-    }
-  }
-  return(tnoexist)
-}
-
-
-
-pcheck.xlsx <- function(wbnm, savewb=TRUE, outfn=NULL, outfolder=NULL,
-	outfn.date=TRUE, overwrite=FALSE)  {
-  ## CREATE EXCEL WORKBOOK AND SHEET
-  ###############################################################
-  if (is.null(outfn)) outfn <- "WORKBOOK"
-
-  newwb <- FALSE
-  if (is.null(wbnm)) {
-    wb <- xlsx::createWorkbook(type="xlsx")
-    newwb <- TRUE
-  } else {
-    if (!file.exists(wbnm)) {
- 
-      if (!file.exists(dirname(wbnm))) stop("invalid directory")
-      wb.basenm <- basename(wbnm)
-      outfolder <- dirname(wbnm)
-
-      ## Check if there is an extension
-      if (raster::extension(wbnm) == "") {
-        message("wbnm must end in xlsx.. adding to wbnm")
-        wbnm <- paste0(wbnm, ".xlsx")
-        if (file.exists(wbnm)) {
-          message(paste("creating workbook:", wbnm))
-          wb <- xlsx::loadWorkbook(file=wbnm)
-          outfn <- wb.basenm
-        }        
-      } else {  
-        message(paste(wbnm, "does not exist... creating new workbook"))
-        wb <- xlsx::createWorkbook(type="xlsx")
-        outfn <- FIESTA::basename.NoExt(wb.basenm)
-        newwb <- TRUE
-      } 
-    } else {     
-      wb <- xlsx::loadWorkbook(file=wbnm)
-    }
-  }
-  if (savewb) {
- 
-    ## GET NAME FOR WORKBOOK
-    ###############################################################
-    if (newwb) {
-
-      ## Check outfn.date
-      outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date", 
-		title="Add date to filenm?", first="YES")
-      if (outfn.date)
-        outfn <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
-
-      ## Check overwrite
-      overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite file?", first="YES")
-
-      if (!overwrite) {
-        outfn <- FIESTA::fileexistsnm(outfolder, outfn, "xlsx")
-        if (!is.null(outfolder))
-          outfn <- paste(outfolder, outfn, sep="/")
-      } else {
-        if (is.null(outfolder)) outfolder <- dirname(outfn)
-        outfn <- paste(outfolder, outfn, sep="/")
-      }
-      outfilenm <- paste0(outfn, ".xlsx")
-
-      #outallin1base <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
-      #outallin1fn <- fileexistsnm(outfolder, outfn, "xlsx")
-      #outfilenm <- paste0(outfolder, "/", outallin1fn, ".xlsx")
-    } else {
-      outfilenm <- wbnm
-    }
-
-    ## SAVE EXCEL WORKBOOK
-    ###############################################################
-    xlsx::saveWorkbook(wb, outfilenm)  
-    
-    cat(
-    " ###############################################################################", 
-    "\n", paste("Table written to: "), "\n", paste(" ", outfilenm), "\n", 
-    "###############################################################################",
-    "\n" )
-  }
-
-  return(wbnm=outfilenm)
-}
-
-
-

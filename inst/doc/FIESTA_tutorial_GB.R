@@ -1,4 +1,4 @@
-## ---- results = 'asis', echo=FALSE---------------------------------------
+## ---- results = 'asis', echo=FALSE--------------------------------------------
 
 #required.lut <- read.table("C:/_tsf/_GitHub/meta/required_variables.txt", header=TRUE, sep="\t")
 
@@ -9,7 +9,7 @@ required.lut <- data.frame(
                "MICRPROP_UNADJ", "MACRPROP_UNADJ", "*puniqueid*", "STATECD", "INVYR"), 
   Description = c("Unique identifier for each plot, for joining tables (ex. PLT_CN)", 
     "Unique identifier for each condition on plot, for joining tables. Optional if only 1 condition (record)   per plot", 
-    "Number of trees per acre each sample tree represents (ex. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on microplot)", "Unique identifier for each plot, for joining tables (ex. PLT_CN)", 
+    "Number of trees per acre each sample tree represents (ex. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on microplot)", "Unique identifier for each plot, for joining tables (e.g., PLT_CN)", 
     "Unique identifier for each condition on plot, for joining tables. Optional if only 1 condition (record) per plot", 
     "Unadjusted proportion of condition on each plot. Optional if only 1 condition (record) per plot", 
     "Status of each forested condition on plot (i.e. accessible forest, nonforest, water, etc.)", 
@@ -35,16 +35,15 @@ kable(required.lut,
 )
 
 
-## ---- results = 'asis', echo=FALSE---------------------------------------
+## ---- results = 'asis', echo=FALSE--------------------------------------------
 
 #stratdat.lut <- read.csv("C:/_tsf/_GitHub/meta/stratdat_variables.csv", stringsAsFactors=FALSE)
 #source("C:/_tsf/_GitHub/meta/undataframe.R")
 #stratdat.lut <- undataframe(stratdat.lut)
 
-stratdat.lut <- data.frame(Variable = c("ESTN_UNIT", "STRATUMCD", "P1POINTCNT", "n.strata", "n.total", "strwt", "CONDPROP_UNADJ_SUM", 
-    "CONDPROP_ADJFAC"), Description = c("Estimation unit", "Strata value", "Number of pixels by strata and estimation unit ", 
-    "Number of plots in strata (and estimation unit)", "Number of plots for estimation unit", "Total acres for estimation unit", 
-    "Summed condition proportion by strata and estimation unit ", "Adjustment factor for nonsampled plots by strata and/or estimation unit (CONDPROP_UNADJ_SUM/n.strata)"), 
+stratdat.lut <- data.frame(
+Variable = c("ESTN_UNIT", "STRATUMCD", "P1POINTCNT", "P2POINTCNT", "n.strata", "n.total", "strwt", "CONDPROP_UNADJ_SUM", "cadjfac", "ACRES", "expfac", "EXPNS"), 
+Description = c("Estimation unit", "Strata value", "Number of pixels by strata and estimation unit", "Number of P2 plots in population data", "Number of sampled plots in strata", "Number of sampled plots for estimation unit", "Proportion of pixels in strata (strata weight)", "Summed condition proportion in strata", "Adjustment factor for nonsampled plots in strata (CONDPROP_UNADJ_SUM/n.strata)", "Total acres for estimation unit", "Expansion factor, in acres, area in strata divided by number of sampled plots", "Expanded area, in acres, expfac multiplied by strwt"), 
     stringsAsFactors = FALSE)
 
 library(knitr)
@@ -58,14 +57,14 @@ kable(stratdat.lut,
 ) 
 
 
-## ---- results = 'asis', echo=FALSE---------------------------------------
+## ---- results = 'asis', echo=FALSE--------------------------------------------
 
 
 nonratio <- data.frame(Variable = c("nhat", "nhat.var", "est", "est.var"), Description = c("Estimated proportion", "Variance estimate of estimated proportion", "Estimated acres { nhat * ACRES }", "Variance estimate of estimated acres { nhat * ACRES^2 }"), stringsAsFactors = FALSE)
 
 ratio <- data.frame(Variable = c("nhat", "nhat.var", "dhat", "dhat.var", "covar", "estn", "estd", "estn.var", "estn.se", "estn.cv", "estn.pse", "estd.var", "estd.se", "estd.cv", "estd.pse", "est.covar", "rhat", "rhat.var", "rhat.se", "rhat.cv", "est", "est.var"), Description = c("Estimated proportion of land, for numerator", "Variance estimate of estimated proportion of land, for numerator", "Estimated proportion of land, for denominator", "Variance estimate of estimated proportion of land, for denominator", "Covariance of estimated proportion of numerator and denominator", "Estimated acres, for numerator", "Estimated acres, for denominator", "Variance estimate of estimate acres, for numerator", "Standard error estimated acres, for numerator", "Coeffiecient of variation of estimated acres, for numerator", "Percent sampling error of estimate, for numerator", "Variance estimate of estimate acres, for denominator", "Standard error estimated acres, for denominator", "Coefficient of variation of estimated acres, for denominator", "Percent sampling error of estimate, for denominator", "Covariance of estimated acres of numerator and denominator", "Ratio of estimated proportions (numerator/denominator)", "Variance of ratio of estimated proportions", "Standard error of ratio of estimated proportions { rhat.se/rhat }", "Coefficient of variation of ratio of estimated proportions { sqrt(rhat.var) }", "Estimated percent cover of land { rhat*100 }", "Variance of estimated percent cover of land { rhat.var*100^2 }"), stringsAsFactors = FALSE)
 
-all <- data.frame(Variable = c("NBRPLT", "NBRPLT.gt0", "ACRES", "est.se", "est.cv", "pse", "CI99left", "CI99right", "CI95left", "CI95right", "CI68left", "CI68right"), Description = c("Number of total plots used in estimate", "Number of nonzero plots used in estimate", "Total acres for estimation unit", "Standard error of estimated acres { sqrt(est.var) }", "Coefficient of variation of estimated acres { est.se/est }", "Percent sampling error of estimate { est.cv * 100 }", "Left tail of 99% confidence interval for estimate { est - (2.58*est.se) }", "Right tail of 99% confidence interval for estimate { est + (2.58*est.se) }", "Left tail of 95% confidence interval for estimate { est - (1.96*est.se) }", "Right tail of 95% confidence interval for estimate { est + (1.96*est.se) }", "Left tail of 68% confidence interval for estimate { est - (0.97*est.se) }", "Right tail of 68% confidence interval for estimate { est + (0.97*est.se) }"), stringsAsFactors = FALSE)
+all <- data.frame(Variable = c("NBRPLT.gt0", "ACRES", "est.se", "est.cv", "pse", "CI99left", "CI99right", "CI95left", "CI95right", "CI68left", "CI68right"), Description = c("Number of nonzero plots used in estimate", "Total acres for estimation unit", "Standard error of estimated acres { sqrt(est.var) }", "Coefficient of variation of estimated acres { est.se/est }", "Percent sampling error of estimate { est.cv * 100 }", "Left tail of 99% confidence interval for estimate { est - (2.58*est.se) }", "Right tail of 99% confidence interval for estimate { est + (2.58*est.se) }", "Left tail of 95% confidence interval for estimate { est - (1.96*est.se) }", "Right tail of 95% confidence interval for estimate { est + (1.96*est.se) }", "Left tail of 68% confidence interval for estimate { est - (0.97*est.se) }", "Right tail of 68% confidence interval for estimate { est + (0.97*est.se) }"), stringsAsFactors = FALSE)
 
 
 library(knitr)

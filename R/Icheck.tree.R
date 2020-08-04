@@ -1,4 +1,4 @@
-check.tree <- function(gui, treef, condall=NULL, plt=NULL, bycond=TRUE, bytdom, 
+check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom, 
 	tuniqueid=NULL, cuniqueid=NULL, puniqueid=NULL, esttype="TREE", 
 	ratiotype="PERACRE", estvarn=NULL, estvarn.TPA=TRUE, estvarn.filter=NULL, 
 	estvarn.name=NULL, esttotn=TRUE, estvard=NULL, estvard.TPA=TRUE, 
@@ -15,7 +15,8 @@ check.tree <- function(gui, treef, condall=NULL, plt=NULL, bycond=TRUE, bytdom,
 
 
   ## GET TREE ESTIMATION VARIABLE AND CHECK IF IN TREE DATA SET (NUMERATOR)
-  estvarn <- FIESTA::pcheck.varchar(var2check=estvarn, varnm="estvarn", gui=gui, 
+  varnm <- ifelse(esttype == "TREE", "estvar", "estvarn")
+  estvarn <- FIESTA::pcheck.varchar(var2check=estvarn, varnm=varnm, gui=gui, 
 		checklst=estvarlst, caption=paste0("Est variable (NUM)"), 
 		warn=paste(estvarn, "not in tree table"), stopifnull=TRUE)
 
@@ -54,22 +55,23 @@ check.tree <- function(gui, treef, condall=NULL, plt=NULL, bycond=TRUE, bytdom,
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
   #####################################################################################
   if (bytdom) {
-    tdomdata <- datSumTreeDom(tree=treef, cond=condall, plt=plt, tuniqueid=tuniqueid, 
+    suppressWarnings(
+    tdomdata <- datSumTreeDom(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, tsumvar=estvarn, 
 		TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, tfilter=estvarn.filter, 
-		tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, checkNA=FALSE)
+		tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
     if (is.null(tdomdata)) return(NULL)
     
     tdomdat <- tdomdata$tdomdat
-    tdomsumn <- tdomdata$tdomsum
     tdomvarn <- tdomdata$tdomtotnm
     tdomvarlstn <- tdomdata$tdomlst
 
   } else {
-    treedata <- datSumTree(tree=treef, cond=condall, plt=plt, tuniqueid=tuniqueid, 
+    suppressWarnings(
+    treedata <- datSumTree(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, tsumvarlst=estvarn, 
 		tsumvarnmlst=estvarn.name, TPA=estvarn.TPA, tfilter=estvarn.filter,
-		adjtree=adjtree, checkNA=FALSE)
+		adjtree=adjtree, checkNA=FALSE))
     if (is.null(treedata)) return(NULL)
     
     tdomdat <- treedata$treedat
@@ -101,16 +103,15 @@ check.tree <- function(gui, treef, condall=NULL, plt=NULL, bycond=TRUE, bytdom,
     if (!is.null(estvard.name) && !is.character(estvard.name))
       stop("invalid estvard.name.. must be a string")  
 
-
     ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (DENOMINATOR)
     #################################################################################
     if (bytdom) {
-      tdomdata <- datSumTreeDom(tree=treef, cond=condall, tuniqueid=tuniqueid, 
+      tdomdata <- datSumTreeDom(tree=treef, cond=condf, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, bycond=TRUE, tsumvar=estvard, TPA=estvard.TPA, 
       	tdomtot=esttotd, tdomtotnm=estvard.name, tfilter=estvard.filter, 
-		tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, checkNA=FALSE)
+		tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, checkNA=FALSE, 
+		pivot=FALSE)
       tdomdatd <- tdomdata$tdomdat
-      tdomsumd <- tdomdata$tdomsum
       tdomvard <- tdomdata$tdomtotnm
       tdomvarlstd <- tdomdata$tdomlst
 
@@ -125,7 +126,7 @@ check.tree <- function(gui, treef, condall=NULL, plt=NULL, bycond=TRUE, bytdom,
       tdomvarlstd <- paste(tdomvarlstd, "d", sep=".")
 
     } else {
-      tdomdata <- datSumTree(tree=treef, cond=condall, tuniqueid=tuniqueid, 
+      tdomdata <- datSumTree(tree=treef, cond=condf, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, bycond=TRUE, tsumvarlst=estvard, 
 		tsumvarnmlst=estvard.name, TPA=estvard.TPA, tfilter=estvard.filter, 
 		adjtree=adjtree, checkNA=FALSE)
@@ -138,7 +139,7 @@ check.tree <- function(gui, treef, condall=NULL, plt=NULL, bycond=TRUE, bytdom,
     }
 
     ## Merge table with denominator to table with numerator
-    tdomdat <- merge(tdomdat, tdomdatd, by=names(condall))
+    tdomdat <- merge(tdomdat, tdomdatd, by=names(condf))
 
   } else {
     tdomvard <- NULL

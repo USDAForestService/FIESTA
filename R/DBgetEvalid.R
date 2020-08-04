@@ -1,7 +1,6 @@
-DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE, 
-	FS_FIADB=TRUE, invyrtab=NULL, invtype="ANNUAL", evalCur=TRUE, evalEndyr=NULL, 
-	evalid=NULL, evalType="AREAVOL", dbconn=NULL, dbconnopen=FALSE, isdwm=FALSE,
-	gui=FALSE) {
+DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL", 
+	evalCur=TRUE, evalEndyr=NULL, evalid=NULL, evalAll=FALSE, evalType="AREAVOL", 
+	isdwm=FALSE, gui=FALSE, returnPOP=TRUE) {
 
   ###############################################################################
   ## DESCRIPTION: Gets evalid or checks evalid from FIA database.
@@ -17,8 +16,7 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
   if (nargs() == 0) gui <- TRUE
 
   if (!gui)
-    gui <- ifelse(nargs() == 0 || (nargs() == 1 & !is.null(dbconn)) ||
-		(nargs() == 2 & !is.null(dbconn) & dbconnopen), TRUE, FALSE)
+    gui <- ifelse(nargs() == 0, TRUE, FALSE)
   
 
   ## SET OPTIONS
@@ -26,53 +24,35 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
 
+  ## Define variables
+  ZIP <- TRUE
+  SCHEMA. <- ""
+
   ## Set global variables
   EVALID=evalidlist=evalTypelist <- NULL
-
-  if (gui) {
-    if (!is.null(dbconn)) {
-      if (DBI::dbIsValid(dbconn)) {
-        datsource <- "ORACLE"
-      } else {
-        stop("dbconn is invalid")
-      }
-    } else {
-      if (!is.null(dbconnopen) && !dbconnopen) dbconnopen <- NULL
-      datsource <- NULL
-    }
-    ZIP=FS_FIADB=invtype=evalCur=evalType <- NULL
-  }
   invyrs <- NULL
-  evalresp <- FALSE
+  evalresp <- TRUE
+
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
-  ## Check datsource
-  datsourcelst <- c("ORACLE", "CSV")
-  datsource <- FIESTA::pcheck.varchar(var2check=datsource, varnm="datsource", 
-		checklst=datsourcelst, gui=gui, caption="Data source?", stopifnull=TRUE)  
-
-  if (datsource == "CSV") {
-    if (!"sqldf" %in% rownames(installed.packages()))
-      stop("the sqldf package is required when datsource='ORACLE'")
+  if (!"sqldf" %in% rownames(installed.packages(.Library)))
+    stop("the sqldf package is required")
   
-    if (!"httr" %in% rownames(installed.packages()))
-      stop("the httr package is required when datsource='ORACLE'")
+  if (!"httr" %in% rownames(installed.packages(.Library)))
+    stop("the httr package is required")
 
-    ## Check ZIP
-    ZIP <- FIESTA::pcheck.logical(ZIP, varnm="ZIP", title="Zip files?", 
+  ## Check ZIP
+  ZIP <- FIESTA::pcheck.logical(ZIP, varnm="ZIP", title="Zip files?", 
 		gui=gui, first="YES")
-  } else {
-    if (!"DBI" %in% rownames(installed.packages()))
-      stop("the DBI package is required when datsource='ORACLE'")
-  }
+
 
   ## If evalid is not NULL, get state
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
     evalid <- unique(unlist(evalid)) 
-    stcdlst <- unique(unlist(sapply(evalid, substr, nchar(evalid)-5, nchar(evalid)-4)))
+    stcdlst <- substr(evalid, 1, nchar(evalid)-4)
     states <- FIESTA::pcheck.states(stcdlst, "MEANING")
   } else if (!is.null(invyrtab)) {
     if (!all(class(invyrtab) %in% c("data.frame", "data.table"))) 
@@ -84,13 +64,13 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
       states <- FIESTA::pcheck.states(stcdlst, "MEANING")
     }
   } else {
-    rs <- FIESTA::pcheck.varchar(var2check=rs, varnm="rs", 
+    RS <- FIESTA::pcheck.varchar(var2check=RS, varnm="RS", 
 		checklst=rslst, caption="Research Unit?", gui=gui, multiple=TRUE)
-    if (is.null(rs)) rs <- rslst  
+    if (is.null(RS)) RS <- rslst  
 
-    states <- pcheck.states(states, gui=gui, rs=rs)
+    states <- pcheck.states(states, gui=gui, RS=RS)
     if (is.null(states)) {
-      states <- pcheck.states(states, gui=TRUE, rs=rs)
+      states <- pcheck.states(states, gui=TRUE, RS=RS)
       if (is.null(states)) stop("must include states")
     }
     stcdlst <- pcheck.states(states, "VALUE")
@@ -99,62 +79,38 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
 		"RS"])
   rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
   rslst <- unique(rslst)
-
   
-  ## Get database connection, if datsource=ORACLE, and define SCHEMA for queries
-  if (datsource == "ORACLE") {
-
-    if (is.null(dbconn)) {
-      ## CONNECT TO ORACLE DATABASE
-      dbconn <- DBtestORACLE(dbconnopen=TRUE)
-    } else {
-      if (!DBI::dbIsValid(dbconn)) stop("the database connection is invalid")
-    } 
-    if (length(rslst) == 1) {
-      FS_FIADB <- pcheck.logical(FS_FIADB, varnm="FS_FIADB", 
-		title="FS_FIADB schema?", first="YES", gui=gui, stopifnull=TRUE)
-    } else {
-      FS_FIADB <- TRUE
-    }
- 
-    ## check dbconnopen
-    dbconnopen <- FIESTA::pcheck.logical(dbconnopen, varnm="dbconnopen", 
-		title="Keep ODBC open?", first="NO", gui=gui)
-
-    if (!FS_FIADB) {
-      SCHEMA <- paste("FS_NIMS_FIADB", rslst, sep="_")
-    } else {
-      SCHEMA <- "FS_FIADB"
-    }
-    SCHEMA. <- paste0(SCHEMA, ".")
-  } else {
-    SCHEMA. <- ""
-  }
 
   ## Define query POP_EVAL, POP_EVAL_TYP table
   popevaltypqry <- paste0("select pev.*, pet.eval_typ from ", SCHEMA., 
 		"POP_EVAL_TYP pet join ", SCHEMA., "POP_EVAL pev on (pev.cn = pet.eval_cn) ",
-		"where pev.STATECD in ", FIESTA::addcommas(stcdlst, paren=TRUE))
+		"where pev.STATECD in ", paste0("(", toString(stcdlst), ")"))
 
-  if (datsource == "ORACLE") {
-    ## Get POP_EVAL table with POP_EVAL_TYP
-    tryCatch( POP_EVAL <- DBqryORACLE(popevaltypqry, dbconn, dbconnopen=TRUE), 
-		error=function(e) stop("pop_eval query is invalid"))
+############ CSV only
 
-    ## Get SURVEY table
-    surveyqry <- paste0("select * from ", SCHEMA., "SURVEY where STATECD in ", 
-		FIESTA::addcommas(stcdlst, paren=TRUE))
-    tryCatch( SURVEY <- DBqryORACLE(surveyqry, dbconn, dbconnopen=TRUE), 
-		error=function(e) stop("survey query is invalid"))
+  #########################################################################
+  ## Get database tables - POP_EVAL, POP_EVAL_TYPE, SURVEY
+  #########################################################################
 
-  } else if (datsource == "CSV") {
- 
-    POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, ZIP=ZIP)
-    POP_EVAL_TYP <- FIESTA::DBgetCSV("POP_EVAL_TYP", stcdlst, ZIP=ZIP)
-    SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE)
+  POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, ZIP=ZIP, stopifnull=FALSE)
+  if (nrow(POP_EVAL) == 0) {
+    message("no data in database for ", toString(states))
+    return(NULL)
+  } else {
+    if (!all(stcdlst %in% unique(POP_EVAL$STATECD))) {
+      miss <- stcdlst[!stcdlst %in% unique(POP_EVAL$STATECD)]
+      message("no data in database for ", toString(miss))
+      stcdlst <- stcdlst[!stcdlst %in% miss]
+    }
+  } 
+  POP_EVAL_TYP <- FIESTA::DBgetCSV("POP_EVAL_TYP", stcdlst, ZIP=ZIP, stopifnull=FALSE)
+  if (nrow(POP_EVAL_TYP) == 0) return(NULL)
+  SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE, stopifnull=FALSE)
+  if (nrow(SURVEY) == 0) return(NULL)
 
-    POP_EVAL <- sqldf::sqldf(popevaltypqry)
-  }
+  POP_EVAL <- sqldf::sqldf(popevaltypqry)
+
+############ End CSV only
 
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
   if ("Texas" %in% states) {
@@ -173,33 +129,29 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
       ## Create table of state, inventory year, and cycle
       invyrqry <- paste0("select STATECD, STATENM, STATEAB, ANN_INVENTORY, INVYR, 
 		CYCLE from ", SCHEMA., "SURVEY where STATENM IN(", 
-		FIESTA::addcommas(states, quotes=TRUE), ") and invyr <> 9999")
-      if (datsource == "CSV") {
-        invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
-      } else {
-        invyrtab <- tryCatch( SURVEY <- DBqryORACLE(invyrqry, dbconn, dbconnopen=TRUE), 
-		error=function(e) stop("invyr query is invalid"))
-      }
+		toString(paste0("'", states, "'")), ") and invyr <> 9999")
+
+############ CSV only
+      invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
+
+############ End CSV only
 
       invyrs <- list()
       evalidlist <- list()
       evalTypelist <- list()
       for (i in 1:length(evalid)) { 
         eval <- evalid[[i]]
-        st <- substr(eval, nchar(evalid)-5, nchar(evalid)-4)
-        etypcd <- substr(eval, nchar(evalid)-1, nchar(evalid))
+        st <- substr(eval, 1, nchar(eval)-4)
+        etypcd <- substr(eval, nchar(eval)-1, nchar(eval))
         state <- FIESTA::pcheck.states(st, "MEANING")
-        startyr <- unique(min(POP_EVAL[POP_EVAL$EVALID == eval, c("START_INVYR")]))
-        endyr <- unique(max(POP_EVAL[POP_EVAL$EVALID == eval, c("END_INVYR")]))
- 
+        pop_eval <- POP_EVAL[POP_EVAL$EVALID == eval,]
+        startyr <- unique(min(pop_eval$START_INVYR))
+        endyr <- unique(min(pop_eval$END_INVYR))
         ann_inventory <- SURVEY[SURVEY$STATECD == st & SURVEY$INVYR == endyr, 
 		"ANN_INVENTORY"][[1]]
         invtype <- ifelse(ann_inventory == "Y", "ANNUAL", "PERIODIC")
         stinvyr <- startyr:endyr
-        evalTypecd <- unique(POP_EVAL$EVALID[endsWith(as.character(POP_EVAL$EVALID), 
-			paste0(substr(endyr, nchar(endyr)-1, nchar(endyr)), etypcd))])
-        evalTypelist[[state]] <- POP_EVAL[POP_EVAL$EVALID %in% evalTypecd, "EVAL_TYP"][[1]]
-
+        evalTypelist[[state]] <- unique(pop_eval$EVAL_TYP)[1]
         if (state %in% names(invyrs)) {
           invyrs[[state]] <- sort(unique(c(invyrs[[state]], stinvyr)))
           evalidlist[[state]] <- sort(unique(c(evalidlist[[state]], eval)))
@@ -210,9 +162,8 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
         invyrtab <- invyrtab[invyrtab$ANN_INVENTORY == ann_inventory,]
       }
     }
-    return(returnlst <- list(states=states, evalidlist=evalidlist, invtype=invtype,
- 		invyrtab=invyrtab, invyrs=invyrs, evalType=evalTypelist, datsource=datsource, 
-		FS_FIADB=FS_FIADB, ZIP=ZIP, dbconn=dbconn))
+    return(returnlst <- list(states=states, rslst=rslst, evalidlist=evalidlist, 
+		invtype=invtype, invyrtab=invyrtab, invyrs=invyrs, evalType=evalTypelist))
   }
  
   ## Check invyrtab. Data frame with inventory years by state
@@ -234,7 +185,7 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
 
     ## Create table of state, inventory year, and cycle
     invyrqry <- paste0("select STATECD, STATENM, STATEAB, ANN_INVENTORY, INVYR, CYCLE from ", 
-		"SURVEY where STATENM IN(", FIESTA::addcommas(states, quotes=TRUE), 
+		"SURVEY where STATENM IN(", toString(paste0("'", states, "'")), 
 		") and invyr <> 9999 and ANN_INVENTORY = '", ann_inventory, "'")
 
     invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
@@ -266,25 +217,33 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
   stinvyr.max <- lapply(stinvyr.vals, '[[', 2)
   invyr.min <- min(unlist(stinvyr.min))
   invyr.max <- max(unlist(stinvyr.max))
+
  
   if (is.null(evalEndyr)) {
-    ## Check evalCur
+    ## Check evalAll
     ###########################################################
-    evalCur <- FIESTA::pcheck.logical(evalCur, varnm="evalCur", 
+    evalAll <- FIESTA::pcheck.logical(evalAll, varnm="evalAll", 
+		title="All evaluations?", first="YES", gui=gui)
+
+    if (is.null(evalAll) || !evalAll) {
+      ## Check evalCur
+      evalCur <- FIESTA::pcheck.logical(evalCur, varnm="evalCur", 
 		title="Most current evaluation?", first="YES", gui=gui)
-    if (is.null(evalCur) || !evalCur) {
-      if (gui) {
-        evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
-		  multiple=FALSE)
-        if (evalresp == "") stop("")
-        evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
-      } else {
-        evalresp <- FALSE
-      }
+      if (evalCur) evalresp <- TRUE
     } else {
-      evalresp <- TRUE
+      if (evalAll) {
+        evalCur <- FALSE
+        evalresp <- TRUE
+      }
+    }
+    if ((is.null(evalCur) || !evalCur) && (is.null(evalAll) || !evalAll) && gui) {
+      evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
+		  	multiple=FALSE)
+      if (evalresp == "") stop("")
+      evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
     }
   }
+
   if (!is.null(evalEndyr)) {
     if (class(evalEndyr)[1] != "list") {
       if (length(states) > 1) {
@@ -346,6 +305,7 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
     }
   }
 
+
   ## Get last year of evaluation period and the evaluation type
   if (evalresp) {
     invyrs <- list()
@@ -353,11 +313,16 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
 
     ## Get the evalidation type - areavol or grm)
     evalSelectlst <- c("AREAVOL", "GRM", "DWM")
-    if (invtype == "ANNUAL") evalSelectlst <- c("ALL", evalSelectlst)
+    if (invtype == "ANNUAL") {
+      evalSelectlst <- c("ALL", evalSelectlst)
+    } else {
+      if (any(evalType == "ALL"))
+        message("PERIODIC invtype does not have evalType = 'ALL'")      
+    }
     evalType <- FIESTA::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
 		checklst=evalSelectlst, caption="Evaluation type", multiple=TRUE, 
 		preselect="AREAVOL")
-    if (is.null(evalType)) evalType <- "ALL"
+    if (is.null(evalType)) evalType <- "AREAVOL"
 
     ## check evalType
     if (length(grep("AREAVOL", evalType, ignore.case=TRUE)) > 0) 
@@ -404,6 +369,8 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
       } else {   ## is.null(evalEndyr)
         if (evalCur) {
           Endyr <- max(POP_EVAL_endyrs)
+        } else if (evalAll) {
+          Endyr <- POP_EVAL_endyrs
         } else {
           if (length(POP_EVAL_endyrs) > 1 && gui) {
             Endyr <- select.list(as.character(POP_EVAL_endyrs), 
@@ -417,14 +384,14 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
       }
  
       ## Get evalid and inventory years from POP_EVAL table
-      pop_endyr <- POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR == Endyr
+      pop_endyr <- POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR %in% Endyr
       if (all(is.na(pop_endyr[pop_endyr != FALSE])))
         stop("invalid invtype for ", state)
       popevaltab <- POP_EVAL[POP_EVAL$STATECD == stcd & !is.na(POP_EVAL$END_INVYR) & 
-		POP_EVAL$END_INVYR == Endyr,]
+		POP_EVAL$END_INVYR %in% Endyr,]
 
-      if (is.null(invtype)) {
-        Startyr <- unique(POP_EVAL[POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR == Endyr, 
+      if (is.null(invtype) && !evalAll) {
+        Startyr <- unique(POP_EVAL[POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR %in% Endyr, 
 		"START_INVYR"])
         #invtype <- ifelse(is.na(Startyr) || Endyr == Startyr, "PERIODIC", "ANNUAL")
         invtype <- ifelse(Endyr == Startyr, "PERIODIC", "ANNUAL")
@@ -439,7 +406,7 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
 
         evalidall <- popevaltab$EVALID[!is.na(popevaltab$EVALID)]
         evalidlist[[state]] <- 
-		popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]
+		sort(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]])
         invyrs[[state]]  <- 
 		min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
      
@@ -462,18 +429,10 @@ DBgetEvalid <- function (states=NULL, rs=NULL, datsource="CSV", ZIP=TRUE,
   returnlst <- list(states=states, rslst=rslst, evalidlist=evalidlist, 
 		invtype=invtype, invyrtab=invyrtab, evalTypelist=evalTypelist)
   if (!is.null(invyrs)) returnlst$invyrs <- invyrs
-  returnlst$datsource <- datsource
-  
-  ## Close database connection
-  if (datsource == "ORACLE") {
-    if (!dbconnopen) {
-      DBI::dbDisconnect(dbconn)
-    } else {
-      returnlst$dbconn <- dbconn
-    }
-    returnlst$FS_FIADB <- FS_FIADB
-  } else {
-    returnlst$ZIP <- ZIP
+
+  if (returnPOP) {
+    returnlst$SURVEY <- SURVEY
+    returnlst$POP_EVAL <- POP_EVAL
   }
 
   return(returnlst)

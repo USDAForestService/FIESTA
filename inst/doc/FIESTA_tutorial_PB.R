@@ -1,4 +1,4 @@
-## ---- results = 'asis', echo=FALSE---------------------------------------
+## ---- results = 'asis', echo=FALSE--------------------------------------------
 
 stratdat.lut <- data.frame(Variable = c("ESTN_UNIT", "STRATUMCD", "P1POINTCNT", "n.strata", "n.total", "ACRES", "strwt"), Description = c("Estimation unit", "Strata value", "Number of pixels by strata and estimation unit", 
     "Number of plots in strata (and estimation unit)", "Number of plots for estimation unit", "Total acres for estimation unit", 
@@ -32,7 +32,7 @@ kable(pltdom.lut,
 
 
 
-## ---- results = 'asis', echo=FALSE---------------------------------------
+## ---- results = 'asis', echo=FALSE--------------------------------------------
 
 nonratio <- data.frame(Variable = c("phat", "phat.var", "phat.se", "phat.cv", "est", "est.var"), Description = c("Estimated proportion of land", "Variance estimate of estimated proportion of land", "Standard error of estimated proportion of land { sqrt(phat.var) }", "Coefficient of variance of estimated proportion of land { phat.se/phat }", "Estimated percent cover of land { phat*100 }", "Variance of estimated percent cover of land { phat.var*100^2 }"), stringsAsFactors = FALSE)
 

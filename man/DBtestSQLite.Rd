@@ -1,0 +1,33 @@
+\name{DBtestSQLite}
+\alias{DBtestSQLite}
+\title{
+	Database - Checks access to a SQLite database. 
+}
+\description{
+	Checks a SQLite database.
+}
+\usage{
+	DBtestSQLite(SQLitefn = NULL, gpkg = FALSE, dbconnopen = FALSE, 
+		outfolder = NULL, showlist = TRUE, returnpath = TRUE,
+		createnew = TRUE, stopifnull = FALSE)
+}
+ 
+\arguments{
+  \item{SQLitefn}{ String. Name of SQLite database (*.sqlite). }
+  \item{gpkg}{ Logical. If TRUE, Sqlite geopackage database. }
+  \item{dbconnopen}{ Logical. If TRUE, the dbconn connection is not closed. }
+  \item{outfolder}{ String. Optional. Name of output folder. If NULL, export
+	to working directory. }
+  \item{showlist}{ Logical. If TRUE, shows list of tables in database. }
+  \item{returnpath}{ Logical. If TRUE, returns full path to SQLite file name. 
+		If FALSE, returns SQLitefn. }
+  \item{createnew}{ If TRUE, creates new SQLite database. }
+  \item{stopifnull}{ Logical. If TRUE, stops if SQLite database doesn't exist. }
+
+}
+\author{
+	Tracey S. Frescino
+}
+
+
+\keyword{ data }

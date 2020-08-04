@@ -11,43 +11,48 @@
 }
 
 \usage{
-spExtractPoly(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN", 
-	polylst, poly_dsn = NULL, polyvarlst = NULL, polyvarnmlst = NULL, 
-	keepnull = TRUE, showext = FALSE, savedata = FALSE, exportshp = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.date = TRUE, overwrite = FALSE, ...)
+spExtractPoly(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", polyvlst, 
+	polyv_dsn = NULL, polyvarlst = NULL, polyvarnmlst = NULL, keepNA = FALSE,
+	showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,
+	out_fmt = "shp", out_dsn = NULL, out_layer = "polyext", outfolder = NULL, 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, ...)
 }
 
 \arguments{
-  \item{spplt}{ S4 SpatialPoints object or shapefile filename (*.shp), including 
-	full path and extension. The spatial layer must have a defined projection.
-	If NULL, include xyplt. }
-  \item{spplt_dsn}{ String. Name of the folder or database with spplt. }
-  \item{xyplt}{ Data frame, data.table, matrix, or comma-delimited file (*.csv). 
-	Includes unique identifier of rows (uniqueid) and x and y coordinates. 	
-	If spplt=NULL, x/y coordinates are used for data extraction. Must include 
-	projection information in respective parameters. }
+  \item{xyplt}{ Data frame object or String. Name of layer with xy coordinates
+	and unique identifier. Can be layer with xy_dsn, full pathname, including 
+	extension, or file name (with extension) in xy_dsn folder. }
+  \item{xyplt_dsn}{ String. Name of database where xyplt is. The dsn varies by
+	driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
   \item{uniqueid}{ String.* Unique identifier of xyplt rows. }
-  \item{polylst}{ String vector. Name(s) of polygon layers. Must be either
-	shapefiles or SpatialPolygonsDataFrame objects. Include extensions. }
-  \item{poly_dsn}{ String. Name of the folder or database with polygon layers. }
-  \item{polyvarlst}{String vector or list. The name(s) of variable(s) to extract from polygon 
-	layer. If extracting multiple variables from more than one polygon, specify the names in 
-	a list format, corresponding to polylst. }
-  \item{polyvarnmlst}{String vector or list. The output name(s) of variable(s) extracted 
-	from polygon layer. If extracting multiple variables from more than one polygon, 
-	specify the names in a list format, corresponding to polylst. The number of names
+  \item{polyvlst}{ sf R object or String. Name(s) of polygon layers to extract 
+	values. A spatial polygon object, full path to shapefile, or name of a 
+	layer within a database. }
+  \item{polyv_dsn}{ String. Data source name (dsn) where polyvlst layers are
+	found (e.g., *.sqlite, *.gdb, folder name). The dsn varies by driver. 
+	See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html). }
+  \item{polyvarlst}{String vector or list. The name(s) of variable(s) to extract 
+	from polygon(s). If extracting multiple variables from more than one polygon, 
+	specify names in a list format, corresponding to polyvlst. }
+  \item{polyvarnmlst}{String vector or list. Output name(s) of variable(s) extracted 
+	from polygon(s). If extracting multiple variables from more than one polygon, 
+	specify names in a list format, corresponding to polyvlst. The number of names
 	must match the number of variables in polyvarlst. }
+  \item{keepNA}{ Logical. If TRUE, keep NA values. }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
-  \item{keepnull}{ Logical. If TRUE, keep NULL values after extraction. }
   \item{savedata}{ Logical. If TRUE, the input data with extracted values are
 	saved to outfolder. }
-  \item{exportshp}{ Logical. If TRUE, exports Spatial object to outfolder as an 
-	ArcGIS shapefile (*.shp). Variable names are truncated to 10 characters or less
-	(See note below). }
-  \item{outfolder}{ String. If savedata=TRUE or exportshp=TRUE, name of output folder. 
+  \item{exportsp}{ Logical. If TRUE, the extracted point data are exported to outfolder. }
+  \item{exportNA}{ Logical. If TRUE, NULL values are exported to outfolder. }
+  \item{out_fmt}{ String. File format for output ('sqlite','gpkg','shp','gdb').
+	If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed. 
+	If out_fmt='gdb', argisbinding package must be installed and functional. }
+  \item{out_dsn}{ String. Name of dsn for output data (e.g., sqlite database or 
+	full pathname to shapefile). } 
+  \item{out_layer}{ String. Name of layer in out_dsn if database.}
+  \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
-  \item{outfn}{ String. Name of the output shapefile/.csv file (Do not include 
-	extension). If NULL, default name is datext_'date'. }
+  \item{outfn.pre}{ String. A prefix for out_dsn. }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
@@ -68,7 +73,7 @@ spExtractPoly(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
   \item{var.name}{ String vector. Variable names of extracted variables. }
 
   If savedata=TRUE, outdat data frame is saved to outfolder (Default name: datext_'date'.csv).
-  If exportshp=TRUE, the SpatialPointsDataFrame object is exported to outfolder
+  If exportsp=TRUE, the SpatialPointsDataFrame object is exported to outfolder
 	(Default name: datext_'date'.shp). Variable names are truncated to 10 characters or 
 	less (See note below). Name changes are output to 'outfn'_newnames_'data'.csv in
 	outfolder.
@@ -93,6 +98,8 @@ spExtractPoly(spplt = NULL, spplt_dsn = NULL, xyplt = NULL, uniqueid = "PLT_CN",
 	NAD83 and WGS84 are identical unless other transformation parameters are specified. 
 	Be aware, providing inaccurate or incomplete CRS information may lead to erroneous 
 	data shifts when reprojecting. See spTransform help documentation for more details.
+
+  Any names in polygon layers that are the same as in xyplt are renamed to name'_1'.
 }
 
 \keyword{ data }

@@ -1,8 +1,9 @@
-spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_CN",
- 	rastlst=NULL, rastfolder=NULL, rast.prjstr=NULL, bandlst=NULL, var.name=NULL,
- 	interpolate=FALSE, windowsize=1, windowstat=NULL, keepnull=TRUE, showext=FALSE,
- 	savedata=FALSE, exportshp=FALSE, exportna=FALSE, outfolder=NULL, outfn=NULL,
- 	outfn.date=TRUE, overwrite=FALSE, ...){
+spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst, 
+ 	rastfolder=NULL, rast.crs=NULL, bandlst=NULL, var.name=NULL, interpolate=FALSE, 
+ 	windowsize=1, windowstat=NULL, rast.NODATA=NULL, keepNA=TRUE, showext=FALSE, 
+	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="shp", 
+	out_dsn=NULL, out_layer="rastext", outfn.pre=NULL, outfn.date=TRUE, 
+	overwrite=FALSE, ...){
   #####################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more raster layers and appends to input spatial layer 
@@ -12,47 +13,41 @@ spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
   ## a specified statistic.
   #####################################################################################
 
-  if (!"rgeos" %in% rownames(installed.packages()))
-    stop("spExtractRast function requires package rgeos")
+  ## Check for necessary packages
+  ###########################################################
+  if (!"sf" %in% rownames(installed.packages()))
+    stop("sf package is required for spExtractRast()")
+  
+  if (!"rgdal" %in% rownames(installed.packages()))
+    stop("rgdal package is required for spExtractRast()")
+
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-
-  if (gui) shp=xytable=bfun=focalrast=ffun=focalsave=extrtype <- NULL
+  if (gui) xyplt=bfun=focalrast=ffun=focalsave=extrtype <- NULL
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
 
-  ### Spatial Points: shp or xytable for data extraction.. 
+  ## Spatial points for data extraction.. 
   ##################################################################################
-  if (is.null(spplt)) {
-
-    ## Check parameters
-    if (is.null(xyplt)) stop("either include spplt or xyplt for data extraction")
-         
-    ## Create spatial object from xyplt coordinates
-    sppltx <- FIESTA::spMakeSpatialPoints(xyplt=xyplt, uniqueid=uniqueid, ...)
-  } else {
+  sppltx <- pcheck.table(tab=xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
+			caption="XY coordinates?", stopifnull=TRUE)
  
-    ## Check spplt
-    sppltx <- FIESTA::pcheck.spatial(layer=spplt, dsn=spplt_dsn, gui=gui,
-		caption="Spatial points with XY coords?")
-    if (is.null(sp::proj4string(sppltx))) stop("spplt must have defined projection")
-
+  if (!"sf" %in% class(sppltx)) { 
+    ## Create spatial object from xyplt coordinates
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, uniqueid=uniqueid, 
+		exportsp=FALSE, ...)
+  } else {
     ## GET uniqueid
-    sppltnames <- names(sppltx@data)
+    sppltnames <- names(sppltx)
     uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
-
-    ## Check for NA or duplicate values in uniqueid
-    if (sum(is.na(sppltx@data[[uniqueid]])) > 0) stop("NA values in ", uniqueid)
-    if (length(unique(sppltx@data[[uniqueid]])) < nrow(sppltx@data)) 
-      stop("spplt records are not unique")
   }
  
-   ## Check showext    
+  ## Check showext    
   showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
  
@@ -60,38 +55,37 @@ spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
-  ## Check outfolder 
+  ## Check exportsp 
+  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+		title="Export spatial?", first="NO", gui=gui)  
+
+  ## Check exportNA 
+  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+		title="Export NA values?", first="NO", gui=gui)  
+
+
+  ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata || exportshp) {
-    ## Check overwrite 
+  if (savedata || exportsp || exportNA) {
     overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite files?", first="NO", gui=gui)  
-
+    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+		title="Add date to outfiles?", first="YES", gui=gui)  
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-
-    if (is.null(outfn)) {
-      outfn <- "dataext"
-    } else if (!is.character(outfn)) {
-      stop("outfn must be character")
-    }      
   }
   
   ## Verify rasters
   ########################################################
-  rastfnlst <- getrastlst(rastlst, rastfolder, filenames=TRUE, gui=gui)
-  if (any(rastfnlst == "")) stop("must write raster to file")
+  rastfnlst <- getrastlst.rgdal(rastlst, rastfolder, gui=gui)
+  #if (any(rastfnlst == "")) stop("must write raster to file")
   nrasts <- length(rastfnlst)
 
 
   ## Get names of rasters
-  rastnmlst <- lapply(rastfnlst, 
-	function(x) sub(raster::extension(basename(x)), "", basename(x)))
-
-  ## Import rasters
-  rasterlst <- lapply(rastfnlst, raster::raster)
+  rastnmlst <- lapply(rastfnlst, basename.NoExt)
 
   ## Get number of bands in each raster and set names
-  nbandlist <- lapply(rasterlst, nbands)
+  nbandlist <- lapply(rastfnlst, function(x) rasterInfo(x)$nbands)
   names(nbandlist) <- rastnmlst
   nrastbands <- length(unlist(nbandlist))
   
@@ -124,7 +118,25 @@ spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
   ## Get rasterfiles
   rasterfile <- rep(rastfnlst, unlist(lapply(bandlist, length)))
 
-  
+  ## Check rast.NODATA
+  if (!is.null(rast.NODATA)) {
+    if (!is.numeric(rast.NODATA))
+      stop("rast.NODATA must be numeric")
+    if (length(rast.NODATA) != nlayers) {
+      if (length(rast.NODATA) == 1) {
+        message(rast.NODATA, "used as NODATA value all raster layers")
+        rast.NODATA <- rep(rast.NODATA, nlayers)
+      } else if (length(rast.NODATA) == nrasts) {
+        rast.NODATA <- rep(rast.NODATA, unlist(lapply(bandlist, length)))
+        message("using same NODATA value for multiple bands")
+      } else {
+        stop("number of NODATA values does not match number of raster layers")
+      }
+    }
+  } else {
+    rast.NODATA  <- rep(NA, nlayers)
+  }    
+
   ## Check var.name
   if (!is.null(var.name)) {
     if (!is.character(var.name)) 
@@ -146,8 +158,11 @@ spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
       stop("interpolate is invalid... must be logical, TRUE or FALSE")
     if (length(interpolate) != nlayers) {
       if (length(interpolate) == 1) {
-        interptxt <- ifelse(interpolate, "be used", "not be used")
-        message(paste("interpolation will", interptxt, "for all raster layers"))
+        if (interpolate) {
+          message("interpolation used for all raster layers")
+        } else {
+          message("no interpolation used for any raster layers")
+        }
         interpolate <- rep(interpolate, nlayers)
       } else if (length(interpolate) == nrasts) {
         interpolate <- rep(interpolate, unlist(lapply(bandlist, length)))
@@ -203,44 +218,42 @@ spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
     }
   }
 
-  inputs <- data.table(rasterfile, band, var.name, interpolate, windowsize, statistic)
+  inputs <- data.table(rasterfile, band, var.name, interpolate, windowsize, statistic,
+			rast.NODATA)
   print(inputs)
-
-  ## Check raster projections
-  #raster.prj <- lapply(rasterlst, sp::proj4string)
 
   ########################################################################
   ### DO THE WORK
   ########################################################################  
-  outnames <- {}      
-  for (i in 1:nrasts) {
+  outnames <- {}  
+  NAlst <- list() 
+  for (i in 1:nrasts) {	## loop through rasters
 
     rastfn <- rastfnlst[[i]]
-    rast <- raster(rastfn)
     rastnm <- FIESTA::basename.NoExt(rastfn)
+    rast.prj <- rasterInfo(rastfn)$crs
+    rast.bbox <- rasterInfo(rastfn)$bbox
 
-    ## Check projection
-    prjdat <- CRScompare(rast, sppltx, prj4str=rast.prjstr)
-    rast <- prjdat$layer1
-    sppltprj <- prjdat$layer2
+    ## Check projection and reproject sppltx if different than rast
+    sppltprj <- crsCompare(sppltx, rast.prj, crs.default=rast.crs)$x
     
     ## Subset Spatial data frame to just id, x, y
-    sppltxy <- data.frame(sppltprj[[uniqueid]], coordinates(sppltprj))
-    names(sppltxy) <- c("id", "x", "y")
+    sppltxy <- data.frame(sppltprj[[uniqueid]], sf::st_coordinates(sppltprj))
+    names(sppltxy)[1] <- uniqueid
 
     ## Check extents
-    msg <- FIESTA::check.extents(rast, sppltprj, showext, layer1nm=rastnm, 
-			layer2nm="spplt")
-    if (msg == "non-overlapping extents") stop("msg")
-
+    names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
+    bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
+    bbox2 <- sf::st_bbox(sppltprj)
+    check.extents(bbox1, bbox2, showext=showext, layer1nm=rastnm, layer2nm="xyplt",
+			stopifnotin=TRUE)
            
     ## Extract values
-    ########################################################  
-        
+    ########################################################          
     message(paste("extracting point values from", rastnm, "...")) 
     inputs.rast <- inputs[rasterfile == rastfn,]
 
-    for (j in 1:nrow(inputs.rast)) {
+    for (j in 1:nrow(inputs.rast)) {	## loop through raster bands
 
       band <- inputs.rast[j, band]
       if (nrow(inputs.rast) > 1) message(paste("band", band, "...")) 
@@ -250,27 +263,37 @@ spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
       windowsize <- inputs.rast[j, windowsize]
       statistic <- inputs.rast[j, statistic] 
       if (statistic == "value") statistic <- NULL
+      rast.NODATA <- inputs.rast[j, rast.NODATA]
 
-      dat <- setDT(extractPtsFromRaster(ptdata=sppltxy, rasterfile=rastfn, band=band, 
-			var.name=var.name, interpolate=interpolate, windowsize=windowsize, 
-			statistic=statistic))
+      dat <- suppressWarnings(extractPtsFromRaster(ptdata=sppltxy, 
+			rasterfile=rastfn, band=band, var.name=var.name, 
+			interpolate=interpolate, windowsize=windowsize, statistic=statistic))
       cname <- names(dat)[2]
       outnames <- c(outnames, cname)
-      sppltx <- sp::merge(sppltx, dat, by.x=uniqueid, by.y="pid", all.x=TRUE)
+
+      if ("data.table" %in% class(sppltx)) stop("xyplt cannot be sf data.table")
+      sppltx <- merge(sppltx, dat, by.x=uniqueid, by.y="pid")
+
+      if (!is.na(rast.NODATA))
+        sppltx[sppltx[[cname]] == rast.NODATA, cname] <- NA
+
+      #print(table(sppltx[[cname]]))
 
       ## Print missing values to screen
-      navals <- sum(is.na(dat[[2]]))
+      navals <- sum(is.na(sppltx[[cname]]))
       if (navals > 0) {
+        NAlst[[var.name]] <- navals
         message(paste(navals, "missing values for", rastnm))
-        if (exportna) {
+        if (exportNA) {
           sppltna <- sppltx[is.na(sppltx[[cname]]),]
-          outfn.na <- paste(basename(rastfn), "na", sep="_")
-          spExportShape(sppltna, outshpnm=outfn.na, outfolder=outfolder, 
-			outfn.date=outfn.date, overwrite=overwrite, uniqueid=uniqueid)
+          outfn.na <- paste(var.name, "na", sep="_")
+          spExportSpatial(sppltna, out_layer=outfn.na, outfolder=outfolder, 
+			out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date,
+ 			overwrite_layer=overwrite)
         }
       }
 
-      if (!keepnull && sum(is.na(sppltx[[cname]])) > 0) {
+      if (!keepNA && sum(is.na(sppltx[[cname]])) > 0) {
         message("removing missing values from input dataset")
         sppltx <- sppltx[!is.na(sppltx[[cname]]),]
       }
@@ -278,14 +301,18 @@ spExtractRast <- function(spplt=NULL, spplt_dsn=NULL, xyplt=NULL, uniqueid="PLT_
   }
 
   if (savedata)
-    write2csv(sppltx@data, outfolder=outfolder, outfilenm=outfn, outfn.date=outfn.date,
-		overwrite=overwrite)
+    write2csv(sppltx, outfolder=outfolder, outfilenm=out_layer, outfn.pre=outfn.pre,
+ 		outfn.date=outfn.date, overwrite=overwrite)
 
-  if (exportshp) 
-    spExportShape(sppltx, outshpnm=outfn, outfolder=outfolder, outfn.date=outfn.date,
-		overwrite=overwrite, uniqueid=uniqueid)
+  if (exportsp) 
+    spExportSpatial(sppltx, out_layer=out_layer, outfolder=outfolder, 
+		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
 
-  returnlst <- list(spplt=sppltx, pltdat=sppltx@data, outnames=outnames,
-		rastfnlst=rastfnlst, inputdf=inputs)
+  returnlst <- list(sppltext=sppltx, outnames=outnames, rastfnlst=rastfnlst, 
+				inputdf=inputs)
+
+  if (length(NAlst) > 0) 
+    returnlst$NAlst <- NAlst
+
   return(returnlst)
 }

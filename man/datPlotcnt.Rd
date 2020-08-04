@@ -1,10 +1,10 @@
 \name{datPlotcnt}
 \alias{datPlotcnt}
 \title{
-	Database - Get plot counts from FIA database
+	Database - Get plot counts.
 }
 \description{
-	Extract plot counts from FIA database.  
+	Extract plot counts by inventory year and state.  
 }
 \usage{
 datPlotcnt(plt, yrtype = "INVYR", states = NULL, designcd = FALSE, forsamp = TRUE,

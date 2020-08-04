@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
 
@@ -30,9 +29,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -201,7 +197,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -288,6 +285,7 @@ setwd(&quot;C:/FIESTA&quot;)
 if (!file.exists(&quot;outfolder&quot;)) dir.create(&quot;outfolder&quot;)
 if (!file.exists(&quot;outfolder/tables&quot;))  dir.create(&quot;outfolder/tables&quot;)
 outfolder &lt;- &quot;outfolder/tables&quot;
+
 </code></pre>
 <p>Main datasets</p>
 <pre><code>cond &lt;- WYcond 
@@ -321,7 +319,7 @@ estround=1
 divideby=&quot;thousand&quot;
 
 estdat &lt;- modGBarea(cond=cond, pltstrat=pltstrat, sumunits=TRUE, landarea=landarea,
-        unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+        unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, rowvar=rowvar,
         colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
         col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby)
 esttab &lt;- estdat$est
@@ -344,6 +342,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
 write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &quot;, tabtitle),  
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         fill=TRUE, wbnm=wbnm,   sheetnm=paste0(tabnm,&quot;.2&quot;))
+
 </code></pre>
 </div>
 <div id="standard-errors-in-next-cell" class="section level4">
@@ -360,7 +359,7 @@ estround=1
 divideby=&quot;thousand&quot;
 
 estdat &lt;- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
-        unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+        unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, rowvar=rowvar,
         colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
         col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby)
 esttab &lt;- estdat$est
@@ -384,6 +383,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         fill=TRUE, psetab=psetab, addSEcol=TRUE, wbnm=wbnm, 
         sheetnm=paste0(tabnm,&quot;.4&quot;))
+
 </code></pre>
 </div>
 <div id="standard-errors-in-same-cell" class="section level4">
@@ -400,7 +400,7 @@ estround=1
 divideby=&quot;thousand&quot;
 
 estdat &lt;- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
-        unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+        unitvar=&quot;ESTN_UNIT&quot;, unitarea=unitarea, stratalut=stratalut, rowvar=rowvar, 
         colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
         col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby,
         allin1=TRUE)
@@ -420,6 +420,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
 write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &quot;, tabtitle),  
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         fill=TRUE, allin1=TRUE, wbnm=wbnm,sheetnm=paste0(tabnm,&quot;.6&quot;))
+
 </code></pre>
 </div>
 </div>
@@ -445,7 +446,7 @@ returntitle=TRUE
 rowgrp=TRUE
 
 estdat &lt;- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
-        unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+        unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, rowvar=rowvar, 
         colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
         col.add0=TRUE, returntitle=TRUE, estround=estround, divideby=divideby,
         rowgrp=rowgrp)
@@ -466,6 +467,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         title.rowgrp=title.rowgrp, rowgrp=rowgrp, fill=TRUE, wbnm=wbnm, 
         sheetnm=paste0(tabnm,&quot;.8&quot;))
+
 </code></pre>
 </div>
 <div id="standard-errors-in-next-cell-1" class="section level4">
@@ -485,7 +487,7 @@ returntitle=TRUE
 rowgrp=TRUE
 
 estdat &lt;- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
-        unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+        unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, rowvar=rowvar,
         colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
         col.add0=TRUE, returntitle=TRUE, estround=estround, divideby=divideby,
         rowgrp=rowgrp)
@@ -509,6 +511,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         title.rowgrp=title.rowgrp, rowgrp=rowgrp, psetab=psetab, addSEcol=TRUE, 
         fill=TRUE, wbnm=wbnm,   sheetnm=paste0(tabnm,&quot;.10&quot;))
+
 </code></pre>
 </div>
 <div id="standard-errors-in-same-cell-1" class="section level4">
@@ -526,7 +529,7 @@ divideby=&quot;thousand&quot;
 rowgrp=TRUE
 
 estdat &lt;- modGBarea(cond=cond, pltstrat=pltstrat, FIA=TRUE, landarea=landarea,
-        unitarea=unitarea, stratalut=stratalut, rowvar=rowvar,
+        unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, rowvar=rowvar,
         colvar=colvar, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
         col.add0=col.add0, returntitle=TRUE, estround=estround, divideby=divideby,
         rowgrp=rowgrp, allin1=TRUE)
@@ -549,6 +552,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         title.rowgrp=title.rowgrp, rowgrp=rowgrp, allin1=TRUE, fill=TRUE, 
         wbnm=wbnm,  sheetnm=paste0(tabnm,&quot;.12&quot;))
+
 </code></pre>
 </div>
 </div>
@@ -574,7 +578,7 @@ col.add0=TRUE
 
 estdat2 &lt;- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
     rowvar=rowvar, colvar=colvar, title.rgrp=title.rgrp, FIA=TRUE, landarea=landarea,
-    unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+    unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, row.FIAname=row.FIAname, 
     col.FIAname=col.FIAname, rowgrp=TRUE, col.add0=TRUE) 
 esttab &lt;- estdat2$esttab
 psetab &lt;- estdat2$psetab
@@ -599,6 +603,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
         fill=TRUE, wbnm=wbnm,   sheetnm=paste0(tabnm,&quot;.14&quot;))
+
 </code></pre>
 </div>
 <div id="standard-errors-in-next-cell-2" class="section level4">
@@ -615,7 +620,7 @@ landarea &lt;- &quot;FOREST&quot;
 
 estdat2 &lt;- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
     rowvar=rowvar, colvar=colvar, title.rgrp=title.rgrp, FIA=TRUE, landarea=landarea,
-    unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+    unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, row.FIAname=row.FIAname, 
     col.FIAname=col.FIAname, rowgrp=TRUE, col.add0=TRUE) 
 esttab &lt;- estdat2$esttab
 psetab &lt;- estdat2$psetab
@@ -638,6 +643,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar, 
         title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
         addSEcol=TRUE, fill=TRUE, wbnm=wbnm, sheetnm=paste0(tabnm,&quot;.16&quot;))
+
 </code></pre>
 </div>
 <div id="standard-errors-in-same-cell-2" class="section level4">
@@ -654,7 +660,7 @@ landarea &lt;- &quot;FOREST&quot;
 
 estdat2 &lt;- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
     rowvar=rowvar, colvar=colvar, title.rgrp=title.rgrp, FIA=TRUE, landarea=landarea,
-    unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+    unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, row.FIAname=row.FIAname, 
     col.FIAname=col.FIAname, allin1=TRUE, rowgrp=TRUE, col.add0=TRUE) 
 esttab &lt;- estdat2$esttab
 esttab.title &lt;- estdat2$esttab.title
@@ -671,6 +677,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.colvar=title.colvar, outfolder=outfolder, title.rowvar=title.rowvar,
         title.rowgrp=title.rowgrp, rowgrp=TRUE, subtotal=TRUE, allin1=TRUE, 
         fill=TRUE, wbnm=wbnm, sheetnm=paste0(tabnm,&quot;.18&quot;))
+
 </code></pre>
 </div>
 </div>
@@ -693,7 +700,7 @@ landarea &lt;- &quot;FOREST&quot;
 
 estdat2 &lt;- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
     rowvar=rowvar, colvar=colvar, title.rgrp=NULL, FIA=TRUE, landarea=landarea,
-    unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+    unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, row.FIAname=row.FIAname, 
     col.FIAname=col.FIAname, colgrp=TRUE, cgrpcdvar=cgrpcdvar, rowgrp=rowgrp,
     colgrptot=FALSE) 
 esttab &lt;- estdat2$esttab
@@ -720,6 +727,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
         addSEcol=FALSE, fill=TRUE, colgrp=TRUE, cnames=cnames, coltotal=FALSE,
         wbnm=wbnm, sheetnm=paste0(tabnm,&quot;.20&quot;))
+
 </code></pre>
 </div>
 <div id="table-with-row-groups-including-subtotals-and-no-standard-errors-with-column-group-total" class="section level4">
@@ -742,9 +750,9 @@ colgrptot=TRUE
 
 estdat2 &lt;- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
     rowvar=rowvar, colvar=colvar, title.rgrp=NULL, FIA=TRUE, landarea=landarea,
-    unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
-    col.FIAname=col.FIAname, colgrp=TRUE, cgrpcdvar=cgrpcdvar, rowgrp=rowgrp,
-    colgrptot=TRUE) 
+    unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, 
+    row.FIAname=row.FIAname, col.FIAname=col.FIAname, colgrp=TRUE, 
+    cgrpcdvar=cgrpcdvar, rowgrp=rowgrp, colgrptot=TRUE) 
 esttab &lt;- estdat2$esttab
 psetab &lt;- estdat2$psetab
 title.rowvar &lt;- estdat2$title.rowvar
@@ -769,6 +777,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.rowgrp=title.rowgrp, rowgrp=TRUE, psetab=psetab, subtotal=TRUE, 
         addSEcol=FALSE, fill=TRUE, colgrp=TRUE, cnames=cnames, coltotal=TRUE,
         wbnm=wbnm, sheetnm=paste0(tabnm,&quot;.22&quot;))
+
 </code></pre>
 <pre><code>## Needs work
 
@@ -794,7 +803,7 @@ pltstrat &lt;- WYpltstrat
 
 estdat2 &lt;- tabgrp(esttype=esttype, cond=cond, tree=NULL, pltstrat=pltstrat, 
     rowvar=rowvar, colvar=colvar, title.rgrp=NULL, FIA=TRUE, landarea=landarea,
-    unitarea=unitarea, stratalut=stratalut, row.FIAname=row.FIAname, 
+    unitarea=unitarea, unitvar=&quot;ESTN_UNIT&quot;, stratalut=stratalut, row.FIAname=row.FIAname, 
     col.FIAname=col.FIAname, colgrp=TRUE, cgrpcdvar=cgrpcdvar, rowgrp=rowgrp) 
 esttab &lt;- estdat2$esttab
 psetab &lt;- estdat2$psetab
@@ -827,6 +836,7 @@ write2xlsx(esttab=esttab, tabtitle=paste0(&quot;Table &quot;, tabnm, &quot;. &qu
         title.rowgrp=title.rowgrp, rowgrp=FALSE, psetab=psetab, subtotal=FALSE,
         addSEcol=FALSE, fill=TRUE, colgrp=TRUE, cnames=cnames, coltotal=FALSE,
         wbnm=wbnm, sheetnm=paste0(tabnm,&quot;.24&quot;))
+    
         </code></pre>
 </div>
 </div>

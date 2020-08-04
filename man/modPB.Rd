@@ -10,21 +10,23 @@ Patterson (2012) photo-based estimators for the Nevada photo-based inventory.
 }
 \usage{
 modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
-	pltpctvars = NULL, pltstrat = NULL, puniqueid = "CN", ratio = FALSE, 
-	tabtype = "PCT", sumunits = FALSE, strata = FALSE, landarea = "ALL", 
-	landarea.filter = NULL, nonsamp.filter = NULL, pnt.filter = NULL, 
-	plt.filter = NULL, unitarea = NULL, unitvar = NULL, unitvar2 = NULL, 
-	areavar = "ACRES", stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", autocombine = TRUE, rowvar = NULL, colvar = NULL, 
-	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
-	rowlut = NULL, collut = NULL, domlut = NULL, domvarlst = NULL, 
-	ratioden = "ROWVAR", allin1 = FALSE, estround = 3, pseround = 3, 
-	estnull = 0, psenull = "--", savedata = FALSE, rawdata = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE,
-	overwrite = FALSE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
-	title.unitvar = NULL, title.filter = NULL, title.units = "acres", 
-	gainloss = FALSE, gainloss.vals = NULL, gui = FALSE)
+	pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
+	pltassgnid = "CN", plt.nonsamp.filter = NULL, tabtype = "PCT", 
+	strata = FALSE, sumunits = FALSE, unitvar = NULL, unitvar2 = NULL, 
+	unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, 
+	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
+	stratcombine = TRUE, ratio = FALSE, landarea = "ALL", landarea.filter = NULL, 
+	pnt.nonsamp.filter = NULL, pnt.filter = NULL, plt.filter = NULL, 
+	rowvar = NULL, colvar = NULL, row.orderby = NULL, col.orderby = NULL, 
+	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, 
+	domlut = NULL, domvarlst = NULL, ratioden = "ROWVAR", allin1 = FALSE, 
+	estround = 3, pseround = 3, estnull = 0, psenull = "--", divideby = NULL, 
+	savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
+	outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, addtitle = TRUE, 
+	returntitle = FALSE, title.main = NULL, title.ref = NULL, 
+	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+	title.filter = NULL, title.units = "acres", gainloss = FALSE, 
+	gainloss.vals = NULL, PBpopdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -33,48 +35,58 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
   \item{pltpct}{ DF/DT or comma-delimited file (*.csv). Plot-domain-level table 
 	with percent observed by domain per plot. }
   \item{plotid}{ String. Unique identifier of plot in pnt. All values
-	must match puniqueid values, if pltstrat is not NULL. }
+	must match puniqueid values, if pltassgn is not NULL. }
   \item{pntid}{ String. Unique identifier of points in pnt. }
   \item{pltpctvars}{ String vector. Variables in pltpct for estimation. If NULL,
 	all variables are used except plotid in pltpct. }
-  \item{pltstrat}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
+  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
+	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
+	or a sf R object. Plot-level variables. If nonsampled plots are included, 
+	PLOT_STATUS_CD variable must be in table. Optional. }
+  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
 	shapefile(*.shp). The plot-level data with one record per plot, including 
 	estimation unit and/or strata information. Optional. }
-  \item{puniqueid}{ String. Name of unique identifier of plot in pltstrat with 
+  \item{puniqueid}{ String. Unique identifier of plot. }
+  \item{pltassgnid}{ String. Name of unique identifier of plot in pltassgn with 
 	All values must match plotid values if pnt is not NULL. }
-  \item{ratio}{ Logical. If TRUE, ratio estimates are generated. }  
+  \item{plt.nonsamp.filter}{ String. An expression for filtering nonsampled plots. 
+	Must be R syntax. }
   \item{tabtype}{ String. Type of units for the table ("PCT", "AREA"). }
+  \item{strata}{ Logical. If TRUE, add data information for stratification. }
   \item{sumunits}{ Logical. If TRUE, estimation units are combined to one table for
 	output. Note: only available if tabtype="AREA". Acres}
-  \item{strata}{ Logical. TRUE, if adding stratification information for pre- or 
-	post-stratication. }
-  \item{landarea}{ String. Sample area for estimates ("ALL", "CHANGE"). Used to
-	describe landarea.filter. }
-  \item{landarea.filter}{ String. filter for land area. Must be R syntax. }
-  \item{nonsamp.filter}{ String. An expression for filtering nonsampled plots. 
-	Must be R syntax. }
-  \item{pnt.filter}{ String. A global filter for the pnt file. Must be R syntax. }
-  \item{plt.filter}{ String. A global filter for the plt file. Must be R syntax. }
+  \item{unitvar}{ String. Name of the estimation unit variable in cond or pltassgn 
+	with estimation unit assignment for each plot (e.g., 'ESTN_UNIT'). 
+	If one estimation unit, set unitvar=NULL. }
+  \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
+	pltassgn with assignment for each plot (e.g., 'STATECD'). }
   \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
 	unit, include number of total acreage for the area of interest or a data frame
 	with areavar. If more than one estimation unit, provide a data frame of total 
 	area by estimation unit, including unitvar and areavar. }
-  \item{unitvar}{ String. Name of the estimation unit variable in stratalut and cond or 
-	pltstrat. If FIA, unitvar defaults to "ESTN_UNIT". If no unitvar, unitvar="NONE". }
-  \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
-	pltstrat with assignment for each plot (e.g., 'STATECD'). }
-  \item{areavar}{ String. Name of the area variable in unitarea. Default="ACRES". }
-  \item{stratalut}{ DF/DT. Strata look-up table with area by strata (estimation unit). 
-	If no strata, set stratalut=NULL and include totacres. A stratalut table will 
-	be generated using 1 strata. }
-  \item{strvar}{ String. Name of the strata variable in stratalut and pnt or plt. 
-	The default="STRATUMCD". }
+  \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
+  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
+	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
+	proportions ('strwt') by strata (and estimation unit). To calculate 
+	'strwt', set getwt=TRUE and getwtvar= name of variable with information 
+	to calculate weights from (e.g., pixel counts) }.
+  \item{strvar}{ String. Name of strata variable in stratalut and table with strata
+	assignment for each plot. Default="STRATUMCD". }
   \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
 	If FALSE, 'strwt' variable must be in stratalut. }
   \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt).
  	Default="P1POINTCNT". }
-  \item{autocombine}{ Logical. If TRUE, automatically combine estimation units if less 
+  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{ratio}{ Logical. If TRUE, ratio estimates are generated. }  
+  \item{landarea}{ String. Sample area for estimates ("ALL", "CHANGE"). Used to
+	describe landarea.filter. }
+  \item{landarea.filter}{ String. filter for land area. Must be R syntax. }
+  \item{pnt.nonsamp.filter}{ String. An expression for filtering nonsampled points
+	(e.g., cloud coverage). Must be R syntax. }
+  \item{pnt.filter}{ String. A global filter for the pnt file. Must be R syntax. }
+  \item{plt.filter}{ String. A global filter for the plt file. Must be R syntax. }
   \item{rowvar}{ String. Name of domain variable in pnt used for output estimation 
 	table rows. If only 1 domain, must be rowvar. If no domain, rowvar=NULL. }
   \item{colvar}{ String. Name of domain variable in pnt used for output estimation 
@@ -104,6 +116,7 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
   \item{pseround}{ Integer. Number of decimal places for percent standard error. }
   \item{estnull}{ Integer or String. Value to replace NULL values for estimates. }
   \item{psenull}{ Integer or String. Value to replace NULL values for percent standard error. }
+  \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{savedata}{ Logical. If TRUE, saves tables to outfolder. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, this table is also written to file. }
@@ -134,6 +147,7 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
   \item{gainloss}{ Logical. If TRUE, a table with the difference of gain and loss 
 	along with the variance and standard error, in percent, is generated. }
   \item{gainloss.vals}{ String vector. A vector of names for values in gainloss table. }
+  \item{PBpopdat}{ List. Population data objects returned from modPBpop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{
@@ -255,7 +269,7 @@ Rocky Mountain Research Station. 14 p.
 	estimated. Remotely-sensed data is often used to generate strata weights with 
 	proporation of pixels by strata. If stratification is desired (strata=TRUE), the 
 	required data include: stratum assignment for the center location of each plot, 
-	stored in either pltstrat or cond; and a look-up table with the area or proportion 
+	stored in either pltassgn or cond; and a look-up table with the area or proportion 
 	of the total area of each strata value by estimation unit, making sure the name of 
 	the strata (and estimation unit) variable and values match the plot assignment name(s) 
 	and value(s).
@@ -279,7 +293,7 @@ Rocky Mountain Research Station. 14 p.
 	data frame. If savedata=TRUE, a separate file is written for each estimation unit.
 
 
-	autocombine:\cr
+	stratcombine:\cr
 	If TRUE and less than 2 plots in any one estimation unit, all estimation units with 
 	10 or less plots are combined. The current method for combining is to group the
 	estimation unit with less than 10 plots with the estimation unit following in 

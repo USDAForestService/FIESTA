@@ -1,7 +1,7 @@
 \name{datPBpnt2pct}
 \alias{datPBpnt2pct}
 \title{
-	Data - Transpose points to plot-level as percent by domain.
+	Data - Transpose point data to plot-level percent by domain.
 }
 \description{
 	Calculates percent point by plot and domain and transpose to plot level.

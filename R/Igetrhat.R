@@ -1,4 +1,4 @@
-getrhat <- function(x, estround=8, pseround=8){
+getrhat <- function(x){
   ## DESCRIPTION: Internal function to calculate rhat and variance or rhat.
 
   ########################################################################################
@@ -36,9 +36,7 @@ getrhat <- function(x, estround=8, pseround=8){
 
   x[,	rhat.se := sqrt(rhat.var)][, 
 	rhat.cv := rhat.se / rhat][,
-  	pse := round(rhat.cv * 100, pseround)]
-
-  x[, rhat := round(rhat, estround)]
+  	pse := rhat.cv * 100]
 
 
   ## CHANGE NA VALUES
