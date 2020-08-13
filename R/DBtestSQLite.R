@@ -16,7 +16,13 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
   ## Check gpkg
   dbext <- ifelse(gpkg, ".gpkg", ".sqlite")
 
-  if (is.null(SQLitefn)) stop("SQLitefn is NULL")
+  if (is.null(SQLitefn)) {
+    if (stopifnull) {
+      stop("SQLitefn is NULL")
+    } else {
+      return(NULL)
+    }
+  }
   SQLitepath <- SQLitefn
 
   if (is.na(getext(SQLitefn)) || getext(SQLitefn) == "NA")

@@ -151,7 +151,6 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
   }
   #rm(popcheck)
 
-
   ###################################################################################
   ## CHECK unitarea BY ESTIMATION UNIT
   ## Returns: data table with unitvar and area by estimation unit (unitvar)

@@ -59,7 +59,7 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
     treex[TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, PROP_BASIS := "MACR"]
     PROPvars <- c(PROPvars, "MACRPROP_UNADJ")
   }
-
+ 
   if (checkNA) {
     ## Check for missing PROPvars and NA values in PROPvars
     cmissvars <- PROPvars[which(!PROPvars %in% condnmlst)]
@@ -75,8 +75,7 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
   }
 
   ## check for numeric
-  condx[, (PROPvars) := lapply(.SD, check.numeric), .SDcols=PROPvars]
-
+  suppressWarnings(condx[, (PROPvars) := lapply(.SD, check.numeric), .SDcols=PROPvars])
 
   return(list(condx=condx, treex=treex, propvars=PROPvars))
 }

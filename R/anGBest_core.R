@@ -275,27 +275,27 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   B26 <- "Table B26. Net volume of sawtimber trees, in million board feet (International 1/4-inch rule) on forest land by species group and ownership group"
   B27 <- "Table B27. Aboveground dry weight of live trees on forest land by owner class and forest land status"
   B28 <- "Table B28. Aboveground dry weight of standing-dead trees on forest land by owner class, reserved status, and forest land status"
-  B30 <- "Table B30. Aboveground dry weight of live trees on forest land by species group and diameter class"
-  B31 <- "Table B31. Aboveground dry weight of standing-dead trees on forest land by species group and diameter class"
-  B33 <- "Table B33. Aboveground carbon in live trees on forest land by ownership group, ownership class, reserved status, and forest land status"
-  B34 <- "Table B34. Aboveground carbon in standing-dead trees on forest land by ownership group, ownership class, reserved status, and forest land status"
-  B35 <- "Table B35. Average annual net growth of live trees by ownership group, ownership class, reserved status, and forest land status"
-  B36 <- "Table B36. Average annual net growth of live trees on forest land by forest type group and stand-size class"
-  B37 <- "Table B37. Average annual net growth of live trees on forest land by species group and stand-size class"
-  B38 <- "Table B38. Average annual net growth of growing-stock trees on timberland by species group and stand-size class"
-  B39 <- "Table B39. Average annual mortality of trees by owner class, reserved status, and forest land status"
-  B40 <- "Table B40. Average annual mortality on forest land by forest type group and stand-size class"
-  B41 <- "Table B41. Average annual mortality of trees on forest land by species group and stand-size class"
-  B42 <- "Table B42. Average annual mortality of growing-stock trees on timberland by species group and stand-size class"
-  B43 <- "Table B43. Area of forest land by inventory unit, county and forest land status"
-  B44 <- "Table B44. Area of forest land by county, forest type group, ownership group, and forest land status"
-  B45 <- "Table B45. Area of forest land by county, forest type group and stand-size class"
-  B46 <- "Table B46. Area of forest land by county, forest type group and stocking class"
-  B47 <- "Table B47. Net volume of growing-stock trees on timberland by inventory unit, county, and major species group"
+  B29 <- "Table B29. Aboveground dry weight of live trees on forest land by species group and diameter class"
+  B30 <- "Table B30. Aboveground dry weight of standing-dead trees on forest land by species group and diameter class"
+  B31 <- "Table B31. Aboveground carbon in live trees on forest land by ownership group, ownership class, reserved status, and forest land status"
+  B32 <- "Table B32. Aboveground carbon in standing-dead trees on forest land by ownership group, ownership class, reserved status, and forest land status"
+  B33 <- "Table B33. Average annual net growth of live trees by ownership group, ownership class, reserved status, and forest land status"
+  B34 <- "Table B34. Average annual net growth of live trees on forest land by forest type group and stand-size class"
+  B35 <- "Table B35. Average annual net growth of live trees on forest land by species group and stand-size class"
+  B36 <- "Table B36. Average annual net growth of growing-stock trees on timberland by species group and stand-size class"
+  B37 <- "Table B37. Average annual mortality of trees by owner class, reserved status, and forest land status"
+  B38 <- "Table B38. Average annual mortality on forest land by forest type group and stand-size class"
+  B39 <- "Table B39. Average annual mortality of trees on forest land by species group and stand-size class"
+  B40 <- "Table B40. Average annual mortality of growing-stock trees on timberland by species group and stand-size class"
+  B41 <- "Table B41. Area of forest land by inventory unit, county and forest land status"
+  B42 <- "Table B42. Area of forest land by county, forest type group, ownership group, and forest land status"
+  B43 <- "Table B43. Area of forest land by county, forest type group and stand-size class"
+  B44 <- "Table B44. Area of forest land by county, forest type group and stocking class"
+  B45 <- "Table B45. Net volume of growing-stock trees on timberland by inventory unit, county, and major species group"
 
   toc <- data.frame(rbind(B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12, B13, B14, B15, 
-		B16, B17, B18, B19, B20, B21, B22, B23, B24, B25, B26, B27, B28, B30, B31, 
-		B33, B34, B35, B36, B37, B38, B39, B40, B41, B42, B43, B44, B45, B46, B47), stringsAsFactors=FALSE)
+		B16, B17, B18, B19, B20, B21, B22, B23, B24, B25, B26, B27, B28, B29, B30, B31, B32,
+		B33, B34, B35, B36, B37, B38, B39, B40, B41, B42, B43, B44, B45), stringsAsFactors=FALSE)
 
 
   ## Create row and cells for title
@@ -1582,17 +1582,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B29 - Aboveground green weight of live trees by owner class and forest land status
-  #########################################################################################
-
-
-
-
-  #########################################################################################
-  ## B30 - Aboveground dry weight of live trees on forest land by species group 
+  ## B29 - Aboveground dry weight of live trees on forest land by species group 
   ##			and diameter class
   #########################################################################################
-  tabnm <- "B30"
+  tabnm <- "B29"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "SPGRPCD"
@@ -1636,10 +1629,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B31 - Aboveground dry weight of standing-dead trees on forest land by species group 
+  ## B30 - Aboveground dry weight of standing-dead trees on forest land by species group 
   ##			and diameter class
   #########################################################################################
-  tabnm <- "B31"
+  tabnm <- "B30"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "SPGRPCD"
@@ -1682,18 +1675,12 @@ print(paste("Table", tabnm))
 		footnote2=footnote2, footnote3=footnote3, footnote4=footnote4)
 
 
-  #########################################################################################
-  ## B32 - Aboveground green weight of standing-dead trees on forest land by species group 
-  ##			and diameter class
-  #########################################################################################
-
-
 
 
   #########################################################################################
-  ## B33 - Aboveground carbon in live trees by owner class and forest land status
+  ## B31 - Aboveground carbon in live trees by owner class and forest land status
   #########################################################################################
-  tabnm <- "B33"
+  tabnm <- "B31"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "OWNCD"
@@ -1737,9 +1724,9 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B34 - Aboveground carbon in standing-dead trees by owner class and forest land status
+  ## B32 - Aboveground carbon in standing-dead trees by owner class and forest land status
   #########################################################################################
-  tabnm <- "B34"
+  tabnm <- "B32"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "OWNCD"
@@ -1784,10 +1771,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B35 - Avg annual net growth of live trees by owner group, owner class and 
+  ## B33 - Avg annual net growth of live trees by owner group, owner class and 
   ##			forest land status
   #########################################################################################
-  tabnm <- "B35"
+  tabnm <- "B33"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "OWNCD"
@@ -1831,10 +1818,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B36 - Avg annual net growth of live trees on forest land by forest type group 
+  ## B34 - Avg annual net growth of live trees on forest land by forest type group 
   ##			and stand-size class
   #########################################################################################
-  tabnm <- "B36"
+  tabnm <- "B34"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "FORTYPGRPCD"
@@ -1869,10 +1856,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B37 - Avg annual net growth of live trees on forest land by species group 
+  ## B35 - Avg annual net growth of live trees on forest land by species group 
   ##			and ownership group
   #########################################################################################
-  tabnm <- "B37"
+  tabnm <- "B35"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "SPGRPCD"
@@ -1915,10 +1902,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B38 - Avg annual net growth of growing-stock trees on forest land by species 
+  ## B36 - Avg annual net growth of growing-stock trees on forest land by species 
   ##			group and ownership group
   #########################################################################################
-  tabnm <- "B38"
+  tabnm <- "B36"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "SPGRPCD"
@@ -1960,9 +1947,9 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B39 - Avg annual mortality of trees by owner class and forest land status
+  ## B37 - Avg annual mortality of trees by owner class and forest land status
   #########################################################################################
-  tabnm <- "B39"
+  tabnm <- "B37"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "OWNCD"
@@ -2006,9 +1993,9 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B40 - Avg annual mortality on forest land by forest type group and stand-size class
+  ## B38 - Avg annual mortality on forest land by forest type group and stand-size class
   #########################################################################################
-  tabnm <- "B40"
+  tabnm <- "B38"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "FORTYPGRPCD"
@@ -2044,9 +2031,9 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B41 - Avg annual mortality of trees on forest land by species group and ownership group
+  ## B39 - Avg annual mortality of trees on forest land by species group and ownership group
   #########################################################################################
-  tabnm <- "B41"
+  tabnm <- "B39"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "SPGRPCD"
@@ -2088,10 +2075,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B42 - Avg annual mortality of growing-stock trees on timberland by species group 
+  ## B40 - Avg annual mortality of growing-stock trees on timberland by species group 
   ##		and ownership group
   #########################################################################################
-  tabnm <- "B42"
+  tabnm <- "B40"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "SPGRPCD"
@@ -2134,9 +2121,9 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B43 - Area of forest land by inventory unit, county and forest land status
+  ## B41 - Area of forest land by inventory unit, county and forest land status
   #########################################################################################
-  tabnm <- "B43"
+  tabnm <- "B41"
 print(paste("Table", tabnm))
   esttype <- "AREA"
   rowvar <- "COUNTYNM"
@@ -2179,10 +2166,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B44 - Area of forest land by inventory unit, county, ownership group, 
+  ## B42 - Area of forest land by inventory unit, county, ownership group, 
   ##			and forest land status
   #########################################################################################
-  tabnm <- "B44"
+  tabnm <- "B42"
 print(paste("Table", tabnm))
   esttype <- "AREA"
   rowvar <- "COUNTYNM"
@@ -2226,9 +2213,9 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B45 - Area of timberland by inventory unit, county, and stand-size class 
+  ## B43 - Area of timberland by inventory unit, county, and stand-size class 
   #########################################################################################
-  tabnm <- "B45"
+  tabnm <- "B43"
 print(paste("Table", tabnm))
   esttype <- "AREA"
   rowvar <- "COUNTYNM"
@@ -2270,9 +2257,9 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B46 - Area of timberland by inventory unit, county, and stocking class 
+  ## B44 - Area of timberland by inventory unit, county, and stocking class 
   #########################################################################################
-  tabnm <- "B46"
+  tabnm <- "B44"
 print(paste("Table", tabnm))
   esttype <- "AREA"
   rowvar <- "COUNTYNM"
@@ -2315,10 +2302,10 @@ print(paste("Table", tabnm))
 
 
   #########################################################################################
-  ## B47 - Net volume of growing-stock trees on timberland by inventory unit, county,
+  ## B45 - Net volume of growing-stock trees on timberland by inventory unit, county,
   ##			and major species group
   #########################################################################################
-  tabnm <- "B47"
+  tabnm <- "B45"
 print(paste("Table", tabnm))
   esttype <- "TREE"
   rowvar <- "COUNTYNM"

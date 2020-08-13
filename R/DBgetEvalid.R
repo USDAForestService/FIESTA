@@ -107,8 +107,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   if (nrow(POP_EVAL_TYP) == 0) return(NULL)
   SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE, stopifnull=FALSE)
   if (nrow(SURVEY) == 0) return(NULL)
-
   POP_EVAL <- sqldf::sqldf(popevaltypqry)
+
 
 ############ End CSV only
 
@@ -187,8 +187,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
     invyrqry <- paste0("select STATECD, STATENM, STATEAB, ANN_INVENTORY, INVYR, CYCLE from ", 
 		"SURVEY where STATENM IN(", toString(paste0("'", states, "'")), 
 		") and invyr <> 9999 and ANN_INVENTORY = '", ann_inventory, "'")
-
     invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
+
     cat("INVENTORY CYCLE BY INVENTORY YEAR", "\n" )
     print(invyrtab)
 
@@ -217,7 +217,6 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   stinvyr.max <- lapply(stinvyr.vals, '[[', 2)
   invyr.min <- min(unlist(stinvyr.min))
   invyr.max <- max(unlist(stinvyr.max))
-
  
   if (is.null(evalEndyr)) {
     ## Check evalAll
@@ -236,11 +235,20 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
         evalresp <- TRUE
       }
     }
-    if ((is.null(evalCur) || !evalCur) && (is.null(evalAll) || !evalAll) && gui) {
-      evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
+    if ((is.null(evalCur) || !evalCur) && (is.null(evalAll) || !evalAll)) {
+      if (gui) {
+        evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
 		  	multiple=FALSE)
-      if (evalresp == "") stop("")
-      evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
+        if (evalresp == "") stop("")
+        evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
+      } else {
+        return(list(states=states, rslst=rslst, evalidlist=NULL, 
+			invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
+
+        return(returnlst <- list(states=states, rslst=rslst, evalidlist=NULL, 
+		invtype=invtype, invyrtab=invyrtab, evalType=evalTypelist))
+
+      }
     }
   }
 

@@ -26,9 +26,13 @@ DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
     SQLitefn <- paste0(SQLitefn, dbext)
 
   outfolder <- pcheck.outfolder(outfolder, default=NULL)
-  if (!is.null(outfolder)) 
+  if (!is.null(outfolder)) {
     SQLitepath <- file.path(outfolder, SQLitefn)
+  } else {
+    SQLitepath <- SQLitefn
+  }
   if (!dir.exists(dirname(SQLitepath))) stop("invalid directory path") 
+
   if (outfn.date || !overwrite) 
    SQLitepath <- getoutfn(basename(SQLitepath), outfn.date=outfn.date, 
 		outfolder=dirname(SQLitepath), ext=getext(SQLitepath))

@@ -139,11 +139,10 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
     measEndyr <- RAVG.year
     measEndyr.filter <- "AOI == 1"
   }
- 
+
   ##################################################################################
   ## modSAtree() default parameters
-  ##################################################################################
-
+  #################################################################################
   if (is.null(SApopdat)) {
     SApop <- anSApop_ecomap(smallbnd=RAVG, smallbnd_dsn=RAVG_dsn, 	
 		smallbnd.unique=smallbnd.unique, smallbnd.filter=RAVG.filter, 

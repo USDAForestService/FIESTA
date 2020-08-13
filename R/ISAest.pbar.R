@@ -83,7 +83,6 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
              domain.col = "DOMAIN",
              sample.id.col = cuniqueid,
              neg.sfrac = TRUE)
-
     #building pieces		
     partA <- res$data$samp.agg.X.pop[,c("domain.id","n.i",
 				paste0(yn,".ybar.i"),

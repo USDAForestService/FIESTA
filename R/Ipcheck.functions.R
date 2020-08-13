@@ -206,14 +206,18 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       if (returnsf) {
         return(tab)
       } else {
-        return(sf::st_drop_geometry(tab))
+        tab <- sf::st_drop_geometry(tab)
+        if (returnDT) tab <- setDT(tab)
+        return(tab)
       }
     } else if (canCoerce(tab, "sf")) {
       tabx <- sf::st_as_sf(tab)
       if (returnsf) {
         return(tabx)
       } else {
-        return(sf::st_drop_geometry(tabx))
+        tab <- sf::st_drop_geometry(tab)
+        if (returnDT) tab <- setDT(tab)
+        return(tab)
       }
     } else if (is.data.frame(tab)) {
       if (nrow(tab) == 0) {
@@ -233,62 +237,60 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       stop(tabnm, " must be an sf object or character layer name") 
     } 
   }
-  if (!is.null(tab_dsn)) {
-    if (!file.exists(tab_dsn)) {
-      extlst <- c("shp", "csv", "sqlite", "gpkg")
-      ext <- extlst[sapply(extlst, function(x, tab_dsn) 
+  if (is.null(tab_dsn))
+    tab_dsn <- tab
+
+  if (!file.exists(tab_dsn)) {
+    extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb")
+    ext <- extlst[sapply(extlst, function(x, tab_dsn) 
 				file.exists(paste(tab_dsn, x, sep=".")), tab_dsn)]
-      if (length(ext) == 1)
+    if (length(ext) == 1)
         tab_dsn <- paste(tab_dsn, ext, sep=".")
-    }
-    tabext <- getext(tab_dsn)
-    if (is.na(tabext) || tabext == "NA") {
-      if (dir.exists(tab_dsn) && file.exists(paste(tab_dsn, tab, sep="/"))) {
-        tab_dsn <- paste(tab_dsn, tab, sep="/")
-        tabext <- getext(tab_dsn)
-      } 
-    }
-    if (tabext == "shp") {
-      tabx <- sf::st_read(tab_dsn, quiet=TRUE)
-    } else if (tabext == "gdb") {
-      tabx <- data.table(pcheck.spatial(tab, dsn=tab_dsn, dropgeom=TRUE))
-    } else if (tabext %in% tabdblst) {
-      if (is.null(tab) || !is.character(tab)) 
-        stop("tab is invalid")
-      if (tabext %in% c("sqlite", "gpkg")) {
-        if (!"RSQLite" %in% rownames(installed.packages()))
-          stop("importing spatial layers requires package RSQLite")
-        dbconn <- DBtestSQLite(tab_dsn, dbconnopen=TRUE, showlist=FALSE) 
-        tablst <- DBI::dbListTables(dbconn)
-        if (!tab %in% tablst) {
-          if (tolower(tab) %in% tablst) {
-            tab <- tolower(tab)
-          } else {
-            stop(tab, " not in ", tab_dsn)
-          }
-        }
-        if (!is.null(tabqry)) {
-          tabx <- setDT(DBI::dbGetQuery(dbconn, tabqry))
+  } else {
+    if (is.null(tab)) return(NULL)
+  }
+  tabext <- getext(tab_dsn)
+  if (is.na(tabext) || tabext == "NA") {
+    if (dir.exists(tab_dsn) && file.exists(paste(tab_dsn, tab, sep="/"))) {
+      tab_dsn <- paste(tab_dsn, tab, sep="/")
+      tabext <- getext(tab_dsn)
+    } 
+  }
+
+  if (tabext == "shp") {
+    tabx <- sf::st_read(tab_dsn, quiet=TRUE)
+  } else if (tabext == "gdb") {
+    tabx <- pcheck.spatial(tab, dsn=tab_dsn)
+  } else if (tabext %in% tabdblst) {
+    if (is.null(tab) || !is.character(tab)) 
+      stop("tab is invalid")
+    if (tabext %in% c("sqlite", "gpkg")) {
+      if (!"RSQLite" %in% rownames(installed.packages()))
+        stop("importing spatial layers requires package RSQLite")
+      dbconn <- DBtestSQLite(tab_dsn, dbconnopen=TRUE, showlist=FALSE) 
+      tablst <- DBI::dbListTables(dbconn)
+      if (!tab %in% tablst) {
+        if (tolower(tab) %in% tablst) {
+          tab <- tolower(tab)
         } else {
-          tabx <- setDT(DBI::dbReadTable(dbconn, tab))
+          stop(tab, " not in ", tab_dsn)
         }
-        DBI::dbDisconnect(dbconn)
-      } else {
-        stop("file format currently not supported")
       }
+      if (!is.null(tabqry)) {
+        tabx <- setDT(DBI::dbGetQuery(dbconn, tabqry))
+      } else {
+        tabx <- setDT(DBI::dbReadTable(dbconn, tab))
+      }
+      DBI::dbDisconnect(dbconn)
     } else {
-      tabx <- tryCatch(data.table::fread(tab_dsn, integer64="numeric"),
+      stop("file format currently not supported")
+    }
+  } else {
+    tabx <- tryCatch(data.table::fread(tab_dsn, integer64="numeric"),
 			error=function(e) {
 			print(e)
 			return(NULL)})
-      if (is.null(tabx)) stop("file format is currently not supported")
-    }
-  } else {
-    if (stopifnull) {
-      stop(paste(tabnm, "is NULL"))
-    } else {
-      return(NULL)
-    }
+    if (is.null(tabx)) stop("file format is currently not supported")
   }
 
   if (nullcheck) { 
@@ -296,17 +298,18 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       tabx <- tabx[apply(tabx, 1, function(x) sum(is.na(x) | x=="NA" | x=="")) != ncol(x),]
   }
 
-  if (!returnsf) {
-    if (!is.data.table(tabx)) tabx <- data.table(tabx)
-  
+  if (returnsf && "sf" %in% class(tabx)) {
+    return(tabx)
+  } else {
     if (returnDT) {
-      if (!is.data.table(tabx)) 
+      if (!is.data.table(tabx)) {
         return(setDT(tabx))
+      } else {
+        return(tabx)
+      }
     } else {
       return(setDF(tabx))
     }
-  } else {
-    return(tabx)
   }
 }
 

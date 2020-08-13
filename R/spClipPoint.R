@@ -53,7 +53,6 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
   ## clippolyv.filter
   clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter)$xf
 
-
    ## Check showext    
   showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)

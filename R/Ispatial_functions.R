@@ -241,7 +241,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
         dsn <- paste(dsn, fmt, sep=".")
       if (!file.exists(dsn)) dsn <- NULL
     }
-    if (ext.dsn == "shp")
+    if (ext.dsn %in% c("shp", "csv"))
       layer <- basename.NoExt(dsn)
   }
  
@@ -263,7 +263,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
     } else {
       fmt <- ext.dsn
     }
-    if (fmt == "shp") {
+    if (fmt %in% c("shp", "csv")) {
       layer <- basename.NoExt(dsn)    
     } else {    
       layerlst <- sf::st_layers(dsn)$name
@@ -279,12 +279,21 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   layerlst <- sf::st_layers(dsn)
 
   ## Note: if dsn is a SpatiaLite database, only spatial layers are listed
-  if (!layer %in% layerlst$name) 
-    return(pcheck.table(tab=layer, tab_dsn=dsn))
+  if (!layer %in% layerlst$name) {
+    if (ext.dsn == "sqlite") {
+      return(pcheck.table(tab=layer, tab_dsn=dsn))
+    } else {
+      stop(layer, " is not in database")
+    }
+  }
 
   geomtype <- layerlst$geomtype[layerlst$name == layer][[1]]
   if (is.na(geomtype)) {
-    return(pcheck.table(tab=layer, tab_dsn=dsn))
+    if (!checkonly) {
+      return(pcheck.table(tab=layer, tab_dsn=dsn))
+    } else {
+      return(list(dsn=dsn, layer=layer))
+    }
   } else {
     splayer <- sf::st_read(dsn=dsn, layer=layer, query=sql, 
 				stringsAsFactors=stringsAsFactors, quiet=FALSE)
@@ -313,7 +322,6 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
     if (dropgeom)
       splayer <- sf::st_drop_geometry(splayer)
   }
-
 
   if (checkonly) {
     return(list(dsn=dsn, layer=layer))
@@ -1186,24 +1194,43 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   } else {
     stop("stbnd invalid... must include states")
   }
+  
+  statenames <- states
+  if (!all(states %in% FIESTA::ref_statecd$MEANING)) {
+    if (stbnd.att == "COUNTYFIPS")
+      statenames <- FIESTA::ref_statecd[FIESTA::ref_statecd$VALUE %in% 
+			unique(as.numeric(substr(states, 1,2))), "MEANING"]    
+  }
+  
+  ## Check statenames
+  if (is.null(RS)) {
+    statenameslst <- FIESTA::ref_statecd$MEANING
+    statenames <- pcheck.varchar(var2check=statenames, varnm="states", gui=gui, 
+		checklst=statenameslst, caption="States", stopifnull=TRUE, multiple=TRUE)
 
-  if (!is.null(RS) && 
-	length(states[!states %in% FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, 
-		"MEANING"]]) > 0) {
-    statesout <- states[!states %in% FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]]
-    states <- states[states %in% FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]]
+  } else { 
+    statenameslst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]
+    if (!all(statenames %in% statenameslst)) {
+      statesout <- statenames[which(!statenames %in% statenameslst)] 
+      statenames <- statenames[which(statenames %in% statenameslst)]  
+ 
+      message(paste0("states are outside ", RS, " region: ", toString(statesout)))
+      message("clipping boundary to ", RS, " states: ", toString(statenames))
 
-    message(paste0("states are outside ", RS, " region: ", toString(statesout)))
-    message("clipping boundary to ", RS, " states: ", toString(states))
+      bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[[stbnd.att]] %in% statenames, ])
 
-    bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[[stbnd.att]] %in% states, ])
+      if (stbnd.att == "COUNTYFIPS") {
+        stcds <- FIESTA::ref_statecd[FIESTA::ref_statecd$MEANING %in% statenames, "VALUE"]
+        states <- states[as.numeric(substr(states, 1, 2)) %in% stcds]
+      }
+    }
   }
 
   ## Save boundary
   if (savebnd)
     spExportSpatial(bndx, outfolder=outfolder, out_layer="bnd", ...)
 
-  return(list(states=states, bndx=bndx))
+  return(list(states=states, bndx=bndx, stbnd.att=stbnd.att, statenames=statenames))
 
 }
 

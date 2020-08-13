@@ -325,7 +325,6 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
       }
     }
 
-
     ## Check Endyr
     if (!is.null(Endyr)) {
       #if (!is.numeric(Endyr)) stop("Endyr must be numeric year")
@@ -348,7 +347,20 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
       where.qry <- paste(" where", where.qry)
 
     ## create pfromqry
-    pfromqry <- paste0(SCHEMA., "plot p
+#    if (varCur != "INVYR") {
+#      pfromqry <- paste0(SCHEMA., "plot p
+#		INNER JOIN 
+#		(select statecd, unitcd, countycd, plot, max(", varCur, ") maxyr,
+#			max(invyr) invyr
+#		from ", SCHEMA., "plot", where.qry,
+#		" group by statecd, unitcd, countycd, plot) pp
+#		ON p.statecd = pp.statecd and 
+#			p.unitcd = pp.unitcd and 
+#				p.countycd = pp.countycd and 
+#					p.plot = pp.plot and p.", varCur, 
+#						" = pp.maxyr and p.invyr = pp.invyr") 
+#    } else {
+      pfromqry <- paste0(SCHEMA., "plot p
 		INNER JOIN 
 		(select statecd, unitcd, countycd, plot, max(", varCur, ") maxyr
 		from ", SCHEMA., "plot", where.qry,
@@ -357,6 +369,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 			p.unitcd = pp.unitcd and 
 				p.countycd = pp.countycd and 
 					p.plot = pp.plot and p.", varCur, " = pp.maxyr") 
+#    }
 
     if (popSURVEY)
       pfromqry <- paste(pfromqry, "join survey s on (s.CN = p.SRV_CN and s.ANN_INVENTORY = 'Y')")

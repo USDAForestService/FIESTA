@@ -88,7 +88,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   condx <- GBpopdat$condx
   pltcondx <- GBpopdat$pltcondx	
   treex <- GBpopdat$treex
-  treex <- GBpopdat$treex
+  if (is.null(treex)) stop("must include tree data for ratio estimates")
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
   tuniqueid <- GBpopdat$tuniqueid

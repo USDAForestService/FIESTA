@@ -1,20 +1,64 @@
-anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, 
-	clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
-	plot_layer="plot", cond_layer="cond", tree_layer="tree", 
-	puniqueid="CN", measCur=TRUE, measEndyr=NULL, measEndyr.filter=NULL,
+anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE, 
+	datsource="sqlite", data_dsn=NULL, istree=TRUE, plot_layer="plot",
+ 	cond_layer="cond", tree_layer="tree", puniqueid="CN", 
+	xy.joinid="PLT_CN", measCur=TRUE, measEndyr=NULL, measEndyr.filter=NULL,  
 	intensity1=FALSE, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
 	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
-	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt = "csv", 
+	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
 	SApltdat=NULL, ...) {
-
 
   ## Set global variables
   gui <- FALSE
   ref_titles <- FIESTA::ref_titles
   plt=AOI <- NULL
 
+## TESTING
+#clipxy=TRUE
+#plot_layer="plot"
+#cond_layer="cond"
+#tree_layer="tree"
+#puniqueid="CN"
+#measCur=TRUE
+#bnd=SAdoms
+#bnd.filter=measEndyr.filter=NULL
+#bnd_dsn=NULL
+#stbnd.att="COUNTYFIPS"
+#states=NULL
+#RS=NULL
+#stbnd=NULL
+#stbnd_dsn=NULL
+#savebnd=FALSE
+#xy=NULL
+#istree=FALSE
+#other_layers=NULL
+#allyrs=FALSE
+#measEndyr=NULL
+#evalid=NULL
+#evalEndyr=NULL
+#evalCur=FALSE
+#intensity1=FALSE
+
+
+#statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
+#			stbnd.att=stbnd.att, RS=RS, states=states, savebnd=savebnd, 
+#			outfolder=outfolder)
+#bndx <- statedat$bndx
+#if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
+#  statecnty <- statedat$states
+#    stcds <- unique(as.numeric(substr(statecnty, 1,2)))
+#} else {
+#    stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
+#}
+
+
+#      SApltdat <- spGetPlots(bnd=SAdoms, bnd.filter=measEndyr.filter, 
+#		RS=RS, statebnd.att="COUNTYFIPS", clipxy=clipxy, datsource=datsource, 
+#		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
+#		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
+#		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE, 
+#		savedata=FALSE)
 
 
   ####################################################################
@@ -22,11 +66,18 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   ####################################################################
   if (is.null(SApltdat)) {
     if (!is.null(measEndyr.filter)) {
+
+      message("... using measEndyr where: ", measEndyr.filter)
+
       SApltdat <- spGetPlots(bnd=SAdoms, bnd.filter=measEndyr.filter, 
-		RS=RS, statebnd.att="COUNTYFIPS", clipxy=clipxy, datsource=datsource, 
+		RS=RS, statebnd.att="COUNTYFIPS", clipxy=clipxy, 
+		xy.joinid=xy.joinid, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
-		cond_layer=cond_layer, tree_layer=tree_layer, measCur=TRUE,
-		measEndyr=measEndyr, intensity1=intensity1, savedata=FALSE, ...)
+		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
+		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE, 
+		savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
+		out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_layer=overwrite, ...)
       xyplt <- SApltdat$clip_xyplt
       xy.uniqueid <- SApltdat$xy.uniqueid
       bnd <- SApltdat$clip_poly
@@ -35,33 +86,41 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
       plt <- SApltdat$clip_tabs$clip_plt
       cond <- SApltdat$clip_tabs$clip_cond
       tree <- SApltdat$clip_tabs$clip_tree
+      states <- SApltdat$states
 
       SApltdat <- spGetPlots(bnd=SAdoms, bnd.filter=paste0("!", measEndyr.filter), 
-		RS=RS, clipxy=clipxy, datsource=datsource, 
-		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
+		RS=RS, statebnd.att="COUNTYFIPS", clipxy=clipxy, xy.joinid=xy.joinid,
+ 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, measCur=TRUE,
-		intensity1=intensity1, savedata=FALSE, ...)
+		intensity1=intensity1, showsteps=FALSE, savedata=FALSE, 
+		savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, out_dsn=out_dsn, 
+		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
       xyplt2 <- SApltdat$clip_xyplt
       plt2 <- SApltdat$clip_tabs$clip_plt
       cond2 <- SApltdat$clip_tabs$clip_cond
       tree2 <- SApltdat$clip_tabs$clip_tree
 
       xyplt <- rbind(xyplt, xyplt2)
+      xyplt <- unique(xyplt)
       plt <- rbindlist(list(plt, plt2))
+      plt <- unique(plt)
       cond <- rbindlist(list(cond, cond2))
+      cond <- unique(cond)
       tree <- rbindlist(list(tree, tree2))
-
+      tree <- unique(tree)
       rm(xyplt2)
       rm(plt2)
       rm(tree2)
       gc()
 
     } else {
-
       SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
-		measEndyr=measEndyr, intensity1=intensity1, savedata=FALSE, ...)
+		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE,
+		savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
+		out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_layer=overwrite)
       xyplt <- SApltdat$clip_xyplt
       xy.uniqueid <- SApltdat$xy.uniqueid
       puniqueid <- SApltdat$puniqueid
@@ -86,7 +145,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     cond <- SApltdat$clip_tabs$clip_cond
     tree <- SApltdat$clip_tabs$clip_tree
   }
-
 
   if (showsteps) {
     ## Set plotting margins

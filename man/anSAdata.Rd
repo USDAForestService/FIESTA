@@ -10,7 +10,7 @@
 anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, 
 	datsource = "sqlite", data_dsn = NULL, istree = TRUE, plot_layer = "plot", 
 	cond_layer = "cond", tree_layer = "tree", puniqueid = "CN",
-	measCur = TRUE, measEndyr = NULL, measEndyr.filter = NULL, 
+ 	xy.joinid = "PLT_CN", measCur = TRUE, measEndyr = NULL, measEndyr.filter = NULL, 
 	intensity1 = FALSE, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, 
 	vars2keep = "AOI", showsteps = FALSE, savedata = FALSE, 
@@ -36,6 +36,8 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
   \item{tree_layer}{ String. Name of layer in database of file name of FIA tree table 
 	if istree=TRUE. }
   \item{puniqueid}{ String. Name of unique identifier of plt. }
+  \item{xy.joinid}{ String. Name of variable join identifier in xy data 
+	to join plt and xy data. }
   \item{measCur}{ String. Get plots with most current measurement. }
   \item{measEndyr}{ Logical. If measCur=TRUE, extract plots with most current 
 	measurement for state(s) for years measured before measEndyr. }

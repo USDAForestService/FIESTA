@@ -152,8 +152,9 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
         title.landarea <- paste("on", title.landarea)
       }
       if (!is.null(title.units)) {
-        title.estvar <- ifelse(is.null(divideby), capfirst(title.units), 
+        title.units <- ifelse(is.null(divideby), capfirst(title.units), 
 					capfirst(paste(divideby, title.units)))
+
         title.units <- ifelse (is.null(divideby), paste0(", in ", title.units, ", "), 
 		paste0(", in ", divideby, " ", title.units, ", "))
       } else {
@@ -312,7 +313,7 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
   } else {
     titlelst <- list(title.estpse=title.estpse)
   }
-  titlelst$title.estvar <- title.estvar
+  titlelst$title.estvar <- title.estvarn
 
   if (!is.null(title.unitvar)) 
     titlelst$title.unitvar <- title.unitvar

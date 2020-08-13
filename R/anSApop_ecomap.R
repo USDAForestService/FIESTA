@@ -17,7 +17,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   gui <- FALSE
   returnlst <- list()
 
-
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
@@ -50,13 +49,21 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   largebnd.threshold=largebnd.threshold
   savesteps=savedata
   measCur=TRUE
- 
 
+#smallbnd.domain=NULL
+#smallbnd.ecofilter <- getfilter("PROVINCE", RAVG.ecoprov)
+#nbrdom.min=10
+
+ 
   #############################################################################
   ## SA domains
   #############################################################################
   if (is.null(SAdomdat) && is.null(SAdata)) {
     message("generating SAdoms...")
+
+#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\ISAinternal.R")
+#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetSAdoms.R")
+
     SAdomdat <- spGetSAdoms(smallbnd=smallbnd, smallbnd_dsn=smallbnd_dsn, 	
 		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain,
  		smallbnd.filter=smallbnd.filter, smallbnd.stfilter=smallbnd.stfilter,
@@ -81,21 +88,20 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   ###########################################################################
   ## Extract FIA data and auxiliary data
   ###########################################################################
-  message("extracting data...")
  
-  if (is.null(SAdata)) {    
+  if (is.null(SAdata)) {
+
     ###########################################################################
     ## Extract FIA data and model data
     ###########################################################################
     SAdata <- anSAdata(SAdoms, smallbnd=smallbnd, RS=RS, datsource=datsource, 
-		allyrs=TRUE, istree=TRUE, data_dsn=SQLitefn, measCur=measCur,
-		measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
+		allyrs=TRUE, xy.joinid="ZSTUNCOPLOT", istree=TRUE, data_dsn=SQLitefn, 
+		measCur=measCur, measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		showsteps=showsteps, savedata=savedata, savexy=savexy, 
 		outfolder=outfolder, out_fmt="sqlite", out_dsn=NULL, overwrite=TRUE, ...)
     if (is.null(SAdata)) return(NULL)
-
     returnlst$SAdata <- SAdata
 
     if (saveobj) 
@@ -125,7 +131,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
  
   if (is.null(SAdoms)) 
     return(NULL)
- 
+
   ####################################################################
   ## Get population data
   ####################################################################

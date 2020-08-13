@@ -207,7 +207,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 
   ## Check dsn and create queries to get population subset from database
   ###################################################################################
-  if (!is.null(dsn)) {
+  if (!is.null(dsn) && getext(dsn) == "sqlite") {
     dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE)
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
@@ -244,11 +244,12 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## Import plt and cond table and check unique identifiers
   ###################################################################################
   condx <- pcheck.table(cond, tab_dsn=dsn, tabnm="cond", caption="cond table?", 
-		nullcheck=nullcheck, tabqry=condqry)
+		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE)
   pltx <- pcheck.table(plt, tab_dsn=dsn, tabnm="plt", caption="plot table?", 
-		nullcheck=nullcheck, tabqry=plotqry)
+		nullcheck=nullcheck, tabqry=plotqry, returnsf=FALSE)
   pltassgnx <- pcheck.table(pltassgn, tab_dsn=dsn, tabnm="pltassgn", 
-		caption="plot assignments?", nullcheck=nullcheck, tabqry=pltassgnqry)
+		caption="plot assignments?", nullcheck=nullcheck, tabqry=pltassgnqry,
+		returnsf=FALSE)
 
   if (is.null(condx) && is.null(pltx) && is.null(pltassgnx)) 
     stop("must include plt or cond table")
@@ -276,8 +277,10 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui, 
 		checklst=names(pltx), caption="UniqueID variable of plot", 
 		warn=paste(puniqueid, "not in plt table"), stopifnull=TRUE)
-      if (any(duplicated(pltx[[puniqueid]]))) 
-        warning("plt records are not unique in: plt")
+      if (any(duplicated(pltx[[puniqueid]]))) {
+        dups <- plt[[puniqueid]][duplicated(plt[[puniqueid]])]
+        warning(paste("plt records are not unique in: plt:", toString(dups)))
+      }
 
       ## Check for NA values in necessary variables in plt table
       pltx.na <- sum(is.na(pltx[[puniqueid]]))
@@ -288,12 +291,11 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     }
  
     if (!is.null(pltassgnx)) {
-      warntab <- ifelse(module %in% c("MA", "SA"), "pltmodel", "pltassgn")
       pltassgnid <- pcheck.varchar(var2check=pltassgnid, varnm="pltassgnid", gui=gui, 
 		checklst=names(pltassgnx), caption="UniqueID variable of plot", 
 		warn=paste(pltassgnid, "not in pltassgn"), stopifnull=TRUE)
       if (any(duplicated(pltassgnx[[pltassgnid]]))) 
-        warning("plot records are not unique in: ", warntab)
+        warning("plot records are not unique in: pltassgn")
       
       ## Check for NA values in necessary variables in plt table
       pltassgnx.na <- sum(is.na(pltassgnx[[pltassgnid]]))
@@ -327,7 +329,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       pltx <- pltassgnx
       puniqueid <- pltassgnid
     }
-
+ 
     ##################################################################################
     ## Filter for population data
     ##################################################################################
@@ -509,19 +511,21 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ######################################################################################
   ## Generate table of plots by strata, including nonsampled plots (P2POINTCNT)
   ######################################################################################
-  if (strata && "PLOT_STATUS_CD" %in% pltcondnmlst) {
+  if (strata) {
     P2POINTCNT <- pltcondx[, uniqueN(get(cuniqueid)), by=c(unitvars, strvar)]
     setnames(P2POINTCNT, "V1", "P2POINTCNT")
     
-    ## Generate table of nonsampled plots by strata (if nonresp=TRUE)
-    if (nonresp && "PLOT_STATUS_CD" %in% pltcondnmlst) {
-      if (!3 %in% unique(pltcondx[["PLOT_STATUS_CD"]]))
-        stop("must include PLOT_STATUS_CD = 3 in dataset") 
+    if ("PLOT_STATUS_CD" %in% pltcondnmlst) {
+      ## Generate table of nonsampled plots by strata (if nonresp=TRUE)
+      if (nonresp && "PLOT_STATUS_CD" %in% pltcondnmlst) {
+        if (!3 %in% unique(pltcondx[["PLOT_STATUS_CD"]]))
+          stop("must include PLOT_STATUS_CD = 3 in dataset") 
 
-      ## Create table with number of nonsampled plots by strata, substrata
-      nonsampplots <- pltcondx[PLOT_STATUS_CD == 3, uniqueN(get(cuniqueid)), 
+        ## Create table with number of nonsampled plots by strata, substrata
+        nonsampplots <- pltcondx[PLOT_STATUS_CD == 3, uniqueN(get(cuniqueid)), 
 					by=c(strvar, substrvar)]
-      setkeyv(nonsampplots, c(strvar, substrvar))
+        setkeyv(nonsampplots, c(strvar, substrvar))
+      }
     }
   } else {
     P2POINTCNT <- pltcondx[, uniqueN(get(cuniqueid)), unitvars]
@@ -656,11 +660,12 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   if ((is.null(cond.nonsamp.filter) || cond.nonsamp.filter == "") && adj != "none") {
     if ("COND_STATUS_CD" %in% pltcondnmlst) {
       cond.nonsamp.filter <- "COND_STATUS_CD != 5"
-      message("removing ", sum(pltcondx$COND_STATUS_CD == 5), " nonsampled forest conditions")
+      message("removing ", sum(pltcondx$COND_STATUS_CD == 5, na.rm=TRUE), 
+		" nonsampled forest conditions")
     }
     if (ACI && "NF_COND_STATUS_CD" %in% pltcondnmlst) {
       cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
-      message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5), 
+      message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
 		" nonsampled nonforest conditions")
       if (!is.null(cond.nonsamp.filter)) 
         cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
@@ -686,7 +691,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## Import and check tree data table
   ###################################################################################
   treex <- pcheck.table(tree, tab_dsn=dsn, tabnm="tree", caption="Tree table?", 
-		nullcheck=nullcheck, gui=gui, tabqry=treeqry)
+		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE)
   if (!is.null(treex)) {
     ## Define necessary variable for tree table
     tvars2keep <- "TPA_UNADJ"
@@ -727,7 +732,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     tabs <- FIESTA::check.matchclass(pltcondx, treex, cuniqueid, tuniqueid)
     pltcondx <- tabs$tab1
     treex <- tabs$tab2
-
 
     ## Check for missing tvars2keep 
     tmissvars <- tvars2keep[which(!tvars2keep %in% treenmlst)]

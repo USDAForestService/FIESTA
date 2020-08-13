@@ -206,6 +206,8 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     nbrdom <- 0
     mbnd <- {}
 
+    message("\ngetting model domains for ", sbndnm, "...")
+
     ## Get number of boundaries - if maxbnd=NULL, use number of largebnd
     ## If nbrdom.min=NULL, only use 1 maxbnd
     if (length(mbndlst) > 0) {
@@ -230,19 +232,21 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     ## Loop thru maxbndlst
     while (nbrdom < nbrdom.minx && j <= ifelse(length(maxbndxlst) > 0, length(mbnd), 1)) {
       if (length(mbnd) > 0) {
-        message("adding ", maxbnd.unique, ": ", mbnd[j])
-        ## Subset maxbndx.intd
+        message("\nadding ", maxbnd.unique, ": ", mbnd[j])
+
+        ## Subset maxbndx.intd 
         maxbndx.tmpd <- maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% mbnd[j],]
 
        ## Remove columns in maxbndx.tmpd with same names as in largebndx.int
         maxbndx.tmpd <- maxbndx.tmpd[, 
 		names(maxbndx.tmpd)[!names(maxbndx.tmpd) %in% names(largebndx)]]
 
-        ## Get largebnd polygons within maxbndx 
+        ## Get largebnd polygons within maxbndx and dissolve
         largebndx.int <- suppressWarnings(selectByIntersects(largebndx, maxbndx.tmpd))
         if (is.null(largebndx.int)) 
           stop("no largebnds for maxbnd: ", mbnd[j])
-        largebndx.intd <- sf_dissolve(largebndx.int, largebnd.unique)
+        largebndx.intd <- sf_dissolve(largebndx.int, largebnd.unique, areacalc=FALSE)
+
       } else {
  
         ## get intersection of largebndx and smallbndx
@@ -299,7 +303,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
       ## Select largebnd(s) that intersect more than threshold
       largebnd_select <- largebndx.intd[largebndx.intd[[largebnd.unique]] %in% largebnd.gtthres,]
-
+ 
       ############################################################
       ## Display and save image for largebnd_intersect
       ############################################################
@@ -310,6 +314,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
         text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
       }
+
       if (savesteps) {
         out_layer <- paste0("step", stepcnt, "_", sbndnm, "_largebnd_intersect")
         spExportSpatial(largebndx.intd, outfolder=stepfolder, out_dsn=step_dsn, 
@@ -340,12 +345,13 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
       ## For largebnds with no intersecting smallbnd, get largebndx polygons closest 
       ## to smallbnd centroid within maxbnd
-      #if (length(largebnd.lt0) > 0) {
+      if (length(largebndxlst) > 0) {
         largebndx.dist <- closest_poly(sbnd.centroid, 
 			ypoly=largebndx[largebndx[[largebnd.unique]] %in% largebndxlst,], 
 			ypoly.att=largebnd.unique, returnsf=FALSE)
         largebndxlst <- unique(c(largebnd.ltthres, largebnd.lt0, names(largebndx.dist)))
-      #} 
+      } 
+ 
       while (!end) {
         ## Get intersecting helper polygons
         helperbndx.tmp <- suppressWarnings(sf::st_join(helperbndx, 
@@ -393,7 +399,6 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           largebnd_select <- rbind(largebnd_select, 
 			sf_dissolve(largebndx[largebndx[[largebnd.unique]] %in% largebndxlst[k],],
 			largebnd.unique, areacalc=FALSE))
-
           end <- FALSE
         } else {
           end <- TRUE
@@ -479,7 +484,6 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
       j <- j + 1
     } ## End while j - maxbnd
-
 
     ## Remove columns in helperbndx.tmp with same names as in smallbnd attributes
     helperbndx.tmp <- helperbndx.tmp[, names(helperbndx.tmp)[!names(helperbndx.tmp) %in% 

@@ -51,7 +51,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   ## Set global variables
   gui <- FALSE  
 
-
 #    smallbnd.domain = NULL
 #    helperbnd.filter = NULL
 #    largebnd.filter = NULL
@@ -145,6 +144,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
     if (any(table(smallbndx[[smallbnd.unique]])) > 1) 
       message("smallbnd.unique is not unique")
   }
+
   smallbndnmlst <- smallbndnmlst[smallbndnmlst != smallbnd.unique]
   smallbnd.domain <- pcheck.varchar(var2check=smallbnd.domain, varnm="smallbnd.domain", 
 		gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
@@ -152,12 +152,14 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   if (is.null(smallbnd.domain)) 
     smallbnd.domain <- smallbnd.unique
 
+
   ## Apply smallbnd.filter
   ####################################################################
   if (!is.null(smallbnd.filter))  {
     smallbndx <- subset(smallbndx, eval(parse(text = smallbnd.filter)))
   }
   smallbnd.cols <- names(smallbndx)
+
 
   ## Apply smallbnd.stfilter (Just state)
   ####################################################################
@@ -211,6 +213,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
       plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
     }
   }
+
 
   message("smallbnd...")
   print(st_drop_geometry(smallbndx))

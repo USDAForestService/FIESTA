@@ -5,7 +5,8 @@
 
 check.numeric <- function(x) {
   ## DESCRIPTION: check if vector x is numeric. If not, change to numeric.
-  if (!is.numeric(x)) {
+
+  if (!all(is.na(x)) && !is.numeric(x)) {
     if (is.factor(x)) {
       x <- as.numeric(as.character(x))
     } else {

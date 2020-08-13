@@ -456,7 +456,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 			SApackage=SApackage, SAmethod="unit", esttype=esttype, 
 			prednames=prednames, fmla=fmla, domain=domain,
 			response=response))
-
+ 
     ## get estimate by domain, by largebnd value
     message("generating area-level estimates for ", response, "...")
     dunit.multest.area <- do.call(rbind, lapply(largebnd.vals, SAest.large, 
@@ -506,7 +506,6 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
   est <- getarea(est, areavar=areavar, esttype=esttype,
 				nhatcol=nhat, nhatcol.var=nhat.var)
 
-
   if (multest) {
 
     ## Merge SAdom attributes to dunit.multest
@@ -548,6 +547,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 
       ## Export dunit.multest
       overwrite_layer <- ifelse(multest.append, FALSE, overwrite)
+
       datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=multest_outfolder, 
  		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite_layer, 
 		append=multest.append)

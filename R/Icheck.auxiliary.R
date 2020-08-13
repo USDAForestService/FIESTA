@@ -210,7 +210,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
     ## Check if class of unitvar in auxlut matches class of unitvar in pltx
     tabs <- FIESTA::check.matchclass(pltx, auxlut, c(unitvars, strvars),
-		tab1txt="pltmodel", tab2txt="auxlut")
+		tab1txt="pltassgn", tab2txt="auxlut")
     pltx <- tabs$tab1
     auxlut <- tabs$tab2
 
@@ -223,10 +223,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 		tab1txt="auxlut", tab2txt="plt", stopifmiss=FALSE)
   }
 
-
   ## Merge P2POINTCNT to auxlut
   ##################################################
-  if (!P2POINTCNT %in% names(auxlut) && !is.null(P2POINTCNT)) {
+  if (!is.null(P2POINTCNT) && !P2POINTCNT %in% names(auxlut)) {
 
     ## Check if class of unitvar in auxlut matches class of unitvar in P2POINTCNT
     tabs <- FIESTA::check.matchclass(P2POINTCNT, auxlut, c(unitvars, strvars),
