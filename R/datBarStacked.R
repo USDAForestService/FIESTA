@@ -1,6 +1,6 @@
 datBarStacked <- function(x, main.attribute, sub.attribute, response="phat", 
 	percent=FALSE, LUT.color=NULL, color="rainbow", device.type="default", jpeg.res=300,
-	device.width=7, device.height=7, mar=NULL, horiz=TRUE, bar.lim=NULL, bar.ratio=1, 
+	device.width=9, device.height=6, mar=NULL, horiz=TRUE, bar.lim=NULL, bar.ratio=1, 
 	ylabel=NULL, xlabel=NULL, las.xnames=NULL, main.order=NULL, sub.order=NULL, 
 	legend.fit=NULL, legend.cex=0.8, legend.x=NULL, legend.y=NULL, legend.title=NULL, 
 	legend.bty="o", legend.bg=par("bg"), legend.inset=0, legend.xpd=par("xpd"), 

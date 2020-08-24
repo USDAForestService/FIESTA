@@ -107,7 +107,8 @@ pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
   } else if (tabext == "shp") {
     return(dsn) 
   } else {
-    stop("file format currently not supported")
+    if (!file.exists(dsn)) stop("file does not exist")
+    #stop("file format currently not supported")
   }
 }
 

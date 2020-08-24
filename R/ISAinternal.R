@@ -5,8 +5,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 		helperbndx, helperbnd.unique, largebndx, largebnd.unique, 
 		maxbndx=NULL, maxbnd.unique=NULL, nbrdom.min=NULL,
 		maxislarge=FALSE, largeishelper=FALSE, savesteps=FALSE, showsteps=TRUE,
-		stepfolder=NULL, out_fmt="shp", step_dsn=NULL, maxbnd.threshold=30, 
-		largebnd.threshold=30, multiSAdoms=FALSE, overwrite=TRUE) {
+		stepfolder=NULL, out_fmt="shp", step_dsn=NULL, step.cex=0.8, 
+		maxbnd.threshold=30, largebnd.threshold=30, multiSAdoms=FALSE, 
+		overwrite=TRUE) {
   ## DESCRIPTION:: Automate selection of helperbnd polygons for modeling.
   ## maxbnd - maximum constraint for modeling extent (e.g., ECOMAP Province)
   ## if maxbnd, maxbnd is intersected with smallbnd and dissolved by maxbnd.unique (*maxbnd_select)
@@ -50,7 +51,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
 
       coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
-      text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]])
+      text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
     }
  
     if (savesteps) {
@@ -85,14 +86,14 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       maxbndxlst <- maxbndx.pct[[maxbnd.unique]]
       maxbnd.gtthres <- maxbndxlst[maxbndx.pct$int.pct >= maxbnd.threshold]
       maxbnd.ltthres <- maxbndxlst[maxbndx.pct$int.pct < maxbnd.threshold]
-      print(maxbndx.pct)
+      message(paste0(capture.output(maxbndx.pct), collapse = "\n"))
 
 
       ## Get percent overlap of each fire with maxbndx
       smallbndx.pct <- suppressWarnings(tabulateIntersections(layer1=smallbndx,
  		layer1fld=smallbnd.unique, layer2=maxbndx.int, layer2fld=maxbnd.unique))
       smallbndx.pct <- data.table(smallbndx.pct)
-      print("smallbnd overlap with maxbnd")
+      message("smallbnd overlap with maxbnd")
      # print(smallbndx.pct[!is.na(smallbndx.pct$int.pct),])
 
 
@@ -157,7 +158,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbnd.gtthres,]), 
 		add=TRUE, border="cyan2", lwd=2)
       coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
-      text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]])
+      text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
     }
     if (savesteps) {
       out_layer <- paste0("step", stepcnt, "_maxbnd_select")
@@ -267,7 +268,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #        plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-        text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+        text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
       }
 
       if (savesteps) {
@@ -299,7 +300,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       largebnd.ltthres <- largebndx.pct[largebndx.pct$int.pct < largebnd.threshold & 
 					largebndx.pct$int.pct != 0, largebnd.unique]
       largebnd.lt0 <- largebndx.pct[largebndx.pct$int.pct == 0, largebnd.unique]
-      print(largebndx.pct)
+      message(paste0(capture.output(largebndx.pct), collapse = "\n"))
 
       ## Select largebnd(s) that intersect more than threshold
       largebnd_select <- largebndx.intd[largebndx.intd[[largebnd.unique]] %in% largebnd.gtthres,]
@@ -312,7 +313,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE)
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-        text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+        text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
       }
 
       if (savesteps) {
@@ -381,15 +382,15 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           message("reached nbrdom.min... total of ", nbrdom, " domains")
         }
         ## Show intermediate step
-        if (showsteps) {
-          plot(append(sf::st_as_sfc(sf::st_bbox(sbnd)), 
-			sf::st_as_sfc(sf::st_bbox(helperbndx.tmp))), border="transparent")  
-          plot(sf::st_geometry(helperbndx.tmp), add=TRUE, border="grey")
-          plot(sf::st_geometry(sbnd), add=TRUE, border="red")
-          plot(sf::st_geometry(largebnd_select), add=TRUE)
-          coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebnd_select)))
-          text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]])
-        }
+##        if (showsteps) {
+##          plot(append(sf::st_as_sfc(sf::st_bbox(sbnd)), 
+##			sf::st_as_sfc(sf::st_bbox(helperbndx.tmp))), border="transparent")  
+##          plot(sf::st_geometry(helperbndx.tmp), add=TRUE, border="grey")
+##          plot(sf::st_geometry(sbnd), add=TRUE, border="red")
+##          plot(sf::st_geometry(largebnd_select), add=TRUE)
+##          coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebnd_select)))
+##          text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]], cex=step.cex)
+##        }
 #        if (nbrdom > nbrdom.minx || k > length(largebndxlst)) {
 
         if (nbrdom.needed > 0 && k < length(largebndxlst)) {
@@ -441,7 +442,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
           plot(sf::st_geometry(largebnd_select), add=TRUE, border="cyan2", lwd=2)
           coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
         dev.off()
         message("Writing jpg to ", jpgfn, "\n")
  
@@ -458,7 +459,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE)
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebnd_select)))
-        text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]])
+        text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]], 0.8)
       }
 
       if (savesteps && !is.null(helperbndx.tmp)) {
@@ -624,7 +625,7 @@ FIESTA_SAmod_demo_plots <- function (estvar, prednames=NULL, est.com, domain.att
 			col = mycolors)
 	   #print n.sample plots
 		text(tmp1[2,]+.5, y = maxy.AOI*.8, 
-			labels = est.AOI$NBRPLT.y[my.range],cex=1)
+			labels = est.AOI$NBRPLT.y[my.range], cex=1)
 	   #error bars
 		tmp2<- est.AOI[my.range,c("DIR.se", "JU.GREG.se",  
 			"JU.EBLUP.se.1","JFH.se","JA.synth.se", "DIR.se")]

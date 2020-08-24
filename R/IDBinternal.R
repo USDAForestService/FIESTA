@@ -260,7 +260,7 @@ getspconddat <- function(cond=NULL, ACTUALcond=NULL, cuniqueid="PLT_CN", condid1
 getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE, 
 	varCur="MEASYEAR", Endyr=NULL, invyrs=NULL, allyrs=FALSE, SCHEMA.=NULL, 
 	subcycle99=NULL, designcd1=TRUE, intensity1=NULL, popSURVEY=FALSE, chk=FALSE,
-	syntax="sql") {
+	syntax="sql", plotnm="plot") {
   ## DESCRIPTION: gets from statement for database query
   ## syntax - ('sql', 'R')
 
@@ -270,6 +270,9 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
   if (!is.null(dsn)) {
     dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE)
     tablst <- DBI::dbListTables(dbconn)
+  } else {
+    chk <- FALSE
+    SCHEMA.=NULL
   }
 
   if (!is.null(evalid)) {
@@ -282,7 +285,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
       if (!all(evalid %in% evalidlst)) stop("invalid evalid")
     }
     pfromqry <- paste0(SCHEMA., "pop_plot_stratum_assgn ppsa JOIN ", 
-			SCHEMA., "plot p ON (p.CN = ppsa.PLT_CN)")
+			SCHEMA., plotnm, " p ON (p.CN = ppsa.PLT_CN)")
     return(pfromqry)
   }
 
@@ -360,10 +363,10 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 #					p.plot = pp.plot and p.", varCur, 
 #						" = pp.maxyr and p.invyr = pp.invyr") 
 #    } else {
-      pfromqry <- paste0(SCHEMA., "plot p
+      pfromqry <- paste0(SCHEMA., plotnm, " p
 		INNER JOIN 
 		(select statecd, unitcd, countycd, plot, max(", varCur, ") maxyr
-		from ", SCHEMA., "plot", where.qry,
+		from ", SCHEMA., plotnm, where.qry,
 		" group by statecd, unitcd, countycd, plot) pp
 		ON p.statecd = pp.statecd and 
 			p.unitcd = pp.unitcd and 
@@ -376,7 +379,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
    
  
   } else if (allyrs) {  
-    pfromqry <- paste0(SCHEMA., "plot p")
+    pfromqry <- paste0(SCHEMA., plotnm, " p")
 
   } else if (!is.null(invyrs)) {  
  
@@ -467,12 +470,71 @@ getEvalid <- function(dbconn, SCHEMA.=NULL, states, evalAll=FALSE,
 }
 
 
+getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE, 
+		evalEndyr=NULL, evalType="01") {
+  ## DESCRIPTION: gets evalid from POP_PLOT_STRATUM_ASSGN table
+  ## ARGUMENTS:
+  ## chk - Logical. If TRUE, checks if data tables and variables exist
 
-getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL) {
+  ## set global variables
+  Endyr=EVALID=evaltyp=STATECD <- NULL
+  
+
+  ## create state filter
+  if (!is.null(states)) {
+    stcd <- pcheck.states(states, statereturn="VALUE")
+  } else {
+    states <- sort(unique(ppsa$STATECD))
+  }
+  stfilter <- getfilter("STATECD", stcd, syntax='sql')
+
+  eval.qry <- paste("select distinct STATECD, EVALID 
+			from ppsa
+			where", stfilter, "order by STATECD, EVALID")
+  evaldt <- setDT(sqldf::sqldf(eval.qry))
+
+
+  ## add endyr and evaltyp columns to dataframe
+  evaldt[, Endyr := substr(EVALID, nchar(EVALID) - 3, nchar(EVALID)-2)]
+  evaldt[, evaltyp := substr(EVALID, nchar(EVALID)-1, nchar(EVALID))]
+
+  if (is.null(evalType)) evalType <- "00"
+  if (!is.null(evalType)) {
+    if (!is.character(evalType)) stop("evalType must be 2 character string")
+    if (!all(sapply(evalType, nchar) == 2)) stop("evalType must be 2 character string")
+    if (!all(evalType %in% unique(evaldt$evaltyp))) 
+      stop("invalid evalType... must be in following list: ", sort(unique(evaldt$evaltyp))) 
+
+    evaldt <- evaldt[evaltyp %in% evalType, ]
+  }
+
+  if (evalAll) {
+    evalidlst <- sort(unique(evaldt$EVALID))
+  } else {
+    if (!is.null(evalEndyr)) {
+      if (!is.numeric(evalEndyr))  stop("evalEndyr must be numeric yyyy")
+      if (nchar(evalEndyr) != 4) stop("evalEndyr must be numeric yyyy")
+      yr <- substr(evalEndyr, 3, 4)
+
+      Endyr.max <- evaldt[Endyr <= yr, max(Endyr), by="STATECD"]
+    } else {
+      Endyr.max <- evaldt[, max(Endyr), by="STATECD"]
+    }
+    setnames(Endyr.max, "V1", "Endyr")
+    evalidlst <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))$EVALID
+  }
+  return(evalidlst)
+}
+
+
+
+
+getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL,
+	designcd1=TRUE) {
   ## DESCRIPTION: get plots with most current measurement before endyr (if not null)
 
   ## Set global variables
-  PLOT_STATUS_CD=pltf <- NULL
+  pltf <- NULL
 
   ## Set data.table
   if (!"data.table" %in% class(pltx))
@@ -492,7 +554,13 @@ getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL) {
 
   ## Remove nonsampled plots (PLOT_STATUS_CD == 3)
   if ("PLOT_STATUS_CD" %in% names(pltx)) 
-    pltx <- pltx[PLOT_STATUS_CD < 3,]
+    pltx <- pltx[pltx$PLOT_STATUS_CD < 3,]
+
+
+  ## Keep only plots where DESIGNCD = 1
+  if (designcd1) 
+    pltx <- pltx[pltx$DESIGNCD == 1,]
+
 
   ## Check Endyr
   if (!is.null(Endyr) && is.numeric(Endyr) && Endyr > min(as.numeric(pltx[[varCur]]), na.rm=TRUE)) {

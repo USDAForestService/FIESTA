@@ -41,7 +41,7 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
   \item{measCur}{ String. Get plots with most current measurement. }
   \item{measEndyr}{ Logical. If measCur=TRUE, extract plots with most current 
 	measurement for state(s) for years measured before measEndyr. }
-  \item{measEndyr.filter}{ Filter. If measEndyr=NULL, a filter for plots. }
+  \item{measEndyr.filter}{ Filter. If measEndyr != NULL, a filter for plots. }
   \item{intensity1}{ Logical. If TRUE, include only plots with INTENSITY=1. }
   \item{rastlst.cont}{ String vector or list. Continuous rasters (file names 
 	or raster objects). }

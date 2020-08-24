@@ -11,16 +11,16 @@
 }
 \usage{
 spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL, 
-	stbnd_dsn = NULL, stbnd.att = NULL, RS = NULL, xy = NULL, xy_dsn = NULL, 	
+	stbnd_dsn = NULL, stbnd.att = "COUNTYFIPS", RS = NULL, xy = NULL, xy_dsn = NULL, 	
 	xy.uniqueid = "PLT_CN", xvar = "LON_PUBLIC", yvar = "LAT_PUBLIC", xy.crs = 4269,
 	xy.joinid = "PLT_CN", clipxy = TRUE, datsource = "datamart", data_dsn = NULL, 
 	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
 	other_layers = NULL, puniqueid = "CN", evalid = NULL, evalCur = FALSE, 
 	evalEndyr = NULL, evalType = "AREAVOL", measCur = FALSE, measEndyr = NULL, 
-	invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, 
-	savedata = FALSE, savebnd = FALSE, savexy = FALSE, outfolder = NULL, 
-	out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
+	Endyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
+	showsteps = FALSE, savedata = FALSE, savebnd = FALSE, savexy = FALSE, 
+	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
 }
 \arguments{
   \item{bnd}{ sf R object or String. Area of interest boundary. Can be a spatial 
@@ -86,6 +86,7 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
   \item{measCur}{ Logical. If TRUE, extract plots with most current measurement for 
 	state(s). }
   \item{measEndyr}{ Integer. Defining end year of measurement (yyyy). }
+  \item{Endyr.filter}{ Filter. If measEndyr != =NULL or evalEndyr != NULL, a filter for plots. }
   \item{invyrs}{ Integer vector. Defining specific years of data (e.g., 2010:2015). }
   \item{allyrs}{ Logical. If TRUE, selects all years (annual inventory) in database. }
   \item{intensity1}{ Logical. If TRUE, include only plots with INTENSITY=1. }

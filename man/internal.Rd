@@ -76,8 +76,10 @@
 \alias{DBgetfn}
 \alias{getpfromqry}
 \alias{getEvalid}
+\alias{getEvalid.ppsa}
 \alias{getPlotCur}
 \alias{nbrdecimals}
+\alias{nbrdigits}
 \alias{getfilter}
 
 \alias{PBest.pbar}

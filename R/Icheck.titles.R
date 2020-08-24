@@ -151,10 +151,8 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
         title.units <- unique(ref_estvar[ref_estvar$ESTVAR == estvarn, "ESTUNITS"])
         title.landarea <- paste("on", title.landarea)
       }
-      if (!is.null(title.units)) {
-        title.units <- ifelse(is.null(divideby), capfirst(title.units), 
-					capfirst(paste(divideby, title.units)))
 
+      if (!is.null(title.units)) {
         title.units <- ifelse (is.null(divideby), paste0(", in ", title.units, ", "), 
 		paste0(", in ", divideby, " ", title.units, ", "))
       } else {

@@ -9,7 +9,7 @@ vignette: >
 
 
 ## FIESTA Overview
-The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. The objectives ares to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other model and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
 
 Functions are organized by type or objective and are named with a corresponding prefix: 
@@ -33,10 +33,10 @@ Functions are organized by type or objective and are named with a corresponding 
 
 
 ### Photo-based (PB) module overview
-FIESTA's Photo-Based (PB) module calculates population estimates and associated sampling errors based on Patterson (2012). In contrast to FIA's traditional green-book estimators which were constructed based on the finite sampling paradigm using sample plots with distinct area, the photo-based estimators were constructed based on the context of the infinite sampling paradigm, along with the concept of a support region. The sample is the set of plot centers and the information from the support region (the photo plot) is assigned to the plot centers. The photo interpreted points are used as a sample of the support region and the measurements are used to estimate the information from the support region. FIESTA includes non-ratio estimators for area and percent cover estimates by domain and ratio-of-means estimators for area and percent cover estimates within domain, and supports post-stratification for reducing variance.
+FIESTA's Photo-Based (PB) module calculates population estimates and associated sampling errors based on Patterson (2012). In contrast to FIA's traditional green-book estimators which were constructed based on the finite sampling paradigm using sample plots with distinct area, the photo-based estimators were constructed based on the context of the infinite sampling paradigm, along with the concept of a support region. The sample is the set of plot centers and the information from the support region (the photo plot) are assigned to the plot centers. The photo interpreted points are used as a sample of the support region and the observations are used to estimate the information from the support region. FIESTA includes non-ratio estimators for area and percent cover estimates by domain, and ratio-of-means estimators for area and percent cover estimates within domain, and supports post-stratification for reducing variance.
 
 ### Objective of tutorial
-The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates, supplementary to FIA's traditional estimates, using photo-based estimators from Patterson (2012). 
+The main objective of this tutorial is to demonstrate how to use FIESTA for generating photo-based estimates, supplementary to FIA's traditional estimates, using estimators from Patterson (2012). 
 
 
 * [FIESTA parameters](#input)
@@ -65,7 +65,7 @@ The PB module was originally developed for the Nevada Photo-Based Inventory Pilo
 <a name="dtab"></a>
 **Data tables, unique identifiers, number of points**
 
-A data table of individual or aggregated point data is required input to the modPB function. Plot-level information, such as: state, county, or strata assignment, may be included in pltassgn or in pnt, or pltpct with pltassgn=NULL. The parameter input can be the name of a comma-delimited file (\*.csv) or an R data frame or data table object already loaded into R. The pltassgn table can also be a point shapefile (\*.shp) or a SpatialDataFrame object with one point per plot. The unique identifier for the plots must be provided in pltassgn and pnt and the unique identifier for the points must additionally in pnt. See the required variables section for a list of variables necessary to include for estimation.
+A data table of individual or aggregated point data is required input to the modPB function. Plot-level information, such as: state, county, or strata assignment, may be included in pltassgn or in pnt, or pltpct with pltassgn=NULL. The parameter input can be the name of a comma-delimited file (\*.csv) or an R data frame or data table object already loaded into R. The pltassgn table can also be a point shapefile (\*.shp) or an sf spatial object with one point per plot. The unique identifier for the plots must be provided in pltassgn and pnt and the unique identifier for the points must additionally be in pnt. See the required variables section for a list of variables necessary to include for estimation.
 
 * **pnt**       - Point-level data, with 1 record per point. If NULL, aggregated point counts must be in pntcnt.
 * **pltpct**    - Plot-domain-level data, with 1 record per domain per plot.
@@ -411,6 +411,33 @@ icecover_2
 
 
 
+#### modPBpop
+
+```
+#######################################################################################
+# Usage:
+# modPBpop(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
+#	    pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
+#	    pltassgnid = "CN", plt.nonsamp.filter = NULL, tabtype = "PCT", strata = FALSE, 
+#    	sumunits = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+#   	areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", 
+#   	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, pvars2keep = NULL, 
+#   	gui = FALSE)
+# 
+# Description:
+# Generates percent or acre estimates by domain (and estimation unit).   
+########################################################################################
+help(modPBpop)
+
+
+## Percent ##
+# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
+PBpop <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt")
+names(PBpop)
+
+
+```
+
 #### modPB
 
 ```
@@ -443,6 +470,7 @@ help(modPB)
 #### Point-level data - Totals
 
 ```
+
 ## Percent ##
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 cover1 <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
@@ -459,7 +487,7 @@ cover1$est
 # Note: An Uninterpretable class is included in table. To remove, add a nonsamp.filter
 cover1 <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, rawdata=TRUE, title.rowvar="Land Cover (2011)",
-		nonsamp.filter="cover_1 != 999")
+		pnt.nonsamp.filter="cover_1 != 999")
 names(cover1)
 cover1$est
 
@@ -469,16 +497,17 @@ cover1$est
 # Add a nonsamp.filter to remove uninterpretable points (e.g., cloud cover)
 cover1.area <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=sum(unitarea$ACRES))
+		pnt.nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=sum(unitarea$ACRES))
 cover1.area$est
 
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modPB.R")
 
 ## Percent ##
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 # Note: Return raw data
 cover1 <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.filter="cover_1 != 999", rawdata=TRUE)
+		pnt.nonsamp.filter="cover_1 != 999", rawdata=TRUE)
 names(cover1)
 cover1$est
 cover1.raw <- cover1$raw
@@ -487,8 +516,6 @@ names(cover1.raw)
 cover1.raw$unitvars
 cover1.raw$strvar
 cover1.raw$rowvar
-cover1.raw$colvar
-cover1.raw$pntsampcnt
 cover1.raw$stratdat
 cover1.raw$unit.rowest
 
@@ -498,7 +525,7 @@ cover1.raw$unit.rowest
 # Note: Save to outfolder
 cover1 <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.filter="cover_1 != 999", rawdata=TRUE, savedata=TRUE, outfolder=outfolder)
+		pnt.nonsamp.filter="cover_1 != 999", rawdata=TRUE, savedata=TRUE, outfolder=outfolder)
 names(cover1)
 cover1$est
 cover1.raw <- cover1$raw
@@ -531,7 +558,7 @@ netchg
 
 ## Percent ##
 # Percent land by agent of change in Davis and Salt Lake Counties, UT
-chg_ag <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+chg_ag <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
 		returntitle=TRUE)
 names(chg_ag)
@@ -541,7 +568,7 @@ chg_ag$titlelst
 
 ## Area ##
 # Area, in acres, of land by agent of change in Davis and Salt Lake Counties, UT
-chg_ag.area <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+chg_ag.area <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
 		returntitle=TRUE, tabtype="AREA", unitarea=sum(unitarea$ACRES), title.units="hectares")
 names(chg_ag.area)
@@ -555,7 +582,7 @@ chg_ag.area$titlelst
 # Percent land with observed change by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a landarea filter to subset dataset to only plots with observed change.
 landarea.filter <- "change_1_2 == 1"
-chg_ag.plts <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+chg_ag.plts <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
 		landarea="CHANGE", landarea.filter=landarea.filter, returntitle=TRUE)
 names(chg_ag.plts)
@@ -567,7 +594,7 @@ chg_ag.plts$titlelst
 # Percent land changed by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a point filter to include observed change on points
 pnt.filter <- "chg_ag_2 > 0"
-chg_ag.pnts <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+chg_ag.pnts <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
 		pnt.filter=pnt.filter, returntitle=TRUE, title.filter="observed changed")
 names(chg_ag.pnts)
@@ -587,7 +614,7 @@ chg_ag.pnts$est
 # Area, in acres, of land with observed change by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a landarea filter to subset dataset to only plots with observed change.
 landarea.filter <- "change_1_2 == 1"
-chg_ag.plts.area <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+chg_ag.plts.area <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
 		landarea="CHANGE", landarea.filter=landarea.filter, returntitle=TRUE, tabtype="AREA", 
 		unitarea=sum(unitarea$ACRES))
@@ -600,7 +627,7 @@ chg_ag.plts.area$titlelst
 # Area, in acres, of land changed by agent of change in Davis and Salt Lake Counties, UT
 # Note: Add a point filter to include observed change on points
 pnt.filter <- "chg_ag_2 > 0"
-chg_ag.pnts.area <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+chg_ag.pnts.area <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
 		pnt.filter=pnt.filter, returntitle=TRUE, title.filter="observed changed", 
 		tabtype="AREA", unitarea=sum(unitarea$ACRES))
@@ -619,7 +646,7 @@ chg_ag.pnts.area$est
 
 ## Percent ##
 # Percent land changed by agent of change and land cover (2011) in Davis and Salt Lake Counties, UT
-chg_ag_cover1 <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt", rowvar="chg_ag_2", 
+chg_ag_cover1 <- modPB(pnt=icepnt, pntid="dot_cnt", rowvar="chg_ag_2", 
     rowlut=icechg_ag, colvar="cover_1", collut=icecover_1, rawdata=TRUE, 
     title.rowvar="Change agent", title.colvar="Land cover (2011)", returntitle=TRUE)
 chg_ag_cover1$est
@@ -629,7 +656,7 @@ chg_ag_cover1$titlelst
 
 ## Area ##
 # Area, in acres, of land changed by agent of change and land cover (2011) in Davis and Salt Lake Counties, UT
-chg_ag_cover1.acres <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt", rowvar="chg_ag_2", 
+chg_ag_cover1.acres <- modPB(pnt=icepnt, pntid="dot_cnt", rowvar="chg_ag_2", 
     rowlut=icechg_ag, colvar="cover_2", collut=icecover_2, rawdata=TRUE, 
     title.rowvar="Change agent", title.colvar="Land cover (2011)", returntitle=TRUE,
     tabtype="AREA", unitarea=sum(unitarea$ACRES))
@@ -640,7 +667,7 @@ chg_ag_cover1.acres$titlelst
 
 ## Percent ##
 # Percent land changed by agent of change and land cover (2014) in Davis and Salt Lake Counties, UT
-chg_ag_cover2 <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt", rowvar="chg_ag_2", 
+chg_ag_cover2 <- modPB(pnt=icepnt, pntid="dot_cnt", rowvar="chg_ag_2", 
     rowlut=icechg_ag, colvar="cover_2", collut=icecover_2, rawdata=TRUE, 
     title.rowvar="Change agent", title.colvar="Land cover (2014)", returntitle=TRUE)
 chg_ag_cover2$est
@@ -654,33 +681,34 @@ chg_ag_cover2$titlelst
 
 ## Area by Estimation Unit ##
 # Area, in acres, of land cover at Time 1 (2011) by County for all land in Davis and Salt Lake Counties, UT
-cover1.unit.area <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", 
+cover1.unit.area <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id",  
     pntid="dot_cnt", rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-    nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, unitvar="ESTN_UNIT", 
+    pnt.nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, unitvar="ESTN_UNIT", 
     areavar="ACRES")
 names(cover1.unit.area)
 cover1.unit.area$est
 cover1.unit.area$pse
 
-
 ## Area by Estimation Unit ##
 # Area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 # Note: Estimates are generated by ESTN_UNIT and summed to the population.
-cover1.unitsum <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover1.unitsum2 <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, 
-		unitvar="ESTN_UNIT", areavar="ACRES", sumunits=TRUE)
+		pnt.nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, 
+		unitvar="ESTN_UNIT", areavar="ACRES", sumunits=TRUE, rawdata=TRUE)
 names(cover1.unitsum)
 cover1.unitsum$est
+cover1.unitsum$raw$unit.rowest
+cover1.unitsum2$raw$rowest
 
 
 ## Area by Estimation Unit ##
 # Area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 # Return raw data
 # Note: Estimates are generated by ESTN_UNIT and summed to the population.
-cover1.unitsum.area <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover1.unitsum.area <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, 
+		pnt.nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, 
 		unitvar="ESTN_UNIT", areavar="ACRES", sumunits=TRUE, rawdata=TRUE)
 names(cover1.unitsum.area)
 cover1.unitsum.area$est
@@ -700,10 +728,10 @@ cover1.unitsum.raw$unit.rowest
 ```
 ## Percent ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover12 <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12 <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
 		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2012)", 
-		nonsamp.filter="cover_1 != 999", returntitle=TRUE)
+		pnt.nonsamp.filter="cover_1 != 999", returntitle=TRUE)
 names(cover12)
 
 cover12$est
@@ -721,10 +749,10 @@ cover12$titlelst
 
 ## Area ##
 # Area, in acres, of land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover12.acres <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12.acres <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
 		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2012)", 
-		nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=sum(unitarea$ACRES))
+		pnt.nonsamp.filter="cover_1 != 999", tabtype="AREA", unitarea=sum(unitarea$ACRES))
 names(cover12.acres)
 cover12.acres$est
 cover12.acres$pse
@@ -739,9 +767,9 @@ icepnt2 <- merge(icepnt, icecover_1, by="cover_1")
 icepnt2 <- merge(icepnt2, icecover_2, by="cover_2")
 
 icepnt2$cover_12_nm <- paste(icepnt2$cover_1_nm, icepnt2$cover_2_nm, sep="-")
-cover12nm <- modPB(pnt=icepnt2, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12nm <- modPB(pnt=icepnt2, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_12_nm", rawdata=TRUE, title.rowvar="Land Cover (2011-2014)",  
-		nonsamp.filter="cover_1 != 999", returntitle=TRUE)
+		pnt.nonsamp.filter="cover_1 != 999", returntitle=TRUE)
 names(cover12nm)
 
 cover12nm$est
@@ -758,10 +786,10 @@ cover12$pse
 ## Percent ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Filter for only categories of cover_1 < 200
-cover12.lt200 <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12.lt200 <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
 		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2012)", 
-		nonsamp.filter="cover_1 != 999", pnt.filter="cover_1 < 200", 
+		pnt.nonsamp.filter="cover_1 != 999", pnt.filter="cover_1 < 200", 
 		title.filter="Vegetated land", returntitle=TRUE)
 names(cover12.lt200)
 cover12.lt200$est
@@ -774,10 +802,10 @@ cover12.lt200$titlelst
 ## Percent ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Return gain/loss estimates for each category in rawdata tables
-cover12b <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12b <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
 		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2014)", 
-		nonsamp.filter="cover_1 != 999", gainloss=TRUE)
+		pnt.nonsamp.filter="cover_1 != 999", gainloss=TRUE)
 names(cover12b)
 
 cover12b$est
@@ -825,7 +853,7 @@ changelut
 
 chgcover1 <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="change_1_2", rowlut=changelut, colvar="cover_1", 
-		collut=icecover_1, nonsamp.filter="cover_1 != 999", rawdata=TRUE, 
+		collut=icecover_1, pnt.nonsamp.filter="cover_1 != 999", rawdata=TRUE, 
 		title.rowvar="Change")
 chgcover1$est
 chgcover1$pse
@@ -848,7 +876,7 @@ head(icepnt2)
 
 chgcover1.grp <- modPB(pnt=icepnt2, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="change_1_2nm", row.orderby="change_1_2cd", colvar="cover_1", 
-		collut=icecover_1, nonsamp.filter="cover_1 != 999", rawdata=TRUE, 
+		collut=icecover_1, pnt.nonsamp.filter="cover_1 != 999", rawdata=TRUE, 
 		title.rowvar="Change", title.colvar="Land cover (2011)", returntitle=TRUE)
 names(chgcover1.grp)
 chgcover1.grp$est
@@ -868,7 +896,7 @@ chgcover1.grp$est
 # Percent land cover at Time 1 (2011) within agent of change in Davis and Salt Lake Counties, UT 
 chg_ag_cover1.rat <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="chg_ag_2", rowlut=icechg_ag, colvar="cover_1", collut=icecover_1, 
-		rawdata=TRUE, nonsamp.filter="cover_1 != 999", title.rowvar="Change agent", 
+		rawdata=TRUE, pnt.nonsamp.filter="cover_1 != 999", title.rowvar="Change agent", 
 		title.colvar="Land cover (2011)", returntitle=TRUE)
 chg_ag_cover1.rat$est
 chg_ag_cover1.rat$pse
@@ -888,7 +916,7 @@ chg_ag_cover1.rat$est
 # Acres of land cover at Time 1 (2011) within agent of change in Davis and Salt Lake Counties, UT 
 chg_ag_cover1.rat.acres <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="chg_ag_2", rowlut=icechg_ag, colvar="cover_1", collut=icecover_1, 
-		rawdata=TRUE, nonsamp.filter="cover_1 != 999", title.rowvar="Change agent", 
+		rawdata=TRUE, pnt.nonsamp.filter="cover_1 != 999", title.rowvar="Change agent", 
 		title.colvar="Land cover (2011)", returntitle=TRUE, tabtype="AREA",
 		unitarea=sum(unitarea$ACRES))
 chg_ag_cover1.rat.acres$est
@@ -903,7 +931,7 @@ chg_ag_cover1.rat.acres$est
 # Percent land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
 cover1_2.rat <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, nonsamp.filter="cover_1 != 999", title.rowvar="Land cover (2011)", 
+		rawdata=TRUE, pnt.nonsamp.filter="cover_1 != 999", title.rowvar="Land cover (2011)", 
 		title.colvar="Land cover (2014)", returntitle=TRUE)
 cover1_2.rat$est
 cover1_2.rat$pse
@@ -914,7 +942,7 @@ cover1_2.rat$titlelst
 # Acres of land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
 cover1_2.acres.rat <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, nonsamp.filter="cover_1 != 999", title.rowvar="Land cover (2011)", 
+		rawdata=TRUE, pnt.nonsamp.filter="cover_1 != 999", title.rowvar="Land cover (2011)", 
 		title.colvar="Land cover (2014)", returntitle=TRUE, tabtype="AREA",
 		unitarea=sum(unitarea$ACRES))
 cover1_2.acres.rat$est
@@ -1003,8 +1031,10 @@ pltpct1.trans$titlelst
 ```
 ## Percent
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
+
+
 # With post-stratification
-cover12ps <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12ps <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
 		rawdata=TRUE, title.rowvar="Land Cover", strvar="STRATUMCD", stratalut=strlutfn,
 		strata=TRUE)
@@ -1034,7 +1064,7 @@ cover12ps$pse
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # With post-stratification
 icepnt$cover_12 <- paste(icepnt$cover_1, icepnt$cover_2)
-cover12ps <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12ps <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
 		rawdata=TRUE, title.rowvar="Land Cover", strvar="STRATUMCD", stratalut=strlutfn,
 		strata=TRUE)
@@ -1051,6 +1081,7 @@ cover12ps$pse
 #### Simple Bar Plots
 
 ```
+
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 names11 <- names(icepctcover)[endsWith(names(icepctcover), "11")]
 pltpct1 <- modPB(pltpct=icepctcover, pltpctvars=names11, title.rowvar="Land cover (2011)",
@@ -1058,10 +1089,9 @@ pltpct1 <- modPB(pltpct=icepctcover, pltpctvars=names11, title.rowvar="Land cove
 x <- pltpct1$est
 x2 <- pltpct1$raw$unit.rowest
 datBarplot(x=x, xvar="Land cover (2011)", yvar="Estimate")
-datBarplot(x=x2, xvar="variable", yvar="est")
+datBarplot(x=x2, xvar="Land cover (2011)", yvar="est")
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\datBarplot.R")
-datBarplot(x=x2, xvar="variable", yvar="est", ylim=c(0,30), xlabel="Land cover categories",
+datBarplot(x=x2, xvar="Land cover (2011)", yvar="est", ylim=c(0,30), xlabel="Land cover categories",
             ylabel="Percent", errbars=TRUE, sevar="est.se")
             
 
@@ -1069,21 +1099,21 @@ datBarplot(x=x2, xvar="variable", yvar="est", ylim=c(0,30), xlabel="Land cover c
 # Percent land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
 cover1_2.rat <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, nonsamp.filter="cover_1 != 999", title.rowvar="Land cover (2011)", 
+		rawdata=TRUE, pnt.nonsamp.filter="cover_1 != 999", title.rowvar="Land cover (2011)", 
 		title.colvar="Land cover (2014)", returntitle=TRUE)
 x <- cover1_2.rat$raw$unit.grpest
 
-datBarStacked(x=x, main.attribute="cover_1_nm", sub.attribute="cover_2_nm",
+datBarStacked(x=x, main.attribute="Land cover (2011)", sub.attribute="Land cover (2014)",
       response="est", xlabel="Land Cover (2011)", legend.title="Land Cover (2014)")
       
       
 ## Gain / Loss ##
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Return gain/loss estimates for each category in rawdata tables
-cover12b <- modPB(pnt=icepnt, pltassgn=iceplt, puniqueid="plot_id", pntid="dot_cnt",
+cover12b <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
 		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
 		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2014)", 
-		nonsamp.filter="cover_1 != 999", gainloss=TRUE)
+		pnt.nonsamp.filter="cover_1 != 999", gainloss=TRUE)
 names(cover12b)
 gainloss <- cover12b.raw$est.gainloss
 

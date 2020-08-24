@@ -112,7 +112,7 @@ getrastlst.rgdal <- function(rastnmlst, rastfolder=NULL, stopifLonLat=FALSE,
         if (file.exists(rastnm[[1]])) {
           rastfnlst <- c(rastfnlst, rastnm)
         } else {
-          print(rastnm[[1]], "is invaid")
+          message(rastnm[[1]], "is invalid")
         }
       } else {
         rastfn <- rastnm[[1]]@file@name
@@ -142,7 +142,7 @@ getrastlst.rgdal <- function(rastnmlst, rastfolder=NULL, stopifLonLat=FALSE,
 
   ## Check each raster for projection information
   for (rastfn in rastfnlst) {
-    print(rastfn)
+    message(rastfn)
     rast.info <- rasterInfo(rastfn)
     if (is.null(rast.info)) stop("invalid raster: ", rastfn)
     rast.prj <- rast.info$crs
@@ -511,12 +511,19 @@ check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL,
     plot(sf::st_geometry(bbox1sfc), add=TRUE, border="red")
   }
 
-  if (intpct == 0) {
+  if (is.na(intpct) || intpct == 0) {
     msg <- paste(layer1nm, "does not overlap", layer2nm)
-    if (stopifnotin) stop(msg)
-  } else if (intpct < 100) {
-    message(layer1nm, " is not completely contained within ", layer2nm)
-    message("...intersection of ", intpct, "%")
+    if (stopifnotin) {
+      stop(msg)
+    } else {
+      return(NULL)
+    }
+  } else {
+    if (intpct < 100) {
+      message(layer1nm, " is not completely contained within ", layer2nm)
+      message("...intersection of ", intpct, "%")
+    }
+    return(intpct)
   } 
 }
 
@@ -710,6 +717,9 @@ spPlotRastcl <- function(rastcl, bks=NULL, col.bks=NULL, col.palette=NULL, ext=N
   ##  rastcl	- classified raster
   ##  bks		- raster breaks
 
+  if (!"raster" %in% rownames(installed.packages()))
+    stop("displaying raster class objects requires package raster")
+
   if (class(rastcl) != "RasterLayer") stop("rastcl must be a Rasterlayer")
   
   ## Define class breaks of rastcl
@@ -748,7 +758,7 @@ spPlotRastcl <- function(rastcl, bks=NULL, col.bks=NULL, col.palette=NULL, ext=N
   if (is.null(labels))
     labels <- as.character(bks[-1])
   
-  plot(sf::st_geometry(rastcl), ext=ext, col=col.bks,
+  plot(rastcl, ext=ext, col=col.bks,
 	axis.args=list(at=labpts, labels=labels), breaks=bks, ...)
 }
 
@@ -885,7 +895,7 @@ crsCompare <- function(x, ycrs=NULL, x.crs=NULL, nolonglat=FALSE,
   #############################
   if (is.null(ycrs)) {
     warning("ycrs is NULL...  using default projection:")
-    message(print("EPSG:5070 - NAD83/Conus Albers"))
+    message("EPSG:5070 - NAD83/Conus Albers")
     ycrs <- crs.default
   }
   crs.y <- sf::st_crs(ycrs)
@@ -901,7 +911,7 @@ crsCompare <- function(x, ycrs=NULL, x.crs=NULL, nolonglat=FALSE,
       crs.y <- crs.x
     } else {
       message("crs.default must be in a projected CRS... using US albers")
-      print(crs.albersUS)
+      message(crs.albersUS)
       crs.y <- crs.albersUS
     }
     if ("sf" %in% class(ycrs)) 
@@ -1179,6 +1189,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     ## Check intersecting states
     stbnd <- suppressWarnings(sf::st_crop(stbnd, sf::st_bbox(bndx)))
     stated <- sf_dissolve(stbnd, stbnd.att)
+
     stateint <- suppressWarnings(selectByIntersects(stated, sf::st_make_valid(bndx), 
 				overlapThreshold=0))
     states <- stateint[[stbnd.att]]

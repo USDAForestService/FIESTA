@@ -3,7 +3,7 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
 	keepNA=FALSE, savedata=FALSE, returnsp=TRUE, exportsp=FALSE, 
 	outfolder=NULL, out_fmt="shp", out_dsn=NULL, out_layer="pnt", 
 	outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
-	othertabnms=NULL, ...) {
+	othertabnms=NULL, stopifnotin=TRUE, ...) {
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -81,8 +81,11 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
   ## Check extents
   bbox1 <- sf::st_bbox(clippolyvx)
   bbox2 <- sf::st_bbox(sppntx)
-  check.extents(bbox1, bbox2, showext, layer1nm="polyv", layer2nm="sppntx",
-			stopifnotin=TRUE)
+
+  ## Check if extents overlap... if not and stopifnotin=TRUE, return NULL
+  chk <- check.extents(bbox1, bbox2, showext, layer1nm="polyv", layer2nm="sppntx",
+			stopifnotin=stopifnotin)
+  if (is.null(chk)) return(NULL)
 
   ## Clip points that intersect polygon
   injoin <- sf::st_join(sppntx, clippolyvx, join=st_intersects, left=FALSE)

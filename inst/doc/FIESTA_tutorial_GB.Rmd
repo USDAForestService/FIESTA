@@ -88,7 +88,7 @@ The required data tables are from the FIA national database. Plot-level informat
 * **cuniqueid** - Unique identifier for plot in cond.
 * **condid**    - Unique identifier for conditions in cond (default="CONDID").
 * **pltassgnid**- Unique identifier for plot in pltassgn, if pltassgn is included.
-* **pjoinid**   - Join variable in plot to match pltassgnid. Does not need to be uniqueid.
+* **pjoinid**   - Join variable in plot to match pltassgnid. Does not need to be unique.
 
 
 <a name="edata"></a>

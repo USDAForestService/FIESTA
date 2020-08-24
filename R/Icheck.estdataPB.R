@@ -1,21 +1,22 @@
 check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt", 
-	ratio=FALSE, plt.filter=NULL, landarea="ALL", landarea.filter=NULL, 
-	pnt.nonsamp.filter=NULL, pnt.filter=NULL, allin1=FALSE, estround=3, pseround=3,
- 	divideby=NULL, savedata=FALSE, addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, 
-	outfolder=NULL, pvars2keep=NULL){
+	tabtype="PCT", ratio=FALSE, plt.filter=NULL, landarea="ALL", landarea.filter=NULL, 
+	pnt.nonsamp.filter=NULL, pnt.filter=NULL, sumunits=FALSE, allin1=FALSE, 
+	estround=3, pseround=3, divideby=NULL, savedata=FALSE, addtitle=TRUE, 
+	returntitle=TRUE, rawdata=FALSE, outfolder=NULL){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
   ## Check landarea ("FOREST", "ALL", "TIMBERLAND")
   ## Import and check cond and plt tables and check unique identifiers
-  ## Check plt table (if NULL, plt=cond[, pvars2keep])
+  ## Check plt table
   ## - Check for NA values
   ## - Apply plt filter, if plt exists.
   ## - Check missing pdoms2keep variables
   ## - Check predfac variable(s) and strvar - for factor status
   ## Apply cond filters to condf: landarea.filter, ACI.filter, cond.filter
-  ## Check other table parameters: allin1, estround, pseround, divideby, 
+  ## Check other table parameters: sumunits, allin1, estround, pseround, divideby, 
   ##		savedata, addtitle, returntitle, rawdata, outfolder
+  ## - If sumunits=TRUE, estimation units are summed to 1 estimate
   ## - If allin1=TRUE, puts estimate (% sample error) in each cell
   ## - If savedata=TRUE, saves tables to outfolder
   ## - If addtitle=TRUE, adds title(s) to saved tables
@@ -24,6 +25,8 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## Return data and nosamp.filter
   ###################################################################################
 
+  ## Set global variables
+  filterids <- NULL
 
   ## Check logical parameters
   ###################################################################################      
@@ -92,6 +95,15 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ### Check other table parameters
   #####################################################################################
 
+  ## Check sumunits 
+  ########################################################
+  sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
+		title="Sum estimation units?", first="YES", gui=gui)
+  if (!is.null(sumunits) && sumunits && tabtype == "PCT") {
+    warning("must include unitarea to calculate unit weights for summing units")
+    sumunits <- FALSE
+  }
+
   ## Check allin1
   allin1 <- FIESTA::pcheck.logical(allin1, varnm="allin1", 
 		title="All 1 table - Est (%error)?", first="NO", gui=gui)
@@ -151,7 +163,7 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## Set up list of variables to return
   ######################################################################################
   returnlst <- list(PBf=PBf, plotid=plotid, pntid=pntid, filterids=filterids,
-	landarea=landarea, allin1=allin1, estround=estround, pseround=pseround, 
+	landarea=landarea, sumunits=sumunits, allin1=allin1, estround=estround, pseround=pseround, 
 	divideby=divideby, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 	savedata=savedata, outfolder=outfolder)
 

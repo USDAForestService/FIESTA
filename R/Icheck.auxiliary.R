@@ -282,25 +282,27 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     pltx <- pltx[pltx[[PSstrvar]] %in% unique(auxlut[[PSstrvar]]),]
     message("removing plots with invalid strata assignments")
   }
-   
+
   ###################################################################################
   ## Collapse strata and/or estimation unit classes if errtab warnings
   ###################################################################################
   if (any(errtab$errtyp == "warn")) {
+    vars2combine <- c(getwtvar, npixelvar)
+    if ("strwt" %in% names(auxlut)) vars2combine <- c(vars2combine, "strwt")
     collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx, 
 		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
 		unitarea=unitarea, areavar=areavar, unitvar=unitvar, unitvar2=unitvar2,
 		strvar=PSstrvar, stratcombine=stratcombine, unitcombine=unitcombine,
- 		vars2combine=c(getwtvar, npixelvar, "strwt"))
+ 		vars2combine=vars2combine)
     auxlut <- collapse$strlut
     unitvar <- collapse$unitvar
     PSstrvar <- collapse$strvar
     pltx <- collapse$pltstratx
+    unitarea <- collapse$unitarea
 
     if (stratcombine)
       unitstrgrplut <- collapse$unitstrgrplut
   } 
-
  
   if (module %in% c("GB", "PB")) {
     if (getwt) {

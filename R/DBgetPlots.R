@@ -371,7 +371,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   if (greenwt) sppvars <- c(sppvars, "DRYWT_TO_GREENWT_CONVERSION")
 
 
-
   ###########################################################################
   ############################      From query       ########################
   ###########################################################################
@@ -445,7 +444,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   if (savePOP || iseval)
     ppsafromqry <- paste0(SCHEMA., "POP_PLOT_STRATUM_ASSGN")
   
-
 
   ###########################################################################
   ########################      SET OUTFILE NAMES    ########################

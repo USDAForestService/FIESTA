@@ -364,7 +364,6 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   if (!is.null(filterids))
     PBx[!paste(PBx[[plotid]], PBx[[pntid]]) %in% filterids, "TOTAL"] <- 9999
 
- 
   ## Define PBvars2keep
   PBvars2keep <- unique(c(plotid, condid, domainlst, PBvars2keep, pntid))
   PBx <- PBx[,PBvars2keep, with=FALSE]

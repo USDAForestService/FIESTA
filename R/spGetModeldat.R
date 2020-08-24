@@ -268,7 +268,6 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## 3) Continuous raster layers - Extract values and get zonal statistics
   ###############################################################################
   if (!is.null(rastlst.cont)) {
-
     ## Extract values from continuous raster layers
     #############################################################################
     extdat.rast.cont <- spExtractRast(sppltx, uniqueid=uniqueid,
@@ -318,9 +317,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     for (i in 1:length(rastlst.contfn)) {
       rastfn <- rastlst.contfn[i]
       rastnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == rastfn]
-      print(rastfn)
-      print(rastnm)
       rast.cont.NODATA <- rastlst.cont.NODATA[i]
+      message(rastfn, "...")
 
       if (i == 1) {
         zonalstat <- c("npixels", rastlst.cont.stat) 
@@ -329,7 +327,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       } else {
         zonalstat <- rastlst.cont.stat 
       }  
-
+ 
       if (identical(aspfn, rastfn)) {
         zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, polyv.att=domvar, 
 		zonalstat=zonalstat, pixelfun=northness, rast.NODATA=rast.cont.NODATA,
@@ -349,6 +347,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         zonalDT.cont <- zonalDT.cont[zonalext]
  
       } else {
+
         zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA, 
 		polyv.att=domvar, zonalstat=zonalstat, showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast$zonalext)
@@ -366,7 +365,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     rm(zonaldat.rast)
     gc() 
   }
- 
+
   ###############################################################################
   ## 4) Categorical raster layers - Extract values and get zonal probabilities
   ###############################################################################
@@ -415,8 +414,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     for (i in 1:length(rastlst.catfn)) {
       rastfn <- rastlst.catfn[i]
       rastnm <- inputdf.cat[inputdf.cat$rasterfile == rastfn, "var.name"][[1]]
-      print(rastfn)
-      print(rastnm)
+      message(rastfn, "...")
       rast.cat.NODATA <- rastlst.cat.NODATA[i]
 
       if (is.null(rastlst.cont) && i == 1) {

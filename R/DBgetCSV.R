@@ -1,5 +1,5 @@
 DBgetCSV <- function (DBtable, states=NULL, ZIP=TRUE, returnDT=FALSE, 
-			stopifnull=TRUE, gui=FALSE) {
+			stopifnull=TRUE, noIDate=TRUE, gui=FALSE) {
 
   ## Stop if no arguments passed. No GUI available for this function
   if (nargs() == 0) stop("must include sql")
@@ -30,25 +30,9 @@ DBgetCSV <- function (DBtable, states=NULL, ZIP=TRUE, returnDT=FALSE,
     gettab <- function (stabbr=NULL, DBtable) {
       if (is.null(stabbr)) {
         fn <- paste0(downloadfn, toupper(DBtable), ".csv")
-        if (httr::http_error(fn)) {
-          if (stopifnull) {
-            stop(fn, " does not exist")
-          } else {
-            message(fn, " does not exist")
-            return(NULL)
-          }
-        }
         message(paste("downloading", DBtable, "..."))
       } else {
         fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".csv")
-        if (httr::http_error(fn)) {
-          if (stopifnull) {
-            stop(fn, " does not exist")
-          } else {
-            message(fn, " does not exist")
-            return(NULL)
-          }
-        }
         message(paste("downloading", DBtable, "for", stabbr, "..."))
       }
       fread(fn, integer64="numeric")
@@ -59,33 +43,16 @@ DBgetCSV <- function (DBtable, states=NULL, ZIP=TRUE, returnDT=FALSE,
 
       if (is.null(stabbr)) {
         fn <- paste0(downloadfn, toupper(DBtable), ".zip")
-        if (httr::http_error(fn)) {
-          if (stopifnull) {
-            stop(fn, " does not exist")
-          } else {
-            message(fn, " does not exist")
-            return(NULL)
-          }
-        }
         message(paste("downloading and extracting", DBtable, "..."))
       } else {
         fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".zip")
-        if (httr::http_error(fn)) {
-          if (stopifnull) {
-            stop(fn, " does not exist")
-          } else {
-            message(fn, " does not exist")
-            return(NULL)
-          }
-        }
         message(paste("downloading and extracting", DBtable, "for", stabbr, "..."))
       }
 
       temp <- tempfile()
       tempdir <- tempdir()
-      utils::download.file(fn, temp, mode="wb")
+      utils::download.file(fn, temp, mode="wb", quiet=TRUE)
       filenm <- utils::unzip(temp, exdir=tempdir)
-
       dat <- suppressWarnings(fread(filenm, integer64="numeric"))
 
       unlink(temp)
@@ -102,6 +69,11 @@ DBgetCSV <- function (DBtable, states=NULL, ZIP=TRUE, returnDT=FALSE,
     csvtable <- gettab(DBtable=DBtable)
   } else {
     csvtable <- do.call(rbind, lapply(stabbrs, gettab, DBtable))
+  }
+
+  if (noIDate) {
+    cols <- names(csvtable)[!unlist(lapply(csvtable, function(x) any(class(x) == "IDate")))]
+    csvtable <- csvtable[, cols, with=FALSE]
   }
 
   if (!returnDT) csvtable <- data.frame(csvtable, stringsAsFactors=FALSE)

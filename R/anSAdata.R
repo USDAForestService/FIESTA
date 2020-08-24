@@ -213,6 +213,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   pltassgnid <- SAmodeldat$pltassgnid
 
 
+
+
   ##########################################
   ## Create output list
   ##########################################

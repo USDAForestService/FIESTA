@@ -104,6 +104,8 @@ fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif",
 demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
 
 
+WYdata <- system.file("extdata", "WYdat_eval2013.sqlite", package="FIESTA")
+
 ```
 
 

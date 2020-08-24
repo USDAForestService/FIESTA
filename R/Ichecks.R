@@ -49,7 +49,7 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE, stopifinv
     if (!any(unlist(sapply(logic.chars, 
 		function(x, statement){grep(x, statement)}, statement)))) {
       if (grep("=", statement)) {
-        warning("must be R syntax.. changing '=' to '=='")
+        message("must be R syntax.. changing '=' to '==' ")
         statement <- sub("=", "==", statement)
       }
     }

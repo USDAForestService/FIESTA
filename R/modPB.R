@@ -27,7 +27,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## Set global variables
   TOTAL=ONEUNIT=n.total=n.strata=strwt=NBRPNTS=psq.pltdom=
 	  uniqueid=p.pltdom.n=nbrpts.pltdom.n=PtsPerPlot=nbrpts.pltdom=
-	  value=p.pltdom=cvars2keep=title.est=title.pse=title.estpse=
+	  value=p.pltdom=PBvars2keep=title.est=title.pse=title.estpse=
 	  outfn.estpse <- NULL
 
 
@@ -41,7 +41,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   minplotnum <- 10
   returnPBpopdat <- TRUE 
 
-
   ##################################################################
   ## Check population data
   ########################################################
@@ -49,9 +48,10 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     PBpopdat <- modPBpop(pnt=pnt, pltpct=pltpct, plotid=plotid, pntid=pntid,
  	pltpctvars=pltpctvars, plt=plt, pltassgn=pltassgn, puniqueid=puniqueid, 
 	pltassgnid=pltassgnid, plt.nonsamp.filter=plt.nonsamp.filter, tabtype=tabtype,
-	sumunits=sumunits, strata=FALSE, unitvar=unitvar, unitvar2=unitvar2, 
-	unitcombine=unitcombine, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
-	stratcombine=stratcombine, pvars2keep=NULL, gui=gui)
+	sumunits=sumunits, strata=strata, unitarea=unitarea, unitvar=unitvar, 
+	unitvar2=unitvar2, unitcombine=unitcombine, stratalut=stratalut, 
+	strvar=strvar, getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, 
+	gui=gui)
   } else {
     returnPBpopdat <- FALSE
     if (!is.list(PBpopdat))
@@ -73,33 +73,38 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   tabtype <- PBpopdat$tabtype
   unitvar <- PBpopdat$unitvar
   unitvar2 <- PBpopdat$unitvar2
-  unitarea <- PBpopdat$unitarea
-  areavar <- PBpopdat$areavar
   strlut <- PBpopdat$strlut
   strvar <- PBpopdat$strvar
   plotsampcnt <- PBpopdat$plotsampcnt
   stratcombinelut <- PBpopdat$stratcombinelut
   getprop <- PBpopdat$getprop
-  if (!is.null(PBpopdat$rowvar)) rowvar <- PBpopdat$rowvar
+  if (!getprop) {
+    rowvar <- PBpopdat$rowvar
+    PBvars2keep <- "p.pltdom"
+  }
   unitvars <- c(unitvar, unitvar2)
   strunitvars <- c(unitvar, strvar)
-    
 
-
+  if (tabtype == "AREA") {
+    unitarea <- PBpopdat$unitarea
+    areavar <- PBpopdat$areavar
+  }  
+ 
   ###################################################################################
   ## Check parameters and apply plot and pnt filters
   ###################################################################################
-  estdat <- check.estdataPB(gui=gui, PBx=PBx, plotid=plotid, pntid=pntid,
-	ratio=ratio, plt.filter=plt.filter, landarea=landarea, 
-	landarea.filter=landarea.filter, pnt.filter=pnt.filter, allin1=allin1, 
-	estround=estround, pseround=pseround, divideby=divideby, savedata=savedata, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-	outfolder=outfolder, pvars2keep=NULL) 
+  estdat <- check.estdataPB(gui=gui, PBx=PBx, plotid=plotid, pntid=pntid, tabtype=tabtype,
+	ratio=ratio, plt.filter=plt.filter, pnt.nonsamp.filter=pnt.nonsamp.filter,
+	landarea=landarea, landarea.filter=landarea.filter, pnt.filter=pnt.filter, 
+	sumunits=sumunits, allin1=allin1, estround=estround, pseround=pseround, 
+	divideby=divideby, savedata=savedata, addtitle=addtitle, returntitle=returntitle, 
+	rawdata=rawdata, outfolder=outfolder) 
   if (is.null(estdat)) return(NULL)
   PBx <- estdat$PBf	
   plotid <- estdat$plotid
   pntid <- estdat$pntid
   filterids <- estdat$filterids
+  sumunits <- estdat$sumunits
   allin1 <- estdat$allin1
   estround <- estdat$estround
   pseround <- estdat$pseround
@@ -109,8 +114,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   rawdata <- estdat$rawdata
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
-  
-
 
   #################################################################################
   ### GET ROW AND COLUMN INFO
@@ -136,8 +139,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   col.add0 <- rowcolinfo$col.add0
   if (ratio)
     PBx.d <- rowcolinfo$PBx.d
-
-
 
   ###################################################################################
   ## MERGE FILTERED DATA TO ALL PLOTS
@@ -177,7 +178,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   outfn.param <- alltitlelst$outfn.param
   if (rawdata) outfn.rawdat <- alltitlelst$outfn.rawdat
 
- 
+
   ###########################################################
   ## DO WORK
   ###########################################################
@@ -203,7 +204,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       }
       if (rowvar != "Total") {
         pltdom.row <- getpltdom.prop(PBall, uniqueid=plotid, domain=rowvar, strunitvars)
-
         rowest.pntcnt <- pltdom.row[get(rowvar) != "NOTinDOMAIN", 
 			list(NBRPNTS=sum(nbrpts.pltdom)), by=c(unitvar, rowvar)]
         setkeyv(rowest.pntcnt, c(unitvar, rowvar))
@@ -261,7 +261,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   } else {
     pltdom.row <- PBall
   }
- 
+
   ####################################################################### 
   ## GENERATE ESTIMATES
   ####################################################################### 
@@ -317,7 +317,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       ## Get filter value for row and column
       row.filterval <- ifelse (is.numeric(unit.rowest[[rowvar]]), 9999, "NOTinDOMAIN")
     }
-    
+   
     ## Get column (and cell) estimate  
     if (colvar != "NONE") {
       pbar.colest <- FIESTA::PBest.pbar(dom.prop=pltdom.col, uniqueid=puniqueid, 
@@ -612,9 +612,18 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ###################################################################
 
   if (rawdata) {
-    rawdat <- list(unitvars=unitvars, strvar=strvar, rowvar=rowvar, colvar=colvar, 
-		stratdat=setDF(strlut))
-    if (stratcombine && !is.null(stratcombinelut)) rawdat$stratcombinelut <- stratcombinelut
+    rawdat <- list(unitvars=unitvars, strvar=strvar, stratdat=setDF(strlut))
+    if (!is.null(rowvar) && rowvar != "NONE") {
+      rawdat$rowvar <- rowvar
+      rawdat$pltdom.row <- pltdom.row
+    }
+    if (!is.null(colvar) && colvar != "NONE") {
+      rawdat$colvar <- colvar 
+      rawdat$pltdom.col <- pltdom.col
+      rawdat$pltdom.grp <- pltdom.grp
+    }
+    if (stratcombine && !is.null(stratcombinelut)) 
+      rawdat$stratcombinelut <- stratcombinelut
 
     ## Generate sample counts by attribute
 #    if (is.null(sampcnt)) {
@@ -625,42 +634,42 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 #      setorderv(sampcnt, byvars)
 #    }
 
-    if (!is.null(sampcnt)) {
+    if (!is.null(plotsampcnt)) {
 
       if (!is.null(row.orderby)) {
-        mergevar.row <- ifelse (rowvar %in% names(sampcnt), rowvar, row.orderby)
+        mergevar.row <- ifelse (rowvar %in% names(plotsampcnt), rowvar, row.orderby)
       } else {
         mergevar.row <- rowvar
       }
-
       if (colvar != "NONE") {
         if (col.orderby != "NONE") {
-          mergevar.col <- ifelse (colvar %in% names(sampcnt), colvar, col.orderby)
+          mergevar.col <- ifelse (colvar %in% names(plotsampcnt), colvar, col.orderby)
         } else {
           mergevar.col <- colvar
         }
- 
+
         if (ncol(uniquerow) > 1 && ncol(uniquecol) > 1) {
-          if (unitvar %in% names(sampcnt)) {
-            sampcnt <- FIESTA::add0unit(x=sampcnt, mergevar.row, uniquerow, 
+          if (unitvar %in% names(plotsampcnt)) {
+            plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, mergevar.row, uniquerow, 
 			unitvar=unitvar, xvar2=mergevar.col, uniquex2=uniquecol, add0=row.add0)
           } else {
-            sampcnt <- add0unit(x=sampcnt, mergevar.row, uniquerow, 
+            plotsampcnt <- add0unit(x=plotsampcnt, mergevar.row, uniquerow, 
 			xvar2=mergevar.col, uniquex2=uniquecol, add0=row.add0)
           }
         } else if (ncol(uniquerow) > 1) {
-          sampcnt <- FIESTA::add0unit(x=sampcnt, mergevar.row, uniquerow, add0=row.add0)
+          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, mergevar.row, uniquerow, add0=row.add0)
         } else if (ncol(uniquecol) > 1) {
-          sampcnt <- FIESTA::add0unit(x=sampcnt, mergevar.col, uniquecol, add0=col.add0)
+          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, mergevar.col, uniquecol, add0=col.add0)
         }
+
       } else {
  
         if (!is.null(uniquerow) && ncol(uniquerow) > 1) {
-          xvar <- ifelse (rowvar %in% names(sampcnt), rowvar, row.orderby)
-          sampcnt <- FIESTA::add0unit(x=sampcnt, xvar=xvar, uniquerow, add0=row.add0)
+          xvar <- ifelse (rowvar %in% names(plotsampcnt), rowvar, row.orderby)
+          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=xvar, uniquerow, add0=row.add0)
         }
       }
-      rawdat$pntsampcnt <- setDF(sampcnt)
+      rawdat$plotsampcnt <- setDF(plotsampcnt)
     }
 
     if (!is.null(pltdom.row)) { 
@@ -859,7 +868,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
         if (!tabnm %in% c("unitvars", "strvar", "rowvar", "colvar", "est.gainloss")) {
           rawtab <- rawdat[[i]]
           outfn.rawtab <- paste(outfn.rawdat, tabnm, sep="_") 
-          if (tabnm %in% c("sampcnt", "pntsampcnt")) {
+          if (tabnm %in% c("plotsampcnt", "pntsampcnt")) {
              write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
 			outfn.date=outfn.date, overwrite=overwrite)
           } else {

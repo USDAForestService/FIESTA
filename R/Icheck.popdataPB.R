@@ -1,7 +1,7 @@
 check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL, 
 	plt=NULL, pltassgn=NULL, plotid="plot_id", pntid="dot_cnt",
  	puniqueid="CN", pltassgnid="CN", plt.nonsamp.filter=NULL, tabtype="PCT",
-	sumunits=FALSE, unitvar=NULL, unitvar2=NULL, auxvars=NULL, unitcombine=FALSE, 
+	unitvar=NULL, unitvar2=NULL, auxvars=NULL, unitcombine=FALSE, 
 	strata=FALSE, strvar=NULL, stratcombine=TRUE, pvars2keep=NULL){
 
   ###################################################################################
@@ -11,8 +11,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ## Check tabtype, module, and MAmethod
   ## - module in("GB", "MA")
   ## - MAmethod in("HT", "PS", "GREG")
-  ## Check logical parameters: ratio, sumunits, strata
-  ## - If sumunits=TRUE, estimation units are summed to 1 estimate
+  ## Check logical parameters: ratio, strata
   ## - If strata, only 1 auxvar allowed
   ## Import pnt or pltpct table and check unique identifiers (plotid):
   ## If pltpct, 
@@ -41,7 +40,8 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ###################################################################################
 
   ## Set global variables
-  pltdomainlst=pntprop=sampcnt=condid=value=ONEUNIT=plotsampcnt=p.pltdom=predfac <- NULL
+  pltdomainlst=pntprop=sampcnt=condid=value=ONEUNIT=plotsampcnt=p.pltdom=predfac=
+	PBvars2keep <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -55,21 +55,11 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ###################################################################################
   ## Check logical parameters: unitcombine, strata, ACI
   ###################################################################################
-
   
   ## Check tabtype
   tabtype <- FIESTA::pcheck.varchar(var2check=tabtype, varnm="tabtype", gui=gui, 
 		checklst=c("PCT", "AREA"), caption="Table output type", 
 		warn="invalid tabtype")
-
-  ## Check sumunits 
-  ########################################################
-  sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
-		title="Sum estimation units?", first="YES", gui=gui)
-  if (!is.null(sumunits) && sumunits && tabtype == "PCT") {
-    warning("must include unitarea to calculate unit weights for summing units")
-    sumunits <- FALSE
-  }
 
   ## Check unitcombine 
   ########################################################
@@ -342,12 +332,15 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
     }
   }  
 
-
   ## Set up list of variables to return
   ######################################################################################
   returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
 	pltassgnid=pltassgnid, unitvar=unitvar, unitvar2=unitvar2, unitcombine=unitcombine, 
 	tabtype=tabtype, strata=strata, strvar=strvar, stratcombine=stratcombine, 
-	plotsampcnt=plotsampcnt, getprop=getprop, rowvar=rowvar, sumunits=sumunits)
+	plotsampcnt=plotsampcnt, getprop=getprop)
+
+  if (!is.null(pltpctx))
+    returnlst$rowvar <- rowvar
+
   return(returnlst)
 }

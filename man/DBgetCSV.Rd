@@ -8,7 +8,7 @@
 }
 \usage{
 	DBgetCSV(DBtable, states = NULL, ZIP = TRUE, returnDT = FALSE, 
-		stopifnull = TRUE, gui = FALSE)
+		stopifnull = TRUE, noIDate = TRUE, gui = FALSE)
 }
  
 \arguments{
@@ -21,6 +21,7 @@
 	downloaded. }
   \item{returnDT}{ Logical. If TRUE, a data table is returned, else, a data frame. }
   \item{stopifnull}{ Logical. If TRUE, stop if table is NULL. }
+  \item{noIDate}{ Logical. If TRUE, do not include columns with type IDate. }
   \item{gui}{ Logical. If TRUE, gui windows pop up for parameter selection. }
 }
 \details{

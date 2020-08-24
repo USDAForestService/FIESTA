@@ -36,15 +36,13 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
   if (file.exists(SQLitepath)) {
     if (DBI::dbCanConnect(RSQLite::SQLite(), SQLitepath)) {
       message("SQLite connection successful")
-
       sqlconn <- DBI::dbConnect(RSQLite::SQLite(), SQLitepath, loadable.extensions = TRUE)
       tablst <- DBI::dbListTables(sqlconn)
-      if (showlist)
-        print(tablst)
       if (length(tablst) != 0 && "SpatialIndex" %in% tablst) {
         message(paste(SQLitepath, "is a Spatialite database... "))
-        sf::st_layers(SQLitepath)
+        tablst <- sf::st_layers(SQLitepath)
       } 
+      if (showlist) message(paste0(capture.output(tablst), collapse = "\n"))
     } else {
         stop("SQLite connection failed")
     }

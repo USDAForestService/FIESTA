@@ -44,7 +44,7 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 	plt=plt, pltassgn=pltassgn, plotid=plotid, pntid=pntid, puniqueid=puniqueid, 
 	pltassgnid=pltassgnid, plt.nonsamp.filter=plt.nonsamp.filter, unitvar=unitvar, 
 	unitvar2=unitvar2, unitcombine=unitcombine, auxvars=auxvars, strata=strata, 
-	strvar=strvar, stratcombine=NULL, pvars2keep=NULL, sumunits=sumunits)
+	strvar=strvar, stratcombine=stratcombine, pvars2keep=pvars2keep, tabtype=tabtype)
   PBx <- popcheck$PBx
   pltassgnx <- popcheck$pltassgnx
   plotid <- popcheck$plotid
@@ -54,14 +54,14 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   unitvar2 <- popcheck$unitvar2
   unitcombine <- popcheck$unitcombine
   tabtype <- popcheck$tabtype
-  sumunits <- popcheck$sumunits
   strata <- popcheck$strata
   strvar <- popcheck$strvar
   stratcombine <- popcheck$stratcombine
   plotsampcnt <- popcheck$plotsampcnt
   getprop <- popcheck$getprop
-  rowvar <- popcheck$rowvar
 
+  if (!getprop)
+    rowvar <- popcheck$rowvar
  
   ###################################################################################
   ## CHECK unitarea BY ESTIMATION UNIT
@@ -96,7 +96,7 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## - if unitcombine=TRUE, combines estimation units to reach minplotnum.unit.
   ###################################################################################
   stratcheck <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="PB",
-		auxlut=stratalut, PSstrvar=strvar, stratcombine=stratcombine, 
+		strata=strata, auxlut=stratalut, PSstrvar=strvar, stratcombine=stratcombine, 
 		unitcombine=unitcombine, unitarea=unitarea, unitvar=unitvar, 
 		unitvar2=unitvar2, areavar=areavar, getwt=getwt, getwtvar=getwtvar)  
   pltassgnx <- stratcheck$pltx
@@ -107,11 +107,17 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   stratcombinelut <- stratcheck$unitstrgrplut
   strunitvars <- c(unitvar, strvar)
 
-
   returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
 		pltassgnid=pltassgnid, tabtype=tabtype, sumunits=sumunits, 
-		unitarea=unitarea, areavar=areavar, unitvar=unitvar, strlut=strlut, 
-		strvar=strvar, plotsampcnt=plotsampcnt, getprop=getprop, rowvar=rowvar)
+		unitvar=unitvar, strlut=strlut, strvar=strvar, 
+		plotsampcnt=plotsampcnt, getprop=getprop)
+
+  if (tabtype == "AREA") {
+    returnlst$unitarea <- stratcheck$unitarea
+    returnlst$areavar <- areavar
+  }
+  if (!getprop) 
+    returnlst$rowvar <- rowvar
 
   if (!is.null(stratcombinelut)) 
     returnlst$stratcombinelut <- stratcombinelut

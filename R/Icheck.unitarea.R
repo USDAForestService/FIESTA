@@ -26,7 +26,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
 
   ## Get unique values of unitvars in pltx
   unit.vals <- unique(do.call(paste, pltx[, unitvars, with=FALSE]))
-  nbrunits <- length(unit.vals)  
+  nbrunits <- length(unit.vals) 
 
   ## Check unitarea and areavar
   ######################################################################
@@ -49,7 +49,6 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
       } else {
         stop("need a numeric vector of length 1 with unitarea")
       }
-
       unitarea <- data.table(unique(pltx[, unitvars, with=FALSE]), AREA=unitarea)
       areavar <- "AREA"
       setnames(unitarea, "AREA", areavar)
@@ -61,14 +60,22 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
 
       if (nrow(unitarea) >  1) {
         if (length(unitvars) == 1) {
-          unitarea <- unitarea[unitarea[[unitvars]] %in% unit.vals,]
-          if (nrow(unitarea) != 1) stop("invalid unitarea")
+          if (!unitvars %in% names(unitarea)) {
+            if (unitvars == "ONEUNIT") {
+              unitarea$ONEUNIT <- 1
+              unitarea <- unitarea[, sum(.SD), by="ONEUNIT", .SDcols=areavar]
+              setnames(unitarea, "V1", areavar)
+            } else {
+              stop("invalid unitarea")
+            }
+          } else {
+            if (nrow(unitarea) != 1) stop("invalid unitarea")
+          }
         }
       }
       if (is.null(areavar) || !areavar %in% names(unitarea)) 
         stop("invalid areavar")
-    }     
-
+    } 
   } else {   ## nbrunits > 1
     if (!is.data.frame(unitarea) && is.numeric(unitarea))
       stop("plots have more than one estimation unit with no acres specified")
@@ -114,7 +121,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
 
     ## Check that the values of unitvars in unitarea are all in pltx
     unitarea <- check.matchval(unitarea, pltx, unitvars, 
-		tab1txt="unitarea", tab2txt="plt")
+		tab1txt="unitarea", tab2txt="plt", subsetrows=TRUE)
 
     ## Sum area by unitvars
     unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), by=unitvars, 

@@ -40,9 +40,6 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   if (!"sqldf" %in% rownames(installed.packages(.Library)))
     stop("the sqldf package is required")
   
-  if (!"httr" %in% rownames(installed.packages(.Library)))
-    stop("the httr package is required")
-
   ## Check ZIP
   ZIP <- FIESTA::pcheck.logical(ZIP, varnm="ZIP", title="Zip files?", 
 		gui=gui, first="YES")
@@ -82,7 +79,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   
 
   ## Define query POP_EVAL, POP_EVAL_TYP table
-  popevaltypqry <- paste0("select pev.*, pet.eval_typ from ", SCHEMA., 
+  popevalvars <- c("CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", "START_INVYR", "END_INVYR")
+  popevaltypqry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", pet.eval_typ from ", SCHEMA., 
 		"POP_EVAL_TYP pet join ", SCHEMA., "POP_EVAL pev on (pev.cn = pet.eval_cn) ",
 		"where pev.STATECD in ", paste0("(", toString(stcdlst), ")"))
 
@@ -103,6 +101,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       stcdlst <- stcdlst[!stcdlst %in% miss]
     }
   } 
+
   POP_EVAL_TYP <- FIESTA::DBgetCSV("POP_EVAL_TYP", stcdlst, ZIP=ZIP, stopifnull=FALSE)
   if (nrow(POP_EVAL_TYP) == 0) return(NULL)
   SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE, stopifnull=FALSE)
@@ -119,7 +118,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
     maxyr <- max(POP_EVAL[POP_EVAL$STATECD == Texascd, "END_INVYR"])
     SURVEY <- SURVEY[!SURVEY$STATECD == Texascd | SURVEY$INVYR <= maxyr,]
   }
- 
+
   ## Check if evalid is valid. If valid, get invyrtab invyrs, evalidlist, and invtype
   if (!is.null(evalid)) {
     ## Check if evalid is valid
@@ -312,7 +311,6 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       }
     }
   }
-
 
   ## Get last year of evaluation period and the evaluation type
   if (evalresp) {

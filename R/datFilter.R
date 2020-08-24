@@ -1,7 +1,8 @@
 datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL, 
 	uniqueid="PLT_CN", vardelete=NULL, title.filter=NULL, savedata=FALSE, 
 	outfolder=NULL, outfn="datf", outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=FALSE, filternm=NULL, stopifnull=FALSE, returnDT=TRUE, gui=FALSE) {
+	overwrite=FALSE, filternm=NULL, stopifnull=FALSE, returnDT=TRUE, xnm=NULL,
+	gui=FALSE) {
 
   ## DESCRIPTION: subsets data table x with filter(s), and other tables if specified.
   ## VALUE: Return:
@@ -28,9 +29,6 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   ##################################################################
   intabs <- NULL
 
-  ## CHECK INPUTS
-  ##############################################
-  datx <- pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE)
 
   ## Check filternm
   if (is.null(filternm)) filternm <- "filter"
@@ -38,7 +36,13 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   ## Check title.filter
   if (is.null(title.filter)) title.filter <- filternm
 
-  ### GET savedata 
+  ## Check inputs
+  ##############################################
+  datx <- pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE, 
+			tabnm=xnm)
+
+
+  ### Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, "Save data tables?", "NO")
   if (savedata) 
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)

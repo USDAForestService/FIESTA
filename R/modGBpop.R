@@ -107,7 +107,8 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
     pjoinid <- GBdata$pjoinid
     pltassgnid <- GBdata$pltassgnid  
   }  
- 
+
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -119,7 +120,7 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
 	condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
 	evalid=evalid, invyrs=invyrs, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
- 	stratcombine=stratcombine, strata=strata, strvar=strvar)
+ 	unitcombine=unitcombine, stratcombine=stratcombine, strata=strata, strvar=strvar)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
@@ -150,6 +151,7 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
     nonsampplots <- popcheck$nonsampplots
   }
   #rm(popcheck)
+
 
   ###################################################################################
   ## CHECK unitarea BY ESTIMATION UNIT

@@ -73,13 +73,12 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
 		title="Add date to outfiles?", first="YES", gui=gui)  
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
   }
-  
+ 
   ## Verify rasters
   ########################################################
   rastfnlst <- getrastlst.rgdal(rastlst, rastfolder, gui=gui)
   #if (any(rastfnlst == "")) stop("must write raster to file")
   nrasts <- length(rastfnlst)
-
 
   ## Get names of rasters
   rastnmlst <- lapply(rastfnlst, basename.NoExt)
@@ -220,7 +219,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
 
   inputs <- data.table(rasterfile, band, var.name, interpolate, windowsize, statistic,
 			rast.NODATA)
-  print(inputs)
+  message(paste0(capture.output(inputs), collapse = "\n"))
 
   ########################################################################
   ### DO THE WORK

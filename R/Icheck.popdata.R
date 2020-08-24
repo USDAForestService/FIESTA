@@ -346,6 +346,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       pltx <- datFilter(pltx, getfilter("EVALID", evalid, syntax="R"))$xf
 
     } else if (measCur || !is.null(measEndyr)) {
+
       pltx <- getPlotCur(pltx, Endyr=measEndyr, varCur="MEASYEAR", 
 				Endyr.filter=measEndyr.filter)
 

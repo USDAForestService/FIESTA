@@ -17,7 +17,7 @@ importFrom("stats", "as.formula", "na.omit", "rnorm", "sd", "xtabs", "aggregate"
 	"median", "var", "complete.cases", "ave", "model.matrix")
 importFrom("utils", "download.file", "select.list", "unzip",
 	"write.table", "head", "tail", "setTxtProgressBar", 
-	"txtProgressBar", "installed.packages")
+	"txtProgressBar", "installed.packages", "capture.output")
 if(.Platform$OS.type == "windows"){importFrom("utils", "choose.dir", "choose.files")}
 importFrom("methods", "as", "new", "slot", "canCoerce")
 #importFrom("sqldf", "sqldf")

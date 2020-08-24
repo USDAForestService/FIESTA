@@ -11,7 +11,7 @@ datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL,
 	uniqueid = "PLT_CN", vardelete = NULL, title.filter = NULL, savedata = FALSE, 
 	outfolder = NULL, outfn = "datf", outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite = FALSE, filternm = NULL, stopifnull = FALSE, returnDT = TRUE, 
-	gui = FALSE)
+	xnm = NULL, gui = FALSE)
 }
 \arguments{
   \item{x}{ Data frame Spatial*Dataframe or comma-delimited file (*.csv). A data 
@@ -40,6 +40,7 @@ datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL,
   \item{filternm}{ String. Optional. Name of filter, for feedback purposes. }
   \item{stopifnull}{ Logical. If TRUE, stop if output is NULL. }
   \item{returnDT}{ Logical. If TRUE, returns a data table. If FALSE, returns a data frame. }
+  \item{xnm}{ String. Name for filter attribute. Used for warning messages. }
   \item{gui}{ Logical. If TRUE, pop-up windows will appear for user-interface. }
 }
 \details{

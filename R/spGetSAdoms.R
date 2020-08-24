@@ -3,8 +3,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 	smallbnd.ecofilter=NULL, helperbnd=NULL, helperbnd_dsn=NULL, helperbnd.unique=NULL, 
 	helperbnd.filter=NULL, largebnd=NULL, largebnd_dsn=NULL, largebnd.unique=NULL, 
 	largebnd.filter=NULL, maxbnd=NULL, maxbnd_dsn=NULL, maxbnd.unique=NULL, 
-	maxbnd.filter=NULL, helper_autoselect=TRUE, nbrdom.min=NULL, maxbnd.threshold=30, 
-	largebnd.threshold=20, multiSAdoms=TRUE, showsteps=TRUE, savedata=FALSE, 
+	maxbnd.filter=NULL, helper_autoselect=TRUE, nbrdom.min=NULL, maxbnd.threshold=20, 
+	largebnd.threshold=10, multiSAdoms=TRUE, showsteps=TRUE, savedata=FALSE, 
 	savesteps=FALSE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
   ##############################################################################
@@ -170,21 +170,21 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
       stop("smallbnd.stfilter is invalid")
     smallbnd.stfilter <- paste0("STATENM %in% c(", 
 			addcommas(smallbnd.stfilter , quotes=TRUE), ")")
-    statebndf <- datFilter(stunitco, smallbnd.stfilter, stopifnull=TRUE)$xf
+    stunitcof <- datFilter(stunitco, smallbnd.stfilter, stopifnull=TRUE)$xf
 
     ## Need to dissolve because small area could be in multiple counties
-    statebndf <- sf_dissolve(statebndf, areacalc=FALSE)
+    stunitcof <- sf_dissolve(stunitcof, areacalc=FALSE)
 
     ## Check projections
-    crsdat <- crsCompare(statebndf, smallbndx, nolonglat=TRUE)
-    statebndf <- crsdat$x
+    crsdat <- crsCompare(stunitcof, smallbndx, nolonglat=TRUE)
+    stunitcof <- crsdat$x
     smallbndx <- crsdat$ycrs
 
     ## Intersect smallbnd with statebnd
-    smallbndx <- selectByIntersects(smallbndx, statebndf, 30)
+    smallbndx <- suppressWarnings(selectByIntersects(smallbndx, stunitcof, 30))
  
 #    if (showsteps) {
-#      plot(sf::st_geometry(statebndf))
+#      plot(sf::st_geometry(stunitcof))
 #      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
 #    }
   }
@@ -208,23 +208,32 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
     smallbndx <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
     if (is.null(smallbndx) || nrow(smallbndx) == 0) return(NULL)
 
-    if (showsteps) {
-      plot(sf::st_geometry(ecomapf))
-      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
-    }
+ #   if (showsteps) {
+ #     plot(sf::st_geometry(ecomapf))
+ #     plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
+ #   }
   }
 
-
   message("smallbnd...")
-  print(st_drop_geometry(smallbndx))
+  #print(st_drop_geometry(smallbndx))
 
   ## Add AOI attribute to smallbndx
   smallbndx$AOI <- 1
 
   ## Display smallbnd
-  if (showsteps) 
-    plot(sf::st_geometry(smallbndx), reset=FALSE)    
-  
+  if (showsteps) {
+    if (!is.null(smallbnd.ecofilter)) {
+      plot(sf::st_geometry(ecomapf))
+      plot(sf::st_geometry(ecomapf), add=TRUE)
+    } else if (!is.null(smallbnd.stfilter)) {
+      plot(sf::st_geometry(stunitcof), border="transparent")
+      plot(sf::st_geometry(stunitcof), add=TRUE)
+    } else {
+      plot(sf::st_geometry(stunitco), border="dark grey")
+    }
+    plot(sf::st_geometry(smallbndx), add=TRUE) 
+  }   
+ 
   ## helperbnd
   ####################################################################
   helperbndx <- pcheck.spatial(layer=helperbnd, dsn=helperbnd_dsn, 
@@ -438,7 +447,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 					largebndx[, largebnd.unique], largest=TRUE))
     if (showsteps) {
       plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
-      plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=2)
+      plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1)
     } 
     if (savedata) {
       SAdoms_layer <- "SAdoms"
@@ -458,7 +467,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
         jpgfn <- paste0(stepfolder, "/", SAdoms_layer, ".jpg")
         jpeg(jpgfn, res=400, units="in", width=8, height=10)
           plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
-          plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=2)
+          plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1)
         dev.off()
         message("Writing jpg to ", jpgfn, "\n")
       }

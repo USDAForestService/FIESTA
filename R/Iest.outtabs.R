@@ -36,7 +36,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
   ## Get conversion number
   dividebynum <- NULL
-
+ 
   if (!is.null(divideby)) {
     dividebynum <- ifelse(divideby == "hundred", 100, 
 				ifelse(divideby == "thousand", 1000, 
@@ -224,15 +224,14 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setnames(estpsetot, c(title.unitvar, title.yhat, title.yhat.pse))
         }
       }
-
       if (!is.null(totunit)) {
         if (esttype == "RATIO") {
           totunit <- getrhat(totunit)
         } else {
-          if (!is.null(divideby))
+          if (!is.null(divideby)) {
             totunit[, (estnmd) := get(estnm) / dividebynum]
             totunit[, (senmd) := get(senm) / dividebynum]
-
+          }
           totunit[, (estnmd) := round(get(estnmd), estround)]
           totunit[, (psenm) := round(get(psenm), pseround)]
         }
@@ -274,15 +273,14 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           if (esttype == "RATIO") {
             rowunit <- getrhat(rowunit)
           } else {
-            if (!is.null(divideby))
+            if (!is.null(divideby)) {
               rowunit[, (estnmd) := get(estnm) / dividebynum]
               rowunit[, (senmd) := get(senm) / dividebynum]
-
+            }
             rowunit[, (estnmd) := round(get(estnmd), estround)]
             rowunit[, (psenm) := round(get(psenm), pseround)]
           }
         }
-
         if (!is.null(unit.totest) && !is.null(uniquecol))
           unit.totest <- add0unit(unit.totest, unitvar, uniquecol, "TOTAL", TRUE)
    

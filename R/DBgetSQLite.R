@@ -21,13 +21,11 @@ DBgetSQLite <- function (states=NULL, outfolder=NULL) {
   ## Check outfolder
   outfolder <- FIESTA::pcheck.outfolder(outfolder)
 
-
   for (st in stabbrs) {
     ## Create file name to download
     fn <- paste0(downloadfn, "/SQLite_FIADB_", st, ".zip")
 
     ## Download zipfile and extract database
-    if (httr::http_error(fn)) stop(fn, " does not exist")
     message(paste("downloading SQLite database for", st, "..."))
 
     outfn <- paste0(outfolder, "/SQLite_FIADB_", st, ".zip")

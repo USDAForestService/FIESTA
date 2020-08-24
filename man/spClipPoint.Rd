@@ -14,7 +14,7 @@ spClipPoint(xyplt, xyplt_dsn = NULL, xy.uniqueid = "PLT_CN", clippolyv,
 	keepNA = FALSE, savedata = FALSE, returnsp = TRUE, exportsp = FALSE, 
 	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer="pnt", 
 	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-	othertabnms = NULL, ...)
+	othertabnms = NULL, stopifnotin = TRUE, ...)
 }
 
 \arguments{
@@ -49,6 +49,8 @@ spClipPoint(xyplt, xyplt_dsn = NULL, xy.uniqueid = "PLT_CN", clippolyv,
   \item{othertabnms}{ String vector. Name(s) of R objects, comma-delimited files,
 	or database layers to subset. Must include quotes (e.g., 
 	othertabnms=c("tree", "cond")). }
+  \item{stopifnotin}{ Logical. If TRUE, stops if boundaries do not overlap. 
+	If FALSE, returns NULL. }
   \item{...}{ Arguments to be passed to spMakeSpatialPoints. }
 
 }

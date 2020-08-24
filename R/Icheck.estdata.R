@@ -29,13 +29,12 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ## - pseround - round percent standard error values
   ###################################################################################
 
-
   ###########################################################################
   ## Apply plt.filter to plt table
   ###########################################################################
   pltcondnmlst <- names(pltcondf)
   pltcondf <- datFilter(x=pltcondf, xfilter=plt.filter, title.filter="plt filter?",
-		gui=gui, filternm="plt.filter", stopifnull=TRUE)$xf
+		gui=gui, filternm="plt.filter", xnm="pltcondf")$xf
   if (is.null(pltcondf)) {
     message(paste(plt.filter, "removed all records"))
     return(NULL)
@@ -75,7 +74,6 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
       stop("missing variables: ", paste(landcolsmiss, collapse=", "))
   }
 
-
   ###################################################################################
   ## Apply cond filters
   ###################################################################################
@@ -103,7 +101,6 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
       return(NULL)
     }
   }
-  
 
   #####################################################################################
   ### Check other table parameters

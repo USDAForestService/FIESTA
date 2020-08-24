@@ -58,7 +58,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   if (!unitcombine) {
     if (any(unique(stratacnt$n.total) < minplotnum.unit)) {
       estunits <- unique(stratacnt[stratacnt$n.total < minplotnum.unit, unitvar, with=FALSE][[1]])
-      message("estimation unit has less than ", minplotnum.unit, " plots", 
+      stop("estimation unit has less than ", minplotnum.unit, " plots", 
 		"... remove or combine estimation units")
       print(paste(estunits, collapse="; "))
     }
@@ -70,7 +70,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   ## than minplotnum.unit.
   #############################################################################
   if (unitcombine && any(unique(stratacnt$n.total) < minplotnum.unit)) {
-    message("collapsing estimation units")
+    message("\ncollapsing estimation units...")
 
     ## Define a variable to restrain collapsing by. Use unitvar2 if exists.
     if (is.null(unitvar2)) {
@@ -85,7 +85,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
          
     ## Group estimation units if less than minplotnum
     unitvarnew <- paste0(unitvar, ".1")
-    stratacnt <- setDF(stratacnt)
+    stratacnt <- setDT(stratacnt)
     unitcnt <- setDF(stratacnt[, list(n.total = sum(n.total)), by=c(unitcombinevar, unitvar)])
     unitgrp <- by(unitcnt, unitcnt[, unitcombinevar], groupEstunit, 
 			unitvar=unitvar, unitvarnew=unitvarnew, minplotnum=minplotnum.unit, 
@@ -108,9 +108,8 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 
     ## Create look up table with original classes and new classes
     unitgrpvars <- c(unitjoinvars, unitvarnew)
-    unitgrplut <- unique(unitgrp.dt[, unitgrpvars, with=FALSE])
-    unitstrgrplut <- unitgrp.dt[, c(unitgrpvars, strvar), with=FALSE]
-  
+    unitgrplut <- unique(stratacnt[, unitgrpvars, with=FALSE])
+    unitstrgrplut <- unique(stratacnt[, c(unitgrpvars, strvar), with=FALSE])
 
     if (!is.null(unitarea)) {
       ## unitarea: Check if estunit1nm class match
@@ -136,12 +135,13 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
     unitgrplut <- stratacnt
   }
 
-
   #############################################################################
   ## If stratcombine=TRUE and number of total plots is less than minplotnum.strat
   #############################################################################
-  if ("n.strata" %in% names(stratacnt) && 
-		any(unique(stratacnt$n.strata) < minplotnum.strat)) {
+#  if ("n.strata" %in% names(unitgrpsum) && 
+#		any(unique(unitgrpsum$n.strata) < minplotnum.strat)) {
+  if ("n.strata" %in% names(unitgrpsum) && 
+		any(unique(unitgrpsum$n.strata) < 60)) {
 
     ## Group strata classes by estimation unit
     strvarnew <- paste0(strvar, ".1")
@@ -180,11 +180,21 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   } else {
     strlut <- unitgrpsum
   }
+
+  ## Print new table
+  msg <- "## new auxlut"
+  message("\n################################### \n", 
+            msg, "\n###################################")
+  message(paste0(capture.output(strlut), collapse = "\n"))
+
  
   returnlst <- list(pltstratx=pltstratx, strlut=strlut, unitvar=unitvar)
   if (!is.null(strvar)) returnlst$strvar <- strvar
   if (stratcombine && !is.null(unitstrgrplut))
     returnlst$unitstrgrplut <- unitstrgrplut
+
+  if (!is.null(unitarea)) 
+    returnlst$unitarea <- unitarea
 
   return(returnlst)
 }
