@@ -48,10 +48,10 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
 
   ## Check polyvx
   clippolyvx <- pcheck.spatial(clippolyv, dsn=clippolyv_dsn, gui=gui, 
-				tabnm="clippoly", caption="Clipping polygon?")
-
+				tabnm="clippoly", caption="Clipping polygon?", stopifnull=TRUE)
+    
   ## clippolyv.filter
-  clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter)$xf
+  clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter, stopifnull=TRUE)$xf
 
    ## Check showext    
   showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
@@ -81,11 +81,12 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
   ## Check extents
   bbox1 <- sf::st_bbox(clippolyvx)
   bbox2 <- sf::st_bbox(sppntx)
-
+ 
   ## Check if extents overlap... if not and stopifnotin=TRUE, return NULL
   chk <- check.extents(bbox1, bbox2, showext, layer1nm="polyv", layer2nm="sppntx",
-			stopifnotin=stopifnotin)
+			stopifnotin=stopifnotin, quiet=TRUE)
   if (is.null(chk)) return(NULL)
+ 
 
   ## Clip points that intersect polygon
   injoin <- sf::st_join(sppntx, clippolyvx, join=st_intersects, left=FALSE)

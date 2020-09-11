@@ -12,7 +12,7 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
 	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
 	puniqueid = "CN", intensity1 = TRUE, strata = TRUE, strattype = "RASTER", 
 	strat_layer = NULL, strat_dsn = NULL, showsteps = FALSE, cex.plots = 0.5, 
-	savedata = FALSE, savexy = FALSE, saveobj = FALSE, outfolder = NULL, 
+	savedata = FALSE, savexy = TRUE, saveobj = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite = TRUE, ...)
 }

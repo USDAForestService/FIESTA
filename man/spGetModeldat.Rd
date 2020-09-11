@@ -1,21 +1,14 @@
 \name{spGetModeldat}
 \alias{spGetModeldat}
 \title{
-	Spatial wrapper - Extracts point attribute values and area from spatial 
-		polygons layer representing estimation units or small are domains
-		and zonal statistics from a list of auxiliary raster layers.
+	Spatial wrapper - Extracts and compiles auxiliary data within a specified boundary.
 }
 \description{
-	Wrapper to extract attribute and area from an estimation unit or small area
-	domain spatial polygons layer and zonal statistics (i.e., mean, probability) 
-	from a list of raster auxiliary layers. Points are reprojected on-the-fly 
-	to projection of polygon layer or rasters. Includes options to use bilinear 
-	interpolation or summarize over a window of n pixels using a specified 
-	statistic.\cr 
-	- Point attribute extraction from SpatialPolygons (spExtractPoly)
-		or from raster (spExtractRast)\cr
-	- Calculate area by estimation unit(s) (areacalc.poly/areacalc.pixel)\cr 
-	- Zonal statistics (spZonalRast)
+	Wrapper to extract and compile auxiliary data by domain (i.e, estimation 
+		unit or small area domain). The following information is compiled:\cr 
+	- Attribute defining domain (i.e., estimation unit) from domain layer\cr
+	- Area by domain (i.e., estimation unit)\cr 
+	- Zonal statistics by domain (i.e., estimation unit) - spZonalRast()\cr
 }
 
 \usage{

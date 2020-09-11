@@ -60,75 +60,24 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
 #		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE, 
 #		savedata=FALSE)
 
-
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(SApltdat)) {
-    if (!is.null(measEndyr.filter)) {
-
-      message("... using measEndyr where: ", measEndyr.filter)
-
-      SApltdat <- spGetPlots(bnd=SAdoms, bnd.filter=measEndyr.filter, 
-		RS=RS, statebnd.att="COUNTYFIPS", clipxy=clipxy, 
-		xy.joinid=xy.joinid, datsource=datsource, 
+    SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
-		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE, 
-		savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
-		out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite, ...)
-      xyplt <- SApltdat$clip_xyplt
-      xy.uniqueid <- SApltdat$xy.uniqueid
-      bnd <- SApltdat$clip_poly
-      puniqueid <- SApltdat$puniqueid
-      pjoinid <- SApltdat$pjoinid
-      plt <- SApltdat$clip_tabs$clip_plt
-      cond <- SApltdat$clip_tabs$clip_cond
-      tree <- SApltdat$clip_tabs$clip_tree
-      states <- SApltdat$states
-
-      SApltdat <- spGetPlots(bnd=SAdoms, bnd.filter=paste0("!", measEndyr.filter), 
-		RS=RS, statebnd.att="COUNTYFIPS", clipxy=clipxy, xy.joinid=xy.joinid,
- 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
-		cond_layer=cond_layer, tree_layer=tree_layer, measCur=TRUE,
-		intensity1=intensity1, showsteps=FALSE, savedata=FALSE, 
-		savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, out_dsn=out_dsn, 
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
-      xyplt2 <- SApltdat$clip_xyplt
-      plt2 <- SApltdat$clip_tabs$clip_plt
-      cond2 <- SApltdat$clip_tabs$clip_cond
-      tree2 <- SApltdat$clip_tabs$clip_tree
-
-      xyplt <- rbind(xyplt, xyplt2)
-      xyplt <- unique(xyplt)
-      plt <- rbindlist(list(plt, plt2))
-      plt <- unique(plt)
-      cond <- rbindlist(list(cond, cond2))
-      cond <- unique(cond)
-      tree <- rbindlist(list(tree, tree2))
-      tree <- unique(tree)
-      rm(xyplt2)
-      rm(plt2)
-      rm(tree2)
-      gc()
-
-    } else {
-      SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
-		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
-		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
-		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE,
-		savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
+		measEndyr=measEndyr, Endyr.filter=measEndyr.filter, intensity1=intensity1, 
+		showsteps=FALSE, savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
 		out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_layer=overwrite)
-      xyplt <- SApltdat$clip_xyplt
-      xy.uniqueid <- SApltdat$xy.uniqueid
-      puniqueid <- SApltdat$puniqueid
-      pjoinid <- SApltdat$pjoinid
-      plt <- SApltdat$clip_tabs$clip_plt
-      cond <- SApltdat$clip_tabs$clip_cond
-      tree <- SApltdat$clip_tabs$clip_tree
-    }
+    xyplt <- SApltdat$clip_xyplt
+    xy.uniqueid <- SApltdat$xy.uniqueid
+    puniqueid <- SApltdat$puniqueid
+    pjoinid <- SApltdat$pjoinid
+    plt <- SApltdat$clip_tabs$clip_plt
+    cond <- SApltdat$clip_tabs$clip_cond
+    tree <- SApltdat$clip_tabs$clip_tree
     if (is.null(SApltdat)) return(NULL)
 
     if (saveobj) {
@@ -154,7 +103,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
     plot(sf::st_geometry(SAdoms), border="grey")
     #plot(sf::st_geometry(bnd), add=TRUE)
     plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=.25)
-    if (!is.null(smallbnd)) 
+    if (!is.null(smallbnd) && "sf" %in% class(smallbnd)) 
       plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
 
     par(mar=mar)

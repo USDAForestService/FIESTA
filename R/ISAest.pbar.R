@@ -34,6 +34,12 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
     plt.dom <- plt.dom[!plt.dom[[dunitvar]] %in% lt2,]
   }
 
+  ## Check if all plots are zero
+  if (sum(plt.dom[[yn]]) == 0) {
+    message(yn, " has all 0 values... returning NULL")
+    return(NULL)
+  }  
+
   ## Calculate number of non-zero plots
   NBRPLT.gt0 <- plt.dom[, sum(get(yn) > 0), by=dunitvar]
   setnames(NBRPLT.gt0, "V1", "NBRPLT.gt0")
@@ -69,6 +75,7 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
   }
 
   if (SAmethod == "area") {
+
     xpop.dom <- paste0(preds.dom, ".X.pop")
     fmla.dom2 <- as.formula(paste(paste0(yn, ".ybar.i"), 
 				paste(xpop.dom, collapse= "+"), sep="~"))

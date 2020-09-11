@@ -243,7 +243,17 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
     }
     if (ext.dsn %in% c("shp", "csv"))
       layer <- basename.NoExt(dsn)
-  }
+  } else {
+    ext.layer <- getext(layer)
+    if (!is.na(ext.layer) && ext.layer != "NA" && file.exists(layer)) {
+      if (ext.layer %in% c("shp", "csv")) {
+        dsn <- layer
+        layer <- basename.NoExt(dsn)
+      } else {
+        stop(ext.layer, " not supported")
+      }
+    }
+  }    
  
   ######################################################
   ## Check dsn
@@ -300,7 +310,16 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   }
 
   if ("sf" %in% class(splayer)) {
-        
+
+    if (nrow(splayer) == 0 && stopifnull) {
+      msg <- "layer has 0 records"
+      if (stopifnull) {
+        stop(msg)
+      } else {
+        message(msg)
+      }
+    }
+              
     ## Check if projection
     ############################################################
     if (is.na(sf::st_crs(splayer))) {
@@ -473,7 +492,7 @@ getEPSG <- function(prj=NULL, datum=NULL, zone=NULL) {
 
 
 check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL, 
-	layer2nm=NULL, stopifnotin=FALSE) {
+	layer2nm=NULL, stopifnotin=FALSE, quiet=FALSE) {
 
   ##########################################################################
   ## DESCRIPTION
@@ -519,7 +538,7 @@ check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL,
       return(NULL)
     }
   } else {
-    if (intpct < 100) {
+    if (intpct < 100 && !quiet) {
       message(layer1nm, " is not completely contained within ", layer2nm)
       message("...intersection of ", intpct, "%")
     }
@@ -1124,8 +1143,9 @@ clip.othertables <- function(inids, othertabnms, othertabs=NULL, uniqueid="PLT_C
 
 
 spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL, 
-	stbnd=NULL, stbnd_dsn=NULL, stbnd.att=NULL, RS=NULL, states=NULL, 
-	showsteps=FALSE, savebnd=FALSE, outfolder=NULL, ...) {
+	stbnd=NULL, stbnd_dsn=NULL, stbnd.att=NULL, stname.att="STATENM",
+	RS=NULL, states=NULL, showsteps=FALSE, savebnd=FALSE, 
+	outfolder=NULL, ...) {
 
   ##############################################################################
   ## DESCRIPTION
@@ -1142,10 +1162,11 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   #############################################################################
   ## Import boundary
   #############################################################################
-  bndx <- pcheck.spatial(layer=bnd_layer, dsn=bnd_dsn, caption="boundary")
+  bndx <- pcheck.spatial(layer=bnd_layer, dsn=bnd_dsn, caption="boundary",
+		stopifnull=TRUE)
  
   ## bnd.filter
-  bndx <- datFilter(bndx, xfilter=bnd.filter)$xf
+  bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
 
  
   ########################################################################
@@ -1159,7 +1180,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   #############################################################################
   if (!is.null(stbnd) || !is.null(stbnd_dsn)) {
     stbnd <- pcheck.spatial(layer=stbnd, dsn=stbnd_dsn)
-    stbnd.att<- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
+    stbnd.att <- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stbnd.att, "not in stbnd"))
     if (is.null(stbnd.att) && "NAME" %in% names(stbnd)) {
@@ -1193,6 +1214,12 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     stateint <- suppressWarnings(selectByIntersects(stated, sf::st_make_valid(bndx), 
 				overlapThreshold=0))
     states <- stateint[[stbnd.att]]
+
+    ## Check name of attribute identifying state
+    stname.att <- FIESTA::pcheck.varchar(var2check=stname.att, varnm="stname.att", 
+		gui=gui, checklst=names(stbnd), caption="State name attribute", 
+		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
+
 
     if (showsteps) {
       mar <-  par("mar")
@@ -1228,8 +1255,10 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
       message(paste0("states are outside ", RS, " region: ", toString(statesout)))
       message("clipping boundary to ", RS, " states: ", toString(statenames))
 
-      bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[[stbnd.att]] %in% statenames, ])
-
+      if (!is.null(stname.att)) {
+        bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[[stname.att]] %in% statenames, ])
+        if (nrow(bndx) == 0) stop("invalid stname.att")
+      }
       if (stbnd.att == "COUNTYFIPS") {
         stcds <- FIESTA::ref_statecd[FIESTA::ref_statecd$MEANING %in% statenames, "VALUE"]
         states <- states[as.numeric(substr(states, 1, 2)) %in% stcds]

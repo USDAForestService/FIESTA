@@ -6,7 +6,7 @@
 \description{
 	Wrapper to get FIA plots within the boundary population (area of interest)
   	- Intersect with state boundary 
-  	- Get FIA plots for intersected states, including tree, and spatial (DBgetPlots)
+  	- Get FIA plots for intersected states, including tree, and spatial
   	- Clip spatial coordinates and other tables to boundary (spClipPoint)
 }
 \usage{
@@ -18,7 +18,7 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	other_layers = NULL, puniqueid = "CN", evalid = NULL, evalCur = FALSE, 
 	evalEndyr = NULL, evalType = "AREAVOL", measCur = FALSE, measEndyr = NULL, 
 	Endyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
-	showsteps = FALSE, savedata = FALSE, savebnd = FALSE, savexy = FALSE, 
+	showsteps = FALSE, savedata = FALSE, savebnd = FALSE, savexy = TRUE, 
 	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
 }
@@ -117,6 +117,33 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
   If savedata=TRUE, outdat data frame is saved to outfolder.    
 }
 \details{
+
+	\bold{datsource}
+
+	Plots are extracted from 3 different data sources:\cr
+	1) CSV - data have previously been extracted from the FIA database and stored 
+		as CSV files.\cr
+	2) datamart - data are extracted from FIA's publically-available datamart.\cr
+	3) sqlite - data have previously been extracted from the FIA database and stored 
+		within a SQLite database.\cr 
+
+
+	\bold{Selection parameters}
+
+	FIA plots are selected based on the following parameters:\cr
+	\tabular{ll}{
+	\tab evalid - the FIA evaluation identifier\cr 
+	\tab evalCur - the most current FIA evaluation in database\cr 
+	\tab evalEndyr - the FIA evaluation ending in evalEndyr\cr 
+	\tab evalType - the FIA evaluation type ('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN')\cr 
+	\tab measCur - the most current measurement of each plot in database\cr 
+	\tab measEndyr - the most current measuremtn of each plot in database in or prior to measEndyr\cr 
+	\tab Endyr.filter - a filter for bnd that specifies the boundary where measEndyr should be applied\cr 
+ 	}
+}
+
+
+\note{
 
   If exportsp=TRUE:\cr
  	If out_fmt="shp", the writeOGR (rgdal) function is called. The ArcGIS driver 

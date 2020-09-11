@@ -206,8 +206,15 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, uniqueid=uniqueid, 
 		polyvarlst=unitvar, keepNA=FALSE, exportNA=exportNA)
       sppltx <- extpoly$sppltext
-      unitNA <- sppltx$NAlst[[1]]
- 
+      unitNA <- extpoly$NAlst[[1]]
+      outname <- extpoly$outname
+      if (outname != unitvar) {
+        message("unitvar changed from ", unitvar, " to ", outname, 
+				" because of duplicate names in xyplt")
+        names(unitlayerprj)[names(unitlayerprj) == unitvar] <- outname
+        unitvar <- outname
+      }
+
       ## Get pixel counts by estimation unit
       stratalut <- setDT(zonalFreq(src=unitlayerprj, attribute=unitvar, 
 			rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA))
@@ -216,7 +223,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       stratalut <- stratalut[!is.na(get(strvar)), ]
 
       ## Get unitarea 
-      unitlayerprj <- areacalc.poly(unitlayerx, unit=areaunits)
+      unitlayerprj <- areacalc.poly(unitlayerprj, unit=areaunits)
       areavar <- paste0(areaunits, "_GIS")  
       unitarea <- aggregate(unitlayerprj[[areavar]], list(unitlayerprj[[unitvar]]), sum)
       names(unitarea) <- c(unitvar, areavar)

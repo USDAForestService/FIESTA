@@ -56,9 +56,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     returnPBpopdat <- FALSE
     if (!is.list(PBpopdat))
       stop("PBpopdat must be a list")
-    listitems <- c("condx", "pltcondx", "cuniqueid", "condid", 
-		"ACI.filter", "unitarea", "unitvar", "strlut", "strvar",
-		"plotsampcnt", "condsampcnt")
+    listitems <- c("PBx", "plotid", "pntid", "tabtype", "getprop")
     if (!all(listitems %in% names(PBpopdat))) {
       items.miss <- listitems[!listitems %in% names(PBpopdat)]
       stop("invalid PBpopdat... missing items: ", paste(items.miss, collapse=", "))

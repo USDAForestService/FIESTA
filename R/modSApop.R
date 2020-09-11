@@ -141,9 +141,7 @@ modSApop <- function(SAdoms, cond, tree=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   ## adjfac = 1 / summed condition proportions (by plot-size), for area and trees
   ###################################################################################
   ## Returns:
-  ##  1. Summed proportions (*PROP_UNADJ_SUM) and adjustment factors (*PROP_ADJFAC)  
-  ##     by strata and estunit (*PROP_UNADJ_SUM / n.strata)
-  ##  2. Adjusted condition proportion (CONDPROP_ADJ) appended to condx
+  ##  Adjusted condition proportion (CONDPROP_ADJ) appended to condx
   ###################################################################################
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)

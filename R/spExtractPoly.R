@@ -31,7 +31,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 #			caption="XY coordinates?", stopifnull=TRUE)
   sppltx <- pcheck.spatial(xyplt, dsn=xyplt_dsn, tabnm="xyplt", 
 			caption="XY coordinates?", stopifnull=TRUE)
- 
+
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
     sppltx <- spMakeSpatialPoints(xyplt=sppltx, uniqueid=uniqueid, 
@@ -90,7 +90,6 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     polyvarnmlst <- polyvarlst
   }
 
-
    ## Check showext    
   showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
@@ -120,7 +119,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 		title="Add date to outfiles?", first="YES", gui=gui)  
     outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
   }
- 
+
   ########################################################################
   ### DO THE WORK
   ########################################################################
@@ -137,13 +136,11 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     sppltx <- prjdat$x
     polyv <- prjdat$ycrs
 
-
     ## Check extents
     bbox1 <- sf::st_bbox(polyv)
     bbox2 <- sf::st_bbox(sppltx)
     check.extents(bbox1, bbox2, showext=showext, layer1nm="polyv", layer2nm="xyplt",
 			stopifnotin=TRUE)
-
 
     ## Check polyvarlst
     ########################################################  
@@ -154,13 +151,29 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
        polyvars <- names(polyv)
     }
 
-    ## Change names in polyvars that are the same as sppltx
+    ## Check polyvarnm
     ########################################################  
-    polyvars <- suppressWarnings(sapply(polyvars, checknm, names(sppltx)))
+    polyvarnm <- polyvarnmlst[[i]]
+    if (length(polyvarnm) != length(polyvars)) {
+      message("number of names does not match number of attributes... using attribute names")
+      polyvarnm <- polyvars
+      polyvarnmlst[[i]] <- polyvarnm
+    }
+
+    ## Change names in polyvarnms that are the same as sppltx
+    ########################################################  
+    polyvarnm <- suppressWarnings(sapply(polyvarnm, checknm, names(sppltx)))
+    polyvarnmlst[[i]] <- polyvarnm
+
 
     ## Subset polyv to polyvars
     ########################################################  
     polyv <- polyv[, polyvars]
+
+
+    ## Change names in polyv that are the same as sppltx
+    ########################################################  
+    names(polyv)[names(polyv) %in% polyvars] <- polyvarnm
 
     ## Extract data from polygon
     ######################################################## 
@@ -169,14 +182,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 
     ## Set polyvarnm
     ########################################################  
-    polyvarnm <- polyvarnmlst[[i]]
-    if (length(polyvarnm) != length(polyvars)) {
-      message("number of names does not match number of attributes... using attribute names")
-      polyvarnm <- polyvars
-      polyvarnmlst[[i]] <- polyvarnm
-    }
-    names(sppltext)[names(sppltext) %in% polyvars] <- polyvarnm 
-
+    #names(sppltext)[names(sppltext) %in% polyvars] <- polyvarnm 
 
     ## Check points outside poly
     ########################################################  

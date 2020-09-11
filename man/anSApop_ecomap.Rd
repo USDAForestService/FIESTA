@@ -5,9 +5,15 @@
 }
 \description{
 	Wrapper to compile population data for generating estimates using 
-	Small-Area methods. Includes creating SAdoms, extracting FIA data,
-	summarizing spatial auxiliary data, and calculating population 
-	adjustments.	
+	Small Area Estimation (SAE) methods (modSA*). Includes: creating model 
+	domain units (spGetSAdoms); extracting FIA data and summarizing spatial 
+	auxiliary data (anSAdata); and calculating population adjustments (modSApop).
+
+	The selection of model domain units are set to the hierarchical-based, 
+	2007 Cleland Ecomap boundaries (Cleland, and others 2007), where the 
+	Subsection boundaries are used for delineating helper polygons; the 
+	Section boundaries are used for defining the large area; and the Province 
+	boundaries are used for restraining the automated selection process.	
 }
 \usage{
 anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique, 
@@ -83,8 +89,40 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 }
  
 \value{
-  Estimate.
+  A list with population data for Small-Area estimates. 
+
+  \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer. }
+  \item{condx}{ Data frame. Condition-level data with adjusted condition proportions
+		and predictor values. }
+  \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
+  \item{cuniqueid}{ String. Unique identifier of plot in condx and pltcondx. }
+  \item{condid}{ String. Unique identifier of condition in condx and pltcondx. }
+  \item{treex}{ Data frame. If esttype='TREE', tree-level data, including sample 
+	adjustment factor. }
+  \item{tuniqueid}{ String. If esttype='TREE', unique identifier of plot in treex. }
+  \item{ACI.filter}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" . }
+  \item{dunitarea}{ Data frame. Area by model domain unit. }
+  \item{areavar}{ String. Name of area variable in dunitarea. }
+  \item{dunitvar}{ String. Name of variable defining model domain units in dunitarea. }
+  \item{dunitlut}{ Data frame. Table of model domain units with zonal statistics 
+	of predictor values, number of plots by domain unit. }
+  \item{prednames}{ String vector. Name of variables in dunitlut and condx 
+	defining small area model predictors. }
+  \item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. }
+  \item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. }
+  \item{states}{ String. State names in dataset. }
+  \item{invyrs}{ String. Range of inventory years in dataset. }
+  \item{adjtree}{ Logical. If TRUE, treex includes adjustment factors. }
 }
+
+\references{
+	Cleland, D.T.; Freeouf, J.A.; Keys, J.E., Jr.; Nowacki, G.J.; Carpenter, C; 
+	McNab, W.H. 2007. Ecological Subregions: Sections and Subsections of the 
+	Conterminous United States [1:3,500,000] [CD-ROM]. Sloan, A.M., cartog. 
+	Gen. Tech. Report WO-76. Washington, DC: U.S. Department of Agriculture, 
+	Forest Service.
+}
+
 \author{
 	Tracey S. Frescino
 }

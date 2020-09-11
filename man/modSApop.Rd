@@ -1,11 +1,10 @@
 \name{modSApop}
 \alias{modSApop}
 \title{
-	Small-Area module - Generate population data for SA module.
+	Small-Area module - Compile population data for SA module.
 }
 \description{
-	Generates population data for generating small-area estimation. 
-	Plots that are totally nonsampled are excluded from estimation dataset. }
+	Compile population data for input to the modSA* modules. }
 
 \usage{    
 modSApop(SAdoms, cond, tree = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, 
@@ -137,8 +136,9 @@ modSApop(SAdoms, cond, tree = NULL, plt = NULL, pltassgn = NULL, dsn = NULL,
 \value{
   A list with population data for Small-Area estimates. 
 
-  \item{condx}{ Data frame. Condition-level data with adjusted condition proportions 
-		and predictors. }
+  \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer. }
+  \item{condx}{ Data frame. Condition-level data with adjusted condition proportions
+		and predictor values. }
   \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
   \item{cuniqueid}{ String. Unique identifier of plot in condx and pltcondx. }
   \item{condid}{ String. Unique identifier of condition in condx and pltcondx. }
@@ -146,57 +146,32 @@ modSApop(SAdoms, cond, tree = NULL, plt = NULL, pltassgn = NULL, dsn = NULL,
 	adjustment factor. }
   \item{tuniqueid}{ String. If esttype='TREE', unique identifier of plot in treex. }
   \item{ACI.filter}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" . }
-  \item{dunitarea}{ String. Returned table of area by domain unit. }
-  \item{dunitvar}{ String. Variable name for domain units. }
-  \item{dunitlut}{ String. Domain unit table with zonal statistics of predictor
-	values, number of plots by domain unit. }
-  \item{prednames}{ String vector. Variable name(s) for small area model 
-	predictor variables. }
+  \item{dunitarea}{ Data frame. Area by model domain unit. }
+  \item{areavar}{ String. Name of area variable in dunitarea. }
+  \item{dunitvar}{ String. Name of variable defining model domain units in dunitarea. }
+  \item{dunitlut}{ Data frame. Table of model domain units with zonal statistics 
+	of predictor values, number of plots by domain unit. }
+  \item{prednames}{ String vector. Name of variables in dunitlut and condx 
+	defining small area model predictors. }
   \item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. }
   \item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. }
   \item{states}{ String. State names in dataset. }
   \item{invyrs}{ String. Range of inventory years in dataset. }
-
-
-  \item{stratdat}{ Data frame. Strata information by estimation unit. }
-	\tabular{lll}{
-		\tab \bold{Variable}	\tab \bold{Description}\cr
-	 	\tab unitvar		\tab estimation unit \cr
-	 	\tab strvar		\tab stratum value \cr
-	 	\tab strwtvar	\tab number of pixels by strata and estimation unit \cr
-	 	\tab n.strata	\tab number of plots in strata (after totally nonsampled plots removed) \cr
-	 	\tab n.total	\tab number of plots for estimation unit \cr
-	 	\tab strwt		\tab proportion of area (or plots) by strata and estimation unit (i.e., strata weight) \cr
-	 	\tab CONDPROP_UNADJ_SUM	\tab summed condition proportion by strata and estimation unit \cr
-	 	\tab CONDPROP_ADJFAC	\tab adjusted condition proportion by strata after nonsampled plots removed \cr
-	 	\tab AREA_USED	\tab total area of estimation unit \cr
-	 	\tab expfac		\tab strata-level expansion factor after nonsampled plots and conditions removed
-						(AREA_USED/n.strata) \cr
-	 	\tab EXPNS		\tab strata-level area expansions (expfac * strwt)\cr
-	}
-  
-  Table(s) are also written to outfolder.
+  \item{adjtree}{ Logical. If TRUE, treex includes adjustment factors. }
 }
 \author{
 	Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
-}
-\references{
-	Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.; Smith, William D.; Westfall, James A.; 
-	Hansen, Mark H.; Moisen, Gretchen G. 2005. Sample-based estimators used by the Forest Inventory and
-	Analysis national information management system. Gen. Tech. Rep. SRS-80. Asheville, NC: U.S. Department
-	of Agriculture, Forest Service, Southern Research Station, p.53-77.
 }
 
 \note{
  
 	ADJUSTMENT FACTOR:\cr
-	The adjustment factor is necessary to account for nonsampled conditions. It is calculated 
-		for each estimation unit by strata. by summing the unadjusted proportions of the 
-		subplot, microplot, and macroplot (i.e. *PROP_UNADJ) and dividing by the number 
-		of plots in the strata/estimation unit).
+	The adjustment factor is necessary to account for nonsampled conditions. 
+	For model-based estimation, we calculate adjustment factors by plot. 
 
-	An adjustment factor is determined for each tree based on the size of the plot it was 
-	measured on. This is identified using TPA_UNADJ as follows: 
+	It is calculated by dividing 1 / summed condition proportions by plot. An 
+	adjustment factor is determined for each tree based on the size of the plot 
+	it was measured on. This is identified using TPA_UNADJ as follows: 
 
 	\tabular{llr}{
 	\tab \bold{PLOT SIZE}	\tab \bold{TPA_UNADJ} \cr
@@ -209,26 +184,6 @@ modSApop(SAdoms, cond, tree = NULL, plt = NULL, pltassgn = NULL, dsn = NULL,
 		for in adjustment factor.
 	This is if you are interested in estimates for all lands or nonforest lands in the 
 		All-Condition-Inventory.
-
-
-	unitcombine:\cr
-	If TRUE and less than 2 plots in any one estimation unit, all estimation units with 
-	10 or less plots are combined. The current method for combining is to group the
-	estimation unit with less than 10 plots with the estimation unit following in 
-	consecutive order (numeric or alphabetical), restrained by survey unit (UNITCD) if 
-	included in dataset, and continuing until the number of plots equals 10. If there are 
-	no estimation units following in order, it is combined with the estimation unit previous 
-	in order. 
-
-	stratcombine:\cr
-	If TRUE and less than 2 plots in any one strata class within an esimation unit, 
-	all strata classes with 2 or less plots are combined. The current method for combining 
-	is to group the strata with less than 2 plots with the strata class following in 
-	consecutive order (numeric or alphabetical), restrained by estimation unit 
-	(if unitcombine=FALSE), and continuing until the number of plots equals 10. If there 
-	are no strata classes following in order, it is combined with the estimation unit 
-	previous in order. 
-
 }
 
 \keyword{ data }

@@ -27,7 +27,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   if ("data.table" %in% class(datx)) {
     isdatatable <- TRUE
     datkey <- key(datx)
-    datx <- setDF(datx)
+#    datx <- setDF(datx)
   }
 
   ## Check xvar
@@ -65,7 +65,6 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   group <- FIESTA::pcheck.logical(group, varnm="group", title="Variable group?", 
 		first="NO", gui=gui)
    
-
   #######################################################################
   ## Check LUTvar
   #######################################################################
@@ -125,6 +124,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
     LUTnewvarlst <- LUTnmlst[which(LUTnmlst != LUTvar)]
  
   } else if (FIAname) {
+
     ## Check if DSTRBCD
     #################################################
     LUTvar <- ifelse (FIAname && length(grep("DSTRBCD", xvar)) == 1, "DSTRBCD", xvar)
@@ -170,8 +170,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
         LUTnewvar <- c(LUTnewvar, grpnames)
       }        
 
-    } else {
-    
+    } else {    
       LUTx <- ref
       LUTnewvarlst <- names(LUTx)
 
@@ -249,13 +248,14 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   ############################################################################
   ### SELECT RELEVANT COLUMNS FROM LUT & MERGE TO x.
   if (!is.null(LUTnewvar) && length(LUTnewvar) != 0) {
-
+    if (is.null(xtxt)) xtxt <- xvar
     ## Check that the all values of LUTvar in datx are all in xvar in LUTx
-    check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, 
+    check.matchval(datx, LUTx, xvar, LUTvar, tab1txt=xtxt, tab2txt=paste(xtxt, "lut"),
 		stopifmiss=stopifmiss)
- 
+
     ## Check if class of xvar in datx matches class of xvar in LUTx
-    tabs <- FIESTA::check.matchclass(datx, LUTx, xvar, LUTvar, tab1txt=xtxt)
+    tabs <- FIESTA::check.matchclass(datx, LUTx, xvar, LUTvar, 
+		tab1txt=xtxt, tab2txt=LUTvar)
     datx <- tabs$tab1
     LUTx <- tabs$tab2
 
@@ -264,23 +264,23 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
       setnames(LUTx, LUTnewvar, LUTnewvar2)
       LUTnewvar <- LUTnewvar2
     }
-
     datx.names <- names(datx)
     xLUT <- merge(datx, LUTx[,c(LUTvar, LUTnewvar), with=FALSE], 
 			by.x=xvar, by.y=LUTvar, all.x=TRUE)
+
     xLUTvals <- unique(as.character(xLUT[[LUTnewvar[1]]][!is.na(xLUT[[xvar]])]))
     if (any(is.na(xLUTvals))) {
       xLUTmiss <- unique(xLUT[!is.na(get(xvar)) & is.na(get(LUTnewvar[1])), xvar, 
 		with=FALSE])
       warning("missing codes: ", paste(xLUTmiss, collapse=", "))
     }
+
     setcolorder(xLUT, c(datx.names, LUTnewvar))
     if (!is.null(LUTnewvarnm)) 
       setnames(xLUT, LUTnewvar, LUTnewvarnm)    
   } else {
     xLUT <- datx
   } 
-
  
   ## Only include xvar values that exist in x
   if (!add0) 

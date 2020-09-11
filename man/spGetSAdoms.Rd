@@ -1,14 +1,15 @@
 \name{spGetSAdoms}
 \alias{spGetSAdoms}
 \title{
-	Spatial - Generate spatial domains for small area estimation.
+	Spatial - Generate a set of model domain units for Small Area Estimation (SAE) 
+	strategies.
 }
 \description{
-	Wrapper to get spatial domains for small area estimation. Small area polygons
-	area unioned with helper polygons and subset to the extent of the large
-	area. The smallbnd and largebnd are optional. If NULL, the helper polygons
-	are used as small area domains. A variable named 'AOI' is appended to 
-	attribute table to indicate the area of interest, or small area polygons.	
+	Spatial process to generate a set of model domains (i.e., helper polygons) 
+	for Small Area Estimation (SAE) strategies. If helper_autoselect=TRUE, an 
+	automated process is used to select helper polygons within a large area 
+	overlapping the small area. The helper polygons are unioned with the small 
+	area polygons, resulting in a set of model domains that can be used for SAE.
 }
 \usage{
 spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique, 
@@ -112,7 +113,10 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 }
  
 \value{
-  A list object with small area domains. 
+  \item{SAdomslst}{ List object. Set(s) of model domain units. If multiSAdoms=TRUE, 
+	the list may have more than one set of model domain units. }
+  \item{smallbndlst}{ List object. smallbnd(s). If multiSAdoms=TRUE, 
+	the list may have more than one set of smallbnd. }
 
   If exportsp=TRUE, the SAdoms spatial object(s) is exported to outfolder, with format
 	specified by out_fmt.
@@ -120,6 +124,40 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 \author{
 	Tracey S. Frescino
 }
+\details{
+	\bold{optional boundaries}
+
+	The helperbnd, largebnd, and maxbnd are optional. If helperbnd=NULL, the 
+	smallbnd polygons are used for model domain units. If largebnd=NULL, the 
+	maxbnd is used to define the large area. If maxbnd=NULL, the largebnd is 
+	used to restrain the model extent. If both, largebnd=NULL and maxbnd=NULL, 
+	the extent of the smallbnd or helperbnd is used for defining and restraining
+	the model extent. 
+
+
+	\bold{nbrdom.min}
+
+	The number of helper polygons selected are defined by nbrdom.min parameter. 
+	If nbrdom.min=NULL, all helper polygons within the large area extent are
+	selected. 
+
+      
+	\bold{multiSAdoms}
+
+	Use multiSAdoms parameter when small area of interest has multiple polygon 
+	features and the small area polygons overlap (within maxbnd.threshold) more 
+	than one maxbnd polygon. If multiSAdoms=TRUE, more than one set of model
+	domain units are generated; one for each maxbnd where overlap is within
+	maxbnd.threshold. If multiSAdoms=FALSE, only one set of model domain units
+	are generated, using the maxbnd with the greatest overlap.  
+
+
+	\bold{AOI attribute}
+
+	A variable named 'AOI' is appended to the SAdoms attribute table to distinguish
+	between the small area of interest polygons and the helper domain units. 
+}
+
 \note{
 
   If exportsp=TRUE and out_fmt="shp":\cr

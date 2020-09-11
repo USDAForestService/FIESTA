@@ -413,6 +413,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
   tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
 
+  if (sum(tdomdattot[[response]]) == 0) return(NULL)
 
   if (is.null(largebnd.att)) {
     estkey <- c(largebnd.att, "DOMAIN")
@@ -427,7 +428,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
      			dunitlut=dunitlut, dunitvar=dunitvar, 
 			SApackage=SApackage, SAmethod="unit", 
 			esttype=esttype, prednames=prednames, fmla=fmla,
-			domain=domain, response=response)) 
+			domain=domain, response=response))
 
 #save(tdomdattot, file=file.path(outfolder, "tdomdattot.rda"))
 #save(dunitlut, file=file.path(outfolder, "dunitlut.rda"))
@@ -467,6 +468,9 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 			response=response))
 
   }
+
+  if (ncol(dunit.multest.area) == 1) return(NULL)
+  if (ncol(dunit.multest.unit) == 1) return(NULL)
 
   SAunit.vars <- c("JU.Synth", "JU.GREG", "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1")
   SAarea.vars <- c("JFH", "JFH.se", "JA.synth", "JA.synth.se")

@@ -152,7 +152,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       row.FIAname <- FALSE
     }
   }
-
   if (rowvar != "NONE") {
 
     ## GET row titles defined in FIESTA
@@ -221,7 +220,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
             } 
           }
         } else {
-
           rowLUTgrp <- FALSE
           if (rowgrp) {
             if (!is.null(rowgrpnm)) {
@@ -237,6 +235,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
           if (!is.null(rowlut)) row.add0 <- TRUE
           rowLUT <- datLUTnm(x=condf, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
 		  		group=rowLUTgrp, add0=row.add0)
+
           condf <- rowLUT$xLUT
           rowlut <- rowLUT$LUT
           rowLUTnm <- rowLUT$xLUTnm

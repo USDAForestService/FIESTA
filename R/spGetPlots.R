@@ -6,7 +6,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
 	evalType="AREAVOL", measCur=FALSE, measEndyr=NULL, Endyr.filter=NULL, 
 	invyrs=NULL, allyrs=FALSE, intensity1=FALSE, showsteps=FALSE, savedata=FALSE, 
-	savebnd=FALSE, savexy=FALSE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, 
+	savebnd=FALSE, savexy=TRUE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
 	overwrite_layer=FALSE, ...) {
 
@@ -44,7 +44,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
  
   ## bnd.filter
-  bndx <- datFilter(bndx, xfilter=bnd.filter)$xf
+  bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
+
 
   #############################################################################
   ## Set datsource
@@ -130,11 +131,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     if (!all(states %in% FIESTA::ref_statecd$MEANING))
       stop("states is invalid")
   } else {
-    ## Get intersecting states
-#    statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
-#			stbnd.att=stbnd.att, RS=RS, states=states, savebnd=savebnd, 
-#			outfolder=outfolder)
-
     ## Get stbnd.att
     if (is.null(stbnd.att) && exists("stunitco"))
       stbnd.att <- "COUNTYFIPS"
@@ -143,7 +139,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
 			stbnd.att=stbnd.att, RS=RS, states=states, savebnd=savebnd, 
 			outfolder=outfolder, ...)
-
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att
     statenames <- statedat$statenames
@@ -156,7 +151,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   }
   message("boundary intersected states: ", toString(statenames))
 
-
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
@@ -166,7 +160,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   if (!is.null(xyinfo)) {
     if (!is.null(xyinfo) && getext(xy_dsn) %in% c("csv", "shp")) {
       xydat <- pcheck.spatial(xyinfo$xy, xyinfo$xy_dsn)
-
       xyfields <- names(xydat)
       xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 		gui=gui, checklst=xyfields, caption="xy uniqueid", stopifnull=TRUE)
@@ -377,7 +370,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
         }
         ## Set up query for plots
-        plt.qry <- paste0("select distinct * from ", pfromqry, " where ", stfilter) 
+        plt.qry <- paste0("select distinct p.* from ", pfromqry, " where ", stfilter) 
         puniqueid <- "CN"
 
         ## Query plt table
@@ -486,7 +479,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
             ## Set up query for plots
-            plt2.qry <- paste0("select distinct * from ", pfromqry2, " where ", stfilter) 
+            plt2.qry <- paste0("select distinct p.* from ", pfromqry2, " where ", stfilter) 
 
             ## Query plt table
             plt2 <- setDT(sqldf::sqldf(plt2.qry))
@@ -650,6 +643,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 if (length(xy) == 1) {
                   xvar <- "LON_PUBLIC"
                   yvar <- "LAT_PUBLIC"
+                } else {
+                  if ("plot" %in% tabs) 
+                    xy <- "plot"
                 }
               }
             } 
@@ -661,7 +657,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               xvar <- xyfields[grepl("LON", xyfields)]
             if (is.null(yvar))
               yvar <- xyfields[grepl("LAT", xyfields)]
-
             xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 			gui=gui, checklst=xyfields, caption="xy uniqueid")
             xy.joinid <- pcheck.varchar(var2check=xy.joinid, varnm="xy.joinid", 
@@ -679,6 +674,15 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
             ## Check xy.joinid
             pltfields <- DBI::dbListFields(conn, "plot")
+
+            if (grepl("xyCur", xy)) {
+              if (xy.joinid %in% c("CN", "PLT_CN") && "ZSTUNCOPLOT" %in% xyfields && 
+				"ZSTUNCOPLOT" %in% pltfields) {
+                 message("changing xy.joinid from ", xy.joinid, "to ZSTUNCOPLOT")
+                 xy.joinid <- "ZSTUNCOPLOT"
+              }
+            }
+                 
             if (xy.joinid %in% pltfields) {
               pjoinid  <- xy.joinid
             } else {
@@ -689,7 +693,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               }
             }
           }
-        }
+        }    ## End if i=1
 
         ## Create state filter
         stfilter <- paste("p.statecd IN(", toString(stcd), ")")
@@ -726,12 +730,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				intensity1=intensity1, syntax="R")
         }
         ## Set up query for plots
-        plt.qry <- paste0("select distinct * from ", pfromqry, " where ", stfilter) 
-
+        plt.qry <- paste0("select distinct p.* from ", pfromqry, " where ", stfilter) 
 
         ## Query database for plots
         rs <- DBI::dbSendQuery(conn, plt.qry)
         plt <- setDT(DBI::dbFetch(rs))
+        DBI::dbClearResult(rs)
 
         zids <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
         if (!"ZSTUNCOPLOT" %in% names(plt)) {
@@ -758,19 +762,27 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
         if (!is.null(Endyr.filter)) clipxy <- TRUE
         if (clipxy) {
-
           ## Generate xy table for all plots in state (xystate)
           #########################################################
-          xyvars <- c(xy.joinid, xvar, yvar)
           if (!is.null(xydat)) {
+            xyvars <- c(xy.joinid, xvar, yvar)
             xystate <- xydat[, xyvars, with=FALSE]
-          } else {
-            if (allyrs || measCur) measCur.xy <- TRUE
-            xyfromqry <- getpfromqry(evalid=evalid, plotCur=measCur, 
+          } else {            
+            xy.joinid <- pjoinid
+            xyvars <- c(xy.joinid, xvar, yvar)
+            if (xy == "plot") {
+              xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
+				pfromqry, " where ", stfilter) 
+            } else {            
+              if (allyrs || measCur) measCur.xy <- TRUE
+              xyfromqry <- getpfromqry(evalid=evalid, plotCur=measCur.xy, 
 				invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
-            xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
-				xyfromqry, " where ", stfilter) 
+
+              xy.qry <- paste0("select distinct ", toString(paste0("xy.", xyvars)), 
+				" from ", xyfromqry, " JOIN ", xy, " xy ON (p.", pjoinid, 
+				" = xy.", xy.joinid, ")", " where ", stfilter) 
+            }
             xystate <- DBI::dbGetQuery(xyconn, xy.qry) 
           }
 
@@ -794,13 +806,15 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(conn, cond1.qry)
             cond1 <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
 
             if (istree) {
               tree1.qry <- paste0("select tree.* from ", pfromqry,
 			" join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
-			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+			" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
               rs <- DBI::dbSendQuery(conn, tree1.qry)
               tree1 <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
             }
 
             if (!is.null(other_layers)) {
@@ -808,10 +822,11 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 layer <- other_layers[i]
                 ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
                 other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
-				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+				" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
                 rs <- DBI::dbSendQuery(conn, other.qry)
                 assign(paste0(layer, "1"), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
+                DBI::dbClearResult(rs)
               }
             } 
 
@@ -834,7 +849,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
             ## Set up query for plots
-            plt2.qry <- paste0("select distinct * from ", pfromqry2, " where ", stfilter) 
+            plt2.qry <- paste0("select distinct p.* from ", pfromqry2, " where ", stfilter) 
 
             ## Query database for plots
             rs <- DBI::dbSendQuery(conn, plt2.qry)
@@ -875,6 +890,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(conn, cond2.qry)
             cond2 <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
 
             if (istree) {
               tree2.qry <- paste0("select tree.* from ", pfromqry,
@@ -882,6 +898,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 			" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
               rs <- DBI::dbSendQuery(conn, tree2.qry)
               tree2 <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
             }
 
             if (!is.null(other_layers)) {
@@ -893,6 +910,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 rs <- DBI::dbSendQuery(conn, other.qry)
                 assign(paste0(layer, "2"), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
+                DBI::dbClearResult(rs)
               }
             } 
           
@@ -917,14 +935,15 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				clippolyv=bndx)
             xyplt <- clipdat$clip_xyplt
 
-            pltx <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
-            pltids <- pltx[[puniqueid]]
+            plt <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
+            pltids <- plt[[puniqueid]]
 
             cond.qry <- paste0("select cond.* from ", pfromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(conn, cond.qry)
             cond <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
 
             if (istree) {
               tree.qry <- paste0("select tree.* from ", pfromqry,
@@ -932,6 +951,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
               rs <- DBI::dbSendQuery(conn, tree.qry)
               tree <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
             }
 
             if (!is.null(other_layers)) {
@@ -943,12 +963,14 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 rs <- DBI::dbSendQuery(conn, other.qry)
                 assign(paste0(layer), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
+                DBI::dbClearResult(rs)
               }
             } 
           }  ## if Endyr.filter is not NULL
 
           pltx <- rbind(pltx, plt)
           condx <- rbind(condx, cond)
+
           if (istree)
             treex <- rbind(treex, tree)
           if (!is.null(other_layers)) {

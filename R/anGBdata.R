@@ -3,7 +3,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
 	istree=TRUE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
 	puniqueid="CN", intensity1=TRUE, strata=TRUE, strattype="RASTER", 
 	strat_layer=NULL, strat_dsn=NULL, showsteps=FALSE, cex.plots=0.5, 
-	savedata=FALSE, savexy=FALSE, saveobj=FALSE, outfolder=NULL, 
+	savedata=FALSE, savexy=TRUE, saveobj=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite=TRUE, ...) {
 
@@ -80,7 +80,8 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
   GBpltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
 		RS=RS, clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
 		istree=istree, plot_layer=plot_layer, cond_layer=cond_layer, 
-		tree_layer=tree_layer, intensity1=intensity1, savedata=FALSE, ...)
+		tree_layer=tree_layer, intensity1=intensity1, savedata=FALSE, 
+		savexy=savexy, ...)
 
   xyplt <- GBpltdat$clip_xyplt
   xy.uniqueid <- GBpltdat$xy.uniqueid
@@ -91,7 +92,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
   cond <- GBpltdat$clip_tabs$clip_cond
   tree <- GBpltdat$clip_tabs$clip_tree
 
-  if (showsteps) {
+  if (showsteps && savexy) {
     ## Set plotting margins
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
@@ -117,7 +118,6 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)
   }
-
 
   ####################################################################
   ## Get strata data for bnd

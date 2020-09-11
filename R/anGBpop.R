@@ -1,6 +1,6 @@
 anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	datsource="sqlite", SQLitefn=NULL, RS=NULL, strata=TRUE, strat_layer=NULL, 
-	showsteps=FALSE, savedata=FALSE, savexy=FALSE, outfolder=NULL, outfn.pre=NULL, 
+	showsteps=FALSE, savedata=FALSE, savexy=TRUE, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite=TRUE, GBdata=NULL, ...) {
 
 
@@ -60,7 +60,6 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   puniqueid <- GBdata$puniqueid
   pltassgnid <- GBdata$pltassgnid
   pjoinid <- GBdata$pjoinid
-
   rm(GBdata)
   gc()
 

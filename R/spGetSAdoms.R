@@ -206,7 +206,11 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 
     ## Intersect smallbnd with ecomapf
     smallbndx <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
-    if (is.null(smallbndx) || nrow(smallbndx) == 0) return(NULL)
+    if (is.null(smallbndx) || nrow(smallbndx) == 0) {
+      message("the smallbnd has less than 50% overlap with the ecomap boundary... returning NULL")
+      return(NULL)
+    }
+
 
  #   if (showsteps) {
  #     plot(sf::st_geometry(ecomapf))

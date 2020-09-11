@@ -13,7 +13,7 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, cuniqueid="PLT_CN",
   ##
   ## VALUE:
   ##  1. Summed proportions (*PROP_UNADJ_SUM) and adjustment factors (*PROP_ADJFAC) by  
-  ##     strata and /or estunit (*PROP_UNADJ_SUM / n.strata or n.total, if strvars=NULL)
+  ##     estunit (*PROP_UNADJ_SUM / n.total)
   ##  2. Adjusted condition proportion (CONDPROP_ADJ) appended to condx
   ####################################################################################
  

@@ -108,8 +108,6 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   strunitvars <- c(unitvar, strvar)
 
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Icheck.estdata.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Icheck.titles.R")
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################

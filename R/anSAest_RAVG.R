@@ -1,11 +1,12 @@
 anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
- 	RAVG.state=NULL, RAVG.ecoprov=NULL, datsource="sqlite", SQLitefn, RS=NULL, 
-	largebnd.threshold=10, nbrdom.min=10, rastlst.cont=NULL, rastlst.cont.name=NULL, 
-	rastlst.cat=NULL, rastlst.cat.name=NULL, SApackage="JoSAE", SAmethod="unit", 
-	plt.filter=NULL, landarea="FOREST", cond.filter=NULL, estvarlst, 
-	savedata=FALSE, showsteps=FALSE, outfolder=NULL, multest_dsn="RAVG_SAmultest", 
-	multest.append=FALSE, overwrite=FALSE, barplot.compare=FALSE, title.ref=NULL, 
-	SAdomdat=NULL, SAdata=NULL, SApopdat=NULL) {
+ 	RAVG.state=NULL, RAVG.ecoprov=NULL, RAVG.minacre=NULL, datsource="sqlite", 
+	SQLitefn, RS=NULL, largebnd.threshold=10, nbrdom.min=10, rastlst.cont=NULL,
+ 	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
+	SApackage="JoSAE", SAmethod="unit", plt.filter=NULL, landarea="FOREST", 
+	cond.filter=NULL, estvarlst, savedata=FALSE, showsteps=FALSE, outfolder=NULL,
+ 	multest_dsn="RAVG_SAmultest", multest.append=FALSE, overwrite=FALSE, 
+	barplot.compare=FALSE, title.ref=NULL, SAdomdat=NULL, SAdata=NULL, 
+	SApopdat=NULL) {
 
   ## Check for packages
   if (!"FIESTAdata" %in% rownames(installed.packages()))
@@ -14,7 +15,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   ## Set global variables
   gui=gettitle <- FALSE
   ref_titles <- FIESTA::ref_titles
-  plt=RAVG.filter=measyear=measyear.filter <- NULL
+  plt=RAVG.filter=RAVG.ecofilter=measyear=measyear.filter <- NULL
 
   if (is.null(title.ref)) gettitle <- TRUE
 
@@ -96,6 +97,16 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       title.ref <- paste0(title.ref, ", ", toString(RAVG.ecoprov))
     }
   }
+  ## Check RAVG.minacre
+  if (!is.null(RAVG.minacre)) {
+    if (!is.numeric(RAVG.minacre)) stop("RAVG.minacre must be numeric")
+    acre.filter <- paste("ACRES >=", RAVG.minacre)
+    if (is.null(RAVG.filter)) {
+      RAVG.filter <- acre.filter
+    } else {
+      RAVG.filter <- paste(RAVG.filter, acre.filter, sep=" & ")
+    }
+  }
 
 
   ##################################################################################
@@ -168,6 +179,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   ####################################################################
   SAest <- list()
   SAmultest <- list()
+  SAraw <- list()
 
   message("calculating estimates...")
 
@@ -183,24 +195,34 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
       estvarnm <- ifelse(estvar == "TPA_UNADJ", "COUNT", estvar)
       outnm <- paste(SApackage, estvarnm, tfilter, sep="_")
-      SAestdat <- modSAtree(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
+
+      SAestdat <- tryCatch(
+		modSAtree(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
 			landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
 			estvar=estvar, estvar.filter=estvar.filter, smallbnd.att=smallbnd.att,
 			savedata=TRUE, multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn,
-			multest_layer=outnm, returntitle=TRUE, outfolder=outfolder,
- 			multest.append=multest.append, overwrite=TRUE, outfn.pre=RAVG.ecoprov)
-      SAest[[outnm]] <- SAestdat$est
-      SAmultest[[outnm]] <- SAestdat$dunit.multest
+			multest_layer=outnm, returntitle=TRUE, rawdata=TRUE, outfolder=outfolder,
+ 			multest.append=multest.append, overwrite=TRUE, outfn.pre=RAVG.ecoprov),
+				error=function(err) {
+					message(err)
+					return(NULL)
+				} )
+      if (!is.null(SAestdat)) {
 
+        SAest[[outnm]] <- SAestdat$est
+        SAmultest[[outnm]] <- SAestdat$dunit.multest
+        SAraw[[outnm]] <- SAestdat$raw$dunit.totest
+      
  
-      if (barplot.compare) {
-        ## build plots
-        FIESTA_SAmod_demo_plots(estvar=estvar, prednames=SApopdat$prednames, 
-			est.com=SAestdat$raw$dunit.multest, title.ref=RAVG.ecoprov, saveimg=TRUE, 
+        if (barplot.compare) {
+          ## build plots
+          FIESTA_SAmod_demo_plots(estvar=estvar, prednames=SApopdat$prednames, 
+			est.com=SAestdat$dunit.multest, title.ref=title.ref, saveimg=TRUE, 
 			outfolder=outfolder, showimg=TRUE)
+        }
       }
     }
   }
-  return(list(SAest, SAmultest))
+  return(list(SAest=SAest, SAmultest=SAmultest, SAraw=SAraw))
 }
 		

@@ -1,21 +1,24 @@
 \name{anSAest_RAVG}
 \alias{anSAest_RAVG}
 \title{
-	Analysis - Generate unit-level and area-leve estimates for small areas.
+	Analysis - Generate unit-level and area-leve estimates for fire perimeters.
 }
 \description{
-	Wrapper to get plot data, stratification data and estimates within
-	a custom-defined boundary.	
+	Analysis function for streamlining small area estimation strategies for 
+	fire perimeters from the USDA Forest Service, Rapid Assessment of Vegetation 
+	Condition (RAVG) program. The RAVG post-fire product delineates fire 
+	perimeters that include burn areas within at least 1000 acres of National 
+	Forest System (NFS) land (500 acres for Regions 8 and 9, as of 2016).
 }
 \usage{
 anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL, 
-	RAVG.state = NULL, RAVG.ecoprov = NULL, datsource = "sqlite", 
-	SQLitefn, RS = NULL, largebnd.threshold = 10, nbrdom.min = 10, 
-	rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cat = NULL, 
-	rastlst.cat.name = NULL, SApackage = "JoSAE", SAmethod = "unit", 
-	plt.filter = NULL, landarea = "FOREST", cond.filter = NULL, estvarlst, 
-	savedata = FALSE, showsteps = FALSE, outfolder = NULL, 
-	multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
+	RAVG.state = NULL, RAVG.ecoprov = NULL, RAVG.minacre = NULL, 
+	datsource = "sqlite", SQLitefn, RS = NULL, largebnd.threshold = 10, 
+	nbrdom.min = 10, rastlst.cont = NULL, rastlst.cont.name = NULL, 
+	rastlst.cat = NULL, rastlst.cat.name = NULL, SApackage = "JoSAE", 
+	SAmethod = "unit", plt.filter = NULL, landarea = "FOREST", 
+	cond.filter = NULL, estvarlst, savedata = FALSE, showsteps = FALSE, 
+	outfolder = NULL, multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
 	overwrite = FALSE, barplot.compare = FALSE, title.ref = NULL, 
 	SAdomdat = NULL, SAdata = NULL, SApopdat = NULL)
 }
@@ -27,6 +30,7 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
   \item{RAVG.state}{ String. States to apply a spatial filter to smallbnd. } 
   \item{RAVG.ecoprov}{ String. Ecomap ecoregion province to apply a spatial 
 		filter to smallbnd. } 
+  \item{RAVG.minacre}{ Number. Minimum acre size for fires. } 
   \item{datsource}{ String. Name of datasource ('sqlite', 'datamart'). }
   \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }
   \item{RS}{ String. Name of FIA research station to restrict states to. } 
