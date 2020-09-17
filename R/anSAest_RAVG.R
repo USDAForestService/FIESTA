@@ -16,6 +16,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   gui=gettitle <- FALSE
   ref_titles <- FIESTA::ref_titles
   plt=RAVG.filter=RAVG.ecofilter=measyear=measyear.filter <- NULL
+  returnlst <- list()
 
   if (is.null(title.ref)) gettitle <- TRUE
 
@@ -166,8 +167,11 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		showsteps=showsteps, savedata=savedata, savexy=savexy, savesteps=savedata,
  		outfolder=outfolder, outfn.pre=RAVG.ecoprov, out_fmt="sqlite", 
 		out_dsn=NULL, overwrite=TRUE, SAdomdat=SAdomdat, SAdata=SAdata)
+
+     ## Return SA population data
+     returnlst$SApopdat <- SApop$SApopdat
+     SApopdat <- SApop$SApopdat
   }
-  SApopdat <- SApop$SApopdat
   #SAdata <- SApop$SAdata
 
   if (is.null(SApopdat)) 
@@ -203,7 +207,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 			estvar=estvar, estvar.filter=estvar.filter, smallbnd.att=smallbnd.att,
 			savedata=savedata, multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn,
 			multest_layer=outnm, returntitle=TRUE, rawdata=TRUE, outfolder=outfolder,
- 			multest.append=multest.append, overwrite=TRUE, outfn.pre=RAVG.ecoprov),
+ 			multest.append=multest.append, title.ref=title.ref, overwrite=TRUE, 
+			outfn.pre=RAVG.ecoprov),
 				error=function(err) {
 					message(err)
 					return(NULL)
@@ -225,7 +230,11 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       }
     }
   }
-  returnlst <- list(SAest=SAest, SAraw=SAraw, SAtitlelst=SAtitlelst, SAmultest=SAmultest)
+
+  returnlst$SAest <- SAest
+  returnlst$SAraw <- SAraw
+  returnlst$SAtitlelst <- SAtitlelst
+  returnlst$SAmultest <- SAmultest
 
   return(returnlst)
 }

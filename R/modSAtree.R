@@ -28,7 +28,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
-	title.rowvar=title.colvar <- NULL
+	title.rowvar=title.colvar=TOTAL <- NULL
   gui <- FALSE
 
   ##################################################################
@@ -457,7 +457,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 			SApackage=SApackage, SAmethod="unit", esttype=esttype, 
 			prednames=prednames, fmla=fmla, domain=domain,
 			response=response))
- 
+
     ## get estimate by domain, by largebnd value
     message("generating area-level estimates for ", response, "...")
     dunit.multest.area <- do.call(rbind, lapply(largebnd.vals, SAest.large, 
@@ -511,7 +511,6 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 				nhatcol=nhat, nhatcol.var=nhat.var)
 
   if (multest) {
-
     ## Merge SAdom attributes to dunit.multest
     if (addSAdomsdf) {
       dunit.multest[, AOI := NULL]
@@ -525,11 +524,11 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
       dunit.multest <- dunit.multest[order(-dunit.multest$AOI, dunit.multest$DOMAIN),]
     } else {
       dunit.multest <- dunit.multest[order(-dunit.multest$AOI, dunit.multest$DOMAIN),]
-    }    
+    }  
 
     ## Remove TOTAL column from dunit.multest
     if (domain == "TOTAL" && "TOTAL" %in% names(dunit.multest))
-      dunit.multest$TOTAL <- NULL
+      dunit.multest[, TOTAL := NULL]
 
     if (multest.AOIonly) 
       ## Subset dunit.multest, where AOI = 1
@@ -539,8 +538,9 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
     if (savedata) {
 
       ## Remove TOTAL column from est
-      if (domain == "TOTAL" && "TOTAL" %in% names(dunit.multest))
-        dunit.multest$TOTAL <- NULL
+      if (domain == "TOTAL" && "TOTAL" %in% names(dunit.multest)) {
+        dunit.multest[, TOTAL := NULL]
+      }
 
 
       ## Remove column headings if appending to csv file
@@ -558,7 +558,6 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
     }
   } 
 
-  
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES
@@ -573,7 +572,6 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 
   estnm <- "est"
   unit.totest <- setDT(est)
-
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	unitvar=smallbnd.att, unit.totest=unit.totest, unit.rowest=unit.rowest, 
 	unit.colest=unit.colest, unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, 
@@ -593,7 +591,6 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
   titlelst <- tabs$titlelst
   if (rawdata) 
     names(rawdat)[names(rawdat) == "unit.totest"] <- "dunit.totest"
-
 
   if (savedata) {
     if (rawdata) {

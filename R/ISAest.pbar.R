@@ -54,6 +54,7 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
   ## note: the variables selected can change depending on the order in original formula (fmla)
   fmla.dom <- stats::as.formula(paste(yn, paste(preds.dom, collapse= "+"), sep="~"))
  
+
   if (SAmethod == "unit") {
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
@@ -75,7 +76,6 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
   }
 
   if (SAmethod == "area") {
-
     xpop.dom <- paste0(preds.dom, ".X.pop")
     fmla.dom2 <- as.formula(paste(paste0(yn, ".ybar.i"), 
 				paste(xpop.dom, collapse= "+"), sep="~"))
@@ -90,6 +90,11 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
              domain.col = "DOMAIN",
              sample.id.col = cuniqueid,
              neg.sfrac = TRUE)
+
+    ## To add space to messages
+    cat("\n")
+
+
     #building pieces		
     partA <- res$data$samp.agg.X.pop[,c("domain.id","n.i",
 				paste0(yn,".ybar.i"),
@@ -118,7 +123,6 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
   ## Merge AOI
   if (!"AOI" %in% names(est))
     est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
- 
 }
 
 

@@ -238,7 +238,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       }
 
       if (rowvar == "TOTAL") {
-
         if (!is.null(totunit)) {
           totunit <- setDF(totunit)
           if (allin1) {
@@ -722,13 +721,14 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         unit.totest <- FIESTA::getrhat(unit.totest)
 
       ## Split columns if unitvar2 exists
-      unit.totest[, TOTAL := NULL]
+      if ("TOTAL" %in% names(unit.totest))
+        unit.totest[, TOTAL := NULL]
       if (!is.null(unitvar2)) {
         unit.totest[, c(unitvar2, unitvar) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
         setcolorder(unit.totest, c(unitvar2, unitvar, 
 		names(unit.totest)[!names(unit.totest) %in% c(unitvar2, unitvar)])) 
       } 
- 
+
       rawdat$unit.totest <- setDF(unit.totest)
       rawdat.tabs <- c(rawdat.tabs, "unit.totest")
 

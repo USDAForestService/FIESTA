@@ -1,7 +1,7 @@
 \name{anSAest_RAVG}
 \alias{anSAest_RAVG}
 \title{
-	Analysis - Generate unit-level and area-leve estimates for fire perimeters.
+	Analysis - Generate unit-level and area-level estimates for fire perimeters.
 }
 \description{
 	Analysis function for streamlining small area estimation strategies for 
