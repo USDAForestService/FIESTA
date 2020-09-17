@@ -180,6 +180,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   SAest <- list()
   SAmultest <- list()
   SAraw <- list()
+  SAtitlelst <- list()
 
   message("calculating estimates...")
 
@@ -200,7 +201,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		modSAtree(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
 			landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
 			estvar=estvar, estvar.filter=estvar.filter, smallbnd.att=smallbnd.att,
-			savedata=TRUE, multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn,
+			savedata=savedata, multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn,
 			multest_layer=outnm, returntitle=TRUE, rawdata=TRUE, outfolder=outfolder,
  			multest.append=multest.append, overwrite=TRUE, outfn.pre=RAVG.ecoprov),
 				error=function(err) {
@@ -212,7 +213,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
         SAest[[outnm]] <- SAestdat$est
         SAmultest[[outnm]] <- SAestdat$dunit.multest
         SAraw[[outnm]] <- SAestdat$raw$dunit.totest
-      
+        SAtitlelst[[outnm]] <- SAestdat$titlelst
+     
  
         if (barplot.compare) {
           ## build plots
@@ -223,6 +225,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       }
     }
   }
-  return(list(SAest=SAest, SAmultest=SAmultest, SAraw=SAraw))
+  returnlst <- list(SAest=SAest, SAraw=SAraw, SAtitlelst=SAtitlelst, SAmultest=SAmultest)
+
+  return(returnlst)
 }
 		
