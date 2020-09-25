@@ -40,6 +40,9 @@ jobs:
       ##########################
       - name: Checkout Code
         uses: actions/checkout@v2
+      
+      # Generate location to store lint report
+      - run: mkdir -p /github/workspace/
 
       ################################
       # Run Linter against code base #
@@ -50,3 +53,11 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      ####################################
+      # Upload report as Action artifact #
+      ####################################
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Lint Report
+          path: /github/workspace/super-linter.report
