@@ -631,7 +631,13 @@ to attach them to the start of each source file to most effectively
 state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages.
+    The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool 
+    for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, 
+    Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, 
+    different evaluation time periods, customized stratification schemes, non-standard variance equations, 
+    integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling 
+    and estimation tools from CRAN R's library of packages.
+    
     Copyright (C) 2020  Frescino, Tracey S.; Moisen, Gretchen G.; Patterson, Paul L.; Toney, Chris; Freeman, Elizabeth A.
 
     This program is free software: you can redistribute it and/or modify
