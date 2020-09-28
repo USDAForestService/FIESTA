@@ -380,8 +380,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   #############################################################################
   if (helper_autoselect) { 
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\ISAinternal.R")
-
     autoselectlst <- helper.select(smallbndx, smallbnd.unique, smallbnd.domain=smallbnd.domain,
  		helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, largebndx=largebndx, 
 		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
