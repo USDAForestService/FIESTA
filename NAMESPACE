@@ -7,6 +7,7 @@ exportPattern(".")
 # Import all packages listed as Imports or Depends
 import("data.table")
 import("sf")
+import("rgeos")
 importFrom("grDevices", "colors", "dev.new", "dev.off", "jpeg", "pdf",
 	"png", "postscript", "rainbow", "terrain.colors", "is.raster",
 	"cm.colors", "hcl.colors", "heat.colors", "topo.colors")

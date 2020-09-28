@@ -306,7 +306,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
     }
   } else {
     splayer <- sf::st_read(dsn=dsn, layer=layer, query=sql, 
-				stringsAsFactors=stringsAsFactors, quiet=FALSE)
+				stringsAsFactors=stringsAsFactors, quiet=TRUE)
   }
 
   if ("sf" %in% class(splayer)) {

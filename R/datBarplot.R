@@ -481,7 +481,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     ## ADD TOP LABELS
     ####################################
     if (!is.null(toplabelvar)) {
-      toplabels <- datxbp[[toplabelvar]]
+      toplabels <- round(datxbp[[toplabelvar]])
       ## Labels on top
       #up <- max(datxbp[[yvar]]) * 0.05
       #ypos <- datxbp[[yvar]] + up

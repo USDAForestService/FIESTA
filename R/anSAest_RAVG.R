@@ -25,7 +25,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   ## spGetSAdoms() - default parameters
   ##################################################################################
   smallbnd.unique <- "FIRE_ID"
-  smallbnd.att <- "Fire_Name"
+  smallbnd.domain <- "Fire_Name"
   maxbnd.threshold <- 50
   #largebnd.threshold <- 10
   multiSAdoms <- FALSE
@@ -157,8 +157,9 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   #################################################################################
   if (is.null(SApopdat)) {
     SApop <- anSApop_ecomap(smallbnd=RAVG, smallbnd_dsn=RAVG_dsn, 	
-		smallbnd.unique=smallbnd.unique, smallbnd.filter=RAVG.filter, 
-		smallbnd.stfilter=RAVG.stfilter, smallbnd.ecofilter=RAVG.ecofilter,
+		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain, 
+		smallbnd.filter=RAVG.filter, smallbnd.stfilter=RAVG.stfilter, 
+		smallbnd.ecofilter=RAVG.ecofilter,
 		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold,
 		nbrdom.min=nbrdom.min, datsource=datsource, SQLitefn=SQLitefn, RS=RS,
  		measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
@@ -204,7 +205,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       SAestdat <- tryCatch(
 		modSAtree(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
 			landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
-			estvar=estvar, estvar.filter=estvar.filter, smallbnd.att=smallbnd.att,
+			estvar=estvar, estvar.filter=estvar.filter,
 			savedata=savedata, multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn,
 			multest_layer=outnm, returntitle=TRUE, rawdata=TRUE, outfolder=outfolder,
  			multest.append=multest.append, title.ref=title.ref, overwrite=TRUE, 

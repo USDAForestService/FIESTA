@@ -19,7 +19,7 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	largebnd_dsn = NULL, largebnd.unique = NULL, largebnd.filter = NULL, 
 	maxbnd = NULL, maxbnd_dsn = NULL, maxbnd.unique = NULL, 
 	maxbnd.filter = NULL, helper_autoselect = TRUE, nbrdom.min = NULL, 
-	maxbnd.threshold = 20, largebnd.threshold = 10, multiSAdoms = TRUE, 
+	maxbnd.threshold = 20, largebnd.threshold = 10, multiSAdoms = FALSE, 
 	showsteps = TRUE, savedata = FALSE, savesteps = FALSE, outfolder = NULL, 
 	out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE)
