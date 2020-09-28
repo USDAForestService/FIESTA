@@ -768,7 +768,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             xyvars <- c(xy.joinid, xvar, yvar)
             xystate <- xydat[, xyvars, with=FALSE]
           } else {            
-            xy.joinid <- pjoinid
+            #xy.joinid <- pjoinid
             xyvars <- c(xy.joinid, xvar, yvar)
             if (xy == "plot") {
               xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
