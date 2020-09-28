@@ -4,7 +4,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 	helperbnd.filter=NULL, largebnd=NULL, largebnd_dsn=NULL, largebnd.unique=NULL, 
 	largebnd.filter=NULL, maxbnd=NULL, maxbnd_dsn=NULL, maxbnd.unique=NULL, 
 	maxbnd.filter=NULL, helper_autoselect=TRUE, nbrdom.min=NULL, maxbnd.threshold=20, 
-	largebnd.threshold=10, multiSAdoms=TRUE, showsteps=TRUE, savedata=FALSE, 
+	largebnd.threshold=10, multiSAdoms=FALSE, showsteps=TRUE, savedata=FALSE, 
 	savesteps=FALSE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
   ##############################################################################
@@ -379,6 +379,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   ### DO THE WORK
   #############################################################################
   if (helper_autoselect) { 
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\ISAinternal.R")
+
     autoselectlst <- helper.select(smallbndx, smallbnd.unique, smallbnd.domain=smallbnd.domain,
  		helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, largebndx=largebndx, 
 		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,

@@ -88,8 +88,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       maxbnd.ltthres <- maxbndxlst[maxbndx.pct$int.pct < maxbnd.threshold]
       message(paste0(capture.output(maxbndx.pct), collapse = "\n"))
 
-
-      ## Get percent overlap of each fire with maxbndx
+      ## Get percent overlap of each small area with maxbndx
       smallbndx.pct <- suppressWarnings(tabulateIntersections(layer1=smallbndx,
  		layer1fld=smallbnd.unique, layer2=maxbndx.int, layer2fld=maxbnd.unique))
       smallbndx.pct <- data.table(smallbndx.pct)
@@ -126,6 +125,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 				ypoly=maxbndx.intd[maxbndx.intd[[maxbnd.unique]] != lt, ], 
 				ypoly.att=maxbnd.unique, nbr=1, returnsf=FALSE))
             	return(c(closest.maxbnd, lt)) }, maxbndx.intd, maxbnd.unique)
+            mbndlst <- c(maxbnd.gtthres, unlist(mbndlst))
           } else {
             mbndlst <- maxbndxlst[1]
           }
@@ -135,6 +135,8 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           ## Create list of new smallbnd(s)
           sbndlst <- lapply(mbndlst, function(mbnd, maxpct, smallbndx, smallbnd.unique) {
             sbnd.att <- maxpct[maxpct[[maxbnd.unique]] %in% mbnd, smallbnd.unique]
+            if (length(sbnd.att) == 0) 
+              stop("cannot have more than one model...  check smallbnd")             
             smallbndx[smallbndx[[smallbnd.unique]] %in% sbnd.att,] 
           }, maxpct, smallbndx, smallbnd.unique)
         }
@@ -197,7 +199,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   smallbndxlst <- list()
   SAbndlst <- list()
   SAdomsnmlst <- vector("integer", length(sbndlst))
- 
+
   ## Loop thru sbndlst
   for (i in 1:length(sbndlst)) {
     sbnd <- sf_dissolve(sbndlst[[i]], "AOI")
