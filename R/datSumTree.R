@@ -436,7 +436,8 @@ datSumTree <- function(tree=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       } else if (tvar %in% remvars) {
         tpavar <- "TPAREMV_UNADJ"
       } else{
-        tpavar <- "TPAGROW_UNADJ"
+        #tpavar <- "TPAGROW_UNADJ"
+        tpavar <- "TPA_UNADJ"
       } 
       newname <- paste0(tvar, "_TPA")
       ## Adjust by adjTPA variable (Default is 1)

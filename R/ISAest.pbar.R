@@ -56,6 +56,7 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
  
 
   if (SAmethod == "unit") {
+
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
     dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=plt.dom, random=~1|DOMAIN)))

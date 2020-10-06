@@ -137,7 +137,6 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   landarea <- estdat$landarea
   if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
-
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -184,8 +183,6 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   treedat <- check.tree(gui=gui, treef=treef, condf=condf, bytdom=bytdom, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
 		estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, adjtree=adjtree)
-
-
   if (is.null(treedat)) return(NULL) 
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid))
   estvar <- treedat$estvar

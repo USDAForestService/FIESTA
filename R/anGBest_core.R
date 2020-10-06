@@ -958,7 +958,6 @@ print(paste("Table", tabnm))
 #  } else {
 #    footnote4 <- footnote
 #  }
-
   estdat2 <- tabgrp(GBpopdat=popdat, esttype="TREE", sumunits=TRUE, landarea=landarea, 
 	estvar=estvar, estvar.filter=estvar.filter, rowvar=rowvar, colvar=colvar, rowgrp=rowgrp, 
 	colgrp=colgrp, colgrpcd=colgrpcd, row.FIAname=row.FIAname, col.FIAname=col.FIAname, 

@@ -131,8 +131,8 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       }
     } else if (!is.vector(x.order)) {
       stop("invalid x.order..  must be 'DESC', 'ASC' or a vector of xvar values")
-    } else if (!all(x[[xvar]] %in% x.order)) {
-      notinOrder <- x[[xvar]][which(!x[[xvar]] %in% x.order)]  
+    } else if (!all(datx[[xvar]] %in% x.order)) {
+      notinOrder <- datx[[xvar]][which(!datx[[xvar]] %in% x.order)]  
       if (length(notinOrder) > 0) {
         stop("invalid x.order values.. missing: ", paste(notinOrder, collapse=","))
       } else{
@@ -222,7 +222,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       datxbp <- datxbp[order(datxbp[,grpvar], match(datxbp[,xvar], x.order)),]
     }
   } else {
-    datxbp <- datxbp
+    datxbp <- datxbp[match(datxbp[[xvar]], datx[[xvar]]),]
   }
  
   ## ylim

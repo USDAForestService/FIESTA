@@ -398,9 +398,11 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           totest[[senmd]] <- totest[[senm]] / dividebynum
           unit.totest[[senmd]] <- unit.totest[[senm]] / dividebynum
         }
-        if (allin1) 
-          char.width <- max(nchar(round(na.omit(totest[["pse"]]), pseround)))
+ 
+        if (allin1)
+          char.width <- max(nchar(round(na.omit(totest[["pse"]]), pseround)))          
       }
+      if (char.width == -Inf) char.width <- 0
 
       if (!is.null(unit.rowest)) {
         rowest <- groupUnits(tabest=unit.rowest, domain=rowvar, estncol=estnm,

@@ -767,7 +767,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (!is.null(xydat)) {
             xyvars <- c(xy.joinid, xvar, yvar)
             xystate <- xydat[, xyvars, with=FALSE]
-          } else {            
+          } else {  
             #xy.joinid <- pjoinid
             xyvars <- c(xy.joinid, xvar, yvar)
             if (xy == "plot") {
@@ -784,6 +784,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				" = xy.", xy.joinid, ")", " where ", stfilter) 
             }
             xystate <- DBI::dbGetQuery(xyconn, xy.qry) 
+            if (nrow(xystate) == 0) break
           }
 
           ## Get most current plots in database for Endyr.filter & !Endyr.filter
@@ -928,7 +929,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               xyplt <- rbind(xyplt1, xyplt2)
 
           } else {    ## Endyr.filter = NULL
-
             ## Clip data
             clipdat <- spClipPoint(xyplt=xystate, 
 				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 

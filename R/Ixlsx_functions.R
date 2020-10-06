@@ -399,9 +399,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
   for (i in 1:length(cgrpcds)) {
     cgrp <- cgrpcds[i]
 
-#print("cgrp")
-#print(cgrp)
- 
     if (cgrp != 9999) 
       colgrpnm <- ref_colgrp[ref_colgrp$VALUE == cgrp, "MEANING"]
    
@@ -419,9 +416,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
 
     for (j in 1:length(rgrpcds)) {
       rgrp <- rgrpcds[j]
-
-#print("rgrp")
-#print(rgrp)
 
       if (rgrp == 9999) {
         cond3.filter <- cond2.filter
@@ -483,21 +477,31 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
         coltot <- rbind(coltot, setDF(coltottab))
       }
       if (esttype == "AREA") {
-        estdat <- modGBarea(cond=pltcondx, pltassgn=pltassgn, cond.filter=cond3.filter, 
-		rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, returntitle=TRUE, 
-		col.add0=TRUE, collut=collut, row.add0=TRUE, rowlut=rowlut2, allin1=allin1, 
-		title.rowvar=title.rowvar, sumunits=sumunits, unitvar=unitvar, 
-		title.filter="", landarea=landarea, title.colvar=title.colvar, 
-		col.orderby=col.orderby, estnull=estnull, psenull=psenull, 
-		GBpopdat=GBpopdat, ...)
+        estdat <- 	tryCatch(
+        	modGBarea(cond=pltcondx, pltassgn=pltassgn, cond.filter=cond3.filter, 
+			rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, returntitle=TRUE, 
+			col.add0=TRUE, collut=collut, row.add0=TRUE, rowlut=rowlut2, allin1=allin1, 
+			title.rowvar=title.rowvar, sumunits=sumunits, unitvar=unitvar, 
+			title.filter="", landarea=landarea, title.colvar=title.colvar, 
+			col.orderby=col.orderby, estnull=estnull, psenull=psenull, 
+			GBpopdat=GBpopdat, ...),
+				error=function(err) {
+					message(err)
+					return(NULL)
+				} )
       } else if (esttype == "TREE") { 
-        estdat <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
-		unitvar=unitvar, cond.filter=cond3.filter, rowvar=rowvar, colvar=colvar,
- 		row.orderby=row.orderby, returntitle=TRUE, col.add0=TRUE, collut=collut, 
-		row.add0=TRUE, rowlut=rowlut2, title.rowvar=title.rowvar, allin1=allin1, 
-		title.filter="", estvar.filter=estvar2.filter, landarea=landarea, 
-		title.colvar=title.colvar, col.orderby=col.orderby, estnull=estnull, 
-		psenull=psenull, GBpopdat=GBpopdat, rawdata=TRUE, ... ) 
+        estdat <- 	tryCatch(
+		modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
+			unitvar=unitvar, cond.filter=cond3.filter, rowvar=rowvar, colvar=colvar,
+ 			row.orderby=row.orderby, returntitle=TRUE, col.add0=TRUE, collut=collut, 
+			row.add0=TRUE, rowlut=rowlut2, title.rowvar=title.rowvar, allin1=allin1, 
+			title.filter="", estvar.filter=estvar2.filter, landarea=landarea, 
+			title.colvar=title.colvar, col.orderby=col.orderby, estnull=estnull, 
+			psenull=psenull, GBpopdat=GBpopdat, rawdata=TRUE, ...),
+				error=function(err) {
+					message(err)
+					return(NULL)
+				} )
       }
       if (!is.null(estdat)) {
         est <- estdat$est

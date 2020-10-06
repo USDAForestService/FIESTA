@@ -106,9 +106,8 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
     pltassgnid <- GBdata$pltassgnid  
-  }  
-
-
+  } 
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions

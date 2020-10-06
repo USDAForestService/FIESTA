@@ -452,7 +452,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 					largebndx[, largebnd.unique], largest=TRUE))
     if (showsteps) {
       plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
-      plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1)
+      plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1, color="translucent")
     } 
     if (savedata) {
       SAdoms_layer <- "SAdoms"

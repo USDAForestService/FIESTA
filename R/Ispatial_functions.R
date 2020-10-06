@@ -241,8 +241,11 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
         dsn <- paste(dsn, fmt, sep=".")
       if (!file.exists(dsn)) dsn <- NULL
     }
-    if (ext.dsn %in% c("shp", "csv"))
+    if (ext.dsn %in% c("shp", "csv")) {
       layer <- basename.NoExt(dsn)
+    } else if (!gui && is.null(layer)) {
+      stop("layer is NULL")
+    }
   } else {
     ext.layer <- getext(layer)
     if (!is.na(ext.layer) && ext.layer != "NA" && file.exists(layer)) {

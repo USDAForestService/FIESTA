@@ -22,7 +22,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	PLOT_STATUS_CD=BA=DIA=CRCOVPCT_RMRS=TIMBERCD=SITECLCD=RESERVCD=JENKINS_TOTAL_B1=
 	JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=
 	ACI_NFS=OWNCD=OWNGRPCD=FORNONSAMP=ZSTUNCOPLOT=sppvarsnew=out_fmt=out_dsn=
-	evalFilter.min=STATECD=UNITCD=COUNTYCD=INVYR <- NULL
+	STATECD=UNITCD=COUNTYCD=INVYR <- NULL
 
 
   ## SET OPTIONS
@@ -632,7 +632,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       evalid <- evalidlist[[state]]
       evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
 
-      evalFilter.min <- paste("ppsa.EVALID =", min(evalid))
       if (isdwm) {
         evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
         if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
@@ -654,7 +653,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         invyrFilter <- paste0("p.INVYR IN(", toString(invyr), ")")
         evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(invyr), ")")
       }
-      evalFilter.min <- evalFilter
  
       if (!subcycle99)
         evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
@@ -736,7 +734,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
     ## SET QUERY FILTER
     xfilter <- paste0(evalFilter, stateFilters)
-    xfilter.min <- paste0(evalFilter.min, stateFilters)
     
     #####################################################################################
     ###################################    RUN QUERIES   ################################
@@ -750,7 +747,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       #if (iseval) 
       #  vars <- paste0(vars, ", ppsa.EVALID")
 
-      pltcondqry <- paste("select", vars, "from", pcfromqry, "where", xfilter)
+      pltcondqry <- paste("select distinct", vars, "from", pcfromqry, "where", xfilter)
       pltcondx <- setDT(sqldf::sqldf(pltcondqry, stringsAsFactors=FALSE))
    
       ## Write query to outfolder
@@ -984,7 +981,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       ## Get xy for the most current sampled plot
       if (xymeasCur) {
         xvars <- c("p.ZSTUNCOPLOT", "p.CN", paste0("p.", getcoords(coords)))
-        xyx.qry <- paste("select", toString(xvars), "from", xyfromqry)
+        xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
         xyx.qry <- gsub("from plot", "from pltx ", xyx.qry)
 
         xyCurx <- sqldf::sqldf(xyx.qry)
@@ -1009,8 +1006,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       } else {
         ## add commas
         ttvars <- toString(paste0("t.", c(treevarlst, tsumvarlst)))
-        treeqry <- paste("select", ttvars, "from", tfromqry, "where", evalFilter.min)
+        treeqry <- paste("select distinct", ttvars, "from", tfromqry, "where", evalFilter)
         treex <- sqldf::sqldf(treeqry, stringsAsFactors=FALSE)
+
         if (!is.null(sppvars)) {
           sppsql <- paste("select SPCD,", paste(sppvars, collapse=","), "from REF_SPECIES")
           ref_spp <- sqldf::sqldf(sppsql)
@@ -1086,7 +1084,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       } else {
         ## add commas
         ssvars <- toString(paste0("s.", c(seedvarlst, ssumvarlst)))
-        seedqry <- paste("select", ssvars, "from", sfromqry, "where", evalFilter.min)
+        seedqry <- paste("select distinct", ssvars, "from", sfromqry, "where", evalFilter)
         seedx <- sqldf::sqldf(seedqry, stringsAsFactors=FALSE)
 
         if (nrow(seedx) != 0) {
@@ -1137,7 +1135,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
       ## Get data for P2VEG_SUBPLOT_SPP
       vspsppvars <- toString(paste0("v.", vspsppvarlst))
-      vspsppqry <- paste("select", vspsppvars, "from", vfromqry, "where", evalFilter.min)
+      vspsppqry <- paste("select distinct", vspsppvars, "from", vfromqry, "where", evalFilter)
       vspsppx <- sqldf::sqldf(vspsppqry, stringsAsFactors=FALSE)
 
       if (nrow(vspsppx) != 0) {
@@ -1161,7 +1159,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
       ## Get data for P2VEG_SUBP_STRUCTURE
       vspstrvars <- toString(paste0("v.", vspstrvarlst))
-      vspstrqry <- paste("select", vspstrvars, "from", vstrfromqry, "where", evalFilter)
+      vspstrqry <- paste("select distinct", vspstrvars, "from", vstrfromqry, "where", evalFilter)
       vspstrx <- sqldf::sqldf(vspstrqry, stringsAsFactors=FALSE)
 
       if(nrow(vspstrx) != 0){
@@ -1199,8 +1197,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       } else {
 
         dvars <- toString(paste0("d.", dwmlst))
-        xfilter.dwm <- sub("ppsa.", "", xfilter.min)
-        dwmqry <- paste("select", dvars, "from", dfromqry, "where", xfilter.dwm)
+        xfilter.dwm <- sub("ppsa.", "", xfilter)
+        dwmqry <- paste("select distinct", dvars, "from", dfromqry, "where", xfilter.dwm)
         dwmx <- sqldf::sqldf(dwmqry, stringsAsFactors=FALSE)
 
         if (nrow(dwmx) != 0) {
@@ -1238,11 +1236,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     
         othertablexnm <- paste0("otherx", j)
         if (othertable == "PLOTGEOM") {
-          xqry <- paste("select * from", sub("SUBX", othertable, xfromqry2), 
-			"where", xfilter.min)
+          xqry <- paste("select distinct * from", sub("SUBX", othertable, xfromqry2), 
+			"where", xfilter)
         } else {
-          xqry <- paste("select * from", sub("SUBX", othertable, xfromqry), 
-			"where", xfilter.min)
+          xqry <- paste("select distinct * from", sub("SUBX", othertable, xfromqry), 
+			"where", xfilter)
         }
         assign(othertablexnm, sqldf::sqldf(xqry, stringsAsFactors=FALSE))
 

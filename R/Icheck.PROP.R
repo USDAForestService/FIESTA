@@ -1,7 +1,8 @@
-check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
+check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE, 
+	SUBP_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL){
 
   ## Global variables
-  PROP_BASIS=SUBPPROP_UNADJ=MICRPROP_UNADJ=TPA_UNADJ=MACRPROP_UNADJ <- NULL
+  TPROP_BASIS=SUBPPROP_UNADJ=MICRPROP_UNADJ=TPA_UNADJ=MACRPROP_UNADJ <- NULL
 
 
   ###################################################################################
@@ -18,47 +19,55 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE){
 #  micadj <- ifelse(any(TPAvals > 50), TRUE, FALSE)
 #  macadj <- ifelse(any(TPAvals > 0 & TPAvals < 5), TRUE, FALSE)
 
-  subadj=micadj=macadj <- TRUE
 
-  treex[, PROP_BASIS := "SUBP"]
-  if (subadj) {
-    if (!"SUBPPROP_UNADJ" %in% condnmlst) {
-      if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
-        ## If SUBPPROP_UNADJ not in cond table and only 1 condition per plot, 
-        ## 	add SUBPPROP_UNADJ and set = 1 (100 percent)
-        condx[, SUBPPROP_UNADJ := 1]
-      } else {
-        stop("SUBPPROP_UNADJ must be in cond table")
-      }
-    } 
-    PROPvars <- c(PROPvars, "SUBPPROP_UNADJ")
-  }    
-  if (micadj) {
-    if (!"MICRPROP_UNADJ" %in% condnmlst) {
-      if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
-        ## If MICRPROP_UNADJ not in cond table and only 1 condition per plot, 
-        ## 	add MICRPROP_UNADJ and set = 1 (100 percent)
-        condx[, MICRPROP_UNADJ := 1]
-      } else {
-        stop("MICRPROP_UNADJ must be in cond table")
-      }
+  ## Check SUBP_BREAKPOINT_DIA  and MACRO_BREAKPOINT_DIA    
+  if (!is.null(SUBP_BREAKPOINT_DIA ) && !is.numeric(SUBP_BREAKPOINT_DIA ) &&
+ 		length(SUBP_BREAKPOINT_DIA ) != 1)
+    stop("supb.mindia must be a numeric vector of length 1")
+  if (!is.null(MACRO_BREAKPOINT_DIA) && !is.numeric(MACRO_BREAKPOINT_DIA) &&
+ 		length(MACRO_BREAKPOINT_DIA) != 1)
+    stop("MACRO_BREAKPOINT_DIA must be a numeric vector of length 1")
+
+  treex[, TPROP_BASIS := "SUBP"]
+  if (!"SUBPPROP_UNADJ" %in% names(condx)) {
+    if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
+      ## If SUBPPROP_UNADJ not in cond table and only 1 condition per plot, 
+      ## 	add SUBPPROP_UNADJ and set = 1 (100 percent)
+      condx[, SUBPPROP_UNADJ := 1]
+    } else {
+      stop("SUBPPROP_UNADJ must be in cond table")
     }
-    treex[TPAGROW_UNADJ > 50, PROP_BASIS := "MICR"]
-    PROPvars <- c(PROPvars, "MICRPROP_UNADJ")
-  }
-  if (macadj) {
-    if (!"MACRPROP_UNADJ" %in% condnmlst) {
-      if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
-        ## If MACRPROP_UNADJ not in cond table and only 1 condition per plot, 
-        ## 	add MACRPROP_UNADJ and set = 1 (100 percent)
-        condx[, MACRPROP_UNADJ := 1]
-      } else {
-        stop("MACRPROP_UNADJ must be in cond table")
-      }
+  } 
+ 
+  if (!"MICRPROP_UNADJ" %in% names(condx)) {
+    if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
+      ## If MICRPROP_UNADJ not in cond table and only 1 condition per plot, 
+      ## 	add MICRPROP_UNADJ and set = 1 (100 percent)
+      condx[, MICRPROP_UNADJ := 1]
+    } else {
+      stop("MICRPROP_UNADJ must be in cond table")
     }
-    treex[TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, PROP_BASIS := "MACR"]
-    PROPvars <- c(PROPvars, "MACRPROP_UNADJ")
   }
+  treex[!is.na(DIA) & DIA < SUBP_BREAKPOINT_DIA , TPROP_BASIS := "MICR"]
+
+  if (!"MACRPROP_UNADJ" %in% names(condx)) {
+    if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
+      ## If MACRPROP_UNADJ not in cond table and only 1 condition per plot, 
+      ## 	add MACRPROP_UNADJ and set = 1 (100 percent)
+      condx[, MACRPROP_UNADJ := 1]
+    } else {
+      stop("MACRPROP_UNADJ must be in cond table")
+    }
+  }
+  
+  if (is.null(MACRO_BREAKPOINT_DIA) && "MACRO_BREAKPOINT_DIA" %in% names(condx)) {
+    treex[condx, TPROP_BASIS := ifelse(PROP_BASIS == "MACR" & 
+		!is.na(DIA) & DIA >= MACRO_BREAKPOINT_DIA, "MACR", TPROP_BASIS)] 
+  } else if (!is.null(MACRO_BREAKPOINT_DIA)) {
+    treex[!is.na(DIA) & DIA >= MACRO_BREAKPOINT_DIA, TPROP_BASIS := "MACR"]
+  }
+  
+  PROPvars <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
  
   if (checkNA) {
     ## Check for missing PROPvars and NA values in PROPvars

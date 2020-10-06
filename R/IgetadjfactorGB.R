@@ -92,9 +92,9 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, tuniqueid="PLT_CN",
 #      treex[condx, tadjfac := ifelse(PROP_BASIS == "MICR", ADJ_FACTOR_MICR, 
 #		ifelse(PROP_BASIS == "MACR", ADJ_FACTOR_MACR,
 #		ADJ_FACTOR_SUBP))]
-    if ("PROP_BASIS" %in% names(treex)) {
-      treex[condx, tadjfac := ifelse(PROP_BASIS == "MICR", ADJ_FACTOR_MICR, 
-		ifelse(PROP_BASIS == "MACR", ADJ_FACTOR_MACR,
+    if ("TPROP_BASIS" %in% names(treex)) {
+      treex[condx, tadjfac := ifelse(TPROP_BASIS == "MICR", ADJ_FACTOR_MICR, 
+		ifelse(TPROP_BASIS == "MACR", ADJ_FACTOR_MACR,
 		ADJ_FACTOR_SUBP))]
     } else {
       treex[condx, tadjfac := ifelse(TPAGROW_UNADJ > 50, ADJ_FACTOR_MICR, 

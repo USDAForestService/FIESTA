@@ -423,7 +423,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       ##################################################################################
       designcd <- unique(pltcondx[["DESIGNCD"]])
       if (length(designcd) != 1) {
-        stop("more than 1 plot design, calculate separate estimates by design")
+        warning("more than 1 plot design, calculate separate estimates by design")
       } else if (adj == "samp" && designcd != 1) {
         stop("samp adjustment for trees is only for designcd = 1 (annual inventory)") 
       }

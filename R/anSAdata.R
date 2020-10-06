@@ -1,7 +1,7 @@
 anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE, 
 	datsource="sqlite", data_dsn=NULL, istree=TRUE, plot_layer="plot",
  	cond_layer="cond", tree_layer="tree", puniqueid="CN", 
-	xy.joinid="PLT_CN", measCur=TRUE, measEndyr=NULL, measEndyr.filter=NULL,  
+	xy.joinid="PLT_CN", measCur=TRUE, measEndyr=NULL, Endyr.filter=NULL,  
 	intensity1=FALSE, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
 	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
@@ -67,10 +67,10 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
-		measEndyr=measEndyr, Endyr.filter=measEndyr.filter, intensity1=intensity1, 
+		measEndyr=measEndyr, Endyr.filter=Endyr.filter, intensity1=intensity1, 
 		showsteps=FALSE, savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
 		out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite)
+		overwrite_layer=overwrite, ...)
     xyplt <- SApltdat$clip_xyplt
     xy.uniqueid <- SApltdat$xy.uniqueid
     puniqueid <- SApltdat$puniqueid
@@ -160,8 +160,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   dunitarea <- SAmodeldat$domarea
   areavar <- SAmodeldat$areavar
   pltassgnid <- SAmodeldat$pltassgnid
-
-
 
 
   ##########################################

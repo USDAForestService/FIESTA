@@ -26,16 +26,15 @@ allin1f <- function(x, y, char.width=NULL, estnull="--", psenull="--",
     if (!is.null(pseround))
       y <- round(y, pseround)
   }
-
   if (is.null(char.width)) char.width <- max(nchar(y))  
 
   x.nsmall <- ifelse(!is.null(estround), estround, nbrdecimals(x))
   y.nsmall <- ifelse(!is.null(pseround), pseround, nbrdecimals(x))
 
-
   paste0(format(x, big.mark=",", digits=nbrdigits(x), nsmall=x.nsmall), " (", 
 	format(y, width=char.width, justify="right", digits=nbrdigits(y), 
 	nsmall=y.nsmall), ")")
+
 }
 
 
@@ -171,6 +170,7 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
     group.est[[psenm]] <- as.character(group.est[[psenm]])
   group.est[NBRPLT.gt0 == 0, (estnm) := estnull]
   group.est[NBRPLT.gt0 == 0, (psenm) := psenull]
+
 
   if (!is.null(rowvar.est)) {
     if (is.numeric(rowvar.est[[estnm]]))

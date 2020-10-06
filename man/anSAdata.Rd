@@ -10,7 +10,7 @@
 anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, 
 	datsource = "sqlite", data_dsn = NULL, istree = TRUE, plot_layer = "plot", 
 	cond_layer = "cond", tree_layer = "tree", puniqueid = "CN",
- 	xy.joinid = "PLT_CN", measCur = TRUE, measEndyr = NULL, measEndyr.filter = NULL, 
+ 	xy.joinid = "PLT_CN", measCur = TRUE, measEndyr = NULL, Endyr.filter = NULL, 
 	intensity1 = FALSE, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, 
 	vars2keep = "AOI", showsteps = FALSE, savedata = FALSE, 
@@ -26,7 +26,8 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
   \item{smallbnd}{ sf R object or String. Area of interest. 
 	Can be a spatial polygon object, full pathname to a shapefile, or name of 
 	a layer within a database. }
-  \item{RS}{ String. Name of FIA research station to restrict states to. } 
+  \item{RS}{ String. Name of FIA research station to restrict states to
+	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. } 
   \item{clipxy}{ Logical. If TRUE, clip xy data. } 
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Name of database where *_layers reside. }
@@ -41,7 +42,7 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
   \item{measCur}{ String. Get plots with most current measurement. }
   \item{measEndyr}{ Logical. If measCur=TRUE, extract plots with most current 
 	measurement for state(s) for years measured before measEndyr. }
-  \item{measEndyr.filter}{ Filter. If measEndyr != NULL, a filter for plots. }
+  \item{Endyr.filter}{ Filter. If measEndyr != NULL, a filter for plots. }
   \item{intensity1}{ Logical. If TRUE, include only plots with INTENSITY=1. }
   \item{rastlst.cont}{ String vector or list. Continuous rasters (file names 
 	or raster objects). }
