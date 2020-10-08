@@ -18,18 +18,17 @@
 modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
 	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", evalid = NULL, 
-	invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
-	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
-	estvar.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE, 
-	col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
-	col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, 
-	rowgrpord = NULL, sumunits = TRUE, allin1 = FALSE, estround = 1, pseround = 2, 
-	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
+	invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,
+ 	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, 
+	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
+	landarea = "FOREST", plt.filter = NULL, cond.filter = NULL, estvar = NULL, 
+	estvar.filter = NULL, estvar.name = NULL, rowvar = NULL, colvar = NULL, 
+	row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
+	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, 
+	rowgrpnm = NULL, rowgrpord = NULL, sumunits = TRUE, allin1 = FALSE, estround = 1, 
+	pseround = 2, estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
+	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
 	overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
 	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
 	title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, 
@@ -91,6 +90,7 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 

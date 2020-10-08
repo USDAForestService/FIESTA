@@ -77,12 +77,12 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
     if (is.na(getext(out_dsn))) out_dsn <- paste0(out_dsn, ".", out_fmt)
 
-    if (append) {
-      out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE)
-    } else {
-      out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, 
-		overwrite=overwrite_dsn, outfn.date=outfn.date)
-    } 
+#    if (append) {
+#      out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE)
+#    } else {
+#      out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, 
+#		overwrite=overwrite_dsn, outfn.date=outfn.date)
+#    } 
     if (!file.exists(out_dsn)) {
       ## Check if spatiaLite database
       sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=append,

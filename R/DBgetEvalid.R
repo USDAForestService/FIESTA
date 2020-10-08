@@ -18,6 +18,9 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   if (!gui)
     gui <- ifelse(nargs() == 0, TRUE, FALSE)
   
+  ## Set global variables
+  EVAL_GRP_Endyr=STATECD <- NULL
+
 
   ## SET OPTIONS
   options.old <- options()
@@ -79,9 +82,11 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   
 
   ## Define query POP_EVAL, POP_EVAL_TYP table
-  popevalvars <- c("CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", "START_INVYR", "END_INVYR")
-  popevaltypqry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", pet.eval_typ from ", SCHEMA., 
-		"POP_EVAL_TYP pet join ", SCHEMA., "POP_EVAL pev on (pev.cn = pet.eval_cn) ",
+  popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", 
+		"START_INVYR", "END_INVYR", "LOCATION_NM")
+  popevaltypqry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", 
+		pet.eval_typ from ", SCHEMA., "POP_EVAL_TYP pet join ", SCHEMA., 
+		"POP_EVAL pev on (pev.cn = pet.eval_cn) ",
 		"where pev.STATECD in ", paste0("(", toString(stcdlst), ")"))
 
 ############ CSV only
@@ -90,7 +95,10 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   ## Get database tables - POP_EVAL, POP_EVAL_TYPE, SURVEY
   #########################################################################
 
-  POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, ZIP=ZIP, stopifnull=FALSE)
+  POP_EVAL_GRP <- FIESTA::DBgetCSV("POP_EVAL_GRP", stcdlst, ZIP=ZIP, stopifnull=FALSE,
+		returnDT=TRUE)
+  POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, ZIP=ZIP, stopifnull=FALSE,
+		returnDT=TRUE)
   if (nrow(POP_EVAL) == 0) {
     message("no data in database for ", toString(states))
     return(NULL)
@@ -100,24 +108,22 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       message("no data in database for ", toString(miss))
       stcdlst <- stcdlst[!stcdlst %in% miss]
     }
-  } 
+  }    
 
   POP_EVAL_TYP <- FIESTA::DBgetCSV("POP_EVAL_TYP", stcdlst, ZIP=ZIP, stopifnull=FALSE)
   if (nrow(POP_EVAL_TYP) == 0) return(NULL)
   SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE, stopifnull=FALSE)
   if (nrow(SURVEY) == 0) return(NULL)
-  POP_EVAL <- sqldf::sqldf(popevaltypqry)
+  POP_EVAL <- setDT(sqldf::sqldf(popevaltypqry))
+
+  ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
+  POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP$EVAL_GRP, 
+		nchar(POP_EVAL_GRP$EVAL_GRP) - 3, nchar(POP_EVAL_GRP$EVAL_GRP)))]
 
 
 ############ End CSV only
 
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
-  if ("Texas" %in% states) {
-    Texascd <- FIESTA::pcheck.states("Texas", "VALUE")
-    POP_EVAL <- POP_EVAL[!POP_EVAL$STATECD == Texascd | POP_EVAL$LOCATION_NM == "Texas", ]
-    maxyr <- max(POP_EVAL[POP_EVAL$STATECD == Texascd, "END_INVYR"])
-    SURVEY <- SURVEY[!SURVEY$STATECD == Texascd | SURVEY$INVYR <= maxyr,]
-  }
 
   ## Check if evalid is valid. If valid, get invyrtab invyrs, evalidlist, and invtype
   if (!is.null(evalid)) {
@@ -348,30 +354,23 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       stabbr <- FIESTA::pcheck.states(stcd, "ABBR")
       stinvyrs <- unique(stinvyr.vals[[state]])
 
-      POP_EVAL_endyrs <- unique(POP_EVAL[POP_EVAL$STATECD == stcd, "END_INVYR"])
-      if (any(is.na(POP_EVAL_endyrs))) 
-        POP_EVAL_endyrs <- unique(c(POP_EVAL_endyrs, 
-          POP_EVAL[POP_EVAL$STATECD == stcd & is.na(POP_EVAL$END_INVYR), "REPORT_YEAR_NM"]))
-      POP_EVAL_endyrs <- sort(POP_EVAL_endyrs)
-      POP_EVAL_endyrs <- POP_EVAL_endyrs[POP_EVAL_endyrs %in% invyrtab$INVYR]
+      ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
+      ## Remove East and West in LOCATION_NM and EVAL_DESCR
+      if (any(stcdlst == 48)) {
+        POP_EVAL_GRP <- POP_EVAL_GRP[!grepl("EAST", POP_EVAL_GRP$EVAL_GRP_DESCR, 
+		ignore.case=TRUE) &
+		!grepl("WEST", POP_EVAL_GRP$EVAL_GRP_DESCR, ignore.case=TRUE), ]
+      }
+    
+      POP_EVAL_endyrs <- na.omit(unique(POP_EVAL_GRP[POP_EVAL_GRP$STATECD == stcd, 
+		"EVAL_GRP_Endyr"][[1]]))
+
       if (!is.null(evalEndyr)) {
         Endyr <- evalEndyr[[state]]
 
-        if (!Endyr %in% POP_EVAL_endyrs) {
-          popevalcols <- c("CN", "EVAL_GRP_CN", "EVALID", "EVAL_DESCR", 
-			"REPORT_YEAR_NM", "START_INVYR", "END_INVYR", "LAND_ONLY", 
-			"TIMBERLAND_ONLY", "GROWTH_ACCT", "ESTN_METHOD")
-          message(POP_EVAL[POP_EVAL$STATECD == stcd, popevalcols])
-          stop(paste0(Endyr, " is not in ", stabbr, "_", "POP_EVAL table"))
-
-#          msg <- paste(Endyr, "is not in POP_EVAL...")
-#          if (max(POP_EVAL_endyrs) < max(stinvyrs)) {
-#            Endyr <- max(POP_EVAL_endyrs[POP_EVAL_endyrs > max(stinvyrs)])
-#          } else {
-#            Endyr <- min(POP_EVAL_endyrs[POP_EVAL_endyrs > max(stinvyrs)])
-#          }
-#          message(paste(msg, "using", Endyr)) 
-        } 
+        if (!Endyr %in% POP_EVAL_endyrs) 
+          stop(paste0(Endyr, " data are not in ", stabbr, "_", "POP_EVAL table"))
+         
       } else {   ## is.null(evalEndyr)
         if (evalCur) {
           Endyr <- max(POP_EVAL_endyrs)
@@ -388,17 +387,15 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
           }
         }
       }
- 
+
       ## Get evalid and inventory years from POP_EVAL table
-      pop_endyr <- POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR %in% Endyr
-      if (all(is.na(pop_endyr[pop_endyr != FALSE])))
-        stop("invalid invtype for ", state)
-      popevaltab <- POP_EVAL[POP_EVAL$STATECD == stcd & !is.na(POP_EVAL$END_INVYR) & 
-		POP_EVAL$END_INVYR %in% Endyr,]
+      setkey(POP_EVAL, "EVAL_GRP_CN")
+      setkey(POP_EVAL_GRP, "CN")
+      popevaltab <- POP_EVAL[POP_EVAL_GRP[, 
+		c("CN", "EVAL_GRP_Endyr")]][STATECD == stcd & EVAL_GRP_Endyr == Endyr,]
 
       if (is.null(invtype) && !evalAll) {
-        Startyr <- unique(POP_EVAL[POP_EVAL$STATECD == stcd & POP_EVAL$END_INVYR %in% Endyr, 
-		"START_INVYR"])
+        Startyr <- sort(unique(popevaltab[["START_INVYR"]]))
         #invtype <- ifelse(is.na(Startyr) || Endyr == Startyr, "PERIODIC", "ANNUAL")
         invtype <- ifelse(Endyr == Startyr, "PERIODIC", "ANNUAL")
       }

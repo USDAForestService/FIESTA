@@ -1,5 +1,7 @@
-anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE, 
-		savedata=FALSE, outfolder=NULL, divideby.vol="million") {
+anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL, 
+		evalType=c("ALL", "AREAVOL", "GRM"), fill=TRUE, addSEcol=FALSE, 
+		allin1=FALSE, savedata=FALSE, outfolder=NULL, outfn.date=TRUE, 
+		divideby.vol="million", datCore=NULL) {
 
   ## Set global variables
   SPGRPCD=footnote3=footnote4 <- NULL
@@ -12,6 +14,7 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   #library(xlsx)
   gui <- FALSE
   cellwidth <- ifelse(allin1, 12, 10)
+  estround <- 1
 
 
   ## Notes:
@@ -32,12 +35,19 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   ########################################################
   outfolder <- FIESTA::pcheck.outfolder(outfolder)
 
-  ## Extract data from coredata object
-  ########################################################################
-  if (!"datPlots" %in% names(datCore))
-    stop("coredata must include datPlots... run anGBest_core_data()")
-  if (!"datStrata" %in% names(datCore))
-    stop("coredata must include datStrata... run anGBest_core_data()")
+  if (is.null(datCore)) {
+    datCore <- anGBest_core_data(state=state, evalCur=evalCur, evalEndyr=evalEndyr,
+		evalType=evalType, savedata=savedata, outfolder=outfolder, 
+		outfn.date=outfn.date) 
+  } else {
+
+    ## Extract data from coredata object
+    ########################################################################
+    if (!"datPlots" %in% names(datCore))
+      stop("coredata must include datPlots... run anGBest_core_data()")
+    if (!"datStrata" %in% names(datCore))
+      stop("coredata must include datStrata... run anGBest_core_data()")
+  }
 
   datPlots <- datCore$datPlots
   datStrata <- datCore$datStrata
@@ -55,9 +65,9 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   pltassgnid <- datStrata$pltassgnid
 
   if (lapply(evalid, length) > 1) {
-    pltassgn00 <- pltassgn[endsWith(as.character(pltassgn[["EVALID"]]), "00"),]
-    pltassgn03 <- pltassgn[endsWith(as.character(pltassgn[["EVALID"]]), "03"),]
-    pltassgn <- pltassgn[endsWith(as.character(pltassgn[["EVALID"]]), "01"),]
+    pltassgn00 <- pltassgn[endsWith(as.character(pltassgn[["EVALID"]]), "0"),]
+    pltassgn03 <- pltassgn[endsWith(as.character(pltassgn[["EVALID"]]), "3"),]
+    pltassgn <- pltassgn[endsWith(as.character(pltassgn[["EVALID"]]), "1"),]
 
     plt00 <- plt[plt$CN %in% pltassgn00[[pltassgnid]],]
     plt03 <- plt[plt$CN %in% pltassgn03[[pltassgnid]],]
@@ -70,13 +80,13 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
     tree03 <- tree[tree$PLT_CN %in% pltassgn03[[pltassgnid]],]
     tree <- tree[tree$PLT_CN %in% pltassgn[[pltassgnid]],]
 
-    unitarea00 <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "00"),]
-    unitarea03 <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "03"),]
-    unitarea <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "01"),]
+    unitarea00 <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "0"),]
+    unitarea03 <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "3"),]
+    unitarea <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "1"),]
 
-    stratalut00 <- stratalut[endsWith(as.character(stratalut[["EVALID"]]), "00"),]
-    stratalut03 <- stratalut[endsWith(as.character(stratalut[["EVALID"]]), "03"),]
-    stratalut <- stratalut[endsWith(as.character(stratalut[["EVALID"]]), "01"),]
+    stratalut00 <- stratalut[endsWith(as.character(stratalut[["EVALID"]]), "0"),]
+    stratalut03 <- stratalut[endsWith(as.character(stratalut[["EVALID"]]), "3"),]
+    stratalut <- stratalut[endsWith(as.character(stratalut[["EVALID"]]), "1"),]
 
   } else {
     pltassgn00 <- pltassgn
@@ -229,10 +239,12 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   #############################################################
   popdat03 <- modGBpop(cond=cond03, plt=plt03, tree=tree03, 
 			pltassgn=pltassgn03, pltassgnid=pltassgnid, 
-			unitvar="ESTN_UNIT", unitarea=unitarea03, stratalut=stratalut03)
+			unitvar="ESTN_UNIT", unitarea=unitarea03, minplotnum.unit=2,
+			stratalut=stratalut03)
   popdat <- modGBpop(cond=cond, plt=plt, tree=tree, 
 			pltassgn=pltassgn, pltassgnid=pltassgnid, 
-			unitvar="ESTN_UNIT", unitarea=unitarea, stratalut=stratalut)
+			unitvar="ESTN_UNIT", unitarea=unitarea, minplotnum.unit=2, 
+			stratalut=stratalut)
 
 
   ## Set up Excel Workbook
@@ -310,7 +322,6 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   ## SAVE EXCEL WORKBOOK
   ###############################################################
   xlsx::saveWorkbook(wb, wbnm)  
-  estround <- 1
 
 
   #######################################################################################
@@ -334,7 +345,7 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
 
     cond.filter <- paste("RESERVCD ==", res)
     est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, 
-		strata=TRUE, unitvar="ESTN_UNIT", unitarea=unitarea00, 
+		strata=TRUE, unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2,
 		stratalut=stratalut00, landarea="FOREST", cond.filter=cond.filter, 
 		rowvar="TIMBERCD.PROD", row.FIAname=TRUE, adj="none", sumunits=TRUE, 
 		estround=estround)$est
@@ -345,8 +356,9 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   }
   cond2.filter <- "COND_STATUS_CD == 1"
   est2 <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
-		unitvar="ESTN_UNIT", unitarea=unitarea00, stratalut=stratalut00, 
-		cond.filter=cond2.filter, adj="none", sumunits=TRUE, estround=estround)$est
+		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
+		stratalut=stratalut00, cond.filter=cond2.filter, adj="none", 
+		sumunits=TRUE, estround=estround)$est
   est2 <- data.frame("Total", est2, stringsAsFactors=FALSE)
   names(est2) <- c("landstatus1", "landstatus2", "Estimate", "Percent Sampling Error")
   b1.1 <- rbind(b1.1, est2)
@@ -358,8 +370,8 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   ################################################################
   cond.filter <- "COND_STATUS_CD == 2"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
-		unitvar="ESTN_UNIT", unitarea=unitarea00, stratalut=stratalut00, 
-		landarea="ALL", cond.filter=cond.filter, 
+		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
+		stratalut=stratalut00, landarea="ALL", cond.filter=cond.filter, 
 		adj="none", sumunits=TRUE, estround=estround)$est
   b1.2 <- data.frame(landstatus1="Nonforest and other land", "Nonforest land", "", est[, -1],
 		stringsAsFactors=FALSE)
@@ -367,17 +379,18 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
 
   cond.filter <- "COND_STATUS_CD %in% c(3,4)"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
-		unitvar="ESTN_UNIT", unitarea=unitarea00, stratalut=stratalut00, 
-		landarea="ALL", cond.filter=cond.filter, rowvar="COND_STATUS_CD", 
-		row.FIAname=TRUE, adj="none", sumunits=TRUE, estround=estround)$est
+		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
+		stratalut=stratalut00, landarea="ALL", cond.filter=cond.filter, 
+		rowvar="COND_STATUS_CD", row.FIAname=TRUE, adj="none", sumunits=TRUE, 
+		estround=estround)$est
   b1.3 <- data.frame(landstatus1="Nonforest and other land", "Water", est, stringsAsFactors=FALSE)
   names(b1.3) <- b1.names
 
   cond.filter <- "COND_STATUS_CD %in% c(2,3,4)"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
-		unitvar="ESTN_UNIT", unitarea=unitarea00, stratalut=stratalut00, 
-		landarea="ALL", cond.filter=cond.filter, adj="none", sumunits=TRUE, 
-		estround=estround)$est
+		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
+		stratalut=stratalut00, landarea="ALL", cond.filter=cond.filter, 
+		adj="none", sumunits=TRUE, estround=estround)$est
   b1.4 <- data.frame(landstatus1="Nonforest and other land", "Total", "", est[, -1],
 		stringsAsFactors=FALSE)
   names(b1.4) <- b1.names
@@ -387,9 +400,10 @@ anGBest_core <- function(datCore, fill=TRUE, addSEcol=FALSE, allin1=FALSE,
   ################################################################
   cond.filter <- "COND_STATUS_CD == 5"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
-		unitvar="ESTN_UNIT", unitarea=unitarea00, stratalut=stratalut00, 
-		landarea="ALL", cond.filter=cond.filter, rowvar="COND_NONSAMPLE_REASN_CD", 
-		row.FIAname=TRUE, adj="none", sumunits=TRUE, estround=estround)$est
+		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
+		stratalut=stratalut00, landarea="ALL", cond.filter=cond.filter, 
+		rowvar="COND_NONSAMPLE_REASN_CD", row.FIAname=TRUE, adj="none", 
+		sumunits=TRUE, estround=estround)$est
   b1.5 <- data.frame(landstatus1="Nonsampled land", est[,1], "", est[, -1])
   names(b1.5) <- b1.names
 

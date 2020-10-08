@@ -18,8 +18,8 @@ modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
 	evalid = NULL, invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, 
 	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
 	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	stratalut = NULL, strvar = "STRATUMCD", strwtvar="strwt", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE, 
+	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", strwtvar="strwt", 
+	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE, 
 	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite = TRUE, gui = FALSE)
 }
@@ -76,6 +76,7 @@ modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 

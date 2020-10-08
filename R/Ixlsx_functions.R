@@ -503,6 +503,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
 					return(NULL)
 				} )
       }
+
       if (!is.null(estdat)) {
         est <- estdat$est
         est.titlelst <- estdat$titlelst
@@ -522,7 +523,13 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
         names(est)[names(est) == rowvar] <- title.rowvar
         if (subtotal) est <- rbind(est, "Subtotal")
 
-        estncols <- length(cgrpcds) + 1
+        #estncols <- length(cgrpcds) + 1
+        if (is.data.frame(collut)) {
+          estncols <- nrow(collut) + 1
+        } else {
+          estncols <- length(collut) + 1
+        }
+   
         #if (rowgrptot) estncols <- estncols + 1
 
         if (!allin1) {
@@ -530,15 +537,15 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
           pse <- est
           pse[pse == 0] <- "--"
         } else {
-
-          char.width <- max(sapply(esttabrow, function(x) { 
-			begin <- gregexpr(pattern='\\(', x)[[1]][1]
-			end <- gregexpr(pattern='\\)', x)[[1]][1]
-			end - begin - 1}))
-
           est <- cbind(est, 
-			as.data.frame(matrix(allin1f(estnull, psenull, char.width=char.width), 
+			as.data.frame(matrix(allin1f(estnull, psenull), 
 			nrow(est), estncols)))
+        }
+        if (j == 1) {
+          refnames <- ref_col[match(collut, ref_col$VALUE), "MEANING"]
+          names(est) <- c(title.rowvar, refnames, "Total")
+          if (!allin1) 
+            names(pse) <- c(title.rowvar, refnames, "Total")
         }
       }
 
@@ -547,7 +554,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
         est <- cbind(grpnm, est)
         names(est)[names(est) == rowgrpnm] <- title.rowgrp
  
-        #esttabrow <- rbind(esttabrow, setDF(est))
         esttabrow <- setDF(rbindlist(list(esttabrow, est), use.names=FALSE, 
 			fill=FALSE, idcol=FALSE))
       } else {
@@ -589,7 +595,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
 		estnull=estnull, psenull=psenull, GBpopdat=GBpopdat, ...)
       }
       est2 <- estdat2$est
-
       if (!allin1) pse2 <- estdat2$pse
       
       if (is.null(est2)) {
@@ -615,11 +620,14 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       ## Add total row
       ###########################################################
  #     if (rowgrptot) {
-        esttabrow <- rbind(esttabrow, est.totalrow)
+        esttabrow <- setDF(rbindlist(list(esttabrow, est.totalrow), use.names=FALSE,
+			fill=FALSE, idcol=FALSE))
         if (!allin1) 
-          psetabrow <- rbind(psetabrow, pse.totalrow)
+          psetabrow <- setDF(rbindlist(list(psetabrow, pse.totalrow), use.names=FALSE,
+			fill=FALSE, idcol=FALSE))
 #      }
     } 
+
       if (colvar == "TIMBERCD.PROD") {
         if (colgrpnm == "Reserved") {
           names(esttabrow)[names(esttabrow) %in% c(1,2)] <- c("Productive", "Unproductive")
@@ -641,7 +649,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       ## Change names to concatenate column group name 
       varnms <- paste(colgrpnm, names(esttabrow)[-(1:rnbr)], sep="#")
       names(esttabrow)[-(1:rnbr)] <- varnms
-      if (colgrp && !allin1) {
+      if (!allin1) {
         varnms <- paste(colgrpnm, names(psetabrow)[-(1:rnbr)], sep="#")
         names(psetabrow)[-(1:rnbr)] <- varnms
       }

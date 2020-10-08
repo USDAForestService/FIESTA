@@ -2,10 +2,10 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
 	dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", evalid=NULL, 
 	invyrs=NULL, ACI=FALSE, adj="samp", strata=TRUE, plt.nonsamp.filter=NULL, 
 	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
-	areavar="ACRES", unitcombine=FALSE, stratalut=NULL, strvar="STRATUMCD", 
-	strwtvar="strwt", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
-	saveobj=FALSE, savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=TRUE, gui=FALSE){
+	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
+	strvar="STRATUMCD", strwtvar="strwt", getwt=TRUE, getwtvar="P1POINTCNT", 
+	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
+	outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -177,7 +177,8 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
 		auxlut=stratalut, PSstrvar=strvar, nonresp=nonresp, substrvar=substrvar, 
 		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
 		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-		getwt=getwt, getwtvar=getwtvar, P2POINTCNT=P2POINTCNT)  
+		minplotnum.unit=minplotnum.unit, getwt=getwt, getwtvar=getwtvar, 
+		P2POINTCNT=P2POINTCNT)  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar

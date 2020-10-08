@@ -20,7 +20,7 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, cuniqueid="PLT_CN",
   ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ=CONDPROP_ADJFAC=tadjfac=cadjfac=TPA_UNADJ=
 	MICRPROP_UNADJ_SUM=MACRPROP_UNADJ_SUM=SUBPPROP_UNADJ_SUM=MICRPROP_ADJFAC_SUM=
-	MACRPROP_ADJFAC_SUM=SUBPPROP_ADJFAC_SUM=CONDPROP_UNADJ_SUM=PROP_BASIS <- NULL    
+	MACRPROP_ADJFAC_SUM=SUBPPROP_ADJFAC_SUM=CONDPROP_UNADJ_SUM=TPROP_BASIS <- NULL    
   keycondx <- key(condx)
 
   ## Condition proportion variable
@@ -68,9 +68,9 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, cuniqueid="PLT_CN",
     ## (SUBPLOT: TPA_UNADJ=6.018046; MICROPLOT: TPA_UNADJ=74.965282; MACROPLOT: TPA_UNADJ=0.999188
     setkeyv(treex, tuniqueid)
 
-    if ("PROP_BASIS" %in% names(treex)) {
-      treex[pltadj, tadjfac := ifelse(PROP_BASIS == "MICR", MICRPROP_UNADJ_SUM, 
-		ifelse(PROP_BASIS == "MACR", MACRPROP_UNADJ_SUM,
+    if ("TPROP_BASIS" %in% names(treex)) {
+      treex[pltadj, tadjfac := ifelse(TPROP_BASIS == "MICR", MICRPROP_UNADJ_SUM, 
+		ifelse(TPROP_BASIS == "MACR", MACRPROP_UNADJ_SUM,
 		SUBPPROP_UNADJ_SUM))]
     } else {
       treex[pltadj, tadjfac := ifelse(TPA_UNADJ > 50, MICRPROP_UNADJ_SUM, 

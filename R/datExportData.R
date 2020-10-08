@@ -82,11 +82,10 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
       out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, 
 		returnpath=TRUE)
     }      
-
+ 
     write2sqlite(dfobj, SQLitefn=out_dsn, out_name=out_layer, gpkg=gpkg, 
 		overwrite=overwrite_layer, appendtab=append, index.unique=index.unique,
-		index=index)
-    
+		index=index)    
  
   } else if (out_fmt == "gdb") {
     out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 

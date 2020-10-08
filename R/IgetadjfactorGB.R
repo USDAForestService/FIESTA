@@ -26,7 +26,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, tuniqueid="PLT_CN",
   ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ=ADJ_FACTOR_COND=cadjfac=tadjfac=TPAGROW_UNADJ=
 	ADJ_FACTOR_MICR=ADJ_FACTOR_MACR=ADJ_FACTOR_SUBP=expfac=expcond=expcondtab=
-	n.strata=PROP_BASIS=EXPNS=strwt=Prop <- NULL
+	n.strata=TPROP_BASIS=EXPNS=strwt=Prop <- NULL
     
   strunitvars <- c(unitvars, strvars)
   keycondx <- key(condx)

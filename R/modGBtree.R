@@ -2,8 +2,8 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", evalid=NULL, invyrs=NULL, 
 	ACI=FALSE, adj="samp", strata=TRUE, plt.nonsamp.filter=NULL, 
-	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, 
-	unitarea=NULL, areavar="ACRES", unitcombine=FALSE, stratalut=NULL, 
+	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
+	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
 	landarea="FOREST", plt.filter=NULL, cond.filter=NULL, estvar=NULL, 
 	estvar.filter=NULL, estvar.name=NULL, rowvar=NULL, colvar=NULL, 
@@ -67,8 +67,8 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	invyrs=invyrs, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 	cond.nonsamp.filter=cond.nonsamp.filter, strata=strata, unitvar=unitvar, 
 	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
-	stratalut=stratalut, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
-	stratcombine=stratcombine, gui=gui, savedata=FALSE)
+	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
+	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, gui=gui, savedata=FALSE)
   } else {
     returnGBpopdat <- FALSE
     if (!is.list(GBpopdat))

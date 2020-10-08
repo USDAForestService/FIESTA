@@ -29,23 +29,28 @@ write2sqlite <- function(tab, SQLitefn, out_name=NULL, gpkg=FALSE,
   if (is.null(out_name)) 
     out_name <- "tab"
 
+  ## Check tab
+  tab <- pcheck.table(tab)
+
   ## Write table to database
   DBI::dbWriteTable(dbconn, out_name, tab, append=appendtab, overwrite=overwrite)
   message(paste("writing", out_name, "to", SQLitefn))
 
   if (!is.null(index.unique) && !all(index.unique %in% names(tab))) {
-    message("invalid index.unique... names not in ", tab)
+    message("invalid index.unique... names not in ", out_name)
     index.unique <- NULL
   }
+
   if (!is.null(index.unique)) {
     idxnm <- paste0(out_name, "_", paste(tolower(index.unique), collapse="_"), "_idx")
-    if (sum(duplicated(tab[,index.unique])) > 0) {
+    if (sum(duplicated(tab[,index.unique, with=FALSE])) > 0) {
       warning(idxnm, " is not unique... creating non-unique index")
       idxsql <- paste0("create index ", idxnm, " ON ", out_name,   
 				"(", paste(index.unique, collapse=","), ")")
     } else {
       idxsql <- paste0("create unique index ", idxnm, " ON ", out_name, 
 				"(", paste(index.unique, collapse=","), ")")
+
       DBI::dbExecute(dbconn, idxsql)
       message(sub("create", "creating", idxsql))
     }
@@ -54,6 +59,7 @@ write2sqlite <- function(tab, SQLitefn, out_name=NULL, gpkg=FALSE,
     message("invalid index... names not in tab")
     index <- NULL
   }
+ 
   if (!is.null(index)) {
     indxnm <- paste0(out_name, "_", paste(tolower(index), collapse="_"), "_idx")
     message("adding index: ", indxnm, " to ", out_name)

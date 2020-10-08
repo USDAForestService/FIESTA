@@ -4,10 +4,8 @@
 	Database - Extracts inventory plot data from FIA database.
 }
 \description{
-	Extracts field, calculated, and derived plot data from FIA's internal, permission-
-	controlled, Oracle database, or from FIA's publically-accessible online 
-	DataMart (https://apps.fs.usda.gov/fia/datamart/datamart.html), in the form 
-	of comma-separated values (CSV) files or compresssed comma-delimited files (*.zip).
+	Extracts data from FIA's publically-accessible online 
+	DataMart (https://apps.fs.usda.gov/fia/datamart/datamart.html). 
 }
 \usage{
 DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL, 
@@ -16,9 +14,9 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	isseed = FALSE, isveg = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
 	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
 	subcycle99 = FALSE, intensity1 = TRUE, stateFilter = NULL,  allFilter = NULL, 
-	savedata = FALSE, parameters = FALSE, outfolder = NULL, outSQLitefn=NULL, 
-	gpkg = FALSE, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-	savePOP = FALSE)
+	savedata = FALSE, parameters = FALSE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, append = TRUE, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite = FALSE, savePOP = FALSE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
@@ -88,9 +86,13 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
   \item{parameters}{ Logical. If TRUE, saves file of input parameters to outfolder. }
   \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE or parameters=TRUE 
 	or isshp=TRUE, outfolder is the working directory. }
-  \item{outSQLitefn}{ String. Name of an existing SQLite database or a new database to 
-	create where tables will be written if savedata=TRUE. }
-  \item{gpkg}{ Logical. If TRUE, return a *.gpkg database instead of *.sqlite database. }
+  \item{out_fmt}{ String. File format for output ('csv', 'sqlite','gpkg', 'gdb').
+	If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed. If
+	out_fmt='gdb', arcgisbinding package and R-Bridge must be installed. }
+  \item{out_dsn}{ String. Data source name for output. If extension is not
+	included, out_fmt is used. Use full path if outfolder=NULL. }
+  \item{append}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
+		a database or shapefile. If FALSE, the out_dsn will be overwritten if exists. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }

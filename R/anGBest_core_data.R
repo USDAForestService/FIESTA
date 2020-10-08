@@ -51,16 +51,16 @@ anGBest_core_data <- function(state, evalCur=TRUE, evalEndyr=NULL,
 
 ############ End CSV only
 
+  datCore <- list()
+  datCore$datPlots <- datPlots
+  datCore$datStrata <- datStrata
+  datCore$ref_countycd <- ref_countycd
+  datCore$ref_unitcd <- ref_unitcd
+
   if (savedata) {
     datCorefn <- "datCore"
     if (outfn.date) 
       datCorefn <- paste(datCorefn, format(Sys.time(), "%Y%m%d"), sep="_")
-
-    datCore <- list()
-    datCore$datPlots <- datPlots
-    datCore$datStrata <- datStrata
-    datCore$ref_countycd <- ref_countycd
-    datCore$ref_unitcd <- ref_unitcd
 
     if (!is.null(evalEndyr)) {
       fn <- paste0(outfolder, "/", st, "_eval", evalEndyr, "_", datCorefn, ".rda")

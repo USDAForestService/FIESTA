@@ -3,8 +3,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	allyrs=FALSE, invyrs=NULL, istree=FALSE, isseed=FALSE, isveg=FALSE, 
 	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, 
 	regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, intensity1=TRUE, stateFilter=NULL,
-	allFilter=NULL, savedata=FALSE, parameters=FALSE, outfolder=NULL, outSQLitefn=NULL, 
-	gpkg=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, savePOP=FALSE) {
+	allFilter=NULL, savedata=FALSE, parameters=FALSE, outfolder=NULL, out_fmt="csv",
+	out_dsn=NULL, append=TRUE, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
+	savePOP=FALSE) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -21,7 +22,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	TREECOUNT_CALC=SEEDSUBP6=LIVE_CANOPY_CVR_PCT=CONDPROP_UNADJ=PLOT_NONSAMPLE_REASN_CD=
 	PLOT_STATUS_CD=BA=DIA=CRCOVPCT_RMRS=TIMBERCD=SITECLCD=RESERVCD=JENKINS_TOTAL_B1=
 	JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=
-	ACI_NFS=OWNCD=OWNGRPCD=FORNONSAMP=ZSTUNCOPLOT=sppvarsnew=out_fmt=out_dsn=
+	ACI_NFS=OWNCD=OWNGRPCD=FORNONSAMP=ZSTUNCOPLOT=sppvarsnew=
 	STATECD=UNITCD=COUNTYCD=INVYR <- NULL
 
 
@@ -323,31 +324,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## Check outfolder, outfn.date, overwrite
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn) {
+    outfolder <- pcheck.outfolder(outfolder, gui=gui)
 
-    ## Check outSQLitefn
-    ###########################################################
-    if (!is.null(outSQLitefn)) {
-      outSQLitefn <- DBcreateSQLite(outSQLitefn, dbconnopen=FALSE, gpkg=gpkg,
-			outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite)
-      outSQLite <- TRUE
-      if (issp) 
-        out_fmt <- ifelse(gpkg, "gpkg", "sqlite")
+    ## append
+    append <- FIESTA::pcheck.logical(append, varnm="append", 
+		title="append data", first="NO", gui=gui)
+    if (length(states) > 1 && !append) append <- TRUE
+    overwrite_dsn <- ifelse(append, FALSE, TRUE)
 
-      if (is.null(outfolder)) outfolder <- dirname(outSQLitefn)
-    } else {
-      outfolder <- pcheck.outfolder(outfolder, gui=gui)
-  
-      ## Check outfn.date
-      outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date", 
-		title="Add date to outfile", first="FALSE", gui=gui)
-
-      ## Check overwrite
-      overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite files?", first="YES", gui=gui)
-
-      if (issp) 
-        out_fmt <- "shp"
-    }
   }
  
   ###########################################################################
@@ -445,79 +429,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     ppsafromqry <- paste0(SCHEMA., "POP_PLOT_STRATUM_ASSGN")
   
 
-  ###########################################################################
-  ########################      SET OUTFILE NAMES    ########################
-  ###########################################################################
-  if (savedata && !outSQLite) {
-    ## PLOT data
-    path.outpltfn <- DBgetfn("plt", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-    if (savePOP)    
-      path.outppsafn <- DBgetfn("pop_plot_stratum_assgn", invtype, outfn.pre, 
-		stabbrlst, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-
-    ## COND data
-    path.outcondfn <- DBgetfn("cond", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-
-    ## TREE data
-    if (istree)
-      ## The tree data will be written to files by state.
-      path.outtreecfn <- DBgetfn("tree", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-
-    ## SEEDLING data
-    if (isseed)   
-      path.outseedfn <- DBgetfn("seed", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-    
-    ## Understory vegetation data
-    if (isveg) { 
-      path.outvspsppfn <- DBgetfn("vspspp", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-      path.outvspstrfn <- DBgetfn("vspstr", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-    }
-
-    ## DWM data
-    if (isdwm) 
-      path.outdwmfn <- DBgetfn("dwm", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-
-    ## Other tables
-    if (!is.null(othertables)) {
-      for (i in 1:length(othertables)) {
-         assign(paste0("path.outother", i, "fn"), DBgetfn(othertables[i],
-         	invtype, outfn.pre, stabbrlst, evalid=evalidlist, outfn.date=outfn.date, 
-		outfolder=outfolder, overwrite=overwrite))
-      }
-    }
-
-    ## spconddat data
-    if (spcond)
-      path.outspconddatfn <- DBgetfn("spconddat", invtype, outfn.pre, stabbrlst, 
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-		overwrite=overwrite)
-
-  }
-  if (savedata) {
-    ## Plot counts
-    path.outpltcntfn <- DBgetfn("pltcnt", invtype, outfn.pre, stabbrlst,
-		evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder, 
-		overwrite=overwrite)
-
-    if (iseval) 
-      path.outevalfn <- DBgetfn("evalid", invtype, outfn.pre, stabbrlst,
-		outfn.date=outfn.date, outfolder=outfolder, overwrite=overwrite)
-  }
 
 ##############################################################################
 ##############################################################################
@@ -606,15 +517,18 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
     ## Seedling table
     if (isseed)
-      SEEDLING <- FIESTA::DBgetCSV("SEEDLING", stabbr, ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)
+      SEEDLING <- FIESTA::DBgetCSV("SEEDLING", stabbr, ZIP=TRUE, returnDT=TRUE, 
+		stopifnull=FALSE)
 
     ## Understory vegetation
     if (isveg) {
       P2VEG_SUBPLOT_SPP <- 
-		FIESTA::DBgetCSV("P2VEG_SUBPLOT_SPP", stabbr, ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)
+		FIESTA::DBgetCSV("P2VEG_SUBPLOT_SPP", stabbr, ZIP=TRUE, returnDT=TRUE, 
+			stopifnull=FALSE)
 
       P2VEG_SUBP_STRUCTURE <- 
-		FIESTA::DBgetCSV("P2VEG_SUBP_STRUCTURE", stabbr, ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)
+		FIESTA::DBgetCSV("P2VEG_SUBP_STRUCTURE", stabbr, ZIP=TRUE, returnDT=TRUE,
+			 stopifnull=FALSE)
     }
 
     ## Other tables
@@ -734,7 +648,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
     ## SET QUERY FILTER
     xfilter <- paste0(evalFilter, stateFilters)
-    
+
     #####################################################################################
     ###################################    RUN QUERIES   ################################
     #####################################################################################
@@ -972,10 +886,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         spconddat <- rbind(spconddat, spconddatx)
       }
 
+ 
       ##############################################################
       ## xydata
       ##############################################################
-      xyx <- pltx[, c("CN", getcoords(coords)), with=FALSE]
+      #xyx <- pltx[, c("CN", getcoords(coords)), with=FALSE]
+      xyx <- copy(pltx)
       setnames(xyx, "CN", "PLT_CN")
  
       ## Get xy for the most current sampled plot
@@ -1236,10 +1152,10 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     
         othertablexnm <- paste0("otherx", j)
         if (othertable == "PLOTGEOM") {
-          xqry <- paste("select distinct * from", sub("SUBX", othertable, xfromqry2), 
+          xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry2), 
 			"where", xfilter)
         } else {
-          xqry <- paste("select distinct * from", sub("SUBX", othertable, xfromqry), 
+          xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
 			"where", xfilter)
         }
         assign(othertablexnm, sqldf::sqldf(xqry, stringsAsFactors=FALSE))
@@ -1265,7 +1181,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
             ## Subset overall filters from pltx
             assign(othertablexnm, 
-			get(othertablexnm)[get(othertablexnm)[["PLT_CN"]] %in% unique(pltx$ZSTUNCOPLOT),])
+			get(othertablexnm)[get(othertablexnm)[["PLT_CN"]] %in% unique(pltx$CN),])
+
+
 
           }
           assign(paste0("other", j), rbind(get(paste0("other", j)), get(othertablexnm)))
@@ -1330,27 +1248,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
             warning("number of plots in ", spxynm, " does not match plt table")            
 
           ## Generate shapefile
-          if (outSQLite) {
-            out_dsn <- outSQLitefn
-          } else {
-            out_dsn <- DBgetfn("spxy", invtype, outfn.pre, stabbrlst, 
-				evalid=evalid, othertxt=coords)
-          }
-          message("writing ", spxynm, " to ", out_dsn)
-
+          out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
           assign(spxynm, spMakeSpatialPoints(xyplt=xyplt, xvar=xycoords[1], 
 			yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
-			exportsp=savedata, out_dsn=out_dsn, out_fmt=out_fmt, 
-			out_layer=spxynm, outfn.date=outfn.date, 
-			overwrite_dsn=FALSE, overwrite_layer=overwrite, append=TRUE))
+			exportsp=savedata, out_dsn=out_dsn, out_fmt=out_fmt_sp, 
+			out_layer=spxynm, outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, 
+			overwrite_layer=overwrite, append=append))
         }
       }       
-
-      if (i == 1 && outSQLite) {
-        ## Open database connection
-        connSQLite <- DBI::dbConnect(RSQLite::SQLite(), outSQLitefn, 
-			loadable.extensions = TRUE)
-      }
 
       if (!issp) {
         xycoords <- getcoords(coords)
@@ -1364,178 +1269,104 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         }
  
         if (!is.null(xyplt)) {
-          if (outSQLite) {
-            message("writing ", xynm, " for ", stabbr, " to ", outSQLitefn)
-            DBI::dbWriteTable(connSQLite, xynm, xyplt, overwrite=overwrite, 
-				append=append)
-            if (i == 1)
-              DBI::dbExecute(connSQLite, 
-			paste0("CREATE UNIQUE INDEX ", xynm, "_pltcn_idx ON ", xynm, " (PLT_CN)")) 
-#             DBI::dbExecute(connSQLite, 
-#			paste0("ALTER TABLE ", xynm, " ADD CONSTRAINT pk_", xynm, "_pltcn PRIMARY KEY (PLT_CN)"))                 
-          } else {
-            path.outxypltfn <- DBgetfn(xynm, invtype, outfn.pre, stabbrlst, 
-				evalid=evalidlist, outfn.date=outfn.date, outfolder=outfolder,
-				overwrite=overwrite)
-            write.table(xyplt, path.outxypltfn, sep=",", row.names=FALSE, 
-				append=append, col.names=col.names)
-          }
+          index.unique.xyplt <- NULL
+          if (i == 1) index.unique.xyplt <- "PLT_CN"
+          datExportData(xyplt, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer=xynm, 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.xyplt, append=append)
         }
       }   
- 
+
       if (!is.null(spconddatx)) {
-        if (outSQLite) {
-          message("writing spconddat for ", stabbr, " to ", outSQLitefn)
-          DBI::dbWriteTable(connSQLite, "spconddat", spconddatx, overwrite=overwrite, 
-				append=append)
-          if (i == 1)
-            DBI::dbExecute(connSQLite, 
-			"CREATE UNIQUE INDEX spconddat_pltcn_idx ON spconddat (PLT_CN)")
-#             DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE spconddat ADD CONSTRAINT pk_pltcn PRIMARY KEY (PLT_CN)")         
-        } else {
-          write.table(spconddat, path.outspconddatfn, sep=",", row.names=FALSE, 
-				append=append, col.names=col.names)
-        }
+        index.unique.spconddat <- NULL
+        if (i == 1) index.unique.spconddat <- "PLT_CN"
+        datExportData(spconddat, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="spconddat", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.spconddat, append=append)
       }
 
       if (!is.null(pltx)) {
-        if (outSQLite) {
-          message("writing plt for ", stabbr, " to ", outSQLitefn)
-          DBI::dbWriteTable(connSQLite, "plot", pltx, overwrite=overwrite, append=append)
-          if (i == 1)
-            DBI::dbExecute(connSQLite, "CREATE UNIQUE INDEX plt_cn_idx ON plot (CN)")
-#            DBI::dbExecute(connSQLite, "ALTER TABLE plot ADD CONSTRAINT pk_cn PRIMARY KEY (CN)")         
-        } else {
-          write.table(pltx, path.outpltfn, sep=",", row.names=FALSE, append=append,
-			col.names=col.names)
-        }
+        index.unique.pltx <- NULL
+        if (i == 1) index.unique.pltx <- "CN"
+        datExportData(pltx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plot", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.pltx, append=append)
       }
+
       if (!is.null(condx)) {
-        if (outSQLite) {
-          message("writing cond for ", stabbr, " to ", outSQLitefn)
-          DBI::dbWriteTable(connSQLite, "cond", condx, overwrite=overwrite, append=append)
-          if (i == 1)
-            DBI::dbExecute(connSQLite, 
-			"CREATE UNIQUE INDEX cond_pltcn_condid_idx ON cond (PLT_CN, CONDID)")
-#            DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE cond ADD CONSTRAINT pk_pltcn_condid PRIMARY KEY (PLT_CN, CONDID)")         
-        } else {
-          write.table(condx, path.outcondfn, sep=",", row.names=FALSE, append=append,
-			col.names=col.names)
-        }
+        index.unique.condx <- NULL
+        if (i == 1) index.unique.condx <- c("PLT_CN", "CONDID")
+        datExportData(condx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.condx, append=append)
       }
+
       if (!is.null(treex)) {
-        if (outSQLite) {
-          message("writing tree for ", stabbr, " to ", outSQLitefn)
-          DBI::dbWriteTable(connSQLite, "tree", treex, overwrite=overwrite, append=append)
-          if (i == 1)
-            DBI::dbExecute(connSQLite, 
-			"CREATE UNIQUE INDEX tree_pltcn_condid_subp_tree_idx ON tree (PLT_CN, CONDID, SUBP, TREE)")
-#            DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE tree ADD CONSTRAINT pk_pltcn_condid_subp_tree PRIMARY KEY (PLT_CN, CONDID, SUBP, TREE)")         
-        } else {
-          write.table(treex, path.outtreecfn, sep=",", row.names=FALSE, append=append,
-				col.names=col.names)
-        }
+        index.unique.treex <- NULL
+        if (i == 1) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
+        datExportData(treex, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.treex, append=append)
       }
+
       if (!is.null(seedx)) {
-        if (outSQLite) {
-           message("writing seed for ", stabbr, " to ", outSQLitefn)
-           DBI::dbWriteTable(connSQLite, "seed", seedx, overwrite=overwrite, append=append)
-           if (i == 1)
-             DBI::dbExecute(connSQLite, 
-			"CREATE UNIQUE INDEX seed_pltcn_condid_subp_seed_idx ON seed (PLT_CN, CONDID, SUBP)")
-#             DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE seed ADD CONSTRAINT pk_pltcn_condid_subp PRIMARY KEY (PLT_CN, CONDID, SUBP)")         
-        } else {
-           write.table(seedx, path.outseedfn, sep=",", row.names=FALSE, append=append,
-				col.names=col.names)
-        }
+        index.unique.seedx <- NULL
+        if (i == 1) index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
+        datExportData(seedx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seed", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.seedx, append=append)
       } 
       if (!is.null(vspsppx)) {
-        if (outSQLite) {
-          message("writing vspspp for ", stabbr, " to ", outSQLitefn)
-          DBI::dbWriteTable(connSQLite, "vspspp", vspsppx, overwrite=overwrite, append=append)
-          DBI::dbWriteTable(connSQLite, "vspstr", vspstrx, overwrite=overwrite, append=append)
-          if (i == 1) {
-            DBI::dbExecute(connSQLite, 
-			"CREATE UNIQUE INDEX vspspp_pltcn_condid_idx ON vspspp (PLT_CN, CONDID)")
-            DBI::dbExecute(connSQLite, 
-			"CREATE UNIQUE INDEX vspstr_pltcn_condid_idx ON vspstr (PLT_CN, CONDID)")
-#            DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE vspspp ADD CONSTRAINT pk_pltcn_condid PRIMARY KEY (PLT_CN, CONDID)")         
-#            DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE vspstr ADD CONSTRAINT pk_pltcn_condid PRIMARY KEY (PLT_CN, CONDID)")         
-          }
-        } else {
-          write.table(vspsppx, file=path.outvspsppfn, sep=",", row.names=FALSE,
-			col.names=FALSE, append=TRUE)
-          write.table(vspstrx, file=path.outvspstrfn, sep=",", row.names=FALSE,
-			col.names=FALSE, append=TRUE)
-        }
+        index.unique.vspsppx <- NULL
+        if (i == 1) index.unique.vspsppx <- c("PLT_CN", "CONDID")
+        datExportData(vspsppx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vspspp", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.vspsppx, append=append)
+
+        index.unique.vspstrx <- NULL
+        if (i == 1) index.unique.vspstrx <- c("PLT_CN", "CONDID")
+        datExportData(vspstrx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vspstr", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.vspstrx, append=append)
       } 
+
       if (!is.null(dwmx)) {
-        if (outSQLite) {
-          message("writing dwm for ", stabbr, " to ", outSQLitefn)
-          DBI::dbWriteTable(connSQLite, "dwm", dwmx, overwrite=overwrite, append=append)
-          if (i == 1)
-            DBI::dbExecute(connSQLite, 
-			"CREATE UNIQUE INDEX dwm_pltcn_condid_idx ON dwm (PLT_CN, CONDID)")
-#            DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE dwm ADD CONSTRAINT pk_pltcn_condid PRIMARY KEY (PLT_CN, CONDID)")         
-        } else {
-          write.table(dwmx, file=path.outdwmfn, sep=",", row.names=FALSE, 
-			col.names=FALSE, append=TRUE)
-        }
+        index.unique.dwmx <- NULL
+        if (i == 1) index.unique.dwmx <- c("PLT_CN", "CONDID")
+        datExportData(dwmx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dwm", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.dwmx, append=append)
       } 
+
       if (!is.null(othertables)) {
         for (j in 1:length(othertables)) {
           othertable <- othertables[j]
           othertablexnm <- paste0("otherx", j)
           othernm <- paste0("other", j)
-          if (!is.null(get(othernm))) {
-            if (outSQLite) {
-              message("writing ", othertable, " for ", stabbr, " to ", outSQLitefn)
-              DBI::dbWriteTable(connSQLite, othertable, get(othertablexnm), 
-				overwrite=overwrite, append=append)
-              if (i == 1) {
-                if (othertable == "PLOTGEOM") {
-#                  DBI::dbExecute(connSQLite, 
-#				paste0("CREATE UNIQUE INDEX ", othertable, "_stuncoplot_idx ON ", 
-#				othertable, " (STATECD, UNITCD, COUNTYCD, PLOT)"))
-                } else {
-                  DBI::dbExecute(connSQLite, 
-				paste0("CREATE UNIQUE INDEX ", othertable, "_pltcn_idx ON ", 
-				othertable, " (PLT_CN)"))
-                }
-#               DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE dwm ADD CONSTRAINT pk_pltcn_condid PRIMARY KEY (PLT_CN, CONDID)")   
-              }      
-            } else {
-              fn <- paste0("path.outother", i, "fn")
-              write.table(get(othertablexnm), file=fn, sep=",", row.names=FALSE, 
-			col.names=FALSE, append=TRUE)
-            }
-          }
+
+          datExportData(get(othertablexnm), outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer=othertable, 
+			outfn.date=outfn.date, overwrite_layer=overwrite, append=append)
         }
       }  
  
       if (savePOP && !is.null(ppsax)) {
-        if (outSQLite) {
-          message("writing ppsa for ", stabbr, " to ", outSQLitefn)
-          DBI::dbWriteTable(connSQLite, "pop_plot_stratum_assgn", ppsax, 
-				overwrite=overwrite, append=append)
-          if (i == 1)
-            DBI::dbExecute(connSQLite, 
-			"CREATE INDEX ppsa_pltcn_idx ON pop_plot_stratum_assgn (PLT_CN)")
-#            DBI::dbExecute(connSQLite, 
-#			"ALTER TABLE pop_plot_stratum_assgn ADD CONSTRAINT pk_plt_cn PRIMARY KEY (PLT_CN)")         
-        } else {
-          write.table(ppsax, file=path.outppsafn, sep=",", row.names=FALSE, 
-			col.names=FALSE, append=TRUE)
-        }
-      }                   
+        index.unique.ppsax <- NULL
+        if (i == 1) index.unique.ppsax <- "PLT_CN"
+        datExportData(ppsax, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="ppsa", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			index.unique=index.unique.ppsax, append=append)
+      }
     }
     plt <- rbind(plt, pltx)
     cond <- rbind(cond, condx)
@@ -1609,8 +1440,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   }
  
   ## Write out plot/condition counts to comma-delimited file.
-  if (savedata)
-    write2csv(pltcnt, outfilenm=path.outpltcntfn, overwrite=overwrite)
+  if (savedata) {
+    datExportData(pltcnt, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcnt", 
+			outfn.date=outfn.date, overwrite_layer=overwrite)
+  }
 
 
   ## GENERATE RETURN LIST
@@ -1687,14 +1521,15 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     evaliddf <- evaliddf[order(evaliddf$STATECD), ]
     fiadatlst$evalid <- evalidlist
 
-    if (savedata)
-      write2csv(evaliddf, outfilenm=path.outevalfn, overwrite=overwrite)
+    if (savedata) {
+      datExportData(evaliddf, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="evalid", 
+			outfn.date=outfn.date, overwrite_layer=overwrite)
+    }
   }
   
   if (saveqry) cat("\n", paste("Saved queries to:", outfolder), "\n") 
 
-  if (outSQLite)
-    DBI::dbDisconnect(connSQLite)
  
 
   ## Return data list
