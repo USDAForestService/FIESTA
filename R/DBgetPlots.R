@@ -936,7 +936,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
           ## Filter treex with alltFilter      
           ###########################################
-          treex <- FIESTA::datFilter(x=treex, xfilter=alltFilter)$xf
+          treexf <- FIESTA::datFilter(x=treex, xfilter=alltFilter)$xf
+          if (!is.null(treexf)) treex <- treexf
 
 
           ## Check ACI
