@@ -1,6 +1,6 @@
 spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp", 
 	outfolder=NULL, out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, append=FALSE) {
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE) {
   ###########################################################################
   ## DESCRIPTION: Exports an S4 Spatial object to an ArcGIS shapefile (*.shp).
   ## out_fmt	Output format ('sqlite', 'gpkg', 'shp')		
@@ -59,11 +59,9 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
 		title="Overwrite layer?", first="NO", gui=gui)  
   outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
 		title="Add date to dsn name?", first="YES", gui=gui)  
-  append <- FIESTA::pcheck.logical(append, varnm="append", 
+  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
 		title="Append to dsn?", first="YES", gui=gui) 
 
-  if (append) 
-    overwrite_dsn <- FALSE
     
   ## Check out_layer
   ####################################################
@@ -74,10 +72,11 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
   ## Write sf layer
   ########################################################
   if (out_fmt %in% c("sqlite", "gpkg")) {
+    if (append_layer) overwrite_dsn <- FALSE
     gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
     if (is.na(getext(out_dsn))) out_dsn <- paste0(out_dsn, ".", out_fmt)
 
-#    if (append) {
+#    if (append_layer) {
 #      out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE)
 #    } else {
 #      out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, 
@@ -85,16 +84,17 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
 #    } 
     if (!file.exists(out_dsn)) {
       ## Check if spatiaLite database
-      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=append,
+      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=append_layer,
 		dataset_options="SPATIALITE=YES", layer_options="GEOMETRY_NAME = geometry",
 		delete_dsn=overwrite_dsn, delete_layer=overwrite_layer, quiet=FALSE) 
     } else {
-      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=append,
+      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=append_layer,
 		layer_options="GEOMETRY_NAME = geometry",
 		delete_dsn=overwrite_dsn, delete_layer=overwrite_layer, quiet=FALSE) 
     }
 
   } else if (out_fmt == "gdb") {
+    if (append_layer) overwrite_dsn <- FALSE
     out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 
 		overwrite=overwrite_dsn, outfn.date=outfn.date, showlist=FALSE)
 
@@ -105,16 +105,24 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
 
   } else if (out_fmt == "shp") {
 
-    ## Note: for a new shapefile, overwrite_dsn=FALSE, delete_layer=TRUE
+## Note: for a new shapefile, overwrite_dsn=FALSE, delete_layer=TRUE
+#delete_dsn=FALSE; delete_layer=TRUE; append_layer=TRUE	## overwrites layer
+#delete_dsn=FALSE; delete_layer=TRUE; append_layer=FALSE	## overwrites layer
+#delete_dsn=FALSE; delete_layer=FALSE; append_layer=TRUE	## appends or creates layer
+#delete_dsn=FALSE; delete_layer=FALSE; append_layer=FALSE	## cannot replace layer if delete_layer=FALSE
+#delete_dsn=TRUE; delete_layer=FALSE; append_layer=TRUE	## overwrites layer
+#delete_dsn=TRUE; delete_layer=TRUE; append_layer=FALSE	## overwrites layer
+#delete_dsn=TRUE; delete_layer=FALSE; append_layer=FALSE	## cannot replace layer if delete_layer=FALSE
+#delete_dsn=TRUE; delete_layer=TRUE; append_layer=TRUE	## appends layer (if exists)
 
     ## Get out_dsn
     ########################################################
     overwrite_layer <- ifelse(any(overwrite_dsn, overwrite_layer), TRUE, FALSE)
-    if (is.null(out_dsn) || !file.exists(out_dsn))
+    if (is.null(out_dsn) || !file.exists(out_dsn)) {
       out_dsn <- getoutfn(outfn=out_layer, outfolder=outfolder,
 		outfn.pre=outfn.pre, outfn.date=outfn.date, ext=out_fmt,
-		overwrite=overwrite_layer)
-
+		overwrite=overwrite_dsn, append=append_layer)
+    }
 
     ## Truncate variable names to 10 characters or less
     sfobjdat <- FIESTA::trunc10shp(sfobj)
@@ -122,14 +130,15 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     newnms <- sfobjdat$newnms
 
     suppressWarnings(sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, 
-		driver="ESRI Shapefile", append=append, delete_dsn=overwrite_dsn,
+		driver="ESRI Shapefile", append=append_layer, delete_dsn=FALSE,
  		delete_layer=overwrite_layer, quiet=FALSE))
+
 
     ## Write new names to *.csv file
     if (!is.null(newnms))
       write2csv(newnms, outfolder=dirname(out_dsn), 
 		outfilenm=paste0(basename.NoExt(out_dsn), "_newnames"),
-		outfn.date=outfn.date, overwrite=overwrite_layer) 
+		outfn.date=outfn.date, overwrite=append_layer) 
 
   } else {
     stop(out_fmt, " currently not supported")

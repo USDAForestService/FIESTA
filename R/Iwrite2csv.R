@@ -1,11 +1,11 @@
-write2csv <- function(tab, outfile=NULL, outfolder=NULL, outfilenm=NULL, outfn.pre=NULL, 
+write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite=FALSE, tabtitle=NULL, appendfile=FALSE, closefn=TRUE, 
 	outtxt=NULL, gui=FALSE){
   ###################################################################################
   ## DESCRIPTION: Internal function to write to csv file.
   ##  
   ## ARGUMENTS: 
-  ##  tab    DF. The table to output.
+  ##  layer    DF. The table to output.
   ##  outfile	An open outfile
   ##  outfilefn  String. The output file name (Full path) of open file or new file
   ##  outfn.date	Adds a date to the end of the file name
@@ -55,7 +55,7 @@ write2csv <- function(tab, outfile=NULL, outfolder=NULL, outfilenm=NULL, outfn.p
     cat(tabtitle, file=outfile, sep="\n")
 
   ## Write table to file.
-  write.table(tab, outfile, row.names=FALSE, append=TRUE, sep=",")
+  write.table(layer, outfile, row.names=FALSE, append=TRUE, sep=",")
 
   ## If closefn is TRUE, close the file.
   if (closefn) {

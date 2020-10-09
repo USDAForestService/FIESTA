@@ -454,7 +454,7 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL,
       ## Export dunit.multest
       datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=outfolder, 
  		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite, 
-		append=multest.append)
+		append_layer=multest.append)
     }
   }
 

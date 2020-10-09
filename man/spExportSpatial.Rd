@@ -10,7 +10,7 @@
 \usage{
 spExportSpatial(sfobj, out_layer = NULL, out_fmt = "shp", outfolder = NULL, 
 	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, append = FALSE)
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE)
 }
 \arguments{
   \item{sfobj}{ sf class R object. Spatial object to export. }
@@ -26,7 +26,7 @@ spExportSpatial(sfobj, out_layer = NULL, out_fmt = "shp", outfolder = NULL,
   \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
-  \item{append}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
+  \item{append_layer}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
 		a database or shapefile. }
 }
 \details{

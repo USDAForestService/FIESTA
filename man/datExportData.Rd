@@ -11,7 +11,7 @@
 datExportData(dfobj, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
 	out_layer = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	create_dsn = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, 
-	append = FALSE, index.unique = NULL, index = NULL)
+	append_layer = FALSE, index.unique = NULL, index = NULL)
 }
 \arguments{
   \item{dfobj}{ Data.frame class R object. Data frame object to export. }
@@ -29,7 +29,7 @@ datExportData(dfobj, outfolder = NULL, out_fmt = "csv", out_dsn = NULL,
   \item{create_dsn}{ Logical. If TRUE, creates new database. }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
-  \item{append}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
+  \item{append_layer}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
 		a database or shapefile. }
   \item{index.unique}{ String. Name of variable(s) in dfobj to make unique index. }
   \item{index}{ String. Name of variable(s) in dfobj to make (non-unique) index. }

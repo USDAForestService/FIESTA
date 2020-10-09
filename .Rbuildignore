@@ -1,3 +1,5 @@
 ^\.github$
 
 
+^doc$
+^Meta$

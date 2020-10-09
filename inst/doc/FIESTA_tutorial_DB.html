@@ -15,6 +15,15 @@
 <title>FIESTA - Database Tools</title>
 
 
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+      </style>
+
 
 
 
@@ -217,7 +226,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <div id="fiesta-overview" class="section level2">
 <h2>FIESTA Overview</h2>
-<p>The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R’s library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors.</p>
+<p>The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN R’s library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors.</p>
 <p>Functions are organized by type or objective and are named with a corresponding prefix:</p>
 <ul>
 <li><p>Database tools (DB) - functions for querying and extracting data from FIA’s national database.</p></li>
@@ -229,7 +238,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>FIESTA’s DB tools extract data from FIA’s online publically-available comma-delimited files (*.csv or *.zip). FIA’s CSV files are available by state from the FIA DataMart at the following link: <a href="https://apps.fs.usda.gov/fia/datamart/datamart.html" class="uri">https://apps.fs.usda.gov/fia/datamart/datamart.html</a>. Because of FIA’s confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA’s sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA’s Spatial Data Services (<a href="https://www.fia.fs.fed.us/tools-data/spatial/index.php" class="uri">https://www.fia.fs.fed.us/tools-data/spatial/index.php</a>).</p>
 <div id="objective-of-tutorial" class="section level3">
 <h3>Objective of tutorial</h3>
-<p>The objective of this tutorial is to demonstrate the use of FIESTA’s DB tools for accessing FIA data. These tools extract data from FIADB using FIA’s standard evaluations as well as customized evaluations (DBgetPlots and DBgetStrata). An FIA Evaluation is a group of plots within the FIA database that is used for population estimates, representing different inventory spans of data with different stratification or area adjustments. Each Evaluation is determined by the type of estimation (evalType) including: area and tree estimates, growth and mortality estimates, and area change estimates (evalType). These plots are identified by an evalid, which is a unique identifier in the format of a 2-digit State code, a 2-digit year code, and a 2-digit evaluation type code. For example, EVALID ‘491601’ represents the Utah 2016 evaluation for current area estimates.</p>
+<p>The objective of this tutorial is to demonstrate the use of FIESTA’s DB tools for accessing FIA data. These tools extract data from FIAD Datamart using FIA’s standard evaluations as well as customized evaluations (DBgetPlots and DBgetStrata). An FIA Evaluation is a group of plots within the FIA database that is used for population estimates. An FIA Evaluation represents different inventory spans of data with different stratification and area adjustments for nonreponse. Each Evaluation is determined by the type of estimation (evalType) including: area and tree estimates, growth and mortality estimates, and area change estimates (evalType). These plots are identified by an evalid, which is a unique identifier in the format of a 2-digit State code, a 2-digit year code, and a 2-digit evaluation type code. For example, EVALID ‘491601’ represents the Utah 2016 evaluation for current area estimates.</p>
 <table>
 <colgroup>
 <col width="18%"></col>
@@ -284,8 +293,7 @@ outfolder &lt;- &quot;outfolder&quot;
 
 
 ## Load SQLite database from FIESTAdata package
-library(FIESTAdata)
-SQLitefn &lt;- FIESTAdata::get_sqlite()
+WYdat &lt;- system.file(&quot;extdata&quot;, &quot;WYdat_eval2013.sqlite&quot;, package=&quot;FIESTA&quot;)
 
 </code></pre>
 <p>The following examples show how to use FIA’s publically-available, online zipfiles or a custom-built SQLite database that is stored internal to FIESTA. The plot coordinates have been altered for privacy (See <a href="https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php" class="uri">https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php</a> for details). The zip files are extracted on-the-fly from the online website. Web server connections will affect download speeds.</p>
@@ -394,7 +402,7 @@ WYeval$invyrs
 WYeval$invyrtab
 WYeval$invtype
 
-## Get evalid for Utah and Wyoming
+## Get evalids for Utah and Wyoming
 UTWYeval &lt;- DBgetEvalid(states=c(&quot;Wyoming&quot;, &quot;Utah&quot;))
 UTWYeval$evalidlist
 UTWYeval$invyrs
@@ -402,10 +410,9 @@ UTWYeval$invyrtab
 UTWYeval$invtype
 
 ## Get most current evaluation for all states in RMRS and NCRS FIA research units
-eval.cur &lt;- DBgetEvalid(RS=c(&quot;RMRS&quot;, &quot;NCRS&quot;))
+eval.cur &lt;- DBgetEvalid(RS=c(&quot;RMRS&quot;, &quot;NCRS&quot;), evalCur=TRUE)
 names(eval.cur)
 eval.cur$evalidlist
-
 
 ## Get most current evaluation for New York and Texas for areavol and grm evalTypes
 NYTXeval.cur &lt;- DBgetEvalid(states=c(&quot;New York&quot;, &quot;Texas&quot;), evalType=c(&quot;AREAVOL&quot;, &quot;GRM&quot;))
@@ -420,13 +427,14 @@ NYTXeval.cur$evalTypelist
 <pre><code>######################################################################################
 # Usage:
 # DBgetPlots(states = NULL, RS = NULL, invtype = &quot;ANNUAL&quot;, evalid = NULL, 
-#   evalCur = FALSE, evalEndyr = NULL, evalType = &quot;AREAVOL&quot;, allyrs = FALSE, 
-#   invyrs = NULL, istree = FALSE, isseed = FALSE, isveg = FALSE, issp = FALSE, 
+#   evalCur = FALSE, evalEndyr = NULL, evalType = &quot;AREAVOL&quot;, measCur = FALSE, 
+#   measEndyr = NULL, allyrs = FALSE, invyrs = NULL, istree = FALSE, isseed = FALSE, 
+#   isveg = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE,
 #   spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE,
 #   subcycle99 = FALSE, intensity1 = TRUE, stateFilter = NULL, allFilter = NULL,  
-#   savedata = FALSE, saveqry = FALSE, parameters = FALSE, outfolder = NULL, 
-#   outSQLitern = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-#   returnPOP = FALSE)
+#   alltFilter = NULL, savedata = FALSE, parameters = FALSE, outfolder = NULL, 
+#   out_fmt = &quot;csv&quot;, out_dsn = NULL, append_layer = TRUE, outfn.pre = NULL,  
+#   outfn.date = FALSE, overwrite = FALSE, savePOP = FALSE)
 # 
 # Description:
 # Extracts field, calculated, and derived data from FIA's publically-accessible 
@@ -462,6 +470,7 @@ NYTXeval.cur$evalTypelist
 
 help(DBgetPlots)
 
+source(&quot;C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetPlots.R&quot;)
 # Using GUI interface.
 dat &lt;- DBgetPlots()
 names(dat)
@@ -500,9 +509,9 @@ head(WYtree1)
 ## Save to SQLite database (&quot;C:/FIESTA/data.sqlite&quot;)
 WYdat1 &lt;- DBgetPlots(states=&quot;Wyoming&quot;, evalCur=TRUE, issp=TRUE, istree=FALSE,
               savedata=TRUE, outfolder=outfolder, 
-              outSQLitefn=&quot;data.sqlite&quot;, overwrite=TRUE)
+              out_fmt=&quot;sqlite&quot;, out_dsn=&quot;data6.sqlite&quot;, overwrite=TRUE, othertables=&quot;SUBPLOT&quot;)
 
-sqlitefn &lt;- file.path(outfolder, &quot;data.sqlite&quot;)
+sqlitefn &lt;- file.path(outfolder, &quot;data6.sqlite&quot;)
 
 ## Connect to database and list tables
 conn &lt;- DBI::dbConnect(RSQLite::SQLite(), sqlitefn)

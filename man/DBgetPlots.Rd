@@ -13,10 +13,10 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	measEndyr = NULL, allyrs = FALSE, invyrs = NULL, istree = FALSE, 
 	isseed = FALSE, isveg = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
 	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
-	subcycle99 = FALSE, intensity1 = TRUE, stateFilter = NULL,  allFilter = NULL, 
-	savedata = FALSE, parameters = FALSE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, append = TRUE, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = FALSE, savePOP = FALSE)
+	subcycle99 = FALSE, intensity1 = TRUE, stateFilter = NULL, allFilter = NULL, 
+	alltFilter = NULL, savedata = FALSE, parameters = FALSE, outfolder = NULL, 
+	out_fmt = "csv", out_dsn = NULL, append_layer = TRUE, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite = FALSE, savePOP = FALSE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
@@ -78,8 +78,10 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	and filter in sql query. Must include plot alias ('p.') and be sql syntax 
 	(e.g., 'p.COUNTYCD = 1'). If more than 1 state, stateFilter must be a named list 
 	with names as state(s) (e.g., list(Utah='p.COUNTYCD = 1'). } 
-  \item{allFilter}{ String. An overall filter for data set (i.e. all states). The expression 
-	must be R syntax. If no filter, allFilter="NONE". }
+  \item{allFilter}{ String. An overall filter for all states in query. The expression 
+	must be R syntax (e.g., 'PLOT_STATUS_CD == 1'). }
+  \item{alltFilter}{ String. If istree=TRUE, an overall filter for tree data in all
+	states (e.g., only Whitebark pine trees - 'SPCD == 101'). }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder as comma-delimited file (*.csv). 
 	No objects are returned. If FALSE, the data are saved as R objects and returned to user. 
 	See details for caveats. }
@@ -91,7 +93,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	out_fmt='gdb', arcgisbinding package and R-Bridge must be installed. }
   \item{out_dsn}{ String. Data source name for output. If extension is not
 	included, out_fmt is used. Use full path if outfolder=NULL. }
-  \item{append}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
+  \item{append_layer}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
 		a database or shapefile. If FALSE, the out_dsn will be overwritten if exists. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }

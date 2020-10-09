@@ -1,6 +1,6 @@
 datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
  	out_layer=NULL, outfn.pre=NULL, outfn.date=FALSE, create_dsn=FALSE,
-	overwrite_dsn=FALSE, overwrite_layer=FALSE, append=FALSE, 
+	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, 
 	index.unique=NULL, index=NULL) {
   ###########################################################################
   ## DESCRIPTION: Exports a data.frame to file or database.
@@ -58,10 +58,10 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 		title="Overwrite layer?", first="NO", gui=gui)  
   outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
 		title="Add date to dsn name?", first="YES", gui=gui)  
-  append <- FIESTA::pcheck.logical(append, varnm="append", 
+  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
 		title="Append to dsn?", first="YES", gui=gui) 
 
-  if (append) 
+  if (append_layer) 
     overwrite_dsn <- FALSE
     
   ## Check out_layer
@@ -84,8 +84,8 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
     }      
  
     write2sqlite(dfobj, SQLitefn=out_dsn, out_name=out_layer, gpkg=gpkg, 
-		overwrite=overwrite_layer, appendtab=append, index.unique=index.unique,
-		index=index)    
+		overwrite=overwrite_layer, append_layer=append_layer, 
+		index.unique=index.unique, index=index)    
  
   } else if (out_fmt == "gdb") {
     out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 
@@ -98,7 +98,7 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 
     write2csv(dfobj, outfolder=outfolder, outfilenm=out_layer, 
 		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite=overwrite_layer,
-		appendfile=append)
+		appendfile=append_layer)
 
   } else {
     stop(out_fmt, " currently not supported")

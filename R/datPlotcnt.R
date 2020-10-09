@@ -75,8 +75,9 @@ datPlotcnt <- function(plt, yrtype="INVYR", states=NULL, designcd=FALSE, forsamp
   pltcnt <- FIESTA::datFreq(x=pltx, xvar=vars, total=total, subtotal=subtotal)
   pltcnt <- pltcnt[pltcnt$FREQ != 0,]
 
-  if (!is.null(stabbr))
-    pltcnt <- data.frame(STABBR=stabbr, pltcnt)
+  ## Add State abbreviations
+  pltcnt <- merge(ref_statecd[, c("VALUE", "ABBR")], pltcnt, by.x="VALUE", by.y="STATECD")
+  names(pltcnt)[names(pltcnt) %in% c("VALUE", "ABBR")] <- c("STATECD", "STABBR")
 
   names(pltcnt)[names(pltcnt) == "FREQ"] <- "NBRPLTS"
   names(pltcnt)[names(pltcnt) == "FORNONSAMP2"] <- "PLOT_STATUS"

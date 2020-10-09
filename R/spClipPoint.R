@@ -120,11 +120,11 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
       message("cannot export shapefile... more than 1 record per xy.uniqueid")
     spExportSpatial(inpnts, out_layer=out_layer, out_dsn=out_dsn, 
 		out_fmt=out_fmt, outfolder=outfolder, outfn.pre=outfn.pre, 
-		outfn.date=outfn.date, overwrite_layer=overwrite, append=TRUE) 
+		outfn.date=outfn.date, overwrite_layer=overwrite, append_layer=TRUE) 
  
     spExportSpatial(clippolyvx, out_layer="bnd", out_dsn=out_dsn, 
 		out_fmt=out_fmt, outfolder=outfolder, outfn.pre=outfn.pre, 
-		outfn.date=outfn.date, overwrite_layer=overwrite, append=TRUE)       
+		outfn.date=outfn.date, overwrite_layer=overwrite, append_layer=TRUE)       
   } 
 
   if (savedata)

@@ -462,10 +462,10 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
         smallbnd_layer <- paste0(smallbnd_layer, i)
       }
       spExportSpatial(SAdomslst[[i]], outfolder=outfolder, out_fmt=out_fmt, 
-			out_dsn=out_dsn, out_layer=SAdoms_layer, append=TRUE,
+			out_dsn=out_dsn, out_layer=SAdoms_layer, append_layer=TRUE,
 			overwrite_layer=overwrite_layer)
       spExportSpatial(smallbndxlst[[i]], outfolder=outfolder, out_fmt=out_fmt, 
-			out_dsn=out_dsn, out_layer=smallbnd_layer, append=TRUE,
+			out_dsn=out_dsn, out_layer=smallbnd_layer, append_layer=TRUE,
 			overwrite_layer=overwrite_layer)
 
       if (savesteps) {

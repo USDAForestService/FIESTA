@@ -57,7 +57,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     if (savesteps) {
       out_layer <- paste0("step", stepcnt, "_maxbnd_intersect")
       spExportSpatial(maxbndx.intd, outfolder=stepfolder, out_dsn=step_dsn, 
-			out_fmt=out_fmt, out_layer=out_layer, append=TRUE,
+			out_fmt=out_fmt, out_layer=out_layer, append_layer=TRUE,
 			overwrite_dsn=FALSE, overwrite_layer=overwrite)
 
       jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
@@ -166,7 +166,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       out_layer <- paste0("step", stepcnt, "_maxbnd_select")
       maxbndx.selectd <- maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbnd.gtthres,]
       spExportSpatial(maxbndx.selectd, outfolder=stepfolder, out_dsn=step_dsn, 
-			out_fmt=out_fmt, out_layer=out_layer, append=TRUE,
+			out_fmt=out_fmt, out_layer=out_layer, append_layer=TRUE,
 			overwrite_layer=overwrite)
 
       jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
@@ -276,7 +276,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       if (savesteps) {
         out_layer <- paste0("step", stepcnt, "_", sbndnm, "_largebnds")
         spExportSpatial(largebndx.intd, outfolder=stepfolder, out_dsn=step_dsn, 
-			out_fmt=out_fmt, out_layer=out_layer, append=TRUE,
+			out_fmt=out_fmt, out_layer=out_layer, append_layer=TRUE,
 			overwrite_layer=overwrite)
 
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
@@ -321,7 +321,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       if (savesteps) {
         out_layer <- paste0("step", stepcnt, "_", sbndnm, "_largebnd_intersect")
         spExportSpatial(largebndx.intd, outfolder=stepfolder, out_dsn=step_dsn, 
-			out_fmt=out_fmt, out_layer=out_layer, append=TRUE,
+			out_fmt=out_fmt, out_layer=out_layer, append_layer=TRUE,
 			overwrite_layer=overwrite)
 
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
@@ -435,7 +435,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       if (savesteps && !is.null(helperbndx.tmp)) {
         out_layer <- paste0("step", stepcnt, "_", sbndnm, "_largebnd_select")
         spExportSpatial(largebnd_select, outfolder=stepfolder, out_dsn=step_dsn, 
-			out_fmt=out_fmt, out_layer=out_layer, append=TRUE,
+			out_fmt=out_fmt, out_layer=out_layer, append_layer=TRUE,
 			overwrite_layer=overwrite)
 
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
@@ -467,7 +467,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       if (savesteps && !is.null(helperbndx.tmp)) {
         out_layer <- paste0("step", stepcnt, "_", sbndnm, "_helperbnd_intersect")
         spExportSpatial(largebnd_select, outfolder=stepfolder, out_dsn=step_dsn, 
-			out_fmt=out_fmt, out_layer=out_layer, append=TRUE,
+			out_fmt=out_fmt, out_layer=out_layer, append_layer=TRUE,
 			overwrite_layer=overwrite)
 
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")

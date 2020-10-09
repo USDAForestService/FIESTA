@@ -93,13 +93,13 @@ save1tab <- function(tab, tab.title=NULL, outfolder, allin1=TRUE, coltitlerow=TR
     outfile <- file(outfilenm, "w")
     cat(gsub(",", "; ", tab.title), file=outfile, sep="\n")
     cat("\n", file=outfile)
-#    outfile <- write2csv(tab=tab, outfile=outfile, appendfile=TRUE, 
+#    outfile <- write2csv(tab, outfile=outfile, appendfile=TRUE, 
 #		outfn.date=outfn.date, overwrite=overwrite, closefn=FALSE)
-    outfile <- write2csv(tab=tab, outfile=outfile, appendfile=TRUE, closefn=FALSE)
+    outfile <- write2csv(tab, outfile=outfile, appendfile=TRUE, closefn=FALSE)
   } else { 
-#    outfile <- write2csv(tab=tab, outfilenm=outfilenm, outfn.date=outfn.date, 
+#    outfile <- write2csv(tab, outfilenm=outfilenm, outfn.date=outfn.date, 
 #		overwrite=overwrite, closefn=FALSE) 
-    outfile <- write2csv(tab=tab, outfilenm=outfilenm, closefn=FALSE) 
+    outfile <- write2csv(tab, outfilenm=outfilenm, closefn=FALSE) 
   }
   close(outfile)
 

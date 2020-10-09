@@ -3,9 +3,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	allyrs=FALSE, invyrs=NULL, istree=FALSE, isseed=FALSE, isveg=FALSE, 
 	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, 
 	regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, intensity1=TRUE, stateFilter=NULL,
-	allFilter=NULL, savedata=FALSE, parameters=FALSE, outfolder=NULL, out_fmt="csv",
-	out_dsn=NULL, append=TRUE, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
-	savePOP=FALSE) {
+	allFilter=NULL, alltFilter=NULL, savedata=FALSE, parameters=FALSE, outfolder=NULL,
+ 	out_fmt="csv", out_dsn=NULL, append_layer=TRUE, outfn.pre=NULL, outfn.date=FALSE,
+ 	overwrite=FALSE, savePOP=FALSE) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -326,12 +326,13 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   if (savedata | saveqry | parameters | !treeReturn) {
     outfolder <- pcheck.outfolder(outfolder, gui=gui)
 
-    ## append
-    append <- FIESTA::pcheck.logical(append, varnm="append", 
+    ## check append_layer
+    append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
 		title="append data", first="NO", gui=gui)
-    if (length(states) > 1 && !append) append <- TRUE
-    overwrite_dsn <- ifelse(append, FALSE, TRUE)
 
+    ## check overwrite
+    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="overwrite data", first="NO", gui=gui)
   }
  
   ###########################################################################
@@ -384,7 +385,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   if (xymeasCur) 
     xyfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA.)
   
-
   ## TREE query
   ################################################
   if (istree) 
@@ -487,11 +487,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         assign(paste0("otherx", j), NULL)
     }    
    
-    if (savedata) {
-      overwrite <- ifelse (i == 1, overwrite, FALSE)
-      append <- ifelse (i == 1, FALSE, TRUE)
-      col.names <- ifelse (i == 1, TRUE, FALSE)
-    }
 
 ############ CSV only
 
@@ -648,6 +643,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
     ## SET QUERY FILTER
     xfilter <- paste0(evalFilter, stateFilters)
+    message(paste(stcd, "-", xfilter))
 
     #####################################################################################
     ###################################    RUN QUERIES   ################################
@@ -937,6 +933,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
           ## Subset overall filters from pltx
           treex <- treex[treex$PLT_CN %in% unique(pltx$CN),]
+
+          ## Filter treex with alltFilter      
+          ###########################################
+          treex <- FIESTA::datFilter(x=treex, xfilter=alltFilter)$xf
+
 
           ## Check ACI
           if (!ACI) {
@@ -1233,7 +1234,18 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     ###############################################################################
     ###############################################################################
     if (savedata && !is.null(pltx)) {
+
+      overwrite_layer <- overwrite
+      append_layer2 <- append_layer
+      col.names <- ifelse (i == 1, TRUE, FALSE)
+      if (i == 1) { 
+        if (overwrite && append_layer) append_layer2 <- FALSE
+      } else {
+        if (length(states) > 1 && !append_layer) append_layer2 <- TRUE
+      }
+
       if (issp) {
+        message("saving spatial xy data...")
         xycoords <- getcoords(coords)
 
         if (xymeasCur) {
@@ -1252,8 +1264,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           assign(spxynm, spMakeSpatialPoints(xyplt=xyplt, xvar=xycoords[1], 
 			yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
 			exportsp=savedata, out_dsn=out_dsn, out_fmt=out_fmt_sp, 
-			out_layer=spxynm, outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, 
-			overwrite_layer=overwrite, append=append))
+			outfolder=outfolder, out_layer=spxynm, outfn.date=outfn.date,
+ 			overwrite_layer=overwrite_layer, append_layer=append_layer2,
+			outfn.pre=outfn.pre))
         }
       }       
 
@@ -1273,8 +1286,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           if (i == 1) index.unique.xyplt <- "PLT_CN"
           datExportData(xyplt, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer=xynm, 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.xyplt, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.xyplt, append_layer=append_layer2,
+			outfn.pre=outfn.pre)
         }
       }   
 
@@ -1283,8 +1297,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         if (i == 1) index.unique.spconddat <- "PLT_CN"
         datExportData(spconddat, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="spconddat", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.spconddat, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.spconddat, append_layer=append_layer2,
+			outfn.pre=outfn.pre)
       }
 
       if (!is.null(pltx)) {
@@ -1292,8 +1307,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         if (i == 1) index.unique.pltx <- "CN"
         datExportData(pltx, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plot", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.pltx, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.pltx, append_layer=append_layer2,
+			outfn.pre=outfn.pre)
       }
 
       if (!is.null(condx)) {
@@ -1301,8 +1317,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         if (i == 1) index.unique.condx <- c("PLT_CN", "CONDID")
         datExportData(condx, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.condx, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.condx, append_layer=append_layer2,
+			outfn.pre=outfn.pre)
       }
 
       if (!is.null(treex)) {
@@ -1310,8 +1327,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         if (i == 1) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
         datExportData(treex, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.treex, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.treex, append_layer=append_layer2,
+			outfn.pre=outfn.pre)
       }
 
       if (!is.null(seedx)) {
@@ -1319,23 +1337,26 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         if (i == 1) index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
         datExportData(seedx, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seed", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.seedx, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.seedx, append_layer=append_layer2,
+			outfn.pre=outfn.pre)
       } 
       if (!is.null(vspsppx)) {
         index.unique.vspsppx <- NULL
         if (i == 1) index.unique.vspsppx <- c("PLT_CN", "CONDID")
         datExportData(vspsppx, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vspspp", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.vspsppx, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.vspsppx, append_layer=append_layer,
+			outfn.pre=outfn.pre)
 
         index.unique.vspstrx <- NULL
         if (i == 1) index.unique.vspstrx <- c("PLT_CN", "CONDID")
         datExportData(vspstrx, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vspstr", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.vspstrx, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.vspstrx, append_layer=append_layer,
+			outfn.pre=outfn.pre)
       } 
 
       if (!is.null(dwmx)) {
@@ -1343,8 +1364,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         if (i == 1) index.unique.dwmx <- c("PLT_CN", "CONDID")
         datExportData(dwmx, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dwm", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.dwmx, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.dwmx, append_layer=append_layer,
+			outfn.pre=outfn.pre)
       } 
 
       if (!is.null(othertables)) {
@@ -1355,7 +1377,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
           datExportData(get(othertablexnm), outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer=othertable, 
-			outfn.date=outfn.date, overwrite_layer=overwrite, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer, outfn.pre=outfn.pre)
         }
       }  
  
@@ -1364,8 +1387,10 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         if (i == 1) index.unique.ppsax <- "PLT_CN"
         datExportData(ppsax, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="ppsa", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			index.unique=index.unique.ppsax, append=append)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.ppsax, append_layer=append_layer,
+			outfn.pre=outfn.pre)
+
       }
     }
     plt <- rbind(plt, pltx)
@@ -1443,7 +1468,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   if (savedata) {
     datExportData(pltcnt, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcnt", 
-			outfn.date=outfn.date, overwrite_layer=overwrite)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			append_layer=append_layer2, outfn.pre=outfn.pre)
   }
 
 
@@ -1524,7 +1550,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     if (savedata) {
       datExportData(evaliddf, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="evalid", 
-			outfn.date=outfn.date, overwrite_layer=overwrite)
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			append_layer=append_layer2, outfn.pre=outfn.pre)
     }
   }
   

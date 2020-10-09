@@ -554,7 +554,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 
       datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=multest_outfolder, 
  		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite_layer, 
-		append=multest.append)
+		append_layer=multest.append)
     }
   } 
 

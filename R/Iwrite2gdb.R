@@ -1,9 +1,9 @@
-write2gdb <- function(tab, gdbfn, out_name=NULL, overwrite=FALSE){
+write2gdb <- function(layer, gdbfn, out_name=NULL, overwrite=FALSE){
   ###################################################################################
   ## DESCRIPTION: Internal function to write to csv file.
   ##  
   ## ARGUMENTS: 
-  ##  tab    DF. The table to output.
+  ##  layer    DF. The table to output.
   ##  out_name	String. Name of output layer.
   ##
   ## VALUE:
@@ -16,9 +16,9 @@ write2gdb <- function(tab, gdbfn, out_name=NULL, overwrite=FALSE){
 
   ## Check out_name
   if (is.null(out_name)) 
-    out_name <- "tab"
+    out_name <- "layer"
 
   ## Write table to database
-  arcgisbinding::arc.write(file.path(gdbfn, out_name), data=tab, overwrite=overwrite)
+  arcgisbinding::arc.write(file.path(gdbfn, out_name), data=layer, overwrite=overwrite)
 
 }

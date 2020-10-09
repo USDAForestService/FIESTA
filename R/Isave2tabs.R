@@ -63,7 +63,7 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
   } else {    
     cat("Estimate", file=outfile, sep="\n")
   }
-  outfile <- write2csv(tab=tab1, outfile=outfile, appendfile=TRUE, closefn=FALSE)
+  outfile <- write2csv(tab1, outfile=outfile, appendfile=TRUE, closefn=FALSE)
   
   if (addtitle) {
     cat("\n", file=outfile)
@@ -72,7 +72,7 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
   } else {    
     cat("", "Percent Error", file=outfile, sep="\n")
   }
-  outfile <- write2csv(tab=tab2, outfile=outfile, appendfile=TRUE, closefn=FALSE)
+  outfile <- write2csv(tab2, outfile=outfile, appendfile=TRUE, closefn=FALSE)
   close(outfile)
   
     message("###################################\n", 
