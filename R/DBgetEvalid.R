@@ -19,7 +19,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
     gui <- ifelse(nargs() == 0, TRUE, FALSE)
   
   ## Set global variables
-  EVAL_GRP_Endyr=STATECD <- NULL
+  EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR <- NULL
 
 
   ## SET OPTIONS
@@ -46,7 +46,6 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   ## Check ZIP
   ZIP <- FIESTA::pcheck.logical(ZIP, varnm="ZIP", title="Zip files?", 
 		gui=gui, first="YES")
-
 
   ## If evalid is not NULL, get state
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
@@ -129,7 +128,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   if (!is.null(evalid)) {
     ## Check if evalid is valid
     if (!all(evalid %in% POP_EVAL$EVALID)) {
-      stop("invalid EVALID")
+      notin <- evalid[!evalid %in% POP_EVAL$EVALID]
+      stop("invalid EVALID: ", toString(notin))
     } else {
       ## Create table of state, inventory year, and cycle
       invyrqry <- paste0("select STATECD, STATENM, STATEAB, ANN_INVENTORY, INVYR, 
@@ -324,23 +324,21 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
     evalidlist <- sapply(states, function(x) NULL)
 
     ## Get the evalidation type - areavol or grm)
-    evalSelectlst <- c("AREAVOL", "GRM", "DWM")
-    if (invtype == "ANNUAL") {
-      evalSelectlst <- c("ALL", evalSelectlst)
-    } else {
-      if (any(evalType == "ALL"))
-        message("PERIODIC invtype does not have evalType = 'ALL'")      
-    }
+    evalSelectlst <- c("ALL", "AREAVOL", "GRM", "DWM")
     evalType <- FIESTA::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
 		checklst=evalSelectlst, caption="Evaluation type", multiple=TRUE, 
 		preselect="AREAVOL")
     if (is.null(evalType)) evalType <- "AREAVOL"
 
     ## check evalType
-    if (length(grep("AREAVOL", evalType, ignore.case=TRUE)) > 0) 
-      evalType[grep("AREAVOL", evalType, ignore.case=TRUE)] <- "VOL"  
-    if (length(grep("GRM", evalType, ignore.case=TRUE)) > 0) 
-      evalType[grep("GRM", evalType, ignore.case=TRUE)] <- "GROW"  
+    if (invtype == "PERIODIC" && evalType == "ALL") {
+      evalType <- "CURR"
+    } else {
+      if (length(grep("AREAVOL", evalType, ignore.case=TRUE)) > 0) 
+        evalType[grep("AREAVOL", evalType, ignore.case=TRUE)] <- "VOL"  
+      if (length(grep("GRM", evalType, ignore.case=TRUE)) > 0) 
+        evalType[grep("GRM", evalType, ignore.case=TRUE)] <- "GROW"  
+    }
 
     if (isdwm) {
       message("adding dwm to evalType")
@@ -362,8 +360,19 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
 		!grepl("WEST", POP_EVAL_GRP$EVAL_GRP_DESCR, ignore.case=TRUE), ]
       }
     
-      POP_EVAL_endyrs <- na.omit(unique(POP_EVAL_GRP[POP_EVAL_GRP$STATECD == stcd, 
-		"EVAL_GRP_Endyr"][[1]]))
+
+      ## Get evalid and inventory years from POP_EVAL table
+      setkey(POP_EVAL, "EVAL_GRP_CN")
+      setkey(POP_EVAL_GRP, "CN")
+
+      popevaltab <- POP_EVAL[POP_EVAL_GRP[, c("CN", "EVAL_GRP_Endyr")]][STATECD == stcd,]
+      if (invtype == "ANNUAL") {
+        popevaltab <- popevaltab[START_INVYR != END_INVYR, ]
+      } else { 
+        popevaltab <- popevaltab[START_INVYR == END_INVYR, ]
+      }
+
+      POP_EVAL_endyrs <- na.omit(unique(popevaltab[, "EVAL_GRP_Endyr"][[1]]))
 
       if (!is.null(evalEndyr)) {
         Endyr <- evalEndyr[[state]]
@@ -386,18 +395,6 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
             message("No end year specified.. using most current year in database")
           }
         }
-      }
-
-      ## Get evalid and inventory years from POP_EVAL table
-      setkey(POP_EVAL, "EVAL_GRP_CN")
-      setkey(POP_EVAL_GRP, "CN")
-      popevaltab <- POP_EVAL[POP_EVAL_GRP[, 
-		c("CN", "EVAL_GRP_Endyr")]][STATECD == stcd & EVAL_GRP_Endyr == Endyr,]
-
-      if (is.null(invtype) && !evalAll) {
-        Startyr <- sort(unique(popevaltab[["START_INVYR"]]))
-        #invtype <- ifelse(is.na(Startyr) || Endyr == Startyr, "PERIODIC", "ANNUAL")
-        invtype <- ifelse(Endyr == Startyr, "PERIODIC", "ANNUAL")
       }
 
       ## Check evalType with evalType in database for state

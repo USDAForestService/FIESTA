@@ -27,7 +27,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=xypltx=tabs2save=ZSTUNCOPLOT=INVYR <- NULL
+  xydat=stateFilter=statecnty=xypltx=tabs2save=PLOT_ID=INVYR <- NULL
   cuniqueid=tuniqueid <- "PLT_CN"
   returnlst <- list()
   #clipdat <- list()
@@ -375,7 +375,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
         ## Query plt table
         plt <- setDT(sqldf::sqldf(plt.qry))
-        plt[, ZSTUNCOPLOT := paste0("Z", 
+        plt[, PLOT_ID := paste0("ID", 
 			formatC(plt$STATECD, width=2, digits=2, flag=0), 
           		formatC(plt$UNITCD, width=2, digits=2, flag=0),
           		formatC(plt$COUNTYCD, width=3, digits=3, flag=0),
@@ -423,12 +423,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             setnames(xystate, c("LON", "LAT"), c(xvar, yvar))
 
             if (measCur.xy) {
-              xystate[, ZSTUNCOPLOT := paste0("Z", 
+              xystate[, PLOT_ID := paste0("ID", 
 				formatC(xystate$STATECD, width=2, digits=2, flag=0), 
           			formatC(xystate$UNITCD, width=2, digits=2, flag=0),
           			formatC(xystate$COUNTYCD, width=3, digits=3, flag=0),
           			formatC(xystate$PLOT, width=5, digits=5, flag=0))] 
-              xy.joinid <- "ZSTUNCOPLOT"
+              xy.joinid <- "PLOT_ID"
             } else {
               xy.joinid <- puniqueid
             } 
@@ -483,7 +483,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
             ## Query plt table
             plt2 <- setDT(sqldf::sqldf(plt2.qry))
-            plt2[, ZSTUNCOPLOT := paste0("Z", 
+            plt2[, PLOT_ID := paste0("ID", 
 			formatC(plt2$STATECD, width=2, digits=2, flag=0), 
           		formatC(plt2$UNITCD, width=2, digits=2, flag=0),
           		formatC(plt2$COUNTYCD, width=3, digits=3, flag=0),
@@ -676,10 +676,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             pltfields <- DBI::dbListFields(conn, "plot")
 
             if (grepl("xyCur", xy)) {
-              if (xy.joinid %in% c("CN", "PLT_CN") && "ZSTUNCOPLOT" %in% xyfields && 
-				"ZSTUNCOPLOT" %in% pltfields) {
-                 message("changing xy.joinid from ", xy.joinid, "to ZSTUNCOPLOT")
-                 xy.joinid <- "ZSTUNCOPLOT"
+              if (xy.joinid %in% c("CN", "PLT_CN") && "PLOT_ID" %in% xyfields && 
+				"PLOT_ID" %in% pltfields) {
+                 message("changing xy.joinid from ", xy.joinid, "to PLOT_ID")
+                 xy.joinid <- "PLOT_ID"
               }
             }
                  
@@ -738,12 +738,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         DBI::dbClearResult(rs)
 
         zids <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
-        if (!"ZSTUNCOPLOT" %in% names(plt)) {
+        if (!"PLOT_ID" %in% names(plt)) {
           if (!all(zids %in% names(plt))) {
             message("cannot create unique identifier for plot")
             message(toString(zids[which(!zids %in% names(plt))]), " not in plt")
           } else {
-            plt[, ZSTUNCOPLOT := paste0("Z", 
+            plt[, PLOT_ID := paste0("ID", 
 			formatC(plt$STATECD, width=2, digits=2, flag=0), 
           		formatC(plt$UNITCD, width=2, digits=2, flag=0),
           		formatC(plt$COUNTYCD, width=3, digits=3, flag=0),
@@ -856,9 +856,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             rs <- DBI::dbSendQuery(conn, plt2.qry)
             plt2 <- DBI::dbFetch(rs)
 
-            if (!"ZSTUNCOPLOT" %in% names(plt2)) {
+            if (!"PLOT_ID" %in% names(plt2)) {
               if (all(zids %in% names(plt2))) {
-                plt2[, ZSTUNCOPLOT := paste0("Z", 
+                plt2[, PLOT_ID := paste0("ID", 
 				formatC(plt2$STATECD, width=2, digits=2, flag=0), 
           			formatC(plt2$UNITCD, width=2, digits=2, flag=0),
           			formatC(plt2$COUNTYCD, width=3, digits=3, flag=0),

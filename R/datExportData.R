@@ -42,10 +42,10 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
   ###########################################################
   if (out_fmt %in% c("sqlite", "gpkg")) {
     if (!"RSQLite" %in% rownames(installed.packages()))
-      stop("RSQLite package is required for datExportData")
+      stop("RSQLite package is required for exporting to sqlite or gpkg formats")
   } else if (out_fmt %in% c("gdb")) {
     if (!"arcgisbinding" %in% rownames(installed.packages()))
-      stop("arcgisbinding package is required for datExportData")
+      stop("arcgisbinding package is required for exporting to gdb format")
     arcgisbinding::arc.check_product()
   }
 
@@ -95,7 +95,6 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 			overwrite=overwrite_layer)
     
   } else if (out_fmt == "csv") {
-
     write2csv(dfobj, outfolder=outfolder, outfilenm=out_layer, 
 		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite=overwrite_layer,
 		appendfile=append_layer)

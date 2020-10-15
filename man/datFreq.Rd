@@ -9,8 +9,8 @@
 	totals and/or subtotals. 
 }
 \usage{
-datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, savedata = FALSE, 
-	outfolder = NULL, outfn = NULL)
+datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, subtotalcol = NULL, 
+	savedata = FALSE, outfolder = NULL, outfn = NULL)
 }
 \arguments{
   \item{x}{ Data frame or comma-delimited file (*.csv). The table with the variable(s). }
@@ -18,6 +18,7 @@ datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, savedata = FALSE,
   \item{total}{ Logical. If TRUE, a row is added to bottom of table with a total for the 
 	whole table. }
   \item{subtotal}{ Logical. If TRUE, a row is added to bottom of each section for subtotals. }
+  \item{subtotalcol}{ Logical. If subtotal=TRUE, the column(s) to generate subtotals. }
   \item{savedata}{ Logical. If TRUE, writes output data to outfolder. }
   \item{outfolder}{ String. The name of the output folder, if savedata=TRUE. }
   \item{outfn}{ String. The name of the output file if savedata=TRUE (*.csv). Do not include 

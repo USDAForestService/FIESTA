@@ -1,6 +1,6 @@
-write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=FALSE, tabtitle=NULL, appendfile=FALSE, closefn=TRUE, 
-	outtxt=NULL, gui=FALSE){
+write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL, 
+	outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, tabtitle=NULL, 
+	appendfile=FALSE, closefn=TRUE, outtxt=NULL, gui=FALSE){
   ###################################################################################
   ## DESCRIPTION: Internal function to write to csv file.
   ##  
@@ -27,8 +27,10 @@ write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL, outfn
     ## open file
     if (appendfile) {
       outfile <- file(outfilenm, "a")
+      cnames <- FALSE
     } else {
       outfile <- file(outfilenm, "w")
+      cnames <- TRUE
     }
 
     msg <- ifelse (!is.null(outtxt) && is.character(outtxt),
@@ -55,7 +57,8 @@ write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL, outfn
     cat(tabtitle, file=outfile, sep="\n")
 
   ## Write table to file.
-  write.table(layer, outfile, row.names=FALSE, append=TRUE, sep=",")
+  write.table(layer, outfile, row.names=FALSE, append=TRUE, sep=",",
+	col.names=cnames)
 
   ## If closefn is TRUE, close the file.
   if (closefn) {

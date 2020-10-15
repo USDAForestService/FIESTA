@@ -5,7 +5,7 @@ datPlotcnt <- function(plt, yrtype="INVYR", states=NULL, designcd=FALSE, forsamp
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  FORNONSAMP2 <- NULL
+  FORNONSAMP2=subtotalcol <- NULL
 
 
   ########################################################################
@@ -58,10 +58,12 @@ datPlotcnt <- function(plt, yrtype="INVYR", states=NULL, designcd=FALSE, forsamp
   vars <- {}
   if ("STATECD" %in% names(pltx)) vars <- c(vars, "STATECD")
   #if ("CYCLE" %in% names(pltx)) vars <- c(vars, "CYCLE")
+  subtotalcol <- c(subtotalcol, "STATECD", yrtype) 
 
   vars <- c(vars, yrtype)
   if (designcd && "DESIGNCD" %in% names(pltx)) {
-    if ("DESIGNCD" %in% names(pltx)) vars <- c(vars, "DESIGNCD") 
+    if ("DESIGNCD" %in% names(pltx)) vars <- c(vars, "DESIGNCD")
+    subtotalcol <- c(subtotalcol, "DESIGNCD") 
   } else {
     designcd <- FALSE
   }
@@ -72,12 +74,18 @@ datPlotcnt <- function(plt, yrtype="INVYR", states=NULL, designcd=FALSE, forsamp
     vars <- c(vars, "FORNONSAMP2")
   }
 
-  pltcnt <- FIESTA::datFreq(x=pltx, xvar=vars, total=total, subtotal=subtotal)
-  pltcnt <- pltcnt[pltcnt$FREQ != 0,]
 
   ## Add State abbreviations
-  pltcnt <- merge(ref_statecd[, c("VALUE", "ABBR")], pltcnt, by.x="VALUE", by.y="STATECD")
-  names(pltcnt)[names(pltcnt) %in% c("VALUE", "ABBR")] <- c("STATECD", "STABBR")
+  pltx <- merge(FIESTA::ref_statecd[, c("VALUE", "ABBR")], pltx, 
+			by.x="VALUE", by.y="STATECD")
+  setnames(pltx, c("VALUE", "ABBR"), c("STATECD", "STABBR"))
+  vars <- c("STABBR", vars)
+#  setkeyv(pltx, vars)
+
+
+  pltcnt <- datFreq(x=pltx, xvar=vars, total=total, subtotal=subtotal, 
+	subtotalcol=subtotalcol)
+  pltcnt <- pltcnt[pltcnt$FREQ != 0,]
 
   names(pltcnt)[names(pltcnt) == "FREQ"] <- "NBRPLTS"
   names(pltcnt)[names(pltcnt) == "FORNONSAMP2"] <- "PLOT_STATUS"

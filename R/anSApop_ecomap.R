@@ -95,7 +95,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
     ## Extract FIA data and model data
     ###########################################################################
     SAdata <- anSAdata(SAdoms, smallbnd=smallbnd, RS=RS, datsource=datsource, 
-		xy.joinid="ZSTUNCOPLOT", istree=TRUE, data_dsn=SQLitefn, 
+		xy.joinid="PLOT_ID", istree=TRUE, data_dsn=SQLitefn, 
 		measCur=measCur, measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 

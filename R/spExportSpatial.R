@@ -76,21 +76,19 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
     if (is.na(getext(out_dsn))) out_dsn <- paste0(out_dsn, ".", out_fmt)
 
-#    if (append_layer) {
-#      out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE)
-#    } else {
-#      out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, 
-#		overwrite=overwrite_dsn, outfn.date=outfn.date)
-#    } 
+    ## Test and get fileneam of SQLite database
+    out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE,
+		createnew=FALSE)
+
     if (!file.exists(out_dsn)) {
       ## Check if spatiaLite database
-      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=append_layer,
+      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=TRUE,
 		dataset_options="SPATIALITE=YES", layer_options="GEOMETRY_NAME = geometry",
 		delete_dsn=overwrite_dsn, delete_layer=overwrite_layer, quiet=FALSE) 
     } else {
-      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=append_layer,
+      sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=FALSE,
 		layer_options="GEOMETRY_NAME = geometry",
-		delete_dsn=overwrite_dsn, delete_layer=overwrite_layer, quiet=FALSE) 
+		delete_dsn=overwrite_dsn, delete_layer=TRUE, quiet=FALSE) 
     }
 
   } else if (out_fmt == "gdb") {
@@ -121,7 +119,7 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     if (is.null(out_dsn) || !file.exists(out_dsn)) {
       out_dsn <- getoutfn(outfn=out_layer, outfolder=outfolder,
 		outfn.pre=outfn.pre, outfn.date=outfn.date, ext=out_fmt,
-		overwrite=overwrite_dsn, append=append_layer)
+		overwrite=overwrite_layer, append=append_layer)
     }
 
     ## Truncate variable names to 10 characters or less
@@ -138,7 +136,7 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     if (!is.null(newnms))
       write2csv(newnms, outfolder=dirname(out_dsn), 
 		outfilenm=paste0(basename.NoExt(out_dsn), "_newnames"),
-		outfn.date=outfn.date, overwrite=append_layer) 
+		outfn.date=outfn.date, overwrite=overwrite_layer) 
 
   } else {
     stop(out_fmt, " currently not supported")

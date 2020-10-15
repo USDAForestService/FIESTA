@@ -81,8 +81,14 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
   if (overwrite && !append) {
     nm <- paste0(outfilenm, ".", ext)
     if (file.exists(nm)) {
-      file.remove(nm)  
-      message("removing ", nm)
+      test <- tryCatch(
+        file.remove(nm),
+			warning=function(war) {
+             			stop(war)
+			}, error=function(err) {
+					message(err)
+			} ) 
+      message("removing ", nm, "...")
     } 
   } else if (!append) {
     outfn.base <- FIESTA::fileexistsnm(outfolder, outfn.base, ext)

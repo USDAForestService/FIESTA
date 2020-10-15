@@ -13,9 +13,9 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	measEndyr = NULL, allyrs = FALSE, invyrs = NULL, istree = FALSE, 
 	isseed = FALSE, isveg = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
 	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
-	subcycle99 = FALSE, intensity1 = TRUE, stateFilter = NULL, allFilter = NULL, 
+	subcycle99 = FALSE, intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, 
 	alltFilter = NULL, savedata = FALSE, parameters = FALSE, outfolder = NULL, 
-	out_fmt = "csv", out_dsn = NULL, append_layer = TRUE, outfn.pre = NULL, 
+	out_fmt = "csv", out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite = FALSE, savePOP = FALSE)
 }
 \arguments{
@@ -78,10 +78,11 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	and filter in sql query. Must include plot alias ('p.') and be sql syntax 
 	(e.g., 'p.COUNTYCD = 1'). If more than 1 state, stateFilter must be a named list 
 	with names as state(s) (e.g., list(Utah='p.COUNTYCD = 1'). } 
-  \item{allFilter}{ String. An overall filter for all states in query. The expression 
-	must be R syntax (e.g., 'PLOT_STATUS_CD == 1'). }
+  \item{allFilter}{ String. An overall filter for plot or condition data in all states 
+	in query. The expression must be R syntax (e.g., 'PLOT_STATUS_CD == 1'). }
   \item{alltFilter}{ String. If istree=TRUE, an overall filter for tree data in all
-	states (e.g., only Whitebark pine trees - 'SPCD == 101'). }
+	states (e.g., only Whitebark pine trees - 'SPCD == 101'). Note: this filter subsets
+	plots to only plots with trees included in filter. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder as comma-delimited file (*.csv). 
 	No objects are returned. If FALSE, the data are saved as R objects and returned to user. 
 	See details for caveats. }
@@ -97,7 +98,8 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 		a database or shapefile. If FALSE, the out_dsn will be overwritten if exists. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite}{ Logical. If TRUE and out_fmt = 'csv', files are overwritten. 
+	If out_fmt != 'csv', the out_dsn is overwritten. }
   \item{savePOP}{ Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN table. }
 }
 \details{
@@ -145,8 +147,11 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 		ID is output. }
   \item{pltcnt}{ Data frame. Number of plots (NBRPLOTS) by state, cycle, inventory year,
 		and plot status. }
-  \item{POP_PLOT_STRATUM_ASSGN}{ Data frame. If returnPOP=TRUE, and Evaluations are
-		used to extract data from database, return the POP_PLOT_STRATUM_ASSGN table. }
+  \item{POP_PLOT_STRATUM_ASSGN}{ Data frame. If savePOP=TRUE, and Evaluations are
+		used to extract data from database, return the POP_PLOT_STRATUM_ASSGN table 
+		or, if more than one evalType and savePOP=FALSE. If more than one evalType,
+		only the records for the evalTypes are returned, otherwise all evalTypes for
+		the state evaluation are returned. }
 
   
 	\tabular{ll}{
@@ -282,9 +287,9 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	\tab NBRCNDFGRP - The number of sampled forested conditions with different forest type groups on plot.\cr
 	\tab CCLIVEPLT - Percent live canopy cover of condition aggregated to plot-level 
 			(LIVE_CANOPY_CVR_PCT * CONDPROP_UNADJ).\cr
-	\tab UNIQUEID - Unique Identifier for plot location 
-			('Z' + STATECD(2) + UNITCD(2) + COUNTYCD(3) + PLOT(5)).
-			This variable can be used to identify multiple plots per location.\cr
+	\tab PLOT_ID - Unique Identifier for a plot 
+			('ID' + STATECD(2) + UNITCD(2) + COUNTYCD(3) + PLOT(5)).
+			This variable can be used to identify multiple records for each measurement of plot.\cr
 	}
 
 	Condition-level variables:\cr

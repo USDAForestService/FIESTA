@@ -127,7 +127,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 #    if (length(xy) == 0)
 #      stop("no xy is SQLitefn")
 #    xy.uniqueid <- "PLT_CN"
-#    xy.joinid <- "ZSTUNCOPLOT"
+#    xy.joinid <- "PLOT_ID"
 
 #    xyx <- xy[grepl("ACTUAL", xy)]
 #    if (length(xyx) == 1) {

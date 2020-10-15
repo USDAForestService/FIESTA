@@ -259,13 +259,13 @@ getspconddat <- function(cond=NULL, ACTUALcond=NULL, cuniqueid="PLT_CN", condid1
 
 getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE, 
 	varCur="MEASYEAR", Endyr=NULL, invyrs=NULL, allyrs=FALSE, SCHEMA.=NULL, 
-	subcycle99=NULL, designcd1=TRUE, intensity1=NULL, popSURVEY=FALSE, chk=FALSE,
+	subcycle99=NULL, designcd1=FALSE, intensity1=NULL, popSURVEY=FALSE, chk=FALSE,
 	syntax="sql", plotnm="plot") {
   ## DESCRIPTION: gets from statement for database query
   ## syntax - ('sql', 'R')
 
   ## set global variables
-  where.qry <- ""
+  #where.qry <- ""
 
   if (!is.null(dsn)) {
     dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE)
@@ -299,6 +299,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
   }
 
   if (plotCur) {
+    where.qry <- "PLOT_STATUS_CD != 3"
     if (!is.null(subcycle99) && !subcycle99) {
       subcycle.filter <- "SUBCYCLE <> 99"
       if (syntax == 'R') gsub("<>", "!=", subcycle.filter)
@@ -375,7 +376,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 #    }
 
     if (popSURVEY)
-      pfromqry <- paste(pfromqry, "join survey s on (s.CN = p.SRV_CN and s.ANN_INVENTORY = 'Y')")
+      pfromqry <- paste(pfromqry, "JOIN survey s on (s.CN = p.SRV_CN and s.ANN_INVENTORY = 'Y')")
    
  
   } else if (allyrs) {  
@@ -542,8 +543,8 @@ getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL,
 
 
   ## Get unique identifier for plot location in data table
-  if ("ZSTUNCOPLOT" %in% names(pltx)) {
-    uniqueloc <- "ZSTUNCOPLOT"
+  if ("PLOT_ID" %in% names(pltx)) {
+    uniqueloc <- "PLOT_ID"
   } else {
     uniqueloc <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
     uniqueloc <- uniqueloc[which(uniqueloc %in% names(pltx))]

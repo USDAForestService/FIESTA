@@ -52,8 +52,8 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
   \item{xy.crs}{ PROJ.4 String or CRS object or Integer EPSG code defining Coordinate 
 	Reference System. }  
   \item{xy.joinid}{ String. Variable to join XY data to plot data. Not necessary to
-	be unique. If using most current XY coordinates, use identifier for 
-	plot location (e.g., ZSTUNCOPLOT). }
+	be unique. If using most current XY coordinates, use identifier for a plot 
+	(e.g., PLOT_ID). }
   \item{datsource}{ String. Source of FIA data ("obj", "csv", "datamart", "sqlite").  
 	If datsource="sqlite", specify database name in data_dsn and layers in 
 	*_layer arguments. 

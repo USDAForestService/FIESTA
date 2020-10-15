@@ -56,6 +56,8 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
       SQLitepath <- DBcreateSQLite(SQLitefn=SQLitepath, returnpath=TRUE)
     } else if (stopifnull) {
       stop("SQLite database does not exist")
+    } else if (returnpath) {
+      return(SQLitepath)   
     } else {
       return(NULL)
     }

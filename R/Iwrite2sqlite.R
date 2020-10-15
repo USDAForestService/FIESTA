@@ -50,8 +50,12 @@ write2sqlite <- function(layer, SQLitefn, out_name=NULL, gpkg=FALSE,
     } else {
       idxsql <- paste0("create unique index ", idxnm, " ON ", out_name, 
 				"(", paste(index.unique, collapse=","), ")")
-
-      DBI::dbExecute(dbconn, idxsql)
+ 
+      test <- tryCatch(
+        DBI::dbExecute(dbconn, idxsql),
+		error=function(err) {
+				message(err)
+		} ) 
       message(sub("create", "creating", idxsql))
     }
   }

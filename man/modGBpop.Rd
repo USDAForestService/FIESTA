@@ -48,7 +48,7 @@ modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
   \item{pltassgnid}{ String. Unique identifier of plot. }
   \item{pjoinid}{ String. Join variable in plot to match pltassgnid. Does not need to
 	be uniqueid. If using most current XY coordinates for plot assignments, 
-	use identifier for plot location (e.g., ZSTUNCOPLOT). }
+	use identifier for plot (e.g., PLOT_ID). }
   \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
   \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
   \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 

@@ -1,5 +1,5 @@
-datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, savedata=FALSE, 
-	outfolder=NULL, outfn=NULL){
+datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, subtotalcol=NULL,
+	savedata=FALSE, outfolder=NULL, outfn=NULL){
   #####################################################################################
   ##	Generates a frequency table from a data frame, including number of records
   ##	by a specified variable or variables in the data frame with optional
@@ -35,6 +35,15 @@ datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, savedata=FALSE,
   subtotal <- FIESTA::pcheck.logical(subtotal, varnm="subtotal", 
 		title="Add subtotals?", first="YES", gui=gui)
 
+  if (subtotal) {
+    ## Check subtotal columns
+    if (!all(subtotalcol %in% names(x))) {
+      misscol <- subtotalcol[!subtotalcol %in% names(x)] 
+      warning("invalid subtotalcol: ", toString(misscol))
+      subtotalcol <- NULL
+    }
+  }
+
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", "Save data tables?", 
 		first="NO", gui=gui)
@@ -57,19 +66,25 @@ datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, savedata=FALSE,
 
   ## GET FREQUENCY BY PLOT
   freqtab <- datx[, .N, by=xvar]
-  setnames(freqtab, c(xvar, yvar))
+  setnames(freqtab, "N", yvar)
+  setorderv(freqtab, xvar)
+
   freqtab <- setDF(freqtab)
 
   ## SORT TABLE BY THE FIRST VARIABLE IN LIST
   numxvar <- length(xvar)
 
-  if ((subtotal | total) && numxvar > 1) {
+  if ((subtotal | total)) {
+    if (is.null(subtotalcol))
+      subtotalcol <- names(x)[ncol(x)-1]
+
     freqtab.tot <- data.frame()
     tot <- sum(freqtab[["FREQ"]])
-    for (i in 1:(numxvar - 1)) {
-      varx <- xvar[i]
+
+    for (i in length(subtotalcol)) {
+      varx <- subtotalcol[i]
       vals <- unique(freqtab[[varx]])
-      if (length(vals) > 1 && varx != "CYCLE") {
+      if (length(vals) > 1) {
         for (val in vals) {
           freqtab.tot <- rbind(freqtab.tot, freqtab[freqtab[[varx]] == val,])
 
