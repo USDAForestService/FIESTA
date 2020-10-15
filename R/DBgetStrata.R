@@ -106,7 +106,7 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
       }
     }
   }
-
+ 
   ## Get Evalid
   evalInfo <- DBgetEvalid(states=states, invyrtab=invyrtab, evalid=evalid, 
 		evalCur=evalCur, evalEndyr=evalEndyr, evalAll=evalAll, evalType=evalType, 

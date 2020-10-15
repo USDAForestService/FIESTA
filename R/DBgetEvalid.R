@@ -365,6 +365,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       setkey(POP_EVAL, "EVAL_GRP_CN")
       setkey(POP_EVAL_GRP, "CN")
 
+      ## Subset POP_EVAL/POP_EVAL_GRP by state
       popevaltab <- POP_EVAL[POP_EVAL_GRP[, c("CN", "EVAL_GRP_Endyr")]][STATECD == stcd,]
       if (invtype == "ANNUAL") {
         popevaltab <- popevaltab[START_INVYR != END_INVYR, ]
@@ -373,6 +374,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       }
 
       POP_EVAL_endyrs <- na.omit(unique(popevaltab[, "EVAL_GRP_Endyr"][[1]]))
+
 
       if (!is.null(evalEndyr)) {
         Endyr <- evalEndyr[[state]]
@@ -396,6 +398,9 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
           }
         }
       }
+
+      ## Subset popevaltab by Endyr
+      popevaltab <- popevaltab[EVAL_GRP_Endyr %in% Endyr,]
 
       ## Check evalType with evalType in database for state
       evalType.chklst <- unique(popevaltab$EVAL_TYP)

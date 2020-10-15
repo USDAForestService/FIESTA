@@ -724,7 +724,6 @@ plot(sf::st_geometry(WYspxy_PUBLIC1214))
 UTWY15dat <- DBgetPlots(states=c("Utah", "Wyoming"), invyrs=2015)
 names(UTWY15dat)
 
-
 ## Look at data
 UTWY15plt <- UTWY15dat$plt
 dim(UTWY15plt)
@@ -733,11 +732,13 @@ UTWY15data$pltcnt
 table(UTWY15plt$STATECD, UTWY15plt$INVYR)
 
 
+
 # Two different states, different inventory years
 ##################################################################################
 UT10WY15dat <- DBgetPlots(states=c("Utah", "Wyoming"), invyrs=list(Utah=2010, Wyoming=2015))
 names(UT10WY15dat)
 
+## Look at plot counts
 dim(UT10WY15dat$plt)
 UT10WY15dat$pltcnt
 
@@ -745,104 +746,133 @@ UT10WY15dat$pltcnt
 
 # All years of periodic data for Wyoming
 ##################################################################################
-WYdata.periodic <- DBgetPlots(states="Wyoming", invtype="PERIODIC", allyrs=TRUE)
-names(WYdata.periodic)
-WYdata.periodic$pltcnt
+WYdat.periodic <- DBgetPlots(states="Wyoming", invtype="PERIODIC", allyrs=TRUE)
+names(WYdat.periodic)
+
+## Look at plot counts
+WYdat.periodic$pltcnt
 
 
 
 # Most current evaluation of periodic data for Wyoming
 # Note: the periodic inventory did not have evalType="ALL"
 ##################################################################################
-WYdata.periodic2 <- DBgetPlots(states="Wyoming", invtype="PERIODIC", evalCur=TRUE)
-names(WYdata.periodic2)
-WYdata.periodic2$pltcnt
+WYdat.periodic2 <- DBgetPlots(states="Wyoming", invtype="PERIODIC", evalCur=TRUE)
+names(WYdat.periodic2)
 
-
-# Evaluation ending in 2017 (2008-2017) of Utah and Wyoming filtered for OWNCD=11
-##################################################################################
-UTWYdata.nfs <- DBgetPlots(states=c("Utah", "Wyoming"), evalEndyr=2017, 
-                  allFilter="OWNCD == 11", evalType="ALL")
-names(UTWYdata.nfs)
-UTWYdata.nfs$pltcnt
-table(UTWYdata.nfs$cond$ADFORCD)
-
-
-# Inventory years 2008-2017 for Idaho/Montana, R1, filtered for OWNGRPCD=10
-# Include tree data
-##################################################################################
-UTdata.nfs <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017, istree=TRUE,
-                  allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
-names(UTdata.nfs)
-UTdata.nfs$pltcnt
-table(UTdata.nfs$cond$ADFORCD)
-
-
-## Get plots that have pinyon pine trees in Utah and Colorado
-utcoplts.tree106 <- DBgetPlots(states=c("Utah", "Colorado"), measCur=TRUE, istree=TRUE, 
-            alltFilter="SPCD == 106")
-dim(utcoplts.tree106)
-dim(utcoplts.tree106)
-dim(utcoplts.tree106)
-
-
-
-################## All Condition Inventory (ACI) data
-
-# Region 1 plots, filtered for OWNGRPCD=10, include tree data with ACI
-# Note: ACI data are not included in FIA evaluations, must specify inventory years
-##################################################################################
-UTdata.nfsACI <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017, 
-                  istree=TRUE, ACI=TRUE, 
-                  allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
-names(UTdata.nfsACI)
-UTdata.nfsACI$pltcnt
-table(UTdata.nfsACI$cond$ADFORCD)
-
-
-
-## Compare with FIA 2008-2017 Inventory years, not including ACI data
-table(UTdata.nfs$plt$NF_PLOT_STATUS_CD)
-dim(UTdata.nfs$tree)
-
-table(UTdata.nfsACI$plt$NF_PLOT_STATUS_CD)
-dim(UTdata.nfsACI$tree)
-
+## Look at plot counts
+WYdat.periodic2$pltcnt
 
 
 # All inventory years for Utah
 ##################################################################################
 UTdat.all <- DBgetPlots(states="Utah", allyrs=TRUE)
 names(UTdat.all)
+
+## Look at plot counts
+UTdat.all$pltcnt
+
 UTplt.all <- UTdat.all$plt
 table(UTplt.all$INVYR)
 
 
 
-################## Save to SQLite database
-
-# Wyoming - most current evaluation - save to SQLite database
 ##################################################################################
-WYdat <- DBgetPlots(states="Wyoming", evalCur=TRUE, istree=TRUE, 
-          savedata=TRUE, outfolder=outfolder, outSQLitefn="WYdat",
-          overwrite=TRUE)
-names(WYdat)
-WYplt <- WYdat$plt
-WYcond <- WYdat$cond
-WYtree <- WYdat$tree
-WYpltcnt <- WYdat$pltcnt
+## Other ways to extract plots - Filters
+##################################################################################
 
-head(WYplt)
-head(WYcond)
-head(WYtree)
-WYpltcnt
+# Evaluation ending in 2017 (2008-2017) of Utah and Wyoming filtered for OWNCD=11
+##################################################################################
+UTWYnfsdat <- DBgetPlots(states=c("Utah", "Wyoming"), evalEndyr=2017, 
+                  allFilter="OWNCD == 11", evalType="ALL", issp=TRUE)
+names(UTWYnfsdat)
 
-## Read SQLite database
-dsn <- file.path(outfolder, "WYdat.sqlite")
-conn <- dbConnect(RSQLite::SQLite(), dsn)
-dbListTables(conn)
-WYplt <- dbGetQuery(conn, "select * from plot")
-dbDisconnect(conn)
+## Look at plot counts
+UTWYnfsdat$pltcnt
+table(UTWYnfsdat$cond$ADFORCD)
+
+
+## Display points with by PLOT_STATUS_CD (1-Green; 2-Orange; 3-Black)
+UTWYnfs.spxy <- UTWYnfsdat$spxy_PUBLIC
+
+UTWYnfs.spxy$color <- with(UTWYnfs.spxy, 
+          ifelse(PLOT_STATUS_CD == 2, "orange", 
+                ifelse(PLOT_STATUS_CD == 3, "black", "dark green")))
+table(UTWYnfs.spxy$PLOT_STATUS_CD)
+table(UTWYnfs.spxy$color)
+
+plot(sf::st_geometry(UTWYnfs.spxy['PLOT_STATUS_CD']), pch=16, cex=.5,
+          col=UTWYnfs.spxy$color)
+
+
+
+# Inventory years 2008-2017 for Idaho/Montana, R1, filtered for OWNGRPCD=10
+##################################################################################
+R4dat <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017,
+                  istree=TRUE, issp=TRUE,
+                  allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
+names(R4dat)
+
+## Look at plot counts
+R4dat$pltcnt
+table(R4dat$cond$ADFORCD)
+dim(R4dat$tree)
+
+## Display points with by PLOT_STATUS_CD (1-Green; 2-Orange; 3-Black)
+R4dat.spxy <- R4dat$spxy_PUBLIC
+
+R4dat.spxy$color <- with(R4dat.spxy, 
+          ifelse(PLOT_STATUS_CD == 2, "orange", 
+                ifelse(PLOT_STATUS_CD == 3, "black", "dark green")))
+plot(sf::st_geometry(R4dat.spxy['PLOT_STATUS_CD']), pch=16, cex=.5,
+          col=R4dat.spxy$color)
+
+
+
+
+## Get plots that have pinyon pine trees in Utah and Colorado
+##################################################################################
+R4dat.t101 <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017, issp=TRUE,
+                  allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)",
+                  istree=TRUE, alltFilter="SPCD == 101")
+names(R4dat.t101)
+
+## Look at plot counts
+R4dat.t101$pltcnt
+table(R4dat.t101$cond$ADFORCD)
+dim(R4dat.t101$tree)
+
+## Display points with by PLOT_STATUS_CD (1-Green; 2-Orange; 3-Black)
+R4dat.t101.spxy <- R4dat.t101$spxy_PUBLIC
+plot(sf::st_geometry(R4dat.t101.spxy), pch=16, cex=.5, col="red", add=TRUE)
+
+                  
+
+
+## All Condition Inventory (ACI) data
+##################################################################################
+
+# Region 1 plots, filtered for OWNGRPCD=10, include tree data with ACI
+# Note: ACI data are not included in FIA evaluations, must specify inventory years
+##################################################################################
+R4ACIdat <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017, 
+                  istree=TRUE, issp=TRUE, ACI=TRUE, 
+                  allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)")
+names(R4ACIdat)
+
+## Look at plot counts
+R4ACIdat$pltcnt
+table(R4ACIdat$cond$ADFORCD)
+dim(R4ACIdat$tree)
+
+
+
+## Compare with FIA 2008-2017 Inventory years, not including ACI data
+table(R4dat$plt$NF_PLOT_STATUS_CD)
+dim(R4dat$tree)
+
+table(R4ACIdat$plt$NF_PLOT_STATUS_CD)
+dim(R4ACIdat$tree)
 
 
 ```
@@ -852,9 +882,9 @@ dbDisconnect(conn)
 ######################################################################################
 # Usage:
 # DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL, 
-#   evalCur = FALSE, evalEndyr = NULL, evalType = "AREAVOL", savedata = FALSE, 
-#   outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-#   POP_PLOT_STRATUM_ASSGN = NULL)
+#   evalCur = FALSE, evalEndyr = NULL, evalAll = FALSE, evalType = "AREAVOL",  
+#   savedata = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE,  
+#   overwrite = FALSE, getassgn = TRUE, POP_PLOT_STRATUM_ASSGN = NULL)
 # 
 # Description:
 # Gets strata information from FIA DataMart, including:
@@ -888,15 +918,27 @@ help(DBgetStrata)
 WYstrat1 <- DBgetStrata(states="Wyoming", evalCur=TRUE)
 names(WYstrat1)
 
+## Look at plot assign data
 WYpltassgn <- WYstrat1$pltassgn
-head(WYpltassgn)
+head
+
+table(WYpltassgn$EVALID)
+
+WYstrat1$evalid           ## EVALID for most current evaluation
+WYstrat1$pltassgnid
+
+
+## Look at area data for estimation unit
 WYstrat1$unitarea
 WYstrat1$unitvar
+WYstrat1$unitvar2
 WYstrat1$areavar
+
+## Look at stratification data for estimation unit
 WYstrat1$strlut
 WYstrat1$strvar
-WYstrat1$strwtvar
-WYstrat1$evalid
+WYstrat1$getwtvar
+
 
 
 # Get strata information for a specific evaluation for Wyoming

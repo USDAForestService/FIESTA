@@ -69,7 +69,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ########################################################################
   iseval <- FALSE
   subsetPOP <- FALSE
-  if (!is.null(evalid) || length(evalType)) savePOP=subsetPOP <- TRUE
+  if (!is.null(evalid) || length(evalType) > 1) savePOP=subsetPOP <- TRUE
 
   ## Get states, Evalid and/or invyrs info
   evalInfo <- DBgetEvalid(states=states, RS=RS, invtype=invtype, 
@@ -82,11 +82,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   invtype <- evalInfo$invtype
   invyrtab <- evalInfo$invyrtab
   SURVEY <- evalInfo$SURVEY
-
   if (length(evalidlist) > 0) {
     invyrs <- evalInfo$invyrs
     iseval <- TRUE
-    savePOP <- TRUE
   }
 
   ### GET RS & rscd
@@ -894,50 +892,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       
       setnames(pltx, "PLT_CN", "CN")
       setkeyv(pltx, "CN")
-
-
-      ##  GET PLOT AND CONDITION COUNTS  
-      ######################################################################
-      plotcnt.vars <- names(pltx)[names(pltx) %in% c("CN", "STATECD", "INVYR", "FORNONSAMP")]
-      pltcnt <- rbind(pltcnt, 
-		 datPlotcnt(plt=unique(pltx[, plotcnt.vars, with=FALSE]), savedata=FALSE))
-
-
-      ##############################################################
-      ## spconddata
-      ##############################################################
-      if (spcond) {
-        ## Get condition data for spatial plot 
-        spconddatx <- getspconddat(cond=condx, condid1=spcondid1, ACI=ACI)
-
-        ## Append data
-        spconddat <- rbind(spconddat, spconddatx)
-      }
-
- 
-      ##############################################################
-      ## xydata
-      ##############################################################
-      #xyx <- pltx[, c("CN", getcoords(coords)), with=FALSE]
-      xyx <- copy(pltx)
-      setnames(xyx, "CN", "PLT_CN")
- 
-      ## Get xy for the most current sampled plot
-      if (xymeasCur) {
-        xvars <- c("p.PLOT_ID", "p.CN", paste0("p.", getcoords(coords)))
-        xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
-        xyx.qry <- gsub("from plot", "from pltx ", xyx.qry)
-
-        xyCurx <- sqldf::sqldf(xyx.qry)
-        names(xyCurx)[names(xyCurx) == "CN"] <- "PLT_CN"
-        assign(paste0("xyCurx_", coords), xyCurx) 
-        assign(paste0("xyCur_", coords), 
-				rbind(get(paste0("xyCur_", coords)), xyCurx)) 
-      } else {
-        assign(paste0("xyx_", coords), xyx)
-        assign(paste0("xy_", coords), 
-				rbind(get(paste0("xy_", coords)), xyx))
-      } 
     }
  
     ##############################################################
@@ -969,16 +923,16 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           ## Filter treex with alltFilter      
           ###########################################
           if (!is.null(alltFilter)) {
-            treexf <- FIESTA::datFilter(x=treex, xfilter=alltFilter)$xf
-            if (!is.null(treexf)) treex <- treexf
-
-            pltx <- pltx[pltx$CN %in% treex$PLT_CN, ]
-            condx <- condx[condx$PLT_CN %in% treex$PLT_CN, ]
+            treex <- FIESTA::datFilter(x=treex, xfilter=alltFilter)$xf
+            if (is.null(treex)) {
+              pltx=condx <- NULL
+            } else {
+              pltx <- pltx[pltx$CN %in% treex$PLT_CN, ]
+              condx <- condx[condx$PLT_CN %in% treex$PLT_CN, ]
+            }
           }
 
-          if (is.null(treex)) {
-            istree <- FALSE
-          } else { 
+          if (!is.null(treex)) {
 
             ## Check ACI
             if (!ACI) {
@@ -1030,6 +984,54 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           }
         }
       }
+    }
+
+    ##############################################################
+    ## Plot counts and spatial data
+    ##############################################################
+    if (!is.null(pltx)) {
+      ##  GET PLOT AND CONDITION COUNTS  
+      ######################################################################
+      plotcnt.vars <- names(pltx)[names(pltx) %in% c("CN", "STATECD", "INVYR", "FORNONSAMP")]
+      pltcnt <- rbind(pltcnt, 
+		 datPlotcnt(plt=unique(pltx[, plotcnt.vars, with=FALSE]), savedata=FALSE))
+
+
+      ##############################################################
+      ## spconddata
+      ##############################################################
+      if (spcond) {
+        ## Get condition data for spatial plot 
+        spconddatx <- getspconddat(cond=condx, condid1=spcondid1, ACI=ACI)
+
+        ## Append data
+        spconddat <- rbind(spconddat, spconddatx)
+      }
+
+ 
+      ##############################################################
+      ## xydata
+      ##############################################################
+      #xyx <- pltx[, c("CN", getcoords(coords)), with=FALSE]
+      xyx <- copy(pltx)
+      setnames(xyx, "CN", "PLT_CN")
+ 
+      ## Get xy for the most current sampled plot
+      if (xymeasCur) {
+        xvars <- c("p.PLOT_ID", "p.CN", paste0("p.", getcoords(coords)))
+        xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
+        xyx.qry <- gsub("from plot", "from pltx ", xyx.qry)
+
+        xyCurx <- sqldf::sqldf(xyx.qry)
+        names(xyCurx)[names(xyCurx) == "CN"] <- "PLT_CN"
+        assign(paste0("xyCurx_", coords), xyCurx) 
+        assign(paste0("xyCur_", coords), 
+				rbind(get(paste0("xyCur_", coords)), xyCurx)) 
+      } else {
+        assign(paste0("xyx_", coords), xyx)
+        assign(paste0("xy_", coords), 
+				rbind(get(paste0("xy_", coords)), xyx))
+      } 
     }
  
     ##############################################################
