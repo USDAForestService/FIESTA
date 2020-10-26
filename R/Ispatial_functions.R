@@ -1147,7 +1147,7 @@ clip.othertables <- function(inids, othertabnms, othertabs=NULL, uniqueid="PLT_C
 
 spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL, 
 	stbnd=NULL, stbnd_dsn=NULL, stbnd.att=NULL, stname.att="STATENM",
-	RS=NULL, states=NULL, showsteps=FALSE, savebnd=FALSE, 
+	RS=NULL, states=NULL, overlap=2, showsteps=FALSE, savebnd=FALSE, 
 	outfolder=NULL, ...) {
 
   ##############################################################################
@@ -1215,7 +1215,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     stated <- sf_dissolve(stbnd, stbnd.att)
 
     stateint <- suppressWarnings(selectByIntersects(stated, sf::st_make_valid(bndx), 
-				overlapThreshold=0))
+				overlapThreshold=overlap))
     states <- stateint[[stbnd.att]]
 
     ## Check name of attribute identifying state
