@@ -22,7 +22,7 @@ Functions are organized by type or objective and are named with a corresponding 
 
 * Estimation modules (GB, PB, SA) - functions for different estimation strategies, such as FIA's standard 'Green-Book' estimators (GB); suplementary photo-based estimators (PB); integration with different available small area estimators (SAE) or other model-assisted or model-based estimation tools, such as LASSO.
 
-* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
+* Analysis tools (an) - wrapper functions for stream-lining estimation processes.
 
 
 
@@ -135,6 +135,14 @@ sql3.csv <- "select STATECD, INVYR, count(*) NBRPLOTS
           from plot 
           where statecd in(49,56) group by STATECD, INVYR"
 DBqryCSV(sql=sql3.csv, states=c("Utah", "Wyoming"), sqltables="plot")
+
+
+# QUERY4: Number of plots by inventory year for Utah and Wyoming that have subalpine fir trees (SPCD=19)
+sql4.csv <- "select p.STATECD, p.INVYR, count(*) NBRPLOTS 
+          from plot p JOIN tree t ON p.CN = t.PLT_CN 
+          where p.statecd in(49,56) and t.SPCD = 19
+          group by p.STATECD, p.INVYR"
+DBqryCSV(sql=sql4.csv, states=c("Utah", "Wyoming"), sqltables=c("plot", "tree"))
 
 
 ```
@@ -830,7 +838,7 @@ plot(sf::st_geometry(R4dat.spxy['PLOT_STATUS_CD']), pch=16, cex=.5,
 
 
 
-## Get plots that have pinyon pine trees in Utah and Colorado
+## Get plots that have pinyon pine trees in Idaho and Montana
 ##################################################################################
 R4dat.t101 <- DBgetPlots(states=c("Idaho", "Montana"), invyrs=2008:2017, issp=TRUE,
                   allFilter="OWNGRPCD == 10 & (ADFORCD > 100 & ADFORCD < 200)",

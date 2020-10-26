@@ -43,7 +43,7 @@ anGBest_evalid <- function(SQLitefn, state, evalidlst=NULL, ppsa="pop_plot_strat
 
     GBpopdat <- modGBpop(cond="cond", plt="plot", tree="tree", pltassgn=ppsa, 
 		dsn=SQLitefn, evalid=evalid, strata=TRUE, unitvar=unitvar, unitarea=unitarea.eval, 
-		areavar=areavar, stratalut=strlut.eval, strvar=strvar, strwtvar=strwtvar, 
+		areavar=areavar, stratalut=strlut.eval, strvar=strvar, 
 		getwt=TRUE, getwtvar=getwtvar, stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, 
 		outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE)
     names(GBpopdat)

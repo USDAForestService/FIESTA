@@ -15,40 +15,49 @@
 \usage{    
 modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL, 
 	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
-	evalid = NULL, invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
-	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", strwtvar="strwt", 
+	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
+	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, ACI = FALSE, 
+	adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL, 
+	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, 
+	unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
+	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE, 
 	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite = TRUE, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{GBdata}{ R List object. Output data list components from GBdata. }
-  \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
-	The condition-level variables with one record per condition, including or 
+  \item{GBdata}{ R List object. Output data list components from FIESTA::GBdata(). }
+  \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
 	variable(s) may be included if plt and pltassgn=NULL. See details for necessary 
 	variables to include. }
-  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
-	or a sf R object. Plot-level variables. If nonsampled plots are included, 
-	PLOT_STATUS_CD variable must be in table. Optional. }
-  \item{tree}{ DF/DT, comma-delimited file(*.csv), or layer in dsn. If esttype="TREE",
-	tree-level variables to aggregate to condition-level. See details for necessary 
-	variables to include. }
-  \item{pltassgn}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
-	or a sf R object. Plot-level assignment of estimation unit and/or strata. Optional. }
-  \item{dsn}{ String. Name of database where tree, cond, and pltassgn tables reside. 
+  \item{plt}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
+	layer or spatial layer in dsn, or shapefile(*.shp).
+	Plot-level data with one record for each plot, including or excluding 
+	nonsampled conditions. If nonsampled plots are included, PLOT_STATUS_CD 
+	variable must be in table or a filter defined in plt.nonsamp.filter. }
+  \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Tree-level data with one record for each tree. Tree data are aggregated to 
+	condition-level. See details for necessary variables to include. }
+  \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
+	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
+	estimation unit and/or strata, with one record for each plot. }
+  \item{dsn}{ String. Name of database where tree, cond, and plot-level tables reside. 
 	The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). }
-  \item{puniqueid}{ String. Unique identifier of plot. }
-  \item{pltassgnid}{ String. Unique identifier of plot. }
+  \item{puniqueid}{ String. Unique identifier of plot in plt. }
+  \item{pltassgnid}{ String. Unique identifier of plot in pltassgn. }
   \item{pjoinid}{ String. Join variable in plot to match pltassgnid. Does not need to
 	be uniqueid. If using most current XY coordinates for plot assignments, 
 	use identifier for plot (e.g., PLOT_ID). }
+  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
+  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
+  \item{condid}{ String. Unique identifier of plot conditions (e.g., CONDID). 
+	If no condid in cond, the data are assumed to have 1 condition per plot. 
+	A CONDID=1 is automatically added. }
+  \item{areawt}{ String. Name of variable for summarizing area weights (e.g., CONDPROP_UNADJ). }
   \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
   \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
   \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
@@ -57,40 +66,39 @@ modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
 	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
-	are only calculated for annual inventory plots (designcd=1). } 
-  \item{strata}{ Logical. If TRUE, add data information for stratification. }
+	are only calculated for annual inventory plots (DESIGNCD=1). } 
+  \item{strata}{ Logical. If TRUE, include information for post-stratification. }
   \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
 	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
   \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
 	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
 	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
-  \item{unitvar}{ String. Name of the estimation unit variable in cond or pltassgn 
-	with estimation unit assignment for each plot (e.g., 'ESTN_UNIT'). 
-	If one estimation unit, set unitvar=NULL. }
-  \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
-	pltassgn with assignment for each plot (e.g., 'STATECD'). }
+  \item{unitvar}{ String. Name of the estimation unit variable in unitarea and 
+	cond or pltassgn data frame with estimation unit assignment for each plot 
+	(e.g., 'ESTN_UNIT'). Optional if only one estimation unit. }
+  \item{unitvar2}{ String. Name of a second level estimation unit variable in unitarea
+	and cond or pltassgn with assignment for each plot (e.g., 'STATECD'). }
   \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
 	unit, include number of total acreage for the area of interest or a data frame
-	with areavar. If more than one estimation unit, provide a data frame of total 
-	area by estimation unit, including unitvar and areavar. }
-  \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
+	with area and estimation unit. If more than one estimation unit, provide a data frame 
+	of total area by estimation unit, including unitvar and areavar. }
+  \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
+	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
-  \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
-	proportions ('strwt') by strata (and estimation unit). To calculate 
-	'strwt', set getwt=TRUE and getwtvar= name of variable with information 
-	to calculate weights from (e.g., pixel counts) }.
-  \item{strvar}{ String. Name of strata variable in stratalut and table with strata
-	assignment for each plot. Default="STRATUMCD". }
-  \item{strwtvar}{ Logical. Strata weight (i.e., proportions) variable in stratalut.
-	If need to calculate, set getwtvar must be included. }
+  \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with pixel counts or area
+	by strata or proportion or area ('strwt') by strata (and estimation unit). 
+	If 'strwt' is not included, set getwt=TRUE and getwtvar as the name of variable 
+	to calculate weights from (e.g., pixel counts). }
+  \item{strvar}{ String. If strata=TRUE, name of the strata variable in stratalut and 
+	cond or pltassgn data frame with stratum assignment for each plot 
+	(Default = 'STRATUMCD'). }
   \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
 	If FALSE, 'strwt' variable must be in stratalut. }
-  \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt).
- 	Default="P1POINTCNT". }
-  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt) 
+ 	(Default = "P1POINTCNT"). }
+  \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
+	strata categories if less than 2 plots in any one stratum. See notes for more info. }
   \item{saveobj}{ Logical. If TRUE, saves SApopdat object to outfolder. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 

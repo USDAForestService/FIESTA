@@ -35,7 +35,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast,
   ########################################################  
 
   ## Verify rasters 
-  rastfn <- getrastlst.rgdal(rast, rastfolder, stopifLonLat=TRUE, gui=gui)
+  rastfn <- suppressWarnings(getrastlst.rgdal(rast, rastfolder, stopifLonLat=TRUE, gui=gui))
 
   ## Get names of raster 
   rastnm <- basename.NoExt(rastfn) 
@@ -135,8 +135,9 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast,
     prename <- outname 
     if (!is.null(prename) && rast.nbands > 1)  
       prename <- paste(prename, b, sep="_") 
+
     if (any(zonalstat %in% c("mean", "sum", "npixels"))) { 
-      atts <- zonalstat[which(zonalstat %in% c("mean", "sum", "npixels"))] 
+      atts <- zonalstat[which(zonalstat %in% c("mean", "min", "max", "sum", "npixels"))] 
 #      atts[atts == "sum"] <- "sumvalues" 
       atts[atts == "count"] <- "npixels"  
       zstats <- setDT(zonalStats(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,  
@@ -153,6 +154,8 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast,
 
       zonalext <- zonalext[zstats] 
       outnames <- c(outnames, var.name) 
+      if (length(bands) > 1 && b == 1 && "npixels" %in% names(zonalstat)) 
+        zonalstat <- zonalstat[zonalstat != "npixels"]
     }  
 
     if (any(zonalstat == "majority")) { 
@@ -268,15 +271,6 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast,
 
         zonalext <- zonalext[zstats.prop] 
         outnames <- c(outnames, var.name) 
-      } 
-
-      if (any(zonalstat == "npixels")) { 
-        zstats.npixels <- zstats[, sum(count), by="zoneid"]
-        setnames(zstats.npixels, "V1", "npixels")
-        setkey(zstats.npixels, "zoneid") 
-
-        zonalext <- zonalext[zstats.npixels] 
-        outnames <- c(outnames, "npixels") 
       } 
     } 
   }  

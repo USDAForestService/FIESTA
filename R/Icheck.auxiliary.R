@@ -141,12 +141,18 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     ## Check continuous variables
     ############################################################################
     predcon <- prednames[!prednames %in% predfac]
- 
-    ## Check for missing variables in auxlut
-    missvars <- predcon[which(!predcon %in% auxnmlst)]
-    if (length(missvars) > 0) 
-      stop("auxvar not in auxlut: ", paste(missvars, collapse=", "))
- 
+    if (length(predcon) > 0) {
+      ## Check for missing variables in auxlut
+      missvars <- predcon[which(!predcon %in% auxnmlst)]
+      if (length(missvars) > 0) {
+        for (i in 1:length(missvars)) {
+          if (sum(grepl(missvars[i], auxnmlst)) > 1)
+          stop("check predfac for defining factor predictors: ", 
+			toString(auxnmlst[grepl(missvars[i], auxnmlst)]))
+        }
+        stop("auxvar not in auxlut: ", paste(missvars, collapse=", "))
+      }
+    }
   
     ## Check for NA values in continuous variables in auxlut
     ############################################################################

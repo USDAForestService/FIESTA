@@ -17,15 +17,14 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
 	other_layers = NULL, puniqueid = "CN", evalid = NULL, evalCur = FALSE, 
 	evalEndyr = NULL, evalType = "AREAVOL", measCur = FALSE, measEndyr = NULL, 
-	Endyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
+	measEndyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
 	showsteps = FALSE, savedata = FALSE, savebnd = FALSE, savexy = TRUE, 
 	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
 }
 \arguments{
-  \item{bnd}{ sf R object or String. Area of interest boundary. Can be a spatial 
-	polygon object, full pathname to a shapefile, or name of a layer within 
-	a database. }
+  \item{bnd}{ sf R object, Area of Interest (AOI) boundary. Can be a spatial 
+	sf object, full pathname to a shapefile, or name of a layer within a database. }
   \item{bnd_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
 	pathname) of bnd. The dsn varies by driver. See gdal OGR 
 	vector formats (https://www.gdal.org/ogr_formats.html). Optional if bnd
@@ -85,11 +84,15 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	See FIA database manual for regional availability and/or differences. }
   \item{measCur}{ Logical. If TRUE, extract plots with most current measurement for 
 	state(s). }
-  \item{measEndyr}{ Integer. Defining end year of measurement (yyyy). }
-  \item{Endyr.filter}{ Filter. If measEndyr != =NULL or evalEndyr != NULL, a filter for plots. }
+  \item{measEndyr}{ Integer year (YYYY). If measCur=TRUE, extract plots with most 
+	current measurement for state(s) for years measured before measEndyr. }
+  \item{measEndyr.filter}{ Filter. If measCur=TRUE and measEndyr != NULL, a filter 
+	for bnd to identify and area to use measEndyr, such as disturbed areas
+	where you want to exclude plots measured after disturbance. }
   \item{invyrs}{ Integer vector. Defining specific years of data (e.g., 2010:2015). }
   \item{allyrs}{ Logical. If TRUE, selects all years (annual inventory) in database. }
-  \item{intensity1}{ Logical. If TRUE, include only plots with INTENSITY=1. }
+  \item{intensity1}{ Logical. If TRUE, include only single intensity plots 
+	(i.e., INTENSITY = 1). }
   \item{showsteps}{ Logical. If TRUE, display data in device window. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
   \item{savebnd}{ Logical. If TRUE, saves bnd. If out_fmt="sqlite", saves to a 

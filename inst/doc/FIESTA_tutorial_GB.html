@@ -871,22 +871,21 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p><sup>2</sup>USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (<a href="http://data.fs.usda.gov/geodata/edw" class="uri">http://data.fs.usda.gov/geodata/edw</a>). Description: A depiction of the boundary that encompasses a Ranger District.</p>
 <div id="set-up-for-examples" class="section level4">
 <h4>Set up for examples</h4>
-<pre><code># Load library
-library(FIESTA)
-
-# Set workspace to FIESTA folder (create if doesn't exist)
-if (!file.exists(&quot;C:/FIESTA&quot;))  dir.create(&quot;C:/FIESTA&quot;)
-setwd(&quot;C:/FIESTA&quot;)
-
-# Create 2 subfolders under the FIESTA folder, 'data' and 'outfolder' and set path to objects 
-if (!file.exists(&quot;data&quot;))  dir.create(&quot;data&quot;)
-datfolder &lt;- &quot;data&quot; 
-
-if (!file.exists(&quot;outfolder&quot;)) dir.create(&quot;outfolder&quot;)
-outfolder &lt;- &quot;outfolder&quot;
-
-</code></pre>
+<pre><code></code></pre>
 </div>
+</div>
+<div id="load-library" class="section level1">
+<h1>Load library</h1>
+<p>library(FIESTA)</p>
+</div>
+<div id="set-workspace-to-fiesta-folder-create-if-doesnt-exist" class="section level1">
+<h1>Set workspace to FIESTA folder (create if doesn’t exist)</h1>
+<p>if (!file.exists(“C:/FIESTA”)) dir.create(“C:/FIESTA”) setwd(“C:/FIESTA”)</p>
+</div>
+<div id="create-2-subfolders-under-the-fiesta-folder-data-and-outfolder-and-set-path-to-objects" class="section level1">
+<h1>Create 2 subfolders under the FIESTA folder, ‘data’ and ‘outfolder’ and set path to objects</h1>
+<p>if (!file.exists(“data”)) dir.create(“data”) datfolder &lt;- “data”</p>
+<p>if (!file.exists(“outfolder”)) dir.create(“outfolder”) outfolder &lt;- “outfolder”</p>
 <div id="gb-functions" class="section level4">
 <h4>GB Functions</h4>
 <ul>
@@ -1543,12 +1542,12 @@ head(rat7b$est)
 
 </code></pre>
 </div>
-</div>
 <div id="references" class="section level2">
 <h2>References</h2>
 <p>Bechtold, William A.; Patterson, Paul L., Editors. 2005. The enhanced Forest Inventory and Analysis program national sampling design and estimation procedures. Gen. Tech. Rep. SRS-80. Asheville, NC: U.S. Department of Agriculture, Forest Service, Southern Research Station. 85 p.</p>
 <p>Patterson, Paul L. 2012. Photo-based estimators for the Nevada photo-based inventory. Res. Pap. RMRS-RP-92. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.</p>
 <p>Westfall, James A.; Patterson, Paul L.; Coulston, John W. 2011. Post-stratified estimation: with-in strata and total sample size recommendations. Canadian Journal of Forest Research. 41: 1130-1139.</p>
+</div>
 </div>
 
 

@@ -1,18 +1,19 @@
 modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, dsn=NULL, 
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", 
-	pltassgnid="CN", ACI=FALSE, adj="samp", MAmethod="GREG", 
-	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, 
-	unitarea=NULL, areavar="ACRES", unitcombine=FALSE, unitlut=NULL, npixelvar="npixels",
- 	prednames=NULL, predfac=NULL, PSstrvar=NULL, stratcombine=TRUE, landarea="ALL", 
-	plt.filter=NULL, cond.filter=NULL, estvar=NULL, estvar.filter=NULL, estvar.name=NULL,
- 	sumunits=FALSE, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, 
-	collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, allin1=FALSE, estround=1, 
+	pltassgnid="CN", pjoinid="CN", evalid=NULL, invyrs=NULL, ACI=FALSE, adj="samp",
+ 	MAmethod="GREG", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE,
+ 	minplotnum.unit=10, unitlut=NULL, npixelvar="npixels", prednames=NULL, predfac=NULL, 
+ 	PSstrvar=NULL, stratcombine=TRUE, landarea="ALL", plt.filter=NULL, cond.filter=NULL, 
+	estvar=NULL, estvar.filter=NULL, estvar.name=NULL, rowvar=NULL, colvar=NULL, 
+ 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
+	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
+	rowgrpnm=NULL, rowgrpord=NULL, sumunits=FALSE, allin1=FALSE, estround=1, 
 	pseround=2, estnull="--", psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
 	addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
 	title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, 
-	MApopdat=NULL, gui=FALSE){
+	MAmodeldat=NULL, MApopdat=NULL, gui=FALSE){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -42,21 +43,22 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
   minplotnum <- 10
-  title.rowgrp=NULL
   esttype="TREE"
   returnMApopdat <- TRUE
 
- 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(MApopdat)) {
-    MApopdat <- modMApop(MAmethod=MAmethod, tree=tree, cond=cond, plt=plt, dsn=dsn, 
-	pltassgn=pltassgn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid,  
-	puniqueid=puniqueid, pltassgnid=pltassgnid, ACI=ACI, adj=adj, 	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter,
-	unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
-	unitcombine=unitcombine, unitlut=unitlut, npixelvar=npixelvar, prednames=prednames,
- 	predfac=predfac, PSstrvar=PSstrvar, stratcombine=stratcombine, gui=gui)
+    MApopdat <- modMApop(tree=tree, cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
+	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid,  
+	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
+	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter,
+ 	cond.nonsamp.filter=cond.nonsamp.filter, MAmethod=MAmethod, unitvar=unitvar, 
+	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
+	minplotnum.unit=minplotnum.unit, unitlut=unitlut, npixelvar=npixelvar, 
+	prednames=prednames, predfac=predfac, PSstrvar=PSstrvar, 
+	stratcombine=stratcombine, MAmodeldat=MAmodeldat, gui=gui)
   } else {
     returnMApopdat <- FALSE
     if (!is.list(MApopdat))
@@ -103,7 +105,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
  		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-		savedata=savedata, outfolder=outfolder)
+		savedata=savedata, outfolder=outfolder, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -129,12 +131,13 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, 
-	condf=pltcondf, cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
-	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
-	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby,
- 	row.add0=row.add0, col.add0=col.add0, title.rowvar=title.rowvar, 
-	title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-	rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea) 
+	condf=pltcondf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, rowvar=rowvar,
+ 	rowvar.filter=rowvar.filter, colvar=colvar, colvar.filter=colvar.filter,
+ 	row.FIAname=row.FIAname, col.FIAname=col.FIAname, row.orderby=row.orderby, 
+	col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0, 
+	title.rowvar=title.rowvar, title.colvar=title.colvar, rowlut=rowlut, 
+	collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+	landarea=landarea) 
   treef <- rowcolinfo$treef
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
@@ -148,6 +151,8 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   col.add0 <- rowcolinfo$col.add0
   title.rowvar <- rowcolinfo$title.rowvar
   title.colvar <- rowcolinfo$title.colvar
+  rowgrpnm <- rowcolinfo$rowgrpnm
+  title.rowgrp <- rowcolinfo$title.rowgrp
   bytdom <- rowcolinfo$bytdom
   tdomvar <- rowcolinfo$tdomvar
   concat <- rowcolinfo$concat
@@ -166,10 +171,9 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   ### GET ESTIMATION DATA FROM TREE TABLE
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- check.tree(gui=gui, treef=treef, bycond=TRUE, condf=condf, 
-	bytdom=bytdom, tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
-	esttype=esttype, estvarn=estvar, estvarn.filter=estvar.filter, esttotn=TRUE, 
-	tdomvar=tdomvar, adjtree=adjtree)
+  treedat <- check.tree(gui=gui, treef=treef, bycond=TRUE, condf=condf, bytdom=bytdom, 
+	tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
+	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
   estvar <- treedat$estvar
@@ -193,7 +197,6 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     }
   } 
 
-
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
@@ -202,8 +205,8 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
  	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
 	title.filter=title.filter, title.estvarn=title.estvar, unitvar=unitvar, 
 	rowvar=rowvar, colvar=colvar, estvarn=estvar, estvarn.filter=estvar.filter, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, invyrs=invyrs, 
-	landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
+	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
+	invyrs=invyrs, landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
 	allin1=allin1, divideby=divideby, outfn=outfn, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
@@ -246,6 +249,11 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 #setorder(test, "COUNTYFIPS", "fnf")
 #test
 
+#unit=1
+#dat=tdomdattot
+#domain="TOTAL"
+#FIA=TRUE
+
     unit.totest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
@@ -266,6 +274,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar,
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
 		domain=rowvar, response=response, npixels=npixels))
+    unit.rowest <- unit.rowest[!is.na(unit.rowest[[rowvar]]), ]
 
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -274,6 +283,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
 		domain=colvar, response=response, npixels=npixels))
+      unit.colest <- unit.colest[!is.na(unit.colest[[colvar]]), ]
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, grpvar, PSstrvar, prednames), .SDcols=response]
@@ -281,6 +291,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
 		domain=grpvar, response=response, npixels=npixels))
+      unit.grpest <- unit.grpest[!is.na(unit.grpest[[grpvar]]), ]
     }
   }
 

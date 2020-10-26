@@ -49,16 +49,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   coords <- "PUBLIC"
   isdwm <- FALSE
   saveqry <- FALSE
-
-
-  ## Set maxstates 
-  ###########################################################
-  ##  The number of states to append together, while still small enough to return 
-  ##  as objects (without memory issues). This includes all tables except tree table..  
-  ##  If there is more than 1 state with more than 6 inventory years and no filters,  
-  ##  the tree table will not be returned as an object.. only written to outfolder.
-  maxstates.tree <- ifelse(allyrs && is.null(allFilter), 3, 
-						ifelse(!is.null(allFilter), 10, 20))  
   biojenk <- FALSE 
   greenwt <- TRUE
   outSQLite <- FALSE     
@@ -205,6 +195,17 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     ACI <- FALSE
     intensity1 <- FALSE
   }
+
+
+  ## Set maxstates 
+  ###########################################################
+  ##  The number of states to append together, while still small enough to return 
+  ##  as objects (without memory issues). This includes all tables except tree table..  
+  ##  If there is more than 1 state with more than 6 inventory years and no filters,  
+  ##  the tree table will not be returned as an object.. only written to outfolder.
+  maxstates.tree <- ifelse(allyrs && is.null(allFilter), 3, 
+						ifelse(!is.null(allFilter), 10, 20))  
+
 
   ## Get maximum number of inventory years for states in query 
   ## (used to determine size of tree data)

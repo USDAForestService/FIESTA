@@ -1,9 +1,21 @@
-GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="ACRES",
+GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
  	ratiotype="PERACRE", bytdom=FALSE, strlut, uniqueid, unitvar, strvar=NULL, domain){
-
-
   ########################################################################################
   ## DESCRIPTION: Calculates the following variables using Green-book estimators
+  ## ARGUMENTS:
+  ## sumyn		- string. estimation response
+  ## ysum		- data frame. domain-level aggregated dataset
+  ## sumyd 		- string. estimation response (denominator) - for ratio of means estimates
+  ## esttype 	- string. type of estimate ('AREA', 'TREE', 'RATIO')
+  ## ratiotype	- string. type of ratio ('PERACRE', 'PERTREE')
+  ## bytdom		- logical. if TRUE, estimates are by tree domains (e.g., species)
+  ## strlut		- data.frame. strata-level information
+  ## uniqueid 	- unique plot identifier in ysum
+  ## unitvar 	- name of variable defining estimation unit
+  ## strvar		- name of variable defining strata 
+  ## domain		- name of variable defining domain (e.g., forest type)
+  ##
+  ## VALUE:
   ## nhat		- estimate proportion of land covered by condition, for numerator
   ## nhat.var	- variance of estimated proportion, for numerator
   ## dhat		- estimate proportion of land covered by condition, for denominator

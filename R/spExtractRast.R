@@ -76,7 +76,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
  
   ## Verify rasters
   ########################################################
-  rastfnlst <- getrastlst.rgdal(rastlst, rastfolder, gui=gui)
+  rastfnlst <- suppressWarnings(getrastlst.rgdal(rastlst, rastfolder, gui=gui))
   #if (any(rastfnlst == "")) stop("must write raster to file")
   nrasts <- length(rastfnlst)
 
@@ -140,16 +140,19 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
   if (!is.null(var.name)) {
     if (!is.character(var.name)) 
       stop("var.name must be a character vector")
-    if (length(var.name) != nlayers)
+    if (!length(var.name) %in% c(nlayers, length(rastfnlst)))
       stop("number of var.name must match ", nlayers, " layers")
-  } else {
-    var.name <- unlist(lapply(names(nbandlist), function(x, nbandlist) {
+
+    #if (length(var.name) != length(nlayers)) 
+    names(nbandlist) <- var.name
+  }   
+  var.name <- unlist(lapply(names(nbandlist), function(x, nbandlist) {
 		if (nbandlist[[x]] == 1) { 
              return(x) 
 		} else { 
 		  return(paste(x, 1:nbandlist[[x]], sep="_")) 
 		} }, nbandlist))
-  }
+
 
   ## Check interpolate
   if (!is.null(interpolate)) {

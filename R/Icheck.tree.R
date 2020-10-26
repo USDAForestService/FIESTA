@@ -1,5 +1,5 @@
 check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom, 
-	tuniqueid=NULL, cuniqueid=NULL, puniqueid=NULL, esttype="TREE", 
+	tuniqueid=NULL, cuniqueid=NULL, condid="CONDID", puniqueid=NULL, esttype="TREE", 
 	ratiotype="PERACRE", estvarn=NULL, estvarn.TPA=TRUE, estvarn.filter=NULL, 
 	estvarn.name=NULL, esttotn=TRUE, estvard=NULL, estvard.TPA=TRUE, 
 	estvard.filter=NULL, estvard.name=NULL, esttotd=TRUE, tdomvar=NULL, 
@@ -57,9 +57,10 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
   if (bytdom) {
     suppressWarnings(
     tdomdata <- datSumTreeDom(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, tsumvar=estvarn, 
-		TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, tfilter=estvarn.filter, 
-		tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
+		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid, 
+		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, 
+		tfilter=estvarn.filter, tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, 
+		checkNA=FALSE, pivot=FALSE))
     if (is.null(tdomdata)) return(NULL)
     
     tdomdat <- tdomdata$tdomdat
@@ -69,9 +70,9 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
   } else {
     suppressWarnings(
     treedata <- datSumTree(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
-		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, tsumvarlst=estvarn, 
-		tsumvarnmlst=estvarn.name, TPA=estvarn.TPA, tfilter=estvarn.filter,
-		adjtree=adjtree, checkNA=FALSE))
+		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid,
+ 		tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA, 
+		tfilter=estvarn.filter, adjtree=adjtree, checkNA=FALSE))
     if (is.null(treedata)) return(NULL)
     
     tdomdat <- treedata$treedat
@@ -107,10 +108,10 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
     #################################################################################
     if (bytdom) {
       tdomdata <- datSumTreeDom(tree=treef, cond=condf, tuniqueid=tuniqueid, 
-		cuniqueid=cuniqueid, bycond=TRUE, tsumvar=estvard, TPA=estvard.TPA, 
-      	tdomtot=esttotd, tdomtotnm=estvard.name, tfilter=estvard.filter, 
-		tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, checkNA=FALSE, 
-		pivot=FALSE)
+		cuniqueid=cuniqueid, bycond=TRUE, condid=condid, tsumvar=estvard, 
+		TPA=estvard.TPA, tdomtot=esttotd, tdomtotnm=estvard.name, 
+		tfilter=estvard.filter, tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, 
+		checkNA=FALSE, pivot=FALSE)
       tdomdatd <- tdomdata$tdomdat
       tdomvard <- tdomdata$tdomtotnm
       tdomvarlstd <- tdomdata$tdomlst
@@ -127,7 +128,7 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
 
     } else {
       tdomdata <- datSumTree(tree=treef, cond=condf, tuniqueid=tuniqueid, 
-		cuniqueid=cuniqueid, bycond=TRUE, tsumvarlst=estvard, 
+		cuniqueid=cuniqueid, bycond=TRUE, condid=condid, tsumvarlst=estvard, 
 		tsumvarnmlst=estvard.name, TPA=estvard.TPA, tfilter=estvard.filter, 
 		adjtree=adjtree, checkNA=FALSE)
       tdomdatd <- tdomdata$treedat
@@ -145,7 +146,6 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
     tdomvard <- NULL
     tdomvarlstd <- NULL
   }
-
 
   if (esttype == "RATIO") {
     treedat <- list(tdomdat=tdomdat, estvarn=estvarn, estvarn.name=tdomvarn, 

@@ -12,11 +12,6 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
   ########################################################
   ref_titles <- FIESTA::ref_titles
   if (!is.null(unitvar2) && unitvar2 == "NONE") unitvar2 <- NULL  
-  if (is.null(title.units)) {
-    title.units <- "acres"
-  } else {
-    title.units <- tolower(title.units)
-  }
 
   ## title.unitvar
   #if (is.null(title.unitvar) && unitvar != "ONEUNIT") title.unitvar <- unitvar   
@@ -42,6 +37,7 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
       title.unitvar.out <- paste("by", title.unitvar)
     if (!is.null(title.unitvar.out) && !is.null(unitvar2)) 
       title.unitvar.out <- paste(title.unitvar.out, "and", unitvar2)
+
     #####  TITLE INFO FOR OUTPUT TABLES
     ########################################################
     ## Reference title
@@ -100,25 +96,30 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
 
         if (is.null(title.estvarn)) {
           ref_estvarn <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
+
+          if (nrow(ref_estvarn) == 0) {
+            title.estvarn <- estvarn
+          } else {
       
-          if (!is.null(estvarn.filter)) {
-            estfilters <- strsplit(estvarn.filter, "&")[[1]]
-            ## Find matching filter in ref_estvar. If more than 1, uses first.
-            gfind <- sapply(estfilters, function(x, ref_estvarn) 
+            if (!is.null(estvarn.filter)) {
+              estfilters <- strsplit(estvarn.filter, "&")[[1]]
+              ## Find matching filter in ref_estvar. If more than 1, uses first.
+              gfind <- sapply(estfilters, function(x, ref_estvarn) 
         			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvarn$ESTFILTER)), 
 				ref_estvarn)
-            if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) gfind <- gfind[1]
-            gfind <- table(gfind)
-            if (length(gfind) > 0) {
-              gfind.max <- names(gfind)[max(gfind)]
-              if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
+              if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) gfind <- gfind[1]
+              gfind <- table(gfind)
+              if (length(gfind) > 0) {
+                gfind.max <- names(gfind)[max(gfind)]
+                if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
+              } else {
+                gfind.max <- 1
+              }
             } else {
               gfind.max <- 1
             }
-          } else {
-            gfind.max <- 1
+            title.estvarn <- ref_estvarn[as.numeric(gfind.max), "ESTTITLE"]
           }
-          title.estvarn <- ref_estvarn[as.numeric(gfind.max), "ESTTITLE"]
 
           if (esttype == "RATIO" && ratiotype == "PERACRE")
             title.estvarn <- paste(title.estvarn, "per acre")
@@ -130,21 +131,24 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
           if (is.null(title.estvard)) {
             ref_estvard <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
 
-            if (!is.null(estvard.filter)) {
+            if (nrow(ref_estvard) == 0) {
+              title.estvard <- estvard
+            } else {
+              if (!is.null(estvard.filter)) {
+                estfilters <- strsplit(estvard.filter, "&")[[1]]
 
-              estfilters <- strsplit(estvard.filter, "&")[[1]]
-
-              ## Find matching filter in ref_estvar. If more than 1, uses first.
-              gfind <- sapply(estfilters, function(x, ref_estvard) 
+                ## Find matching filter in ref_estvar. If more than 1, uses first.
+                gfind <- sapply(estfilters, function(x, ref_estvard) 
         			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvard$ESTFILTER)), 
 				ref_estvard)
-              gfind <- table(gfind)
-              gfind.max <- names(gfind)[max(gfind)]
-              if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
-            } else {
-              gfind.max <- TRUE
+                gfind <- table(gfind)
+                gfind.max <- names(gfind)[max(gfind)]
+                if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
+              } else {
+                gfind.max <- TRUE
+              }
+              title.estvard <- ref_estvard[gfind.max, "ESTTITLE"]
             }
-            title.estvard <- ref_estvard[gfind.max, "ESTTITLE"]
           }
           title.part1 <- paste(title.part1, "by", tolower(title.estvard))
         }
@@ -152,13 +156,13 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
         title.landarea <- paste("on", title.landarea)
       }
 
-      if (!is.null(title.units)) {
-        title.units <- ifelse (is.null(divideby), paste0(", in ", title.units, ", "), 
+      if (!is.null(title.units) && length(title.units) > 0) {
+        title.units <- ifelse (is.null(divideby), paste0(", in ", title.units, ","), 
 		paste0(", in ", divideby, " ", title.units, ", "))
       } else {
-        title.units <- NULL
+        title.units <- ""
       }
-      title.part1 <- paste0(title.part1, title.units, title.landarea)
+      title.part1 <- paste0(title.part1, title.units)
 
       ## title.part2
       ####################################################################
@@ -202,10 +206,10 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
 		(colvar == "NONE" && length(unique(dat[[unitvar]])) == 1)) {
 
           if (rowvar == "TOTAL") {
-            title.estpse <- paste(title.part1, "and percent sampling error")
+            title.estpse <- paste(title.part1, "and percent sampling error", title.landarea)
             title.tot <- title.part1
           } else {
-            title.estpse <- paste(title.part1, "and percent sampling error", title.part2)
+            title.estpse <- paste(title.part1, "and percent sampling error", title.landarea, title.part2)
             title.row <- paste(title.part1, title.part2.row)
           }
           if (!is.null(title.filter)) 

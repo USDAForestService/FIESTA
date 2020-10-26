@@ -226,7 +226,7 @@ getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut,
   return(returnlst)
 }
 
-transpose2row <- function(x, uniqueid, tvars=NULL, na.rm=TRUE) {
+transpose2row <- function(x, uniqueid, tvars=NULL, na.rm=TRUE, tnewname=NULL, tvalue=NULL) {
   ## DESCRIPTION: transpose data.table variables from columns to row
   ## ARGUMENTS:
   ## x 		DT. Data.table to transpose
@@ -236,6 +236,11 @@ transpose2row <- function(x, uniqueid, tvars=NULL, na.rm=TRUE) {
 
   xt <- melt(x, id.vars=uniqueid, measure.vars=tvars, na.rm=na.rm)
   if (is.data.table(xt)) setkeyv(xt, uniqueid)
+  
+  if (!is.null(tnewname)) 
+    setnames(xt, "variable", tnewname)
+  if (!is.null(tvalue)) 
+    setnames(xt, "value", tvalue)
 
   return(xt)
 }

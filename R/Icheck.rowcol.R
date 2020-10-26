@@ -42,7 +42,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   ref_titles <- FIESTA::ref_titles
   concat <- FALSE
   bytdom <- FALSE
- 
+
   ##################################################################
   ## SET UP VARIABLE LISTS
   ##################################################################
@@ -70,7 +70,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 
   ## DEFINE other variables
   varlst <- sort(domvarlst)
-
 
   if(esttype %in% c("TREE", "RATIO")){
     ## DEFINE TREE VARIABLE LISTS
@@ -114,7 +113,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   if (rowgrp && is.null(rowgrpnm) && !row.FIAname) 
      stop("either row.FIAname must be TRUE or rowgrpnm != NULL to add row groups")
 
-
   ##############################################################
   ### ROW VARIABLE
   ##############################################################
@@ -144,7 +142,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
     return(returnlst)
   }
 
-  if (row.FIAname) {
+  if (!is.null(row.FIAname) && row.FIAname) {
     ## Get FIA reference table for xvar
     xvar.ref <- FIESTA::getRefobject(toupper(rowvar))
     if (is.null(xvar.ref)) {
@@ -269,7 +267,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
           } 
         }
       } else if (!is.null(row.orderby) && row.orderby != "NONE") {
-
         if (!row.orderby %in% names(condf)) stop("row.orderby must be in cond")
         if (row.orderby == rowvar) stop("row.orderby must be different than rowvar")
 
@@ -288,7 +285,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
             condf[get(row.orderby) == "", (row.orderby) := "Undefined"]
           }
         }
-
         condf <- FIESTA::DT_NAto0(DT=condf, cols=rowvar)
         condf <- FIESTA::DT_NAto0(DT=condf, cols=row.orderby)
       }
@@ -756,6 +752,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   cvars2keep <- cvars2keep[cvars2keep %in% names(condf)]
   condf <- condf[, cvars2keep, with=FALSE]
   setkeyv(condf, c(cuniqueid, condid))
+
 
   ## Create factors for ordering tables
   ##############################################################################

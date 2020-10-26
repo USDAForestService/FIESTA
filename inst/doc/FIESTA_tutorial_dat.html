@@ -243,7 +243,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </ul>
 <p><strong>Analysis Tools</strong></p>
 <ul>
-<li>Analysis tools (an) - wrapper functions for steam-lining estimation processes.</li>
+<li>Analysis tools (an) - wrapper functions for stream-lining estimation processes.</li>
 </ul>
 <div id="overview-of-fiesta-data-dat-tools" class="section level3">
 <h3>Overview of FIESTA data (dat) tools</h3>
@@ -330,14 +330,16 @@ if (!file.exists(&quot;outfolder&quot;)) dir.create(&quot;outfolder&quot;)
 outfolder &lt;- &quot;outfolder&quot;
 
 </code></pre>
-<p>The following examples use FIA data from Wyoming for inventory years 2011-2012.</p>
+<p>The following examples use FIA data from Wyoming for inventory years 2011-2013.</p>
 <div id="datfilter" class="section level4">
 <h4><a name="datFilter"></a>datFilter()</h4>
 <pre><code>######################################################################################
 # Usage:
 # datFilter(x, xfilter = NULL, xfiltervar = NULL, othertables = NULL, 
 #       uniqueid = &quot;PLT_CN&quot;, vardelete = NULL, title.filter = NULL, savedata = FALSE, 
-#       outfolder = NULL, outfn = NULL, filternm = NULL, stopifnull=FALSE, gui=FALSE) 
+#       outfolder = NULL, outfn = &quot;datf&quot;, outfn.pre = NULL, outfn.date = FALSE, 
+#       overwrite = FALSE, filternm = NULL, stopifnull = FALSE, returnDT = TRUE, 
+#       xnm = NULL, gui = FALSE) 
 # 
 # Description:
 # Subsets a data table by specified filter(s) or logical statement.
@@ -352,7 +354,9 @@ WYcond.nfs &lt;- WYconddat.nfs$xf
 dim(WYcond.nfs)
 head(WYcond.nfs)
 
-## Subset trees that are standing dead aspens in WYoming
+
+
+## Subset trees that are standing dead aspen trees in WYoming
 WYtreedat.dead &lt;- datFilter(WYtree, &quot;STATUSCD == 2 &amp; STANDING_DEAD_CD == 1 &amp; SPCD == 746&quot;)
 names(WYtreedat.dead)
 WYtree.deadasp &lt;- WYtreedat.dead$xf
@@ -384,8 +388,8 @@ dim(WYcond.deadasp)
 <h4><a name="datFreq"></a>datFreq()</h4>
 <pre><code>######################################################################################
 # Usage:
-# datFreq(x, xvar=NULL, total=FALSE, subtotal=FALSE, savedata=FALSE, outfolder=NULL,
-#     outfn=NULL) 
+# datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, subtotalcol = NULL,
+#     savedata = FALSE, outfolder = NULL, outfn = NULL) 
 # 
 #   Generates a frequency table from a data frame, including number of records
 #   by a specified variable or variables in the data frame with optional
@@ -748,6 +752,12 @@ tdomlst &lt;- treedomCNTs$tdomlst
 tdomtotnm &lt;- treedomCNTs$tdomtotnm
 
 head(tdomdat.treeseed)
+
+
+tdomdat.tree[tdomdat.tree$CN == 40404742010690,]
+tdomdat.seed[tdomdat.seed$CN == 40404742010690,]
+tdomdat.treeseed[tdomdat.treeseed$CN == 40404742010690,]
+
 
 #####
 ## Presence of live trees by species, including seedlings

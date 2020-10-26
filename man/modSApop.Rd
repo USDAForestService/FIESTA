@@ -7,19 +7,21 @@
 	Compile population data for input to the modSA* modules. }
 
 \usage{    
-modSApop(SAdoms, cond, tree = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, 
-	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", puniqueid = "CN", 
-	pltassgnid = "CN", pjoinid = "CN", measCur = FALSE, measEndyr = NULL, 
-	measEndyr.filter = NULL, invyrs = NULL, ACI = FALSE, adj = "plot", 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, dunitvar = NULL, 
-	dunitvar2 = NULL, dunitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	dunitlut = NULL, prednames = NULL, predfac = NULL, pvars2keep = NULL, 
-	cvars2keep = NULL, saveobj = FALSE, outfolder = NULL, outfn.pre = NULL, 
-	outfn.date=FALSE, overwrite=FALSE, gui = FALSE)
+modSApop(SAdata = NULL, SAdoms = NULL, cond = NULL, tree = NULL, plt = NULL, 
+	pltassgn = NULL, dsn = NULL, tuniqueid="PLT_CN", cuniqueid = "PLT_CN", 
+	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", 
+	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
+	ACI = FALSE, adj = "plot", plt.nonsamp.filter = NULL, 
+	cond.nonsamp.filter = NULL, dunitvar = NULL, dunitvar2 = NULL, 
+	dunitarea = NULL, areavar = "ACRES", unitcombine = FALSE, dunitlut = NULL, 
+	prednames = NULL, predfac = NULL, pvars2keep = NULL, cvars2keep = NULL, 
+	saveobj = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date=FALSE, 
+	overwrite=FALSE, gui = FALSE)
 }
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
   \item{SAdoms}{sf object. SA domains with attributes for joining. }
   \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
 	The condition-level variables with one record per condition, including or 

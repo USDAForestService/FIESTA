@@ -13,12 +13,12 @@
 
 \usage{
 spGetModeldat(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
-	module = "SA", domtype = "POLY", dom_layer = NULL, dom_dsn = NULL, 
-	domvar = "DOMAIN", rastlst.cont = NULL, rastlst.cont.name = NULL, 
-	rastlst.cont.stat = "mean", rastlst.cont.NODATA = NULL, rastlst.cat = NULL, 	
-	rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, rastfolder = NULL, 
-	asptransform = FALSE, rast.asp = NULL, rast.lut = NULL, rastlut = NULL, 
-	areacalc = TRUE, areaunits = "ACRES", keepNA = TRUE, NAto0 = TRUE, 
+	domtype = "POLY", dom_layer = NULL, dom_dsn = NULL, domvar = "DOMAIN", 
+	rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cont.stat = "mean", 
+	rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 	
+	rastlst.cat.NODATA = NULL, rastfolder = NULL, asptransform = FALSE, 
+	rast.asp = NULL, rast.lut = NULL, rastlut = NULL, areacalc = TRUE, 
+	areaunits = "ACRES", keepNA = TRUE, NAto0 = TRUE, npixels = TRUE, 
 	showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite = TRUE, vars2keep = NULL, ...)
@@ -30,31 +30,35 @@ spGetModeldat(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
 	extension, or file name (with extension) in xy_dsn folder. }
   \item{xyplt_dsn}{ String. Name of database where xyplt is. The dsn varies by
 	driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
-  \item{uniqueid}{ String.* Unique identifier of xyplt rows. }
-  \item{module}{ String. The module using ('SA', 'MA'). }
-  \item{domtype}{ String. Spatial layer type of domlayer ("POLY", "RASTER"). }
-  \item{dom_layer}{ String or S4 object. The name of the domain
-	spatial polygons layer. The layer name may be a full pathname to a file, 
-	the basename to a file, a spatial layer name from a database, or a 
-	SpatialPolygons object with a defined projection. }
+  \item{uniqueid}{ String.* Unique identifier of xyplt records. }
+  \item{domtype}{ String. Type of spatial layer dom_layer is ("POLY", "RASTER"). }
+  \item{dom_layer}{ sf R object or String. Name of the domain spatial layer. 
+	Can be a spatial polygon object, full pathname to a shapefile,
+	name of a polygon layer within a database, or a full pathname to raster 
+	file. }
   \item{dom_dsn}{ String. The data source name (dsn; i.e., folder or database name)
 	of dom_layer. The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). Optional. } 
-  \item{domvar}{ String. Name of domain variable in domlayer. }
-  \item{rastlst.cont}{ String vector or list. Continuous rasters (file names 
-	or raster objects). }
+  \item{domvar}{ String. Name of domain variable in domlayer. If NULL, 
+	assuming one domain. An attribute names ONEUNIT is added to layer with value=1. }
+  \item{rastlst.cont}{ String vector or list. A list of raster(s) with continuous
+	data values (e.g., DEM). The list may include file name of raster(s) or 
+	raster objects that are not InMemory. }
   \item{rastlst.cont.name}{ String vector. Output names for continuous rasters. 
-	Optional. If NULL, name of raster is default or name+'_'+layer number 
+	Optional. If NULL, name of raster is used as default or name+'_'+layer number 
 	for multi-band layers. }
+  \item{rastlst.cont.stat}{ String. Zonal statistic for continuous rasters. }
   \item{rastlst.cont.NODATA}{ Numeric vector. NODATA value for continuous rasters 
 	(See notes). These values will be converted to NA and removed from output 
-	if keepNA=FALSE. If 1 number, the same value will be used for all continuous 
+	if keepNA=FALSE. If 1 number, the same value will be used for all categorical 
 	rasters. If more than 1 number, the number of values must be equal to the 
 	number of rasters in rastlst.cont. }
-  \item{rastlst.cont.stat}{ String. Zonal statistic for continuous rasters. }
-  \item{rastlst.cat}{ String vector or list. Categorical rasters (file names 
-	or raster objects). }
-  \item{rastlst.cat.name}{ String vector. Output names for categorical rasters. }
+  \item{rastlst.cat}{ String vector or list. A list of raster(s) with thematic 
+	(i.e., categorical) data values. The list may include file name of raster(s) or 
+	raster objects that are not InMemory. }
+  \item{rastlst.cat.name}{ String vector. Output names for categorical rasters. 
+	If NULL, name of raster is used as default or name+'_'+layer number 
+	for multi-band layers. }
   \item{rastlst.cat.NODATA}{ Numeric vector. NODATA value for categorical rasters 
 	(See notes). These values will be converted to NA and removed from output 
 	if keepNA=FALSE. If 1 number, the same value will be used for all categorical 
@@ -66,14 +70,15 @@ spGetModeldat(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
 	indices using sin and cosine functions. }
   \item{rast.asp}{ String or raster object. The raster in rastlst.cont that is the
 	aspect raster (Note: aspect must have units in degrees). }
-  \item{rast.lut}{ String or raster object. The raster in rastlst.cat that is the
- 	raster for collapsing values using rastlut. }
+  \item{rast.lut}{ String. A raster in rastlst.cat to group class values. Only
+	one raster is allowed. }
   \item{rastlut}{ String or raster object. The raster look up table used for 
 	collapsing rast.lut values. }
-  \item{areacalc}{ Logical. If TRUE, returns acres by domvar. }
+  \item{areacalc}{ Logical. If TRUE, returns area by domvar. }
   \item{areaunits}{ String. Output area units ("ACRES", "HECTARES", "SQMETERS"). }
   \item{keepNA}{ Logical. If TRUE, returns data frame of NA values. }
   \item{NAto0}{ Logical. If TRUE, converts extracted NA values to 0. }
+  \item{npixels}{ Logical. If TRUE, include number of pixels. }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
   \item{savedata}{ Logical. If TRUE, the input data with extracted values are
 	saved to outfolder. }

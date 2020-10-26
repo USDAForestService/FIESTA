@@ -1,8 +1,8 @@
 check.popdata <- function(module="GB", method="GREG", tree=NULL, cond, 
 	plt=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", 
-	condid="CONDID", puniqueid="CN", pltassgnid="CN", pjoinid="CN", evalid=NULL, 
-	measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, 
-	adj="samp", strata=TRUE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
+	condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", pltassgnid="CN", 
+	pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, 
+	invyrs=NULL, adj="samp", strata=TRUE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
 	areavar="ACRES", unitcombine=FALSE, strvar="STRATUMCD", getwt=TRUE, 
 	getwtvar="P1POINTCNT", nonresp=FALSE, substrvar=NULL, stratcombine=TRUE, 
 	prednames=NULL, predfac=NULL, ACI=FALSE, plt.nonsamp.filter=NULL, 
@@ -16,7 +16,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ##		INVYR, MEASYEAR, PLOT_STATUS_CD, RDDISTCD, WATERCD, ELEV, ELEV_PUBLIC, 
   ##		ECOSUBCD, CONGCD, INTENSITY, DESIGNCD
   ## - plt (pvars2keep) - unitvars, auxvars
-  ## - cond (cvars2keep) - CONDPROP_UNADJ
+  ## - cond (cvars2keep) - areawt
   ## Check module, method (if MA,SA), adj
   ## - module in("GB", "MA", "SA")
   ## - if (module="MA") method in("HT", "PS", "GREG")
@@ -45,7 +45,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## - If unitvar = NULL, add unitvar=ONEUNIT
   ## Check condition data
   ## - Check condid (NA values and duplicate records (cuniqueid, condid)
-  ## - Check for CONDPROP_UNADJ (if not included, add CONDPROP_UNADJ=1 
+  ## - Check for areawt (if not included, add CONDPROP_UNADJ=1 
   ## - Check for COND_STATUS_CD (if not included, add COND_STATUS_CD = PLOT_STATUS_CD with 3=5)
   ## - Generate table of sampled/nonsampled plots and conditions (if COND_STATUS_CD included)
   ## - If ACI, add table of sampled/nonsampled nonforest conditions (if NF_COND_STATUS_CD included)
@@ -70,7 +70,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ###################################################################################
 
   ## Set global variables
-  CONDPROP_UNADJ=COND_STATUS_CD=CONDID=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
+  COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
 	STATECD=PLOT_STATUS_CD=PSTATUSCD=cndnmlst=pltdomainlst=invyrs=PROP_BASIS=
 	ACI.filter=V1=ONEUNIT=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonsampplots=
@@ -81,7 +81,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## Define necessary plot and condition level variables
   ###################################################################################
   pvars2keep <- unique(c(unitvar, unitvar2, pvars2keep))
-  cvars2keep <- unique(c(cvars2keep, "CONDPROP_UNADJ"))
+  cvars2keep <- unique(c(cvars2keep, areawt))
 
   pdoms2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "INVYR", 
 	"MEASYEAR", "PLOT_STATUS_CD", "PSTATUSCD", "RDDISTCD", "WATERCD", "ELEV", 
@@ -237,7 +237,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       pltassgnqry <- paste("select ppsa.* from", pfromqry, whereqry)
     if (tree %in% tablst) 
       treeqry <- paste("select t.* from", tfromqry, whereqry)
-
   }
  
   ###################################################################################
@@ -310,7 +309,8 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     if (!is.null(pltx) && !is.null(pltassgnx)) {
       pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", gui=gui, 
 		checklst=names(pltx), caption="Joinid variable in plot", 
-		warn=paste(pjoinid, "not in plt table"), stopifnull=TRUE)
+		warn=paste(pjoinid, "not in plt table"))
+      if (is.null(pjoinid)) pjoinid <- puniqueid
       setkeyv(pltx, pjoinid)
 
       pltassgnx <- pltassgnx[, unique(c(pltassgnid, 
@@ -321,9 +321,9 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       tabs <- check.matchclass(pltx, pltassgnx, pjoinid, pltassgnid)
       pltx <- tabs$tab1
       pltassgnx <- tabs$tab2
-
+    
       ## Merge pltx and pltassgnx
-      pltx <- merge(pltx, pltassgnx, by.x=pjoinid, by.y=pltassgnid)
+      pltx <- pltx[pltassgnx]
 
     } else if (is.null(pltx)) {
       pltx <- pltassgnx
@@ -421,7 +421,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       ## NOTE: If adj='samp', make sure dataset is annual inventory only (DESIGNCD=1). 
       ## Only adjust plots when DESIGNCD=1. Cannot have more than 1 DESIGNCD.
       ##################################################################################
-      designcd <- unique(pltcondx[["DESIGNCD"]])
+      designcd <- unique(na.omit(pltcondx[["DESIGNCD"]]))
       if (length(designcd) != 1) {
         warning("more than 1 plot design, calculate separate estimates by design")
       } else if (adj == "samp" && designcd != 1) {
@@ -474,6 +474,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     if (nonresp) stop("PLOT_STATUS_CD must be in dataset if nonresp=TRUE")
     message("PLOT_STATUS_CD not in dataset.. assuming all plots are at least ", 
 			"partially sampled")
+    plotsampcnt <- pltcondx[, list(NBRPLOT=uniqueN(get(cuniqueid)))]
   }
 
   if (ACI) {
@@ -600,16 +601,19 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## Check for necessary cond variables in cond table 
   #############################################################################
 
-  ## If CONDPROP_UNADJ not in cond table and only 1 condition per plot, 
-  ## 	add CONDPROP_UNADJ and set = 1 (100 percent)
-  if (!"CONDPROP_UNADJ" %in% pltcondnmlst) {
+  ## If areawt not in cond table and only 1 condition per plot, 
+  ## 	add areawt and set = 1 (100 percent)
+  if (is.null(areawt) || is.na(areawt) || !areawt %in% pltcondnmlst) {
     ## If only 1 condition, check CONDPROP_UNADJ
     if (nrow(pltcondx) == length(unique(pltcondx[[cuniqueid]]))) {
       message("CONDPROP_UNADJ not in dataset.. assuming CONDPROP_UNADJ = 1") 
-      pltcondx[, CONDPROP_UNADJ := 1]  
+      pltcondx[, CONDPROP_UNADJ := 1] 
+      areawt <- "CONDPROP_UNADJ" 
+    } else {
+      stop("areawt is invalid...")
     }
   }
-  pltcondx$CONDPROP_UNADJ <- check.numeric(pltcondx$CONDPROP_UNADJ)
+  pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
 
 
   ## Check for COND_STATUS_CD and create ACI filter
@@ -639,7 +643,10 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     setkey(condsampcnt, COND_STATUS_CD)
     
     if (!ACI) ACI.filter <- "COND_STATUS_CD == 1"
-  } 
+  } else {
+    condsampcnt <- pltcondx[, list(NBRCOND=.N)]
+  }
+
   if (ACI) {
     if ("NF_COND_STATUS_CD" %in% pltcondnmlst) {
       ref_nf_cond_status_cd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "NF_COND_STATUS_CD", ]
@@ -695,7 +702,8 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE)
   if (!is.null(treex)) {
     ## Define necessary variable for tree table
-    tvars2keep <- "TPA_UNADJ"
+    tvars2keep <- {}
+    if (adj != "none") tvars2keep <- "TPA_UNADJ"
     treenmlst <- names(treex)
 
     ## Check unique identifiers
@@ -752,10 +760,10 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
         stop(tvars.na[tvars.na > 0], " NA values in variable: ", 
 		paste(names(tvars.na[tvars.na > 0]), collapse=", "))
     }
- 
+
     ## Add necessary variables to cvars2keep depending on data in tree
     ###################################################################
-    if (adj != "NONE") {
+    if (adj != "none") {
       ## Check for condition proportion variables
       propchk <- check.PROP(treex, pltcondx, checkNA=FALSE)
       propvars <- propchk$propvars

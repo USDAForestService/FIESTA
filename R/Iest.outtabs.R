@@ -207,7 +207,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           unit.rowest[, (senmd) := get(senm) / dividebynum]
         }
       }
- 
+
       ## GET TOTAL TABLE
       if (!is.null(unit.totest)) {
         if (allin1) {       
@@ -283,7 +283,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         if (!is.null(unit.totest) && !is.null(uniquecol))
           unit.totest <- add0unit(unit.totest, unitvar, uniquecol, "TOTAL", TRUE)
    
-
         ## Get table of estimates
         estpsecross <- crossxtab(group.est=unit.rowest, rowvar.est=rowunit, 
 			colvar.est=unit.totest, total.est=totunit, rowvar=rowvar, 
@@ -791,7 +790,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (esttype == "RATIO")
         unit.grpest <- FIESTA::getrhat(unit.grpest)
       setorderv(unit.grpest, c(unitvar, rowvar, colvar))
-     
+ 
+    
       setnames(unit.grpest, rowvar, title.rowvar)
       setnames(unit.grpest, colvar, title.colvar)
       rawdat$unit.grpest <- setDF(unit.grpest)
@@ -804,6 +804,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         rawdat.tabs <- c(rawdat.tabs, "grpest")
       }
     }
+
     if (CI)
       rawdat[rawdat.tabs] <- lapply(rawdat[rawdat.tabs], FIESTA::addCI, estnm=estnm)
   }

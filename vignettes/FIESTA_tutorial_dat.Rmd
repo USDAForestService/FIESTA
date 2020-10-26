@@ -29,7 +29,7 @@ Functions are organized by type or objective and are named with a corresponding 
 
 **Analysis Tools**
 
-* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
+* Analysis tools (an) - wrapper functions for stream-lining estimation processes.
 
 
 
@@ -78,7 +78,7 @@ outfolder <- "outfolder"
 
 ```
 
-The following examples use FIA data from Wyoming for inventory years 2011-2012.
+The following examples use FIA data from Wyoming for inventory years 2011-2013.
 
 #### <a name="datFilter"/>datFilter()
 ```
@@ -86,7 +86,9 @@ The following examples use FIA data from Wyoming for inventory years 2011-2012.
 # Usage:
 # datFilter(x, xfilter = NULL, xfiltervar = NULL, othertables = NULL, 
 #	    uniqueid = "PLT_CN", vardelete = NULL, title.filter = NULL, savedata = FALSE, 
-#   	outfolder = NULL, outfn = NULL, filternm = NULL, stopifnull=FALSE, gui=FALSE) 
+#   	outfolder = NULL, outfn = "datf", outfn.pre = NULL, outfn.date = FALSE, 
+#	    overwrite = FALSE, filternm = NULL, stopifnull = FALSE, returnDT = TRUE, 
+#	    xnm = NULL, gui = FALSE) 
 # 
 # Description:
 # Subsets a data table by specified filter(s) or logical statement.
@@ -101,7 +103,9 @@ WYcond.nfs <- WYconddat.nfs$xf
 dim(WYcond.nfs)
 head(WYcond.nfs)
 
-## Subset trees that are standing dead aspens in WYoming
+
+
+## Subset trees that are standing dead aspen trees in WYoming
 WYtreedat.dead <- datFilter(WYtree, "STATUSCD == 2 & STANDING_DEAD_CD == 1 & SPCD == 746")
 names(WYtreedat.dead)
 WYtree.deadasp <- WYtreedat.dead$xf
@@ -135,8 +139,8 @@ dim(WYcond.deadasp)
 ```
 ######################################################################################
 # Usage:
-# datFreq(x, xvar=NULL, total=FALSE, subtotal=FALSE, savedata=FALSE, outfolder=NULL,
-# 	  outfn=NULL) 
+# datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, subtotalcol = NULL,
+#     savedata = FALSE, outfolder = NULL, outfn = NULL) 
 # 
 #	Generates a frequency table from a data frame, including number of records
 #	by a specified variable or variables in the data frame with optional
@@ -507,6 +511,12 @@ tdomlst <- treedomCNTs$tdomlst
 tdomtotnm <- treedomCNTs$tdomtotnm
 
 head(tdomdat.treeseed)
+
+
+tdomdat.tree[tdomdat.tree$CN == 40404742010690,]
+tdomdat.seed[tdomdat.seed$CN == 40404742010690,]
+tdomdat.treeseed[tdomdat.treeseed$CN == 40404742010690,]
+
 
 #####
 ## Presence of live trees by species, including seedlings

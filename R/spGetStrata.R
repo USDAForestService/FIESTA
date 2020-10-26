@@ -1,6 +1,6 @@
 spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
 	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
-	unit.filter = NULL, strattype="RASTER", strat_layer=NULL, 
+	unit.filter=NULL, strattype="RASTER", strat_layer=NULL, 
 	strat_dsn=NULL, strvar=NULL, strat_lut=NULL, areaunits="ACRES", 
 	rast.NODATA=NULL, keepNA=FALSE, keepxy=TRUE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, 
@@ -159,7 +159,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     } else {
       strvar <- "STRATUMCD"
     }
-
+ 
     ##################################################################
     ## if strattype == "RASTER"
     ##################################################################

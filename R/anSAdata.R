@@ -1,7 +1,7 @@
 anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE, 
 	datsource="sqlite", data_dsn=NULL, istree=TRUE, plot_layer="plot",
  	cond_layer="cond", tree_layer="tree", puniqueid="CN", 
-	xy.joinid="PLT_CN", measCur=TRUE, measEndyr=NULL, Endyr.filter=NULL,  
+	xy.joinid="PLT_CN", measCur=TRUE, measEndyr=NULL, measEndyr.filter=NULL,  
 	intensity1=FALSE, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
 	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
@@ -67,33 +67,31 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
-		measEndyr=measEndyr, Endyr.filter=Endyr.filter, intensity1=intensity1, 
+		measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, intensity1=intensity1, 
 		showsteps=FALSE, savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
 		out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_layer=overwrite, ...)
-    xyplt <- SApltdat$clip_xyplt
-    xy.uniqueid <- SApltdat$xy.uniqueid
-    puniqueid <- SApltdat$puniqueid
-    pjoinid <- SApltdat$pjoinid
-    plt <- SApltdat$clip_tabs$clip_plt
-    cond <- SApltdat$clip_tabs$clip_cond
-    tree <- SApltdat$clip_tabs$clip_tree
     if (is.null(SApltdat)) return(NULL)
-
     if (saveobj) {
       message("saving SApltdat object to: ", file.path(outfolder, "SApltdat.rda"), "...")
       save(SApltdat, file=file.path(outfolder, "SApltdat.rda"))
     }
   } else {
-
-    xyplt <- SApltdat$clip_xyplt
-    xy.uniqueid <- SApltdat$xy.uniqueid
-    puniqueid <- SApltdat$puniqueid
-    pjoinid <- SApltdat$pjoinid
-    plt <- SApltdat$clip_tabs$clip_plt
-    cond <- SApltdat$clip_tabs$clip_cond
-    tree <- SApltdat$clip_tabs$clip_tree
+    SApltdat.names <- c("clip_xyplt", "clip_polyv", "xy.uniqueid", "puniqueid",
+		"pjoinid", "clip_tabs")
+    if (!all(SApltdat.names %in% names(SApltdat))) 
+      stop("missing components in SApltdat list: ", 
+		toString(SApltdat.names[!SApltdat.names %in% names(SApltdat)])) 
   }
+
+  ## Extract list objects
+  xyplt <- SApltdat$clip_xyplt
+  xy.uniqueid <- SApltdat$xy.uniqueid
+  puniqueid <- SApltdat$puniqueid
+  pjoinid <- SApltdat$pjoinid
+  plt <- SApltdat$clip_tabs$clip_plt
+  cond <- SApltdat$clip_tabs$clip_cond
+  tree <- SApltdat$clip_tabs$clip_tree
 
   if (showsteps) {
     ## Set plotting margins

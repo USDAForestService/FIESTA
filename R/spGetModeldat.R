@@ -1,11 +1,11 @@
 spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
- 	module="SA", domtype="POLY", dom_layer=NULL, dom_dsn=NULL, domvar="DOMAIN",
+ 	domtype="POLY", dom_layer=NULL, dom_dsn=NULL, domvar="DOMAIN",
  	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.stat="mean", 
 	rastlst.cont.NODATA=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	rastlst.cat.NODATA=NULL, rastfolder=NULL, asptransform=FALSE, rast.asp=NULL, 
 	rast.lut=NULL, rastlut=NULL, areacalc=TRUE, areaunits="ACRES", keepNA=TRUE, 
-	NAto0=TRUE, showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, 
+	NAto0=TRUE, npixels=TRUE, showext=FALSE, savedata=FALSE, exportsp=FALSE, 
+	exportNA=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite=TRUE, vars2keep=NULL, ...){
 
   ##################################################################################
@@ -26,7 +26,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (gui) {uniqueid=savedata <- NULL}
 
   ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn <- NULL
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
@@ -47,7 +47,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, uniqueid=uniqueid, 
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=uniqueid, 
 		exportsp=FALSE, ...)
   } else {
     ## GET uniqueid
@@ -56,12 +56,6 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
-
-  ## Verify spatial Layers
-  ##################################################################################
-  modulelst <- c("SA", "MA") 
-  module <- FIESTA::pcheck.varchar(var2check=module, varnm="module", gui=gui,
-	checklst=modulelst, caption="Module?", stopifnull=TRUE)
 
   ## Check domtype
   ###################################################################
@@ -81,11 +75,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		checklst=names(domlayerx), caption="Domain variable", 
 		warn=paste(domvar, "not in domlayer"))
     if (is.null(domvar)) {
-      if (module == "SA") {
-        domvar <- "ONEDOM"
-      } else if (module == "MA") {
-        domvar <- "ONEUNIT"
-      }
+      domvar <- "ONEUNIT"
       domlayerx[[domvar]] <- 1
     }
 
@@ -99,7 +89,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check continuous rasters
   ###################################################################
-  rastlst.contfn <- getrastlst.rgdal(rastlst.cont, rastfolder, gui=gui)
+  rastlst.contfn <- suppressWarnings(getrastlst.rgdal(rastlst.cont, rastfolder, gui=gui))
 
   if (!is.null(rastlst.contfn)) {
     band.cont <- sapply(rastlst.contfn, function(x) rasterInfo(x)$nbands)
@@ -112,9 +102,12 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		caption="Raster zonal stat?")
     if (is.null(rastlst.cont.stat)) rastlst.cont.stat <- "mean"
 
-    if (!is.null(rastlst.cont.name) && length(rastlst.cont.name) != nlayers.cont)
+    ## Check if length of names equals either length of bands or length of rasters
+    if (!is.null(rastlst.cont.name) && (!length(rastlst.cont.name) %in% 
+			c(length(rastlst.cont), nlayers.cont))) {
       stop(paste0("number of rastlst.cont.name (", length(rastlst.cont.name), ") does not ", 
 		"match number of rastlst.cont layers (", nlayers.cont, ")"))
+    }
 
     ## Check rastlst.cont.NODATA
     if (!is.null(rastlst.cont.NODATA)) {
@@ -138,17 +131,18 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       ## Check aspect raster
       rast.aspfn <- getrastlst.rgdal(rast.asp, rastfolder, gui=gui)  
 
-      if (is.null(rast.aspfn)) {
-        stop("must identify aspect raster using rast.asp")
-      } else if (sum(sapply(rastlst.contfn, function(x) identical(x, rast.aspfn))) == 0) {
-        stop("rast.asp does not match any rasters in rastlst.cont")
-      } 
+      if (is.null(rast.aspfn))
+        stop("must identify aspect raster in rastlst.contfn using rast.asp")
+      if (length(rast.aspfn) > 1) 
+        stop("only one raster allowed for transforming aspect") 
+      if (!rast.aspfn %in% rastlst.contfn)
+        stop("rast.asp must be included in rastlst.contfn")
     }
   }
 
   ## Check categorical rasters
   ###################################################################
-  rastlst.catfn <- getrastlst.rgdal(rastlst.cat, rastfolder, gui=gui)
+  rastlst.catfn <- suppressWarnings(getrastlst.rgdal(rastlst.cat, rastfolder, gui=gui))
 
   if (!is.null(rastlst.catfn)) {
     band.cat <- sapply(rastlst.catfn, function(x) rasterInfo(x)$nbands)
@@ -172,20 +166,25 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     ## Check raster for lookup table
-    rast.lutfn <- getrastlst.rgdal(rast.lut, rastfolder, gui=gui)  
-
+    rast.lutfn <- suppressWarnings(getrastlst.rgdal(rast.lut, rastfolder, gui=gui))
+    
     if (!is.null(rast.lutfn)) {
+      if (length(rast.lutfn) > 1) 
+        stop("only one categorical raster allowed for grouping classes") 
+      if (!rast.lutfn %in% rastlst.catfn)
+        stop("rast.lut must be included in rastlst.catfn")
+
       ## Check rastlut
       rastlutx <- FIESTA::pcheck.table(rastlut, gui=gui, caption="Data table?", 
 		returnDT=TRUE)
-
-      if (is.null(rast.lut)) {
-        stop("must include a value lookup table for", rast.lut)
-      } else if (sum(sapply(rastlst.catfn, function(x) identical(x, rast.lutfn))) == 0) {
-          stop("rast.lut does not match any rasters in rastlst.cont")
-      }
+      if (is.null(rast.lut)) 
+        stop("invalid lookup table for", rast.lut)
     } 
   }
+
+  ## npixels    
+  npixels <- FIESTA::pcheck.logical(npixels, varnm="npixels", 
+		title="Number of pixels?", first="YES", gui=gui)
 
   ## Check showext    
   showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
@@ -254,9 +253,6 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   #############################################################################
   ## 2) Set up outputs - domlut, prednames, inputdf, zonalnames
   #############################################################################
-#  domlut <- data.table(DOMAIN = unique(domlayerx[[domvar]]))
-
-
   domlut <- data.table(unique(sf::st_drop_geometry(domlayerx[, c(domvar, vars2keep),
  		drop=FALSE])))
   setkeyv(domlut, domvar)
@@ -283,25 +279,10 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
     ## Transform aspect 
     if (asptransform) {
-      if (sum(sapply(rastlst.cont, function(x) identical(x, rast.asp))) > 0) {
-        aspfn <- rastlst.contfn[sapply(rastlst.cont, function(x) identical(x, rast.asp))]
-        aspnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == aspfn]
-      } else if (sum(grepl(rast.asp, inputdf.cont$rasterfile)) > 0) {
-        aspfn <- inputdf.cont$rasterfile[grepl(rast.asp, inputdf.cont$rasterfile)]
-        aspnm <- inputdf.cont$var.name[grepl(rast.asp, inputdf.cont$rasterfile)]
-      } else {
-        #stop("invalid rast.asp")
-        asptransform <- FALSE 
-      } 
+      aspnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == rast.aspfn]     
       sppltx$cosAsp <- northness(sppltx[[aspnm]])
       sppltx$sinAsp <- eastness(sppltx[[aspnm]])
-#      sppltx[[aspnm]] <- NULL
       prednames.cont <- c(prednames.cont[prednames.cont != aspnm], "cosAsp", "sinAsp")
-    
-#    if (!is.null(rastfolder)) aspfn <- paste(rastfolder, aspfn, sep="/")
-#    rastfnlst.cont <- rastfnlst.cont[rastfnlst.cont != aspfn] 
-#    rastfnlst.cont <- c(rastfnlst.cont, paste0(aspfn, " - derived"), 
-#			paste0(aspfn, " - derived"))
     }
     prednames <- c(prednames, prednames.cont)
     inputdf <- rbind(inputdf, inputdf.cont)
@@ -318,36 +299,42 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rastfn <- rastlst.contfn[i]
       rastnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == rastfn]
       rast.cont.NODATA <- rastlst.cont.NODATA[i]
+      zonalstat <- rastlst.cont.stat 
       message(rastfn, "...")
 
-      if (i == 1) {
-        zonalstat <- c("npixels", rastlst.cont.stat) 
-        if (!is.null(rastnm)) 
-          rastnm <- c("npixels", rastnm)
-      } else {
-        zonalstat <- rastlst.cont.stat 
-      }  
- 
-      if (identical(aspfn, rastfn)) {
+      if (asptransform && identical(rast.aspfn, rastfn)) {
+        rastnm2 <- ifelse(is.null(rastnm), "cosAsp", paste0(rastnm, "_cos"))
+        if (i == 1 && npixels) {
+          zonalstat <- c("npixels", rastlst.cont.stat) 
+          rastnm2 <- c("npixels", rastnm2)
+        }  
         zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, polyv.att=domvar, 
 		zonalstat=zonalstat, pixelfun=northness, rast.NODATA=rast.cont.NODATA,
 		na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast$zonalext)
         outname <- zonaldat.rast$outname
-        setnames(zonalext, outname, "cosAsp")
+        if (!is.null(rastnm)) 
+          setnames(zonalext, outname, rastnm2)
         setkeyv(zonalext, domvar)
         zonalDT.cont <- zonalDT.cont[zonalext] 
   
+        rastnm2 <- ifelse(is.null(rastnm), "sinAsp", paste0(rastnm, "_sin"))
+        zonalstat <- c(rastlst.cont.stat) 
         zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA,
  		polyv.att=domvar, zonalstat=rastlst.cont.stat, pixelfun=eastness, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast$zonalext)
         outname <- zonaldat.rast$outname
-        setnames(zonalext, outname, "sinAsp")
+        if (!is.null(rastnm2)) 
+          setnames(zonalext, outname, rastnm2)
         setkeyv(zonalext, domvar)
         zonalDT.cont <- zonalDT.cont[zonalext]
  
       } else {
-
+        if (i == 1 && npixels) {
+          zonalstat <- c("npixels", rastlst.cont.stat) 
+          if (!is.null(rastnm)) 
+            rastnm <- c("npixels", rastnm)
+        }  
         zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA, 
 		polyv.att=domvar, zonalstat=zonalstat, showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast$zonalext)
@@ -358,6 +345,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         setkeyv(zonalext, domvar)
         zonalDT.cont <- zonalDT.cont[zonalext] 
       }
+      if (npixels) npixels <- FALSE
     }
     domlut <- domlut[zonalDT.cont] 
 
@@ -417,26 +405,27 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       message(rastfn, "...")
       rast.cat.NODATA <- rastlst.cat.NODATA[i]
 
-      if (is.null(rastlst.cont) && i == 1) {
-        zonalstat <- c("npixels", "proportion")
-      } else {
-        zonalstat <- "proportion"
-      }
-
+      zonalstat <- "proportion"
+      if (i == 1 && npixels)
+        zonalstat <- c("npixels", zonalstat)        
       if (identical(rast.lutfn, rastfn)) {
         zonaldat.rast.cat <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cat.NODATA, 
  		polyv.att=domvar, zonalstat=zonalstat, rastlut=rastlut, outname=names(rastlut)[2],
 		na.rm=TRUE)
       } else {
         zonaldat.rast.cat <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cat.NODATA, 
- 		polyv.att=domvar, zonalstat=zonalstat, outname=rastnm, na.rm=TRUE)
+ 		polyv.att=domvar, outname=rastnm, zonalstat=zonalstat, na.rm=TRUE)
       }
 
       zonalext <- setDT(zonaldat.rast.cat$zonalext)
-      outnames <- zonaldat.rast.cat$outname
+      outname <- zonaldat.rast.cat$outname
+      outname[grep("npixels", outname)] <- "npixels"
+      setnames(zonalext, c(domvar, outname))
       setkeyv(zonalext, domvar)
       zonalDT.cat <- zonalDT.cat[zonalext] 
-      zonalnames <- c(zonalnames, outnames)
+      zonalnames <- c(zonalnames, outname[outname != "npixels"])
+
+      if (npixels) npixels <- FALSE
     }
     domlut <- domlut[zonalDT.cat]  
 

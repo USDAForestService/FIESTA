@@ -158,7 +158,7 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 		esttype, MAmethod="HT", PSstrvar=NULL, prednames=NULL, 
 		domain, response, npixels, FIA=TRUE) {
 ## testing
-#unit=estunits[i]
+#unit=1
 #domain="TOTAL"
 #print(unit)
 

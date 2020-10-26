@@ -50,6 +50,7 @@
 \alias{pcheck.table}
 \alias{pcheck.unitacres}
 \alias{pcheck.varchar}
+\alias{pcheck.unique}
 \alias{pcheck.xlsx}
 \alias{projfix}
 \alias{save1tab}
@@ -178,6 +179,7 @@
 \alias{layerFromRasterExtent}
 \alias{vectorTranslate}
 
+\alias{RMest.pbar}
 
 \alias{GBest.pbar}
 \alias{GBest.pop}

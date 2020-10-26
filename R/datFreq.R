@@ -76,7 +76,7 @@ datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, subtotalcol=NULL,
 
   if ((subtotal | total)) {
     if (is.null(subtotalcol))
-      subtotalcol <- names(x)[ncol(x)-1]
+      subtotalcol <- names(freqtab)[ncol(freqtab)-1]
 
     freqtab.tot <- data.frame()
     tot <- sum(freqtab[["FREQ"]])

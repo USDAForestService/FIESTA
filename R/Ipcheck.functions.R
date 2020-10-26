@@ -1,4 +1,5 @@
 #pcheck.logical	- Checks logical function parameters
+#pcheck.unique	- Check for unique records
 #pcheck.varchar	- Checks string variable parameter
 #pcheck.table
 #pcheck.outfolder
@@ -27,6 +28,23 @@ pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", gui=
     stop(varnm, " must be logical")
   }
   return(var2check)
+}
+
+
+pcheck.unique <- function(tab, uniqueid, gui=FALSE, tabnm=NULL, 
+	warn=NULL, stopifnull=FALSE, stopifinvalid=TRUE, multiple=FALSE, ...){
+  ## DESCRIPTION: Checks string variable parameter
+
+  tab <- pcheck.table(tab)
+  uniqueid <- c("PLT_CN", "CONDID")
+
+  if (is.null(tabnm)) tabnm <- "data frame"
+  setkeyv(tab, uniqueid)
+
+  if (!tab[, uniqueN(.SD) == .N, .SDcols=key(tab)])
+    stop("uniqueid for ", tabnm, " is not unique: ", toString(uniqueid))
+  
+  return(tab)
 }
 
 

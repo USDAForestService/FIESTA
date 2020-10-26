@@ -1,14 +1,13 @@
-modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL, 
-	dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, ACI=FALSE, 
-	adj="samp", strata=TRUE, plt.nonsamp.filter=NULL, 
-	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
-	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
-	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
+modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL, 
+	clustassgn=NULL, dsn=NULL, clustid="CN", clustassgnid="PLT_CN",
+	clustjoinid="CN", buniqueid="PLT_CN", baseid="CONDID", tuniqueid=NULL,
+ 	basewt="CONDPROP_UNADJ", invyrs=NULL, adj="none", 
+	strata=TRUE, clust.nonsamp.filter=NULL, base.nonsamp.filter=NULL, 
+	unitlevel1=NULL, unitlevel2=NULL, unitarea=NULL, areavar="ACRES", 
+	unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
+	strvar="STRATUMCD", strwtvar="strwt", getwt=TRUE, getwtvar="P1POINTCNT", 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
-	gui=FALSE){
+	outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -40,7 +39,7 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
   adjtree <- FALSE
   nonresp <- FALSE
   substrvar <- NULL
-
+  if (is.null(tuniqueid)) tuniqueid <- buniqueid
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -86,27 +85,27 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
     }	
   } 
 
-  if (!is.null(GBdata)) {
-    if (!is.list(GBdata))
-      stop("GBdata must be a list")
-    listitems <- c("bnd", "plt", "cond", "unitarea", "unitvar")
-    if (!all(listitems %in% names(GBdata))) {
-      items.miss <- listitems[!listitems %in% names(GBdata)]
-      stop("invalid GBdata... missing items: ", paste(items.miss, collapse=", "))
+  if (!is.null(FAOdata)) {
+    if (!is.list(FAOdata))
+      stop("FAOdata must be a list")
+    listitems <- c("bnd", "plt", "base", "unitarea", "unitvar")
+    if (!all(listitems %in% names(FAOdata))) {
+      items.miss <- listitems[!listitems %in% names(FAOdata)]
+      stop("invalid FAOdata... missing items: ", paste(items.miss, collapse=", "))
     } 
-    bnd <- GBdata$bnd
-    plt <- GBdata$plt
-    pltassgn <- GBdata$pltassgn
-    cond <- GBdata$cond
-    tree <- GBdata$tree
-    unitarea <- GBdata$unitarea
-    unitvar <- GBdata$unitvar
-    areavar <- GBdata$areavar
-    stratalut <- GBdata$stratalut
-    strvar <- GBdata$strvar
-    puniqueid <- GBdata$puniqueid
-    pjoinid <- GBdata$pjoinid
-    pltassgnid <- GBdata$pltassgnid  
+    bnd <- FAOdata$bnd
+    cluster <- FAOdata$cluster
+    clustassgn <- FAOdata$clustassgn
+    base <- FAOdata$base
+    tree <- FAOdata$tree
+    unitarea <- FAOdata$unitarea
+    unitvar <- FAOdata$unitvar
+    areavar <- FAOdata$areavar
+    stratalut <- FAOdata$stratalut
+    strvar <- FAOdata$strvar
+    clustid <- FAOdata$clustid
+    clustjoinid <- FAOdata$clustjoinid
+    clustassgnid <- FAOdata$clustassgnid  
   } 
  
   ###################################################################################
@@ -115,12 +114,12 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
-  popcheck <- check.popdata(gui=gui, module="GB", tree=tree, cond=cond, plt=plt, 
-	pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
-	condid=condid, areawt=areawt, puniqueid=puniqueid, pltassgnid=pltassgnid, 
-	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, ACI=ACI, adj=adj,
- 	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter,
- 	unitvar=unitvar, unitvar2=unitvar2, unitcombine=unitcombine, 
+  popcheck <- check.popdata(gui=gui, module="GB", tree=tree, cond=base, plt=cluster, 
+	pltassgn=clustassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=buniqueid, 
+	condid=baseid, areawt=basewt, puniqueid=clustid, pltassgnid=clustassgnid, 
+	pjoinid=clustjoinid, invyrs=invyrs, adj=adj,
+ 	plt.nonsamp.filter=clust.nonsamp.filter, cond.nonsamp.filter=base.nonsamp.filter,
+ 	unitvar=unitlevel1, unitvar2=unitlevel2, unitcombine=unitcombine, 
 	stratcombine=stratcombine, strata=strata, strvar=strvar)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
@@ -131,14 +130,13 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
   condid <- popcheck$condid
   tuniqueid <- popcheck$tuniqueid
   pltassgnid <- popcheck$pltassgnid
-  ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
   unitcombine <- popcheck$unitcombine
-  stratcombine <- popcheck$stratcombine
   strata <- popcheck$strata
   strvar <- popcheck$strvar
+  stratcombine <- popcheck$stratcombine
   nonresp <- popcheck$nonresp
   P2POINTCNT <- popcheck$P2POINTCNT 
   plotsampcnt <- popcheck$plotsampcnt
@@ -196,7 +194,7 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
   ## Calculates adjustment factors for area and trees by strata (and estimation unit)
   ##		to account for nonsampled plots and conditions.
   ## Creates an adjusted condition proportion by merging strata-level adjustment
-  ##		factors to cond and dividing CONDPROP_UNADJ by adjustment factor.
+  ##		factors to base and dividing CONDPROP_UNADJ by adjustment factor.
   ###################################################################################
   ## Returns:
   ##  1. Summed proportions (*PROP_UNADJ_SUM) and adjustment factors (*PROP_ADJFAC)  
@@ -219,9 +217,9 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
     expcondtab <- adjfacdata$expcondtab
   } 
  
-  returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid,
- 		ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
- 		unitvar=unitvar, strlut=strlut, strvar=strvar, expcondtab=expcondtab,
+  returnlst <- list(basex=condx, clustbasex=pltcondx, buniqueid=cuniqueid, baseid=condid,
+ 		unitarea=unitarea, areavar=areavar,
+ 		unitlevel1=unitvar, strlut=strlut, strvar=strvar, expcondtab=expcondtab,
  		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, invyrs=invyrs)
 
   if (!is.null(treef)) {
@@ -234,15 +232,15 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
     returnlst$stratcombinelut <- stratcombinelut
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="GBpopdat.rda", outfolder=outfolder, 
+    objfn <- getoutfn(outfn="FAOpopdat.rda", outfolder=outfolder, 
 		overwrite=overwrite, outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
-    datExportData(pltassgn, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+    datExportData(pltassgnx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="clustassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite)
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 

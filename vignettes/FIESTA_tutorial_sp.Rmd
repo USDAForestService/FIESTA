@@ -29,7 +29,7 @@ Functions are organized by type or objective and are named with a corresponding 
 
 **Analysis Tools**
 
-* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
+* Analysis tools (an) - wrapper functions for stream-lining estimation processes.
 
 
 ### Overview of FIESTA spatial (sp) tools
@@ -115,10 +115,6 @@ USAco <- raster::getData('GADM', country="USA", level=2)
 head(USAco@data)
 WYco <- USAco[USAco$NAME_1 == "Wyoming",]
 
-
-## Load SQLite database from FIESTAdata package
-library(FIESTAdata)
-SQLitefn <- FIESTAdata::get_sqlite()
 
 
 ```
@@ -225,8 +221,8 @@ WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC",
 
 ## Reproject a vector Spatial object or file. 
 sf::st_crs(WYspplt)
-WYspplt.utm12 <- spReprojectVector(layer=WYspplt, prj.new="utm", datum.new="NAD83", 
-    zone.new=12)
+prj <- "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+WYspplt.utm12 <- spReprojectVector(layer=WYspplt, crs.new=prj)
         
 ## Check results
 sf::st_crs(WYspplt.utm12)
@@ -346,7 +342,7 @@ plot(st_geometry(WYbhdist))
 plot(st_geometry(WYbhMW), border="red", add=TRUE)
 
 
-WYbhMW.fornf <- spClipRast(WYbhMW, rast=fornffn, outfolder=outfolder)
+WYbhMW.fornf <- spClipRast(fornffn, clippolyv=WYbhMW, outfolder=outfolder)
 
 ## Display results
 sp::plot(raster::raster(WYbhMW.fornf))
@@ -449,6 +445,7 @@ head(WYspplt_dem)
 # Description:
 # Wrapper to get FIA plots within the boundary population (area of interest).
 ######################################################################################
+
 
 ## Extract public coordinates within WY Bighorn NF boundary
 WYbhdat <- spGetPlots(bnd=WYbhfn, states="Wyoming", datsource="datamart", evalCur=TRUE)

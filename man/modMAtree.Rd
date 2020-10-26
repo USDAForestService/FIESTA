@@ -10,51 +10,56 @@
 \usage{    
 modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
 	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	puniqueid = "CN", pltassgnid = "CN", ACI = FALSE, 
-	adj = "samp", MAmethod = "GREG", plt.nonsamp.filter = NULL, 
+	puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL, 
+	ACI = FALSE, adj = "samp", MAmethod = "GREG", plt.nonsamp.filter = NULL, 
 	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", unitcombine = FALSE, unitlut = NULL, npixelvar = "npixels", 
-	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
-	landarea = "ALL", plt.filter = NULL, cond.filter = NULL, estvar = NULL, 
-	estvar.filter = NULL, estvar.name=NULL, sumunits = FALSE, rowvar=NULL, 
+	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit=10, unitlut = NULL, 
+	npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL, 
+	stratcombine = TRUE, landarea = "ALL", plt.filter = NULL, cond.filter = NULL, 
+	estvar = NULL, estvar.filter = NULL, estvar.name=NULL, rowvar=NULL, 
 	colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
 	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
-	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, allin1 = FALSE, estround = 1, 
-	pseround = 2, estnull = "--", psenull = "--", divideby = NULL, 
+	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, allin1 = FALSE, 
+	estround = 1, pseround = 2, estnull = "--", psenull = "--", divideby = NULL, 
 	savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
 	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, addtitle = TRUE, 
 	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
 	title.colvar = NULL, title.unitvar = NULL, title.estvar = NULL, 
-	title.filter = NULL, MApopdat = NULL, gui = FALSE)
+	title.filter = NULL, MAmodeldat = NULL, MApopdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{tree}{ DF/DT, comma-delimited file(*.csv), or layer in dsn. Tree-level 
-	variables to aggregate to condition-level. See details for necessary 
+  \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Tree-level data with one record for each tree. Tree data are aggregated to 
+	condition-level. See details for necessary variables to include. }
+  \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Condition-level data with one record for each condition, including or 
+	excluding nonsampled conditions. Plot variables and strata/estimation unit 
+	variable(s) may be included if plt and pltassgn=NULL. See details for necessary 
 	variables to include. }
-  \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
-	The condition-level variables with one record per condition, including or 
-	excluding nonsampled conditions. Plot variables and strata variable(s)
-	may be included for post-stratification if plt and pltassgn=NULL. See details 
-	for necessary variables to include. }
-  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
-	or a sf R object. Plot-level variables. If nonsampled plots are included, 
-	PLOT_STATUS_CD variable must be in table. Optional. }
-  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
-	shapefile(*.shp) with one record per plot, estimation unit variable(s) and 
-	mean (continuous rasters) or proportions (categorical rasters) by 
-	estimation unit. Optional. }
+  \item{plt}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
+	layer or spatial layer in dsn, or shapefile(*.shp).
+	Plot-level data with one record for each plot, including or excluding 
+	nonsampled conditions. If nonsampled plots are included, PLOT_STATUS_CD 
+	variable must be in table or a filter defined in plt.nonsamp.filter. }
+  \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
+	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
+	estimation unit and/or strata, with one record for each plot. }
   \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
-  \item{dsn}{ String. Name of database where tree, cond, and pltassgn tables reside. 
+  \item{dsn}{ String. Name of database where tree, cond, and plot-level tables reside. 
 	The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). }
   \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
   \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{condid}{ String. Unique identifier of plot conditions. If no condid in 
-	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
-  \item{puniqueid}{ String. Unique identifier of plot. }
-  \item{pltassgnid}{ String. Unique identifier of plot. }
+  \item{condid}{ String. Unique identifier of plot conditions (e.g., CONDID). 
+	If no condid in cond, the data are assumed to have 1 condition per plot. 
+	A CONDID=1 is automatically added. }
+  \item{puniqueid}{ String. Unique identifier of plot in plt. }
+  \item{pltassgnid}{ String. Unique identifier of plot in pltassgn. }
+  \item{pjoinid}{ String. Name of variable in plot to join to pltassgn. This
+	variable does not need to be unique (e.g., PLOT_ID). If NULL, pjoinid=puniqueid. }
+  \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
+  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
   \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
 	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 
@@ -68,65 +73,83 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
 	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
 	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
-  \item{unitvar}{ String. Name of the estimation unit variable in cond or pltstrat 
-	with estimation unit assignment for each plot. If FIA, default="ESTUNIT". }
-  \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
-	pltstrat with assignment for each plot (e.g., 'STATECD'). }
+  \item{unitvar}{ String. Name of the estimation unit variable in unitarea and 
+	cond or pltassgn data frame with estimation unit assignment for each plot 
+	(e.g., 'ESTN_UNIT'). Optional if only one estimation unit. }
+  \item{unitvar2}{ String. Name of a second level estimation unit variable in unitarea
+	and cond or pltassgn with assignment for each plot (e.g., 'STATECD'). }
   \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
 	unit, include number of total acreage for the area of interest or a data frame
-	with areavar. If more than one estimation unit, provide a data frame of total 
-	area by estimation unit, including unitvar and areavar. }
-  \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
+	with area and estimation unit. If more than one estimation unit, provide a data frame 
+	of total area by estimation unit, including unitvar and areavar. }
+  \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{unitlut}{ DF/DT. Table with ancillary information by estimation 
+	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
+  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{unitlut}{ DF/DT. Table with summarized auxiliary information by estimation 
 	unit. For continuous data, means by estimation unit; for categorical data, 
 	proportion of class by estimation unit. }
-  \item{npixelvar}{ String. Name of variable in unitlut with number of pixels by 
+  \item{npixelvar}{ String. Name of variable in unitlut defining number of pixels by 
 	estimation unit. }
-  \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
-  \item{predfac}{ String vector. Name(s) of factor predictor variables to use in model. }
+  \item{prednames}{ String vector. Name(s) of predictor variables to include in model. }
+  \item{predfac}{ String vector. Name(s) of prednames that are factors (i.e., categorical). }
   \item{PSstrvar}{ String. Name of strata variable in stratalut and table with strata
 	assignment for each plot. Default="STRATUMCD". }
-  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
-	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
-	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{plt.filter}{ String. A filter for the pltstrat. Must be R syntax. }
-  \item{cond.filter}{ String. A filter for the cond. Must be R syntax. }
-  \item{estvar}{ String. Name of the tree estimate variable. }
-  \item{estvar.filter}{ String. A tree filter for the estimate variable. Must be R syntax 
-	(e.g., "STATUSCD == 1"). }
+  \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
+	strata categories if less than 2 plots in any one stratum. See notes for more info. }
+  \item{landarea}{ String. The condition-level filter for defining land area 
+	('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1; 
+	if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0. }
+  \item{plt.filter}{ String. A filter for plot-level data. The attributes must
+	be in plt or pltassgn data frames. Must be R syntax ('COUNTYCD == 1'). }
+  \item{cond.filter}{ String. A filter for the cond. The attributes must be in
+	cond data frame. Must be R syntax (e.g., 'OWNGRPCD != 40'). }
+  \item{estvar}{ String. Name of the tree-level estimate variable (e.g., 'VOLCFNET'). }
+  \item{estvar.filter}{ String. A tree-level filter for estvar. Must be R syntax 
+	(e.g., 'STATUSCD == 1'). }
   \item{estvar.name}{ String. A name given to the output aggregated tree estimate variable. 
-	If NULL, = estvar'_SUM'. This name will be used for default table titles and/or output 
+	If NULL, = estvar'_SUM'. This name is used for default table titles and/or output 
 	file names. } 
+  \item{rowvar}{ String. Optional. Name of domain variable to group estvar by 
+	for rows in table output. Rowvar must be included in an input data frame 
+	(i.e., plt, cond, tree). If no rowvar is included, an estimate is returned
+	for the total estimation unit. Include colvar for grouping by 2 variables. }
+  \item{colvar}{ String. Optional. If rowvar != NULL, name of domain variable to 
+	group estvar by for columns in table output. Colvar must be included in an 
+	input data frame (i.e., plt, cond, tree). }
+  \item{row.FIAname}{ Logical. If TRUE, retrieves default FIA reference names for 
+	rowvar located in FIESTA::ref_codes data frame. Names are only available for 
+	certain variables (Check sort(unique(FIESTA::ref_codes$VARIABLE)) for available names.
+  	If row.FIAname = TRUE and rowvar is in FIESTA::ref_codes, the rowvar name
+	is used for the output table, and the rowvar code is used to sort. }
+  \item{col.FIAname}{ Logical. If TRUE, retrieves default FIA reference names for 
+	colvar located in FIESTA::ref_codes data frame. Names are only available for 
+	certain variables. Check: sort(unique(FIESTA::ref_codes$VARIABLE)) for available names. 
+	If col.FIAname = TRUE and rowvar is in FIESTA::ref_codes, the colvar name
+	is used for the output table, and the colvar code is used to sort. }
+  \item{row.orderby}{ String. Optional. Name of variable to sort table rows. Both
+	the rowvar and row.orderby variables must be included in the same input data.frame. 
+	if NULL, and row.FIAname=FALSE or rowvar is not in FIESTA::ref_codes, the rows
+	are ordered by rowvar. }
+  \item{col.orderby}{ String. Optional. Name of variable to sort table columns. Both
+	the colvar and col.orderby variables must be included in the same input data.frame. 
+	if NULL, and col.FIAname=FALSE or colvar is not in FIESTA::ref_codes, the columns
+	are ordered by colvar. }
+  \item{row.add0}{ Logical. If TRUE, include rows with 0 values to the output table. }
+  \item{col.add0}{ Logical. If TRUE, include columns with 0 values to the output table. }  
+  \item{rowlut}{ Data frame. A lookup table with variable codes and code names to
+	include as rows of output table (See notes for more information and format). }
+  \item{collut}{ Data frame. A lookup table with variable codes and code names to
+	include as columns of output table (See notes for more information and format). }
+  \item{rowgrp}{ Logical. If TRUE, appends row groups to first column of table. 
+	Only available if group category exists in ref_codes table or defined in rowgrpnm 
+	(e.g., FORTYPGRPCD, OWNGRPCD). }   
+  \item{rowgrpnm}{ String. Name of variable for grouping rowvar. Variable must be
+	included in same input table as rowvar. }  
+  \item{rowgrpord}{ String. Name of variable to sort row group variable. Variable 
+	must be included in same input table as rowgrpnm. }  
   \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
 	one table. }
-  \item{rowvar}{ String. Name of the row domain variable in cond or tree. If only one 
-	domain, rowvar = domain variable. If more than one domain, include colvar. If no 
-	domain, rowvar = NULL. }
-  \item{colvar}{ String. Name of the column domain variable in cond or tree. }
-  \item{row.FIAname}{ Logical. If TRUE, gets FIA reference names for row variable based on 
-	ref_codes. Only available for certain variables. }
-  \item{col.FIAname}{ Logical. If TRUE, gets FIA reference names for column variable based
-	on ref_codes. Only available for certain variables. }
-  \item{row.orderby}{ String. Name of variable to sort table rows. If row.FIAname=TRUE 
-	and a ref_* exists for rowvar, the rowvar code is used to sort. If NULL, the 
-	table is sorted by rowvar.}    
-  \item{col.orderby}{ String. Name of variable to sort table columns. If col.FIAname=TRUE 
-	and a ref_* exists for colvar, the colvar code is used to sort. If NULL, the 
-	table is sorted by colvar.}    
-  \item{row.add0}{ Logical. If TRUE, add the rows that have 0 values. }
-  \item{col.add0}{ Logical. If TRUE, add the columns that have 0 values. }  
-  \item{rowlut}{ Data frame. A lookup table with variable codes and descriptions to
-	include in rows of output table (See notes for more information and format). }
-  \item{collut}{ Data frame. A lookup table with variable codes and descriptions to
-	include in columns of output table (See notes for more information and format). }
-  \item{rowgrp}{ Logical. If TRUE, appends row groups to first column of table. 
-	Only available if group category exists in ref_codes table (e.g., FORTYPGRPCD, OWNGRPCD). }   
-  \item{rowgrpnm}{ String. Name of row group variable. }  
-  \item{rowgrpord}{ String. Name of row group variable to sort table rows. }  
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
@@ -164,6 +187,7 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 	name for the estimate variable. If NULL, title.estvar = estvar.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
+  \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }

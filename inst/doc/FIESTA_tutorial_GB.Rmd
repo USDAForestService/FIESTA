@@ -438,6 +438,8 @@ WYbighorn_districtbnd.shp | Polygon shapefile of WY Bighorn National Forest Dist
 #### Set up for examples
 
 ```
+
+```
 # Load library
 library(FIESTA)
 
@@ -452,8 +454,6 @@ datfolder <- "data"
 if (!file.exists("outfolder")) dir.create("outfolder")
 outfolder <- "outfolder"
 
-
-```
 
 
 

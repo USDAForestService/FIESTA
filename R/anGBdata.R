@@ -2,10 +2,10 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
 	bnd.filter=NULL, RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL,  
 	istree=TRUE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
 	puniqueid="CN", intensity1=TRUE, strata=TRUE, strattype="RASTER", 
-	strat_layer=NULL, strat_dsn=NULL, showsteps=FALSE, cex.plots=0.5, 
-	savedata=FALSE, savexy=TRUE, saveobj=FALSE, outfolder=NULL, 
+	strat_layer=NULL, strat_dsn=NULL, strvar=NULL, showsteps=FALSE, cex.plots=0.5, 
+	savedata=FALSE, savexy=TRUE, savesteps=FALSE, saveobj=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=TRUE, ...) {
+	overwrite=TRUE, GBpltdat=NULL, ...) {
 
 
   ## Set global variables
@@ -77,12 +77,26 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
-  GBpltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
+  if (is.null(GBpltdat)) {
+    GBpltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
 		RS=RS, clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
 		istree=istree, plot_layer=plot_layer, cond_layer=cond_layer, 
 		tree_layer=tree_layer, intensity1=intensity1, savedata=FALSE, 
-		savexy=savexy, ...)
+		savexy=TRUE, ...)
+    if (is.null(GBpltdat)) return(NULL)
+    if (saveobj) {
+      message("saving GBpltdat object to: ", file.path(outfolder, "GBpltdat.rda"), "...")
+      save(GBpltdat, file=file.path(outfolder, "GBpltdat.rda"))
+    }
+  } else {
+    GBpltdat.names <- c("clip_xyplt", "clip_polyv", "xy.uniqueid", "puniqueid",
+		"pjoinid", "clip_tabs")
+    if (!all(GBpltdat.names %in% names(GBpltdat))) 
+      stop("missing components in GBpltdat list: ", 
+		toString(GBpltdat.names[!GBpltdat.names %in% names(GBpltdat)])) 
+  }
 
+  ## Extract list objects
   xyplt <- GBpltdat$clip_xyplt
   xy.uniqueid <- GBpltdat$xy.uniqueid
   bnd <- GBpltdat$clip_poly
@@ -92,7 +106,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
   cond <- GBpltdat$clip_tabs$clip_cond
   tree <- GBpltdat$clip_tabs$clip_tree
 
-  if (showsteps && savexy) {
+  if (showsteps) {
     ## Set plotting margins
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
@@ -103,7 +117,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
     par(mar=mar)
   }
 
-  if (savedata) {
+  if (savesteps) {
     ## Set plotting margins
     mar <-  par("mar")
 
@@ -124,8 +138,9 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
   ####################################################################
   if (strata) {
     message("summarizing stratification data...")
-    stratdat <- spGetStrata(xyplt, uniqueid=pjoinid, unit_layer=bnd, 
-		unitvar=bnd.att, strattype=strattype, strat_layer=strat_layer, 
+    stratdat <- spGetStrata(xyplt, unittype="POLY", uniqueid=xy.uniqueid, 
+		unit_layer=bnd, unitvar=bnd.att, strattype=strattype, 
+		strat_layer=strat_layer, strat_dsn=strat_dsn, strvar=strvar, 
 		rast.NODATA=0) 
 
     pltassgn <- setDT(stratdat$pltassgn)
@@ -138,7 +153,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
 
   } else {
     message("summarizing estimation unit data...")
-    stratdat <- spGetEstUnit(xyplt, uniqueid=pjoinid, unittype="POLY", 
+    stratdat <- spGetEstUnit(xyplt, unittype="POLY", uniqueid=xy.uniqueid, 
 		unit_layer=bnd, unitvar=bnd.att) 
     pltassgn <- stratdat$pltassgn
     unitarea <- stratdat$unitarea
@@ -147,6 +162,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
     pltassgnid <- stratdat$pltassgnid
   } 
    
+
   ##########################################
   ## Create output list
   ##########################################

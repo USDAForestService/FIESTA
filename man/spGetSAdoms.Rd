@@ -12,7 +12,7 @@
 	area polygons, resulting in a set of model domains that can be used for SAE.
 }
 \usage{
-spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique, 
+spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL, 
 	smallbnd.domain = NULL, smallbnd.filter = NULL, smallbnd.stfilter = NULL, 
 	smallbnd.ecofilter = NULL, helperbnd = NULL, helperbnd_dsn = NULL, 
 	helperbnd.unique = NULL, helperbnd.filter = NULL, largebnd = NULL, 

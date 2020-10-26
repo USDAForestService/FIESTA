@@ -1,6 +1,6 @@
-modSApop <- function(SAdoms, cond, tree=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", 
-	pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
+modSApop <- function(SAdata=NULL, SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, 
+	pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
+	puniqueid="CN", pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, 
 	cond.nonsamp.filter=NULL, dunitvar=NULL, dunitvar2=NULL, dunitarea=NULL, 
 	areavar="ACRES", unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
@@ -63,6 +63,42 @@ modSApop <- function(SAdoms, cond, tree=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 
     objfn <- getoutfn(outfn="SApopdat.rda", outfolder=outfolder, 
 		overwrite=overwrite, outfn.date=outfn.date)
+  }
+
+
+  ## Check SAdata
+  #########################################################
+  if (!is.null(SAdata)) {
+    SAdata.names <- c("SAdoms", "cond", "plt",
+		"pltassgn", "puniqueid", "pltassgnid", "pjoinid", "dunitarea",
+		"dunitvar", "areavar", "dunitlut")
+    if (!all(SAdata.names %in% names(SAdata))) 
+      stop("missing components in SAdata list: ", 
+		toString(SAdata.names[!SAdata.names %in% names(SAdata)])) 
+
+    SAdoms <- SAdata$SAdoms
+    tree <- SAdata$tree
+    cond <- SAdata$cond
+    plt <- SAdata$plt
+    pltassgn <- SAdata$pltassgn
+    puniqueid <- SAdata$puniqueid
+    pltassgnid <- SAdata$pltassgnid
+    pjoinid <- SAdata$pjoinid
+    dunitarea <- SAdata$dunitarea
+    dunitvar <- SAdata$dunitvar
+    areavar <- SAdata$areavar
+    dunitlut <- SAdata$dunitlut
+    prednames <- SAdata$prednames
+    predfac <- SAdata$predfac
+
+    if (is.null(prednames)) {
+      prednames <- SAdata$prednames
+    } else {
+      if (!all(prednames %in% SAdata$prednames))
+        stop("invalid prednames: ", 
+		toString(prednames[!prednames %in% SAdata$prednames]))
+      predfac <- predfac[predfac %in% prednames]
+    }
   }
 
   ## Check SAdoms

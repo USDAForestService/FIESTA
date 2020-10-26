@@ -4,7 +4,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
 	data_dsn=NULL, istree=TRUE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
 	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
-	evalType="AREAVOL", measCur=FALSE, measEndyr=NULL, Endyr.filter=NULL, 
+	evalType="AREAVOL", measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, 
 	invyrs=NULL, allyrs=FALSE, intensity1=FALSE, showsteps=FALSE, savedata=FALSE, 
 	savebnd=FALSE, savexy=TRUE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
@@ -27,7 +27,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=xypltx=tabs2save=PLOT_ID=INVYR <- NULL
+  xydat=stateFilter=statecnty=xypltx=tabs2save=evalidst=PLOT_ID=INVYR <- NULL
   cuniqueid=tuniqueid <- "PLT_CN"
   returnlst <- list()
   #clipdat <- list()
@@ -127,9 +127,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ########################################################################
   ### DO THE WORK
   ########################################################################
-  if (!is.null(states)) {
+  if (!is.null(evalid)) {
+    stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4)))    
+  } else if (!is.null(states)) {
     if (!all(states %in% FIESTA::ref_statecd$MEANING))
       stop("states is invalid")
+    statenames <- states
+    stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% states]
   } else {
     ## Get stbnd.att
     if (is.null(stbnd.att) && exists("stunitco"))
@@ -148,8 +152,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     } else {
       stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
     }
+    message("boundary intersected states: ", toString(statenames))
   }
-  message("boundary intersected states: ", toString(statenames))
 
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
@@ -276,23 +280,23 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       message(paste0("\ngetting data for ", state, "..."))
 
       msg <- "..."
-      if (allyrs) {
+      if (!is.null(evalid)) {
+        evalidst <- evalid[unique(as.numeric(substr(evalid, nchar(evalid)-6, 
+					nchar(evalid)-4))) == stcd]
+        msg <- paste0(msg, "for evaluation: ", toString(evalidst)) 
+      } else if (allyrs) {
         msg <- paste0(msg, "for all years")
       } else if (measCur) {
         msg <- paste0(msg, "for most currently measured plots")
         if (!is.null(measEndyr)) {
           msg <- paste0(msg, ", from year ", measEndyr, " or before")
-          if (!is.null(Endyr.filter)) 
-            msg <- paste0(msg, ", ", Endyr.filter)
+          if (!is.null(measEndyr.filter)) 
+            msg <- paste0(msg, ", ", measEndyr.filter)
         }
-      } else if (!is.null(evalid)) {
-        msg <- paste0(msg, "for evaluation:", evalid)
       } else if (evalCur) {
         msg <- paste0(msg, "for most evaluation")
         if (!is.null(evalEndyr))
           msg <- paste0("ending in ", evalEndyr)
-          if (!is.null(Endyr.filter)) 
-            msg <- paste0(msg, ", ", Endyr.filter)
       } else if (!is.null(invyrs)) {
         msg <- paste0(msg, "for inventory years", min(invyrs), "to", max(invyrs))
       } else {
@@ -343,13 +347,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
           evalCurType <- ifelse(evalType == "ALL", "00", 
 			ifelse(evalType == "AREAVOL", "01", "00"))
-          evalid <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
+          evalidst <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
 			evalEndyr=evalEndyr, evalCur=evalCur, evalType=evalCurType)
         }
 
         ## Get evalid filter
-        if (!is.null(evalid)) {
-          stfilter <- paste0("ppsa.evalid IN(", toString(evalid), ")")
+        if (!is.null(evalidst)) {
+          stfilter <- paste0("ppsa.evalid IN(", toString(evalidst), ")")
         } else {
           if (intensity1)
             stfilter <- paste(stfilter, "p.intensity == 1", sep=" and ")
@@ -359,13 +363,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         message(stfilter)
 
         ## get pfromqry
-        pfromqry <- getpfromqry(evalid=evalid, plotCur=measCur, 
+        pfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur, 
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
         if (is.null(pfromqry)) {
           message("no time frame specified... including all years")
           allyrs <- TRUE
-          pfromqry <- getpfromqry(evalid=evalid, plotCur=measCur, 
+          pfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur, 
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
         }
@@ -403,7 +407,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           }
         }
 
-        if (!is.null(Endyr.filter)) clipxy <- TRUE
+        if (!is.null(measEndyr.filter)) clipxy <- TRUE
         if (clipxy) {
 
           ## Generate xy table for all plots in state (xystate)
@@ -413,8 +417,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             yvar <- "LAT_PUBLIC"
             measCur.xy <- FALSE
             if (allyrs || measCur) measCur.xy <- TRUE
-            xyvars <- paste0("p.", c("STATECD", "UNITCD", "COUNTYCD", "PLOT", "LON", "LAT"))
-            xyfromqry <- getpfromqry(evalid=evalid, plotCur=measCur, 
+            xyvars <- paste0("p.", c("CN", "STATECD", "UNITCD", "COUNTYCD", 
+			"PLOT", "LON", "LAT"))
+            xyfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur, 
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
             xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
@@ -436,13 +441,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             pjoinid <- xy.joinid
           }
 
-          ## Get most current plots in database for !Endyr.filter
+          ## Get most current plots in database for !measEndyr.filter
           #######################################################
-          if (!is.null(Endyr.filter)) {
-            bndxf1 <- datFilter(bndx, xfilter=Endyr.filter)$xf
-            bndxf2 <- datFilter(bndx, xfilter=paste0("!", Endyr.filter))$xf
+          if (!is.null(measEndyr.filter)) {
+            bndxf1 <- datFilter(bndx, xfilter=measEndyr.filter)$xf
+            bndxf2 <- datFilter(bndx, xfilter=paste0("!", measEndyr.filter))$xf
 
-            ## Clip data using measEndyr for Endyr.filter
+            ## Clip data using measEndyr for measEndyr.filter
             clipdat <- spClipPoint(xyplt=xystate, 
 				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
 				clippolyv=bndxf1, stopifnotin=FALSE)
@@ -464,18 +469,18 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             ############################################
             ## Get most current evalid
             if (evalCur) {
-              evalid <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
+              evalidst <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
 				evalEndyr=evalEndyr, evalCur=evalCur, evalType=evalCurType)
             }
             ## Get evalid filter
-            if (!is.null(evalid)) {
-              stfilter <- paste0("ppsa.evalid IN(", toString(evalid), ")")
+            if (!is.null(evalidst)) {
+              stfilter <- paste0("ppsa.evalid IN(", toString(evalidst), ")")
             } else {
               if (intensity1)
                 stfilter <- paste(stfilter, "p.intensity == 1", sep=" and ")
             }
             ## get pfromqry
-            pfromqry2 <- getpfromqry(evalid=evalid, plotCur=measCur, 
+            pfromqry2 <- getpfromqry(evalid=evalidst, plotCur=measCur, 
 				invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
             ## Set up query for plots
@@ -534,7 +539,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (savexy || showsteps)
               xyplt <- rbind(xyplt1, xyplt2)
 
-          } else {    ## Endyr.filter = NULL
+          } else {    ## measEndyr.filter = NULL
 
             ## Clip data
             clipdat <- spClipPoint(xyplt=xystate, 
@@ -554,7 +559,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				get(layer)[get(layer)[["PLT_CN"]] %in% pltids, ])
               }
             }
-          }  ## if Endyr.filter is not NULL
+          }  ## if measEndyr.filter is not NULL
 
           pltx <- rbind(pltx, plt)
           condx <- rbind(condx, cond)
@@ -585,7 +590,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         gc()
           
       } else if (datsource == "sqlite") {
-
         ####################################################################
         ## 1) Check if data for all states is in database
         ## 1) Get most current plots from xy database that intersect state
@@ -704,12 +708,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (evalCur) {
           evalCurType <- ifelse(evalType == "ALL", "00", 
 			ifelse(evalType == "AREAVOL", "01", "00"))
-          evalid <- getEvalid(dbconn=conn, states=stcd, evalEndyr=evalEndyr, 
+          evalidst <- getEvalid(dbconn=conn, states=stcd, evalEndyr=evalEndyr, 
 			evalCur=evalCur, evalType=evalCurType)
         }
         ## Get evalid filter
-        if (!is.null(evalid)) {
-          stfilter <- paste0("ppsa.evalid IN(", toString(evalid), ")")
+        if (!is.null(evalidst)) {
+          stfilter <- paste0("ppsa.evalid IN(", toString(evalidst), ")")
         } else {
           if (intensity1)
             stfilter <- paste(stfilter, "p.intensity == 1", sep=" and ")
@@ -719,13 +723,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         message(stfilter)
 
         ## get pfromqry
-        pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalid, plotCur=measCur, 
+        pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalidst, plotCur=measCur, 
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R")
         if (is.null(pfromqry)) {
           message("no time frame specified... including all years")
           allyrs <- TRUE
-          pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalid, plotCur=measCur, 
+          pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalidst, plotCur=measCur, 
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R")
         }
@@ -760,7 +764,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           plt <- plt[, head(.SD, 1), by=pjoinid]
         }
 
-        if (!is.null(Endyr.filter)) clipxy <- TRUE
+        if (!is.null(measEndyr.filter)) clipxy <- TRUE
         if (clipxy) {
           ## Generate xy table for all plots in state (xystate)
           #########################################################
@@ -775,7 +779,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				pfromqry, " where ", stfilter) 
             } else {            
               if (allyrs || measCur) measCur.xy <- TRUE
-              xyfromqry <- getpfromqry(evalid=evalid, plotCur=measCur.xy, 
+              xyfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur.xy, 
 				invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
 
@@ -787,11 +791,11 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (nrow(xystate) == 0) break
           }
 
-          ## Get most current plots in database for Endyr.filter & !Endyr.filter
+          ## Get most current plots in database for measEndyr.filter & !measEndyr.filter
           #######################################################################
-          if (!is.null(Endyr.filter)) {
-            bndxf1 <- datFilter(bndx, xfilter=Endyr.filter)$xf
-            bndxf2 <- datFilter(bndx, xfilter=paste0("!", Endyr.filter))$xf
+          if (!is.null(measEndyr.filter)) {
+            bndxf1 <- datFilter(bndx, xfilter=measEndyr.filter)$xf
+            bndxf2 <- datFilter(bndx, xfilter=paste0("!", measEndyr.filter))$xf
 
             ## Clip xystate and other tables for bndxf1
             ############################################
@@ -835,18 +839,18 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             ############################################
             ## Get most current evalid
             if (evalCur) {
-              evalid <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
+              evalidst <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
 				evalCur=evalCur, evalType=evalCurType)
             }
             ## Get evalid filter
-            if (!is.null(evalid)) {
-              stfilter <- paste0("ppsa.evalid IN(", toString(evalid), ")")
+            if (!is.null(evalidst)) {
+              stfilter <- paste0("ppsa.evalid IN(", toString(evalidst), ")")
             } else {
               if (intensity1)
                 stfilter <- paste(stfilter, "p.intensity == 1", sep=" and ")
             }
             ## get pfromqry
-            pfromqry2 <- getpfromqry(evalid=evalid, plotCur=measCur, 
+            pfromqry2 <- getpfromqry(evalid=evalidst, plotCur=measCur, 
 				invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm="PLOT")
             ## Set up query for plots
@@ -928,7 +932,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (savexy || showsteps)
               xyplt <- rbind(xyplt1, xyplt2)
 
-          } else {    ## Endyr.filter = NULL
+          } else {    ## measEndyr.filter = NULL
             ## Clip data
             clipdat <- spClipPoint(xyplt=xystate, 
 				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
@@ -966,7 +970,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 DBI::dbClearResult(rs)
               }
             } 
-          }  ## if Endyr.filter is not NULL
+          }  ## if measEndyr.filter is not NULL
 
           pltx <- rbind(pltx, plt)
           condx <- rbind(condx, cond)

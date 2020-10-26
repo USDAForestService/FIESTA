@@ -233,7 +233,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><p>Data tools (dat) - functions for summarizing and exploring FIA data.</p></li>
 <li><p>Spatial tools (sp) - functions for manipulating and summarizing spatial data.</p></li>
 <li><p>Estimation modules (GB, PB, SA) - functions for different estimation strategies, such as FIA’s standard ‘Green-Book’ estimators (GB); suplementary photo-based estimators (PB); integration with different available small area estimators (SAE) or other model-assisted or model-based estimation tools, such as LASSO.</p></li>
-<li><p>Analysis tools (an) - wrapper functions for steam-lining estimation processes.</p></li>
+<li><p>Analysis tools (an) - wrapper functions for stream-lining estimation processes.</p></li>
 </ul>
 <p>FIESTA’s DB tools extract data from FIA’s online publically-available comma-delimited files (*.csv or *.zip). FIA’s CSV files are available by state from the FIA DataMart at the following link: <a href="https://apps.fs.usda.gov/fia/datamart/datamart.html" class="uri">https://apps.fs.usda.gov/fia/datamart/datamart.html</a>. Because of FIA’s confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA’s sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA’s Spatial Data Services (<a href="https://www.fia.fs.fed.us/tools-data/spatial/index.php" class="uri">https://www.fia.fs.fed.us/tools-data/spatial/index.php</a>).</p>
 <div id="objective-of-tutorial" class="section level3">
@@ -360,6 +360,14 @@ sql3.csv &lt;- &quot;select STATECD, INVYR, count(*) NBRPLOTS
           from plot 
           where statecd in(49,56) group by STATECD, INVYR&quot;
 DBqryCSV(sql=sql3.csv, states=c(&quot;Utah&quot;, &quot;Wyoming&quot;), sqltables=&quot;plot&quot;)
+
+
+# QUERY4: Number of plots by inventory year for Utah and Wyoming that have subalpine fir trees (SPCD=19)
+sql4.csv &lt;- &quot;select p.STATECD, p.INVYR, count(*) NBRPLOTS 
+          from plot p JOIN tree t ON p.CN = t.PLT_CN 
+          where p.statecd in(49,56) and t.SPCD = 19
+          group by p.STATECD, p.INVYR&quot;
+DBqryCSV(sql=sql4.csv, states=c(&quot;Utah&quot;, &quot;Wyoming&quot;), sqltables=c(&quot;plot&quot;, &quot;tree&quot;))
 
 </code></pre>
 </div>
@@ -1052,7 +1060,7 @@ plot(sf::st_geometry(R4dat.spxy['PLOT_STATUS_CD']), pch=16, cex=.5,
 
 
 
-## Get plots that have pinyon pine trees in Utah and Colorado
+## Get plots that have pinyon pine trees in Idaho and Montana
 ##################################################################################
 R4dat.t101 &lt;- DBgetPlots(states=c(&quot;Idaho&quot;, &quot;Montana&quot;), invyrs=2008:2017, issp=TRUE,
                   allFilter=&quot;OWNGRPCD == 10 &amp; (ADFORCD &gt; 100 &amp; ADFORCD &lt; 200)&quot;,

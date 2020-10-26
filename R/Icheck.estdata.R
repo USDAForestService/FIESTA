@@ -43,11 +43,11 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   #############################################################################
   ## Check landarea 
   #############################################################################
-  if (esttype == "RATIO") {
-    landarealst <- c("FOREST", "TIMBERLAND")
-  } else {
+#  if (esttype == "RATIO") {
+#    landarealst <- c("FOREST", "TIMBERLAND")
+#  } else {
     landarealst <- c("FOREST", "ALL", "TIMBERLAND")
-  }
+#  }
   landarea <- FIESTA::pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	checklst=landarealst, caption="Sample land area?")
 

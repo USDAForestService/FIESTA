@@ -19,9 +19,11 @@ getrhat <- function(x){
 
   ## GET RATIO ESTIMATES (rhat) AND VARIANCE OF RATIO ESTIMATES (rhat.var)
   ## Variance (EQ 4.17)
-  x[,	rhat := estn / estd][, 
-	rhat.var := (estn.var + rhat^2 * estd.var - 2*rhat * est.covar) / estd^2] 	
 
+  if (!"rhat" %in% names(x)) {
+    x[, rhat := estn / estd][, 
+	rhat.var := (estn.var + rhat^2 * estd.var - 2*rhat * est.covar) / estd^2] 	
+  }
 
   ## SET NEW VARIABLE TO FOR RECORDING NOTES
 #  x[, note := "ok"]

@@ -1,10 +1,12 @@
 modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL, 
-	dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	puniqueid="CN", pltassgnid="CN", ACI=FALSE, adj="samp", 
-	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, 
-	unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, 
-	unitlut=NULL, npixelvar="npixels", prednames=NULL, predfac=NULL, 
-	PSstrvar=NULL, stratcombine=TRUE, gui=FALSE){
+	dsn=NULL, puniqueid="CN", pltassgnid="CN", pjoinid="CN", 
+	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
+	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, ACI=FALSE, 
+	adj="samp", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
+	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
+	stratcombine=TRUE, MAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -29,8 +31,34 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE)
   adjtree <- FALSE
- 
 
+  if (!is.null(MAmodeldat)) {
+    modeldat.names <- c("pltassgn", "domzonal", "domvar",
+		"predfac", "npixelvar", "pltassgnid", "domarea", "areavar")
+    if (!all(modeldat.names %in% names(MAmodeldat))) 
+      stop("missing components in MAmodeldat list: ", 
+		toString(modeldat.names[!modeldat.names %in% names(MAmodeldat)])) 
+
+    pltassgn <- MAmodeldat$pltassgn
+    pltassgnid <- MAmodeldat$pltassgnid
+    unitlut <- MAmodeldat$domzonal
+    unitvar <- MAmodeldat$domvar
+    unitarea <- MAmodeldat$domarea
+    areavar <- MAmodeldat$areavar
+    npixelvar <- MAmodeldat$npixelvar
+    predfac <- MAmodeldat$predfac
+    PSstrvar <- MAmodeldat$PSstrvar
+
+    if (is.null(prednames)) {
+      prednames <- MAmodeldat$prednames
+    } else {
+      if (!all(prednames %in% MAmodeldat$prednames))
+        stop("invalid prednames: ", 
+		toString(prednames[!prednames %in% MAmodeldat$prednames]))
+      predfac <- predfac[predfac %in% prednames]
+    }
+  }
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -39,11 +67,12 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="MA", method=MAmethod, 
 	tree=tree, cond=cond, plt=plt, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, 
-	cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, 
+	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid,
+ 	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
 	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
- 	strvar=PSstrvar, prednames=prednames, predfac=predfac, stratcombine=stratcombine, 
-	pvars2keep=pvars2keep, cvars2keep=cvars2keep)
+ 	unitcombine=unitcombine, stratcombine=stratcombine, strvar=PSstrvar, 
+	prednames=prednames, predfac=predfac)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
@@ -57,10 +86,11 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
   unitcombine <- popcheck$unitcombine
-  PSstrvar <- popcheck$strvar
   stratcombine <- popcheck$stratcombine
+  PSstrvar <- popcheck$strvar
   prednames <- popcheck$prednames
   predfac <- popcheck$predfac
+  P2POINTCNT <- popcheck$P2POINTCNT 
   plotsampcnt <- popcheck$plotsampcnt
   condsampcnt <- popcheck$condsampcnt
   states <- popcheck$states
@@ -79,6 +109,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 	unitvars=c(unitvar, unitvar2), areavar=areavar, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
+
 
   ###################################################################################
   ## CHECK STRATA

@@ -104,7 +104,7 @@ getrastlst.rgdal <- function(rastnmlst, rastfolder=NULL, stopifLonLat=FALSE,
     if (file.exists(rastfn)) {
       rastfnlst <- c(rastfnlst, rastfn)
     } else {
-      stop(rastfn, "is invalid")
+      stop(rastfn, "is invalid... must be saved to file")
     }
   } else if (any(sapply(rastnmlst, isS4))) {
     for (rastnm in rastnmlst) {

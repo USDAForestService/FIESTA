@@ -1,5 +1,5 @@
 check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE, 
-	SUBP_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL){
+	tpavar="TPA_UNADJ", SUBP_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL){
 
   ## Global variables
   TPROP_BASIS=SUBPPROP_UNADJ=MICRPROP_UNADJ=TPA_UNADJ=MACRPROP_UNADJ=DIA=PROP_BASIS <- NULL
@@ -9,9 +9,9 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
   ## DESCRIPTION: Check for necessary proportion variables.
   ## VALUE: Vector of PROPORTION variables in dataset.
   ###################################################################################
-  if (!"TPAGROW_UNADJ" %in% names(treex)) stop("must include TPAGROW_UNADJ in tree table")
+  if (!tpavar %in% names(treex)) stop("must include ", tpavar, " in tree table")
   condnmlst <- names(condx)
-  PROPvars=TPAGROW_UNADJ <- NULL
+  PROPvars <- NULL
 
   ## Check if TPA values exist for SUBPLOT, MICROPLOT, AND MACROPLOT
 #  TPAvals <- unique(treex$TPA_UNADJ)[!is.na(unique(treex$TPA_UNADJ))]

@@ -1,4 +1,4 @@
-spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique, 
+spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL, 
 	smallbnd.domain=NULL, smallbnd.filter=NULL, smallbnd.stfilter=NULL, 
 	smallbnd.ecofilter=NULL, helperbnd=NULL, helperbnd_dsn=NULL, helperbnd.unique=NULL, 
 	helperbnd.filter=NULL, largebnd=NULL, largebnd_dsn=NULL, largebnd.unique=NULL, 

@@ -14,7 +14,7 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
 	strat_layer = NULL, strat_dsn = NULL, showsteps = FALSE, cex.plots = 0.5, 
 	savedata = FALSE, savexy = TRUE, saveobj = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = TRUE, ...)
+	overwrite = TRUE, GBpltdat = NULL, ...)
 }
 \arguments{
   \item{bnd_layer}{ sf R object or String. Area of interest (population boundary 
@@ -59,6 +59,7 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
 	(e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE, overwrite existing files. }
+  \item{GBpltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
   \item{...}{ Parameters for spGetPlots(). }
 }
  

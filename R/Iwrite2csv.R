@@ -17,6 +17,7 @@ write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL,
   ####################################################################################
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0) gui <- TRUE 
+  cnames <- TRUE
 
   if (is.null(outfile)) {
     ## Check outfilenm
