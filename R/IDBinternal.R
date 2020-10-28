@@ -478,7 +478,7 @@ getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE,
   ## chk - Logical. If TRUE, checks if data tables and variables exist
 
   ## set global variables
-  Endyr=EVALID=evaltyp=STATECD <- NULL
+  Endyr=EVALID=evaltyp=STATECD=INVYR <- NULL
   
 
   ## create state filter
@@ -489,9 +489,10 @@ getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE,
   }
   stfilter <- getfilter("STATECD", stcd, syntax='sql')
 
-  eval.qry <- paste("select distinct STATECD, EVALID 
+  eval.qry <- paste("select distinct STATECD, EVALID, max(INVYR) INVYR 
 			from ppsa
-			where", stfilter, "order by STATECD, EVALID")
+			where", stfilter, "group by STATECD, EVALID", 
+			"order by STATECD, EVALID")
   evaldt <- setDT(sqldf::sqldf(eval.qry))
 
 
@@ -519,10 +520,10 @@ getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE,
 
       Endyr.max <- evaldt[Endyr <= yr, max(Endyr), by="STATECD"]
     } else {
-      Endyr.max <- evaldt[, max(Endyr), by="STATECD"]
+      setorder(evaldt, -INVYR, -Endyr)
+      Endyr.max <- evaldt[1,]
     }
-    setnames(Endyr.max, "V1", "Endyr")
-    evalidlst <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))$EVALID
+    evalidlst <- Endyr.max[["EVALID"]]
   }
   return(evalidlst)
 }

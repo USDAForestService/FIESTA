@@ -11,10 +11,11 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
 	RS = NULL, clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
 	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
 	puniqueid = "CN", intensity1 = TRUE, strata = TRUE, strattype = "RASTER", 
-	strat_layer = NULL, strat_dsn = NULL, showsteps = FALSE, cex.plots = 0.5, 
-	savedata = FALSE, savexy = TRUE, saveobj = FALSE, outfolder = NULL, 
-	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = TRUE, GBpltdat = NULL, ...)
+	strat_layer = NULL, strat_dsn = NULL, strvar = NULL, showsteps = FALSE, 
+	cex.plots = 0.5, savedata = FALSE, savexy = TRUE, savesteps = FALSE, 
+	saveobj = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, GBpltdat = NULL, 
+	...)
 }
 \arguments{
   \item{bnd_layer}{ sf R object or String. Area of interest (population boundary 
@@ -46,10 +47,13 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
   \item{strat_dsn}{ String. The data source name (dsn; i.e., folder or database name, 
 	if polygon layer) of strat_layer. The dsn varies by driver. See gdal OGR vector 
 	formats (https://www.gdal.org/ogr_formats.html). Optional. } 
+  \item{strvar}{ String. If strattype="POLY", name of strata attribute in 
+	strat_layer. }
   \item{showsteps}{ Logical. If TRUE, show intermediate steps. }
   \item{cex.plots}{ Number. Size of dots representing plots in display. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
   \item{savexy}{ Logical. If TRUE, saves xy coordinates to outfolder. }
+  \item{savesteps}{ Logical. If TRUE, saves plotting steps as jpg images to outfolder. }
   \item{saveobj}{ Logical. If TRUE, save SAest object to outfolder. }
   \item{outfolder}{ String. Name of output folder for saved data. If NULL,  
 	the working directory is used. }

@@ -1,54 +1,46 @@
-\name{anSAdata}
-\alias{anSAdata}
+\name{anMAdata}
+\alias{anMAdata}
 \title{
-	Data - Get data for small area estimation.
+	Analysis - Generate estimates for state boundaries.
 }
 \description{
-	Wrapper to get data for small area estimation.	
+	Wrapper to get estimates using Model-assisted methods - generalized
+		regression estimator (GREG).	
 }
 \usage{
-anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, 
-	datsource = "sqlite", data_dsn = NULL, istree = TRUE, plot_layer = "plot", 
-	cond_layer = "cond", tree_layer = "tree", puniqueid = "CN",
- 	xy.joinid = "PLT_CN", measCur = TRUE, measEndyr = NULL, measEndyr.filter = NULL, 
-	intensity1 = FALSE, rastfolder = NULL, rastlst.cont = NULL, 
-	rastlst.cont.name = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
-	rastlst.cat.NODATA = NULL, vars2keep = "AOI", showsteps = FALSE, 
-	savedata = FALSE, savexy = FALSE, savesteps = FALSE, saveobj = FALSE, 
-	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = TRUE, SApltdat = NULL, ...)
+anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
+	RS = NULL, clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
+	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
+	puniqueid = "CN", intensity1 = TRUE, rastfolder=rastfolder, 
+	rastlst.cont = NULL, rastlst.cont.name = NULL, 
+	rastlst.cat = NULL, rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, 
+	showsteps = FALSE, cex.plots=0.5, savedata = FALSE, savexy = FALSE, 
+	savesteps = FALSE, saveobj=FALSE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE,
+	MApltdat=NULL, ...)
 }
 
 \arguments{
-  \item{SAdoms}{ sf R object or String. Model domains. 
-	Can be a spatial sf object, full pathname to a shapefile, or name of 
-	a layer within a database. }
-  \item{smallbnd}{ sf R object or String. Area of Interest (AOI) boundary. 
-	Can be a spatial polygon object, full pathname to a shapefile, or name of 
-	a layer within a database. }
-  \item{RS}{ String. Name of FIA research station to restrict states to
-	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. } 
+  \item{bnd_layer}{ sf R object or String. Area of interest (population boundary 
+	or estimation unit). Can be a spatial polygon object, full pathname to a 
+	shapefile, or name of a layer within a database. }
+  \item{bnd_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
+	pathname) of boundary. The dsn varies by driver. See gdal OGR vector formats
+	(https://www.gdal.org/ogr_formats.html). Optional if bnd is sf object. } 
+  \item{bnd.att}{ String. The attribute in bnd_layer that defines the
+	estimation unit(s). If NULL, bnd is default as one estimation unit. } 
+  \item{bnd.filter}{ String. Filter to subset bnd SpatialPolygons layer. }
+  \item{RS}{ String. Name of FIA research station to restrict states to. } 
   \item{clipxy}{ Logical. If TRUE, clip xy data. } 
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
-  \item{data_dsn}{ String. Data sournce name. Name of database where *_layers reside. }
+  \item{data_dsn}{ String. Name of database where *_layers reside. }
   \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
   \item{plot_layer}{ String. Name of layer in database of file name of FIA plot table. }
   \item{cond_layer}{ String. Name of layer in database of file name of FIA cond table. }
   \item{tree_layer}{ String. Name of layer in database of file name of FIA tree table 
 	if istree=TRUE. }
   \item{puniqueid}{ String. Name of unique identifier of plt. }
-  \item{xy.joinid}{ String. Variable to join XY data to plot data. Not necessary to
-	be unique. If using most current XY coordinates, use identifier for a plot 
-	(e.g., PLOT_ID). }
-  \item{measCur}{ Logical. If TRUE, extract plots with most current measurement for 
-	state(s). }
-  \item{measEndyr}{ Integer year (YYYY). If measCur=TRUE, extract plots with most 
-	current measurement for state(s) for years measured before measEndyr. }
-  \item{measEndyr.filter}{ Filter. If measCur=TRUE and measEndyr != NULL, a filter 
-	for bnd to identify and area to use measEndyr, such as disturbed areas
-	where you want to exclude plots measured after disturbance. }
-  \item{intensity1}{ Logical. If TRUE, include only single intensity plots 
-	(i.e., INTENSITY = 1). }
+  \item{intensity1}{ Logical. If TRUE, include only plots with INTENSITY=1. }
   \item{rastfolder}{ String. Name of the folder with raster layers. Optional. 
 	Useful if all raster layers are in same folder. }
   \item{rastlst.cont}{ String vector or list. A list of raster(s) with continuous
@@ -68,25 +60,23 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
 	if keepNA=FALSE. If 1 number, the same value will be used for all categorical 
 	rasters. If more than 1 number, the number of values must be equal to the 
 	number of rasters in rastlst.cat. }
-  \item{vars2keep}{ String. Name of variable(s) in smallbnd to keep for output. }
   \item{showsteps}{ Logical. If TRUE, clipped points are displayed.
 	If savedata=TRUE, the display is saved as *.jpg to outfolder. }
+  \item{cex.plots}{ Number. Size of dots representing plots in display. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
-  \item{savexy}{ Logical. If TRUE, save xy coordinates to rawfolder. }
-  \item{savesteps}{ Logical. If TRUE, save steps spatial intermediate layers. }
+  \item{savexy}{ Logical. If TRUE, saves xy coordinates to outfolder. }
+  \item{savesteps}{ Logical. If TRUE, saves plotting steps as jpg images to outfolder. }
   \item{saveobj}{ Logical. If TRUE, save SAest object to outfolder. }
   \item{outfolder}{ String. Name of output folder for saved data. If NULL,  
 	the working directory is used. }
   \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
   \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
-  \item{outfn.pre}{ String. If out_fmt = "shp", a new folder is created within outfolder
-	named outfn.pre. If out_fmt != "shp", a prefix is concatenated to out_dsn, using
-	an underscore as separator. }
+  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
 	(e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE, overwrite existing files. }
-  \item{SApltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
-  \item{...}{ Other parameters for DBgetPlots. }
+  \item{MApltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
+  \item{...}{ Parameters for spGetPlots(). }
 }
  
 \value{
@@ -97,18 +87,18 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
 }
 \note{
 
-  If exportsp=TRUE:\cr
- 	If out_fmt="shp", the writeOGR (rgdal) function is called. The ArcGIS 
-	driver truncates variable names to 10 characters or less. Variable names are 
-	changed before export using an internal function (trunc10shp). If Spatial o
-	bject has more than 1 record, it will be returned but not exported. 
+  If exportshp=TRUE:\cr
+ 	The writeOGR (rgdal) function is called. The ArcGIS driver truncates variable 
+	names to 10 characters or less. Variable names are changed before export using 
+	an internal function (trunc10shp). If Spatial object has more than 1 record, 
+	it will be returned but not exported. 
   
   The spTransform (rgdal) method is used for on-the-fly map projection conversion and 
 	datum transformation using PROJ.4 arguments. Datum transformation only occurs if 
 	the +datum tag is present in the both the from and to PROJ.4 strings. The +towgs84 
 	tag is used when no datum transformation is needed. PROJ.4 transformations assume 
 	NAD83 and WGS84 are identical unless other transformation parameters are specified. 
-	Be aware, providing inaccurate or incomplete CRS information may lead to erroneous 
+	Be aware, providing inaccurate or incomplete CRS 	information may lead to erroneous 
 	data shifts when reprojecting. See spTransform help documentation for more details.
 }
 \keyword{ data }

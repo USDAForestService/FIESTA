@@ -1,8 +1,8 @@
-anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, 
-	bnd.filter=NULL, RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL,  
-	istree=TRUE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
-	puniqueid="CN", intensity1=TRUE, strata=TRUE, strattype="RASTER", 
-	strat_layer=NULL, strat_dsn=NULL, strvar=NULL, showsteps=FALSE, cex.plots=0.5, 
+anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
+	RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
+	plot_layer="plot", cond_layer="cond", tree_layer="tree", puniqueid="CN", 
+	intensity1=TRUE, strata=TRUE, strattype="RASTER", strat_layer=NULL, 
+	strat_dsn=NULL, strvar=NULL, showsteps=FALSE, cex.plots=0.5, 
 	savedata=FALSE, savexy=TRUE, savesteps=FALSE, saveobj=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite=TRUE, GBpltdat=NULL, ...) {
@@ -12,7 +12,6 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
   gui <- FALSE
   ref_titles <- FIESTA::ref_titles
   plt=strvar=stratalut <- NULL
-  savesteps=FALSE
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -112,7 +111,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
     par(mar=c(1,1,1,1))
 
     plot(sf::st_geometry(bnd), border="dark grey")
-    plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=.25)
+    plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=cex.plots)
 
     par(mar=mar)
   }
@@ -161,7 +160,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL,
     areavar <- stratdat$areavar
     pltassgnid <- stratdat$pltassgnid
   } 
-   
+
 
   ##########################################
   ## Create output list

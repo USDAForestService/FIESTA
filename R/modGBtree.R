@@ -14,7 +14,7 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	rawdata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, 
 	overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
 	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, 
-	title.filter=NULL, GBpopdat=NULL, gui=FALSE){
+	title.filter=NULL, GBpopdat=NULL, GBdata=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -22,7 +22,8 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   ##################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(GBpopdat)) gui <- TRUE 
+  if (nargs() == 0 || is.null(tree) && is.null(GBpopdat) && is.null(GBdata)) 
+    gui <- TRUE 
 
 
   ## If gui.. set variables to NULL
@@ -69,7 +70,7 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	cond.nonsamp.filter=cond.nonsamp.filter, strata=strata, unitvar=unitvar, 
 	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
 	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
-	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, gui=gui)
+	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
     if (!is.list(GBpopdat))

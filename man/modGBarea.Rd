@@ -30,7 +30,7 @@ modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre=NULL, outfn.date = TRUE, 
 	overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
 	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.filter = NULL, GBpopdat = NULL, gui = FALSE)
+	title.filter = NULL, GBpopdat = NULL, GBdata = NULL, gui = FALSE)
 }
  
 \arguments{
@@ -161,6 +161,7 @@ modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
   \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
+  \item{GBdata}{ List. Data objects returned from FIESTA::GBdata(). }
   \item{gui}{ Logical. If TRUE, user is prompted for parameters. }
 }
 \details{

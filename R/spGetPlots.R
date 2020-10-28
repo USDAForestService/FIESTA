@@ -141,8 +141,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
     ## Get intersecting states
     statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
-			stbnd.att=stbnd.att, RS=RS, states=states, savebnd=savebnd, 
-			outfolder=outfolder, ...)
+			stbnd.att=stbnd.att, RS=RS, states=states, showsteps=showsteps, 
+			savebnd=savebnd, outfolder=outfolder, ...)
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att
     statenames <- statedat$statenames
@@ -294,7 +294,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             msg <- paste0(msg, ", ", measEndyr.filter)
         }
       } else if (evalCur) {
-        msg <- paste0(msg, "for most evaluation")
+        msg <- paste0(msg, "for most current evaluation")
         if (!is.null(evalEndyr))
           msg <- paste0("ending in ", evalEndyr)
       } else if (!is.null(invyrs)) {
@@ -313,146 +313,71 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       }
 
       if (datsource == "datamart") {
+        xystate <- NULL
         stabbr <- pcheck.states(stcd, statereturn="ABBR") 
 
-        #########################################
-        ## Get CSV files
-        #########################################
-
-        ## PLOT table
-        PLOT <- DBgetCSV("PLOT", stabbr, ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)
-
-        ## COND table 
-        cond <- DBgetCSV("COND", stabbr, ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)
- 
-        ## TREE table
+        if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) 
+          allyrs=clipxy <- TRUE
+        ## Get plot data
+        dat <- DBgetPlots(states=stcd, stateFilter=stateFilter, allyrs=allyrs,
+			evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, evalType=evalType, 
+			measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, istree=istree, 
+			othertables=other_layers, intensity1=intensity1)
+        PLOT <- dat$plt
+        cond <- dat$cond
         if (istree)
-          tree <- DBgetCSV("TREE", stabbr, ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)
-
-        ## other tables
-        if (!is.null(other_layers)) {
-          for (layer in other_layers)
-            assign(layer, FIESTA::DBgetCSV(layer, stabbr, ZIP=TRUE, 
-			returnDT=TRUE, stopifnull=FALSE))
-        }
-
-        ## Create state filter
-        stfilter <- stateFilter
-
-        ## Get most current evalid
-        if (evalCur) {
-          ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
-          pop_plot_stratum_assgn <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
-			ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)    
-
-          evalCurType <- ifelse(evalType == "ALL", "00", 
-			ifelse(evalType == "AREAVOL", "01", "00"))
-          evalidst <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
-			evalEndyr=evalEndyr, evalCur=evalCur, evalType=evalCurType)
-        }
-
-        ## Get evalid filter
-        if (!is.null(evalidst)) {
-          stfilter <- paste0("ppsa.evalid IN(", toString(evalidst), ")")
-        } else {
-          if (intensity1)
-            stfilter <- paste(stfilter, "p.intensity == 1", sep=" and ")
-        }
-
-        ## Print stfilter
-        message(stfilter)
-
-        ## get pfromqry
-        pfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur, 
-				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R", plotnm="PLOT")
-        if (is.null(pfromqry)) {
-          message("no time frame specified... including all years")
-          allyrs <- TRUE
-          pfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur, 
-				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R", plotnm="PLOT")
-        }
-        ## Set up query for plots
-        plt.qry <- paste0("select distinct p.* from ", pfromqry, " where ", stfilter) 
+          tree <- dat$tree
         puniqueid <- "CN"
 
-        ## Query plt table
-        plt <- setDT(sqldf::sqldf(plt.qry))
-        plt[, PLOT_ID := paste0("ID", 
-			formatC(plt$STATECD, width=2, digits=2, flag=0), 
-          		formatC(plt$UNITCD, width=2, digits=2, flag=0),
-          		formatC(plt$COUNTYCD, width=3, digits=3, flag=0),
-          		formatC(plt$PLOT, width=5, digits=5, flag=0))] 
-
-        ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
-        if (nrow(plt) > length(unique(plt[[puniqueid]]))) {
-          if ("INVYR" %in% names(plt)) {
-            setorder(plt, -INVYR)
+        if (is.null(xydat)) { 
+          if ("xyCur_PUBLIC" %in% names(dat)) {
+            xy_PUBLIC <- setDT(dat$xyCur_PUBLIC)
+            xy.joinid=pjoinid <- "PLOT_ID"
           } else {
-            setorderv(plt, -puniqueid)
+            xy_PUBLIC <- setDT(dat$xy_PUBLIC)
+            xy.joinid <- "PLT_CN"
+            pjoinid <- puniqueid
           }
-          plt <- plt[, head(.SD, 1), by=pjoinid]
-        }
-
-        ## Check xy.joinid
-        pltfields <- names(plt)
-        if (xy.joinid %in% pltfields) {
-          pjoinid  <- xy.joinid
+          xvar <- "LON_PUBLIC"
+          yvar <- "LAT_PUBLIC"
+          xystate <- xy_PUBLIC[, c(xy.joinid, xvar, yvar), with=FALSE]
         } else {
-          if (xy.joinid == "PLT_CN" && "CN" %in% pltfields) {
-            pjoinid <- "CN"
-          } else {
-            stop(xy.joinid, " not in plt")
-          }
+          pjoinid <- ifelse (xy.joinid %in% names(PLOT), xy.joinid, puniqueid)
+          xystate <- xydat[xydat[[xy.joinid]] %in% PLOT[[pjoinid]],]
         }
 
-        if (!is.null(measEndyr.filter)) clipxy <- TRUE
         if (clipxy) {
-
-          ## Generate xy table for all plots in state (xystate)
-          #########################################################
-          if (is.null(xydat)) {
-            xvar <- "LON_PUBLIC"
-            yvar <- "LAT_PUBLIC"
-            measCur.xy <- FALSE
-            if (allyrs || measCur) measCur.xy <- TRUE
-            xyvars <- paste0("p.", c("CN", "STATECD", "UNITCD", "COUNTYCD", 
-			"PLOT", "LON", "LAT"))
-            xyfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur, 
-				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R", plotnm="PLOT")
-            xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
-				xyfromqry, " where ", stfilter) 
-            xystate <- setDT(sqldf::sqldf(xy.qry))
-            setnames(xystate, c("LON", "LAT"), c(xvar, yvar))
-
-            if (measCur.xy) {
-              xystate[, PLOT_ID := paste0("ID", 
-				formatC(xystate$STATECD, width=2, digits=2, flag=0), 
-          			formatC(xystate$UNITCD, width=2, digits=2, flag=0),
-          			formatC(xystate$COUNTYCD, width=3, digits=3, flag=0),
-          			formatC(xystate$PLOT, width=5, digits=5, flag=0))] 
-              xy.joinid <- "PLOT_ID"
-            } else {
-              xy.joinid <- puniqueid
-            } 
-            xystate <- xystate[, c(xy.joinid, xvar, yvar), with=FALSE]
-            pjoinid <- xy.joinid
-          }
 
           ## Get most current plots in database for !measEndyr.filter
           #######################################################
-          if (!is.null(measEndyr.filter)) {
+          if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
             bndxf1 <- datFilter(bndx, xfilter=measEndyr.filter)$xf
             bndxf2 <- datFilter(bndx, xfilter=paste0("!", measEndyr.filter))$xf
 
-            ## Clip data using measEndyr for measEndyr.filter
+            ####################################################
+            ## Clip xystate and other tables for bndxf1
+            ####################################################
+            ## ## Query plots - measCur=TRUE and measEndyr
+            pfromqry <- getpfromqry(plotCur=TRUE, Endyr=measEndyr, 
+				syntax="R", plotnm="PLOT")
+            plt.qry <- paste0("select distinct p.* from ", pfromqry) 
+            PLOT <- setDT(sqldf::sqldf(plt.qry))
+
+            ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
+            if (nrow(PLOT) > length(unique(PLOT[[puniqueid]]))) {
+              if ("INVYR" %in% names(PLOT)) {
+                setorder(PLOT, -INVYR)
+              } else {
+                setorderv(PLOT, -puniqueid)
+              }
+              PLOT <- PLOT[, head(.SD, 1), by=pjoinid]
+            }
+
             clipdat <- spClipPoint(xyplt=xystate, 
 				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
 				clippolyv=bndxf1, stopifnotin=FALSE)
             xyplt1 <- clipdat$clip_xyplt
-            plt1 <- plt[plt[[pjoinid]] %in% xyplt1[[xy.joinid]], ]
+            plt1 <- PLOT[PLOT[[pjoinid]] %in% xyplt1[[xy.joinid]], ]
             pltids1 <- plt1[[puniqueid]]
 
             cond1 <- cond[cond[["PLT_CN"]] %in% pltids1, ]
@@ -465,55 +390,31 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               }
             }
 
-            ## Clip plots from all database
-            ############################################
-            ## Get most current evalid
-            if (evalCur) {
-              evalidst <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
-				evalEndyr=evalEndyr, evalCur=evalCur, evalType=evalCurType)
-            }
-            ## Get evalid filter
-            if (!is.null(evalidst)) {
-              stfilter <- paste0("ppsa.evalid IN(", toString(evalidst), ")")
-            } else {
-              if (intensity1)
-                stfilter <- paste(stfilter, "p.intensity == 1", sep=" and ")
-            }
-            ## get pfromqry
-            pfromqry2 <- getpfromqry(evalid=evalidst, plotCur=measCur, 
-				invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R", plotnm="PLOT")
-            ## Set up query for plots
-            plt2.qry <- paste0("select distinct p.* from ", pfromqry2, " where ", stfilter) 
+            ####################################################
+            ## Clip xystate and other tables for bndxf2
+            ####################################################
 
-            ## Query plt table
-            plt2 <- setDT(sqldf::sqldf(plt2.qry))
-            plt2[, PLOT_ID := paste0("ID", 
-			formatC(plt2$STATECD, width=2, digits=2, flag=0), 
-          		formatC(plt2$UNITCD, width=2, digits=2, flag=0),
-          		formatC(plt2$COUNTYCD, width=3, digits=3, flag=0),
-          		formatC(plt2$PLOT, width=5, digits=5, flag=0))] 
-            xystate2 <- plt2[, c(xy.joinid, "LON", "LAT"), with=FALSE]
-            setnames(xystate2, c("LON", "LAT"), c(xvar, yvar))
+            ## ## Query plots - measCur=TRUE
+            pfromqry <- getpfromqry(plotCur=TRUE, syntax="R", plotnm="PLOT")
+            plt.qry <- paste0("select distinct p.* from ", pfromqry) 
+            PLOT2 <- setDT(sqldf::sqldf(plt.qry))
 
             ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
-            if (nrow(plt2) > length(unique(plt2[[pjoinid]]))) {
-              if ("INVYR" %in% names(plt)) {
-                setorder(plt2, -INVYR)
+            if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
+              if ("INVYR" %in% names(PLOT2)) {
+                setorder(PLOT2, -INVYR)
               } else {
-                setorderv(plt2, -puniqueid)
+                setorderv(PLOT2, -puniqueid)
               }
-              plt2 <- plt2[, head(.SD, 1), by=pjoinid]
-            }
+              PLOT2 <- PLOT2[, head(.SD, 1), by=pjoinid]
+            }         
 
-            ## Clip xystate and other tables for bndxf2
-            ############################################
             clipdat <- spClipPoint(xyplt=xystate, 
 				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
 				clippolyv=bndxf2, stopifnotin=FALSE)
             xyplt2 <- clipdat$clip_xyplt
 
-            plt2 <- plt2[plt2[[pjoinid]] %in% xyplt2[[xy.joinid]], ]
+            plt2 <- PLOT2[PLOT2[[pjoinid]] %in% xyplt2[[xy.joinid]], ]
             pltids2 <- plt2[[puniqueid]]
 
             cond2 <- cond[cond[["PLT_CN"]] %in% pltids2, ]
@@ -547,8 +448,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				clippolyv=bndx)
             xyplt <- clipdat$clip_xyplt
 
-            pltx <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
-            pltids <- pltx[[puniqueid]]
+            plt <- PLOT[PLOT[[pjoinid]] %in% xyplt[[xy.joinid]], ]
+            pltids <- plt[[puniqueid]]
 
             cond <- cond[cond[["PLT_CN"]] %in% pltids, ]
             if (istree)
@@ -571,6 +472,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
             }
           }
+
           if (savexy || showsteps)
             xypltx <- rbind(xypltx, xyplt)
 
@@ -596,7 +498,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ## 2) Clip xy (for state) to boundary
         ## 3) Subset other data with clipped xy joinid
         ####################################################################
-
         if (i == 1) {
           conn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
           tabs <- DBI::dbListTables(conn)
@@ -733,6 +634,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R")
         }
+
         ## Set up query for plots
         plt.qry <- paste0("select distinct p.* from ", pfromqry, " where ", stfilter) 
 
@@ -839,7 +741,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             ############################################
             ## Get most current evalid
             if (evalCur) {
-              evalidst <- getEvalid.ppsa(ppsa=pop_plot_stratum_assgn, states=stcd, 
+              evalidst <- getEvalid.ppsa(ppsa="pop_plot_stratum_assgn", states=stcd, 
 				evalCur=evalCur, evalType=evalCurType)
             }
             ## Get evalid filter
@@ -858,7 +760,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
             ## Query database for plots
             rs <- DBI::dbSendQuery(conn, plt2.qry)
-            plt2 <- DBI::dbFetch(rs)
+            plt2 <- setDT(DBI::dbFetch(rs))
 
             if (!"PLOT_ID" %in% names(plt2)) {
               if (all(zids %in% names(plt2))) {

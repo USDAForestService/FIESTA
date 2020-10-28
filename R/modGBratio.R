@@ -16,7 +16,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, 
 	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, 
 	title.unitvar=NULL, title.estvarn=NULL, title.estvard=NULL, title.filter=NULL, 
-	GBpopdat=NULL, gui=FALSE){
+	GBpopdat=NULL, GBdata=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION: 
@@ -65,14 +65,14 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(GBpopdat)) {
-    GBpopdat <- modGBpop(tree=tree, cond=cond, plt=plt, dsn=dsn, 
-	pltassgn=pltassgn, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-	evalid=evalid, invyrs=invyrs, ACI=ACI, adj=adj, 	
-	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter, 
-	strata=strata, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea, 
-	areavar=areavar, unitcombine=unitcombine, minplotnum.unit=minplotnum.unit, 
-	stratalut=stratalut, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
-	stratcombine=stratcombine, gui=gui)
+    GBpopdat <- modGBpop(tree=tree, cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
+	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid, 
+	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
+	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 	
+	cond.nonsamp.filter=cond.nonsamp.filter, strata=strata, unitvar=unitvar, 
+	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
+	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
+	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
     if (!is.list(GBpopdat))

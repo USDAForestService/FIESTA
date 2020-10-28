@@ -2,7 +2,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
 	datsource="sqlite", data_dsn=NULL, istree=TRUE, plot_layer="plot",
  	cond_layer="cond", tree_layer="tree", puniqueid="CN", 
 	xy.joinid="PLT_CN", measCur=TRUE, measEndyr=NULL, measEndyr.filter=NULL,  
-	intensity1=FALSE, rastlst.cont=NULL, rastlst.cont.name=NULL, 
+	intensity1=FALSE, rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
 	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
 	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
@@ -92,6 +92,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   plt <- SApltdat$clip_tabs$clip_plt
   cond <- SApltdat$clip_tabs$clip_cond
   tree <- SApltdat$clip_tabs$clip_tree
+  SAdoms <- SApltdat$clip_polyv
 
   if (showsteps) {
     ## Set plotting margins
@@ -145,10 +146,11 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   ####################################################################
   message("summarizing auxiliary model data...")
   SAmodeldat <- spGetModeldat(xyplt=xyplt, uniqueid=xy.uniqueid, 
-		module="SA", dom_layer=SAdoms, 
+		dom_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
-		rastlst.cat.NODATA=NULL, vars2keep="AOI", savedata=FALSE)
+		rastlst.cat.NODATA=NULL, keepNA=FALSE, npixels=FALSE, 
+		vars2keep="AOI", savedata=FALSE)
   pltassgn <- SAmodeldat$pltassgn
   dunitlut <- SAmodeldat$domzonal
   dunitvar <- SAmodeldat$domvar

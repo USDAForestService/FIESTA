@@ -284,7 +284,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
       ## Print missing values to screen
       navals <- sum(is.na(sppltx[[cname]]))
       if (navals > 0) {
-        NAlst[[var.name]] <- navals
+        NAlst[[var.name]] <- sppltx[is.na(sppltx[[cname]]),]
         message(paste(navals, "missing values for", rastnm))
         if (exportNA) {
           sppltna <- sppltx[is.na(sppltx[[cname]]),]

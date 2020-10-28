@@ -9,13 +9,13 @@
 }
 \usage{    
 modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
-	condid="CONDID", puniqueid = "CN", pltassgnid = "CN", ACI = FALSE, 
-	adj = "samp", MAmethod = "GREG", plt.nonsamp.filter = NULL, 
+	condid="CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL,
+ 	invyrs=NULL,ACI = FALSE, adj = "samp", MAmethod = "GREG", plt.nonsamp.filter = NULL, 
 	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", unitcombine = FALSE, unitlut = NULL, npixelvar = "npixels", 
-	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
-	landarea = "ALL", plt.filter = NULL, cond.filter = NULL, sumunits = FALSE, 
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, unitlut = NULL, 
+	npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL, 
+	stratcombine = TRUE, landarea = "ALL", plt.filter = NULL, cond.filter = NULL, 
+	sumunits = FALSE, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, 
 	collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, allin1 = FALSE, 
 	estround = 0, pseround = 3, estnull = "--", psenull = "--", divideby = NULL, 
@@ -23,7 +23,7 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, addtitle = TRUE, 
 	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
 	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, 
-	MApopdat = NULL, gui = FALSE)
+	MAmodeldat = NULL, MApopdat = NULL, gui = FALSE)
 }
  
 \arguments{
@@ -48,6 +48,10 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
   \item{puniqueid}{ String. Unique identifier of plot. }
   \item{pltassgnid}{ String. Unique identifier of plot. }
+  \item{pjoinid}{ String. Name of variable in plot to join to pltassgn. This
+	variable does not need to be unique (e.g., PLOT_ID). If NULL, pjoinid=puniqueid. }
+  \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
+  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
   \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
 	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 
@@ -72,6 +76,7 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
   \item{unitlut}{ DF/DT. Table with ancillary information by estimation 
 	unit. For continuous data, means by estimation unit; for categorical data, 
 	proportion of class by estimation unit. }
@@ -149,6 +154,7 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
+  \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }

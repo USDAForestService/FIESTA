@@ -14,23 +14,22 @@
 modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
 	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", evalid = NULL, 
-	invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
-	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
-	plt.filter = NULL, cond.filter = NULL, ratiotype = "PERACRE", estvarn = NULL, 
-	estvarn.filter = NULL, estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, 
-	estvard.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE, 
-	col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
-	col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, 
-	rowgrpord = NULL, sumunits = TRUE, allin1 = FALSE, estround = 3, pseround = 2, 
-	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
-	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+	invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,
+ 	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, 
+	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
+	landarea = "FOREST", plt.filter = NULL, cond.filter = NULL, ratiotype = "PERACRE", 
+	estvarn = NULL, estvarn.filter = NULL, estvarn.name = NULL, estvard = NULL, 
+	estvard.filter = NULL, estvard.name = NULL, rowvar = NULL, colvar = NULL, 
+	row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
+	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, 
+	rowgrpnm = NULL, rowgrpord = NULL, sumunits = TRUE, allin1 = FALSE, estround = 3, 
+	pseround = 2, estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
+	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE,
+ 	overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
 	title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, 
-	GBpopdat = NULL, gui = FALSE)
+	GBpopdat = NULL, GBdata = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -184,6 +183,7 @@ modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
   \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
+  \item{GBdata}{ List. Data objects returned from FIESTA::GBdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

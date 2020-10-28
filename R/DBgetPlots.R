@@ -92,6 +92,17 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
   if (!iseval) {   
 
+    ### Check allyrs
+    ###########################################################
+    allyrs <- FIESTA::pcheck.logical(allyrs, varnm="allyrs", title="All years?", 
+		first="YES", gui=gui)
+    if (allyrs) {
+      xymeasCur <- TRUE
+      measCur <- FALSE
+      measEndyr=measEndyr.filter <- NULL
+    }
+
+
     ### Check measCur
     ###########################################################
     measCur <- FIESTA::pcheck.logical(measCur, varnm="measCur", title="Current measyear?", 
@@ -112,12 +123,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       xymeasCur <- TRUE
       allyrs <- FALSE
     }
-
-    ### Check allyrs
-    ###########################################################
-    allyrs <- FIESTA::pcheck.logical(allyrs, varnm="allyrs", title="All years?", 
-		first="YES", gui=gui)
-    if (allyrs) xymeasCur <- TRUE
  
     ## Check INVYR(S) 
     ###########################################################

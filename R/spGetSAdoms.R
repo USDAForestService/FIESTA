@@ -181,12 +181,19 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- crsdat$ycrs
 
     ## Intersect smallbnd with statebnd
-    smallbndx <- suppressWarnings(selectByIntersects(smallbndx, stunitcof, 30))
- 
-#    if (showsteps) {
-#      plot(sf::st_geometry(stunitcof))
-#      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
-#    }
+    smallbndx2 <- suppressWarnings(selectByIntersects(smallbndx, stunitcof, 30))
+    if (showsteps) {
+      plot(sf::st_geometry(stunitcof))
+      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
+    }
+
+    if (is.null(smallbndx2) || nrow(smallbndx2) == 0) {
+      message("the smallbnd has less than 50% overlap with the state boundary... returning NULL")
+      return(NULL)
+    } else {
+      smallbndx <- smallbndx2
+      rm(smallbndx2)
+    }
   }
  
   ## Apply smallbnd.ecofilter
@@ -205,17 +212,19 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- crsdat$ycrs
 
     ## Intersect smallbnd with ecomapf
-    smallbndx <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
-    if (is.null(smallbndx) || nrow(smallbndx) == 0) {
-      message("the smallbnd has less than 50% overlap with the ecomap boundary... returning NULL")
-      return(NULL)
+    smallbndx2 <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
+    if (showsteps) {
+      plot(sf::st_geometry(ecomapf))
+      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
     }
 
-
- #   if (showsteps) {
- #     plot(sf::st_geometry(ecomapf))
- #     plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
- #   }
+    if (is.null(smallbndx2) || nrow(smallbndx2) == 0) {
+      message("the smallbnd has less than 50% overlap with the ecomap boundary... returning NULL")
+      return(NULL)
+    } else {
+      smallbndx <- smallbndx2
+      rm(smallbndx2)
+    }
   }
 
   message("smallbnd...")

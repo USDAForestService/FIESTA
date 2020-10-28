@@ -152,10 +152,11 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast,
       zonalext <- tabs$tab1
       zstats <- tabs$tab2
 
-      zonalext <- zonalext[zstats] 
+      zonalext <- zonalext[zstats]
       outnames <- c(outnames, var.name) 
-      if (length(bands) > 1 && b == 1 && "npixels" %in% names(zonalstat)) 
+      if (length(bands) > 1 && b == 1 && "npixels" %in% zonalstat) {
         zonalstat <- zonalstat[zonalstat != "npixels"]
+      }
     }  
 
     if (any(zonalstat == "majority")) { 
@@ -273,6 +274,8 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast,
         outnames <- c(outnames, var.name) 
       } 
     } 
+    rm(zstats)
+    gc() 
   }  
 
   if (savedata)

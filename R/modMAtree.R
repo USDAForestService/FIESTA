@@ -86,8 +86,6 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   unitlut <- MApopdat$unitlut
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
-  PSstrvar <- MApopdat$PSstrvar
-  prednames <- MApopdat$prednames
   expcondtab <- MApopdat$expcondtab
   plotsampcnt <- MApopdat$plotsampcnt
   condsampcnt <- MApopdat$condsampcnt
@@ -95,6 +93,13 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   invyrs <- MApopdat$invyrs
   MAmethod <- MApopdat$MAmethod
   stratcombinelut <- MApopdat$stratcombinelut
+
+  if (is.null(prednames))
+    prednames <- MApopdat$prednames
+  if (is.null(predfac)) 
+    predfac <- MApopdat$predfac
+  if (is.null(predfac)) 
+    PSstrvar <- MApopdat$PSstrvar
 
 
   ###################################################################################

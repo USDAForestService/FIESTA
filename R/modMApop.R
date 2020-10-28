@@ -6,7 +6,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
-	stratcombine=TRUE, MAmodeldat=NULL, gui=FALSE){
+	stratcombine=TRUE, MAmodeldat=NULL, MAdata=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -32,13 +32,14 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   on.exit(options(options.old), add=TRUE)
   adjtree <- FALSE
 
-  if (!is.null(MAmodeldat)) {
-    modeldat.names <- c("pltassgn", "domzonal", "domvar",
+  if (is.null(MAdata)) {
+    if (!is.null(MAmodeldat)) {
+      modeldat.names <- c("pltassgn", "domzonal", "domvar",
 		"predfac", "npixelvar", "pltassgnid", "domarea", "areavar")
-    if (!all(modeldat.names %in% names(MAmodeldat))) 
-      stop("missing components in MAmodeldat list: ", 
+      if (!all(modeldat.names %in% names(MAmodeldat))) 
+        stop("missing components in MAmodeldat list: ", 
 		toString(modeldat.names[!modeldat.names %in% names(MAmodeldat)])) 
-
+    }
     pltassgn <- MAmodeldat$pltassgn
     pltassgnid <- MAmodeldat$pltassgnid
     unitlut <- MAmodeldat$domzonal
@@ -47,7 +48,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
     areavar <- MAmodeldat$areavar
     npixelvar <- MAmodeldat$npixelvar
     predfac <- MAmodeldat$predfac
-    PSstrvar <- MAmodeldat$PSstrvar
+    if (MAmethod == "PS")
+      PSstrvar <- MAmodeldat$PSstrvar
 
     if (is.null(prednames)) {
       prednames <- MAmodeldat$prednames
@@ -57,8 +59,38 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 		toString(prednames[!prednames %in% MAmodeldat$prednames]))
       predfac <- predfac[predfac %in% prednames]
     }
-  }
- 
+  } else {
+    if (!is.list(MAdata))
+      stop("MAdata must be a list")
+    listitems <- c("bnd", "plt", "cond", "unitarea", "unitvar")
+    if (!all(listitems %in% names(MAdata))) {
+      items.miss <- listitems[!listitems %in% names(MAdata)]
+      stop("invalid MAdata... missing items: ", paste(items.miss, collapse=", "))
+    } 
+    plt <- MAdata$plt
+    cond <- MAdata$cond
+    tree <- MAdata$tree
+    pltassgn <- MAdata$pltassgn
+    pltassgnid <- MAdata$pltassgnid
+    unitlut <- MAdata$unitlut
+    unitvar <- MAdata$unitvar
+    unitarea <- MAdata$unitarea
+    areavar <- MAdata$areavar
+    npixelvar <- MAdata$npixelvar
+    predfac <- MAdata$predfac
+    if (MAmethod == "PS")
+      PSstrvar <- MAdata$PSstrvar
+
+    if (is.null(prednames)) {
+      prednames <- MAdata$prednames
+    } else {
+      if (!all(prednames %in% MAdata$prednames))
+        stop("invalid prednames: ", 
+		toString(prednames[!prednames %in% MAdata$prednames]))
+      predfac <- predfac[predfac %in% prednames]
+    }
+  } 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions

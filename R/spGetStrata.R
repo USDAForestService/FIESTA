@@ -54,6 +54,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
 
+
   ## Spatial Layers: strattype and unittype
   ##################################################################################
   typelst <- c("POLY", "RASTER") 
@@ -164,8 +165,8 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## if strattype == "RASTER"
     ##################################################################
     ## Check strat_layer
-    stratlayerfn <- getrastlst.rgdal(strat_layer, rastfolder=strat_dsn,
- 		stopifLonLat=TRUE)
+    stratlayerfn <- suppressWarnings(getrastlst.rgdal(strat_layer, rastfolder=strat_dsn,
+ 		stopifLonLat=TRUE))
 
     ## Get raster info
     rast_info <- rasterInfo(stratlayerfn)
@@ -243,7 +244,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, var.name=strvar, 
 			uniqueid=uniqueid, exportna=exportsp, keepNA=keepNA, 
 			exportNA=exportNA, outfolder=outfolder, overwrite=overwrite)
-
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
@@ -278,7 +278,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
   setkeyv(stratalut, c(unitvar, strvar))
-
 
   ## If lookup table, merge and aggregate
   #######################################

@@ -165,9 +165,8 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL,
  		pltassgnid=pltassgnid, measCur=FALSE, measEndyr=NULL, invyrs=NULL, ACI=ACI,
 		adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 		cond.nonsamp.filter=cond.nonsamp.filter, dunitvar=dunitvar, dunitvar2=NULL,
- 		dunitarea=dunitarea, areavar=areavar, unitcombine=unitcombine, 
-		dunitlut=dunitlut, prednames=prednames, predfac=predfac, 
- 		pvars2keep=pvars2keep, gui=gui)
+ 		dunitarea=dunitarea, areavar=areavar, unitcombine=unitcombine, dunitlut=dunitlut, 
+		prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, gui=gui)
   } else {
     returnSApopdat <- FALSE
     if (!is.list(SApopdat))
@@ -181,6 +180,7 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL,
     }   
   }		
   if (is.null(SApopdat)) return(NULL)
+  SAdomsdf <- SApopdat$SAdomsdf
   condx <- SApopdat$condx
   pltcondx <- SApopdat$pltcondx
   cuniqueid <- SApopdat$cuniqueid
@@ -194,6 +194,19 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL,
   condsampcnt <- SApopdat$condsampcnt
   states <- SApopdat$states
   invyrs <- SApopdat$invyrs
+
+  ## check SAdomsdf
+  ########################################################
+  SAdomsdf <- pcheck.table(SAdomsdf, tabnm="SAdomsdf", caption="SAdoms?")
+
+
+  ## check smallbnd.att
+  ########################################################
+  smallbnd.att <- FIESTA::pcheck.varchar(var2check=smallbnd.att, varnm="smallbnd.att", 
+		checklst=names(SAdomsdf), caption="smallbnd attribute for output?", 
+		multiple=FALSE, stopifnull=FALSE)
+  if (is.null(smallbnd.att)) smallbnd.att <- "DOMAIN"
+
 
   ## Check prednames
   if (is.null(prednames)) {

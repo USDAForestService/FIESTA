@@ -30,9 +30,8 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 	pseround = 2, estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
 	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
 	overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
-	title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, 
-	GBpopdat = NULL, gui = FALSE)
+	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,  
+	title.estvar = NULL, title.filter = NULL, GBpopdat = NULL, GBdata = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -196,7 +195,8 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 	name for the estimate variable. If NULL, title.estvar = estvar.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
-  \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
+  \item{GBpopdat}{ List. Population data objects returned from FIESTA::modGBpop(). }
+  \item{GBdata}{ List. Data objects returned from FIESTA::GBdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

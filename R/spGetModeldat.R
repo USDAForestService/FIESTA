@@ -273,6 +273,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     sppltx <- extdat.rast.cont$spplt
     prednames.cont <- extdat.rast.cont$outnames
     inputdf.cont <- extdat.rast.cont$inputdf
+    rm(extdat.rast.cont)
+    gc() 
 
     if (NAto0) 
       for (col in prednames.cont) set(sppltx, which(is.na(sppltx[[col]])), col, 0)
@@ -308,11 +310,12 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
           zonalstat <- c("npixels", rastlst.cont.stat) 
           rastnm2 <- c("npixels", rastnm2)
         }  
-        zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, polyv.att=domvar, 
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rast=rastfn, polyv.att=domvar, 
 		zonalstat=zonalstat, pixelfun=northness, rast.NODATA=rast.cont.NODATA,
 		na.rm=TRUE)
-        zonalext <- setDT(zonaldat.rast$zonalext)
-        outname <- zonaldat.rast$outname
+        zonalext <- setDT(zonaldat.rast.cont$zonalext)
+        outname <- zonaldat.rast.cont$outname
+
         if (!is.null(rastnm)) 
           setnames(zonalext, outname, rastnm2)
         setkeyv(zonalext, domvar)
@@ -320,10 +323,10 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   
         rastnm2 <- ifelse(is.null(rastnm), "sinAsp", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
-        zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA,
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA,
  		polyv.att=domvar, zonalstat=rastlst.cont.stat, pixelfun=eastness, na.rm=TRUE)
-        zonalext <- setDT(zonaldat.rast$zonalext)
-        outname <- zonaldat.rast$outname
+        zonalext <- setDT(zonaldat.rast.cont$zonalext)
+        outname <- zonaldat.rast.cont$outname
         if (!is.null(rastnm2)) 
           setnames(zonalext, outname, rastnm2)
         setkeyv(zonalext, domvar)
@@ -335,23 +338,22 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
           if (!is.null(rastnm)) 
             rastnm <- c("npixels", rastnm)
         }  
-        zonaldat.rast <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA, 
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA, 
 		polyv.att=domvar, zonalstat=zonalstat, showext=showext, na.rm=TRUE)
-        zonalext <- setDT(zonaldat.rast$zonalext)
+        zonalext <- setDT(zonaldat.rast.cont$zonalext)
+        outname <- zonaldat.rast.cont$outname
 
-        outname <- zonaldat.rast$outname
         if (!is.null(rastnm)) 
           setnames(zonalext, outname, rastnm)
         setkeyv(zonalext, domvar)
         zonalDT.cont <- zonalDT.cont[zonalext] 
       }
       if (npixels) npixels <- FALSE
+      rm(zonaldat.rast.cont)
+      rm(zonalext)
+      gc() 
     }
     domlut <- domlut[zonalDT.cont] 
-
-    rm(extdat.rast.cont)
-    rm(zonaldat.rast)
-    gc() 
   }
 
   ###############################################################################
@@ -370,6 +372,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     prednames <- c(prednames, prednames.cat)
     predfac <- c(predfac, prednames.cat)
     inputdf <- rbind(inputdf, inputdf.cat)
+    rm(extdat.rast.cat)
+    gc() 
 
     if (NAto0) 
       for (col in prednames.cat) set(sppltx, which(is.na(sppltx[[col]])), col, 0)
@@ -426,12 +430,11 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       zonalnames <- c(zonalnames, outname[outname != "npixels"])
 
       if (npixels) npixels <- FALSE
+      rm(zonaldat.rast.cat)
+      rm(zonalext)
+      gc() 
     }
     domlut <- domlut[zonalDT.cat]  
-
-    rm(extdat.rast.cat)
-    rm(zonaldat.rast.cat)
-    gc() 
   }
  
   ###################################################################################

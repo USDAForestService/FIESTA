@@ -1,8 +1,9 @@
 modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="PLT_CN", 
-	condid="CONDID", puniqueid="CN", pltassgnid="CN", ACI=FALSE, 
-	adj="samp", MAmethod="GREG", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, 
-	unitlut=NULL, npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
+	condid="CONDID", puniqueid="CN", pltassgnid="CN", pjoinid="CN", evalid=NULL, 
+	invyrs=NULL, ACI=FALSE, adj="samp", MAmethod="GREG", plt.nonsamp.filter=NULL,
+ 	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
+	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
+	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
 	stratcombine=TRUE, landarea="ALL", plt.filter=NULL, cond.filter=NULL, 
 	sumunits=FALSE, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, 
@@ -10,8 +11,8 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
 	pseround=3, estnull="--", psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, 
 	addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
-	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, MApopdat=NULL, 
-	gui=FALSE){
+	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, MAmodeldat=NULL, 
+	MApopdat=NULL, gui=FALSE){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -50,13 +51,15 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(MApopdat)) {
-    MApopdat <- modMApop(MAmethod=MAmethod, cond=cond, plt=plt, dsn=dsn, 
-	pltassgn=pltassgn, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid, 
-	pltassgnid=pltassgnid, ACI=ACI, adj=adj, 
-	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter, 
-	unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
-	unitcombine=unitcombine, unitlut=unitlut, npixelvar=npixelvar, prednames=prednames, 
-	predfac=predfac, PSstrvar=PSstrvar, stratcombine=stratcombine, gui=gui)
+    MApopdat <- modMApop(cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
+	cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid, 
+	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
+	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
+	cond.nonsamp.filter=cond.nonsamp.filter, MAmethod=MAmethod, unitvar=unitvar,
+	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine,
+ 	minplotnum.unit=minplotnum.unit, unitlut=unitlut, npixelvar=npixelvar, 
+	prednames=prednames, predfac=predfac, PSstrvar=PSstrvar, 
+	stratcombine=stratcombine, MAmodeldat=MAmodeldat, gui=gui)
   } else {
     returnMApopdat <- FALSE
     if (!is.list(MApopdat))
@@ -83,9 +86,6 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
   unitlut <- MApopdat$unitlut
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
-  PSstrvar <- MApopdat$PSstrvar
-  stratcombine <- MApopdat$stratcombine
-  prednames <- MApopdat$prednames
   expcondtab <- MApopdat$expcondtab
   plotsampcnt <- MApopdat$plotsampcnt
   condsampcnt <- MApopdat$condsampcnt
@@ -93,6 +93,13 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
   invyrs <- MApopdat$invyrs
   MAmethod <- MApopdat$MAmethod
   stratcombinelut <- MApopdat$stratcombinelut
+
+  if (is.null(prednames))
+    prednames <- MApopdat$prednames
+  if (is.null(predfac)) 
+    predfac <- MApopdat$predfac
+  if (is.null(predfac)) 
+    PSstrvar <- MApopdat$PSstrvar
 
 
   ###################################################################################

@@ -13,7 +13,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 	outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, 
 	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
 	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, GBpopdat=NULL, 
-	gui=FALSE){
+	GBdata=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -66,13 +66,13 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   ###################################################################################
   if (is.null(GBpopdat)) {
     GBpopdat <- modGBpop(cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
-	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-	evalid=evalid, invyrs=invyrs, ACI=ACI, adj=adj, 
+	puniqueid=puniqueid, cuniqueid=cuniqueid, condid=condid, pltassgnid=pltassgnid, 
+	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, ACI=ACI, adj=adj, 
 	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter, 
 	strata=strata, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea, 
 	areavar=areavar, unitcombine=unitcombine, minplotnum.unit=minplotnum.unit, 
 	stratalut=stratalut, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
-	stratcombine=stratcombine, gui=gui)
+	stratcombine=stratcombine, GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
     if (!is.list(GBpopdat))
