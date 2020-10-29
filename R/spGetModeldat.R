@@ -245,7 +245,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     extpoly <- spExtractPoly(xyplt=sppltx, polyvlst=domlayerx, 
 		uniqueid=uniqueid, polyvarlst=unique(c(domvar, vars2keep)), 
 		keepNA=FALSE, exportNA=exportNA)
-    sppltx <- extpoly$spplt
+    sppltx <- unique(extpoly$spplt)
   } else {
     message(domvar, " already in spplt... not extracting from domlayer")
   }
@@ -270,7 +270,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 			rastlst=rastlst.contfn, interpolate=FALSE, showext=showext,
 			var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
 			keepNA=keepNA, exportNA=exportNA)
-    sppltx <- extdat.rast.cont$spplt
+    sppltx <- unique(extdat.rast.cont$spplt)
     prednames.cont <- extdat.rast.cont$outnames
     inputdf.cont <- extdat.rast.cont$inputdf
     rm(extdat.rast.cont)

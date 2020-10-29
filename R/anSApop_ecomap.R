@@ -61,9 +61,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   if (is.null(SAdomdat) && is.null(SAdata)) {
     message("generating SAdoms...")
 
-#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\ISAinternal.R")
-#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetSAdoms.R")
-
     SAdomdat <- spGetSAdoms(smallbnd=smallbnd, smallbnd_dsn=smallbnd_dsn, 	
 		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain,
  		smallbnd.filter=smallbnd.filter, smallbnd.stfilter=smallbnd.stfilter,

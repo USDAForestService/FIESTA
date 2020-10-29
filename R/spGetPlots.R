@@ -492,6 +492,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         gc()
           
       } else if (datsource == "sqlite") {
+
         ####################################################################
         ## 1) Check if data for all states is in database
         ## 1) Get most current plots from xy database that intersect state

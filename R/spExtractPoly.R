@@ -178,7 +178,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     ## Extract data from polygon
     ######################################################## 
     #sppltext <- sf::st_intersection(sppltx, polyv[, polyvars])
-    sppltext <- sf::st_join(sppltx, polyv)
+    sppltext <- unique(sf::st_join(sppltx, polyv))
 
     ## Set polyvarnm
     ########################################################  

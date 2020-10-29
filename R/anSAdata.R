@@ -66,11 +66,11 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   if (is.null(SApltdat)) {
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
-		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
-		measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, intensity1=intensity1, 
-		showsteps=FALSE, savedata=FALSE, savexy=TRUE, outfolder=NULL, out_fmt=out_fmt, 
-		out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite, ...)
+		cond_layer=cond_layer, tree_layer=tree_layer, xy.joinid=xy.joinid, 
+		measCur=measCur, measEndyr=measEndyr, measEndyr.filter=measEndyr.filter,
+ 		intensity1=intensity1, showsteps=FALSE, savedata=FALSE, savexy=TRUE,
+ 		outfolder=NULL, out_fmt=out_fmt, out_dsn=out_dsn, outfn.pre=outfn.pre,
+ 		outfn.date=outfn.date, overwrite_layer=overwrite, ...)
     if (is.null(SApltdat)) return(NULL)
     if (saveobj) {
       message("saving SApltdat object to: ", file.path(outfolder, "SApltdat.rda"), "...")
@@ -145,7 +145,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  SAmodeldat <- spGetModeldat(xyplt=xyplt, uniqueid=xy.uniqueid, 
+  SAmodeldat <- spGetModeldat(xyplt=xyplt, uniqueid=xy.joinid, 
 		dom_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
