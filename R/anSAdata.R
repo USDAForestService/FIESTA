@@ -145,7 +145,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  SAmodeldat <- spGetModeldat(xyplt=xyplt, uniqueid=xy.joinid, 
+  SAmodeldat <- spGetModeldat(xyplt=xyplt, uniqueid=xy.uniqueid, 
 		dom_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
