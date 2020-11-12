@@ -1,4 +1,4 @@
-modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL, 
+modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL, 
 	dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", 
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, ACI=FALSE, 
@@ -7,8 +7,8 @@ modGBpop <- function(GBdata=NULL, cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
 	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
-	gui=FALSE){
+	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite=TRUE, GBdata=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:

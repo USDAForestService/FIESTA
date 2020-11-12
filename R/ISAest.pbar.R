@@ -46,7 +46,7 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
  
   # variable selection for unit-level model for largebnd value
   mod.dom <- stats::lm(fmla, data=plt.dom)
-  mod.dom.step <- stats::step(mod.dom)
+  mod.dom.step <- stats::step(mod.dom, trace=FALSE)
   mod.summary <- summary(mod.dom.step)
   preds.dom <- names(mod.dom.step$model[-1])
 

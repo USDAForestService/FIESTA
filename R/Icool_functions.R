@@ -18,9 +18,10 @@
 
 
 getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
-		outfn.date=FALSE, overwrite=FALSE, ext=NULL, baseonly=FALSE, 
+		outfn.date=FALSE, overwrite=FALSE, ext="csv", baseonly=FALSE, 
 		noext=FALSE, outfn.default="outfile", gui=FALSE, append=FALSE) {
   ## DESCRIPTION: get full pathname 
+
 
   ## Check outfn
   if (is.null(outfn)) {
@@ -30,14 +31,33 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
       stop("outfn and outfn.default is null")
     }
   }
-
   if (!is.character(outfn))
     stop("outfn must be a character string")
-
-  ## get extension of outfn
   extfn <- getext(outfn) 
+
+
+  ## Check ext
+  extlst <- c("sqlite", "csv", "txt", "gdb", "shp", "gpkg")
+  if (!is.null(ext)) {
+    if (startsWith(ext, ".")) 
+      ext <- sub(".", "", ext)
+    if (!ext %in% extlst)
+      stop("ext not supported")
+
+    if (is.na(getext(outfn)) || !extfn %in% extlst)
+      outfn <- paste0(outfn, ".", ext)
+  } else {
+    if (is.na(getext(outfn)) || !extfn %in% extlst)
+      stop(extfn, " not supported")
+  }     
+
+  ## Get basename
+  outfn.base <- basename.NoExt(outfn)
+  extfn <- getext(outfn) 
+
+  ## Check if outfolder
   if ((is.na(extfn) || extfn=="NA") && dir.exists(outfn)) {
-    message("outfn is folder name... must be a file name")
+    message("outfn is a folder name... must be a file name")
     return(outfn)
   }
 
@@ -49,21 +69,6 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
       if (dir.exists(file.path(outfolder, dirname(outfn))))
         outfolder <- file.path(outfolder, dirname(outfn))
     }
-  }
-
-  ## Get basename 
-  outfn.base <- basename.NoExt(outfn)
-  extfn <- getext(outfn) 
-  if (is.null(ext)) {
-    if (!is.na(extfn) && extfn != "NA") {
-      ext <- extfn
-    } else {
-      stop("include ext")
-    }
-  } else {
-    if ((!is.na(extfn) && extfn != "NA") && ext != extfn)
-      message(paste0("ext (", ext, ") does not match file extension (", extfn, 
-		")... using ", ext))
   }
  
   ## Check outfn.pre
@@ -176,8 +181,7 @@ removecols <- function (x, vars) {
   x[,which(!names(x) %in% vars)]
 }
 
-
-DT_NAto0 <- function (DT, cols, changeto=NULL) {
+DT_NAto0 <- function (DT, cols, changeto=0) {
   ## DESCRIPTION: Change NA values to 0 values in data.table
 
   if (!any(class(DT) %in% "data.table")) DT <- setDT(DT)

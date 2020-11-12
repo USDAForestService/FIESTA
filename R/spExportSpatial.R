@@ -65,20 +65,27 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     
   ## Check out_layer
   ####################################################
-  if (is.null(out_layer))
-    out_layer <- basename.NoExt(out_dsn) 
-
+  #if (is.null(out_layer))
+   # out_layer <- basename.NoExt(out_dsn) 
 
   ## Write sf layer
   ########################################################
   if (out_fmt %in% c("sqlite", "gpkg")) {
     if (append_layer) overwrite_dsn <- FALSE
     gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-    if (is.na(getext(out_dsn))) out_dsn <- paste0(out_dsn, ".", out_fmt)
 
-    ## Test and get fileneam of SQLite database
+    if (!is.null(out_dsn) && is.na(getext(out_dsn))) 
+      out_dsn <- paste0(out_dsn, ".", out_fmt)
+
+    ## Test and get filename of SQLite database
     out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, showlist=FALSE,
 		createnew=FALSE)
+    if (is.null(out_dsn)) 
+      out_dsn <- "data"
+
+    ## Check out_layer
+    if (is.null(out_layer))
+      out_layer <- basename.NoExt(out_dsn) 
 
     if (!file.exists(out_dsn)) {
       ## Check if spatiaLite database
@@ -95,6 +102,10 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     if (append_layer) overwrite_dsn <- FALSE
     out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 
 		overwrite=overwrite_dsn, outfn.date=outfn.date, showlist=FALSE)
+
+    ## Check out_layer
+    if (is.null(out_layer))
+      out_layer <- basename.NoExt(out_dsn) 
 
     geofld <- attr(sfobj, "sf_column")
     sfobj <- sfobj[, c(names(sfobj)[!names(sfobj) %in% names(sfobj)[
@@ -121,6 +132,10 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
 		outfn.pre=outfn.pre, outfn.date=outfn.date, ext=out_fmt,
 		overwrite=overwrite_layer, append=append_layer)
     }
+
+    ## Check out_layer
+    if (is.null(out_layer))
+      out_layer <- basename.NoExt(out_dsn) 
 
     ## Truncate variable names to 10 characters or less
     sfobjdat <- FIESTA::trunc10shp(sfobj)

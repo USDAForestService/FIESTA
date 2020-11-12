@@ -440,7 +440,7 @@ rasterInfo <- function(srcfile) {
 	return(ri)
 }
 
-reprojectRaster <- function(srcfile, dstfile, t_srs, of=NULL, ot=NULL,
+reprojectRaster <- function(srcfile, dstfile, t_srs, s_srs=NULL, of=NULL, ot=NULL,
 							te=NULL, tr=NULL, r=NULL, 
 							dstnodata=NULL, co=NULL, addOptions=NULL) {
 
@@ -473,6 +473,9 @@ reprojectRaster <- function(srcfile, dstfile, t_srs, of=NULL, ot=NULL,
 
 
 	opt = c("-t_srs", t_srs)
+	if (!is.null(s_srs)) {
+		opt = c(opt, "-s_srs", s_srs)
+  	}  
 	if(!is.null(of)) {
 		opt = c(opt, "-of", as.character(of))
 	}
@@ -494,6 +497,8 @@ reprojectRaster <- function(srcfile, dstfile, t_srs, of=NULL, ot=NULL,
 	if(!is.null(co)) {
 		opt = c(opt, "-co", as.character(co))
 	}
+	opt = c(opt, "-overwrite")
+
 	opt = c(opt, addOptions)
 	#print(opt)
 	

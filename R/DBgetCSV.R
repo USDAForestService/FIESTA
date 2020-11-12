@@ -35,7 +35,23 @@ DBgetCSV <- function (DBtable, states=NULL, ZIP=TRUE, returnDT=FALSE,
         fn <- paste0(downloadfn, stabbr, "_", toupper(DBtable), ".csv")
         message(paste("downloading", DBtable, "for", stabbr, "..."))
       }
-      fread(fn, integer64="numeric")
+      tab <- tryCatch(
+			fread(fn, integer64="numeric"),
+		  	error=function(e) {
+				warning(basename(fn), " does not exist")
+  			return(NULL)
+             }
+      )
+      if (noIDate) {
+        cols <- names(tab)[unlist(lapply(tab, function(x) any(class(x) == "IDate")))]
+        tab[, (cols) := lapply(.SD, as.character), .SDcols=cols]
+        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE))
+          tab$MODIFIED_DATE <- as.character(tab$MODIFIED_DATE)
+      } else {
+        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE))
+          tab$MODIFIED_DATE <- as.IDate(tab$MODIFIED_DATE)
+      }
+      return(tab)
     }
 
   } else {
@@ -51,14 +67,34 @@ DBgetCSV <- function (DBtable, states=NULL, ZIP=TRUE, returnDT=FALSE,
 
       temp <- tempfile()
       tempdir <- tempdir()
-      utils::download.file(fn, temp, mode="wb", quiet=TRUE)
+      tab <- tryCatch(
+			utils::download.file(fn, temp, mode="wb", quiet=TRUE),
+			error=function(e) {
+			warning(basename(fn), " does not exist")
+  			return(NULL)
+             }
+      )
+      if (is.null(tab)) {
+        message(tab, " is not available")
+        return(NULL)
+      }
+
       filenm <- utils::unzip(temp, exdir=tempdir)
-      dat <- suppressWarnings(fread(filenm, integer64="numeric"))
+      tab <- suppressWarnings(fread(filenm, integer64="numeric"))
+      if (noIDate) {
+        cols <- names(tab)[unlist(lapply(tab, function(x) any(class(x) == "IDate")))]
+        tab[, (cols) := lapply(.SD, as.character), .SDcols=cols]
+        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE))
+          tab$MODIFIED_DATE <- as.character(tab$MODIFIED_DATE)
+      } else {
+        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE))
+          tab$MODIFIED_DATE <- as.IDate(tab$MODIFIED_DATE)
+      }
 
       unlink(temp)
       unlink(tempdir)
       file.remove(filenm)
-      return(dat)
+      return(tab)
     }
   }
 
@@ -68,16 +104,17 @@ DBgetCSV <- function (DBtable, states=NULL, ZIP=TRUE, returnDT=FALSE,
   if (is.null(stabbrs)) {
     csvtable <- gettab(DBtable=DBtable)
   } else {
-    csvtable <- do.call(rbind, lapply(stabbrs, gettab, DBtable))
+    csvtable <- tryCatch(
+      do.call(rbindlist, list(lapply(stabbrs, gettab, DBtable))),
+		error=function(e) {
+ 		message(e, "\n")
+		return(NULL)
+          }
+    )
   }
-
-  if (noIDate) {
-    cols <- names(csvtable)[!unlist(lapply(csvtable, function(x) any(class(x) == "IDate")))]
-    csvtable <- csvtable[, cols, with=FALSE]
-  }
-
+  if (is.null(csvtable)) return(NULL)
   if (!returnDT) csvtable <- data.frame(csvtable, stringsAsFactors=FALSE)
-
 
   return(csvtable)
 }
+

@@ -68,23 +68,22 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## Returns: data table with unitvar and area by estimation unit (unitvar)
   ##	 and areavar (default="ACRES")
   ###################################################################################
-  if (tabtype == "AREA" || sumunits) {
-    if (is.null(unitarea) || unitarea == 0) {
+  if (is.null(unitarea) || unitarea == 0) {   
+    if (tabtype == "AREA" || sumunits) {
       if (sumunits) {
         stop("need unitarea to combine estimation units")
       } else {
         stop("need unitarea to return acre estimates")
       }
     }
+    unitarea <- NULL
+  } else {
     unitvars <- c(unitvar, unitvar2)
     unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
 		unitvars=unitvars, areavar=areavar, gui=gui)
     unitarea <- unitdat$unitarea
     areavar <- unitdat$areavar
-  } else {
-    unitarea <- NULL
   }
-
  
   ###################################################################################
   ## CHECK STRATA
@@ -112,7 +111,7 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 		unitvar=unitvar, strlut=strlut, strvar=strvar, 
 		plotsampcnt=plotsampcnt, getprop=getprop)
 
-  if (tabtype == "AREA") {
+  if (!is.null(unitarea)) {
     returnlst$unitarea <- stratcheck$unitarea
     returnlst$areavar <- areavar
   }

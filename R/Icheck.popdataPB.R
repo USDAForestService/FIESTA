@@ -1,6 +1,7 @@
 check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL, 
 	plt=NULL, pltassgn=NULL, plotid="plot_id", pntid="dot_cnt",
- 	puniqueid="CN", pltassgnid="CN", plt.nonsamp.filter=NULL, tabtype="PCT",
+ 	puniqueid="CN", pltassgnid="CN", plt.nonsamp.filter=NULL, 
+	plt.filter=NULL, pnt.nonsamp.filter=NULL, tabtype="PCT",
 	unitvar=NULL, unitvar2=NULL, auxvars=NULL, unitcombine=FALSE, 
 	strata=FALSE, strvar=NULL, stratcombine=TRUE, pvars2keep=NULL){
 
@@ -30,13 +31,8 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ## - Check unique identifier of plot
   ## - Check class of unique identifier of plot and pnt tables
   ## - If no plot table, create one from pnt table's unique identifier 
-  ## - Apply plot filters
-  ## Check table parameters: allin1, savedata, addtitle, returntitle, add0, rawdata:
-  ## - If allin1=TRUE, puts estimate (% sample error) in each cell
-  ## - If savedata=TRUE, saves tables to outfolder
-  ## - If addtitle=TRUE, adds title(s) to saved tables
-  ## - If returntitle, saves title(s) of tables
-  ## - If rawdata=TRUE, generates and saves rawdata variables for estimates
+  ## - Apply plot filters (plt.filter)
+  ## Apply point nonsample filter (pnt.nonsample.filter)
   ###################################################################################
 
   ## Set global variables
@@ -330,11 +326,33 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
         pltassgnx[[fac]] <- factor(pltassgnx[[fac]], levels=fac.levels) 
       }
     }
-  }  
+  } 
+
+
+  ##############################################################################
+  ## Apply filters
+  ##############################################################################
+
+  ## plt.filter to plt table
+  PBf <- datFilter(x=PBx, xfilter=plt.filter, title.filter="plt filter?",
+		gui=gui, filternm="plt.filter", stopifnull=TRUE)$xf
+  if (is.null(PBf)) {
+    message(paste(plt.filter, "removed all records"))
+    return(NULL)
+  }
+
+  ## pnt.nonsamp.filter
+  PBf <- FIESTA::datFilter(PBf, pnt.nonsamp.filter, title.filter="pnt.nonsample filter",
+			filternm="pnt.nonsamp.filter")$xf
+  if (is.null(PBf)) {
+    message(paste(pnt.nonsamp.filter, "removed all records"))
+    return(NULL)
+  }
+ 
 
   ## Set up list of variables to return
   ######################################################################################
-  returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
+  returnlst <- list(PBx=PBf, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
 	pltassgnid=pltassgnid, unitvar=unitvar, unitvar2=unitvar2, unitcombine=unitcombine, 
 	tabtype=tabtype, strata=strata, strvar=strvar, stratcombine=stratcombine, 
 	plotsampcnt=plotsampcnt, getprop=getprop)

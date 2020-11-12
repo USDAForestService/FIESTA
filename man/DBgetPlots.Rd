@@ -14,7 +14,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	isseed = FALSE, isveg = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
 	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
 	subcycle99 = FALSE, intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, 
-	alltFilter = NULL, savedata = FALSE, parameters = FALSE, outfolder = NULL, 
+	alltFilter = NULL, savedata = FALSE, saveqry = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite = FALSE, savePOP = FALSE)
 }
@@ -86,7 +86,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
   \item{savedata}{ Logical. If TRUE, saves data to outfolder as comma-delimited file (*.csv). 
 	No objects are returned. If FALSE, the data are saved as R objects and returned to user. 
 	See details for caveats. }
-  \item{parameters}{ Logical. If TRUE, saves file of input parameters to outfolder. }
+  \item{saveqry}{ Logical. If TRUE, saves queries to outfolder (by state). }
   \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE or parameters=TRUE 
 	or isshp=TRUE, outfolder is the working directory. }
   \item{out_fmt}{ String. File format for output ('csv', 'sqlite','gpkg', 'gdb').

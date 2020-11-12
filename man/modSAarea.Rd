@@ -7,7 +7,7 @@
 	Generates small area estimates by domain (and estimation unit). 	 
 }
 \usage{    
-modSAarea(SApopdat = NULL, SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
+modSAarea(SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
 	seed = NULL, dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
 	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", measCur = FALSE, 
 	measEndyr = NULL, invyrs = NULL, ACI=FALSE, adj = "plot", SApackage = "JoSAE", 
@@ -22,11 +22,10 @@ modSAarea(SApopdat = NULL, SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = 
 	multest_dsn = NULL, multest_layer = NULL, multest.append = FALSE, 
 	multest.AOIonly = FALSE, outfn.date=FALSE, overwrite = FALSE, addtitle = TRUE, 
 	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.dunitvar = NULL, 
-	title.filter = NULL)
+	title.filter = NULL, SApopdat = NULL, SAdata = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
   \item{SAdomsdf}{ DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
 	with attributes from smallbnd to add to estimation table. }
   \item{cond}{ DF/DT or comma-delimited file (*.csv). The condition-level table with one 
@@ -128,6 +127,8 @@ modSAarea(SApopdat = NULL, SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = 
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
+  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
+  \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

@@ -60,6 +60,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
 #		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE, 
 #		savedata=FALSE)
 
+
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################

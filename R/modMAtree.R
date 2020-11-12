@@ -13,7 +13,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
 	addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
 	title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, 
-	MAmodeldat=NULL, MApopdat=NULL, gui=FALSE){
+	MApopdat=NULL, MAdata=NULL, gui=FALSE){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -21,7 +21,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   ######################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(MApopdat)) gui <- TRUE 
+  if (nargs() == 0 || is.null(tree) && is.null(MApopdat) && is.null(MAdata)) gui <- TRUE 
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
@@ -58,7 +58,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
 	minplotnum.unit=minplotnum.unit, unitlut=unitlut, npixelvar=npixelvar, 
 	prednames=prednames, predfac=predfac, PSstrvar=PSstrvar, 
-	stratcombine=stratcombine, MAmodeldat=MAmodeldat, gui=gui)
+	stratcombine=stratcombine, MAdata=MAdata, gui=gui)
   } else {
     returnMApopdat <- FALSE
     if (!is.list(MApopdat))
@@ -72,6 +72,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
       stop("invalid MApopdat... missing items: ", paste(items.miss, collapse=", "))
     }   
   }	
+
   if (is.null(MApopdat)) return(NULL)	
   condx <- MApopdat$condx
   pltcondx <- MApopdat$pltcondx

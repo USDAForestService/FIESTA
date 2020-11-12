@@ -24,9 +24,9 @@ datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE,
   \item{grpvar}{ String. Name of the variable for grouping. }
   \item{errbars}{ Logical. If TRUE, error bars are added to bar plot (sevar or psevar must 
 	also be populated). }
-  \item{x.order}{ String or Vector. Define order of xvar: descending ("DESC") or 
-	ascending ("ASC"). Use vector for more than one xvar. If NULL, the default order of
-	table is used. }
+  \item{x.order}{ String or Vector. Define order of xvar based on y values: 
+	descending ("DESC") or ascending ("ASC") or vector of row numbers. 
+	If NULL, the order of the input table is used. }
   \item{sevar}{ String. Name of the variable with standard error values. }
   \item{psevar}{ String. Name of the variable with percent standard error. }
   \item{device.type}{ String. Type(s) of device for plotting ("dev.new", "jpg", "pdf", or "ps"). }
@@ -63,8 +63,9 @@ datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE,
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
-  \item{...}{ list of additional arguments to pass to barplot(); names of the list are used 
-	as argument names. }
+  \item{...}{ additional arguments to pass to barplot(), including a list of 
+	arguments for legend() arguments (e.g., args.legend=list(x="topleft", "bty="n"), 
+	for moving legend to topleft and removing box around legend). }
 
 }
 \details{

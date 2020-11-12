@@ -970,8 +970,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
 
-    plot(sf::st_geometry(bndx), border="grey")
-    plot(sf::st_geometry(xypltx), add=TRUE, col="blue", cex=.25)
+    plot(sf::st_geometry(xypltx), col="blue", cex=.25)
+    plot(st_geometry(bndx), add=TRUE, border="black", lwd=0.75)
     par(mar=mar)
   }
 

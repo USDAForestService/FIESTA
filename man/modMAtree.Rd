@@ -25,7 +25,7 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, addtitle = TRUE, 
 	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
 	title.colvar = NULL, title.unitvar = NULL, title.estvar = NULL, 
-	title.filter = NULL, MAmodeldat = NULL, MApopdat = NULL, gui = FALSE)
+	title.filter = NULL, MApopdat = NULL, MAdata = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -187,8 +187,8 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 	name for the estimate variable. If NULL, title.estvar = estvar.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
-  \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
+  \item{MAdata}{ List. Modeldat output from FIESTA::anMAdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

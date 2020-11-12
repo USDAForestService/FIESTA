@@ -290,6 +290,7 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
 
     if (esttype %in% c("TREE", "RATIO")) {
       pretitle <- paste0(pretitle, "_", estvarn)
+
       if (esttype == "RATIO") {
         if (is.null(estvard)) estvard <- "ACRE"
         pretitle <- paste0(pretitle, "_", estvard)
@@ -315,7 +316,19 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
   } else {
     titlelst <- list(title.estpse=title.estpse)
   }
-  titlelst$title.estvar <- title.estvarn
+
+  if (esttype %in% c("TREE", "RATIO")) {
+    titlelst$title.yvar <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, 
+		"ESTTITLE1"]
+    titlelst$title.estvar <- title.estvarn
+
+    if (esttype == "RATIO") {
+      titlelst$title.yvard <- ref_estvar[ref_estvar$ESTTITLE == title.estvard, 
+		"ESTTITLE1"]
+      titlelst$title.estvard <- title.estvard
+    }
+  }
+
 
   if (!is.null(title.unitvar)) 
     titlelst$title.unitvar <- title.unitvar

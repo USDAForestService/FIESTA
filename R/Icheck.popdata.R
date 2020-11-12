@@ -134,7 +134,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## Check logical parameters: unitcombine, strata, ACI
   ###################################################################################
 
-
   ## Check ACI (if ACI=FALSE, need to filter COND_STATUS_CD == 1)
   ###################################################################################
   ACI <- FIESTA::pcheck.logical(ACI, varnm="ACI", title="ACI?", first="NO", gui=gui)

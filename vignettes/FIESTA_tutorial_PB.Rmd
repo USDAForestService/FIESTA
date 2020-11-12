@@ -1082,20 +1082,63 @@ cover12ps$pse
 
 ```
 
+## Barplot of land cover, Time 1
+##############################################################################################
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 names11 <- names(icepctcover)[endsWith(names(icepctcover), "11")]
 pltpct1 <- modPB(pltpct=icepctcover, pltpctvars=names11, title.rowvar="Land cover (2011)",
     rawdata=TRUE)
 x <- pltpct1$est
+
+
+## Create barplot with estimates and error bars (use Percent Sampling Error column)
+datBarplot(x=x, xvar="Land cover (2011)", yvar="Estimate", errbars=TRUE, psevar="Percent Sampling Error")
+
+## You can use data from the raw tables as well
 x2 <- pltpct1$raw$unit.rowest
-datBarplot(x=x, xvar="Land cover (2011)", yvar="Estimate")
-datBarplot(x=x2, xvar="Land cover (2011)", yvar="est")
 
-datBarplot(x=x2, xvar="Land cover (2011)", yvar="est", ylim=c(0,30), xlabel="Land cover categories",
-            ylabel="Percent", errbars=TRUE, sevar="est.se")
-            
+## Create barplot with estimates and error bars (using se column) and add labels and titles
+datBarplot(x=x2, xvar="Land cover (2011)", yvar="est", errbars=TRUE, sevar="est.se",
+  ylim=c(0,30), ylabel="Percent of land", main="Percent cover at Time 1 (2011)")
 
-## Ratio ##
+
+## Barplot of land cover, Time 1 and Time 2
+##############################################################################################
+## Let's look at estimates at Time 1 compared to estimates at Time 2
+# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
+cover1 <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
+		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)")
+names(cover1)
+cover1 <- cover1$est
+
+# Percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
+cover2 <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
+		rowvar="cover_2", rowlut=icecover_2, rawdata=TRUE, title.rowvar="Land Cover (2014)")
+names(cover2)
+cover2 <- cover2$est
+
+## First, let's change the column names and merge the tables to 1 table (removing Uninterpretable class)
+setnames(cover1, c("Land Cover", "est11", "pse11"))
+setnames(cover2, c("Land Cover", "est14", "pse14"))
+cover <- merge(cover1, cover2, by="Land Cover")
+
+## Next, we will remove the Total row and reorder
+cover <- cover[c(6,4,3,1,2,7),]
+
+## Create barplot with estimates and error bars (using pse columns)
+datBarplot(x=cover, xvar="Land Cover", yvar=c("est11", "est14"), errbars=TRUE, psevar=c("pse11", "pse14"),
+  ylim=c(0,30), ylabel="Percent of land", main="Percent cover at Time 1 (2011) and Time 2 (2014)")
+  
+
+## Let's add a legend to the bar plot, specifying the location, the text, and no surrounding box
+datBarplot(x=cover, xvar="Land Cover", yvar=c("est11", "est14"), errbars=TRUE, psevar=c("pse11", "pse14"),
+  ylim=c(0,30), ylabel="Percent of land", main="Percent cover at Time 1 (2011) and Time 2 (2014)", addlegend=TRUE,
+  args.legend=list(x="topleft", legend=c("2011", "2014"), bty="n"))
+  
+
+
+
+## Ratio ## - Transitional change within category
 # Percent land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
 cover1_2.rat <- modPB(pnt=icepnt, puniqueid="plot_id", pntid="dot_cnt",
 		ratio=TRUE, rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
@@ -1106,8 +1149,17 @@ x <- cover1_2.rat$raw$unit.grpest
 datBarStacked(x=x, main.attribute="Land cover (2011)", sub.attribute="Land cover (2014)",
       response="est", xlabel="Land Cover (2011)", legend.title="Land Cover (2014)")
       
+ 
+## Now, let's only look at change
+x2 <- x[x$'Land cover (2011)' != x$'Land cover (2014)',]
+datBarStacked(x=x2, main.attribute="Land cover (2011)", sub.attribute="Land cover (2014)",
+      response="est", xlabel="Land Cover (2011)", legend.title="Land Cover (2014)",
+      main.order=rev(c("Tree", "Shrub", "OtherVegetation", "Impervious", "Barren", "Water")))
+    
       
-## Gain / Loss ##
+      
+      
+## Gain / Loss ## - The difference in proportion between Time 1 and Time 2
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Return gain/loss estimates for each category in rawdata tables
 cover12b <- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",

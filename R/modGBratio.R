@@ -24,7 +24,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   ##################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(GBpopdat)) gui <- TRUE 
+  if (nargs() == 0 || is.null(tree) && is.null(GBpopdat) && is.null(GBdata)) gui <- TRUE 
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=rowvar.filter=colvar.filter <- NULL

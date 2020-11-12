@@ -21,7 +21,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   ###################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(cond) && is.null(GBpopdat)) gui <- TRUE 
+  if (nargs() == 0 || is.null(cond) && is.null(GBpopdat) && is.null(GBdata)) gui <- TRUE 
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL

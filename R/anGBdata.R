@@ -60,16 +60,6 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
       out_dsn <- DBcreateSQLite(SQLitefn=out_dsn, gpkg=gpkg, outfolder=outfolder, 
 			overwrite=overwrite, returnpath=FALSE)
     }	
-
-    if (savesteps) {
-      stepfolder <- file.path(outfolder, "SAdoms_steps")
-      if (!dir.exists(stepfolder)) dir.create(stepfolder)
-      if (out_fmt == "shp") {
-        step_dsn <- NULL
-      } else {
-        step_dsn <- paste0("SAdoms_steps.", out_fmt)
-      }
-    }
   }
 
 

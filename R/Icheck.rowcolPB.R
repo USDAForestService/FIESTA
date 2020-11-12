@@ -75,7 +75,6 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   col.add0 <- FIESTA::pcheck.logical(col.add0, varnm="col.add0", 
 		title="Add 0 for column?", first="NO", gui=gui)
 
-
   ##############################################################
   ### ROW VARIABLE
   ##############################################################
@@ -109,9 +108,9 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
     ##################################################################################
     ## Check for lookup tables
     ##################################################################################
-
     ## Check rowlut
     if (!is.null(rowlut)) {
+
       if (is.vector(rowlut) && length(rowlut) > 1) {
         rowlut <- data.table(rowlut)
         setnames(rowlut, rowvar)
@@ -123,7 +122,6 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
     ## domlut defines columns in cond to use for codes, code names, and table titles
     ##################################################################################
     if (!is.null(domlut)) {
- 
       if (!rowvar %in% domvarlst) stop(paste(rowvar, "not in domlut"))
       if (rowvar %in% domlut[["DOMCODE"]]) {
         row.orderby <- rowvar
@@ -143,7 +141,6 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
         } 
       }
     } else if (rowvar %in% names(PBx)) {
-
       if (!is.null(rowlut) &&  all(names(rowlut) %in% names(PBx))) {
         if (is.null(row.orderby) || row.orderby == "NONE") {
           message("row.orderby is not defined... ordering by rowvar")
@@ -279,7 +276,6 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   domainlst <- unique(c(domainlst, rowvar, colvar))
   domainlst <- domainlst[domainlst != "NONE"]
 
-
   ############################################################################
   ## Get uniquerow and uniquecol
   ############################################################################
@@ -323,6 +319,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
       uniquerow <- rowlut
     }
   }
+
   if (colvar != "NONE") {
     ## Filter photo data - columns
     if (is.factor(PBx[[colvar]]))
@@ -377,11 +374,11 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   if (!is.null(uniquecol)) 
     uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=unique(uniquecol[[colvar]]))
     
- 
   returnlst <- list(PBx=PBx, uniquerow=uniquerow, uniquecol=uniquecol, 
 	domainlst=domainlst, rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, 
 	col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0, 
 	title.rowvar=title.rowvar, title.colvar=title.colvar, title.rowgrp=title.rowgrp)
+
   if (ratio) returnlst$PBx.d <- PBx.d
 
   return(returnlst)

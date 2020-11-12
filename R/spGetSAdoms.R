@@ -137,20 +137,21 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   smallbnd.unique <- pcheck.varchar(var2check=smallbnd.unique, varnm="smallbnd.unique", 
 		gui=gui, checklst=smallbndnmlst, caption="Small area attribute", 
 		warn=paste(smallbnd.unique, "not in smallbnd"), stopifnull=FALSE)
-  if (is.null(smallbnd.unique)) {
-    smallbndx$SMALLAREA <- "SMALLAREA"
-    smallbnd.unique <- "SMALLAREA"
-  } else {
-    if (any(table(smallbndx[[smallbnd.unique]])) > 1) 
-      message("smallbnd.unique is not unique")
-  }
-
-  smallbndnmlst <- smallbndnmlst[smallbndnmlst != smallbnd.unique]
+  if (!is.null(smallbnd.unique))
+    smallbndnmlst <- smallbndnmlst[smallbndnmlst != smallbnd.unique]
   smallbnd.domain <- pcheck.varchar(var2check=smallbnd.domain, varnm="smallbnd.domain", 
 		gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
 		stopifnull=FALSE, stopifinvalid=FALSE)
-  if (is.null(smallbnd.domain)) 
+  if (all(is.null(smallbnd.unique), is.null(smallbnd.domain))) {
+    smallbndx$SMALLAREA <- "SMALLAREA"
+    smallbnd.unique <- "SMALLAREA"
+  } else if (is.null(smallbnd.unique)) {
+    smallbnd.unique <- smallbnd.domain
+  } else {
     smallbnd.domain <- smallbnd.unique
+  }    
+  if (any(table(smallbndx[[smallbnd.unique]])) > 1) 
+    message("smallbnd.unique is not unique")
 
 
   ## Apply smallbnd.filter

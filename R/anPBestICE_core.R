@@ -1,9 +1,11 @@
-anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltassgn=NULL, puniqueid="CN", 
-	plotid="plot_id", pntid="dot_id", tabtype="PCT", sumunits=FALSE, strata=FALSE, 
-	stratalut=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, unitcombine=FALSE, 
-	strvar=NULL, getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, lutfolder="_luts", 
-	savedata=TRUE, returntitle=TRUE, outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, 
-	rawdata=TRUE, pnt1=FALSE, estname=NULL, stabbr=NULL){
+anPBestICE_core <- function(ice.dotsfn, ice.plotsfn=NULL, estunitnm, T1, T2, 
+	plotid="plot_id", pntid="dot_cnt", pltassgn=NULL, pltassgnid=NULL, 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	unitcombine=FALSE, strata=FALSE, stratalut=NULL, strvar=NULL,  
+	getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, tabtype="PCT", 
+	sumunits=FALSE, rawdata=TRUE, returntitle=TRUE, outfolder=NULL, 
+	outfn.date=TRUE, overwrite=FALSE, subunitnm=NULL, estabbr=NULL, 
+	pnt1=FALSE, ...){
 
 
   ##################################################################
@@ -15,620 +17,422 @@ anPBestICE_core <- function(icedat, state=NULL, T1, T2, pltassgn=NULL, puniqueid
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- FALSE
+  savedata <- TRUE
 
-  ## Get state abbreviation 
-  state <- pcheck.states(state)
 
-  ## Get state abbreviation 
-  ST <- pcheck.states(state, statereturn="ABBR")
-  if (is.null(ST)) {
-    if (is.null(stabbr)) {
-      stop("state is not in ref_statecd... include stabbr")
-    } else {
-      ST <- stabbr
-    }
-  }
+  ## Check outfolder
+  ###########################################################
+  outfolder <- pcheck.outfolder(outfolder)
+  outfolder <- paste0(outfolder, "/estimates")
+  if (!dir.exists(outfolder)) dir.create(outfolder)
+
+  ## Create outfn.pre
+  ###########################################################
+  if (is.null(estabbr)) estabbr <- estunitnm
+  outfn.pre <- ifelse(!is.null(subunitnm), 
+		paste(estabbr, subunitnm, sep="_"), estabbr)
+
+
+  ## Generate title.ref
+  ###########################################################
+  title.ref <- paste0(estunitnm, paste0(", ", T1, "-", T2))
+  if (pnt1) title.ref <- paste(title.ref, "- 1pt")
 
 
   #########################################################################
-  ## IMPORT NAIP SCHEDULE AND GENERATE title.ref
+  ## Get ICE data 
   ##################################################################
-  title.ref <- paste(state, paste0(T1, "-", T2))
-  if (pnt1) title.ref <- paste(title.ref, "- 1pt")
-  if (!is.null(estname)) title.ref <- paste(title.ref, estname, sep=" - ")
+  icedat <- anPBestICE_data(ice.dotsfn, plotid="plot_id", pntid="dot_cnt", 
+			T1=T1, T2=T2, appendluts=TRUE, ...)
+  names(icedat)
+  ice.dots <- icedat$ice.dots
+  plotid <- icedat$plotid
+  pntid <- icedat$pntid
+  domlut <- icedat$domlut
+  changelut <- icedat$changelut
+  coverlut <- icedat$coverlut
+  uselut <- icedat$uselut
+  agentlut <- icedat$agentlut
+  domlut <- icedat$domlut
 
-  areavar <- "ACRES"
-  oldstates <- c("VT", "NH", "UT", "NV", "NE", "NY", "NJ", "MD", "OH", "WI")
-  oldstates <- {}
-  coverlutfn <- ifelse(ST %in% oldstates, "cover_LUT_old", "cover_LUT")
-
-  coverlutfn <- "cover_LUT"
-  coverlut <- paste0(lutfolder, "/", coverlutfn, ".csv")
-  coverlut <- data.table::fread(coverlut)
-
-  uselutfn <- ifelse(ST %in% oldstates, "use_LUT_old", "use_LUT")
-  uselutfn <- "use_LUT"
-  uselut <- paste0(lutfolder, "/", uselutfn, ".csv")
-  uselut <- data.table::fread(uselut)
-
-  chgaglutfn <- ifelse(ST %in% oldstates, "chg_ag_2_LUT_old", "chg_ag_2_LUT")
-  chgaglutfn <- "chg_ag_2_LUT"
-  chgaglut <- paste0(lutfolder, "/", chgaglutfn, ".csv")
-  chgaglut <- data.table::fread(chgaglut)
-
-  if (!file.exists(outfolder)) dir.create(outfolder)
-  outfolder <- pcheck.outfolder(outfolder)
+  ## Check data in changelut
+  if (!is.null(changelut)) {
+    agent_cols <- c("chg_ag_2_GRP", "chg_ag_2_GRP_nm", "change_pnt")
+    if (!all(agent_cols %in% names(agentlut))) {     
+      miss <- agent_cols[!agent_cols %in% names(agentlut)]
+      message("missing columns in agentlut: ", toString(miss))
+    }
+  }
+  ## Check data in coverlut
+  if (!is.null(coverlut)) {
+    cover_cols <- c("cover", "cover_nm", "cover_GRP", "cover_GRP_nm",
+		"cover_GRP2", "cover_GRP2_nm")
+    if (!all(cover_cols %in% names(coverlut))) {     
+      miss <- cover_cols[!cover_cols %in% names(coverlut)]
+      message("missing columns in coverlut: ", toString(miss))
+    }
+  }
+  ## Check data in uselut
+  if (!is.null(uselut)) {
+    use_cols <- c("use", "use_nm", "use_FOR", "use_FOR_nm")
+    if (!all(use_cols %in% names(uselut))) {     
+      miss <- use_cols[!use_cols %in% names(uselut)]
+      message("missing columns in uselut: ", toString(miss))
+    }
+  }
+  ## Check other columns in ice.dots
+  other_cols <- c("use_1_2", "cover_1_2", "use_1_2_FOR")
+  if (!all(other_cols %in% names(ice.dots))) {     
+    miss <- other_cols[!other_cols %in% names(ice.dots)]
+    message("missing columns in ice.dots: ", toString(miss))
+  }
+  
+  #########################################################################
+  ## Get population data
+  ##################################################################
+  PBpopdat <- FIESTA::modPBpop(pnt=ice.dots, plt=ice.plotsfn, plotid=plotid, pntid=pntid, 
+        		puniqueid=plotid, pltassgn=pltassgn, pltassgnid=pltassgnid,
+			unitarea=unitarea, unitcombine=unitcombine, strata=strata, 
+			strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
+			stratcombine=stratcombine, sumunits=sumunits)
+  names(PBpopdat)
 
 
   ###############################################################################
-  ## 01. Estimates of change_pnt on all lands; Vermont 2012-2014
+  ## 01. Estimates of change_pnt on all lands
   ## Percent changed.
   ###############################################################################
+  outfn.pre2 <- paste0("01_", outfn.pre)
   rowvar <- "change_pnt"
-  outfn.pre <- ifelse(pnt1, paste("01", ST, "1pt", sep="_"), paste("01", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  est.change_pnt <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
-	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	sumunits=sumunits, stabbr=stabbr)
-  est.change_pnt
+  est.change_pnt <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, sumunits=sumunits, domlut=domlut, 
+	savedata=savedata, outfolder=outfolder, outfn.date=outfn.date, 
+	overwrite=overwrite, outfn.pre=outfn.pre2, rawdata=rawdata, 
+	title.ref=title.ref, returntitle=returntitle)
 
 
   ###############################################################################
-  ## 02. Estimates of chg_ag_2_NEW on all lands; Vermont 2012-2014
-  ## Percent changed by change agent
+  ## 02. Estimates of chg_ag_2_GRP on all lands
+  ## Percent change by change agent
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "chg_ag_2_NEWGRP", "chg_ag_2_GRP")
+  outfn.pre2 <- paste0("02_", outfn.pre)
+  rowvar <- "chg_ag_2_GRP"
   rowvarnm <- paste(rowvar, "nm", sep="_")
-  rowlut <- unique(chgaglut[!get(rowvar) %in% c(99), c(rowvar, rowvarnm), with=FALSE])
-  rowlut <- rowlut[rowlut[[rowvar]] != 0,]
+  rowlut <- unique(agentlut[!agentlut[[rowvar]] %in% c(99,0), c(rowvar, rowvarnm)])
   pnt.filter <- "change_pnt == 1"
-  outfn.pre <- ifelse(pnt1, paste("02", ST, "1pt", sep="_"), paste("02", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  est.chg_ag_2grp <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata,
- 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
-	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, pnt.filter=pnt.filter, 
-	row.add0=TRUE, rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, 
-	stabbr=stabbr)
-  est.chg_ag_2grp
+  est.chg_ag_2grp <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvarnm, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
+  	pnt.filter <- pnt.filter, sumunits=sumunits, 
+	savedata=savedata, outfolder=outfolder, outfn.date=outfn.date, 
+	overwrite=overwrite, outfn.pre=outfn.pre2, rawdata=rawdata, 
+	title.ref=title.ref, returntitle=returntitle)
+  #est.chg_ag_2grp$est
 
  
   ###############################################################################
-  ## 03. Estimates of land use at Time 1 on all lands; Vermont 2012-2014
+  ## 03. Estimates of land use at Time 1 on all lands
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "use_1_NEW", "use_1")
-
+  outfn.pre2 <- paste0("03_", outfn.pre)
+  rowvar <- "use_1"
   rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(uselut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm), 
-			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("03", ST, "1pt", sep="_"), paste("03", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
+  rowvarnm <- paste(rowvar, "nm", sep="_")
+  rowlut <- unique(uselut[!uselut[[rowvar2]] %in% c(-1,0,999), 
+			c(rowvar2, paste(rowvar2, "nm", sep="_")), with=FALSE])
+  setnames(rowlut, c(rowvar, rowvarnm))
 
-  use_1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
-	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, 
-	rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
-  #use_1
+  use_1 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #use_1$est
 
 
   ###############################################################################
-  ## 04. Estimates of land use at Time 2 on all lands; Vermont 2012-2014
+  ## 04. Estimates of land use at Time 2 on all lands
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "use_2_NEW", "use_2")
-
+  outfn.pre2 <- paste0("04_", outfn.pre)
+  rowvar <- "use_2"
   rowvar2 <- sub("_2", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(uselut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm), 
-			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("04", ST, "1pt", sep="_"), paste("04", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
+  rowvarnm <- paste(rowvar, "nm", sep="_")
+  rowlut <- unique(uselut[!uselut[[rowvar2]] %in% c(-1,0,999), 
+			c(rowvar2, paste(rowvar2, "nm", sep="_")), with=FALSE])
+  setnames(rowlut, c(rowvar, rowvarnm))
 
-  use_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre, 
-	rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, rowlut=rowlut, 
-	returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
-  #use_2
+  use_2 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #use_2$est
 
 
   ###############################################################################
-  ## 05. Estimates of land cover at Time 1 all lands; Vermont 2012-2014
+  ## 05. Estimates of land cover at Time 1 all lands
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "cover_1_NEW", "cover_1")
-
+  outfn.pre2 <- paste0("05_", outfn.pre)
+  rowvar <- "cover_1"
   rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(coverlut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 	with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("05", ST, "1pt", sep="_"), paste("05", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
+  rowvarnm <- paste(rowvar, "nm", sep="_")
+  rowlut <- unique(coverlut[!coverlut[[rowvar2]] %in% c(-1,0,999), 
+			c(rowvar2, paste(rowvar2, "nm", sep="_"))])
+  setnames(rowlut, c(rowvar, rowvarnm))
 
-  cover_1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, 
-	outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, 
-	rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
-  #cover_1
+  cover_1 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
 
 
   ###############################################################################
-  ## 06. Estimates of land cover at Time 2 on all lands; Vermont 2012-2014
+  ## 06. Estimates of land cover at Time 2 on all lands
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "cover_2_NEW", "cover_2")
-
+  outfn.pre2 <- paste0("06_", outfn.pre)
+  rowvar <- "cover_2"
   rowvar2 <- sub("_2", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(coverlut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 	with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("06", ST, "1pt", sep="_"), paste("06", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
+  rowvarnm <- paste(rowvar, "nm", sep="_")
+  rowlut <- unique(coverlut[!coverlut[[rowvar2]] %in% c(-1,0,999), 
+			c(rowvar2, paste(rowvar2, "nm", sep="_"))])
+  setnames(rowlut, c(rowvar, rowvarnm))
 
-  cover_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, row.add0=TRUE, 
-	rowlut=rowlut, returntitle=returntitle, sumunits=sumunits, stabbr=stabbr)
-  #cover_2
+  cover_2 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
 
 
   ###############################################################################
   ## 07. Estimates of use_2_FOR by use_1_FOR
   ## Percent of forest land use change.
   ###############################################################################
+  outfn.pre2 <- paste0("07_", outfn.pre)
   rowvar <- "use_1_FOR"  
   colvar <- "use_2_FOR" 
-  outfn.pre <- ifelse(pnt1, paste("07", ST, "1pt", sep="_"), paste("07", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
 
-  use_1_2_FOR <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,  
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.date=outfn.date, 
-	overwrite=overwrite, outfn.pre=outfn.pre, rawdata=rawdata, title.ref=title.ref, 
-	returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, gainloss=TRUE, 
-	sumunits=sumunits, stabbr=stabbr)
-  use_1_2_FOR
+  use_1_2_FOR <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #use_1_2_FOR$est
+
 
   ###############################################################################
-  ## 08. Estimates of cover_2_NEWGRP by cover_1_NEWGRP
+  ## 08. Estimates of cover_2_GRP by cover_1_GRP
   ## Percent of land cover change where land use was forest at Time 1.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "cover_1_NEWGRP", "cover_1_GRP")
-  colvar <- ifelse(ST %in% oldstates, "cover_2_NEWGRP", "cover_2_GRP")
-  #pnt.filter="use_1_FOR == 1"
-  pnt.filter <- NULL
-  outfn.pre <- ifelse(pnt1, paste("08", ST, "1pt", sep="_"), paste("08", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
+  outfn.pre2 <- paste0("08_", outfn.pre)
+  rowvar <- "cover_1_GRP"
+  colvar <- "cover_2_GRP"
 
-  rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(coverlut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-
-  colvar2 <- sub("_2", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(coverlut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-
-  cover_1_2_NEWGRP <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, pnt.filter=pnt.filter, 
-	lutfolder=lutfolder, savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
-	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, 
-	returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, gainloss=TRUE, 
-	rowlut=rowlut, collut=collut, sumunits=sumunits, stabbr=stabbr)
-  #cover_1_2_NEWGRP
-
+  cover_1_2_GRP <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle,
+	gainloss=TRUE)
+  #cover_1_2_GRP$est
 
 
   ###############################################################################
-  ## 09. Estimates of use_2_NEW by use_1_NEW
+  ## 09. Estimates of use_2 by use_1
   ## Percent of land use change from Time 1 to Time 2.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "use_1_NEW", "use_1")
-  colvar <- ifelse(ST %in% oldstates, "use_2_NEW", "use_2")
+  outfn.pre2 <- paste0("09_", outfn.pre)
+  rowvar <- "use_1"
+  colvar <- "use_2"
 
-  rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(uselut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-
-  colvar2 <- sub("_2", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(uselut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("09", ST, "1pt", sep="_"), paste("09", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  use_1_2_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,  
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
-	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, 
-	returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, gainloss=TRUE, 
-	rowlut=rowlut, collut=collut, sumunits=sumunits, stabbr=stabbr)
-  #use_1_2_NEW
+  use_1_2 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
+	gainloss=TRUE)
+  #use_1_2$est
 
 
   ###############################################################################
-  ## 10. Estimates of cover_2_NEW by cover_1_NEW
+  ## 10. Estimates of cover_2 by cover_1
   ## Percent of land cover change from Time 1 to Time 2.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "cover_1_NEW", "cover_1")
-  colvar <- ifelse(ST %in% oldstates, "cover_2_NEW", "cover_2")
+  outfn.pre2 <- paste0("10_", outfn.pre)
+  rowvar <- "cover_1"
+  colvar <- "cover_2"
 
-  rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(coverlut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-
-  colvar2 <- sub("_2", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(coverlut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("10", ST, "1pt", sep="_"), paste("10", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  cover_1_2_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state,  
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
-	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, 
-	title.ref=title.ref, returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, 
-	gainloss=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, stabbr=stabbr)
-  #cover_1_2_NEW
+  cover_1_2 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
+	gainloss=TRUE)
+  #cover_1_2$est
 
 
   ###############################################################################
-  ## 11. Estimates of cover_1_NEW by use_1_NEW
+  ## 11. Estimates of cover_1 by use_1
   ## Percent of land cover by land use at Time 1.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "use_1_NEW", "use_1")
-  colvar <- ifelse(ST %in% oldstates, "cover_1_NEW", "cover_1")
+  outfn.pre2 <- paste0("11_", outfn.pre)
+  rowvar <- "use_1"
+  colvar <- "cover_1"
 
-  rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(uselut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-
-  colvar2 <- sub("_1", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(coverlut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("11", ST, "1pt", sep="_"), paste("11", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  use_1_cover_1_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, 
-	outfn.date=outfn.date, overwrite=overwrite, rawdata=rawdata, 
-	title.ref=title.ref, returntitle=returntitle, row.add0=TRUE, col.add0=TRUE, 
-	rowlut=rowlut, collut=collut, sumunits=sumunits, stabbr=stabbr)
-  #use_1_cover_1_NEW
+  use_1_cover_1 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
+	gainloss=TRUE)
+  #use_1_cover_1$est
 
 
   ###############################################################################
-  ## 12. Estimates of cover_2_NEW by use_2_NEW
+  ## 12. Estimates of cover_2 by use_2
   ## Percent of land cover by land use at Time 2.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "use_2_NEW", "use_2")
-  colvar <- ifelse(ST %in% oldstates, "cover_2_NEW", "cover_2")
+  outfn.pre2 <- paste0("12_", outfn.pre)
+  rowvar <- "use_2"
+  colvar <- "cover_2"
 
-  rowvar2 <- sub("_2", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(uselut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-
-  colvar2 <- sub("_2", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(coverlut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("12", ST, "1pt", sep="_"), paste("12", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  use_2_cover_2_NEW <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
-	stabbr=stabbr)
-  #use_2_cover_2_NEW
+  use_2_cover_2 <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
+	gainloss=TRUE)
+  #use_2_cover_2$est
 
 
   ###############################################################################
-  ## 13. Ratio estimates of use_2_NEW within use_1_NEW
+  ## 13. Ratio estimates of use_2 within use_1
   ## Percent change of land use at Time 1 within land use at Time 2.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "use_1_NEW", "use_1")
-  colvar <- ifelse(ST %in% oldstates, "use_2_NEW", "use_2")
+  outfn.pre2 <- paste0("13_", outfn.pre)
+  rowvar <- "use_1"
+  colvar <- "use_2"
 
-  rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(uselut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm), 
-			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-
-  colvar2 <- sub("_2", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(uselut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm), 
-			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("13", ST, "1pt", sep="_"), paste("13", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  rat1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
-	stabbr=stabbr)
-  #rat1
-
+  use_1_use_2_rat <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, ratio=TRUE,
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #use_1_use_2_rat$est
 
 
   ###############################################################################
-  ## 13a. Ratio estimates of use_2_NEW within use_1_NEW
-  ## Percent change of land use at Time 1 within land use at Time 2.
+  ## 13a. Ratio estimates of use_2 within cover_2
+  ## Percent change of land use at Time 1 within land cover at Time 2.
   ###############################################################################
-  nbr <- "13a"
-  rowvar <- ifelse(ST %in% oldstates, "use_2_NEW", "use_2")
-  colvar <- ifelse(ST %in% oldstates, "cover_2_NEW", "cover_2")
+  outfn.pre2 <- paste0("13a_", outfn.pre)
+  rowvar <- "use_2"
+  colvar <- "cover_2"
 
-  rowvar2 <- sub("_2", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(uselut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm), 
-			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
+  use_2_cover_2_rat <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, ratio=TRUE,
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #use_2_cover_2_rat$est
 
-  colvar2 <- sub("_2", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(coverlut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-
-  outfn.pre <- ifelse(pnt1, paste(nbr, ST, "1pt", sep="_"), paste(nbr, ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  rat1 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
-	stabbr=stabbr)
-  rat1
-
-#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\datBarStacked.R")
-#est <- rat1$raw$unit.grpest
-#datBarStacked(est, "use_2_nm", "cover_2_nm", response="est",
-#		main.order=rev(uselut$use_nm[-1]), sub.order=collut$cover_2_nm,
-#		savedata=TRUE, outfolder=outfolder, 
-#		device.width=12, bar.lim=c(0,75), bar.ratio=0.70)
-#		legend.fit=TRUE, legend.inset=.9)
-
-#x=est
-#main.attribute="use_2_nm" 
-#sub.attribute="cover_2_nm" 
-#response="phat.n"
-#percent=TRUE
-#legend.fit=TRUE
-#main.order=uselut$use_nm[-1]
-#sub.order=collut$cover_2_nm
 
   ###############################################################################
-  ## 14. Ratio estimates of cover_2_NEW within cover_1_NEW
+  ## 14. Ratio estimates of cover_2 within cover_1
   ## Percent change of land cover at Time 1 within land use at Time 2.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "cover_1_NEW", "cover_1")
-  colvar <- ifelse(ST %in% oldstates, "cover_2_NEW", "cover_2")
+  outfn.pre2 <- paste0("14_", outfn.pre)
+  rowvar <- "cover_1"
+  colvar <- "cover_2"
 
-  rowvar2 <- sub("_1", "", rowvar)
-  rowvar2nm <- paste(rowvar2, "nm", sep="_")
-  rowlut <- unique(coverlut[!get(rowvar2) %in% c(-1,0,999), c(rowvar2, rowvar2nm),
- 			with=FALSE])
-  names(rowlut) <- c(rowvar, paste(rowvar, "nm", sep="_"))
-
-  colvar2 <- sub("_2", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(coverlut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("14", ST, "1pt", sep="_"), paste("14", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  rat2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, sumunits=sumunits, 
-	stabbr=stabbr)
-  #rat2
+  cover_1_cover_2_rat <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, ratio=TRUE,
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #cover_1_cover_2_rat$est
 
 
   ###############################################################################
-  ## 15. Ratio estimates of use_1_NEW within chg_ag_2_NEWGRP
+  ## 15. Ratio estimates of use_1 within chg_ag_2_GRP
   ## Percent change of land use at Time 1 within within change agent group.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "chg_ag_2_NEWGRP", "chg_ag_2_GRP")
-  colvar <- ifelse(ST %in% oldstates, "use_1_NEW", "use_1")
-  pnt.filter <- ifelse(ST %in% oldstates, "use_1_NEW != use_2_NEW", "use_1 != use_2")
+  outfn.pre2 <- paste0("15_", outfn.pre)
+  rowvar <- "chg_ag_2_GRP"
+  colvar <- "use_1"
+  pnt.filter <- "use_1 != use_2"
 
-  rowvarnm <- paste(rowvar, "nm", sep="_")
-  rowlut <- unique(chgaglut[!get(rowvar) %in% c(99), c(rowvar, rowvarnm), with=FALSE])
-
-  colvar2 <- sub("_1", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(uselut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm), 
-			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("15", ST, "1pt", sep="_"), paste("15", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  rat3 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	pnt.filter=pnt.filter, row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, 
-	sumunits=sumunits, stabbr=stabbr)
-  #rat3
+  agent_use_1_rat <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, ratio=TRUE,
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #agent_use_1_rat$est
 
 
   ###############################################################################
-  ## 16. Ratio estimates of cover_1_NEW within chg_ag_2_NEWGRP
+  ## 16. Ratio estimates of cover_1 within chg_ag_2_GRP
   ## Percent change of land cover at Time 1 within change agent group.
   ###############################################################################
-  rowvar <- ifelse(ST %in% oldstates, "chg_ag_2_NEWGRP", "chg_ag_2_GRP")
-  colvar <- ifelse(ST %in% oldstates, "cover_1_NEW", "cover_1")
-  pnt.filter <- ifelse(ST %in% oldstates, "cover_1_NEW != cover_2_NEW", 
-		"cover_1 != cover_2")
+  outfn.pre2 <- paste0("16_", outfn.pre)
+  rowvar <- "chg_ag_2_GRP"
+  colvar <- "cover_1"
+  pnt.filter <- "cover_1 != cover_2"
 
-  rowvarnm <- paste(rowvar, "nm", sep="_")
-  rowlut <- unique(chgaglut[!get(rowvar) %in% c(99) , c(rowvar, rowvarnm), with=FALSE])
-
-  colvar2 <- sub("_1", "", colvar)
-  colvar2nm <- paste(colvar2, "nm", sep="_")
-  collut <- unique(coverlut[!get(colvar2) %in% c(-1,0,999), c(colvar2, colvar2nm),
- 			with=FALSE])
-  names(collut) <- c(colvar, paste(colvar, "nm", sep="_"))
-  outfn.pre <- ifelse(pnt1, paste("16", ST, "1pt", sep="_"), paste("16", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  rat4 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, ratio=TRUE, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, colvar=colvar, lutfolder=lutfolder, 
-	savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	pnt.filter=pnt.filter, row.add0=TRUE, col.add0=TRUE, rowlut=rowlut, collut=collut, 
-	sumunits=sumunits, stabbr=stabbr)
-  #rat4
+  agent_cover_1_rat <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, ratio=TRUE,
+	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
+	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #agent_cover_1_rat$est
 
 
   ###############################################################################
   ## 17. Transitions - Land Use
   ## Percent change of Land Use from Time 1 to Time 2.
   ###############################################################################
-  rowvar <- "use_1_2_nm"
+  outfn.pre2 <- paste0("17_", outfn.pre)
+  rowvar <- "use_1_2"
   pnt.filter <- "use_1 != use_2"
 
-  outfn.pre <- ifelse(pnt1, paste("17", ST, "1pt", sep="_"), paste("17", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  est.use_1_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, 
-	returntitle=returntitle, sumunits=sumunits, pnt.filter=pnt.filter, stabbr=stabbr)
-  #use_1_2 <- est.use_1_2$raw$unit.rowest
+  use_1_2t <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, domlut=domlut, row.add0=TRUE, 
+	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #use_1_2t$est
 
 
   ###############################################################################
   ## 18. Transitions - Land Cover
   ## Percent change of Land Cover from Time 1 to Time 2.
   ###############################################################################
-  rowvar <- "cover_1_2_nm"
+  outfn.pre2 <- paste0("18_", outfn.pre)
+  rowvar <- "cover_1_2"
   pnt.filter <- "cover_1 != cover_2"
 
-  outfn.pre <- ifelse(pnt1, paste("18", ST, "1pt", sep="_"), paste("18", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  est.cover_1_2 <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	sumunits=sumunits, pnt.filter=pnt.filter, stabbr=stabbr)
-  #cover_1_2 <- est.cover_1_2$raw$unit.rowest
+  cover_1_2t <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, domlut=domlut, row.add0=TRUE, 
+	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #cover_1_2t$est
 
 
   ###############################################################################
   ## 19. Transitions - Land Use - Forest/Nonforest
   ## Percent change of Land Use (Forest/Nonforest) from Time 1 to Time 2.
   ###############################################################################
-  rowvar <- "use_1_2_FOR_nm"
+  outfn.pre2 <- paste0("19_", outfn.pre)
+  rowvar <- "use_1_2_FOR"
   pnt.filter <- "use_1_FOR != use_2_FOR"
 
-  outfn.pre <- ifelse(pnt1, paste("19", ST, "1pt", sep="_"), paste("19", ST, sep="_"))
-  if (!is.null(estname)) outfn.pre <- paste(outfn.pre, estname, sep="_")
-  outfn.pre <- paste(outfn.pre, T1, T2, sep="_") 
-
-  est.use_1_2_FOR <- anPBestICE(icedat=icedat, pltassgn=pltassgn, state=state, 
-	strata=strata, puniqueid=puniqueid, plotid=plotid, pntid=pntid, tabtype=tabtype, 
-	unitarea=unitarea, unitvar=unitvar, stratalut=stratalut, strvar=strvar, 
-	stratcombine=stratcombine, rowvar=rowvar, lutfolder=lutfolder, savedata=savedata, 
-	outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	overwrite=overwrite, rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
-	sumunits=sumunits, pnt.filter=pnt.filter, stabbr=stabbr)
-  #use_1_2_FOR <- est.use_1_2_FOR$raw$unit.rowest
+  use_1_2_FORt <- modPB(PBpopdat=PBpopdat, tabtype=tabtype, 
+	rowvar=rowvar, domlut=domlut, row.add0=TRUE, 
+	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+  #use_1_2_FORt$est
  
 }
 

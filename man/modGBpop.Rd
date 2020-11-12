@@ -13,7 +13,7 @@
 	total land area in the population. 
 }
 \usage{    
-modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL, 
+modGBpop(cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL, 
 	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
 	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, ACI = FALSE, 
@@ -22,12 +22,12 @@ modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
 	unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
 	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE, 
-	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = TRUE, gui = FALSE)
+	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
+	GBdata = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{GBdata}{ R List object. Output data list components from FIESTA::GBdata(). }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
@@ -103,12 +103,15 @@ modGBpop(GBdata = NULL, cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
   \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
 	extension. Default file name includes parameter inputs 
 	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{GBdata}{ R List object. Output data list components from FIESTA::GBdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

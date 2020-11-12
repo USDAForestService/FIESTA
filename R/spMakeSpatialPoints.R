@@ -21,7 +21,6 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
   xypltx <- pcheck.table(xyplt, xyplt_dsn, tabnm="xyplt", 
 		caption="XY data table", stopifnull=TRUE, returnDT=FALSE)
 
-
   ## check xy.uniqueid
   xypltnmlst <- names(xypltx)
   xy.uniqueid <- FIESTA::pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 

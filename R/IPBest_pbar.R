@@ -14,6 +14,10 @@ PBest.pbar <- function(dom.prop, uniqueid, domain, strattype=NULL, strlut, strun
   psq.pltdom=sump.dom=n.strata=strwt=sumpsq.dom=phat.se=phat.var=phat.cv=
 	ese.pct=pse=phat=p.pltdom=nbrpts.pltdom <- NULL
 
+  ## Check that strlut is a data.table
+  if (!"data.table" %in% class(strlut))
+    strlut <- setDT(strlut)
+  setkeyv(strlut, strunitvars)
 
   ## Proportion of points per plot, squared (intermediate variable)
   dom.prop[, psq.pltdom := p.pltdom^2]
@@ -59,7 +63,6 @@ PBest.pbar <- function(dom.prop, uniqueid, domain, strattype=NULL, strlut, strun
 
   unit.vars <- sapply(unit.agvars, function(x) sub(".strwt", "", x) )
   setnames(est.unit, unit.agvars, unit.vars)
-
 
   ## Calculate standard error (se), coefficient of variation (cv) 
   #suppressWarnings(

@@ -11,8 +11,8 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
 	pseround=3, estnull="--", psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, 
 	addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
-	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, MAmodeldat=NULL, 
-	MApopdat=NULL, gui=FALSE){
+	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, MApopdat=NULL, 
+	MAdata=NULL, gui=FALSE){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -20,7 +20,7 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
   ######################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(cond) && is.null(MApopdat)) gui <- TRUE 
+  if (nargs() == 0 || is.null(cond) && is.null(MApopdat) && is.null(MAdata)) gui <- TRUE 
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
@@ -59,7 +59,7 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
 	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine,
  	minplotnum.unit=minplotnum.unit, unitlut=unitlut, npixelvar=npixelvar, 
 	prednames=prednames, predfac=predfac, PSstrvar=PSstrvar, 
-	stratcombine=stratcombine, MAmodeldat=MAmodeldat, gui=gui)
+	stratcombine=stratcombine, MAdata=MAdata, gui=gui)
   } else {
     returnMApopdat <- FALSE
     if (!is.list(MApopdat))

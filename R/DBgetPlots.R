@@ -3,7 +3,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	allyrs=FALSE, invyrs=NULL, istree=FALSE, isseed=FALSE, isveg=FALSE, 
 	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, 
 	regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, intensity1=FALSE, stateFilter=NULL,
-	allFilter=NULL, alltFilter=NULL, savedata=FALSE, parameters=FALSE, outfolder=NULL,
+	allFilter=NULL, alltFilter=NULL, savedata=FALSE, saveqry=FALSE, outfolder=NULL,
  	out_fmt="csv", out_dsn=NULL, append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE,
  	overwrite=FALSE, savePOP=FALSE) {
 
@@ -11,9 +11,10 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   if (gui) 
-    invtype=evalCur=allyrs=evalType=istree=isseed=isveg=issp=
+    invtype=evalCur=allyrs=measCur=evalType=istree=isseed=isveg=issp=
 	spcondid1=defaultVars=regionVars=ACI=subcycle99=intensity1=
-	allFilter=savedata=saveqry=parameters=BIOJENK_kg=BIOJENK_lb=PREV_PLTCN <- NULL
+	allFilter=savedata=saveqry=parameters=out_fmt=overwrite=
+	BIOJENK_kg=BIOJENK_lb=PREV_PLTCN <- NULL
 
   ## Set global variables  
   CN=CONDID=COND_STATUS_CD=PLT_CN=FORTYPCD=pltvarlst=condvarlst=treevarlst=tsumvarlst=
@@ -48,7 +49,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   xycoords = c("LON_PUBLIC", "LAT_PUBLIC")
   coords <- "PUBLIC"
   isdwm <- FALSE
-  saveqry <- FALSE
+  parameters <- FALSE
   biojenk <- FALSE 
   greenwt <- TRUE
   outSQLite <- FALSE     
@@ -92,17 +93,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
   if (!iseval) {   
 
-    ### Check allyrs
-    ###########################################################
-    allyrs <- FIESTA::pcheck.logical(allyrs, varnm="allyrs", title="All years?", 
-		first="YES", gui=gui)
-    if (allyrs) {
-      xymeasCur <- TRUE
-      measCur <- FALSE
-      measEndyr=measEndyr.filter <- NULL
-    }
-
-
     ### Check measCur
     ###########################################################
     measCur <- FIESTA::pcheck.logical(measCur, varnm="measCur", title="Current measyear?", 
@@ -118,15 +108,24 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       measCur <- TRUE
       measEndyr.filter <- paste0(" and MEASYEAR < ", measEndyr)
     }
-
     if (measCur) {
       xymeasCur <- TRUE
       allyrs <- FALSE
     }
- 
+
+    ### Check allyrs
+    ###########################################################
+    allyrs <- FIESTA::pcheck.logical(allyrs, varnm="allyrs", title="All years?", 
+		first="YES", gui=gui)
+    if (allyrs) {
+      xymeasCur <- TRUE
+      measCur <- FALSE
+      measEndyr=measEndyr.filter <- NULL
+    }
+
     ## Check INVYR(S) 
     ###########################################################
-    if (!measCur) {
+    if (!measCur && !allyrs) {
       if ((is.null(invyrs) || length(invyrs) == 0)) {
         invyrs <- sapply(states, function(x) NULL)
         for (state in states) { 
@@ -199,8 +198,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       message("ACI plots are not included in FIA evaluations")  
     ACI <- FALSE
     intensity1 <- FALSE
+    allyrs <- FALSE
   }
-
 
   ## Set maxstates 
   ###########################################################
@@ -334,6 +333,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   if (savedata | saveqry | parameters | !treeReturn) {
     outfolder <- pcheck.outfolder(outfolder, gui=gui)
 
+    ## Check out_fmt
+    ###########################################################
+    out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb')
+    out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
+		caption="Out format", gui=gui)
+
     ## check append_layer
     append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
 		title="append data", first="NO", gui=gui)
@@ -342,12 +347,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
 		title="overwrite data", first="NO", gui=gui)
 
-
-    ## Check out_fmt
-    ###########################################################
-    out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb')
-    out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
-		caption="Out format", gui=gui)
 
     ## Check for necessary packages
     ###########################################################
@@ -360,11 +359,13 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       arcgisbinding::arc.check_product()
     }
 
-    if (out_fmt != "csv" && overwrite) {
-      outfilenm <- getoutfn(out_dsn, outfolder=outfolder, outfn.pre=outfn.pre, 
-		outfn.date=outfn.date, overwrite=TRUE, outfn.default = "data")
-      overwrite <- FALSE
-    }
+#    if (out_fmt != "csv") {
+#      out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
+#		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
+#		ext=out_fmt)
+#      overwrite <- FALSE
+#      outfolder <- NULL
+#    }
   }
 
   ###########################################################################
@@ -668,7 +669,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       }
       if (i == 1 && length(states) > 1) {
         resp <- select.list(c("YES", "NO"), title="Same for all states", multiple=FALSE)
-        if (resp == "YES") stateFilter <- FALSE
+        if (resp == "YES") gui <- FALSE
       }
     } 
     if (!is.null(stateFilter)) {
@@ -698,11 +699,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
    
       ## Write query to outfolder
       if (saveqry) {
-        pltcondqryfnbase <- DBgetfn("pltcond", invtype, outfn.pre, stabbr, 
-		evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-        pltcondqryfn <- FIESTA::fileexistsnm(outfolder, pltcondqryfnbase, "txt")
-        outfile <- file(paste0(outfolder, "/", pltcondqryfn, ".txt"), "w")
-          cat(  paste0(pltcondqry, xfilter), "\n", file=outfile)
+        pltcondqryfn <- DBgetfn("pltcond", invtype, outfn.pre, stabbr, 
+		evalid=evalid, qry=TRUE, outfolder=outfolder, overwrite=overwrite, 
+		outfn.date=outfn.date, ext="txt")
+        outfile <- file(pltcondqryfn, "w")
+        cat(  pltcondqry, "\n", file=outfile)
         close(outfile)
       }
     }
@@ -948,11 +949,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
             ## Write query to outfolder
             if (saveqry) {
-              treeqryfnbase <- DBgetfn("tree", invtype, outfn.pre, stabbr, 
-			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-              treeqryfn <- FIESTA::fileexistsnm(outfolder, treeqryfnbase, "txt")
-              outfile <- file(paste0(outfolder, "/", treeqryfn, ".txt"), "w")
-                cat(  paste0(treeqry, xfilter), "\n", file=outfile)
+              treeqryfn <- DBgetfn("tree", invtype, outfn.pre, stabbr, 
+			evalid=evalid, qry=TRUE, outfolder=outfolder, 
+			overwrite=overwrite, outfn.date=outfn.date, ext="txt")
+              outfile <- file(treeqryfn, "w")
+              cat(  treeqryfn, "\n", file=outfile)
               close(outfile)
             }
 
@@ -1002,7 +1003,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       pltcnt <- rbind(pltcnt, 
 		 datPlotcnt(plt=unique(pltx[, plotcnt.vars, with=FALSE]), savedata=FALSE))
 
-
       ##############################################################
       ## spconddata
       ##############################################################
@@ -1014,7 +1014,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         spconddat <- rbind(spconddat, spconddatx)
       }
 
- 
       ##############################################################
       ## xydata
       ##############################################################
@@ -1070,14 +1069,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           } 
 
           ## Write query to outfolder
-          if (saveqry) {
-            seedqryfnbase <- DBgetfn("seed", invtype, outfn.pre, stabbr, 
-			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-            seedqryfn <- FIESTA::fileexistsnm(outfolder, seedqryfnbase, "txt")
-            outfile <- file(paste0(outfolder, "/", seedqryfn, ".txt"), "w")
-              cat(  paste0(seedqry, xfilter), "\n", file=outfile)
-            close(outfile)
-          }
+#          if (saveqry) {
+#            seedqryfnbase <- DBgetfn("seed", invtype, outfn.pre, stabbr, 
+#			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
+#            seedqryfn <- FIESTA::fileexistsnm(outfolder, seedqryfnbase, "txt")
+#            outfile <- file(paste0(outfolder, "/", seedqryfn, ".txt"), "w")
+#              cat(  paste0(seedqry, xfilter), "\n", file=outfile)
+#            close(outfile)
+#          }
 
           ## Change NA values to 0 values
 #          if (any(names(seedx) %in% seednavars)) 
@@ -1115,14 +1114,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         vspsppx <- vspsppx[vspsppx$PLT_CN %in% unique(pltx$CN),]
 
         ## Write query to outfolder
-        if (saveqry) {
-          vspsppqryfnbase <- DBgetfn("vspspp", invtype, outfn.pre, stabbr, 
-			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-          vspsppqryfn <- FIESTA::fileexistsnm(outfolder, vspsppqryfnbase, "txt")
-          outfile <- file(paste0(outfolder, "/", vspsppqryfn, ".txt"), "w")
-          cat(  paste0(vspsppqry, xfilter), "\n", file=outfile)
-          close(outfile)
-        }
+#        if (saveqry) {
+#          vspsppqryfnbase <- DBgetfn("vspspp", invtype, outfn.pre, stabbr, 
+#			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
+#          vspsppqryfn <- FIESTA::fileexistsnm(outfolder, vspsppqryfnbase, "txt")
+#          outfile <- file(paste0(outfolder, "/", vspsppqryfn, ".txt"), "w")
+#          cat(  paste0(vspsppqry, xfilter), "\n", file=outfile)
+#          close(outfile)
+#        }
       }
 
       ## Get data for P2VEG_SUBP_STRUCTURE
@@ -1139,14 +1138,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         vspstrx <- vspstrx[vspstrx$PLT_CN %in% unique(pltx$CN),]
 
         ## Write query to outfolder
-        if (saveqry) {
-          vspstrqryfnbase <- DBgetfn("vspstr", invtype, outfn.pre, stabbr, 
-			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-          vspstrqryfn <- FIESTA::fileexistsnm(outfolder, vspstrqryfnbase, "txt")
-          outfile <- file(paste0(outfolder, "/", vspstrqryfn, ".txt"), "w")
-          cat(  paste0(vspstrqry, xfilter), "\n", file=outfile)
-          close(outfile)
-        }
+#        if (saveqry) {
+#          vspstrqryfnbase <- DBgetfn("vspstr", invtype, outfn.pre, stabbr, 
+#			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
+#          vspstrqryfn <- FIESTA::fileexistsnm(outfolder, vspstrqryfnbase, "txt")
+#          outfile <- file(paste0(outfolder, "/", vspstrqryfn, ".txt"), "w")
+#          cat(  paste0(vspstrqry, xfilter), "\n", file=outfile)
+#          close(outfile)
+#        }
       }
       vspspp <- rbind(vspspp, vspsppx)
       vspstr <- rbind(vspstr, vspstrx)
@@ -1178,14 +1177,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           dwmx <- dwmx[dwmx$PLT_CN %in% unique(pltx$CN),]
 
           ## Write query to outfolder
-          if (saveqry) {
-            dwmqryfnbase <- DBgetfn("dwm", invtype, outfn.pre, stabbr, 
-			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-            dwmqryfn <- fileexistsnm(outfolder, dwmqryfnbase, "txt")
-            outfile <- file(paste0(outfolder, "/", dwmqryfn, ".txt"), "w")
-            cat(  paste0(dwmqry, xfilter), "\n", file=outfile)
-            close(outfile)
-          }
+#          if (saveqry) {
+#            dwmqryfnbase <- DBgetfn("dwm", invtype, outfn.pre, stabbr, 
+#			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
+#            dwmqryfn <- fileexistsnm(outfolder, dwmqryfnbase, "txt")
+#            outfile <- file(paste0(outfolder, "/", dwmqryfn, ".txt"), "w")
+#            cat(  paste0(dwmqry, xfilter), "\n", file=outfile)
+#            close(outfile)
+#          }
         }
       }
       dwm <- rbind(dwm, dwmx)
@@ -1255,14 +1254,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         ppsax <- ppsax[ppsax$PLT_CN %in% unique(pltx$CN),]
 
         ## Write query to outfolder
-        if (saveqry) {
-          ppsaqryfnbase <- DBgetfn("ppsa", invtype, outfn.pre, stabbr, 
-			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-          ppsaqryfn <- FIESTA::fileexistsnm(outfolder, ppsaqryfnbase, "txt")
-          outfile <- file(paste0(outfolder, "/", ppsaqryfn, ".txt"), "w")
-          cat(  paste0(ppsaqry, xfilter), "\n", file=outfile)
-          close(outfile)
-        }
+#        if (saveqry) {
+#          ppsaqryfnbase <- DBgetfn("ppsa", invtype, outfn.pre, stabbr, 
+#			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
+#          ppsaqryfn <- FIESTA::fileexistsnm(outfolder, ppsaqryfnbase, "txt")
+#          outfile <- file(paste0(outfolder, "/", ppsaqryfn, ".txt"), "w")
+#          cat(  paste0(ppsaqry, xfilter), "\n", file=outfile)
+#          close(outfile)
+#        }
       }
       ppsa <- rbind(ppsa, ppsax)
     }
@@ -1273,6 +1272,13 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     ###############################################################################
     ###############################################################################
     if ((savedata || !treeReturn) && !is.null(pltx)) {
+      if (out_fmt != "csv") {
+        out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
+		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
+		ext=out_fmt)
+        overwrite <- FALSE
+        outfolder <- NULL
+      }
 
       overwrite_layer <- overwrite
       append_layer2 <- append_layer
@@ -1303,12 +1309,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
           ## Generate shapefile
           out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
-
           assign(spxynm, spMakeSpatialPoints(xyplt=xyplt, xvar=xycoords[1], 
 			yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
 			exportsp=savedata, out_dsn=out_dsn, out_fmt=out_fmt_sp, 
 			outfolder=outfolder, out_layer=spxynm, outfn.date=outfn.date,
- 			overwrite_layer=overwrite_layer, append_layer=append_layer2,
+ 			overwrite_layer=overwrite_layer, append_layer=TRUE,
 			outfn.pre=outfn.pre))
         }
       }       
@@ -1606,7 +1611,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     }
   }
   
-  if (saveqry) cat("\n", paste("Saved queries to:", outfolder), "\n") 
+  #if (saveqry) cat("\n", paste("Saved queries to:", outfolder), "\n") 
 
  
 

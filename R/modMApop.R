@@ -6,7 +6,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
-	stratcombine=TRUE, MAmodeldat=NULL, MAdata=NULL, gui=FALSE){
+	stratcombine=TRUE, MAdata=NULL, MAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -16,7 +16,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
 #  if (nargs() == 0 | is.null(estvar)) gui <- TRUE
   if (nargs() == 0) gui <- TRUE
-
 
   ## If gui.. set variables to NULL
   if (gui)  

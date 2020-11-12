@@ -1,6 +1,6 @@
-modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL, 
-	pltassgn=NULL, seed=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", 
-	condid="CONDID", puniqueid="CN", pltassgnid="CN", measCur=FALSE, measEndyr=NULL, 
+modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL, 
+	seed=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
+	puniqueid="CN", pltassgnid="CN", measCur=FALSE, measEndyr=NULL, 
 	invyrs=NULL, ACI=FALSE, adj="plot", SApackage="JoSAE", SAmethod="unit", 
 	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, dunitvar="DOMAIN", 
 	dunitvar2=NULL, dunitarea=NULL, areavar=NULL, dunitlut=NULL, prednames=NULL, 
@@ -11,8 +11,8 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL,
 	raw_fmt="csv", raw_dsn="rawdata", multest_fmt="csv", multest_outfolder=NULL, 
 	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, multest.AOIonly=FALSE, 
 	outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, 
-	title.main=NULL, title.ref=NULL, title.dunitvar=NULL, title.filter=NULL){
-
+	title.main=NULL, title.ref=NULL, title.dunitvar=NULL, title.filter=NULL, 
+	SApopdat=NULL, SAdata=NULL){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -20,7 +20,7 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL,
   ######################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(SApopdat)) gui <- TRUE 
+  if (nargs() == 0 || is.null(tree) && is.null(SApopdat) && is.null(SAdata)) gui <- TRUE 
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
@@ -161,12 +161,13 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, cond=NULL, plt=NULL,
   ###################################################################################
   if (is.null(SApopdat)) {
     SApopdat <- modSApop(cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn,
- 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid,
- 		pltassgnid=pltassgnid, measCur=FALSE, measEndyr=NULL, invyrs=NULL, ACI=ACI,
-		adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
+ 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
+		puniqueid=puniqueid, pltassgnid=pltassgnid, measCur=FALSE, measEndyr=NULL, 
+		invyrs=NULL, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 		cond.nonsamp.filter=cond.nonsamp.filter, dunitvar=dunitvar, dunitvar2=NULL,
  		dunitarea=dunitarea, areavar=areavar, unitcombine=unitcombine, dunitlut=dunitlut, 
-		prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, gui=gui)
+		prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, SAdata=SAdata, 
+		gui=gui)
   } else {
     returnSApopdat <- FALSE
     if (!is.list(SApopdat))

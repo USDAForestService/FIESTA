@@ -94,8 +94,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   ## Get database tables - POP_EVAL, POP_EVAL_TYPE, SURVEY
   #########################################################################
 
-  POP_EVAL_GRP <- FIESTA::DBgetCSV("POP_EVAL_GRP", stcdlst, ZIP=ZIP, stopifnull=FALSE,
-		returnDT=TRUE)
+  POP_EVAL_GRP <- DBgetCSV("POP_EVAL_GRP", stcdlst, ZIP=ZIP, 
+		stopifnull=FALSE, returnDT=TRUE)
   POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, ZIP=ZIP, stopifnull=FALSE,
 		returnDT=TRUE)
   if (nrow(POP_EVAL) == 0) {
@@ -106,13 +106,16 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       miss <- stcdlst[!stcdlst %in% unique(POP_EVAL$STATECD)]
       message("no data in database for ", toString(miss))
       stcdlst <- stcdlst[!stcdlst %in% miss]
+      states <- pcheck.states(stcdlst, "MEANING")
     }
   }    
 
-  POP_EVAL_TYP <- FIESTA::DBgetCSV("POP_EVAL_TYP", stcdlst, ZIP=ZIP, stopifnull=FALSE)
+  POP_EVAL_TYP <- DBgetCSV("POP_EVAL_TYP", stcdlst, ZIP=ZIP, stopifnull=FALSE)
   if (nrow(POP_EVAL_TYP) == 0) return(NULL)
-  SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE, stopifnull=FALSE)
+
+  SURVEY <- DBgetCSV("SURVEY", stcdlst, ZIP=ZIP, returnDT=TRUE, stopifnull=FALSE)
   if (nrow(SURVEY) == 0) return(NULL)
+
   POP_EVAL <- setDT(sqldf::sqldf(popevaltypqry))
 
   ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
@@ -222,6 +225,14 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   stinvyr.max <- lapply(stinvyr.vals, '[[', 2)
   invyr.min <- min(unlist(stinvyr.min))
   invyr.max <- max(unlist(stinvyr.max))
+
+  if (!all(states %in% names(stinvyr.vals))) {
+    missnames <- states[!states %in% names(stinvyr.vals)]
+    misscodes <- FIESTA::pcheck.states(missnames, "VALUE")
+    message("there is no data in the database for: ", toString(missnames))
+    stcdlst <- stcdlst[!stcdlst %in% misscodes]
+    states <- states[!states %in% missnames]
+  }
  
   if (is.null(evalEndyr)) {
     ## Check evalAll
@@ -252,7 +263,6 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
 
         return(returnlst <- list(states=states, rslst=rslst, evalidlist=NULL, 
 		invtype=invtype, invyrtab=invyrtab, evalType=evalTypelist))
-
       }
     }
   }
@@ -351,6 +361,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       state <- FIESTA::pcheck.states(stcd, "MEANING")
       stabbr <- FIESTA::pcheck.states(stcd, "ABBR")
       stinvyrs <- unique(stinvyr.vals[[state]])
+      invtype.invyrs <- invyrtab[invyrtab$STATECD == stcd, "INVYR"]
 
       ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
       ## Remove East and West in LOCATION_NM and EVAL_DESCR
@@ -365,17 +376,11 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       setkey(POP_EVAL, "EVAL_GRP_CN")
       setkey(POP_EVAL_GRP, "CN")
 
-      ## Subset POP_EVAL/POP_EVAL_GRP by state
+      ## Subset POP_EVAL/POP_EVAL_GRP by state and inventory type
       popevaltab <- POP_EVAL[POP_EVAL_GRP[, c("CN", "EVAL_GRP_Endyr")]][STATECD == stcd,]
-      if (invtype == "ANNUAL") {
-        popevaltab <- popevaltab[START_INVYR != END_INVYR, ]
-      } else { 
-        popevaltab <- popevaltab[START_INVYR == END_INVYR, ]
-      }
+      popevaltab <- popevaltab[popevaltab$END_INVYR %in% invtype.invyrs,]
 
       POP_EVAL_endyrs <- na.omit(unique(popevaltab[, "EVAL_GRP_Endyr"][[1]]))
-
-
       if (!is.null(evalEndyr)) {
         Endyr <- evalEndyr[[state]]
 
@@ -408,13 +413,11 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       if (invtype == "ANNUAL") {
         if (!all(evalTypelist[[state]] %in% evalType.chklst)) 
           stop(paste("invalid evalType for", state))
-
         evalidall <- popevaltab$EVALID[!is.na(popevaltab$EVALID)]
         evalidlist[[state]] <- 
 		sort(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]])
         invyrs[[state]]  <- 
 		min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
-     
       } else {
         if (!all(evalTypelist[[state]] %in% evalType.chklst)) { 
           evalid.min <- min(popevaltab$EVALID)

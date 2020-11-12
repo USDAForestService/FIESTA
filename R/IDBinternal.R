@@ -157,7 +157,8 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
 
 
 DBgetfn <- function(tab, invtype, outfn.pre, stabbrlst=NULL, evalid=NULL, qry=FALSE, 
-	othertxt=NULL, outfn.date=FALSE, addslash=FALSE, outfolder=NULL, overwrite=FALSE) {
+	othertxt=NULL, outfn.date=FALSE, addslash=FALSE, ext="csv", outfolder=NULL, 
+	overwrite=FALSE) {
 
   invtypenm <- substr(invtype, 1, 3)
 
@@ -184,9 +185,9 @@ DBgetfn <- function(tab, invtype, outfn.pre, stabbrlst=NULL, evalid=NULL, qry=FA
     fn <- paste0(fn, "_", format(Sys.time(), "%Y%m%d"))
 
   if (!overwrite)
-    fn <- FIESTA::fileexistsnm(outfolder, fn, "csv")
+    fn <- FIESTA::fileexistsnm(outfolder, fn, ext)
   
-  path.fn <- paste0(outfolder, "/", fn, ".csv")
+  path.fn <- paste0(outfolder, "/", fn, paste0(".", ext))
   return(path.fn)
 }
 

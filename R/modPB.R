@@ -40,6 +40,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   on.exit(options(options.old), add=TRUE) 
   minplotnum <- 10
   returnPBpopdat <- TRUE 
+  parameters <- FALSE
 
   ##################################################################
   ## Check population data
@@ -68,9 +69,10 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   plotid <- PBpopdat$plotid
   pntid <- PBpopdat$pntid
   pltassgnid <- PBpopdat$pltassgnid
-  tabtype <- PBpopdat$tabtype
   unitvar <- PBpopdat$unitvar
   unitvar2 <- PBpopdat$unitvar2
+  unitarea <- PBpopdat$unitarea
+  areavar <- PBpopdat$areavar
   strlut <- PBpopdat$strlut
   strvar <- PBpopdat$strvar
   plotsampcnt <- PBpopdat$plotsampcnt
@@ -83,11 +85,21 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   unitvars <- c(unitvar, unitvar2)
   strunitvars <- c(unitvar, strvar)
 
-  if (tabtype == "AREA") {
-    unitarea <- PBpopdat$unitarea
-    areavar <- PBpopdat$areavar
-  }  
- 
+  ## Check tabtype
+  tabtype <- FIESTA::pcheck.varchar(var2check=tabtype, varnm="tabtype", gui=gui, 
+		checklst=c("PCT", "AREA"), caption="Table output type", 
+		warn="invalid tabtype")
+  ## Check unitcombine 
+  unitcombine <- FIESTA::pcheck.logical(unitcombine, varnm="unitcombine", 
+		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
+  if ((tabtype == "AREA" || unitcombine) && is.null(unitarea)) {
+    if (sumunits) {
+      stop("need unitarea to combine estimation units")
+    } else {
+      stop("need unitarea to return acre estimates")
+    }
+  }
+
   ###################################################################################
   ## Check parameters and apply plot and pnt filters
   ###################################################################################
@@ -113,6 +125,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
 
+
   #################################################################################
   ### GET ROW AND COLUMN INFO
   #################################################################################
@@ -121,7 +134,8 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 	pntid=pntid, rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, 
 	col.orderby=col.orderby, domvarlst=domvarlst, domlut=domlut, 
 	title.rowvar=title.rowvar, title.colvar=title.colvar, filterids=filterids, 
-	rowlut=rowlut, collut=collut, PBvars2keep=PBvars2keep)
+	row.add0=row.add0, col.add0=col.add0, rowlut=rowlut, collut=collut, 
+	PBvars2keep=PBvars2keep)
   PBx <- rowcolinfo$PBx
   setkeyv(PBx, c(plotid, pntid))
   uniquerow <- rowcolinfo$uniquerow
@@ -267,11 +281,10 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 	unit.totest.str=unit.rowest.str=unit.colest.str=unit.grpest.str <- NULL
 
   if (!ratio) {
-
     if (!is.null(pltdom.tot)) {
       ## Get estimate for TOTAL
       #######################################################################
-      pbar.totest <- FIESTA::PBest.pbar(dom.prop=pltdom.tot, uniqueid=plotid, domain=totvar, 
+      pbar.totest <- PBest.pbar(dom.prop=pltdom.tot, uniqueid=plotid, domain=totvar, 
 		strattype="post", strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar)
       unit.totest <- pbar.totest$est.unit
@@ -305,7 +318,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     ## Get estimate for row and columns
     #######################################################################
     if (rowvar != "TOTAL") {
-      pbar.rowest <- FIESTA::PBest.pbar(dom.prop=pltdom.row, uniqueid=plotid, domain=rowvar, 
+      pbar.rowest <- PBest.pbar(dom.prop=pltdom.row, uniqueid=plotid, domain=rowvar, 
 		strattype="post", strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar)
       unit.rowest <- pbar.rowest$est.unit
@@ -318,7 +331,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
    
     ## Get column (and cell) estimate  
     if (colvar != "NONE") {
-      pbar.colest <- FIESTA::PBest.pbar(dom.prop=pltdom.col, uniqueid=puniqueid, 
+      pbar.colest <- PBest.pbar(dom.prop=pltdom.col, uniqueid=puniqueid, 
 		domain=colvar, strattype="post", strlut=strlut, strunitvars=strunitvars,
  		unitvars=unitvar, strvar=strvar)
       unit.colest <- pbar.colest$est.unit
@@ -328,7 +341,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       ## Get filter value for column
       col.filterval <- ifelse (is.numeric(unit.colest[[colvar]]), 9999, "NOTinDOMAIN")
 
-      pbar.grpest <- FIESTA::PBest.pbar(dom.prop=pltdom.grp, uniqueid=puniqueid,
+      pbar.grpest <- PBest.pbar(dom.prop=pltdom.grp, uniqueid=puniqueid,
  		domain=grpvar, strattype="post", strlut=strlut, strunitvars=strunitvars,
  		unitvars=unitvar, strvar=strvar)
       unit.grpest <- pbar.grpest$est.unit
@@ -340,7 +353,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     phat.var <- "phat.var"
   } else {
 
-    unit.grpest <- FIESTA::PBest.pbarRatio(dom.prop.n=pltdom.n, dom.prop.d=pltdom.d, 
+    unit.grpest <- PBest.pbarRatio(dom.prop.n=pltdom.n, dom.prop.d=pltdom.d, 
 		uniqueid=plotid, domain=domain, attribute=attribute, strlut=strlut, 
 		strunitvars=strunitvars, unitvars=unitvar, strvar=strvar)
     setkeyv(unit.grpest, c(unitvar, grpvar))
@@ -348,7 +361,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     if (tabtype == "AREA") {
       pltdom <- pltdom.n
       names(pltdom) <- sub("\\.n", "", names(pltdom.n))
-      unit.grpest.domtot <- FIESTA::PBest.pbar(dom.prop=pltdom, uniqueid=plotid, 
+      unit.grpest.domtot <- PBest.pbar(dom.prop=pltdom, uniqueid=plotid, 
 		domain=domain, strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar, strattype="post")$est.unit
       setkeyv(unit.grpest.domtot, c(unitvar, domain))
@@ -771,7 +784,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   }
 
  
-  if (savedata) {
+  if (parameters) {
     ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
     ###########################################################
     if(is.null(outfn)) {
@@ -885,7 +898,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
 			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
 			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite))
-
           }
         }
       }

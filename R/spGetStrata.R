@@ -287,7 +287,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     stratalut <- stratalut[, list(strwt=sum(strwt)), by=c(unitvar, strvar)]
   }
 
-
   ## Export to shapefile
   if (exportsp)
     spExportSpatial(sppltx, out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer,

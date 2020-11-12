@@ -1,11 +1,11 @@
-modSApop <- function(SAdata=NULL, SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, 
-	pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
+modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL, 
+	dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	puniqueid="CN", pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, 
 	cond.nonsamp.filter=NULL, dunitvar=NULL, dunitvar2=NULL, dunitarea=NULL, 
 	areavar="ACRES", unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
 	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, outfolder=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=FALSE, gui=FALSE){
+	outfn.date=FALSE, overwrite=FALSE, SAdata=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:

@@ -7,8 +7,8 @@
 	Generates small area estimates by domain and/or tree domain (and estimation unit). 	 
 }
 \usage{    
-modSAtree(SApopdat = NULL, SAdomsdf = NULL, tree = NULL, cond = NULL, plt = NULL, 
-	pltassgn = NULL, seed = NULL, dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
+modSAtree(SAdomsdf = NULL, tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
+	seed = NULL, dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
 	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", measCur = FALSE, 
 	measEndyr = NULL, invyrs = NULL, ACI=FALSE, adj = "plot", plt.nonsamp.filter = NULL, 
 	cond.nonsamp.filter = NULL, dunitvar = "DOMAIN", dunitvar2 = NULL, 
@@ -22,11 +22,11 @@ modSAtree(SApopdat = NULL, SAdomsdf = NULL, tree = NULL, cond = NULL, plt = NULL
 	multest_fmt = "csv", multest_outfolder = NULL, multest_dsn = NULL, multest_layer = NULL, 
 	multest.append = FALSE, multest.AOIonly = FALSE, outfn.date = FALSE, overwrite = FALSE, 
 	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL)
+	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, 
+	SApopdat = NULL, SAdata = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
   \item{SAdomsdf}{ DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
 	with attributes from smallbnd to add to estimation table. }
   \item{tree}{ DF/DT or comma-delimited file(*.csv). The tree table with tree data to 
@@ -135,6 +135,8 @@ modSAtree(SApopdat = NULL, SAdomsdf = NULL, tree = NULL, cond = NULL, plt = NULL
 	name for the estimate variable. If NULL, title.estvar = estvar.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
+  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
+  \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

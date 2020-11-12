@@ -1,4 +1,4 @@
-modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL, 
+modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL, 
 	pltassgn=NULL, seed=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", 
 	condid="CONDID", puniqueid="CN", pltassgnid="CN", measCur=FALSE, measEndyr=NULL, 
 	invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
@@ -12,7 +12,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
 	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, multest.AOIonly=FALSE, 
 	outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, 
 	title.main=NULL, title.ref=NULL, title.dunitvar=NULL, title.estvar=NULL, 
-	title.filter=NULL){
+	title.filter=NULL, SApopdat=NULL, SAdata=NULL){
 
 
   ######################################################################################
@@ -24,7 +24,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
   ######################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(SApopdat)) gui <- TRUE 
+  if (nargs() == 0 || is.null(tree) && is.null(SApopdat) && is.null(SAdata)) gui <- TRUE 
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
@@ -197,12 +197,13 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
   ###################################################################################
   if (is.null(SApopdat)) {
     SApopdat <- modSApop(tree=tree, cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn,
- 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid,
- 		pltassgnid=pltassgnid, measCur=FALSE, measEndyr=NULL, invyrs=NULL, ACI=ACI, 
-		adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
+ 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
+		puniqueid=puniqueid, pltassgnid=pltassgnid, measCur=FALSE, measEndyr=NULL,
+ 		invyrs=NULL, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 		cond.nonsamp.filter=cond.nonsamp.filter, dunitvar=dunitvar, dunitvar2=dunitvar2,
 		dunitarea=dunitarea, areavar=areavar, unitcombine=unitcombine, dunitlut=dunitlut,
- 		prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, gui=gui)
+ 		prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, SAdata=SAdata,
+		gui=gui)
   } else {
     returnSApopdat <- FALSE
     if (!is.list(SApopdat))
@@ -416,7 +417,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NU
   if (sum(tdomdattot[[response]]) == 0) return(NULL)
 
   if (is.null(largebnd.att)) {
-    estkey <- c(largebnd.att, "DOMAIN")
+    estkey <- "DOMAIN"
 
     ## get unique domains
     doms <- as.character(unique(tdomdattot[[domain]]))

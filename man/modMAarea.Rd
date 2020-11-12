@@ -23,7 +23,7 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, addtitle = TRUE, 
 	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
 	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, 
-	MAmodeldat = NULL, MApopdat = NULL, gui = FALSE)
+	MApopdat = NULL, MAdata = NULL, gui = FALSE)
 }
  
 \arguments{
@@ -154,8 +154,8 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If NULL, = "". }
-  \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
+  \item{MAdata}{ List. Modeldat output from FIESTA::anMAdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

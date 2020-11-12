@@ -20,6 +20,12 @@ PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute,
 	sumpd=sumpdsq=covar.strwt=sumpnpd=phat.n=phat.d=phat.var.n=phat.var.d=covar=
 	rhat.se=rhat.var=rhat.cv=rhat <- NULL
 
+
+  ## Check that strlut is a data.table
+  if (!"data.table" %in% class(strlut))
+    strlut <- setDT(strlut)
+  setkeyv(strlut, strunitvars)
+
   ## Merge pd to ysum.n
   dom.prop.n <- merge(dom.prop.n, dom.prop.d, by=c(strunitvars, uniqueid, domain, "PtsPerPlot"))
 
@@ -40,7 +46,6 @@ PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute,
 		by=c(strunitvars, domain)]
   setkeyv(ysum.d.strata, strunitvars)
  
-
 
   ## STRATA/DOMAIN LEVEL: Merge domain-level sums to strata table
   ybardat.n <- strlut[ysum.n.strata]

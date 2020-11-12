@@ -20,8 +20,8 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, pltassgn = NULL, dsn = NULL,
 	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
 	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
 	minplotnum.unit = 10, unitlut = NULL, npixelvar="npixels", prednames = NULL, 
-	predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, MAmodeldat = NULL, 
-	MAdata = NULL, gui = FALSE)
+	predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, MAdata = NULL, 
+	MAmodeldat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -94,8 +94,8 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, pltassgn = NULL, dsn = NULL,
 	assignment for each plot. Default="STRATUMCD". }
   \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
 	strata categories if less than 2 plots in any one stratum. See notes for more info. }
-  \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }
   \item{MAdata}{ List. Data output from FIESTA::MAdata(). }
+  \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{
