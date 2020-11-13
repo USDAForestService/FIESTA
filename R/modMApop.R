@@ -38,25 +38,26 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
       if (!all(modeldat.names %in% names(MAmodeldat))) 
         stop("missing components in MAmodeldat list: ", 
 		toString(modeldat.names[!modeldat.names %in% names(MAmodeldat)])) 
-    }
-    pltassgn <- MAmodeldat$pltassgn
-    pltassgnid <- MAmodeldat$pltassgnid
-    unitlut <- MAmodeldat$domzonal
-    unitvar <- MAmodeldat$domvar
-    unitarea <- MAmodeldat$domarea
-    areavar <- MAmodeldat$areavar
-    npixelvar <- MAmodeldat$npixelvar
-    predfac <- MAmodeldat$predfac
-    if (MAmethod == "PS")
-      PSstrvar <- MAmodeldat$PSstrvar
 
-    if (is.null(prednames)) {
-      prednames <- MAmodeldat$prednames
-    } else {
-      if (!all(prednames %in% MAmodeldat$prednames))
-        stop("invalid prednames: ", 
+      pltassgn <- MAmodeldat$pltassgn
+      pltassgnid <- MAmodeldat$pltassgnid
+      unitlut <- MAmodeldat$domzonal
+      unitvar <- MAmodeldat$domvar
+      unitarea <- MAmodeldat$domarea
+      areavar <- MAmodeldat$areavar
+      npixelvar <- MAmodeldat$npixelvar
+      predfac <- MAmodeldat$predfac
+      if (MAmethod == "PS")
+        PSstrvar <- MAmodeldat$PSstrvar
+
+      if (is.null(prednames)) {
+        prednames <- MAmodeldat$prednames
+      } else {
+        if (!all(prednames %in% MAmodeldat$prednames))
+          stop("invalid prednames: ", 
 		toString(prednames[!prednames %in% MAmodeldat$prednames]))
-      predfac <- predfac[predfac %in% prednames]
+        predfac <- predfac[predfac %in% prednames]
+      } 
     }
   } else {
     if (!is.list(MAdata))
@@ -131,6 +132,9 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   MAmethod <- popcheck$method
 
 
+print("TEST")
+print(unitarea)
+
   ###################################################################################
   ## CHECK unitarea BY ESTIMATION UNIT
   ## Returns: data table with unitvar and area by estimation unit (unitvar)
@@ -168,7 +172,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   stratcombinelut <- auxdat$unitstrgrplut
 
 
-
   if ("GREG" %in% MAmethod && !is.null(predfac)) {
     for (fac in predfac) {
       ## Get factor levels
@@ -195,7 +198,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
     }
   }
 
- 
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS

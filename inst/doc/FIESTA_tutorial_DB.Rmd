@@ -551,7 +551,7 @@ names(dat2)
 dat2$evalid
 
 table(dat2$plt$STATECD)
-table(dat2$POP_PLOT_STRATUM_ASSGN$EVALID)
+table(dat2$plt$STATECD, dat2$plt$INVYR)
 
 
 

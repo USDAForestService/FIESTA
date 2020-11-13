@@ -1411,20 +1411,63 @@ cover12ps$pse
 <div id="simple-bar-plots" class="section level4">
 <h4>Simple Bar Plots</h4>
 <pre><code>
+## Barplot of land cover, Time 1
+##############################################################################################
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
 names11 &lt;- names(icepctcover)[endsWith(names(icepctcover), &quot;11&quot;)]
 pltpct1 &lt;- modPB(pltpct=icepctcover, pltpctvars=names11, title.rowvar=&quot;Land cover (2011)&quot;,
     rawdata=TRUE)
 x &lt;- pltpct1$est
+
+
+## Create barplot with estimates and error bars (use Percent Sampling Error column)
+datBarplot(x=x, xvar=&quot;Land cover (2011)&quot;, yvar=&quot;Estimate&quot;, errbars=TRUE, psevar=&quot;Percent Sampling Error&quot;)
+
+## You can use data from the raw tables as well
 x2 &lt;- pltpct1$raw$unit.rowest
-datBarplot(x=x, xvar=&quot;Land cover (2011)&quot;, yvar=&quot;Estimate&quot;)
-datBarplot(x=x2, xvar=&quot;Land cover (2011)&quot;, yvar=&quot;est&quot;)
 
-datBarplot(x=x2, xvar=&quot;Land cover (2011)&quot;, yvar=&quot;est&quot;, ylim=c(0,30), xlabel=&quot;Land cover categories&quot;,
-            ylabel=&quot;Percent&quot;, errbars=TRUE, sevar=&quot;est.se&quot;)
-            
+## Create barplot with estimates and error bars (using se column) and add labels and titles
+datBarplot(x=x2, xvar=&quot;Land cover (2011)&quot;, yvar=&quot;est&quot;, errbars=TRUE, sevar=&quot;est.se&quot;,
+  ylim=c(0,30), ylabel=&quot;Percent of land&quot;, main=&quot;Percent cover at Time 1 (2011)&quot;)
 
-## Ratio ##
+
+## Barplot of land cover, Time 1 and Time 2
+##############################################################################################
+## Let's look at estimates at Time 1 compared to estimates at Time 2
+# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
+cover1 &lt;- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+        rowvar=&quot;cover_1&quot;, rowlut=icecover_1, title.rowvar=&quot;Land Cover (2011)&quot;)
+names(cover1)
+cover1 &lt;- cover1$est
+
+# Percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
+cover2 &lt;- modPB(pnt=icepnt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
+        rowvar=&quot;cover_2&quot;, rowlut=icecover_2, rawdata=TRUE, title.rowvar=&quot;Land Cover (2014)&quot;)
+names(cover2)
+cover2 &lt;- cover2$est
+
+## First, let's change the column names and merge the tables to 1 table (removing Uninterpretable class)
+setnames(cover1, c(&quot;Land Cover&quot;, &quot;est11&quot;, &quot;pse11&quot;))
+setnames(cover2, c(&quot;Land Cover&quot;, &quot;est14&quot;, &quot;pse14&quot;))
+cover &lt;- merge(cover1, cover2, by=&quot;Land Cover&quot;)
+
+## Next, we will remove the Total row and reorder
+cover &lt;- cover[c(6,4,3,1,2,7),]
+
+## Create barplot with estimates and error bars (using pse columns)
+datBarplot(x=cover, xvar=&quot;Land Cover&quot;, yvar=c(&quot;est11&quot;, &quot;est14&quot;), errbars=TRUE, psevar=c(&quot;pse11&quot;, &quot;pse14&quot;),
+  ylim=c(0,30), ylabel=&quot;Percent of land&quot;, main=&quot;Percent cover at Time 1 (2011) and Time 2 (2014)&quot;)
+  
+
+## Let's add a legend to the bar plot, specifying the location, the text, and no surrounding box
+datBarplot(x=cover, xvar=&quot;Land Cover&quot;, yvar=c(&quot;est11&quot;, &quot;est14&quot;), errbars=TRUE, psevar=c(&quot;pse11&quot;, &quot;pse14&quot;),
+  ylim=c(0,30), ylabel=&quot;Percent of land&quot;, main=&quot;Percent cover at Time 1 (2011) and Time 2 (2014)&quot;, addlegend=TRUE,
+  args.legend=list(x=&quot;topleft&quot;, legend=c(&quot;2011&quot;, &quot;2014&quot;), bty=&quot;n&quot;))
+  
+
+
+
+## Ratio ## - Transitional change within category
 # Percent land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
 cover1_2.rat &lt;- modPB(pnt=icepnt, puniqueid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,
         ratio=TRUE, rowvar=&quot;cover_1&quot;, rowlut=icecover_1, colvar=&quot;cover_2&quot;, collut=icecover_2, 
@@ -1435,8 +1478,17 @@ x &lt;- cover1_2.rat$raw$unit.grpest
 datBarStacked(x=x, main.attribute=&quot;Land cover (2011)&quot;, sub.attribute=&quot;Land cover (2014)&quot;,
       response=&quot;est&quot;, xlabel=&quot;Land Cover (2011)&quot;, legend.title=&quot;Land Cover (2014)&quot;)
       
+ 
+## Now, let's only look at change
+x2 &lt;- x[x$'Land cover (2011)' != x$'Land cover (2014)',]
+datBarStacked(x=x2, main.attribute=&quot;Land cover (2011)&quot;, sub.attribute=&quot;Land cover (2014)&quot;,
+      response=&quot;est&quot;, xlabel=&quot;Land Cover (2011)&quot;, legend.title=&quot;Land Cover (2014)&quot;,
+      main.order=rev(c(&quot;Tree&quot;, &quot;Shrub&quot;, &quot;OtherVegetation&quot;, &quot;Impervious&quot;, &quot;Barren&quot;, &quot;Water&quot;)))
+    
       
-## Gain / Loss ##
+      
+      
+## Gain / Loss ## - The difference in proportion between Time 1 and Time 2
 # Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 # Return gain/loss estimates for each category in rawdata tables
 cover12b &lt;- modPB(pnt=icepnt, pltassgn=iceplt, pltassgnid=&quot;plot_id&quot;, pntid=&quot;dot_cnt&quot;,

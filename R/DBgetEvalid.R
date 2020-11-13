@@ -191,13 +191,14 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
     }
     ann_inventory <- ifelse(invtype == "PERIODIC", 'N', 'Y')
 
-    ## Create table of state, inventory year, and cycle
-    invyrqry <- paste0("select STATECD, STATENM, STATEAB, ANN_INVENTORY, INVYR, CYCLE from ", 
-		"SURVEY where STATENM IN(", toString(paste0("'", states, "'")), 
-		") and invyr <> 9999 and ANN_INVENTORY = '", ann_inventory, "'")
+    ## Create table of state, inventory year
+    invyrqry <- paste0("select distinct STATECD, STATENM, STATEAB, ANN_INVENTORY, 
+		INVYR from ", "SURVEY where STATENM IN(", 
+		toString(paste0("'", states, "'")), 
+		") and invyr <> 9999 and P3_OZONE_IND = 'N' and ANN_INVENTORY = '", 
+		ann_inventory, "'")
     invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
-
-    cat("INVENTORY CYCLE BY INVENTORY YEAR", "\n" )
+    cat("Inventory years by state...", "\n" )
     print(invyrtab)
 
   } else {
@@ -371,7 +372,6 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
 		!grepl("WEST", POP_EVAL_GRP$EVAL_GRP_DESCR, ignore.case=TRUE), ]
       }
     
-
       ## Get evalid and inventory years from POP_EVAL table
       setkey(POP_EVAL, "EVAL_GRP_CN")
       setkey(POP_EVAL_GRP, "CN")
