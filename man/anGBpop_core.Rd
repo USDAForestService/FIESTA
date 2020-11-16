@@ -7,7 +7,7 @@
 	Generates a set of core tables based on area of interest.
 }
 \usage{
-anGBpop_core(GBpopdat, title.ref, xlsx = TRUE, outfolder = NULL, 
+anGBpop_core(GBpopdat, title.ref, xlsx = FALSE, outfolder = NULL, 
 	outfn.date = TRUE, overwrite = FALSE, divideby.vol = "million")
 }
 %- maybe also 'usage' for other objects documented here.
@@ -16,7 +16,6 @@ anGBpop_core(GBpopdat, title.ref, xlsx = TRUE, outfolder = NULL,
 	modGBpop() function for a specified area of interest. }
   \item{title.ref}{ Reference information for title and output file names. }
   \item{xlsx}{ Logical. If TRUE, adds all tables to Excel spreadsheet. }
-  \item{evalCur}{ Logical. If TRUE, the most current FIA Evalidation for state(s). }
   \item{outfolder}{ String. The path of folder to output tables. }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
   \item{overwrite}{ Logical. If TRUE, overwrites file if it exists. }
