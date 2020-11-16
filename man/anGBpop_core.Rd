@@ -8,7 +8,7 @@
 }
 \usage{
 anGBpop_core(GBpopdat, title.ref, xlsx = TRUE, outfolder = NULL, 
-	outfn.date = TRUE, divideby.vol = "million")
+	outfn.date = TRUE, overwrite = FALSE, divideby.vol = "million")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,6 +19,7 @@ anGBpop_core(GBpopdat, title.ref, xlsx = TRUE, outfolder = NULL,
   \item{evalCur}{ Logical. If TRUE, the most current FIA Evalidation for state(s). }
   \item{outfolder}{ String. The path of folder to output tables. }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
+  \item{overwrite}{ Logical. If TRUE, overwrites file if it exists. }
   \item{divideby.vol}{ String. divideby for volume tables 
 		('hundred', 'thousand', 'million'). }
 }

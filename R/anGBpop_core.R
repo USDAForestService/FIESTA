@@ -1,5 +1,5 @@
 anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE, 
-		outfolder=NULL, outfn.date=TRUE, divideby.vol="million") {
+		outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, divideby.vol="million") {
 
   ## Set global variables
   SPGRPCD=footnote3=footnote4 <- NULL
@@ -16,6 +16,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   estround <- 1
   fill <- TRUE
   addSEcol <- FALSE
+  returntitle <- TRUE
 
   ## Notes:
   ## 1. If want to add row groups with no subtotals, use GBest*() with rowgrp=TRUE.
@@ -41,7 +42,6 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 
   savedata <- ifelse(xlsx, FALSE, TRUE)
   rawdata <- ifelse(xlsx, FALSE, TRUE)
-  returntitle <- ifelse(xlsx, FALSE, TRUE)
   allin1 <- ifelse(xlsx, TRUE, FALSE)
 
   if (xlsx) {
@@ -49,13 +49,13 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     outfn <- paste0(gsub(" ", "", gsub(",", "", title.ref)), "_core_tables")
 
     ## Check Excel workbook
-    wbnm <- FIESTA::pcheck.xlsx(wbnm=NULL, savewb=TRUE, outfn=outfn, outfolder=outfolder)
+    wbnm <- FIESTA::pcheck.xlsx(wbnm=NULL, savewb=TRUE, outfn=outfn, outfolder=outfolder, 
+			overwrite=overwrite)
 
     ## Define footnotes
     footnote1 <- "Numbers in rows and columns may not sum to totals due to rounding."
     footnote2 <- "A dash (--) indicates no sample for the cell; 0 indicates a value of greater than 0 but less than 0.1."
     cellwidth <- 12
-
 
     ## Set up Excel Workbook
     wb <- xlsx::loadWorkbook(file=wbnm)
@@ -65,15 +65,12 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     datsheet <- xlsx::getSheets(wb)[[sheetnm]]
     message(paste("saving to sheet", sheetnm))
 
-
     #######################################################################################
     ## Table of Contents (TOC)
     #######################################################################################
     t1 <- "Table 01. Area by land class and reserved status"
     t2 <- "Table 02. Area by fortyp and stand-size class"
-
-    toc <- data.frame(rbind(t1), stringsAsFactors=FALSE)
-
+    toc <- data.frame(rbind(t1, t2), stringsAsFactors=FALSE)
 
     ## Create row and cells for title
     toctitle.row <- xlsx::createRow(datsheet, 1)
@@ -105,7 +102,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		allin1=allin1, title.ref=title.ref)
   estdat$est
   esttab <- estdat$est
-  tabtitle <- estdat$titlelst$title.estpse
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
   title.colvar <- estdat$titlelst$title.colvar
   title.rowvar <- estdat$titlelst$title.rowvar
 
@@ -136,7 +133,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		allin1=allin1, title.ref=title.ref)
   estdat$est
   esttab <- estdat$est
-  tabtitle <- estdat$titlelst$title.estpse
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
   title.colvar <- estdat$titlelst$title.colvar
   title.rowvar <- estdat$titlelst$title.rowvar
 
