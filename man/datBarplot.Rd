@@ -29,7 +29,7 @@ datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE,
 	If NULL, the order of the input table is used. }
   \item{sevar}{ String. Name of the variable with standard error values. }
   \item{psevar}{ String. Name of the variable with percent standard error. }
-  \item{device.type}{ String. Type(s) of device for plotting ("dev.new", "jpg", "pdf", or "ps"). }
+  \item{device.type}{ String. Type(s) of device for plotting ("dev.new", "jpg", "pdf"). }
   \item{jpeg.res}{ Integer. Resolution for jpeg image. }
   \item{device.height}{ Integer. Height (in inches) of barplot, if writing to file. }
   \item{device.width}{ Integer. Width (in inches) of barplot, if writing to file. }

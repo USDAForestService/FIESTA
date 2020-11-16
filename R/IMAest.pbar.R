@@ -114,6 +114,7 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
     est <- MAest.ht(yn.vect, N)
 
   } else if (MAmethod == "PS") {
+
     x_sample <- pltdat.dom[, PSstrvar, with=FALSE][[1]]
     x_pop <- unitlut[, c(PSstrvar, "Prop"), with=FALSE]
     est <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)

@@ -620,7 +620,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             cols <- levels(group.est[[colvar]])
 
             ## TABLES TO RETURN
-            if (length(cols) == 1) {
+            if (length(cols) == 0) {    ## Remove in future
               estpsetab <- data.frame(cbind(esttab[,title.rnames], esttab[,cols], 
         		psetab[,cols]), stringsAsFactors=FALSE)
               names(estpsetab) <- c(rnames, title.yhat, title.yhat.pse)

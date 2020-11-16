@@ -37,7 +37,8 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
 
 
   ## Check ext
-  extlst <- c("sqlite", "csv", "txt", "gdb", "shp", "gpkg")
+  extlst <- c("sqlite", "csv", "txt", "gdb", "shp", "gpkg", 
+		"jpg", "png", "tif", "img", "pdf")
   if (!is.null(ext)) {
     if (startsWith(ext, ".")) 
       ext <- sub(".", "", ext)

@@ -481,8 +481,8 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       #up <- max(datxbp[[yvar]]) * 0.05
       #ypos <- datxbp[[yvar]] + up
       ypos <- datxbp[[yvar]]
-      xpos <- bp + .15
-      text(xpos, ypos, toplabels, cex=.75, pos=3)
+      xpos <- bp + .25
+      text(xpos, ypos, toplabels, cex=.55, pos=3)
     }
  
     ## ADD ERROR BARS

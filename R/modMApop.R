@@ -132,9 +132,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   MAmethod <- popcheck$method
 
 
-print("TEST")
-print(unitarea)
-
   ###################################################################################
   ## CHECK unitarea BY ESTIMATION UNIT
   ## Returns: data table with unitvar and area by estimation unit (unitvar)

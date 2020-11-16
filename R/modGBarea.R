@@ -108,6 +108,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   }
   strunitvars <- c(unitvar, strvar)
 
+
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
