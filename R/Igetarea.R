@@ -54,7 +54,7 @@ getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
 			estd.cv := estd.se/estd][, 
 			estd.pse := estd.cv*100] )
 
-      if ("covar" %in% xdat) 
+      if ("covar" %in% names(xdat)) 
         ## Calculate covariance of estimated acres for numerator/denominator
         xdat[, est.covar := covar * get(areavar)^2]	
     }         

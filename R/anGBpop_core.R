@@ -54,8 +54,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 
     ## Define footnotes
     footnote1 <- "Numbers in rows and columns may not sum to totals due to rounding."
-    footnote2 <- "A dash (--) indicates no sample for the cell; 0 indicates a value of greater than 0 but less than 0.1."
-    cellwidth <- 12
+    footnote2 <- "A dash (--) indicates no sample for the cell"
 
     ## Set up Excel Workbook
     wb <- xlsx::loadWorkbook(file=wbnm)
@@ -69,8 +68,9 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     ## Table of Contents (TOC)
     #######################################################################################
     t1 <- "Table 01. Area by land class and reserved status"
-    t2 <- "Table 02. Area by fortyp and stand-size class"
-    toc <- data.frame(rbind(t1, t2), stringsAsFactors=FALSE)
+    t2 <- "Table 02. Area by fortyp and stand-size class on forest land"
+    t3 <- "Table 03. Area by forest type group and disturbance class on forest land"
+    toc <- data.frame(rbind(t1, t2, t3), stringsAsFactors=FALSE)
 
     ## Create row and cells for title
     toctitle.row <- xlsx::createRow(datsheet, 1)
@@ -108,6 +108,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 
 
   if (xlsx) {
+    cellwidth <- 14
     write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
 		title.colvar=title.colvar, outfolder=outfolder,
 		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
@@ -118,13 +119,14 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 
 
   #######################################################################################
-  ## 02 - Area by forest type and stand-size class
+  ## 02 - Area by forest type and stand-size class on forest land
   #######################################################################################
   tabnm <- "02"
   landarea <- "FOREST"
   rowvar <- "FORTYPCD"
   colvar <- "STDSZCD"
   coltottxt <- "All forest land"
+  cellwidth <- 14
 
   estdat <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
 		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
@@ -138,10 +140,43 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   title.rowvar <- estdat$titlelst$title.rowvar
 
   if (xlsx) {
+    cellwidth <- 14
     write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
 		title.colvar=title.colvar, outfolder=outfolder,
 		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
 		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
            footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
   }
+
+
+  #######################################################################################
+  ## 03 - Area by forest type group and disturbance class on forest land
+  #######################################################################################
+  tabnm <- "03"
+  landarea <- "FOREST"
+  rowvar <- "FORTYPGRPCD"
+  colvar <- "DSTRBCD1"
+  coltottxt <- "All forest land"
+  cellwidth <- 14
+
+  estdat <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
+		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
+		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref)
+  estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
 }

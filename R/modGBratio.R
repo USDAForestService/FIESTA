@@ -279,6 +279,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
+    tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
     unit.rowest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, bytdom=bytdom, 
 		uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, strvar=strvar, 
@@ -287,6 +288,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
+      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
       unit.colest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, bytdom=bytdom, 
 		uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, strvar=strvar, 
@@ -294,6 +296,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
     
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
+      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[grpvar]]),]
       unit.grpest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, bytdom=bytdom, 
 		uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, strvar=strvar, 

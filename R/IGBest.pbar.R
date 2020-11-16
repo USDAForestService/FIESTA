@@ -115,7 +115,7 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
 
   est.unit <- merge(est.unit, NBRPLT.gt0, by=c(unitvar, domain))
   
-  if (bytdom) est.unit$tdom <- sumyn
+  #if (bytdom) est.unit$tdom <- sumyn
 
   return(est.unit)
 }
