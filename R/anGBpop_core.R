@@ -13,7 +13,6 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     #library(xlsx)
   }
   gui <- FALSE
-  cellwidth <- ifelse(allin1, 12, 10)
   estround <- 1
   fill <- TRUE
   addSEcol <- FALSE
@@ -55,6 +54,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     ## Define footnotes
     footnote1 <- "Numbers in rows and columns may not sum to totals due to rounding."
     footnote2 <- "A dash (--) indicates no sample for the cell; 0 indicates a value of greater than 0 but less than 0.1."
+    cellwidth <- 12
 
 
     ## Set up Excel Workbook
