@@ -10,11 +10,11 @@
 \usage{
 anGBest_custom(GBpopdat, esttype = "TREE", landarea = "FOREST", plt.filter = NULL, 
 	cond.filter = NULL, estvar = NULL, estvar.filter = NULL, rowvar = NULL, 
-	colvar = NULL, treedia.brks = c(0,5,10,20,50,100), divideby = "thousand", 
-	title.ref = NULL, title.main = NULL, getbarplot = TRUE, barplot.row=TRUE, 
-	barplot.ord="DESC", barplot.col=NULL, barplot.ylim = NULL, 
+	colvar = NULL, treedia.brks = c(0,5,10,20,50,100), divideby = NULL, 
+	title.ref = NULL, title.main = NULL, getbarplot = FALSE, barplot.row=TRUE, 
+	barplot.ord="DESC", barplot.color=NULL, barplot.ylim = NULL, barplot.nplt = FALSE, 
 	savedata = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = TRUE)
+	overwrite = TRUE, ...)
 }
 \arguments{
   \item{GBpopdat}{ R list object. FIA population data and calculations for estimation. }
@@ -43,16 +43,18 @@ anGBest_custom(GBpopdat, esttype = "TREE", landarea = "FOREST", plt.filter = NUL
 	columns are used. }
   \item{barplot.ord}{ String. The order of x based on y values ('DESC', "ASC') for 
 	barplot. If NULL, the default order of the table is used. }
-  \item{barplot.col}{ String. The base color palette for barplot 
+  \item{barplot.color}{ String. The base color palette for barplot 
 	('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2').  }
   \item{barplot.ylim}{ Number. A vector of min and max values, c(min,max) for the 
 	barplot y axis. If NULL, defaults to maximum y value plus the standard error. }
+  \item{barplot.nplt}{ Logical. If TRUE, Adds number of plots on top of bar. }
   \item{savedata}{ Logical. If TRUE, saves data objects to outfolder. }
   \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{...}{ Parameters for modGB*() functions. }
 }
  
 \value{

@@ -126,7 +126,8 @@ modSAarea(SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{title.dunitvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty  
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If NULL, = "". }
+	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	If title.filter="", no title.filter is used. }
   \item{SApopdat}{ List. Population data objects returned from modSApop(). }
   \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
 }

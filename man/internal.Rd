@@ -199,6 +199,7 @@
 \alias{FIESTA_SAmod_demo_plots}
 \alias{helper.select}
 
+\alias{kable.table}
 
 
 \title{ Internal FIESTA Functions }

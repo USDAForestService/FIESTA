@@ -19,7 +19,9 @@ modPBpop(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
 	sumunits = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
 	areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, pvars2keep = NULL, 
-	gui = FALSE)
+	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite = TRUE, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -73,6 +75,18 @@ modPBpop(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
   \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
   \item{pvars2keep}{ String vector. Additional plot variables to keep in dataset. }
+  \item{saveobj}{ Logical. If TRUE, saves SApopdat object to outfolder. }
+  \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
+  \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
+	written to working directory, or if gui, a window to browse. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
+  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
+	extension. Default file name includes parameter inputs 
+	(e.g., tree_'estvar.name'_'rowvar'_'date') }
+  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
+  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
+  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

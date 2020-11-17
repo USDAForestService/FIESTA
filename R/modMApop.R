@@ -6,7 +6,9 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
-	stratcombine=TRUE, MAdata=NULL, MAmodeldat=NULL, gui=FALSE){
+	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
+	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite=TRUE, MAdata=NULL, MAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -259,6 +261,27 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 
   if (!is.null(stratcombinelut)) 
     returnlst$stratcombinelut <- stratcombinelut
+
+
+  if (saveobj) {
+    objfn <- getoutfn(outfn="MApopdat", outfolder=outfolder, 
+		overwrite=overwrite, outfn.date=outfn.date, ext="rda")
+    save(returnlst, file=objfn)
+    message("saving object to: ", objfn)
+  } 
+
+  if (savedata) {
+    datExportData(pltassgnx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    datExportData(unitarea, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    datExportData(unitlut, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitlut", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+  }
+
 
   return(returnlst)
 }

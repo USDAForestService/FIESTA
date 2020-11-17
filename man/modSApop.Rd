@@ -14,8 +14,9 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, plt = NULL, pltassgn = NULL,
 	adj = "plot", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
 	dunitvar = NULL, dunitvar2 = NULL, dunitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, dunitlut = NULL, prednames = NULL, predfac = NULL, 
-	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, outfolder = NULL, 
-	outfn.pre = NULL, outfn.date=FALSE, overwrite=FALSE, SAdata = NULL, 
+	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, savedata = FALSE, 
+	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn = NULL, 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, SAdata = NULL, 
 	gui = FALSE)
 }
 
@@ -83,8 +84,14 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, plt = NULL, pltassgn = NULL,
   \item{pvars2keep}{ String vector. Additional plot variables to keep in dataset. }
   \item{cvars2keep}{ String vector. Additional condition variables to keep in dataset. }
   \item{saveobj}{ Logical. If TRUE, save SApopdat object to outfolder. }
+  \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
+  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
+	extension. Default file name includes parameter inputs 
+	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }

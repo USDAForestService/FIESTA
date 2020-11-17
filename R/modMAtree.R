@@ -478,7 +478,15 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 
   returnlst <- list(est=est2return)
   if (!is.null(pse2return)) returnlst$pse <- pse2return 
-  if (rawdata) returnlst$raw <- rawdat
+  if (rawdata) {
+    rawdat$esttype <- "TREE"
+    rawdat$MAmethod <- MAmethod
+    rawdat$estvar <- estvar
+    rawdat$estvar.filter <- estvar.filter
+    if (!is.null(rowvar)) rawdat$rowvar <- rowvar
+    if (!is.null(colvar)) rawdat$colvar <- colvar
+    returnlst$raw <- rawdat
+  }
   if (returntitle) returnlst$titlelst <- titlelst
   if (returnMApopdat) returnlst$MApopdat <- MApopdat
     

@@ -99,7 +99,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
-		allin1=allin1, title.ref=title.ref)
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder)
   estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -132,7 +132,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
-		allin1=allin1, title.ref=title.ref)
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder)
   estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -163,7 +163,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
-		allin1=allin1, title.ref=title.ref)
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder)
   estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)

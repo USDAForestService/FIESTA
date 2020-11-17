@@ -4,8 +4,9 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, 
 	cond.nonsamp.filter=NULL, dunitvar=NULL, dunitvar2=NULL, dunitarea=NULL, 
 	areavar="ACRES", unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
-	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, outfolder=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=FALSE, SAdata=NULL, gui=FALSE){
+	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
+	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite=FALSE, SAdata=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -208,7 +209,24 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
     returnlst$adjtree <- adjtree
   }
 
-  if (saveobj) save(returnlst, file=objfn)
+  if (saveobj) {
+    objfn <- getoutfn(outfn="SApopdat", outfolder=outfolder, 
+		overwrite=overwrite, outfn.date=outfn.date, ext="rda")
+    save(returnlst, file=objfn)
+    message("saving object to: ", objfn)
+  } 
+
+  if (savedata) {
+    datExportData(pltassgnx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    datExportData(dunitarea, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    datExportData(dunitlut, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+  }
 
   return(returnlst)
 }

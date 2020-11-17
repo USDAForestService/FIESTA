@@ -3,7 +3,9 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
  	plt.nonsamp.filter=NULL, tabtype="PCT", strata=FALSE, sumunits=FALSE,
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, 
 	stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
-	stratcombine=TRUE, pvars2keep=NULL, gui=FALSE){
+	stratcombine=TRUE, pvars2keep=NULL, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
+	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite=TRUE, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -120,6 +122,28 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 
   if (!is.null(stratcombinelut)) 
     returnlst$stratcombinelut <- stratcombinelut
+
+
+  if (saveobj) {
+    objfn <- getoutfn(outfn="PBpopdat", outfolder=outfolder, 
+		overwrite=overwrite, outfn.date=outfn.date, ext="rda")
+    save(returnlst, file=objfn)
+    message("saving object to: ", objfn)
+  } 
+
+  if (savedata) {
+    datExportData(pltassgnx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    if (!is.null(unitarea)) {
+      datExportData(unitarea, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    }
+    datExportData(strlut, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="strlut", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+  }
 
   return(returnlst)
 }

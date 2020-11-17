@@ -1,10 +1,10 @@
 anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST", 
 	plt.filter=NULL, cond.filter=NULL, estvar=NULL, estvar.filter=NULL, 
 	rowvar=NULL, colvar=NULL, treedia.brks=c(0,5,10,20,50,100), 
-	divideby="thousand", title.ref=NULL, title.main=NULL, getbarplot=TRUE, 
-	barplot.row=TRUE, barplot.ord="DESC", barplot.col=NULL, barplot.ylim=NULL, 
-	savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=TRUE) {
+	divideby = NULL, title.ref=NULL, title.main=NULL, getbarplot=FALSE, 
+	barplot.row=TRUE, barplot.ord="DESC", barplot.color=NULL, barplot.ylim=NULL, 
+	barplot.nplt=FALSE, savedata=FALSE, outfolder=NULL, outfn.pre=NULL, 
+	outfn.date=FALSE, overwrite=TRUE, ...) {
 
 
   ## Set global variables
@@ -21,9 +21,26 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
   esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", 
 		checklst=esttypelst, caption="Estimation type", stopifnull=TRUE)
 
+
+  ## Check getbarplot 
+  getbarplot <- FIESTA::pcheck.logical(getbarplot, varnm="getbarplot", 
+		title="Create barplot?", first="YES", gui=gui)  
+
+  if (getbarplot) {
+    toplabelvar <- NULL
+
+    ## Check barplot.row
+    barplot.row <- FIESTA::pcheck.logical(barplot.row, varnm="barplot.row", 
+		title="Rows for barplot?", first="NO", gui=gui)  
+ 
+    ## Check barplot.nplots
+    barplot.nplt <- FIESTA::pcheck.logical(barplot.nplt, varnm="barplot.nplt", 
+		title="Add number of plots?", first="NO", gui=gui)  
+  }
+
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data extraction?", first="NO", gui=gui)  
+		title="Save data extraction?", first="NO", gui=gui) 
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
@@ -68,13 +85,13 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
     ####################################################################
     ## Get estimates
     ####################################################################
-    FIAest <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
+    MODest <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
 		plt.filter=plt.filter, cond.filter=cond.filter, 
-		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, col.FIAname=col.FIAname, 
-		sumunits=sumunits, rawdata=TRUE, divideby=divideby, 
+		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
+		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite)
+		overwrite=overwrite, divideby=divideby, ...)
 
   } else if (esttype == "TREE") {
 
@@ -82,127 +99,44 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
     ## Get estimates
     ####################################################################
 
-    FIAest <- modGBtree(GBpopdat=GBpopdat, landarea=landarea, 
+    MODest <- modGBtree(GBpopdat=GBpopdat, landarea=landarea, 
 		plt.filter=plt.filter, cond.filter=cond.filter, 
 		estvar=estvar, estvar.filter=estvar.filter,
-		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, col.FIAname=col.FIAname, 
-		sumunits=sumunits, rawdata=TRUE, divideby=divideby, 
+		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
+		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite)
+		overwrite=overwrite, divideby=divideby, ...)
 
   } else if (esttype == "RATIO") {
-    FIAest <- modGBratio(GBpopdat=GBpopdat, landarea=landarea, 
+    MODest <- modGBratio(GBpopdat=GBpopdat, landarea=landarea, 
 		plt.filter=plt.filter, cond.filter=cond.filter, 
 		estvarn=estvar, estvarn.filter=estvar.filter,
-		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, col.FIAname=col.FIAname, 
-		sumunits=sumunits, rawdata=TRUE, divideby=divideby, 
+		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
+		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite)
+		overwrite=overwrite, divideby=divideby, ...)
   }
-  est <- FIAest$est
+  est <- MODest$est
 
   if (!is.null(colvar)) 
-    pse <- FIAest$pse
-  raw <- FIAest$raw
-  titlelst <- FIAest$titlelst
+    pse <- MODest$pse
+  raw <- MODest$raw
+  titlelst <- MODest$titlelst
 
   ####################################################################
   ## Get barplot
   ####################################################################
   if (getbarplot) {
-    estcol <- ifelse(esttype == "RATIO", "rhat", "est")
-    secol <- ifelse(esttype == "RATIO", "rhat.se", "est.se")
-    if (esttype != "RATIO" && !is.null(divideby)) {
-      estcol <- paste0("est.", divideby)
-      secol <- paste0("est.se.", divideby)
-    }
-
-    ## Check barplot.ord 
-    ########################################################
-    orderlst <- c('DESC', 'ASC')
-    barplot.ord <- FIESTA::pcheck.varchar(var2check=barplot.ord, varnm="barplot.ord", 
-		checklst=orderlst, caption="Barplot order")
-
-    ## Check barplot.col 
-    ########################################################
-    colorlst <- c('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2')
-    barplot.col <- FIESTA::pcheck.varchar(var2check=barplot.col, varnm="barplot.col", 
-		checklst=colorlst, caption="Barplot color")
-
-    if (!is.null(colvar)) {
-      ## Check barplot.row
-      barplot.row <- FIESTA::pcheck.logical(barplot.row, varnm = "barplot.row", 
-        	title = "Row values?", first = "YES", stopifnull = TRUE)
-
-      if (barplot.row) {
-        title.rowvar <- titlelst$title.rowvar
-        bpest <- raw$unit.rowest[, c(title.rowvar, estcol, secol, "NBRPLT.gt0")]
-      } else {
-        title.colvar <- titlelst$title.colvar
-        bpest <- raw$unit.colest[, c(title.colvar, estcol, secol, "NBRPLT.gt0")]
-      } 
-    } else {
-      title.rowvar <- titlelst$title.rowvar
-      bpest <- raw$unit.rowest[, c(title.rowvar, estcol, secol, "NBRPLT.gt0")]
-    }
-
-    xvar <- names(bpest)[1]
-    nbrx <- nrow(bpest) 
-    if (esttype %in% "AREA") {
-      ylabel <- "Area - Acres"
-      if (!is.null(divideby)) 
-        ylabel <- paste0(ylabel, ", in ", divideby, "s")
-      bplotfn <- paste0(esttype, "_", rowvar, "_barplot")
-
-    } else {
-      if (estvar %in% ref_titles$DOMVARNM) {
-        ylabel <- ref_titles[ref_titles$DOMVARNM == estvar, "DOMTITLE"]
-      } else {
-        ylabel <- estvar
-      }
- 
-      if (esttype == "RATIO") {
-        ylabel <- paste(ylabel, "per acre") 
-      } else if (!is.null(divideby)) {
-        ylabel <- paste0(ylabel, ", in ", divideby, "s")
-      }
-      bplotfn <- paste0(esttype, "_", estvar, "_", rowvar, "_barplot")
-    }
-
-    if (is.null(barplot.col)) {
-      bplot.col <- NULL
-    } else if (barplot.col == "rainbow") {
-      bplot.col <- rainbow(nbrx)
-    } else if (barplot.col == "heat") {
-      bplot.col <- heat.colors(nbrx)
-    } else if (barplot.col == "terrain") {
-      bplot.col <- terrain.colors(nbrx)
-    } else if (barplot.col == "topo") {
-      bplot.col <- topo.colors(nbrx)
-    } else if (barplot.col == "cm") {
-      bplot.col <- cm.colors(nbrx)
-    } else if (barplot.col == "hcl1") {
-      bplot.col <- hcl.colors(nbrx)
-    } else if (barplot.col == "hcl2") {
-      bplot.col <- hcl.colors(nbrx, "Set 2")
-    } else {
-      bplot.col <- NULL
-    }
-
-    if (is.null(title.main)) {
-      main <- wraptitle(titlelst$title.row, 60)
-    } else {
-      main <- wraptitle(title.main, 60)
-    }
- 
-   datBarplot(x=bpest, xvar=xvar, yvar=estcol, errbars=TRUE, sevar=secol, 
-		savedata=savedata, outfolder=outfolder, x.order=barplot.ord,
-		outfn=bplotfn, outfn.date=outfn.date, overwrite=overwrite, 
-		device.height=7, las.xnames=2, ylabel=ylabel, col=bplot.col, 
-		main=main, ylim=barplot.ylim, toplabelvar="NBRPLT.gt0")
+    anMOD_barplot(MODest=MODest, barplot.row=barplot.row,
+		barplot.ord=barplot.ord, barplot.color=barplot.color, 
+		barplot.ylim=barplot.ylim, barplot.nplt=barplot.nplt,
+		savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre,
+		outfn.date=outfn.date, overwrite=overwrite, title.ref=title.ref,
+		title.main=title.main, divideby=divideby)
   }
+
 
   returnlst$est <- est
   if (!is.null(colvar)) 

@@ -234,14 +234,14 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
     returnlst$stratcombinelut <- stratcombinelut
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="GBpopdat.rda", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=outfn.date)
+    objfn <- getoutfn(outfn="GBpopdat", outfolder=outfolder, 
+		overwrite=overwrite, outfn.date=outfn.date, ext="rda")
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
-    datExportData(pltassgn, outfolder=outfolder, 
+    datExportData(pltassgnx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite)
     datExportData(unitarea, outfolder=outfolder, 

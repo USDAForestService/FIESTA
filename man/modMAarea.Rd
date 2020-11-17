@@ -153,7 +153,8 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{title.unitvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty  
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If NULL, = "". }
+	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	If title.filter="", no title.filter is used. }
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
   \item{MAdata}{ List. Modeldat output from FIESTA::anMAdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }

@@ -613,7 +613,14 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   ## GET VALUES TO RETURN
   returnlst <- list(est=est2return)
   if (!is.null(pse2return)) returnlst$pse <- pse2return 
-  if (rawdata) returnlst$raw <- rawdat
+  if (rawdata) {
+    rawdat$esttype <- "TREE"
+    rawdat$estvar <- estvar
+    rawdat$estvar.filter <- estvar.filter
+    if (!is.null(rowvar)) rawdat$rowvar <- rowvar
+    if (!is.null(colvar)) rawdat$colvar <- colvar
+    returnlst$raw <- rawdat
+  }
   if(returntitle) returnlst$titlelst <- alltitlelst
   if (returnGBpopdat) returnlst$GBpopdat <- GBpopdat
 

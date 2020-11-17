@@ -14,7 +14,7 @@ anGBpop_core(GBpopdat, title.ref, xlsx = FALSE, outfolder = NULL,
 \arguments{
   \item{GBpopdat}{ R object. Population data from database, returned from 
 	modGBpop() function for a specified area of interest. }
-  \item{title.ref}{ Reference information for title and output file names. }
+  \item{title.ref}{ String. Reference information for title and output file names. }
   \item{xlsx}{ Logical. If TRUE, adds all tables to Excel spreadsheet. }
   \item{outfolder}{ String. The path of folder to output tables. }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }

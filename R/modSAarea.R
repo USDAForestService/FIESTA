@@ -530,7 +530,14 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
 
   returnlst <- list(est=est2return)
   if (multest) returnlst$dunit.multest <- dunit.multest 
-  if (rawdata) returnlst$raw <- rawdat
+  if (rawdata) {
+    rawdat$esttype <- "AREA"
+    rawdat$SApackage <- SApackage
+    rawdat$SAmethod <- SAmethod
+    if (!is.null(rowvar)) rawdat$rowvar <- rowvar
+    if (!is.null(colvar)) rawdat$colvar <- colvar
+    returnlst$raw <- rawdat
+  }
   if (returntitle) returnlst$titlelst <- alltitlelst
   if (returnSApopdat) returnlst$SApopdat <- SApopdat
 

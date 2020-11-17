@@ -181,7 +181,8 @@ modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{title.estvard}{ String. TITLE: if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for the denominator estimate variable. If NULL, title.estvar = estvard.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If NULL, = "". }
+	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	If title.filter="", no title.filter is used. }
   \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
   \item{GBdata}{ List. Data objects returned from FIESTA::GBdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
