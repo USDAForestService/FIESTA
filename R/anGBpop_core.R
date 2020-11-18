@@ -1,5 +1,6 @@
 anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE, 
-		outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, divideby.vol="million") {
+		outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
+		treedia.brks=c(0,5,10,15,20,25,50,100), divideby.vol="million") {
 
   ## Set global variables
   SPGRPCD=footnote3=footnote4 <- NULL
@@ -42,7 +43,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 
   savedata <- ifelse(xlsx, FALSE, TRUE)
   rawdata <- ifelse(xlsx, FALSE, TRUE)
-  allin1 <- ifelse(xlsx, TRUE, FALSE)
+  allin1 <- TRUE
 
   if (xlsx) {
     ## Set workbook name
@@ -67,9 +68,18 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     #######################################################################################
     ## Table of Contents (TOC)
     #######################################################################################
-    t1 <- "Table 01. Area by land class and reserved status"
-    t2 <- "Table 02. Area by fortyp and stand-size class on forest land"
-    t3 <- "Table 03. Area by forest type group and disturbance class on forest land"
+    t01 <- "Table 01. Area by land class and reserved status"
+    t02 <- "Table 02. Area by forest type and stand-size class, on forest land"
+    t03 <- "Table 03. Area by forest type group and disturbance class, on forest land"
+    t04 <- "Table 04. Area by distance to road and land class, on all land"
+    t05 <- "Table 05. Number of live trees by species and disturbance group, on forest land"
+    t06 <- "Table 06. Number of live trees by species and diameter class, on forest land"
+    t07 <- "Table 07. Number of dead trees by species by diameter class, on forest land"
+    t08 <- "Table 08. Net cuft volume of live trees by species and diameter class, on forest land"
+    t09 <- "Table 09. Net cuft volume of dead trees by species and diameter class, on forest land"
+    t10 <- "Table 10. Basal area of dead trees by agent code, on forest land"
+    t11 <- "Table 11. Number of live trees per acre by species and disturbance group, on forest land"
+    t12 <- "Table 12. Basal area per acre of dead trees by agent code, on forest land"
     toc <- data.frame(rbind(t1, t2, t3), stringsAsFactors=FALSE)
 
     ## Create row and cells for title
@@ -87,27 +97,46 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 
 
   #######################################################################################
+  ## New Variables
+  #######################################################################################
+
+  ## Disturbance group for primary disturbance (DSTRBCD1) - DSTRBCD
+  GBpopdat$pltcondx <- merge(GBpopdat$pltcondx, 
+		ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")], 
+		by.x="DSTRBCD1", by.y="VALUE")
+  names(GBpopdat$pltcondx)[names(GBpopdat$pltcondx) == "GROUPCD"] <- "DSTRBGRP"
+
+  ## Diameter class for DIA - DIACL
+  treedia.brks=c(0,5,10,15,20,25,50,100)
+  datlut <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.brks) 
+  GBpopdat$treex <- datlut$xLUT
+
+
+
+  #######################################################################################
   ## 01 - Area by land class and reserved status
   #######################################################################################
   tabnm <- "01"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "ALL"
   rowvar <- "COND_STATUS_CD"
   colvar <- "RESERVCD"
-  coltottxt <- NULL
 
-  estdat <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
-		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
+  estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea, 
+		rowvar=rowvar, row.FIAname=TRUE, 
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
-		allin1=allin1, title.ref=title.ref, outfolder=outfolder)
-  estdat$est
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
   title.colvar <- estdat$titlelst$title.colvar
   title.rowvar <- estdat$titlelst$title.rowvar
 
-
   if (xlsx) {
+    coltottxt <- NULL
     cellwidth <- 14
     write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
 		title.colvar=title.colvar, outfolder=outfolder,
@@ -117,29 +146,30 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   }
 
 
-
   #######################################################################################
-  ## 02 - Area by forest type and stand-size class on forest land
+  ## 02 - Area by forest type and stand-size class, on forest land
   #######################################################################################
   tabnm <- "02"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
-  rowvar <- "FORTYPCD"
+  rowvar <- "FORTYPGRPCD"
   colvar <- "STDSZCD"
-  coltottxt <- "All forest land"
-  cellwidth <- 14
 
-  estdat <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
-		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
+  estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea, 
+		rowvar=rowvar, row.FIAname=TRUE, 
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
-		allin1=allin1, title.ref=title.ref, outfolder=outfolder)
-  estdat$est
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
   title.colvar <- estdat$titlelst$title.colvar
   title.rowvar <- estdat$titlelst$title.rowvar
 
   if (xlsx) {
+    coltottxt <- "All forest land"
     cellwidth <- 14
     write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
 		title.colvar=title.colvar, outfolder=outfolder,
@@ -150,27 +180,351 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 
 
   #######################################################################################
-  ## 03 - Area by forest type group and disturbance class on forest land
+  ## 03 - Area by forest type group and disturbance class, on forest land
   #######################################################################################
   tabnm <- "03"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "FORTYPGRPCD"
   colvar <- "DSTRBCD1"
-  coltottxt <- "All forest land"
-  cellwidth <- 14
 
-  estdat <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
-		rowvar=rowvar, row.FIAname=TRUE, sumunits=TRUE,
+  estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea, cond.filter="DSTRBCD1 > 0",
+		rowvar=rowvar, row.FIAname=TRUE, 
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
-		allin1=allin1, title.ref=title.ref, outfolder=outfolder)
-  estdat$est
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
   title.colvar <- estdat$titlelst$title.colvar
   title.rowvar <- estdat$titlelst$title.rowvar
 
   if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 04 - Area by distance to road and land class, on all land
+  #######################################################################################
+  tabnm <- "04"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "ALL"
+  rowvar <- "RDDISTCD"
+  colvar <- "COND_STATUS_CD"
+
+  estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea, cond.filter="DSTRBCD1 > 0",
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+
+  #######################################################################################
+  ## 05 - Number of live trees by species and disturbance group, on forest land
+  #######################################################################################
+  tabnm <- "05"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "DSTRBGRP"
+  estvar <- "TPA_UNADJ"
+  estvar.filter <- "STATUSCD == 1"
+
+  estdat <- modGBtree(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvar=estvar, estvar.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 06 - Number of live trees by species and diameter class, on forest land
+  #######################################################################################
+  tabnm <- "06"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "DIACL"
+  estvar <- "TPA_UNADJ"
+  estvar.filter <- "STATUSCD == 1"
+
+  estdat <- modGBtree(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvar=estvar, estvar.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 07 - Number of dead trees by species by diameter class, on forest land
+  #######################################################################################
+  tabnm <- "07"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "DIACL"
+  estvar <- "TPA_UNADJ"
+  estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+
+  estdat <- modGBtree(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvar=estvar, estvar.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 08 - Net cuft volume of live trees by species and diameter class, on forest land
+  #######################################################################################
+  tabnm <- "08"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "DIACL"
+  estvar <- "VOLCFNET"
+  estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+
+  estdat <- modGBtree(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvar=estvar, estvar.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 09 - Net cuft volume of dead trees by species and diameter class, on forest land
+  #######################################################################################
+  tabnm <- "09"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "DIACL"
+  estvar <- "VOLCFNET"
+  estvar.filter <- "STATUSCD == 1 & DIA >= 5"
+
+  estdat <- modGBtree(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvar=estvar, estvar.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 10 - Basal area of dead trees by agent code, on forest land
+  #######################################################################################
+  tabnm <- "10"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "AGENTCD"
+  estvar <- "BA"
+  estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+
+  estdat <- modGBtree(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvar=estvar, estvar.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 11 - Number of live trees per acre by species and disturbance group, on forest land
+  #######################################################################################
+  tabnm <- "11"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "DSTRBGRP"
+  estvar <- "TPA_UNADJ"
+  estvar.filter <- "STATUSCD == 1"
+
+  estdat <- modGBratio(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvarn=estvar, estvarn.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
+    cellwidth <- 14
+    write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
+		title.colvar=title.colvar, outfolder=outfolder,
+		title.rowvar=title.rowvar, fill=fill, allin1=allin1, addSEcol=addSEcol,
+		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
+           footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
+  }
+
+
+  #######################################################################################
+  ## 12 - Basal area per acre of dead trees by agent code, on forest land
+  #######################################################################################
+  tabnm <- "12"
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  landarea <- "FOREST"
+  rowvar <- "SPCD"
+  colvar <- "AGENTCD"
+  estvar <- "BA"
+  estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+
+  estdat <- modGBratio(GBpopdat=GBpopdat, sumunits=TRUE,
+		landarea=landarea,
+           estvarn=estvar, estvarn.filter=estvar.filter,
+		rowvar=rowvar, row.FIAname=TRUE, 
+		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
+		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
+		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
+  #estdat$est
+  esttab <- estdat$est
+  tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
+  title.colvar <- estdat$titlelst$title.colvar
+  title.rowvar <- estdat$titlelst$title.rowvar
+
+  if (xlsx) {
+    coltottxt <- "All forest land"
     cellwidth <- 14
     write2xlsx(esttab=esttab, tabtitle=paste0("Table ", tabnm, ". ", tabtitle),  
 		title.colvar=title.colvar, outfolder=outfolder,

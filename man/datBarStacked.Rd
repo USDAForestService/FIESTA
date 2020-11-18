@@ -49,10 +49,11 @@ datBarStacked(x, main.attribute, sub.attribute, response = "phat",
   \item{xlabel}{ String. A label for the x axis (same as xlab). }
   \item{las.xnames}{ Number. The direction of x variable names (0,1,2,3). 0:Default, 
 	parallel; 1:horizontal; 2:perpendicular; 3:vertical. } 
-  \item{main.order}{ A vector of main.attribute names in desired order for bars. }
-  \item{sub.order}{ A vector of sub.attribute names in desired order for stack, 
+  \item{main.order}{ String vector. A vector of main.attribute names in desired order 
+	for bars. May also be 'DESC' or 'ASC'. }
+  \item{sub.order}{ String vector. Avector of sub.attribute names in desired order for stack, 
 	with the first name used as the column in each stack. If NULL, the order is based 
-	on the overall cover of each sub.attribute. }
+	on the overall cover of each sub.attribute. May also be 'DESC' or 'ASC'. }
   \item{legend.fit}{ Logical. Should bar.lim be changed to fit the legend of the plot. 
 	Will only be used if the legend is on the right side of a horizontal plot or the top 
 	of a vertical plot. (i.e. horiz=FALSE). }

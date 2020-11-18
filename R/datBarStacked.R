@@ -121,18 +121,22 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
   if (!is.numeric(datx[[response]])) { 
     stop("the response attribute must be numeric") }
 
+  ## Check horiz
+  horiz <- FIESTA::pcheck.logical(horiz, varnm="horiz", 
+		title="Horizontal bars?", first="NO", gui=gui)  
+
+
   ###################################################################################
   ########################## Process pbar.table ####################################
   ###################################################################################
 
-
   ## Divide by
   divide <- FALSE
-  if(max(abs(datx[[response]])) > 10000000){
+  if (max(abs(datx[[response]])) > 10000000) {
     datx[[response]] <- datx[,response] / 1000000
     divide <- TRUE
     dlabel <- "(millions)"
-  }else if(max(abs(datx[[response]])) > 10000){
+  } else if (max(abs(datx[[response]])) > 10000) {
     datx[[response]] <- datx[[response]] / 1000
     divide <- TRUE
     dlabel <- "(thousands)"
@@ -142,6 +146,53 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
           sub=datx[,sub.attribute],
           response=datx[,response])
 
+
+  ################## NEW CODE
+  main.names <- unique(p.sub$main)
+  sub.names <- unique(p.sub$sub)
+
+  ## Order main.attribute values
+  if (!is.null(main.order)) {
+    if (length(main.order) == 1 && main.order %in% c("ASC", "DESC")) {
+      tmp <- aggregate(p.sub$response, by=list(p.sub$main), sum)
+      names(tmp) <- c("main", "response")
+      decreasing <- ifelse(main.order == "DESC", TRUE, FALSE)
+      if (!horiz) decreasing <- !decreasing
+      tmp <- tmp[order(tmp$response, decreasing=decreasing), ]
+      main.order <- tmp$main
+    }
+
+    main.order <- as.character(main.order)
+    if (!all(main.names %in% main.order)) {
+      not <- main.names[which(!main.names %in% main.order)]
+      stop("check main.order..  incomplete number of names: ", toString(not))
+    } else if (!all(main.order %in% main.names)) {
+      main.order <- main.order[which(main.order %in% main.names)]
+    }
+  } else {
+    main.order <- main.names
+  }
+  main.order <- rev(main.order)
+
+  ## Order sub.attribute values
+  if (!is.null(sub.order)) {
+    if (length(sub.order) == 1 && sub.order %in% c("ASC", "DESC")) {
+      tmp <- aggregate(p.sub$response, by=list(p.sub$sub), sum)
+      names(tmp) <- c("sub", "response")
+      decreasing <- ifelse(sub.order == "DESC", FALSE, TRUE)
+      tmp <- tmp[order(tmp$response, decreasing=decreasing), ]
+      sub.order <- tmp$sub
+    }
+
+    sub.order <- as.character(sub.order)
+    if (!all(sub.names %in% sub.order)) {
+      not <- sub.names[which(!sub.names %in% sub.order)]
+      stop("check sub.order..  incomplete number of names: ", addcommas(not))
+    } else if (!all(sub.order %in% sub.names)){
+      sub.order <- sub.order[which(sub.order %in% sub.names)]
+    }
+  }
+ 
   ## LUT.color
   ################################
   LUT.color <- pcheck.table(LUT.color, caption="Color lookup table?", gui=gui)
@@ -186,7 +237,8 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
     subclasses <- unique(datx[[sub.attribute]])
     nbrclasses <- length(subclasses)
   
-    LUT.color <- data.frame(cbind(subclasses, get(color)(nbrclasses)), stringsAsFactors=FALSE)
+    LUT.color <- data.frame(cbind(subclasses, get(color)(nbrclasses)),
+ 		stringsAsFactors=FALSE)
     names(LUT.color) <- c(sub.attribute, "COLOR")
 
   }
@@ -223,78 +275,82 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
   ## SET UP MAR and TEXT PLACEMENT AND ADD TEXT
   ######################################################
   maxattnum <- 15
+  xmaxnum <- max(nchar(p.sub$main))
     
   ## las.xnames
   ######################
-  if(is.null(las.xnames)){
-    if(horiz){
+  if (is.null(las.xnames)) {
+    if (horiz) {
       las.xnames <- 1
-    }else{
-      if(length(datx[,main.attribute]) > maxattnum){
-        las.xnames <- 2
-      }else{
+    } else {
+      if (length(unique(p.sub$main)) > maxattnum || xmaxnum > 10) {
+        las.xnames <- 3
+      } else {
         las.xnames <- 1
       }
     }
   }
+  srt <- ifelse(las.xnames == 1, 0, ifelse(las.xnames == 3, 60, 90))
+
   ## ylabel
   ######################
-  ymaxnum <- max(sapply(round(datx[,response]), nchar)) 
-  if(!is.null(ylabel)){
-    if(horiz){
+  ymaxnum <- max(sapply(round(p.sub$response), nchar)) 
+  if (!is.null(ylabel)) {
+    if (horiz) {
       yside <- 1
       ylasnum <- 1
       ylinenum <- 2
-    }else{
+    } else {
       yside <- 2
       ylasnum <- 0
       ylinenum <- ymaxnum * cex.names/2 + 1
     }
-    if(divide){
+    if (divide) {
       ylabel <- paste(ylabel, dlabel)
     }
-  }else{
+  } else {
     ylinenum <- ymaxnum * cex.names/2 + 2
   }
+
   ## xlabel
   ######################
-  xmaxnum <- max(nchar(datx[[main.attribute]]))
-  if(!is.null(xlabel)){ 
+  if (!is.null(xlabel)) { 
     xside <- ifelse(horiz, 2, 1)		## axis position (1:xaxis; 2:yaxis)
-    xlasnum <- ifelse(horiz, 0, 1)		## orientation (0:horizontal; 1:vertical)
+    xlasnum <- ifelse(horiz, 0, 1)	## orientation (0:horizontal; 1:vertical)
     linenum <- 2
-
-    if(horiz){
-      xlinenum <- .36 * (xmaxnum * cex.names) + linenum 
-    }else{
-      if(las.xnames == 2){
-        xlinenum <- .36 * (xmaxnum * cex.names) + linenum 
-      }else{
+    if (horiz) {
+      #xlinenum <- .36 * (xmaxnum * cex.names) + linenum 
+      xlinenum <- .36 * xmaxnum + linenum 
+    } else {
+      if (las.xnames %in% c(0,2)) {
+        xlinenum <- .36 * xmaxnum + linenum 
+      } else {
         xlinenum <- 4
       }
     }
-  }else{
-    if(horiz){
-      xlinenum <- (xmaxnum * cex.names)/2 + 0.5
-    }else{
-      xlinenum <- 2.5
-    } 
+  } else {
+    if (horiz) {
+     xlinenum <- (xmaxnum * cex.names)/2 - 1
+    } else {
+      xlinenum <- ifelse(las.xnames==0, xmaxnum/3, xmaxnum/4)
+      #xlinenum = 8
+    }
   }
 
   ## Set mar (number of lines for margins - bottom, left, top, right)
-  if(is.null(mar)){
+  if (is.null(mar)) {
     mar <-  par("mar")
 
     mar[3] <- ifelse(!is.null(main), 3.5, 2)	## top mar
     mar[4] <- 2.5						## right mar
 
-    if(horiz){
+    if (horiz) {
       mar[1] <- ylinenum + 2.0				## bottom mar
       mar[2] <- xlinenum + 2.0				## left mar
       mar[4] <- 2.5						## right mar
-    }else{
-      mar[1] <- 4 * cex.names				## bottom mar
-      mar[2] <- ylinenum + 1.5				## left mar
+    } else {
+      mar[1] <- xlinenum * cex.names + 3.5		## bottom mar
+      mar[2] <- ylinenum + 1.6				## left mar
       mar[4] <- 0.5						## right mar
     }
   }
@@ -302,20 +358,20 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 
   ## GENERATE BARPLOTS
   ################################################# 
-  for(i in 1:length(device.type)){
+  for (i in 1:length(device.type)) {
 
     ### Output filenames ###
     #################################################
-    if(device.type[i] != "default"){ 
+    if (device.type[i] != "default") { 
       ext <- device.type[i]
       OUTPUTfn <- getoutfn(outfn, outfolder=outfolder, outfn.pre=outfn.pre, 
 		outfn.date=outfn.date, overwrite=overwrite, ext=ext)
     }
 
-    if(device.type[i] == "default"){
+    if (device.type[i] == "default") {
       dev.new(width=device.width, height=device.height, record=TRUE)
-    }else{
-      if(savedata){
+    } else {
+      if (savedata) {
         switch(device.type[i], 
           jpg = {jpeg(filename=OUTPUTfn, width=device.width, height=device.height, 
 			res=jpeg.res, units="in")},
@@ -323,12 +379,11 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
           pdf = {pdf(file=OUTPUTfn, width=device.width, height=device.height)},
           stop("invalid device.type") 
         )
-      }else{
+      } else {
         device.type[-i] <- device.type[-i]
       }
     }
       
-
     # create matrix with: 
     #  one row for each possible value of sub.attribute
     #  one column for each possible group
@@ -337,36 +392,19 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 
     ################## NEW CODE
     ## Order main.attribute values
-    if(!is.null(main.order)){
-      if(!all(colnames(mat.type) %in% main.order)){
-        not <- colnames(mat.type)[which(!colnames(mat.type) %in% main.order)]
-        stop("check main.order..  incomplete number of names: ", addcommas(not))
-      }else if(!all(main.order %in% colnames(mat.type))){
-        main.order <- main.order[which(main.order %in% colnames(mat.type))]
-      }
+    if (!is.null(main.order))
       mat.type <- mat.type[, main.order] 
-    }
 
     ## Order sub.attribute values
-    if(is.null(sub.order)){
-      ### reorder table based on the total row sums.. 
-      mat.type <- mat.type[order(rowSums(mat.type), decreasing=TRUE),] 
-    }else{
-      if(!all(row.names(mat.type) %in% sub.order)){
-        not <- row.names(mat.type)[which(!row.names(mat.type) %in% sub.order)]
-        stop("check sub.order..  incomplete number of names: ", addcommas(not))
-      }else if(!all(sub.order %in% row.names(mat.type))){
-        sub.order <- sub.order[which(sub.order %in% row.names(mat.type))]
-      }
+    if (!is.null(sub.order))
       mat.type <- mat.type[match(sub.order, row.names(mat.type)),]
-    }
 
     mat.type <- mat.type[rowSums(mat.type) > 0,]
     
     ### if percent
-    if(percent){
+    if (percent)
       mat.type <- t(t(mat.type)/colSums(mat.type) * 100)
-    }
+    
     ################## END NEW CODE
 
     #find ordered unique names of main.attribute and sub.attribute
@@ -385,7 +423,7 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 
     # make bar plot
   
-    if(horiz == FALSE){
+    if (horiz == FALSE) {
       op <- par(xpd=NA, cex=par("cex"), mar=mar)
 
       # check legend.x and legend.y
@@ -398,7 +436,6 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
         legend.fit <- FALSE}
 
       # make sure there is space for legend
-
       plot(c(0,1),c(0,1),type="n",bty="n",xaxt="n",yaxt="n",xlab="",ylab="",xaxs="i",yaxs="i")
       LEGEND <- legend(  x=legend.x,
               y=legend.y,
@@ -415,16 +452,16 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
       BP <- barplot(mat.type, col=sub.colors, yaxt="n", horiz=horiz, cex.names=cex.names, 
             plot=FALSE,...)
 
-      if(legend.fit){
+      if (legend.fit) {
         # check left clearance
-        if(legend.x == "topright"){
+        if (legend.x == "topright") {
           LEG.left <- (LEGEND$rect$left)*(max(BP)+min(BP))
           intheway <- (LEG.left < BP+0.5*(BP[2]-BP[1]))}
-        if(legend.x == "topleft"){
+        if (legend.x == "topleft") {
           LEG.right <- (LEGEND$rect$left+LEGEND$rect$w)*(max(BP)+min(BP))
           intheway <- (LEG.right > BP-0.5*(BP[2]-BP[1]))}
         # check top/bottom clearance
-        if(legend.x == "bottomright"){
+        if (legend.x == "bottomright") {
           LEG.top <- (LEGEND$rect$top)*(max(BP)+min(BP))
           intheway <- (LEG.top > BP-0.5*(BP[2]-BP[1])) }
 
@@ -432,60 +469,68 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
         legendside.max <- max(all.max[intheway])
       
         # check bottom clearance
-        LEG.bottom<-LEGEND$rect$top-LEGEND$rect$h-0.02
+        LEG.bottom <- LEGEND$rect$top-LEGEND$rect$h-0.02
         legendside.max<-legendside.max/LEG.bottom
       }
       
       # calculate lengthwise axis
 
-      if(is.null(bar.lim)){
+      if (is.null(bar.lim)) {
         bar.max <- max(all.max,na.rm = TRUE)
-      }else{
+      } else {
         bar.max <- max(bar.lim)}
 
-      if(percent){
+      if (percent) {
         bar.max <- 100
         ticks <- (0:5)*20
-      }else{
-        if(trunc(bar.max) > 100){
+      } else {
+        if (trunc(bar.max) > 100) {
           ticks <- pretty(c(0,bar.max), n=5)
           bar.max <- max(ticks)
-        }else{
-          if(trunc(bar.max) == 100){
+        } else {
+          if (trunc(bar.max) == 100) {
             bar.max <- 100
             ticks <- (0:5)*20
-          }else{
-            if(bar.max >= 80){
+          } else {
+            if (bar.max >= 80) {
               bar.max <- ceiling(bar.max/20)*20
               ticks <- (0:(bar.max/20))*20
-            }else{
-              if(bar.max >= 30){
+            } else {
+              if (bar.max >= 30) {
                 bar.max <- ceiling(bar.max/10)*10
                 ticks <- (0:(bar.max/10))*10
-              }else{
+              } else {
                 bar.max <- ceiling(bar.max/5)*5
                 ticks <- (0:(bar.max/5))*5}}}}
       }
 
-      if(is.null(bar.lim)){
-        if(legend.fit){
+      if (is.null(bar.lim)) {
+        if (legend.fit) {
           bar.lim <- c(0, max(bar.max,legendside.max)/bar.ratio)
-        }else{
+        } else {
           bar.lim <- c(0, bar.max/bar.ratio)}
-      }else{
-        bar.lim <- bar.lim/bar.ratio}
-
+      } else {
+        bar.lim <- bar.lim/bar.ratio
+      }
 
       par(new=TRUE)
       bp <- barplot(mat.type, col=sub.colors, ylim=bar.lim, yaxt="n", horiz=horiz, 
-          cex.names=cex.names, ...)
+          cex.names=cex.names, axisnames=FALSE, ...)
+      text(bp, par("usr")[3], adj = c(1, 1), xpd=TRUE, labels=main.order, 
+			cex=cex.names, srt=srt)
+
       bp.max <- max(bp)+min(bp)
 
       lines(c(0,0),c(0,bar.max))
-      for(j in ticks){
+      for (j in ticks) {
         lines(c(-bp.max/80,0), c(j,j))}
-      text(x=rep(0, length(ticks)), y=ticks,labels=ticks, cex=cex.names, pos=2, offset=.5)
+ 
+      text(x=rep(0, length(ticks)), y=ticks, labels=ticks, cex=cex.names, pos=2, 
+		offset=.5)
       mtext(ylabel, line=2, side=2, at=max(ticks)/2, cex=cex.label, adj=.5)
+
+      ## if length of sub is greater than 4, create 2 columns in legend
+      ncol <- ifelse (length(sub.colors) > 4, 2, 1)
 
       # make legend
       legend(  x=legend.x,
@@ -498,26 +543,26 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
           legend=names(sub.colors),
           fill=sub.colors,
           cex=legend.cex,
-          ncol=2)
-      if(!is.null(main)){
-        title(main=main, cex.main=cex.main) }
+          ncol=ncol)
+      if (!is.null(main))
+        title(main=main, cex.main=cex.main)
 
     }
 
-    if(horiz==TRUE){
+    if (horiz==TRUE) {
       op <- par(xpd=NA, cex=par("cex"), las=1, mar=mar, mgp=c(3,0.5,0))
 
       # check legend.x and legend.y
-      if(is.null(legend.x) && is.null(legend.y)){
-        legend.x <- "bottomright"}
+      if (is.null(legend.x) && is.null(legend.y))
+        legend.x <- "bottomright"
 
-      if(is.null(legend.fit)){
-        legend.fit <- TRUE}
-      if(!legend.x %in% c("topright","bottomright")){
-        legend.fit <- FALSE}
+      if (is.null(legend.fit))
+        legend.fit <- TRUE
+      if (!legend.x %in% c("topright","bottomright"))
+        legend.fit <- FALSE
 
-      if(legend.fit){
-        legend.inset <- legend.inset + .04}
+      if (legend.fit)
+        legend.inset <- legend.inset + .04
 
       # make sure there is space for legend
       plot(c(0,1),c(0,1),type="n",bty="n",xaxt="n",yaxt="n",xlab="",ylab="",xaxs="i",yaxs="i")
@@ -537,7 +582,7 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
       BP <- barplot(mat.type, col=sub.colors, xaxt="n", horiz=horiz, cex.names=cex.names, 
           plot=FALSE,...)
 
-      if(legend.fit){
+      if (legend.fit) {
         # check top/bottom clearance
         if(legend.x == "bottomright"){
           LEG.top <- (LEGEND$rect$top) * (max(BP)+min(BP))
@@ -560,52 +605,52 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 
       # calculate lengthwise axis
 
-      if(is.null(bar.lim)){
+      if (is.null(bar.lim)) {
         bar.max <- max(all.max, na.rm = TRUE)
-      }else{
-        bar.max <- max(bar.lim)}
+      } else {
+        bar.max <- max(bar.lim)
+      }
 
-      if(percent){
+      if (percent) {
         bar.max <- 100
         ticks <- (0:5)*20
-      }else{
-        if(trunc(bar.max) > 100){
+      } else {
+        if (trunc(bar.max) > 100) {
           ticks <- pretty(c(0,bar.max), n=5)
           bar.max <- max(ticks)
-        }else{
-          if(trunc(bar.max) == 100){
+        } else {
+          if (trunc(bar.max) == 100) {
             bar.max <- 100
             ticks <- (0:5)*20
-          }else{
-            if(bar.max >= 80){
+          } else {
+            if (bar.max >= 80) {
               bar.max <- ceiling(bar.max/20)*20
               ticks <- (0:(bar.max/20))*20
-            }else{
-              if(bar.max >= 30){
+            } else {
+              if (bar.max >= 30) {
                 bar.max <- ceiling(bar.max/10)*10
                 ticks <- (0:(bar.max/10))*10
-              }else{
+              } else {
                 bar.max <- ceiling(bar.max/5)*5
                 ticks <- (0:(bar.max/5))*5}}}}
       }
 
-      if(is.null(bar.lim)){
-        if(legend.fit){
+      if (is.null(bar.lim)) {
+        if (legend.fit) {
           bar.lim <- c(0, max(bar.max,legendside.max)/bar.ratio)
-        }else{
+        } else {
           bar.lim <- c(0, bar.max/bar.ratio)}
-      }else{
+      } else {
         bar.lim <- bar.lim/bar.ratio}
 
       par(new=TRUE)
       bp <- barplot(mat.type, col=sub.colors, xlim=bar.lim, xaxt="n", cex.names=cex.names, 
-          horiz=horiz,...)
-
+          horiz=horiz, ...)
       bp.max <- max(bp) + min(bp)
 
       ## y axis
       lines(c(0,bar.max),c(0,0))
-      for(j in ticks){
+      for (j in ticks) {
         lines(c(j,j), c(-bp.max/80,0))}
       text(y=rep(0,length(ticks)), x=ticks, labels=ticks, cex=cex.names, pos=1, offset=.5)
       mtext(ylabel, line=1.25, side=1, at=max(ticks)/2, cex=cex.label, adj=.5)
@@ -625,13 +670,12 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
           cex=legend.cex,
           ncol=1)
       }
-      if(!is.null(main)){
-        title(main=main, cex.main=cex.main) }
-
+      if (!is.null(main))
+        title(main=main, cex.main=cex.main)
 
     ## x label
-    if(!is.null(xlabel)){ 
-      mtext(xlabel, side=xside, line=xlinenum, cex=cex.label, las=xlasnum) }
+    if (!is.null(xlabel))  
+      mtext(xlabel, side=xside, line=xlinenum, cex=cex.label, las=xlasnum) 
 
     par(op)
 

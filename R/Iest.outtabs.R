@@ -572,7 +572,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			pseround=pseround, allin1=allin1, rowgrp=rowgrp, rowgrpnm=rowgrpnm,
  			title.rnames=title.rnames, estnull=estnull, psenull=psenull,
 			char.width=char.width)
- 
+
         if (allin1) {
           estpsetab <- tabs
         
@@ -692,7 +692,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
  					overwrite=overwrite))
                   } else {
                     suppressWarnings(
-                    FIESTA::save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
+                    save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
 					tab2.title=title.pse.unit, outfolder=outfolder, coltitlerow=TRUE,
  					coltitle=title.colvar, rnames=rnames, outfn.estpse=outfn.estpse.unit, 
 					addtitle=addtitle, rowtotal=FALSE, outfn.date=outfn.date,

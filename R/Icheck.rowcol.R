@@ -62,6 +62,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
   } else {
     domvarlst <- names(condf)[!names(condf) %in% 
 		c(cuniqueid, condid, "LON", "LAT", "PLOT")]
+
   }
   if ("DSTRBCD1" %in% names(condf)) 
     domvarlst <- c(domvarlst, "DSTRBGRP", "DSTRBGRPNM")
@@ -219,6 +220,14 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
           }
         } else {
           rowLUTgrp <- FALSE
+#          if (rowvar %in% c("DSTRBCD1", "DSTRBCD2", "DSTRBCD3")) {
+#            condf <- merge(condf, 
+#			ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")], 
+#			by.x=rowvar, by.y="VALUE")
+#            names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
+#            rowvar <- "DSTRBGRP"
+#          }
+          
           if (rowgrp) {
             if (!is.null(rowgrpnm)) {
               if (!rowgrpnm %in% names(condf)) stop(paste(rowgrpnm, "not in cond"))
@@ -466,6 +475,14 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       }
 
     } else if (colvar %in% names(condf)) {
+
+#      if (colvar %in% c("DSTRBCD1", "DSTRBCD2", "DSTRBCD3")) {
+#        condf <- merge(condf, 
+#			ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")], 
+#			by.x=colvar, by.y="VALUE")
+#        names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
+#        colvar <- "DSTRBGRP"
+#      }
 
       if (col.FIAname || !is.null(collut)) {
         if (!is.null(collut) && ncol(collut) > 1 && all(names(collut) %in% names(condf))) {
@@ -740,12 +757,12 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
     }
   }
 
-  if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
-    if (any(uniquecol[[colvar]] %in% c(0, "Nonforest"))) {
-      message("0 values are assumed to represent nonforest land and are removed from analysis")
-      uniquecol <- uniquecol[!uniquecol[[colvar]] %in% c(0, "Nonforest"),]
-    }
-  } 
+  #if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
+  #  if (any(uniquecol[[colvar]] %in% c(0, "Nonforest"))) {
+  #    message("0 values are assumed to represent nonforest land and are removed from analysis")
+  #    uniquecol <- uniquecol[!uniquecol[[colvar]] %in% c(0, "Nonforest"),]
+  #  }
+  #} 
  
   ## Define cvars2keep
   cvars2keep <- unique(c(cuniqueid, condid, cvars2keep))

@@ -206,7 +206,9 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
       tdomdat[,(colvar) := sapply(get(grpvar), 
 			function(x){strsplit(as.character(x), "#")[[1]][2]})]
     }
+    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
   } 
+
 
   #####################################################################################
   ### Get titles for output tables
@@ -339,16 +341,16 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 			function(x){strsplit(as.character(x), "#")[[1]][1]})]
           unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
 			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
+          ordnames <- unique(c(ordnames, names(uniquecol)))
         } else {
-          ordnames <- c(ordnames, colvar)
+          ordnames <- unique(c(ordnames, colvar))
         }
         if (!is.null(uniquerow))  {
           unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
 			row.add0)
-          ordnames <- c(names(uniquerow), ordnames)
+          ordnames <- unique(c(names(uniquerow), ordnames))
         } else {
-          ordnames <- c(ordnames, rowvar)
+          ordnames <- unique(c(ordnames, rowvar))
         }
       } else if (col.add0) {
         if (!is.null(uniquecol))  {
@@ -356,9 +358,9 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 			(rowvar) := NULL]
           unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
 			col.add0)
-          ordnames <- c(ordnames, names(uniquecol))
+          ordnames <- unique(c(ordnames, names(uniquecol)))
         } else {
-          ordnames <- c(ordnames, colvar)
+          ordnames <- unique(c(ordnames, colvar))
         }
         if (!is.null(uniquerow))  {
           unit.grpest[,(rowvar) := sapply(get(unitvar), 
@@ -367,24 +369,24 @@ modGBtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 			function(x){strsplit(as.character(x), "#")[[1]][1]})]
           unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
 			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
+          ordnames <- unique(c(names(uniquerow), ordnames))
         } else {
-          ordnames <- c(rowvar, ordnames)
+          ordnames <- unique(c(rowvar, ordnames))
         }
       } else {
         if (!is.null(uniquecol)) {
           unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
 			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
+          ordnames <- unique(c(ordnames, names(uniquecol)))
         } else {
-          ordnames <- c(ordnames, colvar)
+          ordnames <- unique(c(ordnames, colvar))
         }
         if (!is.null(uniquerow)) {
           unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
 			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
+          ordnames <- unique(c(names(uniquerow), ordnames))
         } else {
-          ordnames <- c(ordnames, rowvar)
+          ordnames <- unique(c(ordnames, rowvar))
         }
       }
       ordnames <- c(unitvar, ordnames)

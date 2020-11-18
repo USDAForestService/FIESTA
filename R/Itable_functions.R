@@ -171,7 +171,6 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   group.est[NBRPLT.gt0 == 0, (estnm) := estnull]
   group.est[NBRPLT.gt0 == 0, (psenm) := psenull]
 
-
   if (!is.null(rowvar.est)) {
     if (is.numeric(rowvar.est[[estnm]]))
       rowvar.est[[estnm]] <- round(rowvar.est[[estnm]], estround)
@@ -346,6 +345,7 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
     ## Merge row
     ##############################################################
     if (allin1) {
+
       estpse.row <- c(estpse.row, estpse.tot)
       estpse$Total <- estpse.row
     } else {
@@ -354,8 +354,7 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
       est$Total <- est.row
       pse$Total <- pse.row
     }
-  }
-       
+  }       
   if (allin1) {
     return(estpse)
   } else {

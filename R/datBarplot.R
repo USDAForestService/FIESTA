@@ -174,7 +174,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   datxbp <- datx[, lapply(.SD, sum, na.rm=TRUE), 
 			by=c(xvar, grpvar, sevar, toplabelvar), .SDcols=yvar]
 
-  ## Decending order
+  ## Ordering
   if (!is.null(x.order)) {
     if (length(x.order) == 1) {
       if (x.order == "DESC") {
@@ -204,12 +204,12 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
         message("missing values in x.order list: ", toString(notinOrder)) 
         datxbp <- datxbp[x.order, ]
       }
-    } else if (all(datxbp[[xvar]] %in% x.order)) {
-      datx[match(x.order, datx[[xvar]]),]
-    } else if (!all(datxbp[[xvar]] %in% x.order)) {
-      notinOrder <- datxbp[[xvar]][which(!datxbp[[xvar]] %in% x.order)] 
+    } else if (all(datxbp[[xvar]] %in% as.character(x.order))) {
+      datx[match(as.character(x.order), datx[[xvar]]),]
+    } else if (!all(datxbp[[xvar]] %in% as.character(x.order))) {
+      notinOrder <- datxbp[[xvar]][which(!datxbp[[xvar]] %in% as.character(x.order))] 
       message("missing values in x.order list: ", toString(notinOrder)) 
-      datxbp <- datxbp[match(x.order, datxbp[[xvar]]),]    
+      datxbp <- datxbp[match(as.character(x.order), datxbp[[xvar]]),]    
     }
   }
 
@@ -312,7 +312,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   ######################################################
   maxattnum <- 15
   xmaxnum <- max(nchar(x[[xvar]]))
-  ymaxnum <- max(sapply(round(na.omit(datxbp[,yvar, with=FALSE])), nchar)) 
+  ymaxnum <- max(sapply(round(na.omit(datxbp[, yvar, with=FALSE])), nchar)) 
  
   ## las.xnames
   ######################
@@ -327,8 +327,8 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       }
     }
   }
- 
   srt <- ifelse(las.xnames == 1, 0, ifelse(las.xnames == 3, 90, 60))
+
   ## ylabel
   ######################
   if (is.null(ylabel) & !is.null(divideby)) {

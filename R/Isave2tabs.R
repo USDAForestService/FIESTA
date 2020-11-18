@@ -14,17 +14,9 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
   ## coltitlerow Logical. If TRUE, there is a title for Columns 
 
 
-  ## Make sure tab1 and tab2 are data.frames
-  if ("data.table" %in% class(tab1)) {
-    tab1.names <- names(tab1)
-    tab1 <- data.frame(tab1)
-    names(tab1) <- tab1.names
-  }
-  if ("data.table" %in% class(tab2)) {
-    tab2.names <- names(tab2)
-    tab2 <- data.frame(tab2)
-    names(tab2) <- tab2.names
-  }
+  ## Make sure tab1 and tab2 are data.tables
+  tab1 <- pcheck.table(tab1)
+  tab2 <- pcheck.table(tab2)
 
 
   ## REMOVE COLUMNS WITH 0 VALUES.
@@ -40,12 +32,15 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
   ###########################################
   if (coltitlerow) {
     ## ADD TITLE TO TABLE COLUMNS AND FORMAT TABLE
-    tab1[,-(1:rnbr)] <- noquote(lapply(tab1[,-(1:rnbr)], 
-		function(x){format(as.numeric(x), big.mark=",")}))
-    tab1 <- rbind(colnames(tab1), tab1)
+    #tab1[,-(1:rnbr)] <- noquote(lapply(tab1[,-(1:rnbr)], 
+	#	function(x) {format(x[!is.na(suppressWarnings(as.numeric(x)))], big.mark=",")} ))
+
+    tab1 <- tab1[, lapply(.SD, function(x) ifelse(is.na(suppressWarnings(as.numeric(x))),  
+		x, format(suppressWarnings(as.numeric(x)), big.mark=",")))]
+    tab1 <- rbindlist(list(setDT(as.list(colnames(tab1)))[], tab1), use.names=FALSE)
     colnames(tab1) <- c(rep(" ", rnbr), coltitle, rep(" ", ncol(tab1)- (rnbr+1)))
 
-    tab2 <- rbind(colnames(tab2), tab2)
+    tab2 <- rbindlist(list(setDT(as.list(colnames(tab2)))[], tab2), use.names=FALSE)
     colnames(tab2) <- c(rep(" ", rnbr), coltitle, rep(" ", ncol(tab2)- (rnbr+1)))
   }
 
