@@ -1,5 +1,4 @@
 ---
-title: "A report for `r params$AOInm`"
 output:
   word_document:
     reference_docx: template.docx
@@ -9,6 +8,7 @@ params:
   title.ref: NULL
   year: NULL
   GBpopdat: NULL
+  photofn: ""
 ---
 
 
@@ -23,29 +23,14 @@ rawfolder <- params$rawfolder
 AOInm <- params$AOInm
 title.ref <- params$title.ref
 outfolder <- params$outfolder
-
+photofn <- params$photofn
 
 if (is.null(rawfolder)) stop()
 if (is.null(AOInm)) stop()
 
 if (is.null(title.ref)) title.ref <- AOInm
 if (is.null(outfolder)) outfolder <- rawfolder
-
-
-## Define function to create prettier tables
-kable.table <- function(est, title.row, title.rowvar) {
-    knitr::kable(est,
-    #format = "pandoc",   # default
-    format = "simple",   # default
-    caption = wraptitle(title.row, 80),
-    col.names = names(est),
-    row.names = FALSE,
-    align = c("r"),       # align = c("c", "c", "c", "r")
-    digits = 2,
-    format.args=list(decimal.mark = ",", big.mark=",")
-    # padding = 2         # inner spacing
-  ) 
-}
+figNum <- 0
 
 
 ```
@@ -54,27 +39,56 @@ kable.table <- function(est, title.row, title.rowvar) {
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
+rowestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.rowest*csv"))
+grpestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.grpest*csv"))
+xtabfn <- list.files(dirname(rawfolder), glob2rx("01*csv"))
 
-filelst <- list.files(rawfolder, pattern=c("area_COND_STATUS_NM", "csv"))
-fn <- filelst[grep("unit.rowest", filelst)][1]
+rowest <- fread(file.path(rawfolder, rowestfn))
+grpest <- fread(file.path(rawfolder, grpestfn))
+xtab <- fread(file.path(dirname(rawfolder), xtabfn))
 
-
-unit.est <- fread(file.path(rawfolder, fn))
-
-title.rowvar <- names(unit.est)[2]
-totarea <- unique(unit.est$ACRES_GIS)
-area.for <- unit.est[unit.est[[title.rowvar]] == "Forest land", "est"]
-area.nf <- unit.est[unit.est[[title.rowvar]] == "Nonforest land", "est"]
-area.water <- sum(unit.est[unit.est[[title.rowvar]] %in% c("Noncensus water", "Nonforest land"), "est"])
-est <- unit.est[, c(title.rowvar, "est", "pse"), with=FALSE]
+title.rowvar <- "Land class"
+title.colvar <- "Reserved status"
+totarea <- unique(rowest$ACRES_GIS)
+area.for <- rowest[rowest[[title.rowvar]] == "Forest land", "est"]
+area.nf <- rowest[rowest[[title.rowvar]] == "Nonforest land", "est"]
+area.water <- sum(rowest[rowest[[title.rowvar]] %in% c("Noncensus water", "Nonforest land"), "est"])
+est <- rowest[, c(title.rowvar, "est", "pse"), with=FALSE]
 
 title1 <- paste0("Area by land class, ", title.ref)
+title2 <- paste0("Area by land class and reserved status, ", title.ref)
+
 
 
 ```
 
 
+---
+title: "Report summary for `r AOInm`"
+---
+
+
 &nbsp;
+&nbsp;
+
+__Date:__ `r format(Sys.time(), "%B %d, %Y")`
+
+
+&nbsp;
+&nbsp;
+
+`r figNum=0`
+
+############### 
+![](report_image.png)
+
+``` {r picture,include=FALSE}
+figNum = figNum+1
+figCap = paste0("Figure ",figNum,": Photo from", AOInm)
+```
+########## `r figCap`
+
+
 &nbsp;
 &nbsp;
 
@@ -91,8 +105,8 @@ The area of `r params$AOInm` is `r format(round(totarea), big.mark=",")` acres w
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 ## Create prettier table
-kable.table(est, paste("Table 1.", title1), title.rowvar)
-
+knitr::kable(xtab, 'simple', align=c('l', 'r', 'r', 'r'), 
+             caption=paste("Table 1:", title2))
 
 
 ```
@@ -105,9 +119,13 @@ kable.table(est, paste("Table 1.", title1), title.rowvar)
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap=paste("Fig. 1.", title1)}
 
-datBarplot(x=unit.est, xvar=names(unit.est)[2], yvar="est", errbars=TRUE, 
+datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", errbars=TRUE, 
            sevar="est.se", x.order=NULL, las.xnames=2, ylabel="Area - Acres", 
-           col=hcl.colors(nrow(unit.est)), ylim=NULL, toplabelvar="NBRPLT.gt0")
+           col=terrain.colors(nrow(rowest)), ylim=NULL, toplabelvar="NBRPLT.gt0")
+
+#datBarStacked(x=grpest, main.attribute=title.rowvar, sub.attribute=title.colvar, 
+#              response="est", horiz=FALSE,
+#              main.order=unique(grpest[[title.rowvar]]), sub.order=unique(grpest[[title.colvar]]))
 
 
 ```

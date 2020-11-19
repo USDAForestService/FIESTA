@@ -80,7 +80,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     t10 <- "Table 10. Basal area of dead trees by agent code, on forest land"
     t11 <- "Table 11. Number of live trees per acre by species and disturbance group, on forest land"
     t12 <- "Table 12. Basal area per acre of dead trees by agent code, on forest land"
-    toc <- data.frame(rbind(t1, t2, t3), stringsAsFactors=FALSE)
+    toc <- data.frame(rbind(t01,t02,t03,t04,t05,t06,t07,t08,t09,t10,t11,t12), stringsAsFactors=FALSE)
 
     ## Create row and cells for title
     toctitle.row <- xlsx::createRow(datsheet, 1)

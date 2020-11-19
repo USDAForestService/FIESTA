@@ -239,7 +239,7 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
 			function(x){strsplit(as.character(x), "#")[[1]][2]})]
     }
   } 
- 
+
   #####################################################################################
   ### Get titles for output tables
   #####################################################################################

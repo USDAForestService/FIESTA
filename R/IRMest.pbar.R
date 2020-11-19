@@ -28,9 +28,9 @@ RMest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd, bytdom=FALSE, uniqueid
 	n.total=n.strata=prop.total=prop.plt=value=rhat <- NULL
 
   ## Set key for est.unit (note: to run separate)
-  est.unit <- setDT(est.unit)
+  #est.unit <- setDT(est.unit)
   ysum <- setDT(ysum)
-  setkeyv(est.unit, unitvar)
+  #setkeyv(est.unit, unitvar)
 
 
   if (!"n.strata" %in% names(strlut)) stop("need n.strata in strlut")

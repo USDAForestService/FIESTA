@@ -14,9 +14,9 @@ datBarStacked(x, main.attribute, sub.attribute, response = "phat",
 	main.order = NULL, sub.order = NULL, legend.fit = NULL, legend.cex = 0.8, 
 	legend.x = NULL, legend.y = NULL, legend.title = NULL, legend.bty = "o", 
 	legend.bg = par("bg"), legend.inset = 0, legend.xpd = par("xpd"), main = NULL, 
-	cex.main = 1.0, cex.label = 1, cex.names = 0.8, savedata = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
-	overwrite = FALSE, ...)
+	cex.main = 1.0, cex.label = 1, cex.names = 0.8, sub.add0 = FALSE, 
+	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
+	outfn.date = TRUE, overwrite = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -74,6 +74,7 @@ datBarStacked(x, main.attribute, sub.attribute, response = "phat",
 	and/or ylabels. }
   \item{cex.names}{ Number. Expansion factor for axis names (bar labels). Ex. 0.5 
 	represents half the size. } 
+  \item{sub.add0}{ Logical. If TRUE, adds categories with 0 values to sub.attribute legend. }
   \item{savedata}{ Logical. If TRUE, writes output data to outfolder (jpg and pdf). }
   \item{outfolder}{ String. The name of the output folder. If savedata=TRUE, all output 
 	saved to the outfolder. If savedata=FALSE, only a text file of input parameters 

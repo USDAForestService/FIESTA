@@ -4,8 +4,8 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 	ylabel=NULL, xlabel=NULL, las.xnames=NULL, main.order=NULL, sub.order=NULL, 
 	legend.fit=NULL, legend.cex=0.8, legend.x=NULL, legend.y=NULL, legend.title=NULL, 
 	legend.bty="o", legend.bg=par("bg"), legend.inset=0, legend.xpd=par("xpd"), 
-	main=NULL, cex.main=1, cex.label=1, cex.names=0.8, savedata=FALSE, outfolder=NULL, 
-    	outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, ...){
+	main=NULL, cex.main=1, cex.label=1, cex.names=0.8, sub.add0=FALSE, savedata=FALSE, 
+	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, ...){
 
 ### Arguments ###
 
@@ -388,6 +388,7 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
     #  one row for each possible value of sub.attribute
     #  one column for each possible group
 
+
     mat.type <- xtabs(response ~ sub + main, p.sub)
 
     ################## NEW CODE
@@ -399,7 +400,6 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
     if (!is.null(sub.order))
       mat.type <- mat.type[match(sub.order, row.names(mat.type)),]
 
-    mat.type <- mat.type[rowSums(mat.type) > 0,]
     
     ### if percent
     if (percent)
@@ -413,6 +413,12 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 
     #find maximum height of each bar (must be done before linking colors to 'mat.type'
     all.max <- apply(mat.type[,], 2, sum, na.rm = TRUE)
+
+    ## Remove rows with 0 values
+    if (!sub.add0) {
+      sub.names <- sub.names[rowSums(mat.type) > 0]
+      mat.type <- mat.type[rowSums(mat.type) > 0,]
+    }
 
     #find colors
     sub.colors <- vector("character", length(sub.names))
