@@ -366,18 +366,22 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
 
       ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
       ## Remove East and West in LOCATION_NM and EVAL_DESCR
-      if (any(stcdlst == 48)) {
-        POP_EVAL_GRP <- POP_EVAL_GRP[!grepl("EAST", POP_EVAL_GRP$EVAL_GRP_DESCR, 
+      if (stcd == 48) {
+        POP_EVAL_GRPstcd <- POP_EVAL_GRP[STATECD == stcd & 
+		!grepl("EAST", POP_EVAL_GRP$EVAL_GRP_DESCR, 
 		ignore.case=TRUE) &
 		!grepl("WEST", POP_EVAL_GRP$EVAL_GRP_DESCR, ignore.case=TRUE), ]
+      } else {
+        POP_EVAL_GRPstcd <- POP_EVAL_GRP[STATECD == stcd,]
       }
+
     
       ## Get evalid and inventory years from POP_EVAL table
       setkey(POP_EVAL, "EVAL_GRP_CN")
-      setkey(POP_EVAL_GRP, "CN")
+      setkey(POP_EVAL_GRPstcd, "CN")
 
       ## Subset POP_EVAL/POP_EVAL_GRP by state and inventory type
-      popevaltab <- POP_EVAL[POP_EVAL_GRP[, c("CN", "EVAL_GRP_Endyr")]][STATECD == stcd,]
+      popevaltab <- POP_EVAL[POP_EVAL_GRPstcd[, c("CN", "EVAL_GRP_Endyr")]]
       popevaltab <- popevaltab[popevaltab$END_INVYR %in% invtype.invyrs,]
 
       POP_EVAL_endyrs <- na.omit(unique(popevaltab[, "EVAL_GRP_Endyr"][[1]]))
