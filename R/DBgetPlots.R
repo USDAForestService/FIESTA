@@ -504,7 +504,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
   ## REF_SPECIES table 
   if (istree  && !is.null(sppvars)) {
-    REF_SPECIES <- FIESTA::DBgetCSV("REF_SPECIES", ZIP=TRUE, returnDT=TRUE, stopifnull=FALSE)
+    REF_SPECIES <- FIESTA::DBgetCSV("REF_SPECIES", ZIP=TRUE, returnDT=TRUE,
+ 		stopifnull=FALSE)
   }
 
 
@@ -525,6 +526,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         assign(paste0("otherx", j), NULL)
     }    
    
+    ## Create filter for state
+    stFilter <- paste0("p.STATECD IN(", stcd, ")") 
 
 ############ CSV only
 
@@ -584,9 +587,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         evalFilter.dwm <- paste("EVALID =", evalid.dwm)
       } 
     } else {
-      ## Create filter for state
-      stFilter <- paste0("p.STATECD IN(", stcd, ")") 
-
       if (measCur) {
         evalFilter <- stFilter 
    
@@ -1197,12 +1197,19 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     if (!is.null(othertables) && !is.null(pltx)) {
       for (j in 1:length(othertables)) {
         othertable <- othertables[j]
+        othertablexnm <- paste0("otherx", j)
 
         cat("\n",
         "## STATUS: GETTING", othertable, "(", stabbr, ") ...", "\n")
     
-        othertablexnm <- paste0("otherx", j)
-        if (othertable == "PLOTGEOM") {
+        if (grepl("POP", othertable)) {
+          xfromqry <- paste0(SCHEMA., othertable, " x")
+          if (!iseval) {
+            xfilter <- stFilter
+          } else {
+            xfilter <- paste0("x.EVALID IN(", toString(evalid), ")")
+          }
+        } else if (othertable == "PLOTGEOM") {
           joinid <- "CN"
           xfromqry <- sub("x.PLT_CN", "x.CN", xfromqry)
         } else {
@@ -1210,17 +1217,25 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         }
         xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
 			"where", xfilter)
-        assign(othertablexnm, sqldf::sqldf(xqry, stringsAsFactors=FALSE))
+        tab <- tryCatch( sqldf::sqldf(xqry, stringsAsFactors=FALSE), 
+			error=function(e) return(NULL))
+        if (is.null(tab)) {
+          xqry <- paste("select * from", othertable, "where", stFilter)
+          tab <- tryCatch( sqldf::sqldf(xqry, stringsAsFactors=FALSE), 
+			error=function(e) return(NULL))
+        }
 
-        if (nrow(get(othertablexnm)) != 0) {
-          assign(othertablexnm, setDT(get(othertablexnm)))
+        if (!is.null(tab) && nrow(tab) != 0) {
+          assign(othertablexnm, setDT(tab))
 
-          get(othertablexnm)[, PLT_CN := as.character(PLT_CN)]
-          setkey(get(othertablexnm), "PLT_CN")
+          if ("PLT_CN" %in% names(get(othertablexnm))) {
+            get(othertablexnm)[, PLT_CN := as.character(PLT_CN)]
+            setkey(get(othertablexnm), "PLT_CN")
 
-          ## Subset overall filters from pltx
-          assign(othertablexnm, 
+            ## Subset overall filters from pltx
+            assign(othertablexnm, 
 			get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),])
+          }
           assign(paste0("other", j), rbind(get(paste0("other", j)), get(othertablexnm)))
         }
       }

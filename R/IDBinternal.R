@@ -36,7 +36,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
 	"RDDISTCD", "WATERCD", "LON", "LAT", "ELEV", "GROW_TYP_CD", "MORT_TYP_CD", 
 	"P2PANEL", "P3PANEL", "SUBPANEL", "ECOSUBCD", 
 	"NF_PLOT_STATUS_CD", "NF_PLOT_NONSAMPLE_REASN_CD", "NF_SAMPLING_STATUS_CD",
- 	"P2VEG_SAMPLING_STATUS_CD", "QA_STATUS")
+ 	"P2VEG_SAMPLING_STATUS_CD", "QA_STATUS", "MODIFIED_DATE")
 
   if (isRMRS && regionVars)
     pltvarlst <- c(pltvarlst, "COLOCATED_CD_RMRS", "CONDCHNGCD_RMRS", 
