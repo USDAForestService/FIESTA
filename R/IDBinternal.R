@@ -271,9 +271,9 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
   if (!is.null(dsn)) {
     dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE)
     tablst <- DBI::dbListTables(dbconn)
+    SCHEMA.=NULL
   } else {
     chk <- FALSE
-    SCHEMA.=NULL
   }
 
   if (!is.null(evalid)) {
@@ -365,6 +365,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 #					p.plot = pp.plot and p.", varCur, 
 #						" = pp.maxyr and p.invyr = pp.invyr") 
 #    } else {
+
       pfromqry <- paste0(SCHEMA., plotnm, " p
 		INNER JOIN 
 		(select statecd, unitcd, countycd, plot, max(", varCur, ") maxyr
@@ -377,7 +378,8 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 #    }
 
     if (popSURVEY)
-      pfromqry <- paste(pfromqry, "JOIN survey s on (s.CN = p.SRV_CN and s.ANN_INVENTORY = 'Y')")
+      pfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., "SURVEY", 
+		" s on (s.CN = p.SRV_CN and s.ANN_INVENTORY = 'Y')")
    
  
   } else if (allyrs) {  
