@@ -161,6 +161,7 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
   if (keepcutbreaks) {
     datx <- merge(datx, LUTx2, by=LUTclassnm, all.x=TRUE)
     setcolorder(datx, c(datxnames, paste0(xvar, "_cutbreaks")))
+    setnames(datx, paste0(xvar, "_cutbreaks"), paste0(LUTclassnm, "_brks"))
   }    
 
        
