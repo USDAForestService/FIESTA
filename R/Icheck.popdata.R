@@ -248,7 +248,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   pltassgnx <- pcheck.table(pltassgn, tab_dsn=dsn, tabnm="pltassgn", 
 		caption="plot assignments?", nullcheck=nullcheck, tabqry=pltassgnqry,
 		returnsf=FALSE)
-
   if (is.null(condx) && is.null(pltx) && is.null(pltassgnx)) 
     stop("must include plt or cond table")
 
@@ -344,7 +343,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       }
       pltx <- datFilter(pltx, getfilter("EVALID", evalid, syntax="R"))$xf
 
-    } else if (measCur || !is.null(measEndyr)) {
+    } else if (!is.null(pltx) && (measCur || !is.null(measEndyr))) {
 
       pltx <- getPlotCur(pltx, Endyr=measEndyr, varCur="MEASYEAR", 
 				Endyr.filter=measEndyr.filter)
@@ -561,7 +560,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 		paste(names(pvars.na[pvars.na > 0]), collapse=", ")))
 
 
-
   ###################################################################################
   ###################################################################################
   ## Check condition data
@@ -613,7 +611,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     }
   }
   pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
-
 
   ## Check for COND_STATUS_CD and create ACI filter
   #############################################################################
@@ -667,8 +664,9 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   if ((is.null(cond.nonsamp.filter) || cond.nonsamp.filter == "") && adj != "none") {
     if ("COND_STATUS_CD" %in% pltcondnmlst) {
       cond.nonsamp.filter <- "COND_STATUS_CD != 5"
-      message("removing ", sum(pltcondx$COND_STATUS_CD == 5, na.rm=TRUE), 
-		" nonsampled forest conditions")
+      nonsampn <- sum(pltcondx$COND_STATUS_CD == 5, na.rm=TRUE)
+      if (length(nonsampn) > 0)
+        message("removing ", nonsampn, " nonsampled forest conditions")
     }
     if (ACI && "NF_COND_STATUS_CD" %in% pltcondnmlst) {
       cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"

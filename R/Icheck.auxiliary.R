@@ -275,6 +275,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   ## - error tab with warnings.
   ## - nostrat included if there are plot strata values with no strata in auxlut
   #################################################################################
+  if (minplotnum.strat > minplotnum.unit) minplotnum.strat <- minplotnum.unit
   pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid, 
 		unitlut=auxlut, unitvars=unitvar, strvars=PSstrvar, 
 		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit, 
