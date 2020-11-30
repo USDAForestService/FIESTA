@@ -305,10 +305,10 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 		  title.filter=rowvar)$xf
       if (nrow(condf) < cnrows) isfilter <- TRUE
 
-      if (sum(is.na(condf[[rowvar]])) > 0) {
-        rowvar.na.filter <- paste0("!is.na(", rowvar, ")")
-        condf <- subset(condf, eval(parse(text = rowvar.na.filter)))
-      }
+      #if (sum(is.na(condf[[rowvar]])) > 0) {
+      #  rowvar.na.filter <- paste0("!is.na(", rowvar, ")")
+      #  condf <- subset(condf, eval(parse(text = rowvar.na.filter)))
+      #}
       
       ## add rowvar to cvars2keep
       cvars2keep <- c(cvars2keep, rowvar, row.orderby)

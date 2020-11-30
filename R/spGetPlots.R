@@ -38,6 +38,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   gui <- FALSE
   coordtype <- "public"
 
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% formals(spGetPlots))) {
+    miss <- input.params[!input.params %in% formals(spGetPlots)]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   #############################################################################
   ## Import boundary
   #############################################################################
@@ -318,6 +325,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
         if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) 
           allyrs=clipxy <- TRUE
+
         ## Get plot data
         dat <- DBgetPlots(states=stcd, stateFilter=stateFilter, allyrs=allyrs,
 			evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, evalType=evalType, 

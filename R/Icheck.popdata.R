@@ -74,7 +74,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 	STATECD=PLOT_STATUS_CD=PSTATUSCD=cndnmlst=pltdomainlst=invyrs=PROP_BASIS=
 	ACI.filter=V1=ONEUNIT=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonsampplots=
-	plotqry=condqry=treeqry <- NULL
+	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry <- NULL
 
 
   ###################################################################################
@@ -211,31 +211,37 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
     SCHEMA. <- NULL
+    whereqry <- ""
   
     ## Filter for population data
     if (!is.null(evalid)) {
       pfromqry <- getpfromqry(evalid, dsn=dsn)
       whereqry <- paste0("where EVALID in(", toString(evalid), ")")
     } else if (measCur) {
-      pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=measEndyr, dsn=dsn)
-      whereqry <- ""
+      pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=measEndyr, dsn=dsn, plotnm=plt)
     } else if (!is.null(invyrs)) {
-      pfromqry <- getpfromqry(invyrs=invyrs, dsn=dsn)
+      pfromqry <- getpfromqry(invyrs=invyrs, dsn=dsn, plotnm=plt)
       whereqry <- paste0("where invyrs in(", toString(invyrs), ")")
     }
-    cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				"cond c ON (c.PLT_CN = p.CN)")
-    tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				"tree t ON (t.PLT_CN = p.CN)")
 
-    if (plt %in% tablst) 
+    if (!is.null(plt) && is.character(plt) && plt %in% tablst) 
       plotqry <- paste("select p.* from", pfromqry, whereqry)
-    if (cond %in% tablst) 
+    if (!is.null(cond) && is.character(cond) && cond %in% tablst) {
+      cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., cond,
+				" c ON (c.PLT_CN = p.CN)")
       condqry <- paste("select c.* from", cfromqry, whereqry)
-    if (pltassgn %in% tablst) 
+    }
+    if (!is.null(pltassgn) && is.character(pltassgn) && pltassgn %in% tablst)
       pltassgnqry <- paste("select ppsa.* from", pfromqry, whereqry)
-    if (tree %in% tablst) 
+    if (!is.null(tree) && is.character(tree) && tree %in% tablst) {
+      if (!is.null(pfromqry)) {
+        tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
+				" t ON (t.PLT_CN = p.CN)")
+      } else {
+        tfromqry <- paste(tree, "t")
+      }
       treeqry <- paste("select t.* from", tfromqry, whereqry)
+    }
   }
  
   ###################################################################################
@@ -396,7 +402,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   if (length(pvarsmiss) > 0) 
     stop("missing variables: ", paste(pvarsmiss, collapse=", "))
   pvars <- pltcondnmlst[which(pltcondnmlst %in% c(pvars2keep, pdoms2keep))]
-
 
   ###########################################################################
   ## Check missing pdoms2keep variables in pltcondx

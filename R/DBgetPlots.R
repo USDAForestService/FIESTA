@@ -40,6 +40,13 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       PUBLIC = c("LON_PUBLIC", "LAT_PUBLIC"))
   }  
 
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% formals(DBgetPlots))) {
+    miss <- input.params[!input.params %in% formals(DBgetPlots)]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   ## Define variables
   ZIP <- TRUE
   actual=getinvyr <- FALSE
@@ -125,7 +132,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
     ## Check INVYR(S) 
     ###########################################################
-    if (!measCur && !allyrs) {
+    if (!measCur) {
       if ((is.null(invyrs) || length(invyrs) == 0)) {
         invyrs <- sapply(states, function(x) NULL)
         for (state in states) { 
@@ -400,14 +407,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     pfromqry <- paste0(fromqry, " JOIN ", SCHEMA., 
 			"PLOT p ON (p.CN = ppsa.PLT_CN)")
   } else if (measCur) {
-    pfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA., 
+    pfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA., allyrs=allyrs,
 				subcycle99=subcycle99, intensity1=intensity1, popSURVEY=TRUE)
     pfromqry <- gsub("plot", "PLOT", pfromqry)
     pfromqry <- gsub("survey", "SURVEY", pfromqry)
   } else {
     pfromqry <- paste0(SCHEMA., "PLOT p")
   }
-  
+
   ## PLOT/COND from/join query
   ################################################
   pcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 

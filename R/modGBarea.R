@@ -50,7 +50,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 
   ### Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+		title="Save data?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check outfolder 
   ########################################################
@@ -165,7 +165,6 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   title.rowgrp <- rowcolinfo$title.rowgrp
   grpvar <- rowcolinfo$grpvar
   rm(rowcolinfo)
-
 
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
