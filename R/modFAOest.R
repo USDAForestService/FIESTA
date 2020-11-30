@@ -270,7 +270,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
 	rowunit=totunit <- NULL
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlstn) && length(tdomvarlstn) > 1)), TRUE, FALSE)
-  strlut$prop.total <- sum(tdomdat[[basewt]]) 
+  strlut$prop.total <- sum(tdomdat[[basewt]], na.rm=TRUE) 
+  strlut$propsq.total <- sum(tdomdat[[basewt]]^2, na.rm=TRUE) 
 
   ## Note: tdomdat is the summed response by condition (not domain)
   if (addtotal) {
@@ -312,6 +313,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
 
     }
   }
+
+prop.total
  
   ###################################################################################
   ## Check add0 and Add area
