@@ -44,7 +44,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     stop("invalid parameter: ", toString(miss))
   }
 
-
   #############################################################################
   ## Import boundary
   #############################################################################
