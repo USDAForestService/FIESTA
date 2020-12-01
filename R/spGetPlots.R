@@ -39,7 +39,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   coordtype <- "public"
 
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% names(formals(spGetPlots))))) {
+  if (!all(input.params %in% names(formals(spGetPlots)))) {
     miss <- input.params[!input.params %in% formals(spGetPlots)]
     stop("invalid parameter: ", toString(miss))
   }
