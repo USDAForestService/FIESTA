@@ -41,7 +41,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   }  
 
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% formals(DBgetPlots))) {
+  if (!all(input.params %in% names(formals(DBgetPlots)))) {
     miss <- input.params[!input.params %in% formals(DBgetPlots)]
     stop("invalid parameter: ", toString(miss))
   }
