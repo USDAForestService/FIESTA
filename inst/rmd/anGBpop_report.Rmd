@@ -15,9 +15,9 @@ params:
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(FIESTA)
 
-#rawfolder <- "C:/Users/tfrescino/Documents/Fishlake/rawdata"
-#AOInm <- "Fishlake"
-#title.ref <- NULL
+rawfolder <- "C:/Users/tfrescino/Documents/Fishlake/rawdata"
+AOInm <- "Fishlake"
+title.ref <- NULL
 
 rawfolder <- params$rawfolder
 AOInm <- params$AOInm

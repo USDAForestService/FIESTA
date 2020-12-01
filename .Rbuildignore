@@ -1,6 +1,6 @@
 ^\.github$
 ^Meta$
 
-^vignettes
 ^inst\extdata
 
+^doc$
