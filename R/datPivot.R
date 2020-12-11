@@ -78,7 +78,7 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   ptab <- dcast(datxf, concatx ~ get(yvar), value.var=pvar, fun.aggregate=pfun,
 		fill=pfill) 
   ptab[, (xvar) := tstrsplit(concatx, "-", fixed=TRUE)][][, concatx :=NULL]
-
+  datxf[, concatx := NULL]
    
   cols <- names(ptab)[!names(ptab) %in% xvar]
   setcolorder(ptab, c(xvar, cols))

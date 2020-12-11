@@ -17,20 +17,21 @@
 \usage{
 modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
 	condid = "CONDID", puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
-	evalid = NULL, invyrs = NULL, ACI = FALSE, adj = "samp", strata = TRUE, 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
-	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
+	evalid = NULL, invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, 
+	strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
+	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
+	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
+	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
 	plt.filter = NULL, cond.filter = NULL, rowvar = NULL, colvar = NULL, 
 	row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
 	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, 
 	rowgrpnm=NULL, rowgrpord=NULL, sumunits = TRUE, allin1 = FALSE, estround = 1, 
 	pseround = 2, estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
-	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre=NULL, outfn.date = TRUE, 
-	overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.filter = NULL, GBpopdat = NULL, GBdata = NULL, gui = FALSE)
+	rawdata = FALSE, rawonly = FALSE, outfolder = NULL, outfn = NULL, outfn.pre=NULL,
+ 	outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, 
+	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
+ 	title.unitvar = NULL, title.filter = NULL, GBpopdat = NULL, GBdata = NULL, 
+	gui = FALSE)
 }
  
 \arguments{
@@ -57,13 +58,14 @@ modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	be uniqueid. }
   \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
   \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
-  \item{ACI}{ Logical. If TRUE, includes All Condition Inventory (ACI) plots. Removes 
-	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). }
+  \item{intensity}{ Integer code. Code(s) indicating intensity to use for population. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 
 	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (designcd=1). } 
+  \item{ACI}{ Logical. If TRUE, includes All Condition Inventory (ACI) plots. Removes 
+	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). }
   \item{strata}{ Logical. If TRUE, add data information for stratification. }
   \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
 	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
@@ -138,6 +140,9 @@ modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
+  \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes
+	many estimation units, and only raw data tables are needed, it is more 
+	efficient to output raw data only. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
   \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include

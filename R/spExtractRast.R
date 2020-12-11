@@ -26,6 +26,15 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) xyplt=bfun=focalrast=ffun=focalsave=extrtype <- NULL
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::spExtractRast)), 
+		names(formals(FIESTA::spMakeSpatialPoints)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################

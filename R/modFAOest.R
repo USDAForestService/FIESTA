@@ -279,9 +279,9 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
     tdomdat$TOTAL <- 1
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
-    unit.totest <- RMest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdattot, bytdom=bytdom, uniqueid=cuniqueid, 
-		strlut=strlut, unitvar=unitvar, strvar=strvar, domain="TOTAL")
+    unit.totest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+		ysum=tdomdattot, uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, 
+		strvar=strvar, domain="TOTAL")
     tabs <- FIESTA::check.matchclass(unitarea, unit.totest, unitvar)
     unitarea <- tabs$tab1
     unit.totest <- tabs$tab2
@@ -294,21 +294,21 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
-    unit.rowest <- RMest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, bytdom=bytdom, uniqueid=cuniqueid, 
+    unit.rowest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut, unitvar=unitvar, strvar=strvar, domain=rowvar)
 
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
-      unit.colest <- RMest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, bytdom=bytdom, uniqueid=cuniqueid, 
+      unit.colest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut, unitvar=unitvar, strvar=strvar, domain=colvar)
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
-      unit.grpest <- RMest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, bytdom=bytdom, uniqueid=cuniqueid, 
+      unit.grpest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut, unitvar=unitvar, strvar=strvar, domain=grpvar)
 
     }
@@ -319,7 +319,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
-    unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
+    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
     unitarea <- tabs$tab1
     unit.rowest <- tabs$tab2
@@ -330,7 +331,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   }
 
   if (!is.null(unit.colest)) {
-    unit.colest <- FIESTA::add0unit(x=unit.colest, colvar, uniquecol, unitvar, col.add0)
+    unit.colest <- FIESTA::add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+		unitvar=unitvar, xvar.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
     unitarea <- tabs$tab1
     unit.colest <- tabs$tab2
@@ -341,85 +343,9 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   }
 
   if (!is.null(unit.grpest)) {
-    if (!is.null(grpvar)) {
-      ## SEPARATE COLUMNS
-      unit.grpest[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      unit.grpest[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-      unit.grpest[,(grpvar) := NULL]
-    } 
-
-    if (row.add0 && col.add0) {
-      unit.grpest <- add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=TRUE, xvar2=colvar, uniquex2=uniquecol)
-
-    } else {
-      ordnames <- {}
-
-      if (row.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(colvar), sep="#")][, 
-			(colvar) := NULL]
-          unit.grpest[,(colvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			row.add0)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      } else if (col.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(rowvar), sep="#")][, 
-			(rowvar) := NULL]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			col.add0)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest[,(rowvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(rowvar, ordnames)
-        }
-      } else {
-        if (!is.null(uniquecol)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      }
-      ordnames <- c(unitvar, ordnames)
-      setcolorder(unit.grpest, 
-		c(ordnames, names(unit.grpest)[!names(unit.grpest) %in% ordnames]))
-    }
-
+    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
+		xvar2.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
     unitarea <- tabs$tab1
     unit.grpest <- tabs$tab2
@@ -455,11 +381,12 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
     ## Calculate unit totals for rowvar
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, rowvar), .SDcols=estvarn.name]
-    rowunit <- RMest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, bytdom=bytdom, uniqueid=cuniqueid, 
+    rowunit <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut2, unitvar="ONEUNIT", domain=rowvar)
 
-    rowunit <- add0unit(rowunit, rowvar, uniquerow, "ONEUNIT", row.add0)
+    rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
+		unitvar="ONEUNIT", xvar.add0=row.add0)
     tabs <- FIESTA::check.matchclass(unitacres2, rowunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     rowunit <- tabs$tab2
@@ -471,8 +398,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
     ## Calculate grand total for all units
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, "TOTAL"), .SDcols=estvarn.name]
-    totunit <- RMest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, bytdom=bytdom, uniqueid=cuniqueid, 
+    totunit <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut2, unitvar="ONEUNIT", domain="TOTAL")
     tabs <- FIESTA::check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1

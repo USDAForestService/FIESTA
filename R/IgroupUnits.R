@@ -27,6 +27,7 @@ groupUnits <- function(tabest, domain, esttype="AREA", estncol="estn",
     agvars <- c(agvars, estdcol, estdcol.var, "est.covar")
     agvars <- agvars[which(agvars %in% names(tabest))]
   }
+  keepvars <- keepvars[keepvars %in% names(tabest)]
   tabgrp <- tabest[, lapply(.SD, sum, na.rm=TRUE), by=c(domvargrp, keepvars), 
 		.SDcols=agvars]
 

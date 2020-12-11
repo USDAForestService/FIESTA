@@ -416,7 +416,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
 
     for (j in 1:length(rgrpcds)) {
       rgrp <- rgrpcds[j]
-
+ 
       if (rgrp == 9999) {
         cond3.filter <- cond2.filter
         estvar2.filter <- estvar.filter
@@ -441,6 +441,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
         grpnm <- ref_rowgrp[ref_rowgrp[[rowgrpord]] == rgrp, rowgrpnm, with=FALSE]
         rowlut2 <- rowlut[rowlut[[rowgrpord]] == rgrp, ]
       }
+ 
       if (colgrptot && i == 1) {
         if (rgrp != 9999) {
           if (rowgrpord %in% names(pltcondx)) {
@@ -490,6 +491,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
 					return(NULL)
 				} )
       } else if (esttype == "TREE") { 
+ 
         estdat <- 	tryCatch(
 		modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
 			unitvar=unitvar, cond.filter=cond3.filter, rowvar=rowvar, colvar=colvar,
@@ -519,7 +521,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
         }
       } else {
         est <- setDF(rowlut2[, rowvar, with=FALSE])
-
         names(est)[names(est) == rowvar] <- title.rowvar
         if (subtotal) est <- rbind(est, "Subtotal")
 
@@ -548,7 +549,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
             names(pse) <- c(title.rowvar, refnames, "Total")
         }
       }
-
       if (rgrp != 9999) {
         est[est[[title.rowvar]] == "Total", title.rowvar] <- "Subtotal"
         est <- cbind(grpnm, est)
@@ -572,7 +572,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
           psetabrow <- setDF(pse)
         } 
       }
-    }    ## end for loop
+    }    ## end for j loop
 #    if (rowgrp && rowgrptot) {
  
     if (rowgrp) {
@@ -596,7 +596,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       }
       est2 <- estdat2$est
       if (!allin1) pse2 <- estdat2$pse
-      
       if (is.null(est2)) {
         est2 <- setDF(rowlut2[, rowvar, with=FALSE])
         names(est2)[names(est2) == rowvar] <- title.rowvar
@@ -627,7 +626,6 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
 			fill=FALSE, idcol=FALSE))
 #      }
     } 
-
       if (colvar == "TIMBERCD.PROD") {
         if (colgrpnm == "Reserved") {
           names(esttabrow)[names(esttabrow) %in% c(1,2)] <- c("Productive", "Unproductive")
@@ -691,6 +689,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       names(coltottab2)[names(coltottab2) == "TOTAL"] <- title.rowvar
       coltot <- rbind(coltot, coltottab2)
     } 
+
     if (allin1) {
       esttabcol <- cbind(esttabcol, Total=coltot[, "Estimate (% Sampling Error)"], 
 		stringsAsFactors=FALSE)
@@ -701,7 +700,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       psetabcol <- cbind(psetabcol, Total=coltot[, "Percent Sampling Error"],
 		stringsAsFactors=FALSE)
   }
-
+ 
   ## esttab.title
   ###########################################################
   if (rowgrp) {

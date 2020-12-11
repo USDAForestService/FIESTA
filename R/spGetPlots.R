@@ -38,9 +38,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   gui <- FALSE
   coordtype <- "public"
 
+  ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% names(formals(spGetPlots)))) {
-    miss <- input.params[!input.params %in% formals(spGetPlots)]
+  formallst <- c(names(formals(FIESTA::spGetPlots)), 
+		names(formals(FIESTA::spMakeSpatialPoints)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 

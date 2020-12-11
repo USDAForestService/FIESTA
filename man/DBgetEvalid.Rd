@@ -11,7 +11,7 @@
 \usage{
 DBgetEvalid(states = NULL, RS = NULL, invyrtab = NULL, invtype = "ANNUAL", 
 	evalCur = TRUE, evalEndyr = NULL, evalid = NULL, evalAll = FALSE, 
-	evalType = "AREAVOL", isdwm = FALSE, gui = FALSE, returnPOP = TRUE)
+	evalType = "AREAVOL", isveg = FALSE, isdwm = FALSE, gui = FALSE, returnPOP = TRUE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
@@ -35,8 +35,8 @@ DBgetEvalid(states = NULL, RS = NULL, invyrtab = NULL, invtype = "ANNUAL",
 	includes plots used for growth, removals, mortality, and change estimates
 	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
 	See FIA database manual for regional availability and/or differences. }
-  \item{isdwm}{ Logical. If TRUE, summarized down woody debris data are extracted from 
-	FIA database (COND_DWM_CALC). }
+  \item{isveg}{ Logical. If TRUE, the Evaluation for understory vegetation is added. }
+  \item{isdwm}{ Logical. If TRUE, the Evaluation for DWM is added. }
   \item{gui}{ Logical. If TRUE, gui windows pop up for parameter selection. }
   \item{returnPOP}{ Logical. If TRUE, returns population table (SURVEY, POP_PLOT_STRATUM_ASSGN). }
 }

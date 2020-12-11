@@ -3,7 +3,7 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
 	ratiotype="PERACRE", estvarn=NULL, estvarn.TPA=TRUE, estvarn.filter=NULL, 
 	estvarn.name=NULL, esttotn=TRUE, estvard=NULL, estvard.TPA=TRUE, 
 	estvard.filter=NULL, estvard.name=NULL, esttotd=TRUE, tdomvar=NULL, 
-	adjtree=FALSE, adjtpa=FALSE) {
+	tdomvar2=NULL, adjtree=FALSE, adjtpa=FALSE) {
 
   ###################################################################################
   ### GETS ESTIMATION DATA FROM TREE TABLE
@@ -51,7 +51,7 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
   } else {
     adjTPA <- 1
   }
- 
+
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
   #####################################################################################
   if (bytdom) {
@@ -59,14 +59,13 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
     tdomdata <- datSumTreeDom(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid, 
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, 
-		tfilter=estvarn.filter, tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, 
-		checkNA=FALSE, pivot=FALSE))
+		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree, 
+		adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
     if (is.null(tdomdata)) return(NULL)
     
     tdomdat <- tdomdata$tdomdat
     tdomvarn <- tdomdata$tdomtotnm
     tdomvarlstn <- tdomdata$tdomlst
-
   } else {
     suppressWarnings(
     treedata <- datSumTree(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
@@ -110,8 +109,8 @@ check.tree <- function(gui, treef, condf=NULL, plt=NULL, bycond=TRUE, bytdom,
       tdomdata <- datSumTreeDom(tree=treef, cond=condf, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, bycond=TRUE, condid=condid, tsumvar=estvard, 
 		TPA=estvard.TPA, tdomtot=esttotd, tdomtotnm=estvard.name, 
-		tfilter=estvard.filter, tdomvar=tdomvar, adjtree=adjtree, adjTPA=adjTPA, 
-		checkNA=FALSE, pivot=FALSE)
+		tfilter=estvard.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, 
+		adjtree=adjtree, adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE)
       tdomdatd <- tdomdata$tdomdat
       tdomvard <- tdomdata$tdomtotnm
       tdomvarlstd <- tdomdata$tdomlst

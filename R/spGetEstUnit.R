@@ -23,6 +23,15 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     Filters=rbind(Filters,tif=c("Raster tif files (*.tif)", "*.tif"))
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::spGetEstUnit)), 
+		names(formals(FIESTA::spMakeSpatialPoints)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
 
   ##################################################################
   ## CHECK INPUT PARAMETERS

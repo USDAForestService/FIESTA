@@ -80,7 +80,7 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
       }
     }
   }
-    
+ 
   if (esttype == "AREA") {
     ####################################################################
     ## Get estimates
@@ -98,7 +98,6 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
     ####################################################################
     ## Get estimates
     ####################################################################
-
     MODest <- modGBtree(GBpopdat=GBpopdat, landarea=landarea, 
 		plt.filter=plt.filter, cond.filter=cond.filter, 
 		estvar=estvar, estvar.filter=estvar.filter,

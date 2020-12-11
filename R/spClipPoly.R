@@ -17,6 +17,14 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
   ## If gui.. set variables to NULL
   if(gui){polyv=clippolyv=exportsp=areacalc <- NULL}
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::spClipPoly)), 
+		names(formals(FIESTA::spMakeSpatialPoints)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
 
   ##################################################################
   ## CHECK INPUT PARAMETERS

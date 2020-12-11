@@ -27,6 +27,14 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
 	title.rowvar=title.colvar <- NULL
   gui <- FALSE
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modSAarea))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
   ##################################################################
   ## INITIALIZE SETTINGS
   ##################################################################

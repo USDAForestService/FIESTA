@@ -19,6 +19,13 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% names(formals(spExportSpatial)))) {
+    miss <- input.params[!input.params %in% formals(spExportSpatial)]
+    stop("invalid parameter: ", toString(miss))
+  }
+
   ## Check sfobj
   ###########################################################
   if (is.null(sfobj)) {

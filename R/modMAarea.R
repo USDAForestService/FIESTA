@@ -26,6 +26,15 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
  
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modMAarea)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   ##################################################################
   ## INITIALIZE SETTINGS
   ##################################################################
@@ -223,7 +232,6 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
     unit.totest <- getarea(unit.totest, areavar=areavar, esttype=esttype)
   }
 
-
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -255,7 +263,8 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
-    unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
+    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
     unitarea <- tabs$tab1
     unit.rowest <- tabs$tab2
@@ -264,9 +273,9 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
     unit.rowest <- FIESTA::getarea(unit.rowest, areavar=areavar, esttype=esttype)
     setkeyv(unit.rowest, c(unitvar, rowvar))
   }
-
   if (!is.null(unit.colest)) {
-    unit.colest <- FIESTA::add0unit(x=unit.colest, colvar, uniquecol, unitvar, col.add0)
+    unit.colest <- FIESTA::add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+		unitvar=unitvar, xvar.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
     unitarea <- tabs$tab1
     unit.colest <- tabs$tab2
@@ -275,86 +284,10 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
     unit.colest <- FIESTA::getarea(unit.colest, areavar=areavar, esttype=esttype)
     setkeyv(unit.colest, c(unitvar, colvar))
   }
-
   if (!is.null(unit.grpest)) {
-    if (!is.null(grpvar)) {
-      ## SEPARATE COLUMNS
-      unit.grpest[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      unit.grpest[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-      unit.grpest[,(grpvar) := NULL]
-    } 
-
-    if (row.add0 && col.add0) {
-      unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=TRUE, xvar2=colvar, uniquex2=uniquecol)
-
-    } else {
-      ordnames <- {}
-
-      if (row.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(colvar), sep="#")][, 
-			(colvar) := NULL]
-          unit.grpest[,(colvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			row.add0)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      } else if (col.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(rowvar), sep="#")][, 
-			(rowvar) := NULL]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			col.add0)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest[,(rowvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(rowvar, ordnames)
-        }
-      } else {
-        if (!is.null(uniquecol)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      }
-      ordnames <- c(unitvar, ordnames)
-      setcolorder(unit.grpest, 
-		c(ordnames, names(unit.grpest)[!names(unit.grpest) %in% ordnames]))
-    }
+    unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
+		xvar2.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
     unitarea <- tabs$tab1
     unit.grpest <- tabs$tab2
@@ -363,7 +296,6 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
     unit.grpest <- FIESTA::getarea(unit.grpest, areavar=areavar, esttype=esttype)
     setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
   }
-
 
 
   ###################################################################################

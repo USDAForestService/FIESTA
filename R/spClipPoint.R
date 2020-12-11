@@ -19,6 +19,16 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) xyplt=xy.uniqueid=exportsp <- NULL
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::spClipPoint)), 
+		names(formals(FIESTA::spMakeSpatialPoints)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################

@@ -152,7 +152,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   tabnm <- "02"
   outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
-  rowvar <- "FORTYPGRPCD"
+  rowvar <- "FORTYPCD"
   colvar <- "STDSZCD"
 
   estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,

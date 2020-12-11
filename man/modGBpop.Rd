@@ -13,11 +13,11 @@
 	total land area in the population. 
 }
 \usage{    
-modGBpop(cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL, 
+modGBpop(cond = NULL, plt = NULL, tree = NULL, vspspp = NULL, pltassgn = NULL, 
 	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
 	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, ACI = FALSE, 
-	adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL, 
+	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL, 
+	adj = "samp", ACI = FALSE, strata = TRUE, plt.nonsamp.filter = NULL, 
 	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, 
 	unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
 	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
@@ -41,6 +41,8 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
   \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Tree-level data with one record for each tree. Tree data are aggregated to 
 	condition-level. See details for necessary variables to include. }
+  \item{vspspp}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Vegetation species-level data with one record for each species (P2VEG_SUBPLOT_SPP). }
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
 	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
 	estimation unit and/or strata, with one record for each plot. }
@@ -60,6 +62,7 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, pltassgn = NULL,
   \item{areawt}{ String. Name of variable for summarizing area weights (e.g., CONDPROP_UNADJ). }
   \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
   \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
+  \item{intensity}{ Integer code. Code(s) indicating intensity to use for population. }
   \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
 	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 

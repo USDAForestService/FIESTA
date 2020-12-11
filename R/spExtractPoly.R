@@ -21,6 +21,15 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) showext=savedata=exportsp <- NULL
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::spExtractPoly)), 
+		names(formals(FIESTA::spMakeSpatialPoints)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
@@ -220,7 +229,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 
   ## Export to shapefile
   if (exportsp) 
-    spExportSpatial(sppltout, out_dsn=out_dsn, out_layer=out_layer, 
+    spExportSpatial(sppltext, out_dsn=out_dsn, out_layer=out_layer, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_layer=overwrite)
   

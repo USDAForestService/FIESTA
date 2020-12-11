@@ -4,7 +4,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   ## unitcombine - If TRUE, combine estimation units, If FALSE, only combine strata
 
   ## Set global variables
-  n.strata=n.total=puniqueid=unitstrgrplut=UNITCD <- NULL
+  n.strata=n.total=puniqueid=unitstrgrplut=UNITCD=unitnew=strvarnew <- NULL
   addUNITCD <- FALSE
 
   if (!"data.table" %in% class(stratacnt)) stratacnt <- setDT(stratacnt)
@@ -75,29 +75,32 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
     ## Define a variable to restrain collapsing by. Use unitvar2 if exists.
     if (is.null(unitvar2)) {
       if (unitvar != "UNITCD" && !"UNITCD" %in% names(stratacnt)) {
-        stratacnt[, UNITCD := 1]
+        stratacnt$UNITCD <- 1
         addUNITCD <- TRUE
       }
       unitcombinevar <- "UNITCD"
     } else {
       unitcombinevar <- unitvar2
     }
-         
+
+    if (!is.factor(stratacnt[[unitvar]])) 
+      stratacnt[[unitvar]] <- factor(stratacnt[[unitvar]])
+    stratacnt$unitvar <- as.numeric(stratacnt[[unitvar]])
+    stratacnt$unitnew <- as.character(-1)
+    setkeyv(stratacnt, c(unitcombinevar, unitvar))
+
     ## Group estimation units if less than minplotnum
-    unitvarnew <- paste0(unitvar, ".1")
-    stratacnt <- setDT(stratacnt)
-    unitcnt <- setDF(stratacnt[, list(n.total = sum(n.total)), by=c(unitcombinevar, unitvar)])
-    unitgrp <- by(unitcnt, unitcnt[, unitcombinevar], groupEstunit, 
-			unitvar=unitvar, unitvarnew=unitvarnew, minplotnum=minplotnum.unit, 
-			unitgrpnm=TRUE, n="n.total")
-    unitgrp.dt <- setDT(data.frame(do.call(rbind, unitgrp), stringsAsFactors=FALSE, row.names=NULL))
-    stratacnt <- merge(stratacnt, unitgrp.dt[, c(unitcombinevar, unitvar, unitvarnew), with=FALSE],
-		by=c(unitcombinevar, unitvar))
+    unitgrp <- stratacnt[, groupEstunit(.SD, minplotnum.unit), by=UNITCD]
+    unitvarnew <- "unitnew"
+    setkeyv(unitgrp, c(unitcombinevar, unitvar))
+    stratacnt <- merge(stratacnt[,unitnew:=NULL], 
+		unitgrp[, c(unitcombinevar, "unitvar", unitvarnew), with=FALSE],
+		by=c(unitcombinevar, "unitvar"))
     SDcols <- c(vars2combine, "n.strata", "n.total")
     SDcols <- SDcols[SDcols %in% names(stratacnt)]
     unitgrpsum <- stratacnt[, lapply(.SD, sum, na.rm=TRUE), 
 			by=c(unitcombinevar, unitvarnew, strvar), .SDcols=SDcols]
-    setorderv(unitgrpsum, c(unitcombinevar, unitvarnew, strvar))
+    setkeyv(unitgrpsum, c(unitcombinevar, unitvarnew, strvar))
 
     if (addUNITCD) {
       unitgrpsum[, (unitcombinevar) := NULL]
@@ -127,6 +130,8 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
     }
 
     ## Merge new unitvar to pltstratx
+    setkeyv(pltstratx, unitjoinvars)
+    setkeyv(unitgrplut, unitjoinvars)
     pltstratx <- merge(pltstratx, unitgrplut, by=unitjoinvars)
     unitvar <- unitvarnew
 
@@ -143,40 +148,46 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   if ("n.strata" %in% names(unitgrpsum) && 
 		any(unique(unitgrpsum$n.strata) < 60)) {
 
-    ## Group strata classes by estimation unit
-    strvarnew <- paste0(strvar, ".1")
-    unitgrpsum <- setDF(unitgrpsum)
-    stratgrp <- by(unitgrpsum, unitgrpsum[, unitvar], groupStrata, 
-			strvar=strvar, strvarnew=strvarnew, minplotnum=minplotnum.strat)
-    stratgrp.dt <- setDT(data.frame(do.call(rbind, stratgrp), stringsAsFactors=FALSE, 
-		row.names=NULL))
-    strlut <- stratgrp.dt[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, strvarnew), .SDcols=c(vars2combine, "n.strata")]
-    strlut[, n.total := stratgrp.dt[match(strlut[[unitvar]], stratgrp.dt[[unitvar]]), 
+    if (!is.factor(unitgrpsum[[strvar]])) 
+      unitgrpsum[[strvar]] <- factor(unitgrpsum[[strvar]])
+    unitgrpsum$strat <- as.numeric(unitgrpsum[[strvar]])
+    unitgrpsum$stratnew <- as.character(-1)
+
+    stratgrp <- unitgrpsum[, groupStrata(.SD, minplotnum.strat), by=unitvar]
+
+    strlut <- stratgrp[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(unitvar, "stratnew"), .SDcols=c(vars2combine, "n.strata")]
+    strlut[, n.total := stratgrp[match(strlut[[unitvar]], stratgrp[[unitvar]]), 
 		"n.total"]]
+
 
     ## Create look up table with original classes and new classes
     unitstrjoinvars <- c(unitvar, strvar)
     if (!is.null(unitstrgrplut)) {
       unitstrgrplut <- merge(unitstrgrplut, 
-			stratgrp.dt[, c(unitvar, strvar, strvarnew), with=FALSE], 
+			stratgrp[, c(unitvar, strvar, "stratnew"), with=FALSE], 
 			by=unitstrjoinvars)
-      unitstrgrplut <- unitstrgrplut[, c(unitgrpvars, strvar, strvarnew), with=FALSE]
+      unitstrgrplut <- unitstrgrplut[, c(unitgrpvars, strvar, "stratnew"), with=FALSE]
     } else {
-      unitstrgrplut <- stratgrp.dt[, c(unitvar, strvar, strvarnew), with=FALSE]
+      unitstrgrplut <- stratgrp[, c(unitvar, strvar, "stratnew"), with=FALSE]
     }
-
     ## Merge new strata to look up table with original classes and new classes
     keyvars <- unitstrjoinvars
     setkeyv(setDT(unitstrgrplut), keyvars)
 
     ## Merge new unitvar to pltstratx
-    pltstratx <- merge(pltstratx, 
-		unique(unitstrgrplut[,c(unitstrjoinvars, strvarnew), with=FALSE]), 
-		by=unitstrjoinvars)
-    strvar <- strvarnew
-    strunitvars=c(unitvar, strvar)
+    setkeyv(pltstratx, unitstrjoinvars)
+    setkeyv(unitgrplut, unitstrjoinvars)
 
+    tabs <- FIESTA::check.matchclass(pltstratx, unitstrgrplut, unitstrjoinvars)
+    pltstratx <- tabs$tab1
+    unitstrgrplut <- tabs$tab2
+
+    pltstratx <- merge(pltstratx, 
+		unique(unitstrgrplut[,c(unitstrjoinvars, "stratnew"), with=FALSE]), 
+		by=unitstrjoinvars)
+    strvar <- "stratnew"
+    strunitvars=c(unitvar, strvar)
   } else {
     strlut <- unitgrpsum
   }

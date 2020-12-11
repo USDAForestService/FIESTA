@@ -1,6 +1,8 @@
 anGBpop_report <- function(rawfolder, AOInm, photofn=NULL, title.ref=NULL, 
 	outfolder=NULL) {
-  ## Description: Creates a report using Rmarkdown  
+  ## DESCRIPTION: Creates a report using Rmarkdown 
+  ## 		Adds a folder named report in the outfolder and copies all 
+  ##		components of report into folder.
 
   outfolder <- pcheck.outfolder(outfolder)
   reportfolder <- file.path(outfolder, "report")
@@ -15,10 +17,6 @@ anGBpop_report <- function(rawfolder, AOInm, photofn=NULL, title.ref=NULL,
 	file.path(reportfolder, "template.docx"), overwrite=TRUE)
   file.copy(photofn, file.path(reportfolder, "report_image.png"))
 
-print(system.file("rmd", "anGBpop_report.Rmd", package="FIESTA"))
-print(rmdfn)
-print(reportfn)
-stop()
 
   rmarkdown::render(
     input = rmdfn,

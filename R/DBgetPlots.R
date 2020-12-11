@@ -1,6 +1,6 @@
 DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL, 
 	evalCur=FALSE, evalEndyr=NULL, evalType="ALL", measCur=FALSE, measEndyr=NULL, 
-	allyrs=FALSE, invyrs=NULL, istree=FALSE, isseed=FALSE, isveg=FALSE, 
+	allyrs=FALSE, invyrs=NULL, istree=FALSE, isseed=FALSE, isveg=FALSE, isdwm=FALSE,
 	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, 
 	regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, intensity1=FALSE, stateFilter=NULL,
 	allFilter=NULL, alltFilter=NULL, savedata=FALSE, saveqry=FALSE, outfolder=NULL,
@@ -14,7 +14,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     invtype=evalCur=allyrs=measCur=evalType=istree=isseed=isveg=issp=
 	spcondid1=defaultVars=regionVars=ACI=subcycle99=intensity1=
 	allFilter=savedata=saveqry=parameters=out_fmt=overwrite=
-	BIOJENK_kg=BIOJENK_lb=PREV_PLTCN <- NULL
+	BIOJENK_kg=BIOJENK_lb=PREV_PLTCN=savePOP <- NULL
 
   ## Set global variables  
   CN=CONDID=COND_STATUS_CD=PLT_CN=FORTYPCD=pltvarlst=condvarlst=treevarlst=tsumvarlst=
@@ -55,7 +55,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   isRMRS <- FALSE
   xycoords = c("LON_PUBLIC", "LAT_PUBLIC")
   coords <- "PUBLIC"
-  isdwm <- FALSE
   parameters <- FALSE
   biojenk <- FALSE 
   greenwt <- TRUE
@@ -72,7 +71,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## Get states, Evalid and/or invyrs info
   evalInfo <- DBgetEvalid(states=states, RS=RS, invtype=invtype, 
 	evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, evalType=evalType, 
-	isdwm=isdwm, gui=gui)
+	isdwm=isdwm, isveg=isveg, gui=gui)
   if (is.null(evalInfo)) return(NULL)
   states <- evalInfo$states
   rslst <- evalInfo$rslst
@@ -256,7 +255,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       isveg <- FALSE
     }
   }
-  if (all(!rslst %in% c("RMRS", "PNWRS"))) isveg <- FALSE
+  #if (all(!rslst %in% c("RMRS", "PNWRS"))) isveg <- FALSE
 
 
   ## Check defaultVars
@@ -297,7 +296,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## Check issp
   ###########################################################
   issp <- FIESTA::pcheck.logical(issp, varnm="issp", 
-		title="SpatialPoints of plot vars?", first="YES", gui=gui)
+		title="SpatialPoints of plot vars?", first="NO", gui=gui)
 
   if (spcond) 
     ## Check spcondid1
@@ -318,7 +317,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## Check parameters
   ###########################################################
   parameters <- FIESTA::pcheck.logical(parameters, varnm="parameters", 
-		title="Save parameters", first="YES", gui=gui)
+		title="Save parameters", first="NO", gui=gui)
 
   ## Check savePOP
   ###########################################################
@@ -536,6 +535,46 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     ## Create filter for state
     stFilter <- paste0("p.STATECD IN(", stcd, ")") 
 
+    ## If FIA evaluation, get all plot from all evaluations.
+    if (iseval) {
+      evalid <- evalidlist[[state]]
+      evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
+
+      if (isveg) {
+        evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
+        if (length(evalid.veg) == 0) stop("must include evaluation ending in 10")
+        evalFilter.veg <- paste("ppsa.EVALID =", evalid.veg)
+      } 
+      if (isdwm) {
+        evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
+        if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
+        evalFilter.dwm <- paste("ppsa.EVALID =", evalid.dwm)
+      } 
+    } else {
+      if (measCur) {
+        evalFilter <- stFilter 
+   
+      } else {
+        if (length(invyrs) > 1){
+          invyr <- invyrs[[state]]
+        } else {
+          invyr <- invyrs[[1]]
+        }
+        invyrFilter <- paste0("p.INVYR IN(", toString(invyr), ")")
+        evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(invyr), ")")
+      }
+ 
+      if (!subcycle99)
+        evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
+      if (intensity1)
+        evalFilter <- paste(evalFilter, "and p.INTENSITY = '1'")
+
+      if (isveg) 
+        evalFilter.veg <- evalFilter
+      if (isdwm)
+        evalFilter.dwm <- evalFilter       
+    } 
+
 ############ CSV only
 
     ## Get CSV files
@@ -573,6 +612,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			 stopifnull=FALSE)
     }
 
+    ## DWM calc table
+    if (isdwm)
+      COND_DWM_CALC <- FIESTA::DBgetCSV("COND_DWM_CALC", stabbr, ZIP=TRUE, returnDT=TRUE, 
+		stopifnull=FALSE)
+
+
     ## Other tables
     if (!is.null(othertables)) {
       for (othertable in othertables) {
@@ -581,37 +626,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       }
     }
      
-############ End CSV only
-
-    ## If FIA evaluation, get all plot from all evaluations.
-    if (iseval) {
-      evalid <- evalidlist[[state]]
-      evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
-
-      if (isdwm) {
-        evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
-        if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
-        evalFilter.dwm <- paste("EVALID =", evalid.dwm)
-      } 
-    } else {
-      if (measCur) {
-        evalFilter <- stFilter 
-   
-      } else {
-        if (length(invyrs) > 1){
-          invyr <- invyrs[[state]]
-        } else {
-          invyr <- invyrs[[1]]
-        }
-        invyrFilter <- paste0("p.INVYR IN(", toString(invyr), ")")
-        evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(invyr), ")")
-      }
- 
-      if (!subcycle99)
-        evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
-      if (intensity1)
-        evalFilter <- paste(evalFilter, "and p.INTENSITY = '1'")
-    }         
+############ End CSV only        
 
     ####################################################################################
     #############################  ADDS FILTER (OPTIONAL)  #############################
@@ -1109,7 +1124,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
       ## Get data for P2VEG_SUBPLOT_SPP
       vspsppvars <- toString(paste0("v.", vspsppvarlst))
-      vspsppqry <- paste("select distinct", vspsppvars, "from", vfromqry, "where", xfilter)
+      vspsppqry <- paste("select distinct", vspsppvars, "from", vfromqry, 
+		"where", paste0(evalFilter.veg, stateFilters))
       vspsppx <- sqldf::sqldf(vspsppqry, stringsAsFactors=FALSE)
 
       if (nrow(vspsppx) != 0) {
@@ -1133,7 +1149,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
       ## Get data for P2VEG_SUBP_STRUCTURE
       vspstrvars <- toString(paste0("v.", vspstrvarlst))
-      vspstrqry <- paste("select distinct", vspstrvars, "from", vstrfromqry, "where", xfilter)
+      vspstrqry <- paste("select distinct", vspstrvars, "from", vstrfromqry, 
+		"where", paste0(evalFilter.veg, stateFilters))
       vspstrx <- sqldf::sqldf(vspstrqry, stringsAsFactors=FALSE)
 
       if(nrow(vspstrx) != 0){
@@ -1172,7 +1189,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
         dvars <- toString(paste0("d.", dwmlst))
         xfilter.dwm <- sub("ppsa.", "", xfilter)
-        dwmqry <- paste("select distinct", dvars, "from", dfromqry, "where", xfilter)
+        dwmqry <- paste("select distinct", dvars, "from", dfromqry, 
+		"where", paste0(evalFilter.dwm, stateFilters))
         dwmx <- sqldf::sqldf(dwmqry, stringsAsFactors=FALSE)
 
         if (nrow(dwmx) != 0) {
@@ -1433,7 +1451,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         index.unique.dwmx <- NULL
         if (i == 1) index.unique.dwmx <- c("PLT_CN", "CONDID")
         datExportData(dwmx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dwm", 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dwm_calc", 
 			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 			index.unique=index.unique.dwmx, append_layer=append_layer2,
 			outfn.pre=outfn.pre)

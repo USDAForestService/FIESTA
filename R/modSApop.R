@@ -27,6 +27,13 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
   if (gui)  
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% names(formals(modSApop)))) {
+    miss <- input.params[!input.params %in% formals(modSApop)]
+    stop("invalid parameter: ", toString(miss))
+  }
+
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL

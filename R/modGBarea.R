@@ -1,19 +1,19 @@
 modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, 
 	cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", pltassgnid="PLT_CN", 
-	pjoinid="CN", evalid=NULL, invyrs=NULL, ACI=FALSE, adj="samp", strata=TRUE, 
-	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, 
-	unitarea=NULL, areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, 
-	stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
-	stratcombine=TRUE, landarea="FOREST", plt.filter=NULL, cond.filter=NULL, 
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+	pjoinid="CN", evalid=NULL, invyrs=NULL, intensity=NULL, adj="samp", ACI=FALSE, 
+	strata=TRUE, plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, 
+	unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, 
+	minplotnum.unit=10, stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
+	getwtvar="P1POINTCNT", stratcombine=TRUE, landarea="FOREST", plt.filter=NULL, 
+	cond.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits=TRUE, allin1=FALSE, estround=1, pseround=2, estnull="--", 
-	psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, outfolder=NULL, 
-	outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, 
-	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
-	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, GBpopdat=NULL, 
-	GBdata=NULL, gui=FALSE){
+	psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, rawonly=FALSE, 
+	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, 
+	addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
+	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, 
+	GBpopdat=NULL, GBdata=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -25,6 +25,14 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modGBarea)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
 
   ###################################################################################
   ## INITIALIZE SETTINGS
@@ -46,7 +54,8 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   nonresp <- FALSE
   substrvar <- NULL
   returnGBpopdat <- TRUE 
-
+  parameters <- FALSE
+  returnlst <- list()
 
   ### Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -60,19 +69,18 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
       dir.create(paste(outfolder, "rawdata", sep="/"))
   }
 
- 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(GBpopdat)) {
     GBpopdat <- modGBpop(cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
 	puniqueid=puniqueid, cuniqueid=cuniqueid, condid=condid, pltassgnid=pltassgnid, 
-	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, ACI=ACI, adj=adj, 
-	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter, 
-	strata=strata, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea, 
-	areavar=areavar, unitcombine=unitcombine, minplotnum.unit=minplotnum.unit, 
-	stratalut=stratalut, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
-	stratcombine=stratcombine, GBdata=GBdata, gui=gui)
+	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, intensity=intensity,
+	adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
+	cond.nonsamp.filter=cond.nonsamp.filter, strata=strata, unitvar=unitvar, 
+	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine,
+ 	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
+	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
     if (!is.list(GBpopdat))
@@ -108,7 +116,6 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   }
   strunitvars <- c(unitvar, strvar)
 
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -117,7 +124,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
  		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-		savedata=savedata, outfolder=outfolder, gui=gui)
+		rawonly=rawonly, savedata=savedata, outfolder=outfolder, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -208,6 +215,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(cdomdat[[rowvar]])) > 1, TRUE, FALSE)
   estvar.name <- ifelse(adj == "samp", "CONDPROP_ADJ", "CONDPROP_UNADJ")
 
+  message("getting estimates...")
 #  if (addtotal) {
     ## Get total estimate and merge area
     cdomdat$TOTAL <- 1
@@ -253,7 +261,8 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
-    unit.rowest <- add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
+    unit.rowest <- add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
     unitarea <- tabs$tab1
     unit.rowest <- tabs$tab2
@@ -264,7 +273,8 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   }
 
   if (!is.null(unit.colest)) {
-    unit.colest <- FIESTA::add0unit(x=unit.colest, colvar, uniquecol, unitvar, col.add0)
+    unit.colest <- add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+		unitvar=unitvar, xvar.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
     unitarea <- tabs$tab1
     unit.colest <- tabs$tab2
@@ -273,86 +283,10 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
     unit.colest <- FIESTA::getarea(unit.colest, areavar=areavar, esttype=esttype)
     setkeyv(unit.colest, c(unitvar, colvar))
   }
-
   if (!is.null(unit.grpest)) {
-    if (!is.null(grpvar)) {
-      ## SEPARATE COLUMNS
-      unit.grpest[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      unit.grpest[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-      unit.grpest[,(grpvar) := NULL]
-    } 
-
-    if (row.add0 && col.add0) {
-      unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=TRUE, xvar2=colvar, uniquex2=uniquecol)
-
-    } else {
-      ordnames <- {}
-
-      if (row.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(colvar), sep="#")][, 
-			(colvar) := NULL]
-          unit.grpest[,(colvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			row.add0)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      } else if (col.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(rowvar), sep="#")][, 
-			(rowvar) := NULL]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			col.add0)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest[,(rowvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(rowvar, ordnames)
-        }
-      } else {
-        if (!is.null(uniquecol)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      }
-      ordnames <- c(unitvar, ordnames)
-      setcolorder(unit.grpest, 
-		c(ordnames, names(unit.grpest)[!names(unit.grpest) %in% ordnames]))
-    }
+    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
+		xvar2.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
     unitarea <- tabs$tab1
     unit.grpest <- tabs$tab2
@@ -365,7 +299,6 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   ###################################################################################
   ## Get row and column totals for units if sumunits=FALSE
   ###################################################################################
-
   ## For sumunits=FALSE, get estimation unit totals
   if (!sumunits && (length(unique(unitarea[[unitvar]])) > 1 && !is.null(grpvar))) {
 
@@ -392,7 +325,8 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
     rowunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
 		uniqueid=cuniqueid, strlut=strlut2, unitvar="ONEUNIT", strvar=strvar, 
 		domain=rowvar)
-    rowunit <- FIESTA::add0unit(rowunit, rowvar, uniquerow, "ONEUNIT", row.add0)
+    rowunit <- FIESTA::add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
+		unitvar="ONEUNIT", xvar.add0=row.add0)
     tabs <- FIESTA::check.matchclass(unitacres2, rowunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     rowunit <- tabs$tab2
@@ -414,7 +348,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
     totunit <- totunit[unitacres2, nomatch=0]
     totunit <- FIESTA::getarea(totunit, areavar=areavar, esttype=esttype)
   }          
-
+ 
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
@@ -423,7 +357,8 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
     rawdat <- list()
     rawdat$domdat <- setDF(cdomdat)
   }
- 
+
+  message("getting output...")
   estnm <- "est" 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	unitvar=unitvar, unitvar2=unitvar2, unit.totest=unit.totest, 
@@ -436,7 +371,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
  	title.pse=title.pse, rawdata=rawdata, outfn.estpse=outfn.estpse, 
 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, 
 	estround=estround, pseround=pseround, divideby=divideby, rawdat=rawdat, 
-	returntitle=returntitle, estnull=estnull, psenull=psenull) 
+	returntitle=returntitle, estnull=estnull, psenull=psenull, rawonly=rawonly) 
 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
@@ -457,28 +392,32 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
       for (i in 1:length(rawdat)) {
         tabnm <- names(rawdat[i])
         rawtab <- rawdat[[i]]
-        outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm, ".csv") 
-        if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratdat", "stratcombinelut")) {
-          write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
+        if (!is.null(rawtab)) {
+          outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm, ".csv") 
+          if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratdat", "stratcombinelut")) {
+            write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
 			outfn.date=outfn.date, overwrite=overwrite)
-        } else if (is.data.frame(rawtab)) {
-          suppressWarnings(save1tab(tab=rawtab, tab.title=title.raw, 
+          } else if (is.data.frame(rawtab)) {
+            suppressWarnings(save1tab(tab=rawtab, tab.title=title.raw, 
 			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
 			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
 			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite))
+          }
         }
       }
     }
 
-    ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
-    ###########################################################
-    if (!is.null(outfn)) 
-      outfn.param <- paste(outfn.estpse, "parameters", sep="_")
-    outparamfn <- getoutfn(outfn.param, outfolder=outfolder, 
+    if (parameters) {
+
+      ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
+      ###########################################################
+      if (!is.null(outfn)) 
+        outfn.param <- paste(outfn.estpse, "parameters", sep="_")
+      outparamfn <- getoutfn(outfn.param, outfolder=outfolder, 
 		outfn.date=outfn.date, overwrite=overwrite, ext="txt")
 
-    outfile <- file(outparamfn, "w")
-    cat(  "cond = ", as.character(bquote(cond)), "\n",
+      outfile <- file(outparamfn, "w")
+      cat(  "cond = ", as.character(bquote(cond)), "\n",
       "cond = ", as.character(bquote(cond)), "\n",
       "plt = ", as.character(bquote(plt)), "\n",
       "pltassgn = ", as.character(bquote(pltassgn)), "\n",
@@ -545,7 +484,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
     file = outfile, sep="")
 
     cat(  "est <- modGBarea(cond=cond, plt=plt, pltassgn=pltassgn, cuniqueid=cuniqueid, 
-	puniqueid=puniqueid,  	pltassgnid=pltassgnid, ACI=ACI, sumunits=sumunits, adj=adj, 
+	puniqueid=puniqueid, pltassgnid=pltassgnid, ACI=ACI, sumunits=sumunits, adj=adj, 
 	strata=strata, plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter,
  	landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, unitvar=unitvar, 
 	unitvar2=unitvar2, stratcombine=stratcombine, unitarea=unitarea, areavar=areavar,
@@ -561,11 +500,12 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 	title.rowvar=title.rowvar, title.colvar=title.colvar, title.unitvar=title.unitvar,
  	title.filter=title.filter, gui=gui)", file = outfile, sep="")
     close(outfile)
+    }
 
   }
  
   ## GET VALUES TO RETURN
-  returnlst <- list(est=est2return)
+  if (!is.null(est2return)) returnlst$est <- est2return
   if (!is.null(pse2return)) returnlst$pse <- pse2return
   if (rawdata) {
     rawdat$esttype <- "AREA"

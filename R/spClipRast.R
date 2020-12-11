@@ -14,6 +14,15 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::spClipRast)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
   ## If gui.. set variables to NULL
   if(gui){poly=clippoly=unionpoly=savedata <- NULL}
 

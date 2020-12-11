@@ -37,7 +37,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
   ## Set global variables
   ONEUNIT=ONESTRAT=npixels=nonsampplots=strvars=PLOT_STATUS_CD=strwt=testlt1=
-		pixels=unitstrgrplut <- NULL
+		pixels=unitstrgrplut=vars2combine <- NULL
   gui <- FALSE
   unitvars <- c(unitvar, unitvar2)
 
@@ -262,6 +262,14 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   }
 
 
+  ##################################################################################
+  ## Check estimation unit values from auxlut with unitarea
+  ##################################################################################
+  auxlut <- check.matchval(auxlut, unitarea, unitvar, tab1txt="auxlut",
+			tab2txt="unitarea", subsetrows=TRUE)
+
+
+
   ###################################################################################
   ## Check number of plots by unitvar
   ##	 (including partially sampled plots - COND_STATUS_CD=5) 
@@ -290,12 +298,15 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     message("removing plots with invalid strata assignments")
   }
 
+
   ###################################################################################
   ## Collapse strata and/or estimation unit classes if errtab warnings
   ###################################################################################
   if (any(errtab$errtyp == "warn")) {
-    vars2combine <- c(getwtvar, npixelvar)
-    if ("strwt" %in% names(auxlut)) vars2combine <- c(vars2combine, "strwt")
+    if (any(c(getwtvar, npixelvar, "strwt") %in% names(auxlut))) {
+      vars2combine <- c(vars2combine, c(getwtvar, npixelvar, "strwt"))
+      vars2combine <- vars2combine[vars2combine %in% names(auxlut)]
+    }
     collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx, 
 		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
 		unitarea=unitarea, areavar=areavar, unitvar=unitvar, unitvar2=unitvar2,

@@ -30,6 +30,13 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 	  value=p.pltdom=PBvars2keep=title.est=title.pse=title.estpse=
 	  outfn.estpse <- NULL
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modPB))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
 
   ## If gui.. set variables to NULL
   if (gui) pnt=pntid=plotid=puniqueid=landarea=strvar=areavar=PBvars2keep <- NULL
@@ -391,7 +398,8 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     unit.rowest <- unit.rowest[get(eval(rowvar)) != row.filterval,]
 
     ## Merge uniquerow
-    unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
+    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0)
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
     if (!is.null(unit.rowest) && !ratio) {
@@ -420,7 +428,8 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     unit.colest <- unit.colest[get(eval(colvar)) != col.filterval,]
 
     ## Merge uniquecol
-    unit.colest <- FIESTA::add0unit(unit.colest, colvar, uniquecol, unitvar, col.add0)
+    unit.colest <- FIESTA::add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+		unitvar=unitvar, xvar.add0=col.add0)
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
     if (tabtype == "AREA" || sumunits) {
@@ -437,122 +446,16 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   }
 
   if (!is.null(unit.grpest)) {
-    ## Merge number of points
-    tabs <- FIESTA::check.matchclass(unit.grpest, grpest.pntcnt, c(unitvar, grpvar))
-    unit.grpest <- tabs$tab1
-    grpest.pntcnt <- tabs$tab2
-    unit.grpest <- unit.grpest[grpest.pntcnt, nomatch=0]
-
-
-    ## Remove rows that are filtered out (NOTinDOMAIN or 9999)
-    unit.grpest <- unit.grpest[get(eval(rowvar)) != row.filterval | 
-		get(eval(colvar)) != col.filterval,]
-
-    if (row.add0 && col.add0) {
-      unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=TRUE, xvar2=colvar, uniquex2=uniquecol)
-    } else {
-      ordnames <- {}
-
-      if (row.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(colvar), sep="#")][, 
-			(colvar) := NULL]
-          unit.grpest[,(colvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			row.add0)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      } else if (col.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(rowvar), sep="#")][, 
-			(rowvar) := NULL]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			col.add0)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest[,(rowvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(rowvar, ordnames)
-        }
-      } else {
-        if (!is.null(uniquecol)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=colvar, uniquex=uniquecol, 
-			unitvar=unitvar, add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
-			unitvar=unitvar, add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      }
-      ordnames <- c(unitvar, ordnames)
-      setcolorder(unit.grpest, 
-		c(ordnames, names(unit.grpest)[!names(unit.grpest) %in% ordnames]))
-    }
-
-    if (tabtype == "AREA" || sumunits) {
-      if (ratio) {
-
-        tabs <- FIESTA::check.matchclass(unitarea, unit.grpest.domtot, unitvar)
-        unitarea <- tabs$tab1
-        unit.grpest.domtot <- tabs$tab2
-        setkeyv(unit.grpest.domtot, unitvar)
-        unit.grpest.domtot <- unit.grpest.domtot[unitarea, nomatch=0]
-        unit.grpest.domtot <- PBgetest(unit.grpest.domtot, areavar, phatcol="phat", 
-			phatcol.var="phat.var")
-        setkeyv(unit.grpest.domtot, c(unitvar, rowvar))
-        setnames(unit.grpest.domtot, "est", "DOMACRES")
-
-        tabs <- FIESTA::check.matchclass(unit.grpest, unit.grpest.domtot, key(unit.grpest.domtot))
-        unit.grpest <- tabs$tab1
-        unit.grpest.domtot <- tabs$tab2
-
-        unit.grpest <- merge(unit.grpest, 
-			unit.grpest.domtot[, c(key(unit.grpest.domtot), "DOMACRES"), with=FALSE],
-			by=key(unit.grpest.domtot))
-
-        unit.grpest <- PBgetest(unit.grpest, "DOMACRES", phatcol=phat, phatcol.var=phat.var)
-        setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
-
-      } else {
-        tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
-        unitarea <- tabs$tab1
-        unit.grpest <- tabs$tab2
-        setkeyv(unit.grpest, unitvar)
-        unit.grpest <- unit.grpest[unitarea, nomatch=0]
-        unit.grpest <- PBgetest(unit.grpest, areavar, phatcol=phat, phatcol.var=phat.var)
-        setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
-      }
-    } else {
-      unit.grpest <- PBgetest(unit.grpest, phatcol=phat, phatcol.var=phat.var)
-    }
+    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
+		xvar2.add0=col.add0)
+    tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
+    unitarea <- tabs$tab1
+    unit.grpest <- tabs$tab2
+    setkeyv(unit.grpest, unitvar)
+    unit.grpest <- unit.grpest[unitarea, nomatch=0]
+    unit.colest <- PBgetest(unit.grpest, areavar)
+    setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
   }
         
   if (!sumunits && length(unique(strlut[[unitvar]])) > 1 && !ratio && tabtype != "PCT") {
@@ -581,7 +484,8 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     rowunit <- FIESTA::PBest.pbar(dom.prop=pltdom.prop, uniqueid=plotid, 
 		domain=rowvar, strattype="post", strlut=strlut2, strunitvars=strunitvars2,
  		unitvars="ONEUNIT", strvar=strvar)$est.unit
-    rowunit <- FIESTA::add0unit(rowunit, rowvar, uniquerow, "ONEUNIT", row.add0)
+    rowunit <- FIESTA::add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
+		unitvar="ONEUNIT", xvar.add0=row.add0)
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
     if (tabtype == "AREA") {
       tabs <- FIESTA::check.matchclass(rowunit, unitarea2, "ONEUNIT")
@@ -661,23 +565,26 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 
         if (ncol(uniquerow) > 1 && ncol(uniquecol) > 1) {
           if (unitvar %in% names(plotsampcnt)) {
-            plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, mergevar.row, uniquerow, 
-			unitvar=unitvar, xvar2=mergevar.col, uniquex2=uniquecol, add0=row.add0)
+            plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
+			unitvar=unitvar, xvar2=mergevar.col, uniquex2=uniquecol, xvar.add0=row.add0)
           } else {
-            plotsampcnt <- add0unit(x=plotsampcnt, mergevar.row, uniquerow, 
-			xvar2=mergevar.col, uniquex2=uniquecol, add0=row.add0)
+            plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
+			xvar2=mergevar.col, uniquex2=uniquecol, xvar.add0=row.add0)
           }
         } else if (ncol(uniquerow) > 1) {
-          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, mergevar.row, uniquerow, add0=row.add0)
+          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
+			xvar.add0=row.add0)
         } else if (ncol(uniquecol) > 1) {
-          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, mergevar.col, uniquecol, add0=col.add0)
+          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.col, uniquex=uniquecol, 
+			xvar.add0=col.add0)
         }
 
       } else {
  
         if (!is.null(uniquerow) && ncol(uniquerow) > 1) {
           xvar <- ifelse (rowvar %in% names(plotsampcnt), rowvar, row.orderby)
-          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=xvar, uniquerow, add0=row.add0)
+          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=xvar, uniquex=uniquerow, 
+			xvar.add0=row.add0)
         }
       }
       rawdat$plotsampcnt <- setDF(plotsampcnt)

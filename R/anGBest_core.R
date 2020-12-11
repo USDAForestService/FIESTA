@@ -59,6 +59,8 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
   plt <- datPlots$plt
   cond <- datPlots$cond
   tree <- datPlots$tree 
+  vspspp <- datPlots$vspspp
+  vspstr <- datPlots$vspstr
   pltassgn <- datStrata$pltassgn
   unitarea <- datStrata$unitarea
   stratalut <- datStrata$strlut
@@ -79,6 +81,9 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
 
     tree03 <- tree[tree$PLT_CN %in% pltassgn03[[pltassgnid]],]
     tree <- tree[tree$PLT_CN %in% pltassgn[[pltassgnid]],]
+
+    vspspp <- vspspp[vspspp$PLT_CN %in% pltassgn[[pltassgnid]],]
+    vspstr <- vspstr[vspstr$PLT_CN %in% pltassgn[[pltassgnid]],]
 
     unitarea00 <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "0"),]
     unitarea03 <- unitarea[endsWith(as.character(unitarea[["EVALID"]]), "3"),]
@@ -472,7 +477,6 @@ print(paste("Table", tabnm))
 #  } else {
 #    footnote4 <- footnote
 #  }
-
   estdat2 <- tabgrp(GBpopdat=popdat, esttype="AREA", sumunits=TRUE, landarea=landarea, 
 	rowvar=rowvar, colvar=colvar, rowgrp=rowgrp, colgrp=colgrp, colgrpcd=colgrpcd, 
 	row.FIAname=row.FIAname, col.FIAname=col.FIAname, rowgrp.subtot=rowgrp.subtot, 
@@ -1086,7 +1090,7 @@ print(paste("Table", tabnm))
   returntitle=TRUE
   rowgrp.subtot=TRUE
   coltottxt="All owners"
-
+ 
   estdat2 <- tabgrp(GBpopdat=popdat, esttype="TREE", sumunits=TRUE, landarea=landarea, 
 	estvar=estvar, estvar.filter=estvar.filter, rowvar=rowvar, colvar=colvar, rowgrp=rowgrp, 
 	row.FIAname=row.FIAname, col.FIAname=col.FIAname, rowgrp.subtot=rowgrp.subtot, 

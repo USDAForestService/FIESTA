@@ -13,7 +13,6 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
   ## outfolder  String. The name of the output folder.
   ## coltitlerow Logical. If TRUE, there is a title for Columns 
 
-
   ## Make sure tab1 and tab2 are data.tables
   tab1 <- pcheck.table(tab1)
   tab2 <- pcheck.table(tab2)
@@ -27,19 +26,17 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
 
   ## Get number of row names
   rnbr <- length(rnames)
-
+ 
   ## ADD TITLE AND FORMAT TABLE
   ###########################################
   if (coltitlerow) {
     ## ADD TITLE TO TABLE COLUMNS AND FORMAT TABLE
     #tab1[,-(1:rnbr)] <- noquote(lapply(tab1[,-(1:rnbr)], 
 	#	function(x) {format(x[!is.na(suppressWarnings(as.numeric(x)))], big.mark=",")} ))
-
     tab1 <- tab1[, lapply(.SD, function(x) ifelse(is.na(suppressWarnings(as.numeric(x))),  
 		x, format(suppressWarnings(as.numeric(x)), big.mark=",")))]
     tab1 <- rbindlist(list(setDT(as.list(colnames(tab1)))[], tab1), use.names=FALSE)
     colnames(tab1) <- c(rep(" ", rnbr), coltitle, rep(" ", ncol(tab1)- (rnbr+1)))
-
     tab2 <- rbindlist(list(setDT(as.list(colnames(tab2)))[], tab2), use.names=FALSE)
     colnames(tab2) <- c(rep(" ", rnbr), coltitle, rep(" ", ncol(tab2)- (rnbr+1)))
   }

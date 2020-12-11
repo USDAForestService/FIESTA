@@ -2,7 +2,8 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 	condid="CONDID", treex=NULL, tuniqueid="PLT_CN", sumunits=FALSE, 
 	landarea=NULL, ACI.filter=NULL, plt.filter=NULL, cond.filter=NULL, 
 	allin1=FALSE, estround=6, pseround=3, divideby=NULL, addtitle=TRUE, 
-	returntitle=TRUE, rawdata=FALSE, savedata=FALSE, outfolder=NULL, gui=FALSE){
+	returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, savedata=FALSE, 
+	outfolder=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
@@ -136,10 +137,13 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 		title="Save output titles?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check rawtable
-  ########################################################
   rawdata <- FIESTA::pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?", 
 		first="NO", gui=gui, stopifnull=TRUE)
 
+  ## Check rawonly
+  rawonly <- FIESTA::pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?", 
+		first="NO", gui=gui, stopifnull=TRUE)
+  if (rawonly && !rawdata) rawdata <- TRUE
 
   ## Check outfolder 
   ########################################################

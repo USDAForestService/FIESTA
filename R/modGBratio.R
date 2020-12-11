@@ -1,19 +1,19 @@
 modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 	dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", evalid=NULL, 
-	invyrs=NULL, ACI=FALSE, adj="samp", strata=TRUE, plt.nonsamp.filter=NULL, 
-	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
-	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
-	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
-	stratcombine=TRUE, landarea="FOREST", plt.filter=NULL, cond.filter=NULL, 
-	ratiotype="PERACRE", estvarn=NULL, estvarn.filter=NULL, estvarn.name=NULL, 
-	estvard=NULL, estvard.filter=NULL, estvard.name=NULL, rowvar=NULL, 
-	colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
+	invyrs=NULL, intensity=NULL, adj="samp", ACI=FALSE, strata=TRUE, 
+	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, 
+	unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, 
+	minplotnum.unit=10, stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
+	getwtvar="P1POINTCNT", stratcombine=TRUE, landarea="FOREST", plt.filter=NULL, 
+	cond.filter=NULL, ratiotype="PERACRE", estvarn=NULL, estvarn.filter=NULL, 
+	estvarn.name=NULL, estvard=NULL, estvard.filter=NULL, estvard.name=NULL, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
 	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
 	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits=TRUE, allin1=FALSE, 
 	estround=3, pseround=2, estnull="--", psenull="--", divideby=NULL, 
-	savedata=FALSE, rawdata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, 
-	outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, 
+	savedata=FALSE, rawdata=FALSE, rawonly=FALSE, outfolder=NULL, outfn=NULL,
+ 	outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, 
 	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, 
 	title.unitvar=NULL, title.estvarn=NULL, title.estvard=NULL, title.filter=NULL, 
 	GBpopdat=NULL, GBdata=NULL, gui=FALSE){
@@ -29,6 +29,13 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=rowvar.filter=colvar.filter <- NULL
 
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% names(formals(modGBratio)))) {
+    miss <- input.params[!input.params %in% formals(modGBratio)]
+    stop("invalid parameter: ", toString(miss))
+  }
 
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -47,6 +54,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   nonresp <- FALSE
   substrvar <- NULL 
   returnGBpopdat <- TRUE 
+  parameters <- FALSE
 
   ### Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -68,7 +76,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
     GBpopdat <- modGBpop(tree=tree, cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
 	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid, 
 	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
-	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 	
+	intensity=intensity, adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 	
 	cond.nonsamp.filter=cond.nonsamp.filter, strata=strata, unitvar=unitvar, 
 	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
 	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
@@ -120,7 +128,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
  		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-		savedata=savedata, outfolder=outfolder)
+		rawonly=rawonly, savedata=savedata, outfolder=outfolder)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -170,7 +178,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   title.rowgrp <- rowcolinfo$title.rowgrp
   bytdom <- rowcolinfo$bytdom
   tdomvar <- rowcolinfo$tdomvar
-  concat <- rowcolinfo$concat
+  tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
   #rm(rowcolinfo)  
 
@@ -192,9 +200,9 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, ratiotype=ratiotype, 
 	estvarn=estvarn, estvarn.filter=estvarn.filter, estvarn.name=estvarn.name, 
 	estvard=estvard, estvard.filter=estvard.filter, estvard.name=estvard.name, 
-	esttotn=TRUE, esttotd=TRUE, tdomvar=tdomvar, adjtree=adjtree)
+	esttotn=TRUE, esttotd=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
-
+ 
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid))
   estvarn <- treedat$estvarn
   estvarn.name <- treedat$estvarn.name
@@ -211,21 +219,8 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   }
 
   ## add or separate concatenated columns
-  if (concat) {
-    if (is.null(grpvar)) {
-      tdomdatkey <- key(tdomdat)
-      setkeyv(tdomdat, c(rowvar, colvar))   
-      grpvar <- paste(rowvar, colvar, sep="#")
-      tdomdat[, (grpvar) := paste(tdomdat[[rowvar]], tdomdat[[colvar]], sep="#")]
-      setkeyv(tdomdat, tdomdatkey)
-    } else if (!is.null(tdomvar) && grpvar == tdomvar) { 
-      tdomdat[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      tdomdat[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-    }
-  } 
-
+  if (!is.null(tdomvar) && !is.null(tdomvar2))
+    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
 
   #####################################################################################
   ### Get titles for output tables
@@ -248,7 +243,6 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   outfn.param <- alltitlelst$outfn.param
   if(rawdata) outfn.rawdat <- alltitlelst$outfn.rawdat
 
-
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
@@ -257,7 +251,6 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlstn) && length(tdomvarlstn) > 1)), TRUE, FALSE)
 
-
   ## Note: tdomdat is the summed response by condition (not domain)
   if (addtotal) {
     ## Get estimate for total
@@ -265,7 +258,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
     unit.totest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdattot, 
-		esttype=esttype, ratiotype=ratiotype, bytdom=bytdom, uniqueid=cuniqueid,
+		esttype=esttype, ratiotype=ratiotype, uniqueid=cuniqueid,
 		strlut=strlut, unitvar=unitvar, strvar=strvar, domain="TOTAL")
     tabs <- FIESTA::check.matchclass(unitarea, unit.totest, unitvar)
     unitarea <- tabs$tab1
@@ -281,7 +274,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
     tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
     unit.rowest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, bytdom=bytdom, 
+		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
 		uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, strvar=strvar, 
 		domain=rowvar)
 
@@ -290,27 +283,26 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
       tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
       unit.colest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, bytdom=bytdom, 
+		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
 		uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, strvar=strvar, 
 		domain=colvar)
     
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
-      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[grpvar]]),]
       unit.grpest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, bytdom=bytdom, 
+		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
 		uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, strvar=strvar, 
 		domain=grpvar)
     }
   }
   
-
   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
-    unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
+    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
     unitarea <- tabs$tab1
     unit.rowest <- tabs$tab2
@@ -319,9 +311,9 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
     unit.rowest <- FIESTA::getarea(unit.rowest, areavar=areavar, esttype=esttype)
     setkeyv(unit.rowest, c(unitvar, rowvar))
   }
-
   if (!is.null(unit.colest)) {
-    unit.colest <- FIESTA::add0unit(x=unit.colest, colvar, uniquecol, unitvar, col.add0)
+    unit.colest <- FIESTA::add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+		unitvar=unitvar, xvar.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
     unitarea <- tabs$tab1
     unit.colest <- tabs$tab2
@@ -330,83 +322,10 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
     unit.colest <- FIESTA::getarea(unit.colest, areavar=areavar, esttype=esttype)
     setkeyv(unit.colest, c(unitvar, colvar))
   }
-
   if (!is.null(unit.grpest)) {
-    if (!is.null(grpvar)) {
-      ## SEPARATE COLUMNS
-      unit.grpest[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      unit.grpest[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-      unit.grpest[,(grpvar) := NULL]
-    } 
-
-    if (row.add0 && col.add0) {
-      unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=TRUE, xvar2=colvar, uniquex2=uniquecol)
-
-    } else {
-      ordnames <- {}
-
-      if (row.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(colvar), sep="#")][, 
-			(colvar) := NULL]
-          unit.grpest[,(colvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=colvar, 
-			uniquex=uniquecol, unitvar=unitvar, add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=rowvar, 
-			uniquex=uniquerow, unitvar=unitvar, row.add0)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      } else if (col.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(rowvar), sep="#")][, 
-			(rowvar) := NULL]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=colvar, uniquex=uniquecol, 
-			unitvar=unitvar, add0=col.add0)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest[, c(unitvar, rowvar) := tstrsplit(get(unitvar), "#", fixed=TRUE)]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=rowvar, 
-			uniquex=uniquerow, unitvar=unitvar, add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(rowvar, ordnames)
-        }
-      } else {
-        if (!is.null(uniquecol)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=colvar, uniquex=uniquecol, 
-			unitvar=unitvar, add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
-			unitvar=unitvar, add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      }
-      ordnames <- c(unitvar, ordnames)
-      setcolorder(unit.grpest, 
-		c(ordnames, names(unit.grpest)[!names(unit.grpest) %in% ordnames]))
-    }
+    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
+		xvar2.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
     unitarea <- tabs$tab1
     unit.grpest <- tabs$tab2
@@ -440,7 +359,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 		by=c(strunitvars2, tuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
 
     rowunit <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdatsum, 
-		esttype=esttype, bytdom=bytdom, uniqueid=tuniqueid, strlut=strlut2, 
+		esttype=esttype, uniqueid=tuniqueid, strlut=strlut2, 
 		unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
     
     rowunit <- FIESTA::add0unit(rowunit, rowvar, uniquerow, "ONEUNIT", row.add0)
@@ -457,7 +376,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 		by=c(strunitvars2, tuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
 
     totunit <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdatsum, 
-		esttype=esttype, bytdom=bytdom, uniqueid=tuniqueid, strlut=strlut2, 
+		esttype=esttype, uniqueid=tuniqueid, strlut=strlut2, 
 		unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
     tabs <- FIESTA::check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
@@ -480,7 +399,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
       rawdat$estvard.filter <- estvard.filter
     }
   }
- 
+
   estnm <- "estn"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, unitvar=unitvar, 
 	unitvar2=unitvar2, unit.totest=unit.totest, unit.rowest=unit.rowest, 
@@ -502,6 +421,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 
 
   if (savedata) {
+    if (parameters) {
     ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
     ###########################################################
     if (!is.null(outfn)) 
@@ -606,6 +526,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
  	title.estvar=title.estvar, title.filter=title.filter, gui=gui)",
     	file = outfile, sep="")
     close(outfile)
+    }
 
     if (rawdata) {
       rawfolder <- paste(outfolder, "rawdata", sep="/")

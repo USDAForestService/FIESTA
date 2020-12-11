@@ -11,12 +11,13 @@
 DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL, 
 	evalCur = FALSE, evalEndyr = NULL, evalType = "ALL", measCur = FALSE, 
 	measEndyr = NULL, allyrs = FALSE, invyrs = NULL, istree = FALSE, 
-	isseed = FALSE, isveg = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
-	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
-	subcycle99 = FALSE, intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, 
-	alltFilter = NULL, savedata = FALSE, saveqry = FALSE, outfolder = NULL, 
-	out_fmt = "csv", out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = FALSE, savePOP = FALSE)
+	isseed = FALSE, isveg = FALSE, isdwm = FALSE, othertables = NULL, 
+	issp = FALSE, spcond = FALSE, spcondid1 = FALSE, defaultVars = TRUE, 
+	regionVars = FALSE, ACI = FALSE, subcycle99 = FALSE, intensity1 = FALSE, 
+	stateFilter = NULL, allFilter = NULL, alltFilter = NULL, savedata = FALSE, 
+	saveqry = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	append_layer = FALSE, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite = FALSE, savePOP = FALSE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
@@ -51,8 +52,10 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
   \item{istree}{ Logical. If TRUE, tree data are extracted from TREE table in database. }
   \item{isseed}{ Logical. If TRUE, seedling data are extracted from SEEDLING table in 
 	database. }
-  \item{isveg}{ Logical. If TRUE, understory vegetation data are extracted from NIMS 
-	database (3 tables: P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE). }
+  \item{isveg}{ Logical. If TRUE, understory vegetation tables are extracted
+	from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE). }
+  \item{isdwm}{ Logical. If TRUE, summarized condition-level down woody debris 
+	data are extracted from FIA database (COND_DWM_CALC). }
   \item{othertables}{ String Vector. Names of other tables in FIADB to include in
 	output. }
   \item{issp}{ Logical. If TRUE, a SpatialPointsDataFrame object is generated from the 

@@ -242,8 +242,8 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
     ## Extract values of raster layer to points
     extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, var.name=strvar, 
-			uniqueid=uniqueid, exportna=exportsp, keepNA=keepNA, 
-			exportNA=exportNA, outfolder=outfolder, overwrite=overwrite)
+			uniqueid=uniqueid, exportNA=exportsp, keepNA=keepNA, 
+			outfolder=outfolder, overwrite=overwrite)
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst

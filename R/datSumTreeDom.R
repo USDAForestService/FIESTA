@@ -434,7 +434,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   treef <- tdat$xf
   tree.filter <- tdat$xfilter
 
-
   ## Check tdomvar 
   tdomvar <- FIESTA::pcheck.varchar(var2check=tdomvar, varnm="tdomvar", gui=gui, 
 		checklst=sort(names(treef)), caption="Tree domain name?", 
@@ -489,7 +488,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     
   ## GETS name for tdomvar
   #####################################################################
-  ## If tdomvar2 exists, concatenate the columns to one column
+  ## If tdomvar2 exists, concatenate the columns to one column (if pivot=TRUE)
   ## treef is the tree table after filtered tree domains
 
   ## GETS FIAname for tdomvar
@@ -721,24 +720,16 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ## GET NAME FOR SUMMED TREE VARIABLE FOR ALL TREE DOMAINS (IF PROPORTION = TRUE)
   if (proportion) denomvar <- paste0(newname, "_ALL")
 
-  ## Apply filters to tree (and seed) table with only tdoms in tdomvarlst
-  #####################################################################
-  tdomtreef <- treef[treef[[tdomvar]] %in% tdomvarlst]
-
-  if (!is.null(seedx))
-    tdomseedf <- seedx[seedx[[tdomvar]] %in% tdomvarlst]
-
-
   ## Sum tree (and seed) by tdomvarnm
   #####################################################################
   byvars <- unique(c(tsumuniqueid, tdomvar, tdomvarnm))
-  tdomtreef <- tdomtreef[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
+  tdomtreef <- treef[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
   setnames(tdomtreef, "V1", newname)
   setkeyv(tdomtreef, byvars)
 
   if (addseed) { 
     seedname <- ifelse(TPA, seed_newname, "TREECOUNT_CALC")
-    tdomseedf <- tdomseedf[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seedname]
+    tdomseedf <- seed[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seedname]
     setnames(tdomseedf, "V1", seedname)
     setkeyv(tdomseedf, byvars)
 
@@ -753,19 +744,21 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
   setkeyv(tdomtreef, tsumuniqueid)
 
-
   ######################################################################## 
   ## If pivot=FALSE
   ######################################################################## 
-
   if (!pivot) {
     tdoms <- tdomtreef
     tdomscolstot <- newname
     tdomtotnm <- newname
     tdomscols <- sort(unique(tdomtreef[[tdomvarnm]]))
 
-  } else {
+    if (!is.null(tdomvar2)) {
+      tdoms <- tdoms[, c(tdomvar, tdomvar2) := tstrsplit(get(tdomvarnm), "_")]
+      tdomvarnm <- c(tdomvar, tdomvar2)
+    }
 
+  } else {
     ######################################################################## 
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
@@ -823,15 +816,15 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   names(tdomvarlut) <- c(byvars, newname, nvar)
 
   if (tdomvar == "SPCD") {
-    ref_spcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPCD",]
+    ref_spcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPCD", c("VALUE", "MEANING")]
     tdomvarlut <- merge(ref_spcd, tdomvarlut, by.x="VALUE", by.y="SPCD")
     names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPCD", "SPNM")
   } else if (tdomvar == "SPGRPCD") {
-    ref_spgrpcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPGRPCD",]
+    ref_spgrpcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPGRPCD", c("VALUE", "MEANING")]
     tdomvarlut <- merge(ref_spgrpcd, tdomvarlut, by.x="VALUE", by.y="SPGRPCD")
     names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPGRPCD", "SPGRPNM")
   }        
-
+ 
   ## Generate barplot
   if (tdombarplot) {
     ## Frequency
@@ -905,7 +898,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       for (col in tdomscolstot) {set(sumtreef.cov, i=NULL, j=col, 
 				value=sumtreef.cov[[col]] * sumtreef.cov[[covervar]]) }
     }
-
   } else {
     sumtreef <- tdoms
 
@@ -1018,7 +1010,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     file = outfile, sep="")
     close(outfile)
   }
-
+ 
   tdomdata <- list()
   if (!notdomdat) {
     if (returnDT)

@@ -1,6 +1,6 @@
 DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL", 
 	evalCur=TRUE, evalEndyr=NULL, evalid=NULL, evalAll=FALSE, evalType="AREAVOL", 
-	isdwm=FALSE, gui=FALSE, returnPOP=TRUE) {
+	isveg=FALSE, isdwm=FALSE, gui=FALSE, returnPOP=TRUE) {
 
   ###############################################################################
   ## DESCRIPTION: Gets evalid or checks evalid from FIA database.
@@ -14,6 +14,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0) gui <- TRUE
+  if (gui) evalCur=evalAll=returnPOP=evalType <- NULL
 
   if (!gui)
     gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -267,6 +268,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       }
     }
   }
+  returnPOP <- FIESTA::pcheck.logical(returnPOP, varnm="returnPOP", 
+		title="Return POP tables?", first="YES", gui=gui)
 
   if (!is.null(evalEndyr)) {
     if (class(evalEndyr)[1] != "list") {
@@ -335,7 +338,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
     evalidlist <- sapply(states, function(x) NULL)
 
     ## Get the evalidation type - areavol or grm)
-    evalSelectlst <- c("ALL", "AREAVOL", "GRM", "DWM")
+    evalSelectlst <- c("ALL", "AREAVOL", "GRM", "P2VEG", "DWM")
     evalType <- FIESTA::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
 		checklst=evalSelectlst, caption="Evaluation type", multiple=TRUE, 
 		preselect="AREAVOL")
@@ -355,7 +358,12 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       message("adding dwm to evalType")
       evalType <- c(evalType, "DWM")
     }
-    evalTypelist <- sapply(states, function(x) list(evalType))
+    if (isveg) {
+      message("adding P2VEG to evalType")
+      evalType <- c(evalType, "P2VEG")
+    }
+
+    evalTypelist <- sapply(states, function(x) list(unique(evalType)))
     evalTypelist <- lapply(evalTypelist, function(x) paste0("EXP", x))
 
     for (stcd in stcdlst) {

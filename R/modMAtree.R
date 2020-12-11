@@ -46,6 +46,15 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   esttype="TREE"
   returnMApopdat <- TRUE
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modMAtree)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
@@ -161,7 +170,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   title.rowgrp <- rowcolinfo$title.rowgrp
   bytdom <- rowcolinfo$bytdom
   tdomvar <- rowcolinfo$tdomvar
-  concat <- rowcolinfo$concat
+  tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
   #rm(rowcolinfo)  
   
@@ -172,14 +181,14 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
   
-
   #####################################################################################
   ### GET ESTIMATION DATA FROM TREE TABLE
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=treef, bycond=TRUE, condf=condf, bytdom=bytdom, 
 	tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
-	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, adjtree=adjtree)
+	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2,
+	adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
   estvar <- treedat$estvar
@@ -187,21 +196,9 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
 
-  ## add separate columns
-  if (concat) {
-    if (is.null(grpvar)) {
-      tdomdatkey <- key(tdomdat)
-      setkeyv(tdomdat, c(rowvar, colvar))   
-      grpvar <- paste(rowvar, colvar, sep="#")
-      tdomdat[, (grpvar) := paste(tdomdat[[rowvar]], tdomdat[[colvar]], sep="#")]
-      setkeyv(tdomdat, tdomdatkey)
-    } else if (!is.null(tdomvar) && grpvar == tdomvar) { 
-      tdomdat[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      tdomdat[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-    }
-  } 
+  ## add or separate concatenated columns
+  if (!is.null(tdomvar) && !is.null(tdomvar2))
+    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
@@ -238,28 +235,11 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   response <- estvar.name
   estunits <- sort(unique(tdomdat[[unitvar]]))
 
-
 #  if (addtotal) {
     ## Get total estimate and merge area
     tdomdat$TOTAL <- 1
-
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, "TOTAL", PSstrvar, prednames), .SDcols=estvar.name]
-#print(table(tdomdattot$fnf))
-#print(dim(tdomdattot))
-#print(head(tdomdattot))
-#print(sum(tdomdattot[[estvar.name]]))
-#print(unitlut)
-
-#test <- tdomdattot[, .N, by=c("COUNTYFIPS", "fnf")]
-#setorder(test, "COUNTYFIPS", "fnf")
-#test
-
-#unit=1
-#dat=tdomdattot
-#domain="TOTAL"
-#FIA=TRUE
-
     unit.totest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
@@ -276,6 +256,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, rowvar, PSstrvar, prednames), .SDcols=response]
+    tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
     unit.rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar,
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
@@ -285,6 +266,8 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, colvar, PSstrvar, prednames), .SDcols=response]
+      tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
+
       unit.colest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
@@ -306,7 +289,8 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
-    unit.rowest <- FIESTA::add0unit(unit.rowest, rowvar, uniquerow, unitvar, row.add0)
+    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
     unitarea <- tabs$tab1
     unit.rowest <- tabs$tab2
@@ -315,9 +299,9 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     unit.rowest <- FIESTA::getarea(unit.rowest, areavar=areavar, esttype=esttype)
     setkeyv(unit.rowest, c(unitvar, rowvar))
   }
-
   if (!is.null(unit.colest)) {
-    unit.colest <- FIESTA::add0unit(x=unit.colest, colvar, uniquecol, unitvar, col.add0)
+    unit.colest <- FIESTA::add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+		unitvar=unitvar, xvar.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
     unitarea <- tabs$tab1
     unit.colest <- tabs$tab2
@@ -326,86 +310,10 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     unit.colest <- FIESTA::getarea(unit.colest, areavar=areavar, esttype=esttype)
     setkeyv(unit.colest, c(unitvar, colvar))
   }
-
   if (!is.null(unit.grpest)) {
-    if (!is.null(grpvar)) {
-      ## SEPARATE COLUMNS
-      unit.grpest[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      unit.grpest[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-      unit.grpest[,(grpvar) := NULL]
-    } 
-
-    if (row.add0 && col.add0) {
-      unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=TRUE, xvar2=colvar, uniquex2=uniquecol)
-
-    } else {
-      ordnames <- {}
-
-      if (row.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(colvar), sep="#")][, 
-			(colvar) := NULL]
-          unit.grpest[,(colvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			row.add0)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      } else if (col.add0) {
-        if (!is.null(uniquecol))  {
-          unit.grpest[, (unitvar) := paste(get(unitvar), get(rowvar), sep="#")][, 
-			(rowvar) := NULL]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			col.add0)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow))  {
-          unit.grpest[,(rowvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-          unit.grpest[,(unitvar) := sapply(get(unitvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(rowvar, ordnames)
-        }
-      } else {
-        if (!is.null(uniquecol)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, colvar, uniquecol, unitvar, 
-			add0=FALSE)
-          ordnames <- c(ordnames, names(uniquecol))
-        } else {
-          ordnames <- c(ordnames, colvar)
-        }
-        if (!is.null(uniquerow)) {
-          unit.grpest <- FIESTA::add0unit(x=unit.grpest, rowvar, uniquerow, unitvar, 
-			add0=FALSE)
-          ordnames <- c(names(uniquerow), ordnames)
-        } else {
-          ordnames <- c(ordnames, rowvar)
-        }
-      }
-      ordnames <- c(unitvar, ordnames)
-      setcolorder(unit.grpest, 
-		c(ordnames, names(unit.grpest)[!names(unit.grpest) %in% ordnames]))
-    }
+    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
+		xvar2.add0=col.add0)
     tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
     unitarea <- tabs$tab1
     unit.grpest <- tabs$tab2
@@ -414,7 +322,6 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     unit.grpest <- FIESTA::getarea(unit.grpest, areavar=areavar, esttype=esttype)
     setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
   }
-  
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES

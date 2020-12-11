@@ -1,8 +1,8 @@
-modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL, 
-	dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, ACI=FALSE, 
-	adj="samp", strata=TRUE, plt.nonsamp.filter=NULL, 
+modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL, 
+	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", 
+	pjoinid="CN", tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
+	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, intensity=NULL, 
+	adj="samp", ACI=FALSE, strata=TRUE, plt.nonsamp.filter=NULL, 
 	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
 	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
@@ -29,6 +29,14 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
   if (gui)  
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modGBpop)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab <- NULL
@@ -116,20 +124,22 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, pltassgn=NULL,
   ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="GB", tree=tree, cond=cond, plt=plt, 
-	pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
+	vspspp=vspspp, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
 	condid=condid, areawt=areawt, puniqueid=puniqueid, pltassgnid=pltassgnid, 
-	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, ACI=ACI, adj=adj,
- 	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter,
- 	unitvar=unitvar, unitvar2=unitvar2, unitcombine=unitcombine, 
-	stratcombine=stratcombine, strata=strata, strvar=strvar)
+	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, intensity=intensity, 
+	adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
+	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
+ 	unitcombine=unitcombine, stratcombine=stratcombine, strata=strata, strvar=strvar)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
+  vspsppf <- popcheck$vspsppf
   pltassgnx <- popcheck$pltassgnx
   cuniqueid <- popcheck$cuniqueid
   condid <- popcheck$condid
   tuniqueid <- popcheck$tuniqueid
+  vuniqueid <- popcheck$vuniqueid
   pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj

@@ -1,5 +1,4 @@
-RMest.pbar <- function(sumyn, ysum, sumyd, bytdom=FALSE, uniqueid, strlut,
- 	unitvar, strvar, domain){
+Ratio2Size <- function(sumyn, ysum, sumyd, uniqueid, strlut, unitvar, strvar, domain){
   ########################################################################################
   ## DESCRIPTION: Ratio-to-size estimators
   ## ARGUMENTS:
@@ -33,11 +32,18 @@ RMest.pbar <- function(sumyn, ysum, sumyd, bytdom=FALSE, uniqueid, strlut,
   ## Set key for est.unit (note: to run separate)
   #require(data.table)
 
-  tdomdatsum <- fread("tdomdatsum.csv")
-  ysum <- tdomdatsum
-  ysum <- setDT(ysum)
-  setkeyv(ysum, c(strunitvars, uniqueid))
+  #tdomdatsum <- fread("data4_IRMpbar/tdomdatsum.csv")
+  #ysum <- tdomdatsum
+  #ysum <- setDT(ysum)
+  #sumyn=estvarn.name
+  #sumyd=estvard.name 
+  #ysum=tdomdatsum
+  #uniqueid=cuniqueid
+  #domain=rowvar
 
+
+  ## Set key on ysum
+  setkeyv(ysum, c(strunitvars, uniqueid))
 
   if (!"n.strata" %in% names(strlut)) stop("need n.strata in strlut")
   if (!"n.total" %in% names(strlut)) stop("need n.total in strlut")
@@ -88,15 +94,14 @@ RMest.pbar <- function(sumyn, ysum, sumyd, bytdom=FALSE, uniqueid, strlut,
   
   ## Calculate rhat and rhat.var
   ###################################################################
-  ybardat[, rhat.strwt := nhat.strwt / dhat.strwt]
-  
+  ybardat[, rhat.strwt := nhat.strwt / dhat.strwt]  
   ybardat[, rhat.var.strwt :=
             n.strata / (n.strata-1) * (sumynsq.dom-2 * rhat.strwt * 
 			sumnd.dom + rhat.strwt^2 * sumydsq.dom) / (sumyd.dom^2)]
 
+
   unit.agvars <- unique(c("nhat.strwt", "nhat.var.strwt", 
 				"dhat.strwt", "dhat.var.strwt", "rhat.strwt", "rhat.var.strwt"))
-
 
   ## Aggregate strata-level weights to estimation unit
   est.unit <- ybardat[, lapply(.SD, sum, na.rm=TRUE), by=c(unitvar, domain), 

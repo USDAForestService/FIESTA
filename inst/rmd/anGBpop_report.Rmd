@@ -12,7 +12,7 @@ params:
 ---
 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r inputs, echo=FALSE, warning=FALSE, message=FALSE}
 library(FIESTA)
 
 rawfolder <- "C:/Users/tfrescino/Documents/Fishlake/rawdata"
@@ -36,8 +36,35 @@ figNum <- 0
 ```
 
 
+---
+title: "Report summary for `r AOInm`"
+---
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+&nbsp;
+&nbsp;
+
+__Date:__ `r format(Sys.time(), "%B %d, %Y")`
+
+&nbsp;
+&nbsp;
+
+`r figNum=0`
+
+############### 
+![](report_image.png)
+
+``` {r picture,include=FALSE}
+figNum = figNum+1
+figCap = paste0("Figure ",figNum,": Photo from", AOInm)
+```
+########## `r figCap`
+
+&nbsp;
+&nbsp;
+
+
+
+```{r tab1data, echo=FALSE, warning=FALSE, message=FALSE}
 
 rowestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.rowest*csv"))
 grpestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.grpest*csv"))
@@ -55,69 +82,94 @@ area.nf <- rowest[rowest[[title.rowvar]] == "Nonforest land", "est"]
 area.water <- sum(rowest[rowest[[title.rowvar]] %in% c("Noncensus water", "Nonforest land"), "est"])
 est <- rowest[, c(title.rowvar, "est", "pse"), with=FALSE]
 
-title1 <- paste0("Area by land class, ", title.ref)
-title2 <- paste0("Area by land class and reserved status, ", title.ref)
-
+title1a <- paste0("Area by land class, ", title.ref)
+title1b <- paste0("Area by land class and reserved status, ", title.ref)
 
 
 ```
 
-
----
-title: "Report summary for `r AOInm`"
----
-
-
-&nbsp;
-&nbsp;
-
-__Date:__ `r format(Sys.time(), "%B %d, %Y")`
-
-
-&nbsp;
-&nbsp;
-
-`r figNum=0`
-
-############### 
-![](report_image.png)
-
-``` {r picture,include=FALSE}
-figNum = figNum+1
-figCap = paste0("Figure ",figNum,": Photo from", AOInm)
-```
-########## `r figCap`
-
-
-&nbsp;
-&nbsp;
 
 
 The area of `r params$AOInm` is `r format(round(totarea), big.mark=",")` acres with `r round(area.for/totarea * 100)` percent of the area classified as forest land, `r round(area.nf/totarea * 100)` percent classified as nonforest land, and `r round(area.water/totarea * 100)` percent as water (Fig. 1).
 
-
 &nbsp;
 &nbsp;
 &nbsp;
 &nbsp;
 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r tab1xtab, echo=FALSE, warning=FALSE, message=FALSE}
 
 ## Create prettier table
 knitr::kable(xtab, 'simple', align=c('l', 'r', 'r', 'r'), 
-             caption=paste("Table 1:", title2))
+             caption=paste("Table 1:", title1b))
+
+
+```
+
+&nbsp;
+&nbsp;
+
+```{r tab1bplot, echo=FALSE, warning=FALSE, message=FALSE, fig.cap=paste("Fig. 1.", title1a)}
+
+datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", errbars=TRUE, 
+           sevar="est.se", x.order=NULL, las.xnames=2, ylabel="Area - Acres", 
+           col=terrain.colors(nrow(rowest)), ylim=NULL, toplabelvar="NBRPLT.gt0")
+
+#datBarStacked(x=grpest, main.attribute=title.rowvar, sub.attribute=title.colvar, 
+#              response="est", horiz=FALSE,
+#              main.order=unique(grpest[[title.rowvar]]), sub.order=unique(grpest[[title.colvar]]))
+
+
+```
+
+&nbsp;
+&nbsp;
+
+
+
+```{r tab2data, echo=FALSE, warning=FALSE, message=FALSE}
+
+rowestfn <- list.files(rawfolder, pattern=glob2rx("02*unit.rowest*csv"))
+grpestfn <- list.files(rawfolder, pattern=glob2rx("02*unit.grpest*csv"))
+xtabfn <- list.files(dirname(rawfolder), glob2rx("02*csv"))
+
+rowest <- fread(file.path(rawfolder, rowestfn))
+grpest <- fread(file.path(rawfolder, grpestfn))
+xtab <- fread(file.path(dirname(rawfolder), xtabfn))
+
+title.rowvar <- "Forest type"
+title.colvar <- "Stand-size class"
+est <- rowest[, c(title.rowvar, "est", "pse"), with=FALSE]
+
+title2a <- paste0("Area by forest type, ", title.ref)
+title2b <- paste0("Area by forest type and stand-size class, ", title.ref)
 
 
 ```
 
 
+The composition of the area of interest can be described by the distribution of forest types and stand-size classes. The most prominent forest type across `r params$AOInm` is `r rowest[rowest$est == max(rowest$est), "Forest type"]`, covering `r round(max(rowest$est) / sum(rowest$est) * 100)` of the area (Table 2; Fig. 2).
+
+&nbsp;
+&nbsp;
 &nbsp;
 &nbsp;
 
 
+```{r tab2xtab, echo=FALSE, warning=FALSE, message=FALSE}
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, fig.cap=paste("Fig. 1.", title1)}
+## Create prettier table
+knitr::kable(xtab, 'simple', align=c('l', 'r', 'r', 'r'), 
+             caption=paste("Table 2:", title2b))
+
+
+```
+
+&nbsp;
+&nbsp;
+
+```{r tab2bplot, echo=FALSE, warning=FALSE, message=FALSE, fig.cap=paste("Fig. 2.", title2a)}
 
 datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", errbars=TRUE, 
            sevar="est.se", x.order=NULL, las.xnames=2, ylabel="Area - Acres", 
@@ -131,6 +183,4 @@ datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", errbars=TRUE,
 ```
 
 
-&nbsp;
-&nbsp;
 

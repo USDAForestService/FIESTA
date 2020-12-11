@@ -31,6 +31,15 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
 	title.rowvar=title.colvar=TOTAL <- NULL
   gui <- FALSE
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modSAtree))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   ##################################################################
   ## INITIALIZE SETTINGS
   ##################################################################
@@ -312,10 +321,9 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   title.colvar <- rowcolinfo$title.colvar
   bytdom <- rowcolinfo$bytdom
   tdomvar <- rowcolinfo$tdomvar
-  concat <- rowcolinfo$concat
+  tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
   #rm(rowcolinfo)  
-
 
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
@@ -323,7 +331,6 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
     setnames(uniquecol, dunitvar)
     uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
   }
-
 
   #####################################################################################
   ### Get estimation data from tree table, with plot-level adjustment for nonresponse
@@ -341,23 +348,11 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
   tdomdat <- DT_NAto0(tdomdat, estvar.name, 0)
 
-
-  ## add separate columns
-  if (concat) {
-    if (is.null(grpvar)) {
-      tdomdatkey <- key(tdomdat)
-      setkeyv(tdomdat, c(rowvar, colvar))   
-      grpvar <- paste(rowvar, colvar, sep="#")
-      tdomdat[, (grpvar) := paste(tdomdat[[rowvar]], tdomdat[[colvar]], sep="#")]
-      setkeyv(tdomdat, tdomdatkey)
-    } else if (!is.null(tdomvar) && grpvar == tdomvar) { 
-      tdomdat[,(rowvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][1]})]
-      tdomdat[,(colvar) := sapply(get(grpvar), 
-			function(x){strsplit(as.character(x), "#")[[1]][2]})]
-    }
-  } 
-
+  ## add or separate concatenated columns
+  if (!is.null(tdomvar) && !is.null(tdomvar2)) {
+    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
+    grpvar <- c(tdomvar, tdomvar2)
+  }
 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES

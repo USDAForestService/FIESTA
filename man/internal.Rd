@@ -98,6 +98,7 @@
 \alias{crossxtab}
 \alias{getdomain}
 \alias{getestvar}
+\alias{crossxbyunit}
 
 \alias{wrapSE}
 \alias{tabgrp}
@@ -179,7 +180,7 @@
 \alias{layerFromRasterExtent}
 \alias{vectorTranslate}
 
-\alias{RMest.pbar}
+\alias{Ratio2Size}
 
 \alias{GBest.pbar}
 \alias{GBest.pop}

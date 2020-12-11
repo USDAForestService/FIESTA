@@ -25,7 +25,15 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## If gui.. set variables to NULL
   if (gui)  
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
-  
+ 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::modPBpop))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+ 
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt <- NULL

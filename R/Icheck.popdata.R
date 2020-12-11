@@ -1,13 +1,13 @@
 check.popdata <- function(module="GB", method="GREG", tree=NULL, cond, 
-	plt=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", 
-	condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", pltassgnid="CN", 
-	pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, 
-	invyrs=NULL, adj="samp", strata=TRUE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
-	areavar="ACRES", unitcombine=FALSE, strvar="STRATUMCD", getwt=TRUE, 
-	getwtvar="P1POINTCNT", nonresp=FALSE, substrvar=NULL, stratcombine=TRUE, 
-	prednames=NULL, predfac=NULL, ACI=FALSE, plt.nonsamp.filter=NULL, 
-	cond.nonsamp.filter=NULL, nullcheck=FALSE, pvars2keep=NULL, 
-	cvars2keep=NULL, gui=FALSE){
+	plt=NULL, vspspp=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
+	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", 
+	pltassgnid="CN", pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL,
+	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
+	strata=TRUE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	unitcombine=FALSE, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
+	nonresp=FALSE, substrvar=NULL, stratcombine=TRUE, prednames=NULL, 
+	predfac=NULL, ACI=FALSE, plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
+	nullcheck=FALSE, pvars2keep=NULL, cvars2keep=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
@@ -82,6 +82,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ###################################################################################
   pvars2keep <- unique(c(unitvar, unitvar2, pvars2keep))
   cvars2keep <- unique(c(cvars2keep, areawt))
+  vuniqueid <- "PLT_CN" 
 
   pdoms2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "INVYR", 
 	"MEASYEAR", "PLOT_STATUS_CD", "PSTATUSCD", "RDDISTCD", "WATERCD", "ELEV", 
@@ -242,6 +243,16 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       }
       treeqry <- paste("select t.* from", tfromqry, whereqry)
     }
+    if (!is.null(vspspp) && is.character(vspspp) && vspspp %in% tablst) {
+      if (!is.null(pfromqry)) {
+        vspspp.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vspspp,
+				" vspspp ON (vspspp.PLT_CN = p.CN)")
+      } else {
+        vspspp.fromqry <- paste(vspspp, "vspspp")
+      }
+      vspsppqry <- paste("select vspspp.* from", vspspp.fromqry, whereqry)
+    }
+
   }
  
   ###################################################################################
@@ -353,7 +364,14 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 
       pltx <- getPlotCur(pltx, Endyr=measEndyr, varCur="MEASYEAR", 
 				Endyr.filter=measEndyr.filter)
-
+      if (!is.null(intensity)) {
+        INTENSITY <- pcheck.varchar(var2check="INTENSITY", 
+		checklst=names(pltx), warn="INTENSITY variable not in plt")
+        if (!all(intensity %in% unique(pltx[[INTENSITY]])))
+          stop("invalid intensity")
+        intensity.filter <- getfilter(INTENSITY, intensity)
+        pltx <- datFilter(pltx, intensity.filter)$xf 
+      }      
     } else if (!is.null(invyrs)) {
       if (!"INVYR" %in% names(pltx)) stop("INVYR not in pltx")
       if (!all(invyrs %in% unique(pltx[["INVYR"]]))) {
@@ -363,6 +381,24 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
         invyrs <- invyrs[!invyrs %in% invyrs.miss]
       } 
       pltx <- datFilter(x=pltx, xfilter=paste("INVYR %in% c(", toString(invyrs), ")"))$xf
+
+      if (!is.null(intensity)) {
+        INTENSITY <- pcheck.varchar(var2check="INTENSITY", 
+		checklst=names(pltx), warn="INTENSITY variable not in plt")
+        if (!all(intensity %in% unique(pltx[[INTENSITY]])))
+          stop("invalid intensity")
+        intensity.filter <- getfilter(INTENSITY, intensity)
+        pltx <- datFilter(pltx, intensity.filter)$xf 
+      }      
+    } else {
+      if (!is.null(intensity)) {
+        INTENSITY <- pcheck.varchar(var2check="INTENSITY", 
+		checklst=names(pltx), warn="INTENSITY variable not in plt")
+        if (!all(intensity %in% unique(pltx[[INTENSITY]])))
+          stop("invalid intensity")
+        intensity.filter <- getfilter(INTENSITY, intensity)
+        pltx <- datFilter(pltx, intensity.filter)$xf 
+      }      
     }
 
     ## Merge plot data to cond
@@ -773,7 +809,41 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       pltcondx <- propchk$condx
       cvars2keep <- unique(c(cvars2keep, propvars))
     }
-  }  
+  }
+
+  ###################################################################################
+  ###################################################################################
+  ## Check Vegetation data
+  ###################################################################################
+  ###################################################################################
+
+  ###################################################################################
+  ## Import and check vspspp data table
+  ###################################################################################
+  vspsppx <- pcheck.table(vspspp, tab_dsn=dsn, tabnm="vspspp", 
+		caption="Veg Species table?", nullcheck=nullcheck, gui=gui, 
+		tabqry=vspsppqry, returnsf=FALSE)
+  if (!is.null(vspsppx)) {
+    ## Define necessary variable for tree table
+    vspsppnmlst <- names(vspsppx)
+
+    ## Check unique identifiers
+    vuniqueid <- FIESTA::pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
+		checklst=vspsppnmlst, caption="UniqueID variable of veg spp", 
+		warn=paste(vuniqueid, "not in vegspspp"), stopifnull=TRUE)
+
+    ## Check for NA values in necessary variables in tree table
+    vspsppx.na <- sum(is.na(vspsppx[[vuniqueid]]))
+    if (vspsppx.na > 0) stop("NA values in ", vuniqueid)
+
+    if (vuniqueid %in% pltcondnmlst) {
+      idplace <- which(pltcondnmlst %in% vuniqueid)
+      if (idplace != 1) { 
+	  pltcondnmlst <- c(vuniqueid, pltcondnmlst) 
+	  pltcondnmlst <- pltcondnmlst[-(idplace + 1)] 
+      }
+    } 
+  }
  
   ############################################################################
   ## Subset variables for pltassgnx, condx, and pltcondx
@@ -806,6 +876,14 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     returnlst$treef <- treef
     returnlst$tuniqueid <- tuniqueid
   }
+  if (!is.null(vspsppx)) {
+    ## Check that the values of tuniqueid in vspsppx are all in cuniqueid in condf
+    vspsppf <- check.matchval(vspsppx, pltcondx, vuniqueid, cuniqueid, tab1txt="vspspp", 
+		tab2txt="cond", subsetrows=TRUE)
+    returnlst$vspsppf <- vspsppf
+    returnlst$vuniqueid <- vuniqueid
+  }
+
   if (module == "MA") returnlst$method <- method
   if (ACI) returnlst$nfplotsampcnt <- nfplotsampcnt
   if (nonresp) {
