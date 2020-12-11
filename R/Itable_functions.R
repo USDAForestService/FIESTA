@@ -101,41 +101,71 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       uniquex2 <- setDT(uniquex2)
     byvars <- c(byvars, xvar2)
 
+
     if (xvar.add0 && xvar2.add0) {
       uniquex.exp <- expand.grid(uniquex[[xvar]], uniquex2[[xvar2]])
-      uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), each=nrow(uniquex.exp)), uniquex.exp)
-      setnames(uniquex.exp, c(unitvar, xvar, xvar2))
+      if (!is.null(unitvar)) {
+        uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
+			each=nrow(uniquex.exp)), uniquex.exp)
+        setnames(uniquex.exp, c(unitvar, xvar, xvar2))
+        chkvars <- c(unitvar, xvar, xvar2)
+      } else {
+        setnames(uniquex.exp, c(xvar, xvar2))
+        chkvars <- c(xvar, xvar2)
+      }
 
-      xchk <- FIESTA::check.matchclass(uniquex.exp, x, c(unitvar, byvars))
+      xchk <- FIESTA::check.matchclass(uniquex.exp, x, chkvars)
       uniquex.exp <- xchk$tab1
       x <- xchk$tab2
 
-      x <- merge(uniquex.exp, x, by=c(unitvar, byvars), all.x=TRUE)
+      x <- merge(uniquex.exp, x, by=chkvars, all.x=TRUE)
       x[is.na(x)] <- 0
 
     } else if (xvar.add0) {
-      setnames(x, unitvar, "uvar")
-      x <- x[uniquex[rep(1:nrow(uniquex), uniqueN(x$uvar)), 
-		c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex))))], 
-		on=c("uvar", xvar)]
-      setnames(x, "uvar", unitvar)
-      x[is.na(x)] <- 0
-     
+
+      ## Merge uniquex
       xchk <- FIESTA::check.matchclass(uniquex, x, xvar)
       uniquex <- xchk$tab1
       x <- xchk$tab2
 
-      x <- merge(uniquex, x, by=xvar)
+      if (!is.null(unitvar)) {
+        setnames(x, unitvar, "uvar")
+        x <- x[uniquex[rep(1:nrow(uniquex), uniqueN(x$uvar)), 
+		c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex))))], 
+		on=c("uvar", xvar)]
+        setnames(x, "uvar", unitvar)
+        x[is.na(x)] <- 0
+      } else {
+        x <- merge(uniquex, x, by=xvar)
+      }
+     
+      ## Merge uniquex2
+      xchk <- FIESTA::check.matchclass(uniquex, x, xvar2)
+      uniquex2 <- xchk$tab1
+      x <- xchk$tab2
+
+      x <- merge(uniquex2, x, by=xvar2)
       x[is.na(x)] <- 0
 
     } else if (xvar2.add0) {
-      setnames(x, unitvar, "uvar")
-      x <- x[uniquex2[rep(1:nrow(uniquex2), uniqueN(x$uvar)), 
+
+      ## Merge uniquex2
+      xchk <- FIESTA::check.matchclass(uniquex2, x, xvar2)
+      uniquex2 <- xchk$tab1
+      x <- xchk$tab2
+
+      if (!is.null(unitvar)) {
+        setnames(x, unitvar, "uvar")
+        x <- x[uniquex2[rep(1:nrow(uniquex2), uniqueN(x$uvar)), 
 		c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex2))))], 
 		on=c("uvar", xvar2)]
-      setnames(x, "uvar", unitvar)
-      x[is.na(x)] <- 0
-     
+        setnames(x, "uvar", unitvar)
+        x[is.na(x)] <- 0
+      } else {
+        x <- merge(uniquex2, x, by=xvar2)
+      }
+
+      ## Merge uniquex
       xchk <- FIESTA::check.matchclass(uniquex, x, xvar)
       uniquex <- xchk$tab1
       x <- xchk$tab2
@@ -158,14 +188,21 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       x[[xvar2]] <- factor(x[[xvar2]], levels=levels(uniquex2[[xvar2]]))
   } else {
     if (xvar.add0) {
-      setnames(x, unitvar, "uvar")
-      x <- x[uniquex[rep(1:nrow(uniquex), uniqueN(x$uvar)), 
+      xchk <- FIESTA::check.matchclass(uniquex, x, byvars)
+      uniquex <- xchk$tab1
+      x <- xchk$tab2
+
+      if (!is.null(unitvar)) {
+        setnames(x, unitvar, "uvar")
+        x <- x[uniquex[rep(1:nrow(uniquex), uniqueN(x$uvar)), 
 		c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex))))], 
 		on=c("uvar", xvar)]
-      setnames(x, "uvar", unitvar)
-      x[is.na(x)] <- 0
-     
-   } else {
+        setnames(x, "uvar", unitvar)
+        x[is.na(x)] <- 0
+      } else {
+        x <- merge(uniquex, x, by=byvars)
+      }
+    } else {
 
       xchk <- FIESTA::check.matchclass(uniquex, x, byvars)
       uniquex <- xchk$tab1

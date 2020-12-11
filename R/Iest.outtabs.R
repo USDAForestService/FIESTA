@@ -359,7 +359,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         if (!is.null(unit.totest) && !is.null(uniquecol))
           unit.totest <- add0unit(x=unit.totest, xvar=unitvar, uniquex=uniquecol, 
 			xvar.add0=TRUE)
-
         ## Get table of estimates
         estpsecross <- crossxtab(group.est=unit.rowest, rowvar.est=rowunit, 
 			colvar.est=unit.totest, total.est=totunit, rowvar=rowvar, 
