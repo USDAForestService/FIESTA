@@ -4,6 +4,8 @@
 #pcheck.table
 #pcheck.outfolder
 #pcheck.states
+#pcheck.object
+
 
 
 pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", gui=FALSE,
@@ -145,7 +147,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   ## shp  Logical. If TRUE and tab is a shapefile, return a shapefile.
 
   ## Set global variables
-  x <- NULL
+  x=tabx <- NULL
 
   if (!factors) {
     options.old <- options()
@@ -203,13 +205,10 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
         tab_dsn <- choose.files(default=getwd(), caption="Select database file", 
             filters=Filters[c(tabdblst, "All"),], multi=FALSE)
         if (tab_dsn == "") stop("")
-      } else {
-        tabx <- NULL
       }
-    } else {
-      if (stopifnull) stop(paste(tabnm, "is NULL"))
-      return(NULL)
     } 
+    if (is.null(tabx) && stopifnull) stop(paste(tabnm, "is NULL"))
+      return(NULL)
   } 
  
   if (!is.null(tab)) {
@@ -438,3 +437,77 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
 
   return(states2return)
 }
+
+
+
+pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL, 
+	stopifnull=FALSE, gui=FALSE, listitems=NULL){
+  ## DESCRIPTION: checks object name 
+ 
+  ## Set global variables
+  objx <- NULL
+
+  if (is.null(objnm)) objnm <- "obj" 
+  if (is.null(caption)) caption <- "Object?" 
+   
+  selectlst <- c("NONE", "object", "rda")
+
+  ## Check gui
+  if (gui && !.Platform$OS.type=="windows") 
+    stop("gui not supported")
+  if (is.null(obj)) {
+    if (gui) {
+      objresp <- select.list(selectlst, title=caption, multiple=FALSE)
+      if (objresp=="") {
+        stop("")
+      } else if (objresp == "NONE") {
+        objx <- NULL
+      } else if (objresp == "R Object") {
+        objlst <- c(ls(pos=1, all.names=TRUE), 
+		ls(envir=as.environment("package:FIESTA"), pattern="WY"))
+        objlst <- objlst[sapply(objlst, function(x) is.data.frame(get(x)))]
+        obj <- select.list(objlst, title=caption, multiple=FALSE)
+        if (obj == "") stop("") 
+        objx <- get(obj, pos=1)
+        if (!is.list(objx)) stop("must be list object")
+      } else if (objresp == "rda") {
+        objfn <- choose.files(default=getwd(), caption=caption, 
+			filters=Filters[c("rda", "All"),], multi=FALSE)
+        if (objfn == "") stop("")
+        objx <- get(load(objfn))
+        if (!is.list(objx)) stop("must be list object")
+      }
+    }
+    if (is.null(objx) && stopifnull) stop(paste(tabnm, "is NULL"))
+      return(NULL)
+  } 
+ 
+  if (!is.null(obj)) {
+    if (is.character(obj)) {
+      if (exists(obj, envir=.GlobalEnv) && is.list(get(obj))) {
+        #message(tab, " exists in Global Environment")
+        return(get(obj))  
+      } else if (!is.na(getext(obj)) && file.exists(obj)) {
+        objx <- get(load(obj))
+        if (!is.list(objx)) stop("must be list object")
+      } else if (!is.na(getext(obj)) && !file.exists(obj)) {
+        stop("file does not exist") 
+      } else if (is.na(getext(obj))) {
+        stop(objnm, " must be a list object or filename") 
+      } else {
+        stop(objnm, " must be a list object or filename") 
+      }
+    } else if (!is.list(obj)) {
+      stop(objnm, " must be a list object or filename") 
+    } 
+  }
+  if (!is.null(listitems)) {
+    if (!all(listitems %in% names(objx))) { 
+      missitems <- listitems[!listitems %in% names(objx)] 
+      stop("must include the following item in list: ", toString(missitems))
+    }
+  }
+
+  return(objx)
+}
+

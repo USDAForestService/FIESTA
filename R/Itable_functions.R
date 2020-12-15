@@ -508,6 +508,7 @@ crossxbyunit <- function(unit=NULL, unit.grpest=NULL, unit.rowest=NULL,
     } else {
       total.est <- unit.totest
     }
+  }
   if (!is.null(unit.rowest)) {
     if (!is.null(unit)) {
       rowvar.est <- unit.rowest[get(unitvar) == unit,]
@@ -526,7 +527,7 @@ crossxbyunit <- function(unit=NULL, unit.grpest=NULL, unit.rowest=NULL,
   } else {
     coltitlerow <- FALSE
   }
-  if (!is.null(unit.grpest)) 
+  if (!is.null(unit.grpest)) {
     if (!is.null(unit)) {
       group.est <- unit.grpest[get(unitvar) == unit,]
     } else {

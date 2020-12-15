@@ -365,13 +365,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       arcgisbinding::arc.check_product()
     }
 
-#    if (out_fmt != "csv") {
-#      out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
-#		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
-#		ext=out_fmt)
-#      overwrite <- FALSE
-#      outfolder <- NULL
-#    }
+    if (out_fmt != "csv") {
+      out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
+		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
+		ext=out_fmt, baseonly=TRUE)
+      overwrite <- FALSE
+    }
   }
 
   ###########################################################################
@@ -1305,30 +1304,23 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       }
       ppsa <- rbind(ppsa, ppsax)
     }
-
+ 
     ###############################################################################
     ###############################################################################
     ## SAVE data
     ###############################################################################
     ###############################################################################
     if ((savedata || !treeReturn) && !is.null(pltx)) {
-      if (out_fmt != "csv") {
-        out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
-		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
-		ext=out_fmt)
-        overwrite <- FALSE
-        outfolder <- NULL
-      }
 
       overwrite_layer <- overwrite
       append_layer2 <- append_layer
       col.names <- ifelse (i == 1, TRUE, FALSE)
       if (i == 1) { 
-        if (overwrite && append_layer) append_layer2 <- FALSE
+        if (overwrite && append_layer) 
+          append_layer2 <- FALSE
       } else {
         if (length(states) > 1 && !append_layer) {
           append_layer2 <- TRUE
-          overwrite_layer <- FALSE
         }
       }
 
@@ -1379,7 +1371,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			outfn.pre=outfn.pre)
         }
       }   
-
       if (savedata && !is.null(spconddatx)) {
         index.unique.spconddat <- NULL
         if (i == 1) index.unique.spconddat <- "PLT_CN"
@@ -1389,7 +1380,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			index.unique=index.unique.spconddat, append_layer=append_layer2,
 			outfn.pre=outfn.pre)
       }
-
       if (savedata && !is.null(pltx)) {
         index.unique.pltx <- NULL
         if (i == 1) index.unique.pltx <- "CN"
@@ -1399,7 +1389,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			index.unique=index.unique.pltx, append_layer=append_layer2,
 			outfn.pre=outfn.pre)
       }
-
       if (savedata && !is.null(condx)) {
         index.unique.condx <- NULL
         if (i == 1) index.unique.condx <- c("PLT_CN", "CONDID")
@@ -1409,8 +1398,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			index.unique=index.unique.condx, append_layer=append_layer2,
 			outfn.pre=outfn.pre)
       }
-
-      if (!treeReturn && !is.null(treex)) {
+      if ((savedata || !treeReturn) && !is.null(treex)) {
         index.unique.treex <- NULL
         if (i == 1) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
         datExportData(treex, outfolder=outfolder, 
@@ -1419,7 +1407,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			index.unique=index.unique.treex, append_layer=append_layer2,
 			outfn.pre=outfn.pre)
       }
-
       if (savedata && !is.null(seedx)) {
         index.unique.seedx <- NULL
         if (i == 1) index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
@@ -1453,8 +1440,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         datExportData(dwmx, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dwm_calc", 
 			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.dwmx, append_layer=append_layer2,
-			outfn.pre=outfn.pre)
+			append_layer=append_layer2, outfn.pre=outfn.pre)
       } 
 
       if (savedata && !is.null(othertables)) {
@@ -1642,13 +1628,13 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     evaliddf <- evaliddf[order(evaliddf$STATECD), ]
     fiadatlst$evalid <- evalidlist
 
-    if (savedata) {
-      append_layer2 <- ifelse(overwrite, FALSE, append_layer)
-      datExportData(evaliddf, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="evalid", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
-			append_layer=append_layer2, outfn.pre=outfn.pre)
-    }
+#    if (savedata) {
+#      append_layer2 <- ifelse(overwrite, FALSE, append_layer)
+#      datExportData(evaliddf, outfolder=outfolder, 
+#			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="evalid", 
+#			outfn.date=outfn.date, overwrite_layer=overwrite,
+#			append_layer=append_layer2, outfn.pre=outfn.pre)
+#    }
   }
   
   #if (saveqry) cat("\n", paste("Saved queries to:", outfolder), "\n") 

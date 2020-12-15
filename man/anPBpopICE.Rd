@@ -1,29 +1,25 @@
-\name{anPBestICE_core}
-\alias{anPBestICE_core}
+\name{anPBpopICE}
+\alias{anPBpopICE}
 \title{
-	ANALYSIS - Generate core tables for ICE.
+	ANALYSIS - Generate population data for ICE.
 }
 \description{
-	Generates a set of core tables based on state of interest.
+	Generates a set of population data for area of interest.
 }
 \usage{
-anPBestICE_core(ice.dotsfn, ice.plotsfn = NULL, estunitnm, T1, T2, 
-	plotid = "plot_id", pntid = "dot_cnt", pltassgn = NULL, pltassgnid = NULL, 
+anPBpopICE(ice.pntfn, ice.plotfn = NULL, T1, T2, plotid = "plot_id", 
+	pntid = "dot_cnt", pltassgn = NULL, pltassgnid = NULL, 
 	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, strata = FALSE, stratalut = NULL, strvar = NULL, 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
-	tabtype = "PCT", sumunits = FALSE, rawdata = TRUE, returntitle = TRUE, 
-	outfolder = NULL, outfn.date = TRUE, overwrite = FALSE, 
-	subunitnm = NULL, estabbr = NULL, pnt1 = FALSE, ...)
+	sumunits = FALSE, saveobj = FALSE, savedata = FALSE, outfolder = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{ice.dotsfn}{ Comma-delimited file (*.csv). The full path file name of 
+  \item{ice.pntfn}{ Comma-delimited file (*.csv). The full path file name of 
 	ICE point-level data. }
-  \item{ice.plotsfn}{ Comma-delimited file (*.csv). The full path file name of 
+  \item{ice.plotfn}{ Comma-delimited file (*.csv). The full path file name of 
 	ICE plot-level data (optional). }
-  \item{estunitnm}{ String. The name of the estimation unit (i.e., population)
-	for titles and output names. }
   \item{T1}{ Integer. Year of Time 1 imagery (YYYY). }
   \item{T2}{ Interger. Year of Time 2 imagery (YYYY). }
   \item{plotid}{ String. Name of unique identifier for ice45 plots. }
@@ -55,51 +51,37 @@ anPBestICE_core(ice.dotsfn, ice.plotsfn = NULL, estunitnm, T1, T2,
  	Default="P1POINTCNT". }
   \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{tabtype}{ String. Type of units for the table ("AREA", "PCT"). }
-  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
-	one table. }
-  \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
-	for estimation (See Value). If savedata = TRUE, this table is also written to file. }
-  \item{returntitle}{ Logical. If TRUE, returns title information for output tables. }
+  \item{sumunits}{ Logical. If TRUE, sums Estimation unit results. (Note: Need to 
+	include area by estimation unit). }
+  \item{saveobj}{ Logical. If TRUE, saves object to outfolder. }
+  \item{savedata}{ Logical. If TRUE, saves data tables to outfolder. }
   \item{outfolder}{ String.  The outfolder to write files to. }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
-  \item{subunitnm}{ String. Name of estimation subunit (i.e., subpopulation) to append 
-	to file names and titles. }
-  \item{estabbr}{ String. Abbreviated name of estimation unit to use as a prefix
-	for output names. }
-  \item{pnt1}{ Logical. If TRUE, use only center point when no change observed. }
-  \item{...}{ Other parameters to FIESTA::anPBestICE_data() function. }
+  \item{...}{ Other parameters to FIESTA::datExportData() function. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.
 		
 }
 \value{
-  The following tables are saved to a folder named 'estimates' in the outfolder.
-  If rawdata=TRUE, the rawdata is saved to a folder named 'rawdata' in the 
-	estimates folder.
+  List object of population data for ICE estimation.
 
-  \item{table01}{ Estimates of change_pnt on all lands. }
-  \item{table02}{ Estimates of chg_ag_2_GRP on all lands. }
-  \item{table03}{ Estimates of land use at Time 1 on all lands. }
-  \item{table04}{ Estimates of land use at Time 2 on all lands. }
-  \item{table05}{ Estimates of land cover at Time 1 all lands. }
-  \item{table06}{ Estimates of land cover at Time 2 on all lands. }
-  \item{table07}{ Percent of forest land use change. }
-  \item{table08}{ Percent of land cover change where land use was forest at Time 1. }
-  \item{table09}{ Percent of land use change from Time 1 to Time 2. }
-  \item{table10}{ Percent of land cover change from Time 1 to Time 2. }
-  \item{table11}{ Percent of land cover by land use at Time 1. }
-  \item{table12}{ Percent of land cover by land use at Time 2. }
-  \item{table13}{ Percent change of land use at Time 1 within land use at Time 2. }
-  \item{table13a}{ Percent change of land use at Time 1 within land cover at Time 2. }
-  \item{table14}{ Percent change of land cover at Time 1 within land use at Time 2. }
-  \item{table15}{ Percent change of land use at Time 1 within within change agent group. }
-  \item{table16}{ Percent change of land cover at Time 1 within change agent group. }
-  \item{table17}{ Percent change of Land Use from Time 1 to Time 2. }
-  \item{table18}{ Percent change of Land Cover from Time 1 to Time 2. }
-  \item{table19}{ Percent change of Land Use (Forest/Nonforest) from Time 1 to Time 2. }
+  \item{PBx}{ Photo-based interpretation data for estimation. }
+  \item{pltassgnx}{ Data frame. Plot-level data with plot assignments of 
+		Estimation unit as stratum value. }
+  \item{plotid}{ String. Unique identifier of plot. }
+  \item{pntid}{ String. Unique identifier of points. }
+  \item{pltassgnid}{ String. Unique identifier of plot in pltassgn. }
+  \item{tabtype}{ String. Table type ('PCT', 'AREA').  }
+  \item{sumunits}{ Logical. If TRUE, sums estimation unit results. }
+  \item{unitvar}{ String. Name of variable defining estimation units. }
+  \item{strlut}{ Data frame. Strata-level information (e.g., pixel counts) 
+		by estimation unit. }
+  \item{strvar}{ String. Name of variable defining strata. }
+  \item{plotsampcnt}{ NULL. }
+  \item{getprop}{ Logical. If TRUE, gets proportions from PBx data. }
+  \item{reflst}{ List object of reference tables for ICE (changelut, coverlut,
+		uselut, agentlut, use_FORlut). }
+  \item{domlut}{ Domain reference for table output. }
 }
 \author{
 	Tracey S. Frescino

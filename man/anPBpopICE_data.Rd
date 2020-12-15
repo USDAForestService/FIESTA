@@ -1,5 +1,5 @@
-\name{anPBestICE_data}
-\alias{anPBestICE_data}
+\name{anPBpopICE_data}
+\alias{anPBpopICE_data}
 \title{
 	ANALYSIS - Photo-based estimates for Image Change Estimation (ICE).
 }
@@ -7,13 +7,13 @@
 	Generates percent or acre estimates by domain (and estimation unit).
 }
 \usage{
-anPBestICE_data(ice.dotsfn, T1, T2, plotid = "plot_id", pntid = "dot_cnt", 
+anPBpopICE_data(ice.pntfn, T1, T2, plotid = "plot_id", pntid = "dot_cnt", 
 	changelut=NULL, coverlut=NULL, uselut=NULL, agentlut=NULL, 
 	appendluts=TRUE, domlut=NULL, savedata=FALSE, outfolder=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{ice.dotsfn}{ Comma-delimited file (*.csv). The full path file name
+  \item{ice.pntfn}{ Comma-delimited file (*.csv). The full path file name
 	for the ICE points. }
   \item{T1}{ Integer. Year of Time 1 imagery (YYYY). }
   \item{T2}{ Integer. Year of Time 2 imagery (YYYY). }

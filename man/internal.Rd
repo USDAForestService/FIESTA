@@ -48,6 +48,7 @@
 \alias{pcheck.states}
 \alias{pcheck.strata}
 \alias{pcheck.table}
+\alias{pcheck.object}
 \alias{pcheck.unitacres}
 \alias{pcheck.varchar}
 \alias{pcheck.unique}

@@ -265,7 +265,8 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea
   ##################################################################################
-  auxlut <- check.matchval(auxlut, unitarea, unitvar, tab1txt="auxlut",
+  if (!is.null(unitarea)) 
+    auxlut <- check.matchval(auxlut, unitarea, unitvar, tab1txt="auxlut",
 			tab2txt="unitarea", subsetrows=TRUE)
 
 

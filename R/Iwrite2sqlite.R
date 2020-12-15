@@ -72,7 +72,7 @@ write2sqlite <- function(layer, SQLitefn, out_name=NULL, gpkg=FALSE,
     DBI::dbExecute(dbconn, idxsql)
     message(sub("create", "creating", idxsql))
   }
-
+ 
   ## If closedb is TRUE, close the sql database dbconnection.
   if (!dbconnopen)
     DBI::dbDisconnect(dbconn)

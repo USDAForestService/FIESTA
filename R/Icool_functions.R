@@ -90,7 +90,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
       test <- tryCatch(
         file.remove(nm),
 			warning=function(war) {
-             			stop(war)
+             			stop("cannot overwrite file... permission denied")
 			}, error=function(err) {
 					message(err)
 			} ) 

@@ -1,20 +1,20 @@
-anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt", 
+anPBpopICE_data <- function(ice.pntfn, T1, T2, plotid="plot_id", pntid="dot_cnt", 
 	changelut=NULL, coverlut=NULL, uselut=NULL, agentlut=NULL, 
 	appendluts=TRUE, domlut=NULL, savedata=FALSE, outfolder=NULL, ...){
 
   ##########################################################################
   ## DESCRIPTION: Set up ICE data with code classes
-  ## ice.dots	- point-level data file name
+  ## ice.pnts	- point-level data file name
   ## T1		- year of Time 1 (YYYY)
   ## T2		- year of Time 2 (YYYY)
-  ## plotid	- unique identifier of plots in ice.dots and ice.plots
-  ## pntid		- unique identifier of points in ice.dots
+  ## plotid	- unique identifier of plots in ice.pnts and ice.plots
+  ## pntid		- unique identifier of points in ice.pnts
   ## changelut	- different look up table for land use or land cover change
   ##				(see ref_ICE_change)
   ## coverlut	- different look up table for land cover (see ref_ICE_cover)
   ## uselut	- different look up table for land use (see ref_ICE_use)
   ## agentlut	- different look up table for causal agent (see ref_ICE_agent)
-  ## appendluts	- logical. if TRUE, append all look up tables to ice.dots
+  ## appendluts	- logical. if TRUE, append all look up tables to ice.pnts
   ## domlut	- data frame defining domain codes, names, and titles
   ## savedata	- logical. if TRUE, saves data to outfolder
   ## ... 		- other parameters to datExportdata
@@ -32,7 +32,7 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
   gui <- FALSE
 
   ## Import ICE dots
-  ice.dots <- FIESTA::pcheck.table(ice.dotsfn)
+  ice.pnts <- FIESTA::pcheck.table(ice.pntfn)
 
   ## Check savedata
   if (savedata) {
@@ -46,28 +46,28 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
   ## This gives us 45 points per plot where there was observed change, 
   ## and 5 points per plots where there was no change observed.
   #########################################################################
-  ice.dots <- ice.dots[(change_1_2 %in% c(0,2,3) & get(eval(pntid)) %in% 
+  ice.pnts <- ice.pnts[(change_1_2 %in% c(0,2,3) & get(eval(pntid)) %in% 
 	c(1,26,31,36,41)) | change_1_2 == 1,]
-  n.ice.dots <- nrow(ice.dots)
+  n.ice.pnts <- nrow(ice.pnts)
 
   ## Check to make sure there are either 5 points or 45 points
-  idtab <- table(ice.dots[[plotid]])
+  idtab <- table(ice.pnts[[plotid]])
   lt5 <- names(idtab)[idtab < 5]
   if (length(lt5) > 0) 
     stop("check data:", paste(lt5, collapse=", "))
 
   ## Remove all points that were uninterpretable at Time 1 or Time 2
   ## This makes sure all estimates of change add up.
-  ice.dots <- ice.dots[cover_1 != 999 & cover_2 != 999 & use_1 != 999 & 
+  ice.pnts <- ice.pnts[cover_1 != 999 & cover_2 != 999 & use_1 != 999 & 
 		use_2 != 999 & chg_ag_2 != 99,]
-  if (nrow(ice.dots) < n.ice.dots)
-    message(nrow(ice.dots) - n.ice.dots, 
+  if (nrow(ice.pnts) < n.ice.pnts)
+    message(nrow(ice.pnts) - n.ice.pnts, 
 		" uninterpretable points were removed from dataset")
 
 
 
   #########################################################################
-  ## LOAD LUTS and merge to ice.dots table
+  ## LOAD LUTS and merge to ice.pnts table
   #########################################################################
 
   ## changelut - table defining change
@@ -132,7 +132,7 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
   colorder <- c(plotid, pntid, "change_1_2") 
 
   ## Check if all values exist in cover_LUT
-  misscd <- unique(ice.dots$cover_1[which(!ice.dots$cover_1 %in% coverlut$cover)])
+  misscd <- unique(ice.pnts$cover_1[which(!ice.pnts$cover_1 %in% coverlut$cover)])
   if (length(misscd) > 0)
     print(paste("missing attribute values in cover_LUT: ", addcommas(misscd)))
 
@@ -141,23 +141,23 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
     col <- "cover_1"
     new_LUT <- copy(coverlut)
     names(new_LUT) <- sub("cover", col, names(new_LUT))
-    ice.dots <- merge(ice.dots, new_LUT, by=col)
-    if ("COLOR" %in% names(ice.dots))
-      ice.dots[,COLOR := NULL]
+    ice.pnts <- merge(ice.pnts, new_LUT, by=col)
+    if ("COLOR" %in% names(ice.pnts))
+      ice.pnts[,COLOR := NULL]
       
     colorder <- c(colorder, col, names(new_LUT)[which(!names(new_LUT) %in% c(col, "COLOR"))])
-    setcolorder(ice.dots, c(colorder, names(ice.dots)[which(!names(ice.dots) %in% colorder)]))
+    setcolorder(ice.pnts, c(colorder, names(ice.pnts)[which(!names(ice.pnts) %in% colorder)]))
       
     ## cover_2
     col <- "cover_2"
     new_LUT <- copy(coverlut)
     names(new_LUT) <- sub("cover", col, names(new_LUT))
-    ice.dots <- merge(ice.dots, new_LUT, by=col)
-    if ("COLOR" %in% names(ice.dots))
-      ice.dots[,COLOR := NULL]
+    ice.pnts <- merge(ice.pnts, new_LUT, by=col)
+    if ("COLOR" %in% names(ice.pnts))
+      ice.pnts[,COLOR := NULL]
       
     colorder <- c(colorder, col, names(new_LUT)[which(!names(new_LUT) %in% c(col, "COLOR"))])
-    setcolorder(ice.dots, c(colorder, names(ice.dots)[which(!names(ice.dots) %in% colorder)]))
+    setcolorder(ice.pnts, c(colorder, names(ice.pnts)[which(!names(ice.pnts) %in% colorder)]))
   }
 
   ##########################################################################
@@ -165,7 +165,7 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
   ##########################################################################
  
   ## Check if all values exist in use_LUT
-  misscd <- unique(ice.dots$use_1[which(!ice.dots$use_1 %in% uselut$use)])
+  misscd <- unique(ice.pnts$use_1[which(!ice.pnts$use_1 %in% uselut$use)])
   if (length(misscd) > 0)
     print(paste("missing attribute values in use_LUT: ", addcommas(misscd)))
       
@@ -174,21 +174,21 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
     col <- "use_1"
     new_LUT <- copy(uselut)
     names(new_LUT) <- sub("use", col, names(new_LUT))
-    ice.dots <- merge(ice.dots, new_LUT, by=col)
-    if ("COLOR" %in% names(ice.dots)) ice.dots[,COLOR := NULL]
+    ice.pnts <- merge(ice.pnts, new_LUT, by=col)
+    if ("COLOR" %in% names(ice.pnts)) ice.pnts[,COLOR := NULL]
        
     colorder <- c(colorder, col, names(new_LUT)[which(!names(new_LUT) %in% c(col, "COLOR"))])
-    setcolorder(ice.dots, c(colorder, names(ice.dots)[which(!names(ice.dots) %in% colorder)]))
+    setcolorder(ice.pnts, c(colorder, names(ice.pnts)[which(!names(ice.pnts) %in% colorder)]))
 
     ## use_2
     col <- "use_2"
     new_LUT <- copy(uselut)
     names(new_LUT) <- sub("use", col, names(new_LUT))
-    ice.dots <- merge(ice.dots, new_LUT, by=col)
-    if ("COLOR" %in% names(ice.dots)) ice.dots[,COLOR := NULL]
+    ice.pnts <- merge(ice.pnts, new_LUT, by=col)
+    if ("COLOR" %in% names(ice.pnts)) ice.pnts[,COLOR := NULL]
        
     colorder <- c(colorder, col, names(new_LUT)[which(!names(new_LUT) %in% c(col, "COLOR"))])
-    setcolorder(ice.dots, c(colorder, names(ice.dots)[which(!names(ice.dots) %in% colorder)]))
+    setcolorder(ice.pnts, c(colorder, names(ice.pnts)[which(!names(ice.pnts) %in% colorder)]))
   }
 
   ##########################################################################
@@ -196,37 +196,37 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
   ##########################################################################
 
   ## Check if all values exist in chg_ag_2_LUT
-  misscd <- unique(ice.dots$chg_ag_2[which(!ice.dots$chg_ag_2 %in% agentlut$chg_ag_2)])
+  misscd <- unique(ice.pnts$chg_ag_2[which(!ice.pnts$chg_ag_2 %in% agentlut$chg_ag_2)])
   if (length(misscd) > 0)
     print(paste("missing attribute values in agentlut: ", paste(misscd, collapse=", "))) 
       
   if (appendluts) {
     col <- "chg_ag_2"
-    ice.dots <- merge(ice.dots, agentlut, by=col)
-    if ("COLOR" %in% names(ice.dots)) ice.dots[,COLOR := NULL]
+    ice.pnts <- merge(ice.pnts, agentlut, by=col)
+    if ("COLOR" %in% names(ice.pnts)) ice.pnts[,COLOR := NULL]
       
     colorder <- c(colorder, col, names(agentlut)[which(!names(agentlut) %in% 
 		c(col, "COLOR"))])
-    setcolorder(ice.dots, c(colorder, names(ice.dots)[which(!names(ice.dots) %in% colorder)]))
+    setcolorder(ice.pnts, c(colorder, names(ice.pnts)[which(!names(ice.pnts) %in% colorder)]))
   }
 
   ###############################################################################
   ## DEFINE change variables (use_1_2, cover_1_2, use_1_2_FOR) 
   ###############################################################################
-  if ("use_1" %in% names(ice.dots) && "use_2" %in% names(ice.dots)) {
-    ice.dots[, use_1_2 := paste(use_1, use_2, sep="_to_")]
-    if ("use_1_nm" %in% names(ice.dots) & "use_2_nm" %in% names(ice.dots)) {
-      ice.dots[, use_1_2_nm := paste(use_1_nm, use_2_nm, sep="_to_")]
+  if ("use_1" %in% names(ice.pnts) && "use_2" %in% names(ice.pnts)) {
+    ice.pnts[, use_1_2 := paste(use_1, use_2, sep="_to_")]
+    if ("use_1_nm" %in% names(ice.pnts) & "use_2_nm" %in% names(ice.pnts)) {
+      ice.pnts[, use_1_2_nm := paste(use_1_nm, use_2_nm, sep="_to_")]
   
       ## Add to domlut
       if (!is.null(domlut)) 
         domlut <- rbind(domlut, list("use_1_2", "use_1_2_nm", "Use_Change"))
     }
   }
-  if ("cover_1" %in% names(ice.dots) && "cover_2" %in% names(ice.dots)) {
-    ice.dots[, cover_1_2 := paste(cover_1, cover_2, sep="_to_")]
-    if ("cover_1_nm" %in% names(ice.dots) & "cover_2_nm" %in% names(ice.dots)) {
-      ice.dots[, cover_1_2_nm := paste(cover_1_nm, cover_2_nm, sep="_to_")]
+  if ("cover_1" %in% names(ice.pnts) && "cover_2" %in% names(ice.pnts)) {
+    ice.pnts[, cover_1_2 := paste(cover_1, cover_2, sep="_to_")]
+    if ("cover_1_nm" %in% names(ice.pnts) & "cover_2_nm" %in% names(ice.pnts)) {
+      ice.pnts[, cover_1_2_nm := paste(cover_1_nm, cover_2_nm, sep="_to_")]
   
       ## Add to domlut
       if (!is.null(domlut)) 
@@ -234,13 +234,13 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
     }
   }
 
-  if ("use_1_FOR" %in% names(ice.dots) && "use_2_FOR" %in% names(ice.dots)) {
+  if ("use_1_FOR" %in% names(ice.pnts) && "use_2_FOR" %in% names(ice.pnts)) {
     if ("use_FOR_nm" %in% names(uselut))
       use_FORlut <- unique(uselut[, c("use_FOR", "use_FOR_nm")])
 
-    ice.dots[, use_1_2_FOR:= paste(use_1_FOR, use_2_FOR, sep="_to_")]
-    if ("use_1_FOR_nm" %in% names(ice.dots) & "use_2_FOR_nm" %in% names(ice.dots)) {
-      ice.dots[, use_1_2_FOR_nm := paste(use_1_FOR_nm, use_2_FOR_nm, sep="_to_")]
+    ice.pnts[, use_1_2_FOR:= paste(use_1_FOR, use_2_FOR, sep="_to_")]
+    if ("use_1_FOR_nm" %in% names(ice.pnts) & "use_2_FOR_nm" %in% names(ice.pnts)) {
+      ice.pnts[, use_1_2_FOR_nm := paste(use_1_FOR_nm, use_2_FOR_nm, sep="_to_")]
   
       ## Add to domlut
       if (!is.null(domlut)) 
@@ -261,25 +261,23 @@ anPBestICE_data <- function(ice.dotsfn, T1, T2, plotid="plot_id", pntid="dot_cnt
   #################################################################################
 
   ## Set key, ordering by plotid and pntid
-  setkeyv(ice.dots, c(plotid, pntid))
+  setkeyv(ice.pnts, c(plotid, pntid))
 
 
   ## Save data to outfolder
   if (savedata) {
-    ice.dotslutfn <- paste0(basename.NoExt(ice.dotsfn), "_lut.csv")
-    datExportData(ice.dots, outfolder=outfolder, out_layer=ice.dotslutfn, ...)
+    ice.pntlutfn <- paste0(basename.NoExt(ice.pntfn), "_lut.csv")
+    datExportData(ice.pnts, outfolder=outfolder, out_layer=ice.pntlutfn, ...)
   }
 
   ## Return data
-  returnlst <- list(ice.dots=ice.dots, plotid=plotid, pntid=pntid)
-  returnlst$changelut <- changelut
-  returnlst$coverlut <- coverlut
-  returnlst$uselut <- uselut
-  returnlst$agentlut <- agentlut
-  returnlst$domlut <- domlut
-
+  returnlst <- list(ice.pnts=ice.pnts, plotid=plotid, pntid=pntid)
+  reflst <- list(changelut=changelut, coverlut=coverlut, uselut=uselut, 
+				agentlut=agentlut)
   if (!is.null(use_FORlut))
-    returnlst$use_FORlut <- use_FORlut
+    reflst$use_FORlut <- use_FORlut
+  returnlst$reflst <- reflst
+  returnlst$domlut <- domlut
 
   return(returnlst)
 }

@@ -288,6 +288,9 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 	unit.totest.str=unit.rowest.str=unit.colest.str=unit.grpest.str <- NULL
 
   if (!ratio) {
+    phatcol <- "phat"
+    phatcol.var <- "phat.var"
+
     if (!is.null(pltdom.tot)) {
       ## Get estimate for TOTAL
       #######################################################################
@@ -311,9 +314,9 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
         unit.totest <- tabs$tab2
         setkeyv(unit.totest, unitvar)
         unit.totest <- unit.totest[unitarea, nomatch=0]
-        unit.totest <- PBgetest(unit.totest, areavar)
+        unit.totest <- PBgetest(unit.totest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
       } else {
-        unit.totest <- PBgetest(unit.totest)
+        unit.totest <- PBgetest(unit.totest, phatcol=phatcol, phatcol.var=phatcol.var)
       }
 
       ## Remove rows that are filtered out (NOTinDOMAIN or 9999)
@@ -355,10 +358,10 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       if (rawdata) unit.grpest.str <- pbar.grpest$ybardat
       setkeyv(unit.grpest, c(unitvar, grpvar))
     }
+  } else {  ## ratio=TRUE
 
-    phat <- "phat"
-    phat.var <- "phat.var"
-  } else {
+    phatcol <- "rhat"
+    phatcol.var <- "rhat.var"
 
     unit.grpest <- PBest.pbarRatio(dom.prop.n=pltdom.n, dom.prop.d=pltdom.d, 
 		uniqueid=plotid, domain=domain, attribute=attribute, strlut=strlut, 
@@ -373,9 +376,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 		strvar=strvar, strattype="post")$est.unit
       setkeyv(unit.grpest.domtot, c(unitvar, domain))
     }
-
-    phat <- "rhat"
-    phat.var <- "rhat.var"
 
     ## Get filter value for row and column
     row.filterval <- ifelse (is.numeric(unit.rowest[[rowvar]]), 9999, "NOTinDOMAIN")
@@ -409,10 +409,10 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
         unit.rowest <- tabs$tab2
         setkeyv(unit.rowest, unitvar)
         unit.rowest <- unit.rowest[unitarea, nomatch=0]
-        unit.rowest <- PBgetest(unit.rowest, areavar)
+        unit.rowest <- PBgetest(unit.rowest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
         setkeyv(unit.rowest, c(unitvar, rowvar))
       } else {
-        unit.rowest <- PBgetest(unit.rowest)
+        unit.rowest <- PBgetest(unit.rowest, phatcol=phatcol, phatcol.var=phatcol.var)
       }
     }
   }
@@ -438,10 +438,10 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       unit.colest <- tabs$tab2
       setkeyv(unit.colest, unitvar)
       unit.colest <- unit.colest[unitarea, nomatch=0]
-      unit.colest <- PBgetest(unit.colest, areavar)
+      unit.colest <- PBgetest(unit.colest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
       setkeyv(unit.colest, c(unitvar, colvar))
     } else {
-      unit.colest <- PBgetest(unit.colest)
+      unit.colest <- PBgetest(unit.colest, phatcol=phatcol, phatcol.var=phatcol.var)
     }
   }
 
@@ -449,13 +449,18 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
-    unitarea <- tabs$tab1
-    unit.grpest <- tabs$tab2
-    setkeyv(unit.grpest, unitvar)
-    unit.grpest <- unit.grpest[unitarea, nomatch=0]
-    unit.colest <- PBgetest(unit.grpest, areavar)
-    setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
+
+    if (tabtype == "AREA" || sumunits) {
+      tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
+      unitarea <- tabs$tab1
+      unit.grpest <- tabs$tab2
+      setkeyv(unit.grpest, unitvar)
+      unit.grpest <- unit.grpest[unitarea, nomatch=0]
+      unit.colest <- PBgetest(unit.grpest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
+      setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
+    } else {
+      unit.grpest <- PBgetest(unit.grpest, phatcol=phatcol, phatcol.var=phatcol.var)
+    }
   }
         
   if (!sumunits && length(unique(strlut[[unitvar]])) > 1 && !ratio && tabtype != "PCT") {
@@ -493,11 +498,11 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       unitarea2 <- tabs$tab2
       setkeyv(rowunit, "ONEUNIT")
       rowunit <- rowunit[unitarea2, nomatch=0]
-      rowunit <- PBgetest(rowunit, areavar)
+      rowunit <- PBgetest(rowunit, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
       setkeyv(rowunit, c("ONEUNIT", rowvar))
 
     } else {
-      rowunit <- PBgetest(rowunit)
+      rowunit <- PBgetest(rowunit, phatcol=phatcol, phatcol.var=phatcol.var)
     }  
 
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
@@ -514,9 +519,9 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     setkeyv(totunit, "ONEUNIT")
     if (tabtype == "AREA") {
       totunit <- totunit[unitarea2, nomatch=0]
-      totunit <- PBgetest(totunit, areavar)
+      totunit <- PBgetest(totunit, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
     } else {
-      PBgetest(totunit)
+      PBgetest(totunit, phatcol=phatcol, phatcol.var=phatcol.var)
     }
    # totunit[, TOTAL:= "Total"]
    # setnames(totunit, names(totunit), names(rowunit))
@@ -772,24 +777,26 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
  	estround=estround, pseround=pseround, rawdata=rawdata, gui=gui)", 
     file = outfile, sep="")
     close(outfile)
+  }
 
-    outfn.rawtab <- NULL
-    if (rawdata) {
-      rawfolder <- paste(outfolder, "rawdata", sep="/")
-      if (!file.exists(rawfolder)) dir.create(rawfolder)
+  outfn.rawtab <- NULL
+  if (rawdata) {
 
-      title.estpse <- paste(title.estpse, title.ref)
-      for (i in 1:length(rawdat)) {
-        outfile <- NULL
-        tabnm <- names(rawdat[i])
+    rawfolder <- paste(outfolder, "rawdata", sep="/")
+    if (!dir.exists(rawfolder)) dir.create(rawfolder)
+
+    title.estpse <- paste(title.estpse, title.ref)
+    for (i in 1:length(rawdat)) {
+      outfile <- NULL
+      tabnm <- names(rawdat[i])
  
-        if (!tabnm %in% c("unitvars", "strvar", "rowvar", "colvar", "est.gainloss")) {
-          rawtab <- rawdat[[i]]
-          outfn.rawtab <- paste(outfn.rawdat, tabnm, sep="_") 
-          if (tabnm %in% c("plotsampcnt", "pntsampcnt")) {
-             write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
+      if (!tabnm %in% c("unitvars", "strvar", "rowvar", "colvar", "est.gainloss")) {
+        rawtab <- rawdat[[i]]
+        outfn.rawtab <- paste(outfn.rawdat, tabnm, sep="_") 
+        if (tabnm %in% c("plotsampcnt", "pntsampcnt")) {
+           write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
 			outfn.date=outfn.date, overwrite=overwrite)
-          } else {
+        } else {
             #if ("NBRPNTS" %in% names(rawtable)) {
             #  charvars <- c("NBRPNTS", 
 		 #		names(rawtable)[which(sapply(rawtable, class) %in% 
@@ -805,7 +812,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
 			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
 			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite))
-          }
         }
       }
     }
