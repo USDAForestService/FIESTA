@@ -10,6 +10,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
+
   if (gui) 
     invtype=evalCur=allyrs=measCur=evalType=istree=isseed=isveg=issp=
 	spcondid1=defaultVars=regionVars=ACI=subcycle99=intensity1=
@@ -1398,7 +1399,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			index.unique=index.unique.condx, append_layer=append_layer2,
 			outfn.pre=outfn.pre)
       }
-      if ((savedata || !treeReturn) && !is.null(treex)) {
+      if ((savedata || !treeReturn) && !is.null(treex)) { 
         index.unique.treex <- NULL
         if (i == 1) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
         datExportData(treex, outfolder=outfolder, 
