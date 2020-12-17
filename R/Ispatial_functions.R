@@ -147,10 +147,10 @@ getrastlst.rgdal <- function(rastnmlst, rastfolder=NULL, stopifLonLat=FALSE,
     if (is.null(rast.info)) stop("invalid raster: ", rastfn)
     rast.prj <- rast.info$crs
 
-    if (is.null(rast.prj))
+    if (is.null(rast.prj) || rast.prj == "") {
       message(paste("raster has undefined projection:", rastfn))    
 
-    if (sf::st_is_longlat(rast.prj)) {
+    } else if (sf::st_is_longlat(rast.prj)) {
       message(paste("rast is longlat:", rastfn))
       if (stopifLonLat) stop("")
     }
@@ -836,11 +836,11 @@ checkrast.longlat <- function(rastfn, dstfile=NULL, nolonglat=TRUE, crs.default=
   ##################################################################################
   ## DESCRIPTION: Check for longlat Geodetic coordinate system.
   ## 
-  ## Default projection: NAD83 - Conus Albers
+  ## Default projection: NAD83 - Conus Albers (EPSG:5070)
   ## +proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96,
   ##		+x_0=0 +y_0=0", "+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs")
   ##################################################################################
-  crs.albersUS <- 5070
+  crs.albersUS <- "EPSG:5070"
   
   ## Define default coordinate System
   if (is.null(crs.default))

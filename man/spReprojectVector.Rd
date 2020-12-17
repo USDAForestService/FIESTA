@@ -1,17 +1,16 @@
 \name{spReprojectVector}
 \alias{spReprojectVector}
 \title{
-	Spatial - Reprojects an Esri shapefile (*shp) or S4 Spatial object.
+	Spatial - Reprojects an sf spatial object.
 }
 \description{
-	Reprojects an Esri shapefile (*.shp) or S4 Spatial object to a new geographic
-	or projected coordinate system, with option to save new object.
+	Reprojects an sf spatial object to a new coordinate reference system.
 }
 \usage{
 spReprojectVector(layer, dsn=NULL, crs.new, exportsp = FALSE, ...)
 }
 \arguments{
-  \item{layer}{ SpatialPolygons class R object or String. The spatial layer must 
+  \item{layer}{ sf class R object or String. The spatial layer must 
 	have a defined projection (test using sf::st_crs(layer)). }
   \item{dsn}{ String. Data source name (dsn; i.e., folder or database name)
 	of splayer. The dsn varies by driver. See gdal OGR vector formats 

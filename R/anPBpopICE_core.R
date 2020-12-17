@@ -44,9 +44,10 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, estunitnm, T1, T2,
   ## Get ICE population data
   #########################################################################
   if (is.null(PBpopdatICE)) {
-    PBpopdatICE <- modPBpop(pnt=ice.pntfn, plt=ice.plotfn, plotid=plotid, 
-		pntid=pntid, puniqueid=plotid, pltassgn=pltassgn, 
-		pltassgnid=pltassgnid, unitarea=unitarea, unitcombine=unitcombine, 
+    PBpopdatICE <- anPBpopICE(ice.pntfn=ice.pntfn, ice.plotfn=ice.plotfn, 
+		T1=T1, T2=T2, plotid="plot_id", pntid="dot_cnt", 
+		puniqueid=plotid, pltassgn=pltassgn, pltassgnid=pltassgnid, 
+		unitarea=unitarea, unitcombine=unitcombine, 
 		strata=strata, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
 		stratcombine=stratcombine, sumunits=sumunits, ...)
   } 
@@ -82,7 +83,8 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, estunitnm, T1, T2,
   outfn.pre2 <- paste0("02_", outfn.pre)
   rowvar <- "chg_ag_2_GRP"
   rowvarnm <- paste(rowvar, "nm", sep="_")
-  rowlut <- unique(agentlut[!agentlut[[rowvar]] %in% c(99,0), c(rowvar, rowvarnm)])
+  rowlut <- unique(agentlut[!agentlut[[rowvar]] %in% c(99,0), 
+			c(rowvar, rowvarnm), with=FALSE])
   pnt.filter <- "change_pnt == 1"
 
   est.chg_ag_2grp <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
@@ -180,7 +182,8 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, estunitnm, T1, T2,
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
-	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
+	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle,
+	gainloss=TRUE)
   #use_1_2_FOR$est
 
 

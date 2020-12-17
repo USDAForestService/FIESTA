@@ -14,7 +14,7 @@
 # nbrdecimals
 # nbrdigits
 # getfilter
-# wrapit
+# wraptitle
 
 
 getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
@@ -383,7 +383,7 @@ getfilter <- function(att, val, syntax="R") {
 }
 
 
-wraptitle <- function(x, len) {
+wraptitle <- function(x, len=10) {
   sapply(x, function(y) paste(strwrap(y, len), 
          collapse = "\n"), USE.NAMES = FALSE)
 }

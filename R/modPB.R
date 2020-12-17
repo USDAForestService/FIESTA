@@ -687,7 +687,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 
     ## Add to return list
     rawdat$est.gainloss <- est.gainloss
-   
+
     if (savedata) {
       outfn.gainloss <- paste(outfn.rawdat, "gainloss", sep="_")
       write2csv(est.gainloss, outfolder=paste(outfolder, "rawdata", sep="/"), 

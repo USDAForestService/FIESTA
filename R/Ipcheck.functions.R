@@ -443,6 +443,11 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
 pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL, 
 	stopifnull=FALSE, gui=FALSE, listitems=NULL){
   ## DESCRIPTION: checks object name 
+
+  ## Adds to file filters to Cran R Filters table.
+  if (.Platform$OS.type=="windows") {
+    Filters=rbind(Filters,shp=c("R Objects (*.rda)", "*.rda")) }
+
  
   ## Set global variables
   objx <- NULL
@@ -478,7 +483,7 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
         if (!is.list(objx)) stop("must be list object")
       }
     }
-    if (is.null(objx) && stopifnull) stop(paste(tabnm, "is NULL"))
+    if (is.null(objx) && stopifnull) stop(paste(objnm, "is NULL"))
       return(NULL)
   } 
  

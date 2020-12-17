@@ -1,4 +1,4 @@
-anPBpopICE <- function(ice.pntfn, ice.plotfn=NULL, T1, T2, 
+anPBpopICE <- function(ice.pntfn, ice.pltfn=NULL, T1, T2, 
 	plotid="plot_id", pntid="dot_cnt", pltassgn=NULL, pltassgnid=NULL, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, strata=FALSE, stratalut=NULL, strvar=NULL,  
@@ -21,10 +21,12 @@ anPBpopICE <- function(ice.pntfn, ice.plotfn=NULL, T1, T2,
   #########################################################################
   ## Get ICE data 
   ##################################################################
-  icedat <- anPBpopICE_data(ice.pntfn, plotid="plot_id", pntid="dot_cnt", 
+  icedat <- anPBpopICE_data(ice.pntfn, ice.pltfn=ice.pltfn, 
+			plotid="plot_id", pntid="dot_cnt", 
 			T1=T1, T2=T2, appendluts=TRUE, ...)
   names(icedat)
-  ice.pnts <- icedat$ice.pnts
+  ice.pnt <- icedat$ice.pnt
+  ice.plt <- icedat$ice.plt
   plotid <- icedat$plotid
   pntid <- icedat$pntid
   domlut <- icedat$domlut
@@ -58,24 +60,30 @@ anPBpopICE <- function(ice.pntfn, ice.plotfn=NULL, T1, T2,
       message("missing columns in uselut: ", toString(miss))
     }
   }
-  ## Check other columns in ice.pnts
+  ## Check other columns in ice.pnt
   other_cols <- c("use_1_2", "cover_1_2", "use_1_2_FOR")
-  if (!all(other_cols %in% names(ice.pnts))) {     
-    miss <- other_cols[!other_cols %in% names(ice.pnts)]
-    message("missing columns in ice.pnts: ", toString(miss))
+  if (!all(other_cols %in% names(ice.pnt))) {     
+    miss <- other_cols[!other_cols %in% names(ice.pnt)]
+    message("missing columns in ice.pnt: ", toString(miss))
   }
  
   #########################################################################
   ## Get population data
   ##################################################################
-  PBpopdatICE <- modPBpop(pnt=ice.pnts, plt=ice.plotfn, plotid=plotid, pntid=pntid, 
+  PBpopdatICE <- modPBpop(pnt=ice.pnt, plt=ice.pltfn, plotid=plotid, pntid=pntid, 
         		puniqueid=plotid, pltassgn=pltassgn, pltassgnid=pltassgnid,
 			unitarea=unitarea, unitcombine=unitcombine, strata=strata, 
 			strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
-			stratcombine=stratcombine, sumunits=sumunits, saveobj=saveobj,
-			savedata=savedata, outfolder=outfolder)
+			stratcombine=stratcombine, sumunits=sumunits, savedata=savedata, 
+			outfolder=outfolder)
   PBpopdatICE$reflst <- icedat$reflst
   PBpopdatICE$domlut <- domlut
+
+  if (saveobj) {
+    objfn <- getoutfn(outfn="PBpopdatICE", outfolder=outfolder, ext="rda")
+    save(PBpopdatICE, file=objfn)
+    message("saving object to: ", objfn)
+  } 
     
   return(PBpopdatICE) 
 }

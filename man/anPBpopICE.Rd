@@ -7,7 +7,7 @@
 	Generates a set of population data for area of interest.
 }
 \usage{
-anPBpopICE(ice.pntfn, ice.plotfn = NULL, T1, T2, plotid = "plot_id", 
+anPBpopICE(ice.pntfn, ice.pltfn = NULL, T1, T2, plotid = "plot_id", 
 	pntid = "dot_cnt", pltassgn = NULL, pltassgnid = NULL, 
 	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, strata = FALSE, stratalut = NULL, strvar = NULL, 
@@ -18,7 +18,7 @@ anPBpopICE(ice.pntfn, ice.plotfn = NULL, T1, T2, plotid = "plot_id",
 \arguments{
   \item{ice.pntfn}{ Comma-delimited file (*.csv). The full path file name of 
 	ICE point-level data. }
-  \item{ice.plotfn}{ Comma-delimited file (*.csv). The full path file name of 
+  \item{ice.pltfn}{ Comma-delimited file (*.csv). The full path file name of 
 	ICE plot-level data (optional). }
   \item{T1}{ Integer. Year of Time 1 imagery (YYYY). }
   \item{T2}{ Interger. Year of Time 2 imagery (YYYY). }

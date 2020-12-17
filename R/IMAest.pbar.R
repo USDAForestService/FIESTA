@@ -5,7 +5,7 @@ MAest.ht <- function(y, N, FIA=TRUE) {
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "lin_HTSRS"
+  var_method <- "unconditional_SRS"
   estht <- mase::horvitzThompson(y, pi = NULL, N = N, pi2 = NULL, 
 						var_est = TRUE, var_method = var_method, 
 						B = 1000, strata = NULL)

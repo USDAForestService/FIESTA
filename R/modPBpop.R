@@ -94,7 +94,7 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     unitarea <- unitdat$unitarea
     areavar <- unitdat$areavar
   }
- 
+
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################

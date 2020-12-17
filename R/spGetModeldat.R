@@ -319,7 +319,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
           zonalstat <- c("npixels", rastlst.cont.stat) 
           rastnm2 <- c("npixels", rastnm2)
         }  
-        zonaldat.rast.cont <- spZonalRast(domlayerx, rast=rastfn, polyv.att=domvar, 
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, polyv.att=domvar, 
 		zonalstat=zonalstat, pixelfun=northness, rast.NODATA=rast.cont.NODATA,
 		na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
@@ -332,7 +332,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   
         rastnm2 <- ifelse(is.null(rastnm), "sinAsp", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
-        zonaldat.rast.cont <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA,
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, rast.NODATA=rast.cont.NODATA,
  		polyv.att=domvar, zonalstat=rastlst.cont.stat, pixelfun=eastness, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
@@ -347,7 +347,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
           if (!is.null(rastnm)) 
             rastnm <- c("npixels", rastnm)
         }  
-        zonaldat.rast.cont <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cont.NODATA, 
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, rast.NODATA=rast.cont.NODATA, 
 		polyv.att=domvar, zonalstat=zonalstat, showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
@@ -422,11 +422,11 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       if (i == 1 && npixels)
         zonalstat <- c("npixels", zonalstat)        
       if (identical(rast.lutfn, rastfn)) {
-        zonaldat.rast.cat <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cat.NODATA, 
+        zonaldat.rast.cat <- spZonalRast(domlayerx, rastfn=rastfn, rast.NODATA=rast.cat.NODATA, 
  		polyv.att=domvar, zonalstat=zonalstat, rastlut=rastlut, outname=names(rastlut)[2],
 		na.rm=TRUE)
       } else {
-        zonaldat.rast.cat <- spZonalRast(domlayerx, rast=rastfn, rast.NODATA=rast.cat.NODATA, 
+        zonaldat.rast.cat <- spZonalRast(domlayerx, rastfn=rastfn, rast.NODATA=rast.cat.NODATA, 
  		polyv.att=domvar, outname=rastnm, zonalstat=zonalstat, na.rm=TRUE)
       }
 

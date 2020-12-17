@@ -9,7 +9,7 @@
 }
 
 \usage{
-spZonalRast(polyv, polyv_dsn = NULL, polyv.att = NULL, rast, 
+spZonalRast(polyv, polyv_dsn = NULL, polyv.att = NULL, rastfn, 
 	rastfolder = NULL, bands = NULL, zonalstat, pixelfun = NULL, 
 	outname = NULL, showext = FALSE, rastlut = NULL, rast.NODATA = NULL, 
 	na.rm = TRUE, savedata = FALSE, outfolder = NULL, outfn = "zonalext", 
@@ -25,7 +25,7 @@ spZonalRast(polyv, polyv_dsn = NULL, polyv.att = NULL, rast,
 	formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf object. }
   \item{polyv.att}{ String. Name of attribute in polyv to identify zones for 
 	summarizing raster statistics. }
-  \item{rast}{ String or Raster. File name(s) with extensions, or raster object(s). 
+  \item{rastfn}{ String or Raster. File name(s) with extensions, or raster object(s). 
 	Note: raster objects must be written to file. }
   \item{rastfolder}{ String. Name of the folder with raster layers. Optional. 
 	Useful if all raster layers are in same folder. }

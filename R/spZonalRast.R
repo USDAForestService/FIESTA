@@ -1,4 +1,4 @@
-spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast, 
+spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn, 
 	rastfolder=NULL, bands=NULL, zonalstat, pixelfun=NULL, outname=NULL, 
 	showext=FALSE, rastlut=NULL, rast.NODATA=NULL, na.rm=TRUE, savedata=FALSE, 
 	outfolder=NULL, outfn="zonalext", outfn.pre=NULL, outfn.date=FALSE, 
@@ -35,14 +35,12 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rast,
   ########################################################  
 
   ## Verify rasters 
-  rastfn <- suppressWarnings(getrastlst.rgdal(rast, rastfolder, stopifLonLat=TRUE, gui=gui))
+  rastfn <- suppressWarnings(getrastlst.rgdal(rastfn, rastfolder, 
+		stopifLonLat=TRUE, gui=gui))
 
   ## Get names of raster 
   rastnm <- basename.NoExt(rastfn) 
  
-  ## Import rasters 
-  #rastx <- raster(rastfn)  
-
   ## Get number of bands in each raster and set names 
   rast.nbands <- rasterInfo(rastfn)$nbands
 

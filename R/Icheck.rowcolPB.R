@@ -268,7 +268,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
 
     if (is.null(title.colvar)) title.colvar <- colvar
   }
- 
+
   ###################################################################################
   ## GET DOMAIN
   ###################################################################################
@@ -283,6 +283,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   if (ratio) PBx.d <- data.table::copy(PBx)
 
   if (rowvar != "NONE") {
+
     ## Filter photo data - rows
     if (is.factor(PBx[[rowvar]]))
       PBx[[rowvar]] <- as.character(PBx[[rowvar]])
@@ -300,8 +301,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
       if (!is.null(filterids))
         PBx[!paste(PBx[[plotid]], PBx[[pntid]]) %in% filterids, 
 			row.orderby] <- orderby.val
-    }
- 
+    } 
     if (is.null(rowlut)) {
       if (!is.null(row.orderby) && row.orderby != "NONE") {   
         uniquerow <- unique(PBx[PBx[[row.orderby]] != orderby.val, 

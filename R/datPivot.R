@@ -72,12 +72,12 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
     datxf <- na.omit(datxf, cols=yvar)
   if (dropNAxvar)
     datxf <- na.omit(datxf, cols=xvar)
-  datxf[, concatx := do.call(paste, c(.SD, sep="-")), .SDcols=xvar]
+  datxf[, concatx := do.call(paste, c(.SD, sep="#")), .SDcols=xvar]
   
   pfill <- ifelse(NAto0, 0, NA)
   ptab <- dcast(datxf, concatx ~ get(yvar), value.var=pvar, fun.aggregate=pfun,
 		fill=pfill) 
-  ptab[, (xvar) := tstrsplit(concatx, "-", fixed=TRUE)][][, concatx :=NULL]
+  ptab[, (xvar) := tstrsplit(concatx, "#", fixed=TRUE)][][, concatx :=NULL]
   datxf[, concatx := NULL]
    
   cols <- names(ptab)[!names(ptab) %in% xvar]

@@ -426,7 +426,7 @@ rasterInfo <- function(srcfile) {
 	ri$bbox = c(xmin,ymin,xmax,ymax)
 	ri$cellsize = c(gt[2], -gt[6])
 	#ri$crs = .Call("RGDAL_GetProjectionRef", src_ds, PACKAGE="rgdal")
-	ri$crs = getProjectionRef(src_ds)
+	ri$crs = rgdal::getProjectionRef(src_ds)
 	ri$nbands = .Call("RGDAL_GetRasterCount", src_ds, PACKAGE="rgdal")
 	ri$datatype = c()
 	ri$nodata_value = c()
