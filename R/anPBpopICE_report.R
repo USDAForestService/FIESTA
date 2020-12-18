@@ -5,7 +5,7 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre,
   ##		components of report into folder.
 
   outfolder <- pcheck.outfolder(outfolder)
-  outfolder <- normalizePath(outfolder)
+  #outfolder <- normalizePath(outfolder)
   reportfolder <- file.path(outfolder, "report")
   if (!dir.exists(reportfolder)) dir.create(reportfolder)
   

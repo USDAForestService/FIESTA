@@ -132,15 +132,11 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   ## Get output raster format
   of <- drivers[drivers$DefaultExt == outext, "fmt"]
 
-
   ##################################################################
   ## DO WORK
   ##################################################################
 
-  rastfn.new <- FIESTA::reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
+  FIESTA::reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
 	t_srs=t_srs, s_srs=s_srs, of=of, ot=ot, r=r, dstnodata=dstnodata)
-
-  
-  return(rastfn.new)
-
+ 
 }
