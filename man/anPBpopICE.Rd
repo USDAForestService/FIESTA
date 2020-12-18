@@ -7,12 +7,13 @@
 	Generates a set of population data for area of interest.
 }
 \usage{
-anPBpopICE(ice.pntfn, ice.pltfn = NULL, T1, T2, plotid = "plot_id", 
+anPBpopICE(ice.pntfn=NULL, ice.pltfn = NULL, T1, T2, plotid = "plot_id", 
 	pntid = "dot_cnt", pltassgn = NULL, pltassgnid = NULL, 
 	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, strata = FALSE, stratalut = NULL, strvar = NULL, 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
-	sumunits = FALSE, saveobj = FALSE, savedata = FALSE, outfolder = NULL, ...)
+	sumunits = FALSE, saveobj = FALSE, savedata = FALSE, 
+	outfolder = NULL, overwrite=FALSE, PBdataICE=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,7 +56,9 @@ anPBpopICE(ice.pntfn, ice.pltfn = NULL, T1, T2, plotid = "plot_id",
 	include area by estimation unit). }
   \item{saveobj}{ Logical. If TRUE, saves object to outfolder. }
   \item{savedata}{ Logical. If TRUE, saves data tables to outfolder. }
-  \item{outfolder}{ String.  The outfolder to write files to. }
+  \item{outfolder}{ String. The outfolder to write files to. }
+  \item{overwrite}{ Logical. If TRUE, overwrites files. }
+  \item{PBdataICE}{ R Object. Output data object from FIESTA::anPBpopICE_data() function. }
   \item{...}{ Other parameters to FIESTA::datExportData() function. }
 }
 \details{

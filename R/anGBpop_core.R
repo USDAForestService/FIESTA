@@ -222,7 +222,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   colvar <- "COND_STATUS_CD"
 
   estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
-		landarea=landarea, cond.filter="DSTRBCD1 > 0",
+		landarea=landarea,
 		rowvar=rowvar, row.FIAname=TRUE, 
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 

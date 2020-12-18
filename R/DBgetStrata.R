@@ -74,8 +74,14 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
       states <- datx.states
     }
 
-    if (is.null(evalid) && "EVALID" %in% names(datx)) 
-      evalid <- unique(datx$EVALID)
+    if (is.null(evalid)) {
+      if ("EVALID" %in% names(datx)) {
+        evalid <- unique(datx$EVALID)
+      } else {
+        evalAll <- TRUE
+        evalCur <- FALSE
+      }
+    }
 
     invyrtab <- unique(datx[, c("STATECD", "INVYR")])
     setorder(invyrtab, "STATECD", "INVYR")

@@ -7,7 +7,7 @@
 	Generates percent or acre estimates by domain (and estimation unit).
 }
 \usage{
-anPBpopICE_data(ice.pntfn, ice.pltfn = NULL, T1, T2, plotid = "plot_id", 
+anPBpopICE_data(ice.pntfn, ice.pltfn = NULL, plotid = "plot_id", 
 	pntid = "dot_cnt", changelut=NULL, coverlut=NULL, uselut=NULL, 
 	agentlut=NULL, appendluts=TRUE, domlut=NULL, savedata=FALSE, 
 	outfolder=NULL, ...)
@@ -18,8 +18,6 @@ anPBpopICE_data(ice.pntfn, ice.pltfn = NULL, T1, T2, plotid = "plot_id",
 	for the ICE point-level data. }
   \item{ice.pltfn}{ Comma-delimited file (*.csv). The full path file name
 	for the ICE plot-level data. }
-  \item{T1}{ Integer. Year of Time 1 imagery (YYYY). }
-  \item{T2}{ Integer. Year of Time 2 imagery (YYYY). }
   \item{plotid}{ String. Name of unique identifier for plots. }
   \item{pntid}{ String. Name of unique identifier for points. }
   \item{changelut}{ Data frame or comma-delimted file. A different look up 

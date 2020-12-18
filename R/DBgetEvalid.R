@@ -370,7 +370,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       state <- FIESTA::pcheck.states(stcd, "MEANING")
       stabbr <- FIESTA::pcheck.states(stcd, "ABBR")
       stinvyrs <- unique(stinvyr.vals[[state]])
-      invtype.invyrs <- invyrtab[invyrtab$STATECD == stcd, "INVYR"]
+      invtype.invyrs <- invyrtab[invyrtab$STATECD == stcd][["INVYR"]]
 
       ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
       ## Remove East and West in LOCATION_NM and EVAL_DESCR
@@ -391,8 +391,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       ## Subset POP_EVAL/POP_EVAL_GRP by state and inventory type
       popevaltab <- POP_EVAL[POP_EVAL_GRPstcd[, c("CN", "EVAL_GRP_Endyr")]]
       popevaltab <- popevaltab[popevaltab$END_INVYR %in% invtype.invyrs,]
+      POP_EVAL_endyrs <- na.omit(unique(popevaltab[["EVAL_GRP_Endyr"]]))
 
-      POP_EVAL_endyrs <- na.omit(unique(popevaltab[, "EVAL_GRP_Endyr"][[1]]))
       if (!is.null(evalEndyr)) {
         Endyr <- evalEndyr[[state]]
 

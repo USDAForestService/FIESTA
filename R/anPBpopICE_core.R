@@ -1,10 +1,10 @@
-anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, estunitnm, T1, T2, 
-	plotid="plot_id", pntid="dot_cnt", pltassgn=NULL, pltassgnid=NULL, 
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	unitcombine=FALSE, strata=FALSE, stratalut=NULL, strvar=NULL,  
-	getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, tabtype="PCT", 
-	sumunits=FALSE, rawdata=TRUE, returntitle=TRUE, outfolder=NULL, 
-	outfn.date=TRUE, overwrite=FALSE, subunitnm=NULL, estabbr=NULL, 
+anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm, 
+	T1, T2, plotid="plot_id", pntid="dot_cnt", pltassgn=NULL, 
+	pltassgnid=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
+	areavar="ACRES", unitcombine=FALSE, strata=FALSE, stratalut=NULL, 
+	strvar=NULL, getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
+	tabtype="PCT", sumunits=FALSE, rawdata=TRUE, returntitle=TRUE, 
+	outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, 
 	pnt1=FALSE, domlut=NULL, PBpopdatICE=NULL, ...){
 
 
@@ -28,14 +28,11 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, estunitnm, T1, T2,
 
   ## Create outfn.pre
   ###########################################################
-  if (is.null(estabbr)) estabbr <- estunitnm
-  outfn.pre <- ifelse(!is.null(subunitnm), 
-		paste(estabbr, subunitnm, sep="_"), estabbr)
-
+  if (is.null(outfn.pre)) outfn.pre <- AOInm
 
   ## Generate title.ref
   ###########################################################
-  title.ref <- paste0(estunitnm, paste0(", ", T1, "-", T2))
+  title.ref <- paste0(AOInm, paste0(", ", T1, "-", T2))
   if (pnt1) title.ref <- paste(title.ref, "- 1pt")
 
 

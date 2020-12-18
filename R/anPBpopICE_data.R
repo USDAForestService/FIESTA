@@ -1,12 +1,13 @@
-anPBpopICE_data <- function(ice.pntfn, ice.pltfn=NULL, T1, T2, plotid="plot_id", 
-	pntid="dot_cnt", changelut=NULL, coverlut=NULL, uselut=NULL, agentlut=NULL, 
-	appendluts=TRUE, domlut=NULL, savedata=FALSE, outfolder=NULL, ...){
+anPBpopICE_data <- function(ice.pntfn, ice.pltfn=NULL,
+	plotid="plot_id", pntid="dot_cnt", changelut=NULL, coverlut=NULL, 
+	uselut=NULL, agentlut=NULL, appendluts=TRUE, domlut=NULL, 
+	savedata=FALSE, outfolder=NULL, ...){
 
   ##########################################################################
   ## DESCRIPTION: Set up ICE data with code classes
-  ## ice.pnt	- point-level data file name
-  ## T1		- year of Time 1 (YYYY)
-  ## T2		- year of Time 2 (YYYY)
+  ## ice.pntfn	- point-level data file name
+  ## ice.pltfn	- plot-level data file name
+  ## ice.QAQCfn	- compiled QAQC data file name
   ## plotid	- unique identifier of plots in ice.pnt and ice.plt
   ## pntid		- unique identifier of points in ice.pnt
   ## changelut	- different look up table for land use or land cover change
@@ -36,6 +37,25 @@ anPBpopICE_data <- function(ice.pntfn, ice.pltfn=NULL, T1, T2, plotid="plot_id",
 
   ## Import ICE plots
   ice.plt <- FIESTA::pcheck.table(ice.pltfn)
+
+#  ## Import ICE QAQC data
+#  ice.QAQC <- FIESTA::pcheck.table(ice.QAQCfn)
+#  
+#  if (!is.null(ice.QAQC)) {
+#    if (!all(c("QAQC_check", "Result") %in% names(ice.QAQC))) {
+#      warning("ice.QAQC table must include QAQC_check and Result columns")
+#      ice.QAQC <- NULL
+#    } else {
+#      check.vals <- c("PC_self_check", "PC_cross_check", "LC1_2_self_check", 
+#		"LC1_2_cross_check", "LU1_2_self_check", "LU1_2_cross_check")
+#      if (!all(check.vals %in% ice.QAQC[["QAQC_check"]])) {
+#        miss.vals <- check.vals[!check.vals %in% ice.QAQC[["QAQC_check"]]]
+#        warning("ice.QAQC table must include following values in QAQC_check column: ",
+#		toString(miss.vals))
+#        ice.QAQC <- NULL
+#      }
+#    } 
+#  } 
 
   ## Check savedata
   if (savedata) {
@@ -286,6 +306,7 @@ anPBpopICE_data <- function(ice.pntfn, ice.pltfn=NULL, T1, T2, plotid="plot_id",
     reflst$use_FORlut <- use_FORlut
   returnlst$reflst <- reflst
   returnlst$domlut <- domlut
+  
 
   return(returnlst)
 }

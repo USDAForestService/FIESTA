@@ -31,9 +31,10 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ###########################################################################
   ## Extract FIA data and auxiliary data
   ###########################################################################
-  message("extracting data...")
 
-  if (is.null(GBdata)) {    
+  if (is.null(GBdata)) { 
+    message("extracting data...")
+   
     ###########################################################################
     ## Extract FIA data and model data
     ###########################################################################
@@ -44,7 +45,10 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 		outfolder=outfolder, outfn.pre="GBdata", out_fmt="csv", out_dsn=NULL, 
 		overwrite=TRUE, ...)
     returnlst$GBdata <- GBdata
-  } 
+  } else {
+    GBdata <- pcheck.object(GBdata, objnm="GBdata", 
+		list.items=c("bnd", "plt", "cond", "unitarea"))
+  }
 	
   ## GBdata
   bnd <- GBdata$bnd

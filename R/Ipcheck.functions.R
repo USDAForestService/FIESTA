@@ -441,7 +441,7 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
 
 
 pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL, 
-	stopifnull=FALSE, gui=FALSE, listitems=NULL){
+	stopifnull=FALSE, gui=FALSE, list.items=NULL){
   ## DESCRIPTION: checks object name 
 
   ## Adds to file filters to Cran R Filters table.
@@ -504,11 +504,14 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
       }
     } else if (!is.list(obj)) {
       stop(objnm, " must be a list object or filename") 
-    } 
+    } else {
+      objx <- obj
+    }
   }
-  if (!is.null(listitems)) {
-    if (!all(listitems %in% names(objx))) { 
-      missitems <- listitems[!listitems %in% names(objx)] 
+ 
+  if (!is.null(list.items)) {
+    if (!all(list.items %in% names(objx))) { 
+      missitems <- list.items[!list.items %in% names(objx)] 
       stop("must include the following item in list: ", toString(missitems))
     }
   }

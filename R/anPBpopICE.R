@@ -1,9 +1,10 @@
-anPBpopICE <- function(ice.pntfn, ice.pltfn=NULL, T1, T2, 
+anPBpopICE <- function(ice.pntfn=NULL, ice.pltfn=NULL, T1, T2, 
 	plotid="plot_id", pntid="dot_cnt", pltassgn=NULL, pltassgnid=NULL, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, strata=FALSE, stratalut=NULL, strvar=NULL,  
 	getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, sumunits=FALSE, 
-	saveobj=FALSE, savedata=FALSE, outfolder=NULL, ...){
+	saveobj=FALSE, savedata=FALSE, outfolder=NULL, overwrite=FALSE, 
+	PBdataICE=NULL, ...){
 
 
   ##################################################################
@@ -15,25 +16,45 @@ anPBpopICE <- function(ice.pntfn, ice.pltfn=NULL, T1, T2,
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- FALSE
+  returnlst <- list()
+
+
+  ## Check savedata 
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data extraction?", first="NO", gui=gui)  
+
+  ## Check overwrite, outfn.date, outfolder, outfn 
+  ########################################################
+  if (savedata) 
+    outfolder <- pcheck.outfolder(outfolder, gui=gui)
 
 
 
   #########################################################################
   ## Get ICE data 
-  ##################################################################
-  icedat <- anPBpopICE_data(ice.pntfn, ice.pltfn=ice.pltfn, 
-			plotid="plot_id", pntid="dot_cnt", 
-			T1=T1, T2=T2, appendluts=TRUE, ...)
-  names(icedat)
-  ice.pnt <- icedat$ice.pnt
-  ice.plt <- icedat$ice.plt
-  plotid <- icedat$plotid
-  pntid <- icedat$pntid
-  domlut <- icedat$domlut
-  changelut <- icedat$reflst$changelut
-  coverlut <- icedat$reflst$coverlut
-  uselut <- icedat$reflst$uselut
-  agentlut <- icedat$reflst$agentlut
+  #########################################################################
+  if (is.null(PBdataICE)) {
+    PBdataICE <- anPBpopICE_data(ice.pntfn, ice.pltfn=ice.pltfn,
+			plotid="plot_id", pntid="dot_cnt", T1=T1, T2=T2, 
+			appendluts=TRUE, savedata=savedata, outfolder=outfolder, 
+			overwrite=overwrite, ...)
+    returnlst$PBdataICE <- PBdataICE
+  } else {
+    PBdataICE <- pcheck.object(PBdataICE, objnm="PBdataICE", 
+		list.items=c("ice.pnt", "ice.plt", "plotid", "pntid"))
+  }
+  names(PBdataICE)
+  ice.pnt <- PBdataICE$ice.pnt
+  ice.plt <- PBdataICE$ice.plt
+  plotid <- PBdataICE$plotid
+  pntid <- PBdataICE$pntid
+  domlut <- PBdataICE$domlut
+  changelut <- PBdataICE$reflst$changelut
+  coverlut <- PBdataICE$reflst$coverlut
+  uselut <- PBdataICE$reflst$uselut
+  agentlut <- PBdataICE$reflst$agentlut
+  rm(PBdataICE)
+  gc()
 
   ## Check data in changelut
   if (!is.null(changelut)) {
@@ -72,15 +93,17 @@ anPBpopICE <- function(ice.pntfn, ice.pltfn=NULL, T1, T2,
   ##################################################################
   PBpopdatICE <- modPBpop(pnt=ice.pnt, plt=ice.pltfn, plotid=plotid, pntid=pntid, 
         		puniqueid=plotid, pltassgn=pltassgn, pltassgnid=pltassgnid,
-			unitarea=unitarea, unitcombine=unitcombine, strata=strata, 
+			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+			unitcombine=unitcombine, strata=strata, 
 			strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
 			stratcombine=stratcombine, sumunits=sumunits, savedata=savedata, 
 			outfolder=outfolder)
-  PBpopdatICE$reflst <- icedat$reflst
+  PBpopdatICE$reflst <- PBdataICE$reflst
   PBpopdatICE$domlut <- domlut
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="PBpopdatICE", outfolder=outfolder, ext="rda")
+    objfn <- getoutfn(outfn="PBpopdatICE", outfolder=outfolder, 
+		overwrite=overwrite, ext="rda")
     save(PBpopdatICE, file=objfn)
     message("saving object to: ", objfn)
   } 

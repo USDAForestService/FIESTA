@@ -1,14 +1,12 @@
 ---
 output:
   word_document:
-    reference_docx: template.docx
+    reference_docx: anGBtemplate.docx
 params:
   rawfolder: ""
   AOInm: ""
   title.ref: NULL
   year: NULL
-  GBpopdat: NULL
-  photofn: ""
 ---
 
 
@@ -23,7 +21,6 @@ rawfolder <- params$rawfolder
 AOInm <- params$AOInm
 title.ref <- params$title.ref
 outfolder <- params$outfolder
-photofn <- params$photofn
 
 if (is.null(rawfolder)) stop()
 if (is.null(AOInm)) stop()

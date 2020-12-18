@@ -7,15 +7,14 @@
 	Generates a set of core tables based on area of interest.
 }
 \usage{
-anPBpopICE_core(ice.pntfn, ice.plotfn = NULL, estunitnm, T1, T2, 
+anPBpopICE_core(ice.pntfn, ice.plotfn = NULL, AOInm, T1, T2, 
 	plotid = "plot_id", pntid = "dot_cnt", pltassgn = NULL, pltassgnid = NULL, 
 	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, strata = FALSE, stratalut = NULL, strvar = NULL, 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
 	tabtype = "PCT", sumunits = FALSE, rawdata = TRUE, returntitle = TRUE, 
-	outfolder = NULL, outfn.date = TRUE, overwrite = FALSE, 
-	subunitnm = NULL, estabbr = NULL, pnt1 = FALSE, domlut = NULL, 
-	PBpopdatICE = NULL, ...)
+	outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, 
+	pnt1 = FALSE, domlut = NULL, PBpopdatICE = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,7 +22,7 @@ anPBpopICE_core(ice.pntfn, ice.plotfn = NULL, estunitnm, T1, T2,
 	ICE point-level data. }
   \item{ice.plotfn}{ Comma-delimited file (*.csv). The full path file name of 
 	ICE plot-level data (optional). }
-  \item{estunitnm}{ String. The name of the estimation unit (i.e., population)
+  \item{AOInm}{ String. The name of the area of interest (i.e., population)
 	for titles and output names. }
   \item{T1}{ Integer. Year of Time 1 imagery (YYYY). }
   \item{T2}{ Interger. Year of Time 2 imagery (YYYY). }
@@ -63,12 +62,10 @@ anPBpopICE_core(ice.pntfn, ice.plotfn = NULL, estunitnm, T1, T2,
 	for estimation (See Value). If savedata = TRUE, this table is also written to file. }
   \item{returntitle}{ Logical. If TRUE, returns title information for output tables. }
   \item{outfolder}{ String.  The outfolder to write files to. }
+  \item{outfn.pre}{ String. A short name used for output file names. If NULL, 
+	the AOInm is used. }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
-  \item{subunitnm}{ String. Name of estimation subunit (i.e., subpopulation) to append 
-	to file names and titles. }
-  \item{estabbr}{ String. Abbreviated name of estimation unit to use as a prefix
-	for output names. }
   \item{pnt1}{ Logical. If TRUE, use only center point when no change observed. }
   \item{domlut}{ Data frame. Lookup table of domain categories and titles for estimation.
 	If NULL, default from FIESTA::PBpopdatICE(). }
