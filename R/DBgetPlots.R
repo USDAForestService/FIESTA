@@ -354,7 +354,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
 		title="overwrite data", first="NO", gui=gui)
 
-
     ## Check for necessary packages
     ###########################################################
     if (out_fmt %in% c("sqlite", "gpkg")) {

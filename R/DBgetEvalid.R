@@ -51,6 +51,8 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   ## If evalid is not NULL, get state
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
+    if (!is.numeric(evalid) || nchar(evalid) > 6)
+      stop("invalid evalid")
     evalid <- unique(unlist(evalid)) 
     stcdlst <- substr(evalid, 1, nchar(evalid)-4)
     states <- FIESTA::pcheck.states(stcdlst, "MEANING")
@@ -370,7 +372,7 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
       state <- FIESTA::pcheck.states(stcd, "MEANING")
       stabbr <- FIESTA::pcheck.states(stcd, "ABBR")
       stinvyrs <- unique(stinvyr.vals[[state]])
-      invtype.invyrs <- invyrtab[invyrtab$STATECD == stcd][["INVYR"]]
+      invtype.invyrs <- setDT(invyrtab)[invyrtab$STATECD == stcd][["INVYR"]]
 
       ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
       ## Remove East and West in LOCATION_NM and EVAL_DESCR
