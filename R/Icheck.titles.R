@@ -7,7 +7,6 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
 	parameters=TRUE, states=NULL, invyrs=NULL, landarea=NULL, plt.filter=NULL, 
 	cond.filter=NULL, allin1=FALSE, divideby=NULL, outfn=NULL, outfn.pre=NULL){ 
 
-
   ## TITLE INFO FOR OUTPUT TABLES
   ########################################################
   ref_titles <- FIESTA::ref_titles
@@ -99,21 +98,23 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
 
           if (nrow(ref_estvarn) == 0) {
             title.estvarn <- estvarn
-          } else {
-      
+          } else {     
             if (!is.null(estvarn.filter)) {
-              estfilters <- strsplit(estvarn.filter, "&")[[1]]
-              ## Find matching filter in ref_estvar. If more than 1, uses first.
-              gfind <- sapply(estfilters, function(x, ref_estvarn) 
+              gfind.max <- grep(estvarn.filter, ref_estvarn$ESTFILTER)
+              if (length(gfind.max) == 0) {
+                estfilters <- strsplit(estvarn.filter, "&")[[1]]
+                ## Find matching filter in ref_estvar. If more than 1, uses first.
+                gfind <- sapply(estfilters, function(x, ref_estvarn) 
         			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvarn$ESTFILTER)), 
 				ref_estvarn)
-              if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) gfind <- gfind[1]
-              gfind <- table(gfind)
-              if (length(gfind) > 0) {
-                gfind.max <- names(gfind)[max(gfind)]
-                if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
-              } else {
-                gfind.max <- 1
+                if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) gfind <- gfind[1]
+                gfind <- table(gfind)
+                if (length(gfind) > 0) {
+                  gfind.max <- names(gfind)[max(gfind)]
+                  if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
+                } else {
+                  gfind.max <- 1
+                }
               }
             } else {
               gfind.max <- 1
@@ -135,17 +136,23 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
               title.estvard <- estvard
             } else {
               if (!is.null(estvard.filter)) {
-                estfilters <- strsplit(estvard.filter, "&")[[1]]
+                gfind.max <- grep(estvarn.filter, ref_estvarn$ESTFILTER)
+                if (length(gfind.max) == 0) {
 
-                ## Find matching filter in ref_estvar. If more than 1, uses first.
-                gfind <- sapply(estfilters, function(x, ref_estvard) 
+                  estfilters <- strsplit(estvard.filter, "&")[[1]]
+
+                  ## Find matching filter in ref_estvar. If more than 1, uses first.
+                  gfind <- sapply(estfilters, function(x, ref_estvard) 
         			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvard$ESTFILTER)), 
 				ref_estvard)
-                gfind <- table(gfind)
-                gfind.max <- names(gfind)[max(gfind)]
-                if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
+                  gfind <- table(gfind)
+                  gfind.max <- names(gfind)[max(gfind)]
+                  if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
+                } else {
+                  gfind.max <- 1
+                }
               } else {
-                gfind.max <- TRUE
+                gfind.max <- 1
               }
               title.estvard <- ref_estvard[gfind.max, "ESTTITLE"]
             }

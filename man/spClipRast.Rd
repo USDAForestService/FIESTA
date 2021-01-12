@@ -12,7 +12,7 @@
 \usage{
 spClipRast(rast, rastfolder = NULL, clippolyv, clippolyv_dsn = NULL, 
 	clippolyv.filter = NULL, rast.crs = NULL, bands = NULL, NODATA = NULL, 
-	buffdist = NULL, maskByPolygons = TRUE, showext = FALSE, setNODATA = FALSE, 
+	buffdist = NULL, maskByPolygons = TRUE, showext = FALSE, 
 	fmt = "HFA", outfolder = NULL, outfn = "rastclip", outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite=FALSE)
 }
@@ -39,7 +39,6 @@ spClipRast(rast, rastfolder = NULL, clippolyv, clippolyv_dsn = NULL,
   \item{maskByPolygons}{ Logical. If TRUE, rast is clipped to boundary of polygon.
 	If FALSE, rast is clipped to extent of polygon. }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
-  \item{setNODATA}{ Logical. If TRUE, background NODATA values are set as NODATA. }
   \item{fmt}{ String. Format for exported raster. Default is format of unput raster. 
 	("raster", "ascii", "SAGA", "IDRISI", "CDF", "GTiff", "ENVI", "EHdr", "HFA", "VRT").
 	VRT is a virtual raster (See note below). }

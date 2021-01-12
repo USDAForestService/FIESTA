@@ -27,7 +27,8 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, pltassgn = NULL, dsn = NULL,
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{MAmethod}{ String. mase (i.e., model-assisted) method to use ('HT', 'PS', 'GREG') }
+  \item{MAmethod}{ String. mase (i.e., model-assisted) method to use 
+	('HT', 'PS', 'greg', 'gregEN') }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 

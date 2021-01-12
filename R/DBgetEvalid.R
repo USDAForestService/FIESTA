@@ -51,10 +51,10 @@ DBgetEvalid <- function (states=NULL, RS=NULL, invyrtab=NULL, invtype="ANNUAL",
   ## If evalid is not NULL, get state
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
-    if (!is.numeric(evalid) || nchar(evalid) > 6)
+    if (any(nchar(evalid) > 6))
       stop("invalid evalid")
     evalid <- unique(unlist(evalid)) 
-    stcdlst <- substr(evalid, 1, nchar(evalid)-4)
+    stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
     states <- FIESTA::pcheck.states(stcdlst, "MEANING")
   } else if (!is.null(invyrtab)) {
     if (!all(class(invyrtab) %in% c("data.frame", "data.table"))) 

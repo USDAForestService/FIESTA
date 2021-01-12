@@ -267,11 +267,14 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   } else {
     if (is.null(tab)) return(NULL)
   }
+
   tabext <- getext(tab_dsn)
   if (is.na(tabext) || tabext == "NA") {
     if (dir.exists(tab_dsn) && file.exists(paste(tab_dsn, tab, sep="/"))) {
       tab_dsn <- paste(tab_dsn, tab, sep="/")
       tabext <- getext(tab_dsn)
+    } else {
+      stop(tabnm, " is invalid")
     } 
   }
 
@@ -512,7 +515,7 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
   if (!is.null(list.items)) {
     if (!all(list.items %in% names(objx))) { 
       missitems <- list.items[!list.items %in% names(objx)] 
-      stop("must include the following item in list: ", toString(missitems))
+      stop(objnm, " must include the following item in list: ", toString(missitems))
     }
   }
 

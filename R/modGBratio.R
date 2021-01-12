@@ -83,15 +83,10 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
-    if (!is.list(GBpopdat))
-      stop("GBpopdat must be a list")
-    listitems <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
+    list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 		"tuniqueid", "ACI.filter", "unitarea", "unitvar", "strlut", "strvar",
 		"plotsampcnt", "condsampcnt")
-    if (!all(listitems %in% names(GBpopdat))) {
-      items.miss <- listitems[!listitems %in% names(GBpopdat)]
-      stop("invalid GBpopdat... missing items: ", paste(items.miss, collapse=", "))
-    }   
+    GBpopdat <- FIESTA::pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   }	
   if (is.null(GBpopdat)) return(NULL)
   condx <- GBpopdat$condx

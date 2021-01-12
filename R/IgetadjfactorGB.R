@@ -1,4 +1,4 @@
-getadjfactorGB <- function(condx=NULL, treex=NULL, tuniqueid="PLT_CN", 
+getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", unitlut=NULL, unitvars=NULL, strvars=NULL, 
 	unitarea=NULL, areavar=NULL, cvars2keep=NULL){
 
@@ -101,6 +101,11 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, tuniqueid="PLT_CN",
  		ifelse(TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, ADJ_FACTOR_MACR,
  		ADJ_FACTOR_SUBP))]
     }
+
+    if (!is.null(seedx)) {
+      setkeyv(seedx, c(tuniqueid, condid))
+      seedx[condx, tadjfac := ADJ_FACTOR_MICR]
+    }  
   }  
 
   ## Calculate expansion factors (strata-level and cond-level)
@@ -138,6 +143,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, tuniqueid="PLT_CN",
   adjfacdata <- list(condx=condx, unitlut=unitlut)
   adjfacdata$expcondtab <- expcondtab
   if (!is.null(treex)) adjfacdata$treex <- treex 
+  if (!is.null(seedx)) adjfacdata$seedx <- seedx 
   adjfacdata$cvars2keep <- names(condx)[names(condx) != "CONDPROP_ADJ"]
 
   return(adjfacdata)

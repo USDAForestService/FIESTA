@@ -5,7 +5,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, intensity1=FALSE, stateFilter=NULL,
 	allFilter=NULL, alltFilter=NULL, savedata=FALSE, saveqry=FALSE, outfolder=NULL,
  	out_fmt="csv", out_dsn=NULL, append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE,
- 	overwrite=FALSE, savePOP=FALSE) {
+ 	overwrite=FALSE, savePOP=FALSE, returndata=TRUE) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -337,7 +337,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
   ## Check outfolder, outfn.date, overwrite
   ###########################################################
-  if (savedata | saveqry | parameters | !treeReturn) {
+  if (savedata | saveqry | parameters | !treeReturn | !returndata) {
     outfolder <- pcheck.outfolder(outfolder, gui=gui)
 
     ## Check out_fmt
@@ -475,36 +475,38 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   stcds <- {}
   stabbrfn <- ""
   pltcnt <- {}
-  
-  plt=cond=pltcond=tree=seed=spconddat=xy <- {}
-  if(isveg){ vspspp <- vspstr <- {} }
-  if(isdwm){ dwm <- {} }
-  if(savePOP || iseval) ppsa <- {}  
   stateFilters <- {}
   filtervarlst <- c(pltvarlst, condvarlst)
   spcoords <- "PUBLIC"
   spcoordslst <- "PUBLIC"
 
-  if (!is.null(othertables)) {
-    for (i in 1:length(othertables)) 
-      assign(paste0("other", i), {})
-  }    
+  if (returndata) {
+    plt=cond=pltcond=tree=seed=spconddat=xy <- {}
+    if(isveg){ vspspp <- vspstr <- {} }
+    if(isdwm){ dwm <- {} }
+    if(savePOP || iseval) ppsa <- {}  
 
-  ## Create empty object for each spcoords
-  for (coords in spcoordslst) {
-    if (xymeasCur) {
-      assign(paste0("xyCur_", coords), {})
-    } else {
-      assign(paste0("xy_", coords), {})
-    }
+    if (!is.null(othertables)) {
+      for (i in 1:length(othertables)) 
+        assign(paste0("other", i), {})
+    }    
 
-    if (issp) {
+    ## Create empty object for each spcoords
+    for (coords in spcoordslst) {
       if (xymeasCur) {
-        assign(paste0("spxyCur_", coords), {})
+        assign(paste0("xyCur_", coords), {})
       } else {
-        assign(paste0("spxy_", coords), {})
+        assign(paste0("xy_", coords), {})
       }
-    } 
+
+      if (issp) {
+        if (xymeasCur) {
+          assign(paste0("spxyCur_", coords), {})
+        } else {
+          assign(paste0("spxy_", coords), {})
+        }
+      } 
+    }
   }
 
   ## REF_SPECIES table 
@@ -512,7 +514,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     REF_SPECIES <- FIESTA::DBgetCSV("REF_SPECIES", ZIP=TRUE, returnDT=TRUE,
  		stopifnull=FALSE)
   }
-
 
 
   ###################################################################################
@@ -1007,7 +1008,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
             }  
 
             ## Append data
-            if (treeReturn)
+            if (treeReturn && returndata)
               tree <- rbind(tree, treex)
           }
         }
@@ -1038,8 +1039,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       ##############################################################
       ## xydata
       ##############################################################
-      #xyx <- pltx[, c("CN", getcoords(coords)), with=FALSE]
-      xyx <- copy(pltx)
+      xyx <- pltx[, c("CN", getcoords(coords), "PLOT_ID"), with=FALSE]
+      #xyx <- copy(pltx)
       setnames(xyx, "CN", "PLT_CN")
  
       ## Get xy for the most current sampled plot
@@ -1051,11 +1052,13 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         xyCurx <- sqldf::sqldf(xyx.qry)
         names(xyCurx)[names(xyCurx) == "CN"] <- "PLT_CN"
         assign(paste0("xyCurx_", coords), xyCurx) 
-        assign(paste0("xyCur_", coords), 
+        if (returndata) 
+          assign(paste0("xyCur_", coords), 
 				rbind(get(paste0("xyCur_", coords)), xyCurx)) 
       } else {
         assign(paste0("xyx_", coords), xyx)
-        assign(paste0("xy_", coords), 
+        if (returndata) 
+          assign(paste0("xy_", coords), 
 				rbind(get(paste0("xy_", coords)), xyx))
       } 
     }
@@ -1112,8 +1115,10 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           }              
         }
       }
-      ## Append data
-      seed <- rbind(seed, seedx)
+
+      if (returndata) 
+        ## Append data
+        seed <- rbind(seed, seedx)
     }
 
     ##############################################################
@@ -1170,8 +1175,10 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 #          close(outfile)
 #        }
       }
-      vspspp <- rbind(vspspp, vspsppx)
-      vspstr <- rbind(vspstr, vspstrx)
+      if (returndata) {
+        vspspp <- rbind(vspspp, vspsppx)
+        vspstr <- rbind(vspstr, vspstrx)
+      }
     }
 
     ##############################################################
@@ -1211,7 +1218,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 #          }
         }
       }
-      dwm <- rbind(dwm, dwmx)
+      if (returndata)
+        dwm <- rbind(dwm, dwmx)
     }
 
 
@@ -1260,7 +1268,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
             assign(othertablexnm, 
 			get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),])
           }
-          assign(paste0("other", j), rbind(get(paste0("other", j)), get(othertablexnm)))
+          if (returndata) 
+            assign(paste0("other", j), rbind(get(paste0("other", j)), get(othertablexnm)))
         }
       }
     }
@@ -1302,7 +1311,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 #          close(outfile)
 #        }
       }
-      ppsa <- rbind(ppsa, ppsax)
+      if (returndata)
+        ppsa <- rbind(ppsa, ppsax)
     }
  
     ###############################################################################
@@ -1311,6 +1321,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     ###############################################################################
     ###############################################################################
     if ((savedata || !treeReturn) && !is.null(pltx)) {
+      message("saving data...")
 
       overwrite_layer <- overwrite
       append_layer2 <- append_layer
@@ -1463,18 +1474,19 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       }  
  
       if (savedata && savePOP && !is.null(ppsax)) {
-        index.unique.ppsax <- NULL
-        if (i == 1) index.unique.ppsax <- "PLT_CN"
+        #index.unique.ppsax <- NULL
+        #if (i == 1) index.unique.ppsax <- "PLT_CN"
         datExportData(ppsax, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="ppsa", 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pop_plot_stratum_assgn", 
 			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.ppsax, append_layer=append_layer2,
-			outfn.pre=outfn.pre)
+			append_layer=append_layer2, outfn.pre=outfn.pre)
 
       }
     }
-    plt <- rbind(plt, pltx)
-    cond <- rbind(cond, condx)
+    if (returndata) {
+      plt <- rbind(plt, pltx)
+      cond <- rbind(cond, condx)
+    }
     rm(nbrcnd)
     rm(pltcondx)
     rm(treex)
@@ -1556,66 +1568,68 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
   ## GENERATE RETURN LIST
   fiadatlst <- list(states=states)
-  if (!is.null(plt)) {
-    nbrplots <- length(unique(plt$CN))
-    if (nrow(plt) != nbrplots) warning("plt records are not unique")
-    fiadatlst$plt <- setDF(plt) 
-  }
-  if (!is.null(cond)) {
+
+  if (returndata) {
     if (!is.null(plt)) {
-      if (length(unique(cond$PLT_CN)) != nbrplots)
-        warning("number of plots in cond table does not match plt table")
+      nbrplots <- length(unique(plt$CN))
+      if (nrow(plt) != nbrplots) warning("plt records are not unique")
+      fiadatlst$plt <- setDF(plt) 
     }
-    fiadatlst$cond <- setDF(cond)
-  }
-  notsame <- FALSE
-  if (istree & !is.null(tree)) fiadatlst$tree <- setDF(tree)
-  if (isseed & !is.null(seed)) fiadatlst$seed <- setDF(seed)
+    if (!is.null(cond)) {
+      if (!is.null(plt)) {
+        if (length(unique(cond$PLT_CN)) != nbrplots)
+          warning("number of plots in cond table does not match plt table")
+      }
+      fiadatlst$cond <- setDF(cond)
+    }
+    notsame <- FALSE
+    if (istree & !is.null(tree)) fiadatlst$tree <- setDF(tree)
+    if (isseed & !is.null(seed)) fiadatlst$seed <- setDF(seed)
  
+    if (isveg) {
+      if (!is.null(vspspp)) fiadatlst$vspspp <- setDF(vspspp)
+      if (!is.null(vspstr)) fiadatlst$vspstr <- setDF(vspstr)
+    }
+    if (isdwm) 
+      if (!is.null(dwm)) fiadatlst$dwm <- setDF(dwm)
 
-  if (isveg) {
-    if (!is.null(vspspp)) fiadatlst$vspspp <- setDF(vspspp)
-    if (!is.null(vspstr)) fiadatlst$vspstr <- setDF(vspstr)
-  }
-  if (isdwm) 
-    if (!is.null(dwm)) fiadatlst$dwm <- setDF(dwm)
+    if (!is.null(othertables)) {
+      for (i in 1:length(othertables))
+        fiadatlst[[othertables[i]]] <- get(paste0("other", i))
+    }
 
-  if (!is.null(othertables)) {
-    for (i in 1:length(othertables))
-      fiadatlst[[othertables[i]]] <- get(paste0("other", i))
-  }
-
-  if (issp) {
-    xycoords <- getcoords(coords)
-    if (xymeasCur) {
-      spxyCurnm <- paste0("spxyCur_", coords)
-      assign(spxyCurnm, 
+    if (issp) {
+      xycoords <- getcoords(coords)
+      if (xymeasCur) {
+        spxyCurnm <- paste0("spxyCur_", coords)
+        assign(spxyCurnm, 
 		spMakeSpatialPoints(xyplt=get(paste0("xyCur_", coords)), 
 		xvar=xycoords[1], yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269))
-      fiadatlst[[spxyCurnm]] <- get(spxyCurnm)
-    } else {  
-      spxynm <- paste0("spxy_", coords)
-      assign(spxynm, 
+        fiadatlst[[spxyCurnm]] <- get(spxyCurnm)
+      } else {  
+        spxynm <- paste0("spxy_", coords)
+        assign(spxynm, 
 		spMakeSpatialPoints(xyplt=get(paste0("xy_", coords)), 
 		xvar=xycoords[1], yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269))
-      fiadatlst[[spxynm]] <- get(spxynm)
-    }
-  } else {
-    xycoords <- getcoords(coords)
-    if (xymeasCur) {
-      xyCurnm <- paste0("xyCur_", coords)
-      assign(xyCurnm, get(paste0("xyCur_", coords))) 
-      fiadatlst[[xyCurnm]] <- get(xyCurnm)
+        fiadatlst[[spxynm]] <- get(spxynm)
+      }
     } else {
-      xynm <- paste0("xy_", coords)
-      assign(xynm, get(paste0("xy_", coords))) 
-      fiadatlst[[xynm]] <- get(xynm)
+      xycoords <- getcoords(coords)
+      if (xymeasCur) {
+        xyCurnm <- paste0("xyCur_", coords)
+        assign(xyCurnm, get(paste0("xyCur_", coords))) 
+        fiadatlst[[xyCurnm]] <- get(xyCurnm)
+      } else {
+        xynm <- paste0("xy_", coords)
+        assign(xynm, get(paste0("xy_", coords))) 
+        fiadatlst[[xynm]] <- get(xynm)
+      }
     }
-  }
 
-  if (!is.null(spconddat)) fiadatlst$spconddat <- setDF(spconddat)
-  if ((savePOP || iseval) && !is.null(ppsa)) fiadatlst$POP_PLOT_STRATUM_ASSGN <- setDF(ppsa)
-    
+    if (!is.null(spconddat)) fiadatlst$spconddat <- setDF(spconddat)
+    if ((savePOP || iseval) && !is.null(ppsa)) fiadatlst$POP_PLOT_STRATUM_ASSGN <- setDF(ppsa)
+  }
+ 
   if (length(evalidlist) > 0) fiadatlst$evalid <- evalidlist
   fiadatlst$pltcnt <- pltcnt
 

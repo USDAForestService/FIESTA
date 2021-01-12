@@ -17,7 +17,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	stateFilter = NULL, allFilter = NULL, alltFilter = NULL, savedata = FALSE, 
 	saveqry = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
 	append_layer = FALSE, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = FALSE, savePOP = FALSE)
+	overwrite = FALSE, savePOP = FALSE, returndata = TRUE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
@@ -104,6 +104,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
   \item{overwrite}{ Logical. If TRUE and out_fmt = 'csv', files are overwritten. 
 	If out_fmt != 'csv', the out_dsn is overwritten. }
   \item{savePOP}{ Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN table. }
+  \item{returndata}{ Logical. If TRUE, returns data objects. }
 }
 \details{
 

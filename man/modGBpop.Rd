@@ -13,18 +13,18 @@
 	total land area in the population. 
 }
 \usage{    
-modGBpop(cond = NULL, plt = NULL, tree = NULL, vspspp = NULL, pltassgn = NULL, 
-	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
-	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL, 
-	adj = "samp", ACI = FALSE, strata = TRUE, plt.nonsamp.filter = NULL, 
-	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, 
-	unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
-	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE, 
-	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
-	outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
-	GBdata = NULL, gui = FALSE)
+modGBpop(cond = NULL, plt = NULL, tree = NULL, seed = NULL, vspspp = NULL, 
+	pltassgn = NULL, dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", 
+	pjoinid = "CN", tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
+	condid = "CONDID", areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, 
+	intensity = NULL, adj = "samp", ACI = FALSE, plt.nonsamp.filter = NULL, 
+	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, 
+	strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", nonresp = FALSE,
+	substrvar = NULL, getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
+	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite = TRUE, GBdata = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -41,6 +41,8 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, vspspp = NULL, pltassgn = NULL,
   \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Tree-level data with one record for each tree. Tree data are aggregated to 
 	condition-level. See details for necessary variables to include. }
+  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Seedling data with one record for each seedling count. }
   \item{vspspp}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Vegetation species-level data with one record for each species (P2VEG_SUBPLOT_SPP). }
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
@@ -70,7 +72,6 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, vspspp = NULL, pltassgn = NULL,
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (DESIGNCD=1). } 
-  \item{strata}{ Logical. If TRUE, include information for post-stratification. }
   \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
 	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
   \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
@@ -89,6 +90,7 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, vspspp = NULL, pltassgn = NULL,
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{strata}{ Logical. If TRUE, include information for post-stratification. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with pixel counts or area
 	by strata or proportion or area ('strwt') by strata (and estimation unit). 
 	If 'strwt' is not included, set getwt=TRUE and getwtvar as the name of variable 
@@ -96,6 +98,10 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, vspspp = NULL, pltassgn = NULL,
   \item{strvar}{ String. If strata=TRUE, name of the strata variable in stratalut and 
 	cond or pltassgn data frame with stratum assignment for each plot 
 	(Default = 'STRATUMCD'). }
+  \item{nonresp}{ Logical. If TRUE, using variance for nonresponse substrata. 
+	Note: substrvar must be included and PLOT_STATUS_CD must be included in plot data. }
+  \item{substrvar}{ String. If strata=TRUE, name of the substrata variable in stratalut 
+	and cond or pltassgn data frame with stratum assignment for each plot. } 
   \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
 	If FALSE, 'strwt' variable must be in stratalut. }
   \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt) 

@@ -15,7 +15,7 @@
 	expanded to using the total land area in the population. 
 }
 \usage{    
-modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
+modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
 	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", evalid = NULL, 
 	invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, strata = TRUE, 
@@ -53,7 +53,6 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
 	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
 	estimation unit and/or strata, with one record for each plot. }
-  \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
   \item{dsn}{ String. Name of database where tree, cond, and plot-level tables reside. 
 	The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). }
@@ -402,8 +401,8 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 
 
      UNITS:\cr
-     The following variables are converted from pounds (in NIMS) to short tons by multiplying 
-	the variable by 0.0005.
+     The following variables are converted from pounds (from FIA database) to short tons by 
+	multiplying the variable by 0.0005.
      DRYBIO_AG, DRYBIO_BG, DRYBIO_WDLD_SPP, DRYBIO_SAPLING, DRYBIO_STUMP, DRYBIO_TOP, DRYBIO_BOLE, 
 	DRYBIOT, DRYBIOM, DRYBIOTB, JBIOTOT, CARBON_BG, CARBON_AG 
 

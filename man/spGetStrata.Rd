@@ -52,7 +52,7 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
   \item{strvar}{ String. If strattype="POLY", name of strata attribute in 
 	strat_layer. }
   \item{strat_lut}{ Data frame. A look-up table of codes to aggregate. The
-	formate of table includes 2 columns, one column same name as strvar. 
+	format of table includes 2 columns, one column same name as strvar. 
 	If strattype="RASTER", strvar="value". }
   \item{areaunits}{ String. Output area units ("ACRES", "HECTARES", "SQMETERS"). }
   \item{rast.NODATA}{ Numeric. NODATA value if stratlayer is raster 

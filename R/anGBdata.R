@@ -151,7 +151,6 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     pltassgnid <- stratdat$pltassgnid
   } 
 
-
   ##########################################
   ## Create output list
   ##########################################

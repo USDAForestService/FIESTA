@@ -11,7 +11,7 @@
 anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	RS = NULL, clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
 	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
-	puniqueid = "CN", intensity1 = TRUE, rastfolder=rastfolder, 
+	puniqueid = "CN", intensity1 = TRUE, rastfolder = NULL, 
 	rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, 
 	showsteps = FALSE, cex.plots=0.5, savedata = FALSE, savexy = FALSE, 

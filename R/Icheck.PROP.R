@@ -60,12 +60,16 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
     }
   }
   
-  if (is.null(MACRO_BREAKPOINT_DIA) && "MACRO_BREAKPOINT_DIA" %in% names(condx)) {
-    treex[condx, TPROP_BASIS := ifelse(PROP_BASIS == "MACR" & 
+  if ("DIA" %in% names(treex)) {
+    if (is.null(MACRO_BREAKPOINT_DIA) && "MACRO_BREAKPOINT_DIA" %in% names(condx)) {
+      treex[condx, TPROP_BASIS := ifelse(PROP_BASIS == "MACR" & 
 		!is.na(DIA) & DIA >= MACRO_BREAKPOINT_DIA, "MACR", TPROP_BASIS)] 
-  } else if (!is.null(MACRO_BREAKPOINT_DIA)) {
-    treex[!is.na(DIA) & DIA >= MACRO_BREAKPOINT_DIA, TPROP_BASIS := "MACR"]
-  }
+    } else if (!is.null(MACRO_BREAKPOINT_DIA)) {
+      treex[!is.na(DIA) & DIA >= MACRO_BREAKPOINT_DIA, TPROP_BASIS := "MACR"]
+    }
+  } else {
+    treex[, TPROP_BASIS := "MICR"]
+  }  
   
   PROPvars <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
  

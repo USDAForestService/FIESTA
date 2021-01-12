@@ -1,4 +1,5 @@
-anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, outfolder=NULL, ...) {
+anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, strat_layer=NULL, 
+	outfolder=NULL, ...) {
 
 
   ## Check for packages
@@ -31,7 +32,8 @@ anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, outfolder=NULL, ...) {
   fnamelst <- FIESTAdata::get_ALP_names(REGION=fsregion)
 
   ## Check strat_layer
-  strat_layer <- FIESTAdata::get_tnt()
+  if (is.null(strat_layer)) 
+    strat_layer <- FIESTAdata::get_tnt()
 
 
   ## Check ADFOR.name
@@ -66,8 +68,9 @@ anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, outfolder=NULL, ...) {
   ####################################################################
   message("calculating estimates for ", ADFOR.name, "...")
 
- 
-  GBpoplst <- anGBpop(bnd=bnd, bnd.att=bnd.att, outfn.pre=outfn.pre, ...)
+  
+  GBpoplst <- anGBpop(bnd=bnd, bnd.att=bnd.att, strat_layer=strat_layer, 
+	outfn.pre=outfn.pre, ...)
  
 
   return(GBpoplst)

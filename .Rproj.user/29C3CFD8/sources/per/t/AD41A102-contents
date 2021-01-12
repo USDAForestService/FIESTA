@@ -1,0 +1,623 @@
+---
+title: "FIESTA - ADFOR - ALP"
+author: "Tracey S. Frescino"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+### Objectives:
+Get Estimates for a Administrative National Forest boundary
+
+### FIA Estimation Strategy
+Estimation calculations are based on the green-book (Scott et al. 2005) for mapped plots, using post-stratification. Stratification is used to incorporate auxiliary information to reduce variance in population estimates. 
+
+The population information needed to produce an estimate include: 
+
+* AOI: Population boundary (i.e., estimation unit(s))
+* FIA Plots: A set of FIA plots within the boundary, including identification of nonresponse plots and/or conditions
+* Area: Area of estimation unit(s)
+* Auxiliary Data: Proportion of area (or pixels) by stratum and/or estimation unit(s)
+* Plot Check: 10 sampled plots or greater within each estimation unit, 2 sampled plots or greater plots in a stratum
+* Assignment: An assignment of estimation unit and stratum to each plot
+
+In FIADB, the population data for each state has been previously compiled and stored in POP_* tables to retain efficiency and consistency when generating FIA's mandated state-level estimates. This stored information is referred to as an Evaluation. An Evaluation is defined as a group of plots that is used for population estimates, representing different inventory spans of data with different stratification and nonresponse. Each Evaluation is identified by an EVALID. An EVALID is a unique identifier, generally in the format of a 2-digit state code, a 2-digit year code, and a 2-digit evaluation type code. EVALIDator uses this information to produce estimates.
+
+In FIESTA, the population boundary and time span of FIA plots are defined by the user, with option to extract data from FIADB, including population data. If using a custom boundary, the population data are compiled 'on-the-fly' using FIESTA functions, including: total area of the boundary (i.e., estimation unit); proportion of pixels by stratum; and assignment of stratum and estimation unit to each plot. In this demonstration, we use the 2019 National Forest Administrative boundaries (S_USA.AdministrativeForest.gdb) to define our population.
+
+All estimation percent sampling errors (Confidence level 68%) 
+
+
+
+<!-- I. [Load libraries](#loadlib) -->
+<!-- II. [Data Inputs](#input) -->
+<!-- AREA1. [Area by forest type on forest land](#area1) -->
+<!-- AREA2. [Area by stand-size class on forest land](#area2) -->
+<!-- AREA3. [Live tree volume by forest type on forest land](#area3) -->
+<!-- AREA4. [Area by forest type group and disturbance class on forest land](#area4) -->
+<!-- TREE1. [Live tree volume by species on forest land](#tree1) -->
+<!-- TREE2. [Number of live trees by disturbance class on forest land](#tree2) -->
+<!-- TREE3. [Number of dead trees by disturbance class on forest land](#tree3) -->
+<!-- TREE4. [Number of dead trees by diameter class on forest land](#tree4) -->
+<!-- TREE5. [Basal area of dead trees by agent code on forest land](#tree5) -->
+<!-- RATIO1. [Live tree volume by species on forest land](#ratio1) -->
+<!-- RATIO2. [Live tree volume per acre by species on forest land](#ratio2) -->
+<!-- RATIO3. [Basal area per acre of dead trees by agent code on forest land](#ratio3) -->
+
+
+### I. Load libraries{#loadlib}
+
+```{r include=FALSE}
+
+## Install packages and load libraries
+if (!require("FIESTA")) install.packages("FIESTA")            ## FIESTA
+if (!require("FIESTAdata")) install.packages("FIESTAdata")    ## FIESTA data package
+if (!require("knitr")) install.packages("knitr")              ## For prettier tables
+
+library(FIESTA)
+library(FIESTAdata)
+library(knitr)
+
+# 
+# ## Define function to create prettier tables
+# kable.table <- function(est, title.row, title.rowvar) {
+#     knitr::kable(est,
+#     format = "pandoc",   # default
+#     caption = wraptitle(title.row, 80),
+#     col.names = names(est),
+#     row.names = FALSE,
+#     align = c("r"),       # align = c("c", "c", "c", "r")
+#     digits = 2,
+#     format.args=list(big.mark = ",")
+#     # padding = 2         # inner spacing
+#   ) 
+# }
+
+
+```
+
+
+
+## *Data Inputs*
+
+### II. Data Inputs{#input}
+
+Estimation unit: A population, or area of interest, with known area and number of plots. An estimation unit may be a subpopulation of a larger population. Subpopulations are mutually exclusive within a population, therefore estimated totals and variances are additive. 
+
+Examples: 
+
+* Counties within state
+* Different intensities within state
+* National Forests within state
+* Districts within National Forest
+
+
+```{r include=FALSE}
+
+## Set options
+options(scipen=6)
+options(stringsAsFactors=FALSE)
+savedata <- FALSE
+outfolder <- NULL
+
+
+## Set path to SQLite database
+SQLitefn <- "E:/FIAdata/FIAactual_RMRS_allyrs_20200629.sqlite"
+FIESTA::DBtestSQLite(SQLitefn)
+
+## Get predicted raster layer of tree/not-tree (stored in FIESTAdata package)
+strat_layer <- FIESTAdata::get_tnt()
+#help(get_tnt)
+
+## Get forest names in Region 4
+fnames <- FIESTAdata::get_ALP_names(REGION=4)
+fnames
+
+
+## Define forest of interest
+ADFOR.name <- "Fishlake National Forest"
+
+
+## Define reference for titles
+title.ref <- "Fishlake NF, 2009-2018"
+
+
+```
+
+
+### III. Connect to SQLite database{#sqlite}
+
+In FIESTA, FIA data are extracted using the FIESTA DBgetPlots() function. The data extracted are defined by the user, including: 1) by evaluation; 2) most current measurement; 3) specific inventory years; 4) or all inventory years. One option from this function is to export the data to a SQLite database. 
+
+In this example, we use a SQLite database with data for all annual inventory years in all RMRS states, extracted from FIADB on June 29, 2020. The database includes the following tables:
+
+* plot - plot-level data
+* cond - condition-level data
+* tree - tree-level data
+* PLOTGEOM - plot-level spatial data extractions
+* pop_plot_stratum_assgn - plot-level identification of evaluation
+* xyCur_ACTUAL - xy actual coordinates for most current measurement of each plot
+* xyCur_PUBLIC - xy public coordinates for most current measurement of each plot
+
+Note: To join xyCur* coordinates to FIA plot data, it is necessary to use a unique identifier for the plot center location (e.g., ZSTUNCOPLOT). This is default in spGetPlots() if XY data are in the same database as FIA plot data.
+
+```{r include=FALSE}
+
+## Connect to SQLite database
+dbconn <- FIESTA::DBtestSQLite(SQLitefn, dbconnopen=TRUE)
+
+
+## List fields in pop_plot_strataum_assgn
+DBI::dbListFields(dbconn, "pop_plot_stratum_assgn")
+
+## Read table from SQLite database and store as data frame object in R
+ppsa <- DBI::dbReadTable(dbconn, "pop_plot_stratum_assgn")
+class(ppsa)
+
+## Look at the first 6 rows of data in ppsa data frame
+head(ppsa)
+
+## Let's look at all EVALIDs in ppsa
+unique(ppsa[, c("STATECD", "EVALID")])
+
+
+## Or, we can query SQLite database for 1 state.
+DBI::dbGetQuery(dbconn, 
+          "select distinct EVALID 
+              from pop_plot_stratum_assgn 
+              where statecd=35
+              order by EVALID")
+
+
+## Read in xy table from SQLite database
+xy <- DBI::dbReadTable(dbconn, "xyCur_ACTUAL")
+head(xy)
+dim(xy)
+
+
+```
+
+
+## *Population Data*
+
+### Population data{#pop}
+
+FIESTA's analysis functions are wrappers to perform multiple core functions to stream-line estimation processes. The anGBpop_ADFOR function is a wrapper to compile all data for a custom National Forest population needed to generate estimates using Green-Book estimators. The function sets up the boundary input for anGBpop(). See anGBpop() for parameter inputs.
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+estpop <- anGBpop_ADFOR(ADFOR.name=ADFOR.name, SQLitefn=SQLitefn, evalCur=TRUE,
+                  strat_layer=strat_layer,
+                  savedata=TRUE)
+
+## Get help on anGBpop
+## help(anGBpop)
+GBpopdat <- estpop$GBpopdat
+#names(GBpopdat)   # list of population data used for estimation
+
+
+## Note: the pltcondx table from GBpopdat contains variables for table row and columns (e.g., FORTYPCD)
+pltcondx <- GBpopdat$pltcondx
+#head(pltcondx)
+
+## Note: the treex table from GBpopdat contains variables for table row and columns (e.g., SPCD) or
+##        estvar and estvar.filter
+treex <- GBpopdat$treex
+#head(treex)
+
+
+```
+
+
+## *Area Estimates*
+
+
+### AREA5. Area by land class{#area5}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: Try different colors for barplot (barplot.col)
+##  ('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2')
+
+## Also, notice I used the title.main parameter to use my own title for barplot
+## ...and I used the cond.filter parameter to exclude DSTRBCD1 codes = 0 (Undisturbed)
+
+esttype <- "AREA"
+landarea <- "ALL"
+rowvar <- "COND_STATUS_CD"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea,
+                  rowvar=rowvar, 
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.col="hcl1",
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+### AREA1. Area by forest type on forest land{#area1}
+
+FIESTA's analysis functions are wrappers to perform multiple core functions to stream-line estimation processes. The anGBest_custom function is a over-arching wrapper to include all functions needed for generate a table and barplot for a customized estimation using Green-Book estimators. The functions performed include: spGetPlots(), spGetStrata(), modGBpop() for getting population data and runs the modGBarea(), modGBtree(), or modGBratio() depending on estimation type, and datBarplot() for generating bar plots.  
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Get help on anGBest_custom
+## help(anGBest_custom)
+
+esttype <- "AREA"
+landarea <- "FOREST"
+rowvar <- "FORTYPCD"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, 
+                  rowvar=rowvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE,
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+names(raw)        # list of raw data output from estimation
+names(titlelst)   # list of titles for output tables and/or barplots
+
+## Look at raw data for row estimates
+## Note: NBRPLT.gt0 column is the number of non-zero plots that go into estimate. 
+## This value is added to top of each bar in barplot.
+#raw$unit.rowest
+
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+
+### AREA2. Area by stand-size class on forest land{#area2}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+esttype <- "AREA"
+landarea <- "FOREST"
+rowvar <- "STDSZCD"
+
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea,
+                  rowvar=rowvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE,
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+names(raw)
+
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+### AREA3. Area by forest type and stand-size class on forest land{#area3}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+esttype <- "AREA"
+landarea <- "FOREST"
+rowvar <- "FORTYPCD"
+colvar <- "STDSZCD"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, 
+                  rowvar=rowvar, colvar=colvar, 
+                  getbarplot=FALSE, barplot.nplt=TRUE,
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+
+### AREA4. Area by forest type group and disturbance class on forest land{#area4}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: Try different colors for barplot (barplot.col)
+##  ('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2')
+
+## Also, notice I used the title.main parameter to use my own title for barplot
+## ...and I used the cond.filter parameter to exclude DSTRBCD1 codes = 0 (Undisturbed)
+
+esttype <- "AREA"
+landarea <- "FOREST"
+colvar <- "FORTYPGRPCD"
+rowvar <- "DSTRBCD1"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, cond.filter="DSTRBCD1 != 0",
+                  rowvar=rowvar, colvar=colvar, 
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.col="hcl1", 
+                  savedata=savedata, outfolder=outfolder, title.filter="", title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+
+## *Tree Estimates*
+
+### TREE1. Live tree volume by species on forest land{#tree1}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: estvar="VOLCFNET" gives you net cubic-foot volume of trees
+## Note: Try different ordering (barplot.ord)
+##    If barplot.ord=NULL, the barplot will order the same as input table
+
+esttype <- "TREE"
+landarea <- "FOREST"
+rowvar <- "SPCD"
+estvar <- "VOLCFNET"
+estvar.filter <- "STATUSCD == 1"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, 
+                  estvar=estvar, estvar.filter=estvar.filter,
+                  rowvar=rowvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.col="hcl2", barplot.ord="DESC",
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref, 
+                  divideby="thousand")
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+### TREE2. Number of live trees by disturbance class on forest land{#tree2}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: estvar="TPA_UNADJ" gives you number of trees
+## Also, set the ybar scale to compare with Number of dead trees, following
+
+esttype <- "TREE"
+landarea <- "FOREST"
+rowvar <- "DSTRBCD1"
+estvar <- "TPA_UNADJ"
+estvar.filter <- "STATUSCD == 1 & DIA >= 5"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, cond.filter="DSTRBCD1 != 0",
+                  estvar=estvar, estvar.filter=estvar.filter, 
+                  rowvar=rowvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.col="terrain",
+                  savedata=savedata, outfolder=outfolder, title.filter="", title.ref=title.ref, 
+                  divideby="thousand")
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+### TREE3. Number of dead trees by disturbance class on forest land{#tree3}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: estvar="TPA_UNADJ" gives you number of trees
+
+esttype <- "TREE"
+landarea <- "FOREST"
+rowvar <- "DSTRBCD1"
+estvar <- "TPA_UNADJ"
+estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, cond.filter="DSTRBCD1 != 0",
+                  estvar=estvar, estvar.filter=estvar.filter, 
+                  rowvar=rowvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.col="terrain",
+                  savedata=savedata, outfolder=outfolder, title.filter="", title.ref=title.ref, 
+                  divideby="thousand")
+
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+
+### TREE4. Number of dead trees by diameter class on forest land{#tree4}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: Setting rowvar or colvar as 'DIACL', uses user-defined treedia.brks for defining classes
+## Also, using barplot.row=FALSE uses colvar for generating barplot
+
+esttype <- "TREE"
+landarea <- "FOREST"
+rowvar <- "SPCD"
+colvar <- "DIACL"
+estvar <- "TPA_UNADJ"
+estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+treedia.brks <- c(5,10,15,20,30,999)
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea,
+                  estvar=estvar, estvar.filter=estvar.filter, 
+                  rowvar=rowvar, colvar=colvar, treedia.brks=treedia.brks,
+                  getbarplot=TRUE, barplot.row=FALSE, barplot.nplt=TRUE, barplot.col="terrain",
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref, 
+                  divideby="million")
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+### TREE5. Basal area of dead trees by agent code on forest land{#tree5}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+esttype <- "TREE"
+landarea <- "FOREST"
+rowvar <- "SPCD"
+colvar <- "AGENTCD"
+estvar <- "BA"
+estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea,
+                  estvar=estvar, estvar.filter=estvar.filter, 
+                  rowvar=rowvar, colvar=colvar,
+                  getbarplot=TRUE, barplot.row=FALSE, barplot.nplt=TRUE, barplot.col="terrain", barplot.ord=NULL,
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref, 
+                  divideby="thousand")
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+## *Ratio Estimates*
+
+### RATIO1. Live tree volume per acre by species on forest land{#ratio1}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: tree ratio estimates are generated using esttype="RATIO"
+
+esttype <- "RATIO"
+landarea <- "FOREST"
+rowvar <- "SPCD"
+estvar <- "VOLCFNET"
+estvar.filter <- "STATUSCD == 1"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, 
+                  estvar=estvar, estvar.filter=estvar.filter,
+                  rowvar=rowvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.col="hcl2", barplot.ord=NULL, 
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+### RATIO2. Number of live trees per acre by disturbance class on forest land{#ratio2}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+## Note: estvar="TPA_UNADJ" gives you number of trees
+## Also, set the ybar scale to compare with Number of dead trees, following
+
+esttype <- "RATIO"
+landarea <- "FOREST"
+rowvar <- "DSTRBCD1"
+estvar <- "TPA_UNADJ"
+estvar.filter <- "STATUSCD == 1 & DIA >= 5"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea, cond.filter="DSTRBCD1 != 0",
+                  estvar=estvar, estvar.filter=estvar.filter, 
+                  rowvar=rowvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.col="terrain",
+                  savedata=savedata, outfolder=outfolder, title.filter="", title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```
+
+
+### RATIO3. Basal area per acre of dead trees by agent code on forest land{#ratio3}
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+esttype <- "RATIO"
+landarea <- "FOREST"
+rowvar <- "SPCD"
+colvar <- "AGENTCD"
+estvar <- "BA"
+estvar.filter <- "STATUSCD == 2 & STANDING_DEAD_CD == 1"
+
+estdat <- anGBest_custom(GBpopdat=GBpopdat,
+                  esttype=esttype, landarea=landarea,
+                  estvar=estvar, estvar.filter=estvar.filter, 
+                  rowvar=rowvar, colvar=colvar,
+                  getbarplot=TRUE, barplot.nplt=TRUE, barplot.row=FALSE, barplot.col="terrain", barplot.ord=NULL,
+                  savedata=savedata, outfolder=outfolder, title.ref=title.ref)
+est <- estdat$est
+raw <- estdat$raw
+titlelst <- estdat$titlelst
+
+## Create prettier table
+kable.table(est, titlelst$title.row, titlelst$title.rowvar)
+
+
+```

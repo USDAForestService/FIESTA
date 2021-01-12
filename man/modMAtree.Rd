@@ -11,13 +11,13 @@
 modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
 	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL, 
-	ACI = FALSE, adj = "samp", MAmethod = "GREG", plt.nonsamp.filter = NULL, 
+	ACI = FALSE, adj = "samp", MAmethod = "greg", plt.nonsamp.filter = NULL, 
 	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
 	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit=10, unitlut = NULL, 
 	npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL, 
-	stratcombine = TRUE, landarea = "ALL", plt.filter = NULL, cond.filter = NULL, 
-	estvar = NULL, estvar.filter = NULL, estvar.name=NULL, rowvar=NULL, 
-	colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
+	stratcombine = TRUE, landarea = "ALL", plt.filter = NULL, 
+	cond.filter = NULL, estvar = NULL, estvar.filter = NULL, estvar.name=NULL, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
 	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
 	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, allin1 = FALSE, 
 	estround = 1, pseround = 2, estnull = "--", psenull = "--", divideby = NULL, 
@@ -67,7 +67,8 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (designcd=1). } 
-  \item{MAmethod}{ String. mase (i.e., model-assisted) method to use ('HT', 'PS', 'GREG') }
+  \item{MAmethod}{ String. mase (i.e., model-assisted) method to use 
+	('HT', 'PS', 'greg', 'gregEN') }
   \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
 	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
   \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
@@ -95,7 +96,7 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{predfac}{ String vector. Name(s) of prednames that are factors (i.e., categorical). }
   \item{PSstrvar}{ String. Name of strata variable in stratalut and table with strata
 	assignment for each plot. Default="STRATUMCD". }
-  \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
+  \item{stratcombine}{ Logical. If MAmethod='PS', if TRUE, automatically combines 
 	strata categories if less than 2 plots in any one stratum. See notes for more info. }
   \item{landarea}{ String. The condition-level filter for defining land area 
 	('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1; 
@@ -198,14 +199,14 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
      	Necessary variables:\cr
 	\tabular{llll}{
 		\tab \bold{Data} \tab \bold{Variable}	\tab \bold{Description}\cr
-	 	\tab tree \tab tuniqueid	\tab Unique identifier for each plot, to link to pltstrat 
+	 	\tab tree \tab tuniqueid	\tab Unique identifier for each plot, to link to pltassgn 
 								(ex. PLT_CN).\cr
 		\tab  \tab CONDID		\tab Unique identifier of each condition on plot, to link to cond. 
 								Set CONDID=1, if only 1 condition per plot.\cr
 		\tab  \tab TPA_UNADJ		\tab Number of trees per acre each sample tree represents
 								(ex. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot;
 								74.965282 for trees on microplot).\cr
-	 	\tab cond \tab cuniqueid	\tab Unique identifier for each plot, to link to pltstrat 
+	 	\tab cond \tab cuniqueid	\tab Unique identifier for each plot, to link to pltassgn 
 								(ex. PLT_CN).\cr
 		\tab  \tab CONDID		\tab Unique identfier of each condition on plot. 
 								Set CONDID=1, if only 1 condition per plot.\cr
@@ -225,7 +226,7 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 		\tab  \tab MACRPROP_UNADJ	\tab If macroplot tree attributes. Unadjusted proportion 
 							of macroplot conditions on each plot. Set MACRPROP_UNADJ=1, 
 							if only 1 condition per macroplot.\cr
-	 	\tab pltstrat \tab puniqueid	\tab Unique identifier for each plot, to link to cond 
+	 	\tab pltassgn \tab puniqueid	\tab Unique identifier for each plot, to link to cond 
 								(ex. CN).\cr
 	 	\tab  \tab STATECD		\tab Identifies state each plot is located in.\cr
 	 	\tab  \tab INVYR		\tab Identifies inventory year of each plot.\cr
@@ -342,32 +343,58 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
 	This is if you are interested in estimates for all lands or nonforest lands in the All-Condition-Inventory.
 
 
-	STRATA:\cr
-	If using strata information, a strata value must be attached to each plot and a look-up 
-	table by strata (and estimation unit) must be included (stratalut). The strata values 
-	may be in the pltstrat table or the cond table. Specify the strata variable name strvar 
-	(and unitvar). The table must have a column from strata and a column for area (areavar) 
-	by strvar (and unitvar). 
+	sumunits:\cr
+	An estimation unit is a population, or area of interest, with known area and number
+	of plots. Individual counties or combined Super-counties are common estimation units 
+	for FIA. An estimation unit may also be a subpopulation of a larger population 
+	(e.g., Counties within a State). Subpopulations are mutually exclusive and independent 
+	within a population, therefore estimated totals and variances are additive. For example, 
+	State-level estimates are generated by summing estimates from all subpopulations 
+	within the State (Bechtold and Patterson. 2005. Chapter 2). Each plot must be assigned 
+	to only one estimation unit.
 
-	If only 1 strata, simple random sample is used. Set strlut=NULL and include totacres. 
-	The function adds a dummy variable, STRATA=1, to areadat and generates a strlut based 
-	on the totacres and estimation unit if included.
+	If sumunits=TRUE, estimates are generated by estimation unit, summed together, and 
+	returned as one estimate. If rawdata=TRUE, estimates by individual estimation unit
+	are also returned.
 
-	If you have tree domain data already summarized to condition level, set rowvar or 
-	colvar = tdomvar to define the arrangement in output estimation table. 
+	If sumunits=FALSE, estimates are generated and returned by estimation unit as one
+	data frame. If savedata=TRUE, a separate file is written for each estimation unit.
 
 
-	FIA=TRUE vs FIA=FALSE:\cr
-	FIA=TRUE means estimates are calculated by estimation unit and then collapsed (summed) 
-		for the entire population.
-	FIA=FALSE means estimates are calculated by estimation unit and reported by estimation unit. 
-	The returned object includes all estimation units. If savedata=TRUE, there is a separate 
-		file for each estimation unit.
+	stratcombine:\cr
+	If MAmethod='PS', and stratcombine=TRUE, and less than 2 plots in any one estimation unit, 
+	all estimation units with 10 or less plots are combined. The current method for combining 
+	is to group the estimation unit with less than 10 plots with the estimation unit following 
+	in consecutive order (numeric or alphabetical), restrained by survey unit (UNITCD) if 
+	included in dataset, and continuing until the number of plots equals 10. If there are 
+	no estimation units following in order, it is combined with the estimation unit previous 
+	in order. 
+
+	autoxreduce:\cr
+	If MAmethod='GREG', and autoxreduce=TRUE, and there is an error because of multicolinearity,
+	a variable reduction method is applied to remove correlated variables. The method used
+	is based on the variance-inflation factor (vif) from a linear model. The vif estimates
+	how much the variance of each x variable is inflated due to mulitcolinearity in the model.
+
+	rowlut/collut:\cr
+	There are several objectives for including rowlut/collut look-up tables: 1) to include 
+	descriptive names that match row/column codes in the input table; 2) to use number 
+	codes that match row/column names in the input table for ordering rows; 3) to add 
+	rows and/or columns with 0 values for consistency. No duplicate names are allowed.
+
+	Include 2 columns in the table:\cr
+	1-the merging variable with same name as the variable in the input merge table;\cr 
+	2-the ordering or descriptive variable.\cr
+ 	If the ordering variable is the rowvar/colvar in the input table and the descriptive 
+	variable is in rowlut/collut, set row.orderby/col.orderby equal to rowvar/colvar. If 
+	the descriptive variable is the rowvar/colvar in the input table, and the ordering 
+	code variable is in rowlut/collut, set row.orderby/col.orderby equal to the variable 
+	name of the code variable in rowlut/collut.
 
 
      UNITS:\cr
-     The following variables are converted from pounds (in NIMS) to short tons by multiplying 
-	the variable by 0.0005.
+     The following variables are converted from pounds (from FIA database) to short tons by 
+	multiplying the variable by 0.0005.
      DRYBIO_AG, DRYBIO_BG, DRYBIO_WDLD_SPP, DRYBIO_SAPLING, DRYBIO_STUMP, DRYBIO_TOP, DRYBIO_BOLE, 
 	DRYBIOT, DRYBIOM, DRYBIOTB, JBIOTOT, CARBON_BG, CARBON_AG 
 

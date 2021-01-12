@@ -1,0 +1,516 @@
+---
+title: "EVALIDator - Part Ic - Tree Estimates - ALP_ADFORCD - Manti-LaSal"
+author: Tracey S. Frescino
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+### Objective:
+Demonstrate difference between generating estimates using EVALIDator vs generating estimates on-the-fly using FIESTA. 
+
+Part I: Describe process for populating FIADB population tables and generating estimates using EVALIDator.
+  a. Steps for generating population data
+  b. Steps for calculating area estimates
+  c. Steps for calculating tree estimates
+  
+Part II: Describe process using FIESTA for generating population data and estimates.
+  Method (A): using state as population, data from FIADB, filtered for National Forest (match EVALIDator)
+  Method (B): using state as population, data sumarized in FIESTA, filtered for National Forest
+  Method (C): using National Forest boundary as population, data summarized in FIESTA
+
+Part III: Compare results of EVALIDator process and FIESTA process.
+
+
+### FIA Estimation Strategy
+Estimation calculations based on the green-book (Scott et al. 2005) for mapped plots, using post-stratification.Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as green/brown (i.e., predicted forest and nonforest). 
+
+Steps for estimation
+
+* Adjusted condition proportions are summed by plot and domain, then summed by strata.
+
+* The strata means are then combined using the strata weights and then expanded using the total land tree in the population.
+
+* The strata variance are calculated and expanded using the total land tree in the population. 
+
+<!-- I. [Load libraries](#loadlib) -->
+<!-- II. [Specify data identifier](#evalid) -->
+<!-- III. [Import data](#importdata) -->
+<!-- TREE1. [Adjust condition proportions and trees per acre](#adj) -->
+<!-- TREE2. [Apply plot/condition filters](#filters) -->
+<!-- TREE3. [Define estimation response and domain(s)](#define) -->
+<!-- TREE4. [Apply tree filters](#filters) -->
+<!-- TREE5. [Summarize adjusted response by domain and strata](#ydomstr) -->
+<!-- TREE6. [Calculate tree estimates](#treeest) -->
+<!-- TREE7. [Calculate error for tree estimates](#treeerr) -->
+<!-- TREE8. [Merge tree estimates and error](#treeesterr) -->
+<!-- TREE9. [A nice tabular way to output table](#treekable) -->
+<!-- TREE10. [Bar plot](#treebar) -->
+<!-- EXPORT. [Export tree estimates and error](#exptree) -->
+
+
+```{r include=FALSE}
+
+## Install packages and load libraries
+if (!require("knitr")) install.packages("knitr")      ## Create nice table
+if (!require("ggplot2")) install.packages("ggplot2")  ## Create nice barplot
+
+
+```
+
+
+### I. Load libraries{#loadlib}
+
+```{r results='hide'}
+
+options(scipen=6)
+options(stringsAsFactors=FALSE)
+
+library(knitr)
+library(ggplot2)
+
+```
+
+
+### II. Specify data identifier{#evalid}
+```{r results='hide'}
+
+evalid <- c(491800, 81800)
+
+
+```
+
+
+### III. Import data{#importdata}
+```{r}
+
+## Import data from CSV files in working directory, with names including prefix
+
+## Define datafolder
+datfolder <- "_data"
+
+## Define prefix for input file names
+datpre <- paste0("EVALIDator_steps_eval_", paste(evalid, collapse="_"))
+
+
+## Import population data
+pltassgn <- read.csv(file.path(datfolder, paste0(datpre, "_pltassgn.csv")), stringsAsFactors=FALSE)
+stratalut <- read.csv(file.path(datfolder, paste0(datpre, "_stratalut.csv")), stringsAsFactors=FALSE)
+ 
+## Import condition-level and tree-level data for evalid
+plt <- read.csv(file.path(datfolder, paste0(datpre, "_plt.csv")), stringsAsFactors=FALSE)
+condf <- read.csv(file.path(datfolder, paste0(datpre, "_condf.csv")), stringsAsFactors=FALSE)
+tree <- read.csv(file.path(datfolder, paste0(datpre, "_tree.csv")), stringsAsFactors=FALSE)
+
+table(plt$PLOT_STATUS_CD)
+table(condf$COND_STATUS_CD)
+head(stratalut)
+
+dim(condf)
+
+head(plt[, c("CN", "STATECD", "COUNTYCD", "PLOT", "INVYR", "PLOT_STATUS_CD", "EVALID", "ALP_ADFORCD")])
+
+
+```
+
+
+### TREE1. Adjust condition proportions and trees per acre{#adj}
+
+Create adjusted proportions for conditions (CONDPROP_ADJ) and adjusted trees per acre (TPA_ADJ) for trees based on subplot and microplot adjustments.
+
+
+Calculation steps:
+
+1. Merge stratalut to to pltassn by ESTN_UNIT and STRATUMCD, then merge to cond by PLT_CN
+2. CONDPROP_ADJ: Merge area adjustment factors for condition to cond table
+3. Calculate adjusted condition proportion (CONDPROP_ADJ) by multiplying CONDPROP_UNADJ with ADJ_FACTOR_SUBP or ADJ_FACTOR_MACR, based on PROP_BASIS
+4. Merge area adjustment factors for trees to tree table
+5. Create a tree adjustment factor for trees based on TPA_UNADJ for each tree
+
+
+```{r}
+
+## 1. Merge area adjustment factors for condition and trees to pltassn by ESTN_UNIT and STRATUMCD
+pltadj <- merge(pltassgn, 
+          stratalut[, c("STATECD", "ESTN_UNIT", "STRATUMCD", "ADJ_FACTOR_MACR", "ADJ_FACTOR_SUBP",
+                "ADJ_FACTOR_MICR")], by=c("STATECD", "ESTN_UNIT", "STRATUMCD"))
+
+## 2. CONDPROP_ADJ: Merge area adjustment factors for condition to cond table
+condadj <- merge(condf, pltadj[, c("PLT_CN", "ADJ_FACTOR_MACR", "ADJ_FACTOR_SUBP")],
+                by="PLT_CN")
+
+#head(condadj)
+dim(condadj)
+
+
+## 3. Calculate adjusted condition proportion (CONDPROP_ADJ) by multiplying CONDPROP_UNADJ with 
+##    ADJ_FACTOR_MACR or ADJ_FACTOR_SUBP.
+condadj$CONDPROP_ADJ <- ifelse(condadj$PROP_BASIS == "MACR", 
+                            condadj$CONDPROP_UNADJ * condadj$ADJ_FACTOR_MACR,
+                                condadj$CONDPROP_UNADJ * condadj$ADJ_FACTOR_SUBP)    
+
+head(condadj[, c("PLT_CN", "CONDID", "ADJ_FACTOR_MACR", "ADJ_FACTOR_SUBP", "CONDPROP_ADJ")])
+dim(condadj)
+
+
+## 2. Merge area adjustment factors for trees to tree table
+treeadj <- merge(tree, pltadj[, c("PLT_CN", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR")],
+                by="PLT_CN")
+dim(treeadj)
+
+
+## 3. Create a tree adjustment factor for trees based on TPAGROW_UNADJ for each tree
+treeadj$tadjfac <- with(treeadj, ifelse(TPAGROW_UNADJ > 50, ADJ_FACTOR_MICR, 
+                                        ifelse(TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, ADJ_FACTOR_MACR,
+                                               ADJ_FACTOR_SUBP)))
+
+head(treeadj[, c("PLT_CN", "CONDID", "SUBP", "TREE", "SPCD", "DIA", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "tadjfac")])
+dim(treeadj)
+
+
+```
+
+
+### TREE2. Apply plot/condition filters{#filters}
+
+Plot and condition filters subset the area of the population for the desired output. This does not change the population data used for estimation, including stratum weights or number of sampled plots by estimation unit. Therefore, all plots within the population are used for generating estimates and estimated variances, with plots not included in the filter considered 'outside the domain of interest' and set to 0.
+
+Calculation steps:
+
+1. Merge plot variables and adjusted cond tables
+2. Apply land area filters (e.g., Forest land only)
+3. Apply other plot/condition filters (e.g., Fishlake National Forest)
+4. Define titles for land area and condition filters
+
+```{r}
+
+
+## 1. Merge plot variables and adjusted cond tables
+pltcondadj <- merge(plt, condadj, by.x="CN", by.y="PLT_CN")
+dim(condadj)
+dim(pltcondadj)
+
+
+## 2. Apply land tree filters (e.g., Forest land only)
+pltcondadjf <- pltcondadj[pltcondadj$COND_STATUS_CD == 1, ]
+
+## 3. Apply other plot/condition filters (e.g., Fishlake National Forest)
+pltcondadjf <- pltcondadjf[!is.na(pltcondadjf$ALP_ADFORCD) & pltcondadjf$ALP_ADFORCD == 410, ]
+
+dim(pltcondadj)
+dim(pltcondadjf)
+
+
+## 4. Define titles for land area and condition filters
+title.landarea <- "forest land"
+title.filter <- "Manti-LaSal National Forest"
+
+
+```
+
+
+### TREE3. Define estimation response and domain(s){#define}
+
+For tree estimates, your response attribute is a tree attribute expanded by the adjusted trees per acre (TPA_ADJ).
+
+What do you want to estimate?
+What do you want to estimate response by?
+
+Calculation steps:
+
+1. Define estimation response  (e.g., VOLCFNET)
+2. Define domain of interest (e.g., FORTYPCD)
+3. Define TPA variable for calculations
+4. Define domain title for output
+
+```{r results='hide'}
+
+## 1. Define estimation response (e.g., VOLCFNET)
+y <- "VOLCFNET"
+
+## 2. Define estimation response filter (i.e., tree filter)
+y.filter <- "STATUSCD == 1"
+
+## 2. Define domain of interest (e.g., FORTYPCD)
+domain <- "STDSZCD"
+
+## 3. Define TPA variable for calculations
+tpa <- "TPA_UNADJ"
+
+
+## 4. Define domain title for output 
+title.domain <- "Stand-size class"
+
+
+
+```
+
+
+### TREE4. Apply tree filters{#filters}
+
+Tree filters subset the measured trees of the population for the desired output. This does not change the population data used for estimation or the filtered plot/condition data. Filtered plots/conditions with no filtered trees will return 0 values. 
+
+Calculation steps:
+
+1. Apply tree filters (e.g., Live trees only)
+2. Define titles for land area and condition filters
+
+```{r}
+
+## 1. Apply tree filters (e.g., Live trees only)
+treeadjf <- subset(treeadj, eval(parse(text = y.filter)))
+
+dim(treeadj)
+dim(treeadjf)
+
+
+## 2. Define titles for land area and condition filters
+title.landarea <- "forest land"
+title.filter <- "Manti-LaSal National Forest"
+
+
+```
+
+
+### TREE5. Summarize adjusted response by domain and strata{#ydomstr}
+
+Estimates are calculated by strata and weighted by strata proportions. Consequently, all estimation calculations are summarized and stored in stratalut.
+Calculation steps:
+
+1. Merge treeadjf to condadjf to add domain
+2. Sum (filtered) estimation response (y) multiplied by TPA* and adjustment factor (tadjfac) by plot and domain to plot-level
+3. Merge estn_unit and stratum assignment from pltassgn to pltdom
+4. Sum plot estimation response (y.plt) by domain and strata
+5. Merge to stratalut
+
+```{r results='hide'}
+
+## 1. Merge treeadjf to condadjf to add domain
+treeadjfc <- merge(pltcondadjf[, c("CN", "CONDID", domain)], treeadjf, 
+                      by.x=c("CN", "CONDID"), by.y=c("PLT_CN", "CONDID"))
+
+## 2. Sum (filtered) estimation response (y) multiplied by TPA* and adjustment factor (tadjfac) 
+##    by plot and domain to plot-level
+pltdom <- aggregate((treeadjfc[[y]] * treeadjfc[[tpa]] * treeadjfc$tadjfac), 
+                        treeadjfc[, c("CN", domain)], sum, na.rm=TRUE)
+names(pltdom) <- c("CN", domain, "y.plt")
+head(pltdom)
+
+
+## 3. Merge estn_unit and stratum assignment from pltassgn to pltdom
+pltdom.assgn <- merge(pltdom, pltassgn, by.x="CN", by.y="PLT_CN")
+head(pltdom.assgn)
+
+
+## 4. Sum plot estimation response (y.plt) by domain and strata
+stratdom <- aggregate(pltdom.assgn$y.plt, 
+                pltdom.assgn[, c("STATECD", "ESTN_UNIT", "STRATUMCD", domain)], sum, na.rm=TRUE)
+names(stratdom) <- c("STATECD", "ESTN_UNIT", "STRATUMCD", domain, "y.str")
+head(stratdom)
+
+## 5. Merge to stratalut
+stratdom <- merge(stratalut, stratdom, by=c("STATECD", "ESTN_UNIT", "STRATUMCD"))
+
+## order by STATECD, ESTN_UNIT, STRATUMCD
+stratdom <- stratdom[order(stratdom$STATECD, stratdom$ESTN_UNIT, stratdom$STRATUMCD),]
+head(stratdom)
+
+
+```
+
+
+### TREE6. Calculate tree estimates{#treeest}
+
+Now, let's get estimates. 
+
+Calculation steps:
+
+1. Calculate strata-level estimate by multiplying the summed adjusted response with stratum expansion factor (y.str * EXPNS) by domain, stratum, and estimation unit
+2. BY ESTIMATION UNIT: Aggregate estimate by domain and esimation unit
+3. TOTAL: Aggregate estimated (est) by domain
+
+```{r results='hide'}
+
+## 1. Calculate strata-level estimate by multiplying the summed adjusted response with
+##    stratum expansion factor (y.str * EXPNS) by domain, stratum, and estimation unit
+stratdom$est.str <- with(stratdom, y.str * EXPNS)
+
+
+## 2. BY ESTIMATION UNIT: Sum strata estimate (est.str) by domain and esimation unit and statecd
+tree.est.unit <- aggregate(stratdom$est.str, 
+                    by=stratdom[, c("STATECD", "ESTN_UNIT", domain)], sum, na.rm=TRUE)
+names(tree.est.unit) <- c("STATECD", "ESTN_UNIT", domain, "est")
+tree.est.unit <- tree.est.unit[order(tree.est.unit$ESTN_UNIT, tree.est.unit[[domain]]), ]
+
+## order by STATECD, ESTN_UNIT, STRATUMCD
+tree.est.unit <- tree.est.unit[order(tree.est.unit$STATECD, tree.est.unit$ESTN_UNIT, 
+                                     tree.est.unit[[domain]]),]
+head(tree.est.unit)
+
+
+## 3. TOTAL: Aggregate estimated (est) by domain
+tree.est <- aggregate(tree.est.unit$est, 
+                    by=list(tree.est.unit[[domain]]), sum, na.rm=TRUE)
+names(tree.est) <- c(domain, "TREE.EST")
+tree.est
+
+
+```
+
+
+### TREE7. Calculate error for tree estimates{#treeerr}
+
+Most importantly, let's get variance of estimates. 
+
+Calculation steps:
+ 
+1. Square plot estimation response (y.plt)
+2. Sum squared plot estimation response (ysq.plt) by domain and strata and merge to stratdom 
+3. Merge summed squared response to stratdom
+4. Calculate estimated variance of the estimate by domain, stratum, and estimation unit
+5. BY ESTIMATION UNIT: Aggregate estimated variance by domain and estimation unit
+6. TOTAL: Aggregate estimated variance (est.var) by domain
+
+```{r results='hide'}
+
+
+## 1. Square plot estimation response (y.plt)
+pltdom.assgn$ysq.plt <- pltdom.assgn$y.plt^2
+
+
+## 2. Sum squared plot estimation response (ysq.plt) by domain and strata and merge to stratdom
+stratdom.ysq <- aggregate(pltdom.assgn$ysq.plt, 
+                     by=pltdom.assgn[, c("STATECD", "ESTN_UNIT", "STRATUMCD", domain)], sum)
+names(stratdom.ysq) <- c("STATECD", "ESTN_UNIT", "STRATUMCD", domain, "ysq.str")
+
+
+## 3. Merge summed squared response to stratdom
+stratdom2 <- merge(stratdom, stratdom.ysq, by=c("STATECD", "ESTN_UNIT", "STRATUMCD", domain))
+head(stratdom2)
+
+
+## 4. Calculate estimated variance of the estimate by domain, stratum, and estimation unit
+stratdom2$est.var.str <- with(stratdom2,   
+	( strwt * n.strata / n.total + (1 - strwt) * n.strata / n.total^2 ) * 
+	( ysq.str - 1 / n.strata * y.str^2 ) / ( n.strata * (n.strata - 1) ) 
+	* AREA_USED^2 )
+
+
+## 5. BY ESTIMATION UNIT: Aggregate estimated variance by domain and estimation unit
+tree.var.unit <- aggregate(stratdom2$est.var.str, 
+                    by=stratdom2[, c("STATECD", "ESTN_UNIT", domain)], sum, na.rm=TRUE)
+names(tree.var.unit) <- c("STATECD", "ESTN_UNIT", domain, "est.var")
+tree.var.unit <- tree.var.unit[order(tree.var.unit$ESTN_UNIT, tree.var.unit[[domain]]), ]
+
+## order by STATECD, ESTN_UNIT, STRATUMCD
+tree.var.unit <- tree.var.unit[order(tree.var.unit$STATECD, tree.var.unit$ESTN_UNIT, 
+                                     tree.var.unit[[domain]]),]
+head(tree.var.unit)
+
+
+## 6. TOTAL: Aggregate estimated variance (est.var) by domain
+tree.var <- aggregate(tree.var.unit$est.var, 
+                    by=list(tree.var.unit[[domain]]), sum, na.rm=TRUE)
+names(tree.var) <- c(domain, "TREE.VAR")
+tree.var
+
+
+
+```
+
+
+
+### TREE8. Merge tree estimates and error{#treeesterr}
+
+Calculation steps:
+
+1. Merge tree estimates with error estimates
+2. Calculate standard error
+3. Calculate percent error (confidence level - 68%)
+4. Calculate confidence interval
+
+```{r}
+
+## 1. Merge tree estimates with error estimates
+treetab <- merge(tree.est, tree.var, by=domain)
+
+
+## 2. Calculate standard error
+treetab$TREE.SE <- sqrt(treetab$TREE.VAR)
+
+
+## 3. Calculate percent error (confidence level - 68%)
+treetab$TREE.ERRPCT <- (treetab$TREE.SE / treetab$TREE.EST) * 100
+
+
+```
+
+
+### TREE9: A nice way to output table{#treekable}
+```{r}
+
+## Paste together for caption
+title.main <- paste0("Area, in acres, of ", title.landarea, " by ", 
+                        tolower(title.domain), ", ", title.filter)
+
+kable(treetab[, c(domain, "TREE.EST", "TREE.ERRPCT")],
+  format = "pandoc",   # default
+  caption = title.main,
+  col.names = c(domain, "TREE.EST", "TREE.ERRPCT"),
+  row.names = FALSE,
+  align = c("r"),       # align = c("c", "c", "c", "r")
+  digits = 2,
+  format.args=list(big.mark = ",")
+  # padding = 2         # inner spacing
+)
+```
+
+
+
+### TREE10. Bar plot{#treebar}
+
+```{r}
+
+## Create barplot of estimates, including standard errors
+ggplot(treetab, aes(x=as.factor(get(domain)), y=TREE.EST)) +
+        geom_bar(position=position_dodge(), stat="identity", colour='black') +
+        ggtitle(paste(strwrap(title.main, 77), collapse="\n")) +
+        xlab(title.domain) + ylab("Acres") +
+        theme(plot.title = element_text(size=12)) +
+        geom_errorbar(aes(ymin=TREE.EST-TREE.SE, ymax=TREE.EST+TREE.SE),
+              width=.2,position=position_dodge(.9))
+
+
+```
+
+
+### EXPORT. Export tree estimates and error{#exportest}
+
+```{r}
+
+
+## Define folder for estimates
+estfolder <- "_estimates"
+
+## Define prefix for output names
+treeout.pre <- "EVALIDator_tree"
+
+## Define variable names for output 
+tree.names <- c("TREE.EST", "TREE.SE", "TREE.ERRPCT")
+
+## Define new variable names for output
+treeout.names <- paste(treeout.pre, c("est", "se", "pse"), sep="_")
+
+
+## Subset table and add new names
+treeout <- treetab[, c(domain, tree.names)]
+names(treeout) <- c(domain, treeout.names)
+treeout
+
+## Export table estfolder
+write.csv(treeout, file.path(estfolder, paste0(treeout.pre, "_estimates.csv")), row.names=FALSE)
+
+
+```
+

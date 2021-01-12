@@ -1,3 +1,4 @@
+
 MAest.ht <- function(y, N, FIA=TRUE) {
 
   ## Set global variables
@@ -6,6 +7,8 @@ MAest.ht <- function(y, N, FIA=TRUE) {
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
   var_method <- "unconditional_SRS"
+
+  message("generating estimates using mase::horvitzThompson function...\n")
   estht <- mase::horvitzThompson(y, pi = NULL, N = N, pi2 = NULL, 
 						var_est = TRUE, var_method = var_method, 
 						B = 1000, strata = NULL)
@@ -29,6 +32,8 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE) {
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
   var_method <- "lin_HTSRS"
+
+  message("generating estimates using mase::postStrat function...\n")
   estps <- mase::postStrat(	  y = y, 
 					   x_sample = x_sample, 
 					   x_pop = x_pop, 
@@ -50,13 +55,17 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 
 MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 
+#y <- yn.vect
+
   ## Set global variables
   nhat.var <- NULL
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
   var_method <- "lin_HTSRS"
-  estgreg <- mase::greg(	y = y, 
+
+  message("generating estimates using mase::greg function...\n")
+  estgreg <- tryCatch(mase::greg(	y = y, 
 					x_sample = x_sample, 
 					x_pop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
@@ -65,8 +74,14 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 					data_type = "means", 
   					model_select = FALSE, 
 					lambda = "lambda.min", 
-					B = 1000, strata = NULL)
-
+					B = 1000, strata = NULL),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+  if (is.null(estgreg)) 
+    stop("multicolineary exists in predictor data set...  try MAmethod = gregEN")
+  
   estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
  
@@ -76,6 +91,52 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
   }
   return(estgreg)
 }
+
+
+
+MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear") {
+
+#y <- yn.vect
+
+  ## Set global variables
+  nhat.var <- NULL
+
+  NBRPLT <- length(y)
+  NBRPLT.gt0 <- sum(y > 0)
+  var_method <- "lin_HTSRS"
+
+#save(y, file="E:/workspace/_tmp/elastic_test/y.rda")
+#save(x_sample, file="E:/workspace/_tmp/elastic_test/x_sample.rda")
+#save(x_pop, file="E:/workspace/_tmp/elastic_test/x_pop.rda")
+#print(N)
+
+  message("generating estimates using mase::gregElasticNet function...\n")
+  estgregEN <- tryCatch(mase::gregElasticNet(	y = y, 
+					x_sample = x_sample, 
+					x_pop = x_pop, 
+					pi = NULL, N = N, pi2 = NULL,
+					model = "linear", 
+  					var_est = TRUE, var_method = var_method, 
+					data_type = "means", 
+					lambda = "lambda.min", 
+					B = 1000, strata = NULL),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+  if (is.null(estgregEN)) 
+    stop("error in mase::gregElasticNet function")
+  
+  estgregEN <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estgregEN, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+ 
+  if (FIA) {
+    ## This takes out the finite population correction term (to estimated variance from FIA)
+    estgregEN[, nhat.var := nhat.var / (1 - length(y) / N)]
+  }
+  return(estgregEN)
+}
+
 
 
 
@@ -119,11 +180,15 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
     x_pop <- unitlut[, c(PSstrvar, "Prop"), with=FALSE]
     est <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
-  } else if (MAmethod == "GREG") {
-
+  } else if (MAmethod == "greg") {
     x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
     x_pop <- setDF(unitlut[, prednames, with=FALSE])
     est <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA)
+
+  } else if (MAmethod == "gregEN") {
+    x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
+    x_pop <- setDF(unitlut[, prednames, with=FALSE])
+    est <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
   }
   return(est)
 }
@@ -135,11 +200,10 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
 MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod, 
 		PSstrvar=NULL, prednames=NULL, domain, N, response=NULL, FIA=TRUE) {
 #dom <- doms[1]
+#yn=response
+
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
-
-#yn=response
-#dat=dat.dom
 
   ## Apply function to each dom
   domest <- data.table(dom, MAest(yn=response, dat.dom=dat.dom, 
@@ -185,12 +249,12 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
   unitlut.unit <- unitlut[unitlut[[unitvar]] == unit, ]
   N.unit <-  npixels[["npixels"]][npixels[[unitvar]] == unit]
 
-  if (!MAmethod %in% c("HT", "PS")) {
-    if (any(pltassgn.unit[, colSums(.SD), .SDcols=prednames] < 3)) {
-      prednames <- prednames[pltassgn.unit[, colSums(.SD), .SDcols=prednames] >= 3]
-      if (length(prednames) == 0) MAmethod <- "HT"
-    }
-  }
+#  if (!MAmethod %in% c("HT", "PS")) {
+#    if (any(pltassgn.unit[, colSums(.SD), .SDcols=prednames] < 3)) {
+#      prednames <- prednames[pltassgn.unit[, colSums(.SD), .SDcols=prednames] >= 3]
+#      if (length(prednames) == 0) MAmethod <- "HT"
+#    }
+#  }
 
   doms <- as.character(unique(dat.unit[[domain]]))
 
@@ -198,7 +262,6 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 #unitlut=unitlut.unit
 #pltassgn=pltassgn.unit
 #N=N.unit
-#prednames="fnf"
 
   unitest <- do.call(rbind, lapply(doms, MAest.dom, 
 			dat=dat.unit, cuniqueid=cuniqueid, 

@@ -44,7 +44,7 @@ write2sqlite <- function(layer, SQLitefn, out_name=NULL, gpkg=FALSE,
   if (!is.null(index.unique)) {
     idxnm <- paste0(out_name, "_", paste(tolower(index.unique), collapse="_"), "_idx")
     if (sum(duplicated(layer[,index.unique, with=FALSE])) > 0) {
-      warning(idxnm, " is not unique... creating non-unique index")
+      warning(idxnm, " is not unique... creating non-unique index\n")
       idxsql <- paste0("create index ", idxnm, " ON ", out_name,   
 				"(", paste(index.unique, collapse=","), ")")
     } else {

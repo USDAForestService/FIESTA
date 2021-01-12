@@ -222,7 +222,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         ## Get estimates
         estcross <- crosstabx(rowest, rowvar, estnmd, psenm, allin1=allin1,
 		estnull=estnull, psenull=psenull, char.width=char.width)
- 
+
         if (allin1) {
           tottab <- data.frame(TOTAL="Total", allin1f(totest[[estnmd]], 
 			totest[[psenm]], char.width=char.width, estnull=estnull, 

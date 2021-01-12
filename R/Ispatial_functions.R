@@ -1182,16 +1182,19 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   ## Get intersecting states
   #############################################################################
   if (!is.null(stbnd) || !is.null(stbnd_dsn)) {
+
     stbnd <- pcheck.spatial(layer=stbnd, dsn=stbnd_dsn)
     stbnd.att <- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stbnd.att, "not in stbnd"))
-    if (is.null(stbnd.att) && "NAME" %in% names(stbnd)) {
-      stbnd.att <- "NAME"
-    } else if (is.null(stbnd.att) && "STATENM" %in% names(stbnd)) {
-      stbnd.att <- "STATENM"
-    } else {
-      stop("include attribute in stbnd with state names - stbnd.att")
+    if (is.null(stbnd.att)) {
+      if ("NAME" %in% names(stbnd)) {
+        stbnd.att <- "NAME"
+      } else if ("STATENM" %in% names(stbnd)) {
+        stbnd.att <- "STATENM"
+      } else {
+        stop("include attribute in stbnd with state names - stbnd.att")
+      }
     }
   } else if (exists("stunitco")) {
     stbnd <- FIESTA::stunitco			## longlat-NAD83 projection
@@ -1222,7 +1225,6 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     stname.att <- FIESTA::pcheck.varchar(var2check=stname.att, varnm="stname.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
-
 
     if (showsteps) {
       mar <-  par("mar")

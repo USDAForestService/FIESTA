@@ -1,5 +1,5 @@
 anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
-	datsource="sqlite", SQLitefn=NULL, RS=NULL, strata=TRUE, strat_layer=NULL, 
+	datsource="sqlite", SQLitefn=NULL, RS=NULL, strat_layer=NULL, 
 	showsteps=FALSE, savedata=FALSE, savexy=TRUE, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite=TRUE, GBdata=NULL, ...) {
 
@@ -7,6 +7,7 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Set global variables
   gui <- FALSE
   returnlst <- list()
+  strata <- TRUE
 
 
   ## Check savedata 
@@ -34,10 +35,11 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 
   if (is.null(GBdata)) { 
     message("extracting data...")
-   
+ 
     ###########################################################################
     ## Extract FIA data and model data
     ###########################################################################
+    if (is.null(strat_layer)) strata <- FALSE
     GBdata <- anGBdata(bnd_layer=bnd, bnd_dsn=bnd_dsn, bnd.att=bnd.att, 
 		bnd.filter=bnd.filter, RS=RS, datsource=datsource, istree=TRUE, 
 		data_dsn=SQLitefn, strata=strata, strat_layer=strat_layer, 

@@ -261,7 +261,7 @@ getspconddat <- function(cond=NULL, ACTUALcond=NULL, cuniqueid="PLT_CN", condid1
 getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE, 
 	varCur="MEASYEAR", Endyr=NULL, invyrs=NULL, allyrs=FALSE, SCHEMA.=NULL, 
 	subcycle99=NULL, designcd1=FALSE, intensity1=NULL, popSURVEY=FALSE, chk=FALSE,
-	syntax="sql", plotnm="plot") {
+	syntax="sql", plotnm="plot", ppsanm="pop_plot_stratum_assgn") {
   ## DESCRIPTION: gets from statement for database query
   ## syntax - ('sql', 'R')
 
@@ -278,14 +278,14 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 
   if (!is.null(evalid)) {
     if (chk) {
-      ppsanm <- pcheck.varchar("pop_plot_stratum_assgn", varnm="pop_plot_stratum_assgn",
+      ppsanm <- pcheck.varchar(ppsanm, varnm="pop_plot_stratum_assgn",
 			checklst=tablst, stopifnull=TRUE)
 
       evalidlst.qry <- paste("select distinct EVALID from ", ppsanm, "order by EVALID")
       evalidlst <- DBI::dbGetQuery(dbconn, evalidlst.qry)[[1]]
       if (!all(evalid %in% evalidlst)) stop("invalid evalid")
     }
-    pfromqry <- paste0(SCHEMA., "pop_plot_stratum_assgn ppsa JOIN ", 
+    pfromqry <- paste0(SCHEMA., ppsanm, " ppsa JOIN ", 
 			SCHEMA., plotnm, " p ON (p.CN = ppsa.PLT_CN)")
     return(pfromqry)
   }
@@ -407,7 +407,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 
 getEvalid <- function(dbconn, SCHEMA.=NULL, states, evalAll=FALSE, 
 		evalCur=FALSE, evalEndyr=NULL, evalType="01", chk=FALSE,
-		dbconnopen=TRUE) {
+		dbconnopen=TRUE, ppsanm="pop_plot_stratum_assgn") {
   ## DESCRIPTION: gets evalid in database by state from
   ##			POP_PLOT_STRATUM_ASSGN table
   ## ARGUMENTS:
@@ -428,13 +428,13 @@ getEvalid <- function(dbconn, SCHEMA.=NULL, states, evalAll=FALSE,
   stfilter <- getfilter("STATECD", stcd, syntax='sql')
 
   if (chk) {
-    ppsanm <- pcheck.varchar("pop_plot_stratum_assgn", varnm="pop_plot_stratum_assgn",
+    ppsanm <- pcheck.varchar(ppsanm, varnm="pop_plot_stratum_assgn",
 			checklst=tablst, stopifnull=TRUE)
   }
 
   eval.qry <- paste("select distinct STATECD, EVALID 
-			from pop_plot_stratum_assgn 
-			where", stfilter, "order by STATECD, EVALID")
+			from", ppsanm,  
+			"where", stfilter, "order by STATECD, EVALID")
   evaldt <- setDT(DBI::dbGetQuery(dbconn, eval.qry))
 
 

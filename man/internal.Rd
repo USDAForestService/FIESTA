@@ -192,6 +192,7 @@
 \alias{MAest}
 \alias{MAest.ps}
 \alias{MAest.greg}
+\alias{MAest.gregEN}
 \alias{MAest.ht}
 
 \alias{SAest.pop}

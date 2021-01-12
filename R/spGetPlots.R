@@ -2,7 +2,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	stbnd=NULL, stbnd_dsn=NULL, stbnd.att="COUNTYFIPS", RS=NULL, xy=NULL, 
 	xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
-	data_dsn=NULL, istree=TRUE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
+	data_dsn=NULL, istree=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
 	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
 	evalType="AREAVOL", measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, 
 	invyrs=NULL, allyrs=FALSE, intensity1=FALSE, showsteps=FALSE, savedata=FALSE, 
@@ -325,8 +325,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         xystate <- NULL
         stabbr <- pcheck.states(stcd, statereturn="ABBR") 
 
-        if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) 
-          allyrs=clipxy <- TRUE
+        #if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) 
+        #  allyrs=clipxy <- TRUE
 
         ## Get plot data
         dat <- DBgetPlots(states=stcd, stateFilter=stateFilter, allyrs=allyrs,

@@ -1,6 +1,6 @@
 spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL, 
 	clippolyv.filter=NULL, rast.crs=NULL, bands=NULL, NODATA=NULL, buffdist=NULL,
- 	maskByPolygons=TRUE, showext=FALSE, setNODATA=FALSE, fmt="HFA", outfolder=NULL,
+ 	maskByPolygons=TRUE, showext=FALSE, fmt="HFA", outfolder=NULL,
  	outfn="rastclip", outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE) {
 
   #####################################################################################
@@ -118,8 +118,8 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
 		first="NO", gui=gui)
 
   ## Check setNODATA
-  setNODATA <- FIESTA::pcheck.logical(setNODATA, varnm="setNODATA", title="Set NODATA?", 
-		first="NO", gui=gui)
+#  setNODATA <- FIESTA::pcheck.logical(setNODATA, varnm="setNODATA", title="Set NODATA?", 
+#		first="NO", gui=gui)
 
   ## Check fmt
   fmt <- FIESTA::pcheck.varchar(var2check=fmt, varnm="fmt", gui=gui, 

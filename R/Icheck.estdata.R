@@ -1,9 +1,9 @@
 check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN", 
-	condid="CONDID", treex=NULL, tuniqueid="PLT_CN", sumunits=FALSE, 
-	landarea=NULL, ACI.filter=NULL, plt.filter=NULL, cond.filter=NULL, 
-	allin1=FALSE, estround=6, pseround=3, divideby=NULL, addtitle=TRUE, 
-	returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, savedata=FALSE, 
-	outfolder=NULL, gui=FALSE){
+	condid="CONDID", treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
+	sumunits=FALSE, landarea=NULL, ACI.filter=NULL, plt.filter=NULL, 
+	cond.filter=NULL, allin1=FALSE, estround=6, pseround=3, divideby=NULL, 
+	addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
+	savedata=FALSE, outfolder=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
@@ -186,6 +186,13 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 		tab2txt="cond", subsetrows=TRUE)
     returnlst$treef <- treef
     returnlst$tuniqueid <- tuniqueid
+
+    if (!is.null(seedx)) {
+      seedf <- check.matchval(seedx, pltcondf, tuniqueid, cuniqueid, tab1txt="seed", 
+		tab2txt="seed", subsetrows=TRUE)
+      returnlst$seedf <- seedf
+      returnlst$tuniqueid <- tuniqueid
+    }
   }
  
   return(returnlst)

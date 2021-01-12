@@ -10,7 +10,7 @@
 }
 \usage{
 anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, 
-	datsource = "sqlite", SQLitefn = NULL, RS = NULL, strata = TRUE, 
+	datsource = "sqlite", SQLitefn = NULL, RS = NULL, 
 	strat_layer = NULL, showsteps = FALSE, savedata = FALSE, savexy = TRUE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
 	GBdata = NULL, ...)
@@ -28,7 +28,6 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL,
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }
   \item{RS}{ String. Name of FIA research station to restrict states to. } 
-  \item{strata}{ Logical. If TRUE, use post-stratification. }
   \item{strat_layer}{ String or raster object. Name of the strata spatial raster 
 	layer, including fullpath and extension (e.g., *.img). If raster object,
 	must be written to file. }

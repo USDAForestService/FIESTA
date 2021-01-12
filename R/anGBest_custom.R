@@ -31,7 +31,9 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
 
     ## Check barplot.row
     barplot.row <- FIESTA::pcheck.logical(barplot.row, varnm="barplot.row", 
-		title="Rows for barplot?", first="NO", gui=gui)  
+		title="Rows for barplot?", first="NO", gui=gui) 
+    if (!barplot.row && is.null(colvar)) 
+      stop("must include colvar if barplot.row=FALSE") 
  
     ## Check barplot.nplots
     barplot.nplt <- FIESTA::pcheck.logical(barplot.nplt, varnm="barplot.nplt", 
@@ -68,7 +70,6 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
   ## Add variable for tree diameter class
   if (esttype != "AREA") {
     if ((!is.null(rowvar) && rowvar == "DIACL") || (!is.null(colvar) && colvar == "DIACL")) {
-
       ## Check treedia.brks
       if (!is.null(treedia.brks)) {
         datlut <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.brks) 
@@ -76,7 +77,7 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
 
         print(table(GBpopdat$treex$DIACL))
         if (rowvar == "DIACL") row.FIAname <- FALSE
-        if (colvar == "DIACL") col.FIAname <- FALSE
+        if (!is.null(colvar) && colvar == "DIACL") col.FIAname <- FALSE
       }
     }
   }
@@ -124,6 +125,7 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
   raw <- MODest$raw
   titlelst <- MODest$titlelst
 
+
   ####################################################################
   ## Get barplot
   ####################################################################
@@ -135,7 +137,6 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
 		outfn.date=outfn.date, overwrite=overwrite, title.ref=title.ref,
 		title.main=title.main, divideby=divideby)
   }
-
 
   returnlst$est <- est
   if (!is.null(colvar)) 

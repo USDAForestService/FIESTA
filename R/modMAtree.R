@@ -1,12 +1,12 @@
 modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, dsn=NULL, 
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", 
 	pltassgnid="CN", pjoinid="CN", evalid=NULL, invyrs=NULL, ACI=FALSE, adj="samp",
- 	MAmethod="GREG", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
+ 	MAmethod="greg", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE,
  	minplotnum.unit=10, unitlut=NULL, npixelvar="npixels", prednames=NULL, predfac=NULL, 
- 	PSstrvar=NULL, stratcombine=TRUE, landarea="ALL", plt.filter=NULL, cond.filter=NULL, 
-	estvar=NULL, estvar.filter=NULL, estvar.name=NULL, rowvar=NULL, colvar=NULL, 
- 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
+ 	PSstrvar=NULL, stratcombine=TRUE, landarea="ALL", plt.filter=NULL,
+ 	cond.filter=NULL, estvar=NULL, estvar.filter=NULL, estvar.name=NULL, rowvar=NULL, 
+	colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
 	rowgrpnm=NULL, rowgrpord=NULL, sumunits=FALSE, allin1=FALSE, estround=1, 
 	pseround=2, estnull="--", psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
@@ -70,18 +70,12 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 	stratcombine=stratcombine, MAdata=MAdata, gui=gui)
   } else {
     returnMApopdat <- FALSE
-    if (!is.list(MApopdat))
-      stop("MApopdat must be a list")
-    listitems <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
+    list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 		"tuniqueid", "ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
 		"npixelvar", "PSstrvar", "prednames", "expcondtab", "plotsampcnt",
 		"condsampcnt", "MAmethod")
-    if (!all(listitems %in% names(MApopdat))) {
-      items.miss <- listitems[!listitems %in% names(MApopdat)]
-      stop("invalid MApopdat... missing items: ", paste(items.miss, collapse=", "))
-    }   
+    MApopdat <- FIESTA::pcheck.object(MApopdat, "MApopdat", list.items=list.items)
   }	
-
   if (is.null(MApopdat)) return(NULL)	
   condx <- MApopdat$condx
   pltcondx <- MApopdat$pltcondx
@@ -110,7 +104,6 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     predfac <- MApopdat$predfac
   if (is.null(predfac)) 
     PSstrvar <- MApopdat$PSstrvar
-
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
@@ -260,7 +253,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     unit.rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar,
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-		domain=rowvar, response=response, npixels=npixels))
+		domain=rowvar, response=response, npixels=npixels, FIA=TRUE))
     unit.rowest <- unit.rowest[!is.na(unit.rowest[[rowvar]]), ]
 
     if (colvar != "NONE") {
@@ -271,7 +264,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
       unit.colest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-		domain=colvar, response=response, npixels=npixels))
+		domain=colvar, response=response, npixels=npixels, FIA=TRUE))
       unit.colest <- unit.colest[!is.na(unit.colest[[colvar]]), ]
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -279,7 +272,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
       unit.grpest <- do.call(rbind, lapply(estunits, MAest.unit,
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-		domain=grpvar, response=response, npixels=npixels))
+		domain=grpvar, response=response, npixels=npixels, FIA=TRUE))
       unit.grpest <- unit.grpest[!is.na(unit.grpest[[grpvar]]), ]
     }
   }

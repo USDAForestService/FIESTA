@@ -11,7 +11,7 @@
 spReprojectRaster(rastfn, bands = NULL, crs = NULL, crs.new = NULL,
     	res.new = NULL, bbox.new = NULL, dtype.new = NULL, NODATA.new = NULL, 
 	resamp.method = "near", crs.default = "EPSG:5070", outfolder = NULL, 
-	outfn = NULL, outext = "img")
+	outfn = NULL, outext = "img", overwrite = FALSE)
 }
 \arguments{
   \item{rastfn}{ String or Raster. File name(s) with extensions, or raster object(s). 
@@ -47,6 +47,7 @@ spReprojectRaster(rastfn, bands = NULL, crs = NULL, crs.new = NULL,
 	the working directory is used. }
   \item{outfn}{ String. Name of output raster. If NULL, default is 'polyrast'. }
   \item{outext}{ String. Name of raster extension (fmt). }
+  \item{overwrite}{ Logical. If TRUE, overwrites raster file. }
 }
 
 \value{

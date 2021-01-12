@@ -1,9 +1,9 @@
 modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, 
 	cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", pltassgnid="PLT_CN", 
 	pjoinid="CN", evalid=NULL, invyrs=NULL, intensity=NULL, adj="samp", ACI=FALSE, 
-	strata=TRUE, plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, 
+	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, 
 	unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, 
-	minplotnum.unit=10, stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
+	minplotnum.unit=10, strata=TRUE, stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
 	getwtvar="P1POINTCNT", stratcombine=TRUE, landarea="FOREST", plt.filter=NULL, 
 	cond.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
@@ -77,21 +77,17 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 	puniqueid=puniqueid, cuniqueid=cuniqueid, condid=condid, pltassgnid=pltassgnid, 
 	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, intensity=intensity,
 	adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
-	cond.nonsamp.filter=cond.nonsamp.filter, strata=strata, unitvar=unitvar, 
-	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine,
- 	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
-	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
+	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2, 
+	unitarea=unitarea, areavar=areavar, unitcombine=unitcombine,
+ 	minplotnum.unit=minplotnum.unit, strata=strata, stratalut=stratalut, 
+	strvar=strvar, nonresp=nonresp, substrvar=substrvar, getwt=getwt, 
+	getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
-    if (!is.list(GBpopdat))
-      stop("GBpopdat must be a list")
-    listitems <- c("condx", "pltcondx", "cuniqueid", "condid", 
+    list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"ACI.filter", "unitarea", "unitvar", "strlut", "strvar",
 		"plotsampcnt", "condsampcnt")
-    if (!all(listitems %in% names(GBpopdat))) {
-      items.miss <- listitems[!listitems %in% names(GBpopdat)]
-      stop("invalid GBpopdat... missing items: ", paste(items.miss, collapse=", "))
-    }   
+    GBpopdat <- FIESTA::pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   }	
   if (is.null(GBpopdat)) return(NULL)	
   condx <- GBpopdat$condx
@@ -375,6 +371,7 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
+
   if (rawdata) rawdat <- tabs$rawdat
   if (returntitle) titlelst <- tabs$titlelst
 

@@ -349,7 +349,7 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 
   ## GET VALUES TO RETURN
   FIAstrata <- list(unitarea=setDF(unitarea), unitvar=unitvar, unitvar2="STATECD", 
-		areavar=areavar, strlut=setDF(stratalut), 
+		areavar=areavar, stratalut=setDF(stratalut), 
 		strvar=strvar, getwt=TRUE, getwtvar="P1POINTCNT", evalid=evalidlist)
  
   if (getassgn) {

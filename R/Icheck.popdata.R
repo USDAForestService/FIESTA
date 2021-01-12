@@ -1,5 +1,5 @@
-check.popdata <- function(module="GB", method="GREG", tree=NULL, cond, 
-	plt=NULL, vspspp=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
+check.popdata <- function(module="GB", method="greg", tree=NULL, cond, 
+	plt=NULL, seed=NULL, vspspp=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", 
 	pltassgnid="CN", pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
@@ -7,7 +7,8 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 	unitcombine=FALSE, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
 	nonresp=FALSE, substrvar=NULL, stratcombine=TRUE, prednames=NULL, 
 	predfac=NULL, ACI=FALSE, plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
-	nullcheck=FALSE, pvars2keep=NULL, cvars2keep=NULL, gui=FALSE){
+	nullcheck=FALSE, pvars2keep=NULL, cvars2keep=NULL, 
+	ppsanm="pop_plot_stratum_assgn", gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
@@ -19,16 +20,16 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## - cond (cvars2keep) - areawt
   ## Check module, method (if MA,SA), adj
   ## - module in("GB", "MA", "SA")
-  ## - if (module="MA") method in("HT", "PS", "GREG")
+  ## - if (module="MA") method in("HT", "PS", "greg", "gregEN")
   ## - if (module="SA") SApackage <- c("JoSAE", "sae"); method <- c("unit", "area")
   ## Check logical parameters: ACI, unitcombine, strata stratcombine (if strata=TRUE)
   ## - If ACI, add NF_PLOT_STATUS_CD to pvars2keep and NF_COND_STATUS_CD to cvars2keep
   ## - If unitcombine, estimation units are combined if less than 10 plots
   ## - If strata, only 1 auxvar allowed, add to pvars2keep
-  ## - If module = SA or MA-GREG, add prednames to pvars2keep
+  ## - If module = SA or MA-greg, add prednames to pvars2keep
   ## - If adj="samp", nonsample adjustment factors calculated at strata level
   ## - If adj="plot", nonsample adjustment factors calculated at plot level
-  ## Check predfac, if module = SA, MA-GREG
+  ## Check predfac, if module = SA, MA-greg
   ## Import and check cond, plt, pltassgn tables 
   ## Check corresponding unique identifiers (cuniqueid, puniqueid, pltassgnid)
   ## Merge cond, plt, pltassgn tables to check necessary variables
@@ -73,7 +74,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
 	STATECD=PLOT_STATUS_CD=PSTATUSCD=cndnmlst=pltdomainlst=invyrs=PROP_BASIS=
 	ACI.filter=V1=ONEUNIT=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
-	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonsampplots=
+	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry <- NULL
 
 
@@ -105,7 +106,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     if (module == "MA") {
       if (!"mase" %in% rownames(installed.packages()))
 	   stop("MA module requires package mase.")
-      methodlst <- c("HT", "PS", "GREG")
+      methodlst <- c("HT", "PS", "greg", "gregEN")
       method <- FIESTA::pcheck.varchar(var2check=method, varnm="method", gui=gui, 
 		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
       if (method == "PS") strata <- TRUE
@@ -193,7 +194,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 
   ## Check predfac
   ###################################################################################
-  if (module == "SA" || (module == "MA" && method == "GREG"))  {
+  if (module == "SA" || (module == "MA" && method == "greg"))  {
     if (!is.null(predfac) && !is.character(predfac)) 
       stop("invalid predfac... must be character string")
 
@@ -211,18 +212,36 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE)
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
-    SCHEMA. <- NULL
+    SCHEMA.=ppsanm=pltassgnqry <- NULL
     whereqry <- ""
-  
+    if (!is.null(pltassgn) && is.character(pltassgn) && pltassgn %in% tablst)
+      ppsanm <- pltassgn
+ 
     ## Filter for population data
     if (!is.null(evalid)) {
-      pfromqry <- getpfromqry(evalid, dsn=dsn)
-      whereqry <- paste0("where EVALID in(", toString(evalid), ")")
+      pfromqry <- getpfromqry(evalid, dsn=dsn, ppsanm=ppsanm)
+      whereqry <- paste0("where ppsa.EVALID in(", toString(evalid), ")")
+      if (!is.null(pltassgn) && is.character(pltassgn) && pltassgn %in% tablst)
+        pltassgnqry <- paste("select ppsa.* from", pfromqry, whereqry)
     } else if (measCur) {
-      pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=measEndyr, dsn=dsn, plotnm=plt)
+      pfromqry <- getpfromqry(varCur="MEASYEAR", Endyr=measEndyr, dsn=dsn, 
+		plotnm=plt, ppsanm=ppsanm)
+      if (!is.null(pltassgn) && is.character(pltassgn) && pltassgn %in% tablst)
+        pltassgnqry <- paste("select ppsa.* from", pfromqry)
     } else if (!is.null(invyrs)) {
-      pfromqry <- getpfromqry(invyrs=invyrs, dsn=dsn, plotnm=plt)
+      pfromqry <- getpfromqry(invyrs=invyrs, dsn=dsn, plotnm=plt, ppsanm=ppsanm)
       whereqry <- paste0("where invyrs in(", toString(invyrs), ")")
+      if (!is.null(pltassgn) && is.character(pltassgn) && pltassgn %in% tablst)
+        pltassgnqry <- paste("select ppsa.* from", pfromqry, whereqry)
+    } else {
+      if (!is.null(ppsanm)) {
+        pfromqry <- paste0("plot p INNER JOIN ", ppsanm, 
+			" ON(p.", pjoinid, " = ", ppsanm, ".", pltassgnid, ")")
+      } else {
+        pfromqry <- "plot p"
+      }
+#      if (!is.null(pltassgn) && is.character(pltassgn) && pltassgn %in% tablst)
+#        pltassgnqry <- paste("select * from", ppsanm)
     }
 
     if (!is.null(plt) && is.character(plt) && plt %in% tablst) 
@@ -232,8 +251,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
 				" c ON (c.PLT_CN = p.CN)")
       condqry <- paste("select c.* from", cfromqry, whereqry)
     }
-    if (!is.null(pltassgn) && is.character(pltassgn) && pltassgn %in% tablst)
-      pltassgnqry <- paste("select ppsa.* from", pfromqry, whereqry)
     if (!is.null(tree) && is.character(tree) && tree %in% tablst) {
       if (!is.null(pfromqry)) {
         tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
@@ -242,6 +259,15 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
         tfromqry <- paste(tree, "t")
       }
       treeqry <- paste("select t.* from", tfromqry, whereqry)
+    }
+    if (!is.null(tree) && is.character(tree) && tree %in% tablst) {
+      if (!is.null(pfromqry)) {
+        sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., seed,
+				" s ON (s.PLT_CN = p.CN)")
+      } else {
+        sfromqry <- paste(seed, "s")
+      }
+      seedqry <- paste("select s.* from", sfromqry, whereqry)
     }
     if (!is.null(vspspp) && is.character(vspspp) && vspspp %in% tablst) {
       if (!is.null(pfromqry)) {
@@ -252,7 +278,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
       }
       vspsppqry <- paste("select vspspp.* from", vspspp.fromqry, whereqry)
     }
-
   }
  
   ###################################################################################
@@ -538,7 +563,6 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     }
   }
 
-
   ######################################################################################
   ## Check unitvar - if NULL, add unitvar=ONEUNIT to pltcondx
   ######################################################################################
@@ -553,21 +577,25 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   ## Generate table of plots by strata, including nonsampled plots (P2POINTCNT)
   ######################################################################################
   if (strata) {
-    P2POINTCNT <- pltcondx[, uniqueN(get(cuniqueid)), by=c(unitvars, strvar)]
-    setnames(P2POINTCNT, "V1", "P2POINTCNT")
-    
-    if ("PLOT_STATUS_CD" %in% pltcondnmlst) {
+    if (nonresp) {
       ## Generate table of nonsampled plots by strata (if nonresp=TRUE)
-      if (nonresp && "PLOT_STATUS_CD" %in% pltcondnmlst) {
+      if ("PLOT_STATUS_CD" %in% pltcondnmlst) {
         if (!3 %in% unique(pltcondx[["PLOT_STATUS_CD"]]))
           stop("must include PLOT_STATUS_CD = 3 in dataset") 
 
         ## Create table with number of nonsampled plots by strata, substrata
-        nonsampplots <- pltcondx[PLOT_STATUS_CD == 3, uniqueN(get(cuniqueid)), 
-					by=c(strvar, substrvar)]
-        setkeyv(nonsampplots, c(strvar, substrvar))
-      }
+        nonresplut <- pltcondx[PLOT_STATUS_CD == 3, uniqueN(get(cuniqueid)), 
+					by=c(unitvars, strvar, substrvar)]
+        setnames(nonresplut, "V1", "n.nonresp")
+        setkeyv(nonresplut, c(unitvars, strvar, substrvar))
+      } 
     }
+    P2POINTCNT <- pltcondx[, list(P2POINTCNT=uniqueN(get(cuniqueid))), 
+		by=c(unitvars, strvar, substrvar)]
+    setkeyv(P2POINTCNT, c(unitvars, strvar, substrvar))
+    if (nonresp)
+      P2POINTCNT <- P2POINTCNT[nonresplut]
+      
   } else {
     P2POINTCNT <- pltcondx[, uniqueN(get(cuniqueid)), unitvars]
     setnames(P2POINTCNT, "V1", "P2POINTCNT")
@@ -578,9 +606,10 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   #############################################################################
   if ((is.null(plt.nonsamp.filter) || plt.nonsamp.filter == "") && adj != "none") {
     if ("PLOT_STATUS_CD" %in% names(pltcondx)) {
-      plt.nonsamp.filter <- "PLOT_STATUS_CD != 3"
-      if (sum(pltcondx$PLOT_STATUS_CD == 3) > 0)
+      if (sum(pltcondx$PLOT_STATUS_CD == 3, na.rm=TRUE) > 0) {
         message("removing ", sum(pltcondx$PLOT_STATUS_CD == 3), " nonsampled forest plots")
+        plt.nonsamp.filter <- "PLOT_STATUS_CD != 3"
+      }
     }
   }
   ## Apply plt.nonsamp.filter
@@ -811,6 +840,81 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     }
   }
 
+
+  ###################################################################################
+  ###################################################################################
+  ## Check seedling data
+  ###################################################################################
+  ###################################################################################
+
+  ###################################################################################
+  ## Import and check seed data table
+  ###################################################################################
+  seedx <- pcheck.table(seed, tab_dsn=dsn, tabnm="seed", caption="Seedling table?", 
+		nullcheck=nullcheck, gui=gui, tabqry=seedqry, returnsf=FALSE)
+  if (!is.null(seedx)) {
+    ## Define necessary variable for tree table
+    svars2keep <- {}
+    if (adj != "none") svars2keep <- "TPA_UNADJ"
+    seednmlst <- names(seedx)
+
+    ## Check unique identifiers
+    tuniqueid <- FIESTA::pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui, 
+		checklst=treenmlst, caption="UniqueID variable of plot", 
+		warn=paste(tuniqueid, "not in tree"), stopifnull=TRUE)
+
+    ## Check for NA values in necessary variables in tree table
+    seedx.na <- sum(is.na(seedx[[tuniqueid]]))
+    if (seedx.na > 0) stop("NA values in ", tuniqueid)
+
+    if (tuniqueid %in% pltcondnmlst) {
+      idplace <- which(pltcondnmlst %in% tuniqueid)
+      if (idplace != 1) { 
+	  pltcondnmlst <- c(tuniqueid, pltcondnmlst) 
+	  pltcondnmlst <- pltcondnmlst[-(idplace + 1)] 
+      }
+    } 
+
+    ## Check for condid in tree
+    if (!condid %in% names(treex)) {
+      if (nrow(seedx) == length(unique(seedx[[tuniqueid]]))) {
+        seedx[, CONDID := 1]
+      } else { 
+        stop("only 1 record for each tuniqueid allowed")
+      }
+    } else {
+      ## Check for NA values in condid
+      seedx.na <- sum(is.na(seedx[, tuniqueid, with=FALSE]))
+      if (seedx.na > 0) stop("NA values in ", tuniqueid)
+    }
+    setkeyv(seedx, c(tuniqueid, condid))
+
+    ## Check if class of tuniqueid in seedx matches class of cuniqueid in condx
+    tabs <- FIESTA::check.matchclass(pltcondx, seedx, cuniqueid, tuniqueid)
+    pltcondx <- tabs$tab1
+    seedx <- tabs$tab2
+
+    ## Check for missing tvars2keep 
+    smissvars <- svars2keep[which(!svars2keep %in% seednmlst)]
+    if (length(smissvars) > 0)
+      stop("missing necessary variables from seed: ", paste(smissvars, collapse=", "))
+
+    ## Check for NA values in svars2keep variables
+    ## TPA_UNADJ=NA, but trees have a DIA 
+    ## these are down dead trees that only count in growth and mortality, 
+    ## but wouldn't be measured if they hadn't been alive at the previous inventory
+
+    svars2keep2 <- svars2keep[svars2keep != "TPA_UNADJ"]
+    if (length(svars2keep) > 0) {
+      svars.na <- sapply(c(tuniqueid, condid, svars2keep2), 
+		function(x, seedx){ sum(is.na(seedx[,x, with=FALSE])) }, seedx)
+      if (any(svars.na) > 0) 
+        stop(svars.na[svars.na > 0], " NA values in variable: ", 
+		paste(names(svars.na[svars.na > 0]), collapse=", "))
+    }
+  }
+
+
   ###################################################################################
   ###################################################################################
   ## Check Vegetation data
@@ -876,6 +980,12 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
     returnlst$treef <- treef
     returnlst$tuniqueid <- tuniqueid
   }
+  if (!is.null(seedx)) {
+    ## Check that the values of tuniqueid in treex are all in cuniqueid in condf
+    seedf <- check.matchval(seedx, pltcondx, tuniqueid, cuniqueid, tab1txt="seed", 
+		tab2txt="seed", subsetrows=TRUE)
+    returnlst$seedf <- seedf
+  }
   if (!is.null(vspsppx)) {
     ## Check that the values of tuniqueid in vspsppx are all in cuniqueid in condf
     vspsppf <- check.matchval(vspsppx, pltcondx, vuniqueid, cuniqueid, tab1txt="vspspp", 
@@ -888,7 +998,7 @@ check.popdata <- function(module="GB", method="GREG", tree=NULL, cond,
   if (ACI) returnlst$nfplotsampcnt <- nfplotsampcnt
   if (nonresp) {
     returnlst$substrvar <- substrvar 
-    returnlst$nonsampplots <- nonsampplots
+    returnlst$nonresplut <- nonresplut
   }
   
   return(returnlst)

@@ -1,7 +1,7 @@
 anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
 	plot_layer="plot", cond_layer="cond", tree_layer="tree", puniqueid="CN", 
-	intensity1=TRUE, rastfolder=rastfolder, rastlst.cont=NULL, 
+	intensity1=TRUE, rastfolder=NULL, rastlst.cont=NULL, 
 	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	rastlst.cat.NODATA=NULL, showsteps=FALSE, cex.plots=0.5, savedata=FALSE, 
 	savexy=FALSE, savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
@@ -132,6 +132,9 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     par(mar=mar)
   }
 
+print("TEST")
+print(rastlst.cont)
+print(rastlst.cont.name)
 
   ####################################################################
   ## Get model data
@@ -152,7 +155,6 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   areavar <- MAmodeldat$areavar
   pltassgnid <- MAmodeldat$pltassgnid
   npixelvar <- MAmodeldat$npixelvar
-
 
   ##########################################
   ## Create output list

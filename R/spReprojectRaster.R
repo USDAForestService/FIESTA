@@ -1,7 +1,7 @@
 spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
     	res.new=NULL, bbox.new=NULL, dtype.new=NULL, NODATA.new=NULL,
  	resamp.method="near", crs.default="EPSG:5070", outfolder=NULL, 
-	outfn=NULL, outext="img") {
+	outfn=NULL, outext="img", overwrite=FALSE) {
 
   ##################################################################################
   ## DESCRIPTION: reproject raster. If crs.new is not defined, uses crs.default. 	
@@ -127,7 +127,8 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
     outext <- outext.tmp[length(outext.tmp)]   
     if (!outext %in% drivers[["DefaultExt"]]) stop("outext is invalid") 
   }
-  outfilenm <- getoutfn(outfn, outfolder=outfolder, outfn.pre=NULL, ext=outext)
+  outfilenm <- getoutfn(outfn, outfolder=outfolder, outfn.pre=NULL, ext=outext,
+	overwrite=overwrite)
 
   ## Get output raster format
   of <- drivers[drivers$DefaultExt == outext, "fmt"]
@@ -138,5 +139,7 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
 
   FIESTA::reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
 	t_srs=t_srs, s_srs=s_srs, of=of, ot=ot, r=r, dstnodata=dstnodata)
+
+  return(outfilenm)
  
 }

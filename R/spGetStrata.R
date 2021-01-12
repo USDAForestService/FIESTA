@@ -158,7 +158,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
       rast.NODATA <- 0
     } else {
-      strvar <- "STRATUMCD"
+      strvar <- "value"
     }
  
     ##################################################################
@@ -182,7 +182,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 #      } 
     
     if (!nounit) {
-
       ## Check unitvar
       unitvar <- FIESTA::pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		checklst=names(unitlayerx), caption="Estimation unit variable", 
@@ -230,7 +229,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       names(unitarea) <- c(unitvar, areavar)
         
     } else {  ## if nounit == TRUE
-
       stratalut <- areacalc.pixel(stratlayerfn, rast.NODATA=rast.NODATA)
       stratalut$strwt <- stratalut$count / sum(stratalut$count)
       strvar <- "value"
@@ -257,12 +255,33 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
   }
 
+  ## If lookup table, merge and aggregate
+  #######################################
+  if (!is.null(strat_lut)) {
+    stratalut <- merge(stratalut, strat_lut, by=strvar)
+    stratalut <- stratalut[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(unitvar, "strclass"), .SDcols=c("count", "strwt")]
+    setorderv(stratalut, c(unitvar, "strclass"))
+    setnames(stratalut, "strclass", "STRATUMCD")
+
+    sppltx <- merge(sppltx, strat_lut, by=strvar)
+    setnames(sppltx, "strclass", "STRATUMCD")
+    strvar <- "STRATUMCD"
+  } else {
+    setnames(stratalut, strvar, "STRATUMCD")
+    setnames(sppltx, strvar, "STRATUMCD")
+    strvar <- "STRATUMCD"
+  }  
+
   ## Write data frames to CSV files
   #######################################
   pltassgn <- sf::st_drop_geometry(sppltx)
 
   if (!keepxy) 
     pltassgn2 <- pltassgn[, c(uniqueid, unitvar, strvar)]
+
+  if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
+  setkeyv(stratalut, c(unitvar, strvar))  
 
   if (savedata) {
     datExportData(pltassgn, outfolder=outfolder, 
@@ -274,17 +293,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     datExportData(stratalut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
 		outfn.date=outfn.date, overwrite_layer=overwrite)
-  }
-
-  if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
-  setkeyv(stratalut, c(unitvar, strvar))
-
-  ## If lookup table, merge and aggregate
-  #######################################
-  if (!is.null(strat_lut)) {
-    stratalut <- merge(stratalut, strat_lut, by=strvar)
-    sppltx <- merge(sppltx, strat_lut, by=strvar)
-    stratalut <- stratalut[, list(strwt=sum(strwt)), by=c(unitvar, strvar)]
   }
 
   ## Export to shapefile

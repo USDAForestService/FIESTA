@@ -18,9 +18,9 @@
 modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
 	condid = "CONDID", puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
 	evalid = NULL, invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, 
-	strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
+	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
+	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
+	minplotnum.unit = 10, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
 	plt.filter = NULL, cond.filter = NULL, rowvar = NULL, colvar = NULL, 
 	row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
@@ -66,7 +66,6 @@ modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 	are only calculated for annual inventory plots (designcd=1). } 
   \item{ACI}{ Logical. If TRUE, includes All Condition Inventory (ACI) plots. Removes 
 	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). }
-  \item{strata}{ Logical. If TRUE, add data information for stratification. }
   \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
 	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
   \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
@@ -85,6 +84,7 @@ modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{strata}{ Logical. If TRUE, add data information for stratification. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 

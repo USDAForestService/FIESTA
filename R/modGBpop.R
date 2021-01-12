@@ -1,13 +1,14 @@
-modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL, 
+modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL, vspspp=NULL, 
 	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", 
 	pjoinid="CN", tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, intensity=NULL, 
-	adj="samp", ACI=FALSE, strata=TRUE, plt.nonsamp.filter=NULL, 
+	adj="samp", ACI=FALSE, plt.nonsamp.filter=NULL, 
 	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
-	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
-	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
-	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, 
+	stratalut=NULL, strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL, 
+	getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
+	saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite=TRUE, GBdata=NULL, gui=FALSE){
 
   ##################################################################################
@@ -32,7 +33,7 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(FIESTA::modGBpop)) 
+  formallst <- names(formals(modGBpop)) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -46,9 +47,6 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
   adjtree <- FALSE
-  nonresp <- FALSE
-  substrvar <- NULL
-
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -62,7 +60,7 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
   ## Check overwrite, outfolder, outfn 
   ########################################################
   if (savedata || saveobj) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outfolder <- pcheck.outfolder(outfolder, gui)
     overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite?", first="NO", gui=gui)  
     outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
@@ -75,7 +73,6 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
     }
 
     if (savedata) {
-
       out_fmtlst <- c("sqlite", "gpkg", "csv", "gdb", "shp")
       out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
 		checklst=out_fmtlst, gui=gui, caption="Output format?") 
@@ -95,13 +92,8 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
   } 
 
   if (!is.null(GBdata)) {
-    if (!is.list(GBdata))
-      stop("GBdata must be a list")
-    listitems <- c("bnd", "plt", "cond", "unitarea", "unitvar")
-    if (!all(listitems %in% names(GBdata))) {
-      items.miss <- listitems[!listitems %in% names(GBdata)]
-      stop("invalid GBdata... missing items: ", paste(items.miss, collapse=", "))
-    } 
+    list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
+    GBdata <- FIESTA::pcheck.object(GBdata, "GBdata", list.items=list.items)
     bnd <- GBdata$bnd
     plt <- GBdata$plt
     pltassgn <- GBdata$pltassgn
@@ -116,7 +108,7 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
     pjoinid <- GBdata$pjoinid
     pltassgnid <- GBdata$pltassgnid  
   } 
- 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -124,16 +116,18 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
   ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="GB", tree=tree, cond=cond, plt=plt, 
-	vspspp=vspspp, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
-	condid=condid, areawt=areawt, puniqueid=puniqueid, pltassgnid=pltassgnid, 
-	pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, intensity=intensity, 
-	adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
+	seed=seed, vspspp=vspspp, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid,
+ 	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid,
+ 	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs,
+ 	intensity=intensity, adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
 	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
- 	unitcombine=unitcombine, stratcombine=stratcombine, strata=strata, strvar=strvar)
+ 	unitcombine=unitcombine, stratcombine=stratcombine, strata=strata, strvar=strvar,
+	nonresp=nonresp, substrvar=substrvar)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
+  seedf <- popcheck$seedf
   vspsppf <- popcheck$vspsppf
   pltassgnx <- popcheck$pltassgnx
   cuniqueid <- popcheck$cuniqueid
@@ -157,10 +151,8 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
   invyrs <- popcheck$invyrs
   cvars2keep <- popcheck$cvars2keep
   pvars2keep <- popcheck$pvars2keep
-  if (nonresp) {
+  if (nonresp) 
     substrvar <- popcheck$substrvar 
-    nonsampplots <- popcheck$nonsampplots
-  }
   #rm(popcheck)
 
 
@@ -174,7 +166,6 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
 
- 
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -220,12 +211,14 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
 
   if (adj == "samp") {
     adjtree <- TRUE
-    adjfacdata <- getadjfactorGB(treex=treef, condx=condx, cuniqueid=cuniqueid, 
-		tuniqueid=tuniqueid, condid=condid, unitlut=strlut, unitvars=unitvar, 
-		strvars=strvar, unitarea=unitarea, areavar=areavar)
+    adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
+		cuniqueid=cuniqueid, tuniqueid=tuniqueid, condid=condid, 
+		unitlut=strlut, unitvars=unitvar, strvars=strvar, 
+		unitarea=unitarea, areavar=areavar)
     condx <- adjfacdata$condx
     strlut <- adjfacdata$unitlut
     treef <- adjfacdata$treex
+    seedf <- adjfacdata$seedx
     expcondtab <- adjfacdata$expcondtab
   } 
  
@@ -239,6 +232,9 @@ modGBpop <- function(cond=NULL, plt=NULL, tree=NULL, vspspp=NULL,
     returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
   }
+  if (!is.null(seedf))
+    returnlst$seedx <- seedf
+  
 
   if (!is.null(stratcombinelut)) 
     returnlst$stratcombinelut <- stratcombinelut

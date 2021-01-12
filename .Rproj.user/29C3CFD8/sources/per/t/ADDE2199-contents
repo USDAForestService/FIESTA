@@ -1,0 +1,679 @@
+---
+title: "FIESTA - Part II - Method (C) - Manti LaSal - Alp"
+author: Tracey S. Frescino
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+### Objectives:
+Demonstrate difference between generating estimates using EVALIDator vs generating estimates on-the-fly using FIESTA. 
+
+Part I: Describe process for populating FIADB population tables and generating estimates using EVALIDator.
+
+Part II: Describe process using FIESTA for generating population data and estimates.
+  Method (A): using state as population, data from FIADB, filtered for National Forest (match EVALIDator)
+  Method (B): using state as population, data sumarized in FIESTA, filtered for National Forest (identified by actual coordinates)
+  Method (C): using National Forest boundary as population, data summarized in FIESTA
+
+Part III: Compare results of EVALIDator process and FIESTA process.
+ 
+
+This example demonstrates Method (C), summarizing boundary-level population data using FIESTA functions. Method (C) is different than EVALIDator methods because it uses population data that is summarized and calculated on-the-fly within the population boundary. 
+
+
+### FIA Estimation Strategy
+Estimation calculations are based on the green-book (Scott et al. 2005) for mapped plots, using post-stratification. Stratification is used to incorporate auxiliary information to reduce variance in population estimates. 
+
+The population information needed to produce an estimate include: 
+
+* AOI: Population boundary (i.e., estimation unit(s))
+* FIA Plots: A set of FIA plots within the boundary, including identification of nonresponse plots and/or conditions
+* Area: Area of estimation unit(s)
+* Auxiliary Data: Proportion of area (or pixels) by stratum and/or estimation unit(s)
+* Plot Check: 10 sampled plots or greater within each estimation unit, 2 sampled plots or greater plots in a stratum
+* Assignment: An assignment of estimation unit and stratum to each plot
+
+In FIADB, the population data for each state has been previously compiled and stored in POP_* tables to retain efficiency and consistency when generating FIA's mandated state-level estimates. This stored information is referred to as an Evaluation. An Evaluation is defined as a group of plots that is used for population estimates, representing different inventory spans of data with different stratification and nonresponse. Each Evaluation is identified by an EVALID. An EVALID is a unique identifier, generally in the format of a 2-digit state code, a 2-digit year code, and a 2-digit evaluation type code. EVALIDator uses this information to produce estimates.
+
+In FIESTA, the population boundary and time span of FIA plots are defined by the user, with option to extract data from FIADB, including population data. If using a custom boundary, the population data are compiled 'on-the-fly' using FIESTA functions, including: total area of the boundary (i.e., estimation unit); proportion of pixels by stratum; and assignment of stratum and estimation unit to each plot. In this demonstration, we use the 2019 National Forest Administrative boundaries (S_USA.AdministrativeForest.gdb) to define our population.
+
+
+<!-- I. [Install and load libraries](#loadlib) -->
+<!-- II. [Set up options and parameters](#setup) -->
+<!-- DAT1. [Population boundary (i.e., Estimation unit(s))](#estunit) -->
+<!-- DAT2. [FIA plots within Estimation unit(s)](#fiadat) -->
+<!-- DAT3. [[Display plots](#showplots) -->
+<!-- CALC. [FIESTA population calculations](#popcalc) -->
+<!-- FILTERS. [Define plot/condition filters](#filters) -->
+<!-- RESPONSE. [Define estimation response and domain(s)](#resp) -->
+<!-- AREA1. [Area estimates and Errors](#areaest) -->
+<!-- AREA2. [Area table and bar plot](#areabar) -->
+<!-- TREE1. [Tree estimates and Errors](#treeest) -->
+<!-- TREE2. [Tree table and bar plot](#treebar) -->
+<!-- EXPORT1. [Export data to files](#expdata) -->
+<!-- EXPORT2. [Export area estimates and error](#exparea) -->
+<!-- EXPORT3. [Export tree estimates and error](#exptree) -->
+
+
+### I. Install and load libraries{#loadlib}
+
+```{r include=FALSE}
+
+## Check and install packages
+if (!require("FIESTA")) install.packages("FIESTA")            ## FIESTA
+#if (!require("FIESTAO")) install.packages("FIESTAO")         ## Database connection - Oracle
+if (!require("FIESTAdata")) install.packages("FIESTAdata")    ## FIESTA data package
+if (!require("knitr")) install.packages("knitr")              ## For prettier tables
+
+
+## Load libraries
+library(FIESTA)
+#library(FIESTAO)
+library(FIESTAdata)
+
+
+## Define function to create prettier tables
+kable.table <- function(estdf, domain, title.est=NULL) {
+    ## Description: Creates (knits) a prettier table from a data frame.
+    ## Arguments:
+    ## estdf - dataframe of estimates
+    ## domain - domain variable in estdf
+    ## title.est - title for table 
+  
+  knitr::kable(estdf[, c(domain, "est", "pse")],
+    format = "pandoc",   # default
+    caption = wraptitle(title.est, 75),
+    col.names = c(domain, "Estimate", "Pct Error"),
+    row.names = FALSE,
+    align = c("r"),       # align = c("c", "c", "c", "r")
+    digits = 2,
+    format.args=list(big.mark = ",")
+    # padding = 2         # inner spacing
+  )
+}
+
+
+```
+
+
+### II. Set up options and parameters{#setup}
+
+```{r results='hide'}
+
+options(scipen=6)
+options(stringsAsFactors=FALSE)
+
+
+## Define outfolder
+outfolder <- "outfolder"
+if (!dir.exists(outfolder)) dir.create(outfolder)
+
+## Define SQLite database
+SQLitefn <- "E:/FIAdata/FIAactual_UTCO_evalCur00_20200601.sqlite"
+
+
+## Define forest 
+forestname <- "Manti-La Sal National Forest"
+
+
+```
+
+
+## *Population Data Inputs*
+
+### DAT1. Population boundary (i.e., Estimation unit(s){#estunit}
+
+Estimation unit: A population, or area of interest, with known area and number of plots. An estimation unit may be a subpopulation of a larger population. Subpopulations are mutually exclusive within a population, therefore estimated totals and variances are additive. 
+
+Examples: 
+
+* Counties within state
+* Different intensities within state
+* National Forests within state
+* Districts within National Forest
+
+In FIESTA, the population, or estimation unit(s) are defined by the user. For Method (C) example, we use a National Forest Administrative boundary (e.g., Fishlake National Forest) as the population and summarize and calculate the population data using actual coordinates from FIADB and FIESTA functions. The 2019 National Forest Administrative boundaries (S_USA.AdministrativeForest.gdb) are stored as external data in the FIESTAdata package and are used for defining esimation units. To extract actual coordinates from FIADB, we must use FIESTA's sister package, FIESTAO and is only available with select permission to the SDS_PLOT or regional SDS_PLOT table.
+
+
+```{r}
+
+## Get Administrative Forest boundary data source name (dsn) from external data stored in FIESTAdata
+adfor_dsn <- FIESTAdata::get_ALP()
+adfor_dsn  
+  
+## Get Administrative Forest boundary layer name from external data stored in FIESTAdata
+FIESTAdata::get_layer_info(adfor_dsn)
+adfor_layer <- "BasicOwnershipFS"
+
+
+## Import ALP sf layer to look at it's data frame
+## Note: this layer has National Forest inholdings defined as OWNERCLASSIFICATION='NON-FS'
+adfor <- FIESTA::spImportSpatial(dsn=adfor_dsn, layer=adfor_layer)
+head(adfor)
+
+
+## Define National Forest filter (NOTE: must filter out NA values as well... see results from get_ALP_filter)
+FIESTAdata::get_layer_info(adfor_dsn, layer=adfor_layer)
+#FIESTAdata::get_ALP_names()
+adfor.filter <- FIESTAdata::get_ALP_filter(forestname)
+adfor.filter
+
+
+## Define unitvar
+adfor.unitvar <- "FORESTNAME"
+
+
+
+```
+
+
+
+### DAT2. FIA plots within Estimation unit(s){#fiaplots}
+
+In FIESTA, the set of plots for estimation is defined by the user. One option is to extract the plot data in FIADB using an EVALID. This assures a full cycle of data and spatially distributed sample of plots across the estimation unit. The plot data are identified using the POP_PLOT_STRATUM_ASSGN table in FIADB, which indicates the associated EVALID for each plot. All FIESTA-Method examples use plots from an FIADB evaluation. In this example, we use FIA's actual coordinates. To extract actual coordinates from FIADB, we must use FIESTA's sister package, FIESTAO which is only available with select permission to the SDS_PLOT or regional SDS_PLOT tables. 
+
+For Method (C) example, the data are clipped to the user-defined boundary perimeter. We will use the spatial wrapper function, spGetDBbnd() to extract and clip the data to the boundary. The spGetDBbnd function calls FIESTA core functions, DBgetPlots() and spClipPoints(). The spGetDBbndO function is available in the sister-package, FIESTAO, which includes functions to connect to the FIA database. Here, we continue using a SQLite database with data previously exported using this function (note: much quicker).  
+
+For auxiliary data summaries and data extractions, we need plot center coordinates:
+* xy_ACTUAL
+
+For area estimates, we need the following data tables from Oracle:
+* PLOT
+* COND
+
+For tree estimates, we need the following additional data table from Oracle:
+* TREE
+
+
+```{r}
+
+evalid <- c(491800, 81800)
+
+
+## Use FIESTA's spGetDBbnd function to extract data for custom population.
+# dat <- FIESTAO::spGetPlotsO(bnd=adfor_layer, bnd_dsn=adfor_dsn, bnd.filter=adfor.filter, 
+#                  evalid=evalid, actual=TRUE)
+#
+
+## Note: add information to save to use again
+# dat <- FIESTAO::spGetPlotsO(bnd=adfor_layer, bnd_dsn=adfor_dsn, bnd.filter=adfor.filter, 
+#                  evalid=evalid, actual=TRUE, savedata=TRUE, out_fmt="sqlite",
+#                  out_dsn="FIAactual_custom", outfn.date=TRUE)
+# 
+# ## plot data
+# plt <- dat$plt
+# 
+# ## condition data
+# cond <- dat$cond
+# 
+# ## tree data
+# tree <- dat$tree
+# 
+# ## the POP_PLOT_STRATUM_ASSGN used for extracting data 
+# POP_PLOT_STRATUM_ASSGN <- dat$POP_PLOT_STRATUM_ASSGN
+ 
+
+## ...  or get plots from a SQLite database with data for UT/CO.
+dbconn <- FIESTA::DBtestSQLite(SQLitefn, dbconnopen=TRUE)
+
+
+## Use spGetDBbnd with a predefined sqlite database
+dat <- FIESTA::spGetPlots(bnd=adfor_layer, bnd_dsn=adfor_dsn, datsource="sqlite",
+          bnd.filter=adfor.filter, intensity1=TRUE, xy_dsn=SQLitefn,
+          xy="xy_ACTUAL", xvar="LON_ACTUAL", yvar="LAT_ACTUAL",
+          evalid=evalid, data_dsn=SQLitefn)
+names(dat)
+
+## spatial boundary layer
+bnd <- dat$clip_polyv
+bnd
+
+## other tables (plot, cond, tree)
+tabs <- dat$clip_tabs
+
+names(tabs)
+plt <- tabs$clip_plt
+cond <- tabs$clip_cond
+tree <- tabs$clip_tree
+
+dim(plt)
+dim(cond)
+dim(tree)
+
+## Check plot status
+table(plt$PLOT_STATUS_CD)
+
+
+```
+
+
+### DAT3. Display plots{#showplots}
+
+Make xy data frame spatial and add to plot (using public coordinates in plt)
+To create spatial points, the following information must be provided:  
+* xy           - data frame with x/y coordinates (e.g., plt)
+* xy.uniqueid  - variable name in xy data frame with the unique identifier of plots
+* xvar/yvar    - variable names in xy data frame with x and y coordinates of the center location of each plot * crs          - the coordinate reference system of the x/y coordinates (e.g., EPSG:4269)
+
+```{r}
+
+par(mar=c(1,1,1,1))
+## Display estimation unit with points
+plot(sf::st_geometry(bnd))
+
+
+## Make xy data frame spatial and add to plot (using public coordinates in plt)
+## To create spatial points, the following information must be provided:  
+## - xy           - data frame with x/y coordinates (e.g., plt)
+## - xy.uniqueid  - variable name in xy data frame with the unique identifier of plots
+## - xvar/yvar    - variable names in xy data frame with x and y coordinates of
+##                  the center location of each plot  
+## - crs          - the coordinate reference system of the x/y coordinates 
+##                  (e.g., EPSG:4269)
+
+## xy data
+xy <- dat$clip_xyplt
+dim(xy)
+
+names(xy)
+xy.uniqueid <- "PLT_CN"
+xvar <- "LON_ACTUAL"
+yvar <- "LAT_ACTUAL"
+crs <- 4269
+spxy <- FIESTA::spMakeSpatialPoints(xy, xy.uniqueid=xy.uniqueid, 
+                                      xvar=xvar, yvar=yvar, crs=crs)
+plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.3)
+
+
+```
+
+
+### DAT3. Auxiliary data for Estimation unit(s){#auxdat}
+
+In FIESTA, the stratification data are defined by the user. For custom populations, the area by estimation unit, stratum pixel counts and stratum weights (i.e., proportion of pixels by stratum), and plot assignments are summarized using the FIESTA function, spGetStrata(). If no post-stratification, the area by estimation unit and plot assignments are generated using the FIESTA function, spGetEstunit(). 
+
+For Method (C) example, we summarize stratification data using FIESTA function, spGetStrata(). We will use a predicted raster layer of forest/nonforest that is stored in the FIESTAdata package as the stratification layer.
+
+```{r}
+
+## Get predicted raster layer of forest/nonforest (stored in FIESTAdata package)
+strat_layer <- FIESTAdata::get_tnt()
+#help(get_tnt)
+
+
+## Get area of Estimation unit(s), strata pixel count, strata weight, plot assignments
+stratdat <- FIESTA::spGetStrata(xyplt=xy, uniqueid=xy.uniqueid, xvar=xvar, yvar=yvar, 
+                        unit_layer=bnd, unitvar=adfor.unitvar, unit.filter=adfor.filter,
+                        strat_layer=strat_layer, rast.NODATA=0)
+names(stratdat)
+
+pltassgn <- stratdat$pltassgn
+pltassgnid <- stratdat$pltassgnid
+unitarea <- stratdat$unitarea
+unitvar <- stratdat$unitvar
+areavar <- stratdat$areavar
+stratalut <- stratdat$stratalut
+strvar <- stratdat$strvar
+
+
+## unitarea
+unitarea
+unitvar
+
+## pixel count/strata weights
+stratalut
+strvar
+
+
+## plot assignment
+head(pltassgn)
+
+
+
+## Check extracted data with data in database (i.e., plotgeom)
+pltgeom.qry <- "select CN, ALP_ADFORCD from plotgeom"
+pltgeom <- DBI::dbGetQuery(dbconn, pltgeom.qry)
+pltassgn.merge <- merge(pltgeom, pltassgn, by.x="CN", by.y="PLT_CN")
+ 
+## get difference between database and plot extraction
+diff <- pltassgn.merge[is.na(pltassgn.merge$ALP_ADFORCD),]
+diff <- merge(diff, plt[, c("CN", "PLOT_STATUS_CD")], by="CN")
+
+diffxy <- FIESTA::spMakeSpatialPoints(diff, xy.uniqueid="CN", xvar=xvar, yvar=yvar, crs=crs)
+#sf::st_crs(bnd)
+#sf::st_crs(diffxy)
+
+
+## Display estimation unit 
+par(mar=c(1,1,1,1))
+plot(sf::st_geometry(bnd))
+
+## Make xy data frame spatial and add to plot (Note: need to reproject points to projection of bnd)
+plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.3)
+diffxy <- FIESTA::spReprojectVector(diffxy, crs.new=st_crs(bnd))
+plot(sf::st_geometry(diffxy), add=TRUE, col="red", pch=19, cex=1)
+
+## Show table for differing plots
+diffxy
+
+
+```
+
+
+## *Population Data Calculations*
+
+### CALC. FIESTA population calculations{#popcalc}
+
+In FIESTA, the population data calculations, including number of sampled plots, area expansions (EXPNS), and area adjustment factors (ADJ_FACTOR_*) are generated using the FIESTA function, modGBpop(). The adjustment factors for nonsampled condition proportions, are also calculated in this function (see estimation section following).
+
+```{r}
+
+
+## Get population calculations for estimation unit(s)
+popdat <- FIESTA::modGBpop(cond=cond, plt=plt, tree=tree, pltassgn=pltassgn, 
+		pltassgnid=pltassgnid, unitvar=unitvar, unitarea=unitarea, areavar=areavar, 
+		stratalut=stratalut, strvar=strvar)			
+names(popdat)
+
+condx <- popdat$condx
+pltcondx <- popdat$pltcondx
+cuniqueid <- popdat$cuniqueid
+condid <- popdat$condid
+tuniqueid <- popdat$tuniqueid
+ACI.filter <- popdat$ACI.filter
+unitarea <- popdat$unitarea
+areavar <- popdat$areavar
+unitvar <- popdat$unitvar
+stratalut <- popdat$strlut
+strvar <- popdat$strvar
+expcondtab <- popdat$expcondtab
+plotsampcnt <- popdat$plotsampcnt
+condsampcnt <- popdat$condsampcnt
+treex <- popdat$treex
+adjtree <- popdat$adjtree
+
+
+
+## Filter for All Condition Plots (ACI)
+ACI.filter
+
+
+## Stratum-level information, including strata weights, number of plots, area expansion
+head(stratalut)
+
+
+## Number of plots by PLOT_STATUS_CD and number of plots by COND_STATUS_CD
+plotsampcnt
+condsampcnt
+
+
+## Condition-level adjustment factors and adjusted condition proportions
+condadj <- popdat$condx
+head(condadj[, c("PLT_CN", "CONDID", "CONDPROP_UNADJ", "SUBPPROP_UNADJ", "MICRPROP_UNADJ", 
+                 "MACRPROP_UNADJ", "cadjfac", "CONDPROP_ADJ")])
+dim(condadj)
+
+
+## Tree-level adjustment factors
+treeadj <- popdat$treex
+head(treeadj[, c("PLT_CN", "SUBP", "TREE", "CONDID", "STATUSCD", "SPCD", "DIA", "TPA_UNADJ", 
+                  "tadjfac")])
+dim(treeadj)
+
+
+```
+
+
+
+## *Estimation*
+
+### FILTERS. Define plot/condition filters{#filters}
+
+Plot and condition filters subset the area of the population for the desired output. This does not change the population data used for estimation, including stratum weights or number of sampled plots by estimation unit. Therefore, all plots within the population are used for generating estimates and estimated variances, with plots not included in the filter considered 'outside the domain of interest' and set to 0.
+
+In FIESTA, the plot and condition filters are defined using the following parameters: landarea, plt.filter, cond.filter
+
+1. land area filters ("FOREST", "TIMBERLAND", "ALL") - these filters are preset within FIESTA.
+* FOREST - COND_STATUS_CD == 1
+* TIMBERLAND - "SITECLCD %in% c(1:6) & RESERVCD == 0" 
+
+2. Apply other plot/condition filters (e.g., Fishlake National Forest)
+
+```{r}
+
+## 1. Define land area filters (e.g., Forest land only)
+landarea <- "FOREST"
+
+
+## 2. Apply other plot/condition filters (e.g., Fishlake National Forest)
+cond.filter <- NULL
+
+
+```
+
+
+
+### RESPONSE. Define estimation response and domain(s){#resp}
+
+For area estimates, the response attribute is the adjusted condition proportion (CONDPROP_ADJ), defaulted in FIESTA.
+For tree estimates, your response attribute is a tree attribute expanded by the adjusted trees per acre (TPA_ADJ).
+
+What do you want to estimate?
+What do you want to estimate response by?
+
+```{r results='hide'}
+
+## 1. Define estimation response
+estvar <- "VOLCFNET"
+
+## 1. Define estimation response filter (i.e., tree filter)
+estvar.filter <- "STATUSCD == 1"
+
+
+## 2. Define domain of interest (e.g., FORTYPCD)
+domain <- "STDSZCD"
+
+
+```
+
+
+### AREA1. Area estimates and Errors{#areaest}
+
+In FIESTA, area estimates, with associated errors, are generated using FIESTA's modGBarea() function. Calculations use the default adjusted condition proportions (CONDPROP_ADJ) response, output from FIESTA's modGBpop() function, and by user-defined domain(s) (i.e., rowvar, colvar).
+
+```{r}
+
+## Condition-level adjusted condition proportions
+areaest <- FIESTA::modGBarea(GBpopdat=popdat, landarea=landarea, cond.filter=cond.filter,
+                     rowvar=domain, row.FIAname=TRUE, 
+                     rawdata=TRUE, returntitle=TRUE, savedata=FALSE)
+names(areaest)
+areaest$est
+
+## Extract raw data from areaest 
+area.raw <- areaest$raw
+names(area.raw)
+
+## Extract titles from areaest
+titlelst <- areaest$titlelst
+
+
+## Details of estimates for table rows, summed to population
+area.rowest <- area.raw$unit.rowest
+
+
+## Title for rowvar
+title.rowvar <- titlelst$title.rowvar
+
+## Title for row estimates
+area.title.row <- titlelst$title.row
+
+
+```
+
+
+### AREA2. Area bar plot{#areabar}
+
+```{r}
+
+
+## Create prettier table using function defined above
+kable.table(area.rowest, domain=domain, title.est=area.title.row)
+
+
+## Create barplot of area estimates, including standard errors
+FIESTA::datBarplot(area.rowest, xvar=title.rowvar, yvar="est", errbars=TRUE, sevar="est.se",
+           ylabel=title.rowvar, divideby="million", x.order="DESC",
+           main=wraptitle(area.title.row, 80))
+
+
+```
+
+
+### TREE1. Tree estimates and Error{#treeest}
+
+In FIESTA, tree estimates, with associated errors, are generated using FIESTA's modGBtree() function. Calculations use a user-defined tree estimation response multiplied by the adjusted trees per acre (TPA_ADJ), output from FIESTA's modGBpop() function, and by user-defined domain(s) (i.e., rowvar, colvar).
+
+
+```{r}
+
+treeest <- FIESTA::modGBtree(GBpopdat=popdat, landarea=landarea, cond.filter=cond.filter,
+                     estvar=estvar, estvar.filter=estvar.filter, 
+                     rowvar=domain, row.FIAname=TRUE,
+                     rawdata=TRUE, returntitle=TRUE, savedata=FALSE)
+names(treeest)
+treetab <- treeest$est
+treetab
+
+
+## Extract raw data from areaest 
+tree.raw <- treeest$raw
+names(tree.raw)
+
+## Extract titles from areaest
+titlelst <- treeest$titlelst
+
+## Details of estimates for table rows, summed to population
+tree.rowest <- tree.raw$unit.rowest
+
+## Title for rowvar
+title.rowvar <- titlelst$title.rowvar
+
+
+## Title for row estimates
+tree.title.row <- titlelst$title.row
+
+
+```
+
+
+### TREE2. Tree bar plot{#treebar}
+
+```{r}
+
+
+## Create prettier table using function defined above
+kable.table(tree.rowest, domain=domain, title.est=tree.title.row)
+
+
+## Create barplot of tree estimates, including standard errors
+FIESTA::datBarplot(tree.rowest, xvar=title.rowvar, yvar="est", errbars=TRUE, sevar="est.se",
+           ylabel=title.rowvar, divideby="million", x.order="DESC",
+           main=wraptitle(tree.title.row, 80))
+
+
+```
+
+
+## *Export data*
+
+### EXPORT1. Export data to files{#expdata}
+
+Write data to files.
+
+* pltassgn  - plot data with estimation unit and stratum assignments
+* stratalut  - stratum-level data, including stratum weights, plot counts, area, and area expansions
+* unitarea   - area, in acres, by estimation unit
+
+* plot   - plot-level data for evaluation(s)
+* cond   - condition-level data for evaluation(s)
+* tree   - tree-level data for evaluation(s)
+
+
+```{r results='hide'}
+
+## Export data to CSV files in working directory, with names including prefix
+
+## Define prefix for output file names
+datpre <- paste0("FIESTA_MethodC_eval_", paste(evalid, collapse="_"))
+
+
+# ## Export population data
+write.csv(pltassgn, file.path(outfolder, paste0(datpre, "_pltassgn.csv")), row.names=FALSE)
+write.csv(stratalut, file.path(outfolder, paste0(datpre, "_stratalut.csv")), row.names=FALSE)
+write.csv(unitarea, file.path(outfolder, paste0(datpre, "_unitarea.csv")), row.names=FALSE)
+
+## Export plot, cond, tree data
+write.csv(plt, file.path(outfolder, paste0(datpre, "_plt.csv")), row.names=FALSE)
+write.csv(cond, file.path(outfolder, paste0(datpre, "_cond.csv")), row.names=FALSE)
+write.csv(tree, file.path(outfolder, paste0(datpre, "_tree.csv")), row.names=FALSE)
+
+ 
+```
+
+
+
+### EXPORT2. Export area estimates and error{#exparea}
+
+Write area estimates to files.
+
+```{r}
+
+
+## Define folder for estimates
+estfolder <- "_estimates"
+
+## Define prefix for output names
+areaout.pre <- "FIESTA_MethodC_area"
+
+## Define variable names for output 
+area.names <- c("est", "est.se", "pse")
+
+## Define new variable names for output
+areaout.names <- paste(areaout.pre, c("est", "se", "pse"), sep="_")
+
+## Subset table and add new names
+areaout <- area.rowest[, c(domain, area.names)]
+names(areaout) <- c(domain, areaout.names)
+areaout
+
+## Export table estfolder
+write.csv(areaout, file.path(outfolder, paste0(areaout.pre, "_estimates.csv")), row.names=FALSE)
+
+
+```
+
+
+### EXPORT3. Export tree estimates and error{#exptree}
+
+Write tree estimates to files.
+
+```{r}
+
+## Define prefix for output names
+treeout.pre <- "FIESTA_MethodC_tree"
+tree.names <- c("est", "est.se", "pse")
+treeout.names <- paste(treeout.pre, c("est", "se", "pse"), sep="_")
+
+treeout <- tree.rowest[, c(domain, "est", "est.se", "pse")]
+names(treeout) <- c(domain, treeout.names)
+treeout
+
+## Export estimates with variance and percent error
+write.csv(treeout, file.path(outfolder, paste0(treeout.pre, "_estimates.csv")), row.names=FALSE)
+
+
+```
+

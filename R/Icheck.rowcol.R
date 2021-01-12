@@ -436,11 +436,11 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 
     ## GET column titles defined in FIESTA
     ###################################################
-    if (is.null(title.colvar))
-     title.colvar <- ifelse (colvar %in% ref_titles[["DOMVARNM"]], 
+    if (is.null(title.colvar)) 
+      title.colvar <- ifelse (colvar %in% ref_titles[["DOMVARNM"]], 
 		ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"], 
-     ifelse (colvar %in% ref_titles[["DOMVARNM"]], 
-		ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"], colvar))	
+      	ifelse (colvar %in% ref_titles[["DOMVARNM"]], 
+			ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"], colvar))   	
 
     ## Check collut
     if (!is.null(collut)) {

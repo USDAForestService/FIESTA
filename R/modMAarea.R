@@ -1,6 +1,6 @@
 modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="PLT_CN", 
 	condid="CONDID", puniqueid="CN", pltassgnid="CN", pjoinid="CN", evalid=NULL, 
-	invyrs=NULL, ACI=FALSE, adj="samp", MAmethod="GREG", plt.nonsamp.filter=NULL,
+	invyrs=NULL, ACI=FALSE, adj="samp", MAmethod="greg", plt.nonsamp.filter=NULL,
  	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
 	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
@@ -71,16 +71,11 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
 	stratcombine=stratcombine, MAdata=MAdata, gui=gui)
   } else {
     returnMApopdat <- FALSE
-    if (!is.list(MApopdat))
-      stop("MApopdat must be a list")
-    listitems <- c("condx", "pltcondx", "cuniqueid", "condid", 
+    list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
 		"npixelvar", "PSstrvar", "prednames", "expcondtab", "plotsampcnt",
 		"condsampcnt", "MAmethod")
-    if (!all(listitems %in% names(MApopdat))) {
-      items.miss <- listitems[!listitems %in% names(MApopdat)]
-      stop("invalid MApopdat... missing items: ", paste(items.miss, collapse=", "))
-    }   
+    MApopdat <- FIESTA::pcheck.object(MApopdat, "MApopdat", list.items=list.items)
   }		
   if (is.null(MApopdat)) return(NULL)
   condx <- MApopdat$condx
@@ -239,7 +234,7 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
     unit.rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-	domain=rowvar, response=estvar.name, npixels=npixels))
+	domain=rowvar, response=estvar.name, npixels=npixels, FIA=TRUE))
   }
   if (colvar != "NONE") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -247,14 +242,14 @@ modMAarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, cuniqueid="P
     unit.colest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-	domain=colvar, response=estvar.name, npixels=npixels))
+	domain=colvar, response=estvar.name, npixels=npixels, FIA=TRUE))
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, grpvar, PSstrvar, prednames), .SDcols=estvar.name]
     unit.grpest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-	domain=grpvar, response=estvar.name, npixels=npixels))
+	domain=grpvar, response=estvar.name, npixels=npixels, FIA=TRUE))
   }
 
 

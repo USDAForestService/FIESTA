@@ -70,13 +70,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
       } 
     }
   } else {
-    if (!is.list(MAdata))
-      stop("MAdata must be a list")
-    listitems <- c("bnd", "plt", "cond", "unitarea", "unitvar")
-    if (!all(listitems %in% names(MAdata))) {
-      items.miss <- listitems[!listitems %in% names(MAdata)]
-      stop("invalid MAdata... missing items: ", paste(items.miss, collapse=", "))
-    } 
+    list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
+    MAdata <- FIESTA::pcheck.object(MAdata, "MAdata", list.items=list.items)
     plt <- MAdata$plt
     cond <- MAdata$cond
     tree <- MAdata$tree
@@ -179,12 +174,12 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   stratcombinelut <- auxdat$unitstrgrplut
 
 
-  if ("GREG" %in% MAmethod && !is.null(predfac)) {
+  if ("greg" %in% MAmethod && !is.null(predfac)) {
     for (fac in predfac) {
       ## Get factor levels
       fac.levels <- sort(unique(pltassgnx[[fac]]))
 
-      ## Set factor levels to keep and delete from unitlut.GREG
+      ## Set factor levels to keep and delete from unitlut.
       fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
       fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
       unitlut[[fac.unitcol.del]] <- NULL
@@ -254,12 +249,12 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   }
 
 
-  returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid,
- 		ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
-		unitvar=unitvar, unitlut=unitlut, npixels=npixels, npixelvar=npixelvar, 
-		PSstrvar=PSstrvar, prednames=prednames, expcondtab=expcondtab, 
-		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, invyrs=invyrs,
- 		MAmethod=MAmethod)
+  returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
+	condid=condid, ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
+	unitvar=unitvar, unitlut=unitlut, npixels=npixels, npixelvar=npixelvar, 
+	PSstrvar=PSstrvar, prednames=prednames, expcondtab=expcondtab, 
+	plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
+	invyrs=invyrs, MAmethod=MAmethod)
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
@@ -289,7 +284,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitlut", 
 		outfn.date=outfn.date, overwrite_layer=overwrite)
   }
-
 
   return(returnlst)
 }

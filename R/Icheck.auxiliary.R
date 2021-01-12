@@ -54,7 +54,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
       PSstrvar <- FIESTA::pcheck.varchar(var2check=PSstrvar, varnm="PSstrvar", 
 		gui=gui, checklst=c("NONE", names(auxlut)), caption="Strata variable?", 
 		warn="strata variable not in auxlut", stopifnull=TRUE) 
-      strvars <- c(strvars, PSstrvar) 
+      #strvars <- c(strvars, PSstrvar) 
 
       ## Check for a total value in the last row of table..  If exists, exclude.
       lastrow <- auxlut[nrow(auxlut),]
@@ -69,7 +69,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
         if (any(unitvars == "ONEUNIT") && !"ONEUNIT" %in% names(auxlut))
           auxlut[, ONEUNIT := 1]
       }
-
+ 
       ## Check substrvar (if nonresp)
       #############################################################
       if (module =="GB" && nonresp) {
@@ -80,19 +80,17 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
         substrvar <- FIESTA::pcheck.varchar(var2check=substrvar, varnm="substrvar", 
 		gui=gui, checklst=auxnmlst, caption="Substrata variable?", 
 		warn="substrata variable not in strata table", stopifnull=TRUE)
-        strvars <- c(strvars, substrvar)
+        #strvars <- c(strvars, substrvar)
 
-        ## Check number of plots and concatenate to 1 variable
-        nbrplots <- pltx[, .N, by=strvars]
-        if (any(nbrplots$N < minplotnum.strat)) {
-          stop("not enough plots in substrata... consider collapsing")
-        } else {
-          auxlut[["STRATASUB"]] <- paste(auxlut[[PSstrvar]], auxlut[[substrvar]], sep="-")
-          pltx[["STRATASUB"]] <- paste(pltx[[PSstrvar]], pltx[[substrvar]], sep="-")
-          PSstrvar <- "STRATASUB"
-        }
+        ## Concatenate to 1 variable
+        auxlut[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
+        pltx[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
+        if (!is.null(P2POINTCNT))
+          P2POINTCNT[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")][
+			, c(PSstrvar, substrvar) := NULL]
+        PSstrvar <- "STRATASUB"
       } 
-
+      strvars <- c(strvars, PSstrvar) 
     } else {
       message("no strata")
       PSstrvar <- "ONESTRAT"
@@ -208,9 +206,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     ############################
     sumvars <- c(getwtvar, npixelvar, "strwt")
     sumvars <- sumvars[sumvars %in% names(auxlut)]
+
     if (length(sumvars) > 0) {
-      auxlut <- auxlut[, sum(get(sumvars), na.rm=TRUE), by=c(unitvars, strvars)]
-      setnames(auxlut, c(unitvars, PSstrvar, substrvar, sumvars))
+      auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE), by=c(unitvars, strvars), .SDcols=sumvars]
+      setnames(auxlut, c(unitvars, strvars, sumvars))
     }
     setkeyv(auxlut, unitvars)
 
@@ -240,9 +239,8 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     auxlut <- tabs$tab2
     
     ## Check that the strunitvars in pltx are all in auxlut
-    auxlut2 <- merge(auxlut, P2POINTCNT, by=c(unitvars, strvars))
-    if (nrow(auxlut2) == nrow(auxlut))
-      auxlut <- auxlut2
+    auxlut <- merge(auxlut, P2POINTCNT, by=c(unitvars, strvars), all.x=TRUE)
+    auxlut[is.na(auxlut)] <- 0
   }
 
   ##################################################################################

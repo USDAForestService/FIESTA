@@ -41,7 +41,7 @@ allin1f <- function(x, y, char.width=NULL, estnull="--", psenull="--",
 
 
 crosstabx <- function(x, xvar, estnm, psenm, allin1=FALSE, char.width=NULL,
-		estround=0, pseround=0, estnull="--", psenull="--") {
+		estround=NULL, pseround=NULL, estnull="--", psenull="--") {
   
   ## Set global variable
   NBRPLT.gt0 <- NULL
