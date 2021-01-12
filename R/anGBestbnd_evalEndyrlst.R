@@ -39,9 +39,10 @@ anGBestbnd_evalEndyrlst <- function(evalEndyrlst, data_dsn=NULL,
   stcds <- pcheck.states(states, statereturn = "VALUE")
 
   ## Generate list of evalids to generate estimates from
-  evalidlst <- as.vector(sapply(stcds, function(x) 
+  evalidlst <- data.table::transpose(lapply(stcds, function(x) 
 		paste0(x, substr(evalEndyrlst, 3, 4), "01")))
-
+  names(evalidlst) <- paste0("eval", evalEndyrlst)
+  
 
   ## Get data from FIA Datamart and store in temporary directory
   #########################################################################
@@ -61,7 +62,7 @@ anGBestbnd_evalEndyrlst <- function(evalEndyrlst, data_dsn=NULL,
 
   ## Check evalidlst
   #########################################################################
-  evalidlst <- as.vector(unlist(DBgetEvalid(evalid=evalidlst)$evalidlist))
+  evalidchk <- DBgetEvalid(evalid=unlist(evalidlst))
 
 
   ## Check xy data
@@ -86,14 +87,13 @@ anGBestbnd_evalEndyrlst <- function(evalEndyrlst, data_dsn=NULL,
   estlst <- list()
   estrawlst <- list()
 
-  for (evalid in evalidlst) {
-    message("getting estimates from ", evalid)
-    evalnm <- paste0("eval_",evalid)
+  for (evalyr in names(evalidlst)) {
+    message("getting estimates from ", toString(evalyr))
 
     xy.qry <- paste("select p.CN,", xyvars, "from", xy_layer, " xy",
 	"join plot p on(p.PLOT_ID = xy.PLOT_ID)
 	join pop_plot_stratum_assgn ppsa on(ppsa.PLT_CN = p.CN)  
-	where ppsa.evalid =", evalid)
+	where ppsa.evalid in(", toString(evalidlst[[evalyr]]), ")")
     xy_conn <- DBI::dbConnect(RSQLite::SQLite(), xy_dsn)
     xy <- DBI::dbGetQuery(xy_conn, xy.qry)
     DBI::dbDisconnect(xy_conn)
@@ -142,7 +142,7 @@ anGBestbnd_evalEndyrlst <- function(evalEndyrlst, data_dsn=NULL,
 		dsn=data_dsn, pjoinid="CN", strata=strata, unitvar=unitvar, 
 		unitarea=unitarea, areavar=areavar, stratalut=stratalut, strvar=strvar, 
 		getwt=FALSE, stratcombine=TRUE, saveobj=FALSE, savedata=savedata, 
-		outfolder=NULL, outfn.pre=evalnm, outfn.date=FALSE, overwrite=TRUE)
+		outfolder=NULL, outfn.pre=evalyr, outfn.date=FALSE, overwrite=TRUE)
 
 
     ## Generate estimates
@@ -163,8 +163,8 @@ anGBestbnd_evalEndyrlst <- function(evalEndyrlst, data_dsn=NULL,
 		rawdata=TRUE, returntitle=TRUE, savedata=savedata)
     }  
  
-    estlst[[evalnm]] <- est$est
-    estrawlst[[evalnm]] <- est$raw$unit.rowest
+    estlst[[evalyr]] <- est$est
+    estrawlst[[evalyr]] <- est$raw$unit.rowest
   }
 
   return(list(estlst=estlst, estrawlst=estrawlst))
