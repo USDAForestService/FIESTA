@@ -11,14 +11,14 @@
 
 }
 \usage{
-modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
-	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", evalid = NULL, 
-	invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, strata = TRUE, 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
-	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
+modGBratio(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
+	estseed = "none", dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
+	condid = "CONDID", puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
+	evalid = NULL, invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, 
+	strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
+	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
+	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
+	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
 	plt.filter = NULL, cond.filter = NULL, ratiotype = "PERACRE", 
 	estvarn = NULL, estvarn.filter = NULL, estvarn.name = NULL, estvard = NULL, 
 	estvard.filter = NULL, estvard.name = NULL, rowvar = NULL, colvar = NULL, 
@@ -37,6 +37,8 @@ modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{tree}{ DF/DT, comma-delimited file(*.csv), or layer in dsn. Tree-level 
 	variables to aggregate to condition-level. See details for necessary 
 	variables to include. }
+  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Seedling-level data with one record of seedling counts for each species in plot. }
   \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
 	The condition-level variables with one record per condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
@@ -49,7 +51,8 @@ modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{pltassgn}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
 	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
 	or a sf R object. Plot-level assignment of estimation unit and/or strata. Optional. }
-  \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
+  \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
+	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{dsn}{ String. Name of database where tree, cond, and pltassgn tables reside. 
 	The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). }

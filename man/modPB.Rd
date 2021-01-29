@@ -12,9 +12,9 @@ Patterson (2012) photo-based estimators for the Nevada photo-based inventory.
 modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
 	pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
 	pltassgnid = "CN", plt.nonsamp.filter = NULL, tabtype = "PCT", 
-	strata = FALSE, sumunits = FALSE, unitvar = NULL, unitvar2 = NULL, 
-	unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, 
-	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
+	strata = FALSE, strtype = "POST", sumunits = FALSE, unitvar = NULL, 
+	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
+	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
 	stratcombine = TRUE, ratio = FALSE, landarea = "ALL", landarea.filter = NULL, 
 	pnt.nonsamp.filter = NULL, pnt.filter = NULL, plt.filter = NULL, 
 	rowvar = NULL, colvar = NULL, row.orderby = NULL, col.orderby = NULL, 
@@ -53,6 +53,8 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
 	Must be R syntax. }
   \item{tabtype}{ String. Type of units for the table ("PCT", "AREA"). }
   \item{strata}{ Logical. If TRUE, add data information for stratification. }
+  \item{strtype}{ String. If strata=TRUE, the type of strata ('POST', 'PRE'). 
+	Note: the variance equations are slighlty different. }
   \item{sumunits}{ Logical. If TRUE, estimation units are combined to one table for
 	output. Note: only available if tabtype="AREA". Acres}
   \item{unitvar}{ String. Name of the estimation unit variable in cond or pltassgn 

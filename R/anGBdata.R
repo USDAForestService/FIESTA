@@ -1,11 +1,12 @@
 anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
-	plot_layer="plot", cond_layer="cond", tree_layer="tree", puniqueid="CN", 
-	intensity1=TRUE, strata=TRUE, strattype="RASTER", strat_layer=NULL, 
-	strat_dsn=NULL, strvar=NULL, showsteps=FALSE, cex.plots=0.5, 
-	savedata=FALSE, savexy=TRUE, savesteps=FALSE, saveobj=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=TRUE, GBpltdat=NULL, ...) {
+	isseed=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
+	seed_layer="seed", puniqueid="CN", intensity1=TRUE, strata=TRUE, 
+	strattype="RASTER", strat_layer=NULL, strat_dsn=NULL, strvar=NULL, 
+	showsteps=FALSE, cex.plots=0.5, savedata=FALSE, savexy=TRUE, 
+	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
+	GBpltdat=NULL, ...) {
 
 
   ## Set global variables
@@ -61,17 +62,17 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 			overwrite=overwrite, returnpath=FALSE)
     }	
   }
-
-
+ 
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(GBpltdat)) {
     GBpltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
 		RS=RS, clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
-		istree=istree, plot_layer=plot_layer, cond_layer=cond_layer, 
-		tree_layer=tree_layer, intensity1=intensity1, savedata=FALSE, 
-		savexy=TRUE, ...)
+		istree=istree, isseed=isseed, plot_layer=plot_layer, cond_layer=cond_layer, 
+		tree_layer=tree_layer, seed_layer=seed_layer, intensity1=intensity1, 
+		savedata=FALSE, savexy=TRUE, ...)
+
     if (is.null(GBpltdat)) return(NULL)
     if (saveobj) {
       message("saving GBpltdat object to: ", file.path(outfolder, "GBpltdat.rda"), "...")
@@ -94,6 +95,9 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   plt <- GBpltdat$clip_tabs$clip_plt
   cond <- GBpltdat$clip_tabs$clip_cond
   tree <- GBpltdat$clip_tabs$clip_tree
+  if (isseed) 
+    seed <- GBpltdat$clip_tabs$clip_seed
+ 
 
   if (showsteps) {
     ## Set plotting margins
@@ -154,10 +158,14 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ##########################################
   ## Create output list
   ##########################################
-  GBdata <- list(bnd=bnd, plt=plt, pltassgn=pltassgn, cond=cond, tree=tree, 
+  GBdata <- list(bnd=bnd, plt=plt, pltassgn=pltassgn, cond=cond,
 			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
 			stratalut=stratalut, strvar=strvar, puniqueid=puniqueid,
 			pjoinid=pjoinid, pltassgnid=pltassgnid)
+  if (istree) 
+    GBdata$tree <- tree
+  if (isseed)
+    GBdata$seed <- seed
 
   if (savexy) {
     GBdata$xyplt <- xyplt
@@ -192,8 +200,13 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     datExportData(cond, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
 		outfn.date=outfn.date, overwrite_layer=overwrite)
-    datExportData(tree, outfolder=outfolder, 
+    if (istree) 
+      datExportData(tree, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
+		outfn.date=outfn.date, overwrite_layer=overwrite)
+    if (isseed) 
+      datExportData(seed, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seed", 
 		outfn.date=outfn.date, overwrite_layer=overwrite)
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 

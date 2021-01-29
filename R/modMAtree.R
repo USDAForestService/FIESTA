@@ -1,7 +1,7 @@
-modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, dsn=NULL, 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", 
-	pltassgnid="CN", pjoinid="CN", evalid=NULL, invyrs=NULL, ACI=FALSE, adj="samp",
- 	MAmethod="greg", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
+modMAtree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, pltassgn=NULL, 
+	estseed="none", dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
+	puniqueid="CN", pltassgnid="CN", pjoinid="CN", evalid=NULL, invyrs=NULL, ACI=FALSE, 
+	adj="samp", MAmethod="greg", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE,
  	minplotnum.unit=10, unitlut=NULL, npixelvar="npixels", prednames=NULL, predfac=NULL, 
  	PSstrvar=NULL, stratcombine=TRUE, landarea="ALL", plt.filter=NULL,
@@ -54,15 +54,21 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
     stop("invalid parameter: ", toString(miss))
   }
 
+  ## Check estseed 
+  ########################################################
+  estseedlst <- c("none", "only", "add")
+  estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
+		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
+
 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(MApopdat)) {
-    MApopdat <- modMApop(tree=tree, cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
-	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid,  
-	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
-	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter,
+    MApopdat <- modMApop(tree=tree, seed=seed, cond=cond, plt=plt, dsn=dsn, 
+	pltassgn=pltassgn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
+	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, 
+	invyrs=invyrs, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter,
  	cond.nonsamp.filter=cond.nonsamp.filter, MAmethod=MAmethod, unitvar=unitvar, 
 	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
 	minplotnum.unit=minplotnum.unit, unitlut=unitlut, npixelvar=npixelvar, 
@@ -80,6 +86,8 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   condx <- MApopdat$condx
   pltcondx <- MApopdat$pltcondx
   treex <- MApopdat$treex
+  seedx <- MApopdat$seedx
+  if (is.null(treex) && is.null(seedx)) stop("must include tree data for tree estimates")
   cuniqueid <- MApopdat$cuniqueid
   condid <- MApopdat$condid
   tuniqueid <- MApopdat$tuniqueid
@@ -109,15 +117,16 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 		condid=condid, treex=treex, sumunits=sumunits, landarea=landarea,
- 		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
-		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
- 		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
+ 		condid=condid, treex=treedat, seedx=seedx, sumunits=sumunits, 
+		landarea=landarea, ACI.filter=ACI.filter, plt.filter=plt.filter, 
+		cond.filter=cond.filter, allin1=allin1, estround=estround, pseround=pseround,
+ 		divideby=divideby, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 		savedata=savedata, outfolder=outfolder, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
   treef <- estdat$treef
+  seedf <- estdat$seedf
   tuniqueid <- estdat$tuniqueid
   sumunits <- estdat$sumunits
   allin1 <- estdat$allin1
@@ -138,7 +147,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, 
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
 	condf=pltcondf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, rowvar=rowvar,
  	rowvar.filter=rowvar.filter, colvar=colvar, colvar.filter=colvar.filter,
  	row.FIAname=row.FIAname, col.FIAname=col.FIAname, row.orderby=row.orderby, 
@@ -147,6 +156,7 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
 	collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
 	landarea=landarea) 
   treef <- rowcolinfo$treef
+  seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -178,10 +188,11 @@ modMAtree <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
   ### GET ESTIMATION DATA FROM TREE TABLE
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- check.tree(gui=gui, treef=treef, bycond=TRUE, condf=condf, bytdom=bytdom, 
-	tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
-	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2,
-	adjtree=adjtree)
+  treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
+	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
+	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
+	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, 
+	tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
   estvar <- treedat$estvar

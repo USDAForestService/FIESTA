@@ -36,6 +36,9 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   yvar <- FIESTA::pcheck.varchar(var2check=yvar, varnm="yvar", checklst=xnamelst, 
 	caption="Y variable", warn="yvar not in data table", stopifnull=TRUE) 
 
+  ## Check NAto0
+  NAto0 <- FIESTA::pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
+		first="YES", gui=gui)
 
   ## Check function (pfun) used for aggregation
   pfunlst <- c("sum", "mean", "max", "min", "length", "I")
@@ -64,7 +67,6 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
       outfn <- "pivot"
   }
 
-
   ################################################################################	
   ## DO WORK
   ################################################################################
@@ -74,9 +76,16 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
     datxf <- na.omit(datxf, cols=xvar)
   datxf[, concatx := do.call(paste, c(.SD, sep="#")), .SDcols=xvar]
   
-  pfill <- ifelse(NAto0, 0, NA)
-  ptab <- dcast(datxf, concatx ~ get(yvar), value.var=pvar, fun.aggregate=pfun,
-		fill=pfill) 
+  if (NAto0) {
+    pfill <- ifelse(NAto0, 0, NA)  
+  }  
+ 
+  ptab <- data.table::dcast(datxf, concatx ~ get(yvar), value.var=pvar, 
+		fun.aggregate=pfun, na.rm=TRUE, pfill=pfill)
+  if (NAto0) { 
+    ptab[is.na(ptab)] <- 0
+  }
+
   ptab[, (xvar) := tstrsplit(concatx, "#", fixed=TRUE)][][, concatx :=NULL]
   datxf[, concatx := NULL]
    
@@ -89,11 +98,9 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   tabs <- suppressWarnings(check.matchclass(datxf, ptab, xvar))
   ptab <- tabs$tab2
 
-
   if (savedata)
     FIESTA::write2csv(ptab, outfolder=outfolder, outfilenm=outfn, 
 		outfn.date=outfn.date, overwrite=overwrite)
-
 
     
   return(ptab)

@@ -41,6 +41,15 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     return(NULL)
   }
 
+
+  #############################################################################
+  ## Check esttype
+  #############################################################################
+  esttypelst <- c("AREA", "TREE", "RATIO", "SEED")
+  esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
+	checklst=esttypelst, caption="Esttype?")
+
+
   #############################################################################
   ## Check landarea 
   #############################################################################
@@ -180,7 +189,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
  	outfolder=outfolder, estround=estround, pseround=pseround, landarea=landarea)
 
 
-  if (esttype %in% c("TREE", "RATIO")) {
+  if (esttype %in% c("TREE", "RATIO", "SEED")) {
     ## Check that the values of tuniqueid in treex are all in cuniqueid in condf
     treef <- check.matchval(treex, pltcondf, tuniqueid, cuniqueid, tab1txt="tree", 
 		tab2txt="cond", subsetrows=TRUE)

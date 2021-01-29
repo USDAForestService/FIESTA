@@ -86,7 +86,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       maxbndxlst <- maxbndx.pct[[maxbnd.unique]]
       maxbnd.gtthres <- maxbndxlst[maxbndx.pct$int.pct >= maxbnd.threshold]
       maxbnd.ltthres <- maxbndxlst[maxbndx.pct$int.pct < maxbnd.threshold]
-      message(paste0(capture.output(maxbndx.pct), collapse = "\n"))
+      message(paste0(utils::capture.output(maxbndx.pct), collapse = "\n"))
 
       ## Get percent overlap of each small area with maxbndx
       smallbndx.pct <- suppressWarnings(tabulateIntersections(layer1=smallbndx,
@@ -302,7 +302,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       largebnd.ltthres <- largebndx.pct[largebndx.pct$int.pct < largebnd.threshold & 
 					largebndx.pct$int.pct != 0, largebnd.unique]
       largebnd.lt0 <- largebndx.pct[largebndx.pct$int.pct == 0, largebnd.unique]
-      message(paste0(capture.output(largebndx.pct), collapse = "\n"))
+      message(paste0(utils::capture.output(largebndx.pct), collapse = "\n"))
 
       ## Select largebnd(s) that intersect more than threshold
       largebnd_select <- largebndx.intd[largebndx.intd[[largebnd.unique]] %in% largebnd.gtthres,]

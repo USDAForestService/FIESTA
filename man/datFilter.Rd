@@ -14,7 +14,7 @@ datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL,
 	xnm = NULL, gui = FALSE)
 }
 \arguments{
-  \item{x}{ Data frame Spatial*Dataframe or comma-delimited file (*.csv). A data 
+  \item{x}{ Data frame, sf data frame or comma-delimited file (*.csv). A data 
 	frame to filter. }
   \item{xfilter}{ String. A filter expression. Must be R syntax. 
 	(e.g., "STATUSCD == 1", "INVYR %in% 2002:2005"). Use single quotes for strings 
@@ -23,7 +23,7 @@ datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL,
   \item{xfiltervar}{ String. The filtervar if you know what it is. If NULL, a window 
 	will pop up to select filter value(s). }
   \item{othertabnms}{ String vector. Name(s) of the objects or comma-delimited files to subset.
-	 Names must be in quotes (e.g., othertables=c("tree", "cond")). }
+	 Names must be in quotes (e.g., othertables=c('tree', 'cond')). }
   \item{uniqueid}{ String. Unique identifier of x. Only needed if othertables != NULL. 
 	The uniqueid must be the same for all tables except if PLT_CN and CN. }
   \item{vardelete}{ String vector. Vector of variables you would like deleted from filter
@@ -65,6 +65,8 @@ datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL,
 	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1), 
 			FORTYPCD = c(182,184,201,221,221,184,221,182,182,201,182,221)))
 	datFilter(x = tab, xfilter = "FORTYPCD != 182")
-	datFilter(x = tab, xfilter = "FORTYPCD == c(184) & CONDCLASS != 3")
+
+	datFilter(x = FIESTA::WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
+
 }
 \keyword{ data }

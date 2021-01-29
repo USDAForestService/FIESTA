@@ -95,6 +95,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (!is.null(dividebynum)) {
         rowest[[estnmd]] <- round(rowest[[estnm]] / dividebynum, estround)
         rowest[[senmd]] <- rowest[[senm]] / dividebynum
+        unit.rowest[[estnmd]] <- round(unit.rowest[[estnm]] / dividebynum, estround)
+        unit.rowest[[senmd]] <- unit.rowest[[senm]] / dividebynum
       } else {
         rowest[[estnmd]] <- round(rowest[[estnm]], estround)
       }
@@ -110,6 +112,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (!is.null(dividebynum)) {
         colest[[estnmd]] <- round(colest[[estnm]] / dividebynum, estround)
         colest[[senmd]] <- colest[[estnm]] / dividebynum
+        unit.colest[[estnmd]] <- round(unit.colest[[estnm]] / dividebynum, estround)
+        unit.colest[[senmd]] <- unit.colest[[senm]] / dividebynum
       } else {
         colest[[estnmd]] <- round(colest[[estnm]], estround)
       }
@@ -126,6 +130,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (!is.null(dividebynum)) {
         grpest[[estnmd]] <- round(grpest[[estnm]] / dividebynum, estround)
         grpest[[senmd]] <- grpest[[senm]] / dividebynum
+        unit.grpest[[estnmd]] <- round(unit.grpest[[estnm]] / dividebynum, estround)
+        unit.grpest[[senmd]] <- unit.grpest[[senm]] / dividebynum
       } else {
         grpest[[estnmd]] <- round(grpest[[estnm]], estround)
       }

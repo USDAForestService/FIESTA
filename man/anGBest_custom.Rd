@@ -8,17 +8,18 @@
 	a custom-defined boundary.	
 }
 \usage{
-anGBest_custom(GBpopdat, esttype = "TREE", landarea = "FOREST", plt.filter = NULL, 
-	cond.filter = NULL, estvar = NULL, estvar.filter = NULL, rowvar = NULL, 
-	colvar = NULL, treedia.brks = c(0,5,10,20,50,100), divideby = NULL, 
-	title.ref = NULL, title.main = NULL, getbarplot = FALSE, barplot.row=TRUE, 
-	barplot.ord="DESC", barplot.color=NULL, barplot.ylim = NULL, barplot.nplt = FALSE, 
-	savedata = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = TRUE, ...)
+anGBest_custom(GBpopdat, esttype = "TREE", estseed = "none", landarea = "FOREST", 
+	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
+	rowvar = NULL, colvar = NULL, treedia.brks = c(0,5,10,20,50,100), sumunits=TRUE,
+	divideby = NULL, title.ref = NULL, title.main = NULL, getbarplot = FALSE, 
+	barplot.row=TRUE, barplot.ord="DESC", barplot.color=NULL, barplot.ylim = NULL, 
+	barplot.nplt = FALSE, savedata = FALSE, outfolder = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite = TRUE, ...)
 }
 \arguments{
   \item{GBpopdat}{ R list object. FIA population data and calculations for estimation. }
   \item{esttype}{ String. Type of estimation ("AREA", "TREE", "RATIO"). }
+  \item{estseed}{ String. What to do with seedling information ("none", "only", "add"). }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
@@ -35,6 +36,8 @@ anGBest_custom(GBpopdat, esttype = "TREE", landarea = "FOREST", plt.filter = NUL
  	treedia.brks are used for class breaks. }
   \item{treedia.brks}{ Integer vector. Vector of breaks to define diameter classes 
 	(e.g., c(0,5,10,20,50,100). Define rowvar or colvar = "DIACL". }
+  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
+	one table. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{title.ref}{ String. Table title for reference. }
   \item{title.main}{ String. Main title for table and barplot. }

@@ -1,7 +1,7 @@
-anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST", 
+anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="FOREST", 
 	plt.filter=NULL, cond.filter=NULL, estvar=NULL, estvar.filter=NULL, 
-	rowvar=NULL, colvar=NULL, treedia.brks=c(0,5,10,20,50,100), 
-	divideby = NULL, title.ref=NULL, title.main=NULL, getbarplot=FALSE, 
+	rowvar=NULL, colvar=NULL, treedia.brks=c(0,5,10,20,50,100), sumunits=TRUE,
+	divideby=NULL, title.ref=NULL, title.main=NULL, getbarplot=FALSE, 
 	barplot.row=TRUE, barplot.ord="DESC", barplot.color=NULL, barplot.ylim=NULL, 
 	barplot.nplt=FALSE, savedata=FALSE, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite=TRUE, ...) {
@@ -10,7 +10,6 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
   ## Set global variables
   gui <- FALSE
   ref_titles <- FIESTA::ref_titles
-  sumunits <- FALSE
   returnlst <- list()
   row.FIAname=col.FIAname <- TRUE
 
@@ -95,11 +94,10 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
 		overwrite=overwrite, divideby=divideby, ...)
 
   } else if (esttype == "TREE") {
-
     ####################################################################
     ## Get estimates
     ####################################################################
-    MODest <- modGBtree(GBpopdat=GBpopdat, landarea=landarea, 
+    MODest <- modGBtree(GBpopdat=GBpopdat, estseed=estseed, landarea=landarea, 
 		plt.filter=plt.filter, cond.filter=cond.filter, 
 		estvar=estvar, estvar.filter=estvar.filter,
 		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
@@ -109,7 +107,7 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", landarea="FOREST",
 		overwrite=overwrite, divideby=divideby, ...)
 
   } else if (esttype == "RATIO") {
-    MODest <- modGBratio(GBpopdat=GBpopdat, landarea=landarea, 
+    MODest <- modGBratio(GBpopdat=GBpopdat, estseed=estseed, landarea=landarea, 
 		plt.filter=plt.filter, cond.filter=cond.filter, 
 		estvarn=estvar, estvarn.filter=estvar.filter,
 		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 

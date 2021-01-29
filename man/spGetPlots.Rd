@@ -14,13 +14,14 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	stbnd_dsn = NULL, stbnd.att = "COUNTYFIPS", RS = NULL, xy = NULL, xy_dsn = NULL, 	
 	xy.uniqueid = "PLT_CN", xvar = "LON_PUBLIC", yvar = "LAT_PUBLIC", xy.crs = 4269,
 	xy.joinid = "PLT_CN", clipxy = TRUE, datsource = "datamart", data_dsn = NULL, 
-	istree = FALSE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
-	other_layers = NULL, puniqueid = "CN", evalid = NULL, evalCur = FALSE, 
-	evalEndyr = NULL, evalType = "AREAVOL", measCur = FALSE, measEndyr = NULL, 
-	measEndyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
-	showsteps = FALSE, savedata = FALSE, savebnd = FALSE, savexy = TRUE, 
-	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
+	istree = FALSE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
+	tree_layer = "tree", seed_layer = "seed", other_layers = NULL, puniqueid = "CN", 
+	evalid = NULL, evalCur = FALSE, evalEndyr = NULL, evalType = "AREAVOL", 
+	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
+	allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, 
+	savebnd = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "shp", 
+	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = FALSE, ...)
 }
 \arguments{
   \item{bnd}{ sf R object, Area of Interest (AOI) boundary. Can be a spatial 
@@ -63,10 +64,13 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
   \item{clipxy}{ Logical. If TRUE, clips xy data to bnd. }
   \item{data_dsn}{ String. Name of database where *_layers reside. }
   \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
+  \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{plot_layer}{ String. Name of layer in database of file name of FIA plot table. }
   \item{cond_layer}{ String. Name of layer in database of file name of FIA cond table. }
   \item{tree_layer}{ String. Name of layer in database of file name of FIA tree table 
 	if istree=TRUE. }
+  \item{seed_layer}{ String. Name of layer in database of file name of FIA seedling table 
+	if isseed=TRUE. }
   \item{other_layers}{ String. Other layer(s) in database to clip and/or extract
 	from database (Note: must include PLT_CN variable as unique identifier). }
   \item{puniqueid}{ String. Name of unique identifier of plt. }

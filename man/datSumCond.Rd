@@ -71,11 +71,11 @@ datSumCond(cond = NULL, plt = NULL, plt_dsn = NULL, cuniqueid = "PLT_CN",
 \examples{
 
   ## Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
-  condsum <- datSumCond(cond=WYcond, csumvar="LIVE_CANOPY_CVR_PCT")$condsum
+  condsum <- datSumCond(cond=FIESTA::WYcond, csumvar="LIVE_CANOPY_CVR_PCT")$condsum
 
   ## Check results
   condsum[condsum$PLT_CN == 40404737010690,]
-  WYcond[WYcond$PLT_CN == 40404737010690,]
+  FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
 }
 
 \keyword{ data }

@@ -42,6 +42,9 @@ datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, subtotalcol = NULL,
 	datFreq(x=tab, xvar=c("CONDCLASS", "FORTYPCD"))
 	datFreq(x=tab, xvar=c("CONDCLASS", "FORTYPCD"), total=TRUE, subtotal=TRUE)
 	datFreq(x=tab, xvar="FORTYPCD")
+
+ 	datFreq(x=FIESTA::WYtree, xvar=c("SPGRPCD", "SPCD", "STATUSCD"), 
+		subtotal=TRUE, subtotalcol="SPCD")
 }
 
 \keyword{ data }

@@ -1,7 +1,7 @@
 modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL, 
 	pltpctvars=NULL, plt=NULL, pltassgn=NULL, puniqueid="CN", pltassgnid="CN",
-	plt.nonsamp.filter=NULL, tabtype="PCT", strata=FALSE, sumunits=FALSE,   
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	plt.nonsamp.filter=NULL, tabtype="PCT", strata=FALSE, strtype="POST",
+	sumunits=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
 	getwtvar="P1POINTCNT", stratcombine=TRUE, ratio=FALSE, landarea="ALL", 
 	landarea.filter=NULL, pnt.nonsamp.filter=NULL, pnt.filter=NULL, 
@@ -106,6 +106,11 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       stop("need unitarea to return acre estimates")
     }
   }
+  ## Check strtype
+  strtype <- FIESTA::pcheck.varchar(var2check=strtype, varnm="strtype", gui=gui, 
+		checklst=c("POST", "PRE"), caption="Strata type", 
+		warn="invalid strtype")
+
 
   ###################################################################################
   ## Check parameters and apply plot and pnt filters
@@ -295,7 +300,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       ## Get estimate for TOTAL
       #######################################################################
       pbar.totest <- PBest.pbar(dom.prop=pltdom.tot, uniqueid=plotid, domain=totvar, 
-		strattype="post", strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
+		strtype="post", strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar)
       unit.totest <- pbar.totest$est.unit
       if (rawdata) unit.totest.str <- pbar.totest$ybardat
@@ -329,7 +334,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     #######################################################################
     if (rowvar != "TOTAL") {
       pbar.rowest <- PBest.pbar(dom.prop=pltdom.row, uniqueid=plotid, domain=rowvar, 
-		strattype="post", strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
+		strtype="post", strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar)
       unit.rowest <- pbar.rowest$est.unit
       if (rawdata) unit.rowest.str <- pbar.rowest$ybardat
@@ -342,7 +347,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     ## Get column (and cell) estimate  
     if (colvar != "NONE") {
       pbar.colest <- PBest.pbar(dom.prop=pltdom.col, uniqueid=puniqueid, 
-		domain=colvar, strattype="post", strlut=strlut, strunitvars=strunitvars,
+		domain=colvar, strtype="post", strlut=strlut, strunitvars=strunitvars,
  		unitvars=unitvar, strvar=strvar)
       unit.colest <- pbar.colest$est.unit
       if (rawdata) unit.colest.str <- pbar.colest$ybardat
@@ -352,7 +357,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       col.filterval <- ifelse (is.numeric(unit.colest[[colvar]]), 9999, "NOTinDOMAIN")
 
       pbar.grpest <- PBest.pbar(dom.prop=pltdom.grp, uniqueid=puniqueid,
- 		domain=grpvar, strattype="post", strlut=strlut, strunitvars=strunitvars,
+ 		domain=grpvar, strtype="post", strlut=strlut, strunitvars=strunitvars,
  		unitvars=unitvar, strvar=strvar)
       unit.grpest <- pbar.grpest$est.unit
       if (rawdata) unit.grpest.str <- pbar.grpest$ybardat
@@ -373,7 +378,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       names(pltdom) <- sub("\\.n", "", names(pltdom.n))
       unit.grpest.domtot <- PBest.pbar(dom.prop=pltdom, uniqueid=plotid, 
 		domain=domain, strlut=strlut, strunitvars=strunitvars, unitvars=unitvar,
-		strvar=strvar, strattype="post")$est.unit
+		strvar=strvar, strtype="post")$est.unit
       setkeyv(unit.grpest.domtot, c(unitvar, domain))
     }
 
@@ -487,7 +492,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     ## CALCULATE UNIT TOTALS FOR ROWVAR
     pltdom.prop <- getpltdom.prop(PBall, uniqueid=plotid, domain=rowvar, strunitvars2)
     rowunit <- FIESTA::PBest.pbar(dom.prop=pltdom.prop, uniqueid=plotid, 
-		domain=rowvar, strattype="post", strlut=strlut2, strunitvars=strunitvars2,
+		domain=rowvar, strtype="post", strlut=strlut2, strunitvars=strunitvars2,
  		unitvars="ONEUNIT", strvar=strvar)$est.unit
     rowunit <- FIESTA::add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
@@ -509,7 +514,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
     pltdom.prop <- FIESTA::getpltdom.prop(PBall, uniqueid=plotid, domain="TOTAL", 
 		strunitvars2)
     totunit <- FIESTA::PBest.pbar(dom.prop=pltdom.prop, uniqueid=plotid, 
-		domain="TOTAL", strattype="post", strlut=strlut2, strunitvars=strunitvars2,
+		domain="TOTAL", strtype="post", strlut=strlut2, strunitvars=strunitvars2,
  		unitvars="ONEUNIT", strvar=strvar)$est.unit
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")

@@ -2,31 +2,31 @@
 output:
   word_document:
     reference_docx: anGBtemplate.docx
+    fig_caption: yes
+  pdf_document: default
 params:
   rawfolder: ""
   AOInm: ""
-  title.ref: NULL
-  year: NULL
+  title.ref: ""
 ---
 
 
 ```{r inputs, echo=FALSE, warning=FALSE, message=FALSE}
 library(FIESTA)
 
-rawfolder <- "C:/Users/tfrescino/Documents/Fishlake/rawdata"
-AOInm <- "Fishlake"
-title.ref <- NULL
+# ## Set the following parameters to run report
+#rawfolder <- "C:/FIESTA/outfolder/rawdata"
+#AOInm <- "Bighorn"
+#title.ref <- AOInm
 
 rawfolder <- params$rawfolder
 AOInm <- params$AOInm
 title.ref <- params$title.ref
-outfolder <- params$outfolder
 
-if (is.null(rawfolder)) stop()
-if (is.null(AOInm)) stop()
-
+if (is.null(rawfolder)) stop("rawfolder is NULL")
+if (!dir.exists(rawfolder)) stop("rawfolder path is invalid")
+if (is.null(AOInm)) stop("AOInm is NULL")
 if (is.null(title.ref)) title.ref <- AOInm
-if (is.null(outfolder)) outfolder <- rawfolder
 figNum <- 0
 
 
@@ -34,7 +34,7 @@ figNum <- 0
 
 
 ---
-title: "Report summary for `r AOInm`"
+title: "Report summary for `r title.ref`"
 ---
 
 &nbsp;
@@ -47,12 +47,11 @@ __Date:__ `r format(Sys.time(), "%B %d, %Y")`
 
 `r figNum=0`
 
-############### 
-![](report_image.png)
+############### ![](report_image.png)
 
-``` {r picture,include=FALSE}
+``` {r picture, include=FALSE, fig.height=2, fig.width=8, fig.align="center"}
 figNum = figNum+1
-figCap = paste0("Figure ",figNum,": Photo from", AOInm)
+figCap = paste0("Figure ",figNum,": Photo from ", title.ref)
 ```
 ########## `r figCap`
 
@@ -73,7 +72,7 @@ xtab <- fread(file.path(dirname(rawfolder), xtabfn))
 
 title.rowvar <- "Land class"
 title.colvar <- "Reserved status"
-totarea <- unique(rowest$ACRES_GIS)
+totarea <- round(rowest$est/rowest$nhat)[1]
 area.for <- rowest[rowest[[title.rowvar]] == "Forest land", "est"]
 area.nf <- rowest[rowest[[title.rowvar]] == "Nonforest land", "est"]
 area.water <- sum(rowest[rowest[[title.rowvar]] %in% c("Noncensus water", "Nonforest land"), "est"])
@@ -109,7 +108,7 @@ knitr::kable(xtab, 'simple', align=c('l', 'r', 'r', 'r'),
 
 ```{r tab1bplot, echo=FALSE, warning=FALSE, message=FALSE, fig.cap=paste("Fig. 1.", title1a)}
 
-datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", errbars=TRUE, 
+datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", divideby="thousand", errbars=TRUE, 
            sevar="est.se", x.order=NULL, las.xnames=2, ylabel="Area - Acres", 
            col=terrain.colors(nrow(rowest)), ylim=NULL, toplabelvar="NBRPLT.gt0")
 

@@ -1,13 +1,14 @@
-DBqryCSV <- function(sql, ZIP=TRUE, states=NULL, sqltables=NULL){
+DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
 
-  if (!"sqldf" %in% rownames(installed.packages()))
+  if (!"sqldf" %in% rownames(installed.packages())) {
     stop("DBgetEvalid function requires package sqldf when datsource='CSV'")
-
+  }
 
   ## SET OPTIONS
   options.old <- options()
   options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
+  on.exit(options(options.old), add=TRUE)
+  ZIP <- TRUE 
 
   ## Stop if no arguments passed. No GUI available for this function
   if (nargs() == 0) stop("must include sql")
@@ -16,13 +17,17 @@ DBqryCSV <- function(sql, ZIP=TRUE, states=NULL, sqltables=NULL){
   ## Check states and sqltables
   states <- FIESTA::pcheck.states(states)
 
-  ## Check ZIP
+  ## Check ZIP (note: this was previously set up as a parameter)
   ZIP <- FIESTA::pcheck.logical(ZIP, varnm="ZIP", title="Zip files?", first="YES")
 
-  if (is.null(sqltables)) stop("must include sqltables")
-  if (!is.character(sqltables)) stop("sqltables must be character vector")
+  if (is.null(sqltables)) {
+    stop("must include sqltables")
+  }
+  if (!is.character(sqltables)) {
+    stop("sqltables must be character vector")
+  }
 
-  ## Check tables witih sql query
+  ## Check input tables match tables in sql query
   nbrtabs <- length(sqltables)
   tabfind <- sapply(sqltables, grepl, sql)
   if (sum(tabfind) < length(sqltables)) {
@@ -32,13 +37,13 @@ DBqryCSV <- function(sql, ZIP=TRUE, states=NULL, sqltables=NULL){
   }
 
   ## Get tables
-  for (tab in sqltables) 
-    assign(tab, FIESTA::DBgetCSV(DBtable=tab, states=states, ZIP=ZIP))
+  for (tab in sqltables) {
+    assign(tab, FIESTA::DBgetCSV(DBtable=tab, states=states))
+  }
 
   ## Query dataset
   sql <- gsub("\n", " ", sql)
   dat <- sqldf::sqldf(sql, stringsAsFactors=FALSE)
-
 
   return(dat)
 }

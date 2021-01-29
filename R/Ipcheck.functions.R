@@ -8,11 +8,12 @@
 
 
 
-pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", gui=FALSE,
-	stopifnull=FALSE) {
+pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", 
+	gui=FALSE, stopifnull=FALSE) {
   ## DESCRIPTION: Checks logical function parameters
 
-  msg <- ifelse (!is.null(varnm), paste(varnm, "must be logical"), "variable must be logical")
+  msg <- ifelse (!is.null(varnm), paste(varnm, "must be logical"), 
+	"variable must be logical")
   second <- ifelse(toupper(first) == "YES", "NO", "YES") 
   if (is.null(var2check)) {
     if (gui) {
@@ -40,12 +41,14 @@ pcheck.unique <- function(tab, uniqueid, gui=FALSE, tabnm=NULL,
   tab <- pcheck.table(tab)
   uniqueid <- c("PLT_CN", "CONDID")
 
-  if (is.null(tabnm)) tabnm <- "data frame"
+  if (is.null(tabnm)) {
+    tabnm <- "data frame"
+  }
   setkeyv(tab, uniqueid)
 
-  if (!tab[, uniqueN(.SD) == .N, .SDcols=key(tab)])
+  if (!tab[, uniqueN(.SD) == .N, .SDcols=key(tab)]) {
     stop("uniqueid for ", tabnm, " is not unique: ", toString(uniqueid))
-  
+  }
   return(tab)
 }
 
@@ -57,19 +60,26 @@ pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=N
   if (is.null(varnm)) { 
     varnm <- "varnm" 
   } else {
-    if (!is.character(varnm)) warning("varnm must be a string")
+    if (!is.character(varnm)) {
+      warning("varnm must be a string")
+    }
   } 
   #if (is.null(var2check) && stopifnull) stop(paste(varnm, "is NULL"))
-  if (is.null(caption)) caption <- paste0(varnm, "?") 
-  if (is.null(warn)) 
+  if (is.null(caption)) {
+    caption <- paste0(varnm, "?") 
+  }
+  if (is.null(warn)) {
     warn <- ifelse(!is.null(checklst) && length(checklst) < 6, 
-		paste(varnm, "must be in following list:", paste(checklst, collapse=", ")),
+		paste(varnm, "must be in following list:", toString(checklst)),
 		paste(varnm, "is invalid"))
-
-  if (is.null(var2check) || is.na(var2check) || length(var2check) == 0 || gsub(" ", "", var2check) == "") {
+  }
+  if (is.null(var2check) || is.na(var2check) || length(var2check) == 0 || 
+	gsub(" ", "", var2check) == "") {
     if (gui) {
       var2check <- select.list(checklst, title=caption, multiple=multiple, ...)
-      if (length(var2check) == 0 || var2check == "") stop("NULL")
+      if (length(var2check) == 0 || var2check == "") {
+        stop("NULL")
+      }
     } else {
       if (stopifnull) { 
         stop(paste(varnm, "is NULL"))
@@ -95,10 +105,12 @@ pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=N
       var2check <- select.list(checklst, title=caption, multiple=multiple, ...)
       if (length(var2check) == 0 || var2check == "") stop("")
     } else {
-      if (stopifinvalid) { 
-        if (multiple)
+      if (stopifinvalid) {
+        if (multiple) {
           warn <- message("invalid variable: ", 
-				paste(var2check[which(!var2check %in% checklst)], collapse=", "))
+				toString(var2check[which(!var2check %in% checklst)]), 
+				"\n possible values: ", toString(checklst))
+        }
         stop(warn)
       } else {
         return(NULL)
@@ -110,7 +122,9 @@ pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=N
 
 
 pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
-  if (is.null(dsn)) stop("dsn is null")
+  if (is.null(dsn)) {
+    stop("dsn is null")
+  }
   if (!file.exists(dsn)) {
     extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb")
     ext <- extlst[sapply(extlst, function(x, dsn) 
@@ -119,9 +133,9 @@ pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
       dsn <- paste(dsn, ext, sep=".")
   }
   tabext <- getext(dsn)
-  if (is.na(tabext) || tabext == "NA")
+  if (is.na(tabext) || tabext == "NA") {
     stop("dsn must include extension")
-
+  }
   if (tabext %in% c("sqlite", "gpkg")) {
     return(DBtestSQLite(dsn, dbconnopen=dbconnopen))
   } else if (tabext == "shp") {
@@ -156,9 +170,9 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   } 
 
   ## Check for installed packages
-  if (!"sf" %in% rownames(installed.packages()))
+  if (!"sf" %in% rownames(installed.packages())) {
     stop("importing spatial layers requires package sf")
-
+  }
  
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
@@ -168,12 +182,17 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     Filters=rbind(Filters,gpkg=c("Comma-delimited files (*.gpkg)", "*.gpkg")) }
   tabdblst <- c("sqlite", "gpkg")
 
-  if (is.null(tabnm)) tabnm <- "tab" 
-  if (is.null(caption)) caption <- "Table?" 
+  if (is.null(tabnm)) {
+    tabnm <- "tab" 
+  }
+  if (is.null(caption)) {
+    caption <- "Table?"
+  } 
    
   selectlst <- c("NONE", "R Object", "csv", "database")
-  if (returnsf) selectlst <- c(selectlst, "*.shp" ) 
-
+  if (returnsf) {
+    selectlst <- c(selectlst, "*.shp" ) 
+  }
   ## Check gui
   if (gui && !.Platform$OS.type=="windows") 
     stop("gui not supported")
@@ -207,8 +226,10 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
         if (tab_dsn == "") stop("")
       }
     } 
-    if (is.null(tabx) && stopifnull) stop(paste(tabnm, "is NULL"))
+    if (is.null(tabx) && stopifnull) {
+      stop(paste(tabnm, "is NULL"))
       return(NULL)
+    }
   } 
  
   if (!is.null(tab)) {
@@ -258,7 +279,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   if (is.null(tab_dsn))
     tab_dsn <- tab
 
-  if (!file.exists(tab_dsn)) {
+  if (!is.null(tab_dsn) && !file.exists(tab_dsn)) {
     extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb")
     ext <- extlst[sapply(extlst, function(x, tab_dsn) 
 				file.exists(paste(tab_dsn, x, sep=".")), tab_dsn)]
@@ -341,11 +362,13 @@ pcheck.outfolder <- function(outfolder, default=getwd(), gui=FALSE) {
       outfolder <- choose.dir(default=getwd(), caption="Select folder")
       if (is.na(outfolder)) stop("")
     } else {
-      if (is.null(default)) return(NULL)
-      if (default == getwd()) {
-        message("outfolder is NULL, files will be written to working directory")
+      if (is.null(default)) {
+        return(NULL)
+      } else if (is.null(outfolder)) {
+        message("outfolder is NULL, defaulting to working directory")
         outfolder <- getwd()
       }
+      #return(NULL)
     }
   } else {
     if (!is.character(outfolder)) {

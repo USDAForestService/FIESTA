@@ -2,13 +2,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	stbnd=NULL, stbnd_dsn=NULL, stbnd.att="COUNTYFIPS", RS=NULL, xy=NULL, 
 	xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
-	data_dsn=NULL, istree=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
-	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
-	evalType="AREAVOL", measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, 
-	invyrs=NULL, allyrs=FALSE, intensity1=FALSE, showsteps=FALSE, savedata=FALSE, 
-	savebnd=FALSE, savexy=TRUE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=FALSE, ...) {
+	data_dsn=NULL, istree=FALSE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
+	tree_layer="tree", seed_layer="seed", other_layers=NULL, puniqueid="CN", 
+	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="AREAVOL", 
+	measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, 
+	intensity1=FALSE, showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
+	outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
+	overwrite_dsn=FALSE, overwrite_layer=FALSE, ...) {
 
   ##############################################################################
   ## DESCRIPTION
@@ -40,7 +40,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::spGetPlots)), 
+  formallst <- c(names(formals(spGetPlots)), 
 		names(formals(FIESTA::spMakeSpatialPoints)))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
@@ -208,6 +208,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       if (!is.null(treex)) 
         tabs2save <- c(tabs2save, "treex")
     }
+    ## seed data
+    if (isseed) {
+      seedx <- pcheck.table(seed_layer, obj=obj, stopifnull=TRUE)
+      if (!is.null(seedx)) 
+        tabs2save <- c(tabs2save, "seedx")
+    }
 
     ## other data
     if (!is.null(other_layers)) {
@@ -275,6 +281,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       treex <- {} 
       tabs2save <- c(tabs2save, "treex")
     }
+    if (isseed) {
+      seedx <- {} 
+      tabs2save <- c(tabs2save, "seedx")
+    }
     if (!is.null(other_layers)) {
       for (layer in other_layers) {
         assign(paste0(layer, "x"), {})
@@ -332,11 +342,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         dat <- DBgetPlots(states=stcd, stateFilter=stateFilter, allyrs=allyrs,
 			evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, evalType=evalType, 
 			measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, istree=istree, 
-			othertables=other_layers, intensity1=intensity1)
+			isseed=isseed, othertables=other_layers, intensity1=intensity1)
         PLOT <- dat$plt
         cond <- dat$cond
         if (istree)
           tree <- dat$tree
+        if (isseed)
+          seed <- dat$seed
         puniqueid <- "CN"
 
         if (is.null(xydat)) { 
@@ -393,6 +405,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             cond1 <- cond[cond[["PLT_CN"]] %in% pltids1, ]
             if (istree)
               tree1 <- tree[tree[["PLT_CN"]] %in% pltids1, ]
+            if (isseed)
+              seed1 <- seed[seed[["PLT_CN"]] %in% pltids1, ]
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
                 assign(paste0(layer, "2"), 
@@ -430,6 +444,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             cond2 <- cond[cond[["PLT_CN"]] %in% pltids2, ]
             if (istree)
               tree2 <- tree[tree[["PLT_CN"]] %in% pltids2, ]
+            if (isseed)
+              seed2 <- seed[seed[["PLT_CN"]] %in% pltids2, ]
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
                 assign(paste0(layer, "2"), 
@@ -441,6 +457,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             cond <- rbind(cond1, cond2)
             if (istree)
               tree <- rbind(tree1, tree2)
+            if (isseed)
+              seed <- rbind(seed1, seed2)
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
@@ -464,6 +482,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             cond <- cond[cond[["PLT_CN"]] %in% pltids, ]
             if (istree)
               tree <- tree[tree[["PLT_CN"]] %in% pltids, ]
+            if (isseed)
+              seed <- seed[seed[["PLT_CN"]] %in% pltids, ]
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
                 assign(layer, 
@@ -476,6 +496,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           condx <- rbind(condx, cond)
           if (istree)
             treex <- rbind(treex, tree)
+          if (isseed)
+            seedx <- rbind(seedx, seed)
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
@@ -499,6 +521,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         rm(plt)
         rm(cond)
         if (istree) rm(tree)
+        if (isseed) rm(seed)
         gc()
           
       } else if (datsource == "sqlite") {
@@ -514,6 +537,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           tabs <- DBI::dbListTables(conn)
           layers <- c(plot_layer, cond_layer)
           if (istree) layers <- c(layers, tree_layer)
+          if (isseed) layers <- c(layers, seed_layer)
           if (!any(layers %in% tabs))
             stop("missing layers in database: ", toString(layers[!layers %in% tabs]))
           if (!is.null(other_layers) && !any(other_layers %in% tabs))
@@ -594,7 +618,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (grepl("xyCur", xy)) {
               if (xy.joinid %in% c("CN", "PLT_CN") && "PLOT_ID" %in% xyfields && 
 				"PLOT_ID" %in% pltfields) {
-                 message("changing xy.joinid from ", xy.joinid, "to PLOT_ID")
+                 message("changing xy.joinid from ", xy.joinid, " to PLOT_ID")
                  xy.joinid <- "PLOT_ID"
               }
             }
@@ -734,8 +758,15 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               tree1 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
-
-            if (!is.null(other_layers)) {
+            if (isseed) {
+              seed1.qry <- paste0("select seed.* from ", pfromqry,
+			" join seed on(seed.PLT_CN = p.CN) where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
+              rs <- DBI::dbSendQuery(conn, seed1.qry)
+              seed1 <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
+            }
+           if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
                 ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
@@ -818,6 +849,14 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               tree2 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
+            if (isseed) {
+              seed2.qry <- paste0("select seed.* from ", pfromqry,
+			" join seed on(seed.PLT_CN = p.CN) where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
+              rs <- DBI::dbSendQuery(conn, seed2.qry)
+              seed2 <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
+            }
 
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
@@ -836,6 +875,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             cond <- rbind(cond1, cond2)
             if (istree)
               tree <- rbind(tree1, tree2)
+            if (isseed)
+              seed <- rbind(seed1, seed2)
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
@@ -870,6 +911,14 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               tree <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
+            if (isseed) {
+              seed.qry <- paste0("select seed.* from ", pfromqry,
+			" join seed on(seed.PLT_CN = p.CN) where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+              rs <- DBI::dbSendQuery(conn, seed.qry)
+              seed <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
+            }
 
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
@@ -890,6 +939,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
           if (istree)
             treex <- rbind(treex, tree)
+          if (isseed)
+            seedx <- rbind(seedx, seed)
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
@@ -936,6 +987,14 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(conn, tree.qry)
             treex <- rbind(treex, DBI::dbFetch(rs))
+            DBI::dbClearResult(rs)
+          }
+          if (isseed) {
+            seed.qry <- paste0("select seed.* from ", pfromqry,
+			" join tree on(seed.PLT_CN = p.CN) where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(conn, seed.qry)
+            seedx <- rbind(seedx, DBI::dbFetch(rs))
             DBI::dbClearResult(rs)
           }
 

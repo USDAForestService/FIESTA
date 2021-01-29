@@ -1,6 +1,6 @@
 DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE, 
 	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
-	returnpath=TRUE) {
+	returnpath=TRUE, stopifnull=FALSE) {
   ## DESCRIPTION: 
   ## Test SQLite connection (SQLite or Geopackage database)
   ## ARGUMENTS:
@@ -16,26 +16,26 @@ DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
   ## Check gpkg
   dbext <- ifelse(gpkg, ".gpkg", ".sqlite")
 
-  if (is.null(SQLitefn)) stop("SQLitefn is NULL")
-  SQLitepath <- SQLitefn
+  ## Check filename
+  SQLitePath <- checkfilenm(SQLitefn, outfolder, stopifnull=stopifnull)
 
-  if (!is.null(outfn.pre)) 
-    SQLitefn <- paste(outfn.pre, SQLitefn, sep="_")
-
-  if (is.na(getext(SQLitefn)) || getext(SQLitefn) == "NA")
-    SQLitefn <- paste0(SQLitefn, dbext)
-
-  outfolder <- pcheck.outfolder(outfolder, default=NULL)
-  if (!is.null(outfolder)) {
-    SQLitepath <- file.path(outfolder, SQLitefn)
-  } else {
-    SQLitepath <- SQLitefn
+  if (is.null(SQLitePath) && is.null(SQLitefn)) {
+    SQLitefn <- "data"
   }
-  if (!dir.exists(dirname(SQLitepath))) stop("invalid directory path") 
 
-  if (outfn.date || !overwrite) 
-   SQLitepath <- getoutfn(basename(SQLitepath), outfn.date=outfn.date, 
-		outfolder=dirname(SQLitepath), ext=getext(SQLitepath))
+  if (!is.null(outfn.pre)) {
+    SQLitefn <- paste(outfn.pre, SQLitefn, sep="_")
+  }
+  
+  if (is.na(getext(SQLitefn)) || getext(SQLitefn) == "NA") {
+    SQLitefn <- paste0(SQLitefn, dbext)
+  }
+  if (!dir.exists(dirname(SQLitefn))) {
+    stop("invalid directory path") 
+  }
+
+  SQLitepath <- getoutfn(SQLitefn, outfn.date=outfn.date, 
+		outfolder=outfolder, overwrite=overwrite, ext="sqlite")
 
   ## Overwrite file
   if (file.exists(SQLitepath)) {
@@ -57,7 +57,7 @@ DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
     } else {
       DBI::dbDisconnect(sqlconn)
       if (returnpath) {
-        return(SQLitepath)
+        return(normalizePath(SQLitepath))
       } else {
         return(basename(SQLitepath))
       }

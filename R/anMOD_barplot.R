@@ -81,22 +81,32 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord="DESC",
   barplot.color <- FIESTA::pcheck.varchar(var2check=barplot.color, varnm="barplot.color", 
 		checklst=colorlst, caption="Barplot color")
 
-  if (!is.null(colvar)) {
-    ## Check barplot.row
+  ## Check barplot.row
+  if (!is.null(colvar) && colvar != "NONE") {
     barplot.row <- FIESTA::pcheck.logical(barplot.row, varnm = "barplot.row", 
         	title = "Row values?", first = "YES", stopifnull = TRUE)
-
-    if (barplot.row) {
-      title.rowvar <- titlelst$title.rowvar
-      bpest <- raw$unit.rowest[, c(title.rowvar, estcol, secol, "NBRPLT.gt0")]
-    } else {
-      title.colvar <- titlelst$title.colvar
-      bpest <- raw$unit.colest[, c(title.colvar, estcol, secol, "NBRPLT.gt0")]
-    } 
   } else {
-    title.rowvar <- titlelst$title.rowvar
-    bpest <- raw$unit.rowest[, c(title.rowvar, estcol, secol, "NBRPLT.gt0")]
+    barplot.row <- TRUE
   }
+
+  if (barplot.row) {
+    xvar <- titlelst$title.rowvar
+    if (!is.null(raw$rowest)) {
+      btab <- raw$rowest
+    } else {
+      btab <- raw$unit.rowest
+    }
+  } else {
+    xvar <- titlelst$title.colvar
+    if (!is.null(raw$colest)) {
+      btab <- raw$colest
+    } else {
+      btab <- raw$unit.colest
+    }
+  }
+
+  bpest <- btab[, c(xvar, estcol, secol, "NBRPLT.gt0")]
+
 
   xvar <- names(bpest)[1]
   nbrx <- nrow(bpest) 
@@ -147,7 +157,7 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord="DESC",
   } else {
     main <- wraptitle(title.main, 60)
   }
- 
+
   if (barplot.nplt) toplabelvar <- "NBRPLT.gt0"
   datBarplot(x=bpest, xvar=xvar, yvar=estcol, errbars=TRUE, sevar=secol, 
 		savedata=savedata, outfolder=outfolder, x.order=barplot.ord,

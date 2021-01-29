@@ -1,7 +1,7 @@
-modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL, 
-	dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", evalid=NULL, 
-	invyrs=NULL, intensity=NULL, adj="samp", ACI=FALSE, strata=TRUE, 
+modGBratio <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, pltassgn=NULL, 
+	estseed="none", dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", 
+	condid="CONDID", puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", 
+	evalid=NULL, invyrs=NULL, intensity=NULL, adj="samp", ACI=FALSE, strata=TRUE, 
 	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, unitvar=NULL, 
 	unitvar2=NULL, unitarea=NULL, areavar="ACRES", unitcombine=FALSE, 
 	minplotnum.unit=10, stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
@@ -68,19 +68,19 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
       dir.create(paste(outfolder, "rawdata", sep="/"))
   }
 
-
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(GBpopdat)) {
-    GBpopdat <- modGBpop(tree=tree, cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn, 
-	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, puniqueid=puniqueid, 
-	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
-	intensity=intensity, adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 	
-	cond.nonsamp.filter=cond.nonsamp.filter, strata=strata, unitvar=unitvar, 
-	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
-	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
-	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
+    GBpopdat <- modGBpop(tree=tree, seed=seed, cond=cond, plt=plt, dsn=dsn, 
+	pltassgn=pltassgn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
+	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid,
+ 	invyrs=invyrs, intensity=intensity, adj=adj, ACI=ACI,
+ 	plt.nonsamp.filter=plt.nonsamp.filter, cond.nonsamp.filter=cond.nonsamp.filter,
+ 	strata=strata, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea, 
+	areavar=areavar, unitcombine=unitcombine, minplotnum.unit=minplotnum.unit,
+ 	stratalut=stratalut, strvar=strvar, getwt=getwt, getwtvar=getwtvar,
+ 	stratcombine=stratcombine, GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
     list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
@@ -92,7 +92,8 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   condx <- GBpopdat$condx
   pltcondx <- GBpopdat$pltcondx	
   treex <- GBpopdat$treex
-  if (is.null(treex)) stop("must include tree data for ratio estimates")
+  seedx <- GBpopdat$seedx
+  if (is.null(treex) && is.null(seedx)) stop("must include tree data for ratio estimates")
   cuniqueid <- GBpopdat$cuniqueid
   condid <- GBpopdat$condid
   tuniqueid <- GBpopdat$tuniqueid
@@ -115,19 +116,34 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   strunitvars <- c(unitvar, strvar)
 
 
+  ## Check estseed 
+  ########################################################
+  estseedlst <- c("none", "only", "add")
+  estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
+		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
+  if (estseed == "none") {
+    seedx <- NULL
+  } else {
+    if (is.null(seedx)) {
+      stop("no seedling data in population data")
+    }
+  } 
+
+
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 		condid=condid, treex=treex, sumunits=sumunits, landarea=landarea,
- 		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
-		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
- 		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-		rawonly=rawonly, savedata=savedata, outfolder=outfolder)
+ 		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
+		landarea=landarea, ACI.filter=ACI.filter, plt.filter=plt.filter, 						cond.filter=cond.filter, allin1=allin1, estround=estround, 
+		pseround=pseround, divideby=divideby, addtitle=addtitle, 
+		returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
+		savedata=savedata, outfolder=outfolder)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
   treef <- estdat$treef
+  seedf <- estdat$seedf
   tuniqueid <- estdat$tuniqueid
   sumunits <- estdat$sumunits
   allin1 <- estdat$allin1
@@ -144,11 +160,10 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   landarea <- estdat$landarea
   if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
-
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, 
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
 	condf=pltcondf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, rowvar=rowvar, 
 	rowvar.filter=rowvar.filter, colvar=colvar, colvar.filter=colvar.filter, 
 	row.FIAname=row.FIAname, col.FIAname=col.FIAname, row.orderby=row.orderby, 
@@ -157,6 +172,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
 	collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord,
 	landarea=landarea)
   treef <- rowcolinfo$treef
+  seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -186,18 +202,18 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
-
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- check.tree(gui=gui, treef=treef, condf=condf, bytdom=bytdom, 
-	tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, ratiotype=ratiotype, 
-	estvarn=estvarn, estvarn.filter=estvarn.filter, estvarn.name=estvarn.name, 
+  treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
+	condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
+	esttype=esttype, ratiotype=ratiotype, estvarn=estvarn, 
+	estvarn.filter=estvarn.filter, estvarn.name=estvarn.name, 
 	estvard=estvard, estvard.filter=estvard.filter, estvard.name=estvard.name, 
-	esttotn=TRUE, esttotd=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree)
+	esttotn=TRUE, esttotd=TRUE, tdomvar=tdomvar, 
+	tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
- 
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid))
   estvarn <- treedat$estvarn
   estvarn.name <- treedat$estvarn.name
@@ -296,8 +312,12 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, pltassgn=NULL, seed=NULL,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
-    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+    unit.rowest2 <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
+
+levels(uniquerow$STDAGECL)
+levels(unit.rowest$STDAGECL)
+
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
     unitarea <- tabs$tab1
     unit.rowest <- tabs$tab2

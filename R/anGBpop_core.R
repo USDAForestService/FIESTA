@@ -245,7 +245,6 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   }
 
 
-
   #######################################################################################
   ## 05 - Number of live trees by species and disturbance group, on forest land
   #######################################################################################

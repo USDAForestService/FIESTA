@@ -33,6 +33,9 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
 
   ## Condition proportion variable
   varlst <- "CONDPROP_UNADJ"
+ 
+  ## veg.samp.filter
+  veg.samp.filter <- "P2VEG_SAMPLING_STATUS_CD == 1"
 
   ## Get list of condition-level variables to calculate adjustments for
   if (!is.null(treex)) {  
@@ -40,6 +43,8 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
     tvarlst2 <- tvarlst[which(tvarlst%in% names(condx))]
     if (length(tvarlst2) == 0) stop("must include *PROP_UNADJ variables in cond")
     varlst <- c(varlst, tvarlst2)
+#  } else if (!is.null(vspsppf)) {
+#    varlst <- c(varlst, "SUBPPROP_UNADJ")
   }
   varsumlst <- paste0(varlst, "_SUM")
 
@@ -63,9 +68,44 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   n <- ifelse(is.null(strvars), "n.total", "n.strata")
 
   ## Calculate adjustment factor for conditions
-  ## (divide summed conditions by total number of plots in strata)
+  ## (divide summed condition proportions by total number of plots in strata)
   unitlut[, (varlstadj) := lapply(.SD, 
-	function(x) ifelse((is.na(x) | x==0), 0, get(n)/x)), .SDcols=varsumlst]
+	function(x, n) ifelse((is.na(x) | x==0), 0, get(n)/x), n), .SDcols=varsumlst]
+
+
+#  if (!is.null(condv)) {
+#
+#subpv <- setDT(subp[subp$PLT_CN %in% pltassgnv$PLT_CN,])
+#subpv1 <- subpv[P2VEG_SUBP_STATUS_CD == 1,]
+#subpprop <- subpv1[, length(SUBP) * 25 / 100, by=c("PLT_CN")]
+#setnames(subpprop, "V1", "VEGSUBPPROP_UNADJ")
+
+#test <- merge(condv[, c("PLT_CN", "ESTN_UNIT", "STRATUMCD")], subpprop, by="PLT_CN", all.x=TRUE)
+#    vegadj <- test[, lapply(.SD, sum, na.rm=TRUE), by=strunitvars, 
+#		.SDcols="VEGSUBPPROP_UNADJ"]
+#
+#
+#    vegadj <- condv[, lapply(.SD, sum, na.rm=TRUE), by=strunitvars, 
+#		.SDcols="SUBPPROP_UNADJ"]
+#    setnames(vegadj, "SUBPPROP_UNADJ", "VEGPROP_UNADJ")
+#    setkeyv(vegadj, strunitvars)
+#
+#    ## Merge veg adjustment factors to strata table.
+#    unitlut <- unitlut[vegadj]
+#    nveg <- ifelse(is.null(strvars), "nveg.total", "nveg.strata")
+#
+#    ## Calculate adjustment factor for conditions
+#    ## (divide summed subplot proportions by total number of plots in strata)
+#    unitlut[, ADJ_FACTOR_P2VEG_SUBP := lapply(.SD, 
+#	function(x, n) ifelse((is.na(x) | x==0), 0, get(nveg)/x), nveg), 
+#		.SDcols="VEGPROP_UNADJ"]
+#
+#    unitlut[, ADJ_FACTOR_P2VEG_SUBP := lapply(.SD, 
+#	function(x, n) ifelse((is.na(x) | x==0), 0, get(nveg)/x), nveg), 
+#		.SDcols="VEGSUBPPROP_UNADJ"]
+#
+#  }
+
 
   ## Merge condition adjustment factors to cond table to get plot identifiers.
   setkeyv(condx, strunitvars)

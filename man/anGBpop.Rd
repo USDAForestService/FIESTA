@@ -9,8 +9,8 @@
 	anGBdata() (spGetPlots(), spGetStrata()), and modGBpop().	
 }
 \usage{
-anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, 
-	datsource = "sqlite", SQLitefn = NULL, RS = NULL, 
+anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, istree = TRUE, 
+	isseed = FALSE, datsource = "sqlite", SQLitefn = NULL, RS = NULL, 
 	strat_layer = NULL, showsteps = FALSE, savedata = FALSE, savexy = TRUE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
 	GBdata = NULL, ...)
@@ -25,6 +25,8 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL,
   \item{bnd.att}{ String. The attribute in bnd_layer that defines the
 	estimation unit(s). If NULL, bnd is default as one estimation unit. } 
   \item{bnd.filter}{ String. Filter to subset bnd SpatialPolygons layer. }
+  \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
+  \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }
   \item{RS}{ String. Name of FIA research station to restrict states to. } 

@@ -4,7 +4,7 @@
 	Green-Book module - Generate tree estimates.
 }
 \description{
-	Generates tree estimates by domain and/or tree domain (and estimation unit). 
+	Generates tree and or seedling estimates by domain and/or tree domain (and estimation unit). 
 	Calculations are based on Scott et al. 2005 ('the green-book') for mapped forest 
 	inventory plots. The non-ratio estimator for estimating tree attributes
 	by stratum and domain is used. Plots that are totally nonsampled are excluded from 
@@ -15,14 +15,14 @@
 	expanded to using the total land area in the population. 
 }
 \usage{    
-modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
-	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", evalid = NULL, 
-	invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, strata = TRUE, 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
-	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
+modGBtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
+	estseed = "none", dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
+	condid = "CONDID", puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
+	evalid = NULL, invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, 
+	strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
+	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
+	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
+	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
 	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
 	estvar.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE, 
 	col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
@@ -40,6 +40,8 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Tree-level data with one record for each tree. Tree data are aggregated to 
 	condition-level. See details for necessary variables to include. }
+  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Seedling-level data with one record of seedling counts for each species in plot. }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
@@ -53,6 +55,8 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
 	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
 	estimation unit and/or strata, with one record for each plot. }
+  \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
+	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{dsn}{ String. Name of database where tree, cond, and plot-level tables reside. 
 	The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). }

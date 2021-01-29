@@ -1,5 +1,5 @@
-modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL, 
-	dsn=NULL, puniqueid="CN", pltassgnid="CN", pjoinid="CN", 
+modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL, 
+	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="CN", pjoinid="CN", 
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, ACI=FALSE, 
 	adj="samp", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
@@ -75,6 +75,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
     plt <- MAdata$plt
     cond <- MAdata$cond
     tree <- MAdata$tree
+    seed <- MAdata$seed
     pltassgn <- MAdata$pltassgn
     pltassgnid <- MAdata$pltassgnid
     unitlut <- MAdata$unitlut
@@ -102,8 +103,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
-  popcheck <- check.popdata(gui=gui, module="MA", method=MAmethod, 
-	tree=tree, cond=cond, plt=plt, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, 
+  popcheck <- check.popdata(gui=gui, module="MA", method=MAmethod, tree=tree, 
+	cond=cond, plt=plt, seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, 
 	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid,
  	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
 	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
@@ -113,6 +114,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
+  seedf <- popcheck$seedf
   pltassgnx <- popcheck$pltassgnx
   cuniqueid <- popcheck$cuniqueid
   condid <- popcheck$condid
@@ -222,13 +224,14 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
     ## Merge plot strata info to condx
     condx <- condx[pltassgnx[,c(pltassgnid, unitvar, PSstrvar, prednames), with=FALSE]]
  
-    adjfacdata <- getadjfactorGB(treex=treef, condx=condx, tuniqueid=tuniqueid, 
-		cuniqueid=cuniqueid, condid=condid, unitlut=unitlut, 
+    adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
+		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, unitlut=unitlut, 
 		unitvars=unitvar, strvars=PSstrvar, unitarea=unitarea, areavar=areavar, 
 		cvars2keep=cvars2keep)
     condx <- adjfacdata$condx
     unitlut <- adjfacdata$unitlut
     treef <- adjfacdata$treex
+    seedf <- adjfacdata$seedx
     expcondtab <- adjfacdata$expcondtab
   } else if (adj == "plot") {
     adjtree <- TRUE
@@ -241,6 +244,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condadj
     treef <- adjfacdata$treeadj
+    seedf <- adjfacdata$seedx
   } else {
 
     ## Merge plot strata info to condx
@@ -261,6 +265,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, pltassgn=NULL,
     returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
   }
+  if (!is.null(seedf))
+    returnlst$seedx <- seedf
 
   if (!is.null(stratcombinelut)) 
     returnlst$stratcombinelut <- stratcombinelut

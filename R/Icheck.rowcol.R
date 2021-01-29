@@ -1,4 +1,4 @@
-check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN", 
+check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid="PLT_CN", 
 	tuniqueid="PLT_CN", condid="CONDID", rowvar=NULL, rowvar.filter=NULL, colvar=NULL, 
 	colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
 	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, domvarlst=NULL, 
@@ -343,10 +343,16 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
           if (!is.null(rowlut)) row.add0 <- TRUE
           rowLUT <- FIESTA::datLUTnm(x=treef, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
 		  		group=rowLUTgrp, add0=row.add0, xtxt="tree")
-
           treef <- rowLUT$xLUT
           rowlut <- rowLUT$LUT
           rowLUTnm <- rowLUT$xLUTnm
+
+          if (!is.null(seedf) && rowvar %in% names(seedf)) {
+            rowLUT <- FIESTA::datLUTnm(x=seedf, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
+		  		group=rowLUTgrp, add0=row.add0, xtxt="seed")
+            seedf <- rowLUT$xLUT
+          }
+
           if (rowgrp) {
             rowgrpord <- rowLUT$grpcode
             rowgrpnm <- rowLUT$grpname
@@ -475,7 +481,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       }
 
     } else if (colvar %in% names(condf)) {
-
 #      if (colvar %in% c("DSTRBCD1", "DSTRBCD2", "DSTRBCD3")) {
 #        condf <- merge(condf, 
 #			ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")], 
@@ -584,6 +589,12 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
           treef <- colLUT$xLUT
           collut <- colLUT$LUT
           colLUTnm <- colLUT$xLUTnm
+
+          if (!is.null(seedf) && colvar %in% names(seedf)) {
+            colLUT <- FIESTA::datLUTnm(x=seedf, xvar=colvar, LUT=collut, 
+				FIAname=col.FIAname, add0=col.add0, xtxt="seed")
+            seedf <- colLUT$xLUT
+          }
 
           if (col.orderby == "NONE") {
             if (!is.null(colLUTnm)) {
@@ -697,21 +708,31 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       uniquerow <- unique(condf[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
       setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
     } else {
-      #rowvals <- na.omit(unique(condf[, rowvar, with=FALSE]))
-      rowvals <- unique(condf[, rowvar, with=FALSE])
-      uniquerow <- as.data.table(rowvals)
-      names(uniquerow) <- rowvar
-      setkeyv(uniquerow, rowvar)
+      if (is.factor(condf[[rowvar]])) {
+        uniquerow <- as.data.table(levels(condf[[rowvar]]))
+        names(uniquerow) <- rowvar
+      } else {
+        #rowvals <- na.omit(unique(condf[, rowvar, with=FALSE]))
+        rowvals <- unique(condf[, rowvar, with=FALSE])
+        uniquerow <- as.data.table(rowvals)
+        names(uniquerow) <- rowvar
+        setkeyv(uniquerow, rowvar)
+      }
     }
   } else if (rowvar %in% names(treef)) {
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       uniquerow <- unique(treef[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
       setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
     } else {
-      rowvals <- na.omit(unique(treef[, rowvar, with=FALSE]))
-      uniquerow <- as.data.table(rowvals)
-      names(uniquerow) <- rowvar
-      setkeyv(uniquerow, rowvar)
+      if (is.factor(condf[[rowvar]])) {
+        uniquerow <- as.data.table(levels(treef[[rowvar]]))
+        names(uniquerow) <- rowvar
+      } else {
+        rowvals <- na.omit(unique(treef[, rowvar, with=FALSE]))
+        uniquerow <- as.data.table(rowvals)
+        names(uniquerow) <- rowvar
+        setkeyv(uniquerow, rowvar)
+      }
     }
   }
   if (!is.null(landarea) && landarea == c("FOREST", "TIMBERLAND"))
@@ -734,21 +755,31 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
       uniquecol <- unique(condf[,c(colvar, col.orderby), with=FALSE])
       setkeyv(uniquecol, col.orderby)
     } else {
-      #colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
-      colvals <- unique(condf[, colvar, with=FALSE])
-      uniquecol <- as.data.table(colvals)
-      names(uniquecol) <- colvar
-      setkeyv(uniquecol, colvar)
+      if (is.factor(condf[[colvar]])) {
+        uniquecol <- as.data.table(levels(condf[[colvar]]))
+        names(uniquecol) <- rowvar
+      } else {
+        #colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
+        colvals <- unique(condf[, colvar, with=FALSE])
+        uniquecol <- as.data.table(colvals)
+        names(uniquecol) <- colvar
+        setkeyv(uniquecol, colvar)
+      }
     }
   } else if (colvar %in% names(treef)) {
     if (col.orderby != "NONE") {
       uniquecol <- unique(treef[,c(colvar, col.orderby), with=FALSE])
       setkeyv(uniquecol, col.orderby)
     } else {
-      colvals <- na.omit(unique(treef[, colvar, with=FALSE]))
-      uniquecol <- as.data.table(colvals)
-      names(uniquecol) <- colvar
-      setkeyv(uniquecol, colvar)
+      if (is.factor(condf[[colvar]])) {
+        uniquecol <- as.data.table(levels(treef[[colvar]]))
+        names(uniquecol) <- rowvar
+      } else {
+        colvals <- na.omit(unique(treef[, colvar, with=FALSE]))
+        uniquecol <- as.data.table(colvals)
+        names(uniquecol) <- colvar
+        setkeyv(uniquecol, colvar)
+      }
     }
   }
 
@@ -798,12 +829,17 @@ check.rowcol <- function(gui, esttype, treef=NULL, condf, cuniqueid="PLT_CN",
 	rowgrpnm=rowgrpnm, title.rowgrp=title.rowgrp, tdomvar=tdomvar, 
 	tdomvar2=tdomvar2, grpvar=grpvar)
 
-  if (esttype %in% c("TREE", "RATIO")) {
+  if (esttype %in% c("TREE", "RATIO", "SEED")) {
     ## Filter tree data for any cond filters
     treef <- treef[paste(get(tuniqueid), get(condid), sep="_") %in% 
 		condf[,paste(get(cuniqueid), get(condid), sep="_")]]
- 
     returnlst <- append(list(treef=treef), returnlst)
+
+    if (!is.null(seedf)) {
+      seedf <- seedf[paste(get(tuniqueid), get(condid), sep="_") %in% 
+		condf[,paste(get(cuniqueid), get(condid), sep="_")]]
+      returnlst <- append(list(seedf=seedf), returnlst)
+    }
   } 
 
   return(returnlst)

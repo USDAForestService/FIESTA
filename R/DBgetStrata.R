@@ -1,7 +1,7 @@
 DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL, 
 	evalCur=TRUE, evalEndyr=NULL, evalAll=FALSE, evalType="AREAVOL", savedata=FALSE, 
-	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
-	getassgn=TRUE, POP_PLOT_STRATUM_ASSGN=NULL){
+	outfolder=NULL, out_fmt="csv", out_dsn=NULL, append_layer=FALSE, outfn.pre=NULL,
+ 	outfn.date=FALSE, overwrite=FALSE, getassgn=TRUE, POP_PLOT_STRATUM_ASSGN=NULL){
   ######################################################################################
   ## DESCRIPTION: This function gets the strata info and area by estimation unit from 
   ##		FIA Database, extracts and merges plot-level assignments to data file, and 
@@ -136,18 +136,42 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 		title="Save parameters", first="YES", gui=gui)
 
   ## Check outfolder/outfn
-  if (savedata || parameters) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui=gui)
-  
-    ## GET outfn
-#    if (is.null(outfn.pre) || gsub(" ", "", outfn.pre) == "") {
-#      outfn.pre <- ""
-#    } else {
-#      outfn.pre <- paste0(outfn.pre, "_")
-#    }
+  if (savedata) {
+    ## Check out_fmt
+    ###########################################################
+    out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb')
+    out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
+		caption="Out format", gui=gui)
 
-    outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date", 
-		title="Add date to outfile", first="FALSE", gui=gui)
+    ## check append_layer
+    append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
+		title="append data", first="NO", gui=gui)
+
+    ## check overwrite
+    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="overwrite", first="NO", gui=gui)
+
+    ## Check for necessary packages
+    ###########################################################
+    if (out_fmt %in% c("sqlite", "gpkg")) {
+      if (!"RSQLite" %in% rownames(installed.packages()))
+        stop("RSQLite package is required for exporting to sqlite or gpkg formats")
+    } else if (out_fmt %in% c("gdb")) {
+      if (!"arcgisbinding" %in% rownames(installed.packages()))
+        stop("arcgisbinding package is required for exporting to gdb format")
+      arcgisbinding::arc.check_product()
+    }
+    if (out_fmt != "csv") {
+      if (!file.exists(checkfilenm(out_dsn, outfolder=outfolder)) || overwrite) {
+        out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
+		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
+		ext=out_fmt, append=append_layer)
+      }
+      outfolder <- dirname(out_dsn)
+      out_dsn <- paste(basename.NoExt(out_dsn), out_fmt, sep=".")
+    } else {
+      outfolder <- pcheck.outfolder(outfolder, gui=gui)
+    }
   }
 
   ##################################################################
@@ -168,11 +192,11 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 ############ CSV only
 
   ## POP_ESTN_UNIT table (ZIP FILE)- To get total area by estimation unit
-  POP_ESTN_UNIT <- FIESTA::DBgetCSV("POP_ESTN_UNIT", stabbrlst, ZIP=ZIP, returnDT=TRUE,
+  POP_ESTN_UNIT <- FIESTA::DBgetCSV("POP_ESTN_UNIT", stabbrlst, returnDT=TRUE,
 		stopifnull=FALSE)
 
   ## POP_STRATUM table (ZIP FILE) - To get pixel counts by estimation unit and stratum.
-  POP_STRATUM <- FIESTA::DBgetCSV("POP_STRATUM", stabbrlst, ZIP=ZIP, returnDT=TRUE, 
+  POP_STRATUM <- FIESTA::DBgetCSV("POP_STRATUM", stabbrlst, returnDT=TRUE, 
 		stopifnull=FALSE)
 
   if (getassgn) {
@@ -196,7 +220,7 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
     }
     if (is.null(POP_PLOT_STRATUM_ASSGN)) {
       POP_PLOT_STRATUM_ASSGN <- FIESTA::DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
-		ZIP=ZIP, returnDT=TRUE, stopifnull=FALSE)
+		returnDT=TRUE, stopifnull=FALSE)
     }
   }
 ############ End CSV only
@@ -331,18 +355,21 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   }
 
   if (savedata) {
-   
-    unitareafn <- DBgetfn("unitarea", invtype, outfn.pre, stabbrlst, evalid=evalidlist)
-    stratalutfn <- DBgetfn("stratalut", invtype, outfn.pre, stabbrlst, evalid=evalidlist)
-    FIESTA::write2csv(unitarea, outfolder=outfolder, outfilenm=unitareafn, 
-		outfn.date=outfn.date, overwrite=overwrite)
-    FIESTA::write2csv(stratalut, outfolder=outfolder, outfilenm=stratalutfn, 
-		outfn.date=outfn.date, overwrite=overwrite)
+     datExportData(unitarea, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			append_layer=append_layer, outfn.pre=outfn.pre)
+
+    datExportData(stratalut, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			append_layer=append_layer, outfn.pre=outfn.pre)
 
     if (getassgn) {
-      datstratfn <- DBgetfn("pltassgn", invtype, outfn.pre, stabbrlst, evalid=evalidlist)
-      FIESTA::write2csv(datstrat, outfolder=outfolder, outfilenm=datstratfn, 
-		outfn.date=outfn.date, overwrite=overwrite)
+      datExportData(datstrat, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+			outfn.date=outfn.date, overwrite_layer=overwrite,
+			append_layer=append_layer, outfn.pre=outfn.pre)
     }
   }
 

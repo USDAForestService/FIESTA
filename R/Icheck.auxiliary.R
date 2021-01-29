@@ -37,7 +37,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
   ## Set global variables
   ONEUNIT=ONESTRAT=npixels=nonsampplots=strvars=PLOT_STATUS_CD=strwt=testlt1=
-		pixels=unitstrgrplut=vars2combine <- NULL
+		pixels=unitstrgrplut=vars2combine=STRATASUB <- NULL
   gui <- FALSE
   unitvars <- c(unitvar, unitvar2)
 

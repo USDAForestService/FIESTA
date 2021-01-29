@@ -8,30 +8,33 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
-	dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL, 
-	ACI = FALSE, adj = "samp", MAmethod = "greg", plt.nonsamp.filter = NULL, 
-	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit=10, unitlut = NULL, 
-	npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL, 
-	stratcombine = TRUE, landarea = "ALL", plt.filter = NULL, 
-	cond.filter = NULL, estvar = NULL, estvar.filter = NULL, estvar.name=NULL, 
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
-	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
-	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, allin1 = FALSE, 
-	estround = 1, pseround = 2, estnull = "--", psenull = "--", divideby = NULL, 
-	savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
-	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, addtitle = TRUE, 
-	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
-	title.colvar = NULL, title.unitvar = NULL, title.estvar = NULL, 
-	title.filter = NULL, MApopdat = NULL, MAdata = NULL, gui = FALSE)
+modMAtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
+	estseed = "none", dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
+	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", 
+	evalid=NULL, invyrs=NULL, ACI = FALSE, adj = "samp", MAmethod = "greg", 
+	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
+	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
+	minplotnum.unit=10, unitlut = NULL, npixelvar = "npixels", prednames = NULL, 
+	predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, landarea = "ALL", 
+	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
+	estvar.name=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
+	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
+	sumunits = FALSE, allin1 = FALSE, estround = 1, pseround = 2, 
+	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
+	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite = FALSE, addtitle = TRUE, returntitle = FALSE, 
+	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
+	title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, 
+	MApopdat = NULL, MAdata = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Tree-level data with one record for each tree. Tree data are aggregated to 
 	condition-level. See details for necessary variables to include. }
+  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Seedling-level data with one record of seedling counts for each species in plot. }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
@@ -45,7 +48,8 @@ modMAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
 	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
 	estimation unit and/or strata, with one record for each plot. }
-  \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
+  \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
+	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{dsn}{ String. Name of database where tree, cond, and plot-level tables reside. 
 	The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). }

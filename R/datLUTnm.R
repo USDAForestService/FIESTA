@@ -36,6 +36,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   xvar <- FIESTA::pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
 		caption="Join variable in dat", stopifnull=TRUE)
 
+ 
   ## Check LUT
   ########################################################
   if (is.vector(LUT) && length(LUT) > 1) {
@@ -64,7 +65,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   ## Check group
   group <- FIESTA::pcheck.logical(group, varnm="group", title="Variable group?", 
 		first="NO", gui=gui)
-   
+
   #######################################################################
   ## Check LUTvar
   #######################################################################
@@ -209,7 +210,6 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   if (!is.character(NAclass) && length(NAclass) != 1) 
     stop("NAclass must be a character string of length 1")
 
-
   ### GET LUTnewvar
   ###########################################
   if (length(LUTnewvarlst) > 0) {
@@ -233,7 +233,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
       if (length(LUTnewvar) == 0) stop("")
     }
   }
-
+ 
   ### GET savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", title="Save data tables?", 
 		first="NO", gui=gui)
@@ -359,6 +359,5 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
       write2csv(xLUT, outfilenm=outfn, outfolder=outfolder)
     }
   }
-
   return(xLUTlst)
 }

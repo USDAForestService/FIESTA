@@ -1,4 +1,4 @@
-getadjfactorPLOT <- function(condx=NULL, treex=NULL, cuniqueid="PLT_CN", 
+getadjfactorPLOT <- function(condx=NULL, treex=NULL, seedx=NULL, cuniqueid="PLT_CN", 
 	tuniqueid="PLT_CN", checkNA=TRUE){
 
   ####################################################################################
@@ -78,6 +78,12 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, cuniqueid="PLT_CN",
  		SUBPPROP_UNADJ_SUM))]
     }
     treex[, tadjfac := ifelse(tadjfac > 0, tadjfac, 1)]
+
+    if (!is.null(seedx)) {
+      setkeyv(seedx, c(tuniqueid))
+      seedx[pltadj, tadjfac := MICRPROP_UNADJ_SUM]
+      seedx[, tadjfac := ifelse(tadjfac > 0, tadjfac, 1)]
+    }  
   } 
 
   ## Calculate adjusted condition proportions 
@@ -85,6 +91,7 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, cuniqueid="PLT_CN",
 
   adjfacdata <- list(condadj = condx)
   if (!is.null(treex)) adjfacdata$treeadj <- treex 
+  if (!is.null(seedx)) adjfacdata$seedx <- seedx 
 
   return(adjfacdata)
 }

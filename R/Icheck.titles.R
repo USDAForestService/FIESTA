@@ -1,11 +1,12 @@
-check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PERACRE", 
-	tabtype="PCT", sumunits=FALSE, title.main=NULL, title.pre=NULL, title.ref=NULL,
- 	title.rowvar=NULL, title.rowgrp=NULL, title.colvar=NULL, title.unitvar=NULL, 
-	title.filter=NULL, title.units=NULL, title.estvarn=NULL, title.estvard=NULL, 
-	unitvar, unitvar2=NULL, rowvar=NULL, colvar=NULL, estvarn=NULL, estvarn.filter=NULL,
- 	estvard=NULL, estvard.filter=NULL, addtitle=FALSE, returntitle=TRUE, rawdata=FALSE,
-	parameters=TRUE, states=NULL, invyrs=NULL, landarea=NULL, plt.filter=NULL, 
-	cond.filter=NULL, allin1=FALSE, divideby=NULL, outfn=NULL, outfn.pre=NULL){ 
+check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL, 
+	ratiotype="PERACRE", tabtype="PCT", sumunits=FALSE, title.main=NULL, title.pre=NULL, 
+	title.ref=NULL, title.rowvar=NULL, title.rowgrp=NULL, title.colvar=NULL, 
+	title.unitvar=NULL, title.filter=NULL, title.units=NULL, title.estvarn=NULL, 
+	title.estvard=NULL, unitvar, unitvar2=NULL, rowvar=NULL, colvar=NULL, estvarn=NULL,
+ 	estvarn.filter=NULL, estvard=NULL, estvard.filter=NULL, addtitle=FALSE, 
+	returntitle=TRUE, rawdata=FALSE, parameters=TRUE, states=NULL, invyrs=NULL, 
+	landarea=NULL, plt.filter=NULL, cond.filter=NULL, allin1=FALSE, divideby=NULL, 
+	outfn=NULL, outfn.pre=NULL){ 
 
   ## TITLE INFO FOR OUTPUT TABLES
   ########################################################
@@ -95,26 +96,39 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
 
         if (is.null(title.estvarn)) {
           ref_estvarn <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
-
           if (nrow(ref_estvarn) == 0) {
             title.estvarn <- estvarn
+          } else if (estseed %in% c("add", "only")) {
+            ref_estvarn <- ref_estvarn[grep("(< 1.0 in)", ref_estvarn$ESTTITLE),]
+            if (estseed == "only") {
+              gfind.max <- grep("seedlings", ref_estvarn$ESTUNITS)
+            } else {
+              gfind.max <- grep("trees", ref_estvarn$ESTUNITS)
+            }
           } else {     
             if (!is.null(estvarn.filter)) {
               gfind.max <- grep(estvarn.filter, ref_estvarn$ESTFILTER)
+              ## If the filter is not found in ref_estvar, try splitting
               if (length(gfind.max) == 0) {
                 estfilters <- strsplit(estvarn.filter, "&")[[1]]
                 ## Find matching filter in ref_estvar. If more than 1, uses first.
                 gfind <- sapply(estfilters, function(x, ref_estvarn) 
         			grep(gsub("\\s", "", x), gsub("\\s", "", ref_estvarn$ESTFILTER)), 
-				ref_estvarn)
-                if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) gfind <- gfind[1]
+				ref_estvarn)             
+                if (length(gfind) > 1 && any(lapply(gfind, length) > 0)) {
+                  gfind <- gfind[1]
+                }
                 gfind <- table(gfind)
                 if (length(gfind) > 0) {
                   gfind.max <- names(gfind)[max(gfind)]
-                  if (length(gfind.max) > 1) gfind.max <- gfind.max[1]
+                  if (length(gfind.max) > 1) {
+                    gfind.max <- gfind.max[1]
+                  }
                 } else {
                   gfind.max <- 1
                 }
+              } else {
+                 gfind.max <- gfind.max[1]
               }
             } else {
               gfind.max <- 1
@@ -335,7 +349,6 @@ check.titles <- function(dat, esttype, phototype=NULL, Npts=NULL, ratiotype="PER
       titlelst$title.estvard <- title.estvard
     }
   }
-
 
   if (!is.null(title.unitvar)) 
     titlelst$title.unitvar <- title.unitvar

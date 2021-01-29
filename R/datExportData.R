@@ -31,27 +31,28 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
   if (!"data.frame" %in% class(dfobj))
     stop("the object must be of class data frame")
 
-
   ## Check out_fmt
   ###########################################################
-  out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb')
+  out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb', 'rda')
   out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
 		caption="Out format", gui=gui)
 
   ## Check for necessary packages
   ###########################################################
   if (out_fmt %in% c("sqlite", "gpkg")) {
-    if (!"RSQLite" %in% rownames(installed.packages()))
+    if (!"RSQLite" %in% rownames(installed.packages())) {
       stop("RSQLite package is required for exporting to sqlite or gpkg formats")
+    }
   } else if (out_fmt %in% c("gdb")) {
-    if (!"arcgisbinding" %in% rownames(installed.packages()))
+    if (!"arcgisbinding" %in% rownames(installed.packages())) {
       stop("arcgisbinding package is required for exporting to gdb format")
+    }
     arcgisbinding::arc.check_product()
   }
 
   ## Check outfolder, overwrite_dsn, overwrite_layer, outfn.date 
   ########################################################
-  outfolder <- pcheck.outfolder(outfolder, default=NULL)
+  #outfolder <- pcheck.outfolder(outfolder, default=NULL)
   overwrite_dsn <- FIESTA::pcheck.logical(overwrite_dsn, varnm="overwrite_dsn", 
 		title="Overwrite dsn?", first="NO", gui=gui)  
   overwrite_layer <- FIESTA::pcheck.logical(overwrite_layer, varnm="overwrite_layer", 
@@ -61,19 +62,22 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
   append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
 		title="Append to dsn?", first="YES", gui=gui) 
 
-  if (append_layer) 
+  if (append_layer) {
     overwrite_dsn <- FALSE
-    
+  }
+
   ## Check out_layer
   ####################################################
-  if (is.null(out_layer))
-    out_layer <- basename.NoExt(out_dsn) 
+  if (is.null(out_layer)) {
+    out_layer <- basename.NoExt(out_dsn)
+  }
 
   ## Write data frame
   ########################################################
   if (out_fmt %in% c("sqlite", "gpkg")) {
-    gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
+    overwrite_layer <- ifelse(append_layer, FALSE, TRUE)
 
+    gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
     if (create_dsn) {
       out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, 
 		overwrite=overwrite_dsn, outfn.date=outfn.date,
@@ -81,7 +85,7 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
     } else {
       out_dsn <- DBtestSQLite(out_dsn, gpkg=gpkg, outfolder=outfolder, 
 		returnpath=TRUE)
-    }      
+    } 
     write2sqlite(dfobj, SQLitefn=out_dsn, out_name=out_layer, gpkg=gpkg, 
 		overwrite=overwrite_layer, append_layer=append_layer, 
 		index.unique=index.unique, index=index)    
@@ -98,6 +102,10 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite=overwrite_layer,
 		appendfile=append_layer)
 
+  } else if (out_fmt == "rda") {
+    objfn <- getoutfn(outfn=out_layer, outfolder=outfolder, outfn.pre=outfn.pre,
+		outfn.date=outfn.date, overwrite=overwrite_layer, ext="rda")
+    save(dfobj, file=objfn)
   } else {
     stop(out_fmt, " currently not supported")
   }  

@@ -1,5 +1,5 @@
-PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute, strlut,  
-	strunitvars, unitvars, strvar){
+PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute, 
+	strtype="post", strlut, strunitvars, unitvars, strvar){
 
   ########################################################################################
   ## DESCRIPTION: Calculates the following variables
@@ -18,7 +18,8 @@ PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute,
   ## Set global variables
   psq.pltdom.n=p.pltdom.n=pnpd=p.pltdom.d=psq.pltdom.d=sumpn=n.strata=strwt=sumpnsq=
 	sumpd=sumpdsq=covar.strwt=sumpnpd=phat.n=phat.d=phat.var.n=phat.var.d=covar=
-	rhat.se=rhat.var=rhat.cv=rhat <- NULL
+	rhat.se=rhat.var=rhat.cv=rhat=phat.n.strwt=phat.var.n.strwt=phat.d.strwt=
+	phat.var.d.strwt=n.total <- NULL
 
 
   ## Check that strlut is a data.table
@@ -51,22 +52,51 @@ PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute,
   ybardat.n <- strlut[ysum.n.strata]
   ybardat.d <- strlut[ysum.d.strata]
 
+  if (strtype == "pre") {
 
-  ## Calculate estimate and estimated variance by estimation unit and strata for numerator
-  ybardat.n[, ':=' (
-	phat.n.strwt = sumpn / n.strata * strwt,
-	phat.var.n.strwt = strwt^2 * 	
-	( sumpnsq - 1 / n.strata * sumpn^2 ) / ( n.strata * (n.strata - 1) )) ]
+    ## Calculate estimate weights by estimation unit and strata for numerator
+    ybardat.n[, phat.n.strwt := sumpn / n.strata * strwt]
 
-  ## Calculate estimate and estimated variance by estimation unit and strata for denominator
-  ybardat.d[, ':=' (
-	phat.d.strwt = sumpd / n.strata * strwt,
-	phat.var.d.strwt = strwt^2 * 	
-	( sumpdsq - 1 / n.strata * sumpd^2 ) / ( n.strata * (n.strata - 1) )) ]
+    ## Calculate estimated variance by estimation unit and strata for numerator
+    ybardat.n[, phat.var.n.strwt := strwt^2 * 	
+		( sumpnsq - 1 / n.strata * sumpn^2 ) / ( n.strata * (n.strata - 1) ) ]
 
-  ## Calculate covariance weights by estimation unit and strata for ratio
-  ybardat.n[, covar.strwt := strwt^2 *
+    ## Calculate estimate weights by estimation unit and strata for denominator
+    ybardat.d[, phat.d.strwt := sumpd / n.strata * strwt]
+
+    ## Calculate estimated variance by estimation unit and strata for denominator
+    ybardat.d[, phat.var.d.strwt := strwt^2 * 	
+		( sumpdsq - 1 / n.strata * sumpd^2 ) / ( n.strata * (n.strata - 1) ) ]
+
+    ## Calculate covariance weights by estimation unit and strata for ratio
+    ybardat.n[, covar.strwt := strwt^2 *
 		( sumpnpd - 1 / n.strata * sumpn * sumpd ) / ( n.strata * (n.strata - 1) ) ]
+
+  }
+
+  if (strtype == "post") {
+
+    ## Calculate estimate weights by estimation unit and strata for numerator
+    ybardat.n[, phat.n.strwt := sumpn / n.strata * strwt]
+
+    ## Calculate estimated variance by estimation unit and strata for numerator
+    ybardat.n[, phat.var.n.strwt := 
+		( strwt * n.strata / n.total + (1 - strwt) * n.strata / n.total^2 ) * 	
+		( sumpnsq - 1 / n.strata * sumpn^2 ) / ( n.strata * (n.strata - 1) ) ]
+
+    ## Calculate estimate weights by estimation unit and strata for denominator
+    ybardat.d[, phat.d.strwt := sumpd / n.strata * strwt]
+
+    ## Calculate estimated variance by estimation unit and strata for denominator
+    ybardat.d[, phat.var.d.strwt := 
+		( strwt * n.strata / n.total + (1 - strwt) * n.strata / n.total^2 ) * 	
+		( sumpdsq - 1 / n.strata * sumpd^2 ) / ( n.strata * (n.strata - 1) ) ]
+
+    ## Calculate covariance weights by estimation unit and strata for ratio
+    ybardat.n[, covar.strwt := 
+		( strwt * n.strata / n.total + (1 - strwt) * n.strata / n.total^2 ) *
+		( sumpnpd - 1 / n.strata * sumpn * sumpd ) / ( n.strata * (n.strata - 1) ) ]
+  }
 
   unit.agvars.n <- c("phat.n.strwt", "phat.var.n.strwt", "covar.strwt", "nbrpts.n", "nbrpts.d")
   unit.agvars.d <- c("phat.d.strwt", "phat.var.d.strwt")

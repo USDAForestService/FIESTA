@@ -45,7 +45,11 @@ datPivot(x, pvar, xvar, yvar, pfun=sum, xfilter = NULL, NAto0 = TRUE,
 }
 
 \examples{
-	datPivot(x=WYcond, pvar="CONDPROP_UNADJ", xvar="FORTYPCD", yvar="STDSZCD")
+	datPivot(x=FIESTA::WYcond, pvar="CONDPROP_UNADJ", xvar="FORTYPCD", yvar="STDSZCD")
+
+	datPivot(x=FIESTA::WYtree, pvar="TPA_UNADJ", xvar="SPCD", yvar="STATUSCD", 
+		pfun=mean, NAto0=FALSE)
+
 }
 
 \keyword{ data }

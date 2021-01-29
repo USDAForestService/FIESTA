@@ -1,32 +1,35 @@
 \name{DBgetEvalid}
 \alias{DBgetEvalid}
 \title{
-	Database - Gets or checks evalid and gets inventory years from FIA database.
+	Database - Gets or checks FIA EVALIDs and/or gets inventory years from 
+		FIA's online publicly-available DataMart 
+		(https://apps.fs.usda.gov/fia/datamart/CSV/datamart_csv.html).
 }
 \description{
-	Extracts an evalid for identifying an estimation group of plots. If evalCur=TRUE, 
-	extracts current evalid and inventory years for state(s), or for a specified 
-	evalEndyr. Otherwise checks an evalid and returns states and inventory years. 
+	Extracts FIA EVALIDs for identifying an estimation group of plots. EVALIDs 
+	may be extracted by most current evaluation (evalCur=TRUE) or by the end
+	year of an evaluation (evalEndyr) or all evaluations in the database for 
+	one or more states. See details for more information.
 }
 \usage{
-DBgetEvalid(states = NULL, RS = NULL, invyrtab = NULL, invtype = "ANNUAL", 
-	evalCur = TRUE, evalEndyr = NULL, evalid = NULL, evalAll = FALSE, 
-	evalType = "AREAVOL", isveg = FALSE, isdwm = FALSE, gui = FALSE, returnPOP = TRUE)
+DBgetEvalid(states = NULL, RS = NULL, invtype = "ANNUAL", evalCur = TRUE, 
+	evalEndyr = NULL, evalid = NULL, evalAll = FALSE, evalType = "AREAVOL", 
+	invyrtab = NULL, gui = FALSE)
 }
 \arguments{
-  \item{states}{ String or numeric vector. Name(s) (e.g., 'Arizona','New Mexico') or 
-	code(s) (e.g., 4, 35) of states for evalid. }
-  \item{RS}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS'). }
-  \item{invyrtab}{ Data frame. A data frame including inventory years by state. If NULL,
-	it is generated from SURVEY table from FIA database based on states and invtype. }
+  \item{states}{ String or numeric vector. Name (e.g., 'Arizona','New Mexico') or 
+	code (e.g., 4, 35) of state(s) for evalid. If all states in one or more FIA Research
+	Station is desired, set states=NULL and use RS argument to define RS. }
+  \item{RS}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS').
+	Do not use if states is populated. }
   \item{invtype}{ String. The type of FIA data to extract ('PERIODIC', 'ANNUAL').  
 	See further details below. }
   \item{evalCur}{ Logical. If TRUE, the most current evalidation is extracted for state(s). }
-  \item{evalEndyr}{ Number. The last year of the evaluation period of interest. Selects
-	only sampled plots and conditions for the evalidation period ending in the specified 
-	year. If more than one state, create a named list object with evalEndyr
-	labeled for each state (ex. list(Utah=2014, Colorado=2013). }
-  \item{evalid}{ Integer. To check an already existing evalid. }
+  \item{evalEndyr}{ Number. The end year of the evaluation period of interest. Selects
+	only sampled plots and conditions for the evalidation period. If more than one state, 
+	create a named list object with evalEndyr labeled for each state 
+	(e.g., list(Utah=2014, Colorado=2013). }
+  \item{evalid}{ Integer. One or more EVALID to check if exists. }
   \item{evalAll}{ Logical. If TRUE, gets all EVALIDs for invtype. }
   \item{evalType}{ String vector. The type(s) of evaluation of interest 
 	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
@@ -34,15 +37,14 @@ DBgetEvalid(states = NULL, RS = NULL, invyrtab = NULL, invtype = "ANNUAL",
 	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
 	includes plots used for growth, removals, mortality, and change estimates
 	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
-	See FIA database manual for regional availability and/or differences. }
-  \item{isveg}{ Logical. If TRUE, the Evaluation for understory vegetation is added. }
-  \item{isdwm}{ Logical. If TRUE, the Evaluation for DWM is added. }
+	See details below and FIA database manual for regional availability and/or differences. }
+  \item{invyrtab}{ Data frame. A data frame including inventory years by state. If NULL,
+	it is generated from SURVEY table from FIA database based on states and invtype. }
   \item{gui}{ Logical. If TRUE, gui windows pop up for parameter selection. }
-  \item{returnPOP}{ Logical. If TRUE, returns population table (SURVEY, POP_PLOT_STRATUM_ASSGN). }
 }
 
 \value{
-  returnlst - a list of the following objects:
+  A list of the following objects:
   \item{states}{ String vector. State names. }
   \item{rslst}{ String vector. FIA research station names included in output. }
   \item{evalidlist}{ Named list. evalid by state. }
@@ -50,21 +52,51 @@ DBgetEvalid(states = NULL, RS = NULL, invyrtab = NULL, invtype = "ANNUAL",
   \item{invyrtab}{ Data frame. Inventory years by state for evalidlist. }
   \item{evalTypelist}{ Named list. Evaluation type(s) by state. }
   \item{invyrs}{ Named list. Inventory years by state for evalidlist. }
+  \item{SURVEY}{ Data frame. If returnPOP=TRUE, the SURVEY table from FIADB. }
 }
 
 \note{
-	FIA database tables used:
-	1. SURVEY	- To get latest inventory year, invyrtab = NULL
+	FIA database tables used:\cr
+	1. SURVEY	- To get latest inventory year, invyrtab = NULL\cr
 	2. POP_EVAL - To get EVALID and EVALID years
 }
+\details{
 
+   FIA Evaluation\cr
+	An Evaluation defines a group of plots in the FIA Database used for 
+	state-level estimates, representing different spans of data and
+	different stratification and area adjustments. An Evaluation Type 
+	(evalType) is used to identify a specific set of plots for a 
+	particular response to be able to ensure a sample-based estimate 
+	for a population. See FIA's Database documentation for current
+	available Evaluation Types and descriptions 
+	(https://www.fia.fs.fed.us/library/database-documentation/index.php). 
+
+    EVALID\cr
+	An EVALID is a unique code defining an Evaluation, generally in the format 
+	of a 2-digit State code, a 2-digit year code, and a 2-digit Evaluation
+	Type code.
+
+
+    EVAL_TYP\cr
+	\tabular{llll}{
+		\tab \bold{EVALIDCD}	\tab \bold{EVAL_TYP}	\tab \bold{Description}\cr
+	 	\tab 00	\tab EXPALL			\tab All area\cr
+	 	\tab 01	\tab EXPVOL/EXPCURR	\tab Area/Volume\cr
+	 	\tab 03	\tab EXPCHNG/EXPGROW/EXPMORT/EXPREMV	\tab Area Change/GRM\cr
+	 	\tab 07	\tab EXPDWM			\tab DWM\cr
+	 	\tab 08	\tab EXPREGEN		\tab Regeneration\cr
+	 	\tab 09	\tab EXPINV			\tab Invasive\cr
+	 	\tab 10	\tab EXPP2VEG		\tab Veg profile\cr
+	 	\tab 12	\tab EXPCRWN		\tab Crown\cr
+      }
+}	
+	
 \author{
 	Tracey S. Frescino
 }
 
 \examples{
-
-  \dontrun{
 
     ## Get evalid and inventory years for Wyoming
     WYeval <- DBgetEvalid(states="Wyoming")
@@ -77,9 +109,14 @@ DBgetEvalid(states = NULL, RS = NULL, invyrtab = NULL, invtype = "ANNUAL",
     WYeval$invyrs
 
 
-    ## Get evalid for Utah and Wyoming (from CSV files)
-    DBgetEvalid(states=c("Wyoming", "Utah"), datsource="CSV")
-  }
+    ## Get evalid for Utah and Wyoming 
+    DBgetEvalid(states=c("Wyoming", "Utah"))
+
+    ## Get evalid for an FIA Research Station
+    RSevalid <- DBgetEvalid(RS="NERS")
+    names(RSevalid)
+    RSevalid$evalidlist
+
 }
 
 \keyword{ data }

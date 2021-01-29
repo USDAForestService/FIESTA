@@ -13,12 +13,113 @@ params:
   outfn.pre: ""
 ---
 
+```{r info, include=FALSE, echo=FALSE} 
+
+
+## Adjust margins and other document settings in reference_docx: ICE_Summary_RMARKDOWN_TEXT_STYLE_REFDOC.docx
+## For example, header 14 is ##############
+
+#=================================================================================
+# Load R packages needed:
+#=================================================================================
+
+# suppressMessages loads in packages quietly, so that loading messages do not get sent to document 
+suppressMessages(library(knitr))
+suppressMessages(library(gridExtra))
+suppressMessages(library(data.table))
+suppressMessages(library(pheatmap))
+
+### Remove any objects from environment before running script ###
+rm(list=ls())
+
+
+## Define functions from FIESTA
+#wraptitle <- function(x, len=10) {
+#  sapply(x, function(y) paste(strwrap(y, len), 
+#         collapse = "\n"), USE.NAMES = FALSE)
+#}
+
+
+#=================================================================================
+# Important Info (1/11/2021)
+#=================================================================================
+# Revised slightly to incorporate as template in FIESTA - Tracey Frescino
+# 1. Changed code for inputs to parameters
+# 2. Change method for importing rawdata *.csv files so not to have to include dates
+# 3. Change method for defining LU/LC classes (an attempt to make more generic), using classes from Input6 and Input10
+# 4. Using FIESTA function above (wraptitle) for create class labels
+# 5. Removed getrange and getmap functions, not using anymore
+# 6. In plotNetChangesByClass, plotGainLossSingClass functions, and plotCheckerboard functions changed input of inFile from file name to already imported object data frame.
+# 7. In, plotCheckerboard functions, added arguments to specify name of land use and land cover variables (an attempt to make more generic).
+# 8. Used generic variable object names in summaryInfo
+# 9. Changed state parameter to AOInm.
+# 10. Got rid of unnecessary libraries (stringr, dply, rgeos, RColorBrewer, gridExtra, raster, OpenStreeMap).
+# 11. Using d instead of mat for pheatmap
+
+
+#=========================================================================================================
+# TABLE OF CONTENTS --- Code Chunks --- Can search different chunks/functions (e.g. ctr+f "r setup chunk")  
+#=========================================================================================================
+# 1. r setup chunk: All directories, unique objects (state), and input data are in the first chunk of code (this chunk)
+# 2. r customFunc chunk: All custom data & plot functions
+#    *Data Functions
+#       -  1. getmap
+#       -  2. plotNetChangesByClass
+#       -  3. plotGainLossSingClass
+#    *Plot Functions 
+#       -  1. getmap
+#       -  2. plotNetChangesByClass
+#       -  3. plotGainLossSingClass 
+# 3. r iceOverviewGraphicCapGen chunk: This chunk creates Figure 1
+# 4. r getSummaryInfo chunk: This chunk creates an empty datatable that is populated with LC and LU data from the Fiesta estimates --> nostrata --> rawdata folder. The table info is used for plots 
+# 5. r luNetChange chunk: Creates Figure 2
+# 6. r luForGainLoss_tab3 chunk: Creates Figure 3
+# 7. r lcNetChange chunk: Creates Figure 4
+# 8. r lcTreeGainLoss chunk: Creates Figure 5
+# 9. r chgAgBarChart chunk: Creates Figure 6
+# 10. r T2-LCover_LUse chunk: Creates Figure 7
+# 11. used d instead of mat for pheatmap
+
+
+##*** Adjust figure size with -- ```{r, fig.align = "center", fig.height = 8, fig.width = 8,
+    ## out.width = "8.5in"}
+## Refer to this guide for more rmarkdown code https://rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf
+
+
+
+#############--- FILE/DATA INPUTS ---###########################################
+# Use ctr+f to find where inputs are loaded in (code below), and used in code 
+# ------------------------------------------------------------------------------
+
+#### Directories, State, Years, File name inputs ####
+# INPUT 1. State name -- !!! Have to update this input 
+# INPUT 2. Years of NAIP imagery  
+# INPUT 3. Unique file name "year0101" (i.e. year, two digit month, two digit day) --unique file identifier used later to input correct data   
+# INPUT 4. FIA data
+# INPUT 5. Master" plot data
+
+#### Forest LU and LC inputs ####
+# INPUT 6. Land Use (LU) data for Time 1 (T1: Year 1) 
+# INPUT 7. Land Use (LU) data for Time 2 (T2: Year 2)  
+# INPUT 8: LU net change and uncertainty associated w/ LU net change
+# INPUT 9: LU change decrease or increased, and type of LU that increased/decreased
+# INPUT 10: Percent of Tree Landcover (LC) for T1 (Year 1)
+# INPUT 11: Percent of Tree Landcover (LC) for T2 (Year 2)
+# INPUT 12: Tree LC Net Change and Tree LC net change uncertainty
+# INPUT 13: Overall tree LC increase or decrease -- What forest changed to for T1 and T2 (year1 and year 2)
+
+#### Figure Inputs #####
+# Input 14: Net Land use change among all LU classes (Figure 2)
+# Input 15: Forest Land Use Change input (Figure 3)
+## Input 16: Net Land Cover Change Among All Classes (Figure 4)
+# Input 17: Forest Land Use Change input (Figure 5) 
+## Input 18: Forest Land Use Change input (Figure 6) 
+
+```
 
 
 ```{r inputs, echo=FALSE, warning=FALSE, message=FALSE}
-library(FIESTA)
-
-
+#library(FIESTA)
 rawfolder <- params$rawfolder
 AOInm <- params$AOInm
 yearT1 <- params$T1
@@ -26,18 +127,32 @@ yearT2 <- params$T2
 ice.QAQCfn <- params$ice.QAQCfn
 outfn.pre <- params$outfn.pre
 
+# ## Set the following parameters to run report
+# rawfolder <- "E:/workspace/ICE/prototype/_reports/gtac_ICE/states/Caribbean/estimates/rawdata"
+# AOInm <- "Caribbean"
+# yearT1 <- 2017
+# yearT2 <- 2018
+# #ice.QAQCfn <- "E:/workspace/ICE/prototype/_reports/gtac_ICE/states/Caribbean/Photo_data/StJohns_QAQC.csv"
+# ice.QAQCfn <- NULL
+# outfn.pre <- AOInm
+
+
 if (is.null(rawfolder)) stop("rawfolder is NULL")
 if (!dir.exists(rawfolder)) stop("rawfolder path is invalid")
 if (is.null(AOInm)) stop("AOInm is NULL")
 if (is.null(yearT1)) stop("T1 is NULL")
 if (is.null(yearT2)) stop("T2 is NULL")
-if (is.null(outfn.pre)) stop("outfn.pre is NULL")
+if (is.null(outfn.pre)) outfn.pre <- AOInm
 
 
 ## Import ICE QAQC data
-ice.QAQC <- FIESTA::pcheck.table(ice.QAQCfn)
+#ice.QAQC <- FIESTA::pcheck.table(ice.QAQCfn)
+if (is.null(ice.QAQCfn)) ice.QAQC <- NULL
 
 if (!is.null(ice.QAQC)) {
+  if (!dir.exists(ice.QAQCfn)) stop(ice.QAQCfn, " does not exist")
+  ice.QAQC <- fread(ice.QAQCfn)
+  
   if (!all(c("QAQC_check", "Result") %in% names(ice.QAQC))) {
     warning("ice.QAQC table must include QAQC_check and Result columns")
     ice.QAQC <- NULL
@@ -69,9 +184,6 @@ agentnm <- "Change Agent-GRP"
 
 
 ```{r setup, include=FALSE, echo=FALSE} 
-
-suppressMessages(library(knitr))
-suppressMessages(library(pheatmap))
 
 
 rawfolder <- normalizePath(rawfolder)
@@ -218,7 +330,6 @@ nLCClasses = length(allLCClasses)
 #=============================================================================
 # 1. setDecPlaces
 # 2. getNPrettyDecPlaces
-# 3. getrange
 
 
 # --> to specify the number of decimal places:
@@ -245,26 +356,6 @@ getNPrettyDecPlaces = function(x) {
 } # end function getNPrettyDecPlaces
 
 
-# --> TF's function to get the extent of a map (ul,ur,ll,lr)
-#     Input(s): Extent or matrix 
-#     Output(s): coordinates of corners 
-getrange <- function(x){
-  if(class(x) == "Extent"){
-    rng <- c(x@xmin, x@ymin, x@xmax, x@ymax)
-  }else if(class(x) == "matrix"){
-    rng <- c(x[1,1], x[2,1], x[1,2], x[2,2])
-  }else{
-    stop("must be class 'Extent' or 'matrix'")
-  }
-
-  ul <- rng[c(4,1)]	# (ymax, xmin)
-  ur <- rng[c(4,3)]	# (ymax, xmax)
-  ll <- rng[c(2,1)]	# (ymin, xmin)
-  lr <- rng[c(2,3)]	# (ymin, xmax)
-       
-  return(list(rng=rng, ul=ul, ur=ur, ll=ll, lr=lr))
-}
-
 
 ##********** END of DATA FUNCTIONS ***********************************###
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
@@ -273,8 +364,8 @@ getrange <- function(x){
 #=============================================================================
 #### CUSTOM PLOT FUNCTIONS ####
 #=============================================================================
-# 2. plotNetChangesByClass
-# 3. plotGainLossSingClass
+# 1. plotNetChangesByClass
+# 2. plotGainLossSingClass
 
 
 #===============================================================================  
@@ -1308,7 +1399,7 @@ d = data.frame(Input21[,-1],row.names = Input21[,1])
 d = as.matrix(d, replace=TRUE)
 
 ## Round values to first decimal 
-mat = round(as.numeric(d),1)
+#mat = round(as.numeric(d),1)
 
 ```
 
@@ -1746,6 +1837,48 @@ figCap = paste0("Figure ",figNum,": Estimated Land Cover change for ", AOInm," "
 ########## `r figCap`
 
 
+################ %T2-LC within T2-LU for `r AOInm` (`r yearT1` to `r yearT2`)
+&nbsp;
+&nbsp;
+```{r T2-LCover_LUse,echo=FALSE, fig.height=4.5, fig.width = 10, dpi=300}
+
+# #===================================================================================================================
+# # Figure 9 - Heatmap 
+# #===================================================================================================================
+# 
+col1 = colorRampPalette(c("gray50", 'gray90'))(10)
+
+pheatmap(d, display_numbers = T,
+         cluster_rows = TRUE, cluster_cols = TRUE,
+         treeheight_col = 0,
+         treeheight_row = 0,
+         cutree_cols = 5,
+         cutree_rows = 6,
+         clustering_distance_cols = "correlation",
+         clustering_distance_rows = "correlation",
+         color = col1,
+         border_color = "Black",
+         cellwidth = 50,
+         cellheight = 20,
+         xlab = "Landclass1",
+         ylab = "Landclass2",
+         fontsize = 14,
+         fontsize_row = 10,
+         fontsize_col = 10,
+         fontsize_number = 8,
+         angle_col = 45,
+         number_color = "Black",
+         number_format = "%.1f",
+         legend = TRUE,
+         scale = "none",
+         legend_breaks = c(0, 20, 40, 60, 80, 100, max(d)),
+         legend_labels = c("0", "20", "40", "60", "80", "100", "\n"),
+         na_col = "Black"
+)
+
+
+```
+
 
 ``` {r T2LUCapGen,include=FALSE}
 figNum = figNum + 1
@@ -1757,7 +1890,6 @@ figCap = paste0("Figure ",figNum,": The percent of ", AOInm,
 
 ########## `r figCap`
 
-\newpage
 
 ############
 ############## Quality Assessment and Quality Control (QAQC) report

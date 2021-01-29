@@ -13,17 +13,18 @@
 	total land area in the population. 
 }
 \usage{    
-modMApop(MAmethod, cond, plt = NULL, tree = NULL, pltassgn = NULL, dsn = NULL, 
-	puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", tuniqueid="PLT_CN", 
-	cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", 
-	evalid = NULL, invyrs = NULL, ACI = FALSE, adj = "samp", 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
-	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit = 10, unitlut = NULL, npixelvar="npixels", prednames = NULL, 
-	predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, saveobj = FALSE, 
-	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
-	outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
-	MAdata = NULL, MAmodeldat = NULL, gui = FALSE)
+modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL, 
+	dsn = NULL, puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", 
+	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
+	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, ACI = FALSE, 
+	adj = "samp", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
+	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
+	unitcombine = FALSE, minplotnum.unit = 10, unitlut = NULL, 	
+	npixelvar="npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL, 
+	stratcombine = TRUE, saveobj = FALSE, savedata = FALSE, outfolder = NULL, 
+	out_fmt = "csv", out_dsn = NULL, outfn = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite = TRUE, MAdata = NULL, MAmodeldat = NULL, 
+	gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,6 +43,8 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, pltassgn = NULL, dsn = NULL,
   \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Tree-level data with one record for each tree. Tree data are aggregated to 
 	condition-level. See details for necessary variables to include. }
+  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Seedling data with one record for each seedling count. }
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
 	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
 	estimation unit and/or strata, with one record for each plot. }

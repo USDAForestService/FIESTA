@@ -1,3 +1,4 @@
+# checkfilenm
 # getoutfn
 # addcommas
 # pastevars
@@ -17,8 +18,44 @@
 # wraptitle
 
 
+
+checkfilenm <- function(fn, outfolder=NULL, ext=NULL, 
+	stopifnull=FALSE) {
+
+  if (is.null(fn)) {
+    #message("file name is NULL")
+    if (stopifnull) {
+      stop()
+    } else {
+      return(NULL)
+    }
+  }
+  if (!is.character(fn)) {
+    stop("file name must be a character string")
+  }
+  if (!is.null(outfolder)) {
+    outfolder <- pcheck.outfolder(outfolder)
+    if (file.exists(file.path(outfolder, fn))) {
+      return(normalizePath(file.path(outfolder, fn)))
+    }
+  } else if (file.exists(fn)) {
+      return(fn)
+  } else if (!is.null(ext)) {
+    if (substring(ext, 1, 1) != ".") {
+      ext <- paste0(".", ext)
+    }
+
+    if (!file.exists(file.path(outfolder, fn, ext))) {
+      stop("file name does not exist")
+    }
+  } else {
+    return(NULL)
+  }
+}
+    
+
 getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
-		outfn.date=FALSE, overwrite=FALSE, ext="csv", baseonly=FALSE, 
+		outfn.date=FALSE, overwrite=FALSE, ext=NULL, baseonly=FALSE, 
 		noext=FALSE, outfn.default="outfile", gui=FALSE, append=FALSE) {
   ## DESCRIPTION: get full pathname 
 
@@ -35,7 +72,6 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
     stop("outfn must be a character string")
   extfn <- getext(outfn) 
 
-
   ## Check ext
   extlst <- c("sqlite", "csv", "txt", "gdb", "shp", "gpkg", 
 		"jpg", "png", "tif", "img", "pdf", "rda")
@@ -48,8 +84,13 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
     if (is.na(getext(outfn)) || !extfn %in% extlst)
       outfn <- paste0(outfn, ".", ext)
   } else {
-    if (is.na(getext(outfn)) || !extfn %in% extlst)
+    if (is.na(getext(outfn))) {
+      stop("specify out_format") 
+    } else if (!extfn %in% extlst) {
       stop(extfn, " not supported")
+    } else {
+      ext <- extfn
+    }
   }     
 
   ## Get basename
@@ -61,17 +102,17 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
     message("outfn is a folder name... must be a file name")
     return(outfn)
   }
-
-  if (!dir.exists(dirname(outfn))) stop(outfn, " does not exist")
-  if (dirname(outfn) != "." && !baseonly) {
-    if (is.null(outfolder)) {
+ 
+  if (is.null(outfolder)) {
+    if (!dir.exists(dirname(outfn)) && !dir.exists(dirname(normalizePath(outfn)))) {
+      stop(outfn, " does not exist")
+    } else if (dir.exists(dirname(outfn))) {
       outfolder <- dirname(outfn)
     } else {
-      if (dir.exists(file.path(outfolder, dirname(outfn))))
-        outfolder <- file.path(outfolder, dirname(outfn))
+      outfolder <- dirname(normalizePath(outfn))
     }
   }
- 
+     
   ## Check outfn.pre
   if (!is.null(outfn.pre) && is.character(outfn.pre))
     outfn.base <- paste(outfn.pre, outfn.base, sep="_")
@@ -84,16 +125,19 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
   outfolder <- pcheck.outfolder(outfolder, gui=gui)  
   outfilenm <- file.path(outfolder, outfn.base)
 
-  if (overwrite && !append) {
+  if (overwrite) {
     nm <- paste0(outfilenm, ".", ext)
     if (file.exists(nm)) {
       test <- tryCatch(
         file.remove(nm),
 			warning=function(war) {
+             			#stop(war,"\n")
              			stop("cannot overwrite file... permission denied\n")
 			}, error=function(err) {
 					message(err)
-			} ) 
+			} )
+      if (is.null(test)) 
+        stop("permission denied") 
       message("overwriting ", nm, "...")
     } 
   } else if (!append) {
@@ -102,8 +146,8 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
 
   if (!baseonly) {
     ## Check outfolder
-    outfolder <- pcheck.outfolder(outfolder, gui=gui)  
-    outfilenm <- file.path(outfolder, outfn.base)
+    outfolder <- pcheck.outfolder(outfolder, gui=gui) 
+    outfilenm <- file.path(normalizePath(outfolder), outfn.base)
   } else {
     outfilenm <- outfn.base
   }

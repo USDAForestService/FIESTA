@@ -9,8 +9,9 @@
 \usage{
 anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
 	RS = NULL, clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
-	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
-	puniqueid = "CN", intensity1 = TRUE, strata = TRUE, strattype = "RASTER", 
+	istree = TRUE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
+	tree_layer = "tree", seed_layer = "seed", puniqueid = "CN", 
+	intensity1 = TRUE, strata = TRUE, strattype = "RASTER", 
 	strat_layer = NULL, strat_dsn = NULL, strvar = NULL, showsteps = FALSE, 
 	cex.plots = 0.5, savedata = FALSE, savexy = TRUE, savesteps = FALSE, 
 	saveobj = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
@@ -32,10 +33,13 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Name of database where *_layers reside. }
   \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
+  \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{plot_layer}{ String. Name of layer in database of file name of FIA plot table. }
   \item{cond_layer}{ String. Name of layer in database of file name of FIA cond table. }
   \item{tree_layer}{ String. Name of layer in database of file name of FIA tree table 
 	if istree=TRUE. }
+  \item{seed_layer}{ String. Name of layer in database of file name of FIA seedling 
+	table if isseed=TRUE. }
   \item{puniqueid}{ String. Name of unique identifier of plt. }
   \item{intensity1}{ Logical. If TRUE, include only plots with INTENSITY=1. }
   \item{strata}{ Logical. If TRUE, get strata weights from strat_layer. }

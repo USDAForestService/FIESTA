@@ -9,7 +9,7 @@
 \usage{
 	DBtestSQLite(SQLitefn = NULL, gpkg = FALSE, dbconnopen = FALSE, 
 		outfolder = NULL, showlist = TRUE, returnpath = TRUE,
-		createnew = TRUE, stopifnull = FALSE)
+		createnew = TRUE, stopifnull = FALSE, overwrite = TRUE)
 }
  
 \arguments{
@@ -23,7 +23,7 @@
 		If FALSE, returns SQLitefn. }
   \item{createnew}{ If TRUE, creates new SQLite database. }
   \item{stopifnull}{ Logical. If TRUE, stops if SQLite database doesn't exist. }
-
+  \item{overwrite}{ Logical. If TRUE, overwrites data. }
 }
 \author{
 	Tracey S. Frescino

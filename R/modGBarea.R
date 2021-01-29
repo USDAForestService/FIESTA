@@ -80,8 +80,8 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
 	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2, 
 	unitarea=unitarea, areavar=areavar, unitcombine=unitcombine,
  	minplotnum.unit=minplotnum.unit, strata=strata, stratalut=stratalut, 
-	strvar=strvar, nonresp=nonresp, substrvar=substrvar, getwt=getwt, 
-	getwtvar=getwtvar, stratcombine=stratcombine, GBdata=GBdata, gui=gui)
+	strvar=strvar, getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, 
+	GBdata=GBdata, gui=gui)
   } else {
     returnGBpopdat <- FALSE
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 

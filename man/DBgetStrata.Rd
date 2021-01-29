@@ -12,7 +12,8 @@
 \usage{
 DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL, 
 	evalCur = TRUE, evalEndyr = NULL, evalAll = FALSE, evalType = "AREAVOL", 
-	savedata = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	append_layer = FALSE, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite = FALSE, getassgn = TRUE, POP_PLOT_STRATUM_ASSGN = NULL)
 }
 \arguments{
@@ -37,9 +38,16 @@ DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL,
   \item{savedata}{ Logical. If TRUE, writes output to outfolder. }
   \item{outfolder}{ String.* If savedata=TRUE, name of the output folder. If NULL, 
 	data are saved to the working directory. }
+  \item{out_fmt}{ String. File format for output ('csv', 'sqlite','gpkg', 'gdb').
+	If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed. If
+	out_fmt='gdb', arcgisbinding package and R-Bridge must be installed. }
+  \item{out_dsn}{ String. Data source name for output. If extension is not
+	included, out_fmt is used. Use full path if outfolder=NULL. }
+  \item{append_layer}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
+	a database or shapefile. If FALSE, the out_dsn will be overwritten if exists. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'.) }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE, if savedata=TRUE, overwrites files. }
+  \item{overwrite}{ Logical. If TRUE, overwrite data. }
   \item{getassgn}{ Logical. If TRUE, extracts plot assignments from POP_PLOT_STRATUM_ASSGN 
 	table in database. }
   \item{POP_PLOT_STRATUM_ASSGN}{ Data frame. The POP_PLOT_STRATUM_ASSGN for state(s). }
@@ -73,7 +81,7 @@ DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL,
   \item{unitarea}{ Data frame. Total acres by estimation unit. }
   \item{unitvar}{ String. Name of the estimation unit variable (ESTN_UNIT). }
   \item{areavar}{ String. Name of the acre variable (ACRES). }
-  \item{strlut}{ Data frame. Strata look-up table with summarized pixel counts
+  \item{stratalut}{ Data frame. Strata look-up table with summarized pixel counts
 		(P1POINTCNT) by strata/estimation unit. }
   \item{strvar}{ String. Name of the strata variable (STRATA). }
   \item{strwtvar}{ String. Name of the strata weight variable (P1POINTCNT). }

@@ -13,21 +13,23 @@
 	total land area in the population. 
 }
 \usage{    
-modGBpop(cond = NULL, plt = NULL, tree = NULL, seed = NULL, vspspp = NULL, 
-	pltassgn = NULL, dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", 
-	pjoinid = "CN", tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
-	condid = "CONDID", areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, 
-	intensity = NULL, adj = "samp", ACI = FALSE, plt.nonsamp.filter = NULL, 
-	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, 
-	strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", nonresp = FALSE,
-	substrvar = NULL, getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
+modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL, 
+	vspspp = NULL, subplot = NULL, subp_cond = NULL, pltassgn = NULL, dsn = NULL, 
+	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", tuniqueid = "PLT_CN", 
+	cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", 
+	evalid = NULL, invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, 
+	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
+	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
+	unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, stratalut = NULL, 
+	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
 	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
 	out_dsn = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite = TRUE, GBdata = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{popType}{ String. Type of evaluation(s) to include in population data 
+	("VOL", "P2VEG"). }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
@@ -45,6 +47,10 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, seed = NULL, vspspp = NULL,
 	Seedling data with one record for each seedling count. }
   \item{vspspp}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Vegetation species-level data with one record for each species (P2VEG_SUBPLOT_SPP). }
+  \item{subplot}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Subplot-level data with one record for each species (SUBPLOT). }
+  \item{subp_cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Subplot condition-level data with one record for each species (SUBP_COND). }
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
 	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
 	estimation unit and/or strata, with one record for each plot. }
@@ -98,10 +104,6 @@ modGBpop(cond = NULL, plt = NULL, tree = NULL, seed = NULL, vspspp = NULL,
   \item{strvar}{ String. If strata=TRUE, name of the strata variable in stratalut and 
 	cond or pltassgn data frame with stratum assignment for each plot 
 	(Default = 'STRATUMCD'). }
-  \item{nonresp}{ Logical. If TRUE, using variance for nonresponse substrata. 
-	Note: substrvar must be included and PLOT_STATUS_CD must be included in plot data. }
-  \item{substrvar}{ String. If strata=TRUE, name of the substrata variable in stratalut 
-	and cond or pltassgn data frame with stratum assignment for each plot. } 
   \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
 	If FALSE, 'strwt' variable must be in stratalut. }
   \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt) 

@@ -9,17 +9,19 @@
 	by multiplying by TPA.
 }
 \usage{
-datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PLT_CN", 
-	cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE, condid = "CONDID", 
-	bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, tsumvarnmlst = NULL, 
-	TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, 
-	getadjplot = FALSE, adjtree = FALSE, adjTPA = 1, NAto0 = FALSE, 
-	savedata = FALSE, outfolder = NULL, out_layer = NULL, outfn.date = TRUE, 
-	overwrite = FALSE, tround = 16, checkNA = FALSE, returnDT = TRUE)
+datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
+	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE, 
+	condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, 
+	tsumvarnmlst = NULL, TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, 
+	addseed = FALSE, lbs2tons = TRUE, getadjplot = FALSE, adjtree = FALSE, 
+	adjTPA = 1, NAto0 = FALSE, savedata = FALSE, outfolder = NULL, 
+	out_layer = NULL, outfn.date = TRUE, overwrite = FALSE, tround = 16, 
+	checkNA = FALSE, returnDT = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{tree}{ Dataframe or comma-delimited file (*.csv). The tree-level table. }
+  \item{seed}{ Dataframe or comma-delimited file (*.csv). The seedling table. }
   \item{cond}{ Dataframe or comma-delimited file (*.csv). Condition-level table to join the 
 	aggregated tree data to, if bycond=TRUE. This table also may be used for condition 
 	proportion or strata variables used if adjcond or adjstrata = TRUE (See details below). 
@@ -53,6 +55,7 @@ datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PL
   \item{tfilter}{ String. Filter to subset the tree data before aggregating 
 	(e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is prompted. 
 	Use tfilter="NONE" if no filters. }
+  \item{addseed}{ Logical. If TRUE, add seedling data to tree counts (if TPA variable in tsumvarlst). }
   \item{lbs2tons}{ Logical. If TRUE, converts biomass or carbon variables from pounds to tons. }
   \item{getadjplot}{ Logical. If TRUE, adjustments are calculated for nonsampled 
 	conditions on plot. }
@@ -115,6 +118,15 @@ datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PL
 	If a dat table is provided, the aggregated tree data will be merged to table and NULL 
 	values will be output as 0.	
 
+}
+\examples{
+
+  ## Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
+  treesum <- datSumTree(tree=FIESTA::WYtree, tsumvarlst="TPA_UNADJ")$treedat
+
+  ## Check results
+  treesum[treesum$PLT_CN == 40404737010690,]
+  FIESTA::WYtree[FIESTA::WYtree$PLT_CN == 40404737010690,]
 }
 
 \keyword{ data }

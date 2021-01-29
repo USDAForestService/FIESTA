@@ -1,6 +1,6 @@
 DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE, 
 	outfolder=NULL, showlist=TRUE, returnpath=TRUE, createnew=TRUE,
-	stopifnull=FALSE) {
+	stopifnull=FALSE, overwrite=TRUE) {
   ## DESCRIPTION: 
   ## Test SQLite connection (SQLite or Geopackage database)
   ## ARGUMENTS:
@@ -16,24 +16,24 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
   ## Check gpkg
   dbext <- ifelse(gpkg, ".gpkg", ".sqlite")
 
-  if (is.null(SQLitefn)) {
-    if (stopifnull) {
-      stop("SQLitefn is NULL")
+  ## Check filename
+  SQLitepath <- checkfilenm(SQLitefn, outfolder)
+
+  if (is.null(SQLitepath)) {
+    if (createnew) {
+      SQLitepath <- DBcreateSQLite(SQLitefn=SQLitefn, outfolder=outfolder, 
+		overwrite=overwrite, returnpath=TRUE)
+    } else if (stopifnull) {
+      stop("SQLite database does not exist")
+    } else if (returnpath) {
+      return(SQLitepath)   
     } else {
       return(NULL)
     }
-  }
-  SQLitepath <- SQLitefn
+  } else {
+    if (is.na(getext(SQLitefn)) || getext(SQLitefn) == "NA")
+      SQLitefn <- paste0(SQLitefn, dbext)
 
-  if (is.na(getext(SQLitefn)) || getext(SQLitefn) == "NA")
-    SQLitefn <- paste0(SQLitefn, dbext)
-
-  outfolder <- pcheck.outfolder(outfolder, default=NULL)
-  if (!is.null(outfolder)) 
-    SQLitepath <- file.path(outfolder, SQLitefn)
-
-  ## Check file
-  if (file.exists(SQLitepath)) {
     if (DBI::dbCanConnect(RSQLite::SQLite(), SQLitepath)) {
       message("SQLite connection successful")
       sqlconn <- DBI::dbConnect(RSQLite::SQLite(), SQLitepath, loadable.extensions = TRUE)
@@ -47,19 +47,9 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
         stop("SQLite connection failed")
     }
     if (dbconnopen) {
-      ## Connect to database
+      ## Connect to database   
       sqlconn <- DBI::dbConnect(RSQLite::SQLite(), SQLitepath, loadable.extensions = TRUE)
       return(sqlconn)    
-    }
-  } else {
-    if (createnew) {
-      SQLitepath <- DBcreateSQLite(SQLitefn=SQLitepath, returnpath=TRUE)
-    } else if (stopifnull) {
-      stop("SQLite database does not exist")
-    } else if (returnpath) {
-      return(SQLitepath)   
-    } else {
-      return(NULL)
     }
   }
 

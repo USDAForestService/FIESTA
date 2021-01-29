@@ -379,7 +379,7 @@ dim(WYspplt)
 dim(WYspplt_bh)
 
 head(WYspplt_bh)
-plot(WYspplt_bh["DISTRICTNA"])
+plot(WYspplt_bh["DISTRICTNA"], pch=8)
 
 
 
@@ -509,11 +509,11 @@ rastlst.cat.name="fornf"
 modeldat <- FIESTA::spGetModeldat(xyplt=WYspplt, uniqueid="CN", dom_layer=WYbhfn, 
   domvar=NULL, rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
   rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
-  rast.NODATA=0, asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, 
+  asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, 
   savedata=FALSE)
 names(modeldat)
 
-sppltmodel <- modeldat$pltassgn
+pltassgn <- modeldat$pltassgn
 unitmodel <- modeldat$domzonal
 unitvar <- modeldat$domvar
 inputdf <- modeldat$inputdf
@@ -527,7 +527,7 @@ unitvar
 areavar
 unitmodel
 unitarea
-head(sppltmodel)
+head(pltassgn)
 
 prednames
 zonalnames
@@ -614,7 +614,7 @@ head(polyUnion)
 WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
 
 ## Extract polygon attributes from WYbighorn to WYpts, keeping NULL values
-zonallst <- FIESTA::spZonalRast(polyv=WYbhdist, polyv.att="DISTRICTNA", rast=demfn, 
+zonallst <- FIESTA::spZonalRast(polyv=WYbhdist, polyv.att="DISTRICTNA", rastfn=demfn, 
       zonalstat=c("mean", "sum")) 
 names(zonallst) 
 

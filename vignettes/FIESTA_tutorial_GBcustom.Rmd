@@ -9,7 +9,7 @@ vignette: >
 
 
 ## FIESTA Overview
-The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data like that from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
 
 Functions are organized by type or objective and are named with a corresponding prefix: 
@@ -106,6 +106,7 @@ demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIEST
 
 WYdata <- system.file("extdata", "WYdat_eval2013.sqlite", package="FIESTA")
 
+
 ```
 
 
@@ -139,7 +140,7 @@ There are several reference tables stored in FIESTA, including table variable de
 
 ## Create spatial points from WYplt
 WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
-        yvar="LAT_PUBLIC", crs=4269)
+        yvar="LAT_PUBLIC", xy.crs=4269)
 xyplt=WYspplt
 
 
@@ -147,7 +148,7 @@ xyplt=WYspplt
 # Get estimation unit acres for Bighorn National Forest.
 ######################################################################################
 unitdat.bh <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
-    crs=4269, unit_layer=WYbhfn)
+    xy.crs=4269, unit_layer=WYbhfn)
 
 names(unitdat.bh)
 sppltunit.bh <- unitdat.bh$sppltassgn
@@ -164,7 +165,7 @@ areavar.bh
 # Get estimation unit acres and strata information for Bighorn National Forest.
 ######################################################################################
 unitdat.bhdist <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
-    crs=4269, unit_layer=WYbhdistfn, unitvar="DISTRICTNA")
+    xy.crs=4269, unit_layer=WYbhdistfn, unitvar="DISTRICTNA")
 
 names(unitdat.bhdist)
 sppltunit.bhdist <- unitdat.bhdist$sppltassgn
@@ -187,12 +188,12 @@ areavar.bhdist
 ######################################################################################
 # Usage:
 # spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
-#     unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, strattype = "RASTER", 
-#     strat_layer = NULL, strat_dsn = NULL, strvar = NULL, strat_lut = NULL,
-#   	areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, showext = TRUE,
-#     savedata = FALSE, exportsp = FALSE, exportNA = FALSE, outfolder = NULL,
-#     out_fmt = "shp", out_dsn = NULL, out_layer = "strat_assgn", outfn.date = TRUE,
-#     outfn.pre = NULL, overwrite = FALSE, ...) 
+#     unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL,  
+#     strattype = "RASTER", strat_layer = NULL, strat_dsn = NULL, strvar = NULL, 
+#   	strat_lut = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
+#     keepxy = TRUE, showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE, 
+#     outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "strat_assgn", 
+#     outfn.date = TRUE, outfn.pre = NULL, overwrite = FALSE, ...) 
 # 
 # Description:
 # Wrapper to extract attribute and area from a polygon or raster estimation 
@@ -258,20 +259,20 @@ areavar.bhdist
 ######################################################################################
 # Usage:
 # modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
-#   condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", sumunits = FALSE, 
-#   adjsamp = TRUE, strata = TRUE, landarea = "ALL", ACI = FALSE, 
-#   plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, plt.filter = NULL, 
-#   cond.filter = NULL, unitarea = NULL, unitvar = NULL, unitvar2 = NULL,
-#   autocombine = TRUE, unitarea = NULL, areavar = "ACRES", stratalut = NULL, 
-#   strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", rowvar = NULL,
-#   rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, row.FIAname = FALSE,
-#   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
-#   col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, estround = 0, 
-#   pseround = 2, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
-#   rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,
-#   outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE,
-#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
-#   title.unitvar = NULL, title.filter = NULL, gui = FALSE)
+#   condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL,   
+#   invyrs=NULL, ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,    
+#   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
+#   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD",   
+#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
+#   plt.filter = NULL, cond.filter = NULL, rowvar = NULL, colvar = NULL,   
+#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,   
+#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = NULL,  
+#   rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE,  
+#   estround = 0, pseround = 2, estnull = 0, psenull = "--", divideby = NULL,  
+#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,  
+#   outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE,  
+#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
+#   title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, GBpopdat=NULL)
 # 
 # Description:
 # Generates acre estimates by domain (and estimation unit). Calculations are based on 
@@ -348,21 +349,21 @@ head(area.bhdist.raw$unit.grpest)
 # Usage:
 # modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
 #   dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-#   puniqueid = "CN", pltassgnid = "CN", sumunits = FALSE, adjsamp = TRUE, 
-#   strata = TRUE, landarea="FOREST", ACI = FALSE, plt.nonsamp.filter = NULL, 
-#   cond.nonsamp.filter = NULL, plt.filter = NULL, cond.filter = NULL, 
-#   unitvar = NULL, unitvar2 = NULL, autocombine = TRUE, unitarea = NULL,
-#   areavar = "ACRES", stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE,
-#   strwtvar = "P1POINTCNT", estvar = NULL, estvar.filter = NULL, estvar.name = NULL, 
-#   rowvar = NULL, rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, 
-#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
-#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, 
-#   estround = 0, pseround = 2, estnull = 0, psenull = "--", divideby = NULL, 
-#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
-#   outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, 
-#   returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
-#   title.colvar = NULL, title.unitvar = NULL, title.estvar = NULL, 
-#   title.filter = NULL, gui = FALSE)
+#   puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL,   
+#   ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,  
+#   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
+#   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", 
+#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", 
+#   plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL,  
+#   estvar.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE,    
+#   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE,   
+#   col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL,   
+#   rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE, estround = 0, pseround = 2,     
+#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,    
+#   outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE,  
+#   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL,   
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
+#   title.ref = NULL, title.unitvar = NULL, title.estvar = NULL, title.filter = NULL)
 # 
 # Description:
 #	Generates tree estimates by domain and/or tree domain (and estimation unit). 
@@ -398,11 +399,11 @@ balive.bh$titlelst
 ## By Bighorn National Forest District ##
 # Live tree basal area by forest type for Bighorn National Forest districts
 balive.bhdist <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn.bhdist, 
-  sumunits=FALSE, rowvar="FORTYPCD", row.FIAname=TRUE, unitvar=unitvar.bhdist, 
-  strvar=strvar.bhdist, unitarea=unitarea.bhdist, stratalut=stratalut.bhdist, 
-  areavar=areavar.bhdist, getwt=FALSE, estvar="BA", estvar.filter="STATUSCD==1",
-  rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest", 
-  autocombine=FALSE)
+  pltassgnid="CN", sumunits=FALSE, rowvar="FORTYPCD", row.FIAname=TRUE,  
+  unitvar=unitvar.bhdist, strvar=strvar.bhdist, unitarea=unitarea.bhdist,  
+  stratalut=stratalut.bhdist, areavar=areavar.bhdist, getwt=FALSE, estvar="BA", 
+  estvar.filter="STATUSCD==1", rawdata=TRUE, returntitle=TRUE,  
+  title.ref="Bighorn National Forest", stratcombine=FALSE)
 names(balive.bhdist)
 balive.bhdist$est
 balive.bhdist$pse
@@ -457,22 +458,22 @@ head(tree.bh$raw$unit.grpest)
 # Usage:
 # modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
 #   dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-#   puniqueid = "CN", pltassgnid = "CN", sumunits = FALSE, adjsamp = TRUE, 
-#   strata = TRUE, ratiotype = "PERACRE", landarea="FOREST", ACI = FALSE, 
-#   plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, plt.filter = NULL, 
-#   cond.filter = NULL, unitvar = NULL, unitvar2 = NULL, autocombine = TRUE, 
-#   unitarea = NULL, areavar = "ACRES", stratalut = NULL, strvar = "STRATUMCD",
-#   getwt = TRUE, strwtvar = "P1POINTCNT", estvarn = NULL, estvarn.filter = NULL, 
+#   puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL, ACI = FALSE, 
+#   adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
+#   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",   
+#   unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
+#   strwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", plt.filter = NULL,  
+#   cond.filter = NULL, ratiotype = "PERACRE", estvarn = NULL, estvarn.filter = NULL, 
 #   estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, estvard.name = NULL, 
-#   rowvar = NULL, rowvar.filter = NULL, colvar = NULL, colvar.filter = NULL, 
-#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
-#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, allin1 = FALSE, 
-#   estround = 3, pseround = 2, estnull = 0, psenull = "--", divideby = NULL,
-#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
-#   outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, 
-#   returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
-#   title.colvar = NULL, title.unitvar = NULL, title.estvarn = NULL, 
-#   title.estvard = NULL, title.filter = NULL, gui = FALSE)
+#   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,   
+#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,  
+#   rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL,  
+#   sumunits = FALSE, allin1 = FALSE, estround = 3, pseround = 2, estnull = 0,   
+#   psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,   
+#   outfolder = NULL, outfn = NULL,  outfn.pre = NULL, outfn.date = TRUE, 
+#   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
+#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE)
 # 
 # Description:
 #	Generates per-acre and per-tree estimates by domain and/or tree domain (and 

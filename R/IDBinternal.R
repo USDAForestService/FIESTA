@@ -6,7 +6,7 @@
 ## getEvalid		## Get evalid from a SQLite database
 
 
-DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALSE) {
+DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, isRMRS=FALSE) {
 
   ## Set global variables
   treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=dwmlst <- NULL
@@ -38,11 +38,11 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
 	"NF_PLOT_STATUS_CD", "NF_PLOT_NONSAMPLE_REASN_CD", "NF_SAMPLING_STATUS_CD",
  	"P2VEG_SAMPLING_STATUS_CD", "QA_STATUS", "MODIFIED_DATE")
 
-  if (isRMRS && regionVars)
+  if (isRMRS && regionVars) {
     pltvarlst <- c(pltvarlst, "COLOCATED_CD_RMRS", "CONDCHNGCD_RMRS", 
 		"FUTFORCD_RMRS", "MANUAL_RMRS", "PREV_PLOT_STATUS_CD_RMRS")
-
-
+  }
+ 
   ################################  COND VARIABLES  ##################################
   ## Variables from FS_NIMS_FIADB_RMRS.COND
   condvarlst <- c("PLT_CN", "CONDID", "COND_STATUS_CD", "COND_NONSAMPLE_REASN_CD", 
@@ -58,18 +58,18 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
 	"CARBON_UNDERSTORY_AG", "CARBON_UNDERSTORY_BG", "NF_COND_STATUS_CD", 
 	"NF_COND_NONSAMPLE_REASN_CD","LAND_COVER_CLASS_CD") 
 	
-  if (isRMRS && regionVars)
+  if (isRMRS && regionVars) {
     condvarlst <- c(condvarlst, "LAND_USECD_RMRS", "PCTBARE_RMRS", 
 		"CRCOVPCT_RMRS", "COND_STATUS_CHNG_CD_RMRS", "QMD_RMRS", 
 		"RANGETYPCD_RMRS", "SDIMAX_RMRS", "SDIPCT_RMRS", "SDI_RMRS") 
-    
+  }  
 
   returnlst <- list(pltvarlst=pltvarlst, condvarlst=condvarlst)
 
 
   ################################  TREE VARIABLES  ##################################
   if (istree) {
-    ### Variables from FS_NIMS_FIADB_RMRS.TREE (these variables change from NIMSf to FIADB)
+    ## Variables from FS_NIMS_FIADB_RMRS.TREE (these variables change from NIMSf to FIADB)
     treevarlst <- c("CN", "PLT_CN", "PREV_TRE_CN", "SUBP", "TREE", "CONDID", 
 		"AZIMUTH", "DIST", "STATUSCD", "SPCD", "SPGRPCD", "DIA", "HT", "ACTUALHT", 
 		"HTCD", "TREECLCD", "CR", "CCLCD", "AGENTCD", "CULL", "DECAYCD", "STOCKING", 
@@ -79,10 +79,11 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
     ## Tree summary variables
     tsumvarlst <- c(volvars, growvars, mortvars, remvars, tpavars, biovars, carbonvars)
 
-    if (isRMRS && regionVars)
+    if (isRMRS && regionVars) {
       treevarlst <- c(treevarlst, "TREECLCD_RMRS", "DAMAGE_AGENT_CD1",
 		"DAMAGE_AGENT_CD2", "DAMAGE_AGENT_CD3", "RADGRW_RMRS", "DIA_1YRAGO_RMRS", 
 		"HT_1YRAGO_RMRS", "PREV_ACTUALHT_RMRS", "PREV_TREECLCD_RMRS")
+    }
 
     ## Variables to convert from NA to 0
 #    treenavars <- c(tsumvarlst, "TOTAGE", "BHAGE", "CULLDEAD", "CULLFORM", "CFSND", 
@@ -96,7 +97,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
 
   ################################  SEED VARIABLES  ##################################
   if (isseed) {
-    ### Variables from FS_NIMS_RMRS.SEEDLING
+    ## Variables from FS_NIMS_RMRS.SEEDLING
     seedvarlst <- c("PLT_CN", "SUBP", "CONDID", "SPCD", "SPGRPCD", "TOTAGE", "TPA_UNADJ")
 
     ## SEED summary variables
@@ -107,12 +108,11 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
 
     returnlst$seedvarlst <- seedvarlst
     returnlst$ssumvarlst <- ssumvarlst     
-
   }
     
   ############################  UNDERSTORY VEG VARIABLES  ############################
   if (isveg) {    ## FS_NIMS_FIADB_RMRS or FS_FIADB
-    ### Variables from P2VEG_SUBPLOT_SPP
+    ## Variables from P2VEG_SUBPLOT_SPP
     vspsppvarlst <- c("PLT_CN", "SUBP", "CONDID", "VEG_FLDSPCD", "UNIQUE_SP_NBR", 
 	"VEG_SPCD", "GROWTH_HABIT_CD", "LAYER", "COVER_PCT")
 
@@ -124,9 +124,38 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, regionVars, isRMRS=FALS
     returnlst$vspstrvarlst <- vspstrvarlst
   }
 
+  ############################  UNDERSTORY VEG VARIABLES  ############################
+  if (issubp) {    ## FS_NIMS_FIADB_RMRS or FS_FIADB
+    ## Variables from SUBP
+    subpvarlst <- c("PLT_CN", "SUBP", "SUBP_STATUS_CD", "NF_SUBP_STATUS_CD", 
+		"NF_SUBP_NONSAMPLE_REASN_CD", "P2VEG_SUBP_STATUS_CD", 
+		"P2VEG_SUBP_NONSAMPLE_REASN_CD", "INVASIVE_SUBP_STATUS_CD", 
+		"INVASIVE_NONSAMPLE_REASN_CD")
+
+    if (isRMRS && regionVars) {
+      subpvarlst <- c(subpvarlst, c('GROUND_TRAN_PTS_BARE_RMRS',
+		'GROUND_TRAN_PTS_CRYP_RMRS', 'GROUND_TRAN_PTS_DEV_RMRS',
+		'GROUND_TRAN_PTS_LICHEN_RMRS', 'GROUND_TRAN_PTS_LITTER_RMRS', 
+		'GROUND_TRAN_PTS_MOSS_RMRS', 'GROUND_TRAN_PTS_NOTSAMP_RMRS',
+		'GROUND_TRAN_PTS_OTHER_RMRS', 'GROUND_TRAN_PTS_PEIS_RMRS',
+		'GROUND_TRAN_PTS_ROAD_RMRS', 'GROUND_TRAN_PTS_ROCK_RMRS',
+		'GROUND_TRAN_PTS_TRIS_RMRS', 'GROUND_TRAN_PTS_VEG_RMRS',
+		'GROUND_TRAN_PTS_WATER_RMRS', 'GROUND_TRAN_PTS_WOOD_RMRS',
+		'PREV_STATUSCD_RMRS', 'ROOTSEVCD_RMRS'))
+    }
+
+    ## Variables from SUBP_COND
+    subpcvarlst <- c("PLT_CN", "SUBP", "CONDID", "MICRCOND_PROP", 
+		"SUBPCOND_PROP", "MACRCOND_PROP")
+
+    returnlst$subpvarlst <- subpvarlst
+    returnlst$subpcvarlst <- subpcvarlst
+  }
+
+
   ##############################  DOWN WOODY MATERIAL  ###############################
   if (isdwm) {
-    ### Variables from COND_DWM_CALC
+    ## Variables from COND_DWM_CALC
     dwmlst <- c("PLT_CN", "CONDID", "CONDPROP_CWD", "CONDPROP_FWD_SM", "CONDPROP_FWD_MD", 
 	"CONDPROP_FWD_LG", "CONDPROP_DUFF", "CWD_TL_COND", "CWD_TL_UNADJ", "CWD_TL_ADJ", 
 	"CWD_LPA_COND", "CWD_LPA_UNADJ", "CWD_LPA_ADJ", "CWD_VOLCF_COND", "CWD_VOLCF_UNADJ", 
@@ -261,7 +290,7 @@ getspconddat <- function(cond=NULL, ACTUALcond=NULL, cuniqueid="PLT_CN", condid1
 getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE, 
 	varCur="MEASYEAR", Endyr=NULL, invyrs=NULL, allyrs=FALSE, SCHEMA.=NULL, 
 	subcycle99=NULL, designcd1=FALSE, intensity1=NULL, popSURVEY=FALSE, chk=FALSE,
-	syntax="sql", plotnm="plot", ppsanm="pop_plot_stratum_assgn") {
+	syntax="sql", plotnm="plot", ppsanm="pop_plot_stratum_assgn", ppsaid="PLT_CN") {
   ## DESCRIPTION: gets from statement for database query
   ## syntax - ('sql', 'R')
 
@@ -286,7 +315,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
       if (!all(evalid %in% evalidlst)) stop("invalid evalid")
     }
     pfromqry <- paste0(SCHEMA., ppsanm, " ppsa JOIN ", 
-			SCHEMA., plotnm, " p ON (p.CN = ppsa.PLT_CN)")
+			SCHEMA., plotnm, " p ON (p.CN = ppsa.", ppsaid, ")")
     return(pfromqry)
   }
 

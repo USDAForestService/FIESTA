@@ -9,7 +9,7 @@
 \usage{
 	DBcreateSQLite(SQLitefn = NULL, gpkg = FALSE, dbconnopen = FALSE, 
 		outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-		returnpath = TRUE)
+		returnpath = TRUE, stopifnull = FALSE)
 }
  
 \arguments{
@@ -22,7 +22,9 @@
   \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
   \item{overwrite}{ Logical. If TRUE, overwrites the sqlite database, if exists. }
   \item{returnpath}{ Logical. If TRUE, returns full path to SQLite file name. 
-		If FALSE, returns SQLitefn}
+	If FALSE, returns SQLitefn}
+  \item{stopifnull}{ Logical. If TRUE, and SQLitefn is NULL, stops execution of program.
+	If FALSE, returns NULL}
 }
 \author{
 	Tracey S. Frescino

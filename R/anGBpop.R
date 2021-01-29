@@ -1,7 +1,8 @@
 anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
-	datsource="sqlite", SQLitefn=NULL, RS=NULL, strat_layer=NULL, 
-	showsteps=FALSE, savedata=FALSE, savexy=TRUE, outfolder=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=TRUE, GBdata=NULL, ...) {
+	istree=TRUE, isseed=FALSE, datsource="sqlite", SQLitefn=NULL, RS=NULL, 
+	strat_layer=NULL, showsteps=FALSE, savedata=FALSE, savexy=TRUE, 
+	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
+	GBdata=NULL, ...) {
 
 
   ## Set global variables
@@ -22,7 +23,6 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 		title="Add date to outfiles?", first="NO", gui=gui) 
     overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite?", first="NO", gui=gui)  
-
     if (!is.null(outfn.pre)) {
       outfolder <- file.path(outfolder, outfn.pre)
       if (!dir.exists(outfolder)) dir.create(outfolder)
@@ -41,8 +41,8 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     ###########################################################################
     if (is.null(strat_layer)) strata <- FALSE
     GBdata <- anGBdata(bnd_layer=bnd, bnd_dsn=bnd_dsn, bnd.att=bnd.att, 
-		bnd.filter=bnd.filter, RS=RS, datsource=datsource, istree=TRUE, 
-		data_dsn=SQLitefn, strata=strata, strat_layer=strat_layer, 
+		bnd.filter=bnd.filter, RS=RS, datsource=datsource, istree=istree, 
+		isseed=isseed, data_dsn=SQLitefn, strata=strata, strat_layer=strat_layer, 
 		showsteps=showsteps, cex.plots=.75, savedata=savedata, savexy=savexy, 
 		outfolder=outfolder, outfn.pre="GBdata", out_fmt="csv", out_dsn=NULL, 
 		overwrite=TRUE, ...)
@@ -57,6 +57,7 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   plt <- GBdata$plt
   cond <- GBdata$cond
   tree <- GBdata$tree
+  seed <- GBdata$seed
   pltassgn <- GBdata$pltassgn
   unitarea <- GBdata$unitarea
   unitvar <- GBdata$unitvar
@@ -73,11 +74,11 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ####################################################################
   ## Get population data
   ####################################################################
-  GBpopdat <- modGBpop(tree=tree, cond=cond, plt=plt, pltassgn=pltassgn, 
-		puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-		unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
-		strata=strata, stratalut=stratalut, strvar=strvar, 
-		saveobj=TRUE, outfolder=outfolder)
+  GBpopdat <- modGBpop(tree=tree, seed=seed, cond=cond, plt=plt, 
+		pltassgn=pltassgn, puniqueid=puniqueid, pltassgnid=pltassgnid, 
+		pjoinid=pjoinid, unitarea=unitarea, unitvar=unitvar, 
+		areavar=areavar, strata=strata, stratalut=stratalut, 
+		strvar=strvar, saveobj=TRUE, outfolder=outfolder)
   names(GBpopdat)
   returnlst$GBpopdat <- GBpopdat
 

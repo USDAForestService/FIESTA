@@ -28,6 +28,7 @@
 \alias{getadjfactorPLOT}
 \alias{getcrossord}
 \alias{getfunnm}
+\alias{checkfilenm}
 \alias{getoutfn}
 \alias{getlt10char}
 \alias{getRefobject}
