@@ -1,5 +1,5 @@
 DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE, 
-	evalEndyr=NULL, evalid=NULL, evalAll=FALSE, evalType="AREAVOL", 
+	evalEndyr=NULL, evalid=NULL, evalAll=FALSE, evalType="VOL", 
 	invyrtab=NULL, gui=FALSE) {
 
   ###############################################################################
@@ -37,6 +37,12 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
   evalresp <- TRUE
   isgrm=issccm <- FALSE 
 
+  ## Define evalTypee choices
+  evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "DWM")
+#  evalTypelst <- c("ALL", "CURR", "VOL", "CHNG", "DWM", "GROW", "MORT", "REMV", 
+#		"CRWN", "INV", "P2VEG")
+
+
   ## Check arguments
   ###########################################################
   input.params <- names(as.list(match.call()))[-1]
@@ -55,10 +61,10 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
   ## If evalid is not NULL, get state
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
+    evalid <- unique(unlist(evalid)) 
     if (any(nchar(evalid) > 6)) {
       stop("invalid evalid")
     }
-    evalid <- unique(unlist(evalid)) 
     stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
     states <- FIESTA::pcheck.states(stcdlst, "MEANING")
   } else if (!is.null(invyrtab)) {
@@ -91,7 +97,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
   ## Define query POP_EVAL, POP_EVAL_TYP table
   popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", 
 		"START_INVYR", "END_INVYR", "LOCATION_NM")
-  popevaltypqry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", 
+  popevalTypeqry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", 
 		pet.eval_typ from ", SCHEMA., "POP_EVAL_TYP pet join ", SCHEMA., 
 		"POP_EVAL pev on (pev.cn = pet.eval_cn) ",
 		"where pev.STATECD in ", paste0("(", toString(stcdlst), ")"))
@@ -123,7 +129,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
   SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
   if (nrow(SURVEY) == 0) return(NULL)
 
-  POP_EVAL <- setDT(sqldf::sqldf(popevaltypqry))
+  POP_EVAL <- setDT(sqldf::sqldf(popevalTypeqry))
 
   ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
   POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP$EVAL_GRP, 
@@ -275,63 +281,25 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
     }
   }
 
+  ## Check evalEndyr
   if (!is.null(evalEndyr)) {
     if (class(evalEndyr)[1] != "list") {
-      if (length(states) > 1) {
-        if (!is.numeric(evalEndyr)) stop("evalEndyr must be numeric")
-        if (length(evalEndyr) == 1) {
-          if (all(evalEndyr >= stinvyr.min) && all(evalEndyr <= stinvyr.max)) {
-            warning("using same evalEndyr for each state: ", unique(evalEndyr))
-            evalEndyr <- sapply(states, function(x) {list(evalEndyr)})
-          } else {
-            stop("check evalEndyr.. not in range in database")
-            #evalEndyr <- NULL
-          }
-        } else if (is.vector(evalEndyr) && length(evalEndyr) == length(stinvyr.max) && 
-			identical(names(evalEndyr), names(stinvyr.max))) {
-          evalEndyr <- as.list(evalEndyr)
-        }
+      if (!is.vector(evalEndyr) || !is.numeric(as.numeric(evalEndyr))) {
+        stop("invalid evalEndyr")
+      }
+      evalEndyr <- sapply(states, function(x) list(evalEndyr))
+    }
+
+    for (st in names(evalEndyr)) {
+      evalendyr <- evalEndyr[[st]]
+      invendyr.min <- stinvyr.min[[st]]
+      invendyr.max <- stinvyr.max[[st]]
+
+      if (evalendyr < invendyr.min || evalendyr > invendyr.max) {
+        message(paste("check evalEndyr.. outside of range in database:", st))    
+        evalendyr <- invendyr.max
       } else {
-        if (class(evalEndyr)[1] %in% c("data.table", "data.frame"))
-           evalEndyr <- evalEndyr[[1]]
-        if (evalEndyr >= stinvyr.min && evalEndyr <= stinvyr.max) {
-          evalEndyr <- list(evalEndyr); names(evalEndyr) <- states
-        } else {
-          stop("check evalEndyr.. not in range in database")
-          #evalEndyr <- NULL
-        }
-      }
-      evalresp <- TRUE
-    } else {
-
-      if (is.null(names(evalEndyr))) 
-        stop("check evalEndyr.. must be named list")
-
-      if (length(evalEndyr) != length(states)) {
-        stop("check evalEndyr.. number of years does not match number of states")
-      } else if (!identical(names(evalEndyr), names(stinvyr.vals))) {
-        stop("evalEndyr names must match: ", toString(names(stinvyr.vals)))
-      } else if (sum(unlist(lapply(evalEndyr, is.numeric))) != length(evalEndyr)) {
-        stop("check evalEndyr.. must be numeric")
-      }
-
-      if (is.null(names(evalEndyr))) {
-        if (length(states) > 1)
-          message("evalEndyr is not a named list... using order of states")
-        names(evalEndyr) <- states
-      }
-
-      for (st in names(evalEndyr)) {
-        evalendyr <- evalEndyr[[st]]
-        invendyr.min <- stinvyr.min[[st]]
-        invendyr.max <- stinvyr.max[[st]]
-
-        if (evalendyr < invendyr.min || evalendyr > invendyr.max) {
-          message(paste("check evalEndyr.. outside of range in database:", st))    
-          evalendyr <- invendyr.max
-        } else {
-          evalresp <- TRUE
-        }
+        evalresp <- TRUE
       }
     }
   }
@@ -341,20 +309,23 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
     invyrs <- list()
     evalidlist <- sapply(states, function(x) NULL)
 
-    ## Get the evalidation type - areavol or grm)
-    evalSelectlst <- c("ALL", "AREAVOL", "GRM", "P2VEG", "DWM")
-#    evalSelectlst <- c("ALL", "AREAVOL", "GRM", "P2VEG", "DWM", "REGEN", "INV", "CRWN")
+    ## Get the evalidation type
     evalType <- FIESTA::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
-		checklst=evalSelectlst, caption="Evaluation type", multiple=TRUE, 
-		preselect="AREAVOL")
-    if (is.null(evalType)) evalType <- "AREAVOL"
+		checklst=evalTypelst, caption="Evaluation type", multiple=TRUE, 
+		preselect="VOL")
+    if (is.null(evalType)) evalType <- "VOL"
 
     ## check evalType
     if (invtype == "PERIODIC" && evalType == "ALL") {
       evalType <- "CURR"
     } else {
-      if (length(grep("AREAVOL", evalType, ignore.case=TRUE)) > 0) 
-        evalType[grep("AREAVOL", evalType, ignore.case=TRUE)] <- "VOL"  
+      if (length(grep("VOL", evalType, ignore.case=TRUE)) > 0) {
+        evalType[grep("VOL", evalType, ignore.case=TRUE)] <- "VOL" 
+      }
+      if (length(grep("VOL", evalType, ignore.case=TRUE)) > 0 && 
+		length(grep("CURR", evalType, ignore.case=TRUE)) > 0) {
+        evalType <- evalType[-grep("CURR", evalType, ignore.case=TRUE)]
+      }  
       if (length(grep("GRM", evalType, ignore.case=TRUE)) > 0) 
         evalType[grep("GRM", evalType, ignore.case=TRUE)] <- "GROW"  
     }

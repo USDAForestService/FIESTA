@@ -14,7 +14,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
   ## Set global variables
   gui=gettitle <- FALSE
-  ref_titles <- FIESTA::ref_titles
   plt=RAVG.filter=RAVG.ecofilter=measyear=measyear.filter <- NULL
   returnlst <- list()
 

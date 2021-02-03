@@ -24,8 +24,8 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
   \item{states}{ String or numeric vector. Name (e.g., 'Arizona','New Mexico') or 
 	code (e.g., 4, 35) of state(s) for evalid. If all states in one or more FIA Research
 	Station is desired, set states=NULL and use RS argument to define RS. }
-  \item{RS}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS').
-	Do not use if states is populated. }
+  \item{RS}{ String vector. Name of research station(s) 
+	('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states is populated. }
   \item{invtype}{ String. Type of FIA inventory to extract ('PERIODIC', 'ANNUAL').  
 	Only one inventory type (PERIODIC/ANNUAL) at a time. }
   \item{evalid}{ Integer. Inventory span defining variable. Extract data for a 
@@ -39,14 +39,15 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	evalEndyr by state (e.g., list(Utah=2014, Colorado=2013). }
   \item{evalAll}{ Logical. Inventory span defining variable. If TRUE, extract data 
 	for all Evaluations for each state. }
-  \item{evalType}{ String vector. Inventory span defining variable. Extract data 
-	for the Evaluation type(s) of interest ('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 
-	'INV', 'REGEN', 'CRWN'). The evalType 'ALL' includes nonsampled plots; 'AREAVOL' 
-	includes plots used for area or tree estimates (eval_typ %in% c(CURR, VOL)); 
-	The evalType 'GRM' includes plots used for growth, removals, mortality, 
-	and change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types 
-	are accepted. See FIA database manual for regional availability and/or differences. 
-	Note: do not use if EVALID is specified. }
+  \item{evalType}{ String vector. The type(s) of evaluation of interest 
+	('ALL', 'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
+	The evalType 'ALL' includes nonsampled plots; 'CURR' includes plots 
+	used for area estimates; 'VOL' includes plots used for area and/or tree
+	estimates; The evalType 'GRM' includes plots used for growth, removals,
+	mortality, and change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)). 
+	Multiple types are accepted. See details below and FIA database manual 
+	for regional availability and/or differences. Note: do not use if EVALID 
+	is specified. }
   \item{measCur}{ Logical. Inventory span defining variable. If TRUE, extract plots 
 	with most current measurement for state(s). }
   \item{measEndyr}{ Logical. Inventory span defining variable. If TRUE, extract plots 
@@ -260,7 +261,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 
 	Define one or more Evaluation Type for evalCur=TRUE or evalEndyr=YYYY. An Evaluation
 	type is used to identify a specific set of plots for a particular response that
-	can be used to a make a statistically valid sample-based estimate. If evaltype="ALL", 
+	can be used to a make a statistically valid sample-based estimate. If evalType="ALL", 
 	the evaluation includes all sampled and nonsampled plots or plots that were 
 	missed in an inventory year. 
 

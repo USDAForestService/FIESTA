@@ -1,13 +1,17 @@
-anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre,
+anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre=NULL,
 	ice.QAQCfn=NULL, photofn=NULL, outfolder=NULL) {
   ## DESCRIPTION: Creates a report using Rmarkdown 
   ## 		Adds a folder named report in the outfolder and copies all 
   ##		components of report into folder.
 
   outfolder <- pcheck.outfolder(outfolder)
-  #outfolder <- normalizePath(outfolder)
+  outfolder <- normalizePath(outfolder)
   reportfolder <- file.path(outfolder, "report")
   if (!dir.exists(reportfolder)) dir.create(reportfolder)
+
+  if (is.null(outfn.pre)) {
+    outfn.pre <- gsub(" ", "_", AOInm)
+  }
   
   ## Copy files to outfolder
   rmdfn <- file.path(reportfolder, paste0(AOInm, '_report.Rmd'))
@@ -29,8 +33,8 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre,
   #file.copy("C:/_tsf/_GitHub/FIESTA/inst/rmd/ICE.PNG", file.path(reportfolder, "ICE.PNG"), overwrite=TRUE)
 
   if (is.null(ice.QAQCfn)) {
-    # Lines 1762-1780 contain text for QAQC
-    system(paste("sed -i '1762,1780d'", rmdfn)) 
+    # Lines 1889-1908 contain text for QAQC
+    system(paste("sed -i '1889,1908d'", rmdfn)) 
   }
 
 
@@ -41,5 +45,4 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre,
 		outfn.pre=outfn.pre, ice.QAQCfn=ice.QAQCfn),
     envir = parent.frame()
   )
-
 }

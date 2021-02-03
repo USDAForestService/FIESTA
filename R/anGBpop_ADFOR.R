@@ -8,7 +8,6 @@ anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, strat_layer=NULL,
 
   ## Set global variables
   gui <- TRUE
-  ref_titles <- FIESTA::ref_titles
   plt <- NULL
   datsource <- "sqlite"
 

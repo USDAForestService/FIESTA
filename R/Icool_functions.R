@@ -31,12 +31,14 @@ checkfilenm <- function(fn, outfolder=NULL, ext=NULL,
     }
   }
   if (!is.character(fn)) {
-    stop("file name must be a character string")
+    message("file name must be a character string")
   }
   if (!is.null(outfolder)) {
     outfolder <- pcheck.outfolder(outfolder)
     if (file.exists(file.path(outfolder, fn))) {
       return(normalizePath(file.path(outfolder, fn)))
+    } else {
+      return(NULL)
     }
   } else if (file.exists(fn)) {
       return(fn)
@@ -58,7 +60,6 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
 		outfn.date=FALSE, overwrite=FALSE, ext=NULL, baseonly=FALSE, 
 		noext=FALSE, outfn.default="outfile", gui=FALSE, append=FALSE) {
   ## DESCRIPTION: get full pathname 
-
 
   ## Check outfn
   if (is.null(outfn)) {

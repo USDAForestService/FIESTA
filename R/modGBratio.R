@@ -135,7 +135,8 @@ modGBratio <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
  		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
-		landarea=landarea, ACI.filter=ACI.filter, plt.filter=plt.filter, 						cond.filter=cond.filter, allin1=allin1, estround=estround, 
+		landarea=landarea, ACI.filter=ACI.filter, plt.filter=plt.filter, 
+		cond.filter=cond.filter, allin1=allin1, estround=estround, 
 		pseround=pseround, divideby=divideby, addtitle=addtitle, 
 		returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
 		savedata=savedata, outfolder=outfolder)
@@ -278,7 +279,6 @@ modGBratio <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
     unit.totest <- unit.totest[unitarea, nomatch=0]
     unit.totest <- FIESTA::getarea(unit.totest, areavar=areavar, esttype=esttype)
   }
-
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -312,12 +312,8 @@ modGBratio <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit.rowest)) {
-    unit.rowest2 <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
-
-levels(uniquerow$STDAGECL)
-levels(unit.rowest$STDAGECL)
-
     tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
     unitarea <- tabs$tab1
     unit.rowest <- tabs$tab2
@@ -428,7 +424,6 @@ levels(unit.rowest$STDAGECL)
 	overwrite=overwrite, outfn.date=outfn.date, estnm=estnm, estround=estround, 
 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 
-
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
   rawdat <- tabs$rawdat

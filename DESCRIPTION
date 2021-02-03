@@ -5,7 +5,7 @@ Version:  3.0.13
 Date:  2020-12-11
 Imports: methods, grDevices, graphics, utils, sp, rgdal, Rcpp(>= 1.0.0)
 Suggests: knitr, rmarkdown, rJava, xlsx, JoSAE, mase, RSQLite, DBI, rgeos,	
-	sqldf, raster, units, nlme, xml2, RPostgreSQL, arcgisbinding, pheatmap
+	sqldf, raster, units, nlme, xml2, RPostgreSQL, arcgisbinding, pheatmap, RColorBrewer
 Depends: R(>= 4.0), data.table, sf
 Description: A research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. 
 Author: Tracey S. Frescino, Gretchen G. Moisen, Paul L. Patterson, Chris Toney, Elizabeth A. Freeman 

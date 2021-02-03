@@ -102,8 +102,6 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
  		tsumvarlst=estvarn, tsumvarnmlst=estvarn.name, TPA=estvarn.TPA, 
 		tfilter=estvarn.filter, adjtree=adjtree, checkNA=FALSE))
     } else if (estseed == "add") {
-print("TEST")
-print(estvarn.name)
       treedata <- datSumTree(tree=treef, seed=seedf, cond=condf, plt=plt, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, 
 		bycond=bycond, condid=condid, tsumvarlst=estvarn, 

@@ -224,13 +224,14 @@ modGBtree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   ### Get titles for output tables
   #####################################################################################
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
-	sumunits=sumunits, title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
- 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
-	title.filter=title.filter, title.estvarn=title.estvar, unitvar=unitvar, 
-	rowvar=rowvar, colvar=colvar, estvarn=estvar, estvarn.filter=estvar.filter, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
-	invyrs=invyrs, landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
-	allin1=allin1, divideby=divideby, outfn=outfn, outfn.pre=outfn.pre)
+	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
+ 	title.unitvar=title.unitvar, title.filter=title.filter, title.estvarn=title.estvar,
+ 	unitvar=unitvar, rowvar=rowvar, colvar=colvar, estvarn=estvar,
+ 	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
+	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
+	plt.filter=plt.filter, cond.filter=cond.filter, allin1=allin1, divideby=divideby,
+ 	outfn=outfn, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse

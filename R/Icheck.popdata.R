@@ -158,7 +158,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   unitcombine <- FIESTA::pcheck.logical(unitcombine, varnm="unitcombine", 
 		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
- 
   ## Check strata, strvars
   ###################################################################################
   if (module == "GB" || (module == "MA" && method == "PS")) {
@@ -300,6 +299,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       subp_condqry <- paste("select distinct subc.* from", subpcfromqry, whereqry)
     }
   }
+ 
 
   ###################################################################################
   ## Import tables

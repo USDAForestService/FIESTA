@@ -494,6 +494,7 @@ getestvar <- function() {
 crossxbyunit <- function(unit=NULL, unit.grpest=NULL, unit.rowest=NULL, 
 	unit.colest=NULL, unit.totest=NULL, unitvar, rowvar, colvar, 
 	estnm, psenm, allin1, char.width, estnull, psenull, 
+	estround=NULL, pseround=NULL,
 	rowgrp=NULL, rowgrpnm=NULL, title.rnames=NULL, numunits, 
 	savedata, addtitle, returntitle, outfn.estpse, title.estpse, 
 	title.est, title.pse, title.ref, outfolder, outfn.date, overwrite,
@@ -542,7 +543,8 @@ crossxbyunit <- function(unit=NULL, unit.grpest=NULL, unit.rowest=NULL,
 	colvar.est=colvar.est, total.est=total.est, rowvar=rowvar, 
 	colvar=colvar, estnm=estnm, psenm=psenm, allin1=allin1, 
 	rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames, 
- 	estnull=estnull, psenull=psenull, char.width=char.width)
+ 	estnull=estnull, psenull=psenull, char.width=char.width,
+	estround=estround, pseround=pseround)
  
   if (allin1) {
     estpsetab <- tabs       

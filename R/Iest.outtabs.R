@@ -32,6 +32,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ## Define est.var name
   estnm.var <- paste0(estnm, ".var")
   senm <- paste0(estnm, ".se")
+  estnm2 <- ifelse(esttype == "RATIO", "rhat", estnm)
+  senm2 <- paste0(estnm2, ".se")
+
 
   ## Get conversion number
   dividebynum <- NULL
@@ -76,14 +79,14 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		domain="TOTAL", esttype=esttype, rowgrpnm=rowgrpnm, unitvar=unitvar, 
 		areavar=areavar, phototype=phototype, photoratio=photoratio)
       if (esttype != "RATIO" && !is.null(dividebynum)) {
-        totest[[estnmd]] <- round(totest[[estnm]] / dividebynum, estround)
-        totest[[senmd]] <- totest[[senm]] / dividebynum
+        totest[[estnmd]] <- totest[[estnm2]] / dividebynum
+        totest[[senmd]] <- totest[[senm2]] / dividebynum
       } else {
-        totest[[estnmd]] <- round(totest[[estnm]], estround)
+        totest[[estnmd]] <- totest[[estnm2]]
       }  
-      totest[[psenm]] <- round(totest[[psenm]], pseround)      
+      totest[[psenm]] <- totest[[psenm]]     
       if (allin1) {
-        char.width <- max(nchar(na.omit(totest[[psenm]]))) 
+        char.width <- max(nchar(na.omit(round(totest[[psenm]], pseround)))) 
         if (!is.null(char.width) && char.width == -Inf) char.width <- 0
       }
     }
@@ -92,34 +95,39 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			estncol.var=estnm.var, esttype=esttype, rowgrpnm=rowgrpnm,
 			unitvar=unitvar, areavar=areavar, phototype=phototype, 
 			photoratio=photoratio, keepvars=keepvars.row)
-      if (!is.null(dividebynum)) {
-        rowest[[estnmd]] <- round(rowest[[estnm]] / dividebynum, estround)
-        rowest[[senmd]] <- rowest[[senm]] / dividebynum
-        unit.rowest[[estnmd]] <- round(unit.rowest[[estnm]] / dividebynum, estround)
-        unit.rowest[[senmd]] <- unit.rowest[[senm]] / dividebynum
+      if (esttype != "RATIO" && !is.null(dividebynum)) {
+        rowest[[estnmd]] <- rowest[[estnm2]] / dividebynum
+        rowest[[senmd]] <- rowest[[senm2]] / dividebynum
+        unit.rowest[[estnmd]] <- unit.rowest[[estnm2]] / dividebynum
+        unit.rowest[[senmd]] <- unit.rowest[[senm2]] / dividebynum
       } else {
-        rowest[[estnmd]] <- round(rowest[[estnm]], estround)
+        rowest[[estnmd]] <- rowest[[estnm2]]
       }
-      rowest[[psenm]] <- round(rowest[[psenm]], pseround)
-      if (allin1) 
-        char.width <- max(char.width, max(nchar(na.omit(rowest[[psenm]]))))
+      rowest[[psenm]] <- rowest[[psenm]]
+      if (allin1) {
+        char.width <- max(char.width, 
+		max(nchar(na.omit(round(rowest[[psenm]], pseround)))))
+      }
     }
+
     if (!is.null(unit.colest)) {
       colest <- groupUnits(tabest=unit.colest, domain=colvar, estncol=estnm,
 			estncol.var=estnm.var, esttype=esttype, unitvar=unitvar, 
 			areavar=areavar, phototype=phototype, photoratio=photoratio,
 			keepvars=keepvars.col)
-      if (!is.null(dividebynum)) {
-        colest[[estnmd]] <- round(colest[[estnm]] / dividebynum, estround)
-        colest[[senmd]] <- colest[[estnm]] / dividebynum
-        unit.colest[[estnmd]] <- round(unit.colest[[estnm]] / dividebynum, estround)
-        unit.colest[[senmd]] <- unit.colest[[senm]] / dividebynum
+      if (esttype != "RATIO" && !is.null(dividebynum)) {
+        colest[[estnmd]] <- colest[[estnm2]] / dividebynum
+        colest[[senmd]] <- colest[[senm2]] / dividebynum
+        unit.colest[[estnmd]] <- unit.colest[[estnm2]] / dividebynum
+        unit.colest[[senmd]] <- unit.colest[[senm2]] / dividebynum
       } else {
-        colest[[estnmd]] <- round(colest[[estnm]], estround)
+        colest[[estnmd]] <- colest[[estnm2]]
       }
-      colest[[psenm]] <- round(colest[[psenm]], pseround)
-      if (allin1) 
-        char.width <- max(char.width, max(nchar(na.omit(colest[[psenm]]))))
+      colest[[psenm]] <- colest[[psenm]]
+      if (allin1) {
+        char.width <- max(char.width, 
+		max(nchar(na.omit(round(colest[[psenm]], pseround)))))
+      }
     }
     if (!is.null(unit.grpest)) {
       grpest <- groupUnits(tabest=unit.grpest, domain=rowvar, estncol=estnm, 
@@ -127,33 +135,36 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			rowgrpnm=rowgrpnm, unitvar=unitvar, areavar=areavar, 
 			phototype=phototype, photoratio=photoratio, 
 			keepvars=c(keepvars.row, keepvars.col))
-      if (!is.null(dividebynum)) {
-        grpest[[estnmd]] <- round(grpest[[estnm]] / dividebynum, estround)
-        grpest[[senmd]] <- grpest[[senm]] / dividebynum
-        unit.grpest[[estnmd]] <- round(unit.grpest[[estnm]] / dividebynum, estround)
-        unit.grpest[[senmd]] <- unit.grpest[[senm]] / dividebynum
+      if (esttype != "RATIO" && !is.null(dividebynum)) {
+        grpest[[estnmd]] <- grpest[[estnm2]] / dividebynum
+        grpest[[senmd]] <- grpest[[senm2]] / dividebynum
+        unit.grpest[[estnmd]] <- unit.grpest[[estnm2]] / dividebynum
+        unit.grpest[[senmd]] <- unit.grpest[[senm2]] / dividebynum
       } else {
-        grpest[[estnmd]] <- round(grpest[[estnm]], estround)
+        grpest[[estnmd]] <- grpest[[estnm2]]
       }
-      grpest[[psenm]] <- round(grpest[[psenm]], pseround)
-      if (allin1) 
-        char.width <- max(char.width, max(nchar(na.omit(grpest[[psenm]]))))
+      grpest[[psenm]] <- grpest[[psenm]]
+      if (allin1) {
+        char.width <- max(char.width, 
+		max(nchar(na.omit(round(grpest[[psenm]], pseround)))))
+      }
     } 
+
   } else {   ## sumunits = FALSE
     if (!is.null(unit.totest)) {
       if (esttype == "RATIO") {
         unit.totest <- suppressWarnings(FIESTA::getrhat(unit.totest))
       } else {
         if (!is.null(dividebynum)) {
-          unit.totest[[estnmd]] <- round(unit.totest[[estnm]] / dividebynum, estround)
-          unit.totest[[senmd]] <- unit.totest[[senm]] / dividebynum
+          unit.totest[[estnmd]] <- unit.totest[[estnm2]] / dividebynum
+          unit.totest[[senmd]] <- unit.totest[[senm2]] / dividebynum
         } else {
-          unit.totest[[estnmd]] <- round(unit.totest[[estnm]], estround)
+          unit.totest[[estnmd]] <- unit.totest[[estnm2]]
         }  
-        unit.totest[[psenm]] <- round(unit.totest[[psenm]], pseround)
+        unit.totest[[psenm]] <- unit.totest[[psenm]]
       }
       if (allin1) {
-        char.width <- max(nchar(na.omit(unit.totest[[psenm]]))) 
+        char.width <- max(nchar(na.omit(round(unit.totest[[psenm]], pseround)))) 
         if (!is.null(char.width) && char.width == -Inf) char.width <- 0
       }
     }
@@ -162,48 +173,54 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         unit.rowest <- suppressWarnings(FIESTA::getrhat(unit.rowest))
       } else {
         if (!is.null(dividebynum)) {
-          unit.rowest[[estnmd]] <- round(unit.rowest[[estnm]] / dividebynum, estround)
-          unit.rowest[[senmd]] <- unit.rowest[[senm]] / dividebynum
+          unit.rowest[[estnmd]] <- unit.rowest[[estnm2]] / dividebynum
+          unit.rowest[[senmd]] <- unit.rowest[[senm2]] / dividebynum
         } else {
-          unit.rowest[[estnmd]] <- round(unit.rowest[[estnm]], estround)
+          unit.rowest[[estnmd]] <- unit.rowest[[estnm2]]
         }
-        unit.rowest[[psenm]] <- round(unit.rowest[[psenm]], pseround)
+        unit.rowest[[psenm]] <- unit.rowest[[psenm]]
       }
-      if (allin1) 
-        char.width <- max(char.width, max(nchar(na.omit(unit.rowest[[psenm]]))))
+      if (allin1) {
+        char.width <- max(char.width, 
+		max(nchar(na.omit(round(unit.rowest[[psenm]], pseround)))))
+      }
     }
     if (!is.null(unit.colest)) {
       if (esttype == "RATIO") {
         unit.colest <- suppressWarnings(FIESTA::getrhat(unit.colest))
       } else {
         if (!is.null(dividebynum)) {
-          unit.colest[[estnmd]] <- round(unit.colest[[senm]] / dividebynum, estround)
-          unit.colest[[senmd]] <- unit.colest[[senm]] / dividebynum
+          unit.colest[[estnmd]] <- unit.colest[[estnm2]] / dividebynum
+          unit.colest[[senmd]] <- unit.colest[[senm2]] / dividebynum
         } else {
-          unit.colest[[estnmd]] <- round(unit.colest[[senm]], estround)
+          unit.colest[[estnmd]] <- unit.colest[[senm2]]
         }
-        unit.colest[[psenm]] <- round(unit.colest[[psenm]], pseround)
+        unit.colest[[psenm]] <- unit.colest[[psenm]]
       }
-      if (allin1) 
-        char.width <- max(char.width, max(nchar(na.omit(unit.colest[[psenm]]))))
+      if (allin1) {
+        char.width <- max(char.width, 
+		max(nchar(na.omit(round(unit.colest[[psenm]], pseround)))))
+      }
     }
     if (!is.null(unit.grpest)) {
       if (esttype == "RATIO") {
         unit.grpest <- suppressWarnings(FIESTA::getrhat(unit.grpest))
       } else {
         if (!is.null(dividebynum)) {
-          unit.grpest[[estnmd]] <- round(unit.grpest[[estnm]] / dividebynum, estround)
-          unit.grpest[[senmd]] <- unit.grpest[[senm]] / dividebynum
+          unit.grpest[[estnmd]] <- unit.grpest[[estnm2]] / dividebynum
+          unit.grpest[[senmd]] <- unit.grpest[[senm2]] / dividebynum
         } else {
-          unit.grpest[[estnmd]] <- round(unit.grpest[[estnm]], estround)
+          unit.grpest[[estnmd]] <- unit.grpest[[estnm2]]
         }
-        unit.grpest[[psenm]] <- round(unit.grpest[[psenm]], pseround)
+        unit.grpest[[psenm]] <- unit.grpest[[psenm]]
       }
-      if (allin1) 
-        char.width <- max(char.width, max(nchar(na.omit(unit.grpest[[psenm]]))))
+      if (allin1) {
+        char.width <- max(char.width, 
+		max(nchar(na.omit(round(unit.grpest[[psenm]], pseround)))))
+      }
     }
   }
- 
+
   if (!rawonly) {
   ###################################################################
   ## GENERATE OUTPUT TABLES
@@ -212,14 +229,16 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     if (sumunits) {
       if (rowvar == "TOTAL") {
         if (allin1) {
-          estpse <- data.table(TOTAL="Total", allin1f(totest[[estnmd]], 
-			totest[[psenm]], estnull=estnull, psenull=psenull, 
-			char.width=char.width), stringsAsFactors=FALSE)
+          estpse <- data.frame(TOTAL="Total", allin1f(round(totest[[estnmd]], estround), 
+			round(totest[[psenm]], pseround), estnull=estnull, psenull=psenull), 
+			char.width=char.width, stringsAsFactors=FALSE)
           setnames(estpse, c("TOTAL", title.yhatpse))
         } else {
           estpse <- data.table(TOTAL="Total", 
 			totest[, c(estnmd, psenm), with=FALSE],
 			stringsAsFactors=FALSE)
+          estpse[[estnmd]] <- round(estpse[[estnmd]], estround)
+          estpse[[psenm]] <- round(estpse[[psenm]], pseround)
           names(estpse) <- c("TOTAL", title.yhat, title.yhat.pse)
         }
         rowtotal <- FALSE
@@ -227,12 +246,13 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       } else {  ##  rowvar != "TOTAL"
         ## Get estimates
         estcross <- crosstabx(rowest, rowvar, estnmd, psenm, allin1=allin1,
-		estnull=estnull, psenull=psenull, char.width=char.width)
+		estnull=estnull, psenull=psenull, char.width=char.width,
+		estround=estround, pseround=pseround)
 
         if (allin1) {
           tottab <- data.frame(TOTAL="Total", allin1f(totest[[estnmd]], 
 			totest[[psenm]], char.width=char.width, estnull=estnull, 
-			psenull=psenull), stringsAsFactors=FALSE)
+			psenull=psenull, estround=estround, pseround=pseround), stringsAsFactors=FALSE)
           setnames(tottab, c("TOTAL", title.yhatpse))
 
           estpse <- estcross
@@ -263,7 +283,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             for (rname in title.rnames) 
               estpse[[rname]] <- as.character(estpse[[rname]])
 
-            tottab <- c(totals, totest[[estnmd]], totest[[psenm]])
+            tottab <- c(totals, round(totest[[estnmd]], estround), round(totest[[psenm]], pseround))
             names(tottab) <- c(totals, title.yhat, title.yhat.pse) 
             estpse <- rbind(estpse, tottab)
           }
@@ -286,23 +306,26 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			overwrite=overwrite, charvars=title.rnames, cols2format=title.yhat) )
       }
             
-    } else {  ## colvar = NONE, sumunits = FALSE
+    } else {  ## colvar != NONE, sumunits = FALSE
       ## GET INITIAL TABLE AND TOTALS
       estnmd <- ifelse(esttype == "RATIO", "rhat", estnmd)
       senmd <- ifelse(esttype == "RATIO", "rhat.se", senmd)
 
       ## GET TOTAL TABLE
       if (!is.null(unit.totest)) {
-        if (allin1) {       
+        if (allin1) { 
             ## Get table with estimates by unitvar
              estpsetot <- data.table(unit.totest[[unitvar]], 
 			crosstabx(x=unit.totest, unitvar, estnm=estnmd, 
 				psenm=psenm, allin1=TRUE, estnull=estnull, 
-				psenull=psenull, char.width=char.width))
+				psenull=psenull, char.width=char.width,
+				estround=estround, pseround=pseround))
             setnames(estpsetot, c(title.unitvar, title.yhatpse))
         } else {
           ## GET TABLE OF ESTIMATES WITH TITLES
           estpsetot <- unit.totest[,c(unitvar, estnmd, psenm), with=FALSE]
+          estpsetot[[estnmd]] <- round(estpsetot[[estnmd]], estround)
+          estpsetot[[psenm]] <- round(estpsetot[[psenm]], pseround)
           setnames(estpsetot, c(title.unitvar, title.yhat, title.yhat.pse))
         }
       }
@@ -312,8 +335,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           totunit <- suppressWarnings(getrhat(totunit))
         } else {
           if (!is.null(divideby)) {
-            totunit[, (estnmd) := round(get(estnm) / dividebynum, estround)]
-            totunit[, (senmd) := get(senm) / dividebynum]
+            totunit[, (estnmd) := round(get(estnm2) / dividebynum, estround)]
+            totunit[, (senmd) := get(senm2) / dividebynum]
           }
           totunit[, (estnmd) := round(get(estnmd), estround)]
           totunit[, (psenm) := round(get(psenm), pseround)]
@@ -325,7 +348,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           totunit <- setDF(totunit)
           if (allin1) {
             totunit <- data.frame(TOTAL="Total", allin1f(totunit[[estnmd]], totunit[[psenm]],
-			estnull=estnull, psenull=psenull), stringsAsFactors=FALSE)
+			estnull=estnull, psenull=psenull, char.width=char.width, estround=estround,
+			pseround=pseround), stringsAsFactors=FALSE)
             setnames(totunit, c(unitvar, title.yhatpse))
           } else {         
             totunit <- c("TOTAL", totunit[, c(estnmd, psenm)])
@@ -355,8 +379,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             rowunit <- suppressWarnings(FIESTA::getrhat(rowunit))
           } else {
             if (!is.null(divideby)) {
-              rowunit[, (estnmd) := get(estnm) / dividebynum]
-              rowunit[, (senmd) := get(senm) / dividebynum]
+              rowunit[, (estnmd) := get(estnm2) / dividebynum]
+              rowunit[, (senmd) := get(senm2) / dividebynum]
             }
             rowunit[, (estnmd) := round(get(estnmd), estround)]
             rowunit[, (psenm) := round(get(psenm), pseround)]
@@ -376,7 +400,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         if (esttype != "RATIO") {
           if (!is.null(unit.totest)) {
             ## GET TOTAL ESTIMATE TO COMPARE TO SUM OF ATTRIBUTE ESTIMATES
-            totest <- sum(unit.totest[[estnm]], na.rm=TRUE)
+            totest <- sum(unit.totest[[estnm2]], na.rm=TRUE)
 
             ## GET SUM OF ESTIMATES TO COMPARE TO TOTAL
             sumest <- sum(unit.rowest[[estnm]])
@@ -467,7 +491,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       numunits <- length(units)
       tabs <- crossxbyunit(unit=NULL, grpest, rowest, colest, 
 		totest, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
-		estnm=estnmd, psenm=psenm, allin1, char.width, estnull, psenull, 
+		estnm=estnmd, psenm=psenm, allin1, char.width, estnull, psenull,
+		estround=estround, pseround=pseround,  
 		rowgrp, rowgrpnm, title.rnames, numunits, savedata, addtitle, 
 		returntitle, outfn.estpse, title.estpse, title.est, title.pse, 
 		title.ref, outfolder, outfn.date, overwrite, esttype, phototype,
@@ -482,6 +507,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       tabs <- lapply(units, crossxbyunit, unit.grpest, unit.rowest, unit.colest, 
 		unit.totest, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
 		estnm=estnmd, psenm=psenm, allin1, char.width, estnull, psenull, 
+		estround=estround, pseround=pseround,  
 		rowgrp, rowgrpnm, title.rnames, numunits, savedata, addtitle, returntitle, 
 		outfn.estpse, title.estpse, title.est, title.pse, title.ref,
 		outfolder, outfn.date, overwrite, esttype, phototype,

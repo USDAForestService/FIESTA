@@ -20,7 +20,9 @@ anMOD_barplot(MODest, barplot.row=TRUE, barplot.ord="DESC", barplot.color=NULL,
   \item{barplot.ord}{ String. The order of x based on y values ('DESC', "ASC') for 
 	barplot. If NULL, the default order of the table is used. }
   \item{barplot.color}{ String. The base color palette for barplot 
-	('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2').  }
+	('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2', 'BrewerDark2',
+	'BrewerPaired', 'BrewerBlues'). Note: All colors beginning with 'Brewer' 
+	are color palettes from the RColorBrewer package. }
   \item{barplot.ylim}{ Number. A vector of min and max values, c(min,max) for the 
 	barplot y axis. If NULL, defaults to maximum y value plus the standard error. }
   \item{barplot.nplt}{ Logical. If TRUE, Adds number of plots on top of bar. }

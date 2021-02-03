@@ -2,7 +2,6 @@
 output:
   word_document:
     reference_docx: anPBtemplateICE.docx
-    fig_caption: yes
   pdf_document: default
 params:
   rawfolder: ""
@@ -25,12 +24,9 @@ params:
 
 # suppressMessages loads in packages quietly, so that loading messages do not get sent to document 
 suppressMessages(library(knitr))
-suppressMessages(library(gridExtra))
+#suppressMessages(library(gridExtra))
 suppressMessages(library(data.table))
 suppressMessages(library(pheatmap))
-
-### Remove any objects from environment before running script ###
-rm(list=ls())
 
 
 ## Define functions from FIESTA

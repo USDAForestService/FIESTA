@@ -9,7 +9,6 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
 
   ## Set global variables
   gui=gettitle <- FALSE
-  ref_titles <- FIESTA::ref_titles
   plt=measyear=measyear.filter <- NULL
 
   if (is.null(title.ref)) gettitle <- TRUE

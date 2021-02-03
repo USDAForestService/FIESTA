@@ -9,7 +9,6 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
 
   ## Set global variables
   gui <- FALSE
-  ref_titles <- FIESTA::ref_titles
   returnlst <- list()
   row.FIAname=col.FIAname <- TRUE
 

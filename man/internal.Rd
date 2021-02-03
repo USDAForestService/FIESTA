@@ -45,6 +45,7 @@
 \alias{pcheck.landarea}
 \alias{pcheck.logical}
 \alias{pcheck.outfolder}
+\alias{pcheck.output}
 \alias{pcheck.rowcol}
 \alias{pcheck.states}
 \alias{pcheck.strata}

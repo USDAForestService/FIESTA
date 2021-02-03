@@ -545,3 +545,49 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
   return(objx)
 }
 
+
+pcheck.output <- function(out_dsn=NULL, out_fmt="csv", outfolder=NULL, 
+	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE,
+	gui=FALSE) {
+
+  ## Check out_fmt
+  ###########################################################
+  out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb')
+  out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
+		caption="Out format", gui=gui)
+
+  ## check append_layer
+  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
+		title="append data", first="NO", gui=gui)
+
+  ## check overwrite
+  overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+		title="overwrite", first="NO", gui=gui)
+
+
+  ## Check for necessary packages
+  ###########################################################
+  if (out_fmt %in% c("sqlite", "gpkg")) {
+    if (!"RSQLite" %in% rownames(installed.packages()))
+      stop("RSQLite package is required for exporting to sqlite or gpkg formats")
+  } else if (out_fmt %in% c("gdb")) {
+    if (!"arcgisbinding" %in% rownames(installed.packages()))
+      stop("arcgisbinding package is required for exporting to gdb format")
+    arcgisbinding::arc.check_product()
+  }
+
+  ## Check file name
+  ###########################################################
+  chkfn <- checkfilenm(out_dsn, outfolder=outfolder)
+  if (is.null(chkfn) || overwrite) {
+    out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
+		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
+		ext=out_fmt, append=append_layer)
+  } else {
+    out_dsn <- chkfn
+  }
+  outfolder <- dirname(out_dsn)
+  out_dsn <- paste(basename.NoExt(out_dsn), out_fmt, sep=".")
+
+  return(list(out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn))
+} 

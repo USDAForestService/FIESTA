@@ -10,7 +10,6 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 
   ## Set global variables
   gui <- FALSE
-  ref_titles <- FIESTA::ref_titles
   plt <- NULL
 
   ## Check savedata 

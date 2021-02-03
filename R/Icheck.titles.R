@@ -10,7 +10,6 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 
   ## TITLE INFO FOR OUTPUT TABLES
   ########################################################
-  ref_titles <- FIESTA::ref_titles
   if (!is.null(unitvar2) && unitvar2 == "NONE") unitvar2 <- NULL  
 
   ## title.unitvar
@@ -31,6 +30,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 	ifelse (landarea == "ALL", "allland", 
 		ifelse (landarea == "TIMBERLAND", "timberland",
 			ifelse (landarea == "CHANGE", "change", ""))))
+
   if (addtitle || returntitle) {
     title.unitvar.out <- NULL
     if (!sumunits && length(unique(dat[[unitvar]])) > 1) 
@@ -105,6 +105,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
             } else {
               gfind.max <- grep("trees", ref_estvarn$ESTUNITS)
             }
+            title.estvarn <- ref_estvarn[as.numeric(gfind.max), "ESTTITLE"]
           } else {     
             if (!is.null(estvarn.filter)) {
               gfind.max <- grep(estvarn.filter, ref_estvarn$ESTFILTER)

@@ -11,7 +11,7 @@
 
 \usage{
 DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL, 
-	evalCur = TRUE, evalEndyr = NULL, evalAll = FALSE, evalType = "AREAVOL", 
+	evalCur = TRUE, evalEndyr = NULL, evalAll = FALSE, evalType = "VOL", 
 	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
 	append_layer = FALSE, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite = FALSE, getassgn = TRUE, POP_PLOT_STRATUM_ASSGN = NULL)
@@ -28,13 +28,14 @@ DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL,
   \item{evalEndyr}{ Number. The end year of evalidation time period for state(s). }
   \item{evalAll}{ Logical. If TRUE, gets all EVALIDs for invtype. }
   \item{evalType}{ String vector. The type(s) of evaluation of interest 
-	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
-	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
-	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
-	includes plots used for growth, removals, mortality, and change estimates
-	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
-	See FIA database manual for regional availability and/or differences. 
-	See notes for more information on evalType. }
+	('ALL', 'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
+	The evalType 'ALL' includes nonsampled plots; 'CURR' includes plots 
+	used for area estimates; 'VOL' includes plots used for area and/or tree
+	estimates; The evalType 'GRM' includes plots used for growth, removals,
+	mortality, and change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)). 
+	Multiple types are accepted. See details below and FIA database manual 
+	for regional availability and/or differences. Note: do not use if EVALID 
+	is specified. See notes for more information on evalType. }
   \item{savedata}{ Logical. If TRUE, writes output to outfolder. }
   \item{outfolder}{ String.* If savedata=TRUE, name of the output folder. If NULL, 
 	data are saved to the working directory. }

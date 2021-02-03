@@ -11,7 +11,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
 
   ## Set global variables
   gui <- FALSE
-  ref_titles <- FIESTA::ref_titles
   plt=AOI <- NULL
 
 ## TESTING

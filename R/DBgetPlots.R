@@ -395,42 +395,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
 
-    ## Check out_fmt
-    ###########################################################
-    out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb')
-    out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
-		caption="Out format", gui=gui)
-
-    ## check append_layer
-    append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
-		title="append data", first="NO", gui=gui)
-
-    ## check overwrite
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="overwrite", first="NO", gui=gui)
-
-
-    ## Check for necessary packages
-    ###########################################################
-    if (out_fmt %in% c("sqlite", "gpkg")) {
-      if (!"RSQLite" %in% rownames(installed.packages()))
-        stop("RSQLite package is required for exporting to sqlite or gpkg formats")
-    } else if (out_fmt %in% c("gdb")) {
-      if (!"arcgisbinding" %in% rownames(installed.packages()))
-        stop("arcgisbinding package is required for exporting to gdb format")
-      arcgisbinding::arc.check_product()
-    }
-    if (out_fmt != "csv") {
-      if (!file.exists(checkfilenm(out_dsn, outfolder=outfolder)) || overwrite) {
-        out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
-		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
-		ext=out_fmt, append=append_layer)
-      }
-      outfolder <- dirname(out_dsn)
-      out_dsn <- paste(basename.NoExt(out_dsn), out_fmt, sep=".")
-    } else {
-      outfolder <- pcheck.outfolder(outfolder, gui=gui)
-    }
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite, append_layer=append_layer, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
   ###########################################################################

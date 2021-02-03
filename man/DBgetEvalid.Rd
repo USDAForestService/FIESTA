@@ -13,7 +13,7 @@
 }
 \usage{
 DBgetEvalid(states = NULL, RS = NULL, invtype = "ANNUAL", evalCur = TRUE, 
-	evalEndyr = NULL, evalid = NULL, evalAll = FALSE, evalType = "AREAVOL", 
+	evalEndyr = NULL, evalid = NULL, evalAll = FALSE, evalType = "VOL", 
 	invyrtab = NULL, gui = FALSE)
 }
 \arguments{
@@ -32,12 +32,13 @@ DBgetEvalid(states = NULL, RS = NULL, invtype = "ANNUAL", evalCur = TRUE,
   \item{evalid}{ Integer. One or more EVALID to check if exists. }
   \item{evalAll}{ Logical. If TRUE, gets all EVALIDs for invtype. }
   \item{evalType}{ String vector. The type(s) of evaluation of interest 
-	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
-	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
-	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
-	includes plots used for growth, removals, mortality, and change estimates
-	(eval_typ %in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. 
-	See details below and FIA database manual for regional availability and/or differences. }
+	('ALL', 'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
+	The evalType 'ALL' includes nonsampled plots; 'CURR' includes plots 
+	used for area estimates; 'VOL' includes plots used for area and/or tree
+	estimates; The evalType 'GRM' includes plots used for growth, removals,
+	mortality, and change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)). 
+	Multiple types are accepted. See details below and FIA database manual 
+	for regional availability and/or differences. }
   \item{invyrtab}{ Data frame. A data frame including inventory years by state. If NULL,
 	it is generated from SURVEY table from FIA database based on states and invtype. }
   \item{gui}{ Logical. If TRUE, gui windows pop up for parameter selection. }

@@ -77,7 +77,8 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord="DESC",
 
   ## Check barplot.color 
   ########################################################
-  colorlst <- c('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2')
+  colorlst <- c('rainbow', 'heat', 'terrain', 'topo', 'cm', 'hcl1', 'hcl2',
+	'BrewerDark2', 'BrewerPaired', 'BrewerBlues')
   barplot.color <- FIESTA::pcheck.varchar(var2check=barplot.color, varnm="barplot.color", 
 		checklst=colorlst, caption="Barplot color")
 
@@ -132,6 +133,15 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord="DESC",
     bplotfn <- paste0(esttype, "_", estvar, "_", rowvar, "_barplot")
   }
 
+
+  if (!is.null(barplot.color) && 
+	barplot.color %in% c("BrewerDark2", "BrewerPaired", "BrewerBlues")) {
+    if (!"RColorBrewer" %in% rownames(installed.packages())) {
+      stop("RColorBrewer package is required using Brewer colors")
+    }
+  }
+  
+
   if (is.null(barplot.color)) {
     bplot.col <- NULL
   } else if (barplot.color == "rainbow") {
@@ -148,6 +158,12 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord="DESC",
     bplot.col <- hcl.colors(nbrx)
   } else if (barplot.color == "hcl2") {
     bplot.col <- hcl.colors(nbrx, "Set 2")
+  } else if (barplot.color == "BrewerDark2") {
+    bplot.col <- RColorBrewer::brewer.pal(nbrx, name="Dark2")
+  } else if (barplot.color == "BrewerPaired") {
+    bplot.col <- RColorBrewer::brewer.pal(nbrx, name="Paired")
+  } else if (barplot.color == "BrewerBlues") {
+    bplot.col <- RColorBrewer::brewer.pal(nbrx, name="Blues")
   } else {
     bplot.col <- NULL
   }
