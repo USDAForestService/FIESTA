@@ -95,7 +95,6 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
     xlsx::saveWorkbook(wb, wbnm) 
   } 
 
-
   #######################################################################################
   ## New Variables
   #######################################################################################
@@ -112,7 +111,6 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   GBpopdat$treex <- datlut$xLUT
 
 
-
   #######################################################################################
   ## 01 - Area by land class and reserved status
   #######################################################################################
@@ -123,14 +121,14 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   colvar <- "RESERVCD"
 
   estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
-		landarea=landarea, 
+		landarea=landarea, row.add=TRUE, 
 		rowvar=rowvar, row.FIAname=TRUE, 
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
 		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite=overwrite)
-  #estdat$est
   esttab <- estdat$est
+
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
   title.colvar <- estdat$titlelst$title.colvar
   title.rowvar <- estdat$titlelst$title.rowvar
@@ -144,7 +142,6 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		coltottxt=coltottxt, cellwidth=cellwidth, wbnm=wbnm, sheetnm=tabnm,
            footnote1=footnote1, footnote2=footnote2, footnote3=footnote3)
   }
-
 
   #######################################################################################
   ## 02 - Area by forest type and stand-size class, on forest land

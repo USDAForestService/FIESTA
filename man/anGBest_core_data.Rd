@@ -8,7 +8,7 @@
 }
 \usage{
 anGBest_core_data(state, evalCur = TRUE, evalEndyr = NULL, 
-	evalType = c("ALL", "AREAVOL", "GRM"), savedata = TRUE, 
+	evalType = c("ALL", "VOL", "GRM"), savedata = TRUE, 
 	outfolder = NULL, outfn.date = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -20,7 +20,7 @@ anGBest_core_data(state, evalCur = TRUE, evalEndyr = NULL,
 	year. If more than one state, create a named list object with years labeled
 	by state (ex. list(Utah=2014, Colorado=2013). }
   \item{evalType}{ String vector. The type(s) of evaluation of interest 
-	('ALL', 'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
+	('ALL', 'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN'). 
 	The evalType 'ALL' includes nonsampled plots; 'AREAVOL' includes plots used
 	for area or tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM'
 	includes plots used for growth, removals, mortality, and change estimates

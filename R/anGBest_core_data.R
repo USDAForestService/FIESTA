@@ -1,5 +1,5 @@
 anGBest_core_data <- function(state, evalCur=TRUE, evalEndyr=NULL, 
-	evalType=c("ALL", "AREAVOL", "GRM"), savedata=TRUE, outfolder=NULL, 
+	evalType=c("ALL", "VOL", "GRM"), savedata=TRUE, outfolder=NULL, 
 	outfn.date=TRUE) {
 
   ## Check state

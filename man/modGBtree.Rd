@@ -432,20 +432,22 @@ modGBtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
 
 \examples{
 
-  \dontrun{
-
   ## Rows only; combine estimation units (sumunits=TRUE)
-  modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, 	
-  	landarea="FOREST", unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, 
-  	estvar="VOLCFNET", estvar.filter="STATUSCD==1", rowvar="FORTYPCD", row.FIAname=TRUE)
-  
+  MODest <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE, 
+	landarea="FOREST", estvar="VOLCFNET", estvar.filter="STATUSCD==1", 
+	rowvar="FORTYPCD", row.FIAname=TRUE)
+  names(MODest)
+  MODest$est
 
   ## Rows only; by estimation units (allin1=TRUE)
-  modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, 	
-  	landarea="FOREST", unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, 
-  	estvar="VOLCFNET", estvar.filter="STATUSCD==1", rowvar="FORTYPCD", row.FIAname=TRUE, 
-  	allin1=TRUE)
-  }
+  MODest <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE, 
+	landarea="FOREST", estvar="VOLCFNET", estvar.filter="STATUSCD==1", 
+	rowvar="FORTYPCD", row.FIAname=TRUE, allin1=TRUE)
+  names(MODest)
+  MODest$est
+
 }
 
 \keyword{ data }

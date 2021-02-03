@@ -502,8 +502,8 @@ modGBarea <- function(cond=NULL, plt=NULL, pltassgn=NULL, dsn=NULL,
   }
  
   ## GET VALUES TO RETURN
-  if (!is.null(est2return)) returnlst$est <- est2return
-  if (!is.null(pse2return)) returnlst$pse <- pse2return
+  if (!is.null(est2return)) returnlst$est <- setDF(est2return)
+  if (!is.null(pse2return)) returnlst$pse <- setDF(pse2return)
   if (rawdata) {
     rawdat$esttype <- "AREA"
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar

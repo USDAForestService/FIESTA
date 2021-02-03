@@ -798,7 +798,6 @@ write2xlsx <- function(esttab, psetab=NULL, wbnm=NULL, sheetnm=NULL, tabtitle=NU
 		psecols=psecols, esttab.style=esttab.style, psetab.style=psetab.style, 
 		rnames=rnames, norname=TRUE, allin1=allin1, addSEcol=addSEcol)
     ########################################################################### 
-
     startrow.tab <- endrow.tab
     xlsx::autoSizeColumn(datsheet, colIndex=colIndex.txt)
   }

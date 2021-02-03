@@ -9,7 +9,7 @@
 	anGBdata() (spGetPlots(), spGetStrata()), and modGBpop().	
 }
 \usage{
-anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, istree = TRUE, 
+anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL", 
 	isseed = FALSE, datsource = "sqlite", SQLitefn = NULL, RS = NULL, 
 	strat_layer = NULL, showsteps = FALSE, savedata = FALSE, savexy = TRUE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
@@ -25,6 +25,8 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, istree = TRUE,
   \item{bnd.att}{ String. The attribute in bnd_layer that defines the
 	estimation unit(s). If NULL, bnd is default as one estimation unit. } 
   \item{bnd.filter}{ String. Filter to subset bnd SpatialPolygons layer. }
+  \item{popType}{ String. Type of evaluation(s) to include in population data 
+	("VOL"). Note: currently only 'VOL' is available. }
   \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
   \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
@@ -50,6 +52,17 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, istree = TRUE,
 }
 \author{
 	Tracey S. Frescino
+}
+\examples{
+
+  ## Get population data using strata and area estimates for evaluations ending 2015 to 2019
+  WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+  GBpop <- anGBpop(WYbhfn, datsource="datamart")
+  names(GBpop)
+
+  names(GBpop$GBdata)
+  names(GBpop$GBpopdat)
+
 }
 \keyword{ data }
 

@@ -26,11 +26,23 @@ anGBpop_core(GBpopdat, title.ref, xlsx = FALSE, outfolder = NULL,
 		('hundred', 'thousand', 'million'). }
 }
 \details{
-	If variables are NULL, then it will prompt user to input variables.
+  If variables are NULL, then it will prompt user to input variables.
 		
 }
 \author{
 	Tracey S. Frescino
 }
+\examples{
 
+  ## Get population data using strata and area estimates for evaluations ending 2015 to 2019
+  WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+  GBpop <- anGBpop(WYbhfn, datsource="datamart")
+  names(GBpop)
+
+  names(GBpop$GBdata)
+  names(GBpop$GBpopdat)
+
+  ## Run core tables
+  anGBpop_core(GBpopdat=GBpop$GBpopdat, title.ref="Black Hills", xlsx=TRUE)
+}
 \keyword{ data }

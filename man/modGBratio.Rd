@@ -433,20 +433,21 @@ modGBratio(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
 
 \examples{
 
-  \dontrun{
-
   ## Rows only; combine estimation units (sumunits=TRUE)
-  modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, 	
-  	landarea="FOREST", unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, 	
-  	estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", row.FIAname=TRUE)
+  MODest <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, 
+	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE, 	
+  	landarea="FOREST", estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", 
+	rowvar="FORTYPCD", row.FIAname=TRUE)
+  names(MODest)
+  MODest$est
   
-
   ## Rows only; by estimation units (allin1=TRUE)
-  modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, 	
-  	landarea="FOREST", unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, 	
-  	estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", row.FIAname=TRUE, 
-  	allin1=TRUE, estround=0)
-  }  
+  MODest <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE, 	
+  	landarea="FOREST", estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", 
+	rowvar="FORTYPCD", row.FIAname=TRUE, allin1=TRUE, estround=0)
+  names(MODest)
+  MODest$est
 }
 
 

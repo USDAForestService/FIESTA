@@ -1,5 +1,5 @@
 anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
-	istree=TRUE, isseed=FALSE, datsource="sqlite", SQLitefn=NULL, RS=NULL, 
+	popType="VOL", isseed=FALSE, datsource="sqlite", SQLitefn=NULL, RS=NULL, 
 	strat_layer=NULL, showsteps=FALSE, savedata=FALSE, savexy=TRUE, 
 	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
 	GBdata=NULL, ...) {
@@ -9,6 +9,17 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   gui <- FALSE
   returnlst <- list()
   strata <- TRUE
+  istree <- FALSE
+
+
+  ## Check popType
+  popTypelst <- c("VOL")
+  popType <- FIESTA::pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
+		checklst=popTypelst, caption="population type", stopifnull=TRUE,
+		warn="only VOL is currently available")
+  if (popType %in% c("VOL", "CHNG")) {
+    istree <- TRUE
+  }
 
 
   ## Check savedata 
@@ -74,11 +85,11 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ####################################################################
   ## Get population data
   ####################################################################
-  GBpopdat <- modGBpop(tree=tree, seed=seed, cond=cond, plt=plt, 
-		pltassgn=pltassgn, puniqueid=puniqueid, pltassgnid=pltassgnid, 
-		pjoinid=pjoinid, unitarea=unitarea, unitvar=unitvar, 
-		areavar=areavar, strata=strata, stratalut=stratalut, 
-		strvar=strvar, saveobj=TRUE, outfolder=outfolder)
+  GBpopdat <- modGBpop(popType=popType, tree=tree, seed=seed, cond=cond, 
+	plt=plt, pltassgn=pltassgn, puniqueid=puniqueid, pltassgnid=pltassgnid, 
+	pjoinid=pjoinid, unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+	strata=strata, stratalut=stratalut, strvar=strvar, saveobj=TRUE, 
+	outfolder=outfolder)
   names(GBpopdat)
   returnlst$GBpopdat <- GBpopdat
 

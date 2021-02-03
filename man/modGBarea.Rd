@@ -358,19 +358,21 @@ modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
 
 \examples{
 
-  \dontrun{
-
   ## Rows only; combine estimation units (sumunits=TRUE)
-  modGBarea(cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, landarea="FOREST",
-	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, rowvar="FORTYPCD", 
- 	row.FIAname=TRUE)
+  MODest <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, 
+	sumunits=TRUE, landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE)
+  names(MODest)
+  MODest$est
   
-
   ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
-  modGBarea(cond=WYcond, pltassgn=WYpltassgn, sumunits=TRUE, landarea="FOREST",
-	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, rowvar="FORTYPCD", 
- 	row.FIAname=TRUE, allin1=TRUE)
-  }
+  MODest <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut,
+ 	sumunits=TRUE, landarea="FOREST", 
+	rowvar="FORTYPCD", row.FIAname=TRUE, allin1=TRUE)
+  names(MODest)
+  MODest$est
+
 }
 
 

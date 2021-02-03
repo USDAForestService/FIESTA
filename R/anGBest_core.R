@@ -1,5 +1,5 @@
 anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL, 
-		evalType=c("ALL", "AREAVOL", "GRM"), fill=TRUE, addSEcol=FALSE, 
+		evalType=c("ALL", "VOL", "GRM"), fill=TRUE, addSEcol=FALSE, 
 		allin1=FALSE, savedata=FALSE, outfolder=NULL, outfn.date=TRUE, 
 		divideby.vol="million", datCore=NULL) {
 
@@ -63,7 +63,7 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
   vspstr <- datPlots$vspstr
   pltassgn <- datStrata$pltassgn
   unitarea <- datStrata$unitarea
-  stratalut <- datStrata$strlut
+  stratalut <- datStrata$stratalut
   pltassgnid <- datStrata$pltassgnid
 
   if (lapply(evalid, length) > 1) {

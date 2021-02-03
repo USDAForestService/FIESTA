@@ -47,11 +47,11 @@ anGBpopDB_evalEndyrlst(evalEndyrlst, states, evalType = "VOL",
   Data.
 }
 \examples{
-GBpoplst <- anGBpopDB_evalEndyrlst(states="Utah", evalEndyr=c(2015:2019))
+  GBpoplst <- anGBpopDB_evalEndyrlst(evalEndyrlst=c(2015:2019), states="Utah", 
+	evalType="CURR")
 
-lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
+  lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
 	landarea="FOREST", row.FIAname=TRUE))
-
 }
 \author{
 	Tracey S. Frescino

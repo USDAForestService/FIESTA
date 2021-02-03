@@ -48,6 +48,13 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   nonresp=FALSE
   substrvar=NULL
 
+
+  ## Check popType
+  popTypelst <- c("VOL")
+  popType <- FIESTA::pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
+		checklst=popTypelst, caption="population type", stopifnull=TRUE,
+		warn="only VOL is currently available")
+
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)

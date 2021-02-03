@@ -788,6 +788,14 @@ setCells <- function(datsheet, estgrp, psegrp, nbrgrps=1, startrow=1, endrow=NUL
   ## allin1			Logical. If TRUE, estimate and percent standard error in same cell.
   ## addSEcol		Logical. If TRUE, %SE is included in table. 
 
+  if ("data.table" %in% class(estgrp)) {
+    estgrp <- setDF(estgrp)
+  }
+  if (!is.null(psegrp) && "data.table" %in% class(psegrp)) {
+    psegrp <- setDF(psegrp)
+  }
+
+
   ## Create new rows for table data
   ################################################################
   if (is.null(endrow)) endrow <- nrow(estgrp)
@@ -811,6 +819,7 @@ setCells <- function(datsheet, estgrp, psegrp, nbrgrps=1, startrow=1, endrow=NUL
   ################################################################
   estgrp.cells <- xlsx::getCells(tab.rows, colIndex=estcols)
   #tabvals <- t(as.matrix(estgrp[, -(colIndex.rname)]))
+
   tabvals <- t(as.matrix(estgrp[, tabcols]))
 
   if (allin1) tabvals <- mapply(wrapSE, tabvals)

@@ -75,10 +75,25 @@ anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL,
   Data.
 }
 \examples{
-#evalidlst <- c(491501, 491601, 491701, 491801, 491901)
-#est <- anGBest_evalidlst(evalidlst=evalidlst, esttype="AREA", landarea="FOREST",
-#	rowvar="FORTYPCD")
+  ## Get population data and area estimates for evaluations ending 2015 to 2019
+  WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+  GBpoplst <- anGBpop_evalEndyrlst(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
+	xymeasCur=TRUE, xy.uniqueid="PLOT_ID", evalType="CURR")
 
+  est <- lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
+	landarea="FOREST", row.FIAname=TRUE))
+
+
+  ## Get population data using strata and area estimates for evaluations ending 2015 to 2019
+  fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
+  GBpoplst2 <- anGBpop_evalEndyrlst(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
+	xymeasCur=TRUE, xy.uniqueid="PLOT_ID", evalType="CURR", strat_layer=fornffn)
+
+  est.strat <- lapply(GBpoplst2, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
+	landarea="FOREST", row.FIAname=TRUE))
+
+  est$eval2019
+  est.strat$eval2019
 }
 \author{
 	Tracey S. Frescino

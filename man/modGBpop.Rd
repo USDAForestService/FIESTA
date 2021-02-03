@@ -29,7 +29,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{popType}{ String. Type of evaluation(s) to include in population data 
-	("VOL", "P2VEG"). }
+	("VOL"). Note: currently only 'VOL' is available. }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 

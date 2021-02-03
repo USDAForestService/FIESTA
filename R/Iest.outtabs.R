@@ -193,7 +193,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           unit.colest[[estnmd]] <- unit.colest[[estnm2]] / dividebynum
           unit.colest[[senmd]] <- unit.colest[[senm2]] / dividebynum
         } else {
-          unit.colest[[estnmd]] <- unit.colest[[senm2]]
+          unit.colest[[estnmd]] <- unit.colest[[estnm2]]
         }
         unit.colest[[psenm]] <- unit.colest[[psenm]]
       }
@@ -306,7 +306,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			overwrite=overwrite, charvars=title.rnames, cols2format=title.yhat) )
       }
             
-    } else {  ## colvar != NONE, sumunits = FALSE
+    } else {  ## colvar == NONE, sumunits = FALSE
       ## GET INITIAL TABLE AND TOTALS
       estnmd <- ifelse(esttype == "RATIO", "rhat", estnmd)
       senmd <- ifelse(esttype == "RATIO", "rhat.se", senmd)
@@ -374,6 +374,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			outfn.date=outfn.date, overwrite=overwrite, cols2format=title.yhat))
 
       } else {  ## rowvar != "TOTAL"
+
         if (!is.null(rowunit)) {
           if (esttype == "RATIO") {
             rowunit <- suppressWarnings(FIESTA::getrhat(rowunit))
@@ -386,9 +387,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             rowunit[, (psenm) := round(get(psenm), pseround)]
           }
         }
-        if (!is.null(unit.totest) && !is.null(uniquecol))
+        if (!is.null(unit.totest) && !is.null(uniquecol)) {
           unit.totest <- add0unit(x=unit.totest, xvar=unitvar, uniquex=uniquecol, 
 			xvar.add0=TRUE)
+        }
         ## Get table of estimates
         estpsecross <- crossxtab(group.est=unit.rowest, rowvar.est=rowunit, 
 			colvar.est=unit.totest, total.est=totunit, rowvar=rowvar, 
@@ -514,8 +516,12 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		rnames, title.colvar, title.unitvar)
       names(tabs) <- units
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
-      if (unique(lapply(tabs, length)) == 2)
+      est2return[is.na(est2return)] <- estnull
+
+      if (unique(lapply(tabs, length)) == 2) {
         pse2return <- rbindlist(lapply(tabs, `[[`, 2), use.names=TRUE, fill=TRUE)
+        pse2return[is.na(est2return)] <- psenull
+      }
     }
   }
   returnlst$tabest <- est2return

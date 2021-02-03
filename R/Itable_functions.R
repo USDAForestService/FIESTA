@@ -545,7 +545,7 @@ crossxbyunit <- function(unit=NULL, unit.grpest=NULL, unit.rowest=NULL,
 	rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames, 
  	estnull=estnull, psenull=psenull, char.width=char.width,
 	estround=estround, pseround=pseround)
- 
+
   if (allin1) {
     estpsetab <- tabs       
     if (!is.null(estpsetab)) {

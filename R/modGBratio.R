@@ -565,8 +565,8 @@ modGBratio <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   }  
 
   ## GET VALUES TO RETURN
-  returnlst <- list(est=est2return)
-  if (!is.null(pse2return)) returnlst$pse <- pse2return
+  returnlst <- list(est=setDF(est2return))
+  if (!is.null(pse2return)) returnlst$pse <- setDF(pse2return)
   if (rawdata) {
     rawdat$esttype <- "RATIO"
     rawdat$estvarn <- estvarn
