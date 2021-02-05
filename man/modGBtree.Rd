@@ -15,33 +15,24 @@
 	expanded to using the total land area in the population. 
 }
 \usage{    
-modGBtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
-	estseed = "none", dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
-	condid = "CONDID", puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
-	evalid = NULL, invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, 
-	strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
-	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
+modGBtree(tree = NULL, cond = NULL, plt = NULL, estseed = "none", landarea = "FOREST", 
 	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
-	estvar.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE, 
-	col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
-	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, 
-	rowgrpnm = NULL, rowgrpord = NULL, sumunits = TRUE, allin1 = FALSE, estround = 1, 
-	pseround = 2, estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
+	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
+	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
+	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
+	sumunits = TRUE, allin1 = FALSE, estround = 1, pseround = 2, 
+	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
 	rawdata = FALSE, rawonly = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,
  	outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, 
 	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
  	title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, GBpopdat = NULL, 
-	GBdata = NULL, gui = FALSE)
+	gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Tree-level data with one record for each tree. Tree data are aggregated to 
 	condition-level. See details for necessary variables to include. }
-  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
-	Seedling-level data with one record of seedling counts for each species in plot. }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
@@ -52,65 +43,8 @@ modGBtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
 	Plot-level data with one record for each plot, including or excluding 
 	nonsampled conditions. If nonsampled plots are included, PLOT_STATUS_CD 
 	variable must be in table or a filter defined in plt.nonsamp.filter. }
-  \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
-	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
-	estimation unit and/or strata, with one record for each plot. }
   \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
 	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
-  \item{dsn}{ String. Name of database where tree, cond, and plot-level tables reside. 
-	The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). }
-  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
-  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{condid}{ String. Unique identifier of plot conditions (e.g., CONDID). 
-	If no condid in cond, the data are assumed to have 1 condition per plot. 
-	A CONDID=1 is automatically added. }
-  \item{puniqueid}{ String. Unique identifier of plot in plt. }
-  \item{pltassgnid}{ String. Unique identifier of plot in pltassgn. }
-  \item{pjoinid}{ String. Name of variable in plot to join to pltassgn. This
-	variable does not need to be unique (e.g., PLOT_ID). If NULL, pjoinid=puniqueid. }
-  \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
-  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
-  \item{intensity}{ Integer code. Code(s) indicating intensity to use for population. }
-  \item{adj}{ String. How to calculate adjustment factors for nonsampled 
-	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
-	'samp' - adjustments are calculated at strata/estimation unit level; 
-	'plot' - adjustments are calculated at plot-level. Adjustments 
-	are only calculated for annual inventory plots (designcd=1). } 
-  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
-	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
-  \item{strata}{ Logical. If TRUE, include information for post-stratification. }
-  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
-	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
-  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
-  \item{unitvar}{ String. Name of the estimation unit variable in unitarea and 
-	cond or pltassgn data frame with estimation unit assignment for each plot 
-	(e.g., 'ESTN_UNIT'). Optional if only one estimation unit. }
-  \item{unitvar2}{ String. Name of a second level estimation unit variable in unitarea
-	and cond or pltassgn with assignment for each plot (e.g., 'STATECD'). }
-  \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
-	unit, include number of total acreage for the area of interest or a data frame
-	with area and estimation unit. If more than one estimation unit, provide a data frame 
-	of total area by estimation unit, including unitvar and areavar. }
-  \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
-  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
-  \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with pixel counts or area
-	by strata or proportion or area ('strwt') by strata (and estimation unit). 
-	If 'strwt' is not included, set getwt=TRUE and getwtvar as the name of variable 
-	to calculate weights from (e.g., pixel counts). }
-  \item{strvar}{ String. If strata=TRUE, name of the strata variable in stratalut and 
-	cond or pltassgn data frame with stratum assignment for each plot 
-	(Default = 'STRATUMCD'). }
-  \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
-	If FALSE, 'strwt' variable must be in stratalut. }
-  \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt) 
- 	(Default = "P1POINTCNT"). }
-  \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
-	strata categories if less than 2 plots in any one stratum. See notes for more info. }
   \item{landarea}{ String. The condition-level filter for defining land area 
 	('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1; 
 	if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0. }
@@ -121,9 +55,6 @@ modGBtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{estvar}{ String. Name of the tree-level estimate variable (e.g., 'VOLCFNET'). }
   \item{estvar.filter}{ String. A tree-level filter for estvar. Must be R syntax 
 	(e.g., 'STATUSCD == 1'). }
-  \item{estvar.name}{ String. A name given to the output aggregated tree estimate variable. 
-	If NULL, = estvar'_SUM'. This name is used for default table titles and/or output 
-	file names. } 
   \item{rowvar}{ String. Optional. Name of domain variable to group estvar by 
 	for rows in table output. Rowvar must be included in an input data frame 
 	(i.e., plt, cond, tree). If no rowvar is included, an estimate is returned
@@ -206,8 +137,8 @@ modGBtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
 	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
 	If title.filter="", no title.filter is used. }
   \item{GBpopdat}{ List. Population data objects returned from FIESTA::modGBpop(). }
-  \item{GBdata}{ List. Data objects returned from FIESTA::GBdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
+  \item{...}{ List. Data objects returned from FIESTA::modGBpop(). }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

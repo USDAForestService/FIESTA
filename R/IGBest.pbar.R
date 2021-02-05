@@ -1,5 +1,5 @@
 GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
- 	ratiotype="PERACRE", strlut, uniqueid, unitvar, strvar=NULL, domain){
+ 	ratiotype="PERACRE", stratalut, uniqueid, unitvar, strvar=NULL, domain){
   ########################################################################################
   ## DESCRIPTION: Calculates the following variables using Green-book estimators
   ## ARGUMENTS:
@@ -8,7 +8,7 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
   ## sumyd 		- string. estimation response (denominator) - for ratio of means estimates
   ## esttype 	- string. type of estimate ('AREA', 'TREE', 'RATIO')
   ## ratiotype	- string. type of ratio ('PERACRE', 'PERTREE')
-  ## strlut		- data.frame. strata-level information
+  ## stratalut		- data.frame. strata-level information
   ## uniqueid 	- unique plot identifier in ysum
   ## unitvar 	- name of variable defining estimation unit
   ## strvar		- name of variable defining strata 
@@ -29,8 +29,8 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
 	sumynsq.dom=dhat.strwt=sumyd.dom=dhat.var.strwt=sumydsq.dom=
 	covar.strwt=sumnd.dom <- NULL
 
-  if (!"n.strata" %in% names(strlut)) stop("need n.strata in strlut")
-  if (!"n.total" %in% names(strlut)) stop("need n.total in strlut")
+  if (!"n.strata" %in% names(stratalut)) stop("need n.strata in stratalut")
+  if (!"n.total" %in% names(stratalut)) stop("need n.total in stratalut")
 
 
   if (esttype == "RATIO") {
@@ -66,8 +66,8 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
   }
 
   ## STRATA/DOMAIN LEVEL: Merge domain-level sums to strata table
-  setkeyv(strlut, strunitvars)
-  ybardat <- strlut[ysum.strata]
+  setkeyv(stratalut, strunitvars)
+  ybardat <- stratalut[ysum.strata]
 
 
   ## Calculate estimate weights by estimation unit and strata for numerator

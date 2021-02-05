@@ -34,7 +34,8 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
 
   ## Set global variables
   EVALID=evalidlist=evalTypelist=invyrs <- NULL
-  evalresp <- TRUE
+  #evalresp <- TRUE
+  evalresp <- FALSE
   isgrm=issccm <- FALSE 
 
   ## Define evalTypee choices
@@ -81,13 +82,21 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
     RS <- FIESTA::pcheck.varchar(var2check=RS, varnm="RS", 
 		checklst=rslst, caption="Research Unit?", gui=gui, multiple=TRUE)
     if (is.null(RS)) RS <- rslst  
-
-    states <- FIESTA::pcheck.states(states, gui=gui, RS=RS)
     if (is.null(states)) {
-      states <- FIESTA::pcheck.states(states, gui=TRUE, RS=RS)
+      stgui <- ifelse(is.null(RS), TRUE, FALSE)
+      states <- FIESTA::pcheck.states(states, gui=stgui, RS=RS)
       if (is.null(states)) stop("must include states")
+    } else {
+      if (is.null(RS)) {
+        statelst <- FIESTA::pcheck.states(states)
+      } else {
+        RSstatelst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS %in% RS,"MEANING"]
+        if (!(states %in% RSstatelst)) {
+          stop("RS and states are invalid... ", toString(states[!states %in% RSstatelst]))
+        }
+      }
     }
-    stcdlst <- pcheck.states(states, "VALUE")
+    stcdlst <- FIESTA::pcheck.states(states, "VALUE")
   }
   rslst <- unique(FIESTA::ref_statecd[match(states, FIESTA::ref_statecd$MEANING), 
 		"RS"])

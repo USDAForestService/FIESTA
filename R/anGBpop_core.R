@@ -121,7 +121,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   colvar <- "RESERVCD"
 
   estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
-		landarea=landarea, row.add=TRUE, 
+		landarea=landarea, row.add0=TRUE, 
 		rowvar=rowvar, row.FIAname=TRUE, 
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 

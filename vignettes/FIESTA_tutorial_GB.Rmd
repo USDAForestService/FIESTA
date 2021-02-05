@@ -496,8 +496,8 @@ help(modGBpop)
 
 ## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
 ########################################################################################
-GBpopdat <- modGBpop(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", unitarea=WYunitarea, 
-    unitvar="ESTN_UNIT", stratalut=WYstrlut)
+GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=WYpltassgn, pltassgnid="CN", 
+    unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut)
 
 ## Get names of list components
 names(GBpopdat)
@@ -506,7 +506,7 @@ names(GBpopdat)
 names(GBpopdat)
 GBpopdat$plotsampcnt	# Number of plots after plot filter
 GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
-GBpopdat$strlut       # Strata information and adjustment factors
+GBpopdat$stratalut       # Strata information and adjustment factors
 
 
 ```

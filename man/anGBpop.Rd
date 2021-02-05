@@ -27,7 +27,6 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL",
   \item{bnd.filter}{ String. Filter to subset bnd SpatialPolygons layer. }
   \item{popType}{ String. Type of evaluation(s) to include in population data 
 	("VOL"). Note: currently only 'VOL' is available. }
-  \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
   \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }

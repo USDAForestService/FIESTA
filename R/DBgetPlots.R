@@ -1127,10 +1127,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       #xyx <- pltx[, c("CN", getcoords(coords), "PLOT_ID"), with=FALSE]
       xyx <- copy(pltx)
       setnames(xyx, "CN", "PLT_CN")
+
  
       ## Get xy for the most current sampled plot
       if (xymeasCur) {
-        xvars <- c("p.PLOT_ID", "p.CN", paste0("p.", getcoords(coords)))
+        xvars <- c("p.CN", "p.STATECD", "p.UNITCD", "p.COUNTYCD", "p.PLOT", 
+		"p.PLOT_ID", paste0("p.", getcoords(coords)))
         xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
         xyx.qry <- gsub("from plot", "from pltx ", xyx.qry)
 
@@ -1141,6 +1143,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           assign(paste0("xyCur_", coords), 
 				rbind(get(paste0("xyCur_", coords)), xyCurx)) 
       } else {
+        xyx <- xyx[, c("PLT_CN", "STATECD", "UNITCD", "COUNTYCD", "PLOT", 
+		"LON_PUBLIC", "LAT_PUBLIC", "PLOT_ID"), with=FALSE]
         assign(paste0("xyx_", coords), xyx)
         if (returndata) 
           assign(paste0("xy_", coords), 
@@ -1829,8 +1833,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       }
     }
 
-    if (!is.null(spconddat)) fiadatlst$spconddat <- setDF(spconddat)
-    if ((savePOP || iseval) && !is.null(ppsa)) fiadatlst$POP_PLOT_STRATUM_ASSGN <- setDF(ppsa)
+    if (!is.null(spconddat)) {
+      fiadatlst$spconddat <- setDF(spconddat)
+    }
+    if (savePOP || (iseval && length(evalidlist > 1)) && !is.null(ppsa)) {
+		fiadatlst$POP_PLOT_STRATUM_ASSGN <- setDF(ppsa)
+    }
   }
  
   if (length(evalidlist) > 0) fiadatlst$evalid <- evalidlist

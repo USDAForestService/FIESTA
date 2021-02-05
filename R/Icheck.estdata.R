@@ -41,7 +41,6 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     return(NULL)
   }
 
-
   #############################################################################
   ## Check esttype
   #############################################################################
@@ -83,7 +82,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     if (length(landcolsmiss) > 0) 
       stop("missing variables: ", paste(landcolsmiss, collapse=", "))
   }
-
+ 
   ###################################################################################
   ## Apply cond filters
   ###################################################################################
@@ -95,6 +94,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     message(paste(landarea.filter, "removed all records"))
     return(NULL)
   }
+
   ## Apply cond.filter to condf
   pltcondf <- datFilter(x=pltcondf, xfilter=cond.filter, 
 		title.filter="cond filter", gui=gui, stopifnull=FALSE)$xf
@@ -102,6 +102,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     message(paste(cond.filter, "removed all records"))
     return(NULL)
   }
+
   ## Apply ACI.filter to condf
   if (landarea != "ALL") {
     pltcondf <- FIESTA::datFilter(x=pltcondf, xfilter=ACI.filter, 

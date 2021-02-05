@@ -17,14 +17,14 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	vspspp = NULL, subplot = NULL, subp_cond = NULL, pltassgn = NULL, dsn = NULL, 
 	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", tuniqueid = "PLT_CN", 
 	cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", 
-	evalid = NULL, invyrs = NULL, intensity = NULL, adj = "samp", ACI = FALSE, 
+	adj = "samp", evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE, 
 	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
 	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, stratalut = NULL, 
 	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
 	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
 	out_dsn = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = TRUE, GBdata = NULL, gui = FALSE)
+	overwrite = TRUE, GBdata = NULL, GBstratdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -123,6 +123,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{GBdata}{ R List object. Output data list components from FIESTA::GBdata(). }
+  \item{GBstratdat}{ R List object. Output data list components from FIESTA::DBgetStrata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{
