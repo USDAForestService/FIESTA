@@ -54,7 +54,7 @@ write2sqlite <- function(layer, SQLitefn, out_name=NULL, gpkg=FALSE,
       test <- tryCatch(
         DBI::dbExecute(dbconn, idxsql),
 		error=function(err) {
-				message(err)
+				message(err, "\n")
 		} ) 
       message(sub("create", "creating", idxsql))
     }

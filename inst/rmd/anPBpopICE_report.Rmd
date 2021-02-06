@@ -133,17 +133,19 @@ outfn.pre <- params$outfn.pre
 # outfn.pre <- AOInm
 
 
-if (is.null(rawfolder)) stop("rawfolder is NULL")
+if (is.null(rawfolder) || rawfolder == "") stop("rawfolder is NULL")
 if (!dir.exists(rawfolder)) stop("rawfolder path is invalid")
-if (is.null(AOInm)) stop("AOInm is NULL")
-if (is.null(yearT1)) stop("T1 is NULL")
-if (is.null(yearT2)) stop("T2 is NULL")
-if (is.null(outfn.pre)) outfn.pre <- AOInm
+if (is.null(AOInm) || AOInm == "") stop("AOInm is NULL")
+if (is.null(yearT1) || T1 == "") stop("T1 is NULL")
+if (is.null(yearT2) || T1 == "") stop("T2 is NULL")
+if (is.null(outfn.pre) || outfn.pre == "") outfn.pre <- AOInm
 
 
 ## Import ICE QAQC data
 #ice.QAQC <- FIESTA::pcheck.table(ice.QAQCfn)
-if (is.null(ice.QAQCfn)) ice.QAQC <- NULL
+if (is.null(ice.QAQCfn) || ice.QAQCfn == "") {
+  ice.QAQC <- NULL
+}
 
 if (!is.null(ice.QAQC)) {
   if (!dir.exists(ice.QAQCfn)) stop(ice.QAQCfn, " does not exist")
