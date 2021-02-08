@@ -1,10 +1,10 @@
-\name{WYstrlut}
+\name{WYstratalut}
 \docType{data}
-\alias{WYstrlut}
+\alias{WYstratalut}
 \title{ FIA data. Strata data from FIA public database. }
 \description{ FIA condition-level data for the state of Wyoming, inventory years 2011-2012
 	and was downloaded Sept 8, 2017 from FIADB_1.7.0.00. It includes P1POINTCNT and number of FIA plots by strata (1:GREEN; 2:BROWN) and by estimation unit (ESTN_UNIT). }
-\usage{ WYstrlut }
+\usage{ WYstratalut }
 \format{ A dataframe with 6 columns and 39 rows. }
 \source{ FIA Database. }
 

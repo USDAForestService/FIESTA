@@ -81,7 +81,8 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
   } else {
     RS <- FIESTA::pcheck.varchar(var2check=RS, varnm="RS", 
 		checklst=rslst, caption="Research Unit?", gui=gui, multiple=TRUE)
-    if (is.null(RS)) RS <- rslst  
+    if (is.null(RS)) RS <- rslst 
+
     if (is.null(states)) {
       stgui <- ifelse(is.null(RS), TRUE, FALSE)
       states <- FIESTA::pcheck.states(states, gui=stgui, RS=RS)
@@ -90,7 +91,8 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
       if (is.null(RS)) {
         statelst <- FIESTA::pcheck.states(states)
       } else {
-        RSstatelst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS %in% RS,"MEANING"]
+        RSstatelst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS %in% RS, "MEANING"]
+        states <- FIESTA::pcheck.states(states)
         if (!(states %in% RSstatelst)) {
           stop("RS and states are invalid... ", toString(states[!states %in% RSstatelst]))
         }
@@ -322,7 +324,9 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
     evalType <- FIESTA::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
 		checklst=evalTypelst, caption="Evaluation type", multiple=TRUE, 
 		preselect="VOL")
-    if (is.null(evalType)) evalType <- "VOL"
+    if (is.null(evalType)) {
+      evalType <- "VOL"
+    }
 
     ## check evalType
     if (invtype == "PERIODIC" && evalType == "ALL") {

@@ -19,7 +19,6 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
 #  micadj <- ifelse(any(TPAvals > 50), TRUE, FALSE)
 #  macadj <- ifelse(any(TPAvals > 0 & TPAvals < 5), TRUE, FALSE)
 
-
   ## Check SUBP_BREAKPOINT_DIA  and MACRO_BREAKPOINT_DIA    
   if (!is.null(SUBP_BREAKPOINT_DIA ) && !is.numeric(SUBP_BREAKPOINT_DIA ) &&
  		length(SUBP_BREAKPOINT_DIA ) != 1)

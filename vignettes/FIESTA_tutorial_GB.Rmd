@@ -302,8 +302,8 @@ A list object with one or more of the following components. If savedata=TRUE, al
 * **GBpopdat$unitarea**    - Data frame with area by estimation unit.
 * **GBpopdat$areavar**     - Name of area variable in unitarea.
 * **GBpopdat$unitvar**     - Name of estimation unit variable in unitarea and condx.
-* **GBpopdat$strlut**      - Data frame of stratification information by estimation unit. See below for variable descriptions.
-* **GBpopdat$strvar**      - Name of strata variable in strlut and condx 
+* **GBpopdat$stratalut**      - Data frame of stratification information by estimation unit. See below for variable descriptions.
+* **GBpopdat$strvar**      - Name of strata variable in stratalut and condx 
 * **GBpopdat$expcondtab**  - Data frame of condition-level area expansion factors.
 * **GBpopdat$plotsampcnt** - Number of plots by plot status.
 * **GBpopdat$condsampcnt** - Number of conditions by condition status.
@@ -422,7 +422,7 @@ WYpltassgn  | WY plot-level data with strata and estimation unit assignments
 WYcond      | WY condition-level data
 WYtree      | WY tree-level data
 WYunitarea | WY estimation unit look-up table with total acres by estimation unit (ESTUNIT)
-WYstrlut    | WY strata look-up table with pixel counts (P1POINTCNT) by strata and estimation unit
+WYstratalut    | WY strata look-up table with pixel counts (P1POINTCNT) by strata and estimation unit
 
 External data             | Description
 :-------------------------| :------------------------------------------------------------------------
@@ -497,7 +497,7 @@ help(modGBpop)
 ## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
 ########################################################################################
 GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=WYpltassgn, pltassgnid="CN", 
-    unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut)
+    unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstratalut)
 
 ## Get names of list components
 names(GBpopdat)
@@ -554,7 +554,7 @@ help(modGBarea)
 ## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
 ########################################################################################
 area1 <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", unitarea=WYunitarea, 
-    unitvar="ESTN_UNIT", stratalut=WYstrlut, landarea="FOREST", sumunits=TRUE)
+    unitvar="ESTN_UNIT", stratalut=WYstratalut, landarea="FOREST", sumunits=TRUE)
 
 ## Get names of list components
 names(area1)
@@ -567,7 +567,7 @@ area1$est
 ## Add raw data and return title
 #######################################################################################
 area1 <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", unitarea=WYunitarea, 
-  unitvar="ESTN_UNIT", stratalut=WYstrlut, landarea="FOREST", sumunits=TRUE,
+  unitvar="ESTN_UNIT", stratalut=WYstratalut, landarea="FOREST", sumunits=TRUE,
   rawdata=TRUE, returntitle=TRUE)
 
 ## Get names of list components
@@ -587,7 +587,7 @@ GBpopdat <- area1$GBpopdat
 names(GBpopdat)
 GBpopdat$plotsampcnt	# Number of plots after plot filter
 GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
-GBpopdat$strlut    # Strata information and adjustment factors
+GBpopdat$stratalut    # Strata information and adjustment factors
 
 ## Look at titles
 area1$titlelst
@@ -598,14 +598,14 @@ area1$titlelst
 ####################################################################################
 ## Rows only; combine estimation units (sumunits=TRUE)
 area2a <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   rowvar="FORTYPCD", row.FIAname=TRUE, sumunits=TRUE, savedata=TRUE, 
   returntitle=TRUE, outfolder="outfolder")
 area2a$est
 
 ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
 area2b <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   rowvar="FORTYPCD", row.FIAname=TRUE, sumunits=TRUE, allin1=TRUE)
 area2b$est
 
@@ -617,7 +617,7 @@ area2b$est
  
 ## Rows and columns; combine estimation units (sumunits=TRUE)
 area3a <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN",   
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, strata=TRUE, stratalut=WYstrlut,   
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, strata=TRUE, stratalut=WYstratalut,   
   landarea="FOREST", rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE,
   col.FIAname=TRUE, sumunits=TRUE)
 area3a$est
@@ -635,7 +635,7 @@ area3aa$pse
 
 ## Rows and columns; combine estimation units (sumunits=TRUE; allin1=TRUE)
 area3b <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   rowvar="FORTYPCD", colvar="OWNGRPCD", row.FIAname=TRUE, col.FIAname=TRUE, 
   allin1=TRUE, sumunits=TRUE)
 area3b$est
@@ -643,7 +643,7 @@ area3b$est
 
 ## Rows and columns; combine estimation units (sumunits=TRUE; rawdata=TRUE; returntitle=TRUE)
 area3c <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN",
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE, 
   sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
 names(area3c)
@@ -690,7 +690,7 @@ area5a$pse
 
 ## Rows and columns; 1 estimation unit; get raw data and savedata and title info
 area5b <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", unitvar=NULL, 
-  unitarea=sum(WYunitarea$ACRES), stratalut=WYstrlut, landarea="FOREST", 
+  unitarea=sum(WYunitarea$ACRES), stratalut=WYstratalut, landarea="FOREST", 
   rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE, 
   rawdata=TRUE, savedata=TRUE, returntitle=TRUE, outfolder=outfolder)
 names(area5b)
@@ -748,7 +748,7 @@ ref_estvar
 ## Total net volume of live trees (at least 5 inches), Wyoming, 2011-2013
 ######################################################################################
 tree1 <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD == 1", sumunits=TRUE, rawdata=TRUE, 
   returntitle=TRUE)
 
@@ -769,7 +769,7 @@ GBpopdat <- tree1$GBpopdat
 names(GBpopdat)
 GBpopdat$plotsampcnt	# Number of plots after plot filter
 GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
-GBpopdat$strlut    # Strata information and adjustment factors
+GBpopdat$stratalut    # Strata information and adjustment factors
 
 ## Look at titles
 tree1$titlelst
@@ -781,14 +781,14 @@ tree1$titlelst
 
 ## Rows only; combine estimation units (sumunits=TRUE)
 tree2a <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD", row.FIAname=TRUE, 
   sumunits=TRUE, savedata=TRUE, returntitle=TRUE, outfolder="outfolder")
 tree2a$est
 
 ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
 tree2b <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD", row.FIAname=TRUE, 
   sumunits=TRUE, allin1=TRUE)
 tree2b$est
@@ -801,7 +801,7 @@ tree2b$est
 
 ## Rows and columns; combine estimation units (sumunits=TRUE)
 tree3a <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  strata=TRUE, unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST",
+  strata=TRUE, unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST",
   estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD", colvar="STDSZCD",  
   row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE)
 tree3a$est
@@ -817,14 +817,14 @@ tree3aa$pse
 
 ## Rows and columns; combine estimation units (sumunits=TRUE; allin1=TRUE)
 tree3b <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD", colvar="OWNGRPCD",
   row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE, allin1=TRUE)
 tree3b$est
 
 ## Rows and columns; combine estimation units (sumunits=TRUE; rawdata=TRUE; returntitle=TRUE)
 tree3c <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD",colvar="STDSZCD", 
   row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
 names(tree3c)
@@ -870,7 +870,7 @@ tree5a$pse
 
 ## Rows and columns; 1 estimation unit; get raw data and savedata and title info
 tree5b <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN",  
-  unitvar=NULL, unitarea=sum(WYunitarea$ACRES), stratalut=WYstrlut, landarea="FOREST", 
+  unitvar=NULL, unitarea=sum(WYunitarea$ACRES), stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD", colvar="STDSZCD", 	
   row.FIAname=TRUE, col.FIAname=TRUE, rawdata=TRUE, savedata=TRUE, returntitle=TRUE, 
   outfolder=outfolder)
@@ -884,7 +884,7 @@ names(tree5b.raw)
 ## Add species for rows
 ## Net volume of live trees (at least 5 inches) by species; by estimation units (allin1=TRUE)
 tree6 <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="TPA_UNADJ", estvar.filter="STATUSCD==1", sumunits=TRUE, rowvar="SPCD", row.FIAname=TRUE)
 tree6
 
@@ -894,7 +894,7 @@ tree6
 ## Including stratification for by estimation unit (strata=TRUE)
 ## Get raw data and title info and save data to outfolder
 tree7 <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD==1", rowvar="FORTYPCD", colvar="SPCD", 
   row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
 names(tree7)
@@ -908,7 +908,7 @@ WYtree <- dat$xLUT
 LUT <- dat$LUT
 
 tree8 <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="TPA_UNADJ", estvar.filter="STATUSCD==1", rowvar="SPCD", colvar="DIACL2IN", 
   row.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE)
 names(tree8)
@@ -925,7 +925,7 @@ head(raw8$grpest)
 WYtree$DIA2 <- cut(WYtree$DIA, c(5, 20, 100))
 
 tree9 <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="TPA_UNADJ", estvar.filter="STATUSCD==1", rowvar="DIA2", sumunits=TRUE, 
   rawdata=TRUE)
 names(tree9)
@@ -943,7 +943,7 @@ head(raw9$rowest)
 
 ## Rows and columns; combine estimation units (sumunits=TRUE)
 tree10 <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD==2", rowvar="SPCD", row.FIAname=TRUE, 
   colvar="AGENTCD", col.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE)
 names(tree10)
@@ -994,7 +994,7 @@ help(modGBratio)
 ## Total net volume per acre of live trees (at least 5 inches), Wyoming, 2011-2013
 ####################################################################################
 rat1 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", sumunits=TRUE, rawdata=TRUE, 
   returntitle=TRUE)
 
@@ -1015,7 +1015,7 @@ GBpopdat <- rat1$GBpopdat
 names(GBpopdat)
 GBpopdat$plotsampcnt	# Number of plots after plot filter
 GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
-GBpopdat$strlut    # Strata information and adjustment factors
+GBpopdat$stratalut    # Strata information and adjustment factors
 
 ## Look at titles
 rat1$titlelst
@@ -1028,7 +1028,7 @@ rat1$titlelst
 
 ## Rows only; combine estimation units (sumunits=TRUE)
 rat2a <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", rowvar="FORTYPCD", row.FIAname=TRUE, 
   sumunits=TRUE, savedata=TRUE, returntitle=TRUE, outfolder="outfolder")
 rat2a$est
@@ -1036,7 +1036,7 @@ rat2a$est
 
 ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
 rat2b <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", rowvar="FORTYPCD", row.FIAname=TRUE, 
   sumunits=TRUE, allin1=TRUE)
 rat2b$est
@@ -1046,7 +1046,7 @@ rat2b$est
 ## Net volume per acre of live trees (at least 5 inches) by forest type and stand size class, 
 ##    Wyoming, 2011-2013
 rat3 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", colvar="STDSZCD", 
   row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
 rat3$est
@@ -1070,14 +1070,14 @@ rat3aa$pse
 
 ## Rows only - Species per acre; combine estimation units (sumunits=TRUE)
 rat4 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", row.FIAname=TRUE, 
   sumunits=TRUE)
 rat4$est
 
 ## Rows only - Species per acre; by estimation units (allin1=TRUE)
 rat5 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", colvar="SPCD", 
   row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE)
 rat5$est
@@ -1090,7 +1090,7 @@ WYtree <- dat$xLUT
 LUT <- dat$LUT
 
 rat6 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea,stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea,stratalut=WYstratalut, landarea="FOREST", 
   estvarn="TPA_UNADJ", estvarn.filter="STATUSCD==1", rowvar="SPCD", colvar="DIACL2IN", 
   row.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE)
 rat6$est
@@ -1106,14 +1106,14 @@ raw6$grpest
 ## Tree ratio
 ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
 rat7 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, landarea="FOREST", 
+  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", estvard="VOLCFNET", rowvar="FORTYPCD", 
   row.FIAname=TRUE, sumunits=TRUE, allin1=TRUE)
 rat7$est
 
 
 rat7b <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  ratiotype="PERTREE", unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstrlut, 
+  ratiotype="PERTREE", unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, 
   landarea="FOREST", estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", estvard="VOLCFNET", 
  rowvar="FORTYPCD", row.FIAname=TRUE,  sumunits=TRUE, allin1=TRUE)
 rat7b$est

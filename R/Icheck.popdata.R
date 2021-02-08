@@ -574,7 +574,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     if (any(c("NF_PLOT_STATUS_CD", "PSTATUSNF") %in% pltcondnmlst)) {
       if ("PSTATUSNF" %in% names(pltcondx)) 
         names(pltcondx)[names(pltcondx) == "PSTATUSNF"] <- "NF_PLOT_STATUS_CD"
-      ref_nf_plot_status_cd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "NF_PLOT_STATUS_CD", ]
+      ref_nf_plot_status_cd <- 
+		FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "NF_PLOT_STATUS_CD", ]
       nfplotsampcnt <- pltcondx[, list(NBRPLOT=uniqueN(get(cuniqueid))), by=NF_PLOT_STATUS_CD]
       nfplotsampcnt <- 
 	 	cbind(NF_PLOT_STATUS_NM=ref_nf_plot_status_cd[match(nfplotsampcnt$NF_PLOT_STATUS_CD, 
@@ -712,7 +713,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     if (length(unique(pltcondx[[cuniqueid]])) == nrow(pltcondx) && 
 		"PLOT_STATUS_CD" %in% pltcondnmlst) {
       message("COND_STATUS_CD not in dataset.. using PLOT_STATUS_CD for COND_STATUS_CD")
-      pltcondx[, COND_STATUS_CD := PLOT_STATUS_CD]
+      pltcondx[["COND_STATUS_CD"]] <- "PLOT_STATUS_CD"
       pltcondx[COND_STATUS_CD == 3, COND_STATUS_CD := 5]
     } else {
       message("COND_STATUS_CD not in dataset.. assuming all sampled conditions")
@@ -739,7 +740,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 
   if (ACI) {
     if ("NF_COND_STATUS_CD" %in% pltcondnmlst) {
-      ref_nf_cond_status_cd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "NF_COND_STATUS_CD", ]
+      ref_nf_cond_status_cd <- 
+		FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "NF_COND_STATUS_CD", ]
       nfcondsampcnt <- pltcondx[, list(NBRCOND=.N), by=NF_COND_STATUS_CD]
       nfcondsampcnt <- 
 	 	cbind(NF_COND_STATUS_NM=ref_nf_cond_status_cd[match(nfcondsampcnt$NF_COND_STATUS_CD, 
@@ -852,7 +854,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     ###################################################################
     if (adj != "none") {
       ## Check for condition proportion variables
-      propchk <- check.PROP(treex, pltcondx, checkNA=FALSE)
+      propchk <- check.PROP(treex, pltcondx, cuniqueid=cuniqueid, checkNA=FALSE)
       propvars <- propchk$propvars
       treex <- propchk$treex
       pltcondx <- propchk$condx

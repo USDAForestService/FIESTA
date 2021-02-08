@@ -134,7 +134,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     getwt <- GBstratdat$getwt
     getwtvar <- GBstratdat$getwtvar
   } 
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -148,8 +148,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
  	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs,
  	intensity=intensity, adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
 	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
- 	unitcombine=unitcombine, stratcombine=stratcombine, strata=strata, strvar=strvar,
-	nonresp=nonresp, substrvar=substrvar)
+ 	unitcombine=unitcombine, stratcombine=stratcombine, strata=strata, strvar=strvar)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx

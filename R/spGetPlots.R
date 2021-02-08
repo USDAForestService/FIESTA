@@ -4,7 +4,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
 	data_dsn=NULL, istree=FALSE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
 	tree_layer="tree", seed_layer="seed", other_layers=NULL, puniqueid="CN", 
-	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="AREAVOL", 
+	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
 	measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, 
 	intensity1=FALSE, showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
 	outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
@@ -171,9 +171,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   xyinfo <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
 
   if (!is.null(xyinfo)) {
-    if (!is.null(xyinfo) && getext(xy_dsn) %in% c("csv", "shp")) {
-      xydat <- pcheck.spatial(xyinfo$xy, xyinfo$xy_dsn)
-      xyfields <- names(xydat)
+    if (!is.null(xyinfo)) {
+      #xydat <- pcheck.spatial(xyinfo$xy, xyinfo$xy_dsn)
+      xyfields <- names(xyinfo)
       xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 		gui=gui, checklst=xyfields, caption="xy uniqueid", stopifnull=TRUE)
       xy.joinid <- pcheck.varchar(var2check=xy.joinid, varnm="xy.joinid", 

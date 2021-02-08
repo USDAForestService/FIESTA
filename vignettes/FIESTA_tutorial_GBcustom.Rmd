@@ -306,7 +306,7 @@ area.bh$titlelst
 area.bh.GBpopdat <- area.bh$GBpopdat
 names(area.bh.GBpopdat)
 
-area.bh.GBpopdat$strlut
+area.bh.GBpopdat$stratalut
 
 ## raw data tables
 area.bh.raw <- area.bh$raw
@@ -331,7 +331,7 @@ area.bhdist$titlelst
 area.bh.GBpopdat <- area.bh$GBpopdat
 names(area.bh.GBpopdat)
 
-area.bh.GBpopdat$strlut
+area.bh.GBpopdat$stratalut
 
 
 ## raw data tables
@@ -441,7 +441,7 @@ tree.bh$titlelst
 tree.bh.GBpopdat <- tree.bh$GBpopdat
 names(tree.bh.GBpopdat)
 
-tree.bh.GBpopdat$strlut
+tree.bh.GBpopdat$stratalut
 
 
 ## Look at raw data
@@ -506,7 +506,7 @@ rat.bh$titlelst
 rat.bh.GBpopdat <- rat.bh$GBpopdat
 names(rat.bh.GBpopdat)
 
-rat.bh.GBpopdat$strlut
+rat.bh.GBpopdat$stratalut
 
 
 ## Look at raw data table
@@ -532,7 +532,7 @@ rat.bhdist$titlelst
 rat.bh.GBpopdat <- rat.bh$GBpopdat
 names(rat.bh.GBpopdat)
 
-rat.bh.GBpopdat$strlut
+rat.bh.GBpopdat$stratalut
 
 
 ## Look at raw data table
