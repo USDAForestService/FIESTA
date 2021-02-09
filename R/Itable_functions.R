@@ -392,7 +392,7 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
     estpse.col <- crosstabx(colvar.est, colvar, estnm, psenm, allin1=allin1,
 		char.width=char.width, estnull=estnull, psenull=psenull,
 		estround=estround, pseround=pseround)
- 
+
     if (allin1) {
       estpse <- rbind(setDF(estpse), c(totals, estpse.col))
     } else {
@@ -452,7 +452,8 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
       est$Total <- est.row
       pse$Total <- pse.row
     }
-  }       
+  } 
+      
   if (allin1) {
     return(estpse)
   } else {

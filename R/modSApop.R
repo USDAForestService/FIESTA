@@ -44,6 +44,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
   on.exit(options(options.old), add=TRUE)
   adjtree <- FALSE
   returnSApopdat <- FALSE
+  returnlst <- list()
 
 # dunitvar2=NULL
 # pvars2keep=NULL
@@ -110,7 +111,9 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
   }
 
   ## Check SAdoms
-  if (!"sf" %in% class(SAdoms)) stop("invalid SAdoms")
+  if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {
+    stop("invalid SAdoms")
+  }
 
   ###################################################################################
   ## Check population parameters 
@@ -204,12 +207,15 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
     treef <- adjfacdata$treeadj
   }
  
-  returnlst <- list(SAdomsdf=sf::st_drop_geometry(SAdoms),
-		condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
-		condid=condid, tuniqueid=tuniqueid, ACI.filter=ACI.filter, 
-		dunitarea=dunitarea, areavar=areavar, dunitvar=dunitvar, 
-		dunitlut=dunitlut, prednames=prednames, plotsampcnt=plotsampcnt,
- 		condsampcnt=condsampcnt, states=states, invyrs=invyrs)
+  if (!is.null(SAdoms)) {
+    returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)
+  }
+  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx,
+		cuniqueid=cuniqueid, condid=condid, tuniqueid=tuniqueid, 
+		ACI.filter=ACI.filter, dunitarea=dunitarea, areavar=areavar, 
+		dunitvar=dunitvar, dunitlut=dunitlut, prednames=prednames, 
+		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
+ 		invyrs=invyrs))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

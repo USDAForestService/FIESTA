@@ -15,35 +15,25 @@
 	area in the population.   
 }
 \usage{
-modGBarea(cond = NULL, plt = NULL, landarea = "FOREST", 
-	plt.filter = NULL, cond.filter = NULL, rowvar = NULL, colvar = NULL, 
+modGBarea(landarea = "FOREST", 
+	pfilter = NULL, cfilter = NULL, rowvar = NULL, colvar = NULL, 
 	row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
 	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, 
 	rowgrp = FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits = TRUE, allin1 = FALSE, 
 	estround = 1, pseround = 2, estnull = "--", psenull = "--", divideby = NULL, 
 	savedata = FALSE, rawdata = FALSE, rawonly = FALSE, outfolder = NULL, 
-	outfn = NULL, outfn.pre=NULL, outfn.date = TRUE, overwrite = TRUE, 
+	outfn.pre=NULL, outfn.date = TRUE, overwrite = TRUE, 
 	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
 	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
 	title.filter = NULL, GBpopdat = NULL, gui = FALSE, ...)
 }
  
 \arguments{
-  \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
-	Condition-level data with one record for each condition, including or 
-	excluding nonsampled conditions. Plot variables and strata/estimation unit 
-	variable(s) may be included if plt and pltassgn=NULL. See details for necessary 
-	variables to include. }
-  \item{plt}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
-	layer or spatial layer in dsn, or shapefile(*.shp).
-	Plot-level data with one record for each plot, including or excluding 
-	nonsampled conditions. If nonsampled plots are included, PLOT_STATUS_CD 
-	variable must be in table or a filter defined in plt.nonsamp.filter. }
   \item{landarea}{ String. The sample area filter for estimates ("ALL", "FOREST", "TIMBERLAND"). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, 
 	filtered to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{plt.filter}{ String. A filter for the pltassgn. Must be R logical syntax. }
-  \item{cond.filter}{ String. A filter for the cond. Must be R logical syntax. }
+  \item{pfilter}{ String. A filter for the pltassgn. Must be R logical syntax. }
+  \item{cfilter}{ String. A filter for the cond. Must be R logical syntax. }
   \item{rowvar}{ String. Name of row domain variable in cond. If only one domain, 
 	rowvar = domain variable. If more than one domain, include colvar. If no domain,
 	rowvar = NULL. }
@@ -87,8 +77,6 @@ modGBarea(cond = NULL, plt = NULL, landarea = "FOREST",
 	efficient to output raw data only. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs (e.g., area_'rowvar'_'date'). }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
@@ -106,11 +94,11 @@ modGBarea(cond = NULL, plt = NULL, landarea = "FOREST",
   \item{title.unitvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty  
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
   \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
-  \item{...}{ List. Data objects returned from FIESTA::modGBpop(). }
+  \item{...}{ Parameters for modGBpop() if GBpopdat is NULL. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

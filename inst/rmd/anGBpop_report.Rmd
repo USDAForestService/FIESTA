@@ -59,16 +59,15 @@ figCap = paste0("Figure ",figNum,": Photo from ", title.ref)
 &nbsp;
 
 
-
 ```{r tab1data, echo=FALSE, warning=FALSE, message=FALSE}
 
 rowestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.rowest*csv"))
 grpestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.grpest*csv"))
 xtabfn <- list.files(dirname(rawfolder), glob2rx("01*csv"))
 
-rowest <- fread(file.path(rawfolder, rowestfn))
-grpest <- fread(file.path(rawfolder, grpestfn))
-xtab <- fread(file.path(dirname(rawfolder), xtabfn))
+rowest <- fread(file.path(rawfolder, rowestfn[length(rowestfn)]))
+grpest <- fread(file.path(rawfolder, grpestfn[length(grpestfn)]))
+xtab <- fread(file.path(dirname(rawfolder), xtabfn[length(xtabfn)]))
 
 title.rowvar <- "Land class"
 title.colvar <- "Reserved status"
@@ -130,9 +129,9 @@ rowestfn <- list.files(rawfolder, pattern=glob2rx("02*unit.rowest*csv"))
 grpestfn <- list.files(rawfolder, pattern=glob2rx("02*unit.grpest*csv"))
 xtabfn <- list.files(dirname(rawfolder), glob2rx("02*csv"))
 
-rowest <- fread(file.path(rawfolder, rowestfn))
-grpest <- fread(file.path(rawfolder, grpestfn))
-xtab <- fread(file.path(dirname(rawfolder), xtabfn))
+rowest <- fread(file.path(rawfolder, rowestfn[length(rowestfn)]))
+grpest <- fread(file.path(rawfolder, grpestfn[length(grpestfn)]))
+xtab <- fread(file.path(dirname(rawfolder), xtabfn[length(xtabfn)]))
 
 title.rowvar <- "Forest type"
 title.colvar <- "Stand-size class"

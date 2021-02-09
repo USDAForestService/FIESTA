@@ -1,7 +1,7 @@
 check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL, 
 	plt=NULL, pltassgn=NULL, plotid="plot_id", pntid="dot_cnt",
  	puniqueid="CN", pltassgnid="CN", plt.nonsamp.filter=NULL, 
-	plt.filter=NULL, pnt.nonsamp.filter=NULL, tabtype="PCT",
+	pfilter=NULL, pnt.nonsamp.filter=NULL, tabtype="PCT",
 	unitvar=NULL, unitvar2=NULL, auxvars=NULL, unitcombine=FALSE, 
 	strata=FALSE, strvar=NULL, stratcombine=TRUE, pvars2keep=NULL){
 
@@ -31,7 +31,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ## - Check unique identifier of plot
   ## - Check class of unique identifier of plot and pnt tables
   ## - If no plot table, create one from pnt table's unique identifier 
-  ## - Apply plot filters (plt.filter)
+  ## - Apply plot filters (pfilter)
   ## Apply point nonsample filter (pnt.nonsample.filter)
   ###################################################################################
 
@@ -333,11 +333,11 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ## Apply filters
   ##############################################################################
 
-  ## plt.filter to plt table
-  PBf <- datFilter(x=PBx, xfilter=plt.filter, title.filter="plt filter?",
-		gui=gui, filternm="plt.filter", stopifnull=TRUE)$xf
+  ## pfilter to plt table
+  PBf <- datFilter(x=PBx, xfilter=pfilter, title.filter="plt filter?",
+		gui=gui, filternm="pfilter", stopifnull=TRUE)$xf
   if (is.null(PBf)) {
-    message(paste(plt.filter, "removed all records"))
+    message(paste(pfilter, "removed all records"))
     return(NULL)
   }
 

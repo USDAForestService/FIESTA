@@ -145,11 +145,11 @@ A minimum of 2 plots per strata is necessary for stratification. If there are le
 <a name="filt"></a>
 **Estimation Filters**
 
-Filters subset the area of the sample population for the desired output. Filters do no change the population data used for estimate (e.g., number of plots, strata weights). Some filters are defined internally, depending on the dataset, such as land area of interest (landarea) or inclusion of ACI (All Condition Inventory) data. Others are specified according to the input table, such as plt.filter or cond.filter. The nonsamp.filter is for removing nonsampled conditions and is applied, internally, unless otherwise stated. *All filter expressions must be in R syntax*.
+Filters subset the area of the sample population for the desired output. Filters do no change the population data used for estimate (e.g., number of plots, strata weights). Some filters are defined internally, depending on the dataset, such as land area of interest (landarea) or inclusion of ACI (All Condition Inventory) data. Others are specified according to the input table, such as pfilter or cfilter. The nonsamp.filter is for removing nonsampled conditions and is applied, internally, unless otherwise stated. *All filter expressions must be in R syntax*.
 
 * **landarea**       - A predefined cond filter depending on desired sample land area {ALL, FOREST (COND_STATUS_CD=1), TIMBERLAND (SITECLCD in(1:6) & RESERVCD=0)}.
-* **plt.filter**     - Plot-level filter.
-* **cond.filter**    - Condition-level filter.
+* **pfilter**    - Plot-level filter.
+* **cfilter**    - Condition-level filter.
 
 
 <a name="tree"></a>
@@ -437,22 +437,24 @@ WYbighorn_districtbnd.shp | Polygon shapefile of WY Bighorn National Forest Dist
 
 #### Set up for examples
 
-```
 
 ```
 # Load library
 library(FIESTA)
 
-# Set workspace to FIESTA folder (create if doesn't exist)
-if (!file.exists("C:/FIESTA"))  dir.create("C:/FIESTA")
-setwd("C:/FIESTA")
+## If not on windows platform, set up an outfolder to output from examples
+if (.Platform$OS.type == "windows") {
+  # Set workspace to FIESTA folder (create if doesn't exist)
+  if (!file.exists("C:/FIESTA"))  {
+    dir.create("C:/FIESTA")
+  }
+  setwd("C:/FIESTA")
 
-# Create 2 subfolders under the FIESTA folder, 'data' and 'outfolder' and set path to objects 
-if (!file.exists("data"))  dir.create("data")
-datfolder <- "data" 
-
-if (!file.exists("outfolder")) dir.create("outfolder")
-outfolder <- "outfolder"
+  if (!file.exists("outfolder")) {
+    dir.create("outfolder")
+  }
+  outfolder <- "outfolder"
+}
 
 
 ```
@@ -471,15 +473,18 @@ outfolder <- "outfolder"
 ```
 ######################################################################################
 # Usage:
-# modGBpop(cond, plt = NULL, tree = NULL, pltassgn = NULL, dsn = NULL,  
-#   cuniqueid = "PLT_CN", condid = "CONDID", puniqueid = "CN", tuniqueid = "PLT_CN",   
-#   pltassgnid = "CN", pjoinid = "CN", evalid = NULL, invyrs = NULL, 
-#   ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,     
-#   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,   
-#   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD",    
-#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, savedata = FALSE,  
-#   outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, 
-#   overwrite = TRUE, gui = FALSE)
+# modGBpop(popType="VOL", cond, plt = NULL, tree = NULL, seed = NULL, 
+#   vspspp = NULL, subplot = NULL, subp_cond = NULL, pltassgn = NULL, dsn = NULL,  
+#   puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", tuniqueid = "PLT_CN",     
+#   cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", adj = "samp",  
+#   evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE,      
+#   plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL,    
+#   unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
+#   minplotnum.unit = 10, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD",    
+#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE,  
+#   savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL,  
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, GBdata = NULL, 
+#   GBstratdat = NULL, gui = FALSE)
 # 
 # Description:
 # Generates population data for input to modGB* estimation modules. Data includes
@@ -494,7 +499,7 @@ outfolder <- "outfolder"
 help(modGBpop)
 
 
-## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
+## Get population data for 
 ########################################################################################
 GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=WYpltassgn, pltassgnid="CN", 
     unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstratalut)
@@ -513,7 +518,6 @@ GBpopdat$stratalut       # Strata information and adjustment factors
 
 
 
-
 <a name="modGBarea"></a>
 
 #### modGBarea
@@ -521,21 +525,16 @@ GBpopdat$stratalut       # Strata information and adjustment factors
 ```
 ######################################################################################
 # Usage:
-# modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
-#   condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL,   
-#   invyrs=NULL, ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,    
-#   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
-#   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD",   
-#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
-#   plt.filter = NULL, cond.filter = NULL, rowvar = NULL, colvar = NULL,   
-#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,   
-#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = NULL,  
-#   rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE,  
-#   estround = 0, pseround = 2, estnull = 0, psenull = "--", divideby = NULL,  
-#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,  
-#   outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE,  
-#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
-#   title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, GBpopdat=NULL)
+# modGBarea(landarea = "FOREST", pfilter = NULL, cfilter = NULL,    
+#   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,    
+#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,   
+#   rowlut = NULL, collut = NULL, rowgrp = NULL, rowgrpnm = NULL, rowgrpord = NULL, 
+#   sumunits = FALSE, allin1 = FALSE, estround = 0, pseround = 2, 
+#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,  
+#   rawonly = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE,  
+#   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
+#   title.unitvar = NULL, title.filter = NULL, GBpopdat=NULL, gui = FALSE, ...)
 # 
 # Description:
 # Generates acre estimates by domain (and estimation unit). Calculations are based on 
@@ -548,7 +547,7 @@ GBpopdat$stratalut       # Strata information and adjustment factors
 # strata weights and then expanded to acres using the total land area in the population.  
 ########################################################################################
 
-help(modGBarea)
+#help(modGBarea)
 
 
 ## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
@@ -709,23 +708,17 @@ names(area5b.raw)
 ```
 ######################################################################################
 # Usage:
-# modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
-#   dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-#   puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL,   
-#   ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,  
-#   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
-#   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", 
-#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", 
-#   plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL,  
-#   estvar.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE,    
-#   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE,   
-#   col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL,   
-#   rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE, estround = 0, pseround = 2,     
-#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,    
-#   outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE,  
-#   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL,   
-#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.ref = NULL, title.unitvar = NULL, title.estvar = NULL, title.filter = NULL)
+# modGBtree(estseed = "none", landarea="FOREST", pfilter = NULL, cfilter = NULL, 
+#   estvar = NULL, estvar.filter = NULL, rowvar = NULL, colvar = NULL,  
+#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,     
+#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL,   
+#   rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE,    
+#   allin1 = FALSE, estround = 0, pseround = 2, estnull = 0, psenull = "--",     
+#   divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE, 
+#   outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
+#   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL,  
+#   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
+#   title.estvar = NULL, title.filter = NULL, GBpopdat = NULL, gui = FALSE, ...)
 # 
 # Description:
 #	Generates tree estimates by domain and/or tree domain (and estimation unit). 
@@ -744,6 +737,7 @@ help(modGBtree)
 
 ## Reference table for tree estimates
 ref_estvar
+
 
 ## Total net volume of live trees (at least 5 inches), Wyoming, 2011-2013
 ######################################################################################
@@ -961,24 +955,19 @@ head(raw10$rowest)
 ```
 ####################################################################################
 # Usage:
-# modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
-#   dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-#   puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL, ACI = FALSE, 
-#   adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-#   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",   
-#   unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-#   strwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", plt.filter = NULL,  
-#   cond.filter = NULL, ratiotype = "PERACRE", estvarn = NULL, estvarn.filter = NULL, 
-#   estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, estvard.name = NULL, 
-#   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,   
-#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,  
-#   rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL,  
-#   sumunits = FALSE, allin1 = FALSE, estround = 3, pseround = 2, estnull = 0,   
-#   psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,   
-#   outfolder = NULL, outfn = NULL,  outfn.pre = NULL, outfn.date = TRUE, 
-#   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE)
+# modGBratio(estseed = "none", ratiotype = "PERACRE", landarea="FOREST",  
+#   pfilter = NULL, cfilter = NULL, estvarn = NULL, estvarn.filter = NULL, 
+#   estvard = NULL, estvard.filter = NULL, rowvar = NULL, colvar = NULL,  
+#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,   
+#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, 
+#   rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE,  
+#   allin1 = FALSE, estround = 3, pseround = 2, estnull = 0, psenull = "--",   
+#   divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE,  
+#   outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
+#   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
+#   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
+#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, 
+#   GBpopdat = NULL, gui = FALSE, ...)
 # 
 # Description:
 #	Generates per-acre and per-tree estimates by domain and/or tree domain (and 

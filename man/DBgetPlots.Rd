@@ -102,8 +102,8 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	No objects are returned. If FALSE, the data are saved as R objects and returned to user. 
 	See details for caveats. }
   \item{saveqry}{ Logical. If TRUE, saves queries to outfolder (by state). }
-  \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE or parameters=TRUE 
-	or isshp=TRUE, outfolder is the working directory. }
+  \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE 
+	or saveqry=TRUE, outfolder is the working directory. }
   \item{out_fmt}{ String. File format for output ('csv', 'sqlite','gpkg', 'gdb').
 	If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed. If
 	out_fmt='gdb', arcgisbinding package and R-Bridge must be installed. }

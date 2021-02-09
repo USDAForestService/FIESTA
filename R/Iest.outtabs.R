@@ -151,6 +151,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     } 
 
   } else {   ## sumunits = FALSE
+
     if (!is.null(unit.totest)) {
       if (esttype == "RATIO") {
         unit.totest <- suppressWarnings(FIESTA::getrhat(unit.totest))
@@ -168,6 +169,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         if (!is.null(char.width) && char.width == -Inf) char.width <- 0
       }
     }
+
     if (!is.null(unit.rowest)) {
       if (esttype == "RATIO") {
         unit.rowest <- suppressWarnings(FIESTA::getrhat(unit.rowest))
@@ -185,6 +187,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(unit.rowest[[psenm]], pseround)))))
       }
     }
+
     if (!is.null(unit.colest)) {
       if (esttype == "RATIO") {
         unit.colest <- suppressWarnings(FIESTA::getrhat(unit.colest))
@@ -202,6 +205,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(unit.colest[[psenm]], pseround)))))
       }
     }
+
     if (!is.null(unit.grpest)) {
       if (esttype == "RATIO") {
         unit.grpest <- suppressWarnings(FIESTA::getrhat(unit.grpest))
@@ -220,7 +224,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       }
     }
   }
-
+ 
   if (!rawonly) {
   ###################################################################
   ## GENERATE OUTPUT TABLES
@@ -514,16 +518,21 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		outfn.estpse, title.estpse, title.est, title.pse, title.ref,
 		outfolder, outfn.date, overwrite, esttype, phototype,
 		rnames, title.colvar, title.unitvar)
+
       names(tabs) <- units
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
-      est2return[is.na(est2return)] <- estnull
-
+      if (!allin1) {
+        est2return[is.na(est2return)] <- estnull
+      }
       if (unique(lapply(tabs, length)) == 2) {
         pse2return <- rbindlist(lapply(tabs, `[[`, 2), use.names=TRUE, fill=TRUE)
-        pse2return[is.na(est2return)] <- psenull
+        if (!allin1) {
+          pse2return[is.na(est2return)] <- psenull
+        }
       }
     }
   }
+
   returnlst$tabest <- est2return
   titlelst$title.estpse <- title.estpse
   if (!is.null(pse2return)) {

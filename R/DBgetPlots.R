@@ -394,7 +394,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## Check outfolder, outfn.date, overwrite
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
-
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite=overwrite, append_layer=append_layer, gui=gui)

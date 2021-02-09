@@ -107,14 +107,14 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   if (module %in% c("MA", "SA")) {
     if (module == "MA") {
       if (!"mase" %in% rownames(installed.packages()))
-	   stop("MA module requires package mase.")
+	   stop("MA module requires package mase")
       methodlst <- c("HT", "PS", "greg", "gregEN")
       method <- FIESTA::pcheck.varchar(var2check=method, varnm="method", gui=gui, 
 		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
-      if (method == "PS") strata <- TRUE
+      if (any(method == "PS")) strata <- TRUE
     } else if (module == "SA") {
       if (!any(c("JoSAE", "sae") %in% rownames(installed.packages())))
-        stop("SA module requires either package JoSAE or sae.")
+        stop("SA module requires either package JoSAE or sae")
     }
   }
 
@@ -158,6 +158,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   unitcombine <- FIESTA::pcheck.logical(unitcombine, varnm="unitcombine", 
 		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
+ 
   ## Check strata, strvars
   ###################################################################################
   if (module == "GB" || (module == "MA" && method == "PS")) {
@@ -197,14 +198,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     if (!is.null(predfac)) predfac <- NULL
   } else {
     strvar <- NULL
-    if (is.null(prednames)) 
+    if (is.null(prednames)) {
       stop("prednames is null... must include at least one variable name")
-    pvars2keep <- c(pvars2keep, prednames)
+    }
+    pvars2keep <- unique(c(pvars2keep, prednames))
   }
-
+ 
   ## Check predfac
   ###################################################################################
-  if (module == "SA" || (module == "MA" && method == "greg"))  {
+  if (module == "SA" || (module == "MA" && method %in% c("greg", "gregEN")))  {
     if (!is.null(predfac) && !is.character(predfac)) 
       stop("invalid predfac... must be character string")
 
@@ -942,7 +944,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
   pltcondx[, (cvars2keep) := NULL]
 
-
   ###################################################################################
   ###################################################################################
   ## Check subplot and sub_cond data
@@ -1129,9 +1130,16 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       returnlst$vuniqueid <- vuniqueid
     }
   }
-
-  if (module == "MA") returnlst$method <- method
-  if (ACI) returnlst$nfplotsampcnt <- nfplotsampcnt
+  if (module == "MA") {
+    returnlst$method <- method
+    if (method %in% c("greg", "gregEN")) {
+      returnlst$prednames <- prednames
+      returnlst$predfac <- predfac
+    }
+  }
+  if (ACI) {
+    returnlst$nfplotsampcnt <- nfplotsampcnt
+  }
   if (nonresp) {
     returnlst$substrvar <- substrvar 
     returnlst$nonresplut <- nonresplut

@@ -42,12 +42,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   unitvars <- c(unitvar, unitvar2)
 
   ## Check auxlut
-  stopifnull <- ifelse((module == "SA" || (module == "MA" && MAmethod != "HT")),
+  stopifnull <- ifelse((module == "SA" || (module == "MA" && any(MAmethod != "HT"))),
 				TRUE, FALSE)
   auxlut <- FIESTA::pcheck.table(auxlut, gui=gui, tabnm="auxlut",
  		caption="Strata table?", nullcheck=TRUE, stopifnull=stopifnull)
 
- 
+
   if (module %in% c("GB", "PB")) {
     if (strata) {
       auxnmlst <- names(auxlut)
@@ -162,6 +162,11 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
         auxlut <- na.omit(auxlut, cols=predcon)
     }
 
+    if (strata && module == "MA" && length(MAmethod) > 1) {
+      auxlut2 <- copy(auxlut)
+    }
+
+
     ## Check values of continuous variable in prednames...  make sure in range of pltx
     ## Still workin on
     #pmin <- pltx[, lapply(.SD, min), by=unitvar, .SDcols=predcon]
@@ -200,7 +205,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
       }
     }
   }
- 
+
   if (strata) {
     ## Aggregate variables to unitvar (and strvars)
     ############################
@@ -348,7 +353,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
       getwtvar <- NULL
     } 
   }
-
+ 
   ## Set key to strlut and unitarea
   strunitvars <- c(unitvar, PSstrvar)
   setkeyv(auxlut, strunitvars)
@@ -363,7 +368,11 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 #			prednames=prednames, predfac=predfac)
 
   returnlst <- list(pltx=pltx, auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, 
-			PSstrvar=PSstrvar, prednames=prednames, predfac=predfac)
+			prednames=prednames, predfac=predfac)
+
+  if (strata) {
+    returnlst$PSstrvar <- PSstrvar
+  } 
 
   if (!is.null(npixelvar)) {
     returnlst$npixels <- npixels
@@ -371,6 +380,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   }
   if (nonresp)
     returnlst$nonsampplots <- nonsampplots
+  if (!is.null(getwtvar)) {
+    returnlst$getwtvar <- getwtvar
+  }
 
   if (!is.null(unitstrgrplut)) 
     returnlst$stratcombinelut <- unitstrgrplut

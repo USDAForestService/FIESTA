@@ -88,49 +88,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite_dsn <- FIESTA::pcheck.logical(overwrite_dsn, varnm="overwrite_dsn", 
-		title="Overwrite dsn?", first="NO", gui=gui)  
-    overwrite_layer <- FIESTA::pcheck.logical(overwrite_layer, varnm="overwrite_layer", 
-		title="Overwrite layers?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    ## If outfn.pre is not null, create a folder within the outfolder, named outfn.pre
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
-    }
-
-    out_fmtlst <- c("sqlite", "gpkg", "csv", "gdb")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-
-    out_fmtlst <- c("sqlite", "gpkg", "csv", "gdb")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-    if (out_fmt != "shp" && is.null(out_dsn))
-      out_dsn <- paste0("GBdata.", out_fmt)
-
-    if (out_fmt == "gdb") {
-      gdbfn <- DBtestESRIgdb(gdbfn=out_dsn, outfolder=outfolder, 
-			overwrite=overwrite_dsn, showlist=FALSE, returnpath=FALSE)
-    }	else if (out_fmt %in% c("sqlite", "gpkg")) {
-      gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-
-      SQLitefn <- DBcreateSQLite(SQLitefn=out_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=overwrite_dsn, returnpath=FALSE)
-    }	
-
-#    if (savesteps) {
-#      stepfolder <- file.path(outfolder, "steps")
-#      if (!dir.exists(stepfolder)) dir.create(stepfolder)
-#      if (out_fmt == "shp") {
-#        step_dsn <- NULL
-#      } else {
-#        step_dsn <- paste0("steps.", out_fmt)
-#      }
-#    }
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
   ########################################################################

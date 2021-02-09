@@ -60,8 +60,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   #cond.nonsamp.filter <- base.nonsamp.filter
   #unitvar <- unitlevel1 
   #unitvar2 <- unitlevel2
-  #clust.filter <- plt.filter
-  #cond.filter <- base.filter 
+  #clust.filter <- pfilter
+  #cfilter <- base.filter 
 
 
   ### Check savedata 
@@ -132,7 +132,7 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
  		condid=condid, treex=treex, tuniqueid=tuniqueid, sumunits=sumunits, 
-		landarea=landarea, plt.filter=clust.filter, cond.filter=base.filter, 
+		landarea=landarea, pfilter=clust.filter, cfilter=base.filter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata,
 		savedata=savedata, outfolder=outfolder, gui=gui)
@@ -250,8 +250,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
  	title.units=title.units, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
 	estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
  	estvard.filter=estvard.filter, addtitle=addtitle, rawdata=rawdata,
- 	states=states, invyrs=invyrs, landarea=landarea, plt.filter=clust.filter, 
-	cond.filter=base.filter, allin1=allin1, divideby=divideby, outfn=outfn, 
+ 	states=states, invyrs=invyrs, landarea=landarea, pfilter=clust.filter, 
+	cfilter=base.filter, allin1=allin1, divideby=divideby, outfn=outfn, 
 	outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est

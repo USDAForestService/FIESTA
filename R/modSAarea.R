@@ -4,8 +4,8 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
 	invyrs=NULL, ACI=FALSE, adj="plot", SApackage="JoSAE", SAmethod="unit", 
 	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, dunitvar="DOMAIN", 
 	dunitvar2=NULL, dunitarea=NULL, areavar=NULL, dunitlut=NULL, prednames=NULL, 
-	predfac=NULL, largebnd.att=NULL, landarea="ALL", plt.filter=NULL, 
-	cond.filter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, 
+	predfac=NULL, largebnd.att=NULL, landarea="ALL", pfilter=NULL, 
+	cfilter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, 
 	estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
 	raw_fmt="csv", raw_dsn="rawdata", multest_fmt="csv", multest_outfolder=NULL, 
@@ -231,7 +231,7 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
  		condid=condid, sumunits=sumunits, landarea=landarea,
- 		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
+ 		ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 		savedata=savedata, outfolder=outfolder)
@@ -299,7 +299,7 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
  	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.dunitvar,
 	title.filter=title.filter, unitvar=dunitvar, rowvar=rowvar, colvar=colvar, 
 	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
-	invyrs=invyrs, landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
+	invyrs=invyrs, landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
 	allin1=allin1, parameters=FALSE, divideby=divideby)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est

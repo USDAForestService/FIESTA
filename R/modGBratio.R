@@ -1,12 +1,12 @@
-modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none", 
-	landarea="FOREST", plt.filter=NULL, cond.filter=NULL, ratiotype="PERACRE", 
+modGBratio <- function(estseed="none", ratiotype="PERACRE", 
+	landarea="FOREST", pfilter=NULL, cfilter=NULL, 
 	estvarn=NULL, estvarn.filter=NULL, estvard=NULL, estvard.filter=NULL, 
 	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits=TRUE, allin1=FALSE, estround=3, pseround=2, estnull="--", psenull="--", 
 	divideby=NULL, savedata=FALSE, rawdata=FALSE, rawonly=FALSE, outfolder=NULL, 
-	outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, 
+	outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, 
  	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
 	title.colvar=NULL, title.unitvar=NULL, title.estvarn=NULL, title.estvard=NULL, 
 	title.filter=NULL, GBpopdat=NULL, gui=FALSE, ...){
@@ -26,9 +26,9 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
   }
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(GBpopdat)) {
-    gui <- TRUE 
-  }
+  if (nargs() == 0 && is.null(GBpopdat)) {
+    gui <- TRUE
+  } 
 
   ## If gui.. set variables to NULL
   if (gui) { 
@@ -53,7 +53,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
   parameters <- FALSE
   returnlst <- list()
 
-  ### Check savedata 
+  ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="YES", gui=gui, stopifnull=TRUE)
 
@@ -69,7 +69,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(GBpopdat)) {
-    GBpopdat <- modGBpop(gui=gui, tree=tree, cond=cond, plt=plt, ...)
+    GBpopdat <- modGBpop(gui=gui, ...)
   } else {
     returnGBpopdat <- FALSE
     list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
@@ -98,7 +98,9 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
   condsampcnt <- GBpopdat$condsampcnt
   states <- GBpopdat$states
   invyrs <- GBpopdat$invyrs
+  estvar.area <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
+  getwtvar <- GBpopdat$getwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
 
@@ -122,8 +124,8 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
  		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
-		landarea=landarea, ACI.filter=ACI.filter, plt.filter=plt.filter, 
-		cond.filter=cond.filter, allin1=allin1, estround=estround, 
+		landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter, 
+		cfilter=cfilter, allin1=allin1, estround=estround, 
 		pseround=pseround, divideby=divideby, addtitle=addtitle, 
 		returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
 		savedata=savedata, outfolder=outfolder)
@@ -141,6 +143,7 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
   addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
   rawdata <- estdat$rawdata
+  rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   estround <- estdat$estround
@@ -211,11 +214,11 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
     estvard.name <- treedat$estvard.name
     tdomvarlstd <- treedat$tdomvarlstd
   } else {
-    estvard.name <- "CONDPROP_ADJ"
+    estvard.name <- estvar.area
     tdomvarlstd <- NULL
   }
 
-  ## add or separate concatenated columns
+  ## remove NA values
   if (!is.null(tdomvar) && !is.null(tdomvar2))
     tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
 
@@ -228,9 +231,8 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
  	title.filter=title.filter, title.estvarn=title.estvarn, unitvar=unitvar, 
 	rowvar=rowvar, colvar=colvar, estvarn=estvarn, estvarn.filter=estvarn.filter, 
 	estvard=estvard, estvard.filter=estvard.filter, addtitle=addtitle, rawdata=rawdata,
- 	states=states, invyrs=invyrs, landarea=landarea, plt.filter=plt.filter, 
-	cond.filter=cond.filter, allin1=allin1, divideby=divideby, outfn=outfn, 
-	outfn.pre=outfn.pre)
+ 	states=states, invyrs=invyrs, landarea=landarea, pfilter=pfilter, 
+	cfilter=cfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -251,7 +253,6 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
   ## Note: tdomdat is the summed response by condition (not domain)
   if (addtotal) {
     ## Get estimate for total
-    tdomdat$TOTAL <- 1
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
     unit.totest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdattot, 
@@ -336,7 +337,9 @@ modGBratio <- function(tree=NULL, cond=NULL, plt=NULL, estseed="none",
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
-    if (is.null(getwtvar) || !getwtvar %in% names(stratalut2)) getwtvar <- "strwt"
+    if (is.null(getwtvar) || !getwtvar %in% names(stratalut2)) {
+      getwtvar <- "strwt"
+    }
     stratalut2 <- stratalut2[, lapply(.SD, sum, na.rm=TRUE), 
 		by = strunitvars2, .SDcols=c(getwtvar, "n.strata")]
     stratalut2[, strwt:=prop.table(get(getwtvar)), by="ONEUNIT"]

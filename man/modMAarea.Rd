@@ -8,94 +8,28 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
-	condid="CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL,
- 	invyrs=NULL,ACI = FALSE, adj = "samp", MAmethod = "greg", plt.nonsamp.filter = NULL, 
-	cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, unitlut = NULL, 
-	npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL, 
-	stratcombine = TRUE, landarea = "ALL", plt.filter = NULL, 
-	cond.filter = NULL, sumunits = FALSE, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, 
-	col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, 
-	col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, 
-	rowgrpord=NULL, allin1 = FALSE, estround = 0, pseround = 3, estnull = "--", 
-	psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, 
-	outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, addtitle = TRUE, 
-	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
-	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, 
-	MApopdat = NULL, MAdata = NULL, gui = FALSE)
+modMAarea(MAmethod = "greg", prednames = NULL, 
+	landarea = "ALL", pfilter = NULL, cfilter = NULL, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
+	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
+	sumunits = FALSE, allin1 = FALSE, estround = 1, pseround = 2, estnull = "--", 
+	psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE, 
+	rawonly = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, 
+	overwrite = FALSE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
+	title.unitvar = NULL, title.filter = NULL, MApopdat = NULL, gui = FALSE, ...)
 }
  
 \arguments{
-  \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
-	The condition-level variables with one record per condition, including or 
-	excluding nonsampled conditions. Plot variables and strata variable(s)
-	may be included for post-stratification if plt and pltassgn=NULL. See details 
-	for necessary variables to include. }
-  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
-	or a sf R object. Plot-level variables. If nonsampled plots are included, 
-	PLOT_STATUS_CD variable must be in table. Optional. }
-  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
-	shapefile(*.shp) with one record per plot, estimation unit variable(s) and 
-	mean (continuous rasters) or proportions (categorical rasters) by 
-	estimation unit. Optional. }
-  \item{dsn}{ String. Name of database where cond and pltassgn tables reside. 
-	The dsn varies by driver. See gdal OGR vector formats 	
-	(https://www.gdal.org/ogr_formats.html). }
-  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{condid}{ String. Unique identifier of plot conditions. If no condid in 
-	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
-  \item{puniqueid}{ String. Unique identifier of plot. }
-  \item{pltassgnid}{ String. Unique identifier of plot. }
-  \item{pjoinid}{ String. Name of variable in plot to join to pltassgn. This
-	variable does not need to be unique (e.g., PLOT_ID). If NULL, pjoinid=puniqueid. }
-  \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
-  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
-  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
-	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
-  \item{adj}{ String. How to calculate adjustment factors for nonsampled 
-	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
-	'samp' - adjustments are calculated at strata/estimation unit level; 
-	'plot' - adjustments are calculated at plot-level. Adjustments 
-	are only calculated for annual inventory plots (designcd=1). } 
   \item{MAmethod}{ String. mase (i.e., model-assisted) method to use 
 	('HT', 'PS', 'greg', 'gregEN') }
-  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
-	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
-  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
-  \item{unitvar}{ String. Name of the estimation unit variable in cond or pltstrat 
-	with estimation unit assignment for each plot. If FIA, default="ESTUNIT". }
-  \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
-	pltstrat with assignment for each plot (e.g., 'STATECD'). }
-  \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
-	unit, include number of total acreage for the area of interest or a data frame
-	with areavar. If more than one estimation unit, provide a data frame of total 
-	area by estimation unit, including unitvar and areavar. }
-  \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
-  \item{unitlut}{ DF/DT. Table with ancillary information by estimation 
-	unit. For continuous data, means by estimation unit; for categorical data, 
-	proportion of class by estimation unit. }
-  \item{npixelvar}{ String. Name of variable in unitlut with number of pixels by 
-	estimation unit. }
-  \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
-  \item{predfac}{ String vector. Name(s) of factor predictor variables to use in model. }
-  \item{PSstrvar}{ String. Name of strata variable in stratalut and table with strata
-	assignment for each plot. Default="STRATUMCD". }
-  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{prednames}{ String vector. Name(s) of predictor variables to include in model. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{plt.filter}{ String. A filter for the pltstrat. Must be R syntax. }
-  \item{cond.filter}{ String. A filter for the cond. Must be R syntax. }
-  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
-	one table. }
+  \item{pfilter}{ String. A filter for the pltstrat. Must be R syntax. }
+  \item{cfilter}{ String. A filter for the cond. Must be R syntax. }
   \item{rowvar}{ String. Name of the row domain variable in cond or tree. If only one 
 	domain, rowvar = domain variable. If more than one domain, include colvar. If no 
 	domain, rowvar = NULL. }
@@ -119,7 +53,9 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{rowgrp}{ Logical. If TRUE, appends row groups to first column of table. 
 	Only available if group category exists in ref_codes table (e.g., FORTYPGRPCD, OWNGRPCD). }   
   \item{rowgrpnm}{ String. Name of row group variable. }  
-  \item{rowgrpord}{ String. Name of row group variable to sort table rows. }  
+  \item{rowgrpord}{ String. Name of row group variable to sort table rows. } 
+  \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
+	one table. } 
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
@@ -132,11 +68,11 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
+  \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes
+	many estimation units, and only raw data tables are needed, it is more 
+	efficient to output raw data only. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs 
-	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
@@ -154,11 +90,11 @@ modMAarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT
   \item{title.unitvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty  
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
-  \item{MAdata}{ List. Modeldat output from FIESTA::anMAdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
+  \item{...}{ Parameters for modMApop() if MApopdat is NULL. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

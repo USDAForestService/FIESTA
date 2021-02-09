@@ -2,6 +2,13 @@
 
 
 kable.table <- function(est, title.row, title.rowvar) {
+    ## DESCRIPTION: create pretty tables
+   
+    ## set options to convert NA values to "--"
+    options(knitr.kable.NA = "--")
+
+    est[,-1] <- suppressWarnings(lapply(est[-1], as.numeric))
+
     knitr::kable(est,
     format = "pandoc",   # default
     caption = wraptitle(title.row, 80),

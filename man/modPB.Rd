@@ -16,7 +16,7 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
 	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
 	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
 	stratcombine = TRUE, ratio = FALSE, landarea = "ALL", landarea.filter = NULL, 
-	pnt.nonsamp.filter = NULL, pnt.filter = NULL, plt.filter = NULL, 
+	pnt.nonsamp.filter = NULL, pnt.filter = NULL, pfilter = NULL, 
 	rowvar = NULL, colvar = NULL, row.orderby = NULL, col.orderby = NULL, 
 	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, 
 	domlut = NULL, domvarlst = NULL, ratioden = "ROWVAR", allin1 = FALSE, 
@@ -88,7 +88,7 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
   \item{pnt.nonsamp.filter}{ String. An expression for filtering nonsampled points
 	(e.g., cloud coverage). Must be R syntax. }
   \item{pnt.filter}{ String. A global filter for the pnt file. Must be R syntax. }
-  \item{plt.filter}{ String. A global filter for the plt file. Must be R syntax. }
+  \item{pfilter}{ String. A global filter for the plt file. Must be R syntax. }
   \item{rowvar}{ String. Name of domain variable in pnt used for output estimation 
 	table rows. If only 1 domain, must be rowvar. If no domain, rowvar=NULL. }
   \item{colvar}{ String. Name of domain variable in pnt used for output estimation 

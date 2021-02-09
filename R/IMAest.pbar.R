@@ -6,7 +6,7 @@ MAest.ht <- function(y, N, FIA=TRUE) {
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "unconditional_SRS"
+  var_method <- "lin_HTSRS"
 
   message("generating estimates using mase::horvitzThompson function...\n")
   estht <- mase::horvitzThompson(y, pi = NULL, N = N, pi2 = NULL, 
@@ -31,7 +31,7 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "lin_HTSRS"
+  var_method <- "unconditional_SRS"
 
   message("generating estimates using mase::postStrat function...\n")
   estps <- mase::postStrat(	  y = y, 
@@ -172,23 +172,23 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   yn.vect[is.na(yn.vect)] <- 0
 
   if (MAmethod == "HT") {
-    est <- MAest.ht(yn.vect, N)
+    est <- suppressMessages(MAest.ht(yn.vect, N))
 
   } else if (MAmethod == "PS") {
 
     x_sample <- pltdat.dom[, PSstrvar, with=FALSE][[1]]
     x_pop <- unitlut[, c(PSstrvar, "Prop"), with=FALSE]
-    est <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
+    est <- suppressMessages(MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA))
 
   } else if (MAmethod == "greg") {
     x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
     x_pop <- setDF(unitlut[, prednames, with=FALSE])
-    est <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA)
+    est <- suppressMessages(MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA))
 
   } else if (MAmethod == "gregEN") {
     x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
     x_pop <- setDF(unitlut[, prednames, with=FALSE])
-    est <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
+    est <- suppressMessages(MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA))
   }
   return(est)
 }
@@ -256,7 +256,8 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 #    }
 #  }
 
-  doms <- as.character(unique(dat.unit[[domain]]))
+  #doms <- as.character(unique(dat.unit[[domain]]))
+  doms <- unique(dat.unit[!is.na(get(domain)) & get(domain) != "NA NA"][[domain]])
 
 #dat=dat.unit
 #unitlut=unitlut.unit

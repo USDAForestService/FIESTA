@@ -84,16 +84,19 @@ Set up for examples
 # Load library
 library(FIESTA)
 
-# Set workspace to FIESTA folder (create if doesn't exist)
-if (!file.exists("C:/FIESTA"))  dir.create("C:/FIESTA")
-setwd("C:/FIESTA")
+## If not on windows platform, set up an outfolder to output from examples
+if (.Platform$OS.type == "windows") {
+  # Set workspace to FIESTA folder (create if doesn't exist)
+  if (!file.exists("C:/FIESTA"))  {
+    dir.create("C:/FIESTA")
+  }
+  setwd("C:/FIESTA")
 
-# Create 2 subfolders under the FIESTA folder, 'data' and 'outfolder' and set path to objects 
-if (!file.exists("data"))  dir.create("data")
-datfolder <- "data" 
-
-if (!file.exists("outfolder")) dir.create("outfolder")
-outfolder <- "outfolder"
+  if (!file.exists("outfolder")) {
+    dir.create("outfolder")
+  }
+  outfolder <- "outfolder"
+}
 
 # File names for external spatial data
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
@@ -264,7 +267,7 @@ areavar.bhdist
 #   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
 #   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD",   
 #   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
-#   plt.filter = NULL, cond.filter = NULL, rowvar = NULL, colvar = NULL,   
+#   pfilter = NULL, cfilter = NULL, rowvar = NULL, colvar = NULL,   
 #   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,   
 #   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = NULL,  
 #   rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE,  
@@ -313,7 +316,6 @@ area.bh.raw <- area.bh$raw
 names(area.bh.raw)
 area.bh$raw$unit.grpest
 
-
 ## By Bighorn National Forest District ##
 # Area by forest type and stand-size class for Bighorn National Forest by district
 area.bhdist <- modGBarea(cond=WYcond, pltassgn=pltassgn.bhdist, pltassgnid="CN",
@@ -354,7 +356,7 @@ head(area.bhdist.raw$unit.grpest)
 #   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
 #   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", 
 #   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", 
-#   plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL,  
+#   pfilter = NULL, cfilter = NULL, estvar = NULL, estvar.filter = NULL,  
 #   estvar.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE,    
 #   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE,   
 #   col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL,   
@@ -462,8 +464,8 @@ head(tree.bh$raw$unit.grpest)
 #   adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
 #   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",   
 #   unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-#   strwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", plt.filter = NULL,  
-#   cond.filter = NULL, ratiotype = "PERACRE", estvarn = NULL, estvarn.filter = NULL, 
+#   strwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", pfilter = NULL,  
+#   cfilter = NULL, ratiotype = "PERACRE", estvarn = NULL, estvarn.filter = NULL, 
 #   estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, estvard.name = NULL, 
 #   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,   
 #   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,  

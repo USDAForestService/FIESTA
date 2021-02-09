@@ -5,7 +5,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 	title.estvard=NULL, unitvar, unitvar2=NULL, rowvar=NULL, colvar=NULL, estvarn=NULL,
  	estvarn.filter=NULL, estvard=NULL, estvard.filter=NULL, addtitle=FALSE, 
 	returntitle=TRUE, rawdata=FALSE, parameters=TRUE, states=NULL, invyrs=NULL, 
-	landarea=NULL, plt.filter=NULL, cond.filter=NULL, allin1=FALSE, divideby=NULL, 
+	landarea=NULL, pfilter=NULL, cfilter=NULL, allin1=FALSE, divideby=NULL, 
 	outfn=NULL, outfn.pre=NULL){ 
 
   ## TITLE INFO FOR OUTPUT TABLES
@@ -62,13 +62,13 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
     if (is.null(title.main) || title.main == "") {
       ## Title for filters
       if (is.null(title.filter)) {
-        if (!is.null(plt.filter)) {
-          title.filter <- paste0("(", plt.filter)
-          if (!is.null(cond.filter))
-            title.filter <- paste0(title.filter, " & ", cond.filter)
+        if (!is.null(pfilter)) {
+          title.filter <- paste0("(", pfilter)
+          if (!is.null(cfilter))
+            title.filter <- paste0(title.filter, " & ", cfilter)
           title.filter <- paste0(title.filter, ")")
-        } else if (!is.null(cond.filter)) {
-          title.filter <- paste0("(", cond.filter, ")")
+        } else if (!is.null(cfilter)) {
+          title.filter <- paste0("(", cfilter, ")")
         }
       } else if (title.filter == "") {
         title.filter <- NULL

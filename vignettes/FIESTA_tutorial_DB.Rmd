@@ -53,16 +53,19 @@ Set up for examples
 # Load library
 library(FIESTA)
 
-# Set workspace to FIESTA folder (create if doesn't exist)
-if (!file.exists("C:/FIESTA"))  dir.create("C:/FIESTA")
-setwd("C:/FIESTA")
+## If not on windows platform, set up an outfolder to output from examples
+if (.Platform$OS.type == "windows") {
+  # Set workspace to FIESTA folder (create if doesn't exist)
+  if (!file.exists("C:/FIESTA"))  {
+    dir.create("C:/FIESTA")
+  }
+  setwd("C:/FIESTA")
 
-# Create 2 subfolders under the FIESTA folder, 'data' and 'outfolder' and set path to objects 
-if (!file.exists("data"))  dir.create("data")
-datfolder <- "data" 
-
-if (!file.exists("outfolder")) dir.create("outfolder")
-outfolder <- "outfolder"
+  if (!file.exists("outfolder")) {
+    dir.create("outfolder")
+  }
+  outfolder <- "outfolder"
+}
 
 
 ## Load SQLite database from FIESTAdata package

@@ -145,10 +145,8 @@ if (is.null(outfn.pre) || outfn.pre == "") outfn.pre <- AOInm
 #ice.QAQC <- FIESTA::pcheck.table(ice.QAQCfn)
 if (is.null(ice.QAQCfn) || ice.QAQCfn == "") {
   ice.QAQC <- NULL
-}
-
-if (!is.null(ice.QAQC)) {
-  if (!dir.exists(ice.QAQCfn)) stop(ice.QAQCfn, " does not exist")
+} else {
+  if (!file.exists(ice.QAQCfn)) stop(ice.QAQCfn, " does not exist")
   ice.QAQC <- fread(ice.QAQCfn)
   
   if (!all(c("QAQC_check", "Result") %in% names(ice.QAQC))) {

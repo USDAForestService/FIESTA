@@ -7,7 +7,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, 
 	stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite=TRUE, GBdata=NULL, GBstratdat=NULL, gui=FALSE){
 
   ##################################################################################
@@ -134,7 +134,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     getwt <- GBstratdat$getwt
     getwtvar <- GBstratdat$getwtvar
   } 
- 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -270,12 +270,12 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     expcondtab <- adjfacdata$expcondtab
   } 
 
-  estvar.name <- ifelse(adj == "samp", "CONDPROP_ADJ", "CONDPROP_UNADJ")
+  estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid,
  		ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
  		unitvar=unitvar, stratalut=stratalut, strvar=strvar, expcondtab=expcondtab,
  		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, invyrs=invyrs,
-		estvar.name=estvar.name, adj=adj)
+		estvar.area=estvar.area, adj=adj)
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

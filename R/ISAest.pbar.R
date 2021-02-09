@@ -50,10 +50,14 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
   mod.summary <- summary(mod.dom.step)
   preds.dom <- names(mod.dom.step$model[-1])
 
+  if (length(preds.dom) == 0) {
+    message("no predictors were selected for model")
+    return(NULL)
+  }
+  
   ## create new model formula with variables selected from step procedure
   ## note: the variables selected can change depending on the order in original formula (fmla)
   fmla.dom <- stats::as.formula(paste(yn, paste(preds.dom, collapse= "+"), sep="~"))
- 
 
   if (SAmethod == "unit") {
 
@@ -138,6 +142,7 @@ SAest.dom <- function(dom, plt.dom, cuniqueid, dunitlut, dunitvar="DOMAIN",
   plt.dom <- plt.dom[plt.dom[[domain]] == dom,] 
 
 #yn=response
+
 
   ## Apply function to each dom
   domest <- data.table(dom, SAest(yn=response, plt.dom=plt.dom, 

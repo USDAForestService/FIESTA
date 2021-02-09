@@ -23,8 +23,8 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, stratalut = NULL, 
 	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
 	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = TRUE, GBdata = NULL, GBstratdat = NULL, gui = FALSE)
+	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
+	GBdata = NULL, GBstratdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -116,9 +116,6 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	written to working directory, or if gui, a window to browse. }
   \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
   \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs 
-	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }

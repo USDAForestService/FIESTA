@@ -8,113 +8,36 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
-	estseed = "none", dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
-	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", 
-	evalid=NULL, invyrs=NULL, ACI = FALSE, adj = "samp", MAmethod = "greg", 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL, 
-	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit=10, unitlut = NULL, npixelvar = "npixels", prednames = NULL, 
-	predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, landarea = "ALL", 
-	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
-	estvar.name=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
-	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	sumunits = FALSE, allin1 = FALSE, estround = 1, pseround = 2, 
-	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
-	rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = FALSE, addtitle = TRUE, returntitle = FALSE, 
-	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
-	title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, 
-	MApopdat = NULL, MAdata = NULL, gui = FALSE)
+modMAtree(MAmethod = "greg", prednames = NULL, estseed = "none", 
+	landarea = "ALL", pfilter = NULL, cfilter = NULL, 
+	estvar = NULL, estvar.filter = NULL, rowvar=NULL, colvar=NULL, 
+	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
+	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
+	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, 
+	allin1 = FALSE, estround = 1, pseround = 2, estnull = "--", psenull = "--", 
+	divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE, 
+	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
+	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
+	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
+	title.estvar = NULL, title.filter = NULL, MApopdat = NULL, gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
-	Tree-level data with one record for each tree. Tree data are aggregated to 
-	condition-level. See details for necessary variables to include. }
-  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
-	Seedling-level data with one record of seedling counts for each species in plot. }
-  \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
-	Condition-level data with one record for each condition, including or 
-	excluding nonsampled conditions. Plot variables and strata/estimation unit 
-	variable(s) may be included if plt and pltassgn=NULL. See details for necessary 
-	variables to include. }
-  \item{plt}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
-	layer or spatial layer in dsn, or shapefile(*.shp).
-	Plot-level data with one record for each plot, including or excluding 
-	nonsampled conditions. If nonsampled plots are included, PLOT_STATUS_CD 
-	variable must be in table or a filter defined in plt.nonsamp.filter. }
-  \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
-	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
-	estimation unit and/or strata, with one record for each plot. }
-  \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
-	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
-  \item{dsn}{ String. Name of database where tree, cond, and plot-level tables reside. 
-	The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). }
-  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
-  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{condid}{ String. Unique identifier of plot conditions (e.g., CONDID). 
-	If no condid in cond, the data are assumed to have 1 condition per plot. 
-	A CONDID=1 is automatically added. }
-  \item{puniqueid}{ String. Unique identifier of plot in plt. }
-  \item{pltassgnid}{ String. Unique identifier of plot in pltassgn. }
-  \item{pjoinid}{ String. Name of variable in plot to join to pltassgn. This
-	variable does not need to be unique (e.g., PLOT_ID). If NULL, pjoinid=puniqueid. }
-  \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
-  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
-  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
-	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
-  \item{adj}{ String. How to calculate adjustment factors for nonsampled 
-	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
-	'samp' - adjustments are calculated at strata/estimation unit level; 
-	'plot' - adjustments are calculated at plot-level. Adjustments 
-	are only calculated for annual inventory plots (designcd=1). } 
   \item{MAmethod}{ String. mase (i.e., model-assisted) method to use 
 	('HT', 'PS', 'greg', 'gregEN') }
-  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
-	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
-  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
-  \item{unitvar}{ String. Name of the estimation unit variable in unitarea and 
-	cond or pltassgn data frame with estimation unit assignment for each plot 
-	(e.g., 'ESTN_UNIT'). Optional if only one estimation unit. }
-  \item{unitvar2}{ String. Name of a second level estimation unit variable in unitarea
-	and cond or pltassgn with assignment for each plot (e.g., 'STATECD'). }
-  \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
-	unit, include number of total acreage for the area of interest or a data frame
-	with area and estimation unit. If more than one estimation unit, provide a data frame 
-	of total area by estimation unit, including unitvar and areavar. }
-  \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
-  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
-  \item{unitlut}{ DF/DT. Table with summarized auxiliary information by estimation 
-	unit. For continuous data, means by estimation unit; for categorical data, 
-	proportion of class by estimation unit. }
-  \item{npixelvar}{ String. Name of variable in unitlut defining number of pixels by 
-	estimation unit. }
   \item{prednames}{ String vector. Name(s) of predictor variables to include in model. }
-  \item{predfac}{ String vector. Name(s) of prednames that are factors (i.e., categorical). }
-  \item{PSstrvar}{ String. Name of strata variable in stratalut and table with strata
-	assignment for each plot. Default="STRATUMCD". }
-  \item{stratcombine}{ Logical. If MAmethod='PS', if TRUE, automatically combines 
-	strata categories if less than 2 plots in any one stratum. See notes for more info. }
+  \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
+	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{landarea}{ String. The condition-level filter for defining land area 
 	('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1; 
 	if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0. }
-  \item{plt.filter}{ String. A filter for plot-level data. The attributes must
+  \item{pfilter}{ String. A filter for plot-level data. The attributes must
 	be in plt or pltassgn data frames. Must be R syntax ('COUNTYCD == 1'). }
-  \item{cond.filter}{ String. A filter for the cond. The attributes must be in
+  \item{cfilter}{ String. A filter for the cond. The attributes must be in
 	cond data frame. Must be R syntax (e.g., 'OWNGRPCD != 40'). }
   \item{estvar}{ String. Name of the tree-level estimate variable (e.g., 'VOLCFNET'). }
   \item{estvar.filter}{ String. A tree-level filter for estvar. Must be R syntax 
 	(e.g., 'STATUSCD == 1'). }
-  \item{estvar.name}{ String. A name given to the output aggregated tree estimate variable. 
-	If NULL, = estvar'_SUM'. This name is used for default table titles and/or output 
-	file names. } 
   \item{rowvar}{ String. Optional. Name of domain variable to group estvar by 
 	for rows in table output. Rowvar must be included in an input data frame 
 	(i.e., plt, cond, tree). If no rowvar is included, an estimate is returned
@@ -167,11 +90,11 @@ modMAtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
+  \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes
+	many estimation units, and only raw data tables are needed, it is more 
+	efficient to output raw data only. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs 
-	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
@@ -191,11 +114,11 @@ modMAtree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{title.estvar}{ String. TITLE: if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for the estimate variable. If NULL, title.estvar = estvar.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
-  \item{MAdata}{ List. Modeldat output from FIESTA::anMAdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
+  \item{...}{ Parameters for modMApop() if MApopdat is NULL. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

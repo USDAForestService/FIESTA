@@ -7,7 +7,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite=TRUE, MAdata=NULL, MAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
@@ -31,7 +31,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     stop("invalid parameter: ", toString(miss))
   }
  
-
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab <- NULL
 
@@ -48,7 +47,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
       if (!all(modeldat.names %in% names(MAmodeldat))) 
         stop("missing components in MAmodeldat list: ", 
 		toString(modeldat.names[!modeldat.names %in% names(MAmodeldat)])) 
-
       pltassgn <- MAmodeldat$pltassgn
       pltassgnid <- MAmodeldat$pltassgnid
       unitlut <- MAmodeldat$domzonal
@@ -57,16 +55,17 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
       areavar <- MAmodeldat$areavar
       npixelvar <- MAmodeldat$npixelvar
       predfac <- MAmodeldat$predfac
-      if (MAmethod == "PS")
-        PSstrvar <- MAmodeldat$PSstrvar
+      PSstrvar <- MAmodeldat$PSstrvar
 
-      if (is.null(prednames)) {
-        prednames <- MAmodeldat$prednames
-      } else {
-        if (!all(prednames %in% MAmodeldat$prednames))
-          stop("invalid prednames: ", 
-		toString(prednames[!prednames %in% MAmodeldat$prednames]))
-        predfac <- predfac[predfac %in% prednames]
+      if (any(MAmethod %in% c("greg", "gregEN"))) {
+        if (is.null(prednames)) {
+          prednames <- MAmodeldat$prednames
+        } else {
+          if (!all(prednames %in% MAmodeldat$prednames))
+            stop("invalid prednames: ", 
+			toString(prednames[!prednames %in% MAmodeldat$prednames]))
+          predfac <- predfac[predfac %in% prednames]
+        }
       } 
     }
   } else {
@@ -84,19 +83,20 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     areavar <- MAdata$areavar
     npixelvar <- MAdata$npixelvar
     predfac <- MAdata$predfac
-    if (MAmethod == "PS")
-      PSstrvar <- MAdata$PSstrvar
+    MAmodeldat$PSstrvar
 
-    if (is.null(prednames)) {
-      prednames <- MAdata$prednames
-    } else {
-      if (!all(prednames %in% MAdata$prednames))
-        stop("invalid prednames: ", 
-		toString(prednames[!prednames %in% MAdata$prednames]))
-      predfac <- predfac[predfac %in% prednames]
-    }
+    if (any(MAmethod %in% c("greg", "gregEN"))) {
+      if (is.null(prednames)) {
+        prednames <- MAmodeldat$prednames
+      } else {
+        if (!all(prednames %in% MAmodeldat$prednames))
+          stop("invalid prednames: ", 
+			toString(prednames[!prednames %in% MAmodeldat$prednames]))
+        predfac <- predfac[predfac %in% prednames]
+      }
+    } 
   } 
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -149,7 +149,6 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
 
-
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -164,44 +163,16 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 		MAmethod=MAmethod, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea,
 		areavar=areavar, unitcombine=unitcombine, auxlut=unitlut, strata=strata, 
 		PSstrvar=PSstrvar, prednames=prednames, predfac=predfac, npixelvar=npixelvar, 
-		stratcombine=stratcombine, removeifnostrata=TRUE)  
+		stratcombine=stratcombine, removeifnostrata=TRUE)
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
   unitlut <- auxdat$auxlut
-  PSstrvar <- auxdat$PSstrvar
   prednames <- auxdat$prednames
   predfac <- auxdat$predfac
   npixels <- auxdat$npixels
   stratcombinelut <- auxdat$unitstrgrplut
-
-
-  if ("greg" %in% MAmethod && !is.null(predfac)) {
-    for (fac in predfac) {
-      ## Get factor levels
-      fac.levels <- sort(unique(pltassgnx[[fac]]))
-
-      ## Set factor levels to keep and delete from unitlut.
-      fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
-      fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
-      unitlut[[fac.unitcol.del]] <- NULL
-  
-      ## Rename factor variables and add names to predictor list
-      facs <- paste0(fac, fac.levels[-1])
-      names(unitlut)[names(unitlut) %in% fac.unitcol.keep] <- facs
-      unitpreds <- c(prednames[prednames != fac], facs)
-
-      ## Create dummy variables for factor levels - 1
-      dtfac <- pltassgnx[, as.data.table(model.matrix(~., 
-				data=pltassgnx[, fac, with=FALSE]))][,-1]
-      pltassgnx <- cbind(pltassgnx, dtfac)
-      pltassgnx[, (fac) := NULL]
-
-      ## Remove old name and add new names to predictor list
-      prednames <- unique(c(prednames[prednames != fac], facs))
-    }
-  }
-
+  PSstrvar <- auxdat$PSstrvar
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -217,6 +188,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   ###################################################################################
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
+
   if (adj == "samp") {
     bycond <- TRUE
     adjtree <- TRUE
@@ -252,13 +224,13 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     setkeyv(condx, c(cuniqueid, condid))
   }
 
-
+  estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
 	condid=condid, ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
 	unitvar=unitvar, unitlut=unitlut, npixels=npixels, npixelvar=npixelvar, 
-	PSstrvar=PSstrvar, prednames=prednames, expcondtab=expcondtab, 
+	prednames=prednames, expcondtab=expcondtab, 
 	plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
-	invyrs=invyrs, MAmethod=MAmethod)
+	invyrs=invyrs, MAmethod=MAmethod, estvar.area=estvar.area, adj=adj)
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
@@ -268,9 +240,17 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   if (!is.null(seedf))
     returnlst$seedx <- seedf
 
-  if (!is.null(stratcombinelut)) 
-    returnlst$stratcombinelut <- stratcombinelut
+  if (strata) {
+    returnlst$PSstrvar <- PSstrvar
+    if (!is.null(stratcombinelut)) {
+      returnlst$stratcombinelut <- stratcombinelut
+    }
+  }
 
+  if (any(MAmethod %in% c("greg", "gregEN"))) {
+    returnlst$prednames <- prednames
+    returnlst$predfac <- predfac
+  }
 
   if (saveobj) {
     objfn <- getoutfn(outfn="MApopdat", outfolder=outfolder, 

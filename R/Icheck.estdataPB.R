@@ -1,5 +1,5 @@
 check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt", 
-	tabtype="PCT", ratio=FALSE, plt.filter=NULL, landarea="ALL", landarea.filter=NULL, 
+	tabtype="PCT", ratio=FALSE, pfilter=NULL, landarea="ALL", landarea.filter=NULL, 
 	pnt.nonsamp.filter=NULL, pnt.filter=NULL, sumunits=FALSE, allin1=FALSE, 
 	estround=3, pseround=3, divideby=NULL, savedata=FALSE, addtitle=TRUE, 
 	returntitle=TRUE, rawdata=FALSE, outfolder=NULL){
@@ -13,7 +13,7 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## - Apply plt filter, if plt exists.
   ## - Check missing pdoms2keep variables
   ## - Check predfac variable(s) and strvar - for factor status
-  ## Apply cond filters to condf: landarea.filter, ACI.filter, cond.filter
+  ## Apply cond filters to condf: landarea.filter, ACI.filter, cfilter
   ## Check other table parameters: sumunits, allin1, estround, pseround, divideby, 
   ##		savedata, addtitle, returntitle, rawdata, outfolder
   ## - If sumunits=TRUE, estimation units are summed to 1 estimate
@@ -53,11 +53,11 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## Apply filters
   ##############################################################################
 
-  ## plt.filter to plt table
-  PBf <- datFilter(x=PBx, xfilter=plt.filter, title.filter="plt filter?",
-		gui=gui, filternm="plt.filter", stopifnull=TRUE)$xf
+  ## pfilter to plt table
+  PBf <- datFilter(x=PBx, xfilter=pfilter, title.filter="plt filter?",
+		gui=gui, filternm="pfilter", stopifnull=TRUE)$xf
   if (is.null(PBf)) {
-    message(paste(plt.filter, "removed all records"))
+    message(paste(pfilter, "removed all records"))
     return(NULL)
   }
 

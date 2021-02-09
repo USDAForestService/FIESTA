@@ -134,7 +134,10 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
     col.add0 <- FALSE
     row.FIAname <- FALSE
 
-    returnlst <- list(treef=treef, condf=condf[,c(cuniqueid, condid), with=FALSE], 
+    ## Add a column for totals
+    condf$TOTAL <- 1
+
+    returnlst <- list(treef=treef, condf=condf[,c(cuniqueid, condid, "TOTAL"), with=FALSE], 
 		uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
 		rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, 
 		col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0,
@@ -491,7 +494,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
 
       if (col.FIAname || !is.null(collut)) {
         if (!is.null(collut) && ncol(collut) > 1 && all(names(collut) %in% names(condf))) {
-         if (is.null(col.orderby) || col.orderby == "NONE") {
+          if (is.null(col.orderby) || col.orderby == "NONE") {
             message("col.orderby is not defined... ordering by colvar")
           } else {
             if (col.orderby == colvar) {
@@ -502,14 +505,13 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
           }
         } else {
 
-          #if (!is.null(collut)) col.add0 <- TRUE
+          if (!is.null(collut)) col.add0 <- TRUE
           colLUT <- datLUTnm(x=condf, xvar=colvar, LUT=collut, FIAname=col.FIAname, 
 			add0=col.add0)
           condf <- colLUT$xLUT
           collut <- colLUT$LUT
           colLUTnm <- colLUT$xLUTnm
 
-          #if (!is.null(collut)) col.add0 <- TRUE
           if (is.null(col.orderby) || col.orderby == "NONE") {
             if (!is.null(colLUTnm)) {
               col.orderby <- colvar
@@ -820,7 +822,11 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
       uniquecol <- setorder(uniquecol, -GSSTKCD)
     uniquecol[[colvar]] <- factor(uniquecol[[colvar]], 
 			levels=unique(uniquecol[[colvar]]))
-  }  
+  } 
+
+
+  ## Add a column for totals
+  condf$TOTAL <- 1
  
   returnlst <- list(condf=condf, uniquerow=uniquerow, uniquecol=uniquecol, 
 	domainlst=domainlst, bytdom=bytdom, rowvar=rowvar, colvar=colvar, 

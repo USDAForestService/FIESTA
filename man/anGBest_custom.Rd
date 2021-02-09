@@ -9,10 +9,10 @@
 }
 \usage{
 anGBest_custom(GBpopdat, esttype = "TREE", estseed = "none", landarea = "FOREST", 
-	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
+	pfilter = NULL, cfilter = NULL, estvar = NULL, estvar.filter = NULL, 
 	rowvar = NULL, colvar = NULL, treedia.brks = c(0,5,10,20,50,100), sumunits=TRUE,
 	divideby = NULL, title.ref = NULL, title.main = NULL, getbarplot = FALSE, 
-	barplot.row=TRUE, barplot.ord="DESC", barplot.color=NULL, barplot.ylim = NULL, 
+	barplot.row=TRUE, barplot.ord=NULL, barplot.color=NULL, barplot.ylim = NULL, 
 	barplot.nplt = FALSE, savedata = FALSE, outfolder = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite = TRUE, ...)
 }
@@ -23,8 +23,8 @@ anGBest_custom(GBpopdat, esttype = "TREE", estseed = "none", landarea = "FOREST"
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{plt.filter}{ String A filter for plot-level data (e.g., "INVYR == 2012"). }
-  \item{cond.filter}{ String. A filter for condition-level data (e.g., "FORTYPCD == 180"). 
+  \item{pfilter}{ String A filter for plot-level data (e.g., "INVYR == 2012"). }
+  \item{cfilter}{ String. A filter for condition-level data (e.g., "FORTYPCD == 180"). 
 	Must be R syntax. }
   \item{estvar}{ String. Name of the tree estimate variable. }
   \item{estvar.filter}{ String. A tree filter for the estimate variable. Must be R syntax 

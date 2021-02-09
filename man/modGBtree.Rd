@@ -15,14 +15,14 @@
 	expanded to using the total land area in the population. 
 }
 \usage{    
-modGBtree(tree = NULL, cond = NULL, plt = NULL, estseed = "none", landarea = "FOREST", 
-	plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL, 
+modGBtree(estseed = "none", landarea = "FOREST", 
+	pfilter = NULL, cfilter = NULL, estvar = NULL, estvar.filter = NULL, 
 	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
 	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
 	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
 	sumunits = TRUE, allin1 = FALSE, estround = 1, pseround = 2, 
 	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
-	rawdata = FALSE, rawonly = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,
+	rawdata = FALSE, rawonly = FALSE, outfolder = NULL, outfn.pre = NULL,
  	outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, 
 	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
  	title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, GBpopdat = NULL, 
@@ -30,27 +30,14 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, estseed = "none", landarea = "FO
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
-	Tree-level data with one record for each tree. Tree data are aggregated to 
-	condition-level. See details for necessary variables to include. }
-  \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
-	Condition-level data with one record for each condition, including or 
-	excluding nonsampled conditions. Plot variables and strata/estimation unit 
-	variable(s) may be included if plt and pltassgn=NULL. See details for necessary 
-	variables to include. }
-  \item{plt}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
-	layer or spatial layer in dsn, or shapefile(*.shp).
-	Plot-level data with one record for each plot, including or excluding 
-	nonsampled conditions. If nonsampled plots are included, PLOT_STATUS_CD 
-	variable must be in table or a filter defined in plt.nonsamp.filter. }
   \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
 	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{landarea}{ String. The condition-level filter for defining land area 
 	('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1; 
 	if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0. }
-  \item{plt.filter}{ String. A filter for plot-level data. The attributes must
+  \item{pfilter}{ String. A filter for plot-level data. The attributes must
 	be in plt or pltassgn data frames. Must be R syntax ('COUNTYCD == 1'). }
-  \item{cond.filter}{ String. A filter for the cond. The attributes must be in
+  \item{cfilter}{ String. A filter for the cond. The attributes must be in
 	cond data frame. Must be R syntax (e.g., 'OWNGRPCD != 40'). }
   \item{estvar}{ String. Name of the tree-level estimate variable (e.g., 'VOLCFNET'). }
   \item{estvar.filter}{ String. A tree-level filter for estvar. Must be R syntax 
@@ -112,9 +99,6 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, estseed = "none", landarea = "FO
 	efficient to output raw data only. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs 
-	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
@@ -134,11 +118,11 @@ modGBtree(tree = NULL, cond = NULL, plt = NULL, estseed = "none", landarea = "FO
   \item{title.estvar}{ String. TITLE: if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for the estimate variable. If NULL, title.estvar = estvar.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
   \item{GBpopdat}{ List. Population data objects returned from FIESTA::modGBpop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
-  \item{...}{ List. Data objects returned from FIESTA::modGBpop(). }
+  \item{...}{ Parameters for modGBpop() if GBpopdat is NULL. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

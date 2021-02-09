@@ -14,7 +14,7 @@ modSAarea(SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
 	SAmethod = "unit", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
 	dunitvar = "DOMAIN", dunitvar2 = NULL, dunitarea = NULL, areavar = NULL, 
 	dunitlut = NULL, prednames = NULL, predfac = NULL, largebnd.att = NULL, 
-	landarea = "ALL", plt.filter = NULL, cond.filter = NULL, smallbnd.att = NULL, 
+	landarea = "ALL", pfilter = NULL, cfilter = NULL, smallbnd.att = NULL, 
 	allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = "--", 
 	divideby = NULL, savedata = FALSE, rawdata = FALSE, multest = TRUE, 
 	addSAdomsdf = TRUE, SAdomvars = NULL, outfolder = NULL, outfn.pre = NULL, 
@@ -83,8 +83,8 @@ modSAarea(SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{plt.filter}{ String. A filter for plt. Must be R syntax. }
-  \item{cond.filter}{ String. A filter for cond. Must be R syntax. }
+  \item{pfilter}{ String. A filter for plt. Must be R syntax. }
+  \item{cfilter}{ String. A filter for cond. Must be R syntax. }
   \item{smallbnd.att}{ String. Attribute in smallbnd, alternative to DOMAIN, to output
 	in estimation table. }
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
@@ -126,7 +126,7 @@ modSAarea(SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
   \item{title.dunitvar}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty  
 	name for the estimation unit variable. If NULL, = unitvar. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If title.filter=NULL, a default is generated from cond.filter. 
+	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
   \item{SApopdat}{ List. Population data objects returned from modSApop(). }
   \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }

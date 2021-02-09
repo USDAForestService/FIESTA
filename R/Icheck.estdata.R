@@ -1,20 +1,20 @@
 check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN", 
 	condid="CONDID", treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
-	sumunits=FALSE, landarea=NULL, ACI.filter=NULL, plt.filter=NULL, 
-	cond.filter=NULL, allin1=FALSE, estround=6, pseround=3, divideby=NULL, 
+	sumunits=FALSE, landarea=NULL, ACI.filter=NULL, pfilter=NULL, 
+	cfilter=NULL, allin1=FALSE, estround=6, pseround=3, divideby=NULL, 
 	addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
 	savedata=FALSE, outfolder=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
   ## Apply plot filter
-  ## - plt.filter (e.g., COUNTY == 3)
+  ## - pfilter (e.g., COUNTY == 3)
   ## Check landarea ("FOREST", "ALL", "TIMBERLAND") and create landarea.filter
   ## - if landarea = FOREST, "COND_STATUS_CD == 1"
   ## - if landarea = TIMBERLAND, "SITECLCD %in% c(1:6) & RESERVCD == 0"
   ## Apply condition filters
   ## - landarea.filter
-  ## - cond.filter (e.g., FORTYPCD == 122)
+  ## - cfilter (e.g., FORTYPCD == 122)
   ## - ACI.filter (e.g., if, ACI=FALSE, COND_STATUS_CD == 1)
   ## Check output parameters
   ## - divideby, divides final estimates by (hundred, thousand, million)
@@ -31,13 +31,13 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ###################################################################################
 
   ###########################################################################
-  ## Apply plt.filter to plt table
+  ## Apply pfilter to plt table
   ###########################################################################
   pltcondnmlst <- names(pltcondf)
-  pltcondf <- datFilter(x=pltcondf, xfilter=plt.filter, title.filter="plt filter?",
-		gui=gui, filternm="plt.filter", xnm="pltcondf")$xf
+  pltcondf <- datFilter(x=pltcondf, xfilter=pfilter, title.filter="plt filter?",
+		gui=gui, filternm="pfilter", xnm="pltcondf")$xf
   if (is.null(pltcondf)) {
-    message(paste(plt.filter, "removed all records"))
+    message(paste(pfilter, "removed all records"))
     return(NULL)
   }
 
@@ -95,11 +95,11 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     return(NULL)
   }
 
-  ## Apply cond.filter to condf
-  pltcondf <- datFilter(x=pltcondf, xfilter=cond.filter, 
+  ## Apply cfilter to condf
+  pltcondf <- datFilter(x=pltcondf, xfilter=cfilter, 
 		title.filter="cond filter", gui=gui, stopifnull=FALSE)$xf
   if (is.null(pltcondf)) {
-    message(paste(cond.filter, "removed all records"))
+    message(paste(cfilter, "removed all records"))
     return(NULL)
   }
 
@@ -186,8 +186,9 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ######################################################################################
   returnlst <- list(pltcondf=pltcondf, cuniqueid=cuniqueid, sumunits=sumunits, 
 	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, savedata=savedata,
- 	outfolder=outfolder, estround=estround, pseround=pseround, landarea=landarea)
+	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly,
+	savedata=savedata, outfolder=outfolder, estround=estround, pseround=pseround,
+ 	landarea=landarea)
 
 
   if (esttype %in% c("TREE", "RATIO", "SEED")) {

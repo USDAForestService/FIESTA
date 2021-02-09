@@ -120,8 +120,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
     ## Check rastlst.cont.NODATA
     if (!is.null(rastlst.cont.NODATA)) {
-      if (!is.numeric(rast.cont.NODATA))
-        stop("rast.cont.NODATA must be numeric")
+      if (!is.numeric(rastlst.cont.NODATA))
+        stop("rastlst.cont.NODATA must be numeric")
 
       if (length(rastlst.cont.NODATA) == 1 && nlayers.cont > 1) {
         message("using same rastlst.cont.NODATA value for each raster in rastlst.cont")
@@ -291,9 +291,9 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## Transform aspect 
     if (asptransform) {
       aspnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == rast.aspfn]     
-      sppltx$cosAsp <- northness(sppltx[[aspnm]])
-      sppltx$sinAsp <- eastness(sppltx[[aspnm]])
-      prednames.cont <- c(prednames.cont[prednames.cont != aspnm], "cosAsp", "sinAsp")
+      sppltx$asp_cos <- northness(sppltx[[aspnm]])
+      sppltx$asp_sin <- eastness(sppltx[[aspnm]])
+      prednames.cont <- c(prednames.cont[prednames.cont != aspnm], "asp_cos", "asp_sin")
     }
     prednames <- c(prednames, prednames.cont)
     inputdf <- rbind(inputdf, inputdf.cont)
@@ -314,7 +314,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       message(rastfn, "...")
 
       if (asptransform && identical(rast.aspfn, rastfn)) {
-        rastnm2 <- ifelse(is.null(rastnm), "cosAsp", paste0(rastnm, "_cos"))
+        rastnm2 <- ifelse(is.null(rastnm), "asp_cos", paste0(rastnm, "_cos"))
         if (i == 1 && npixels) {
           zonalstat <- c("npixels", rastlst.cont.stat) 
           rastnm2 <- c("npixels", rastnm2)
@@ -330,7 +330,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         setkeyv(zonalext, domvar)
         zonalDT.cont <- zonalDT.cont[zonalext] 
   
-        rastnm2 <- ifelse(is.null(rastnm), "sinAsp", paste0(rastnm, "_sin"))
+        rastnm2 <- ifelse(is.null(rastnm), "asp_sin", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
         zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, rast.NODATA=rast.cont.NODATA,
  		polyv.att=domvar, zonalstat=rastlst.cont.stat, pixelfun=eastness, na.rm=TRUE)

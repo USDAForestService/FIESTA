@@ -1,14 +1,13 @@
-modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST", 
-	plt.filter=NULL, cond.filter=NULL, rowvar=NULL, colvar=NULL, 
-	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
-	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
-	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits=TRUE, allin1=FALSE, 
-	estround=1, pseround=2, estnull="--", psenull="--", divideby=NULL, 
-	savedata=FALSE, rawdata=FALSE, rawonly=FALSE, outfolder=NULL, 
-	outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, 
-	addtitle=TRUE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
-	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, 
-	GBpopdat=NULL, gui=FALSE, ...){
+modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
+	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
+	sumunits=TRUE, allin1=FALSE, estround=1, pseround=2, 
+	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
+	rawonly=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, 
+	overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, title.main=NULL, 
+	title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, 
+	title.filter=NULL, GBpopdat=NULL, gui=FALSE, ...){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -53,7 +52,7 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
   parameters <- FALSE
   returnlst <- list()
 
-  ### Check savedata 
+  ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="YES", gui=gui, stopifnull=TRUE)
 
@@ -69,7 +68,7 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(GBpopdat)) {
-    GBpopdat <- modGBpop(gui=gui, cond=cond, plt=plt, ...)
+    GBpopdat <- modGBpop(gui=gui, ...)
   } else {
     returnGBpopdat <- FALSE
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
@@ -77,7 +76,7 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
 		"plotsampcnt", "condsampcnt")
     GBpopdat <- FIESTA::pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   }
-  if (is.null(GBpopdat)) return(NULL)	
+  if (is.null(GBpopdat)) return(NULL)
   condx <- GBpopdat$condx
   pltcondx <- GBpopdat$pltcondx
   cuniqueid <- GBpopdat$cuniqueid
@@ -94,8 +93,9 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
   condsampcnt <- GBpopdat$condsampcnt
   states <- GBpopdat$states
   invyrs <- GBpopdat$invyrs
-  estvar.name <- GBpopdat$estvar.name
+  estvar.name <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
+  getwtvar <- GBpopdat$getwtvar
   if (nonresp) {
     substrvar <- GBpopdat$substrvar
     nonsampplots <- GBpopdat$nonsampplots
@@ -107,14 +107,13 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
  		condid=condid, sumunits=sumunits, landarea=landarea,
- 		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
+ 		ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 		rawonly=rawonly, savedata=savedata, outfolder=outfolder, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
-  tuniqueid <- estdat$tuniqueid
   sumunits <- estdat$sumunits
   allin1 <- estdat$allin1
   estround <- estdat$estround
@@ -123,6 +122,7 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
   addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
   rawdata <- estdat$rawdata
+  rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   estround <- estdat$estround
@@ -166,13 +166,17 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
+  ## Add a column for totals
+  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
+  if (addtotal) {
+    condf$TOTAL <- 1
+  }
+
   ## Merge filtered condition data (condf) to all conditions (condx)
   ###################################################################################
   setkeyv(condx, c(cuniqueid, condid))
   setkeyv(condf, c(cuniqueid, condid))
-
   cdomdat <- condx[condf]
-
 
   ###################################################################################
   ### Get titles for output tables
@@ -182,8 +186,8 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
  	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
 	title.filter=title.filter, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
 	addtitle=addtitle, rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
-	plt.filter=plt.filter, cond.filter=cond.filter, allin1=allin1, divideby=divideby, 
-	outfn=outfn, outfn.pre=outfn.pre)
+	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby, 
+	outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -198,12 +202,11 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
   ## GENERATE ESTIMATES
   ###################################################################################
   unit.totest=unit.rowest=unit.colest=unit.grpest=rowunit=totunit=tdomdattot <- NULL
-  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(cdomdat[[rowvar]])) > 1, TRUE, FALSE)
+  addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
 
   message("getting estimates...")
 #  if (addtotal) {
     ## Get total estimate and merge area
-    cdomdat$TOTAL <- 1
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
     unit.totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
@@ -290,7 +293,9 @@ modGBarea <- function(cond=NULL, plt=NULL, landarea="FOREST",
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
-    if (is.null(getwtvar) || !getwtvar %in% names(stratalut2)) getwtvar <- "strwt"
+    if (is.null(getwtvar) || !getwtvar %in% names(stratalut2)) {
+      getwtvar <- "strwt"
+    }
     stratalut2 <- stratalut2[, lapply(.SD, sum, na.rm=TRUE), 
 		by=strunitvars2, .SDcols=c(getwtvar, "n.strata")]
     stratalut2[, strwt:=prop.table(get(getwtvar)), by="ONEUNIT"]

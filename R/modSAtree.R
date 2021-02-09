@@ -4,7 +4,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
 	invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
 	dunitvar="DOMAIN", dunitvar2=NULL, dunitarea=NULL, areavar=NULL, dunitlut=NULL, 
 	prednames=NULL, predfac=NULL, SApackage="JoSAE", SAmethod="unit", 
-	largebnd.att=NULL, landarea="ALL", plt.filter=NULL, cond.filter=NULL, 
+	largebnd.att=NULL, landarea="ALL", pfilter=NULL, cfilter=NULL, 
 	estvar=NULL, estvar.filter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, 
 	pseround=3, estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
@@ -224,7 +224,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
       items.miss <- listitems[!listitems %in% names(SApopdat)]
       stop("invalid SApopdat... missing items: ", paste(items.miss, collapse=", "))
     }   
-  }		
+  }
   if (is.null(SApopdat)) return(NULL)
   SAdomsdf <- SApopdat$SAdomsdf
   condx <- SApopdat$condx
@@ -270,7 +270,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
  		condid=condid, treex=treex, sumunits=sumunits, landarea=landarea,
- 		ACI.filter=ACI.filter, plt.filter=plt.filter, cond.filter=cond.filter, 
+ 		ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 		savedata=savedata, outfolder=outfolder)
@@ -364,7 +364,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
 	title.filter=title.filter, title.estvarn=title.estvar, unitvar=dunitvar, 
 	rowvar=rowvar, colvar=colvar, estvarn=estvar, estvarn.filter=estvar.filter, 
 	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
-	invyrs=invyrs, landarea=landarea, plt.filter=plt.filter, cond.filter=cond.filter, 
+	invyrs=invyrs, landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
 	allin1=allin1, divideby=divideby, parameters=FALSE, outfn.pre=outfn.pre)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
@@ -389,6 +389,8 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   response <- estvar.name
   #setnames(tdomdat, dunitvar, "DOMAIN")
 
+  message("getting estimates...")
+  message("using the following predictors...", toString(prednames))
 
   ############################################################################
   ## Generate models
@@ -408,6 +410,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
   tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
+
 
   if (sum(tdomdattot[[response]]) == 0) return(NULL)
 

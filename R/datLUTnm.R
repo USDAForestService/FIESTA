@@ -290,7 +290,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTnewvar, with=FALSE], as.character)))
 
   ## If NA values and NAclass != NULL, add NA to LUT
-  if (!is.null(NAclass) && sum(is.na(datx[[xvar]])) > 0 && all(!is.na(LUTx[[LUTvar]]))) {
+  if (!is.null(NAclass) && sum(is.na(xLUT[[xvar]])) > 0 && all(!is.na(LUTx[[LUTvar]]))) {
     NAclass <- checknm(NAclass, LUTnewvar.vals) 
 
     LUTxrow <- rep(NA, ncol(LUTx))
@@ -302,6 +302,9 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
       }
     }
     LUTx <- rbind(LUTx, as.list(LUTxrow))
+
+    ## change NA values in xLUT
+    DT_NAto0(xLUT, LUTnewvar, changeto=NAclass)
   }
 
   ## Add records if not other values exist in xLUT
