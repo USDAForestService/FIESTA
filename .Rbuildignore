@@ -1,4 +1,6 @@
-^\.github$
+.gitignore
+.github$
+.git$
 ^Meta$
 
 ^inst\extdata
@@ -9,3 +11,4 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+

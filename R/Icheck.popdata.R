@@ -715,7 +715,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     if (length(unique(pltcondx[[cuniqueid]])) == nrow(pltcondx) && 
 		"PLOT_STATUS_CD" %in% pltcondnmlst) {
       message("COND_STATUS_CD not in dataset.. using PLOT_STATUS_CD for COND_STATUS_CD")
-      pltcondx[["COND_STATUS_CD"]] <- "PLOT_STATUS_CD"
+      pltcondx[["COND_STATUS_CD"]] <- pltcondx[["PLOT_STATUS_CD"]]
       pltcondx[COND_STATUS_CD == 3, COND_STATUS_CD := 5]
     } else {
       message("COND_STATUS_CD not in dataset.. assuming all sampled conditions")

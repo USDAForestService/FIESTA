@@ -68,9 +68,6 @@ if (.Platform$OS.type == "windows") {
 }
 
 
-## Load SQLite database from FIESTAdata package
-WYdat <- system.file("extdata", "WYdat_eval2013.sqlite", package="FIESTA")
-
 
 ```
 

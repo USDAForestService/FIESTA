@@ -1,34 +1,11 @@
-FIESTA_2.4.0 (Release date: 2019-05-23)
+FIESTA_3.0.13 (Release date: 2021-02-09)
 ==============
+This release contains updates for core functions and Green Book (GB), Model-Assisted (MA), and Photo-Based (PB) modules. There are also several additional analysis functions for streamlining routines and generating core tables of estimates and core reports.
 
+Next priorities include: (1) updating SA module; (2) adding to core tables and reports; (3) on-the-fly estimation for Growth/Removal/Mortality (GRM), P2 vegetation, and Change; (4) and continued documentation.
 
-Changes:
-
-1. Added 2 new packages in Suggests 
-DBI, RSQLite
-
-2. Changed all input parameters of vector spatial files from 1 parameter to 2 parameters
-This change will allow flexibility for different inputs of vector layers. The past options were only for shapefiles or objects. Now we can use options such as GeoPackages or SQLite databases.
-
-
-
-FIESTA_2.4.1 (Release date: 2019-07-11)
-==============
-
-1. Model-Assisted estimation module is functioning similar to Green-Book Module,
-	with similar format of output.
-
-
-
-FIESTA_2.4.2 (Release date: 2019-09-09)
-==============
-
-1. Changed Oracle database connections and queries from using RODBC package to DBI. 
-	DBI package is more versatile for querying Oracle and spatial databases.
-
-2. Added sf package to list in anticipation to use for vector spatial manipulations.
-
-3. Fixed bugs in anGBest_core()
+1. Changed plt.filter to pfilter
+2. Changed cond.filter to cfilter
 
 
 
@@ -63,5 +40,36 @@ DBgetPlots -
 
 
 
-FIESTA_3.0.0 (Release date: 2019-04-09)
+
+FIESTA_2.4.2 (Release date: 2019-09-09)
 ==============
+
+1. Changed Oracle database connections and queries from using RODBC package to DBI. 
+	DBI package is more versatile for querying Oracle and spatial databases.
+
+2. Added sf package to list in anticipation to use for vector spatial manipulations.
+
+3. Fixed bugs in anGBest_core()
+
+
+
+FIESTA_2.4.1 (Release date: 2019-07-11)
+==============
+
+1. Model-Assisted estimation module is functioning similar to Green-Book Module,
+	with similar format of output.
+
+
+
+
+FIESTA_2.4.0 (Release date: 2019-05-23)
+==============
+
+Changes:
+
+1. Added 2 new packages in Suggests 
+DBI, RSQLite
+
+2. Changed all input parameters of vector spatial files from 1 parameter to 2 parameters
+This change will allow flexibility for different inputs of vector layers. The past options were only for shapefiles or objects. Now we can use options such as GeoPackages or SQLite databases.
+

@@ -102,6 +102,7 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
   }
   strunitvars <- c(unitvar, strvar)
 
+
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
