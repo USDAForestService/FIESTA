@@ -218,8 +218,13 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   if (is.null(caption)) caption <- ""
 
   ## Return NULL
-  if (is.null(layer) && is.null(dsn)) 
-    return(NULL)
+  if (is.null(layer) && is.null(dsn)) {
+    if (checkonly) {
+      return(FALSE)
+    } else {
+      return(NULL)
+    }
+  }
 
   ## Check layer - if sf object
   if (!is.null(layer)) {
@@ -293,10 +298,17 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
 
   ## Note: if dsn is a SpatiaLite database, only spatial layers are listed
   if (!layer %in% layerlst$name) {
+    if (checkonly) {
+      return(FALSE) 
+    }
     if (ext.dsn == "sqlite") {
       return(pcheck.table(tab=layer, tab_dsn=dsn))
     } else {
       stop(layer, " is not in database")
+    }
+  } else {
+    if (checkonly) {
+      return(TRUE)
     }
   }
 

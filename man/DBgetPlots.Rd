@@ -18,7 +18,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, alltFilter = NULL, 
 	savedata = FALSE, saveqry = FALSE, outfolder = NULL, out_fmt = "csv", 
 	out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite = FALSE, savePOP = FALSE, returndata = TRUE)
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, savePOP = FALSE, returndata = TRUE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name (e.g., 'Arizona','New Mexico') or 
@@ -113,7 +113,10 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	a database or shapefile. If FALSE, the out_dsn will be overwritten if exists. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE, overwrite data. }
+  \item{overwrite_dsn}{ Logical. If TRUE and out_fmt = 'sqlite', 
+	the out_dsn is overwritten. }
+  \item{overwrite_layer}{ Logical. If TRUE and out_fmt = 'csv', files are overwritten. 
+	If out_fmt != 'csv', the layer in database is overwritten. }
   \item{savePOP}{ Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN table. }
   \item{returndata}{ Logical. If TRUE, returns data objects. }
 }

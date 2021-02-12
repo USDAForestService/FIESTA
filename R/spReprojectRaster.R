@@ -1,7 +1,7 @@
 spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
     	res.new=NULL, bbox.new=NULL, dtype.new=NULL, NODATA.new=NULL,
  	resamp.method="near", crs.default="EPSG:5070", outfolder=NULL, 
-	outfn=NULL, outext="img", overwrite=FALSE) {
+	outfn=NULL, outext=NULL, overwrite=FALSE) {
 
   ##################################################################################
   ## DESCRIPTION: reproject raster. If crs.new is not defined, uses crs.default. 	
@@ -118,10 +118,18 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   outfolder <- pcheck.outfolder(outfolder)
   
   ## Check outfn
-  if (is.null(outfn)) 
+  if (is.null(outfn)) {
     outfn <- paste0(rastnm, "_prj")
+  }
 
   ## Check outext and outfilenm
+  if (is.null(outext)) {
+    outext <- getext(outfn)
+    if (is.na(outext) || outext == "") {
+      outext <- "tif"
+    }
+  }
+
   outext.tmp <- unlist(strsplit(outext, "\\."))
   if (length(outext.tmp) > 1) {
     outext <- outext.tmp[length(outext.tmp)]   

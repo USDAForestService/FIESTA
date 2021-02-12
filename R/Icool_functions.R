@@ -96,6 +96,12 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
 
   ## Get basename
   outfn.base <- basename.NoExt(outfn)
+  outfn.dir <- dirname(outfn)
+  if (outfn.dir != "." && dir.exists(file.path(outfolder, outfn.dir))) {
+    outfolder <- file.path(outfolder, outfn.dir)
+  }
+    
+
   extfn <- getext(outfn) 
 
   ## Check if outfolder
@@ -115,13 +121,13 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
   }
      
   ## Check outfn.pre
-  if (!is.null(outfn.pre) && is.character(outfn.pre))
+  if (!is.null(outfn.pre) && is.character(outfn.pre)) {
     outfn.base <- paste(outfn.pre, outfn.base, sep="_")
-
+  }
   ## DESCRIPTION: gets outfile name
-  if (outfn.date)
+  if (outfn.date) {
     outfn.base <- paste0(outfn.base, "_", format(Sys.time(), "%Y%m%d"))
-
+  }
   ## Get full path filename
   outfolder <- pcheck.outfolder(outfolder, gui=gui)  
   outfilenm <- file.path(outfolder, outfn.base)

@@ -4,9 +4,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
 	data_dsn=NULL, istree=FALSE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
 	tree_layer="tree", seed_layer="seed", other_layers=NULL, puniqueid="CN", 
-	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
+	pjoinid="CN", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
 	measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, 
-	intensity1=FALSE, showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
+	intensity1=FALSE, showsteps=FALSE, 
+	savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
 	outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
 	overwrite_dsn=FALSE, overwrite_layer=FALSE, ...) {
 
@@ -131,23 +132,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
   ## Check xy table
-  xyinfo <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
-
-  if (!is.null(xyinfo)) {
-    if (!is.null(xyinfo)) {
-      #xydat <- pcheck.spatial(xyinfo$xy, xyinfo$xy_dsn)
-      xyfields <- names(xyinfo)
-      xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
-		gui=gui, checklst=xyfields, caption="xy uniqueid", stopifnull=TRUE)
-      xy.joinid <- pcheck.varchar(var2check=xy.joinid, varnm="xy.joinid", 
-		gui=gui, checklst=xyfields, caption="xy joinid")
-      if (is.null(xy.joinid)) xy.joinid <- xy.uniqueid
-      xvar <- pcheck.varchar(var2check=xvar, varnm="xvar", gui=gui, 
-		checklst=xyfields, caption="x variable", stopifnull=TRUE)
-      yvar <- pcheck.varchar(var2check=yvar, varnm="yvar", gui=gui, 
-		checklst=xyfields, caption="y variable", stopifnull=TRUE)
-    }
-  }
+  xychk <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
 
   if (datsource %in% c("obj", "csv")) {
 
@@ -187,8 +172,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     }
 
     if (clipxy) {
-      if (is.null(xydat))
-        message("no xy data... using all plots in dataset")
+      if (!xychk) {
+        stop("must include xy to clip plots")
+      }
 
       clipdat <- spClipPoint(xyplt=xy, xy.uniqueid=xy.joinid, 
 			xvar=xvar, yvar=yvar, xy.crs=xy.crs, addxy=TRUE, clippolyv=bndx)
@@ -236,7 +222,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     }
 
   } else {			## datsource in('datamart', 'sqlite')
-
     condx <- {}
     pltx <- {}
     tabs2save <- c("pltx", "condx")
@@ -488,6 +473,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         gc()
           
       } else if (datsource == "sqlite") {
+        xyindb <- FALSE
 
         ####################################################################
         ## 1) Check if data for all states is in database
@@ -496,18 +482,21 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ## 3) Subset other data with clipped xy joinid
         ####################################################################
         if (i == 1) {
-          conn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-          tabs <- DBI::dbListTables(conn)
+          dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+          tablst <- DBI::dbListTables(dbconn)
           layers <- c(plot_layer, cond_layer)
           if (istree) layers <- c(layers, tree_layer)
           if (isseed) layers <- c(layers, seed_layer)
-          if (!any(layers %in% tabs))
-            stop("missing layers in database: ", toString(layers[!layers %in% tabs]))
-          if (!is.null(other_layers) && !any(other_layers %in% tabs))
-            stop("missing layers in database: ", toString(other_layers[!other_layers %in% tabs]))
+          if (!any(layers %in% tablst)) {
+            stop("missing layers in database: ", toString(layers[!layers %in% tablst]))
+          }
+          if (!is.null(other_layers) && !any(other_layers %in% tablst)) {
+            stop("missing layers in database: ", 
+			toString(other_layers[!other_layers %in% tablst]))
+          }
 
           ## Check for state in database
-          dbstcds <- DBI::dbGetQuery(conn, paste("select distinct statecd from", 
+          dbstcds <- DBI::dbGetQuery(dbconn, paste("select distinct statecd from", 
 				plot_layer))[[1]]
           if (!all(stcds %in% dbstcds)) {
             statemiss <- stcds[!stcds %in% dbstcds]
@@ -520,13 +509,18 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               message("database does not include all states: ", toString(statemiss))
             }  
           }
-          if (clipxy && is.null(xydat)) {
-            xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE,
-					createnew=FALSE)
-            if (!is.null(xyconn)) {
-              tabs <- DBI::dbListTables(xyconn)
+          if (clipxy) {
+            if (xychk && xy_dsn == data_dsn) {
+              xyconn <- dbconn
+              xyindb <- TRUE
             } else {
-              xyconn <- conn
+              xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE,
+					createnew=FALSE)
+            }
+            if (!is.null(xyconn)) {
+              xytablst <- DBI::dbListTables(xyconn)
+            } else {
+              xyconn <- dbconn
             }
 
             ## Check xy data
@@ -547,13 +541,16 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                   xvar <- "LON_PUBLIC"
                   yvar <- "LAT_PUBLIC"
                 } else {
-                  if ("plot" %in% tabs) 
+                  if ("plot" %in% tablst) 
                     xy <- "plot"
                 }
               }
             } 
-            if (!xy %in% tabs)
+            if (!xy %in% tablst) {
               stop(xy, " not in ", xy_dsn) 
+            } else {
+              xyindb <- TRUE
+            }
 
             xyfields <- DBI::dbListFields(xyconn, xy)
             if (is.null(xvar))
@@ -576,8 +573,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               warning("check xy and yvar: ", toString(c(xy, yvar)))
 
             ## Check xy.joinid
-            pltfields <- DBI::dbListFields(conn, "plot")
+            pltfields <- DBI::dbListFields(dbconn, "plot")
 
+            ## Not sure about following code.
+            ## Checks for PLOT_ID in both xy and plot data. 
             if (grepl("xyCur", xy)) {
               if (xy.joinid %in% c("CN", "PLT_CN") && "PLOT_ID" %in% xyfields && 
 				"PLOT_ID" %in% pltfields) {
@@ -637,7 +636,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         plt.qry <- paste0("select distinct p.* from ", pfromqry, " where ", stfilter) 
 
         ## Query database for plots
-        rs <- DBI::dbSendQuery(conn, plt.qry)
+        rs <- DBI::dbSendQuery(dbconn, plt.qry)
         plt <- setDT(DBI::dbFetch(rs))
         DBI::dbClearResult(rs)
 
@@ -668,10 +667,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (clipxy) {
           ## Generate xy table for all plots in state (xystate)
           #########################################################
-          if (!is.null(xydat)) {
-            xyvars <- c(xy.joinid, xvar, yvar)
-            xystate <- xydat[, xyvars, with=FALSE]
-          } else {  
+          if (xyindb) { 
             #xy.joinid <- pjoinid
             xyvars <- c(xy.joinid, xvar, yvar)
             if (xy == "plot") {
@@ -681,7 +677,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               if (allyrs || measCur) measCur.xy <- TRUE
               xyfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur.xy, 
 				invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R", plotnm="PLOT")
+				intensity1=intensity1, syntax="R", plotnm=plot_layer)
 
               xy.qry <- paste0("select distinct ", toString(paste0("xy.", xyvars)), 
 				" from ", xyfromqry, " JOIN ", xy, " xy ON (p.", pjoinid, 
@@ -689,10 +685,17 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
             xystate <- DBI::dbGetQuery(xyconn, xy.qry) 
             if (nrow(xystate) == 0) break
+          } else if (xychk) {
+            xydat <- pcheck.spatial(layer=xy, dsn=xy_dsn)
+            xyvars <- c(xy.joinid, xvar, yvar)
+            xystate <- xydat[, xyvars, with=FALSE]
+          } else { 
+            stop("must include xy data")
           }
 
           ## Get most current plots in database for measEndyr.filter & !measEndyr.filter
           #######################################################################
+          p2fromqry <- paste(plot_layer, "p")
           if (!is.null(measEndyr.filter)) {
             bndxf1 <- datFilter(bndx, xfilter=measEndyr.filter)$xf
             bndxf2 <- datFilter(bndx, xfilter=paste0("!", measEndyr.filter))$xf
@@ -706,36 +709,36 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             plt1 <- plt[plt[[pjoinid]] %in% xyplt1[[xy.joinid]], ]
             pltids1 <- plt1[[puniqueid]]
 
-            cond1.qry <- paste0("select cond.* from ", pfromqry,
-			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
-				" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
-            rs <- DBI::dbSendQuery(conn, cond1.qry)
+            cond1.qry <- paste0("select cond.* from ", p2fromqry,
+			" join cond on(cond.PLT_CN = p.CN) where ", 
+				"p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(dbconn, cond1.qry)
             cond1 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
 
             if (istree) {
-              tree1.qry <- paste0("select tree.* from ", pfromqry,
+              tree1.qry <- paste0("select tree.* from ", p2fromqry,
 			" join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
-              rs <- DBI::dbSendQuery(conn, tree1.qry)
+              rs <- DBI::dbSendQuery(dbconn, tree1.qry)
               tree1 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
             if (isseed) {
-              seed1.qry <- paste0("select seed.* from ", pfromqry,
+              seed1.qry <- paste0("select seed.* from ", p2fromqry,
 			" join seed on(seed.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
-              rs <- DBI::dbSendQuery(conn, seed1.qry)
+              rs <- DBI::dbSendQuery(dbconn, seed1.qry)
               seed1 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
-           if (!is.null(other_layers)) {
+            if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+                ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
                 other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
 				" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
-                rs <- DBI::dbSendQuery(conn, other.qry)
+                rs <- DBI::dbSendQuery(dbconn, other.qry)
                 assign(paste0(layer, "1"), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
                 DBI::dbClearResult(rs)
@@ -759,12 +762,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             ## get pfromqry
             pfromqry2 <- getpfromqry(evalid=evalidst, plotCur=measCur, 
 				invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R", plotnm="PLOT")
+				intensity1=intensity1, syntax="R", plotnm=plot_layer)
             ## Set up query for plots
             plt2.qry <- paste0("select distinct p.* from ", pfromqry2, " where ", stfilter) 
 
             ## Query database for plots
-            rs <- DBI::dbSendQuery(conn, plt2.qry)
+            rs <- DBI::dbSendQuery(dbconn, plt2.qry)
             plt2 <- setDT(DBI::dbFetch(rs))
 
             if (!"PLOT_ID" %in% names(plt2)) {
@@ -797,26 +800,26 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             plt2 <- plt2[plt2[[pjoinid]] %in% xyplt2[[xy.joinid]], ]
             pltids2 <- plt2[[puniqueid]]
 
-            cond2.qry <- paste0("select cond.* from ", pfromqry,
+            cond2.qry <- paste0("select cond.* from ", p2fromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
-            rs <- DBI::dbSendQuery(conn, cond2.qry)
+            rs <- DBI::dbSendQuery(dbconn, cond2.qry)
             cond2 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
 
             if (istree) {
-              tree2.qry <- paste0("select tree.* from ", pfromqry,
+              tree2.qry <- paste0("select tree.* from ", p2fromqry,
 			" join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
-              rs <- DBI::dbSendQuery(conn, tree2.qry)
+              rs <- DBI::dbSendQuery(dbconn, tree2.qry)
               tree2 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
             if (isseed) {
-              seed2.qry <- paste0("select seed.* from ", pfromqry,
+              seed2.qry <- paste0("select seed.* from ", p2fromqry,
 			" join seed on(seed.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
-              rs <- DBI::dbSendQuery(conn, seed2.qry)
+              rs <- DBI::dbSendQuery(dbconn, seed2.qry)
               seed2 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
@@ -824,10 +827,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+                ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
                 other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
 				" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
-                rs <- DBI::dbSendQuery(conn, other.qry)
+                rs <- DBI::dbSendQuery(dbconn, other.qry)
                 assign(paste0(layer, "2"), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
                 DBI::dbClearResult(rs)
@@ -859,26 +862,26 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             plt <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
             pltids <- plt[[puniqueid]]
 
-            cond.qry <- paste0("select cond.* from ", pfromqry,
+            cond.qry <- paste0("select cond.* from ", p2fromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-            rs <- DBI::dbSendQuery(conn, cond.qry)
+            rs <- DBI::dbSendQuery(dbconn, cond.qry)
             cond <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
 
             if (istree) {
-              tree.qry <- paste0("select tree.* from ", pfromqry,
+              tree.qry <- paste0("select tree.* from ", p2fromqry,
 			" join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-              rs <- DBI::dbSendQuery(conn, tree.qry)
+              rs <- DBI::dbSendQuery(dbconn, tree.qry)
               tree <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
             if (isseed) {
-              seed.qry <- paste0("select seed.* from ", pfromqry,
+              seed.qry <- paste0("select seed.* from ", p2fromqry,
 			" join seed on(seed.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-              rs <- DBI::dbSendQuery(conn, seed.qry)
+              rs <- DBI::dbSendQuery(dbconn, seed.qry)
               seed <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
@@ -886,10 +889,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+                ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
                 other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-                rs <- DBI::dbSendQuery(conn, other.qry)
+                rs <- DBI::dbSendQuery(dbconn, other.qry)
                 assign(paste0(layer), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
                 DBI::dbClearResult(rs)
@@ -919,7 +922,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             xypltx <- xydat
         
           ## Query database for plots
-          rs <- DBI::dbSendQuery(conn, plt.qry)
+          rs <- DBI::dbSendQuery(dbconn, plt.qry)
           plt <- DBI::dbFetch(rs)
 
           ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
@@ -937,26 +940,26 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           rm(plt)
           gc()
 
-          cond.qry <- paste0("select cond.* from ", pfromqry,
+          cond.qry <- paste0("select cond.* from ", p2fromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-          rs <- DBI::dbSendQuery(conn, cond.qry)
+          rs <- DBI::dbSendQuery(dbconn, cond.qry)
           condx <- rbind(condx, DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
 
           if (istree) {
-            tree.qry <- paste0("select tree.* from ", pfromqry,
+            tree.qry <- paste0("select tree.* from ", p2fromqry,
 			" join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-            rs <- DBI::dbSendQuery(conn, tree.qry)
+            rs <- DBI::dbSendQuery(dbconn, tree.qry)
             treex <- rbind(treex, DBI::dbFetch(rs))
             DBI::dbClearResult(rs)
           }
           if (isseed) {
-            seed.qry <- paste0("select seed.* from ", pfromqry,
+            seed.qry <- paste0("select seed.* from ", p2fromqry,
 			" join tree on(seed.PLT_CN = p.CN) where ", stfilter, 
 			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-            rs <- DBI::dbSendQuery(conn, seed.qry)
+            rs <- DBI::dbSendQuery(dbconn, seed.qry)
             seedx <- rbind(seedx, DBI::dbFetch(rs))
             DBI::dbClearResult(rs)
           }
@@ -964,10 +967,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
-              ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+              ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
               other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
 			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
-              rs <- DBI::dbSendQuery(conn, other.qry)
+              rs <- DBI::dbSendQuery(dbconn, other.qry)
               assign(paste0(layer, "x"), rbind(paste0(layer, "x"), DBI::dbFetch(rs)))
               othertabnms <- c(othertabnms, layer)
               DBI::dbClearResult(rs)
@@ -979,7 +982,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
     ## Disconnect database
     if (datsource == "sqlite")
-      DBI::dbDisconnect(conn)
+      DBI::dbDisconnect(dbconn)
   }
 
   #############################################################################

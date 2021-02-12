@@ -6,8 +6,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
  	defaultVars=TRUE, regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, 
 	intensity1=FALSE, stateFilter=NULL, allFilter=NULL, alltFilter=NULL, 
 	savedata=FALSE, saveqry=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
-	savePOP=FALSE, returndata=TRUE) {
+	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, savePOP=FALSE, returndata=TRUE) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -391,12 +391,12 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     treeReturn <- FALSE
   }
 
-  ## Check outfolder, outfn.date, overwrite
+  ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite, append_layer=append_layer, gui=gui)
+		overwrite=overwrite_dsn, append_layer=append_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -803,7 +803,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       ## Write query to outfolder
       if (saveqry) {
         pltcondqryfn <- DBgetfn("pltcond", invtype, outfn.pre, stabbr, 
-		evalid=evalid, qry=TRUE, outfolder=outfolder, overwrite=overwrite, 
+		evalid=evalid, qry=TRUE, outfolder=outfolder, overwrite=overwrite_layer, 
 		outfn.date=outfn.date, ext="txt")
         outfile <- file(pltcondqryfn, "w")
         cat(  pltcondqry, "\n", file=outfile)
@@ -1050,7 +1050,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
             if (saveqry) {
               treeqryfn <- DBgetfn("tree", invtype, outfn.pre, stabbr, 
 			evalid=evalid, qry=TRUE, outfolder=outfolder, 
-			overwrite=overwrite, outfn.date=outfn.date, ext="txt")
+			overwrite=overwrite_layer, outfn.date=outfn.date, ext="txt")
               outfile <- file(treeqryfn, "w")
               cat(  treeqryfn, "\n", file=outfile)
               close(outfile)
@@ -1508,11 +1508,10 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     if ((savedata || !treeReturn) && !is.null(pltx)) {
       message("saving data...")
       col.names <- ifelse (i == 1, TRUE, FALSE)
-      overwrite_layer <- overwrite
       if (i > 1) { 
         append_layer <- TRUE
       }
-      if (append_layer && overwrite) {
+      if (append_layer && overwrite_layer) {
         overwrite_layer <- FALSE
       }
 

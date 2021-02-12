@@ -98,7 +98,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check continuous rasters
   ###################################################################
-  rastlst.contfn <- suppressWarnings(getrastlst.rgdal(rastlst.cont, rastfolder, gui=gui))
+  rastlst.contfn <- suppressWarnings(getrastlst.rgdal(rastlst.cont, 
+	rastfolder, gui=gui, stopifLonLat=TRUE))
 
   if (!is.null(rastlst.contfn)) {
     band.cont <- sapply(rastlst.contfn, function(x) rasterInfo(x)$nbands)
