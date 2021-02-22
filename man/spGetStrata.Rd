@@ -6,7 +6,7 @@
 }
 \description{
 	Wrapper to extract attribute and area from a polygon or raster estimation 
-	unit laer and a polygon or raster layer with strata pixel categories. }
+	unit layer and a polygon or raster layer with strata pixel categories. }
 
 \usage{
 spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
@@ -20,9 +20,9 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 }
 
 \arguments{
-  \item{xyplt}{ Data frame object or String. Name of layer with xy coordinates
-	and unique identifier. Can be layer with xy_dsn, full pathname, including 
-	extension, or file name (with extension) in xy_dsn folder. }
+  \item{xyplt}{ Data frame, sf object, full pathname to *.csv or *shp, or 
+	layer name in a geodatabase. Includes XY coordinates and unique identifier.
+	If non-spatial, include parameters for FIESTA::spMakeSpatialPoints(). }
   \item{xyplt_dsn}{ String. Name of database where xyplt is. The dsn varies by
 	driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
   \item{uniqueid}{ String.* Unique identifier of xyplt records. }
@@ -42,7 +42,7 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
   \item{unit.filter}{ String. Filter to subset unit_layer spatial layer. }
   \item{strattype}{ String. Spatial layer type of stratlayer ("POLY", "RASTER"). 
 	Note: polygon strata layers are converted to raster. }
-  \item{strat_layer}{ sf R object or String. Name of the strata spatial layer.
+  \item{strat_layer}{ sf R object or full pathname of spatial stratification layer.
 	Can be a spatial polygon object, full pathname to a shapefile, name of a 
 	polygon layer within a database, or a full pathname to raster file. }
   \item{strat_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 

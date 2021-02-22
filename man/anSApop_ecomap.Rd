@@ -24,7 +24,8 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	rastlst.cat = NULL, rastlst.cat.name = NULL, showsteps = FALSE, 
 	savedata = FALSE, savexy = FALSE, saveobj = TRUE, outfolder = NULL, 
 	outfn.pre = NULL, out_fmt = "sqlite", out_dsn = NULL, outfn.date = FALSE, 
-	overwrite = TRUE, SAdomdat = NULL, SAdata = NULL, ...)
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, SAdomdat = NULL, 
+	SAdata = NULL, ...)
 }
 \arguments{
   \item{smallbnd}{ sf R object or String. Small area of interest boundary. 
@@ -82,7 +83,8 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
   \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
   \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{SAdomdat}{ R list object. SA domain data. }
   \item{SAdata}{ R list object. FIA data for estimation. }
   \item{...}{ Parameters for SAdata. }

@@ -54,7 +54,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   } else {
     adjTPA <- 1
   }
-
+ 
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
   #####################################################################################
   if (bytdom) {
@@ -84,6 +84,10 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     if (is.null(tdomdata)) return(NULL)   
     tdomdat <- tdomdata$tdomdat
     tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
+    #if (any(is.na(tdomdat[[tdomvar]]))) {
+    #  levels(tdomdat[[tdomvar]]) <- c(levels(tdomdat[[tdomvar]]), "notindomain")
+    #  tdomdat[is.na(tdomdat[[tdomvar]]), tdomvar] <- "notindomain"
+    #}
     tdomvarn <- tdomdata$tdomtotnm
     tdomvarlstn <- tdomdata$tdomlst
 
@@ -173,8 +177,9 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
       tdomvarlstd <- tdomdata$tdomlst
 
       tdombadlst <- tdomvarlstn[which(!tdomvarlstn %in% tdomvarlstd)]
-      if(length(tdombadlst) > 0){
-        warning("there are more tree domains in the numerator than in the denominator") }
+      if (length(tdombadlst) > 0) {
+        warning("there are more tree domains in the numerator than in the denominator") 
+      }
 
       ## Change names in denominator
       names(tdomdatd)[names(tdomdatd) %in% tdomvarlstd] <- paste(tdomvarlstd, "d", sep=".")

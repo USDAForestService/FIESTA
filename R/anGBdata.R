@@ -5,8 +5,8 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 	strattype="RASTER", strat_layer=NULL, strat_dsn=NULL, strvar=NULL, 
 	showsteps=FALSE, cex.plots=0.5, savedata=FALSE, savexy=TRUE, 
 	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
-	GBpltdat=NULL, ...) {
+	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, GBpltdat=NULL, ...) {
 
 
   ## Set global variables
@@ -33,33 +33,12 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Check overwrite, outfolder, outfn 
   ########################################################
   if (savedata || savexy || savesteps || saveobj) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    ## If outfn.pre is not null, create a folder within the outfolder, named outfn.pre
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
-    }
-
-    out_fmtlst <- c("sqlite", "gpkg", "csv", "gdb", "shp")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-    if (out_fmt == "shp") out_fmt <- "csv"
-    if (out_fmt != "csv" && is.null(out_dsn))
-      out_dsn <- paste0("SAdata.", out_fmt)
-
-    if (out_fmt == "gdb") {
-      out_dsn <- DBtestESRIgdb(gdbfn=out_dsn, outfolder=outfolder, overwrite=overwrite, 
-			showlist=FALSE, returnpath=FALSE)
-    }	else if (out_fmt %in% c("sqlite", "gpkg")) {
-      gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-      out_dsn <- DBcreateSQLite(SQLitefn=out_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=overwrite, returnpath=FALSE)
-    }	
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
  
   ####################################################################
@@ -80,9 +59,10 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   } else {
     GBpltdat.names <- c("clip_xyplt", "clip_polyv", "xy.uniqueid", "puniqueid",
 		"pjoinid", "clip_tabs")
-    if (!all(GBpltdat.names %in% names(GBpltdat))) 
+    if (!all(GBpltdat.names %in% names(GBpltdat))) {
       stop("missing components in GBpltdat list: ", 
 		toString(GBpltdat.names[!GBpltdat.names %in% names(GBpltdat)])) 
+    }
   }
 
   ## Extract list objects
@@ -173,47 +153,49 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 
   if (saveobj) {
     objfn <- getoutfn(outfn="GBpopdat.rda", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=TRUE)
+		overwrite=overwrite_layer, outfn.date=TRUE)
     save(GBdata, file=objfn)
     message("saving object to: ", objfn)
   } 
 
 
   if (savedata) {
-   if (!is.null(RS))
-     datExportData(sf::st_drop_geometry(bnd), outfolder=outfolder, 
+    if (!is.null(RS)) {
+      datExportData(sf::st_drop_geometry(bnd), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="bnd", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-
-    if (savexy)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
+    if (savexy) {
       datExportData(sf::st_drop_geometry(xyplt), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyplt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(plt, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(cond, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-    if (istree) 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    if (istree) {
       datExportData(tree, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-    if (isseed) 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
+    if (isseed) {
       datExportData(seed, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seed", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)  
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)  
     if (strata) {
       datExportData(stratalut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }
   }
 

@@ -151,13 +151,13 @@ modGBtree <- function(	estseed="none", landarea="FOREST", pfilter=NULL,
   ### Check row and column data
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
-	condf=pltcondf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, rowvar=rowvar, 
-	rowvar.filter=rowvar.filter, colvar=colvar, colvar.filter=colvar.filter, 
-	row.FIAname=row.FIAname, col.FIAname=col.FIAname, row.orderby=row.orderby, 
-	col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0, 
-	title.rowvar=title.rowvar, title.colvar=title.colvar, rowlut=rowlut, 
-	collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
-	landarea=landarea)
+	condf=pltcondf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, estseed=estseed,
+	rowvar=rowvar, rowvar.filter=rowvar.filter, colvar=colvar, 
+	colvar.filter=colvar.filter, row.FIAname=row.FIAname, col.FIAname=col.FIAname,
+ 	row.orderby=row.orderby, col.orderby=col.orderby, row.add0=row.add0, 
+	col.add0=col.add0, title.rowvar=title.rowvar, title.colvar=title.colvar, 
+	rowlut=rowlut, collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
+	rowgrpord=rowgrpord, landarea=landarea)
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
@@ -204,9 +204,9 @@ modGBtree <- function(	estseed="none", landarea="FOREST", pfilter=NULL,
   tdomvarlst <- treedat$tdomvarlst
 
   ## remove NA values
-  if (!is.null(tdomvar) && !is.null(tdomvar2)) {
-    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
-  }
+  #if (!is.null(tdomvar) && !is.null(tdomvar2)) {
+  #  tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
+  #}
   
   #####################################################################################
   ### Get titles for output tables

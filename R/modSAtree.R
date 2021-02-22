@@ -1,10 +1,5 @@
-modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL, 
-	pltassgn=NULL, seed=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", 
-	condid="CONDID", puniqueid="CN", pltassgnid="CN", measCur=FALSE, measEndyr=NULL, 
-	invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
-	dunitvar="DOMAIN", dunitvar2=NULL, dunitarea=NULL, areavar=NULL, dunitlut=NULL, 
-	prednames=NULL, predfac=NULL, SApackage="JoSAE", SAmethod="unit", 
-	largebnd.att=NULL, landarea="ALL", pfilter=NULL, cfilter=NULL, 
+modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod="unit", 
+	estseed="none", largebnd.att=NULL, landarea="ALL", pfilter=NULL, cfilter=NULL, 
 	estvar=NULL, estvar.filter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, 
 	pseround=3, estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
@@ -12,7 +7,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
 	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, multest.AOIonly=FALSE, 
 	outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, 
 	title.main=NULL, title.ref=NULL, title.dunitvar=NULL, title.estvar=NULL, 
-	title.filter=NULL, SApopdat=NULL, SAdata=NULL){
+	title.filter=NULL, SApopdat=NULL, ...){
 
 
   ######################################################################################
@@ -22,28 +17,22 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   ##			named as raw_dsn. If raw_fmt != 'csv', a database is created
   ##			within the outfolder names as raw_dsn. 
   ######################################################################################
-
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(SApopdat) && is.null(SAdata)) gui <- TRUE 
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
-	title.rowvar=title.colvar=TOTAL <- NULL
   gui <- FALSE
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(FIESTA::modSAtree))
+  formallst <- c(names(formals(FIESTA::modSAtree)),
+		names(formals(FIESTA::modSApop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  if (nargs() == 0 && is.null(SApopdat)) {
+    gui <- TRUE
+  } 
 
-  ##################################################################
-  ## INITIALIZE SETTINGS
-  ##################################################################
- 
   ## If gui.. set variables to NULL
   if (gui) { 
     tree=landarea <- NULL
@@ -51,6 +40,14 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
     if (!col.FIAname) col.FIAname <- NULL
   }
 
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
+	title.rowvar=title.colvar=TOTAL <- NULL
+
+
+  ##################################################################
+  ## INITIALIZE SETTINGS
+  ##################################################################
 # divideby=NULL
 # allin1=FALSE
 # addtitle=FALSE
@@ -106,6 +103,31 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   rowgrpnm=NULL
   rowgrpord=NULL 
 
+
+  ## Check SApackage 
+  SApackagelst <- c("JoSAE", "sae")
+  SApackage <- FIESTA::pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
+		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
+
+  ## Check for JoSAE library
+  if (SApackage == "JoSAE") {
+    if (!"JoSAE" %in% rownames(installed.packages()))
+	 stop("SApackage JoSAE requires package JoSAE.")
+  } else {
+    if (!"sae" %in% rownames(installed.packages()))
+	 stop("SApackage sae requires package sae.")
+  }
+
+  ## Check SAmethod 
+  SAmethodlst <- c("unit", "area")
+  SAmethod <- FIESTA::pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
+		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
+
+  ## Check estseed 
+  ########################################################
+  estseedlst <- c("none", "only", "add")
+  estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
+		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
 
   ### Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -182,54 +204,28 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
     }
   }
 
-  ## Check SA packages and method
-  SApackagelst <- c("JoSAE", "sae")
-  SApackage <- FIESTA::pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
-		checklst=SApackagelst, caption="SA package", multiple=FALSE, stopifnull=TRUE)
-
-  ## Check for JoSAE library
-  if (SApackage == "JoSAE") {
-    if (!"JoSAE" %in% rownames(installed.packages()))
-	 stop("SApackage JoSAE requires package JoSAE.")
-  } else {
-    if (!"sae" %in% rownames(installed.packages()))
-	 stop("SApackage sae requires package sae.")
-  }
-  methodlst <- c("unit", "area")
-  SAmethod <- FIESTA::pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
-		checklst=methodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
-
-
 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(SApopdat)) {
-    SApopdat <- modSApop(tree=tree, cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn,
- 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
-		puniqueid=puniqueid, pltassgnid=pltassgnid, measCur=FALSE, measEndyr=NULL,
- 		invyrs=NULL, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
-		cond.nonsamp.filter=cond.nonsamp.filter, dunitvar=dunitvar, dunitvar2=dunitvar2,
-		dunitarea=dunitarea, areavar=areavar, unitcombine=unitcombine, dunitlut=dunitlut,
- 		prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, SAdata=SAdata,
-		gui=gui)
+    SApopdat <- modSApop(gui=gui, prednames=prednames, ...)
   } else {
     returnSApopdat <- FALSE
-    if (!is.list(SApopdat))
-      stop("SApopdat must be a list")
-    listitems <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
+    list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
 		"prednames", "plotsampcnt", "condsampcnt")
-    if (!all(listitems %in% names(SApopdat))) {
-      items.miss <- listitems[!listitems %in% names(SApopdat)]
-      stop("invalid SApopdat... missing items: ", paste(items.miss, collapse=", "))
-    }   
+    SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", list.items=list.items)
   }
   if (is.null(SApopdat)) return(NULL)
   SAdomsdf <- SApopdat$SAdomsdf
   condx <- SApopdat$condx
   pltcondx <- SApopdat$pltcondx
   treex <- SApopdat$treex
+  seedx <- SApopdat$seedx
+  if (is.null(treex) && is.null(seedx)) {
+    stop("must include tree data for tree estimates")
+  }
   cuniqueid <- SApopdat$cuniqueid
   condid <- SApopdat$condid
   tuniqueid <- SApopdat$tuniqueid
@@ -237,12 +233,26 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   dunitarea <- SApopdat$dunitarea
   areavar <- SApopdat$areavar
   dunitvar <- SApopdat$dunitvar
+  dunitvar2 <- SApopdat$dunitvar2
   dunitlut <- SApopdat$dunitlut
   plotsampcnt <- SApopdat$plotsampcnt
   condsampcnt <- SApopdat$condsampcnt
   states <- SApopdat$states
   invyrs <- SApopdat$invyrs
+  adj <- SApopdat$adj
 
+  ## Check estseed 
+  ########################################################
+  estseedlst <- c("none", "only", "add")
+  estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
+		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
+  if (estseed == "none") {
+    seedx <- NULL
+  } else {
+    if (is.null(seedx)) {
+      stop("no seedling data in population data")
+    }
+  } 
 
   ## check SAdomsdf
   ########################################################
@@ -269,8 +279,8 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 		condid=condid, treex=treex, sumunits=sumunits, landarea=landarea,
- 		ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
+ 		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
+		landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
  		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 		savedata=savedata, outfolder=outfolder)
@@ -278,6 +288,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
   treef <- estdat$treef
+  seedf <- estdat$seedf
   tuniqueid <- estdat$tuniqueid
   sumunits <- estdat$sumunits
   allin1 <- estdat$allin1
@@ -299,7 +310,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
   if (!sumunits) col.add0 <- TRUE
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, 
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
 	condf=pltcondf, cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
 	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
 	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby,
@@ -307,6 +318,7 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
 	title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
 	rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea) 
   treef <- rowcolinfo$treef
+  seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -336,9 +348,9 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   ### Get estimation data from tree table, with plot-level adjustment for nonresponse
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- check.tree(gui=gui, treef=treef, bycond=TRUE, condf=condf, 
-	bytdom=bytdom, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
-	puniqueid=puniqueid, esttype=esttype, estvarn=estvar, 
+  treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
+	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
+	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
 	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, adjtree=adjtree)
   if (is.null(treedat)) return(NULL) 
   estvar <- treedat$estvar
@@ -346,19 +358,19 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
-  tdomdat <- DT_NAto0(tdomdat, estvar.name, 0)
+  #tdomdat <- DT_NAto0(tdomdat, estvar.name, 0)
 
   ## add or separate concatenated columns
-  if (!is.null(tdomvar) && !is.null(tdomvar2)) {
-    tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
-    grpvar <- c(tdomvar, tdomvar2)
-  }
+  #if (!is.null(tdomvar) && !is.null(tdomvar2)) {
+  #  tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
+  #  grpvar <- c(tdomvar, tdomvar2)
+  #}
 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
   if (is.null(title.dunitvar)) title.dunitvar <- smallbnd.att
-  alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, sumunits=sumunits, 
+  alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, sumunits=sumunits, 
  	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
  	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.dunitvar,
 	title.filter=title.filter, title.estvarn=title.estvar, unitvar=dunitvar, 
@@ -379,7 +391,6 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
   } 
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
-
   
   #####################################################################################
   ## GENERATE ESTIMATES
@@ -440,7 +451,6 @@ modSAtree <- function(SAdomsdf=NULL, tree=NULL, cond=NULL, plt=NULL,
 			SApackage=SApackage, SAmethod="area", 
 			esttype=esttype, prednames=prednames, fmla=fmla,
 			domain=domain, response=response)) 
-
   } else {
     estkey <- c(largebnd.att, "DOMAIN")
 

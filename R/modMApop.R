@@ -8,7 +8,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=TRUE, MAdata=NULL, MAmodeldat=NULL, gui=FALSE){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, MAdata=NULL, MAmodeldat=NULL, 
+	gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -39,36 +40,37 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE)
   adjtree <- FALSE
+  popType <- "VOL"
+  returnlst <- list()
 
-  if (is.null(MAdata)) {
-    if (!is.null(MAmodeldat)) {
-      modeldat.names <- c("pltassgn", "domzonal", "domvar",
-		"predfac", "npixelvar", "pltassgnid", "domarea", "areavar")
-      if (!all(modeldat.names %in% names(MAmodeldat))) 
-        stop("missing components in MAmodeldat list: ", 
-		toString(modeldat.names[!modeldat.names %in% names(MAmodeldat)])) 
-      pltassgn <- MAmodeldat$pltassgn
-      pltassgnid <- MAmodeldat$pltassgnid
-      unitlut <- MAmodeldat$domzonal
-      unitvar <- MAmodeldat$domvar
-      unitarea <- MAmodeldat$domarea
-      areavar <- MAmodeldat$areavar
-      npixelvar <- MAmodeldat$npixelvar
-      predfac <- MAmodeldat$predfac
-      PSstrvar <- MAmodeldat$PSstrvar
 
-      if (any(MAmethod %in% c("greg", "gregEN"))) {
-        if (is.null(prednames)) {
-          prednames <- MAmodeldat$prednames
-        } else {
-          if (!all(prednames %in% MAmodeldat$prednames))
-            stop("invalid prednames: ", 
-			toString(prednames[!prednames %in% MAmodeldat$prednames]))
-          predfac <- predfac[predfac %in% prednames]
-        }
-      } 
-    }
-  } else {
+  ## Check popType
+  popTypelst <- c("VOL")
+  popType <- FIESTA::pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
+		checklst=popTypelst, caption="population type", stopifnull=TRUE,
+		warn="only VOL is currently available")
+
+  ## Check savedata 
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check saveobj 
+  saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
+		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check output
+  ########################################################
+  if (savedata || saveobj) {
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
+  } 
+
+
+  if (!is.null(MAdata)) {
     list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
     MAdata <- FIESTA::pcheck.object(MAdata, "MAdata", list.items=list.items)
     plt <- MAdata$plt
@@ -95,6 +97,30 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
         predfac <- predfac[predfac %in% prednames]
       }
     } 
+  } else if (!is.null(MAmodeldat)) {
+    list.items <- c("pltassgn", "domzonal", "domvar", "predfac", "npixelvar", 
+		"pltassgnid", "domarea", "areavar")
+    MAmodeldat <- FIESTA::pcheck.object(MAmodeldat, "MAmodeldat", list.items=list.items)
+    pltassgn <- MAmodeldat$pltassgn
+    pltassgnid <- MAmodeldat$pltassgnid
+    unitlut <- MAmodeldat$domzonal
+    unitvar <- MAmodeldat$domvar
+    unitarea <- MAmodeldat$domarea
+    areavar <- MAmodeldat$areavar
+    npixelvar <- MAmodeldat$npixelvar
+    predfac <- MAmodeldat$predfac
+    PSstrvar <- MAmodeldat$PSstrvar
+
+    if (any(MAmethod %in% c("greg", "gregEN"))) {
+      if (is.null(prednames)) {
+        prednames <- MAmodeldat$prednames
+      } else {
+        if (!all(prednames %in% MAmodeldat$prednames))
+          stop("invalid prednames: ", 
+			toString(prednames[!prednames %in% MAmodeldat$prednames]))
+        predfac <- predfac[predfac %in% prednames]
+      }
+    }
   } 
  
   ###################################################################################
@@ -111,6 +137,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
  	unitcombine=unitcombine, stratcombine=stratcombine, strvar=PSstrvar, 
 	prednames=prednames, predfac=predfac)
+  if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
@@ -237,9 +264,9 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
   }
-  if (!is.null(seedf))
+  if (!is.null(seedf)) {
     returnlst$seedx <- seedf
-
+  }
   if (strata) {
     returnlst$PSstrvar <- PSstrvar
     if (!is.null(stratcombinelut)) {
@@ -254,7 +281,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 
   if (saveobj) {
     objfn <- getoutfn(outfn="MApopdat", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=outfn.date, ext="rda")
+		overwrite=overwrite_layer, outfn.date=outfn.date, ext="rda")
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
@@ -262,13 +289,13 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   if (savedata) {
     datExportData(pltassgnx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(unitlut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
 
   return(returnlst)

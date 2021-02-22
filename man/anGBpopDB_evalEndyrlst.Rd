@@ -10,7 +10,8 @@
 anGBpopDB_evalEndyrlst(evalEndyrlst, states, evalType = "VOL", 
 	data_dsn = NULL, isseed = FALSE, ppsanm = "pop_plot_stratum_assgn", 
 	savedata = FALSE, out_dsn=NULL, out_fmt="sqlite", 
-	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE)
+	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE)
 }
 \arguments{
   \item{evalEndyrlst}{ Integer vector. Vector of one or more Evaluation 
@@ -40,7 +41,8 @@ anGBpopDB_evalEndyrlst(evalEndyrlst, states, evalType = "VOL",
 	outfolder is the working directory. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE, overwrite data. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
 }
  
 \value{

@@ -122,6 +122,7 @@ modMAtree <- function(MAmethod="greg", prednames=NULL,
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
   PSstrvar <- MApopdat$PSstrvar
+  adj <- MApopdat$adj
 
   if (MAmethod %in% c("greg", "gregEN")) {
     if (is.null(prednames)) {
@@ -237,7 +238,6 @@ modMAtree <- function(MAmethod="greg", prednames=NULL,
   tdomvar <- rowcolinfo$tdomvar
   tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
-  adj <- MApopdat$adj
   #rm(rowcolinfo)  
   
   ## Generate a uniquecol for estimation units
@@ -272,8 +272,8 @@ modMAtree <- function(MAmethod="greg", prednames=NULL,
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
-  alltitlelst <- FIESTA::check.titles(dat=tdomdat, esttype=esttype, sumunits=sumunits, 
- 	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
+  alltitlelst <- FIESTA::check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
+	sumunits=sumunits, title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
  	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
 	title.filter=title.filter, title.estvarn=title.estvar, unitvar=unitvar, 
 	rowvar=rowvar, colvar=colvar, estvarn=estvar, estvarn.filter=estvar.filter, 

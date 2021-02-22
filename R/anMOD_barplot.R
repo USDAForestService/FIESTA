@@ -1,4 +1,4 @@
-anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord="DESC", 
+anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL, 
 	barplot.color=NULL, barplot.ylim=NULL, barplot.nplt=FALSE,
 	savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite=FALSE, title.ref=NULL, title.main=NULL, divideby=NULL) {

@@ -184,9 +184,11 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       x <- xchk$tab2
       x <- merge(uniquex2, x, by=xvar2)
     }
-    if (is.factor(uniquex2[[xvar2]]))
+    if (is.factor(uniquex2[[xvar2]])) {
       x[[xvar2]] <- factor(x[[xvar2]], levels=levels(uniquex2[[xvar2]]))
-  } else {
+    }
+
+  } else {  ## is.null(xvar2)
     if (xvar.add0) {
       xchk <- FIESTA::check.matchclass(uniquex, x, byvars)
       uniquex <- xchk$tab1
@@ -256,16 +258,21 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   ## Note: If NBRPLT.gt0 = 0, it is replaced by null value (i.e., estnull, psenull)
   ##############################################################################
 
-  if (!is.null(estround) && is.numeric(group.est[[estnm]]))
+  if (!is.null(estround) && is.numeric(group.est[[estnm]])) {
     group.est[[estnm]] <- round(group.est[[estnm]], estround)
-  if (!is.null(pseround) && is.numeric(group.est[[psenm]]))
+  }
+  if (!is.null(pseround) && is.numeric(group.est[[psenm]])) {
     group.est[[psenm]] <- round(group.est[[psenm]], pseround)
-  if (is.null(char.width))
+  }
+  if (is.null(char.width)) {
     char.width <- max(nchar(na.omit(group.est[[psenm]])))
-  if (is.character(estnull)) 
+  }
+  if (is.character(estnull)) {
     group.est[[estnm]] <- as.character(group.est[[estnm]])
-  if (is.character(psenull))
+  }
+  if (is.character(psenull)) {
     group.est[[psenm]] <- as.character(group.est[[psenm]])
+  }
   group.est[NBRPLT.gt0 == 0, (estnm) := estnull]
   group.est[NBRPLT.gt0 == 0, (psenm) := psenull]
 

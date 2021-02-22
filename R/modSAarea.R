@@ -1,10 +1,5 @@
-modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL, 
-	seed=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	puniqueid="CN", pltassgnid="CN", measCur=FALSE, measEndyr=NULL, 
-	invyrs=NULL, ACI=FALSE, adj="plot", SApackage="JoSAE", SAmethod="unit", 
-	plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, dunitvar="DOMAIN", 
-	dunitvar2=NULL, dunitarea=NULL, areavar=NULL, dunitlut=NULL, prednames=NULL, 
-	predfac=NULL, largebnd.att=NULL, landarea="ALL", pfilter=NULL, 
+modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", 
+	SAmethod="unit", largebnd.att=NULL, landarea="ALL", pfilter=NULL, 
 	cfilter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, 
 	estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
@@ -12,41 +7,43 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
 	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, multest.AOIonly=FALSE, 
 	outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, 
 	title.main=NULL, title.ref=NULL, title.dunitvar=NULL, title.filter=NULL, 
-	SApopdat=NULL, SAdata=NULL){
+	SApopdat=NULL, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
   ## Generates model-assisted estimates by domain (and estimation unit)
   ######################################################################################
-
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 || is.null(tree) && is.null(SApopdat) && is.null(SAdata)) gui <- TRUE 
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
-	title.rowvar=title.colvar <- NULL
   gui <- FALSE
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(FIESTA::modSAarea))
+  formallst <- c(names(formals(FIESTA::modSAarea)),
+		names(formals(FIESTA::modSApop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 
-  ##################################################################
-  ## INITIALIZE SETTINGS
-  ##################################################################
- 
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  if (nargs() == 0 && is.null(SApopdat)) {
+    gui <- TRUE
+  } 
+
   ## If gui.. set variables to NULL
   if (gui) { 
-    tree=landarea <- NULL
+    landarea <- NULL
     if (!row.FIAname) row.FIAname <- NULL
     if (!col.FIAname) col.FIAname <- NULL
   }
 
-  ## SET OPTIONS
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
+	title.rowvar=title.colvar <- NULL
+
+
+  ##################################################################
+  ## INITIALIZE SETTINGS
+  ##################################################################
   options.old <- options()
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
@@ -71,6 +68,26 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   rowgrp=FALSE
   rowgrpnm=NULL
   rowgrpord=NULL 
+
+
+  ## Check SApackage 
+  SApackagelst <- c("JoSAE", "sae")
+  SApackage <- FIESTA::pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
+		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
+
+  ## Check for JoSAE library
+  if (SApackage == "JoSAE") {
+    if (!"JoSAE" %in% rownames(installed.packages()))
+	 stop("SApackage JoSAE requires package JoSAE.")
+  } else {
+    if (!"sae" %in% rownames(installed.packages()))
+	 stop("SApackage sae requires package sae.")
+  }
+
+  ## Check SAmethod 
+  SAmethodlst <- c("unit", "area")
+  SAmethod <- FIESTA::pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
+		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
 
 
   ### Check savedata 
@@ -145,48 +162,18 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
     }
   }
 
-  ## Check SA packages and method
-  SApackagelst <- c("JoSAE", "sae")
-  SApackage <- FIESTA::pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
-		checklst=SApackagelst, caption="SA package", multiple=FALSE, stopifnull=TRUE)
-
-  ## Check for JoSAE library
-  if (SApackage == "JoSAE") {
-    if (!"JoSAE" %in% rownames(installed.packages()))
-	 stop("SApackage JoSAE requires package JoSAE.")
-  } else {
-    if (!"sae" %in% rownames(installed.packages()))
-	 stop("SApackage sae requires package sae.")
-  }
-  methodlst <- c("unit", "area")
-  SAmethod <- FIESTA::pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
-		checklst=methodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
-
-
 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(SApopdat)) {
-    SApopdat <- modSApop(cond=cond, plt=plt, dsn=dsn, pltassgn=pltassgn,
- 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
-		puniqueid=puniqueid, pltassgnid=pltassgnid, measCur=FALSE, measEndyr=NULL, 
-		invyrs=NULL, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
-		cond.nonsamp.filter=cond.nonsamp.filter, dunitvar=dunitvar, dunitvar2=NULL,
- 		dunitarea=dunitarea, areavar=areavar, unitcombine=unitcombine, dunitlut=dunitlut, 
-		prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, SAdata=SAdata, 
-		gui=gui)
+    SApopdat <- modSApop(gui=gui, prednames=prednames, ...)
   } else {
     returnSApopdat <- FALSE
-    if (!is.list(SApopdat))
-      stop("SApopdat must be a list")
-    listitems <- c("condx", "pltcondx", "cuniqueid", "condid", 
-		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
+    list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
+		"ACI.filter", "dunitarea", "dunitvar", "dunitlut",
 		"prednames", "plotsampcnt", "condsampcnt")
-    if (!all(listitems %in% names(SApopdat))) {
-      items.miss <- listitems[!listitems %in% names(SApopdat)]
-      stop("invalid SApopdat... missing items: ", paste(items.miss, collapse=", "))
-    }   
+    SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", list.items=list.items)
   }		
   if (is.null(SApopdat)) return(NULL)
   SAdomsdf <- SApopdat$SAdomsdf
@@ -203,6 +190,7 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   condsampcnt <- SApopdat$condsampcnt
   states <- SApopdat$states
   invyrs <- SApopdat$invyrs
+  estvar.name <- SApopdat$estvar.area
 
   ## check SAdomsdf
   ########################################################
@@ -281,6 +269,13 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   grpvar <- rowcolinfo$grpvar
   #rm(rowcolinfo)  
 
+  ## Generate a uniquecol for estimation units
+  if (!sumunits && colvar == "NONE") {
+    uniquecol <- data.table(dunitarea[[dunitvar]])
+    setnames(uniquecol, dunitvar)
+    uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
+  }
+
 
   ## Merge filtered condition data (condf) to all conditions (condx)
   ###################################################################################
@@ -321,7 +316,7 @@ modSAarea <- function(SAdomsdf=NULL, cond=NULL, plt=NULL, pltassgn=NULL,
   #####################################################################################
   unit.totest=unit.tdomest=unit.domest=unit.rowest=unit.colest=unit.grpest=
 	rowunit=totunit <- NULL
-  response <- ifelse(adj == "samp", "CONDPROP_ADJ", "CONDPROP_UNADJ")
+  response <- estvar.name
   
 
   ############################################################################

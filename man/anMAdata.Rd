@@ -10,14 +10,14 @@
 \usage{
 anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	RS = NULL, clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
-	istree = TRUE, plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
-	puniqueid = "CN", intensity1 = TRUE, rastfolder = NULL, 
-	rastlst.cont = NULL, rastlst.cont.name = NULL, 
+	istree = TRUE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
+	tree_layer = "tree", seed_layer = "seed", puniqueid = "CN", intensity1 = TRUE, 
+	rastfolder = NULL, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, 
 	showsteps = FALSE, cex.plots=0.5, savedata = FALSE, savexy = FALSE, 
 	savesteps = FALSE, saveobj=FALSE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE,
-	MApltdat=NULL, ...)
+	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, MApltdat=NULL, ...)
 }
 
 \arguments{
@@ -35,10 +35,13 @@ anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Name of database where *_layers reside. }
   \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
+  \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{plot_layer}{ String. Name of layer in database of file name of FIA plot table. }
   \item{cond_layer}{ String. Name of layer in database of file name of FIA cond table. }
   \item{tree_layer}{ String. Name of layer in database of file name of FIA tree table 
 	if istree=TRUE. }
+  \item{seed_layer}{ String. Name of layer in database of file name of FIA seedling 
+	table if isseed=TRUE. }
   \item{puniqueid}{ String. Name of unique identifier of plt. }
   \item{intensity1}{ Logical. If TRUE, include only plots with INTENSITY=1. }
   \item{rastfolder}{ String. Name of the folder with raster layers. Optional. 
@@ -74,7 +77,8 @@ anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
 	(e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE, overwrite existing files. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{MApltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
   \item{...}{ Parameters for spGetPlots(). }
 }

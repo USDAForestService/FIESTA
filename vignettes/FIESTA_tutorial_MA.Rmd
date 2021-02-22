@@ -210,7 +210,8 @@ prednames
 #   npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL,    
 #   stratcombine = TRUE, saveobj = FALSE, savedata = FALSE, outfolder = NULL,  
 #   out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = TRUE,  
-#   overwrite = TRUE, MAdata = NULL, MAmodeldat = NULL, gui = FALSE)
+#   overwrite_dsn = FALSE, overwrite_layer = TRUE, MAdata = NULL, 
+#   MAmodeldat = NULL, gui = FALSE)
 # 
 # Description:
 # Generates population data for input to modMA* estimation modules. Data includes
@@ -409,7 +410,6 @@ area.greg$pse
 area.greg <- modMAarea(MApopdat=MApopdat.greg, MAmethod="greg",  
   	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
 area.greg$est
-area.greg$pse
 
 
 ```

@@ -97,8 +97,14 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
   ## Get basename
   outfn.base <- basename.NoExt(outfn)
   outfn.dir <- dirname(outfn)
-  if (outfn.dir != "." && dir.exists(file.path(outfolder, outfn.dir))) {
-    outfolder <- file.path(outfolder, outfn.dir)
+  if (outfn.dir != ".") {
+    if (is.null(outfolder)) {
+      outfolder <- outfn.dir
+    } else {
+      if (dir.exists(file.path(outfolder, outfn.dir))) {
+        outfolder <- file.path(outfolder, outfn.dir)
+      }
+    }
   }
     
 

@@ -274,19 +274,15 @@ pltassgnid
 ```
 ######################################################################################
 # Usage:
-# modSAtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL,   
-#	  dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID",   
-#	  puniqueid = "PLT_CN", pltassgnid = "CN", measCur = FALSE, measEndyr = NULL,  
-#   invyrs = NULL, ACI = FALSE, adj = "plot", plt.nonsamp.filter = NULL,  
-#   cond.nonsamp.filter = NULL, dunitvar = "DOMAIN", dunitvar2 = NULL, 
-#   dunitarea = NULL, areavar = NULL, dunitlut = NULL, prednames = NULL, predfac= NULL,
-#   SApackage = "JoSAE", SAmethod = "unit", largebnd.att = NULL, landarea = "ALL", 
-#   plt.filter = NULL, cond.filter = NULL, estvar = NULL, estvar.filter = NULL,  
+# modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "unit",   
+#	  estseed = "none", largebnd.att = NULL, landarea = "ALL", 
+#   pfilter = NULL, cfilter = NULL, estvar = NULL, estvar.filter = NULL,  
 #   allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = "--", 
 #   divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, 
 #   outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, 
 #   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL,
-#   title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, SApopdat = NULL) 
+#   title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, 
+#   SApopdat = NULL, ...) 
 # 
 # Description:
 # Generate estimates for area of interest, or small boundary.

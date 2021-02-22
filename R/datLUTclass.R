@@ -1,6 +1,6 @@
-datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX", 
+datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL, 
 	cutbreaks=NULL, cutlabels=NULL, LUTclassnm=NULL, label.dec=1, 
-	NAto0=FALSE, vars2keep=NULL, keepcutbreaks = FALSE, savedata=FALSE, 
+	NAto0=FALSE, vars2keep=NULL, keepcutbreaks=FALSE, savedata=FALSE, 
 	outfolder=NULL, outfn="datlut"){
   #################################################################################
   ## DESCRIPTION: Function to get variable name from a table stored within FIESTA 
@@ -74,21 +74,28 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
     ## Check minvar and maxvar
     ########################################################
     LUTnmlst <- names(LUTx)
+    if (is.null(minvar) && grepl("MIN", LUTnmlst, ignore.case=TRUE)) {
+      minvar <- "MIN"
+    }
     minvar <- FIESTA::pcheck.varchar(minvar, "minvar", LUTnmlst, gui=gui,
 		caption="LUT min variable", stopifnull=TRUE)
-    if (all(LUTx[[minvar]] > xvar.max)) 
+    if (all(LUTx[[minvar]] > xvar.max)) {
       stop("all minvar values are greter than max xvar value")
-
+    }
     LUTnmlst <- LUTnmlst[LUTnmlst != minvar]
+    if (is.null(maxvar) && grepl("MAX", LUTnmlst, ignore.case=TRUE)) {
+      maxvar <- "MAX"
+    }
     maxvar <- FIESTA::pcheck.varchar(maxvar, "maxvar", LUTnmlst, gui=gui,
-		caption="LUT max variable")
+		caption="LUT max variable", stopifnull=FALSE)
     if (!is.null(maxvar)) {
       if (all(LUTx[[maxvar]] < xvar.min)) 
         stop("all maxvar values are greater than min xvar value")
     } else {
       val <- as.numeric(ifelse(label.dec == 0, 0, 
 		ifelse(label.dec == 1, 0.1, paste0(".", rep(0, label.dec-1), 1))))
-      maxvar <- c(LUTx[[minvar]][-1] - val, round(xvar.max + 1, label.dec)) 
+      LUTx$MAX <- c(LUTx[[minvar]][-1] - val, round(xvar.max + 1, label.dec)) 
+      maxvar <- "MAX"
     }  
     cutbreaks <- c(LUTx[[minvar]], LUTx[[maxvar]][nrow(LUTx)])
 
@@ -130,8 +137,9 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
   ############################################################################
   ## DO THE WORK 
   ############################################################################
-  if (NAto0)
-     datx[is.na(datx[[xvar]]), (xvar) := 0] 
+  if (NAto0) {
+    datx[is.na(datx[[xvar]]), (xvar) := 0] 
+  }
 
   ## Test values
   vals <- unique(na.omit(datx[[xvar]]))
@@ -140,7 +148,9 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
       message(paste("values are outside of cutbreaks range:", paste(gtvals, collapse=", ")))
   }
 
-  if (is.null(LUTclassnm)) LUTclassnm <- paste0(xvar, "CL")
+  if (is.null(LUTclassnm)) {
+    LUTclassnm <- paste0(xvar, "CL")
+  }
   datxnames <- names(datx) 
   datx[, (LUTclassnm) := cut(datx[[xvar]], breaks=cutbreaks, labels=cutlabels, 
 		right=FALSE)]  
@@ -163,7 +173,6 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar="MIN", maxvar="MAX",
     setcolorder(datx, c(datxnames, paste0(xvar, "_cutbreaks")))
     setnames(datx, paste0(xvar, "_cutbreaks"), paste0(LUTclassnm, "_brks"))
   }    
-
        
   ## Output list
   ########################################################

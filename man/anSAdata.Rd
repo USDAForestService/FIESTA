@@ -7,16 +7,16 @@
 	Wrapper to get data for small area estimation.	
 }
 \usage{
-anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, 
-	datsource = "sqlite", data_dsn = NULL, istree = TRUE, plot_layer = "plot", 
-	cond_layer = "cond", tree_layer = "tree", puniqueid = "CN",
- 	xy.joinid = "PLT_CN", measCur = TRUE, measEndyr = NULL, measEndyr.filter = NULL, 
-	intensity1 = FALSE, rastfolder = NULL, rastlst.cont = NULL, 
+anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, datsource = "sqlite", 
+	data_dsn = NULL, istree = TRUE, isseed = FALSE, plot_layer = "plot", 
+	cond_layer = "cond", tree_layer = "tree", seed_layer = "seed", 
+	puniqueid = "CN", intensity1 = FALSE, rastfolder = NULL, rastlst.cont = NULL, 
 	rastlst.cont.name = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
 	rastlst.cat.NODATA = NULL, vars2keep = "AOI", showsteps = FALSE, 
 	savedata = FALSE, savexy = FALSE, savesteps = FALSE, saveobj = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = TRUE, SApltdat = NULL, ...)
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	SApltdat = NULL, ...)
 }
 
 \arguments{
@@ -32,21 +32,14 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Data sournce name. Name of database where *_layers reside. }
   \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
+  \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{plot_layer}{ String. Name of layer in database of file name of FIA plot table. }
   \item{cond_layer}{ String. Name of layer in database of file name of FIA cond table. }
   \item{tree_layer}{ String. Name of layer in database of file name of FIA tree table 
 	if istree=TRUE. }
+  \item{seed_layer}{ String. Name of layer in database of file name of FIA seedling 
+	table if isseed=TRUE. }
   \item{puniqueid}{ String. Name of unique identifier of plt. }
-  \item{xy.joinid}{ String. Variable to join XY data to plot data. Not necessary to
-	be unique. If using most current XY coordinates, use identifier for a plot 
-	(e.g., PLOT_ID). }
-  \item{measCur}{ Logical. If TRUE, extract plots with most current measurement for 
-	state(s). }
-  \item{measEndyr}{ Integer year (YYYY). If measCur=TRUE, extract plots with most 
-	current measurement for state(s) for years measured before measEndyr. }
-  \item{measEndyr.filter}{ Filter. If measCur=TRUE and measEndyr != NULL, a filter 
-	for bnd to identify and area to use measEndyr, such as disturbed areas
-	where you want to exclude plots measured after disturbance. }
   \item{intensity1}{ Logical. If TRUE, include only single intensity plots 
 	(i.e., INTENSITY = 1). }
   \item{rastfolder}{ String. Name of the folder with raster layers. Optional. 
@@ -84,7 +77,8 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE,
 	an underscore as separator. }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
 	(e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE, overwrite existing files. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{SApltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
   \item{...}{ Other parameters for DBgetPlots. }
 }

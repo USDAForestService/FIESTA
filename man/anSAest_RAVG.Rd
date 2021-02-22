@@ -19,8 +19,8 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
 	SAmethod = "unit", pfilter = NULL, landarea = "FOREST", 
 	cfilter = NULL, estvarlst, savedata = FALSE, showsteps = FALSE, 
 	outfolder = NULL, multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
-	overwrite = FALSE, barplot.compare = FALSE, title.ref = NULL, 
-	SAdomdat = NULL, SAdata = NULL, SApopdat = NULL)
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, barplot.compare = FALSE, 
+	title.ref = NULL, SAdomdat = NULL, SAdata = NULL, SApopdat = NULL)
 }
 \arguments{
   \item{RAVG}{ String. RAVG layer. } 
@@ -61,7 +61,8 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
   \item{outfolder}{ String. Name of output folder. If NULL, the working directory is used. }
   \item{multest_dsn}{ String. Name of dsn to output multest table. }
   \item{multest.append}{ Logical. If TRUE, appends dunit.multest rawdata to out_dsn. }
-  \item{overwrite}{ Logical. If TRUE, overwrites output. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{barplot.compare}{ Logical. If TRUE, creates barplot to compare estimate. }
   \item{title.ref}{ String. Reference information to use in title. }
   \item{SAdomdat}{ R list object. SA domain data. }

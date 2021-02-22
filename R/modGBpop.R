@@ -8,7 +8,8 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=TRUE, GBdata=NULL, GBstratdat=NULL, gui=FALSE){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, GBdata=NULL, GBstratdat=NULL, 
+	gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -47,6 +48,8 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   adjtree <- FALSE
   nonresp=FALSE
   substrvar=NULL
+  returnlst <- list()
+
 
   ## Check popType
   popTypelst <- c("VOL")
@@ -62,44 +65,15 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
 
-  ## Check overwrite, outfolder, outfn 
+  ## Check output
   ########################################################
   if (savedata || saveobj) {
-    if (savedata) {
-      out_fmtlst <- c("sqlite", "gpkg", "csv", "gdb", "shp")
-      out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-      if (out_fmt == "shp") out_fmt <- "csv"
-      if (out_fmt != "csv") {
-        if (is.null(out_dsn)) {
-          out_dsn <- paste0("SAdata.", out_fmt)
-        } else {
-          if (!file.exists(checkfilenm(out_dsn, outfolder=outfolder)) || overwrite) {
-            if (out_fmt == "gdb") {
-              out_dsn <- DBtestESRIgdb(gdbfn=out_dsn, outfolder=outfolder, 
-				overwrite=overwrite, showlist=FALSE, outfn.date=outfn.date, 
-				returnpath=FALSE)
-            } else if (out_fmt %in% c("sqlite", "gpkg")) {
-              gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-              out_dsn <- DBcreateSQLite(SQLitefn=out_dsn, gpkg=gpkg, outfolder=outfolder, 
-				overwrite=overwrite, outfn.date=outfn.date, returnpath=FALSE)
-            }
-          }
-        }
-      } else {
-        outfolder <- pcheck.outfolder(outfolder, gui)
-        overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-			title="Overwrite?", first="NO", gui=gui)  
-        outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-			title="Add date to outfiles?", first="NO", gui=gui) 
-
-        ## If outfn.pre is not null, create a folder within the outfolder, named outfn.pre
-        if (!is.null(outfn.pre)) {
-          outfolder <- file.path(outfolder, outfn.pre)
-          if (!dir.exists(outfolder)) dir.create(outfolder)
-        }
-      }
-    }
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   } 
 
   if (!is.null(GBdata)) {
@@ -195,6 +169,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
 
+
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -271,27 +246,28 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   } 
 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid,
- 		ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
- 		unitvar=unitvar, stratalut=stratalut, strvar=strvar, expcondtab=expcondtab,
- 		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, invyrs=invyrs,
-		estvar.area=estvar.area, adj=adj)
+  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
+		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+ 		unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
+ 		stratalut=stratalut, strvar=strvar, expcondtab=expcondtab, 
+		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
+		invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
     returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
   }
-  if (!is.null(seedf))
+  if (!is.null(seedf)) {
     returnlst$seedx <- seedf
-  
+  }
 
   if (!is.null(stratcombinelut)) 
     returnlst$stratcombinelut <- stratcombinelut
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="GBpopdat", outfolder=outfolder, ext="rda",
-		overwrite=overwrite, outfn.pre=outfn.pre, outfn.date=outfn.date)
+    objfn <- getoutfn(outfn="GBpopdat", ext="rda", outfolder=outfolder, 
+		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
@@ -299,13 +275,13 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (savedata) {
     datExportData(pltassgnx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(stratalut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
 
   return(returnlst)

@@ -483,8 +483,8 @@ if (.Platform$OS.type == "windows") {
 #   minplotnum.unit = 10, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD",    
 #   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE,  
 #   savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL,  
-#   outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, GBdata = NULL, 
-#   GBstratdat = NULL, gui = FALSE)
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE,  
+#   overwrite_layer = TRUE, GBdata = NULL, GBstratdat = NULL, gui = FALSE)
 # 
 # Description:
 # Generates population data for input to modGB* estimation modules. Data includes
@@ -499,10 +499,11 @@ if (.Platform$OS.type == "windows") {
 help(modGBpop)
 
 
-## Get population data for 
+## Get population data for Wyoming area of interest using post-stratification
 ########################################################################################
-GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=WYpltassgn, pltassgnid="CN", 
-    unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstratalut)
+GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, seed=WYseed, 
+    pltassgn=WYpltassgn, pltassgnid="CN", 
+    unitarea=WYunitarea, unitvar="ESTN_UNIT", strata=TRUE, stratalut=WYstratalut)
 
 ## Get names of list components
 names(GBpopdat)
@@ -511,7 +512,7 @@ names(GBpopdat)
 names(GBpopdat)
 GBpopdat$plotsampcnt	# Number of plots after plot filter
 GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
-GBpopdat$stratalut       # Strata information and adjustment factors
+GBpopdat$stratalut      # Strata information and adjustment factors
 
 
 ```
@@ -631,18 +632,15 @@ area3aa$est
 area3aa$pse
 
 
-
 ## Rows and columns; combine estimation units (sumunits=TRUE; allin1=TRUE)
-area3b <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
+area3b <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
   rowvar="FORTYPCD", colvar="OWNGRPCD", row.FIAname=TRUE, col.FIAname=TRUE, 
   allin1=TRUE, sumunits=TRUE)
 area3b$est
 
 
 ## Rows and columns; combine estimation units (sumunits=TRUE; rawdata=TRUE; returntitle=TRUE)
-area3c <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN",
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
+area3c <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
   rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE, 
   sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
 names(area3c)
@@ -661,6 +659,8 @@ area3c$titlelst
 
 ## No strata
 ## Rows and columns; combine estimation units (sumunits=TRUE); no strata (strata=FALSE)
+## Note: the population data includes stratification...  must recalculate population data 
+## for no strata (using GBpopdat() or through modGBarea.
 area4 <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", strata=FALSE, 
   unitvar="ESTN_UNIT", unitarea=WYunitarea, landarea="FOREST", 
   rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE, 
@@ -802,25 +802,25 @@ tree3a$est
 tree3a$pse
 
 ## Try adding GBpopdat
-tree3aa <- modGBtree(GBpopdat=GBpopdat, estvar="VOLCFNET", estvar.filter="STATUSCD == 1",
-  landarea="FOREST", sumunits=TRUE, rowvar="FORTYPCD", colvar="STDSZCD", 
-  row.FIAname=TRUE, col.FIAname=TRUE)
+tree3aa <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvar="VOLCFNET", estvar.filter="STATUSCD == 1",
+  rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE)
 tree3aa$est
 tree3aa$pse
 
 
 ## Rows and columns; combine estimation units (sumunits=TRUE; allin1=TRUE)
-tree3b <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
-  estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD", colvar="OWNGRPCD",
-  row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE, allin1=TRUE)
+tree3b <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvar="VOLCFNET", estvar.filter="STATUSCD == 1", 
+  rowvar="FORTYPCD", colvar="OWNGRPCD", row.FIAname=TRUE, col.FIAname=TRUE, 
+  sumunits=TRUE, allin1=TRUE)
 tree3b$est
 
 ## Rows and columns; combine estimation units (sumunits=TRUE; rawdata=TRUE; returntitle=TRUE)
-tree3c <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
-  estvar="VOLCFNET", estvar.filter="STATUSCD == 1", rowvar="FORTYPCD",colvar="STDSZCD", 
-  row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
+tree3c <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvar="VOLCFNET", estvar.filter="STATUSCD == 1", 
+  rowvar="FORTYPCD",colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE, 
+  sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
 names(tree3c)
 tree3c$est
 tree3c$pse
@@ -838,6 +838,8 @@ tree3c$titlelst
 
 ## No strata
 ## Rows and columns; combine estimation units (sumunits=TRUE); no strata (strata=FALSE)
+## Note: the population data includes stratification...  must recalculate population data 
+## for no strata (using GBpopdat() or through modGBarea.
 tree4 <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
   strata=FALSE, unitvar="ESTN_UNIT", unitarea=WYunitarea, landarea="FOREST", 
   estvar="VOLCFNET", estvar.filter="STATUSCD ==1 ", rowvar="FORTYPCD", colvar="STDSZCD", 
@@ -947,6 +949,34 @@ names(raw10)
 head(raw10$rowest)
 
 
+
+
+## Now, use GBpopdat with a new diameter class
+######################################################################################
+
+# Use datLUTclass to define class breaks
+treedia.brks <- c(1,10,20,30,40,999)
+GBpopdat$treex <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.brks)$xLUT
+head(GBpopdat$treex)
+table(GBpopdat$treex$DIACL)
+
+# Get number of live trees by species and diameter class
+tree11 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvar="TPA_UNADJ", estvar.filter="STATUSCD==1", rowvar="SPCD", row.FIAname=TRUE, 
+  colvar="DIACL", sumunits=TRUE, rawdata=TRUE)
+names(tree11)
+tree11$est
+
+
+# Get number of live trees by species and diameter class, and add seedlings
+tree11b <- modGBtree(GBpopdat=GBpopdat, estseed="add", landarea="FOREST", 
+  estvar="TPA_UNADJ", estvar.filter="STATUSCD==1", rowvar="SPCD", row.FIAname=TRUE, 
+  colvar="DIACL", sumunits=TRUE, rawdata=TRUE)
+names(tree11b)
+tree11b$est
+
+
+
 ```
 
 <a name="modGBratio"></a>
@@ -1050,25 +1080,26 @@ rat3$titlelst
 
 
 ## Try adding GBpopdat
-rat3aa <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", estvarn="VOLCFNET", 	
-  estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE, 
-  col.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
+rat3aa <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", 
+  rowvar="FORTYPCD", colvar="STDSZCD", row.FIAname=TRUE, col.FIAname=TRUE, 
+  sumunits=TRUE, rawdata=TRUE, returntitle=TRUE)
 rat3aa$est
 rat3aa$pse
 
 
 ## Rows only - Species per acre; combine estimation units (sumunits=TRUE)
-rat4 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
-  estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", row.FIAname=TRUE, 
+rat4 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", 
+  rowvar="FORTYPCD", row.FIAname=TRUE, 
   sumunits=TRUE)
 rat4$est
 
 ## Rows only - Species per acre; by estimation units (allin1=TRUE)
-rat5 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
-  estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rowvar="FORTYPCD", colvar="SPCD", 
-  row.FIAname=TRUE, col.FIAname=TRUE, sumunits=TRUE)
+rat5 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", 
+  rowvar="FORTYPCD", colvar="SPCD", row.FIAname=TRUE, col.FIAname=TRUE, 
+  sumunits=TRUE)
 rat5$est
 
 
@@ -1078,10 +1109,10 @@ dat <- datLUTclass(x=WYtree, xvar="DIA", LUT=ref_diacl2in, LUTclassnm="DIACL2IN"
 WYtree <- dat$xLUT
 LUT <- dat$LUT
 
-rat6 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea,stratalut=WYstratalut, landarea="FOREST", 
-  estvarn="TPA_UNADJ", estvarn.filter="STATUSCD==1", rowvar="SPCD", colvar="DIACL2IN", 
-  row.FIAname=TRUE, sumunits=TRUE, rawdata=TRUE)
+rat6 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvarn="TPA_UNADJ", estvarn.filter="STATUSCD==1", 
+  rowvar="SPCD", colvar="DIACL2IN", row.FIAname=TRUE, 
+  sumunits=TRUE, rawdata=TRUE)
 rat6$est
 
 names(rat6)
@@ -1094,17 +1125,17 @@ raw6$grpest
 
 ## Tree ratio
 ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
-rat7 <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
-  estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", estvard="VOLCFNET", rowvar="FORTYPCD", 
-  row.FIAname=TRUE, sumunits=TRUE, allin1=TRUE)
+rat7 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+  estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", estvard="VOLCFNET", 
+  rowvar="FORTYPCD", row.FIAname=TRUE, 
+  sumunits=TRUE, allin1=TRUE)
 rat7$est
 
 
-rat7b <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-  ratiotype="PERTREE", unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, 
-  landarea="FOREST", estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", estvard="VOLCFNET", 
- rowvar="FORTYPCD", row.FIAname=TRUE,  sumunits=TRUE, allin1=TRUE)
+rat7b <- modGBratio(GBpopdat=GBpopdat, ratiotype="PERTREE", landarea="FOREST", 
+  estvarn="VOLCFNET", estvarn.filter="STATUSCD == 1", estvard="VOLCFNET", 
+  rowvar="FORTYPCD", row.FIAname=TRUE,  
+  sumunits=TRUE, allin1=TRUE)
 rat7b$est
 
 head(rat7$est)

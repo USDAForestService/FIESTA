@@ -4,7 +4,8 @@ anGBpop_evalEndyrlst <- function(evalEndyrlst, bnd_layer, bnd_dsn=NULL,
 	xy_dsn=NULL, xy_layer="xyCur_ACTUAL", xy.uniqueid="PLOT_ID", 
 	xvar="LON_ACTUAL", yvar="LAT_ACTUAL", xy.crs=4269, strat_layer=NULL, 
 	strat_lut=NULL, savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", 
-	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE) {
+	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
+	overwrite_layer=TRUE) {
 
   ## DESCRIPTION: get estimates for each evalid in list
   
@@ -52,7 +53,7 @@ anGBpop_evalEndyrlst <- function(evalEndyrlst, bnd_layer, bnd_dsn=NULL,
   if (savedata) { 
     outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite)
+		overwrite=overwrite_dsn)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -72,7 +73,7 @@ anGBpop_evalEndyrlst <- function(evalEndyrlst, bnd_layer, bnd_dsn=NULL,
     }
     pltdat <- DBgetPlots(evalid=evalidlst, istree=istree, isseed=isseed,
 		xymeasCur=xymeasCur, savedata=savedata, out_fmt=out_fmt, 
-		outfolder=outfolder, out_dsn=out_dsn)
+		outfolder=outfolder, out_dsn=out_dsn, overwrite_layer=overwrite_layer)
     plt <- pltdat$plt
     cond <- pltdat$cond
     tree <- pltdat$tree
@@ -217,7 +218,8 @@ anGBpop_evalEndyrlst <- function(evalEndyrlst, bnd_layer, bnd_dsn=NULL,
 		dsn=data_dsn, pjoinid=pjoinid, strata=strata, unitvar=unitvar, 
 		unitarea=unitarea, areavar=areavar, stratalut=stratalut, strvar=strvar, 
 		getwt=FALSE, stratcombine=TRUE, saveobj=FALSE, savedata=savedata, 
-		outfolder=NULL, outfn.pre=evalnm, outfn.date=FALSE, overwrite=overwrite)
+		outfolder=NULL, outfn.pre=evalnm, outfn.date=FALSE, 
+		overwrite_layer=overwrite_layer)
  
     GBpop_evalEndyrlst[[evalnm]] <- GBpopdat
   }

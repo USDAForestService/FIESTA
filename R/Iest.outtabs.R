@@ -109,7 +109,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(rowest[[psenm]], pseround)))))
       }
     }
-
     if (!is.null(unit.colest)) {
       colest <- groupUnits(tabest=unit.colest, domain=colvar, estncol=estnm,
 			estncol.var=estnm.var, esttype=esttype, unitvar=unitvar, 
@@ -234,9 +233,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (rowvar == "TOTAL") {
         if (allin1) {
           estpse <- data.frame(TOTAL="Total", allin1f(round(totest[[estnmd]], estround), 
-			round(totest[[psenm]], pseround), estnull=estnull, psenull=psenull), 
-			char.width=char.width, stringsAsFactors=FALSE)
+			round(totest[[psenm]], pseround), estnull=estnull, psenull=psenull, 
+			char.width=char.width), stringsAsFactors=FALSE)
           setnames(estpse, c("TOTAL", title.yhatpse))
+
         } else {
           estpse <- data.table(TOTAL="Total", 
 			totest[, c(estnmd, psenm), with=FALSE],

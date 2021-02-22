@@ -501,7 +501,6 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     outfn.param <- paste(out_layer, "param", sep="_")
   }
 
-
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -729,12 +728,12 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 		outfn.date=outfn.date, overwrite=overwrite)
   } 
 
-  if (!returnDT)      
+  if (!returnDT) {     
     sumdat <- setDF(sumdat)
-
+  }
   sumtreelst <- list(treedat=sumdat, sumvars=tsumvarnmlst2)
-  if (!is.null(tfilter)) 
+  if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
-
+  }
   return(sumtreelst)
 } 

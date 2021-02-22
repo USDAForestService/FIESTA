@@ -112,7 +112,7 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
     dat.al <- dat.al[dat.al$NBRPLT.gt0 > 1,]
 
     est.area <- JoSAE::sae.al.f(
-    		domain.id=dat.al$domain.id , n.i=dat.al$n.i , psi.i=dat.al$se.srs^2,
+    		domain.id=dat.al$domain.id, n.i=dat.al$n.i, psi.i=dat.al$se.srs^2,
     		formula=fmla.dom2, data=dat.al,
     		b.i=rep(1, nrow(dat.al)),
     		type="RE")
@@ -140,9 +140,6 @@ SAest.dom <- function(dom, plt.dom, cuniqueid, dunitlut, dunitvar="DOMAIN",
 
   ## Subset tomdat to domain=dom
   plt.dom <- plt.dom[plt.dom[[domain]] == dom,] 
-
-#yn=response
-
 
   ## Apply function to each dom
   domest <- data.table(dom, SAest(yn=response, plt.dom=plt.dom, 

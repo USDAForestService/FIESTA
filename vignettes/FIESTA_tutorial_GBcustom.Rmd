@@ -261,21 +261,16 @@ areavar.bhdist
 ```
 ######################################################################################
 # Usage:
-# modGBarea(cond = NULL, plt = NULL, pltassgn = NULL, dsn = NULL, cuniqueid = "PLT_CN", 
-#   condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL,   
-#   invyrs=NULL, ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,    
-#   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
-#   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD",   
-#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea = "FOREST", 
-#   pfilter = NULL, cfilter = NULL, rowvar = NULL, colvar = NULL,   
-#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,   
-#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = NULL,  
-#   rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE,  
-#   estround = 0, pseround = 2, estnull = 0, psenull = "--", divideby = NULL,  
-#   savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL,  
-#   outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE,  
-#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
-#   title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, GBpopdat=NULL)
+# modGBarea(landarea = "FOREST", pfilter = NULL, cfilter = NULL, rowvar = NULL,    
+#   colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL,    
+#   col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, 
+#   collut = NULL, rowgrp = NULL, rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE,  
+#   allin1 = FALSE, estround = 0, pseround = 2, estnull = 0, psenull = "--",   
+#   divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, 
+#   outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE,  
+#   overwrite_layer = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.colvar = NULL,  
+#   title.unitvar = NULL, title.filter = NULL, GBpopdat=NULL, ...)
 # 
 # Description:
 # Generates acre estimates by domain (and estimation unit). Calculations are based on 
@@ -349,23 +344,18 @@ head(area.bhdist.raw$unit.grpest)
 ```
 ######################################################################################
 # Usage:
-# modGBtree(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
-#   dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-#   puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL,   
-#   ACI = FALSE, adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL,  
-#   cond.nonsamp.filter = NULL, unitvar = NULL, unitvar2 = NULL, unitarea = NULL,  
-#   areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", 
-#   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", 
-#   pfilter = NULL, cfilter = NULL, estvar = NULL, estvar.filter = NULL,  
-#   estvar.name = NULL, rowvar = NULL, colvar = NULL, row.FIAname = FALSE,    
-#   col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE,   
-#   col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL,   
-#   rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE, estround = 0, pseround = 2,     
+# modGBtree(estseed = "none", landarea="FOREST", pfilter = NULL, cfilter = NULL, 
+#   estvar = NULL, estvar.filter = NULL, estvar.name = NULL,  
+#   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,    
+#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,   
+#   rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL,   
+#   sumunits = FALSE, allin1 = FALSE, estround = 0, pseround = 2,     
 #   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,    
 #   outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE,  
 #   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL,   
 #   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.ref = NULL, title.unitvar = NULL, title.estvar = NULL, title.filter = NULL)
+#   title.ref = NULL, title.unitvar = NULL, title.estvar = NULL, title.filter = NULL,
+#   GBpopdat = NULL, gui = FALSE, ...)
 # 
 # Description:
 #	Generates tree estimates by domain and/or tree domain (and estimation unit). 
@@ -458,14 +448,8 @@ head(tree.bh$raw$unit.grpest)
 ```
 ####################################################################################
 # Usage:
-# modGBratio(tree = NULL, cond = NULL, plt = NULL, pltassgn = NULL, seed = NULL, 
-#   dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-#   puniqueid = "CN", pltassgnid = "CN", pjoinid="CN", evalid=NULL, invyrs=NULL, ACI = FALSE, 
-#   adj = "samp", strata = TRUE, plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-#   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",   
-#   unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-#   strwtvar = "P1POINTCNT", stratcombine = TRUE, landarea="FOREST", pfilter = NULL,  
-#   cfilter = NULL, ratiotype = "PERACRE", estvarn = NULL, estvarn.filter = NULL, 
+# modGBratio(estseed = "none", ratiotype = "PERACRE", landarea="FOREST",   
+#   pfilter = NULL, cfilter = NULL, estvarn = NULL, estvarn.filter = NULL, 
 #   estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, estvard.name = NULL, 
 #   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,   
 #   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,  
@@ -475,7 +459,8 @@ head(tree.bh$raw$unit.grpest)
 #   outfolder = NULL, outfn = NULL,  outfn.pre = NULL, outfn.date = TRUE, 
 #   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
 #   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE)
+#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, 
+#   GBpopdat=NULL, gui=FALSE, ...)
 # 
 # Description:
 #	Generates per-acre and per-tree estimates by domain and/or tree domain (and 

@@ -12,7 +12,8 @@
 anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL", 
 	isseed = FALSE, datsource = "sqlite", SQLitefn = NULL, RS = NULL, 
 	strat_layer = NULL, showsteps = FALSE, savedata = FALSE, savexy = TRUE, 
-	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, 
+	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE,
 	GBdata = NULL, ...)
 }
 \arguments{
@@ -39,9 +40,12 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL",
   \item{savexy}{ Logical. If TRUE, saves xy coordinates to outfolder. }
   \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{GBdata}{ R list object. FIA data for estimation. }
   \item{...}{ Parameters for GBdata. }
 }

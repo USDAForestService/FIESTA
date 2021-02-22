@@ -118,7 +118,6 @@ modGBratio <- function(estseed="none", ratiotype="PERACRE",
     }
   } 
 
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -219,13 +218,14 @@ modGBratio <- function(estseed="none", ratiotype="PERACRE",
   }
 
   ## remove NA values
-  if (!is.null(tdomvar) && !is.null(tdomvar2))
+  if (!is.null(tdomvar) && !is.null(tdomvar2)) {
     tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
+  }
 
   #####################################################################################
   ### Get titles for output tables
   #####################################################################################
-  alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, ratiotype=ratiotype,
+  alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, ratiotype=ratiotype,
  	sumunits=sumunits, title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
  	title.filter=title.filter, title.estvarn=title.estvarn, unitvar=unitvar, 

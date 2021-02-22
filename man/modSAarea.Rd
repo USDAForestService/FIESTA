@@ -7,77 +7,25 @@
 	Generates small area estimates by domain (and estimation unit). 	 
 }
 \usage{    
-modSAarea(SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL, 
-	seed = NULL, dsn = NULL, tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", 
-	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", measCur = FALSE, 
-	measEndyr = NULL, invyrs = NULL, ACI=FALSE, adj = "plot", SApackage = "JoSAE", 
-	SAmethod = "unit", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	dunitvar = "DOMAIN", dunitvar2 = NULL, dunitarea = NULL, areavar = NULL, 
-	dunitlut = NULL, prednames = NULL, predfac = NULL, largebnd.att = NULL, 
-	landarea = "ALL", pfilter = NULL, cfilter = NULL, smallbnd.att = NULL, 
-	allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = "--", 
-	divideby = NULL, savedata = FALSE, rawdata = FALSE, multest = TRUE, 
-	addSAdomsdf = TRUE, SAdomvars = NULL, outfolder = NULL, outfn.pre = NULL, 
-	raw_fmt = "csv", raw_dsn = "rawdata", multest_fmt = "csv", multest_outfolder = NULL, 
-	multest_dsn = NULL, multest_layer = NULL, multest.append = FALSE, 
-	multest.AOIonly = FALSE, outfn.date=FALSE, overwrite = FALSE, addtitle = TRUE, 
-	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.dunitvar = NULL, 
-	title.filter = NULL, SApopdat = NULL, SAdata = NULL)
+modSAarea(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "unit", 
+	largebnd.att = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL,
+ 	smallbnd.att = NULL, allin1 = FALSE, estround = 0, 
+	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
+	rawdata = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
+	outfolder = NULL, outfn.pre = NULL, raw_fmt = "csv", raw_dsn = "rawdata", 
+	multest_fmt = "csv", multest_outfolder = NULL, multest_dsn = NULL, 
+	multest_layer = NULL, multest.append = FALSE, multest.AOIonly = FALSE, 
+	outfn.date=FALSE, overwrite = FALSE, addtitle = TRUE, returntitle = FALSE, 
+	title.main = NULL, title.ref = NULL, title.dunitvar = NULL, title.filter = NULL, 
+	SApopdat = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{SAdomsdf}{ DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
 	with attributes from smallbnd to add to estimation table. }
-  \item{cond}{ DF/DT or comma-delimited file (*.csv). The condition-level table with one 
-	record per condtions and including nonsampled conditions. 
-	Plot variables and strata/estimation unit variable(s) may be included for 
-	post-stratification. See details for necessary variables to include. }
-  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
-	or a sf R object. Plot-level variables. If nonsampled plots are included, 
-	PLOT_STATUS_CD variable must be in table. Optional. }
-  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
-	shapefile(*.shp) with one record per plot, estimation unit variable(s) and 
-	mean (continuous rasters) or proportions (categorical rasters) by 
-	estimation unit. Optional. }
-  \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
-  \item{dsn}{ Sting. Data Source name of database with tree, cond, pltassgn. }
-  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
-  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{condid}{ String. Unique identifier of plot conditions. If no condid in 
-	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
-  \item{puniqueid}{ String. Unique identifier of plot. }
-  \item{pltassgnid}{ String. Unique identifier of plot. }
-  \item{measCur}{ Logical. If TRUE, extract plots with most current measurement for 
-	state(s). }
-  \item{measEndyr}{ Logical. If TRUE, extract plots with most current measurement for 
-	state(s) for years measured before measEndyr. }
-  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
-  \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
-	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
-  \item{adj}{ String. How to calculate adjustment factors for nonsampled 
-	(nonresponse) conditions based on summed proportions for by plot ('samp', 'plot').
-	'samp' - adjustments are calculated at strata/estimation unit (i.e., domain unit) level; 
-	'plot' - adjustments are calculated at plot-level. Adjustments 
-	are only calculated for annual inventory plots (designcd=1). } 
+  \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
   \item{SApackage}{ String. small area package to use ('JoSAE', 'sae') }
   \item{SAmethod}{ String. small area method to use ('unit', 'area') }
-  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
-	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
-  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
-  \item{dunitvar}{ String. Name of the domain unit variable in cond, plt, or pltassgn 
-	with domain unit assignment for each plot. }
-  \item{dunitvar2}{ String. Name of a second domain unit variable in cond or 
-	pltassgn with assignment for each plot (e.g., 'STATECD'). }
-  \item{dunitarea}{ Numeric or DF. Total area by domain unit. }
-  \item{areavar}{ String. Name of acre variable in unitacres. Default="ACRES". }
-  \item{dunitlut}{ DF/DT. Data frame with auxiliary information by domain unit. For 
-	continuous data, means by domain unit; for categorical data, proportion of 
-	class by domain unit. }
-  \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
-  \item{predfac}{ String vector. Name(s) of factor predictor variables to use in model. }
   \item{largebnd.att}{ String. Name of the large boundary attribute to define plots
 	within a model extent. If NULL, all plots are used for model extent. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
@@ -129,7 +77,7 @@ modSAarea(SAdomsdf = NULL, cond = NULL, plt = NULL, pltassgn = NULL,
 	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
   \item{SApopdat}{ List. Population data objects returned from modSApop(). }
-  \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
+  \item{...}{ Parameters for modSApop() if SApopdat is NULL. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

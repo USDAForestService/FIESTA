@@ -8,7 +8,7 @@
 	Adds a variable (LUTclassnm) to x, defining as: xvar >= MIN (and xvar <= MAX).
 }
 \usage{
-datLUTclass(x, xvar = NULL, LUT = NULL, minvar = "MIN", maxvar = "MAX", 
+datLUTclass(x, xvar = NULL, LUT = NULL, minvar = NULL, maxvar = NULL, 
 	cutbreaks = NULL, cutlabels = NULL, LUTclassnm = NULL, label.dec = 1, 
 	NAto0 = FALSE, vars2keep = NULL, keepcutbreaks = FALSE, savedata = FALSE, 
 	outfolder = NULL, outfn = "datlut")
@@ -23,7 +23,7 @@ datLUTclass(x, xvar = NULL, LUT = NULL, minvar = "MIN", maxvar = "MAX",
 	values and names are optional. }
   \item{minvar}{ String. If LUT is not null, name of variable with minimimum class 
 	value (>= minvar). }
-  \item{maxvar}{ String. Optional. If LUT is not null, name of variable with maximun 
+  \item{maxvar}{ String. Optional. If LUT is not null, name of variable with maximum 
 	class value (<= maxvar). }  
   \item{cutbreaks}{ Numeric vector. Vector of numbers for minimum class values. }  
   \item{cutlabels}{ String vector. Optional. Vector of names for classes. If NULL,
@@ -76,13 +76,29 @@ datLUTclass(x, xvar = NULL, LUT = NULL, minvar = "MIN", maxvar = "MAX",
 \keyword{ data }
 
 \examples{
-	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=ref_diacl2in, LUTclassnm="DIACL2IN")
+	head(FIESTA::ref_diacl2in)
+	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=FIESTA::ref_diacl2in, 
+		LUTclassnm="DIACL2IN")
 	names(WYtreelut)
 	head(WYtreelut$xLUT)
 	table(WYtreelut$xLUT$DIACL2IN)
 
-	WYtreelut2 <- datLUTclass(WYtree, xvar="DIA", cutbreaks=c(1,5,25,50,100), LUTclassnm="DIACL2IN")
+	WYtreelut2 <- datLUTclass(WYtree, xvar="DIA", cutbreaks=c(1,5,25,50,100), 
+		LUTclassnm="DIACL2IN")
 	names(WYtreelut2)
 	head(WYtreelut2$xLUT)
 	table(WYtreelut2$xLUT$DIACL2IN)
+
+	## Create look-up table of stand age classes
+	MIN <- c(0, 20, 40, 60, 80, 101)
+	STDAGENM <- c("0-20", "21-40", "41-60", "61-80", "81-100", "101+") 
+	stdagelut <- data.frame(MIN=MIN, STDAGENM=STDAGENM)
+	stdagelut
+
+	WYcondlut <- datLUTclass(WYcond, xvar="STDAGE", LUT=stdagelut, 
+		LUTclassnm="STDAGENM")
+	names(WYcondlut)
+	head(WYcondlut$xLUT)
+	table(WYcondlut$xLUT$STDAGENM)
+
 }

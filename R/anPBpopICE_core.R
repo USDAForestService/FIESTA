@@ -66,6 +66,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   ###############################################################################
   outfn.pre2 <- paste0("01_", outfn.pre)
   rowvar <- "change_pnt"
+
   est.change_pnt <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, sumunits=sumunits, domlut=domlut, 
 	savedata=savedata, outfolder=outfolder, outfn.date=outfn.date, 

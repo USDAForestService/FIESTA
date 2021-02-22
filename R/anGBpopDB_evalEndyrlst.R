@@ -1,7 +1,8 @@
 anGBpopDB_evalEndyrlst <- function(evalEndyrlst, states, evalType="VOL", 
 	data_dsn=NULL, isseed=FALSE, ppsanm="pop_plot_stratum_assgn", 
 	savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE) {
+	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
+	overwrite_layer=TRUE) {
   ## DESCRIPTION: estimates for each evalid in list
   
   ## Set global variables
@@ -20,7 +21,7 @@ anGBpopDB_evalEndyrlst <- function(evalEndyrlst, states, evalType="VOL",
   if (savedata) { 
     outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite)
+		overwrite=overwrite_dsn)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -130,7 +131,7 @@ anGBpopDB_evalEndyrlst <- function(evalEndyrlst, states, evalType="VOL",
 		strata=TRUE, unitvar=unitvar, unitarea=unitarea, areavar=areavar, 
 		stratalut=stratalut, strvar=strvar, getwt=TRUE, getwtvar=getwtvar,
  		stratcombine=TRUE, saveobj=savedata, outfolder=outfolder, 
-		outfn.pre=evalnm, outfn.date=FALSE, overwrite=overwrite)
+		outfn.pre=evalnm, outfn.date=FALSE, overwrite_layer=overwrite_layer)
 
     GBpop_evalEndyrlst[[evalnm]] <- GBpopdat
   }

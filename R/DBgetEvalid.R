@@ -93,6 +93,11 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
           message("getting coordinates for ", states)
         }
       }
+    } else {
+      states <- FIESTA::pcheck.states(states, RS=RS)
+      if (is.null(states)) {
+        states <- FIESTA::pcheck.states(states, RS=rslst)
+      }
     }
     stcdlst <- FIESTA::pcheck.states(states, "VALUE")
   }

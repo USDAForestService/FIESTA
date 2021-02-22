@@ -114,7 +114,6 @@ modMAarea <- function(MAmethod="greg", prednames=NULL,
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
   PSstrvar <- MApopdat$PSstrvar
-
  
   if (MAmethod %in% c("greg", "gregEN")) {
     if (is.null(prednames)) {

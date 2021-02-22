@@ -1,13 +1,13 @@
 anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE, 
-	datsource="sqlite", data_dsn=NULL, istree=TRUE, plot_layer="plot",
- 	cond_layer="cond", tree_layer="tree", puniqueid="CN", 
-	xy.joinid="PLT_CN", measCur=TRUE, measEndyr=NULL, measEndyr.filter=NULL,  
-	intensity1=FALSE, rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
+	datsource="sqlite", data_dsn=NULL, istree=TRUE, isseed=FALSE, 
+	plot_layer="plot", cond_layer="cond", tree_layer="tree", 
+	seed_layer="seed", puniqueid="CN", intensity1=FALSE, 
+	rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
 	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
 	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
-	SApltdat=NULL, ...) {
+	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, SApltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -60,17 +60,30 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
 #		savedata=FALSE)
 
 
+  ## Check savedata
+  #############################################################################
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data?", first="NO", gui=gui)  
+ 
+  ## Check overwrite, outfn.date, outfolder, outfn 
+  ########################################################
+  if (savedata) {
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
+  }
+
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(SApltdat)) {
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
-		cond_layer=cond_layer, tree_layer=tree_layer, xy.joinid=xy.joinid, 
-		measCur=measCur, measEndyr=measEndyr, measEndyr.filter=measEndyr.filter,
- 		intensity1=intensity1, showsteps=FALSE, savedata=FALSE, savexy=TRUE,
- 		outfolder=NULL, out_fmt=out_fmt, out_dsn=out_dsn, outfn.pre=outfn.pre,
- 		outfn.date=outfn.date, overwrite_layer=overwrite, ...)
+		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
+ 		intensity1=intensity1, savedata=FALSE, savexy=TRUE, ...)
     if (is.null(SApltdat)) return(NULL)
     if (saveobj) {
       message("saving SApltdat object to: ", file.path(outfolder, "SApltdat.rda"), "...")
@@ -79,9 +92,10 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   } else {
     SApltdat.names <- c("clip_xyplt", "clip_polyv", "xy.uniqueid", "puniqueid",
 		"pjoinid", "clip_tabs")
-    if (!all(SApltdat.names %in% names(SApltdat))) 
+    if (!all(SApltdat.names %in% names(SApltdat))) {
       stop("missing components in SApltdat list: ", 
 		toString(SApltdat.names[!SApltdat.names %in% names(SApltdat)])) 
+    }
   }
 
   ## Extract list objects
@@ -89,9 +103,9 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   xy.uniqueid <- SApltdat$xy.uniqueid
   puniqueid <- SApltdat$puniqueid
   pjoinid <- SApltdat$pjoinid
-  plt <- SApltdat$clip_tabs$clip_plt
-  cond <- SApltdat$clip_tabs$clip_cond
-  tree <- SApltdat$clip_tabs$clip_tree
+  plt <- SApltdat$clip_tabs$clip_pltx
+  cond <- SApltdat$clip_tabs$clip_condx
+  tree <- SApltdat$clip_tabs$clip_treex
   SAdoms <- SApltdat$clip_polyv
 
   if (showsteps) {
@@ -133,7 +147,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   test <- data.table(st_drop_geometry((extpoly$sppltext)))
   test <- test[AOI == 1, .N, by="DOMAIN"]
 
-  message("checking number of plots...")
+  message("checking number of plots in domain...")
   print(test)
 
   if (all(test$N <= 2)) {
@@ -177,40 +191,40 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
 
   if (saveobj) {
     objfn <- getoutfn(outfn="SApopdat.rda", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=TRUE)
+		overwrite=overwrite_layer, outfn.date=TRUE)
     save(SAdata, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
-   if (!is.null(RS))
-     datExportData(sf::st_drop_geometry(SAdoms), outfolder=outfolder, 
+    if (!is.null(RS)) {
+      datExportData(sf::st_drop_geometry(SAdoms), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="SAdoms", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-
-    if (savexy)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
+    if (savexy) {
       datExportData(sf::st_drop_geometry(xyplt), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyplt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(plt, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(cond, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(tree, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(dunitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(dunitlut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
    	
   return(SAdata)

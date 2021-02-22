@@ -99,8 +99,14 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
       auxlut <- unique(pltx[, c(unitvar2, unitvar), with=FALSE]) 
       auxlut[, ONESTRAT := 1]
       auxlut[, strwt := 1]
+
+      if (!is.null(P2POINTCNT)) {
+        P2POINTCNT[, ONESTRAT := 1]
+      }
       getwt <- FALSE
       getwtvar <- NULL
+      strvars <- c(strvars, PSstrvar) 
+      strata <- TRUE
     }
 
     ## Check getwt and calculate strata weights (proportion by estimation unit)

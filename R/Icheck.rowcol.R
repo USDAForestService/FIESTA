@@ -1,10 +1,10 @@
-check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid="PLT_CN", 
-	tuniqueid="PLT_CN", condid="CONDID", rowvar=NULL, rowvar.filter=NULL, colvar=NULL, 
-	colvar.filter=NULL, row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, 
-	col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, domvarlst=NULL, 
-	domlut=NULL, title.rowvar=NULL, title.colvar=NULL, rowlut=NULL, collut=NULL, 
-	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, title.rowgrp=NULL, landarea=NULL,
- 	cvars2keep=NULL){
+check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, 
+	cuniqueid="PLT_CN", tuniqueid="PLT_CN", condid="CONDID", estseed="none", 
+	rowvar=NULL, rowvar.filter=NULL, colvar=NULL, colvar.filter=NULL, 
+	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
+	row.add0=FALSE, col.add0=FALSE, domvarlst=NULL, domlut=NULL, title.rowvar=NULL,
+ 	title.colvar=NULL, rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, 
+	rowgrpord=NULL, title.rowgrp=NULL, landarea=NULL, cvars2keep=NULL){
 
   ####################################################################################
   ## CHECKS ROW AND COLUMN INFO
@@ -42,6 +42,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
   ref_titles <- FIESTA::ref_titles
   concat <- FALSE
   bytdom <- FALSE
+  seedclnm <- "<1"
 
   ##################################################################
   ## SET UP VARIABLE LISTS
@@ -350,9 +351,14 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
           rowlut <- rowLUT$LUT
           rowLUTnm <- rowLUT$xLUTnm
 
-          if (!is.null(seedf) && rowvar %in% names(seedf)) {
-            rowLUT <- FIESTA::datLUTnm(x=seedf, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
-		  		group=rowLUTgrp, add0=row.add0, xtxt="seed")
+          if (estseed == "add" && !is.null(seedf)) {
+            if (rowvar %in% names(seedf)) {
+              rowLUT <- FIESTA::datLUTnm(x=seedf, xvar=rowvar, LUT=rowlut,
+				FIAname=row.FIAname, group=rowLUTgrp, add0=row.add0, xtxt="seed")
+              seedf <- rowLUT$xLUT
+            } else if (rowvar == "DIACL") {
+              seedf$DIACL <- seedclnm
+            }
             seedf <- rowLUT$xLUT
           }
 
@@ -382,10 +388,14 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
               }
             } 
           } else if (row.orderby == rowvar) {
+            if (estseed == "add") {
+              estseed[[row.orderby]] <- min(treef[[row.orderby]]) - 0.5
+            } 
              rowvar <- rowLUTnm
           } else {
-            if (!row.orderby %in% names(rowlut))
+            if (!row.orderby %in% names(rowlut)) {
               stop("row.orderby not in rowlut")
+            }
           } 
         }
       } else if (!is.null(row.orderby) && row.orderby != "NONE") {
@@ -409,8 +419,19 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
           }
         }
 
+        if (estseed == "add" && !is.null(seedf) && rowvar=="DIACL" && 
+		!row.orderby %in% names(seedf)) {
+          seedclord <- min(treef[[row.orderby]]) - 0.5
+          estseed[[row.orderby]] <- seedclord
+        } 
+
         treef <- FIESTA::DT_NAto0(DT=treef, cols=rowvar)
         treef <- FIESTA::DT_NAto0(DT=treef, cols=row.orderby)
+      } else {
+        if (estseed == "add" && !is.null(seedf) && rowvar=="DIACL" && 
+		!"DIACL" %in% names(seedf)) { 
+          seedf$DIACL <- seedclnm
+        }
       }
 
       ## rowvar.filter
@@ -522,7 +543,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
           }
         }
 
-      } else if (col.orderby != "NONE") {
+      } else if (!is.null(col.orderby) && col.orderby != "NONE") {
 
         if (!col.orderby %in% names(condf)) stop("col.orderby must be in cond")
         if (col.orderby == colvar) stop("col.orderby must be different than colvar")
@@ -545,16 +566,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
 
         condf <- FIESTA::DT_NAto0(DT=condf, cols=colvar)
         condf <- FIESTA::DT_NAto0(DT=condf, cols=col.orderby)
-        collut <- unique(condf[,c(colvar, col.orderby), with=FALSE])
-        setkeyv(collut, col.orderby)
-
-      } else {
-
-        colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
-        collut <- as.data.table(colvals)
-        names(collut) <- colvar
-        setkeyv(collut, colvar)
-      }
+      } 
 
       ## colvar.filter
       ########################################################
@@ -592,24 +604,31 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
           collut <- colLUT$LUT
           colLUTnm <- colLUT$xLUTnm
 
-          if (!is.null(seedf) && colvar %in% names(seedf)) {
-            colLUT <- FIESTA::datLUTnm(x=seedf, xvar=colvar, LUT=collut, 
+          if (estseed == "add" && !is.null(seedf)) {
+            if (colvar %in% names(seedf)) {
+              colLUT <- FIESTA::datLUTnm(x=seedf, xvar=colvar, LUT=collut, 
 				FIAname=col.FIAname, add0=col.add0, xtxt="seed")
-            seedf <- colLUT$xLUT
+              seedf <- colLUT$xLUT
+            } else if (colvar == "DIACL") {
+              seedf$DIACL <- seedclnm
+            }
           }
-
-          if (col.orderby == "NONE") {
+          if (!is.null(col.orderby) && col.orderby == "NONE") {
             if (!is.null(colLUTnm)) {
               col.orderby <- colvar
               colvar <- colLUTnm
             }
           } else if (col.orderby == colvar) {
-             colvar <- colLUTnm
+            if (estseed == "add") {
+              seedclord <- min(treef[[col.orderby]]) - 0.5
+              estseed[[col.orderby]] <- seedclord
+            } 
+            colvar <- colLUTnm
           }
           setkeyv(collut, col.orderby)
         }
 
-      } else if (col.orderby != "NONE") {
+      } else if (!is.null(col.orderby) && col.orderby != "NONE") {
 
         if (!col.orderby %in% names(treef)) stop("col.orderby must be in tree")
         if (col.orderby == colvar) stop("col.orderby must be different than colvar")
@@ -630,17 +649,19 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
           }
         }
 
+        if (estseed == "add" && !is.null(seedf) && colvar=="DIACL" && 
+		!col.orderby %in% names(seedf)) {
+          seedclord <- min(treef[[col.orderby]]) - 0.5
+          estseed[[col.orderby]] <- seedclord
+        } 
+
         treef <- FIESTA::DT_NAto0(DT=treef, cols=colvar)
         treef <- FIESTA::DT_NAto0(DT=treef, cols=col.orderby)
-        uniquecol <- unique(treef[,c(colvar, col.orderby), with=FALSE])
-        setkeyv(uniquecol, col.orderby)
-
       } else {
-
-        colvals <- na.omit(unique(treef[, colvar, with=FALSE]))
-        uniquecol <- as.data.table(colvals)
-        names(uniquecol) <- colvar
-        setkeyv(uniquecol, colvar)
+        if (estseed == "add" && !is.null(seedf) && colvar=="DIACL" && 
+		!"DIACL" %in% names(seedf)) { 
+          seedf$DIACL <- seedclnm
+        }
       }
 
       ## colvar.filter
@@ -725,6 +746,20 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       uniquerow <- unique(treef[,c(rowgrpord, rowgrpnm, row.orderby, rowvar), with=FALSE])
       setkeyv(uniquerow, c(rowgrpord, rowgrpnm, row.orderby))
+
+      if (estseed == "add" && !is.null(seedf)) {
+        if (all(c(rowvar, row.orderby) %in% names(seedf)) && rowvar == "DIACL") {
+          if (is.factor(uniquerow[[rowvar]])) {
+            levels(uniquerow[[rowvar]]) <- c(seedclnm, levels(uniquerow[[rowvar]]))
+          }
+          if (is.factor(uniquerow[[row.orderby]])) {
+            levels(uniquerow[[row.orderby]]) <- c(seedclord, levels(uniquerow[[row.orderby]]))
+          }
+          uniqueseed <- data.table(seedclord, seedclnm)
+          setnames(uniqueseed, c(col.orderby, colvar))
+          uniquerow <- rbindlist(list(uniqueseed, uniquerow))
+        }
+      }
     } else {
       if (is.factor(condf[[rowvar]])) {
         uniquerow <- as.data.table(levels(treef[[rowvar]]))
@@ -734,6 +769,14 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
         uniquerow <- as.data.table(rowvals)
         names(uniquerow) <- rowvar
         setkeyv(uniquerow, rowvar)
+      }
+
+      if (estseed == "add" && !is.null(seedf)) {
+        if (rowvar %in% names(seedf) && rowvar == "DIACL") {
+          if (is.factor(uniquerow[[rowvar]])) {
+            levels(uniquerow[[rowvar]]) <- c(seedclnm, levels(uniquerow[[rowvar]]))
+          }
+        }
       }
     }
   }
@@ -754,7 +797,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
       setkeyv(uniquecol, col.orderby)
   } else if (colvar %in% names(condf)) {
     if (!is.null(col.orderby) && col.orderby != "NONE") {
-      uniquecol <- unique(condf[,c(colvar, col.orderby), with=FALSE])
+      uniquecol <- unique(condf[, c(colvar, col.orderby), with=FALSE])
       setkeyv(uniquecol, col.orderby)
     } else {
       if (is.factor(condf[[colvar]])) {
@@ -769,9 +812,23 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
       }
     }
   } else if (colvar %in% names(treef)) {
-    if (col.orderby != "NONE") {
+    if (!is.null(col.orderby) && col.orderby != "NONE") {
       uniquecol <- unique(treef[,c(colvar, col.orderby), with=FALSE])
       setkeyv(uniquecol, col.orderby)
+
+      if (estseed == "add" && !is.null(seedf)) {
+        if (all(c(colvar, col.orderby) %in% names(seedf)) && colvar == "DIACL") {
+          if (is.factor(uniquecol[[colvar]])) {
+            levels(uniquecol[[colvar]]) <- c(seedclnm, levels(uniquecol[[colvar]]))
+          }
+          if (is.factor(uniquecol[[col.orderby]])) {
+            levels(uniquecol[[col.orderby]]) <- c(seedclord, levels(uniquecol[[col.orderby]]))
+          }
+          uniqueseed <- data.table(seedclord, seedclnm)
+          setnames(uniqueseed, c(col.orderby, colvar))
+          uniquecol <- rbindlist(list(uniqueseed, uniquecol))
+        }
+      }
     } else {
       if (is.factor(condf[[colvar]])) {
         uniquecol <- as.data.table(levels(treef[[colvar]]))
@@ -781,6 +838,14 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf, cuniqueid=
         uniquecol <- as.data.table(colvals)
         names(uniquecol) <- colvar
         setkeyv(uniquecol, colvar)
+      }
+
+      if (estseed == "add" && !is.null(seedf)) {
+        if (colvar %in% names(seedf) && colvar == "DIACL") {
+          if (is.factor(uniquecol[[colvar]])) {
+            levels(uniquecol[[colvar]]) <- c(seedclnm, levels(uniquecol[[colvar]]))
+          }
+        }
       }
     }
   }

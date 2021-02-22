@@ -7,17 +7,17 @@
 	Compile population data for input to the modSA* modules. }
 
 \usage{    
-modSApop(SAdoms = NULL, cond = NULL, tree = NULL, plt = NULL, pltassgn = NULL, 
-	dsn = NULL, tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", measCur = FALSE, 
-	measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, ACI = FALSE, 
-	adj = "plot", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	dunitvar = NULL, dunitvar2 = NULL, dunitarea = NULL, areavar = "ACRES", 
+modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL, 
+	pltassgn = NULL, dsn = NULL, tuniqueid="PLT_CN", cuniqueid = "PLT_CN", 
+	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", 
+	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
+	ACI = FALSE, adj = "plot", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
+	dunitvar = "DOMAIN", dunitvar2 = NULL, dunitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, dunitlut = NULL, prednames = NULL, predfac = NULL, 
 	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, savedata = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn = NULL, 
-	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, SAdata = NULL, 
-	gui = FALSE)
+	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, SAdata = NULL, gui = FALSE)
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -31,6 +31,8 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, plt = NULL, pltassgn = NULL,
   \item{tree}{ DF/DT, comma-delimited file(*.csv), or layer in dsn. If esttype="TREE",
 	tree-level variables to aggregate to condition-level. See details for necessary 
 	variables to include. }
+  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Seedling data with one record for each seedling count. }
   \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
 	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
 	or a sf R object. Plot-level variables. If nonsampled plots are included, 
@@ -94,7 +96,8 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, plt = NULL, pltassgn = NULL,
 	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }

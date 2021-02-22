@@ -1,7 +1,8 @@
 anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	popType="VOL", isseed=FALSE, datsource="sqlite", SQLitefn=NULL, RS=NULL, 
 	strat_layer=NULL, showsteps=FALSE, savedata=FALSE, savexy=TRUE, 
-	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
+	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, 
+	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	GBdata=NULL, ...) {
 
 
@@ -29,15 +30,12 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
-    outfolder <- pcheck.outfolder(outfolder, gui=gui)
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
-    }
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
   ###########################################################################
@@ -55,40 +53,19 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 		bnd.filter=bnd.filter, RS=RS, datsource=datsource, istree=istree, 
 		isseed=isseed, data_dsn=SQLitefn, strata=strata, strat_layer=strat_layer, 
 		showsteps=showsteps, cex.plots=.75, savedata=savedata, savexy=savexy, 
-		outfolder=outfolder, outfn.pre="GBdata", out_fmt="csv", out_dsn=NULL, 
-		overwrite=TRUE, ...)
+		outfolder=outfolder, outfn.pre="GBdata", out_fmt=out_fmt, out_dsn=out_dsn, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,, ...)
     returnlst$GBdata <- GBdata
   } else {
     GBdata <- pcheck.object(GBdata, objnm="GBdata", 
 		list.items=c("bnd", "plt", "cond", "unitarea"))
   }
 	
-  ## GBdata
-  bnd <- GBdata$bnd
-  plt <- GBdata$plt
-  cond <- GBdata$cond
-  tree <- GBdata$tree
-  seed <- GBdata$seed
-  pltassgn <- GBdata$pltassgn
-  unitarea <- GBdata$unitarea
-  unitvar <- GBdata$unitvar
-  areavar <- GBdata$areavar
-  stratalut <- GBdata$stratalut
-  strvar <- GBdata$strvar
-  puniqueid <- GBdata$puniqueid
-  pltassgnid <- GBdata$pltassgnid
-  pjoinid <- GBdata$pjoinid
-  rm(GBdata)
-  gc()
-
 
   ####################################################################
   ## Get population data
   ####################################################################
-  GBpopdat <- modGBpop(popType=popType, tree=tree, seed=seed, cond=cond, 
-	plt=plt, pltassgn=pltassgn, puniqueid=puniqueid, pltassgnid=pltassgnid, 
-	pjoinid=pjoinid, unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
-	strata=strata, stratalut=stratalut, strvar=strvar, saveobj=TRUE, 
+  GBpopdat <- modGBpop(popType=popType, GBdata=GBdata, saveobj=TRUE, 
 	outfolder=outfolder)
   names(GBpopdat)
   returnlst$GBpopdat <- GBpopdat

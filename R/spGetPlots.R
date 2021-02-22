@@ -4,10 +4,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
 	data_dsn=NULL, istree=FALSE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
 	tree_layer="tree", seed_layer="seed", other_layers=NULL, puniqueid="CN", 
-	pjoinid="CN", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
-	measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, 
-	intensity1=FALSE, showsteps=FALSE, 
-	savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
+	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", measCur=FALSE, 
+	measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, 
+	intensity1=FALSE, showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
 	outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
 	overwrite_dsn=FALSE, overwrite_layer=FALSE, ...) {
 
@@ -265,7 +264,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (!is.null(evalEndyr))
           msg <- paste0("ending in ", evalEndyr)
       } else if (!is.null(invyrs)) {
-        msg <- paste0(msg, "for inventory years", min(invyrs), "to", max(invyrs))
+        msg <- paste0(msg, "for inventory years ", min(invyrs), " to ", max(invyrs))
       } else {
         msg <- "using all plots in database"
         allyrs <- TRUE
@@ -606,7 +605,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (evalCur) {
           evalCurType <- ifelse(evalType == "ALL", "00", 
 			ifelse(evalType == "AREAVOL", "01", "00"))
-          evalidst <- getEvalid(dbconn=conn, states=stcd, evalEndyr=evalEndyr, 
+          evalidst <- getEvalid(dbconn=dbconn, states=stcd, evalEndyr=evalEndyr, 
 			evalCur=evalCur, evalType=evalCurType)
         }
         ## Get evalid filter

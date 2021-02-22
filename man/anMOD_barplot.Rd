@@ -8,7 +8,7 @@
 	a custom-defined boundary.	
 }
 \usage{
-anMOD_barplot(MODest, barplot.row=TRUE, barplot.ord="DESC", barplot.color=NULL, 
+anMOD_barplot(MODest, barplot.row=TRUE, barplot.ord=NULL, barplot.color=NULL, 
 	barplot.ylim = NULL, barplot.nplt = FALSE, savedata = FALSE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
 	title.ref = NULL, title.main = NULL, divideby = NULL) 

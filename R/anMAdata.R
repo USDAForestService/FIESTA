@@ -1,12 +1,12 @@
 anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
-	plot_layer="plot", cond_layer="cond", tree_layer="tree", puniqueid="CN", 
-	intensity1=TRUE, rastfolder=NULL, rastlst.cont=NULL, 
-	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
+	isseed=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
+	seed_layer="seed", puniqueid="CN", intensity1=TRUE, rastfolder=NULL, 
+	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	rastlst.cat.NODATA=NULL, showsteps=FALSE, cex.plots=0.5, savedata=FALSE, 
 	savexy=FALSE, savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, 
-	MApltdat=NULL, ...) {
+	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
+	overwrite_layer=TRUE, MApltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -32,43 +32,12 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Check overwrite, outfolder, outfn 
   ########################################################
   if (savedata || savexy || savesteps || saveobj) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    ## If outfn.pre is not null, create a folder within the outfolder, named outfn.pre
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
-    }
-
-    out_fmtlst <- c("sqlite", "gpkg", "csv", "gdb", "shp")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-    if (out_fmt == "shp") out_fmt <- "csv"
-    if (out_fmt != "csv" && is.null(out_dsn))
-      out_dsn <- paste0("SAdata.", out_fmt)
-
-    if (out_fmt == "gdb") {
-      out_dsn <- DBtestESRIgdb(gdbfn=out_dsn, outfolder=outfolder, overwrite=overwrite, 
-			showlist=FALSE, returnpath=FALSE)
-    }	else if (out_fmt %in% c("sqlite", "gpkg")) {
-      gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-      out_dsn <- DBcreateSQLite(SQLitefn=out_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=overwrite, returnpath=FALSE)
-    }	
-
-    if (savesteps) {
-      stepfolder <- file.path(outfolder, "SAdoms_steps")
-      if (!dir.exists(stepfolder)) dir.create(stepfolder)
-      if (out_fmt == "shp") {
-        step_dsn <- NULL
-      } else {
-        step_dsn <- paste0("SAdoms_steps.", out_fmt)
-      }
-    }
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
 
@@ -78,9 +47,9 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   if (is.null(MApltdat)) {
     MApltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
 		RS=RS, clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
-		istree=istree, plot_layer=plot_layer, cond_layer=cond_layer, 
-		tree_layer=tree_layer, intensity1=intensity1, savedata=FALSE, 
-		savexy=TRUE, ...)
+		istree=istree, isseed=TRUE, plot_layer=plot_layer, cond_layer=cond_layer, 
+		seed_layer=seed_layer, tree_layer=tree_layer, intensity1=intensity1, 
+		savedata=FALSE, savexy=TRUE, ...)
     if (is.null(MApltdat)) return(NULL)
     if (saveobj) {
       message("saving MApltdat object to: ", file.path(outfolder, "MApltdat.rda"), "...")
@@ -131,10 +100,6 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     par(mar=mar)
   }
 
-print("TEST")
-print(rastlst.cont)
-print(rastlst.cont.name)
-
   ####################################################################
   ## Get model data
   ####################################################################
@@ -170,7 +135,7 @@ print(rastlst.cont.name)
 
   if (saveobj) {
     objfn <- getoutfn(outfn="MApopdat.rda", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=TRUE)
+		overwrite=overwrite_layer, outfn.date=TRUE)
     save(MAdata, file=objfn)
     message("saving object to: ", objfn)
   } 
@@ -179,31 +144,31 @@ print(rastlst.cont.name)
    if (!is.null(RS))
      datExportData(sf::st_drop_geometry(bnd), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="bnd", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
 
     if (savexy)
       datExportData(sf::st_drop_geometry(xyplt), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyplt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
 
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(plt, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(cond, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(tree, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(unitlut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
    	
   return(MAdata)

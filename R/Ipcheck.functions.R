@@ -5,7 +5,7 @@
 #pcheck.outfolder
 #pcheck.states
 #pcheck.object
-
+#pcheck.output
 
 
 pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", 

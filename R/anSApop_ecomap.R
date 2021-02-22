@@ -5,13 +5,14 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 	measEndyr.filter=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, showsteps=FALSE, 
 	savedata=FALSE, savexy=FALSE, saveobj=TRUE, outfolder=NULL, outfn.pre=NULL, 
-	out_fmt="sqlite", out_dsn=NULL, outfn.date=FALSE, overwrite=TRUE, 
-	SAdomdat=NULL, SAdata=NULL, ...) {
+	out_fmt="sqlite", out_dsn=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, SAdomdat=NULL, SAdata=NULL, ...) {
 		
 
   ## Check for packages
-  if (!"FIESTAdata" %in% rownames(installed.packages()))
+  if (!"FIESTAdata" %in% rownames(installed.packages())) {
     stop("FIESTAdata package is required for anSApop_ecomap()")
+  }
 
   ## Set global variables
   gui <- FALSE
@@ -24,16 +25,12 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || saveobj) {
-    outfolder <- pcheck.outfolder(outfolder, gui=gui)
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
-    }
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
   ## Set parameters
@@ -97,7 +94,8 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		showsteps=showsteps, savedata=savedata, savexy=savexy, 
-		outfolder=outfolder, out_fmt="sqlite", out_dsn=NULL, overwrite=TRUE, ...)
+		outfolder=outfolder, out_fmt=out_fmt, out_dsn=NULL, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, ...)
     if (is.null(SAdata)) return(NULL)
     returnlst$SAdata <- SAdata
 
@@ -107,36 +105,32 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   } 
 
   ## SAdata
-  SAdoms <- SAdata$SAdoms
-  plt <- SAdata$plt
-  cond <- SAdata$cond
-  tree <- SAdata$tree
-  pltassgn <- SAdata$pltassgn
-  dunitlut <- SAdata$dunitlut
-  dunitvar <- SAdata$dunitvar
-  prednames <- SAdata$prednames
-  zonalnames <- SAdata$zonalnames
-  predfac <- SAdata$predfac
-  dunitarea <- SAdata$dunitarea
-  areavar <- SAdata$areavar
-  puniqueid <- SAdata$puniqueid
-  pltassgnid <- SAdata$pltassgnid
-  pjoinid <- SAdata$pjoinid
+#  SAdoms <- SAdata$SAdoms
+#  plt <- SAdata$plt
+#  cond <- SAdata$cond
+#  tree <- SAdata$tree
+#  pltassgn <- SAdata$pltassgn
+#  dunitlut <- SAdata$dunitlut
+#  dunitvar <- SAdata$dunitvar
+#  prednames <- SAdata$prednames
+#  zonalnames <- SAdata$zonalnames
+#  predfac <- SAdata$predfac
+#  dunitarea <- SAdata$dunitarea
+#  areavar <- SAdata$areavar
+#  puniqueid <- SAdata$puniqueid
+#  pltassgnid <- SAdata$pltassgnid
+#  pjoinid <- SAdata$pjoinid
 
-  rm(SAdata)
-  gc()
+#  rm(SAdata)
+#  gc()
  
-  if (is.null(SAdoms)) 
+  if (is.null(SAdata$SAdoms)) 
     return(NULL)
 
   ####################################################################
   ## Get population data
   ####################################################################
-  SApopdat <- modSApop(SAdoms=SAdoms, tree=tree, cond=cond, plt=plt, 
-		pltassgn=pltassgn, puniqueid=puniqueid, pltassgnid=pltassgnid, 
-		pjoinid=pjoinid, measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
-		dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
-		dunitlut=dunitlut, prednames=prednames, predfac=predfac)
+  SApopdat <- modSApop(SAdata=SAdata)
   names(SApopdat)
   returnlst$SApopdat <- SApopdat
 

@@ -15,8 +15,8 @@ anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL,
 	xy_dsn = NULL, xy_layer = "xyCur_ACTUAL", xy.uniqueid = "PLOT_ID", 
 	xvar = "LON_ACTUAL", yvar = "LAT_ACTUAL", xy.crs = 4269, 
 	strat_layer = NULL, strat_lut = NULL, savedata = FALSE, 
-	out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=FALSE)
+	out_dsn = NULL, out_fmt = "sqlite", outfolder=NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE)
 }
 \arguments{
   \item{evalEndyrlst}{ Integer vector. Vector of one or more Evaluation 
@@ -68,7 +68,8 @@ anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL,
 	outfolder is the working directory. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE, overwrite data. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
 }
  
 \value{
@@ -82,7 +83,7 @@ anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL,
 
   est <- lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
 	landarea="FOREST", row.FIAname=TRUE))
-
+  names(est)
 
   ## Get population data using strata and area estimates for evaluations ending 2015 to 2019
   fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")

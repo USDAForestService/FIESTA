@@ -1,12 +1,12 @@
-modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL, 
-	dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
+modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL, 
+	pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	puniqueid="CN", pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, 
-	cond.nonsamp.filter=NULL, dunitvar=NULL, dunitvar2=NULL, dunitarea=NULL, 
+	cond.nonsamp.filter=NULL, dunitvar="DOMAIN", dunitvar2=NULL, dunitarea=NULL, 
 	areavar="ACRES", unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
 	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=FALSE, SAdata=NULL, gui=FALSE){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, SAdata=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -56,23 +56,24 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
 # gui <- FALSE 
 
 
-  ### Check saveobj 
+  ## Check savedata 
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check saveobj 
   saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
 
-  ## Check outfolder 
+  ## Check output
   ########################################################
-  if (saveobj) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to file name?", first="NO", gui=gui) 
-
-    objfn <- getoutfn(outfn="SApopdat.rda", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=outfn.date)
-  }
+  if (savedata || saveobj) {
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
+  } 
 
 
   ## Check SAdata
@@ -119,7 +120,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
   ## Check population parameters 
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="SA", tree=tree, cond=cond, plt=plt, 
-	pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
+	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
 	condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
 	measCur=measCur, measEndyr=measEndyr, measEndyr.filter, invyrs=invyrs, 
 	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
@@ -128,6 +129,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
+  seedf <- popcheck$seedf
   pltassgnx <- popcheck$pltassgnx
   cuniqueid <- popcheck$cuniqueid
   condid <- popcheck$condid
@@ -145,7 +147,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
   invyrs <- popcheck$invyrs
   cvars2keep <- popcheck$cvars2keep
 
-  if (is.null(treef)) {
+  if (is.null(treef) && is.null(seedf)) {
     stop("must include tree data")
   }
 
@@ -201,30 +203,37 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
     adjtree <- TRUE
     bycond <- FALSE
 
-    adjfacdata <- getadjfactorPLOT(condx=condx, treex=treef, 
+    adjfacdata <- getadjfactorPLOT(condx=condx, treex=treef, seedx=seedf, 
 				cuniqueid=cuniqueid, tuniqueid=tuniqueid, )
     condx <- adjfacdata$condadj
     treef <- adjfacdata$treeadj
+    seedf <- adjfacdata$seedx
   }
  
   if (!is.null(SAdoms)) {
     returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)
   }
+
+  estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx,
-		cuniqueid=cuniqueid, condid=condid, tuniqueid=tuniqueid, 
-		ACI.filter=ACI.filter, dunitarea=dunitarea, areavar=areavar, 
-		dunitvar=dunitvar, dunitlut=dunitlut, prednames=prednames, 
+		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+		dunitarea=dunitarea, areavar=areavar, dunitvar=dunitvar, 
+		dunitlut=dunitlut, prednames=prednames, 
 		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
- 		invyrs=invyrs))
+ 		invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
+    returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
+  }
+  if (!is.null(seedf)) {
+    returnlst$seedx <- seedf
   }
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="SApopdat", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=outfn.date, ext="rda")
+    objfn <- getoutfn(outfn="SApopdat", ext="rda", outfolder=outfolder, 
+		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
@@ -232,13 +241,13 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, plt=NULL, pltassgn=NULL,
   if (savedata) {
     datExportData(pltassgnx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(dunitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(dunitlut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
 
   return(returnlst)

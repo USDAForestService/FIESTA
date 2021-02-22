@@ -23,10 +23,11 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  COND_STATUS_CD=COUNT=tadjfac=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD <- NULL
+  COND_STATUS_CD=COUNT=tadjfac=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=seedf <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
+  seedclnm <- "<1"
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -505,7 +506,9 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     if (!is.null(xfilter)) {
       ## Seed filter
       sdat <- datFilter(x=seedx, xfilter=tfilter, title.filter="tfilter")
-      seedx <- sdat$xf
+      seedf <- sdat$xf
+    } else {
+      seedf <- seedx
     }
   }
 
@@ -522,9 +525,15 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## check seed table
-  if (addseed && !tdomvar %in% names(seedx)) {
-    message("tdomvar not in seedx: ", tdomvar, "... no seeds included")
-    addseed <- FALSE
+  if (addseed) {
+    if (tdomvar == "DIACL") {
+      if ("DIACL" %in% names(seedf)) {
+        seedf$DIACL <- seedclnm
+      }
+    } else if (!tdomvar %in% names(seedf)) {
+      message("tdomvar not in seedf: ", tdomvar, "... no seeds included")
+      addseed <- FALSE
+    }
   }
 
   nbrtdoms <- length(tdoms)
@@ -538,16 +547,33 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       tdomvarlst <- tdoms
     }
   } else { 
-    if (!all(tdomvarlst %in% unique(treef[[tdomvar]]))) {
+    if (any(!tdomvarlst %in% unique(treef[[tdomvar]]))) {
       tdom.miss <- tdomvarlst[which(!tdomvarlst %in% unique(treef[,get(tdomvar)]))]
-      warning("check tdomvarlst... ", addcommas(tdom.miss), " not in tree table")
-      tdomvarlst <- select.list(as.character(tdoms), title="Tree domain(s)", multiple=TRUE)
-      if (length(tdomvarlst) == 0) stop("")
-      if (is.numeric(tdoms)) tdomvarlst <- as.numeric(tdomvarlst) 
+        tdom.miss <- tdomvarlst[!tdomvarlst %in% unique(treef[[tdomvar]])]
+        if (length(tdom.miss) == 1 && addseed && tdom.miss == seedclnm) {
+          tdom.miss <- NULL
+        }
+        if (!is.null(tdom.miss) || length(tdom.miss) > 0) {
+          message("tdomvarlst domain values not in tree table: ", toString(tdom.miss))
+        }
+        if (gui) {
+          tdomvarlst <- select.list(as.character(tdoms), title="Tree domain(s)", 
+			multiple=TRUE)
+        }      
+      if (length(tdomvarlst) == 0) {
+        stop("")
+      }
+      if (is.numeric(tdoms)) {
+        tdomvarlst <- as.numeric(tdomvarlst) 
+      }
     }  
     treef <- treef[treef[[tdomvar]] %in% tdomvarlst,]
     if (addseed) {
-      seedx <- seedx[seedx[[tdomvar]] %in% tdomvarlst,]
+      if (tdomvar == "DIACL") {
+        seedf <- seedf[seedf[[tdomvar]] %in% seedclnm,]
+      } else {
+        seedf <- seedf[seedf[[tdomvar]] %in% tdomvarlst,]
+      }
     }
   }
 
@@ -557,10 +583,12 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 		first="NO", gui=gui)
 
   ## Check tdomtotnm
-  if (tdomtot) 
-    if (!is.null(tdomtotnm) & !is.character(tdomtotnm)) 
+  if (tdomtot) {
+    if (!is.null(tdomtotnm) & !is.character(tdomtotnm)) {
       warning("tdomtotnm is not valid... using default")
-    
+    }
+  }
+  
   ## GETS name for tdomvar
   #####################################################################
   ## If tdomvar2 exists, concatenate the columns to one column (if pivot=TRUE)
@@ -581,8 +609,8 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     #tdomvarlut <- unique(treef[,c(tdomvar, tdomvarnm), with=FALSE]) 
 
     if (addseed) {
-      sdomdata <- FIESTA::datLUTnm(seedx, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
-      seedx <- sdomdata$xLUT
+      sdomdata <- FIESTA::datLUTnm(seedf, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
+      seedf <- sdomdata$xLUT
     }
     tdomvarlst2 <- tdomvarlut[match(tdomvarlst, tdomvarlut[[tdomvar]]), 
 		tdomvarnm, with=FALSE][[1]]
@@ -599,7 +627,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     #tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
 
     if (addseed) {
-      seedx[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
+      seedf[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
 			width=maxchar, flag="0"))]
     }
     #tdomvarlut <- data.frame(tdomvarlst, tdomvarlst2, stringsAsFactors=FALSE)
@@ -615,6 +643,19 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ## GET tdomvarlst2 or CHECK IF ALL tree domains IN tdomvar2lst ARE INCLUDED IN tdomvar2.
   if (!is.null(tdomvar2)) {
     tdoms2 <- sort(unique(treef[[tdomvar2]]))
+
+    ## check seed table
+    if (addseed) {
+      if (tdomvar2 == "DIACL") {
+        if ("DIACL" %in% names(seedf)) {
+          seedf$DIACL <- seedclnm
+        }
+        levels(tdoms2) <- c(seedclnm, levels(tdoms2))
+      } else if (!tdomvar2 %in% names(seedf)) {
+        message("tdomvar2 not in seed: ", tdomvar2, "... no seeds included")
+        addseed <- FALSE
+      }
+    }
     if (is.null(tdomvar2lst)) {
       ## GET tdomvar2lst
       if (gui) {
@@ -625,13 +666,24 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
         tdomvar2lst <- tdoms2
       }
     } else { 
-      if (sum(sapply(tdomvar2lst, 
-		function(x,y,z){x %in% unique(y[,z])}, treef, tdomvar2)) == 0) {
-        message("check tdomvar2lst: a tree domain value not in tree table")
-        tdomvar2lst <- select.list(as.character(tdoms2), title="Tree domain(s)", 
-		multiple=TRUE)
-        if (length(tdomvar2lst) == 0) stop("")
-        if (is.numeric(tdoms2))  tdomvar2lst <- as.numeric(tdomvar2lst)
+      if (any(!tdomvar2lst %in% unique(treef[[tdomvar2]]))) {
+        tdom.miss <- tdomvar2lst[!tdomvar2lst %in% unique(treef[[tdomvar2]])]
+        if (length(tdom.miss) == 1 && addseed && tdom.miss == seedclnm) {
+          tdom.miss <- NULL
+        }
+        if (!is.null(tdom.miss) || length(tdom.miss) > 0) {
+          message("tdomvar2lst domain values not in tree table: ", toString(tdom.miss))
+        }
+        if (gui) {
+          tdomvar2lst <- select.list(as.character(tdoms2), title="Tree domain(s)", 
+			multiple=TRUE)
+        }
+        if (length(tdomvar2lst) == 0) {
+          stop("")
+        }
+        if (is.numeric(tdoms2))  {
+          tdomvar2lst <- as.numeric(tdomvar2lst)
+        }
       }
     }
     if (!is.null(tdomvar2)) {
@@ -645,17 +697,30 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
         FIAname <- ifelse(FIAnameresp == "YES", TRUE, FALSE)
       }
       if (FIAname) {
-        tdomdata <- datLUTnm(treef, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
+        tdomdata <- datLUTnm(treef, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
         treef <- tdomdata$xLUT
         tdomvar2nm <- tdomdata$xLUTnm
+      
+        if (addseed) {
+          sdomdata <- FIESTA::datLUTnm(seedf, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
+          seedf <- sdomdata$xLUT
+        }
       }
 
       if (is.numeric(treef[[tdomvar2]])) {
         maxchar2 <- max(sapply(tdomvar2lst, function(x) {nchar(x)}))
-        treef[, (tdomvarnm) := paste0(treef[[tdomvarnm]], "_", 
+        treef[, (tdomvarnm) := paste0(treef[[tdomvarnm]], "#", 
             formatC(treef[[tdomvar2]], width=maxchar2, flag="0"))]
+
+        if (addseed) {
+          seedf[, (tdomvarnm) := paste0(seedf[[tdomvarnm]], "#", 
+            formatC(seedf[[tdomvar2]], width=maxchar2, flag="0"))]
+        }
       } else {
-        treef[, (tdomvarnm) := paste0(treef[[tdomvarnm]], "_", treef[[tdomvar2]])]
+        treef[, (tdomvarnm) := paste0(treef[[tdomvarnm]], "#", treef[[tdomvar2]])]
+        if (addseed) {
+          seedf[, (tdomvarnm) := paste0(seedf[[tdomvarnm]], "#", seedf[[tdomvar2]])]
+        }
       }
       tdomvarlst2 <- sort(unique(treef[[tdomvarnm]]))
     }
@@ -754,12 +819,12 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
 
-    adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedx, condx=condx, 
+    adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condadj
     treef2 <- adjfacdata$treeadj
     if (addseed) {
-      seedx <- adjfacdata$seedx
+      seedf <- adjfacdata$seedx
     }
    
     adjtree <- TRUE
@@ -782,12 +847,12 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       treef[, (newname) := get(eval(tsumvar)) * tadjfac]
     }
 
-    if (!is.null(seedx) && tsumvar == "COUNT") {
+    if (!is.null(seedf) && tsumvar == "COUNT") {
       seed_newname <- paste0("SEED_", newname)
       if (TPA) {
-        seedx[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar)) * tadjfac]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar)) * tadjfac]
       } else {
-        seedx[, (seed_newname) := get(eval(tsumvar)) * tadjfac]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * tadjfac]
       }
     }
   } else {
@@ -797,12 +862,12 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     } else {
       treef[, (newname) := get(eval(tsumvar))]
     }
-    if (!is.null(seedx) && tsumvar == "COUNT") {
+    if (!is.null(seedf) && tsumvar == "COUNT") {
       seed_newname <- paste0("SEED_", newname)
       if (TPA) {
-        seedx[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar))]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar))]
       } else {
-        seedx[, (seed_newname) := get(eval(tsumvar)) * tadjfac]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * tadjfac]
       }
     }
   }
@@ -829,7 +894,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
   if (addseed) { 
     seedname <- ifelse(TPA, seed_newname, "TREECOUNT_CALC")
-    tdomseedf <- seedx[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seedname]
+    tdomseedf <- seedf[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seedname]
     setnames(tdomseedf, "V1", seedname)
     setkeyv(tdomseedf, byvars)
 
@@ -845,7 +910,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
   setkeyv(tdomtreef, tsumuniqueid)
 
-
   ######################################################################## 
   ## If pivot=FALSE
   ######################################################################## 
@@ -856,7 +920,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     tdomscols <- sort(unique(tdomtreef[[tdomvarnm]]))
 
     if (!is.null(tdomvar2)) {
-      tdoms <- tdoms[, c(tdomvar, tdomvar2) := tstrsplit(get(tdomvarnm), "_")]
+      tdoms <- tdoms[, c(tdomvar, tdomvar2) := tstrsplit(get(tdomvarnm), "#")]
       tdomvarnm <- c(tdomvar, tdomvar2)
     }
 
@@ -1115,8 +1179,9 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
  
   tdomdata <- list()
   if (!notdomdat) {
-    if (returnDT)
+    if (returnDT) {
       sumtreef <- setDF(sumtreef)
+    }
     tdomdata$tdomdat <- sumtreef
   }
   if (proportion) {

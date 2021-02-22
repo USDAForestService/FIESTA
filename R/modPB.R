@@ -120,7 +120,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 	landarea=landarea, landarea.filter=landarea.filter, pnt.filter=pnt.filter, 
 	sumunits=sumunits, allin1=allin1, estround=estround, pseround=pseround, 
 	divideby=divideby, savedata=savedata, addtitle=addtitle, returntitle=returntitle, 
-	rawdata=rawdata, outfolder=outfolder) 
+	rawdata=rawdata, outfolder=outfolder)
   if (is.null(estdat)) return(NULL)
   PBx <- estdat$PBf	
   plotid <- estdat$plotid
@@ -136,7 +136,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   rawdata <- estdat$rawdata
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
-
 
   #################################################################################
   ### GET ROW AND COLUMN INFO
@@ -449,7 +448,6 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       unit.colest <- PBgetest(unit.colest, phatcol=phatcol, phatcol.var=phatcol.var)
     }
   }
-
   if (!is.null(unit.grpest)) {
     unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
