@@ -11,7 +11,7 @@ modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "un
 	estseed = "none", largebnd.att = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL,
  	estvar = NULL, estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, estround = 0, 
 	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
-	rawdata = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
+	rawdata = FALSE, rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
 	outfolder = NULL, outfn.pre = NULL, raw_fmt = "csv", raw_dsn = "rawdata", 
 	multest_fmt = "csv", multest_outfolder = NULL, multest_dsn = NULL, multest_layer = NULL, 
 	multest.append = FALSE, multest.AOIonly = FALSE, outfn.date = FALSE, overwrite = FALSE, 
@@ -52,6 +52,9 @@ modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "un
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
+  \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes
+	many estimation units, and only raw data tables are needed, it is more 
+	efficient to output raw data only. }
   \item{multest}{ Logical. If TRUE, returns a data frame of SA estimates using both
 	unit-level and area-level estimates. }
   \item{addSAdomsdf}{ Logical. If TRUE, sppends SAdomdf to unit.multest table for output. }

@@ -151,6 +151,13 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
     measEndyr.filter <- "AOI == 1"
   }
 
+  ## Check outfolder
+  outfolder <- pcheck.outfolder(outfolder)
+  if (!dir.exists(file.path(outfolder, "RAVG.ecoprov"))) {
+    dir.create(file.path(outfolder, RAVG.ecoprov))
+    outfolder <- file.path(outfolder, RAVG.ecoprov)
+  }
+
   ##################################################################################
   ## modSAtree() default parameters
   #################################################################################
@@ -165,9 +172,9 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
  		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		showsteps=showsteps, savedata=savedata, savexy=savexy, savesteps=savedata,
- 		outfolder=outfolder, outfn.pre=RAVG.ecoprov, out_fmt="sqlite", 
-		out_dsn=NULL, overwrite_layer=overwrite_layer, SAdomdat=SAdomdat, 
-		SAdata=SAdata)
+ 		outfolder=outfolder, out_fmt="sqlite", out_dsn=NULL, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+		SAdomdat=SAdomdat, SAdata=SAdata)
 
      ## Return SA population data
      returnlst$SApopdat <- SApop$SApopdat
@@ -189,11 +196,12 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
   message("calculating estimates...")
 
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modSAtree.R")
   for (j in 1:length(estvarlst)) {
     estvar <- estvarlst[j]
     for (k in 1:length(tfilterlst)) {
       tfilter <- tfilterlst[k]
-      message("generating estimates for ", estvar, " - ", tfilter, "...")
+      message("\ngenerating estimates for ", estvar, " - ", tfilter, "...")
 
       estvar.filter <- ifelse(tfilter == "live", "STATUSCD == 1", 
 					ifelse(tfilter == "dead", "STATUSCD == 2 & STANDING_DEAD_CD == 1", 
@@ -208,8 +216,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 			estvar=estvar, estvar.filter=estvar.filter,
 			savedata=savedata, multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn,
 			multest_layer=outnm, returntitle=TRUE, rawdata=TRUE, outfolder=outfolder,
- 			multest.append=multest.append, title.ref=title.ref, overwrite=overwrite_layer, 
-			outfn.pre=RAVG.ecoprov),
+ 			multest.append=multest.append, title.ref=title.ref, overwrite_dsn=overwrite_dsn,
+ 			overwrite=overwrite_layer, outfn.pre=RAVG.ecoprov, rawonly=TRUE),
 				error=function(err) {
 					message(err)
 					return(NULL)

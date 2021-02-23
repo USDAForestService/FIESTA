@@ -2,12 +2,12 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
 	estseed="none", largebnd.att=NULL, landarea="ALL", pfilter=NULL, cfilter=NULL, 
 	estvar=NULL, estvar.filter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, 
 	pseround=3, estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
-	multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
-	raw_fmt="csv", raw_dsn="rawdata", multest_fmt="csv", multest_outfolder=NULL, 
-	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, multest.AOIonly=FALSE, 
-	outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, 
-	title.main=NULL, title.ref=NULL, title.dunitvar=NULL, title.estvar=NULL, 
-	title.filter=NULL, SApopdat=NULL, ...){
+	rawonly=FALSE, multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, 
+	outfn.pre=NULL, raw_fmt="csv", raw_dsn="rawdata", multest_fmt="csv", 
+	multest_outfolder=NULL, multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE,
+ 	multest.AOIonly=FALSE, outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, 
+	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.dunitvar=NULL, 
+	title.estvar=NULL, title.filter=NULL, SApopdat=NULL, ...){
 
 
   ######################################################################################
@@ -204,7 +204,6 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
     }
   }
 
-
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
@@ -217,6 +216,7 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
 		"prednames", "plotsampcnt", "condsampcnt")
     SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", list.items=list.items)
   }
+
   if (is.null(SApopdat)) return(NULL)
   SAdomsdf <- SApopdat$SAdomsdf
   condx <- SApopdat$condx
@@ -274,7 +274,6 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
       stop("invalid prednames... must be in: ", toString(SApopdat$prednames))
   }
 
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -282,7 +281,7 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
  		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
 		landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
- 		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
+ 		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly,
 		savedata=savedata, outfolder=outfolder)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
@@ -298,6 +297,7 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
   rawdata <- estdat$rawdata
+  rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   estround <- estdat$estround
@@ -422,6 +422,8 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
 
+print("TEST")
+save(tdomdattot, file="outfolder/RAVGyr2015/M262/SA2check/tdomdattot.rda")
 
   if (sum(tdomdattot[[response]]) == 0) return(NULL)
 
@@ -589,7 +591,7 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
 	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
-	rawdata=rawdata, outfn.estpse=outfn.estpse, outfolder=outfolder, 
+	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 

@@ -55,19 +55,17 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE, stopifinv
     }
 
     ## Check if there are any variables in x that match filter
-    varInFilter <- sapply(names(x), function(x, y){ grepl(x, y) }, statement)
-    if (length(varInFilter) > 1)
-      varInFilter <- unique(na.omit(names(varInFilter[varInFilter == TRUE]))[1])
+    varInFilter <- names(x)[sapply(names(x), function(x, y){ grepl(x, y) }, statement)]
 
-    if (is.na(varInFilter) || length(varInFilter) > 1) {
+    if (is.na(varInFilter)) {
 #      writeLines(fwarning)
 #      statement <- NULL
-       if (stopifinvalid) {
-         stop(fwarning)
-       } else {
-         return(NULL)
-       }
-    }
+      if (stopifinvalid) {
+        stop(fwarning)
+      } else {
+        return(NULL)
+      }
+    } 
   }
   return(statement)
 }

@@ -23,9 +23,8 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	measEndyr.filter = NULL, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, showsteps = FALSE, 
 	savedata = FALSE, savexy = FALSE, saveobj = TRUE, outfolder = NULL, 
-	outfn.pre = NULL, out_fmt = "sqlite", out_dsn = NULL, outfn.date = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, SAdomdat = NULL, 
-	SAdata = NULL, ...)
+	out_fmt = "sqlite", out_dsn = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, SAdomdat = NULL, SAdata = NULL, ...)
 }
 \arguments{
   \item{smallbnd}{ sf R object or String. Small area of interest boundary. 
@@ -79,7 +78,6 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
   \item{saveobj}{ Logical. If TRUE, saves data list objects to outfolder. }
   \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
-  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
   \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }

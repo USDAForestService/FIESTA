@@ -393,7 +393,7 @@ modGBtree <- function(	estseed="none", landarea="FOREST", pfilter=NULL,
 	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
-	rawdata=rawdata, outfn.estpse=outfn.estpse, outfolder=outfolder, 
+	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 

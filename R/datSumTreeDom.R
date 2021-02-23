@@ -501,7 +501,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   tree.filter <- tdat$xfilter
 
   if (addseed) {
-    xfilter <- tryCatch( FIESTA::check.logic(seedx, tfilter),
+    xfilter <- tryCatch( check.logic(seedx, tfilter),
 		error=function(e) return(NULL))
     if (!is.null(xfilter)) {
       ## Seed filter

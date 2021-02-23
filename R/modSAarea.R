@@ -2,12 +2,12 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 	SAmethod="unit", largebnd.att=NULL, landarea="ALL", pfilter=NULL, 
 	cfilter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, 
 	estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
-	multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
-	raw_fmt="csv", raw_dsn="rawdata", multest_fmt="csv", multest_outfolder=NULL, 
-	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, multest.AOIonly=FALSE, 
-	outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, 
-	title.main=NULL, title.ref=NULL, title.dunitvar=NULL, title.filter=NULL, 
-	SApopdat=NULL, ...){
+	rawonly=FALSE, multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, 
+	outfn.pre=NULL, raw_fmt="csv", raw_dsn="rawdata", multest_fmt="csv", 
+	multest_outfolder=NULL, multest_dsn=NULL, multest_layer=NULL, 
+	multest.append=FALSE, multest.AOIonly=FALSE, outfn.date=FALSE, 
+	overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, title.main=NULL, 
+	title.ref=NULL, title.dunitvar=NULL, title.filter=NULL, SApopdat=NULL, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -221,7 +221,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
  		condid=condid, sumunits=sumunits, landarea=landarea,
  		ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
 		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
- 		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
+ 		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly,
 		savedata=savedata, outfolder=outfolder)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
@@ -234,6 +234,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   addtitle <- estdat$addtitle
   returntitle <- estdat$returntitle
   rawdata <- estdat$rawdata
+  rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   estround <- estdat$estround
@@ -496,7 +497,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
-	rawdata=rawdata, outfn.estpse=outfn.estpse, outfolder=outfolder, 
+	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 

@@ -148,14 +148,17 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL,
 \value{
   A list with population data for Small-Area estimates. 
 
-  \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer. }
-  \item{condx}{ Data frame. Condition-level data with adjusted condition proportions
-		and predictor values. }
+  \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer. 
+	Includes DOMAIN and AOI attributes. DOMAIN represents modeling domains. 
+	AOI identifies the small area of interest. }
+  \item{condx}{ Data frame. Condition-level data with condition proportions,
+	domain and predictor assignments, and adjusted condition proportions,
+	if adj in('samp', 'plot').  
   \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
   \item{cuniqueid}{ String. Unique identifier of plot in condx and pltcondx. }
   \item{condid}{ String. Unique identifier of condition in condx and pltcondx. }
-  \item{treex}{ Data frame. If esttype='TREE', tree-level data, including sample 
-	adjustment factor. }
+  \item{treex}{ Data frame. If esttype='TREE', tree-level data, including  
+	adjustment factors, if adj in('samp', 'plot'). }
   \item{tuniqueid}{ String. If esttype='TREE', unique identifier of plot in treex. }
   \item{ACI.filter}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" . }
   \item{dunitarea}{ Data frame. Area by model domain unit. }
@@ -164,7 +167,7 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL,
   \item{dunitlut}{ Data frame. Table of model domain units with zonal statistics 
 	of predictor values, number of plots by domain unit. }
   \item{prednames}{ String vector. Name of variables in dunitlut and condx 
-	defining small area model predictors. }
+	defining potential predictors for small area estimation. }
   \item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. }
   \item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. }
   \item{states}{ String. State names in dataset. }

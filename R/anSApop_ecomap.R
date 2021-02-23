@@ -4,7 +4,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 	nbrdom.min=10, datsource="sqlite", SQLitefn, RS=NULL, measEndyr=NULL, 
 	measEndyr.filter=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, showsteps=FALSE, 
-	savedata=FALSE, savexy=FALSE, saveobj=TRUE, outfolder=NULL, outfn.pre=NULL, 
+	savedata=FALSE, savexy=FALSE, saveobj=TRUE, outfolder=NULL, 
 	out_fmt="sqlite", out_dsn=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
 	overwrite_layer=TRUE, SAdomdat=NULL, SAdata=NULL, ...) {
 		
@@ -26,7 +26,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   ########################################################
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		outfolder=outfolder, outfn.date=outfn.date, 
 		overwrite=overwrite_dsn, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
@@ -68,7 +68,8 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 		multiSAdoms=multiSAdoms, maxbnd.threshold=maxbnd.threshold,
  		largebnd.threshold=largebnd.threshold, nbrdom.min=nbrdom.min,
 		savedata=TRUE, showsteps=showsteps, savesteps=savesteps, 
-		outfolder=outfolder, out_fmt="shp")
+		outfolder=outfolder, out_fmt="shp", overwrite_dsn=overwrite_dsn, 
+		overwrite_layer=overwrite_layer)
     if (is.null(SAdomdat)) return(NULL)
 
     if (saveobj) 

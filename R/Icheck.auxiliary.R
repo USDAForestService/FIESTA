@@ -358,6 +358,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
       }
       getwtvar <- NULL
     } 
+  } else {
+    if ("n.strata" %in% auxlut) {
+      auxlut[["n.strata"]] <- NULL
+    }
   }
  
   ## Set key to strlut and unitarea

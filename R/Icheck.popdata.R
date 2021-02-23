@@ -199,7 +199,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   } else {
     strvar <- NULL
     if (is.null(prednames)) {
-      stop("prednames is null... must include at least one variable name")
+      stop("prednames is null... must include at least one variable name\n")
     }
     pvars2keep <- unique(c(pvars2keep, prednames))
   }
