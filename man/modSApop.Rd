@@ -153,7 +153,7 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL,
 	AOI identifies the small area of interest. }
   \item{condx}{ Data frame. Condition-level data with condition proportions,
 	domain and predictor assignments, and adjusted condition proportions,
-	if adj in('samp', 'plot').  
+	if adj in('samp', 'plot'). }
   \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
   \item{cuniqueid}{ String. Unique identifier of plot in condx and pltcondx. }
   \item{condid}{ String. Unique identifier of condition in condx and pltcondx. }

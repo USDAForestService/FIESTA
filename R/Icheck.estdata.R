@@ -87,7 +87,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ## Apply cond filters
   ###################################################################################
 
-  ## Apply landarea.filter to condf
+  ## Apply landarea.filter to pltcondf
   pltcondf <- FIESTA::datFilter(x=pltcondf, xfilter=landarea.filter, 
 		title.filter="landarea filter", gui=gui, stopifnull=FALSE)$xf
   if (is.null(pltcondf)) {
@@ -95,7 +95,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     return(NULL)
   }
 
-  ## Apply cfilter to condf
+  ## Apply cfilter to pltcondf
   pltcondf <- datFilter(x=pltcondf, xfilter=cfilter, 
 		title.filter="cond filter", gui=gui, stopifnull=FALSE)$xf
   if (is.null(pltcondf)) {
@@ -192,6 +192,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 
 
   if (esttype %in% c("TREE", "RATIO", "SEED")) {
+
     ## Check that the values of tuniqueid in treex are all in cuniqueid in condf
     treef <- check.matchval(treex, pltcondf, tuniqueid, cuniqueid, tab1txt="tree", 
 		tab2txt="cond", subsetrows=TRUE)

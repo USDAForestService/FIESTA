@@ -196,7 +196,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
   message("calculating estimates...")
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modSAtree.R")
   for (j in 1:length(estvarlst)) {
     estvar <- estvarlst[j]
     for (k in 1:length(tfilterlst)) {

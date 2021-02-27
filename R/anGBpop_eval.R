@@ -1,8 +1,7 @@
-anGBpopDB_evalEndyrlst <- function(evalEndyrlst, states, evalType="VOL", 
-	data_dsn=NULL, isseed=FALSE, ppsanm="pop_plot_stratum_assgn", 
+anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states, 
+	evalType="VOL", data_dsn=NULL, isseed=FALSE, ppsanm="pop_plot_stratum_assgn", 
 	savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
-	overwrite_layer=TRUE) {
+	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
   ## DESCRIPTION: estimates for each evalid in list
   
   ## Set global variables
@@ -45,8 +44,8 @@ anGBpopDB_evalEndyrlst <- function(evalEndyrlst, states, evalType="VOL",
 
   ## Get evalid list
   ########################################################
-  evalidlst <- DBgetEvalid(states=states, RS=NULL, evalEndyr=evalEndyrlst, 
-		evalType=evalType)$evalidlist
+  evalidlst <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
+		states=states, RS=NULL, evalType=evalType)$evalidlist
   evalidlst <- transpose(evalidlst)
   names(evalidlst) <- paste0("eval", evalEndyrlst)
  

@@ -14,7 +14,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  COND_STATUS_CD=tadjfac=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
+  COND_STATUS_CD=tadjfac=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=seedf=
 	TREECOUNT_CALC <- NULL
 
 
@@ -24,6 +24,8 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
+  seedonly <- FALSE
+
 
   ## SET OPTIONS
   options.old <- options()
@@ -81,6 +83,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   }
   if (is.null(treex) && !is.null(seedx)) {
     addseed <- FALSE
+    seedonly <- TRUE
     treex <- seedx
   }
 
@@ -471,13 +474,15 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   treef <- tdat$xf
   tfilter <- tdat$xfilter
  
-  if (addseed) {
+  if (addseed || seedonly) {
     xfilter <- tryCatch( FIESTA::check.logic(seedx, tfilter),
 		error=function(e) return(NULL))
     if (!is.null(xfilter)) {
       ## Seed filter
-      sdat <- datFilter(x=seedx, xfilter=tfilter, title.filter="tfilter")
-      seedx <- sdat$xf
+      sdat <- datFilter(x=seedx, xfilter=tfilter, title.filter="tfilter", xnm="seed")
+      seedf <- sdat$xf
+    } else {
+      seedf <- seedx
     }
   }
 
@@ -530,12 +535,12 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
 
-    adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedx, condx=condx, 
+    adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condadj
     treef <- adjfacdata$treeadj
     if (addseed) {
-      seedx <- adjfacdata$seedx
+      seedf <- adjfacdata$seedx
     }
    
     adjtree <- TRUE
@@ -551,8 +556,8 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   ## If any variable in tsumvarlst is a TPA variable, add a count variable to treex
   if (any(tsumvarlst %in% tpavars)) {
     treef[, COUNT := 1]
-    if (addseed) {
-      seedx[, COUNT := 1]
+    if (addseed || seedonly) {
+      seedf[, COUNT := 1]
     }
   }   
 
@@ -580,12 +585,12 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       }
       treef[, (newname) := get(eval(tvar)) * get(eval(tpavar))]
 
-      if (addseed && tvar=="COUNT" && tpavar %in% names(seedx)) {
-        #seedx[, COUNT := TREECOUNT_CALC]
+      if ((addseed || seedonly) && tvar=="COUNT" && tpavar %in% names(seedf)) {
+        #seedf[, COUNT := TREECOUNT_CALC]
         if (adjTPA > 1) {
-          seedx[, (tpavar) := get(eval(tpavar)) * adjTPA]
+          seedf[, (tpavar) := get(eval(tpavar)) * adjTPA]
         }
-        seedx[, (newname) := get(eval(tvar)) * get(eval(tpavar))]
+        seedf[, (newname) := get(eval(tvar)) * get(eval(tpavar))]
         seedcountvar=treecountvar <- newname
       }
     } else {
@@ -604,8 +609,8 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       ## Apply adjustments
       treef[, (newname2) := get(eval(newname)) * tadjfac]
    
-      if (addseed && tvar=="COUNT" && "tadjfac" %in% names(seedx)) {
-        seedx[, (newname2) := get(eval(newname)) * tadjfac]
+      if ((addseed || seedonly) && tvar=="COUNT" && "tadjfac" %in% names(seedf)) {
+        seedf[, (newname2) := get(eval(newname)) * tadjfac]
         seedcountvar=treecountvar <- newname2
       }       
     } else {
@@ -628,22 +633,29 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   ######################################################################## 
   ## Aggregate tree variables
   ######################################################################## 
-  datvars <- treef[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
+
+  if (seedonly) {
+    datvars <- seedf[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
+		by=key(seedf), .SDcols=tsumvarlst2]
+    setnames(datvars, c(tsumuniqueid, tsumvarnmlst2))
+  } else {
+    datvars <- treef[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
 		by=key(treef), .SDcols=tsumvarlst2]
-  setnames(datvars, c(tsumuniqueid, tsumvarnmlst2))
+    setnames(datvars, c(tsumuniqueid, tsumvarnmlst2))
 
-  if (addseed && !is.null(seedcountvar)) {
-    sdatvars <- seedx[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
-		by=key(seedx), .SDcols=seedcountvar]
-    setnames(sdatvars, c(tsumuniqueid, paste0("SEED_", seedcountvar)))
+    if (addseed && !is.null(seedcountvar)) {
+      sdatvars <- seedf[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
+		by=key(seedf), .SDcols=seedcountvar]
+      setnames(sdatvars, c(tsumuniqueid, paste0("SEED_", seedcountvar)))
 
-    ## Merge using all.x and all.y in case there are plots with seedlings, no trees
-    datvars <- merge(datvars, sdatvars, all.x=TRUE, all.y=TRUE)
-    datvars[, (paste0("TREE_", treecountvar)) := get(treecountvar)]
-    datvars[, (treecountvar) := sum(.SD, na.rm=TRUE), by=key(datvars), 
+      ## Merge using all.x and all.y in case there are plots with seedlings, no trees
+      datvars <- merge(datvars, sdatvars, all.x=TRUE, all.y=TRUE)
+      datvars[, (paste0("TREE_", treecountvar)) := get(treecountvar)]
+      datvars[, (treecountvar) := sum(.SD, na.rm=TRUE), by=key(datvars), 
 			.SDcols=c(paste0("TREE_", treecountvar), paste0("SEED_", treecountvar))]
-    tsumvarnmlst2 <- treecountvar	
-  }     
+      tsumvarnmlst2 <- treecountvar	
+    } 
+  }    
 
   ######################################################################## 
   ######################################################################## 

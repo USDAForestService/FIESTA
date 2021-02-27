@@ -9,10 +9,9 @@ vignette: >
 
 
 ## FIESTA Overview
-The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. FIESTA can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. FIESTA can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
-
-Functions are organized by type or objective and are named with a corresponding prefix: 
+Functions are organized by type or objective and are named with a corresponding prefix. FIESTA core functions facilitate data extraction and compilation of data input information and are used independently or within the FIESTA estimation modules. FIESTA estimation modules combine multiple functions from FIESTA or other packages to generate population estimates using different estimation strategies. Each module has an associated mod*pop function for compiling the population data and calculations (e.g., adjustments for nonresponse) for a custom boundary and can be used for generating multiple estimates. FIESTA analysis functions streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
 
 **Core Functions**
 
@@ -27,16 +26,16 @@ Functions are organized by type or objective and are named with a corresponding 
 * Small Area (modSA) - functions for integration with available small area estimators (SAE).
 * Model-Assisted (modMA) - functions for integration with available Model-Assisted estimators.
 
-**Analysis Tools**
+**Analysis Functions**
 
-* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
+* Analysis functions (an) - wrapper functions for steam-lining estimation processes.
 
 
 
 ### Green-Book (GB) module overview
 FIESTA's Green-Book (GB) module calculates population estimates and their sampling errors based on Bechtold and Patterson's (2005), 'Green-Book' for FIA's nationally-consistent, systematic annual sample design, chapter 4 (Scott et al. 2005). FIA's sample design is based on 2 phases: the first phase uses remotely-sensed data to stratify the land area to increase precision of estimates; while the 2nd phase obtains photo and ground observations and measurements for a suite of information across a hexagonal grid, each approximately 6000 acres in size. The associated estimators and variance estimators are used for area and tree attribute totals with the assumption of a simple random, stratified design and double sampling for stratification. Adjustment factors are calculated by estimation unit and strata to account for nonsampled (nonresponse) conditions.   
 
-Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, FIESTA adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA's publically-available online tool (EVALIDator - https://apps.fs.usda.gov/Evalidator/evalidator.jsp) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).
+Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, FIESTA adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA's publicly-available online tool (EVALIDator - https://apps.fs.usda.gov/Evalidator/evalidator.jsp) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).
 
 ### Objective of tutorial
 The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates and estimated variances using the 'Green Book' estimators with FIA's plot and standard population data from the FIA database (FIADB). This tutorial steps through the following topics to help use FIESTA's GB module. 
@@ -57,11 +56,12 @@ The parameters for GB functions are organized by different categories based on p
 
 Population data:
 
-1. [Data tables and unique identifiers of plot](#dtab)  
-2. [Estimation data](#edata)   
-3. [Nonsample filters](#nonsamp)
-4. [Estimation unit information](#estunit)
-5. [Stratification information](#strat)
+1. [Population type](#ptyp)  
+2. [Data tables and unique identifiers of plot](#dtab)  
+3. [Estimation data](#edata)   
+4. [Nonsample filters](#nonsamp)
+5. [Estimation unit information](#estunit)
+6. [Stratification information](#strat)
 
 Estimation output:
 
@@ -73,6 +73,14 @@ Estimation output:
 6. [Output table title(s)](#title)
 
 
+<a name="ptyp"></a>
+**Population type**
+
+The population types (i.e., Eval_Type) currently available for FIESTA estimation. The population type defines the set of sampled plots and data used for estimation. For example, if you are only interested in area estimates (popType='CURR'), you do not need the tree data. Other population types will be available in the future, including GRM (Growth, mortality, removals), P2VEG (understory vegetation), CHNG (Change), and DWM (down woody material). These population types may have different sets of plots based on what was sampled.
+
+* **popType**    - Population type ('ALL', 'CURR', 'VOL').
+
+
 <a name="dtab"></a>
 **Data tables and unique identifiers**
 
@@ -82,7 +90,7 @@ The required data tables are from the FIA national database. Plot-level informat
 * **cond**      - Condition-level data, with 1 record per condition, including nonsampled conditions. May include estimation unit and strata assignment if plt=NULL and pltassgn=NULL - *required for all estimates*. 
 * **plt**       - Plot-level data, with 1 record per plot, including nonsampled conditions. May include nonsampled plots if PLOT_STATUS_CD variable is in dataset. May include estimation unit and strata assignment if pltassgn=NULL - *optional for all estimates*. 
 * **pltassgn**  - Plot-level data, with 1 record per plot and plot assignment of estimation unit and strata, if applying stratification. If nonsampled plots are included, PLOT_STATUS_CD variable must be in table. These plots are excluded from the analysis.       - *optional for all estimates*.
-* **seed**      - Seedling data - *required for modGBtree() or modGBratio() seedling estimates*.
+* **seed**      - Seedling data, with 1 record per seedling count - *required for modGBtree() or modGBratio() seedling estimates*.
 * **dsn**       - Data source name of database where data table layers reside.
 * **tuniqueid** - Unique identifier for plot in tree or seed.
 * **cuniqueid** - Unique identifier for plot in cond.
@@ -92,21 +100,29 @@ The required data tables are from the FIA national database. Plot-level informat
 
 
 <a name="edata"></a>
-**Estimation data**
+**Estimation area info**
 
-Define information for estimation data: ACI, adjust for nonsampled conditions; post-stratify.
+Define information for area estimation.
 
-* **evalid**    - FIA Evaluation identifier for subsetting plots for population (e.g., EVALID == 491801).
-* **invyrs**    - Inventory year(s) (e.g., c(2000, 2001, 2002)).
-* **ACI**       - FALSE. Defines whether to include All Condition Inventory (ACI) conditions and associated tree data in estimates. If FALSE, a filter, COND_STATUS_CD == 1, is generated and addition filters are applied for removing nonsampled conditions (see cond.nonsamp.filter).
-* **adj**       - Adjustment factors are calculated to account for nonsampled (nonresponse) conditions ('samp', 'plot', 'none'). If adj='samp', calculations are based on summed proportions of sampled conditions divided by the total plots in the strata/estimation unit. These adjustments are only calculated for annual inventory plots (designcd=1). If adj='plot', calculations are based on 1 divided by the summed proportions of sampled conditions in plot.
-* **strata**    - TRUE, use stratification for variance reduction.
+* **areawt**    - Variable to use for calculating area estimates (e.g., CONDPROP_UNADJ). This may change for other population types.
+* **adj**       - Adjustment for nonresponse ('none', 'samp', 'plot'). Note: adj='samp', expands area across strata and estimation unit(s), based on the summed proportions of sampled conditions divided by the total plots in the strata/estimation unit; adj='plot', expands area across plot based on 1 divided by the summed proportions of sampled conditions in plot.
+
+
+<a name="popfilters"></a>
+**Population filters**
+
+Population filters subset the plot data set before population calculations are generated. 
+
+* **evalid**    - If multiple evaluations are in dataset, select evalid for estimation.
+* **invyrs**    - If want to subset inventory years in dataset for estimation.
+* **intensity** - If want to specify intensification number of code to use for estimation.
+* **ACI**       - Logical. If TRUE, includes All Condition Inventory (ACI) conditions and associated tree data in estimates. If FALSE, a filter, is applied to remove nonsampled nonforest conditions (see cond.nonsamp.filter).
 
 
 <a name="nonsamp"></a>
 **Nonsample filters**
 
-Nonsample filters remove nonsample conditions from the dataset. Nonsample filters are identified internally, unless otherwise specified.
+Nonsample filters remove nonsample (i.e., nonresponse) conditions from the dataset. Nonsample filters are defined internally, unless otherwise specified.
 
 * **plt.nonsamp.filter** - If plt.nonsamp.filter=NULL, a predefined filter for nonsampled (nonresponse) plots (PLOT_STATUS_CD != 3 is used. If a different filter is needed, define the filter to remove plots that are nonsampled.
 * **cond.nonsamp.filter** - If cond.nonsamp.filter=NULL, a predefined filter for nonsampled (nonresponse) conditions is used (COND_STATUS_CD != 5; or if ACI=TRUE: is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5). If a different filter is needed, define the filter to remove conditions that are nonsampled.
@@ -129,6 +145,7 @@ An estimation unit is a population, or area of interest, with known area and num
 
 Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.
 
+* **strata**    - TRUE, use stratification for variance reduction.
 * **stratalut** - Look-up table with pixel counts, area, or proportions (strwt) by strata (and estimation unit).
 * **strvar**    - Name of strata variable in stratalut and pltassgn or cond table with strata assignment for each plot.
 * **getwt**     - If TRUE, calculates strata weights from getwtvar in stratalut.

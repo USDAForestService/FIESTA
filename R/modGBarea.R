@@ -102,7 +102,6 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
   }
   strunitvars <- c(unitvar, strvar)
 
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -130,7 +129,6 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
   pseround <- estdat$pseround
   landarea <- estdat$landarea
   if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
-
 
   ###################################################################################
   ### Check row and column data

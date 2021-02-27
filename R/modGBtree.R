@@ -120,11 +120,12 @@ modGBtree <- function(	estseed="none", landarea="FOREST", pfilter=NULL,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits,
- 		landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter,
- 		cfilter=cfilter, allin1=allin1, estround=estround, pseround=pseround,
- 		divideby=divideby, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-		rawonly=rawonly, savedata=savedata, outfolder=outfolder, gui=gui)
+ 	condid=condid, treex=treex, seedx=seedx, sumunits=sumunits,
+ 	landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter,
+ 	cfilter=cfilter, allin1=allin1, estround=estround, pseround=pseround,
+ 	divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder, 
+	gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -146,6 +147,7 @@ modGBtree <- function(	estseed="none", landarea="FOREST", pfilter=NULL,
   pseround <- estdat$pseround
   landarea <- estdat$landarea
   if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
+
 
   ###################################################################################
   ### Check row and column data

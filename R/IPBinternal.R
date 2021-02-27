@@ -226,7 +226,8 @@ getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut,
   return(returnlst)
 }
 
-transpose2row <- function(x, uniqueid, tvars=NULL, na.rm=TRUE, tnewname=NULL, tvalue=NULL) {
+transpose2row <- function(x, uniqueid, tvars=NULL, na.rm=TRUE, tnewname=NULL, 
+	tvalue=NULL, returnfactor=FALSE) {
   ## DESCRIPTION: transpose data.table variables from columns to row
   ## ARGUMENTS:
   ## x 		DT. Data.table to transpose
@@ -241,6 +242,10 @@ transpose2row <- function(x, uniqueid, tvars=NULL, na.rm=TRUE, tnewname=NULL, tv
     setnames(xt, "variable", tnewname)
   if (!is.null(tvalue)) 
     setnames(xt, "value", tvalue)
+
+  if (!returnfactor) {
+    xt[["variable"]] <- as.character(xt[["variable"]])
+  }
 
   return(xt)
 }

@@ -31,8 +31,21 @@ check.numeric <- function(x) {
 #}
 
 
-check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE, stopifinvalid=TRUE){
+check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE, 
+	stopifinvalid=TRUE, removeinvalid=FALSE){
   ## DESCRIPTION: checks logical statement
+  ## ARGUMENTS"
+  ## x 	- data frame to check column names
+  ## statement - logical statement
+  ## filternm  - name to use in messages
+  ## stopifnull - if statement=NULL, stop
+  ## stopifinvalid - if statement is not valid (i.e., columns names do not 
+  ##		match any name in logical statement)
+  ## removeinvalid - if TRUE, and a part of a multipart logical statement 
+  ## 		is invalid, the invalid part is removed, returning only valid part.
+  ## 	    	Note: an example is if using statement for trees and seedlings:
+  ##		"STATUSCD == 1 & SPCD = 475". Since there is no STATUSCD == 1 in 
+  ##		the seedling table, it is removed from logical statement.
  
   if (is.null(statement)) return(NULL)
   
@@ -48,22 +61,47 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE, stopifinv
   if (statement != "NONE") {
     if (!any(unlist(sapply(logic.chars, 
 		function(x, statement){grep(x, statement)}, statement)))) {
-      if (grep("=", statement)) {
+      if (grepl("=", statement) && sum(gregexpr("==", statement)>0) == 0) {
         message("must be R syntax.. changing '=' to '==' ")
-        statement <- sub("=", "==", statement)
+        statement <- gsub("=", "==", statement)
       }
     }
-
-    ## Check if there are any variables in x that match filter
-    varInFilter <- names(x)[sapply(names(x), function(x, y){ grepl(x, y) }, statement)]
-
-    if (is.na(varInFilter)) {
-#      writeLines(fwarning)
-#      statement <- NULL
-      if (stopifinvalid) {
-        stop(fwarning)
-      } else {
-        return(NULL)
+    if (grepl("&&", statement)) {
+      statement <- gsub("&&", "&", statement)
+    }
+    if (grepl("\\|\\|", statement)) {
+      statement <- gsub("\\|\\|", "\\|", statement)
+    }
+    if (grepl("&", statement) || grepl("\\|", statement)) {
+      parts <- {}
+      if (grepl("&", statement)) {
+        parts <- unlist(strsplit(statement, "&"))
+      } else if (grepl("\\|", statement)) {
+        parts <- unlist(strsplit(statement, "\\|"))
+      }
+      ## Check if there are any variables in x that match filter
+      chkparts <- sapply(parts, function(y, x){ 
+				sum(sapply(names(x), 
+				function(xnm, y){ grepl(xnm, y) }, y)) }, x)
+      if (any(chkparts == 0)) {
+        if (any(chkparts > 0) && removeinvalid) {
+          statement <- trimws(names(chkparts)[chkparts > 0])
+        } else if (stopifinvalid) {
+          stop(fwarning)
+        } else {
+          return(NULL)
+        }
+      }
+    } else {
+      ## Check if there are any variables in x that match filter
+      chk <- sum(sapply(names(x), function(x, y){ grepl(x, y) }, statement))
+          
+      if (chk == 0) {
+        if (stopifinvalid) {
+          stop(fwarning)
+        } else {
+          return(NULL)
+        }
       }
     } 
   }

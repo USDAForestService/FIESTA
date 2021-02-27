@@ -1,6 +1,6 @@
-anGBpop_evalEndyrlst <- function(evalEndyrlst, bnd_layer, bnd_dsn=NULL, 
-	bnd.att=NULL, bnd.filter=NULL, evalType="VOL", data_dsn=NULL, 
-	isseed=FALSE, xymeasCur=TRUE, pjoinid="PLOT_ID",  
+anGBpop_evalcustom <- function(evalidlst=NULL, evalEndyrlst=NULL, 
+	bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, evalType="VOL", 
+	data_dsn=NULL, isseed=FALSE, xymeasCur=TRUE, pjoinid="PLOT_ID",  
 	xy_dsn=NULL, xy_layer="xyCur_ACTUAL", xy.uniqueid="PLOT_ID", 
 	xvar="LON_ACTUAL", yvar="LAT_ACTUAL", xy.crs=4269, strat_layer=NULL, 
 	strat_lut=NULL, savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", 
@@ -37,8 +37,8 @@ anGBpop_evalEndyrlst <- function(evalEndyrlst, bnd_layer, bnd_dsn=NULL,
 
   ## Get evalid list
   ########################################################
-  evalidlst <- DBgetEvalid(states=states, RS=NULL, evalEndyr=evalEndyrlst, 
-		evalType=evalType)$evalidlist
+  evalidlst <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
+		states=states, RS=NULL, evalType=evalType)$evalidlist
   evalidlst <- transpose(evalidlst)
   names(evalidlst) <- paste0("eval", evalEndyrlst)
 

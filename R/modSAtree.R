@@ -422,9 +422,6 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
 
-print("TEST")
-save(tdomdattot, file="outfolder/RAVGyr2015/M262/SA2check/tdomdattot.rda")
-
   if (sum(tdomdattot[[response]]) == 0) return(NULL)
 
   if (is.null(largebnd.att)) {

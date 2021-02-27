@@ -139,7 +139,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     condf$TOTAL <- 1
 
     returnlst <- list(treef=treef, condf=condf[,c(cuniqueid, condid, "TOTAL"), with=FALSE], 
-		uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
+		seedf=seedf, uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
 		rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, 
 		col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0,
  		title.rowvar=title.rowvar, title.colvar=title.colvar, tdomvar=tdomvar, 
@@ -316,7 +316,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       
       ## add rowvar to cvars2keep
       cvars2keep <- c(cvars2keep, rowvar, row.orderby)
-
     } else if (rowvar %in% names(treef)) {
       bytdom <- TRUE
       if (row.FIAname || !is.null(rowlut)) {
@@ -448,7 +447,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       }
     }
   }
-
+ 
   ##############################################################
   ## COLUMN VARIABLE
   ##############################################################
@@ -802,7 +801,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     } else {
       if (is.factor(condf[[colvar]])) {
         uniquecol <- as.data.table(levels(condf[[colvar]]))
-        names(uniquecol) <- rowvar
+        names(uniquecol) <- colvar
       } else {
         #colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
         colvals <- unique(condf[, colvar, with=FALSE])
@@ -863,7 +862,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   condf <- condf[, cvars2keep, with=FALSE]
   setkeyv(condf, c(cuniqueid, condid))
 
-
   ## Create factors for ordering tables
   ##############################################################################
   if (!is.null(uniquerow)) {
@@ -888,7 +886,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     uniquecol[[colvar]] <- factor(uniquecol[[colvar]], 
 			levels=unique(uniquecol[[colvar]]))
   } 
-
 
   ## Add a column for totals
   condf$TOTAL <- 1

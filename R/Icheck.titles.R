@@ -30,7 +30,6 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 	ifelse (landarea == "ALL", "allland", 
 		ifelse (landarea == "TIMBERLAND", "timberland",
 			ifelse (landarea == "CHANGE", "change", ""))))
-
   if (addtitle || returntitle) {
     title.unitvar.out <- NULL
     if (!sumunits && length(unique(dat[[unitvar]])) > 1) 
@@ -88,7 +87,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
         if (is.null(title.estvarn)) 
           title.estvarn <- "Area"
         title.part1 <- title.estvarn
-        title.landarea <- paste("of", title.landarea)
+        title.landarea <- paste("on", title.landarea)
       
       } else if (esttype %in% c("TREE", "RATIO")) {
         ref_estvar <- FIESTA::ref_estvar
@@ -99,7 +98,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
           if (nrow(ref_estvarn) == 0) {
             title.estvarn <- estvarn
           } else if (estseed %in% c("add", "only")) {
-            ref_estvarn <- ref_estvarn[grep("(< 1.0 in)", ref_estvarn$ESTTITLE),]
+            ref_estvarn <- ref_estvarn[grep("seedlings", ref_estvarn$ESTTITLE),]
             if (estseed == "only") {
               gfind.max <- grep("seedlings", ref_estvarn$ESTUNITS)
             } else {
@@ -179,18 +178,16 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       }
 
       if (!is.null(title.units) && length(title.units) > 0) {
-        title.units <- ifelse (is.null(divideby), paste0(", in ", title.units, ","), 
-		paste0(", in ", divideby, " ", title.units, ", "))
-      } else {
-        title.units <- ""
-      }
-      title.part1 <- paste0(title.part1, title.units)
-
+        title.units <- ifelse (is.null(divideby), paste0(", in ", title.units), 
+		paste0(", in ", divideby, " ", title.units))
+        title.part1 <- paste0(title.part1, title.units)
+      } 
+ 
       ## title.part2
       ####################################################################
       title.rowgrp2 <- if(!is.null(title.rowgrp)) paste(" and", title.rowgrp) 
       if (rowvar == "TOTAL") {
-        title.part2 <- NULL
+        title.part2 <- ""
       } else {
         title.part2 <- tolower(paste0("by ", title.rowvar, title.rowgrp2))
         title.part2.row <- tolower(paste0("by ", title.rowvar, title.rowgrp2))
@@ -206,15 +203,19 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 
       ## Add percent sampling error
       if (allin1) {
-        title.estpse <- paste(title.part1, "(percent sampling error)", title.part2)
+        title.error <- ifelse(is.null(title.units), "(percent sampling error)",
+		"(percent sampling error),")
         if (rowvar == "TOTAL") {
-          title.tot <- title.part1
+          title.estpse <- paste(title.part1, title.error, title.landarea)
+          title.tot <- paste(title.part1, title.error, title.landarea)
         } else {
-          title.row <- paste(title.part1, title.part2)
+          title.estpse <- paste(title.part1, title.error, title.part2, 
+			title.landarea)
+          title.row <- paste(title.part1, title.error, title.part2, title.landarea)
         }
         if (colvar != "NONE") {
-          title.row <- paste(title.part1, title.part2.row)
-          title.col <- paste(title.part1, title.part2.col)
+          title.row <- paste(title.part1, title.error, title.part2.row, title.landarea)
+          title.col <- paste(title.part1, title.error, title.part2.col, title.landarea)
         }
         if (!is.null(title.filter))
           title.estpse <- paste(title.estpse, title.filter)
@@ -222,30 +223,33 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
           title.estpse <- paste(title.estpse, title.unitvar.out)
         
       } else {
-
+        if (!is.null(title.units)) {
+           title.part1 <- paste0(title.part1, ",")
+        }
         if (rowvar == "TOTAL" || 
 		(colvar == "NONE" && sumunits) || 
 		(colvar == "NONE" && length(unique(dat[[unitvar]])) == 1)) {
 
           if (rowvar == "TOTAL") {
             title.estpse <- paste(title.part1, "and percent sampling error", title.landarea)
-            title.tot <- title.part1
+          title.tot <- paste(title.part1, title.landarea)
           } else {
             title.estpse <- paste(title.part1, "and percent sampling error", title.landarea, title.part2)
-            title.row <- paste(title.part1, title.part2.row)
+            title.row <- paste(title.part1, title.landarea, title.part2.row)
           }
-          if (!is.null(title.filter)) 
-			title.estpse <- paste(title.estpse, title.filter)
-          if (!is.null(title.unitvar.out)) 
-			title.estpse <- paste(title.estpse, title.unitvar.out)
-
+          if (!is.null(title.filter)) {
+            title.estpse <- paste(title.estpse, title.filter)
+          }
+          if (!is.null(title.unitvar.out)) {
+            title.estpse <- paste(title.estpse, title.unitvar.out)
+          }
         } else {
 
-          title.est <- paste(title.part1, title.part2)
+          title.est <- paste(title.part1, title.landarea, title.part2)
           title.pse <- paste("Percent sampling error of", tolower(title.part1),
-			title.part2)
-          title.row <- paste(title.part1, title.part2.row)
-          title.col <- paste(title.part1, title.part2.col)
+			title.landarea, title.part2)
+          title.row <- paste(title.part1, title.landarea, title.part2.row)
+          title.col <- paste(title.part1, title.landarea, title.part2.col)
 
           if (!is.null(title.filter)) {
             title.est <- paste(title.est, title.filter)
@@ -276,6 +280,12 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
         }
       }
       if (!is.null(title.ref) && title.ref != "") {
+        if (!is.null(title.estpse)) {
+          title.estpse <- paste0(title.estpse, "; ", title.ref)
+        } else {
+          title.est <- paste0(title.est, "; ", title.ref)
+          title.pse <- paste0(title.pse, "; ", title.ref)
+        }
         if (rowvar == "TOTAL") {
           title.tot <- paste0(title.tot, "; ", title.ref)
         } else {
@@ -334,9 +344,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
   }
 
   if (is.null(title.estpse)) {
-    titlelst <- list(title.est=title.est, title.pse=title.pse)
+    titlelst <- list(title.est=trimws(title.est), title.pse=trimws(title.pse))
   } else {
-    titlelst <- list(title.estpse=title.estpse)
+    titlelst <- list(title.estpse=trimws(title.estpse))
   }
 
   if (esttype %in% c("TREE", "RATIO")) {

@@ -58,20 +58,21 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (NUMERATOR)
   #####################################################################################
   if (bytdom) {
+    pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
     if (estseed == "none") {
       suppressWarnings(
       tdomdata <- datSumTreeDom(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid, 
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, 
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree, 
-		adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
+		adjTPA=adjTPA, checkNA=FALSE, pivot=pivot))
     } else if (estseed == "only") {
       suppressWarnings(
       tdomdata <- datSumTreeDom(seed=seedf, cond=condf, plt=plt, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid, 
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, 
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
+ 		adjTPA=adjTPA, checkNA=FALSE, pivot=pivot))
     } else if (estseed == "add") {
       suppressWarnings(
       tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
@@ -79,18 +80,16 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 		bycond=bycond, condid=condid, tsumvar=estvarn, TPA=estvarn.TPA, 
 		tdomtot=esttotn, tdomtotnm=estvarn.name, addseed=TRUE, 
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
+ 		adjTPA=adjTPA, checkNA=FALSE, pivot=pivot))
     }
     if (is.null(tdomdata)) return(NULL)   
     tdomdat <- tdomdata$tdomdat
-    tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
-    #if (any(is.na(tdomdat[[tdomvar]]))) {
-    #  levels(tdomdat[[tdomvar]]) <- c(levels(tdomdat[[tdomvar]]), "notindomain")
-    #  tdomdat[is.na(tdomdat[[tdomvar]]), tdomvar] <- "notindomain"
-    #}
+
+    if (!pivot) {
+      tdomdat <- tdomdat[!is.na(tdomdat[[tdomvar]]),]
+    }
     tdomvarn <- tdomdata$tdomtotnm
     tdomvarlstn <- tdomdata$tdomlst
-
   } else {
 
     if (estseed == "none") {
@@ -144,20 +143,21 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
     ### GET TREE DATA (& TREE DOMAIN DATA) AGGREGATED TO CONDITION (DENOMINATOR)
     #################################################################################
     if (bytdom) {
+      pivot <- ifelse(esttype == "RATIO", TRUE, FALSE)
       if (estseed == "none") {
         suppressWarnings(
         tdomdata <- datSumTreeDom(tree=treef, cond=condf, plt=plt, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid, 
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, 
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree, 
-		adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
+		adjTPA=adjTPA, checkNA=FALSE, pivot=pivot))
       } else if (estseed == "only") {
         suppressWarnings(
         tdomdata <- datSumTreeDom(seed=seedf, cond=condf, plt=plt, tuniqueid=tuniqueid, 
 		cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, condid=condid, 
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, 
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
+ 		adjTPA=adjTPA, checkNA=FALSE, pivot=pivot))
       } else if (estseed == "add") {
         suppressWarnings(
         tdomdata <- datSumTreeDom(tree=treef, seed=seedf, cond=condf, plt=plt, 
@@ -165,14 +165,16 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 		bycond=bycond, condid=condid, tsumvar=estvarn, TPA=estvarn.TPA, 
 		tdomtot=esttotn, tdomtotnm=estvarn.name, addseed=TRUE, 
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree,
- 		adjTPA=adjTPA, checkNA=FALSE, pivot=FALSE))
+ 		adjTPA=adjTPA, checkNA=FALSE, pivot=pivot))
       }
       if (is.null(tdomdata)) {
         message("invalid denominator... returning null")
         return(NULL) 
       }  
       tdomdatd <- tdomdata$tdomdat
-      tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
+      if (!pivot) {
+        tdomdatd <- tdomdatd[!is.na(tdomdatd[[tdomvar]]),]
+      }
       tdomvard <- tdomdata$tdomtotnm
       tdomvarlstd <- tdomdata$tdomlst
 

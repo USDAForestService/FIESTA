@@ -1,5 +1,5 @@
-\name{anGBpopDB_evalEndyrlst}
-\alias{anGBpopDB_evalEndyrlst}
+\name{anGBpop_eval}
+\alias{anGBpop_eval}
 \title{
 	Analysis - Get estimates for Green-Book module.
 }
@@ -7,13 +7,14 @@
 	Wrapper to generate estimates for each evalid in list.	
 }
 \usage{
-anGBpopDB_evalEndyrlst(evalEndyrlst, states, evalType = "VOL", 
+anGBpop_eval(evalidlst=NULL, evalEndyrlst=NULL, states, evalType = "VOL", 
 	data_dsn = NULL, isseed = FALSE, ppsanm = "pop_plot_stratum_assgn", 
-	savedata = FALSE, out_dsn=NULL, out_fmt="sqlite", 
-	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn = FALSE, 
+	savedata = FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
+	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn = FALSE, 
 	overwrite_layer = TRUE)
 }
 \arguments{
+  \item{evalidlst}{ Integer vector. Vector of one or more evalid (e.g, 491801). }
   \item{evalEndyrlst}{ Integer vector. Vector of one or more Evaluation 
 	end years to generate estimates (YYYY). }
   \item{states}{ String vector. Name(s) of states in evaluation. }
@@ -49,11 +50,12 @@ anGBpopDB_evalEndyrlst(evalEndyrlst, states, evalType = "VOL",
   Data.
 }
 \examples{
-  GBpoplst <- anGBpopDB_evalEndyrlst(evalEndyrlst=c(2015:2019), states="Utah", 
+  GBpoplst <- anGBpop_eval(evalEndyrlst=c(2015:2019), states="Utah", 
 	evalType="CURR")
 
   lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
 	landarea="FOREST", row.FIAname=TRUE))
+
 }
 \author{
 	Tracey S. Frescino

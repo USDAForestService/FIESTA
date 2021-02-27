@@ -1,5 +1,5 @@
-\name{anGBpop_evalEndyrlst}
-\alias{anGBpop_evalEndyrlst}
+\name{anGBpop_evalcustom}
+\alias{anGBpop_evalcustom}
 \title{
 	Analysis - Get estimates for Green-Book module by FIA Evaluation End year.
 }
@@ -9,9 +9,9 @@
 	state ending in the same year are used. Data are subset to boundary. 	
 }
 \usage{
-anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL, 
-	bnd.att = NULL, bnd.filter=NULL, evalType = "VOL", data_dsn = NULL, 
-  	isseed = FALSE, xymeasCur = TRUE, pjoinid = "PLOT_ID", 
+anGBpop_evalcustom(evalidlst=NULL, evalEndyrlst=NULL, bnd_layer, 
+	bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL, evalType = "VOL", 
+	data_dsn = NULL, isseed = FALSE, xymeasCur = TRUE, pjoinid = "PLOT_ID", 
 	xy_dsn = NULL, xy_layer = "xyCur_ACTUAL", xy.uniqueid = "PLOT_ID", 
 	xvar = "LON_ACTUAL", yvar = "LAT_ACTUAL", xy.crs = 4269, 
 	strat_layer = NULL, strat_lut = NULL, savedata = FALSE, 
@@ -19,6 +19,7 @@ anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL,
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE)
 }
 \arguments{
+  \item{evalidlst}{ Integer vector. Vector of one or more evalid (e.g, 491801). }
   \item{evalEndyrlst}{ Integer vector. Vector of one or more Evaluation 
 	end years to generate estimates (YYYY). }
   \item{bnd_layer}{ sf R object or String. Area of interest (population boundary 
@@ -78,7 +79,7 @@ anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL,
 \examples{
   ## Get population data and area estimates for evaluations ending 2015 to 2019
   WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
-  GBpoplst <- anGBpop_evalEndyrlst(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
+  GBpoplst <- anGBpop_evalcustom(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
 	xymeasCur=TRUE, xy.uniqueid="PLOT_ID", evalType="CURR")
 
   est <- lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
@@ -87,7 +88,7 @@ anGBpop_evalEndyrlst(evalEndyrlst, bnd_layer, bnd_dsn = NULL,
 
   ## Get population data using strata and area estimates for evaluations ending 2015 to 2019
   fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
-  GBpoplst2 <- anGBpop_evalEndyrlst(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
+  GBpoplst2 <- anGBpop_evalcustom(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
 	xymeasCur=TRUE, xy.uniqueid="PLOT_ID", evalType="CURR", strat_layer=fornffn)
 
   est.strat <- lapply(GBpoplst2, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 

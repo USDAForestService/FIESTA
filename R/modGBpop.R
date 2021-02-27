@@ -165,7 +165,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ##	 and areavar (default="ACRES")
   ###################################################################################
   unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
-	unitvars=c(unitvar, unitvar2), areavar=areavar, gui=gui)
+	unitvars=c(unitvar, unitvar2), areavar=areavar, evalid=evalid, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
 
@@ -185,7 +185,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
 		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
 		minplotnum.unit=minplotnum.unit, getwt=getwt, getwtvar=getwtvar, 
-		P2POINTCNT=P2POINTCNT)  
+		P2POINTCNT=P2POINTCNT, evalid=evalid)  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar

@@ -3,7 +3,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 	auxlut=NULL, prednames=NULL, strata=FALSE, PSstrvar=NULL, predfac=NULL, 
 	nonresp=FALSE, substrvar=NULL, getwt=FALSE, getwtvar=NULL, P2POINTCNT=NULL, 
 	npixelvar=NULL, stratcombine=FALSE, minplotnum.unit=10, minplotnum.strat=2, 
-	na.rm=TRUE, removeifnostrata=FALSE, pvars2keep=NULL){
+	na.rm=TRUE, removeifnostrata=FALSE, pvars2keep=NULL, evalid=evalid){
 
   ##################################################################################
   ## DESCRIPTION: 
@@ -46,6 +46,17 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 				TRUE, FALSE)
   auxlut <- FIESTA::pcheck.table(auxlut, gui=gui, tabnm="auxlut",
  		caption="Strata table?", nullcheck=TRUE, stopifnull=stopifnull)
+
+  ## Check evalid
+  if (!is.null(evalid)) {
+    ecol <- pcheck.varchar("EVALID", checklst=names(auxlut), stopifinvalid=FALSE)
+    if (!is.null(ecol)) {
+      auxlut <- auxlut[auxlut[[ecol]] %in% evalid,]
+      if (nrow(auxlut) == 0) {
+        stop("evalid in auxlut does not match evalid")
+      }
+    }
+  }
 
 
   if (module %in% c("GB", "PB")) {

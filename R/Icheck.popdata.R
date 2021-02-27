@@ -325,7 +325,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   if (is.null(condx) && is.null(pltx) && is.null(pltassgnx)) 
     stop("must include plt or cond table")
 
-
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
 

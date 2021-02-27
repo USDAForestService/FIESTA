@@ -28,6 +28,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   checkNAcvars <- {}
   checkNAtvars <- {}
   seedclnm <- "<1"
+  seedonly <- FALSE
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -97,6 +98,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
   if (is.null(treex) && !is.null(seedx)) {
     addseed <- FALSE
+    seedonly <- TRUE
     treex <- seedx
   }
 
@@ -500,13 +502,18 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   treef <- tdat$xf
   tree.filter <- tdat$xfilter
 
-  if (addseed) {
-    xfilter <- tryCatch( check.logic(seedx, tfilter),
+  if (addseed || seedonly) {
+    xfilter <- tryCatch( check.logic(seedx, tfilter, removeinvalid=TRUE),
 		error=function(e) return(NULL))
     if (!is.null(xfilter)) {
       ## Seed filter
-      sdat <- datFilter(x=seedx, xfilter=tfilter, title.filter="tfilter")
+      sdat <- datFilter(x=seedx, xfilter=xfilter, title.filter="tfilter", xnm="seed")
       seedf <- sdat$xf
+      if (is.null(seedf)) {
+        message(paste(xfilter, "removed all records in seed"))
+        return(NULL)
+      }
+
     } else {
       seedf <- seedx
     }
@@ -789,7 +796,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     outfn.param <- paste(outfn, "param", sep="_")
   }
 
-
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -871,6 +877,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       }
     }
   }
+
   treef <- treef[, unique(c(key(treef), tdomvar, tdomvarnm, newname)), with=FALSE]
 
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
@@ -888,25 +895,33 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ## Sum tree (and seed) by tdomvarnm
   #####################################################################
   byvars <- unique(c(tsumuniqueid, tdomvar, tdomvarnm))
-  tdomtreef <- treef[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
-  setnames(tdomtreef, "V1", newname)
-  setkeyv(tdomtreef, byvars)
 
-  if (addseed) { 
-    seedname <- ifelse(TPA, seed_newname, "TREECOUNT_CALC")
-    tdomseedf <- seedf[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seedname]
-    setnames(tdomseedf, "V1", seedname)
-    setkeyv(tdomseedf, byvars)
+  if (seedonly) {
+    tdomtreef <- seedf[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seed_newname]
+    setnames(tdomtreef, "V1", newname)
+    setkeyv(tdomtreef, byvars)
+  } else {
+    tdomtreef <- treef[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=newname]
+    setnames(tdomtreef, "V1", newname)
+    setkeyv(tdomtreef, byvars)
 
-    tdomtreef <- merge(tdomtreef, tdomseedf, all.x=TRUE, all.y=TRUE)
-    tdomtreef[, (paste0("TREE_", newname)) := get(newname)]
-    tdomtreef[, (newname) := rowSums(.SD, na.rm=TRUE), .SDcols=c(newname, seedname)]
+    if (addseed) { 
+
+      seedname <- ifelse(TPA, seed_newname, "TREECOUNT_CALC")
+      tdomseedf <- seedf[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seed_newname]
+      setnames(tdomseedf, "V1", seedname)
+      setkeyv(tdomseedf, byvars)
+      tdomtreef <- merge(tdomtreef, tdomseedf, by=byvars, all.x=TRUE, all.y=TRUE)
+
+      tdomtreef[, (paste0("TREE_", newname)) := get(newname)]
+      tdomtreef[, (newname) := rowSums(.SD, na.rm=TRUE), .SDcols=c(newname, seedname)]
  
-    #tdomtreef[, c(newname, seedname) := NULL]
-    #setnames(tdomtreef, "tmp", newname)
+      #tdomtreef[, c(newname, seedname) := NULL]
+      #setnames(tdomtreef, "tmp", newname)
 
-    ## Set 0 to NA values
-    tdomtreef[is.na(tdomtreef)] <- 0
+      ## Set 0 to NA values
+      tdomtreef[is.na(tdomtreef)] <- 0
+    }
   }
   setkeyv(tdomtreef, tsumuniqueid)
 
@@ -916,8 +931,8 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   if (!pivot) {
     tdoms <- tdomtreef
     tdomscolstot <- newname
-    tdomtotnm <- newname
     tdomscols <- sort(unique(tdomtreef[[tdomvarnm]]))
+    tdomtotnm <- newname
 
     if (!is.null(tdomvar2)) {
       tdoms <- tdoms[, c(tdomvar, tdomvar2) := tstrsplit(get(tdomvarnm), "#")]
@@ -925,12 +940,12 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     }
 
   } else {
+
     ######################################################################## 
     ## If pivot=TRUE, aggregate tree domain data
     ######################################################################## 
     tdoms <- datPivot(tdomtreef, pvar=newname, xvar=tsumuniqueid,
 			yvar=tdomvarnm, pvar.round=tround)
-
     ## check if tree domain in tdomlst.. if not, create column with all 0 values
     tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% tsumuniqueid]
     UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 
@@ -941,13 +956,15 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
     ## ADD TOTAL OF TREE DOMAINS IN tdomvarlst 
     if ((tdomtot || proportion || cover)) {
+      tdomtotnm <- newname
+
       ## Sum the total tree domains in tdomvarlst after any filtering by plot
       tdoms[, (tdomtotnm) := round(rowSums(.SD, na.rm=TRUE), tround), .SDcols=tdomvarlst2]
       tdomscolstot <- c(tdomvarlst2, tdomtotnm)
     } else {
       tdomscolstot <- tdomvarlst2
     }
-
+ 
     ## Create a table of proportions for each tdom by total by plot
     if (proportion) {
       tdoms.prop <- tdoms[, lapply(.SD, function(x, tdomtotnm) round(x / get(eval(tdomtotnm))), 
@@ -1014,6 +1031,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     ## Merge summed data to cond table
     sumtreef <- merge(condx, tdoms, all.x=TRUE)
     for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
+    sumtreef[is.na(sumtreef)] <- 0
 
     ## Merge proportion table to cond table
     if (proportion) {
