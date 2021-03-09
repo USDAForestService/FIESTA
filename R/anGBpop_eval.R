@@ -90,7 +90,6 @@ anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states,
     tree <- pltdat$tree
     seed <- pltdat$seed
     pltassgn <- pltdat$POP_PLOT_STRATUM_ASSGN
-
   }
 
 
@@ -101,6 +100,7 @@ anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states,
   names(stratdat)
 
   unitvar <- stratdat$unitvar
+  unitvar2 <- stratdat$unitvar2
   strvar <- stratdat$strvar
   strwtvar <- stratdat$strwtvar
   getwt <- stratdat$getwt
@@ -123,11 +123,10 @@ anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states,
     unitarea <- stratdat$unitarea[stratdat$unitarea$EVALID %in% evalid,] 
     stratalut <- stratdat$stratalut[stratdat$stratalut$EVALID %in% evalid,]
 
-
     GBpopdat <- modGBpop(cond=cond, plt=plt, tree=tree, seed=seed,
 		pltassgn=pltassgn, pltassgnid=pltassgnid, evalid=evalid,
-		dsn=data_dsn, pjoinid=pjoinid, 
-		strata=TRUE, unitvar=unitvar, unitarea=unitarea, areavar=areavar, 
+		dsn=data_dsn, pjoinid=pjoinid, strata=TRUE, unitvar=unitvar, 
+		unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
 		stratalut=stratalut, strvar=strvar, getwt=TRUE, getwtvar=getwtvar,
  		stratcombine=TRUE, saveobj=savedata, outfolder=outfolder, 
 		outfn.pre=evalnm, outfn.date=FALSE, overwrite_layer=overwrite_layer)

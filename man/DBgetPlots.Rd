@@ -12,7 +12,7 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	evalCur = FALSE, evalEndyr = NULL, evalAll=FALSE, evalType = "ALL", 
 	measCur = FALSE, measEndyr = NULL, allyrs = FALSE, invyrs = NULL, 
 	xymeasCur = FALSE, istree = FALSE, isseed = FALSE, isveg = FALSE, 
-	issubp = FALSE, isdwm = FALSE, othertables = NULL, 
+	issubp = FALSE, isdwm = FALSE, plotgeom = FALSE, othertables = NULL, 
 	issp = FALSE, spcond = FALSE, spcondid1 = FALSE, 
 	defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, subcycle99 = FALSE, 
 	intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, alltFilter = NULL, 
@@ -69,6 +69,8 @@ DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL,
 	(SUBPLOT, SUBP_COND). }
   \item{isdwm}{ Logical. If TRUE, summarized condition-level down woody debris 
 	data are extracted from FIA database (COND_DWM_CALC). }
+  \item{plotgeom}{ Logical. If TRUE, variables from the PLOTGEOM table are
+	appended to the plot table. }
   \item{othertables}{ String Vector. Name of other table(s) in FIADB to include in
 	output. The table must have PLT_CN as unique identifier of a plot. }
   \item{issp}{ Logical. If TRUE, an sf spatial object is generated from the 

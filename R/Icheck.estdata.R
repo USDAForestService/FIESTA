@@ -64,10 +64,13 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ## Create landarea.filter 
   #############################################################################
   landarea.filter <- NULL
+  landcols <- {}
   if (landarea != "ALL") {
     if (landarea == "FOREST") {
-      landarea.filter <- "COND_STATUS_CD == 1"
-      landcols <- "COND_STATUS_CD"
+      if ("COND_STATUS_CD" %in% names(pltcondf)) {
+        landarea.filter <- "COND_STATUS_CD == 1"
+        landcols <- "COND_STATUS_CD"
+      }
     } else if (landarea == "TIMBERLAND") {
       landcols <- c("SITECLCD", "RESERVCD")
       if (any(!landcols %in% pltcondnmlst)) {
@@ -78,9 +81,12 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
       landarea.filter <- "SITECLCD %in% c(1:6) & RESERVCD == 0"
     }  
     ## Check for missing landcols 
-    landcolsmiss <- landcols[which(!landcols %in% pltcondnmlst)]
-    if (length(landcolsmiss) > 0) 
-      stop("missing variables: ", paste(landcolsmiss, collapse=", "))
+    if (length(landcols) > 0) {
+      landcolsmiss <- landcols[which(!landcols %in% pltcondnmlst)]
+      if (length(landcolsmiss) > 0) {
+        stop("missing variables: ", paste(landcolsmiss, collapse=", "))
+      }
+    }
   }
  
   ###################################################################################

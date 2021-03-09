@@ -150,6 +150,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   invyrs <- popcheck$invyrs
   cvars2keep <- popcheck$cvars2keep
   pvars2keep <- popcheck$pvars2keep
+  areawt <- popcheck$areawt
   if (nonresp) 
     substrvar <- popcheck$substrvar 
   #rm(popcheck)
@@ -231,13 +232,12 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
 
-
   if (adj == "samp") {
     adjtree <- TRUE
     adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
 		cuniqueid=cuniqueid, condid=condid, tuniqueid=tuniqueid, 
 		unitlut=stratalut, unitvars=unitvar, strvars=strvar, 
-		unitarea=unitarea, areavar=areavar)
+		unitarea=unitarea, areavar=areavar, areawt=areawt)
     condx <- adjfacdata$condx
     stratalut <- adjfacdata$unitlut
     treef <- adjfacdata$treex

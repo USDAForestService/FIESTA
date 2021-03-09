@@ -9,18 +9,19 @@ groupUnits <- function(tabest, domain, esttype="AREA", estncol="estn",
   ## Set global variables
   pse=rhat=TOTAREA=WEIGHT=rhat.var=NBRPNTS=phat=phat.var=est=est.var <- NULL
 
-  if (!"data.table" %in% class(tabest))
+  if (!"data.table" %in% class(tabest)) {
     tabest <- setDT(tabest)
+  }
 
   ## Domain variables
   domvargrp <- domain
   if (!is.null(domvar2)) domvargrp <- c(domvargrp, domvar2)
-  if (!is.null(rowgrpnm) && rowgrpnm %in% names(tabest)) 
-		domvargrp <- c(domvargrp, rowgrpnm)
-
+  if (!is.null(rowgrpnm) && rowgrpnm %in% names(tabest)) { 
+    domvargrp <- c(domvargrp, rowgrpnm)
+  }
   
   ## Aggregation variables
-  agvars <- c(estncol, estncol.var, "NBRPLT.gt0")
+  agvars <- c(estncol, estncol.var, "NBRPLT.gt0", areavar)
   agvars <- agvars[which(agvars %in% names(tabest))]
 
   if (esttype == "RATIO") {

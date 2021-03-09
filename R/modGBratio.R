@@ -1,4 +1,4 @@
-modGBratio <- function(estseed="none", ratiotype="PERACRE", 
+modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE", 
 	landarea="FOREST", pfilter=NULL, cfilter=NULL, 
 	estvarn=NULL, estvarn.filter=NULL, estvard=NULL, estvard.filter=NULL, 
 	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
@@ -9,7 +9,7 @@ modGBratio <- function(estseed="none", ratiotype="PERACRE",
 	outfn.pre=NULL, outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, 
  	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
 	title.colvar=NULL, title.unitvar=NULL, title.estvarn=NULL, title.estvard=NULL, 
-	title.filter=NULL, GBpopdat=NULL, gui=FALSE, ...){
+	title.filter=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION: 

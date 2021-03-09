@@ -1,4 +1,4 @@
-modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL, 
+modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, cfilter=NULL, 
 	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
@@ -7,7 +7,7 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
 	rawonly=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, 
 	overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, title.main=NULL, 
 	title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, 
-	title.filter=NULL, GBpopdat=NULL, gui=FALSE, ...){
+	title.filter=NULL, gui=FALSE, ...){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -38,6 +38,7 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  #estvar <- "CONDPROP_ADJ"
 
   ###################################################################################
   ## INITIALIZE SETTINGS
@@ -127,8 +128,6 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
   outfolder <- estdat$outfolder
   estround <- estdat$estround
   pseround <- estdat$pseround
-  landarea <- estdat$landarea
-  if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
   ###################################################################################
   ### Check row and column data
@@ -202,6 +201,7 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
   ###################################################################################
   unit.totest=unit.rowest=unit.colest=unit.grpest=rowunit=totunit=tdomdattot <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
+  #estvar.name <- estvar 
 
   message("getting estimates...")
 #  if (addtotal) {
@@ -346,7 +346,7 @@ modGBarea <- function(landarea="FOREST", pfilter=NULL, cfilter=NULL,
     rawdat <- list()
     rawdat$domdat <- setDF(cdomdat)
   }
-
+ 
   message("getting output...")
   estnm <- "est" 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 

@@ -6,6 +6,7 @@
 #pcheck.states
 #pcheck.object
 #pcheck.output
+#pcheck.colors
 
 
 pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", 
@@ -591,3 +592,28 @@ pcheck.output <- function(out_dsn=NULL, out_fmt="csv", outfolder=NULL,
 
   return(list(out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn))
 } 
+
+
+pcheck.colors <- function(colorlst, n) {
+
+   if (!"RColorBrewer" %in% rownames(installed.packages())) {
+	stop("must install RColorBrewer package")
+   }
+
+   ## Check colorlst
+   brewerlst <- c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3")
+   brewercblst <- c("Dark2", "Paired", "Set2")
+   if (!is.vector(colorlst) || !is.character(colorlst)) {
+     stop("colorlst must be a character vector of color names, hexadecimal codes, or brewer palettes")
+   }
+   if (length(colorlst) == 1 && colorlst %in% brewerlst) {
+     if (n < 3) {
+       stop("minimum number for brewer palettes is 3")
+     }      
+     colorlst <- RColorBrewer::brewer.pal(n, colorlst)
+   } else if (length(colorlst) != n) {
+     stop("number of colors is invalid")
+   }
+   return(colorlst)
+}
+  

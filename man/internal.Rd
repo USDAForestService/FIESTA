@@ -55,6 +55,7 @@
 \alias{pcheck.varchar}
 \alias{pcheck.unique}
 \alias{pcheck.xlsx}
+\alias{pcheck.colors}
 \alias{projfix}
 \alias{save1tab}
 \alias{save2tabs}
@@ -108,6 +109,7 @@
 \alias{setCells}
 \alias{write2xlsx}
 \alias{wraptitle}
+\alias{addclass}
 
 \alias{getext}
 \alias{getrastlst.rgdal}

@@ -39,7 +39,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, invtype="ANNUAL", evalCur=TRUE,
   isgrm=issccm <- FALSE 
 
   ## Define evalTypee choices
-  evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "DWM")
+  evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "DWM", "CHNG")
 #  evalTypelst <- c("ALL", "CURR", "VOL", "CHNG", "DWM", "GROW", "MORT", "REMV", 
 #		"CRWN", "INV", "P2VEG")
 

@@ -88,6 +88,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
           title.estvarn <- "Area"
         title.part1 <- title.estvarn
         title.landarea <- paste("on", title.landarea)
+        title.units <- "acres"
       
       } else if (esttype %in% c("TREE", "RATIO")) {
         ref_estvar <- FIESTA::ref_estvar
@@ -178,9 +179,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       }
 
       if (!is.null(title.units) && length(title.units) > 0) {
-        title.units <- ifelse (is.null(divideby), paste0(", in ", title.units), 
+        title.units2 <- ifelse (is.null(divideby), paste0(", in ", title.units), 
 		paste0(", in ", divideby, " ", title.units))
-        title.part1 <- paste0(title.part1, title.units)
+        title.part1 <- paste0(title.part1, title.units2)
       } 
  
       ## title.part2
@@ -383,6 +384,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
   if (colvar != "NONE") {
     titlelst$title.colvar <- title.colvar
     titlelst$title.col <- title.col
+  }
+  if (!is.null(title.units)) {
+    titlelst$title.units <- title.units
   }
   return(titlelst)
 }  

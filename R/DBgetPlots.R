@@ -2,8 +2,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	evalCur=FALSE, evalEndyr=NULL, evalAll=FALSE, evalType="ALL", measCur=FALSE,
  	measEndyr=NULL, allyrs=FALSE, invyrs=NULL, xymeasCur=FALSE, 
 	istree=FALSE, isseed=FALSE, isveg=FALSE, issubp=FALSE, isdwm=FALSE, 
-	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE,
- 	defaultVars=TRUE, regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, 
+	plotgeom=FALSE, othertables=NULL, issp=FALSE, spcond=FALSE, 
+	spcondid1=FALSE, defaultVars=TRUE, regionVars=FALSE, ACI=FALSE, subcycle99=FALSE, 
 	intensity1=FALSE, stateFilter=NULL, allFilter=NULL, alltFilter=NULL, 
 	savedata=FALSE, saveqry=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
 	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
@@ -17,7 +17,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
 	"DWM_RESIDUAL_PILE", "DWM_TRANSECT_SEGMENT", "DWM_VISIT", "GRND_CVR", 
 	"INVASIVE_SUBPLOT_SPP", "LICHEN_LAB", "LICHEN_PLOT_SUMMARY", "LICHEN_VISIT", 
-	"PLOTGEOM", "PLOTSNAP", "PLOT_REGEN", "SEEDLING_REGEN", "SITETREE", 
+	"PLOTSNAP", "PLOT_REGEN", "SEEDLING_REGEN", "SITETREE", 
 	"SOILS_EROSION", "SOILS_LAB", "SOILS_SAMPLE_LOC", "SOILS_VISIT", 
 	"SUBPLOT_REGEN", "SURVEY", "TREE_GRM_BEGIN", "TREE_GRM_ESTN", "TREE_GRM_MIDPT",
  	"TREE_GRM_THRESHOLD", "TREE_REGIONAL_BIOMASS", "TREE_WOODLAND_STEMS")
@@ -34,9 +34,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   }
 
   ## Set global variables  
-  CN=CONDID=COND_STATUS_CD=PLT_CN=FORTYPCD=pltvarlst=condvarlst=treevarlst=
-	tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=subpvarlst=
-	subpcvarlst=dwmvarlst=grmvarlst=sccmvarlst=filtervarlst=
+  CN=CONDID=COND_STATUS_CD=PLT_CN=FORTYPCD=pltvarlst=condvarlst=pgeomvarlst=
+	treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=
+	subpvarlst=subpcvarlst=dwmvarlst=grmvarlst=sccmvarlst=filtervarlst=
 	SUBPPROP_UNADJ=MICRPROP_UNADJ=TPA_UNADJ=TPAMORT_UNADJ=TPAREMV_UNADJ=
 	SEEDCNT6=TREECOUNT_CALC=SEEDSUBP=LIVE_CANOPY_CVR_PCT=CONDPROP_UNADJ=
 	PLOT_NONSAMPLE_REASN_CD=PLOT_STATUS_CD=BA=DIA=CRCOVPCT_RMRS=TIMBERCD=
@@ -76,8 +76,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   parameters <- FALSE
   biojenk <- FALSE 
   greenwt <- TRUE
-  issccm <- FALSE
   isgrm <- FALSE
+  issccm=FALSE
 
   ########################################################################
   ### GET PARAMETERS 
@@ -130,9 +130,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     isdwm <- FIESTA::pcheck.logical(isdwm, varnm="isdwm", 
 		title="DWM variables?", first="YES", gui=gui)
     isgrm <- FIESTA::pcheck.logical(isgrm, varnm="isgrm", 
-		title="DWM variables?", first="YES", gui=gui)
-    issccm <- FIESTA::pcheck.logical(isdwm, varnm="issccm", 
-		title="DWM variables?", first="YES", gui=gui)
+		title="GRM variables?", first="YES", gui=gui)
+    issccm <- FIESTA::pcheck.logical(issccm, varnm="issccm", 
+		title="Subplot Change variables?", first="YES", gui=gui)
   }
 
 
@@ -408,12 +408,14 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   if (defaultVars) {
     istree2 <- ifelse(istree || !is.null(alltFilter), TRUE, FALSE)
     DBvars <- DBvars.default(istree=istree2, isseed=isseed, isveg=isveg, 
-		issubp=issubp, isdwm=isdwm, regionVars=regionVars)
+		issubp=issubp, isdwm=isdwm, plotgeom=plotgeom, regionVars=regionVars)
     for (nm in names(DBvars)) assign(nm, DBvars[[nm]])
     for (nm in names(filtervarlst)) assign(nm, filtervarlst[[nm]])
 
     ## add commas
     vars <- toString(c(paste0("p.", pltvarlst), paste0("c.", condvarlst)))
+    pcgvars <- toString(c(paste0("p.", pltvarlst), paste0("pg.", pgeomvarlst), 
+		paste0("c.", condvarlst)))
     if (iseval)
       vars <- paste0(vars, ", ppsa.EVALID")
   } else {
@@ -447,6 +449,10 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ################################################
   pcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				"COND c ON (c.PLT_CN = p.CN)")
+  if (plotgeom) {
+    pcgeomfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA., 
+				"PLOTGEOM pg ON (pg.CN = p.CN)")
+  }
 
   ## xymeasCur
   ################################################
@@ -491,8 +497,17 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
   ## SCCM query
   ################################################
   if (issccm) {
-    sccmfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				"SUBP_COND_CHNG_MTRX sccm ON (sccm.PLT_CN = p.CN)")
+    sccmfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA.,
+		"COND PCOND ON (PCOND.PLT_CN = p.PREV_PLT_CN) JOIN ", SCHEMA.,
+		"SUBP_COND_CHNG_MTRX SCCM ON (SCCM.PLT_CN = c.PLT_CN AND 
+			SCCM.PREV_PLT_CN = PCOND.PLT_CN AND SCCM.CONDID = c.CONDID 
+			AND SCCM.PREVCOND = PCOND.CONDID)")
+    sccmwhereqry <- "c.CONDPROP_UNADJ IS NOT NULL 
+		AND ((SCCM.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR') 
+		OR (SCCM.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP')) 
+		AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
+		AND COALESCE(PCOND.COND_NONSAMPLE_REASN_CD, 0) = 0" 
+#		AND (c.COND_STATUS_CD = 1 AND PCOND.COND_STATUS_CD = 1)" 
   }
   ## GRM query
   ################################################
@@ -500,6 +515,7 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     grmfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				"TREE_GRM_COMPONENT grm ON (grm.PLT_CN = p.CN)")
   }
+
 
   ## Other tables
   ################################################
@@ -579,8 +595,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     message("getting data from ", state)
     stcd <- FIESTA::pcheck.states(state, "VALUE")
     stabbr <- FIESTA::pcheck.states(state, "ABBR")
-    pltx=condx=treex=seedx=vspsppx=vspstrx=subpx=subpcx=dwmx=ppsax=
-		spconddatx <- NULL   
+    pltx=condx=treex=seedx=vspsppx=vspstrx=subpx=subpcx=dwmx=sccmx=
+		ppsax=spconddatx <- NULL   
 
     if (!is.null(othertables)) {
       for (j in 1:length(othertables)) 
@@ -648,6 +664,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
     ## PLOT table  
     PLOT <- FIESTA::DBgetCSV("PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
+
+    if (plotgeom) {
+      ## PLOTGEOM table  
+      PLOTGEOM <- FIESTA::DBgetCSV("PLOTGEOM", stabbr, returnDT=TRUE, stopifnull=FALSE)
+    }
 
     ## COND table 
     COND <- FIESTA::DBgetCSV("COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
@@ -797,7 +818,11 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       #if (iseval) 
       #  vars <- paste0(vars, ", ppsa.EVALID")
 
-      pltcondqry <- paste("select distinct", vars, "from", pcfromqry, "where", xfilter)
+      if (plotgeom) {
+        pltcondqry <- paste("select distinct", pcgvars, "from", pcgeomfromqry, "where", xfilter)
+      } else {      
+        pltcondqry <- paste("select distinct", vars, "from", pcfromqry, "where", xfilter)
+      }
       pltcondx <- setDT(sqldf::sqldf(pltcondqry, stringsAsFactors=FALSE))
    
       ## Write query to outfolder
@@ -815,6 +840,9 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       message("no plots in database for ", state)
     } else {
       pltvarlst2 <- pltvarlst
+      if (plotgeom) {
+        pltvarlst2 <- unique(c(pltvarlst2, pgeomvarlst))
+      }
       #if (iseval) pltvarlst2 <- c(pltvarlst2, "EVALID")
       condvarlst2 <- condvarlst
 
@@ -1006,6 +1034,46 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
  
     ## Create combined unique identifier to subset other tables
     pcondID <- condx[, paste(PLT_CN, CONDID)]
+
+
+    ##############################################################
+    ## SUBP_COND_CHNG_MTRX (SCCM) data
+    ##############################################################
+    if (issccm && !is.null(pltx)) {
+      message("\n",
+      	"## STATUS: Getting area change data from SUBP_COND_CHNG_MTRX (", stabbr, ") ...", "\n")
+      sccmvars <- c("PLT_CN", "CONDID", "SUBP", "SUBPTYP", "PREV_PLT_CN", 
+			"PREVCOND", "SUBPTYP_PROP_CHNG")
+      sccmqry <- paste("select", toString(paste0("SCCM.", sccmvars)), 
+			"from", sccmfromqry, "where", sccmwhereqry, "and", xfilter)
+#      sccmqry <- paste("select SCCM.PLT_CN, 
+#			sum(COALESCE(SCCM.SUBPTYP_PROP_CHNG / 4, 0)) PROP_CHNG", 
+#			"from", sccmfromqry, "where", sccmwhereqry, "and", xfilter,
+#			"group by SCCM.PLT_CN")
+      sccmx <- sqldf::sqldf(sccmqry, stringsAsFactors=FALSE)
+
+      if (nrow(sccmx) != 0) {
+        sccmx <- setDT(sccmx)
+        sccmx[, PLT_CN := as.character(PLT_CN)]
+        setkey(sccmx, PLT_CN)
+
+        ## Subset overall filters from pltx
+        sccmx <- sccmx[sccmx$PLT_CN %in% pltx$CN,]
+
+print(dim(pltx))
+print(dim(sccmx))
+
+        ## Merge to pltx
+        #pltx <- merge(pltx, sccmx, all.x=TRUE, by.x="CN", by.y="PLT_CN")
+        
+      }
+
+      if (returndata) {
+        ## Append data
+        sccm <- rbind(sccm, sccmx)
+      }
+    }
+
 
     ##############################################################
     ## Tree data
@@ -1332,39 +1400,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 
 
     ##############################################################
-    ## Area Change Matrix (SUBP_COND_CHNG_MTRX)
-    ##############################################################
-    if (issccm && !is.null(pltx)) {
-      message("\n",
-      "## STATUS: Getting area change data from SUBP_COND_CHNG_MTRX (", 
-		stabbr, ") ...", "\n")
-    
-      if (is.null(sccmvarlst)) {
-        sccmx <- NULL
-        issccm <- NULL
-      } else {
-
-        #sccmvars <- toString(paste0("sccm.", sccmvarlst))
-        sccmqry <- paste("select sccm.* from", dfromqry, 
-		"where", paste0(evalFilter, stateFilters))
-        sccmx <- sqldf::sqldf(sccmqry, stringsAsFactors=FALSE)
-
-        if (nrow(sccmx) != 0) {
-          sccmx <- setDT(sccmx)
-          sccmx[, PLT_CN := as.character(PLT_CN)]
-          setkey(sccmx, PLT_CN, CONDID)
-
-          ## Subset overall filters from condx
-          sccmx <- sccmx[paste(sccmx$PLT_CN, sccmx$CONDID) %in% pcondID,]
-
-        }
-      }
-      if (returndata) {
-        sccm <- rbind(sccm, sccmx)
-      }
-    }
-
-    ##############################################################
     ## Tree Change, Growth, and Mortality (TREE_GRM_COMPONENT)
     ##############################################################
     if (isgrm && !is.null(pltx)) {
@@ -1414,9 +1449,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
           } else {
             xfilter <- paste0("x.EVALID IN(", toString(evalid), ")")
           }
-        } else if (othertable == "PLOTGEOM") {
-          joinid <- "CN"
-          xfromqry <- sub("x.PLT_CN", "x.CN", xfromqry)
         } else {
           joinid <- "PLT_CN"
         }
@@ -1589,6 +1621,15 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
 			index.unique=index.unique.condx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       }
+      if (savedata && !is.null(sccmx)) {
+        index.unique.sccmx <- NULL
+        if (!append_layer) index.unique.sccmx <- c("PLT_CN")
+        datExportData(sccmx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="sccm", 
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.sccmx, append_layer=append_layer,
+			outfn.pre=outfn.pre)
+      } 
       if ((savedata || !treeReturn) && !is.null(treex)) { 
         index.unique.treex <- NULL
         if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
@@ -1784,9 +1825,15 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
       fiadatlst$cond <- setDF(cond)
     }
     notsame <- FALSE
-    if (istree & !is.null(tree)) fiadatlst$tree <- setDF(tree)
-    if (isseed & !is.null(seed)) fiadatlst$seed <- setDF(seed)
- 
+    if (istree && !is.null(tree)) {
+      fiadatlst$tree <- setDF(tree)
+    }
+    if (isseed && !is.null(seed)) {
+      fiadatlst$seed <- setDF(seed)
+    }
+    if (issccm && !is.null(sccm)) {
+      fiadatlst$sccm <- setDF(sccm)
+    }
     if (isveg) {
       if (!is.null(vspspp)) fiadatlst$vspspp <- setDF(vspspp)
       if (!is.null(vspstr)) fiadatlst$vspstr <- setDF(vspstr)
@@ -1834,8 +1881,8 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
     if (!is.null(spconddat)) {
       fiadatlst$spconddat <- setDF(spconddat)
     }
-    if (savePOP || (iseval && length(evalidlist > 1)) && !is.null(ppsa)) {
-		fiadatlst$POP_PLOT_STRATUM_ASSGN <- setDF(ppsa)
+    if (savePOP || (iseval && length(evalidlist) > 1) && !is.null(ppsa)) {
+      fiadatlst$POP_PLOT_STRATUM_ASSGN <- setDF(ppsa)
     }
   }
  

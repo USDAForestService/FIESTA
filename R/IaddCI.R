@@ -11,9 +11,9 @@ addCI <- function(x, estnm, senm=NULL, conf.level=c(99, 95, 68), gainloss=FALSE)
   ##################################################################
 
   ## Get standard error (se) variable from dataset. If no se, calculate from variance (var)
-  if (is.null(senm))
+  if (is.null(senm)) {
     senm <- paste(estnm, "se", sep=".")
-  
+  }
   if (!senm %in% names(x)) {
     varnm <- paste(estnm, "var", sep=".")
     if (varnm %in% names(x)) {
@@ -38,12 +38,13 @@ addCI <- function(x, estnm, senm=NULL, conf.level=c(99, 95, 68), gainloss=FALSE)
     leftvar <- paste0("CI", level * 100, "left")
     rightvar <- paste0("CI", level * 100, "right")
 
-    x[[leftvar]] <- x[, estnm] - (zval * x[, senm])
+    x[[leftvar]] <- x[[estnm]] - (zval * x[[senm]])
 
-    if (!gainloss)
+    if (!gainloss) {
       x[is.na(x[[leftvar]]) | x[[leftvar]] < 0, leftvar] <- 0
+    }
     
-    x[, rightvar] <- x[, estnm] + (zval * x[, senm])
+    x[[rightvar]] <- x[[estnm]] + (zval * x[[senm]])
     
   #  }, x, estnm, senm)
   }

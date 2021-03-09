@@ -1103,7 +1103,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	unitvar2=unitvar2, unitcombine=unitcombine, prednames=prednames, predfac=predfac,
 	adj=adj, strata=strata, strvar=strvar, stratcombine=stratcombine, nonresp=nonresp,
  	P2POINTCNT=P2POINTCNT, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-	states=states, invyrs=invyrs, ACI.filter=ACI.filter)
+	states=states, invyrs=invyrs, ACI.filter=ACI.filter, areawt=areawt)
 
   if (!is.null(treex)) {
     ## Check that the values of tuniqueid in treex are all in cuniqueid in pltcondx

@@ -11,8 +11,8 @@
 
 }
 \usage{
-modGBratio(estseed = "none", ratiotype = "PERACRE", landarea = "FOREST", 
-	pfilter = NULL, cfilter = NULL, 
+modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE", 
+	landarea = "FOREST", pfilter = NULL, cfilter = NULL, 
 	estvarn = NULL, estvarn.filter = NULL, estvard = NULL, estvard.filter = NULL, 
 	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
 	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
@@ -23,10 +23,11 @@ modGBratio(estseed = "none", ratiotype = "PERACRE", landarea = "FOREST",
  	outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, 
 	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
  	title.unitvar = NULL, title.estvarn = NULL, title.estvard = NULL, 
-	title.filter = NULL, GBpopdat = NULL, gui = FALSE, ...)
+	title.filter = NULL, gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
   \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
 	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{ratiotype}{ String. The type of ratio estimates ("PERACRE", "PERTREE"). }
@@ -107,7 +108,6 @@ modGBratio(estseed = "none", ratiotype = "PERACRE", landarea = "FOREST",
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
-  \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
   \item{...}{ Parameters for modGBpop() if GBpopdat is NULL. }
 }

@@ -141,10 +141,10 @@ SAest.dom <- function(dom, plt.dom, cuniqueid, dunitlut, dunitvar="DOMAIN",
   ## Subset tomdat to domain=dom
   plt.dom <- plt.dom[plt.dom[[domain]] == dom,] 
 
-print("TEST")
-save(plt.dom, file="outfolder/RAVGyr2015/M262/SA2check/pltdom.rda")
-save(dunitlut, file="outfolder/RAVGyr2015/M262/SA2check/dunitlut.rda")
-save(fmla, file="outfolder/RAVGyr2015/M262/SA2check/fmla.rda")
+#print("TEST")
+#save(plt.dom, file="outfolder/RAVGyr2015/M262/SA2check/pltdom.rda")
+#save(dunitlut, file="outfolder/RAVGyr2015/M262/SA2check/dunitlut.rda")
+#save(fmla, file="outfolder/RAVGyr2015/M262/SA2check/fmla.rda")
 
   ## Apply function to each dom
   domest <- data.table(dom, SAest(yn=response, plt.dom=plt.dom, 

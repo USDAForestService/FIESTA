@@ -2,180 +2,1245 @@
 output:
   word_document:
     reference_docx: anGBtemplate.docx
-    fig_caption: yes
-  pdf_document: default
 params:
-  rawfolder: ""
-  AOInm: ""
-  title.ref: ""
+  GBpopdat: ''
+  photofn: ''
+  AOInm: ''
+  invyrs: ''
+  EVALIDator_match: TRUE
+  popfilter: ''
+  photo_author: ''
+  title.ref: ''
+  
 ---
 
 
-```{r inputs, echo=FALSE, warning=FALSE, message=FALSE}
-library(FIESTA)
+```{r Data_Inputs, echo=FALSE, warning=FALSE, message=FALSE}
 
-# ## Set the following parameters to run report
-#rawfolder <- "C:/FIESTA/outfolder/rawdata"
-#AOInm <- "Bighorn"
-#title.ref <- AOInm
+AOInm <- "Fishlake National Forest"
+invyrs <- unlist(GBpopdat$invyrs)
+invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
+states <- GBpopdat$states
+EVALIDator_match <- params$EVALIDator_match
+popfilter <- params$popfilter
+photo_author <- params$photo_author
+photofn <- params$photofn
 
-rawfolder <- params$rawfolder
-AOInm <- params$AOInm
-title.ref <- params$title.ref
-
-if (is.null(rawfolder)) stop("rawfolder is NULL")
-if (!dir.exists(rawfolder)) stop("rawfolder path is invalid")
-if (is.null(AOInm)) stop("AOInm is NULL")
-if (is.null(title.ref)) title.ref <- AOInm
-figNum <- 0
-
+if (is.null(title.ref)) {
+  title.ref <- AOInm
+}
 
 ```
 
 
 ---
-title: "Report summary for `r title.ref`"
+title: "Forest Report:  \n `r AOInm`, `r toString(states)`, (`r invyrs2`)"
 ---
 
-&nbsp;
-&nbsp;
 
-__Date:__ `r format(Sys.time(), "%B %d, %Y")`
+-----  
 
-&nbsp;
-&nbsp;
+&nbsp;  
 
-`r figNum=0`
+Rocky Mountain Research Station, Forest Inventory and Analysis  | `r format(Sys.time(), "%B %Y")`
 
-############### ![](report_image.png)
+&nbsp;  
 
-``` {r picture, include=FALSE, fig.height=2, fig.width=8, fig.align="center"}
-figNum = figNum+1
-figCap = paste0("Figure ",figNum,": Photo from ", title.ref)
-```
-########## `r figCap`
+![](report_image.png)
+Photo from the `r AOInm`, `r toString(states)`. Photo courtesy of `r photo_author`.
 
-&nbsp;
-&nbsp;
+&nbsp;    
 
 
-```{r tab1data, echo=FALSE, warning=FALSE, message=FALSE}
+----- 
 
-rowestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.rowest*csv"))
-grpestfn <- list.files(rawfolder, pattern=glob2rx("01*unit.grpest*csv"))
-xtabfn <- list.files(dirname(rawfolder), glob2rx("01*csv"))
 
-rowest <- fread(file.path(rawfolder, rowestfn[length(rowestfn)]))
-grpest <- fread(file.path(rawfolder, grpestfn[length(grpestfn)]))
-xtab <- fread(file.path(dirname(rawfolder), xtabfn[length(xtabfn)]))
+# Summary
+
+&nbsp;  
+
+```{r Summary_Info, echo=FALSE, include=FALSE}
+
+estsummary <- modGBarea(GBpopdat=GBpopdat, rowvar="COND_STATUS_CD", row.FIAname=TRUE, 
+                rawdata=TRUE, landarea="ALL", colvar="RESERVCD", col.FIAname=TRUE)
+
+rowest <- estsummary$raw$rowest
+colest <- estsummary$raw$colest
 
 title.rowvar <- "Land class"
 title.colvar <- "Reserved status"
-totarea <- round(rowest$est/rowest$nhat)[1]
+totarea=sum(GBpopdat$unitarea$ACRES)
 area.for <- rowest[rowest[[title.rowvar]] == "Forest land", "est"]
 area.nf <- rowest[rowest[[title.rowvar]] == "Nonforest land", "est"]
-area.water <- sum(rowest[rowest[[title.rowvar]] %in% c("Noncensus water", "Nonforest land"), "est"])
-est <- rowest[, c(title.rowvar, "est", "pse"), with=FALSE]
+area.water <- sum(rowest[rowest[[title.rowvar]] %in% c("Noncensus water", "Census water"), "est"])
 
-title1a <- paste0("Area by land class, ", title.ref)
-title1b <- paste0("Area by land class and reserved status, ", title.ref)
-
-
-```
-
-
-
-The area of `r params$AOInm` is `r format(round(totarea), big.mark=",")` acres with `r round(area.for/totarea * 100)` percent of the area classified as forest land, `r round(area.nf/totarea * 100)` percent classified as nonforest land, and `r round(area.water/totarea * 100)` percent as water (Fig. 1).
-
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
+if (!EVALIDator_match) {
+summary_text <-
+paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report are from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, ". All estimation percent sampling errors are reported 68% confidence level.")
+} else {
+addtext <- "The estimates are based on state-level population data"
+if (is.null(popfilter) || popfilter == "") {
+addtext <- paste0(addtext, ". ")
+} else {
+addtext <- paste0(addtext, ", filtered by ", popfilter, ". ")
+}
+summary_text <-
+paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report are from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, ". ", addtext, "All estimation percent sampling errors are reported 68% confidence level.")
+}
 
 
-```{r tab1xtab, echo=FALSE, warning=FALSE, message=FALSE}
-
-## Create prettier table
-knitr::kable(xtab, 'simple', align=c('l', 'r', 'r', 'r'), 
-             caption=paste("Table 1:", title1b))
-
-
-```
-
-&nbsp;
-&nbsp;
-
-```{r tab1bplot, echo=FALSE, warning=FALSE, message=FALSE, fig.cap=paste("Fig. 1.", title1a)}
-
-datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", divideby="thousand", errbars=TRUE, 
-           sevar="est.se", x.order=NULL, las.xnames=2, ylabel="Area - Acres", 
-           col=terrain.colors(nrow(rowest)), ylim=NULL, toplabelvar="NBRPLT.gt0")
-
-#datBarStacked(x=grpest, main.attribute=title.rowvar, sub.attribute=title.colvar, 
-#              response="est", horiz=FALSE,
-#              main.order=unique(grpest[[title.rowvar]]), sub.order=unique(grpest[[title.colvar]]))
-
-
-```
-
-&nbsp;
-&nbsp;
-
-
-
-```{r tab2data, echo=FALSE, warning=FALSE, message=FALSE}
-
-rowestfn <- list.files(rawfolder, pattern=glob2rx("02*unit.rowest*csv"))
-grpestfn <- list.files(rawfolder, pattern=glob2rx("02*unit.grpest*csv"))
-xtabfn <- list.files(dirname(rawfolder), glob2rx("02*csv"))
-
-rowest <- fread(file.path(rawfolder, rowestfn[length(rowestfn)]))
-grpest <- fread(file.path(rawfolder, grpestfn[length(grpestfn)]))
-xtab <- fread(file.path(dirname(rawfolder), xtabfn[length(xtabfn)]))
-
-title.rowvar <- "Forest type"
-title.colvar <- "Stand-size class"
-est <- rowest[, c(title.rowvar, "est", "pse"), with=FALSE]
-
-title2a <- paste0("Area by forest type, ", title.ref)
-title2b <- paste0("Area by forest type and stand-size class, ", title.ref)
-
+unitvars <- c(GBpopdat$unitvar, GBpopdat$unitvars)
+stratalut <- setDT(GBpopdat$stratalut)
+nplots <- sum(stratalut[, sum(n.total, na.rm=TRUE), by=unitvars][["V1"]])
 
 ```
 
 
-The composition of the area of interest can be described by the distribution of forest types and stand-size classes. The most prominent forest type across `r params$AOInm` is `r rowest[rowest$est == max(rowest$est), "Forest type"]`, covering `r round(max(rowest$est) / sum(rowest$est) * 100)` of the area (Table 2; Fig. 2).
+The area of `r params$AOInm` located in `r toString(states)`, is `r format(round(totarea), big.mark=",")` acres with `r round(area.for/totarea * 100)` percent of the area classified as forest land, `r round(area.nf/totarea * 100)` percent classified as nonforest land, and `r round(area.water/totarea * 100)` percent as water. There are a total of `r format(nplots, big.mark=",")` FIA plots within the population. 
 
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
+&nbsp;  
+
+`r summary_text`
+
+&nbsp;   
+
+\newpage
 
 
-```{r tab2xtab, echo=FALSE, warning=FALSE, message=FALSE}
+&nbsp;  
 
-## Create prettier table
-knitr::kable(xtab, 'simple', align=c('l', 'r', 'r', 'r'), 
-             caption=paste("Table 2:", title2b))
 
+-----  
+
+
+# EST1 - Number of live trees (>= 1.0 in dia) per acre by forest type group table.
+
+
+-----  
+
+
+Table 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;    
+
+```{r EST1_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="TPA_UNADJ", 
+		estvarn.filter="STATUSCD == 1 & DIA >= 1.0", 
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest" )
+
+estdat_EST1_raw_rowest <- estdat_EST1$raw$rowest
+
+EST1 <- subset(estdat_EST1_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST1 <- setnames(EST1, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST1, "simple", align=c("lrr"), digits=c(0,2,0),
+             format.args=list(big.mark = ","))
+
+```  
+
+&nbsp;    
+
+
+-----  
+
+
+# EST1 - Number of live trees (>= 1.0 in dia) per acre by forest type group barplot.
+
+
+-----  
+
+
+&nbsp;    
+
+```{r EST1_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST1, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
+```
+Figure 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage    
+
+
+&nbsp;    
+
+
+-----  
+
+
+# EST2 - Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group table.
+
+
+-----  
+
+
+Table 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST2_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="TPA_UNADJ", 
+		estvarn.filter="TREECLCD == 2 & DIA >= 5.0", 
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest")
+
+estdat_EST2_raw_rowest <- estdat_EST2$raw$rowest
+
+EST2 <- subset(estdat_EST2_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST2 <- setnames(EST2, c("Forest-type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST2, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args=list(big.mark = ","))
 
 ```
 
-&nbsp;
-&nbsp;
+&nbsp;    
 
-```{r tab2bplot, echo=FALSE, warning=FALSE, message=FALSE, fig.cap=paste("Fig. 2.", title2a)}
 
-datBarplot(x=rowest, xvar=names(rowest)[2], yvar="est", errbars=TRUE, 
-           sevar="est.se", x.order=NULL, las.xnames=2, ylabel="Area - Acres", 
-           col=terrain.colors(nrow(rowest)), ylim=NULL, toplabelvar="NBRPLT.gt0")
+-----  
 
-#datBarStacked(x=grpest, main.attribute=title.rowvar, sub.attribute=title.colvar, 
-#              response="est", horiz=FALSE,
-#              main.order=unique(grpest[[title.rowvar]]), sub.order=unique(grpest[[title.colvar]]))
 
+# EST2 - Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group barplot.
+
+
+-----  
+
+
+&nbsp;    
+
+```{r EST2_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST2, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
+  
+```
+Figure 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;    
+
+
+-----  
+
+  
+# EST3 - Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group table.
+  
+
+-----  
+
+
+Table 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;    
+
+```{r EST3_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST3 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="BA", 
+		estvarn.filter="STATUSCD == 1", 
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest")
+
+estdat_EST3_raw_rowest <- estdat_EST3$raw$rowest
+
+EST3 <- subset(estdat_EST3_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST3 <- setnames(EST3, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST3, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args=list(big.mark = ","))
 
 ```
 
+&nbsp;    
 
+
+-----  
+
+
+# EST3 - Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group barplot.
+
+
+-----  
+
+
+&nbsp;    
+
+```{r EST3_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST3, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;    
+
+
+-----   
+
+
+# EST4_v1 - Number of live seedlings (< 1.0 in dia) per acre by forest type group table.
+
+
+-----  
+
+
+Table 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;    
+
+```{r EST4_v1_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST4_v1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="TPA_UNADJ", estseed="only", 
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest")
+
+estdat_EST4_v1_raw_rowest <- estdat_EST4_v1$raw$rowest
+
+EST4_v1 <- subset(estdat_EST4_v1_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST4_v1 <- setnames(EST4_v1, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST4_v1, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;    
+
+
+-----  
+
+
+# EST4_v1 - Number of live seedlings (< 1.0 in dia) per acre by forest type group barplot.
+
+
+-----  
+
+
+&nbsp;  
+
+```{r EST4_v1_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST4_v1, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage 
+
+
+&nbsp;    
+
+
+-----   
+
+
+# EST4_v2 - Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group table.
+
+
+-----  
+
+
+Table 5. Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;   
+
+```{r EST4_v2_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST4_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="TPA_UNADJ", estseed="only", 
+		estvarn.filter="SPCD == 746",
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.estvarn="Number of seedlings (aspen) (less than 1.0 in dia) per acre",
+		title.filter="Fishlake National Forest")
+
+estdat_EST4_v2_raw_rowest <- estdat_EST4_v2$raw$rowest
+
+EST4_v2 <- subset(estdat_EST4_v2_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST4_v2 <- setnames(EST4_v2, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST4_v2, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;    
+
+
+-----  
+
+
+# EST4_v2 - Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group table.
+
+
+-----  
+
+
+&nbsp;    
+
+```{r EST4_v2_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST4_v2, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 5. Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;    
+
+
+-----  
+
+
+# EST5 - Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group table.
+ 
+
+-----  
+
+
+Table 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;   
+
+```{r EST5_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+estdat_EST5 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="VOLCFNET", 
+		estvarn.filter="STATUSCD == 1 & DIA >= 5.0",
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest")
+
+estdat_EST5_raw_rowest <- estdat_EST5$raw$rowest
+
+EST5 <- subset(estdat_EST5_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST5 <- setnames(EST5, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST5, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+-----  
+
+
+# EST5 - Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group barplot.
+
+
+-----  
+
+
+&nbsp;  
+
+```{r EST5_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST5, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;    
+
+
+-----  
+
+  
+# EST6 - Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species table.
+
+ 
+-----  
+
+
+Table 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;   
+
+```{r EST6_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST6 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="VOLCFNET", 
+		estvarn.filter="STATUSCD == 1 & DIA >= 5.0",
+		rowvar="SPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest")
+
+estdat_EST6_raw_rowest <- estdat_EST6$raw$rowest
+
+EST6 <- subset(estdat_EST6_raw_rowest, select=c("Species", "rhat", "pse"))
+
+EST6 <- setnames(EST6, c("Species", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST6, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+\newpage
+
+
+&nbsp;    
+
+
+-----  
+
+
+# EST6 - Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species barplot.
+
+
+----- 
+
+
+&nbsp;    
+
+```{r EST6_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST6, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;    
+
+
+----- 
+
+  
+# EST7 - Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group table.
+
+
+----- 
+
+
+Table 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;   
+
+```{r EST7_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST7 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", 
+		estvar="VOLCFNET", estvar.filter="STATUSCD == 1 & DIA >= 5.0",
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		divideby="million", title.filter="Fishlake National Forest")
+
+estdat_EST7_raw_rowest <- estdat_EST7$raw$rowest
+
+EST7 <- subset(estdat_EST7_raw_rowest, select=c("Forest-type group", "est", "pse"))
+
+EST7 <- setnames(EST7, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST7, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+----- 
+
+
+# EST7 - Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group barplot.
+
+
+----- 
+
+
+&nbsp;  
+
+```{r EST7_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST7, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL,
+              divideby="million")
+
+```
+Figure 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+
+# EST8_v1 - Number of standing dead trees (>= 8.0 in dia) per acre by forest type group table.
+
+
+----- 
+
+
+Table 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST8_v1_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST8_v1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="TPA_UNADJ", 
+		estvarn.filter="STATUSCD == 2 & STANDING_DEAD_CD == 1 & DIA >= 8.0",
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.estvarn="Number of standing-dead trees (at least 8.0 in dia) per acre",
+		title.filter="Fishlake National Forest")
+
+estdat_EST8_v1_raw_rowest <- estdat_EST8_v1$raw$rowest
+
+EST8_v1 <- subset(estdat_EST8_v1_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST8_v1 <- setnames(EST8_v1, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST8_v1, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+----- 
+
+
+# EST8_v1 - Number of standing dead trees (>= 8.0 in dia) per acre by forest type group barplot.
+
+
+----- 
+
+
+&nbsp;    
+
+```{r EST8_v1_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST8_v1, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+
+# EST8_v2 - Number of standing dead trees (>= 18.0 in dia) per acre by forest type group table.
+  
+
+----- 
+
+
+Table 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST8_v2_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST8_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", estvarn="TPA_UNADJ", 
+		estvarn.filter="STATUSCD == 2 & STANDING_DEAD_CD == 1 & DIA >= 18.0",
+		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.estvarn="Number of standing-dead trees (at least 18.0 in dia) per acre",
+		title.filter="Fishlake National Forest")
+
+estdat_EST8_v2_raw_rowest <- estdat_EST8_v2$raw$rowest
+
+EST8_v2 <- subset(estdat_EST8_v2_raw_rowest, select=c("Forest-type group", "rhat", "pse"))
+
+EST8_v2 <- setnames(EST8_v2, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST8_v2, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+----- 
+
+
+# EST8_v2 - Number of standing dead trees (>= 18.0 in dia) per acre by forest type group barplot. 
+
+
+----- 
+
+
+&nbsp;  
+
+```{r EST8_v2_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST8_v2, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+  
+# EST9_v1 - Acres of forestland by stand age up to 100 years in 20 year interval classes table.
+
+
+----- 
+
+
+Table 11. Acres of forestland by stand age up to 100 years in 20 year interval classes, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST9_v1_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+MIN_EST9_v1 <- c(0, 21, 41, 61, 81, 101)
+MAX_EST9_v1 <- c(20.9, 40.9, 60.9, 80.9, 100.9, 9999)
+STDAGENM_EST9_v1 <- c("0-20", "21-40", "41-60", "61-80", "81-100", "100+")
+stdagelut_EST9_v1 <- data.frame(MIN=MIN_EST9_v1, MAX=MAX_EST9_v1, STDAGENM=STDAGENM_EST9_v1)
+
+datlut_EST9_v1 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_EST9_v1, LUTclassnm="STDAGENM") 
+
+GBpopdat$pltcondx <- datlut_EST9_v1$xLUT
+
+estdat_EST9_v1 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408",	rowvar="STDAGENM",
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.rowvar="stand age class",	title.filter="Fishlake National Forest",
+		divideby="thousand")
+
+estdat_EST9_v1_raw_rowest <- estdat_EST9_v1$raw$rowest
+
+EST9_v1 <- subset(estdat_EST9_v1_raw_rowest, select=c("stand age class", "est", "pse"))
+
+EST9_v1 <- setnames(EST9_v1, c("Stand Age Class", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST9_v1, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+----- 
+
+
+# EST9_v1 - Acres of forestland by stand age up to 100 years in 20 year interval classes barplot.
+
+
+----- 
+
+
+&nbsp;  
+
+```{r EST9_v1_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST9_v1, barplot.row=TRUE,barplot.nplt=TRUE, 
+              barplot.ord=NULL, divideby="thousand")
+
+```
+Figure 11. Acres of forestland by stand age up to 100 years in 20 year interval classes, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+  
+# EST9_v2 - Acres of forestland by stand age up to 500 years in 20 year interval classes table.
+  
+
+----- 
+
+
+Table 12. Acres of forestland by stand age up to 500 years in 20 year interval classes, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp; 
+
+```{r EST9_v2_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+MIN_EST9_v2 <- c(0, 21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 
+                 321, 341, 361, 381, 401, 421, 441, 461, 481, 501)
+MAX_EST9_v2 <- c(20.9, 40.9, 60.9, 80.9, 100.9, 120.9, 140.9, 160.9, 180.9, 200.9, 220.9, 
+                 240.9, 260.9, 280.9, 300.9, 320.9, 340.9, 360.9, 380.9, 400.9, 420.9, 440.9,
+                 460.9, 480.9, 500.9, 9999)
+STDAGENM_EST9_v2 <- c("0-20", "21-40", "41-60", "61-80", "81-100", "101-120", "121-140", 
+                      "141-160","161-180", "181-200", "201-220", "221-240", "241-260", 
+                      "261-280", "281-300", "301-320", "321-340", "341-360", "361-380", 
+                      "381-400", "401-420", "421-440", "441-460", "461-480", "481-500", 
+                      "500+")
+stdagelut_EST9_v2 <- data.frame(MIN=MIN_EST9_v2, MAX=MAX_EST9_v2, STDAGENM=STDAGENM_EST9_v2)
+
+datlut_EST9_v2 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_EST9_v2, LUTclassnm="STDAGENM") 
+
+GBpopdat$pltcondx <- datlut_EST9_v2$xLUT
+
+estdat_EST9_v2 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", rowvar="STDAGENM",
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.rowvar="stand age class",	title.filter="Fishlake National Forest",
+		divideby="thousand")
+
+estdat_EST9_v2_raw_rowest <- estdat_EST9_v2$raw$rowest
+
+EST9_v2 <- subset(estdat_EST9_v2_raw_rowest, select=c("stand age class", "est", "pse"))
+
+EST9_v2 <- setnames(EST9_v2, c("Stand Age Class", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST9_v2, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+```
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+
+# EST9_v2 - Acres of forestland by stand age up to 500 years in 20 year interval classes barplot.
+
+
+----- 
+
+
+&nbsp;  
+
+```{r EST9_v2_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST9_v2, barplot.row=TRUE,barplot.nplt=TRUE, 
+              barplot.ord=NULL, divideby="thousand")
+
+```
+Figure 12. Acres of forestland by stand age up to 500 years in 20 year interval classes, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+
+# EST10 - Acres of forest by forest type group table.
+  
+
+----- 
+
+
+Table 13. Acres of forest by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST10_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST10 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest", divideby="thousand")
+
+estdat_EST10_raw_rowest <- estdat_EST10$raw$rowest
+
+EST10 <- subset(estdat_EST10_raw_rowest, select=c("Forest-type group", "est", "pse"))
+
+EST10 <- setnames(EST10, c("Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST10, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+----- 
+
+
+# EST10 - Acres of forest by forest type group barplot.
+
+
+----- 
+
+
+&nbsp;  
+
+```{r EST10_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST10, barplot.row=TRUE,barplot.nplt=TRUE, 
+              barplot.ord=NULL, divideby="thousand")
+  
+```
+Figure 13. Acres of forest by forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+
+# EST11_v1 - Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) table.
+  
+
+----- 
+
+
+Table 14. Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+  
+```{r EST11_v1_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+treedia.brks_EST11_v1 <- c(1,5,8,18,999)
+
+datlut_EST11_v1 <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.brks_EST11_v1)
+GBpopdat$treex <- datlut_EST11_v1$xLUT
+
+estdat_EST11_v1 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST",
+    sumunits=TRUE, cfilter="ADFORCD == 408", estseed="add",
+		estvar="TPA_UNADJ", estvar.filter="STATUSCD == 1 & SPCD == 746", rowvar="DIACL",
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		divideby="million", title.filter="Fishlake National Forest",
+		title.rowvar="diameter class of aspen")
+
+estdat_EST11_v1_raw_rowest <- estdat_EST11_v1$raw$rowest
+
+EST11_v1 <- subset(estdat_EST11_v1_raw_rowest, select=c("diameter class of aspen", "est", "pse"))
+
+EST11_v1 <- setnames(EST11_v1, c("Diameter Class (aspen)", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST11_v1, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+----- 
+
+
+# EST11_v1 - Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) barplot. 
+
+
+----- 
+
+
+&nbsp;  
+
+```{r EST11_v1_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST11_v1, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL, divideby="million")
+
+```
+Figure 14. Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+
+# EST11_v2 - Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) table.
+  
+
+----- 
+
+
+Table 15. Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+  
+```{r EST11_v2_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+treedia.brks_EST11_v2 <- c(1,5,8,18,999)
+
+datlut_EST11_v2 <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.brks_EST11_v2)
+GBpopdat$treex <- datlut_EST11_v2$xLUT
+
+estdat_EST11_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
+    sumunits=TRUE, cfilter="ADFORCD == 408", estseed="add",
+		estvarn="TPA_UNADJ", estvarn.filter="STATUSCD == 1 & SPCD == 746", rowvar="DIACL", 
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest", title.rowvar="diameter class of aspen")
+
+estdat_EST11_v2_raw_rowest <- estdat_EST11_v2$raw$rowest
+
+EST11_v2 <- subset(estdat_EST11_v2_raw_rowest, select=c("diameter class of aspen", "rhat", "pse"))
+
+EST11_v2 <- setnames(EST11_v2, c("Diameter Class (aspen)", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST11_v2, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+----- 
+
+
+# EST11_v2 - Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) barplot.
+
+
+----- 
+
+
+&nbsp;  
+
+```{r EST11_v2_Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST11_v2, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 15. Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+
+\newpage
+
+
+&nbsp;  
+
+
+----- 
+
+
+# EST12 - Basal area (square feet) per acre by forest type and stand age classes (up to 500 years in 20 year intervals) table.
+  
+
+-----  
+
+
+Table 16. Basal area (square feet) per acre by forest type and stand age classes (up to 500 years in 20 year intervals), `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST12_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+MIN_EST12 <- c(0, 21, 41, 61, 81, 101, 121, 141, 161, 181, 201, 221, 241, 261, 281, 301, 321, 341, 361,
+         381, 401, 421, 441, 461, 481, 501)
+MAX_EST12 <- c(20.9, 40.9, 60.9, 80.9, 100.9, 120.9, 140.9, 160.9, 180.9, 200.9, 220.9, 240.9, 260.9,
+         280.9, 300.9, 320.9, 340.9, 360.9, 380.9, 400.9, 420.9, 440.9, 460.9, 480.9, 500.9, 9999)
+STDAGENM_EST12 <- c("0-20", "21-40", "41-60", "61-80", "81-100", "101-120", "121-140", "141-160", 
+                      "161-180", "181-200", "201-220", "221-240", "241-260", "261-280", "281-300", 
+                      "301-320", "321-340", "341-360", "361-380", "381-400", "401-420", "421-440", 
+                      "441-460", "461-480", "481-500", "500+")
+
+stdagelut_EST12 <- data.frame(MIN=MIN_EST12, MAX=MAX_EST12, STDAGENM=STDAGENM_EST12)
+
+datlut_EST12 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_EST12, LUTclassnm="STDAGENM") 
+
+GBpopdat$pltcondx <- datlut_EST12$xLUT
+
+estdat_EST12 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", 
+		estvarn="BA", estvarn.filter="STATUSCD == 1",
+		rowvar="STDAGENM", colvar="FORTYPGRPCD", col.FIAname=TRUE,
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
+		title.filter="Fishlake National Forest")
+
+estdat_EST12_raw_grpest <- estdat_EST12$raw$grpest
+
+EST12 <- subset(estdat_EST12_raw_grpest, select=c("STDAGENM", "Forest-type group", "rhat", "pse"))
+
+EST12 <- setnames(EST12, c("Stand Age Class", "Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST12, "simple", align=c("llll"), digits=c(0,0,2,0),
+             format.args = list(big.mark = ","))
+
+```
+
+\newpage
+
+
+&nbsp;  
+
+
+-----  
+
+  
+# EST13 - Acres of forest by stand age class (up to 200 years in 5 year intervals) and forest type group table.
+  
+
+-----  
+
+
+Table 17. Acres of forest by stand age class (up to 200 years in 5 year intervals) and forest type group, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST13_Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+MIN_EST13 <- c(0, 6, 11, 16, 21, 26, 31, 36, 41, 46, 51, 56, 61, 66, 71, 76, 81, 86, 91, 96, 101, 106,
+               111, 116, 121, 126, 131, 136, 141, 146, 151, 156, 161, 166, 171, 176, 181, 186, 191,
+               196, 201)
+MAX_EST13 <- c(5.9, 10.9, 15.9, 20.9, 25.9, 30.9, 35.9, 40.9, 45.9, 50.9, 55.9, 60.9, 65.9, 70.9,
+               75.9, 80.9, 85.9, 90.9, 95.9, 100.9, 105.9, 110.9, 115.9, 120.9, 125.9, 130.9, 135.9,
+               140.9, 145.9, 150.9, 155.9, 160.9, 165.9, 170.9, 175.9, 180.5, 185.9, 190.5, 195.5,
+               200.9, 9999)
+               
+STDAGENM_EST13 <- c("0-5", "6-10", "11-15", "16-20", "21-25", "26-30", "31-35", "36-40", 
+                    "41-45", "46-50", "51-55", "56-60", "61-65", "66-70", "71-75", 
+                    "76-80", "81-85", "86-90", "91-95", "96-100", "101-105", "106-110", 
+                    "111-115", "116-120", "121-125", "126-130", "131-135", "136-140",
+                    "141-145", "146-150", "151-155", "156-160", "161-165", "166-170", 
+                    "171-175", "176-180", "181-185", "186-190", "191-195", "196-200", "200+")
+
+stdagelut_EST13 <- data.frame(MIN=MIN_EST13, MAX=MAX_EST13, STDAGENM=STDAGENM_EST13)
+
+datlut_EST13 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_EST13, LUTclassnm="STDAGENM") 
+
+GBpopdat$pltcondx <- datlut_EST13$xLUT
+
+estdat_EST13 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", 
+		rowvar="STDAGENM", colvar="FORTYPGRPCD", col.FIAname=TRUE, 
+		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0)
+
+estdat_EST13_raw_grpest <- estdat_EST13$raw$grpest
+
+EST13 <- subset(estdat_EST13_raw_grpest, select=c("STDAGENM", "Forest-type group", "est", "pse"))
+
+EST13 <- setnames(EST13, c("Stand Age Class", "Forest-Type Group", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST13, "simple", align=c("llll"), digits=c(0,0,2,0),
+             format.args = list(big.mark = ","))
+```
+
+\newpage
+
+
+&nbsp;  
+
+
+-----  
+
+
+# EST14 - Acres of forest by disturbance table.  
+  
+
+-----  
+
+
+Table 18. Acres of forest by disturbance, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+&nbsp;  
+
+```{r EST14__Table, echo=FALSE, warning=FALSE, message=FALSE}
+
+estdat_EST14 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
+		cfilter="ADFORCD == 408", rowvar="DSTRBCD1", 
+		row.FIAname=TRUE,	rawdata=TRUE, returntitle=TRUE, 
+		estround=2, pseround=0, title.filter="Fishlake National Forest")
+
+estdat_EST14_raw_rowest <- estdat_EST14$raw$rowest
+
+EST14 <- subset(estdat_EST14_raw_rowest, select=c("Primary disturbance", "est", "pse"))
+
+EST14 <- setnames(EST14, c("Primary Disturbance", "Estimate", "Percent Sampling Error"))
+
+knitr::kable(EST14, "simple", align=c("lll"), digits=c(0,2,0),
+             format.args=list(big.mark = ","))
+
+```
+
+&nbsp;  
+
+
+-----  
+
+
+# EST14 - Acres of forest by disturbance barplot.
+
+
+-----  
+
+
+&nbsp;  
+
+```{r EST14__Barplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+anMOD_barplot(estdat_EST14, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
+
+```
+Figure 16. Acres of forest by disturbance, `r AOInm`, `r toString(states)`, `r invyrs2`.
+
+\newpage
+
+&nbsp;  
+
+
+# References
+
+&nbsp;  
+
+Bechtold, William A.; Patterson, Paul L.; [Editors] 2005. The enhanced forest inventory and analysis program - national sampling design and estimation procedures. Gen. Tech. Rep. SRS-80. Asheville, NC: U.S. Department of Agriculture, Forest Service, Southern Research Station. 85 p.  
+
+&nbsp;  
+
+Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Freeman, Elizabeth A. 2015. FIESTA—An R estimation tool for FIA analysts. In: Stanton, Sharon M.; Christensen, Glenn A., comps. 2015. Pushing boundaries: new directions in inventory techniques and applications: Forest Inventory and Analysis (FIA) symposium 2015. 2015 December 8–10; Portland, Oregon. Gen. Tech. Rep. PNW-GTR-931. Portland, OR: U.S. Department of Agriculture, Forest Service, Pacific Northwest Research Station. p. 72.
 

@@ -140,6 +140,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", evalid=NUL
     setkeyv(unitarea, unitvars)
 
   }
+
   return(list(unitarea=unitarea, areavar=areavar))
 }
 

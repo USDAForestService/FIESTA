@@ -66,10 +66,11 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   divideby <- FIESTA::pcheck.varchar(var2check=divideby, varnm="divideby", 
 		gui=gui, checklst=dividebylst, caption="Divide estimates?")
 
-  if (!is.null(divideby))
+  if (!is.null(divideby)) {
     dividebynum <- ifelse(divideby == "hundred", 100, 
 				ifelse(divideby == "thousand", 1000, 
 					ifelse(divideby == "million", 1000000, 1)))
+  }
   
   ## Check errbars 
   errbars <- FIESTA::pcheck.logical(errbars, "Error bars?", "NO")
@@ -435,7 +436,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
 			cex=cex.names, srt=srt)
         }
       } else {
-        xmat <- as.matrix(t(datxbp[,yvar, with=FALSE]))
+        xmat <- as.matrix(t(datxbp[[yvar]]))
         if (addlegend) {
           bp <- barplot(xmat, beside=TRUE, xlim=xlim,
  			ylim=ylim, cex.names=cex.names, axisnames=FALSE, horiz=horiz,

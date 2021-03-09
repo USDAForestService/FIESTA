@@ -16,6 +16,7 @@
 # nbrdigits
 # getfilter
 # wraptitle
+# addclass
 
 
 
@@ -443,4 +444,11 @@ getfilter <- function(att, val, syntax="R") {
 wraptitle <- function(x, len=10) {
   sapply(x, function(y) paste(strwrap(y, len), 
          collapse = "\n"), USE.NAMES = FALSE)
+}
+
+
+addclass <- function(x, xtab, xvar, brks) {
+  ## DESCRIPTION: Adds a class based on breaks to a table in modGBpop
+  x[[xtab]] <- datLUTclass(x=x[[xtab]], xvar=xvar, cutbreaks=brks)$xLUT
+  return(x)
 }

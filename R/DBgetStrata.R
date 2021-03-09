@@ -89,10 +89,10 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 
 
     id <- NULL
-    if ("ZSTCOPLOT" %in% names(datx)) {
-      id <- "ZSTCOPLOT"
-    } else if (all(c("STATE", "COUNTYCD", "PLOT") %in% names(datx))) {
-      id <- c("STATE", "COUNTYCD", "PLOT")
+    if ("PLOT_ID" %in% names(datx)) {
+      id <- "PLOT_ID"
+    } else if (all(c("STATECD", "COUNTYCD", "PLOT") %in% names(datx))) {
+      id <- c("STATECD", "COUNTYCD", "PLOT")
     } else if (all(c("COUNTYCD", "PLOT") %in% names(datx))) {
       id <- c("COUNTYCD", "PLOT")
     } else if ("PLOT" %in% names(datx)) {
@@ -154,6 +154,7 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   ########################################################
   ## Get state abbreviations
   stabbrlst <- FIESTA::pcheck.states(states, statereturn="ABBR", gui=TRUE)
+  stcds <- FIESTA::pcheck.states(states, statereturn="VALUE", gui=TRUE)
 
   ## Define variables
   POP_ESTN_UNIT_VARS <- c("STATECD", "ESTN_UNIT", "ESTN_UNIT_DESCR", "AREA_USED", "EVALID")
@@ -182,7 +183,6 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
         message("STATECD not in POP_PLOT_STRATUM_ASSGN")
         POP_PLOT_STRATUM_ASSGN <- NULL
       }
-      stcds <- FIESTA::pcheck.states(states, statereturn="VALUE")
       if (!all(stcds %in% unique(POP_PLOT_STRATUM_ASSGN[["STATECD"]]))) {
         message("POP_PLOT_STRATUM_ASSGN must include: ", paste(states, collapse=", "))
         POP_PLOT_STRATUM_ASSGN <- NULL

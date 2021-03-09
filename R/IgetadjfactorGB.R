@@ -1,6 +1,6 @@
 getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", unitlut=NULL, unitvars=NULL, strvars=NULL, 
-	unitarea=NULL, areavar=NULL, cvars2keep=NULL){
+	unitarea=NULL, areavar=NULL, areawt="CONDPROP_UNADJ", cvars2keep=NULL){
 
   ####################################################################################
   ## DESCRIPTION: 
@@ -32,7 +32,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   keycondx <- key(condx)
 
   ## Condition proportion variable
-  varlst <- "CONDPROP_UNADJ"
+  varlst <- areawt
  
   ## veg.samp.filter
   veg.samp.filter <- "P2VEG_SAMPLING_STATUS_CD == 1"
@@ -52,11 +52,11 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   varlstadj <- sapply(varlst, function(x) sub("PROP_UNADJ", "", x) )
   varlstadj <- paste0("ADJ_FACTOR_", varlstadj)
 
+
   ###############################################################################
   ## Calculate adjustment factors by strata (and estimation unit) for variable list
   ## Sum condition variable(s) in varlst and divide by total number of plots in strata
   ###############################################################################
- 
   ## Sum condition variable(s) in varlst by strata and rename varlst to *_sum
   cndadj <- condx[, lapply(.SD, sum, na.rm=TRUE), by=strunitvars, .SDcols=varlst]
   setnames(cndadj, varlst, varsumlst)
@@ -111,12 +111,15 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   setkeyv(condx, strunitvars)
   condx <- condx[unitlut[,c(strunitvars, varlstadj), with=FALSE]]
 
+
   ## Change name of condition adjustment factor to cadjfac
-  setnames(condx, "ADJ_FACTOR_COND", "cadjfac")
-  setnames(unitlut, "ADJ_FACTOR_COND", "cadjfac")
+  cadjfactnm <- ifelse(areawt == "CONDPROP_UNADJ", "ADJ_FACTOR_COND", 
+		paste0("ADJ_FACTOR_", areawt))
+  setnames(condx, cadjfactnm, "cadjfac")
+  setnames(unitlut, cadjfactnm, "cadjfac")
 
   ## Calculate adjusted condition proportion for plots
-  condx[, CONDPROP_ADJ := CONDPROP_UNADJ * cadjfac]
+  condx[, CONDPROP_ADJ := get(areawt) * cadjfac]
   setkeyv(condx, c(cuniqueid, condid))
 
   ## Calculate adjusted condition proportions for different size plots for trees

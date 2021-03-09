@@ -6,10 +6,12 @@
 ## getEvalid		## Get evalid from a SQLite database
 
 
-DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, isRMRS=FALSE) {
+DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, 
+	plotgeom=FALSE, isRMRS=FALSE) {
 
   ## Set global variables
-  treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=dwmlst <- NULL
+  treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=
+	dwmlst=pgeomvarlst <- NULL
 
 
   ## DESCRIPTION: Set default variables for FIA plot data extraction
@@ -63,8 +65,15 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, isR
 		"CRCOVPCT_RMRS", "COND_STATUS_CHNG_CD_RMRS", "QMD_RMRS", 
 		"RANGETYPCD_RMRS", "SDIMAX_RMRS", "SDIPCT_RMRS", "SDI_RMRS") 
   }  
-
   returnlst <- list(pltvarlst=pltvarlst, condvarlst=condvarlst)
+
+  if (plotgeom) {
+    ################################  PLOTGEOM VARIABLES ##################################
+    ## Variables from FIADB.PLOTGEOM
+    pgeomvarlst <- c("CN", "CONGCD", "ECOSUBCD", "HUC", "EMAP_HEX", "ALP_ADFORCD",
+		"FVS_VARIANT", "FVS_LOC_CD", "FVS_REGION", "FVS_FOREST", "FVS_DISTRICT")
+    returnlst$pgeomvarlst <- pgeomvarlst
+  }
 
 
   ################################  TREE VARIABLES  ##################################

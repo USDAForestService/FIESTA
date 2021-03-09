@@ -15,7 +15,7 @@
 	area in the population.   
 }
 \usage{
-modGBarea(landarea = "FOREST", 
+modGBarea(GBpopdat = NULL, landarea = "FOREST", 
 	pfilter = NULL, cfilter = NULL, rowvar = NULL, colvar = NULL, 
 	row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
 	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, 
@@ -25,10 +25,11 @@ modGBarea(landarea = "FOREST",
 	outfn.pre=NULL, outfn.date = TRUE, overwrite = TRUE, 
 	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
 	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.filter = NULL, GBpopdat = NULL, gui = FALSE, ...)
+	title.filter = NULL, gui = FALSE, ...)
 }
  
 \arguments{
+  \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
   \item{landarea}{ String. The sample area filter for estimates ("ALL", "FOREST", "TIMBERLAND"). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, 
 	filtered to SITECLCD in(1:6) and RESERVCD = 0. }
@@ -96,7 +97,6 @@ modGBarea(landarea = "FOREST",
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
-  \item{GBpopdat}{ List. Population data objects returned from modGBpop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
   \item{...}{ Parameters for modGBpop() if GBpopdat is NULL. }
 }

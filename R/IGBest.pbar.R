@@ -23,6 +23,10 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
   ########################################################################################
   strunitvars <- c(unitvar, strvar)
 
+  if ("data.table" %in% class(stratalut)) {
+    stratalut <- setDT(stratalut)
+  }
+
   ## Set global variables
   sumyn.pltdom=sumyd.pltdom=sumynsq.pltdom=sumydsq.pltdom=sumnd.pltdom=
 	nhat.strwt=sumyn.dom=n.strata=strwt=nhat.var.strwt=n.total=

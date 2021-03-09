@@ -1,4 +1,4 @@
-modGBtree <- function(	estseed="none", landarea="FOREST", pfilter=NULL, 
+modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=NULL, 
 	cfilter=NULL, estvar=NULL, estvar.filter=NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
@@ -8,7 +8,7 @@ modGBtree <- function(	estseed="none", landarea="FOREST", pfilter=NULL,
 	outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, 
  	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, 
 	title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, 
- 	GBpopdat=NULL, gui=FALSE, ...){
+ 	gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
