@@ -15,7 +15,8 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	xy.uniqueid = "PLT_CN", xvar = "LON_PUBLIC", yvar = "LAT_PUBLIC", xy.crs = 4269,
 	xy.joinid = "PLT_CN", clipxy = TRUE, datsource = "datamart", data_dsn = NULL, 
 	istree = FALSE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
-	tree_layer = "tree", seed_layer = "seed", other_layers = NULL, puniqueid = "CN", 
+	tree_layer = "tree", seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn",
+	other_layers = NULL, puniqueid = "CN", 
 	evalid = NULL, evalCur = FALSE, evalEndyr = NULL, evalType = "VOL", 
 	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
 	allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, 
@@ -71,6 +72,8 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	if istree=TRUE. }
   \item{seed_layer}{ String. Name of layer in database of file name of FIA seedling table 
 	if isseed=TRUE. }
+  \item{ppsa_layer}{ String. Name of layer in database of file name of FIA 
+	pop_plot_stratum_assgn table, if using evaluations. }
   \item{other_layers}{ String. Other layer(s) in database to clip and/or extract
 	from database (Note: must include PLT_CN variable as unique identifier). }
   \item{puniqueid}{ String. Name of unique identifier of plt. }
