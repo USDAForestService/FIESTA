@@ -95,7 +95,6 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   ## GET addlegend 
   addlegend <- FIESTA::pcheck.logical(addlegend, "Add legend?", "NO")
 
-
   ## Top labels
   topvarlst <- datnmlst[which(!datnmlst %in% c(xvar,yvar))] 
   toplabelvar <- FIESTA::pcheck.varchar(var2check=toplabelvar, varnm="toplabelvar", 
@@ -436,7 +435,8 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
 			cex=cex.names, srt=srt)
         }
       } else {
-        xmat <- as.matrix(t(datxbp[[yvar]]))
+        xmat <- as.matrix(t(datxbp[, yvar, with=FALSE]))
+
         if (addlegend) {
           bp <- barplot(xmat, beside=TRUE, xlim=xlim,
  			ylim=ylim, cex.names=cex.names, axisnames=FALSE, horiz=horiz,
@@ -454,8 +454,9 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
         }
       }     
     } else {
-      xmat <- tapply(datxbp[[yvar]], list(datxbp[[xvar]], datxbp[[grpvar]]), I)
+      xmat <- tapply(datxbp[,yvar, with=FALSE], list(datxbp[[xvar]], datxbp[[grpvar]]), I)
       xmat[is.na(xmat)] <- 0
+
       if (addlegend) {
          bp <- barplot(xmat, beside=TRUE, xlim=xlim, ylim=ylim, cex.names=cex.names,
  		horiz=horiz, legend=rownames(xmat), cex.axis=cex.names, las=las.xnames, ...)
@@ -481,7 +482,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       ## Labels on top
       #up <- max(datxbp[[yvar]]) * 0.05
       #ypos <- datxbp[[yvar]] + up
-      ypos <- datxbp[[yvar]]
+      ypos <- datxbp[, yvar, with=FALSE]
       xpos <- bp + .25
       text(xpos, ypos, toplabels, cex=.55, pos=3)
     }
