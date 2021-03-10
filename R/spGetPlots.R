@@ -3,10 +3,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
 	data_dsn=NULL, istree=FALSE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
-	tree_layer="tree", seed_layer="seed", other_layers=NULL, puniqueid="CN", 
-	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", measCur=FALSE, 
-	measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, 
-	intensity1=FALSE, showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
+	tree_layer="tree", seed_layer="seed", ppsa_layer="pop_plot_stratum_assgn", 	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, 
+	evalEndyr=NULL, evalType="VOL", measCur=FALSE, measEndyr=NULL, 
+	measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
+	showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
 	outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
 	overwrite_dsn=FALSE, overwrite_layer=FALSE, ...) {
 
@@ -598,9 +598,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
         ## Create state filter
         stfilter <- paste("p.statecd IN(", toString(stcd), ")")
-        if (!is.null(stateFilter)) 
+        if (!is.null(stateFilter)) { 
           stfilter <- paste(stfilter, "and", stateFilter)
-    
+        }
         ## Get most current evalid
         if (evalCur) {
           evalCurType <- ifelse(evalType == "ALL", "00", 
@@ -612,8 +612,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (!is.null(evalidst)) {
           stfilter <- paste0("ppsa.evalid IN(", toString(evalidst), ")")
         } else {
-          if (intensity1)
+          if (intensity1) {
             stfilter <- paste(stfilter, "p.intensity == 1", sep=" and ")
+          }
         }
 
         ## Print stfilter
@@ -622,13 +623,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ## get pfromqry
         pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalidst, plotCur=measCur, 
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R")
+				intensity1=intensity1, syntax="R", ppsanm=ppsa_layer, chk=TRUE)
         if (is.null(pfromqry)) {
           message("no time frame specified... including all years")
           allyrs <- TRUE
           pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalidst, plotCur=measCur, 
 				Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
-				intensity1=intensity1, syntax="R")
+				intensity1=intensity1, syntax="R", ppsanm=ppsa_layer, chk=TRUE)
         }
 
         ## Set up query for plots
@@ -672,12 +673,11 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (xy == "plot") {
               xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
 				pfromqry, " where ", stfilter) 
-            } else {            
+            } else { 
               if (allyrs || measCur) measCur.xy <- TRUE
               xyfromqry <- getpfromqry(evalid=evalidst, plotCur=measCur.xy, 
 				invyrs=invyrs, allyrs=allyrs, 
 				intensity1=intensity1, syntax="R", plotnm=plot_layer)
-
               xy.qry <- paste0("select distinct ", toString(paste0("xy.", xyvars)), 
 				" from ", xyfromqry, " JOIN ", xy, " xy ON (p.", pjoinid, 
 				" = xy.", xy.joinid, ")", " where ", stfilter) 
@@ -691,10 +691,10 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           } else { 
             stop("must include xy data")
           }
-
           ## Get most current plots in database for measEndyr.filter & !measEndyr.filter
           #######################################################################
-          p2fromqry <- paste(plot_layer, "p")
+          #p2fromqry <- paste(plot_layer, "p")
+          p2fromqry <- pfromqry
           if (!is.null(measEndyr.filter)) {
             bndxf1 <- datFilter(bndx, xfilter=measEndyr.filter)$xf
             bndxf2 <- datFilter(bndx, xfilter=paste0("!", measEndyr.filter))$xf
@@ -852,12 +852,12 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               xyplt <- rbind(xyplt1, xyplt2)
 
           } else {    ## measEndyr.filter = NULL
+
             ## Clip data
             clipdat <- spClipPoint(xyplt=xystate, 
 				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
 				clippolyv=bndx)
             xyplt <- clipdat$clip_xyplt
-
             plt <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
             pltids <- plt[[puniqueid]]
 
@@ -916,7 +916,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             xypltx <- rbind(xypltx, xyplt)
 
         } else {      ## clipxy = FALSE
-
           if ((savexy || showsteps) && !is.null(xydat))
             xypltx <- xydat
         
@@ -938,7 +937,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           pltx <- rbind(pltx, plt)
           rm(plt)
           gc()
-
           cond.qry <- paste0("select cond.* from ", p2fromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")

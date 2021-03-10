@@ -44,7 +44,7 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 
   if (is.null(GBdata)) { 
     message("extracting data...")
- 
+
     ###########################################################################
     ## Extract FIA data and model data
     ###########################################################################
@@ -60,7 +60,6 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     GBdata <- pcheck.object(GBdata, objnm="GBdata", 
 		list.items=c("bnd", "plt", "cond", "unitarea"))
   }
-	
 
   ####################################################################
   ## Get population data
