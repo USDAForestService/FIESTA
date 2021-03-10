@@ -1,4 +1,4 @@
-modMAtree <- function(MAmethod="greg", prednames=NULL, 
+modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL, 
 	estseed="none", landarea="ALL", pfilter=NULL, cfilter=NULL, estvar=NULL, 
 	estvar.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
@@ -8,7 +8,7 @@ modMAtree <- function(MAmethod="greg", prednames=NULL,
 	outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, 
 	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
 	title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, 
-	MApopdat=NULL, gui=FALSE, ...){
+	gui=FALSE, ...){
 
   ########################################################################################
   ## DESCRIPTION: 

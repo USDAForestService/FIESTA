@@ -85,15 +85,15 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     areavar <- MAdata$areavar
     npixelvar <- MAdata$npixelvar
     predfac <- MAdata$predfac
-    MAmodeldat$PSstrvar
+    PSstrvar <- MAdata$PSstrvar
 
     if (any(MAmethod %in% c("greg", "gregEN"))) {
       if (is.null(prednames)) {
-        prednames <- MAmodeldat$prednames
+        prednames <- MAdata$prednames
       } else {
-        if (!all(prednames %in% MAmodeldat$prednames))
+        if (!all(prednames %in% MAdata$prednames))
           stop("invalid prednames: ", 
-			toString(prednames[!prednames %in% MAmodeldat$prednames]))
+			toString(prednames[!prednames %in% MAdata$prednames]))
         predfac <- predfac[predfac %in% prednames]
       }
     } 
@@ -122,7 +122,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
       }
     }
   } 
- 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions

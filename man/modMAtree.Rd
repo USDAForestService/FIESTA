@@ -8,8 +8,8 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAtree(MAmethod = "greg", prednames = NULL, estseed = "none", 
-	landarea = "ALL", pfilter = NULL, cfilter = NULL, 
+modMAtree(MApopdat = NULL, MAmethod = "greg", prednames = NULL, 
+	estseed = "none", landarea = "ALL", pfilter = NULL, cfilter = NULL, 
 	estvar = NULL, estvar.filter = NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
@@ -19,10 +19,11 @@ modMAtree(MAmethod = "greg", prednames = NULL, estseed = "none",
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
 	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
 	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.estvar = NULL, title.filter = NULL, MApopdat = NULL, gui = FALSE, ...)
+	title.estvar = NULL, title.filter = NULL, gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{MApopdat}{ List. Population data objects returned from modMApop(). }
   \item{MAmethod}{ String. mase (i.e., model-assisted) method to use 
 	('HT', 'PS', 'greg', 'gregEN') }
   \item{prednames}{ String vector. Name(s) of predictor variables to include in model. }
@@ -116,7 +117,6 @@ modMAtree(MAmethod = "greg", prednames = NULL, estseed = "none",
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
-  \item{MApopdat}{ List. Population data objects returned from modMApop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
   \item{...}{ Parameters for modMApop() if MApopdat is NULL. }
 }
