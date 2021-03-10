@@ -64,7 +64,7 @@ datBarplot(x, xvar = NULL, yvar = "FREQ", grpvar = NULL, errbars = FALSE,
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
   \item{...}{ additional arguments to pass to barplot(), including a list of 
-	arguments for legend() arguments (e.g., args.legend=list(x="topleft", "bty="n"), 
+	arguments for legend() arguments (e.g., args.legend=list(x="topleft", bty="n"), 
 	for moving legend to topleft and removing box around legend). }
 
 }

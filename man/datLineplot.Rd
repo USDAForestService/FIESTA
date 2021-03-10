@@ -10,7 +10,7 @@
 datLineplot(x, xvar, yvar, plotCI = FALSE, sevar = NULL, CIlst=c(68,95),
 	CIcolorlst=c("dark grey", "black"), addshade = FALSE, device.type = "dev.new", 
 	jpeg.res = 300, device.height = 5, device.width = 8, 
-	ylim = NULL, divideby = NULL, ylabel = NULL, xlabel = NULL, 
+	ylim = NULL, divideby = NULL, ylabel = NULL, xlabel = NULL, xticks = NULL,
 	mar = NULL, addlegend = FALSE, main = NULL, cex.main = 1, 
 	cex.label = 1, cex.names = 0.8, las.xnames = 0, las.ynames = 1, 
 	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
@@ -39,6 +39,7 @@ datLineplot(x, xvar, yvar, plotCI = FALSE, sevar = NULL, CIlst=c(68,95),
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{ylabel}{ String. Label for the y axis (same as ylab). }
   \item{xlabel}{ String. Label for the x axis (same as xlab). }
+  \item{xticks}{ Numeric vector. Vector of tick marks for x axis. }
   \item{mar}{ See par.. A numerical vector representing number of lines for margins 
 	(c(bottom, left, top, right). }
   \item{addlegend}{ Logical. If TRUE, adds legend to bar plot (only applicable if grouping). }
