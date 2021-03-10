@@ -38,7 +38,7 @@ title.states <- paste(states, collapse=" and ")
 
 
 ---
-title: "Forest Resource Report: \n `r AOInm`, `r title.states`, \n  `r invyrs2`"
+title: "Forest Resource Report:  \n`r AOInm`, `r title.states`,  \n`r invyrs2`"
 ---
 
 
