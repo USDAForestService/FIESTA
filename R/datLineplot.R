@@ -1,9 +1,10 @@
 datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL, 
 	CIlst=c(68,95), CIcolorlst=c("dark grey", "black"), addshade=FALSE, 
 	device.type="dev.new", jpeg.res=300, device.height=5, device.width=8, 
-	ylim=NULL, divideby=NULL, ylabel=NULL, xlabel=NULL, mar=NULL, addlegend=FALSE, 
-	main=NULL, cex.main=1, cex.label=1, cex.names=0.8, las.xnames=0, las.ynames=1, 
-	savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, 
+	ylim=NULL, divideby=NULL, ylabel=NULL, xlabel=NULL, xticks=NULL, 
+	mar=NULL, addlegend=FALSE, main=NULL, cex.main=1, cex.label=1, 
+	cex.names=0.8, las.xnames=0, las.ynames=1, savedata=FALSE, 
+	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, 
 	overwrite=FALSE, ...){ 
   ####################################################################################
   ## DESCRIPTION: Function to generate a barplot of frequencies ordered from most
@@ -19,6 +20,8 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   if (.Platform$OS.type=="windows")
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
 
+  ## Set global variables
+  xlim <- NULL
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -97,6 +100,17 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 		max(datx[[yvar]]) + max(datx[[yvar]]) * .05)
   }
 
+  ## Set tick marks
+  ylim.min <- ylim[1]		## bug fixed by Liz
+  ylim.max <- ylim[2]		## bug fixed by Liz
+
+#  if (is.null(xticks)) {
+#    xticks <- pretty(datx[[xvar]])
+#    xlim <- c(min(xticks), max(xticks))
+#  }
+  #xticks <- datx[[xvar]]
+
+
   ## GET addlegend 
   addlegend <- FIESTA::pcheck.logical(addlegend, "Add legend?", "NO")
 
@@ -157,9 +171,10 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   ## ylabel
   ######################
   if (is.null(ylabel) & !is.null(divideby)) {
-    ylabel <- yvar
+    ylabel <- paste0(divideby, "s")
+  } else if (!is.null(ylabel) && !is.null(divideby)) {
+    ylabel <- paste0(ylabel, " (", divideby, "s)")
   }
-  ylabel <- paste0(ylabel, " (", divideby, "s)")
  
   if (!is.null(ylabel)) { 
     yside <- 2
@@ -174,7 +189,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   if (!is.null(xlabel)) { 
     xside <- 1			## axis position (1:xaxis; 2:yaxis)
     xlasnum <- 1			## orientation (0:horizontal; 1:vertical)
-    linenum <- 2
+    linenum <- 1
     if (las.xnames %in% c(0,2)) {
       xlinenum <- .36 * xmaxnum + linenum 
     } else {
@@ -185,12 +200,12 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
     xlinenum <- ifelse(las.xnames==0, xmaxnum/3, xmaxnum/4)
     #xlinenum = 8
   }
-
+ 
   ## Set mar (number of lines for margins - bottom, left, top, right)
   if (is.null(mar)) {
     mar <-  par("mar")
     mar[3] <- ifelse(!is.null(main), 3, 2)		## top mar
-    mar[1] <- xlinenum * cex.names + 3.5		## bottom mar
+    mar[1] <- xlinenum * cex.names + 3			## bottom mar
     mar[2] <- ylinenum + 1.6				## left mar
     mar[4] <- 0.5						## right mar
   }
@@ -227,8 +242,9 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
     ###########################################
     op <- par(xpd=NA, cex=par("cex"), mar=mar, las=las.xnames, mgp=c(3,0.5,0))
 
-    plot(datx[[xvar]], y=datx[[yvar]], type="b", ylim=ylim, xlab=xlabel, 
-		ylab=ylabel, cex.axis=cex.names, las=las.ynames)
+    plot(datx[[xvar]], y=datx[[yvar]], type="b", ylim=ylim, ylab='', 
+		xlim=xlim, xlab='', cex.axis=cex.names, las=las.ynames, xaxt="n")
+    axis(side=1, at=xticks, labels=xticks, cex=cex.names)
 
     if (plotCI && addshade) {
       graphics::polygon(c(datx[[xvar]], rev(datx[[xvar]])), 
@@ -257,6 +273,15 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
     if (addlegend) {
       legend("bottomleft", lty="dashed", col=CIcolorlst, legend=CIlst, cex=.75, bty="n")
     }
+
+    ## SET UP TEXT PLACEMENT AND ADD TEXT
+    ######################################################
+    if (!is.null(ylabel))  
+      mtext(ylabel, side=yside, line=cex.names*ylinenum, cex.lab=cex.label, las=ylasnum) 
+    if (!is.null(xlabel)) 
+      mtext(xlabel, side=xside, line=cex.names*xlinenum, cex.lab=cex.label, las=xlasnum) 
+    if (!is.null(main))
+      title(main=main, cex.main=cex.main)
  
     if (savedata && !device.type[i] %in% c("default", "dev.new")) {
 

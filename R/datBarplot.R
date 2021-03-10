@@ -232,7 +232,6 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     if (length(ylim) != 2) {
       stop("ylim must be format c(min,max)")
     } else {
-      ylim <- ylim
       ylim.min <- ylim[1]		## bug fixed by Liz
       ylim.max <- ylim[2]		## bug fixed by Liz
     }
