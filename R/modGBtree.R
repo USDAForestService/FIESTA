@@ -146,7 +146,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   estround <- estdat$estround
   pseround <- estdat$pseround
   landarea <- estdat$landarea
-  if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
+  #if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
 
   ###################################################################################

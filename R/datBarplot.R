@@ -173,7 +173,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   ## Aggregate table with selected variables
   datxbp <- datx[, lapply(.SD, sum, na.rm=TRUE), 
 			by=c(xvar, grpvar, sevar, toplabelvar), .SDcols=yvar]
-
+ 
   ## Ordering
   if (!is.null(x.order)) {
     if (length(x.order) == 1) {
@@ -205,7 +205,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
         datxbp <- datxbp[x.order, ]
       }
     } else if (all(datxbp[[xvar]] %in% as.character(x.order))) {
-      datx[match(as.character(x.order), datx[[xvar]]),]
+      datxbp <- datxbp[match(as.character(x.order), datxbp[[xvar]]),]
     } else if (!all(datxbp[[xvar]] %in% as.character(x.order))) {
       notinOrder <- datxbp[[xvar]][which(!datxbp[[xvar]] %in% as.character(x.order))] 
       message("missing values in x.order list: ", toString(notinOrder)) 
@@ -434,8 +434,8 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
 			cex=cex.names, srt=srt)
         }
       } else {
-        xmat <- as.matrix(t(datxbp[, yvar, with=FALSE]))
 
+        xmat <- as.matrix(t(datxbp[, yvar, with=FALSE]))
         if (addlegend) {
           bp <- barplot(xmat, beside=TRUE, xlim=xlim,
  			ylim=ylim, cex.names=cex.names, axisnames=FALSE, horiz=horiz,
@@ -474,18 +474,19 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
     if (!is.null(main))
       title(main=main, cex.main=cex.main)
 
-    ## ADD TOP LABELS
+    ## ADD TOP LABELS (NOTE: only works with 1 yvar... need to look into)
     ####################################
-    if (!is.null(toplabelvar)) {
+    if (!is.null(toplabelvar) && length(yvar) == 1) {
       toplabels <- round(datxbp[[toplabelvar]])
       ## Labels on top
       #up <- max(datxbp[[yvar]]) * 0.05
       #ypos <- datxbp[[yvar]] + up
-      ypos <- datxbp[, yvar, with=FALSE]
+      ypos <- datxbp[[yvar]]
+      #ypos <- datxbp[, yvar, with=FALSE]
       xpos <- bp + .25
       text(xpos, ypos, toplabels, cex=.55, pos=3)
     }
- 
+
     ## ADD ERROR BARS
     ######################################################
     if (errbars) {
