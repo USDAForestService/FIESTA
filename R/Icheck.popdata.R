@@ -90,7 +90,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   pdoms2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "INVYR", 
 	"MEASYEAR", "PLOT_STATUS_CD", "PSTATUSCD", "RDDISTCD", "WATERCD", "ELEV", 
 	"ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "INTENSITY", "DESIGNCD"))
-  pdoms2keep <- pdoms2keep[!pdoms2keep %in% pvars2keep]
+  #pdoms2keep <- pdoms2keep[!pdoms2keep %in% pvars2keep]
 
   ###################################################################################
   ## Check module, method, adj
@@ -932,12 +932,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     }
   }
 
-
   ############################################################################
   ## Subset variables for pltassgnx, condx, and pltcondx
   ############################################################################
   pltassgnx <- unique(pltcondx[, c(cuniqueid, pvars2keep), with=FALSE])
   pltassgnid <- cuniqueid
+
+  if ("STATECD" %in% pvars2keep) {
+    pvars2keep <- pvars2keep[pvars2keep != "STATECD"]
+  }
   pltcondx[, (pvars2keep) := NULL]
 
   condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])

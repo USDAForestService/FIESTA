@@ -170,7 +170,6 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
 
-
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################

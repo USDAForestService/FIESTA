@@ -9,6 +9,7 @@ params:
   EVALIDator_match: TRUE
   cfilter: ''
   pfilter: ''
+  spcd: ''
   photo_author: ''
   title.ref: ''
   
@@ -22,19 +23,16 @@ AOInm <- params$AOInm
 EVALIDator_match <- params$EVALIDator_match
 cfilter <- params$cfilter
 pfilter <- params$pfilter
+spcd <- params$spcd
 photo_author <- params$photo_author
 photofn <- params$photofn
 title.ref <- params$title.ref
 
-invyrs <- unlist(GBpopdat$invyrs)
-invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
-states <- GBpopdat$states
 
 if (is.null(title.ref)) {
   title.ref <- AOInm
 }
 
-title.states <- paste(states, collapse=" and ")
 popfilter <- NULL
 if (!is.null(pfilter) || !is.null(cfilter)) {
   if (!is.null(pfilter)) {
@@ -47,11 +45,46 @@ if (!is.null(pfilter) || !is.null(cfilter)) {
   }
 }
 
+## Get states in GBpopdat or that popfilter
+states <- GBpopdat$states
+invyrs <- unique(unlist(GBpopdat$invyrs))
+
+if (!is.null(popfilter) && "STATECD" %in% names(GBpopdat$pltcondx)) {
+  pltcondf <- datFilter(GBpopdat$pltcondx, xfilter=popfilter)$xf
+
+  states <- pcheck.states(unique(pltcondf$STATECD))
+  invyrs <- unique(pltcondf$INVYR)
+}
+
+title.states <- paste(states, collapse=" and ")
+invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
+stcd <- pcheck.states(states, statereturn="VALUE")
+
+
+## Check species
+if (is.null(spcd)) {
+  spcd <- 746
+} else {
+  if (!all(spcd %in% ref_codes[ref_codes$VARIABLE == "SPCD", "VALUE"])) {
+    stop("spcd is invalid")
+  }
+}
+title.spcd <- paste(ref_codes[ref_codes$VARIABLE == "SPCD" & ref_codes$VALUE %in% spcd, 
+                              "MEANING"], collapse = " and ")
+spcd.filter <- paste0("SPCD %in% c(", toString(spcd), ")")
+
+
+## Photo text
+photo_text <- paste0("Photo from the ", AOInm, ", ", title.states, ".")
+if (!is.null(photo_author)) {
+  photo_text <- paste0(photo_text, " Photo courtesy of ", photo_author, ".")
+}
+
 ```
 
 
 ---
-title: "Forest Resource Report:  \n`r AOInm`, `r title.states`,  \n`r invyrs2`"
+title: "Forest Resource Report:  \n`r AOInm`, `r title.states`, r invyrs2`"
 ---
 
 
@@ -63,8 +96,9 @@ Rocky Mountain Research Station, Forest Inventory and Analysis  | `r format(Sys.
 
 &nbsp;  
 
-![](report_image.png)
-Photo from the `r AOInm`, `r title.states`. Photo courtesy of `r photo_author`.
+## ![](report_image.PNG)
+
+`r photo_text`
 
 &nbsp;    
 
@@ -79,46 +113,73 @@ Photo from the `r AOInm`, `r title.states`. Photo courtesy of `r photo_author`.
 ```{r Summary_Info, echo=FALSE, include=FALSE}
 
 estsummary <- modGBarea(GBpopdat=GBpopdat, rowvar="COND_STATUS_CD", row.FIAname=TRUE, 
-                rawdata=TRUE, landarea="ALL", colvar="RESERVCD", col.FIAname=TRUE)
+                rawdata=TRUE, landarea="ALL", colvar="RESERVCD", col.FIAname=TRUE,
+                pfilter=pfilter, cfilter=cfilter)
 
 rowest <- estsummary$raw$rowest
 colest <- estsummary$raw$colest
+totest <- estsummary$raw$totest
 
 title.rowvar <- "Land class"
 title.colvar <- "Reserved status"
-totarea=sum(GBpopdat$unitarea$ACRES)
+
+unitarea <- GBpopdat$unitarea
+if ("STATECD" %in% names(unitarea)) {
+  unitarea <- unitarea[unitarea$STATECD %in% stcd,] 
+}
+areapop <- sum(unitarea[[GBpopdat$areavar]])
+areapopf <- totest$est
+
 area.for <- rowest[rowest[[title.rowvar]] == "Forest land", "est"]
 area.nf <- rowest[rowest[[title.rowvar]] == "Nonforest land", "est"]
 area.water <- sum(rowest[rowest[[title.rowvar]] %in% c("Noncensus water", "Census water"), "est"])
 
-if (!EVALIDator_match) {
-summary_text <-
-paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report are from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, ". All estimation percent sampling errors are reported 68% confidence level. The estimates are based on population data from a custom boundary.")
-
-} else {
-addtext <- "The estimates are based on state-level population data"
-if (is.null(popfilter) || popfilter == "") {
-addtext <- paste0(addtext, ". ")
-} else {
-addtext <- paste0(addtext, ", filtered by ", popfilter, ". ")
-}
-summary_text <-
-paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report are from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, ". ", addtext, "All estimation percent sampling errors are reported 68% confidence level.")
-}
-
-
 unitvars <- c(GBpopdat$unitvar, GBpopdat$unitvars)
 stratalut <- setDT(GBpopdat$stratalut)
-nplots <- sum(stratalut[, sum(n.total, na.rm=TRUE), by=unitvars][["V1"]])
+if ("STATECD" %in% names(stratalut)) {
+  stratalut <- stratalut[stratalut$STATECD %in% stcd, ]
+}
+nplotspop <- sum(stratalut[, sum(n.total, na.rm=TRUE), by=unitvars][["V1"]])
+nplotspopf <- totest$NBRPLT.gt0
+
+
+intro_text1 <- paste0("The area of ", AOInm, " located in ", title.states, " is ", format(round(areapopf), big.mark=","), " acres with ", round(area.for/areapopf * 100), " percent of the area classified as forest land, ", round(area.nf/areapopf * 100), " percent classified as nonforest land, and ", round(area.water/areapopf * 100), " percent as water.") 
+
+
+if (!EVALIDator_match) {
+intro_text2 <-
+paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Woudenberg et al. 2010). The estimates are based on population data from a custom boundary, including a total of ", format(nplotspop, big.mark=","), " FIA plots. All percent sampling errors are reported at 68% confidence level.")
+
+} else {
+  
+addtext <- "The estimates are based on state-level population data"
+if (is.null(popfilter) || popfilter == "") {
+  addtext <- paste0(addtext, ". ")
+} else {
+  addtext <- paste0(addtext, ", filtered by ", popfilter, ". ")
+}
+addtext2 <- paste("There are a total of", format(nplotspop, big.mark=","), 
+                  "FIA plots within the population")
+if (is.null(popfilter) || popfilter == "") {
+  addtext2 <- paste0(addtext2, ". ")
+} else {
+  addtext2 <- paste0(addtext2, " with ", nplotspopf, " plots inside the area of interest. ")
+}
+
+intro_text2 <-
+paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Woudenberg et al. 2010). ", addtext, addtext2, "All percent sampling errors are reported at 68% confidence level.")
+
+}
+
 
 ```
 
 
-The area of `r params$AOInm` located in `r title.states`, is `r format(round(totarea), big.mark=",")` acres with `r round(area.for/totarea * 100)` percent of the area classified as forest land, `r round(area.nf/totarea * 100)` percent classified as nonforest land, and `r round(area.water/totarea * 100)` percent as water. There are a total of `r format(nplots, big.mark=",")` FIA plots within the population. 
+`r intro_text1`
 
 &nbsp;  
 
-`r summary_text`
+`r intro_text2`
 
 &nbsp;   
 
@@ -373,13 +434,13 @@ Figure 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group,
 -----   
 
 
-# EST4_v2 - Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group table.
+# EST4_v2 - Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group table.
 
 
 -----  
 
 
-Table 5. Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
 
 &nbsp;   
 
@@ -387,10 +448,10 @@ Table 5. Number of live aspen seedlings (< 1.0 in dia) per acre by forest type g
 
 estdat_EST4_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
 		cfilter=cfilter, estvarn="TPA_UNADJ", estseed="only", 
-		estvarn.filter="SPCD == 746",
+		estvarn.filter=spcd.filter,
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.estvarn="Number of seedlings (aspen) (less than 1.0 in dia) per acre",
+		title.estvarn=paste0("Number of seedlings (", title.spcd, ") (less than 1.0 in dia) per acre"),
 		title.filter=AOInm)
 
 estdat_EST4_v2_raw_rowest <- estdat_EST4_v2$raw$rowest
@@ -410,7 +471,7 @@ knitr::kable(EST4_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 -----  
 
 
-# EST4_v2 - Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group barplot.
+# EST4_v2 - Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group barplot.
 
 
 -----  
@@ -423,7 +484,7 @@ knitr::kable(EST4_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST4_v2, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 5. Number of live aspen seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
 
 
 \newpage
@@ -956,13 +1017,13 @@ Figure 13. Acres of forest by forest type group, `r AOInm`, `r title.states`, `r
 ----- 
 
 
-# EST11_v1 - Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) table.
+# EST11_v1 - Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) table.
   
 
 ----- 
 
 
-Table 14. Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Table 14. Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
 
 &nbsp;  
   
@@ -975,16 +1036,18 @@ GBpopdat$treex <- datlut_EST11_v1$xLUT
 
 estdat_EST11_v1 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST",
     sumunits=TRUE, cfilter=cfilter, estseed="add",
-		estvar="TPA_UNADJ", estvar.filter="STATUSCD == 1 & SPCD == 746", rowvar="DIACL",
+		estvar="TPA_UNADJ", estvar.filter=paste("STATUSCD == 1", spcd.filter, sep=" & "), rowvar="DIACL",
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		divideby="million", title.filter=AOInm,
-		title.rowvar="diameter class of aspen")
+		title.rowvar=paste("diameter class of", title.spcd))
 
 estdat_EST11_v1_raw_rowest <- estdat_EST11_v1$raw$rowest
 
-EST11_v1 <- subset(estdat_EST11_v1_raw_rowest, select=c("diameter class of aspen", "est", "pse"))
+EST11_v1 <- subset(estdat_EST11_v1_raw_rowest, 
+                   select=c(paste("diameter class of", title.spcd), "est", "pse"))
 
-EST11_v1 <- setnames(EST11_v1, c("Diameter Class (aspen)", "Estimate", "Percent Sampling Error"))
+EST11_v1 <- setnames(EST11_v1, c(paste0("Diameter Class (", title.spcd, ")"), 
+                                 "Estimate", "Percent Sampling Error"))
 
 knitr::kable(EST11_v1, "simple", align=c("lrr"), digits=c(0,2,0),
              format.args = list(big.mark = ","))
@@ -997,7 +1060,7 @@ knitr::kable(EST11_v1, "simple", align=c("lrr"), digits=c(0,2,0),
 ----- 
 
 
-# EST11_v1 - Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) barplot. 
+# EST11_v1 - Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) barplot. 
 
 
 ----- 
@@ -1010,7 +1073,7 @@ knitr::kable(EST11_v1, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST11_v1, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL, divideby="million")
 
 ```
-Figure 14. Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 14. Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
 
 
 \newpage
@@ -1022,13 +1085,13 @@ Figure 14. Number of live aspen stems by diameter class (0 - <1, 1 - <5, 5 - <8,
 ----- 
 
 
-# EST11_v2 - Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) table.
+# EST11_v2 - Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) table.
   
 
 ----- 
 
 
-Table 15. Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Table 15. Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
 
 &nbsp;  
   
@@ -1041,15 +1104,17 @@ GBpopdat$treex <- datlut_EST11_v2$xLUT
 
 estdat_EST11_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
     sumunits=TRUE, cfilter=cfilter, estseed="add",
-		estvarn="TPA_UNADJ", estvarn.filter="STATUSCD == 1 & SPCD == 746", rowvar="DIACL", 
+		estvarn="TPA_UNADJ", estvarn.filter=paste("STATUSCD == 1", spcd.filter, sep=" & "), rowvar="DIACL", 
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm, title.rowvar="diameter class of aspen")
+		title.filter=AOInm, title.rowvar=paste("diameter class of", title.spcd))
 
 estdat_EST11_v2_raw_rowest <- estdat_EST11_v2$raw$rowest
 
-EST11_v2 <- subset(estdat_EST11_v2_raw_rowest, select=c("diameter class of aspen", "rhat", "pse"))
+EST11_v2 <- subset(estdat_EST11_v2_raw_rowest, 
+              select=c(paste("diameter class of", title.spcd), "rhat", "pse"))
 
-EST11_v2 <- setnames(EST11_v2, c("Diameter Class (aspen)", "Estimate", "Percent Sampling Error"))
+EST11_v2 <- setnames(EST11_v2, c(paste0("Diameter Class (", title.spcd, ")"), 
+                                "Estimate", "Percent Sampling Error"))
 
 knitr::kable(EST11_v2, "simple", align=c("lrr"), digits=c(0,2,0),
              format.args = list(big.mark = ","))
@@ -1062,7 +1127,7 @@ knitr::kable(EST11_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 ----- 
 
 
-# EST11_v2 - Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) barplot.
+# EST11_v2 - Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia) barplot.
 
 
 ----- 
@@ -1075,7 +1140,7 @@ knitr::kable(EST11_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST11_v2, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 15. Number of live aspen stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 15. Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
 
 
 \newpage
@@ -1262,3 +1327,6 @@ Bechtold, William A.; Patterson, Paul L.; [Editors] 2005. The enhanced forest in
 
 Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Freeman, Elizabeth A. 2015. FIESTA—An R estimation tool for FIA analysts. In: Stanton, Sharon M.; Christensen, Glenn A., comps. 2015. Pushing boundaries: new directions in inventory techniques and applications: Forest Inventory and Analysis (FIA) symposium 2015. 2015 December 8–10; Portland, Oregon. Gen. Tech. Rep. PNW-GTR-931. Portland, OR: U.S. Department of Agriculture, Forest Service, Pacific Northwest Research Station. p. 72.
 
+&nbsp;  
+
+Woudenberg, Sharon W.; Conkling, Barbara L.; O'Connell, Barbara M.; LaPoint, Elizabeth B.; Turner, Jeffery A.; Waddell, Karen L. 2010. The Forest Inventory and Analysis database: database description and users manual version 4.0 for Phase 2. Gen. Tech. Rep. RMRS-GTR-245. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 336 p.

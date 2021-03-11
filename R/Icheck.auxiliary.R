@@ -270,12 +270,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   if (length(unitvars) > 1) {
     unitvar12 <- paste(unitvar2, unitvar, sep="-")
     auxlut[[unitvar12]] <- paste(auxlut[[unitvar2]], auxlut[[unitvar]], sep="-")
-    auxlut[, c(unitvar, unitvar2) := NULL]
+    #auxlut[, c(unitvar, unitvar2) := NULL]
 
     pltx[[unitvar12]] <- paste(pltx[[unitvar2]], pltx[[unitvar]], sep="-")
     if (!is.null(unitarea)) {
       unitarea[[unitvar12]] <- paste(unitarea[[unitvar2]], unitarea[[unitvar]], sep="-")
-      unitarea[, c(unitvar, unitvar2) := NULL]
+      #unitarea[, c(unitvar, unitvar2) := NULL]
     }
     unitvar <- unitvar12
   }

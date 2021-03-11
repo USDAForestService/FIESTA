@@ -8,8 +8,8 @@
 }
 \usage{
 anGBpop_report(GBpopdat, AOInm, photofn = NULL, photo_author = NULL, 
-	EVALIDator_match = FALSE, cfilter = NULL, pfilter = NULL, title.ref = NULL, 
-	outfolder = NULL)
+	EVALIDator_match = FALSE, cfilter = NULL, pfilter = NULL, spcd = 746,
+	title.ref = NULL, outfolder = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +22,9 @@ anGBpop_report(GBpopdat, AOInm, photofn = NULL, photo_author = NULL,
 	Must be in R syntax (e.g., ADFORCD == 408). Optional. }
   \item{pfilter}{ String. Name of variable or string that filters plots. 
 	Must be in R syntax (e.g., COUNTYCD == 1). Optional. }
+  \item{spcd}{ Integer. A species code to use as focus species of the report. 
+	Multiple codes are accepted if the focus species is a combined group. 
+	Default is 746 (quaking aspen). }
   \item{title.ref}{ String. Reference information for title and output file names. }
   \item{outfolder}{ String. The path of folder to output tables. }
 }

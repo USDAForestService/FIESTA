@@ -21,7 +21,8 @@ groupUnits <- function(tabest, domain, esttype="AREA", estncol="estn",
   }
   
   ## Aggregation variables
-  agvars <- c(estncol, estncol.var, "NBRPLT.gt0", areavar)
+#  agvars <- c(estncol, estncol.var, "NBRPLT.gt0", areavar)
+  agvars <- c(estncol, estncol.var, "NBRPLT.gt0")
   agvars <- agvars[which(agvars %in% names(tabest))]
 
   if (esttype == "RATIO") {

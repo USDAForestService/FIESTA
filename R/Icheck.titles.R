@@ -42,10 +42,10 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
     ## Reference title
     if (is.null(title.ref)) {
       if (!is.null(states)) 
-        title.state <- paste(as.character(states), collapse="; ")
+        title.state <- paste(as.character(states), collapse=" and ")
       if (!is.null(invyrs)) {
         if (is.null(states) && !is.null(names(invyrs))) 
-          title.state <- paste(as.character(states), collapse="; ")
+          title.state <- paste(as.character(states), collapse=" and ")
         invyrs <- as.numeric(as.character(unlist(invyrs)))
         if (length(unique(invyrs)) > 1) {
           title.ref <- paste0(title.state, ", ", min(invyrs), "-", max(invyrs))
