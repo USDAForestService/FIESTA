@@ -1060,9 +1060,6 @@ DBgetPlots <- function (states=NULL, RS=NULL, invtype="ANNUAL", evalid=NULL,
         ## Subset overall filters from pltx
         sccmx <- sccmx[sccmx$PLT_CN %in% pltx$CN,]
 
-print(dim(pltx))
-print(dim(sccmx))
-
         ## Merge to pltx
         #pltx <- merge(pltx, sccmx, all.x=TRUE, by.x="CN", by.y="PLT_CN")
         
@@ -1430,7 +1427,7 @@ print(dim(sccmx))
         grm <- rbind(grm, grmx)
       }
     }
-
+ 
     ##############################################################
     ## Other tables
     ##############################################################
@@ -1461,12 +1458,13 @@ print(dim(sccmx))
           tab <- tryCatch( sqldf::sqldf(xqry, stringsAsFactors=FALSE), 
 			error=function(e) return(NULL))
         }
-
-        ## Subset overall filters from condx
-        if ("CONDID" %in% names(tab)) {
-          tab <- tab[paste(tab$PLT_CN, tab$CONDID) %in% pcondID,]
-        } else {
-          tab <- tab[tab[[joinid]] %in% unique(pltx$CN),]
+        if (!grepl("POP", othertable)) {
+          ## Subset overall filters from condx
+          if ("CONDID" %in% names(tab)) {
+            tab <- tab[paste(tab$PLT_CN, tab$CONDID) %in% pcondID,]
+          } else {
+            tab <- tab[tab[[joinid]] %in% unique(pltx$CN),]
+          }
         }
         if (nrow(tab) == 0) {
           message("othertable must include PLT_CN")
@@ -1489,7 +1487,6 @@ print(dim(sccmx))
         }
       }
     }
-
 
     ##############################################################
     ## If savePOP or more than one evalType
