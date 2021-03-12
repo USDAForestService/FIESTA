@@ -148,6 +148,13 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   landarea <- estdat$landarea
   #if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
+  if ("STATECD" %in% names(pltcondf)) {
+    states <- pcheck.states(sort(unique(pltcondf$STATECD)))
+  }
+  if ("INVYR" %in% names(pltcondf)) {
+    invyr <- sort(unique(pltcondf$INVYR))
+  }
+
 
   ###################################################################################
   ### Check row and column data

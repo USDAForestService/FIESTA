@@ -96,7 +96,7 @@ Rocky Mountain Research Station, Forest Inventory and Analysis  | `r format(Sys.
 
 &nbsp;  
 
-## ![](report_image.PNG)
+## ![](report_image.PNG){height=360px width=720px}
 
 `r photo_text`
 
@@ -205,8 +205,8 @@ Table 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r 
 ```{r EST1_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="TPA_UNADJ", sumunits=TRUE,
-		estvarn.filter="STATUSCD == 1 & DIA >= 1.0", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="TPA_UNADJ", 
+		sumunits=TRUE, estvarn.filter="STATUSCD == 1 & DIA >= 1.0", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.filter=AOInm)
@@ -265,7 +265,7 @@ Table 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type g
 ```{r EST2_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="TPA_UNADJ", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="TPA_UNADJ", 
 		estvarn.filter="TREECLCD == 2 & DIA >= 5.0", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -326,7 +326,7 @@ Table 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by fore
 ```{r EST3_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST3 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="BA", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="BA", 
 		estvarn.filter="STATUSCD == 1", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -387,7 +387,7 @@ Table 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group, 
 ```{r EST4_v1_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST4_v1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="TPA_UNADJ", estseed="only", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="TPA_UNADJ", estseed="only", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.filter=AOInm)
@@ -447,7 +447,7 @@ Table 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by fore
 ```{r EST4_v2_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST4_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="TPA_UNADJ", estseed="only", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="TPA_UNADJ", estseed="only", 
 		estvarn.filter=spcd.filter,
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -510,7 +510,7 @@ Table 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia)
 
 
 estdat_EST5 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="VOLCFNET", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="VOLCFNET", 
 		estvarn.filter="STATUSCD == 1 & DIA >= 5.0",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -571,7 +571,7 @@ Table 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia)
 ```{r EST6_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST6 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="VOLCFNET", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="VOLCFNET", 
 		estvarn.filter="STATUSCD == 1 & DIA >= 5.0",
 		rowvar="SPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -635,7 +635,7 @@ Table 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 i
 ```{r EST7_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST7 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, 
+		pfilter=pfilter, cfilter=cfilter, 
 		estvar="VOLCFNET", estvar.filter="STATUSCD == 1 & DIA >= 5.0",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -697,7 +697,7 @@ Table 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type g
 ```{r EST8_v1_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST8_v1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="TPA_UNADJ", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="TPA_UNADJ", 
 		estvarn.filter="STATUSCD == 2 & STANDING_DEAD_CD == 1 & DIA >= 8.0",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -759,7 +759,7 @@ Table 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest type
 ```{r EST8_v2_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST8_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, estvarn="TPA_UNADJ", 
+		pfilter=pfilter, cfilter=cfilter, estvarn="TPA_UNADJ", 
 		estvarn.filter="STATUSCD == 2 & STANDING_DEAD_CD == 1 & DIA >= 18.0",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -830,7 +830,7 @@ datlut_EST9_v1 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_E
 GBpopdat$pltcondx <- datlut_EST9_v1$xLUT
 
 estdat_EST9_v1 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter,	rowvar="STDAGENM",
+		pfilter=pfilter, cfilter=cfilter,	rowvar="STDAGENM",
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.rowvar="stand age class",	title.filter=AOInm,
 		divideby="thousand")
@@ -907,7 +907,7 @@ datlut_EST9_v2 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_E
 GBpopdat$pltcondx <- datlut_EST9_v2$xLUT
 
 estdat_EST9_v2 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, rowvar="STDAGENM",
+		pfilter=pfilter, cfilter=cfilter, rowvar="STDAGENM",
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.rowvar="stand age class",	title.filter=AOInm,
 		divideby="thousand")
@@ -970,7 +970,7 @@ Table 13. Acres of forest by forest type group, `r AOInm`, `r title.states`, `r 
 ```{r EST10_Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST10 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, rowvar="FORTYPGRPCD", row.FIAname=TRUE,
+		pfilter=pfilter, cfilter=cfilter, rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.filter=AOInm, divideby="thousand")
 
@@ -1035,7 +1035,7 @@ datlut_EST11_v1 <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.b
 GBpopdat$treex <- datlut_EST11_v1$xLUT
 
 estdat_EST11_v1 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST",
-    sumunits=TRUE, cfilter=cfilter, estseed="add",
+    sumunits=TRUE, pfilter=pfilter, cfilter=cfilter, estseed="add",
 		estvar="TPA_UNADJ", estvar.filter=paste("STATUSCD == 1", spcd.filter, sep=" & "), rowvar="DIACL",
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		divideby="million", title.filter=AOInm,
@@ -1103,7 +1103,7 @@ datlut_EST11_v2 <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.b
 GBpopdat$treex <- datlut_EST11_v2$xLUT
 
 estdat_EST11_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
-    sumunits=TRUE, cfilter=cfilter, estseed="add",
+    sumunits=TRUE, pfilter=pfilter, cfilter=cfilter, estseed="add",
 		estvarn="TPA_UNADJ", estvarn.filter=paste("STATUSCD == 1", spcd.filter, sep=" & "), rowvar="DIACL", 
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.filter=AOInm, title.rowvar=paste("diameter class of", title.spcd))
@@ -1180,7 +1180,7 @@ datlut_EST12 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_EST
 GBpopdat$pltcondx <- datlut_EST12$xLUT
 
 estdat_EST12 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, 
+		pfilter=pfilter, cfilter=cfilter, 
 		estvarn="BA", estvarn.filter="STATUSCD == 1",
 		rowvar="STDAGENM", colvar="FORTYPGRPCD", col.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
@@ -1240,7 +1240,7 @@ datlut_EST13 <- datLUTclass(x=GBpopdat$pltcondx, xvar="STDAGE",LUT=stdagelut_EST
 GBpopdat$pltcondx <- datlut_EST13$xLUT
 
 estdat_EST13 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, 
+		pfilter=pfilter, cfilter=cfilter, 
 		rowvar="STDAGENM", colvar="FORTYPGRPCD", col.FIAname=TRUE, 
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0)
 
@@ -1276,7 +1276,7 @@ Table 18. Acres of forest by disturbance, `r AOInm`, `r title.states`, `r invyrs
 ```{r EST14__Table, echo=FALSE, warning=FALSE, message=FALSE}
 
 estdat_EST14 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
-		cfilter=cfilter, rowvar="DSTRBCD1", 
+		pfilter=pfilter, cfilter=cfilter, rowvar="DSTRBCD1", 
 		row.FIAname=TRUE,	rawdata=TRUE, returntitle=TRUE, 
 		estround=2, pseround=0, title.filter=AOInm)
 

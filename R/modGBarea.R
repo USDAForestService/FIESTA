@@ -129,6 +129,13 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, cfilter=NU
   estround <- estdat$estround
   pseround <- estdat$pseround
 
+  if ("STATECD" %in% names(pltcondf)) {
+    states <- pcheck.states(sort(unique(pltcondf$STATECD)))
+  }
+  if ("INVYR" %in% names(pltcondf)) {
+    invyr <- sort(unique(pltcondf$INVYR))
+  }
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -409,6 +416,12 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, cfilter=NU
   }
   if (returntitle) returnlst$titlelst <- alltitlelst
   if (returnGBpopdat) returnlst$GBpopdat <- GBpopdat
+  if ("STATECD" %in% names(pltcondf)) {
+    returnlst$statecd <- sort(unique(pltcondf$STATECD))
+  }
+  if ("INVYR" %in% names(pltcondf)) {
+    returnlst$invyr <- sort(unique(pltcondf$INVYR))
+  }
     
   return(returnlst)
 }

@@ -181,6 +181,13 @@ modMAarea <- function(MAmethod="greg", prednames=NULL,
   landarea <- estdat$landarea
   if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
+  if ("STATECD" %in% names(pltcondf)) {
+    states <- pcheck.states(sort(unique(pltcondf$STATECD)))
+  }
+  if ("INVYR" %in% names(pltcondf)) {
+    invyr <- sort(unique(pltcondf$INVYR))
+  }
+
 
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
