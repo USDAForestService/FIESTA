@@ -8,22 +8,25 @@
 	(https://apps.fs.usda.gov/fia/datamart/CSV/datamart_csv.html). 
 }
 \usage{
-DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL, 
-	evalCur = FALSE, evalEndyr = NULL, evalAll=FALSE, evalType = "ALL", 
-	measCur = FALSE, measEndyr = NULL, allyrs = FALSE, invyrs = NULL, 
-	xymeasCur = FALSE, istree = FALSE, isseed = FALSE, isveg = FALSE, 
-	issubp = FALSE, isdwm = FALSE, plotgeom = FALSE, othertables = NULL, 
-	issp = FALSE, spcond = FALSE, spcondid1 = FALSE, 
-	defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, subcycle99 = FALSE, 
-	intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, alltFilter = NULL, 
-	savedata = FALSE, saveqry = FALSE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, savePOP = FALSE, returndata = TRUE)
+DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL, 
+	invtype = "ANNUAL", evalid = NULL, evalCur = FALSE, evalEndyr = NULL, 
+	evalAll=FALSE, evalType = "ALL", measCur = FALSE, measEndyr = NULL, 
+	allyrs = FALSE, invyrs = NULL, xymeasCur = FALSE, istree = FALSE, 
+	isseed = FALSE, isveg = FALSE, issubp = FALSE, isdwm = FALSE, 
+	plotgeom = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
+	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
+	subcycle99 = FALSE, intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, 
+	alltFilter = NULL, savedata = FALSE, saveqry = FALSE, outfolder = NULL, 
+	out_fmt = "csv", out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	savePOP = FALSE, returndata = TRUE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name (e.g., 'Arizona','New Mexico') or 
 	code (e.g., 4, 35) of state(s) for evalid. If all states in one or more FIA Research
 	Station is desired, set states=NULL and use RS argument to define RS. }
+  \item{datsource}{ String. Source of data ('datamart', 'sqlite'). }
+  \item{data_dsn}{ String. If datsource='sqlite', the name of SQLite database (*.sqlite). }
   \item{RS}{ String vector. Name of research station(s) 
 	('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states is populated. }
   \item{invtype}{ String. Type of FIA inventory to extract ('PERIODIC', 'ANNUAL').  

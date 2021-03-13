@@ -2,6 +2,7 @@
 \alias{addCI}
 \alias{addcommas}
 \alias{DBvars.default}
+\alias{chkdbtab}
 \alias{change10char}
 \alias{check.logic}
 \alias{check.estdata}

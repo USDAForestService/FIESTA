@@ -4,7 +4,7 @@
 ## getpfromqry      	## Get pfromqry for extracting data
 ## getplotCur
 ## getEvalid		## Get evalid from a SQLite database
-
+## chkdbtab			## Checks if table name exists in list of database tables
 
 DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, 
 	plotgeom=FALSE, isRMRS=FALSE) {
@@ -12,7 +12,6 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
   ## Set global variables
   treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=
 	dwmlst=pgeomvarlst <- NULL
-
 
   ## DESCRIPTION: Set default variables for FIA plot data extraction
 
@@ -68,6 +67,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
   returnlst <- list(pltvarlst=pltvarlst, condvarlst=condvarlst)
 
   if (plotgeom) {
+    dbtablst <- c(dbtablst, "PLOTGEOM")
     ################################  PLOTGEOM VARIABLES ##################################
     ## Variables from FIADB.PLOTGEOM
     pgeomvarlst <- c("CN", "CONGCD", "ECOSUBCD", "HUC", "EMAP_HEX", "ALP_ADFORCD",
@@ -78,6 +78,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 
   ################################  TREE VARIABLES  ##################################
   if (istree) {
+
     ## Variables from FS_NIMS_FIADB_RMRS.TREE (these variables change from NIMSf to FIADB)
     treevarlst <- c("CN", "PLT_CN", "PREV_TRE_CN", "SUBP", "TREE", "CONDID", 
 		"AZIMUTH", "DIST", "STATUSCD", "SPCD", "SPGRPCD", "DIA", "HT", "ACTUALHT", 
@@ -106,6 +107,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 
   ################################  SEED VARIABLES  ##################################
   if (isseed) {
+
     ## Variables from FS_NIMS_RMRS.SEEDLING
     seedvarlst <- c("PLT_CN", "SUBP", "CONDID", "SPCD", "SPGRPCD", "TOTAGE", "TPA_UNADJ")
 
@@ -121,6 +123,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
     
   ############################  UNDERSTORY VEG VARIABLES  ############################
   if (isveg) {    ## FS_NIMS_FIADB_RMRS or FS_FIADB
+
     ## Variables from P2VEG_SUBPLOT_SPP
     vspsppvarlst <- c("PLT_CN", "SUBP", "CONDID", "VEG_FLDSPCD", "UNIQUE_SP_NBR", 
 	"VEG_SPCD", "GROWTH_HABIT_CD", "LAYER", "COVER_PCT")
@@ -135,6 +138,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 
   ############################  UNDERSTORY VEG VARIABLES  ############################
   if (issubp) {    ## FS_NIMS_FIADB_RMRS or FS_FIADB
+
     ## Variables from SUBP
     subpvarlst <- c("PLT_CN", "SUBP", "SUBP_STATUS_CD", "NF_SUBP_STATUS_CD", 
 		"NF_SUBP_NONSAMPLE_REASN_CD", "P2VEG_SUBP_STATUS_CD", 
@@ -164,6 +168,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 
   ##############################  DOWN WOODY MATERIAL  ###############################
   if (isdwm) {
+
     ## Variables from COND_DWM_CALC
     dwmlst <- c("PLT_CN", "CONDID", "CONDPROP_CWD", "CONDPROP_FWD_SM", "CONDPROP_FWD_MD", 
 	"CONDPROP_FWD_LG", "CONDPROP_DUFF", "CWD_TL_COND", "CWD_TL_UNADJ", "CWD_TL_ADJ", 
@@ -189,7 +194,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 
     returnlst$dwmlst <- dwmlst
   }
-
+  
   return(returnlst)
 }
 
@@ -299,7 +304,8 @@ getspconddat <- function(cond=NULL, ACTUALcond=NULL, cuniqueid="PLT_CN", condid1
 getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE, 
 	varCur="MEASYEAR", Endyr=NULL, invyrs=NULL, allyrs=FALSE, SCHEMA.=NULL, 
 	subcycle99=NULL, designcd1=FALSE, intensity1=NULL, popSURVEY=FALSE, chk=FALSE,
-	syntax="sql", plotnm="plot", ppsanm="pop_plot_stratum_assgn", ppsaid="PLT_CN") {
+	syntax="sql", plotnm="plot", ppsanm="pop_plot_stratum_assgn", ppsaid="PLT_CN",
+	surveynm="survey") {
   ## DESCRIPTION: gets from statement for database query
   ## syntax - ('sql', 'R')
 
@@ -415,10 +421,10 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 					p.plot = pp.plot and p.", varCur, " = pp.maxyr") 
 #    }
 
-    if (popSURVEY)
-      pfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., "SURVEY", 
+    if (popSURVEY) {
+      pfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., surveynm, 
 		" s on (s.CN = p.SRV_CN and s.ANN_INVENTORY = 'Y')")
-   
+    }
  
   } else if (allyrs) {  
     pfromqry <- paste0(SCHEMA., plotnm, " p")
@@ -640,6 +646,20 @@ getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL,
   return(plotCur)
 }
 
+chkdbtab <- function(dbtablst, tab, stopifnull=FALSE) {
+  ## DESCRIPTION: checks if table exists in list of database tables
+  ## 		If doesn't exist, returns NULL, else returns table name
+  if (tolower(tab) %in% dbtablst) {
+    return(tolower(tab)) 
+  } else if (toupper(tab) %in% dbtablst) {
+    return(toupper(tab))
+  } else {
+    if (stopifnull) {
+      stop(tab, " does not exist in database")
+    }
+    return(NULL)
+  }
+}
 
 
 
