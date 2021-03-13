@@ -4,6 +4,9 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre=NULL,
   ## 		Adds a folder named report in the outfolder and copies all 
   ##		components of report into folder.
 
+
+  wkdir <- getwd()
+
   outfolder <- pcheck.outfolder(outfolder)
   outfolder <- normalizePath(outfolder)
   reportfolder <- file.path(outfolder, "report")
@@ -37,6 +40,8 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre=NULL,
     system(paste("sed -i '1889,1908d'", rmdfn)) 
   }
 
+  ## Set working directory to reportfolder
+  setwd(reportfolder) 
 
   rmarkdown::render(
     input = rmdfn,
@@ -45,4 +50,8 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre=NULL,
 		outfn.pre=outfn.pre, ice.QAQCfn=ice.QAQCfn),
     envir = parent.frame()
   )
+
+  ## Set working directory back to original working directory
+  setwd(wkdir) 
+
 }
