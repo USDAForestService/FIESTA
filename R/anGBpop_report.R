@@ -5,6 +5,8 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   ## 		Adds a folder named report in the outfolder and copies all 
   ##		components of report into folder.
 
+  wkdir <- getwd()
+
   ## set global variables
   report_imagefn <- NULL
 
@@ -27,8 +29,11 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   file.copy(system.file("rmd", "anGBtemplate.docx", package="FIESTA"),
 	file.path(reportfolder, "anGBtemplate.docx"), overwrite=TRUE)
   if (!is.null(photofn)) {
-    file.copy(photofn, file.path(reportfolder, "report_image.png")) 
-    report_imagefn <- file.path(reportfolder, "report_image.png")
+    if (!file.exists(photofn)) {
+      stop(photofn, "does not exist")
+    }
+    file.copy(photofn, file.path(reportfolder, "report_image.PNG")) 
+    report_imagefn <- file.path(reportfolder, "report_image.PNG")
   }
 
 
@@ -41,12 +46,19 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
     system(paste("sed -i '48,59d'", rmdfn)) 
   }
 
+  ## Set working directory to reportfolder
+  setwd(reportfolder) 
+
   rmarkdown::render(
     input = rmdfn,
     output_file = reportfn,
-    params = list(GBpopdat=GBpopdat, AOInm=AOInm, photofn=photofn, 
+    params = list(GBpopdat=GBpopdat, AOInm=AOInm, 
 		photo_author=photo_author, cfilter=cfilter, pfilter=pfilter, 
 		spcd=spcd, EVALIDator_match=EVALIDator_match, title.ref=title.ref),
     envir = parent.frame()
   )
+
+  ## Set working directory back to original working directory
+  setwd(wkdir) 
+
 }

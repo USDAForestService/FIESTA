@@ -1,5 +1,5 @@
-anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, strat_layer=NULL, 
-	outfolder=NULL, ...) {
+anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, xy=NULL, xy_dsn=NULL, 
+	strat_layer=NULL, outfolder=NULL, ...) {
 
 
   ## Check for packages
@@ -68,8 +68,8 @@ anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, strat_layer=NULL,
   message("calculating estimates for ", ADFOR.name, "...")
 
   
-  GBpoplst <- anGBpop(bnd=bnd, bnd.att=bnd.att, strat_layer=strat_layer, 
-	outfn.pre=outfn.pre, ...)
+  GBpoplst <- anGBpop(bnd=bnd, bnd.att=bnd.att, xy=xy, xy_dsn=xy_dsn, 
+	strat_layer=strat_layer, outfn.pre=outfn.pre, ...)
  
 
   return(GBpoplst)

@@ -288,8 +288,14 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       layer <- select.list(layerlst, title="Select layer", multiple=FALSE)
     }    
   } 
-  if (is.null(dsn))
-    stop("dsn is NULL")
+  if (is.null(dsn)) {
+    message("dsn is NULL")
+    if (checkonly) {   
+      return(FALSE)
+    } else {
+      stop("dsn is NULL")
+    }
+  }
   
   ######################################################
   ## Check layer

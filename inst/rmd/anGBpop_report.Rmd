@@ -5,7 +5,6 @@ output:
 params:
   GBpopdat: ''
   AOInm: ''
-  photofn: ''
   EVALIDator_match: TRUE
   cfilter: ''
   pfilter: ''
@@ -25,9 +24,7 @@ cfilter <- params$cfilter
 pfilter <- params$pfilter
 spcd <- params$spcd
 photo_author <- params$photo_author
-photofn <- params$photofn
 title.ref <- params$title.ref
-
 
 if (is.null(title.ref)) {
   title.ref <- AOInm

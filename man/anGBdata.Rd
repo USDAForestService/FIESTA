@@ -8,10 +8,10 @@
 }
 \usage{
 anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
-	RS = NULL, clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
-	istree = TRUE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
-	tree_layer = "tree", seed_layer = "seed", puniqueid = "CN", 
-	intensity1 = TRUE, strata = TRUE, strattype = "RASTER", 
+	RS = NULL, xy = NULL, xy_dsn = NULL, clipxy = TRUE, datsource = "sqlite", 
+	data_dsn = NULL, istree = TRUE, isseed = FALSE, plot_layer = "plot", 
+	cond_layer = "cond", tree_layer = "tree", seed_layer = "seed", 
+	puniqueid = "CN", intensity1 = TRUE, strata = TRUE, strattype = "RASTER", 
 	strat_layer = NULL, strat_dsn = NULL, strvar = NULL, showsteps = FALSE, 
 	cex.plots = 0.5, savedata = FALSE, savexy = TRUE, savesteps = FALSE, 
 	saveobj = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
@@ -29,6 +29,12 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
 	estimation unit(s). If NULL, bnd is default as one estimation unit. } 
   \item{bnd.filter}{ String. Filter to subset bnd SpatialPolygons layer. }
   \item{RS}{ String. Name of FIA research station to restrict states to. } 
+  \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
+	polygon object, data frame, full pathname to a shapefile, or name of a 
+	layer within a database. }
+  \item{xy_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
+	of xy. The dsn varies by driver. See gdal OGR vector formats 
+	(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R object. } 
   \item{clipxy}{ Logical. If TRUE, clip xy data. } 
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Name of database where *_layers reside. }

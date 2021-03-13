@@ -10,11 +10,11 @@
 }
 \usage{
 anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL", 
-	isseed = FALSE, datsource = "sqlite", SQLitefn = NULL, RS = NULL, 
-	strat_layer = NULL, showsteps = FALSE, savedata = FALSE, savexy = TRUE, 
-	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE,
-	GBdata = NULL, ...)
+	isseed = FALSE, datsource = "sqlite", data_dsn = NULL, RS = NULL, 
+	xy = NULL, xy_dsn = NULL, strat_layer = NULL, showsteps = FALSE, 
+	savedata = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, GBdata = NULL, ...)
 }
 \arguments{
   \item{bnd}{ sf R object or String. Area of interest (population boundary 
@@ -30,8 +30,14 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL",
 	("VOL"). Note: currently only 'VOL' is available. }
   \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
-  \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }
+  \item{data_dsn}{ String. Full pathname to SQLite database with plot data. }
   \item{RS}{ String. Name of FIA research station to restrict states to. } 
+  \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
+	polygon object, data frame, full pathname to a shapefile, or name of a 
+	layer within a database. }
+  \item{xy_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
+	of xy. The dsn varies by driver. See gdal OGR vector formats 
+	(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R object. } 
   \item{strat_layer}{ String or raster object. Name of the strata spatial raster 
 	layer, including fullpath and extension (e.g., *.img). If raster object,
 	must be written to file. }

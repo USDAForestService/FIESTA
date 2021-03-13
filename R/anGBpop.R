@@ -1,7 +1,7 @@
 anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
-	popType="VOL", isseed=FALSE, datsource="sqlite", SQLitefn=NULL, RS=NULL, 
-	strat_layer=NULL, showsteps=FALSE, savedata=FALSE, savexy=TRUE, 
-	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, 
+	popType="VOL", isseed=FALSE, datsource="sqlite", data_dsn=NULL, RS=NULL, 
+	xy=NULL, xy_dsn=NULL, strat_layer=NULL, showsteps=FALSE, savedata=FALSE, 
+	savexy=TRUE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	GBdata=NULL, ...) {
 
@@ -50,11 +50,13 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     ###########################################################################
     if (is.null(strat_layer)) strata <- FALSE
     GBdata <- anGBdata(bnd_layer=bnd, bnd_dsn=bnd_dsn, bnd.att=bnd.att, 
-		bnd.filter=bnd.filter, RS=RS, datsource=datsource, istree=istree, 
-		isseed=isseed, data_dsn=SQLitefn, strata=strata, strat_layer=strat_layer, 
-		showsteps=showsteps, cex.plots=.75, savedata=savedata, savexy=savexy, 
-		outfolder=outfolder, outfn.pre="GBdata", out_fmt=out_fmt, out_dsn=out_dsn, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,, ...)
+		bnd.filter=bnd.filter, RS=RS, xy=xy, xy_dsn=xy_dsn, 
+		datsource=datsource, istree=istree, isseed=isseed, 
+		data_dsn=data_dsn, strata=strata, strat_layer=strat_layer, 
+		showsteps=showsteps, cex.plots=.75, savedata=savedata, 
+		savexy=savexy, outfolder=outfolder, outfn.pre="GBdata", 
+		out_fmt=out_fmt, out_dsn=out_dsn, overwrite_dsn=overwrite_dsn,
+ 		overwrite_layer=overwrite_layer, ...)
     returnlst$GBdata <- GBdata
   } else {
     GBdata <- pcheck.object(GBdata, objnm="GBdata", 

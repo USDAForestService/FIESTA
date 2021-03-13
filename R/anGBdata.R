@@ -1,6 +1,7 @@
 anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
-	RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
-	isseed=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
+	RS=NULL, xy=NULL, xy_dsn=NULL, clipxy=TRUE, datsource="sqlite", 
+	data_dsn=NULL, istree=TRUE, isseed=FALSE, 
+	plot_layer="plot", cond_layer="cond", tree_layer="tree", 
 	seed_layer="seed", puniqueid="CN", intensity1=TRUE, strata=TRUE, 
 	strattype="RASTER", strat_layer=NULL, strat_dsn=NULL, strvar=NULL, 
 	showsteps=FALSE, cex.plots=0.5, savedata=FALSE, savexy=TRUE, 
@@ -41,19 +42,20 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     out_fmt <- outlst$out_fmt
   }
  
+
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(GBpltdat)) {
     GBpltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
-		RS=RS, clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
-		istree=istree, isseed=isseed, plot_layer=plot_layer, cond_layer=cond_layer, 
-		tree_layer=tree_layer, seed_layer=seed_layer, intensity1=intensity1, 
-		savedata=FALSE, savexy=TRUE, ...)
-
+		RS=RS, clipxy=clipxy, datsource=datsource, xy=xy, xy_dsn=xy_dsn, 
+		data_dsn=data_dsn, istree=istree, isseed=isseed, plot_layer=plot_layer,
+ 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
+		intensity1=intensity1, savedata=FALSE, savexy=TRUE, ...)
     if (is.null(GBpltdat)) return(NULL)
     if (saveobj) {
-      message("saving GBpltdat object to: ", file.path(outfolder, "GBpltdat.rda"), "...")
+      message("saving GBpltdat object to: ", 
+			file.path(outfolder, "GBpltdat.rda"), "...")
       save(GBpltdat, file=file.path(outfolder, "GBpltdat.rda"))
     }
   } else {

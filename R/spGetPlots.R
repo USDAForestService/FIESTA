@@ -3,7 +3,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
 	data_dsn=NULL, istree=FALSE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
-	tree_layer="tree", seed_layer="seed", ppsa_layer="pop_plot_stratum_assgn", 	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, 
+	tree_layer="tree", seed_layer="seed", ppsa_layer="pop_plot_stratum_assgn", 	
+	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, 
 	evalEndyr=NULL, evalType="VOL", measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
 	showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
@@ -99,6 +100,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ########################################################################
   ### DO THE WORK
   ########################################################################
+  ## Check xy table
+  xychk <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
+
   if (!is.null(evalid)) {
     stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4)))    
   } else if (!is.null(states)) {
@@ -130,8 +134,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
-  ## Check xy table
-  xychk <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
 
   if (datsource %in% c("obj", "csv")) {
 
@@ -298,7 +300,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           seed <- dat$seed
         puniqueid <- "CN"
 
-        if (is.null(xydat)) { 
+        if (!xychk) { 
           if ("xyCur_PUBLIC" %in% names(dat)) {
             xy_PUBLIC <- setDT(dat$xyCur_PUBLIC)
             xy.joinid=pjoinid <- "PLOT_ID"
@@ -311,6 +313,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           yvar <- "LAT_PUBLIC"
           xystate <- xy_PUBLIC[, c(xy.joinid, xvar, yvar), with=FALSE]
         } else {
+          xydat <- pcheck.spatial(xy, xy_dsn)
           pjoinid <- ifelse (xy.joinid %in% names(PLOT), xy.joinid, puniqueid)
           xystate <- xydat[xydat[[xy.joinid]] %in% PLOT[[pjoinid]],]
         }
@@ -472,7 +475,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         gc()
           
       } else if (datsource == "sqlite") {
-        xyindb <- FALSE
 
         ####################################################################
         ## 1) Check if data for all states is in database
@@ -481,6 +483,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ## 3) Subset other data with clipped xy joinid
         ####################################################################
         if (i == 1) {
+          xyindb <- FALSE
           dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
           tablst <- DBI::dbListTables(dbconn)
           layers <- c(plot_layer, cond_layer)
@@ -509,53 +512,64 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }  
           }
           if (clipxy) {
-            if (xychk && xy_dsn == data_dsn) {
+            if ((xychk && xy_dsn == data_dsn) || !xychk) {
               xyconn <- dbconn
               xyindb <- TRUE
+              xy_dsn <- data_dsn
             } else {
               xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE,
 					createnew=FALSE)
             }
-            if (!is.null(xyconn)) {
-              xytablst <- DBI::dbListTables(xyconn)
-            } else {
+            if (is.null(xyconn)) {
               xyconn <- dbconn
             }
-
+ 
             ## Check xy data
             ######################################################################
             if (is.null(xy)) {
               xytabs <- DBI::dbListTables(xyconn)
               xytabs <- xytabs[grepl("xy", xytabs)]
-              if (length(xytabs) == 0)
+              if (length(xytabs) == 0) {
                 stop("no xy in ", xy_dsn)
-
-              xy <- xytabs[grepl("ACTUAL", xytabs)]
-              if (length(xy) == 1) {
-                xvar <- "LON_ACTUAL"
-                yvar <- "LAT_ACTUAL"
-              } else {
-                xy <- xytabs[grepl("PUBLIC", xytabs)]
-                if (length(xy) == 1) {
-                  xvar <- "LON_PUBLIC"
-                  yvar <- "LAT_PUBLIC"
-                } else {
-                  if ("plot" %in% tablst) 
-                    xy <- "plot"
-                }
               }
-            } 
-            if (!xy %in% tablst) {
-              stop(xy, " not in ", xy_dsn) 
+              if (any(grepl("ACTUAL", xytabs))) {
+                xy <- xytabs[grepl("ACTUAL", xytabs)]
+                message("xy is NULL...  using ", xy)
+              } else if (any(grepl("PUBLIC", xytabs))) {
+                xy <- xytabs[grepl("PUBLIC", xytabs)]
+                message("xy is NULL...  using ", xy)
+              } else if (any(grepl("plot", xytabs, ignore.case=TRUE))) {
+                message("xy is NULL...  using plot table")
+                if (length(grepl("plot", xytabs, ignore.case=TRUE)) == 1) {
+                  ptab <- xytabs[grepl("plot", xytabs, ignore.case=TRUE)]
+                  pfields <- DBI::dbListFields(xyconn, ptab)
+                  if ("LON_PUBLIC" %in% pfields) {
+                    xvar <- "LON_PUBLIC"
+                    if ("LAT_PUBLIC" %in% pfields) {
+                      yvar <- "LAT_PUBLIC"
+                    }
+                  }
+                }
+              } else {
+                stop(xy, " not in ", xy_dsn) 
+              }
             } else {
               xyindb <- TRUE
             }
-
             xyfields <- DBI::dbListFields(xyconn, xy)
-            if (is.null(xvar))
-              xvar <- xyfields[grepl("LON", xyfields)]
-            if (is.null(yvar))
-              yvar <- xyfields[grepl("LAT", xyfields)]
+            if (grepl("ACTUAL", xy)) {
+              xvar <- "LON_ACTUAL"
+              yvar <- "LAT_ACTUAL"
+            } else if (grepl("PUBLIC", xy)) {
+              xvar <- "LON_PUBLIC"
+              yvar <- "LAT_PUBLIC"
+            }
+            if (!xvar %in% xyfields) {
+              message(xvar, " not in xy fields: ", toString(xyfields))
+            }
+            if (!yvar %in% xyfields) {
+              message(yvar, " not in xy fields: ", toString(xyfields))
+            } 
             xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 			gui=gui, checklst=xyfields, caption="xy uniqueid")
             xy.joinid <- pcheck.varchar(var2check=xy.joinid, varnm="xy.joinid", 
