@@ -32,7 +32,7 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
     if (!file.exists(photofn)) {
       stop(photofn, "does not exist")
     }
-    file.copy(photofn, file.path(reportfolder, "report_image.PNG")) 
+    file.copy(photofn, file.path(reportfolder, "report_image.PNG"), overwrite=TRUE) 
     report_imagefn <- file.path(reportfolder, "report_image.PNG")
   }
 
