@@ -3,7 +3,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 	device.type="dev.new", jpeg.res=300, device.height=5, device.width=8, 
 	ylim=NULL, divideby=NULL, ylabel=NULL, xlabel=NULL, xticks=NULL, 
 	mar=NULL, addlegend=FALSE, main=NULL, cex.main=1, cex.label=1, 
-	cex.names=0.8, las.xnames=0, las.ynames=1, savedata=FALSE, 
+	cex.names=0.9, las.xnames=0, las.ynames=1, savedata=FALSE, 
 	outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, 
 	overwrite=FALSE, ...){ 
   ####################################################################################
@@ -89,27 +89,35 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
     ## Add left and right CI values for all in CIlst
     datx <- addCI(datx, estnm="EST", senm="SE", conf.level=CIlst) 
 
-    ## Set ylim to max CIlst
-    maxCI <- max(CIlst)
-    maxCIleft <- paste0("CI", maxCI, "left")
-    maxCIright <- paste0("CI", maxCI, "right")
-    ylim <- c(min(datx[[maxCIleft]]) - min(datx[[maxCIleft]]) * .05,
- 		max(datx[[maxCIright]]) + max(datx[[maxCIright]]) * .05)   
+    if (is.null(ylim)) {
+      ## Set ylim to max CIlst
+      maxCI <- max(CIlst)
+      maxCIleft <- paste0("CI", maxCI, "left")
+      maxCIright <- paste0("CI", maxCI, "right")
+
+      add.ylim <- mean(datx[[yvar]]) * .15
+      ylim.min <- min(datx[,maxCIleft, with=FALSE]) - add.ylim
+      ylim.max <- max(datx[,maxCIright, with=FALSE]) + add.ylim 
+      ylim <- c(ylim.min, ylim.max)
+    }
+   
   } else {
-    ylim <- c(min(datx[[yvar]]) - min(datx[[yvar]]) * .05, 
-		max(datx[[yvar]]) + max(datx[[yvar]]) * .05)
+    if (is.null(ylim)) {
+      add.ylim <- mean(datx[[yvar]]) * .15
+      ylim.min <- min(datx[,yvar, with=FALSE]) - add.ylim
+      ylim.max <- max(datx[,yvar, with=FALSE]) + add.ylim 
+      ylim <- c(ylim.min, ylim.max)
+    }
   }
 
   ## Set tick marks
   ylim.min <- ylim[1]		## bug fixed by Liz
   ylim.max <- ylim[2]		## bug fixed by Liz
 
-#  if (is.null(xticks)) {
-#    xticks <- pretty(datx[[xvar]])
-#    xlim <- c(min(xticks), max(xticks))
-#  }
-  #xticks <- datx[[xvar]]
-
+  if (is.null(xticks)) {
+    xticks <- pretty(datx[[xvar]])
+  }
+  xlim <- c(min(xticks), max(xticks))
 
   ## GET addlegend 
   addlegend <- FIESTA::pcheck.logical(addlegend, "Add legend?", "NO")
@@ -168,6 +176,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   }
   srt <- ifelse(las.xnames == 1, 0, ifelse(las.xnames == 3, 90, 60))
 
+
   ## ylabel
   ######################
   if (is.null(ylabel) & !is.null(divideby)) {
@@ -179,7 +188,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   if (!is.null(ylabel)) { 
     yside <- 2
     ylasnum <- 0
-    ylinenum <- ymaxnum * cex.names/2 + 2
+    ylinenum <- ymaxnum * cex.names/2 + 1
   } else {
     ylinenum <- ymaxnum * cex.names/2 + 1
   }
@@ -193,14 +202,14 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
     if (las.xnames %in% c(0,2)) {
       xlinenum <- .36 * xmaxnum + linenum 
     } else {
-      xlinenum <- 4
+      xlinenum <- 2
     }
   } else {
     xlabel <- xvar
     xlinenum <- ifelse(las.xnames==0, xmaxnum/3, xmaxnum/4)
     #xlinenum = 8
   }
- 
+
   ## Set mar (number of lines for margins - bottom, left, top, right)
   if (is.null(mar)) {
     mar <-  par("mar")
@@ -237,14 +246,20 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
         device.type[-i] <- device.type[-i]
       }
     }
-
+ 
     ## GENERATE BARPLOT
     ###########################################
     op <- par(xpd=NA, cex=par("cex"), mar=mar, las=las.xnames, mgp=c(3,0.5,0))
 
     plot(datx[[xvar]], y=datx[[yvar]], type="b", ylim=ylim, ylab='', 
 		xlim=xlim, xlab='', cex.axis=cex.names, las=las.ynames, xaxt="n")
-    axis(side=1, at=xticks, labels=xticks, cex=cex.names)
+    axis(side=1, at=xticks, labels=FALSE)
+    #text(x=xticks, par("usr")[3], labels=datx[[xvar]], adj = c(1, 2),
+	#		cex=cex.names, srt=srt, xpd=TRUE)
+    #text(x=xticks, par("usr")[3], labels=datx[[xvar]], adj = c(1.4, 1),
+	#		cex=cex.names, srt=srt, xpd=TRUE)
+    text(x=xticks, par("usr")[3], labels=datx[[xvar]], pos=1, adj = c(1, 1),
+			cex=cex.names, srt=srt, xpd=TRUE)
 
     if (plotCI && addshade) {
       graphics::polygon(c(datx[[xvar]], rev(datx[[xvar]])), 

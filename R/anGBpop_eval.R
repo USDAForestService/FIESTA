@@ -1,5 +1,5 @@
 anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states, 
-	evalType="VOL", datsource="sqlite", data_dsn=NULL, isseed=FALSE, 
+	evalType="VOL", datsource="datamart", data_dsn=NULL, isseed=FALSE, 
 	ppsanm="pop_plot_stratum_assgn", 
 	savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
@@ -48,9 +48,10 @@ anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states,
   #########################################################################
   if (datsource == "sqlite") {
 
+    if (is.null(data_dsn)) {
+      stop("must include data_dsn")
+    }
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-    tablst <- DBI::dbListTables(dbconn)
-    tablst
 
     ## Get evalid list
     ########################################################
