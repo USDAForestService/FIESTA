@@ -1666,12 +1666,13 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     ##############################################################
     ## If savePOP or more than one evalType
     ##############################################################
-    if (savePOP && !is.null(pltx)) {
+    if ((iseval || savePOP) && !is.null(pltx)) {
       cat("\n",
       "## STATUS: GETTING POP_PLOT_STRATUM_ASSGN DATA(", stabbr, ") ...", "\n")
     
       ppsavars <- toString(c("PLT_CN", "EVALID", "STATECD", "ESTN_UNIT", "STRATUMCD"))
       ppsaqry <- paste("select", ppsavars, "from", ppsafromqry, "where statecd =", stcd)
+
       if (iseval) {
         if (subsetPOP) {
           ppsaqry <- paste(ppsaqry, "and evalid in(", toString(evalid), ")")
@@ -1681,6 +1682,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         }
       }
       ppsax <- sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE)
+
       if(nrow(ppsax) != 0){
         ppsax <- setDT(ppsax)
         ppsax[, PLT_CN := as.character(PLT_CN)]

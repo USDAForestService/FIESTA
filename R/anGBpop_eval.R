@@ -48,15 +48,20 @@ anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states,
   #########################################################################
   if (datsource == "sqlite") {
 
+    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+    tablst <- DBI::dbListTables(dbconn)
+    tablst
+
     ## Get evalid list
     ########################################################
-    evalidlst <- getEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
-		states=states, evalType=evalType)$evalidlist
+    evalidlst <- getEvalid(dbconn=dbconn, states=states, evalid=evalidlst, 
+		evalEndyr=evalEndyrlst, evalType=evalType)$evalidlist
     evalidlst <- transpose(evalidlst)
     names(evalidlst) <- paste0("eval", evalEndyrlst)
 
-    pltdat <- spGetPlots(evalid=evalidlst, istree=istree, isseed=isseed,
-	savedata=savedata, out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
+    pltdat <- spGetPlots(evalid=evalidlst, datsource="sqlite", data_dsn=SQLitefn,
+		istree=istree, isseed=isseed, savedata=savedata, 
+		out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
 
   } else {
 

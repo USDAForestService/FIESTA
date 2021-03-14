@@ -457,6 +457,21 @@ getEvalid <- function(dbconn, SCHEMA.=NULL, RS=NULL, states, evalAll=FALSE,
   ## ARGUMENTS:
   ## chk - Logical. If TRUE, checks if data tables and variables exist
 
+  getlistfromdt <- function(dt, x, xnm="STATECD") {
+     ## DESCRIPTION: generates a list of 1 or more values from a data table
+     dtunique <- dt[, lapply(get(x), unique), by=xnm]
+     xnames <- dtunique[[xnm]]
+     dtlst <- as.list(data.frame(t(dtunique[, -1])))
+
+     if (xnm == "STATECD") {
+       names(dtlst) <- pcheck.states(xnames)
+     } else {
+       names(dtlst) <- xnames
+     }    
+     return(dtlst)
+  }
+
+
   ## set global variables
   Endyr=EVALID=evaltyp=STATECD=evalidlist=invyrtab <- NULL
 
@@ -482,9 +497,10 @@ getEvalid <- function(dbconn, SCHEMA.=NULL, RS=NULL, states, evalAll=FALSE,
   ## If evalid is not NULL, get state
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
-    if (any(nchar(evalid) > 6))
-      stop("invalid evalid")
-    evalid <- unique(unlist(evalid)) 
+    evalid <- unlist(evalid)
+    if (any(lapply(evalid, nchar) > 6)) {
+      stop("invalid evalid... must be 6 or less characters")
+    }
     stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
     states <- FIESTA::pcheck.states(stcdlst, "MEANING")
   } else {
@@ -588,7 +604,6 @@ getEvalid <- function(dbconn, SCHEMA.=NULL, RS=NULL, states, evalAll=FALSE,
 		evalType=evalTypelist))
 
   } else {
-
     ## Check evalAll
     evalAll <- FIESTA::pcheck.logical(evalAll, varnm="evalAll", 
 		title="All evaluations?", first="YES", gui=gui)
@@ -602,7 +617,6 @@ getEvalid <- function(dbconn, SCHEMA.=NULL, RS=NULL, states, evalAll=FALSE,
         evalCur <- FALSE
       }
     }
-
     if (is.null(evalEndyr) && (is.null(evalCur) || !evalCur) && 
 			(is.null(evalAll) || !evalAll)) {
       if (gui) {
@@ -635,27 +649,21 @@ getEvalid <- function(dbconn, SCHEMA.=NULL, RS=NULL, states, evalAll=FALSE,
   }
 
   if (evalAll) {
-    evalunique <- evaldt[, lapply(EVALID, unique), by="STATECD"]
-    stnames <- evalunique$STATECD
-    evalidlist <- as.list(data.frame(t(evalunique[, -1])))
-    names(evalidlist) <- pcheck.states(stnames)
+    evalidlist <- getlistfromdt(evaldt, x="EVALID")
   } else if (evalCur) {
     Endyr.max <- evaldt[, list(Endyr=max(Endyr)), by="STATECD"]
     evaldt <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))
-    evalidlist <- as.list(evaldt$EVALID)
-    names(evalidlist) <- pcheck.states(evaldt$STATECD)
+    evalidlist <- getlistfromdt(evaldt, x="EVALID")
   } else if (!is.null(evalEndyr)) {
     #if (!is.numeric(evalEndyr))  stop("evalEndyr must be numeric yyyy")
-    if (nchar(evalEndyr) != 4) stop("evalEndyr must be numeric yyyy")
+    if (any(sapply(evalEndyr, function(x) nchar(x) != 4))) {
+      stop("evalEndyr must be numeric yyyy")
+    }
     yr <- substr(evalEndyr, 3, 4)
-    Endyr.max <- evaldt[Endyr <= yr, list(Endyr=max(Endyr)), by="STATECD"]
-    evaldt <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))
-    evalidlist <- as.list(evaldt$EVALID)
-    names(evalidlist) <- pcheck.states(evaldt$STATECD)
+    evaldt <- evaldt[Endyr %in% yr, ]
+    evalidlist <- getlistfromdt(evaldt, x="EVALID")
   } 
   
-
-
   if (!dbconnopen) {
     DBI::dbDisconnect(dbconn)
   }
