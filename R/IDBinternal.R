@@ -449,72 +449,217 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 }
 
 
-getEvalid <- function(dbconn, SCHEMA.=NULL, states, evalAll=FALSE, 
-		evalCur=FALSE, evalEndyr=NULL, evalType="01", chk=FALSE,
-		dbconnopen=TRUE, ppsanm="pop_plot_stratum_assgn") {
+getEvalid <- function(dbconn, SCHEMA.=NULL, RS=NULL, states, evalAll=FALSE, 
+	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
+	dbconnopen=TRUE, ppsanm="pop_plot_stratum_assgn", chk=FALSE, gui=FALSE) {
   ## DESCRIPTION: gets evalid in database by state from
   ##			POP_PLOT_STRATUM_ASSGN table
   ## ARGUMENTS:
   ## chk - Logical. If TRUE, checks if data tables and variables exist
 
   ## set global variables
-  Endyr=EVALID=evaltyp=STATECD <- NULL
+  Endyr=EVALID=evaltyp=STATECD=evalidlist=invyrtab <- NULL
 
   ## Check database connection
   if (!DBI::dbIsValid(dbconn)) stop("invalid database connection")
 
   ## Get list of tables in dbconn
   tablst <- DBI::dbListTables(dbconn)
-  
 
-  ## create state filter
-  stcd <- pcheck.states(states, statereturn="VALUE")
-  stfilter <- getfilter("STATECD", stcd, syntax='sql')
+  ## Create lookup for evalType
+  evalCode <- c("00","01","01")
+  names(evalCode) <- c("ALL", "CURR", "VOL")
 
-  if (chk) {
-    ppsanm <- pcheck.varchar(ppsanm, varnm="pop_plot_stratum_assgn",
-			checklst=tablst, stopifnull=TRUE)
+  if (is.null(evalType)) {
+    evalType <- "00"
+  } else if (!all(evalType %in% names(evalCode))) {
+    stop("evalType is invalid... must be: ", toString(names(evalCode)))
   }
 
-  eval.qry <- paste("select distinct STATECD, EVALID 
+  ## Get code for evalType
+  evalTypecd <- unique(evalCode[which(names(evalCode) %in% evalType)])
+
+  ## If evalid is not NULL, get state
+  rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
+  if (!is.null(evalid)) {
+    if (any(nchar(evalid) > 6))
+      stop("invalid evalid")
+    evalid <- unique(unlist(evalid)) 
+    stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
+    states <- FIESTA::pcheck.states(stcdlst, "MEANING")
+  } else {
+    RS <- FIESTA::pcheck.varchar(var2check=RS, varnm="RS", 
+		checklst=rslst, caption="Research Unit?", gui=gui, multiple=TRUE)
+    if (!is.null(RS) && !is.null(states)) {     
+      RSstatelst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS %in% RS,"MEANING"]
+      if (!all(states %in% RSstatelst)) {
+        msg <- paste("RS and states are invalid...", toString(states[!states %in% RSstatelst]))
+        message(msg)
+        states <- toString(states[states %in% RSstatelst])
+        if (is.null(states) || states == "") {
+          stop("")
+        } else {
+          message("getting coordinates for ", states)
+        }
+      }
+    } else {
+      states <- FIESTA::pcheck.states(states, RS=RS)
+      if (is.null(states)) {
+        states <- FIESTA::pcheck.states(states, RS=rslst)
+      }
+    }
+    stcdlst <- FIESTA::pcheck.states(states, "VALUE")
+  }
+  rslst <- unique(FIESTA::ref_statecd[match(states, FIESTA::ref_statecd$MEANING), "RS"])
+  rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
+  rslst <- unique(rslst)
+
+  ## create state filter
+  stfilter <- getfilter("STATECD", stcdlst, syntax='sql')
+
+  ## create evalTypelist
+  evalTypelist <- as.list(rep(evalType, length(states)))
+  names(evalTypelist) <- states
+
+  ## check ppsanm
+  ppsachk <- chkdbtab(tablst, ppsanm)
+  if (is.null(ppsachk) && ppsanm != "ppsa") {
+    ppsachk <- chkdbtab(tablst, "ppsa")
+    if (is.null(ppsachk) && ppsanm != "pop_plot_stratum_assgn") {
+      ppsanm <- chkdbtab(tablst, "pop_plot_stratum_assgn", stopifnull=TRUE)
+    } else {
+      ppsanm <- ppsachk
+    }
+  } else {
+    ppsanm <- ppsachk
+  }
+  ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
+  EVALID <- chkdbtab(ppsaflds, "EVALID", stopifnull=TRUE)
+  ppsavars <- c("STATECD", "EVALID")
+  INVYR <- chkdbtab(ppsaflds, "INVYR")
+  if (!is.null(INVYR)) {
+    ppsavars <- c(ppsavars, "INVYR")
+  }
+  
+  ## check plot
+  plot <- chkdbtab(tablst, "PLOT")
+  if (!"INVYR" %in% ppsavars && !is.null(plot)) {
+    INVYR <- chkdbtab(DBI::dbListFields(dbconn, plot), "INVYR")
+    ppsaid <- chkdbtab(ppsaflds, "PLT_CN", stopifnull=TRUE)
+    if (is.null(ppsaid)) {
+      ppsaid <- chkdbtab(ppsaflds, "CN", stopifnull=TRUE)
+      if (is.null(ppsaid)) stop("invalid plot identifier in ", ppsanm)
+    }
+    stfilter <- sub("STATECD", "ppsa.STATECD", stfilter)
+
+    ppsavars <- toString(paste0("ppsa.", ppsavars))
+    invyr.qry <- paste0("select distinct ", ppsavars, ", p.", INVYR,
+		" from ", ppsanm, " ppsa join ", plot, " p on(p.CN = ppsa.", ppsaid, ")",  
+		" where ", stfilter, " order by ppsa.STATECD, ppsa.EVALID")
+    invyrdt <- tryCatch( setDT(DBI::dbGetQuery(dbconn, invyr.qry)),
+			error=function(e) return(NULL))
+    evaldt <- unique(invyrdt[, EVALID, STATECD])
+    invyrtab <- unique(invyrdt[, INVYR, STATECD])
+
+    invyrs <- as.list(aggregate(invyrtab$INVYR, by=list(invyrtab$STATECD), unique)$x)
+    names(invyrs) <- pcheck.states(unique(invyrtab$STATECD))
+
+  } else {
+    eval.qry <- paste("select distinct STATECD, EVALID 
 			from", ppsanm,  
 			"where", stfilter, "order by STATECD, EVALID")
-  evaldt <- setDT(DBI::dbGetQuery(dbconn, eval.qry))
+    evaldt <- tryCatch( setDT(DBI::dbGetQuery(dbconn, eval.qry)),
+			error=function(e) return(NULL))
+  }
+  if (is.null(evaldt)) {
+    evalidlist <- NULL
+  }
+  if (!is.null(evalid)) {   
+    ## Check if evalid is valid
+    if (!all(evalid %in% unique(evaldt$EVALID))) {
+      notin <- evalid[!evalid %in% evaldt$EVALID]
+      stop("invalid EVALID: ", toString(notin))
+    } 
+    names(evalid) <- sapply(evalid, function(x) substr(x, 1, nchar(x)-4))
+    evalidlist=as.list(aggregate(evalid, by=list(names(evalid)), unique)$x)
+    names(evalidlist) <- pcheck.states(unique(names(evalid)))
 
+    return(list(states=states, rslst=rslst, evalidlist=evalidlist, 
+		evalType=evalTypelist))
+
+  } else {
+
+    ## Check evalAll
+    evalAll <- FIESTA::pcheck.logical(evalAll, varnm="evalAll", 
+		title="All evaluations?", first="YES", gui=gui)
+
+    if (is.null(evalAll) || !evalAll) {
+      ## Check evalCur
+      evalCur <- FIESTA::pcheck.logical(evalCur, varnm="evalCur", 
+		title="Most current evaluation?", first="YES", gui=gui)
+    } else {
+      if (evalAll) {
+        evalCur <- FALSE
+      }
+    }
+
+    if (is.null(evalEndyr) && (is.null(evalCur) || !evalCur) && 
+			(is.null(evalAll) || !evalAll)) {
+      if (gui) {
+        evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
+		  	multiple=FALSE)
+        if (evalresp == "") stop("")
+        evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
+      } else {
+        return(list(states=states, rslst=rslst, evalidlist=NULL, evalType=evalTypelist))
+      }
+    }
+  }
 
   ## add endyr and evaltyp columns to dataframe
   evaldt[, Endyr := substr(EVALID, nchar(EVALID) - 3, nchar(EVALID)-2)]
   evaldt[, evaltyp := substr(EVALID, nchar(EVALID)-1, nchar(EVALID))]
+  if (!all(evalTypecd %in% unique(evaldt$evaltyp))) { 
+    evaldttyp <- sort(unique(evaldt$evaltyp))
+    notype <- evalTypecd[!evalTypecd %in% evaldttyp]
+    if (length(notype) > 0) {
+      stop(notype, " not in database")
+    } else {
+      stop("invalid evalType... must be in following list: ", toString(evaldttyp)) 
+    }
+  }
 
-  if (is.null(evalType)) evalType <- "00"
-  if (!is.null(evalType)) {
-    if (!is.character(evalType)) stop("evalType must be 2 character string")
-    if (!all(sapply(evalType, nchar) == 2)) stop("evalType must be 2 character string")
-    if (!all(evalType %in% unique(evaldt$evaltyp))) 
-      stop("invalid evalType... must be in following list: ", sort(unique(evaldt$evaltyp))) 
-
-    evaldt <- evaldt[evaltyp %in% evalType, ]
+  evaldt <- evaldt[evaltyp %in% evalTypecd, ]
+  if (nrow(evaldt) == 0) {
+    evalidlist <- NULL
   }
 
   if (evalAll) {
-    evalidlst <- sort(unique(evaldt$EVALID))
-  } else {
-    if (!is.null(evalEndyr)) {
-      if (!is.numeric(evalEndyr))  stop("evalEndyr must be numeric yyyy")
-      if (nchar(evalEndyr) != 4) stop("evalEndyr must be numeric yyyy")
-      yr <- substr(evalEndyr, 3, 4)
+    evalunique <- evaldt[, lapply(EVALID, unique), by="STATECD"]
+    stnames <- evalunique$STATECD
+    evalidlist <- as.list(data.frame(t(evalunique[, -1])))
+    names(evalidlist) <- pcheck.states(stnames)
+  } else if (evalCur) {
+    Endyr.max <- evaldt[, list(Endyr=max(Endyr)), by="STATECD"]
+    evaldt <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))
+    evalidlist <- as.list(evaldt$EVALID)
+    names(evalidlist) <- pcheck.states(evaldt$STATECD)
+  } else if (!is.null(evalEndyr)) {
+    #if (!is.numeric(evalEndyr))  stop("evalEndyr must be numeric yyyy")
+    if (nchar(evalEndyr) != 4) stop("evalEndyr must be numeric yyyy")
+    yr <- substr(evalEndyr, 3, 4)
+    Endyr.max <- evaldt[Endyr <= yr, list(Endyr=max(Endyr)), by="STATECD"]
+    evaldt <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))
+    evalidlist <- as.list(evaldt$EVALID)
+    names(evalidlist) <- pcheck.states(evaldt$STATECD)
+  } 
+  
 
-      Endyr.max <- evaldt[Endyr <= yr, max(Endyr), by="STATECD"]
-    } else {
-      Endyr.max <- evaldt[, max(Endyr), by="STATECD"]
-    }
-    setnames(Endyr.max, "V1", "Endyr")
-    evalidlst <- merge(evaldt, Endyr.max, by=c("STATECD", "Endyr"))$EVALID
-  }
-  if (!dbconnopen) 
+
+  if (!dbconnopen) {
     DBI::dbDisconnect(dbconn)
-
-  return(evalidlst)
+  }
+  return(list(states=states, rslst=rslst, evalidlist=evalidlist, evalType=evalTypelist))
 }
 
 
@@ -543,22 +688,42 @@ getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE,
   evaldt <- setDT(sqldf::sqldf(eval.qry))
 
 
+  ## Create lookup for evalType
+  evalCode <- c("00","01","01")
+  names(evalCode) <- c("ALL", "CURR", "VOL")
+
+  if (is.null(evalType)) {
+    evalType <- "00"
+  } else if (!all(evalType %in% names(evalCode))) {
+    stop("evalType is invalid... must be: ", toString(names(evalCode)))
+  }
+
+  ## Get code for evalType
+  evalTypecd <- unique(evalCode[which(names(evalCode) %in% evalType)])
+
+
   ## add endyr and evaltyp columns to dataframe
   evaldt[, Endyr := substr(EVALID, nchar(EVALID) - 3, nchar(EVALID)-2)]
   evaldt[, evaltyp := substr(EVALID, nchar(EVALID)-1, nchar(EVALID))]
 
-  if (is.null(evalType)) evalType <- "00"
-  if (!is.null(evalType)) {
-    if (!is.character(evalType)) stop("evalType must be 2 character string")
-    if (!all(sapply(evalType, nchar) == 2)) stop("evalType must be 2 character string")
-    if (!all(evalType %in% unique(evaldt$evaltyp))) 
-      stop("invalid evalType... must be in following list: ", sort(unique(evaldt$evaltyp))) 
-
-    evaldt <- evaldt[evaltyp %in% evalType, ]
+  ## add endyr and evaltyp columns to dataframe
+  evaldt[, Endyr := substr(EVALID, nchar(EVALID) - 3, nchar(EVALID)-2)]
+  evaldt[, evaltyp := substr(EVALID, nchar(EVALID)-1, nchar(EVALID))]
+  if (!all(evalTypecd %in% unique(evaldt$evaltyp))) { 
+    evaldttyp <- sort(unique(evaldt$evaltyp))
+    notype <- evalTypecd[!evalTypecd %in% evaldttyp]
+    if (length(notype) > 0) {
+      stop(notype, " not in database")
+    } else {
+      stop("invalid evalType... must be in following list: ", toString(evaldttyp)) 
+    }
   }
+  evaldt <- evaldt[evaltyp %in% evalTypecd, ]
 
   if (evalAll) {
-    evalidlst <- sort(unique(evaldt$EVALID))
+    evalidlist <- sort(unique(evaldt$EVALID))
+  } else if (evalCur) {
+
   } else {
     if (!is.null(evalEndyr)) {
       if (!is.numeric(evalEndyr))  stop("evalEndyr must be numeric yyyy")
@@ -570,9 +735,9 @@ getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE,
       setorder(evaldt, -INVYR, -Endyr)
       Endyr.max <- evaldt[1,]
     }
-    evalidlst <- Endyr.max[["EVALID"]]
+    evalidlist <- Endyr.max[["EVALID"]]
   }
-  return(evalidlst)
+  return(evalidlist)
 }
 
 

@@ -41,8 +41,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 	SEEDCNT6=TREECOUNT_CALC=SEEDSUBP=LIVE_CANOPY_CVR_PCT=CONDPROP_UNADJ=
 	PLOT_NONSAMPLE_REASN_CD=PLOT_STATUS_CD=BA=DIA=CRCOVPCT_RMRS=TIMBERCD=
 	SITECLCD=RESERVCD=JENKINS_TOTAL_B1=JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=
-	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=
-	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=INVYR=SEEDSUBP6 <- NULL
+	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=INVYR=
+	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=invyrs=SEEDSUBP6 <- NULL
 
 
   ## SET OPTIONS
@@ -173,10 +173,15 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     evalType <- c(evalType, "CHNG")
   }
 
-  ## Get states, Evalid and/or invyrs info
-  evalInfo <- DBgetEvalid(states=states, RS=RS, invtype=invtype, 
-	evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, evalAll=evalAll, 
-	evalType=evalType, gui=gui)
+  if (datsource == "sqlite") {
+    evalInfo <- getEvalid(dbconn=dbconn, states=states, evalAll=evalAll,
+		evalCur=evalCur, evalEndyr=evalEndyr, evalType=evalType)
+  } else {
+    ## Get states, Evalid and/or invyrs info
+    evalInfo <- DBgetEvalid(states=states, RS=RS, invtype=invtype, 
+		evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, 
+		evalAll=evalAll, evalType=evalType, gui=gui)
+  }
   if (is.null(evalInfo)) return(NULL)
   states <- evalInfo$states
   rslst <- evalInfo$rslst
@@ -202,8 +207,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   nbrstates <- length(states)  ##  Check whether to return tree data
 
   ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
-  if (!iseval) {   
-
+  if (!iseval) {  
     ### Check measCur
     ###########################################################
     measCur <- FIESTA::pcheck.logical(measCur, varnm="measCur", 
@@ -213,12 +217,14 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     ###########################################################
     measEndyr.filter <- NULL
     if (!is.null(measEndyr)) {
-      minyr <- min(invyrtab$INVYR)
-      if (!is.numeric(measEndyr) || measEndyr < minyr)
-        stop("measEndyr must be yyyy format and greater than minimum inventory year: ", 
-		minyr)
-      measCur <- TRUE
-      measEndyr.filter <- paste0(" and MEASYEAR < ", measEndyr)
+      if (!is.null(invyrtab)) {
+        minyr <- min(invyrtab$INVYR)
+        if (!is.numeric(measEndyr) || measEndyr < minyr)
+          stop("measEndyr must be yyyy format and greater than minimum inventory year: ", 
+			minyr)
+        measCur <- TRUE
+        measEndyr.filter <- paste0(" and MEASYEAR < ", measEndyr)
+      }
     }
     if (measCur) {
       xymeasCur <- TRUE
@@ -241,6 +247,9 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     ###########################################################
     if (!measCur) {
       if ((is.null(invyrs) || length(invyrs) == 0)) {
+        if (is.null(invyrtab)) {
+          stop("must include INVYR in plot")
+        } 
         invyrs <- sapply(states, function(x) NULL)
         for (state in states) { 
           stabbr <- FIESTA::pcheck.states(state, "ABBR")
@@ -477,7 +486,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         ppsa_layer <- chkdbtab(dbtablst, "ppsa", stopifnull=TRUE)
       }
     }
-    ppsafromqry <- paste0(SCHEMA., ppsa_layer)
+    ppsafromqry <- paste0(SCHEMA., ppsa_layer, " ppsa")
   }
 
   ## PLOT from/join query
@@ -486,9 +495,12 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     pfromqry <- paste0(ppsafromqry, " JOIN ", SCHEMA., 
 			plot_layer, " p ON (p.CN = ppsa.PLT_CN)")
   } else if (measCur) {
+    popSURVEY <- TRUE
     survey_layer <- "SURVEY"
-    survey_layer <- chkdbtab(dbtablst, "SURVEY")
-    popSURVEY <- ifelse(is.null(survey_layer), FALSE, TRUE)
+    if (datsource == "sqlite") {
+      survey_layer <- chkdbtab(dbtablst, "SURVEY")
+      popSURVEY <- ifelse(is.null(survey_layer), FALSE, TRUE)
+    }
     pfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA., allyrs=allyrs,
 			subcycle99=subcycle99, intensity1=intensity1, popSURVEY=popSURVEY,
 			plotnm=plot_layer, surveynm=survey_layer)
@@ -513,12 +525,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 				plotgeom_layer, " pg ON (pg.CN = p.CN)")
   }
 
-  ## xymeasCur
-  ################################################
-  if (xymeasCur) {
-    xyfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA.,
-		subcycle99=subcycle99, intensity1=intensity1, plotnm=plot_layer)
-  }  
   ## TREE query
   ################################################
   if (istree || !is.null(alltFilter)) {
@@ -705,7 +711,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     REF_SPECIES <- FIESTA::DBgetCSV("REF_SPECIES", returnDT=TRUE, stopifnull=FALSE)
   }
 
-
   ###################################################################################
   ## Loop through states
   ###################################################################################
@@ -874,7 +879,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         } else {
           filterALIAS <- "c"
         }
-        filterfromqry <- fromqry
+        filterfromqry <- pfromqry
             
         filtervars <- c(filtervars, filtervar)
         filterlst <- filterlst[filterlst != filtervar]
@@ -1326,14 +1331,14 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       xyx <- copy(pltx)
       setnames(xyx, "CN", "PLT_CN")
 
- 
       ## Get xy for the most current sampled plot
       if (xymeasCur) {
+        xyfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA.,
+		subcycle99=subcycle99, intensity1=intensity1, plotnm="pltx")
+
         xvars <- c("p.CN", "p.STATECD", "p.UNITCD", "p.COUNTYCD", "p.PLOT", 
 		"p.PLOT_ID", paste0("p.", getcoords(coords)))
         xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
-        xyx.qry <- gsub("from plot", "from pltx ", xyx.qry)
-
         xyCurx <- sqldf::sqldf(xyx.qry)
         names(xyCurx)[names(xyCurx) == "CN"] <- "PLT_CN"
         assign(paste0("xyCurx_", coords), xyCurx) 
@@ -1596,16 +1601,19 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         if (grepl("POP", othertable)) {
           xfromqry <- paste0(SCHEMA., othertable, " x")
           if (!iseval) {
-            xfilter <- stFilter
+            xfilterpop <- stFilter
+            xfilterpop <- sub("p.", "x.", xfilterpop)
           } else {
-            xfilter <- paste0("x.EVALID IN(", toString(evalid), ")")
+            xfilterpop <- paste0("x.EVALID IN(", toString(evalid), ")")
           }
+          xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
+			"where", xfilterpop)
+
         } else {
           joinid <- "PLT_CN"
-        }
-        xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
+          xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
 			"where", xfilter)
-
+        }
         if (datsource == "sqlite") {
           tab <- tryCatch( DBI::dbGetQuery(dbconn, xqry),
 			error=function(e) return(NULL))
@@ -1624,6 +1632,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			error=function(e) return(NULL))
           }
         }
+ 
         if (!grepl("POP", othertable)) {
           ## Subset overall filters from condx
           if ("CONDID" %in% names(tab)) {
@@ -2051,7 +2060,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
  
   if (length(evalidlist) > 0) fiadatlst$evalid <- evalidlist
   fiadatlst$pltcnt <- pltcnt
-
 
   if (!is.null(evalidlist)) {
     evaliddf <- data.frame(do.call(rbind, evalidlist))

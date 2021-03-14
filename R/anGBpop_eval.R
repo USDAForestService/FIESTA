@@ -1,5 +1,6 @@
 anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states, 
-	evalType="VOL", data_dsn=NULL, isseed=FALSE, ppsanm="pop_plot_stratum_assgn", 
+	evalType="VOL", datsource="sqlite", data_dsn=NULL, isseed=FALSE, 
+	ppsanm="pop_plot_stratum_assgn", 
 	savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
   ## DESCRIPTION: estimates for each evalid in list
@@ -42,44 +43,30 @@ anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states,
 #  names(evalidlst) <- paste0("eval", evalEndyrlst)
 
 
-  ## Get evalid list
-  ########################################################
-  evalidlst <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
-		states=states, RS=NULL, evalType=evalType)$evalidlist
-  evalidlst <- transpose(evalidlst)
-  names(evalidlst) <- paste0("eval", evalEndyrlst)
- 
 
   ## Get data from FIA Datamart and store in temporary directory
   #########################################################################
-  if (!is.null(data_dsn)) {
-    if (!is.null(outfolder)) {
-      data_dsn <- file.path(outfolder, data_dsn)
-    }
-    plt <- "plot"
-    cond <- "cond"
-    pltassgn <- ppsanm
-    dblayers <- c("plot", "cond", ppsanm)
+  if (datsource == "sqlite") {
 
-    if (istree) {
-      tree <- "tree"
-      dblayers <- c(dblayers, "tree")
-    }
-    if (isseed) {
-      seed <- "seed"
-      dblayers <- c(dblayers, "seed")
-    }
+    ## Get evalid list
+    ########################################################
+    evalidlst <- getEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
+		states=states, evalType=evalType)$evalidlist
+    evalidlst <- transpose(evalidlst)
+    names(evalidlst) <- paste0("eval", evalEndyrlst)
 
-    ## Check table in database
-    dtabs <- DBI::dbListTables(DBI::dbConnect(RSQLite::SQLite(), data_dsn))
-    message("data tables: ", toString(dtabs))
-    dtablst <- c("plot", "cond")
-    if (!all(dtablst %in% dtabs)) {
-      dtab.miss <- dtablst[!dtablst %in% dtabs]
-      message("missing tables in database: ", toString(dtab.miss))
-    }
+    pltdat <- spGetPlots(evalid=evalidlst, istree=istree, isseed=isseed,
+	savedata=savedata, out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
 
   } else {
+
+    ## Get evalid list
+    ########################################################
+    evalidlst <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
+		states=states, RS=NULL, evalType=evalType)$evalidlist
+    evalidlst <- transpose(evalidlst)
+    names(evalidlst) <- paste0("eval", evalEndyrlst)
+
     if (any(evalType %in% c("VOL", "CHNG"))) {
       istree <- TRUE
     }

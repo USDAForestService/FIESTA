@@ -8,7 +8,8 @@
 }
 \usage{
 anGBpop_eval(evalidlst=NULL, evalEndyrlst=NULL, states, evalType = "VOL", 
-	data_dsn = NULL, isseed = FALSE, ppsanm = "pop_plot_stratum_assgn", 
+	datsource = "datamart", data_dsn = NULL, isseed = FALSE, 
+	ppsanm = "pop_plot_stratum_assgn", 
 	savedata = FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn = FALSE, 
 	overwrite_layer = TRUE)
@@ -26,6 +27,7 @@ anGBpop_eval(evalidlst=NULL, evalEndyrlst=NULL, states, evalType = "VOL",
 	mortality, and change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)). 
 	Multiple types are accepted. See details below and FIA database manual 
 	for regional availability and/or differences. }
+  \item{datsource}{ String. Source of data ('datamart', 'sqlite'). }
   \item{data_dsn}{ String. Name of database with FIA plot data. The database
 	must include the following tables: plot, cond, tree (if esttype='TREE'), 
 	and ppsa (POP_PLOT_STRATUM_ASSGN). If NULL, data are extracted from 
