@@ -28,7 +28,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=xypltx=tabs2save=evalidst=PLOT_ID=INVYR <- NULL
+  xydat=stateFilter=statecnty=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=othertabnms <- NULL
   cuniqueid=tuniqueid <- "PLT_CN"
   returnlst <- list()
   #clipdat <- list()
@@ -222,7 +222,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       ## other data
       if (!is.null(other_layers)) {
         for (layer in other_layers) {
-          assign(paste0(layer, "x"), get(layer)[get(layer)[["PLT_CN"]] %in% clipids, ])
+          if (!grepl("POP", layer, ignore.case=TRUE)) {
+            assign(paste0(layer, "x"), get(layer)[get(layer)[["PLT_CN"]] %in% clipids, ])
+          }
         }
       }
     }
@@ -373,8 +375,10 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed1 <- seed[seed[["PLT_CN"]] %in% pltids1, ]
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
-                assign(paste0(layer, "2"), 
+                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                  assign(paste0(layer, "2"), 
 				get(layer)[get(layer)[["PLT_CN"]] %in% pltids1, ])
+                }
               }
             }
 
@@ -411,8 +415,10 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed2 <- seed[seed[["PLT_CN"]] %in% pltids2, ]
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
-                assign(paste0(layer, "2"), 
+                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                  assign(paste0(layer, "2"), 
 				get(layer)[get(layer)[["PLT_CN"]] %in% pltids2, ])
+                }
               }
             }
 
@@ -425,7 +431,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
+                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                  assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
+                }
               }
             }
             if (savexy || showsteps)
@@ -449,8 +457,10 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed <- seed[seed[["PLT_CN"]] %in% pltids, ]
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
-                assign(layer, 
+                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                  assign(layer, 
 				get(layer)[get(layer)[["PLT_CN"]] %in% pltids, ])
+                }
               }
             }
           }  ## if measEndyr.filter is not NULL
@@ -464,7 +474,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
-              assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
+              if (!grepl("POP", layer, ignore.case=TRUE)) {
+                assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
+              }
             }
           }
 
@@ -717,6 +729,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             clipxy <- TRUE
           }
         }
+ 
         ## Generate xy table for all plots in state (xystate)
         #########################################################
         if (xyindb) { 
@@ -793,9 +806,17 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
-                other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
+                if (grepl("POP", layer, ignore.case=TRUE)) {
+                  if (!is.null(evalidst)) {
+                    other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
+                  } else {
+                    other.qry <- paste0("select * from ", layer, " p where ", stfilter)
+                  }
+                } else {
+                  ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+                  other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
 				" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
+                }
                 rs <- DBI::dbSendQuery(dbconn, other.qry)
                 assign(paste0(layer, "1"), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
@@ -884,9 +905,17 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
-                other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
+                if (grepl("POP", layer, ignore.case=TRUE)) {
+                  if (!is.null(evalidst)) {
+                    other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
+                  } else {
+                    other.qry <- paste0("select * from ", layer, " p where ", stfilter)
+                  }
+                } else {
+                  ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+                  other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
 				" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
+                }
                 rs <- DBI::dbSendQuery(dbconn, other.qry)
                 assign(paste0(layer, "2"), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
@@ -903,7 +932,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
+                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                  assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
+                }
               }
             }
             if (savexy || showsteps) {
@@ -945,9 +976,17 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
-                other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
+                if (grepl("POP", layer, ignore.case=TRUE)) {
+                  if (!is.null(evalidst)) {
+                    other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
+                  } else {
+                    other.qry <- paste0("select * from ", layer, " p where ", stfilter)
+                  }
+                } else {
+                  ofromqry <- paste(p2fromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+                  other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+                }
                 rs <- DBI::dbSendQuery(dbconn, other.qry)
                 assign(paste0(layer), DBI::dbFetch(rs))
                 othertabnms <- c(othertabnms, layer)
@@ -968,7 +1007,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
-              assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
+              if (!grepl("POP", layer, ignore.case=TRUE)) {
+                assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
+              }
             }
           }
           if (savexy || showsteps) {
@@ -976,14 +1017,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           }
 
         } else {      ## clipxy = FALSE
-
           if ((savexy || showsteps) && !is.null(xystate)) {
-            xypltx <- xystate
+            xypltx <- rbind(xypltx, xystate)
           }
 
           ## Query database for plots
           rs <- DBI::dbSendQuery(dbconn, plt.qry)
-          plt <- DBI::dbFetch(rs)
+          plt <- setDT(DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
 
           ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
@@ -1000,6 +1040,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           pltx <- rbind(pltx, plt)
           rm(plt)
           gc()
+
           cond.qry <- paste0("select cond.* from ", pfromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
@@ -1027,9 +1068,17 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
-              ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
-              other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
-			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+              if (grepl("POP", layer, ignore.case=TRUE)) {
+                if (!is.null(evalidst)) {
+                  other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
+                } else {
+                  other.qry <- paste0("select * from ", layer, " p where ", stfilter)
+                }
+              } else {
+                ofromqry <- paste(pfromqry, "JOIN", layer, "o on(o.PLT_CN=p.CN)")
+                other.qry <- paste("select o.* from", ofromqry, "where", stfilter,
+				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+              }
               rs <- DBI::dbSendQuery(dbconn, other.qry)
               assign(paste0(layer, "x"), rbind(paste0(layer, "x"), DBI::dbFetch(rs)))
               othertabnms <- c(othertabnms, layer)
@@ -1072,14 +1121,21 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     par(mar=mar)
   }
 
-  returnlst$clip_tabs <- lapply(tabs2save, get, envir=environment())
-#  returnlst$clip_tabs <- lapply(tabs2save, get)
+  if (clipxy) {
+    returnlst$clip_tabs <- lapply(tabs2save, get, envir=environment())
+    names(returnlst$clip_tabs) <- paste0("clip_", tabs2save)
+  } else {
+    returnlst$tabs <- lapply(tabs2save, get, envir=environment())
+    names(returnlst$tabs) <- tabs2save
+  } 
 
-  names(returnlst$clip_tabs) <- paste0("clip_", tabs2save)
-
-  if (savexy) 
-    returnlst$clip_xyplt <- xypltx
-  
+  if (savexy) {
+    if (clipxy) {
+      returnlst$clip_xyplt <- xypltx
+    } else { 
+      returnlst$xyplt <- xypltx
+    }
+  }
   returnlst$clip_polyv <- bndx
   returnlst$puniqueid <- puniqueid
   returnlst$xy.uniqueid <- xy.joinid

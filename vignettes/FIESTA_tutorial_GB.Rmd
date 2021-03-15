@@ -543,7 +543,7 @@ GBpopdat$stratalut      # Strata information and adjustment factors
 ```
 ######################################################################################
 # Usage:
-# modGBarea(landarea = "FOREST", pfilter = NULL, cfilter = NULL,    
+# modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL,    
 #   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,    
 #   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,   
 #   rowlut = NULL, collut = NULL, rowgrp = NULL, rowgrpnm = NULL, rowgrpord = NULL, 
@@ -552,7 +552,7 @@ GBpopdat$stratalut      # Strata information and adjustment factors
 #   rawonly = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE,  
 #   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
 #   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
-#   title.unitvar = NULL, title.filter = NULL, GBpopdat=NULL, gui = FALSE, ...)
+#   title.unitvar = NULL, title.filter = NULL, gui = FALSE, ...)
 # 
 # Description:
 # Generates acre estimates by domain (and estimation unit). Calculations are based on 
@@ -725,8 +725,8 @@ names(area5b.raw)
 ```
 ######################################################################################
 # Usage:
-# modGBtree(estseed = "none", landarea="FOREST", pfilter = NULL, cfilter = NULL, 
-#   estvar = NULL, estvar.filter = NULL, rowvar = NULL, colvar = NULL,  
+# modGBtree(GBpopdat = NULL, estseed = "none", landarea="FOREST", pfilter = NULL,  
+#   cfilter = NULL, estvar = NULL, estvar.filter = NULL, rowvar = NULL, colvar = NULL,  
 #   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,     
 #   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL,   
 #   rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE,    
@@ -735,7 +735,7 @@ names(area5b.raw)
 #   outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
 #   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL,  
 #   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.estvar = NULL, title.filter = NULL, GBpopdat = NULL, gui = FALSE, ...)
+#   title.estvar = NULL, title.filter = NULL, gui = FALSE, ...)
 # 
 # Description:
 #	Generates tree estimates by domain and/or tree domain (and estimation unit). 
@@ -1002,7 +1002,7 @@ tree11b$est
 ```
 ####################################################################################
 # Usage:
-# modGBratio(estseed = "none", ratiotype = "PERACRE", landarea="FOREST",  
+# modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE", landarea="FOREST",  
 #   pfilter = NULL, cfilter = NULL, estvarn = NULL, estvarn.filter = NULL, 
 #   estvard = NULL, estvard.filter = NULL, rowvar = NULL, colvar = NULL,  
 #   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,   
@@ -1013,8 +1013,7 @@ tree11b$est
 #   outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
 #   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
 #   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, 
-#   GBpopdat = NULL, gui = FALSE, ...)
+#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE, ...)
 # 
 # Description:
 #	Generates per-acre and per-tree estimates by domain and/or tree domain (and 

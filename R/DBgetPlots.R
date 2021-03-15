@@ -804,10 +804,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         POP_PLOT_STRATUM_ASSGN <- FIESTA::DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
 		returnDT=TRUE, stopifnull=FALSE) 
       }   
-      ## TREE table
-      if (istree || !is.null(alltFilter)) {
-        TREE <- FIESTA::DBgetCSV("TREE", stabbr, returnDT=TRUE, stopifnull=FALSE)
-      }
       ## Seedling table
       if (isseed) {
         SEEDLING <- FIESTA::DBgetCSV("SEEDLING", stabbr, returnDT=TRUE, 
@@ -1209,6 +1205,11 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     ## Tree data
     ##############################################################
     if ((istree || !is.null(alltFilter)) && !is.null(pltx)) {
+      ## TREE table
+      if (istree || !is.null(alltFilter)) {
+        TREE <- FIESTA::DBgetCSV("TREE", stabbr, returnDT=TRUE, stopifnull=FALSE)
+      }
+
       message("\n",
       	"## STATUS: Getting tree data from TREE (", stabbr, ") ...", "\n")
       if (is.null(treevarlst) & is.null(tsumvarlst)) {
@@ -1296,6 +1297,18 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
             if (treeReturn && returndata) {
               tree <- rbind(tree, treex)
             }
+
+            if ((savedata || !treeReturn) && !is.null(treex)) { 
+              index.unique.treex <- NULL
+              if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
+              datExportData(treex, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.treex, append_layer=append_layer,
+			outfn.pre=outfn.pre)
+            }
+            rm(treex)
+            gc()
           }
           rm(TREE)
           gc()
@@ -1598,7 +1611,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         cat("\n",
         "## STATUS: GETTING", othertable, "(", stabbr, ") ...", "\n")
     
-        if (grepl("POP", othertable)) {
+        if (grepl("POP", othertable, ignore.case=TRUE)) {
           xfromqry <- paste0(SCHEMA., othertable, " x")
           if (!iseval) {
             xfilterpop <- stFilter
@@ -1633,7 +1646,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
           }
         }
  
-        if (!grepl("POP", othertable)) {
+        if (!grepl("POP", othertable, ignore.case=TRUE)) {
           ## Subset overall filters from condx
           if ("CONDID" %in% names(tab)) {
             tab <- tab[paste(tab$PLT_CN, tab$CONDID) %in% pcondID,]
@@ -1804,15 +1817,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			index.unique=index.unique.sccmx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       } 
-      if ((savedata || !treeReturn) && !is.null(treex)) { 
-        index.unique.treex <- NULL
-        if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
-        datExportData(treex, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.treex, append_layer=append_layer,
-			outfn.pre=outfn.pre)
-      }
       if (savedata && !is.null(seedx)) {
         index.unique.seedx <- NULL
         if (!append_layer) index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")

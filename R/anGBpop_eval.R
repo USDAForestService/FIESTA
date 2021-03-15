@@ -1,4 +1,4 @@
-anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states, 
+anGBpop_eval <- function(evalidlst=NULL, evalCur=FALSE, evalEndyrlst=NULL, states, 
 	evalType="VOL", datsource="datamart", data_dsn=NULL, isseed=FALSE, 
 	ppsanm="pop_plot_stratum_assgn", 
 	savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
@@ -52,17 +52,28 @@ anGBpop_eval <- function(evalidlst=NULL, evalEndyrlst=NULL, states,
       stop("must include data_dsn")
     }
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+    tablst <- DBI::dbListTables(dbconn)
+    pop_stratum <- chkdbtab(tablst, "pop_stratum")
+    pop_estn_unit <- chkdbtab(tablst, "pop_estn_unit")
+
 
     ## Get evalid list
     ########################################################
-    evalidlst <- getEvalid(dbconn=dbconn, states=states, evalid=evalidlst, 
-		evalEndyr=evalEndyrlst, evalType=evalType)$evalidlist
+    evalidlst <- getEvalid(dbconn=dbconn, RS=RS, states=states, evalid=evalidlst, 
+		evalCur=evalCur, evalEndyr=evalEndyrlst, evalType=evalType)$evalidlist
     evalidlst <- transpose(evalidlst)
     names(evalidlst) <- paste0("eval", evalEndyrlst)
 
-    pltdat <- spGetPlots(evalid=evalidlst, datsource="sqlite", data_dsn=SQLitefn,
+    if (!is.null(pop_stratum) && !is.null(pop_estn_unit)) {
+      pltdat <- spGetPlots(evalid=evalidlst, datsource="sqlite", data_dsn=data_dsn,
+		istree=istree, isseed=isseed, savedata=savedata, 
+		other_layers=c(pop_stratum, pop_estn_unit), 
+		out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
+    } else {
+      pltdat <- spGetPlots(evalid=evalidlst, datsource="sqlite", data_dsn=data_dsn,
 		istree=istree, isseed=isseed, savedata=savedata, 
 		out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
+    }
 
   } else {
 
