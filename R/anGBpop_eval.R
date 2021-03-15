@@ -9,7 +9,7 @@ anGBpop_eval <- function(evalidlst=NULL, evalCur=FALSE, evalEndyrlst=NULL, state
   tree=seed <- NULL
   gui <- FALSE
   istree=FALSE
-
+  RS=NULL
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
