@@ -19,12 +19,13 @@ For ease of installing and updating FIESTA, generate a token from GitHub setting
 Note: FIESTA is frequently updated. You will use this token each time you update 
 FIESTA (until public release).
 
-1. In the upper-right corner of any page, click your profile photo, then click Settings.
+1. In the upper-right corner of any page, click your profile photo, then click Settings in dropdown menu.
 2. In the left sidebar, click Developer settings.
-3. Click Generate new token.
-4. Give your token a descriptive name.
-5. Check all boxes
-6. Save token...  (~30 character string).
+3. Go to Personal access tokens.
+4. Click Generate new token.
+5. Give your token a descriptive name.
+6. Check all boxes
+7. Save token...  (~30 character string).
 
 
 <b>Install FIESTA suggested packages<b>
