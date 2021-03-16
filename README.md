@@ -9,12 +9,12 @@ The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research e
 
 <b>Installation:<b>
 
-<b>Install Rtools<b>
+<b>1. Install Rtools<b>
 If Windows OS, in order to install source code from GitHub, you must install Rtools from 
 the CRAN website (https://cran.r-project.org/). Install the most current Rtools for Windows 64-bit.
 
 
-<b>Create token for GitHub<b>
+<b>2. Create token for GitHub<b>
 For ease of installing and updating FIESTA, generate a token from GitHub settings.
 Note: FIESTA is frequently updated. You will use this token each time you update 
 FIESTA (until public release).
@@ -28,7 +28,7 @@ FIESTA (until public release).
 7. Save token...  (~30 character string).
 
 
-<b>Install FIESTA suggested packages<b>
+<b>3. Install FIESTA suggested packages<b>
 - Checks to make sure all FIESTA dependent packages are installed
 - Removes old version of FIESTA from current R library
 - pkginstalled <- installed.packages()
