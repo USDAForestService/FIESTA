@@ -25,7 +25,7 @@ FIESTA (until public release).
 4. Click Generate new token.
 5. Give your token a descriptive name.
 6. Check all boxes
-7. Save token...  (~30 character string).
+7. Save token (~30 character string) to a file and as an R object.
 
 
 <b>3. Install FIESTA suggested packages<b>
@@ -114,7 +114,7 @@ Next install FIESTA from GitHub, using the token you saved as an R object.
 ```
 Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 devtools::install_github("https://github.com/USDAForestService/FIESTA", 
-		auth_token = token,
+		auth_token = your_token,
 		build_vignettes = TRUE,
  		INSTALL_opts = c("--compile-both"),
 		dependencies=c("Depends", "Imports"))
