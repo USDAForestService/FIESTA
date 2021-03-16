@@ -11,7 +11,7 @@ The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research e
 
 <b>1. Install Rtools<b>
 If Windows OS, in order to install source code from GitHub, you must install Rtools from 
-the CRAN website (https://cran.r-project.org/). Install the most current Rtools for Windows 64-bit.
+the CRAN website (https://cran.r-project.org/). Go to Download R for Windows and Install the most current Rtools for Windows 64-bit.
 
 
 <b>2. Create token for GitHub<b>
