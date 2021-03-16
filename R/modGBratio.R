@@ -212,6 +212,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
 		esttotn=TRUE, esttotd=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
   tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid))
+
   if (!is.null(tdomvar)) {
     cdomdat <- merge(condx, condf, by=c(cuniqueid, condid))
   }
@@ -228,7 +229,6 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
     estvard.name <- estvar.area
     tdomvarlstd <- NULL
   }
-
 
   #####################################################################################
   ### Get titles for output tables
@@ -297,6 +297,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
     unit.totest <- unit.totest[unitarea, nomatch=0]
     unit.totest <- FIESTA::getarea(unit.totest, areavar=areavar, esttype=esttype)
   }
+
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     if (!is.null(tdomvar)) {
@@ -328,12 +329,13 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
     }
+
     #tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
     unit.rowest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
 		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
 		domain=rowvar)
-
+ 
     if (colvar != "NONE") {
       if (!is.null(tdomvar)) {
         if (!is.null(tdomvar2)) {
@@ -374,14 +376,15 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
         if (!is.null(tdomvar2)) {
           tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 			by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
+          #ddomvarnm <- paste(tdomvar, tdomvar2, sep="#")
         } else {
           ddomvar <- grpvar[grpvar != tdomvar]
           tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 			by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlstn]
           tdomdatsum <- transpose2row(tdomdatsum, uniqueid=c(strunitvars, cuniqueid, ddomvar),
  			tvars=tdomvarlstn)
-          ddomvarnm <- ifelse(is.null(tdomvar), ddomvar, paste(tdomvar, tdomvar2, sep="#"))
-          setnames(tdomdatsum, c("variable", "value"), c(ddomvarnm, estvarn.name))
+          #ddomvarnm <- ddomvar
+          setnames(tdomdatsum, c("variable", "value"), c(tdomvar, estvarn.name))      
 
           if (any(grpvar %in% names(cdomdat))) {
             mergevar <- grpvar[grpvar %in% names(cdomdat)]
@@ -398,9 +401,9 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 	 	by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
       }
-      if (!is.null(tdomvar2)) {
-        tdomdatsum[, (grpvar) := tstrsplit(get(ddomvarnm), "#")]
-      }
+      #if (!is.null(tdomvar2)) {
+      #  tdomdatsum[, (grpvar) := tstrsplit(get(ddomvarnm), "#")]
+      #}
       unit.grpest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
 		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 

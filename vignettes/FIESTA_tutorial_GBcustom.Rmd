@@ -70,7 +70,6 @@ WYbighorn_dem_250m.img   | Erdas Imagine raster of elevation change, in meters**
 
 FUNCTION  | DESCRIPTION
 -------------- | ---------------------------------------------------------------
-[spGetEstUnit()](#spGetEstUnit) | Estimation unit information for customized estimates.
 [spGetStrata()](#spGetStrata) | Strata/estimation unit information for customized estimates.
 [modGBpop()](#modGBpop)| Compile population data for GB estimation.
 [modGBarea()](#modGBarea)| Green-book estimates of area using customized strata/estimation unit.
@@ -108,9 +107,6 @@ fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif",
 demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
 
 
-WYdata <- system.file("extdata", "WYdat_eval2013.sqlite", package="FIESTA")
-
-
 ```
 
 
@@ -124,68 +120,6 @@ There are several reference tables stored in FIESTA, including table variable de
 * Code definitions - ref_codes
 
 
-
-<a name="custom.estunit"></a>
-
-#### <a name="spGetEstUnit"/>spGetEstUnit()
-```
-######################################################################################
-# Usage:
-# spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
-#   	unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, areavar= NULL, 
-#     areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, showext = TRUE, 
-#     savedata = FALSE, exportsp = FALSE, exportNA = FALSE, outfolder = NULL, 
-#     out_fmt = "shp", out_dsn = NULL, out_layer = "unit_assgn", outfn.date = TRUE,
-#     outfn.pre = NULL, overwrite = FALSE, ...) 
-# 
-# Description:
-# Extract estimation unit values to plots and calculate area by estimation unit.
-######################################################################################
-
-## Create spatial points from WYplt
-WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
-        yvar="LAT_PUBLIC", xy.crs=4269)
-xyplt=WYspplt
-
-
-## By Bighorn National Forest ##
-# Get estimation unit acres for Bighorn National Forest.
-######################################################################################
-unitdat.bh <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
-    xy.crs=4269, unit_layer=WYbhfn)
-
-names(unitdat.bh)
-sppltunit.bh <- unitdat.bh$sppltassgn
-unitarea.bh <- unitdat.bh$unitarea
-unitvar.bh <- unitdat.bh$unitvar
-areavar.bh <- unitdat.bh$areavar
-
-unitarea.bh
-unitvar.bh
-areavar.bh
-
-
-## By Bighorn National Forest District ##
-# Get estimation unit acres and strata information for Bighorn National Forest.
-######################################################################################
-unitdat.bhdist <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
-    xy.crs=4269, unit_layer=WYbhdistfn, unitvar="DISTRICTNA")
-
-names(unitdat.bhdist)
-sppltunit.bhdist <- unitdat.bhdist$sppltassgn
-unitarea.bhdist <- unitdat.bhdist$unitarea
-unitvar.bhdist <- unitdat.bhdist$unitvar
-areavar.bhdist <- unitdat.bhdist$areavar
-
-unitarea.bhdist
-unitvar.bhdist
-areavar.bhdist
-
-
-```
-
-
-<a name="custom.strata"></a>
 
 #### <a name="spGetStrata"/>spGetStrata()
 ```
@@ -218,9 +152,16 @@ strvar.bh <- stratdat.bh$strvar
 unitvar.bh <- stratdat.bh$unitvar
 areavar.bh <- stratdat.bh$areavar
 
+## Plot assignment of strata and estimation unit (ONEUNIT, STRATUMCD)
+head(pltassgn.bh)
+
+## Area by estimation unit
 unitarea.bh
+
+## Pixel counts and strata weights (strwt) by strata and estimation unit
 stratalut.bh
 
+## Variable names
 unitvar.bh
 strvar.bh
 areavar.bh
@@ -241,9 +182,18 @@ strvar.bhdist <- stratdat.bhdist$strvar
 unitvar.bhdist <- stratdat.bhdist$unitvar
 areavar.bhdist <- stratdat.bhdist$areavar
 
+
+## Plot assignment of strata and estimation unit (ONEUNIT, STRATUMCD)
+head(pltassgn.bhdist)
+
+## Area by estimation units (Districts)
 unitarea.bhdist
+
+## Pixel counts and strata weights (strwt) by strata and estimation units
 stratalut.bhdist
 
+
+## Variable names
 unitvar.bhdist
 strvar.bhdist
 areavar.bhdist
@@ -252,7 +202,7 @@ areavar.bhdist
 ```
 
 
-#### modGBpop
+#### <a name="modGBpop"/>modGBpop()
 
 ```
 ######################################################################################
@@ -290,28 +240,32 @@ GBpopdat.bh <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=pltassgn.bh, pltassgn
     stratalut=stratalut.bh, strvar=strvar.bh, getwt=FALSE)
 names(GBpopdat.bh)
 
+## Condition information with adjusted condition proportions for area
 head(GBpopdat.bh$condx)
-GBpopdat.bh$unitarea
-GBpopdat.bh$unitvar
 
+## Tree information with tree-level adjustment factors
+head(GBpopdat.bh$treex)
+
+## Strata-level information, including number of plots by strata and strata-level adjustment factors
 GBpopdat.bh$stratalut
-GBpopdat.bh$strvar
 
 
 
 ## Population data for a customized population (e.g., Bighorn National Forest Districts)
 ######################################################################################
 GBpopdat.bhdist <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=pltassgn.bhdist, pltassgnid="CN", 
-    unitvar=unitvar.bhdist, unitarea=unitarea.bhdist, areavar=areavar.bh, 
+    unitvar=unitvar.bhdist, unitarea=unitarea.bhdist, areavar=areavar.bhdist, 
     stratalut=stratalut.bhdist, strvar=strvar.bhdist, getwt=FALSE)
-names(GBpopdat.bh)
+names(GBpopdat.bhdist)
 
+## Condition information with adjusted condition proportions for area
 head(GBpopdat.bhdist$condx)
-GBpopdat.bhdist$unitarea
-GBpopdat.bhdist$unitvar
 
+## Tree information with tree-level adjustment factors
+head(GBpopdat.bhdist$treex)
+
+## Strata-level information, including number of plots by strata and strata-level adjustment factors
 GBpopdat.bhdist$stratalut
-GBpopdat.bhdist$strvar
 
 
 ```
@@ -322,7 +276,7 @@ GBpopdat.bhdist$strvar
 ## GB Functions
 
 
-#### modGBarea
+#### <a name="modGBarea"/>modGBarea()
 
 ```
 ######################################################################################
@@ -357,29 +311,88 @@ help(modGBarea)
 
 ## By Bighorn National Forest ##
 # Area by forest type and stand-size class for Bighorn National Forest
+# Note: Including population data in function
 area.bh <- modGBarea(cond=WYcond, pltassgn=pltassgn.bh, pltassgnid="CN", 
-    rowvar="FORTYPCD", colvar="STDSZCD", unitvar=unitvar.bh, strvar=strvar.bh, 
-    unitarea=unitarea.bh, stratalut=stratalut.bh, areavar=areavar.bh, getwt=FALSE, 
-    rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest")
-
-area.bh <- modGBarea(GBpopdat=GBpopdat.bh, cond=WYcond, 
+    unitvar=unitvar.bh, unitarea=unitarea.bh, areavar=areavar.bh,  
+    stratalut=stratalut.bh, strvar=strvar.bh, getwt=FALSE, 
     rowvar="FORTYPCD", colvar="STDSZCD", 
     rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest")
-names(area.bh)
+
+## Estimates and percent sampling error
 area.bh$est
 area.bh$pse
-area.bh$titlelst
 
-## raw data tables
+## List of raw data
 area.bh.raw <- area.bh$raw
 names(area.bh.raw)
+
+## Raw data for estimation unit
+area.bh$raw$unit.totest
+
+## Raw data for row estimates
+area.bh$raw$unit.rowest
+
+## Raw data for column estimates
+area.bh$raw$unit.colest
+
+## Raw data for group (cell) - level estimates
 area.bh$raw$unit.grpest
+
+## List of titles
+area.bh$titlelst
+
+
+# Note: Including pre-calculated population data (GBpopdat) in function
+area.bh <- modGBarea(GBpopdat=GBpopdat.bh, cond=WYcond, 
+    rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+    rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest")
+names(area.bh)
+
+## Estimates and percent sampling error
+area.bh$est
+area.bh$pse
+
+
+
+## Area estimates for a customized population (e.g., Bighorn National Forest Districts)
+######################################################################################
+
+## By Bighorn National Forest Districts ##
+# Area by forest type group and primary disturbance class for Bighorn National Forest
+# Note: Including pre-calculated population data (GBpopdat) in function
+area.bhdist <- modGBarea(GBpopdat=GBpopdat.bhdist, 
+    rowvar="FORTYPGRPCD", row.FIAname=TRUE, colvar="DSTRBCD1", col.FIAname=TRUE,
+    rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest")
+
+## Estimates and percent sampling error
+area.bhdist$est
+area.bhdist$pse
+
+## List of raw data
+area.bhdist.raw <- area.bhdist$raw
+names(area.bhdist.raw)
+
+## Raw data for estimation unit
+area.bhdist$raw$unit.totest
+
+## Raw data for row estimates
+area.bhdist$raw$unit.rowest
+
+## Raw data for column estimates
+area.bhdist$raw$unit.colest
+
+## Raw data for group (cell) estimates
+area.bhdist$raw$unit.grpest
+
+## List of titles
+area.bhdist$titlelst
 
 
 ```
 
 
-#### modGBtree
+#### <a name="modGBtree"/>modGBtree()
+
 ```
 ######################################################################################
 # Usage:
@@ -414,61 +427,121 @@ help(modGBtree)
 
 ## By Bighorn National Forest ##
 # Live tree basal area by forest type for Bighorn National Forest
+# Note: Including pre-calculated population data (GBpopdat) in function
 balive.bh <- modGBtree(GBpopdat=GBpopdat.bh, tree=WYtree, cond=WYcond,
-  sumunits=FALSE, rowvar="FORTYPCD", row.FIAname=TRUE,  
-  estvar="BA", estvar.filter="STATUSCD==1", rawdata=TRUE, 
-  returntitle=TRUE, title.ref="Bighorn National Forest", savedata=TRUE, 
-  outfolder=outfolder)
+  rowvar="FORTYPCD", row.FIAname=TRUE,  estvar="BA", estvar.filter="STATUSCD==1",  
+  rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest", 
+  savedata=TRUE, outfolder=outfolder)
 names(balive.bh)
+
+## Estimates and percent sampling error
 balive.bh$est
+
+## List of raw data
+balive.bh.raw <- balive.bh$raw
+names(balive.bh.raw)
+
+## Raw data for estimation unit
+balive.bh$raw$unit.totest
+
+## Raw data for row estimates
+balive.bh$raw$unit.rowest
+
+## List of titles
 balive.bh$titlelst
 
 
+
+## Tree estimates for a customized population (e.g., Bighorn National Forest Districts)
+######################################################################################
+
 ## By Bighorn National Forest District ##
-# Live tree basal area by forest type for Bighorn National Forest districts
+## Live tree basal area by forest type for Bighorn National Forest districts
+## Note: adding sumunits=TRUE, sums estimation units for final estimate, 
+##    and includes unit-level and summed estimates in raw data.
 balive.bhdist <- modGBtree(GBpopdat=GBpopdat.bhdist, tree=WYtree, cond=WYcond, 
-  pltassgnid="CN", sumunits=FALSE, rowvar="FORTYPCD", row.FIAname=TRUE,  
+  sumunits=TRUE, rowvar="FORTYPCD", row.FIAname=TRUE,  
   estvar="BA", estvar.filter="STATUSCD==1", rawdata=TRUE, returntitle=TRUE,  
   title.ref="Bighorn National Forest", stratcombine=FALSE)
 names(balive.bhdist)
+
+## Estimates and percent sampling error for total forest
 balive.bhdist$est
-balive.bhdist$pse
+
+## List of raw data
+balive.bhdist.raw <- balive.bhdist$raw
+names(balive.bhdist.raw)
+
+## Raw data for total by estimation unit
+balive.bhdist$raw$unit.totest
+
+## Raw data for estimation unit
+balive.bhdist$raw$totest
+
+## Raw data for row estimates by estimation unit
+balive.bhdist$raw$unit.rowest
+
+## Raw data for total row estimates
+balive.bhdist$raw$rowest
+
+## List of titles
 balive.bhdist$titlelst
+
 
 
 ## By Bighorn National Forest District ##
-## Add title for estimation units
+## Note: set sumunits=FALSE, to get estimates by district
 balive.bhdist <- modGBtree(GBpopdat=GBpopdat.bhdist, tree=WYtree, cond=WYcond,  
   sumunits=FALSE, rowvar="FORTYPCD", row.FIAname=TRUE, 
   estvar="BA", estvar.filter="STATUSCD==1", rawdata=FALSE, returntitle=TRUE, 
-  title.ref="Bighorn National Forest", title.unitvar="District")
+  title.ref="Bighorn National Forest")
 names(balive.bhdist)
+
+## Estimates and percent sampling error by district
 balive.bhdist$est
 balive.bhdist$pse
+
+## List of titles
 balive.bhdist$titlelst
+
 
 
 ## By Bighorn National Forest ##
 # Volume of live trees by forest type and stand-size class for Bighorn National Forest
-tree.bh <- modGBtree(GBpopdat=GBpopdat.bh, tree=WYtree, cond=WYcond, 
-  rowvar="FORTYPCD", colvar="STDSZCD", 
-  estvar="VOLCFNET", estvar.filter="STATUSCD==1", rawdata=TRUE, returntitle=TRUE, 
-  title.ref="Bighorn National Forest")
-names(tree.bh)
-tree.bh$est
-tree.bh$pse
-tree.bh$titlelst
+vol.bh <- modGBtree(GBpopdat=GBpopdat.bh, tree=WYtree, cond=WYcond, 
+  rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  estvar="VOLCFNET", estvar.filter="STATUSCD==1", 
+  rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest")
+names(vol.bh)
 
+## Estimates and percent sampling error by district
+vol.bh$est
+vol.bh$pse
 
-## Look at raw data
-tree.bh.raw <- tree.bh$raw
-names(tree.bh.raw)
-head(tree.bh$raw$unit.grpest)
+## List of raw data
+vol.bh.raw <- vol.bh$raw
+names(vol.bh.raw)
+
+## Raw data for estimation unit
+vol.bh$raw$unit.totest
+
+## Raw data for row estimates
+vol.bh$raw$unit.rowest
+
+## Raw data for column estimates
+vol.bh$raw$unit.colest
+
+## Raw data for group (cell) estimates
+head(vol.bh$raw$unit.grpest)
+
+## List of titles
+vol.bh$titlelst
 
 
 ```
 
-#### modGBratio
+#### <a name="modGBratio"/>modGBratio()
+
 ```
 ####################################################################################
 # Usage:
@@ -500,37 +573,76 @@ help(modGBratio)
 ## Tree ratio estimates for a customized population (e.g., Bighorn National Forest)
 ######################################################################################
 
-# Volume per acre of live trees by forest type and stand-size class for Bighorn National Forest
-rat.bh <- modGBratio(GBpopdat=GBpopdat.bh, tree=WYtree, cond=WYcond, 
-  rowvar="FORTYPCD", colvar="STDSZCD",  
+## Volume per acre of live trees by forest type and stand-size class for Bighorn National Forest
+volrat.bh <- modGBratio(GBpopdat=GBpopdat.bh, tree=WYtree, cond=WYcond, 
+  rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE, 
   estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", rawdata=TRUE, returntitle=TRUE, 
   title.ref="Bighorn National Forest")
-names(rat.bh)
-rat.bh$est
-rat.bh$pse
-rat.bh$titlelst
+names(volrat.bh)
 
-## Look at raw darat.bh.raw <- rat.bh$raw
-names(rat.bh.raw)
-head(rat.bh$raw$unit.grpest)
-ta table
+## Estimates and percent sampling error by district
+volrat.bh$est
+volrat.bh$pse
+
+
+## List of raw data
+volrat.bh.raw <- volrat.bh$raw
+names(volrat.bh.raw)
+
+## Raw data for estimation unit
+volrat.bh$raw$unit.totest
+
+## Raw data for row estimates
+volrat.bh$raw$unit.rowest
+
+## Raw data for column estimates
+volrat.bh$raw$unit.colest
+
+## Raw data for group (cell) estimates
+head(volrat.bh$raw$unit.grpest)
+
+## List of titles
+volrat.bh$titlelst
 
 	
 ## By Bighorn National Forest District ##
-# Area by forest type and stand-size class for Bighorn National Forest by district
-rat.bhdist <- modGBratio(GBpopdat=GBpopdat.bhdist, tree=WYtree, cond=WYcond,  pltassgnid="CN",
-  sumunits=FALSE, rowvar="FORTYPCD", colvar="STDSZCD",  
-  estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", 
-  rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest", title.unitvar="District")
-names(rat.bhdist)
-rat.bhdist$est
-rat.bhdist$pse
-rat.bhdist$titlelst
+## Tree ratio estimates for a customized population (e.g., Bighorn National Forest districts)
+######################################################################################
+	
+## By Bighorn National Forest District ##
+## Trees per acre by species and stand-size class for Bighorn National Forest by district
+## Note: Change title of estimation unit to District
+## Set sumunits=TRUE, to get estimates for total forest
 
-## Look at raw data table
-rat.bhdist.raw <- rat.bhdist$raw
-names(rat.bhdist.raw)
-head(rat.bhdist$raw$unit.grpest)
+spprat.bhdist <- modGBratio(GBpopdat=GBpopdat.bhdist, tree=WYtree, cond=WYcond,
+  sumunits=TRUE, rowvar="SPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  estvarn="VOLCFNET", estvarn.filter="STATUSCD==1", 
+  rawdata=TRUE, returntitle=TRUE, title.ref="Bighorn National Forest")
+names(spprat.bhdist)
+
+## Estimates and percent sampling error by district
+spprat.bhdist$est
+spprat.bhdist$pse
+
+
+## List of raw data
+spprat.bhdist.raw <- spprat.bhdist$raw
+names(spprat.bhdist.raw)
+
+## Raw data for estimation unit
+spprat.bhdist$raw$unit.totest
+
+## Raw data for row estimates
+spprat.bhdist$raw$unit.rowest
+
+## Raw data for column estimates
+spprat.bhdist$raw$unit.colest
+
+## Raw data for group (cell) estimates
+head(spprat.bhdist$raw$unit.grpest)
+
+## List of titles
+spprat.bhdist$titlelst
 
 
 ```

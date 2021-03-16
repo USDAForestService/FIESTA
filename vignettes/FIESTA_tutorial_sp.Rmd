@@ -47,7 +47,8 @@ FUNCTION  | DESCRIPTION
 [spClipRast()](#spClipRast) | Subset raster layer with a Spatial polygons layer.
 [spExtractPoly()](#spExtractPoly) | Extracts point attribute values from Spatial polygons layer(s).
 [spExtractRast()](#spExtractRast) | Extracts point attribute values from raster layer(s).
-[spStrata()](#spStrata) | Extracts point attribute values and pixel counts for strata spatial layers.
+[spGetEstUnit()](#spGetEstUnit) | Extracts point attribute values and area for estimation unit(s).
+[spGetStrata()](#spGetStrata) | Extracts point attribute values, area for estimation unit(s), and pixel counts for strata spatial layers.
 [spUnionPoly()](#spUnionPoly) | Generates one Spatial polygons object from two Spatial polygons layers.
 [spZonalRast()](#spZonalRast) | Extracts summary statistics by polygon (i.e., zone) for a raster.
 
@@ -537,6 +538,66 @@ zonalnames
 
 
 ```
+
+
+
+#### <a name="spGetEstUnit"/>spGetEstUnit()
+```
+######################################################################################
+# Usage:
+# spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
+#   	unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
+#     areavar = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE,  
+#     showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,  
+#     outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "unit_assgn", 
+#     outfn.date = TRUE, outfn.pre = NULL, overwrite = FALSE, ...) 
+# 
+# Description:
+# Extract estimation unit values to plots and calculate area by estimation unit.
+######################################################################################
+
+## Create spatial points from WYplt
+WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
+        yvar="LAT_PUBLIC", xy.crs=4269)
+xyplt=WYspplt
+
+
+## By Bighorn National Forest ##
+# Get estimation unit acres for Bighorn National Forest.
+######################################################################################
+unitdat.bh <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
+    xy.crs=4269, unit_layer=WYbhfn)
+
+names(unitdat.bh)
+sppltunit.bh <- unitdat.bh$sppltassgn
+unitarea.bh <- unitdat.bh$unitarea
+unitvar.bh <- unitdat.bh$unitvar
+areavar.bh <- unitdat.bh$areavar
+
+unitarea.bh
+unitvar.bh
+areavar.bh
+
+
+## By Bighorn National Forest District ##
+# Get estimation unit acres and strata information for Bighorn National Forest.
+######################################################################################
+unitdat.bhdist <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
+    xy.crs=4269, unit_layer=WYbhdistfn, unitvar="DISTRICTNA")
+
+names(unitdat.bhdist)
+sppltunit.bhdist <- unitdat.bhdist$sppltassgn
+unitarea.bhdist <- unitdat.bhdist$unitarea
+unitvar.bhdist <- unitdat.bhdist$unitvar
+areavar.bhdist <- unitdat.bhdist$areavar
+
+unitarea.bhdist
+unitvar.bhdist
+areavar.bhdist
+
+
+```
+
 
 #### <a name="spGetStrata"/>spGetStrata()
 ```
