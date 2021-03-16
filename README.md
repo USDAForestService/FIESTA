@@ -112,9 +112,11 @@ remove.packages("FIESTA", lib=.libPaths())
 Next install FIESTA from GitHub, using the token you saved as an R object.
 
 ```
+token <- <i>your_token<i>
+
 Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 devtools::install_github("https://github.com/USDAForestService/FIESTA", 
-		auth_token = your_token,
+		auth_token = <i>token<i>,
 		build_vignettes = TRUE,
  		INSTALL_opts = c("--compile-both"),
 		dependencies=c("Depends", "Imports"))
