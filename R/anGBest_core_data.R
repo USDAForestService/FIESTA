@@ -27,7 +27,7 @@ anGBest_core_data <- function(state, evalCur=TRUE, evalEndyr=NULL,
   datPlots <- DBgetPlots(states=state, evalEndyr=evalEndyr, evalCur=evalCur, 
 		istree=TRUE, evalType=evalType, savePOP=TRUE)
   plt <- datPlots$plt
-  POP_PLOT_STRATUM_ASSGN <- datPlots$POP_PLOT_STRATUM_ASSGN
+  POP_PLOT_STRATUM_ASSGN <- datPlots$pop_plot_stratum_assgn
   evalid <- datPlots$evalid
 
   if (is.null(evalEndyr)) {

@@ -2,14 +2,13 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	vspspp=NULL, subplot=NULL, subp_cond=NULL, pltassgn=NULL, dsn=NULL, 
 	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", adj="samp", 
-	evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, plt.nonsamp.filter=NULL, 
-	cond.nonsamp.filter=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
-	areavar="ACRES", unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, 
-	stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", 
-	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, GBdata=NULL, GBstratdat=NULL, 
-	gui=FALSE){
+	evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, stratalut=NULL, 
+	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
+	saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
+	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
+	GBdata=NULL, GBstratdat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -29,7 +28,6 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (gui)  
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   
-
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- names(formals(modGBpop)) 
@@ -47,15 +45,8 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   on.exit(options(options.old), add=TRUE) 
   adjtree <- FALSE
   nonresp=FALSE
-  substrvar=NULL
+  substrvar=plt.nonsamp.filter=cond.nonsamp.filter <- NULL
   returnlst <- list()
-
-
-  ## Check popType
-  popTypelst <- c("VOL")
-  popType <- FIESTA::pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
-		checklst=popTypelst, caption="population type", stopifnull=TRUE,
-		warn="only VOL is currently available")
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -70,7 +61,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -108,7 +99,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     getwt <- GBstratdat$getwt
     getwtvar <- GBstratdat$getwtvar
   } 
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -121,8 +112,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid, 
  	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs,
  	intensity=intensity, adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
-	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
- 	unitcombine=unitcombine, stratcombine=stratcombine, strata=strata, strvar=strvar)
+	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=unitarea, unitvar=unitvar, 
+	unitvar2=unitvar2, areavar=areavar, unitcombine=unitcombine, strata=strata, 
+	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
@@ -136,8 +128,10 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
+  unitarea <- popcheck$unitarea
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
+  areavar <- popcheck$areavar
   unitcombine <- popcheck$unitcombine
   stratcombine <- popcheck$stratcombine
   strata <- popcheck$strata
@@ -151,6 +145,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   cvars2keep <- popcheck$cvars2keep
   pvars2keep <- popcheck$pvars2keep
   areawt <- popcheck$areawt
+  if (strata) {
+    stratalut <- popcheck$stratalut
+  }
   if (nonresp) 
     substrvar <- popcheck$substrvar 
   #rm(popcheck)
@@ -160,15 +157,6 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     vspsppf <- popcheck$vspsppf
   }
 
-  ###################################################################################
-  ## CHECK unitarea BY ESTIMATION UNIT
-  ## Returns: data table with unitvar and area by estimation unit (unitvar)
-  ##	 and areavar (default="ACRES")
-  ###################################################################################
-  unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
-	unitvars=c(unitvar, unitvar2), areavar=areavar, evalid=evalid, gui=gui)
-  unitarea <- unitdat$unitarea
-  areavar <- unitdat$areavar
 
   ###################################################################################
   ## CHECK STRATA
@@ -185,7 +173,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
 		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
 		minplotnum.unit=minplotnum.unit, getwt=getwt, getwtvar=getwtvar, 
-		P2POINTCNT=P2POINTCNT, evalid=evalid)  
+		P2POINTCNT=P2POINTCNT)  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -263,6 +251,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 
   if (!is.null(stratcombinelut)) 
     returnlst$stratcombinelut <- stratcombinelut
+  if (!is.null(evalid)) {
+    returnlst$evalid <- evalid
+  }
 
   if (saveobj) {
     objfn <- getoutfn(outfn="GBpopdat", ext="rda", outfolder=outfolder, 

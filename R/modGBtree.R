@@ -4,11 +4,12 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
 	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits=TRUE, allin1=FALSE, 
 	estround=1, pseround=2, estnull="--", psenull="--", divideby=NULL, 
-	savedata=FALSE, rawdata=FALSE, rawonly=FALSE, outfolder=NULL, outfn.pre=NULL, 
-	outfn.date=TRUE, overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, 
- 	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, 
-	title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, 
- 	gui=FALSE, ...){
+	savedata=FALSE, outfolder=NULL, overwrite=FALSE, outfn.pre=NULL, outfn.date=TRUE,
+ 	addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL, 
+	layer.pre=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, 
+ 	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
+	title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, 
+	gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -17,7 +18,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::modGBtree)),
+  formallst <- c(names(formals(modGBtree)),
 		names(formals(FIESTA::modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
@@ -51,16 +52,22 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   parameters <- FALSE
   returnlst <- list()
 
+
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data?", first="YES", gui=gui, stopifnull=TRUE)
+		title="Save data extraction?", first="NO", gui=gui) 
 
-  ## Check outfolder 
-  ########################################################
-  if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    if (rawdata && !file.exists(paste(outfolder, "rawdata", sep="/"))) 
-      dir.create(paste(outfolder, "rawdata", sep="/"))
+  ## If savedata, check output file names
+  ################################################################
+  if (savedata) { 
+    outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		append_layer=append_layer, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
   }
  
   ###################################################################################
@@ -114,7 +121,8 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
     if (is.null(seedx)) {
       stop("no seedling data in population data")
     }
-  } 
+  }
+ 
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
@@ -141,8 +149,6 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   returntitle <- estdat$returntitle
   rawdata <- estdat$rawdata
   rawonly <- estdat$rawonly
-  savedata <- estdat$savedata
-  outfolder <- estdat$outfolder
   estround <- estdat$estround
   pseround <- estdat$pseround
   landarea <- estdat$landarea
@@ -216,7 +222,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   #if (!is.null(tdomvar) && !is.null(tdomvar2)) {
   #  tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
   #}
-  
+ 
   #####################################################################################
   ### Get titles for output tables
   #####################################################################################
@@ -237,7 +243,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
   if (rawdata) outfn.rawdat <- alltitlelst$outfn.rawdat
-   
+ 
   ############################################################################
   ## GENERATE ESTIMATES
   ############################################################################
@@ -392,7 +398,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
     rawdat$estvar <- estvar.name
     rawdat$estvar.filter <- estvar.filter
   }
-
+ 
   estnm <- "est"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	unitvar=unitvar, unitvar2=unitvar2, unit.totest=unit.totest, unit.rowest=unit.rowest, 
@@ -403,8 +409,8 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
-	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
+	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround,
+ 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle, 
 	estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
@@ -424,15 +430,26 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
       for (i in 1:length(rawdat)) {
         tabnm <- names(rawdat[i])
         rawtab <- rawdat[[i]]
-        outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm, ".csv") 
-        if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratdat", "stratcombinelut")) {
+        outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
+        if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
           write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			outfn.date=outfn.date, overwrite=overwrite, outtxt=tabnm)
+			outfn.date=outfn.date, overwrite=overwrite_layer, outtxt=tabnm)
         } else if (is.data.frame(rawtab)) {
-          suppressWarnings(save1tab(tab=rawtab, tab.title=title.raw, 
-			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
-			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
-			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite))
+          #overwrite_layer <- ifelse(append_layer, FALSE, overwrite_layer)
+          if (out_fmt == "csv") {
+            out_layer <- tabnm 
+            if (!is.null(layer.pre)) {
+              out_layer <- paste0(layer.pre, "_", out_layer)
+            }
+          } else {
+            out_layer <- outfn.rawdat
+          }
+          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
+ 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer, layer.pre=NULL)
+#          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
+# 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
+#			append_layer=append_layer, layer.pre=outfn.rawdat)
         }
       }
     }

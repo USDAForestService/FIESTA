@@ -1,5 +1,4 @@
-check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", evalid=NULL, 
-	gui=FALSE) {
+check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE) {
 
   ## DESCRIPTION: Checks unitarea
   ## Check acres by estimation unit
@@ -27,17 +26,6 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", evalid=NUL
   ## Get unique values of unitvars in pltx
   unit.vals <- unique(do.call(paste, pltx[, unitvars, with=FALSE]))
   nbrunits <- length(unit.vals) 
-
-  ## Check evalid
-  if (!is.null(evalid)) {
-    ecol <- pcheck.varchar("EVALID", checklst=names(unitarea), stopifinvalid=FALSE)
-    if (!is.null(ecol)) {
-      unitarea <- unitarea[unitarea[[ecol]] %in% evalid,]
-      if (nrow(unitarea) == 0) {
-        stop("evalid in unitarea does not match evalid")
-      }
-    }
-  }
 
   ## Check unitarea and areavar
   ######################################################################

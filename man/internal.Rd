@@ -81,7 +81,6 @@
 \alias{capfirst}
 \alias{DBgetfn}
 \alias{getpfromqry}
-\alias{getEvalid}
 \alias{getEvalid.ppsa}
 \alias{getPlotCur}
 \alias{nbrdecimals}

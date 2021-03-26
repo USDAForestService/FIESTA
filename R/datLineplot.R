@@ -188,21 +188,19 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   if (!is.null(ylabel)) { 
     yside <- 2
     ylasnum <- 0
-    ylinenum <- ymaxnum * cex.names/2 + 1
-  } else {
-    ylinenum <- ymaxnum * cex.names/2 + 1
-  }
+  } 
+  ylinenum <- ymaxnum * cex.names/2 + 1
 
   ## xlabel
   ######################
   if (!is.null(xlabel)) { 
     xside <- 1			## axis position (1:xaxis; 2:yaxis)
     xlasnum <- 1			## orientation (0:horizontal; 1:vertical)
-    linenum <- 1
+    linenum <- 1.5
     if (las.xnames %in% c(0,2)) {
       xlinenum <- .36 * xmaxnum + linenum 
     } else {
-      xlinenum <- 2
+      xlinenum <- 2.5
     }
   } else {
     xlabel <- xvar
@@ -258,8 +256,13 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 	#		cex=cex.names, srt=srt, xpd=TRUE)
     #text(x=xticks, par("usr")[3], labels=datx[[xvar]], adj = c(1.4, 1),
 	#		cex=cex.names, srt=srt, xpd=TRUE)
-    text(x=xticks, par("usr")[3], labels=datx[[xvar]], pos=1, adj = c(1, 1),
-			cex=cex.names, srt=srt, xpd=TRUE)
+print("TEST")
+print(srt)
+print(datx[[xvar]])
+adj=c(0,1)
+    offset <- ifelse(srt==60, 1.5, 1)
+    text(x=xticks, par("usr")[3], labels=datx[[xvar]], pos=1,
+			cex=cex.names, srt=srt, xpd=TRUE, offset=offset)
 
     if (plotCI && addshade) {
       graphics::polygon(c(datx[[xvar]], rev(datx[[xvar]])), 

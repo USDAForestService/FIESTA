@@ -7,7 +7,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 	title.estpse=NULL, title.est=NULL, title.pse=NULL, outfn.estpse=NULL, 
 	outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, estnm, psenm="pse", 
 	estround=0, pseround=2, estnull="--", psenull="--", divideby=NULL, 
-	coltitlerow=TRUE, rowtotal=TRUE, rawdata=FALSE, CI=TRUE, rawdat=NULL,
+	coltitlerow=TRUE, rowtotal=TRUE, rawdata=FALSE, CI=TRUE, rawdat=NULL, 
 	char.width=NULL, rawonly=FALSE){ 
 
   ## Set global variables
@@ -447,8 +447,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
               save1tab(tab=estpsetab, tab.title=title.estpse, 
 			outfn=outfn.estpse, outfolder=outfolder, allin1=allin1, 
 			coltitlerow=FALSE, rowtotal=TRUE, addtitle=addtitle,
-			outfn.date=outfn.date, overwrite=overwrite, charvars=title.rnames,
-			cols2format=title.yhat))
+			outfn.date=outfn.date, overwrite=overwrite,  			
+			charvars=title.rnames, cols2format=title.yhat))
         } else {  # > 1 unit
 
           if (allin1) {

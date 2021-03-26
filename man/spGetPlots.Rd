@@ -16,7 +16,7 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	xy.joinid = "PLT_CN", clipxy = TRUE, datsource = "datamart", data_dsn = NULL, 
 	istree = FALSE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
 	tree_layer = "tree", seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn",
-	other_layers = NULL, puniqueid = "CN", 
+	other_layers = NULL, puniqueid = "CN", savePOP = FALSE,
 	evalid = NULL, evalCur = FALSE, evalEndyr = NULL, evalType = "VOL", 
 	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
 	allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, 
@@ -77,6 +77,7 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
   \item{other_layers}{ String. Other layer(s) in database to clip and/or extract
 	from database (Note: must include PLT_CN variable as unique identifier). }
   \item{puniqueid}{ String. Name of unique identifier of plt. }
+  \item{savePOP}{ Logical. If TRUE, returns and/or saves POP_PLOT_STRATUM_ASSGN table. }
   \item{evalid}{ Integer. To extract data for a specific evaluation period. See notes 
 	for more information about FIA Evaluations. }
   \item{evalCur}{ Logical. If TRUE, extract plots with most current FIA Evalidation 

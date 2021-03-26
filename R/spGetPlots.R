@@ -4,7 +4,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
 	data_dsn=NULL, istree=FALSE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
 	tree_layer="tree", seed_layer="seed", ppsa_layer="pop_plot_stratum_assgn", 	
-	other_layers=NULL, puniqueid="CN", evalid=NULL, evalCur=FALSE, 
+	other_layers=NULL, puniqueid="CN", savePOP=FALSE, evalid=NULL, evalCur=FALSE, 
 	evalEndyr=NULL, evalType="VOL", measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
 	showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
@@ -47,6 +47,11 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
+
+  ## Define list of pop_tables (without PLT_CN)
+  pop_tables <- c("POP_ESTN_UNIT", "POP_EVAL", "POP_EVAL_ATTRIBUTE", "POP_EVAL_GRP", 
+	"POP_EVAL_TYP", "POP_STRATUM", "SURVEY") 
+
  
   #############################################################################
   ## Import boundary
@@ -94,7 +99,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -107,7 +112,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   xychk <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
 
   if (!is.null(evalid)) {
-    stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4)))    
+    evalid <- unlist(evalid)
+    stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4))) 
+    savePOP <- TRUE
   } else if (!is.null(states)) {
     if (!all(states %in% FIESTA::ref_statecd$MEANING))
       stop("states is invalid")
@@ -159,16 +166,24 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     ## tree data
     if (istree) {
       treex <- pcheck.table(tree_layer, obj=obj, stopifnull=TRUE)
-      if (!is.null(treex)) 
+      if (!is.null(treex)) {
         tabs2save <- c(tabs2save, "treex")
+      }
     }
     ## seed data
     if (isseed) {
       seedx <- pcheck.table(seed_layer, obj=obj, stopifnull=TRUE)
-      if (!is.null(seedx)) 
+      if (!is.null(seedx)) {
         tabs2save <- c(tabs2save, "seedx")
+      }
     }
-
+    ## pop_plot_stratam_assgn data
+    if (savePOP) {
+      pop_plot_stratum_assgnx <- pcheck.table(ppsa_layer, obj=obj, stopifnull=TRUE)
+      if (!is.null(pop_plot_stratum_assgnx)) {
+        tabs2save <- c(tabs2save, "pop_plot_stratum_assgnx")
+      }
+    }
     ## other data
     if (!is.null(other_layers)) {
       for (layer in other_layers) {
@@ -216,13 +231,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       condx <- condx[condx[[cuniqueid]] %in% clipids,]
 
       ## Subset tree data
-      if (istree) 
+      if (istree) {
         treex <- treex[treex[[tuniqueid]] %in% clipids,]
-
+      }
       ## other data
       if (!is.null(other_layers)) {
         for (layer in other_layers) {
-          if (!grepl("POP", layer, ignore.case=TRUE)) {
+          if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
             assign(paste0(layer, "x"), get(layer)[get(layer)[["PLT_CN"]] %in% clipids, ])
           }
         }
@@ -248,37 +263,46 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       }
     }
 
+    msg <- "getting data for..."
+    if (!is.null(evalid)) {
+      evalid <- unlist(evalid)
+      evalidst <- evalid[unique(as.numeric(substr(evalid, nchar(evalid)-6, 
+					nchar(evalid)-4))) == stcd]
+      msg <- paste0(msg, "for evaluation: ", toString(evalidst))
+      savePOP <- TRUE
+    } else if (allyrs) {
+      msg <- paste0(msg, "for all years")
+    } else if (measCur) {
+      msg <- paste0(msg, "for most currently measured plots")
+      if (!is.null(measEndyr)) {
+        msg <- paste0(msg, ", from year ", measEndyr, " or before")
+        if (!is.null(measEndyr.filter)) {
+          msg <- paste0(msg, ", ", measEndyr.filter)
+        }
+      }
+    } else if (evalCur) {
+      msg <- paste0(msg, "for most current evaluation")
+      if (!is.null(evalEndyr)) {
+        msg <- paste0("ending in ", evalEndyr)
+      }
+      savePOP <- TRUE
+    } else if (!is.null(invyrs)) {
+      msg <- paste0(msg, "for inventory years ", min(invyrs), " to ", max(invyrs))
+    } else {
+      msg <- "using all plots in database"
+      allyrs <- TRUE
+    }
+    message(paste(msg, "\n"))
+    if (savePOP) {
+      pop_plot_stratum_assgnx <- {} 
+      tabs2save <- c(tabs2save, "pop_plot_stratum_assgnx")
+    }
+
+
     for (i in 1:length(stcds)) { 
       stcd <- stcds[i]
       state <- pcheck.states(stcd) 
-
-      message(paste0("\ngetting data for ", state, "..."))
-
-      msg <- "..."
-      if (!is.null(evalid)) {
-        evalidst <- evalid[unique(as.numeric(substr(evalid, nchar(evalid)-6, 
-					nchar(evalid)-4))) == stcd]
-        msg <- paste0(msg, "for evaluation: ", toString(evalidst)) 
-      } else if (allyrs) {
-        msg <- paste0(msg, "for all years")
-      } else if (measCur) {
-        msg <- paste0(msg, "for most currently measured plots")
-        if (!is.null(measEndyr)) {
-          msg <- paste0(msg, ", from year ", measEndyr, " or before")
-          if (!is.null(measEndyr.filter)) 
-            msg <- paste0(msg, ", ", measEndyr.filter)
-        }
-      } else if (evalCur) {
-        msg <- paste0(msg, "for most current evaluation")
-        if (!is.null(evalEndyr))
-          msg <- paste0("ending in ", evalEndyr)
-      } else if (!is.null(invyrs)) {
-        msg <- paste0(msg, "for inventory years ", min(invyrs), " to ", max(invyrs))
-      } else {
-        msg <- "using all plots in database"
-        allyrs <- TRUE
-      }
-      message(paste(msg, "\n"))
+      message(paste0("\n", state, "..."))
 
       ## Check for counties
       if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(statecnty)) {
@@ -301,21 +325,30 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           }
           dat <- DBgetPlots(states=stcd, datsource="datamart", stateFilter=stateFilter, 
 			allyrs=TRUE, istree=istree, isseed=isseed, othertables=other_layers, 
-			intensity1=intensity1)
+			intensity1=intensity1, savePOP=savePOP)
         } else {
           dat <- DBgetPlots(states=stcd, datsource="datamart", stateFilter=stateFilter, 
 			allyrs=allyrs, evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, 
 			evalType=evalType, measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, 
-			istree=istree, isseed=isseed, othertables=other_layers, intensity1=intensity1)
+			istree=istree, isseed=isseed, othertables=other_layers, 
+			intensity1=intensity1, savePOP=savePOP)
         }
         PLOT <- dat$plt
         cond <- dat$cond
-        if (istree)
+        if (istree) 
           tree <- dat$tree
         if (isseed)
           seed <- dat$seed
+        if (savePOP) {
+          pop_plot_stratum_assgn <- dat[[chkdbtab(names(dat), "POP_PLOT_STRATUM_ASSGN")]]
+        }
         puniqueid <- "CN"
 
+        if (!is.null(other_layers)) {
+          for (layer in other_layers) {
+            assign(layer, dat[[chkdbtab(names(dat), layer)]])
+          }
+        }
         if (!xychk) { 
           if ("xyCur_PUBLIC" %in% names(dat)) {
             xy_PUBLIC <- setDT(dat$xyCur_PUBLIC)
@@ -334,7 +367,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           xystate <- xydat[xydat[[xy.joinid]] %in% PLOT[[pjoinid]],]
         }
  
-        if (clipxy) {
+        if (clipxy) {  ## datsource="datamart"
 
           ## Get most current plots in database for !measEndyr.filter
           #######################################################
@@ -373,9 +406,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               tree1 <- tree[tree[["PLT_CN"]] %in% pltids1, ]
             if (isseed)
               seed1 <- seed[seed[["PLT_CN"]] %in% pltids1, ]
+            if (savePOP) {
+              pop_plot_stratum_assgn1 <- 
+			pop_plot_stratum_assgn[pop_plot_stratum_assgn[["PLT_CN"]] %in% pltids1, ]
+            }
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
-                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                   assign(paste0(layer, "2"), 
 				get(layer)[get(layer)[["PLT_CN"]] %in% pltids1, ])
                 }
@@ -413,9 +450,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               tree2 <- tree[tree[["PLT_CN"]] %in% pltids2, ]
             if (isseed)
               seed2 <- seed[seed[["PLT_CN"]] %in% pltids2, ]
+            if (savePOP) {
+              pop_plot_stratum_assgn2 <- 
+			pop_plot_stratum_assgn[pop_plot_stratum_assgn[["PLT_CN"]] %in% pltids2, ]
+            }
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
-                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                   assign(paste0(layer, "2"), 
 				get(layer)[get(layer)[["PLT_CN"]] %in% pltids2, ])
                 }
@@ -428,10 +469,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               tree <- rbind(tree1, tree2)
             if (isseed)
               seed <- rbind(seed1, seed2)
+            if (savePOP) {
+              pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
+            }
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                   assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
                 }
               }
@@ -457,7 +501,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed <- seed[seed[["PLT_CN"]] %in% pltids, ]
             if (!is.null(other_layers)) {
               for (layer in other_layers) {
-                if (!grepl("POP", layer, ignore.case=TRUE)) {
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                   assign(layer, 
 				get(layer)[get(layer)[["PLT_CN"]] %in% pltids, ])
                 }
@@ -471,19 +515,20 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             treex <- rbind(treex, tree)
           if (isseed)
             seedx <- rbind(seedx, seed)
+          if (savePOP) {
+            pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, pop_plot_stratum_assgn)
+          }
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
-              if (!grepl("POP", layer, ignore.case=TRUE)) {
-                assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
-              }
+              assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
             }
           }
 
           if (savexy || showsteps)
             xypltx <- rbind(xypltx, xyplt)
 
-        } else {      ## clipxy = FALSE
+        } else {      ## clipxy = FALSE, datsource="datamart"
 
           if ((savexy || showsteps) && !is.null(xydat)) {
             xypltx <- xydat
@@ -497,12 +542,15 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (isseed) {
             seedx <- rbind(seedx, seed)
           }
-        
+          if (savePOP) {
+            pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, pop_plot_stratum_assgn)
+          }       
         }   ## clipxy
         rm(PLOT)
         rm(cond)
         if (istree) rm(tree)
         if (isseed) rm(seed)
+        if (savePOP) rm(pop_plot_stratum_assgn)
         gc()
           
       } else if (datsource == "sqlite") {
@@ -534,10 +582,17 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed_layer <- seedchk
             }
           }
+          if (savePOP) {
+            ppsa_layer <- chkdbtab(tablst, ppsa_layer, stopifnull=TRUE)
+          }       
           if (!is.null(other_layers) && !any(other_layers %in% tablst)) {
             stop("missing layers in database: ", 
 			toString(other_layers[!other_layers %in% tablst]))
           }
+
+          ## Check list of pop_tables
+          pop_tables <- unlist(sapply(pop_tables, pcheck.varchar, 
+			checklst=tablst, stopifinvalid=FALSE))
 
           ## Check for state in database
           dbstcds <- DBI::dbGetQuery(dbconn, paste("select distinct statecd from", 
@@ -659,9 +714,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ## Get most current evalid
         if (evalCur) {
           ppsa_layer<- chkdbtab(tablst, ppsa_layer, stopifnull=TRUE)
-          evalidlst <- getEvalid(dbconn=dbconn, states=stcd, evalid=evalid, 
-			evalEndyr=evalEndyr, evalCur=evalCur, evalType=evalType, 
-			ppsanm=ppsa_layer)
+          evalidlst <- DBgetEvalid(states=stcd, datsource="sqlite", 
+			data_dsn=data_dsn, evalid=evalid, evalEndyr=evalEndyr,
+			evalCur=evalCur, evalType=evalType, ppsanm=ppsa_layer)
           evalidst <- unlist(evalidlst$evalidlist)
         }
  
@@ -763,7 +818,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 			xvar=xvar, yvar=yvar, xy.crs=xy.crs)
         }
  
-        if (clipxy) {
+        if (clipxy) {    ## datsource="sqlite"
 
           ## Get most current plots in database for measEndyr.filter & !measEndyr.filter
           #######################################################################
@@ -803,10 +858,18 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed1 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
+            if (savePOP) {
+              ppsa1.qry <- paste0("select ppsa.* from ", p2fromqry,
+			" where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
+              rs <- DBI::dbSendQuery(dbconn, ppsa1.qry)
+              pop_plot_stratum_assgn1 <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
+            }       
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                if (grepl("POP", layer, ignore.case=TRUE)) {
+                if (!is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                   if (!is.null(evalidst)) {
                     other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
                   } else {
@@ -823,7 +886,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 DBI::dbClearResult(rs)
               }
             } 
-
             ## Clip plots from all database
             ############################################
             ## Get most current evalid
@@ -901,11 +963,19 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed2 <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
+            if (savePOP) {
+              ppsa2.qry <- paste0("select ppsa.* from ", p2fromqry,
+			" where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
+              rs <- DBI::dbSendQuery(dbconn, ppsa2.qry)
+              pop_plot_stratum_assgn2 <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
+            }       
 
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                if (grepl("POP", layer, ignore.case=TRUE)) {
+                if (!is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                   if (!is.null(evalidst)) {
                     other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
                   } else {
@@ -929,12 +999,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               tree <- rbind(tree1, tree2)
             if (isseed)
               seed <- rbind(seed1, seed2)
+            if (savePOP) {
+              pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
+            }
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                if (!grepl("POP", layer, ignore.case=TRUE)) {
-                  assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
-                }
+                assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
               }
             }
             if (savexy || showsteps) {
@@ -972,11 +1043,19 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               seed <- DBI::dbFetch(rs)
               DBI::dbClearResult(rs)
             }
+            if (savePOP) {
+              ppsa.qry <- paste0("select ppsa.* from ", p2fromqry,
+			" where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+              rs <- DBI::dbSendQuery(dbconn, ppsa.qry)
+              pop_plot_stratum_assgn <- DBI::dbFetch(rs)
+              DBI::dbClearResult(rs)
+            }       
 
             if (!is.null(other_layers)) {
               for (i in 1:length(other_layers)) {
                 layer <- other_layers[i]
-                if (grepl("POP", layer, ignore.case=TRUE)) {
+                if (!is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                   if (!is.null(evalidst)) {
                     other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
                   } else {
@@ -1004,19 +1083,21 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (isseed) {
             seedx <- rbind(seedx, seed)
           }
+          if (savePOP) {
+            pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, pop_plot_stratum_assgn)
+          }
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
-              if (!grepl("POP", layer, ignore.case=TRUE)) {
-                assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
-              }
+              assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
             }
           }
           if (savexy || showsteps) {
             xypltx <- rbind(xypltx, xyplt)
           }
 
-        } else {      ## clipxy = FALSE
+        } else {      ## clipxy=FALSE, datsource="sqlite"
+
           if ((savexy || showsteps) && !is.null(xystate)) {
             xypltx <- rbind(xypltx, xystate)
           }
@@ -1064,11 +1145,20 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             seedx <- rbind(seedx, DBI::dbFetch(rs))
             DBI::dbClearResult(rs)
           }
+          if (savePOP) {
+            ppsa.qry <- paste0("select ppsa.* from ", pfromqry,
+			" where ", stfilter, 
+			" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(dbconn, ppsa.qry)
+            pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, DBI::dbFetch(rs))
+            DBI::dbClearResult(rs)
+          }       
 
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
-              if (grepl("POP", layer, ignore.case=TRUE)) {
+
+              if (!is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
                 if (!is.null(evalidst)) {
                   other.qry <- paste0("select * from ", layer, " ppsa where ", stfilter)
                 } else {
@@ -1080,7 +1170,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
               }
               rs <- DBI::dbSendQuery(dbconn, other.qry)
-              assign(paste0(layer, "x"), rbind(paste0(layer, "x"), DBI::dbFetch(rs)))
+              #assign(paste0(layer, "x"), DBI::dbFetch(rs))
+              assign(paste0(layer, "x"), rbind(get(paste0(layer, "x")), DBI::dbFetch(rs)))
               othertabnms <- c(othertabnms, layer)
               DBI::dbClearResult(rs)
             }

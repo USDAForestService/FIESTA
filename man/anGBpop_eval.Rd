@@ -7,18 +7,20 @@
 	Wrapper to generate estimates for each evalid in list.	
 }
 \usage{
-anGBpop_eval(evalidlst=NULL, evalEndyrlst=NULL, states, evalType = "VOL", 
-	datsource = "datamart", data_dsn = NULL, isseed = FALSE, 
-	ppsanm = "pop_plot_stratum_assgn", 
-	savedata = FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE)
+anGBpop_eval(evalidlst = NULL, evalCur = FALSE, evalEndyrlst = NULL, 
+	states = NULL, RS = NULL, evalType = "VOL", datsource = "datamart", 
+	data_dsn = NULL, isseed = FALSE, ppsanm = "pop_plot_stratum_assgn", 
+	byEndyr = FALSE, savedata = FALSE, outfolder = NULL, ...)
 }
 \arguments{
   \item{evalidlst}{ Integer vector. Vector of one or more evalid (e.g, 491801). }
+  \item{evalCur}{ Logical. If TRUE, gets the most current evaluation for
+	each state. }
   \item{evalEndyrlst}{ Integer vector. Vector of one or more Evaluation 
 	end years to generate estimates (YYYY). }
   \item{states}{ String vector. Name(s) of states in evaluation. }
+  \item{RS}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS').
+	Do not use if states is populated. }
   \item{evalType}{ String vector. The type(s) of evaluation of interest 
 	('ALL', 'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
 	The evalType 'ALL' includes nonsampled plots; 'CURR' includes plots 
@@ -28,33 +30,29 @@ anGBpop_eval(evalidlst=NULL, evalEndyrlst=NULL, states, evalType = "VOL",
 	Multiple types are accepted. See details below and FIA database manual 
 	for regional availability and/or differences. }
   \item{datsource}{ String. Source of data ('datamart', 'sqlite'). }
-  \item{data_dsn}{ String. Name of database with FIA plot data. The database
-	must include the following tables: plot, cond, tree (if esttype='TREE'), 
-	and ppsa (POP_PLOT_STRATUM_ASSGN). If NULL, data are extracted from 
-	FIA datamart. }
+  \item{data_dsn}{ If datsource='sqlite', the file name (data source name) of the 
+	sqlite database (*.sqlite). }
   \item{isseed}{ Logical. If TRUE, add seedling data from Evaluation(s). } 
   \item{ppsanm}{ String. Name of pop_plot_stratum_assgn table in database. } 
+  \item{byEndyr}{ Logical. If TRUE, organizes evalidlst by evalEndyr. 
+	Set TRUE if estimates include more than one state (e.g., if area of 
+	interest crosses more than one state - Manti-LaSal). }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
-  \item{out_dsn}{ String. Data source name for output. If extension is not
-	included, out_fmt is used. Use full path if outfolder=NULL. }
-  \item{out_fmt}{ String. File format for output ('csv', 'sqlite','gpkg', 'gdb').
-	If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed. If
-	out_fmt='gdb', arcgisbinding package and R-Bridge must be installed. }
   \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE, 
 	outfolder is the working directory. }
-  \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{...}{ Parameters to FIESTA::modGBpop(). }
 }
  
 \value{
-  Data.
+  Set of population data from FIESTA::modGBpop() for each Evaluation specified.
 }
 \examples{
+
+  ## Calculate population data for Utah, area evaluations 2015-2019
   GBpoplst <- anGBpop_eval(evalEndyrlst=c(2015:2019), states="Utah", 
 	evalType="CURR")
 
+  ## Get acres by forest type from each Evaluation in GBpoplst
   lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
 	landarea="FOREST", row.FIAname=TRUE))
 

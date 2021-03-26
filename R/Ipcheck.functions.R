@@ -179,8 +179,10 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   if (.Platform$OS.type=="windows") {
     Filters=rbind(Filters,shp=c("Shapefiles (*.shp)", "*.shp"))
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
-    Filters=rbind(Filters,sqlite=c("Comma-delimited files (*.sqlite)", "*.sqlite"))
-    Filters=rbind(Filters,gpkg=c("Comma-delimited files (*.gpkg)", "*.gpkg")) }
+    Filters=rbind(Filters,sqlite=c("SQLite database (*.sqlite)", "*.sqlite"))
+    Filters=rbind(Filters,sqlite=c("SQLite database (*.db)", "*.db"))
+    Filters=rbind(Filters,sqlite=c("SQLite database (*.db3)", "*.db3"))
+    Filters=rbind(Filters,gpkg=c("GeoPackage SQLite database (*.gpkg)", "*.gpkg")) }
   tabdblst <- c("sqlite", "gpkg")
 
   if (is.null(tabnm)) {
@@ -281,7 +283,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     tab_dsn <- tab
 
   if (!is.null(tab_dsn) && !file.exists(tab_dsn)) {
-    extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb")
+    extlst <- c("shp", "csv", "sqlite", "sqlite3", "db", "db3", "gpkg", "gdb")
     ext <- extlst[sapply(extlst, function(x, tab_dsn) 
 				file.exists(paste(tab_dsn, x, sep=".")), tab_dsn)]
     if (length(ext) == 1)
@@ -307,7 +309,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   } else if (tabext %in% tabdblst) {
     if (is.null(tab) || !is.character(tab)) 
       stop("tab is invalid")
-    if (tabext %in% c("sqlite", "gpkg")) {
+    if (tabext %in% c("sqlite", "sqlite3", "db", "db3", "gpkg")) {
       if (!"RSQLite" %in% rownames(installed.packages()))
         stop("importing spatial layers requires package RSQLite")
       dbconn <- DBtestSQLite(tab_dsn, dbconnopen=TRUE, showlist=FALSE) 
@@ -548,49 +550,71 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
 
 
 pcheck.output <- function(out_dsn=NULL, out_fmt="csv", outfolder=NULL, 
-	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE,
-	gui=FALSE) {
+	append_layer=FALSE, outfn.pre=NULL, layer.pre=NULL, outfn.date=FALSE,
+ 	overwrite_dsn=FALSE, overwrite_layer=TRUE, gui=FALSE) {
 
   ## Check out_fmt
   ###########################################################
-  out_fmtlst <- c('sqlite', 'gpkg', 'csv', 'gdb')
+  out_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb')
   out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
 		caption="Out format", gui=gui)
-
-  ## check append_layer
-  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
-		title="append data", first="NO", gui=gui)
-
-  ## check overwrite
-  overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="overwrite", first="NO", gui=gui)
-
 
   ## Check for necessary packages
   ###########################################################
   if (out_fmt %in% c("sqlite", "gpkg")) {
-    if (!"RSQLite" %in% rownames(installed.packages()))
+    if (!"RSQLite" %in% rownames(installed.packages())) {
       stop("RSQLite package is required for exporting to sqlite or gpkg formats")
+    }
   } else if (out_fmt %in% c("gdb")) {
-    if (!"arcgisbinding" %in% rownames(installed.packages()))
+    if (!"arcgisbinding" %in% rownames(installed.packages())) {
       stop("arcgisbinding package is required for exporting to gdb format")
+    }
     arcgisbinding::arc.check_product()
+  }
+ 
+  ## check append_layer
+  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
+		title="append data", first="NO", gui=gui)
+
+  ## check overwrite_dsn
+  overwrite_dsn <- FIESTA::pcheck.logical(overwrite_dsn, varnm="overwrite_dsn", 
+		title="overwrite_dsn", first="NO", gui=gui)
+
+  ## check overwrite_layer
+  overwrite_layer <- FIESTA::pcheck.logical(overwrite_layer, varnm="overwrite_layer", 
+		title="overwrite_layer", first="NO", gui=gui)
+
+  ## check outfn.pre
+  if (!is.null(outfn.pre) && (!is.vector(outfn.pre) || length(outfn.pre) > 1)) {
+    stop("invalid outfn.pre")
+  }
+ 
+  ## check layer.pre
+  if (!is.null(layer.pre) && (!is.vector(layer.pre) || length(layer.pre) > 1)) {
+    stop("invalid layer.pre")
   }
 
   ## Check file name
   ###########################################################
   chkfn <- checkfilenm(out_dsn, outfolder=outfolder)
-  if (is.null(chkfn) || overwrite) {
+  if (is.null(chkfn) || overwrite_dsn) {
     out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
-		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "data",
+		outfn.date=outfn.date, overwrite=overwrite_dsn, outfn.default = "data",
 		ext=out_fmt, append=append_layer)
   } else {
     out_dsn <- chkfn
   }
   outfolder <- dirname(out_dsn)
-  out_dsn <- paste(basename.NoExt(out_dsn), out_fmt, sep=".")
+  out_dsn <- basename(out_dsn)
 
-  return(list(out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn))
+  ## check append_layer
+  if (append_layer) {
+    overwrite_layer <- FALSE
+  }
+
+  return(list(out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn,
+	overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+	append_layer=append_layer, outfn.date=outfn.date))
 } 
 
 

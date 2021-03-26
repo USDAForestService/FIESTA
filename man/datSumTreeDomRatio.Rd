@@ -8,9 +8,10 @@
 }
 \usage{
 datSumTreeDomRatio(ndat, ddat, uniqueid = "PLT_CN", nprefix = NULL, dprefix = NULL, 
-	rprefix = "r", datround = NULL, savedata = FALSE, out_layer = NULL, outfolder = NULL,
- 	out_fmt = "csv", out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = FALSE)
+	rprefix = "r", datround = NULL, savedata = FALSE, outfolder = NULL,
+ 	out_fmt = "csv", out_dsn = NULL, out_layer = NULL, outfn.pre = NULL, 
+	layer.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer=FALSE, append_layer = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,19 +25,21 @@ datSumTreeDomRatio(ndat, ddat, uniqueid = "PLT_CN", nprefix = NULL, dprefix = NU
   \item{rprefix}{ String. The prefix variable identifier of new ratio variables (default="r"). }
   \item{datround}{ Integer. Number of digits to round ratio values to. }
   \item{savedata}{ Logical. If TRUE, writes output data to outfolder. }
-  \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE, 
-	outfolder is the working directory. }
-  \item{out_layer}{ String. The output name of data table. If NULL, 'rprefix_data'. } 
-  \item{out_fmt}{ String. File format for output ('csv', 'sqlite','gpkg', 'gdb').
-	If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed. If
-	out_fmt='gdb', arcgisbinding package and R-Bridge must be installed. }
+  \item{outfolder}{ String. Name of the output folder. If savedata=TRUE, output is
+	saved to the outfolder. }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg'). }
   \item{out_dsn}{ String. Data source name for output. If extension is not
 	included, out_fmt is used. Use full path if outfolder=NULL. }
-  \item{append_layer}{ Logical. If TRUE, appends to existing out_dsn. The out_dsn
-	a database or shapefile. If FALSE, the out_dsn will be overwritten if exists. }
-  \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE, overwrite data. }
+  \item{out_layer}{ String. Name of output layer in database or *.csv file, 
+	if savedata=TRUE. If NULL, the file will be named tsum_'date'.csv. }
+  \item{outfn.pre}{ String. Prefix for out_dsn. }
+  \item{layer.pre}{ String. Prefix for out_layer. }
+  \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer in raw_dsn
+	or *.csv raw data layer, if datsource="csv". }
+  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data data frames 
+	to existing out_dsn layer or *.csv file. }  
 }
 \value{
   \item{rdat}{ Data frame. Table with ratio values (ndat / ddat). }

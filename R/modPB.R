@@ -416,7 +416,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
         unit.rowest <- PBgetest(unit.rowest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
         setkeyv(unit.rowest, c(unitvar, rowvar))
       } else {
-        unit.rowest <- PBgetest(unit.rowest, phatcol=phatcol, phatcol.var=phatcol.var)
+        unit.rowest <- PBgetest(xdat=copy(unit.rowest), phatcol=phatcol, phatcol.var=phatcol.var)
       }
     }
   }
@@ -445,7 +445,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       unit.colest <- PBgetest(unit.colest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
       setkeyv(unit.colest, c(unitvar, colvar))
     } else {
-      unit.colest <- PBgetest(unit.colest, phatcol=phatcol, phatcol.var=phatcol.var)
+      unit.colest <- PBgetest(xdat=copy(unit.colest), phatcol=phatcol, phatcol.var=phatcol.var)
     }
   }
   if (!is.null(unit.grpest)) {
@@ -462,7 +462,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
       unit.colest <- PBgetest(unit.grpest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
       setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
     } else {
-      unit.grpest <- PBgetest(unit.grpest, phatcol=phatcol, phatcol.var=phatcol.var)
+      unit.grpest <- PBgetest(xdat=copy(unit.grpest), phatcol=phatcol, phatcol.var=phatcol.var)
     }
   }
         
@@ -642,9 +642,9 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## GAIN/LOSS
   if (gainloss) {
 
-    if (is.null(rowvar) || is.null(colvar))
+    if (is.null(rowvar) || is.null(colvar)) {
       stop("must have rowvar and colvar to calculate gain/loss") 
- 
+    }
     ## Check
     rowcolvals <- unique(c(pltdom.grp[[rowvar]], pltdom.grp[[colvar]]))
 

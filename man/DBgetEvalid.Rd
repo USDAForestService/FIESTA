@@ -12,9 +12,10 @@
 	one or more states. See details for more information.
 }
 \usage{
-DBgetEvalid(states = NULL, RS = NULL, invtype = "ANNUAL", evalCur = TRUE, 
-	evalEndyr = NULL, evalid = NULL, evalAll = FALSE, evalType = "VOL", 
-	invyrtab = NULL, gui = FALSE)
+DBgetEvalid(states = NULL, RS = NULL, datsource = "datamart", data_dsn = NULL, 
+	invtype = "ANNUAL", evalCur = TRUE, evalEndyr = NULL, evalid = NULL, 
+	evalAll = FALSE, evalType = "VOL", invyrtab = NULL, 
+	ppsanm = "pop_plot_stratum_assgn", gui = FALSE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name (e.g., 'Arizona','New Mexico') or 
@@ -22,6 +23,9 @@ DBgetEvalid(states = NULL, RS = NULL, invtype = "ANNUAL", evalCur = TRUE,
 	Station is desired, set states=NULL and use RS argument to define RS. }
   \item{RS}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS').
 	Do not use if states is populated. }
+  \item{datsource}{ Source of data ('datamart', 'sqlite'). }
+  \item{data_dsn}{ If datsource='sqlite', the file name (data source name) of the 
+	sqlite database (*.sqlite). }
   \item{invtype}{ String. The type of FIA data to extract ('PERIODIC', 'ANNUAL').  
 	See further details below. }
   \item{evalCur}{ Logical. If TRUE, the most current evalidation is extracted for state(s). }
@@ -41,6 +45,7 @@ DBgetEvalid(states = NULL, RS = NULL, invtype = "ANNUAL", evalCur = TRUE,
 	for regional availability and/or differences. }
   \item{invyrtab}{ Data frame. A data frame including inventory years by state. If NULL,
 	it is generated from SURVEY table from FIA database based on states and invtype. }
+  \item{ppsanm}{ String. Name of pop_plot_assgn_layer in database. }
   \item{gui}{ Logical. If TRUE, gui windows pop up for parameter selection. }
 }
 

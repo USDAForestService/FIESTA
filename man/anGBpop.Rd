@@ -64,9 +64,12 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL",
 }
 \examples{
 
-  ## Get population data using strata and area estimates for evaluations ending 2015 to 2019
+  ## Get data for WY Bighorn administrative boundary using 
   WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
-  GBpop <- anGBpop(WYbhfn, datsource="datamart")
+  fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
+
+  ## Get population data for generating GB estimates
+  GBpop <- anGBpop(WYbhfn, datsource="datamart", strat_layer=fornffn)
   names(GBpop)
 
   names(GBpop$GBdata)

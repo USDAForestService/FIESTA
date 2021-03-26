@@ -1,7 +1,8 @@
 DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL, 
 	evalCur=TRUE, evalEndyr=NULL, evalAll=FALSE, evalType="VOL", savedata=FALSE, 
-	outfolder=NULL, out_fmt="csv", out_dsn=NULL, append_layer=FALSE, outfn.pre=NULL,
- 	outfn.date=FALSE, overwrite=FALSE, getassgn=TRUE, POP_PLOT_STRATUM_ASSGN=NULL){
+	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, getassgn=TRUE, 
+	POP_PLOT_STRATUM_ASSGN=NULL){
   ######################################################################################
   ## DESCRIPTION: This function gets the strata info and area by estimation unit from 
   ##		FIA Database, extracts and merges plot-level assignments to data file, and 
@@ -139,7 +140,8 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite, append_layer=append_layer, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		append_layer=append_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -292,7 +294,8 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
       if (nrow(datstrat) != nrow(datx)) {
         nostrata <- datx[!get(uniqueid) %in% datstrat[[uniqueid]], uniqueid, with=FALSE][[1]]
         if (!all(datx[nostrata, "PLOT_STATUS_CD"][[1]] < 3)) {
-          warn1 <- paste("no strata assignment for", length(nostrata), "plots with PLOT_STATUS_CD = 3")
+          warn1 <- paste("no strata assignment for", length(nostrata), 
+			"plots with PLOT_STATUS_CD = 3")
           if (length(nostrata) <= 20) {
             warning(paste0(warn1, ": ", paste(nostrata, collapse=", ")))
           } else {
@@ -316,7 +319,8 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
     }
 
     ## Generate a table of plot counts by strata/estimation unit from datstrat
-    stratacnt <- datstrat[, list(FIAPLOTS=length(get(datstratid))), by=c(statecd, unitvar, strvar)]
+    stratacnt <- datstrat[, list(FIAPLOTS=length(get(datstratid))), 
+		by=c(statecd, unitvar, strvar)]
     setkeyv(stratacnt, c(statecd, unitvar, strvar))
 
     ## Merge pixel counts and area by estimation unit
@@ -329,18 +333,18 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   if (savedata) {
      datExportData(unitarea, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 			append_layer=append_layer, outfn.pre=outfn.pre)
 
     datExportData(stratalut, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 			append_layer=append_layer, outfn.pre=outfn.pre)
 
     if (getassgn) {
       datExportData(datstrat, outfolder=outfolder, 
 			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-			outfn.date=outfn.date, overwrite_layer=overwrite,
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 			append_layer=append_layer, outfn.pre=outfn.pre)
     }
   }

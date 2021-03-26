@@ -14,7 +14,7 @@ DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
     stop("accessing SQLite databases requires package RSQLite")
 
   ## Check gpkg
-  dbext <- ifelse(gpkg, ".gpkg", ".sqlite")
+  dbext <- ifelse(gpkg, ".gpkg", ".db")
 
   ## Check filename
   SQLitePath <- checkfilenm(SQLitefn, outfolder, stopifnull=stopifnull)

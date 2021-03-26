@@ -32,6 +32,33 @@ anGBpop_report(GBpopdat, AOInm, photofn = NULL, photo_author = NULL,
 	If variables are NULL, then it will prompt user to input variables.
 		
 }
+\examples{
+ 
+  ## Calculate population data for Utah, area evaluations 2015-2019
+  GBpop <- anGBpop_eval(evalEndyrlst=2019, states="Utah", isseed=TRUE, 
+	evalType="VOL")[[1]]
+
+  ## Generate report for stat of Utah
+  anGBpop_report(GBpop, AOInm="Utah", EVALIDator_match=TRUE)
+
+  ## Change focus species to Engelmann spruce/subpalpine fir
+  anGBpop_report(GBpop, AOInm="Utah", EVALIDator_match=TRUE, spcd=c(19,93))
+
+
+  ## Get data for WY Bighorn administrative boundary using 
+  WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+  fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
+  photofn <- system.file("rmd", "bighorn.jpg", package="FIESTA")
+
+  ## Get population data for generating GB estimates
+  GBpopbh <- anGBpop(WYbhfn, datsource="datamart", isseed=TRUE, popType="VOL", strat_layer=fornffn)
+  names(GBpopbh)
+
+  ## Generate report for Bighorn National Forest
+  anGBpop_report(GBpopbh$GBpopdat, AOInm="Bighorn National Forest", EVALIDator_match=FALSE,
+	photofn=photofn, photo_author="Tracey S. Frescino")
+
+}
 \author{
 	Tracey S. Frescino
 }

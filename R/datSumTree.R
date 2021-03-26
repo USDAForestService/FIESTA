@@ -3,8 +3,10 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 	condid="CONDID", bysubp=FALSE, subpid="SUBP", tsumvarlst=NULL, 
 	tsumvarnmlst=NULL, TPA=TRUE, tfun=sum, ACI=FALSE, tfilter=NULL, 
 	addseed=FALSE, lbs2tons=TRUE, getadjplot=FALSE, adjtree=FALSE, adjTPA=1, 
-	NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_layer=NULL, outfn.date=TRUE, 
-	overwrite=FALSE, tround=16, checkNA=FALSE, returnDT=TRUE){
+	NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
+	out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
+	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, tround=16, 
+	checkNA=FALSE, returnDT=TRUE){
   ####################################################################################
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
   ##        using specified tree filters (ex. live trees only)
@@ -24,7 +26,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
-  seedonly <- FALSE
+  seedonly=parameters <- FALSE
 
 
   ## SET OPTIONS
@@ -492,18 +494,27 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     tround <- 6
   }
 
-  ### GET savedata 
+  ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="NO", gui=gui)
 
-  ## GET outfolder
-  if (savedata) {
-    outfolder <- pcheck.outfolder(outfolder, gui)
+  ## If savedata, check output file names
+  ################################################################
+  if (savedata) { 
+    outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
 
-    ## out_layer
-    if (is.null(out_layer))
+    ## outfn
+    if (is.null(out_layer) || gsub(" ", "", out_layer) == "") {
       out_layer <- "tsum"
-    outfn.param <- paste(out_layer, "param", sep="_")
+    }
+    if (!is.null(layer.pre)) {
+      out_layer <- paste(layer.pre, out_layer, sep="_")
+    }
   }
 
   ################################################################################  
@@ -680,9 +691,10 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     ## Change NA values TO 0
     for (col in tsumvarnmlst2) set(sumdat, which(is.na(sumdat[[col]])), col, 0) 
 
-  if (savedata) {
+  if (savedata && parameters) {
     ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
     ###########################################################
+    outfn.param <- paste(out_layer, "parameters", sep="_")
     outparamfnbase <- paste(outfn.param, format(Sys.time(), "%Y%m%d"), sep="_")
     outparamfn <- fileexistsnm(outfolder, outparamfnbase, "txt")
 
@@ -717,7 +729,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       "outfolder = \"", outfolder, "\"", "\n",
       "out_layer = ", out_layer, "\n",
       "outfn.date = ", outfn.date, "\n",
-      "overwrite= ", overwrite, "\n",
+      "overwrite_dsn = ", overwrite_dsn, "\n",
       "tround = \"", tround, "\"", "\n", "\n",
     file = outfile, sep="")
 
@@ -727,17 +739,20 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 	tsumvarnmlst=tsumvarnmlst, TPA=TPA, tfun=tfun, ACI=ACI, tfilter=tfilter, 
 	lbs2tons=lbs2tons, getadjplot=getadjplot, adjtree=adjtree, adjTPA=adjTPA, 
 	NAto0=NAto0, savedata=savedata, outfolder=outfolder, out_layer=out_layer, 
-	outfn.date=outfn.date, overwrite=overwrite, tround=tround)",
+	outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, tround=tround)",
     file = outfile, sep="")
     close(outfile)
 
     #### WRITE TO FILE 
     #############################################################
-    if (pltsp)  
+    if (pltsp) {
       spExportSpatial(sumdat, out_dsn=plt_dsn, out_layer=out_layer, 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-    write2csv(sumdat, outfolder=outfolder, outfilenm=out_layer, 
-		outfn.date=outfn.date, overwrite=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
+		append_layer=append_layer)
+    }
+    datExportData(sumdat, outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn,
+		out_layer=out_layer, outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer)
   } 
 
   if (!returnDT) {     

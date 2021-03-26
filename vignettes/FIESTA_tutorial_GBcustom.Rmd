@@ -174,6 +174,7 @@ stratdat.bhdist <- spGetStrata(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yv
     prj="longlat", datum="NAD83", unit_layer=WYbhdistfn, unitvar="DISTRICTNA",
     strat_layer=fornffn, rast.NODATA=0)
 
+## Extract list output from spGetStrata()
 names(stratdat.bhdist)
 pltassgn.bhdist <- stratdat.bhdist$pltassgn
 unitarea.bhdist <- stratdat.bhdist$unitarea
@@ -211,8 +212,7 @@ areavar.bhdist
 #   vspspp = NULL, subplot = NULL, subp_cond = NULL, pltassgn = NULL, dsn = NULL,  
 #   puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", tuniqueid = "PLT_CN",     
 #   cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", adj = "samp",  
-#   evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE,      
-#   plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL,    
+#   evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE, unitvar = NULL,    
 #   unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
 #   minplotnum.unit = 10, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD",    
 #   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE,  
@@ -572,7 +572,6 @@ help(modGBratio)
 ## By Bighorn National Forest ##
 ## Tree ratio estimates for a customized population (e.g., Bighorn National Forest)
 ######################################################################################
-
 ## Volume per acre of live trees by forest type and stand-size class for Bighorn National Forest
 volrat.bh <- modGBratio(GBpopdat=GBpopdat.bh, tree=WYtree, cond=WYcond, 
   rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE, 

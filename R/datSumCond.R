@@ -1,7 +1,8 @@
 datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN", 
 	puniqueid="CN", csumvar=NULL, csumvarnm=NULL, cfilter=NULL, getadjplot=FALSE, 
-	adjcond=FALSE, NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_layer=NULL,
- 	outfn.date=TRUE, overwrite=FALSE, returnDT=TRUE){
+	adjcond=FALSE, NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv",
+	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
+	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, returnDT=TRUE){
   #####################################################################################
   ## DESCRIPTION: Aggregates CONDPROP_UNADJ variable or other continuous condition 
   ##	variables to plot level with option to apply condition filters. If condition 
@@ -93,20 +94,30 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   adjcond <- FIESTA::pcheck.logical(adjcond, varnm="adjcond", 
 		title="Adjust conditions?", first="NO", gui=gui)
 
-  ### Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, "Save data tables?", "NO")
 
-  ### Check overwrite
-  overwrite <- FIESTA::pcheck.logical(overwrite, "Save data tables?", "NO")
+  ## Check savedata 
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data tables?", first="NO", gui=gui)
 
-  ## GET outfolder
-  if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+  ## If savedata, check output file names
+  ################################################################
+  if (savedata) { 
+    outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
 
-    ## out_layer
-    if (is.null(out_layer))
+    ## outfn
+    if (is.null(out_layer) || gsub(" ", "", out_layer) == "") {
       out_layer <- "condsum"
+      if (!is.null(layer.pre)) {
+        out_layer <- paste(layer.pre, out_layer, sep="_")
+      }
+    }
   }
+
 
 
   ################################################################################  
@@ -155,16 +166,17 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
     if (pltsp) {
       spExportSpatial(condf.sum, out_dsn=plt_dsn, out_layer=out_layer,
 			outfolder=outfolder, outfn.date=outfn.date, 
-			overwrite_layer=overwrite)
-    } else {
-      FIESTA::write2csv(condf.sum, outfolder=outfolder, outfilenm=out_layer, 
-		outfn.date=outfn.date, overwrite=overwrite)
+			overwrite_layer=overwrite_layer, append_layer=append_layer)
     }
+    datExportData(condf.sum, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer=out_layer, outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer)
+    
   }  
 
-  if (!returnDT)      
+  if (!returnDT) {     
     condf.sum <- setDF(condf.sum)
- 
+  }
   sumcondlst <- list(condsum=condf.sum, csumvarnm=csumvarnm)
   if (!is.null(cfilter))
     sumcondlst$cfilter <- cfilter

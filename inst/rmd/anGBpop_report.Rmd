@@ -53,7 +53,14 @@ if (!is.null(popfilter) && "STATECD" %in% names(GBpopdat$pltcondx)) {
   invyrs <- unique(pltcondf$INVYR)
 }
 
-title.states <- paste(states, collapse=" and ")
+if (is.null(cfilter) && is.null(pfilter)) {
+  title.statesx=title.states <- NULL
+  title.filter <- NULL
+} else {
+  title.statesx <- paste(states, collapse=" and ")
+  title.states <- paste0(", ", paste(states, collapse=" and "))
+  title.filter <- AOInm
+}
 invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
 stcd <- pcheck.states(states, statereturn="VALUE")
 
@@ -72,7 +79,7 @@ spcd.filter <- paste0("SPCD %in% c(", toString(spcd), ")")
 
 
 ## Photo text
-photo_text <- paste0("Photo from the ", AOInm, ", ", title.states, ".")
+photo_text <- paste0("Photo from ", AOInm, title.states, ".")
 if (!is.null(photo_author)) {
   photo_text <- paste0(photo_text, " Photo courtesy of ", photo_author, ".")
 }
@@ -81,7 +88,7 @@ if (!is.null(photo_author)) {
 
 
 ---
-title: "Forest Resource Report:  \n`r AOInm`, `r title.states`,  \n`r invyrs2`"
+title: "Forest Resource Report:  \n`r AOInm``r title.states`,  \n`r invyrs2`"
 ---
 
 
@@ -140,7 +147,7 @@ nplotspop <- sum(stratalut[, sum(n.total, na.rm=TRUE), by=unitvars][["V1"]])
 nplotspopf <- totest$NBRPLT.gt0
 
 
-intro_text1 <- paste0("The area of ", AOInm, " located in ", title.states, " is ", format(round(areapopf), big.mark=","), " acres with ", round(area.for/areapopf * 100), " percent of the area classified as forest land, ", round(area.nf/areapopf * 100), " percent classified as nonforest land, and ", round(area.water/areapopf * 100), " percent as water.") 
+intro_text1 <- paste0("The area of ", AOInm, " located in ", title.statesx, " is ", format(round(areapopf), big.mark=","), " acres with ", round(area.for/areapopf * 100), " percent of the area classified as forest land, ", round(area.nf/areapopf * 100), " percent classified as nonforest land, and ", round(area.water/areapopf * 100), " percent as water.") 
 
 
 if (!EVALIDator_match) {
@@ -182,9 +189,7 @@ paste0("Estimates are calculated using the Forest Inventory ESTimation and Analy
 
 \newpage
 
-
 &nbsp;  
-
 
 -----  
 
@@ -195,7 +200,7 @@ paste0("Estimates are calculated using the Forest Inventory ESTimation and Analy
 -----  
 
 
-Table 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;    
 
@@ -206,7 +211,7 @@ estdat_EST1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		sumunits=TRUE, estvarn.filter="STATUSCD == 1 & DIA >= 1.0", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST1_raw_rowest <- estdat_EST1$raw$rowest
 
@@ -237,14 +242,12 @@ knitr::kable(EST1, "simple", align=c("lrr"), digits=c(0,2,0),
 
 anMOD_barplot(estdat_EST1, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
 ```
-Figure 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage    
 
-
 &nbsp;    
-
 
 -----  
 
@@ -255,7 +258,7 @@ Figure 1. Number of live trees (>= 1.0 in dia) per acre by forest type group, `r
 -----  
 
 
-Table 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -266,7 +269,7 @@ estdat_EST2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		estvarn.filter="TREECLCD == 2 & DIA >= 5.0", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST2_raw_rowest <- estdat_EST2$raw$rowest
 
@@ -298,14 +301,12 @@ knitr::kable(EST2, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST2, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
   
 ```
-Figure 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;    
-
 
 -----  
 
@@ -316,7 +317,7 @@ Figure 2. Number of growing-stock trees (>= 5.0 in dia) per acre by forest type 
 -----  
 
 
-Table 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;    
 
@@ -327,7 +328,7 @@ estdat_EST3 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		estvarn.filter="STATUSCD == 1", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST3_raw_rowest <- estdat_EST3$raw$rowest
 
@@ -359,14 +360,12 @@ knitr::kable(EST3, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST3, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;    
-
 
 -----   
 
@@ -377,7 +376,7 @@ Figure 3. Basal area (square feet) of live trees (>= 1.0 in dia) per acre by for
 -----  
 
 
-Table 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;    
 
@@ -387,7 +386,7 @@ estdat_EST4_v1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		pfilter=pfilter, cfilter=cfilter, estvarn="TPA_UNADJ", estseed="only", 
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST4_v1_raw_rowest <- estdat_EST4_v1$raw$rowest
 
@@ -419,14 +418,12 @@ knitr::kable(EST4_v1, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST4_v1, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage 
 
-
 &nbsp;    
-
 
 -----   
 
@@ -437,7 +434,7 @@ Figure 4. Number of live seedlings (< 1.0 in dia) per acre by forest type group,
 -----  
 
 
-Table 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;   
 
@@ -449,7 +446,7 @@ estdat_EST4_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.estvarn=paste0("Number of seedlings (", title.spcd, ") (less than 1.0 in dia) per acre"),
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST4_v2_raw_rowest <- estdat_EST4_v2$raw$rowest
 
@@ -481,14 +478,12 @@ knitr::kable(EST4_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST4_v2, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;    
-
 
 -----  
 
@@ -499,7 +494,7 @@ Figure 5. Number of live `r title.spcd` seedlings (< 1.0 in dia) per acre by for
 -----  
 
 
-Table 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;   
 
@@ -511,7 +506,7 @@ estdat_EST5 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		estvarn.filter="STATUSCD == 1 & DIA >= 5.0",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST5_raw_rowest <- estdat_EST5$raw$rowest
 
@@ -543,14 +538,12 @@ knitr::kable(EST5, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST5, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;    
-
 
 -----  
 
@@ -561,7 +554,7 @@ Figure 6. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia
 -----  
 
 
-Table 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;   
 
@@ -572,7 +565,7 @@ estdat_EST6 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		estvarn.filter="STATUSCD == 1 & DIA >= 5.0",
 		rowvar="SPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST6_raw_rowest <- estdat_EST6$raw$rowest
 
@@ -587,9 +580,7 @@ knitr::kable(EST6, "simple", align=c("lrr"), digits=c(0,2,0),
 
 \newpage
 
-
 &nbsp;    
-
 
 -----  
 
@@ -607,14 +598,12 @@ knitr::kable(EST6, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST6, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) per acre by species, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;    
-
 
 ----- 
 
@@ -625,7 +614,7 @@ Figure 7. Net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia
 ----- 
 
 
-Table 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;   
 
@@ -636,7 +625,7 @@ estdat_EST7 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST",
 		estvar="VOLCFNET", estvar.filter="STATUSCD == 1 & DIA >= 5.0",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		divideby="million", title.filter=AOInm)
+		divideby="million", title.filter=title.filter)
 
 estdat_EST7_raw_rowest <- estdat_EST7$raw$rowest
 
@@ -669,14 +658,12 @@ anMOD_barplot(estdat_EST7, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL,
               divideby="million")
 
 ```
-Figure 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 in dia) by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -687,7 +674,7 @@ Figure 8. Total net merchantable bole volume (cubic feet) of live trees (>= 5.0 
 ----- 
 
 
-Table 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -699,7 +686,7 @@ estdat_EST8_v1 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.estvarn="Number of standing-dead trees (at least 8.0 in dia) per acre",
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST8_v1_raw_rowest <- estdat_EST8_v1$raw$rowest
 
@@ -731,14 +718,12 @@ knitr::kable(EST8_v1, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST8_v1, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -749,7 +734,7 @@ Figure 9. Number of standing dead trees (>= 8.0 in dia) per acre by forest type 
 ----- 
 
 
-Table 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -761,7 +746,7 @@ estdat_EST8_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
 		title.estvarn="Number of standing-dead trees (at least 18.0 in dia) per acre",
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST8_v2_raw_rowest <- estdat_EST8_v2$raw$rowest
 
@@ -793,14 +778,12 @@ knitr::kable(EST8_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST8_v2, barplot.row=TRUE,barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -811,7 +794,7 @@ Figure 10. Number of standing dead trees (>= 18.0 in dia) per acre by forest typ
 ----- 
 
 
-Table 11. Acres of forestland by stand age up to 100 years in 20 year interval classes, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 11. Acres of forestland by stand age up to 100 years in 20 year interval classes, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -829,7 +812,7 @@ GBpopdat$pltcondx <- datlut_EST9_v1$xLUT
 estdat_EST9_v1 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
 		pfilter=pfilter, cfilter=cfilter,	rowvar="STDAGENM",
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.rowvar="stand age class",	title.filter=AOInm,
+		title.rowvar="stand age class",	title.filter=title.filter,
 		divideby="thousand")
 
 estdat_EST9_v1_raw_rowest <- estdat_EST9_v1$raw$rowest
@@ -863,14 +846,12 @@ anMOD_barplot(estdat_EST9_v1, barplot.row=TRUE,barplot.nplt=TRUE,
               barplot.ord=NULL, divideby="thousand")
 
 ```
-Figure 11. Acres of forestland by stand age up to 100 years in 20 year interval classes, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 11. Acres of forestland by stand age up to 100 years in 20 year interval classes, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -881,7 +862,7 @@ Figure 11. Acres of forestland by stand age up to 100 years in 20 year interval 
 ----- 
 
 
-Table 12. Acres of forestland by stand age up to 500 years in 20 year interval classes, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 12. Acres of forestland by stand age up to 500 years in 20 year interval classes, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp; 
 
@@ -906,7 +887,7 @@ GBpopdat$pltcondx <- datlut_EST9_v2$xLUT
 estdat_EST9_v2 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
 		pfilter=pfilter, cfilter=cfilter, rowvar="STDAGENM",
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.rowvar="stand age class",	title.filter=AOInm,
+		title.rowvar="stand age class",	title.filter=title.filter,
 		divideby="thousand")
 
 estdat_EST9_v2_raw_rowest <- estdat_EST9_v2$raw$rowest
@@ -921,9 +902,7 @@ knitr::kable(EST9_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -942,14 +921,12 @@ anMOD_barplot(estdat_EST9_v2, barplot.row=TRUE,barplot.nplt=TRUE,
               barplot.ord=NULL, divideby="thousand")
 
 ```
-Figure 12. Acres of forestland by stand age up to 500 years in 20 year interval classes, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 12. Acres of forestland by stand age up to 500 years in 20 year interval classes, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -960,7 +937,7 @@ Figure 12. Acres of forestland by stand age up to 500 years in 20 year interval 
 ----- 
 
 
-Table 13. Acres of forest by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 13. Acres of forest by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -969,7 +946,7 @@ Table 13. Acres of forest by forest type group, `r AOInm`, `r title.states`, `r 
 estdat_EST10 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
 		pfilter=pfilter, cfilter=cfilter, rowvar="FORTYPGRPCD", row.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm, divideby="thousand")
+		title.filter=title.filter, divideby="thousand")
 
 estdat_EST10_raw_rowest <- estdat_EST10$raw$rowest
 
@@ -1002,14 +979,12 @@ anMOD_barplot(estdat_EST10, barplot.row=TRUE,barplot.nplt=TRUE,
               barplot.ord=NULL, divideby="thousand")
   
 ```
-Figure 13. Acres of forest by forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 13. Acres of forest by forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -1020,7 +995,7 @@ Figure 13. Acres of forest by forest type group, `r AOInm`, `r title.states`, `r
 ----- 
 
 
-Table 14. Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Table 14. Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
   
@@ -1035,7 +1010,7 @@ estdat_EST11_v1 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST",
     sumunits=TRUE, pfilter=pfilter, cfilter=cfilter, estseed="add",
 		estvar="TPA_UNADJ", estvar.filter=paste("STATUSCD == 1", spcd.filter, sep=" & "), rowvar="DIACL",
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		divideby="million", title.filter=AOInm,
+		divideby="million", title.filter=title.filter,
 		title.rowvar=paste("diameter class of", title.spcd))
 
 estdat_EST11_v1_raw_rowest <- estdat_EST11_v1$raw$rowest
@@ -1070,14 +1045,12 @@ knitr::kable(EST11_v1, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST11_v1, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL, divideby="million")
 
 ```
-Figure 14. Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 14. Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -1088,7 +1061,7 @@ Figure 14. Number of live `r title.spcd` stems by diameter class (0 - <1, 1 - <5
 ----- 
 
 
-Table 15. Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Table 15. Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
   
@@ -1103,7 +1076,7 @@ estdat_EST11_v2 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
     sumunits=TRUE, pfilter=pfilter, cfilter=cfilter, estseed="add",
 		estvarn="TPA_UNADJ", estvarn.filter=paste("STATUSCD == 1", spcd.filter, sep=" & "), rowvar="DIACL", 
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm, title.rowvar=paste("diameter class of", title.spcd))
+		title.filter=title.filter, title.rowvar=paste("diameter class of", title.spcd))
 
 estdat_EST11_v2_raw_rowest <- estdat_EST11_v2$raw$rowest
 
@@ -1137,14 +1110,12 @@ knitr::kable(EST11_v2, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST11_v2, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 15. Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 15. Number of live `r title.spcd` stems per acre by diameter class (0 - <1, 1 - <5, 5 - <8, 8 - <18, 18+ in dia), `r AOInm``r title.states`, `r invyrs2`.
 
 
 \newpage
 
-
 &nbsp;  
-
 
 ----- 
 
@@ -1155,7 +1126,7 @@ Figure 15. Number of live `r title.spcd` stems per acre by diameter class (0 - <
 -----  
 
 
-Table 16. Basal area (square feet) per acre by forest type and stand age classes (up to 500 years in 20 year intervals), `r AOInm`, `r title.states`, `r invyrs2`.
+Table 16. Basal area (square feet) per acre by forest type and stand age classes (up to 500 years in 20 year intervals), `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -1181,7 +1152,7 @@ estdat_EST12 <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST",
 		estvarn="BA", estvarn.filter="STATUSCD == 1",
 		rowvar="STDAGENM", colvar="FORTYPGRPCD", col.FIAname=TRUE,
 		rawdata=TRUE, returntitle=TRUE, estround=2, pseround=0,
-		title.filter=AOInm)
+		title.filter=title.filter)
 
 estdat_EST12_raw_grpest <- estdat_EST12$raw$grpest
 
@@ -1196,9 +1167,7 @@ knitr::kable(EST12, "simple", align=c("llrr"), digits=c(0,0,2,0),
 
 \newpage
 
-
 &nbsp;  
-
 
 -----  
 
@@ -1209,7 +1178,7 @@ knitr::kable(EST12, "simple", align=c("llrr"), digits=c(0,0,2,0),
 -----  
 
 
-Table 17. Acres of forest by stand age class (up to 200 years in 5 year intervals) and forest type group, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 17. Acres of forest by stand age class (up to 200 years in 5 year intervals) and forest type group, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -1253,9 +1222,7 @@ knitr::kable(EST13, "simple", align=c("llrr"), digits=c(0,0,2,0),
 
 \newpage
 
-
 &nbsp;  
-
 
 -----  
 
@@ -1266,7 +1233,7 @@ knitr::kable(EST13, "simple", align=c("llrr"), digits=c(0,0,2,0),
 -----  
 
 
-Table 18. Acres of forest by disturbance, `r AOInm`, `r title.states`, `r invyrs2`.
+Table 18. Acres of forest by disturbance, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -1275,7 +1242,7 @@ Table 18. Acres of forest by disturbance, `r AOInm`, `r title.states`, `r invyrs
 estdat_EST14 <- modGBarea(GBpopdat=GBpopdat, landarea="FOREST", 
 		pfilter=pfilter, cfilter=cfilter, rowvar="DSTRBCD1", 
 		row.FIAname=TRUE,	rawdata=TRUE, returntitle=TRUE, 
-		estround=2, pseround=0, title.filter=AOInm)
+		estround=2, pseround=0, title.filter=title.filter)
 
 estdat_EST14_raw_rowest <- estdat_EST14$raw$rowest
 
@@ -1307,7 +1274,7 @@ knitr::kable(EST14, "simple", align=c("lrr"), digits=c(0,2,0),
 anMOD_barplot(estdat_EST14, barplot.row=TRUE, barplot.nplt=TRUE, barplot.ord=NULL)
 
 ```
-Figure 16. Acres of forest by disturbance, `r AOInm`, `r title.states`, `r invyrs2`.
+Figure 16. Acres of forest by disturbance, `r AOInm``r title.states`, `r invyrs2`.
 
 \newpage
 
@@ -1320,10 +1287,11 @@ Figure 16. Acres of forest by disturbance, `r AOInm`, `r title.states`, `r invyr
 
 Bechtold, William A.; Patterson, Paul L.; [Editors] 2005. The enhanced forest inventory and analysis program - national sampling design and estimation procedures. Gen. Tech. Rep. SRS-80. Asheville, NC: U.S. Department of Agriculture, Forest Service, Southern Research Station. 85 p.  
 
-&nbsp;  
+&nbsp;
+
+Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J., Christiansen, G., Conkling, B.L., Winnie, D., 2018. Forest Inventory and Analysis Database [WWW Document]. St Paul MN US Dep. Agric. For. Serv. North. Res. Stn. URL http://apps.fs.fed.us/fiadb-downloads/datamart.html (accessed 3.6.21).
+
+&nbsp; 
 
 Frescino, Tracey S.; Patterson, Paul L.; Moisen, Gretchen G.; Freeman, Elizabeth A. 2015. FIESTA—An R estimation tool for FIA analysts. In: Stanton, Sharon M.; Christensen, Glenn A., comps. 2015. Pushing boundaries: new directions in inventory techniques and applications: Forest Inventory and Analysis (FIA) symposium 2015. 2015 December 8–10; Portland, Oregon. Gen. Tech. Rep. PNW-GTR-931. Portland, OR: U.S. Department of Agriculture, Forest Service, Pacific Northwest Research Station. p. 72.
 
-&nbsp;  
-
-Woudenberg, Sharon W.; Conkling, Barbara L.; O'Connell, Barbara M.; LaPoint, Elizabeth B.; Turner, Jeffery A.; Waddell, Karen L. 2010. The Forest Inventory and Analysis database: database description and users manual version 4.0 for Phase 2. Gen. Tech. Rep. RMRS-GTR-245. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 336 p.

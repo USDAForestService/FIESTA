@@ -63,7 +63,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -134,9 +134,9 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid,
  	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
 	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
-	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=unitvar, unitvar2=unitvar2,
- 	unitcombine=unitcombine, stratcombine=stratcombine, strvar=PSstrvar, 
-	prednames=prednames, predfac=predfac)
+	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=unitarea, unitvar=unitvar, 
+	unitvar2=unitvar2, areavar=areavar, unitcombine=unitcombine, 
+	stratcombine=stratcombine, strvar=PSstrvar, prednames=prednames, predfac=predfac)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
@@ -151,6 +151,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   adj <- popcheck$adj
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
+  areavar <- popcheck$areavar
   unitcombine <- popcheck$unitcombine
   stratcombine <- popcheck$stratcombine
   PSstrvar <- popcheck$strvar
@@ -171,10 +172,10 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   ## Returns: data table with unitvar and area by estimation unit (unitvar)
   ##	 and areavar (default="ACRES")
   ###################################################################################
-  unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
-	unitvars=c(unitvar, unitvar2), areavar=areavar, gui=gui)
-  unitarea <- unitdat$unitarea
-  areavar <- unitdat$areavar
+#  unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
+#	unitvars=c(unitvar, unitvar2), areavar=areavar, gui=gui)
+#  unitarea <- unitdat$unitarea
+#  areavar <- unitdat$areavar
 
   ###################################################################################
   ## CHECK STRATA

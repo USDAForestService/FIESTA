@@ -1,18 +1,28 @@
-anGBpop_evalcustom <- function(evalidlst=NULL, evalEndyrlst=NULL, 
+anGBpop_evalcustom <- function(evalidlst=NULL, evalCur=FALSE, evalEndyrlst=NULL, 
 	bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, evalType="VOL", 
-	data_dsn=NULL, isseed=FALSE, xymeasCur=TRUE, pjoinid="PLOT_ID",  
-	xy_dsn=NULL, xy_layer="xyCur_ACTUAL", xy.uniqueid="PLOT_ID", 
-	xvar="LON_ACTUAL", yvar="LAT_ACTUAL", xy.crs=4269, strat_layer=NULL, 
-	strat_lut=NULL, savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", 
-	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
-	overwrite_layer=TRUE) {
+	datsource="datamart", data_dsn=NULL, isseed=FALSE, intensity1=FALSE, 
+	xymeasCur=TRUE, pjoinid="PLOT_ID", xy_dsn=NULL, xy_layer="xyCur_ACTUAL", 
+	xy.uniqueid="PLOT_ID", xvar="LON_ACTUAL", yvar="LAT_ACTUAL", 
+	xy.crs=4269, strat_layer=NULL, strat_lut=NULL, byEndyr=FALSE, 
+	savedata=FALSE, outfolder=NULL, ...) {
 
   ## DESCRIPTION: get estimates for each evalid in list
   
   ## Set global variables
-  tree=seed <- NULL
+  tree=seed=RS <- NULL
   gui <- FALSE
   istree <- FALSE
+
+
+  ## Check savedata 
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data extraction?", first="NO", gui=gui) 
+
+  ## Check outfolder 
+  if (savedata) {
+    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui=gui)
+  } 
+
 
   #############################################################################
   ## Import boundary
@@ -29,39 +39,51 @@ anGBpop_evalcustom <- function(evalidlst=NULL, evalEndyrlst=NULL,
 			stbnd.att="STATENM", RS=NULL, showsteps=TRUE)$statenames
   stcds <- pcheck.states(states, statereturn = "VALUE")
 
-  ## Generate list of evalids to generate estimates from
-  evalidlst <- data.table::transpose(lapply(stcds, function(x) 
-		paste0(x, substr(evalEndyrlst, 3, 4), "01")))
-  names(evalidlst) <- paste0("eval", evalEndyrlst)
-  
 
-  ## Get evalid list
+  ## Get list of evalids from database
   ########################################################
-  evalidlst <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
-		states=states, RS=NULL, evalType=evalType)$evalidlist
-  evalidlst <- transpose(evalidlst)
-  names(evalidlst) <- paste0("eval", evalEndyrlst)
+  if (datsource == "sqlite") {
+    if (is.null(data_dsn)) {
+      stop("must include data_dsn")
+    }
 
+    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+    tablst <- DBI::dbListTables(dbconn)
+    stratalut <- chkdbtab(tablst, "pop_stratum")
+    unitarea <- chkdbtab(tablst, "pop_estn_unit")
+    pltassgn <- chkdbtab(tablst, ppsanm, stopifnull=TRUE)
+    if (is.null(evalidlst) && !evalCur && is.null(evalEndyrlst)) {
+      evalAll <- TRUE
+    }
+    evaliddat <- DBgetEvalid(datsource=datsource, data_dsn=data_dsn, 
+		RS=RS, states=states, evalAll=evalAll,
+		evalid=evalidlst, evalCur=evalAll, evalEndyr=evalEndyrlst, 
+		evalType=evalType)
+    evalidlst <- evaliddat$evalidlist
 
-  ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data extraction?", first="NO", gui=gui) 
-
-
-  ## If savedata, check output file names
-  ################################################################
-  if (savedata) { 
-    outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite_dsn)
-    out_dsn <- outlst$out_dsn
-    outfolder <- outlst$outfolder
-    out_fmt <- outlst$out_fmt
-#  } else {
-#    out_dsn <- "tmpdat.sqlite"
-#    out_fmt <- "sqlite"
-#    outfolder <- tempdir()
-#    savedata <- TRUE
+  } else {   ## datsource="datamart"
+    evaliddat <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
+		states=states, RS=RS, evalAll=FALSE, evalType=evalType)
+    evalidlst <- evaliddat$evalidlist
+  }
+  if (byEndyr) {
+    if (unique(unlist(lapply(evalidlst, length))) != length(evalEndyrlst)) {
+      message("list of evalids does not match evalEndyrlst")
+      message("evalidlst: ", toString(evalidlst), "\n", 
+			"evalEndyrlst: ", toString(evalEndyrlst))
+      stop()
+    }
+    evalidlst <- transpose(evalidlst)
+    names(evalidlst) <- paste0("eval", evalEndyrlst)
+  } else {
+    evalidlst <- unlist(evalidlst)
+    #evalidstcds <- substr(unlist(evalidlst), nchar(evalidlst)-5, nchar(evalidlst)-4)
+    #evalidstabbr <- sapply(evalidstcds, pcheck.states, statereturn="ABBR")
+    #names(evalidlst) <- paste0(evalidstabbr, evalidlst)
+    names(evalidlst) <- paste0("eval", evalidlst)
+  }  
+  if (any(evalType %in% c("VOL", "CHNG"))) {
+    istree <- TRUE
   }
 
 
@@ -72,8 +94,7 @@ anGBpop_evalcustom <- function(evalidlst=NULL, evalEndyrlst=NULL,
       istree <- TRUE
     }
     pltdat <- DBgetPlots(evalid=evalidlst, istree=istree, isseed=isseed,
-		xymeasCur=xymeasCur, savedata=savedata, out_fmt=out_fmt, 
-		outfolder=outfolder, out_dsn=out_dsn, overwrite_layer=overwrite_layer)
+		intensity1=intensity1, xymeasCur=xymeasCur, savedata=FALSE)
     plt <- pltdat$plt
     cond <- pltdat$cond
     tree <- pltdat$tree
@@ -167,7 +188,7 @@ anGBpop_evalcustom <- function(evalidlst=NULL, evalEndyrlst=NULL,
     stratdat <- FIESTA::spGetStrata(xyplt=xy, uniqueid=xy.uniqueid, 
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs, unit_layer=bndx, 
 		unitvar=bnd.att, strat_layer=strat_layer, strat_lut=strat_lut, 
-		rast.NODATA=0)
+		rast.NODATA=0, savedata=FALSE)
     pltassgn <- stratdat$pltassgn
     pltassgnid <- stratdat$pltassgnid
     unitarea <- stratdat$unitarea
@@ -184,7 +205,7 @@ anGBpop_evalcustom <- function(evalidlst=NULL, evalEndyrlst=NULL,
     unitdat <- FIESTA::spGetEstUnit(xyplt=xy, uniqueid=xy.uniqueid, 
 		xvar=xvar, yvar=yvar, 
           	unit_layer=bnd_layer, unit_dsn=bnd_dsn, 
-		unitvar=bnd.att, unit.filter=bnd.filter)
+		unitvar=bnd.att, unit.filter=bnd.filter, savedata=FALSE)
     pltassgn <- unitdat$pltassgn
     pltassgnid <- unitdat$pltassgnid
     unitarea <- unitdat$unitarea
@@ -213,21 +234,19 @@ anGBpop_evalcustom <- function(evalidlst=NULL, evalEndyrlst=NULL,
 
     ## Get population data for boundary
     #########################################################################
-    GBpopdat <- modGBpop(cond=cond, plt=plt, tree=tree, seed=seed,
+    GBpopdat <- modGBpop(popType=evalType, cond=cond, plt=plt, tree=tree, seed=seed,
 		pltassgn=ppsanm, pltassgnid=pltassgnid,
 		dsn=data_dsn, pjoinid=pjoinid, strata=strata, unitvar=unitvar, 
 		unitarea=unitarea, areavar=areavar, stratalut=stratalut, strvar=strvar, 
-		getwt=FALSE, stratcombine=TRUE, saveobj=FALSE, savedata=savedata, 
-		outfolder=NULL, outfn.pre=evalnm, outfn.date=FALSE, 
-		overwrite_layer=overwrite_layer)
- 
+		getwt=FALSE, stratcombine=TRUE, savedata=savedata, 
+		outfolder=NULL, outfn.pre=evalnm, ...)
     GBpop_evalEndyrlst[[evalnm]] <- GBpopdat
   }
 
 
-  if (!is.null(out_dsn)) {
+  if (!is.null(data_dsn)) {
     ## Remove temporary table from data_dsn
-    out_conn <- DBI::dbConnect(RSQLite::SQLite(), out_dsn)
+    out_conn <- DBI::dbConnect(RSQLite::SQLite(), data_dsn)
     DBI::dbRemoveTable(out_conn, "ppsatmp")
     DBI::dbDisconnect(out_conn)
   }

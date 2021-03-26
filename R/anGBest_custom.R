@@ -4,7 +4,7 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
 	divideby=NULL, title.ref=NULL, title.main=NULL, getbarplot=FALSE, 
 	barplot.row=TRUE, barplot.ord=NULL, barplot.color=NULL, barplot.ylim=NULL, 
 	barplot.nplt=FALSE, savedata=FALSE, outfolder=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=TRUE, ...) {
+	outfn.date=FALSE, overwrite=FALSE, ...) {
 
 
   ## Set global variables
@@ -47,19 +47,10 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui) 
 
-  ## Check overwrite, outfn.date, outfolder, outfn 
+  ## Check outfolder
   ########################################################
   if (savedata) {
-    outfolder <- pcheck.outfolder(outfolder, gui=gui)
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
-    }
+    outfolder <- pcheck.outfolder(outfolder=outfolder, gui=gui)
   }
 
 
@@ -94,8 +85,8 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
 		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
 		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite, divideby=divideby, ...)
+		outfolder=outfolder, overwrite=overwrite, outfn.pre=outfn.pre, 
+		outfn.date=outfn.date, divideby=divideby, ...)
 
   } else if (esttype == "TREE") {
     ####################################################################
@@ -108,7 +99,7 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
 		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite, divideby=divideby, ...)
+		divideby=divideby, ...)
 
   } else if (esttype == "RATIO") {
     MODest <- modGBratio(GBpopdat=GBpopdat, estseed=estseed, landarea=landarea, 
@@ -118,7 +109,7 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
 		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite, divideby=divideby, ...)
+		divideby=divideby, ...)
   }
   est <- MODest$est
 
@@ -142,8 +133,8 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
 		barplot.ord=barplot.ord, barplot.color=barplot.color, 
 		barplot.ylim=barplot.ylim, barplot.nplt=barplot.nplt,
 		savedata=savedata, outfolder=outfolder, outfn.pre=outfn.pre,
-		outfn.date=outfn.date, overwrite=overwrite, title.ref=title.ref,
-		title.main=title.main, divideby=divideby)
+		outfn.date=outfn.date, overwrite=overwrite, 
+		title.ref=title.ref, title.main=title.main, divideby=divideby)
   }
 
   returnlst$est <- est

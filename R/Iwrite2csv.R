@@ -21,10 +21,10 @@ write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL,
 
   if (is.null(outfile)) {
     ## Check outfilenm
+ 
     outfilenm <- getoutfn(outfilenm, outfolder=outfolder, outfn.pre=outfn.pre, 
 		outfn.date=outfn.date, overwrite=overwrite, outfn.default = "outfile",
 		ext="csv", append=appendfile)
-
     ## open file
     if (appendfile) {
       outfile <- file(outfilenm, "a")

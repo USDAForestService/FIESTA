@@ -1,7 +1,7 @@
 datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dprefix=NULL, 
-	rprefix="r", datround=NULL, savedata=FALSE, out_layer=NULL, outfolder=NULL,
- 	out_fmt="csv", out_dsn=NULL, append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE,
- 	overwrite=FALSE){
+	rprefix="r", datround=NULL, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=FALSE, 
+	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE){
 
   ## DESCRIPTION: Generates ratio of tree domain summaries from FIESTA::datSumTreedom().
   ##
@@ -49,14 +49,17 @@ datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dpref
   if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite, append_layer=append_layer)
+		overwrite_dsn=overwrite_dsn, append_layer=append_layer)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
 
     ## out_layer
     if (is.null(out_layer)) {
-      out_layer <- paste(newprefix, "_dat", sep="")
+      out_layer <- paste(newprefix, "dat", sep="_")
+    }
+    if (!is.null(layer.pre)) {
+      out_layer <- paste(layer.pre, out_layer, sep="_")
     }
   }
 
@@ -108,7 +111,7 @@ datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dpref
   if (savedata) {
     datExportData(datx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer, 
-		outfn.date=outfn.date, overwrite_layer=overwrite,
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		index.unique=uniqueid)
   }
 

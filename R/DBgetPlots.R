@@ -1,6 +1,6 @@
 DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL, 
 	RS=NULL, invtype="ANNUAL", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
-	evalAll=FALSE, evalType="ALL", measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
+	evalAll=FALSE, evalType="VOL", measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
 	invyrs=NULL, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, isveg=FALSE, 
 	issubp=FALSE, isdwm=FALSE, plotgeom=FALSE, othertables=NULL, 
 	issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, regionVars=FALSE, 
@@ -19,11 +19,11 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 	"INVASIVE_SUBPLOT_SPP", "LICHEN_LAB", "LICHEN_PLOT_SUMMARY", "LICHEN_VISIT", 
 	"PLOTSNAP", "PLOT_REGEN", "SEEDLING_REGEN", "SITETREE", 
 	"SOILS_EROSION", "SOILS_LAB", "SOILS_SAMPLE_LOC", "SOILS_VISIT", 
-	"SUBPLOT_REGEN", "SURVEY", "TREE_GRM_BEGIN", "TREE_GRM_ESTN", "TREE_GRM_MIDPT",
+	"SUBPLOT_REGEN", "TREE_GRM_BEGIN", "TREE_GRM_ESTN", "TREE_GRM_MIDPT",
  	"TREE_GRM_THRESHOLD", "TREE_REGIONAL_BIOMASS", "TREE_WOODLAND_STEMS")
 
   pop_tables <- c("POP_ESTN_UNIT", "POP_EVAL", "POP_EVAL_ATTRIBUTE", "POP_EVAL_GRP", 
-	"POP_EVAL_TYP", "POP_STRATUM") 
+	"POP_EVAL_TYP", "POP_STRATUM", "SURVEY") 
 
 
   if (gui) {
@@ -77,14 +77,13 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   biojenk <- FALSE 
   greenwt <- TRUE
   isgrm <- FALSE
-  issccm=FALSE
+  issccm=islulc=FALSE
 
   ########################################################################
   ### GET PARAMETERS 
   ########################################################################
   iseval <- FALSE
   subsetPOP <- FALSE
-  if (!is.null(evalid) || length(evalType) > 1) savePOP=subsetPOP <- TRUE
 
   ## Check invtype
   invtypelst <- c('ANNUAL', 'PERIODIC')
@@ -102,12 +101,15 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 	 stop("RSQLite and DBI packages are required to run SQLite queries")
   } 
   if (datsource %in% c("sqlite", "gdb")) {
-    if (is.null(data_dsn)) stop("data_dsn is NULL")
-    if (!file.exists(data_dsn)) stop(data_dsn, " is invalid")
+    data_dsn <- DBtestSQLite(data_dsn)
   }
-  if (!is.null(data_dsn) && getext(data_dsn) == "sqlite") {
-    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-    dbtablst <- DBI::dbListTables(dbconn)
+  if (!is.null(data_dsn)) {
+    if (getext(data_dsn) == "sqlite") {
+      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+      dbtablst <- DBI::dbListTables(dbconn)
+    } else {
+      stop("only sqlite databases available currently")
+    }     
   }
 
   ## GETS DATA TABLES (OTHER THAN PLOT/CONDITION) IF NULL
@@ -172,16 +174,11 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   if (isgrm || issccm) {
     evalType <- c(evalType, "CHNG")
   }
-
-  if (datsource == "sqlite") {
-    evalInfo <- getEvalid(dbconn=dbconn, states=states, evalAll=evalAll,
-		evalCur=evalCur, evalEndyr=evalEndyr, evalType=evalType)
-  } else {
-    ## Get states, Evalid and/or invyrs info
-    evalInfo <- DBgetEvalid(states=states, RS=RS, invtype=invtype, 
-		evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, 
-		evalAll=evalAll, evalType=evalType, gui=gui)
-  }
+ 
+  ## Get states, Evalid and/or invyrs info
+  evalInfo <- DBgetEvalid(states=states, RS=RS, datsource="datamart", 
+		data_dsn=data_dsn, invtype=invtype, evalid=evalid, evalCur=evalCur, 
+		evalEndyr=evalEndyr, evalAll=evalAll, evalType=evalType, gui=gui)
   if (is.null(evalInfo)) return(NULL)
   states <- evalInfo$states
   rslst <- evalInfo$rslst
@@ -314,6 +311,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		title="ACI conditions?", first="NO", gui=gui)
 
   } else {
+    savePOP=subsetPOP <- TRUE
+
     if (!is.null(subcycle99) && subcycle99) 
       message("subcycle99 plots are not included in FIA evaluations")  
     subcycle99 <- FALSE
@@ -424,7 +423,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite_dsn, append_layer=append_layer, gui=gui)
+		overwrite_dsn=overwrite_dsn, append_layer=append_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -626,6 +625,13 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		AND COALESCE(PCOND.COND_NONSAMPLE_REASN_CD, 0) = 0" 
 #		AND (c.COND_STATUS_CD = 1 AND PCOND.COND_STATUS_CD = 1)" 
   }
+  ## lulc query
+  ################################################
+  if (islulc) {
+    lulcfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA.,
+		"COND PCOND ON (PCOND.PLT_CN = p.PREV_PLT_CN)")
+  }
+
   ## GRM query
   ################################################
   if (isgrm) {
@@ -1200,6 +1206,40 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       }
     }
 
+    ##############################################################
+    ## lulc data
+    ##############################################################
+    if (islulc && !is.null(pltx)) {
+      message("\n",
+      	"## STATUS: Getting Land Use/Land Cover data (", stabbr, ") ...", "\n")
+      lulcvars <- c("PLT_CN", "CONDID", "LAND_COVER_CLASS_CD", "PRESNFCD")
+      lulcqry <- paste("select", toString(paste0("c.", lulcvars)), 
+			"from", lulcfromqry, "where", xfilter)
+
+      if (datsource == "sqlite") {
+        lulcx <- DBI::dbGetQuery(dbconn, lulcqry)
+      } else {
+        lulcx <- sqldf::sqldf(lulcqry, stringsAsFactors=FALSE)
+      }
+      if (nrow(lulcx) != 0) {
+        lulcx <- setDT(lulcx)
+        lulcx[, PLT_CN := as.character(PLT_CN)]
+        setkey(lulcx, PLT_CN)
+
+        ## Subset overall filters from pltx
+        lulcx <- lulcx[lulcx$PLT_CN %in% pltx$CN,]
+
+        ## Merge to pltx
+        #pltx <- merge(pltx, lulcx, all.x=TRUE, by.x="CN", by.y="PLT_CN")
+        
+      }
+
+      if (returndata) {
+        ## Append data
+        lulc <- rbind(lulc, lulcx)
+      }
+    }
+
 
     ##############################################################
     ## Tree data
@@ -1297,18 +1337,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
             if (treeReturn && returndata) {
               tree <- rbind(tree, treex)
             }
-
-            if ((savedata || !treeReturn) && !is.null(treex)) { 
-              index.unique.treex <- NULL
-              if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
-              datExportData(treex, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.treex, append_layer=append_layer,
-			outfn.pre=outfn.pre)
-            }
-            rm(treex)
-            gc()
           }
           rm(TREE)
           gc()
@@ -1611,7 +1639,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         cat("\n",
         "## STATUS: GETTING", othertable, "(", stabbr, ") ...", "\n")
     
-        if (grepl("POP", othertable, ignore.case=TRUE)) {
+        if (!is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
           xfromqry <- paste0(SCHEMA., othertable, " x")
           if (!iseval) {
             xfilterpop <- stFilter
@@ -1646,7 +1674,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
           }
         }
  
-        if (!grepl("POP", othertable, ignore.case=TRUE)) {
+        if (is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
           ## Subset overall filters from condx
           if ("CONDID" %in% names(tab)) {
             tab <- tab[paste(tab$PLT_CN, tab$CONDID) %in% pcondID,]
@@ -1817,6 +1845,15 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			index.unique=index.unique.sccmx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       } 
+      if (savedata && !is.null(treex)) {
+        index.unique.treex <- NULL
+        if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
+        datExportData(treex, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			index.unique=index.unique.treex, append_layer=append_layer,
+			outfn.pre=outfn.pre)
+      }
       if (savedata && !is.null(seedx)) {
         index.unique.seedx <- NULL
         if (!append_layer) index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
@@ -2060,7 +2097,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       fiadatlst$spconddat <- setDF(spconddat)
     }
     if (savePOP || (iseval && length(evalidlist) > 1) && !is.null(ppsa)) {
-      fiadatlst$POP_PLOT_STRATUM_ASSGN <- setDF(ppsa)
+      fiadatlst$pop_plot_stratum_assgn <- setDF(ppsa)
     }
   }
  

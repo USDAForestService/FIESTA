@@ -119,7 +119,6 @@ head(USAco@data)
 WYco <- USAco[USAco$NAME_1 == "Wyoming",]
 
 
-
 ```
 
 
@@ -453,9 +452,8 @@ head(WYspplt_dem)
 # Extract data from FIA database for plots within a given boundary.
 ######################################################################################
 
-
 ## Extract public coordinates within WY Bighorn NF boundary
-WYbhdat <- FIESTA::spGetPlots(bnd=WYbhfn, states="Wyoming", datsource="datamart", 
+WYbhdat <- spGetPlots(bnd=WYbhfn, states="Wyoming", datsource="datamart", 
         evalCur=TRUE, istree=FALSE)
 names(WYbhdat)
 

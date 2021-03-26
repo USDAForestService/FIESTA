@@ -9,17 +9,18 @@
 	state ending in the same year are used. Data are subset to boundary. 	
 }
 \usage{
-anGBpop_evalcustom(evalidlst=NULL, evalEndyrlst=NULL, bnd_layer, 
-	bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL, evalType = "VOL", 
-	data_dsn = NULL, isseed = FALSE, xymeasCur = TRUE, pjoinid = "PLOT_ID", 
-	xy_dsn = NULL, xy_layer = "xyCur_ACTUAL", xy.uniqueid = "PLOT_ID", 
-	xvar = "LON_ACTUAL", yvar = "LAT_ACTUAL", xy.crs = 4269, 
-	strat_layer = NULL, strat_lut = NULL, savedata = FALSE, 
-	out_dsn = NULL, out_fmt = "sqlite", outfolder=NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE)
+anGBpop_evalcustom(evalidlst=NULL, evalCur=FALSE, evalEndyrlst=NULL, 
+	bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL, evalType = "VOL", 
+	datsource = "datamart", data_dsn=NULL, isseed = FALSE, intensity1 = FALSE, 
+	xymeasCur = TRUE, pjoinid = "PLOT_ID", xy_dsn = NULL, xy_layer = "xyCur_ACTUAL", 
+	xy.uniqueid = "PLOT_ID", xvar = "LON_ACTUAL", yvar = "LAT_ACTUAL", 
+	xy.crs = 4269, strat_layer = NULL, strat_lut = NULL, byEndyr = FALSE, 
+	savedata = FALSE, outfolder=NULL, ...)
 }
 \arguments{
   \item{evalidlst}{ Integer vector. Vector of one or more evalid (e.g, 491801). }
+  \item{evalCur}{ Logical. If TRUE, gets the most current evaluation for
+	each state. }
   \item{evalEndyrlst}{ Integer vector. Vector of one or more Evaluation 
 	end years to generate estimates (YYYY). }
   \item{bnd_layer}{ sf R object or String. Area of interest (population boundary 
@@ -39,11 +40,12 @@ anGBpop_evalcustom(evalidlst=NULL, evalEndyrlst=NULL, bnd_layer,
 	mortality, and change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)). 
 	Multiple types are accepted. See details below and FIA database manual 
 	for regional availability and/or differences. }
-  \item{data_dsn}{ String. Name of database with FIA plot data. The database
-	must include the following tables: plot, cond, tree (if esttype='TREE'), 
-	and ppsa (POP_PLOT_STRATUM_ASSGN). If NULL, data are extracted from 
-	FIA datamart. }
+  \item{datsource}{ String. Source of data ('datamart', 'sqlite'). }
+  \item{data_dsn}{ If datsource='sqlite', the file name (data source name) of the 
+	sqlite database (*.sqlite). }
   \item{isseed}{ Logical. If TRUE, add seedling data from Evaluation(s). } 
+  \item{intensity1}{ Logical. If TRUE, extracts single intensity plots only from
+	database. Assures equal probability sample within boundary. }
   \item{xymeasCur}{ Logical. If TRUE, and more than one plot measured at same location,
 	only the most current coordinate is returned for the plot. }
   \item{pjoinid}{ String. Name of variable in ppsanm to join with plot table. } 
@@ -59,43 +61,31 @@ anGBpop_evalcustom(evalidlst=NULL, evalEndyrlst=NULL, bnd_layer,
   \item{strat_lut}{ Data frame. A look-up table of codes to aggregate. The
 	format of table includes 2 columns, one column same name as strvar. 
 	If strattype="RASTER", strvar="value". }
+  \item{byEndyr}{ Logical. If TRUE, organizes evalidlst by evalEndyr. 
+	Set TRUE if estimates include more than one state (e.g., if area of 
+	interest crosses more than one state - Manti-LaSal). }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
-  \item{out_dsn}{ String. Data source name for output. If extension is not
-	included, out_fmt is used. Use full path if outfolder=NULL. }
-  \item{out_fmt}{ String. File format for output ('csv', 'sqlite','gpkg', 'gdb').
-	If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed. If
-	out_fmt='gdb', arcgisbinding package and R-Bridge must be installed. }
   \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE, 
 	outfolder is the working directory. }
-  \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{...}{ Parameters to FIESTA::modGBpop(). }
 }
  
 \value{
-  Data.
+  Set of population data (from modGBpop()) for bnd.
 }
 \examples{
-  ## Get population data and area estimates for evaluations ending 2015 to 2019
+  ## Get population data and area estimates for WY Bighorn National Forest 
+  ##		for evaluations ending 2015 to 2019
   WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
-  GBpoplst <- anGBpop_evalcustom(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
-	xymeasCur=TRUE, xy.uniqueid="PLOT_ID", evalType="CURR")
-
-  est <- lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
-	landarea="FOREST", row.FIAname=TRUE))
-  names(est)
-
-  ## Get population data using strata and area estimates for evaluations ending 2015 to 2019
   fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
-  GBpoplst2 <- anGBpop_evalcustom(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
+
+  GBpoplst <- anGBpop_evalcustom(evalEndyrlst=c(2015:2019), bnd_layer=WYbhfn, 
 	xymeasCur=TRUE, xy.uniqueid="PLOT_ID", evalType="CURR", strat_layer=fornffn)
 
-  est.strat <- lapply(GBpoplst2, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
+  estlst <- lapply(GBpoplst, function(x) modGBarea(GBpopdat=x, rowvar="FORTYPGRPCD", 
 	landarea="FOREST", row.FIAname=TRUE))
-
-  est$eval2019
-  est.strat$eval2019
+  names(estlst)
+  names(estlst$eval561501)
 }
 \author{
 	Tracey S. Frescino

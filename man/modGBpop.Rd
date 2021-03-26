@@ -18,7 +18,6 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", tuniqueid = "PLT_CN", 
 	cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", 
 	adj = "samp", evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE, 
-	plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
 	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
 	unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, stratalut = NULL, 
 	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
@@ -78,11 +77,6 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (DESIGNCD=1). } 
-  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
-	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
-  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
   \item{unitvar}{ String. Name of the estimation unit variable in unitarea and 
 	cond or pltassgn data frame with estimation unit assignment for each plot 
 	(e.g., 'ESTN_UNIT'). Optional if only one estimation unit. }

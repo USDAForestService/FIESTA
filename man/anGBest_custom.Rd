@@ -14,7 +14,7 @@ anGBest_custom(GBpopdat, esttype = "TREE", estseed = "none", landarea = "FOREST"
 	divideby = NULL, title.ref = NULL, title.main = NULL, getbarplot = FALSE, 
 	barplot.row=TRUE, barplot.ord=NULL, barplot.color=NULL, barplot.ylim = NULL, 
 	barplot.nplt = FALSE, savedata = FALSE, outfolder = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = TRUE, ...)
+	outfn.date = FALSE, overwrite = FALSE, ...)
 }
 \arguments{
   \item{GBpopdat}{ R list object. FIA population data and calculations for estimation. }
@@ -58,12 +58,12 @@ anGBest_custom(GBpopdat, esttype = "TREE", estseed = "none", landarea = "FOREST"
 	If NULL, the working directory is used. }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite}{ Logical. If TRUE, overwrites output table and barplot. }
   \item{...}{ Parameters for modGB*() functions. }
 }
  
 \value{
-  Estimate.
+  Estimate and barplot (if getbarplot=TRUE).
 }
 \author{
 	Tracey S. Frescino

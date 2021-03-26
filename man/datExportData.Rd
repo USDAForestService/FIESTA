@@ -9,7 +9,7 @@
 
 \usage{
 datExportData(dfobj, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
-	out_layer = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	out_layer = NULL, outfn.pre = NULL, layer.pre = NULL, outfn.date = FALSE, 
 	create_dsn = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, 
 	append_layer = FALSE, index.unique = NULL, index = NULL)
 }
@@ -24,7 +24,8 @@ datExportData(dfobj, outfolder = NULL, out_fmt = "csv", out_dsn = NULL,
 	included, out_fmt is used. Use full path if outfolder=NULL. }
   \item{out_layer}{ String. Name of layer in out_dsn. If NULL, basename of 
 	out_dsn is used. }
-  \item{outfn.pre}{ String. Prefix for out_dsn. }
+  \item{outfn.pre}{ String. Prefix for out_dsn or csv file, if out_fmt=".csv". }
+  \item{layer.pre}{ String. Prefix for layer in database, if out_fmt != ".csv". }
   \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
   \item{create_dsn}{ Logical. If TRUE, creates new database. }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }

@@ -42,8 +42,8 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
 
 
   if (is.null(photofn)) {
-    # Lines 48 to 59
-    system(paste("sed -i '48,59d'", rmdfn)) 
+    # Lines 102 to 106
+    system(paste("sed -i '102,106d'", rmdfn)) 
   }
 
   ## Set working directory to reportfolder

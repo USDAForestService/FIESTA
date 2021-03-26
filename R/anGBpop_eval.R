@@ -1,142 +1,156 @@
-anGBpop_eval <- function(evalidlst=NULL, evalCur=FALSE, evalEndyrlst=NULL, states, 
-	evalType="VOL", datsource="datamart", data_dsn=NULL, isseed=FALSE, 
-	ppsanm="pop_plot_stratum_assgn", 
-	savedata=FALSE, out_dsn=NULL, out_fmt="sqlite", outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
+anGBpop_eval <- function(evalidlst=NULL, evalCur=FALSE, evalEndyrlst=NULL, 
+	states=NULL, RS=NULL, evalType="VOL", datsource="datamart", data_dsn=NULL, 
+	isseed=FALSE, ppsanm="pop_plot_stratum_assgn", byEndyr=FALSE,
+	savedata=FALSE, outfolder=NULL, ...) {
   ## DESCRIPTION: estimates for each evalid in list
   
   ## Set global variables
-  tree=seed <- NULL
+  tree=seed=seed_layer=unitvar2 <- NULL
   gui <- FALSE
-  istree=FALSE
-  RS=NULL
+  istree=evalAll <- FALSE
+  GBpop_evallst <- list()
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui) 
 
+  ## Check outfolder 
+  if (savedata) {
+    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui=gui)
+  } 
 
-  ## If savedata, check output file names
-  ################################################################
-  if (savedata) { 
-    outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite_dsn)
-    out_dsn <- outlst$out_dsn
-    outfolder <- outlst$outfolder
-    out_fmt <- outlst$out_fmt
-#  } else {
-#    out_dsn <- "tmpdat.sqlite"
-#    out_fmt <- "sqlite"
-#    outfolder <- tempdir()
-#    savedata <- TRUE
+  ## Check byEndyr
+  byEndyr <- FIESTA::pcheck.logical(byEndyr, varnm="byEndyr", 
+		title="By Endyr?", first="NO", gui=gui) 
+  if (byEndyr) {
+    if (is.null(evalEndyrlst)) {
+      stop("must include evalEndyrlst if byEndyr=TRUE")
+    }
   }
 
-
-#  ## Check evalidlst
-#  if (any(nchar(evalidlst) > 6)) {
-#    stop("invalid evalidlst... must be integer values < 6 digits")
-#  }
-#  ## Generate list of evalids to generate estimates from
-#  evalidlst <- data.table::transpose(lapply(stcds, function(x) 
-#		paste0(x, substr(evalEndyrlst, 3, 4), "01")))
-#  names(evalidlst) <- paste0("eval", evalEndyrlst)
-
-
-
-  ## Get data from FIA Datamart and store in temporary directory
-  #########################################################################
+  ## Get list of evalids from database
+  ########################################################
   if (datsource == "sqlite") {
-
     if (is.null(data_dsn)) {
       stop("must include data_dsn")
     }
+
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     tablst <- DBI::dbListTables(dbconn)
-    pop_stratum <- chkdbtab(tablst, "pop_stratum")
-    pop_estn_unit <- chkdbtab(tablst, "pop_estn_unit")
+    stratalut <- chkdbtab(tablst, "pop_stratum")
+    unitarea <- chkdbtab(tablst, "pop_estn_unit")
+    pltassgn <- chkdbtab(tablst, ppsanm, stopifnull=TRUE)
+    if (is.null(evalidlst) && !evalCur && is.null(evalEndyrlst)) {
+      evalAll <- TRUE
+    }
+    evaliddat <- DBgetEvalid(datsource=datsource, data_dsn=data_dsn, 
+		RS=RS, states=states, evalAll=evalAll,
+		evalid=evalidlst, evalCur=evalAll, evalEndyr=evalEndyrlst, 
+		evalType=evalType)
+    evalidlst <- evaliddat$evalidlist
 
-
-    ## Get evalid list
-    ########################################################
-    evalidlst <- getEvalid(dbconn=dbconn, RS=RS, states=states, evalid=evalidlst, 
-		evalCur=evalCur, evalEndyr=evalEndyrlst, evalType=evalType)$evalidlist
+  } else {   ## datsource="datamart"
+    evaliddat <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
+		states=states, RS=RS, evalAll=FALSE, evalType=evalType)
+    evalidlst <- evaliddat$evalidlist
+  }
+  if (byEndyr) {
+    if (unique(unlist(lapply(evalidlst, length))) != length(evalEndyrlst)) {
+      message("list of evalids does not match evalEndyrlst")
+      message("evalidlst: ", toString(evalidlst), "\n", 
+			"evalEndyrlst: ", toString(evalEndyrlst))
+      stop()
+    }
     evalidlst <- transpose(evalidlst)
     names(evalidlst) <- paste0("eval", evalEndyrlst)
-
-    if (!is.null(pop_stratum) && !is.null(pop_estn_unit)) {
-      pltdat <- spGetPlots(evalid=evalidlst, datsource="sqlite", data_dsn=data_dsn,
-		istree=istree, isseed=isseed, savedata=savedata, 
-		other_layers=c(pop_stratum, pop_estn_unit), 
-		out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
-    } else {
-      pltdat <- spGetPlots(evalid=evalidlst, datsource="sqlite", data_dsn=data_dsn,
-		istree=istree, isseed=isseed, savedata=savedata, 
-		out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
-    }
-
   } else {
-
-    ## Get evalid list
-    ########################################################
-    evalidlst <- DBgetEvalid(evalid=evalidlst, evalEndyr=evalEndyrlst, 
-		states=states, RS=NULL, evalType=evalType)$evalidlist
-    evalidlst <- transpose(evalidlst)
-    names(evalidlst) <- paste0("eval", evalEndyrlst)
-
-    if (any(evalType %in% c("VOL", "CHNG"))) {
-      istree <- TRUE
-    }
-    pltdat <- DBgetPlots(evalid=evalidlst, istree=istree, isseed=isseed,
-	savedata=savedata, out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn)
-    plt <- pltdat$plt
-    cond <- pltdat$cond
-    tree <- pltdat$tree
-    seed <- pltdat$seed
-    pltassgn <- pltdat$POP_PLOT_STRATUM_ASSGN
+    evalidlst <- unlist(evalidlst)
+    #evalidstcds <- substr(unlist(evalidlst), nchar(evalidlst)-5, nchar(evalidlst)-4)
+    #evalidstabbr <- sapply(evalidstcds, pcheck.states, statereturn="ABBR")
+    #names(evalidlst) <- paste0(evalidstabbr, evalidlst)
+    names(evalidlst) <- paste0("eval", evalidlst)
+  }  
+  if (any(evalType %in% c("VOL", "CHNG"))) {
+    istree <- TRUE
   }
 
-
-  ## Get strata information
-  ########################################################
-  stratdat <- DBgetStrata(evalid=evalidlst, getassgn=FALSE,
-	savedata=savedata, out_dsn=out_dsn, out_fmt=out_fmt, outfolder=outfolder)
-  names(stratdat)
-
-  unitvar <- stratdat$unitvar
-  unitvar2 <- stratdat$unitvar2
-  strvar <- stratdat$strvar
-  strwtvar <- stratdat$strwtvar
-  getwt <- stratdat$getwt
-  getwtvar <- stratdat$getwtvar
-  areavar <- stratdat$areavar
-  pltassgnid <- "PLT_CN"
-  pjoinid <- "CN"
-
-  
-
-  ## Loop through Evaluation year list
+  ## Get population from the sqlite database with pop tables
   #########################################################################
-  GBpop_evalEndyrlst <- list()
+  if (datsource == "sqlite" && (!is.null(stratalut) && !is.null(unitarea))) {
+    if (isseed) seed_layer <- "seed"
 
-  for (evalnm in names(evalidlst)) {
-    evalid <- evalidlst[[evalnm]]
-    message("getting population data for ", toString(evalnm))
-    message("evalid: ", toString(evalid))
+    if (byEndyr) {
+      evalidloop <- names(evalidlst)
+    } else {
+      evalidloop <- unlist(evalidlst)
+    }
 
-    unitarea <- stratdat$unitarea[stratdat$unitarea$EVALID %in% evalid,] 
-    stratalut <- stratdat$stratalut[stratdat$stratalut$EVALID %in% evalid,]
+    for (i in 1:length(evalidloop)) {
+      evalid <- evalidloop[i]
+      evalnm <- names(evalid)
+      if (byEndyr) {
+        evalnm <- evalid
+        evalid <- evalidlst[[evalid]]
+      }
+      message("getting population data for ", toString(evalnm))
+      message("evalid: ", toString(evalid))
+ 
+      GBpopdat <- modGBpop(popType=evalType, cond="cond", plt="plot", 
+		tree="tree", seed=seed_layer, pltassgn=pltassgn, pltassgnid="PLT_CN", 
+		evalid=evalid, dsn=data_dsn, pjoinid="CN", strata=TRUE, unitvar="ESTN_UNIT", 
+		unitvar2="STATECD", unitarea=unitarea, areavar="AREA_USED", 
+		stratalut=stratalut, strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT",
+ 		stratcombine=TRUE, savedata=savedata, outfolder=outfolder, 
+		outfn.pre=evalnm, ...)
+      GBpop_evallst[[evalnm]] <- GBpopdat
+    }
+  } else {  
+    ## Get population from datamart or sqlite database without pop tables
+    #########################################################################
+    if (datsource == "sqlite") {
+      pltdat <- spGetPlots(evalid=evalidlst, datsource="sqlite", data_dsn=data_dsn,
+		istree=istree, isseed=isseed, savePOP=TRUE, savedata=FALSE)
+      tabs <- pltdat$tabs
+      plt <- tabs$pltx
+      cond <- tabs$condx
+      tree <- tabs$treex
+      seed <- tabs$seedx
+      pop_plot_stratum_assgn <- tabs$pop_plot_stratum_assgnx
+      
+    } else {
+      pltdat <- DBgetPlots(evalid=evalidlst, istree=istree, isseed=isseed,
+		savePOP=TRUE, savedata=FALSE)
+      plt <- pltdat$plt
+      cond <- pltdat$cond
+      tree <- pltdat$tree
+      seed <- pltdat$seed
+      pop_plot_stratum_assgn <- pltdat$pop_plot_stratum_assgn
+    }
 
-    GBpopdat <- modGBpop(cond=cond, plt=plt, tree=tree, seed=seed,
-		pltassgn=pltassgn, pltassgnid=pltassgnid, evalid=evalid,
-		dsn=data_dsn, pjoinid=pjoinid, strata=TRUE, unitvar=unitvar, 
-		unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
-		stratalut=stratalut, strvar=strvar, getwt=TRUE, getwtvar=getwtvar,
- 		stratcombine=TRUE, saveobj=savedata, outfolder=outfolder, 
-		outfn.pre=evalnm, outfn.date=FALSE, overwrite_layer=overwrite_layer)
+    ## Get strata information for evalidlst
+    GBstratdat <- DBgetStrata(evalid=evalidlst, 
+			POP_PLOT_STRATUM_ASSGN=pop_plot_stratum_assgn)
 
-    GBpop_evalEndyrlst[[evalnm]] <- GBpopdat
+    if (byEndyr) {
+      evalidloop <- names(evalidlst)
+    } else {
+      evalidloop <- unlist(evalidlst)
+    }
+
+    for (i in 1:length(evalidloop)) {
+      evalid <- evalidloop[i]
+      evalnm <- names(evalid)
+      if (byEndyr) {
+        evalid <- evalidlst[[evalid]]
+      }
+      message("getting population data for ", toString(evalnm))
+      message("evalid: ", toString(evalid))
+
+      GBpopdat <- modGBpop(popType=evalType, cond=cond, plt=plt, tree=tree, seed=seed,
+		evalid=evalid, dsn=data_dsn, pltassgn=pltassgn, GBstratdat=GBstratdat, 
+		savedata=savedata, outfolder=outfolder, outfn.pre=evalnm, ...)
+      GBpop_evallst[[evalnm]] <- GBpopdat
+    }
   }
-
-  return(GBpop_evalEndyrlst)
+  return(GBpop_evallst)
 }

@@ -14,7 +14,7 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
     stop("accessing SQLite databases requires package RSQLite")
 
   ## Check gpkg
-  dbext <- ifelse(gpkg, ".gpkg", ".sqlite")
+  dbext <- ifelse(gpkg, ".gpkg", ".db")
 
   ## Check filename
   SQLitepath <- checkfilenm(SQLitefn, outfolder)
@@ -31,9 +31,9 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
       return(NULL)
     }
   } else {
-    if (is.na(getext(SQLitefn)) || getext(SQLitefn) == "NA")
+    if (is.na(getext(SQLitefn)) || getext(SQLitefn) == "NA") {
       SQLitefn <- paste0(SQLitefn, dbext)
-
+    }
     if (DBI::dbCanConnect(RSQLite::SQLite(), SQLitepath)) {
       message("SQLite connection successful")
       sqlconn <- DBI::dbConnect(RSQLite::SQLite(), SQLitepath, loadable.extensions = TRUE)

@@ -10,7 +10,7 @@
 \usage{
 DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL, 
 	invtype = "ANNUAL", evalid = NULL, evalCur = FALSE, evalEndyr = NULL, 
-	evalAll=FALSE, evalType = "ALL", measCur = FALSE, measEndyr = NULL, 
+	evalAll=FALSE, evalType = "VOL", measCur = FALSE, measEndyr = NULL, 
 	allyrs = FALSE, invyrs = NULL, xymeasCur = FALSE, istree = FALSE, 
 	isseed = FALSE, isveg = FALSE, issubp = FALSE, isdwm = FALSE, 
 	plotgeom = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
@@ -147,7 +147,7 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 		ID is output. }
   \item{pltcnt}{ Data frame. Number of plots (NBRPLOTS) by state, cycle, inventory year,
 		and plot status. }
-  \item{POP_PLOT_STRATUM_ASSGN}{ Data frame. If savePOP=TRUE, and Evaluations are
+  \item{pop_plot_stratum_assgn}{ Data frame. If savePOP=TRUE, and Evaluations are
 		used to extract data from database, return the POP_PLOT_STRATUM_ASSGN table 
 		or, if more than one evalType and savePOP=FALSE. If more than one evalType,
 		only the records for the evalTypes are returned, otherwise all evalTypes for
@@ -505,11 +505,10 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 	Inventory and Analysis (FIA) Symposium 2008. RMRS-P-56CD. Fort Collins, CO: U.S. Department 
 	of Agriculture, Forest Service, Rocky Mountain Research Station. 1 CD.
 
-	O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer, D.; Wilson, A.M.; 
-	Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The Forest Inventory and Analysis 
-	Database: Database Description and Users Manual Version 5.1.2 for Phase 2. U.S. Department 
-	of Agriculture. 
-	(http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user manual_5-1-2_p2_07_2012.pdf)
+	Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J., Christiansen, G., 
+	Conkling, B.L., Winnie, D., 2018. Forest Inventory and Analysis Database [WWW Document]. 
+	St Paul MN US Dep. Agric. For. Serv. North. Res. Stn. 
+	URL http://apps.fs.fed.us/fiadb-downloads/datamart.html (accessed 3.6.21).
 }
 
 

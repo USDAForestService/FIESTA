@@ -7,9 +7,9 @@
 	Generates a set of core tables based on state of interest.
 }
 \usage{
-anGBest_core(state, evalCur = TRUE, evalEndyr = NULL, 
+anGBest_core(state = NULL, evalCur = TRUE, evalEndyr = NULL, 
 	evalType = c("ALL", "VOL", "GRM"), fill = TRUE, addSEcol = FALSE, 
-	allin1 = FALSE, savedata = FALSE, outfolder = NULL, outfn.date = TRUE, 
+	allin1 = TRUE, savedata = FALSE, outfolder = NULL, outfn.date = TRUE, 
 	divideby.vol = "million", datCore = NULL)
 }
 %- maybe also 'usage' for other objects documented here.

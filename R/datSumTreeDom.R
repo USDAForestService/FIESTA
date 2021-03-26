@@ -5,8 +5,10 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 	tdomvar2=NULL, tdomvar2lst=NULL, tdomprefix=NULL, tdombarplot=FALSE, 
 	tdomtot=FALSE, tdomtotnm=NULL, FIAname=FALSE, addseed=FALSE, pivot=TRUE, 
 	presence=FALSE, proportion=FALSE, cover=FALSE, getadjplot=FALSE, adjtree=FALSE, 
-	NAto0=FALSE, adjTPA=1, savedata=FALSE, outfolder=NULL, out_layer=NULL, 
-	outfn.date=TRUE, overwrite=FALSE, tround=16, checkNA=FALSE, returnDT=TRUE){
+	NAto0=FALSE, adjTPA=1, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
+	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, tround=16, 
+	checkNA=FALSE, returnDT=TRUE){
 
   ####################################################################################
   ## DESCRIPTION: Aggregates tree domain data (ex. species) to condition or plot level  
@@ -28,7 +30,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   checkNAcvars <- {}
   checkNAtvars <- {}
   seedclnm <- "<1"
-  seedonly <- FALSE
+  seedonly=parameters <- FALSE
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -615,7 +617,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     setkeyv(treef, tsumuniqueid) 
     #tdomvarlut <- unique(treef[,c(tdomvar, tdomvarnm), with=FALSE]) 
 
-    if (addseed) {
+    if (addseed || seedonly) {
       sdomdata <- FIESTA::datLUTnm(seedf, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
       seedf <- sdomdata$xLUT
     }
@@ -633,7 +635,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     #treef[, (tdomvarnm) := paste0(tdomprefix, get(eval(tdomvar)))]
     #tdomvarlst2 <- paste0(tdomprefix, tdomvarlst)
 
-    if (addseed) {
+    if (addseed || seedonly) {
       seedf[, (tdomvarnm):= paste0(tdomprefix, formatC(get(eval(tdomvar)), 
 			width=maxchar, flag="0"))]
     }
@@ -783,17 +785,26 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", title="Save data tables?", 
-		first="NO", gui=gui)
+  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+		title="Save data tables?", first="NO", gui=gui)
 
-  ## Check outfolder
-  if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+  ## If savedata, check output file names
+  ################################################################
+  if (savedata) { 
+    outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
 
     ## outfn
-    if (is.null(outfn) || gsub(" ", "", outfn) == "") 
-      outfn <- paste(tdomvar, tsumvar, sep="_")
-    outfn.param <- paste(outfn, "param", sep="_")
+    if (is.null(out_layer) || gsub(" ", "", out_layer) == "") {
+      out_layer <- paste(tdomvar, tsumvar, sep="_")
+      if (!is.null(layer.pre)) {
+        out_layer <- paste(layer.pre, out_layer, sep="_")
+      }
+    }
   }
 
   ################################################################################  
@@ -1091,97 +1102,107 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   
   if (savedata) {
     if (pltsp) {
-      spExportSpatial(sumtreef, out_layer=paste0(out_layer, "_DAT"), outfolder=outfolder, 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+      spExportSpatial(sumtreef, out_layer=paste0(out_layer, "_dat"), outfolder=outfolder, 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer, append_layer=append_layer)
     } else {
-      write2csv(sumtreef, outfolder=outfolder, outfilenm=paste0(out_layer, "_DAT"), 
-		outfn.date=outfn.date, overwrite=overwrite)
+      datExportData(sumtreef, outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn,
+		out_layer=paste0(out_layer, "_dat"), outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer)
     }
     if (proportion) {
       if (pltsp) {
-        spExportSpatial(sumtreef.prop, out_layer=paste0(out_layer, "_PROP"), 
-		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite)
+        spExportSpatial(sumtreef.prop, out_layer=paste0(out_layer, "_prop"), 
+		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		append_layer=append_layer)
       } else {
-        write2csv(sumtreef.prop, outfolder=outfolder, outfilenm=paste0(out_layer, "_PROP"), 
-		outfn.date=outfn.date, overwrite=overwrite)
+        datExportData(sumtreef.prop, outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn,
+		out_layer=paste0(out_layer, "_prop"), outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer)
       }
     }
     if (presence) {
       if (pltsp) {
-        spExportSpatial(sumtreef.pres, out_layer=paste0(out_layer, "_PRES"), 
-		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite)
+        spExportSpatial(sumtreef.pres, out_layer=paste0(out_layer, "_pres"), 
+		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		append_layer=append_layer)
       } else {
-        write2csv(sumtreef.pres, outfolder=outfolder, outfilenm=paste0(out_layer, "_PRES"), 
-		outfn.date=outfn.date, overwrite=overwrite)
+        datExportData(sumtreef.pres, outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn,
+		out_layer=paste0(out_layer, "_pres"), outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer)
       }
     }
     if (cover) {
       if (pltsp) {
-        spExportSpatial(sumtreef.cov, out_layer=paste0(out_layer, "_COV"), 
-		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite)
+        spExportSpatial(sumtreef.cov, out_layer=paste0(out_layer, "_cov"), 
+		outfolder=outfolder, outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		append_layer=append_layer)
       } else {
-        write2csv(sumtreef.cov, outfolder=outfolder, outfilenm=paste0(out_layer, "_COV"), 
-		outfn.date=outfn.date, overwrite=overwrite)
+        datExportData(sumtreef.cov, outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn,
+		out_layer=paste0(out_layer, "_cov"), outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer)
       }
     }
-    write2csv(tdomvarlut, outfolder=outfolder, outfilenm=paste0(out_layer, "_LUT"), 
-		outfn.date=outfn.date, overwrite=overwrite)
+    datExportData(tdomvarlut, outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn,
+		out_layer=paste0(out_layer, "_lut"), outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer)
   
 
-    ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
-    ###########################################################
-    outparamfnbase <- paste(outfn.param, format(Sys.time(), "%Y%m%d"), sep="_")
-    outparamfn <- fileexistsnm(outfolder, outparamfnbase, "txt")
+    if (parameters) {
+      ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
+      ###########################################################
+      outfn.param <- paste(out_layer, "parameters", sep="_")
+      outparamfnbase <- paste(outfn.param, format(Sys.time(), "%Y%m%d"), sep="_")
+      outparamfn <- fileexistsnm(outfolder, outparamfnbase, "txt")
   
-    tdomvarlstout <- addcommas(sapply(tdomvarlst, function(x) paste0("'", x, "'") ))
-    tdomvarlst2out <- addcommas(sapply(tdomvar2lst, function(x) paste0("'", x, "'") ))
-    strunitvars <- addcommas(sapply(strunitvars, function(x) paste0("'", x, "'") ))
+      tdomvarlstout <- addcommas(sapply(tdomvarlst, function(x) paste0("'", x, "'") ))
+      tdomvarlst2out <- addcommas(sapply(tdomvar2lst, function(x) paste0("'", x, "'") ))
+      strunitvars <- addcommas(sapply(strunitvars, function(x) paste0("'", x, "'") ))
 
-    outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
-    cat(  "tree = ", as.character(bquote(tree)), "\n",
-      "seed = ", as.character(bquote(seed)), "\n",
-      "cond = ", as.character(bquote(cond)), "\n",
-      "plt = ", as.character(bquote(plt)), "\n",
-      "plt_dsn = \"", plt_dsn, "\"", "\n",
-      "tuniqueid = \"", tuniqueid, "\"", "\n",
-      "cuniqueid = \"", cuniqueid, "\"", "\n",
-      "puniqueid = \"", puniqueid, "\"", "\n",
-      "bycond = ", bycond, "\n",
-      "condid = \"", condid, "\"", "\n",
-      "bysubp = ", bysubp, "\n",
-      "subpid = \"", subpid, "\"", "\n",
-      "tsumvar = \"", tsumvar, "\"", "\n",
-      "TPA = ", TPA, "\n",
-      "tfun = ", noquote(tfunstr), "\n",
-      "ACI = ", ACI, "\n",
-      "tfilter = \"", tfilter, "\"", "\n",
-      "lbs2tons = ", lbs2tons, "\n",
-      "tdomvar = \"", tdomvar, "\"", "\n",
-      "tdomvarlst = c(", tdomvarlstout, ")", "\n", 
-      "tdomvar2 = \"", tdomvar2, "\"", "\n",
-      "tdomvar2lst = c(", tdomvarlst2out, ")", "\n", 
-      "tdomprefix = \"", tdomprefix, "\"", "\n",
-      "tdombarplot = ", tdombarplot, "\n",
-      "tdomtot = ", tdomtot, "\n",
-      "tdomtotnm = \"", tdomtotnm, "\"", "\n",
-      "FIAname = ", FIAname, "\n",
-      "addseed = ", addseed, "\n",
-      "presence = ", presence, "\n",
-      "proportion = ", proportion, "\n",
-      "cover = ", cover, "\n",
-      "getadjplot = ", getadjplot, "\n",
-      "adjtree = ", adjtree, "\n",
-      "NAto0 = ", NAto0, "\n",
-      "adjTPA = ", adjTPA, "\n",
-      "savedata = ", savedata, "\n",
-      "outfolder = \"", outfolder, "\"", "\n",
-      "out_layer = ", out_layer, "\n",
-      "outfn.date = ", outfn.date, "\n",
-      "overwrite = ", overwrite, "\n",
-      "tround = \"", tround, "\"", "\n", "\n",
-    file = outfile, sep="")
+      outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
+      cat(  "tree = ", as.character(bquote(tree)), "\n",
+      	"seed = ", as.character(bquote(seed)), "\n",
+      	"cond = ", as.character(bquote(cond)), "\n",
+      	"plt = ", as.character(bquote(plt)), "\n",
+      	"plt_dsn = \"", plt_dsn, "\"", "\n",
+      	"tuniqueid = \"", tuniqueid, "\"", "\n",
+      	"cuniqueid = \"", cuniqueid, "\"", "\n",
+      	"puniqueid = \"", puniqueid, "\"", "\n",
+      	"bycond = ", bycond, "\n",
+      	"condid = \"", condid, "\"", "\n",
+      	"bysubp = ", bysubp, "\n",
+      	"subpid = \"", subpid, "\"", "\n",
+      	"tsumvar = \"", tsumvar, "\"", "\n",
+      	"TPA = ", TPA, "\n",
+      	"tfun = ", noquote(tfunstr), "\n",
+      	"ACI = ", ACI, "\n",
+      	"tfilter = \"", tfilter, "\"", "\n",
+      	"lbs2tons = ", lbs2tons, "\n",
+      	"tdomvar = \"", tdomvar, "\"", "\n",
+      	"tdomvarlst = c(", tdomvarlstout, ")", "\n", 
+      	"tdomvar2 = \"", tdomvar2, "\"", "\n",
+      	"tdomvar2lst = c(", tdomvarlst2out, ")", "\n", 
+      	"tdomprefix = \"", tdomprefix, "\"", "\n",
+      	"tdombarplot = ", tdombarplot, "\n",
+      	"tdomtot = ", tdomtot, "\n",
+      	"tdomtotnm = \"", tdomtotnm, "\"", "\n",
+      	"FIAname = ", FIAname, "\n",
+      	"addseed = ", addseed, "\n",
+      	"presence = ", presence, "\n",
+      	"proportion = ", proportion, "\n",
+      	"cover = ", cover, "\n",
+      	"getadjplot = ", getadjplot, "\n",
+      	"adjtree = ", adjtree, "\n",
+      	"NAto0 = ", NAto0, "\n",
+      	"adjTPA = ", adjTPA, "\n",
+      	"savedata = ", savedata, "\n",
+      	"outfolder = \"", outfolder, "\"", "\n",
+      	"out_layer = ", out_layer, "\n",
+      	"outfn.date = ", outfn.date, "\n",
+      	"overwrite_dsn = ", overwrite_dsn, "\n",
+      	"tround = \"", tround, "\"", "\n", "\n",
+    	file = outfile, sep="")
 
-    cat(  "tdomdat <- datSumTreeDom(tree=tree, seed=seed, cond=cond, plt=plt, 
+    	cat(  "tdomdat <- datSumTreeDom(tree=tree, seed=seed, cond=cond, plt=plt, 
 		plt_dsn=plt_dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid,
  		bycond=bycond, condid=condid, bysubp=bysubp, subpid=subpid, tsumvar=tsumvar,
 		TPA=TPA, tfun=tfun, ACI=ACI, tfilter=tfilter, lbs2tons=lbs2tons, tdomvar=tdomvar,
@@ -1190,9 +1211,10 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 		tdomtotnm=tdomtotnm, FIAname=FIAname, addseed=addseed, presence=presence,
  		proportion=proportion, cover=cover, getadjplot=getadjplot, adjtree=adjtree,
 		NAto0=NAto0, adjTPA=adjTPA, savedata=savedata, outfolder=outfolder, 
-		out_layer=out_layer, outfn.date=outfn.date, overwrite=overwrite, tround=tround)",
-    file = outfile, sep="")
-    close(outfile)
+		out_layer=out_layer, outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, tround=tround)",
+    	file = outfile, sep="")
+    	close(outfile)
+    }
   }
  
   tdomdata <- list()

@@ -32,6 +32,7 @@ groupUnits <- function(tabest, domain, esttype="AREA", estncol="estn",
   keepvars <- keepvars[keepvars %in% names(tabest)]
   tabgrp <- tabest[, lapply(.SD, sum, na.rm=TRUE), by=c(domvargrp, keepvars), 
 		.SDcols=agvars]
+  setorderv(tabgrp, domvargrp)
 
   if (esttype == "RATIO" || (esttype == "PHOTO" && photoratio)) {
     tabgrp <- getrhat(tabgrp)

@@ -32,7 +32,7 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt

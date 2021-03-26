@@ -84,5 +84,30 @@ anGBdata(bnd_layer, bnd_dsn = NULL, bnd.att = NULL, bnd.filter=NULL,
 \author{
 	Tracey S. Frescino
 }
+\examples{
+
+  ## Get data for WY Bighorn administrative boundary using 
+  WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+  fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
+
+  ## Get data for calculating GB population data and generating GB estimates
+  GBdata <- anGBdata(WYbhfn, datsource="datamart", strat_layer=fornffn)
+  names(GBdata)
+
+  plot(sf::st_geometry(GBdata$bnd))
+  plot(sf::st_geometry(GBdata$xyplt), add=TRUE, pch=18, cex=.5)
+
+  dim(GBdata$xyplt)
+  dim(GBdata$plt)
+  dim(GBdata$pltassgn)
+
+  ## Look at unitarea, area by estimation and stratalut, with strata pixel counts and weights
+  GBdata$unitarea
+  GBdata$stratalut
+
+  ## Display first 6 rows of pltassgn table with plot assignments for strata
+  head(GBdata$pltassgn)
+}
+
 \keyword{ data }
 

@@ -19,11 +19,12 @@ modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE",
 	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
 	sumunits = TRUE, allin1 = FALSE, estround = 3, pseround = 2, 
 	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
-	rawdata = FALSE, rawonly = FALSE, outfolder = NULL, outfn.pre = NULL,
- 	outfn.date = TRUE, overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, 
-	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
- 	title.unitvar = NULL, title.estvarn = NULL, title.estvard = NULL, 
-	title.filter = NULL, gui = FALSE, ...)
+	outfolder = NULL, overwrite = FALSE, outfn.pre = NULL, outfn.date = TRUE,
+	addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, raw_fmt="csv", raw_dsn=NULL, 
+	layer.pre=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, 
+	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
+	title.colvar = NULL, title.unitvar = NULL, title.estvarn = NULL, 
+	title.estvard = NULL, title.filter = NULL, gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -78,17 +79,26 @@ modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE",
 		for percent standard errror. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
+  \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
+	written to working directory, or if gui, a window to browse. }
+  \item{overwrite}{ Logical. If TRUE, overwrites estimates in outfolder. }
+  \item{outfn.pre}{ String. Prefix for out_dsn or csv file, if out_fmt=".csv". }
+  \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
+  \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
   \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes
 	many estimation units, and only raw data tables are needed, it is more 
 	efficient to output raw data only. }
-  \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
-	written to working directory, or if gui, a window to browse. }
-  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
-  \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
+  \item{raw_fmt}{ String. Format for output rawdata tables ('csv', 'sqlite', 'gpkg'). }
+  \item{raw_dsn}{ String. Data source name for rawdata output. If extension is not
+	included, out_fmt is used. Use full path if outfolder=NULL. }
+  \item{layer.pre}{ String. Prefix for rawdata layer in database, if out_fmt != "csv". }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer in raw_dsn
+	or *.csv raw data layer, if datsource="csv". }
+  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data data frames 
+	to existing out_dsn layer or *.csv file. }  
   \item{returntitle}{ Logical. If TRUE, returns title(s) of the estimation table(s). }
   \item{title.main}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: the complete 
 	title used for table. If title.main=NULL, the title.* parameters are used to 

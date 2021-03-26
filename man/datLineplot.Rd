@@ -12,7 +12,7 @@ datLineplot(x, xvar, yvar, plotCI = FALSE, sevar = NULL, CIlst=c(68,95),
 	jpeg.res = 300, device.height = 5, device.width = 8, 
 	ylim = NULL, divideby = NULL, ylabel = NULL, xlabel = NULL, xticks = NULL,
 	mar = NULL, addlegend = FALSE, main = NULL, cex.main = 1, 
-	cex.label = 1, cex.names = 0.8, las.xnames = 0, las.ynames = 1, 
+	cex.label = 1, cex.names = 0.9, las.xnames = 0, las.ynames = 1, 
 	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
 	outfn.date = TRUE, overwrite = FALSE, ...)
 }

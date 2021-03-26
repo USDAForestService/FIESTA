@@ -75,9 +75,11 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
   extfn <- getext(outfn) 
 
   ## Check ext
-  extlst <- c("sqlite", "csv", "txt", "gdb", "shp", "gpkg", 
-		"jpg", "png", "tif", "img", "pdf", "rda")
-  if (!is.null(ext)) {
+  extlst <- c("sqlite", "sqlite3", "db", "db3", "csv", "txt", "gdb", 
+		"shp", "gpkg", "jpg", "png", "tif", "img", "pdf", "rda")
+  if (!is.na(extfn) && extfn %in% extlst) {
+    ext <- extfn
+  } else if (!is.null(ext)) {
     if (startsWith(ext, ".")) 
       ext <- sub(".", "", ext)
     if (!ext %in% extlst)
@@ -85,14 +87,10 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
 
     if (is.na(getext(outfn)) || !extfn %in% extlst)
       outfn <- paste0(outfn, ".", ext)
+  } else if (is.na(getext(outfn))) {
+    stop("specify out_format") 
   } else {
-    if (is.na(getext(outfn))) {
-      stop("specify out_format") 
-    } else if (!extfn %in% extlst) {
-      stop(extfn, " not supported")
-    } else {
-      ext <- extfn
-    }
+    stop(extfn, " not supported")
   }     
 
   ## Get basename
@@ -106,10 +104,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
         outfolder <- file.path(outfolder, outfn.dir)
       }
     }
-  }
-    
-
-  extfn <- getext(outfn) 
+  }  
 
   ## Check if outfolder
   if ((is.na(extfn) || extfn=="NA") && dir.exists(outfn)) {

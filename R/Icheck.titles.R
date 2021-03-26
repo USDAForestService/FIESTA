@@ -18,7 +18,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
   
   ## Initialize variables
   title.est=title.pse=title.estpse=title.row=title.col=outfn.estpse=
-	 title.part2.row=title.part2.col=title.estvar <- NULL
+	 title.part2.row=title.part2.col=title.estvar=title.yvar=title.yvard <- NULL
 
 
   ## Title for landarea
@@ -93,7 +93,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       } else if (esttype %in% c("TREE", "RATIO")) {
         ref_estvar <- FIESTA::ref_estvar
         title.units <- unique(ref_estvar[ref_estvar$ESTVAR == estvarn, "ESTUNITS"])
-
+        if (length(title.units) > 1) {
+          title.units <- title.units[1]
+        }
         if (is.null(title.estvarn)) {
           ref_estvarn <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
           if (nrow(ref_estvarn) == 0) {
@@ -102,6 +104,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
             ref_estvarn <- ref_estvarn[grep("seedlings", ref_estvarn$ESTTITLE),]
             if (estseed == "only") {
               gfind.max <- grep("seedlings", ref_estvarn$ESTUNITS)
+              title.units <- "seedlings"
             } else {
               gfind.max <- grep("trees", ref_estvarn$ESTUNITS)
             }
@@ -137,13 +140,15 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
             title.estvarn <- ref_estvarn[as.numeric(gfind.max), "ESTTITLE"]
           }
 
-          if (esttype == "RATIO" && ratiotype == "PERACRE")
+          ## Get title.yvar
+          title.yvar <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, "ESTTITLE1"]
+          if (esttype == "RATIO" && ratiotype == "PERACRE") {
             title.estvarn <- paste(title.estvarn, "per acre")
+          }
         }
         title.part1 <- title.estvarn
 
         if (esttype == "RATIO" && ratiotype == "PERTREE") {
-
           if (is.null(title.estvard)) {
             ref_estvard <- ref_estvar[ref_estvar$ESTVAR == estvarn, ]
 
@@ -173,8 +178,10 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
             }
           }
           title.part1 <- paste(title.part1, "by", tolower(title.estvard))
+          title.yvard <- ref_estvar[ref_estvar$ESTTITLE == title.estvard, "ESTTITLE1"]
+        } else {
+          title.yvard <- "Acres"
         }
-        title.units <- unique(ref_estvar[ref_estvar$ESTVAR == estvarn, "ESTUNITS"])
         title.landarea <- paste("on", title.landarea)
       }
 
@@ -328,6 +335,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
         if (is.null(estvard)) estvard <- "ACRE"
         pretitle <- paste0(pretitle, "_", estvard)
       }
+      if (!is.null(title.filter)) {
+        pretitle <- paste0(pretitle, "_", sub(" ", "", title.filter))
+      }
     }
 
     if (rowvar == "TOTAL") {
@@ -338,8 +348,6 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       outfn.estpse <- paste0(pretitle, "_", rowvar, "_", colvar, "_", landarea2, 
 		unitvar2)
     }
-    if (sumunits)
-      outfn.estpse <- paste(outfn.estpse, "sumunits", sep="_") 
   } else {
     outfn.estpse <- outfn
   }
@@ -351,13 +359,11 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
   }
 
   if (esttype %in% c("TREE", "RATIO")) {
-    titlelst$title.yvar <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, 
-		"ESTTITLE1"]
+    titlelst$title.yvar <- title.yvar
     titlelst$title.estvar <- title.estvarn
 
     if (esttype == "RATIO") {
-      titlelst$title.yvard <- ref_estvar[ref_estvar$ESTTITLE == title.estvard, 
-		"ESTTITLE1"]
+      titlelst$title.yvard <- title.yvard
       titlelst$title.estvard <- title.estvard
     }
   }

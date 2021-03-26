@@ -124,8 +124,8 @@ Population filters subset the plot data set before population calculations are g
 
 Nonsample filters remove nonsample (i.e., nonresponse) conditions from the dataset. Nonsample filters are defined internally, unless otherwise specified.
 
-* **plt.nonsamp.filter** - If plt.nonsamp.filter=NULL, a predefined filter for nonsampled (nonresponse) plots (PLOT_STATUS_CD != 3 is used. If a different filter is needed, define the filter to remove plots that are nonsampled.
-* **cond.nonsamp.filter** - If cond.nonsamp.filter=NULL, a predefined filter for nonsampled (nonresponse) conditions is used (COND_STATUS_CD != 5; or if ACI=TRUE: is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5). If a different filter is needed, define the filter to remove conditions that are nonsampled.
+* **plt.nonsamp.filter** - A predefined filter for nonsampled (nonresponse) plots (PLOT_STATUS_CD != 3).
+* **cond.nonsamp.filter** - A predefined filter for nonsampled (nonresponse) conditions (COND_STATUS_CD != 5; or if ACI=TRUE: is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5). 
 
 
 <a name="estunit"></a>
@@ -494,8 +494,7 @@ if (.Platform$OS.type == "windows") {
 #   vspspp = NULL, subplot = NULL, subp_cond = NULL, pltassgn = NULL, dsn = NULL,  
 #   puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", tuniqueid = "PLT_CN",     
 #   cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", adj = "samp",  
-#   evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE,      
-#   plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, unitvar = NULL,    
+#   evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE, unitvar = NULL,     
 #   unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
 #   minplotnum.unit = 10, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD",    
 #   getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE,  
@@ -518,8 +517,7 @@ help(modGBpop)
 
 ## Get population data for Wyoming area of interest using post-stratification
 ########################################################################################
-GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, seed=WYseed, 
-    pltassgn=WYpltassgn, pltassgnid="CN", 
+GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=WYpltassgn, pltassgnid="CN", 
     unitarea=WYunitarea, unitvar="ESTN_UNIT", strata=TRUE, stratalut=WYstratalut)
 
 ## Get names of list components
@@ -889,7 +887,7 @@ tree5b <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="C
   outfolder=outfolder)
 names(tree5b)
 tree5b$est
-tree5b$pse
+tree5b$ps
 tree5b$titlelst
 tree5b.raw <- tree5b$raw
 names(tree5b.raw)
@@ -966,6 +964,11 @@ names(raw10)
 head(raw10$rowest)
 
 
+## Get population data for Wyoming area of interest using post-stratification - add seedlings
+#############################################################################################
+GBpopdat2 <- modGBpop(cond=WYcond, tree=WYtree, seed=WYseed, pltassgn=WYpltassgn, pltassgnid="CN", 
+    unitarea=WYunitarea, unitvar="ESTN_UNIT", strata=TRUE, stratalut=WYstratalut)
+names(GBpopdat)
 
 
 ## Now, use GBpopdat with a new diameter class
@@ -973,12 +976,12 @@ head(raw10$rowest)
 
 # Use datLUTclass to define class breaks
 treedia.brks <- c(1,10,20,30,40,999)
-GBpopdat$treex <- datLUTclass(x=GBpopdat$treex, xvar="DIA", cutbreaks=treedia.brks)$xLUT
+GBpopdat$treex <- datLUTclass(x=GBpopdat2$treex, xvar="DIA", cutbreaks=treedia.brks)$xLUT
 head(GBpopdat$treex)
 table(GBpopdat$treex$DIACL)
 
 # Get number of live trees by species and diameter class
-tree11 <- modGBtree(GBpopdat=GBpopdat, landarea="FOREST", 
+tree11 <- modGBtree(GBpopdat=GBpopdat2, landarea="FOREST", 
   estvar="TPA_UNADJ", estvar.filter="STATUSCD==1", rowvar="SPCD", row.FIAname=TRUE, 
   colvar="DIACL", sumunits=TRUE, rawdata=TRUE)
 names(tree11)
@@ -986,7 +989,7 @@ tree11$est
 
 
 # Get number of live trees by species and diameter class, and add seedlings
-tree11b <- modGBtree(GBpopdat=GBpopdat, estseed="add", landarea="FOREST", 
+tree11b <- modGBtree(GBpopdat=GBpopdat2, estseed="add", landarea="FOREST", 
   estvar="TPA_UNADJ", estvar.filter="STATUSCD==1", rowvar="SPCD", row.FIAname=TRUE, 
   colvar="DIACL", sumunits=TRUE, rawdata=TRUE)
 names(tree11b)

@@ -1,13 +1,14 @@
-modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, cfilter=NULL, 
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, 
+	cfilter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits=TRUE, allin1=FALSE, estround=1, pseround=2, 
-	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
-	rawonly=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, 
-	overwrite=TRUE, addtitle=TRUE, returntitle=FALSE, title.main=NULL, 
-	title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, 
-	title.filter=NULL, gui=FALSE, ...){
+	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, outfolder=NULL, 
+	overwrite=FALSE, outfn.pre=NULL, outfn.date=TRUE, addtitle=TRUE, 
+	rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL, layer.pre=NULL, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, 
+ 	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
+	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, gui=FALSE, ...){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -53,16 +54,22 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, cfilter=NU
   parameters <- FALSE
   returnlst <- list()
 
+
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ## Check outfolder 
-  ########################################################
-  if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    if (rawdata && !file.exists(paste(outfolder, "rawdata", sep="/"))) 
-      dir.create(paste(outfolder, "rawdata", sep="/"))
+		title="Save data extraction?", first="NO", gui=gui) 
+ 
+  ## If savedata, check output file names
+  ################################################################
+  if (savedata) { 
+    outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		append_layer=append_layer, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
   }
 
   ###################################################################################
@@ -365,9 +372,9 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, cfilter=NU
  	title.colvar=title.colvar, title.rowvar=title.rowvar, title.rowgrp=title.rowgrp,
  	title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est,
  	title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, 
-	estround=estround, pseround=pseround, divideby=divideby, rawdat=rawdat, 
-	returntitle=returntitle, estnull=estnull, psenull=psenull) 
+	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
+	estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
+	rawdat=rawdat, returntitle=returntitle, estnull=estnull, psenull=psenull) 
 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
@@ -390,15 +397,26 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL, cfilter=NU
         tabnm <- names(rawdat[i])
         rawtab <- rawdat[[i]]
         if (!is.null(rawtab)) {
-          outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm, ".csv") 
-          if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratdat", "stratcombinelut")) {
+          outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
+          if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
             write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
 			outfn.date=outfn.date, overwrite=overwrite)
           } else if (is.data.frame(rawtab)) {
-            suppressWarnings(save1tab(tab=rawtab, tab.title=title.raw, 
-			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
-			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
-			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite))
+          #overwrite_layer <- ifelse(append_layer, FALSE, overwrite_layer)
+          if (out_fmt == "csv") {
+            out_layer <- tabnm 
+            if (!is.null(layer.pre)) {
+              out_layer <- paste0(layer.pre, "_", out_layer)
+            }
+          } else {
+            out_layer <- outfn.rawdat
+          }
+          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
+ 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer, layer.pre=NULL)
+#          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
+# 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
+#			append_layer=append_layer, layer.pre=outfn.rawdat)
           }
         }
       }
