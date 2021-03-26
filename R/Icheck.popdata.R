@@ -220,6 +220,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       if (length(predfac) == 0) predfac <- NULL
     }
   } 
+
   ## Check dsn and create queries to get population subset from database
   ###################################################################################
   if (!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg")) {
@@ -367,14 +368,16 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       ## Set key
       setkeyv(pltx, puniqueid)
     }
- 
+
     if (!is.null(pltassgnx)) {
       pltassgnid <- pcheck.varchar(var2check=pltassgnid, varnm="pltassgnid", gui=gui, 
 		checklst=names(pltassgnx), caption="UniqueID variable of plot", 
 		warn=paste(pltassgnid, "not in pltassgn"), stopifnull=TRUE)
 
-      if (!is.null(evalid) && "EVALID" %in% names(pltassgnx)) {
-        if (!all(evalid %in% unique(pltassgnx[["EVALID"]]))) {
+      if (!is.null(evalid) && !is.null(chkdbtab(names(pltassgnx), "EVALID"))) {
+        evalidnm <- chkdbtab(names(pltassgnx), "EVALID")
+        evalid <- unlist(evalid)
+        if (!all(evalid %in% unique(pltassgnx[[evalidnm]]))) {
           evalid.miss <- evalid[which(!evalid %in% unique(pltassgnx[["EVALID"]]))]
           message("evalid not in dataset: ", paste(evalid.miss, collapse=", "))
           if (length(evalid.miss) == length(evalid)) stop("")
@@ -426,19 +429,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     ## Filter for population data
     ##################################################################################
     if (!datindb) {
-      if (!is.null(evalid)) {
-        if (!"EVALID" %in% names(pltx)) stop("EVALID not in pltx") 
-        if (!is.null(evalid)) {
-          if (!all(evalid %in% unique(pltx[["EVALID"]]))) {
-            evalid.miss <- evalid[which(!evalid %in% unique(pltx[["EVALID"]]))]
-            message("evalid not in dataset: ", paste(evalid.miss, collapse=", "))
-            if (length(evalid.miss) == length(evalid)) stop("")
-            evalid <- evalid[!evalid %in% evalid.miss]
-          } 
-        }
-        pltx <- datFilter(pltx, getfilter("EVALID", evalid, syntax="R"))$xf
-
-      } else if (!is.null(pltx) && (measCur || !is.null(measEndyr))) {
+      if (!is.null(pltx) && (measCur || !is.null(measEndyr))) {
 
         pltx <- getPlotCur(pltx, Endyr=measEndyr, varCur="MEASYEAR", 
 				Endyr.filter=measEndyr.filter)

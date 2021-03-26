@@ -124,8 +124,9 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
 	condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
 	measCur=measCur, measEndyr=measEndyr, measEndyr.filter, invyrs=invyrs, 
 	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
-	cond.nonsamp.filter=cond.nonsamp.filter, unitvar=dunitvar, unitvar2=dunitvar2, 
-	prednames=prednames, predfac=predfac, pvars2keep=pvars2keep, cvars2keep=cvars2keep)
+	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=dunitarea, areavar=areavar, 
+	unitvar=dunitvar, unitvar2=dunitvar2, prednames=prednames, predfac=predfac, 
+	pvars2keep=pvars2keep, cvars2keep=cvars2keep)
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef

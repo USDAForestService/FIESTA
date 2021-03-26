@@ -133,21 +133,20 @@ anGBpop_eval <- function(evalidlst=NULL, evalCur=FALSE, evalEndyrlst=NULL,
 
     if (byEndyr) {
       evalidloop <- names(evalidlst)
+      evalidloop <- evalidlst
     } else {
       evalidloop <- unlist(evalidlst)
+      names(evalidloop) <- names(evalidlst)
     }
 
     for (i in 1:length(evalidloop)) {
       evalid <- evalidloop[i]
       evalnm <- names(evalid)
-      if (byEndyr) {
-        evalid <- evalidlst[[evalid]]
-      }
       message("getting population data for ", toString(evalnm))
       message("evalid: ", toString(evalid))
 
       GBpopdat <- modGBpop(popType=evalType, cond=cond, plt=plt, tree=tree, seed=seed,
-		evalid=evalid, dsn=data_dsn, pltassgn=pltassgn, GBstratdat=GBstratdat, 
+		evalid=evalid, dsn=data_dsn, GBstratdat=GBstratdat, 
 		savedata=savedata, outfolder=outfolder, outfn.pre=evalnm, ...)
       GBpop_evallst[[evalnm]] <- GBpopdat
     }
