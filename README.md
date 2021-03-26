@@ -9,25 +9,26 @@ The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research e
 
 <b>Installation:<b>
 
-<b>Install Rtools<b>
+<b>1. Install Rtools<b>
 If Windows OS, in order to install source code from GitHub, you must install Rtools from 
-the CRAN website (https://cran.r-project.org/). Install the most current Rtools for Windows 64-bit.
+the CRAN website (https://cran.r-project.org/). Go to Download R for Windows and Install the most current Rtools for Windows 64-bit.
 
 
-<b>Create token for GitHub<b>
+<b>2. Create token for GitHub<b>
 For ease of installing and updating FIESTA, generate a token from GitHub settings.
 Note: FIESTA is frequently updated. You will use this token each time you update 
 FIESTA (until public release).
 
-1. In the upper-right corner of any page, click your profile photo, then click Settings.
+1. In the upper-right corner of any page, click your profile photo, then click Settings in dropdown menu.
 2. In the left sidebar, click Developer settings.
-3. Click Generate new token.
-4. Give your token a descriptive name.
-5. Check all boxes
-6. Save token...  (~30 character string).
+3. Go to Personal access tokens.
+4. Click Generate new token.
+5. Give your token a descriptive name.
+6. Check all boxes
+7. Save token (~30 character string) to a file and as an R object.
 
 
-<b>Install FIESTA suggested packages<b>
+<b>3. Install FIESTA suggested packages<b>
 - Checks to make sure all FIESTA dependent packages are installed
 - Removes old version of FIESTA from current R library
 - pkginstalled <- installed.packages()
@@ -111,6 +112,10 @@ remove.packages("FIESTA", lib=.libPaths())
 Next install FIESTA from GitHub, using the token you saved as an R object.
 
 ```
+## Set your token to an R character object, in quotes (Replace your_token with ~30 character string)
+token <- "your_token"
+
+## Install from github
 Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 devtools::install_github("https://github.com/USDAForestService/FIESTA", 
 		auth_token = token,
