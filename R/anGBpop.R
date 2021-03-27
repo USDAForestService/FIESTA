@@ -1,8 +1,8 @@
 anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
 	popType="VOL", isseed=FALSE, datsource="sqlite", data_dsn=NULL, RS=NULL, 
 	xy=NULL, xy_dsn=NULL, strat_layer=NULL, showsteps=FALSE, savedata=FALSE, 
-	savexy=TRUE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
+	savexy=TRUE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
+	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	GBdata=NULL, ...) {
 
 
@@ -66,7 +66,7 @@ anGBpop <- function(bnd, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ####################################################################
   ## Get population data
   ####################################################################
-  GBpopdat <- modGBpop(popType=popType, GBdata=GBdata, saveobj=TRUE, 
+  GBpopdat <- modGBpop(popType=popType, GBdata=GBdata, saveobj=saveobj, 
 	outfolder=outfolder)
   names(GBpopdat)
   returnlst$GBpopdat <- GBpopdat

@@ -52,7 +52,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   pop_tables <- c("POP_ESTN_UNIT", "POP_EVAL", "POP_EVAL_ATTRIBUTE", "POP_EVAL_GRP", 
 	"POP_EVAL_TYP", "POP_STRATUM", "SURVEY") 
 
- 
   #############################################################################
   ## Import boundary
   #############################################################################
@@ -784,7 +783,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             clipxy <- TRUE
           }
         }
- 
+
         ## Generate xy table for all plots in state (xystate)
         #########################################################
         if (xyindb) { 
@@ -934,7 +933,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
             ## Clip xystate and other tables for bndxf2
             ############################################
-            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndxf2, stopifnotin=FALSE)
+            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndxf2, xy.uniqueid=xy.uniqueid,
+			stopifnotin=FALSE)
             xyplt2 <- clipdat$clip_xyplt
 
             plt2 <- plt2[plt2[[pjoinid]] %in% xyplt2[[xy.joinid]], ]
@@ -1013,9 +1013,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
 
           } else {    ## measEndyr.filter = NULL
-
             ## Clip data
-            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndx)
+            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndx, xy.uniqueid=xy.uniqueid)
             xyplt <- clipdat$clip_xyplt
             plt <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
             pltids <- plt[[puniqueid]]

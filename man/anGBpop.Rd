@@ -12,8 +12,8 @@
 anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL", 
 	isseed = FALSE, datsource = "sqlite", data_dsn = NULL, RS = NULL, 
 	xy = NULL, xy_dsn = NULL, strat_layer = NULL, showsteps = FALSE, 
-	savedata = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	savedata = FALSE, savexy = TRUE, saveobj = FALSE, outfolder = NULL, 
+	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, GBdata = NULL, ...)
 }
 \arguments{
@@ -44,6 +44,7 @@ anGBpop(bnd, bnd_dsn = NULL, bnd.att = NULL, bnd.filter = NULL, popType = "VOL",
   \item{showsteps}{ Logical. If TRUE, show intermediate steps. }
   \item{savedata}{ Logical. If TRUE, saves data objects to outfolder. }
   \item{savexy}{ Logical. If TRUE, saves xy coordinates to outfolder. }
+  \item{saveobj}{ Logical. If TRUE, saves GBpopdat object to outfolder. }
   \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
   \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
