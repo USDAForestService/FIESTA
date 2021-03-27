@@ -115,7 +115,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   ylim.max <- ylim[2]		## bug fixed by Liz
 
   if (is.null(xticks)) {
-    xticks <- pretty(datx[[xvar]])
+    xticks <- datx[[xvar]]
   }
   xlim <- c(min(xticks), max(xticks))
 
@@ -256,10 +256,7 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
 	#		cex=cex.names, srt=srt, xpd=TRUE)
     #text(x=xticks, par("usr")[3], labels=datx[[xvar]], adj = c(1.4, 1),
 	#		cex=cex.names, srt=srt, xpd=TRUE)
-print("TEST")
-print(srt)
-print(datx[[xvar]])
-adj=c(0,1)
+ 
     offset <- ifelse(srt==60, 1.5, 1)
     text(x=xticks, par("usr")[3], labels=datx[[xvar]], pos=1,
 			cex=cex.names, srt=srt, xpd=TRUE, offset=offset)
