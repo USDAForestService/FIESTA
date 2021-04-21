@@ -111,6 +111,7 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   pltassgnx <- stratcheck$pltx
   unitarea <- stratcheck$unitarea
   unitvar <- stratcheck$unitvar
+  unitvars <- stratcheck$unitvars
   strlut <- stratcheck$auxlut
   strvar <- stratcheck$PSstrvar
   stratcombinelut <- stratcheck$unitstrgrplut
@@ -118,7 +119,7 @@ modPBpop <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 
   returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
 		pltassgnid=pltassgnid, tabtype=tabtype, sumunits=sumunits, 
-		unitvar=unitvar, strlut=strlut, strvar=strvar, 
+		unitvar=unitvar, unitvars=unitvars, strlut=strlut, strvar=strvar, 
 		plotsampcnt=plotsampcnt, getprop=getprop)
 
   if (!is.null(unitarea)) {

@@ -13,7 +13,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   ## DESCRIPTION: 
   ## Generates model-assisted estimates by domain (and estimation unit)
   ######################################################################################
-  gui <- FALSE
+  gui=addSAdomsdf <- FALSE
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
@@ -151,11 +151,12 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
         }	else if (multest_fmt %in% c("sqlite", "gpkg")) {
           gpkg <- ifelse(multest_fmt == "gpkg", TRUE, FALSE)
           if (multest.append) {
-            multest_dsn <- DBtestSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
-			returnpath=FALSE)
+            multest_dsn <- DBtestSQLite(SQLitefn=multest_dsn, gpkg=gpkg, 
+			outfolder=outfolder, returnpath=FALSE)
           } else {
-            multest_dsn <- DBcreateSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=FALSE, returnpath=FALSE, outfn.date=outfn.date)
+            multest_dsn <- DBcreateSQLite(SQLitefn=multest_dsn, gpkg=gpkg, 
+			outfolder=outfolder, overwrite=FALSE, returnpath=FALSE, 
+			outfn.date=outfn.date)
           }
         }	
       }
@@ -195,7 +196,9 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   ## check SAdomsdf
   ########################################################
   SAdomsdf <- pcheck.table(SAdomsdf, tabnm="SAdomsdf", caption="SAdoms?")
-
+  if (!is.null(SAdomsdf)) {
+    addSAdomsdf <- TRUE
+  }
 
   ## check smallbnd.att
   ########################################################
@@ -413,8 +416,9 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
     ## Subset dunit.multest to estimation output
     est <- dunit.multest[AOI==1, c(dunitvar, nhat, nhat.se), with=FALSE]
 
-  if (!is.null(smallbnd.att)) 
+  if (!is.null(smallbnd.att) && addSAdomsdf) {
     est <- merge(SAdomsdf[, c(dunitvar, smallbnd.att), with=FALSE], est, by=dunitvar)
+  }
   est[, (nhat.var) := get(nhat.se)^2]
   setkeyv(est, dunitvar)
 
@@ -434,7 +438,6 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 
 
   if (multest) {
-
     ## Merge SAdom attributes to dunit.multest
     if (addSAdomsdf) {
       dunit.multest[, AOI := NULL]
@@ -480,15 +483,9 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
-  if (rawdata) {
-    rawdat <- list()
-    rawdat$domdat <- setDF(cdomdat)
-  }
-
-
+  message("getting output...")
   estnm <- "est"
   unit.totest <- setDT(est)
-
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	unitvar=dunitvar, unit.totest=unit.totest, unit.rowest=unit.rowest, 
 	unit.colest=unit.colest, unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, 
@@ -503,9 +500,15 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 	estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  rawdat <- tabs$rawdat
-  titlelst <- tabs$titlelst
-  names(rawdat)[names(rawdat) == "unit.totest"] <- "dunit.totest"
+
+  if (rawdata) {
+    rawdat <- tabs$rawdat
+    names(rawdat)[names(rawdat) == "unit.totest"] <- "dunit.totest"
+    rawdat$domdat <- setDF(cdomdat)
+  }
+  if (returntitle) {
+    titlelst <- tabs$titlelst
+  }
 
   if (savedata) {
     if (rawdata) {
@@ -533,7 +536,9 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 
 
   returnlst <- list(est=est2return)
-  if (multest) returnlst$dunit.multest <- dunit.multest 
+  if (multest) {
+    returnlst$dunit.multest <- dunit.multest 
+  }
   if (rawdata) {
     rawdat$esttype <- "AREA"
     rawdat$SApackage <- SApackage
@@ -542,8 +547,12 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
     if (!is.null(colvar)) rawdat$colvar <- colvar
     returnlst$raw <- rawdat
   }
-  if (returntitle) returnlst$titlelst <- alltitlelst
-  if (returnSApopdat) returnlst$SApopdat <- SApopdat
+  if (returntitle) {
+    returnlst$titlelst <- alltitlelst
+  }
+  if (returnSApopdat) {
+    returnlst$SApopdat <- SApopdat
+  }
 
   return(returnlst)
 }

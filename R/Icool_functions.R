@@ -17,6 +17,7 @@
 # getfilter
 # wraptitle
 # addclass
+# xtabf
 
 
 
@@ -447,3 +448,8 @@ addclass <- function(x, xtab, xvar, brks) {
   x[[xtab]] <- datLUTclass(x=x[[xtab]], xvar=xvar, cutbreaks=brks)$xLUT
   return(x)
 }
+
+xtabf <- function(x, y, levels) {
+  table(factor(x, levels=levels), factor(y, levels=levels))
+}
+

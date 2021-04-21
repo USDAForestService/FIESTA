@@ -11,21 +11,21 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   report_imagefn <- NULL
 
   outfolder <- pcheck.outfolder(outfolder)
-  reportfolder <- file.path(outfolder, "report")
-  reportfolder <- normalizePath(reportfolder)
+  outfolder <- normalizePath(outfolder)
+  reportfolder <- tempdir()
 
 
-  if (!dir.exists(reportfolder)) {
-    message(reportfolder, " does not exist, creating...")
-    dir.create(reportfolder)
-  }
+  #if (!dir.exists(reportfolder)) {
+  #  message(reportfolder, " does not exist, creating...")
+  #  dir.create(reportfolder)
+  #}
   
   ## Copy files to outfolder
   rmdfn <- file.path(reportfolder, paste0(AOInm, '_report.Rmd'))
-  reportfn <- file.path(reportfolder, paste0(AOInm, '_report.docx'))
+  reportnm <- paste0(AOInm, '_report.docx')
+  reportfn <- file.path(reportfolder, reportnm)
   file.copy(system.file("rmd", "anGBpop_report.Rmd", package="FIESTA"),
 	rmdfn, overwrite=TRUE)
-
   file.copy(system.file("rmd", "anGBtemplate.docx", package="FIESTA"),
 	file.path(reportfolder, "anGBtemplate.docx"), overwrite=TRUE)
   if (!is.null(photofn)) {
@@ -57,6 +57,10 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
 		spcd=spcd, EVALIDator_match=EVALIDator_match, title.ref=title.ref),
     envir = parent.frame()
   )
+
+  ## Copy report from temporary folder to outfolder
+  file.copy(reportfn, outfolder)
+  message("saving report to ", file.path(outfolder, reportnm))
 
   ## Set working directory back to original working directory
   setwd(wkdir) 

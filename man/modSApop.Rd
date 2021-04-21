@@ -17,7 +17,7 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL,
 	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, savedata = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn = NULL, 
 	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, SAdata = NULL, gui = FALSE)
+	overwrite_layer = TRUE, SAdata = NULL, SAmodeldat = NULL, gui = FALSE)
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -99,6 +99,7 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL,
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
+  \item{SAmodeldat}{ R List object. Output data list components from FIESTA::SAmodeldat(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

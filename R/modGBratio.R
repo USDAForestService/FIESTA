@@ -102,7 +102,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
   unitvar <- GBpopdat$unitvar
-  unitvar2 <- GBpopdat$unitvar2
+  unitvars <- GBpopdat$unitvars
   stratalut <- GBpopdat$stratalut
   strvar <- GBpopdat$strvar
   expcondtab <- GBpopdat$expcondtab
@@ -516,20 +516,10 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   ###################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################
-  if (rawdata) {
-    rawdat <- list()
-    rawdat$domdat <- setDF(tdomdat) 
-    rawdat$estvarn <- estvarn.name
-    rawdat$estvarn.filter <- estvarn.filter
-    if (ratiotype == "PERACRE") {
-      rawdat$estvard <- estvard.name
-      rawdat$estvard.filter <- estvard.filter
-    }
-  }
-
+  message("getting output...")
   estnm <- "estn"
-  tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, unitvar=unitvar, 
-	unitvar2=unitvar2, unit.totest=unit.totest, unit.rowest=unit.rowest, 
+  tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
+	unitvar=unitvar, unitvars=unitvars, unit.totest=unit.totest, unit.rowest=unit.rowest, 
 	unit.colest=unit.colest, unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, 
 	uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
 	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
@@ -538,12 +528,24 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder,
  	overwrite=overwrite, outfn.date=outfn.date, estnm=estnm, estround=estround,
- 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle, 
+ 	pseround=pseround, divideby=divideby, returntitle=returntitle, 
 	estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  rawdat <- tabs$rawdat
-  titlelst <- tabs$titlelst
+  
+  if (rawdata) {
+    rawdat <- tabs$rawdat
+    rawdat$domdat <- setDF(tdomdat) 
+    rawdat$estvarn <- estvarn.name
+    rawdat$estvarn.filter <- estvarn.filter
+    if (ratiotype == "PERACRE") {
+      rawdat$estvard <- estvard.name
+      rawdat$estvard.filter <- estvard.filter
+    }
+  }
+  if (returntitle) {
+    titlelst <- tabs$titlelst
+  }
 
   if (savedata) {
     if (rawdata) {

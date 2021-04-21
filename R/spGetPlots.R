@@ -109,7 +109,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ########################################################################
   ## Check xy table
   xychk <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
-
   if (!is.null(evalid)) {
     evalid <- unlist(evalid)
     stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4))) 
@@ -121,8 +120,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% states]
   } else if (!is.null(bndx)) {
     ## Get stbnd.att
-    if (is.null(stbnd.att) && exists("stunitco"))
+    if (is.null(stbnd.att) && exists("stunitco")) {
       stbnd.att <- "COUNTYFIPS"
+    }
 
     ## Get intersecting states
     statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
@@ -479,9 +479,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 }
               }
             }
-            if (savexy || showsteps)
+            if (savexy || showsteps) {
               xyplt <- rbind(xyplt1, xyplt2)
-
+            }
           } else {    ## measEndyr.filter = NULL
 
             ## Clip data
@@ -524,8 +524,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
           }
 
-          if (savexy || showsteps)
+          if (savexy || showsteps) {
             xypltx <- rbind(xypltx, xyplt)
+          }
 
         } else {      ## clipxy = FALSE, datsource="datamart"
 
@@ -703,7 +704,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
           #}
         }    ## End if i=1
- 
+
         ## Create state filter
         stfilter <- paste("p.statecd IN(", toString(stcd), ")")
         if (!is.null(stateFilter)) { 
@@ -826,7 +827,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (!is.null(measEndyr.filter)) {
             bndxf1 <- datFilter(bndx, xfilter=measEndyr.filter)$xf
             bndxf2 <- datFilter(bndx, xfilter=paste0("!", measEndyr.filter))$xf
-
             ## Clip xystate and other tables for bndxf1
             ############################################
             clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndxf1, stopifnotin=FALSE)
@@ -1094,7 +1094,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           if (savexy || showsteps) {
             xypltx <- rbind(xypltx, xyplt)
           }
-
         } else {      ## clipxy=FALSE, datsource="sqlite"
 
           if ((savexy || showsteps) && !is.null(xystate)) {
@@ -1180,8 +1179,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     }  ## End of looping thru states
 
     ## Disconnect database
-    if (datsource == "sqlite")
+    if (datsource == "sqlite") {
       DBI::dbDisconnect(dbconn)
+    }
   }
 
   #############################################################################
@@ -1204,7 +1204,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
 
-    plot(sf::st_geometry(xypltx), col="blue", cex=.25)
+    plot(sf::st_geometry(xypltx), col="blue", cex=.5)
     if (!is.null(bndx)) {
       plot(st_geometry(bndx), add=TRUE, border="black", lwd=0.75)
     }
@@ -1226,6 +1226,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       returnlst$xyplt <- xypltx
     }
   }
+
   returnlst$clip_polyv <- bndx
   returnlst$puniqueid <- puniqueid
   returnlst$xy.uniqueid <- xy.joinid

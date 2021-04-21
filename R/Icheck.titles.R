@@ -25,7 +25,8 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
   title.landarea <- ifelse (landarea == "FOREST", "forest land", 
 	ifelse (landarea == "ALL", "all lands", 
 		ifelse (landarea == "TIMBERLAND", "timberland",
-			ifelse (landarea == "CHANGE", "land with observed change", ""))))
+  			ifelse (landarea == "CHANGE" & esttype == "LULC", "land changed",
+				ifelse (landarea == "CHANGE", "land with observed change", "")))))
   landarea2 <- ifelse (landarea == "FOREST", "forestland", 
 	ifelse (landarea == "ALL", "allland", 
 		ifelse (landarea == "TIMBERLAND", "timberland",
@@ -83,9 +84,10 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 		paste0("Estimated area, in ", title.units, ", of"))
         title.units <- NULL
 
-      } else if (esttype == "AREA") {
-        if (is.null(title.estvarn)) 
+      } else if (esttype %in% c("AREA", "LULC")) {
+        if (is.null(title.estvarn)) {
           title.estvarn <- "Area"
+        }
         title.part1 <- title.estvarn
         title.landarea <- paste("on", title.landarea)
         title.units <- "acres"

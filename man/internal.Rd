@@ -86,6 +86,7 @@
 \alias{nbrdecimals}
 \alias{nbrdigits}
 \alias{getfilter}
+\alias{xtabf}
 
 \alias{PBest.pbar}
 \alias{PBest.pbarRatio}

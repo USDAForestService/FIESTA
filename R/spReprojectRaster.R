@@ -1,6 +1,6 @@
 spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
     	res.new=NULL, bbox.new=NULL, dtype.new=NULL, NODATA.new=NULL,
- 	resamp.method="near", crs.default="EPSG:5070", outfolder=NULL, 
+ 	resamp.method="near", crs.default="EPSG:5070", compress=NULL, outfolder=NULL, 
 	outfn=NULL, outext=NULL, overwrite=FALSE) {
 
   ##################################################################################
@@ -8,6 +8,7 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   ## Default projection: NAD83 - Conus Albers (EPSG:5070)
   ## +proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96,
   ##		+x_0=0 +y_0=0", "+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs")
+  ## compress ('LZW', 'DEFLATE', 'PACKBITS')
   ##################################################################################
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
@@ -113,6 +114,12 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
 	varnm="resamp.methodlst", gui=gui,
 	checklst=resamp.methodlst, caption="Resample method?")
 
+  ## Check compression
+  compresslst <- c("LZW", "PACKBITS", "DEFLATE")
+  compress <- FIESTA::pcheck.varchar(var2check=compress, 
+	varnm="compress", gui=gui,
+	checklst=compresslst, caption="Compress output?")
+  co <- paste0("COMPRESS=", compress)
 
   ## Check outfolder
   outfolder <- pcheck.outfolder(outfolder)
@@ -146,7 +153,7 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   ##################################################################
 
   FIESTA::reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
-	t_srs=t_srs, s_srs=s_srs, of=of, ot=ot, r=r, dstnodata=dstnodata)
+	t_srs=t_srs, s_srs=s_srs, of=of, ot=ot, r=r, co=co, dstnodata=dstnodata)
 
   return(outfilenm)
  

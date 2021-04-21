@@ -39,7 +39,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   ONEUNIT=ONESTRAT=npixels=nonsampplots=strvars=PLOT_STATUS_CD=strwt=testlt1=
 		pixels=unitstrgrplut=vars2combine=STRATASUB <- NULL
   gui <- FALSE
-  unitvars <- c(unitvar, unitvar2)
+  unitvars <- c(unitvar2, unitvar)
 
   ## Check auxlut
   stopifnull <- ifelse((module == "SA" || (module == "MA" && any(MAmethod != "HT"))),
@@ -259,12 +259,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   if (length(unitvars) > 1) {
     unitvar12 <- paste(unitvar2, unitvar, sep="-")
     auxlut[[unitvar12]] <- paste(auxlut[[unitvar2]], auxlut[[unitvar]], sep="-")
-    #auxlut[, c(unitvar, unitvar2) := NULL]
+    auxlut[, c(unitvar, unitvar2) := NULL]
 
     pltx[[unitvar12]] <- paste(pltx[[unitvar2]], pltx[[unitvar]], sep="-")
     if (!is.null(unitarea)) {
       unitarea[[unitvar12]] <- paste(unitarea[[unitvar2]], unitarea[[unitvar]], sep="-")
-      #unitarea[, c(unitvar, unitvar2) := NULL]
+      unitarea[, c(unitvar, unitvar2) := NULL]
     }
     unitvar <- unitvar12
   }
@@ -273,10 +273,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea
   ##################################################################################
-  if (!is.null(unitarea)) 
+  if (!is.null(unitarea)) {
     auxlut <- check.matchval(auxlut, unitarea, unitvar, tab1txt="auxlut",
 			tab2txt="unitarea", subsetrows=TRUE)
-
+  }
 
 
   ###################################################################################
@@ -318,7 +318,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     }
     collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx, 
 		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
-		unitarea=unitarea, areavar=areavar, unitvar=unitvar, unitvar2=unitvar2,
+		unitarea=unitarea, areavar=areavar, unitvar=unitvar,
 		strvar=PSstrvar, stratcombine=stratcombine, unitcombine=unitcombine,
  		vars2combine=vars2combine)
     auxlut <- collapse$strlut
@@ -326,9 +326,13 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     PSstrvar <- collapse$strvar
     pltx <- collapse$pltstratx
     unitarea <- collapse$unitarea
+    if (unitvar == "unitnew") {
+      unitvars <- unitvar
+    }
 
-    if (stratcombine)
+    if (stratcombine || unitcombine) {
       unitstrgrplut <- collapse$unitstrgrplut
+    }
   } 
  
   if (module %in% c("GB", "PB")) {
@@ -368,8 +372,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   setkeyv(auxlut, strunitvars)
   setkeyv(pltx, puniqueid)
 
-  if (!is.null(unitarea)) 
+  if (!is.null(unitarea)) {
     setkeyv(unitarea, unitvar)
+  }
 
 
 #  returnlst <- list(pltx=pltx[,c(puniqueid, unitvar, prednames, PSstrvar), with=FALSE], 
@@ -377,7 +382,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 #			prednames=prednames, predfac=predfac)
 
   returnlst <- list(pltx=pltx, auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, 
-			prednames=prednames, predfac=predfac)
+			prednames=prednames, predfac=predfac, unitvars=unitvars)
 
   if (strata) {
     returnlst$PSstrvar <- PSstrvar
@@ -387,15 +392,16 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     returnlst$npixels <- npixels
     returnlst$npixelvar <- npixelvar
   }
-  if (nonresp)
+  if (nonresp) {
     returnlst$nonsampplots <- nonsampplots
+  }
   if (!is.null(getwtvar)) {
     returnlst$getwtvar <- getwtvar
   }
 
-  if (!is.null(unitstrgrplut)) 
+  if (!is.null(unitstrgrplut)) {
     returnlst$stratcombinelut <- unitstrgrplut
-
+  }
 
   return(returnlst)
 }

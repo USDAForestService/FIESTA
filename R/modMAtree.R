@@ -110,7 +110,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   areavar <- MApopdat$areavar
   unitvar <- MApopdat$unitvar
   unitlut <- MApopdat$unitlut
-  unitvar2 <- MApopdat$unitvar2
+  unitvars <- MApopdat$unitvars
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
   expcondtab <- MApopdat$expcondtab
@@ -407,17 +407,10 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
-  result <- list()
-  if (rawdata) {
-    rawdat <- list()
-    rawdat$domdat <- setDF(tdomdat)
-    rawdat$estvar <- estvar.name
-    rawdat$estvar.filter <- estvar.filter
-  }
-
+  message("getting output...")
   estnm <- "est"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvar2=unitvar2, unit.totest=unit.totest, unit.rowest=unit.rowest, 
+	unitvar=unitvar, unitvars=unitvars, unit.totest=unit.totest, unit.rowest=unit.rowest, 
 	unit.colest=unit.colest, unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, 
 	uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
 	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
@@ -428,11 +421,18 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 
- 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  rawdat <- tabs$rawdat
-  titlelst <- tabs$titlelst
+
+  if (rawdata) {
+    rawdat <- tabs$rawdat
+    rawdat$domdat <- setDF(tdomdat)
+    rawdat$estvar <- estvar.name
+    rawdat$estvar.filter <- estvar.filter
+  }
+  if (returntitle) {
+    titlelst <- tabs$titlelst
+  }
 
   if (savedata) {
     if (rawdata) {
@@ -464,8 +464,13 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     }
   }
 
-  returnlst$est <- est2return 
-  if (!is.null(pse2return)) returnlst$pse <- pse2return 
+  ## GET VALUES TO RETURN
+  if (!is.null(est2return)) {
+    returnlst$est <- est2return 
+  }
+  if (!is.null(pse2return)) {
+    returnlst$pse <- pse2return 
+  }
   if (rawdata) {
     rawdat$esttype <- "TREE"
     rawdat$MAmethod <- MAmethod
@@ -475,8 +480,12 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     if (!is.null(colvar)) rawdat$colvar <- colvar
     returnlst$raw <- rawdat
   }
-  if (returntitle) returnlst$titlelst <- titlelst
-  if (returnMApopdat) returnlst$MApopdat <- MApopdat
+  if (returntitle) {
+    returnlst$titlelst <- titlelst
+  }
+  if (returnMApopdat) {
+    returnlst$MApopdat <- MApopdat
+  }
     
   return(returnlst)
 }

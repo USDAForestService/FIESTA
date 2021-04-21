@@ -44,7 +44,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   #############################################################################
   ## Check esttype
   #############################################################################
-  esttypelst <- c("AREA", "TREE", "RATIO", "SEED")
+  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC")
   esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
 	checklst=esttypelst, caption="Esttype?")
 
@@ -57,6 +57,9 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 #  } else {
     landarealst <- c("FOREST", "ALL", "TIMBERLAND")
 #  }
+  if (esttype == "LULC") {
+    landarealst <- c(landarealst, "CHANGE")
+  }
   landarea <- FIESTA::pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	checklst=landarealst, caption="Sample land area?")
 
@@ -79,7 +82,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 		paste(landcols.miss, collapse=", ")))
       } 
       landarea.filter <- "SITECLCD %in% c(1:6) & RESERVCD == 0"
-    }  
+    } 
     ## Check for missing landcols 
     if (length(landcols) > 0) {
       landcolsmiss <- landcols[which(!landcols %in% pltcondnmlst)]

@@ -1,29 +1,30 @@
-\name{modGBarea}
-\alias{modGBarea}
+\name{modGBlulc}
+\alias{modGBlulc}
 \title{
-	Green-Book module - Generate area estimates.
+	Green-Book module - Generate land use/land cover estimates.
 }
 \description{
-	Generates area estimates by domain (and estimation unit). Calculations are based 
-	on Scott et al. 2005 ('the green-book') for mapped forest inventory plots. The 
-	non-ratio estimator for estimating area by stratum and domain is used. Plots that 
-	are totally nonsampled are excluded from estimation dataset. Next, an adjustment 
-	factor is calculated by strata to adjust for nonsampled (nonresponse) conditions 
-	that have proportion less than 1. The attribute is the proportion of the plot which 
-	is divided by the adjustment factor, and averaged by stratum. Strata means are 
-	combined using the strata weights and then expanded to area using the total land 
-	area in the population.   
+	Generates estimates of land use/land cover by domain (and estimation unit). 
+	Calculations are based on Scott et al. 2005 ('the green-book') for mapped 
+	forest inventory plots. The non-ratio estimator for estimating area by stratum 
+	and domain is used. Plots that are totally nonsampled are excluded from 
+	estimation dataset. Next, an adjustment factor is calculated by strata to adjust 
+	for nonsampled (nonresponse) conditions that have proportion less than 1. 
+	The attribute is the proportion of the plot which is divided by the adjustment 
+	factor, and averaged by stratum. Strata means are combined using the strata 
+	weights and then expanded to area using the total land area in the population.   
 }
 \usage{
-modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL, 
+modGBlulc(GBpopdat = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL, 
 	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
 	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
-	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
+	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits = TRUE, allin1 = FALSE, estround = 1, pseround = 2, 
-	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
-	outfolder = NULL, overwrite = FALSE, outfn.pre = NULL, outfn.date = TRUE,
-	addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, 
-	layer.pre = NULL, overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	estnull = "--", psenull = "--", divideby = NULL, gainloss = FALSE, 
+	gainloss.vals = NULL, savedata = FALSE, outfolder = NULL, overwrite = FALSE, 
+	outfn.pre = NULL, outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE, 
+	rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, layer.pre = NULL, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
 	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL,  
 	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, gui = FALSE, ...)
 }
@@ -70,6 +71,9 @@ modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL,
   \item{psenull}{ Number or character. The number or symbol to use to indicate 'not sampled'
 		for percent standard errror. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
+  \item{gainloss}{ Logical. If TRUE, a table with the difference of gain and loss 
+	along with the variance and standard error, in percent, is generated. }
+  \item{gainloss.vals}{ String vector. A vector of names for values in gainloss table. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }

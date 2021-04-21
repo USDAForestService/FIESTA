@@ -146,10 +146,12 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     polyv <- prjdat$ycrs
 
     ## Check extents
-    bbox1 <- sf::st_bbox(polyv)
-    bbox2 <- sf::st_bbox(sppltx)
-    check.extents(bbox1, bbox2, showext=showext, layer1nm="polyv", layer2nm="xyplt",
+    if (showext) {
+      bbox1 <- sf::st_bbox(polyv)
+      bbox2 <- sf::st_bbox(sppltx)
+      check.extents(bbox1, bbox2, showext=showext, layer1nm="polyv", layer2nm="xyplt",
 			stopifnotin=TRUE)
+    }
 
     ## Check polyvarlst
     ########################################################  

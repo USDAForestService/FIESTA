@@ -17,7 +17,7 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   ##			named as raw_dsn. If raw_fmt != 'csv', a database is created
   ##			within the outfolder names as raw_dsn. 
   ######################################################################################
-  gui <- FALSE
+  gui=addSAdomsdf <- FALSE
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
@@ -241,6 +241,14 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   invyrs <- SApopdat$invyrs
   adj <- SApopdat$adj
 
+
+  ## check SAdomsdf
+  ########################################################
+  SAdomsdf <- pcheck.table(SAdomsdf, tabnm="SAdomsdf", caption="SAdoms?")
+  if (!is.null(SAdomsdf)) {
+    addSAdomsdf <- TRUE
+  }
+
   ## Check estseed 
   ########################################################
   estseedlst <- c("none", "only", "add")
@@ -422,7 +430,9 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
 
-  if (sum(tdomdattot[[response]]) == 0) return(NULL)
+  if (sum(tdomdattot[[response]]) == 0) {
+    return(NULL)
+  }
 
   if (is.null(largebnd.att)) {
     estkey <- "DOMAIN"
@@ -504,8 +514,9 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   est <- dunit.multest[AOI==1, c(dunitvar, nhat, nhat.se), with=FALSE]
 
 
-  if (!is.null(smallbnd.att)) 
+  if (!is.null(smallbnd.att) && addSAdomsdf) {
     est <- merge(SAdomsdf[, unique(c(dunitvar, smallbnd.att)), with=FALSE], est, by=dunitvar)
+  }
   est[, (nhat.var) := get(nhat.se)^2]
   setkeyv(est, dunitvar)
 
@@ -570,14 +581,7 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
-  if (rawdata) {
-    rawdat <- list()
-    rawdat$domdat <- setDF(tdomdat)
-    rawdat$estvar <- response
-    rawdat$estvar.filter <- estvar.filter
-  }
-
-
+  message("getting output...")
   estnm <- "est"
   unit.totest <- setDT(est)
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
@@ -590,15 +594,21 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
-	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
+	pseround=pseround, divideby=divideby, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 
-
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  rawdat <- tabs$rawdat
-  titlelst <- tabs$titlelst
-  if (rawdata) 
+
+  if (rawdata) {
+    rawdat <- tabs$rawdat
     names(rawdat)[names(rawdat) == "unit.totest"] <- "dunit.totest"
+    rawdat$domdat <- setDF(tdomdat)
+    rawdat$estvar <- response
+    rawdat$estvar.filter <- estvar.filter
+  }
+  if (returntitle) {
+    titlelst <- tabs$titlelst
+  }
 
   if (savedata) {
     if (rawdata) {

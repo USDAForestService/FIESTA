@@ -182,6 +182,7 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
+  unitvars <- auxdat$unitvars
   strlut <- auxdat$auxlut
   strvar <- auxdat$PSstrvar
   stratcombinelut <- auxdat$unitstrgrplut
@@ -218,8 +219,8 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   } 
  
   returnlst <- list(basex=condx, clustbasex=pltcondx, buniqueid=cuniqueid, baseid=condid,
- 		unitarea=unitarea, areavar=areavar,
- 		unitlevel1=unitvar, strlut=strlut, strvar=strvar, expcondtab=expcondtab,
+ 		unitarea=unitarea, areavar=areavar, unitlevel1=unitvar, unitvars=unitvars,
+ 		strlut=strlut, strvar=strvar, expcondtab=expcondtab,
  		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, invyrs=invyrs)
 
   if (!is.null(treef)) {

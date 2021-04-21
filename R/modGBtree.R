@@ -97,7 +97,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
   unitvar <- GBpopdat$unitvar
-  unitvar2 <- GBpopdat$unitvar2
+  unitvars <- GBpopdat$unitvars
   stratalut <- GBpopdat$stratalut
   strvar <- GBpopdat$strvar
   expcondtab <- GBpopdat$expcondtab
@@ -392,16 +392,10 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
-  if (rawdata) {
-    rawdat <- list()
-    rawdat$domdat <- setDF(tdomdat) 
-    rawdat$estvar <- estvar.name
-    rawdat$estvar.filter <- estvar.filter
-  }
- 
+  message("getting output...")
   estnm <- "est"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvar2=unitvar2, unit.totest=unit.totest, unit.rowest=unit.rowest, 
+	unitvar=unitvar, unitvars=unitvars, unit.totest=unit.totest, unit.rowest=unit.rowest, 
 	unit.colest=unit.colest, unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, 
 	uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
 	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
@@ -410,13 +404,21 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround,
- 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle, 
+ 	pseround=pseround, divideby=divideby, returntitle=returntitle, 
 	estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
-  rawdat <- tabs$rawdat
-  titlelst <- tabs$titlelst
 
+  if (rawdata) {
+    rawdat <- tabs$rawdat
+    rawdat$domdat <- setDF(tdomdat) 
+    rawdat$estvar <- estvar.name
+    rawdat$estvar.filter <- estvar.filter
+  }
+  if (returntitle) {
+    titlelst <- tabs$titlelst
+  }
+ 
   if (savedata) {
     if (rawdata) {
       rawfolder <- paste(outfolder, "rawdata", sep="/")
@@ -456,8 +458,12 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   }  
 
   ## GET VALUES TO RETURN
-  if (!is.null(est2return)) returnlst$est <- setDF(est2return)
-  if (!is.null(pse2return)) returnlst$pse <- setDF(pse2return) 
+  if (!is.null(est2return)) {
+    returnlst$est <- setDF(est2return)
+  }
+  if (!is.null(pse2return)) {
+    returnlst$pse <- setDF(pse2return) 
+  }
   if (rawdata) {
     rawdat$esttype <- "TREE"
     rawdat$estvar <- estvar
@@ -466,8 +472,12 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
     if (!is.null(colvar)) rawdat$colvar <- colvar
     returnlst$raw <- rawdat
   }
-  if(returntitle) returnlst$titlelst <- alltitlelst
-  if (returnGBpopdat) returnlst$GBpopdat <- GBpopdat
+  if(returntitle) {
+    returnlst$titlelst <- alltitlelst
+  }
+  if (returnGBpopdat) {
+    returnlst$GBpopdat <- GBpopdat
+  }
 
   return(returnlst)
 }

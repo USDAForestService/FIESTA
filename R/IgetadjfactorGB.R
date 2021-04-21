@@ -1,6 +1,6 @@
 getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
-	cuniqueid="PLT_CN", condid="CONDID", unitlut=NULL, unitvars=NULL, strvars=NULL, 
-	unitarea=NULL, areavar=NULL, areawt="CONDPROP_UNADJ", cvars2keep=NULL){
+	cuniqueid="PLT_CN", condid="CONDID", unitlut=NULL, unitvars=NULL, 
+	strvars=NULL, unitarea=NULL, areavar=NULL, areawt="CONDPROP_UNADJ", cvars2keep=NULL){
 
   ####################################################################################
   ## DESCRIPTION: 
@@ -157,6 +157,8 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
     unitlut <- tabs$tab1
     unitarea <- tabs$tab2
 
+    ## Merge unitlut with unitarea
+    setkeyv(unitarea, unitvars)
     unitlut <- unitlut[unitarea]
 
     ## Expansion factors - average area by strata

@@ -6,7 +6,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
 	areavar="ACRES", unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
 	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, SAdata=NULL, gui=FALSE){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, SAdata=NULL, SAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -90,16 +90,14 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
     tree <- SAdata$tree
     cond <- SAdata$cond
     plt <- SAdata$plt
-    pltassgn <- SAdata$pltassgn
     puniqueid <- SAdata$puniqueid
-    pltassgnid <- SAdata$pltassgnid
     pjoinid <- SAdata$pjoinid
+    pltassgn <- SAdata$pltassgn
+    pltassgnid <- SAdata$pltassgnid
     dunitarea <- SAdata$dunitarea
     dunitvar <- SAdata$dunitvar
     areavar <- SAdata$areavar
     dunitlut <- SAdata$dunitlut
-    prednames <- SAdata$prednames
-    predfac <- SAdata$predfac
 
     if (is.null(prednames)) {
       prednames <- SAdata$prednames
@@ -109,7 +107,26 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
 		toString(prednames[!prednames %in% SAdata$prednames]))
       predfac <- predfac[predfac %in% prednames]
     }
-  }
+  } else if (!is.null(SAmodeldat)) {
+    list.items <- c("pltassgn", "domzonal", "domvar", "prednames", "domarea")
+    SAmodeldat <- FIESTA::pcheck.object(SAmodeldat, "SAmodeldat", list.items=list.items)
+    pltassgn <- SAmodeldat$pltassgn
+    pltassgnid <- SAmodeldat$pltassgnid
+    dunitarea <- SAmodeldat$domarea
+    dunitvar <- SAmodeldat$domvar
+    areavar <- SAmodeldat$areavar
+    dunitlut <- SAmodeldat$domzonal
+
+    if (is.null(prednames)) {
+      prednames <- SAmodeldat$prednames
+    } else {
+      if (!all(prednames %in% SAmodeldat$prednames))
+        stop("invalid prednames: ", 
+		toString(prednames[!prednames %in% SAmodeldat$prednames]))
+      predfac <- predfac[predfac %in% prednames]
+    }
+  } 
+
 
   ## Check SAdoms
   if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {

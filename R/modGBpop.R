@@ -1,14 +1,14 @@
 modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL, 
-	vspspp=NULL, subplot=NULL, subp_cond=NULL, pltassgn=NULL, dsn=NULL, 
+	vspspp=NULL, subplot=NULL, subp_cond=NULL, lulc=NULL, pltassgn=NULL, dsn=NULL, 
 	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", adj="samp", 
 	evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
-	saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
-	GBdata=NULL, GBstratdat=NULL, gui=FALSE){
+	minplotnum.strat=2, saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, GBdata=NULL, GBstratdat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -108,7 +108,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="GB", popType=popType, 
 	tree=tree, cond=cond, plt=plt, seed=seed, vspspp=vspspp, subplot=subplot, 
-	subp_cond=subp_cond, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, 
+	subp_cond=subp_cond, lulc=lulc, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, 
 	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid, 
  	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs,
  	intensity=intensity, adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
@@ -172,11 +172,12 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 		auxlut=stratalut, PSstrvar=strvar, nonresp=nonresp, substrvar=substrvar, 
 		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
 		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-		minplotnum.unit=minplotnum.unit, getwt=getwt, getwtvar=getwtvar, 
-		P2POINTCNT=P2POINTCNT)  
+		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
+		getwt=getwt, getwtvar=getwtvar, P2POINTCNT=P2POINTCNT)  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
+  unitvars <- auxdat$unitvars
   stratalut <- auxdat$auxlut
   strvar <- auxdat$PSstrvar
   stratcombinelut <- auxdat$unitstrgrplut
@@ -235,7 +236,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
 		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
- 		unitarea=unitarea, areavar=areavar, unitvar=unitvar, 
+ 		unitarea=unitarea, areavar=areavar, unitvar=unitvar, unitvars=unitvars,
  		stratalut=stratalut, strvar=strvar, expcondtab=expcondtab, 
 		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
 		invyrs=invyrs, estvar.area=estvar.area, adj=adj))

@@ -91,7 +91,7 @@ anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 }
 \note{
 
-  If exportshp=TRUE:\cr
+  If exportsp=TRUE:\cr
  	The writeOGR (rgdal) function is called. The ArcGIS driver truncates variable 
 	names to 10 characters or less. Variable names are changed before export using 
 	an internal function (trunc10shp). If Spatial object has more than 1 record, 

@@ -54,7 +54,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
     message("LUT is null and FIAname=FALSE")
     return(NULL)
   }
-
+ 
   if (FIAname) {
     ## Get FIA reference table for xvar
     xvar.ref <- FIESTA::getRefobject(toupper(xvar))
@@ -207,8 +207,9 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   } 
 
   ### Check NAclass
-  if (!is.character(NAclass) && length(NAclass) != 1) 
+  if (!is.character(NAclass) && length(NAclass) != 1) {
     stop("NAclass must be a character string of length 1")
+  }
 
   ### GET LUTnewvar
   ###########################################

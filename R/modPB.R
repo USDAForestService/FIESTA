@@ -77,7 +77,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   pntid <- PBpopdat$pntid
   pltassgnid <- PBpopdat$pltassgnid
   unitvar <- PBpopdat$unitvar
-  unitvar2 <- PBpopdat$unitvar2
+  unitvars <- PBpopdat$unitvars
   unitarea <- PBpopdat$unitarea
   areavar <- PBpopdat$areavar
   strlut <- PBpopdat$strlut
@@ -160,8 +160,9 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   title.colvar <- rowcolinfo$title.colvar 
   row.add0 <- rowcolinfo$row.add0
   col.add0 <- rowcolinfo$col.add0
-  if (ratio)
+  if (ratio) {
     PBx.d <- rowcolinfo$PBx.d
+  }
 
   ###################################################################################
   ## MERGE FILTERED DATA TO ALL PLOTS
@@ -621,7 +622,7 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   CI <- TRUE
   estnm <- "est"
   tabs <- est.outtabs(esttype="PHOTO", phototype=tabtype, photoratio=ratio, 
-	sumunits=sumunits, areavar=areavar, unitvar=unitvar, unitvar2=unitvar2,
+	sumunits=sumunits, areavar=areavar, unitvar=unitvar, unitvars=unitvars,
  	unit.totest=unit.totest, unit.rowest=unit.rowest, unit.colest=unit.colest,
  	unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, uniquerow=uniquerow,
  	uniquecol=uniquecol, rowunit=rowunit, totunit=totunit, allin1=allin1, 

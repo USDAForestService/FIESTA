@@ -12,7 +12,7 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 	invtype = "ANNUAL", evalid = NULL, evalCur = FALSE, evalEndyr = NULL, 
 	evalAll=FALSE, evalType = "VOL", measCur = FALSE, measEndyr = NULL, 
 	allyrs = FALSE, invyrs = NULL, xymeasCur = FALSE, istree = FALSE, 
-	isseed = FALSE, isveg = FALSE, issubp = FALSE, isdwm = FALSE, 
+	isseed = FALSE, isveg = FALSE, issubp = FALSE, islulc = FALSE, isdwm = FALSE, 
 	plotgeom = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
 	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
 	subcycle99 = FALSE, intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, 
@@ -70,6 +70,8 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 	from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE). }
   \item{issubp}{ Logical. If TRUE, subplot tables are extracted from FIA database
 	(SUBPLOT, SUBP_COND). }
+  \item{islulc}{ Logical. If TRUE, condition-level land use/land cover data 
+	are for current and previous years are extracted from FIA database. }
   \item{isdwm}{ Logical. If TRUE, summarized condition-level down woody debris 
 	data are extracted from FIA database (COND_DWM_CALC). }
   \item{plotgeom}{ Logical. If TRUE, variables from the PLOTGEOM table are

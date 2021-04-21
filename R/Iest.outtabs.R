@@ -1,5 +1,5 @@
 est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FALSE, 
-	areavar, unitvar, unitvar2=NULL, unit.totest, unit.rowest=NULL, unit.colest=NULL, 
+	areavar, unitvar, unitvars=NULL, unit.totest, unit.rowest=NULL, unit.colest=NULL, 
 	unit.grpest=NULL, rowvar=NULL, colvar=NULL, uniquerow=NULL, uniquecol=NULL, 
 	rowgrp=FALSE, rowgrpnm=NULL, rowunit=NULL, totunit=NULL, allin1=FALSE, 
 	savedata=FALSE, addtitle=FALSE, returntitle=FALSE, title.ref=NULL, 
@@ -552,13 +552,16 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (esttype == "RATIO") 
         unit.totest <- FIESTA::getrhat(unit.totest)
 
-      ## Split columns if unitvar2 exists
-      if ("TOTAL" %in% names(unit.totest))
+      ## Remove total column
+      if ("TOTAL" %in% names(unit.totest)) {
         unit.totest[, TOTAL := NULL]
-      if (!is.null(unitvar2)) {
-        unit.totest[, c(unitvar2, unitvar) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
-        setcolorder(unit.totest, c(unitvar2, unitvar, 
-		names(unit.totest)[!names(unit.totest) %in% c(unitvar2, unitvar)])) 
+      }
+      ## Split columns if unitvars exists
+      if (!is.null(unitvars) && length(unitvars) > 1) {
+        unit.totest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+        unit.totest[, (unitvar) := NULL]
+        setcolorder(unit.totest, c(unitvars, 
+		names(unit.totest)[!names(unit.totest) %in% unitvars])) 
       } 
       rawdat$unit.totest <- setDF(unit.totest)
       rawdat.tabs <- c(rawdat.tabs, "unit.totest")
@@ -572,11 +575,12 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (!is.null(unit.rowest)) {
         setorderv(unit.rowest, c(unitvar, rowvar))
 
-        ## Split columns if unitvar2 exists
-        if (!is.null(unitvar2)) {
-          unit.rowest[, c(unitvar2, unitvar) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
-          setcolorder(unit.rowest, c(unitvar2, unitvar, 
-			names(unit.rowest)[!names(unit.rowest) %in% c(unitvar2, unitvar)])) 
+        ## Split columns if unitvars exists
+        if (!is.null(unitvars) && length(unitvars) > 1) {
+          unit.rowest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+          unit.rowest[, (unitvar) := NULL]
+          setcolorder(unit.rowest, c(unitvars, 
+			names(unit.rowest)[!names(unit.rowest) %in% unitvars])) 
         } 
         setnames(unit.rowest, rowvar, title.rowvar)
         rawdat$unit.rowest <- setDF(unit.rowest)
@@ -594,11 +598,12 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (!is.null(unit.colest)) {
         setorderv(unit.colest, c(unitvar, colvar))
 
-        ## Split columns if unitvar2 exists
-        if (!is.null(unitvar2)) {
-          unit.colest[, c(unitvar2, unitvar) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
-          setcolorder(unit.colest, c(unitvar2, unitvar, 
-			names(unit.colest)[!names(unit.colest) %in% c(unitvar2, unitvar)])) 
+        ## Split columns if unitvars exists
+        if (!is.null(unitvars) && length(unitvars) > 1) {
+          unit.colest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+          unit.colest[, (unitvar) := NULL]
+          setcolorder(unit.colest, c(unitvars, 
+			names(unit.colest)[!names(unit.colest) %in% unitvars])) 
         } 
         setnames(unit.colest, colvar, title.colvar)
         rawdat$unit.colest <- setDF(unit.colest)
@@ -609,13 +614,22 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           rawdat$colest <- setDF(colest)
           rawdat.tabs <- c(rawdat.tabs, "colest")
         }  
-      }     
-      setorderv(unit.grpest, c(unitvar, rowvar, colvar))    
-      setnames(unit.grpest, rowvar, title.rowvar)
-      setnames(unit.grpest, colvar, title.colvar)
-      rawdat$unit.grpest <- setDF(unit.grpest)
-      rawdat.tabs <- c(rawdat.tabs, "unit.grpest")
+      }  
+      if (!is.null(unit.grpest)) {   
+        setorderv(unit.grpest, c(unitvar, rowvar, colvar))   
 
+        ## Split columns if unitvars exists
+        if (!is.null(unitvars) && length(unitvars) > 1) {
+          unit.grpest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+          unit.grpest[, (unitvar) := NULL]
+          setcolorder(unit.grpest, c(unitvars, 
+			names(unit.grpest)[!names(unit.grpest) %in% unitvars])) 
+        } 
+        setnames(unit.grpest, rowvar, title.rowvar)
+        setnames(unit.grpest, colvar, title.colvar)
+        rawdat$unit.grpest <- setDF(unit.grpest)
+        rawdat.tabs <- c(rawdat.tabs, "unit.grpest")
+      }
       if (sumunits) {
         setnames(grpest, rowvar, title.rowvar)
         setnames(grpest, colvar, title.colvar)

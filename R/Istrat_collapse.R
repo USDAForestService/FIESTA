@@ -83,8 +83,9 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
       unitcombinevar <- unitvar2
     }
 
-    if (!is.factor(stratacnt[[unitvar]])) 
+    if (!is.factor(stratacnt[[unitvar]])) {
       stratacnt[[unitvar]] <- factor(stratacnt[[unitvar]])
+    }
     stratacnt$unitvar <- as.numeric(stratacnt[[unitvar]])
     stratacnt$unitnew <- as.character(-1)
     setkeyv(stratacnt, c(unitcombinevar, unitvar))
@@ -124,9 +125,9 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
       unitarea <- merge(unitarea, unitgrplut, by=unitjoinvars)
       unitarea[, (unitvar) := NULL]
       unitvar <- unitvarnew
-      unitarea <- unitarea[, sum(get(areavar)), by=unitvar]
+      unitarea <- unitarea[, sum(get(areavar)), by=unitvarnew]
       setnames(unitarea, "V1", areavar)
-      setkeyv(unitarea, unitvar)
+      setkeyv(unitarea, unitvarnew)
     }
 
     ## Merge new unitvar to pltstratx
@@ -148,9 +149,11 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   if ("n.strata" %in% names(unitgrpsum) && 
 		any(unique(unitgrpsum$n.strata) < 60)) {
 
-    if (!is.factor(unitgrpsum[[strvar]])) 
-      unitgrpsum[[strvar]] <- factor(unitgrpsum[[strvar]])
-    unitgrpsum$strat <- as.numeric(unitgrpsum[[strvar]])
+    unitgrpsum$strat <- unitgrpsum[[strvar]]
+    if (!is.factor(unitgrpsum$strat)) {
+      unitgrpsum$strat <- factor(unitgrpsum$strat)
+    }
+    unitgrpsum$strat <- as.numeric(unitgrpsum$strat)
     unitgrpsum$stratnew <- as.character(-1)
 
     stratgrp <- unitgrpsum[, groupStrata(.SD, minplotnum.strat), by=unitvar]
@@ -177,7 +180,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 
     ## Merge new unitvar to pltstratx
     setkeyv(pltstratx, unitstrjoinvars)
-    setkeyv(unitgrplut, unitstrjoinvars)
+    setkeyv(unitgrplut, unitjoinvars)
 
     tabs <- FIESTA::check.matchclass(pltstratx, unitstrgrplut, unitstrjoinvars)
     pltstratx <- tabs$tab1
@@ -198,7 +201,6 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
             msg, "\n###################################")
   message(paste0(capture.output(strlut), collapse = "\n"))
 
- 
   returnlst <- list(pltstratx=pltstratx, strlut=strlut, unitvar=unitvar)
   if (!is.null(strvar)) returnlst$strvar <- strvar
   if (stratcombine && !is.null(unitstrgrplut))

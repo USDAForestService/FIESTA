@@ -14,21 +14,23 @@
 }
 \usage{    
 modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL, 
-	vspspp = NULL, subplot = NULL, subp_cond = NULL, pltassgn = NULL, dsn = NULL, 
-	puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", tuniqueid = "PLT_CN", 
-	cuniqueid = "PLT_CN", condid = "CONDID", areawt = "CONDPROP_UNADJ", 
-	adj = "samp", evalid = NULL, invyrs = NULL, intensity = NULL, ACI = FALSE, 
-	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, stratalut = NULL, 
-	strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
-	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, GBdata = NULL, GBstratdat = NULL, gui = FALSE)
+	vspspp = NULL, subplot = NULL, subp_cond = NULL, lulc = NULL, pltassgn = NULL, 
+	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
+	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
+	areawt = "CONDPROP_UNADJ", adj = "samp", evalid = NULL, invyrs = NULL, 
+	intensity = NULL, ACI = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, 
+	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
+	stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, savedata = FALSE, 
+	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	GBdata = NULL, GBstratdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{popType}{ String. Type of evaluation(s) to include in population data 
-	("VOL"). Note: currently only 'VOL' is available. }
+  \item{popType}{ String. Type of evaluation(s) to include in population data. 
+	Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
+	below for descriptions of each. }
   \item{cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Condition-level data with one record for each condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
@@ -50,6 +52,8 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	Subplot-level data with one record for each species (SUBPLOT). }
   \item{subp_cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Subplot condition-level data with one record for each species (SUBP_COND). }
+  \item{lulc}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Land use/Land cover data with current and previous observations. }
   \item{pltassgn}{ DF/DT, Optional. R object, sf R object, comma-delimited file(*.csv), 
 	layer or spatial layer in dsn, or shapefile(*.shp). Plot-level assignment of 
 	estimation unit and/or strata, with one record for each plot. }
@@ -104,6 +108,8 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
  	(Default = "P1POINTCNT"). }
   \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
 	strata categories if less than 2 plots in any one stratum. See notes for more info. }
+  \item{minplotnum.strat}{ Integer. Minimum number of plots for a stratum within an
+	estimation unit. }
   \item{saveobj}{ Logical. If TRUE, saves SApopdat object to outfolder. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
@@ -119,20 +125,29 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{
+	Population types \cr
+	\tabular{lll}{
+		\tab \bold{popType} \bold{Description}\cr
+	 	\tab ALL	\tab Population data, inluding nonsampled plots.\cr
+	 	\tab CURR	\tab Population data for area estimates, excluding nonsampled plots.\cr
+	 	\tab VOL	\tab Population data for area/tree estimates, excluding nonsampled plots.\cr
+	 	\tab LULC	\tab Population data for land use/land cover transitional estimates,
+			including only plots with previous measurements and excluding nonsampled plots.\cr
+      }
+
+
 	If variables are NULL, then it will prompt user to input variables.
 
      	Necessary variables:\cr
 	\tabular{llll}{
 		\tab \bold{Data} \tab \bold{Variable}	\tab \bold{Description}\cr
-	 	\tab tree \tab tuniqueid	\tab Unique identifier for each plot, to link to pltassgn 
-								(ex. PLT_CN).\cr
-		\tab  \tab CONDID		\tab Unique identifier of each condition on plot, to link to cond. 
+	 	\tab tree \tab tuniqueid	\tab Unique identifier for each plot in tree table.\cr
+		\tab  \tab CONDID		\tab Unique identifier of each condition on plot. 
 								Set CONDID=1, if only 1 condition per plot.\cr
 		\tab  \tab TPA_UNADJ		\tab Number of trees per acre each sample tree represents
-								(ex. DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot;
+								(e.g., DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot;
 								74.965282 for trees on microplot).\cr
-	 	\tab cond \tab cuniqueid	\tab Unique identifier for each plot, to link to pltassgn 
-								(ex. PLT_CN).\cr
+	 	\tab cond \tab cuniqueid	\tab Unique identifier for each plot in cond table.\cr
 		\tab  \tab CONDID		\tab Unique identfier of each condition on plot. 
 								Set CONDID=1, if only 1 condition per plot.\cr
 		\tab  \tab CONDPROP_UNADJ	\tab Unadjusted proportion of condition on each plot. 
@@ -151,8 +166,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 		\tab  \tab MACRPROP_UNADJ	\tab If macroplot tree attributes. Unadjusted proportion 
 							of macroplot conditions on each plot. Set MACRPROP_UNADJ=1, 
 							if only 1 condition per macroplot.\cr
-	 	\tab pltassgn \tab puniqueid	\tab Unique identifier for each plot, to link to cond 
-								(ex. CN).\cr
+	 	\tab pltassgn \tab pltassgnid	\tab Unique identifier for each plot in pltassgn.\cr
 	 	\tab  \tab STATECD		\tab Identifies state each plot is located in.\cr
 	 	\tab  \tab INVYR		\tab Identifies inventory year of each plot.\cr
 	 	\tab  \tab PLOT_STATUS_CD	\tab Status of each plot (i.e. sampled, nonsampled). 

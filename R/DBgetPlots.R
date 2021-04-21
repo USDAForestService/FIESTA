@@ -2,7 +2,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 	RS=NULL, invtype="ANNUAL", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
 	evalAll=FALSE, evalType="VOL", measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
 	invyrs=NULL, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, isveg=FALSE, 
-	issubp=FALSE, isdwm=FALSE, plotgeom=FALSE, othertables=NULL, 
+	issubp=FALSE, islulc=FALSE, isdwm=FALSE, plotgeom=FALSE, othertables=NULL, 
 	issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, regionVars=FALSE, 
 	ACI=FALSE, subcycle99=FALSE, intensity1=FALSE, stateFilter=NULL, allFilter=NULL, 
 	alltFilter=NULL, savedata=FALSE, saveqry=FALSE, outfolder=NULL, 
@@ -42,7 +42,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 	PLOT_NONSAMPLE_REASN_CD=PLOT_STATUS_CD=BA=DIA=CRCOVPCT_RMRS=TIMBERCD=
 	SITECLCD=RESERVCD=JENKINS_TOTAL_B1=JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=
 	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=INVYR=
-	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=invyrs=SEEDSUBP6 <- NULL
+	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=invyrs=SEEDSUBP6=
+	PREV_PLT_CN <- NULL
 
 
   ## SET OPTIONS
@@ -77,7 +78,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   biojenk <- FALSE 
   greenwt <- TRUE
   isgrm <- FALSE
-  issccm=islulc=FALSE
+  issccm=FALSE
 
   ########################################################################
   ### GET PARAMETERS 
@@ -189,6 +190,10 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   if (length(evalidlist) > 0) {
     invyrs <- evalInfo$invyrs
     iseval <- TRUE
+    if (!savePOP && (any(lapply(evalInfo$evalTypelist, length) > 1) || 
+		any(lapply(evalInfo$evalidlist, length) > 1))) {
+      savePOP <- TRUE
+    }
   }
 
   ### GET RS & rscd
@@ -311,7 +316,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		title="ACI conditions?", first="NO", gui=gui)
 
   } else {
-    savePOP=subsetPOP <- TRUE
+    subsetPOP <- TRUE
 
     if (!is.null(subcycle99) && subcycle99) 
       message("subcycle99 plots are not included in FIA evaluations")  
@@ -625,11 +630,12 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		AND COALESCE(PCOND.COND_NONSAMPLE_REASN_CD, 0) = 0" 
 #		AND (c.COND_STATUS_CD = 1 AND PCOND.COND_STATUS_CD = 1)" 
   }
+
   ## lulc query
   ################################################
   if (islulc) {
     lulcfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA.,
-		"COND PCOND ON (PCOND.PLT_CN = p.PREV_PLT_CN)")
+		"COND PCOND ON (PCOND.PLT_CN = p.PREV_PLT_CN and PCOND.CONDID=c.CONDID)")
   }
 
   ## GRM query
@@ -687,6 +693,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     if(isdwm) { dwm <- {} }
     if(issccm) { sccm <- {} }
     if(isgrm) { grm <- {} }
+    if (islulc) {lulc <- {} }
     if(savePOP || iseval) ppsa <- {}  
 
     if (!is.null(othertables)) {
@@ -727,7 +734,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     stcd <- FIESTA::pcheck.states(state, "VALUE")
     stabbr <- FIESTA::pcheck.states(state, "ABBR")
     pltx=condx=treex=seedx=vspsppx=vspstrx=subpx=subpcx=dwmx=sccmx=
-		ppsax=spconddatx <- NULL   
+		ppsax=spconddatx=lulcx <- NULL   
 
     if (!is.null(othertables)) {
       for (j in 1:length(othertables)) 
@@ -964,6 +971,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         outfile <- file(pltcondqryfn, "w")
         cat(  pltcondqry, "\n", file=outfile)
         close(outfile)
+        message("saved pltcond query to:\n", pltcondqryfn)
       }
     }
 
@@ -1157,6 +1165,12 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
           condvarlst2 <- c(condvarlst2, "TIMBERCD")
         }
+
+        ## LANDUSECD
+        ## A combination of PRESNFCD and COND_STATUS_CD
+        if (all(c("PRESNFCD", "COND_STATUS_CD") %in% names(condx))) {
+          condx$LANDUSECD <- with(condx, ifelse(is.na(PRESNFCD), COND_STATUS_CD, PRESNFCD))
+        }
       }   ##  End (defaultVars)
       
       setnames(pltx, "PLT_CN", "CN")
@@ -1212,10 +1226,16 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     if (islulc && !is.null(pltx)) {
       message("\n",
       	"## STATUS: Getting Land Use/Land Cover data (", stabbr, ") ...", "\n")
-      lulcvars <- c("PLT_CN", "CONDID", "LAND_COVER_CLASS_CD", "PRESNFCD")
-      lulcqry <- paste("select", toString(paste0("c.", lulcvars)), 
+      lulcqry <- paste("select c.PLT_CN, p.PREV_PLT_CN, p.STATECD, p.UNITCD, p.COUNTYCD, p.PLOT,
+ 		pcond.CONDID PREV_CONDID, c.CONDID, 
+    		pcond.INVYR PREV_INVYR, c.INVYR,
+		pcond.CONDPROP_UNADJ PREV_CONDPROP_UNADJ, c.CONDPROP_UNADJ, 
+ 		pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD,
+ 		pcond.LAND_COVER_CLASS_CD PREV_LAND_COVER_CLASS_CD, c.LAND_COVER_CLASS_CD, 
+		pcond.PRESNFCD PREV_PRESNFCD, c.PRESNFCD,
+		case when pcond.PRESNFCD is null then pcond.COND_STATUS_CD else pcond.PRESNFCD end as PREV_LANDUSECD,
+		case when c.PRESNFCD is null then c.COND_STATUS_CD else c.PRESNFCD end as LANDUSECD",  
 			"from", lulcfromqry, "where", xfilter)
-
       if (datsource == "sqlite") {
         lulcx <- DBI::dbGetQuery(dbconn, lulcqry)
       } else {
@@ -1224,6 +1244,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       if (nrow(lulcx) != 0) {
         lulcx <- setDT(lulcx)
         lulcx[, PLT_CN := as.character(PLT_CN)]
+        lulcx[, PREV_PLT_CN := as.character(PREV_PLT_CN)]
         setkey(lulcx, PLT_CN)
 
         ## Subset overall filters from pltx
@@ -1565,7 +1586,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     
       if (is.null(dwmvarlst)) {
         dwmx <- NULL
-        isdwm <- NULL
+        isdwm <- FALSE
       } else {
 
         dvars <- toString(paste0("d.", dwmvarlst))
@@ -1898,6 +1919,15 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			outfn.pre=outfn.pre)
       }  
 
+      if (savedata && !is.null(lulcx)) {
+        index.unique.lulcx <- NULL
+        if (!append_layer) index.unique.lulcx <- c("PLT_CN", "CONDID")
+        datExportData(lulcx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="lulc", 
+			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+			append_layer=append_layer, outfn.pre=outfn.pre)
+      } 
+
       if (savedata && !is.null(dwmx)) {
         index.unique.dwmx <- NULL
         if (!append_layer) index.unique.dwmx <- c("PLT_CN", "CONDID")
@@ -2057,9 +2087,12 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       if (!is.null(subpx)) fiadatlst$subplot <- setDF(subpx)
       if (!is.null(subpcx)) fiadatlst$subp_cond <- setDF(subpcx)
     }
-    if (isdwm) 
+    if (islulc) {
+      if (!is.null(lulc)) fiadatlst$lulc <- setDF(lulc)
+    }
+    if (isdwm) {
       if (!is.null(dwm)) fiadatlst$dwm <- setDF(dwm)
-
+    }
     if (!is.null(othertables)) {
       for (i in 1:length(othertables))
         fiadatlst[[othertables[i]]] <- get(paste0("other", i))

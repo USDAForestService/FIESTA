@@ -1165,7 +1165,7 @@ clip.othertables <- function(inids, othertabnms, othertabs=NULL, uniqueid="PLT_C
 
 spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL, 
 	stbnd=NULL, stbnd_dsn=NULL, stbnd.att=NULL, stname.att="STATENM",
-	RS=NULL, states=NULL, overlap=2, showsteps=FALSE, savebnd=FALSE, 
+	RS=NULL, states=NULL, overlap=1, showsteps=FALSE, savebnd=FALSE, 
 	outfolder=NULL, ...) {
 
   ##############################################################################

@@ -10,6 +10,9 @@ getRefobject <- function(xvar){
 	paste0("DSTRBCD", seq(1:3)), paste0("TRTCD", seq(1:3)))
 
   if (!xvar %in% vardiff) {
+    if (grepl("PREV_", xvar)) {
+      xvar <- sub("PREV_", "", xvar)
+    }
     if (!xvar %in% FIESTA::ref_codes[["VARIABLE"]]) {
       return(NULL)
     } else {

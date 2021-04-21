@@ -10,8 +10,8 @@
 \usage{
 spReprojectRaster(rastfn, bands = NULL, crs = NULL, crs.new = NULL,
     	res.new = NULL, bbox.new = NULL, dtype.new = NULL, NODATA.new = NULL, 
-	resamp.method = "near", crs.default = "EPSG:5070", outfolder = NULL, 
-	outfn = NULL, outext = NULL, overwrite = FALSE)
+	resamp.method = "near", crs.default = "EPSG:5070", compress = NULL, 
+	outfolder = NULL, outfn = NULL, outext = NULL, overwrite = FALSE)
 }
 \arguments{
   \item{rastfn}{ String or Raster. File name(s) with extensions, or raster object(s). 
@@ -43,7 +43,8 @@ spReprojectRaster(rastfn, bands = NULL, crs = NULL, crs.new = NULL,
 	The default is: EPSG:5070, Conus Albers, PRJ4='+proj=aea +lat_1=29.5 +lat_2=45.5 
 	+lat_0=23 +lon_0=-96, +x_0=0 +y_0=0", "+ellps=GRS80 +towgs84=0,0,0,-0,-0,-0,0 
 	+units=m +no_defs'. }
-  \item{outfolder}{ String. If exportshp=TRUE, name of output folder. If NULL,
+  \item{compress}{ String. An optional compression type ('LZW', "DEFLATE', "PACKBITS'). }
+  \item{outfolder}{ String. If exportsp=TRUE, name of output folder. If NULL,
 	the working directory is used. }
   \item{outfn}{ String. Name of output raster. If NULL, default is 'polyrast'. }
   \item{outext}{ String. Name of raster extension (fmt). If NULL, uses extension

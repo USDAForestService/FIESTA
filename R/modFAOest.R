@@ -112,6 +112,7 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   unitarea <- FAOpopdat$unitarea
   areavar <- FAOpopdat$areavar
   unitvar <- FAOpopdat$unitlevel1
+  unitvars <- FAOpopdat$unitvars
   strlut <- FAOpopdat$strlut
   strvar <- FAOpopdat$strvar
   expcondtab <- FAOpopdat$expcondtab
@@ -421,7 +422,7 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
  
   estnm <- ifelse(esttype == "RATIO", "rhat", "est")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvar2=unitlevel2, unit.totest=unit.totest, 
+	unitvar=unitvar, unitvars=unitvars, unit.totest=unit.totest, 
 	unit.rowest=unit.rowest, unit.colest=unit.colest, unit.grpest=unit.grpest, 
 	rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
 	rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 

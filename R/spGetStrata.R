@@ -54,7 +54,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
 
-
   ## Spatial Layers: strattype and unittype
   ##################################################################################
   typelst <- c("POLY", "RASTER") 
@@ -126,10 +125,10 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   nounit <- ifelse (is.null(unitlayerx), TRUE, FALSE)
 
   ## unit.filter
-  if (!nounit)
+  if (!nounit) {
     unitlayerx <- datFilter(unitlayerx, xfilter=unit.filter)$xf
-
-
+  }
+ 
   ##################################################################
   ## if unittype == "RASTER"
   ## Note: still working on combo... until then, covert to polygon
@@ -160,14 +159,12 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     } else {
       strvar <- "value"
     }
- 
     ##################################################################
     ## if strattype == "RASTER"
     ##################################################################
     ## Check strat_layer
     stratlayerfn <- suppressWarnings(getrastlst.rgdal(strat_layer, rastfolder=strat_dsn,
  		stopifLonLat=TRUE))
-
     ## Get raster info
     rast_info <- rasterInfo(stratlayerfn)
     stratlayer.res <- rast_info$cellsize
@@ -198,8 +195,10 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
       bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
       bbox2 <- sf::st_bbox(unitlayerprj)
-      check.extents(bbox1, bbox2, showext=showext, layer1nm="rast", layer2nm="unitlayer",
+      if (showext) {
+        check.extents(bbox1, bbox2, showext=showext, layer1nm="rast", layer2nm="unitlayer",
 			stopifnotin=TRUE)
+      }
 
       ## Extract values of polygon unitlayer to points
       ## Note: removing all NA values
@@ -239,9 +238,9 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     ## Extract values of raster layer to points
-    extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, var.name=strvar, 
+    extrast <- suppressWarnings(spExtractRast(sppltx, rastlst=stratlayerfn, var.name=strvar, 
 			uniqueid=uniqueid, exportNA=exportsp, keepNA=keepNA, 
-			outfolder=outfolder, overwrite=overwrite)
+			outfolder=outfolder, overwrite=overwrite))
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst

@@ -63,10 +63,10 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   } else {
     domvarlst <- names(condf)[!names(condf) %in% 
 		c(cuniqueid, condid, "LON", "LAT", "PLOT")]
-
   }
-  if ("DSTRBCD1" %in% names(condf)) 
+  if ("DSTRBCD1" %in% names(condf)) {
     domvarlst <- c(domvarlst, "DSTRBGRP", "DSTRBGRPNM")
+  }
   
   domvarlst.not <- names(condf)[!names(condf) %in% domvarlst]
 
@@ -112,8 +112,9 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 		first="NO", gui=gui)
   row.FIAname <- FIESTA::pcheck.logical(row.FIAname, varnm="row.FIAname", 
 		title="Row names?", first="NO", gui=gui)
-  if (rowgrp && is.null(rowgrpnm) && !row.FIAname) 
+  if (rowgrp && is.null(rowgrpnm) && !row.FIAname) {
      stop("either row.FIAname must be TRUE or rowgrpnm != NULL to add row groups")
+  }
 
   ##############################################################
   ### ROW VARIABLE
@@ -149,7 +150,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
   if (!is.null(row.FIAname) && row.FIAname) {
     ## Get FIA reference table for xvar
-    xvar.ref <- FIESTA::getRefobject(toupper(rowvar))
+    xvar.ref <- getRefobject(toupper(rowvar))
     if (is.null(xvar.ref)) {
       message(paste("no reference name for", rowvar))
       row.FIAname <- FALSE
@@ -159,9 +160,13 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
     ## GET row titles defined in FIESTA
     ###################################################
-    if (is.null(title.rowvar)) 
+    if (is.null(title.rowvar)) {
      title.rowvar <- ifelse (rowvar %in% ref_titles[["DOMVARNM"]], 
-		ref_titles[ref_titles[["DOMVARNM"]] == rowvar, "DOMTITLE"], rowvar)	
+		ref_titles[ref_titles[["DOMVARNM"]] == rowvar, "DOMTITLE"], 
+		ifelse (sub("PREV_", "", rowvar) %in% ref_titles[["DOMVARNM"]],
+		paste0("Previous ", tolower(ref_titles[ref_titles[["DOMVARNM"]] == 
+			sub("PREV_", "", rowvar), "DOMTITLE"])), rowvar))
+    }	
 
     ## Check row groups
     if (rowgrp && is.null(rowgrpnm)) {
@@ -465,11 +470,13 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
     ## GET column titles defined in FIESTA
     ###################################################
-    if (is.null(title.colvar)) 
+    if (is.null(title.colvar)) {
       title.colvar <- ifelse (colvar %in% ref_titles[["DOMVARNM"]], 
 		ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"], 
-      	ifelse (colvar %in% ref_titles[["DOMVARNM"]], 
-			ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"], colvar))   	
+		ifelse (sub("PREV_", "", rowvar) %in% ref_titles[["DOMVARNM"]],
+		paste0("Previous ", tolower(ref_titles[ref_titles[["DOMVARNM"]] == 
+			sub("PREV_", "", colvar), "DOMTITLE"])), colvar))
+    }  	
 
     ## Check collut
     if (!is.null(collut)) {

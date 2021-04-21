@@ -85,7 +85,8 @@ getpltdom.prop <- function(pntall, uniqueid, domain, strunitvars=NULL) {
 }
 
 getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut, 
-	unitvar, strvar, tabtype="PCT", areavar=NULL, unitacres=NULL, sumunits=FALSE) {
+	unitvar, strvar, tabtype="PCT", areavar=NULL, unitacres=NULL, sumunits=FALSE,
+	value.var="p.pltdom") {
   ## DESCRIPTION: calculates gain/loss based on all rowvar/colvar values or values
   ## 			input by user (gainloss.vals)
 
@@ -119,22 +120,23 @@ getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut,
 #  plt.val <- dcast(pltdom.val, 
 #		get(eval(unitvar)) + get(eval(strvar)) + get(eval(plotid)) ~ 
 #		paste(get(eval(rowvar)), get(eval(colvar)), sep=" "), 
-#			fun.aggregate = sum, value.var="p.pltdom")
+#			fun.aggregate = sum, value.var=value.var)
 #  setnames(plt.val, c("unitvar", "strvar", "plotid"), c(unitvar, strvar, plotid))
 
   plt.val <- data.table::dcast(pltdom.val, 
 		get(eval(unitvar)) + get(eval(strvar)) + get(eval(plotid)) ~ 
 		paste(get(eval(rowvar)), get(eval(colvar)), sep=" to "), 
-			fun.aggregate = sum, value.var="p.pltdom")
+			fun.aggregate = sum, value.var=value.var)
   setnames(plt.val, c("unitvar", "strvar", "plotid"), c(unitvar, strvar, plotid))
 
   ## Add columns with 0 values if they do not exist.
-  if (!gainnm %in% names(plt.val))
+  if (!gainnm %in% names(plt.val)) {
     plt.val[, (gainnm) := 0]
- 
-  if (!lossnm %in% names(plt.val))
+  }
+  if (!lossnm %in% names(plt.val)) {
     plt.val[, (lossnm) := 0]
-  
+  }
+
   ## Calculate estimate proportions, variance, and covariance of the gain and loss 
   ## variable by strata (estimation unit)
   gainloss.bystr <- plt.val[, .(
@@ -175,6 +177,7 @@ getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut,
 	.SDcols=c("gain.phat", "gain.phat.var", "loss.phat", "loss.phat.var", 
 	"diff.phat", "diff.phat.var")]
 
+
   if (tabtype == "AREA" || sumunits) {
     tabs <- FIESTA::check.matchclass(unitacres, val.byunit, unitvar)
     unitacres <- tabs$tab1
@@ -193,6 +196,8 @@ getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut,
 			diff.phat=sum(diff.phat * WEIGHT), 
 			diff.phat.var=sum(diff.phat.var * WEIGHT^2))]
       setnames(val.grp, "unitvar", unitvar)
+    } else {
+      val.grp <- val.byunit
     }
 
     #est.variables <- c("est", "est.var", "est.se", "est.cv", "pse")
@@ -280,8 +285,5 @@ bp_width.jpg <- function(x){
     ifelse(max(unlist(lapply(strsplit(names(x), " "), nchar))) < 20, 12, 14)
   }
 }
-
-
-
 
 

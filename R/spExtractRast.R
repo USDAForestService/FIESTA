@@ -253,11 +253,13 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
     names(sppltxy)[1] <- uniqueid
 
     ## Check extents
-    names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
-    bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
-    bbox2 <- sf::st_bbox(sppltprj)
-    check.extents(bbox1, bbox2, showext=showext, layer1nm=rastnm, layer2nm="xyplt",
+    if (showext) {
+      names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
+      bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
+      bbox2 <- sf::st_bbox(sppltprj)
+      check.extents(bbox1, bbox2, showext=showext, layer1nm=rastnm, layer2nm="xyplt",
 			stopifnotin=TRUE)
+    }
            
     ## Extract values
     ########################################################          

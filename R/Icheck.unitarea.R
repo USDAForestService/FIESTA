@@ -31,7 +31,9 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
   ######################################################################
   if (nbrunits == 1) { 
     if (!any(class(unitarea) %in% c("data.table", "data.frame"))) {
-      if (is.null(unitarea)) stop("unitarea is invalid")
+      if (is.null(unitarea)) {
+        stop("unitarea is invalid")
+      }
       if (is.character(unitarea) && is.vector(unitarea) && length(unitarea) == 1) {
         if (sum(grepl(",", unitarea)) > 0) {
           unitarea <- as.numeric(gsub(",", "", unitarea))
@@ -43,8 +45,9 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
       }        
 
       if (is.vector(unitarea) && length(unitarea) == 1) {
-        if (is.na(unitarea)) stop("invalid unitarea.. must be a number") 
-        unitarea <- unitarea
+        if (is.na(unitarea)) {
+          stop("invalid unitarea.. must be a number") 
+        }
       } else {
         stop("need a numeric vector of length 1 with unitarea")
       }
@@ -56,6 +59,9 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
       ## Check unitarea
       unitarea <- pcheck.table(unitarea, gui=gui, tabnm="unitarea", 
 			nullcheck=TRUE, stopifnull=TRUE)
+      if (length(unitvars) == 1 && unitvars == "ONEUNIT" && !unitvars %in% names(unitarea)) {
+        unitarea$ONEUNIT <- 1
+      }
 
       if (nrow(unitarea) >  1) {
         if (length(unitvars) == 1) {
@@ -67,13 +73,19 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
             } else {
               stop("invalid unitarea")
             }
+          } else if (unitvars %in% names(unitarea)) {
+            unitarea <- unitarea[, sum(.SD), by=unitvars, .SDcols=areavar]
+            setnames(unitarea, "V1", areavar)
           } else {
-            if (nrow(unitarea) != 1) stop("invalid unitarea")
+            if (nrow(unitarea) != 1) {
+              stop("invalid unitarea")
+            }
           }
         }
       }
-      if (is.null(areavar) || !areavar %in% names(unitarea)) 
+      if (is.null(areavar) || !areavar %in% names(unitarea)) {
         stop("invalid areavar")
+      }
     } 
   } else {   ## nbrunits > 1
     if (!is.data.frame(unitarea) && is.numeric(unitarea))
@@ -91,8 +103,9 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
     if (!is.numeric(unitarea[[areavar]])) {
       if(sum(grepl(",", unitarea[[areavar]])) > 0)
         unitarea[[areavar]] <- as.numeric(gsub(",", "", unitarea[[areavar]]))
-      if (!is.na(unitarea[[areavar]])) 
+      if (!is.na(unitarea[[areavar]])) {
         stop("invalid areavar in unitarea.. must be a number") 
+      }
     }
 
     ## Check for NA values in areavar
@@ -103,16 +116,10 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
       unitarea <- unitarea[!is.na(get(areavar)), ]
     }
       
-    ## Check if class of unitvars in totacres matches class of unitvars in pltx
-    tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
-    pltx <- tabs$tab1
-    unitarea <- tabs$tab2
-
     ## Check the class of unitvars in unitarea matches unitvars in pltx
     tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
     pltx <- tabs$tab1
     unitarea <- tabs$tab2
-
 
     ## Check that the values of unitvars in pltx are all in unitarea
     pltx <- check.matchval(tab1=pltx, tab2=unitarea, var1=unitvars, 

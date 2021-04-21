@@ -1,6 +1,6 @@
 check.popdata <- function(module="GB", method="greg", popType="VOL", 
 	tree=NULL, cond, subplot=NULL, subp_cond=NULL, plt=NULL, seed=NULL, 
-	vspspp=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
+	vspspp=NULL, lulc=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", 
 	pltassgnid="CN", pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
@@ -73,7 +73,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 
   ## Set global variables
   COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
-	STATECD=PLOT_STATUS_CD=PSTATUSCD=cndnmlst=pltdomainlst=invyrs=PROP_BASIS=
+	STATECD=PLOT_STATUS_CD=PSTATUSCD=cndnmlst=pltdomainlst=PROP_BASIS=
 	ACI.filter=V1=ONEUNIT=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
@@ -122,7 +122,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 
   ## Check popType
   ########################################################
-  evalTyplst <- c("ALL", "CURR", "VOL")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC")
   popType <- FIESTA::pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
 		checklst=evalTyplst, caption="popType", multiple=TRUE, stopifnull=TRUE)
   if ("P2VEG" %in% popType) {
@@ -303,6 +303,11 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 				" subc ON (subpc.PLT_CN = p.CN)")
       subp_condqry <- paste("select distinct subc.* from", subpcfromqry, whereqry)
     }
+    if (!is.null(lulc) && is.character(lulc) && lulc %in% tablst) {
+      lulcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., lulc,
+				" ON (lulc.PLT_CN = p.CN)")
+      lulcqry <- paste("select distinct lulc.* from", lulcfromqry, whereqry)
+    }
     if (is.character(unitarea) && !is.null(chkdbtab(tablst, unitarea))) {
       unitindb <- TRUE
       unitarea_layer <- chkdbtab(tablst, unitarea)
@@ -331,7 +336,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   pltassgnx <- pcheck.table(pltassgn, tab_dsn=dsn, tabnm="pltassgn", 
 		caption="plot assignments?", nullcheck=nullcheck, tabqry=pltassgnqry,
 		returnsf=FALSE)
-  if (is.null(condx) && is.null(pltx) && is.null(pltassgnx)) {
+  if (popType != "LULC" && (is.null(condx) && is.null(pltx) && is.null(pltassgnx))) {
     stop("must include plt or cond table")
   }
   treex <- pcheck.table(tree, tab_dsn=dsn, tabnm="tree", caption="Tree table?", 
@@ -343,9 +348,19 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 		nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE)
   subp_condx <- pcheck.table(subp_cond, tab_dsn=dsn, tabnm="subp_cond", caption="subp_cond table?", 
 		nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE)
+  lulcx <- pcheck.table(lulc, tab_dsn=dsn, tabnm="lulc", caption="lulc table?", 
+		nullcheck=nullcheck, tabqry=lulcqry, returnsf=FALSE)
 
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
+
+  ## popType="LULC"
+  if (popType == "LULC") {
+    if (is.null(lulcx)) {
+      stop("must include lulc table")
+    }
+    condx <- lulcx
+  }
 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
@@ -424,7 +439,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       pltx <- pltassgnx
       puniqueid <- pltassgnid
     }
- 
+
     ##################################################################################
     ## Filter for population data
     ##################################################################################
@@ -493,8 +508,13 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 			tab2txt="plt", subsetrows=TRUE)
       
       pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE], all.y=TRUE, 
+      nrow.before <- nrow(pltx)
+      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
 				by.x=cuniqueid, by.y=puniqueid)
+      nrow.after <- length(unique(pltcondx[[cuniqueid]]))
+      if (nrow.after < nrow.before) {
+        message(abs(nrow.after - nrow.before), " plots were removed from population")
+      }
     } else {
       pltcondx <- pltx
       cuniqueid <- puniqueid
@@ -542,8 +562,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       designcd <- unique(na.omit(pltcondx[["DESIGNCD"]]))
       if (length(designcd) != 1) {
         warning("more than 1 plot design, calculate separate estimates by design")
-      } else if (adj == "samp" && designcd != 1) {
-        stop("samp adjustment for trees is only for designcd = 1 (annual inventory)") 
+      } else if (adj == "samp" && !designcd %in% c(1, 501:505, 230:242, 328)) {
+        message("samp adjustment for trees is only for annual inventory") 
       }
     }
 
@@ -712,10 +732,10 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Check for NA values in pvars2keep variables
   pvars.na <- sapply(pvars2keep, function(x, pltcondx){ 
 					sum(is.na(pltcondx[, x, with=FALSE])) }, pltcondx)
-  if (any(pvars.na > 0))
+  if (any(pvars.na > 0)) {
     stop(paste(pvars.na[pvars.na > 0], "NA values in variable:", 
 		paste(names(pvars.na[pvars.na > 0]), collapse=", ")))
-
+  }
 
   ###################################################################################
   ###################################################################################
@@ -826,8 +846,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
       message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
 		" nonsampled nonforest conditions")
-      if (!is.null(cond.nonsamp.filter)) 
+      if (!is.null(cond.nonsamp.filter)) {
         cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
+      }
+    }
+    if (popType == "LULC") {
+      cond.nonsamp.filter.lulc <- "(is.na(PREV_COND_STATUS_CD) | PREV_COND_STATUS_CD != 5)"
+      if (!is.null(cond.nonsamp.filter)) {
+        cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.lulc)
+      }
     }
   } 
   ## Apply cond.nonsamp.filter

@@ -105,6 +105,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     pltassgnid <- MAmodeldat$pltassgnid
     unitlut <- MAmodeldat$domzonal
     unitvar <- MAmodeldat$domvar
+    unitvar2 <- MAmodeldat$domvar2
     unitarea <- MAmodeldat$domarea
     areavar <- MAmodeldat$areavar
     npixelvar <- MAmodeldat$npixelvar
@@ -130,10 +131,10 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="MA", method=MAmethod, tree=tree, 
-	cond=cond, plt=plt, seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, 
-	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid,
- 	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs, 
-	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
+	cond=cond, plt=plt, seed=seed, pltassgn=pltassgn, dsn=dsn,
+ 	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, areawt=areawt,
+ 	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid,
+ 	invyrs=invyrs, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=unitarea, unitvar=unitvar, 
 	unitvar2=unitvar2, areavar=areavar, unitcombine=unitcombine, 
 	stratcombine=stratcombine, strvar=PSstrvar, prednames=prednames, predfac=predfac)
@@ -195,6 +196,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
+  unitvars <- auxdat$unitvars
   unitlut <- auxdat$auxlut
   prednames <- auxdat$prednames
   predfac <- auxdat$predfac
@@ -255,8 +257,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
 	condid=condid, ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
-	unitvar=unitvar, unitlut=unitlut, npixels=npixels, npixelvar=npixelvar, 
-	prednames=prednames, expcondtab=expcondtab, 
+	unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, npixels=npixels,
+ 	npixelvar=npixelvar, prednames=prednames, expcondtab=expcondtab, 
 	plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
 	invyrs=invyrs, MAmethod=MAmethod, estvar.area=estvar.area, adj=adj)
 
