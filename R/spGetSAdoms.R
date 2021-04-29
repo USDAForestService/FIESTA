@@ -5,8 +5,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 	largebnd.filter=NULL, maxbnd=NULL, maxbnd_dsn=NULL, maxbnd.unique=NULL, 
 	maxbnd.filter=NULL, helper_autoselect=TRUE, nbrdom.min=NULL, maxbnd.threshold=20, 
 	largebnd.threshold=10, multiSAdoms=FALSE, showsteps=TRUE, savedata=FALSE, 
-	savesteps=FALSE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
+	savesteps=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, outfolder=NULL, 
+	out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
+	overwrite_dsn=FALSE, overwrite_layer=TRUE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -45,8 +46,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 
   ## Check for necessary packages
   ###########################################################
-  #if (!"FIESTAdata" %in% rownames(installed.packages()))
-  #  stop("FIESTAdata package is required for spGetSAdoms()")
 
   ## Set global variables
   gui <- FALSE  
@@ -88,43 +87,20 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || savesteps) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite_dsn <- FIESTA::pcheck.logical(overwrite_dsn, varnm="overwrite_dsn", 
-		title="Overwrite dsn?", first="NO", gui=gui)  
-    overwrite_layer <- FIESTA::pcheck.logical(overwrite_layer, varnm="overwrite_layer", 
-		title="Overwrite layers?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    ## If outfn.pre is not null, create a folder within the outfolder, named outfn.pre
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
-    }
-
-    out_fmtlst <- c("sqlite", "gpkg", "shp", "gdb")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-    if (out_fmt != "shp" && is.null(out_dsn))
-      out_dsn <- paste0("SAdata.", out_fmt)
-
-    if (out_fmt == "gdb") {
-      gdbfn <- DBtestESRIgdb(gdbfn=out_dsn, outfolder=outfolder, overwrite=overwrite_dsn, 
-			showlist=FALSE, returnpath=FALSE)
-    }	else if (out_fmt %in% c("sqlite", "gpkg")) {
-      gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-      SQLitefn <- DBcreateSQLite(SQLitefn=out_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=overwrite_dsn, returnpath=FALSE)
-    }	
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
 
     if (savesteps) {
       stepfolder <- file.path(outfolder, "SAdoms_steps")
       if (!dir.exists(stepfolder)) dir.create(stepfolder)
-      if (out_fmt == "shp") {
-        step_dsn <- NULL
-      } else {
-        step_dsn <- paste0("SAdoms_steps.", out_fmt)
-      }
+      step_dsn <- NULL
+      step_fmt <- "shp"
     }
   }
 
@@ -137,8 +113,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   smallbnd.unique <- pcheck.varchar(var2check=smallbnd.unique, varnm="smallbnd.unique", 
 		gui=gui, checklst=smallbndnmlst, caption="Small area attribute", 
 		warn=paste(smallbnd.unique, "not in smallbnd"), stopifnull=FALSE)
-  if (!is.null(smallbnd.unique))
+  if (!is.null(smallbnd.unique)) {
     smallbndnmlst <- smallbndnmlst[smallbndnmlst != smallbnd.unique]
+  }
   smallbnd.domain <- pcheck.varchar(var2check=smallbnd.domain, varnm="smallbnd.domain", 
 		gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
 		stopifnull=FALSE, stopifinvalid=FALSE)
@@ -150,9 +127,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   } else {
     smallbnd.domain <- smallbnd.unique
   }    
-  if (any(table(smallbndx[[smallbnd.unique]])) > 1) 
+  if (any(table(smallbndx[[smallbnd.unique]])) > 1) {
     message("smallbnd.unique is not unique")
-
+  }
 
   ## Apply smallbnd.filter
   ####################################################################
@@ -395,8 +372,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
  		nbrdom.min=nbrdom.min, maxislarge=maxislarge, largeishelper=largeishelper, 
 		showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder, 
-		step_dsn=step_dsn, out_fmt=out_fmt, multiSAdoms=multiSAdoms, 
+		step_dsn=step_dsn, out_fmt=step_fmt, multiSAdoms=multiSAdoms, 
 		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
+		maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
 		overwrite=overwrite_layer)
 
     SAdomslst <- autoselectlst$SAdomslst

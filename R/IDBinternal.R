@@ -5,6 +5,9 @@
 ## getplotCur
 ## getEvalid.ppsa     ## Get Evalid from pop_plot_stratum_assgn
 ## chkdbtab			## Checks if table name exists in list of database tables
+## getsppnm			## Get species common names from a list of codes or Research Station
+## gui_filterdf		## Get filter from a data frame
+
 
 DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, 
 	plotgeom=FALSE, isRMRS=FALSE) {
@@ -47,10 +50,10 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
   ################################  COND VARIABLES  ##################################
   ## Variables from FS_NIMS_FIADB_RMRS.COND
   condvarlst <- c("PLT_CN", "CONDID", "COND_STATUS_CD", "COND_NONSAMPLE_REASN_CD", 
-	"RESERVCD", "OWNCD", "OWNGRPCD", "ADFORCD", "FORTYPCD", "FLDTYPCD", "MAPDEN", 
-	"STDAGE", "STDSZCD", "FLDSZCD", "SITECLCD", "SICOND", "SIBASE", "SISP", 
+	"RESERVCD", "OWNCD", "OWNGRPCD", "FORINDCD", "ADFORCD", "FORTYPCD", "FLDTYPCD", 
+	"MAPDEN", "STDAGE", "STDSZCD", "FLDSZCD", "SITECLCD", "SICOND", "SIBASE", "SISP", 
 	"STDORGCD", "STDORGSP", "PROP_BASIS", "CONDPROP_UNADJ", "MICRPROP_UNADJ", 
-	"SUBPPROP_UNADJ", "MACRPROP_UNADJ", "SLOPE", "ASPECT", "GSSTKCD", "ALSTKCD", 
+	"SUBPPROP_UNADJ", "MACRPROP_UNADJ", "SLOPE", "ASPECT", "PHYSCLCD", "GSSTKCD", "ALSTKCD", 
 	"DSTRBCD1", "DSTRBYR1", "DSTRBCD2", "DSTRBYR2", "DSTRBCD3", "DSTRBYR3", 
 	"TRTCD1", "TRTYR1", "TRTCD2", "TRTYR2", "TRTCD3", "TRTYR3", "PRESNFCD", 
 	"BALIVE", "FLDAGE", "FORTYPCDCALC", "HABTYPCD1", "HABTYPCD2", "LIVE_CANOPY_CVR_PCT", 
@@ -619,5 +622,112 @@ chkdbtab <- function(dbtablst, tab, stopifnull=FALSE) {
 }
 
 
+getsppnm <- function(spcdlst=NULL, RS=NULL, returnvalue='common') {
+  ## DESCRIPTION: Get species common names from a list of codes or Research Station
+  ## spcdlst - vector list of SPCD
+  ## RS - one or more RS ('NCRS', 'NERS', 'RMRS', 'PNWRS', 'SRS')
+  ## returnvalue - ('common', 'latin', 'code')
+  if (!is.null(spcdlst)) {
+    ref_codes <- FIESTA::ref_codes
+    spnmlst <- sort(ref_codes[ref_codes$VARIABLE == "SPCD" &
+		ref_codes$VALUE %in% spcdlst, "MEANING"])
+  } else if (!is.null(RS)) {
+    ref_species <- FIESTA::ref_species
+    if (all(RS %in% unique(ref_species$RS))) {
+      cols <- names(ref_species)[grepl(RS, names(ref_species))]
+      spnmlst <- sort(ref_species[rowSums(ref_species[, cols, drop=FALSE] == "X") > 0, 
+		"COMMON_NAME"])
+    }
+  }
+  if (returnvalue == 'common') {
+    return(spnmlst)
+  } else if (returnvalue == 'latin') {
+    gs <- ref_species[ref_species$COMMON_NAME %in% spnmlst, c("GENUS", "SPECIES")]
+    return(paste(gs$GENUS, gs$SPECIES))
+  } else {
+    return(ref_species[ref_species$COMMON_NAME %in% spnmlst, "SPCD"])
+  }
+  return(spnmlst)
+}
 
+
+gui_filterdf <- function(df, byname=TRUE) {
+  ## DESCRIPTION: get filter from a data frame
+  ## df - data frame to filter
+  ## byname - logical. if TRUE, and variable in ref_codes, 
+  ## 			gets names from ref_codes
+  filterlst <- names(df)
+
+  addfilter <- "yes"  
+  xfilter <- {}
+  while (addfilter != "none") {
+    filtervar <- select.list(c("NONE", sort(filterlst)), 
+      	title=paste("Filter variable"), multiple=FALSE)
+    if (filtervar == "") stop("")
+    if (filtervar == "NONE") {
+      break
+    } 
+    filterval <- sort(unique(df[[filtervar]]))
+    if (filtervar %in% c("ELEV", "CRCOVPCT_RMRS", "CRCOVPCT_LIVEMISS_RMRS", 
+	"CRCOVPCT_LIVE_RMRS", "LIVE_CANOPY_CVR_PCT",
+ 	"LIVE_MISSING_CANOPY_CVR_PCT") || length(filterval) > 20) {
+      ## MINIMUM VALUE
+      filtercd_min <- select.list(as.character(filterval), 
+		title=paste("Select MIN", filtervar), multiple=FALSE)
+      if (filtercd_min == "") {
+        stop("")
+      }
+      filterdbmax <- filterval[as.numeric(filterval) >= as.numeric(filtercd_min)]
+      ## MAXIMUM VALUE
+      filtercd_max <- select.list(as.character(filterdbmax), 
+			title=paste("Select MAX", filtervar), multiple=FALSE)
+      if (filtercd_max == "") {
+        stop("")
+      }   
+      xfilter <- paste0(xfilter, paste("(", filtervar, ">=", filtercd_min, 
+			"and", filtervar, "<=", filtercd_max, ")"))
+      byname <- FALSE
+    } else {   
+      if (byname) {
+        ref_codes <- FIESTA::ref_codes
+        if (filtervar %in% unique(ref_codes$VARIABLE)) {
+          filtervalnm <- sort(unique(ref_codes[ref_codes$VARIABLE == filtervar &
+	  	ref_codes$VALUE %in% filterval, "MEANING"]))
+        } else {
+          message("name not in ref_codes... use code to filter")
+          filtervalnm <- filterval
+          byname <- FALSE
+        }
+      } else {
+        filtervalnm <- filterval
+      }
+        
+      filter.sel <- select.list(filtervalnm, 
+			title="Select filter(s)", multiple=TRUE)
+      if (length(filter.sel) == 0) {
+        stop("")
+      }
+      if (byname) {
+        filter.sel <- unique(ref_codes[ref_codes$VARIABLE == filtervar &
+	  	ref_codes$MEANING %in% filter.sel, "VALUE"])
+      }
+
+      xfilter <- paste0(xfilter, getfilter(filtervar, filter.sel))
+
+      addfilter <- select.list(c("none", "and", "or"), 
+	 title=paste("add another filter?"), multiple=FALSE)
+      if (addfilter == "") {
+        stop("")
+      } else {
+        filterlst <- filterlst[!filterlst %in% filtervar]
+        if (addfilter == "and") {
+          xfilter <- paste(xfilter, "& ")
+        } else if (addfilter == "or") {
+          xfilter <- paste(xfilter, "| ")
+        }
+      }
+    }
+  }
+  return(xfilter)
+}
 

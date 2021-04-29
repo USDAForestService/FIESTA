@@ -4,7 +4,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	keepNA=FALSE, showext=FALSE, savedata=FALSE, exportsp=FALSE, 
 	exportNA=FALSE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, 
 	out_layer="unit_assgn", outfn.date=TRUE, outfn.pre=NULL, 
-	overwrite=FALSE, ...){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, ...){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -90,23 +90,12 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    out_fmtlst <- c("sqlite", "gpkg", "shp")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-
-    if (out_fmt %in% c("sqlite", "gpkg")) {
-      gpkg <- ifelse(out_dsn == "gpkg", TRUE, FALSE)        
-      out_dsn <- DBcreateSQLite(out_dsn, outfolder=outfolder, outfn.date=outfn.date, 
-				overwrite=overwrite, dbconnopen=FALSE)
-    } 
-    if (!is.null(outfn.pre))
-      out_layer <- paste(outfn.pre, out_layer, sep="_")
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
 
@@ -168,7 +157,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     extrast <- spExtractRast(sppltx, rastlst=unitlayerx, var.name=unitvar, 
 			uniqueid=uniqueid, keepNA=keepNA, exportNA=exportNA, 
 			outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-			overwrite=overwrite)
+			overwrite_layer=overwrite_layer)
     sppltx <- extrast$spplt
          
     ## Calculate area
@@ -180,22 +169,20 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   #######################################
   pltassgn <- sf::st_drop_geometry(sppltx)
   if (savedata) {
-    if (out_fmt == "csv") {  
-      write2csv(pltassgn, outfolder=outfolder, outfilenm="pltassgn", outfn.pre=outfn.pre,
-		outfn.date=outfn.date, overwrite=overwrite)
-      write2csv(unitarea, outfolder=outfolder, outfilenm="unitarea", outfn.pre=outfn.pre,
-		outfn.date=outfn.date, overwrite=overwrite)	
-    } else {
-      write2sqlite(pltassgn, SQLitefn=out_dsn, out_name="pltassgn", overwrite=overwrite)
-      write2sqlite(unitarea, SQLitefn=out_dsn, out_name="unitarea", overwrite=overwrite)
-    }     			
+    datExportData(pltassgn, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+
+    datExportData(unitarea, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
 
-  if (exportsp)
+  if (exportsp) {
     spExportSpatial(sppltx, out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer,
  		outfolder=outfolder, outfn.pre=NULL, 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-  
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+  }
   
   returnlst <- list(pltassgn=pltassgn, unitarea=unitarea, unitvar=unitvar, areavar=areavar,
 				pltassgnid=uniqueid)

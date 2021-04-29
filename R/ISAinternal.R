@@ -7,7 +7,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 		maxislarge=FALSE, largeishelper=FALSE, savesteps=FALSE, showsteps=TRUE,
 		stepfolder=NULL, out_fmt="shp", step_dsn=NULL, step.cex=0.8, 
 		maxbnd.threshold=30, largebnd.threshold=30, multiSAdoms=FALSE, 
-		overwrite=TRUE) {
+		maxbnd.addtext=TRUE, largebnd.addtext=FALSE, overwrite=TRUE) {
   ## DESCRIPTION:: Automate selection of helperbnd polygons for modeling.
   ## maxbnd - maximum constraint for modeling extent (e.g., ECOMAP Province)
   ## if maxbnd, maxbnd is intersected with smallbnd and dissolved by maxbnd.unique (*maxbnd_select)
@@ -24,8 +24,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   sbndlst <- list(smallbndx)
   SAdomslst <- list()
 
-  if (showsteps) 
+  if (showsteps) {
     par(mar=c(1,1,1,1))
+  }
 
   ############################################################################
   ## maxbnd
@@ -51,7 +52,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
 
       coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
-      text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
+      if (maxbnd.addtext) {
+        text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
+      }
     }
  
     if (savesteps) {
@@ -67,7 +70,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
 
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
-        text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]])
+        if (maxbnd.addtext) {
+          text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]])
+        }
       dev.off()
       message("Writing jpg to ", jpgfn, "\n")
 
@@ -131,7 +136,8 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           }
         } else {  ## multiSAdoms=TRUE
           ## Create list of all maxbnds by smallarea
-          mbndlst <- do.call(c, list(mbndlst, maxbnd.gtthres[!maxbnd.gtthres %in% unlist(mbndlst)]))
+          mbndlst <- do.call(c, list(mbndlst, maxbnd.gtthres[!maxbnd.gtthres %in% 
+			unlist(mbndlst)]))
           ## Create list of new smallbnd(s)
           sbndlst <- lapply(mbndlst, function(mbnd, maxpct, smallbndx, smallbnd.unique) {
             sbnd.att <- maxpct[maxpct[[maxbnd.unique]] %in% mbnd, smallbnd.unique]
@@ -160,7 +166,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbnd.gtthres,]), 
 		add=TRUE, border="cyan2", lwd=2)
       coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
-      text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
+      if (maxbnd.addtext) {
+        text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
+      }
     }
     if (savesteps) {
       out_layer <- paste0("step", stepcnt, "_maxbnd_select")
@@ -177,7 +185,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         plot(sf::st_geometry(maxbndx.selectd), add=TRUE, border="cyan2", lwd=2)
 
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
-        text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]])
+        if (maxbnd.addtext) {
+          text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]])
+        }
       dev.off()
       message("Writing jpg to ", jpgfn, "\n")
 
@@ -185,12 +195,14 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     }
 
     ## Check largebndx
-    if (maxislarge)
+    if (maxislarge) {
       largebndx <- maxbndx.int
+    }
   }
   ## Check helperbndx
-  if (largeishelper)
+  if (largeishelper) {
     helperbndx <- largebndx
+  }
 
   #################################################################
   ## Get helper domains
@@ -270,7 +282,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #        plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-        text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
+        if (largebnd.addtext) {
+          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
+        }
       }
 
       if (savesteps) {
@@ -284,7 +298,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           plot(sf::st_geometry(largebndx.intd), main=NULL, border="dark grey")
           plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
           coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+          if (largebnd.addtext) {
+            text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+          }
         dev.off()
         message("Writing jpg to ", jpgfn, "\n")
 
@@ -315,7 +331,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE)
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-        text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
+        if (largebnd.addtext) {
+          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
+        }
       }
 
       if (savesteps) {
@@ -330,7 +348,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           plot(sf::st_geometry(sbnd), add=TRUE, border="red")
           plot(sf::st_geometry(largebnd_select), add=TRUE)
           coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+          if (largebnd.addtext) {
+            text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+          }
         dev.off()
         message("Writing jpg to ", jpgfn, "\n")
 
@@ -391,7 +411,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 ##          plot(sf::st_geometry(sbnd), add=TRUE, border="red")
 ##          plot(sf::st_geometry(largebnd_select), add=TRUE)
 ##          coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebnd_select)))
-##          text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]], cex=step.cex)
+##          if (largebnd.addtext) {
+##            text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]], cex=step.cex)
+##          }
 ##        }
 #        if (nbrdom > nbrdom.minx || k > length(largebndxlst)) {
 
@@ -429,7 +451,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE, border="cyan2", lwd=2)
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-        text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+        if (largebnd.addtext) {
+          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]])
+        }
       }
 
       if (savesteps && !is.null(helperbndx.tmp)) {
@@ -444,7 +468,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
           plot(sf::st_geometry(largebnd_select), add=TRUE, border="cyan2", lwd=2)
           coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
-          text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
+          if (largebnd.addtext) {
+            text(coords[,"X"], coords[,"Y"], largebndx.intd[[largebnd.unique]], cex=step.cex)
+          }
         dev.off()
         message("Writing jpg to ", jpgfn, "\n")
  
@@ -461,7 +487,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE)
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebnd_select)))
-        text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]], 0.8)
+        if (largebnd.addtext) {
+          text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]], 0.8)
+        }
       }
 
       if (savesteps && !is.null(helperbndx.tmp)) {
@@ -478,7 +506,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           plot(sf::st_geometry(sbnd), add=TRUE, border="red", lwd=1.5)
           plot(sf::st_geometry(largebnd_select), add=TRUE)
           coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebnd_select)))
-          text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]])
+          if (largebnd.addtext) {
+            text(coords[,"X"], coords[,"Y"], largebnd_select[[largebnd.unique]])
+          }
         dev.off()
         message("Writing jpg to ", jpgfn, "\n")
  
@@ -514,7 +544,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #    plot(sf::st_geometry(SAdoms["DOMAIN"]), main=NULL, border="grey",
 #		col=sf.colors(nbrdom, categorical=TRUE, alpha=.2))
 #          coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(SAdoms)))
-#          text(coords[,"X"], coords[,"Y"], SAdoms[["DOMAIN"]], cex=.4)
+#          if (largebnd.addtext) {
+#            text(coords[,"X"], coords[,"Y"], SAdoms[["DOMAIN"]], cex=.4)
+#          }
 
     SAdomslst[[i]] <- SAdoms
     helperbndxlst[[i]] <- helperbndx.tmp

@@ -180,11 +180,12 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
-		landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter, 
-		cfilter=cfilter, allin1=allin1, estround=estround, pseround=pseround,
- 		divideby=divideby, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-		rawonly=rawonly, savedata=savedata, outfolder=outfolder, gui=gui)
+ 	condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
+	landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter, 
+	cfilter=cfilter, allin1=allin1, estround=estround, pseround=pseround,
+ 	divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder, 
+	gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -202,10 +203,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
-  estround <- estdat$estround
-  pseround <- estdat$pseround
   landarea <- estdat$landarea
-  if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -254,7 +252,6 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
 
-  
   #####################################################################################
   ### GET ESTIMATION DATA FROM TREE TABLE
   #####################################################################################
@@ -265,28 +262,38 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, 
 	tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
-  tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
+
+  tdomdat <- treedat$tdomdat
+  if (rowvar != "TOTAL") {
+    if (!row.add0 && any(tdomdat[[rowvar]] == 0)) {
+      tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
+    }
+    if (colvar != "NONE") {
+      if (!col.add0 && any(tdomdat[[colvar]] == 0)) {
+        tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
+      }
+    }
+  }
+
+  tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
   estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
-
-  ## remove NA values
-  #if (!is.null(tdomvar) && !is.null(tdomvar2))
-  #  tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
 
 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
   alltitlelst <- FIESTA::check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
-	sumunits=sumunits, title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
- 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
-	title.filter=title.filter, title.estvarn=title.estvar, unitvar=unitvar, 
-	rowvar=rowvar, colvar=colvar, estvarn=estvar, estvarn.filter=estvar.filter, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
-	invyrs=invyrs, landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
-	allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
+ 	title.unitvar=title.unitvar, title.filter=title.filter, title.estvarn=title.estvar,
+ 	unitvar=unitvar, rowvar=rowvar, colvar=colvar, estvarn=estvar, 
+	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
+	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
+	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby, 
+	outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -331,7 +338,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     unit.totest <- unit.totest[unitarea, nomatch=0]
     unit.totest <- getarea(unit.totest, areavar=areavar, esttype=esttype)
 #  }
- 
+
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -403,7 +410,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     unit.grpest <- FIESTA::getarea(unit.grpest, areavar=areavar, esttype=esttype)
     setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
   }
-
+ 
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
@@ -419,8 +426,9 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
-	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
+	pseround=pseround, divideby=divideby, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 
+
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 

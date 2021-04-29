@@ -24,6 +24,7 @@ getRefobject <- function(xvar){
       FORTYPCD = 'FORTYPCD',
       FLDTYPCD = 'FORTYPCD',
       FORTYPGRP = 'FORTYPCD',
+      FLDTYPGRP = 'FORTYPCD',
       FORTYPCDCALC = 'FORTYPCD',
       TYPGRPCD = 'FORTYPCD',
       DSTRBCD1 = 'DSTRBCD',

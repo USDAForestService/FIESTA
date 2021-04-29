@@ -20,9 +20,10 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,
 	maxbnd = NULL, maxbnd_dsn = NULL, maxbnd.unique = NULL, 
 	maxbnd.filter = NULL, helper_autoselect = TRUE, nbrdom.min = NULL, 
 	maxbnd.threshold = 20, largebnd.threshold = 10, multiSAdoms = FALSE, 
-	showsteps = TRUE, savedata = FALSE, savesteps = FALSE, outfolder = NULL, 
-	out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE)
+	showsteps = TRUE, savedata = FALSE, savesteps = FALSE, maxbnd.addtext=TRUE,
+ 	largebnd.addtext=FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE)
 }
 \arguments{
   \item{smallbnd}{ sf R object or String. Small area of interest boundary. 
@@ -98,7 +99,13 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,
   \item{showsteps}{ Logical. If TRUE, intermediate steps of selection process are
 	displayed. }
   \item{savedata}{ Logical. If TRUE, save SAdoms spatial layer to outfolder. }
-  \item{savesteps}{ Logical. If TRUE, save steps spatial intermediate layers. }
+  \item{savesteps}{ Logical. If TRUE, save steps spatial intermediate layers and 
+	JPG images. All spatial layers are output as *.shp format in a separate
+	folder (SAdoms_steps). }
+  \item{maxbnd.addtext}{ Logical. If TRUE, adds text to intermediate step plots
+	for maxbnd displays. }
+  \item{largebnd.addtext}{ Logical. If TRUE, adds text to intermediate step plots
+	for largebnd displays. }
   \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
   \item{out_fmt}{ String. Format for output tables ('shp', 'sqlite', 'gpkg', 'gdb').

@@ -11,6 +11,9 @@ COUNTYFP was converted to numeric and named COUNTYCD
 Lookup table for FIA Research Station (REF_RESEARCH_STATION) was downloaded from FIA DataMart on 20191105 (FIADB_1.6.1.00) and joined by STATECD.
 A lookup table for UNITCD was created from plot data using unique STATECD, COUNTYCD, UNITCD and joined to table.
 
+Converted to simple feature and saved to R object, with compression='xz'
+CRS - "+proj=longlat +datum=NAD83 +no_defs"
+
 }
 \usage{ stunitco}
 

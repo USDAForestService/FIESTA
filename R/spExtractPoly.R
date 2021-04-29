@@ -2,7 +2,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 	polyv_dsn=NULL, polyvarlst=NULL, polyvarnmlst=NULL, keepNA=FALSE, 
 	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, out_fmt="shp", 
 	out_dsn=NULL, out_layer="polyext", outfolder=NULL, outfn.pre=NULL, 
- 	outfn.date=FALSE, overwrite=TRUE, ...){
+ 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, ...){
   ######################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more polygon layers and appends to input spatial layer 
@@ -122,11 +122,12 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 
   ## Check outfolder
   if (savedata || exportsp || exportNA) {
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="YES", gui=gui)  
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
   ########################################################################
@@ -216,7 +217,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
       spExportSpatial(sppltout, out_dsn=out_dsn, 
 		out_layer=paste0(out_layer, "_", polyvnm, "_NAvals"), 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite)
+		overwrite_layer=overwrite_layer)
  
     if (!keepNA) {
       ## Subset points inside boundary
@@ -225,15 +226,18 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     }
   }
 
-  if (savedata) 
-    write2csv(sppltext, outfolder=outfolder, outfilenm=out_layer, outfn.pre=outfn.pre, 
-		outfn.date=outfn.date, overwrite=overwrite)
+  if (savedata) {
+    datExportData(sppltext, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+  }
 
   ## Export to shapefile
-  if (exportsp) 
+  if (exportsp) {
     spExportSpatial(sppltext, out_dsn=out_dsn, out_layer=out_layer, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite)
+		overwrite_layer=overwrite_layer)
+  }
   
   returnlst <- list(sppltext=sppltext, outnames=unlist(polyvarnmlst))
 

@@ -278,7 +278,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 			tab2txt="unitarea", subsetrows=TRUE)
   }
 
-
   ###################################################################################
   ## Check number of plots by unitvar
   ##	 (including partially sampled plots - COND_STATUS_CD=5) 

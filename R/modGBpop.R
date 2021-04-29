@@ -6,9 +6,10 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
-	minplotnum.strat=2, saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, GBdata=NULL, GBstratdat=NULL, gui=FALSE){
+	minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", savedata=FALSE, 
+	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, GBdata=NULL, pltdat=NULL, 
+	GBstratdat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -61,45 +62,67 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
   } 
 
   if (!is.null(GBdata)) {
     list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
     GBdata <- FIESTA::pcheck.object(GBdata, "GBdata", list.items=list.items)
-    bnd <- GBdata$bnd
+    #bnd <- GBdata$bnd
     plt <- GBdata$plt
     pltassgn <- GBdata$pltassgn
     cond <- GBdata$cond
     tree <- GBdata$tree
     seed <- GBdata$seed
     unitarea <- GBdata$unitarea
-    unitvar <- GBdata$unitvar
     areavar <- GBdata$areavar
     stratalut <- GBdata$stratalut
     strvar <- GBdata$strvar
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
-    pltassgnid <- GBdata$pltassgnid  
+    pltassgnid <- GBdata$pltassgnid 
 
-  } else if (!is.null(GBstratdat)) {
-    list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
-    GBstratdat <- FIESTA::pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
-    pltassgn <- GBstratdat$pltassgn
-    pltassgnid <- GBstratdat$pltassgnid
-    unitarea <- GBstratdat$unitarea
-    unitvar <- GBstratdat$unitvar
-    unitvar2 <- GBstratdat$unitvar2
-    areavar <- GBstratdat$areavar
-    stratalut <- GBstratdat$stratalut
-    strvar <- GBstratdat$strvar
-    getwt <- GBstratdat$getwt
-    getwtvar <- GBstratdat$getwtvar
+    if (is.null(unitvar)) {
+      unitvar <- GBdata$unitvar
+      unitvar2 <- GBdata$unitvar2
+    } 
+
+  } else {
+    if (!is.null(pltdat)) {
+      list.items <- c("clip_poly", "clip_tabs", "clip_xyplt")
+      pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
+
+      ## Extract list objects
+      puniqueid <- pltdat$puniqueid
+      pjoinid <- pltdat$pjoinid
+      plt <- pltdat$clip_tabs$clip_pltx
+      cond <- pltdat$clip_tabs$clip_condx
+      tree <- pltdat$clip_tabs$clip_treex
+      seed <- pltdat$clip_tabs$clip_seedx
+    }
+    if (!is.null(GBstratdat)) {
+      list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
+      GBstratdat <- FIESTA::pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
+      pltassgn <- GBstratdat$pltassgn
+      pltassgnid <- GBstratdat$pltassgnid
+      unitarea <- GBstratdat$unitarea
+      areavar <- GBstratdat$areavar
+      stratalut <- GBstratdat$stratalut
+      strvar <- GBstratdat$strvar
+      getwt <- GBstratdat$getwt
+      getwtvar <- GBstratdat$getwtvar
+
+      if (is.null(unitvar)) {
+        unitvar <- GBstratdat$unitvar
+        unitvar2 <- GBstratdat$unitvar2
+      } 
+    }
   } 
- 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -156,7 +179,6 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     subp_condf <- popcheck$subp_condf
     vspsppf <- popcheck$vspsppf
   }
-
 
   ###################################################################################
   ## CHECK STRATA
@@ -257,13 +279,31 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   }
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="GBpopdat", ext="rda", outfolder=outfolder, 
+    objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
 		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
+    datExportData(condx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="condx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    datExportData(pltcondx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcondx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+
+    if (!is.null(treef)) {
+      datExportData(treef, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
+    if (!is.null(seedf)) {
+      datExportData(seedf, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
+
     datExportData(pltassgnx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)

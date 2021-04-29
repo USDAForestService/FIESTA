@@ -66,6 +66,79 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   returnlst <- list()
   titlelst <- list()
 
+  ## sumunits = FALSE
+  if (!is.null(unit.totest)) {
+    if (esttype == "RATIO") {
+      unit.totest <- suppressWarnings(FIESTA::getrhat(unit.totest))
+    } else {
+      if (!is.null(dividebynum)) {
+        unit.totest[[estnmd]] <- unit.totest[[estnm2]] / dividebynum
+        unit.totest[[senmd]] <- unit.totest[[senm2]] / dividebynum
+      } else {
+        unit.totest[[estnmd]] <- unit.totest[[estnm2]]
+      }  
+      unit.totest[[psenm]] <- unit.totest[[psenm]]
+    }
+    if (allin1) {
+      char.width <- max(nchar(na.omit(round(unit.totest[[psenm]], pseround)))) 
+      if (!is.null(char.width) && char.width == -Inf) char.width <- 0
+    }
+  }
+
+  if (!is.null(unit.rowest)) {
+    if (esttype == "RATIO") {
+      unit.rowest <- suppressWarnings(FIESTA::getrhat(unit.rowest))
+    } else {
+      if (!is.null(dividebynum)) {
+        unit.rowest[[estnmd]] <- unit.rowest[[estnm2]] / dividebynum
+        unit.rowest[[senmd]] <- unit.rowest[[senm2]] / dividebynum
+      } else {
+        unit.rowest[[estnmd]] <- unit.rowest[[estnm2]]
+      }
+      unit.rowest[[psenm]] <- unit.rowest[[psenm]]
+    }
+    if (allin1) {
+      char.width <- max(char.width, 
+		max(nchar(na.omit(round(unit.rowest[[psenm]], pseround)))))
+    }
+  }
+
+  if (!is.null(unit.colest)) {
+    if (esttype == "RATIO") {
+      unit.colest <- suppressWarnings(FIESTA::getrhat(unit.colest))
+    } else {
+      if (!is.null(dividebynum)) {
+        unit.colest[[estnmd]] <- unit.colest[[estnm2]] / dividebynum
+        unit.colest[[senmd]] <- unit.colest[[senm2]] / dividebynum
+      } else {
+        unit.colest[[estnmd]] <- unit.colest[[estnm2]]
+      }
+      unit.colest[[psenm]] <- unit.colest[[psenm]]
+    }
+    if (allin1) {
+      char.width <- max(char.width, 
+		max(nchar(na.omit(round(unit.colest[[psenm]], pseround)))))
+    }
+  }
+
+  if (!is.null(unit.grpest)) {
+    if (esttype == "RATIO") {
+      unit.grpest <- suppressWarnings(FIESTA::getrhat(unit.grpest))
+    } else {
+      if (!is.null(dividebynum)) {
+        unit.grpest[[estnmd]] <- unit.grpest[[estnm2]] / dividebynum
+        unit.grpest[[senmd]] <- unit.grpest[[senm2]] / dividebynum
+      } else {
+        unit.grpest[[estnmd]] <- unit.grpest[[estnm2]]
+      }
+      unit.grpest[[psenm]] <- unit.grpest[[psenm]]
+    }
+    if (allin1) {
+      char.width <- max(char.width, 
+		max(nchar(na.omit(round(unit.grpest[[psenm]], pseround)))))
+    }
+  }
+
   if (sumunits) {
     ## Group estimates
     if (!is.null(uniquerow)) 
@@ -148,82 +221,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(grpest[[psenm]], pseround)))))
       }
     } 
-
-  } else {   ## sumunits = FALSE
-
-    if (!is.null(unit.totest)) {
-      if (esttype == "RATIO") {
-        unit.totest <- suppressWarnings(FIESTA::getrhat(unit.totest))
-      } else {
-        if (!is.null(dividebynum)) {
-          unit.totest[[estnmd]] <- unit.totest[[estnm2]] / dividebynum
-          unit.totest[[senmd]] <- unit.totest[[senm2]] / dividebynum
-        } else {
-          unit.totest[[estnmd]] <- unit.totest[[estnm2]]
-        }  
-        unit.totest[[psenm]] <- unit.totest[[psenm]]
-      }
-      if (allin1) {
-        char.width <- max(nchar(na.omit(round(unit.totest[[psenm]], pseround)))) 
-        if (!is.null(char.width) && char.width == -Inf) char.width <- 0
-      }
-    }
-
-    if (!is.null(unit.rowest)) {
-      if (esttype == "RATIO") {
-        unit.rowest <- suppressWarnings(FIESTA::getrhat(unit.rowest))
-      } else {
-        if (!is.null(dividebynum)) {
-          unit.rowest[[estnmd]] <- unit.rowest[[estnm2]] / dividebynum
-          unit.rowest[[senmd]] <- unit.rowest[[senm2]] / dividebynum
-        } else {
-          unit.rowest[[estnmd]] <- unit.rowest[[estnm2]]
-        }
-        unit.rowest[[psenm]] <- unit.rowest[[psenm]]
-      }
-      if (allin1) {
-        char.width <- max(char.width, 
-		max(nchar(na.omit(round(unit.rowest[[psenm]], pseround)))))
-      }
-    }
-
-    if (!is.null(unit.colest)) {
-      if (esttype == "RATIO") {
-        unit.colest <- suppressWarnings(FIESTA::getrhat(unit.colest))
-      } else {
-        if (!is.null(dividebynum)) {
-          unit.colest[[estnmd]] <- unit.colest[[estnm2]] / dividebynum
-          unit.colest[[senmd]] <- unit.colest[[senm2]] / dividebynum
-        } else {
-          unit.colest[[estnmd]] <- unit.colest[[estnm2]]
-        }
-        unit.colest[[psenm]] <- unit.colest[[psenm]]
-      }
-      if (allin1) {
-        char.width <- max(char.width, 
-		max(nchar(na.omit(round(unit.colest[[psenm]], pseround)))))
-      }
-    }
-
-    if (!is.null(unit.grpest)) {
-      if (esttype == "RATIO") {
-        unit.grpest <- suppressWarnings(FIESTA::getrhat(unit.grpest))
-      } else {
-        if (!is.null(dividebynum)) {
-          unit.grpest[[estnmd]] <- unit.grpest[[estnm2]] / dividebynum
-          unit.grpest[[senmd]] <- unit.grpest[[senm2]] / dividebynum
-        } else {
-          unit.grpest[[estnmd]] <- unit.grpest[[estnm2]]
-        }
-        unit.grpest[[psenm]] <- unit.grpest[[psenm]]
-      }
-      if (allin1) {
-        char.width <- max(char.width, 
-		max(nchar(na.omit(round(unit.grpest[[psenm]], pseround)))))
-      }
-    }
   }
- 
+
   if (!rawonly) {
   ###################################################################
   ## GENERATE OUTPUT TABLES
@@ -490,7 +489,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ### BY ROW AND COLUMN
   #######################################  
   } else {    ## colvar != "NONE"
-
     ## Get cross tables 
     ###############################################
     if (sumunits) {
@@ -508,6 +506,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         pse2return <- tabs[[2]]
 
     } else {  ## colvar != "NONE" & sumunits == FALSE
+
       units <- unique(unit.grpest[[unitvar]])
       numunits <- length(units)
       tabs <- lapply(units, crossxbyunit, unit.grpest, unit.rowest, unit.colest, 
@@ -518,7 +517,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		outfn.estpse, title.estpse, title.est, title.pse, title.ref,
 		outfolder, outfn.date, overwrite, esttype, phototype,
 		rnames, title.colvar, title.unitvar)
-
       names(tabs) <- units
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
       if (!allin1) {
@@ -616,7 +614,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         }  
       }  
       if (!is.null(unit.grpest)) {   
-        setorderv(unit.grpest, c(unitvar, rowvar, colvar))   
+        unit.grpest <- unit.grpest[unit.grpest[["NBRPLT.gt0"]] > 0,] 
+        setorderv(unit.grpest, c(unitvar, rowvar, colvar))  
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
@@ -638,8 +637,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       }
     }
 
-    if (CI)
-      rawdat[rawdat.tabs] <- lapply(rawdat[rawdat.tabs], FIESTA::addCI, estnm=estnm)
+    if (CI) {
+      rawdat[rawdat.tabs] <- lapply(rawdat[rawdat.tabs], FIESTA::addCI, estnm=estnm2)
+    }
   }
 
   if (!is.null(title.rowvar)) titlelst$title.rowvar <- title.rowvar

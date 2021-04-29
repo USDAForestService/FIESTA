@@ -70,10 +70,19 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+		gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+
+    if (savesteps) {
+      stepfolder <- file.path(outfolder, "SAdoms_steps")
+      if (!dir.exists(stepfolder)) dir.create(stepfolder)
+      step_dsn <- NULL
+      step_fmt <- "shp"
+    }
   }
 
   ####################################################################
@@ -116,9 +125,9 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
     plot(sf::st_geometry(SAdoms), border="grey")
     #plot(sf::st_geometry(bnd), add=TRUE)
     plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=.25)
-    if (!is.null(smallbnd) && "sf" %in% class(smallbnd)) 
+    if (!is.null(smallbnd) && "sf" %in% class(smallbnd)) { 
       plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
-
+    }
     par(mar=mar)
   }
 
@@ -128,13 +137,14 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
     par(mar=c(1,1,1,1))
 
     out_layer <- paste0("SAdoms_plots")
-    jpgfn <- paste0(outfolder, "/", out_layer, ".jpg")
+    jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
     jpeg(jpgfn, res=400, units="in", width=8, height=10)
     plot(sf::st_geometry(SAdoms), border="grey")
     #plot(sf::st_geometry(bnd), add=TRUE)
     plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=.25)
-    if (!is.null(smallbnd)) 
+    if (!is.null(smallbnd)) {
       plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
+    }
     dev.off()
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)

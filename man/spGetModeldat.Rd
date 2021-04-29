@@ -21,7 +21,8 @@ spGetModeldat(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
 	areaunits = "ACRES", keepNA = TRUE, NAto0 = TRUE, npixels = TRUE, 
 	showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = TRUE, vars2keep = NULL, ...)
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	vars2keep = NULL, ...)
 }
 
 \arguments{
@@ -91,7 +92,8 @@ spGetModeldat(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
   \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE and exportsp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrite dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
   \item{vars2keep}{ String vector. Attributes in SAdoms, other than domvar to
 	include in domzonal output and extract to pltassgn points. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }

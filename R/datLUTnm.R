@@ -1,5 +1,5 @@
 datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL, 
-	LUTnewvarnm=NULL, FIAname=FALSE, NAclass="OtherNA", group=FALSE, add0=FALSE, 
+	LUTnewvarnm=NULL, FIAname=FALSE, NAclass="Other", group=FALSE, add0=FALSE, 
 	stopifmiss=FALSE, savedata=FALSE, outfolder=NULL, outfn="datlut", xtxt=NULL){
   #################################################################################
   ## DESCRIPTION: Merge variable(s) from a reference table stored within FIESTA  
@@ -177,9 +177,9 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
 
       if ("VALUE" %in% names(LUTx)) {
         ## To get a name other than MEANING
-        nameslst <- FIESTA::getnm(LUTvar, group=group)
+        nameslst <- getnm(LUTvar, group=group)
         LUTnewvar <- nameslst$xvarnm
-        LUTnewvar <- FIESTA::checknm(LUTnewvar, names(datx))   
+        LUTnewvar <- FIESTA::checknm(LUTnewvar, names(datx))  
         setnames(LUTx, lutvars, c(xvar, LUTnewvar))
         LUTvar <- xvar
 

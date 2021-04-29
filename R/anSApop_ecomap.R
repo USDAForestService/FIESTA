@@ -9,11 +9,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 	overwrite_layer=TRUE, SAdomdat=NULL, SAdata=NULL, ...) {
 		
 
-  ## Check for packages
-  if (!"FIESTAdata" %in% rownames(installed.packages())) {
-    stop("FIESTAdata package is required for anSApop_ecomap()")
-  }
-
   ## Set global variables
   gui <- FALSE
   returnlst <- list()

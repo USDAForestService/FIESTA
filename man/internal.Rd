@@ -1,8 +1,6 @@
 \name{FIESTA-internal}
 \alias{addCI}
 \alias{addcommas}
-\alias{DBvars.default}
-\alias{chkdbtab}
 \alias{change10char}
 \alias{check.logic}
 \alias{check.estdata}
@@ -34,7 +32,6 @@
 \alias{getlt10char}
 \alias{getRefobject}
 \alias{getrhat}
-\alias{getspconddat}
 \alias{getstratacnt}
 \alias{groupEstunit}
 \alias{groupStrata}
@@ -79,14 +76,21 @@
 \alias{checknm}
 \alias{check.namedlist}
 \alias{capfirst}
-\alias{DBgetfn}
-\alias{getpfromqry}
-\alias{getEvalid.ppsa}
-\alias{getPlotCur}
 \alias{nbrdecimals}
 \alias{nbrdigits}
 \alias{getfilter}
 \alias{xtabf}
+\alias{recodelut}
+
+\alias{DBvars.default}
+\alias{DBgetfn}
+\alias{getspconddat}
+\alias{chkdbtab}
+\alias{getpfromqry}
+\alias{getPlotCur}
+\alias{getEvalid.ppsa}
+\alias{getsppnm}
+\alias{gui_filterdf}
 
 \alias{PBest.pbar}
 \alias{PBest.pbarRatio}

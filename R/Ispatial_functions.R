@@ -19,7 +19,7 @@
 ## closest_poly - get polygon of y with closest polygon to x (slower than centroid)
 ## getIntersect - get intersection of layer1 with layer2
 ## clip.othertables 
-## spGetSates - get intersecting states
+## spGetStates - get intersecting states
 
 
 
@@ -1031,10 +1031,15 @@ getIntersect <- function(layer1, layer2, layer1.unique, layer2fld, overlapThresh
   layer1.intd <- sf_dissolve(layer1.int, layer1.unique, areacalc=FALSE)
 
   layer1.pct <- suppressWarnings(tabulateIntersections(layer1=layer2,
- 		layer1fld=layer2fld, layer2=layer1.intd, layer2fld=layer1.unique))
-  layer1.intd <- layer1.intd[layer1.intd[[layer1.unique]] %in% 
+ 		layer1fld=layer2fld, layer2=sf::st_make_valid(layer1.intd), 
+		layer2fld=layer1.unique))
+
+  #layer1.intd <- layer1.intd[layer1.intd[[layer1.unique]] %in% 
+  #		layer1.pct[layer1.pct$int.pct != 0, layer1.unique],]
+  layer1.int <- layer1[layer1[[layer1.unique]] %in% 
 		layer1.pct[layer1.pct$int.pct != 0, layer1.unique],]
-  return (layer1.intd)
+
+  return (layer1.int)
 }
 
 

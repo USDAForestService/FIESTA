@@ -192,6 +192,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   states <- SApopdat$states
   invyrs <- SApopdat$invyrs
   estvar.name <- SApopdat$estvar.area
+  adj <- SApopdat$adj
 
   ## check SAdomsdf
   ########################################################
@@ -244,7 +245,6 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   pseround <- estdat$pseround
   landarea <- estdat$landarea
   if (sumunits && nrow(dunitarea) == 1) sumunits <- FALSE 
-
 
 
   ###################################################################################
@@ -331,7 +331,9 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   fmla <- as.formula(paste(response," ~ ", paste(prednames, collapse= "+")))
 
   domain <- rowvar
-  if (rowvar == "TOTAL") cdomdat$TOTAL <- 1
+  if (rowvar == "TOTAL") {
+    cdomdat$TOTAL <- 1
+  }
   estkey <- "DOMAIN"
 
 #  if (addtotal) {
@@ -343,8 +345,12 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=response]
 
+  if (sum(cdomdattot[[response]]) == 0) {
+    return(NULL)
+  }
+
   if (is.null(largebnd.att)) {
-    estkey <- c(largebnd.att, "DOMAIN")
+    estkey <- "DOMAIN"
 
     ## get unique domains
     doms <- as.character(unique(cdomdattot[[domain]]))
@@ -389,7 +395,6 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 			response=response))
 
   }
-
 
   SAunit.vars <- c("JU.Synth", "JU.GREG", "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1")
   SAarea.vars <- c("JFH", "JFH.se", "JA.synth", "JA.synth.se")

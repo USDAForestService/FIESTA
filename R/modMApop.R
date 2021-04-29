@@ -63,16 +63,18 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
   } 
 
 
   if (!is.null(MAdata)) {
     list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
     MAdata <- FIESTA::pcheck.object(MAdata, "MAdata", list.items=list.items)
+    #bnd <- MAdata$bnd
     plt <- MAdata$plt
     cond <- MAdata$cond
     tree <- MAdata$tree
@@ -150,6 +152,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
+  unitarea <- popcheck$unitarea
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
   areavar <- popcheck$areavar

@@ -21,10 +21,10 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	intensity = NULL, ACI = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
 	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, 
 	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
-	stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, savedata = FALSE, 
-	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	GBdata = NULL, GBstratdat = NULL, gui = FALSE)
+	stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, objnm = "GBpopdat", 
+	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 	
+	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	GBdata = NULL, pltdat = NULL, GBstratdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -110,7 +110,8 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	strata categories if less than 2 plots in any one stratum. See notes for more info. }
   \item{minplotnum.strat}{ Integer. Minimum number of plots for a stratum within an
 	estimation unit. }
-  \item{saveobj}{ Logical. If TRUE, saves SApopdat object to outfolder. }
+  \item{saveobj}{ Logical. If TRUE, saves GBpopdat object to outfolder. }
+  \item{objnm}{ String. Name of *.rda object. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
@@ -121,6 +122,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
   \item{GBdata}{ R List object. Output data list components from FIESTA::GBdata(). }
+  \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
   \item{GBstratdat}{ R List object. Output data list components from FIESTA::DBgetStrata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }

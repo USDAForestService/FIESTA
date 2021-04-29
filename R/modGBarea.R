@@ -133,8 +133,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL,
   rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
-  estround <- estdat$estround
-  pseround <- estdat$pseround
+  landarea <- estdat$landarea
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -199,7 +198,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL,
 	title.filter=title.filter, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
 	addtitle=addtitle, rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
 	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby, 
-	outfn.pre=outfn.pre)
+	outfn.pre=layer.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -207,8 +206,9 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL,
   title.ref <- alltitlelst$title.ref
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
-  if (rawdata) outfn.rawdat <- alltitlelst$outfn.rawdat
-
+  if (rawdata) {
+    outfn.rawdat <- alltitlelst$outfn.rawdat
+  }
 
   ###################################################################################
   ## GENERATE ESTIMATES
@@ -401,20 +401,15 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pfilter=NULL,
 			outfn.date=outfn.date, overwrite=overwrite)
           } else if (is.data.frame(rawtab)) {
           #overwrite_layer <- ifelse(append_layer, FALSE, overwrite_layer)
-          if (out_fmt == "csv") {
+
+          if (out_fmt != "csv") {
             out_layer <- tabnm 
-            if (!is.null(layer.pre)) {
-              out_layer <- paste0(layer.pre, "_", out_layer)
-            }
           } else {
             out_layer <- outfn.rawdat
           }
           datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
- 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
-			append_layer=append_layer, layer.pre=NULL)
-#          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
-# 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
-#			append_layer=append_layer, layer.pre=outfn.rawdat)
+ 			out_dsn=out_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer, layer.pre=layer.pre)
           }
         }
       }

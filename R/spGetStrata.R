@@ -5,7 +5,8 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	rast.NODATA=NULL, keepNA=FALSE, keepxy=TRUE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, 
 	out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
-	outfn.date=TRUE, outfn.pre=NULL, overwrite=FALSE, ...){
+	outfn.date=TRUE, outfn.pre=NULL, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, ...){
 
   ## Check for necessary packages
   ###########################################################
@@ -92,26 +93,12 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    out_fmtlst <- c("sqlite", "gpkg", "shp")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-
-    if (out_fmt %in% c("sqlite", "gpkg")) {
-      gpkg <- ifelse(out_dsn == "gpkg", TRUE, FALSE)        
-      out_dsn <- DBcreateSQLite(out_dsn, outfolder=outfolder, outfn.date=outfn.date, 
-				overwrite=overwrite, dbconnopen=FALSE)
-    } else {
-      if (!is.null(outfn.pre)) {
-        outfolder <- file.path(outfolder, outfn.pre)
-        if (!dir.exists(outfolder)) dir.create(outfolder)
-      }
-    } 
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
   ##################################################################
@@ -238,9 +225,10 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     ## Extract values of raster layer to points
-    extrast <- suppressWarnings(spExtractRast(sppltx, rastlst=stratlayerfn, var.name=strvar, 
-			uniqueid=uniqueid, exportNA=exportsp, keepNA=keepNA, 
-			outfolder=outfolder, overwrite=overwrite))
+    extrast <- suppressWarnings(spExtractRast(sppltx, rastlst=stratlayerfn, 
+		var.name=strvar, uniqueid=uniqueid, keepNA=keepNA, exportNA=exportNA, 
+		outfolder=outfolder, overwrite_layer=overwrite_layer, 
+		rast.NODATA=rast.NODATA))
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
@@ -285,21 +273,21 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (savedata) {
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(stratalut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
 
   ## Export to shapefile
-  if (exportsp)
+  if (exportsp) {
     spExportSpatial(sppltx, out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer,
  		outfolder=outfolder, outfn.pre=NULL, 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-    
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+  }
   
   returnlst <- list(pltassgn=pltassgn, unitarea=unitarea, unitvar=unitvar, 
 		areavar=areavar, stratalut=stratalut, strvar=strvar,

@@ -213,10 +213,9 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       x <- merge(uniquex, x, by=byvars)
     }
   }
-
-  if (is.factor(uniquex[[xvar]]))
+  if (is.factor(uniquex[[xvar]])) {
     x[[xvar]] <- factor(x[[xvar]], levels=levels(uniquex[[xvar]]))
-
+  }
   if (is.null(unitvar)) {
     ordervars <- byvars
   } else {

@@ -149,10 +149,9 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   returntitle <- estdat$returntitle
   rawdata <- estdat$rawdata
   rawonly <- estdat$rawonly
-  estround <- estdat$estround
-  pseround <- estdat$pseround
+  savedata <- estdat$savedata
+  outfolder <- estdat$outfolder
   landarea <- estdat$landarea
-  #if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE 
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -160,7 +159,6 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
-
 
   ###################################################################################
   ### Check row and column data
@@ -212,16 +210,25 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
 		estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, 
 		tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL) 
-  tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid))
+
+  tdomdat <- treedat$tdomdat
+  if (rowvar != "TOTAL") {
+    if (!row.add0 && any(tdomdat[[rowvar]] == 0)) {
+      tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
+    }
+    if (colvar != "NONE") {
+      if (!col.add0 && any(tdomdat[[colvar]] == 0)) {
+        tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
+      }
+    }
+  }
+
+  tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
   estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
 
-  ## remove NA values
-  #if (!is.null(tdomvar) && !is.null(tdomvar2)) {
-  #  tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
-  #}
  
   #####################################################################################
   ### Get titles for output tables
@@ -234,7 +241,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
  	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
 	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
 	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby,
- 	outfn.pre=outfn.pre)
+ 	outfn.pre=layer.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -242,7 +249,9 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
   title.ref <- alltitlelst$title.ref
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
-  if (rawdata) outfn.rawdat <- alltitlelst$outfn.rawdat
+  if (rawdata) {
+    outfn.rawdat <- alltitlelst$outfn.rawdat
+  }
  
   ############################################################################
   ## GENERATE ESTIMATES
@@ -438,20 +447,14 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", pfilter=
 			outfn.date=outfn.date, overwrite=overwrite_layer, outtxt=tabnm)
         } else if (is.data.frame(rawtab)) {
           #overwrite_layer <- ifelse(append_layer, FALSE, overwrite_layer)
-          if (out_fmt == "csv") {
+          if (out_fmt != "csv") {
             out_layer <- tabnm 
-            if (!is.null(layer.pre)) {
-              out_layer <- paste0(layer.pre, "_", out_layer)
-            }
           } else {
             out_layer <- outfn.rawdat
           }
           datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
- 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
-			append_layer=append_layer, layer.pre=NULL)
-#          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
-# 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
-#			append_layer=append_layer, layer.pre=outfn.rawdat)
+ 			out_dsn=out_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer, layer.pre=layer.pre)
         }
       }
     }

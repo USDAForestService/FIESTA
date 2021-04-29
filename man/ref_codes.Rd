@@ -3,7 +3,7 @@
 \alias{ref_codes}
 \title{ Reference tables - Code definitions. }
 \description{ Table with variable codes (VALUE) and descriptions (MEANING). }
-\usage{ ref_decaycd}
+\usage{ ref_codes}
 \format{ A dataframe with 7 columns, VARIABLE, VALUE, MEANING, COLORHEX, GROUP, GROUPNM, GROUPHEX. }
 \source{ FIA look-up tables.  }
 

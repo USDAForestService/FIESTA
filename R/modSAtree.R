@@ -365,14 +365,22 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
-  tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
+
+  tdomdat <- treedat$tdomdat
+  if (rowvar != "TOTAL") {
+    if (!row.add0 && any(tdomdat[[rowvar]] == 0)) {
+      tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
+    }
+    if (colvar != "NONE") {
+      if (!col.add0 && any(tdomdat[[colvar]] == 0)) {
+        tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
+      }
+    }
+  }
+
+  tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
   #tdomdat <- DT_NAto0(tdomdat, estvar.name, 0)
 
-  ## add or separate concatenated columns
-  #if (!is.null(tdomvar) && !is.null(tdomvar2)) {
-  #  tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]) & !is.na(tdomdat[[colvar]]),]
-  #  grpvar <- c(tdomvar, tdomvar2)
-  #}
 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
@@ -419,7 +427,9 @@ modSAtree <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", SAmethod
   fmla <- as.formula(paste(response," ~ ", paste(prednames, collapse= "+")))
 
   domain <- rowvar
-  if (rowvar == "TOTAL") tdomdat$TOTAL <- 1
+  if (rowvar == "TOTAL") {
+    tdomdat$TOTAL <- 1
+  }
   estkey <- "DOMAIN"
 
   ## Get total estimate and merge area

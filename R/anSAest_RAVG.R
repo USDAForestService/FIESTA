@@ -8,9 +8,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 	overwrite_layer=TRUE, barplot.compare=FALSE, title.ref=NULL, 
 	SAdomdat=NULL, SAdata=NULL, SApopdat=NULL) {
 
-  ## Check for packages
-  if (!"FIESTAdata" %in% rownames(installed.packages()))
-    stop("FIESTAdata package is required for anSAest_RAVG()")
 
   ## Set global variables
   gui=gettitle <- FALSE

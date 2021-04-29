@@ -98,14 +98,15 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   datsource <- FIESTA::pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (datsource == "sqlite") {
-    if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages())))
+    if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
 	 stop("RSQLite and DBI packages are required to run SQLite queries")
+    }
   } 
   if (datsource %in% c("sqlite", "gdb")) {
     data_dsn <- DBtestSQLite(data_dsn)
   }
   if (!is.null(data_dsn)) {
-    if (getext(data_dsn) == "sqlite") {
+    if (getext(data_dsn) %in% c("sqlite", "db", "db3")) {
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
       dbtablst <- DBI::dbListTables(dbconn)
     } else {
@@ -455,7 +456,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       }
       pltvarlst <- pltvarlst[pltvarlst %in% pltfldlst]
     }
-
+ 
     ## add commas
     vars <- toString(c(paste0("p.", pltvarlst), paste0("c.", condvarlst)))
     pcgvars <- toString(c(paste0("p.", pltvarlst), paste0("pg.", pgeomvarlst), 

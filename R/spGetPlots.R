@@ -71,16 +71,14 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   datsource <- FIESTA::pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (datsource == "sqlite") {
-    if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages())))
+    if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
 	 stop("RSQLite and DBI packages are required to run SQLite queries")
+    }
   } 
   if (datsource %in% c("sqlite", "gdb")) {
     if (is.null(data_dsn)) stop("data_dsn is NULL")
     if (!file.exists(data_dsn)) stop(data_dsn, " is invalid")
-  }
-#  if (datsource %in% c("sqlite"))
-#    data_dsn <- DBtestSQLite(data_dsn, dbconnopen=FALSE)
-  
+  }  
    
   ## Check savedata
   #############################################################################
@@ -203,7 +201,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       if (length(xyplt) == 0) stop("xy does not overlap bndx")
 
       if (showsteps) {
-        plot(st_geometry(clipdat$clip_polyv))
+        plot(st_geometry(clipdat$clip_polyv), border="black")
         plot(st_geometry(xyplt), add=TRUE, col="blue")
       }
 
@@ -597,6 +595,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           ## Check for state in database
           dbstcds <- DBI::dbGetQuery(dbconn, paste("select distinct statecd from", 
 				plot_layer))[[1]]
+
           if (!all(stcds %in% dbstcds)) {
             statemiss <- stcds[!stcds %in% dbstcds]
             message("database does not include all states: ", toString(statemiss))

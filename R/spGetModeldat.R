@@ -6,7 +6,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	rast.lut=NULL, rastlut=NULL, areacalc=TRUE, areaunits="ACRES", keepNA=TRUE, 
 	NAto0=TRUE, npixels=TRUE, showext=FALSE, savedata=FALSE, exportsp=FALSE, 
 	exportNA=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite=TRUE, vars2keep=NULL, ...){
+	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, vars2keep=NULL, ...){
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -220,26 +220,12 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="YES", gui=gui) 
-
-    out_fmtlst <- c("csv", "sqlite", "gpkg", "shp")
-    out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-
-    if (out_fmt %in% c("sqlite", "gpkg")) {
-      gpkg <- ifelse(out_dsn == "gpkg", TRUE, FALSE)        
-      out_dsn <- DBcreateSQLite(out_dsn, outfolder=outfolder, outfn.date=outfn.date, 
-				overwrite=overwrite, dbconnopen=FALSE)
-    } else {
-      if (!is.null(outfn.pre)) {
-        outfolder <- file.path(outfolder, outfn.pre)
-        if (!dir.exists(outfolder)) dir.create(outfolder)
-      }
-    } 
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
 
   ##################################################################
@@ -277,17 +263,19 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## Extract values from continuous raster layers
     #############################################################################
     extdat.rast.cont <- spExtractRast(sppltx, uniqueid=uniqueid,
-			rastlst=rastlst.contfn, interpolate=FALSE, showext=showext,
-			var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
-			keepNA=keepNA, exportNA=exportNA)
+		rastlst=rastlst.contfn, interpolate=FALSE, showext=showext,
+		var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
+		keepNA=keepNA, exportNA=exportNA, outfolder=outfolder, 
+		overwrite_layer=overwrite_layer)
     sppltx <- unique(extdat.rast.cont$spplt)
     prednames.cont <- extdat.rast.cont$outnames
     inputdf.cont <- extdat.rast.cont$inputdf
     rm(extdat.rast.cont)
     gc() 
 
-    if (NAto0) 
+    if (NAto0) {
       for (col in prednames.cont) set(sppltx, which(is.na(sppltx[[col]])), col, 0)
+    }
 
     ## Transform aspect 
     if (asptransform) {
@@ -374,8 +362,9 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## Extract values from categorical raster layers
     ######################################################
     extdat.rast.cat <- spExtractRast(sppltx, uniqueid=uniqueid, rastlst=rastlst.catfn, 
-			interpolate=FALSE, var.name=rastlst.cat.name, rast.NODATA=rastlst.cat.NODATA,
-			keepNA=keepNA, exportNA=exportNA)
+		interpolate=FALSE, var.name=rastlst.cat.name, rast.NODATA=rastlst.cat.NODATA,
+		keepNA=keepNA, exportNA=exportNA, outfolder=outfolder, 
+		overwrite_layer=overwrite_layer)
     sppltx <- extdat.rast.cat$sppltext
     prednames.cat <- extdat.rast.cat$outnames
     inputdf.cat <- extdat.rast.cat$inputdf
@@ -465,10 +454,10 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (savedata) {
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(domlut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="domlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
 
 

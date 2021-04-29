@@ -18,7 +18,7 @@
 # wraptitle
 # addclass
 # xtabf
-
+# recodelut
 
 
 checkfilenm <- function(fn, outfolder=NULL, ext=NULL, 
@@ -37,20 +37,27 @@ checkfilenm <- function(fn, outfolder=NULL, ext=NULL,
   }
   if (!is.null(outfolder)) {
     outfolder <- pcheck.outfolder(outfolder)
-    if (file.exists(file.path(outfolder, fn))) {
-      return(normalizePath(file.path(outfolder, fn)))
-    } else {
-      return(NULL)
-    }
-  } else if (file.exists(fn)) {
-      return(fn)
+  }
+
+  if (is.null(outfolder) && file.exists(fn)) {
+    return(normalizePath(fn)) 
+  }
+  outfolder <- pcheck.outfolder(outfolder)
+
+  if (file.exists(file.path(outfolder, fn))) {
+    return(fn)
   } else if (!is.null(ext)) {
     if (substring(ext, 1, 1) != ".") {
       ext <- paste0(".", ext)
     }
-
-    if (!file.exists(file.path(outfolder, fn, ext))) {
-      stop("file name does not exist")
+    if (!file.exists(file.path(outfolder, paste0(fn, ext)))) {
+      if (stopifnull) {
+        stop("file name does not exist")
+      } else {
+        return(NULL)
+      }
+    } else {
+      return(file.path(outfolder, paste0(fn, ext)))
     }
   } else {
     return(NULL)
@@ -316,8 +323,9 @@ getnm <- function (xvar, group=FALSE) {
   ## DESCRIPTION: creates a name variable from a code variable. 
   ## If 'CD' is at the end of the variable name, changes CD to NM, else adds NM 
   ## to variable name.
+
   CDchar <- as.vector(gregexpr("CD", xvar)[[1]])
-  if (length(CDchar) > 0) {
+  if (CDchar > 0) {
     xvarnm <- xvar
     substring(xvarnm, CDchar[length(CDchar)], CDchar[length(CDchar)]+1) <- "NM"
     if (group) {
@@ -327,7 +335,7 @@ getnm <- function (xvar, group=FALSE) {
       grpname <- paste0(pre, "GRPNM", post)
     }
   } else {
-    newname <- paste0(xvar, "NM")
+    xvarnm <- paste0(xvar, "NM")
     if (group) {
       grpcode <- paste0(xvar, "GRPCD")
       grpname <- paste0(xvar, "GRPNM")
@@ -453,3 +461,14 @@ xtabf <- function(x, y, levels) {
   table(factor(x, levels=levels), factor(y, levels=levels))
 }
 
+
+recodelut <- function(lut, minvar="min", maxvar="max", classvar="class") {
+  ## DESCRIPTION: converts lut with min/max values for continuous data to a 
+  ## lookup table by value
+  lut2 <- lapply(lut[[classvar]], function(x, lut) {
+          data.frame(value=c(lut[lut[[classvar]] == x, minvar]:lut[lut[[classvar]] == x, maxvar]),
+ 				class=rep(x))
+      	}, lut)
+  lut2 <- do.call(rbind, lut2)
+  return(lut2)  
+}

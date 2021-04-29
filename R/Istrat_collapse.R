@@ -180,7 +180,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 
     ## Merge new unitvar to pltstratx
     setkeyv(pltstratx, unitstrjoinvars)
-    setkeyv(unitgrplut, unitjoinvars)
+    setkeyv(unitgrplut, unitstrjoinvars)
 
     tabs <- FIESTA::check.matchclass(pltstratx, unitstrgrplut, unitstrjoinvars)
     pltstratx <- tabs$tab1
@@ -203,11 +203,11 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 
   returnlst <- list(pltstratx=pltstratx, strlut=strlut, unitvar=unitvar)
   if (!is.null(strvar)) returnlst$strvar <- strvar
-  if (stratcombine && !is.null(unitstrgrplut))
+  if (stratcombine && !is.null(unitstrgrplut)) {
     returnlst$unitstrgrplut <- unitstrgrplut
-
-  if (!is.null(unitarea)) 
+  }
+  if (!is.null(unitarea)) {
     returnlst$unitarea <- unitarea
-
+  }
   return(returnlst)
 }

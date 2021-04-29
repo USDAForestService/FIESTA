@@ -15,7 +15,8 @@ spExtractPoly(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", polyvlst,
 	polyv_dsn = NULL, polyvarlst = NULL, polyvarnmlst = NULL, keepNA = FALSE,
 	showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,
 	out_fmt = "shp", out_dsn = NULL, out_layer = "polyext", outfolder = NULL, 
-	outfn.pre = NULL, outfn.date = FALSE, overwrite = TRUE, ...)
+	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, ...)
 }
 
 \arguments{
@@ -54,7 +55,8 @@ spExtractPoly(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", polyvlst,
 	If NULL, the working directory is used. }
   \item{outfn.pre}{ String. A prefix for out_dsn. }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrite dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }
 \details{

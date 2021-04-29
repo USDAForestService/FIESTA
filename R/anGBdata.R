@@ -73,12 +73,10 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   bnd <- GBpltdat$clip_poly
   puniqueid <- GBpltdat$puniqueid
   pjoinid <- GBpltdat$pjoinid
-  plt <- GBpltdat$clip_tabs$clip_plt
-  cond <- GBpltdat$clip_tabs$clip_cond
-  tree <- GBpltdat$clip_tabs$clip_tree
-  if (isseed) 
-    seed <- GBpltdat$clip_tabs$clip_seed
- 
+  pltx <- GBpltdat$clip_tabs$clip_pltx
+  condx <- GBpltdat$clip_tabs$clip_condx
+  treex <- GBpltdat$clip_tabs$clip_treex
+  seedx <- GBpltdat$clip_tabs$clip_seedx
 
   if (showsteps) {
     ## Set plotting margins
@@ -139,14 +137,16 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ##########################################
   ## Create output list
   ##########################################
-  GBdata <- list(bnd=bnd, plt=plt, pltassgn=pltassgn, cond=cond,
+  GBdata <- list(bnd=bnd, plt=pltx, pltassgn=pltassgn, cond=condx,
 			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
 			stratalut=stratalut, strvar=strvar, puniqueid=puniqueid,
 			pjoinid=pjoinid, pltassgnid=pltassgnid)
-  if (istree) 
-    GBdata$tree <- tree
-  if (isseed)
-    GBdata$seed <- seed
+  if (istree) {
+    GBdata$tree <- treex
+  }
+  if (isseed) {
+    GBdata$seed <- seedx
+  }
 
   if (savexy) {
     GBdata$xyplt <- xyplt
@@ -175,20 +175,20 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(plt, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plt", 
+    datExportData(pltx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltx", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(cond, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
+    datExportData(condx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="condx", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     if (istree) {
-      datExportData(tree, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
+      datExportData(treex, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }
     if (isseed) {
-      datExportData(seed, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seed", 
+      datExportData(seedx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }
     datExportData(unitarea, outfolder=outfolder, 

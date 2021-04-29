@@ -559,8 +559,6 @@ tree2.ps$pse
 tree2.ps.gb$pse
 
 
-
-## Live basal area by forest type and species on forest land, Bighorn, National Forest
 tree3.ps <- modMAtree(MApopdat=MApopdat.ps, MAmethod="PS",
   	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
   	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="SPCD", col.FIAname=TRUE,
@@ -569,10 +567,8 @@ names(tree3.ps)
 tree3.ps$est
 tree3.ps$pse
 
-
 ## Compare with modGBtree() results
 ########################################################################################
-
 ## Test with Green-book estimates
 tree3.ps.gb <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, pltassgnid=pltassgnid,
   	strata=TRUE, unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
@@ -580,6 +576,7 @@ tree3.ps.gb <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, pltassgnid
   	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
   	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="SPCD", col.FIAname=TRUE,
   	rawdata=TRUE)
+  	
 tree3.ps.gb$est
 tree3.ps.gb$pse
 
@@ -588,6 +585,9 @@ tree3.ps.gb$est
 
 tree3.ps$pse
 tree3.ps.gb$pse
+
+tree3.ps.gb$raw$unit.grpest
+
 
 
 

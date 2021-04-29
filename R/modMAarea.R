@@ -365,7 +365,7 @@ modMAarea <- function(MAmethod="greg", prednames=NULL,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
-	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
+	pseround=pseround, divideby=divideby, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse

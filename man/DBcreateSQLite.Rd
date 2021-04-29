@@ -8,8 +8,8 @@
 }
 \usage{
 	DBcreateSQLite(SQLitefn = NULL, gpkg = FALSE, dbconnopen = FALSE, 
-		outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-		returnpath = TRUE, stopifnull = FALSE)
+		outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+		overwrite = FALSE, returnpath = TRUE, stopifnull = FALSE)
 }
  
 \arguments{
@@ -20,7 +20,7 @@
 	to working directory. }
   \item{outfn.pre}{ String. Prefix for out_dsn. }
   \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
-  \item{overwrite}{ Logical. If TRUE, overwrites the sqlite database, if exists. }
+  \item{overwrite}{ Logical. If TRUE, overwrites out_dsn. }
   \item{returnpath}{ Logical. If TRUE, returns full path to SQLite file name. 
 	If FALSE, returns SQLitefn}
   \item{stopifnull}{ Logical. If TRUE, and SQLitefn is NULL, stops execution of program.

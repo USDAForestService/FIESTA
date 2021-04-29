@@ -18,7 +18,7 @@ spExtractRast(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", rastlst,
 	rast.NODATA = NULL, keepNA = TRUE, showext = FALSE, savedata = FALSE, 
 	exportsp = FALSE, exportNA = FALSE, outfolder = NULL, out_fmt = "shp", 
 	out_dsn = NULL, out_layer = "rastext", outfn.pre = NULL, outfn.date = TRUE, 
-	overwrite = FALSE, ...)
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, ...)
 }
 
 \arguments{
@@ -68,7 +68,8 @@ spExtractRast(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", rastlst,
   \item{out_layer}{ String. Name of layer in out_dsn if database. }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
 	(e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportsp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrite dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }

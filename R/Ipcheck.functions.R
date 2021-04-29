@@ -127,7 +127,7 @@ pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
     stop("dsn is null")
   }
   if (!file.exists(dsn)) {
-    extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb")
+    extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb", "db", "db3")
     ext <- extlst[sapply(extlst, function(x, dsn) 
 				file.exists(paste(dsn, x, sep=".")), dsn)]
     if (length(ext) == 1)
@@ -380,7 +380,7 @@ pcheck.outfolder <- function(outfolder, default=getwd(), gui=FALSE) {
       stop("invalid outfolder")
     }
   }
-  return(outfolder)
+  return(normalizePath(outfolder))
 }
 
 
@@ -555,7 +555,7 @@ pcheck.output <- function(out_dsn=NULL, out_fmt="csv", outfolder=NULL,
 
   ## Check out_fmt
   ###########################################################
-  out_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb')
+  out_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp')
   out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
 		caption="Out format", gui=gui)
 
@@ -594,13 +594,39 @@ pcheck.output <- function(out_dsn=NULL, out_fmt="csv", outfolder=NULL,
     stop("invalid layer.pre")
   }
 
+  if (out_fmt %in% c("csv", "shp")) {
+    outfolder <- pcheck.outfolder(outfolder)
+    return(list(out_dsn=NULL, outfolder=outfolder, out_fmt=out_fmt, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer))
+  } 
+
   ## Check file name
   ###########################################################
   chkfn <- checkfilenm(out_dsn, outfolder=outfolder)
+  if (is.null(chkfn)) {
+    if (is.na(getext(out_dsn))) {
+      if (out_fmt == "sqlite") {
+        extlst <- c("sqlite", "db", "sqlite3", "db3")
+      } else {
+        extlst <- out_fmt
+      }
+      i <- 1
+      while (is.null(chkfn) && i <= length(extlst)) {
+        ext <- extlst[i]
+        chkfn <- checkfilenm(out_dsn, outfolder=outfolder, ext=ext)
+        i <- i + 1
+      }
+    }
+  }      
   if (is.null(chkfn) || overwrite_dsn) {
     out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
 		outfn.date=outfn.date, overwrite=overwrite_dsn, outfn.default = "data",
 		ext=out_fmt, append=append_layer)
+
+    if (out_fmt %in% c("sqlite", "gpkg")) {
+      gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
+      out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg) 
+    }
   } else {
     out_dsn <- chkfn
   }

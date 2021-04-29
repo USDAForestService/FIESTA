@@ -64,11 +64,17 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     domvarlst <- names(condf)[!names(condf) %in% 
 		c(cuniqueid, condid, "LON", "LAT", "PLOT")]
   }
-  if ("DSTRBCD1" %in% names(condf)) {
-    domvarlst <- c(domvarlst, "DSTRBGRP", "DSTRBGRPNM")
+  ## Append DSTRBGRP to condf if not in table and rowvar or colvar = DSTRBGRP
+  if (any(c(rowvar, colvar) == "DSTRBGRP") && !"DSTRBGRP" %in% names(condf) &&
+	"DSTRBCD1" %in% names(condf)) {
+    condf <- merge(condf, 
+		FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")], 
+			by.x="DSTRBCD1", by.y="VALUE")
+    names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
+    domvarlst <- c(domvarlst, "DSTRBGRP")
   }
-  
   domvarlst.not <- names(condf)[!names(condf) %in% domvarlst]
+
 
   ## DEFINE other variables
   varlst <- sort(domvarlst)
@@ -229,13 +235,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           }
         } else {
           rowLUTgrp <- FALSE
-#          if (rowvar %in% c("DSTRBCD1", "DSTRBCD2", "DSTRBCD3")) {
-#            condf <- merge(condf, 
-#			ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")], 
-#			by.x=rowvar, by.y="VALUE")
-#            names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
-#            rowvar <- "DSTRBGRP"
-#          }
           
           if (rowgrp) {
             if (!is.null(rowgrpnm)) {
@@ -511,13 +510,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       }
 
     } else if (colvar %in% names(condf)) {
-#      if (colvar %in% c("DSTRBCD1", "DSTRBCD2", "DSTRBCD3")) {
-#        condf <- merge(condf, 
-#			ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")], 
-#			by.x=colvar, by.y="VALUE")
-#        names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
-#        colvar <- "DSTRBGRP"
-#      }
 
       if (col.FIAname || !is.null(collut)) {
         if (!is.null(collut) && ncol(collut) > 1 && all(names(collut) %in% names(condf))) {
@@ -531,7 +523,6 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
             } 
           }
         } else {
-
           if (!is.null(collut)) col.add0 <- TRUE
           colLUT <- datLUTnm(x=condf, xvar=colvar, LUT=collut, FIAname=col.FIAname, 
 			add0=col.add0)

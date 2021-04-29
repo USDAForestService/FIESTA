@@ -433,8 +433,8 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 
         if (evalendyr < invendyr.min || evalendyr > invendyr.max) {
           message(paste("check evalEndyr.. outside of range in database:", st))    
-          evalendyr <- invendyr.max
-          evalresp <- FALSE
+          evalEndyr[[st]] <- invendyr.max
+          #evalresp <- FALSE
         }
       }
     } 
@@ -573,9 +573,12 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
         setkey(POP_EVAL_GRPstcd, "CN")
 
         ## Subset POP_EVAL/POP_EVAL_GRP by state and inventory type
-        popevaltab <- POP_EVAL[POP_EVAL_GRPstcd[, c("CN", "EVAL_GRP_Endyr")]]
+        popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN,]
+#        popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN &
+#		POP_EVAL$EVAL_TYP %in% evalTypelist[[state]],]
+#        popevaltab <- POP_EVAL[POP_EVAL_GRPstcd[, c("CN", "EVAL_GRP_Endyr")]]
         popevaltab <- popevaltab[popevaltab$END_INVYR %in% invtype.invyrs,]
-        POP_EVAL_endyrs <- na.omit(unique(popevaltab[["EVAL_GRP_Endyr"]]))
+        POP_EVAL_endyrs <- na.omit(unique(popevaltab[["END_INVYR"]]))
 
         if (!is.null(evalEndyr)) {
           Endyr <- evalEndyr[[state]]
@@ -604,7 +607,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
         evalEndyrlist[[state]] <- Endyr
 
         ## Subset popevaltab by Endyr
-        popevaltab <- popevaltab[EVAL_GRP_Endyr %in% Endyr,]
+        popevaltab <- popevaltab[END_INVYR %in% Endyr,]
 
         ## Check evalType with evalType in database for state
         evalType.chklst <- unique(popevaltab$EVAL_TYP)

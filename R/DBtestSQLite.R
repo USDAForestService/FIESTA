@@ -22,7 +22,7 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
   if (is.null(SQLitepath)) {
     if (createnew) {
       SQLitepath <- DBcreateSQLite(SQLitefn=SQLitefn, outfolder=outfolder, 
-		overwrite=overwrite, returnpath=TRUE)
+		returnpath=TRUE)
     } else if (stopifnull) {
       stop("SQLite database does not exist")
     } else if (returnpath) {

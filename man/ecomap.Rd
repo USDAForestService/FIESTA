@@ -8,6 +8,11 @@ y.htm). The framework systematically divides the country into progressively smal
 
 The EcoMap Provinces feature class contains ecological province polygons attributed with names and descriptions. The EcomapSections 2007 data set describes the ecological sections within the conterminous United States. The EcomapSubections 2007 data set describes the ecological subsections within the conterminous United States.
 }
+
+Converted to simple feature and saved to R object, with compression='xz'
+CRS - "+proj=longlat +datum=NAD83 +no_defs"
+
+
 \usage{ ecomap}
 
 \format{ 
@@ -19,7 +24,6 @@ A SpatialPolygonsDataFrame with 1233 features and 3 attributes
 \source{ 
 Downloaded from the FSGeodata Clearinghouse on 2019 October 30, format ESRI geodatabase
 (https://data.fs.usda.gov/geodata/edw/datasets.php) 
-Converted to SpatialPolygonsDataFrame R object
 }
 \references{
 Cleland, D.T.; Freeouf, J.A.; Keys, J.E., Jr.; Nowacki, G.J.; Carpenter, C; McNab, W.H. 2007. Ecological Subregions: Sections and Subsections of the Conterminous United States [1:3,500,000] [CD-ROM]. Sloan, A.M., cartog. Gen. Tech. Report WO-76. Washington, DC: U.S. Department of Agriculture, Forest Service.

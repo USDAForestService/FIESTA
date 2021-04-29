@@ -10,6 +10,10 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   ## set global variables
   report_imagefn <- NULL
 
+  ## Check GBpopdat
+  GBpopdat <- FIESTA::pcheck.object(GBpopdat, "GBpopdat", 
+		list.items=c("treex", "seedx"))
+
   outfolder <- pcheck.outfolder(outfolder)
   outfolder <- normalizePath(outfolder)
   reportfolder <- tempdir()

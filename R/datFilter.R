@@ -36,6 +36,11 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   ## Check title.filter
   if (is.null(title.filter)) title.filter <- filternm
 
+  ## Check xfilter
+  if (!is.null(xfilter) && xfilter == "") {
+    xfilter <- NULL
+  }
+
   ## Check inputs
   ##############################################
   datx <- pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE, 

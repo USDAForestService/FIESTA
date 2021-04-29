@@ -3,7 +3,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
  	windowsize=1, windowstat=NULL, rast.NODATA=NULL, keepNA=TRUE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="shp", 
 	out_dsn=NULL, out_layer="rastext", outfn.pre=NULL, outfn.date=TRUE, 
-	overwrite=FALSE, ...){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, ...){
   #####################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more raster layers and appends to input spatial layer 
@@ -28,7 +28,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::spExtractRast)), 
+  formallst <- c(names(formals(spExtractRast)), 
 		names(formals(FIESTA::spMakeSpatialPoints)))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
@@ -76,11 +76,12 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="YES", gui=gui)  
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
   }
  
   ## Verify rasters
@@ -257,8 +258,8 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
       names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
       bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
       bbox2 <- sf::st_bbox(sppltprj)
-      check.extents(bbox1, bbox2, showext=showext, layer1nm=rastnm, layer2nm="xyplt",
-			stopifnotin=TRUE)
+      check.extents(bbox1, bbox2, showext=showext, layer1nm=rastnm, 
+		layer2nm="xyplt", stopifnotin=TRUE)
     }
            
     ## Extract values
@@ -302,7 +303,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
           outfn.na <- paste(var.name, "na", sep="_")
           spExportSpatial(sppltna, out_layer=outfn.na, outfolder=outfolder, 
 			out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date,
- 			overwrite_layer=overwrite)
+ 			overwrite_layer=overwrite_layer)
         }
       }
 
@@ -313,13 +314,17 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
     }
   }
 
-  if (savedata)
-    write2csv(sppltx, outfolder=outfolder, outfilenm=out_layer, outfn.pre=outfn.pre,
- 		outfn.date=outfn.date, overwrite=overwrite)
+  if (savedata) {
+    datExportData(sppltx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+  }
 
-  if (exportsp) 
+  if (exportsp) {
     spExportSpatial(sppltx, out_layer=out_layer, outfolder=outfolder, 
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer)
+  }
 
   returnlst <- list(sppltext=sppltx, outnames=outnames, rastfnlst=rastfnlst, 
 				inputdf=inputs)

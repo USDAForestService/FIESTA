@@ -221,7 +221,20 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
  		estvard.filter=estvard.filter, esttotn=TRUE, esttotd=TRUE, 
 		tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
-  tdomdat <- merge(condx, treedat$tdomdat, by=c(cuniqueid, condid))
+
+  tdomdat <- treedat$tdomdat
+  if (rowvar != "TOTAL") {
+    if (!row.add0 && any(tdomdat[[rowvar]] == 0)) {
+      tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
+    }
+    if (colvar != "NONE") {
+      if (!col.add0 && any(tdomdat[[colvar]] == 0)) {
+        tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
+      }
+    }
+  }
+
+  tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
 
   if (!is.null(tdomvar)) {
     cdomdat <- merge(condx, condf, by=c(cuniqueid, condid))
@@ -250,7 +263,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
  	unitvar=unitvar, rowvar=rowvar, colvar=colvar, estvarn=estvarn,
  	estvarn.filter=estvarn.filter, estvard=estvard, estvard.filter=estvard.filter,
  	addtitle=addtitle, rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea,
- 	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+ 	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby, outfn.pre=layer.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -566,20 +579,14 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
 			outfn.date=outfn.date, overwrite=overwrite_layer)
         } else if (is.data.frame(rawtab)) {
           #overwrite_layer <- ifelse(append_layer, FALSE, overwrite_layer)
-          if (out_fmt == "csv") {
+          if (out_fmt != "csv") {
             out_layer <- tabnm 
-            if (!is.null(layer.pre)) {
-              out_layer <- paste0(layer.pre, "_", out_layer)
-            }
           } else {
             out_layer <- outfn.rawdat
           }
           datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
- 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
-			append_layer=append_layer, layer.pre=NULL)
-#          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
-# 			out_dsn=out_dsn, out_layer=tabnm, overwrite_layer=overwrite_layer, 
-#			append_layer=append_layer, layer.pre=outfn.rawdat)
+ 			out_dsn=out_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer, layer.pre=layer.pre)
         }
       }
     }

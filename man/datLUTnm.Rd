@@ -8,7 +8,7 @@
 }
 \usage{
 datLUTnm(x, xvar = NULL, LUT = NULL, LUTvar = NULL, LUTnewvar = NULL, 
-	LUTnewvarnm = NULL, FIAname = FALSE, NAclass = "OtherNA", group=FALSE, 
+	LUTnewvarnm = NULL, FIAname = FALSE, NAclass = "Other", group=FALSE, 
 	add0 = FALSE, stopifmiss = FALSE, savedata = FALSE, outfolder = NULL, 
 	outfn = "datlut", xtxt = NULL)
 }
