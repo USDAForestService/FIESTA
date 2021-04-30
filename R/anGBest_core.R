@@ -142,8 +142,9 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
   ## Define footnotes
   footnote1 <- "Numbers in rows and columns may not sum to totals due to rounding."
   footnote2 <- "A dash (--) indicates no sample for the cell; 0 indicates a value of greater than 0 but less than 0.1."
-  if (addSEcol && !allin1) 
+  if (addSEcol && !allin1) {
     footnote3 <- "PSE refers to estimated percent standard error of the Estimate."
+  }
 
   ########################################################################
   ## Add classes and other data to tables

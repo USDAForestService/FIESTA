@@ -185,26 +185,38 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
         rowLUTgrp <- TRUE
       }
     } 
- 
-    if (row.FIAname) {
-      dat <- datLUTnm(x=pltcondx, xvar=rowvar, FIAname=row.FIAname, group=rowLUTgrp, 
-		add0=row.add0)
 
+    if (row.FIAname) {
+      if (rowvar == "OWNCD" && rowLUTgrp && "OWNGRPCD" %in% names(pltcondx)) {
+        dat <- datLUTnm(x=pltcondx, xvar=rowvar, FIAname=row.FIAname, add0=row.add0)
+      } else {       
+        dat <- datLUTnm(x=pltcondx, xvar=rowvar, FIAname=row.FIAname, group=rowLUTgrp, 
+		add0=row.add0)
+      }
       if (is.null(dat)) stop("")
       row.orderby <- rowvar
       pltcondx <- dat$xLUT
       rowvar <- dat$xLUTnm
       ref_row <- setDF(dat$LUT)
       if (rowgrp) {
-        rowgrpord <- dat$grpcode
-        if (is.null(rowgrpord)) stop("")
-        rowgrpnm <- dat$grpname
+        if (any(c(rowvar, row.orderby) == "OWNCD")) {
+          rowgrpnm <- "OWNGRPCD"
+          dat <- datLUTnm(x=pltcondx, xvar=rowgrpnm, FIAname=row.FIAname, add0=row.add0)
+          rowgrpord <- rowgrpnm
+          pltcondx <- dat$xLUT
+          rowgrpnm <- dat$xLUTnm
+        } else {
+          rowgrpord <- dat$grpcode
+          if (is.null(rowgrpord)) stop("")
+          rowgrpnm <- dat$grpname
+        }
         ref_rowgrp <- unique(pltcondx[!is.na(pltcondx[[rowvar]]), c(rowgrpord, rowgrpnm),
  			with=FALSE])
         setkeyv(ref_rowgrp, rowgrpord)
-        rgrpcds <- ref_rowgrp[[rowgrpord]]
-        if (any(duplicated(rgrpcds)))
+        rgrpcds <- na.omit(ref_rowgrp[[rowgrpord]])
+        if (any(duplicated(rgrpcds))) {
           stop("duplicated row groups in cond: ", rgrpcds[duplicated(rgrpcds)])
+        }
       } else {
         rgrpcds <- 9999
       }
