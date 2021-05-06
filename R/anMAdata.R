@@ -56,22 +56,22 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
       save(MApltdat, file=file.path(outfolder, "MApltdat.rda"))
     }
   } else {
-    MApltdat.names <- c("clip_xyplt", "clip_polyv", "xy.uniqueid", "puniqueid",
-		"pjoinid", "clip_tabs")
+    MApltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
+		"pjoinid", "tabs")
     if (!all(MApltdat.names %in% names(MApltdat))) 
       stop("missing components in MApltdat list: ", 
 		toString(MApltdat.names[!MApltdat.names %in% names(MApltdat)])) 
   }
 
   ## Extract list objects
-  xyplt <- MApltdat$clip_xyplt
+  xyplt <- MApltdat$xypltx
   xy.uniqueid <- MApltdat$xy.uniqueid
-  bnd <- MApltdat$clip_poly
+  bnd <- MApltdat$bndx
   puniqueid <- MApltdat$puniqueid
   pjoinid <- MApltdat$pjoinid
-  plt <- MApltdat$clip_tabs$clip_plt
-  cond <- MApltdat$clip_tabs$clip_cond
-  tree <- MApltdat$clip_tabs$clip_tree
+  plt <- MApltdat$tabs$pltx
+  cond <- MApltdat$tabs$condx
+  tree <- MApltdat$tabs$treex
 
   if (showsteps) {
     ## Set plotting margins

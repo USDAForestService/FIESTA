@@ -441,12 +441,13 @@ head(WYspplt_dem)
 #   xy.uniqueid = "PLT_CN", xvar = "LON_PUBLIC", yvar = "LAT_PUBLIC", xy.crs = 4269, 
 #	  clipxy = TRUE, datsource = "datamart", data_dsn = NULL, istree = TRUE, 
 #	  isseed = FALSE, plot_layer= "plot", cond_layer = "cond", tree_layer = "tree", 
-#   seed_layer = "seed", other_layers = NULL, puniqueid = "CN", evalid = NULL, 
-#   evalCur = FALSE, evalEndyr = NULL, evalType = "VOL", measCur = FALSE, 
-#   measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, allyrs=FALSE,
-#	  intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, savebnd = FALSE, 
-#	  savexy = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, 
-#	  outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
+#   seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn", other_layers = NULL,  
+#   puniqueid = "CN", savePOP = FALSE, evalid = NULL, evalCur = FALSE, evalEndyr = NULL,  
+#   evalType = "VOL", measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, 
+#	  invyrs = NULL, allyrs=FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE,  
+#	  savebnd = FALSE, savexy = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL,  
+#	  outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE,
+#   append_layer = FALSE)
 # 
 # Description:
 # Extract data from FIA database for plots within a given boundary.

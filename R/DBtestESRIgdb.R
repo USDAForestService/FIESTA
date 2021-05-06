@@ -16,20 +16,20 @@ DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
   if (is.null(gdbfn)) stop("gdbfn is NULL")
   gdbpath <- gdbfn
 
-  if (!is.null(outfn.pre)) 
+  if (!is.null(outfn.pre)) {
     gdbfn <- paste(outfn.pre, gdbfn, sep="_")
-
-  if (is.na(getext(gdbfn)) || getext(gdbfn) == "NA")
+  }
+  if (is.na(getext(gdbfn)) || getext(gdbfn) == "NA") {
     gdbfn <- paste0(gdbfn, ".gdb")
-
-  if (outfn.date)
+  }
+  if (outfn.date) {
     gdbfn <- getoutfn(gdbfn, outfn.date=outfn.date, overwrite=overwrite, 
 		ext=getext(gdbfn))
-
+  }
   outfolder <- pcheck.outfolder(outfolder, default=NULL)
-  if (!is.null(outfolder)) 
+  if (!is.null(outfolder)) {
     gdbpath <- paste(outfolder, gdbfn, sep="/")
-
+  }
   
   ## Overwrite file
   if (file.exists(gdbpath)) {

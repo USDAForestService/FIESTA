@@ -7,20 +7,20 @@
 	Generates small area estimates by domain and/or tree domain (and estimation unit). 	 
 }
 \usage{    
-modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "unit", 
-	estseed = "none", largebnd.att = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL,
+modSAtree(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
+	SAmethod = "unit", estseed = "none", largebnd.att = NULL, landarea = "ALL", pcfilter = NULL,
  	estvar = NULL, estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, estround = 0, 
 	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
 	rawdata = FALSE, rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
-	outfolder = NULL, outfn.pre = NULL, raw_fmt = "csv", raw_dsn = "rawdata", 
-	multest_fmt = "csv", multest_outfolder = NULL, multest_dsn = NULL, multest_layer = NULL, 
-	multest.append = FALSE, multest.AOIonly = FALSE, outfn.date = FALSE, overwrite = FALSE, 
-	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, 
-	SApopdat = NULL, ...)
+	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, addtitle = TRUE, raw_fmt = "csv", 
+	raw_dsn = "rawdata", multest_fmt = "csv", multest_outfolder = NULL, multest_dsn = NULL, 
+	multest_layer = NULL, multest.append = FALSE, multest.AOIonly = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, title.main = NULL, 
+	title.ref = NULL, title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
   \item{SAdomsdf}{ DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
 	with attributes from smallbnd to add to estimation table. }
   \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
@@ -33,8 +33,8 @@ modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "un
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{pfilter}{ String. A filter for plt. Must be R syntax. }
-  \item{cfilter}{ String. A filter for cond. Must be R syntax. }
+  \item{pcfilter}{ String. A filter for plot or cond attributes (including pltassgn). 
+	Must be R logical syntax. }
   \item{estvar}{ String. Name of the tree estimate variable. }
   \item{estvar.filter}{ String. A tree filter for estimate variable. Must be R syntax 
 	(e.g., "STATUSCD == 1"). }
@@ -62,6 +62,8 @@ modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "un
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
   \item{outfn.pre}{ String. A prefix for outfile name, if savedata=TRUE. }
+  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
+  \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
   \item{raw_fmt}{ String. Format for raw output tables ('csv', 'sqlite', 'gpkg').}
   \item{raw_dsn}{ String. Name of database if raw_fmt = c('sqlite', 'gpkg'). }
   \item{multest_fmt}{ String. Format for multest output tables ('csv', 'sqlite', 'gpkg').}
@@ -70,9 +72,12 @@ modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "un
   \item{multest_layer}{ String. Name of database layer if multest_fmt = c('sqlite', 'gpkg'). }
   \item{multest.append}{ Logical. If TRUE, appends multest dataframe to output. }
   \item{multest.AOIonly}{ Logical. If TRUE, appends multest dataframe (AOI=1) to output. }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
-  \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the output. If rawdata=TRUE, 
+	overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or out_layers in 
+	raw_dsn (if raw_fmt != 'csv'). }
+  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data 
+	to existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt != 'csv". }  
   \item{returntitle}{ Logical. If TRUE, returns title(s) of the estimation table(s). }
   \item{title.main}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: the complete 
 	title used for table. If title.main=NULL, the title.* parameters are used to 
@@ -86,7 +91,6 @@ modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "un
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
-  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
   \item{...}{ Parameters for modSApop() if SApopdat is NULL. }
 }
 \details{

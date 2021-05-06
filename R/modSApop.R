@@ -69,10 +69,12 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    overwrite_dsn <- outlst$overwrite_dsn
   } 
 
 
@@ -135,6 +137,9 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
 
   ###################################################################################
   ## Check population parameters 
+  ## Note: currently removes units that do not have plots
+  ###################################################################################
+
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="SA", tree=tree, cond=cond, plt=plt, 
 	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
@@ -143,7 +148,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
 	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
 	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=dunitarea, areavar=areavar, 
 	unitvar=dunitvar, unitvar2=dunitvar2, prednames=prednames, predfac=predfac, 
-	pvars2keep=pvars2keep, cvars2keep=cvars2keep)
+	pvars2keep=pvars2keep, cvars2keep=cvars2keep, removeunits=TRUE, removetext="dunitarea")
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
@@ -155,8 +160,10 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
+  dunitarea <- popcheck$unitarea
   dunitvar <- popcheck$unitvar
   dunitvar2 <- popcheck$unitvar2
+  areavar <- popcheck$areavar
   prednames <- popcheck$prednames
   predfac <- popcheck$predfac
   plotsampcnt <- popcheck$plotsampcnt
@@ -164,21 +171,11 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   states <- popcheck$states
   invyrs <- popcheck$invyrs
   cvars2keep <- popcheck$cvars2keep
+  areawt <- popcheck$areawt
 
   if (is.null(treef) && is.null(seedf)) {
     stop("must include tree data")
   }
-
-
-  ###################################################################################
-  ## CHECK domarea BY ESTIMATION UNIT
-  ## Returns: data table with unitvar and acres by estimation unit (unitvar)
-  ##	 and areavar (default="ACRES")
-  ###################################################################################
-  dunitdat <- check.unitarea(unitarea=dunitarea, pltx=pltassgnx, 
-		unitvars=c(dunitvar, dunitvar2), areavar=areavar, gui=gui)
-  dunitarea <- dunitdat$unitarea
-  areavar <- dunitdat$areavar
 
 
   ###################################################################################
@@ -193,7 +190,8 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
 		auxlut=dunitlut, prednames=prednames, predfac=predfac, 
 		unitcombine=unitcombine, unitarea=dunitarea, unitvar=dunitvar, 
-		areavar=areavar, minplotnum.strat=0, minplotnum.unit=0)  
+		areavar=areavar, minplotnum.strat=0, minplotnum.unit=0,
+		auxtext="dunitlut", removetext="dunitarea")  
   pltassgnx <- auxdat$pltx
   dunitvar <- auxdat$unitvar
   dunitlut <- auxdat$auxlut

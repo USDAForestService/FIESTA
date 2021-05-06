@@ -9,11 +9,11 @@
 }
 \usage{
 anGBest_batch(GBpopdatlst = NULL, esttype = "AREA", estseed = "none", 
-	landarea = "FOREST", pfilter = NULL, cfilter = NULL, estvarlst = NULL, 
+	landarea = "FOREST", pcfilter = NULL, estvarlst = NULL, 
 	estvar.filterlst = NULL, rowvar = NULL, colvar = NULL, sumunits = TRUE,
-	savedata = FALSE, raw_dsn=NULL, raw_fmt="sqlite", outfolder = NULL,
+	savedata = FALSE, raw_dsn="estdat", raw_fmt="sqlite", outfolder = NULL,
 	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, title.filterlst = NULL, ...)
+	overwrite_layer = TRUE, append_layer = FALSE, title.filterlst = NULL, ...)
 }
 \arguments{
   \item{GBpopdatlst}{ List of list. One or more population data objects returned 
@@ -25,10 +25,8 @@ anGBest_batch(GBpopdatlst = NULL, esttype = "AREA", estseed = "none",
   \item{landarea}{ String. The condition-level filter for defining land area 
 	('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1; 
 	if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0. }
-  \item{pfilter}{ String. A filter for plot-level data. The attributes must
-	be in plt or pltassgn data frames. Must be R syntax ('COUNTYCD == 1'). }
-  \item{cfilter}{ String. A filter for the cond. The attributes must be in
-	cond data frame. Must be R syntax (e.g., 'OWNGRPCD != 40'). }
+  \item{pcfilter}{ String. A filter for plot or cond attributes (including pltassgn). 
+	Must be R logical syntax. }
   \item{estvarlst}{ String vector. One or more tree-level estimate variable 
 	(e.g., 'VOLCFNET'). }
   \item{estvar.filterlst}{ String vector. One or more tree-level filter for estvar. 
@@ -45,15 +43,18 @@ anGBest_batch(GBpopdatlst = NULL, esttype = "AREA", estseed = "none",
   \item{raw_dsn}{ String. Data source name for rawdata output. If extension is not
 	included, out_fmt is used. Use full path if outfolder=NULL. }
   \item{raw_fmt}{ String. File format for rawdata output 
-	('csv', 'sqlite', 'db', 'gpkg', 'gdb'). If out_fmt %in% c('sqlite','db','gpkg'), 
-	RSQLite package must be installed. If out_fmt='gdb', arcgisbinding package 
-	and R-Bridge must be installed. }
+	('csv', 'sqlite', 'db', 'sqlite3', 'db3', 'gpkg', 'gdb'). If out_fmt='gdb', 
+	must have ArcGIS license and install arcgisbinding package. }
   \item{outfolder}{ String. The output folder path. If NULL and savedata=TRUE, 
 	outfolder is the working directory. }
   \item{outfn.pre}{ String. The name used for prefix of outfiles (e.g., outfn.pre'_plt*'). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites out_dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites layers in out_dsn
+	or files if out_fmt = 'csv'. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
   \item{title.filterlst}{ String vector. A title corresponding to estvar.filterlst. }
   \item{...}{ If GBpopdatlst=NULL, parameters for FIESTA::anGBest_eval(). }
 }

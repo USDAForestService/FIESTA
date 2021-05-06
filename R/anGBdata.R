@@ -33,25 +33,32 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 
   ## Check overwrite, outfolder, outfn 
   ########################################################
-  if (savedata || savexy || savesteps || saveobj) {
+  if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
+		createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    overwrite_dsn <- outlst$overwrite_dsn
+    append_layer <- outlst$append_layer
+
+  } else if (savesteps || saveobj) {
+    outfolder <- pcheck.outfolder(outfolder)
   }
- 
+  
 
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(GBpltdat)) {
     GBpltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
-		RS=RS, clipxy=clipxy, datsource=datsource, xy=xy, xy_dsn=xy_dsn, 
+		RS=RS, xy=xy, xy_dsn=xy_dsn, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, isseed=isseed, plot_layer=plot_layer,
  		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
-		intensity1=intensity1, savedata=FALSE, savexy=TRUE, ...)
+		intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
     if (is.null(GBpltdat)) return(NULL)
     if (saveobj) {
       message("saving GBpltdat object to: ", 
@@ -59,8 +66,8 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
       save(GBpltdat, file=file.path(outfolder, "GBpltdat.rda"))
     }
   } else {
-    GBpltdat.names <- c("clip_xyplt", "clip_polyv", "xy.uniqueid", "puniqueid",
-		"pjoinid", "clip_tabs")
+    GBpltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
+		"pjoinid", "tabs")
     if (!all(GBpltdat.names %in% names(GBpltdat))) {
       stop("missing components in GBpltdat list: ", 
 		toString(GBpltdat.names[!GBpltdat.names %in% names(GBpltdat)])) 
@@ -68,15 +75,15 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   }
 
   ## Extract list objects
-  xyplt <- GBpltdat$clip_xyplt
+  xyplt <- GBpltdat$xypltx
   xy.uniqueid <- GBpltdat$xy.uniqueid
-  bnd <- GBpltdat$clip_poly
+  bnd <- GBpltdat$bndx
   puniqueid <- GBpltdat$puniqueid
   pjoinid <- GBpltdat$pjoinid
-  pltx <- GBpltdat$clip_tabs$clip_pltx
-  condx <- GBpltdat$clip_tabs$clip_condx
-  treex <- GBpltdat$clip_tabs$clip_treex
-  seedx <- GBpltdat$clip_tabs$clip_seedx
+  pltx <- GBpltdat$tabs$pltx
+  condx <- GBpltdat$tabs$condx
+  treex <- GBpltdat$tabs$treex
+  seedx <- GBpltdat$tabs$seedx
 
   if (showsteps) {
     ## Set plotting margins

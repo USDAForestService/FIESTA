@@ -8,7 +8,7 @@
 }
 \usage{
 anGBpop_report(GBpopdat, AOInm, photofn = NULL, photo_author = NULL, 
-	EVALIDator_match = FALSE, cfilter = NULL, pfilter = NULL, spcd = 746,
+	EVALIDator_match = FALSE, pcfilter = NULL, spcd = 746,
 	title.ref = NULL, outfolder = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -18,10 +18,8 @@ anGBpop_report(GBpopdat, AOInm, photofn = NULL, photo_author = NULL,
   \item{photofn}{ String. Path name to photo to add to report. }
   \item{photo_author}{ String. Name of photo author (Optional). }
   \item{EVALIDator_match}{ Logical. If TRUE, estimates match EVALIDator. }
-  \item{cfilter}{ String. Name of variable or string that filters conditions. 
-	Must be in R syntax (e.g., ADFORCD == 408). Optional. }
-  \item{pfilter}{ String. Name of variable or string that filters plots. 
-	Must be in R syntax (e.g., COUNTYCD == 1). Optional. }
+  \item{pcfilter}{ String. Name of variable or string to filter plots or conditions. 
+	Must be in R syntax (e.g., ADFORCD == 408, COUNTYCD == 1). Optional. }
   \item{spcd}{ Integer. A species code to use as focus species of the report. 
 	Multiple codes are accepted if the focus species is a combined group. 
 	Default is 746 (quaking aspen). }

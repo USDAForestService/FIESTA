@@ -15,7 +15,7 @@
 	weights and then expanded to area using the total land area in the population.   
 }
 \usage{
-modGBlulc(GBpopdat = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL, 
+modGBlulc(GBpopdat = NULL, landarea = "ALL", pcfilter = NULL, 
 	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
 	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
 	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
@@ -23,10 +23,10 @@ modGBlulc(GBpopdat = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL,
 	estnull = "--", psenull = "--", divideby = NULL, gainloss = FALSE, 
 	gainloss.vals = NULL, savedata = FALSE, outfolder = NULL, overwrite = FALSE, 
 	outfn.pre = NULL, outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE, 
-	rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, layer.pre = NULL, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
-	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL,  
-	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, gui = FALSE, ...)
+	rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
+	title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,
+ 	title.unitvar = NULL, title.filter = NULL, gui = FALSE, ...)
 }
  
 \arguments{
@@ -34,8 +34,8 @@ modGBlulc(GBpopdat = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL,
   \item{landarea}{ String. The sample area filter for estimates ("ALL", "FOREST", "TIMBERLAND"). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, 
 	filtered to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{pfilter}{ String. A filter for the pltassgn. Must be R logical syntax. }
-  \item{cfilter}{ String. A filter for the cond. Must be R logical syntax. }
+  \item{pcfilter}{ String. A filter for plot or cond attributes (including pltassgn). 
+	Must be R logical syntax. }
   \item{rowvar}{ String. Name of row domain variable in cond. If only one domain, 
 	rowvar = domain variable. If more than one domain, include colvar. If no domain,
 	rowvar = NULL. }
@@ -89,7 +89,6 @@ modGBlulc(GBpopdat = NULL, landarea = "ALL", pfilter = NULL, cfilter = NULL,
   \item{raw_fmt}{ String. Format for output rawdata tables ('csv', 'sqlite', 'gpkg'). }
   \item{raw_dsn}{ String. Data source name for rawdata output. If extension is not
 	included, out_fmt is used. Use full path if outfolder=NULL. }
-  \item{layer.pre}{ String. Prefix for rawdata layer in database, if out_fmt != "csv". }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer in raw_dsn
 	or *.csv raw data layer, if datsource="csv". }

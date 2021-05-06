@@ -207,8 +207,9 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
     stop("importing spatial layers requires package sf")
   if (!is.null(fmt)) {
     if (fmt == "gdb") {
-      if (!"arcgisbinding" %in% rownames(installed.packages()))
+      if (!"arcgisbinding" %in% rownames(installed.packages())) {
         stop("importing spatial layers from *gdb requires package arcgisbinding")
+      }
     }
   } 
   fmtlst <- c("shp", "sqlite", "gpkg", "gdb")
@@ -225,11 +226,15 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       return(NULL)
     }
   }
-
+ 
   ## Check layer - if sf object
   if (!is.null(layer)) {
-    if ("sf" %in% class(layer)) {
-      return(layer)
+    if (any(c("sf", "data.frame") %in% class(layer))) {
+      if (checkonly) {
+        return(TRUE)
+      } else {
+        return(layer)
+      }
     } else if (methods::canCoerce(layer, "sf")) {
       return(sf::st_as_sf(layer, stringsAsFactors=stringsAsFactors))
     } else if (is.character(layer) && file.exists(layer)) {
@@ -262,7 +267,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       }
     }
   }    
- 
+
   ######################################################
   ## Check dsn
   ######################################################
@@ -317,11 +322,10 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       return(TRUE)
     }
   }
-
   geomtype <- layerlst$geomtype[layerlst$name == layer][[1]]
   if (is.na(geomtype)) {
     if (!checkonly) {
-      return(pcheck.table(tab=layer, tab_dsn=dsn))
+      return(pcheck.table(tab=layer, tab_dsn=dsn, tabqry=sql))
     } else {
       return(list(dsn=dsn, layer=layer))
     }
@@ -1295,9 +1299,9 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   }
 
   ## Save boundary
-  if (savebnd)
+  if (savebnd) {
     spExportSpatial(bndx, outfolder=outfolder, out_layer="bnd", ...)
-
+  }
   return(list(states=states, bndx=bndx, stbnd.att=stbnd.att, statenames=statenames))
 
 }

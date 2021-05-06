@@ -15,8 +15,8 @@ modFAOest(tree = NULL, base = NULL, cluster = NULL, clustassgn = NULL, seed = NU
 	clust.nonsamp.filter = NULL, base.nonsamp.filter = NULL, 
 	unitlevel1 = NULL, unitlevel2 = NULL, unitarea = NULL, areavar = "AREA", 
 	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
-	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, clust.filter = NULL, 
-	base.filter = NULL, esttype = "RATIO", ratiotype = "PERACRE", estvarn = NULL, 
+	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
+	bcfilter = NULL, esttype = "RATIO", ratiotype = "PERACRE", estvarn = NULL, 
 	estvarn.filter = NULL, estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, 
 	estvard.name = NULL, TPA = TRUE, rowvar = NULL, colvar = NULL, row.FIAname = FALSE, 
 	col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
@@ -93,8 +93,7 @@ modFAOest(tree = NULL, base = NULL, cluster = NULL, clustassgn = NULL, seed = NU
  	Default="P1POINTCNT". }
   \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{clust.filter}{ String. A filter for the cluster. Must be R syntax. }
-  \item{base.filter}{ String. A filter for base. Must be R syntax. }
+  \item{bcfilter}{ String. A filter for base or cluster attributes. Must be R syntax. }
   \item{esttype}{ String. Estimation type ('AREA', 'TREE', 'RATIO'). }
   \item{ratiotype}{ String. Ratio type ('PERACRE', 'PERTREE'). }
   \item{estvarn}{ String. Name of the tree estimate variable (numerator). }

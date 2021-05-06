@@ -1,4 +1,4 @@
-spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, 
+spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, 
 	stbnd=NULL, stbnd_dsn=NULL, stbnd.att="COUNTYFIPS", RS=NULL, xy=NULL, 
 	xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
 	xy.crs=4269, xy.joinid="PLT_CN", clipxy=TRUE, datsource="datamart", 
@@ -7,9 +7,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	other_layers=NULL, puniqueid="CN", savePOP=FALSE, evalid=NULL, evalCur=FALSE, 
 	evalEndyr=NULL, evalType="VOL", measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
-	showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, 
-	outfolder=NULL, out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
-	overwrite_dsn=FALSE, overwrite_layer=FALSE, ...) {
+	showsteps=FALSE, savedata=FALSE, savebnd=FALSE, savexy=TRUE, outfolder=NULL, 
+	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
+	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE) {
 
   ##############################################################################
   ## DESCRIPTION
@@ -28,7 +28,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=othertabnms <- NULL
+  xydat=stateFilter=statecnty=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
+	othertabnms=stcds <- NULL
   cuniqueid=tuniqueid <- "PLT_CN"
   returnlst <- list()
   #clipdat <- list()
@@ -96,17 +97,20 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
+		createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
   }
-
+ 
   ########################################################################
   ### DO THE WORK
   ########################################################################
   ## Check xy table
-  xychk <- pcheck.spatial(xy, xy_dsn, checkonly=TRUE)
+  xychk <- pcheck.spatial(xy, dsn=xy_dsn, checkonly=TRUE)
   if (!is.null(evalid)) {
     evalid <- unlist(evalid)
     stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4))) 
@@ -116,16 +120,24 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       stop("states is invalid")
     statenames <- states
     stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% states]
+  } else if (is.null(bndx) && !clipxy && xychk) {
+    xy <- pcheck.spatial(xy, dsn=xy_dsn)
+    if ("COUNTYFIPS" %in% names(xy)) {
+      statebnd.att <- "COUNTYFIPS"
+      statecnty <- unique(xy[["COUNTYFIPS"]])
+      stcds <- unique(substr(statecnty, 1, 2))
+    } else if ("STATECD" %in% names(xy)) {
+      stcds <- unique(xy[["STATECD"]])
+    }  
   } else if (!is.null(bndx)) {
     ## Get stbnd.att
     if (is.null(stbnd.att) && exists("stunitco")) {
       stbnd.att <- "COUNTYFIPS"
     }
-
+ 
     ## Get intersecting states
     statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
-			stbnd.att=stbnd.att, RS=RS, states=states, showsteps=showsteps, 
-			savebnd=savebnd, outfolder=outfolder, ...)
+			stbnd.att=stbnd.att, RS=RS, states=states, showsteps=showsteps)
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att
     statenames <- statedat$statenames
@@ -242,6 +254,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     }
 
   } else {			## datsource in('datamart', 'sqlite')
+
+    ## Initialize tables
     condx <- {}
     pltx <- {}
     tabs2save <- c("pltx", "condx")
@@ -294,21 +308,20 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       pop_plot_stratum_assgnx <- {} 
       tabs2save <- c(tabs2save, "pop_plot_stratum_assgnx")
     }
+  }
+    if (datsource == "datamart") {
+      for (i in 1:length(stcds)) { 
+        stcd <- stcds[i]
+        state <- pcheck.states(stcd) 
+        message(paste0("\n", state, "..."))
 
+        ## Check for counties
+        if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(statecnty)) {
+          stcnty <- statecnty[startsWith(statecnty, formatC(stcd, width=2, flag="0"))]
+          countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
+          stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
+        }
 
-    for (i in 1:length(stcds)) { 
-      stcd <- stcds[i]
-      state <- pcheck.states(stcd) 
-      message(paste0("\n", state, "..."))
-
-      ## Check for counties
-      if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(statecnty)) {
-        stcnty <- statecnty[startsWith(statecnty, formatC(stcd, width=2, flag="0"))]
-        countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
-        stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
-      }
-
-      if (datsource == "datamart") {
         xystate <- NULL
         stabbr <- pcheck.states(stcd, statereturn="ABBR") 
 
@@ -359,7 +372,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           yvar <- "LAT_PUBLIC"
           xystate <- xy_PUBLIC[, c(xy.joinid, xvar, yvar), with=FALSE]
         } else {
-          xydat <- pcheck.spatial(xy, xy_dsn)
+          xydat <- pcheck.spatial(xy, dsn=xy_dsn)
           pjoinid <- ifelse (xy.joinid %in% names(PLOT), xy.joinid, puniqueid)
           xystate <- xydat[xydat[[xy.joinid]] %in% PLOT[[pjoinid]],]
         }
@@ -477,9 +490,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 }
               }
             }
-            if (savexy || showsteps) {
-              xyplt <- rbind(xyplt1, xyplt2)
-            }
+            xyplt <- rbind(xyplt1, xyplt2)
+
           } else {    ## measEndyr.filter = NULL
 
             ## Clip data
@@ -521,17 +533,11 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
             }
           }
-
-          if (savexy || showsteps) {
-            xypltx <- rbind(xypltx, xyplt)
-          }
+          xypltx <- rbind(xypltx, xyplt)
 
         } else {      ## clipxy = FALSE, datsource="datamart"
 
-          if ((savexy || showsteps) && !is.null(xydat)) {
-            xypltx <- xydat
-          }
-
+          xypltx <- xydat
           pltx <- rbind(pltx, PLOT)
           condx <- rbind(condx, cond)
           if (istree) {
@@ -550,160 +556,220 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (isseed) rm(seed)
         if (savePOP) rm(pop_plot_stratum_assgn)
         gc()
-          
-      } else if (datsource == "sqlite") {
-        ####################################################################
-        ## 1) Check if data for all states is in database
-        ## 1) Get most current plots from xy database that intersect state
-        ## 2) Clip xy (for state) to boundary
-        ## 3) Subset other data with clipped xy joinid
-        ####################################################################
-        if (i == 1) {
-          xyindb <- FALSE
-          dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-          tablst <- DBI::dbListTables(dbconn)
-          plot_layer <- chkdbtab(tablst, plot_layer, stopifnull=TRUE)
-          cond_layer <- chkdbtab(tablst, cond_layer, stopifnull=TRUE)
-          if (istree) {
-            tree_layer <- chkdbtab(tablst, tree_layer, stopifnull=TRUE)
-          }
-          if (isseed) {
-            seedchk <- chkdbtab(tablst, seed_layer)
-            if (is.null(seedchk) && seed_layer == "seed") {
-              seedchk <- chkdbtab(tablst, "seedling")
-              if (is.null(seedchk) && seed_layer == "seedling") {
-                seed_layer <- chkdbtab(tablst, "seedling", stopifnull=TRUE)
-              } else {
-                seed_layer <- seedchk
-              }
-            } else {
-              seed_layer <- seedchk
-            }
-          }
-          if (savePOP) {
-            ppsa_layer <- chkdbtab(tablst, ppsa_layer, stopifnull=TRUE)
-          }       
-          if (!is.null(other_layers) && !any(other_layers %in% tablst)) {
-            stop("missing layers in database: ", 
-			toString(other_layers[!other_layers %in% tablst]))
-          }
+      }
+    }
 
-          ## Check list of pop_tables
-          pop_tables <- unlist(sapply(pop_tables, pcheck.varchar, 
+############################################################
+    if (datsource == "sqlite") {
+      ####################################################################
+      ## 1) Check if data for all states is in database
+      ## 1) Get most current plots from xy database that intersect state
+      ## 2) Clip xy (for state) to boundary
+      ## 3) Subset other data with clipped xy joinid
+      ####################################################################
+      xyindb <- FALSE
+
+      ## Check for data tables in database
+      ###########################################################
+      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+      tablst <- DBI::dbListTables(dbconn)
+      plot_layer <- chkdbtab(tablst, plot_layer, stopifnull=TRUE)
+      cond_layer <- chkdbtab(tablst, cond_layer, stopifnull=TRUE)
+      if (istree) {
+        tree_layer <- chkdbtab(tablst, tree_layer, stopifnull=TRUE)
+      }
+      if (isseed) {
+        seedchk <- chkdbtab(tablst, seed_layer)
+        if (is.null(seedchk) && seed_layer == "seed") {
+          seedchk <- chkdbtab(tablst, "seedling")
+          if (is.null(seedchk) && seed_layer == "seedling") {
+            seed_layer <- chkdbtab(tablst, "seedling", stopifnull=TRUE)
+          } else {
+            seed_layer <- seedchk
+          }
+        } else {
+          seed_layer <- seedchk
+        }
+      }
+      if (savePOP) {
+        ppsa_layer <- chkdbtab(tablst, ppsa_layer, stopifnull=TRUE)
+      }       
+      if (!is.null(other_layers) && !any(other_layers %in% tablst)) {
+        stop("missing layers in database: ", 
+			toString(other_layers[!other_layers %in% tablst]))
+      }
+
+      ## Check list of pop_tables
+      pop_tables <- unlist(sapply(pop_tables, pcheck.varchar, 
 			checklst=tablst, stopifinvalid=FALSE))
 
-          ## Check for state in database
-          dbstcds <- DBI::dbGetQuery(dbconn, paste("select distinct statecd from", 
-				plot_layer))[[1]]
 
-          if (!all(stcds %in% dbstcds)) {
-            statemiss <- stcds[!stcds %in% dbstcds]
-            message("database does not include all states: ", toString(statemiss))
+      ## Check for state in database
+      ###########################################################
+      dbstcds <- DBI::dbGetQuery(dbconn, paste("select distinct statecd from", 
+			plot_layer))[[1]]
+
+      if (!is.null(stcds) && !all(stcds %in% dbstcds)) {
+        statemiss <- stcds[!stcds %in% dbstcds]
+        message("database does not include all states: ", toString(statemiss))
           
-            if (length(stcds) == length(statemiss)) {
-              message("database does not include states...")
-              return(NULL)
-            } else {
-              message("database does not include all states: ", toString(statemiss))
-            }  
+        if (length(stcds) == length(statemiss)) {
+          message("database does not include states...")
+          return(NULL)
+        } else {
+          message("database does not include all states: ", toString(statemiss))
+        }  
+      }
+
+      ## xy data
+      ###########################################################
+      if (clipxy) {
+        if (xychk && is.null(xy_dsn) && !is.null(xy)) {
+          #sql <- paste0("select * from \"", basename.NoExt(xy), "\" where 1=0")
+          #xy <- pcheck.spatial(xy, sql=sql)
+          #if ("STATECD" %in% xynames) {
+            sql <- paste0("select * from \"", basename.NoExt(xy), "\" where statecd = ", stcds)
+            xy <- pcheck.spatial(xy, sql=sql)
+          #} else {
+          #  xy <- pcheck.spatial(xy)
+          #}
+        } else if (xychk && !is.null(xy_dsn)) {
+          if (xy_dsn == data_dsn) {
+            xyconn <- dbconn
+            xyindb <- TRUE
+            xy_dsn <- data_dsn
+          } else {
+            xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE,
+			 		createnew=FALSE)
           }
-          #if (clipxy) {
-            if ((xychk && xy_dsn == data_dsn) || !xychk) {
-              xyconn <- dbconn
-              xyindb <- TRUE
-              xy_dsn <- data_dsn
-            } else {
-              xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE,
-					createnew=FALSE)
-            }
-            if (is.null(xyconn)) {
-              xyconn <- dbconn
-            }
-            ## Check xy data
-            ######################################################################
-            if (is.null(xy)) {
-              xytabs <- DBI::dbListTables(xyconn)
-              xytabs <- xytabs[grepl("xy", xytabs)]
-              if (length(xytabs) == 0) {
-                stop("no xy in ", xy_dsn)
-              }
-              if (any(grepl("ACTUAL", xytabs))) {
-                xy <- xytabs[grepl("ACTUAL", xytabs)]
-                message("xy is NULL...  using ", xy)
-              } else if (any(grepl("PUBLIC", xytabs))) {
-                xy <- xytabs[grepl("PUBLIC", xytabs)]
-                message("xy is NULL...  using ", xy)
-              } else if (any(grepl("plot", xytabs, ignore.case=TRUE))) {
-                message("xy is NULL...  using plot table")
-                if (length(grepl("plot", xytabs, ignore.case=TRUE)) == 1) {
-                  ptab <- xytabs[grepl("plot", xytabs, ignore.case=TRUE)]
-                  pfields <- DBI::dbListFields(xyconn, ptab)
-                  if ("LON_PUBLIC" %in% pfields) {
-                    xvar <- "LON_PUBLIC"
-                    if ("LAT_PUBLIC" %in% pfields) {
-                      yvar <- "LAT_PUBLIC"
-                    }
-                  }
+          if (is.null(xyconn)) {
+            xyconn <- dbconn
+          }
+          if (!xy %in% DBI::dbListTables(xyconn)) {
+            stop(xy, " not in database")
+          }
+ #         if ("STATECD" %in% DBI::dbListFields(xyconn, xy)) {
+ #           sql <- paste("select * from", xy, "where statecd =", states)
+ #           xy <- DBI::dbGetQuery(xyconn, sql)
+ #         } else {
+ #           xy <- DBI::dbReadTable(xyconn, xy)
+ #         }
+        } else if (!xychk) {
+          xyconn <- dbconn
+          xyindb <- TRUE
+          xy_dsn <- data_dsn
+
+          xytabs <- DBI::dbListTables(xyconn)
+          xytabs <- xytabs[grepl("xy", xytabs)]
+          if (length(xytabs) == 0) {
+            stop("no xy in ", xy_dsn)
+          }
+          if (any(grepl("ACTUAL", xytabs))) {
+            xy <- xytabs[grepl("ACTUAL", xytabs)]
+            message("xy is NULL...  using ", xy)
+          } else if (any(grepl("PUBLIC", xytabs))) {
+            xy <- xytabs[grepl("PUBLIC", xytabs)]
+            message("xy is NULL...  using ", xy)
+          } else if (any(grepl("plot", xytabs, ignore.case=TRUE))) {
+            message("xy is NULL...  using plot table")
+            if (length(grepl("plot", xytabs, ignore.case=TRUE)) == 1) {
+              xy <- xytabs[grepl("plot", xytabs, ignore.case=TRUE)]
+              pfields <- DBI::dbListFields(xyconn, xy)
+              if ("LON_PUBLIC" %in% pfields) {
+                xvar <- "LON_PUBLIC"
+                if ("LAT_PUBLIC" %in% pfields) {
+                  yvar <- "LAT_PUBLIC"
                 }
-              } else {
-                stop(xy, " not in ", xy_dsn) 
               }
-            } else {
-              xyindb <- TRUE
             }
-            xyfields <- DBI::dbListFields(xyconn, xy)
-            if (grepl("ACTUAL", xy)) {
-              xvar <- "LON_ACTUAL"
-              yvar <- "LAT_ACTUAL"
-            } else if (grepl("PUBLIC", xy)) {
-              xvar <- "LON_PUBLIC"
-              yvar <- "LAT_PUBLIC"
-            }
-            if (!xvar %in% xyfields) {
-              message(xvar, " not in xy fields: ", toString(xyfields))
-            }
-            if (!yvar %in% xyfields) {
-              message(yvar, " not in xy fields: ", toString(xyfields))
-            } 
-            xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
+          } else {
+            stop(xy, " not in ", xy_dsn) 
+          }
+        }
+      } else {    ## !clipxy
+        if (xychk) {
+          xy <- pcheck.spatial(xy, dsn=xy_dsn)
+        } 
+      }
+
+      if (xyindb) {
+        xyfields <- DBI::dbListFields(xyconn, xy)
+      } else {
+        xyfields <- names(xy)
+      }
+      xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 			gui=gui, checklst=xyfields, caption="xy uniqueid")
-            xy.joinid <- pcheck.varchar(var2check=xy.joinid, varnm="xy.joinid", 
+      if (xy.joinid == "PLOT_ID" && !xy.joinid %in% xyfields && 
+		"ZSTUNCOPLOT" %in% xyfields) {
+        xy.joinid <- "ZSTUNCOPLOT"
+      }
+      xy.joinid <- pcheck.varchar(var2check=xy.joinid, varnm="xy.joinid", 
 			gui=gui, checklst=xyfields, caption="xy joinid")
-            if (is.null(xy.joinid)) xy.joinid <- xy.uniqueid
-            xvar <- pcheck.varchar(var2check=xvar, varnm="xvar", gui=gui, 
+      if (is.null(xy.joinid)) {
+        xy.joinid <- xy.uniqueid
+      }
+      if (!"sf" %in% class(xy)) { 
+        if (any(grepl("ACTUAL", xyfields))) {
+          xvar <- "LON_ACTUAL"
+          yvar <- "LAT_ACTUAL"
+        } else if (any(grepl("PUBLIC", xyfields))) {
+          xvar <- "LON_PUBLIC"
+          yvar <- "LAT_PUBLIC"
+        }
+        if (!xvar %in% xyfields) {
+          message(xvar, " not in xy fields: ", toString(xyfields))
+        }
+        if (!yvar %in% xyfields) {
+          message(yvar, " not in xy fields: ", toString(xyfields))
+        } 
+        xvar <- pcheck.varchar(var2check=xvar, varnm="xvar", gui=gui, 
 			checklst=xyfields, caption="x variable", stopifnull=TRUE)
-            yvar <- pcheck.varchar(var2check=yvar, varnm="yvar", gui=gui, 
+        yvar <- pcheck.varchar(var2check=yvar, varnm="yvar", gui=gui, 
 			checklst=xyfields, caption="y variable", stopifnull=TRUE)
 
-            if (grepl("ACTUAL", xy) && grepl("PUBLIC", xvar))
-              warning("check xy and xvar: ", toString(c(xy, xvar)))
-            if (grepl("ACTUAL", xy) && grepl("PUBLIC", yvar))
-              warning("check xy and yvar: ", toString(c(xy, yvar)))
+        if (any(grepl("ACTUAL", xyfields)) && grepl("PUBLIC", xvar)) {
+          warning("check xy and xvar: ", toString(c(xy, xvar)))
+        }
+        if (any(grepl("ACTUAL", xyfields)) && grepl("PUBLIC", yvar)) {
+          warning("check xy and yvar: ", toString(c(xy, yvar)))
+        }
+      }
 
-            ## Check xy.joinid
-            pltfields <- DBI::dbListFields(dbconn, "plot")
+      ## Check xy.joinid
+      pltfields <- DBI::dbListFields(dbconn, "plot")
 
-            ## Not sure about following code.
-            ## Checks for PLOT_ID in both xy and plot data. 
-            if (grepl("xyCur", xy)) {
-              if (xy.joinid %in% c("CN", "PLT_CN") && "PLOT_ID" %in% xyfields && 
+      ## Not sure about following code.
+      ## Checks for PLOT_ID in both xy and plot data. 
+      if (any(grepl("xyCur", xyfields))) {
+        if (xy.joinid %in% c("CN", "PLT_CN") && "PLOT_ID" %in% xyfields && 
 				"PLOT_ID" %in% pltfields) {
-                 message("changing xy.joinid from ", xy.joinid, " to PLOT_ID")
-                 xy.joinid <- "PLOT_ID"
-              }
-            }
-            if (xy.joinid %in% pltfields) {
-              pjoinid  <- xy.joinid
-            } else {
-              if (xy.joinid == "PLT_CN" && "CN" %in% pltfields) {
-                pjoinid <- "CN"
-              } else {
-                stop(xy.joinid, " not in plt")
-              }
-            }
-          #}
-        }    ## End if i=1
+           message("changing xy.joinid from ", xy.joinid, " to PLOT_ID")
+           xy.joinid <- "PLOT_ID"
+        }
+      }
+      if (xy.joinid %in% pltfields) {
+        pjoinid  <- xy.joinid
+      } else {
+        if (xy.joinid == "PLT_CN" && "CN" %in% pltfields) {
+          pjoinid <- "CN"
+        } else {
+          stop(xy.joinid, " not in plt")
+        }
+      }
+    
 
+      for (i in 1:length(stcds)) { 
+        stcd <- stcds[i]
+        state <- pcheck.states(stcd) 
+        message(paste0("\n", state, "..."))
+
+        ## Check for counties
+        if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(statecnty)) {
+          stcnty <- statecnty[startsWith(statecnty, formatC(stcd, width=2, flag="0"))]
+          countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
+          stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
+        }
+          
         ## Create state filter
         stfilter <- paste("p.statecd IN(", toString(stcd), ")")
         if (!is.null(stateFilter)) { 
@@ -803,6 +869,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           }
           xystate <- DBI::dbGetQuery(xyconn, xy.qry) 
           if (nrow(xystate) == 0) break
+        } else if ("sf" %in% class(xy)) {
+          xystate <- xy
         } else if (xychk) {
           xydat <- pcheck.spatial(layer=xy, dsn=xy_dsn)
           xyvars <- c(xy.joinid, xvar, yvar)
@@ -814,7 +882,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ## Convert xystate to sf class
         if (!"sf" %in% class(xystate)) { 
           xystate <- spMakeSpatialPoints(xystate, xy.uniqueid=xy.joinid, 
-			xvar=xvar, yvar=yvar, xy.crs=xy.crs)
+			xvar=xvar, yvar=yvar, xy.crs=xy.crs, addxy=TRUE)
         }
  
         if (clipxy) {    ## datsource="sqlite"
@@ -1007,9 +1075,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
                 assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
               }
             }
-            if (savexy || showsteps) {
-              xyplt <- rbind(xyplt1, xyplt2)
-            }
+            xyplt <- rbind(xyplt1, xyplt2)
 
           } else {    ## measEndyr.filter = NULL
             ## Clip data
@@ -1022,7 +1088,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, cond.qry)
-            cond <- DBI::dbFetch(rs)
+            cond <- suppressWarnings(DBI::dbFetch(rs))
             DBI::dbClearResult(rs)
 
             if (istree) {
@@ -1090,14 +1156,11 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
             }
           }
-          if (savexy || showsteps) {
-            xypltx <- rbind(xypltx, xyplt)
-          }
+          xypltx <- rbind(xypltx, xyplt)
+
         } else {      ## clipxy=FALSE, datsource="sqlite"
 
-          if ((savexy || showsteps) && !is.null(xystate)) {
-            xypltx <- rbind(xypltx, xystate)
-          }
+          xypltx <- rbind(xypltx, xystate)
 
           ## Query database for plots
           rs <- DBI::dbSendQuery(dbconn, plt.qry)
@@ -1123,7 +1186,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 				" and p.", puniqueid, " in(", addcommas(pltids, quotes=TRUE), ")")
           rs <- DBI::dbSendQuery(dbconn, cond.qry)
-          condx <- rbind(condx, DBI::dbFetch(rs))
+          condx <- rbind(condx, suppressWarnings(DBI::dbFetch(rs)))
           DBI::dbClearResult(rs)
 
           if (istree) {
@@ -1174,27 +1237,41 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
           } 
         }   ## clipxy
-      }  ## datsource
-    }  ## End of looping thru states
-
-    ## Disconnect database
-    if (datsource == "sqlite") {
+      }  ## End of looping thru states
       DBI::dbDisconnect(dbconn)
-    }
-  }
+    }  ## datsource
+ # }
 
   #############################################################################
   ## Save tables
   #############################################################################
   if (savedata) {
-    if (savexy) 
-      datExportData(sf::st_drop_geometry(xypltx), outfolder=outfolder, 
+    if (savebnd) {
+      spfmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
+      spExportSpatial(bndx, outfolder=outfolder, out_fmt=spfmt,
+		out_dsn=out_dsn, out_layer="bnd", outfn.date=outfn.date,
+		overwrite_layer=overwrite_layer, add_layer=TRUE, 
+		append_layer=append_layer)   
+    }
+    if (savexy) {
+      if (savebnd) {
+        spfmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
+        spExportSpatial(xypltx, outfolder=outfolder, out_fmt=spfmt,
+		out_dsn=out_dsn, out_layer="spxyplt", outfn.date=outfn.date,
+		overwrite_layer=overwrite_layer, add_layer=TRUE, 
+		append_layer=append_layer)   
+      } else {
+        datExportData(sf::st_drop_geometry(xypltx), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyplt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
+		add_layer=TRUE, append_layer=append_layer)
+      }
+    }
     for (tab in tabs2save) {
       datExportData(get(tab), outfolder=outfolder, out_fmt=out_fmt, 
 		out_dsn=out_dsn, out_layer=tab, outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer)
+		overwrite_layer=overwrite_layer, add_layer=TRUE, 
+		append_layer=append_layer)
     }
   } 
 
@@ -1210,23 +1287,17 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     par(mar=mar)
   }
 
-  if (clipxy) {
-    returnlst$clip_tabs <- lapply(tabs2save, get, envir=environment())
-    names(returnlst$clip_tabs) <- paste0("clip_", tabs2save)
-  } else {
+#  if (clipxy) {
+#    returnlst$clip_tabs <- lapply(tabs2save, get, envir=environment())
+#    names(returnlst$clip_tabs) <- paste0("clip_", tabs2save)
+#  } else {
     returnlst$tabs <- lapply(tabs2save, get, envir=environment())
     names(returnlst$tabs) <- tabs2save
-  } 
-
-  if (savexy) {
-    if (clipxy) {
-      returnlst$clip_xyplt <- xypltx
-    } else { 
-      returnlst$xyplt <- xypltx
-    }
-  }
-
-  returnlst$clip_polyv <- bndx
+#  } 
+ 
+  returnlst$xypltx <- xypltx
+  #returnlst$clip_polyv <- bndx
+  returnlst$bndx <- bndx
   returnlst$puniqueid <- puniqueid
   returnlst$xy.uniqueid <- xy.joinid
   returnlst$pjoinid <- pjoinid

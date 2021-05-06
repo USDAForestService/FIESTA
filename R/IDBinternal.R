@@ -7,6 +7,7 @@
 ## chkdbtab			## Checks if table name exists in list of database tables
 ## getsppnm			## Get species common names from a list of codes or Research Station
 ## gui_filterdf		## Get filter from a data frame
+## DBgetbyids		## Gets data from database from ids
 
 
 DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, 
@@ -730,4 +731,15 @@ gui_filterdf <- function(df, byname=TRUE) {
   }
   return(xfilter)
 }
+
+DBgetbyids <- function(dbconn, ids, layernm, layerid="PLT_CN") {
+  ## DESCRIPTION: gets data from database from ids (e.g., CN)
+  qry <- paste0("select * from ", layernm, " where ", 
+		layerid, " in(", addcommas(ids, quotes=TRUE), ")")
+  rs <- DBI::dbSendQuery(dbconn, qry)
+  dat <- DBI::dbFetch(rs)
+  DBI::dbClearResult(rs)
+  return(dat)
+}
+
 

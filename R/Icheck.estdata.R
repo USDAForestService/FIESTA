@@ -1,20 +1,21 @@
 check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN", 
 	condid="CONDID", treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
-	sumunits=FALSE, landarea=NULL, ACI.filter=NULL, pfilter=NULL, 
-	cfilter=NULL, allin1=FALSE, estround=6, pseround=3, divideby=NULL, 
-	addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
-	savedata=FALSE, outfolder=NULL, gui=FALSE){
+	estseed="none", sumunits=FALSE, landarea=NULL, ACI.filter=NULL, 
+	pcfilter=NULL, allin1=FALSE, estround=6, pseround=3, divideby=NULL, 
+	addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 	
+	savedata=FALSE, outfolder=NULL, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE, 
+	append_layer=FALSE, raw_fmt="csv", raw_dsn=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
   ## Apply plot filter
-  ## - pfilter (e.g., COUNTY == 3)
+  ## - pcfilter (e.g., COUNTY == 3, FORTYPCD == 122)
   ## Check landarea ("FOREST", "ALL", "TIMBERLAND") and create landarea.filter
   ## - if landarea = FOREST, "COND_STATUS_CD == 1"
   ## - if landarea = TIMBERLAND, "SITECLCD %in% c(1:6) & RESERVCD == 0"
   ## Apply condition filters
   ## - landarea.filter
-  ## - cfilter (e.g., FORTYPCD == 122)
   ## - ACI.filter (e.g., if, ACI=FALSE, COND_STATUS_CD == 1)
   ## Check output parameters
   ## - divideby, divides final estimates by (hundred, thousand, million)
@@ -30,24 +31,19 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ## - pseround - round percent standard error values
   ###################################################################################
 
+  ## Set global variables
+  rawfolder <- NULL
+
   ###########################################################################
-  ## Apply pfilter to plt table
+  ## Apply pcfilter (plot and cond filters) to pltcondf table
   ###########################################################################
   pltcondnmlst <- names(pltcondf)
-  pltcondf <- datFilter(x=pltcondf, xfilter=pfilter, title.filter="plt filter?",
-		gui=gui, filternm="pfilter", xnm="pltcondf")$xf
+  pltcondf <- datFilter(x=pltcondf, xfilter=pcfilter, title.filter="plt filter?",
+		gui=gui, filternm="pcfilter", xnm="pltcondf")$xf
   if (is.null(pltcondf)) {
-    message(paste(pfilter, "removed all records"))
+    message(paste(pcfilter, "removed all records"))
     return(NULL)
   }
-
-  #############################################################################
-  ## Check esttype
-  #############################################################################
-  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC")
-  esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
-	checklst=esttypelst, caption="Esttype?")
-
 
   #############################################################################
   ## Check landarea 
@@ -93,7 +89,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   }
  
   ###################################################################################
-  ## Apply cond filters
+  ## Apply landarea filters
   ###################################################################################
 
   ## Apply landarea.filter to pltcondf
@@ -101,14 +97,6 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 		title.filter="landarea filter", gui=gui, stopifnull=FALSE)$xf
   if (is.null(pltcondf)) {
     message(paste(landarea.filter, "removed all records"))
-    return(NULL)
-  }
-
-  ## Apply cfilter to pltcondf
-  pltcondf <- datFilter(x=pltcondf, xfilter=cfilter, 
-		title.filter="cond filter", gui=gui, stopifnull=FALSE)$xf
-  if (is.null(pltcondf)) {
-    message(paste(cfilter, "removed all records"))
     return(NULL)
   }
 
@@ -121,6 +109,14 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
       return(NULL)
     }
   }
+
+  #############################################################################
+  ## Check esttype
+  #############################################################################
+  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC")
+  esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
+	checklst=esttypelst, caption="Esttype?")
+
 
   #####################################################################################
   ### Check other table parameters
@@ -164,12 +160,36 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 		first="NO", gui=gui, stopifnull=TRUE)
   if (rawonly && !rawdata) rawdata <- TRUE
 
-  ## Check outfolder 
+  ## Check output info 
   ########################################################
-  if (savedata) 
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-  
-
+  if (savedata) { 
+    if (!rawonly) {
+      outlst <- pcheck.output(out_fmt="csv", outfolder=outfolder, 
+		outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer, gui=gui)
+      outfolder <- outlst$outfolder
+      overwrite_layer <- outlst$overwrite_layer
+      outfn.pre <- outfn.pre
+    }
+    if (rawdata) {
+      if (!is.null(raw_fmt) && raw_fmt == "csv") {
+        rawfolder <- paste(outfolder, "rawdata", sep="/")
+        if (!file.exists(rawfolder)) dir.create(rawfolder)
+      } else {
+        if (is.null(raw_dsn)) {
+          raw_dsn <- "rawdata"
+        }
+        outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		append_layer=append_layer, gui=gui)
+        rawfolder <- outlst$outfolder
+        raw_fmt <- outlst$out_fmt
+        raw_dsn <- outlst$out_dsn
+        overwrite_layer <- outlst$overwrite_layer
+      }
+    }
+  }  
   ## Check rounding variables
   if (is.null(estround)) {
     estround <- ifelse(allin1, 0, 6)
@@ -190,14 +210,14 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     }
   }
 
-
   ## Set up list of variables to return
   ######################################################################################
   returnlst <- list(pltcondf=pltcondf, cuniqueid=cuniqueid, sumunits=sumunits, 
 	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly,
-	savedata=savedata, outfolder=outfolder, estround=estround, pseround=pseround,
- 	landarea=landarea)
+	addtitle=addtitle, returntitle=returntitle, estround=estround, pseround=pseround,
+ 	landarea=landarea, rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+	outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer, 
+	rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn)
 
 
   if (esttype %in% c("TREE", "RATIO", "SEED")) {
@@ -214,6 +234,20 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
       returnlst$seedf <- seedf
       returnlst$tuniqueid <- tuniqueid
     }
+
+    ## Check estseed 
+    ########################################################
+    estseedlst <- c("none", "only", "add")
+    estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
+		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
+    if (estseed == "none") {
+      seedx <- NULL
+    } else {
+      if (is.null(seedx)) {
+        stop("no seedling data in population data")
+      }
+    } 
+    returnlst$estseed <- estseed
   }
  
   return(returnlst)

@@ -7,11 +7,10 @@ Contains regional geographic delineations for analysis of ecological relationshi
 y.htm). The framework systematically divides the country into progressively smaller areas of land and water that have similar physical and biological characteristics and ecological processes.
 
 The EcoMap Provinces feature class contains ecological province polygons attributed with names and descriptions. The EcomapSections 2007 data set describes the ecological sections within the conterminous United States. The EcomapSubections 2007 data set describes the ecological subsections within the conterminous United States.
-}
 
 Converted to simple feature and saved to R object, with compression='xz'
 CRS - "+proj=longlat +datum=NAD83 +no_defs"
-
+}
 
 \usage{ ecomap}
 

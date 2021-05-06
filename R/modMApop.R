@@ -8,8 +8,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, MAdata=NULL, MAmodeldat=NULL, 
-	gui=FALSE){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, MAdata=NULL, pltdat=NULL, 
+	MAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -99,29 +99,43 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
         predfac <- predfac[predfac %in% prednames]
       }
     } 
-  } else if (!is.null(MAmodeldat)) {
-    list.items <- c("pltassgn", "domzonal", "domvar", "predfac", "npixelvar", 
-		"pltassgnid", "domarea", "areavar")
-    MAmodeldat <- FIESTA::pcheck.object(MAmodeldat, "MAmodeldat", list.items=list.items)
-    pltassgn <- MAmodeldat$pltassgn
-    pltassgnid <- MAmodeldat$pltassgnid
-    unitlut <- MAmodeldat$domzonal
-    unitvar <- MAmodeldat$domvar
-    unitvar2 <- MAmodeldat$domvar2
-    unitarea <- MAmodeldat$domarea
-    areavar <- MAmodeldat$areavar
-    npixelvar <- MAmodeldat$npixelvar
-    predfac <- MAmodeldat$predfac
-    PSstrvar <- MAmodeldat$PSstrvar
+  } else {
+    if (!is.null(pltdat)) {
+      list.items <- c("bndx", "tabs", "xypltx")
+      pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
 
-    if (any(MAmethod %in% c("greg", "gregEN"))) {
-      if (is.null(prednames)) {
-        prednames <- MAmodeldat$prednames
-      } else {
-        if (!all(prednames %in% MAmodeldat$prednames))
-          stop("invalid prednames: ", 
+      ## Extract list objects
+      puniqueid <- pltdat$puniqueid
+      pjoinid <- pltdat$pjoinid
+      plt <- pltdat$tabs$pltx
+      cond <- pltdat$tabs$condx
+      tree <- pltdat$tabs$treex
+      seed <- pltdat$tabs$seedx
+    }
+    if (!is.null(MAmodeldat)) {
+      list.items <- c("pltassgn", "domzonal", "domvar", "predfac", "npixelvar", 
+		"pltassgnid", "domarea", "areavar")
+      MAmodeldat <- FIESTA::pcheck.object(MAmodeldat, "MAmodeldat", list.items=list.items)
+      pltassgn <- MAmodeldat$pltassgn
+      pltassgnid <- MAmodeldat$pltassgnid
+      unitlut <- MAmodeldat$domzonal
+      unitvar <- MAmodeldat$domvar
+      unitvar2 <- MAmodeldat$domvar2
+      unitarea <- MAmodeldat$domarea
+      areavar <- MAmodeldat$areavar
+      npixelvar <- MAmodeldat$npixelvar
+      predfac <- MAmodeldat$predfac
+      PSstrvar <- MAmodeldat$PSstrvar
+
+      if (any(MAmethod %in% c("greg", "gregEN"))) {
+        if (is.null(prednames)) {
+          prednames <- MAmodeldat$prednames
+        } else {
+          if (!all(prednames %in% MAmodeldat$prednames))
+            stop("invalid prednames: ", 
 			toString(prednames[!prednames %in% MAmodeldat$prednames]))
-        predfac <- predfac[predfac %in% prednames]
+          predfac <- predfac[predfac %in% prednames]
+        }
       }
     }
   } 

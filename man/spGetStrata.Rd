@@ -13,7 +13,7 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL,
 	strattype = "RASTER", strat_layer = NULL, strat_dsn = NULL, strvar = NULL, 
 	strat_lut = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
-	keepxy = TRUE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
+	keepxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
 	exportNA = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
 	out_layer = "strat_assgn", outfn.date = TRUE, outfn.pre = NULL, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, ...)
@@ -56,8 +56,9 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	If strattype="RASTER", strvar="value". }
   \item{areaunits}{ String. Output area units ("ACRES", "HECTARES", "SQMETERS"). }
   \item{rast.NODATA}{ Numeric. NODATA value if stratlayer is raster 
-	(See notes). This values will be converted to NA and removed from output 
-	if keepNA=FALSE. }
+	(See notes). This values will be converted to NA and removed from output. 
+	if keepNA=TRUE, NA values will not be in included in stratalut but will 
+	remain in pltassgn table. }
   \item{keepNA}{ Logical. If TRUE, returns data frame of NA values. }
   \item{keepxy}{ Logical. If FALSE, removes XY coordinates from pltassgn output. }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
@@ -65,7 +66,8 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	saved to outfolder. }
   \item{exportsp}{ Logical. If TRUE, the extracted strata point data are 
 	exported to outfolder. }
-  \item{exportNA}{ Logical. If TRUE, NA values are exported to outfolder. }
+  \item{exportNA}{ Logical. If TRUE and keepNA=TRUE, NA values are exported to 
+	outfolder as a point shapefile. }
   \item{outfolder}{ String. If savedata=TRUE or exportshp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
   \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
@@ -95,8 +97,8 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
   \item{acrevar}{ Data frame. Variable name for area in unitarea. }
   \item{stratalut}{ Data frame. Strata proportions (weights) by estimation unit and strata. }
   \item{strvar}{ Data frame. Variable name for strata values in stratalut. }
-  \item{NAlst}{ sf List. If NA values exist after data extraction, the spatial NA
-	points are returned. }
+  \item{NAlst}{ sf List. If keepNA=TRUE, and NA values exist after data extraction, 
+	the spatial NA points are returned. }
   \item{pltassgnid}{ String. Unique identifier of plot. }
 
   If savedata=TRUE, pltassgn and unitarea are saved to outfolder.\cr

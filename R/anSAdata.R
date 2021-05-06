@@ -1,13 +1,13 @@
-anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE, 
-	datsource="sqlite", data_dsn=NULL, istree=TRUE, isseed=FALSE, 
-	plot_layer="plot", cond_layer="cond", tree_layer="tree", 
-	seed_layer="seed", puniqueid="CN", intensity1=FALSE, 
+anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL, 
+	xy.joinid="PLOT_ID", clipxy=TRUE, datsource="sqlite", data_dsn=NULL, 
+	istree=TRUE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
+	tree_layer="tree", seed_layer="seed", puniqueid="CN", intensity1=FALSE, 
 	rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
 	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
 	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, SApltdat=NULL, ...) {
+	overwrite_layer=TRUE, append_layer=FALSE, SApltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -40,30 +40,23 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
 #intensity1=FALSE
 
 
-#statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
-#			stbnd.att=stbnd.att, RS=RS, states=states, savebnd=savebnd, 
-#			outfolder=outfolder)
-#bndx <- statedat$bndx
-#if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
-#  statecnty <- statedat$states
-#    stcds <- unique(as.numeric(substr(statecnty, 1,2)))
-#} else {
-#    stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
-#}
 
-
-#      SApltdat <- spGetPlots(bnd=SAdoms, bnd.filter=measEndyr.filter, 
-#		RS=RS, statebnd.att="COUNTYFIPS", clipxy=clipxy, datsource=datsource, 
-#		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
-#		cond_layer=cond_layer, tree_layer=tree_layer, measCur=measCur,
-#		measEndyr=measEndyr, intensity1=intensity1, showsteps=FALSE, 
-#		savedata=FALSE)
-
-
-  ## Check savedata
-  #############################################################################
+  ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data?", first="NO", gui=gui)  
+		title="Save data extraction?", first="NO", gui=gui) 
+
+  ## Check savexy
+  savexy <- FIESTA::pcheck.logical(savexy, varnm="savexy", 
+		title="Save xy data?", first="NO", gui=gui)  
+
+  ## Check savesteps
+  savesteps <- FIESTA::pcheck.logical(savesteps, varnm="savesteps", 
+		title="Save step data?", first="YES", gui=gui)  
+ 
+  ## Check saveobj 
+  saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
+		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+
  
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
@@ -71,11 +64,16 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
-		gui=gui)
+		append_layer=append_layer, createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
+    overwrite_dsn <- outlst$overwrite_dsn
+    append_layer <- outlst$append_layer
+
+  } else if (savesteps || saveobj) {
+    outfolder <- pcheck.outfolder(outfolder)
 
     if (savesteps) {
       stepfolder <- file.path(outfolder, "SAdoms_steps")
@@ -89,18 +87,19 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(SApltdat)) {
-    SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, clipxy=clipxy, datsource=datsource, 
+    SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
+		xy.joinid=xy.joinid, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
- 		intensity1=intensity1, savedata=FALSE, savexy=TRUE, ...)
+ 		intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
     if (is.null(SApltdat)) return(NULL)
     if (saveobj) {
       message("saving SApltdat object to: ", file.path(outfolder, "SApltdat.rda"), "...")
       save(SApltdat, file=file.path(outfolder, "SApltdat.rda"))
     }
   } else {
-    SApltdat.names <- c("clip_xyplt", "clip_polyv", "xy.uniqueid", "puniqueid",
-		"pjoinid", "clip_tabs")
+    SApltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
+		"pjoinid", "tabs")
     if (!all(SApltdat.names %in% names(SApltdat))) {
       stop("missing components in SApltdat list: ", 
 		toString(SApltdat.names[!SApltdat.names %in% names(SApltdat)])) 
@@ -108,14 +107,19 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
   }
 
   ## Extract list objects
-  xyplt <- SApltdat$clip_xyplt
+  xyplt <- SApltdat$xypltx
   xy.uniqueid <- SApltdat$xy.uniqueid
   puniqueid <- SApltdat$puniqueid
   pjoinid <- SApltdat$pjoinid
-  plt <- SApltdat$clip_tabs$clip_pltx
-  cond <- SApltdat$clip_tabs$clip_condx
-  tree <- SApltdat$clip_tabs$clip_treex
-  SAdoms <- SApltdat$clip_polyv
+  plt <- SApltdat$tabs$pltx
+  cond <- SApltdat$tabs$condx
+  tree <- SApltdat$tabs$treex
+  SAdoms <- SApltdat$bndx
+
+  ## Check SAdoms
+  #if (!all(c("DOMAIN", "AOI") %in% names(SAdoms))) {
+  #  stop("invalid SAdoms...  need to include DOMAIN and AOI attributes")
+  #}
 
   if (showsteps) {
     ## Set plotting margins
@@ -149,7 +153,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, clipxy=TRUE,
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)
   }
-
+ 
   ## Check number of plots (Note: must be greater than 2 plots)
   extpoly <- spExtractPoly(xyplt=xyplt, polyvlst=SAdoms, 
 		uniqueid=xy.uniqueid, polyvarlst=unique(c("DOMAIN", "AOI")), 

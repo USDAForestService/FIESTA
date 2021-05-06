@@ -21,10 +21,11 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	intensity = NULL, ACI = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
 	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, 
 	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
-	stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, objnm = "GBpopdat", 
-	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 	
-	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	GBdata = NULL, pltdat = NULL, GBstratdat = NULL, gui = FALSE)
+	strwtvar = "strwt", stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, 
+	objnm = "GBpopdat", savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, 	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE,
+ 	overwrite_layer = TRUE, GBdata = NULL, pltdat = NULL, GBstratdat = NULL, 
+	gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -103,9 +104,11 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	cond or pltassgn data frame with stratum assignment for each plot 
 	(Default = 'STRATUMCD'). }
   \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
-	If FALSE, 'strwt' variable must be in stratalut. }
-  \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt) 
- 	(Default = "P1POINTCNT"). }
+	If FALSE, strwtvar variable must be in stratalut. }
+  \item{getwtvar}{ String. If getwt=TRUE, name of variable in stratalut to calculate 
+	weights (Default = 'P1POINTCNT'). }
+  \item{strwtvar}{ String. If getwt=FALSE, name of variable in stratalut with calculated 
+	weights (Default = 'strwt'). }
   \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
 	strata categories if less than 2 plots in any one stratum. See notes for more info. }
   \item{minplotnum.strat}{ Integer. Minimum number of plots for a stratum within an

@@ -2,7 +2,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter=NULL, strattype="RASTER", strat_layer=NULL, 
 	strat_dsn=NULL, strvar=NULL, strat_lut=NULL, areaunits="ACRES", 
-	rast.NODATA=NULL, keepNA=FALSE, keepxy=TRUE, showext=FALSE, 
+	rast.NODATA=NULL, keepNA=FALSE, keepxy=FALSE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, 
 	out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
 	outfn.date=TRUE, outfn.pre=NULL, overwrite_dsn=FALSE, 
@@ -31,7 +31,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     Filters=rbind(Filters,img=c("Erdas Imagine Images (*.img)", "*.img"))
     Filters=rbind(Filters,tif=c("Raster tif files (*.tif)", "*.tif"))
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
-
 
 
   ##################################################################
@@ -64,6 +63,15 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   strattype <- FIESTA::pcheck.varchar(var2check=strattype, varnm="strattype", 
 	gui=gui, checklst=typelst, caption="Strata type?", stopifnull=TRUE)
 
+
+  ## Check strat_lut
+  ###################################################################
+  if (!is.null(strat_lut)) {
+    if (ncol(strat_lut) > 2) {
+      stop("strat_lut must be a lookup table with 2 columns")
+    }
+  }
+
   ## Check unittype
   ###################################################################
   unittype <- FIESTA::pcheck.varchar(var2check=unittype, varnm="unittype", 
@@ -95,10 +103,12 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (savedata || exportsp || exportNA) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
+		createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    append_layer <- outlst$append_layer
   }
 
   ##################################################################
@@ -246,52 +256,66 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   #######################################
   if (!is.null(strat_lut)) {
     stratalut <- merge(stratalut, strat_lut, by=strvar)
-    stratalut <- stratalut[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, "strclass"), .SDcols=c("count", "strwt")]
-    setorderv(stratalut, c(unitvar, "strclass"))
-    setnames(stratalut, "strclass", "STRATUMCD")
+    strclvar <- names(strat_lut)[names(strat_lut) != strvar]
 
+    stratalut <- stratalut[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(unitvar, strclvar), .SDcols=c("count", "strwt")]
+    setorderv(stratalut, c(unitvar, strclvar))
+    strvar2 <- checknm("STRATUMCD", names(sppltx))
+    setnames(stratalut, strclvar, strvar2)
     sppltx <- merge(sppltx, strat_lut, by=strvar)
-    setnames(sppltx, "strclass", "STRATUMCD")
-    strvar <- "STRATUMCD"
+    setnames(sppltx, strclvar, strvar2)
+    strvar <- strvar2
   } else {
-    setnames(stratalut, strvar, "STRATUMCD")
-    setnames(sppltx, strvar, "STRATUMCD")
-    strvar <- "STRATUMCD"
-  }  
+    strvar2 <- checknm("STRATUMCD", names(sppltx))
+    setnames(stratalut, strvar, strvar2)
+    setnames(sppltx, strvar, strvar2)
+    strvar <- strvar2
+  } 
 
   ## Write data frames to CSV files
   #######################################
-  pltassgn <- sf::st_drop_geometry(sppltx)
+  if (keepxy) {
+    xy.coords <- data.frame(sf::st_coordinates(sppltx))
+    pltassgn <- data.frame(sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)]),
+		xy.coords)
+  } else {
+    pltassgn <- sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)])
+  }
 
-  if (!keepxy) 
-    pltassgn2 <- pltassgn[, c(uniqueid, unitvar, strvar)]
 
-  if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
-  setkeyv(stratalut, c(unitvar, strvar))  
+  #if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
+  #setkeyv(stratalut, c(unitvar, strvar))  
 
   if (savedata) {
-    datExportData(pltassgn, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(unitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(stratalut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    datExportData(pltassgn, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    datExportData(unitarea, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    datExportData(stratalut, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="stratalut", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
   }
 
   ## Export to shapefile
   if (exportsp) {
-    spExportSpatial(sppltx, out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer,
- 		outfolder=outfolder, outfn.pre=NULL, 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    spExportSpatial(sppltx, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer=out_layer,
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
   }
   
-  returnlst <- list(pltassgn=pltassgn, unitarea=unitarea, unitvar=unitvar, 
-		areavar=areavar, stratalut=stratalut, strvar=strvar,
-		pltassgnid=uniqueid, getwt=FALSE, strwtvar="strwt")
+  returnlst <- list(pltassgn=setDF(pltassgn), unitarea=setDF(unitarea), 
+		stratalut=setDF(stratalut), unitvar=unitvar, areavar=areavar, 
+		strvar=strvar, pltassgnid=uniqueid, getwt=FALSE, strwtvar="strwt")
+  if (!is.null(NAlst)) {
+    returnlst$NAlst <- NAlst
+  }
  
   return(returnlst)
 }

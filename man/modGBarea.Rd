@@ -15,15 +15,15 @@
 	area in the population.   
 }
 \usage{
-modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL, 
+modGBarea(GBpopdat = NULL, landarea = "FOREST", pcfilter = NULL, 
 	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
 	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
 	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
 	sumunits = TRUE, allin1 = FALSE, estround = 1, pseround = 2, 
 	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, 
-	outfolder = NULL, overwrite = FALSE, outfn.pre = NULL, outfn.date = TRUE,
-	addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, 
-	layer.pre = NULL, overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, addtitle = TRUE, 
+	rawdata = FALSE, rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
 	returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL,  
 	title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, gui = FALSE, ...)
 }
@@ -33,8 +33,8 @@ modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL,
   \item{landarea}{ String. The sample area filter for estimates ("ALL", "FOREST", "TIMBERLAND"). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, 
 	filtered to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{pfilter}{ String. A filter for the pltassgn. Must be R logical syntax. }
-  \item{cfilter}{ String. A filter for the cond. Must be R logical syntax. }
+  \item{pcfilter}{ String. A filter for plot or cond attributes (including pltassgn). 
+	Must be R logical syntax. }
   \item{rowvar}{ String. Name of row domain variable in cond. If only one domain, 
 	rowvar = domain variable. If more than one domain, include colvar. If no domain,
 	rowvar = NULL. }
@@ -73,24 +73,26 @@ modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL,
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{overwrite}{ Logical. If TRUE, overwrites estimates in outfolder. }
-  \item{outfn.pre}{ String. Prefix for out_dsn or csv file, if out_fmt=".csv". }
+  \item{outfn.pre}{ String. If savedata=TRUE, prefix for output files. If rawdata=TRUE, 
+	prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if raw_fmt != 'csv'). }
   \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
   \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
-	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
-  \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes
-	many estimation units, and only raw data tables are needed, it is more 
+	for estimation (See Value). If savedata = TRUE, tables are written to outfolder 
+	(if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv'). }
+  \item{rawonly}{ Logical. If TRUE, only rawdata are output. If dataset includes
+	many estimation units, and only raw data tables are desired, it is more 
 	efficient to output raw data only. }
-  \item{raw_fmt}{ String. Format for output rawdata tables ('csv', 'sqlite', 'gpkg'). }
+  \item{raw_fmt}{ String. Format for output rawdata tables 
+	('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp'). }
   \item{raw_dsn}{ String. Data source name for rawdata output. If extension is not
 	included, out_fmt is used. Use full path if outfolder=NULL. }
-  \item{layer.pre}{ String. Prefix for rawdata layer in database, if out_fmt != "csv". }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer in raw_dsn
-	or *.csv raw data layer, if datsource="csv". }
-  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data data frames 
-	to existing out_dsn layer or *.csv file. }  
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the output. If rawdata=TRUE, 
+	overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or out_layers in 
+	raw_dsn (if raw_fmt != 'csv'). }
+  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data 
+	to existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt != 'csv". }  
   \item{returntitle}{ Logical. If TRUE, returns title(s) of the estimation table(s). }
   \item{title.main}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: the complete 
 	title used for table. If title.main=NULL, the title.* parameters are used to 
@@ -212,6 +214,18 @@ modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL,
 	 	\tab CI67right	\tab right tail of 67 percent confidence interval for estimated area \cr
 	}
   }
+
+  savedata\cr
+  if savedata=TRUE...\cr
+  tables with estimate and percent standard error will be written as *csv files to outfolder.
+  if rawdata=TRUE, the rawdata will be output to the outfolder in a folder named rawdata (if raw_fmt="csv")
+  or a database in the outfolder, if (raw_fmt != "csv"). 
+
+  if outfn.pre is not null...\cr
+  a prefix is added to output files
+  if raw_fmt = 'csv', prefix is added to file names in rawdata folder
+  if raw_fmt != 'csv', prefix is added to dsn name
+
  
 }
 \author{

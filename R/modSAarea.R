@@ -1,13 +1,13 @@
-modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", 
-	SAmethod="unit", largebnd.att=NULL, landarea="ALL", pfilter=NULL, 
-	cfilter=NULL, smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, 
+modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", 
+	SAmethod="unit", largebnd.att=NULL, landarea="ALL", pcfilter=NULL, 
+	smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, 
 	estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	rawonly=FALSE, multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, 
-	outfn.pre=NULL, raw_fmt="csv", raw_dsn="rawdata", multest_fmt="csv", 
-	multest_outfolder=NULL, multest_dsn=NULL, multest_layer=NULL, 
-	multest.append=FALSE, multest.AOIonly=FALSE, outfn.date=FALSE, 
-	overwrite=FALSE, addtitle=TRUE, returntitle=FALSE, title.main=NULL, 
-	title.ref=NULL, title.dunitvar=NULL, title.filter=NULL, SApopdat=NULL, ...){
+	outfn.pre=NULL, outfn.date=FALSE, addtitle=TRUE, raw_fmt="csv", raw_dsn="rawdata", 
+	multest_fmt="csv", multest_outfolder=NULL, multest_dsn=NULL, multest_layer=NULL, 
+	multest.append=FALSE, multest.AOIonly=FALSE, overwrite_dsn=FALSE,
+	overwrite_layer=TRUE, append_layer=FALSE, returntitle=FALSE, title.main=NULL, 
+	title.ref=NULL, title.dunitvar=NULL, title.filter=NULL, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -90,80 +90,6 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
 
 
-  ### Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ## Check outfolder 
-  ########################################################
-  if (savedata) {
-    fmtlst <- c("sqlite", "gpkg", "csv", "gdb")
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    if (rawdata) {
-      raw_fmt <- FIESTA::pcheck.varchar(var2check=raw_fmt, varnm="raw_fmt", 
-		checklst=fmtlst, gui=gui, caption="Output rawdata format?") 
-      if (is.null(raw_dsn)) raw_dsn <- "rawdata"
-      if (raw_fmt == "csv") {
-        rawfolder <- file.path(outfolder, raw_dsn)
-        if (!file.exists(rawfolder)) dir.create(rawfolder)
-      } else {
-        rawfolder <- outfolder
-        raw_dsn <- paste0(raw_dsn, ".", raw_fmt)
-
-        if (raw_fmt == "gdb") {
-          raw_dsn <- DBtestESRIgdb(gdbfn=raw_dsn, outfolder=outfolder, overwrite=overwrite, 
-			showlist=FALSE, returnpath=FALSE)
-        }	else if (raw_fmt %in% c("sqlite", "gpkg")) {
-          gpkg <- ifelse(raw_fmt == "gpkg", TRUE, FALSE)
-          raw_dsn <- DBcreateSQLite(SQLitefn=raw_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=overwrite, returnpath=FALSE, outfn.date=outfn.date)
-        }	
-      }
-    }
-    multest <- FIESTA::pcheck.logical(multest, varnm="multest", 
-		title="Unit and area estimates?", first="NO", gui=gui) 
-    if (multest) {
-      multest.outfolder <- FIESTA::pcheck.outfolder(multest.outfolder, gui)
-      if (is.null(multest.outfolder)) multest.outfolder <- outfolder
-
-      multest.append <- FIESTA::pcheck.logical(multest.append, varnm="multest.append", 
-		title="Append multest data?", first="NO", gui=gui) 
-
-      multest_fmt <- FIESTA::pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
-		checklst=fmtlst, gui=gui, caption="Output multest format?") 
-      if (multest_fmt == "csv") {
-        multest_dsn <- NULL
-        multest_layer <- paste0("SAmultest_", SApackage, ".", multest_fmt)
-      } else {
-        if (is.null(multest_dsn))
-          multest_dsn <- paste0("SAmultest_", SApackage, ".", multest_fmt)
-        if (is.null(multest_layer))
-          multest_layer <- "dunit_multest"
-        if (multest_fmt == "gdb") {
-          multest_dsn <- DBtestESRIgdb(gdbfn=multest_dsn, outfolder=outfolder, 
-			overwrite=FALSE, showlist=FALSE, returnpath=FALSE)
-        }	else if (multest_fmt %in% c("sqlite", "gpkg")) {
-          gpkg <- ifelse(multest_fmt == "gpkg", TRUE, FALSE)
-          if (multest.append) {
-            multest_dsn <- DBtestSQLite(SQLitefn=multest_dsn, gpkg=gpkg, 
-			outfolder=outfolder, returnpath=FALSE)
-          } else {
-            multest_dsn <- DBcreateSQLite(SQLitefn=multest_dsn, gpkg=gpkg, 
-			outfolder=outfolder, overwrite=FALSE, returnpath=FALSE, 
-			outfn.date=outfn.date)
-          }
-        }	
-      }
-    }
-  }
-
-
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
@@ -213,20 +139,22 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   if (is.null(prednames)) {
     prednames <- SApopdat$prednames
   } else {
-    if (!all(prednames %in% SApopdat$prednames))
+    if (!all(prednames %in% SApopdat$prednames)) {
       stop("invalid prednames... must be in: ", toString(SApopdat$prednames))
+    }
   }
-
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 		condid=condid, sumunits=sumunits, landarea=landarea,
- 		ACI.filter=ACI.filter, pfilter=pfilter, cfilter=cfilter, 
-		allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
- 		addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly,
-		savedata=savedata, outfolder=outfolder)
+ 	condid=condid, sumunits=sumunits, landarea=landarea,
+ 	ACI.filter=ACI.filter, pcfilter=pcfilter, 
+	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
+ 	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
+	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -241,11 +169,51 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
   rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
-  estround <- estdat$estround
-  pseround <- estdat$pseround
-  landarea <- estdat$landarea
-  if (sumunits && nrow(dunitarea) == 1) sumunits <- FALSE 
+  overwrite_layer <- estdat$overwrite_layer
+  layer.pre <- estdat$layer.pre
+  raw_fmt <- estdat$raw_fmt
+  raw_dsn <- estdat$raw_dsn
+  rawfolder <- estdat$rawfolder
 
+  ## Check output for multest 
+  ########################################################
+  if (savedata) {
+    fmtlst <- c("sqlite", "sqlite3", "db", "db3", "gpkg", "csv", "gdb")
+
+    if (multest) {
+      multest_outfolder <- FIESTA::pcheck.outfolder(multest_outfolder, gui)
+      if (is.null(multest_outfolder)) multest_outfolder <- outfolder
+
+      multest.append <- FIESTA::pcheck.logical(multest.append, varnm="multest.append", 
+		title="Append multest data?", first="NO", gui=gui) 
+
+      multest_fmt <- FIESTA::pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
+		checklst=fmtlst, gui=gui, caption="Output multest format?") 
+      if (multest_fmt == "csv") {
+        multest_dsn <- NULL
+        multest_layer <- paste0("SAmultest_", SApackage, ".", multest_fmt)
+      } else {
+        if (is.null(multest_dsn))
+          multest_dsn <- paste0("SAmultest_", SApackage, ".", multest_fmt)
+        if (is.null(multest_layer))
+          multest_layer <- "dunit_multest"
+
+        if (multest_fmt == "gdb") {
+          multest_dsn <- DBtestESRIgdb(gdbfn=multest_dsn, outfolder=outfolder, 
+			overwrite=overwrite_dsn, showlist=FALSE, returnpath=FALSE)
+        }	else if (multest_fmt %in% c("sqlite", "gpkg")) {
+          gpkg <- ifelse(multest_fmt == "gpkg", TRUE, FALSE)
+          if (multest.append || !overwrite_dsn) {
+            multest_dsn <- DBtestSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
+			showlist=FALSE, returnpath=FALSE, createnew=TRUE)
+          } else {
+            multest_dsn <- DBcreateSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
+			overwrite=overwrite_dsn, returnpath=FALSE, outfn.date=outfn.date)
+          }
+        }	
+      }
+    }
+  }
 
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
@@ -298,8 +266,8 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
  	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.dunitvar,
 	title.filter=title.filter, unitvar=dunitvar, rowvar=rowvar, colvar=colvar, 
 	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
-	invyrs=invyrs, landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
-	allin1=allin1, parameters=FALSE, divideby=divideby)
+	invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
+	parameters=FALSE, divideby=divideby)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -479,7 +447,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 
       ## Export dunit.multest
       datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=outfolder, 
- 		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite, 
+ 		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite_layer, 
 		append_layer=multest.append)
     }
   }
@@ -500,7 +468,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
+	outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, estround=estround, 
 	pseround=pseround, divideby=divideby, rawdat=rawdat, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
@@ -533,7 +501,7 @@ modSAarea <- function(SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE",
           suppressWarnings(save1tab(tab=rawtab, tab.title=title.raw, 
 			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
 			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
-			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite))
+			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite_layer))
         }
       }
     }

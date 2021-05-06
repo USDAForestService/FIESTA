@@ -91,6 +91,7 @@
 \alias{getEvalid.ppsa}
 \alias{getsppnm}
 \alias{gui_filterdf}
+\alias{DBgetbyids}
 
 \alias{PBest.pbar}
 \alias{PBest.pbarRatio}

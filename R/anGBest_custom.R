@@ -1,5 +1,5 @@
 anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="FOREST", 
-	pfilter=NULL, cfilter=NULL, estvar=NULL, estvar.filter=NULL, 
+	pcfilter=NULL, estvar=NULL, estvar.filter=NULL, 
 	rowvar=NULL, colvar=NULL, treedia.brks=c(0,5,10,20,50,100), sumunits=TRUE,
 	divideby=NULL, title.ref=NULL, title.main=NULL, getbarplot=FALSE, 
 	barplot.row=TRUE, barplot.ord=NULL, barplot.color=NULL, barplot.ylim=NULL, 
@@ -81,11 +81,11 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
     ## Get estimates
     ####################################################################
     MODest <- modGBarea(GBpopdat=GBpopdat, landarea=landarea, 
-		pfilter=pfilter, cfilter=cfilter, 
+		pcfilter=pcfilter, 
 		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
 		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
-		outfolder=outfolder, overwrite=overwrite, outfn.pre=outfn.pre, 
+		outfolder=outfolder, overwrite_layer=overwrite, outfn.pre=outfn.pre, 
 		outfn.date=outfn.date, divideby=divideby, ...)
 
   } else if (esttype == "TREE") {
@@ -93,23 +93,23 @@ anGBest_custom <- function(GBpopdat, esttype="TREE", estseed="none", landarea="F
     ## Get estimates
     ####################################################################
     MODest <- modGBtree(GBpopdat=GBpopdat, estseed=estseed, landarea=landarea, 
-		pfilter=pfilter, cfilter=cfilter, 
+		pcfilter=pcfilter, 
 		estvar=estvar, estvar.filter=estvar.filter,
 		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
 		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		divideby=divideby, ...)
+		outfolder=outfolder, overwrite_layer=overwrite, outfn.pre=outfn.pre,
+ 		outfn.date=outfn.date, divideby=divideby, ...)
 
   } else if (esttype == "RATIO") {
     MODest <- modGBratio(GBpopdat=GBpopdat, estseed=estseed, landarea=landarea, 
-		pfilter=pfilter, cfilter=cfilter, 
+		pcfilter=pcfilter, 
 		estvarn=estvar, estvarn.filter=estvar.filter,
 		rowvar=rowvar, row.FIAname=row.FIAname, colvar=colvar, 
 		col.FIAname=col.FIAname, sumunits=sumunits, rawdata=TRUE, 
 		returntitle=TRUE, title.ref=title.ref, savedata=savedata, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		divideby=divideby, ...)
+		outfolder=outfolder, overwrite_layer=overwrite, outfn.pre=outfn.pre,
+ 		outfn.date=outfn.date, divideby=divideby, ...)
   }
   est <- MODest$est
 

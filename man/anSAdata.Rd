@@ -7,7 +7,8 @@
 	Wrapper to get data for small area estimation.	
 }
 \usage{
-anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, datsource = "sqlite", 
+anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy = NULL, xy_dsn = NULL, 
+	xy.joinid = "PLOT_ID", clipxy = TRUE, datsource = "sqlite", 
 	data_dsn = NULL, istree = TRUE, isseed = FALSE, plot_layer = "plot", 
 	cond_layer = "cond", tree_layer = "tree", seed_layer = "seed", 
 	puniqueid = "CN", intensity1 = FALSE, rastfolder = NULL, rastlst.cont = NULL, 
@@ -16,7 +17,7 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, datsource = "sqlite"
 	savedata = FALSE, savexy = FALSE, savesteps = FALSE, saveobj = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	SApltdat = NULL, ...)
+	append_layer = FALSE, SApltdat = NULL, ...)
 }
 
 \arguments{
@@ -28,6 +29,15 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, datsource = "sqlite"
 	a layer within a database. }
   \item{RS}{ String. Name of FIA research station to restrict states to
 	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. } 
+  \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
+	polygon object, data frame, full pathname to a shapefile, or name of a 
+	layer within a database. }
+  \item{xy_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
+	of xy. The dsn varies by driver. See gdal OGR vector formats 
+	(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R object. } 
+  \item{xy.joinid}{ String. Variable to join XY data to plot data. Not necessary to
+	be unique. If using most current XY coordinates, use identifier for a plot 
+	(e.g., PLOT_ID). }
   \item{clipxy}{ Logical. If TRUE, clip xy data. } 
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Data sournce name. Name of database where *_layers reside. }
@@ -70,15 +80,21 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, clipxy = TRUE, datsource = "sqlite"
   \item{saveobj}{ Logical. If TRUE, save SAest object to outfolder. }
   \item{outfolder}{ String. Name of output folder for saved data. If NULL,  
 	the working directory is used. }
-  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
+  \item{out_fmt}{ String. Format for output ('csv', 'sqlite', 'db', 'sqlite3', 
+	'db3', 'gpkg', 'gdb'). If out_fmt='gdb', must have ArcGIS license and 
+	install arcgisbinding package. }
+  \item{out_dsn}{ String. Name of database if out_fmt != 'csv'. }
   \item{outfn.pre}{ String. If out_fmt = "shp", a new folder is created within outfolder
 	named outfn.pre. If out_fmt != "shp", a prefix is concatenated to out_dsn, using
 	an underscore as separator. }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile 
 	(e.g., outfn_'date'.csv). }
-  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites out_dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites layers in out_dsn
+	or files if out_fmt = 'csv'. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
   \item{SApltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
   \item{...}{ Other parameters for DBgetPlots. }
 }

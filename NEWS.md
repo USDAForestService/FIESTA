@@ -1,3 +1,26 @@
+FIESTA_3.0.20 (Release date: 2021-02-09)
+==============
+This release
+
+Fixes bugs in spGetStrata()
+if you are using a raster and you already have a variable named STRATUMCD in your data table,
+it will now create add make sure the name is not duplicated by adding _1 or _2, etc.\cr
+Specified rast.NODATA values were not carried through to plot assignments, but this is fixed.\cr
+The NAlst was not returned when keepNA=TRUE, but also fixed.
+
+All overwrite parameters were made into 2 parameter (overwrite_dsn, overwrite_layer) for
+overwriting dsn versus overwriting layer in dsn or file (e.g., shp, csv) in outfolder.
+
+Changed output names in pltdat for consistency when clipxy=TRUE and clipxy=FALSE.
+clip_polyv to bndx
+clip_tabs to tabs
+tabs$clip_* to tabs$*
+clip_xyplt to xypltx
+
+Combined pfilter and cfilter into pcfilter
+
+
+
 FIESTA_3.0.13 (Release date: 2021-02-09)
 ==============
 This release contains updates for core functions and Green Book (GB), Model-Assisted (MA), and Photo-Based (PB) modules. There are also several additional analysis functions for streamlining routines and generating core tables of estimates and core reports.

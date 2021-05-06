@@ -16,8 +16,8 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
 	datsource = "sqlite", SQLitefn, RS = NULL, largebnd.threshold = 10, 
 	nbrdom.min = 10, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, SApackage = "JoSAE", 
-	SAmethod = "unit", pfilter = NULL, landarea = "FOREST", 
-	cfilter = NULL, estvarlst, savedata = FALSE, showsteps = FALSE, 
+	SAmethod = "unit", pcfilter = NULL, landarea = "FOREST", 
+	estvarlst, savedata = FALSE, showsteps = FALSE, 
 	outfolder = NULL, multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, barplot.compare = FALSE, 
 	title.ref = NULL, SAdomdat = NULL, SAdata = NULL, SApopdat = NULL)
@@ -48,12 +48,11 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
   \item{rastlst.cat.name}{ String vector. Output names for categorical rasters. }
   \item{SApackage}{ String. small area package to use ('JoSAE', 'sae') }
   \item{SAmethod}{ String. small area method to use ('unit', 'area') }
-  \item{pfilter}{ String A filter for plot-level data (e.g., "INVYR == 2012"). }
+  \item{pcfilter}{ String. A filter for plot or cond attributes (including pltassgn). 
+	Must be R logical syntax. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{cfilter}{ String. A filter for condition-level data (e.g., "FORTYPCD == 180"). 
-	Must be R syntax. }
   \item{estvarlst}{ String vector. Name(s) of estimation variable 
 	(e.g., c("VOLCFNET", "BA"). }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }

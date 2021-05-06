@@ -19,12 +19,14 @@
 anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique, 
 	smallbnd.domain = NULL, smallbnd.filter = NULL, smallbnd.stfilter = NULL, 
 	smallbnd.ecofilter = NULL, maxbnd.threshold = 10, largebnd.threshold = 10,
-	nbrdom.min = 10, datsource = "sqlite", SQLitefn, RS = NULL, measEndyr = NULL, 
-	measEndyr.filter = NULL, rastlst.cont = NULL, rastlst.cont.name = NULL, 
-	rastlst.cat = NULL, rastlst.cat.name = NULL, showsteps = FALSE, 
-	savedata = FALSE, savexy = FALSE, saveobj = TRUE, outfolder = NULL, 
-	out_fmt = "sqlite", out_dsn = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, SAdomdat = NULL, SAdata = NULL, ...)
+	nbrdom.min = 10, RS = NULL, xy = NULL, xy_dsn = NULL, xy.joinid = "PLOT_ID", 
+	datsource = "sqlite", SQLitefn, measEndyr = NULL, measEndyr.filter = NULL, 
+	rastlst.cont = NULL, rastlst.cont.name = NULL, 
+	rastlst.cat = NULL, rastlst.cat.name = NULL, 
+	showsteps = FALSE, savedata = FALSE, savexy = FALSE, saveobj = TRUE, 
+	outfolder = NULL, out_fmt = "sqlite", out_dsn = "SApopdat", outfn.date = FALSE, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	SAdomdat = NULL, SAdata = NULL, ...)
 }
 \arguments{
   \item{smallbnd}{ sf R object or String. Small area of interest boundary. 
@@ -58,9 +60,19 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	for selecting helperbnds. }
   \item{nbrdom.min}{ Integer. Set number for minimum domains for modeling. If NULL,
 	all domains within largebnd are selected. }
+  \item{RS}{ String. Name of FIA research station to restrict states to
+	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. } 
+  \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
+	polygon object, data frame, full pathname to a shapefile, or name of a 
+	layer within a database. }
+  \item{xy_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
+	of xy. The dsn varies by driver. See gdal OGR vector formats 
+	(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R object. } 
+  \item{xy.joinid}{ String. Variable to join XY data to plot data. Not necessary to
+	be unique. If using most current XY coordinates, use identifier for a plot 
+	(e.g., PLOT_ID). }
   \item{datsource}{ String. Name of datasource ('sqlite', 'datamart'). }
   \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }
-  \item{RS}{ String. Name of FIA research station to restrict states to. } 
   \item{measEndyr}{ Logical. Extract plots with most current measurement for 
 	state(s) for years measured before measEndyr. }
   \item{measEndyr.filter}{ Filter. If measEndyr=NULL, a filter for plots. }
@@ -78,11 +90,17 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
   \item{saveobj}{ Logical. If TRUE, saves data list objects to outfolder. }
   \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
 	If NULL, the working directory is used. }
-  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
+  \item{out_fmt}{ String. Format for output ('csv', 'sqlite', 'db', 'sqlite3', 
+	'db3', 'gpkg', 'gdb'). If out_fmt='gdb', must have ArcGIS license and 
+	install arcgisbinding package. }
+  \item{out_dsn}{ String. Name of database if out_fmt != 'csv'. }
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites out_dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites layers in out_dsn
+	or files if out_fmt = 'csv'. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
   \item{SAdomdat}{ R list object. SA domain data. }
   \item{SAdata}{ R list object. FIA data for estimation. }
   \item{...}{ Parameters for SAdata. }

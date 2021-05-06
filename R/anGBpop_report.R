@@ -1,5 +1,5 @@
 anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL, 
-	EVALIDator_match=FALSE, cfilter=NULL, pfilter=NULL, spcd=746, title.ref=NULL, 
+	EVALIDator_match=FALSE, pcfilter=NULL, spcd=746, title.ref=NULL, 
 	outfolder=NULL) {
   ## DESCRIPTION: Creates a report using Rmarkdown 
   ## 		Adds a folder named report in the outfolder and copies all 
@@ -57,7 +57,7 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
     input = rmdfn,
     output_file = reportfn,
     params = list(GBpopdat=GBpopdat, AOInm=AOInm, 
-		photo_author=photo_author, cfilter=cfilter, pfilter=pfilter, 
+		photo_author=photo_author, pcfilter=pcfilter, 
 		spcd=spcd, EVALIDator_match=EVALIDator_match, title.ref=title.ref),
     envir = parent.frame()
   )

@@ -9,17 +9,19 @@
 }
 \usage{    
 modMAtree(MApopdat = NULL, MAmethod = "greg", prednames = NULL, 
-	estseed = "none", landarea = "ALL", pfilter = NULL, cfilter = NULL, 
+	estseed = "none", landarea = "ALL", pcfilter = NULL, 
 	estvar = NULL, estvar.filter = NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
 	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, 
 	allin1 = FALSE, estround = 1, pseround = 2, estnull = "--", psenull = "--", 
-	divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE, 
-	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.estvar = NULL, title.filter = NULL, gui = FALSE, ...)
+	divideby = NULL, savedata = FALSE, outfolder = NULL, outfn.pre = NULL, 
+	outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, 
+	raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
+	title.main = NULL, title.ref = NULL, title.rowvar = NULL, 
+	title.colvar = NULL, title.unitvar = NULL, title.estvar = NULL, 
+	title.filter = NULL, gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,10 +34,8 @@ modMAtree(MApopdat = NULL, MAmethod = "greg", prednames = NULL,
   \item{landarea}{ String. The condition-level filter for defining land area 
 	('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1; 
 	if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0. }
-  \item{pfilter}{ String. A filter for plot-level data. The attributes must
-	be in plt or pltassgn data frames. Must be R syntax ('COUNTYCD == 1'). }
-  \item{cfilter}{ String. A filter for the cond. The attributes must be in
-	cond data frame. Must be R syntax (e.g., 'OWNGRPCD != 40'). }
+  \item{pcfilter}{ String. A filter for plot or cond attributes (including pltassgn). 
+	Must be R logical syntax. }
   \item{estvar}{ String. Name of the tree-level estimate variable (e.g., 'VOLCFNET'). }
   \item{estvar.filter}{ String. A tree-level filter for estvar. Must be R syntax 
 	(e.g., 'STATUSCD == 1'). }
@@ -89,17 +89,28 @@ modMAtree(MApopdat = NULL, MAmethod = "greg", prednames = NULL,
 		for percent standard errror. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
-  \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
-	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
-  \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes
-	many estimation units, and only raw data tables are needed, it is more 
-	efficient to output raw data only. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{outfn.pre}{ String. If savedata=TRUE, prefix for output files. If rawdata=TRUE, 
+	prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if raw_fmt != 'csv'). }
+  \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
   \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
+  \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
+	for estimation (See Value). If savedata = TRUE, tables are written to outfolder 
+	(if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv'). }
+  \item{rawonly}{ Logical. If TRUE, only rawdata are output. If dataset includes
+	many estimation units, and only raw data tables are desired, it is more 
+	efficient to output raw data only. }
+  \item{raw_fmt}{ String. Format for output rawdata tables 
+	('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp'). }
+  \item{raw_dsn}{ String. Data source name for rawdata output. If extension is not
+	included, out_fmt is used. Use full path if outfolder=NULL. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the output. If rawdata=TRUE, 
+	overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or out_layers in 
+	raw_dsn (if raw_fmt != 'csv'). }
+  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data 
+	to existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt != 'csv". }  
   \item{returntitle}{ Logical. If TRUE, returns title(s) of the estimation table(s). }
   \item{title.main}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: the complete 
 	title used for table. If title.main=NULL, the title.* parameters are used to 

@@ -35,17 +35,18 @@ checkfilenm <- function(fn, outfolder=NULL, ext=NULL,
   if (!is.character(fn)) {
     message("file name must be a character string")
   }
-  if (!is.null(outfolder)) {
-    outfolder <- pcheck.outfolder(outfolder)
+  if (is.null(outfolder)) {
+    if (file.exists(fn)) {
+      return(normalizePath(fn)) 
+    } else {
+      outfolder <- normalizePath(dirname(fn))
+      fn <- basename(fn)
+    } 
   }
 
-  if (is.null(outfolder) && file.exists(fn)) {
-    return(normalizePath(fn)) 
-  }
   outfolder <- pcheck.outfolder(outfolder)
-
   if (file.exists(file.path(outfolder, fn))) {
-    return(fn)
+    return(file.path(outfolder, fn))
   } else if (!is.null(ext)) {
     if (substring(ext, 1, 1) != ".") {
       ext <- paste0(".", ext)
@@ -65,9 +66,9 @@ checkfilenm <- function(fn, outfolder=NULL, ext=NULL,
 }
     
 
-getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
-		outfn.date=FALSE, overwrite=FALSE, ext=NULL, baseonly=FALSE, 
-		noext=FALSE, outfn.default="outfile", gui=FALSE, append=FALSE) {
+getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite=FALSE, ext=NULL, baseonly=FALSE, noext=FALSE, 
+	outfn.default="outfile", add=TRUE, append=FALSE, gui=FALSE) {
   ## DESCRIPTION: get full pathname 
 
   ## Check outfn
@@ -118,8 +119,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
   if ((is.na(extfn) || extfn=="NA") && dir.exists(outfn)) {
     message("outfn is a folder name... must be a file name")
     return(outfn)
-  }
- 
+  } 
   if (is.null(outfolder)) {
     if (!dir.exists(dirname(outfn)) && !dir.exists(dirname(normalizePath(outfn)))) {
       stop(outfn, " does not exist")
@@ -141,7 +141,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
   ## Get full path filename
   outfolder <- pcheck.outfolder(outfolder, gui=gui)  
   outfilenm <- file.path(outfolder, outfn.base)
-
+   
   if (overwrite) {
     nm <- paste0(outfilenm, ".", ext)
     if (file.exists(nm)) {
@@ -157,18 +157,16 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL,
         stop("permission denied") 
       message("overwriting ", nm, "...")
     } 
-  } else if (!append) {
+  } else if (!append && !add) {
     outfn.base <- FIESTA::fileexistsnm(outfolder, outfn.base, ext)
   }
-
   if (!baseonly) {
     ## Check outfolder
-    outfolder <- pcheck.outfolder(outfolder, gui=gui) 
+    #outfolder <- pcheck.outfolder(outfolder, gui=gui) 
     outfilenm <- file.path(normalizePath(outfolder), outfn.base)
   } else {
     outfilenm <- outfn.base
-  }
- 
+  } 
   if (!noext) {
     if (substring(ext, 1, 1) == ".") {
       outfilenm <- paste0(outfilenm, ext)
@@ -356,7 +354,7 @@ checknm <- function(nm, nmlst) {
   while (nm %in% nmlst) {
     i <- i + 1
     nm <- paste(nm, i, sep="_")
-    warning("name exists... changed name to ", nm)
+    message("name exists... changed name to ", nm)
   } 
   return(nm)
 }

@@ -20,9 +20,9 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	evalid = NULL, evalCur = FALSE, evalEndyr = NULL, evalType = "VOL", 
 	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
 	allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, 
-	savebnd = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "shp", 
+	savebnd = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "csv", 
 	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = FALSE, ...)
+	overwrite_layer = FALSE, append_layer = FALSE)
 }
 \arguments{
   \item{bnd}{ sf R object, Area of Interest (AOI) boundary. Can be a spatial 
@@ -103,24 +103,30 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 	(i.e., INTENSITY = 1). }
   \item{showsteps}{ Logical. If TRUE, display data in device window. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
-  \item{savebnd}{ Logical. If TRUE, saves bnd. If out_fmt="sqlite", saves to a 
+  \item{savebnd}{ Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a 
 	SpatiaLite database. }
   \item{savexy}{ Logical. If TRUE, save xy coordinates to outfolder. }
-  \item{outfolder}{ String. If savedata=TRUE or exportsp=TRUE, name of output folder. 
-	If NULL, the working directory is used. }
-  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg', 'gdb').
-	If out_fmt='gdb', must install arcgisbinding package and ArcGIS R-Bridge. }
-  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg', 'gdb'). }
+  \item{outfolder}{ String. If savedata=TRUE or savexy=TRUE, savebnd=TRUE, 
+	name of output folder. If NULL, the working directory is used. }
+  \item{out_fmt}{ String. Format for output ('csv', 'sqlite', 'db', 'sqlite3', 
+	'db3', 'gpkg', 'gdb'). If out_fmt='gdb', must have ArcGIS license and 
+	install arcgisbinding package. }
+  \item{out_dsn}{ String. Name of database if out_fmt != 'csv'. }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
-  \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
-  \item{overwrite_dsn}{ Logical. If TRUE, overwrite dsn. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
-  \item{...}{ Other parameters for spMakeSpatialPoints. }
+  \item{outfn.date}{ Logical. If TRUE, adds current date to out_dsn name 
+	or file name if out_fmt = 'csv'. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites out_dsn. Note: cannot
+	overwrite out_fmt="gdb". }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites layers in out_dsn
+	or files if out_fmt = 'csv'. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
 }
 \value{
-  \item{clip_pnts}{ sf object. Input xy data clipped to boundary. }
-  \item{clip_polyv}{ sf object. Input bnd. }
-  \item{clip_tabs}{ list object. List of input layers clipped to boundary. }
+  \item{xypltx}{ sf object. Input xy data clipped to boundary. }
+  \item{bndx}{ sf object. Input bnd. }
+  \item{tabs}{ list object. List of input layers clipped to boundary (pltx,condx,etc.). }
   \item{xy.uniqueid}{ String. Name of unique identifier of xy. }
   \item{puniqueid}{ String. Name of unique identifier of plot in plt. }
   \item{pjoinid}{ String. Name of unique identifier of plot in plt. }
@@ -156,8 +162,8 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL,
 
 \note{
 
-  If exportsp=TRUE:\cr
- 	If out_fmt="shp", the writeOGR (rgdal) function is called. The ArcGIS driver 
+  If savebnd=TRUE:\cr
+ 	If out_fmt=c('csv','shp'), the writeOGR (rgdal) function is called. The ArcGIS driver 
 	truncates variable names to 10 characters or less. Variable names are changed 
 	before export using an internal function (trunc10shp). If Spatial object has 
 	more than 1 record, it will be returned but not exported. 

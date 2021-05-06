@@ -5,8 +5,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	pltassgnid="CN", pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
 	strata=TRUE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	unitcombine=FALSE, stratalut=NULL, strvar="STRATUMCD", 
-	nonresp=FALSE, substrvar=NULL, stratcombine=TRUE, prednames=NULL, 
+	unitcombine=FALSE, removeunits=TRUE, removetext="unitarea", stratalut=NULL,
+ 	strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL, stratcombine=TRUE, prednames=NULL, 
 	predfac=NULL, ACI=FALSE, plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
 	vegplt.nonsamp.filter=NULL, nullcheck=FALSE, pvars2keep=NULL, cvars2keep=NULL, 
 	ppsanm="pop_plot_stratum_assgn", gui=FALSE){
@@ -74,7 +74,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Set global variables
   COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
 	STATECD=PLOT_STATUS_CD=PSTATUSCD=cndnmlst=pltdomainlst=PROP_BASIS=
-	ACI.filter=V1=ONEUNIT=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
+	ACI.filter=V1=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
 	vspsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD <- NULL
@@ -642,8 +642,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Check unitvar - if NULL, add unitvar=ONEUNIT to pltcondx
   ######################################################################################
   if (is.null(unitvar)) {
-    pltcondx[, ONEUNIT := 1] 
-    unitvar <- "ONEUNIT"
+    unitvar <- checknm("ONEUNIT", names(pltcondx))
+    pltcondx[, (unitvar) := 1] 
     pvars2keep <- c(unitvar, pvars2keep)
     unitvars <- unitvar
     areavar <- NULL
@@ -655,7 +655,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ##	 and areavar (default="ACRES")
   ###################################################################################
   unitdat <- check.unitarea(unitarea=unitarea, pltx=pltcondx, 
-	unitvars=c(unitvar, unitvar2), areavar=areavar, gui=gui)
+	unitvars=c(unitvar, unitvar2), areavar=areavar, removeunits=removeunits, 
+	removetext=removetext, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
 
@@ -673,8 +674,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Strata - Generate table of plots by strata, including nonsampled plots (P2POINTCNT)
   ######################################################################################
   if (strata) {
-    stratalut <- pcheck.table(stratalut, tab_dsn=dsn, tabnm="stratalut", caption="stratalut table?", 
-		nullcheck=nullcheck, tabqry=stratalutqry, returnsf=FALSE)
+    stratalut <- pcheck.table(stratalut, tab_dsn=dsn, tabnm="stratalut", 
+		caption="stratalut table?", nullcheck=nullcheck, tabqry=stratalutqry, 
+		returnsf=FALSE)
     if (!stratindb && !is.null(evalid)) {
       ecol <- pcheck.varchar("EVALID", checklst=names(stratalut), stopifinvalid=FALSE)
       if (!is.null(ecol)) {

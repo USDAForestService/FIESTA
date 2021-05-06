@@ -124,10 +124,11 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   if (savedata || exportsp || exportNA) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
   }
 
   ########################################################################
@@ -137,9 +138,9 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   for (i in 1:length(polyvlst)) {
     polyv <- polyvlst[[i]]
     polyvnm <- names(polyvlst)[i]
-    if (is.null(polyvnm)) 
+    if (is.null(polyvnm)) {
       polyvnm <- paste0("poly", i)
- 
+    }
     ## Check projections of inlayer point layer vs. polygon layer. 
     ## If different, reproject sppltx to polygon projection.
     prjdat <- crsCompare(sppltx, polyv, nolonglat=TRUE) 
@@ -157,6 +158,10 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     ## Check polyvarlst
     ########################################################  
     polyvars <- polyvarlst[[i]]
+    if (!all(polyvars %in% names(polyv))) {
+      miss <- polyvars[!polyvars %in% names(polyv)]
+      stop("polyvars not in polyv: ", toString(miss))
+    }
     vars2remove <- names(polyv)[!names(polyv) %in% polyvars]
     if (length(vars2remove) == length(names(polyv))) {
        message("polyvarlst is invalid... extracting all variables")
@@ -227,15 +232,16 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   }
 
   if (savedata) {
-    datExportData(sppltext, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    datExportData(sppltext, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE)
   }
 
   ## Export to shapefile
   if (exportsp) {
-    spExportSpatial(sppltext, out_dsn=out_dsn, out_layer=out_layer, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+    spExportSpatial(sppltext, outfolder=outfolder, out_layer=out_layer, 
+		outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_layer=overwrite_layer)
   }
   

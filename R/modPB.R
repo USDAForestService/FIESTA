@@ -186,13 +186,21 @@ modPB <- function(pnt=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ###################################################################################
   phototype <- ifelse(ratio, tolower(paste("ratio", tabtype, sep="_")), 
 		tolower(paste("nratio", tabtype, sep="_")))
+  pcfilter <- NULL
+  if (!is.null(pfilter)) {
+    pcfilter <- pfilter
+    if (!is.null(pnt.filter)) {
+      pcfilter <- paste(pcfilter, "and", pnt.filter)
+    } 
+  } else if (!is.null(pnt.filter)) {
+    pcfilter <- pnt.filter
+  }
   alltitlelst <- check.titles(dat=PBall, esttype="PHOTO", phototype=phototype, 
 	tabtype=tabtype, sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
 	title.rowvar=title.rowvar, title.colvar=title.colvar, title.unitvar=title.unitvar, 
 	title.filter=title.filter, title.units=title.units, unitvar=unitvar, rowvar=rowvar,
  	colvar=colvar, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-	landarea=landarea, pfilter=pfilter, cfilter=pnt.filter, 
-	allin1=allin1, outfn=outfn, outfn.pre=outfn.pre)
+	landarea=landarea, pcfilter=pcfilter, allin1=allin1, outfn=outfn, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse

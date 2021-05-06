@@ -1,9 +1,13 @@
-check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE) {
+check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", 
+	removeunits=TRUE, removetext="unitarea", gui=FALSE) {
 
   ## DESCRIPTION: Checks unitarea
   ## Check acres by estimation unit
   ## If 1 estimation unit, unitarea can be a number of a data frame with areavar.
   ## Check if variables match variables in pltx
+  ## removeunits:  If TRUE, removes units that do not have plots
+  ## removetext: If removeunits=TRUE and there are units that do not have plots,
+  ##		the text to show user (e.g., for Small Area, this is changed to dunitarea")
 
   ## Set global variables
   MATCH <- NULL
@@ -66,9 +70,9 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
       if (nrow(unitarea) >  1) {
         if (length(unitvars) == 1) {
           if (!unitvars %in% names(unitarea)) {
-            if (unitvars == "ONEUNIT") {
-              unitarea$ONEUNIT <- 1
-              unitarea <- unitarea[, sum(.SD), by="ONEUNIT", .SDcols=areavar]
+            if (grepl("ONEUNIT", unitvars)) {
+              unitarea[[unitvars]] <- 1
+              unitarea <- unitarea[, sum(.SD), by=unitvars, .SDcols=areavar]
               setnames(unitarea, "V1", areavar)
             } else {
               stop("invalid unitarea")
@@ -120,14 +124,14 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", gui=FALSE)
     tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
     pltx <- tabs$tab1
     unitarea <- tabs$tab2
-
+ 
     ## Check that the values of unitvars in pltx are all in unitarea
     pltx <- check.matchval(tab1=pltx, tab2=unitarea, var1=unitvars, 
-		tab1txt="plt", tab2txt="unitarea", stopifmiss=FALSE)
+		tab1txt="plt", tab2txt=removetext, stopifmiss=FALSE)
 
     ## Check that the values of unitvars in unitarea are all in pltx
     unitarea <- check.matchval(unitarea, pltx, unitvars, 
-		tab1txt="unitarea", tab2txt="plt", subsetrows=TRUE)
+		tab1txt=removetext, tab2txt="plt", subsetrows=removeunits)
 
     ## Sum area by unitvars
     unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), by=unitvars, 

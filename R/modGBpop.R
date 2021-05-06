@@ -5,11 +5,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, stratalut=NULL, 
-	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
-	minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", savedata=FALSE, 
-	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, GBdata=NULL, pltdat=NULL, 
-	GBstratdat=NULL, gui=FALSE){
+	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", strwtvar="strwt",
+	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", 
+	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL,
+ 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, GBdata=NULL, 
+	pltdat=NULL, GBstratdat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -67,6 +67,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
+    overwrite_dsn <- outlst$overwrite_dsn
   } 
 
   if (!is.null(GBdata)) {
@@ -93,16 +94,16 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 
   } else {
     if (!is.null(pltdat)) {
-      list.items <- c("clip_poly", "clip_tabs", "clip_xyplt")
+      list.items <- c("bndx", "tabs", "xypltx")
       pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
 
       ## Extract list objects
       puniqueid <- pltdat$puniqueid
       pjoinid <- pltdat$pjoinid
-      plt <- pltdat$clip_tabs$clip_pltx
-      cond <- pltdat$clip_tabs$clip_condx
-      tree <- pltdat$clip_tabs$clip_treex
-      seed <- pltdat$clip_tabs$clip_seedx
+      plt <- pltdat$tabs$pltx
+      cond <- pltdat$tabs$condx
+      tree <- pltdat$tabs$treex
+      seed <- pltdat$tabs$seedx
     }
     if (!is.null(GBstratdat)) {
       list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
@@ -115,6 +116,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       strvar <- GBstratdat$strvar
       getwt <- GBstratdat$getwt
       getwtvar <- GBstratdat$getwtvar
+      strwtvar <- GBstratdat$strwtvar
 
       if (is.null(unitvar)) {
         unitvar <- GBstratdat$unitvar

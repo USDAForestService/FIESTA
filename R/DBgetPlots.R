@@ -1404,17 +1404,23 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
         xyCurx <- sqldf::sqldf(xyx.qry)
         names(xyCurx)[names(xyCurx) == "CN"] <- "PLT_CN"
+        xyCurx$COUNTYFIPS <- paste0(formatC(xyCurx$STATECD, width=2, digits=2, flag=0), 
+          	formatC(xyCurx$COUNTYCD, width=3, digits=3, flag=0))
         assign(paste0("xyCurx_", coords), xyCurx) 
-        if (returndata) 
+        if (returndata) {
           assign(paste0("xyCur_", coords), 
 				rbind(get(paste0("xyCur_", coords)), xyCurx)) 
+        }
       } else {
         xyx <- xyx[, c("PLT_CN", "STATECD", "UNITCD", "COUNTYCD", "PLOT", 
 		"LON_PUBLIC", "LAT_PUBLIC", "PLOT_ID"), with=FALSE]
+        xyx$COUNTYFIPS <- paste0(formatC(xyx$STATECD, width=2, digits=2, flag=0), 
+          	formatC(xyx$COUNTYCD, width=3, digits=3, flag=0))
         assign(paste0("xyx_", coords), xyx)
-        if (returndata) 
+        if (returndata) {
           assign(paste0("xy_", coords), 
 				rbind(get(paste0("xy_", coords)), xyx))
+        }
       } 
     }
  

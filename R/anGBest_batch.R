@@ -1,9 +1,9 @@
 anGBest_batch <- function(GBpopdatlst=NULL, esttype="AREA", estseed="none",
-	landarea="FOREST", pfilter=NULL, cfilter=NULL, estvarlst=NULL, 
+	landarea="FOREST", pcfilter=NULL, estvarlst=NULL, 
 	estvar.filterlst=NULL, rowvar=NULL, colvar=NULL, sumunits=TRUE, 
-	savedata=FALSE, raw_dsn=NULL, raw_fmt="sqlite", 
-	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, title.filterlst=NULL, ...) {
+	savedata=FALSE, raw_dsn="estdat", raw_fmt="sqlite", outfolder=NULL,  
+	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, append_layer=FALSE, title.filterlst=NULL, ...) {
   ## DESCRIPTION: estimates for each evalid in list
   
   ## Set global variables
@@ -36,16 +36,23 @@ anGBest_batch <- function(GBpopdatlst=NULL, esttype="AREA", estseed="none",
   ## If savedata, check output file names
   ################################################################
   if (savedata) { 
-    outlst <- pcheck.output(gui=gui, out_dsn=raw_dsn, out_fmt=raw_fmt, 
+    outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt, 
 		outfolder=outfolder, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		append_layer=append_layer, createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    overwrite_dsn <- outlst$overwrite_dsn
+    append_layer <- outlst$append_layer
   
-    rawfolder <- paste(outfolder, "rawdata", sep="/")
-    if (!file.exists(rawfolder)) dir.create(rawfolder)
-    append_layer <- ifelse(out_fmt == "csv", FALSE, TRUE)
+    if (out_fmt == "csv") {
+      rawfolder <- paste(outfolder, "rawdata", sep="/")
+      if (!file.exists(rawfolder)) dir.create(rawfolder)
+    } else {
+      rawfolder <- outfolder
+    }
   }
 
   ## If population data
@@ -113,7 +120,7 @@ anGBest_batch <- function(GBpopdatlst=NULL, esttype="AREA", estseed="none",
           if (esttype == "AREA") {
             GBestdat <- tryCatch(
 		    modGBarea(GBpopdat=GBpopdat, 
-			landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
+			landarea=landarea, pcfilter=pcfilter, 
   			rowvar=rowvar, row.FIAname=TRUE,
   			colvar=colvar, col.FIAname=TRUE,
 			savedata=FALSE, returntitle=TRUE, rawdata=TRUE, 
@@ -125,7 +132,7 @@ anGBest_batch <- function(GBpopdatlst=NULL, esttype="AREA", estseed="none",
           } else if (esttype == "TREE") {
             GBestdat <- tryCatch(
 		   modGBtree(GBpopdat=GBpopdat, 
-			landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
+			landarea=landarea, pcfilter=pcfilter, 
 			estvar=estvar, estvar.filter=estvar.filter,
   			rowvar=rowvar, row.FIAname=TRUE,
   			colvar=colvar, col.FIAname=TRUE,
@@ -138,7 +145,7 @@ anGBest_batch <- function(GBpopdatlst=NULL, esttype="AREA", estseed="none",
           } else if (esttype == "RATIO") {
             GBestdat <- tryCatch(
 		   modGBratio(GBpopdat=GBpopdat, 
-			landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
+			landarea=landarea, pcfilter=pcfilter, 
 			estvarn=estvar, estvarn.filter=estvar.filter,
   			rowvar=rowvar, row.FIAname=TRUE,
   			colvar=colvar, col.FIAname=TRUE,
@@ -156,9 +163,8 @@ anGBest_batch <- function(GBpopdatlst=NULL, esttype="AREA", estseed="none",
           for (tabnm in exportlst) { 
             tab <- data.table(EVALID=eval[[1]], GBestdat$raw[[tabnm]])
             if (savedata) {
-              overwrite_layer <- ifelse(append_layer, FALSE, overwrite_layer) 
               datExportData(tab, outfolder=rawfolder, out_fmt=out_fmt, out_dsn=out_dsn, 
-			overwrite_dsn=FALSE, overwrite_layer=overwrite_layer,
+			overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
       		append_layer=append_layer, layer.pre=layer.pre, out_layer=tabnm)
             } else {
               GBest[[layer.pre]][[tabnm]] <- 

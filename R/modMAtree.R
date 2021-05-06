@@ -1,14 +1,14 @@
 modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL, 
-	estseed="none", landarea="ALL", pfilter=NULL, cfilter=NULL, estvar=NULL, 
+	estseed="none", landarea="ALL", pcfilter=NULL, estvar=NULL, 
 	estvar.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits=FALSE, allin1=FALSE, estround=1, pseround=2, estnull="--", psenull="--", 
-	divideby=NULL, savedata=FALSE, rawdata=FALSE, rawonly=FALSE, outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, addtitle=TRUE, 
-	returntitle=FALSE, title.main=NULL, title.ref=NULL, title.rowvar=NULL, 
-	title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, 
-	gui=FALSE, ...){
+	divideby=NULL, savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, 
+	addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, returntitle=FALSE,
+	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, 
+	title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, gui=FALSE, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -58,23 +58,6 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
 		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
-  ## Check estseed 
-  ########################################################
-  estseedlst <- c("none", "only", "add")
-  estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
-		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
-
-  ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ## Check outfolder 
-  ########################################################
-  if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    if (rawdata && !file.exists(paste(outfolder, "rawdata", sep="/"))) 
-      dir.create(paste(outfolder, "rawdata", sep="/"))
-  }
 
   ###################################################################################
   ## Check data and generate population information 
@@ -118,7 +101,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   condsampcnt <- MApopdat$condsampcnt
   states <- MApopdat$states
   invyrs <- MApopdat$invyrs
-  MAmethod <- MApopdat$MAmethod
+  #MAmethod <- MApopdat$MAmethod
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
   PSstrvar <- MApopdat$PSstrvar
@@ -135,18 +118,6 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     }
   } 
 
-  ## Check estseed 
-  ########################################################
-  estseedlst <- c("none", "only", "add")
-  estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
-		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
-  if (estseed == "none") {
-    seedx <- NULL
-  } else {
-    if (is.null(seedx)) {
-      stop("no seedling data in population data")
-    }
-  } 
 
   ## Convert predfac if MAmethod="greg"
   if ("greg" %in% MAmethod && !is.null(predfac)) {
@@ -180,19 +151,22 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 	condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
-	landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter, 
-	cfilter=cfilter, allin1=allin1, estround=estround, pseround=pseround,
- 	divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder, 
-	gui=gui)
+ 	condid=condid, treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
+	landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
+ 	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly,
+ 	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn,
+ 	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date,
+ 	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
   treef <- estdat$treef
   seedf <- estdat$seedf
   tuniqueid <- estdat$tuniqueid
+  estseed <- estdat$estseed
   sumunits <- estdat$sumunits
+  landarea <- estdat$landarea
   allin1 <- estdat$allin1
   estround <- estdat$estround
   pseround <- estdat$pseround
@@ -203,7 +177,10 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
-  landarea <- estdat$landarea
+  overwrite_layer <- estdat$overwrite_layer
+  raw_fmt <- estdat$raw_fmt
+  raw_dsn <- estdat$raw_dsn
+  rawfolder <- estdat$rawfolder
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -292,8 +269,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
  	unitvar=unitvar, rowvar=rowvar, colvar=colvar, estvarn=estvar, 
 	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
 	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
-	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby, 
-	outfn.pre=outfn.pre)
+	pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -425,28 +401,24 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, outfn.estpse=outfn.estpse, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, estnm=estnm, estround=estround, 
+	outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, estround=estround, 
 	pseround=pseround, divideby=divideby, returntitle=returntitle,
 	estnull=estnull, psenull=psenull) 
 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
+  if (returntitle) {
+    titlelst <- tabs$titlelst
+  }
+
   if (rawdata) {
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat)
     rawdat$estvar <- estvar.name
     rawdat$estvar.filter <- estvar.filter
-  }
-  if (returntitle) {
-    titlelst <- tabs$titlelst
-  }
-
-  if (savedata) {
-    if (rawdata) {
-      rawfolder <- paste(outfolder, "rawdata", sep="/")
-      if (!file.exists(rawfolder)) dir.create(rawfolder)
-
+  
+    if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)
       } else {
@@ -457,15 +429,19 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
         tabnm <- names(rawdat[i])
         if (!tabnm %in% c(estvar, prednames)) {
           rawtab <- rawdat[[i]]
-          outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm, ".csv") 
-          if (tabnm %in% c("plotsampcnt", "condsampcnt", "unitlut", "unitarea")) {
+          outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
+          if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
             write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			outfn.date=outfn.date, overwrite=overwrite)
-          } else  { 
-            suppressWarnings(save1tab(tab=rawtab, tab.title=title.raw, 
-			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
-			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
-			addformat=FALSE, outfn.date=outfn.date, overwrite=overwrite))
+			outfn.date=outfn.date, overwrite=overwrite_layer)
+          } else if (is.data.frame(rawtab)) {
+            if (raw_fmt != "csv") {
+              out_layer <- tabnm 
+            } else {
+              out_layer <- outfn.rawtab
+            }
+            datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
+ 			out_dsn=raw_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer)
           }
         }
       }

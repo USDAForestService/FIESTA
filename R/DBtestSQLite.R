@@ -26,7 +26,14 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
     } else if (stopifnull) {
       stop("SQLite database does not exist")
     } else if (returnpath) {
-      return(SQLitepath)   
+      if (is.null(outfolder)) {
+        outfolder <- normalizePath(dirname(SQLitefn))
+        basenm <- basename(SQLitefn)
+      } else {
+        outfolder <- normalizePath(outfolder)
+        basenm <- basename(SQLitefn)
+      }
+      return(file.path(outfolder, basenm))
     } else {
       return(NULL)
     }
@@ -44,7 +51,7 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
       } 
       if (showlist) message(paste0(capture.output(tablst), collapse = "\n"))
     } else {
-        stop("SQLite connection failed")
+      stop("SQLite connection failed")
     }
     if (dbconnopen) {
       ## Connect to database   
@@ -52,7 +59,6 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
       return(sqlconn)    
     }
   }
-
   if (returnpath) {
     return(SQLitepath)
   } else {

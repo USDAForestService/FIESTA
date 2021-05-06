@@ -1,5 +1,5 @@
 anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE", 
-	SAmethod="unit", landarea="FOREST", pfilter=NULL, cfilter=NULL, 
+	SAmethod="unit", landarea="FOREST", pcfilter=NULL, 
 	estvarlst=NULL, tfilterlst="live", showsteps=FALSE, savedata=FALSE, 
 	savemultest=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
  	multest_outfolder=NULL, multest_dsn="SAmultest", multest.append=FALSE,
@@ -91,8 +91,8 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
  
 
 #        SAestdat <- tryCatch(modSAtree(SApopdat=SApopdat, SApackage=SApackage, 
-#		SAmethod=SAmethod, landarea=landarea, pfilter=pfilter, 
-#		cfilter=cfilter, estvar=estvar, estvar.filter=estvar.filter,
+#		SAmethod=SAmethod, landarea=landarea, pcfilter=pcfilter, 
+#		estvar=estvar, estvar.filter=estvar.filter,
 # 		smallbnd.att=smallbnd.att, savedata=TRUE, multest=TRUE, 		
 #		multest_fmt="sqlite", multest_dsn=multest_dsn, multest_layer=outnm, 
 #		returntitle=TRUE, outfolder=outfolder, multest_outfolder=multest_outfolder,
@@ -103,13 +103,13 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
 #			return(NULL) }) 
 
         SAestdat <- modSAtree(SApopdat=SApopdat, SApackage=SApackage, 
-		SAmethod=SAmethod, landarea=landarea, pfilter=pfilter, 
-		cfilter=cfilter, estvar=estvar, estvar.filter=estvar.filter,
+		SAmethod=SAmethod, landarea=landarea, pcfilter=pcfilter, 
+		estvar=estvar, estvar.filter=estvar.filter,
  		smallbnd.att=smallbnd.att, savedata=TRUE, multest=TRUE, 		
 		multest_fmt="sqlite", multest_dsn=multest_dsn, multest_layer=outnm, 
 		returntitle=TRUE, outfolder=outfolder, multest_outfolder=multest_outfolder,
  		multest.append=multest.append, multest.AOIonly=multest.AOIonly, 
-		overwrite=TRUE, outfn.pre=outfn.pre)
+		overwrite_layer=TRUE, outfn.pre=outfn.pre)
 
         if (is.null(SAestdat)) return(NULL)
 

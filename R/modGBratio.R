@@ -1,16 +1,16 @@
 modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE", 
-	landarea="FOREST", pfilter=NULL, cfilter=NULL, 
+	landarea="FOREST", pcfilter=NULL, 
 	estvarn=NULL, estvarn.filter=NULL, estvard=NULL, estvard.filter=NULL, 
 	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits=TRUE, allin1=FALSE, estround=3, pseround=2, estnull="--", psenull="--", 
-	divideby=NULL, savedata=FALSE, outfolder=NULL, overwrite=FALSE, outfn.pre=NULL,
- 	outfn.date=TRUE, addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", 
-	raw_dsn=NULL, layer.pre=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
-	append_layer=FALSE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
-	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.estvarn=NULL, 
-	title.estvard=NULL, title.filter=NULL, gui=FALSE, ...){
+	divideby=NULL, savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE,
+ 	addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL,
+ 	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, returntitle=FALSE,
+ 	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL,
+ 	title.unitvar=NULL, title.estvarn=NULL, title.estvard=NULL, title.filter=NULL,
+ 	gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION: 
@@ -58,23 +58,6 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   returnlst <- list()
 
 
-  ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data extraction?", first="NO", gui=gui) 
-
-  ## If savedata, check output file names
-  ################################################################
-  if (savedata) { 
-    outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		append_layer=append_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
-    outfolder <- outlst$outfolder
-    out_fmt <- outlst$out_fmt
-    overwrite_layer <- outlst$overwrite_layer
-  }
-
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
@@ -116,36 +99,27 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
 
-  ## Check estseed 
-  ########################################################
-  estseedlst <- c("none", "only", "add")
-  estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
-		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
-  if (estseed == "none") {
-    seedx <- NULL
-  } else {
-    if (is.null(seedx)) {
-      stop("no seedling data in population data")
-    }
-  } 
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 		condid=condid, treex=treex, seedx=seedx, sumunits=sumunits, 
-		landarea=landarea, ACI.filter=ACI.filter, pfilter=pfilter, 
-		cfilter=cfilter, allin1=allin1, estround=estround, pseround=pseround, 
-		divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-		rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder,
-		gui=gui)
+ 	condid=condid, treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
+	landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
+	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
+	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
   treef <- estdat$treef
   seedf <- estdat$seedf
   tuniqueid <- estdat$tuniqueid
+  estseed <- estdat$estseed
   sumunits <- estdat$sumunits
+  landarea <- estdat$landarea
   allin1 <- estdat$allin1
   estround <- estdat$estround
   pseround <- estdat$pseround
@@ -156,10 +130,10 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   rawonly <- estdat$rawonly
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
-  estround <- estdat$estround
-  pseround <- estdat$pseround
-  landarea <- estdat$landarea
-  #if (sumunits && nrow(unitarea) == 1) sumunits <- FALSE
+  overwrite_layer <- estdat$overwrite_layer
+  raw_fmt <- estdat$raw_fmt
+  raw_dsn <- estdat$raw_dsn
+  rawfolder <- estdat$rawfolder
 
   if ("STATECD" %in% names(pltcondf)) {
     states <- pcheck.states(sort(unique(pltcondf$STATECD)))
@@ -215,11 +189,11 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
-		bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
-		cuniqueid=cuniqueid, esttype=esttype, ratiotype=ratiotype, 
-		estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
- 		estvard.filter=estvard.filter, esttotn=TRUE, esttotd=TRUE, 
-		tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree)
+	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
+	cuniqueid=cuniqueid, esttype=esttype, ratiotype=ratiotype, 
+	estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
+ 	estvard.filter=estvard.filter, esttotn=TRUE, esttotd=TRUE, 
+	tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree)
   if (is.null(treedat)) return(NULL)
 
   tdomdat <- treedat$tdomdat
@@ -235,7 +209,6 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   }
 
   tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
-
   if (!is.null(tdomvar)) {
     cdomdat <- merge(condx, condf, by=c(cuniqueid, condid))
   }
@@ -263,7 +236,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
  	unitvar=unitvar, rowvar=rowvar, colvar=colvar, estvarn=estvarn,
  	estvarn.filter=estvarn.filter, estvard=estvard, estvard.filter=estvard.filter,
  	addtitle=addtitle, rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea,
- 	pfilter=pfilter, cfilter=cfilter, allin1=allin1, divideby=divideby, outfn.pre=layer.pre)
+ 	pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -271,7 +244,9 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   title.ref <- alltitlelst$title.ref
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
-  if(rawdata) outfn.rawdat <- alltitlelst$outfn.rawdat
+  if(rawdata) {
+    outfn.rawdat <- alltitlelst$outfn.rawdat
+  }
 
   #####################################################################################
   ## GENERATE ESTIMATES
@@ -540,12 +515,16 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
  	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder,
- 	overwrite=overwrite, outfn.date=outfn.date, estnm=estnm, estround=estround,
+ 	overwrite=overwrite_layer, outfn.date=outfn.date, estnm=estnm, estround=estround,
  	pseround=pseround, divideby=divideby, returntitle=returntitle, 
 	estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
   
+  if (returntitle) {
+    titlelst <- tabs$titlelst
+  }
+
   if (rawdata) {
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat) 
@@ -555,16 +534,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
       rawdat$estvard <- estvard.name
       rawdat$estvard.filter <- estvard.filter
     }
-  }
-  if (returntitle) {
-    titlelst <- tabs$titlelst
-  }
-
-  if (savedata) {
-    if (rawdata) {
-      rawfolder <- paste(outfolder, "rawdata", sep="/")
-      if (!file.exists(rawfolder)) dir.create(rawfolder)
-
+    if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)
       } else {
@@ -578,15 +548,14 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
           write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
 			outfn.date=outfn.date, overwrite=overwrite_layer)
         } else if (is.data.frame(rawtab)) {
-          #overwrite_layer <- ifelse(append_layer, FALSE, overwrite_layer)
-          if (out_fmt != "csv") {
+          if (raw_fmt != "csv") {
             out_layer <- tabnm 
           } else {
-            out_layer <- outfn.rawdat
+            out_layer <- outfn.rawtab
           }
-          datExportData(rawtab, out_fmt=out_fmt, outfolder=rawfolder, 
- 			out_dsn=out_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
-			append_layer=append_layer, layer.pre=layer.pre)
+          datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
+ 			out_dsn=raw_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
+			append_layer=append_layer)
         }
       }
     }

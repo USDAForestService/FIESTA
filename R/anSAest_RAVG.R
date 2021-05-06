@@ -2,8 +2,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
  	RAVG.state=NULL, RAVG.ecoprov=NULL, RAVG.minacre=NULL, datsource="sqlite", 
 	SQLitefn, RS=NULL, largebnd.threshold=10, nbrdom.min=10, rastlst.cont=NULL,
  	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
-	SApackage="JoSAE", SAmethod="unit", pfilter=NULL, landarea="FOREST", 
-	cfilter=NULL, estvarlst, savedata=FALSE, showsteps=FALSE, outfolder=NULL,
+	SApackage="JoSAE", SAmethod="unit", pcfilter=NULL, landarea="FOREST", 
+	estvarlst, savedata=FALSE, showsteps=FALSE, outfolder=NULL,
  	multest_dsn="RAVG_SAmultest", multest.append=FALSE, overwrite_dsn=FALSE, 
 	overwrite_layer=TRUE, barplot.compare=FALSE, title.ref=NULL, 
 	SAdomdat=NULL, SAdata=NULL, SApopdat=NULL) {
@@ -169,7 +169,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
  		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		showsteps=showsteps, savedata=savedata, savexy=savexy, savesteps=savedata,
- 		outfolder=outfolder, out_fmt="sqlite", out_dsn=NULL, 
+ 		outfolder=outfolder, out_fmt="sqlite", out_dsn="SApopdat", 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
 		SAdomdat=SAdomdat, SAdata=SAdata)
 
@@ -179,9 +179,9 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   }
   #SAdata <- SApop$SAdata
 
-  if (is.null(SApopdat)) 
+  if (is.null(SApopdat)) {
     return(NULL)
-
+  }
 
   ####################################################################
   ## Get estimates
@@ -208,12 +208,13 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
       SAestdat <- tryCatch(
 		modSAtree(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
-			landarea=landarea, pfilter=pfilter, cfilter=cfilter, 
+			landarea=landarea, pcfilter=pcfilter, 
 			estvar=estvar, estvar.filter=estvar.filter,
-			savedata=savedata, multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn,
-			multest_layer=outnm, returntitle=TRUE, rawdata=TRUE, outfolder=outfolder,
- 			multest.append=multest.append, title.ref=title.ref, overwrite_dsn=overwrite_dsn,
- 			overwrite=overwrite_layer, outfn.pre=RAVG.ecoprov, rawonly=TRUE),
+			savedata=savedata, multest=TRUE, multest_fmt="sqlite", 
+			multest_dsn=multest_dsn, multest_layer=outnm, returntitle=TRUE, 
+			rawdata=TRUE, outfolder=outfolder, multest.append=multest.append,
+ 			title.ref=title.ref, overwrite_dsn=overwrite_dsn,
+ 			overwrite_layer=overwrite_layer, outfn.pre=RAVG.ecoprov, rawonly=TRUE),
 				error=function(err) {
 					message(err)
 					return(NULL)

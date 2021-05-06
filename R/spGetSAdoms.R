@@ -90,7 +90,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		gui=gui)
+		createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
@@ -366,7 +366,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ### DO THE WORK
   #############################################################################
   if (helper_autoselect) { 
-
     autoselectlst <- helper.select(smallbndx, smallbnd.unique, smallbnd.domain=smallbnd.domain,
  		helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, largebndx=largebndx, 
 		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
@@ -376,7 +375,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
 		maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
 		overwrite=overwrite_layer)
-
     SAdomslst <- autoselectlst$SAdomslst
     helperbndxlst <- autoselectlst$helperbndxlst
     smallbndxlst <- autoselectlst$smallbndxlst
@@ -474,6 +472,11 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   rm(maxbndx)
   if (helper_autoselect) rm(autoselectlst)
   gc()
+
+  #if (!multiSAdoms) {
+  #  SAdoms <- SAdomdat$SAdomlst[[1]]
+  #  smallbnd <- SAdomdat$smallbndlst[[1]]
+  #}  
 
   return(list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst))
 }

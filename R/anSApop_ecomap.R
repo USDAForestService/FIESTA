@@ -1,12 +1,12 @@
 anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique, 
 	smallbnd.domain=NULL, smallbnd.filter=NULL, smallbnd.stfilter=NULL, 
 	smallbnd.ecofilter=NULL, maxbnd.threshold=10, largebnd.threshold=10, 
-	nbrdom.min=10, datsource="sqlite", SQLitefn, RS=NULL, measEndyr=NULL, 
-	measEndyr.filter=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
-	rastlst.cat=NULL, rastlst.cat.name=NULL, showsteps=FALSE, 
-	savedata=FALSE, savexy=FALSE, saveobj=TRUE, outfolder=NULL, 
-	out_fmt="sqlite", out_dsn=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, SAdomdat=NULL, SAdata=NULL, ...) {
+	nbrdom.min=10, RS=NULL, xy=NULL, xy_dsn=NULL, xy.joinid="PLOT_ID", 
+	datsource="sqlite", SQLitefn, measEndyr=NULL, measEndyr.filter=NULL, 
+	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
+	showsteps=FALSE, savedata=FALSE, savexy=FALSE, saveobj=TRUE, outfolder=NULL, 
+	out_fmt="sqlite", out_dsn="SApopdat", outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, append_layer=FALSE, SAdomdat=NULL, SAdata=NULL, ...) {
 		
 
   ## Set global variables
@@ -19,14 +19,22 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata || saveobj) {
+  if (savedata) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+		append_layer=append_layer, createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    overwrite_dsn <- outlst$overwrite_dsn
+    append_layer <- outlst$append_layer
+
+  } else if (saveobj) {
+    outfolder <- pcheck.outfolder(outfolder)
   }
+    
 
   ## Set parameters
   helperbnd=FIESTA::ecomap
@@ -52,7 +60,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   #############################################################################
   if (is.null(SAdomdat) && is.null(SAdata)) {
     message("generating SAdoms...")
-
     SAdomdat <- spGetSAdoms(smallbnd=smallbnd, smallbnd_dsn=smallbnd_dsn, 	
 		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain,
  		smallbnd.filter=smallbnd.filter, smallbnd.stfilter=smallbnd.stfilter,
@@ -80,24 +87,23 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   ###########################################################################
  
   if (is.null(SAdata)) {
-
     ###########################################################################
     ## Extract FIA data and model data
     ###########################################################################
-    SAdata <- anSAdata(SAdoms, smallbnd=smallbnd, RS=RS, datsource=datsource, 
-		xy.joinid="PLOT_ID", istree=TRUE, data_dsn=SQLitefn, 
+    SAdata <- anSAdata(SAdoms, smallbnd=smallbnd, RS=RS, xy=xy, xy_dsn=xy_dsn,
+ 		xy.joinid=xy.joinid, datsource=datsource, istree=TRUE, data_dsn=SQLitefn, 
 		measCur=measCur, measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		showsteps=showsteps, savedata=savedata, savexy=savexy, 
-		outfolder=outfolder, out_fmt=out_fmt, out_dsn=NULL, 
+		outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn, 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, ...)
     if (is.null(SAdata)) return(NULL)
     returnlst$SAdata <- SAdata
 
-    if (saveobj) 
+    if (saveobj) {
       save(SAdata, file=file.path(outfolder, "SAdata.rda"))
-
+    }
   } 
 
   ## SAdata

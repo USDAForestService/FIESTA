@@ -1,7 +1,7 @@
 datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
  	out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=FALSE, 
 	create_dsn=FALSE, overwrite_dsn=FALSE, overwrite_layer=FALSE, 
-	append_layer=FALSE, index.unique=NULL, index=NULL) {
+	add_layer=TRUE, append_layer=FALSE, index.unique=NULL, index=NULL) {
   ###########################################################################
   ## DESCRIPTION: Exports a data.frame to file or database.
   ## out_fmt	Output format ('csv', 'sqlite', 'gpkg', 'shp')		
@@ -33,12 +33,12 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 #  } else if ("data.table" %in% class(dfobj)) {
 #    dfobj <- setDF(dfobj)
   }
-
+ 
   ## Check output data
   outlst <- pcheck.output(out_fmt=out_fmt, outfolder=outfolder, 
 	out_dsn=out_dsn, overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-	outfn.date=outfn.date, append_layer=append_layer, 
-	outfn.pre=outfn.pre, layer.pre=layer.pre)
+	outfn.date=outfn.date, add_layer=add_layer, append_layer=append_layer, 
+	outfn.pre=outfn.pre)
   out_fmt <- outlst$out_fmt
   out_dsn <- outlst$out_dsn
   outfolder <- outlst$outfolder

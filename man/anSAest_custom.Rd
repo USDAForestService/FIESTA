@@ -9,7 +9,7 @@
 }
 \usage{
 anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit", 
-	landarea = "FOREST", pfilter = NULL, cfilter = NULL, estvarlst = NULL, 
+	landarea = "FOREST", pcfilter = NULL, estvarlst = NULL, 
 	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, savemultest = FALSE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, multest_outfolder = NULL,
 	multest_dsn = "SAmultest", multest.append = FALSE, multest.AOIonly = TRUE, 
@@ -25,8 +25,8 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
-  \item{pfilter}{ String. A filter for plt. Must be R syntax. }
-  \item{cfilter}{ String. A filter for cond. Must be R syntax. }
+  \item{pcfilter}{ String. A filter for plot or cond attributes (including pltassgn). 
+	Must be R logical syntax. }
   \item{estvarlst}{ String vector. Name of the tree estimate variable(s). }
   \item{tfilterlst}{ String vector. Tree filter ("Live", "Dead"). }
   \item{showsteps}{ Logical. If TRUE, clipped points are displayed.
