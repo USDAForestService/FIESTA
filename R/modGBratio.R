@@ -1,11 +1,11 @@
 modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE", 
-	landarea="FOREST", pcfilter=NULL, 
-	estvarn=NULL, estvarn.filter=NULL, estvard=NULL, estvard.filter=NULL, 
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
-	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	sumunits=TRUE, allin1=FALSE, estround=3, pseround=2, estnull="--", psenull="--", 
-	divideby=NULL, savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE,
+	landarea="FOREST", pcfilter=NULL, estvarn=NULL, estvarn.filter=NULL, 
+	estvard=NULL, estvard.filter=NULL, rowvar=NULL, colvar=NULL, 
+	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
+	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
+	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits=TRUE, allin1=FALSE, 
+	metric=FALSE, estround=3, pseround=2, estnull="--", psenull="--", divideby=NULL, 
+	savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE,
  	addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL,
  	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, returntitle=FALSE,
  	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL,
@@ -57,7 +57,6 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   parameters <- FALSE
   returnlst <- list()
 
-
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
@@ -84,6 +83,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   ACI.filter <- GBpopdat$ACI.filter
   unitarea <- GBpopdat$unitarea
   areavar <- GBpopdat$areavar
+  areaunits <- GBpopdat$areaunits
   unitvar <- GBpopdat$unitvar
   unitvars <- GBpopdat$unitvars
   stratalut <- GBpopdat$stratalut
@@ -98,6 +98,16 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   getwtvar <- GBpopdat$getwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
+
+
+  ########################################
+  ## Check area units
+  ########################################
+  unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
+			areaunits=areaunits, metric=metric)
+  unitarea <- unitchk$unitarea
+  areavar <- unitchk$areavar
+  areaunits <- unitchk$outunits
 
 
   ###################################################################################
@@ -193,9 +203,9 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
 	cuniqueid=cuniqueid, esttype=esttype, ratiotype=ratiotype, 
 	estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
  	estvard.filter=estvard.filter, esttotn=TRUE, esttotd=TRUE, 
-	tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree)
+	tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree, metric=metric)
   if (is.null(treedat)) return(NULL)
-
+ 
   tdomdat <- treedat$tdomdat
   if (rowvar != "TOTAL") {
     if (!row.add0 && any(tdomdat[[rowvar]] == 0)) {
@@ -216,6 +226,8 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   estvarn.name <- treedat$estvarn.name
   estvarn.filter <- treedat$estvarn.filter
   tdomvarlstn <- treedat$tdomvarlstn
+  estunitsn <- treedat$estunitsn
+  estunitsd <- treedat$estunitsd
 
   if (ratiotype == "PERTREE") {
     estvard <- treedat$estvard
@@ -224,7 +236,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   } else {
     estvard.name <- estvar.area
     tdomvarlstd <- NULL
-  }
+  }  
 
   #####################################################################################
   ### Get titles for output tables
@@ -232,11 +244,13 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
 	ratiotype=ratiotype, sumunits=sumunits, title.main=title.main, title.ref=title.ref,
  	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
- 	title.unitvar=title.unitvar, title.filter=title.filter, title.estvarn=title.estvarn,
- 	unitvar=unitvar, rowvar=rowvar, colvar=colvar, estvarn=estvarn,
- 	estvarn.filter=estvarn.filter, estvard=estvard, estvard.filter=estvard.filter,
- 	addtitle=addtitle, rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea,
- 	pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+ 	title.unitvar=title.unitvar, title.filter=title.filter, title.unitsn=estunitsn,
+ 	title.unitsd=estunitsd, title.estvarn=title.estvarn,
+ 	unitvar=unitvar, rowvar=rowvar, colvar=colvar,
+ 	estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
+ 	estvard.filter=estvard.filter, addtitle=addtitle, rawdata=rawdata, states=states,
+ 	invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
+	divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -521,8 +535,14 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
   
+  if (!is.null(est2return)) {
+    returnlst$est <- setDF(est2return)
+  }
+  if (!is.null(pse2return)) {
+    returnlst$pse <- setDF(pse2return)
+  }
   if (returntitle) {
-    titlelst <- tabs$titlelst
+    returnlst$titlelst <- alltitlelst
   }
 
   if (rawdata) {
@@ -559,12 +579,6 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
         }
       }
     }
-  }  
-
-  ## GET VALUES TO RETURN
-  if (!is.null(est2return)) returnlst$est <- setDF(est2return)
-  if (!is.null(pse2return)) returnlst$pse <- setDF(pse2return)
-  if (rawdata) {
     rawdat$esttype <- "RATIO"
     rawdat$estvarn <- estvarn
     rawdat$estvarn.filter <- estvarn.filter
@@ -572,10 +586,18 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
     if (!is.null(estvard.filter)) rawdat$estvard.filter <- estvard.filter
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
+    if (ratiotype == "PERACRE") {
+      rawdat$areaunits <- areaunits
+    }
+    rawdat$estunitsn <- estunitsn
+    if (ratiotype == "PERTREE") {
+      rawdat$estunitsd <- estunitsd
+    }
     returnlst$raw <- rawdat
   }
-  if(returntitle) returnlst$titlelst <- alltitlelst
-  if (returnGBpopdat) returnlst$GBpopdat <- GBpopdat
+  if (returnGBpopdat) {
+    returnlst$GBpopdat <- GBpopdat
+  }
     
   if ("STATECD" %in% names(pltcondf)) {
     returnlst$statecd <- sort(unique(pltcondf$STATECD))

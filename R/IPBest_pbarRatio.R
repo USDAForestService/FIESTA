@@ -1,5 +1,5 @@
 PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute, 
-	strtype="post", strlut, strunitvars, unitvars, strvar){
+	strtype="post", stratalut, strunitvars, unitvars, strvar){
 
   ########################################################################################
   ## DESCRIPTION: Calculates the following variables
@@ -22,10 +22,10 @@ PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute,
 	phat.var.d.strwt=n.total <- NULL
 
 
-  ## Check that strlut is a data.table
-  if (!"data.table" %in% class(strlut))
-    strlut <- setDT(strlut)
-  setkeyv(strlut, strunitvars)
+  ## Check that stratalut is a data.table
+  if (!"data.table" %in% class(stratalut))
+    stratalut <- setDT(stratalut)
+  setkeyv(stratalut, strunitvars)
 
   ## Merge pd to ysum.n
   dom.prop.n <- merge(dom.prop.n, dom.prop.d, by=c(strunitvars, uniqueid, domain, "PtsPerPlot"))
@@ -49,8 +49,8 @@ PBest.pbarRatio <- function(dom.prop.n, dom.prop.d, uniqueid, domain, attribute,
  
 
   ## STRATA/DOMAIN LEVEL: Merge domain-level sums to strata table
-  ybardat.n <- strlut[ysum.n.strata]
-  ybardat.d <- strlut[ysum.d.strata]
+  ybardat.n <- stratalut[ysum.n.strata]
+  ybardat.d <- stratalut[ysum.d.strata]
 
   if (strtype == "pre") {
 

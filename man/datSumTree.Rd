@@ -13,8 +13,8 @@ datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
 	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE, 
 	condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, 
 	tsumvarnmlst = NULL, TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, 
-	addseed = FALSE, lbs2tons = TRUE, getadjplot = FALSE, adjtree = FALSE, 
-	adjTPA = 1, NAto0 = FALSE, savedata = FALSE, outfolder = NULL, 
+	addseed = FALSE, lbs2tons = TRUE, metric = FALSE, getadjplot = FALSE, 
+	adjtree = FALSE, adjTPA = 1, NAto0 = FALSE, savedata = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, out_layer = NULL, outfn.pre = NULL, 
 	layer.pre = NULL, outfn.date = TRUE, overwrite_dsn=FALSE, 
 	overwrite_layer=FALSE, append_layer = FALSE, tround = 16, checkNA = FALSE, 
@@ -57,8 +57,12 @@ datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
   \item{tfilter}{ String. Filter to subset the tree data before aggregating 
 	(e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is prompted. 
 	Use tfilter="NONE" if no filters. }
-  \item{addseed}{ Logical. If TRUE, add seedling data to tree counts (if TPA variable in tsumvarlst). }
+  \item{addseed}{ Logical. If TRUE, add seedling data to tree counts 
+	(if TPA variable in tsumvarlst). }
   \item{lbs2tons}{ Logical. If TRUE, converts biomass or carbon variables from pounds to tons. }
+  \item{metric}{ Logical. If TRUE, converts response to metric units based on 
+	FIESTA::ref_conversion, if any variable in tsumvarlst is in FIESTA::ref_estvar. 
+	Note: if TPA, TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)). }
   \item{getadjplot}{ Logical. If TRUE, adjustments are calculated for nonsampled 
 	conditions on plot. }
   \item{adjtree}{ Logical. If TRUE, trees are individually adjusted by adjustment factors.

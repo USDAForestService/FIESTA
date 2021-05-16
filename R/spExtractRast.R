@@ -129,18 +129,21 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
 
   ## Check rast.NODATA
   if (!is.null(rast.NODATA)) {
-    if (!is.numeric(rast.NODATA))
+    if (!is.numeric(rast.NODATA)) {
       stop("rast.NODATA must be numeric")
+    }
+    if (!is.list(rast.NODATA)) {
+      rast.NODATA <- list(rast.NODATA)
+    }
+
     if (length(rast.NODATA) != nlayers) {
       if (length(rast.NODATA) == 1) {
         message(rast.NODATA, "used as NODATA value all raster layers")
         rast.NODATA <- rep(rast.NODATA, nlayers)
       } else if (length(rast.NODATA) == nrasts) {
         rast.NODATA <- rep(rast.NODATA, unlist(lapply(bandlist, length)))
-        message("using same NODATA value for multiple bands")
-      } else {
-        stop("number of NODATA values does not match number of raster layers")
-      }
+        #message("using same NODATA value for multiple bands")
+      } 
     }
   } else {
     rast.NODATA  <- rep(NA, nlayers)
@@ -244,7 +247,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
     rastfn <- rastfnlst[[i]]
     rastnm <- FIESTA::basename.NoExt(rastfn)
     rast.prj <- rasterInfo(rastfn)$crs
-    rast.bbox <- rasterInfo(rastfn)$bbox
+    rast.bbox <- rasterInfo(rastfn)$bbox      
 
     ## Check projection and reproject sppltx if different than rast
     sppltprj <- crsCompare(sppltx, rast.prj, crs.default=rast.crs)$x
@@ -288,11 +291,9 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
       if ("data.table" %in% class(sppltx)) stop("xyplt cannot be sf data.table")
       sppltx <- merge(sppltx, dat, by.x=uniqueid, by.y="pid")
 
-      if (!is.na(rast.NODATA))
-        sppltx[sppltx[[cname]] == rast.NODATA, cname] <- NA
-
-      #print(table(sppltx[[cname]]))
-
+      ## Remove rast.NODATA values from point data
+      sppltx <- sppltx[!sppltx[[cname]] %in% rast.NODATA[[1]], ] 
+      
       ## Print missing values to screen
       navals <- sum(is.na(sppltx[[cname]]))
       if (navals > 0) {

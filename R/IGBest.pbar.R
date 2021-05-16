@@ -102,6 +102,9 @@ GBest.pbar <- function(sumyn="CONDPROP_ADJ", ysum, sumyd=NULL, esttype="AREA",
     unit.agvars <- unique(c(unit.agvars, "dhat.strwt", "dhat.var.strwt", "covar.strwt"))
   }
 
+#print("CHECK")
+#save(ybardat, file="E:/workspace/ToddShingo/ybardat.rda")
+
   ## Aggregate strata-level weights to estimation unit
   est.unit <- ybardat[, lapply(.SD, sum, na.rm=TRUE), by=c(unitvar, domain), 
 		.SDcols=unit.agvars]

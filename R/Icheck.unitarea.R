@@ -1,5 +1,5 @@
 check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES", 
-	removeunits=TRUE, removetext="unitarea", gui=FALSE) {
+	areaunits="acres", removeunits=TRUE, removetext="unitarea", gui=FALSE) {
 
   ## DESCRIPTION: Checks unitarea
   ## Check acres by estimation unit
@@ -30,6 +30,11 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
   ## Get unique values of unitvars in pltx
   unit.vals <- unique(do.call(paste, pltx[, unitvars, with=FALSE]))
   nbrunits <- length(unit.vals) 
+
+  ## Check areaunits
+  areaunits <- FIESTA::pcheck.varchar(var2check=areaunits, varnm="areaunits", 
+	gui=gui, checklst=c("acres", "hectares"), caption="Area units?", 
+	stopifnull=TRUE)
 
   ## Check unitarea and areavar
   ######################################################################
@@ -66,6 +71,9 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
       if (length(unitvars) == 1 && unitvars == "ONEUNIT" && !unitvars %in% names(unitarea)) {
         unitarea$ONEUNIT <- 1
       }
+      ## Check areavar from strata table.
+      areavar <- FIESTA::pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
+		checklst=names(unitarea), caption="Area variable?", stopifnull=TRUE)
 
       if (nrow(unitarea) >  1) {
         if (length(unitvars) == 1) {
@@ -140,6 +148,6 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
 
   }
 
-  return(list(unitarea=unitarea, areavar=areavar))
+  return(list(unitarea=unitarea, areavar=areavar, areaunits=areaunits))
 }
 

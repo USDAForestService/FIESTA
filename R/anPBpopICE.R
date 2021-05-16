@@ -91,7 +91,7 @@ anPBpopICE <- function(ice.pntfn=NULL, ice.pltfn=NULL, T1, T2,
   #########################################################################
   ## Get population data
   ##################################################################
-  PBpopdatICE <- modPBpop(pnt=ice.pnt, plt=ice.pltfn, plotid=plotid, pntid=pntid, 
+  PBpopdatICE <- modPBpop(pntdat=ice.pnt, plt=ice.pltfn, plotid=plotid, pntid=pntid, 
         		puniqueid=plotid, pltassgn=pltassgn, pltassgnid=pltassgnid,
 			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
 			unitcombine=unitcombine, strata=strata, 

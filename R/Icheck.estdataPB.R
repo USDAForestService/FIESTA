@@ -1,32 +1,27 @@
-check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt", 
+check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt", 
 	tabtype="PCT", ratio=FALSE, pfilter=NULL, landarea="ALL", landarea.filter=NULL, 
-	pnt.nonsamp.filter=NULL, pnt.filter=NULL, sumunits=FALSE, allin1=FALSE, 
-	estround=3, pseround=3, divideby=NULL, savedata=FALSE, addtitle=TRUE, 
-	returntitle=TRUE, rawdata=FALSE, outfolder=NULL){
+	nonsamp.pntfilter=NULL, pntfilter=NULL, sumunits=FALSE, allin1=FALSE, 
+	estround=3, pseround=3, divideby=NULL, addtitle=TRUE, returntitle=TRUE, 
+	rawdata=FALSE, rawonly=FALSE, savedata=FALSE, outfolder=NULL, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE, 
+	append_layer=FALSE, raw_fmt="csv", raw_dsn=NULL, gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
-  ## Check landarea ("FOREST", "ALL", "TIMBERLAND")
-  ## Import and check cond and plt tables and check unique identifiers
-  ## Check plt table
-  ## - Check for NA values
-  ## - Apply plt filter, if plt exists.
-  ## - Check missing pdoms2keep variables
-  ## - Check predfac variable(s) and strvar - for factor status
-  ## Apply cond filters to condf: landarea.filter, ACI.filter, cfilter
-  ## Check other table parameters: sumunits, allin1, estround, pseround, divideby, 
-  ##		savedata, addtitle, returntitle, rawdata, outfolder
-  ## - If sumunits=TRUE, estimation units are summed to 1 estimate
-  ## - If allin1=TRUE, puts estimate (% sample error) in each cell
-  ## - If savedata=TRUE, saves tables to outfolder
-  ## - If addtitle=TRUE, adds title(s) to saved tables
-  ## - If returntitle, saves title(s) of tables
-  ## - If rawdata=TRUE, generates and saves rawdata variables for estimates
-  ## Return data and nosamp.filter
+  ## Applies plot filters (e.g., COUNTYCD == 1")
+  ## Applies pnt filters (e.g., cover_1 == "TREE")
+  ## Applies nonsamp.pntfilter (e.g., cover_1 == "99")
+  ## Applies landarea filter (e.g., change plots only)
+  ## Set filtered points to 'NOTinDOMAIN'
+  ## Check sumunits (whether to generate estimates by unitvar and output sum)
+  ## Check rounding parameters (estround, pseround)
+  ## Check output parameters 
+  ## VALUE:
+  ## Return parameters and filterids for NotinDomain plots
   ###################################################################################
 
   ## Set global variables
-  filterids <- NULL
+  filterids=rawfolder <- NULL
 
   ## Check logical parameters
   ###################################################################################      
@@ -41,7 +36,6 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   landarealst <- c("ALL", "CHANGE")
   landarea <- FIESTA::pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	checklst=landarealst, caption="Sample land area?")
-
 
 
   ## Add a column to PBx for the total estimate
@@ -61,11 +55,11 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
     return(NULL)
   }
 
-  ## pnt.nonsamp.filter
-  PBf <- FIESTA::datFilter(PBf, pnt.nonsamp.filter, title.filter="pnt.nonsample filter",
-			filternm="pnt.nonsamp.filter")$xf
+  ## nonsamp.pntfilter
+  PBf <- FIESTA::datFilter(PBf, nonsamp.pntfilter, title.filter="pnt.nonsample filter",
+			filternm="nonsamp.pntfilter")$xf
   if (is.null(PBf)) {
-    message(paste(pnt.nonsamp.filter, "removed all records"))
+    message(paste(nonsamp.pntfilter, "removed all records"))
     return(NULL)
   }
 
@@ -77,19 +71,19 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
     return(NULL)
   }
 
-  ## pnt.filter
-  PBf <- FIESTA::datFilter(PBf, pnt.filter, gui=gui, 
+  ## pntfilter
+  PBf <- FIESTA::datFilter(PBf, pntfilter, gui=gui, 
 			title.filter="pnt filter")$xf
   if (is.null(PBf)) {
-    message(paste(pnt.filter, "removed all records"))
+    message(paste(pntfilter, "removed all records"))
     return(NULL)
   }
 
   ## Get filter ids for NOTinDOMAIN points
   ########################################################################
-  if (!is.null(PBf) && (nrow(PBf) < nrow(PBx))) 
+  if (!is.null(PBf) && (nrow(PBf) < nrow(PBx))) {
     filterids <- paste(PBf[[plotid]], PBf[[pntid]])
- 
+  }
 
   #####################################################################################
   ### Check other table parameters
@@ -111,10 +105,10 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## Check divideby
   ########################################################
   dividebylst <- c("hundred", "thousand", "million")
-  if (!is.null(divideby) || gui)
+  if (!is.null(divideby) || gui) {
     divideby <- FIESTA::pcheck.varchar(var2check=divideby, varnm="divideby", 
 		gui=gui, checklst=dividebylst, caption="Divide estimates?")
-
+  }
 
   ## Check addtitle 
   addtitle <- FIESTA::pcheck.logical(addtitle, varnm="addtitle", 
@@ -125,19 +119,44 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
 		title="Save output titles?", first="YES", gui=gui)
 
   ## Check rawtable
-  rawdata <- FIESTA::pcheck.logical(rawdata, varnm="rawdata", 
-		title="Output raw data?", first="NO", gui=gui)
+  rawdata <- FIESTA::pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?", 
+		first="NO", gui=gui, stopifnull=TRUE)
 
-  ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
-		title="Save data tables?", first="YES", gui=gui)
+  ## Check rawonly
+  rawonly <- FIESTA::pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?", 
+		first="NO", gui=gui, stopifnull=TRUE)
+  if (rawonly && !rawdata) rawdata <- TRUE
 
-  ## Check outfolder 
-  if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    if (rawdata && !file.exists(paste(outfolder, "rawdata", sep="/"))) 
-      dir.create(paste(outfolder, "rawdata", sep="/"))
-  }
+  ## Check output info 
+  ########################################################
+  if (savedata) { 
+    if (!rawonly) {
+      outlst <- pcheck.output(out_fmt="csv", outfolder=outfolder, 
+		outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, append_layer=append_layer, gui=gui)
+      outfolder <- outlst$outfolder
+      overwrite_layer <- outlst$overwrite_layer
+      outfn.pre <- outfn.pre
+    }
+    if (rawdata) {
+      if (!is.null(raw_fmt) && raw_fmt == "csv") {
+        rawfolder <- paste(outfolder, "rawdata", sep="/")
+        if (!file.exists(rawfolder)) dir.create(rawfolder)
+      } else {
+        if (is.null(raw_dsn)) {
+          raw_dsn <- "rawdata"
+        }
+        outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		append_layer=append_layer, gui=gui)
+        rawfolder <- outlst$outfolder
+        raw_fmt <- outlst$out_fmt
+        raw_dsn <- outlst$out_dsn
+        overwrite_layer <- outlst$overwrite_layer
+      }
+    }
+  }  
 
   ## Check rounding variables
   if (is.null(estround)) {
@@ -163,9 +182,11 @@ check.estdataPB <- function(gui, PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## Set up list of variables to return
   ######################################################################################
   returnlst <- list(PBf=PBf, plotid=plotid, pntid=pntid, filterids=filterids,
-	landarea=landarea, sumunits=sumunits, allin1=allin1, estround=estround, pseround=pseround, 
-	divideby=divideby, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-	savedata=savedata, outfolder=outfolder)
+	landarea=landarea, sumunits=sumunits, allin1=allin1, estround=estround, 
+	pseround=pseround, divideby=divideby, addtitle=addtitle, returntitle=returntitle,
+ 	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder,
+ 	overwrite_layer=overwrite_layer, append_layer=append_layer, rawfolder=rawfolder, 
+	raw_fmt=raw_fmt, raw_dsn=raw_dsn, tabtype=tabtype)
 
 
   return(returnlst)

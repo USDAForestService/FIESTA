@@ -15,15 +15,15 @@ datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
 	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", 
 	bycond = FALSE, condid = "CONDID", bysubp = FALSE, subpid = "SUBP", 
 	tsumvar = NULL, TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, 
-	lbs2tons = TRUE, tdomvar = "SPCD", tdomvarlst = NULL, tdomvar2 = NULL, 
-	tdomvar2lst = NULL, tdomprefix = NULL, tdombarplot = FALSE, tdomtot = FALSE, 
-	tdomtotnm = NULL, FIAname = FALSE, addseed = FALSE, pivot = TRUE, 
-	presence = FALSE, proportion = FALSE, cover = FALSE, getadjplot = FALSE, 
-	adjtree = FALSE, NAto0 = FALSE, adjTPA = 1, savedata = FALSE, 
-	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, out_layer = NULL, 
-	outfn.pre = NULL, layer.pre = NULL, outfn.date = TRUE, overwrite_dsn=FALSE, 
-	overwrite_layer=FALSE, append_layer = FALSE, tround = 16, checkNA = FALSE, 
-	returnDT = TRUE)
+	lbs2tons = TRUE, metric = FALSE, tdomvar = "SPCD", tdomvarlst = NULL, 
+	tdomvar2 = NULL, tdomvar2lst = NULL, tdomprefix = NULL, tdombarplot = FALSE, 
+	tdomtot = FALSE, tdomtotnm = NULL, FIAname = FALSE, addseed = FALSE, 
+	pivot = TRUE, presence = FALSE, proportion = FALSE, cover = FALSE, 
+	getadjplot = FALSE, adjtree = FALSE, NAto0 = FALSE, adjTPA = 1, 
+	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	out_layer = NULL, outfn.pre = NULL, layer.pre = NULL, outfn.date = TRUE,
+ 	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer = FALSE, 
+	tround = 16, checkNA = FALSE, returnDT = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -65,6 +65,9 @@ datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
 	(e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is prompted. 
 	Use tfilter="NONE" if no filters. }
   \item{lbs2tons}{ Logical. If TRUE, converts biomass or carbon variables from pounds to tons. }
+  \item{metric}{ Logical. If TRUE, converts response to metric units based on 
+	FIESTA::ref_conversion, if tsumvar is in FIESTA::ref_estvar. Note: if TPA, 
+	TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)). }
   \item{tdomvar}{ String. The tree domain (tdom) variable used to aggregate by 
 	(e.g., "SPCD", "SPGRPCD").  }
   \item{tdomvarlst}{ String (vector). List of specific tree domains of tdomvar to aggregate 

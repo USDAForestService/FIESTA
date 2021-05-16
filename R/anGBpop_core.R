@@ -192,7 +192,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   colvar <- "DSTRBCD1"
 
   estdat <- modGBarea(GBpopdat=GBpopdat, sumunits=TRUE,
-		landarea=landarea, cfilter="DSTRBCD1 > 0",
+		landarea=landarea, pcfilter="DSTRBCD1 > 0",
 		rowvar=rowvar, row.FIAname=TRUE, 
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 

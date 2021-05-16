@@ -9,85 +9,37 @@ sampling error by domain (and estimation unit). Calculations are based on
 Patterson (2012) photo-based estimators for the Nevada photo-based inventory.
 }
 \usage{
-modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
-	pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
-	pltassgnid = "CN", plt.nonsamp.filter = NULL, tabtype = "PCT", 
-	strata = FALSE, strtype = "POST", sumunits = FALSE, unitvar = NULL, 
-	unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
-	stratcombine = TRUE, ratio = FALSE, landarea = "ALL", landarea.filter = NULL, 
-	pnt.nonsamp.filter = NULL, pnt.filter = NULL, pfilter = NULL, 
+modPB(PBpopdat = NULL, tabtype = "PCT", sumunits = FALSE, strata = FALSE, 
+	strtype = "POST", ratio = FALSE, landarea = "ALL", landarea.filter = NULL, 
+	nonsamp.pntfilter = NULL, pntfilter = NULL, pfilter = NULL, 
 	rowvar = NULL, colvar = NULL, row.orderby = NULL, col.orderby = NULL, 
 	row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, 
 	domlut = NULL, domvarlst = NULL, ratioden = "ROWVAR", allin1 = FALSE, 
 	estround = 3, pseround = 3, estnull = 0, psenull = "--", divideby = NULL, 
-	savedata = FALSE, rawdata = FALSE, outfolder = NULL, outfn = NULL, 
-	outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, addtitle = TRUE, 
-	returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.filter = NULL, title.units = "acres", gainloss = FALSE, 
-	gainloss.vals = NULL, PBpopdat = NULL, gui = FALSE)
+	savedata = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, 
+	addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, raw_fmt = "csv", 
+	raw_dsn = NULL, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	append_layer = FALSE, returntitle = FALSE, title.main = NULL, 
+	title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
+	title.unitvar = NULL, title.filter = NULL, title.units = "acres", 
+	gainloss = FALSE, gainloss.vals = NULL, gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{pnt}{ DF/DT or comma-delimited file (*.csv). Point-level table with
-	one record per point. If NULL, aggregated point counts must be in pntcnt. }
-  \item{pltpct}{ DF/DT or comma-delimited file (*.csv). Plot-domain-level table 
-	with percent observed by domain per plot. }
-  \item{plotid}{ String. Unique identifier of plot in pnt. All values
-	must match puniqueid values, if pltassgn is not NULL. }
-  \item{pntid}{ String. Unique identifier of points in pnt. }
-  \item{pltpctvars}{ String vector. Variables in pltpct for estimation. If NULL,
-	all variables are used except plotid in pltpct. }
-  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
-	or a sf R object. Plot-level variables. If nonsampled plots are included, 
-	PLOT_STATUS_CD variable must be in table. Optional. }
-  \item{pltassgn}{ DF/DT, comma-delimited file(*.csv), SpatialDataFrame, or 
-	shapefile(*.shp). The plot-level data with one record per plot, including 
-	estimation unit and/or strata information. Optional. }
-  \item{puniqueid}{ String. Unique identifier of plot. }
-  \item{pltassgnid}{ String. Name of unique identifier of plot in pltassgn with 
-	All values must match plotid values if pnt is not NULL. }
-  \item{plt.nonsamp.filter}{ String. An expression for filtering nonsampled plots. 
-	Must be R syntax. }
+  \item{PBpopdat}{ List. Population data objects returned from modPBpop(). }
   \item{tabtype}{ String. Type of units for the table ("PCT", "AREA"). }
+  \item{sumunits}{ Logical. If TRUE, estimation units are combined to one table for
+	output. Note: only available if tabtype="AREA". Acres}
   \item{strata}{ Logical. If TRUE, add data information for stratification. }
   \item{strtype}{ String. If strata=TRUE, the type of strata ('POST', 'PRE'). 
 	Note: the variance equations are slighlty different. }
-  \item{sumunits}{ Logical. If TRUE, estimation units are combined to one table for
-	output. Note: only available if tabtype="AREA". Acres}
-  \item{unitvar}{ String. Name of the estimation unit variable in cond or pltassgn 
-	with estimation unit assignment for each plot (e.g., 'ESTN_UNIT'). 
-	If one estimation unit, set unitvar=NULL. }
-  \item{unitvar2}{ String. Name of a second estimation unit variable in cond or 
-	pltassgn with assignment for each plot (e.g., 'STATECD'). }
-  \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
-	unit, include number of total acreage for the area of interest or a data frame
-	with areavar. If more than one estimation unit, provide a data frame of total 
-	area by estimation unit, including unitvar and areavar. }
-  \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
-	proportions ('strwt') by strata (and estimation unit). To calculate 
-	'strwt', set getwt=TRUE and getwtvar= name of variable with information 
-	to calculate weights from (e.g., pixel counts) }.
-  \item{strvar}{ String. Name of strata variable in stratalut and table with strata
-	assignment for each plot. Default="STRATUMCD". }
-  \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
-	If FALSE, 'strwt' variable must be in stratalut. }
-  \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt).
- 	Default="P1POINTCNT". }
-  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
   \item{ratio}{ Logical. If TRUE, ratio estimates are generated. }  
   \item{landarea}{ String. Sample area for estimates ("ALL", "CHANGE"). Used to
 	describe landarea.filter. }
   \item{landarea.filter}{ String. filter for land area. Must be R syntax. }
-  \item{pnt.nonsamp.filter}{ String. An expression for filtering nonsampled points
+  \item{nonsamp.pntfilter}{ String. An expression for filtering nonsampled points
 	(e.g., cloud coverage). Must be R syntax. }
-  \item{pnt.filter}{ String. A global filter for the pnt file. Must be R syntax. }
+  \item{pntfilter}{ String. A global filter for the pnt file. Must be R syntax. }
   \item{pfilter}{ String. A global filter for the plt file. Must be R syntax. }
   \item{rowvar}{ String. Name of domain variable in pnt used for output estimation 
 	table rows. If only 1 domain, must be rowvar. If no domain, rowvar=NULL. }
@@ -119,17 +71,29 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
   \item{estnull}{ Integer or String. Value to replace NULL values for estimates. }
   \item{psenull}{ Integer or String. Value to replace NULL values for percent standard error. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
-  \item{savedata}{ Logical. If TRUE, saves tables to outfolder. }
+  \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
+  \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
+	written to working directory, or if gui, a window to browse. }
+  \item{outfn.pre}{ String. If savedata=TRUE, prefix for output files. If rawdata=TRUE, 
+	prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if raw_fmt != 'csv'). }
+  \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
+  \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
-	for estimation (See Value). If savedata = TRUE, this table is also written to file. }
-  \item{outfolder}{ String.  The outfolder to write files to. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE (*.xlsx). Do not 
-	include extensions or dates. The date will be added to end of file name. If NULL, 
-	generic file names will be given (ex. area_'rowvar'_'date'.csv) }
-  \item{outfn.pre}{ String. A prefix to output name (e.g., "01"). }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
-  \item{addtitle}{ Logical. If TRUE, adds title to the outfile. }
+	for estimation (See Value). If savedata = TRUE, tables are written to outfolder 
+	(if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv'). }
+  \item{rawonly}{ Logical. If TRUE, only rawdata are output. If dataset includes
+	many estimation units, and only raw data tables are desired, it is more 
+	efficient to output raw data only. }
+  \item{raw_fmt}{ String. Format for output rawdata tables 
+	('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp'). }
+  \item{raw_dsn}{ String. Data source name for rawdata output. If extension is not
+	included, out_fmt is used. Use full path if outfolder=NULL. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the output. If rawdata=TRUE, 
+	overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or out_layers in 
+	raw_dsn (if raw_fmt != 'csv'). }
+  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data 
+	to existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt != 'csv". }  
   \item{returntitle}{ Logical. If TRUE, returns a character string of the title of the 
 	output data frame. }
   \item{title.main}{ String. Complete title used for table. If title=NULL and addtitle=TRUE, 
@@ -149,8 +113,8 @@ modPB(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
   \item{gainloss}{ Logical. If TRUE, a table with the difference of gain and loss 
 	along with the variance and standard error, in percent, is generated. }
   \item{gainloss.vals}{ String vector. A vector of names for values in gainloss table. }
-  \item{PBpopdat}{ List. Population data objects returned from modPBpop(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
+  \item{...}{ Parameters for modPBpop() if PBpopdat is NULL. }
 }
 \details{
 	If variables are NULL, then it will prompt user to input variables.

@@ -14,18 +14,18 @@
 }
 \usage{    
 modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL, 
-	vspspp = NULL, subplot = NULL, subp_cond = NULL, lulc = NULL, pltassgn = NULL, 
-	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
-	tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
+	vsubpspp = NULL, vsubpstr = NULL, subplot = NULL, subp_cond = NULL, lulc = NULL, 
+	pltassgn = NULL, dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", 
+	pjoinid = "CN", tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	areawt = "CONDPROP_UNADJ", adj = "samp", evalid = NULL, invyrs = NULL, 
 	intensity = NULL, ACI = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, strata = TRUE, 
-	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
-	strwtvar = "strwt", stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, 
-	objnm = "GBpopdat", savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, 	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE,
- 	overwrite_layer = TRUE, GBdata = NULL, pltdat = NULL, GBstratdat = NULL, 
-	gui = FALSE)
+	areavar = "ACRES", areaunits = "acres", unitcombine = FALSE, minplotnum.unit = 10, 
+	strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
+	getwtvar = "P1POINTCNT", strwtvar = "strwt", stratcombine = TRUE, 
+	minplotnum.strat = 2, saveobj = FALSE, objnm = "GBpopdat", savedata = FALSE, 
+	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	GBdata = NULL, pltdat = NULL, GBstratdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -47,8 +47,10 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	condition-level. See details for necessary variables to include. }
   \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Seedling data with one record for each seedling count. }
-  \item{vspspp}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+  \item{vsubpspp}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Vegetation species-level data with one record for each species (P2VEG_SUBPLOT_SPP). }
+  \item{vsubpstr}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Vegetation species-structure data with one record for each species (P2VEG_SUBP_STRUCTURE). }
   \item{subplot}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Subplot-level data with one record for each species (SUBPLOT). }
   \item{subp_cond}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
@@ -92,6 +94,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	with area and estimation unit. If more than one estimation unit, provide a data frame 
 	of total area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
+  \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }

@@ -1,12 +1,13 @@
 modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL, 
 	pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	puniqueid="CN", pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
-	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", plt.nonsamp.filter=NULL, 
-	cond.nonsamp.filter=NULL, dunitvar="DOMAIN", dunitvar2=NULL, dunitarea=NULL, 
-	areavar="ACRES", unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
-	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, SAdata=NULL, SAmodeldat=NULL, gui=FALSE){
+	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
+	dunitvar2=NULL, dunitarea=NULL, areavar="ACRES", areaunits="acres", 
+	unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
+	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, savedata=FALSE, 
+	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, 
+	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, SAdata=NULL, 
+	SAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -44,6 +45,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   on.exit(options(options.old), add=TRUE)
   adjtree <- FALSE
   returnSApopdat <- FALSE
+  nonsamp.pfilter=nonsamp.cfilter <- NULL 
   returnlst <- list()
 
 # dunitvar2=NULL
@@ -51,8 +53,6 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
 # cvars2keep=NULL
 # adj="plot"
 # ACI=FALSE
-# plt.nonsamp.filter=NULL
-# cond.nonsamp.filter=NULL
 # gui <- FALSE 
 
 
@@ -145,10 +145,11 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
 	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
 	condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
 	measCur=measCur, measEndyr=measEndyr, measEndyr.filter, invyrs=invyrs, 
-	ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
-	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=dunitarea, areavar=areavar, 
-	unitvar=dunitvar, unitvar2=dunitvar2, prednames=prednames, predfac=predfac, 
-	pvars2keep=pvars2keep, cvars2keep=cvars2keep, removeunits=TRUE, removetext="dunitarea")
+	ACI=ACI, adj=adj, nonsamp.pfilter=nonsamp.pfilter, 
+	nonsamp.cfilter=nonsamp.cfilter, unitarea=dunitarea, areavar=areavar, 
+	areaunits=areaunits, unitvar=dunitvar, unitvar2=dunitvar2, prednames=prednames, 
+	predfac=predfac, pvars2keep=pvars2keep, cvars2keep=cvars2keep, removeunits=TRUE,
+ 	removetext="dunitarea")
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
@@ -160,10 +161,11 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
-  dunitarea <- popcheck$unitarea
   dunitvar <- popcheck$unitvar
   dunitvar2 <- popcheck$unitvar2
+  dunitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
+  areaunits <- popcheck$areaunits
   prednames <- popcheck$prednames
   predfac <- popcheck$predfac
   plotsampcnt <- popcheck$plotsampcnt
@@ -233,8 +235,8 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx,
 		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
-		dunitarea=dunitarea, areavar=areavar, dunitvar=dunitvar, 
-		dunitlut=dunitlut, prednames=prednames, 
+		dunitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
+		dunitvar=dunitvar, dunitlut=dunitlut, prednames=prednames, 
 		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
  		invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 

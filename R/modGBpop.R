@@ -1,9 +1,9 @@
 modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL, 
-	vspspp=NULL, subplot=NULL, subp_cond=NULL, lulc=NULL, pltassgn=NULL, dsn=NULL, 
-	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", tuniqueid="PLT_CN", 
-	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", adj="samp", 
-	evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	vsubpspp=NULL, vsubpstr=NULL, subplot=NULL, subp_cond=NULL, lulc=NULL, 
+	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", 
+	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", 
+	adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", areaunits="acres",
 	unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", strwtvar="strwt",
 	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", 
@@ -26,9 +26,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (nargs() == 0) gui <- TRUE
 
   ## If gui.. set variables to NULL
-  if (gui)  
+  if (gui) {
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
-  
+  }
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- names(formals(modGBpop)) 
@@ -38,7 +38,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   }
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=expcondtab <- NULL
+  ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP <- NULL
 
   ## SET OPTIONS
   options.old <- options()
@@ -46,7 +46,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   on.exit(options(options.old), add=TRUE) 
   adjtree <- FALSE
   nonresp=FALSE
-  substrvar=plt.nonsamp.filter=cond.nonsamp.filter <- NULL
+  substrvar=nonsamp.pfilter=nonsamp.cfilter <- NULL
   returnlst <- list()
 
   ## Check savedata 
@@ -56,7 +56,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Check saveobj 
   saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
-
+ 
   ## Check output
   ########################################################
   if (savedata || saveobj) {
@@ -68,7 +68,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     overwrite_dsn <- outlst$overwrite_dsn
-  } 
+  }
 
   if (!is.null(GBdata)) {
     list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
@@ -95,6 +95,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   } else {
     if (!is.null(pltdat)) {
       list.items <- c("bndx", "tabs", "xypltx")
+      if (popType == "LULC") {
+        list.items <- c(list.items, "lulcx")
+      }
       pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
 
       ## Extract list objects
@@ -104,6 +107,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       cond <- pltdat$tabs$condx
       tree <- pltdat$tabs$treex
       seed <- pltdat$tabs$seedx
+      if (popType == "LULC") {
+        lulc <- pltdat$tabs$lulcx
+      }
     }
     if (!is.null(GBstratdat)) {
       list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
@@ -124,7 +130,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       } 
     }
   } 
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -132,13 +138,14 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="GB", popType=popType, 
-	tree=tree, cond=cond, plt=plt, seed=seed, vspspp=vspspp, subplot=subplot, 
-	subp_cond=subp_cond, lulc=lulc, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, 
-	cuniqueid=cuniqueid, condid=condid, areawt=areawt, puniqueid=puniqueid, 
- 	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, invyrs=invyrs,
- 	intensity=intensity, adj=adj, ACI=ACI, plt.nonsamp.filter=plt.nonsamp.filter, 
-	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=unitarea, unitvar=unitvar, 
-	unitvar2=unitvar2, areavar=areavar, unitcombine=unitcombine, strata=strata, 
+	tree=tree, cond=cond, plt=plt, seed=seed, vsubpspp=vsubpspp, vsubpstr=vsubpstr, 
+	subplot=subplot, subp_cond=subp_cond, lulc=lulc, pltassgn=pltassgn, dsn=dsn, 
+	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, areawt=areawt, 
+	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, 
+	invyrs=invyrs, intensity=intensity, adj=adj, ACI=ACI, 
+	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter,
+ 	unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
+	areaunits=areaunits, unitcombine=unitcombine, strata=strata, 
 	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
@@ -153,10 +160,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
-  unitarea <- popcheck$unitarea
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
+  unitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
+  areaunits <- popcheck$areaunits
   unitcombine <- popcheck$unitcombine
   stratcombine <- popcheck$stratcombine
   strata <- popcheck$strata
@@ -173,15 +181,17 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (strata) {
     stratalut <- popcheck$stratalut
   }
-  if (nonresp) 
-    substrvar <- popcheck$substrvar 
+  if (nonresp) {
+    substrvar <- popcheck$substrvar
+  } 
   #rm(popcheck)
   if ("P2VEG" %in% popType) {
     pltassgn.P2VEG <- popcheck$pltassgn.P2VEG
     subp_condf <- popcheck$subp_condf
-    vspsppf <- popcheck$vspsppf
+    vsubpsppf <- popcheck$vsubpsppf
+    vsubpstrf <- popcheck$vsubpsppf
   }
-
+ 
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -197,7 +207,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
 		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
 		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
-		getwt=getwt, getwtvar=getwtvar, P2POINTCNT=P2POINTCNT)  
+		getwt=getwt, getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -226,6 +236,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     setnames(stratalutv, c("n.strata", "n.total"), nveg.names)
     stratalut <- merge(stratalut, stratalutv[, c(key(stratalutv), nveg.names), with=FALSE],
  		by=key(stratalutv))
+
   }
  
   ###################################################################################
@@ -255,15 +266,30 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     treef <- adjfacdata$treex
     seedf <- adjfacdata$seedx
     expcondtab <- adjfacdata$expcondtab
+
+    if (any(popType == "P2VEG")) {
+      ## Merge plot strata info to condx
+      if (is.null(key(subp_condf))) setkeyv(subp_condf, c(cuniqueid, condid))
+      subp_condfx <- subp_condf[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
+
+      subp_adj <- subp_condfx[, sum(SUBPCOND_PROP)/.N, by=c("PLT_CN", strunitvars)][, 
+		sum(V1, na.rm=TRUE), by=strunitvars]
+      setnames(subp_adj, "V1", "SUBPCOND_PROP_SUB")
+      setkeyv(subp_adj, strunitvars)
+      stratalut <- stratalut[subp_adj]
+      stratalut$ADJ_FACTOR_P2VEG_SUBP <- stratalut$P2POINTCNT / subp_adj$SUBPCOND_PROP_SUB
+    }
   } 
 
+  setkeyv(stratalut, strunitvars)
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
-		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
- 		unitarea=unitarea, areavar=areavar, unitvar=unitvar, unitvars=unitvars,
- 		stratalut=stratalut, strvar=strvar, expcondtab=expcondtab, 
-		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
-		invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+  returnlst <- append(returnlst, list(popType=popType, 
+	condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid, 
+	ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar, 
+	areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
+	stratalut=stratalut, strvar=strvar, expcondtab=expcondtab, 
+	plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
+	invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

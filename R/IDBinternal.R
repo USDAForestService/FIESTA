@@ -14,7 +14,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 	plotgeom=FALSE, isRMRS=FALSE) {
 
   ## Set global variables
-  treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=
+  treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vsubpsppvarlst=vsubpstrvarlst=
 	dwmlst=pgeomvarlst <- NULL
 
   ## DESCRIPTION: Set default variables for FIA plot data extraction
@@ -128,15 +128,15 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
   if (isveg) {    ## FS_NIMS_FIADB_RMRS or FS_FIADB
 
     ## Variables from P2VEG_SUBPLOT_SPP
-    vspsppvarlst <- c("PLT_CN", "SUBP", "CONDID", "VEG_FLDSPCD", "UNIQUE_SP_NBR", 
+    vsubpsppvarlst <- c("PLT_CN", "SUBP", "CONDID", "VEG_FLDSPCD", "UNIQUE_SP_NBR", 
 	"VEG_SPCD", "GROWTH_HABIT_CD", "LAYER", "COVER_PCT")
 
     ### Variables from P2VEG_SUBP_STRUCTURE
-    vspstrvarlst <- c("PLT_CN", "SUBP", "CONDID", "GROWTH_HABIT_CD", "LAYER", 
+    vsubpstrvarlst <- c("PLT_CN", "SUBP", "CONDID", "GROWTH_HABIT_CD", "LAYER", 
 	"COVER_PCT")
 
-    returnlst$vspsppvarlst <- vspsppvarlst
-    returnlst$vspstrvarlst <- vspstrvarlst
+    returnlst$vsubpsppvarlst <- vsubpsppvarlst
+    returnlst$vsubpstrvarlst <- vsubpstrvarlst
   }
 
   ############################  UNDERSTORY VEG VARIABLES  ############################

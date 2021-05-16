@@ -79,15 +79,51 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 					message(err, "\n")
 					return(NULL)
 				} )
-  if (is.null(estgreg)) 
-    stop("multicolineary exists in predictor data set...  try MAmethod = gregEN")
-  
+  if (is.null(estgreg)) {
+    stop("multicolinearity exists in predictor data set...  try MAmethod = gregEN")
+  }
   estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
  
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estgreg[, nhat.var := nhat.var / (1 - length(y) / N)]
+  }
+  return(estgreg)
+}
+
+
+MAest.ratioEstimator <- function(y, N, x_sample, x_pop, FIA=TRUE) {
+
+#y <- yn.vect
+
+  ## Set global variables
+  nhat.var <- NULL
+
+  NBRPLT <- length(y)
+  NBRPLT.gt0 <- sum(y > 0)
+  var_method <- "lin_HTSRS"
+
+  message("generating estimates using mase::greg function...\n")
+  estratio <- tryCatch(mase::ratioEstimator(	y = y, 
+					x_sample = x_sample, 
+					x_pop = x_pop, 
+					pi = NULL, N = N, pi2 = NULL,
+					model = "linear", 
+  					var_est = TRUE, var_method = var_method, 
+					data_type = "means", 
+  					model_select = FALSE, 
+					B = 1000, strata = NULL),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+  estratio <- data.table(estratio$pop_mean, estratio$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estratio, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+ 
+  if (FIA) {
+    ## This takes out the finite population correction term (to estimated variance from FIA)
+    estratio[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
   return(estgreg)
 }
@@ -124,9 +160,9 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear") {
 					message(err, "\n")
 					return(NULL)
 				} )
-  if (is.null(estgregEN)) 
+  if (is.null(estgregEN)) {
     stop("error in mase::gregElasticNet function")
-  
+  }
   estgregEN <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estgregEN, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
  

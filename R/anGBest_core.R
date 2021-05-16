@@ -349,10 +349,10 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
     resnm <- ref_reservcd[ref_reservcd[["VALUE"]] == res, "MEANING"] 
     print(resnm)
 
-    cfilter <- paste("RESERVCD ==", res)
+    pcfilter <- paste("RESERVCD ==", res)
     est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, 
 		strata=TRUE, unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2,
-		stratalut=stratalut00, landarea="FOREST", cfilter=cfilter, 
+		stratalut=stratalut00, landarea="FOREST", pcfilter=pcfilter, 
 		rowvar="TIMBERCD.PROD", row.FIAname=TRUE, adj="none", sumunits=TRUE, 
 		estround=estround)$est
     est <- data.frame(paste(resnm, "forest land"), est, stringsAsFactors=FALSE)
@@ -363,7 +363,7 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
   cond2.filter <- "COND_STATUS_CD == 1"
   est2 <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
 		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
-		stratalut=stratalut00, cfilter=cond2.filter, adj="none", 
+		stratalut=stratalut00, pcfilter=cond2.filter, adj="none", 
 		sumunits=TRUE, estround=estround)$est
   est2 <- data.frame("Total", est2, stringsAsFactors=FALSE)
   names(est2) <- c("landstatus1", "landstatus2", "Estimate", "Percent Sampling Error")
@@ -374,28 +374,28 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
 
   ## Nonforest and other land
   ################################################################
-  cfilter <- "COND_STATUS_CD == 2"
+  pcfilter <- "COND_STATUS_CD == 2"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
 		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
-		stratalut=stratalut00, landarea="ALL", cfilter=cfilter, 
+		stratalut=stratalut00, landarea="ALL", pcfilter=pcfilter, 
 		adj="none", sumunits=TRUE, estround=estround)$est
   b1.2 <- data.frame(landstatus1="Nonforest and other land", "Nonforest land", "", est[, -1],
 		stringsAsFactors=FALSE)
   names(b1.2) <- b1.names
 
-  cfilter <- "COND_STATUS_CD %in% c(3,4)"
+  pcfilter <- "COND_STATUS_CD %in% c(3,4)"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
 		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
-		stratalut=stratalut00, landarea="ALL", cfilter=cfilter, 
+		stratalut=stratalut00, landarea="ALL", pcfilter=pcfilter, 
 		rowvar="COND_STATUS_CD", row.FIAname=TRUE, adj="none", sumunits=TRUE, 
 		estround=estround)$est
   b1.3 <- data.frame(landstatus1="Nonforest and other land", "Water", est, stringsAsFactors=FALSE)
   names(b1.3) <- b1.names
 
-  cfilter <- "COND_STATUS_CD %in% c(2,3,4)"
+  pcfilter <- "COND_STATUS_CD %in% c(2,3,4)"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
 		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
-		stratalut=stratalut00, landarea="ALL", cfilter=cfilter, 
+		stratalut=stratalut00, landarea="ALL", pcfilter=pcfilter, 
 		adj="none", sumunits=TRUE, estround=estround)$est
   b1.4 <- data.frame(landstatus1="Nonforest and other land", "Total", "", est[, -1],
 		stringsAsFactors=FALSE)
@@ -404,10 +404,10 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
 
   ## Nonsampled land
   ################################################################
-  cfilter <- "COND_STATUS_CD == 5"
+  pcfilter <- "COND_STATUS_CD == 5"
   est <- modGBarea(cond=cond00, plt=plt00, pltassgn=pltassgn00, strata=TRUE, 
 		unitvar="ESTN_UNIT", unitarea=unitarea00, minplotnum.unit=2, 
-		stratalut=stratalut00, landarea="ALL", cfilter=cfilter, 
+		stratalut=stratalut00, landarea="ALL", pcfilter=pcfilter, 
 		rowvar="COND_NONSAMPLE_REASN_CD", row.FIAname=TRUE, adj="none", 
 		sumunits=TRUE, estround=estround)$est
   b1.5 <- data.frame(landstatus1="Nonsampled land", est[,1], "", est[, -1])
@@ -773,7 +773,7 @@ print(paste("Table", tabnm))
   rowgrpnm=NULL
   rowgrpord=NULL
   colgrpcd=NULL
-  cfilter=NULL
+  pcfilter=NULL
 
   estdat2 <- tabgrp(GBpopdat=popdat, esttype="TREE", sumunits=TRUE, landarea=landarea,  
 	estvar=estvar, estvar.filter=estvar.filter, rowvar=rowvar, colvar=colvar, 
@@ -824,7 +824,7 @@ print(paste("Table", tabnm))
   rowgrpnm=NULL
   rowgrpord=NULL
   colgrpcd=NULL
-  cfilter=NULL
+  pcfilter=NULL
 
   estdat2 <- tabgrp(GBpopdat=popdat, esttype="TREE", sumunits=TRUE, landarea=landarea, 	
 	estvar=estvar, estvar.filter=estvar.filter, rowvar=rowvar, colvar=colvar, rowgrp=rowgrp, 

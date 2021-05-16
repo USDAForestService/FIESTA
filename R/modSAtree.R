@@ -1,7 +1,7 @@
 modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL, 
 	SApackage="JoSAE", SAmethod="unit", estseed="none", largebnd.att=NULL, 
 	landarea="ALL", pcfilter=NULL, estvar=NULL, estvar.filter=NULL, 
-	smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, estnull=0, 
+	smallbnd.att=NULL, allin1=FALSE, metric=FALSE, estround=0, pseround=3, estnull=0, 
 	psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	rawonly=FALSE, multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, addtitle=TRUE, raw_fmt="csv", raw_dsn="rawdata", 
@@ -154,6 +154,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   ACI.filter <- SApopdat$ACI.filter
   dunitarea <- SApopdat$dunitarea
   areavar <- SApopdat$areavar
+  areaunits <- SApopdat$areaunits
   dunitvar <- SApopdat$dunitvar
   dunitvar2 <- SApopdat$dunitvar2
   dunitlut <- SApopdat$dunitlut
@@ -191,6 +192,7 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
       stop("invalid prednames... must be in: ", toString(SApopdat$prednames))
     }
   }
+
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
@@ -313,12 +315,14 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
 	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
 	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
-	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, adjtree=adjtree)
+	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, 
+	adjtree=adjtree, metric=metric)
   if (is.null(treedat)) return(NULL) 
   estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
+  estunits <- treedat$estunits
 
   tdomdat <- treedat$tdomdat
   if (rowvar != "TOTAL") {
@@ -342,12 +346,13 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   if (is.null(title.dunitvar)) title.dunitvar <- smallbnd.att
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, sumunits=sumunits, 
  	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
- 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.dunitvar,
-	title.filter=title.filter, title.estvarn=title.estvar, unitvar=dunitvar, 
-	rowvar=rowvar, colvar=colvar, estvarn=estvar, estvarn.filter=estvar.filter, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
-	invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
-	divideby=divideby, parameters=FALSE, outfn.pre=outfn.pre)
+ 	title.colvar=title.colvar, title.unitvar=title.dunitvar,
+	title.filter=title.filter, title.unitsn=estunits, title.estvarn=title.estvar, 
+	unitvar=dunitvar, rowvar=rowvar, colvar=colvar, estvarn=estvar, 
+	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
+	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
+	pcfilter=pcfilter, allin1=allin1, divideby=divideby, parameters=FALSE, 
+	outfn.pre=outfn.pre)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -609,6 +614,8 @@ modSAtree <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     rawdat$estvar.filter <- estvar.filter
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
+    rawdat$areaunits <- areaunits
+    rawdat$estunits <- estunits
     returnlst$raw <- rawdat
   }
   if (returntitle) returnlst$titlelst <- alltitlelst

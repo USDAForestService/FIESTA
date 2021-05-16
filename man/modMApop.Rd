@@ -17,14 +17,14 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	dsn = NULL, puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", 
 	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, ACI = FALSE, 
-	adj = "samp", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, minplotnum.unit = 10, unitlut = NULL, 	
-	npixelvar="npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL, 
-	stratcombine = TRUE, saveobj = FALSE, savedata = FALSE, outfolder = NULL, 
-	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, MAdata = NULL, pltdat = NULL, 
-	MAmodeldat = NULL, gui = FALSE)
+	adj = "samp", unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+	areavar = "ACRES", areaunits = "acres", unitcombine = FALSE, 
+	minplotnum.unit = 10, unitlut = NULL, npixelvar="npixels", 
+	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
+	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, MAdata = NULL, pltdat = NULL, MAmodeldat = NULL, 
+	gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,7 +39,7 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	layer or spatial layer in dsn, or shapefile(*.shp).
 	Plot-level data with one record for each plot, including or excluding 
 	nonsampled conditions. If nonsampled plots are included, PLOT_STATUS_CD 
-	variable must be in table or a filter defined in plt.nonsamp.filter. }
+	variable must be in table or a filter defined in nonsamp.pfilter. }
   \item{tree}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Tree-level data with one record for each tree. Tree data are aggregated to 
 	condition-level. See details for necessary variables to include. }
@@ -71,11 +71,6 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (DESIGNCD=1). } 
-  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
-	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
-  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
   \item{unitvar}{ String. Name of the estimation unit variable in unitarea and 
 	cond or pltassgn data frame with estimation unit assignment for each plot 
 	(e.g., 'ESTN_UNIT'). Optional if only one estimation unit. }
@@ -86,6 +81,7 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	with area and estimation unit. If more than one estimation unit, provide a data frame 
 	of total area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
+  \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }

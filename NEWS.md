@@ -1,6 +1,27 @@
-FIESTA_3.0.20 (Release date: 2021-02-09)
+FIESTA_3.0.21 (Release date: 2021-05-06)
 ==============
-This release
+Fixed bug in spGetStrata when using more than one NODATA value.
+
+Added ability to output results in metric units.
+- Added a column to FIESTA::ref_estvar, named METRIC, to identify metric units.
+- Added a reference table (FIESTA::ref_conversion) to get conversion factors.
+- Added a logical parameter, metric (TRUE/FALSE) to datSumTree and datSumTreeDom functions 
+	to define output units as English or metric. 
+- Added a parameter, areaunits to mod*pop functions to define the units of areavar in unitarea.
+- Added a logical parameter, metric (TRUE/FALSE) to mod* functions, to define desired output units as 
+	English or metric.
+- All mod* functions return areaunits and estunits.
+
+Variable changes in modPBpop and modPB functions
+pnt to pntdat
+plt.nonsamp.filter to nonsamp.pfilter
+pnt.nonsamp.filter to nonsamp.pntfilter
+plt.filter to pfilter
+pnt.filter to pntfilter
+
+
+FIESTA_3.0.20 (Release date: 2021-05-05)
+==============
 
 Fixes bugs in spGetStrata()
 if you are using a raster and you already have a variable named STRATUMCD in your data table,
@@ -11,7 +32,9 @@ The NAlst was not returned when keepNA=TRUE, but also fixed.
 All overwrite parameters were made into 2 parameter (overwrite_dsn, overwrite_layer) for
 overwriting dsn versus overwriting layer in dsn or file (e.g., shp, csv) in outfolder.
 
-Changed output names in pltdat for consistency when clipxy=TRUE and clipxy=FALSE.
+
+spGetPlots()
+Changed output names from for consistency when clipxy=TRUE and clipxy=FALSE.
 clip_polyv to bndx
 clip_tabs to tabs
 tabs$clip_* to tabs$*

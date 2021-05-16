@@ -138,10 +138,12 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 	See FIESTA::ref_tree for variable definitions. If number of states > 3, 
 	tree data are saved to outfolder, but not returned to accommodate R memory issues. }
   \item{seed}{ Data frame. If isseed=TRUE, seedling variables from FIA DataMart SEEDLING table. }
-  \item{vspspp}{ Data frame. If isveg=TRUE, Subplot-level understory vegetation 
+  \item{vsubpspp}{ Data frame. If isveg=TRUE, Subplot-level understory vegetation 
 	variables from FIA DataMart P2VEG_SUBPLOT_SPP table. }
-  \item{vspstr}{ Data frame. If isveg=TRUE, Subplot-level cover and layer understory 
+  \item{vsubpstr}{ Data frame. If isveg=TRUE, Subplot-level cover and layer understory 
 	vegetation variables from FIA DataMart P2VEG_SUBP_STRUCTURE table. }
+  \item{lulc}{ Data frame. If islulc=TRUE, Condition-level data including data from
+	previous measurements for land use and land cover. }
   \item{spplt_*}{ sf object. If issp=TRUE, a simple feature(sf) object with plot 
 	attributes. } 
   \item{spcond}{ If spcond=TRUE, condition variables representing plot, for spatial display. }

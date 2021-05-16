@@ -11,8 +11,8 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL,
 	pltassgn = NULL, dsn = NULL, tuniqueid="PLT_CN", cuniqueid = "PLT_CN", 
 	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", 
 	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
-	ACI = FALSE, adj = "plot", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL, 
-	dunitvar = "DOMAIN", dunitvar2 = NULL, dunitarea = NULL, areavar = "ACRES", 
+	ACI = FALSE, adj = "plot", dunitvar = "DOMAIN", dunitvar2 = NULL, 
+	dunitarea = NULL, areavar = "ACRES", areaunits = "acres", 
 	unitcombine = FALSE, dunitlut = NULL, prednames = NULL, predfac = NULL, 
 	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, savedata = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn = NULL, 
@@ -65,17 +65,13 @@ modSApop(SAdoms = NULL, cond = NULL, tree = NULL, seed = NULL, plt = NULL,
 	'samp' - adjustments are calculated at strata/estimation unit (i.e., domain unit) level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (designcd=1). } 
-  \item{plt.nonsamp.filter}{ String. A logical expression for filtering nonsampled plots. 
-	Must be R syntax. If plt.nonsamp.filter=NULL, a default is set to: 'PLOT_STATUS_CD != 3'. } 
-  \item{cond.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax. If cond.nonsamp.filter=NULL, a default is set to: 'COND_STATUS_CD != 5'; 
-	if ACI: 'is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5'. }
   \item{dunitvar}{ String. Name of the domain unit variable in cond, plt, or pltassgn 
 	with domain unit assignment for each plot. }
   \item{dunitvar2}{ String. Name of a second domain unit variable in cond, plt, or 
 	pltassgn with assignment for each plot (e.g., 'STATECD'). }
   \item{dunitarea}{ Numeric or DF. Total area by domain unit. }
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
+  \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
   \item{unitcombine}{ Logical. If TRUE, automatically combines domain units 
 	if less than 2 plots in any one domain unit. }
   \item{dunitlut}{ DF/DT. Data frame with auxiliary information by domain 

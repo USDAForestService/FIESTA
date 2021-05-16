@@ -1,6 +1,6 @@
 modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL, SApackage="JoSAE", 
 	SAmethod="unit", largebnd.att=NULL, landarea="ALL", pcfilter=NULL, 
-	smallbnd.att=NULL, allin1=FALSE, estround=0, pseround=3, 
+	smallbnd.att=NULL, allin1=FALSE, metric=FALSE, estround=0, pseround=3, 
 	estnull=0, psenull="--", divideby=NULL, savedata=FALSE, rawdata=FALSE, 
 	rawonly=FALSE, multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, addtitle=TRUE, raw_fmt="csv", raw_dsn="rawdata", 
@@ -111,6 +111,7 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL, SApackage="J
   ACI.filter <- SApopdat$ACI.filter
   dunitarea <- SApopdat$dunitarea
   areavar <- SApopdat$areavar
+  areaunits <- SApopdat$areaunits
   dunitvar <- SApopdat$dunitvar
   dunitlut <- SApopdat$dunitlut
   plotsampcnt <- SApopdat$plotsampcnt
@@ -143,6 +144,7 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL, SApackage="J
       stop("invalid prednames... must be in: ", toString(SApopdat$prednames))
     }
   }
+
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
@@ -263,10 +265,10 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL, SApackage="J
   if (is.null(title.dunitvar)) title.dunitvar <- smallbnd.att
   alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, sumunits=sumunits, 
  	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
- 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.dunitvar,
-	title.filter=title.filter, unitvar=dunitvar, rowvar=rowvar, colvar=colvar, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, states=states, 
-	invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
+ 	title.colvar=title.colvar, title.unitvar=title.dunitvar,
+	title.filter=title.filter, title.unitsn=areaunits, unitvar=dunitvar, rowvar=rowvar, 
+	colvar=colvar, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
+	states=states, invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
 	parameters=FALSE, divideby=divideby)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
@@ -518,6 +520,7 @@ modSAarea <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL, SApackage="J
     rawdat$SAmethod <- SAmethod
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
+    rawdat$areaunits <- areaunits
     returnlst$raw <- rawdat
   }
   if (returntitle) {

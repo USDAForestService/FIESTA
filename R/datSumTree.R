@@ -2,9 +2,9 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", puniqueid="CN", bycond=FALSE, 
 	condid="CONDID", bysubp=FALSE, subpid="SUBP", tsumvarlst=NULL, 
 	tsumvarnmlst=NULL, TPA=TRUE, tfun=sum, ACI=FALSE, tfilter=NULL, 
-	addseed=FALSE, lbs2tons=TRUE, getadjplot=FALSE, adjtree=FALSE, adjTPA=1, 
-	NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-	out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
+	addseed=FALSE, lbs2tons=TRUE, metric=FALSE, getadjplot=FALSE, adjtree=FALSE, 
+	adjTPA=1, NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
 	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, tround=16, 
 	checkNA=FALSE, returnDT=TRUE){
   ####################################################################################
@@ -16,8 +16,8 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  COND_STATUS_CD=tadjfac=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=seedf=
-	TREECOUNT_CALC <- NULL
+  COND_STATUS_CD=tadjfac=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
+	seedf=TREECOUNT_CALC=estunits <- NULL
 
 
   ## If gui.. set variables to NULL
@@ -27,7 +27,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   checkNAcvars <- {}
   checkNAtvars <- {}
   seedonly=parameters <- FALSE
-
+  ref_estvar <- FIESTA::ref_estvar
 
   ## SET OPTIONS
   options.old <- options()
@@ -370,6 +370,10 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     for (j in vars2convert) set(treex, i=NULL, j=j, value=treex[[j]] * 0.0005)
   }
 
+  ## Check metric and convert
+  metric <- FIESTA::pcheck.logical(metric, varnm="metric", title="Metric converstion?", 
+	first="NO", stopifnull=TRUE, gui=gui)
+
   ## Check TPA and if the TPA variable is in treex
   TPA <- FIESTA::pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", 
 		stopifnull=TRUE, gui=gui)
@@ -577,6 +581,27 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     if (tvar %in% c(tuniqueid, tpavars)) {
       tvar <- "COUNT"
     }
+    if (tvar %in% ref_estvar$ESTVAR) { 
+      estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tvar])
+    } else {
+      if (metric) {
+        message(tvar, " not in ref_estvar... no metric conversion")
+        metric <- FALSE
+      } else {
+        message(tvar, " not in ref_estvar... no units found")
+      }
+    }
+    if (metric) {
+      metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
+      if (estunits != metricunits) {
+        cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
+			metricunits]
+        tvarm <- paste0(tvar, "_m")
+        treef[, (tvarm) := get(eval(tvar)) * cfactor]
+        estunits <- metricunits
+        tvar <- tvarm
+      }
+    } 
     ## MULTIPLY tvar BY TPA VARIABLE IF DESIRED
     if (TPA) {
       if (tvar %in% mortvars) {
@@ -593,6 +618,12 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       ## Adjust by adjTPA variable (Default is 1)
       if (adjTPA > 1) {
         treef[, (tpavar) := get(eval(tpavar)) * adjTPA]
+      }
+      ## If metric, convert tpavar to trees per hectare
+      if (metric) {
+        tpa.m <- paste0(tpavar, "_m")
+        treef[, (tpa.m) := 1 / ((1/ get(eval(tpavar)) * 0.4046860))]
+        tpavar <- tpa.m
       }
       treef[, (newname) := get(eval(tvar)) * get(eval(tpavar))]
 
@@ -640,7 +671,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       tsumvarnmlst2 <- tsumvarnmlst
     } 
   }
- 
+
   ######################################################################## 
   ## Aggregate tree variables
   ######################################################################## 
@@ -759,6 +790,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     sumdat <- setDF(sumdat)
   }
   sumtreelst <- list(treedat=sumdat, sumvars=tsumvarnmlst2)
+  sumtreelst$estunits <- estunits
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
   }

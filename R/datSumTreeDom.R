@@ -1,7 +1,7 @@
 datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", puniqueid="CN", bycond=FALSE, 
 	condid="CONDID", bysubp=FALSE, subpid="SUBP", tsumvar=NULL, TPA=TRUE, tfun=sum, 
-	ACI=FALSE, tfilter=NULL, lbs2tons=TRUE, tdomvar="SPCD", tdomvarlst=NULL, 
+	ACI=FALSE, tfilter=NULL, lbs2tons=TRUE, metric=FALSE, tdomvar="SPCD", tdomvarlst=NULL, 
 	tdomvar2=NULL, tdomvar2lst=NULL, tdomprefix=NULL, tdombarplot=FALSE, 
 	tdomtot=FALSE, tdomtotnm=NULL, FIAname=FALSE, addseed=FALSE, pivot=TRUE, 
 	presence=FALSE, proportion=FALSE, cover=FALSE, getadjplot=FALSE, adjtree=FALSE, 
@@ -25,12 +25,14 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  COND_STATUS_CD=COUNT=tadjfac=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=seedf <- NULL
+  COND_STATUS_CD=COUNT=tadjfac=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
+	seedf=estunits <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
   checkNAtvars <- {}
   seedclnm <- "<1"
   seedonly=parameters <- FALSE
+  ref_estvar <- FIESTA::ref_estvar
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -113,6 +115,16 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ###################################################################################
   bysubp <- FIESTA::pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
 		first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check lbs2tons
+  ###################################################################################
+  lbs2tons <- FIESTA::pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
+		first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check metric
+  ###################################################################################
+  metric <- FIESTA::pcheck.logical(metric, varnm="metric", title="Metric?", 
+		first="NO", gui=gui, stopifnull=TRUE)
 
   ## Check checkNA
   ###################################################################################
@@ -405,6 +417,29 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     treex[[tsumvar]] <- treex[[tsumvar]] * 0.0005
   }
 
+  ## Convert to metric
+  if (tsumvar %in% ref_estvar$ESTVAR) { 
+    estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tsumvar])
+  } else {
+    if (metric) {
+      message(tsumvar, " not in ref_estvar... no metric conversion")
+      metric <- FALSE
+    } else {
+      message(tsumvar, " not in ref_estvar... no units found")
+    }
+  }
+  if (metric) {
+    metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tsumvar])
+    if (estunits != metricunits) {
+      cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
+			metricunits]
+      tsumvarm <- paste0(tsumvar, "_m")
+      treef[, (tsumvarm) := get(eval(tsumvar)) * cfactor]
+      estunits <- metricunits
+      tsumvar <- tsumvarm
+    }
+  }   
+
   ## CHECK TPA and tsumvars
   TPA <- FIESTA::pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", gui=gui)
   if (TPA) {
@@ -451,6 +486,12 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       } else {
         message("assuming less than 3 SUBP in dataset")
       }
+    }
+    ## If metric, convert tpavar to trees per hectare
+    if (metric) {
+      tpa.m <- paste0(tpavar, "_m")
+      treex[, (tpa.m) := 1 / ((1/ get(eval(tpavar)) * 0.4046860))]
+      tpavar <- tpa.m
     }
   }
 
@@ -1224,25 +1265,31 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     }
     tdomdata$tdomdat <- sumtreef
   }
+  tdomdata$estunits <- estunits
   if (proportion) {
-    if (returnDT)
+    if (returnDT) {
       sumtreef.prop <- setDF(sumtreef.prop)
+    }
     tdomdata$tdomdat.prop <- sumtreef.prop
   }
   if (presence) {
-    if (returnDT)
+    if (returnDT) {
       sumtreef.pres <- setDF(sumtreef.pres)
+    }
     tdomdata$tdomdat.pres <- setDF(sumtreef.pres)
   }
   if (cover) {
-    if (returnDT)
+    if (returnDT) {
       sumtreef.cov <- setDF(sumtreef.cov)
+    }
     tdomdata$tdomdat.cov <- setDF(sumtreef.cov)
   }
   if (!notdomdat) tdomdata$tdomvarlut <- tdomvarlut
 
   tdomdata$tdomlst <- tdomscols
-  if (!is.null(tdomtotnm)) tdomdata$tdomtotnm <- tdomtotnm
+  if (!is.null(tdomtotnm)) {
+    tdomdata$tdomtotnm <- tdomtotnm
+  }
     
   return(tdomdata)
 } 

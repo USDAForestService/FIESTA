@@ -125,9 +125,10 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ## Check divideby
   ########################################################
   dividebylst <- c("hundred", "thousand", "million")
-  if (!is.null(divideby) || gui)
+  if (!is.null(divideby) || gui) {
     divideby <- FIESTA::pcheck.varchar(var2check=divideby, varnm="divideby", 
 		gui=gui, checklst=dividebylst, caption="Divide estimates?")
+  }
 
   ## Check sumunits 
   ########################################################

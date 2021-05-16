@@ -129,7 +129,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 		checklst=names(auxlut), caption="Acre variable?", stopifinvalid=FALSE)
       if (is.null(getwtvar) || !getwtvar %in% names(auxlut)) {
         if (strwtvar %in% names(auxlut)) {
-          message("using strwtvar column for strata weights")
+          #message("using strwtvar column for strata weights")
           getwt <- FALSE
         } else {
           stop("getwtvar not in auxlut")
@@ -380,7 +380,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   if (!is.null(unitarea)) {
     setkeyv(unitarea, unitvar)
   }
-
 
 #  returnlst <- list(pltx=pltx[,c(puniqueid, unitvar, prednames, PSstrvar), with=FALSE], 
 #		auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, PSstrvar=PSstrvar,

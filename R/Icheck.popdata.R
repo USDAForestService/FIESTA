@@ -1,15 +1,15 @@
 check.popdata <- function(module="GB", method="greg", popType="VOL", 
 	tree=NULL, cond, subplot=NULL, subp_cond=NULL, plt=NULL, seed=NULL, 
-	vspspp=NULL, lulc=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
+	vsubpspp=NULL, vsubpstr=NULL, lulc=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", 
 	pltassgnid="CN", pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
 	strata=TRUE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	unitcombine=FALSE, removeunits=TRUE, removetext="unitarea", stratalut=NULL,
- 	strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL, stratcombine=TRUE, prednames=NULL, 
-	predfac=NULL, ACI=FALSE, plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
-	vegplt.nonsamp.filter=NULL, nullcheck=FALSE, pvars2keep=NULL, cvars2keep=NULL, 
-	ppsanm="pop_plot_stratum_assgn", gui=FALSE){
+	areaunits="acres", unitcombine=FALSE, removeunits=TRUE, removetext="unitarea", 
+	stratalut=NULL, strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL, 
+	stratcombine=TRUE, prednames=NULL, predfac=NULL, ACI=FALSE, nonsamp.pfilter=NULL, 
+	nonsamp.cfilter=NULL, nonsamp.vfilter=NULL, nullcheck=FALSE, 
+	pvars2keep=NULL, cvars2keep=NULL, ppsanm="pop_plot_stratum_assgn", gui=FALSE){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
@@ -42,7 +42,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## - If ACI, add table of sampled/nonsampled nonforest plots (if NF_PLOT_STATUS_CD included)
   ## - Generate table of plots by strata, including nonsampled plots (P2POINTCNT)
   ## - If nonresp, generate table of nonsampled plots by strata, substrvar 
-  ## - Generate and apply plt.nonsamp.filter (PLOT_STATUS_CD != 3)
+  ## - Generate and apply nonsamp.pfilter (PLOT_STATUS_CD != 3)
   ## - Check for NA values in pvars2keep variables
   ## - If unitvar = NULL, add unitvar=ONEUNIT
   ## Check condition data
@@ -77,7 +77,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	ACI.filter=V1=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
-	vspsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD <- NULL
+	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -122,12 +122,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 
   ## Check popType
   ########################################################
-  evalTyplst <- c("ALL", "CURR", "VOL", "LULC")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG")
   popType <- FIESTA::pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
 		checklst=evalTyplst, caption="popType", multiple=TRUE, stopifnull=TRUE)
-  if ("P2VEG" %in% popType) {
-    pvars2keep <- c(pvars2keep, "P2VEG_SAMPLING_STATUS_CD")
-  }
  
   ## Check adj
   ########################################################
@@ -284,14 +281,23 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       }
       seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
     }
-    if (!is.null(vspspp) && is.character(vspspp) && vspspp %in% tablst) {
+    if (!is.null(vsubpspp) && is.character(vsubpspp) && vsubpspp %in% tablst) {
       if (!is.null(pfromqry)) {
-        vspspp.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vspspp,
-				" vspspp ON (vspspp.PLT_CN = p.CN)")
+        vsubpspp.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vsubpspp,
+				" vsubpspp ON (vsubpspp.PLT_CN = p.CN)")
       } else {
-        vspspp.fromqry <- paste(vspspp, "vspspp")
+        vsubpspp.fromqry <- paste(vsubpspp, "vsubpspp")
       }
-      vspsppqry <- paste("select distinct vspspp.* from", vspspp.fromqry, whereqry)
+      vsubpsppqry <- paste("select distinct vsubpspp.* from", vsubpspp.fromqry, whereqry)
+    }
+    if (!is.null(vsubpstr) && is.character(vsubpstr) && vsubpstr %in% tablst) {
+      if (!is.null(pfromqry)) {
+        vsubpstr.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vsubpstr,
+				" vsubpspp ON (vsubpstr.PLT_CN = p.CN)")
+      } else {
+        vsubpstr.fromqry <- paste(vsubpspp, "vsubpstr")
+      }
+      vsubpstrqry <- paste("select distinct vsubpstr.* from", vsubpstr.fromqry, whereqry)
     }
     if (!is.null(subplot) && is.character(subplot) && subplot %in% tablst) {
       subpfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., subplot,
@@ -341,33 +347,37 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   }
   treex <- pcheck.table(tree, tab_dsn=dsn, tabnm="tree", caption="Tree table?", 
 		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE)
-  vspsppx <- pcheck.table(vspspp, tab_dsn=dsn, tabnm="vspspp", 
+  vsubpsppx <- pcheck.table(vsubpspp, tab_dsn=dsn, tabnm="vsubpspp", 
 		caption="Veg Species table?", nullcheck=nullcheck, gui=gui, 
-		tabqry=vspsppqry, returnsf=FALSE)
-  subplotx <- pcheck.table(subplot, tab_dsn=dsn, tabnm="subplot", caption="subplot table?", 
-		nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE)
-  subp_condx <- pcheck.table(subp_cond, tab_dsn=dsn, tabnm="subp_cond", caption="subp_cond table?", 
-		nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE)
+		tabqry=vsubpsppqry, returnsf=FALSE)
+  vsubpstrx <- pcheck.table(vsubpstr, tab_dsn=dsn, tabnm="vsubpstr", 
+		caption="Veg Structure table?", nullcheck=nullcheck, gui=gui, 
+		tabqry=vsubpsppqry, returnsf=FALSE)
+  subplotx <- pcheck.table(subplot, tab_dsn=dsn, tabnm="subplot", 
+		caption="subplot table?", nullcheck=nullcheck, tabqry=subplotqry, 
+		returnsf=FALSE)
+  subp_condx <- pcheck.table(subp_cond, tab_dsn=dsn, tabnm="subp_cond", 
+		caption="subp_cond table?", nullcheck=nullcheck, tabqry=subp_condqry, 
+		returnsf=FALSE)
   lulcx <- pcheck.table(lulc, tab_dsn=dsn, tabnm="lulc", caption="lulc table?", 
 		nullcheck=nullcheck, tabqry=lulcqry, returnsf=FALSE)
 
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
 
-  ## popType="LULC"
-  if (popType == "LULC") {
-    if (is.null(lulcx)) {
-      stop("must include lulc table")
+  if (popType == "P2VEG") {
+    if (is.null(vsubpsppx) && is.null(vsubpstrx)) {
+      stop("must include vsubpspp and/or vsubpstr tables for popType='P2VEG'")
     }
-    condx <- lulcx
   }
 
+ 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
   ###################################################################################
   if (!is.null(pltx) || !is.null(pltassgnx)) {
     if (!is.null(pltx)) {
-      pltnmlst <- names(plt)
+      pltnmlst <- names(pltx)
       puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui, 
 		checklst=names(pltx), caption="UniqueID variable of plot", 
 		warn=paste(puniqueid, "not in plt table"), stopifnull=TRUE)
@@ -413,7 +423,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       ## Set key
       setkeyv(pltassgnx, pltassgnid)
     }
-
+ 
     ## Merge plot and pltassgn tables
     #########################################################
     if (!is.null(pltx) && !is.null(pltassgnx)) {
@@ -426,20 +436,21 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       pltassgnx <- pltassgnx[, unique(c(pltassgnid, 
 		names(pltassgnx)[!names(pltassgnx) %in% names(pltx)])), with=FALSE]
       setkeyv(pltassgnx, pltassgnid)
-
+ 
       ## Check if class of pjoinid in pltx matches class of pltassgnid in pltassgnx
       tabs <- check.matchclass(pltx, pltassgnx, pjoinid, pltassgnid)
       pltx <- tabs$tab1
       pltassgnx <- tabs$tab2
     
-      ## Merge pltx and pltassgnx
-      pltx <- pltx[pltassgnx]
+      ## Merge pltx and pltassgnx (Note: inner join)
+      pltx <- merge(pltassgnx, pltx, by.x=pltassgnid, by.y=puniqueid)
+      puniqueid <- pltassgnid
 
     } else if (is.null(pltx)) {
       pltx <- pltassgnx
       puniqueid <- pltassgnid
     }
-
+ 
     ##################################################################################
     ## Filter for population data
     ##################################################################################
@@ -486,7 +497,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       }     
     }
 
-    ## Merge plot data to cond
+    ## Merge plot data to cond (and lulc to cond)
     #########################################################
     if (!is.null(condx)) {
       cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui, 
@@ -498,6 +509,61 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       condx.na <- sum(is.na(condx[[cuniqueid]]))
       if (condx.na > 0) stop("NA values in ", cuniqueid)
 
+      condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui, 
+		checklst=names(condx), caption="Unique identifier of plot", 
+		warn=paste(condid, "not in cond table"), stopifinvalid=FALSE)
+      if (is.null(condid)) {
+        if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
+          condx[, CONDID := 1]
+          condid <- "CONDID"
+        } else {
+          stop("there is more than 1 record per plot... must include valid CONDID")
+        }
+      }
+      ## Check for NA values in necessary variables in cond table
+      condx.na <- sum(is.na(condx[[condid]]))
+      if (condx.na > 0) stop("NA values in ", condid)
+
+      ## Check if 1 plot-condition per record in cond
+      ######################################################
+      condid.dupid <- condx[duplicated(condx, by=c(cuniqueid, condid))][[cuniqueid]]
+      if (length(condid.dupid) > 0) {
+        msg <- paste("check cuniqueid/condid... duplicate records")
+        if (length(condid.dupid) < 20) print(condid.dupid)
+        stop(msg)
+      }
+      setkeyv(condx, c(cuniqueid, condid))
+
+      ## Check and append lulcx if popType='LULC'
+      #####################################################
+      if (popType == "LULC" && !is.null(lulcx)) {
+        if (!cuniqueid %in% names(lulcx)) {
+          stop(cuniqueid, " must be in lulc")
+        }
+        if (!condid %in% names(lulcx)) {
+          if (nrow(lulcx) == length(unique(lulcx[[cuniqueid]]))) {
+            lulcx[, (condid) := 1]
+          }
+        }
+
+        ## Check if class of puniqueid in lulcx matches class of cuniqueid in condx
+        tabs <- check.matchclass(lulcx, condx, cuniqueid, cuniqueid)
+        lulcx <- tabs$tab1
+        condx <- tabs$tab2
+                
+        ## Check for matching unique identifiers of lulcx and condx
+        lulcx <- check.matchval(lulcx, condx, cuniqueid, cuniqueid, tab1txt="lulc",
+			tab2txt="cond", subsetrows=TRUE)
+        setkeyv(lulcx, c(cuniqueid, condid))
+
+        ## Get columns in condx that are not in lulcx
+        condcols <- unique(c(cuniqueid, condid, names(condx)[!names(condx) %in% names(lulcx)]))
+
+        ## Merge lulcx and condx (Note: inner join to use only lulc conditions)
+        #condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx), all.x=TRUE)
+        condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx))
+      }        
+ 
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
       tabs <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
       condx <- tabs$tab1
@@ -507,22 +573,41 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, tab1txt="cond",
 			tab2txt="plt", subsetrows=TRUE)
       
-      pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
       nrow.before <- nrow(pltx)
-      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
+
+       ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
+#      if (keepplots) {
+#        condcols <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)]))
+#        pltcondx <- merge(pltx, condx[, condcols, with=FALSE], 
+#				by.x=puniqueid, by.y=cuniqueid, all.x=TRUE)
+#        if (cuniqueid != puniqueid) {
+#          setnames(pltcondx, puniqueid, cuniqueid)
+#        }
+#      } else {
+        pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
+        pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
 				by.x=cuniqueid, by.y=puniqueid)
+#      }
       nrow.after <- length(unique(pltcondx[[cuniqueid]]))
       if (nrow.after < nrow.before) {
         message(abs(nrow.after - nrow.before), " plots were removed from population")
       }
-    } else {
+    }
+ 
+    if (is.null(condx)) {
       pltcondx <- pltx
       cuniqueid <- puniqueid
+      condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui, 
+		checklst=names(condx), caption="Unique identifier of plot", 
+		warn=paste(condid, "not in cond table"), stopifnull=FALSE)
+      if (is.null(condid)) {
+        condx[, CONDID := 1]
+      }
     }
   } else {
     pltcondx <- condx
   }
-
+ 
   ###################################################################################
   ###################################################################################
   ## Check plot data
@@ -643,22 +728,24 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ######################################################################################
   if (is.null(unitvar)) {
     unitvar <- checknm("ONEUNIT", names(pltcondx))
+    message("no unitvar specified...  adding a variable named ", unitvar)
     pltcondx[, (unitvar) := 1] 
     pvars2keep <- c(unitvar, pvars2keep)
     unitvars <- unitvar
-    areavar <- NULL
+    #areavar <- NULL
   }
-
+ 
   ###################################################################################
   ## CHECK unitarea BY ESTIMATION UNIT
   ## Returns: data table with unitvar and area by estimation unit (unitvar)
   ##	 and areavar (default="ACRES")
   ###################################################################################
   unitdat <- check.unitarea(unitarea=unitarea, pltx=pltcondx, 
-	unitvars=c(unitvar, unitvar2), areavar=areavar, removeunits=removeunits, 
-	removetext=removetext, gui=gui)
+	unitvars=c(unitvar, unitvar2), areavar=areavar, areaunits=areaunits, 
+	removeunits=removeunits, removetext=removetext, gui=gui)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
+  areaunits <- unitdat$areaunits
 
   if (!unitindb && !is.null(evalid)) {
     ecol <- pcheck.varchar("EVALID", checklst=names(unitarea), stopifinvalid=FALSE)
@@ -709,28 +796,28 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     P2POINTCNT <- pltcondx[, uniqueN(get(cuniqueid)), unitvars]
     setnames(P2POINTCNT, "V1", "P2POINTCNT")
   }
-
+ 
   #############################################################################
-  ## Generate and apply plt.nonsamp.filter 
+  ## Generate and apply nonsamp.pfilter 
   #############################################################################
-  if ((is.null(plt.nonsamp.filter) || plt.nonsamp.filter == "") && adj != "none") {
+  if ((is.null(nonsamp.pfilter) || nonsamp.pfilter == "") && adj != "none") {
     if ("PLOT_STATUS_CD" %in% names(pltcondx)) {
       if (sum(pltcondx$PLOT_STATUS_CD == 3, na.rm=TRUE) > 0) {
         message("removing ", sum(pltcondx$PLOT_STATUS_CD == 3), " nonsampled forest plots")
-        plt.nonsamp.filter <- "PLOT_STATUS_CD != 3"
+        nonsamp.pfilter <- "PLOT_STATUS_CD != 3"
       }
     }
   }
-  ## Apply plt.nonsamp.filter
-  if (!is.null(plt.nonsamp.filter) && plt.nonsamp.filter != "NONE") {
-    pltcondx <- datFilter(x=pltcondx, xfilter=plt.nonsamp.filter, 
-		title.filter="plt.nonsamp.filter", gui=gui)$xf
+  ## Apply nonsamp.pfilter
+  if (!is.null(nonsamp.pfilter) && nonsamp.pfilter != "NONE") {
+    pltcondx <- datFilter(x=pltcondx, xfilter=nonsamp.pfilter, 
+		title.filter="nonsamp.pfilter", gui=gui)$xf
     if (is.null(pltcondx)) {
-      message(paste(plt.nonsamp.filter, "removed all records"))
+      message(paste(nonsamp.pfilter, "removed all records"))
       return(NULL)
     }
   }
-
+ 
   ## Check for NA values in pvars2keep variables
   pvars.na <- sapply(pvars2keep, function(x, pltcondx){ 
 					sum(is.na(pltcondx[, x, with=FALSE])) }, pltcondx)
@@ -744,29 +831,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Check condition data
   ###################################################################################
   ###################################################################################
-  if (is.null(condid) || (!is.null(condid) && !condid %in% pltcondnmlst)) {
-    ## If condid = NULL, add a variable CONDID=1 to cond
-    if (nrow(pltcondx) == length(unique(pltcondx[[cuniqueid]]))) {
-      message("assuming one condition, adding CONDID=1 for 1 condition per plot")
-      pltcondx[, CONDID := 1]
-      condid <- "CONDID"
-    } else { 
-      stop("only 1 record for each cuniqueid allowed")
-    }
-  } else {
-    ## Check for NA values in condid
-    condid.na <- sum(is.na(pltcondx[[cuniqueid]]))
-    if (condid.na > 0) stop("NA values in ", cuniqueid)
-  }
-
-  ## Check if 1 plot-condition per record in cond
-  ######################################################
-  condid.dupid <- pltcondx[duplicated(pltcondx, by=c(cuniqueid, condid))][[cuniqueid]]
-  if (length(condid.dupid) > 0) {
-    msg <- paste("check cuniqueid/condid... duplicate records")
-    if (length(condid.dupid) < 20) print(condid.dupid)
-    stop(msg)
-  }
 
   #############################################################################
   ## Check for necessary cond variables in cond table 
@@ -834,37 +898,38 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   }
 
   #############################################################################
-  ## Generate and apply cond.nonsamp.filter 
+  ## Generate and apply nonsamp.cfilter 
   #############################################################################
-  if ((is.null(cond.nonsamp.filter) || cond.nonsamp.filter == "") && adj != "none") {
+  if ((is.null(nonsamp.cfilter) || nonsamp.cfilter == "") && adj != "none") {
     if ("COND_STATUS_CD" %in% pltcondnmlst) {
-      cond.nonsamp.filter <- "COND_STATUS_CD != 5"
+      nonsamp.cfilter <- "COND_STATUS_CD != 5"
       nonsampn <- sum(pltcondx$COND_STATUS_CD == 5, na.rm=TRUE)
       if (length(nonsampn) > 0) {
         message("removing ", nonsampn, " nonsampled forest conditions")
       }
     }
     if (ACI && "NF_COND_STATUS_CD" %in% pltcondnmlst) {
-      cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
+      nonsamp.cfilter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
       message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
 		" nonsampled nonforest conditions")
-      if (!is.null(cond.nonsamp.filter)) {
-        cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
+      if (!is.null(nonsamp.cfilter)) {
+        nonsamp.cfilter <- paste(nonsamp.cfilter, "&", nonsamp.cfilter.ACI)
       }
     }
     if (popType == "LULC") {
-      cond.nonsamp.filter.lulc <- "(is.na(PREV_COND_STATUS_CD) | PREV_COND_STATUS_CD != 5)"
-      if (!is.null(cond.nonsamp.filter)) {
-        cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.lulc)
+      nonsamp.cfilter.lulc <- "(is.na(PREV_COND_STATUS_CD) | PREV_COND_STATUS_CD != 5)"
+      if (!is.null(nonsamp.cfilter)) {
+        nonsamp.cfilter <- paste(nonsamp.cfilter, "&", nonsamp.cfilter.lulc)
       }
     }
   } 
-  ## Apply cond.nonsamp.filter
-  if (!is.null(cond.nonsamp.filter) && cond.nonsamp.filter != "NONE") {
-    pltcondx <- datFilter(x=pltcondx, xfilter=cond.nonsamp.filter, 
-		title.filter="cond.nonsamp.filter", gui=gui)$xf
+ 
+  ## Apply nonsamp.cfilter
+  if (!is.null(nonsamp.cfilter) && nonsamp.cfilter != "NONE") {
+    pltcondx <- datFilter(x=pltcondx, xfilter=nonsamp.cfilter, 
+		title.filter="nonsamp.cfilter", gui=gui)$xf
     if (is.null(pltcondx)) {
-      message(paste(cond.nonsamp.filter, "removed all records"))
+      message(paste(nonsamp.cfilter, "removed all records"))
       return(NULL)
     }
   }
@@ -1016,11 +1081,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 		paste(names(svars.na[svars.na > 0]), collapse=", "))
     }
   }
-
+ 
   ############################################################################
   ## Subset variables for pltassgnx, condx, and pltcondx
   ############################################################################
-  pltassgnx <- unique(pltcondx[, c(cuniqueid, pvars2keep), with=FALSE])
+  pltassgnvars <- c(cuniqueid, pvars2keep)
+  if (popType == "P2VEG" && "P2VEG_SAMPLING_STATUS_CD" %in% names(pltcondx)) {
+    pltassgnvars <- c(pltassgnvars, "P2VEG_SAMPLING_STATUS_CD")
+  }
+  pltassgnx <- unique(pltcondx[, pltassgnvars, with=FALSE])
   pltassgnid <- cuniqueid
 
   if ("STATECD" %in% pvars2keep) {
@@ -1084,8 +1153,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         subplotx <- tabs$tab1
         subp_condx <- tabs$tab2
 
-        subp_condx <- subplotx[subp_condx]
+        cols <- c(names(subp_condx)[!names(subp_condx) %in% names(subplotx)],
+				subpuniqueid, subpid)
+        subp_condx <- subplotx[subp_condx[, cols, with=FALSE]]
       }
+      if (!"SUBPCOND_PROP" %in% names(subp_condx)) {
+        stop("must include SUBPCOND_PROP in subp_cond")
+      }
+    } else {
+      stop("must include subp_condx for P2VEG estimation")
     }
 
     #############################################################################
@@ -1093,10 +1169,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     #############################################################################
     if (!"P2VEG_SAMPLING_STATUS_CD" %in% names(pltassgnx)) {
       message("assuming all plots sample P2VEG")
+      pltassgn.P2VEG <- pltassgnx
+    } else {
+      if (ACI) {
+        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] %in% c(1,2),]
+      } else {
+        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] == 1,]
+      }
     }
-    pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] == 1,]
-
-
+ 
     ## Subset subplots to sample P2VEG plots
     subp_condf <- check.matchval(subp_condx, pltassgn.P2VEG, subpuniqueid, pltassgnid, 
 		tab1txt="subp_cond", tab2txt="pltassgn.P2VEG", subsetrows=TRUE)
@@ -1105,35 +1186,35 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     #############################################################################
     ## Define and apply subp.nonsamp.filter 
     #############################################################################
-    if (!"SUBP_STATUS_CD" %in% names(subp_condx)) {
-      message("SUBP_STATUS_CD not in subp_cond... assuming all subplots are sampled")
-    } else {
-      subp.nonsamp.filter <- "SUBP_STATUS_CD == 1"
-      if (ACI && "NF_SUBP_STATUS_CD" %in% names(subp_condx)) {
-        subp.nonsamp.filter.ACI <- "(is.na(NF_SUBP_STATUS_CD) | NF_SUBP_STATUS_CD != 3)"
-        message("removing ", sum(is.na(NF_SUBP_STATUS_CD) & NF_SUBP_STATUS_CD == 3, na.rm=TRUE), 
-		" nonsampled subplot conditions")
-        if (!is.null(subp.nonsamp.filter)) 
-          subp.nonsamp.filter <- paste(subp.nonsamp.filter, "&", subp.nonsamp.filter.ACI)
-      }
-    }
-    ## Apply subp.nonsamp.filter 
-    subp_condx <- datFilter(x=subp_condx, xfilter=subp.nonsamp.filter, 
-		title.filter="subp.nonsamp.filter")$xf
-    if (is.null(subp_condx)) {
-      message(paste(subp.nonsamp.filter, "removed all records"))
-      return(NULL)
-    }
+#    if (!"SUBP_STATUS_CD" %in% names(subp_condf)) {
+#      message("SUBP_STATUS_CD not in subp_cond... assuming all subplots are sampled")
+#    } else {
+#      subp.nonsamp.filter <- "SUBP_STATUS_CD == 1"
+#      if (ACI && "NF_SUBP_STATUS_CD" %in% names(subp_condf)) {
+#        subp.nonsamp.filter.ACI <- "(is.na(NF_SUBP_STATUS_CD) | NF_SUBP_STATUS_CD != 3)"
+#        message("removing ", sum(is.na(NF_SUBP_STATUS_CD) & NF_SUBP_STATUS_CD == 3, na.rm=TRUE), 
+#		" nonsampled subplot conditions")
+#        if (!is.null(subp.nonsamp.filter)) 
+#          subp.nonsamp.filter <- paste(subp.nonsamp.filter, "&", subp.nonsamp.filter.ACI)
+#      }
+#    }
+#    ## Apply subp.nonsamp.filter 
+#    subp_condf <- datFilter(x=subp_condf, xfilter=subp.nonsamp.filter, 
+#		title.filter="subp.nonsamp.filter")$xf
+#    if (is.null(subp_condf)) {
+#      message(paste(subp.nonsamp.filter, "removed all records"))
+#      return(NULL)
+#    }
 
     #############################################################################
     ## Define and apply p2veg.nonsamp.filter 
     #############################################################################
-    if ("P2VEG_SUBP_STATUS_CD" %in% names(subp_condx)) {
+    if ("P2VEG_SUBP_STATUS_CD" %in% names(subp_condf)) {
       p2veg.nonsamp.filter <- "!is.na(P2VEG_SUBP_STATUS_CD) & P2VEG_SUBP_STATUS_CD != 2"
     
-      subp_condx <- datFilter(x=subp_condx, xfilter=p2veg.nonsamp.filter, 
+      subp_condf <- datFilter(x=subp_condx, xfilter=p2veg.nonsamp.filter, 
 		title.filter="p2veg.nonsamp.filter")$xf
-      if (is.null(subp_condx)) {
+      if (is.null(subp_condf)) {
         message(paste(p2veg.nonsamp.filter, "removed all records"))
         return(NULL)
       }
@@ -1143,19 +1224,19 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     ## Check veg profile data
     #############################################################################
 
-    if (!is.null(vspsppx)) {
+    if (!is.null(vsubpsppx) && nrow(vsubpsppx) > 0) {
       ## Define necessary variable for tree table
-      vspsppnmlst <- names(vspsppx)
+      vsubpsppnmlst <- names(vsubpsppx)
 
       ## Check unique identifiers
       vuniqueid <- FIESTA::pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
-		checklst=vspsppnmlst, caption="UniqueID variable of veg spp", 
+		checklst=vsubpsppnmlst, caption="UniqueID variable of veg spp", 
 		warn=paste(vuniqueid, "not in vegspspp"), stopifnull=TRUE)
-      cvars2keep <- c(cvars2keep, "SUBPPROP_UNADJ")
+      cvars2keep <- c(cvars2keep, "SUBPCOND_PROP")
     
       ## Check for NA values in necessary variables in tree table
-      vspsppx.na <- sum(is.na(vspsppx[[vuniqueid]]))
-      if (vspsppx.na > 0) stop("NA values in ", vuniqueid)
+      vsubpsppx.na <- sum(is.na(vsubpsppx[[vuniqueid]]))
+      if (vsubpsppx.na > 0) stop("NA values in ", vuniqueid)
 
       if (vuniqueid %in% pltcondnmlst) {
         idplace <- which(pltcondnmlst %in% vuniqueid)
@@ -1165,19 +1246,47 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         }
       } 
 
-      ## Check that the values of tuniqueid in vspsppx are all in cuniqueid in subp_condf
-      vspsppf <- check.matchval(vspsppx, subp_condf, c(vuniqueid, subpid), 
-		tab1txt="vspspp", tab2txt="subp_cond", subsetrows=TRUE)
-      setkeyv(vspsppf, c(subpuniqueid, subpid, condid))
+      ## Check that the values of vuniqueid in vsubpsppx are all in cuniqueid in subp_condf
+      vsubpsppf <- check.matchval(vsubpsppx, subp_condf, c(vuniqueid, subpid), 
+		tab1txt="vsubpspp", tab2txt="subp_cond", subsetrows=TRUE)
+      setkeyv(vsubpsppf, c(subpuniqueid, subpid, condid))
 
-      subpc_vspsppf <- subp_condf[vspsppx]
-      subpc_vspsppf2 <- subp_condf[vspsppf]
+      subpc_vsubpsppf <- merge(vsubpsppx, 
+		subp_condf[, c(subpuniqueid, subpid, condid, "SUBPCOND_PROP"), with=FALSE],
+		by=c(subpuniqueid, subpid, condid))
+    }
+    if (!is.null(vsubpstrx) && nrow(vsubpstrx) > 0) {
+      ## Define necessary variable for tree table
+      vsubpstrnmlst <- names(vsubpstrx)
 
-#vv = vspsppx[!vspsppx$PLT_CN %in% vspsppf$PLT_CN,]
-#ss2 = subp_condf[subp_condf$SUBP_STATUS_CD == 2 & subp_condf$P2VEG_SUBP_STATUS_CD == 1,]
+      ## Check unique identifiers
+      vuniqueid <- FIESTA::pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
+		checklst=vsubpstrnmlst, caption="UniqueID variable of veg structure", 
+		warn=paste(vuniqueid, "not in vegspstr"), stopifnull=TRUE)
+    
+      ## Check for NA values in necessary variables in tree table
+      vsubpstrx.na <- sum(is.na(vsubpstrx[[vuniqueid]]))
+      if (vsubpstrx.na > 0) stop("NA values in ", vuniqueid)
+
+      if (vuniqueid %in% pltcondnmlst) {
+        idplace <- which(pltcondnmlst %in% vuniqueid)
+        if (idplace != 1) { 
+	    pltcondnmlst <- c(vuniqueid, pltcondnmlst) 
+	    pltcondnmlst <- pltcondnmlst[-(idplace + 1)] 
+        }
+      } 
+
+      ## Check that the values of vuniqueid in vsubpsppx are all in cuniqueid in subp_condf
+      vsubpstrf <- check.matchval(vsubpstrx, subp_condf, c(vuniqueid, subpid), 
+		tab1txt="vsubpstr", tab2txt="subp_cond", subsetrows=TRUE)
+      setkeyv(vsubpstrf, c(subpuniqueid, subpid, condid))
+
+      subpc_vsubpstrf <- merge(vsubpstrx, 
+		subp_condf[, c(subpuniqueid, subpid, condid, "SUBPCOND_PROP"), with=FALSE],
+		by=c(subpuniqueid, subpid, condid))
     }
   }
- 
+
 
   ## Subset pltcondx
   #cdoms2keep <- cdoms2keep[!cdoms2keep %in% c(pvars2keep, cvars2keep)] 
@@ -1188,8 +1297,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ######################################################################################
   returnlst <- list(condx=condx, pltcondx=pltcondx, pltassgnx=pltassgnx, 
 	cuniqueid=cuniqueid, condid=condid, pltassgnid=pltassgnid, unitvar=unitvar, 
-	unitarea=unitarea, unitvar2=unitvar2, areavar=areavar, unitcombine=unitcombine, 
-	prednames=prednames, predfac=predfac, adj=adj, 
+	unitarea=unitarea, unitvar2=unitvar2, areavar=areavar, areaunits=areaunits, 
+	unitcombine=unitcombine, prednames=prednames, predfac=predfac, adj=adj, 
 	strata=strata, strvar=strvar, stratcombine=stratcombine, nonresp=nonresp,
  	P2POINTCNT=P2POINTCNT, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
 	states=states, invyrs=invyrs, ACI.filter=ACI.filter, areawt=areawt)
@@ -1209,12 +1318,16 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   }
   if ("P2VEG" %in% popType) {
     returnlst$pltassgn.P2VEG <- pltassgn.P2VEG
-    if (!is.null(subp_condx)) {
+    if (!is.null(subp_condf)) {
       returnlst$subp_condf <- subp_condf
       returnlst$subpuniqueid <- subpuniqueid
     }
-    if (!is.null(vspsppx)) {
-      returnlst$vspsppf <- vspsppf
+    if (!is.null(vsubpsppx)) {
+      returnlst$vsubpsppf <- subpc_vsubpsppf
+      returnlst$vuniqueid <- vuniqueid
+    }
+    if (!is.null(vsubpstrx)) {
+      returnlst$vsubpstrf <- subpc_vsubpstrf
       returnlst$vuniqueid <- vuniqueid
     }
   }

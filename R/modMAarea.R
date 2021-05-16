@@ -2,7 +2,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 	landarea="ALL", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
-	rowgrpnm=NULL, rowgrpord=NULL, sumunits=FALSE, allin1=FALSE, 
+	rowgrpnm=NULL, rowgrpord=NULL, sumunits=FALSE, allin1=FALSE, metric=FALSE,
 	estround=1, pseround=2, estnull="--", psenull="--", divideby=NULL, 
 	savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, 
 	addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL, 
@@ -87,6 +87,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   ACI.filter <- MApopdat$ACI.filter
   unitarea <- MApopdat$unitarea
   areavar <- MApopdat$areavar
+  areaunits <- MApopdat$areaunits
   unitvar <- MApopdat$unitvar
   unitvars <- MApopdat$unitvars
   unitcombine <- MApopdat$unitcombine
@@ -141,6 +142,16 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
       prednames <- unique(c(prednames[prednames != fac], facs))
     }
   }
+
+  ########################################
+  ## Check area units
+  ########################################
+  unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
+			areaunits=areaunits, metric=metric)
+  unitarea <- unitchk$unitarea
+  areavar <- unitchk$areavar
+  areaunits <- unitchk$outunits
+
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters
@@ -229,9 +240,10 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   alltitlelst <- FIESTA::check.titles(dat=cdomdat, esttype=esttype, sumunits=sumunits, 
  	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
  	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
-	title.filter=title.filter, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, invyrs=invyrs, 
-	landarea=landarea, pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+	title.filter=title.filter, title.unitsn=areaunits, unitvar=unitvar, rowvar=rowvar, 
+	colvar=colvar, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
+	invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
+	divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -361,8 +373,14 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
+  if (!is.null(est2return)) {
+    returnlst$est <- est2return
+  } 
+  if (!is.null(pse2return)) {
+    returnlst$pse <- pse2return 
+  }
   if (returntitle) {
-    titlelst <- tabs$titlelst
+    returnlst$titlelst <- alltitlelst
   }
 
   if (rawdata) {
@@ -397,26 +415,21 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
         }
       }
     }
-  }
-  
-  if (!is.null(est2return)) {
-    returnlst$est <- est2return
-  } 
-  if (!is.null(pse2return)) {
-    returnlst$pse <- pse2return 
-  }
-  if (rawdata) {
     rawdat$esttype <- "AREA"
     rawdat$MAmethod <- MAmethod
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
+    rawdat$areaunits <- areaunits
     returnlst$raw <- rawdat
-  }
-  if (returntitle) {
-    returnlst$titlelst <- titlelst
   }
   if (returnMApopdat) {
     returnlst$MApopdat <- MApopdat
+  }
+  if ("STATECD" %in% names(pltcondf)) {
+    returnlst$statecd <- sort(unique(pltcondf$STATECD))
+  }
+  if ("INVYR" %in% names(pltcondf)) {
+    returnlst$invyr <- sort(unique(pltcondf$INVYR))
   }
     
   return(returnlst)

@@ -17,7 +17,7 @@ modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE",
 	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
 	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
 	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
-	sumunits = TRUE, allin1 = FALSE, estround = 3, pseround = 2, 
+	sumunits = TRUE, allin1 = FALSE, metric = FALSE, estround = 3, pseround = 2, 
 	estnull = "--", psenull = "--", divideby = NULL, savedata=FALSE, outfolder=NULL, 
 	outfn.pre=NULL, outfn.date=TRUE, addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
 	raw_fmt="csv", raw_dsn=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE,
@@ -70,6 +70,7 @@ modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE",
   \item{rowgrpord}{ String. Name of row group variable to sort table rows. }  
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
+  \item{metric}{ Logical. If TRUE, output area is in metric units (hectares). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
   \item{pseround}{ Integer. Number of decimal places for percent sampling error. }
   \item{estnull}{ Number or character. The number or symbol to use to indicate 'not sampled'
@@ -225,15 +226,16 @@ modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE",
 	 	\tab covar		\tab covariance for ratio \cr
 	 	\tab NBRPLT.gt0	\tab Number of non-zero plots used in estimates \cr
 	 	\tab ACRES		\tab total area for estimation unit \cr
-		\tab estn		\tab estimated area of land covered by condition, for numerator { nhat*areavar } \cr
-		\tab estn.var	\tab variance of estimated area, for numerator { nhat.var*areavar } \cr
-		\tab estd		\tab estimated area of land covered by condition, for denominator { dhat*areavar }  \cr
-		\tab estd.var	\tab variance of estimated area, for denominator { dhat.var*areavar } \cr
-		\tab estd.covar	\tab estimated covariance of numerator and denominator in area \cr
-	 	\tab rhat		\tab estimated proportion \cr
-	 	\tab rhat.var	\tab variance estimate proportion \cr
-	 	\tab rhat.se	\tab estimated standard error proportion \cr
-	 	\tab rhat.pse	\tab estimated percent standard error \cr
+		\tab estn		\tab estimated area of trees, for numerator { nhat*ACRES } \cr
+		\tab estn.var	\tab variance estimate of estimated area of trees { nhat.var*areavar^2 } \cr
+		\tab estd		\tab estimated area of land (ratiotype="PERACRE"), for denominator { dhat*areavar }  \cr
+		\tab estd.var	\tab variance of estimated area, for denominator { dhat.var*areavar^2 } \cr
+		\tab estd.covar	\tab estimated covariance of numerator and denominator { covar*areavar^2 } \cr
+	 	\tab rhat		\tab estimated ratio { estn/estd } \cr
+	 	\tab rhat.var	\tab variance estimate of estimation ratio { estn.var+rhat^2*estd.var-2*rhat*est.covar)/estd^2 } \cr
+	 	\tab rhat.se	\tab estimated standard error of ratio { sqrt(rhat.var) } \cr
+	 	\tab rhat.cv	\tab estimated coefficient of variation of ratio { rhat.se/rhat } \cr
+	 	\tab rhat.pse	\tab estimated percent standard error or ratio { rhat.cv*100 } \cr
 	 	\tab CI99left	\tab left tail of 99 percent confidence interval for estimated area \cr
 	 	\tab CI99right	\tab right tail of 99 percent confidence interval for estimated area \cr
 	 	\tab CI95left	\tab left tail of 95 percent confidence interval for estimated area \cr

@@ -1,5 +1,5 @@
 spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
- 	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
+ 	unittype="POLY", unit_layer, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter = NULL, areavar=NULL, areaunits="ACRES", rast.NODATA=NULL, 
 	keepNA=FALSE, showext=FALSE, savedata=FALSE, exportsp=FALSE, 
 	exportNA=FALSE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, 
@@ -182,6 +182,11 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     spExportSpatial(sppltx, out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer,
  		outfolder=outfolder, outfn.pre=NULL, 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+  }
+
+  if (showext) {
+    plot(sf::st_geometry(unitlayerx)) 
+    plot(sf::st_geometry(sppltx), add=TRUE) 
   }
   
   returnlst <- list(pltassgn=pltassgn, unitarea=unitarea, unitvar=unitvar, areavar=areavar,

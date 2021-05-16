@@ -8,15 +8,17 @@
 }
 \usage{    
 modSAtree(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
-	SAmethod = "unit", estseed = "none", largebnd.att = NULL, landarea = "ALL", pcfilter = NULL,
- 	estvar = NULL, estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, estround = 0, 
-	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
-	rawdata = FALSE, rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
-	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, addtitle = TRUE, raw_fmt = "csv", 
-	raw_dsn = "rawdata", multest_fmt = "csv", multest_outfolder = NULL, multest_dsn = NULL, 
-	multest_layer = NULL, multest.append = FALSE, multest.AOIonly = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, title.main = NULL, 
-	title.ref = NULL, title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, ...)
+	SAmethod = "unit", estseed = "none", largebnd.att = NULL, landarea = "ALL", 
+	pcfilter = NULL, estvar = NULL, estvar.filter = NULL, smallbnd.att = NULL, 
+	allin1 = FALSE, metric = FALSE, estround = 0, pseround = 3, estnull = 0, 
+	psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE, 
+	rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
+	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, addtitle = TRUE, 
+	raw_fmt = "csv", raw_dsn = "rawdata", multest_fmt = "csv", multest_outfolder = NULL, 
+	multest_dsn = NULL, multest_layer = NULL, multest.append = FALSE, 
+	multest.AOIonly = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	append_layer = FALSE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
+	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,6 +44,7 @@ modSAtree(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE
 	in estimation table. }
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
+  \item{metric}{ Logical. If TRUE, output area is in metric units (hectares). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
   \item{pseround}{ Integer. Number of decimal places for percent sampling error. }
   \item{estnull}{ Number or character. The number or symbol to use to indicate 'not sampled'

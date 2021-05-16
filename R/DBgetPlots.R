@@ -35,7 +35,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
   ## Set global variables  
   CN=CONDID=COND_STATUS_CD=PLT_CN=FORTYPCD=pltvarlst=condvarlst=pgeomvarlst=
-	treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vspsppvarlst=vspstrvarlst=
+	treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vsubpsppvarlst=vsubpstrvarlst=
 	subpvarlst=subpcvarlst=dwmvarlst=grmvarlst=sccmvarlst=filtervarlst=
 	SUBPPROP_UNADJ=MICRPROP_UNADJ=TPA_UNADJ=TPAMORT_UNADJ=TPAREMV_UNADJ=
 	SEEDCNT6=TREECOUNT_CALC=SEEDSUBP=LIVE_CANOPY_CVR_PCT=CONDPROP_UNADJ=
@@ -170,9 +170,9 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   if (isdwm) {
     evalType <- c(evalType, "DWM")
   }
-  if (isveg) {
-    evalType <- c(evalType, "P2VEG")
-  }
+#  if (isveg) {
+#    evalType <- c(evalType, "P2VEG")
+#  }
   if (isgrm || issccm) {
     evalType <- c(evalType, "CHNG")
   }
@@ -434,7 +434,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
   }
-
+ 
   ###########################################################################
   #########################      BUILD QUERIES     ##########################
   ###########################################################################
@@ -689,7 +689,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
   if (returndata) {
     plt=cond=pltcond=tree=seed=spconddat <- {}
-    if(isveg) { vspspp=vspstr <- {} }
+    if(isveg) { vsubpspp=vsubpstr <- {} }
     if(issubp) { subp=subpc <- {} }
     if(isdwm) { dwm <- {} }
     if(issccm) { sccm <- {} }
@@ -734,7 +734,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     message("getting data from ", state)
     stcd <- FIESTA::pcheck.states(state, "VALUE")
     stabbr <- FIESTA::pcheck.states(state, "ABBR")
-    pltx=condx=treex=seedx=vspsppx=vspstrx=subpx=subpcx=dwmx=sccmx=
+    pltx=condx=treex=seedx=vsubpsppx=vsubpstrx=subpx=subpcx=dwmx=sccmx=
 		ppsax=spconddatx=lulcx <- NULL   
 
     if (!is.null(othertables)) {
@@ -750,11 +750,13 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       evalid <- evalidlist[[state]]
       evalFilter <- paste0("ppsa.EVALID IN(", toString(evalid), ")")
 
-      if (isveg) {
+      if (any(evalType == "P2VEG")) {
         evalid.veg <- evalid[endsWith(as.character(evalid), "10")]
         if (length(evalid.veg) == 0) stop("must include evaluation ending in 10")
         evalFilter.veg <- paste("ppsa.EVALID =", evalid.veg)
-      } 
+      } else {
+        evalFilter.veg <- evalFilter
+      }
       if (isdwm) {
         evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
         if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
@@ -1500,41 +1502,41 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		stabbr, ") ...", "\n")
 
       ## Get data for P2VEG_SUBPLOT_SPP
-      vspsppvars <- toString(paste0("v.", vspsppvarlst))
-      vspsppqry <- paste("select distinct", vspsppvars, "from", vfromqry, 
+      vsubpsppvars <- toString(paste0("v.", vsubpsppvarlst))
+      vsubpsppqry <- paste("select distinct", vsubpsppvars, "from", vfromqry, 
 		"where", paste0(evalFilter.veg, stateFilters))
 
       if (datsource == "sqlite") {
-        vspsppx <- DBI::dbGetQuery(dbconn, vspsppqry)
+        vsubpsppx <- DBI::dbGetQuery(dbconn, vsubpsppqry)
       } else {
-        vspsppx <- sqldf::sqldf(vspsppqry, stringsAsFactors=FALSE)
+        vsubpsppx <- sqldf::sqldf(vsubpsppqry, stringsAsFactors=FALSE)
       }
-      if (nrow(vspsppx) != 0) {
-        vspsppx <- setDT(vspsppx)
-        vspsppx[, PLT_CN := as.character(PLT_CN)]
-        setkey(vspsppx, PLT_CN)
+      if (nrow(vsubpsppx) != 0) {
+        vsubpsppx <- setDT(vsubpsppx)
+        vsubpsppx[, PLT_CN := as.character(PLT_CN)]
+        setkey(vsubpsppx, PLT_CN)
 
         ## Subset overall filters from condx
-        vspsppx <- vspsppx[paste(vspsppx$PLT_CN, vspsppx$CONDID) %in% pcondID,]
+        vsubpsppx <- vsubpsppx[paste(vsubpsppx$PLT_CN, vsubpsppx$CONDID) %in% pcondID,]
       }
 
       ## Get data for P2VEG_SUBP_STRUCTURE
-      vspstrvars <- toString(paste0("v.", vspstrvarlst))
-      vspstrqry <- paste("select distinct", vspstrvars, "from", vstrfromqry, 
+      vsubpstrvars <- toString(paste0("v.", vsubpstrvarlst))
+      vsubpstrqry <- paste("select distinct", vsubpstrvars, "from", vstrfromqry, 
 		"where", paste0(evalFilter.veg, stateFilters))
-      vspstrx <- sqldf::sqldf(vspstrqry, stringsAsFactors=FALSE)
+      vsubpstrx <- sqldf::sqldf(vsubpstrqry, stringsAsFactors=FALSE)
 
-      if(nrow(vspstrx) != 0){
-        vspstrx <- setDT(vspstrx)
-        vspstrx[, PLT_CN := as.character(PLT_CN)]
-        setkey(vspstrx, PLT_CN)
+      if(nrow(vsubpstrx) != 0){
+        vsubpstrx <- setDT(vsubpstrx)
+        vsubpstrx[, PLT_CN := as.character(PLT_CN)]
+        setkey(vsubpstrx, PLT_CN)
 
         ## Subset overall filters from condx
-        vspstrx <- vspstrx[paste(vspstrx$PLT_CN, vspstrx$CONDID) %in% pcondID,]
+        vsubpstrx <- vsubpstrx[paste(vsubpstrx$PLT_CN, vsubpstrx$CONDID) %in% pcondID,]
       }
       if (returndata) {
-        vspspp <- rbind(vspspp, vspsppx)
-        vspstr <- rbind(vspstr, vspstrx)
+        vsubpspp <- rbind(vsubpspp, vsubpsppx)
+        vsubpstr <- rbind(vsubpstr, vsubpstrx)
       }
     }
 
@@ -1891,21 +1893,21 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			index.unique=index.unique.seedx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       } 
-      if (savedata && !is.null(vspsppx)) {
-        index.unique.vspsppx <- NULL
-        if (!append_layer) index.unique.vspsppx <- c("PLT_CN", "CONDID")
-        datExportData(vspsppx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vspspp", 
+      if (savedata && !is.null(vsubpsppx)) {
+        index.unique.vsubpsppx <- NULL
+        if (!append_layer) index.unique.vsubpsppx <- c("PLT_CN", "CONDID")
+        datExportData(vsubpsppx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vsubpspp", 
 			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.vspsppx, append_layer=append_layer,
+			index.unique=index.unique.vsubpsppx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
 
-        index.unique.vspstrx <- NULL
-        if (!append_layer) index.unique.vspstrx <- c("PLT_CN", "CONDID")
-        datExportData(vspstrx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vspstr", 
+        index.unique.vsubpstrx <- NULL
+        if (!append_layer) index.unique.vsubpstrx <- c("PLT_CN", "CONDID")
+        datExportData(vsubpstrx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vsubpstr", 
 			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.vspstrx, append_layer=append_layer,
+			index.unique=index.unique.vsubpstrx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       }
       if (savedata && !is.null(subpx)) {
@@ -2087,8 +2089,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       fiadatlst$sccm <- setDF(sccm)
     }
     if (isveg) {
-      if (!is.null(vspspp)) fiadatlst$vspspp <- setDF(vspspp)
-      if (!is.null(vspstr)) fiadatlst$vspstr <- setDF(vspstr)
+      if (!is.null(vsubpspp)) fiadatlst$vsubpspp <- setDF(vsubpspp)
+      if (!is.null(vsubpstr)) fiadatlst$vsubpstr <- setDF(vsubpstr)
     }
     if (issubp) {
       if (!is.null(subpx)) fiadatlst$subplot <- setDF(subpx)

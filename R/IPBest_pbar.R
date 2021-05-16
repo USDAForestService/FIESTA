@@ -1,4 +1,4 @@
-PBest.pbar <- function(dom.prop, uniqueid, domain, strtype="post", strlut, strunitvars, 
+PBest.pbar <- function(dom.prop, uniqueid, domain, strtype="post", stratalut, strunitvars, 
 	unitvars, strvar){
 
   ########################################################################################
@@ -14,10 +14,10 @@ PBest.pbar <- function(dom.prop, uniqueid, domain, strtype="post", strlut, strun
   psq.pltdom=sump.dom=n.strata=strwt=sumpsq.dom=phat.se=phat.var=phat.cv=
 	ese.pct=pse=phat=p.pltdom=nbrpts.pltdom=phat.strwt=phat.var.strwt=n.total <- NULL
 
-  ## Check that strlut is a data.table
-  if (!"data.table" %in% class(strlut))
-    strlut <- setDT(strlut)
-  setkeyv(strlut, strunitvars)
+  ## Check that stratalut is a data.table
+  if (!"data.table" %in% class(stratalut))
+    stratalut <- setDT(stratalut)
+  setkeyv(stratalut, strunitvars)
 
   ## Proportion of points per plot, squared (intermediate variable)
   dom.prop[, psq.pltdom := p.pltdom^2]
@@ -32,8 +32,8 @@ PBest.pbar <- function(dom.prop, uniqueid, domain, strtype="post", strlut, strun
   setkeyv(ysum.strata, strunitvars)
 
   ## STRATA/DOMAIN LEVEL: Merge domain-level sums to strata table
-  #setkeyv(strlut, strunitvars)
-  ybardat <- strlut[ysum.strata]
+  #setkeyv(stratalut, strunitvars)
+  ybardat <- stratalut[ysum.strata]
 
   if (strtype == "pre") {
 

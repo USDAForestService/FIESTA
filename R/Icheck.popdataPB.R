@@ -1,12 +1,31 @@
 check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL, 
 	plt=NULL, pltassgn=NULL, plotid="plot_id", pntid="dot_cnt",
- 	puniqueid="CN", pltassgnid="CN", plt.nonsamp.filter=NULL, 
-	pfilter=NULL, pnt.nonsamp.filter=NULL, tabtype="PCT",
-	unitvar=NULL, unitvar2=NULL, auxvars=NULL, unitcombine=FALSE, 
-	strata=FALSE, strvar=NULL, stratcombine=TRUE, pvars2keep=NULL){
+ 	puniqueid="CN", pltassgnid="CN", nonsamp.pfilter=NULL, 
+	unitvar=NULL, unitvar2=NULL, auxvars=NULL, unitarea=NULL, areavar="ACRES", 
+	areaunits="acres", unitcombine=FALSE, removeunits=TRUE, removetext="unitarea", 
+	strata=FALSE, strvar=NULL, strtype="POST", stratcombine=TRUE, 
+	sumunits=FALSE, pvars2keep=NULL){
 
   ###################################################################################
   ## DESCRIPTION: Checks data inputs 
+  ## Import and check pnt or pltpct tables 
+  ##	- check uniqueid of plot and points 
+  ##	- check NA values
+  ##	- check pltpctvars (if pltpct table)
+  ## Import and check plot and pltassgn tables 
+  ##	- check uniqueid of plot
+  ##	- check NA values
+  ## Merge plot data to points
+  ## Apply plot-level nonsample filter (nonsamp.pfilter - default=NULL)
+  ## Check for missing variables in pvars2keep (unitvar, strvar)
+  ## Generate table of sampled/nonsampled plots (PLOT_STATUS_CD, if exists)
+  ## Subset variables for PBx and pltassgnx
+  ## Check unitarea (if esttype='AREA')
+  ## Check if strvar is.factor
+  ## VALUE:
+  ## Return checked data 
+  ###################################################################################
+
   ## Define necessary plot and condition-level variables: 
   ## - plt (pvars2keep) - "STATECD", unitvars, auxvars
   ## Check tabtype, module, and MAmethod
@@ -47,20 +66,20 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 	"COND_STATUS_CD", "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "INTENSITY", "DESIGNCD"))
   pvars2keep <- unique(c(pvars2keep, unitvar, unitvar2, auxvars))
 
-
   ###################################################################################
   ## Check logical parameters: unitcombine, strata, ACI
   ###################################################################################
   
-  ## Check tabtype
-  tabtype <- FIESTA::pcheck.varchar(var2check=tabtype, varnm="tabtype", gui=gui, 
-		checklst=c("PCT", "AREA"), caption="Table output type", 
-		warn="invalid tabtype")
 
   ## Check unitcombine 
   ########################################################
   unitcombine <- FIESTA::pcheck.logical(unitcombine, varnm="unitcombine", 
 		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check sumunits 
+  ########################################################
+  sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
+		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
 
   ## Check strata, strvars
@@ -71,15 +90,19 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
     if (is.null(strvar)) stop("must include strvar for post-strat estimates")
     if (length(strvar) > 1) stop("invalid strvar... only 1 variable allowed")
     pvars2keep <- unique(c(pvars2keep, strvar))
+
+    ## Check strtype
+    strtype <- FIESTA::pcheck.varchar(var2check=strtype, varnm="strtype", gui=gui, 
+		checklst=c("POST", "PRE"), caption="Strata type", 
+		warn="invalid strtype")
+
+    ## Check stratcombine
+    stratcombine <- FIESTA::pcheck.logical(stratcombine, varnm="stratcombine", 
+		title="Combine strata?", first="YES", gui=gui, stopifnull=TRUE)
+
   } else {
     strvar <- NULL
   }
-
-  ## Check stratcombine 
-  ########################################################
-  if (strata)
-    stratcombine <- FIESTA::pcheck.logical(stratcombine, varnm="stratcombine", 
-		title="Combine strata?", first="YES", gui=gui, stopifnull=TRUE)
   
 
   ## Check auxvars
@@ -89,7 +112,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 
   
   ##################################################################
-  ## Import and check pnt tables 
+  ## Import and check pnt or pltpct tables 
   ##################################################################
   pntx <- FIESTA::pcheck.table(pnt, gui=gui, tabnm="pnt", caption="Point table?", 
 		nullcheck=TRUE)
@@ -177,25 +200,24 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 
 
   ####################################################################################
-  ### Import and check plot table (optional), check unique identifiers
+  ## Import and check plot and pltassgn tables (optional), check unique identifiers
   ####################################################################################
   pltx <- FIESTA::pcheck.table(plt, gui=gui, tabnm="plt", 
 	caption="plt table?", nullcheck=TRUE)
   pltassgnx <- pcheck.table(pltassgn, tabnm="pltassgn", 
 		caption="plot assignments?", nullcheck=TRUE, gui=gui)
-
-
+ 
   ## Check plot-level variables
   ###################################################################################
   if (!is.null(pltx) || !is.null(pltassgnx)) {
     if (!is.null(pltx)) {
-      pltnmlst <- names(plt)
+      pltnmlst <- names(pltx)
       puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui, 
 		checklst=names(pltx), caption="UniqueID variable of plot", 
 		warn=paste(puniqueid, "not in plt table"), stopifnull=TRUE)
-      if (any(duplicated(pltx[[puniqueid]]))) 
+      if (any(duplicated(pltx[[puniqueid]]))) {
         warning("plt records are not unique in: plt")
-
+      }
       ## Check for NA values in necessary variables in plt table
       pltx.na <- sum(is.na(pltx[[puniqueid]]))
       if (pltx.na > 0) stop("NA values in ", puniqueid)
@@ -238,7 +260,6 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
       pltx <- pltassgnx
       puniqueid <- pltassgnid
     }
-  
 
     ## Merge plot data to pnts
     ######################################################
@@ -252,12 +273,12 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 			tab2txt="plt", subsetrows=TRUE)
     PBx <- PBx[pltx]
 
-
     ##############################################################################
     ## Apply plot-level nonsample filter
     ##############################################################################
-    PBx <- FIESTA::datFilter(PBx, plt.nonsamp.filter, title.filter="plt.nonsample filter",
-			filternm="plt.nonsamp.filter")$xf
+    PBx <- FIESTA::datFilter(PBx, nonsamp.pfilter, title.filter="plt.nonsample filter",
+			filternm="nonsamp.pfilter")$xf
+
 
     ######################################################################################
     ## Check for missing variables 
@@ -282,25 +303,53 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
     ## Check for NA values in pvars2keep variables
     pvars.na <- sapply(pvars2keep, function(x, PBx){ 
 					sum(is.na(PBx[, x, with=FALSE])) }, PBx)
-    if (any(pvars.na > 0))
+    if (any(pvars.na > 0)) {
       stop(paste(pvars.na[pvars.na > 0], "NA values in variable:", 
 		paste(names(pvars.na[pvars.na > 0]), collapse=", ")))
+    }
   } 
     
+  ############################################################################
+  ## Subset variables for pltassgnx, condx, and pltcondx
+  ############################################################################
   pvars2keep <- pvars2keep[pvars2keep %in% names(PBx)]
   if (length(pvars2keep) > 0) {
     pltassgnx <- unique(PBx[, c(plotid, pvars2keep), with=FALSE])
     PBx[, (pvars2keep) := NULL]
+    pltassgnid <- plotid
   } else {
     pltassgnx <- unique(PBx[, plotid, with=FALSE])
     pltassgnid <- plotid
   }
 
+
   ## Add unitvar to plt table if NULL
   if (is.null(unitvar)) {
-    pltassgnx[, ONEUNIT := 1] 
-    unitvar <- "ONEUNIT"
+    unitvar <- checknm("ONEUNIT", names(PBx))
+    pltassgnx[, (unitvar) := 1] 
+    unitvar <- unitvar
   }
+
+  ###################################################################################
+  ## CHECK unitarea BY ESTIMATION UNIT
+  ## Returns: data table with unitvar and area by estimation unit (unitvar)
+  ##	 and areavar (default="ACRES")
+  ###################################################################################
+  if (is.null(unitarea) || unitarea == 0) {   
+    if (sumunits) {
+      stop("need unitarea to combine estimation units")
+    }
+    unitarea <- NULL
+  } else {
+    unitvars <- c(unitvar, unitvar2)
+    unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
+		unitvars=unitvars, areavar=areavar, areaunits=areaunits, 
+		removeunits=removeunits, removetext=removetext, gui=gui)
+    unitarea <- unitdat$unitarea
+    areavar <- unitdat$areavar
+    areaunits <- unitdat$areaunits
+  }
+
 
   ## Subset plot-level variables from PBx
   #pdoms2keep <- pdoms2keep[!pdoms2keep %in% pvars2keep] 
@@ -327,38 +376,18 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
       }
     }
   } 
-
-
-  ##############################################################################
-  ## Apply filters
-  ##############################################################################
-
-  ## pfilter to plt table
-  PBf <- datFilter(x=PBx, xfilter=pfilter, title.filter="plt filter?",
-		gui=gui, filternm="pfilter", stopifnull=TRUE)$xf
-  if (is.null(PBf)) {
-    message(paste(pfilter, "removed all records"))
-    return(NULL)
-  }
-
-  ## pnt.nonsamp.filter
-  PBf <- FIESTA::datFilter(PBf, pnt.nonsamp.filter, title.filter="pnt.nonsample filter",
-			filternm="pnt.nonsamp.filter")$xf
-  if (is.null(PBf)) {
-    message(paste(pnt.nonsamp.filter, "removed all records"))
-    return(NULL)
-  }
  
-
   ## Set up list of variables to return
   ######################################################################################
-  returnlst <- list(PBx=PBf, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
-	pltassgnid=pltassgnid, unitvar=unitvar, unitvar2=unitvar2, unitcombine=unitcombine, 
-	tabtype=tabtype, strata=strata, strvar=strvar, stratcombine=stratcombine, 
-	plotsampcnt=plotsampcnt, getprop=getprop)
+  returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
+	pltassgnid=pltassgnid, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea,
+	areavar=areavar, areaunits=areaunits, unitcombine=unitcombine, 
+	strata=strata, strvar=strvar, strtype=strtype, stratcombine=stratcombine,
+ 	plotsampcnt=plotsampcnt, getprop=getprop)
 
-  if (!is.null(pltpctx))
+  if (!is.null(pltpctx)) {
     returnlst$rowvar <- rowvar
+  }
 
   return(returnlst)
 }

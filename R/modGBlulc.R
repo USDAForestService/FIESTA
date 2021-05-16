@@ -56,6 +56,9 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
 		title="Gain-loss estimates?", first="NO", gui=gui) 
   if (gainloss) {
     rawdata <- TRUE
+    if (is.null(colvar)) {
+      stop("must include rowvar and colvar for gainloss estimates")
+    }
   }
  
   ###################################################################################

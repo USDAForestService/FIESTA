@@ -54,6 +54,7 @@
 \alias{pcheck.unique}
 \alias{pcheck.xlsx}
 \alias{pcheck.colors}
+\alias{pcheck.areaunits}
 \alias{projfix}
 \alias{save1tab}
 \alias{save2tabs}

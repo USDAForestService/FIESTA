@@ -12,9 +12,9 @@ modMAtree(MApopdat = NULL, MAmethod = "greg", prednames = NULL,
 	estseed = "none", landarea = "ALL", pcfilter = NULL, 
 	estvar = NULL, estvar.filter = NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
-	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, 
-	rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, 
-	allin1 = FALSE, estround = 1, pseround = 2, estnull = "--", psenull = "--", 
+	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
+	rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, allin1 = FALSE, 
+	metric = FALSE, estround = 1, pseround = 2, estnull = "--", psenull = "--", 
 	divideby = NULL, savedata = FALSE, outfolder = NULL, outfn.pre = NULL, 
 	outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, 
 	raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, 
@@ -81,6 +81,7 @@ modMAtree(MApopdat = NULL, MAmethod = "greg", prednames = NULL,
 	one table. }
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
+  \item{metric}{ Logical. If TRUE, output area is in metric units (hectares). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
   \item{pseround}{ Integer. Number of decimal places for percent sampling error. }
   \item{estnull}{ Number or character. The number or symbol to use to indicate 'not sampled'

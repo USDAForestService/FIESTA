@@ -144,9 +144,9 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
     setkey(tab2, NULL)
   }
 
-  if (!is.null(var2)) 
+  if (!is.null(var2)) {
     if (length(matchcol) > 1) stop("only 1 matchcol allowed if different names")
-
+  }
   for (v in matchcol) {
     if (!is.null(var2)) {
       v1 <- v
@@ -178,9 +178,36 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
     
     tab1.class <- class(tab1[[v1]])
     tab2.class <- class(tab2[[v2]])
+    ## coercion order: logical-integer-numeric-complex-character
+    coerce.order <- c("logical", "integer", "integer64", "numeric", "complex", "character")
+    tab.order <- na.omit(match(c(tab1.class, tab2.class), coerce.order)) 
 
-    if (tab2.class != tab1.class) 
-      suppressWarnings(class(tab2[[v2]]) <- tab1.class)
+    if (length(tab.order) == 2) {
+      if (tab.order[1] < tab.order[2]) {
+        if (coerce.order[tab.order[2]] == "integer64") {
+          fun2 <- as.integer
+        } else {        
+          fun2 <- get(paste0("as.", coerce.order[tab.order[2]]))
+        }
+        tab1[[v1]] <- fun2(tab1[[v1]]) 
+      } else if (tab.order[2] < tab.order[1]) {
+        if (coerce.order[tab.order[1]] == "integer64") {
+          fun1 <- as.integer
+        } else {        
+          fun1 <- get(paste0("as.", coerce.order[tab.order[1]]))
+        }
+        tab2[[v1]] <- fun1(tab2[[v1]]) 
+      }
+    } else if (tab1.class %in% coerce.order) {
+      if (tab1.class == "integer64") {
+        fun1 <- as.integer
+      } else {        
+        fun1 <- get(paste0("as.", tab1.class))
+      }
+      tab1[[v1]] <- fun1(tab1[[v1]])          
+    } else if (tab2.class != tab1.class) {
+      class(tab2[[v2]]) <- tab1.class
+    }
   }
 
   if (is.data.table(tab1))

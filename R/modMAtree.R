@@ -3,12 +3,13 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 	estvar.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	sumunits=FALSE, allin1=FALSE, estround=1, pseround=2, estnull="--", psenull="--", 
-	divideby=NULL, savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, 
-	addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, returntitle=FALSE,
-	title.main=NULL, title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, 
-	title.unitvar=NULL, title.estvar=NULL, title.filter=NULL, gui=FALSE, ...){
+	sumunits=FALSE, allin1=FALSE, metric=FALSE, estround=1, pseround=2, 
+	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, outfolder=NULL, 
+	outfn.pre=NULL, outfn.date=TRUE, addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
+	raw_fmt="csv", raw_dsn=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
+	append_layer=FALSE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
+	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, 
+	title.filter=NULL, gui=FALSE, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -91,6 +92,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   ACI.filter <- MApopdat$ACI.filter
   unitarea <- MApopdat$unitarea
   areavar <- MApopdat$areavar
+  areaunits <- MApopdat$areaunits
   unitvar <- MApopdat$unitvar
   unitlut <- MApopdat$unitlut
   unitvars <- MApopdat$unitvars
@@ -145,6 +147,16 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
       prednames <- unique(c(prednames[prednames != fac], facs))
     }
   }
+
+
+  ########################################
+  ## Check area units
+  ########################################
+  unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
+			areaunits=areaunits, metric=metric)
+  unitarea <- unitchk$unitarea
+  areavar <- unitchk$areavar
+  areaunits <- unitchk$outunits
 
 
   ###################################################################################
@@ -237,7 +249,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
 	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
 	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, 
-	tdomvar2=tdomvar2, adjtree=adjtree)
+	tdomvar2=tdomvar2, adjtree=adjtree, metric=metric)
   if (is.null(treedat)) return(NULL)
 
   tdomdat <- treedat$tdomdat
@@ -257,7 +269,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   estvar.name <- treedat$estvar.name
   estvar.filter <- treedat$estvar.filter
   tdomvarlst <- treedat$tdomvarlst
-
+  estunits <- treedat$estunits
 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
@@ -265,11 +277,12 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   alltitlelst <- FIESTA::check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
 	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
- 	title.unitvar=title.unitvar, title.filter=title.filter, title.estvarn=title.estvar,
- 	unitvar=unitvar, rowvar=rowvar, colvar=colvar, estvarn=estvar, 
-	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
-	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
-	pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+ 	title.unitvar=title.unitvar, title.filter=title.filter, title.unitsn=estunits, 
+	title.estvarn=title.estvar, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
+	estvarn=estvar, estvarn.filter=estvar.filter, addtitle=addtitle, 
+	returntitle=returntitle, rawdata=rawdata, states=states, invyrs=invyrs, 
+	landarea=landarea, pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
+	outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -408,8 +421,14 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
+  if (!is.null(est2return)) {
+    returnlst$est <- est2return 
+  }
+  if (!is.null(pse2return)) {
+    returnlst$pse <- pse2return 
+  }
   if (returntitle) {
-    titlelst <- tabs$titlelst
+    returnlst$titlelst <- alltitlelst
   }
 
   if (rawdata) {
@@ -446,29 +465,24 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
         }
       }
     }
-  }
-
-  ## GET VALUES TO RETURN
-  if (!is.null(est2return)) {
-    returnlst$est <- est2return 
-  }
-  if (!is.null(pse2return)) {
-    returnlst$pse <- pse2return 
-  }
-  if (rawdata) {
     rawdat$esttype <- "TREE"
     rawdat$MAmethod <- MAmethod
     rawdat$estvar <- estvar
     rawdat$estvar.filter <- estvar.filter
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
+    rawdat$areaunits <- areaunits
+    rawdat$estunits <- estunits
     returnlst$raw <- rawdat
-  }
-  if (returntitle) {
-    returnlst$titlelst <- titlelst
   }
   if (returnMApopdat) {
     returnlst$MApopdat <- MApopdat
+  }
+  if ("STATECD" %in% names(pltcondf)) {
+    returnlst$statecd <- sort(unique(pltcondf$STATECD))
+  }
+  if ("INVYR" %in% names(pltcondf)) {
+    returnlst$invyr <- sort(unique(pltcondf$INVYR))
   }
     
   return(returnlst)

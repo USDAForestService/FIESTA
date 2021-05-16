@@ -20,11 +20,14 @@ getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
   estn=estd=estn.var=estn.se=estn.cv=estn.pse=estd.var=estd.se=estd.cv=estd.pse=est.covar=
 	covar <- NULL
 
-  if (is.null(areavar)) stop("need areavar")
+  if (is.null(areavar)) {
+    stop("need areavar")
+  }
  
   ## ESTIMATED ACRES OR PER ACRE (for ratio)
-  if (!is.null(nhatcol))
+  if (!is.null(nhatcol)) {
     xdat[, estn := get(nhatcol) * get(areavar)]
+  }
 
   if (esttype == "RATIO") {
     if (!is.null(dhatcol))
@@ -54,9 +57,10 @@ getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
 			estd.cv := estd.se/estd][, 
 			estd.pse := estd.cv*100] )
 
-      if ("covar" %in% names(xdat)) 
+      if ("covar" %in% names(xdat)) {
         ## Calculate covariance of estimated acres for numerator/denominator
-        xdat[, est.covar := covar * get(areavar)^2]	
+        xdat[, est.covar := covar * get(areavar)^2]
+      }	
     }         
   }
   if (esttype != "RATIO") {

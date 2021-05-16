@@ -2,9 +2,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="CN", pjoinid="CN", 
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, ACI=FALSE, 
-	adj="samp", plt.nonsamp.filter=NULL, cond.nonsamp.filter=NULL, 
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
+	adj="samp", unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	areaunits="acres", unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
 	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
 	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
@@ -41,6 +40,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   on.exit(options(options.old), add=TRUE)
   adjtree <- FALSE
   popType <- "VOL"
+  nonsamp.pfilter=nonsamp.cfilter <- NULL
   returnlst <- list()
 
 
@@ -150,9 +150,9 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	cond=cond, plt=plt, seed=seed, pltassgn=pltassgn, dsn=dsn,
  	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, areawt=areawt,
  	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid,
- 	invyrs=invyrs, ACI=ACI, adj=adj, plt.nonsamp.filter=plt.nonsamp.filter, 
-	cond.nonsamp.filter=cond.nonsamp.filter, unitarea=unitarea, unitvar=unitvar, 
-	unitvar2=unitvar2, areavar=areavar, unitcombine=unitcombine, 
+ 	invyrs=invyrs, ACI=ACI, adj=adj, nonsamp.pfilter=nonsamp.pfilter, 
+	nonsamp.cfilter=nonsamp.cfilter, unitarea=unitarea, unitvar=unitvar, 
+	unitvar2=unitvar2, areavar=areavar, areaunits=areaunits, unitcombine=unitcombine, 
 	stratcombine=stratcombine, strvar=PSstrvar, prednames=prednames, predfac=predfac)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
@@ -166,10 +166,11 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
-  unitarea <- popcheck$unitarea
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
+  unitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
+  areaunits <- popcheck$areaunits
   unitcombine <- popcheck$unitcombine
   stratcombine <- popcheck$stratcombine
   PSstrvar <- popcheck$strvar
@@ -274,10 +275,11 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
 	condid=condid, ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
-	unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, npixels=npixels,
- 	npixelvar=npixelvar, prednames=prednames, expcondtab=expcondtab, 
-	plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
-	invyrs=invyrs, MAmethod=MAmethod, estvar.area=estvar.area, adj=adj)
+	areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, 
+	npixels=npixels, npixelvar=npixelvar, prednames=prednames, 
+	expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+	states=states, invyrs=invyrs, MAmethod=MAmethod, estvar.area=estvar.area, 
+	adj=adj)
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

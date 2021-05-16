@@ -1,8 +1,8 @@
 modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL, 
 	seed=NULL, dsn=NULL, buniqueid="CN", baseid="CONDID", tuniqueid=NULL,
 	basewt="CONDPROP_UNADJ", clustid="CN", clustassgnid="PLT_CN", clustjoinid="CN", 	
-	invyrs=NULL, adj="none", strata=FALSE, clust.nonsamp.filter=NULL, 
- 	base.nonsamp.filter=NULL, unitlevel1=NULL, unitlevel2=NULL, unitarea=NULL, 	
+	invyrs=NULL, adj="none", strata=FALSE, nonsamp.clustfilter=NULL, 
+ 	nonsamp.basefilter=NULL, unitlevel1=NULL, unitlevel2=NULL, unitarea=NULL, 	
 	areavar="AREA", unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
 	bcfilter=NULL, esttype="RATIO", ratiotype="PERACRE", 
@@ -56,8 +56,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   #puniqueid <- cluniqueid
   #pltassgnid <- classgnid
   #pjoinid <- cljoinid
-  #plt.nonsamp.filter <- clust.nonsamp.filter 
-  #cond.nonsamp.filter <- base.nonsamp.filter
+  #plt.nonsamp.filter <- nonsamp.clustfilter 
+  #cond.nonsamp.filter <- nonsamp.basefilter
   #unitvar <- unitlevel1 
   #unitvar2 <- unitlevel2
   #bcfilter <- pcfilter
@@ -82,8 +82,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
     FAOpopdat <- modFAOpop(tree=tree, base=base, cluster=cluster, dsn=dsn, 
 	clustassgn=clustassgn, clustid=clustid, clustassgnid=clustassgnid, 
 	clustjoinid=clustjoinid, tuniqueid=tuniqueid, buniqueid=buniqueid, baseid=baseid, 
- 	basewt=basewt, invyrs=invyrs, adj=adj, clust.nonsamp.filter=clust.nonsamp.filter, 
-	base.nonsamp.filter=base.nonsamp.filter, strata=strata, unitlevel1=unitlevel1, 
+ 	basewt=basewt, invyrs=invyrs, adj=adj, nonsamp.clustfilter=nonsamp.clustfilter, 
+	nonsamp.basefilter=nonsamp.basefilter, strata=strata, unitlevel1=unitlevel1, 
 	unitlevel2=unitlevel2, unitarea=unitarea, areavar=areavar, unitcombine=unitcombine, 
 	minplotnum.unit=minplotnum.unit, stratalut=stratalut, strvar=strvar, 
 	getwt=getwt, getwtvar=getwtvar, stratcombine=stratcombine, gui=gui, savedata=FALSE)
@@ -247,7 +247,7 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
  	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
  	title.unitvar=title.unitvar, title.filter=title.filter, title.estvarn=title.estvarn,
- 	title.units=title.units, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
+ 	title.unitsn=title.units, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
 	estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
  	estvard.filter=estvard.filter, addtitle=addtitle, rawdata=rawdata,
  	states=states, invyrs=invyrs, landarea=landarea, 

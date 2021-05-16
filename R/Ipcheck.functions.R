@@ -7,6 +7,7 @@
 #pcheck.object
 #pcheck.output
 #pcheck.colors
+#pcheck.areaunits
 
 
 pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", 
@@ -692,3 +693,37 @@ pcheck.colors <- function(colorlst, n) {
    return(colorlst)
 }
   
+
+pcheck.areaunits <- function(unitarea, areavar, areaunits, metric=FALSE) {
+  ## Description: check areaunits for conversions
+
+  gui <- FALSE
+#  ## Check outunits
+#  outunits <- FIESTA::pcheck.varchar(var2check=outunits, varnm="outunits", 
+#	gui=gui, checklst=c("ENGLISH", "METRIC"), caption="Area output units?", 
+#	stopifnull=TRUE)
+
+  ## check metric
+  metric <- FIESTA::pcheck.logical(metric, varnm="metric", 
+		title="Metric units", first="NO", gui=gui)
+  if (metric) {
+    outunits <- "hectares"
+  } else {
+    outunits <- "acres"
+  }
+
+  areausedvar <- checknm("AREAUSED", names(unitarea))
+  unitarea[[areausedvar]] <- unitarea[[areavar]]
+  if (areaunits != outunits) {
+    if (areaunits == "acres" && outunits == "hectares") {
+      unitarea[[areausedvar]] <- unitarea[[areausedvar]] * 0.4046860
+    } else if (areaunits == "hectares" && outunits == "acres") {
+      unitarea[[areausedvar]] <- unitarea[[areausedvar]] / 0.4046860
+    } else {
+      stop("invalid units... cannot convert ", areaunits, " to ", outunits) 
+    } 
+  } 
+  areavar <- areausedvar 
+  return(list(unitarea=unitarea, areavar=areavar, outunits=outunits))
+}
+

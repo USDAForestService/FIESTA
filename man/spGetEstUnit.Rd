@@ -17,7 +17,7 @@
 
 \usage{
 spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
-	unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
+	unit_layer, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
 	areavar = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
 	showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE, 
 	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "unit_assgn", 

@@ -70,7 +70,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   est.change_pnt <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, sumunits=sumunits, domlut=domlut, 
 	savedata=savedata, outfolder=outfolder, outfn.date=outfn.date, 
-	overwrite=overwrite, outfn.pre=outfn.pre2, rawdata=rawdata, 
+	overwrite_layer=overwrite, outfn.pre=outfn.pre2, rawdata=rawdata, 
 	title.ref=title.ref, returntitle=returntitle)
 
 
@@ -83,13 +83,13 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   rowvarnm <- paste(rowvar, "nm", sep="_")
   rowlut <- unique(agentlut[!agentlut[[rowvar]] %in% c(99,0), 
 			c(rowvar, rowvarnm), with=FALSE])
-  pnt.filter <- "change_pnt == 1"
+  pntfilter <- "change_pnt == 1"
 
   est.chg_ag_2grp <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvarnm, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
-  	pnt.filter <- pnt.filter, sumunits=sumunits, 
+  	pntfilter=pntfilter, sumunits=sumunits, 
 	savedata=savedata, outfolder=outfolder, outfn.date=outfn.date, 
-	overwrite=overwrite, outfn.pre=outfn.pre2, rawdata=rawdata, 
+	overwrite_layer=overwrite, outfn.pre=outfn.pre2, rawdata=rawdata, 
 	title.ref=title.ref, returntitle=returntitle)
   #est.chg_ag_2grp$est
 
@@ -108,7 +108,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_1 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #use_1$est
 
@@ -127,7 +127,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_2 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #use_2$est
 
@@ -146,7 +146,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   cover_1 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
 
 
@@ -164,7 +164,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   cover_2 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, rowlut=rowlut, domlut=domlut, row.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
 
 
@@ -179,7 +179,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_1_2_FOR <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle,
 	gainloss=TRUE)
   #use_1_2_FOR$est
@@ -196,7 +196,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   cover_1_2_GRP <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle,
 	gainloss=TRUE)
   #cover_1_2_GRP$est
@@ -213,7 +213,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_1_2 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	gainloss=TRUE)
   #use_1_2$est
@@ -230,7 +230,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   cover_1_2 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	gainloss=TRUE)
   #cover_1_2$est
@@ -247,7 +247,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_1_cover_1 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	gainloss=TRUE)
   #use_1_cover_1$est
@@ -264,7 +264,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_2_cover_2 <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle, 
 	gainloss=TRUE)
   #use_2_cover_2$est
@@ -281,7 +281,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_1_use_2_rat <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, ratio=TRUE,
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #use_1_use_2_rat$est
 
@@ -297,7 +297,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   use_2_cover_2_rat <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, ratio=TRUE,
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #use_2_cover_2_rat$est
 
@@ -313,7 +313,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   cover_1_cover_2_rat <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, ratio=TRUE,
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
 	sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #cover_1_cover_2_rat$est
 
@@ -325,12 +325,12 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   outfn.pre2 <- paste0("15_", outfn.pre)
   rowvar <- "chg_ag_2_GRP"
   colvar <- "use_1"
-  pnt.filter <- "use_1 != use_2"
+  pntfilter <- "use_1 != use_2"
 
   agent_use_1_rat <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, ratio=TRUE,
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
-	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	pntfilter=pntfilter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #agent_use_1_rat$est
 
@@ -342,12 +342,12 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   outfn.pre2 <- paste0("16_", outfn.pre)
   rowvar <- "chg_ag_2_GRP"
   colvar <- "cover_1"
-  pnt.filter <- "cover_1 != cover_2"
+  pntfilter <- "cover_1 != cover_2"
 
   agent_cover_1_rat <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, ratio=TRUE,
 	rowvar=rowvar, colvar=colvar, domlut=domlut, row.add0=TRUE, col.add0=TRUE, 
-	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	pntfilter=pntfilter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #agent_cover_1_rat$est
 
@@ -358,12 +358,12 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   ###############################################################################
   outfn.pre2 <- paste0("17_", outfn.pre)
   rowvar <- "use_1_2"
-  pnt.filter <- "use_1 != use_2"
+  pntfilter <- "use_1 != use_2"
 
   use_1_2t <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, domlut=domlut, row.add0=TRUE, 
-	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	pntfilter=pntfilter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #use_1_2t$est
 
@@ -374,12 +374,12 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   ###############################################################################
   outfn.pre2 <- paste0("18_", outfn.pre)
   rowvar <- "cover_1_2"
-  pnt.filter <- "cover_1 != cover_2"
+  pntfilter <- "cover_1 != cover_2"
 
   cover_1_2t <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, domlut=domlut, row.add0=TRUE, 
-	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	pntfilter=pntfilter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #cover_1_2t$est
 
@@ -390,12 +390,12 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
   ###############################################################################
   outfn.pre2 <- paste0("19_", outfn.pre)
   rowvar <- "use_1_2_FOR"
-  pnt.filter <- "use_1_FOR != use_2_FOR"
+  pntfilter <- "use_1_FOR != use_2_FOR"
 
   use_1_2_FORt <- modPB(PBpopdat=PBpopdatICE, tabtype=tabtype, 
 	rowvar=rowvar, domlut=domlut, row.add0=TRUE, 
-	pnt.filter=pnt.filter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite, outfn.pre=outfn.pre2, 
+	pntfilter=pntfilter, sumunits=sumunits, savedata=savedata, outfolder=outfolder, 
+	outfn.date=outfn.date, overwrite_layer=overwrite, outfn.pre=outfn.pre2, 
 	rawdata=rawdata, title.ref=title.ref, returntitle=returntitle)
   #use_1_2_FORt$est
  

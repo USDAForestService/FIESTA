@@ -14,8 +14,9 @@ getrhat <- function(x){
   ## Set global variables
   rhat=rhat.var=rhat.se=rhat.cv=rhat.pse=estn=estn.var=estd=estd.var=est.covar=pse=note <- NULL
 
-  if (!"data.table" %in% class(x))
+  if (!"data.table" %in% class(x)) {
     x <- data.table(x)
+  }
 
   ## GET RATIO ESTIMATES (rhat) AND VARIANCE OF RATIO ESTIMATES (rhat.var)
   ## Variance (EQ 4.17)

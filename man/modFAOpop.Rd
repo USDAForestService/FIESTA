@@ -12,7 +12,7 @@ modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, clustassgn =
 	dsn = NULL, clustid = "CN", clustassgnid = "PLT_CN", clustjoinid = "CN", 
 	buniqueid = "PLT_CN", baseid = "CONDID", tuniqueid = NULL, 
 	basewt = "CONDPROP_UNADJ", invyrs = NULL, adj = "none", strata = TRUE,
- 	clust.nonsamp.filter = NULL, base.nonsamp.filter = NULL, unitlevel1 = NULL, 
+ 	nonsamp.clustfilter = NULL, nonsamp.basefilter = NULL, unitlevel1 = NULL, 
 	unitlevel2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
 	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", strwtvar="strwt", 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE, 
@@ -54,9 +54,9 @@ modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, clustassgn =
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (designcd=1). } 
   \item{strata}{ Logical. If TRUE, add data information for stratification. }
-  \item{clust.nonsamp.filter}{ String. A logical expression for filtering nonsampled clusters.
+  \item{nonsamp.clustfilter}{ String. A logical expression for filtering nonsampled clusters.
 	Must be R syntax (e.g., 'PLOT_STATUS_CD != 3'. } 
-  \item{base.nonsamp.filter}{ String. A logical expression for filtering nonsampled conditions. 
+  \item{nonsamp.basefilter}{ String. A logical expression for filtering nonsampled conditions. 
 	Must be R syntax (e.g., 'COND_STATUS_CD != 5'. }
   \item{unitlevel1}{ String. Name of the estimation unit variable in base or clustassgn 
 	with estimation unit assignment for each plot (e.g., 'ESTN_UNIT'). 
