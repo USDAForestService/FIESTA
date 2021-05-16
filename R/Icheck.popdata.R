@@ -21,7 +21,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## - cond (cvars2keep) - areawt
   ## Check module, method (if MA,SA), adj
   ## - module in("GB", "MA", "SA")
-  ## - if (module="MA") method in("HT", "PS", "greg", "gregEN")
+  ## - if (module="MA") method in("HT", "PS", "greg", "gregEN", "ratio")
   ## - if (module="SA") SApackage <- c("JoSAE", "sae"); method <- c("unit", "area")
   ## Check logical parameters: ACI, unitcombine, strata stratcombine (if strata=TRUE)
   ## - If ACI, add NF_PLOT_STATUS_CD to pvars2keep and NF_COND_STATUS_CD to cvars2keep
@@ -108,7 +108,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     if (module == "MA") {
       if (!"mase" %in% rownames(installed.packages()))
 	   stop("MA module requires package mase")
-      methodlst <- c("HT", "PS", "greg", "gregEN")
+      methodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
       method <- FIESTA::pcheck.varchar(var2check=method, varnm="method", gui=gui, 
 		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
       if (any(method == "PS")) {

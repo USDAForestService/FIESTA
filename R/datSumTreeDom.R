@@ -219,7 +219,8 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       checkNAcvars <- c(checkNAcvars, csumuniqueid)
 
       ## Check that values of tuniqueid in treex are all in puniqueid in pltx
-      treex <- FIESTA::check.matchval(treex, condx, tsumuniqueid, csumuniqueid)
+      treex <- FIESTA::check.matchval(treex, condx, tsumuniqueid, csumuniqueid,
+		tab1txt="tree", tab2txt="cond")
 
       if (addseed) {
         setkeyv(seedx, tsumuniqueid)

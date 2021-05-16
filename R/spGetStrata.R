@@ -122,7 +122,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   nounit <- ifelse (is.null(unitlayerx), TRUE, FALSE)
 
   ## unit.filter
-  if (!nounit) {
+  if (!nounit && unittype == "POLY") {
     unitlayerx <- datFilter(unitlayerx, xfilter=unit.filter)$xf
   }
  

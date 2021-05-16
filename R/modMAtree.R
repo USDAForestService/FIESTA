@@ -1,4 +1,4 @@
-modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL, 
+modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL, 
 	estseed="none", landarea="ALL", pcfilter=NULL, estvar=NULL, 
 	estvar.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
@@ -55,7 +55,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 
 
   ## Check MAmethod 
-  MAmethodlst <- c("HT", "PS", "greg", "gregEN")
+  MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
   MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
 		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
@@ -109,7 +109,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   PSstrvar <- MApopdat$PSstrvar
   adj <- MApopdat$adj
 
-  if (MAmethod %in% c("greg", "gregEN")) {
+  if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
       prednames <- MApopdat$prednames
     } else {
@@ -120,9 +120,8 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     }
   } 
 
-
-  ## Convert predfac if MAmethod="greg"
-  if ("greg" %in% MAmethod && !is.null(predfac)) {
+  ## Convert predfac if MAmethod != c('HT', 'PS')
+  if (!MAmethod %in% c("HT","PS") && !is.null(predfac)) {
     for (fac in predfac) {
       ## Get factor levels
       fac.levels <- sort(unique(condx[[fac]]))
@@ -308,7 +307,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   estunits <- sort(unique(tdomdat[[unitvar]]))
 
   message("getting estimates...")
-  if (MAmethod %in% c("greg", "gregEN")) {
+  if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
   }
 

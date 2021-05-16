@@ -1,4 +1,4 @@
-modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL, 
+modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL, 
 	landarea="ALL", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
@@ -55,7 +55,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
 
 
   ## Check MAmethod 
-  MAmethodlst <- c("HT", "PS", "greg", "gregEN")
+  MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
   MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
 		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
@@ -99,13 +99,13 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   condsampcnt <- MApopdat$condsampcnt
   states <- MApopdat$states
   invyrs <- MApopdat$invyrs
-  MAmethod <- MApopdat$MAmethod
+  #MAmethod <- MApopdat$MAmethod
   estvar.name <- MApopdat$estvar.area
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
   PSstrvar <- MApopdat$PSstrvar
  
-  if (MAmethod %in% c("greg", "gregEN")) {
+  if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
       prednames <- MApopdat$prednames
     } else {
@@ -116,8 +116,8 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
     }
   } 
 
-  ## Convert predfac if MAmethod="greg"
-  if ("greg" %in% MAmethod && !is.null(predfac)) {
+  ## Convert predfac if MAmethod != c('HT', 'PS')
+  if (!MAmethod %in% c("HT","PS") && !is.null(predfac)) {
     for (fac in predfac) {
       ## Get factor levels
       fac.levels <- sort(unique(condx[[fac]]))
@@ -266,7 +266,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod="greg", prednames=NULL,
   estunits <- sort(unique(cdomdat[[unitvar]]))
 
   message("getting estimates...")
-  if (MAmethod %in% c("greg", "gregEN")) {
+  if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
   }
   if (addtotal) {

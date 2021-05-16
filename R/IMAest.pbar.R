@@ -53,7 +53,7 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 }
 
 
-MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
+MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 
 #y <- yn.vect
 
@@ -80,6 +80,15 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 					return(NULL)
 				} )
   if (is.null(estgreg)) {
+    if (save4testing) {
+      message("saving objects to working directory for testing: y, x_sample, x_pop, N")
+
+      save(yn.vect, file=file.path(getwd(), "y.rda"))
+      save(x_sample, file=file.path(getwd(), "x_sample.rda"))
+      save(x_pop, file=file.path(getwd(), "x_pop.rda"))
+      save(N, file=file.path(getwd(), "N.rda"))
+    }
+
     stop("multicolinearity exists in predictor data set...  try MAmethod = gregEN")
   }
   estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
@@ -93,7 +102,7 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE) {
 }
 
 
-MAest.ratioEstimator <- function(y, N, x_sample, x_pop, FIA=TRUE) {
+MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 
 #y <- yn.vect
 
@@ -104,20 +113,31 @@ MAest.ratioEstimator <- function(y, N, x_sample, x_pop, FIA=TRUE) {
   NBRPLT.gt0 <- sum(y > 0)
   var_method <- "lin_HTSRS"
 
-  message("generating estimates using mase::greg function...\n")
+  message("generating estimates using mase::ratioEstimator function...\n")
   estratio <- tryCatch(mase::ratioEstimator(	y = y, 
 					x_sample = x_sample, 
 					x_pop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
-					model = "linear", 
-  					var_est = TRUE, var_method = var_method, 
-					data_type = "means", 
-  					model_select = FALSE, 
+					var_est = TRUE, var_method = var_method, 
+					#data_type = "means", 
 					B = 1000, strata = NULL),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
 				} )
+  if (is.null(estratio)) {
+
+    if (save4testing) {
+      message("saving objects to working directory for testing: y, x_sample, x_pop, N")
+
+      save(yn.vect, file=file.path(getwd(), "y.rda"))
+      save(x_sample, file=file.path(getwd(), "x_sample.rda"))
+      save(x_pop, file=file.path(getwd(), "x_pop.rda"))
+      save(N, file=file.path(getwd(), "N.rda"))
+    }
+    stop("error in mase::ratioEstimator function")
+  }
+
   estratio <- data.table(estratio$pop_mean, estratio$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estratio, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
  
@@ -125,12 +145,12 @@ MAest.ratioEstimator <- function(y, N, x_sample, x_pop, FIA=TRUE) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estratio[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(estgreg)
+  return(estratio)
 }
 
 
 
-MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear") {
+MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4testing=TRUE) {
 
 #y <- yn.vect
 
@@ -141,17 +161,12 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear") {
   NBRPLT.gt0 <- sum(y > 0)
   var_method <- "lin_HTSRS"
 
-#save(y, file="E:/workspace/_tmp/elastic_test/y.rda")
-#save(x_sample, file="E:/workspace/_tmp/elastic_test/x_sample.rda")
-#save(x_pop, file="E:/workspace/_tmp/elastic_test/x_pop.rda")
-#print(N)
-
   message("generating estimates using mase::gregElasticNet function...\n")
   estgregEN <- tryCatch(mase::gregElasticNet(	y = y, 
 					x_sample = x_sample, 
 					x_pop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
-					model = "linear", 
+					model = model, 
   					var_est = TRUE, var_method = var_method, 
 					data_type = "means", 
 					lambda = "lambda.min", 
@@ -161,6 +176,14 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear") {
 					return(NULL)
 				} )
   if (is.null(estgregEN)) {
+    if (save4testing) {
+      message("saving objects to working directory for testing: y, x_sample, x_pop, N")
+
+      save(yn.vect, file=file.path(getwd(), "y.rda"))
+      save(x_sample, file=file.path(getwd(), "x_sample.rda"))
+      save(x_pop, file=file.path(getwd(), "x_pop.rda"))
+      save(N, file=file.path(getwd(), "N.rda"))
+    }
     stop("error in mase::gregElasticNet function")
   }
   estgregEN <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
@@ -208,24 +231,32 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   yn.vect[is.na(yn.vect)] <- 0
 
   if (MAmethod == "HT") {
-    est <- suppressMessages(MAest.ht(yn.vect, N))
+    est <- MAest.ht(yn.vect, N)
 
   } else if (MAmethod == "PS") {
-
     x_sample <- pltdat.dom[, PSstrvar, with=FALSE][[1]]
     x_pop <- unitlut[, c(PSstrvar, "Prop"), with=FALSE]
-    est <- suppressMessages(MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA))
+    est <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
-  } else if (MAmethod == "greg") {
+  } else {
+
     x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
     x_pop <- setDF(unitlut[, prednames, with=FALSE])
-    est <- suppressMessages(MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA))
 
-  } else if (MAmethod == "gregEN") {
-    x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
-    x_pop <- setDF(unitlut[, prednames, with=FALSE])
-    est <- suppressMessages(MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA))
+    if (MAmethod == "greg") {
+      est <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA)
+
+    } else if (MAmethod == "gregEN") {
+      est <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
+
+    } else if (MAmethod == "ratio") {
+      est <- MAest.ratio(yn.vect, N, x_sample, x_pop, FIA=FIA)
+  
+    } else {
+      stop("invalid MAmethod")
+    }
   }
+
   return(est)
 }
 

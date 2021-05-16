@@ -8,7 +8,7 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAarea(MApopdat = NULL, MAmethod = "greg", prednames = NULL, 
+modMAarea(MApopdat = NULL, MAmethod, prednames = NULL, 
 	landarea = "ALL", pcfilter = NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 

@@ -192,7 +192,8 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       checkNAcvars <- c(checkNAcvars, csumuniqueid)
 
       ## Check that values of tuniqueid in treex are all in puniqueid in pltx
-      treex <- FIESTA::check.matchval(treex, condx, tsumuniqueid, csumuniqueid)
+      treex <- FIESTA::check.matchval(treex, condx, tsumuniqueid, csumuniqueid,
+		tab1txt="tree", tab2txt="cond")
     
       if (addseed) {
         ## Check if class of tuniqueid matches class of cuniqueid
@@ -698,7 +699,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       tsumvarnmlst2 <- treecountvar	
     } 
   }    
-
+ 
   ######################################################################## 
   ######################################################################## 
 

@@ -87,9 +87,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     areavar <- MAdata$areavar
     npixelvar <- MAdata$npixelvar
     predfac <- MAdata$predfac
-    PSstrvar <- MAdata$PSstrvar
 
-    if (any(MAmethod %in% c("greg", "gregEN"))) {
+    if (any(MAmethod %in% c("greg", "gregEN", "ratio"))) {
       if (is.null(prednames)) {
         prednames <- MAdata$prednames
       } else {
@@ -98,7 +97,13 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 			toString(prednames[!prednames %in% MAdata$prednames]))
         predfac <- predfac[predfac %in% prednames]
       }
-    } 
+    } else if (any(MAmethod == "PS")) {
+      if (is.null(PSstrvar) && is.null(MAdata$PSstrvar)) {
+        stop("must include PSstrvar if MAmethod = 'PS'")
+      } else if (is.null(PSstrvar)) {
+        PSstrvar <- MAdata$PSstrvar
+      }
+    }
   } else {
     if (!is.null(pltdat)) {
       list.items <- c("bndx", "tabs", "xypltx")
@@ -125,9 +130,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
       areavar <- MAmodeldat$areavar
       npixelvar <- MAmodeldat$npixelvar
       predfac <- MAmodeldat$predfac
-      PSstrvar <- MAmodeldat$PSstrvar
 
-      if (any(MAmethod %in% c("greg", "gregEN"))) {
+      if (any(MAmethod %in% c("greg", "gregEN", "ratio"))) {
         if (is.null(prednames)) {
           prednames <- MAmodeldat$prednames
         } else {
@@ -135,6 +139,12 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
             stop("invalid prednames: ", 
 			toString(prednames[!prednames %in% MAmodeldat$prednames]))
           predfac <- predfac[predfac %in% prednames]
+        }
+      } else if (any(MAmethod == "PS")) {
+        if (is.null(PSstrvar) && is.null(MAmodeldat$PSstrvar)) {
+          stop("must include PSstrvar if MAmethod = 'PS'")
+        } else if (is.null(PSstrvar)) {
+          PSstrvar <- MAmodeldat$PSstrvar
         }
       }
     }
@@ -296,7 +306,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
     }
   }
 
-  if (any(MAmethod %in% c("greg", "gregEN"))) {
+  if (any(MAmethod != "HT")) {
     returnlst$prednames <- prednames
     returnlst$predfac <- predfac
   }

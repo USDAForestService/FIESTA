@@ -8,7 +8,7 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAtree(MApopdat = NULL, MAmethod = "greg", prednames = NULL, 
+modMAtree(MApopdat = NULL, MAmethod, prednames = NULL, 
 	estseed = "none", landarea = "ALL", pcfilter = NULL, 
 	estvar = NULL, estvar.filter = NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
