@@ -83,7 +83,7 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
     if (save4testing) {
       message("saving objects to working directory for testing: y, x_sample, x_pop, N")
 
-      save(yn.vect, file=file.path(getwd(), "y.rda"))
+      save(y, file=file.path(getwd(), "y.rda"))
       save(x_sample, file=file.path(getwd(), "x_sample.rda"))
       save(x_pop, file=file.path(getwd(), "x_pop.rda"))
       save(N, file=file.path(getwd(), "N.rda"))
@@ -119,7 +119,7 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 					x_pop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
 					var_est = TRUE, var_method = var_method, 
-					#data_type = "means", 
+					data_type = "means", 
 					B = 1000, strata = NULL),
 				error=function(err) {
 					message(err, "\n")
@@ -130,7 +130,7 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
     if (save4testing) {
       message("saving objects to working directory for testing: y, x_sample, x_pop, N")
 
-      save(yn.vect, file=file.path(getwd(), "y.rda"))
+      save(y, file=file.path(getwd(), "y.rda"))
       save(x_sample, file=file.path(getwd(), "x_sample.rda"))
       save(x_pop, file=file.path(getwd(), "x_pop.rda"))
       save(N, file=file.path(getwd(), "N.rda"))
@@ -179,7 +179,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
     if (save4testing) {
       message("saving objects to working directory for testing: y, x_sample, x_pop, N")
 
-      save(yn.vect, file=file.path(getwd(), "y.rda"))
+      save(y, file=file.path(getwd(), "y.rda"))
       save(x_sample, file=file.path(getwd(), "x_sample.rda"))
       save(x_pop, file=file.path(getwd(), "x_pop.rda"))
       save(N, file=file.path(getwd(), "N.rda"))
@@ -250,6 +250,11 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
       est <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
     } else if (MAmethod == "ratio") {
+      if (length(prednames) > 1) {
+        stop("only one continuous predictor is allowed")
+      } else {
+        x_sample <- x_sample[[prednames]]
+      }
       est <- MAest.ratio(yn.vect, N, x_sample, x_pop, FIA=FIA)
   
     } else {

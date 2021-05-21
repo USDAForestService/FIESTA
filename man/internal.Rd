@@ -205,6 +205,7 @@
 \alias{MAest.greg}
 \alias{MAest.gregEN}
 \alias{MAest.ht}
+\alias{MAest.ratio}
 
 \alias{SAest.pop}
 \alias{SAest.large}

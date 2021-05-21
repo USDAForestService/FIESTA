@@ -20,10 +20,10 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   if (nargs() == 0) gui <- TRUE 
 
   ## If gui.. set variables to NULL
-  if (gui) getwt=savedata=nostrata <- NULL
+  if (gui) getwt=savedata <- NULL
 
   ## Set global variables
-  NBRPLOTS=NBRSTRATA=n.strata=n.total=TOTACRES=strwt=errtab=joinvars <- NULL
+  NBRPLOTS=NBRSTRATA=n.strata=n.total=TOTACRES=strwt=errtab=joinvars=nostrata <- NULL
 
   ###############################################################
   ## Parameter checks
@@ -53,32 +53,59 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   pvars <- c("STATECD", "UNITCD")
   pvars2keep <- pvars[which(pvars %in% names(pltx))]
   pvars2keep <- pvars2keep[which(pvars2keep %in% names(unitlut))]
-  joinvars <- unique(c(pvars2keep, strunitvars))
    
-
-  ## Get number of plots by strata variables from pltx - n.strata
-  pltcnt <- pltx[, list(NBRPLOTS=.N), joinvars]
-  setkeyv(pltcnt, strunitvars)
-
-  ## Get number of potential combinations of strata from unitlut
-  unitlutcnt <- unitlut[, list(NBRSTRATA=.N), strunitvars]
-  setkeyv(unitlutcnt, strunitvars)
-
-  ## Merge number of plots by strata from pltx and number of potential combos
-  pltcnt <- merge(pltcnt, unitlutcnt, all.x=TRUE, all.y=TRUE)
-  pltcnt[is.na(pltcnt)] <- 0
-
   ## Add number of plots by unit
-  pltcnt[, n.total := sum(NBRPLOTS, na.rm=TRUE), by=unitvars]
+  pltcnt <- pltx[, list(n.total=.N), by=unitvars]
+  setkeyv(pltcnt, unitvars)
 
-  nostrata <- subset(pltcnt, NBRPLOTS > 0 & NBRSTRATA == 0)
+  if (!is.null(strvars)) {
+    joinvars <- unique(c(pvars2keep, strunitvars))
 
-  pltcnt$errtyp <- "none"
-  pltcnt[pltcnt$n.total >= minplotnum.strat & pltcnt$n.total < minplotnum.unit 
+    ## Get number of plots by strata variables from pltx - n.strata
+    pltcnt <- pltx[, list(NBRPLOTS=.N), joinvars]
+    setkeyv(pltcnt, strunitvars)
+
+    ## Get number of potential combinations of strata from unitlut
+    unitlutcnt <- unitlut[, list(NBRSTRATA=.N), strunitvars]
+    setkeyv(unitlutcnt, strunitvars)
+  
+    ## Merge number of plots by strata from pltx and number of potential combos
+    pltcnt <- merge(pltcnt, unitlutcnt, all.x=TRUE, all.y=TRUE)
+    pltcnt[is.na(pltcnt)] <- 0
+    nostrata <- subset(pltcnt, NBRPLOTS > 0 & NBRSTRATA == 0)
+
+    pltcnt$errtyp <- "none"
+    pltcnt[pltcnt$n.total >= minplotnum.strat & pltcnt$n.total < minplotnum.unit 
 		& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
-  pltcnt[pltcnt$NBRPLOTS < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
-  pltcnt[, NBRSTRATA := NULL]
+    pltcnt[pltcnt$NBRPLOTS < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
+    pltcnt[, NBRSTRATA := NULL]
 
+    ## Change name of NBRPLOTS
+    setnames(pltcnt, "NBRPLOTS", "n.strata")
+
+    ## ## Remove NBRSTRATA and merge to unitlut
+    unitlut <- merge(unitlut, pltcnt[, c(joinvars, "n.strata", "n.total"), with=FALSE], 
+		by=joinvars)
+    pvars <- pvars[pvars %in% names(unitlut)]
+    othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, strunitvars))]
+    setcolorder(unitlut, c(unique(c(pvars, strunitvars)), othervars))
+    setorderv(unitlut, unique(c(pvars, strunitvars)))
+
+  } else {
+    joinvars <- unique(c(pvars2keep, unitvars))
+
+    pltcnt$errtyp <- "none"
+    pltcnt[pltcnt$n.total < minplotnum.unit, "errtyp"] <- "warn"
+
+    ## ## Remove NBRSTRATA and merge to unitlut
+    unitlut <- merge(unitlut, pltcnt[, c(joinvars, "n.total"), with=FALSE], 
+		by=joinvars)
+    pvars <- pvars[pvars %in% names(unitlut)]
+    othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, unitvars))]
+    setcolorder(unitlut, c(unique(c(pvars, unitvars)), othervars))
+    setorderv(unitlut, unique(c(pvars, unitvars)))
+
+  }    
 
   if (showwarnings && any(pltcnt$errtyp == "warn")) { 
 
@@ -90,35 +117,18 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     if (stopiferror && any(errtab[["errtyp"]] == "warn"))
       stop("not enough plots in strata")
 
-    ###############################################################
     ## If savedata, write to file
     ###############################################################
-    if (savedata)
+    if (savedata) {
       write2csv(pltcnt, outfolder=outfolder, outfilenm=outfn, outfn.date=outfn.date,
 		outfn.pre=outfn.pre, overwrite=overwrite)
+    }
   }
    
-  if (!is.null(strunitvars)) {
-    ## Change name of NBRPLOTS
-    setnames(pltcnt, "NBRPLOTS", "n.strata")
-
-    ## ## Remove NBRSTRATA and merge to unitlut
-    unitlut <- merge(unitlut, pltcnt[, c(joinvars, "n.strata", "n.total"), with=FALSE], 
-		by=joinvars)
-    pvars <- pvars[pvars %in% names(unitlut)]
-    othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, strunitvars))]
-    setcolorder(unitlut, c(unique(c(pvars, strunitvars)), othervars))
-    setorderv(unitlut, unique(c(pvars, strunitvars)))
-  }
-
-
-  if (is.null(strvars) && "n.strata" %in% unitlut) 
-    unitlut[, n.strata := NULL]
-
   returnlst <- list(unitlut=unitlut, errtab=pltcnt)
 
-  if (!is.null(nostrata) && nrow(nostrata) > 0)       
+  if (!is.null(nostrata) && nrow(nostrata) > 0) {    
     returnlst$nostrat <- nostrata
-
+  }
   return(returnlst)
 }

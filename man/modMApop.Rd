@@ -16,8 +16,8 @@
 modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL, 
 	dsn = NULL, puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", 
 	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
-	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, ACI = FALSE, 
-	adj = "samp", unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
+	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL, 
+	ACI = FALSE, adj = "samp", unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
 	areavar = "ACRES", areaunits = "acres", unitcombine = FALSE, 
 	minplotnum.unit = 10, unitlut = NULL, npixelvar="npixels", 
 	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
@@ -64,6 +64,7 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
   \item{areawt}{ String. Name of variable for summarizing area weights (e.g., CONDPROP_UNADJ). }
   \item{evalid}{ Numeric. FIA Evaluation identifier for subsetting plots for population. }
   \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
+  \item{intensity}{ Integer code. Code(s) indicating intensity to use for population. }
   \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
 	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 

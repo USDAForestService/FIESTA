@@ -139,7 +139,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   ## Check population parameters 
   ## Note: currently removes units that do not have plots
   ###################################################################################
-
+ 
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="SA", tree=tree, cond=cond, plt=plt, 
 	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 

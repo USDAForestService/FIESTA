@@ -1233,7 +1233,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   } else if (is.null(states)) {
     stop("must include state names (states) or state boundary (stbnd) for bnd intersect")
   }
-
+ 
   if (!is.null(stbnd)) {
     ## Reproject stbnd to bnd projection
     prjdat <- crsCompare(stbnd, ycrs=bndx, nolonglat=TRUE)
@@ -1252,7 +1252,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     stname.att <- FIESTA::pcheck.varchar(var2check=stname.att, varnm="stname.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
-
+ 
     if (showsteps) {
       mar <-  par("mar")
       par(mar=c(1,1,1,1))
@@ -1267,11 +1267,11 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   
   statenames <- states
   if (!all(states %in% FIESTA::ref_statecd$MEANING)) {
-    if (stbnd.att == "COUNTYFIPS")
+    if (stbnd.att == "COUNTYFIPS") {
       statenames <- FIESTA::ref_statecd[FIESTA::ref_statecd$VALUE %in% 
-			unique(as.numeric(substr(states, 1,2))), "MEANING"]    
+			unique(as.numeric(substr(states, 1,2))), "MEANING"]
+    }    
   }
-  
   ## Check statenames
   if (is.null(RS)) {
     statenameslst <- FIESTA::ref_statecd$MEANING
@@ -1280,11 +1280,16 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
 
   } else { 
     statenameslst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]
+
     if (!all(statenames %in% statenameslst)) {
       statesout <- statenames[which(!statenames %in% statenameslst)] 
       statenames <- statenames[which(statenames %in% statenameslst)]  
  
       message(paste0("states are outside ", RS, " region: ", toString(statesout)))
+
+      if (length(statenames) == 0) {
+        stop("no states in RMRS")
+      }   
       message("clipping boundary to ", RS, " states: ", toString(statenames))
 
       if (!is.null(stname.att)) {

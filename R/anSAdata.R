@@ -105,15 +105,16 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
 		toString(SApltdat.names[!SApltdat.names %in% names(SApltdat)])) 
     }
   }
-
+ 
   ## Extract list objects
   xyplt <- SApltdat$xypltx
   xy.uniqueid <- SApltdat$xy.uniqueid
   puniqueid <- SApltdat$puniqueid
   pjoinid <- SApltdat$pjoinid
-  plt <- SApltdat$tabs$pltx
-  cond <- SApltdat$tabs$condx
-  tree <- SApltdat$tabs$treex
+  pltx <- SApltdat$tabs$pltx
+  condx <- SApltdat$tabs$condx
+  treex <- SApltdat$tabs$treex
+  seedx <- SApltdat$tabs$seedx
   SAdoms <- SApltdat$bndx
 
   ## Check SAdoms
@@ -189,15 +190,21 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   areavar <- SAmodeldat$areavar
   pltassgnid <- SAmodeldat$pltassgnid
 
-
   ##########################################
   ## Create output list
   ##########################################
-  SAdata <- list(SAdoms=SAdoms, plt=plt, pltassgn=pltassgn, cond=cond, tree=tree, 
+  SAdata <- list(SAdoms=SAdoms, plt=pltx, pltassgn=pltassgn, cond=condx, 
 			dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
 			dunitlut=dunitlut, prednames=prednames, predfac=predfac,
 			zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
 			pltassgnid=pltassgnid)
+  if (istree) {
+    SAdata$tree <- treex
+  }
+  if (isseed) {
+    SAdata$seed <- seedx
+  }
+
   if (savexy) {
     SAdata$xyplt <- xyplt
     SAdata$xy.uniqueid <- xy.uniqueid
@@ -224,13 +231,13 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(plt, outfolder=outfolder, 
+    datExportData(pltx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plt", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(cond, outfolder=outfolder, 
+    datExportData(condx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(tree, outfolder=outfolder, 
+    datExportData(treex, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(dunitarea, outfolder=outfolder, 

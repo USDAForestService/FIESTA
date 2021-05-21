@@ -547,9 +547,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
     ## Append totest to rawdat
     if (!is.null(unit.totest)) {
-      if (esttype == "RATIO") 
+      if (esttype == "RATIO") {
         unit.totest <- FIESTA::getrhat(unit.totest)
-
+      }
       ## Remove total column
       if ("TOTAL" %in% names(unit.totest)) {
         unit.totest[, TOTAL := NULL]
@@ -613,8 +613,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           rawdat.tabs <- c(rawdat.tabs, "colest")
         }  
       }  
-      if (!is.null(unit.grpest)) {   
-        unit.grpest <- unit.grpest[unit.grpest[["NBRPLT.gt0"]] > 0,] 
+      if (!is.null(unit.grpest)) { 
+        if (!"NBRPLT.gt0" %in% names(unit.grpest)) { 
+          unit.grpest <- unit.grpest[unit.grpest[["NBRPLT.gt0"]] > 0,] 
+        }
         setorderv(unit.grpest, c(unitvar, rowvar, colvar))  
 
         ## Split columns if unitvars exists

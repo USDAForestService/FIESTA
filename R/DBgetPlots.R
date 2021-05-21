@@ -1239,6 +1239,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		case when pcond.PRESNFCD is null then pcond.COND_STATUS_CD else pcond.PRESNFCD end as PREV_LANDUSECD,
 		case when c.PRESNFCD is null then c.COND_STATUS_CD else c.PRESNFCD end as LANDUSECD",  
 			"from", lulcfromqry, "where", xfilter)
+print(lulcqry)
       if (datsource == "sqlite") {
         lulcx <- DBI::dbGetQuery(dbconn, lulcqry)
       } else {

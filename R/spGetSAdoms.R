@@ -245,8 +245,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 		caption="Helper areas attribute", 
 		warn=paste(helperbnd.unique, "not in helperbnd"), stopifnull=TRUE)
 
-    if (any(table(helperbndx[[helperbnd.unique]])) > 1) 
+    if (any(table(helperbndx[[helperbnd.unique]])) > 1) {
       message("helperbnd.unique is not unique")
+    }
     polyunion <- TRUE
   
     ## Change name of helperbnd.unique if equals smallbnd.unique
@@ -370,8 +371,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
  		helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, largebndx=largebndx, 
 		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
  		nbrdom.min=nbrdom.min, maxislarge=maxislarge, largeishelper=largeishelper, 
-		showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder, 
-		step_dsn=step_dsn, out_fmt=step_fmt, multiSAdoms=multiSAdoms, 
+		polyunion=polyunion, showsteps=showsteps, savesteps=savesteps, 
+		stepfolder=stepfolder, step_dsn=step_dsn, out_fmt=step_fmt, multiSAdoms=multiSAdoms, 
 		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
 		maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
 		overwrite=overwrite_layer)
@@ -416,8 +417,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 
   for (i in 1:length(SAdomslst)) {   
     ## Check domain
-    if (any(table(SAdomslst[[i]]$DOMAIN) > 1))
-      stop("check smallbnd.domain.. may not be unique") 
+    if (any(table(SAdomslst[[i]]$DOMAIN) > 1)) {
+      stop("check smallbnd.domain.. may not be unique")
+    } 
 
     ## Merge other attributes (smallbnd.domain) to SAdoms
     SAdomslst[[i]] <- merge(SAdomslst[[i]], 
@@ -429,13 +431,14 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 #		by.x="DOMAIN", by.y=smallbnd.unique, all.x=TRUE)
 
     ## Join maxbndx and largebndx attributes (using largest overlap)
-    if (!is.null(maxbndx)) 
+    if (!maxislarge && !is.null(maxbndx) && !maxbnd.unique %in% names(SAdomslst[[i]])) {
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					maxbndx[, maxbnd.unique], largest=TRUE))
-
-    if (!is.null(largebndx)) 
+    }
+    if (!largeishelper && !is.null(largebndx) && !largebnd.unique %in% names(SAdomslst[[i]])) {
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					largebndx[, largebnd.unique], largest=TRUE))
+    }
     if (showsteps) {
       plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
       plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1, color="translucent")

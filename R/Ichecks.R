@@ -178,6 +178,7 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
     
     tab1.class <- class(tab1[[v1]])
     tab2.class <- class(tab2[[v2]])
+ 
     ## coercion order: logical-integer-numeric-complex-character
     coerce.order <- c("logical", "integer", "integer64", "numeric", "complex", "character")
     tab.order <- na.omit(match(c(tab1.class, tab2.class), coerce.order)) 

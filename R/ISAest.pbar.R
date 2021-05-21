@@ -1,4 +1,4 @@
-SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL, 
+SAest <- function(yn="CONDPROP_ADJ", pdomdat, cuniqueid, dunitlut=NULL, 
 	dunitvar="DOMAIN", esttype="ACRES", SAmethod="unit", SApackage="JoSAE", 
 	prednames=NULL, fmla, yd=NULL, ratiotype="PERACRE") {
 
@@ -6,7 +6,7 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
   ## DESCRIPTION: Gets estimates from JoSAE
   ## PARAMETERS:
   ## yn 		- response (numerator)
-  ## plt.dom 	- plt/domain-level data set
+  ## pdomdat 	- plt/domain-level data set
   ## dunitlut	- predictor summaries
   ## prednames	- predictor variable names to use in model
   ## 
@@ -20,32 +20,32 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
   #dunitvar <- "DOMAIN"
 
   ## get mean response by domain and append to dunitlut
-  yn.dunit <- plt.dom[, lapply(.SD, mean), by=dunitvar, .SDcols=yn]
+  yn.dunit <- pdomdat[, lapply(.SD, mean), by=dunitvar, .SDcols=yn]
   setkeyv(yn.dunit, dunitvar)
   dunitlut.dom <- merge(dunitlut, yn.dunit, all.x=TRUE)
   #DT_NAto0(dunitlut.dom, yn, 0)
 
-  ## Kick out domains (in dunitlut and plt.dom) that have less than 2 plots
+  ## Kick out domains (in dunitlut and pdomdat) that have less than 2 plots
   if (any(dunitlut.dom$n.total < 2)) {
     lt2 <- dunitlut.dom$DOMAIN[dunitlut.dom$n.total < 2]
     dunitlut.dom <- dunitlut.dom[dunitlut.dom$n.total >= 2,]
     message("removing domain(s) with less than 2 plots: ", toString(lt2))
 
-    plt.dom <- plt.dom[!plt.dom[[dunitvar]] %in% lt2,]
+    pdomdat <- pdomdat[!pdomdat[[dunitvar]] %in% lt2,]
   }
 
   ## Check if all plots are zero
-  if (sum(plt.dom[[yn]]) == 0) {
+  if (sum(pdomdat[[yn]]) == 0) {
     message(yn, " has all 0 values... returning NULL")
     return(NULL)
   }  
 
   ## Calculate number of non-zero plots
-  NBRPLT.gt0 <- plt.dom[, sum(get(yn) > 0), by=dunitvar]
+  NBRPLT.gt0 <- pdomdat[, sum(get(yn) > 0), by=dunitvar]
   setnames(NBRPLT.gt0, "V1", "NBRPLT.gt0")
  
   # variable selection for unit-level model for largebnd value
-  mod.dom <- stats::lm(fmla, data=plt.dom)
+  mod.dom <- stats::lm(fmla, data=pdomdat)
   mod.dom.step <- stats::step(mod.dom, trace=FALSE)
   mod.summary <- summary(mod.dom.step)
   preds.dom <- names(mod.dom.step$model[-1])
@@ -63,7 +63,7 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
 
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
-    dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=plt.dom, random=~1|DOMAIN)))
+    dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=pdomdat, random=~1|DOMAIN)))
     
     ## calculate the variance of the EBLUP estimate
     est.unit <- JoSAE::eblup.mse.f.wrap(domain.data = dunitlut.dom, lme.obj = dom.lme, debug=FALSE)
@@ -84,13 +84,13 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
     xpop.dom <- paste0(preds.dom, ".X.pop")
     fmla.dom2 <- as.formula(paste(paste0(yn, ".ybar.i"), 
 				paste(xpop.dom, collapse= "+"), sep="~"))
-#save(plt.dom, file=paste0("outfolder/RAVGyr2018/341/plt.dom_", yn, ".rda"))
+#save(pdomdat, file=paste0("outfolder/RAVGyr2018/341/pdomdat_", yn, ".rda"))
 #save(dunitlut.dom, file=paste0("outfolder/RAVGyr2018/341/dunitlut.dom_", yn, ".rda"))
 
     res <-
-    JoSAE::sae.ul.f(samp.data = plt.dom,
+    JoSAE::sae.ul.f(samp.data = pdomdat,
              population.data = dunitlut.dom,
-             k.ij = rep(1,nrow(plt.dom)),
+             k.ij = rep(1,nrow(pdomdat)),
              formula = fmla.dom,
              domain.col = "DOMAIN",
              sample.id.col = cuniqueid,
@@ -134,20 +134,20 @@ SAest <- function(yn="CONDPROP_ADJ", plt.dom, cuniqueid, dunitlut=NULL,
 ########################################################################
 ## By domain
 ########################################################################
-SAest.dom <- function(dom, plt.dom, cuniqueid, dunitlut, dunitvar="DOMAIN", 
+SAest.dom <- function(dom, pdomdat, cuniqueid, dunitlut, dunitvar="DOMAIN", 
 		esttype, SApackage, SAmethod, prednames=NULL, fmla, 
 		domain, response=NULL) {
 
   ## Subset tomdat to domain=dom
-  plt.dom <- plt.dom[plt.dom[[domain]] == dom,] 
+  pdomdat <- pdomdat[pdomdat[[domain]] == dom,] 
 
 #print("TEST")
-#save(plt.dom, file="outfolder/RAVGyr2015/M262/SA2check/pltdom.rda")
+#save(pdomdat, file="outfolder/RAVGyr2015/M262/SA2check/pltdom.rda")
 #save(dunitlut, file="outfolder/RAVGyr2015/M262/SA2check/dunitlut.rda")
 #save(fmla, file="outfolder/RAVGyr2015/M262/SA2check/fmla.rda")
 
   ## Apply function to each dom
-  domest <- data.table(dom, SAest(yn=response, plt.dom=plt.dom, 
+  domest <- data.table(dom, SAest(yn=response, pdomdat=pdomdat, 
 			cuniqueid=cuniqueid, esttype=esttype, dunitlut=dunitlut, 
 			dunitvar=dunitvar, prednames=prednames, fmla=fmla, 
 			SApackage=SApackage, SAmethod=SAmethod))
@@ -159,30 +159,30 @@ SAest.dom <- function(dom, plt.dom, cuniqueid, dunitlut, dunitvar="DOMAIN",
 ########################################################################
 ## By largebnd
 ########################################################################
-SAest.large <- function(largebnd.val, plt.dom, cuniqueid, largebnd.att, 
+SAest.large <- function(largebnd.val, pdomdat, cuniqueid, largebnd.att, 
 		dunitlut, dunitvar="DOMAIN", esttype, SApackage="JoSAE", 
 		SAmethod="unit", fmla, domain, response, prednames=NULL) {
   message("generating estimate for: ", largebnd.val)
 
 
   ## subset datasets by largebnd value (e.g., ecosection)
-  plt.dom.large <- plt.dom[plt.dom[[largebnd.att]] == largebnd.val, ]
-  if (nrow(plt.dom.large) == 0) stop("invalid largebnd.val")
-  setkeyv(plt.dom.large, cuniqueid)
+  pdomdat.large <- pdomdat[pdomdat[[largebnd.att]] == largebnd.val, ]
+  if (nrow(pdomdat.large) == 0) stop("invalid largebnd.val")
+  setkeyv(pdomdat.large, cuniqueid)
 
   ## get unique domain units and subset domain lut for largebnd value
-  dunits <- sort(unique(plt.dom.large[[dunitvar]]))
+  dunits <- sort(unique(pdomdat.large[[dunitvar]]))
   dunitlut.large <- dunitlut[dunitlut[[dunitvar]] %in% dunits,]
      
   ## get unique domains
-  doms <- as.character(unique(plt.dom.large[[domain]]))
+  doms <- as.character(na.omit(unique(pdomdat.large[[domain]])))
 
-#plt.dom=plt.dom.large
+#pdomdat=pdomdat.large
 #dunitlut=dunitlut.large
 #dom=doms
 
   domest <- do.call(rbind, lapply(doms, SAest.dom, 
-			plt.dom=plt.dom.large, cuniqueid=cuniqueid, 
+			pdomdat=pdomdat.large, cuniqueid=cuniqueid, 
      			dunitlut=dunitlut.large, dunitvar=dunitvar,
 			SApackage=SApackage, SAmethod=SAmethod, 
 			esttype=esttype, prednames=prednames, fmla=fmla,

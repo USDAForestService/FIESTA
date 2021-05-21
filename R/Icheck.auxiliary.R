@@ -225,7 +225,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     ## Aggregate variables to unitvar (and strvars)
     ############################
     sumvars <- c(getwtvar, npixelvar, strwtvar)
-    sumvars <- sumvars[sumvars %in% names(auxlut)]
+    sumvars <- unique(sumvars[sumvars %in% names(auxlut)])
 
     if (length(sumvars) > 0) {
       auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE), by=c(unitvars, strvars), .SDcols=sumvars]
@@ -315,7 +315,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     pltx <- pltx[pltx[[PSstrvar]] %in% unique(auxlut[[PSstrvar]]),]
     message("removing plots with invalid strata assignments")
   }
-
 
   ###################################################################################
   ## Collapse strata and/or estimation unit classes if errtab warnings

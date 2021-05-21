@@ -126,7 +126,7 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "TPA_UNADJ"
   estvar.filter <- "STATUSCD == 1"
 
-  estdat <- modSAtree(SApopdat=SApopdat, landarea=landarea,
+  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea,
            estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 
@@ -155,7 +155,7 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "VOLCFNET"
   estvar.filter <- "STATUSCD == 1 & DIA >= 5"
 
-  estdat <- modSAtree(SApopdat=SApopdat, landarea=landarea,
+  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea,
            estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 
@@ -184,7 +184,7 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "BA"
   estvar.filter <- "STATUSCD == 1 & DIA >= 1"
 
-  estdat <- modSAtree(SApopdat=SApopdat, landarea=landarea,
+  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea,
            estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 
@@ -214,8 +214,8 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "BA"
   estvar.filter <- "STATUSCD == 1 & DIA >= 1"
 
-  estdat <- modSAtree(SApopdat=SApopdat, landarea=landarea, pcfilter=pcfilter,
-           estvar=estvar, estvar.filter=estvar.filter,
+  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea, 
+		pcfilter=pcfilter, estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 

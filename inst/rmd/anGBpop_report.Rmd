@@ -15,7 +15,8 @@ params:
 
 
 ```{r Data_Inputs, echo=FALSE, warning=FALSE, message=FALSE}
-
+ 
+library(FIESTA)
 GBpopdat <- params$GBpopdat
 AOInm <- params$AOInm
 EVALIDator_match <- params$EVALIDator_match
@@ -23,6 +24,8 @@ pcfilter <- params$pcfilter
 spcd <- params$spcd
 photo_author <- params$photo_author
 title.ref <- params$title.ref
+
+
 
 if (is.null(title.ref)) {
   title.ref <- AOInm
@@ -33,9 +36,9 @@ if (is.null(title.ref)) {
 states <- GBpopdat$states
 invyrs <- unique(unlist(GBpopdat$invyrs))
 
-if (!is.null(pcfilter) && "STATECD" %in% names(GBpopdat$pltcondx)) {
+if (!is.null(pcfilter) && 'STATECD' %in% names(GBpopdat$pltcondx)) {
   pltcondf <- datFilter(GBpopdat$pltcondx, xfilter=pcfilter)$xf
-  states <- pcheck.states(unique(pltcondf$STATECD))
+  states <- FIESTA::pcheck.states(unique(pltcondf$STATECD))
   invyrs <- unique(pltcondf$INVYR)
 }
 
@@ -48,10 +51,10 @@ if (is.null(pcfilter)) {
   title.filter <- AOInm
 }
 invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
-stcd <- pcheck.states(states, statereturn="VALUE")
-
+stcd <- FIESTA::pcheck.states(states, statereturn="VALUE")
 
 ## Check species
+ref_codes <- FIESTA::ref_codes
 if (is.null(spcd)) {
   spcd <- 746
 } else {
@@ -69,6 +72,7 @@ photo_text <- paste0("Photo from ", AOInm, title.states, ".")
 if (!is.null(photo_author)) {
   photo_text <- paste0(photo_text, " Photo courtesy of ", photo_author, ".")
 }
+
 
 ```
 
@@ -101,7 +105,7 @@ Rocky Mountain Research Station, Forest Inventory and Analysis  | `r format(Sys.
 &nbsp;  
 
 ```{r Summary_Info, echo=FALSE, include=FALSE}
-
+ 
 estsummary <- modGBarea(GBpopdat=GBpopdat, rowvar="COND_STATUS_CD", row.FIAname=TRUE, 
                 rawdata=TRUE, landarea="ALL", colvar="RESERVCD", col.FIAname=TRUE,
                 pcfilter=pcfilter)
@@ -114,7 +118,7 @@ title.rowvar <- "Land class"
 title.colvar <- "Reserved status"
 
 unitarea <- GBpopdat$unitarea
-if ("STATECD" %in% names(unitarea)) {
+if ('STATECD' %in% names(unitarea)) {
   unitarea <- unitarea[unitarea$STATECD %in% stcd,] 
 }
 areapop <- sum(unitarea[[GBpopdat$areavar]])
@@ -126,7 +130,7 @@ area.water <- sum(rowest[rowest[[title.rowvar]] %in% c("Noncensus water", "Censu
 
 unitvars <- c(GBpopdat$unitvar, GBpopdat$unitvars)
 stratalut <- setDT(GBpopdat$stratalut)
-if ("STATECD" %in% names(stratalut)) {
+if ('STATECD' %in% names(stratalut)) {
   stratalut <- stratalut[stratalut$STATECD %in% stcd, ]
 }
 nplotspop <- sum(stratalut[, sum(n.total, na.rm=TRUE), by=unitvars][["V1"]])
@@ -134,7 +138,7 @@ nplotspopf <- totest$NBRPLT.gt0
 
 
 intro_text1 <- paste0("The area of ", AOInm, " located in ", title.statesx, " is ", format(round(areapopf), big.mark=","), " acres with ", round(area.for/areapopf * 100), " percent of the area classified as forest land, ", round(area.nf/areapopf * 100), " percent classified as nonforest land, and ", round(area.water/areapopf * 100), " percent as water.") 
-
+ 
 
 if (!EVALIDator_match) {
 intro_text2 <-

@@ -111,6 +111,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ########################################################################
   ## Check xy table
   xychk <- pcheck.spatial(xy, dsn=xy_dsn, checkonly=TRUE)
+ 
   if (!is.null(evalid)) {
     evalid <- unlist(evalid)
     stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4))) 
@@ -134,7 +135,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     if (is.null(stbnd.att) && exists("stunitco")) {
       stbnd.att <- "COUNTYFIPS"
     }
- 
     ## Get intersecting states
     statedat <- spGetStates(bndx, stbnd=stbnd, stbnd_dsn=stbnd_dsn, 
 			stbnd.att=stbnd.att, RS=RS, states=states, showsteps=showsteps)
@@ -155,7 +155,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
-
   if (datsource %in% c("obj", "csv")) {
 
     ####################################################################
@@ -757,7 +756,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         }
       }
     
-
       for (i in 1:length(stcds)) { 
         stcd <- stcds[i]
         state <- pcheck.states(stcd) 
@@ -1078,8 +1076,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             xyplt <- rbind(xyplt1, xyplt2)
 
           } else {    ## measEndyr.filter = NULL
+
             ## Clip data
-            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndx, xy.uniqueid=xy.uniqueid)
+            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndx, xy.uniqueid=xy.joinid)
             xyplt <- clipdat$clip_xyplt
             plt <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
             pltids <- plt[[puniqueid]]

@@ -207,8 +207,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       outnm <- paste(SApackage, estvarnm, tfilter, sep="_")
 
       SAestdat <- tryCatch(
-		modSAtree(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
-			landarea=landarea, pcfilter=pcfilter, 
+		modSAest(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
+			esttype="TREE", landarea=landarea, pcfilter=pcfilter, 
 			estvar=estvar, estvar.filter=estvar.filter,
 			savedata=savedata, multest=TRUE, multest_fmt="sqlite", 
 			multest_dsn=multest_dsn, multest_layer=outnm, returntitle=TRUE, 

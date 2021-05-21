@@ -582,25 +582,28 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     if (tvar %in% c(tuniqueid, tpavars)) {
       tvar <- "COUNT"
     }
-    if (tvar %in% ref_estvar$ESTVAR) { 
-      estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tvar])
-    } else {
-      if (metric) {
-        message(tvar, " not in ref_estvar... no metric conversion")
-        metric <- FALSE
+    if (tvar != "COUNT") {
+      if (tvar %in% ref_estvar$ESTVAR) { 
+        estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tvar])
       } else {
-        message(tvar, " not in ref_estvar... no units found")
+        if (metric) {
+          message(tvar, " not in ref_estvar... no metric conversion")
+          metric <- FALSE
+        } else {
+          message(tvar, " not in ref_estvar... no units found")
+        }
       }
-    }
-    if (metric) {
-      metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
-      if (estunits != metricunits) {
-        cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
+    
+      if (metric) {
+        metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
+        if (estunits != metricunits) {
+          cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
 			metricunits]
-        tvarm <- paste0(tvar, "_m")
-        treef[, (tvarm) := get(eval(tvar)) * cfactor]
-        estunits <- metricunits
-        tvar <- tvarm
+          tvarm <- paste0(tvar, "_m")
+          treef[, (tvarm) := get(eval(tvar)) * cfactor]
+          estunits <- metricunits
+          tvar <- tvarm
+        }
       }
     } 
     ## MULTIPLY tvar BY TPA VARIABLE IF DESIRED

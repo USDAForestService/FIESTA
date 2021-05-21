@@ -31,6 +31,7 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   xvar <- FIESTA::pcheck.varchar(var2check=xvar, varnm="xvar", checklst=xnamelst, 
 	caption="X variable", warn="xvar not in data table", multiple=TRUE, 
 	stopifnull=TRUE) 
+  xvar.class <- lapply(datx[,xvar], class)
 
   ## Check yvar
   yvar <- FIESTA::pcheck.varchar(var2check=yvar, varnm="yvar", checklst=xnamelst, 
@@ -70,7 +71,7 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   ################################################################################	
   ## DO WORK
   ################################################################################
-  if (dropNAyvar)
+  if (dropNAyvar) 
     datxf <- na.omit(datxf, cols=yvar)
   if (dropNAxvar)
     datxf <- na.omit(datxf, cols=xvar)
@@ -94,14 +95,15 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   ptab[, (cols) := round(.SD, pvar.round), .SDcols=cols]
   setkeyv(ptab, xvar)
 
-  ## Match class of new table xvar to xvar of x
-  tabs <- suppressWarnings(check.matchclass(datxf, ptab, xvar))
-  ptab <- tabs$tab2
+  ## Define class of xvar and yvar
+  for (x in xvar) {
+    class(ptab[[x]]) <- xvar.class[[x]]
+  } 
 
-  if (savedata)
+  if (savedata) {
     FIESTA::write2csv(ptab, outfolder=outfolder, outfilenm=outfn, 
 		outfn.date=outfn.date, overwrite=overwrite)
-
+  }
     
   return(ptab)
 }

@@ -74,8 +74,9 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 		overwrite_layer=overwrite_layer)
     if (is.null(SAdomdat)) return(NULL)
 
-    if (saveobj) 
+    if (saveobj) {
       save(SAdomdat, file=file.path(outfolder, "SAdomdat.rda"))
+    }
   }
 
   smallbnd <- SAdomdat$smallbndlst[[1]]
@@ -126,8 +127,9 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 #  rm(SAdata)
 #  gc()
  
-  if (is.null(SAdata$SAdoms)) 
+  if (is.null(SAdata$SAdoms)) {
     return(NULL)
+  }
 
   ####################################################################
   ## Get population data
@@ -137,9 +139,9 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   returnlst$SApopdat <- SApopdat
 
 
-  if (saveobj)
+  if (saveobj) {
     save(SApopdat, file=file.path(outfolder, "SApopdat.rda"))
-
+  }
 
   return(returnlst)
 }

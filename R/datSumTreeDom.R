@@ -205,9 +205,8 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
           stop("cuniqueid is invalid")
         }
       }
-
       ## Check if class of tuniqueid matches class of cuniqueid
-      tabs <- FIESTA::check.matchclass(treex, condx, tuniqueid, cuniqueid)
+      tabs <- check.matchclass(treex, condx, tuniqueid, cuniqueid)
       treex <- tabs$tab1
       condx <- tabs$tab2
 
@@ -237,7 +236,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   } else {   ## byplt
     tsumuniqueid <- tuniqueid
   }
-
   if (bysubp) {
     pltshp <- FALSE
     noplt <- TRUE
@@ -419,25 +417,27 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## Convert to metric
-  if (tsumvar %in% ref_estvar$ESTVAR) { 
-    estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tsumvar])
-  } else {
-    if (metric) {
-      message(tsumvar, " not in ref_estvar... no metric conversion")
-      metric <- FALSE
+  if (tsumvar != "COUNT") {
+    if (tsumvar %in% ref_estvar$ESTVAR) { 
+      estunits <- unique(ref_estvar$ESTUNITS[ref_estvar$ESTVAR == tsumvar])
     } else {
-      message(tsumvar, " not in ref_estvar... no units found")
+      if (metric) {
+        message(tsumvar, " not in ref_estvar... no metric conversion")
+        metric <- FALSE
+      } else {
+        message(tsumvar, " not in ref_estvar... no units found")
+      }
     }
-  }
-  if (metric) {
-    metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tsumvar])
-    if (estunits != metricunits) {
-      cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
+    if (metric) {
+      metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tsumvar])
+      if (estunits != metricunits) {
+        cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
 			metricunits]
-      tsumvarm <- paste0(tsumvar, "_m")
-      treef[, (tsumvarm) := get(eval(tsumvar)) * cfactor]
-      estunits <- metricunits
-      tsumvar <- tsumvarm
+        tsumvarm <- paste0(tsumvar, "_m")
+        treef[, (tsumvarm) := get(eval(tsumvar)) * cfactor]
+        estunits <- metricunits
+        tsumvar <- tsumvarm
+      }
     }
   }   
 
@@ -574,7 +574,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   } else {
     tdoms <- sort(unique(treef[[tdomvar]]))
   }
-
+ 
   ## check seed table
   if (addseed) {
     if (tdomvar == "DIACL") {
@@ -930,7 +930,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       }
     }
   }
-
   treef <- treef[, unique(c(key(treef), tdomvar, tdomvarnm, newname)), with=FALSE]
 
   ## GET NAME FOR SUMMED TREE VARIABLE FOR FILTERED TREE DOMAINS 
@@ -991,7 +990,6 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       tdoms <- tdoms[, c(tdomvar, tdomvar2) := tstrsplit(get(tdomvarnm), "#")]
       tdomvarnm <- c(tdomvar, tdomvar2)
     }
-
   } else {
 
     ######################################################################## 
@@ -1080,9 +1078,15 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     ## Check for duplicate names
     matchnames <- sapply(tdomscolstot, checknm, names(condx)) 
     setnames(tdoms, tdomscolstot, matchnames)
-      
+
+    ## Check if class of cuniqueid matches class of cuniqueid
+    tabs <- FIESTA::check.matchclass(condx, tdoms, c(cuniqueid, condid))
+    condx <- tabs$tab1
+    tdoms <- tabs$tab2
+     
     ## Merge summed data to cond table
-    sumtreef <- merge(condx, tdoms, all.x=TRUE)
+    sumtreef <- merge(condx, tdoms, all.x=TRUE, by=c(cuniqueid, condid))
+
     for (col in tdomscolstot) set(sumtreef, which(is.na(sumtreef[[col]])), col, 0)
     sumtreef[is.na(sumtreef)] <- 0
 
@@ -1109,6 +1113,11 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     ## Check for duplicate names
     matchnames <- sapply(tdomscolstot, checknm, names(pltx)) 
     setnames(tdoms, tdomscolstot, matchnames)
+
+    ## Check if class of cuniqueid matches class of cuniqueid
+    tabs <- FIESTA::check.matchclass(pltx, tdoms, puniqueid, cuniqueid)
+    pltx <- tabs$tab1
+    tdoms <- tabs$tab2
 
     ## Merge summed data to plt table
     setkeyv(tdoms, tuniqueid)

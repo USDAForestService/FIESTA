@@ -1,14 +1,14 @@
 modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL, 
 	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="CN", pjoinid="CN", 
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, ACI=FALSE, 
-	adj="samp", unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	areaunits="acres", unitcombine=FALSE, minplotnum.unit=10, unitlut=NULL, 
-	npixelvar="npixels", prednames=NULL, predfac=NULL, PSstrvar=NULL, 
-	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, MAdata=NULL, pltdat=NULL, 
-	MAmodeldat=NULL, gui=FALSE){
+	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, intensity=NULL, 
+	ACI=FALSE, adj="samp", unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
+	areavar="ACRES", areaunits="acres", unitcombine=FALSE, 
+	minplotnum.unit=10, unitlut=NULL, npixelvar="npixels", 
+	prednames=NULL, predfac=NULL, PSstrvar=NULL, stratcombine=TRUE, 
+	saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, MAdata=NULL, pltdat=NULL, MAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -149,7 +149,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
       }
     }
   } 
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -160,7 +160,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	cond=cond, plt=plt, seed=seed, pltassgn=pltassgn, dsn=dsn,
  	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, areawt=areawt,
  	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid,
- 	invyrs=invyrs, ACI=ACI, adj=adj, nonsamp.pfilter=nonsamp.pfilter, 
+ 	adj=adj, invyrs=invyrs, intensity=intensity, ACI=ACI, nonsamp.pfilter=nonsamp.pfilter, 
 	nonsamp.cfilter=nonsamp.cfilter, unitarea=unitarea, unitvar=unitvar, 
 	unitvar2=unitvar2, areavar=areavar, areaunits=areaunits, unitcombine=unitcombine, 
 	stratcombine=stratcombine, strvar=PSstrvar, prednames=prednames, predfac=predfac)

@@ -121,7 +121,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 01 - Area by land class and reserved status
   #######################################################################################
   tabnm <- "01"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "ALL"
   rowvar <- "COND_STATUS_CD"
   colvar <- "RESERVCD"
@@ -132,7 +132,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   esttab <- estdat$est
 
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -153,7 +153,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 02 - Area by forest type and stand-size class, on forest land
   #######################################################################################
   tabnm <- "02"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "FORTYPCD"
   colvar <- "STDSZCD"
@@ -164,7 +164,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=TRUE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -186,7 +186,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 03 - Area by forest type group and disturbance class, on forest land
   #######################################################################################
   tabnm <- "03"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "FORTYPGRPCD"
   colvar <- "DSTRBCD1"
@@ -197,7 +197,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -219,7 +219,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 04 - Area by distance to road and land class, on all land
   #######################################################################################
   tabnm <- "04"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "ALL"
   rowvar <- "RDDISTCD"
   colvar <- "COND_STATUS_CD"
@@ -230,7 +230,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -252,7 +252,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 05 - Number of live trees by species and disturbance group, on forest land
   #######################################################################################
   tabnm <- "05"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "DSTRBGRP"
@@ -266,7 +266,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -288,7 +288,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 06 - Number of live trees by species and diameter class, on forest land
   #######################################################################################
   tabnm <- "06"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "DIACL"
@@ -302,7 +302,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -324,7 +324,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 07 - Number of dead trees by species by diameter class, on forest land
   #######################################################################################
   tabnm <- "07"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "DIACL"
@@ -338,7 +338,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -360,7 +360,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 08 - Net cuft volume of live trees by species and diameter class, on forest land
   #######################################################################################
   tabnm <- "08"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "DIACL"
@@ -374,7 +374,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -396,7 +396,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 09 - Net cuft volume of dead trees by species and diameter class, on forest land
   #######################################################################################
   tabnm <- "09"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "DIACL"
@@ -410,7 +410,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=FALSE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -432,7 +432,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 10 - Basal area of dead trees by agent code, on forest land
   #######################################################################################
   tabnm <- "10"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "AGENTCD"
@@ -446,7 +446,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -468,7 +468,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 11 - Number of live trees per acre by species and disturbance group, on forest land
   #######################################################################################
   tabnm <- "11"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "DSTRBGRP"
@@ -482,7 +482,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)
@@ -504,7 +504,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
   ## 12 - Basal area per acre of dead trees by agent code, on forest land
   #######################################################################################
   tabnm <- "12"
-  outfn.pre <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
+  outfn.pre2 <- ifelse(is.null(outfn.pre), tabnm, paste0(tabnm, "_", outfn.pre))
   landarea <- "FOREST"
   rowvar <- "SPCD"
   colvar <- "AGENTCD"
@@ -518,7 +518,7 @@ anGBpop_core <- function(GBpopdat, title.ref, xlsx=FALSE,
 		colvar=colvar, col.FIAname=TRUE, col.add0=FALSE,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_layer=overwrite)
+		outfn.pre=outfn.pre2, outfn.date=outfn.date, overwrite_layer=overwrite)
   #estdat$est
   esttab <- estdat$est
   tabtitle <- ifelse (allin1, estdat$titlelst$title.estpse, estdat$titlelst$title.est)

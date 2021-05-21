@@ -407,8 +407,8 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
         if (evalresp == "") stop("")
         evalresp <- ifelse(evalresp == "YES", TRUE, FALSE)
       } else {
-        return(list(states=states, rslst=rslst, evalidlist=NULL, 
-			invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
+        #return(list(states=states, rslst=rslst, evalidlist=NULL, 
+	#		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
 
         return(returnlst <- list(states=states, rslst=rslst, evalidlist=NULL, 
 		invtype=invtype, invyrtab=invyrtab, evalType=evalTypelist))

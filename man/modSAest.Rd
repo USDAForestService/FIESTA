@@ -1,5 +1,5 @@
-\name{modSAtree}
-\alias{modSAtree}
+\name{modSAest}
+\alias{modSAest}
 \title{
 	Small area module - Generate small area tree estimates.
 }
@@ -7,18 +7,19 @@
 	Generates small area estimates by domain and/or tree domain (and estimation unit). 	 
 }
 \usage{    
-modSAtree(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
-	SAmethod = "unit", estseed = "none", largebnd.att = NULL, landarea = "ALL", 
-	pcfilter = NULL, estvar = NULL, estvar.filter = NULL, smallbnd.att = NULL, 
-	allin1 = FALSE, metric = FALSE, estround = 0, pseround = 3, estnull = 0, 
-	psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE, 
-	rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
-	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, addtitle = TRUE, 
-	raw_fmt = "csv", raw_dsn = "rawdata", multest_fmt = "csv", multest_outfolder = NULL, 
-	multest_dsn = NULL, multest_layer = NULL, multest.append = FALSE, 
-	multest.AOIonly = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	append_layer = FALSE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, ...)
+modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
+	SAmethod = "unit", esttype = "TREE", estseed = "none", largebnd.att = NULL, 
+	landarea = "ALL", pcfilter = NULL, estvar = NULL, estvar.filter = NULL, 
+	smallbnd.att = NULL, allin1 = FALSE, metric = FALSE, estround = 0, 
+	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
+	rawdata = FALSE, rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, 
+	SAdomvars = NULL, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	addtitle = TRUE, raw_fmt = "csv", raw_dsn = "rawdata", multest_fmt = "csv", 
+	multest_outfolder = NULL, multest_dsn = NULL, multest_layer = NULL, 
+	multest.append = FALSE, multest.AOIonly = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
+	title.main = NULL, title.ref = NULL, title.dunitvar = NULL, 
+	title.estvar = NULL, title.filter = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,8 +27,9 @@ modSAtree(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE
   \item{SAdomsdf}{ DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
 	with attributes from smallbnd to add to estimation table. }
   \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
-  \item{SApackage}{ String. small area package to use ('JoSAE', 'sae') }
-  \item{SAmethod}{ String. small area method to use ('unit', 'area') }
+  \item{SApackage}{ String. Small area package to use ('JoSAE', 'sae') }
+  \item{SAmethod}{ String. Small area method to use ('unit', 'area') }
+  \item{esttype}{ String. Estimation type ('TREE', 'AREA'). }
   \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
 	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{largebnd.att}{ String. Name of the large boundary attribute to define plots

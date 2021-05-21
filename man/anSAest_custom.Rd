@@ -12,9 +12,9 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
 	landarea = "FOREST", pcfilter = NULL, estvarlst = NULL, 
 	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, savemultest = FALSE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, multest_outfolder = NULL,
-	multest_dsn = "SAmultest", multest.append = FALSE, multest.AOIonly = TRUE, 
-	overwrite = FALSE, barplot.compare = FALSE, smallbnd.att = NULL, title.ref = NULL, 
-	...)
+	multest_fmt = "sqlite", multest_dsn = "SAmultest", multest.append = FALSE, 
+	multest.AOIonly = TRUE, overwrite = FALSE, barplot.compare = FALSE, 
+	smallbnd.att = NULL, title.ref = NULL, save4testing=FALSE, ...)
 }
 
 \arguments{
@@ -39,6 +39,7 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
   \item{outfn.date}{ Logical. If TRUE, adds current date to outfile name. }
   \item{multest_outfolder}{ String. The outfolder to write multest data to. If 
 	NULL, saves to outfolder. }
+  \item{multest_fmt}{ String. Format of multest output ('sqlite', 'csv', 'gpkg'). }
   \item{multest_dsn}{ String. Name of database if multest_fmt = c('sqlite', 'gpkg'). }
   \item{multest.append}{ Logical. If TRUE, appends multest dataframe to output. }
   \item{multest.AOIonly}{ Logical. If TRUE, save only AOI data. }
@@ -46,6 +47,8 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
   \item{barplot.compare}{ Logical. If TRUE, generates barplot comparing multest. }
   \item{smallbnd.att}{ String. Name of small attribute to include in output estimate table. }
   \item{title.ref}{ String. Reference string for title. }
+  \item{save4testing}{ Logical. If TRUE, saves intermediate data as R objects 
+	in outfolder. }
   \item{...}{ Parameters for anSApop_ecomap. }
 }
  

@@ -3,8 +3,8 @@
 
 helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL, 
 		helperbndx, helperbnd.unique, largebndx, largebnd.unique, 
-		maxbndx=NULL, maxbnd.unique=NULL, nbrdom.min=NULL,
-		maxislarge=FALSE, largeishelper=FALSE, savesteps=FALSE, showsteps=TRUE,
+		maxbndx=NULL, maxbnd.unique=NULL, nbrdom.min=NULL, maxislarge=FALSE, 
+		largeishelper=FALSE, polyunion=TRUE, showsteps=TRUE, savesteps=FALSE, 
 		stepfolder=NULL, out_fmt="shp", step_dsn=NULL, step.cex=0.8, 
 		maxbnd.threshold=30, largebnd.threshold=30, multiSAdoms=FALSE, 
 		maxbnd.addtext=TRUE, largebnd.addtext=FALSE, overwrite=TRUE) {
@@ -518,19 +518,22 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       j <- j + 1
     } ## End while j - maxbnd
 
-    ## Remove columns in helperbndx.tmp with same names as in smallbnd attributes
-    helperbndx.tmp <- helperbndx.tmp[, names(helperbndx.tmp)[!names(helperbndx.tmp) %in% 
+    if (polyunion) {
+      ## Remove columns in helperbndx.tmp with same names as in smallbnd attributes
+      helperbndx.tmp <- helperbndx.tmp[, names(helperbndx.tmp)[!names(helperbndx.tmp) %in% 
 			c(smallbnd.unique, "AOI", smallbnd.domain)]]
 
-    ## Change name of helperbnd.unique values if the same as smallbnd.unique values
-    if (any(helperbndx[[helperbnd.unique]] %in% smallbndx[[smallbnd.unique]])) {
-      helperbndx[[helperbnd.unique]] <- suppressWarnings(sapply(helperbndx[[helperbnd.unique]], 
+      ## Change name of helperbnd.unique values if the same as smallbnd.unique values
+      if (any(helperbndx[[helperbnd.unique]] %in% smallbndx[[smallbnd.unique]])) {
+        helperbndx[[helperbnd.unique]] <- suppressWarnings(sapply(helperbndx[[helperbnd.unique]], 
 			checknm, smallbndx[[smallbnd.unique]]))
-    }
-
-    ## Union helperbnd and smallbnd polygons 
-    SAdoms <- suppressWarnings(spUnionPoly(sf::st_make_valid(helperbndx.tmp), 
+      }
+      ## Union helperbnd and smallbnd polygons 
+      SAdoms <- suppressWarnings(spUnionPoly(sf::st_make_valid(helperbndx.tmp), 
 				polyv2=sf::st_make_valid(sbndlst[[i]])))
+    } else {
+      SAdoms <- sbndlst[[i]]
+    }
 
     ## Add 0 to non-AOI
     SAdoms[is.na(SAdoms$AOI), "AOI"] <- 0

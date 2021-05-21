@@ -748,7 +748,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
 
     if (savedata) {
       out_layer <- paste(outfn.rawdat, "gainloss", sep="_")
-      datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
+      datExportData(est.gainloss, out_fmt=raw_fmt, outfolder=rawfolder, 
  		out_dsn=raw_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
 		append_layer=append_layer)
     }          

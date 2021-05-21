@@ -109,7 +109,6 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
 
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -151,7 +150,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
-
+ 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -193,7 +192,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
-
+ 
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
@@ -207,6 +206,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   if (is.null(treedat)) return(NULL)
  
   tdomdat <- treedat$tdomdat
+
   if (rowvar != "TOTAL") {
     if (!row.add0 && any(tdomdat[[rowvar]] == 0)) {
       tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
@@ -217,7 +217,6 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
       }
     }
   }
-
   tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
   if (!is.null(tdomvar)) {
     cdomdat <- merge(condx, condf, by=c(cuniqueid, condid))
@@ -284,7 +283,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvard.name]   
     tdomdat <- merge(tdomdat, cdomdattot, by=c(strunitvars, cuniqueid, "TOTAL"))
   }
-
+ 
   ## Note: tdomdat is the summed response by condition (not domain)
   if (addtotal) {
     ## Get estimate for total

@@ -206,7 +206,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
  
   ## Check predfac
   ###################################################################################
-  if (module == "SA" || (module == "MA" && method %in% c("greg", "gregEN")))  {
+  if (module == "SA" || (module == "MA" && !method %in% c("HT", "PS")))  {
     if (!is.null(predfac) && !is.character(predfac)) 
       stop("invalid predfac... must be character string")
 
@@ -371,7 +371,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     }
   }
 
- 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
   ###################################################################################
@@ -443,14 +442,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       pltassgnx <- tabs$tab2
     
       ## Merge pltx and pltassgnx (Note: inner join)
-      pltx <- merge(pltassgnx, pltx, by.x=pltassgnid, by.y=puniqueid)
-      puniqueid <- pltassgnid
+      #pltx <- merge(pltassgnx, pltx, by.x=pltassgnid, by.y=pjoinid)
+      pltx <- merge(pltx, pltassgnx, by.x=pjoinid, by.y=pltassgnid)
+      #puniqueid <- pltassgnid
 
     } else if (is.null(pltx)) {
       pltx <- pltassgnx
       puniqueid <- pltassgnid
     }
- 
+
     ##################################################################################
     ## Filter for population data
     ##################################################################################
@@ -562,7 +562,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         ## Merge lulcx and condx (Note: inner join to use only lulc conditions)
         #condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx), all.x=TRUE)
         condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx))
-      }        
+      }   
  
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
       tabs <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
@@ -1333,7 +1333,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   }
   if (module == "MA") {
     returnlst$method <- method
-    if (method %in% c("greg", "gregEN")) {
+    if (method %in% c("greg", "gregEN", "ratio")) {
       returnlst$prednames <- prednames
       returnlst$predfac <- predfac
     }

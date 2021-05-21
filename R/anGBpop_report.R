@@ -15,9 +15,11 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
 		list.items=c("treex", "seedx"))
 
   outfolder <- pcheck.outfolder(outfolder)
-  outfolder <- normalizePath(outfolder)
   reportfolder <- tempdir()
+  reportrmd <- system.file("rmd", "anGBpop_report.Rmd", package="FIESTA")
 
+  ## TESTING
+  #reportrmd <- "C:/R/R-4.0.5/library/FIESTA/rmd/anGBpop_report.Rmd"
 
   #if (!dir.exists(reportfolder)) {
   #  message(reportfolder, " does not exist, creating...")
@@ -28,8 +30,7 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   rmdfn <- file.path(reportfolder, paste0(AOInm, '_report.Rmd'))
   reportnm <- paste0(AOInm, '_report.docx')
   reportfn <- file.path(reportfolder, reportnm)
-  file.copy(system.file("rmd", "anGBpop_report.Rmd", package="FIESTA"),
-	rmdfn, overwrite=TRUE)
+  file.copy(reportrmd, rmdfn, overwrite=TRUE)
   file.copy(system.file("rmd", "anGBtemplate.docx", package="FIESTA"),
 	file.path(reportfolder, "anGBtemplate.docx"), overwrite=TRUE)
   if (!is.null(photofn)) {
@@ -41,13 +42,10 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   }
 
 
-  ## TESTING
-#  file.copy("C:/_tsf/_GitHub/FIESTA/inst/rmd/anGBpop_report.Rmd", rmdfn, overwrite=TRUE)
-
-
   if (is.null(photofn)) {
     # Lines 102 to 106
-    system(paste("sed -i '102,106d'", rmdfn)) 
+    #system(paste("sed -i '102,106d'", rmdfn)) 
+    system(paste("sed -i '92,96d'", rmdfn)) 
   }
 
   ## Set working directory to reportfolder
