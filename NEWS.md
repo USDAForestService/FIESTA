@@ -1,3 +1,11 @@
+FIESTA_3.0.23 (Release date: 2021-05-20)
+==============
+Model-assisted
+- added ratio estimators
+- added intensity = modMApop()
+
+
+
 FIESTA_3.0.21 (Release date: 2021-05-06)
 ==============
 Fixed bug in spGetStrata when using more than one NODATA value.

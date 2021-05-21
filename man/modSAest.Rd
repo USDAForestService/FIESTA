@@ -19,7 +19,7 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
 	multest.append = FALSE, multest.AOIonly = FALSE, overwrite_dsn = FALSE, 
 	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
 	title.main = NULL, title.ref = NULL, title.dunitvar = NULL, 
-	title.estvar = NULL, title.filter = NULL, ...)
+	title.estvar = NULL, title.filter = NULL, save4testing=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -96,6 +96,8 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
 	If title.filter="", no title.filter is used. }
+  \item{save4testing}{ Logical. If TRUE, saves intermediate steps as R objects to outfolder
+	for testing (pdomdat, dunitlut). }
   \item{...}{ Parameters for modSApop() if SApopdat is NULL. }
 }
 \details{

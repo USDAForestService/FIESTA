@@ -54,16 +54,15 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   pvars2keep <- pvars[which(pvars %in% names(pltx))]
   pvars2keep <- pvars2keep[which(pvars2keep %in% names(unitlut))]
    
-  ## Add number of plots by unit
-  pltcnt <- pltx[, list(n.total=.N), by=unitvars]
-  setkeyv(pltcnt, unitvars)
-
   if (!is.null(strvars)) {
     joinvars <- unique(c(pvars2keep, strunitvars))
 
     ## Get number of plots by strata variables from pltx - n.strata
     pltcnt <- pltx[, list(NBRPLOTS=.N), joinvars]
     setkeyv(pltcnt, strunitvars)
+
+    ## Add number of plots by unit
+    pltcnt[, n.total := sum(NBRPLOTS, na.rm=TRUE), by=unitvars]
 
     ## Get number of potential combinations of strata from unitlut
     unitlutcnt <- unitlut[, list(NBRSTRATA=.N), strunitvars]
@@ -93,6 +92,10 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
 
   } else {
     joinvars <- unique(c(pvars2keep, unitvars))
+
+    ## Add number of plots by unit
+    pltcnt <- pltx[, list(n.total=.N), by=unitvars]
+    setkeyv(pltcnt, unitvars)
 
     pltcnt$errtyp <- "none"
     pltcnt[pltcnt$n.total < minplotnum.unit, "errtyp"] <- "warn"
