@@ -232,6 +232,7 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   stratcombinelut <- auxdat$unitstrgrplut
   PSstrvar <- auxdat$PSstrvar
 
+
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
   ## Calculates adjustment factors for area and trees by strata (and estimation unit)
@@ -253,11 +254,12 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 
     ## Merge plot strata info to condx
     condx <- condx[pltassgnx[,c(pltassgnid, unitvar, PSstrvar, prednames), with=FALSE]]
- 
+
     adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, unitlut=unitlut, 
 		unitvars=unitvar, strvars=PSstrvar, unitarea=unitarea, areavar=areavar, 
 		cvars2keep=cvars2keep)
+
     condx <- adjfacdata$condx
     unitlut <- adjfacdata$unitlut
     treef <- adjfacdata$treex
