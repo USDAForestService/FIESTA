@@ -456,6 +456,11 @@ WYbighorn_districtbnd.shp | Polygon shapefile of WY Bighorn National Forest Dist
 
 
 ```
+
+## Set options
+options(scipen=6)
+options(stringsAsFactors=FALSE)
+
 # Load library
 library(FIESTA)
 
@@ -496,12 +501,13 @@ if (.Platform$OS.type == "windows") {
 #   tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID",   
 #   areawt = "CONDPROP_UNADJ", adj = "samp", evalid = NULL, invyrs = NULL,      
 #   intensity = NULL, ACI = FALSE, unitvar = NULL, unitvar2 = NULL, 
-#   unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, minplotnum.unit = 10, 
-#   strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE,    
-#   getwtvar = "P1POINTCNT", stratcombine = TRUE, minplotnum.strat = 2,   
-#   saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv",   
-#   out_dsn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE,  
-#   overwrite_layer = TRUE, GBdata = NULL, GBstratdat = NULL, gui = FALSE)
+#   unitarea = NULL, areavar = "ACRES", areaunits="acres", unitcombine = FALSE, 
+#   minplotnum.unit = 10, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", 
+#   getwt = TRUE, getwtvar = "P1POINTCNT", strwtvar = "strwt", stratcombine = TRUE,    
+#   minplotnum.strat = 2, saveobj = FALSE, objnm = "GBpopdat", savedata = FALSE,  
+#   outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL,   
+#   outfn.date = TRUE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+#   GBdata = NULL, pltdat = NULL, GBstratdat = NULL, gui = FALSE)
 # 
 # Description:
 # Generates population data for input to modGB* estimation modules. Data includes
@@ -528,7 +534,9 @@ names(GBpopdat)
 names(GBpopdat)
 GBpopdat$plotsampcnt	# Number of plots after plot filter
 GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
-GBpopdat$stratalut      # Strata information and adjustment factors
+
+# Strata information and adjustment factors
+head(GBpopdat$stratalut)    
 
 
 ```
@@ -542,15 +550,16 @@ GBpopdat$stratalut      # Strata information and adjustment factors
 ```
 ######################################################################################
 # Usage:
-# modGBarea(GBpopdat = NULL, landarea = "FOREST", pfilter = NULL, cfilter = NULL,    
+# modGBarea(GBpopdat = NULL, landarea = "FOREST", pcfilter = NULL,    
 #   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,    
 #   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,   
 #   rowlut = NULL, collut = NULL, rowgrp = NULL, rowgrpnm = NULL, rowgrpord = NULL, 
-#   sumunits = FALSE, allin1 = FALSE, estround = 0, pseround = 2, 
-#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,  
-#   rawonly = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE,  
-#   overwrite = TRUE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
-#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
+#   sumunits = FALSE, allin1 = FALSE, metric = FALSE, estround = 0, pseround = 2, 
+#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, outfolder = NULL,  
+#   outfn.pre = NULL, outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE, 
+#   rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = NULL,  
+#   overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
+#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
 #   title.unitvar = NULL, title.filter = NULL, gui = FALSE, ...)
 # 
 # Description:
@@ -724,17 +733,18 @@ names(area5b.raw)
 ```
 ######################################################################################
 # Usage:
-# modGBtree(GBpopdat = NULL, estseed = "none", landarea="FOREST", pfilter = NULL,  
-#   cfilter = NULL, estvar = NULL, estvar.filter = NULL, rowvar = NULL, colvar = NULL,  
+# modGBtree(GBpopdat = NULL, estseed = "none", landarea="FOREST", pcfilter = NULL,  
+#   estvar = NULL, estvar.filter = NULL, rowvar = NULL, colvar = NULL,  
 #   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,     
 #   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL,   
 #   rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE,    
-#   allin1 = FALSE, estround = 0, pseround = 2, estnull = 0, psenull = "--",     
-#   divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE, 
-#   outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
-#   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL,  
-#   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.estvar = NULL, title.filter = NULL, gui = FALSE, ...)
+#   allin1 = FALSE, metric = FALSE, estround = 0, pseround = 2,      
+#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, outfolder = NULL,
+#   outfn.pre = NULL, outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE,  
+#   rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, 
+#   overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
+#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,   
+#   title.unitvar = NULL, title.estvar = NULL, title.filter = NULL, gui = FALSE, ...)
 # 
 # Description:
 #	Generates tree estimates by domain and/or tree domain (and estimation unit). 
@@ -1006,18 +1016,20 @@ tree11b$est
 ```
 ####################################################################################
 # Usage:
-# modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE", landarea="FOREST",  
-#   pfilter = NULL, cfilter = NULL, estvarn = NULL, estvarn.filter = NULL, 
+# modGBratio(GBpopdat = NULL, estseed = "none", ratiotype = "PERACRE",  
+#   landarea="FOREST", pcfilter = NULL, estvarn = NULL, estvarn.filter = NULL, 
 #   estvard = NULL, estvard.filter = NULL, rowvar = NULL, colvar = NULL,  
 #   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL,   
 #   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, 
 #   rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE,  
-#   allin1 = FALSE, estround = 3, pseround = 2, estnull = 0, psenull = "--",   
-#   divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE,  
-#   outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
-#   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-#   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,
-#   title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, gui = FALSE, ...)
+#   allin1 = FALSE, metric = FALSE, estround = 3, pseround = 2,   
+#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, outfolder = NULL,
+#   outfn.pre = NULL, outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE,   
+#   rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, 
+#   overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
+#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, 
+#   title.unitvar = NULL, title.estvarn = NULL, title.estvard = NULL, 
+#   title.filter = NULL, gui = FALSE, ...)
 # 
 # Description:
 #	Generates per-acre and per-tree estimates by domain and/or tree domain (and 

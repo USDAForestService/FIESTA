@@ -84,6 +84,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
   strata <- PBpopdat$strata
   stratalut <- PBpopdat$stratalut
   strvar <- PBpopdat$strvar
+  strwtvar <- PBpopdat$strwtvar
   plotsampcnt <- PBpopdat$plotsampcnt
   stratcombinelut <- PBpopdat$stratcombinelut
   getprop <- PBpopdat$getprop
@@ -96,7 +97,6 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
     strtype <- PBpopdat$strtype
   }
   strunitvars <- c(unitvar, strvar)
-
 
   ###################################################################################
   ## Check parameters and apply plot and pnt filters
@@ -486,11 +486,9 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
-    if (is.null(getwtvar) || !getwtvar %in% names(stratalut2)) getwtvar <- "strwt"
-
     stratalut2 <- stratalut2[, lapply(.SD, sum, na.rm=TRUE), 
-		by=strunitvars2, .SDcols=c(getwtvar, "n.strata")]
-    stratalut2[, strwt:=prop.table(get(getwtvar)), by="ONEUNIT"]
+		by=strunitvars2, .SDcols=c(strwtvar, "n.strata")]
+    stratalut2[, strwt:=prop.table(get(strwtvar)), by="ONEUNIT"]
     stratalut2[, n.total := sum(n.strata)]
     setkeyv(stratalut2, strunitvars2)
 

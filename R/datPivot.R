@@ -28,10 +28,15 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
 	caption="Pivot variable", warn="pvar not in data table", stopifnull=TRUE) 
 
   ## Check xvar
-  xvar <- FIESTA::pcheck.varchar(var2check=xvar, varnm="xvar", checklst=xnamelst, 
-	caption="X variable", warn="xvar not in data table", multiple=TRUE, 
-	stopifnull=TRUE) 
-  xvar.class <- lapply(datx[,xvar], class)
+  if (is.null(xvar)) {
+    xvar <- FIESTA::pcheck.varchar(var2check=xvar, varnm="xvar", checklst=xnamelst, 
+		caption="X variable", warn="xvar not in data table", multiple=TRUE, 
+		stopifnull=TRUE, gui=gui)
+  } else if (!all(xvar %in% xnamelst)) {
+    xvar.miss <- xvar[!xvar %in% namelst]
+    stop("xvar is invalid: ", toString(xvar.miss))
+  }
+  xvar.class <- lapply(datx[,xvar, with=FALSE], class)
 
   ## Check yvar
   yvar <- FIESTA::pcheck.varchar(var2check=yvar, varnm="yvar", checklst=xnamelst, 
@@ -67,7 +72,7 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
     if (is.null(outfn) || gsub(" ", "", outfn) == "") 
       outfn <- "pivot"
   }
-
+ 
   ################################################################################	
   ## DO WORK
   ################################################################################

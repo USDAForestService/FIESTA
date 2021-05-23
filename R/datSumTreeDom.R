@@ -639,7 +639,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       warning("tdomtotnm is not valid... using default")
     }
   }
-  
+ 
   ## GETS name for tdomvar
   #####################################################################
   ## If tdomvar2 exists, concatenate the columns to one column (if pivot=TRUE)
@@ -997,6 +997,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     ######################################################################## 
     tdoms <- datPivot(tdomtreef, pvar=newname, xvar=tsumuniqueid,
 			yvar=tdomvarnm, pvar.round=tround)
+
     ## check if tree domain in tdomlst.. if not, create column with all 0 values
     tdomscols <- colnames(tdoms)[!colnames(tdoms) %in% tsumuniqueid]
     UNMATCH <- tdomvarlst2[is.na(match(tdomvarlst2, tdomscols))] 

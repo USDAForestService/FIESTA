@@ -95,10 +95,9 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   invyrs <- GBpopdat$invyrs
   estvar.area <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
-  getwtvar <- GBpopdat$getwtvar
+  strwtvar <- GBpopdat$strwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
-
 
   ########################################
   ## Check area units
@@ -150,7 +149,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
- 
+
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -235,6 +234,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   } else {
     estvard.name <- estvar.area
     tdomvarlstd <- NULL
+    estunitsd <- areaunits
   }  
 
   #####################################################################################
@@ -466,12 +466,9 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
-    if (is.null(getwtvar) || !getwtvar %in% names(stratalut2)) {
-      getwtvar <- "strwt"
-    }
     stratalut2 <- stratalut2[, lapply(.SD, sum, na.rm=TRUE), 
-		by = strunitvars2, .SDcols=c(getwtvar, "n.strata")]
-    stratalut2[, strwt:=prop.table(get(getwtvar)), by="ONEUNIT"]
+		by=strunitvars2, .SDcols=c(strwtvar, "n.strata")]
+    stratalut2[, strwt:=prop.table(get(strwtvar)), by="ONEUNIT"]
     stratalut2[, n.total := sum(n.strata)]
     setkeyv(stratalut2, strunitvars2)
 

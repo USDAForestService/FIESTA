@@ -214,6 +214,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   unitvars <- auxdat$unitvars
   stratalut <- auxdat$auxlut
   strvar <- auxdat$PSstrvar
+  strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$unitstrgrplut
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   strunitvars <- c(unitvar, strvar)
@@ -287,9 +288,10 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid, 
 	ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar, 
 	areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
-	stratalut=stratalut, strvar=strvar, expcondtab=expcondtab, 
-	plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
-	invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+	stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
+	expcondtab=expcondtab, plotsampcnt=plotsampcnt, 
+	condsampcnt=condsampcnt, states=states, invyrs=invyrs, 
+	estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

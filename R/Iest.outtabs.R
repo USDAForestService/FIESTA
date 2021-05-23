@@ -539,7 +539,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     titlelst$title.pse <- title.pse
   }
   }
- 
+
   ## Make rawtable
   if (rawdata) {
     rawdat.tabs <- {}
@@ -614,7 +614,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         }  
       }  
       if (!is.null(unit.grpest)) { 
-        if (!"NBRPLT.gt0" %in% names(unit.grpest)) { 
+        if ("NBRPLT.gt0" %in% names(unit.grpest)) { 
           unit.grpest <- unit.grpest[unit.grpest[["NBRPLT.gt0"]] > 0,] 
         }
         setorderv(unit.grpest, c(unitvar, rowvar, colvar))  

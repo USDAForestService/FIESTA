@@ -66,6 +66,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 		tsumvar=estvarn, TPA=estvarn.TPA, tdomtot=esttotn, tdomtotnm=estvarn.name, 
 		tfilter=estvarn.filter, tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree, 
 		adjTPA=adjTPA, checkNA=FALSE, pivot=pivot, metric=metric))
+
     } else if (estseed == "only") {
       suppressWarnings(
       tdomdata <- datSumTreeDom(seed=seedf, cond=condf, plt=plt, tuniqueid=tuniqueid, 

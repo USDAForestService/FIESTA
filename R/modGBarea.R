@@ -88,7 +88,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   invyrs <- GBpopdat$invyrs
   estvar.name <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
-  getwtvar <- GBpopdat$getwtvar
+  strwtvar <- GBpopdat$strwtvar
   if (nonresp) {
     substrvar <- GBpopdat$substrvar
     nonsampplots <- GBpopdat$nonsampplots
@@ -308,12 +308,9 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
     ## AGGREGATE UNIT stratalut FOR ROWVAR and GRAND TOTAL
     stratalut2 <- data.table(stratalut, ONEUNIT=1)
     strunitvars2 <- c("ONEUNIT", strvar)
-    if (is.null(getwtvar) || !getwtvar %in% names(stratalut2)) {
-      getwtvar <- "strwt"
-    }
     stratalut2 <- stratalut2[, lapply(.SD, sum, na.rm=TRUE), 
-		by=strunitvars2, .SDcols=c(getwtvar, "n.strata")]
-    stratalut2[, strwt:=prop.table(get(getwtvar)), by="ONEUNIT"]
+		by=strunitvars2, .SDcols=c(strwtvar, "n.strata")]
+    stratalut2[, strwt:=prop.table(get(strwtvar)), by="ONEUNIT"]
     stratalut2[, n.total := sum(n.strata)]
     setkeyv(stratalut2, strunitvars2)
 

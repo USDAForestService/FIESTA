@@ -74,7 +74,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       ####################################################################
       title.divideby <- " "
       if (esttype == "PHOTO") {
-        title.part1 <- ifelse(tabtype == "PCT", "Estimated percent of", 
+        title.part1 <- ifelse(tabtype == "PCT", "Estimated percent", 
 		paste0("Estimated area, in ", title.unitsn, ", of"))
         title.units <- NULL
 
@@ -95,11 +95,13 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
         if (length(title.unitsn) > 1) {
           title.units <- title.unitsn[1]
         }
-        if (is.null(title.unitsd)) {
-          title.unitsd <- unique(ref_estvar[ref_estvar$ESTVAR == estvard, "ESTUNITS"])
-        }
-        if (length(title.unitsd) > 1) {
-          title.unitsd <- title.unitsd[1]
+        if (esttype == "RATIO") {
+          if (is.null(title.unitsd)) {
+            title.unitsd <- unique(ref_estvar[ref_estvar$ESTVAR == estvard, "ESTUNITS"])
+          }
+          if (length(title.unitsd) > 1) {
+            title.unitsd <- title.unitsd[1]
+          }
         }
 
         if (is.null(title.estvarn)) {
@@ -208,9 +210,10 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       }
       if (colvar != "NONE") {
         if (esttype == "PHOTO" && length(grep("nratio", phototype)) == 0) {
+          title.part2.col <- tolower(paste0("by ", title.colvar))
           title.part2 <- paste("of", title.colvar, "within", title.rowvar)         
         } else {
-          title.part2.col <- tolower(paste0("by ", title.colvar, title.rowgrp2))
+          title.part2.col <- tolower(paste0("by ", title.colvar, title.colgrp2))
           title.part2 <- tolower(paste(title.part2, "and", title.colvar))
         }
       }
@@ -240,15 +243,18 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
         if (!is.null(title.unitsn)) {
            title.part1 <- paste0(title.part1, ",")
         }
+
         if (rowvar == "TOTAL" || 
 		(colvar == "NONE" && sumunits) || 
 		(colvar == "NONE" && length(unique(dat[[unitvar]])) == 1)) {
 
           if (rowvar == "TOTAL") {
-            title.estpse <- paste(title.part1, "and percent sampling error", title.landarea)
+            title.estpse <- paste(title.part1, "and percent sampling error",
+			 title.landarea)
           title.tot <- paste(title.part1, title.landarea)
           } else {
-            title.estpse <- paste(title.part1, "and percent sampling error", title.landarea, title.part2)
+            title.estpse <- paste(title.part1, "and percent sampling error", 
+			title.landarea, title.part2)
             title.row <- paste(title.part1, title.landarea, title.part2.row)
           }
           if (!is.null(title.filter)) {
@@ -282,8 +288,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
         } else {
           title.row <- paste(title.row, title.filter)
         }
-        if (colvar != "NONE")
+        if (colvar != "NONE") {
           title.col <- paste(title.col, title.filter)
+        }
       }
       if (!is.null(title.unitvar.out)) {
         if (rowvar != "TOTAL")
@@ -330,9 +337,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       }
     }
 
-    if (!is.null(outfn.pre))
+    if (!is.null(outfn.pre)) {
       pretitle <- paste(outfn.pre, pretitle, sep="_")
-
+    }
 
     if (esttype %in% c("TREE", "RATIO")) {
       pretitle <- paste0(pretitle, "_", estvarn)

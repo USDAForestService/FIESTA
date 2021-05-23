@@ -389,6 +389,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
   if (strata) {
     returnlst$PSstrvar <- PSstrvar
+    if (module %in% c("GB", "PB")) {
+      returnlst$strwtvar <- strwtvar
+    }
   } 
 
   if (!is.null(npixelvar)) {

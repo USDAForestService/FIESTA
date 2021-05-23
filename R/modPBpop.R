@@ -135,11 +135,12 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   unitvars <- stratcheck$unitvars
   stratalut <- stratcheck$auxlut
   strvar <- stratcheck$PSstrvar
+  strwtvar <- stratcheck$strwtvar
   stratcombinelut <- stratcheck$unitstrgrplut
   strunitvars <- c(unitvar, strvar)
 
   returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
-		pltassgnid=pltassgnid, sumunits=sumunits, strata=strata,
+		pltassgnid=pltassgnid, sumunits=sumunits, strata=strata, strwtvar=strwtvar,
 		unitvar=unitvar, unitvars=unitvars, unitarea=unitarea, stratalut=stratalut,
  		strvar=strvar, plotsampcnt=plotsampcnt, getprop=getprop)
 

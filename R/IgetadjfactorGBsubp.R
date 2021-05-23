@@ -159,6 +159,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
 
     ## Merge unitlut with unitarea
     setkeyv(unitarea, unitvars)
+    setkeyv(unitlut, unitvars)
     unitlut <- unitlut[unitarea]
 
     ## Expansion factors - average area by strata
