@@ -707,11 +707,11 @@ spprat.bhdist$titlelst
 ## By Bighorn National Forest ##
 ## Add diameter classes
 ## Net volume per acre of live trees (at least 5 inches) by species group and diameter class
-dat <- datLUTclass(x=GBpopdat$treex, xvar="DIA", LUT=ref_diacl2in, LUTclassnm="DIACL2IN")
-GBpopdat$treex <- dat$xLUT
+dat <- datLUTclass(x=GBpopdat.bh$treex, xvar="DIA", LUT=ref_diacl2in, LUTclassnm="DIACL2IN")
+GBpopdat.bh$treex <- dat$xLUT
 LUT <- dat$LUT
 
-sgrprat.bh <- modGBratio(GBpopdat=GBpopdat, landarea="FOREST", 
+sgrprat.bh <- modGBratio(GBpopdat=GBpopdat.bh, landarea="FOREST", 
   estvarn="TPA_UNADJ", estvarn.filter="STATUSCD==1", 
   rowvar="SPGRPCD", colvar="DIACL2IN", row.FIAname=TRUE, 
   sumunits=TRUE, rawdata=TRUE)

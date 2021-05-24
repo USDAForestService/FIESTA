@@ -30,7 +30,7 @@ getext <- function(x) {
   
 
 getrastlst.rgdal <- function(rastnmlst, rastfolder=NULL, stopifLonLat=FALSE,
-	stopifnull=FALSE, gui=TRUE){
+	stopifnull=FALSE, gui=TRUE, quiet=FALSE){
 
   #########################################################################
   ## DESCRIPTION: 
@@ -142,14 +142,17 @@ getrastlst.rgdal <- function(rastnmlst, rastfolder=NULL, stopifLonLat=FALSE,
 
   ## Check each raster for projection information
   for (rastfn in rastfnlst) {
-    message(rastfn)
+    if (!quiet) {
+      message(rastfn)
+    }
     rast.info <- rasterInfo(rastfn)
-    if (is.null(rast.info)) stop("invalid raster: ", rastfn)
+    if (is.null(rast.info)) {
+      stop("invalid raster: ", rastfn)
+    }
     rast.prj <- rast.info$crs
 
     if (is.na(rast.prj) || rast.prj == "") {
       message(paste("raster has undefined projection:", rastfn))    
-
     } else if (sf::st_is_longlat(rast.prj)) {
       message(paste("rast is longlat:", rastfn))
       if (stopifLonLat) stop("")
@@ -930,8 +933,9 @@ crsCompare <- function(x, ycrs=NULL, x.crs=NULL, nolonglat=FALSE,
       stop("x has no projection defined... must include projection in x.crs")
     } else {
       crs.x <- x.crs
-      if ("sf" %in% class(x))
+      if ("sf" %in% class(x)) {
         sf::st_crs(x) <- crs.x
+      }
     }
   }
 
@@ -943,11 +947,12 @@ crsCompare <- function(x, ycrs=NULL, x.crs=NULL, nolonglat=FALSE,
     ycrs <- crs.default
   }
   crs.y <- sf::st_crs(ycrs)
-  if (is.na(crs.y)) 
+  if (is.na(crs.y)) {
     stop("ycrs must have defined projection")
-  if ("sf" %in% class(ycrs)) 
+  }
+  if ("sf" %in% class(ycrs)) {
     ycrs <- sf::st_transform(ycrs, crs.y, quiet=TRUE)
-    
+  }
   ## Check if longlat
   #############################
   if (nolonglat && sf::st_is_longlat(crs.y)) {
@@ -958,8 +963,9 @@ crsCompare <- function(x, ycrs=NULL, x.crs=NULL, nolonglat=FALSE,
       message(crs.albersUS)
       crs.y <- crs.albersUS
     }
-    if ("sf" %in% class(ycrs)) 
+    if ("sf" %in% class(ycrs)) {
       ycrs <- sf::st_transform(ycrs, crs.y, quiet=TRUE)
+    }
   } 
 
   prj4str.x <- sf::st_crs(x)$input

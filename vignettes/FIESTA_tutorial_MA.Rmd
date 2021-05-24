@@ -133,9 +133,10 @@ There are several reference tables stored in FIESTA, including table variable de
 #	  rastlst.cat.NODATA = NULL, rastfolder = NULL,  
 #   asptransform = FALSE, rast.asp = NULL, rast.lut = NULL, rastlut = NULL, 
 #   areacalc = TRUE, areaunits = "ACRES", keepNA = TRUE, NAto0 = FALSE,
-#   showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,
-#   outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL,
-#   outfn.date = TRUE, overwrite = FALSE, vars2keep = NULL, ...) 
+#   npixels = TRUE, showext = TRUE, savedata = FALSE, exportsp = FALSE, 
+#   exportNA = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE, 
+#   overwrite_layer = TRUE, vars2keep = NULL, ...) 
 # 
 # Description:
 # Get data extraction and zonal statistics for Model-assisted or
@@ -206,7 +207,7 @@ prednames
 #   areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL,  
 #   ACI = FALSE, adj = "samp", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL,     
 #   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",   
-#   unitcombine = FALSE, minplotnum.unit = 10, unitlut = NULL, 
+#   areaunits = "acres", unitcombine = FALSE, minplotnum.unit = 10, unitlut = NULL, 
 #   npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL,    
 #   stratcombine = TRUE, saveobj = FALSE, savedata = FALSE, outfolder = NULL,  
 #   out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = TRUE,  
@@ -226,8 +227,8 @@ prednames
 help(modMApop)
 
 ## Population data for MAmethod='HT' (Horvitz-Thompson)
-MApopdat.ht <- modMApop(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
-  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut)
+MApopdat.ht <- modMApop(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+    adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut)
 names(MApopdat.ht)
 
 MApopdat.ht$MAmethod

@@ -55,10 +55,10 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
   }
 
   ## check xy.crs   
-  if (is.null(xy.crs))
+  if (is.null(xy.crs)) {
     xy.crs <- build.prj4str(prj=prj, datum=datum, zone=zone, 
 		zoneS=zoneS, aea.param=aea.param, gui=gui) 
-    
+  }  
   ### check exportsp
   exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
 		title="Export spatial layer?", first="NO", gui=gui)
@@ -74,7 +74,6 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
   ## Make xy.uniqueid a character
   xypltx[[xy.uniqueid]] <- as.character(xypltx[[xy.uniqueid]])
  
-
   ## Generate sf layer  
   spplt <- sf::st_as_sf(xypltx, coords=c(x,y), crs=xy.crs, 
 		stringsAsFactors=FALSE, agr="identity")
@@ -88,8 +87,9 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
     spplt <- sf::st_sf(data.frame(spplt, xy.coords)) 
   }
 
-  if (exportsp) 
-    spExportSpatial(spplt, ...)    
+  if (exportsp) {
+    spExportSpatial(spplt, ...) 
+  }   
   return(spplt)
 }
 

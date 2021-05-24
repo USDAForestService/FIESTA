@@ -89,9 +89,9 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     varsmiss <- vars2keep[which(!vars2keep %in% names(domlayerx))]
-    if (length(varsmiss) > 0) 
+    if (length(varsmiss) > 0) {
       stop("missing variables: ", paste(varsmiss, collapse=", "))
-  
+    }
   } else {
     stop("under construction... please convert dom_layer to POLY")
   }
@@ -99,7 +99,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check continuous rasters
   ###################################################################
   rastlst.contfn <- suppressWarnings(getrastlst.rgdal(rastlst.cont, 
-	rastfolder, gui=gui, stopifLonLat=TRUE))
+	rastfolder, gui=gui, quiet=TRUE, stopifLonLat=TRUE))
 
   if (!is.null(rastlst.contfn)) {
     band.cont <- sapply(rastlst.contfn, function(x) rasterInfo(x)$nbands)
@@ -152,7 +152,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  
   ## Check categorical rasters
   ###################################################################
-  rastlst.catfn <- suppressWarnings(getrastlst.rgdal(rastlst.cat, rastfolder, gui=gui))
+  rastlst.catfn <- suppressWarnings(getrastlst.rgdal(rastlst.cat, 
+	rastfolder, quiet=TRUE, gui=gui))
 
   if (!is.null(rastlst.catfn)) {
     band.cat <- sapply(rastlst.catfn, function(x) rasterInfo(x)$nbands)
@@ -301,7 +302,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rastnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == rastfn]
       rast.cont.NODATA <- rastlst.cont.NODATA[i]
       zonalstat <- rastlst.cont.stat 
-      message(rastfn, "...")
+      #message(rastfn, "...")
  
       if (asptransform && identical(rast.aspfn, rastfn)) {
         rastnm2 <- ifelse(is.null(rastnm), "asp_cos", paste0(rastnm, "_cos"))
@@ -314,6 +315,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
+        class(zonalext[[domvar]]) <- class(domlut[[domvar]])        
 
         if (!is.null(rastnm)) 
           setnames(zonalext, outname, rastnm2)
@@ -327,27 +329,26 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		pixelfun=eastness, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-        if (!is.null(rastnm2)) 
+        class(zonalext[[domvar]]) <- class(domlut[[domvar]])        
+        if (!is.null(rastnm2)) {
           setnames(zonalext, outname, rastnm2)
+        }
         setkeyv(zonalext, domvar)
         zonalDT.cont <- zonalDT.cont[zonalext]
  
       } else {
         if (i == 1 && npixels) {
           zonalstat <- c("npixels", rastlst.cont.stat) 
-          if (!is.null(rastnm)) 
+          if (!is.null(rastnm)) {
             rastnm <- c("npixels", rastnm)
-        }  
+          }
+        } 
         zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, 
 		rast.NODATA=rast.cont.NODATA, polyv.att=domvar, zonalstat=zonalstat, 
 		showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
- 
-        tabs <- check.matchclass(zonalDT.cont, zonalext, domvar)
-        zonalDT.cont <- tabs$tab1
-        zonalext <- tabs$tab2
-        
+        class(zonalext[[domvar]]) <- class(domlut[[domvar]])        
         if (!is.null(rastnm)) {
           setnames(zonalext, outname, rastnm)
         }
@@ -359,13 +360,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rm(zonalext)
       gc() 
     }
-    tabs <- check.matchclass(domlut, zonalDT.cont, domvar)
-    domlut <- tabs$tab1
-    zonalDT.cont <- tabs$tab2
-
     domlut <- domlut[zonalDT.cont] 
   }
-
   ###############################################################################
   ## 4) Categorical raster layers - Extract values and get zonal probabilities
   ###############################################################################
@@ -392,9 +388,9 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     if (!is.null(rast.lut)) {
       rast.lutnm <- inputdf.cat$var.name[inputdf.cat$rasterfile == rast.lutfn]
 
-      if (!rast.lutnm %in% names(rastlut)) 
+      if (!rast.lutnm %in% names(rastlut)) {
         stop("must have variable named ", rast.lutnm, " in rastlut")
-
+      }
       ## Check that all values of sppltx are in rastlut
       FIESTA::check.matchval(sppltx, rastlut, rast.lutnm, tab1txt="sppltx", 
 		tab2txt="rastlut")
@@ -436,11 +432,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       outname <- zonaldat.rast.cat$outname
       outname[grep("npixels", outname)] <- "npixels"
       setnames(zonalext, c(domvar, outname))
+      class(zonalext[[domvar]]) <- class(domlut[[domvar]])        
       setkeyv(zonalext, domvar)
-
-      tabs <- check.matchclass(zonalDT.cat, zonalext, domvar)
-      zonalDT.cat <- tabs$tab1
-      zonalext <- tabs$tab2
 
       zonalDT.cat <- zonalDT.cat[zonalext] 
       zonalnames <- c(zonalnames, outname[outname != "npixels"])

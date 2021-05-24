@@ -199,10 +199,11 @@ plot(sf::st_geometry(WYspplt), add=TRUE)
 ## NOTE: To display multiple layers, all layers must be in the same coordinate system.
 lapply(list(WYbh, WYbhdist, WYspplt), sf::st_crs)
 
+
 ## Export spatial points to outfolder
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
+WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
         yvar="LAT_PUBLIC", xy.crs=4269, exportsp=TRUE, out_dsn="spplt", out_fmt="shp",
-        outfolder=outfolder, outfn.pre="WY", overwrite_layer=TRUE)
+        outfolder=outfolder, out_layer="WYplots", overwrite_layer=TRUE)
 
 
 ```
@@ -548,11 +549,12 @@ zonalnames
 ######################################################################################
 # Usage:
 # spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
-#   	unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
-#     areavar = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE,  
-#     showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,  
-#     outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "unit_assgn", 
-#     outfn.date = TRUE, outfn.pre = NULL, overwrite = FALSE, ...) 
+#   unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
+#   areavar = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE,  
+#   showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,  
+#   outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "unit_assgn", 
+#   outfn.date = TRUE, outfn.pre = NULL, overwrite_dsn = FALSE, 
+#   overwrite_layer = TRUE, ...) 
 # 
 # Description:
 # Extract estimation unit values to plots and calculate area by estimation unit.
@@ -567,8 +569,8 @@ xyplt=WYspplt
 ## By Bighorn National Forest ##
 # Get estimation unit acres for Bighorn National Forest.
 ######################################################################################
-unitdat.bh <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
-    xy.crs=4269, unit_layer=WYbhfn)
+unitdat.bh <- spGetEstUnit(xyplt=WYplt, uniqueid="CN", 
+    xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269, unit_layer=WYbhfn)
 
 names(unitdat.bh)
 sppltunit.bh <- unitdat.bh$sppltassgn
@@ -606,12 +608,13 @@ areavar.bhdist
 ######################################################################################
 # Usage:
 # spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
-#     unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
-#     strattype = "RASTER", strat_layer = NULL, strat_dsn = NULL, strvar = NULL, 
-#   	strat_lut = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
-#     showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE, 
-#     outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "strat_assgn", 
-#     outfn.date = TRUE, outfn.pre = NULL, overwrite = FALSE, ...) 
+#   unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
+#   strattype = "RASTER", strat_layer = NULL, strat_dsn = NULL, strvar = NULL, 
+#   strat_lut = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
+#   keepxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE,  
+#   exportNA = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
+#   out_layer = "strat_assgn", outfn.date = TRUE, outfn.pre = NULL, 
+#   overwrite_dsn = FALSE, overwrite_layer = TRUE, ...) 
 # 
 # Description:
 # Wrapper to extract attribute and area from a polygon or raster estimation 

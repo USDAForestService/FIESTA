@@ -26,7 +26,7 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     miss <- input.params[!input.params %in% formals(spExportSpatial)]
     stop("invalid parameter: ", toString(miss))
   }
-
+ 
   ## Check sfobj
   ###########################################################
   if (is.null(sfobj)) {
@@ -55,9 +55,7 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
 
   ## Check out_layer
   if (is.null(out_layer)) {
-    if (!is.null(out_dsn)) {
-      out_layer <- "outfile"
-    }
+    out_layer <- "outfile"
   } 
   
   ## Write sf layer
@@ -125,9 +123,9 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
 
     ## Append prefix
     ########################################################
-    if (!is.null(outfn.pre)) {
-      out_layer <- paste(outfn.pre, out_layer, sep="_")
-    }
+    #if (!is.null(outfn.pre)) {
+    #  out_layer <- paste(outfn.pre, out_layer, sep="_")
+    #}
 
     ## Get out_dsn
     ########################################################

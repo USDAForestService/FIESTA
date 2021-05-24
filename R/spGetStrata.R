@@ -217,6 +217,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
       strataNA <- stratalut[is.na(get(strvar)), ]
       stratalut <- stratalut[!is.na(get(strvar)), ]
+      class(stratalut[[unitvar]]) <- class(unitlayerx[[unitvar]])        
 
       ## Get unitarea 
       unitlayerprj <- areacalc.poly(unitlayerprj, unit=areaunits)
@@ -255,6 +256,10 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## If lookup table, merge and aggregate
   #######################################
   if (!is.null(strat_lut)) {
+    tabs <- check.matchclass(stratalut, strat_lut, strvar)
+    stratalut <- tabs$tab1
+    strat_lut <- tabs$tab2
+    
     stratalut <- merge(stratalut, strat_lut, by=strvar)
     strclvar <- names(strat_lut)[names(strat_lut) != strvar]
 
@@ -263,6 +268,11 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     setorderv(stratalut, c(unitvar, strclvar))
     strvar2 <- checknm("STRATUMCD", names(sppltx))
     setnames(stratalut, strclvar, strvar2)
+
+    tabs <- check.matchclass(sppltx, strat_lut, strvar)
+    sppltx <- tabs$tab1
+    strat_lut <- tabs$tab2
+
     sppltx <- merge(sppltx, strat_lut, by=strvar)
     setnames(sppltx, strclvar, strvar2)
     strvar <- strvar2
