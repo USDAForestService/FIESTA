@@ -339,13 +339,16 @@ WYcond[WYcond$PLT_CN == 46792188020004,]
 ```
 ######################################################################################
 # Usage:
-# datSumTree(tree = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, tuniqueid = "PLT_CN",
-#     cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE, condid = "CONDID", 
-#     bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, tsumvarnmlst = NULL,  
-#     TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE,   
-#     getadjplot = FALSE, adjtree = FALSE, adjTPA = 1, NAto0 = TRUE, savedata = FALSE,
-#     outfolder = NULL, out_layer = NULL, outfn.date = TRUE, overwrite = TRUE,
-#     tround = 6, checkNA = FALSE, returnDT = TRUE) 
+# datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
+#   tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE, 
+#   condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, 
+#   tsumvarnmlst = NULL, TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL,  
+#   addseed = FALSE, lbs2tons = TRUE, metric = FALSE, getadjplot = FALSE,   
+#   adjtree = FALSE, adjTPA = 1, NAto0 = TRUE, savedata = FALSE, outfolder = NULL, 
+#   outfolder = NULL, out_fmt = "csv", out_dsn = NULL, out_layer = NULL, 
+#   outfn.pre = NULL, layer.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE,
+#   overwrite_layer = FALSE, append_layer = FALSE, tround = 6, checkNA = FALSE, 
+#   returnDT = TRUE) 
 # 
 # Description:
 # Aggregates tree-level data to plot or condition, including options for
@@ -466,15 +469,17 @@ WYcond[WYcond$PLT_CN %in% cn,]
 ######################################################################################
 # Usage:
 # datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
-#     tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE,   
-#     condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvar = NULL, TPA = FALSE, 
-#     tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, tdomvar = "SPCD",  
-#     tdomvarlst = NULL, tdomvar2 = NULL, tdomvarl2lst = NULL, tdomprefix = NULL, 
-#     tdombarplot = FALSE, tdomtot = FALSE, tdomtotnm = NULL, FIAname = FALSE, 
-#     addseed = FALSE, presence = FALSE, proportion = FALSE, cover = FALSE, 
-#     getadjplot = FALSE, adjtree = FALSE, NAto0 = TRUE, adjtpa = 1, savedata = FALSE,
-#     outfolder = NULL, out_layer = NULL, outfn.date = TRUE, overwrite = FALSE,
-#     tround = 6, checkNA = FALSE, returnDT = TRUE) 
+#   tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE,   
+#   condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvar = NULL, TPA = FALSE, 
+#   tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, metric = FALSE, 
+#   tdomvar = "SPCD", tdomvarlst = NULL, tdomvar2 = NULL, tdomvarl2lst = NULL, 
+#   tdomprefix = NULL, tdombarplot = FALSE, tdomtot = FALSE, tdomtotnm = NULL, 
+#   FIAname = FALSE, addseed = FALSE, pivot = TRUE, presence = FALSE, 
+#   proportion = FALSE, cover = FALSE, getadjplot = FALSE, adjtree = FALSE, 
+#   NAto0 = TRUE, adjtpa = 1, savedata = FALSE, outfolder = NULL, out_fmt = "csv",
+#   out_dsn = NULL, out_layer = NULL, outfn.pre = NULL, layer.pre = NULL, 
+#   outfn.date = TRUE, overwrite_dsn = FALSE, overwrite+layer = FALSE, 
+#   append_layer = FALSE, tround = 6, checkNA = FALSE, returnDT = TRUE) 
 # 
 # Description:
 # Aggregates tree-level data to plot or condition, including options for
