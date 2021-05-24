@@ -419,13 +419,16 @@ icecover_2
 ```
 #######################################################################################
 # Usage:
-# modPBpop(pnt = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
-#	    pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
-#	    pltassgnid = "CN", plt.nonsamp.filter = NULL, tabtype = "PCT", strata = FALSE, 
-#    	sumunits = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-#   	areavar = "ACRES", unitcombine = FALSE, stratalut = NULL, strvar = "STRATUMCD", 
-#   	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, pvars2keep = NULL, 
-#   	gui = FALSE)
+# modPBpop(pntdat = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
+#	  pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
+#	  pltassgnid = "CN", nonsamp.pfilter = NULL, strata = FALSE, sumunits = FALSE, 
+#   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",
+#   areaunits = "acres", unitcombine = FALSE, minplotnum.unit = 10, 
+#   stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
+#   strwtvar = "strwt", stratcombine = TRUE, minplotnum.strat = 2, pvars2keep = NULL, 
+#   saveobj = FALSE, objnm = "PBpopdat", savedata = FALSE, outfolder = NULL, 
+#   out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE,
+#   overwrite_dsn = FALSE, overwrite_layer = TRUE, PBstratdat = NULL, gui = FALSE)
 # 
 # Description:
 # Generates percent or acre estimates by domain (and estimation unit).   
@@ -444,7 +447,7 @@ stratalut <- PBpop$stratalut
 
 head(PBx)
 head(pltassgnx)
-head(stratalut)
+stratalut
 
 
 ```
@@ -465,7 +468,7 @@ head(stratalut)
 #   raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
 #   append_layer = FALSE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
 #   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, title.filter = NULL,
-#   title.units="acres", gainloss=FALSE, gainloss.vals=NULL, gui = FALSE)
+#   title.units="acres", gainloss=FALSE, gainloss.vals=NULL, gui = FALSE, ...)
 # 
 # Description:
 # Generates percent or acre estimates by domain (and estimation unit).   
@@ -543,6 +546,12 @@ PBpoparea <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="
         unitarea=sum(unitarea$ACRES))
 names(PBpoparea)
 
+head(PBpoparea$PBx)
+head(PBpoparea$pltassgnx)
+PBpoparea$stratalut
+PBpoparea$unitarea
+
+## Area ##
 cover1.area <- modPB(PBpopdat=PBpoparea,
 		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
 		nonsamp.pntfilter="cover_1 != 999", tabtype="AREA")
@@ -780,6 +789,12 @@ PBpopunit <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="
         unitarea=unitarea, unitvar="ESTN_UNIT")
 names(PBpopunit)
 
+head(PBpopunit$PBx)
+head(PBpopunit$pltassgnx)
+PBpopunit$stratalut
+PBpopunit$unitarea
+
+## Check PBpopunit
 cover1.unit.areab <- modPB(PBpopdat=PBpopunit,
     rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
     nonsamp.pntfilter="cover_1 != 999", tabtype="AREA", 
@@ -1114,7 +1129,6 @@ pltpct1.raw <- pltpct1$raw
 names(pltpct1.raw)
 
 pltpct1.raw$unit.rowest
-pltpct1.raw$stratdat
 head(pltpct1.raw$pltdom.row)
 
 
@@ -1173,7 +1187,6 @@ cover12ps$pse
 raw12ps <- cover12ps$raw
 names(raw12ps)
 raw12ps$pntsampcnt
-raw12ps$strlut
 raw12ps$pltdom.row
 raw12ps$unit.rowest
 raw12ps$unit.grpest
@@ -1300,6 +1313,7 @@ cover12b <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="d
 names(cover12b)
 gainloss <- cover12b.raw$est.gainloss
 
+## Plot gain/loss
 datPBplotchg(gainloss)
 
 

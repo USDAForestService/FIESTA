@@ -279,7 +279,8 @@ names(WYbhptslst)
 
  
 ## Export clipped points
-FIESTA::spExportSpatial(WYbhspplt, out_layer="WYbhpts", outfolder=outfolder, overwrite_layer=TRUE)
+FIESTA::spExportSpatial(WYbhspplt, out_layer="WYbhpts", outfolder=outfolder, 
+    overwrite_layer=TRUE)
 
 
 ## Get points within Bighorn National Forest boundary (project on the fly)
@@ -356,7 +357,6 @@ raster::plot(raster::raster(WYbhMW.fornf))
 plot(st_geometry(WYbhMWprj), border="red", add=TRUE)
 
 
-
 ```
 
 #### <a name="spExtractPoly"/>spExtractPoly()
@@ -364,10 +364,11 @@ plot(st_geometry(WYbhMWprj), border="red", add=TRUE)
 ######################################################################################
 # Usage:
 # spExtractPoly(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", polyvlst,
-#     polyv_dsn = NULL, polyvarlst = NULL, polyvarnmlst = NULL, keepNA = FALSE, 
-#	    showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,
-#     out_fmt = "shp", out_dsn = NULL, out_layer = "polyext", outfolder = NULL,
-#	    outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, ...) 
+#   polyv_dsn = NULL, polyvarlst = NULL, polyvarnmlst = NULL, keepNA = FALSE, 
+#	  showext = FALSE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,
+#   out_fmt = "shp", out_dsn = NULL, out_layer = "polyext", outfolder = NULL,
+#	  outfn.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE, 
+#   overwrite_layer = TRUE, ...) 
 # 
 # Description:
 # Subset Spatial polygons layer with another Spatial polygons layer. 
@@ -414,7 +415,7 @@ head(WYspplt_bh2)
 #   	keepNA = TRUE, showext = FALSE, savedata = FALSE, exportsp =  FALSE, 
 #   	exportNA = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
 #     out_layer = "rastext", outfn.pre = NULL, outfn.date = TRUE, 
-#     overwrite=FALSE, ...)
+#     overwrite_dsn = FALSE, overwrite_layer = TRUE, ...)
 # 
 # Description:
 # Subset Spatial polygons layer with another Spatial polygons layer.
@@ -439,15 +440,16 @@ head(WYspplt_dem)
 # spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL, 
 #	  stbnd_dsn = NULL, stbnd.att = NULL, RS = NULL, xy = NULL, xy_dsn = NULL, 
 #   xy.uniqueid = "PLT_CN", xvar = "LON_PUBLIC", yvar = "LAT_PUBLIC", xy.crs = 4269, 
-#	  clipxy = TRUE, datsource = "datamart", data_dsn = NULL, istree = TRUE, 
-#	  isseed = FALSE, plot_layer= "plot", cond_layer = "cond", tree_layer = "tree", 
-#   seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn", other_layers = NULL,  
-#   puniqueid = "CN", savePOP = FALSE, evalid = NULL, evalCur = FALSE, evalEndyr = NULL,  
-#   evalType = "VOL", measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, 
-#	  invyrs = NULL, allyrs=FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE,  
-#	  savebnd = FALSE, savexy = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL,  
-#	  outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE,
-#   append_layer = FALSE)
+#	  xy.joinid = "PLT_CN", clipxy = TRUE, datsource = "datamart", data_dsn = NULL,  
+#	  istree = TRUE, isseed = FALSE, plot_layer= "plot", cond_layer = "cond",  
+#   tree_layer = "tree", seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn",   
+#   other_layers = NULL, puniqueid = "CN", savePOP = FALSE, evalid = NULL, 
+#   evalCur = FALSE, evalEndyr = NULL, evalType = "VOL", measCur = FALSE,  
+#   measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, allyrs=FALSE, 
+#	  intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, savebnd = FALSE,  
+#	  savexy = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL,  
+#	  outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+#   overwrite_layer = FALSE, append_layer = FALSE)
 # 
 # Description:
 # Extract data from FIA database for plots within a given boundary.
@@ -473,9 +475,10 @@ names(WYbhdat)
 #	  rastlst.cat.NODATA = NULL, rastfolder = NULL,  
 #   asptransform = FALSE, rast.asp = NULL, rast.lut = NULL, rastlut = NULL, 
 #   areacalc = TRUE, areaunits = "ACRES", keepNA = TRUE, NAto0 = FALSE,
-#   showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,
-#   outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL,
-#   outfn.date = TRUE, overwrite = FALSE, vars2keep = NULL, ...) 
+#   npixels = TRUE, showext = TRUE, savedata = FALSE, exportsp = FALSE, 
+#   exportNA = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE, 
+#   overwrite_layer = TRUE, vars2keep = NULL, ...) 
 # 
 # Description:
 # Get data extraction and zonal statistics for Model-assisted or
@@ -509,7 +512,7 @@ rastlst.cont.name <- c("dem", "slp", "asp")
 rastlst.cat <- fornffn
 rastlst.cat.name="fornf"
 
-modeldat <- FIESTA::spGetModeldat(xyplt=WYspplt, uniqueid="CN", dom_layer=WYbhfn, 
+modeldat <- spGetModeldat(xyplt=WYspplt, uniqueid="CN", dom_layer=WYbhfn, 
   domvar=NULL, rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
   rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
   asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, 

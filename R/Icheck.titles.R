@@ -150,6 +150,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 
           ## Get title.yvar
           title.yvar <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, "ESTTITLE1"]
+          if (!is.null(title.unitsn)) {
+            title.yvar <- paste0(title.yvar, ", in ", title.unitsn)
+          }
           if (esttype == "RATIO" && ratiotype == "PERACRE") {
             title.estvarn <- paste(title.estvarn, "per acre")
           }
@@ -187,6 +190,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
           }
           title.part1 <- paste(title.part1, "by", tolower(title.estvard))
           title.yvard <- ref_estvar[ref_estvar$ESTTITLE == title.estvard, "ESTTITLE1"]
+          if (!is.null(title.unitsd)) {
+            title.yvard <- paste0(title.yvard, ", in ", title.unitsd)
+          }
         } else {
           title.yvard <- "Acres"
         }
@@ -381,8 +387,9 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
     }
   }
 
-  if (!is.null(title.unitvar)) 
+  if (!is.null(title.unitvar)) {
     titlelst$title.unitvar <- title.unitvar
+  }
   titlelst$title.ref <- title.ref
   titlelst$outfn.estpse <- outfn.estpse
   if (rawdata) {

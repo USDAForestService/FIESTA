@@ -538,6 +538,12 @@ GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filte
 # Strata information and adjustment factors
 head(GBpopdat$stratalut)    
 
+## Adjustment factors added to condition-level data
+head(GBpopdat$condx)
+
+## Adjustment factors added to tree data
+head(GBpopdat$treex)
+
 
 ```
 
@@ -979,7 +985,10 @@ head(raw10$rowest)
 #############################################################################################
 GBpopdat2 <- modGBpop(cond=WYcond, tree=WYtree, seed=WYseed, pltassgn=WYpltassgn, pltassgnid="CN", 
     unitarea=WYunitarea, unitvar="ESTN_UNIT", strata=TRUE, stratalut=WYstratalut)
-names(GBpopdat)
+names(GBpopdat2)
+
+## Adjustment factors added to seedling data
+head(GBpopdat2$seedx)
 
 
 ## Now, use GBpopdat with a new diameter class
@@ -1005,7 +1014,6 @@ tree11b <- modGBtree(GBpopdat=GBpopdat2, estseed="add", landarea="FOREST",
   colvar="DIACL", sumunits=TRUE, rawdata=TRUE)
 names(tree11b)
 tree11b$est
-
 
 
 ```

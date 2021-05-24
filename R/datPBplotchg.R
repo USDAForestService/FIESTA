@@ -177,20 +177,28 @@ datPBplotchg <- function(gainloss, CI=95, figTitle="") {
 #                    bty='n',text.col="black",cex=0.8,horiz=TRUE,
 #                    inset=c(0,-0.15))
 
-  legend("topright",
+#  legend("topright",
+#                    legend=c("Gain","Loss"),
+#                    col=c("blue", "red"),
+#                    pch=c(15,15),
+#                    pt.cex=1.5,x.intersp=1.0,
+#                    bty='n',text.col="black",cex=0.8,horiz=FALSE,
+#                    inset=c(0,-0.18))
+
+  legend("bottomright",
                     legend=c("Gain","Loss"),
                     col=c("blue", "red"),
                     pch=c(15,15),
                     pt.cex=1.5,x.intersp=1.0,
                     bty='n',text.col="black",cex=0.8,horiz=FALSE,
-                    inset=c(0,-0.18))
+                    inset=c(0,0.0))
 
   legend("topright",
                     legend=c("95% Confidence Interval"),
                     col=c("darkgray"),
                     lty=c("solid"),lwd=3,
                     bty='n',text.col="black",cex=0.8,horiz=TRUE,
-                    inset=c(-0.00,-0.09))
+                    inset=c(-0.00,0.00))
 
 
         

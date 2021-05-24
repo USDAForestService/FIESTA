@@ -149,7 +149,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         stop("rast.asp must be included in rastlst.contfn")
     }
   }
-
+ 
   ## Check categorical rasters
   ###################################################################
   rastlst.catfn <- suppressWarnings(getrastlst.rgdal(rastlst.cat, rastfolder, gui=gui))
@@ -170,7 +170,8 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       if (length(rastlst.cat.NODATA) == 1 && nlayers.cat > 1) {
         message("using same rastlst.cat.NODATA value for each raster in rastlst.cat")
         rastlst.cat.NODATA <- rep(rastlst.cat.NODATA, nlayers.cat)
-      } else if (length(rastlst.cat.NODATA) > 1 && length(rastlst.cat.NODATA) != nlayers.cat) {
+      } else if (length(rastlst.cat.NODATA) > 1 && 
+		length(rastlst.cat.NODATA) != nlayers.cat) {
         stop("rastlst.cat.NODATA must be same length as rastlst.cat: ", nlayers.cat)
       }
     }
@@ -301,7 +302,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rast.cont.NODATA <- rastlst.cont.NODATA[i]
       zonalstat <- rastlst.cont.stat 
       message(rastfn, "...")
-
+ 
       if (asptransform && identical(rast.aspfn, rastfn)) {
         rastnm2 <- ifelse(is.null(rastnm), "asp_cos", paste0(rastnm, "_cos"))
         if (i == 1 && npixels) {
@@ -321,8 +322,9 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   
         rastnm2 <- ifelse(is.null(rastnm), "asp_sin", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
-        zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, rast.NODATA=rast.cont.NODATA,
- 		polyv.att=domvar, zonalstat=rastlst.cont.stat, pixelfun=eastness, na.rm=TRUE)
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, 
+		rast.NODATA=rast.cont.NODATA, polyv.att=domvar, zonalstat=rastlst.cont.stat, 
+		pixelfun=eastness, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
         if (!is.null(rastnm2)) 
@@ -336,13 +338,19 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
           if (!is.null(rastnm)) 
             rastnm <- c("npixels", rastnm)
         }  
-        zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, rast.NODATA=rast.cont.NODATA, 
-		polyv.att=domvar, zonalstat=zonalstat, showext=showext, na.rm=TRUE)
+        zonaldat.rast.cont <- spZonalRast(domlayerx, rastfn=rastfn, 
+		rast.NODATA=rast.cont.NODATA, polyv.att=domvar, zonalstat=zonalstat, 
+		showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-
-        if (!is.null(rastnm)) 
+ 
+        tabs <- check.matchclass(zonalDT.cont, zonalext, domvar)
+        zonalDT.cont <- tabs$tab1
+        zonalext <- tabs$tab2
+        
+        if (!is.null(rastnm)) {
           setnames(zonalext, outname, rastnm)
+        }
         setkeyv(zonalext, domvar)
         zonalDT.cont <- zonalDT.cont[zonalext] 
       }
@@ -351,6 +359,10 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rm(zonalext)
       gc() 
     }
+    tabs <- check.matchclass(domlut, zonalDT.cont, domvar)
+    domlut <- tabs$tab1
+    zonalDT.cont <- tabs$tab2
+
     domlut <- domlut[zonalDT.cont] 
   }
 
@@ -425,6 +437,11 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       outname[grep("npixels", outname)] <- "npixels"
       setnames(zonalext, c(domvar, outname))
       setkeyv(zonalext, domvar)
+
+      tabs <- check.matchclass(zonalDT.cat, zonalext, domvar)
+      zonalDT.cat <- tabs$tab1
+      zonalext <- tabs$tab2
+
       zonalDT.cat <- zonalDT.cat[zonalext] 
       zonalnames <- c(zonalnames, outname[outname != "npixels"])
 
@@ -433,6 +450,10 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rm(zonalext)
       gc() 
     }
+    tabs <- check.matchclass(domlut, zonalDT.cat, domvar)
+    domlut <- tabs$tab1
+    zonalDT.cat <- tabs$tab2
+
     domlut <- domlut[zonalDT.cat]  
   }
  
