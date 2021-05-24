@@ -33,7 +33,7 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
 		caption="X variable", warn="xvar not in data table", multiple=TRUE, 
 		stopifnull=TRUE, gui=gui)
   } else if (!all(xvar %in% xnamelst)) {
-    xvar.miss <- xvar[!xvar %in% namelst]
+    xvar.miss <- xvar[!xvar %in% xnamelst]
     stop("xvar is invalid: ", toString(xvar.miss))
   }
   xvar.class <- lapply(datx[,xvar, with=FALSE], class)

@@ -213,7 +213,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
           title.part2.col <- tolower(paste0("by ", title.colvar))
           title.part2 <- paste("of", title.colvar, "within", title.rowvar)         
         } else {
-          title.part2.col <- tolower(paste0("by ", title.colvar, title.colgrp2))
+          title.part2.col <- tolower(paste0("by ", title.colvar, title.rowgrp2))
           title.part2 <- tolower(paste(title.part2, "and", title.colvar))
         }
       }
