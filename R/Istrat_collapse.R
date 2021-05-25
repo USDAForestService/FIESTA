@@ -88,18 +88,18 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
     }
     stratacnt$unitvar <- as.numeric(stratacnt[[unitvar]])
     stratacnt$unitnew <- as.character(-1)
-    setkeyv(stratacnt, c(unitcombinevar, unitvar))
+    #setkeyv(stratacnt, c(unitcombinevar, unitvar))
 
     ## Group estimation units if less than minplotnum
     unitgrp <- stratacnt[, groupEstunit(.SD, minplotnum.unit), by=UNITCD]
     unitvarnew <- "unitnew"
-    setkeyv(unitgrp, c(unitcombinevar, unitvar))
-    stratacnt <- merge(stratacnt[,unitnew:=NULL], 
-		unitgrp[, c(unitcombinevar, "unitvar", unitvarnew), with=FALSE],
-		by=c(unitcombinevar, "unitvar"))
+    #setkeyv(unitgrp, c(unitcombinevar, unitvar))
+#    stratacnt <- merge(stratacnt[,unitnew:=NULL], 
+#		unitgrp[, c(unitvar, unitcombinevar, "unitvar", unitvarnew), with=FALSE],
+#		by=c(unitvar, unitcombinevar, "unitvar"))
     SDcols <- c(vars2combine, "n.strata", "n.total")
     SDcols <- SDcols[SDcols %in% names(stratacnt)]
-    unitgrpsum <- stratacnt[, lapply(.SD, sum, na.rm=TRUE), 
+    unitgrpsum <- unitgrp[, lapply(.SD, sum, na.rm=TRUE), 
 			by=c(unitcombinevar, unitvarnew, strvar), .SDcols=SDcols]
     setkeyv(unitgrpsum, c(unitcombinevar, unitvarnew, strvar))
 
@@ -112,8 +112,10 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 
     ## Create look up table with original classes and new classes
     unitgrpvars <- c(unitjoinvars, unitvarnew)
-    unitgrplut <- unique(stratacnt[, unitgrpvars, with=FALSE])
-    unitstrgrplut <- unique(stratacnt[, c(unitgrpvars, strvar), with=FALSE])
+    #unitgrplut <- unique(stratacnt[, unitgrpvars, with=FALSE])
+    #unitstrgrplut <- unique(stratacnt[, c(unitgrpvars, strvar), with=FALSE])
+    unitgrplut <- unique(unitgrp[, unitgrpvars, with=FALSE])
+    unitstrgrplut <- unique(unitgrp[, c(unitgrpvars, strvar), with=FALSE])
 
     if (!is.null(unitarea)) {
       ## unitarea: Check if estunit1nm class match
@@ -146,7 +148,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   #############################################################################
 #  if ("n.strata" %in% names(unitgrpsum) && 
 #		any(unique(unitgrpsum$n.strata) < minplotnum.strat)) {
-  if ("n.strata" %in% names(unitgrpsum) && 
+   if ("n.strata" %in% names(unitgrpsum) && 
 		any(unique(unitgrpsum$n.strata) < 60)) {
 
     unitgrpsum$strat <- unitgrpsum[[strvar]]
@@ -180,7 +182,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 
     ## Merge new unitvar to pltstratx
     setkeyv(pltstratx, unitstrjoinvars)
-    setkeyv(unitgrplut, unitstrjoinvars)
+    setkeyv(unitgrplut, unitvar)
 
     tabs <- FIESTA::check.matchclass(pltstratx, unitstrgrplut, unitstrjoinvars)
     pltstratx <- tabs$tab1

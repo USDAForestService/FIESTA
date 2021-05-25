@@ -265,14 +265,14 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 
     ## if datx != NULL, merge strata assignments to dat
     if (!is.null(datx)) {
-      ## Check that the values of PLT_CN in POP_PLOT_STRATUM_ASSGN are all in datx
-      FIESTA::check.matchval(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN",
-		tab1txt="dat", tab2txt="POP_PLOT_STRATUM_ASSGN")
-
       ## Check if class of uniqueid in POP_PLOT_STRATUM_ASSGN matches class of cuniqueid in condx
       tabs <- FIESTA::check.matchclass(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN")
       datx <- tabs$tab1
       POP_PLOT_STRATUM_ASSGN <- tabs$tab2
+
+      ## Check that the values of PLT_CN in POP_PLOT_STRATUM_ASSGN are all in datx
+      FIESTA::check.matchval(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN",
+		tab1txt="dat", tab2txt="POP_PLOT_STRATUM_ASSGN")
 
       ## Attribute sampled plots outside of evaluation with the values from the 
       if (PLTdups) {

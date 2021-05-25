@@ -83,7 +83,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Define necessary plot and condition level variables
   ###################################################################################
   pvars2keep <- unique(c(unitvar, unitvar2, pvars2keep))
-  cvars2keep <- unique(c(cvars2keep, areawt))
+  cvars2keep <- unique(c(cvars2keep, areawt, "PROP_BASIS"))
   vuniqueid <- "PLT_CN" 
   datindb=unitindb=stratindb <- FALSE
 
@@ -460,12 +460,13 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         pltx <- getPlotCur(pltx, Endyr=measEndyr, varCur="MEASYEAR", 
 				Endyr.filter=measEndyr.filter)
         if (!is.null(intensity)) {
-          INTENSITY <- pcheck.varchar(var2check="INTENSITY", 
+          INTENSITYNM <- pcheck.varchar(var2check="INTENSITY", 
 		checklst=names(pltx), warn="INTENSITY variable not in plt")
-          if (!all(intensity %in% unique(pltx[[INTENSITY]])))
+          if (!all(intensity %in% unique(pltx[[INTENSITYNM]])))
             stop("invalid intensity")
-          intensity.filter <- getfilter(INTENSITY, intensity)
+          intensity.filter <- getfilter(INTENSITYNM, intensity)
           pltx <- datFilter(pltx, intensity.filter)$xf 
+
         }      
       } else if (!is.null(invyrs)) {
         if (!"INVYR" %in% names(pltx)) stop("INVYR not in pltx")
@@ -478,25 +479,26 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         pltx <- datFilter(x=pltx, xfilter=paste("INVYR %in% c(", toString(invyrs), ")"))$xf
 
         if (!is.null(intensity)) {
-          INTENSITY <- pcheck.varchar(var2check="INTENSITY", 
+          INTENSITYNM <- pcheck.varchar(var2check="INTENSITY", 
 			checklst=names(pltx), warn="INTENSITY variable not in plt")
-          if (!all(intensity %in% unique(pltx[[INTENSITY]])))
+          if (!all(intensity %in% unique(pltx[[INTENSITYNM]])))
             stop("invalid intensity")
-          intensity.filter <- getfilter(INTENSITY, intensity)
+          intensity.filter <- getfilter(INTENSITYNM, intensity)
           pltx <- datFilter(pltx, intensity.filter)$xf 
         }      
       } else {
         if (!is.null(intensity)) {
-          INTENSITY <- pcheck.varchar(var2check="INTENSITY", 
+          INTENSITYNM <- pcheck.varchar(var2check="INTENSITY", 
 			checklst=names(pltx), warn="INTENSITY variable not in plt")
-          if (!all(intensity %in% unique(pltx[[INTENSITY]])))
+          if (!all(intensity %in% unique(pltx[[INTENSITYNM]]))) {
             stop("invalid intensity")
-          intensity.filter <- getfilter(INTENSITY, intensity)
+          }
+          intensity.filter <- getfilter(INTENSITYNM, intensity)
           pltx <- datFilter(pltx, intensity.filter)$xf 
         } 
       }     
     }
-
+ 
     ## Merge plot data to cond (and lulc to cond)
     #########################################################
     if (!is.null(condx)) {
@@ -562,6 +564,10 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         ## Merge lulcx and condx (Note: inner join to use only lulc conditions)
         #condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx), all.x=TRUE)
         condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx))
+
+        ## Add PROP_CHNG (sum(SCCM.SUBPTYP_PROP_CHNG) / 4) to cvars2keep 
+        cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
+        areawt <- "PROP_CHNG"
       }   
  
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
@@ -592,6 +598,35 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       if (nrow.after < nrow.before) {
         message(abs(nrow.after - nrow.before), " plots were removed from population")
       }
+    } else if (popType == "LULC" && !is.null(lulcx)) {
+      condx <- lulcx
+      if ("PROP_CHNG" %in% names(condx)) {
+        areawt <- "PROP_CHNG"
+        cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
+      } 
+      cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui, 
+		checklst=names(condx), caption="Unique identifier of plot", 
+		warn=paste(cuniqueid, "not in cond table"), stopifnull=TRUE)
+      setkeyv(condx, cuniqueid)
+
+      ## Check if class of puniqueid in pltx matches class of puniqueid in condx
+      tabs <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
+      condx <- tabs$tab1
+      pltx <- tabs$tab2
+
+      ## Check for matching unique identifiers of condx and pltx
+      condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, tab1txt="cond",
+			tab2txt="plt", subsetrows=TRUE)
+      
+      nrow.before <- nrow(pltx)
+
+      pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
+      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
+				by.x=cuniqueid, by.y=puniqueid)
+      nrow.after <- length(unique(pltcondx[[cuniqueid]]))
+      if (nrow.after < nrow.before) {
+        message(abs(nrow.after - nrow.before), " plots were removed from population")
+      }
     }
  
     if (is.null(condx)) {
@@ -607,7 +642,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   } else {
     pltcondx <- condx
   }
- 
+
   ###################################################################################
   ###################################################################################
   ## Check plot data
@@ -835,7 +870,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   #############################################################################
   ## Check for necessary cond variables in cond table 
   #############################################################################
-
   ## If areawt not in cond table and only 1 condition per plot, 
   ## 	add areawt and set = 1 (100 percent)
   if (is.null(areawt) || is.na(areawt) || !areawt %in% pltcondnmlst) {
@@ -916,7 +950,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         nonsamp.cfilter <- paste(nonsamp.cfilter, "&", nonsamp.cfilter.ACI)
       }
     }
-    if (popType == "LULC") {
+    if (popType == "LULC" && "PREV_COND_STATUS_CD" %in% names(pltcondx)) {
       nonsamp.cfilter.lulc <- "(is.na(PREV_COND_STATUS_CD) | PREV_COND_STATUS_CD != 5)"
       if (!is.null(nonsamp.cfilter)) {
         nonsamp.cfilter <- paste(nonsamp.cfilter, "&", nonsamp.cfilter.lulc)
@@ -1095,8 +1129,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   if ("STATECD" %in% pvars2keep) {
     pvars2keep <- pvars2keep[pvars2keep != "STATECD"]
   }
-  pltcondx[, (pvars2keep) := NULL]
 
+  cvars2keep <- cvars2keep[cvars2keep %in% names(pltcondx)]
+  pltcondx[, (pvars2keep) := NULL]
   condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
   pltcondx[, (cvars2keep) := NULL]
 

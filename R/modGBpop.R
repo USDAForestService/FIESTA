@@ -29,6 +29,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (gui) {
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
+
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- names(formals(modGBpop)) 
@@ -98,17 +99,28 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       if (popType == "LULC") {
         list.items <- c(list.items, "lulcx")
       }
-      pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
+      #pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
 
       ## Extract list objects
       puniqueid <- pltdat$puniqueid
-      pjoinid <- pltdat$pjoinid
-      plt <- pltdat$tabs$pltx
-      cond <- pltdat$tabs$condx
-      tree <- pltdat$tabs$treex
-      seed <- pltdat$tabs$seedx
-      if (popType == "LULC") {
-        lulc <- pltdat$tabs$lulcx
+      if ("tabs" %in% names(pltdat)) {
+        pjoinid <- pltdat$pjoinid
+        plt <- pltdat$tabs$pltx
+        cond <- pltdat$tabs$condx
+        tree <- pltdat$tabs$treex
+        seed <- pltdat$tabs$seedx
+        if (popType == "LULC") {
+          lulc <- pltdat$tabs$lulcx
+        }
+      } else {
+        pjoinid <- puniqueid
+        plt <- pltdat$plt
+        cond <- pltdat$cond
+        tree <- pltdat$tree
+        seed <- pltdat$seed
+        if (popType == "LULC") {
+          lulc <- pltdat$lulc
+        }
       }
     }
     if (!is.null(GBstratdat)) {

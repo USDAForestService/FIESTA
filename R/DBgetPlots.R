@@ -609,34 +609,16 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     dfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				dwm_layer, " d ON (d.PLT_CN = p.CN)")
   }
-  ## SCCM query
-  ################################################
-  if (issccm) {
-    sccm_layer <- "SUBP_COND_CHNG_MTRX"
-    if (datsource == "sqlite") {
-      sccm_layer <- chkdbtab(dbtablst, "SUBP_COND_CHNG_MTRX")
-      if (is.null(sccm_layer)) {
-        issccm <- FALSE
-      }
-    }
-    sccmfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA.,
-		"COND PCOND ON (PCOND.PLT_CN = p.PREV_PLT_CN) JOIN ", SCHEMA.,
-		sccm_layer, " ON (SCCM.PLT_CN = c.PLT_CN AND 
-			SCCM.PREV_PLT_CN = PCOND.PLT_CN AND SCCM.CONDID = c.CONDID 
-			AND SCCM.PREVCOND = PCOND.CONDID)")
-    sccmwhereqry <- "c.CONDPROP_UNADJ IS NOT NULL 
-		AND ((SCCM.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR') 
-		OR (SCCM.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP')) 
-		AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
-		AND COALESCE(PCOND.COND_NONSAMPLE_REASN_CD, 0) = 0" 
-#		AND (c.COND_STATUS_CD = 1 AND PCOND.COND_STATUS_CD = 1)" 
-  }
 
   ## lulc query
   ################################################
   if (islulc) {
-    lulcfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA.,
-		"COND PCOND ON (PCOND.PLT_CN = p.PREV_PLT_CN and PCOND.CONDID=c.CONDID)")
+    lulcfromqry <- paste0(pcfromqry, 
+		" JOIN ", SCHEMA., "COND pcond ON (pcond.PLT_CN = p.PREV_PLT_CN)",
+		" JOIN ", SCHEMA., "SUBP_COND_CHNG_MTRX sccm ON (sccm.PLT_CN = c.PLT_CN 
+		AND sccm.PREV_PLT_CN = pcond.PLT_CN 
+		AND sccm.CONDID = c.CONDID 
+		AND sccm.PREVCOND = pcond.CONDID)")
   }
 
   ## GRM query
@@ -847,7 +829,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		stopifnull=FALSE)
       }
       ## Area change matrix table
-      if (issccm) {
+      if (issccm || islulc) {
         SUBP_COND_CHNG_MTRX <- FIESTA::DBgetCSV("SUBP_COND_CHNG_MTRX", stabbr, 
 		returnDT=TRUE, stopifnull=FALSE)
       }
@@ -1185,45 +1167,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
 
     ##############################################################
-    ## SUBP_COND_CHNG_MTRX (SCCM) data
-    ##############################################################
-    if (issccm && !is.null(pltx)) {
-      message("\n",
-      	"## STATUS: Getting area change data from SUBP_COND_CHNG_MTRX (", stabbr, ") ...", "\n")
-      sccmvars <- c("PLT_CN", "CONDID", "SUBP", "SUBPTYP", "PREV_PLT_CN", 
-			"PREVCOND", "SUBPTYP_PROP_CHNG")
-      sccmqry <- paste("select", toString(paste0("SCCM.", sccmvars)), 
-			"from", sccmfromqry, "where", sccmwhereqry, "and", xfilter)
-#      sccmqry <- paste("select SCCM.PLT_CN, 
-#			sum(COALESCE(SCCM.SUBPTYP_PROP_CHNG / 4, 0)) PROP_CHNG", 
-#			"from", sccmfromqry, "where", sccmwhereqry, "and", xfilter,
-#			"group by SCCM.PLT_CN")
-
-      if (datsource == "sqlite") {
-        sccmx <- DBI::dbGetQuery(dbconn, sccmqry)
-      } else {
-        sccmx <- sqldf::sqldf(sccmqry, stringsAsFactors=FALSE)
-      }
-      if (nrow(sccmx) != 0) {
-        sccmx <- setDT(sccmx)
-        sccmx[, PLT_CN := as.character(PLT_CN)]
-        setkey(sccmx, PLT_CN)
-
-        ## Subset overall filters from pltx
-        sccmx <- sccmx[sccmx$PLT_CN %in% pltx$CN,]
-
-        ## Merge to pltx
-        #pltx <- merge(pltx, sccmx, all.x=TRUE, by.x="CN", by.y="PLT_CN")
-        
-      }
-
-      if (returndata) {
-        ## Append data
-        sccm <- rbind(sccm, sccmx)
-      }
-    }
-
-    ##############################################################
     ## lulc data
     ##############################################################
     if (islulc && !is.null(pltx)) {
@@ -1236,10 +1179,27 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
  		pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD,
  		pcond.LAND_COVER_CLASS_CD PREV_LAND_COVER_CLASS_CD, c.LAND_COVER_CLASS_CD, 
 		pcond.PRESNFCD PREV_PRESNFCD, c.PRESNFCD,
-		case when pcond.PRESNFCD is null then pcond.COND_STATUS_CD else pcond.PRESNFCD end as PREV_LANDUSECD,
-		case when c.PRESNFCD is null then c.COND_STATUS_CD else c.PRESNFCD end as LANDUSECD",  
-			"from", lulcfromqry, "where", xfilter)
-print(lulcqry)
+		case when pcond.PRESNFCD is null 
+			then pcond.COND_STATUS_CD 
+				else pcond.PRESNFCD end as PREV_LANDUSECD,
+		case when c.PRESNFCD is null 
+			then c.COND_STATUS_CD 
+				else c.PRESNFCD end as LANDUSECD,
+		sum(sccm.SUBPTYP_PROP_CHNG) / 4 PROP_CHNG",  
+		"from", lulcfromqry, 
+   		"where c.CONDPROP_UNADJ IS NOT NULL 
+			AND ((sccm.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR') 
+				OR (sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP')) 
+			AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
+			AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0",
+		"and", xfilter, 
+		"group by c.PLT_CN, p.PREV_PLT_CN, 
+  			p.STATECD, p.UNITCD, p.COUNTYCD, p.PLOT,
+    			pcond.CONDID, c.CONDID,
+    			pcond.INVYR, c.INVYR, pcond.CONDPROP_UNADJ, c.CONDPROP_UNADJ,
+    			pcond.COND_STATUS_CD, c.COND_STATUS_CD,
+    			pcond.LAND_COVER_CLASS_CD, c.LAND_COVER_CLASS_CD,
+    			pcond.PRESNFCD, c.PRESNFCD")
       if (datsource == "sqlite") {
         lulcx <- DBI::dbGetQuery(dbconn, lulcqry)
       } else {
@@ -1255,8 +1215,17 @@ print(lulcqry)
         lulcx <- lulcx[lulcx$PLT_CN %in% pltx$CN,]
 
         ## Merge to pltx
-        #pltx <- merge(pltx, lulcx, all.x=TRUE, by.x="CN", by.y="PLT_CN")
-        
+        #pltx <- merge(pltx, lulcx, all.x=TRUE, by.x="CN", by.y="PLT_CN")  
+      }
+
+      ## Write query to outfolder
+      if (saveqry) {
+        lulcqryfn <- DBgetfn("lulc", invtype, outfn.pre, stabbr, 
+		evalid=evalid, qry=TRUE, outfolder=outfolder, 
+		overwrite=overwrite_layer, outfn.date=outfn.date, ext="txt")
+        outfile <- file(lulcqryfn, "w")
+              cat(  lulcqryfn, "\n", file=outfile)
+              close(outfile)
       }
 
       if (returndata) {
@@ -1264,7 +1233,6 @@ print(lulcqry)
         lulc <- rbind(lulc, lulcx)
       }
     }
-
 
     ##############################################################
     ## Tree data
@@ -1867,13 +1835,13 @@ print(lulcqry)
 			index.unique=index.unique.condx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       }
-      if (savedata && !is.null(sccmx)) {
-        index.unique.sccmx <- NULL
-        if (!append_layer) index.unique.sccmx <- c("PLT_CN")
-        datExportData(sccmx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="sccm", 
+      if ((savedata || !treeReturn) && !is.null(lulcx)) {
+        index.unique.lulcx <- NULL
+        if (!append_layer) index.unique.lulcx <- c("PLT_CN", "CONDID")
+        datExportData(lulcx, outfolder=outfolder, 
+			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="lulc", 
 			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.sccmx, append_layer=append_layer,
+			index.unique=index.unique.lulcx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       } 
       if (savedata && !is.null(treex)) {
@@ -2071,6 +2039,7 @@ print(lulcqry)
       nbrplots <- length(unique(plt$CN))
       if (nrow(plt) != nbrplots) warning("plt records are not unique")
       fiadatlst$plt <- setDF(plt) 
+      fiadatlst$puniqueid <- "CN"
     }
     if (!is.null(cond)) {
       if (!is.null(plt)) {

@@ -33,6 +33,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
 
   ## Condition proportion variable
   varlst <- areawt
+  #varlst <- c(areawt, "SUBPPROP_UNADJ", "MACRPROP_UNADJ")
  
   ## veg.samp.filter
   veg.samp.filter <- "P2VEG_SAMPLING_STATUS_CD == 1"
@@ -42,7 +43,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
     tvarlst <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
     tvarlst2 <- tvarlst[which(tvarlst%in% names(condx))]
     if (length(tvarlst2) == 0) stop("must include *PROP_UNADJ variables in cond")
-    varlst <- c(varlst, tvarlst2)
+    varlst <- unique(c(varlst, tvarlst2))
 #  } else if (!is.null(vspsppf)) {
 #    varlst <- c(varlst, "SUBPPROP_UNADJ")
   }
@@ -113,14 +114,21 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
 
 
   ## Change name of condition adjustment factor to cadjfac
+  ## Note: CONDPPROP_UNADJ is the same as below (combination of MACR and SUBP)
   cadjfactnm <- ifelse(areawt == "CONDPROP_UNADJ", "ADJ_FACTOR_COND", 
 		paste0("ADJ_FACTOR_", areawt))
   setnames(condx, cadjfactnm, "cadjfac")
   setnames(unitlut, cadjfactnm, "cadjfac")
 
+  ## This is the same as above
+  #if ("PROP_BASIS" %in% names(condx)) {
+  #  condx[, cadjfac2 := ifelse(PROP_BASIS == "MACR", ADJ_FACTOR_MACR, ADJ_FACTOR_SUBP)]
+  #}
+
   ## Calculate adjusted condition proportion for plots
   condx[, CONDPROP_ADJ := get(areawt) * cadjfac]
   setkeyv(condx, c(cuniqueid, condid))
+
 
   ## Calculate adjusted condition proportions for different size plots for trees
   if (!is.null(treex)) {

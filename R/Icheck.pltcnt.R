@@ -57,15 +57,29 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   if (!is.null(strvars)) {
     joinvars <- unique(c(pvars2keep, strunitvars))
 
-    ## Get number of plots by strata variables from pltx - n.strata
-    pltcnt <- pltx[, list(NBRPLOTS=.N), joinvars]
+    ## Add number of plots by unit
+    pltcnt <- pltx[, list(n.total=.N), by=unitvars]
+    setkeyv(pltcnt, unitvars)
+
+    pltstrcnt <- pltx[, list(n.strata=.N), by=strunitvars]
+    setkeyv(pltstrcnt, unitvars)
+
+    ## combine total counts and strata counts
+    pltcnt <- pltcnt[pltstrcnt]
     setkeyv(pltcnt, strunitvars)
 
+    ## combine total counts and strata counts
+    unitlut <- merge(unitlut, pltcnt)
+
     ## Add number of plots by unit
-    pltcnt[, n.total := sum(NBRPLOTS, na.rm=TRUE), by=unitvars]
+    #pltstrcnt <- pltx[, n.strata := sum(NBRSTRATA, na.rm=TRUE), by=strunitvars]
+
+    ## Get number of plots by strata variables from pltx - n.strata
+    #pltcnt <- pltx[, list(NBRPLOTS=.N), joinvars]
+    #setkeyv(pltcnt, strunitvars)
 
     ## Get number of potential combinations of strata from unitlut
-    unitlutcnt <- unitlut[, list(NBRSTRATA=.N), strunitvars]
+    unitlutcnt <- pltcnt[, list(NBRSTRATA=.N), strunitvars]
     setkeyv(unitlutcnt, strunitvars)
   
     ## Merge number of plots by strata from pltx and number of potential combos
@@ -74,17 +88,14 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     nostrata <- subset(pltcnt, NBRPLOTS > 0 & NBRSTRATA == 0)
 
     pltcnt$errtyp <- "none"
-    pltcnt[pltcnt$n.total >= minplotnum.strat & pltcnt$n.total < minplotnum.unit 
-		& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
-    pltcnt[pltcnt$NBRPLOTS < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
-    pltcnt[, NBRSTRATA := NULL]
-
-    ## Change name of NBRPLOTS
-    setnames(pltcnt, "NBRPLOTS", "n.strata")
+    #pltcnt[pltcnt$n.strata < minplotnum.strat & pltcnt$n.total < minplotnum.unit 
+	#	& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
+    pltcnt[pltcnt$n.strata < minplotnum.strat & pltcnt$n.total > minplotnum.unit, 
+		"errtyp"] <- "warn"
+    pltcnt[pltcnt$n.total < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
 
     ## ## Remove NBRSTRATA and merge to unitlut
-    unitlut <- merge(unitlut, pltcnt[, c(joinvars, "n.strata", "n.total"), with=FALSE], 
-		by=joinvars)
+    pltcnt[, NBRSTRATA:=NULL]
     pvars <- pvars[pvars %in% names(unitlut)]
     othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, strunitvars))]
     setcolorder(unitlut, c(unique(c(pvars, strunitvars)), othervars))

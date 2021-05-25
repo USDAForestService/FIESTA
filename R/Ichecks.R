@@ -197,7 +197,7 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
         } else {        
           fun1 <- get(paste0("as.", coerce.order[tab.order[1]]))
         }
-        tab2[[v1]] <- fun1(tab2[[v1]]) 
+        tab2[[v2]] <- fun1(tab2[[v2]]) 
       }
     } else if (tab1.class %in% coerce.order) {
       if (tab1.class == "integer64") {
