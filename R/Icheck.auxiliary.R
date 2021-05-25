@@ -287,7 +287,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     auxlut <- check.matchval(auxlut, unitarea, unitvar, tab1txt=auxtext,
 			tab2txt=removetext, subsetrows=TRUE)
   }
-
+ 
   ###################################################################################
   ## Check number of plots by unitvar
   ##	 (including partially sampled plots - COND_STATUS_CD=5) 
@@ -306,6 +306,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 		unitlut=auxlut, unitvars=unitvar, strvars=PSstrvar, 
 		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit, 
 		minplotnum.strat=minplotnum.strat)
+
   auxlut <- pltcnts$unitlut
   errtab <- pltcnts$errtab
   nostrat <- pltcnts$nostrat

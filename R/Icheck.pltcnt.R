@@ -62,14 +62,15 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     setkeyv(pltcnt, unitvars)
 
     pltstrcnt <- pltx[, list(n.strata=.N), by=strunitvars]
-    setkeyv(pltstrcnt, unitvars)
+    setkeyv(pltstrcnt, strunitvars)
 
     ## combine total counts and strata counts
     pltcnt <- pltcnt[pltstrcnt]
     setkeyv(pltcnt, strunitvars)
 
     ## combine total counts and strata counts
-    unitlut <- merge(unitlut, pltcnt)
+    setkeyv(unitlut, strunitvars)
+    unitlut <- merge(unitlut, pltcnt, by=strunitvars)
 
     ## Add number of plots by unit
     #pltstrcnt <- pltx[, n.strata := sum(NBRSTRATA, na.rm=TRUE), by=strunitvars]
