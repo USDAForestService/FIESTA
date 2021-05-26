@@ -80,6 +80,13 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   isgrm <- FALSE
   issccm=FALSE
 
+  ## Define layers in SQLite
+  plot_layer <- "PLOT"
+  cond_layer <- "COND"
+  tree_layer <- "TREE" 
+  ppsa_layer <- "POP_PLOT_STRATUM_ASSGN"
+
+
   ########################################################################
   ### GET PARAMETERS 
   ########################################################################
@@ -178,7 +185,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   }
  
   ## Get states, Evalid and/or invyrs info
-  evalInfo <- DBgetEvalid(states=states, RS=RS, datsource="datamart", 
+  evalInfo <- DBgetEvalid(states=states, RS=RS, datsource=datsource, 
 		data_dsn=data_dsn, invtype=invtype, evalid=evalid, evalCur=evalCur, 
 		evalEndyr=evalEndyr, evalAll=evalAll, evalType=evalType, gui=gui)
   if (is.null(evalInfo)) return(NULL)
@@ -196,7 +203,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       savePOP <- TRUE
     }
   }
-
+ 
   ### GET RS & rscd
   ###########################################################
   isRMRS <- ifelse(length(rslst) == 1 && rslst == "RMRS", TRUE, FALSE) 
@@ -461,8 +468,9 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     vars <- toString(c(paste0("p.", pltvarlst), paste0("c.", condvarlst)))
     pcgvars <- toString(c(paste0("p.", pltvarlst), paste0("pg.", pgeomvarlst), 
 		paste0("c.", condvarlst)))
-    if (iseval)
+    if (iseval) {
       vars <- paste0(vars, ", ppsa.EVALID")
+    }
   } else {
     vars <- "p.*"
   }
@@ -474,17 +482,14 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   ###########################################################################
   ############################      From query       ########################
   ###########################################################################
-  plot_layer <- "PLOT"
-  cond_layer <- "COND"
   if (datsource == "sqlite") {
-    plot_layer <- chkdbtab(dbtablst, "PLOT", stopifnull=TRUE)
-    cond_layer <- chkdbtab(dbtablst, "COND", stopifnull=TRUE)
+    plot_layer <- chkdbtab(dbtablst, plot_layer, stopifnull=TRUE)
+    cond_layer <- chkdbtab(dbtablst, cond_layer, stopifnull=TRUE)
   } 
 
   ## PPSA query
   ################################################
   if (savePOP || iseval) {
-    ppsa_layer <- "POP_PLOT_STRATUM_ASSGN"
     if (datsource == "sqlite") {
       ppsa_layer <- chkdbtab(dbtablst, "POP_PLOT_STRATUM_ASSGN")
       if (is.null(ppsa_layer)) {
@@ -493,7 +498,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     }
     ppsafromqry <- paste0(SCHEMA., ppsa_layer, " ppsa")
   }
-
+ 
   ## PLOT from/join query
   ################################################
   if (iseval) {
@@ -533,7 +538,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   ## TREE query
   ################################################
   if (istree || !is.null(alltFilter)) {
-    tree_layer <- "TREE" 
     if (datsource == "sqlite") {
       tree_layer <- chkdbtab(dbtablst, "TREE")
       if (is.null(tree_layer)) {
@@ -1721,7 +1725,13 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
           ppsaqry <- paste(ppsaqry, "and evalid like", paste0("'", evalstyr, "%'"))
         }
       }
-      ppsax <- sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE)
+      if (datsource == "sqlite") {
+        ppsax <- tryCatch( DBI::dbGetQuery(dbconn, ppsaqry),
+			error=function(e) return(NULL))
+      } else {
+        ppsax <- tryCatch( sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE), 
+			error=function(e) return(NULL))
+      }
 
       if(nrow(ppsax) != 0){
         ppsax <- setDT(ppsax)

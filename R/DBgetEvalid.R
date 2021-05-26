@@ -12,17 +12,19 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
   ##   POP_EVAL        	## To get EVALID and EVALID years
   ################################################################################
 
+  if (!gui) {
+    gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  }
+
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0) gui <- TRUE
   if (gui) {
     evalCur=evalAll=evalType <- NULL
   }
-  if (!gui) {
-    gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  }
   
   ## Set global variables
-  EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR=POP_EVAL=POP_EVAL_GRP=POP_EVAL_TYP=SURVEY=evaltyp <- NULL
+  EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR=POP_EVAL=POP_EVAL_GRP=
+		POP_EVAL_TYP=SURVEY=evaltyp <- NULL
 
   ## SET OPTIONS
   options.old <- options()
@@ -38,6 +40,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
   evalresp <- FALSE
   isgrm=issccm <- FALSE 
   returnevalid <- FALSE
+  nopoptables <- TRUE
 
   ## Define evalTypee choices
   evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "DWM", "CHNG")
@@ -68,9 +71,10 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
     }
 
     tabflds <- DBI::dbListFields(dbconn, tabnm)
-    if ("STATECD" %in% tabflds) {
-      qry <- paste("select distinct ", evalvar, "from", tabnm)
-      tabvals <- DBI::dbGetQuery(dbconn, qry)[[1]]
+    if (!evalvar %in% tabflds) {
+      stop(evalvar, " not in table")
+      #qry <- paste("select distinct ", evalvar, "from", tabnm)
+      #tabvals <- DBI::dbGetQuery(dbconn, qry)[[1]]    
     }
     tab.qry <- paste("select * from", tabnm, "where", evalvar, 
 			paste0("in(", toString(evallst), ")"))
@@ -91,6 +95,10 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
      return(dtlst)
   }
 
+  invtypelst <- c("ANNUAL", "PERIODIC")
+  invtype <- FIESTA::pcheck.varchar(var2check=invtype, varnm="invtype", 
+		gui=gui, checklst=invtypelst, caption="Inventory type?")
+  ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -171,13 +179,31 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 ############ SQLite only
 
   if (datsource == "sqlite") {
-    SURVEY <- getdbtab("survey", evalvar="STATECD", evallst=stcdlst)
-    POP_EVAL <- getdbtab("pop_eval", evalvar="STATECD", evallst=stcdlst)
-    POP_EVAL_GRP <- getdbtab("pop_eval_grp", evalvar="STATECD", evallst=stcdlst)
-    POP_EVAL_TYP <- getdbtab("pop_eval_typ", evalvar="STATECD", evallst=stcdlst)
+    if ("SURVEY" %in% dbtablst) {
+      survey.qry <- 
+		paste0("select * from SURVEY
+      	where ann_inventory = '", ann_inv, 
+		"' and statecd in(", toString(stcdlst), ")")
+      SURVEY <- DBI::dbGetQuery(dbconn, survey.qry) 
+    }   
+    if ("POP_EVAL" %in% dbtablst) {
+      POP_EVAL <- setDT(getdbtab("pop_eval", evalvar="STATECD", evallst=stcdlst))
+    }   
+    if ("POP_EVAL_GRP" %in% dbtablst) { 
+      POP_EVAL_GRP <- setDT(getdbtab("pop_eval_grp", evalvar="STATECD", evallst=stcdlst))
+    }
+    if ("POP_EVAL_TYP" %in% dbtablst) {
+      pop_eval_typ_qry <-
+		paste0("select ptyp.* from POP_EVAL_TYP ptyp
+		join POP_EVAL_GRP pgrp on(pgrp.CN = ptyp.EVAL_GRP_CN)
+		where pgrp.statecd in(", toString(stcdlst), ")")
+      POP_EVAL_TYP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_typ_qry))
+    }
 
     if (all(!is.null(POP_EVAL) && !is.null(POP_EVAL_TYP) && !is.null(POP_EVAL_GRP))) {
-      stcdlstdb <- DBI::dbGetQuery(dbconn, paste("select distinct statecd from", ppsanm))
+      nopoptables <- FALSE
+      stcdlstdb <- DBI::dbGetQuery(dbconn, 
+		paste("select distinct statecd from", ppsanm))[[1]]
       if (!all(stcdlst %in% stcdlstdb)) {
         stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
         stop("statecds missing in database: ", toString(stcdmiss))
@@ -190,6 +216,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 ############ CSV only
 
   if (datsource == "datamart") {
+    nopoptables <- FALSE
     POP_EVAL_GRP <- FIESTA::DBgetCSV("POP_EVAL_GRP", stcdlst, stopifnull=FALSE, 
 		returnDT=TRUE)
     POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, stopifnull=FALSE, returnDT=TRUE)
@@ -209,6 +236,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
     if (nrow(POP_EVAL_TYP) == 0) return(NULL)
 
     SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    SURVEY <- SURVEY[SURVEY$ANN_INVENTORY == ann_inv, ]
     if (nrow(SURVEY) == 0) return(NULL)
   }
 
@@ -327,14 +355,11 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
           if (invtype == "") stop("")
         }
       }
-      ann_inventory <- ifelse(invtype == "PERIODIC", 'N', 'Y')
-
       ## Create table of state, inventory year
       invyrqry <- paste0("select distinct STATECD, STATENM, STATEAB, ANN_INVENTORY, 
 		INVYR from ", "SURVEY where STATENM IN(", 
 		toString(paste0("'", states, "'")), 
-		") and invyr <> 9999 and P3_OZONE_IND = 'N' and ANN_INVENTORY = '", 
-		ann_inventory, "'")
+		") and invyr <> 9999 and P3_OZONE_IND = 'N'")
       invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
       cat("Inventory years by state...", "\n" )
       message(paste0(utils::capture.output(invyrtab), collapse = "\n"))
@@ -348,7 +373,9 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       }
     }
   } else {
-    if (!"INVYR" %in% names(invyrtab)) stop("INVYR must be in invyrtab")
+    if (!"INVYR" %in% names(invyrtab)) {
+      stop("INVYR must be in invyrtab")
+    }
     evalEndyr <- as.list(tapply(invyrtab$INVYR, invyrtab$STATECD, max))
     names(evalEndyr) <- FIESTA::pcheck.states(as.numeric(names(evalEndyr)), 
 		statereturn="MEANING")
@@ -450,10 +477,10 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       evalType <- "VOL"
     }
 
-    if (datsource == "sqlite") {
+    if (datsource == "sqlite" && nopoptables) {
       ## Create lookup and get code for evalType
-      evalCode <- c("00","01","01")
-      names(evalCode) <- c("ALL", "CURR", "VOL")  
+      evalCode <- c("00","01","01","03")
+      names(evalCode) <- c("ALL", "CURR", "VOL", "CHNG")  
       evalTypecd <- unique(evalCode[which(names(evalCode) %in% evalType)])
 
       ## Get table of EVALID found in database
@@ -528,7 +555,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       } else {
         invyrtab <- NULL
       }
-    } else {    ## datsource="datamart"
+    } else {    ## datsource="datamart" or datsource="sqlite" & poptables
       invyrs <- list()
       evalidlist <- sapply(states, function(x) NULL)
       evalEndyrlist <- sapply(states, function(x) NULL)

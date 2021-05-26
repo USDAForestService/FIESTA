@@ -411,6 +411,11 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   pdomdat <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
 
+  ## Add mean response to dunitlut for Area-level estimates
+  estmean <- pdomdat[, mean(get(estvar.name), na.rm=TRUE), by="DOMAIN"]
+  setkey(estmean, "DOMAIN")
+  setnames(estmean, "V1", estvar.name)
+  dunitlut <- merge(dunitlut, estmean)
 
   if (sum(pdomdat[[response]]) == 0) {
     return(list(est=NULL, estvar=response, pdomdat=pdomdat))
