@@ -125,8 +125,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   SAmethod <- FIESTA::pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
 		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
 
-
-
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
@@ -230,7 +228,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
-
 
   ## Check output for multest 
   ########################################################
@@ -620,14 +617,15 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
         }
       }
 
-      ## Export dunit.multest
-      overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
-      datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=multest_outfolder, 
+      if (savedata) {
+        ## Export dunit.multest
+        overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
+        datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=multest_outfolder, 
  		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite_layer, 
 		append_layer=multest.append)
+      }
     }
   } 
-
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES
@@ -705,6 +703,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   if (save4testing) {
     message("saving object for testing")
     returnlst$pdomdat <- pdomdat
+    returnlst$dunitlut <- dunitlut
     returnlst$cuniqueid <- cuniqueid
   }
 

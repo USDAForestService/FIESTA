@@ -80,7 +80,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, esttype="AREA", landarea="FOREST", 
  	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
-	multest=TRUE, multest_fmt="sqlite", multest_dsn=multest_dsn, 
+	multest=savemultest, multest_fmt="sqlite", multest_dsn=multest_dsn, 
 	multest_layer=multest_layer, returntitle=TRUE, outfolder=outfolder, 
 	multest_outfolder=multest_outfolder, multest.append=multest.append,
  	multest.AOIonly=multest.AOIonly, overwrite_layer=TRUE, 
@@ -123,8 +123,8 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
         SAestdat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 			SAmethod=SAmethod, esttype="TREE", landarea=landarea, 
 			pcfilter=pcfilter, estvar=estvar, estvar.filter=estvar.filter,
- 			smallbnd.att=smallbnd.att, savedata=TRUE, rawdata=TRUE, 
-			multest=TRUE, multest_fmt=multest_fmt, multest_dsn=multest_dsn, 
+ 			smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
+			multest=savemultest, multest_fmt=multest_fmt, multest_dsn=multest_dsn, 
 			multest_layer=multest_layer, returntitle=TRUE, outfolder=outfolder,
  			multest_outfolder=multest_outfolder, multest.append=multest.append,
  			multest.AOIonly=multest.AOIonly, overwrite_layer=TRUE, 
@@ -136,6 +136,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
           pltdom <- merge(pltdom, 
 			SAestdat$pdomdat[, c("DOMAIN", cuniqueid, rowvar, response), with=FALSE], 
 			by=c("DOMAIN", cuniqueid, rowvar))
+          dunitlut <- SAestdat$dunitlut
         }
 
         if (is.null(SAestdat$est)) {
