@@ -11,7 +11,7 @@
 
 
 DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars, 
-	plotgeom=FALSE, isRMRS=FALSE) {
+	plotgeom=FALSE, regionVarsRS="RMRS") {
 
   ## Set global variables
   treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vsubpsppvarlst=vsubpstrvarlst=
@@ -43,7 +43,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 	"NF_PLOT_STATUS_CD", "NF_PLOT_NONSAMPLE_REASN_CD", "NF_SAMPLING_STATUS_CD",
  	"P2VEG_SAMPLING_STATUS_CD", "QA_STATUS", "MODIFIED_DATE")
 
-  if (isRMRS && regionVars) {
+  if (regionVars && regionVarsRS == "RMRS") {
     pltvarlst <- c(pltvarlst, "COLOCATED_CD_RMRS", "CONDCHNGCD_RMRS", 
 		"FUTFORCD_RMRS", "MANUAL_RMRS", "PREV_PLOT_STATUS_CD_RMRS")
   }
@@ -63,7 +63,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 	"CARBON_UNDERSTORY_AG", "CARBON_UNDERSTORY_BG", "NF_COND_STATUS_CD", 
 	"NF_COND_NONSAMPLE_REASN_CD","LAND_COVER_CLASS_CD") 
 	
-  if (isRMRS && regionVars) {
+  if (regionVars && regionVarsRS == "RMRS") {
     condvarlst <- c(condvarlst, "LAND_USECD_RMRS", "PCTBARE_RMRS", 
 		"CRCOVPCT_RMRS", "COND_STATUS_CHNG_CD_RMRS", "QMD_RMRS", 
 		"RANGETYPCD_RMRS", "SDIMAX_RMRS", "SDIPCT_RMRS", "SDI_RMRS") 
@@ -92,7 +92,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
     ## Tree summary variables
     tsumvarlst <- c(volvars, growvars, mortvars, remvars, tpavars, biovars, carbonvars)
 
-    if (isRMRS && regionVars) {
+    if (regionVars && regionVarsRS == "RMRS") {
       treevarlst <- c(treevarlst, "TREECLCD_RMRS", "DAMAGE_AGENT_CD1",
 		"DAMAGE_AGENT_CD2", "DAMAGE_AGENT_CD3", "RADGRW_RMRS", "DIA_1YRAGO_RMRS", 
 		"HT_1YRAGO_RMRS", "PREV_ACTUALHT_RMRS", "PREV_TREECLCD_RMRS")
@@ -148,7 +148,7 @@ DBvars.default <- function(istree, isseed, isveg, isdwm, issubp, regionVars,
 		"P2VEG_SUBP_NONSAMPLE_REASN_CD", "INVASIVE_SUBP_STATUS_CD", 
 		"INVASIVE_NONSAMPLE_REASN_CD")
 
-    if (isRMRS && regionVars) {
+    if (regionVars && regionVarsRS == "RMRS") {
       subpvarlst <- c(subpvarlst, c('GROUND_TRAN_PTS_BARE_RMRS',
 		'GROUND_TRAN_PTS_CRYP_RMRS', 'GROUND_TRAN_PTS_DEV_RMRS',
 		'GROUND_TRAN_PTS_LICHEN_RMRS', 'GROUND_TRAN_PTS_LITTER_RMRS', 

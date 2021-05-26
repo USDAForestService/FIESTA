@@ -4,11 +4,11 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 	invyrs=NULL, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, isveg=FALSE, 
 	issubp=FALSE, islulc=FALSE, isdwm=FALSE, plotgeom=FALSE, othertables=NULL, 
 	issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, regionVars=FALSE, 
-	ACI=FALSE, subcycle99=FALSE, intensity1=FALSE, stateFilter=NULL, allFilter=NULL, 
-	alltFilter=NULL, savedata=FALSE, saveqry=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, append_layer=FALSE, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, savePOP=FALSE, 
-	returndata=TRUE) {
+	regionVarsRS="RMRS", ACI=FALSE, subcycle99=FALSE, intensity1=FALSE, 
+	stateFilter=NULL, allFilter=NULL, alltFilter=NULL, savedata=FALSE, 
+	saveqry=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
+	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
+ 	overwrite_layer=TRUE, savePOP=FALSE, returndata=TRUE) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)

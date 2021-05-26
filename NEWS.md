@@ -1,3 +1,13 @@
+FIESTA_3.0.25 (Release date: 2021-05-26)
+==============
+DBgetPlots()
+- add functionality to access sqlite database from DataMart.
+
+modGBpop()
+- fix bugs in strata collapsing function
+
+
+
 FIESTA_3.0.23 (Release date: 2021-05-20)
 ==============
 Model-assisted

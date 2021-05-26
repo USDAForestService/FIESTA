@@ -14,12 +14,12 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 	allyrs = FALSE, invyrs = NULL, xymeasCur = FALSE, istree = FALSE, 
 	isseed = FALSE, isveg = FALSE, issubp = FALSE, islulc = FALSE, isdwm = FALSE, 
 	plotgeom = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE, 
-	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, ACI = FALSE, 
-	subcycle99 = FALSE, intensity1 = FALSE, stateFilter = NULL, allFilter = NULL, 
-	alltFilter = NULL, savedata = FALSE, saveqry = FALSE, outfolder = NULL, 
-	out_fmt = "csv", out_dsn = NULL, append_layer = FALSE, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	savePOP = FALSE, returndata = TRUE)
+	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, regionVarsRS = "RMRS",
+	ACI = FALSE, subcycle99 = FALSE, intensity1 = FALSE, stateFilter = NULL, 
+	allFilter = NULL, alltFilter = NULL, savedata = FALSE, saveqry = FALSE, 
+	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, append_layer = FALSE, 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, savePOP = FALSE, returndata = TRUE)
 }
 \arguments{
   \item{states}{ String or numeric vector. Name (e.g., 'Arizona','New Mexico') or 
@@ -90,6 +90,7 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 	See notes for variable descriptions. }
   \item{regionVars}{ Logical. If TRUE, regional variables are included in query 
 	(e.g., SDI_RMRS, SDIPCT_RMRS, SDIMAX_RMRS, QMD_RMRS). }
+  \item{regionVarsRS}{ String. Region for regionVars ('RMRS','SRS','NCRS','NERS','PNWRS'). }
   \item{ACI}{ Logical. If TRUE, the data from All Condition Inventories (ACI) 
 	are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more details. }
   \item{subcycle99}{ Logical. If TRUE, excludes plots with SUBCYCLE = 99. These plots 
