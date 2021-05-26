@@ -5,7 +5,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
  	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="SAmultest", 
 	multest.append=FALSE, multest.AOIonly=TRUE, overwrite=FALSE, 
 	barplot.compare=FALSE, smallbnd.att=NULL, title.ref=NULL, 
-	save4testing=FALSE, ...) {
+	save4testing=FALSE, save4testing.append=FALSE, ...) {
 
 
   ## Set global variables
@@ -156,12 +156,17 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
     }
   }
   if (save4testing) {
-    if (outfn.pre) {
+    if (!is.null(outfn.pre)) {
       save(dunitlut, file=file.path(outfolder, paste(outfn.pre, "_dunitlut.rda")))
       save(pltdom, file=file.path(outfolder, paste(outfn.pre, "_pltdom.rda")))
     } else {
-      save(dunitlut, file=file.path(outfolder, "dunitlut.rda"))
-      save(pltdom, file=file.path(outfolder, "pltdom.rda"))
+      datExportData(dunitlut, outfolder=outfolder, out_layer="dunitlut", 
+		overwrite_layer=overwrite, append_layer=save4testing.append)
+      datExportData(pltdom, outfolder=outfolder, out_layer="pltdom", 
+		overwrite_layer=overwrite, append_layer=save4testing.append)
+
+      #save(dunitlut, file=file.path(outfolder, "dunitlut.rda"))
+      #save(pltdom, file=file.path(outfolder, "pltdom.rda"))
     }
   }
 

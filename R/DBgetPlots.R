@@ -1835,7 +1835,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			index.unique=index.unique.condx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       }
-      if ((savedata || !treeReturn) && !is.null(lulcx)) {
+      if (savedata && !is.null(lulcx)) {
         index.unique.lulcx <- NULL
         if (!append_layer) index.unique.lulcx <- c("PLT_CN", "CONDID")
         datExportData(lulcx, outfolder=outfolder, 
@@ -1844,7 +1844,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			index.unique=index.unique.lulcx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       } 
-      if (savedata && !is.null(treex)) {
+      if ((savedata || !treeReturn) && !is.null(treex)) {
         index.unique.treex <- NULL
         if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
         datExportData(treex, outfolder=outfolder, 
@@ -1896,16 +1896,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			index.unique=index.unique.subpcx, append_layer=append_layer,
 			outfn.pre=outfn.pre)
       }  
-
-      if (savedata && !is.null(lulcx)) {
-        index.unique.lulcx <- NULL
-        if (!append_layer) index.unique.lulcx <- c("PLT_CN", "CONDID")
-        datExportData(lulcx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="lulc", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			append_layer=append_layer, outfn.pre=outfn.pre)
-      } 
-
       if (savedata && !is.null(dwmx)) {
         index.unique.dwmx <- NULL
         if (!append_layer) index.unique.dwmx <- c("PLT_CN", "CONDID")
