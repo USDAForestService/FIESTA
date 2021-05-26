@@ -558,7 +558,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       }
     }
     sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				seed_layer, " s ON (s.PLT_CN = p.CN)")
+				seed_layer, " seed ON (seed.PLT_CN = p.CN)")
   } 
   ## VEG query
   ################################################
@@ -946,6 +946,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       } else {      
         pltcondqry <- paste("select distinct", vars, "from", pcfromqry, "where", xfilter)
       }
+
       if (datsource == "sqlite") {
         pltcondx <- DBI::dbGetQuery(dbconn, pltcondqry)
       } else {
@@ -1411,9 +1412,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         message("\n",
       	"## STATUS: Getting seed data from SEEDLING (", stabbr, ") ...", "\n")
 
-        ssvars <- toString(paste0("s.", c(seedvarlst, ssumvarlst)))
+        ssvars <- toString(paste0("seed.", c(seedvarlst, ssumvarlst)))
         seedqry <- paste("select distinct", ssvars, "from", sfromqry, "where", xfilter)
-
         if (datsource == "sqlite") {
           seedx <- DBI::dbGetQuery(dbconn, seedqry)
         } else {

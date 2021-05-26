@@ -206,7 +206,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 		paste("select distinct statecd from", ppsanm))[[1]]
       if (!all(stcdlst %in% stcdlstdb)) {
         stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
-        stop("statecds missing in database: ", toString(stcdmiss))
+        message("statecds missing in database: ", toString(stcdmiss))
       }
     }
   }
