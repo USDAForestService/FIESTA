@@ -456,15 +456,15 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       spExportSpatial(smallbndxlst[[i]], outfolder=outfolder, out_fmt=out_fmt, 
 			out_dsn=out_dsn, out_layer=smallbnd_layer, append_layer=TRUE,
 			overwrite_layer=overwrite_layer)
+    }
 
-      if (savesteps) {
-        jpgfn <- paste0(stepfolder, "/", SAdoms_layer, ".jpg")
-        jpeg(jpgfn, res=400, units="in", width=8, height=10)
+    if (savesteps) {
+      jpgfn <- paste0(stepfolder, "/SAdoms.jpg")
+      jpeg(jpgfn, res=400, units="in", width=8, height=10)
           plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
           plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1)
-        dev.off()
-        message("Writing jpg to ", jpgfn, "\n")
-      }
+      dev.off()
+      message("Writing jpg to ", jpgfn, "\n")
     }
   }
   par(mar=mar)
@@ -481,5 +481,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   #  smallbnd <- SAdomdat$smallbndlst[[1]]
   #}  
 
-  return(list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst))
+  returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
+		smallbnd.unique=smallbnd.unique)
+  return(returnlst)
 }

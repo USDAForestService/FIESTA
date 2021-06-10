@@ -1,6 +1,7 @@
-modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL, 
-	pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	puniqueid="CN", pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
+modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL, 
+	cond=NULL, tree=NULL, seed=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, 
+	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", 
+	pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
 	dunitvar2=NULL, dunitarea=NULL, areavar="ACRES", areaunits="acres", 
 	unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
@@ -84,11 +85,12 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
     SAdata.names <- c("SAdoms", "cond", "plt",
 		"pltassgn", "puniqueid", "pltassgnid", "pjoinid", "dunitarea",
 		"dunitvar", "areavar", "dunitlut")
-    if (!all(SAdata.names %in% names(SAdata))) 
+    if (!all(SAdata.names %in% names(SAdata))) {
       stop("missing components in SAdata list: ", 
 		toString(SAdata.names[!SAdata.names %in% names(SAdata)])) 
-
+    }
     SAdoms <- SAdata$SAdoms
+    #smallbnd <- SAdata$smallbnd
     tree <- SAdata$tree
     cond <- SAdata$cond
     plt <- SAdata$plt
@@ -100,6 +102,8 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
     dunitvar <- SAdata$dunitvar
     areavar <- SAdata$areavar
     dunitlut <- SAdata$dunitlut
+    predfac <- SAdata$predfac
+    zonalnames <- SAdata$zonalnames
 
     if (is.null(prednames)) {
       prednames <- SAdata$prednames
@@ -128,7 +132,6 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
       predfac <- predfac[predfac %in% prednames]
     }
   } 
-
 
   ## Check SAdoms
   if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {
@@ -190,7 +193,7 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   ## - if unitcombine=TRUE, combines estimation units to reach minplotnum.unit.
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
-		auxlut=dunitlut, prednames=prednames, predfac=predfac, 
+		auxlut=dunitlut, prednames=prednames, predfac=predfac, makedummy=TRUE,
 		unitcombine=unitcombine, unitarea=dunitarea, unitvar=dunitvar, 
 		areavar=areavar, minplotnum.strat=0, minplotnum.unit=0,
 		auxtext="dunitlut", removetext="dunitarea")  
@@ -231,14 +234,21 @@ modSApop <- function(SAdoms=NULL, cond=NULL, tree=NULL, seed=NULL, plt=NULL,
   if (!is.null(SAdoms)) {
     returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)
   }
+  if (!is.null(smallbnd)) {
+    returnlst$smallbnd <- smallbnd
+  }
+  if (!is.null(smallbnd.unique)) {
+    returnlst$smallbnd.unique <- smallbnd.unique
+  }
 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx,
 		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
 		dunitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
-		dunitvar=dunitvar, dunitlut=dunitlut, prednames=prednames, 
-		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, 
- 		invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+		dunitvar=dunitvar, dunitlut=dunitlut, 
+		zonalnames=zonalnames, prednames=prednames, predfac=predfac,
+		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+		states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

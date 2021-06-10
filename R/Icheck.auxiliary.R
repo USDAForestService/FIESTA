@@ -1,10 +1,10 @@
 check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar=NULL, unitcombine=FALSE, 
 	auxlut=NULL, prednames=NULL, strata=FALSE, PSstrvar=NULL, predfac=NULL, 
-	nonresp=FALSE, substrvar=NULL, getwt=FALSE, getwtvar=NULL, strwtvar='strwt',
-	P2POINTCNT=NULL, npixelvar=NULL, stratcombine=FALSE, minplotnum.unit=10, 
-	minplotnum.strat=2, na.rm=TRUE, removeifnostrata=FALSE, auxtext="auxlut", 
-	removetext="unitarea", pvars2keep=NULL){
+	makedummy=FALSE, nonresp=FALSE, substrvar=NULL, getwt=FALSE, getwtvar=NULL, 
+	strwtvar='strwt', P2POINTCNT=NULL, npixelvar=NULL, stratcombine=FALSE, 
+	minplotnum.unit=10, minplotnum.strat=2, na.rm=TRUE, removeifnostrata=FALSE, 
+	auxtext="auxlut", removetext="unitarea", pvars2keep=NULL){
 
   ##################################################################################
   ## DESCRIPTION: 
@@ -147,8 +147,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
       ## Create data frame of number of pixels by estimation unit
       ############################################################################
-      if (npixelvar %in% auxnmlst) 
+      if (npixelvar %in% auxnmlst) {
         npixels <- unique(auxlut[, c(unitvar, npixelvar), with=FALSE])
+      }
     }
 
     ## Check continuous variables
@@ -204,8 +205,33 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
         pltvals <- sort(unique(pltx[[fac]]))
         facnmlst <- auxnmlst[grep(fac, auxnmlst)]
         missvars <- facnmlst[!facnmlst %in% paste0(fac, ".", pltvals)]
-        if (length(missvars) > 0) 
+        if (length(missvars) > 0) {
           message("auxvar not in tables: ", paste(missvars, collapse=", "))
+        }
+      
+        if (makedummy) {
+          ## Get factor levels
+          fac.levels <- sort(unique(pltx[[fac]]))
+
+          ## Set factor levels to keep and delete from auxlut.
+          fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
+          fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
+          auxlut[[fac.unitcol.del]] <- NULL
+  
+          ## Rename factor variables and add names to predictor list
+          facs <- paste0(fac, fac.levels[-1])
+          names(auxlut)[names(auxlut) %in% fac.unitcol.keep] <- facs
+          unitpreds <- c(prednames[prednames != fac], facs)
+
+          ## Create dummy variables for factor levels - 1
+          dtfac <- pltx[, as.data.table(model.matrix(~., 
+				data=pltx[, fac, with=FALSE]))][,-1]
+          pltx <- cbind(pltx, dtfac)
+          pltx[, (fac) := NULL]
+
+          ## Remove old name and add new names to predictor list
+          prednames <- unique(c(prednames[prednames != fac], facs))
+        }
       }
 
       ## Set up dummy variables for PSstrvar

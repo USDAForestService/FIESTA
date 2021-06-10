@@ -453,7 +453,7 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
 
 
 getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE, 
-		evalEndyr=NULL, evalType="01") {
+		evalEndyr=NULL, evalType="VOL") {
   ## DESCRIPTION: gets evalid from POP_PLOT_STRATUM_ASSGN table
   ## ARGUMENTS:
   ## chk - Logical. If TRUE, checks if data tables and variables exist
@@ -511,18 +511,19 @@ getEvalid.ppsa <- function(ppsa, states=NULL, evalAll=FALSE, evalCur=FALSE,
 
   if (evalAll) {
     evalidlist <- sort(unique(evaldt$EVALID))
-  } else if (evalCur) {
-
+#  } else if (evalCur) {
+#
   } else {
     if (!is.null(evalEndyr)) {
       if (!is.numeric(evalEndyr))  stop("evalEndyr must be numeric yyyy")
       if (nchar(evalEndyr) != 4) stop("evalEndyr must be numeric yyyy")
       yr <- substr(evalEndyr, 3, 4)
+      Endyr.max <- evaldt[evaldt[Endyr <= yr, .I[which.max(Endyr)], by="STATECD"]$V1]
 
-      Endyr.max <- evaldt[Endyr <= yr, max(Endyr), by="STATECD"]
     } else {
       setorder(evaldt, -INVYR, -Endyr)
-      Endyr.max <- evaldt[1,]
+      Endyr.max <- evaldt[evaldt[, .I[1], by="STATECD"]$V1]
+
     }
     evalidlist <- Endyr.max[["EVALID"]]
   }
@@ -556,9 +557,9 @@ getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL,
   if (!varCur %in% names(pltx)) stop(varCur, " not in pltx")
 
   ## Remove nonsampled plots (PLOT_STATUS_CD == 3)
-  if ("PLOT_STATUS_CD" %in% names(pltx)) 
+  if ("PLOT_STATUS_CD" %in% names(pltx)) {
     pltx <- pltx[pltx$PLOT_STATUS_CD < 3,]
-
+  }
 
   ## Keep only plots where DESIGNCD = 1
   if (designcd1) 
@@ -594,9 +595,9 @@ getPlotCur <- function(pltx, Endyr=NULL, varCur="MEASYEAR", Endyr.filter=NULL,
   plotCur <- pltx[maxyr]
 
 
-  if (!is.null(pltf)) 
+  if (!is.null(pltf)) {
     plotCur <- rbindlist(list(plotCur, plotCurf))
-  
+  }
   return(plotCur)
 }
 

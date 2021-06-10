@@ -163,6 +163,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   invyrs <- SApopdat$invyrs
   adj <- SApopdat$adj
   estvar.area <- SApopdat$estvar.area
+  predfac <- SApopdat$predfac
 
 
   ## check SAdomsdf
@@ -265,7 +266,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
       }
     }
   }
-
+ 
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
@@ -511,7 +512,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   } else {
     dunit.multest <- NULL
   }
- 
 
   if (SAmethod == "unit" && !is.null(dunit.multest.unit)) {
     nhat <- "JU.EBLUP"
@@ -533,11 +533,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   }
 
   if (!is.null(est)) {
-    if (addSAdomsdf) {
-      est <- merge(SAdomsdf, est, by=dunitvar)         
-    } else if (!is.null(smallbnd.att)) {
-      est <- merge(SAdomsdf[, unique(c(dunitvar, smallbnd.att)), with=FALSE], est, by=dunitvar)
-    } 
     est[, (nhat.var) := get(nhat.se)^2]
     setkeyv(est, dunitvar)
 
@@ -549,6 +544,14 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     est <- est[dunitarea, nomatch=0]
     est <- getarea(est, areavar=areavar, esttype=esttype,
 				nhatcol=nhat, nhatcol.var=nhat.var)
+
+    if (addSAdomsdf) {
+      est <- merge(SAdomsdf[, names(SAdomsdf)[names(SAdomsdf) != areavar], with=FALSE], 
+		est, by=dunitvar)         
+    } else if (!is.null(smallbnd.att)) {
+      est <- merge(SAdomsdf[, unique(c(dunitvar, smallbnd.att)), with=FALSE], est, by=dunitvar)
+    } 
+
   } else {
     returnlst <- list(est=NULL)
     if (multest) returnlst$dunit.multest <- NULL
@@ -597,6 +600,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
       ## Subset dunit.multest, where AOI = 1
       dunit.multest <- dunit.multest[dunit.multest$AOI == 1, ]
     }
+
     ## Save multest table
     if (savedata) {
 
@@ -616,14 +620,11 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
           multest_layer <- paste0(SApackage, "_", response)
         }
       }
-
-      if (savedata) {
-        ## Export dunit.multest
-        overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
-        datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=multest_outfolder, 
+      ## Export dunit.multest
+      overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
+      datExportData(dunit.multest, out_fmt=multest_fmt, outfolder=multest_outfolder, 
  		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite_layer, 
 		append_layer=multest.append)
-      }
     }
   } 
 

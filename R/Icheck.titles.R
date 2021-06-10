@@ -308,10 +308,13 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       }
       if (!is.null(title.ref) && title.ref != "") {
         if (!is.null(title.estpse)) {
-          title.estpse <- paste0(title.estpse, "; ", title.ref)
+          #title.estpse <- paste0(title.estpse, "; ", title.ref)
+          title.estpse <- paste0(title.estpse)
         } else {
-          title.est <- paste0(title.est, "; ", title.ref)
-          title.pse <- paste0(title.pse, "; ", title.ref)
+          #title.est <- paste0(title.est, "; ", title.ref)
+          #title.pse <- paste0(title.pse, "; ", title.ref)
+          title.est <- paste0(title.est)
+          title.pse <- paste0(title.pse)
         }
         if (rowvar == "TOTAL") {
           title.tot <- paste0(title.tot, "; ", title.ref)

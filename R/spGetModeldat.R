@@ -382,8 +382,9 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     rm(extdat.rast.cat)
     gc() 
 
-    if (NAto0) 
+    if (NAto0) {
       for (col in prednames.cat) set(sppltx, which(is.na(sppltx[[col]])), col, 0)
+    }
 
     if (!is.null(rast.lut)) {
       rast.lutnm <- inputdf.cat$var.name[inputdf.cat$rasterfile == rast.lutfn]
@@ -413,7 +414,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     for (i in 1:length(rastlst.catfn)) {
       rastfn <- rastlst.catfn[i]
       rastnm <- inputdf.cat[inputdf.cat$rasterfile == rastfn, "var.name"][[1]]
-      message(rastfn, "...")
+      #message(rastfn, "...")
       rast.cat.NODATA <- rastlst.cat.NODATA[i]
 
       zonalstat <- "proportion"

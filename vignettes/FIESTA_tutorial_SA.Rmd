@@ -158,7 +158,9 @@ WYbhdist <- spImportSpatial(WYbhdistfn)
 head(WYbhdist)
 
 ## Get spatial domains for small area estimation
-SAdomdat <- spGetSAdoms(smallbnd=WYbhdistfn, smallbnd.unique="DISTRICTNA")
+SAdomdat <- spGetSAdoms(smallbnd=WYbhdistfn, smallbnd.unique="DISTRICTNA",
+        helperbnd=ecomap, helperbnd.unique="SUBSECTION", largebnd=ecomap,
+        largebnd.unique="SECTION", nbrdom.min=10)
 SAdoms <- SAdomdat$SAdomlst$SAdoms
 
 plot(st_geometry(SAdoms))
@@ -185,6 +187,98 @@ plot(st_geometry(SAdoms))
 # Description:
 # Extract data from FIA database for plots within a given boundary.
 ######################################################################################
+
+SQLitefn = "E:/FIAdata/FIADB_USA.db"
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetEvalid.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetPlots.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
+SAdata <- spGetPlots(bnd=SAdoms, datsource="sqlite", 
+      data_dsn=SQLitefn, xy="PLOT", xy_dsn=SQLitefn, xvar="LON", yvar="LAT", 
+      xy.uniqueid="CN", invyrs=2011:2013, showsteps=TRUE, xy.joinid="CN")
+      
+      
+SAxy <- spGetXY(bnd=SAdoms, 
+    xy="PLOT", xy_dsn=SQLitefn, xvar="LON", yvar="LAT", 
+    xy.uniqueid="CN", xy.joinid="CN", showsteps=TRUE)
+
+## spGetXY
+bnd=SAdoms
+xy="PLOT"
+xy_dsn=SQLitefn
+xvar="LON"
+yvar="LAT"
+xy.uniqueid="CN"
+xy.joinid="CN"
+showsteps=TRUE
+clipxy=TRUE
+
+
+## spGetPlots
+#bnd
+bnd_dsn=NULL
+bnd.filter=NULL
+states=NULL
+stbnd=NULL
+stbnd_dsn=NULL
+stbnd.att="COUNTYFIPS"
+RS=NULL
+xy=NULL
+xy_dsn=NULL
+xy.uniqueid="PLT_CN"
+xvar="LON_PUBLIC"
+yvar="LAT_PUBLIC"
+xy.crs=4269
+xy.joinid="PLT_CN"
+clipxy=TRUE
+datsource="datamart"
+data_dsn=NULL
+istree=TRUE
+plot_layer="plot"
+cond_layer="cond"
+tree_layer="tree"
+other_layers=NULL
+puniqueid="CN"
+evalid=NULL
+evalCur=FALSE
+evalAll=FALSE
+evalEndyr=NULL
+evalType="VOL"
+measCur=FALSE
+measEndyr=NULL
+measEndyr.filter=NULL
+invyrs=NULL
+allyrs=FALSE
+intensity1=FALSE
+showsteps=FALSE
+savedata=FALSE
+savebnd=FALSE
+savexy=TRUE
+#outfolder=NULL
+out_fmt="shp"
+out_dsn=NULL
+outfn.pre=NULL
+outfn.date=FALSE
+overwrite_dsn=FALSE
+overwrite_layer=FALSE
+gui=FALSE
+iseed=TRUE
+savePOP=FALSE
+
+bnd=SAdoms
+datsource="sqlite"
+data_dsn=SQLitefn
+xy="PLOT"
+xy_dsn=SQLitefn
+xvar="LON"
+yvar="LAT"
+xy.uniqueid="CN"
+invyrs=2011:2013
+showsteps=TRUE
+istree=FALSE
+isseed=FALSE
+
+
 SAdata <- spGetPlots(bnd=SAdoms, states="Wyoming", datsource="datamart", 
       istree=TRUE, invyrs=2011:2013, showsteps=TRUE)
 names(SAdata)
@@ -204,6 +298,7 @@ plot(st_geometry(SAbnd))
 plot(st_geometry(SAxy), add=TRUE)
 
 table(SAplt$INVYR)
+
 
 
 ```

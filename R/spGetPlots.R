@@ -104,6 +104,9 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
+    if (out_fmt != "csv") {
+      outfn.date <- FALSE
+    }
   }
  
   ########################################################################
@@ -847,13 +850,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             clipxy <- TRUE
           }
         }
-
+ 
         ## Generate xy table for all plots in state (xystate)
         #########################################################
         if (xyindb) { 
           #xy.joinid <- pjoinid
-          xyvars <- c(xy.joinid, xvar, yvar)
-          if (xy == "plot") {
+          xyvars <- unique(c(xy.joinid, xy.uniqueid, xvar, yvar))
+          if (xy %in% c("plot", "PLOT")) {
             xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
 				pfromqry, " where ", stfilter) 
           } else { 
@@ -871,7 +874,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           xystate <- xy
         } else if (xychk) {
           xydat <- pcheck.spatial(layer=xy, dsn=xy_dsn)
-          xyvars <- c(xy.joinid, xvar, yvar)
+          xyvars <- unique(c(xy.joinid, xy.uniqueid, xvar, yvar))
           xystate <- xydat[, xyvars, with=FALSE]
         } else if (clipxy) { 
           stop("must include xy data")
@@ -882,7 +885,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           xystate <- spMakeSpatialPoints(xystate, xy.uniqueid=xy.joinid, 
 			xvar=xvar, yvar=yvar, xy.crs=xy.crs, addxy=TRUE)
         }
- 
+
         if (clipxy) {    ## datsource="sqlite"
 
           ## Get most current plots in database for measEndyr.filter & !measEndyr.filter

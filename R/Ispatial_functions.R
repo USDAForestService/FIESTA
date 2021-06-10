@@ -233,18 +233,24 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   ## Check layer - if sf object
   if (!is.null(layer)) {
     if (any(c("sf", "data.frame") %in% class(layer))) {
-      if (checkonly) {
-        return(TRUE)
+      if (nrow(layer) == 0) {
+        if (checkonly) {
+          return(FALSE)
+        } else {
+          stop("no rows in layer")
+        }
       } else {
-        return(layer)
+        if (checkonly) {
+          return(TRUE)
+        } else {
+          return(layer)
+        }
       }
     } else if (methods::canCoerce(layer, "sf")) {
       return(sf::st_as_sf(layer, stringsAsFactors=stringsAsFactors))
     } else if (is.character(layer) && file.exists(layer)) {
       dsn <- layer
-    } else if (is.data.frame(layer)) {
-      return(layer)
-    }
+    } 
   }
 
   if (!is.null(dsn)) {

@@ -82,6 +82,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   smallbnd <- SAdomdat$smallbndlst[[1]]
   SAdoms <- SAdomdat$SAdomlst[[1]]
   SAdomnm <- names(SAdoms)
+  smallbnd.unique <- SAdomdat$smallbnd.unique
 
   ###########################################################################
   ## Extract FIA data and auxiliary data
@@ -91,7 +92,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
     ###########################################################################
     ## Extract FIA data and model data
     ###########################################################################
-    SAdata <- anSAdata(SAdoms, smallbnd=smallbnd, RS=RS, xy=xy, xy_dsn=xy_dsn,
+    SAdata <- anSAdata(SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn,
  		xy.joinid=xy.joinid, datsource=datsource, istree=TRUE, data_dsn=SQLitefn, 
 		measCur=measCur, measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
@@ -130,11 +131,12 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   if (is.null(SAdata$SAdoms)) {
     return(NULL)
   }
-
+ 
   ####################################################################
   ## Get population data
   ####################################################################
-  SApopdat <- modSApop(SAdata=SAdata)
+  SApopdat <- modSApop(SAdata=SAdata, smallbnd=smallbnd, 
+		smallbnd.unique=smallbnd.unique)
   names(SApopdat)
   returnlst$SApopdat <- SApopdat
 

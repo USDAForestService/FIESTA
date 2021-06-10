@@ -15,8 +15,8 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	strat_lut = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
 	keepxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
 	exportNA = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
-	out_layer = "strat_assgn", outfn.date = TRUE, outfn.pre = NULL, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, ...)
+	out_layer = "strat_assgn", outfn.date = FALSE, outfn.pre = NULL, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, ...)
 }
 
 \arguments{
@@ -60,7 +60,7 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	if keepNA=TRUE, NA values will not be in included in stratalut but will 
 	remain in pltassgn table. }
   \item{keepNA}{ Logical. If TRUE, returns data frame of NA values. }
-  \item{keepxy}{ Logical. If FALSE, removes XY coordinates from pltassgn output. }
+  \item{keepxy}{ Logical. If TRUE, returns xy data as sf object (spxyplt). }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
   \item{savedata}{ Logical. If TRUE, the input data with extracted values are
 	saved to outfolder. }
@@ -77,7 +77,10 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	(e.g., outfn_'date'.csv). }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrite dsn. }
-  \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrite csv (if out_fmt="csv")
+	or overwrite layers in dsn. }
+  \item{append_layer}{ Logical. If TRUE, appends to csv (if out_fmt="csv")
+	or appends to layers in dsn. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }
 \details{

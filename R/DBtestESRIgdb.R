@@ -11,26 +11,13 @@ DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
   }
 
   arcgisbinding::arc.check_product()
+  gdbpath <- getoutfn(gdbfn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite=overwrite, outfolder=outfolder, ext=getext(gdbfn))
 
-  ## check gdbfn
-  if (is.null(gdbfn)) stop("gdbfn is NULL")
-  gdbpath <- gdbfn
-
-  if (!is.null(outfn.pre)) {
-    gdbfn <- paste(outfn.pre, gdbfn, sep="_")
-  }
-  if (is.na(getext(gdbfn)) || getext(gdbfn) == "NA") {
-    gdbfn <- paste0(gdbfn, ".gdb")
-  }
-  if (outfn.date) {
-    gdbfn <- getoutfn(gdbfn, outfn.date=outfn.date, overwrite=overwrite, 
-		ext=getext(gdbfn))
-  }
-  outfolder <- pcheck.outfolder(outfolder, default=NULL)
-  if (!is.null(outfolder)) {
-    gdbpath <- paste(outfolder, gdbfn, sep="/")
-  }
-  
+#  if (is.na(getext(gdbfn)) || getext(gdbfn) == "NA") {
+#    gdbfn <- paste0(gdbfn, ".gdb")
+#  }
+   
   ## Overwrite file
   if (file.exists(gdbpath)) {
     if (overwrite) {
@@ -44,8 +31,9 @@ DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
            		stop(x)
 		})			
      }
-     if (!file.exists(gdbpath))
+     if (!file.exists(gdbpath)) {
        message("removed ", gdbpath)
+     }
    } else {
       message("gdb connection successful")
     
@@ -57,6 +45,6 @@ DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
   if (returnpath) {
     return(gdbpath) 
   } else {
-    return(gdbfn)
+    return(basename(gdbpath))
   }
 }

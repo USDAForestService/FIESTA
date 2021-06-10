@@ -25,7 +25,8 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	minplotnum.strat = 2, saveobj = FALSE, objnm = "GBpopdat", savedata = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	GBdata = NULL, pltdat = NULL, GBstratdat = NULL, gui = FALSE)
+	append_layer = FALSE, GBdata = NULL, pltdat = NULL, GBstratdat = NULL, 
+	gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -127,6 +128,9 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
   \item{GBdata}{ R List object. Output data list components from FIESTA::GBdata(). }
   \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
   \item{GBstratdat}{ R List object. Output data list components from FIESTA::DBgetStrata(). }

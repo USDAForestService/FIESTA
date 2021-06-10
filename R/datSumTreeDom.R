@@ -434,7 +434,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
         cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
 			metricunits]
         tsumvarm <- paste0(tsumvar, "_m")
-        treef[, (tsumvarm) := get(eval(tsumvar)) * cfactor]
+        treex[, (tsumvarm) := get(eval(tsumvar)) * cfactor]
         estunits <- metricunits
         tsumvar <- tsumvarm
       }

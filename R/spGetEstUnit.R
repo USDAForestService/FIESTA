@@ -1,10 +1,10 @@
 spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  	unittype="POLY", unit_layer, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter = NULL, areavar=NULL, areaunits="ACRES", rast.NODATA=NULL, 
-	keepNA=FALSE, showext=FALSE, savedata=FALSE, exportsp=FALSE, 
-	exportNA=FALSE, outfolder=NULL, out_fmt="shp", out_dsn=NULL, 
-	out_layer="unit_assgn", outfn.date=TRUE, outfn.pre=NULL, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, ...){
+	keepNA=FALSE, keepxy=FALSE, showext=FALSE, savedata=FALSE, 
+	exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="shp", 
+	out_dsn=NULL, out_layer="unit_assgn", outfn.date=FALSE, outfn.pre=NULL, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, ...){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -92,10 +92,16 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (savedata || exportsp || exportNA) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
+		createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    if (out_fmt != "csv") {
+      outfn.date <- FALSE
+    }
   }
 
 
@@ -191,6 +197,10 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   
   returnlst <- list(pltassgn=pltassgn, unitarea=unitarea, unitvar=unitvar, areavar=areavar,
 				pltassgnid=uniqueid)
+  if (keepxy) {
+    returnlst$spxyplt <- sppltx
+  }
+
  
   return(returnlst)
 }

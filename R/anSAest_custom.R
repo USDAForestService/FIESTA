@@ -76,7 +76,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   if (multest_fmt == "csv") {
     multest_layer <- paste0("multest_", multest_layer)
   }
- 
+
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, esttype="AREA", landarea="FOREST", 
  	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
@@ -84,7 +84,8 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
 	multest_layer=multest_layer, returntitle=TRUE, outfolder=outfolder, 
 	multest_outfolder=multest_outfolder, multest.append=multest.append,
  	multest.AOIonly=multest.AOIonly, overwrite_layer=TRUE, 
-	outfn.pre=outfn.pre, save4testing=save4testing)
+	append_layer=multest.append, outfn.pre=outfn.pre, 
+	save4testing=save4testing)
   if (is.null(SAareadat)) return(NULL)
   SAest[[outnm]] <- SAareadat$est
   SAmultest[[outnm]] <- SAareadat$dunit.multest
@@ -93,7 +94,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   if (save4testing) {
     pltdom <- SAareadat$pdomdat
     cuniqueid <- SAareadat$cuniqueid
-    dunitlut <- SApopdat$dunitlut
+    dunitlut <- SAareadat$dunitlut
 
     if (addSAdomsdf) {
       SAdomsdf <- SApopdat$SAdomsdf
@@ -120,6 +121,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
           chkfn <- paste0(file.path(multest_outfolder, multest_layer), ".csv")
           multest.append <- ifelse(file.exists(chkfn), TRUE, FALSE)
         }  
+
         SAestdat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 			SAmethod=SAmethod, esttype="TREE", landarea=landarea, 
 			pcfilter=pcfilter, estvar=estvar, estvar.filter=estvar.filter,
@@ -136,10 +138,13 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
           pltdom <- merge(pltdom, 
 			SAestdat$pdomdat[, c("DOMAIN", cuniqueid, rowvar, response), with=FALSE], 
 			by=c("DOMAIN", cuniqueid, rowvar))
-          dunitlut <- SAestdat$dunitlut
+          dunitlut <- merge(dunitlut, 
+			SAestdat$dunitlut[, c("DOMAIN", "AOI", response), with=FALSE], 
+			by=c("DOMAIN", "AOI"))
         }
 
         if (is.null(SAestdat$est)) {
+          message("no estimates for ", outnm)
           SAest[[outnm]] <- NA
           SAmultest[[outnm]] <- NA
         } else {
@@ -149,7 +154,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
           if (barplot.compare) {
             ## build plots
             FIESTA_SAmod_demo_plots(estvar=estvar, prednames=SApopdat$prednames, 
-			est.com=SAestdat$raw$dunit.multest, title.ref=title.ref, saveimg=TRUE, 
+			est.com=SAestdat$dunit.multest, title.ref=title.ref, saveimg=TRUE, 
 			outfolder=outfolder, showimg=TRUE)
           }
         }

@@ -42,7 +42,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 	PLOT_NONSAMPLE_REASN_CD=PLOT_STATUS_CD=BA=DIA=CRCOVPCT_RMRS=TIMBERCD=
 	SITECLCD=RESERVCD=JENKINS_TOTAL_B1=JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=
 	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=INVYR=
-	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=invyrs=SEEDSUBP6=
+	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=SEEDSUBP6=
 	PREV_PLT_CN <- NULL
 
 
@@ -203,7 +203,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       savePOP <- TRUE
     }
   }
- 
+
   ### GET RS & rscd
   ###########################################################
   isRMRS <- ifelse(length(rslst) == 1 && rslst == "RMRS", TRUE, FALSE) 
@@ -295,9 +295,17 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         }
         ## Check inventory years
         for (state in states) {
-          stinvyrlst <- invyrtab[invyrtab$STATENM == state, "INVYR"]
-          if (!all(invyrs[[state]] %in% stinvyrlst))
+          stcd <- FIESTA::pcheck.states(state, "VALUE")
+          if ("STATENM" %in% names(invyrtab)) {
+            stinvyrlst <- invyrtab[invyrtab$STATENM == state, "INVYR"]
+          } else if ("STATECD" %in% names(invyrtab)) {
+            stinvyrlst <- invyrtab[invyrtab$STATECD == stcd, "INVYR"]
+          } else {
+            stop("invyrtab is invalid")
+          }
+          if (!all(invyrs[[state]] %in% stinvyrlst)) {
             stop("inventory years do not match database")
+          }
         }
       }
     }
@@ -940,18 +948,20 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     } else {
       #if (iseval) 
       #  vars <- paste0(vars, ", ppsa.EVALID")
-
+print("TEST")
       if (plotgeom) {
         pltcondqry <- paste("select distinct", pcgvars, "from", pcgeomfromqry, "where", xfilter)
       } else {      
         pltcondqry <- paste("select distinct", vars, "from", pcfromqry, "where", xfilter)
       }
+print("TEST2")
 
       if (datsource == "sqlite") {
         pltcondx <- DBI::dbGetQuery(dbconn, pltcondqry)
       } else {
         pltcondx <- setDT(sqldf::sqldf(pltcondqry, stringsAsFactors=FALSE))
       }
+print("TEST3")
    
       ## Write query to outfolder
       if (saveqry) {
@@ -2135,7 +2145,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   
   #if (saveqry) cat("\n", paste("Saved queries to:", outfolder), "\n") 
 
- 
 
   ## Return data list
   return(fiadat=fiadatlst)

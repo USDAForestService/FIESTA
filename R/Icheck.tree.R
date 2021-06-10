@@ -26,16 +26,16 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
   ## GETS TPA (NUMERATOR)
   estvarn.TPA <- FIESTA::pcheck.logical(estvarn.TPA, varnm="estvarn.TPA", 
 		title=paste0("Calculate TPA (NUM)"), first="YES", gui=gui)
-  if (!grepl("TPA", estvarn)) 
+  if (!grepl("TPA", estvarn)) {
     if (estvarn.TPA) message("multiplying ", estvarn, " by TPA")
-  
+  }
   ## GET NAME FOR ESTIMATION VARIABLE FOR ALL TREE DOMAINS
 #  if (is.null(estvarn.name)) {
 #    estvarn.name <- paste0(estvarn, "_SUM")
 #  } else if (!is.character(estvarn.name)) {
-  if (!is.null(estvarn.name) && !is.character(estvarn.name))
+  if (!is.null(estvarn.name) && !is.character(estvarn.name)) {
      stop("invalid estvarn.name.. must be a string")  
-
+  }
   ## CHECK FOR NA VALUES IN TPA_UNADJ
 #  if (sum(is.na(unique(treef$TPA_UNADJ))) > 0) {
 #    nbrna <- nrow(treef[is.na(treef$TPA_UNADJ),])

@@ -591,8 +591,9 @@ FIESTA_SAmod_demo_plots <- function (estvar, prednames=NULL, est.com, domain.att
 					"white")
 #	mycolors <- c("darkgreen", "green","blue","purple","orange","red")
 
- if (is.null(domain.att)) 
+ if (is.null(domain.att)) {
    domain.att <- "DOMAIN"
+ }
 
  if (showimg) {
    dev.new(record=TRUE)
@@ -603,6 +604,7 @@ FIESTA_SAmod_demo_plots <- function (estvar, prednames=NULL, est.com, domain.att
 				"JA.synth","JU.Synth")]
 	   #actual plot
 		tmp1 <- barplot(t(as.matrix(tmp)), beside=T, 
+				names.arg=est.AOI[[domain.att]][my.range], 
 				xlab="", ylab=estvar, ylim = c(0,maxy.AOI),
 		col = mycolors)
 	   #error bars
@@ -657,8 +659,8 @@ FIESTA_SAmod_demo_plots <- function (estvar, prednames=NULL, est.com, domain.att
 
 	   #actual plot
 		tmp1 <- barplot(t(as.matrix(tmp)), beside=T, 
-				names.arg=est.AOI[[domain.att]][my.range], xlab="", 
-				ylab=estvar, ylim = c(0,maxy.AOI),
+				names.arg=est.AOI[[domain.att]][my.range], 
+				xlab="", ylab=estvar, ylim = c(0,maxy.AOI),
 			col = mycolors)
 	   #print n.sample plots
 		text(tmp1[2,]+.5, y = maxy.AOI*.8, 
@@ -716,8 +718,10 @@ if(nrow(est.AOI)==1){
 	 tmp <- est.AOI[,c("DIR", "JU.GREG", 
 				"JU.EBLUP", "JFH", 
 				"JA.synth","JU.Synth")]
+
 	 #actual plot
 		tmp1 <- barplot(t(as.matrix(tmp)), beside=T, 
+				names.arg=est.AOI[[domain.att]][my.range], 
 				xlab="", ylab=estvar, ylim = c(0,maxy.AOI),
 		col = mycolors)
 	 #error bars

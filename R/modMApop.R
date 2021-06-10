@@ -8,7 +8,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
 	prednames=NULL, predfac=NULL, PSstrvar=NULL, stratcombine=TRUE, 
 	saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, MAdata=NULL, pltdat=NULL, MAmodeldat=NULL, gui=FALSE){
+	overwrite_layer=TRUE, append_layer=FALSE, MAdata=NULL, pltdat=NULL, 
+	MAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -63,11 +64,16 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+		append_layer=append_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    if (out_fmt != "csv") {
+      outfn.date <- FALSE
+    }
   } 
 
 
@@ -219,8 +225,8 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="MA",
 		MAmethod=MAmethod, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea,
 		areavar=areavar, unitcombine=unitcombine, auxlut=unitlut, strata=strata, 
-		PSstrvar=PSstrvar, prednames=prednames, predfac=predfac, npixelvar=npixelvar, 
-		stratcombine=stratcombine, removeifnostrata=TRUE)
+		PSstrvar=PSstrvar, prednames=prednames, predfac=predfac, makedummy=TRUE,
+ 		npixelvar=npixelvar, stratcombine=stratcombine, removeifnostrata=TRUE)
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -321,15 +327,40 @@ modMApop <- function(MAmethod, cond, plt=NULL, tree=NULL, seed=NULL,
   } 
 
   if (savedata) {
+    datExportData(condx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="condx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltcondx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcondx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+
+    if (!is.null(treef)) {
+      datExportData(treef, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
+    if (!is.null(seedf)) {
+      datExportData(seedf, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
+
     datExportData(pltassgnx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
     datExportData(unitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
     datExportData(unitlut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
   }
 
   return(returnlst)

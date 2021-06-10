@@ -57,7 +57,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
 
- 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
@@ -74,13 +73,13 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
 
   } else if (savesteps || saveobj) {
     outfolder <- pcheck.outfolder(outfolder)
+  }
 
-    if (savesteps) {
-      stepfolder <- file.path(outfolder, "SAdoms_steps")
-      if (!dir.exists(stepfolder)) dir.create(stepfolder)
-      step_dsn <- NULL
-      step_fmt <- "shp"
-    }
+  if (savesteps) {
+    stepfolder <- file.path(outfolder, "SAdoms_steps")
+    if (!dir.exists(stepfolder)) dir.create(stepfolder)
+    step_dsn <- NULL
+    step_fmt <- "shp"
   }
 
   ####################################################################
@@ -194,10 +193,10 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   ## Create output list
   ##########################################
   SAdata <- list(SAdoms=SAdoms, plt=pltx, pltassgn=pltassgn, cond=condx, 
-			dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
-			dunitlut=dunitlut, prednames=prednames, predfac=predfac,
-			zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
-			pltassgnid=pltassgnid)
+	dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
+	dunitlut=dunitlut, prednames=prednames, predfac=predfac,
+	zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
+	pltassgnid=pltassgnid)
   if (istree) {
     SAdata$tree <- treex
   }

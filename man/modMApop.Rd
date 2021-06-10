@@ -23,8 +23,8 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
 	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
 	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, MAdata = NULL, pltdat = NULL, MAmodeldat = NULL, 
-	gui = FALSE)
+	overwrite_layer = TRUE, append_layer = FALSE, MAdata = NULL, pltdat = NULL, 
+	MAmodeldat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -107,6 +107,9 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
   \item{MAdata}{ List. Data output from FIESTA::MAdata(). }
   \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
   \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }

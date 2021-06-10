@@ -120,32 +120,32 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     }
   } 
 
-  ## Convert predfac if MAmethod != c('HT', 'PS')
-  if (!MAmethod %in% c("HT","PS") && !is.null(predfac)) {
-    for (fac in predfac) {
-      ## Get factor levels
-      fac.levels <- sort(unique(condx[[fac]]))
-
-      ## Set factor levels to keep and delete from unitlut.
-      fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
-      fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
-      unitlut[[fac.unitcol.del]] <- NULL
-  
-      ## Rename factor variables and add names to predictor list
-      facs <- paste0(fac, fac.levels[-1])
-      names(unitlut)[names(unitlut) %in% fac.unitcol.keep] <- facs
-      unitpreds <- c(prednames[prednames != fac], facs)
-
-      ## Create dummy variables for factor levels - 1
-      dtfac <- condx[, as.data.table(model.matrix(~., 
-				data=condx[, fac, with=FALSE]))][,-1]
-      condx <- cbind(condx, dtfac)
-      condx[, (fac) := NULL]
-
-      ## Remove old name and add new names to predictor list
-      prednames <- unique(c(prednames[prednames != fac], facs))
-    }
-  }
+#  ## Convert predfac if MAmethod != c('HT', 'PS')
+#  if (!MAmethod %in% c("HT","PS") && !is.null(predfac)) {
+#    for (fac in predfac) {
+#      ## Get factor levels
+#      fac.levels <- sort(unique(condx[[fac]]))
+#
+#      ## Set factor levels to keep and delete from unitlut.
+#      fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
+#      fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
+#      unitlut[[fac.unitcol.del]] <- NULL
+#  
+#      ## Rename factor variables and add names to predictor list
+#      facs <- paste0(fac, fac.levels[-1])
+#      names(unitlut)[names(unitlut) %in% fac.unitcol.keep] <- facs
+#      unitpreds <- c(prednames[prednames != fac], facs)
+#
+#      ## Create dummy variables for factor levels - 1
+#      dtfac <- condx[, as.data.table(model.matrix(~., 
+#				data=condx[, fac, with=FALSE]))][,-1]
+#      condx <- cbind(condx, dtfac)
+#      condx[, (fac) := NULL]
+#
+#      ## Remove old name and add new names to predictor list
+#      prednames <- unique(c(prednames[prednames != fac], facs))
+#    }
+#  }
 
 
   ########################################

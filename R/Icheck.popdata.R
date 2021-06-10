@@ -77,7 +77,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	ACI.filter=V1=plotsampcnt=nfplotsampcnt=condsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
-	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD <- NULL
+	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD=
+	SUBPCOND_PROP <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -569,15 +570,16 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
         areawt <- "PROP_CHNG"
       }   
- 
+      
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
       tabs <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
       condx <- tabs$tab1
       pltx <- tabs$tab2
 
       ## Check for matching unique identifiers of condx and pltx
-      condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, tab1txt="cond",
-			tab2txt="plt", subsetrows=TRUE)
+      condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, 
+			tab1txt=paste0("cond-"	, cuniqueid),
+			tab2txt=paste0("plt-", puniqueid), subsetrows=TRUE)
       
       nrow.before <- nrow(pltx)
 
@@ -711,6 +713,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     states <- FIESTA::pcheck.states(stcds)
     if ("INVYR" %in% names(pltcondx)) {
       invyrtab <- unique(pltcondx[, c("STATECD", "INVYR")])
+      setorderv(invyrtab, c("STATECD", "INVYR"))
       invyrs <- as.list(by(invyrtab$INVYR, invyrtab$STATECD, I))
       names(invyrs) <- FIESTA::pcheck.states(names(invyrs))
     }
@@ -1159,6 +1162,13 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       subp.na <- sum(is.na(subplotx[[subpid]]))
       if (subp.na > 0) stop("NA values in ", subpid)
       setkeyv(subplotx, c(subpuniqueid, subpid))
+    
+      ## Remove nonsampled subplots (SUBP_STATUS_CD = 3)
+      if ("SUBP_STATUS_CD" %in% names(subplotx)) {      
+        subplotx <- subplotx[subplotx$SUBP_STATUS_CD < 3,]
+      } else {
+        message("SUBP_STATUS_CD not in subplot... assuming all sampled subplots")
+      }
     }
     if (!is.null(subp_condx)) {
       subpuniqueid <- FIESTA::pcheck.varchar(var2check=subpuniqueid, varnm="subpuniqueid", 
@@ -1195,6 +1205,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       if (!"SUBPCOND_PROP" %in% names(subp_condx)) {
         stop("must include SUBPCOND_PROP in subp_cond")
       }
+      #table(subplot$SUBP_STATUS_CD, subplot$P2VEG_SUBP_STATUS_CD)
     } else {
       stop("must include subp_condx for P2VEG estimation")
     }
@@ -1202,20 +1213,22 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     #############################################################################
     ## Subset pltassgn and subp_condx to sampled P2VEG
     #############################################################################
-    if (!"P2VEG_SAMPLING_STATUS_CD" %in% names(pltassgnx)) {
-      message("assuming all plots sample P2VEG")
+    #if (!"P2VEG_SAMPLING_STATUS_CD" %in% names(pltassgnx)) {
+    #  message("assuming all plots sample P2VEG")
       pltassgn.P2VEG <- pltassgnx
-    } else {
-      if (ACI) {
-        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] %in% c(1,2),]
-      } else {
-        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] == 1,]
-      }
-    }
+    #} else {
+    #  if (ACI) {
+    #    pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] %in% c(1,2),]
+    #  } else {
+    #    pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] == 1,]
+    #  }
+    #}
  
     ## Subset subplots to sample P2VEG plots
+#    subp_condf <- check.matchval(subp_condx, pltassgn.P2VEG, subpuniqueid, pltassgnid, 
+#		tab1txt="subp_cond", tab2txt="pltassgn.P2VEG", subsetrows=TRUE)
     subp_condf <- check.matchval(subp_condx, pltassgn.P2VEG, subpuniqueid, pltassgnid, 
-		tab1txt="subp_cond", tab2txt="pltassgn.P2VEG", subsetrows=TRUE)
+		tab1txt="subp_cond", tab2txt="pltassgn", subsetrows=TRUE)
     setkeyv(subp_condf, c(subpuniqueid, subpid, condid))
 
     #############################################################################
@@ -1245,7 +1258,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     ## Define and apply p2veg.nonsamp.filter 
     #############################################################################
     if ("P2VEG_SUBP_STATUS_CD" %in% names(subp_condf)) {
-      p2veg.nonsamp.filter <- "!is.na(P2VEG_SUBP_STATUS_CD) & P2VEG_SUBP_STATUS_CD != 2"
+      #p2veg.nonsamp.filter <- "!is.na(P2VEG_SUBP_STATUS_CD) & P2VEG_SUBP_STATUS_CD != 2"
+      p2veg.nonsamp.filter <- "is.na(P2VEG_SUBP_STATUS_CD) | P2VEG_SUBP_STATUS_CD == 1"
     
       subp_condf <- datFilter(x=subp_condx, xfilter=p2veg.nonsamp.filter, 
 		title.filter="p2veg.nonsamp.filter")$xf
@@ -1320,6 +1334,10 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 		subp_condf[, c(subpuniqueid, subpid, condid, "SUBPCOND_PROP"), with=FALSE],
 		by=c(subpuniqueid, subpid, condid))
     }
+
+    ## Sum subp_condf to condition level
+    subp_condf <- subp_condf[, sum(SUBPCOND_PROP)/4, by=c(subpuniqueid, condid)]
+    setnames(subp_condf, "V1", "SUBPCOND_PROP_UNADJ") 
   }
 
 

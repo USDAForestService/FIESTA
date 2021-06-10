@@ -5,8 +5,8 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	rast.NODATA=NULL, keepNA=FALSE, keepxy=FALSE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, 
 	out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
-	outfn.date=TRUE, outfn.pre=NULL, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, ...){
+	outfn.date=FALSE, outfn.pre=NULL, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, append_layer=FALSE, ...){
 
   ## Check for necessary packages
   ###########################################################
@@ -108,7 +108,11 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
+    if (out_fmt != "csv") {
+      outfn.date <- FALSE
+    }
   }
 
   ##################################################################
@@ -285,14 +289,13 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Write data frames to CSV files
   #######################################
-  if (keepxy) {
-    xy.coords <- data.frame(sf::st_coordinates(sppltx))
-    pltassgn <- data.frame(sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)]),
-		xy.coords)
-  } else {
+#  if (keepxy) {
+#    xy.coords <- data.frame(sf::st_coordinates(sppltx))
+#    pltassgn <- data.frame(sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)]),
+#		xy.coords)
+#  } else {
     pltassgn <- sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)])
-  }
-
+#  }
 
   #if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
   #setkeyv(stratalut, c(unitvar, strvar))  
@@ -302,10 +305,12 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
+
     datExportData(unitarea, outfolder=outfolder, out_fmt=out_fmt, 
 		out_dsn=out_dsn, out_layer="unitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
+
     datExportData(stratalut, outfolder=outfolder, out_fmt=out_fmt, 
 		out_dsn=out_dsn, out_layer="stratalut", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
@@ -318,13 +323,16 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		out_dsn=out_dsn, out_layer=out_layer,
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
-  }
+  }    
   
   returnlst <- list(pltassgn=setDF(pltassgn), unitarea=setDF(unitarea), 
 		stratalut=setDF(stratalut), unitvar=unitvar, areavar=areavar, 
 		strvar=strvar, pltassgnid=uniqueid, getwt=FALSE, strwtvar="strwt")
   if (!is.null(NAlst)) {
     returnlst$NAlst <- NAlst
+  }
+  if (keepxy) {
+    returnlst$spxyplt <- sppltx
   }
  
   return(returnlst)
