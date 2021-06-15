@@ -9,7 +9,7 @@
 }				
 
 \usage{
-spClipPoint(xyplt, xyplt_dsn = NULL, xy.uniqueid = "PLT_CN", clippolyv,
+spClipPoint(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", clippolyv,
 	clippolyv_dsn = NULL, clippolyv.filter = NULL, showext = FALSE, 
 	keepNA = FALSE, savedata = FALSE, returnsp = TRUE, exportsp = FALSE, 
 	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer="pnt", 
@@ -24,7 +24,7 @@ spClipPoint(xyplt, xyplt_dsn = NULL, xy.uniqueid = "PLT_CN", clippolyv,
   \item{xyplt_dsn}{ String. Data source name (dsn; e.g., sqlite or shapefile 
 	pathname) of layer to clip. The dsn varies by driver. See gdal OGR 
 	vector formats (https://www.gdal.org/ogr_formats.html). }
-  \item{xy.uniqueid}{ String.* Unique identifier of xyplt rows. }
+  \item{uniqueid}{ String.* Unique identifier of xyplt rows. }
   \item{clippolyv}{ sf R object or String. Name of clipping polygon spatial
 	polygon object, full path to shapefile, or name of a layer within a 
 	database. } 

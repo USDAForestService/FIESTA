@@ -239,7 +239,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
     SURVEY <- SURVEY[SURVEY$ANN_INVENTORY == ann_inv, ]
     if (nrow(SURVEY) == 0) return(NULL)
   }
-
+ 
   if (all(!is.null(POP_EVAL) && !is.null(POP_EVAL_TYP) && !is.null(POP_EVAL_GRP))) {
     ## Define query POP_EVAL, POP_EVAL_TYP table
     popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", 
@@ -391,7 +391,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       } 
     }  
   }
- 
+
   if (!is.null(invyrtab)) {
     ## Get possible range of inventory years from invyrtab
     stinvyr.vals <- as.list(by(invyrtab$INVYR, invyrtab$STATECD, range))
@@ -427,6 +427,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
         evalresp <- TRUE
       }
     }
+
     if ((is.null(evalCur) || !evalCur) && (is.null(evalAll) || !evalAll)) {
       if (gui) {
         evalresp <- select.list(c("NO", "YES"), title="Use an Evaluation?", 
@@ -438,7 +439,8 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 	#		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
 
         return(returnlst <- list(states=states, rslst=rslst, evalidlist=NULL, 
-		invtype=invtype, invyrtab=invyrtab, evalType=evalTypelist))
+		invtype=invtype, invyrtab=invyrtab, evalType=evalTypelist,
+		SURVEY=SURVEY))
       }
     }
   }

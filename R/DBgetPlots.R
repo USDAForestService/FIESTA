@@ -183,7 +183,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   if (isgrm || issccm) {
     evalType <- c(evalType, "CHNG")
   }
- 
+
   ## Get states, Evalid and/or invyrs info
   evalInfo <- DBgetEvalid(states=states, RS=RS, datsource=datsource, 
 		data_dsn=data_dsn, invtype=invtype, evalid=evalid, evalCur=evalCur, 

@@ -141,7 +141,6 @@ spExtractRast(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", rastlst,
 
   ## Plot extracted values of dem (i.e., elevation)
   plot(sppltext["dem"])
- 
 }
 
 \keyword{ data }
