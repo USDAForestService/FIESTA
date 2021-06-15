@@ -106,7 +106,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (datsource == "sqlite") {
     if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
-	 stop("RSQLite and DBI packages are required to run SQLite queries")
+	 message("RSQLite and DBI packages are required to run SQLite queries")
     }
   } 
   if (datsource %in% c("sqlite", "gdb")) {
@@ -948,20 +948,17 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     } else {
       #if (iseval) 
       #  vars <- paste0(vars, ", ppsa.EVALID")
-print("TEST")
       if (plotgeom) {
         pltcondqry <- paste("select distinct", pcgvars, "from", pcgeomfromqry, "where", xfilter)
       } else {      
         pltcondqry <- paste("select distinct", vars, "from", pcfromqry, "where", xfilter)
       }
-print("TEST2")
 
       if (datsource == "sqlite") {
         pltcondx <- DBI::dbGetQuery(dbconn, pltcondqry)
       } else {
         pltcondx <- setDT(sqldf::sqldf(pltcondqry, stringsAsFactors=FALSE))
       }
-print("TEST3")
    
       ## Write query to outfolder
       if (saveqry) {
@@ -1532,7 +1529,7 @@ print("TEST3")
 
       ## Get data for SUBPLOT
       subpvars <- toString(paste0("subp.", subpvarlst))
-      subpqry <- paste("select distinct", subpvars, "from", subpfromqry, 
+      subpqry <- paste("select distinct", subpvars, ", p.SAMP_METHOD_CD from", subpfromqry, 
 		"where", paste0(evalFilter, stateFilters))
 
       if (datsource == "sqlite") {

@@ -13,15 +13,6 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
   ## a specified statistic.
   #####################################################################################
 
-  ## Check for necessary packages
-  ###########################################################
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("sf package is required for spExtractRast()")
-  
-  if (!"rgdal" %in% rownames(installed.packages()))
-    stop("rgdal package is required for spExtractRast()")
-
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) xyplt=bfun=focalrast=ffun=focalsave=extrtype <- NULL

@@ -186,12 +186,12 @@ agentnm <- "Change Agent-GRP"
 
 #### INPUT 6: Land Use (LU) data for Time 1 (T1: Year 1) #### 
 # -------------------------------------------------------------------------------------
-Input6 <- list.files(rawfolder, pattern=utils::glob2rx("03*unit.rowest*csv"))
+Input6 <- list.files(rawfolder, pattern=utils::glob2rx("03*unit_rowest*csv"))
 Input6 <- read.csv(file.path(rawfolder, Input6[length(Input6)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 #### INPUT 7: Land Use (LU) data for Time 2 (T2: Year 2) ####
 # --------------------------------------------------------------------------------------
-Input7 <- list.files(rawfolder, pattern=utils::glob2rx("04*unit.rowest*csv"))
+Input7 <- list.files(rawfolder, pattern=utils::glob2rx("04*unit_rowest*csv"))
 Input7 <- read.csv(file.path(rawfolder, Input7[length(Input7)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 #### INPUT 8: LU net change and uncertainty associated w/ LU net change ####
@@ -201,17 +201,17 @@ Input8 <- read.csv(file.path(rawfolder, Input8[length(Input8)]), stringsAsFactor
 
 #### INPUT 9: LU change decrease or increased, and type of LU that increased/decreased #####
 # -----------------------------------------------------------------------------------------------
-Input9 <- list.files(rawfolder, pattern=utils::glob2rx("09*unit.grpest*csv"))
+Input9 <- list.files(rawfolder, pattern=utils::glob2rx("09*unit_grpest*csv"))
 Input9 <- read.csv(file.path(rawfolder, Input9[length(Input9)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 #### INPUT 10: Percent of Tree Landcover (LC) ####
 # -----------------------------------------------------------------------------------------------
-Input10 <- list.files(rawfolder, pattern=utils::glob2rx("05*unit.rowest*csv"))
+Input10 <- list.files(rawfolder, pattern=utils::glob2rx("05*unit_rowest*csv"))
 Input10 <- read.csv(file.path(rawfolder, Input10[length(Input10)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 #### INPUT 11: Percent of Tree Landcover (LC) for T2 (Year 2) ####
 # ----------------------------------------------------------------------------------------------
-Input11 <- list.files(rawfolder, pattern=utils::glob2rx("06*unit.rowest*csv"))
+Input11 <- list.files(rawfolder, pattern=utils::glob2rx("06*unit_rowest*csv"))
 Input11 <- read.csv(file.path(rawfolder, Input11[length(Input11)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 #### INPUT 12: Tree LC Net Change and Tree LC net change uncertainty ####
@@ -221,7 +221,7 @@ Input12 <- read.csv(file.path(rawfolder, Input12[length(Input12)]), stringsAsFac
 
 #### INPUT 13: Overall tree LC increase or decrease -- What forest changed to for T1 and T2 (year1 and year 2) ####
 # ----------------------------------------------------------------------------------------------
-Input13 <- list.files(rawfolder, pattern=utils::glob2rx("10*unit.grpest*csv"))
+Input13 <- list.files(rawfolder, pattern=utils::glob2rx("10*unit_grpest*csv"))
 Input13 <- read.csv(file.path(rawfolder, Input13[length(Input13)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 #### Input 14: Net Land use change among all LU classes (Figure 2) 
@@ -246,22 +246,22 @@ Input17 <- read.csv(file.path(rawfolder, Input17[length(Input17)]), stringsAsFac
 
 ## Input 18: Forest Land Use Change input (Figure 6) 
 # ----------------------------------------------------------------------------------------------
-Input18 <- list.files(rawfolder, pattern=utils::glob2rx("02*unit.rowest*csv"))
+Input18 <- list.files(rawfolder, pattern=utils::glob2rx("02*unit_rowest*csv"))
 Input18 <- read.csv(file.path(rawfolder, Input18[length(Input18)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 ## Input 19: Checkerboard figure (Figure 7) 
 # ----------------------------------------------------------------------------------------------
-Input19 <- list.files(rawfolder, pattern=utils::glob2rx("09*unit.grpest*csv"))
+Input19 <- list.files(rawfolder, pattern=utils::glob2rx("09*unit_grpest*csv"))
 Input19 <- read.csv(file.path(rawfolder, Input19[length(Input19)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 ## Input 20: Checkerboard figure (Figure 8) 
 # ----------------------------------------------------------------------------------------------
-Input20 <- list.files(rawfolder, pattern=utils::glob2rx("10*unit.grpest*csv"))
+Input20 <- list.files(rawfolder, pattern=utils::glob2rx("10*unit_grpest*csv"))
 Input20 <- read.csv(file.path(rawfolder, Input20[length(Input20)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 ## Input 20: Checkerboard figure (Figure 8) 
 # ----------------------------------------------------------------------------------------------
-Input21.n <- list.files(rawfolder, pattern=utils::glob2rx("13a*unit.grpest*csv"))
+Input21.n <- list.files(rawfolder, pattern=utils::glob2rx("13a*unit_grpest*csv"))
 Input21.n <- read.csv(file.path(rawfolder, Input21.n[length(Input21.n)]), stringsAsFactors=FALSE, check.names=FALSE)
 
 ## Input 21: Table Estimated percent of T2-Cover within T2-Use; Vermont 2012-2014 (Figure 9) 

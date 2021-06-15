@@ -10,11 +10,6 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
   ## Clip (intersect) point vector layer with polygon vector layer. 
   ###################################################################################
 
-  ## Check for necessary packages
-  ###########################################################
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("spClipPoint function requires package sf")
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) xyplt=xy.uniqueid=exportsp <- NULL

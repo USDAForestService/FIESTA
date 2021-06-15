@@ -38,7 +38,11 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
 #evalEndyr=NULL
 #evalCur=FALSE
 #intensity1=FALSE
-
+#isseed=FALSE
+#savePOP=FALSE
+#xy.joinid="PLOT_ID"
+#xy.uniqueid="PLT_CN"
+#xy_dsn=NULL
 
 
   ## Check savedata 
@@ -192,7 +196,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   ##########################################
   ## Create output list
   ##########################################
-  SAdata <- list(SAdoms=SAdoms, plt=pltx, pltassgn=pltassgn, cond=condx, 
+  SAdata <- list(SAdoms=SAdoms, smallbnd=smallbnd, plt=pltx, 
+	pltassgn=pltassgn, cond=condx, 
 	dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
 	dunitlut=dunitlut, prednames=prednames, predfac=predfac,
 	zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 

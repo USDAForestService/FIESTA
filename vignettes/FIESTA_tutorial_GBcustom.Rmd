@@ -338,16 +338,16 @@ area.bh.raw <- area.bh$raw
 names(area.bh.raw)
 
 ## Raw data for estimation unit
-area.bh$raw$unit.totest
+area.bh$raw$unit_totest
 
 ## Raw data for row estimates
-area.bh$raw$unit.rowest
+area.bh$raw$unit_rowest
 
 ## Raw data for column estimates
-area.bh$raw$unit.colest
+area.bh$raw$unit_colest
 
 ## Raw data for group (cell) - level estimates
-area.bh$raw$unit.grpest
+area.bh$raw$unit_grpest
 
 ## List of titles
 area.bh$titlelst
@@ -386,16 +386,16 @@ area.bhdist.raw <- area.bhdist$raw
 names(area.bhdist.raw)
 
 ## Raw data for estimation unit
-area.bhdist$raw$unit.totest
+area.bhdist$raw$unit_totest
 
 ## Raw data for row estimates
-area.bhdist$raw$unit.rowest
+area.bhdist$raw$unit_rowest
 
 ## Raw data for column estimates
-area.bhdist$raw$unit.colest
+area.bhdist$raw$unit_colest
 
 ## Raw data for group (cell) estimates
-area.bhdist$raw$unit.grpest
+area.bhdist$raw$unit_grpest
 
 ## List of titles
 area.bhdist$titlelst
@@ -467,10 +467,10 @@ balive.bh.raw <- balive.bh$raw
 names(balive.bh.raw)
 
 ## Raw data for estimation unit
-balive.bh$raw$unit.totest
+balive.bh$raw$unit_totest
 
 ## Raw data for row estimates
-balive.bh$raw$unit.rowest
+balive.bh$raw$unit_rowest
 
 ## List of titles
 balive.bh$titlelst
@@ -498,13 +498,13 @@ balive.bhdist.raw <- balive.bhdist$raw
 names(balive.bhdist.raw)
 
 ## Raw data for total by estimation unit
-balive.bhdist$raw$unit.totest
+balive.bhdist$raw$unit_totest
 
 ## Raw data for estimation unit
 balive.bhdist$raw$totest
 
 ## Raw data for row estimates by estimation unit
-balive.bhdist$raw$unit.rowest
+balive.bhdist$raw$unit_rowest
 
 ## Raw data for total row estimates
 balive.bhdist$raw$rowest
@@ -549,16 +549,16 @@ voldead.bh.raw <- voldead.bh$raw
 names(voldead.bh.raw)
 
 ## Raw data for estimation unit
-voldead.bh$raw$unit.totest
+voldead.bh$raw$unit_totest
 
 ## Raw data for row estimates
-voldead.bh$raw$unit.rowest
+voldead.bh$raw$unit_rowest
 
 ## Raw data for column estimates
-voldead.bh$raw$unit.colest
+voldead.bh$raw$unit_colest
 
 ## Raw data for group (cell) estimates
-head(voldead.bh$raw$unit.grpest)
+head(voldead.bh$raw$unit_grpest)
 
 ## List of titles
 titlelst <- voldead.bh$titlelst
@@ -566,10 +566,10 @@ titlelst
 
 
 ## Create barplot
-datBarplot(voldead.bh$raw$unit.rowest, xvar=titlelst$title.rowvar, yvar="est")
+datBarplot(voldead.bh$raw$unit_rowest, xvar=titlelst$title.rowvar, yvar="est")
 
 ## Create fancier barplot
-datBarplot(voldead.bh$raw$unit.rowest, xvar=titlelst$title.rowvar, yvar="est",
+datBarplot(voldead.bh$raw$unit_rowest, xvar=titlelst$title.rowvar, yvar="est",
     errbars=TRUE, sevar="est.se", main=wraptitle(titlelst$title.row,75),
     ylabel=titlelst$title.yvar, divideby="million")
 
@@ -649,16 +649,16 @@ volrat.bh.raw <- volrat.bh$raw
 names(volrat.bh.raw)
 
 ## Raw data for estimation unit
-volrat.bh$raw$unit.totest
+volrat.bh$raw$unit_totest
 
 ## Raw data for row estimates
-volrat.bh$raw$unit.rowest
+volrat.bh$raw$unit_rowest
 
 ## Raw data for column estimates
-volrat.bh$raw$unit.colest
+volrat.bh$raw$unit_colest
 
 ## Raw data for group (cell) estimates
-head(volrat.bh$raw$unit.grpest)
+head(volrat.bh$raw$unit_grpest)
 
 ## List of titles
 volrat.bh$titlelst
@@ -689,16 +689,16 @@ spprat.bhdist.raw <- spprat.bhdist$raw
 names(spprat.bhdist.raw)
 
 ## Raw data for estimation unit
-spprat.bhdist$raw$unit.totest
+spprat.bhdist$raw$unit_totest
 
 ## Raw data for row estimates
-spprat.bhdist$raw$unit.rowest
+spprat.bhdist$raw$unit_rowest
 
 ## Raw data for column estimates
-spprat.bhdist$raw$unit.colest
+spprat.bhdist$raw$unit_colest
 
 ## Raw data for group (cell) estimates
-head(spprat.bhdist$raw$unit.grpest)
+head(spprat.bhdist$raw$unit_grpest)
 
 ## List of titles
 spprat.bhdist$titlelst

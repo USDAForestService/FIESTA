@@ -4,7 +4,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits=TRUE, allin1=FALSE, metric=FALSE, estround=1, pseround=2,
 	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=TRUE, addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
+	outfn.pre=NULL, outfn.date=FALSE, addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
 	raw_fmt="csv", raw_dsn=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE,
  	append_layer=FALSE, returntitle=FALSE, title.main=NULL, title.ref=NULL,
  	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.filter=NULL,
@@ -215,7 +215,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   ###################################################################################
   ## GENERATE ESTIMATES
   ###################################################################################
-  unit.totest=unit.rowest=unit.colest=unit.grpest=rowunit=totunit=tdomdattot <- NULL
+  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=tdomdattot <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
   #estvar.name <- estvar 
 
@@ -224,22 +224,22 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
     ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
-    unit.totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
+    unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
 		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
 		domain="TOTAL")
-    tabs <- FIESTA::check.matchclass(unitarea, unit.totest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
-    unit.totest <- tabs$tab2
-    setkeyv(unit.totest, unitvar)
-    unit.totest <- unit.totest[unitarea, nomatch=0]
-    unit.totest <- FIESTA::getarea(unit.totest, areavar=areavar, esttype=esttype)
+    unit_totest <- tabs$tab2
+    setkeyv(unit_totest, unitvar)
+    unit_totest <- unit_totest[unitarea, nomatch=0]
+    unit_totest <- FIESTA::getarea(unit_totest, areavar=areavar, esttype=esttype)
 #  }
 
   ## Get row estimate  
   if (rowvar != "TOTAL") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
-    unit.rowest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+    unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
 		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
 		domain=rowvar)
   }
@@ -248,13 +248,13 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   if (colvar != "NONE") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
-    unit.colest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+    unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
 		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
 		domain=colvar)
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
-    unit.grpest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
+    unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
 		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
 		domain=grpvar)
   }
@@ -263,40 +263,40 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   ## Check add0 and Add area
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
-  if (!is.null(unit.rowest)) {
-    unit.rowest <- add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+  if (!is.null(unit_rowest)) {
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
-    unit.rowest <- tabs$tab2
-    setkeyv(unit.rowest, unitvar)
-    unit.rowest <- unit.rowest[unitarea, nomatch=0]
-    unit.rowest <- FIESTA::getarea(unit.rowest, areavar=areavar, esttype=esttype)
-    setkeyv(unit.rowest, c(unitvar, rowvar))
+    unit_rowest <- tabs$tab2
+    setkeyv(unit_rowest, unitvar)
+    unit_rowest <- unit_rowest[unitarea, nomatch=0]
+    unit_rowest <- FIESTA::getarea(unit_rowest, areavar=areavar, esttype=esttype)
+    setkeyv(unit_rowest, c(unitvar, rowvar))
   }
 
-  if (!is.null(unit.colest)) {
-    unit.colest <- add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+  if (!is.null(unit_colest)) {
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
 		unitvar=unitvar, xvar.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
-    unit.colest <- tabs$tab2
-    setkeyv(unit.colest, unitvar)
-    unit.colest <- unit.colest[unitarea, nomatch=0]
-    unit.colest <- FIESTA::getarea(unit.colest, areavar=areavar, esttype=esttype)
-    setkeyv(unit.colest, c(unitvar, colvar))
+    unit_colest <- tabs$tab2
+    setkeyv(unit_colest, unitvar)
+    unit_colest <- unit_colest[unitarea, nomatch=0]
+    unit_colest <- FIESTA::getarea(unit_colest, areavar=areavar, esttype=esttype)
+    setkeyv(unit_colest, c(unitvar, colvar))
   }
-  if (!is.null(unit.grpest)) {
-    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+  if (!is.null(unit_grpest)) {
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
-    unit.grpest <- tabs$tab2
-    setkeyv(unit.grpest, unitvar)
-    unit.grpest <- unit.grpest[unitarea, nomatch=0]
-    unit.grpest <- FIESTA::getarea(unit.grpest, areavar=areavar, esttype=esttype)
-    setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
+    unit_grpest <- tabs$tab2
+    setkeyv(unit_grpest, unitvar)
+    unit_grpest <- unit_grpest[unitarea, nomatch=0]
+    unit_grpest <- FIESTA::getarea(unit_grpest, areavar=areavar, esttype=esttype)
+    setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
   ###################################################################################
@@ -357,8 +357,8 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   message("getting output...")
   estnm <- "est" 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvars=unitvars, unit.totest=unit.totest, 
-	unit.rowest=unit.rowest, unit.colest=unit.colest, unit.grpest=unit.grpest,
+	unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+	unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
  	rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol,
  	rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
 	allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
@@ -404,7 +404,8 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
             out_layer <- outfn.rawtab
           }
           datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
+ 			out_dsn=raw_dsn, out_layer=out_layer, 
+			overwrite_layer=overwrite_layer, add_layer=TRUE, 
 			append_layer=append_layer)
         }
       }

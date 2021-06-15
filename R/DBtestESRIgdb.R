@@ -7,7 +7,7 @@ DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
   if (!"arcgisbinding" %in% rownames(installed.packages())) {
     message("accessing ESRI geodatabases requires package arcgisbinding with R-ArcGIS Bridge installed")
     message("see: https://esricanada-ce.github.io/r-arcgis-tutorials/1-Getting-Started.pdf")
-    stop("")
+    #stop("")
   }
 
   arcgisbinding::arc.check_product()

@@ -8,9 +8,7 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
   ## crs - can be EPSG or PROJ.4 string
   ## ... - Arguments passed to spExportSpatial
   ##############################################################################
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("spMakeSpatialPoints function requires package sf")
-
+ 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 

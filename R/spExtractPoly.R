@@ -11,11 +11,6 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   ## to use bilinear interpolation or summarize over a window of n pixels using
   ## a specified statistic.
   #########################################################################################
-
-  ## Check for necessary packages
-  ###########################################################
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("sf package is required for spExtractPoly()")
   
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)

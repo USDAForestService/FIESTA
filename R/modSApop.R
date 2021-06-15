@@ -92,6 +92,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
     SAdoms <- SAdata$SAdoms
     #smallbnd <- SAdata$smallbnd
     tree <- SAdata$tree
+    seed <- SAdata$seed
     cond <- SAdata$cond
     plt <- SAdata$plt
     puniqueid <- SAdata$puniqueid

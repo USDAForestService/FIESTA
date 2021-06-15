@@ -176,6 +176,7 @@ SAest.dom <- function(dom, pdomdat, cuniqueid, dunitlut, dunitvar="DOMAIN",
   ## Subset tomdat to domain=dom
   pdomdat.dom <- pdomdat[pdomdat[[domain]] == dom,] 
 #dunitlut.dom=dunitlut
+#yn=response
 
   ## Apply function to each dom
   domest <- data.table(dom, SAest(yn=response, pdomdat.dom=pdomdat.dom, 

@@ -73,7 +73,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (datsource == "sqlite") {
     if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
-	 stop("RSQLite and DBI packages are required to run SQLite queries")
+	 message("RSQLite and DBI packages are required to run SQLite queries")
     }
   } 
   if (datsource %in% c("sqlite", "gdb")) {
@@ -613,13 +613,14 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
       if (!is.null(stcds) && !all(stcds %in% dbstcds)) {
         statemiss <- stcds[!stcds %in% dbstcds]
-        message("database does not include all states: ", toString(statemiss))
+        #message("database does not include all states: ", toString(statemiss))
           
         if (length(stcds) == length(statemiss)) {
-          message("database does not include states...")
+          message("no states to include...")
           return(NULL)
         } else {
           message("database does not include all states: ", toString(statemiss))
+          stcds <- stcds[!stcds %in% statemiss]
         }  
       }
 
@@ -857,7 +858,8 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           #xy.joinid <- pjoinid
           xyvars <- unique(c(xy.joinid, xy.uniqueid, xvar, yvar))
           if (xy %in% c("plot", "PLOT")) {
-            xy.qry <- paste0("select distinct ", toString(xyvars), " from ", 
+            xy.qry <- paste0("select distinct ", toString(xyvars), 
+				" from ", 
 				pfromqry, " where ", stfilter) 
           } else { 
             if (allyrs || measCur) measCur.xy <- TRUE
@@ -880,12 +882,24 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           stop("must include xy data")
         } 
 
+        ## Subset xystate to plots
+        if (nrow(xystate) > nrow(plt)) {
+          xystate2 <- xystate
+          if (puniqueid %in% names(plt) && xy.uniqueid %in% names(xystate)) {
+            xystate2 <- merge(xystate, plt[, c(pjoinid, puniqueid), with=FALSE], 
+			by.x=c(xy.joinid, xy.uniqueid), by.y=c(pjoinid, puniqueid))
+          }
+          if (nrow(xystate2) > nrow(plt)) {
+            xystate <- setDT(xystate)[, head(.SD, 1), by=xy.joinid]
+          } else {
+            xystate <- xystate2
+          }
+        }
         ## Convert xystate to sf class
         if (!"sf" %in% class(xystate)) { 
           xystate <- spMakeSpatialPoints(xystate, xy.uniqueid=xy.joinid, 
 			xvar=xvar, yvar=yvar, xy.crs=xy.crs, addxy=TRUE)
         }
-
         if (clipxy) {    ## datsource="sqlite"
 
           ## Get most current plots in database for measEndyr.filter & !measEndyr.filter

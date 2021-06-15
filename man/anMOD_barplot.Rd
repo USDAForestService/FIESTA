@@ -11,7 +11,7 @@
 anMOD_barplot(MODest, barplot.row=TRUE, barplot.ord=NULL, barplot.color=NULL, 
 	barplot.ylim = NULL, barplot.nplt = FALSE, savedata = FALSE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
-	title.ref = NULL, title.main = NULL, divideby = NULL) 
+	title.ref = NULL, title.main = NULL, divideby = NULL, ...) 
 }
 \arguments{
   \item{MODest}{ R list object. FIA estimation data from mod*est() functions. }
@@ -35,6 +35,7 @@ anMOD_barplot(MODest, barplot.row=TRUE, barplot.ord=NULL, barplot.color=NULL,
   \item{title.ref}{ String. Table title for reference. }
   \item{title.main}{ String. Main title for table and barplot. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
+  \item{...}{ Added parameters to FIESTA::datBarplot(). }
 }
  
 \value{

@@ -1,3 +1,20 @@
+FIESTA_3.0.27 (Release date: 2021-06-14)
+==============
+added anSApop_report() function 
+removed checks for sf and rgdal package in installed.packages
+changed installed.packages(.Library) to installed.packages() to check for suggests packages
+and changed from stop to message when a package does not exist
+
+
+FIESTA_3.0.26 (Release date: 2021-06-11)
+==============
+changed estimation rawdata output names
+unit.rowest	 to unit_rowest
+unit.colest to unit_colest
+unit.totest to unit_totest
+unit.grpest to unit_grpest
+
+
 FIESTA_3.0.25 (Release date: 2021-05-26)
 ==============
 DBgetPlots()

@@ -1,7 +1,8 @@
 anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL, 
-	barplot.color=NULL, barplot.ylim=NULL, barplot.nplt=FALSE,
-	savedata=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=FALSE, title.ref=NULL, title.main=NULL, divideby=NULL) {
+	barplot.color=NULL, barplot.ylim=NULL, barplot.nplt=FALSE, 
+	savedata=FALSE, outfolder=NULL, outfn.pre=NULL, 
+	outfn.date=FALSE, overwrite=FALSE, title.ref=NULL, title.main=NULL, 
+	divideby=NULL, ...) {
 
 
   ## Set global variables
@@ -9,12 +10,14 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL,
   ref_titles <- FIESTA::ref_titles
   returnlst <- list()
   toplabelvar <- NULL
+  barplot.tot <- FALSE
 
 
   ## Check GBest
   ########################################################
-  if (!all(c("est", "raw", "titlelst") %in% names(MODest)))
-    stop("MODest is invalid") 
+  if (!all(c("est", "raw", "titlelst") %in% names(MODest))) {
+    stop("MODest is invalid")
+  } 
 
 
   ## Get data from MODest
@@ -24,10 +27,12 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL,
   esttype <- raw$esttype
   rowvar <- raw$rowvar
   colvar <- raw$colvar
-  if (esttype == "TREE")
+  if (esttype == "TREE") {
     estvar <- raw$estvar
-  if (esttype == "RATIO")
+  }
+  if (esttype == "RATIO") {
     estvar <- raw$estvarn
+  }
   titlelst <- MODest$titlelst
 
 
@@ -51,8 +56,8 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL,
   }
 
   ## Check barplot.row
-  barplot.row <- FIESTA::pcheck.logical(barplot.row, varnm="barplot.row", 
-		title="Rows for barplot?", first="NO", gui=gui)  
+#  barplot.row <- FIESTA::pcheck.logical(barplot.row, varnm="barplot.row", 
+#		title="Rows for barplot?", first="NO", gui=gui)  
  
   ## Check barplot.nplots
   barplot.nplt <- FIESTA::pcheck.logical(barplot.nplt, varnm="barplot.nplt", 
@@ -86,27 +91,44 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL,
   if (!is.null(colvar) && colvar != "NONE") {
     barplot.row <- FIESTA::pcheck.logical(barplot.row, varnm = "barplot.row", 
         	title = "Row values?", first = "YES", stopifnull = TRUE)
+  } else if (rowvar == "TOTAL") {
+    barplot.tot <- TRUE
   } else {
     barplot.row <- TRUE
   }
 
-  if (barplot.row) {
+  if (barplot.tot) {
+    xvar <- titlelst$title.unitvar
+    if (!is.null(raw$totest)) {
+      btab <- raw$totest
+    } else {
+      if ("dunit_totest" %in% names(raw)) {
+        btab <- raw$dunit_totest
+      } else {
+        btab <- raw$unit_totest
+      }
+    }
+  } else if (barplot.row) {
     xvar <- titlelst$title.rowvar
     if (!is.null(raw$rowest)) {
       btab <- raw$rowest
     } else {
-      btab <- raw$unit.rowest
+      btab <- raw$unit_rowest
     }
   } else {
     xvar <- titlelst$title.colvar
     if (!is.null(raw$colest)) {
       btab <- raw$colest
     } else {
-      btab <- raw$unit.colest
+      btab <- raw$unit_colest
     }
   }
 
-  bpest <- btab[, c(xvar, estcol, secol, "NBRPLT.gt0")]
+  btab.cols <- c(xvar, estcol, secol)
+  if ("NBRPLT.gt0" %in% names(btab)) {
+    btab.cols <- c(btab.cols, "NBRPLT.gt0") 
+  }
+  bpest <- btab[, btab.cols]
 
 
   xvar <- names(bpest)[1]
@@ -137,7 +159,7 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL,
   if (!is.null(barplot.color) && 
 	barplot.color %in% c("BrewerDark2", "BrewerPaired", "BrewerBlues")) {
     if (!"RColorBrewer" %in% rownames(installed.packages())) {
-      stop("RColorBrewer package is required using Brewer colors")
+      message("RColorBrewer package is required using Brewer colors")
     }
   }
   
@@ -175,11 +197,11 @@ anMOD_barplot <- function(MODest, barplot.row=TRUE, barplot.ord=NULL,
   }
 
   if (barplot.nplt) toplabelvar <- "NBRPLT.gt0"
-  datBarplot(x=bpest, xvar=xvar, yvar=estcol, errbars=TRUE, sevar=secol, 
+  datBarplot(x=bpest, xvar=xvar, yvar=estcol, errbars=TRUE, sevar=secol,
 		savedata=savedata, outfolder=outfolder, x.order=barplot.ord,
 		outfn=bplotfn, outfn.date=outfn.date, overwrite=overwrite, 
 		device.height=7, las.xnames=2, ylabel=ylabel, col=bplot.col, 
-		main=main, ylim=barplot.ylim, toplabelvar=toplabelvar)
+		main=main, ylim=barplot.ylim, toplabelvar=toplabelvar, ...)
   
 }
 

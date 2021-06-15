@@ -1,7 +1,7 @@
 DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
 
   if (!"sqldf" %in% rownames(installed.packages())) {
-    stop("DBgetEvalid function requires package sqldf when datsource='CSV'")
+    message("DBqryCSV function requires package sqldf when datsource='CSV'")
   }
 
   ## SET OPTIONS

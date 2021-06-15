@@ -14,8 +14,8 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
 	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, multest_outfolder = NULL,
 	multest_fmt = "sqlite", multest_dsn = "SAmultest", multest.append = FALSE, 
 	multest.AOIonly = TRUE, overwrite = FALSE, barplot.compare = FALSE, 
-	smallbnd.att = NULL, title.ref = NULL, save4testing=FALSE, 
-	save4testing.append=FALSE, ...)
+	smallbnd.att = NULL, title.ref = NULL, save4testing = FALSE, 
+	save4testing.append = FALSE, testfolder = NULL, ...)
 }
 
 \arguments{
@@ -50,7 +50,9 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
   \item{title.ref}{ String. Reference string for title. }
   \item{save4testing}{ Logical. If TRUE, saves intermediate data as R objects 
 	in outfolder. }
-  \item{save4testing.append}{ Logical. Append testing data out file. }
+  \item{save4testing.append}{ Logical. If save4testing=TRUE, append testing data out file. }
+  \item{testfolder}{ String. If save4testing=TRUE, define folder of R objects. If
+	NULL, outfolder is used. }
   \item{...}{ Parameters for anSApop_ecomap. }
 }
  

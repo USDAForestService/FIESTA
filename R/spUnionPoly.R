@@ -7,9 +7,6 @@ spUnionPoly <- function(polyv1, polyv1_dsn=NULL, polyv2, polyv2_dsn=NULL,
   ## features and attributes from both polygons.
   #####################################################################################
 
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("spUnionPoly function requires package sf")
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 

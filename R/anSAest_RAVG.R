@@ -223,7 +223,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
         SAest[[outnm]] <- SAestdat$est
         SAmultest[[outnm]] <- SAestdat$dunit.multest
-        SAraw[[outnm]] <- SAestdat$raw$dunit.totest
+        SAraw[[outnm]] <- SAestdat$raw$dunit_totest
         SAtitlelst[[outnm]] <- SAestdat$titlelst
      
  

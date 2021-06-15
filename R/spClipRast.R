@@ -8,12 +8,8 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
   ## Clips a raster with a polygon.
   #####################################################################################
 
-  if (!"rgdal" %in% rownames(installed.packages()))
-    stop("spClipRast function requires package rgdal")
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]

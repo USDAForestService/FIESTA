@@ -103,12 +103,12 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
-  if (!"sqldf" %in% rownames(installed.packages(.Library))) {
-    stop("the sqldf package is required")
+  if (!"sqldf" %in% rownames(installed.packages())) {
+    message("the sqldf package is required")
   }
   if (datsource == "sqlite" && !is.null(data_dsn)) {
-    if (!"DBI" %in% rownames(installed.packages(.Library))) {
-      stop("the DBI package is required")
+    if (!"DBI" %in% rownames(installed.packages())) {
+      message("the DBI package is required")
     }
 
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)

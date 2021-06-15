@@ -107,8 +107,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ########################################################
   if (module %in% c("MA", "SA")) {
     if (module == "MA") {
-      if (!"mase" %in% rownames(installed.packages()))
-	   stop("MA module requires package mase")
+      if (!"mase" %in% rownames(installed.packages())) {
+	   message("MA module requires package mase")
+      }
       methodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
       method <- FIESTA::pcheck.varchar(var2check=method, varnm="method", gui=gui, 
 		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
@@ -116,8 +117,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
         strata <- TRUE
       }
     } else if (module == "SA") {
-      if (!any(c("JoSAE", "sae") %in% rownames(installed.packages())))
-        stop("SA module requires either package JoSAE or sae")
+      if (!any(c("JoSAE", "sae") %in% rownames(installed.packages()))) {
+        message("SA module requires either package JoSAE or sae")
+      }
     }
   }
 
@@ -1123,8 +1125,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Subset variables for pltassgnx, condx, and pltcondx
   ############################################################################
   pltassgnvars <- c(cuniqueid, pvars2keep)
-  if (popType == "P2VEG" && "P2VEG_SAMPLING_STATUS_CD" %in% names(pltcondx)) {
-    pltassgnvars <- c(pltassgnvars, "P2VEG_SAMPLING_STATUS_CD")
+  if (popType == "P2VEG") {
+    if ("P2VEG_SAMPLING_STATUS_CD" %in% names(pltcondx)) {
+      pltassgnvars <- c(pltassgnvars, "P2VEG_SAMPLING_STATUS_CD")
+    } 
+    if ("SAMP_METHOD_CD" %in% names(pltcondx)) {
+      pltassgnvars <- c(pltassgnvars, "SAMP_METHOD_CD")
+    } else {
+      message("removing nonresponse from field-visited and remotely-sensed plots")
+    }      
   }
   pltassgnx <- unique(pltcondx[, pltassgnvars, with=FALSE])
   pltassgnid <- cuniqueid
@@ -1213,16 +1222,16 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     #############################################################################
     ## Subset pltassgn and subp_condx to sampled P2VEG
     #############################################################################
-    #if (!"P2VEG_SAMPLING_STATUS_CD" %in% names(pltassgnx)) {
-    #  message("assuming all plots sample P2VEG")
+    if (!"P2VEG_SAMPLING_STATUS_CD" %in% names(pltassgnx)) {
+      message("assuming all plots sample P2VEG")
       pltassgn.P2VEG <- pltassgnx
-    #} else {
-    #  if (ACI) {
-    #    pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] %in% c(1,2),]
-    #  } else {
-    #    pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] == 1,]
-    #  }
-    #}
+    } else {
+      if (ACI) {
+        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] %in% c(1,2),]
+      } else {
+        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] == 1,]
+      }
+    }
  
     ## Subset subplots to sample P2VEG plots
 #    subp_condf <- check.matchval(subp_condx, pltassgn.P2VEG, subpuniqueid, pltassgnid, 
@@ -1259,9 +1268,11 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     #############################################################################
     if ("P2VEG_SUBP_STATUS_CD" %in% names(subp_condf)) {
       #p2veg.nonsamp.filter <- "!is.na(P2VEG_SUBP_STATUS_CD) & P2VEG_SUBP_STATUS_CD != 2"
-      p2veg.nonsamp.filter <- "is.na(P2VEG_SUBP_STATUS_CD) | P2VEG_SUBP_STATUS_CD == 1"
+      #p2veg.nonsamp.filter <- "is.na(P2VEG_SUBP_STATUS_CD) | P2VEG_SUBP_STATUS_CD == 1"
+      p2veg.nonsamp.filter <- "(SAMP_METHOD_CD == 1 & !is.na(P2VEG_SUBP_STATUS_CD)) | 
+			SAMP_METHOD_CD == 2"
     
-      subp_condf <- datFilter(x=subp_condx, xfilter=p2veg.nonsamp.filter, 
+      subp_condf <- datFilter(x=subp_condf, xfilter=p2veg.nonsamp.filter, 
 		title.filter="p2veg.nonsamp.filter")$xf
       if (is.null(subp_condf)) {
         message(paste(p2veg.nonsamp.filter, "removed all records"))

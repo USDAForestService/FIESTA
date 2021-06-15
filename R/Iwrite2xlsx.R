@@ -31,10 +31,12 @@ write2xlsx <- function(esttab, psetab=NULL, wbnm=NULL, sheetnm=NULL, tabtitle=NU
   #requireNamespace("rJava")
   #requireNamespace("xlsx")
 
-  if (!"rJava" %in% rownames(installed.packages()))
-    stop("write2xlsx requires package rJava")
-  if (!"xlsx" %in% rownames(installed.packages()))
-    stop("write2xlsx requires package xlsx")
+  if (!"rJava" %in% rownames(installed.packages())) {
+    message("write2xlsx requires package rJava")
+  }
+  if (!"xlsx" %in% rownames(installed.packages())) {
+    message("write2xlsx requires package xlsx")
+  }
 
   ## This works 
   if (Sys.getenv("JAVA_HOME")!="") 

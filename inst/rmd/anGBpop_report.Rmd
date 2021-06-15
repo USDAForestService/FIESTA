@@ -142,7 +142,7 @@ intro_text1 <- paste0("The area of ", AOInm, " located in ", title.statesx, " is
 
 if (!EVALIDator_match) {
 intro_text2 <-
-paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Woudenberg et al. 2010). The estimates are based on population data from a custom boundary, including a total of ", format(nplotspop, big.mark=","), " FIA plots. All percent sampling errors are reported at 68% confidence level.")
+paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on FIA's standard 'Green Book' estimators (Bechtold and Patterson, 2005). Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Burrill et al. 2018). The estimates are based on population data from a custom boundary, including a total of ", format(nplotspop, big.mark=","), " FIA plots. All percent sampling errors are reported at 68% confidence level.")
 
 } else {
   

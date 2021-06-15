@@ -173,7 +173,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
 
   ## Check for installed packages
   if (!"sf" %in% rownames(installed.packages())) {
-    stop("importing spatial layers requires package sf")
+    message("importing spatial layers requires package sf")
   }
  
   ## Adds to file filters to Cran R Filters table.
@@ -315,7 +315,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     }
     if (tabext %in% c("sqlite", "sqlite3", "db", "db3", "gpkg")) {
       if (!"RSQLite" %in% rownames(installed.packages())) {
-        stop("importing spatial layers requires package RSQLite")
+        message("importing spatial layers requires package RSQLite")
       }
       dbconn <- DBtestSQLite(tab_dsn, dbconnopen=TRUE, showlist=FALSE) 
       tablst <- DBI::dbListTables(dbconn)
@@ -569,15 +569,15 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
   ###########################################################
   if (out_fmt == "shp") {
     if (!"sf" %in% rownames(installed.packages())) {
-      stop("sf package is required for spExportSpatial")
+      message("sf package is required for spExportSpatial")
     }
   } else if (out_fmt %in% c("sqlite", "gpkg")) {
     if (!"RSQLite" %in% rownames(installed.packages())) {
-      stop("RSQLite package is required for exporting to sqlite or gpkg formats")
+      message("RSQLite package is required for exporting to sqlite or gpkg formats")
     }
   } else if (out_fmt %in% c("gdb")) {
     if (!"arcgisbinding" %in% rownames(installed.packages())) {
-      stop("arcgisbinding package is required for exporting to gdb format")
+      message("arcgisbinding package is required for exporting to gdb format")
     }
     arcgisbinding::arc.check_product()
   }
@@ -673,7 +673,7 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
 pcheck.colors <- function(colorlst, n) {
 
    if (!"RColorBrewer" %in% rownames(installed.packages())) {
-	stop("must install RColorBrewer package")
+     message("must install RColorBrewer package")
    }
 
    ## Check colorlst

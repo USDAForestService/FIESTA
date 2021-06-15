@@ -298,8 +298,8 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
   ####################################################################### 
   ## GENERATE ESTIMATES
   ####################################################################### 
-  unit.totest=unit.rowest=unit.colest=unit.grpest=rowunit=totunit=
-	unit.totest.str=unit.rowest.str=unit.colest.str=unit.grpest.str <- NULL
+  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=
+	unit_totest.str=unit_rowest.str=unit_colest.str=unit_grpest.str <- NULL
 
   if (!ratio) {
     phatcol <- "phat"
@@ -311,32 +311,32 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
       pbar.totest <- PBest.pbar(dom.prop=pltdom.tot, uniqueid=plotid, domain=totvar, 
 		strtype="post", stratalut=stratalut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar)
-      unit.totest <- pbar.totest$est.unit
-      if (rawdata) unit.totest.str <- pbar.totest$ybardat
-      setkeyv(unit.totest, c(unitvar, totvar))
+      unit_totest <- pbar.totest$est.unit
+      if (rawdata) unit_totest.str <- pbar.totest$ybardat
+      setkeyv(unit_totest, c(unitvar, totvar))
 
       ## Merge NBRPNTS
-      tabs <- FIESTA::check.matchclass(unit.totest, totest.pntcnt, c(unitvar, totvar))
-      unit.totest <- tabs$tab1
+      tabs <- FIESTA::check.matchclass(unit_totest, totest.pntcnt, c(unitvar, totvar))
+      unit_totest <- tabs$tab1
       totest.pntcnt <- tabs$tab2
-      unit.totest <- unit.totest[totest.pntcnt, nomatch=0]
+      unit_totest <- unit_totest[totest.pntcnt, nomatch=0]
     
       ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
       if (tabtype == "AREA" || sumunits) {
-        tabs <- FIESTA::check.matchclass(unitarea, unit.totest, unitvar)
+        tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
         unitarea <- tabs$tab1
-        unit.totest <- tabs$tab2
-        setkeyv(unit.totest, unitvar)
-        unit.totest <- unit.totest[unitarea, nomatch=0]
-        unit.totest <- PBgetest(unit.totest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
+        unit_totest <- tabs$tab2
+        setkeyv(unit_totest, unitvar)
+        unit_totest <- unit_totest[unitarea, nomatch=0]
+        unit_totest <- PBgetest(unit_totest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
       } else {
-        unit.totest <- PBgetest(unit.totest, phatcol=phatcol, phatcol.var=phatcol.var)
+        unit_totest <- PBgetest(unit_totest, phatcol=phatcol, phatcol.var=phatcol.var)
       }
 
       ## Remove rows that are filtered out (NOTinDOMAIN or 9999)
       ## Remove rows that are filtered out (NOTinDOMAIN or 9999)
-      tot.filterval <- ifelse (is.numeric(unit.totest[[totvar]]), 9999, "NOTinDOMAIN")
-      unit.totest <- unit.totest[get(eval(totvar)) != tot.filterval,]
+      tot.filterval <- ifelse (is.numeric(unit_totest[[totvar]]), 9999, "NOTinDOMAIN")
+      unit_totest <- unit_totest[get(eval(totvar)) != tot.filterval,]
     }
 
     ## Get estimate for row and columns
@@ -345,14 +345,14 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
       pbar.rowest <- PBest.pbar(dom.prop=pltdom.row, uniqueid=plotid, domain=rowvar, 
 		strtype="post", stratalut=stratalut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar)
-      unit.rowest <- pbar.rowest$est.unit
+      unit_rowest <- pbar.rowest$est.unit
       if (rawdata) {
-        unit.rowest.str <- pbar.rowest$ybardat
+        unit_rowest.str <- pbar.rowest$ybardat
       }
-      setkeyv(unit.rowest, c(unitvar, rowvar))
+      setkeyv(unit_rowest, c(unitvar, rowvar))
 
       ## Get filter value for row and column
-      row.filterval <- ifelse (is.numeric(unit.rowest[[rowvar]]), 9999, "NOTinDOMAIN")
+      row.filterval <- ifelse (is.numeric(unit_rowest[[rowvar]]), 9999, "NOTinDOMAIN")
     }
    
     ## Get column (and cell) estimate  
@@ -360,125 +360,125 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
       pbar.colest <- PBest.pbar(dom.prop=pltdom.col, uniqueid=puniqueid, 
 		domain=colvar, strtype="post", stratalut=stratalut, strunitvars=strunitvars,
  		unitvars=unitvar, strvar=strvar)
-      unit.colest <- pbar.colest$est.unit
+      unit_colest <- pbar.colest$est.unit
       if (rawdata) { 
-        unit.colest.str <- pbar.colest$ybardat
+        unit_colest.str <- pbar.colest$ybardat
       }
-      setkeyv(unit.colest, c(unitvar, colvar))
+      setkeyv(unit_colest, c(unitvar, colvar))
 
       ## Get filter value for column
-      col.filterval <- ifelse (is.numeric(unit.colest[[colvar]]), 9999, "NOTinDOMAIN")
+      col.filterval <- ifelse (is.numeric(unit_colest[[colvar]]), 9999, "NOTinDOMAIN")
 
       pbar.grpest <- PBest.pbar(dom.prop=pltdom.grp, uniqueid=puniqueid,
  		domain=grpvar, strtype="post", stratalut=stratalut, strunitvars=strunitvars,
  		unitvars=unitvar, strvar=strvar)
-      unit.grpest <- pbar.grpest$est.unit
+      unit_grpest <- pbar.grpest$est.unit
       if (rawdata) {
-        unit.grpest.str <- pbar.grpest$ybardat
+        unit_grpest.str <- pbar.grpest$ybardat
       }
-      setkeyv(unit.grpest, c(unitvar, grpvar))
+      setkeyv(unit_grpest, c(unitvar, grpvar))
     }
   } else {  ## ratio=TRUE
 
     phatcol <- "rhat"
     phatcol.var <- "rhat.var"
 
-    unit.grpest <- PBest.pbarRatio(dom.prop.n=pltdom.n, dom.prop.d=pltdom.d, 
+    unit_grpest <- PBest.pbarRatio(dom.prop.n=pltdom.n, dom.prop.d=pltdom.d, 
 		uniqueid=plotid, domain=domain, attribute=attribute, stratalut=stratalut, 
 		strunitvars=strunitvars, unitvars=unitvar, strvar=strvar)
-    setkeyv(unit.grpest, c(unitvar, grpvar))
+    setkeyv(unit_grpest, c(unitvar, grpvar))
 
     if (tabtype == "AREA") {
       pltdom <- pltdom.n
       names(pltdom) <- sub("\\.n", "", names(pltdom.n))
-      unit.grpest.domtot <- PBest.pbar(dom.prop=pltdom, uniqueid=plotid, 
+      unit_grpest.domtot <- PBest.pbar(dom.prop=pltdom, uniqueid=plotid, 
 		domain=domain, stratalut=stratalut, strunitvars=strunitvars, unitvars=unitvar,
 		strvar=strvar, strtype="post")$est.unit
-      setkeyv(unit.grpest.domtot, c(unitvar, domain))
+      setkeyv(unit_grpest.domtot, c(unitvar, domain))
     }
 
     ## Get filter value for row and column
-    row.filterval <- ifelse (is.numeric(unit.rowest[[rowvar]]), 9999, "NOTinDOMAIN")
-    col.filterval <- ifelse (is.numeric(unit.colest[[colvar]]), 9999, "NOTinDOMAIN")
+    row.filterval <- ifelse (is.numeric(unit_rowest[[rowvar]]), 9999, "NOTinDOMAIN")
+    col.filterval <- ifelse (is.numeric(unit_colest[[colvar]]), 9999, "NOTinDOMAIN")
   }
  
   ###################################################################################
   ## Check add0 and Add acres
   ###################################################################################
-  if (!is.null(unit.rowest)) {
+  if (!is.null(unit_rowest)) {
     if (getprop) {
       ## Merge number of points
-      tabs <- FIESTA::check.matchclass(unit.rowest, rowest.pntcnt, c(unitvar, rowvar))
-      unit.rowest <- tabs$tab1
+      tabs <- FIESTA::check.matchclass(unit_rowest, rowest.pntcnt, c(unitvar, rowvar))
+      unit_rowest <- tabs$tab1
       rowest.pntcnt <- tabs$tab2
-      unit.rowest <- unit.rowest[rowest.pntcnt, nomatch=0]
+      unit_rowest <- unit_rowest[rowest.pntcnt, nomatch=0]
     }
 
     ## Remove rows that are filtered out (NOTinDOMAIN or 9999)
-    unit.rowest <- unit.rowest[get(eval(rowvar)) != row.filterval,]
+    unit_rowest <- unit_rowest[get(eval(rowvar)) != row.filterval,]
 
     ## Merge uniquerow
-    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+    unit_rowest <- FIESTA::add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
-    if (!is.null(unit.rowest) && !ratio) {
+    if (!is.null(unit_rowest) && !ratio) {
       if (tabtype == "AREA" || sumunits) {
-        tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
+        tabs <- FIESTA::check.matchclass(unitarea, unit_rowest, unitvar)
         unitarea <- tabs$tab1
-        unit.rowest <- tabs$tab2
-        setkeyv(unit.rowest, unitvar)
-        unit.rowest <- unit.rowest[unitarea, nomatch=0]
-        unit.rowest <- PBgetest(unit.rowest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
-        setkeyv(unit.rowest, c(unitvar, rowvar))
+        unit_rowest <- tabs$tab2
+        setkeyv(unit_rowest, unitvar)
+        unit_rowest <- unit_rowest[unitarea, nomatch=0]
+        unit_rowest <- PBgetest(unit_rowest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
+        setkeyv(unit_rowest, c(unitvar, rowvar))
       } else {
-        unit.rowest <- PBgetest(xdat=copy(unit.rowest), phatcol=phatcol, phatcol.var=phatcol.var)
+        unit_rowest <- PBgetest(xdat=copy(unit_rowest), phatcol=phatcol, phatcol.var=phatcol.var)
       }
     }
   }
 
-  if (!is.null(unit.colest) && !ratio) {
+  if (!is.null(unit_colest) && !ratio) {
     ## Merge number of points
-    tabs <- FIESTA::check.matchclass(unit.colest, colest.pntcnt, c(unitvar, colvar))
-    unit.colest <- tabs$tab1
+    tabs <- FIESTA::check.matchclass(unit_colest, colest.pntcnt, c(unitvar, colvar))
+    unit_colest <- tabs$tab1
     colest.pntcnt <- tabs$tab2
-    unit.colest <- unit.colest[colest.pntcnt, nomatch=0]
+    unit_colest <- unit_colest[colest.pntcnt, nomatch=0]
 
     ## Remove rows that are filtered out (NOTinDOMAIN or 9999)
-    unit.colest <- unit.colest[get(eval(colvar)) != col.filterval,]
+    unit_colest <- unit_colest[get(eval(colvar)) != col.filterval,]
 
     ## Merge uniquecol
-    unit.colest <- FIESTA::add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+    unit_colest <- FIESTA::add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
 		unitvar=unitvar, xvar.add0=col.add0)
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
     if (tabtype == "AREA" || sumunits) {
-      tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
+      tabs <- FIESTA::check.matchclass(unitarea, unit_colest, unitvar)
       unitarea <- tabs$tab1
-      unit.colest <- tabs$tab2
-      setkeyv(unit.colest, unitvar)
-      unit.colest <- unit.colest[unitarea, nomatch=0]
-      unit.colest <- PBgetest(unit.colest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
-      setkeyv(unit.colest, c(unitvar, colvar))
+      unit_colest <- tabs$tab2
+      setkeyv(unit_colest, unitvar)
+      unit_colest <- unit_colest[unitarea, nomatch=0]
+      unit_colest <- PBgetest(unit_colest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
+      setkeyv(unit_colest, c(unitvar, colvar))
     } else {
-      unit.colest <- PBgetest(xdat=copy(unit.colest), phatcol=phatcol, phatcol.var=phatcol.var)
+      unit_colest <- PBgetest(xdat=copy(unit_colest), phatcol=phatcol, phatcol.var=phatcol.var)
     }
   }
-  if (!is.null(unit.grpest)) {
-    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+  if (!is.null(unit_grpest)) {
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
 
     if (tabtype == "AREA" || sumunits) {
-      tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
+      tabs <- FIESTA::check.matchclass(unitarea, unit_grpest, unitvar)
       unitarea <- tabs$tab1
-      unit.grpest <- tabs$tab2
-      setkeyv(unit.grpest, unitvar)
-      unit.grpest <- unit.grpest[unitarea, nomatch=0]
-      unit.colest <- PBgetest(unit.grpest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
-      setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
+      unit_grpest <- tabs$tab2
+      setkeyv(unit_grpest, unitvar)
+      unit_grpest <- unit_grpest[unitarea, nomatch=0]
+      unit_colest <- PBgetest(unit_grpest, areavar, phatcol=phatcol, phatcol.var=phatcol.var)
+      setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
     } else {
-      unit.grpest <- PBgetest(xdat=copy(unit.grpest), phatcol=phatcol, phatcol.var=phatcol.var)
+      unit_grpest <- PBgetest(xdat=copy(unit_grpest), phatcol=phatcol, phatcol.var=phatcol.var)
     }
   }
         
@@ -551,8 +551,8 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
   estnm <- "est"
   tabs <- est.outtabs(esttype="PHOTO", phototype=tabtype, photoratio=ratio, 
 	sumunits=sumunits, areavar=areavar, unitvar=unitvar, unitvars=unitvars,
- 	unit.totest=unit.totest, unit.rowest=unit.rowest, unit.colest=unit.colest,
- 	unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, uniquerow=uniquerow,
+ 	unit_totest=unit_totest, unit_rowest=unit_rowest, unit_colest=unit_colest,
+ 	unit_grpest=unit_grpest, rowvar=rowvar, colvar=colvar, uniquerow=uniquerow,
  	uniquecol=uniquecol, rowunit=rowunit, totunit=totunit, allin1=allin1, 
 	savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
 	title.rowvar=title.rowvar, title.colvar=title.colvar, title.unitvar=title.unitvar,
@@ -680,14 +680,14 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
       }
     }    
     if (!ratio) {
-      if (!is.null(unit.rowest.str)) {
-        rawdat$unit.rowest.str <- unit.rowest.str
+      if (!is.null(unit_rowest.str)) {
+        rawdat$unit_rowest.str <- unit_rowest.str
       }
-      if (!is.null(unit.colest.str)) {
-        rawdat$unit.colest.str <- unit.colest.str
+      if (!is.null(unit_colest.str)) {
+        rawdat$unit_colest.str <- unit_colest.str
       }
-      if (!is.null(unit.grpest.str)) {
-        rawdat$unit.grpest.str <- unit.grpest.str
+      if (!is.null(unit_grpest.str)) {
+        rawdat$unit_grpest.str <- unit_grpest.str
       }
     }
   }
@@ -747,7 +747,8 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
     if (savedata) {
       out_layer <- paste(outfn.rawdat, "gainloss", sep="_")
       datExportData(est.gainloss, out_fmt=raw_fmt, outfolder=rawfolder, 
- 		out_dsn=raw_dsn, out_layer=out_layer, overwrite_layer=overwrite_layer, 
+ 		out_dsn=raw_dsn, out_layer=out_layer, 
+		overwrite_layer=overwrite_layer, add_layer=TRUE, 
 		append_layer=append_layer)
     }          
   }

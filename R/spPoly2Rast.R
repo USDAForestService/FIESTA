@@ -8,9 +8,6 @@ spPoly2Rast <- function(polyv, polyv_dsn=NULL, polyv.att, polyv.lut=NULL,
   ## to export to an ArcGIS shapefile.
   #####################################################################################
 
-  if (!"rgdal" %in% rownames(installed.packages()))
-    stop("spPoly2Rast function requires package rgdal")
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 

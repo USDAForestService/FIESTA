@@ -8,15 +8,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	outfn.date=FALSE, outfn.pre=NULL, overwrite_dsn=FALSE, 
 	overwrite_layer=TRUE, append_layer=FALSE, ...){
 
-  ## Check for necessary packages
-  ###########################################################
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("sf package is required for spGetStrata()")
-  
-  if (!"rgdal" %in% rownames(installed.packages()))
-    stop("rgdal package is required for spGetStrata()")
-
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 

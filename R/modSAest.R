@@ -113,11 +113,13 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 
   ## Check for JoSAE library
   if (SApackage == "JoSAE") {
-    if (!"JoSAE" %in% rownames(installed.packages()))
-	 stop("SApackage JoSAE requires package JoSAE.")
+    if (!"JoSAE" %in% rownames(installed.packages())) {
+	 message("SApackage JoSAE requires package JoSAE")
+    }
   } else {
-    if (!"sae" %in% rownames(installed.packages()))
-	 stop("SApackage sae requires package sae.")
+    if (!"sae" %in% rownames(installed.packages())) {
+	 message("SApackage sae requires package sae")
+    }
   }
 
   ## Check SAmethod 
@@ -380,8 +382,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   #####################################################################################
   ## GENERATE ESTIMATES
   #####################################################################################
-  unit.totest=unit.domest=unit.domest=unit.rowest=unit.colest=unit.grpest=
-	rowunit=totunit <- NULL
+  unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   response <- estvar.name
   #setnames(cdomdat, dunitvar, "DOMAIN")
 
@@ -519,7 +520,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     nhat.var <- "JU.EBLUP.var"  
 
     ## Subset dunit.multest.unit to estimation output
-    est <- dunit.multest.unit[AOI==1, c(dunitvar, nhat, nhat.se), with=FALSE]
+    est <- dunit.multest.unit[AOI==1, c(dunitvar, nhat, nhat.se, "NBRPLT.gt0"), with=FALSE]
 
   } else if (SAmethod == "area" && !is.null(dunit.multest.area)) {
     nhat <- "JFH"
@@ -527,7 +528,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     nhat.var <- "JFH.EBLUP.var"
 
     ## Subset dunit.multest.area to estimation output
-    est <- dunit.multest.area[AOI==1, c(dunitvar, nhat, nhat.se), with=FALSE]
+    est <- dunit.multest.area[AOI==1, c(dunitvar, nhat, nhat.se, "NBRPLT.gt0"), with=FALSE]
   } else {
     est <- NULL
   }
@@ -633,10 +634,10 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   ###################################################################################
   message("getting output...")
   estnm <- "est"
-  unit.totest <- setDT(est)
+  unit_totest <- setDT(est)
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=smallbnd.att, unit.totest=unit.totest, unit.rowest=unit.rowest, 
-	unit.colest=unit.colest, unit.grpest=unit.grpest, rowvar=rowvar, colvar=colvar, 
+	unitvar=smallbnd.att, unit_totest=unit_totest, unit_rowest=unit_rowest, 
+	unit_colest=unit_colest, unit_grpest=unit_grpest, rowvar=rowvar, colvar=colvar, 
 	uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
 	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
 	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
@@ -651,7 +652,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 
   if (rawdata) {
     rawdat <- tabs$rawdat
-    names(rawdat)[names(rawdat) == "unit.totest"] <- "dunit.totest"
+    names(rawdat)[names(rawdat) == "unit_totest"] <- "dunit_totest"
     rawdat$domdat <- setDF(cdomdat)
     rawdat$estvar <- response
     rawdat$estvar.filter <- estvar.filter
@@ -674,11 +675,17 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
         tabnm <- names(rawdat[i])
         rawtab <- rawdat[[i]]
         outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm, ".csv") 
-        if (!tabnm %in% c("estvar", "estvar.filter")) {
-          suppressWarnings(save1tab(tab=rawtab, tab.title=title.raw, 
-			outfolder=rawfolder, allin1=allin1, coltitlerow=FALSE, 
-			rowtotal=FALSE, outfn=outfn.rawtab, addtitle=FALSE,
-			addformat=FALSE, outfn.date=outfn.date, overwrite=TRUE))
+
+        if (is.data.frame(rawtab)) {
+          if (raw_fmt != "csv") {
+            out_layer <- tabnm 
+          } else {
+            out_layer <- outfn.rawtab
+          }
+          datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
+ 			out_dsn=raw_dsn, out_layer=out_layer, 
+			overwrite_layer=overwrite_layer, add_layer=TRUE, 
+			append_layer=append_layer)
         }
       }
     }

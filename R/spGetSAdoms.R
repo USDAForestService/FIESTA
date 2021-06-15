@@ -67,6 +67,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   polyunion <- FALSE
   largeishelper <- FALSE
   maxislarge <- FALSE
+  #smallishelper <- FALSE
 
 
   ## Check savedata
@@ -234,6 +235,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ## If helperbnd=NULL, check smallbnd for helperbnd.unique
   if (is.null(helperbndx)) {
     helperbndx <- smallbndx
+    #smallishelper <- TRUE
     helperbnd.unique <- pcheck.varchar(var2check=helperbnd.unique, 
 		varnm="helperbnd.unique", gui=gui, checklst=names(helperbndx), 
 		caption="Helper areas attribute")
@@ -386,13 +388,13 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     if (!is.null(maxbndx) && !is.null(largebndx) && !maxislarge) {
       ## Clip largebndx to maxbnd extent
       largebndx <- spClipPoly(polyv=largebndx, clippolyv=maxbndx,
- 		exportsp=savesteps, outfolder=outfolder, outshpnm="largebnd.clip")
+ 		exportsp=savesteps, outfolder=outfolder, out_layer="largebnd_clip")
     }
 
     if (!is.null(largebndx) && !largeishelper) {
       ## Clip helperbndx to largebnd extent
       helperbndx <- spClipPoly(polyv=helperbndx, clippolyv=largebndx,
- 		exportsp=savesteps, outfolder=outfolder, outshpnm="helperbnd.clip")
+ 		exportsp=savesteps, outfolder=outfolder, out_layer="helperbnd_clip")
     }
 
     ## Add DOMAIN column to all rows

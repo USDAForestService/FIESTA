@@ -16,7 +16,7 @@ anGBest_batch <- function(GBpopdatlst=NULL, esttype="AREA", estseed="none",
   if (sumunits) {
     exportlst <- c("totest", "rowest", "colest", "grpest")
   } else {
-    exportlst <- c("unit.totest", "unit.rowest", "unit.colest", "unit.grpest")
+    exportlst <- c("unit_totest", "unit_rowest", "unit_colest", "unit_grpest")
   }
 
   ## Check esttype 

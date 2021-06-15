@@ -498,8 +498,8 @@ getestvar <- function() {
 
 
 
-crossxbyunit <- function(unit=NULL, unit.grpest=NULL, unit.rowest=NULL, 
-	unit.colest=NULL, unit.totest=NULL, unitvar, rowvar, colvar, 
+crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL, 
+	unit_colest=NULL, unit_totest=NULL, unitvar, rowvar, colvar, 
 	estnm, psenm, allin1, char.width, estnull, psenull, 
 	estround=NULL, pseround=NULL,
 	rowgrp=NULL, rowgrpnm=NULL, title.rnames=NULL, numunits, 
@@ -510,36 +510,36 @@ crossxbyunit <- function(unit=NULL, unit.grpest=NULL, unit.rowest=NULL,
   ## set global variables
   total.est=rowvar.est=colvar.est=group.est <- NULL
 
-  if (!is.null(unit.totest)) {
+  if (!is.null(unit_totest)) {
     if (!is.null(unit)) {
-      total.est <- unit.totest[get(unitvar) == unit,]
+      total.est <- unit_totest[get(unitvar) == unit,]
     } else {
-      total.est <- unit.totest
+      total.est <- unit_totest
     }
   }
-  if (!is.null(unit.rowest)) {
+  if (!is.null(unit_rowest)) {
     if (!is.null(unit)) {
-      rowvar.est <- unit.rowest[get(unitvar) == unit,]
+      rowvar.est <- unit_rowest[get(unitvar) == unit,]
     } else {
-      rowvar.est <- unit.rowest
+      rowvar.est <- unit_rowest
     }
   } else {
     rowtotal <- FALSE
   }
-  if (!is.null(unit.colest)) {
+  if (!is.null(unit_colest)) {
     if (!is.null(unit)) {
-      colvar.est <- unit.colest[get(unitvar) == unit,]
+      colvar.est <- unit_colest[get(unitvar) == unit,]
     } else {
-      colvar.est <- unit.colest
+      colvar.est <- unit_colest
     }
   } else {
     coltitlerow <- FALSE
   }
-  if (!is.null(unit.grpest)) {
+  if (!is.null(unit_grpest)) {
     if (!is.null(unit)) {
-      group.est <- unit.grpest[get(unitvar) == unit,]
+      group.est <- unit_grpest[get(unitvar) == unit,]
     } else {
-      group.est <- unit.grpest
+      group.est <- unit_grpest
     }
   }  
   if (nrow(group.est) == 0) return(NULL)

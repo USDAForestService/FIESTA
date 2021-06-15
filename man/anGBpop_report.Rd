@@ -1,10 +1,10 @@
 \name{anGBpop_report}
 \alias{anGBpop_report}
 \title{
-	ANALYSIS - Generate a report from core tables for Green-Book custom population.
+	ANALYSIS - Generate a report for Green-Book custom population.
 }
 \description{
-	Generates a report from a set of core tables based on area of interest.
+	Generates a standard report based on area of interest.
 }
 \usage{
 anGBpop_report(GBpopdat, AOInm, photofn = NULL, photo_author = NULL, 

@@ -5,7 +5,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
  	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="SAmultest", 
 	multest.append=FALSE, multest.AOIonly=TRUE, overwrite=FALSE, 
 	barplot.compare=FALSE, smallbnd.att=NULL, title.ref=NULL, 
-	save4testing=FALSE, save4testing.append=FALSE, ...) {
+	save4testing=FALSE, save4testing.append=FALSE, testfolder=NULL, ...) {
 
 
   ## Set global variables
@@ -44,6 +44,12 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
     #  outfolder <- file.path(outfolder, outfn.pre)
     #  if (!dir.exists(outfolder)) dir.create(outfolder)
     #}
+    if (save4testing) {
+      testfolder <- pcheck.outfolder(testfolder, gui=gui)
+      if (is.null(testfolder)) {
+        testfolder <- outfolder
+      }
+    }
   }
 
   ###########################################################################
@@ -163,16 +169,16 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   }
   if (save4testing) {
     if (!is.null(outfn.pre)) {
-      save(dunitlut, file=file.path(outfolder, paste(outfn.pre, "_dunitlut.rda")))
-      save(pltdom, file=file.path(outfolder, paste(outfn.pre, "_pltdom.rda")))
+      save(dunitlut, file=file.path(testfolder, paste(outfn.pre, "_dunitlut.rda")))
+      save(pltdom, file=file.path(testfolder, paste(outfn.pre, "_pltdom.rda")))
     } else {
-      datExportData(dunitlut, outfolder=outfolder, out_layer="dunitlut", 
+      datExportData(dunitlut, outfolder=testfolder, out_layer="dunitlut", 
 		overwrite_layer=overwrite, append_layer=save4testing.append)
-      datExportData(pltdom, outfolder=outfolder, out_layer="pltdom", 
+      datExportData(pltdom, outfolder=testfolder, out_layer="pltdom", 
 		overwrite_layer=overwrite, append_layer=save4testing.append)
 
-      #save(dunitlut, file=file.path(outfolder, "dunitlut.rda"))
-      #save(pltdom, file=file.path(outfolder, "pltdom.rda"))
+      #save(dunitlut, file=file.path(testfolder, "dunitlut.rda"))
+      #save(pltdom, file=file.path(testfolder, "pltdom.rda"))
     }
   }
 

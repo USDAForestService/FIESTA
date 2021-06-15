@@ -21,7 +21,7 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	smallbnd.ecofilter = NULL, maxbnd.threshold = 10, largebnd.threshold = 10,
 	nbrdom.min = 10, RS = NULL, xy = NULL, xy_dsn = NULL, xy.joinid = "PLOT_ID", 
 	datsource = "sqlite", SQLitefn, measEndyr = NULL, measEndyr.filter = NULL, 
-	rastlst.cont = NULL, rastlst.cont.name = NULL, 
+	intensity1 = TRUE, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, 
 	showsteps = FALSE, savedata = FALSE, savexy = FALSE, saveobj = TRUE, 
 	outfolder = NULL, out_fmt = "sqlite", out_dsn = "SApopdat", outfn.date = FALSE, 
@@ -76,6 +76,7 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
   \item{measEndyr}{ Logical. Extract plots with most current measurement for 
 	state(s) for years measured before measEndyr. }
   \item{measEndyr.filter}{ Filter. If measEndyr=NULL, a filter for plots. }
+  \item{intensity1}{ Logical. If TRUE, include only plots with intensity=1. }
   \item{rastlst.cont}{ String vector or list. Continuous rasters (file names 
 	or raster objects). }
   \item{rastlst.cont.name}{ String vector. Output names for continuous rasters. 

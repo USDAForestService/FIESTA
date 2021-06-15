@@ -32,15 +32,16 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   keycondx <- key(condx)
 
   ## Condition proportion variable
-  varlst <- areawt
-  #varlst <- c(areawt, "SUBPPROP_UNADJ", "MACRPROP_UNADJ")
+  #varlst <- areawt
+  varlst <- c(areawt, "SUBPPROP_UNADJ", "MACRPROP_UNADJ")
  
   ## veg.samp.filter
   veg.samp.filter <- "P2VEG_SAMPLING_STATUS_CD == 1"
 
   ## Get list of condition-level variables to calculate adjustments for
   if (!is.null(treex)) {  
-    tvarlst <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
+    tvarlst <- c("MICRPROP_UNADJ")
+    #tvarlst <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
     tvarlst2 <- tvarlst[which(tvarlst%in% names(condx))]
     if (length(tvarlst2) == 0) stop("must include *PROP_UNADJ variables in cond")
     varlst <- unique(c(varlst, tvarlst2))

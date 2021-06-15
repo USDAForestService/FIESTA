@@ -253,8 +253,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   stratcombinelut <- auxdat$unitstrgrplut
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   strunitvars <- c(unitvar, strvar)
-  if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
- 
+  if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
 
 
   ###################################################################################

@@ -3,8 +3,9 @@ anGBpop_ADFOR <- function(ADFOR.name=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
 
 
   ## Check for packages
-  if (!"FIESTAdata" %in% rownames(installed.packages()))
-    stop("FIESTAdata package is required for anGBest_ADFOR()")
+  if (!"FIESTAdata" %in% rownames(installed.packages())) {
+    message("FIESTAdata package is required for anGBest_ADFOR()")
+  }
 
   ## Set global variables
   gui <- TRUE

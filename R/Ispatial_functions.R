@@ -206,12 +206,10 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   }
 
   ## Check for installed packages
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("importing spatial layers requires package sf")
   if (!is.null(fmt)) {
     if (fmt == "gdb") {
       if (!"arcgisbinding" %in% rownames(installed.packages())) {
-        stop("importing spatial layers from *gdb requires package arcgisbinding")
+        message("importing spatial layers from *gdb requires package arcgisbinding")
       }
     }
   } 
@@ -770,15 +768,17 @@ spPlotRastcl <- function(rastcl, bks=NULL, col.bks=NULL, col.palette=NULL, ext=N
   ##  rastcl	- classified raster
   ##  bks		- raster breaks
 
-  if (!"raster" %in% rownames(installed.packages()))
+  if (!"raster" %in% rownames(installed.packages())) {
     stop("displaying raster class objects requires package raster")
-
-  if (class(rastcl) != "RasterLayer") stop("rastcl must be a Rasterlayer")
+  }
+  if (class(rastcl) != "RasterLayer") {
+    stop("rastcl must be a Rasterlayer")
+  }
   
   ## Define class breaks of rastcl
-  if (is.null(bks))
+  if (is.null(bks)) {
     bks <- sort(raster::unique(rastcl, na.last=NA))
-  
+  }
   if (min(bks) == 0) {
     bks <- c(-1, bks)
   } else {    

@@ -8,9 +8,7 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
   ## Arguments:
   ## areaunits - area calculation units ("ACRES", "HECTARES", "SQKM")
   #####################################################################################
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("spClipPoint function requires package sf")
-
+ 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
@@ -19,12 +17,12 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::spClipPoly)), 
-		names(formals(FIESTA::spMakeSpatialPoints)))
-  if (!all(input.params %in% formallst)) {
-    miss <- input.params[!input.params %in% formallst]
-    stop("invalid parameter: ", toString(miss))
-  }
+#  formallst <- c(names(formals(FIESTA::spClipPoly)), 
+#		names(formals(FIESTA::spMakeSpatialPoints)))
+#  if (!all(input.params %in% formallst)) {
+#    miss <- input.params[!input.params %in% formallst]
+#    stop("invalid parameter: ", toString(miss))
+#  }
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -69,13 +67,14 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
 
 
   ## Calculate area
-  if (areacalc) 
+  if (areacalc) {
     ipoly <- areacalc.poly(ipoly, unit=areaunits)
-
+  }
+ 
   ## Export clipped poly
-  if (exportsp) 
+  if (exportsp) {
     spExportSpatial(ipoly, ...)
-  
+  }
 
   return(ipoly)    
 }

@@ -8,9 +8,6 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
   ## Extracts summary statistics by polygon (i.e., zone).  
   ##################################################################################### 
 
-  if (!"sf" %in% rownames(installed.packages()))
-    stop("spZonalRast function requires package sf")
-
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE 
   gui <- ifelse(nargs() == 0, TRUE, FALSE)  
 

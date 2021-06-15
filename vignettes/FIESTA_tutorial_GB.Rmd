@@ -354,8 +354,8 @@ kable(stratdat.lut,
 The raw data includes the domain-level data set used for estimation and separate data frames with calculated variables used in estimation process. The number of processing tables depends on the input parameters. The tables include:
 
 * **raw$domdat**      - Plot domain data used for estimation.
-* **raw$unit.totest** - Total by estimation unit 
-* **raw$unit.rowest** - If rowvar != NULL, rowvar totals by estimation unit
+* **raw$unit_totest** - Total by estimation unit 
+* **raw$unit_rowest** - If rowvar != NULL, rowvar totals by estimation unit
 * **raw$unit.colvar** - If colvar != NULL, colvar totals by estimation unit
 * **raw$unit.grpvar** - If colvar != NULL, a combination of rowvar and colvar by estimation unit
 * If sumunits=TRUE, the raw data for the summed estimation units are also included: (totest, rowest, colest, grpest, respectively). These tables do not included estimate proportions (nhat and nhat.var). See below for variable descriptions.
@@ -610,7 +610,7 @@ area1$est
 ## Get list of raw data from area1 list components and look at names
 raw.tot <- area1$raw
 names(raw.tot)
-raw.tot$unit.totest	# Raw data for total estimates by estimation unit
+raw.tot$unit_totest	# Raw data for total estimates by estimation unit
 raw.tot$totest		  # Raw data for total estimates by estimation unit summed to one estimate
 
 ## Look at population data
@@ -682,7 +682,7 @@ area3c$pse
 raw.rowcol <- area3c$raw
 names(raw.rowcol)
 
-head(raw.rowcol$unit.grpest)
+head(raw.rowcol$unit_grpest)
 head(raw.rowcol$grpest)
 
 ## Get list of titles from area3c list components
@@ -787,7 +787,7 @@ tree1$est
 ## Get list of raw data from tree1 list components and look at names
 raw.tot <- tree1$raw
 names(raw.tot)
-raw.tot$unit.totest	# Raw data for total estimates by estimation unit
+raw.tot$unit_totest	# Raw data for total estimates by estimation unit
 raw.tot$totest		  # Raw data for total estimates by estimation unit summed to one estimate
 
 ## Look at population data
@@ -861,7 +861,7 @@ tree3c$pse
 raw.rowcol <- tree3c$raw
 names(raw.rowcol)
 
-head(raw.rowcol$unit.grpest)
+head(raw.rowcol$unit_grpest)
 head(raw.rowcol$grpest)
 
 ## Get list of titles from area3c list components
@@ -1066,7 +1066,7 @@ rat1$est
 ## Get list of raw data from tree1 list components and look at names
 raw.tot <- rat1$raw
 names(raw.tot)
-raw.tot$unit.totest	# Raw data for total estimates by estimation unit
+raw.tot$unit_totest	# Raw data for total estimates by estimation unit
 raw.tot$totest		  # Raw data for total estimates by estimation unit summed to one estimate
 
 ## Look at population data
@@ -1114,7 +1114,7 @@ names(rat3)
 rat3$est
 rat3$pse
 names(rat3$raw)
-head(rat3$raw$unit.grpest)
+head(rat3$raw$unit_grpest)
 head(rat3$raw$grpest)
 rat3$titlelst
 

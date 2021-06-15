@@ -266,7 +266,7 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   ############################################################################
   ## GENERATE ESTIMATES
   ############################################################################
-  unit.totest=unit.tdomest=unit.grpest=unit.rowest=unit.colest=unit.grpest=
+  unit_totest=unit.tdomest=unit_grpest=unit_rowest=unit_colest=unit_grpest=
 	rowunit=totunit <- NULL
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlstn) && length(tdomvarlstn) > 1)), TRUE, FALSE)
@@ -279,35 +279,35 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
     tdomdat$TOTAL <- 1
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
-    unit.totest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+    unit_totest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdattot, uniqueid=cuniqueid, strlut=strlut, unitvar=unitvar, 
 		strvar=strvar, domain="TOTAL")
-    tabs <- FIESTA::check.matchclass(unitarea, unit.totest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
-    unit.totest <- tabs$tab2
-    setkeyv(unit.totest, unitvar)
-    unit.totest <- unit.totest[unitarea, nomatch=0]
-    unit.totest <- FIESTA::getarea(unit.totest, areavar=areavar, esttype=esttype)
+    unit_totest <- tabs$tab2
+    setkeyv(unit_totest, unitvar)
+    unit_totest <- unit_totest[unitarea, nomatch=0]
+    unit_totest <- FIESTA::getarea(unit_totest, areavar=areavar, esttype=esttype)
   }
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
-    unit.rowest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+    unit_rowest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut, unitvar=unitvar, strvar=strvar, domain=rowvar)
 
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
-      unit.colest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+      unit_colest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut, unitvar=unitvar, strvar=strvar, domain=colvar)
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
-      unit.grpest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
+      unit_grpest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		strlut=strlut, unitvar=unitvar, strvar=strvar, domain=grpvar)
 
@@ -318,41 +318,41 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
   ## Check add0 and Add area
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
-  if (!is.null(unit.rowest)) {
-    unit.rowest <- FIESTA::add0unit(x=unit.rowest, xvar=rowvar, uniquex=uniquerow, 
+  if (!is.null(unit_rowest)) {
+    unit_rowest <- FIESTA::add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit.rowest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
-    unit.rowest <- tabs$tab2
-    setkeyv(unit.rowest, unitvar)
-    unit.rowest <- unit.rowest[unitarea, nomatch=0]
-    unit.rowest <- getarea(unit.rowest, areavar=areavar, esttype=esttype)
-    setkeyv(unit.rowest, c(unitvar, rowvar))
+    unit_rowest <- tabs$tab2
+    setkeyv(unit_rowest, unitvar)
+    unit_rowest <- unit_rowest[unitarea, nomatch=0]
+    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
+    setkeyv(unit_rowest, c(unitvar, rowvar))
   }
 
-  if (!is.null(unit.colest)) {
-    unit.colest <- FIESTA::add0unit(x=unit.colest, xvar=colvar, uniquex=uniquecol, 
+  if (!is.null(unit_colest)) {
+    unit_colest <- FIESTA::add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
 		unitvar=unitvar, xvar.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit.colest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
-    unit.colest <- tabs$tab2
-    setkeyv(unit.colest, unitvar)
-    unit.colest <- unit.colest[unitarea, nomatch=0]
-    unit.colest <- FIESTA::getarea(unit.colest, areavar=areavar, esttype=esttype)
-    setkeyv(unit.colest, c(unitvar, colvar))
+    unit_colest <- tabs$tab2
+    setkeyv(unit_colest, unitvar)
+    unit_colest <- unit_colest[unitarea, nomatch=0]
+    unit_colest <- FIESTA::getarea(unit_colest, areavar=areavar, esttype=esttype)
+    setkeyv(unit_colest, c(unitvar, colvar))
   }
 
-  if (!is.null(unit.grpest)) {
-    unit.grpest <- add0unit(x=unit.grpest, xvar=rowvar, uniquex=uniquerow, 
+  if (!is.null(unit_grpest)) {
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit.grpest, unitvar)
+    tabs <- FIESTA::check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
-    unit.grpest <- tabs$tab2
-    setkeyv(unit.grpest, unitvar)
-    unit.grpest <- unit.grpest[unitarea, nomatch=0]
-    unit.grpest <- FIESTA::getarea(unit.grpest, areavar=areavar, esttype=esttype)
-    setkeyv(unit.grpest, c(unitvar, rowvar, colvar))
+    unit_grpest <- tabs$tab2
+    setkeyv(unit_grpest, unitvar)
+    unit_grpest <- unit_grpest[unitarea, nomatch=0]
+    unit_grpest <- FIESTA::getarea(unit_grpest, areavar=areavar, esttype=esttype)
+    setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
   ###################################################################################
@@ -421,8 +421,8 @@ modFAOest <- function(tree=NULL, base=NULL, cluster=NULL, clustassgn=NULL,
  
   estnm <- ifelse(esttype == "RATIO", "rhat", "est")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvars=unitvars, unit.totest=unit.totest, 
-	unit.rowest=unit.rowest, unit.colest=unit.colest, unit.grpest=unit.grpest, 
+	unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+	unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
 	rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
 	rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
 	allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
