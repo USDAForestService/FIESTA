@@ -37,7 +37,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
  
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, uniqueid=uniqueid, 
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=uniqueid, 
 		exportsp=FALSE, ...)
   } else {
     ## GET uniqueid
