@@ -104,4 +104,26 @@ spExtractPoly(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", polyvlst,
   Any names in polygon layers that are the same as in xyplt are renamed to name'_1'.
 }
 
+
+\examples{
+
+  ## Get point data from WYplt data in FIESTA
+  WYplt <- FIESTA::WYplt
+
+  ## Get polygon vector layer from FIESTA external data
+  WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+
+  ## Extract points from polygon vector layer
+  xyext <- spExtractPoly(xyplt=WYplt, polyvlst=WYbhdistfn,
+		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+  names(xyext)
+  xyext$outnames
+  sppltext <- xyext$sppltext
+  head(sppltext)
+  xyext$inputdf
+
+  ## Plot extracted values of national forest district
+  plot(sppltext["DISTRICTNU"])
+}
+
 \keyword{ data }

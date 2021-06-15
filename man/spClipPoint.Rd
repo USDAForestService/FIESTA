@@ -99,4 +99,24 @@ spClipPoint(xyplt, xyplt_dsn = NULL, xy.uniqueid = "PLT_CN", clippolyv,
 
 }
 
+\examples{
+
+  ## Get point data from WYplt data in FIESTA
+  WYplt <- FIESTA::WYplt
+
+  ## Get polygon vector layer from FIESTA external data
+  WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+
+  ## Extract points from polygon vector layer
+  xyext <- spClipPoint(xyplt=WYplt, clippolyv=WYbhdistfn, clippolyv.filter="DISTRICTNU == '03'", 
+		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+  names(xyext)
+  xyplt <- xyext$clip_xyplt
+  polyv <- xyext$clip_polyv
+
+  ## Plot extracted values of national forest district
+  plot(st_geometry(polyv))
+  plot(st_geometry(xyplt), add=TRUE)
+}
+
 \keyword{ data }

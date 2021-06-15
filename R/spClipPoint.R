@@ -1,4 +1,4 @@
-spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN", 
+spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
 	clippolyv, clippolyv_dsn=NULL, clippolyv.filter=NULL, showext=FALSE, 
 	keepNA=FALSE, savedata=FALSE, returnsp=TRUE, exportsp=FALSE, 
 	outfolder=NULL, out_fmt="shp", out_dsn=NULL, out_layer="pnt", 
@@ -12,7 +12,7 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-  if (gui) xyplt=xy.uniqueid=exportsp <- NULL
+  if (gui) xyplt=uniqueid=exportsp <- NULL
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
@@ -36,15 +36,15 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
  
   if (!"sf" %in% class(sppntx)) { 
     ## Create spatial object from xyplt coordinates
-    sppntx <- spMakeSpatialPoints(sppntx, xy.uniqueid=xy.uniqueid, 
+    sppntx <- spMakeSpatialPoints(sppntx, xy.uniqueid=uniqueid, 
 		exportsp=FALSE, ...)
   } else {
-    ## GET xy.uniqueid
+    ## GET uniqueid
     sppntnames <- names(sppntx)
-    xy.uniqueid <- FIESTA::pcheck.varchar(var2check=xy.uniqueid, 
-		varnm="xy.uniqueid", gui=gui, 
+    uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, 
+		varnm="uniqueid", gui=gui, 
 		checklst=sppntnames, caption="UniqueID of xyplt", 
-		warn=paste(xy.uniqueid, "not in xyplt"), stopifnull=TRUE)
+		warn=paste(uniqueid, "not in xyplt"), stopifnull=TRUE)
   }
 
   ###################################################################################
@@ -95,7 +95,7 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
 
   ## Clip points that intersect polygon
   injoin <- sf::st_join(sppntx, clippolyvx, join=st_intersects, left=FALSE)
-  inpnts <- sppntx[sppntx[[xy.uniqueid]] %in% injoin[[xy.uniqueid]],]
+  inpnts <- sppntx[sppntx[[uniqueid]] %in% injoin[[uniqueid]],]
 
   if (showext) {
     plot(sf::st_geometry(clippolyvx))
@@ -104,7 +104,7 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
 
   ## Get outside points
   if (keepNA)
-    outpnt <- sppntx[!sppntx[[xy.uniqueid]] %in% injoin[[xy.uniqueid]],]
+    outpnt <- sppntx[!sppntx[[uniqueid]] %in% injoin[[uniqueid]],]
 
   ## Clip othertables
   if (!is.null(othertabnms)) {
@@ -113,7 +113,7 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
       stop("invalid othertabnms: ", paste(miss, collapse=", "))
     }
     othertabs <- lapply(othertabnms, function(x) get(x, envir=environment()))
-    intabs <- clip.othertables(inpnts[[xy.uniqueid]], othertabnms=othertabnms,
+    intabs <- clip.othertables(inpnts[[uniqueid]], othertabnms=othertabnms,
 		othertabs=othertabs, savedata=savedata, outfn.pre=outfn.pre, 
 		outfolder=outfolder, out_dsn=out_dsn, outfn.date=outfn.date, 
 		overwrite=overwrite)
@@ -121,8 +121,8 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
 
   ## Write data to outfolder
   if (exportsp) {
-    if (out_fmt == "shp" && nrow(inpnts) > length(unique(inpnts[[xy.uniqueid]])))
-      message("cannot export shapefile... more than 1 record per xy.uniqueid")
+    if (out_fmt == "shp" && nrow(inpnts) > length(unique(inpnts[[uniqueid]])))
+      message("cannot export shapefile... more than 1 record per uniqueid")
     spExportSpatial(inpnts, out_layer=out_layer, out_dsn=out_dsn, 
 		out_fmt=out_fmt, outfolder=outfolder, outfn.pre=outfn.pre, 
 		outfn.date=outfn.date, overwrite_layer=overwrite, append_layer=TRUE) 
@@ -138,7 +138,7 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid="PLT_CN",
    		
 
   if (!returnsp) inpnts <- sf::st_drop_geometry(inpnts)
-  returnlst <- list(clip_xyplt=inpnts, xy.uniqueid=xy.uniqueid, clip_polyv=clippolyvx)
+  returnlst <- list(clip_xyplt=inpnts, uniqueid=uniqueid, clip_polyv=clippolyvx)
   if (!is.null(intabs)) returnlst$clip_tabs <- intabs
   
   return(returnlst)

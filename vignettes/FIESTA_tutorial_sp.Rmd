@@ -237,7 +237,7 @@ sf::st_crs(WYspplt.utm12)
 ```
 ###################################################################################
 # Usage:
-# spClipPoint(xyplt, xyplt_dsn = NULL, xy.uniqueid = "PLT_CN", 
+# spClipPoint(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
 #     clippolyv, clippolyv_dsn = NULL, clippolyv.filter = NULL, showext = FALSE,  
 #     keepNA = FALSE, savedata = FALSE, returnsp = TRUE, exportsp = FALSE, 
 #     outfolder = NULL, out_fmt = "shp", out_dsn = NULL, out_layer = "pnt", 
@@ -249,7 +249,7 @@ sf::st_crs(WYspplt.utm12)
 ###################################################################################
 
 ## Get points within Bighorn National Forest boundary (project on the fly)
-WYbhptslst <- FIESTA::spClipPoint(xyplt=WYplt, xy.uniqueid="CN", clippolyv=WYbh, 
+WYbhptslst <- FIESTA::spClipPoint(xyplt=WYplt, uniqueid="CN", clippolyv=WYbh, 
     xvar="LON_PUBLIC", yvar="LAT_PUBLIC", prj="longlat", datum="NAD83")
 names(WYbhptslst)
 WYbhspplt <- WYbhptslst$clip_xyplt
@@ -267,13 +267,13 @@ plot(sf::st_geometry(WYbhspplt), add=TRUE)
 
 
 ## Generate a sf object first, then clip sf points 
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
+WYspplt <- FIESTA::spMakeSpatialPoints(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", 
         yvar="LAT_PUBLIC", xy.crs=4269)
 WYbhptslst <- spClipPoint(xyplt=WYspplt, xy.uniqueid="CN", clippolyv=WYbh)
 
 
 ## Subset other tables with clipped points
-WYbhptslst <- spClipPoint(xyplt=WYspplt, xy.uniqueid="CN", clippolyv=WYbh, 
+WYbhptslst <- spClipPoint(xyplt=WYspplt, uniqueid="CN", clippolyv=WYbh, 
         othertabnms=c("WYcond", "WYtree"))
 names(WYbhptslst)
 

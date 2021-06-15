@@ -117,4 +117,31 @@ spExtractRast(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", rastlst,
 	data shifts when reprojecting. See spTransform help documentation for more details.
 }
 
+\examples{
+
+  ## Get point data from WYplt data in FIESTA
+  WYplt <- FIESTA::WYplt
+
+  ## Get raster layers from FIESTA external data
+  fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
+  demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
+
+
+  ## Extract points from raster
+  xyext <- spExtractRast(xyplt=WYplt, rastlst=c(fornffn, demfn), var.name=c("fornf", "dem"),
+		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+  names(xyext)
+  xyext$outnames
+  sppltext <- xyext$sppltext
+  head(sppltext)
+  xyext$inputdf
+
+  ## Plot extracted values of forest/nonforest
+  plot(sppltext["fornf"])
+
+  ## Plot extracted values of dem (i.e., elevation)
+  plot(sppltext["dem"])
+ 
+}
+
 \keyword{ data }

@@ -208,7 +208,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         stop("must include xy to clip plots")
       }
 
-      clipdat <- spClipPoint(xyplt=xy, xy.uniqueid=xy.joinid, 
+      clipdat <- spClipPoint(xyplt=xy, uniqueid=xy.joinid, 
 			xvar=xvar, yvar=yvar, xy.crs=xy.crs, addxy=TRUE, clippolyv=bndx)
       xypltx <- clipdat$clip_xyplt 
       #bndx <- rbind(bndx, clipdat$clip_polyv)
@@ -407,7 +407,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
 
             clipdat <- spClipPoint(xyplt=xystate, 
-				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
+				uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
 				clippolyv=bndxf1, stopifnotin=FALSE)
             xyplt1 <- clipdat$clip_xyplt
             plt1 <- PLOT1[PLOT1[[pjoinid]] %in% xyplt1[[xy.joinid]], ]
@@ -450,7 +450,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
               PLOT2 <- PLOT2[, head(.SD, 1), by=pjoinid]
             }         
             clipdat <- spClipPoint(xyplt=xystate, 
-				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
+				uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
 				clippolyv=bndxf2, stopifnotin=FALSE)
             xyplt2 <- clipdat$clip_xyplt
 
@@ -498,7 +498,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
             ## Clip data
             clipdat <- spClipPoint(xyplt=xystate, 
-				xy.uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
+				uniqueid=xy.joinid, xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
 				clippolyv=bndx)
             xyplt <- clipdat$clip_xyplt
 
@@ -1015,7 +1015,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
             ## Clip xystate and other tables for bndxf2
             ############################################
-            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndxf2, xy.uniqueid=xy.uniqueid,
+            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndxf2, uniqueid=xy.uniqueid,
 			stopifnotin=FALSE)
             xyplt2 <- clipdat$clip_xyplt
 
@@ -1095,7 +1095,7 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           } else {    ## measEndyr.filter = NULL
 
             ## Clip data
-            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndx, xy.uniqueid=xy.joinid)
+            clipdat <- spClipPoint(xyplt=xystate, clippolyv=bndx, uniqueid=xy.joinid)
             xyplt <- clipdat$clip_xyplt
             plt <- plt[plt[[pjoinid]] %in% xyplt[[xy.joinid]], ]
             pltids <- plt[[puniqueid]]
