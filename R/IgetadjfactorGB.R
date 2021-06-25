@@ -27,7 +27,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
   ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ=ADJ_FACTOR_COND=cadjfac=tadjfac=TPAGROW_UNADJ=
 	ADJ_FACTOR_MICR=ADJ_FACTOR_MACR=ADJ_FACTOR_SUBP=expfac=expcond=expcondtab=
-	n.strata=TPROP_BASIS=EXPNS=strwt=Prop <- NULL
+	n.strata=TPROP_BASIS=EXPNS=strwt=Prop=COVER_PCT_SUM <- NULL
     
   strunitvars <- c(unitvars, strvars)
   keycondx <- key(condx)
@@ -120,17 +120,18 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
   }     
 
   if (!is.null(vcondsppx)) { 
-    setkeyv(vcondsppfx, c(vuniqueid, condid))
+    setkeyv(vcondsppx, c(vuniqueid, condid))
     vcondsppx <- merge(vcondsppx, condx[, c(key(condx), "cadjfac"), with=FALSE], 
 		by=key(condx))
-    vcondsppx[, COVER_PCT_SUM_ADJ := COVER_PCT_SUM * cadjfac]
+    vcondsppx[, COVER_PCT_SUM := COVER_PCT_SUM]
   } 
   if (!is.null(vcondstrx)) { 
     setkeyv(vcondstrx, c(vuniqueid, condid))
     vcondstrx <- merge(vcondstrx, condx[, c(key(condx), "cadjfac"), with=FALSE], 
 		by=key(condx))
-    vcondstrx[, COVER_PCT_SUM_ADJ := COVER_PCT_SUM * cadjfac]
+    vcondstrx[, COVER_PCT_SUM := COVER_PCT_SUM]
   } 
+  setnames(unitlut, "cadjfac", "ADJ_FACTOR_P2VEG_SUBP")
 
   ## Calculate expansion factors (strata-level and cond-level)
   if (!is.null(unitarea)) {

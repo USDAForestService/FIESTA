@@ -279,12 +279,8 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     treef <- adjfacdata$treex
     seedf <- adjfacdata$seedx
     expcondtab <- adjfacdata$expcondtab
-    vcondsppx <- adjfacdata$vcondsppx
-    vcondstrx <- adjfacdata$vcondstrx
-
-    if ("P2VEG" %in% popType) {
-      setnames(stratalut, "cadjfac", "ADJ_FACTOR_P2VEG_SUBP")
-    }
+    vcondsppf <- adjfacdata$vcondsppx
+    vcondstrf <- adjfacdata$vcondstrx
   } 
  
   setkeyv(stratalut, strunitvars)
@@ -313,8 +309,8 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     returnlst$evalid <- evalid
   }
   if ("P2VEG" %in% popType) {
-    returnlst$vcondsppx <- vcondsppx
-    returnlst$vcondstrx <- vcondstrx
+    returnlst$vcondsppx <- vcondsppf
+    returnlst$vcondstrx <- vcondstrf
   }
 
 
@@ -347,9 +343,15 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
     }
-    if (!is.null(vcondf)) {
-      datExportData(vcondf, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vcondx", 
+    if (!is.null(vcondstrf)) {
+      datExportData(vcondstrf, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vcondstrx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
+    if (!is.null(vcondsppf)) {
+      datExportData(vcondsppf, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vcondsppx", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
     }

@@ -78,7 +78,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
 	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD=
-	SUBPCOND_PROP <- NULL
+	SUBPCOND_PROP=MACRCOND_PROP <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables

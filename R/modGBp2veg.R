@@ -1,4 +1,4 @@
-modGBp2veg <- function(GBpopdat=NULL, p2vegtype="spp", landarea="FOREST", 
+modGBp2veg <- function(GBpopdat=NULL, p2vegtype="str", landarea="FOREST", 
 	pcfilter=NULL, vfilter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, 
 	col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, 
 	col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, 
@@ -96,7 +96,7 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="spp", landarea="FOREST",
 
   vcondsppx <- GBpopdat$vcondsppx
   vcondstrx <- GBpopdat$vcondstrx
-  estvar.name <- "COVER_PCT_SUM"
+  estvar.name <- "COVER_PCT_SUM_ADJ"
 
   ## Check p2vegtype 
   ########################################################
@@ -164,7 +164,7 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="spp", landarea="FOREST",
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, tree=vcondf, condf=pltcondf, 
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=vcondf, condf=pltcondf, 
 	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
 	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
 	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby, 
@@ -186,6 +186,9 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="spp", landarea="FOREST",
   title.colvar <- rowcolinfo$title.colvar
   rowgrpnm <- rowcolinfo$rowgrpnm
   title.rowgrp <- rowcolinfo$title.rowgrp
+  bytdom <- rowcolinfo$bytdom
+  tdomvar <- rowcolinfo$tdomvar
+  tdomvar2 <- rowcolinfo$tdomvar2
   grpvar <- rowcolinfo$grpvar
   rm(rowcolinfo)
 
@@ -204,7 +207,7 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="spp", landarea="FOREST",
 	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=vuniqueid, 
 	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, estvarn.TPA=FALSE, 
 	estvarn.filter=vfilter, esttotn=TRUE, tdomvar=tdomvar, 
-	tdomvar2=tdomvar2, adjtree=FALSE, metric=metric)
+	tdomvar2=tdomvar2, adjtree=TRUE, adjvar="ADJ_FACTOR_P2VEG_SUBP", metric=metric)
   if (is.null(treedat)) return(NULL) 
 
   tdomdat <- treedat$tdomdat
@@ -360,9 +363,9 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="spp", landarea="FOREST",
 
     ## Calculate unit totals for rowvar
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, tuniqueid, rowvar), .SDcols=estvar.name]
+		by=c(strunitvars2, vuniqueid, rowvar), .SDcols=estvar.name]
     rowunit <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, esttype=esttype, 
-			uniqueid=tuniqueid, stratalut=stratalut2, 
+			uniqueid=vuniqueid, stratalut=stratalut2, 
 			unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
 
     rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
@@ -377,9 +380,9 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="spp", landarea="FOREST",
 
     ## Calculate grand total for all units
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, tuniqueid, "TOTAL"), .SDcols=estvar.name]
+		by=c(strunitvars2, vuniqueid, "TOTAL"), .SDcols=estvar.name]
     totunit <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, esttype=esttype, 
-			uniqueid=tuniqueid, stratalut=stratalut2, 
+			uniqueid=vuniqueid, stratalut=stratalut2, 
 			unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
     tabs <- FIESTA::check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
