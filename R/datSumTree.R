@@ -3,10 +3,10 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 	condid="CONDID", bysubp=FALSE, subpid="SUBP", tsumvarlst=NULL, 
 	tsumvarnmlst=NULL, TPA=TRUE, tfun=sum, ACI=FALSE, tfilter=NULL, 
 	addseed=FALSE, lbs2tons=TRUE, metric=FALSE, getadjplot=FALSE, adjtree=FALSE, 
-	adjTPA=1, NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
-	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, tround=16, 
-	checkNA=FALSE, returnDT=TRUE){
+	adjvar="tadjfac", adjTPA=1, NAto0=FALSE, savedata=FALSE, outfolder=NULL, 
+	out_fmt="csv", out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL,
+ 	outfn.date=TRUE, overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, 
+	tround=16, checkNA=FALSE, returnDT=TRUE){
   ####################################################################################
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
   ##        using specified tree filters (ex. live trees only)
@@ -16,7 +16,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  COND_STATUS_CD=tadjfac=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
+  COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
 	seedf=TREECOUNT_CALC=estunits <- NULL
 
 
@@ -562,8 +562,9 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     adjtree <- TRUE
   }
 
-  if (adjtree && !"tadjfac" %in% names(treef)) {
-    stop("you must have tadjfac variable in tree table to adjust trees")
+  if (adjtree && !adjvar %in% names(treef)) {
+    message(adjvar, " variable not in tree table... no adjustment was added")
+    adjtree <- FALSE
   }
   tsumvarlst2 <- {}
   tsumvarnmlst2 <- {} 
@@ -653,10 +654,10 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
       }
 
       ## Apply adjustments
-      treef[, (newname2) := get(eval(newname)) * tadjfac]
+      treef[, (newname2) := get(eval(newname)) * get(eval(adjvar))]
    
-      if ((addseed || seedonly) && tvar=="COUNT" && "tadjfac" %in% names(seedf)) {
-        seedf[, (newname2) := get(eval(newname)) * tadjfac]
+      if ((addseed || seedonly) && tvar=="COUNT" && adjvar %in% names(seedf)) {
+        seedf[, (newname2) := get(eval(newname)) * get(eval(adjvar))]
         seedcountvar=treecountvar <- newname2
       }       
     } else {

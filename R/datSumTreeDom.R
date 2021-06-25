@@ -5,10 +5,10 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 	tdomvar2=NULL, tdomvar2lst=NULL, tdomprefix=NULL, tdombarplot=FALSE, 
 	tdomtot=FALSE, tdomtotnm=NULL, FIAname=FALSE, addseed=FALSE, pivot=TRUE, 
 	presence=FALSE, proportion=FALSE, cover=FALSE, getadjplot=FALSE, adjtree=FALSE, 
-	NAto0=FALSE, adjTPA=1, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
-	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, tround=16, 
-	checkNA=FALSE, returnDT=TRUE){
+	adjvar="tadjfac", NAto0=FALSE, adjTPA=1, savedata=FALSE, outfolder=NULL, 
+	out_fmt="csv", out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL,
+ 	outfn.date=TRUE, overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, 
+	tround=16, checkNA=FALSE, returnDT=TRUE){
 
   ####################################################################################
   ## DESCRIPTION: Aggregates tree domain data (ex. species) to condition or plot level  
@@ -25,7 +25,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
   ## Set global variables  
-  COND_STATUS_CD=COUNT=tadjfac=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
+  COND_STATUS_CD=COUNT=CONDPROP_UNADJ=V1=samenm=SUBP=NF_COND_STATUS_CD=
 	seedf=estunits <- NULL
   checkNApvars <- {}
   checkNAcvars <- {}
@@ -889,8 +889,9 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     adjtree <- TRUE
   }
  
-  if (adjtree && !"tadjfac" %in% names(treef)) {
-    stop("you must have tadjfac variable in tree table to calculate adjustment factors")
+  if (adjtree && !adjvar %in% names(treef)) {
+    message(adjvar, " variable not in tree table... no adjustment was added")
+    adjtree <- FALSE
   }
   if (nrow(treef) == 0) {
     stop("no tree exists for your dataset")
@@ -901,17 +902,17 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   if (adjtree) {
     newname <- ifelse(TPA, paste0(tsumvar, "_TPA_ADJ"), paste0(tsumvar, "_ADJ"))
     if (TPA) {
-      treef[, (newname) := get(eval(tsumvar)) * get(eval(tpavar)) * tadjfac]
+      treef[, (newname) := get(eval(tsumvar)) * get(eval(tpavar)) * get(eval(adjvar))]
     } else {
-      treef[, (newname) := get(eval(tsumvar)) * tadjfac]
+      treef[, (newname) := get(eval(tsumvar)) * get(eval(adjvar))]
     }
 
     if (!is.null(seedf) && tsumvar == "COUNT") {
       seed_newname <- paste0("SEED_", newname)
       if (TPA) {
-        seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar)) * tadjfac]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar)) * get(eval(adjvar))]
       } else {
-        seedf[, (seed_newname) := get(eval(tsumvar)) * tadjfac]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(adjvar))]
       }
     }
   } else {
@@ -926,7 +927,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       if (TPA) {
         seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(tpavar))]
       } else {
-        seedf[, (seed_newname) := get(eval(tsumvar)) * tadjfac]
+        seedf[, (seed_newname) := get(eval(tsumvar)) * get(eval(adjvar))]
       }
     }
   }

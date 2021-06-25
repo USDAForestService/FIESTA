@@ -19,11 +19,11 @@ datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
 	tdomvar2 = NULL, tdomvar2lst = NULL, tdomprefix = NULL, tdombarplot = FALSE, 
 	tdomtot = FALSE, tdomtotnm = NULL, FIAname = FALSE, addseed = FALSE, 
 	pivot = TRUE, presence = FALSE, proportion = FALSE, cover = FALSE, 
-	getadjplot = FALSE, adjtree = FALSE, NAto0 = FALSE, adjTPA = 1, 
-	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
-	out_layer = NULL, outfn.pre = NULL, layer.pre = NULL, outfn.date = TRUE,
- 	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer = FALSE, 
-	tround = 16, checkNA = FALSE, returnDT = TRUE)
+	getadjplot = FALSE, adjtree = FALSE, adjvar = "tadjfac", NAto0 = FALSE, 
+	adjTPA = 1, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
+	out_dsn = NULL, out_layer = NULL, outfn.pre = NULL, layer.pre = NULL, 
+	outfn.date = TRUE, overwrite_dsn=FALSE, overwrite_layer=FALSE, 
+	append_layer = FALSE, tround = 16, checkNA = FALSE, returnDT = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -98,7 +98,9 @@ datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
   \item{getadjplot}{ Logical. If TRUE, adjustments are calculated for nonsampled 
 	conditions on plot. }
   \item{adjtree}{ Logical. If TRUE, trees are individually adjusted by adjustment factors.
-	Adjustment factors must be included in tree table (tadjfac). }
+	Adjustment factors must be included in tree table (see adjvar). }
+  \item{adjvar}{ String. If adjtree=TRUE, the name of the variable to use for 
+	multiplying by adjustment (e.g., tadjfac). }
   \item{adjTPA}{ Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1 (annual inventory),
 	if using less than 4 subplots. If using only 1 sublot for estimate, adjTPA=4. The 
 	default is 1. }

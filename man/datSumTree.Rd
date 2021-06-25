@@ -14,11 +14,11 @@ datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
 	condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, 
 	tsumvarnmlst = NULL, TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL, 
 	addseed = FALSE, lbs2tons = TRUE, metric = FALSE, getadjplot = FALSE, 
-	adjtree = FALSE, adjTPA = 1, NAto0 = FALSE, savedata = FALSE, outfolder = NULL, 
-	out_fmt = "csv", out_dsn = NULL, out_layer = NULL, outfn.pre = NULL, 
-	layer.pre = NULL, outfn.date = TRUE, overwrite_dsn=FALSE, 
-	overwrite_layer=FALSE, append_layer = FALSE, tround = 16, checkNA = FALSE, 
-	returnDT = TRUE)
+	adjtree = FALSE, adjvar = "tadjfac", adjTPA = 1, NAto0 = FALSE, 
+	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	out_layer = NULL, outfn.pre = NULL, layer.pre = NULL, outfn.date = TRUE,
+ 	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer = FALSE, tround = 16, 
+	checkNA = FALSE, returnDT = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,9 +45,9 @@ datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
   \item{tsumvarlst}{ String (vector). Tree-level variable(s) to aggregate 
 	(e.g., "TPA_UNADJ", "BA"). Use tsumvar="PLT_CN" (tfun=sum) for summed tree count. }
   \item{tsumvarnmlst}{ String (vector). Name of the tree-level variable(s) to aggregate 
-	(e.g., "TPALIVE", "BALIVE"). This list must have the same number of variables as tsumvarlst 
-	and be in respective order. If NULL, the default names will be tsumvar'_tfun' 
-	(e.g., "TPA_UNADJ_SUM", "BA_SUM"). }
+	(e.g., "TPALIVE", "BALIVE"). This list must have the same number of variables as 
+	tsumvarlst and be in respective order. If NULL, the default names will be 
+	tsumvar'_tfun' (e.g., "TPA_UNADJ_SUM", "BA_SUM"). }
   \item{TPA}{ Logical. If TRUE, tsumvarlst variable(s) are multiplied by the respective 
 	trees-per-acre variable (see details) to get per-acre measurements. }
   \item{tfun}{ Function. The name of the function to use to aggregate the data 
@@ -66,7 +66,9 @@ datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL,
   \item{getadjplot}{ Logical. If TRUE, adjustments are calculated for nonsampled 
 	conditions on plot. }
   \item{adjtree}{ Logical. If TRUE, trees are individually adjusted by adjustment factors.
-	Adjustment factors must be included in tree table (tadjfac). }
+	Adjustment factors must be included in tree table (see adjvar). }
+  \item{adjvar}{ String. If adjtree=TRUE, the name of the variable to use for 
+	multiplying by adjustment (e.g., tadjfac). }
   \item{adjTPA}{ Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1 (annual inventory),
 	if using less than 4 subplots. If using only 1 sublot for estimate, adjTPA=4. The 
 	default is 1. }
