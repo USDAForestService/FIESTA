@@ -1,6 +1,7 @@
-getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
-	cuniqueid="PLT_CN", condid="CONDID", unitlut=NULL, unitvars=NULL, 
-	strvars=NULL, unitarea=NULL, areavar=NULL, areawt="CONDPROP_UNADJ", cvars2keep=NULL){
+getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
+	vcondstrx=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", vuniqueid="PLT_CN", 
+	condid="CONDID", unitlut=NULL, unitvars=NULL, strvars=NULL, unitarea=NULL, 
+	areavar=NULL, areawt="CONDPROP_UNADJ", cvars2keep=NULL){
 
   ####################################################################################
   ## DESCRIPTION: 
@@ -35,8 +36,6 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   varlst <- areawt
   #varlst <- c(areawt, "SUBPPROP_UNADJ", "MACRPROP_UNADJ")
  
-  ## veg.samp.filter
-  veg.samp.filter <- "P2VEG_SAMPLING_STATUS_CD == 1"
 
   ## Get list of condition-level variables to calculate adjustments for
   if (!is.null(treex)) {  
@@ -44,8 +43,6 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
     tvarlst2 <- tvarlst[which(tvarlst%in% names(condx))]
     if (length(tvarlst2) == 0) stop("must include *PROP_UNADJ variables in cond")
     varlst <- unique(c(varlst, tvarlst2))
-#  } else if (!is.null(vspsppf)) {
-#    varlst <- c(varlst, "SUBPPROP_UNADJ")
   }
   varsumlst <- paste0(varlst, "_SUM")
 
@@ -68,45 +65,10 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   unitlut <- unitlut[cndadj]
   n <- ifelse(is.null(strvars), "n.total", "n.strata")
 
-  ## Calculate adjustment factor for conditions
+  ## Calculate adjustment factor for conditions 
   ## (divide summed condition proportions by total number of plots in strata)
   unitlut[, (varlstadj) := lapply(.SD, 
 	function(x, n) ifelse((is.na(x) | x==0), 0, get(n)/x), n), .SDcols=varsumlst]
-
-
-#  if (!is.null(condv)) {
-#
-#subpv <- setDT(subp[subp$PLT_CN %in% pltassgnv$PLT_CN,])
-#subpv1 <- subpv[P2VEG_SUBP_STATUS_CD == 1,]
-#subpprop <- subpv1[, length(SUBP) * 25 / 100, by=c("PLT_CN")]
-#setnames(subpprop, "V1", "VEGSUBPPROP_UNADJ")
-
-#test <- merge(condv[, c("PLT_CN", "ESTN_UNIT", "STRATUMCD")], subpprop, by="PLT_CN", all.x=TRUE)
-#    vegadj <- test[, lapply(.SD, sum, na.rm=TRUE), by=strunitvars, 
-#		.SDcols="VEGSUBPPROP_UNADJ"]
-#
-#
-#    vegadj <- condv[, lapply(.SD, sum, na.rm=TRUE), by=strunitvars, 
-#		.SDcols="SUBPPROP_UNADJ"]
-#    setnames(vegadj, "SUBPPROP_UNADJ", "VEGPROP_UNADJ")
-#    setkeyv(vegadj, strunitvars)
-#
-#    ## Merge veg adjustment factors to strata table.
-#    unitlut <- unitlut[vegadj]
-#    nveg <- ifelse(is.null(strvars), "nveg.total", "nveg.strata")
-#
-#    ## Calculate adjustment factor for conditions
-#    ## (divide summed subplot proportions by total number of plots in strata)
-#    unitlut[, ADJ_FACTOR_P2VEG_SUBP := lapply(.SD, 
-#	function(x, n) ifelse((is.na(x) | x==0), 0, get(nveg)/x), nveg), 
-#		.SDcols="VEGPROP_UNADJ"]
-#
-#    unitlut[, ADJ_FACTOR_P2VEG_SUBP := lapply(.SD, 
-#	function(x, n) ifelse((is.na(x) | x==0), 0, get(nveg)/x), nveg), 
-#		.SDcols="VEGSUBPPROP_UNADJ"]
-#
-#  }
-
 
   ## Merge condition adjustment factors to cond table to get plot identifiers.
   setkeyv(condx, strunitvars)
@@ -114,8 +76,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
 
   ## Change name of condition adjustment factor to cadjfac
   ## Note: CONDPPROP_UNADJ is the same as below (combination of MACR and SUBP)
-  cadjfactnm <- ifelse(areawt == "CONDPROP_UNADJ", "ADJ_FACTOR_COND", 
-		paste0("ADJ_FACTOR_", areawt))
+  cadjfactnm <- paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", areawt))
   setnames(condx, cadjfactnm, "cadjfac")
   setnames(unitlut, cadjfactnm, "cadjfac")
 
@@ -156,7 +117,20 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
       setkeyv(seedx, c(tuniqueid, condid))
       seedx[condx, tadjfac := ADJ_FACTOR_MICR]
     }  
-  }  
+  }     
+
+  if (!is.null(vcondsppx)) { 
+    setkeyv(vcondsppfx, c(vuniqueid, condid))
+    vcondsppx <- merge(vcondsppx, condx[, c(key(condx), "cadjfac"), with=FALSE], 
+		by=key(condx))
+    vcondsppx[, COVER_PCT_SUM_ADJ := COVER_PCT_SUM * cadjfac]
+  } 
+  if (!is.null(vcondstrx)) { 
+    setkeyv(vcondstrx, c(vuniqueid, condid))
+    vcondstrx <- merge(vcondstrx, condx[, c(key(condx), "cadjfac"), with=FALSE], 
+		by=key(condx))
+    vcondstrx[, COVER_PCT_SUM_ADJ := COVER_PCT_SUM * cadjfac]
+  } 
 
   ## Calculate expansion factors (strata-level and cond-level)
   if (!is.null(unitarea)) {
@@ -196,7 +170,10 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, tuniqueid="PLT_CN
   adjfacdata <- list(condx=condx, unitlut=unitlut)
   adjfacdata$expcondtab <- expcondtab
   if (!is.null(treex)) adjfacdata$treex <- treex 
-  if (!is.null(seedx)) adjfacdata$seedx <- seedx 
+  if (!is.null(seedx)) adjfacdata$seedx <- seedx
+  if (!is.null(vcondsppx)) adjfacdata$vcondsppx <- vcondsppx
+  if (!is.null(vcondstrx)) adjfacdata$vcondstrx <- vcondstrx
+ 
   adjfacdata$cvars2keep <- names(condx)[names(condx) != "CONDPROP_ADJ"]
 
   return(adjfacdata)
