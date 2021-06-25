@@ -145,7 +145,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
-
+ 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -192,7 +192,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
 	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
-	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
+	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, estvarn.TPA=FALSE, 
 	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, 
 	tdomvar2=tdomvar2, adjtree=adjtree, metric=metric)
   if (is.null(treedat)) return(NULL) 

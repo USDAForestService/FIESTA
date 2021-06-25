@@ -295,7 +295,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   if (length(unitvars) > 1) {
     unitvar12 <- paste(unitvar2, unitvar, sep="-")
     auxlut[[unitvar12]] <- paste(auxlut[[unitvar2]], auxlut[[unitvar]], sep="-")
-    auxlut[, c(unitvar, unitvar2) := NULL]
+    #auxlut[, c(unitvar, unitvar2) := NULL]
 
     pltx[[unitvar12]] <- paste(pltx[[unitvar2]], pltx[[unitvar]], sep="-")
     if (!is.null(unitarea)) {
@@ -304,7 +304,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     }
     unitvar <- unitvar12
   }
-
 
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea

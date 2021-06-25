@@ -4,7 +4,6 @@
 ## getpfromqry      	## Get pfromqry for extracting data
 ## getplotCur
 ## getEvalid.ppsa     ## Get Evalid from pop_plot_stratum_assgn
-## chkdbtab			## Checks if table name exists in list of database tables
 ## getsppnm			## Get species common names from a list of codes or Research Station
 ## gui_filterdf		## Get filter from a data frame
 ## DBgetbyids		## Gets data from database from ids

@@ -21,6 +21,15 @@ anPBpopICE_data <- function(ice.pntfn, ice.pltfn=NULL,
   ## ... 		- other parameters to datExportdata
   ##########################################################################
 
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(anPBpopICE_data)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
   ##################################################################
   ## INITIALIZE SETTINGS AND VARIABLES
   ##################################################################

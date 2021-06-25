@@ -82,6 +82,7 @@
 \alias{getfilter}
 \alias{xtabf}
 \alias{recodelut}
+\alias{findnm}
 
 \alias{DBvars.default}
 \alias{DBgetfn}

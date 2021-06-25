@@ -121,7 +121,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   if (rowgrp && is.null(rowgrpnm) && !row.FIAname) {
      stop("either row.FIAname must be TRUE or rowgrpnm != NULL to add row groups")
   }
-
+ 
   ##############################################################
   ### ROW VARIABLE
   ##############################################################
@@ -321,6 +321,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       ## add rowvar to cvars2keep
       cvars2keep <- c(cvars2keep, rowvar, row.orderby)
     } else if (rowvar %in% names(treef)) {
+
       bytdom <- TRUE
       if (row.FIAname || !is.null(rowlut)) {
         if (!is.null(rowlut) && ncol(rowlut) > 1 && all(names(rowlut) %in% names(treef))) {
@@ -401,6 +402,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
             }
           } 
         }
+
       } else if (!is.null(row.orderby) && row.orderby != "NONE") {
 
         if (!row.orderby %in% names(treef)) stop("row.orderby must be in tree")
@@ -710,7 +712,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   ############################################################################
   ## Get uniquerow and uniquecol
   ############################################################################
-       
+
   ## uniquerow
   #########################################################
   if (!is.null(rowlut)) {
@@ -758,7 +760,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
         }
       }
     } else {
-      if (is.factor(condf[[rowvar]])) {
+      if (is.factor(treef[[rowvar]])) {
         uniquerow <- as.data.table(levels(treef[[rowvar]]))
         names(uniquerow) <- rowvar
       } else {
@@ -777,9 +779,10 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       }
     }
   }
-  if (!is.null(landarea) && landarea == c("FOREST", "TIMBERLAND"))
+  if (!is.null(landarea) && landarea == c("FOREST", "TIMBERLAND")) {
     uniquerow2 <- uniquerow[!uniquerow[[rowvar]] %in% c(0, "Nonforest"),]
-
+  }
+ 
   ## uniquecol
   #########################################################
   if (!is.null(collut)) {
@@ -859,7 +862,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   cvars2keep <- cvars2keep[cvars2keep %in% names(condf)]
   condf <- condf[, cvars2keep, with=FALSE]
   setkeyv(condf, c(cuniqueid, condid))
-
+ 
   ## Create factors for ordering tables
   ##############################################################################
   if (!is.null(uniquerow)) {

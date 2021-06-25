@@ -1,9 +1,9 @@
 check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN", 
-	condid="CONDID", treex=NULL, seedx=NULL, tuniqueid="PLT_CN", 
-	estseed="none", sumunits=FALSE, landarea=NULL, ACI.filter=NULL, 
-	pcfilter=NULL, allin1=FALSE, estround=6, pseround=3, divideby=NULL, 
-	addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, rawonly=FALSE, 	
-	savedata=FALSE, outfolder=NULL, overwrite_dsn=FALSE, 
+	condid="CONDID", treex=NULL, seedx=NULL, vcondx=NULL, tuniqueid="PLT_CN", 
+	estseed="none", vuniqueid="PLT_CN", sumunits=FALSE, landarea=NULL, 
+	ACI.filter=NULL, pcfilter=NULL, allin1=FALSE, estround=6, pseround=3, 
+	divideby=NULL, addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, 
+	rawonly=FALSE, savedata=FALSE, outfolder=NULL, overwrite_dsn=FALSE, 
 	overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE, 
 	append_layer=FALSE, raw_fmt="csv", raw_dsn=NULL, gui=FALSE){
 
@@ -113,7 +113,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   #############################################################################
   ## Check esttype
   #############################################################################
-  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC")
+  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC", "P2VEG")
   esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
 	checklst=esttypelst, caption="Esttype?")
 
@@ -249,6 +249,16 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
       }
     } 
     returnlst$estseed <- estseed
+  }
+
+  if (esttype == "P2VEG") {
+    if (!is.null(vcondx)) {
+      ## Check that the values of vuniqueid in vcondsppx are all in cuniqueid in condf
+      vcondf <- check.matchval(vcondx, pltcondf, vuniqueid, cuniqueid, 
+		tab1txt="vcondx", tab2txt="cond", subsetrows=TRUE)
+     returnlst$vcondf <- vcondf
+     returnlst$vuniqueid <- vuniqueid
+    }
   }
  
   return(returnlst)

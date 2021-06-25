@@ -1,3 +1,13 @@
+FIESTA_3.0.28 (Release date: 2021-06-25)
+==============
+added functionality for P2VEG adjustment factors in modGBpop()
+added new function to calculate P2VEG estimates - modGBp2veg()
+added new parameter in datSumTree() and datSumTreeDom() to give flexibility 
+	name of adjustment factor, tadjvar, with default="tadjfac"
+
+
+
+
 FIESTA_3.0.27 (Release date: 2021-06-14)
 ==============
 added anSApop_report() function 

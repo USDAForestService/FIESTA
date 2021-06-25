@@ -211,11 +211,10 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     substrvar <- popcheck$substrvar
   } 
   #rm(popcheck)
-  if ("P2VEG" %in% popType) {
-    pltassgn.P2VEG <- popcheck$pltassgn.P2VEG
-    subp_condf <- popcheck$subp_condf
-    vsubpsppf <- popcheck$vsubpsppf
-    vsubpstrf <- popcheck$vsubpsppf
+  if (popType == "P2VEG") {
+    vcondsppf <- popcheck$vcondsppf
+    vcondstrf <- popcheck$vcondstrf
+    areawt <- "SUBP_CONDPROP_UNADJ"
   }
  
   ###################################################################################
@@ -234,15 +233,6 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
 		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
 		getwt=getwt, getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)  
-
-#  if ("P2VEG" %in% popType) {
-#    auxdatv <- check.auxiliary(pltx=pltassgn.P2VEG, puniqueid=pltassgnid, 
-#		strata=strata, auxlut=stratalut, PSstrvar=strvar, nonresp=nonresp,
-# 		substrvar=substrvar, stratcombine=stratcombine, unitcombine=unitcombine,
-# 		unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-#		minplotnum.unit=minplotnum.unit, getwt=getwt, getwtvar=getwtvar, 
-#		P2POINTCNT=P2POINTCNT) 
-#  }
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
@@ -254,7 +244,6 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   strunitvars <- c(unitvar, strvar)
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
-
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -272,10 +261,17 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
 
+  ## If more than one unitvar, 
+  ## split the concatenated unitvar variable to keep original columns
+  if (!is.null(unitvar2)) {
+    condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+  }
+
   if (adj == "samp") {
-    adjtree <- TRUE
-    adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
-		cuniqueid=cuniqueid, condid=condid, tuniqueid=tuniqueid, 
+    adjfacdata <- getadjfactorGB(condx=condx, 
+		vcondsppx=vcondsppf, 
+		vcondstrx=vcondstrf, 
+		cuniqueid=cuniqueid, condid=condid, vuniqueid=vuniqueid, 
 		unitlut=stratalut, unitvars=unitvar, strvars=strvar, 
 		unitarea=unitarea, areavar=areavar, areawt=areawt)
     condx <- adjfacdata$condx
@@ -283,32 +279,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     treef <- adjfacdata$treex
     seedf <- adjfacdata$seedx
     expcondtab <- adjfacdata$expcondtab
+    vcondsppx <- adjfacdata$vcondsppx
+    vcondstrx <- adjfacdata$vcondstrx
 
-    if (any(popType == "P2VEG")) {
-#      pltassgnv <- auxdatv$pltx
-#      if (is.null(key(pltassgnv))) setkeyv(pltassgnv, pltassgnid)
-#      stratalutv <- auxdatv$auxlut
-#      stratcombinelutv <- auxdatv$unitstrgrplut
-#      if (nonresp) nonsampplotsv <- auxdatv$nonsampplots
-#      #strunitvars <- c(unitvar, strvar)
-#      nveg.names <- c("nveg.strata", "nveg.total")
-#      setnames(stratalutv, c("n.strata", "n.total"), nveg.names)
-#      stratalut <- merge(stratalut, stratalutv[, c(key(stratalutv), nveg.names), with=FALSE],
-# 		by=key(stratalutv))
-
-
-      ## Merge plot strata info to condx
-      if (is.null(key(subp_condf))) setkeyv(subp_condf, c(cuniqueid, condid))
-#      subp_condfx <- subp_condf[pltassgnv[,c(pltassgnid, strunitvars), with=FALSE]]
-      subp_condfx <- subp_condf[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
-      subp_adj <- subp_condfx[, sum(SUBPCOND_PROP_UNADJ, na.rm=TRUE), by=strunitvars]
-
-#      subp_adj <- subp_condfx[, sum(SUBPCOND_PROP)/4, by=c("PLT_CN", strunitvars)][, 
-#		sum(V1, na.rm=TRUE), by=strunitvars]
-      setnames(subp_adj, "V1", "SUBPCOND_PROP_SUB")
-      setkeyv(subp_adj, strunitvars)
-      stratalut <- stratalut[subp_adj]
-      stratalut$ADJ_FACTOR_P2VEG_SUBP <- stratalut$n.strata / subp_adj$SUBPCOND_PROP_SUB
+    if ("P2VEG" %in% popType) {
+      setnames(stratalut, "cadjfac", "ADJ_FACTOR_P2VEG_SUBP")
     }
   } 
  
@@ -337,6 +312,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (!is.null(evalid)) {
     returnlst$evalid <- evalid
   }
+  if ("P2VEG" %in% popType) {
+    returnlst$vcondsppx <- vcondsppx
+    returnlst$vcondstrx <- vcondstrx
+  }
+
 
   if (saveobj) {
     objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
@@ -364,6 +344,12 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     if (!is.null(seedf)) {
       datExportData(seedf, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
+    if (!is.null(vcondf)) {
+      datExportData(vcondf, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vcondx", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
     }

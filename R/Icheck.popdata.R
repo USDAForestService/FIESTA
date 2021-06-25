@@ -1209,7 +1209,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 
         cols <- c(names(subp_condx)[!names(subp_condx) %in% names(subplotx)],
 				subpuniqueid, subpid)
-        subp_condx <- subplotx[subp_condx[, cols, with=FALSE]]
+        subp_condx <- merge(subplotx, subp_condx[, cols, with=FALSE])
       }
       if (!"SUBPCOND_PROP" %in% names(subp_condx)) {
         stop("must include SUBPCOND_PROP in subp_cond")
@@ -1220,25 +1220,17 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     }
 
     #############################################################################
-    ## Subset pltassgn and subp_condx to sampled P2VEG
+    ## Subset pltassgn to sampled P2VEG and merge to subp_condx
     #############################################################################
     if (!"P2VEG_SAMPLING_STATUS_CD" %in% names(pltassgnx)) {
       message("assuming all plots sample P2VEG")
-      pltassgn.P2VEG <- pltassgnx
+      pltassgnx.P2VEG <- pltassgnx
     } else {
-      if (ACI) {
-        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] %in% c(1,2),]
-      } else {
-        pltassgn.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] == 1,]
-      }
+      pltassgnx.P2VEG <- pltassgnx[pltassgnx[["P2VEG_SAMPLING_STATUS_CD"]] %in% c(1,2),]
     }
  
-    ## Subset subplots to sample P2VEG plots
-#    subp_condf <- check.matchval(subp_condx, pltassgn.P2VEG, subpuniqueid, pltassgnid, 
-#		tab1txt="subp_cond", tab2txt="pltassgn.P2VEG", subsetrows=TRUE)
-    subp_condf <- check.matchval(subp_condx, pltassgn.P2VEG, subpuniqueid, pltassgnid, 
-		tab1txt="subp_cond", tab2txt="pltassgn", subsetrows=TRUE)
-    setkeyv(subp_condf, c(subpuniqueid, subpid, condid))
+    ## Merge pltassgnx.P2VEG to subp_condx - inner join
+    subp_condf <- merge(pltassgnx.P2VEG, subp_condx, by="PLT_CN")
 
     #############################################################################
     ## Define and apply subp.nonsamp.filter 
@@ -1267,18 +1259,33 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     ## Define and apply p2veg.nonsamp.filter 
     #############################################################################
     if ("P2VEG_SUBP_STATUS_CD" %in% names(subp_condf)) {
-      #p2veg.nonsamp.filter <- "!is.na(P2VEG_SUBP_STATUS_CD) & P2VEG_SUBP_STATUS_CD != 2"
-      #p2veg.nonsamp.filter <- "is.na(P2VEG_SUBP_STATUS_CD) | P2VEG_SUBP_STATUS_CD == 1"
-      p2veg.nonsamp.filter <- "(SAMP_METHOD_CD == 1 & !is.na(P2VEG_SUBP_STATUS_CD)) | 
-			SAMP_METHOD_CD == 2"
-    
+      p2veg.nonsamp.filter <- "(SAMP_METHOD_CD == 1 & P2VEG_SUBP_STATUS_CD == 1 |
+ 		is.na(P2VEG_SUBP_STATUS_CD)) | SAMP_METHOD_CD == 2"
+
+      ## It should be this after database is fixed 
+      ## So, when SAMP_METHOD_CD == 1 & P2VEG_SUBP_STATUS_CD == 1, 
+      ##		P2VEG_SUBP_STATUS_CD should equal 2    
       subp_condf <- datFilter(x=subp_condf, xfilter=p2veg.nonsamp.filter, 
 		title.filter="p2veg.nonsamp.filter")$xf
+
       if (is.null(subp_condf)) {
         message(paste(p2veg.nonsamp.filter, "removed all records"))
         return(NULL)
       }
     }
+
+    #############################################################################
+    ## Sum subplot conditions and append to condx table
+    #############################################################################
+    SUBP_CONDPROP_UNADJ <- subp_condf[, list(SUBP_CONDPROP_UNADJ = 
+      sum(ifelse(!is.na(MACRCOND_PROP), MACRCOND_PROP, SUBPCOND_PROP), na.rm=TRUE)/4), 
+			by=c("PLT_CN", "CONDID")]
+    setkeyv(SUBP_CONDPROP_UNADJ, c(subpuniqueid, condid))
+    setkeyv(condx, c(cuniqueid, condid))
+
+    ## Merge summed subplot condition proportions to condx 
+    vcondx <- merge(condx, SUBP_CONDPROP_UNADJ)
+       
 
     #############################################################################
     ## Check veg profile data
@@ -1307,13 +1314,20 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       } 
 
       ## Check that the values of vuniqueid in vsubpsppx are all in cuniqueid in subp_condf
-      vsubpsppf <- check.matchval(vsubpsppx, subp_condf, c(vuniqueid, subpid), 
+      vsubpsppf <- check.matchval(vsubpsppx, vcondx, c(vuniqueid, condid), 
 		tab1txt="vsubpspp", tab2txt="subp_cond", subsetrows=TRUE)
-      setkeyv(vsubpsppf, c(subpuniqueid, subpid, condid))
+      setkeyv(vsubpsppf, c(subpuniqueid, condid))
 
-      subpc_vsubpsppf <- merge(vsubpsppx, 
-		subp_condf[, c(subpuniqueid, subpid, condid, "SUBPCOND_PROP"), with=FALSE],
-		by=c(subpuniqueid, subpid, condid))
+      ## Summarize vsubpsppf columns and divide by 4 (subplots) by condition
+      covpctnm <- findnm("COVER_PCT", names(vsubpsppf))
+      vcols <- c("VEG_FLDSPCD", "VEG_SPCD", "GROWTH_HABIT_CD", "LAYER")
+      vcols <- vcols[vcols %in% names(vsubpsppf)]
+      vcondsppf <- vsubpsppf[, list(COVER_PCT_SUM = sum(get(covpctnm), na.rm=TRUE)/4/100), 
+		by=c(vuniqueid, condid, vcols)]
+      setkeyv(vcondsppf, c(subpuniqueid, condid))
+
+      ## Merge condition sums to pltcondx
+      #vpltcondx <- merge(pltcondx, vcondsppf, all.x=TRUE)
     }
     if (!is.null(vsubpstrx) && nrow(vsubpstrx) > 0) {
       ## Define necessary variable for tree table
@@ -1337,18 +1351,23 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       } 
 
       ## Check that the values of vuniqueid in vsubpsppx are all in cuniqueid in subp_condf
-      vsubpstrf <- check.matchval(vsubpstrx, subp_condf, c(vuniqueid, subpid), 
+      vsubpstrf <- check.matchval(vsubpstrx, vcondx, c(vuniqueid, condid), 
 		tab1txt="vsubpstr", tab2txt="subp_cond", subsetrows=TRUE)
-      setkeyv(vsubpstrf, c(subpuniqueid, subpid, condid))
+      setkeyv(vsubpstrf, c(subpuniqueid, condid))
 
-      subpc_vsubpstrf <- merge(vsubpstrx, 
-		subp_condf[, c(subpuniqueid, subpid, condid, "SUBPCOND_PROP"), with=FALSE],
-		by=c(subpuniqueid, subpid, condid))
+      ## Summarize vsubpsppf columns and divide by 4 (subplots) by condition
+      covpctnm <- findnm("COVER_PCT", names(vsubpsppf))
+      vcols <- c("GROWTH_HABIT_CD", "LAYER")
+      vcols <- vcols[vcols %in% names(vsubpstrf)]
+      vcondstrf <- vsubpstrf[, list(COVER_PCT_SUM = sum(get(covpctnm), na.rm=TRUE)/4/100), 
+		by=c(vuniqueid, condid, vcols)]
+#      vcondstrf <- vsubpstrf[, list(COVER_PCT_SUM = sum(get(covpctnm), na.rm=TRUE)), 
+#		by=c(vuniqueid, condid, vcols)]
+      setkeyv(vcondstrf, c(subpuniqueid, condid))
     }
 
-    ## Sum subp_condf to condition level
-    subp_condf <- subp_condf[, sum(SUBPCOND_PROP)/4, by=c(subpuniqueid, condid)]
-    setnames(subp_condf, "V1", "SUBPCOND_PROP_UNADJ") 
+    ## Merge condition sums to pltcondx
+    #vpltcondx <- merge(pltcondx, vsubpstrf, all.x=TRUE)
   }
 
 
@@ -1381,17 +1400,14 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     returnlst$seedf <- seedf
   }
   if ("P2VEG" %in% popType) {
-    returnlst$pltassgn.P2VEG <- pltassgn.P2VEG
-    if (!is.null(subp_condf)) {
-      returnlst$subp_condf <- subp_condf
-      returnlst$subpuniqueid <- subpuniqueid
-    }
-    if (!is.null(vsubpsppx)) {
-      returnlst$vsubpsppf <- subpc_vsubpsppf
+    returnlst$pltassgnx <- pltassgnx.P2VEG
+    returnlst$condx <- vcondx
+    if (!is.null(vcondsppf)) {
+      returnlst$vcondsppf <- vcondsppf
       returnlst$vuniqueid <- vuniqueid
     }
-    if (!is.null(vsubpstrx)) {
-      returnlst$vsubpstrf <- subpc_vsubpstrf
+    if (!is.null(vsubpstrf)) {
+      returnlst$vcondstrf <- vcondstrf
       returnlst$vuniqueid <- vuniqueid
     }
   }

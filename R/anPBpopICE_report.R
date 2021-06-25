@@ -7,7 +7,7 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre=NULL,
   wkdir <- getwd()
 
   outfolder <- pcheck.outfolder(outfolder)
-  outfolder <- normalizePath(outfolder)
+  #outfolder <- normalizePath(outfolder)
   reportfolder <- tempdir()
 
 #  if (any(lapply(strsplit(outfolder, "/"), substr, 1, 1)[[1]] == "_")) {
@@ -18,7 +18,7 @@ anPBpopICE_report <- function(rawfolder, AOInm, T1, T2, outfn.pre=NULL,
   #if (!dir.exists(reportfolder)) {
   #  dir.create(reportfolder)
   #}
-  rawfolder <- normalizePath(rawfolder, mustWork=TRUE)
+  #rawfolder <- normalizePath(rawfolder, mustWork=TRUE)
   if (!is.null(ice.QAQCfn)) {
     ice.QAQCfn <- normalizePath(ice.QAQCfn, mustWork=TRUE)
   }

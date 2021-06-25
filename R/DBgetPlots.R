@@ -1529,7 +1529,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
       ## Get data for SUBPLOT
       subpvars <- toString(paste0("subp.", subpvarlst))
-      subpqry <- paste("select distinct", subpvars, ", p.SAMP_METHOD_CD from", subpfromqry, 
+      subpqry <- paste("select distinct", subpvars, " from", subpfromqry, 
 		"where", paste0(evalFilter, stateFilters))
 
       if (datsource == "sqlite") {

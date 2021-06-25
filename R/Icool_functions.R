@@ -19,7 +19,7 @@
 # addclass
 # xtabf
 # recodelut
-
+# findnm
 
 checkfilenm <- function(fn, outfolder=NULL, ext=NULL, 
 	stopifnull=FALSE) {
@@ -470,3 +470,15 @@ recodelut <- function(lut, minvar="min", maxvar="max", classvar="class") {
   lut2 <- do.call(rbind, lut2)
   return(lut2)  
 }
+
+findnm <- function(x, xvect) {
+  test <- grepl(x, xvect, ignore.case=TRUE)
+  if (sum(test) == 0) {
+    stop("name not found")
+  } else if (sum(test) > 1) {
+    stop("more than 1 name found")
+  } else {
+    return(xvect[test])
+  }
+}
+  

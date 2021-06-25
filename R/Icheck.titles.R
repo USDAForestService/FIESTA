@@ -78,7 +78,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 		paste0("Estimated area, in ", title.unitsn, ", of"))
         title.units <- NULL
 
-      } else if (esttype %in% c("AREA", "LULC")) {
+      } else if (esttype %in% c("AREA", "LULC", "P2VEG")) {
         if (is.null(title.estvarn)) {
           title.estvarn <- "Area"
         }

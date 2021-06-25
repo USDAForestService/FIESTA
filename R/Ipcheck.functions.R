@@ -236,7 +236,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       return(NULL)
     }
   } 
- 
+
   if (!is.null(tab)) {
     if (is.character(tab)) {
       if (obj && exists(tab, envir=.GlobalEnv) && is.data.frame(get(tab))) {
@@ -244,7 +244,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
         return(get(tab))  
       } else if (file.exists(tab)) {
         tab_dsn <- tab
-      }
+      } 
     } 
     if ("sf" %in% class(tab)) {
       if (returnsf) {
@@ -335,7 +335,9 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     } else {
       stop("file format currently not supported")
     }
-  } else {
+  } else if (tabext == "csv") {
+    stop("file does not exist")
+  } else {    
     tabx <- tryCatch(data.table::fread(tab_dsn, integer64="numeric"),
 			error=function(e) {
 			print(e)
