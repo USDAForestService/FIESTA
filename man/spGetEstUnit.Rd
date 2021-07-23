@@ -19,10 +19,11 @@
 spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
 	unit_layer, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL, 
 	areavar = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
-	keepxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
+	returnxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
 	exportNA = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
 	out_layer = "unit_assgn", outfn.date = FALSE, outfn.pre = NULL, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, ...)
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	vars2keep=NULL, ...)
 }
 
 \arguments{
@@ -48,7 +49,7 @@ spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
   \item{rast.NODATA}{ Numeric. NODATA value if stratlayer is raster. These
 	values will be removed from output strata table, assuming outside boundary. }
   \item{keepNA}{ Logical. If TRUE, returns data frame of NA values. }
-  \item{keepxy}{ Logical. If TRUE, returns xy data as sf object (spxyplt). }
+  \item{returnxy}{ Logical. If TRUE, returns xy data as sf object (spxyplt). }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
   \item{savedata}{ Logical. If TRUE, the input data with extracted values are
 	saved to outfolder. }
@@ -67,6 +68,8 @@ spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
   \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
   \item{append_layer}{ Logical. If TRUE, appends to csv (if out_fmt="csv")
 	or appends to layers in dsn. }
+  \item{vars2keep}{ String vector. Attributes in SAdoms, other than domvar to
+	include in dunitlut output and extract to pltassgn points. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }
 \details{

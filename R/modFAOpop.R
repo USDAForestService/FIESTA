@@ -1,13 +1,17 @@
 modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL, 
-	clustassgn=NULL, dsn=NULL, clustid="CN", clustassgnid="PLT_CN",
+	seed=NULL, clustassgn=NULL, dsn=NULL, clustid="CN", clustassgnid="PLT_CN",
 	clustjoinid="CN", buniqueid="PLT_CN", baseid="CONDID", tuniqueid=NULL,
- 	basewt="CONDPROP_UNADJ", invyrs=NULL, adj="none", 
+ 	basewt="CONDPROP_UNADJ", invyrs=NULL, adj="none", diavar="DIA",
+	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, areawt_micr="MICRPROP_UNADJ", 
+	areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
 	strata=TRUE, nonsamp.clustfilter=NULL, nonsamp.basefilter=NULL, 
 	unitlevel1=NULL, unitlevel2=NULL, unitarea=NULL, areavar="ACRES", 
 	unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
 	strvar="STRATUMCD", strwtvar="strwt", getwt=TRUE, getwtvar="P1POINTCNT", 
-	stratcombine=TRUE, saveobj=FALSE, savedata=FALSE, outfolder=NULL, 
-	outfn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=TRUE, gui=FALSE){
+	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="FAOpopdat", 
+	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL,
+ 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
+	append_layer=FALSE, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -25,9 +29,17 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
 
 
   ## If gui.. set variables to NULL
-  if (gui)  
+  if (gui) {
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
-  
+  }
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(modFAOpop)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab <- NULL
@@ -40,6 +52,23 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   nonresp <- FALSE
   substrvar <- NULL
   if (is.null(tuniqueid)) tuniqueid <- buniqueid
+  FAOdata <- NULL
+  returnlst <- list()
+
+
+  ## Translation
+  #cond <- base
+  #plt <- cluster
+  #pltassgn <- clustassgn 
+  #condid <- baseid
+  #puniqueid <- cluniqueid
+  #pltassgnid <- classgnid
+  #pjoinid <- cljoinid
+  #plt.nonsamp.filter <- nonsamp.clustfilter 
+  #cond.nonsamp.filter <- nonsamp.basefilter
+  #unitvar <- unitlevel1 
+  #unitvar2 <- unitlevel2
+  #bcfilter <- pcfilter
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -50,40 +79,22 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
 
 
-  ## Check overwrite, outfolder, outfn 
+  ## Check output
   ########################################################
   if (savedata || saveobj) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="NO", gui=gui) 
-
-    ## If outfn.pre is not null, create a folder within the outfolder, named outfn.pre
-    if (!is.null(outfn.pre)) {
-      outfolder <- file.path(outfolder, outfn.pre)
-      if (!dir.exists(outfolder)) dir.create(outfolder)
+    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+		append_layer=append_layer, gui=gui)
+    out_dsn <- outlst$out_dsn
+    outfolder <- outlst$outfolder
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    if (out_fmt != "csv") {
+      outfn.date <- FALSE
     }
-
-    if (savedata) {
-
-      out_fmtlst <- c("sqlite", "gpkg", "csv", "gdb", "shp")
-      out_fmt <- FIESTA::pcheck.varchar(var2check=out_fmt, varnm="out_fmt", 
-		checklst=out_fmtlst, gui=gui, caption="Output format?") 
-      if (out_fmt == "shp") out_fmt <- "csv"
-      if (out_fmt != "csv" && is.null(out_dsn))
-        out_dsn <- paste0("SAdata.", out_fmt)
-
-      if (out_fmt == "gdb") {
-        out_dsn <- DBtestESRIgdb(gdbfn=out_dsn, outfolder=outfolder, overwrite=FALSE, 
-			showlist=FALSE, returnpath=FALSE)
-      }	else if (out_fmt %in% c("sqlite", "gpkg")) {
-        gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-        out_dsn <- DBcreateSQLite(SQLitefn=out_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=FALSE, returnpath=FALSE)
-      }
-    }	
-  } 
+  }
 
   if (!is.null(FAOdata)) {
     if (!is.list(FAOdata))
@@ -99,13 +110,17 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
     base <- FAOdata$base
     tree <- FAOdata$tree
     unitarea <- FAOdata$unitarea
-    unitvar <- FAOdata$unitvar
     areavar <- FAOdata$areavar
     stratalut <- FAOdata$stratalut
     strvar <- FAOdata$strvar
     clustid <- FAOdata$clustid
     clustjoinid <- FAOdata$clustjoinid
-    clustassgnid <- FAOdata$clustassgnid  
+    clustassgnid <- FAOdata$clustassgnid 
+
+    if (is.null(unitvar)) {
+      unitvar <- FAOdata$unitvar
+      unitvar2 <- FAOdata$unitvar2
+    }  
   } 
  
   ###################################################################################
@@ -117,14 +132,17 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   popcheck <- check.popdata(gui=gui, module="GB", tree=tree, cond=base, plt=cluster, 
 	pltassgn=clustassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=buniqueid, 
 	condid=baseid, areawt=basewt, puniqueid=clustid, pltassgnid=clustassgnid, 
-	pjoinid=clustjoinid, invyrs=invyrs, adj=adj,
+	pjoinid=clustjoinid, invyrs=invyrs, adj=adj, diavar=diavar,
+	MICRO_BREAKPOINT_DIA=MICRO_BREAKPOINT_DIA, MACRO_BREAKPOINT_DIA=MACRO_BREAKPOINT_DIA, 	areawt_micr=areawt_micr, areawt_subp=areawt_subp, areawt_macr=areawt_macr,
  	nonsamp.pfilter=nonsamp.clustfilter, nonsamp.cfilter=nonsamp.basefilter,
- 	unitvar=unitlevel1, unitvar2=unitlevel2, unitcombine=unitcombine, 
-	stratcombine=stratcombine, strata=strata, strvar=strvar)
+ 	unitarea=unitarea, unitvar=unitlevel1, unitvar2=unitlevel2, 
+	unitcombine=unitcombine, strata=strata, stratalut=stratalut, strvar=strvar,
+ 	stratcombine=stratcombine)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
+  seedf <- popcheck$seedf
   pltassgnx <- popcheck$pltassgnx
   cuniqueid <- popcheck$cuniqueid
   condid <- popcheck$condid
@@ -133,6 +151,9 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   adj <- popcheck$adj
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
+  unitarea <- popcheck$unitarea
+  areavar <- popcheck$areavar
+  areaunits <- popcheck$areaunits
   unitcombine <- popcheck$unitcombine
   strata <- popcheck$strata
   strvar <- popcheck$strvar
@@ -145,24 +166,17 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   invyrs <- popcheck$invyrs
   cvars2keep <- popcheck$cvars2keep
   pvars2keep <- popcheck$pvars2keep
+  areawt <- popcheck$areawt
+  tpropvars <- popcheck$tpropvars
+  if (strata) {
+    stratalut <- popcheck$stratalut
+  }
   if (nonresp) {
     substrvar <- popcheck$substrvar 
     nonsampplots <- popcheck$nonsampplots
   }
   #rm(popcheck)
 
-
-  ###################################################################################
-  ## CHECK unitarea BY ESTIMATION UNIT
-  ## Returns: data table with unitvar and area by estimation unit (unitvar)
-  ##	 and areavar (default="ACRES")
-  ###################################################################################
-  unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
-	unitvars=c(unitvar, unitvar2), areavar=areavar, gui=gui)
-  unitarea <- unitdat$unitarea
-  areavar <- unitdat$areavar
-
- 
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -177,18 +191,19 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
 		auxlut=stratalut, PSstrvar=strvar, nonresp=nonresp, substrvar=substrvar, 
 		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
 		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-		minplotnum.unit=minplotnum.unit, getwt=getwt, getwtvar=getwtvar, 
-		P2POINTCNT=P2POINTCNT)  
+		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat,
+		getwt=getwt, getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
   unitvars <- auxdat$unitvars
-  strlut <- auxdat$auxlut
+  stratalut <- auxdat$auxlut
   strvar <- auxdat$PSstrvar
+  strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$unitstrgrplut
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   strunitvars <- c(unitvar, strvar)
- 
+  if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)  
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -204,51 +219,79 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   ###################################################################################
   ## Merge plot strata info to condx
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
-  if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
   condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
+
+  ## If more than one unitvar, 
+  ## split the concatenated unitvar variable to keep original columns
+  if (!is.null(unitvar2)) {
+    condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+  }
 
   if (adj == "samp") {
     adjtree <- TRUE
-    adjfacdata <- getadjfactorGB(treex=treef, condx=condx, cuniqueid=cuniqueid, 
-		tuniqueid=tuniqueid, condid=condid, unitlut=strlut, unitvars=unitvar, 
-		strvars=strvar, unitarea=unitarea, areavar=areavar)
+    adjfacdata <- getadjfactorGB(condx=condx, treex=treef, seedx=seedf, 
+		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
+		unitlut=stratalut, unitvars=unitvar, strvars=strvar,
+		unitarea=unitarea, areavar=areavar, areawt=areawt, tpropvars=tpropvars)
     condx <- adjfacdata$condx
-    strlut <- adjfacdata$unitlut
+    stratalut <- adjfacdata$unitlut
     treef <- adjfacdata$treex
+    seedf <- adjfacdata$seedx
     expcondtab <- adjfacdata$expcondtab
   } 
  
-  returnlst <- list(basex=condx, clustbasex=pltcondx, buniqueid=cuniqueid, baseid=condid,
- 		unitarea=unitarea, areavar=areavar, unitlevel1=unitvar, unitvars=unitvars,
- 		strlut=strlut, strvar=strvar, expcondtab=expcondtab,
- 		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, states=states, invyrs=invyrs)
+  setkeyv(stratalut, strunitvars)
+  estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
+  returnlst <- append(returnlst, list(basex=condx, clustbasex=pltcondx, 
+		buniqueid=cuniqueid, baseid=condid,
+ 		unitarea=unitarea, areavar=areavar, 
+		areaunits=areaunits, unitlevel1=unitvar, unitvars=unitvars,
+ 		stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
+		expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+ 		states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
     returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
   }
+  if (!is.null(seedf)) {
+    returnlst$seedx <- seedf
+  }
 
-  if (!is.null(stratcombinelut)) 
+  if (!is.null(stratcombinelut)) {
     returnlst$stratcombinelut <- stratcombinelut
+  }
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="FAOpopdat.rda", outfolder=outfolder, 
-		overwrite=overwrite, outfn.date=outfn.date)
+    objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
+		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
-    datExportData(pltassgnx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="clustassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-    datExportData(unitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
-    datExportData(strlut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="strlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite)
+    datExportData(condx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="basex", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltcondx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="clustbasex", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+
+    if (!is.null(treef)) {
+      datExportData(treef, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
+    if (!is.null(seedf)) {
+      datExportData(seedf, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
   }
 
   return(returnlst)

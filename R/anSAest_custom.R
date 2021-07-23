@@ -73,8 +73,8 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   ####################################################################
   ## Get estimates
   ####################################################################
-  SAest <- list()
-  SAmultest <- list()
+  SAestlst <- list()
+  SAmultestlst <- list()
 
   message("calculating estimates...")
   outnm <- paste(SApackage, "CONDPROP_ADJ", sep="_")
@@ -82,7 +82,6 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   if (multest_fmt == "csv") {
     multest_layer <- paste0("multest_", multest_layer)
   }
-
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, esttype="AREA", landarea="FOREST", 
  	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
@@ -93,8 +92,8 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
 	append_layer=multest.append, outfn.pre=outfn.pre, 
 	save4testing=save4testing)
   if (is.null(SAareadat)) return(NULL)
-  SAest[[outnm]] <- SAareadat$est
-  SAmultest[[outnm]] <- SAareadat$dunit.multest
+  SAestlst[[outnm]] <- SAareadat$est
+  SAmultestlst[[outnm]] <- SAareadat$dunit.multest
   response <- SAareadat$raw$estvar
 
   if (save4testing) {
@@ -151,11 +150,11 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
 
         if (is.null(SAestdat$est)) {
           message("no estimates for ", outnm)
-          SAest[[outnm]] <- NA
-          SAmultest[[outnm]] <- NA
+          SAestlst[[outnm]] <- NA
+          SAmultestlst[[outnm]] <- NA
         } else {
-          SAest[[outnm]] <- SAestdat$est
-          SAmultest[[outnm]] <- SAestdat$dunit.multest
+          SAestlst[[outnm]] <- SAestdat$est
+          SAmultestlst[[outnm]] <- SAestdat$dunit.multest
  
           if (barplot.compare) {
             ## build plots
@@ -182,6 +181,6 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
     }
   }
 
-  return(list(SAest, SAmultest))
+  return(list(SAest=SAestlst, SAmultest=SAmultestlst))
 }
 		

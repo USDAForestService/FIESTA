@@ -65,6 +65,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ## CHECK INPUT PARAMETERS
   ##################################################################
   polyunion <- FALSE
+  smallishelper <- FALSE
   largeishelper <- FALSE
   maxislarge <- FALSE
   #smallishelper <- FALSE
@@ -105,7 +106,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     }
   }
 
-  ## Import smallbnd
+  #############################################################################
+  ## smallbnd
   #############################################################################
   smallbndx <- pcheck.spatial(layer=smallbnd, dsn=smallbnd_dsn, caption="small boundary",
 		stopifnull=TRUE)
@@ -160,10 +162,10 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- crsdat$ycrs
 
     ## Intersect smallbnd with statebnd
-    smallbndx2 <- suppressWarnings(selectByIntersects(smallbndx, stunitcof, 30))
+    smallbndx2 <- selectByIntersects(smallbndx, stunitcof, 30)
     if (showsteps) {
       plot(sf::st_geometry(stunitcof))
-      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
+      plot(sf::st_geometry(smallbndx2), add=TRUE, border="red")
     }
 
     if (is.null(smallbndx2) || nrow(smallbndx2) == 0) {
@@ -191,13 +193,14 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- crsdat$ycrs
 
     ## Intersect smallbnd with ecomapf
-    smallbndx2 <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
+    #smallbndx2 <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
+    smallbndx2 <- selectByIntersects(smallbndx, ecomapf, 49)
     if (showsteps) {
       plot(sf::st_geometry(ecomapf))
-      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
+      plot(sf::st_geometry(smallbndx2), add=TRUE, border="red")
     }
 
-    if (is.null(smallbndx2) || nrow(smallbndx2) == 0) {
+    if (is.null(smallbndx) || nrow(smallbndx) == 0) {
       message("the smallbnd has less than 50% overlap with the ecomap boundary... returning NULL")
       return(NULL)
     } else {
@@ -205,29 +208,103 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       rm(smallbndx2)
     }
   }
+  smallbndx.prj <- sf::st_crs(smallbndx)
 
   message("smallbnd...")
   #print(st_drop_geometry(smallbndx))
 
-  ## Add AOI attribute to smallbndx
-  smallbndx$AOI <- 1
 
-  ## Display smallbnd
-  if (showsteps) {
-    if (!is.null(smallbnd.ecofilter)) {
-      plot(sf::st_geometry(ecomapf))
-      plot(sf::st_geometry(ecomapf), add=TRUE)
-    } else if (!is.null(smallbnd.stfilter)) {
-      plot(sf::st_geometry(stunitcof), border="transparent")
-      plot(sf::st_geometry(stunitcof), add=TRUE)
-    } else {
-      plot(sf::st_geometry(stunitco), border="dark grey")
-    }
-    plot(sf::st_geometry(smallbndx), add=TRUE) 
-  }   
+  #############################################################################
+  ## maxbnd
+  #############################################################################
+  maxbndx <- pcheck.spatial(layer=maxbnd, dsn=maxbnd_dsn, caption="max boundary")
  
+  ## Check maxbndx
+  if (!is.null(maxbndx)) {
+    maxbnd.unique <- FIESTA::pcheck.varchar(var2check=maxbnd.unique, 
+		varnm="maxbnd.unique", gui=gui, checklst=names(maxbndx), 
+		caption="max areas attribute", 
+		warn=paste(maxbnd.unique, "not in maxbnd"), stopifnull=TRUE)
+  
+    ## Apply maxbnd.filter
+    if (!is.null(maxbndx) && !is.null(maxbnd.filter)) {
+      FIESTA::check.logic(maxbndx, maxbnd.filter, "maxbndfilter")
+      maxbndx <- subset(maxbndx, eval(parse(text = maxbnd.filter)))
+      if (length(maxbndx) == 0) stop("maxbnd.filter removed all features")
+    }
+
+    ## Intersect smallbnd with ecomapf
+    smallbndx <- selectByIntersects(smallbndx, ecomapf, 49)
+
+    ## Check projections (reproject smallbndx to projection of helperbndx
+    maxbndx <- crsCompare(maxbndx, helperbndx, nolonglat=TRUE)$x
+  
+    ## Change name of maxbnd.unique if equals largebnd.unique 
+    if (identical(maxbnd.unique, c(helperbnd.unique, largebnd.unique))) {
+      tmp.unique <- checknm(maxbnd.unique, names(maxbndx))
+      names(maxbndx)[names(maxbndx) == maxbnd.unique] <- tmp.unique
+      maxbnd.unique <- tmp.unique
+    }
+  }
+
+  #############################################################################
+  ## largebnd
+  #############################################################################
+  largebndx <- pcheck.spatial(layer=largebnd, dsn=largebnd_dsn, 
+		caption="large boundary")
+
+  ## Check largebndx
+  if (is.null(largebndx)) {
+    largebnd.unique <- suppressWarnings(pcheck.varchar(var2check=largebnd.unique, 
+		checklst=names(helperbndx), stopifinvalid=FALSE))
+    if (!is.null(largebnd.unique)) {
+      if (!is.null(largebnd.filter)) {
+        FIESTA::check.logic(largebndx, largebnd.filter, "largebndfilter")
+        largebndx <- subset(largebndx, eval(parse(text = largebnd.filter)))
+        if (length(largebndx) == 0) stop("largebnd.filter removed all features")
+      }
+    } else {
+      if (helper_autoselect) {
+        message("no largebnd included... no autoselect")
+        helper_autoselect <- FALSE
+      }
+    }
+  } else {
+    if (is.null(maxbnd)) {
+      maxislarge <- TRUE
+    }
+    largebnd.unique <- FIESTA::pcheck.varchar(var2check=largebnd.unique, 
+		varnm="largebnd.unique", gui=gui, checklst=names(largebndx), 
+		caption="max areas attribute", 
+		warn=paste(largebnd.unique, "not in largebnd"), stopifnull=TRUE)
+  
+    ## Apply largebnd.filter
+    if (!is.null(largebndx) && !is.null(largebnd.filter)) {
+      FIESTA::check.logic(largebndx, largebnd.filter, "largebnd.filter")
+      largebndx <- subset(largebndx, eval(parse(text = largebnd.filter)))
+      if (length(largebndx) == 0) stop("largebnd.filter removed all features")
+    }
+
+    ## Check projections (reproject largebndx to projection of helperbndx
+    prjdat <- crsCompare(largebndx, smallbndx, nolonglat=TRUE)
+    largebndx <- prjdat$x
+    smallbndx <- prjdat$ycrs
+
+    ## Get intersection of smallbndx
+    smallbndx <- suppressWarnings(selectByIntersects(smallbndx, largebndx, 49))
+
+    ## Change name of largebnd.unique if equals helperbnd.unique
+    if (identical(largebnd.unique, helperbnd.unique)) {
+      tmp.unique <- checknm(largebnd.unique, names(largebndx))
+      names(largebndx)[names(largebndx) == largebnd.unique] <- tmp.unique
+      largebnd.unique <- tmp.unique
+    }
+  }
+
+   
+  #############################################################################
   ## helperbnd
-  ####################################################################
+  #############################################################################
   helperbndx <- pcheck.spatial(layer=helperbnd, dsn=helperbnd_dsn, 
 		caption="helper boundary")
  
@@ -235,12 +312,13 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ## If helperbnd=NULL, check smallbnd for helperbnd.unique
   if (is.null(helperbndx)) {
     helperbndx <- smallbndx
-    #smallishelper <- TRUE
+    smallishelper <- TRUE
     helperbnd.unique <- pcheck.varchar(var2check=helperbnd.unique, 
 		varnm="helperbnd.unique", gui=gui, checklst=names(helperbndx), 
 		caption="Helper areas attribute")
-    if (is.null(helperbnd.unique))
+    if (is.null(helperbnd.unique)) {
       helperbnd.unique <- smallbnd.unique
+    }
   } else {
     helperbnd.unique <- FIESTA::pcheck.varchar(var2check=helperbnd.unique, 
 		varnm="helperbnd.unique", gui=gui, checklst=names(helperbndx), 
@@ -260,110 +338,45 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     }
   }
 
-  ## Apply helperbnd.filter
-  if (!is.null(helperbnd.filter)) {
-    FIESTA::check.logic(helperbndx, helperbnd.filter, "helperbnd filter")
-    helperbndx <- subset(helperbndx, eval(parse(text = helperbnd.filter)))
-  }
+  if (!smallishelper) {
+    ## Apply helperbnd.filter
+    if (!is.null(helperbnd.filter)) {
+      FIESTA::check.logic(helperbndx, helperbnd.filter, "helperbnd filter")
+      helperbndx <- subset(helperbndx, eval(parse(text = helperbnd.filter)))
+    }
 
-  ## Check projections (reproject smallbndx to projection of helperbndx
-  prjlst <- crsCompare(smallbndx, helperbndx, nolonglat=TRUE)
-  smallbndx <- prjlst$x
-  helperbndx <- prjlst$ycrs
+    ## Check projections (reproject smallbndx to projection of helperbndx
+    prjlst <- crsCompare(smallbndx, helperbndx)
+    smallbndx <- prjlst$x
+    helperbndx <- prjlst$ycrs
+  }
   helperbndx.prj <- sf::st_crs(helperbndx)
 
-  ####################################################################
-  ## Apply spatial filters to smallbnd after projecting
-  ####################################################################
 
-  ## largebnd
-  ####################################################################
-  largebndx <- pcheck.spatial(layer=largebnd, dsn=largebnd_dsn, 
-		caption="large boundary")
+  ## clip to US boundary
+  #############################################################################
 
-  ## Check largebndx
-  if (is.null(largebndx)) {
-    largebnd.unique <- suppressWarnings(pcheck.varchar(var2check=largebnd.unique, 
-		checklst=names(helperbndx), stopifinvalid=FALSE))
-    largebndx <- helperbndx
-    largeishelper <- TRUE
-    if (!is.null(largebnd.unique)) {
-      if (!is.null(largebnd.filter)) {
-        FIESTA::check.logic(largebndx, largebnd.filter, "largebndfilter")
-        largebndx <- subset(largebndx, eval(parse(text = largebnd.filter)))
-        if (length(largebndx) == 0) stop("largebnd.filter removed all features")
-      }
-    } else {
-      if (helper_autoselect) {
-        message("no largebnd included... no autoselect")
-        helper_autoselect <- FALSE
-      }
-    }
-  } else {
-    largebnd.unique <- FIESTA::pcheck.varchar(var2check=largebnd.unique, 
-		varnm="largebnd.unique", gui=gui, checklst=names(largebndx), 
-		caption="max areas attribute", 
-		warn=paste(largebnd.unique, "not in largebnd"), stopifnull=TRUE)
-  
-    ## Apply largebnd.filter
-    if (!is.null(largebndx) && !is.null(largebnd.filter)) {
-      FIESTA::check.logic(largebndx, largebnd.filter, "largebndfilter")
-      largebndx <- subset(largebndx, eval(parse(text = largebnd.filter)))
-      if (length(largebndx) == 0) stop("largebnd.filter removed all features")
-    }
 
-    ## Check projections (reproject smallbndx to projection of helperbndx
-    largebndx <- crsCompare(largebndx, helperbndx, nolonglat=TRUE)$x
-   
-    ## Change name of largebnd.unique if equals helperbnd.unique
-    if (identical(largebnd.unique, helperbnd.unique)) {
-      tmp.unique <- checknm(largebnd.unique, names(largebndx))
-      names(largebndx)[names(largebndx) == largebnd.unique] <- tmp.unique
-      largebnd.unique <- tmp.unique
-    }
-  }
- 
-  ## maxbnd
-  ####################################################################
-  maxbndx <- pcheck.spatial(layer=maxbnd, dsn=maxbnd_dsn, caption="max boundary")
- 
-  ## Check maxbndx
-  if (is.null(maxbndx)) {
-    maxbnd.unique <- suppressWarnings(pcheck.varchar(var2check=maxbnd.unique, 
-		checklst=names(largebndx), stopifinvalid=FALSE))
-    if (!is.null(maxbnd.unique)) {
-      maxbndx <- largebndx
-      maxislarge <- TRUE
 
-      if (!is.null(maxbnd.filter)) {
-        FIESTA::check.logic(maxbndx, maxbnd.filter, "maxbndfilter")
-        maxbndx <- subset(maxbndx, eval(parse(text = maxbnd.filter)))
-        if (length(maxbndx) == 0) stop("maxbnd.filter removed all features")
-      }
-    } 
-  } else {
-    maxbnd.unique <- FIESTA::pcheck.varchar(var2check=maxbnd.unique, 
-		varnm="maxbnd.unique", gui=gui, checklst=names(maxbndx), 
-		caption="max areas attribute", 
-		warn=paste(maxbnd.unique, "not in maxbnd"), stopifnull=TRUE)
-  
-    ## Apply maxbnd.filter
-    if (!is.null(maxbndx) && !is.null(maxbnd.filter)) {
-      FIESTA::check.logic(maxbndx, maxbnd.filter, "maxbndfilter")
-      maxbndx <- subset(maxbndx, eval(parse(text = maxbnd.filter)))
-      if (length(maxbndx) == 0) stop("maxbnd.filter removed all features")
-    }
+  ## Add AOI attribute to smallbndx
+  smallbndx$AOI <- 1
 
-    ## Check projections (reproject smallbndx to projection of helperbndx
-    maxbndx <- crsCompare(maxbndx, helperbndx, nolonglat=TRUE)$x
-  
-    ## Change name of maxbnd.unique if equals largebnd.unique 
-    if (identical(maxbnd.unique, c(helperbnd.unique, largebnd.unique))) {
-      tmp.unique <- checknm(maxbnd.unique, names(maxbndx))
-      names(maxbndx)[names(maxbndx) == maxbnd.unique] <- tmp.unique
-      maxbnd.unique <- tmp.unique
+  ## Display smallbnd
+  if (showsteps) {
+    plot(sf::st_geometry(smallbndx)) 
+
+    if (!is.null(smallbnd.ecofilter)) {
+      plot(sf::st_geometry(ecomapf))
+      plot(sf::st_geometry(ecomapf), add=TRUE)
+    } else if (!is.null(smallbnd.stfilter)) {
+      plot(sf::st_geometry(stunitcof), border="transparent")
+      plot(sf::st_geometry(stunitcof), add=TRUE)
+    #} else {
+      #plot(sf::st_geometry(stunitco), border="dark grey", add=TRUE)
     }
-  }
+    #plot(sf::st_geometry(smallbndx), add=TRUE) 
+  } 
+
 
   #############################################################################
   ### DO THE WORK
@@ -385,32 +398,19 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     maxbndx <- autoselectlst$maxbndx.int
  
   } else {
-    if (!is.null(maxbndx) && !is.null(largebndx) && !maxislarge) {
-      ## Clip largebndx to maxbnd extent
-      largebndx <- spClipPoly(polyv=largebndx, clippolyv=maxbndx,
- 		exportsp=savesteps, outfolder=outfolder, out_layer="largebnd_clip")
-    }
-
-    if (!is.null(largebndx) && !largeishelper) {
-      ## Clip helperbndx to largebnd extent
-      helperbndx <- spClipPoly(polyv=helperbndx, clippolyv=largebndx,
- 		exportsp=savesteps, outfolder=outfolder, out_layer="helperbnd_clip")
-    }
 
     ## Add DOMAIN column to all rows
     helperbndx$DOMAIN <- helperbndx[[helperbnd.unique]]
-    if ("AOI" %in% names(smallbndx))
-      smallbndx$AOI <- NULL
-
     SAdomslst <- list(SAdoms=helperbndx)
     smallbndxlst <- list(smallbnd=smallbndx)
   }
 
+
   ###########################################################################
   ## Aggregate (dissolve) polygons on DOMAIN and calculate area on dissolved polygons
   ###########################################################################
-  SAdomslst <- lapply(SAdomslst, sf_dissolve, c("DOMAIN", "AOI"))
-  #SAdomslst2 <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
+  #SAdomslst <- lapply(SAdomslst, sf_dissolve, c("DOMAIN", "AOI"))
+  SAdomslst <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
 
 
   ## Set plotting margins

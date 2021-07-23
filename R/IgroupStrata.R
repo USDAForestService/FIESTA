@@ -51,10 +51,10 @@ groupStrata <- function(x, minplotnum) {
 
   ## set global variables
   strat=stratnew <- NULL
+print(x)
 
   if (any(x$n.strata < minplotnum)) {
     strats <- x$strat
-
     agstrats <- {}
     for (stratum in strats) {
       if (!stratum %in% agstrats) {
@@ -74,7 +74,7 @@ groupStrata <- function(x, minplotnum) {
               agstrats <- c(stratag, agstrats)
             }
             agstratsnm <- paste(agstrats, collapse="-")
-            maxag <- max(x[strat %in% agstrats][["n.strata"]])          
+            maxag <- sum(x[strat %in% agstrats][["n.strata"]])          
             x[strat %in% agstrats][["stratnew"]] <- agstratsnm
           }
         }

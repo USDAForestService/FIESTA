@@ -1,14 +1,16 @@
 modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL, 
-	cond=NULL, tree=NULL, seed=NULL, plt=NULL, pltassgn=NULL, dsn=NULL, 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", puniqueid="CN", 
-	pltassgnid="CN", pjoinid="CN", measCur=FALSE, measEndyr=NULL, 
-	measEndyr.filter=NULL, invyrs=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
+	cond=NULL, plt=NULL, tree=NULL, seed=NULL, pltassgn=NULL, dsn=NULL, 
+	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", tuniqueid="PLT_CN",  
+	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", 
+	invyrs=NULL, intensity=NULL, measCur=FALSE, measEndyr=NULL,
+	measEndyr.filter=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
 	dunitvar2=NULL, dunitarea=NULL, areavar="ACRES", areaunits="acres", 
-	unitcombine=FALSE, dunitlut=NULL, prednames=NULL, predfac=NULL, 
-	pvars2keep=NULL, cvars2keep=NULL, saveobj=FALSE, savedata=FALSE, 
-	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, SAdata=NULL, 
-	SAmodeldat=NULL, gui=FALSE){
+	unitcombine=FALSE, minplotnum.unit=0, removeunit=FALSE, dunitlut=NULL, 
+	prednames=NULL, predfac=NULL, pvars2keep=NULL, cvars2keep=NULL, 
+	saveobj=FALSE, objnm="SApopdat", savedata=FALSE, outfolder=NULL, 
+	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, 
+	SAdata=NULL, pltdat=NULL, SAmodeldat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -21,21 +23,19 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   ##################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-#  if (nargs() == 0 | is.null(estvar)) gui <- TRUE
   if (nargs() == 0) gui <- TRUE
 
-
   ## If gui.. set variables to NULL
-  if (gui)  
+  if (gui) {
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
-  
+  }
+
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   if (!all(input.params %in% names(formals(modSApop)))) {
     miss <- input.params[!input.params %in% formals(modSApop)]
     stop("invalid parameter: ", toString(miss))
   }
-
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
@@ -70,39 +70,41 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   if (savedata || saveobj) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+		append_layer=append_layer, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
-    overwrite_dsn <- outlst$overwrite_dsn
+    append_layer <- outlst$append_layer
+    if (out_fmt != "csv") {
+      outfn.date <- FALSE
+    }
   } 
 
 
-  ## Check SAdata
-  #########################################################
+  ###################################################################################
+  ## Load data
+  ###################################################################################
   if (!is.null(SAdata)) {
-    SAdata.names <- c("SAdoms", "cond", "plt",
+    list.items <- c("SAdoms", "cond", "plt",
 		"pltassgn", "puniqueid", "pltassgnid", "pjoinid", "dunitarea",
 		"dunitvar", "areavar", "dunitlut")
-    if (!all(SAdata.names %in% names(SAdata))) {
-      stop("missing components in SAdata list: ", 
-		toString(SAdata.names[!SAdata.names %in% names(SAdata)])) 
-    }
+    SAdata <- FIESTA::pcheck.object(SAdata, "SAdata", list.items=list.items)
     SAdoms <- SAdata$SAdoms
     #smallbnd <- SAdata$smallbnd
+    plt <- SAdata$plt
+    cond <- SAdata$cond
     tree <- SAdata$tree
     seed <- SAdata$seed
-    cond <- SAdata$cond
-    plt <- SAdata$plt
-    puniqueid <- SAdata$puniqueid
-    pjoinid <- SAdata$pjoinid
     pltassgn <- SAdata$pltassgn
     pltassgnid <- SAdata$pltassgnid
     dunitarea <- SAdata$dunitarea
     dunitvar <- SAdata$dunitvar
     areavar <- SAdata$areavar
     dunitlut <- SAdata$dunitlut
+    puniqueid <- SAdata$puniqueid
+    pjoinid <- SAdata$pjoinid
     predfac <- SAdata$predfac
     zonalnames <- SAdata$zonalnames
 
@@ -114,46 +116,68 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
 		toString(prednames[!prednames %in% SAdata$prednames]))
       predfac <- predfac[predfac %in% prednames]
     }
-  } else if (!is.null(SAmodeldat)) {
-    list.items <- c("pltassgn", "domzonal", "domvar", "prednames", "domarea")
-    SAmodeldat <- FIESTA::pcheck.object(SAmodeldat, "SAmodeldat", list.items=list.items)
-    pltassgn <- SAmodeldat$pltassgn
-    pltassgnid <- SAmodeldat$pltassgnid
-    dunitarea <- SAmodeldat$domarea
-    dunitvar <- SAmodeldat$domvar
-    areavar <- SAmodeldat$areavar
-    dunitlut <- SAmodeldat$domzonal
+  } else {
+    if (!is.null(pltdat)) {
+      list.items <- c("bndx", "tabs", "xypltx")
 
-    if (is.null(prednames)) {
-      prednames <- SAmodeldat$prednames
-    } else {
-      if (!all(prednames %in% SAmodeldat$prednames))
-        stop("invalid prednames: ", 
-		toString(prednames[!prednames %in% SAmodeldat$prednames]))
-      predfac <- predfac[predfac %in% prednames]
+      ## Extract list objects
+      puniqueid <- pltdat$puniqueid
+      if ("tabs" %in% names(pltdat)) {
+        pjoinid <- pltdat$pjoinid
+        plt <- pltdat$tabs$pltx
+        cond <- pltdat$tabs$condx
+        tree <- pltdat$tabs$treex
+        seed <- pltdat$tabs$seedx
+      } else {
+        pjoinid <- puniqueid
+        plt <- pltdat$plt
+        cond <- pltdat$cond
+        tree <- pltdat$tree
+        seed <- pltdat$seed
+      }
     }
-  } 
+    if (!is.null(SAmodeldat)) {
+      list.items <- c("pltassgn", "dunitlut", "dunitvar", "prednames", "dunitarea")
+      SAmodeldat <- FIESTA::pcheck.object(SAmodeldat, "SAmodeldat", list.items=list.items)
+      pltassgn <- SAmodeldat$pltassgn
+      pltassgnid <- SAmodeldat$pltassgnid
+      dunitarea <- SAmodeldat$dunitarea
+      dunitvar <- SAmodeldat$dunitvar
+      areavar <- SAmodeldat$areavar
+      dunitlut <- SAmodeldat$dunitlut
+      zonalnames <- SAmodeldat$zonalnames
+      predfac <- SAmodeldat$predfac
+
+      if (is.null(prednames)) {
+        prednames <- SAmodeldat$prednames
+      } else {
+        if (!all(prednames %in% SAmodeldat$prednames))
+          stop("invalid prednames: ", 
+		  toString(prednames[!prednames %in% SAmodeldat$prednames]))
+        predfac <- predfac[predfac %in% prednames]
+      }
+    } 
+  }
 
   ## Check SAdoms
   if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {
     stop("invalid SAdoms")
   }
-
-  ###################################################################################
-  ## Check population parameters 
-  ## Note: currently removes units that do not have plots
-  ###################################################################################
  
+  ###################################################################################
+  ## CHECK PARAMETERS AND DATA
+  ## Generate table of sampled/nonsampled plots and conditions
+  ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
+  ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="SA", tree=tree, cond=cond, plt=plt, 
 	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
 	condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
-	measCur=measCur, measEndyr=measEndyr, measEndyr.filter, invyrs=invyrs, 
+	measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, 
 	ACI=ACI, adj=adj, nonsamp.pfilter=nonsamp.pfilter, 
 	nonsamp.cfilter=nonsamp.cfilter, unitarea=dunitarea, areavar=areavar, 
 	areaunits=areaunits, unitvar=dunitvar, unitvar2=dunitvar2, prednames=prednames, 
-	predfac=predfac, pvars2keep=pvars2keep, cvars2keep=cvars2keep, removeunits=TRUE,
- 	removetext="dunitarea")
+	predfac=predfac, pvars2keep=pvars2keep, cvars2keep=cvars2keep)
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
@@ -178,11 +202,11 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   invyrs <- popcheck$invyrs
   cvars2keep <- popcheck$cvars2keep
   areawt <- popcheck$areawt
+  tpropvars <- popcheck$tpropvars
 
   if (is.null(treef) && is.null(seedf)) {
     stop("must include tree data")
   }
-
 
   ###################################################################################
   ## CHECK STRATA
@@ -196,13 +220,15 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
 		auxlut=dunitlut, prednames=prednames, predfac=predfac, makedummy=TRUE,
 		unitcombine=unitcombine, unitarea=dunitarea, unitvar=dunitvar, 
-		areavar=areavar, minplotnum.strat=0, minplotnum.unit=0,
+		areavar=areavar, minplotnum.unit=minplotnum.unit, removeunit=removeunit,
 		auxtext="dunitlut", removetext="dunitarea")  
   pltassgnx <- auxdat$pltx
+  unitarea <- auxdat$unitarea
   dunitvar <- auxdat$unitvar
   dunitlut <- auxdat$auxlut
   prednames <- auxdat$prednames
   predfac <- auxdat$predfac
+  if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
 
 
   ###################################################################################
@@ -214,10 +240,8 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   ## Returns:
   ##  Adjusted condition proportion (CONDPROP_ADJ) appended to condx
   ###################################################################################
-  if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
-  if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
-
   ## Merge plot strata info to condx
+  if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   condx <- condx[pltassgnx[, c(pltassgnid, dunitvar, prednames), with=FALSE]]
   setkeyv(condx, c(cuniqueid, condid))
 
@@ -226,9 +250,10 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
     bycond <- FALSE
 
     adjfacdata <- getadjfactorPLOT(condx=condx, treex=treef, seedx=seedf, 
-				cuniqueid=cuniqueid, tuniqueid=tuniqueid, )
-    condx <- adjfacdata$condadj
-    treef <- adjfacdata$treeadj
+				cuniqueid=cuniqueid, tuniqueid=tuniqueid, areawt=areawt,
+				tpropvars=tpropvars)
+    condx <- adjfacdata$condx
+    treef <- adjfacdata$treex
     seedf <- adjfacdata$seedx
   }
  
@@ -261,22 +286,46 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   }
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="SApopdat", ext="rda", outfolder=outfolder, 
+    objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
 		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
+    datExportData(condx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="condx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltcondx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcondx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+
+    if (!is.null(treef)) {
+      datExportData(treef, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
+    if (!is.null(seedf)) {
+      datExportData(seedf, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+    }
+
     datExportData(pltassgnx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
     datExportData(dunitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     datExportData(dunitlut, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
   }
 
   return(returnlst)

@@ -1,6 +1,6 @@
-modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL, 
-	estseed="none", landarea="ALL", pcfilter=NULL, estvar=NULL, 
-	estvar.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none", 
+	landarea="FOREST", pcfilter=NULL, estvar=NULL, estvar.filter=NULL, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
 	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
 	sumunits=FALSE, allin1=FALSE, metric=FALSE, estround=1, pseround=2, 
@@ -55,9 +55,9 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
 
 
   ## Check MAmethod 
-  MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-  MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
-		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
+  #MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
+  #MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
+#		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
 
   ###################################################################################
@@ -70,12 +70,12 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
 		"npixelvar", "expcondtab", "plotsampcnt", "condsampcnt", "MAmethod")
-    if (MAmethod == "PS") {
-      list.items <- c(list.items, "PSstrvar")
-    }
-    if (MAmethod == "greg") {
-      list.items <- c(list.items, "prednames")
-    }
+    #if (MAmethod == "PS") {
+    #  list.items <- c(list.items, "PSstrvar")
+    #}
+    #if (MAmethod == "greg") {
+    #  list.items <- c(list.items, "prednames")
+    #}
     MApopdat <- FIESTA::pcheck.object(MApopdat, "MApopdat", list.items=list.items)
   }	
   if (is.null(MApopdat)) return(NULL)	
@@ -103,7 +103,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
   condsampcnt <- MApopdat$condsampcnt
   states <- MApopdat$states
   invyrs <- MApopdat$invyrs
-  #MAmethod <- MApopdat$MAmethod
+  MAmethod <- MApopdat$MAmethod
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
   PSstrvar <- MApopdat$PSstrvar
@@ -119,33 +119,6 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
       predfac <- predfac[predfac %in% prednames]
     }
   } 
-
-#  ## Convert predfac if MAmethod != c('HT', 'PS')
-#  if (!MAmethod %in% c("HT","PS") && !is.null(predfac)) {
-#    for (fac in predfac) {
-#      ## Get factor levels
-#      fac.levels <- sort(unique(condx[[fac]]))
-#
-#      ## Set factor levels to keep and delete from unitlut.
-#      fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
-#      fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
-#      unitlut[[fac.unitcol.del]] <- NULL
-#  
-#      ## Rename factor variables and add names to predictor list
-#      facs <- paste0(fac, fac.levels[-1])
-#      names(unitlut)[names(unitlut) %in% fac.unitcol.keep] <- facs
-#      unitpreds <- c(prednames[prednames != fac], facs)
-#
-#      ## Create dummy variables for factor levels - 1
-#      dtfac <- condx[, as.data.table(model.matrix(~., 
-#				data=condx[, fac, with=FALSE]))][,-1]
-#      condx <- cbind(condx, dtfac)
-#      condx[, (fac) := NULL]
-#
-#      ## Remove old name and add new names to predictor list
-#      prednames <- unique(c(prednames[prednames != fac], facs))
-#    }
-#  }
 
 
   ########################################
@@ -305,10 +278,14 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
   response <- estvar.name
   estunits <- sort(unique(tdomdat[[unitvar]]))
 
-  message("getting estimates...")
+  masemethod <- ifelse(MAmethod == "PS", "postStrat", 
+	ifelse(MAmethod == "greg", "greg", 
+	ifelse(MAmethod == "gregEN", "gregElasticNet", 
+	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
+  message("generating estimates using mase::", masemethod, " function...\n")
   if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
-  }
+  } 
 
 #  if (addtotal) {
     ## Get total estimate and merge area
@@ -317,7 +294,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     unit_totest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-		domain="TOTAL", response=response, npixels=npixels, FIA=TRUE))
+		domain="TOTAL", response=response, npixels=npixels, FIA=FIA))
     tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -333,7 +310,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     unit_rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar,
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-		domain=rowvar, response=response, npixels=npixels, FIA=TRUE))
+		domain=rowvar, response=response, npixels=npixels, FIA=FIA))
     #unit_rowest <- unit_rowest[!is.na(unit_rowest[[rowvar]]), ]
 
     if (colvar != "NONE") {
@@ -342,7 +319,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
       unit_colest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-		domain=colvar, response=response, npixels=npixels, FIA=TRUE))
+		domain=colvar, response=response, npixels=npixels, FIA=FIA))
       #unit_colest <- unit_colest[!is.na(unit_colest[[colvar]]), ]
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -352,7 +329,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, prednames=NULL,
       unit_grpest <- do.call(rbind, lapply(estunits, MAest.unit,
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-		domain="grpvar", response=response, npixels=npixels, FIA=TRUE))
+		domain="grpvar", response=response, npixels=npixels, FIA=FIA))
       unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
     }
   }

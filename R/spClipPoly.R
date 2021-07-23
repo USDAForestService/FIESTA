@@ -1,6 +1,6 @@
 spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL, 
 	clippolyv.filter=NULL, showext=FALSE, areacalc=FALSE, areaunits="ACRES",
- 	exportsp=FALSE, ...) {
+ 	exportsp=FALSE, nolonglat=TRUE, ...) {
 
   #####################################################################################
   ## DESCRIPTION: 
@@ -51,7 +51,7 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
   ##################################################################
 
   ## Check projections of polygons 
-  prjdat <- crsCompare(clippolyvx, polyvx, nolonglat=TRUE)
+  prjdat <- crsCompare(clippolyvx, polyvx, nolonglat=nolonglat)
   clippolyvx <- prjdat$x
   polyvx <- prjdat$ycrs
 

@@ -4,7 +4,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", 
 	adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", areaunits="acres",
-	unitcombine=FALSE, minplotnum.unit=10, strata=TRUE, stratalut=NULL, 
+	unitcombine=FALSE, minplotnum.unit=10, removeunit=FALSE, strata=TRUE, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", strwtvar="strwt",
 	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", 
 	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL,
@@ -16,10 +16,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Generates population data 'on-the-fly', including strata weights, number
   ## of plots by strata and estimation unit, strata-level expansion factors,
   ## and sample-based area adjustment factors.
-  ## - checks input parameters and data tables (see check.popdata for details)
-  ## - checks unitarea data
-  ## - checks auxiliary data (i.e., stratification data)
-  ## - calculates adjustment factors for nonresponse
+  ## - checks input parameters and data tables, including removing nonsampled
+  ##   plots and conditions (see check.popdata for details).
+  ## - checks auxiliary data (i.e., stratification data).
+  ## - calculates adjustment factors for nonresponse and appends an adjustment
+  ##   variable to condition and tree data.
   ##################################################################################
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
@@ -32,14 +33,15 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(modGBpop)) 
+  formallst <- names(formals(FIESTA::modGBpop)) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ <- NULL
+  ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
+	treef=seedf=vcondsppf=vcondstrf <- NULL
 
   ## SET OPTIONS
   options.old <- options()
@@ -75,22 +77,26 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     }
   }
 
+
+  ###################################################################################
+  ## Load data
+  ###################################################################################
   if (!is.null(GBdata)) {
     list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
     GBdata <- FIESTA::pcheck.object(GBdata, "GBdata", list.items=list.items)
     #bnd <- GBdata$bnd
     plt <- GBdata$plt
-    pltassgn <- GBdata$pltassgn
     cond <- GBdata$cond
     tree <- GBdata$tree
     seed <- GBdata$seed
+    pltassgn <- GBdata$pltassgn
+    pltassgnid <- GBdata$pltassgnid 
     unitarea <- GBdata$unitarea
     areavar <- GBdata$areavar
     stratalut <- GBdata$stratalut
     strvar <- GBdata$strvar
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
-    pltassgnid <- GBdata$pltassgnid 
 
     if (is.null(unitvar)) {
       unitvar <- GBdata$unitvar
@@ -103,7 +109,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       if (popType == "LULC") {
         list.items <- c(list.items, "lulcx")
       }
-      #pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
+      pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
 
       ## Extract list objects
       puniqueid <- pltdat$puniqueid
@@ -194,6 +200,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   unitcombine <- popcheck$unitcombine
   stratcombine <- popcheck$stratcombine
   strata <- popcheck$strata
+  stratalut <- popcheck$stratalut
   strvar <- popcheck$strvar
   nonresp <- popcheck$nonresp
   P2POINTCNT <- popcheck$P2POINTCNT 
@@ -204,9 +211,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   cvars2keep <- popcheck$cvars2keep
   pvars2keep <- popcheck$pvars2keep
   areawt <- popcheck$areawt
-  if (strata) {
-    stratalut <- popcheck$stratalut
-  }
+  tpropvars <- popcheck$tpropvars
   if (nonresp) {
     substrvar <- popcheck$substrvar
   } 
@@ -227,12 +232,12 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## - if unitcombine=TRUE, combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, strata=strata,
-		auxlut=stratalut, PSstrvar=strvar, nonresp=nonresp, substrvar=substrvar, 
-		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
-		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
-		getwt=getwt, getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)  
+  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, unitvar=unitvar, 
+		unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
+		unitcombine=unitcombine, minplotnum.unit=minplotnum.unit, 
+		removeunit=removeunit, strata=strata, auxlut=stratalut, PSstrvar=strvar,  
+		nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
+		minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 					getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
@@ -244,6 +249,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   strunitvars <- c(unitvar, strvar)
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
+
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -266,14 +272,13 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (!is.null(unitvar2)) {
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
-
+ 
   if (adj == "samp") {
-    adjfacdata <- getadjfactorGB(condx=condx, 
-		vcondsppx=vcondsppf, 
-		vcondstrx=vcondstrf, 
-		cuniqueid=cuniqueid, condid=condid, vuniqueid=vuniqueid, 
+    adjfacdata <- getadjfactorGB(condx=condx, treex=treef, seedx=seedf,
+		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
+		vcondsppx=vcondsppf, vcondstrx=vcondstrf, vuniqueid=vuniqueid, 
 		unitlut=stratalut, unitvars=unitvar, strvars=strvar, 
-		unitarea=unitarea, areavar=areavar, areawt=areawt)
+		unitarea=unitarea, areavar=areavar, areawt=areawt, tpropvars=tpropvars)
     condx <- adjfacdata$condx
     stratalut <- adjfacdata$unitlut
     treef <- adjfacdata$treex
@@ -282,17 +287,20 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     vcondsppf <- adjfacdata$vcondsppx
     vcondstrf <- adjfacdata$vcondstrx
   } 
- 
+
+
+  ###################################################################################
+  ## Return population data objects
+  ###################################################################################
   setkeyv(stratalut, strunitvars)
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(popType=popType, 
 	condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid, 
 	ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar, 
 	areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
-	stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
-	expcondtab=expcondtab, plotsampcnt=plotsampcnt, 
-	condsampcnt=condsampcnt, states=states, invyrs=invyrs, 
-	estvar.area=estvar.area, adj=adj))
+	strata=strata, stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
+	expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+	states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
@@ -303,8 +311,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     returnlst$seedx <- seedf
   }
 
-  if (!is.null(stratcombinelut)) 
-    returnlst$stratcombinelut <- stratcombinelut
+  if (strata) {
+    if (!is.null(stratcombinelut)) {
+      returnlst$stratcombinelut <- stratcombinelut
+    }
+  }
   if (!is.null(evalid)) {
     returnlst$evalid <- evalid
   }
@@ -314,6 +325,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   }
 
 
+  ###################################################################################
+  ## Save population data objects
+  ###################################################################################
   if (saveobj) {
     objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
 		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)

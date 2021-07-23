@@ -8,17 +8,20 @@
 
 \usage{    
 modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL, 
-	cond = NULL, tree = NULL, seed = NULL, plt = NULL, 
-	pltassgn = NULL, dsn = NULL, tuniqueid="PLT_CN", cuniqueid = "PLT_CN", 
-	condid = "CONDID", puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN", 
-	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, 
+	cond = NULL, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL, 
+	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
+	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
+	areawt = "CONDPROP_UNADJ", invyrs = NULL, intensity = NULL, 
+	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, 
 	ACI = FALSE, adj = "plot", dunitvar = "DOMAIN", dunitvar2 = NULL, 
 	dunitarea = NULL, areavar = "ACRES", areaunits = "acres", 
-	unitcombine = FALSE, dunitlut = NULL, prednames = NULL, predfac = NULL, 
-	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, savedata = FALSE, 
-	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn = NULL, 
-	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, SAdata = NULL, SAmodeldat = NULL, gui = FALSE)
+	unitcombine = FALSE, minplotnum.unit = 0, removeunit = FALSE, 
+	dunitlut = NULL, prednames = NULL, predfac = NULL, 
+	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, 
+	objnm = "SApopdat", savedata = FALSE, outfolder = NULL, 
+	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	SAdata = NULL, pltdat = NULL, SAmodeldat = NULL, gui = FALSE)
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -31,36 +34,40 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 
 	variable(s) may be included if plt and pltassgn=NULL. See details for necessary 
 	variables to include. }
+  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
+	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
+	or a sf R object. Plot-level variables. If nonsampled plots are included, 
+	PLOT_STATUS_CD variable must be in table. Optional. }
   \item{tree}{ DF/DT, comma-delimited file(*.csv), or layer in dsn. If esttype="TREE",
 	tree-level variables to aggregate to condition-level. See details for necessary 
 	variables to include. }
   \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
 	Seedling data with one record for each seedling count. }
-  \item{plt}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
-	or a sf R object. Plot-level variables. If nonsampled plots are included, 
-	PLOT_STATUS_CD variable must be in table. Optional. }
   \item{pltassgn}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
 	Can also be a shapefile(*.shp) with one record per plot, a spatial layer in dsn,
 	or a sf R object. Plot-level assignment of estimation unit and/or strata. Optional. }
   \item{dsn}{ String. Name of database where tree, cond, and pltassgn tables reside. 
 	The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). }
-  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
-  \item{condid}{ String. Unique identifier of plot conditions. If no condid in 
-	cond, assumed to have 1 condition per plot. A CONDID=1 is automatically added. }
-  \item{puniqueid}{ String. Unique identifier of plot. }
-  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
+  \item{puniqueid}{ String. Unique identifier of plot in plt. }
   \item{pltassgnid}{ String. Unique identifier of plot in pltassgn. }
   \item{pjoinid}{ String. Join variable in plot to match pltassgnid. Does not need to
-	be uniqueid. }
+	be uniqueid. If using most current XY coordinates for plot assignments, 
+	use identifier for plot (e.g., PLOT_ID). }
+  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
+  \item{cuniqueid}{ String. Unique identifier of plot in cond. }
+  \item{condid}{ String. Unique identifier of plot conditions (e.g., CONDID). 
+	If no condid in cond, the data are assumed to have 1 condition per plot. 
+	A CONDID=1 is automatically added. }
+  \item{areawt}{ String. Name of variable for summarizing area weights (e.g., CONDPROP_UNADJ). }
+  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
+  \item{intensity}{ Integer code. Code(s) indicating intensity to use for population. }
   \item{measCur}{ Logical. If TRUE, extract plots with most current measurement for 
 	state(s). }
   \item{measEndyr}{ Logical. If TRUE, extract plots with most current measurement for 
 	state(s) for years measured before measEndyr. }
   \item{measEndyr.filter}{ Filter for extracting plots using measEndyr. Must be in
 	R syntax (e.g., 'AOI == 1'). }
-  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
   \item{ACI}{ Logical. If TRUE, including All Condition Inventory (ACI) plots. Removes 
 	nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must be included. }
   \item{adj}{ String. How to calculate adjustment factors for nonsampled 
@@ -77,6 +84,8 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
   \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
   \item{unitcombine}{ Logical. If TRUE, automatically combines domain units 
 	if less than 2 plots in any one domain unit. }
+  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{removeunit}{ Logical. If TRUE, remove units less than minplotnum.unit. }
   \item{dunitlut}{ DF/DT. Data frame with auxiliary information by domain 
 	unit. For continuous data, means by domain unit; for categorical data, 
 	proportion of class by domain unit. }
@@ -85,19 +94,21 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
   \item{pvars2keep}{ String vector. Additional plot variables to keep in dataset. }
   \item{cvars2keep}{ String vector. Additional condition variables to keep in dataset. }
   \item{saveobj}{ Logical. If TRUE, save SApopdat object to outfolder. }
+  \item{objnm}{ String. Name of *.rda object. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
   \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
   \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs 
-	(e.g., tree_'estvar.name'_'rowvar'_'date') }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
   \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
+  \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
   \item{SAmodeldat}{ R List object. Output data list components from FIESTA::SAmodeldat(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }

@@ -19,12 +19,12 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL, 
 	ACI = FALSE, adj = "samp", unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
 	areavar = "ACRES", areaunits = "acres", unitcombine = FALSE, 
-	minplotnum.unit = 10, unitlut = NULL, npixelvar="npixels", 
+	minplotnum.unit = 10, removeunit = FALSE, unitlut = NULL, npixelvar="npixels", 
 	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
-	saveobj = FALSE, savedata = FALSE, outfolder = NULL, out_fmt = "csv", 
-	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, append_layer = FALSE, MAdata = NULL, pltdat = NULL, 
-	MAmodeldat = NULL, gui = FALSE)
+	minplotnum.strat = 2, saveobj = FALSE, savedata = FALSE, outfolder = NULL, 
+	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	MAdata = NULL, pltdat = NULL, MAmodeldat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -86,6 +86,7 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{removeunit}{ Logical. If TRUE, remove units less than minplotnum.unit. }
   \item{unitlut}{ DF/DT. Table with summarized auxiliary information by estimation 
 	unit. For continuous data, means by estimation unit; for categorical data, 
 	proportion of class by estimation unit. }
@@ -97,6 +98,8 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	assignment for each plot. Default="STRATUMCD". }
   \item{stratcombine}{ Logical. If strata=TRUE, if TRUE, automatically combines 
 	strata categories if less than 2 plots in any one stratum. See notes for more info. }
+  \item{minplotnum.strat}{ Integer. Minimum number of plots for a stratum within an
+	estimation unit. }
   \item{saveobj}{ Logical. If TRUE, saves SApopdat object to outfolder. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 

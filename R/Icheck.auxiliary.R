@@ -3,8 +3,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 	auxlut=NULL, prednames=NULL, strata=FALSE, PSstrvar=NULL, predfac=NULL, 
 	makedummy=FALSE, nonresp=FALSE, substrvar=NULL, getwt=FALSE, getwtvar=NULL, 
 	strwtvar='strwt', P2POINTCNT=NULL, npixelvar=NULL, stratcombine=FALSE, 
-	minplotnum.unit=10, minplotnum.strat=2, na.rm=TRUE, removeifnostrata=FALSE, 
-	auxtext="auxlut", removetext="unitarea", pvars2keep=NULL){
+	minplotnum.unit=10, removeunit=FALSE, minplotnum.strat=2, na.rm=TRUE,
+ 	removeifnostrata=FALSE, auxtext="auxlut", removetext="unitarea", 
+	pvars2keep=NULL){
 
   ##################################################################################
   ## DESCRIPTION: 
@@ -38,85 +39,101 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
   ## Set global variables
   ONEUNIT=npixels=nonsampplots=strvars=PLOT_STATUS_CD=strwt=testlt1=
-		pixels=unitstrgrplut=vars2combine=STRATASUB <- NULL
-  gui <- FALSE
+		pixels=unitstrgrplut=vars2combine=STRATASUB=unitlessthan <- NULL
+  gui=pivotstrat <- FALSE
   unitvars <- c(unitvar2, unitvar)
+  strunitvars <- c(unitvars)
+
 
   ## Check auxlut
   stopifnull <- ifelse((module == "SA" || (module == "MA" && any(MAmethod != "HT"))),
 				TRUE, FALSE)
   auxlut <- FIESTA::pcheck.table(auxlut, gui=gui, tabnm="auxlut",
  		caption="Strata table?", nullcheck=TRUE, stopifnull=stopifnull)
- 
-  if (module %in% c("GB", "PB")) {
-    if (strata) {
-      auxnmlst <- names(auxlut)
-      PSstrvar <- FIESTA::pcheck.varchar(var2check=PSstrvar, varnm="PSstrvar", 
+
+  #######################################################################
+  ## Check strata
+  #######################################################################
+  if (strata && module != "SA") {
+    auxnmlst <- names(auxlut)
+    PSstrvar <- FIESTA::pcheck.varchar(var2check=PSstrvar, varnm="PSstrvar", 
 		gui=gui, checklst=c("NONE", names(auxlut)), caption="Strata variable?", 
 		warn="strata variable not in auxlut", stopifnull=TRUE) 
-      #strvars <- c(strvars, PSstrvar) 
 
-      ## Check for a total value in the last row of table..  If exists, exclude.
-      lastrow <- auxlut[nrow(auxlut),]
-      if (length(grep("Total", lastrow, ignore.case=TRUE)) > 0) {
-        auxlut <- auxlut[-nrow(auxlut)]
-      }
-      ## If auxlut is NULL, generate based on unitvars in pltx
-      #############################################################
-      if (is.null(auxlut)) {
-        auxlut <- unique(pltx[, c(unitvar2, unitvar), with=FALSE]) 
-      } else {
-        if (any(grepl("ONEUNIT", unitvars))) {
-          unittest <- unitvars[any(grepl("ONEUNIT", unitvars))]
-          if (length(unittest) > 1) {
+    ## Check for a total value in the last row of table..  If exists, exclude.
+    lastrow <- auxlut[nrow(auxlut),]
+    if (length(grep("Total", lastrow, ignore.case=TRUE)) > 0) {
+      auxlut <- auxlut[-nrow(auxlut)]
+    }
+    ## If auxlut is NULL, generate based on unitvars in pltx
+    #############################################################
+    if (is.null(auxlut)) {
+      auxlut <- unique(pltx[, c(unitvar2, unitvar), with=FALSE]) 
+    } else {
+      if (any(grepl("ONEUNIT", unitvars))) {
+        unittest <- unitvars[any(grepl("ONEUNIT", unitvars))]
+        if (length(unittest) > 1) {
             stop("more than one ONEUNIT variable")
-          }
-          if (!unittest %in% names(auxlut)) {
+        }
+        if (!unittest %in% names(auxlut)) {
             auxlut[, (unittest) := 1]
-          }
         }
       }
+    }
  
+    ## Check substrvar (if nonresp)
+    #############################################################
+    if (module =="GB" && nonresp) {
       ## Check substrvar (if nonresp)
       #############################################################
-      if (module =="GB" && nonresp) {
-        ## Check substrvar (if nonresp)
-        #############################################################
-        ## Remove PSstrvar from strlutnmlst
-        auxnmlst <- auxnmlst[which(!auxnmlst %in% PSstrvar)]
-        substrvar <- FIESTA::pcheck.varchar(var2check=substrvar, varnm="substrvar", 
+      ## Remove PSstrvar from strlutnmlst
+      auxnmlst <- auxnmlst[which(!auxnmlst %in% PSstrvar)]
+      substrvar <- FIESTA::pcheck.varchar(var2check=substrvar, varnm="substrvar", 
 		gui=gui, checklst=auxnmlst, caption="Substrata variable?", 
 		warn="substrata variable not in strata table", stopifnull=TRUE)
-        #strvars <- c(strvars, substrvar)
+      #strvars <- c(strvars, substrvar)
 
-        ## Concatenate to 1 variable
-        auxlut[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
-        pltx[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
-        if (!is.null(P2POINTCNT)) {
-          P2POINTCNT[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")][
-			, c(PSstrvar, substrvar) := NULL]
-        }
-        PSstrvar <- "STRATASUB"
-      } 
-      strvars <- c(strvars, PSstrvar) 
-    } else {
-      message("no strata")
-      PSstrvar <- checknm("ONESTRAT", names(pltx))
-      strwtvar <- "strwt"
-      pltx[, (PSstrvar) := 1]
-
-      auxlut <- unique(pltx[, c(unitvar2, unitvar), with=FALSE]) 
-      auxlut[, (PSstrvar) := 1]
-      auxlut[, (strwtvar) := 1]
-
+      ## Concatenate to 1 variable
+      auxlut[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
+      pltx[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
       if (!is.null(P2POINTCNT)) {
-        P2POINTCNT[, (PSstrvar) := 1]
+        P2POINTCNT[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")][
+			, c(PSstrvar, substrvar) := NULL]
       }
-      getwt <- FALSE
-      getwtvar <- NULL
-      strvars <- c(strvars, PSstrvar) 
-      strata <- TRUE
+      PSstrvar <- "STRATASUB"
+    } 
+    strvars <- c(strvars, PSstrvar) 
+
+    ## Aggregate strata by estimation unit to make sure no duplicate values exist
+    sumvars <- c(getwtvar, strwtvar, npixelvar)
+    sumvars <- unique(sumvars[sumvars %in% names(auxlut)])
+    if (length(sumvars) > 0) {
+      auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE), 
+				by=c(unitvars, strvars), .SDcols=sumvars]
+      setnames(auxlut, c(unitvars, strvars, sumvars))
+
+      auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE), 
+				by=c(unitvars, strvars), .SDcols=sumvars]
+      setnames(auxlut, c(unitvars, strvars, sumvars))
     }
+    setkeyv(auxlut, unitvars)
+    strunitvars <- c(unitvars, strvars)
+
+
+    ## Check if class of unitvar in auxlut matches class of unitvar in pltx
+    tabs <- FIESTA::check.matchclass(pltx, auxlut, c(unitvars, strvars),
+		tab1txt="pltassgn", tab2txt="auxlut")
+    pltx <- tabs$tab1
+    auxlut <- tabs$tab2
+
+    ## Check that the strunitvars in pltx are all in auxlut
+    pltx <- check.matchval(tab1=pltx, tab2=auxlut, var1=c(unitvars, strvars), 
+		tab1txt="plt", tab2txt=auxtext, stopifmiss=TRUE)
+
+    ## Check that the strunitvars in auxlut are all in pltx
+    auxlut <- check.matchval(tab1=auxlut, tab2=pltx, var1=c(unitvars, strvars), 
+		tab1txt=auxtext, tab2txt="plt", stopifmiss=FALSE)
+
 
     ## Check getwt and calculate strata weights (proportion by estimation unit)
     ###################################################################################
@@ -136,61 +153,167 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
         }
       }
     }
-  } else { ## !module %in% c("GB", "PB")
+  } else if (module %in% c("GB", "PB")) {
 
-    auxnmlst <- names(auxlut)
-    if (module == "MA") {
-      ## Check npixelvar from strata table.
-      ############################################################################
-      npixelvar <- FIESTA::pcheck.varchar(var2check=npixelvar, varnm="npixelvar", gui=gui, 
-		checklst=auxnmlst, caption="Acre variable?", stopifinvalid=TRUE)
+    ## Add a column to identify one strata class for GB or PB modules
+    message("no strata")
+    PSstrvar <- checknm("ONESTRAT", names(pltx))
+    strwtvar <- "strwt"
+    pltx[, (PSstrvar) := 1]
 
-      ## Create data frame of number of pixels by estimation unit
-      ############################################################################
-      if (npixelvar %in% auxnmlst) {
-        npixels <- unique(auxlut[, c(unitvar, npixelvar), with=FALSE])
-      }
+    auxlut <- unique(pltx[, c(unitvar2, unitvar), with=FALSE]) 
+    auxlut[, (PSstrvar) := 1]
+    auxlut[, (strwtvar) := 1]
+
+    if (!is.null(P2POINTCNT)) {
+      P2POINTCNT[, (PSstrvar) := 1]
     }
+    getwt <- FALSE
+    getwtvar <- NULL
+    strvars <- c(strvars, PSstrvar) 
+    strata <- TRUE
+    strunitvars <- c(unitvars, strvars)
+
+  } else if ((module == "MA" && !MAmethod %in% c("HT", "PS")) || module == "SA") {
+    auxnmlst <- names(auxlut)
+    missvars <- {}
+   
+    ## Check predictors
+    ############################################################################
+    missvars <- c(missvars, 
+		predfac[sapply(c(PSstrvar, predfac), 
+			function(x) sum(grepl(x, auxnmlst)) == 0)])
 
     ## Check continuous variables
     ############################################################################
     predcon <- prednames[!prednames %in% predfac]
     if (length(predcon) > 0) {
-      ## Check for missing variables in auxlut
-      missvars <- predcon[which(!predcon %in% auxnmlst)]
-      if (length(missvars) > 0) {
-        for (i in 1:length(missvars)) {
-          if (sum(grepl(missvars[i], auxnmlst)) > 1)
-          stop("check predfac for defining factor predictors: ", 
-			toString(auxnmlst[grepl(missvars[i], auxnmlst)]))
-        }
-        stop("auxvar not in auxlut: ", paste(missvars, collapse=", "))
-      }
+      missvars <- c(missvars, predcon[which(!predcon %in% auxnmlst)])
     }
-  
+    
+    if (length(missvars) > 0) {
+      stop("missing predictor variables in auxlut: ", toString(missvars))
+    }
+ 
     ## Check for NA values in continuous variables in auxlut
     ############################################################################
-    aux.na <- sapply(predcon, function(x, auxlut){ sum(is.na(auxlut[,x, with=FALSE])) }, auxlut)
+    aux.na <- sapply(predcon, 
+		function(x, auxlut){ sum(is.na(auxlut[,x, with=FALSE])) }, auxlut)
     if (any(aux.na) > 0) {
       message(aux.na[aux.na > 0], " NA values in variable: ", 
 		paste(names(aux.na[aux.na > 0]), collapse=", "))
       if (na.rm) 
         auxlut <- na.omit(auxlut, cols=predcon)
     }
-
-    if (strata && module == "MA" && length(MAmethod) > 1) {
-      auxlut2 <- copy(auxlut)
-    }
-
-
-    ## Check values of continuous variable in prednames...  make sure in range of pltx
-    ## Still workin on
-    #pmin <- pltx[, lapply(.SD, min), by=unitvar, .SDcols=predcon]
-    #pmax <- pltx[, lapply(.SD, max), by=unitvar, .SDcols=predcon]
+  } 
  
-    ## Check categorical (predfac) variables
+  if (module == "MA") {
+    auxnmlst <- names(auxlut)
+    ## Check npixelvar from strata table.
     ############################################################################
+    npixelvar <- FIESTA::pcheck.varchar(var2check=npixelvar, varnm="npixelvar", gui=gui, 
+		checklst=auxnmlst, caption="Acre variable?", stopifinvalid=TRUE)
+ 
+    ## Create data frame of number of pixels by estimation unit
+    ############################################################################
+    if (npixelvar %in% auxnmlst) {
+      npixels <- unique(auxlut[, c(unitvar, npixelvar), with=FALSE])
+    }
+  }
+ 
+  ## Merge P2POINTCNT to auxlut
+  ##################################################
+  if (!is.null(P2POINTCNT) && !P2POINTCNT %in% names(auxlut)) {
+
+    ## Check if class of unitvar in auxlut matches class of unitvar in P2POINTCNT
+    tabs <- FIESTA::check.matchclass(P2POINTCNT, auxlut, strunitvars,
+		tab1txt="P2POINTCNT", tab2txt="auxlut")
+    P2POINTCNT <- tabs$tab1
+    auxlut <- tabs$tab2
+    
+    ## Check that the strunitvars in pltx are all in auxlut
+    auxlut <- merge(auxlut, P2POINTCNT, by=strunitvars, all.x=TRUE)
+    auxlut[is.na(auxlut)] <- 0
+  }
+
+  ###################################################################################
+  ## Check number of plots by unitvar
+  ##	 (including partially sampled plots - COND_STATUS_CD=5) 
+  ##	 (excluding totally nonsampled plots - PLOT_STATUS_CD=1) 
+  ###################################################################################
+  ## If number of plots < minplotnum.strat, an error occurs, must collapse plots.
+  ## If number of plots between minplotnum.strat and minplotnum.unit, a warning 
+  ##		is displayed, suggesting to collapse plots. 
+  ## Returns:
+  ## - auxlut including number of plots by strata (n.strata) and/or domain (n.total).
+  ## - error tab with warnings.
+  ## - nostrat included if there are plot strata values with no strata in auxlut
+  #################################################################################
+  if (minplotnum.strat > minplotnum.unit) minplotnum.strat <- minplotnum.unit
+  pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid, 
+		unitlut=auxlut, unitvars=unitvar, strvars=PSstrvar, 
+		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit, 
+		minplotnum.strat=minplotnum.strat)
+  auxlut <- pltcnts$unitlut
+  errtab <- pltcnts$errtab
+  nostrat <- pltcnts$nostrat
+
+  ## If removeunit, remove estimation with less than minplotnum.unit plots
+  if (any(auxlut$n.total < minplotnum.unit)) {
+    unitlessthan <- auxlut[auxlut$n.total < minplotnum.unit][[unitvar]]
+    if (length(unitlessthan) > 0) {
+      if (removeunit) {
+        message("removing domains with plots less than ", minplotnum.unit, 
+		": ", toString(unitlessthan))
+        auxlut <- auxlut[!auxlut[[unitvar]] %in% unitlessthan, ] 
+        pltx <- pltx[!pltx[[unitvar]] %in% unitlessthan, ] 
+        unitarea <- unitarea[!unitarea[[unitvar]] %in% unitlessthan, ] 
+        errtab <- errtab[!errtab[[unitvar]] %in% unitlessthan, ] 
+      } 
+    }
+  }
+
+  ## Remove plots that have a stratum assignment that is not in auxlut
+  if (!is.null(nostrat) && removeifnostrata && !is.null(PSstrvar)) {
+    pltx <- pltx[pltx[[PSstrvar]] %in% unique(auxlut[[PSstrvar]]),]
+    message("removing plots with invalid strata assignments")
+  }
+
+  ###################################################################################
+  ## Collapse strata and/or estimation unit classes if errtab warnings
+  ###################################################################################
+  if (any(errtab$errtyp == "warn")) {
+    if (any(c(getwtvar, npixelvar, strwtvar) %in% names(auxlut))) {
+      vars2combine <- unique(c(vars2combine, c(getwtvar, npixelvar, strwtvar)))
+      vars2combine <- vars2combine[vars2combine %in% names(auxlut)]
+    }
+    collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx, 
+		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
+		unitarea=unitarea, areavar=areavar, unitvar=unitvar,
+		strvar=PSstrvar, stratcombine=stratcombine, unitcombine=unitcombine,
+ 		vars2combine=vars2combine)
+    auxlut <- collapse$strlut
+    unitvar <- collapse$unitvar
+    PSstrvar <- collapse$strvar
+    pltx <- collapse$pltstratx
+    unitarea <- collapse$unitarea
+    if (unitvar == "unitnew") {
+      unitvars <- unitvar
+    } 
+    strunitvars <- c(unitvars, PSstrvar)
+
+    if (stratcombine || unitcombine) {
+      unitstrgrplut <- collapse$unitstrgrplut
+    }
+  } 
+
+  ###################################################################################
+  ## Check categorical (predfac) variables
+  ###################################################################################
+  if (!module %in% c("GB", "PB") && !strata) {
+    auxnmlst <- names(auxlut)
     predfac <- unique(c(PSstrvar, predfac))
+
     if (length(predfac) > 0) {
       notfac <- predfac[!pltx[, lapply(.SD, is.factor), .SDcols=predfac][[1]]]
       if (length(notfac) > 0) {
@@ -199,16 +322,18 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
           pltx[[fac]] <- factor(pltx[[fac]], levels=fac.levels) 
         }
       }
- 
+
       ## Check for missing variables and factor values
       for (fac in predfac) {
         pltvals <- sort(unique(pltx[[fac]]))
         facnmlst <- auxnmlst[grep(fac, auxnmlst)]
-        missvars <- facnmlst[!facnmlst %in% paste0(fac, ".", pltvals)]
-        if (length(missvars) > 0) {
-          message("auxvar not in tables: ", paste(missvars, collapse=", "))
+        if (length(facnmlst) == 0) {
+          message("auxvar not in tables: ", paste(fac, collapse=", "))
+        } else {
+          pivotstrat <- TRUE
         }
       
+        ## Set up dummy variables for PSstrvar
         if (makedummy) {
           ## Get factor levels
           fac.levels <- sort(unique(pltx[[fac]]))
@@ -231,64 +356,19 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
           ## Remove old name and add new names to predictor list
           prednames <- unique(c(prednames[prednames != fac], facs))
+        } 
+        if (pivotstrat) {
+          ## Pivot strata table 
+          if (!is.null(PSstrvar) && fac == PSstrvar) {
+            auxlut <- strat.pivot(x=auxlut, PSstrvar=PSstrvar, unitvars=unitvars, 
+			strwtvar="Prop", strat.levels=fac.levels)
+          }    
         }
-      }
-
-      ## Set up dummy variables for PSstrvar
-      if (!is.null(PSstrvar)) {
-        PScols <- lapply(predfac, function(x, auxnmlst) 
-		auxnmlst[grep(x, auxnmlst)], auxnmlst)[[1]]
-        PSvalslst <- sapply(strsplit(PScols, paste0(PSstrvar, ".")), "[[", 2)
-
-        auxlut <- data.table(PSvalslst, auxlut[, t(.SD), by=unitvar, .SDcols=PScols])
-        setnames(auxlut, c(PSstrvar, unitvars, "Prop"))
-        setcolorder(auxlut, c(unitvar, PSstrvar, "Prop"))
+        strvars <- PSstrvar
       }
     }
   }
-
-  if (strata) {
-    ## Aggregate variables to unitvar (and strvars)
-    ############################
-    sumvars <- c(getwtvar, npixelvar, strwtvar)
-    sumvars <- unique(sumvars[sumvars %in% names(auxlut)])
-
-    if (length(sumvars) > 0) {
-      auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE), by=c(unitvars, strvars), .SDcols=sumvars]
-      setnames(auxlut, c(unitvars, strvars, sumvars))
-    }
-    setkeyv(auxlut, unitvars)
-
-    ## Check if class of unitvar in auxlut matches class of unitvar in pltx
-    tabs <- FIESTA::check.matchclass(pltx, auxlut, c(unitvars, strvars),
-		tab1txt="pltassgn", tab2txt="auxlut")
-    pltx <- tabs$tab1
-    auxlut <- tabs$tab2
-
-    ## Check that the strunitvars in pltx are all in auxlut
-    pltx <- check.matchval(tab1=pltx, tab2=auxlut, var1=c(unitvars, strvars), 
-		tab1txt="plt", tab2txt=auxtext, stopifmiss=TRUE)
-
-    ## Check that the strunitvars in auxlut are all in pltx
-    auxlut <- check.matchval(tab1=auxlut, tab2=pltx, var1=c(unitvars, strvars), 
-		tab1txt=auxtext, tab2txt="plt", stopifmiss=FALSE)
-  }
-
-  ## Merge P2POINTCNT to auxlut
-  ##################################################
-  if (!is.null(P2POINTCNT) && !P2POINTCNT %in% names(auxlut)) {
-
-    ## Check if class of unitvar in auxlut matches class of unitvar in P2POINTCNT
-    tabs <- FIESTA::check.matchclass(P2POINTCNT, auxlut, c(unitvars, strvars),
-		tab1txt="P2POINTCNT", tab2txt="auxlut")
-    P2POINTCNT <- tabs$tab1
-    auxlut <- tabs$tab2
-    
-    ## Check that the strunitvars in pltx are all in auxlut
-    auxlut <- merge(auxlut, P2POINTCNT, by=c(unitvars, strvars), all.x=TRUE)
-    auxlut[is.na(auxlut)] <- 0
-  }
-
+ 
   ##################################################################################
   ## If more than one unitvar, concatenate into 1 unitvar
   ##################################################################################
@@ -304,71 +384,18 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     }
     unitvar <- unitvar12
   }
-
+ 
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea
   ##################################################################################
   if (!is.null(unitarea)) {
     auxlut <- check.matchval(auxlut, unitarea, unitvar, tab1txt=auxtext,
-			tab2txt=removetext, subsetrows=TRUE)
-  }
- 
-  ###################################################################################
-  ## Check number of plots by unitvar
-  ##	 (including partially sampled plots - COND_STATUS_CD=5) 
-  ##	 (excluding totally nonsampled plots - PLOT_STATUS_CD=1) 
-  ###################################################################################
-  ## If number of plots < minplotnum.strat, an error occurs, must collapse plots.
-  ## If number of plots between minplotnum.strat and minplotnum.unit, a warning 
-  ##		is displayed, suggesting to collapse plots. 
-  ## Returns:
-  ## - auxlut including number of plots by strata (n.strata) and/or domain (n.total).
-  ## - error tab with warnings.
-  ## - nostrat included if there are plot strata values with no strata in auxlut
-  #################################################################################
-  if (minplotnum.strat > minplotnum.unit) minplotnum.strat <- minplotnum.unit
-  pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid, 
-		unitlut=auxlut, unitvars=unitvar, strvars=PSstrvar, 
-		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit, 
-		minplotnum.strat=minplotnum.strat)
-
-  auxlut <- pltcnts$unitlut
-  errtab <- pltcnts$errtab
-  nostrat <- pltcnts$nostrat
-
-  ## Remove plots that have a stratum assignment that is not in auxlut
-  if (!is.null(nostrat) && removeifnostrata && !is.null(PSstrvar)) {
-    pltx <- pltx[pltx[[PSstrvar]] %in% unique(auxlut[[PSstrvar]]),]
-    message("removing plots with invalid strata assignments")
+			tab2txt=removetext, subsetrows=removeunit)
   }
 
-  ###################################################################################
-  ## Collapse strata and/or estimation unit classes if errtab warnings
-  ###################################################################################
-  if (any(errtab$errtyp == "warn")) {
-    if (any(c(getwtvar, npixelvar, strwtvar) %in% names(auxlut))) {
-      vars2combine <- c(vars2combine, c(getwtvar, npixelvar, strwtvar))
-      vars2combine <- vars2combine[vars2combine %in% names(auxlut)]
-    }
-    collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx, 
-		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
-		unitarea=unitarea, areavar=areavar, unitvar=unitvar,
-		strvar=PSstrvar, stratcombine=stratcombine, unitcombine=unitcombine,
- 		vars2combine=vars2combine)
-    auxlut <- collapse$strlut
-    unitvar <- collapse$unitvar
-    PSstrvar <- collapse$strvar
-    pltx <- collapse$pltstratx
-    unitarea <- collapse$unitarea
-    if (unitvar == "unitnew") {
-      unitvars <- unitvar
-    }
-
-    if (stratcombine || unitcombine) {
-      unitstrgrplut <- collapse$unitstrgrplut
-    }
-  } 
- 
+  ##################################################################################
+  ## Calculate weights
+  ################################################################################## 
   if (module %in% c("GB", "PB")) {
     if (getwt) {
       ## Caculate weight
@@ -398,7 +425,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   }
  
   ## Set key to strlut and unitarea
-  strunitvars <- c(unitvar, PSstrvar)
   setkeyv(auxlut, strunitvars)
   setkeyv(pltx, puniqueid)
 
@@ -418,21 +444,23 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     if (module %in% c("GB", "PB")) {
       returnlst$strwtvar <- strwtvar
     }
+    if (length(unitlessthan) > 0) {
+      returnlst$unitNA <- unitlessthan
+    }
+    if (nonresp) {
+      returnlst$nonsampplots <- nonsampplots
+    }
+    if (!is.null(getwtvar)) {
+      returnlst$getwtvar <- getwtvar
+    }
+    if (!is.null(unitstrgrplut)) {
+      returnlst$stratcombinelut <- unitstrgrplut
+    }
   } 
 
   if (!is.null(npixelvar)) {
     returnlst$npixels <- npixels
     returnlst$npixelvar <- npixelvar
-  }
-  if (nonresp) {
-    returnlst$nonsampplots <- nonsampplots
-  }
-  if (!is.null(getwtvar)) {
-    returnlst$getwtvar <- getwtvar
-  }
-
-  if (!is.null(unitstrgrplut)) {
-    returnlst$stratcombinelut <- unitstrgrplut
   }
 
   return(returnlst)

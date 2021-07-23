@@ -267,9 +267,9 @@ plot(sf::st_geometry(WYbhspplt), add=TRUE)
 
 
 ## Generate a sf object first, then clip sf points 
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt=WYplt, uniqueid="CN", xvar="LON_PUBLIC", 
+WYspplt <- FIESTA::spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
         yvar="LAT_PUBLIC", xy.crs=4269)
-WYbhptslst <- spClipPoint(xyplt=WYspplt, xy.uniqueid="CN", clippolyv=WYbh)
+WYbhptslst <- spClipPoint(xyplt=WYspplt, uniqueid="CN", clippolyv=WYbh)
 
 
 ## Subset other tables with clipped points
@@ -286,7 +286,7 @@ FIESTA::spExportSpatial(WYbhspplt, out_layer="WYbhpts", outfolder=outfolder,
 
 ## Get points within Bighorn National Forest boundary (project on the fly)
 ## Save to outfolder
-WYbhptslst <- FIESTA::spClipPoint(xyplt=WYplt, xy.uniqueid="CN", clippolyv=WYbh, 
+WYbhptslst <- FIESTA::spClipPoint(xyplt=WYplt, uniqueid="CN", clippolyv=WYbh, 
     xvar="LON_PUBLIC", yvar="LAT_PUBLIC", prj="longlat", datum="NAD83",
     othertabnms=c("WYcond", "WYtree"), exportsp=TRUE, outfolder=outfolder, 
     overwrite=TRUE, outfn.pre="clip")
@@ -469,8 +469,8 @@ names(WYbhdat)
 ```
 ######################################################################################
 # Usage:
-# spGetModeldat(xyplt = NULL, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
-#   domtype = "POLY", dom_layer = NULL, dom_dsn = NULL, domvar = "DOMAIN", 
+# spGetAuxiliary(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
+#   dunittype = "POLY", dunit_layer = NULL, dunit_dsn = NULL, dunitvar = "DOMAIN", 
 #   rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cont.stat = "MEAN", 
 #   rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL,
 #	  rastlst.cat.NODATA = NULL, rastfolder = NULL,  
@@ -485,7 +485,7 @@ names(WYbhdat)
 # Get data extraction and zonal statistics for Model-assisted or
 #		Model-based (Small Area) Estimation. The major steps are as follows:
 #   1) Check parameters 
-#   2) Extract point values from domlayer
+#   2) Extract point values from dunit_layer
 #   3) Set up output data structures
 #   4) Extract point values and get zonal statistics from continuous raster layers
 #   5) Extract point values and get zonal statistics from categorical raster layers
@@ -513,18 +513,18 @@ rastlst.cont.name <- c("dem", "slp", "asp")
 rastlst.cat <- fornffn
 rastlst.cat.name="fornf"
 
-modeldat <- spGetModeldat(xyplt=WYspplt, uniqueid="CN", dom_layer=WYbhfn, 
-  domvar=NULL, rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
+modeldat <- spGetAuxiliary(xyplt=WYspplt, uniqueid="CN", dunit_layer=WYbhfn, 
+  dunitvar=NULL, rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
   rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
   asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, 
   savedata=FALSE)
 names(modeldat)
 
 pltassgn <- modeldat$pltassgn
-unitmodel <- modeldat$domzonal
-unitvar <- modeldat$domvar
+unitmodel <- modeldat$dunitlut
+unitvar <- modeldat$dunitvar
 inputdf <- modeldat$inputdf
-unitarea <- modeldat$domarea
+unitarea <- modeldat$dunitarea
 areavar <- modeldat$areavar
 inputdf <- modeldat$inputdf
 prednames <- modeldat$prednames
@@ -631,6 +631,16 @@ WYspplt <- FIESTA::spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_
 stratlst <- FIESTA::spGetStrata(WYspplt, uniqueid="CN", unittype="POLY", unit_layer=WYbhfn,
      strattype="RASTER", strat_layer=fornffn) 
 names(stratlst) 
+stratlst$stratalut	
+
+## Note: you can also use spGetAuxiliary() function for getting strata info
+##    (only if strata layer is raster)
+stratlst2 <- spGetAuxiliary(WYspplt, uniqueid="CN",
+	dunit_layer=WYbhfn, dunitvar=NULL,
+	rastlst.cat=fornffn, rastlst.cat.name="STRATUMCD",
+	strata=TRUE, rast.strata=fornffn)
+stratlst2$stratalut	
+
 
 pltassgn <- stratlst$pltassgn
 unitarea <- stratlst$unitarea

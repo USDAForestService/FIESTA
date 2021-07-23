@@ -22,7 +22,6 @@
 ## spGetStates - get intersecting states
 
 
-
 getext <- function(x) { 
   xbasename <- basename(x)
   strsplit(xbasename, paste0(basename.NoExt(xbasename), "."))[[1]][2] 
@@ -927,8 +926,9 @@ crsCompare <- function(x, ycrs=NULL, x.crs=NULL, nolonglat=FALSE,
     ycrs <- sf::st_as_sf(ycrs, stringsAsFactors=FALSE)
  
   ## Define default Coordinate System as USGS albers
-  if (is.null(crs.default) || is.na(crs.default) || crs.default=="")
+  if (is.null(crs.default) || is.na(crs.default) || crs.default=="") {
     crs.default <- crs.albersUS
+  }
 
   ## Check x
   #############################
@@ -1323,4 +1323,15 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
 
 }
 
+#getOverlap <- function(p1, p2, gfun="overlap") {
+#  ## DESCRIPTION: gets overlapping polygons
+#  p1 <- as_Spatial(p1)
+#  p2 <- as_Spatial(p2)
+#  if (gfun == "overlap") {
+#    ids <- ifelse(apply(rgeos::gOverlaps(p2, p1, byid=TRUE), 1, sum) > 0, TRUE, FALSE)
+#  } else if (gfun == "within") {
+#    ids <- ifelse(apply(rgeos::gWithin(p2, p1, byid=TRUE), 1, sum) > 0, TRUE, FALSE)
+#  }
+#  st_as_sf(p1[which(ids), ])
+#}
 

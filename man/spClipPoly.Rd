@@ -11,7 +11,7 @@
 \usage{
 spClipPoly(polyv, polyv_dsn = NULL, clippolyv, clippolyv_dsn = NULL, 
 	clippolyv.filter = NULL, showext = FALSE, areacalc = FALSE, 
-	areaunits = "ACRES", exportsp = FALSE, ...)
+	areaunits = "ACRES", exportsp = FALSE, nolonglat = TRUE, ...)
 }
 
 \arguments{
@@ -34,6 +34,8 @@ spClipPoly(polyv, polyv_dsn = NULL, clippolyv, clippolyv_dsn = NULL,
 	to attribute table ("ACRES", "HECTARES", "SQKM"). If NULL, units of polyv.}
   \item{exportsp}{ Logical. If TRUE, the spatial clipped object is exported to 
 	outfolder (see spExportSpatial for details). }
+  \item{nolonglat}{ Logical. If TRUE, and both layer's coordinate system is long/lat,
+	the layers are converted to a projected CRS before clipping. }
   \item{...}{ Parameters for spExportSpatial. }
 }
 \details{

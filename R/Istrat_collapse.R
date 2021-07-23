@@ -45,12 +45,13 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
   ######################################################################################
   if (!stratcombine) {
     if (any(unique(stratacnt$n.total) < minplotnum.unit))
-      stop("estimation unit has less than ", minplotnum.unit, " plots", 
+      message("estimation unit has less than ", minplotnum.unit, " plots", 
 		"... must combine estimation units")
     if ("n.strata" %in% names(stratacnt) && 
-			any(unique(stratacnt$n.strata) < minplotnum.strat))
+			any(unique(stratacnt$n.strata) < minplotnum.strat)) {
       stop("strata has less than ", minplotnum.strat, " plots", 
 		"... must combine strata")
+    }
   }
 
   ## Stop and send message if unitcombine=FALSE and total plots less than minplotnum.unit
@@ -157,7 +158,6 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
     }
     unitgrpsum$strat <- as.numeric(unitgrpsum$strat)
     unitgrpsum$stratnew <- as.character(-1)
-
     stratgrp <- unitgrpsum[, groupStrata(.SD, minplotnum.strat), by=unitvar]
 
     strlut <- stratgrp[, lapply(.SD, sum, na.rm=TRUE), 

@@ -1,10 +1,10 @@
 check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN", 
 	condid="CONDID", treex=NULL, seedx=NULL, vcondx=NULL, tuniqueid="PLT_CN", 
 	estseed="none", vuniqueid="PLT_CN", sumunits=FALSE, landarea=NULL, 
-	ACI.filter=NULL, pcfilter=NULL, allin1=FALSE, estround=6, pseround=3, 
-	divideby=NULL, addtitle=TRUE, returntitle=TRUE, rawdata=FALSE, 
-	rawonly=FALSE, savedata=FALSE, outfolder=NULL, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE, 
+	ACI.filter=NULL, pcfilter=NULL, TPA=TRUE, tpavar="TPA_UNADJ", allin1=FALSE, 
+	estround=6, pseround=3, divideby=NULL, addtitle=TRUE, returntitle=TRUE, 
+	rawdata=FALSE, rawonly=FALSE, savedata=FALSE, outfolder=NULL, 
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE, 
 	append_layer=FALSE, raw_fmt="csv", raw_dsn=NULL, gui=FALSE){
 
   ###################################################################################
@@ -135,6 +135,25 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
 		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
+  ## Check TPA 
+  ########################################################
+  TPA <- FIESTA::pcheck.logical(TPA, varnm="TPA", 
+		title="TPA?", first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check tpavar
+  ########################################################
+  if (TPA) {
+    if (!is.null(treex) && !tpavar %in% names(treex)) {
+      stop("must include ", tpavar, " in tree table")
+    }
+    if (!is.null(seedx) && !tpavar %in% names(seedx)) {
+      stop("must include ", tpavar, " in seed table")
+    }
+  } else {
+    tpavar <- NULL
+  }
+
+
   ## Check allin1
   ########################################################
   allin1 <- FIESTA::pcheck.logical(allin1, varnm="allin1", 
@@ -214,7 +233,7 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   ## Set up list of variables to return
   ######################################################################################
   returnlst <- list(pltcondf=pltcondf, cuniqueid=cuniqueid, sumunits=sumunits, 
-	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
+	TPA=TPA, allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
 	addtitle=addtitle, returntitle=returntitle, estround=estround, pseround=pseround,
  	landarea=landarea, rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
 	outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer, 

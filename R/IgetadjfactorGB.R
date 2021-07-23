@@ -1,7 +1,8 @@
 getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
 	vcondstrx=NULL, tuniqueid="PLT_CN", cuniqueid="PLT_CN", vuniqueid="PLT_CN", 
 	condid="CONDID", unitlut=NULL, unitvars=NULL, strvars=NULL, unitarea=NULL, 
-	areavar=NULL, areawt="CONDPROP_UNADJ", cvars2keep=NULL){
+	areavar=NULL, areawt="CONDPROP_UNADJ", cvars2keep=NULL,
+	tpropvars=list(SUBP="SUBPPROP_UNADJ", MICR="MICRPROP_UNADJ", MACR="MACRPROP_UNADJ")){
 
   ####################################################################################
   ## DESCRIPTION: 
@@ -28,28 +29,40 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
   CONDPROP_ADJ=CONDPROP_UNADJ=ADJ_FACTOR_COND=cadjfac=tadjfac=TPAGROW_UNADJ=
 	ADJ_FACTOR_MICR=ADJ_FACTOR_MACR=ADJ_FACTOR_SUBP=expfac=expcond=expcondtab=
 	n.strata=TPROP_BASIS=EXPNS=strwt=Prop=COVER_PCT_SUM <- NULL
+
+  ## Define function
+  adjnm <- function(nm) {
+    ## DESCRIPTION: changes name of variable
+    if (length(grep("UNADJ", nm)) == 1) {
+      sub("UNADJ", "ADJ", nm)
+    } else {
+      paste0(nm, "_ADJ")
+    }
+  }
     
   strunitvars <- c(unitvars, strvars)
   keycondx <- key(condx)
 
   ## Condition proportion variable
   varlst <- areawt
-  #varlst <- c(areawt, "SUBPPROP_UNADJ", "MACRPROP_UNADJ")
- 
+  areasum <- paste0(areawt, "_SUM")
+  areaadj <- paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", areawt))
+  varsumlst <- areasum
+  varadjlst <- areaadj
 
   ## Get list of condition-level variables to calculate adjustments for
   if (!is.null(treex)) {  
-    tvarlst <- c("SUBPPROP_UNADJ", "MICRPROP_UNADJ", "MACRPROP_UNADJ")
+    tvarlst <- unlist(tpropvars)
     tvarlst2 <- tvarlst[which(tvarlst%in% names(condx))]
-    if (length(tvarlst2) == 0) stop("must include *PROP_UNADJ variables in cond")
-    varlst <- unique(c(varlst, tvarlst2))
+    if (length(tvarlst2) == 0) {
+      stop("must include unadjusted variables in cond")
+    }
+    tvarsum <- lapply(tpropvars, function(x) paste0(x, "_SUM"))
+    tvaradj <- lapply(tpropvars, function(x) paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", x)))
+    varlst <- c(varlst, tvarlst)
+    varsumlst <- c(varsumlst, unlist(tvarsum))
+    varadjlst <- c(varadjlst, unlist(tvaradj))
   }
-  varsumlst <- paste0(varlst, "_SUM")
-
-  ## Names for new, condition-level adjusted variables (_UNADJ to _ADJ) 
-  varlstadj <- sapply(varlst, function(x) sub("PROP_UNADJ", "", x) )
-  varlstadj <- paste0("ADJ_FACTOR_", varlstadj)
-
 
   ###############################################################################
   ## Calculate adjustment factors by strata (and estimation unit) for variable list
@@ -67,28 +80,22 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
 
   ## Calculate adjustment factor for conditions 
   ## (divide summed condition proportions by total number of plots in strata)
-  unitlut[, (varlstadj) := lapply(.SD, 
+  unitlut[, (varadjlst) := lapply(.SD, 
 	function(x, n) ifelse((is.na(x) | x==0), 0, get(n)/x), n), .SDcols=varsumlst]
 
   ## Merge condition adjustment factors to cond table to get plot identifiers.
   setkeyv(condx, strunitvars)
-  condx <- condx[unitlut[,c(strunitvars, varlstadj), with=FALSE]]
+  condx <- condx[unitlut[,c(strunitvars, varadjlst), with=FALSE]]
 
   ## Change name of condition adjustment factor to cadjfac
   ## Note: CONDPPROP_UNADJ is the same as below (combination of MACR and SUBP)
-  cadjfactnm <- paste0("ADJ_FACTOR_", sub("PROP_UNADJ", "", areawt))
-  setnames(condx, cadjfactnm, "cadjfac")
-  setnames(unitlut, cadjfactnm, "cadjfac")
-
-  ## This is the same as above
-  #if ("PROP_BASIS" %in% names(condx)) {
-  #  condx[, cadjfac2 := ifelse(PROP_BASIS == "MACR", ADJ_FACTOR_MACR, ADJ_FACTOR_SUBP)]
-  #}
-
+  setnames(condx, areaadj, "cadjfac")
+  setnames(unitlut, areaadj, "cadjfac")
+      
   ## Calculate adjusted condition proportion for plots
-  condx[, CONDPROP_ADJ := get(areawt) * cadjfac]
+  areawtnm <- adjnm(areawt)
+  condx[, (areawtnm) := get(areawt) * cadjfac]
   setkeyv(condx, c(cuniqueid, condid))
-
 
   ## Calculate adjusted condition proportions for different size plots for trees
   if (!is.null(treex)) {
@@ -104,18 +111,20 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
 #		ifelse(PROP_BASIS == "MACR", ADJ_FACTOR_MACR,
 #		ADJ_FACTOR_SUBP))]
     if ("TPROP_BASIS" %in% names(treex)) {
-      treex[condx, tadjfac := ifelse(TPROP_BASIS == "MICR", ADJ_FACTOR_MICR, 
-		ifelse(TPROP_BASIS == "MACR", ADJ_FACTOR_MACR,
-		ADJ_FACTOR_SUBP))]
+      treex[condx, tadjfac := ifelse(TPROP_BASIS == "MICR", get(tvaradj[["MICR"]]), 
+		ifelse(TPROP_BASIS == "MACR", get(tvaradj[["MACR"]]),
+		get(tvaradj[["SUBP"]])))]
+#    } else if ("TPAGROW_UNADJ" %in% names(treex)) {
+#      treex[condx, tadjfac := ifelse(TPAGROW_UNADJ > 50, get(tvaradj[["MICR"]]), 
+# 		ifelse(TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, get(tvaradj[["MACR"]]),
+# 		get(tvaradj[["SUBP"]])))]
     } else {
-      treex[condx, tadjfac := ifelse(TPAGROW_UNADJ > 50, ADJ_FACTOR_MICR, 
- 		ifelse(TPAGROW_UNADJ > 0 & TPAGROW_UNADJ < 5, ADJ_FACTOR_MACR,
- 		ADJ_FACTOR_SUBP))]
+      treex[condx, tadjfac := 1]
     }
 
     if (!is.null(seedx)) {
       setkeyv(seedx, c(tuniqueid, condid))
-      seedx[condx, tadjfac := ADJ_FACTOR_MICR]
+      seedx[condx, tadjfac := get(tvaradj[["MICR"]])]
     }  
   }     
 

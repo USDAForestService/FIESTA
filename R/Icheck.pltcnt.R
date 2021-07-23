@@ -119,7 +119,6 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, unitvars))]
     setcolorder(unitlut, c(unique(c(pvars, unitvars)), othervars))
     setorderv(unitlut, unique(c(pvars, unitvars)))
-
   }    
 
   if (showwarnings && any(pltcnt$errtyp == "warn")) { 
@@ -129,8 +128,9 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
             msg, "\n###################################")
     message(paste0(capture.output(pltcnt), collapse = "\n"))
 
-    if (stopiferror && any(errtab[["errtyp"]] == "warn"))
+    if (stopiferror && any(errtab[["errtyp"]] == "warn")) {
       stop("not enough plots in strata")
+    }
 
     ## If savedata, write to file
     ###############################################################

@@ -8,13 +8,13 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAtree(MApopdat = NULL, MAmethod, prednames = NULL, 
-	estseed = "none", landarea = "ALL", pcfilter = NULL, 
-	estvar = NULL, estvar.filter = NULL, rowvar=NULL, colvar=NULL, 
-	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
-	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
-	rowgrpnm=NULL, rowgrpord=NULL, sumunits = FALSE, allin1 = FALSE, 
-	metric = FALSE, estround = 1, pseround = 2, estnull = "--", psenull = "--", 
+modMAtree(MApopdat = NULL, FIA = TRUE, prednames = NULL, estseed = "none", 
+	landarea = "FOREST", pcfilter = NULL, estvar = NULL, estvar.filter = NULL, 
+	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
+	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
+	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
+	sumunits = FALSE, allin1 = FALSE, metric = FALSE, 
+	estround = 1, pseround = 2, estnull = "--", psenull = "--", 
 	divideby = NULL, savedata = FALSE, outfolder = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, 
 	raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, 
@@ -26,8 +26,8 @@ modMAtree(MApopdat = NULL, MAmethod, prednames = NULL,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
-  \item{MAmethod}{ String. mase (i.e., model-assisted) method to use 
-	('HT', 'PS', 'greg', 'gregEN') }
+  \item{FIA}{ Logical. If TRUE, the finite population term is removed from 
+	estimator to match FIA estimates. } 
   \item{prednames}{ String vector. Name(s) of predictor variables to include in model. }
   \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
 	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }

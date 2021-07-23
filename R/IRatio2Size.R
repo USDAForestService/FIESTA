@@ -1,4 +1,4 @@
-Ratio2Size <- function(sumyn, ysum, sumyd, uniqueid, strlut, unitvar, strvar, domain){
+Ratio2Size <- function(sumyn, ysum, sumyd, uniqueid, stratalut, unitvar, strvar, domain){
   ########################################################################################
   ## DESCRIPTION: Ratio-to-size estimators
   ## ARGUMENTS:
@@ -7,7 +7,7 @@ Ratio2Size <- function(sumyn, ysum, sumyd, uniqueid, strlut, unitvar, strvar, do
   ## sumyd 		- string. estimation response (denominator) - for ratio of means estimates
   ## bytdom		- logical. if TRUE, estimates are by tree domains (e.g., species)
   ## uniqueid 	- unique plot identifier in ysum
-  ## strlut		- data.frame. estimation unit/strat -level information
+  ## stratalut		- data.frame. estimation unit/strat -level information
   ## unitvar 	- name of variable defining estimation unit
   ## domain		- name of variable defining domain (e.g., forest type)
   ## areavar 	- name of variable defining area
@@ -45,8 +45,8 @@ Ratio2Size <- function(sumyn, ysum, sumyd, uniqueid, strlut, unitvar, strvar, do
   ## Set key on ysum
   setkeyv(ysum, c(strunitvars, uniqueid))
 
-  if (!"n.strata" %in% names(strlut)) stop("need n.strata in strlut")
-  if (!"n.total" %in% names(strlut)) stop("need n.total in strlut")
+  if (!"n.strata" %in% names(stratalut)) stop("need n.strata in stratalut")
+  if (!"n.total" %in% names(stratalut)) stop("need n.total in stratalut")
 
 
   ## STRATA/PLOT LEVEL: Sum area by plot
@@ -73,8 +73,8 @@ Ratio2Size <- function(sumyn, ysum, sumyd, uniqueid, strlut, unitvar, strvar, do
  
 
   ## STRATA/DOMAIN LEVEL: Merge domain-level sums to strata table
-  setkeyv(strlut, strunitvars)
-  ybardat <- strlut[ysum.strata]
+  setkeyv(stratalut, strunitvars)
+  ybardat <- stratalut[ysum.strata]
  
 
   ## Calculate mean for numerator and denominator

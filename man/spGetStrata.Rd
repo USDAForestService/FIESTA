@@ -13,10 +13,11 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	unit_layer = NULL, unit_dsn = NULL, unitvar = NULL, unit.filter = NULL,
 	strattype = "RASTER", strat_layer = NULL, strat_dsn = NULL, strvar = NULL, 
 	strat_lut = NULL, areaunits = "ACRES", rast.NODATA = NULL, keepNA = FALSE, 
-	keepxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
+	returnxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
 	exportNA = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
 	out_layer = "strat_assgn", outfn.date = FALSE, outfn.pre = NULL, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, ...)
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	vars2keep = NULL, ...)
 }
 
 \arguments{
@@ -60,7 +61,7 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	if keepNA=TRUE, NA values will not be in included in stratalut but will 
 	remain in pltassgn table. }
   \item{keepNA}{ Logical. If TRUE, returns data frame of NA values. }
-  \item{keepxy}{ Logical. If TRUE, returns xy data as sf object (spxyplt). }
+  \item{returnxy}{ Logical. If TRUE, returns xy data as sf object (spxyplt). }
   \item{showext}{ Logical. If TRUE, layer extents are displayed in plot window. }
   \item{savedata}{ Logical. If TRUE, the input data with extracted values are
 	saved to outfolder. }
@@ -81,6 +82,8 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
 	or overwrite layers in dsn. }
   \item{append_layer}{ Logical. If TRUE, appends to csv (if out_fmt="csv")
 	or appends to layers in dsn. }
+  \item{vars2keep}{ String vector. Attributes in SAdoms, other than domvar to
+	include in dunitlut output and extract to pltassgn points. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }
 \details{
@@ -103,6 +106,8 @@ spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
   \item{NAlst}{ sf List. If keepNA=TRUE, and NA values exist after data extraction, 
 	the spatial NA points are returned. }
   \item{pltassgnid}{ String. Unique identifier of plot. }
+  \item{spxy}{ Simple feature. If returnxy=TRUE, Spatial coordinates. }
+  \item{xy.uniqueid}{ String. If returnxy=TRUE, unique identifier of spxy. }
 
   If savedata=TRUE, pltassgn and unitarea are saved to outfolder.\cr
   If exportsp=TRUE, the spatial sf points object is exported to outfolder.\cr.

@@ -4,7 +4,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", 
 	pltassgnid="CN", pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
-	strata=TRUE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA", 
+	areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
+	strata=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
 	areaunits="acres", unitcombine=FALSE, removeunits=TRUE, removetext="unitarea", 
 	stratalut=NULL, strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL, 
 	stratcombine=TRUE, prednames=NULL, predfac=NULL, ACI=FALSE, nonsamp.pfilter=NULL, 
@@ -78,7 +80,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
 	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD=
-	SUBPCOND_PROP=MACRCOND_PROP <- NULL
+	SUBPCOND_PROP=MACRCOND_PROP=tpropvars <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -115,6 +117,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
       if (any(method == "PS")) {
         strata <- TRUE
+      } else {
+        strata <- FALSE
       }
     } else if (module == "SA") {
       if (!any(c("JoSAE", "sae") %in% rownames(installed.packages()))) {
@@ -161,7 +165,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   unitcombine <- FIESTA::pcheck.logical(unitcombine, varnm="unitcombine", 
 		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
- 
   ## Check strata, strvars
   ###################################################################################
   if (module == "GB" || (module == "MA" && method == "PS")) {
@@ -435,6 +438,10 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       if (is.null(pjoinid)) pjoinid <- puniqueid
       setkeyv(pltx, pjoinid)
 
+      if (pjoinid %in% names(pltassgnx)) {
+        pltassgnid <- pjoinid
+        setkeyv(pltassgnx, pjoinid)
+      } 
       pltassgnx <- pltassgnx[, unique(c(pltassgnid, 
 		names(pltassgnx)[!names(pltassgnx) %in% names(pltx)])), with=FALSE]
       setkeyv(pltassgnx, pltassgnid)
@@ -443,7 +450,14 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       tabs <- check.matchclass(pltx, pltassgnx, pjoinid, pltassgnid)
       pltx <- tabs$tab1
       pltassgnx <- tabs$tab2
-    
+
+
+#################
+      ## Check for matching unique identifiers of pltx with pltassgnx
+      ## Subset pltx to pltassgnx ids
+      pltx <- check.matchval(pltx, pltassgnx, pjoinid, pltassgnid, tab1txt="plt",
+			tab2txt="pltassgn", subsetrows=TRUE)
+  
       ## Merge pltx and pltassgnx (Note: inner join)
       #pltx <- merge(pltassgnx, pltx, by.x=pltassgnid, by.y=pjoinid)
       pltx <- merge(pltx, pltassgnx, by.x=pjoinid, by.y=pltassgnid)
@@ -652,7 +666,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Check plot data
   ###################################################################################
   ###################################################################################
-
+ 
   ######################################################################################
   ## Check for missing plot variables
   ###########################################################################
@@ -973,7 +987,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     }
   }
 
-
   ###################################################################################
   ###################################################################################
   ## Check tree data
@@ -982,7 +995,6 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   if (!is.null(treex)) {
     ## Define necessary variable for tree table
     tvars2keep <- {}
-    if (adj != "none") tvars2keep <- "TPA_UNADJ"
     treenmlst <- names(treex)
 
     ## Check unique identifiers
@@ -1023,34 +1035,43 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 
     ## Check for missing tvars2keep 
     tmissvars <- tvars2keep[which(!tvars2keep %in% treenmlst)]
-    if (length(tmissvars) > 0)
+    if (length(tmissvars) > 0) {
       stop("missing necessary variables from tree: ", paste(tmissvars, collapse=", "))
+    }
 
     ## Check for NA values in tvars2keep variables
     ## TPA_UNADJ=NA, but trees have a DIA 
     ## these are down dead trees that only count in growth and mortality, 
     ## but wouldn't be measured if they hadn't been alive at the previous inventory
 
-    tvars2keep2 <- tvars2keep[tvars2keep != "TPA_UNADJ"]
     if (length(tvars2keep) > 0) {
-      tvars.na <- sapply(c(tuniqueid, condid, tvars2keep2), 
+      tvars.na <- sapply(c(tuniqueid, condid, tvars2keep), 
 		function(x, treex){ sum(is.na(treex[,x, with=FALSE])) }, treex)
-      if (any(tvars.na) > 0) 
+      if (any(tvars.na) > 0) {
         stop(tvars.na[tvars.na > 0], " NA values in variable: ", 
 		paste(names(tvars.na[tvars.na > 0]), collapse=", "))
+      }
     }
-
+ 
     ## Add necessary variables to cvars2keep depending on data in tree
     ###################################################################
+    ## If trees with DIA less than MICRO_BREAKPOINT_DIA exist in database 
+    ##   and there is no areawt_micr defined, the areawt will be used.
+    ## If trees with DIA greater than MACRO_BREAKPOINT_DIA exist in database 
+    ##    and there is no areawt_macr defined, the areawt will be used.
     if (adj != "none") {
       ## Check for condition proportion variables
-      propchk <- check.PROP(treex, pltcondx, cuniqueid=cuniqueid, checkNA=FALSE)
-      propvars <- propchk$propvars
+      propchk <- check.PROP(treex, pltcondx, cuniqueid=cuniqueid, checkNA=FALSE, 
+		areawt=areawt, diavar=diavar, MICRO_BREAKPOINT_DIA=MICRO_BREAKPOINT_DIA, 
+		MACRO_BREAKPOINT_DIA=MACRO_BREAKPOINT_DIA,
+		areawt_micr=areawt_micr, areawt_subp=areawt_subp, areawt_macr=areawt_macr)
+      tpropvars <- propchk$tpropvars
       treex <- propchk$treex
       pltcondx <- propchk$condx
-      cvars2keep <- unique(c(cvars2keep, propvars))
+      cvars2keep <- unique(c(cvars2keep, unlist(tpropvars)))
     }
   }
+
 
   ###################################################################################
   ###################################################################################
@@ -1128,9 +1149,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   if (popType == "P2VEG") {
     if ("P2VEG_SAMPLING_STATUS_CD" %in% names(pltcondx)) {
       pltassgnvars <- c(pltassgnvars, "P2VEG_SAMPLING_STATUS_CD")
-    } 
-    if ("SAMP_METHOD_CD" %in% names(pltcondx)) {
-      pltassgnvars <- c(pltassgnvars, "SAMP_METHOD_CD")
+    #} 
+    #if ("SAMP_METHOD_CD" %in% names(pltcondx)) {
+    #  pltassgnvars <- c(pltassgnvars, "SAMP_METHOD_CD")
     } else {
       message("removing nonresponse from field-visited and remotely-sensed plots")
     }      
@@ -1428,6 +1449,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     returnlst$substrvar <- substrvar 
     returnlst$nonresplut <- nonresplut
   }
-  
+  if (adj != "none") {
+    returnlst$tpropvars <- tpropvars
+  }
+
   return(returnlst)
 }

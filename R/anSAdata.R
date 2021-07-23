@@ -177,19 +177,19 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  SAmodeldat <- spGetModeldat(xyplt=xyplt, uniqueid=xy.uniqueid, 
+  SAmodeldat <- spGetAuxiliary(xyplt=xyplt, uniqueid=xy.uniqueid, 
 		dom_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
-		rastlst.cat.NODATA=NULL, keepNA=FALSE, npixels=FALSE, 
+		rastlst.cat.NODATA=NULL, keepNA=FALSE, npixels=TRUE, 
 		vars2keep="AOI", savedata=FALSE)
   pltassgn <- SAmodeldat$pltassgn
-  dunitlut <- SAmodeldat$domzonal
-  dunitvar <- SAmodeldat$domvar
+  dunitlut <- SAmodeldat$dunitlut
+  dunitvar <- SAmodeldat$dunitvar
   prednames <- SAmodeldat$prednames
   zonalnames <- SAmodeldat$zonalnames
   predfac <- SAmodeldat$predfac
-  dunitarea <- SAmodeldat$domarea
+  dunitarea <- SAmodeldat$dunitarea
   areavar <- SAmodeldat$areavar
   pltassgnid <- SAmodeldat$pltassgnid
 

@@ -80,9 +80,11 @@
 \alias{nbrdecimals}
 \alias{nbrdigits}
 \alias{getfilter}
+\alias{filter2qry}
 \alias{xtabf}
 \alias{recodelut}
 \alias{findnm}
+\alias{strat.pivot}
 
 \alias{DBvars.default}
 \alias{DBgetfn}

@@ -20,8 +20,8 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	areawt = "CONDPROP_UNADJ", adj = "samp", evalid = NULL, invyrs = NULL, 
 	intensity = NULL, ACI = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
 	areavar = "ACRES", areaunits = "acres", unitcombine = FALSE, minplotnum.unit = 10, 
-	strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, 
-	getwtvar = "P1POINTCNT", strwtvar = "strwt", stratcombine = TRUE, 
+	removeunit = FALSE, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", 
+	getwt = TRUE, getwtvar = "P1POINTCNT", strwtvar = "strwt", stratcombine = TRUE, 
 	minplotnum.strat = 2, saveobj = FALSE, objnm = "GBpopdat", savedata = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
@@ -99,6 +99,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
   \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{removeunit}{ Logical. If TRUE, remove units less than minplotnum.unit. }
   \item{strata}{ Logical. If TRUE, include information for post-stratification. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with pixel counts or area
 	by strata or proportion or area ('strwt') by strata (and estimation unit). 
@@ -131,7 +132,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
   \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
 	or files if out_fmt = 'csv'. Note: currently cannot append layers if
 	out_fmt = "gdb". }
-  \item{GBdata}{ R List object. Output data list components from FIESTA::GBdata(). }
+  \item{GBdata}{ R List object. Output data list components from FIESTA::anGBdata(). }
   \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
   \item{GBstratdat}{ R List object. Output data list components from FIESTA::DBgetStrata(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }

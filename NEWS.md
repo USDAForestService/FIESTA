@@ -5,6 +5,14 @@ added new function to calculate P2VEG estimates - modGBp2veg()
 added new parameter in datSumTree() and datSumTreeDom() to give flexibility 
 	name of adjustment factor, tadjvar, with default="tadjfac"
 
+spGetStrata()/spGetEstUnit()
+changed keepxy parameter to returnxy
+
+Deprecated:
+spGetModeldat() 
+changed to spGetAuxiliary()
+
+
 
 
 

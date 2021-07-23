@@ -1,10 +1,11 @@
 spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  	unittype="POLY", unit_layer, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter = NULL, areavar=NULL, areaunits="ACRES", rast.NODATA=NULL, 
-	keepNA=FALSE, keepxy=FALSE, showext=FALSE, savedata=FALSE, 
+	keepNA=FALSE, returnxy=FALSE, showext=FALSE, savedata=FALSE, 
 	exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="shp", 
 	out_dsn=NULL, out_layer="unit_assgn", outfn.date=FALSE, outfn.pre=NULL, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, ...){
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, 
+	vars2keep=NULL, ...){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -53,6 +54,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
+  sppltx.names <- names(sppltx)
 
 
   ## Check unittype
@@ -75,17 +77,22 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   keepNA <- FIESTA::pcheck.logical(keepNA, varnm="keepNA", 
 		title="Keep NULL values?", first="YES", gui=gui)
 
+  ## Check exportNA 
+  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+		title="Export NA values?", first="NO", gui=gui)
+
+  ## Check returnxy 
+  returnxy <- FIESTA::pcheck.logical(returnxy, varnm="returnxy", 
+		title="Return XY spatial data?", first="NO", gui=gui)  
+
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
-  ## Check exportNA 
-  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
-		title="Export NA values?", first="NO", gui=gui)  
-
-  ## Check exportNA 
-  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
-		title="Export NA values?", first="NO", gui=gui)  
+  ## Check exportsp 
+  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+		title="Export spatial?", first="NO", gui=gui)  
+  
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
@@ -103,8 +110,6 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       outfn.date <- FALSE
     }
   }
-
-
 
   ##################################################################
   ## DO WORK
@@ -139,11 +144,25 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       areacalc <- TRUE
     }
 
+    ## Check vars2keep
+    varsmiss <- vars2keep[which(!vars2keep %in% names(unitlayerprj))]
+    if (length(varsmiss) > 0) {
+      stop("missing variables: ", paste(varsmiss, collapse=", "))
+    }
   
     ## Extract values of polygon unitlayer to points
-    extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerx, uniqueid=uniqueid, 
-		polyvarlst=unitvar, keepNA=keepNA, exportNA=exportNA)
+    extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerx, 
+		uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
+		keepNA=keepNA, exportNA=exportNA)
     sppltx <- extpoly$sppltext
+    unitNA <- extpoly$NAlst[[1]]
+    outname <- extpoly$outname
+    if (outname != unitvar) {
+      message("unitvar changed from ", unitvar, " to ", outname, 
+				" because of duplicate names in xyplt")
+      names(unitlayerprj)[names(unitlayerprj) == unitvar] <- outname
+      unitvar <- outname
+    }
 
     ## Calculate area
     if (areacalc) {
@@ -165,29 +184,50 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 			outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 			overwrite_layer=overwrite_layer)
     sppltx <- extrast$spplt
-         
+    NAlst <- extrast$NAlst[[1]]
+
+    if (!is.null(NAlst)) {
+      message("NA values shown in red... ")
+      plot(sf::st_geometry(sppltx), pch=16, cex=.5)
+      plot(sf::st_geometry(NAlst), add=TRUE, col="red", cex=1, pch=16)
+    }
+
+        
     ## Calculate area
     unitarea <- FIESTA::areacalc.pixel(unitlayerx, units=areaunits) 
-
   }
 
-  ## Write data frames to CSV files
-  #######################################
+
+  if (!is.null(vars2keep)) {
+    unitarea <- merge(unitarea, 
+		sf::st_drop_geometry(unitlayerx[, unique(c(unitvar, vars2keep))]),
+		by=unitvar)
+  }
+
+
+  ##################################################################
+  ## Saving data
+  ##################################################################
   pltassgn <- sf::st_drop_geometry(sppltx)
-  if (savedata) {
-    datExportData(pltassgn, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
 
-    datExportData(unitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+  if (savedata) {
+    datExportData(pltassgn, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="pltassgn", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
+
+    datExportData(unitarea, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="unitarea", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
   }
 
+  ## Export to shapefile
   if (exportsp) {
-    spExportSpatial(sppltx, out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer,
- 		outfolder=outfolder, outfn.pre=NULL, 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    spExportSpatial(sppltx, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer=out_layer,
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
+		add_layer=TRUE, append_layer=append_layer)
   }
 
   if (showext) {
@@ -195,13 +235,21 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     plot(sf::st_geometry(sppltx), add=TRUE) 
   }
   
-  returnlst <- list(pltassgn=pltassgn, unitarea=unitarea, unitvar=unitvar, areavar=areavar,
-				pltassgnid=uniqueid)
-  if (keepxy) {
-    returnlst$spxyplt <- sppltx
+  returnlst <- list(pltassgn=setDF(pltassgn), unitarea=setDF(unitarea), 
+		unitvar=unitvar, areavar=areavar, pltassgnid=uniqueid)
+  if (!is.null(NAlst)) {
+    returnlst$NAlst <- NAlst
+  }
+  ## Returnxy
+  if (returnxy) {
+    ## Add coordinate variables
+    #xyplt <- data.frame(sf::st_coordinates(sppltx))
+    #names(xy.coords) <- c(x,y)
+    #sppltx <- sf::st_sf(data.frame(sppltx, xy.coords)) 
+    returnlst$spxy <- sppltx[, sppltx.names]
+    returnlst[["xy.uniqueid"]] <- uniqueid
   }
 
- 
   return(returnlst)
 }
 

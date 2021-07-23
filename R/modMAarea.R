@@ -1,5 +1,5 @@
-modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL, 
-	landarea="ALL", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
+modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, 
+	landarea="FOREST", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
 	rowgrpnm=NULL, rowgrpord=NULL, sumunits=FALSE, allin1=FALSE, metric=FALSE,
@@ -17,8 +17,8 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::modMAarea)),
-		names(formals(FIESTA::modMApop))) 
+  formallst <- c(names(formals(modMAarea)),
+		names(formals(modMApop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -55,27 +55,28 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
 
 
   ## Check MAmethod 
-  MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-  MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
-		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
+  #MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
+  #MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
+	#	checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(MApopdat)) {
-    MApopdat <- modMApop(gui=gui, MAmethod=MAmethod, prednames=prednames, ...)
+    #MApopdat <- modMApop(gui=gui, MAmethod=MAmethod, prednames=prednames, ...)
+    MApopdat <- modMApop(gui=gui, prednames=prednames, ...)
   } else {
     returnMApopdat <- FALSE
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
 		"npixelvar", "expcondtab", "plotsampcnt", "condsampcnt", "MAmethod")
-    if (MAmethod == "PS") {
-      list.items <- c(list.items, "PSstrvar")
-    }
-    if (MAmethod == "greg") {
-      list.items <- c(list.items, "prednames")
-    }
+#    if (MAmethod == "PS") {
+#      list.items <- c(list.items, "PSstrvar")
+#    }
+#    if (MAmethod == "greg") {
+#      list.items <- c(list.items, "prednames")
+#    }
     MApopdat <- FIESTA::pcheck.object(MApopdat, "MApopdat", list.items=list.items)
   }
 		
@@ -99,11 +100,12 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
   condsampcnt <- MApopdat$condsampcnt
   states <- MApopdat$states
   invyrs <- MApopdat$invyrs
-  #MAmethod <- MApopdat$MAmethod
+  MAmethod <- MApopdat$MAmethod
   estvar.name <- MApopdat$estvar.area
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
   PSstrvar <- MApopdat$PSstrvar
+  adj <- MApopdat$adj
  
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
     if (is.null(prednames)) {
@@ -116,32 +118,6 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     }
   } 
 
-  ## Convert predfac if MAmethod != c('HT', 'PS')
-  if (!MAmethod %in% c("HT","PS") && !is.null(predfac)) {
-    for (fac in predfac) {
-      ## Get factor levels
-      fac.levels <- sort(unique(condx[[fac]]))
-
-      ## Set factor levels to keep and delete from unitlut.
-      fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
-      fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
-      unitlut[[fac.unitcol.del]] <- NULL
-  
-      ## Rename factor variables and add names to predictor list
-      facs <- paste0(fac, fac.levels[-1])
-      names(unitlut)[names(unitlut) %in% fac.unitcol.keep] <- facs
-      unitpreds <- c(prednames[prednames != fac], facs)
-
-      ## Create dummy variables for factor levels - 1
-      dtfac <- condx[, as.data.table(model.matrix(~., 
-				data=condx[, fac, with=FALSE]))][,-1]
-      condx <- cbind(condx, dtfac)
-      condx[, (fac) := NULL]
-
-      ## Remove old name and add new names to predictor list
-      prednames <- unique(c(prednames[prednames != fac], facs))
-    }
-  }
 
   ########################################
   ## Check area units
@@ -156,14 +132,14 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 	condid=condid, sumunits=sumunits, landarea=landarea, ACI.filter=ACI.filter, 
-	pcfilter=pcfilter, allin1=allin1, estround=estround, pseround=pseround, 
-	divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder,
- 	overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
- 	outfn.pre=outfn.pre, outfn.date=outfn.date, append_layer=append_layer, 
-	raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
+	cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
+	landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
+	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
+	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+ 	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+ 	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -265,10 +241,15 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
   estunits <- sort(unique(cdomdat[[unitvar]]))
 
-  message("getting estimates...")
+  masemethod <- ifelse(MAmethod == "PS", "postStrat", 
+	ifelse(MAmethod == "greg", "greg", 
+	ifelse(MAmethod == "gregEN", "gregElasticNet", 
+	ifelse(MAmethod == "ratio", "ratioEstimator", "horvitzThompson"))))
+  message("generating estimates using mase::", masemethod, " function...\n")
   if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
-  }
+  } 
+
   if (addtotal) {
     ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -276,7 +257,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     unit_totest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=cdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames,
- 		domain="TOTAL", response=estvar.name, npixels=npixels, FIA=TRUE))
+ 		domain="TOTAL", response=estvar.name, npixels=npixels, FIA=FIA))
     tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -292,7 +273,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     unit_rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-	domain=rowvar, response=estvar.name, npixels=npixels, FIA=TRUE))
+	domain=rowvar, response=estvar.name, npixels=npixels, FIA=FIA))
   }
   if (colvar != "NONE") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -300,7 +281,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     unit_colest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-	domain=colvar, response=estvar.name, npixels=npixels, FIA=TRUE))
+	domain=colvar, response=estvar.name, npixels=npixels, FIA=FIA))
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, grpvar, PSstrvar, prednames), .SDcols=estvar.name]
@@ -309,7 +290,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod, prednames=NULL,
     unit_grpest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
-	domain="grpvar", response=estvar.name, npixels=npixels, FIA=TRUE))
+	domain="grpvar", response=estvar.name, npixels=npixels, FIA=FIA))
     unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
   }
 

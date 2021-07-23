@@ -8,107 +8,36 @@
 
 }
 \usage{
-modFAOest(tree = NULL, base = NULL, cluster = NULL, clustassgn = NULL, seed = NULL, 
-	dsn = NULL, buniqueid = "CN", baseid = "CONDID", tuniqueid = NULL, 
-	basewt = "CONDPROP_UNADJ", clustid = "CN", clustassgnid = "PLT_CN", 
-	clustjoinid = "CN", invyrs = NULL, adj = "none", strata = FALSE, 
-	nonsamp.clustfilter = NULL, nonsamp.basefilter = NULL, 
-	unitlevel1 = NULL, unitlevel2 = NULL, unitarea = NULL, areavar = "AREA", 
-	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", 
-	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
-	bcfilter = NULL, esttype = "RATIO", ratiotype = "PERACRE", estvarn = NULL, 
-	estvarn.filter = NULL, estvarn.name = NULL, estvard = NULL, estvard.filter = NULL, 
-	estvard.name = NULL, TPA = TRUE, rowvar = NULL, colvar = NULL, row.FIAname = FALSE, 
-	col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, 
-	col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, 
-	rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE, estround = 1, pseround = 2, 
-	estnull = "--", psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE, 
-	outfolder = NULL, outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = TRUE, 
-	addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, 
-	title.estvarn = NULL, title.estvard = NULL, title.filter = NULL, title.units = NULL,
-	FAOpopdat = NULL, gui = FALSE)
+modFAOest(FAOpopdat = NULL, estseed = "none", esttype = "RATIO", ratiotype = "PERACRE", 
+	bcfilter = NULL, estvarn = NULL, estvarn.filter = NULL, 
+	estvard = NULL, estvard.filter = NULL, TPA = TRUE,
+	rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
+	row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
+	rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
+	sumunits = FALSE, allin1 = FALSE, metric = FALSE, 
+	estround = 3, pseround = 2, estnull = "--", psenull = "--", divideby = NULL, 
+	savedata = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, raw_fmt = "csv", 
+	raw_dsn = NULL, overwrite_dsn = FALSE, overwrite_layer = TRUE,
+	append_layer=FALSE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
+	title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, title.estvarn = NULL, 
+	title.estvard = NULL, title.filter = NULL, gui = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{tree}{ DF/DT, comma-delimited file(*.csv), or layer in dsn. Tree-level 
-	variables to aggregate to condition-level. See details for necessary 
-	variables to include. }
-  \item{base}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
-	The base-level data (e.g., COND, SUBP). Cluster variables and strata/estimation unit 
-	variable(s) may be included if cluster and clustassgn=NULL. See details for necessary 
-	variables to include. }
-  \item{cluster}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per cluster, a spatial layer in dsn,
-	or a sf R object. Cluster-level data. Optional. }
-  \item{clustassgn}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-	Can also be a shapefile(*.shp) with one record per cluster, a spatial layer in dsn,
-	or a sf R object. Cluster-level assignment of estimation unit and/or strata. Optional. }
-  \item{seed}{ DF/DT or comma-delimited file (*.csv). Seedling table. }
-  \item{dsn}{ String. Name of database where tree, cond, and pltassgn tables reside. 
-	The dsn varies by driver. See gdal OGR vector formats 
-	(https://www.gdal.org/ogr_formats.html). }
-  \item{buniqueid}{ String. Unique identifier of cluster. }
-  \item{baseid}{ String. Unique identifier of base unit records (e.g., CONDID, SUBPID). }
-  \item{tuniqueid}{ String. Unique identifier of plot in tree and seed. }
-  \item{basewt}{ String. The variable in base to calculate area weights (e.g, CONDPROP_UNADJ).
-    	If NULL, the basewt is assumed to be equal to 1. }
-  \item{clustid}{ String. Unique identifier of cluster. }
-  \item{clustassgnid}{ String. Unique identifier of cluster. }
-  \item{clustjoinid}{ String. Join variable in cluster to match clustassgnid. Does not need to
-	be uniqueid. For example, if using most current XY coordinates for plot assignments. }
-  \item{invyrs}{ Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)). }
-  \item{adj}{ String. How to calculate adjustment factors for nonsampled (nonresponse) 
-	conditions based on summed proportions for by plot ('none', 'samp', 'plot').
-	'samp' - adjustments are calculated at strata/estimation unit level; 
-	'plot' - adjustments are calculated at plot-level. Adjustments 
-	are only calculated for annual inventory plots (designcd=1). } 
-  \item{strata}{ Logical. If TRUE, add data information for stratification. }
-  \item{nonsamp.clustfilter}{ String. A logical expression for filtering nonsampled clusters.
-	Must be R syntax (e.g., 'PLOT_STATUS_CD != 3'. } 
-  \item{nonsamp.basefilter}{ String. A logical expression for filtering nonsampled conditions. 
-	Must be R syntax (e.g., 'COND_STATUS_CD != 5'. }
-  \item{unitlevel1}{ String. Name of the estimation unit variable in base or clustassgn 
-	with estimation unit assignment for each plot (e.g., 'ESTN_UNIT'). 
-	If one estimation unit, set unitvar=NULL. }
-  \item{unitlevel2}{ String. Name of a second estimation unit variable in base or 
-	clustassgn with assignment for each plot (e.g., 'STATECD'). }
-  \item{unitarea}{ Numeric or DF. Total area by estimation unit. If only 1 estimation 
-	unit, include number of total acreage for the area of interest or a data frame
-	with areavar. If more than one estimation unit, provide a data frame of total 
-	area by estimation unit, including unitvar and areavar. }
-  \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
-  \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
-	proportions ('strwt') by strata (and estimation unit). To calculate 
-	'strwt', set getwt=TRUE and getwtvar= name of variable with information 
-	to calculate weights from (e.g., pixel counts) }.
-  \item{strvar}{ String. Name of strata variable in stratalut and table with strata
-	assignment for each plot. Default="STRATUMCD". }
-  \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
-	If FALSE, 'strwt' variable must be in stratalut. }
-  \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt).
- 	Default="P1POINTCNT". }
-  \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
-  \item{bcfilter}{ String. A filter for base or cluster attributes. Must be R syntax. }
+  \item{FAOpopdat}{ List. Population data objects returned from modFAOpop(). }
+  \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
+	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{esttype}{ String. Estimation type ('AREA', 'TREE', 'RATIO'). }
-  \item{ratiotype}{ String. Ratio type ('PERACRE', 'PERTREE'). }
+  \item{ratiotype}{ String. The type of ratio estimates ("PERACRE", "PERTREE"). }
+  \item{bcfilter}{ String. A filter for base or cluster attributes. Must be R syntax. }
   \item{estvarn}{ String. Name of the tree estimate variable (numerator). }
   \item{estvarn.filter}{ String. A tree filter for the estimate variable (numerator).  
 	Must be R syntax (e.g., "STATUSCD == 1"). }
-  \item{estvarn.name}{ String. A name given to the output aggregated tree estimate
-	variable (numerator). If NULL, = 'estvarn'_SUM'. This name will be used for default 
-	table titles and/or output file names. }
   \item{estvard}{ String. Name of the tree estimate variable (denominator). }
   \item{estvard.filter}{ String. A tree filter for the estimate variable (denominator).  
 	Must be R syntax (e.g., "STATUSCD == 1"). }
-  \item{estvard.name}{ String. A name given to the output aggregated tree estimate 
-	variable (denominator). If NULL, = 'estvard'_SUM'. This name will be used for 
-	default table titles and/or output file names. }
-  \item{TPA}{ Logical. If TRUE, expand estvar to per acre values. }
+  \item{TPA}{ Logical. If TRUE, multiply by trees per acre. } 
   \item{rowvar}{ String. Name of the row domain variable in cond or tree. If only one 
 	domain, rowvar = domain variable. If more than one domain, include colvar. If no 
 	domain, rowvar = NULL. }
@@ -132,11 +61,12 @@ modFAOest(tree = NULL, base = NULL, cluster = NULL, clustassgn = NULL, seed = NU
   \item{rowgrp}{ Logical. If TRUE, appends row groups to first column of table. 
 	Only available if group category exists in ref_codes table (e.g., FORTYPGRPCD, OWNGRPCD). }   
   \item{rowgrpnm}{ String. Name of row group variable. }  
+  \item{rowgrpord}{ String. Name of row group variable to sort table rows. }  
   \item{sumunits}{ Logical. If TRUE, estimation units are summed and returned in
 	one table. }
-  \item{rowgrpord}{ String. Name of row group variable to sort table rows. }  
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
+  \item{metric}{ Logical. If TRUE, output area is in metric units (hectares). }
   \item{estround}{ Integer. Number of decimal places for estimates. }
   \item{pseround}{ Integer. Number of decimal places for percent sampling error. }
   \item{estnull}{ Number or character. The number or symbol to use to indicate 'not sampled'
@@ -145,16 +75,28 @@ modFAOest(tree = NULL, base = NULL, cluster = NULL, clustassgn = NULL, seed = NU
 		for percent standard errror. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
-  \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
-	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs (e.g., ratio_'rowvar'_'date') }
-  \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
-  \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{outfn.pre}{ String. If savedata=TRUE, prefix for output files. If rawdata=TRUE, 
+	prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if raw_fmt != 'csv'). }
+  \item{outfn.date}{ Logical. If TRUE, add current date to out_dsn. }
   \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
+  \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
+	for estimation (See Value). If savedata = TRUE, tables are written to outfolder 
+	(if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv'). }
+  \item{rawonly}{ Logical. If TRUE, only rawdata are output. If dataset includes
+	many estimation units, and only raw data tables are desired, it is more 
+	efficient to output raw data only. }
+  \item{raw_fmt}{ String. Format for output rawdata tables 
+	('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp'). }
+  \item{raw_dsn}{ String. Data source name for rawdata output. If extension is not
+	included, out_fmt is used. Use full path if outfolder=NULL. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites raw_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the output. If rawdata=TRUE, 
+	overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or out_layers in 
+	raw_dsn (if raw_fmt != 'csv'). }
+  \item{append_layer}{ Logical. If TRUE, and rawdata=TRUE, appends raw data 
+	to existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt != 'csv". }  
   \item{returntitle}{ Logical. If TRUE, returns title(s) of the estimation table(s). }
   \item{title.main}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: the complete 
 	title used for table. If title.main=NULL, the title.* parameters are used to 
@@ -172,11 +114,10 @@ modFAOest(tree = NULL, base = NULL, cluster = NULL, clustassgn = NULL, seed = NU
   \item{title.estvard}{ String. TITLE: if savedata=TRUE and/or returntitle=TRUE: pretty 
 	name for the denominator estimate variable. If NULL, title.estvar = estvard.name. }
   \item{title.filter}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for filter(s). If NULL, = "". }
-  \item{title.units}{ String. TITLE, if savedata=TRUE and/or returntitle=TRUE: pretty 
-	name for units of estvar (e.g., 'ACRES'). }
-  \item{FAOpopdat}{ List. Population data objects returned from modFAOpop(). }
+	name for filter(s). If title.filter=NULL, a default is generated from cfilter. 
+	If title.filter="", no title.filter is used. }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
+  \item{...}{ Parameters for modGBpop() if FAOpopdat is NULL. }
 }
 \details{
 	If variable = NULL, then it will prompt user for input.

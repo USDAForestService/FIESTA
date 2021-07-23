@@ -538,14 +538,23 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           xypltx <- rbind(xypltx, xyplt)
 
         } else {      ## clipxy = FALSE, datsource="datamart"
+          PLOT <- PLOT[PLOT[[pjoinid]] %in% xydat[[xy.joinid]], ]
+          pltids <- PLOT[[puniqueid]]
+          cond <- cond[cond[[cuniqueid]] %in% pltids, ]
+
+          if (nrow(PLOT) == 0) {
+            stop("the xy id (", xy.joinid, ") does not match plt id (", pjoinid, ")")
+          }
 
           xypltx <- xydat
           pltx <- rbind(pltx, PLOT)
           condx <- rbind(condx, cond)
           if (istree) {
+            tree <- tree[tree[[tuniqueid]] %in% pltids, ]
             treex <- rbind(treex, tree)
           }
           if (isseed) {
+            seed <- seed[seed[[tuniqueid]] %in% pltids, ]
             seedx <- rbind(seedx, seed)
           }
           if (savePOP) {
@@ -604,7 +613,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       ## Check list of pop_tables
       pop_tables <- unlist(sapply(pop_tables, pcheck.varchar, 
 			checklst=tablst, stopifinvalid=FALSE))
-
 
       ## Check for state in database
       ###########################################################
@@ -694,7 +702,6 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           xy <- pcheck.spatial(xy, dsn=xy_dsn)
         } 
       }
-
       if (xyindb) {
         xyfields <- DBI::dbListFields(xyconn, xy)
       } else {
@@ -1175,14 +1182,22 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           xypltx <- rbind(xypltx, xyplt)
 
         } else {      ## clipxy=FALSE, datsource="sqlite"
-
           xypltx <- rbind(xypltx, xystate)
+
+          if (showsteps) {
+            plot(sf::st_geometry(xystate), add=TRUE, col="green")
+          }
 
           ## Query database for plots
           rs <- DBI::dbSendQuery(dbconn, plt.qry)
           plt <- setDT(DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
-
+          
+          ## Subset plots to coordinates
+          plt <- plt[plt[[pjoinid]] %in% xystate[[xy.joinid]], ]
+          if (nrow(plt) == 0) {
+            stop("the xy id (", xy.joinid, ") does not match plt id (", pjoinid, ")")
+          }
           ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
           if (nrow(plt) > length(unique(plt[[pjoinid]]))) {
             if ("INVYR" %in% names(plt)) {
@@ -1192,7 +1207,13 @@ spGetPlots <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
             plt <- plt[, head(.SD, 1), by=pjoinid]
           }
-
+          if (nrow(plt) != nrow(xystate)) {
+            if (nrow(plt) < nrow(xystate)) {
+              message("there are ", nrow(xystate) - nrow(plt), " less plots than coordinates")
+            } else {
+              message("there are ", nrow(plt) - nrow(xystate), " less coordinates than plots")
+            }
+          }
           pltids <- plt[[puniqueid]]
           pltx <- rbind(pltx, plt)
           rm(plt)

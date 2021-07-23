@@ -8,16 +8,20 @@
 	
 }
 \usage{    
-modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, clustassgn = NULL, 
-	dsn = NULL, clustid = "CN", clustassgnid = "PLT_CN", clustjoinid = "CN", 
-	buniqueid = "PLT_CN", baseid = "CONDID", tuniqueid = NULL, 
-	basewt = "CONDPROP_UNADJ", invyrs = NULL, adj = "none", strata = TRUE,
- 	nonsamp.clustfilter = NULL, nonsamp.basefilter = NULL, unitlevel1 = NULL, 
-	unitlevel2 = NULL, unitarea = NULL, areavar = "ACRES", unitcombine = FALSE, 
-	minplotnum.unit = 10, stratalut = NULL, strvar = "STRATUMCD", strwtvar="strwt", 
-	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, saveobj = FALSE, 
-	savedata = FALSE, outfolder = NULL, outfn = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, overwrite = TRUE, gui = FALSE)
+modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, seed = NULL,
+	clustassgn = NULL, dsn = NULL, clustid = "CN", clustassgnid = "PLT_CN", 
+	clustjoinid = "CN", buniqueid = "PLT_CN", baseid = "CONDID", tuniqueid = NULL, 
+	basewt = "CONDPROP_UNADJ", invyrs = NULL, adj = "none", diavar = "DIA",
+	MICRO_BREAKPOINT_DIA= 5, MACRO_BREAKPOINT_DIA = NULL, areawt_micr = "MICRPROP_UNADJ", 
+	areawt_subp = "SUBPPROP_UNADJ", areawt_macr = "MACRPROP_UNADJ",
+	strata = TRUE, nonsamp.clustfilter = NULL, nonsamp.basefilter = NULL, 
+	unitlevel1 = NULL, unitlevel2 = NULL, unitarea = NULL, areavar = "ACRES", 
+	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, 
+	strvar = "STRATUMCD", strwtvar="strwt", getwt = TRUE, getwtvar = "P1POINTCNT", 
+	stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, objnm = "FAOpopdat", 
+	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, append_layer = FALSE, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,6 +36,8 @@ modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, clustassgn =
   \item{tree}{ DF/DT, comma-delimited file(*.csv), or layer in dsn. If esttype="TREE",
 	tree-level variables to aggregate to condition-level. See details for necessary 
 	variables to include. }
+  \item{seed}{ DF/DT, R object, comma-delimited file(*.csv), or layer in dsn. 
+	Seedling data with one record for each seedling count. }
   \item{clustassgn}{ DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
 	Can also be a shapefile(*.shp) with one record per cluster, a spatial layer in dsn,
 	or a sf R object. Cluster-level assignment of estimation unit and/or strata. Optional. }
@@ -53,6 +59,18 @@ modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, clustassgn =
 	'samp' - adjustments are calculated at strata/estimation unit level; 
 	'plot' - adjustments are calculated at plot-level. Adjustments 
 	are only calculated for annual inventory plots (designcd=1). } 
+  \item{diavar}{ String. Name of variable with tree diameters (e.g., DIA). Used for to 
+	define different plot sizes (SUPB, MICR, MACR). }
+  \item{MICRO_BREAKPOINT_DIA}{ Number. If a different plot size for measuring seedlings/saplings, 
+	identify diameter breakpoint to include trees less than (e.g., 5). }
+  \item{MACRO_BREAKPOINT_DIA}{ Number. If a different plot size for measuring large trees, 
+	identify diameter breakpoint to include trees greater than or equal to. }
+  \item{areawt_micr}{ String. Name of variable to identify area for microplot (i.e., seedling/saplings). 
+	If areawt_micr is NULL or not in dataset, areawt is used. }
+  \item{areawt_subp}{ String. Name of variable to identify area for subplot. 
+	If areawt_subp is NULL or not in dataset, areawt is used. }
+  \item{areawt_macr}{ String. Name of variable to identify area for macroplot. 
+	If areawt_macr is NULL or not in dataset, areawt is used. }
   \item{strata}{ Logical. If TRUE, add data information for stratification. }
   \item{nonsamp.clustfilter}{ String. A logical expression for filtering nonsampled clusters.
 	Must be R syntax (e.g., 'PLOT_STATUS_CD != 3'. } 
@@ -75,26 +93,33 @@ modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, clustassgn =
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 
 	to calculate weights from (e.g., pixel counts) }.
-  \item{strvar}{ String. Name of strata variable in stratalut and table with strata
-	assignment for each plot. Default="STRATUMCD". }
-  \item{strwtvar}{ Logical. Strata weight (i.e., proportions) variable in stratalut.
-	If need to calculate, set getwtvar must be included. }
+  \item{strvar}{ String. If strata=TRUE, name of the strata variable in stratalut and 
+	cond or pltassgn data frame with stratum assignment for each plot 
+	(Default = 'STRATUMCD'). }
   \item{getwt}{ Logical. If TRUE, calculates strata weights from stratatlut getwtvar. 
-	If FALSE, 'strwt' variable must be in stratalut. }
-  \item{getwtvar}{ String. Name of variable in stratalut to calculate weights (strwt).
- 	Default="P1POINTCNT". }
+	If FALSE, strwtvar variable must be in stratalut. }
+  \item{getwtvar}{ String. If getwt=TRUE, name of variable in stratalut to calculate 
+	weights (Default = 'P1POINTCNT'). }
+  \item{strwtvar}{ String. If getwt=FALSE, name of variable in stratalut with calculated 
+	weights (Default = 'strwt'). }
   \item{stratcombine}{ Logical. If TRUE, automatically combines estimation units if less 
 	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{minplotnum.strat}{ Integer. Minimum number of plots for a stratum within an
+	estimation unit. }
   \item{saveobj}{ Logical. If TRUE, saves SApopdat object to outfolder. }
+  \item{objnm}{ String. Name of *.rda object. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }
-  \item{outfn}{ String. Name of the output file(s) if savedata=TRUE. Do not include
-	extension. Default file name includes parameter inputs 
-	(e.g., tree_'estvar.name'_'rowvar'_'date') }
+  \item{out_fmt}{ String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+  \item{out_dsn}{ String. Name of database if out_fmt = c('sqlite', 'gpkg'). }
   \item{outfn.pre}{ String. Add a prefix to output name (e.g., "01"). }
   \item{outfn.date}{ Logical. If TRUE, add date to end of outfile (e.g., outfn_'date'.csv). }
-  \item{overwrite}{ Logical. If TRUE and exportshp=TRUE, overwrite files in outfolder. }
+  \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
+  \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

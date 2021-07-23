@@ -277,7 +277,8 @@ check.matchval <- function(tab1, tab2, var1, var2=NULL, tab1txt=NULL, tab2txt=NU
         message(paste0(nbr.missval, " values in ", tab1txt, " not in ", tab2txt, ": ", 
 	 	paste(missval, collapse=", "))) 
       } else {
-        message(paste("there are", nbr.missval, "miss values"))
+        message(paste("there are", nbr.missval, "values in", tab1txt, 
+		"not in", tab2txt))
       }
       if (stopifmiss) {
         message("ERROR"); stopQ()  }

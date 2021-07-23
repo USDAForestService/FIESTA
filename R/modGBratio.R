@@ -19,10 +19,8 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-#  formallst <- c(names(formals(FIESTA::modGBratio)),
-#		names(formals(FIESTA::modGBpop))) 
-  formallst <- c(names(formals(modGBratio)),
-		names(formals(modGBpop))) 
+  formallst <- c(names(formals(FIESTA::modGBratio)),
+		names(formals(FIESTA::modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))

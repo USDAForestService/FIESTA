@@ -2,11 +2,11 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter=NULL, strattype="RASTER", strat_layer=NULL, 
 	strat_dsn=NULL, strvar=NULL, strat_lut=NULL, areaunits="ACRES", 
-	rast.NODATA=NULL, keepNA=FALSE, keepxy=FALSE, showext=FALSE, 
-	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, 
-	out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
+	rast.NODATA=NULL, keepNA=FALSE, returnxy=FALSE, 
+	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
+	outfolder=NULL, out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
 	outfn.date=FALSE, outfn.pre=NULL, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, append_layer=FALSE, ...){
+	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -37,13 +37,14 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## Create spatial object from xyplt coordinates
     sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=uniqueid, 
 		exportsp=FALSE, ...)
+    sppltnames <- names(sppltx)
   } else {
     ## GET uniqueid
-    sppltnames <- names(sppltx)
     uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
-		checklst=sppltnames, caption="UniqueID of spplt", 
+		checklst=names(sppltx), caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
+  sppltx.names <- names(sppltx)
 
   ## Spatial Layers: strattype and unittype
   ##################################################################################
@@ -79,6 +80,10 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check exportNA    
   exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
 		title="Export NA values?", first="YES", gui=gui)
+
+  ## Check returnxy 
+  returnxy <- FIESTA::pcheck.logical(returnxy, varnm="returnxy", 
+		title="Return XY spatial data?", first="NO", gui=gui)  
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -148,6 +153,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       strvar <- polyrast$polyv.att
 
       rast.NODATA <- 0
+
     } else {
       strvar <- "value"
     }
@@ -155,8 +161,9 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## if strattype == "RASTER"
     ##################################################################
     ## Check strat_layer
-    stratlayerfn <- suppressWarnings(getrastlst.rgdal(strat_layer, rastfolder=strat_dsn,
+    stratlayerfn <- suppressMessages(getrastlst.rgdal(strat_layer, rastfolder=strat_dsn,
  		stopifLonLat=TRUE))
+
     ## Get raster info
     rast_info <- rasterInfo(stratlayerfn)
     stratlayer.res <- rast_info$cellsize
@@ -188,14 +195,21 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
       bbox2 <- sf::st_bbox(unitlayerprj)
       if (showext) {
-        check.extents(bbox1, bbox2, showext=showext, layer1nm="rast", layer2nm="unitlayer",
-			stopifnotin=TRUE)
+        check.extents(bbox1, bbox2, showext=showext, 
+			layer1nm="rast", layer2nm="unitlayer", stopifnotin=TRUE)
+      }
+
+      ## Check vars2keep
+      varsmiss <- vars2keep[which(!vars2keep %in% names(unitlayerprj))]
+      if (length(varsmiss) > 0) {
+        stop("missing variables: ", paste(varsmiss, collapse=", "))
       }
 
       ## Extract values of polygon unitlayer to points
       ## Note: removing all NA values
-      extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, uniqueid=uniqueid, 
-		polyvarlst=unitvar, keepNA=FALSE, exportNA=exportNA)
+      extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, 
+		uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
+		keepNA=FALSE, exportNA=exportNA)
       sppltx <- extpoly$sppltext
       unitNA <- extpoly$NAlst[[1]]
       outname <- extpoly$outname
@@ -231,10 +245,10 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     ## Extract values of raster layer to points
-    extrast <- suppressWarnings(spExtractRast(sppltx, rastlst=stratlayerfn, 
+    extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, 
 		var.name=strvar, uniqueid=uniqueid, keepNA=keepNA, exportNA=exportNA, 
 		outfolder=outfolder, overwrite_layer=overwrite_layer, 
-		rast.NODATA=rast.NODATA))
+		rast.NODATA=rast.NODATA)
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
@@ -278,18 +292,28 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     strvar <- strvar2
   } 
 
-  ## Write data frames to CSV files
-  #######################################
-#  if (keepxy) {
+  if (!is.null(vars2keep)) {
+    stratalut <- merge(stratalut, 
+		sf::st_drop_geometry(unitlayerx[, unique(c(unitvar, vars2keep))]),
+		by=unitvar)
+  }
+
+
+
+  ##################################################################
+  ## Saving data
+  ##################################################################
+#  if (returnxy) {
 #    xy.coords <- data.frame(sf::st_coordinates(sppltx))
 #    pltassgn <- data.frame(sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)]),
 #		xy.coords)
 #  } else {
-    pltassgn <- sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)])
+    #pltassgn <- sf::st_drop_geometry(sppltx[, c(uniqueid, unitvar, strvar)])
+    pltassgn <- sf::st_drop_geometry(sppltx)
 #  }
 
   #if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
-  #setkeyv(stratalut, c(unitvar, strvar))  
+  #setkeyv(stratalut, c(unitvar, strvar)) 
 
   if (savedata) {
     datExportData(pltassgn, outfolder=outfolder, out_fmt=out_fmt, 
@@ -322,8 +346,14 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (!is.null(NAlst)) {
     returnlst$NAlst <- NAlst
   }
-  if (keepxy) {
-    returnlst$spxyplt <- sppltx
+  ## Returnxy
+  if (returnxy) {
+    ## Add coordinate variables
+    #xyplt <- data.frame(sf::st_coordinates(sppltx))
+    #names(xy.coords) <- c(x,y)
+    #sppltx <- sf::st_sf(data.frame(sppltx, xy.coords)) 
+    returnlst$spxy <- sppltx[, sppltx.names]
+    returnlst[["xy.uniqueid"]] <- uniqueid
   }
  
   return(returnlst)

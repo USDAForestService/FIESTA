@@ -15,11 +15,13 @@
 # nbrdecimals
 # nbrdigits
 # getfilter
+# filter2qry
 # wraptitle
 # addclass
 # xtabf
 # recodelut
 # findnm
+# strat.pivot
 
 checkfilenm <- function(fn, outfolder=NULL, ext=NULL, 
 	stopifnull=FALSE) {
@@ -433,13 +435,27 @@ nbrdigits <- function(x) {
 getfilter <- function(att, val, syntax="R") {
 ## DESCRIPTION: create filter string from att and val
 ## syntax - ('R', 'sql')
-  if (is.character(val)) 
+  if (is.character(val)) {
     val <- encodeString(val, quote="'")
+  }
   filter <- paste0(att, " %in% c(", toString(val), ")")
 
-  if (syntax == 'sql')
+  if (syntax == 'sql') {
     filter <- gsub("%in% c", "in", filter)
+  }
   return(filter)
+}
+
+
+filter2qry <- function(filt, layernm) {
+  if (grepl("==", filt)) {
+    part2 <- sub("==", "=", filt)
+  } else if (grepl("%in%", filt)) {
+    part2 <- sub("%in% c", "in", filt)
+  } else if (grepl("!=", filt)) {
+    part2 <- sub("!=", "<>", filt)
+  }
+  paste("select * from", layernm, "where", part2)
 }
 
 
@@ -471,9 +487,12 @@ recodelut <- function(lut, minvar="min", maxvar="max", classvar="class") {
   return(lut2)  
 }
 
-findnm <- function(x, xvect) {
+findnm <- function(x, xvect, returnNULL=FALSE) {
   test <- grepl(x, xvect, ignore.case=TRUE)
   if (sum(test) == 0) {
+    if (returnNULL) {
+      return(NULL)
+    }
     stop("name not found")
   } else if (sum(test) > 1) {
     stop("more than 1 name found")
@@ -481,4 +500,24 @@ findnm <- function(x, xvect) {
     return(xvect[test])
   }
 }
+
+
+strat.pivot <- function(x, PSstrvar, unitvars, strwtvar="Prop", strat.levels=NULL) {
+  ## DESCRIPTION: translates strata table from spGetAuxiliary() to spGetStrata() format 
+  nmlst <- names(x)
+  PScols <- nmlst[grep(PSstrvar, nmlst)]
+  PSvalslst <- sapply(strsplit(PScols, paste0(PSstrvar, ".")), "[[", 2)
+
+  strlut <- data.table(PSvalslst, x[, t(.SD), by=unitvars, .SDcols=PScols])
+  setnames(strlut, c(PSstrvar, unitvars, strwtvar))
+  setcolorder(strlut, c(unitvars, PSstrvar, strwtvar))
+  if (is.null(strat.levels)) {
+    strlut[[PSstrvar]] <- factor(strlut[[PSstrvar]])
+  } else {
+    strlut[[PSstrvar]] <- factor(strlut[[PSstrvar]], levels=strat.levels)
+  }
+  strvars <- PSstrvar
+  return(strlut)
+}    
+
   

@@ -79,6 +79,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   areaunits <- GBpopdat$areaunits
   unitvar <- GBpopdat$unitvar
   unitvars <- GBpopdat$unitvars
+  strata <- GBpopdat$strata
   stratalut <- GBpopdat$stratalut
   strvar <- GBpopdat$strvar
   expcondtab <- GBpopdat$expcondtab
@@ -92,7 +93,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   if (nonresp) {
     substrvar <- GBpopdat$substrvar
     nonsampplots <- GBpopdat$nonsampplots
-  }
+  } 
   strunitvars <- c(unitvar, strvar)
 
 
@@ -219,7 +220,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
   #estvar.name <- estvar 
 
-  message("getting estimates...")
+  message("getting estimates using GB...")
 #  if (addtotal) {
     ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 

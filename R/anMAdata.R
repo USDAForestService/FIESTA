@@ -104,18 +104,18 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  MAmodeldat <- spGetModeldat(xyplt=xyplt, uniqueid=xy.uniqueid, 
+  MAmodeldat <- spGetAuxiliary(xyplt=xyplt, uniqueid=xy.uniqueid, 
 		dom_layer=bnd, domvar=bnd.att, rastfolder=rastfolder, 
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		rastlst.cat.NODATA=NULL, keepNA=FALSE, npixels=TRUE)
   pltassgn <- MAmodeldat$pltassgn
-  unitlut <- MAmodeldat$domzonal
-  unitvar <- MAmodeldat$domvar
+  dunitlut <- MAmodeldat$dunitlut
+  dunitvar <- MAmodeldat$dunitvar
   prednames <- MAmodeldat$prednames
   zonalnames <- MAmodeldat$zonalnames
   predfac <- MAmodeldat$predfac
-  unitarea <- MAmodeldat$domarea
+  dunitarea <- MAmodeldat$dunitarea
   areavar <- MAmodeldat$areavar
   pltassgnid <- MAmodeldat$pltassgnid
   npixelvar <- MAmodeldat$npixelvar
@@ -124,8 +124,8 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Create output list
   ##########################################
   MAdata <- list(bnd=bnd, plt=plt, pltassgn=pltassgn, cond=cond, tree=tree, 
-			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
-			unitlut=unitlut, prednames=prednames, predfac=predfac,
+			dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
+			dunitlut=dunitlut, prednames=prednames, predfac=predfac,
 			zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
 			pltassgnid=pltassgnid, npixelvar=npixelvar)
   if (savexy) {
@@ -163,11 +163,11 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     datExportData(tree, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(unitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
+    datExportData(dunitarea, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(unitlut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitlut", 
+    datExportData(dunitlut, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
    	

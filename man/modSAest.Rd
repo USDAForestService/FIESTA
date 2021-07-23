@@ -8,8 +8,8 @@
 }
 \usage{    
 modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
-	SAmethod = "unit", esttype = "TREE", estseed = "none", largebnd.att = NULL, 
-	landarea = "ALL", pcfilter = NULL, estvar = NULL, estvar.filter = NULL, 
+	SAmethod = "area", esttype = "TREE", estseed = "none", largebnd.att = NULL, 
+	landarea = "FOREST", pcfilter = NULL, estvar = NULL, estvar.filter = NULL, 
 	smallbnd.att = NULL, allin1 = FALSE, metric = FALSE, estround = 0, 
 	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
 	rawdata = FALSE, rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, 

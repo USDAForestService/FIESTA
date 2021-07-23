@@ -8,8 +8,9 @@ y.htm). The framework systematically divides the country into progressively smal
 
 The EcoMap Provinces feature class contains ecological province polygons attributed with names and descriptions. The EcomapSections 2007 data set describes the ecological sections within the conterminous United States. The EcomapSubections 2007 data set describes the ecological subsections within the conterminous United States.
 
-Converted to simple feature and saved to R object, with compression='xz'
-CRS - "+proj=longlat +datum=NAD83 +no_defs"
+Converted to simple feature\cr
+Transformed CRS from longlat(EPSG:4269) to Albers (EPSG:5070)\cr
+Saved to R object, with compression='xz'
 }
 
 \usage{ ecomap}

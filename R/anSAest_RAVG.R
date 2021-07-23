@@ -216,7 +216,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
  			title.ref=title.ref, overwrite_dsn=overwrite_dsn,
  			overwrite_layer=overwrite_layer, outfn.pre=RAVG.ecoprov, rawonly=TRUE),
 				error=function(err) {
-					message(err)
+					message(err, "\n")
 					return(NULL)
 				} )
       if (!is.null(SAestdat)) {
