@@ -1,9 +1,10 @@
 anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique, 
 	smallbnd.domain=NULL, smallbnd.filter=NULL, smallbnd.stfilter=NULL, 
-	smallbnd.ecofilter=NULL, maxbnd.threshold=10, largebnd.threshold=10, 
-	nbrdom.min=10, RS=NULL, xy=NULL, xy_dsn=NULL, xy.joinid="PLOT_ID", 
-	datsource="sqlite", SQLitefn, measEndyr=NULL, measEndyr.filter=NULL, 
-	intensity1=TRUE, rastlst.cont=NULL, rastlst.cont.name=NULL, 
+	smallbnd.ecofilter=NULL, maxbnd.threshold=10, largebnd.unique="PROVINCE", 
+	largebnd.filter=NULL, largebnd.threshold=10, nbrdom.min=10, RS=NULL, 
+	xy=NULL, xy_dsn=NULL, xy.joinid="PLOT_ID", datsource="sqlite", SQLitefn, 
+	measEndyr=NULL, measEndyr.filter=NULL, intensity1=TRUE, 
+	rastlst.cont=NULL, rastlst.cont.name=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, showsteps=FALSE, savedata=FALSE, 
 	savexy=FALSE, saveobj=TRUE, outfolder=NULL, out_fmt="sqlite", 
 	out_dsn="SApopdat", outfn.date=FALSE, overwrite_dsn=FALSE, 
@@ -41,9 +42,8 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   helperbnd=FIESTA::ecomap
   helperbnd.unique="SUBSECTION"
   largebnd=NULL
-  largebnd.unique="SECTION"
   maxbnd=NULL
-  maxbnd.unique="PROVINCE"
+  maxbnd.unique=NULL
   helper_autoselect=TRUE
   multiSAdoms=FALSE
   maxbnd.threshold=maxbnd.threshold
@@ -66,7 +66,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
  		smallbnd.filter=smallbnd.filter, smallbnd.stfilter=smallbnd.stfilter,
  		smallbnd.ecofilter=smallbnd.ecofilter, 
 		helperbnd=helperbnd, helperbnd.unique=helperbnd.unique, 
-		largebnd=largebnd, largebnd.unique=largebnd.unique, 
+		largebnd=largebnd, largebnd.unique=largebnd.unique, largebnd.filter=largebnd.filter, 
 		maxbnd=maxbnd, maxbnd.unique=maxbnd.unique, helper_autoselect=TRUE, 
 		multiSAdoms=multiSAdoms, maxbnd.threshold=maxbnd.threshold,
  		largebnd.threshold=largebnd.threshold, nbrdom.min=nbrdom.min,
@@ -76,7 +76,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
     if (is.null(SAdomdat)) return(NULL)
 
     if (saveobj) {
-      save(SAdomdat, file=file.path(outfolder, "SAdomdat.rda"))
+      saveRDS(SAdomdat, file=file.path(outfolder, "SAdomdat.rds"))
     }
   }
 
@@ -85,10 +85,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   SAdomnm <- names(SAdoms)
   smallbnd.unique <- SAdomdat$smallbnd.unique
 
-  ###########################################################################
-  ## Extract FIA data and auxiliary data
-  ###########################################################################
- 
   if (is.null(SAdata)) {
     ###########################################################################
     ## Extract FIA data and model data

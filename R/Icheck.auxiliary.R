@@ -1,16 +1,15 @@
-check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL, 
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar=NULL, unitcombine=FALSE, 
-	auxlut=NULL, prednames=NULL, strata=FALSE, PSstrvar=NULL, predfac=NULL, 
-	makedummy=FALSE, nonresp=FALSE, substrvar=NULL, getwt=FALSE, getwtvar=NULL, 
+check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE, 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar=NULL, 
+	auxlut=NULL, prednames=NULL, strvar=NULL, predfac=NULL, makedummy=FALSE, 
+	nonresp=FALSE, substrvar=NULL, getwt=FALSE, getwtvar=NULL, 
 	strwtvar='strwt', P2POINTCNT=NULL, npixelvar=NULL, stratcombine=FALSE, 
-	minplotnum.unit=10, removeunit=FALSE, minplotnum.strat=2, na.rm=TRUE,
+	minplotnum.unit=10, unit.action="keep", minplotnum.strat=2, na.rm=TRUE,
  	removeifnostrata=FALSE, auxtext="auxlut", removetext="unitarea", 
 	pvars2keep=NULL){
 
   ##################################################################################
   ## DESCRIPTION: 
   ## Check auxiliary table. 
-  ## - if (module == "SA" || (module == "MA" && MAmethod != "HT"), must not be NULL
   ## If module = GB,PB
   ## - if strata=TRUE, 
   ##     - check strvar
@@ -29,11 +28,11 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   ## - If number of plots < minplotnum.strat (2), an error occurs, must collapse plots
   ## - If number of plots between minplotnum.strat and minplotnum.unit (10), a warning 
   ##		is displayed, suggesting to collapse plots
-  ## - If removeifnostrata, remove plots that have an stratum assignment not in auxlut
+  ## - If removeifnostrata, remove plots that have a stratum assignment not in auxlut
   ## - Collapse strata if number of plots in strata is less than minplotnum.strat and
   ## 		stratcombine=TRUE
   ## - Collapse units if number of plots in units is less than minplotnum.unit and
-  ##	 	unitcombine=TRUE
+  ##	 	unit.action='combine'
   ## If module = GB,PB, and getwt=TRUE, calculate strat weights (i.e., proportions)
   ##################################################################################
 
@@ -46,17 +45,17 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
 
   ## Check auxlut
-  stopifnull <- ifelse((module == "SA" || (module == "MA" && any(MAmethod != "HT"))),
-				TRUE, FALSE)
+  #stopifnull <- ifelse((module == "SA" || (module == "MA" && any(MAmethod != "HT"))),
+#				TRUE, FALSE)
   auxlut <- FIESTA::pcheck.table(auxlut, gui=gui, tabnm="auxlut",
- 		caption="Strata table?", nullcheck=TRUE, stopifnull=stopifnull)
+ 		caption="Strata table?", nullcheck=TRUE)
 
   #######################################################################
   ## Check strata
   #######################################################################
   if (strata && module != "SA") {
     auxnmlst <- names(auxlut)
-    PSstrvar <- FIESTA::pcheck.varchar(var2check=PSstrvar, varnm="PSstrvar", 
+    strvar <- FIESTA::pcheck.varchar(var2check=strvar, varnm="strvar", 
 		gui=gui, checklst=c("NONE", names(auxlut)), caption="Strata variable?", 
 		warn="strata variable not in auxlut", stopifnull=TRUE) 
 
@@ -86,23 +85,23 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     if (module =="GB" && nonresp) {
       ## Check substrvar (if nonresp)
       #############################################################
-      ## Remove PSstrvar from strlutnmlst
-      auxnmlst <- auxnmlst[which(!auxnmlst %in% PSstrvar)]
+      ## Remove strvar from strlutnmlst
+      auxnmlst <- auxnmlst[which(!auxnmlst %in% strvar)]
       substrvar <- FIESTA::pcheck.varchar(var2check=substrvar, varnm="substrvar", 
 		gui=gui, checklst=auxnmlst, caption="Substrata variable?", 
 		warn="substrata variable not in strata table", stopifnull=TRUE)
       #strvars <- c(strvars, substrvar)
 
       ## Concatenate to 1 variable
-      auxlut[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
-      pltx[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")]
+      auxlut[, STRATASUB := paste(get(strvar), get(substrvar), sep="-")]
+      pltx[, STRATASUB := paste(get(strvar), get(substrvar), sep="-")]
       if (!is.null(P2POINTCNT)) {
-        P2POINTCNT[, STRATASUB := paste(get(PSstrvar), get(substrvar), sep="-")][
-			, c(PSstrvar, substrvar) := NULL]
+        P2POINTCNT[, STRATASUB := paste(get(strvar), get(substrvar), sep="-")][
+			, c(strvar, substrvar) := NULL]
       }
-      PSstrvar <- "STRATASUB"
+      strvar <- "STRATASUB"
     } 
-    strvars <- c(strvars, PSstrvar) 
+    strvars <- c(strvars, strvar) 
 
     ## Aggregate strata by estimation unit to make sure no duplicate values exist
     sumvars <- c(getwtvar, strwtvar, npixelvar)
@@ -157,31 +156,31 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
 
     ## Add a column to identify one strata class for GB or PB modules
     message("no strata")
-    PSstrvar <- checknm("ONESTRAT", names(pltx))
+    strvar <- checknm("ONESTRAT", names(pltx))
     strwtvar <- "strwt"
-    pltx[, (PSstrvar) := 1]
+    pltx[, (strvar) := 1]
 
     auxlut <- unique(pltx[, c(unitvar2, unitvar), with=FALSE]) 
-    auxlut[, (PSstrvar) := 1]
+    auxlut[, (strvar) := 1]
     auxlut[, (strwtvar) := 1]
 
     if (!is.null(P2POINTCNT)) {
-      P2POINTCNT[, (PSstrvar) := 1]
+      P2POINTCNT[, (strvar) := 1]
     }
     getwt <- FALSE
     getwtvar <- NULL
-    strvars <- c(strvars, PSstrvar) 
+    strvars <- c(strvars, strvar) 
     strata <- TRUE
     strunitvars <- c(unitvars, strvars)
 
-  } else if ((module == "MA" && !MAmethod %in% c("HT", "PS")) || module == "SA") {
+  } else {
     auxnmlst <- names(auxlut)
     missvars <- {}
    
     ## Check predictors
     ############################################################################
     missvars <- c(missvars, 
-		predfac[sapply(c(PSstrvar, predfac), 
+		predfac[sapply(c(strvar, predfac), 
 			function(x) sum(grepl(x, auxnmlst)) == 0)])
 
     ## Check continuous variables
@@ -190,9 +189,20 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     if (length(predcon) > 0) {
       missvars <- c(missvars, predcon[which(!predcon %in% auxnmlst)])
     }
-    
+  
     if (length(missvars) > 0) {
-      stop("missing predictor variables in auxlut: ", toString(missvars))
+      for (mvar in missvars) {
+        if (any(grepl(mvar, auxnmlst))) {
+          mvarnm <- auxnmlst[grepl(mvar, auxnmlst)]
+          if (all(grepl("\\.", mvarnm) && mvar %in% names(pltx))) {
+            message(toString(mvarnm), " exists in auxlut... setting ", mvar, " to predfac")
+            predfac <- c(predfac, mvar)
+            predcon <- prednames[!prednames %in% predfac]
+          } else {
+            stop("missing predictor variables in auxlut: ", toString(missvars))
+          }
+        }
+      }
     }
  
     ## Check for NA values in continuous variables in auxlut
@@ -251,7 +261,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   #################################################################################
   if (minplotnum.strat > minplotnum.unit) minplotnum.strat <- minplotnum.unit
   pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid, 
-		unitlut=auxlut, unitvars=unitvar, strvars=PSstrvar, 
+		unitlut=auxlut, unitvars=unitvar, strvars=strvar, 
 		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit, 
 		minplotnum.strat=minplotnum.strat)
   auxlut <- pltcnts$unitlut
@@ -262,20 +272,23 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   if (any(auxlut$n.total < minplotnum.unit)) {
     unitlessthan <- auxlut[auxlut$n.total < minplotnum.unit][[unitvar]]
     if (length(unitlessthan) > 0) {
-      if (removeunit) {
+      if (unit.action == "remove") {
         message("removing domains with plots less than ", minplotnum.unit, 
 		": ", toString(unitlessthan))
         auxlut <- auxlut[!auxlut[[unitvar]] %in% unitlessthan, ] 
         pltx <- pltx[!pltx[[unitvar]] %in% unitlessthan, ] 
         unitarea <- unitarea[!unitarea[[unitvar]] %in% unitlessthan, ] 
         errtab <- errtab[!errtab[[unitvar]] %in% unitlessthan, ] 
-      } 
+      } else {
+        minplotnum.unit <- 0
+        errtab <- errtab[, errtyp := "none"] 
+      }
     }
   }
 
   ## Remove plots that have a stratum assignment that is not in auxlut
-  if (!is.null(nostrat) && removeifnostrata && !is.null(PSstrvar)) {
-    pltx <- pltx[pltx[[PSstrvar]] %in% unique(auxlut[[PSstrvar]]),]
+  if (!is.null(nostrat) && removeifnostrata && !is.null(strvar)) {
+    pltx <- pltx[pltx[[strvar]] %in% unique(auxlut[[strvar]]),]
     message("removing plots with invalid strata assignments")
   }
 
@@ -287,20 +300,21 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
       vars2combine <- unique(c(vars2combine, c(getwtvar, npixelvar, strwtvar)))
       vars2combine <- vars2combine[vars2combine %in% names(auxlut)]
     }
+    unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
     collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx, 
 		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
 		unitarea=unitarea, areavar=areavar, unitvar=unitvar,
-		strvar=PSstrvar, stratcombine=stratcombine, unitcombine=unitcombine,
+		strvar=strvar, stratcombine=stratcombine, unitcombine=unitcombine,
  		vars2combine=vars2combine)
     auxlut <- collapse$strlut
     unitvar <- collapse$unitvar
-    PSstrvar <- collapse$strvar
+    strvar <- collapse$strvar
     pltx <- collapse$pltstratx
     unitarea <- collapse$unitarea
     if (unitvar == "unitnew") {
       unitvars <- unitvar
     } 
-    strunitvars <- c(unitvars, PSstrvar)
+    strunitvars <- c(unitvars, strvar)
 
     if (stratcombine || unitcombine) {
       unitstrgrplut <- collapse$unitstrgrplut
@@ -312,7 +326,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
   ###################################################################################
   if (!module %in% c("GB", "PB") && !strata) {
     auxnmlst <- names(auxlut)
-    predfac <- unique(c(PSstrvar, predfac))
+    predfac <- unique(c(strvar, predfac))
 
     if (length(predfac) > 0) {
       notfac <- predfac[!pltx[, lapply(.SD, is.factor), .SDcols=predfac][[1]]]
@@ -333,7 +347,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
           pivotstrat <- TRUE
         }
       
-        ## Set up dummy variables for PSstrvar
+        ## Set up dummy variables for strvar
         if (makedummy) {
           ## Get factor levels
           fac.levels <- sort(unique(pltx[[fac]]))
@@ -352,23 +366,23 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
           dtfac <- pltx[, as.data.table(model.matrix(~., 
 				data=pltx[, fac, with=FALSE]))][,-1]
           pltx <- cbind(pltx, dtfac)
-          pltx[, (fac) := NULL]
+          #pltx[, (fac) := NULL]
 
           ## Remove old name and add new names to predictor list
           prednames <- unique(c(prednames[prednames != fac], facs))
         } 
         if (pivotstrat) {
           ## Pivot strata table 
-          if (!is.null(PSstrvar) && fac == PSstrvar) {
-            auxlut <- strat.pivot(x=auxlut, PSstrvar=PSstrvar, unitvars=unitvars, 
+          if (!is.null(strvar) && fac == strvar) {
+            auxlut <- strat.pivot(x=auxlut, strvar=strvar, unitvars=unitvars, 
 			strwtvar="Prop", strat.levels=fac.levels)
           }    
         }
-        strvars <- PSstrvar
+        strvars <- strvar
       }
     }
   }
- 
+
   ##################################################################################
   ## If more than one unitvar, concatenate into 1 unitvar
   ##################################################################################
@@ -402,7 +416,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
       if (is.character(auxlut[[getwtvar]]) && sum(grepl(",", auxlut[[getwtvar]]) > 0))
         auxlut[[getwtvar]] <- as.numeric(gsub(",", "", auxlut[[getwtvar]]))
       auxlut[, strwt := prop.table(get(getwtvar)), by=unitvar]
-#     auxlut <- auxlut[, list(strwt = sum(strwt/.N, na.rm=TRUE)), by=c(unitvar, PSstrvar)]
+#     auxlut <- auxlut[, list(strwt = sum(strwt/.N, na.rm=TRUE)), by=c(unitvar, strvar)]
       strwtvar <- "strwt"
     } else {
       ## Check for strwt
@@ -432,15 +446,15 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", MAmethod=NULL,
     setkeyv(unitarea, unitvar)
   }
 
-#  returnlst <- list(pltx=pltx[,c(puniqueid, unitvar, prednames, PSstrvar), with=FALSE], 
-#		auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, PSstrvar=PSstrvar,
+#  returnlst <- list(pltx=pltx[,c(puniqueid, unitvar, prednames, strvar), with=FALSE], 
+#		auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, strvar=strvar,
 #		prednames=prednames, predfac=predfac)
 
   returnlst <- list(pltx=pltx, auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, 
 		prednames=prednames, predfac=predfac, unitvars=unitvars)
 
   if (strata) {
-    returnlst$PSstrvar <- PSstrvar
+    returnlst$strvar <- strvar
     if (module %in% c("GB", "PB")) {
       returnlst$strwtvar <- strwtvar
     }

@@ -1,4 +1,4 @@
-modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, 
+modMAarea <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL, 
 	landarea="FOREST", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
 	row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, 
 	row.add0=FALSE, col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, 
@@ -31,7 +31,7 @@ modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL,
  
   ## If gui.. set variables to NULL
   if (gui) { 
-    landarea=PSstrvar=areavar <- NULL
+    landarea=strvar=areavar <- NULL
     if (!row.FIAname) row.FIAname <- NULL
     if (!col.FIAname) col.FIAname <- NULL
   }
@@ -55,9 +55,9 @@ modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL,
 
 
   ## Check MAmethod 
-  #MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-  #MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
-	#	checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
+  MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
+  MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
+		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
 
   ###################################################################################
@@ -70,9 +70,9 @@ modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL,
     returnMApopdat <- FALSE
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
-		"npixelvar", "expcondtab", "plotsampcnt", "condsampcnt", "MAmethod")
+		"npixelvar", "expcondtab", "plotsampcnt", "condsampcnt")
 #    if (MAmethod == "PS") {
-#      list.items <- c(list.items, "PSstrvar")
+#      list.items <- c(list.items, "strvar")
 #    }
 #    if (MAmethod == "greg") {
 #      list.items <- c(list.items, "prednames")
@@ -100,11 +100,10 @@ modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL,
   condsampcnt <- MApopdat$condsampcnt
   states <- MApopdat$states
   invyrs <- MApopdat$invyrs
-  MAmethod <- MApopdat$MAmethod
   estvar.name <- MApopdat$estvar.area
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
-  PSstrvar <- MApopdat$PSstrvar
+  strvar <- MApopdat$strvar
   adj <- MApopdat$adj
  
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
@@ -117,7 +116,6 @@ modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL,
       predfac <- predfac[predfac %in% prednames]
     }
   } 
-
 
   ########################################
   ## Check area units
@@ -253,10 +251,10 @@ modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL,
   if (addtotal) {
     ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, "TOTAL", PSstrvar, prednames), .SDcols=estvar.name]
+		by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=estvar.name]
     unit_totest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=cdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames,
+		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames,
  		domain="TOTAL", response=estvar.name, npixels=npixels, FIA=FIA))
     tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
@@ -269,27 +267,27 @@ modMAarea <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL,
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, rowvar, PSstrvar, prednames), .SDcols=estvar.name]
+		by=c(unitvar, cuniqueid, rowvar, strvar, prednames), .SDcols=estvar.name]
     unit_rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
+	esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 	domain=rowvar, response=estvar.name, npixels=npixels, FIA=FIA))
   }
   if (colvar != "NONE") {
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, colvar, PSstrvar, prednames), .SDcols=estvar.name]
+		by=c(unitvar, cuniqueid, colvar, strvar, prednames), .SDcols=estvar.name]
     unit_colest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
+	esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 	domain=colvar, response=estvar.name, npixels=npixels, FIA=FIA))
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, grpvar, PSstrvar, prednames), .SDcols=estvar.name]
+		by=c(unitvar, cuniqueid, grpvar, strvar, prednames), .SDcols=estvar.name]
     cdomdatsum[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
 
     unit_grpest <- do.call(rbind, lapply(estunits, MAest.unit, 
 	dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-	esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
+	esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 	domain="grpvar", response=estvar.name, npixels=npixels, FIA=FIA))
     unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
   }

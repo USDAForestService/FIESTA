@@ -18,11 +18,11 @@
 \usage{
 anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique, 
 	smallbnd.domain = NULL, smallbnd.filter = NULL, smallbnd.stfilter = NULL, 
-	smallbnd.ecofilter = NULL, maxbnd.threshold = 10, largebnd.threshold = 10,
-	nbrdom.min = 10, RS = NULL, xy = NULL, xy_dsn = NULL, xy.joinid = "PLOT_ID", 
-	datsource = "sqlite", SQLitefn, measEndyr = NULL, measEndyr.filter = NULL, 
-	intensity1 = TRUE, rastlst.cont = NULL, rastlst.cont.name = NULL, 
-	rastlst.cat = NULL, rastlst.cat.name = NULL, 
+	smallbnd.ecofilter = NULL, maxbnd.threshold = 10, largebnd.unique = "PROVINCE",
+ 	largebnd.threshold = 10, nbrdom.min = 10, RS = NULL, xy = NULL, xy_dsn = NULL, 
+	xy.joinid = "PLOT_ID", datsource = "sqlite", SQLitefn, measEndyr = NULL, 
+	measEndyr.filter = NULL, intensity1 = TRUE, rastlst.cont = NULL, 
+	rastlst.cont.name = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
 	showsteps = FALSE, savedata = FALSE, savexy = FALSE, saveobj = TRUE, 
 	outfolder = NULL, out_fmt = "sqlite", out_dsn = "SApopdat", outfn.date = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
@@ -58,6 +58,8 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	percentage over the maxbnd.threshold is selected. }
   \item{largebnd.threshold}{ Integer. Percent for including additional largebnds
 	for selecting helperbnds. }
+  \item{largebnd.unique}{ String. Name of attribute in FIESTA::ecomap to use
+	as the modeling extent. }
   \item{nbrdom.min}{ Integer. Set number for minimum domains for modeling. If NULL,
 	all domains within largebnd are selected. }
   \item{RS}{ String. Name of FIA research station to restrict states to

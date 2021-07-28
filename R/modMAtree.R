@@ -32,7 +32,7 @@ modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none",
 
   ## If gui.. set variables to NULL
   if (gui) { 
-    tree=landarea=PSstrvar=areavar <- NULL
+    tree=landarea=strvar=areavar <- NULL
     if (!row.FIAname) row.FIAname <- NULL
     if (!col.FIAname) col.FIAname <- NULL
   }
@@ -71,7 +71,7 @@ modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none",
 		"ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
 		"npixelvar", "expcondtab", "plotsampcnt", "condsampcnt", "MAmethod")
     #if (MAmethod == "PS") {
-    #  list.items <- c(list.items, "PSstrvar")
+    #  list.items <- c(list.items, "strvar")
     #}
     #if (MAmethod == "greg") {
     #  list.items <- c(list.items, "prednames")
@@ -106,7 +106,7 @@ modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none",
   MAmethod <- MApopdat$MAmethod
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
-  PSstrvar <- MApopdat$PSstrvar
+  strvar <- MApopdat$strvar
   adj <- MApopdat$adj
 
   if (MAmethod %in% c("greg", "gregEN", "ratio")) {
@@ -290,10 +290,10 @@ modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none",
 #  if (addtotal) {
     ## Get total estimate and merge area
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, "TOTAL", PSstrvar, prednames), .SDcols=response]
+		by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=response]
     unit_totest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
+		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 		domain="TOTAL", response=response, npixels=npixels, FIA=FIA))
     tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
@@ -306,29 +306,29 @@ modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none",
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, rowvar, PSstrvar, prednames), .SDcols=response]
+		by=c(unitvar, cuniqueid, rowvar, strvar, prednames), .SDcols=response]
     unit_rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar,
-		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
+		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 		domain=rowvar, response=response, npixels=npixels, FIA=FIA))
     #unit_rowest <- unit_rowest[!is.na(unit_rowest[[rowvar]]), ]
 
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, colvar, PSstrvar, prednames), .SDcols=response]
+		by=c(unitvar, cuniqueid, colvar, strvar, prednames), .SDcols=response]
       unit_colest <- do.call(rbind, lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
+		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 		domain=colvar, response=response, npixels=npixels, FIA=FIA))
       #unit_colest <- unit_colest[!is.na(unit_colest[[colvar]]), ]
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(unitvar, cuniqueid, grpvar, PSstrvar, prednames), .SDcols=response]
+		by=c(unitvar, cuniqueid, grpvar, strvar, prednames), .SDcols=response]
       tdomdatsum[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
 
       unit_grpest <- do.call(rbind, lapply(estunits, MAest.unit,
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, PSstrvar=PSstrvar, prednames=prednames, 
+		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 		domain="grpvar", response=response, npixels=npixels, FIA=FIA))
       unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
     }

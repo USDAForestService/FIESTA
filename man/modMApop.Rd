@@ -18,10 +18,10 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL, 
 	ACI = FALSE, adj = "samp", unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", areaunits = "acres", unitcombine = FALSE, 
-	minplotnum.unit = 10, removeunit = FALSE, unitlut = NULL, npixelvar="npixels", 
-	prednames = NULL, predfac = NULL, PSstrvar = NULL, stratcombine = TRUE, 
-	minplotnum.strat = 2, saveobj = FALSE, savedata = FALSE, outfolder = NULL, 
+	areavar = "ACRES", areaunits = "acres", unitlut = NULL, minplotnum.unit = 10, 
+	unit.action = "keep", npixelvar="npixels", prednames = NULL, predfac = NULL, 
+	PSstrvar = NULL, stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, 
+	savedata = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
 	MAdata = NULL, pltdat = NULL, MAmodeldat = NULL, gui = FALSE)
@@ -83,13 +83,13 @@ modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	of total area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
   \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than minplotnum.unit plots in any one estimation unit. See notes for more info. }
-  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
-  \item{removeunit}{ Logical. If TRUE, remove units less than minplotnum.unit. }
   \item{unitlut}{ DF/DT. Table with summarized auxiliary information by estimation 
 	unit. For continuous data, means by estimation unit; for categorical data, 
 	proportion of class by estimation unit. }
+  \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{unit.action}{ String. What to do if number of plots in an estimation unit 
+	is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine',
+	combines estimation unit to the following estimation unit in unitlut. }
   \item{npixelvar}{ String. Name of variable in unitlut defining number of pixels by 
 	estimation unit. }
   \item{prednames}{ String vector. Name(s) of predictor variables to include in model. }

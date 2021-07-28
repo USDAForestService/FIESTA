@@ -15,10 +15,10 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
 
   outfolder <- pcheck.outfolder(outfolder)
   reportfolder <- tempdir()
-  #reportrmd <- system.file("rmd", "anSApop_report.Rmd", package="FIESTA")
+  reportrmd <- system.file("rmd", "anSApop_report.Rmd", package="FIESTA")
 
   ## TESTING
-  reportrmd <- "C:/_tsf/_GitHub/FIESTA/inst/rmd/anSApop_report.Rmd"
+  #reportrmd <- "C:/_tsf/_GitHub/FIESTA/inst/rmd/anSApop_report.Rmd"
 
   #if (!dir.exists(reportfolder)) {
   #  message(reportfolder, " does not exist, creating...")

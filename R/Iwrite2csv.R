@@ -18,6 +18,7 @@ write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL,
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0) gui <- TRUE 
   cnames <- TRUE
+  appendtext <- ifelse(appendfile, "appended to", "written to")
 
   if (is.null(outfile)) {
     ## Check outfilenm
@@ -35,20 +36,20 @@ write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL,
     }
 
     msg <- ifelse (!is.null(outtxt) && is.character(outtxt),
-		paste(outtxt, "written to", outfilenm),
-		paste("data frame written to", outfilenm))
+		paste(outtxt, appendtext, outfilenm),
+		paste("data frame", appendtext, outfilenm))
 
   } else if (!isOpen(outfile)) {
     stop("outfile is not an open file")
   } else {
     if (!is.null(outfilenm) && is.character(outfilenm)) {    
       msg <- ifelse (!is.null(outtxt) && is.character(outtxt), 
-		paste(outtxt, "written to", outfilenm),
-		paste("data frame written to", outfilenm))
+		paste(outtxt, appendtext, outfilenm),
+		paste("data frame", appendtext, outfilenm))
     } else {
       msg <- ifelse (!is.null(outtxt) && is.character(outtxt), 
-        	paste(outtxt, "written to", outfolder),
-		paste("data frame written to", outfolder))
+        	paste(outtxt, appendtext, outfolder),
+		paste("data frame", appendtext, outfolder))
     }  
   }
 

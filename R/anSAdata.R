@@ -94,7 +94,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
 		xy.joinid=xy.joinid, clipxy=clipxy, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
- 		intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
+ 		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
     if (is.null(SApltdat)) return(NULL)
     if (saveobj) {
       message("saving SApltdat object to: ", file.path(outfolder, "SApltdat.rda"), "...")
@@ -157,6 +157,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)
   }
+
  
   ## Check number of plots (Note: must be greater than 2 plots)
   extpoly <- spExtractPoly(xyplt=xyplt, polyvlst=SAdoms, 
@@ -178,7 +179,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   ####################################################################
   message("summarizing auxiliary model data...")
   SAmodeldat <- spGetAuxiliary(xyplt=xyplt, uniqueid=xy.uniqueid, 
-		dom_layer=SAdoms, rastfolder=rastfolder,
+		dunit_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		rastlst.cat.NODATA=NULL, keepNA=FALSE, npixels=TRUE, 

@@ -1,6 +1,6 @@
-anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE", 
-	SAmethod="unit", landarea="FOREST", pcfilter=NULL, 
-	estvarlst=NULL, tfilterlst="live", showsteps=FALSE, savedata=FALSE, 
+anSAest_custom <- function(SApopdat, SApackage="JoSAE", 
+	SAmethod="unit", landarea="FOREST", pcfilter=NULL, estvarlst=NULL, 
+	tfilterlst="live", showsteps=FALSE, savedata=FALSE, append_layer=FALSE,
 	savemultest=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
  	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="SAmultest", 
 	multest.append=FALSE, multest.AOIonly=TRUE, overwrite=FALSE, 
@@ -11,15 +11,11 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   ## Set global variables
   gui=gettitle <- FALSE
   plt=measyear=measyear.filter <- NULL
-  addSAdomsdf <- TRUE
+  addSAdomsdf <- FALSE
+  rawdata <- TRUE
 
   if (is.null(title.ref)) gettitle <- TRUE
 
-  ## Check esttype 
-  ########################################################
-  esttypelst <- c("AREA", "TREE")
-  esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", 
-		checklst=esttypelst, caption="Estimation type", stopifnull=TRUE)
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -34,7 +30,11 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   ########################################################
   if (savedata || savemultest || save4testing) {
     outfolder <- pcheck.outfolder(outfolder, gui=gui)
-    multest_outfolder <- pcheck.outfolder(multest_outfolder, gui=gui)
+    if (is.null(multest_outfolder)) {
+      multest_outfolder <- outfolder
+    } else {
+      multest_outfolder <- pcheck.outfolder(multest_outfolder, gui=gui)
+    }
     outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
 		title="Add date to outfiles?", first="NO", gui=gui) 
     overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
@@ -51,7 +51,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
       }
     }
   }
-
+ 
   ###########################################################################
   ## Extract FIA data and model data
   ###########################################################################
@@ -84,16 +84,17 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
   }
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, esttype="AREA", landarea="FOREST", 
- 	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
-	multest=savemultest, multest_fmt="sqlite", multest_dsn=multest_dsn, 
-	multest_layer=multest_layer, returntitle=TRUE, outfolder=outfolder, 
-	multest_outfolder=multest_outfolder, multest.append=multest.append,
- 	multest.AOIonly=multest.AOIonly, overwrite_layer=TRUE, 
-	append_layer=multest.append, outfn.pre=outfn.pre, 
-	save4testing=save4testing)
+ 	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=rawdata, 
+	multest=savemultest, savemultest=savemultest, multest_fmt=multest_fmt,
+ 	multest_dsn=multest_dsn, multest_layer=multest_layer, returntitle=TRUE,
+ 	outfolder=outfolder, multest_outfolder=multest_outfolder, 
+	multest.append=multest.append, multest.AOIonly=multest.AOIonly, 
+	overwrite_layer=TRUE, append_layer=append_layer, outfn.pre=outfn.pre,
+ 	addSAdomsdf=addSAdomsdf, save4testing=save4testing)
+
   if (is.null(SAareadat)) return(NULL)
   SAestlst[[outnm]] <- SAareadat$est
-  SAmultestlst[[outnm]] <- SAareadat$dunit.multest
+  SAmultestlst[[outnm]] <- SAareadat$dunit_multest
   response <- SAareadat$raw$estvar
 
   if (save4testing) {
@@ -108,7 +109,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
     }
   }
 
-  if (esttype == "TREE") {
+  #if (esttype == "TREE") {
     for (j in 1:length(estvarlst)) {
       estvar <- estvarlst[j]
       for (k in 1:length(tfilterlst)) {
@@ -126,19 +127,19 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
           chkfn <- paste0(file.path(multest_outfolder, multest_layer), ".csv")
           multest.append <- ifelse(file.exists(chkfn), TRUE, FALSE)
         }  
-
         SAestdat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 			SAmethod=SAmethod, esttype="TREE", landarea=landarea, 
 			pcfilter=pcfilter, estvar=estvar, estvar.filter=estvar.filter,
  			smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
-			multest=savemultest, multest_fmt=multest_fmt, multest_dsn=multest_dsn, 
-			multest_layer=multest_layer, returntitle=TRUE, outfolder=outfolder,
- 			multest_outfolder=multest_outfolder, multest.append=multest.append,
- 			multest.AOIonly=multest.AOIonly, overwrite_layer=TRUE, 
-			outfn.pre=outfn.pre, save4testing=save4testing)
+			multest=savemultest, savemultest=savemultest, multest_fmt=multest_fmt,
+ 			multest_dsn=multest_dsn, multest_layer=multest_layer, returntitle=TRUE,
+ 			outfolder=outfolder, multest_outfolder=multest_outfolder,
+ 			multest.append=multest.append, multest.AOIonly=multest.AOIonly,
+ 			overwrite_layer=TRUE, outfn.pre=outfn.pre, save4testing=save4testing,
+ 			addSAdomsdf=addSAdomsdf)
         response <- SAestdat$raw$estvar
         rowvar <- SAestdat$raw$rowvar
-
+ 
         if (save4testing) {
           pltdom <- merge(pltdom, 
 			SAestdat$pdomdat[, c("DOMAIN", cuniqueid, rowvar, response), with=FALSE], 
@@ -154,7 +155,7 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
           SAmultestlst[[outnm]] <- NA
         } else {
           SAestlst[[outnm]] <- SAestdat$est
-          SAmultestlst[[outnm]] <- SAestdat$dunit.multest
+          SAmultestlst[[outnm]] <- SAestdat$dunit_multest
  
           if (barplot.compare) {
             ## build plots
@@ -165,11 +166,11 @@ anSAest_custom <- function(SApopdat, esttype="TREE", SApackage="JoSAE",
         }
       }
     }
-  }
+  #}
   if (save4testing) {
     if (!is.null(outfn.pre)) {
-      save(dunitlut, file=file.path(testfolder, paste(outfn.pre, "_dunitlut.rda")))
-      save(pltdom, file=file.path(testfolder, paste(outfn.pre, "_pltdom.rda")))
+      saveRDS(dunitlut, file=file.path(testfolder, paste(outfn.pre, "_dunitlut.rds")))
+      saveRDS(pltdom, file=file.path(testfolder, paste(outfn.pre, "_pltdom.rds")))
     } else {
       datExportData(dunitlut, outfolder=testfolder, out_layer="dunitlut", 
 		overwrite_layer=overwrite, append_layer=save4testing.append)

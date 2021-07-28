@@ -1,4 +1,4 @@
-check.popdata <- function(module="GB", method="greg", popType="VOL", 
+check.popdata <- function(module="GB", popType="VOL", strata=FALSE, 
 	tree=NULL, cond, subplot=NULL, subp_cond=NULL, plt=NULL, seed=NULL, 
 	vsubpspp=NULL, vsubpstr=NULL, lulc=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", 
@@ -6,8 +6,8 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
 	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA", 
 	areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
-	strata=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	areaunits="acres", unitcombine=FALSE, removeunits=TRUE, removetext="unitarea", 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	areaunits="acres", unit.action="keep", removetext="unitarea", 
 	stratalut=NULL, strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL, 
 	stratcombine=TRUE, prednames=NULL, predfac=NULL, ACI=FALSE, nonsamp.pfilter=NULL, 
 	nonsamp.cfilter=NULL, nonsamp.vfilter=NULL, nullcheck=FALSE, 
@@ -21,17 +21,17 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ##		ECOSUBCD, CONGCD, INTENSITY, DESIGNCD
   ## - plt (pvars2keep) - unitvars, auxvars
   ## - cond (cvars2keep) - areawt
-  ## Check module, method (if MA,SA), adj
   ## - module in("GB", "MA", "SA")
   ## - if (module="MA") method in("HT", "PS", "greg", "gregEN", "ratio")
   ## - if (module="SA") SApackage <- c("JoSAE", "sae"); method <- c("unit", "area")
-  ## Check logical parameters: ACI, unitcombine, strata stratcombine (if strata=TRUE)
+  ## Check logical parameters: ACI, strata, stratcombine (if strata=TRUE)
   ## - If ACI, add NF_PLOT_STATUS_CD to pvars2keep and NF_COND_STATUS_CD to cvars2keep
   ## - If unitcombine, estimation units are combined if less than 10 plots
   ## - If strata, only 1 auxvar allowed, add to pvars2keep
   ## - If module = SA or MA-greg, add prednames to pvars2keep
   ## - If adj="samp", nonsample adjustment factors calculated at strata level
   ## - If adj="plot", nonsample adjustment factors calculated at plot level
+  ## Check unit.action ('keep', 'remove', 'combine'). 
   ## Check predfac, if module = SA, MA-greg
   ## Import and check cond, plt, pltassgn tables 
   ## Check corresponding unique identifiers (cuniqueid, puniqueid, pltassgnid)
@@ -96,7 +96,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   #pdoms2keep <- pdoms2keep[!pdoms2keep %in% pvars2keep]
 
   ###################################################################################
-  ## Check module, method, adj
+  ## Check module, adj
   ###################################################################################
 
   ## Check estimator module 
@@ -105,27 +105,27 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   module <- FIESTA::pcheck.varchar(var2check=module, varnm="module", gui=gui, 
 		checklst=modulelst, caption="FIESTA module", stopifnull=TRUE)
 
-  ## Check method 
-  ########################################################
-  if (module %in% c("MA", "SA")) {
-    if (module == "MA") {
-      if (!"mase" %in% rownames(installed.packages())) {
-	   message("MA module requires package mase")
-      }
-      methodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-      method <- FIESTA::pcheck.varchar(var2check=method, varnm="method", gui=gui, 
-		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
-      if (any(method == "PS")) {
-        strata <- TRUE
-      } else {
-        strata <- FALSE
-      }
-    } else if (module == "SA") {
-      if (!any(c("JoSAE", "sae") %in% rownames(installed.packages()))) {
-        message("SA module requires either package JoSAE or sae")
-      }
-    }
-  }
+#  ## Check method 
+#  ########################################################
+#  if (module %in% c("MA", "SA")) {
+#    if (module == "MA") {
+#      if (!"mase" %in% rownames(installed.packages())) {
+#	   message("MA module requires package mase")
+#      }
+#      methodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
+#      method <- FIESTA::pcheck.varchar(var2check=method, varnm="method", gui=gui, 
+#		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
+#      if (any(method == "PS")) {
+#        strata <- TRUE
+#      } else {
+#        strata <- FALSE
+#      }
+#    } else if (module == "SA") {
+#      if (!any(c("JoSAE", "sae") %in% rownames(installed.packages()))) {
+#        message("SA module requires either package JoSAE or sae")
+#      }
+#    }
+#  }
 
   ## Check popType
   ########################################################
@@ -150,7 +150,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   }
 
   ###################################################################################
-  ## Check logical parameters: unitcombine, strata, ACI
+  ## Check logical parameters: strata, ACI
   ###################################################################################
 
   ## Check ACI (if ACI=FALSE, need to filter COND_STATUS_CD == 1)
@@ -160,14 +160,15 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     pdoms2keep <- unique(c(pdoms2keep, "NF_PLOT_STATUS_CD"))
   }
 
-  ## Check unitcombine 
+  ## Check unit.action
   ########################################################
-  unitcombine <- FIESTA::pcheck.logical(unitcombine, varnm="unitcombine", 
-		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
+  unit.actionlst <- c("keep", "remove", "combine")
+  unit.action <- FIESTA::pcheck.varchar(var2check=unit.action, varnm="unit.action", gui=gui, 
+		checklst=unit.actionlst, caption="unit.action", multiple=FALSE, stopifnull=TRUE)
 
   ## Check strata, strvars
   ###################################################################################
-  if (module == "GB" || (module == "MA" && method == "PS")) {
+  if (module == "GB" || (module == "MA" && strata)) {
     strata <- FIESTA::pcheck.logical(strata, varnm="strata", 
 		title="Post stratify?", first="YES", gui=gui, stopifnull=TRUE)
  
@@ -176,7 +177,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       if (length(strvar) > 1) stop("invalid strvar... only 1 variable allowed")
       pvars2keep <- unique(c(pvars2keep, strvar))
 
-      if (module == "MA" && method == "PS") {
+      if (module == "MA" && strata) {
         if (!strvar %in% predfac) predfac <- strvar
         prednames <- NULL 
       }
@@ -198,24 +199,24 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     } else {
       strvar <- NULL
     }
-  } else if (module == "MA" && method == "HT") {
-    if (!is.null(strvar)) strvar <- NULL
-    if (!is.null(prednames)) prednames <- NULL
-    if (!is.null(predfac)) predfac <- NULL
+#  } else if (module == "MA" && !strata) {
+#    if (!is.null(strvar)) strvar <- NULL
+#    #if (!is.null(prednames)) prednames <- NULL
+#    if (!is.null(predfac)) predfac <- NULL
   } else {
     strvar <- NULL
     if (is.null(prednames)) {
-      stop("prednames is null... must include at least one variable name\n")
+      stop("no prednames included\n")
     }
     pvars2keep <- unique(c(pvars2keep, prednames))
   }
  
   ## Check predfac
   ###################################################################################
-  if (module == "SA" || (module == "MA" && !method %in% c("HT", "PS")))  {
-    if (!is.null(predfac) && !is.character(predfac)) 
+  if (!is.null(predfac)) {
+    if (!is.character(predfac)) {
       stop("invalid predfac... must be character string")
-
+    }
     notin <- predfac[!predfac %in% prednames]
     if (length(notin) > 0) {
       warning("invalid predfac... not in prednames: ", toString(notin))
@@ -661,6 +662,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
     pltcondx <- condx
   }
 
+
   ###################################################################################
   ###################################################################################
   ## Check plot data
@@ -794,6 +796,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   ## Returns: data table with unitvar and area by estimation unit (unitvar)
   ##	 and areavar (default="ACRES")
   ###################################################################################
+  removeunits <- ifelse(unit.action == "remove", TRUE, FALSE)
   unitdat <- check.unitarea(unitarea=unitarea, pltx=pltcondx, 
 	unitvars=c(unitvar, unitvar2), areavar=areavar, areaunits=areaunits, 
 	removeunits=removeunits, removetext=removetext, gui=gui)
@@ -1402,7 +1405,7 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
   returnlst <- list(condx=condx, pltcondx=pltcondx, pltassgnx=pltassgnx, 
 	cuniqueid=cuniqueid, condid=condid, pltassgnid=pltassgnid, unitvar=unitvar, 
 	unitarea=unitarea, unitvar2=unitvar2, areavar=areavar, areaunits=areaunits, 
-	unitcombine=unitcombine, prednames=prednames, predfac=predfac, adj=adj, 
+	unit.action=unit.action, prednames=prednames, predfac=predfac, adj=adj, 
 	strata=strata, strvar=strvar, stratcombine=stratcombine, nonresp=nonresp,
  	P2POINTCNT=P2POINTCNT, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
 	states=states, invyrs=invyrs, ACI.filter=ACI.filter, areawt=areawt)
@@ -1432,12 +1435,9 @@ check.popdata <- function(module="GB", method="greg", popType="VOL",
       returnlst$vuniqueid <- vuniqueid
     }
   }
-  if (module == "MA") {
-    returnlst$method <- method
-    if (method %in% c("greg", "gregEN", "ratio")) {
-      returnlst$prednames <- prednames
-      returnlst$predfac <- predfac
-    }
+  if (module %in% c("MA", "SA")) {
+    returnlst$prednames <- prednames
+    returnlst$predfac <- predfac
   }
   if (ACI) {
     returnlst$nfplotsampcnt <- nfplotsampcnt

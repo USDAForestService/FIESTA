@@ -550,15 +550,13 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     }
     condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
-
     adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condadj
     treef <- adjfacdata$treeadj
     if (addseed) {
       seedf <- adjfacdata$seedx
-    }
-   
+    }   
     adjtree <- TRUE
   }
 
@@ -702,7 +700,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 			.SDcols=c(paste0("TREE_", treecountvar), paste0("SEED_", treecountvar))]
       tsumvarnmlst2 <- treecountvar	
     } 
-  }    
+  }   
  
   ######################################################################## 
   ######################################################################## 

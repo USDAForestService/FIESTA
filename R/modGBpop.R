@@ -4,7 +4,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", 
 	adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", areaunits="acres",
-	unitcombine=FALSE, minplotnum.unit=10, removeunit=FALSE, strata=TRUE, stratalut=NULL, 
+	minplotnum.unit=10, unit.action="keep", strata=TRUE, stratalut=NULL, 
 	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", strwtvar="strwt",
 	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", 
 	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL,
@@ -177,7 +177,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	invyrs=invyrs, adj=adj, intensity=intensity, ACI=ACI, 
 	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter,
  	unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-	areaunits=areaunits, unitcombine=unitcombine, strata=strata, 
+	areaunits=areaunits, unit.action=unit.action, strata=strata, 
 	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
@@ -197,7 +197,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   unitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
   areaunits <- popcheck$areaunits
-  unitcombine <- popcheck$unitcombine
+  unit.action <- popcheck$unit.action
   stratcombine <- popcheck$stratcombine
   strata <- popcheck$strata
   stratalut <- popcheck$stratalut
@@ -234,16 +234,16 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, unitvar=unitvar, 
 		unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
-		unitcombine=unitcombine, minplotnum.unit=minplotnum.unit, 
-		removeunit=removeunit, strata=strata, auxlut=stratalut, PSstrvar=strvar,  
+		minplotnum.unit=minplotnum.unit, unit.action=unit.action,
+		strata=strata, auxlut=stratalut, strvar=strvar,  
 		nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
-		minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 					getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
+		minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 						getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
   unitvar <- auxdat$unitvar
   unitvars <- auxdat$unitvars
-  strvar <- auxdat$PSstrvar
+  strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$unitstrgrplut
   if (nonresp) nonsampplots <- auxdat$nonsampplots

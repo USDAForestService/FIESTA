@@ -5,7 +5,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
 	invyrs=NULL, intensity=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
 	dunitvar2=NULL, dunitarea=NULL, areavar="ACRES", areaunits="acres", 
-	unitcombine=FALSE, minplotnum.unit=0, removeunit=FALSE, dunitlut=NULL, 
+	minplotnum.unit=0, unit.action="keep", dunitlut=NULL, 
 	prednames=NULL, predfac=NULL, pvars2keep=NULL, cvars2keep=NULL, 
 	saveobj=FALSE, objnm="SApopdat", savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
@@ -173,10 +173,10 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   popcheck <- check.popdata(gui=gui, module="SA", tree=tree, cond=cond, plt=plt, 
 	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
 	condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
-	measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, 
-	ACI=ACI, adj=adj, nonsamp.pfilter=nonsamp.pfilter, 
-	nonsamp.cfilter=nonsamp.cfilter, unitarea=dunitarea, areavar=areavar, 
-	areaunits=areaunits, unitvar=dunitvar, unitvar2=dunitvar2, prednames=prednames, 
+	measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, ACI=ACI, adj=adj, 
+	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
+	unitarea=dunitarea, areavar=areavar, areaunits=areaunits, unitvar=dunitvar, 
+	unitvar2=dunitvar2, unit.action=unit.action, prednames=prednames, 
 	predfac=predfac, pvars2keep=pvars2keep, cvars2keep=cvars2keep)
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
@@ -194,6 +194,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   dunitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
   areaunits <- popcheck$areaunits
+  unit.action <- popcheck$unit.action
   prednames <- popcheck$prednames
   predfac <- popcheck$predfac
   plotsampcnt <- popcheck$plotsampcnt
@@ -219,8 +220,8 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
 		auxlut=dunitlut, prednames=prednames, predfac=predfac, makedummy=TRUE,
-		unitcombine=unitcombine, unitarea=dunitarea, unitvar=dunitvar, 
-		areavar=areavar, minplotnum.unit=minplotnum.unit, removeunit=removeunit,
+		unitarea=dunitarea, unitvar=dunitvar, areavar=areavar, 
+		minplotnum.unit=minplotnum.unit, unit.action=unit.action,
 		auxtext="dunitlut", removetext="dunitarea")  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea

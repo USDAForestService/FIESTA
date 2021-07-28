@@ -22,7 +22,9 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
   \item{SApopdat}{ List. Population data objects returned from modSApop(). }
   \item{esttype}{ String. Type of estimation ("AREA", "TREE"). }
   \item{SApackage}{ String. small area package to use ('JoSAE', 'sae') }
-  \item{SAmethod}{ String. small area method to use ('unit', 'area') }
+  \item{SAmethod}{ String. small area method to use ('unit', 'area', 'combo').
+	If SAmethod='combo', a combination of area-level estimation and unit-level
+	EBLUP estimates are output. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }

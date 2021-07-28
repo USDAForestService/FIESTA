@@ -186,7 +186,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     ## Dissolve filtered ecomap layer
     ecomapf <- sf_dissolve(ecomapf, areacalc=FALSE)
     ecomap.cols <- names(ecomapf)
-
+ 
     ## Check projections
     crsdat <- crsCompare(ecomapf, smallbndx, nolonglat=TRUE)
     ecomapf <- crsdat$x
@@ -195,24 +195,23 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     ## Intersect smallbnd with ecomapf
     #smallbndx2 <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
     smallbndx2 <- selectByIntersects(smallbndx, ecomapf, 49)
-    if (showsteps) {
-      plot(sf::st_geometry(ecomapf))
-      plot(sf::st_geometry(smallbndx2), add=TRUE, border="red")
-    }
 
-    if (is.null(smallbndx) || nrow(smallbndx) == 0) {
+    if (is.null(smallbndx2) || nrow(smallbndx2) == 0) {
       message("the smallbnd has less than 50% overlap with the ecomap boundary... returning NULL")
       return(NULL)
     } else {
       smallbndx <- smallbndx2
       rm(smallbndx2)
     }
+    if (showsteps) {
+      plot(sf::st_geometry(ecomapf))
+      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
+    }
   }
   smallbndx.prj <- sf::st_crs(smallbndx)
 
   message("smallbnd...")
   #print(st_drop_geometry(smallbndx))
-
 
   #############################################################################
   ## maxbnd
@@ -254,22 +253,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 		caption="large boundary")
 
   ## Check largebndx
-  if (is.null(largebndx)) {
-    largebnd.unique <- suppressWarnings(pcheck.varchar(var2check=largebnd.unique, 
-		checklst=names(helperbndx), stopifinvalid=FALSE))
-    if (!is.null(largebnd.unique)) {
-      if (!is.null(largebnd.filter)) {
-        FIESTA::check.logic(largebndx, largebnd.filter, "largebndfilter")
-        largebndx <- subset(largebndx, eval(parse(text = largebnd.filter)))
-        if (length(largebndx) == 0) stop("largebnd.filter removed all features")
-      }
-    } else {
-      if (helper_autoselect) {
-        message("no largebnd included... no autoselect")
-        helper_autoselect <- FALSE
-      }
-    }
-  } else {
+  if (!is.null(largebndx)) {
     if (is.null(maxbnd)) {
       maxislarge <- TRUE
     }
@@ -307,6 +291,25 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   #############################################################################
   helperbndx <- pcheck.spatial(layer=helperbnd, dsn=helperbnd_dsn, 
 		caption="helper boundary")
+
+  if (is.null(largebndx)) {
+    largebnd.unique <- suppressWarnings(pcheck.varchar(var2check=largebnd.unique, 
+		checklst=names(helperbndx), stopifinvalid=FALSE))
+    if (!is.null(largebnd.unique)) {
+      if (!is.null(largebnd.filter)) {
+        FIESTA::check.logic(helperbndx, largebnd.filter, "largebndfilter")
+        largebndx <- subset(helperbndx, eval(parse(text = largebnd.filter)))
+        if (length(largebndx) == 0) stop("largebnd.filter removed all features")
+      } else {
+        largebndx <- helperbndx
+      }
+    } else {
+      if (helper_autoselect) {
+        message("no largebnd included... no autoselect")
+        helper_autoselect <- FALSE
+      }
+    }
+  }
  
   ## Check helperbnd.unique
   ## If helperbnd=NULL, check smallbnd for helperbnd.unique
@@ -356,26 +359,24 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ## clip to US boundary
   #############################################################################
 
-
-
   ## Add AOI attribute to smallbndx
   smallbndx$AOI <- 1
 
   ## Display smallbnd
-  if (showsteps) {
-    plot(sf::st_geometry(smallbndx)) 
+#  if (showsteps) {
+#    plot(sf::st_geometry(smallbndx)) 
 
-    if (!is.null(smallbnd.ecofilter)) {
-      plot(sf::st_geometry(ecomapf))
-      plot(sf::st_geometry(ecomapf), add=TRUE)
-    } else if (!is.null(smallbnd.stfilter)) {
-      plot(sf::st_geometry(stunitcof), border="transparent")
-      plot(sf::st_geometry(stunitcof), add=TRUE)
-    #} else {
-      #plot(sf::st_geometry(stunitco), border="dark grey", add=TRUE)
-    }
-    #plot(sf::st_geometry(smallbndx), add=TRUE) 
-  } 
+#    if (!is.null(smallbnd.ecofilter)) {
+#      plot(sf::st_geometry(ecomapf))
+#      plot(sf::st_geometry(ecomapf), add=TRUE)
+#    } else if (!is.null(smallbnd.stfilter)) {
+#      plot(sf::st_geometry(stunitcof), border="transparent")
+#      plot(sf::st_geometry(stunitcof), add=TRUE)
+#    #} else {
+#      #plot(sf::st_geometry(stunitco), border="dark grey", add=TRUE)
+#    }
+#    #plot(sf::st_geometry(smallbndx), add=TRUE) 
+#  } 
 
 
   #############################################################################
@@ -398,7 +399,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     maxbndx <- autoselectlst$maxbndx.int
  
   } else {
-
     ## Add DOMAIN column to all rows
     helperbndx$DOMAIN <- helperbndx[[helperbnd.unique]]
     SAdomslst <- list(SAdoms=helperbndx)
@@ -409,9 +409,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ###########################################################################
   ## Aggregate (dissolve) polygons on DOMAIN and calculate area on dissolved polygons
   ###########################################################################
-  #SAdomslst <- lapply(SAdomslst, sf_dissolve, c("DOMAIN", "AOI"))
-  SAdomslst <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
-
+  SAdomslst <- lapply(SAdomslst, sf_dissolve, c("DOMAIN", "AOI"))
+  #SAdomslst <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
 
   ## Set plotting margins
   mar <-  par("mar")

@@ -1,4 +1,4 @@
-check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN", 
+check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN", 
 	condid="CONDID", treex=NULL, seedx=NULL, vcondx=NULL, tuniqueid="PLT_CN", 
 	estseed="none", vuniqueid="PLT_CN", sumunits=FALSE, landarea=NULL, 
 	ACI.filter=NULL, pcfilter=NULL, TPA=TRUE, tpavar="TPA_UNADJ", allin1=FALSE, 
@@ -117,6 +117,11 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
 	checklst=esttypelst, caption="Esttype?")
 
+  ## Check totals
+  if (esttype %in% c("AREA", "TREE")) {
+    totals <- FIESTA::pcheck.logical(totals, varnm="totals", 
+		title="Totals?", first="NO", gui=gui, stopifnull=TRUE)
+  }
 
   #####################################################################################
   ### Check other table parameters
@@ -239,7 +244,9 @@ check.estdata <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 	outfolder=outfolder, overwrite_layer=overwrite_layer, append_layer=append_layer, 
 	rawfolder=rawfolder, raw_fmt=raw_fmt, raw_dsn=raw_dsn)
 
-
+  if (esttype %in% c("AREA", "TREE")) {
+    returnlst$totals <- totals
+  }
   if (esttype %in% c("TREE", "RATIO", "SEED")) {
 
     ## Check that the values of tuniqueid in treex are all in cuniqueid in condf

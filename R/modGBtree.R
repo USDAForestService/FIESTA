@@ -135,6 +135,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
   savedata <- estdat$savedata
   outfolder <- estdat$outfolder
   overwrite_layer <- estdat$overwrite_layer
+  append_layer <- estdat$append_layer
   raw_fmt <- estdat$raw_fmt
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder

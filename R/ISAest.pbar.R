@@ -22,7 +22,11 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut, yn) {
 SAest.area <- function(fmla.dom, pltdat.dom, dunitlut, cuniqueid, 
 	dunitvar, prednames, yn) {
   ## Remove response values equal to 1
-  dunitlut.NA <- dunitlut[is.na(dunitlut$mean.var) | dunitlut$mean.var == 0, ]
+#  dunitlut.NA <- dunitlut[is.na(dunitlut$mean.var) | dunitlut$mean.var == 0 |
+#		dunitlut$n.total < 2, ]
+
+  nm.var <- paste0(yn, ".var")
+  dunitlut.NA <- dunitlut[is.na(dunitlut[[nm.var]]) | dunitlut[[nm.var]] == 0, ]
   dunitNAids <- dunitlut.NA[[dunitvar]]
   dunitids <-  dunitlut[!dunitlut[[dunitvar]] %in% dunitNAids, 
 			dunitvar, with=FALSE][[1]]
@@ -108,16 +112,35 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   pltdat.dom <- dat.dom[pltassgn]
   pltdat.dom[is.na(pltdat.dom[[yn]]), (yn) := 0]
 
-  ## Check if all plots are zero
-  if (sum(pltdat.dom[[yn]]) == 0) {
-    message(yn, " has all 0 values... returning NULL")
-    return(NULL)
-  }  
-
   ## Calculate number of non-zero plots
   NBRPLT.gt0 <- pltdat.dom[, sum(get(yn) > 0), by=dunitvar]
   setnames(NBRPLT.gt0, "V1", "NBRPLT.gt0")
   setkeyv(NBRPLT.gt0, dunitvar)
+
+  ## Check if all plots are zero
+  if (sum(pltdat.dom[[yn]]) == 0) {
+    message(yn, " has all 0 values... returning NULL")
+    if (SAmethod == "unit") {
+      est <- data.table(dunitlut[[dunitvar]],
+		DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
+		JU.EBLUP=NA, JU.EBLUP.se.1=NA, NBRPLT=dunitlut$n.total)
+      setnames(est, "V1", dunitvar)
+    } else {
+      est <- data.table(dunitlut[[dunitvar]], AOI=dunitlut$AOI,
+		DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
+		JA.synth.se=NA, NBRPLT=dunitlut$n.total)
+      setnames(est, "V1", dunitvar)
+    }
+    ## Merge NBRPLT.gt0
+    est <- merge(est, NBRPLT.gt0, by="DOMAIN")
+
+    ## Merge AOI
+    if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut)) {
+      est <- merge(est, dunitlut[, c("DOMAIN", "AOI")], by="DOMAIN")
+    }
+    return(est)
+  }  
+
 
   if (standardize) {
     ## Standardize predictors at the scale at which borrowing occurs (e.g., PROVINCE/SECTION)
@@ -177,7 +200,6 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     }
   }
 
-
   if (SAmethod == "area") {
     est <- tryCatch(SAest.area(fmla.dom, pltdat.dom, dunitlut, 
 				cuniqueid, dunitvar, prednames, yn),
@@ -187,8 +209,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 				} )
     if (is.null(est)) {
       est <- data.table(dunitlut[[dunitvar]], AOI=dunitlut$AOI,
-		DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
-		JU.EBLUP=NA, JU.EBLUP.se.1=NA, NBRPLT=dunitlut$n.total)
+		DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
+		JA.synth.se=NA, NBRPLT=dunitlut$n.total)
       setnames(est, "V1", dunitvar)
     }
   }
@@ -273,7 +295,7 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.att,
      			dunitlut=dunitlut.large, dunitvar=dunitvar,
 			SApackage=SApackage, SAmethod=SAmethod, 
 			prednames=prednames, fmla=fmla,
-			domain=domain, response=response)) 
+			domain=domain, response=response))
   setkeyv(domest, dunitvar)
 }       
 

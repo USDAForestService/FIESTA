@@ -14,6 +14,7 @@ write2sqlite <- function(layer, SQLitefn, out_name=NULL, gpkg=FALSE,
   ## VALUE:
   ##  Writes data frame to SQLite database.
   ####################################################################################
+  appendtext <- ifelse(append_layer, "appending", "writing")
 
   ## Check SQLite connection
   ###########################################################
@@ -34,7 +35,7 @@ write2sqlite <- function(layer, SQLitefn, out_name=NULL, gpkg=FALSE,
 
   ## Write table to database
   DBI::dbWriteTable(dbconn, out_name, layer, append=append_layer, overwrite=overwrite)
-  message(paste("writing", out_name, "to", SQLitefn))
+  message(paste(appendtext, out_name, "to", SQLitefn))
 
   if (!is.null(index.unique) && !all(index.unique %in% names(layer))) {
     message("invalid index.unique... names not in ", out_name)

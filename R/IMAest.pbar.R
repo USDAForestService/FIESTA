@@ -222,7 +222,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
 ## Get estimates
 ########################################################################
 MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL, 
-	pltassgn, esttype="ACRES", MAmethod, PSstrvar=NULL, prednames=NULL, 
+	pltassgn, esttype="ACRES", MAmethod, strvar=NULL, prednames=NULL, 
 	yd=NULL, ratiotype="PERACRE", N, FIA=TRUE) {
 
   ########################################################################################
@@ -253,8 +253,8 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
     est <- MAest.ht(yn.vect, N, FIA=FIA)
 
   } else if (MAmethod == "PS") {
-    x_sample <- pltdat.dom[, PSstrvar, with=FALSE][[1]]
-    x_pop <- unitlut[, c(PSstrvar, "Prop"), with=FALSE]
+    x_sample <- pltdat.dom[, strvar, with=FALSE][[1]]
+    x_pop <- unitlut[, c(strvar, "Prop"), with=FALSE]
     est <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
   } else {
@@ -289,7 +289,7 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
 ## By domain
 ########################################################################
 MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod, 
-		PSstrvar=NULL, prednames=NULL, domain, N, response=NULL, FIA=TRUE) {
+		strvar=NULL, prednames=NULL, domain, N, response=NULL, FIA=TRUE) {
 
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
@@ -308,7 +308,7 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
   domest <- data.table(dom, suppressMessages(MAest(yn=response, 
 		dat.dom=dat.dom, pltassgn=pltassgn, 
 		cuniqueid=cuniqueid, esttype=esttype, unitlut=unitlut, 
-		PSstrvar=PSstrvar, prednames=prednames, 
+		strvar=strvar, prednames=prednames, 
 		MAmethod=MAmethod, N=N, FIA=FIA)))
   setnames(domest, "dom", domain)
   return(domest)
@@ -320,7 +320,7 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
 ## By estimation unit
 ########################################################################
 MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar, 
-		esttype, MAmethod="HT", PSstrvar=NULL, prednames=NULL, 
+		esttype, MAmethod="HT", strvar=NULL, prednames=NULL, 
 		domain, response, npixels, FIA=TRUE) {
 ## testing
 #unit=1
@@ -342,7 +342,7 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
     return(unitest)
   }
   setkeyv(dat.unit, cuniqueid)
-  pltassgn.unit <- unique(dat[dat[[unitvar]] == unit, c(cuniqueid, PSstrvar, prednames),
+  pltassgn.unit <- unique(dat[dat[[unitvar]] == unit, c(cuniqueid, strvar, prednames),
 			with=FALSE])
   setkeyv(pltassgn.unit, cuniqueid)
 
@@ -367,7 +367,7 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 			dat=dat.unit, cuniqueid=cuniqueid, 
 			unitlut=unitlut.unit, pltassgn=pltassgn.unit,
 			esttype=esttype, MAmethod=MAmethod, 
-			PSstrvar=PSstrvar, prednames=prednames, 
+			strvar=strvar, prednames=prednames, 
 			domain=domain, N=N.unit, response=response,
 			FIA=FIA))
   unitest <- data.table(unit=unit, unitest)

@@ -3,9 +3,10 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 	SQLitefn, RS=NULL, largebnd.threshold=10, nbrdom.min=10, rastlst.cont=NULL,
  	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	SApackage="JoSAE", SAmethod="unit", pcfilter=NULL, landarea="FOREST", 
-	estvarlst, savedata=FALSE, showsteps=FALSE, outfolder=NULL,
- 	multest_dsn="RAVG_SAmultest", multest.append=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, barplot.compare=FALSE, title.ref=NULL, 
+	estvarlst, savedata=FALSE, saveobj=TRUE, showsteps=FALSE, outfolder=NULL,
+ 	multest_outfolder=NULL, multest_dsn="RAVG_SAmultest", multest_fmt="sqlite",
+ 	multest.append=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
+	append_layer=FALSE, barplot.compare=FALSE, title.ref=NULL, save4testing=FALSE, 
 	SAdomdat=NULL, SAdata=NULL, SApopdat=NULL) {
 
 
@@ -21,7 +22,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   ## spGetSAdoms() - default parameters
   ##################################################################################
   smallbnd.unique <- "FIRE_ID"
-  smallbnd.domain <- "Fire_Name"
+  #smallbnd.domain <- "Fire_Name"
+  smallbnd.domain <- NULL
   maxbnd.threshold <- 50
   #largebnd.threshold <- 10
   multiSAdoms <- FALSE
@@ -105,7 +107,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
     }
   }
 
-
   ##################################################################################
   ## anSAdata() default parameters
   ##################################################################################
@@ -162,14 +163,14 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
     SApop <- anSApop_ecomap(smallbnd=RAVG, smallbnd_dsn=RAVG_dsn, 	
 		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain, 
 		smallbnd.filter=RAVG.filter, smallbnd.stfilter=RAVG.stfilter, 
-		smallbnd.ecofilter=RAVG.ecofilter,
+		smallbnd.ecofilter=RAVG.ecofilter, largebnd.filter=RAVG.ecofilter,
 		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold,
 		nbrdom.min=nbrdom.min, datsource=datsource, SQLitefn=SQLitefn, RS=RS,
  		measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
  		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		showsteps=showsteps, savedata=savedata, savexy=savexy, savesteps=savedata,
- 		outfolder=outfolder, out_fmt="sqlite", out_dsn="SApopdat", 
+ 		saveobj=saveobj, outfolder=outfolder, out_fmt="sqlite", out_dsn="SApopdat", 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
 		SAdomdat=SAdomdat, SAdata=SAdata)
 
@@ -182,64 +183,21 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   if (is.null(SApopdat)) {
     return(NULL)
   }
-
+ 
   ####################################################################
   ## Get estimates
   ####################################################################
-  SAest <- list()
-  SAmultest <- list()
-  SAraw <- list()
-  SAtitlelst <- list()
+  SAestdat <- anSAest_custom(SApopdat=SApopdat, SAmethod="combo", estvarlst=estvarlst, 
+		savedata=TRUE, outfolder=outfolder, append_layer=append_layer,
+		savemultest=TRUE, multest_fmt=multest_fmt, 
+		multest.append=multest.append, multest_outfolder=multest_outfolder,
+		save4testing=save4testing, testfolder=outfolder)
+  SAest <- SAestdat$SAest
+  SAmultest <- SAestdat$SAmultest
 
-  message("calculating estimates...")
 
-  for (j in 1:length(estvarlst)) {
-    estvar <- estvarlst[j]
-    for (k in 1:length(tfilterlst)) {
-      tfilter <- tfilterlst[k]
-      message("\ngenerating estimates for ", estvar, " - ", tfilter, "...")
-
-      estvar.filter <- ifelse(tfilter == "live", "STATUSCD == 1", 
-					ifelse(tfilter == "dead", "STATUSCD == 2 & STANDING_DEAD_CD == 1", 
-						NULL)) 
-
-      estvarnm <- ifelse(estvar == "TPA_UNADJ", "COUNT", estvar)
-      outnm <- paste(SApackage, estvarnm, tfilter, sep="_")
-
-      SAestdat <- tryCatch(
-		modSAest(SApopdat=SApopdat, SApackage=SApackage, SAmethod=SAmethod, 
-			esttype="TREE", landarea=landarea, pcfilter=pcfilter, 
-			estvar=estvar, estvar.filter=estvar.filter,
-			savedata=savedata, multest=TRUE, multest_fmt="sqlite", 
-			multest_dsn=multest_dsn, multest_layer=outnm, returntitle=TRUE, 
-			rawdata=TRUE, outfolder=outfolder, multest.append=multest.append,
- 			title.ref=title.ref, overwrite_dsn=overwrite_dsn,
- 			overwrite_layer=overwrite_layer, outfn.pre=RAVG.ecoprov, rawonly=TRUE),
-				error=function(err) {
-					message(err, "\n")
-					return(NULL)
-				} )
-      if (!is.null(SAestdat)) {
-
-        SAest[[outnm]] <- SAestdat$est
-        SAmultest[[outnm]] <- SAestdat$dunit.multest
-        SAraw[[outnm]] <- SAestdat$raw$dunit_totest
-        SAtitlelst[[outnm]] <- SAestdat$titlelst
-     
- 
-        if (barplot.compare) {
-          ## build plots
-          FIESTA_SAmod_demo_plots(estvar=estvar, prednames=SApopdat$prednames, 
-			est.com=SAestdat$dunit.multest, title.ref=title.ref, saveimg=TRUE, 
-			outfolder=outfolder, showimg=TRUE)
-        }
-      }
-    }
-  }
 
   returnlst$SAest <- SAest
-  returnlst$SAraw <- SAraw
-  returnlst$SAtitlelst <- SAtitlelst
   returnlst$SAmultest <- SAmultest
 
   return(returnlst)
