@@ -32,7 +32,7 @@ check.numeric <- function(x) {
 
 
 check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE, 
-	stopifinvalid=TRUE, removeinvalid=FALSE){
+	stopifinvalid=TRUE, removeinvalid=FALSE, returnvar=FALSE){
   ## DESCRIPTION: checks logical statement
   ## ARGUMENTS"
   ## x 	- data frame to check column names
@@ -101,6 +101,10 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE,
           stop(fwarning)
         } else {
           return(NULL)
+        }
+      } else {
+        if (returnvar) {
+          return(names(x)[sapply(names(x), function(x, y){ grepl(x, y) }, statement)])
         }
       }
     } 

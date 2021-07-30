@@ -15,10 +15,9 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
 	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, 
 	ACI = FALSE, adj = "plot", dunitvar = "DOMAIN", dunitvar2 = NULL, 
 	dunitarea = NULL, areavar = "ACRES", areaunits = "acres", 
-	unitcombine = FALSE, minplotnum.unit = 0, removeunit = FALSE, 
-	dunitlut = NULL, prednames = NULL, predfac = NULL, 
-	pvars2keep = NULL, cvars2keep = NULL, saveobj = FALSE, 
-	objnm = "SApopdat", savedata = FALSE, outfolder = NULL, 
+	minplotnum.unit = 0, unit.action = "keep", dunitlut = NULL, 
+	prednames = NULL, predfac = NULL, pvars2keep = NULL, cvars2keep = NULL, 
+	saveobj = FALSE, objnm = "SApopdat", savedata = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
 	SAdata = NULL, pltdat = NULL, SAmodeldat = NULL, gui = FALSE)
@@ -82,10 +81,10 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
   \item{dunitarea}{ Numeric or DF. Total area by domain unit. }
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
   \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines domain units 
-	if less than 2 plots in any one domain unit. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
-  \item{removeunit}{ Logical. If TRUE, remove units less than minplotnum.unit. }
+  \item{unit.action}{ String. What to do if number of plots in an estimation unit 
+	is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine',
+	combines estimation unit to the following estimation unit in unitlut. }
   \item{dunitlut}{ DF/DT. Data frame with auxiliary information by domain 
 	unit. For continuous data, means by domain unit; for categorical data, 
 	proportion of class by domain unit. }

@@ -1,7 +1,7 @@
 anPBpopICE <- function(ice.pntfn=NULL, ice.pltfn=NULL, T1, T2, 
 	plotid="plot_id", pntid="dot_cnt", pltassgn=NULL, pltassgnid=NULL, 
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	unitcombine=FALSE, strata=FALSE, stratalut=NULL, strvar=NULL,  
+	unit.action="keep", strata=FALSE, stratalut=NULL, strvar=NULL,  
 	getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, sumunits=FALSE, 
 	saveobj=FALSE, savedata=FALSE, outfolder=NULL, overwrite=FALSE, 
 	PBdataICE=NULL, ...){
@@ -94,7 +94,7 @@ anPBpopICE <- function(ice.pntfn=NULL, ice.pltfn=NULL, T1, T2,
   PBpopdatICE <- modPBpop(pntdat=ice.pnt, plt=ice.pltfn, plotid=plotid, pntid=pntid, 
         		puniqueid=plotid, pltassgn=pltassgn, pltassgnid=pltassgnid,
 			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
-			unitcombine=unitcombine, strata=strata, 
+			unit.action=unit.action, strata=strata, 
 			strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
 			stratcombine=stratcombine, sumunits=sumunits, savedata=savedata, 
 			outfolder=outfolder)

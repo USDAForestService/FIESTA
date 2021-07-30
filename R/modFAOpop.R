@@ -6,7 +6,7 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
 	areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
 	strata=TRUE, nonsamp.clustfilter=NULL, nonsamp.basefilter=NULL, 
 	unitlevel1=NULL, unitlevel2=NULL, unitarea=NULL, areavar="ACRES", 
-	unitcombine=FALSE, minplotnum.unit=10, stratalut=NULL, 
+	areaunits="acres", minplotnum.unit=10, unit.action="keep", stratalut=NULL, 
 	strvar="STRATUMCD", strwtvar="strwt", getwt=TRUE, getwtvar="P1POINTCNT", 
 	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="FAOpopdat", 
 	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL,
@@ -136,8 +136,8 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
 	MICRO_BREAKPOINT_DIA=MICRO_BREAKPOINT_DIA, MACRO_BREAKPOINT_DIA=MACRO_BREAKPOINT_DIA, 	areawt_micr=areawt_micr, areawt_subp=areawt_subp, areawt_macr=areawt_macr,
  	nonsamp.pfilter=nonsamp.clustfilter, nonsamp.cfilter=nonsamp.basefilter,
  	unitarea=unitarea, unitvar=unitlevel1, unitvar2=unitlevel2, 
-	unitcombine=unitcombine, strata=strata, stratalut=stratalut, strvar=strvar,
- 	stratcombine=stratcombine)
+	areaunits=areaunits, unit.action=unit.action, strata=strata, 
+	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
@@ -154,7 +154,7 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   unitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
   areaunits <- popcheck$areaunits
-  unitcombine <- popcheck$unitcombine
+  unit.action <- popcheck$unit.action
   strata <- popcheck$strata
   strvar <- popcheck$strvar
   stratcombine <- popcheck$stratcombine
@@ -187,18 +187,19 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   ## - if unitcombine=TRUE, combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, strata=strata,
-		auxlut=stratalut, PSstrvar=strvar, nonresp=nonresp, substrvar=substrvar, 
-		stratcombine=stratcombine, unitcombine=unitcombine, unitarea=unitarea, 
-		unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat,
-		getwt=getwt, getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)  
+  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
+		strata=strata, unitvar=unitvar, unitvar2=unitvar2,
+		unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit,
+		unit.action=unit.action, auxlut=stratalut, strvar=strvar, 
+		nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
+		minplotnum.strat=minplotnum.strat, getwt=getwt, getwtvar=getwtvar, 
+		strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)  
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
   unitvars <- auxdat$unitvars
   stratalut <- auxdat$auxlut
-  strvar <- auxdat$PSstrvar
+  strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$unitstrgrplut
   if (nonresp) nonsampplots <- auxdat$nonsampplots

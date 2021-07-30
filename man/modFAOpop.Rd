@@ -16,7 +16,7 @@ modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, seed = NULL,
 	areawt_subp = "SUBPPROP_UNADJ", areawt_macr = "MACRPROP_UNADJ",
 	strata = TRUE, nonsamp.clustfilter = NULL, nonsamp.basefilter = NULL, 
 	unitlevel1 = NULL, unitlevel2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, minplotnum.unit = 10, stratalut = NULL, 
+	areaunits = "acres", minplotnum.unit = 10, unit.action = "keep", stratalut = NULL, 
 	strvar = "STRATUMCD", strwtvar="strwt", getwt = TRUE, getwtvar = "P1POINTCNT", 
 	stratcombine = TRUE, minplotnum.strat = 2, saveobj = FALSE, objnm = "FAOpopdat", 
 	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
@@ -86,9 +86,11 @@ modFAOpop(FAOdata = NULL, base = NULL, cluster = NULL, tree = NULL, seed = NULL,
 	with areavar. If more than one estimation unit, provide a data frame of total 
 	area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{unit.action}{ String. What to do if number of plots in an estimation unit 
+	is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine',
+	combines estimation unit to the following estimation unit in unitlut. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 

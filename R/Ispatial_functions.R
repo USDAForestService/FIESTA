@@ -311,8 +311,19 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   ######################################################
   ## Check layer
   ######################################################
-  layerlst <- sf::st_layers(dsn)
-
+  layerlst <- tryCatch(sf::st_layers(dsn),
+				error=function(err) {
+					#message("", "\n")
+					return(NULL)
+				} )
+  if (is.null(layerlst)) {
+    if (file.exists(dsn)) {
+      stop("file exists... but not spatial")
+    } else {
+      stop("file does not exist")
+    }
+  }
+    
   ## Note: if dsn is a SpatiaLite database, only spatial layers are listed
   if (!layer %in% layerlst$name) {
     if (checkonly) {
@@ -364,13 +375,15 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
 
     ## If polyfix
     ############################################################
-    if (polyfix)
+    if (polyfix) {
       splayer <- polyfix.sf(splayer)
+    }
 
     ## Drop geometry in table
     ############################################################
-    if (dropgeom)
+    if (dropgeom) {
       splayer <- sf::st_drop_geometry(splayer)
+    }
   }
 
   if (checkonly) {
@@ -1245,7 +1258,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   } else if (is.null(states)) {
     stop("must include state names (states) or state boundary (stbnd) for bnd intersect")
   }
- 
+
   if (!is.null(stbnd)) {
     ## Reproject stbnd to bnd projection
     prjdat <- crsCompare(stbnd, ycrs=bndx, nolonglat=TRUE)
@@ -1258,13 +1271,13 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
 
     stateint <- suppressWarnings(selectByIntersects(stated, sf::st_make_valid(bndx), 
 				overlapThreshold=overlap))
-    states <- stateint[[stbnd.att]]
 
     ## Check name of attribute identifying state
     stname.att <- FIESTA::pcheck.varchar(var2check=stname.att, varnm="stname.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
- 
+    states <- stateint[[stbnd.att]]
+
     if (showsteps) {
       mar <-  par("mar")
       par(mar=c(1,1,1,1))
@@ -1277,13 +1290,14 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     stop("stbnd invalid... must include states")
   }
   
-  statenames <- states
+  statenames <- pcheck.states(states)
   if (!all(states %in% FIESTA::ref_statecd$MEANING)) {
     if (stbnd.att == "COUNTYFIPS") {
       statenames <- FIESTA::ref_statecd[FIESTA::ref_statecd$VALUE %in% 
 			unique(as.numeric(substr(states, 1,2))), "MEANING"]
     }    
   }
+
   ## Check statenames
   if (is.null(RS)) {
     statenameslst <- FIESTA::ref_statecd$MEANING

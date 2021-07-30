@@ -54,11 +54,11 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(GBpltdat)) {
-    GBpltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
-		RS=RS, xy=xy, xy_dsn=xy_dsn, clipxy=clipxy, datsource=datsource, 
+    GBpltdat <- spGetPlots(bnd=bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
+		RS=RS, xy=xy, xy_dsn=xy_dsn, intensity1=intensity1, datsource=datsource, 
 		data_dsn=data_dsn, istree=istree, isseed=isseed, plot_layer=plot_layer,
  		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
-		intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
+		savedata=FALSE, savexy=savexy, ...)
     if (is.null(GBpltdat)) return(NULL)
     if (saveobj) {
       message("saving GBpltdat object to: ", 

@@ -15,9 +15,9 @@
 \usage{    
 modPBpop(pntdat = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
 	pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
-	pltassgnid = "CN", nonsamp.pfilter = NULL, strata = FALSE, 
-	sumunits = FALSE, unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", areaunits = "acres", unitcombine = FALSE, minplotnum.unit = 10, 
+	pltassgnid = "CN", nonsamp.pfilter = NULL, strata = FALSE, sumunits = FALSE, 
+	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
+	areaunits = "acres", minplotnum.unit = 10, unit.action = "keep", 
 	stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
 	strwtvar = "strwt", stratcombine = TRUE, minplotnum.strat = 2, pvars2keep = NULL, 
 	saveobj = FALSE, objnm = "PBpopdat", savedata = FALSE, outfolder = NULL, 
@@ -61,9 +61,10 @@ modPBpop(pntdat = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL,
 	area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of acre variable in unitarea. Default="ACRES". }
   \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
+  \item{unit.action}{ String. What to do if number of plots in an estimation unit 
+	is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine',
+	combines estimation unit to the following estimation unit in unitlut. }
   \item{stratalut}{ DF/DT. If strata=TRUE, look-up table with strata 
 	proportions ('strwt') by strata (and estimation unit). To calculate 
 	'strwt', set getwt=TRUE and getwtvar= name of variable with information 

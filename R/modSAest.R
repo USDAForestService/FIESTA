@@ -6,7 +6,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 	divideby=NULL, savedata=FALSE, rawdata=FALSE, rawonly=FALSE, multest=TRUE, 
 	addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, addtitle=TRUE, raw_fmt="csv", raw_dsn="rawdata", 
-	multest_fmt="csv", savemultest=FALSE, multest_outfolder=NULL, 
+	savemultest=FALSE, multest_fmt="csv", multest_outfolder=NULL, 
 	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, 
 	multest.AOIonly=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	append_layer=FALSE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
@@ -47,7 +47,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
-	title.rowvar=title.colvar=TOTAL <- NULL
+	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total <- NULL
 
 
   ##################################################################
@@ -89,7 +90,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   on.exit(options(options.old), add=TRUE) 
   title.rowgrp <- NULL
   pvars2keep <- c("DOMAIN", "AOI")
-  unitcombine <- FALSE
   returnSApopdat <- TRUE
   sumunits=FALSE
 
@@ -242,6 +242,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   rawfolder <- estdat$rawfolder
   totals <- estdat$totals
 
+ 
   ## Check output for multest 
   ########################################################
   if (savedata || savemultest) {
@@ -415,7 +416,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   dunitlut <- merge(dunitlut, estmean)
   setnames(dunitlut, c("mean", "mean.var"), c(estvar.name, paste0(estvar.name, ".var")))
   domain <- rowvar
-
+ 
   if (is.null(largebnd.att)) {
     pdomdat$LARGEBND <- 1
     largebnd.att <- "LARGEBND"
@@ -438,7 +439,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 			message("error with unit-level estimates of ", response, "...")
 			message(e, "\n")
 			return(NULL) }) 
-
+ 
   ## get estimate by domain, by largebnd value
   message("generating area-level estimates for ", response, "...")
   dunit_multest.area <- 
@@ -487,7 +488,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     dunit_multest <- NULL
   }
 
-
 #  if (addSAdomsdf && !is.null(dunit_multest)) {
 #    dunit_multest_SAdoms <- copy(dunit_multest)
 #    dunit_multest_SAdoms[, AOI := NULL]
@@ -514,7 +514,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     nhat <- "JoSAE"
     nhat.se <- "JoSAE.se"
     nhat.var <- "JoSAE.var"
-    nhat.cv <- "JoSAE.var"
+    nhat.cv <- "JoSAE.cv"
 
   } 
   ## Subset dunit_multest.unit to estimation output
@@ -522,14 +522,15 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 		c(dunitvar, nhat, nhat.se, "NBRPLT.gt0"), with=FALSE]
   setkeyv(dunit_totest, dunitvar)
 
+  ## Merge dunitarea
+  tabs <- FIESTA::check.matchclass(dunitarea, dunit_totest, dunitvar)
+  dunitarea <- tabs$tab1
+  dunit_totest <- tabs$tab2
+  dunit_totest <- merge(dunit_totest, 
+		dunitarea[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+
   if (!is.null(dunit_totest)) {
     if (totals) {
-      ## Merge dunitarea
-      tabs <- FIESTA::check.matchclass(dunitarea, dunit_totest, dunitvar)
-      dunitarea <- tabs$tab1
-      dunit_totest <- tabs$tab2
-
-      dunit_totest <- dunit_totest[dunitarea, nomatch=0]
       dunit_totest <- getarea(dunit_totest, areavar=areavar, esttype=esttype,
 				nhatcol=nhat, nhatcol.var=nhat.var)
       estnm <- "est"
@@ -577,6 +578,16 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   }
 
   if (multest && !is.null(dunit_multest)) {
+    ## Merge dunitarea
+    #tabs <- FIESTA::check.matchclass(dunitarea, dunit_multest, dunitvar)
+    #dunitarea <- tabs$tab1
+    #dunit_multest <- tabs$tab2
+
+    dunit_multest <- merge(dunit_multest, 
+		dunitarea[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+    dunit_multest[, JoSAE.total := get(nhat) * AREAUSED]
+    dunit_multest[, JoSAE.pse := get(nhat.se)/get(nhat) * 100]
+
     ## Merge SAdom attributes to dunit_multest
     if (addSAdomsdf) {
       dunit_multest[, AOI := NULL]

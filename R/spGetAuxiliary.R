@@ -270,7 +270,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     extpoly <- spExtractPoly(xyplt=sppltx, polyvlst=dunit_layerx, 
 		uniqueid=uniqueid, polyvarlst=unique(c(dunitvar, vars2keep)), 
 		keepNA=FALSE, exportNA=exportNA)
-    sppltx <- unique(extpoly$spplt)
+    sppltx <- unique(extpoly$spxyext)
   } else {
     message(dunitvar, " already in spplt... not extracting from dunit_layer")
   }

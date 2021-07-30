@@ -102,7 +102,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
     returnlst$SAdata <- SAdata
 
     if (saveobj) {
-      save(SAdata, file=file.path(outfolder, "SAdata.rda"))
+      saveRDS(SAdata, file=file.path(outfolder, "SAdata.rds"))
     }
   } 
 
@@ -140,7 +140,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 
 
   if (saveobj) {
-    save(SApopdat, file=file.path(outfolder, "SApopdat.rda"))
+    saveRDS(SApopdat, file=file.path(outfolder, "SApopdat.rds"))
   }
 
   return(returnlst)

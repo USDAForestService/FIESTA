@@ -8,7 +8,7 @@
 }
 \usage{
 anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy = NULL, xy_dsn = NULL, 
-	xy.joinid = "PLOT_ID", clipxy = TRUE, datsource = "sqlite", 
+	xyjoinid = "PLOT_ID", clipxy = TRUE, datsource = "sqlite", 
 	data_dsn = NULL, istree = TRUE, isseed = FALSE, plot_layer = "plot", 
 	cond_layer = "cond", tree_layer = "tree", seed_layer = "seed", 
 	puniqueid = "CN", intensity1 = FALSE, rastfolder = NULL, rastlst.cont = NULL, 
@@ -35,7 +35,7 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy = NULL, xy_dsn = NULL,
   \item{xy_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
 	of xy. The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R object. } 
-  \item{xy.joinid}{ String. Variable to join XY data to plot data. Not necessary to
+  \item{xyjoinid}{ String. Variable to join XY data to plot data. Not necessary to
 	be unique. If using most current XY coordinates, use identifier for a plot 
 	(e.g., PLOT_ID). }
   \item{clipxy}{ Logical. If TRUE, clip xy data. } 

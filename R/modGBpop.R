@@ -229,7 +229,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## - if < 2 plots, an error occurs, must collapse plots.
   ## - if 2-10 plots, a warning is displayed, with suggestion to collapse plots. 
   ## - if stratcombine=TRUE, combines strata classes to reach minplotnum.strat. 
-  ## - if unitcombine=TRUE, combines estimation units to reach minplotnum.unit.
+  ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, unitvar=unitvar, 

@@ -1,5 +1,5 @@
 anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL, 
-	xy.joinid="PLOT_ID", clipxy=TRUE, datsource="sqlite", data_dsn=NULL, 
+	xyjoinid="PLOT_ID", clipxy=TRUE, datsource="sqlite", data_dsn=NULL, 
 	istree=TRUE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
 	tree_layer="tree", seed_layer="seed", puniqueid="CN", intensity1=FALSE, 
 	rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
@@ -40,7 +40,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
 #intensity1=FALSE
 #isseed=FALSE
 #savePOP=FALSE
-#xy.joinid="PLOT_ID"
+#xyjoinid="PLOT_ID"
 #xy.uniqueid="PLT_CN"
 #xy_dsn=NULL
 
@@ -91,8 +91,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   ####################################################################
   if (is.null(SApltdat)) {
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
-		xy.joinid=xy.joinid, clipxy=clipxy, datsource=datsource, 
-		data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
+		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=datsource, 
+		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
  		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
     if (is.null(SApltdat)) return(NULL)
@@ -163,7 +163,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   extpoly <- spExtractPoly(xyplt=xyplt, polyvlst=SAdoms, 
 		uniqueid=xy.uniqueid, polyvarlst=unique(c("DOMAIN", "AOI")), 
 		keepNA=FALSE)
-  test <- data.table(st_drop_geometry((extpoly$sppltext)))
+  test <- data.table(st_drop_geometry((extpoly$spxyext)))
   test <- test[AOI == 1, .N, by="DOMAIN"]
 
   message("checking number of plots in domain...")

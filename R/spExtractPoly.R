@@ -189,22 +189,22 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 
     ## Extract data from polygon
     ######################################################## 
-    #sppltext <- sf::st_intersection(sppltx, polyv[, polyvars])
-    sppltext <- unique(sf::st_join(sppltx, polyv))
+    #spxyext <- sf::st_intersection(sppltx, polyv[, polyvars])
+    spxyext <- unique(sf::st_join(sppltx, polyv))
 
     ## Set polyvarnm
     ########################################################  
-    #names(sppltext)[names(sppltext) %in% polyvars] <- polyvarnm 
+    #names(spxyext)[names(spxyext) %in% polyvars] <- polyvarnm 
 
     ## Check points outside poly
     ########################################################  
-    #sppltout <- sppltx[!sppltx[[uniqueid]] %in% sppltext[[uniqueid]],]
+    #sppltout <- sppltx[!sppltx[[uniqueid]] %in% spxyext[[uniqueid]],]
 
     ## Check null values
     ######################################################## 
     geocol <- attr(polyv, "sf_column")
     polyvcols <- names(polyv)[names(polyv) != geocol]
-    sppltout <- sppltext[apply(st_drop_geometry(sppltext[, polyvcols]), 1, 
+    sppltout <- spxyext[apply(st_drop_geometry(spxyext[, polyvcols]), 1, 
 				function(x) all(is.na(x))),]
     nulln <- nrow(sppltout)
 
@@ -221,13 +221,13 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
  
     if (!keepNA) {
       ## Subset points inside boundary
-      sppltext <- sppltext[!apply(st_drop_geometry(sppltext[, polyvcols]), 1, 
+      spxyext <- spxyext[!apply(st_drop_geometry(spxyext[, polyvcols]), 1, 
 		function(x) all(is.na(x))),]
     }
   }
 
   if (savedata) {
-    datExportData(sppltext, outfolder=outfolder, out_fmt=out_fmt, 
+    datExportData(spxyext, outfolder=outfolder, out_fmt=out_fmt, 
 		out_dsn=out_dsn, out_layer="unitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE)
@@ -235,12 +235,12 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 
   ## Export to shapefile
   if (exportsp) {
-    spExportSpatial(sppltext, outfolder=outfolder, out_layer=out_layer, 
+    spExportSpatial(spxyext, outfolder=outfolder, out_layer=out_layer, 
 		outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_layer=overwrite_layer)
   }
   
-  returnlst <- list(sppltext=sppltext, outnames=unlist(polyvarnmlst))
+  returnlst <- list(spxyext=spxyext, outnames=unlist(polyvarnmlst))
 
   if (length(NAlst) > 0) 
     returnlst$NAlst <- NAlst

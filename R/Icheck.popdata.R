@@ -26,7 +26,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   ## - if (module="SA") SApackage <- c("JoSAE", "sae"); method <- c("unit", "area")
   ## Check logical parameters: ACI, strata, stratcombine (if strata=TRUE)
   ## - If ACI, add NF_PLOT_STATUS_CD to pvars2keep and NF_COND_STATUS_CD to cvars2keep
-  ## - If unitcombine, estimation units are combined if less than 10 plots
+  ## - If unit.action='combine', estimation units are combined if less than 10 plots
   ## - If strata, only 1 auxvar allowed, add to pvars2keep
   ## - If module = SA or MA-greg, add prednames to pvars2keep
   ## - If adj="samp", nonsample adjustment factors calculated at strata level

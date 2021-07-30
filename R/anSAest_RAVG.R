@@ -4,7 +4,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
  	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	SApackage="JoSAE", SAmethod="unit", pcfilter=NULL, landarea="FOREST", 
 	estvarlst, savedata=FALSE, saveobj=TRUE, showsteps=FALSE, outfolder=NULL,
- 	multest_outfolder=NULL, multest_dsn="RAVG_SAmultest", multest_fmt="sqlite",
+ 	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="RAVG_SAmultest", 
  	multest.append=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	append_layer=FALSE, barplot.compare=FALSE, title.ref=NULL, save4testing=FALSE, 
 	SAdomdat=NULL, SAdata=NULL, SApopdat=NULL) {
@@ -187,6 +187,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   ####################################################################
   ## Get estimates
   ####################################################################
+#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modSAest.R")
+#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\anSAest_custom.R")
   SAestdat <- anSAest_custom(SApopdat=SApopdat, SAmethod="combo", estvarlst=estvarlst, 
 		savedata=TRUE, outfolder=outfolder, append_layer=append_layer,
 		savemultest=TRUE, multest_fmt=multest_fmt, 

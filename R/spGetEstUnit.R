@@ -131,6 +131,11 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       unitvar <- "ONEUNIT"
     }
 
+    ## Check if unitvar in sppltx
+#    if (unitvar %in% names(sppltx)) {
+#      sppltx[[unitvar]] <- NULL
+#    }
+
     ## unit.filter
     unitlayerx <- datFilter(unitlayerx, xfilter=unit.filter)$xf
 
@@ -145,7 +150,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     ## Check vars2keep
-    varsmiss <- vars2keep[which(!vars2keep %in% names(unitlayerprj))]
+    varsmiss <- vars2keep[which(!vars2keep %in% names(unitlayerx))]
     if (length(varsmiss) > 0) {
       stop("missing variables: ", paste(varsmiss, collapse=", "))
     }
@@ -154,13 +159,13 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerx, 
 		uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
 		keepNA=keepNA, exportNA=exportNA)
-    sppltx <- extpoly$sppltext
-    unitNA <- extpoly$NAlst[[1]]
+    sppltx <- extpoly$spxyext
+    NAlst <- extpoly$NAlst[[1]]
     outname <- extpoly$outname
     if (outname != unitvar) {
       message("unitvar changed from ", unitvar, " to ", outname, 
 				" because of duplicate names in xyplt")
-      names(unitlayerprj)[names(unitlayerprj) == unitvar] <- outname
+      names(unitlayerx)[names(unitlayerx) == unitvar] <- outname
       unitvar <- outname
     }
 
@@ -177,7 +182,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     names(unitarea) <- c(unitvar, areavar)
 
   } else { # unittype = "RASTER"
-      
+ 
     ## Extract values of raster layer to points
     extrast <- spExtractRast(sppltx, rastlst=unitlayerx, var.name=unitvar, 
 			uniqueid=uniqueid, keepNA=keepNA, exportNA=exportNA, 
@@ -196,7 +201,6 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## Calculate area
     unitarea <- FIESTA::areacalc.pixel(unitlayerx, units=areaunits) 
   }
-
 
   if (!is.null(vars2keep)) {
     unitarea <- merge(unitarea, 

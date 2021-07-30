@@ -1,15 +1,15 @@
-modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none", 
-	landarea="FOREST", pcfilter=NULL, estvar=NULL, estvar.filter=NULL, 
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
-	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
-	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	sumunits=FALSE, allin1=FALSE, metric=FALSE, estround=1, pseround=2, 
-	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, addtitle=TRUE, rawdata=FALSE, rawonly=FALSE, 
-	raw_fmt="csv", raw_dsn=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
-	append_layer=FALSE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
-	title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, title.estvar=NULL, 
-	title.filter=NULL, gui=FALSE, ...){
+modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL, 
+	estseed="none", landarea="FOREST", pcfilter=NULL, estvar=NULL, 
+	estvar.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, 
+	col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, 
+	col.add0=FALSE, rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, 
+	rowgrpord=NULL, sumunits=FALSE, allin1=FALSE, metric=FALSE, estround=1, 
+	pseround=2, estnull="--", psenull="--", divideby=NULL, savedata=FALSE, 
+	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, addtitle=TRUE, 
+	rawdata=FALSE, rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL, overwrite_dsn=FALSE,
+ 	overwrite_layer=TRUE, append_layer=FALSE, returntitle=FALSE, title.main=NULL, 
+	title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, 
+	title.estvar=NULL, title.filter=NULL, gui=FALSE, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -55,16 +55,16 @@ modMAtree <- function(MApopdat=NULL, FIA=TRUE, prednames=NULL, estseed="none",
 
 
   ## Check MAmethod 
-  #MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-  #MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
-#		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
+  MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
+  MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
+		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
   if (is.null(MApopdat)) {
-    MApopdat <- modMApop(gui=gui, MAmethod=MAmethod, prednames=prednames, ...)
+    MApopdat <- modMApop(gui=gui, prednames=prednames, ...)
   } else {
     returnMApopdat <- FALSE
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 

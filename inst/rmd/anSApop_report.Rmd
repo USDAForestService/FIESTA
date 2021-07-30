@@ -62,7 +62,7 @@ invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
 
 
 ---
-title: "Forest Resource Report:  \n`r AOInm``r title.states`,  \n`r invyrs2`"
+title: "Forest Resource Report:  \n`r title.ref``r title.states`,  \n`r invyrs2`"
 ---
 
 
@@ -81,7 +81,7 @@ smallbnd.unique <- SApopdat$smallbnd.unique
 plot(st_geometry(smallbnd), border="black", main="")
 
 ```
-Figure 1. Small area of interest, `r AOInm``r title.states`, `r invyrs2`.
+Figure 1. Small area of interest, `r title.ref``r title.states`, `r invyrs2`.
 
 &nbsp;  
 
@@ -133,14 +133,11 @@ paste0("Estimates are calculated using the Forest Inventory ESTimation and Analy
 
 -----  
 
-
-# EST1 - Area of forest land by small area domain.
-
+# EST1 - Area of forest land by domain.
 
 -----  
 
-
-Table 1. Area of forest land by small area domain, `r AOInm``r title.states`, `r invyrs2`.
+Table 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
 
 &nbsp;    
 
@@ -149,7 +146,7 @@ Table 1. Area of forest land by small area domain, `r AOInm``r title.states`, `r
 SAareadat1 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
 	SAmethod="combo", esttype="AREA", landarea="FOREST", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
-	returntitle=TRUE, multest=TRUE, title.ref=AOInm)
+	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
 est1 <- SAareadat1$est
 raw1 <- SAareadat1$raw
 titlelst1 <- SAareadat1$titlelst
@@ -159,17 +156,9 @@ knitr::kable(est1, "simple", align=c("lrr"), digits=digits,
 
 ```  
 
-&nbsp;    
-
-
------  
-
-\newpage
-
------  
-
 
 &nbsp;    
+
 
 ```{r est1_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
@@ -184,9 +173,8 @@ plot(smallbnd1['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3),
 	pal=palette(brewer.pal(n=7, name="Greens")),
 	border="black", lwd=.5, main="")
 
-
 ```
-Figure 1. Area of forest land by small area domain, `r AOInm``r title.states`, `r invyrs2`.
+Figure 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
 
 
 \newpage    
@@ -196,14 +184,12 @@ Figure 1. Area of forest land by small area domain, `r AOInm``r title.states`, `
 
 -----  
 
-
-# EST2 - Net cubic-foot volume of live trees on forest land by small area domain.
-
+# EST2 - Net cubic-foot volume of live trees on forest land by domain.
 
 -----  
 
 
-Table 2. Net cubic-foot volume of live trees on forest land by small area domain, `r AOInm``r title.states`, `r invyrs2`.
+Table 2. Net cubic-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
 
 &nbsp;    
 
@@ -213,7 +199,7 @@ SAareadat2 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="VOLCFNET", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
-	returntitle=TRUE, multest=FALSE, title.ref=AOInm)
+	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
 est2 <- SAareadat2$est
 raw2 <- SAareadat2$raw
 titlelst2 <- SAareadat2$titlelst
@@ -225,7 +211,6 @@ knitr::kable(est2, "simple", align=c("lrr"), digits=digits,
 
 &nbsp;    
 
-
 -----  
 
 ```{r est2_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
@@ -235,29 +220,27 @@ knitr::kable(est2, "simple", align=c("lrr"), digits=digits,
 ## Merge estimate to smallbnd
 smallbnd2 <- merge(smallbnd, est2, by.x=smallbnd.unique, by.y="DOMAIN")
 
-plot(smallbnd2['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
-	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=8, 
-	pal=palette(brewer.pal(n=6, name="Blues")),
+plot(smallbnd2['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3),
+	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5,
+#	pal=palette(brewer.pal(n=6, name="Blues")),
 	border="black", lwd=.5, main="")
 
 
 ```
-Figure 2. Net cubic-foot volume of live trees on forest land by small area domain, `r AOInm``r title.states`, `r invyrs2`.
+Figure 2. Net cubic-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
 
 
 \newpage 
 
+&nbsp;  
 
 -----  
 
-
-# EST3 - Square-feet basal area of live trees on forest land by small area domain.
-
+# EST3 - Square-feet basal area of live trees on forest land by domain.
 
 -----  
 
-
-Table 3. Square-feet basal area of live trees on forest land by small area domain, `r AOInm``r title.states`, `r invyrs2`.
+Table 3. Square-feet basal area of live trees on forest land by domain, `r AOInm``r title.states`, `r invyrs2`.
 
 &nbsp;    
 
@@ -266,7 +249,7 @@ SAareadat3 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="BA", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
-	returntitle=TRUE, multest=FALSE, title.ref=AOInm)
+	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
 est3 <- SAareadat3$est
 raw3 <- SAareadat3$raw
 titlelst3 <- SAareadat3$titlelst
@@ -286,19 +269,76 @@ knitr::kable(est3, "simple", align=c("lrr"), digits=digits,
 ## Merge estimate to smallbnd
 smallbnd3 <- merge(smallbnd, est3, by.x=smallbnd.unique, by.y="DOMAIN")
 
+# plot(smallbnd3['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
+# 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
+# 	pal=palette(brewer.pal(n=6, name = "Oranges")),
+# 	border="black", lwd=.5, main="")
+
 plot(smallbnd3['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
-	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=8, 
-	pal=palette(brewer.pal(n=6, name = "Oranges")),
+	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
 	border="black", lwd=.5, main="")
 
-
 ```
-Figure 3. Square-feet basal area of live trees on forest land by small area domain, `r AOInm``r title.states`, `r invyrs2`.
+Figure 3. Square-feet basal area of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
 
 
 \newpage    
 
+&nbsp;  
+
+
+-----  
+
+# EST4 - Net cubic-board foot volume of live trees on forest land by domain.
+
+-----  
+
 &nbsp; 
+
+Table 4. Net board-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
+
+&nbsp;    
+
+```{r est4, echo=FALSE, warning=FALSE, message=FALSE}
+
+SAareadat4 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
+	SAmethod="area", esttype="TREE", landarea="FOREST", 
+	estvar="VOLBFNET", estvar.filter="STATUSCD == 1", 
+ 	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
+	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
+est4 <- SAareadat4$est
+raw4 <- SAareadat4$raw
+titlelst4 <- SAareadat4$titlelst
+
+knitr::kable(est4, "simple", align=c("lrr"), digits=digits,
+             format.args=list(big.mark = ","))
+
+```  
+
+&nbsp;    
+
+
+-----  
+
+```{r est4_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
+
+#anMOD_barplot(SAareadat4, barplot.nplt=TRUE)
+
+## Merge estimate to smallbnd
+smallbnd4 <- merge(smallbnd, est4, by.x=smallbnd.unique, by.y="DOMAIN")
+
+plot(smallbnd4['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3),
+	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5,
+#	pal=palette(brewer.pal(n=6, name="Blues")),
+	border="black", lwd=.5, main="")
+
+
+```
+Figure 4. Net board-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
+
+
+\newpage 
+
 
 
 # References

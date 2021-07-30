@@ -91,7 +91,6 @@ modMAarea <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   areaunits <- MApopdat$areaunits
   unitvar <- MApopdat$unitvar
   unitvars <- MApopdat$unitvars
-  unitcombine <- MApopdat$unitcombine
   unitlut <- MApopdat$unitlut
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar

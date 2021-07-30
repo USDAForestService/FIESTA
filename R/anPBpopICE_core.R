@@ -1,7 +1,7 @@
 anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm, 
 	T1, T2, plotid="plot_id", pntid="dot_cnt", pltassgn=NULL, 
 	pltassgnid=NULL, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
-	areavar="ACRES", unitcombine=FALSE, strata=FALSE, stratalut=NULL, 
+	areavar="ACRES", unit.action="keep", strata=FALSE, stratalut=NULL, 
 	strvar=NULL, getwt=TRUE, getwtvar="P1POINTCNT", stratcombine=TRUE, 
 	tabtype="PCT", sumunits=FALSE, rawdata=TRUE, returntitle=TRUE, 
 	outfolder=NULL, outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE, 
@@ -44,7 +44,7 @@ anPBpopICE_core <- function(ice.pntfn, ice.plotfn=NULL, AOInm,
     PBpopdatICE <- anPBpopICE(ice.pntfn=ice.pntfn, ice.plotfn=ice.plotfn, 
 		T1=T1, T2=T2, plotid="plot_id", pntid="dot_cnt", 
 		puniqueid=plotid, pltassgn=pltassgn, pltassgnid=pltassgnid, 
-		unitarea=unitarea, unitcombine=unitcombine, 
+		unitarea=unitarea, unit.action=unit.action, 
 		strata=strata, strvar=strvar, getwt=getwt, getwtvar=getwtvar, 
 		stratcombine=stratcombine, sumunits=sumunits, ...)
   } 

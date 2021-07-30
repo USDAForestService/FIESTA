@@ -2,7 +2,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 	plt=NULL, pltassgn=NULL, plotid="plot_id", pntid="dot_cnt",
  	puniqueid="CN", pltassgnid="CN", nonsamp.pfilter=NULL, 
 	unitvar=NULL, unitvar2=NULL, auxvars=NULL, unitarea=NULL, areavar="ACRES", 
-	areaunits="acres", unitcombine=FALSE, removeunits=TRUE, removetext="unitarea", 
+	areaunits="acres", unit.action="keep", removetext="unitarea", 
 	strata=FALSE, strvar=NULL, strtype="POST", stratcombine=TRUE, 
 	sumunits=FALSE, pvars2keep=NULL){
 
@@ -67,14 +67,15 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   pvars2keep <- unique(c(pvars2keep, unitvar, unitvar2, auxvars))
 
   ###################################################################################
-  ## Check logical parameters: unitcombine, strata, ACI
+  ## Check logical parameters: strata, ACI
   ###################################################################################
   
 
-  ## Check unitcombine 
+  ## Check unit.action
   ########################################################
-  unitcombine <- FIESTA::pcheck.logical(unitcombine, varnm="unitcombine", 
-		title="Combine estimation units?", first="YES", gui=gui, stopifnull=TRUE)
+  unit.actionlst <- c("keep", "remove", "combine")
+  unit.action <- FIESTA::pcheck.varchar(var2check=unit.action, varnm="unit.action", gui=gui, 
+		checklst=unit.actionlst, caption="unit.action", multiple=FALSE, stopifnull=TRUE)
 
   ## Check sumunits 
   ########################################################
@@ -341,6 +342,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
     }
     unitarea <- NULL
   } else {
+    removeunits <- ifelse(unit.action == "remove", TRUE, FALSE)
     unitvars <- c(unitvar, unitvar2)
     unitdat <- check.unitarea(unitarea=unitarea, pltx=pltassgnx, 
 		unitvars=unitvars, areavar=areavar, areaunits=areaunits, 
@@ -381,7 +383,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ######################################################################################
   returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
 	pltassgnid=pltassgnid, unitvar=unitvar, unitvar2=unitvar2, unitarea=unitarea,
-	areavar=areavar, areaunits=areaunits, unitcombine=unitcombine, 
+	areavar=areavar, areaunits=areaunits, unit.action=unit.action, 
 	strata=strata, strvar=strvar, strtype=strtype, stratcombine=stratcombine,
  	plotsampcnt=plotsampcnt, getprop=getprop)
 

@@ -495,28 +495,34 @@ findnm <- function(x, xvect, returnNULL=FALSE) {
     }
     stop("name not found")
   } else if (sum(test) > 1) {
-    stop("more than 1 name found")
+    testnames <- xvect[test]
+    test <- match(x, testnames)
+    if (length(test) == 1) {
+      return(testnames[test])
+    } else {
+      stop("more than 1 name found")
+    }
   } else {
     return(xvect[test])
   }
 }
 
 
-strat.pivot <- function(x, PSstrvar, unitvars, strwtvar="Prop", strat.levels=NULL) {
+strat.pivot <- function(x, strvar, unitvars, strwtvar="Prop", strat.levels=NULL) {
   ## DESCRIPTION: translates strata table from spGetAuxiliary() to spGetStrata() format 
   nmlst <- names(x)
-  PScols <- nmlst[grep(PSstrvar, nmlst)]
-  PSvalslst <- sapply(strsplit(PScols, paste0(PSstrvar, ".")), "[[", 2)
+  PScols <- nmlst[grep(strvar, nmlst)]
+  PSvalslst <- sapply(strsplit(PScols, paste0(strvar, ".")), "[[", 2)
 
   strlut <- data.table(PSvalslst, x[, t(.SD), by=unitvars, .SDcols=PScols])
-  setnames(strlut, c(PSstrvar, unitvars, strwtvar))
-  setcolorder(strlut, c(unitvars, PSstrvar, strwtvar))
+  setnames(strlut, c(strvar, unitvars, strwtvar))
+  setcolorder(strlut, c(unitvars, strvar, strwtvar))
   if (is.null(strat.levels)) {
-    strlut[[PSstrvar]] <- factor(strlut[[PSstrvar]])
+    strlut[[strvar]] <- factor(strlut[[strvar]])
   } else {
-    strlut[[PSstrvar]] <- factor(strlut[[PSstrvar]], levels=strat.levels)
+    strlut[[strvar]] <- factor(strlut[[strvar]], levels=strat.levels)
   }
-  strvars <- PSstrvar
+  strvars <- strvar
   return(strlut)
 }    
 

@@ -10,7 +10,7 @@
 anPBpopICE_core(ice.pntfn, ice.plotfn = NULL, AOInm, T1, T2, 
 	plotid = "plot_id", pntid = "dot_cnt", pltassgn = NULL, pltassgnid = NULL, 
 	unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES", 
-	unitcombine = FALSE, strata = FALSE, stratalut = NULL, strvar = NULL, 
+	unit.action = "keep", strata = FALSE, stratalut = NULL, strvar = NULL, 
 	getwt = TRUE, getwtvar = "P1POINTCNT", stratcombine = TRUE, 
 	tabtype = "PCT", sumunits = FALSE, rawdata = TRUE, returntitle = TRUE, 
 	outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, 
@@ -41,8 +41,9 @@ anPBpopICE_core(ice.pntfn, ice.plotfn = NULL, AOInm, T1, T2,
 	with areavar. If more than one estimation unit, provide a data frame of total 
 	area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
-  \item{unitcombine}{ Logical. If TRUE, automatically combines estimation units if less 
-	than 2 plots in any one estimation unit. See notes for more info. }
+  \item{unit.action}{ String. What to do if number of plots in an estimation unit 
+	is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine',
+	combines estimation unit to the following estimation unit in unitlut. }
   \item{strata}{ Logical. If TRUE, applies post-stratification to estimation. }
   \item{stratalut}{ DF/DT. Look-up table with strata weights (proportions) or area by 
 	strata (estimation unit). If no strata weights, set getwt=TRUE to calculate.

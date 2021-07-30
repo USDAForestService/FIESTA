@@ -210,7 +210,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, 
 		uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
 		keepNA=FALSE, exportNA=exportNA)
-      sppltx <- extpoly$sppltext
+      sppltx <- extpoly$spxyext
       unitNA <- extpoly$NAlst[[1]]
       outname <- extpoly$outname
       if (outname != unitvar) {

@@ -38,7 +38,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 
   ## Set global variables
   ONEUNIT=npixels=nonsampplots=strvars=PLOT_STATUS_CD=strwt=testlt1=
-		pixels=unitstrgrplut=vars2combine=STRATASUB=unitlessthan <- NULL
+		pixels=unitstrgrplut=vars2combine=STRATASUB=unitlessthan=errtyp <- NULL
   gui=pivotstrat <- FALSE
   unitvars <- c(unitvar2, unitvar)
   strunitvars <- c(unitvars)
@@ -268,7 +268,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   errtab <- pltcnts$errtab
   nostrat <- pltcnts$nostrat
 
-  ## If removeunit, remove estimation with less than minplotnum.unit plots
+  ## If unit.action="remove", remove estimation with less than minplotnum.unit plots
   if (any(auxlut$n.total < minplotnum.unit)) {
     unitlessthan <- auxlut[auxlut$n.total < minplotnum.unit][[unitvar]]
     if (length(unitlessthan) > 0) {
@@ -402,9 +402,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea
   ##################################################################################
+  subsetrows <- ifelse(unit.action == "remove", TRUE, FALSE)
   if (!is.null(unitarea)) {
     auxlut <- check.matchval(auxlut, unitarea, unitvar, tab1txt=auxtext,
-			tab2txt=removetext, subsetrows=removeunit)
+			tab2txt=removetext, subsetrows=subsetrows)
   }
 
   ##################################################################################

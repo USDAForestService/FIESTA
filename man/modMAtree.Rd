@@ -8,7 +8,7 @@
 	McConville et al. (2018)'s mase R package.	 
 }
 \usage{    
-modMAtree(MApopdat = NULL, FIA = TRUE, prednames = NULL, estseed = "none", 
+modMAtree(MApopdat = NULL, MAmethod, FIA = TRUE, prednames = NULL, estseed = "none", 
 	landarea = "FOREST", pcfilter = NULL, estvar = NULL, estvar.filter = NULL, 
 	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
@@ -26,6 +26,8 @@ modMAtree(MApopdat = NULL, FIA = TRUE, prednames = NULL, estseed = "none",
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{MApopdat}{ List. Population data objects returned from modMApop(). }
+  \item{MAmethod}{ String. mase (i.e., model-assisted) method to use 
+	('HT', 'PS', 'greg', 'gregEN'). }
   \item{FIA}{ Logical. If TRUE, the finite population term is removed from 
 	estimator to match FIA estimates. } 
   \item{prednames}{ String vector. Name(s) of predictor variables to include in model. }

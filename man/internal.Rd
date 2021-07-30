@@ -214,6 +214,8 @@
 \alias{SAest.large}
 \alias{SAest.dom}
 \alias{SAest}
+\alias{SAest.area}
+\alias{SAest.unit}
 \alias{FIESTA_SAmod_demo_plots}
 \alias{helper.select}
 

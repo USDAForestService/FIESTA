@@ -216,7 +216,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   ## - if < 2 plots, an error occurs, must collapse plots.
   ## - if 2-10 plots, a warning is displayed, with suggestion to collapse plots. 
   ## - if stratcombine=TRUE, combines strata classes to reach minplotnum.strat. 
-  ## - if unitcombine=TRUE, combines estimation units to reach minplotnum.unit.
+  ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
 		auxlut=dunitlut, prednames=prednames, predfac=predfac, makedummy=TRUE,

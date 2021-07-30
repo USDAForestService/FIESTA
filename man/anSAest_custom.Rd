@@ -8,19 +8,18 @@
 	a custom-defined boundary.	
 }
 \usage{
-anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit", 
+anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit", 
 	landarea = "FOREST", pcfilter = NULL, estvarlst = NULL, 
-	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, savemultest = FALSE, 
-	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, multest_outfolder = NULL,
-	multest_fmt = "sqlite", multest_dsn = "SAmultest", multest.append = FALSE, 
-	multest.AOIonly = TRUE, overwrite = FALSE, barplot.compare = FALSE, 
-	smallbnd.att = NULL, title.ref = NULL, save4testing = FALSE, 
-	save4testing.append = FALSE, testfolder = NULL, ...)
+	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, append_layer = FALSE, 
+	savemultest = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
+	multest_outfolder = NULL, multest_fmt = "sqlite", multest_dsn = "SAmultest", 
+	multest.append = FALSE, multest.AOIonly = TRUE, overwrite = FALSE, 
+	barplot.compare = FALSE, smallbnd.att = NULL, title.ref = NULL, 
+	save4testing = FALSE, save4testing.append = FALSE, testfolder = NULL, ...)
 }
 
 \arguments{
   \item{SApopdat}{ List. Population data objects returned from modSApop(). }
-  \item{esttype}{ String. Type of estimation ("AREA", "TREE"). }
   \item{SApackage}{ String. small area package to use ('JoSAE', 'sae') }
   \item{SAmethod}{ String. small area method to use ('unit', 'area', 'combo').
 	If SAmethod='combo', a combination of area-level estimation and unit-level
@@ -35,6 +34,7 @@ anSAest_custom(SApopdat, esttype = "TREE", SApackage = "JoSAE", SAmethod = "unit
   \item{showsteps}{ Logical. If TRUE, clipped points are displayed.
 	If savedata=TRUE, the display is saved as *.jpg to outfolder. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
+  \item{append_layer}{ String. If TRUE, append output to file. }
   \item{savemultest}{ Logical. If TRUE, saves multest table to multest_outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 
 	written to working directory, or if gui, a window to browse. }

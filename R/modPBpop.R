@@ -1,8 +1,8 @@
 modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL, 
 	pltpctvars=NULL, plt=NULL, pltassgn=NULL, puniqueid="CN", pltassgnid="CN",
  	nonsamp.pfilter=NULL, strata=FALSE, sumunits=FALSE, unitvar=NULL, unitvar2=NULL, 
-	unitarea=NULL, areavar="ACRES", areaunits="acres", unitcombine=FALSE, 
- 	minplotnum.unit=10, stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
+	unitarea=NULL, areavar="ACRES", areaunits="acres", minplotnum.unit=10, 
+ 	unit.action="keep", stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
 	getwtvar="P1POINTCNT", strwtvar="strwt", stratcombine=TRUE, minplotnum.strat=2, 
 	pvars2keep=NULL, saveobj=FALSE, objnm="PBpopdat", savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
@@ -88,10 +88,11 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
+  unitcombine <- ifelse(unitcombine == "combine", TRUE, FALSE)
   popcheck <- check.popdataPB(gui=gui, pnt=pntdat, pltpct=pltpct, pltpctvars=pltpctvars, 
 	plt=plt, pltassgn=pltassgn, plotid=plotid, pntid=pntid, puniqueid=puniqueid, 
 	pltassgnid=pltassgnid, nonsamp.pfilter=nonsamp.pfilter, unitvar=unitvar, 
-	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, areaunits=areaunits, 	unitcombine=unitcombine, auxvars=auxvars, strata=strata, strvar=strvar, 
+	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, areaunits=areaunits, 	unit.action=unit.action, auxvars=auxvars, strata=strata, strvar=strvar, 
 	stratcombine=stratcombine, pvars2keep=pvars2keep, sumunits=sumunits)
   PBx <- popcheck$PBx
   pltassgnx <- popcheck$pltassgnx
@@ -103,7 +104,8 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   areaunits <- popcheck$areaunits
   unitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
-  unitcombine <- popcheck$unitcombine
+  areaunits <- popcheck$areaunits
+  unit.action <- popcheck$unit.action
   strata <- popcheck$strata
   strvar <- popcheck$strvar
   stratcombine <- popcheck$stratcombine
@@ -124,8 +126,8 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## - if unitcombine=TRUE, combines estimation units to reach minplotnum.unit.
   ###################################################################################
   stratcheck <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="PB",
-		strata=strata, auxlut=stratalut, PSstrvar=strvar, stratcombine=stratcombine, 
-		unitcombine=unitcombine, unitarea=unitarea, unitvar=unitvar, 
+		strata=strata, auxlut=stratalut, strvar=strvar, stratcombine=stratcombine, 
+		unit.action=unit.action, unitarea=unitarea, unitvar=unitvar, 
 		unitvar2=unitvar2, areavar=areavar, minplotnum.unit=minplotnum.unit, 
 		minplotnum.strat=minplotnum.strat, getwt=getwt, getwtvar=getwtvar,
 		strwtvar=strwtvar)  
@@ -134,7 +136,7 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   unitvar <- stratcheck$unitvar
   unitvars <- stratcheck$unitvars
   stratalut <- stratcheck$auxlut
-  strvar <- stratcheck$PSstrvar
+  strvar <- stratcheck$strvar
   strwtvar <- stratcheck$strwtvar
   stratcombinelut <- stratcheck$unitstrgrplut
   strunitvars <- c(unitvar, strvar)

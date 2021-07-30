@@ -17,10 +17,12 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
 	nbrdom.min = 10, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cat = NULL, rastlst.cat.name = NULL, SApackage = "JoSAE", 
 	SAmethod = "unit", pcfilter = NULL, landarea = "FOREST", 
-	estvarlst, savedata = FALSE, showsteps = FALSE, 
-	outfolder = NULL, multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, barplot.compare = FALSE, 
-	title.ref = NULL, SAdomdat = NULL, SAdata = NULL, SApopdat = NULL)
+	estvarlst, savedata = FALSE, saveobj = TRUE, showsteps = FALSE, 
+	outfolder = NULL, multest_outfolder = NULL, multest_fmt = "sqlite", 
+	multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
+	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
+	barplot.compare = FALSE, title.ref = NULL, save4testing = FALSE, 
+	SAdomdat = NULL, SAdata = NULL, SApopdat = NULL)
 }
 \arguments{
   \item{RAVG}{ String. RAVG layer. } 
@@ -56,14 +58,20 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
   \item{estvarlst}{ String vector. Name(s) of estimation variable 
 	(e.g., c("VOLCFNET", "BA"). }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
+  \item{saveobj}{ Logical. If TRUE, saves object to outfolder. }
   \item{showsteps}{ Logical. If TRUE, shows steps for creating SAdoms. }
   \item{outfolder}{ String. Name of output folder. If NULL, the working directory is used. }
+  \item{multest_outfolder}{ String. If multest=TRUE, name of output folder for 
+	output with multiple estimates. If NULL, multest_outfolder=outfolder. }
+  \item{multest_fmt}{ String. Format for multest output tables ('csv', 'sqlite', 'gpkg').}
   \item{multest_dsn}{ String. Name of dsn to output multest table. }
   \item{multest.append}{ Logical. If TRUE, appends dunit.multest rawdata to out_dsn. }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
+  \item{append_layer}{ Logical. If TRUE, append layer to output. }
   \item{barplot.compare}{ Logical. If TRUE, creates barplot to compare estimate. }
   \item{title.ref}{ String. Reference information to use in title. }
+  \item{save4testing}{ Logical. If TRUE, saves intermediate files for testing. }
   \item{SAdomdat}{ R list object. SA domain data. }
   \item{SAdata}{ R list object. FIA plot data and model data within SA domain. }
   \item{SApopdat}{ R list object. FIA population data within SA domain. }

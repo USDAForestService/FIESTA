@@ -8,18 +8,19 @@
 }
 \usage{    
 modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
-	SAmethod = "area", esttype = "TREE", estseed = "none", largebnd.att = NULL, 
-	landarea = "FOREST", pcfilter = NULL, estvar = NULL, estvar.filter = NULL, 
-	smallbnd.att = NULL, allin1 = FALSE, metric = FALSE, estround = 0, 
-	pseround = 3, estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, 
-	rawdata = FALSE, rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, 
-	SAdomvars = NULL, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	addtitle = TRUE, raw_fmt = "csv", raw_dsn = "rawdata", multest_fmt = "csv", 
-	multest_outfolder = NULL, multest_dsn = NULL, multest_layer = NULL, 
-	multest.append = FALSE, multest.AOIonly = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
-	title.main = NULL, title.ref = NULL, title.dunitvar = NULL, 
-	title.estvar = NULL, title.filter = NULL, save4testing=FALSE, ...)
+	SAmethod = "area", esttype = "TREE", totals = FALSE, estseed = "none", 
+	largebnd.att = NULL, landarea = "FOREST", pcfilter = NULL, estvar = NULL, 
+	estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, metric = FALSE, 
+	estround = 3, pseround = 3, estnull = 0, psenull = "--", divideby = NULL, 
+	savedata = FALSE, rawdata = FALSE, rawonly = FALSE, multest = TRUE, 
+	addSAdomsdf = TRUE, SAdomvars = NULL, outfolder = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, addtitle = TRUE, raw_fmt = "csv", raw_dsn = "rawdata", 
+	savemultest = FALSE, multest_fmt = "csv", multest_outfolder = NULL, 
+	multest_dsn = NULL, multest_layer = NULL, multest.append = FALSE, 
+	multest.AOIonly = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
+	append_layer = FALSE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
+	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, 
+	save4testing=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +31,7 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
   \item{SApackage}{ String. Small area package to use ('JoSAE', 'sae') }
   \item{SAmethod}{ String. Small area method to use ('unit', 'area') }
   \item{esttype}{ String. Estimation type ('TREE', 'AREA'). }
+  \item{totals}{ Logical. If TRUE, returns total estimate (mean * AREAUSED). }
   \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
 	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
   \item{largebnd.att}{ String. Name of the large boundary attribute to define plots
@@ -71,6 +73,7 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
   \item{addtitle}{ Logical. If TRUE and savedata=TRUE, adds title to outfile. }
   \item{raw_fmt}{ String. Format for raw output tables ('csv', 'sqlite', 'gpkg').}
   \item{raw_dsn}{ String. Name of database if raw_fmt = c('sqlite', 'gpkg'). }
+  \item{savemultest}{ Logical. If TRUE, save table with area- and unit-level estimates. }
   \item{multest_fmt}{ String. Format for multest output tables ('csv', 'sqlite', 'gpkg').}
   \item{multest_outfolder}{ String. Outfolder for multest. If NULL, same as outfolder.}
   \item{multest_dsn}{ String. Name of database if multest_fmt = c('sqlite', 'gpkg'). }
