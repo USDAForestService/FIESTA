@@ -52,7 +52,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   } else {
     clipxy <- FALSE
   }
-
+ 
   #############################################################################
   ## Set xy_datsource
   ########################################################
@@ -186,12 +186,12 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       ####################################################################
       xyindb <- FALSE
       plot_layer <- NULL
-  
+
       ## Check for data tables in database
       ###########################################################
       dbconn <- suppressWarnings(DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE))
       tablst <- DBI::dbListTables(dbconn)
-
+ 
       if (is.null(xy)) {
         xytabs <- tablst[grepl("xy", tablst)]
         if (length(xytabs) == 0) {
@@ -256,15 +256,15 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       if (is.null(xyjoinid)) {
         xyjoinid <- xy.uniqueid
       }
-
+ 
       if (!is.null(xystatenm)) {
         sql <- paste0("select * from ", xy, " where ", xystatenm, " IN(", 
 			toString(stcds), ")")
-        xyplt <- pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql)
- 
+        xyplt <- suppressMessages(pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql))
+
         ## Make spatial
         spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
-			xvar=xvar, yvar=yvar, xy.crs=xy.crs)            
+			xvar=xvar, yvar=yvar, xy.crs=xy.crs) 
       } else {
         plot_layer <- findnm("plot", tablst, returnNULL=TRUE)
         if (!is.null(plot_layer) && length(plot_layer) == 1) {
@@ -295,7 +295,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       } 
     }
   }
-
+ 
   if (clipxy) {
     clipdat <- spClipPoint(spxy, clippolyv=bndx)
     spxy <- clipdat$clip_xyplt 

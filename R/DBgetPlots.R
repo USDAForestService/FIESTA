@@ -284,7 +284,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
             if (length(states) == 1) {
               names(invyrs) <- states
             } else {
-              warning("using specified invyrs for all states")
+              message("using specified invyrs for all states")
               yrs <- invyrs
               invyrs <- sapply(states, function(x) NULL)
               for (st in states) invyrs[st] <- yrs
@@ -297,14 +297,16 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         for (state in states) {
           stcd <- FIESTA::pcheck.states(state, "VALUE")
           if ("STATENM" %in% names(invyrtab)) {
-            stinvyrlst <- invyrtab[invyrtab$STATENM == state, "INVYR"]
+            stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
           } else if ("STATECD" %in% names(invyrtab)) {
-            stinvyrlst <- invyrtab[invyrtab$STATECD == stcd, "INVYR"]
+            stinvyrlst <- sort(invyrtab[invyrtab$STATECD == stcd, "INVYR"])
           } else {
             stop("invyrtab is invalid")
           }
           if (!all(invyrs[[state]] %in% stinvyrlst)) {
-            stop("inventory years do not match database")
+            invyrs[[state]] <- invyrs[[state]][invyrs[[state]] %in% stinvyrlst]
+            missyr <- invyrs[[state]][!invyrs[[state]] %in% stinvyrlst]
+            message(state, " missing following inventory years: ", toString(missyr))
           }
         }
       }
@@ -352,7 +354,6 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   ##  the tree table will not be returned as an object.. only written to outfolder.
   maxstates.tree <- ifelse(allyrs && is.null(allFilter), 3, 
 						ifelse(!is.null(allFilter), 10, 20))  
-
 
   ## Get maximum number of inventory years for states in query 
   ## (used to determine size of tree data)
