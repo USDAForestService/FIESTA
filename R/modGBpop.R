@@ -105,9 +105,16 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 
   } else {
     if (!is.null(pltdat)) {
-      list.items <- c("tabs", "xypltx")
+      if ("tabs" %in% names(pltdat)) {
+        list.items <- c("tabs", "xypltx")
+      } else {
+        list.items <- c("states", "plt", "cond")
+      }
       if (popType == "LULC") {
-        list.items <- c(list.items, "lulcx")
+      #  list.items <- c(list.items, "lulcx")
+      #}
+      if (popType == "P2VEG") {
+        list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
       }
       pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
 
@@ -144,7 +151,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       }
     }
     if (!is.null(GBstratdat)) {
-      list.items <- c("bndx", "pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
+      list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
       GBstratdat <- FIESTA::pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
       bndx <- GBstratdat$bndx
       pltassgn <- GBstratdat$pltassgn
@@ -234,11 +241,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, unitvar=unitvar, 
-		unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
-		minplotnum.unit=minplotnum.unit, unit.action=unit.action,
-		strata=strata, auxlut=stratalut, strvar=strvar,  
-		nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
-		minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 						getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
+	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
+	minplotnum.unit=minplotnum.unit, unit.action=unit.action,
+	strata=strata, auxlut=stratalut, strvar=strvar,  
+	nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
+	minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 						getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut

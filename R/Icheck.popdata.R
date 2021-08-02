@@ -1152,9 +1152,9 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   if (popType == "P2VEG") {
     if ("P2VEG_SAMPLING_STATUS_CD" %in% names(pltcondx)) {
       pltassgnvars <- c(pltassgnvars, "P2VEG_SAMPLING_STATUS_CD")
-    #} 
-    #if ("SAMP_METHOD_CD" %in% names(pltcondx)) {
-    #  pltassgnvars <- c(pltassgnvars, "SAMP_METHOD_CD")
+    } 
+    if ("SAMP_METHOD_CD" %in% names(pltcondx)) {
+      pltassgnvars <- c(pltassgnvars, "SAMP_METHOD_CD")
     } else {
       message("removing nonresponse from field-visited and remotely-sensed plots")
     }      

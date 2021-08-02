@@ -414,9 +414,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   if (module %in% c("GB", "PB")) {
     if (getwt) {
       ## Caculate weight
-      if (is.character(auxlut[[getwtvar]]) && sum(grepl(",", auxlut[[getwtvar]]) > 0))
+      if (is.character(auxlut[[getwtvar]]) && sum(grepl(",", auxlut[[getwtvar]]) > 0)) {
         auxlut[[getwtvar]] <- as.numeric(gsub(",", "", auxlut[[getwtvar]]))
-      auxlut[, strwt := prop.table(get(getwtvar)), by=unitvar]
+      }
+      auxlut[, list(strwt=prop.table(get(getwtvar))), by=unitvar]
 #     auxlut <- auxlut[, list(strwt = sum(strwt/.N, na.rm=TRUE)), by=c(unitvar, strvar)]
       strwtvar <- "strwt"
     } else {
