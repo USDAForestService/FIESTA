@@ -1,13 +1,15 @@
-anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL, 
-	xyjoinid="PLOT_ID", clipxy=TRUE, datsource="sqlite", data_dsn=NULL, 
-	istree=TRUE, isseed=FALSE, plot_layer="plot", cond_layer="cond", 
-	tree_layer="tree", seed_layer="seed", puniqueid="CN", intensity1=FALSE, 
+anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, 
+	xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xyjoinid="PLOT_ID", 
+	clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
+	isseed=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
+	seed_layer="seed", puniqueid="CN", intensity1=FALSE, 
 	rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
-	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
-	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
-	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, append_layer=FALSE, SApltdat=NULL, ...) {
+	rastlst.cont.NODATA=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
+	rastlst.cat.NODATA=NULL, vars2keep="AOI", showsteps=FALSE, 
+	savedata=FALSE, savexy=FALSE, savesteps=FALSE, saveobj=FALSE, 
+	outfolder=NULL, out_fmt="csv", out_dsn = NULL, outfn.pre=NULL, 
+	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
+	append_layer=FALSE, SApltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -91,7 +93,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   ####################################################################
   if (is.null(SApltdat)) {
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
-		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=datsource, 
+		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=xy_datsource, 
 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
  		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
@@ -108,8 +110,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
 		toString(SApltdat.names[!SApltdat.names %in% names(SApltdat)])) 
     }
   }
- 
   ## Extract list objects
+  spxy <- SApltdat$spxy
   xyplt <- SApltdat$xypltx
   xy.uniqueid <- SApltdat$xy.uniqueid
   puniqueid <- SApltdat$puniqueid
@@ -125,14 +127,14 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   #  stop("invalid SAdoms...  need to include DOMAIN and AOI attributes")
   #}
 
-  if (showsteps) {
+  if (showsteps && !is.null(spxy)) {
     ## Set plotting margins
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
 
     plot(sf::st_geometry(SAdoms), border="grey")
     #plot(sf::st_geometry(bnd), add=TRUE)
-    plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=.25)
+    plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.25)
     if (!is.null(smallbnd) && "sf" %in% class(smallbnd)) { 
       plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
     }
@@ -158,11 +160,10 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
     par(mar=mar)
   }
 
- 
   ## Check number of plots (Note: must be greater than 2 plots)
-  extpoly <- spExtractPoly(xyplt=xyplt, polyvlst=SAdoms, 
-		uniqueid=xy.uniqueid, polyvarlst=unique(c("DOMAIN", "AOI")), 
-		keepNA=FALSE)
+  polyvarlst <- unique(c("DOMAIN", "AOI")[!c("DOMAIN", "AOI") %in% names(spxy)])
+  extpoly <- spExtractPoly(xyplt=spxy, polyvlst=SAdoms, 
+		uniqueid=xy.uniqueid, polyvarlst=polyvarlst, keepNA=FALSE)
   test <- data.table(st_drop_geometry((extpoly$spxyext)))
   test <- test[AOI == 1, .N, by="DOMAIN"]
 
@@ -178,7 +179,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, xy=NULL, xy_dsn=NULL,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  SAmodeldat <- spGetAuxiliary(xyplt=xyplt, uniqueid=xy.uniqueid, 
+  SAmodeldat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
 		dunit_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 

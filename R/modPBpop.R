@@ -88,7 +88,7 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
-  unitcombine <- ifelse(unitcombine == "combine", TRUE, FALSE)
+  unitcombine <- ifelse(unit.action == "combine", TRUE, FALSE)
   popcheck <- check.popdataPB(gui=gui, pnt=pntdat, pltpct=pltpct, pltpctvars=pltpctvars, 
 	plt=plt, pltassgn=pltassgn, plotid=plotid, pntid=pntid, puniqueid=puniqueid, 
 	pltassgnid=pltassgnid, nonsamp.pfilter=nonsamp.pfilter, unitvar=unitvar, 

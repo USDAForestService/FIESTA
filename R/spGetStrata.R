@@ -340,9 +340,11 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		add_layer=TRUE, append_layer=append_layer)
   }    
   
-  returnlst <- list(pltassgn=setDF(pltassgn), unitarea=setDF(unitarea), 
-		stratalut=setDF(stratalut), unitvar=unitvar, areavar=areavar, 
-		strvar=strvar, pltassgnid=uniqueid, getwt=FALSE, strwtvar="strwt")
+  returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 
+		pltassgnid=uniqueid, unitarea=setDF(unitarea), 
+		unitvar=unitvar, areavar=areavar, 
+		stratalut=setDF(stratalut), strvar=strvar, 
+		getwt=FALSE, strwtvar="strwt")
   if (!is.null(NAlst)) {
     returnlst$NAlst <- NAlst
   }

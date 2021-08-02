@@ -381,7 +381,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   if (returntitle) {
     returnlst$titlelst <- alltitlelst
   }
-
+ 
   if (rawdata) {
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(cdomdat)

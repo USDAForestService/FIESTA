@@ -28,7 +28,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
   #largebnd.threshold <- 10
   multiSAdoms <- FALSE
   showstep <- TRUE
-  savexy=FALSE
+  savexy=TRUE
   tfilterlst <- "live"
 
   ## set RAVG polygons from FIESTA data package as smallbnd
@@ -124,7 +124,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 #    if (length(xy) == 0)
 #      stop("no xy is SQLitefn")
 #    xy.uniqueid <- "PLT_CN"
-#    xy.joinid <- "PLOT_ID"
+#    xyjoinid <- "PLOT_ID"
 
 #    xyx <- xy[grepl("ACTUAL", xy)]
 #    if (length(xyx) == 1) {
@@ -165,7 +165,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		smallbnd.filter=RAVG.filter, smallbnd.stfilter=RAVG.stfilter, 
 		smallbnd.ecofilter=RAVG.ecofilter, largebnd.filter=RAVG.ecofilter,
 		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold,
-		nbrdom.min=nbrdom.min, datsource=datsource, SQLitefn=SQLitefn, RS=RS,
+		nbrdom.min=nbrdom.min, datsource=datsource, data_dsn=SQLitefn, RS=RS,
  		measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
  		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 

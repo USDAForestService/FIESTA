@@ -1,3 +1,18 @@
+FIESTA_3.0.29 (Release date: 2021-08-02)
+==============
+added new function, spGetXY(), to clip XY coordinates before getting plot data.
+this function returns spatial sf points (if returnxy=TRUE) or a non-spatial data frame 
+	of xy plot identifiers and state information. 
+the function is run within spGetPlot() or independently, with intent to separate 
+	spatial and non-spatial processes.
+
+spGetPlots 
+	added parameter, xy_datsource, to identify datsource of xy data
+	changed xy.joinid to xyjoinid
+ 
+
+
+
 FIESTA_3.0.28 (Release date: 2021-06-25)
 ==============
 added functionality for P2VEG adjustment factors in modGBpop()

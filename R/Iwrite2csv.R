@@ -59,8 +59,8 @@ write2csv <- function(layer, outfile=NULL, outfolder=NULL, outfilenm=NULL,
     cat(tabtitle, file=outfile, sep="\n")
 
   ## Write table to file.
-  write.table(layer, outfile, row.names=FALSE, append=TRUE, sep=",",
-	col.names=cnames)
+  suppressWarnings(write.table(layer, outfile, row.names=FALSE, 
+	append=TRUE, sep=",", col.names=cnames))
 
   ## If closefn is TRUE, close the file.
   if (closefn) {

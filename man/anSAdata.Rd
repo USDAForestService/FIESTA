@@ -7,12 +7,13 @@
 	Wrapper to get data for small area estimation.	
 }
 \usage{
-anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy = NULL, xy_dsn = NULL, 
-	xyjoinid = "PLOT_ID", clipxy = TRUE, datsource = "sqlite", 
-	data_dsn = NULL, istree = TRUE, isseed = FALSE, plot_layer = "plot", 
-	cond_layer = "cond", tree_layer = "tree", seed_layer = "seed", 
-	puniqueid = "CN", intensity1 = FALSE, rastfolder = NULL, rastlst.cont = NULL, 
-	rastlst.cont.name = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
+anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy_datsource = NULL, 
+	xy = NULL, xy_dsn = NULL, xyjoinid = "PLOT_ID", clipxy = TRUE, 
+	datsource = "sqlite", data_dsn = NULL, istree = TRUE, isseed = FALSE, 
+	plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
+	seed_layer = "seed", puniqueid = "CN", intensity1 = FALSE,
+	rastfolder = NULL, rastlst.cont = NULL, rastlst.cont.name = NULL, 
+	rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
 	rastlst.cat.NODATA = NULL, vars2keep = "AOI", showsteps = FALSE, 
 	savedata = FALSE, savexy = FALSE, savesteps = FALSE, saveobj = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
@@ -28,7 +29,8 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy = NULL, xy_dsn = NULL,
 	Can be a spatial polygon object, full pathname to a shapefile, or name of 
 	a layer within a database. }
   \item{RS}{ String. Name of FIA research station to restrict states to
-	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. } 
+	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. }
+  \item{xy_datsource}{ String. Data source of XY data ('sqlite', 'gdb', 'csv', 'datamart') } 
   \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
 	polygon object, data frame, full pathname to a shapefile, or name of a 
 	layer within a database. }
@@ -39,7 +41,7 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy = NULL, xy_dsn = NULL,
 	be unique. If using most current XY coordinates, use identifier for a plot 
 	(e.g., PLOT_ID). }
   \item{clipxy}{ Logical. If TRUE, clip xy data. } 
-  \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
+  \item{datsource}{ String. Data source of FIA data ('sqlite', 'gdb', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Data sournce name. Name of database where *_layers reside. }
   \item{istree}{ Logical. If TRUE, extract tree data from FIA database. }
   \item{isseed}{ Logical. If TRUE, extract seedling data from FIA database. }
@@ -60,6 +62,11 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy = NULL, xy_dsn = NULL,
   \item{rastlst.cont.name}{ String vector. Output names for continuous rasters. 
 	Optional. If NULL, name of raster is used as default or name+'_'+layer number 
 	for multi-band layers. }
+  \item{rastlst.cont.NODATA}{ Numeric vector. NODATA value for categorical rasters 
+	(See notes). These values will be converted to NA and removed from output 
+	if keepNA=FALSE. If 1 number, the same value will be used for all categorical 
+	rasters. If more than 1 number, the number of values must be equal to the 
+	number of rasters in rastlst.cont. }
   \item{rastlst.cat}{ String vector or list. A list of raster(s) with thematic 
 	(i.e., categorical) data values. The list may include file name of raster(s) or 
 	raster objects that are not InMemory. }

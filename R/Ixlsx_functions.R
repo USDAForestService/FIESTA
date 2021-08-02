@@ -4,7 +4,7 @@
 #setCells		Populates Excel spreadsheets with table data.
 
 #tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar, 
-#	colvar=NULL, cfilter=NULL, title.rowvar=NULL, title.colvar=NULL, 
+#	colvar=NULL, pcfilter=NULL, title.rowvar=NULL, title.colvar=NULL, 
 #	title.rowgrp=NULL, row.FIAname=FALSE, col.FIAname=FALSE, estvar=NULL, 
 #	estvar.filter=NULL, sumunits=TRUE, landarea=NULL, unitacres=NULL, stratalut=NULL,
 #	allin1=FALSE, row.add0=FALSE, col.add0=FALSE) { 
@@ -102,7 +102,7 @@ wrapSE <- function(x) {
 
 
 tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar, 
-	colvar=NULL, cfilter=NULL, rowgrp=FALSE, colgrp=FALSE, collut=NULL,
+	colvar=NULL, pcfilter=NULL, rowgrp=FALSE, colgrp=FALSE, collut=NULL,
 	colgrpcd=NULL, rowgrpnm=NULL, rowgrpord=NULL, estvar.filter=NULL, 
 	title.rowvar=NULL, title.rowgrp=NULL, row.FIAname=FALSE, allin1=FALSE, 
 	row.add0=FALSE, col.add0=FALSE, rowgrptot=TRUE, colgrptot=TRUE, sumunits=TRUE,
@@ -117,7 +117,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
   # pltstrast - Data frame or data table with FIA plt/strata data.
   # rowvar - String. The row domain in table.
   # colvar - String. The column domain in table.
-  # cfilter - String. A condition filter.
+  # pcfilter - String. A plot/condition filter.
   # rowgrp - Logical. If TRUE, add row groups to table.
   # rowgrpcd - String. Row group domain variable with codes.
   # rowgrpnm - String. Row group domain variable with code names.
@@ -415,9 +415,9 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       colgrpnm <- ref_colgrp[ref_colgrp$VALUE == cgrp, "MEANING"]
    
     if (cgrp == 9999) {
-      cond2.filter <- cfilter
-    } else if (!is.null(cfilter)) {
-      cond2.filter <- paste(cfilter, "&", colgrpcd, "==", cgrp)
+      cond2.filter <- pcfilter
+    } else if (!is.null(pcfilter)) {
+      cond2.filter <- paste(pcfilter, "&", colgrpcd, "==", cgrp)
     } else {
       cond2.filter <- paste(colgrpcd, "==", cgrp)
     }
@@ -457,26 +457,26 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       if (colgrptot && i == 1) {
         if (rgrp != 9999) {
           if (rowgrpord %in% names(pltcondx)) {
-            if (!is.null(cfilter)) {
-              condtot.filter <- paste(cfilter, "&", rowgrpord, "==", rgrp)
+            if (!is.null(pcfilter)) {
+              condtot.filter <- paste(pcfilter, "&", rowgrpord, "==", rgrp)
             } else {
               condtot.filter <- paste(rowgrpord, "==", rgrp)
             }
           } else {
-            condtot.filter <- cfilter
+            condtot.filter <- pcfilter
           }
         } else {
-          condtot.filter <- cfilter
+          condtot.filter <- pcfilter
         }
         if (esttype == "AREA") { 
           coltottab <- modGBarea(cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits,
-			cfilter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby, 
+			pcfilter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby, 
 			title.rowvar=title.rowvar, allin1=allin1, row.add0=TRUE, unitvar=unitvar, 
 			rowlut=rowlut2, landarea=landarea, col.orderby=col.orderby, 
 			estnull=estnull, psenull=psenull, GBpopdat=GBpopdat, ...)$est
         } else if (esttype == "TREE") {
           coltottab <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
-			cfilter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby,
+			pcfilter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby,
  			title.rowvar=title.rowvar, allin1=allin1, row.add0=TRUE, unitvar=unitvar, 
 			rowlut=rowlut2, estvar.filter=estvar.filter, landarea=landarea, 
 			col.orderby=col.orderby, estnull=estnull, psenull=psenull, 
@@ -491,7 +491,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       }
       if (esttype == "AREA") {
         estdat <- 	tryCatch(
-        	modGBarea(cond=pltcondx, pltassgn=pltassgn, cfilter=cond3.filter, 
+        	modGBarea(cond=pltcondx, pltassgn=pltassgn, pcfilter=cond3.filter, 
 			rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, returntitle=TRUE, 
 			col.add0=TRUE, collut=collut, row.add0=TRUE, rowlut=rowlut2, allin1=allin1, 
 			title.rowvar=title.rowvar, sumunits=sumunits, unitvar=unitvar, 
@@ -506,7 +506,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
  
         estdat <- 	tryCatch(
 		modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
-			unitvar=unitvar, cfilter=cond3.filter, rowvar=rowvar, colvar=colvar,
+			unitvar=unitvar, pcfilter=cond3.filter, rowvar=rowvar, colvar=colvar,
  			row.orderby=row.orderby, returntitle=TRUE, col.add0=TRUE, collut=collut, 
 			row.add0=TRUE, rowlut=rowlut2, title.rowvar=title.rowvar, allin1=allin1, 
 			title.filter="", estvar.filter=estvar2.filter, landarea=landarea, 
@@ -592,7 +592,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       row2.orderby <- rowgrpord
 
       if (esttype == "AREA") {
-        estdat2 <- modGBarea(cond=pltcondx, pltassgn=pltassgn, cfilter=cond2.filter, 
+        estdat2 <- modGBarea(cond=pltcondx, pltassgn=pltassgn, pcfilter=cond2.filter, 
 		rowvar=rowvar2, row.orderby=row2.orderby, colvar=colvar, row.FIAname=FALSE,
 		col.add0=TRUE, collut=collut, row.add0=TRUE, allin1=allin1, 
 		title.rowvar=title.rowvar, title.colvar=title.colvar, sumunits=sumunits, 
@@ -600,7 +600,7 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
  		psenull=psenull, GBpopdat=GBpopdat, ...)
       } else if (esttype == "TREE") {
         estdat2 <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
-		unitvar=unitvar, cfilter=cond2.filter, rowvar=rowvar2, row.orderby=row2.orderby, 
+		unitvar=unitvar, pcfilter=cond2.filter, rowvar=rowvar2, row.orderby=row2.orderby, 
 		colvar=colvar, row.FIAname=FALSE, title.rowvar=title.rowvar, col.add0=TRUE, 
 		collut=collut, row.add0=TRUE, allin1=allin1, estvar.filter=estvar.filter, 
 		landarea=landarea, title.colvar=title.colvar, col.orderby=col.orderby, 
@@ -689,12 +689,12 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
     if (rowgrptot) {
       if (esttype == "AREA") {
         coltottab2 <- modGBarea(cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits,
-		unitvar=unitvar, landarea=landarea, cfilter=cfilter, allin1=allin1, 
+		unitvar=unitvar, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
 		GBpopdat=GBpopdat, ...)$est
       } else if (esttype == "TREE") {
         coltottab2 <- modGBtree(cond=pltcondx, pltassgn=pltassgn, tree=treex, 
 			sumunits=sumunits, unitvar=unitvar, landarea=landarea, 
-			cfilter=cfilter, estvar.filter=estvar.filter, allin1=allin1, 
+			pcfilter=pcfilter, estvar.filter=estvar.filter, allin1=allin1, 
 			GBpopdat=GBpopdat, ...)$est
 
       }

@@ -147,9 +147,10 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
   ## Check projections of polygons 
   clippolyvprj <- crsCompare(clippolyvx, rast.prj, crs.default=rast.crs, nolonglat=TRUE)$x
 
-  if (!is.null(buffdist))
+  if (!is.null(buffdist)) {
     ## This will buffer the polygon 1 pixel to include all pixels inside boundary
     clippolyvprj <- sf::st_buffer(clippolyvprj, width=buffdist)
+  }
 
   ## Check extents
   names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")

@@ -239,8 +239,9 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     plot(sf::st_geometry(sppltx), add=TRUE) 
   }
   
-  returnlst <- list(pltassgn=setDF(pltassgn), unitarea=setDF(unitarea), 
-		unitvar=unitvar, areavar=areavar, pltassgnid=uniqueid)
+  returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 
+		pltassgnid=uniqueid, unitarea=setDF(unitarea), 
+		unitvar=unitvar, areavar=areavar)
   if (!is.null(NAlst)) {
     returnlst$NAlst <- NAlst
   }

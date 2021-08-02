@@ -82,4 +82,31 @@ spClipRast(rast, rastfolder = NULL, clippolyv, clippolyv_dsn = NULL,
 	Tracey S. Frescino
 }
 
+\examples{
+
+  ## Get polygon vector layer from FIESTA external data
+  WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+  WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
+  WYbhdist
+
+  ## Get raster layers from FIESTA external data
+  demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
+  sp::plot(raster::raster(demfn))
+
+
+  ## Clip raster to district = '03'
+  dem03 <- spClipRast(rast=demfn, clippolyv=WYbhdistfn, 
+		clippolyv.filter="DISTRICTNU == '03'", overwrite=TRUE)
+  sp::plot(raster::raster(dem03))
+
+
+  ## Clip raster to district = '06'
+  dem06 <- spClipRast(rast=demfn, clippolyv=WYbhdistfn, 
+		clippolyv.filter="DISTRICTNU == '06'", overwrite=TRUE)
+
+  ## Plot extracted values of national forest district
+  sp::plot(raster::raster(dem06), add=TRUE)
+
+}
+
 \keyword{ data }

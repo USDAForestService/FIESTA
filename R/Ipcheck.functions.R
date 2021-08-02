@@ -335,8 +335,6 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     } else {
       stop("file format currently not supported")
     }
-  } else if (tabext == "csv") {
-    stop("file does not exist")
   } else {    
     tabx <- tryCatch(data.table::fread(tab_dsn, integer64="numeric"),
 			error=function(e) {

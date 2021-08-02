@@ -11,9 +11,9 @@
 }
 \usage{
 spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL, 
-	xyids = NULL, xy = NULL, xy_dsn = NULL, xy.uniqueid = "PLT_CN", 
+	xyids = NULL, xy_datsource = NULL, xy = NULL, xy_dsn = NULL, xy.uniqueid = "PLT_CN", 
 	xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL, pjoinid = NULL, 
-	xy_datsource = NULL, clipxy = TRUE, datsource = "datamart", data_dsn = NULL, 
+	clipxy = TRUE, datsource = "datamart", data_dsn = NULL, 
 	istree = FALSE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
 	tree_layer = "tree", seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn",
 	other_layers = NULL, puniqueid = "CN", savePOP = FALSE,
@@ -37,6 +37,8 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
   \item{RS}{ String. Name of FIA research station to restrict states to
 	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. }
   \item{xyids}{ Data frame. Non-spatial plot identificators within bnd). }
+  \item{xy_datsource}{ String. Source of XY data ("obj", "csv", "datamart", "sqlite").  
+	If datsource=NULL, checks extension of xy_dsn or xy to identify datsource. }
   \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
 	polygon object, data frame, full pathname to a shapefile, or name of a 
 	layer within a database. } 
@@ -53,8 +55,6 @@ spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
   \item{pjoinid}{ String. Variable in plt to join to XY data. Not necessary to
 	be unique. If using most current XY coordinates, use identifier for a plot 
 	(e.g., PLOT_ID). }
-  \item{xy_datsource}{ String. Source of XY data ("obj", "csv", "datamart", "sqlite").  
-	If datsource=NULL, checks extension of xy_dsn or xy to identify datsource. }
   \item{clipxy}{ Logical. If TRUE, clips xy data to bnd. }
   \item{datsource}{ String. Source of FIA data ("obj", "csv", "datamart", "sqlite").  
 	If datsource="sqlite", specify database name in data_dsn and layers in 

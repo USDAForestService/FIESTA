@@ -84,7 +84,6 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   } 
 
   if (!is.null(polyvarnmlst)) {
-
     if (length(polyvarlst) != length(polyvarnmlst))
       stop("the length of polyvarnmlst must correspond with the length of polyvarlst") 
     if (!is.list(polyvarnmlst)) 
@@ -182,7 +181,6 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     ########################################################  
     polyv <- polyv[, polyvars]
 
-
     ## Change names in polyv that are the same as sppltx
     ########################################################  
     names(polyv)[names(polyv) %in% polyvars] <- polyvarnm
@@ -213,11 +211,12 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
       NAlst[[polyvnm]] <- sppltout
     }
 
-    if (exportNA)
+    if (exportNA) {
       spExportSpatial(sppltout, out_dsn=out_dsn, 
 		out_layer=paste0(out_layer, "_", polyvnm, "_NAvals"), 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_layer=overwrite_layer)
+    }
  
     if (!keepNA) {
       ## Subset points inside boundary
@@ -242,8 +241,9 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   
   returnlst <- list(spxyext=spxyext, outnames=unlist(polyvarnmlst))
 
-  if (length(NAlst) > 0) 
+  if (length(NAlst) > 0) {
     returnlst$NAlst <- NAlst
+  }
 
   return(returnlst)
 }

@@ -20,9 +20,9 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	smallbnd.domain = NULL, smallbnd.filter = NULL, smallbnd.stfilter = NULL, 
 	smallbnd.ecofilter = NULL, maxbnd.threshold = 10, largebnd.unique = "PROVINCE",
  	largebnd.filter = NULL, largebnd.threshold = 10, nbrdom.min = 10, RS = NULL, 
-	xy = NULL, xy_dsn = NULL, xy.joinid = "PLOT_ID", datsource = "sqlite", 
-	SQLitefn, measEndyr = NULL, measEndyr.filter = NULL, intensity1 = TRUE, 
-	rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cat = NULL, 
+	xy_datsource = NULL, xy = NULL, xy_dsn = NULL, xyjoinid = "PLOT_ID", 
+	datsource = "sqlite", data_dsn, measEndyr = NULL, measEndyr.filter = NULL, 
+	intensity1 = TRUE, rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cat = NULL, 
 	rastlst.cat.name = NULL, showsteps = FALSE, savedata = FALSE, savexy = FALSE, 
 	saveobj = TRUE, outfolder = NULL, out_fmt = "sqlite", out_dsn = "SApopdat", 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
@@ -65,17 +65,18 @@ anSApop_ecomap(smallbnd, smallbnd_dsn = NULL, smallbnd.unique,
 	all domains within largebnd are selected. }
   \item{RS}{ String. Name of FIA research station to restrict states to
 	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. } 
+  \item{xy_datsource}{ String. Data source of XY data ('sqlite', 'gdb', 'csv', 'datamart') } 
   \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
 	polygon object, data frame, full pathname to a shapefile, or name of a 
 	layer within a database. }
   \item{xy_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
 	of xy. The dsn varies by driver. See gdal OGR vector formats 
 	(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R object. } 
-  \item{xy.joinid}{ String. Variable to join XY data to plot data. Not necessary to
+  \item{xyjoinid}{ String. Variable to join XY data to plot data. Not necessary to
 	be unique. If using most current XY coordinates, use identifier for a plot 
 	(e.g., PLOT_ID). }
   \item{datsource}{ String. Name of datasource ('sqlite', 'datamart'). }
-  \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }
+  \item{data_dsn}{ String. Full pathname to database with plot data. }
   \item{measEndyr}{ Logical. Extract plots with most current measurement for 
 	state(s) for years measured before measEndyr. }
   \item{measEndyr.filter}{ Filter. If measEndyr=NULL, a filter for plots. }

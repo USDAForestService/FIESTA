@@ -118,12 +118,12 @@ spExtractPoly(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", polyvlst,
 		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
   names(xyext)
   xyext$outnames
-  sppltext <- xyext$sppltext
-  head(sppltext)
-  xyext$inputdf
+  spxyext <- xyext$spxyext
+  head(spxyext)
+  NAlst <- xyext$NAlst
 
   ## Plot extracted values of national forest district
-  plot(sppltext["DISTRICTNU"])
+  plot(spxyext["DISTRICTNU"])
 }
 
 \keyword{ data }

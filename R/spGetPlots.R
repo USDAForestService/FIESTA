@@ -1,6 +1,6 @@
 spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
-	RS=NULL, xyids=NULL, xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", 
-	xvar=NULL, yvar=NULL, xy.crs=4269, xyjoinid=NULL, pjoinid=NULL, xy_datsource=NULL, 
+	RS=NULL, xy_datsource=NULL, xyids=NULL, xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", 
+	xvar=NULL, yvar=NULL, xy.crs=4269, xyjoinid=NULL, pjoinid=NULL, 
 	clipxy=TRUE, datsource="datamart", data_dsn=NULL, istree=FALSE, isseed=FALSE, 
 	plot_layer="plot", cond_layer="cond", tree_layer="tree", seed_layer="seed",
  	ppsa_layer="pop_plot_stratum_assgn", other_layers=NULL, puniqueid="CN", 
@@ -29,7 +29,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
   ## Set global variables
   xydat=stateFilter=statecnty=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
-	othertabnms=stcds <- NULL
+	othertabnms=stcds=spxy <- NULL
   cuniqueid=tuniqueid <- "PLT_CN"
   returnlst <- list()
   #clipdat <- list()
@@ -52,101 +52,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ## Define list of pop_tables (without PLT_CN)
   pop_tables <- c("POP_ESTN_UNIT", "POP_EVAL", "POP_EVAL_ATTRIBUTE", "POP_EVAL_GRP", 
 	"POP_EVAL_TYP", "POP_STRATUM", "SURVEY") 
-
-
-  ## Check spXYdat
-  if (is.null(spXYdat)) {
     
-    ## Check clipxy
-    clipxy <- FIESTA::pcheck.logical(clipxy, varnm="clipxy", 
-		title="Clip xy?", first="NO", gui=gui)  
-
-    if (clipxy) {
-      ###########################################################################
-      ## Get XY
-      ###########################################################################
-      xydat <- spGetXY(bnd=bnd, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
-		states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
-		xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
- 		xy_datsource=xy_datsource, clipxy=clipxy, evalid=evalid, evalCur=evalCur,
- 		evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr, 
-		measEndyr.filter=measEndyr.filter, invyrs=invyrs, allyrs=allyrs, 
-		intensity1=intensity1, showsteps=showsteps, returnxy=savexy)
-      spxy <- xydat$spxy
-      xyids <- xydat$xyids
-      states <- xydat$states
-      statecnty <- spXYdat$statecnty
-      stbnd.att <- spXYdat$stbnd.att
-      bndx <- xydat$bndx
-      xyjoinid <- xydat$xyjoinid
-      pjoinid <- xydat$pjoinid
-      stcds <- pcheck.states(states, statereturn="VALUE")
-      if (is.null(spxy) || nrow(spxy) == 0) {
-        stop("spxy is null")
-      }
-    } else if (!is.null(xyids)) {
-
-      ## CHeck xyids
-      xyids <- pcheck.table(xyids)
-
-      ## Check xyjoinid
-      xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		checklst=names(spxy), gui=gui, caption="JoinID in xyids?", stopifnull=TRUE)  
-
-      ## Check pjoinid
-      pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-		checklst=names(spxy), gui=gui, caption="Joinid in plot?")  
- 
-      ## Check stbnd.att
-      stbnd.att <- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
-		checklst=names(xyids), gui=gui, caption="State attribute?", stopifnull=TRUE) 
-     
-    } else {
-      if ("sf" %in% class(xy)) {
-        spxy <- xy
-      } else {
-        spxy <- pcheck.spatial(xy, dsn=xy_dsn)
-      }
-      
-      ## Check xyjoinid
-      xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		checklst=names(spxy), gui=gui, caption="JoinID in xy?", stopifnull=TRUE)  
-
-      pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-		checklst=names(spxy), gui=gui, caption="Joinid in plot?")  
-
-      ## Import boundary
-      bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
-      if (!is.null(bndx)) {
-        bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
-      } 
-
-      ## Check projections. Reproject points to clippolyv projection.
-      prjdat <- crsCompare(spxy, bndx, nolonglat=TRUE)
-      spxy <- prjdat$x
-      bndx <- prjdat$ycrs
-
-      ## Check if extents overlap... if not and stopifnotin=TRUE, return NULL
-      chk <- check.extents(sf::st_bbox(bndx), sf::st_bbox(spxy), 
-			layer1nm="bndx", layer2nm="spxy", stopifnotin=TRUE, quiet=TRUE)
-      if (is.null(chk)) return(NULL)
-
-      ## Get intersecting states
-      statedat <- spGetStates(bndx, stbnd=NULL, stbnd_dsn=NULL, 
-			stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)
-      bndx <- statedat$bndx
-      stbnd.att <- statedat$stbnd.att
-      statenames <- statedat$statenames
-      if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
-        statecnty <- statedat$states
-        stcds <- unique(as.numeric(substr(statecnty, 1,2)))
-      } else {
-        stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
-      }
-      message("boundary intersected states: ", toString(statenames))
-      xyids <- sf::st_drop_geometry(spxy)
-    } 
-  } else {
+  ## Check spXYdat
+  if (!is.null(spXYdat)) {
     spxy <- spXYdat$spxy
     xyids <- spXYdat$xyids
     states <- spXYdat$states
@@ -159,9 +67,126 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     if (is.null(spxy) || nrow(spxy) == 0) {
       stop("spxy is null")
     }
+  } else {   ## is.null(spXYdat) 
+
+    ## Import boundary
+    bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
+    if (!is.null(bndx)) {
+      bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
+    } 
+
+    ## Check xyids
+    xyids <- pcheck.table(xyids)
+
+    if (!is.null(xyids)) {
+      ## Check xyjoinid
+      xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+		checklst=names(xyids), gui=gui, caption="JoinID in xyids?")  
+
+      ## Check pjoinid
+      pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
+		checklst=names(xyids), gui=gui, caption="Joinid in plot?")  
+ 
+      ## Check stbnd.att
+      stbnd.att <- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
+		checklst=names(xyids), gui=gui, caption="State attribute?") 
+      
+      ## Get state codes
+      if (is.null(stbnd.att)) {
+        stbnd.att <- findnm("COUNTYFIPS", names(xyids), returnNULL=TRUE)
+        if (is.null(stbnd.att)) {
+          stbnd.att <- findnm("STATECD", names(xyids), returnNULL=TRUE)
+          if (is.null(stbnd.att)) {
+            stbnd.att <- findnm("STATE", names(xyids), returnNULL=TRUE)
+          }
+        }
+      }
+      if (stbnd.att == "COUNTYFIPS") {
+        statecnty <- sort(unique(xyids[[stbnd.att]]))
+        stcds <- sort(unique(substr(statecnty, 1, 2)))
+      } else {
+        stcds <- sort(unique(pcheck.states(xyids[[stbnd.att]], statereturn="VALUE")))
+      }
+
+    } else { 	## is.null(xyids)
+
+      ## Check clipxy
+      clipxy <- FIESTA::pcheck.logical(clipxy, varnm="clipxy", 
+		title="Clip xy?", first="NO", gui=gui)  
+
+      if (clipxy) {
+        ###########################################################################
+        ## Get XY
+        ###########################################################################
+        if (is.null(xy_datsource)) {
+          xy_datsource <- datsource
+        } 
+        if (is.null(xy) && is.null(xy_dsn)) {
+          xy_dsn <- data_dsn
+        } 
+        xydat <- spGetXY(bnd=bnd, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
+		states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
+		xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
+ 		xy_datsource=xy_datsource, clipxy=clipxy, evalid=evalid, evalCur=evalCur,
+ 		evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr, 
+		measEndyr.filter=measEndyr.filter, invyrs=invyrs, allyrs=allyrs, 
+		intensity1=intensity1, showsteps=showsteps, returnxy=TRUE)
+        spxy <- xydat$spxy
+        xyids <- xydat$xyids
+        states <- xydat$states
+        statecnty <- spXYdat$statecnty
+        stbnd.att <- spXYdat$stbnd.att
+        bndx <- xydat$bndx
+        xyjoinid <- xydat$xyjoinid
+        pjoinid <- xydat$pjoinid
+        stcds <- pcheck.states(states, statereturn="VALUE")
+        if (is.null(spxy) || nrow(spxy) == 0) {
+          stop("spxy is null")
+        }
+      } else {
+        if ("sf" %in% class(xy)) {
+          spxy <- xy
+        } else {
+          spxy <- pcheck.spatial(xy, dsn=xy_dsn)
+        }
+      
+        ## Check xyjoinid
+        xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+		checklst=names(spxy), gui=gui, caption="JoinID in xy?", stopifnull=TRUE)  
+
+        pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
+		checklst=names(spxy), gui=gui, caption="Joinid in plot?")  
+
+
+        ## Check projections. Reproject points to clippolyv projection.
+        prjdat <- crsCompare(spxy, bndx, nolonglat=TRUE)
+        spxy <- prjdat$x
+        bndx <- prjdat$ycrs
+
+        ## Check if extents overlap... if not and stopifnotin=TRUE, return NULL
+        chk <- check.extents(sf::st_bbox(bndx), sf::st_bbox(spxy), 
+			layer1nm="bndx", layer2nm="spxy", stopifnotin=TRUE, quiet=TRUE)
+        if (is.null(chk)) return(NULL)
+
+        ## Get intersecting states
+        statedat <- spGetStates(bndx, stbnd=NULL, stbnd_dsn=NULL, 
+			stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)
+        bndx <- statedat$bndx
+        stbnd.att <- statedat$stbnd.att
+        statenames <- statedat$statenames
+        if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
+          statecnty <- statedat$states
+          stcds <- unique(as.numeric(substr(statecnty, 1,2)))
+        } else {
+          stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
+        }
+        message("boundary intersected states: ", toString(statenames))
+        xyids <- sf::st_drop_geometry(spxy)
+      } 
+    }
   }
   #xyids <- spxy[[xyjoinid]]
-
+ 
   #############################################################################
   ## Set datsource
   ########################################################
@@ -203,7 +228,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   ########################################################################
   ### DO THE WORK
   ########################################################################
-
+ 
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
@@ -347,7 +372,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     } else if (!is.null(invyrs)) {
       msg <- paste0(msg, "for inventory years ", min(invyrs), " to ", max(invyrs))
     } else {
-      msg <- "using all plots in database"
+      msg <- "using all years in database"
       allyrs <- TRUE
     }
     message(paste(msg, "\n"))
@@ -622,7 +647,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
         }
       }
-      if (showsteps && !is.null(spxy)) {
+      if (showsteps && !is.null(xyids)) {
         ## Set plotting margins
         mar <-  par("mar")
         par(mar=c(1,1,1,1))
@@ -700,20 +725,20 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       }  
     }
 
-    ## Check xyjoinid
+    ## Get fields in plot table
     pltfields <- DBI::dbListFields(dbconn, "plot")
 
     ## Not sure about following code.
     ## Checks for PLOT_ID in both xy and plot data. 
-    if (any(grepl("xyCur", names(spxy)))) {
-      if (xyjoinid %in% c("CN", "PLT_CN") && "PLOT_ID" %in% names(spxy) && 
-				"PLOT_ID" %in% pltfields) {
-         message("changing xyjoinid from ", xyjoinid, " to PLOT_ID")
-         xyjoinid <- "PLOT_ID"
-      }
-    }
+#    if (any(grepl(xyjoinid, names(xyids)))) {
+#      if (xyjoinid %in% c("CN", "PLT_CN") && "PLOT_ID" %in% names(xyids) && 
+#				"PLOT_ID" %in% pltfields) {
+#         message("changing xyjoinid from ", xyjoinid, " to PLOT_ID")
+#         xyjoinid <- "PLOT_ID"
+#      }
+#    }
+
     ## Define pjoinid
-    pltfields <- names(plt)
     if (is.null(pjoinid)) {
       if (xyjoinid %in% pltfields) {
         pjoinid  <- xyjoinid
@@ -725,7 +750,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         }
       }
     }
-   
+ 
     for (i in 1:length(stcds)) { 
       stcd <- stcds[i]
       state <- pcheck.states(stcd) 
@@ -733,7 +758,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
       ## Check for counties
       if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(statecnty)) {
-        stcnty <- statecnty[startsWith(statecnty, formatC(stcd, width=2, flag="0"))]
+        stcnty <- statecnty[startsWith(as.character(statecnty), 
+				formatC(stcd, width=2, flag="0"))]
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
       }
@@ -1125,7 +1151,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
         }
       }
-      if (showsteps && !is.null(spxy)) {
+      if (showsteps && !is.null(spxy) && !is.null(bndx)) {
         ## Set plotting margins
         mar <-  par("mar")
         par(mar=c(1,1,1,1))
@@ -1143,7 +1169,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     }  ## End of looping thru states
     DBI::dbDisconnect(dbconn)
   }  ## datsource
-
+ 
   #############################################################################
   ## Save tables
   #############################################################################
@@ -1155,21 +1181,14 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 		overwrite_layer=overwrite_layer, add_layer=TRUE, 
 		append_layer=append_layer)   
     }
-    if (savexy) {
-      if (savebnd) {
-        spfmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
-        spExportSpatial(xypltx, outfolder=outfolder, out_fmt=spfmt,
+    if (savexy && !is.null(spxy)) {
+      spfmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
+      spExportSpatial(spxy, outfolder=outfolder, out_fmt=spfmt,
 		out_dsn=out_dsn, out_layer="spxyplt", outfn.date=outfn.date,
 		overwrite_layer=overwrite_layer, add_layer=TRUE, 
 		append_layer=append_layer)   
-      } else {
-        datExportData(sf::st_drop_geometry(xypltx), outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyplt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-		add_layer=TRUE, append_layer=append_layer)
-      }
     }
-    for (tab in tabs2save) {
+    for (tab in c(xyids, tabs2save)) {
       datExportData(get(tab), outfolder=outfolder, out_fmt=out_fmt, 
 		out_dsn=out_dsn, out_layer=tab, outfn.date=outfn.date, 
 		overwrite_layer=overwrite_layer, add_layer=TRUE, 
@@ -1182,7 +1201,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 #    mar <-  par("mar")
 #    par(mar=c(1,1,1,1))
 #
-#    plot(sf::st_geometry(spxy), col="blue", cex=.5)
+#    plot(sf::st_geometry(xyids), col="blue", cex=.5)
 #    if (!is.null(bndx)) {
 #      plot(st_geometry(bndx), add=TRUE, border="black", lwd=0.75)
 #    }
@@ -1197,7 +1216,10 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     names(returnlst$tabs) <- tabs2save
 #  } 
  
-  returnlst$xypltx <- spxy
+  if (savexy && !is.null(spxy)) {
+    returnlst$spxy <- spxy
+  }
+  returnlst$xypltx <- xyids
   #returnlst$clip_polyv <- bndx
   returnlst$bndx <- bndx
   returnlst$puniqueid <- puniqueid

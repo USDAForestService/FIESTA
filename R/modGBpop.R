@@ -41,7 +41,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-	treef=seedf=vcondsppf=vcondstrf <- NULL
+	treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
 
   ## SET OPTIONS
   options.old <- options()
@@ -105,7 +105,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 
   } else {
     if (!is.null(pltdat)) {
-      list.items <- c("bndx", "tabs", "xypltx")
+      list.items <- c("tabs", "xypltx")
       if (popType == "LULC") {
         list.items <- c(list.items, "lulcx")
       }
@@ -144,8 +144,9 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       }
     }
     if (!is.null(GBstratdat)) {
-      list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
+      list.items <- c("bndx", "pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
       GBstratdat <- FIESTA::pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
+      bndx <- GBstratdat$bndx
       pltassgn <- GBstratdat$pltassgn
       pltassgnid <- GBstratdat$pltassgnid
       unitarea <- GBstratdat$unitarea
@@ -294,7 +295,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ###################################################################################
   setkeyv(stratalut, strunitvars)
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- append(returnlst, list(popType=popType, 
+  returnlst <- append(returnlst, list(popType=popType, bndx=bndx,
 	condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid, 
 	ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar, 
 	areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 

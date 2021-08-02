@@ -71,6 +71,7 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 		index.unique=index.unique, index=index)    
  
   } else if (out_fmt == "gdb") {
+    message(out_layer, " written to ", out_dsn)
     out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 
 		overwrite=overwrite_dsn, outfn.date=outfn.date, showlist=FALSE)
     arcgisbinding::arc.write(file.path(out_dsn, out_layer), dfobj, 

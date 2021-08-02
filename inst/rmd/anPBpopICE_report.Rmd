@@ -123,14 +123,14 @@ yearT2 <- params$T2
 ice.QAQCfn <- params$ice.QAQCfn
 outfn.pre <- params$outfn.pre
 
-# ## Set the following parameters to run report
-# rawfolder <- "E:/workspace/ICE/prototype/_reports/gtac_ICE/states/Caribbean/estimates/rawdata"
-# AOInm <- "Caribbean"
-# yearT1 <- 2017
-# yearT2 <- 2018
-# #ice.QAQCfn <- "E:/workspace/ICE/prototype/_reports/gtac_ICE/states/Caribbean/Photo_data/StJohns_QAQC.csv"
-# ice.QAQCfn <- NULL
-# outfn.pre <- AOInm
+# # ## Set the following parameters to run report
+#  rawfolder <- "E:/workspace/FIESTA/FIESTA_PB/outfolder/estimates/rawdata"
+#  AOInm <- "Caribbean"
+#  yearT1 <- 2017
+#  yearT2 <- 2018
+#  #ice.QAQCfn <- "E:/workspace/ICE/prototype/_reports/gtac_ICE/states/Caribbean/Photo_data/StJohns_QAQC.csv"
+#  ice.QAQCfn <- NULL
+#  outfn.pre <- AOInm
 
 
 if (is.null(rawfolder) || rawfolder == "") stop("rawfolder is NULL")

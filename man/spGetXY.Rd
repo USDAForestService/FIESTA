@@ -13,7 +13,7 @@
 spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL, 
 	xy = NULL, xy_dsn = NULL, xy.uniqueid = "PLT_CN", 
 	xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL,
-	pjoinid = NULL, xy_datsource = NULL, clipxy = TRUE, evalid = NULL, 
+	pjoinid = "CN", xy_datsource = NULL, clipxy = TRUE, evalid = NULL, 
 	evalCur = FALSE, evalEndyr = NULL, measCur = FALSE, measEndyr = NULL, 
 	measEndyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
 	showsteps = FALSE, savedata = FALSE, exportsp = FALSE, returnxy = TRUE, 

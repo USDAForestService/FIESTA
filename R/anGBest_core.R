@@ -240,7 +240,7 @@ anGBest_core <- function(state=NULL, evalCur=TRUE, evalEndyr=NULL,
     tree03[SPGRPCD %in% softhard, ':=' (SPGRPGRPCD2=3, SPGRPGRPNM2="Soft hardwoods")]
     tree03[SPGRPCD %in% hardhard, ':=' (SPGRPGRPCD2=4, SPGRPGRPNM2="Hard hardwoods")]
   }
-
+ 
   ## Get population data
   #############################################################
   popdat03 <- modGBpop(cond=cond03, plt=plt03, tree=tree03, 

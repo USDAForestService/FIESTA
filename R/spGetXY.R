@@ -22,7 +22,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=stcds <- NULL
+  xydat=stateFilter=statecnty=stcds=dbconn <- NULL
   returnlst <- {}
 
   ##################################################################
@@ -227,7 +227,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       xyfields <- DBI::dbListFields(dbconn, xy)
       xystatenm <- findnm("STATECD", xyfields, returnNULL=TRUE)
 
-      if (is.null(xvar)) {
+      if (is.null(xvar) || !xvar %in% names(xyfields)) {
         if (grepl("ACTUAL", xy)) {
           xvar <- "LON_ACTUAL"
           yvar <- "LAT_ACTUAL"
@@ -293,9 +293,12 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
           spxy <- pcheck.spatial(xy, dsn=xy_dsn)
         }
       } 
-    }
+      if (!is.null(dbconn)) {
+        DBI::dbDisconnect(dbconn)
+      }
+    }   # xy_datsource == "sqlite"
   }
- 
+
   if (clipxy) {
     clipdat <- spClipPoint(spxy, clippolyv=bndx)
     spxy <- clipdat$clip_xyplt 
