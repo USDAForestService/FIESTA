@@ -1,5 +1,5 @@
 spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
-	RS=NULL, xy_datsource=NULL, xyids=NULL, xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", 
+	RS=NULL, xyids=NULL, xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", 
 	xvar=NULL, yvar=NULL, xy.crs=4269, xyjoinid=NULL, pjoinid=NULL, 
 	clipxy=TRUE, datsource="datamart", data_dsn=NULL, istree=FALSE, isseed=FALSE, 
 	plot_layer="plot", cond_layer="cond", tree_layer="tree", seed_layer="seed",
