@@ -251,7 +251,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     if (multest) {
       multest_outfolder <- FIESTA::pcheck.outfolder(multest_outfolder, gui)
       if (is.null(multest_outfolder)) multest_outfolder <- outfolder
-
+print("XXXXX")
+print(multest_outfolder)
       multest.append <- FIESTA::pcheck.logical(multest.append, varnm="multest.append", 
 		title="Append multest data?", first="NO", gui=gui) 
 
@@ -262,19 +263,19 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
       } else {
         if (is.null(multest_dsn)) {
           multest_dsn <- paste0("SAmultest_", SApackage, ".", multest_fmt)
-        }
-        if (multest_fmt == "gdb") {
-          multest_dsn <- DBtestESRIgdb(gdbfn=multest_dsn, outfolder=outfolder, 
-			overwrite=overwrite_dsn, showlist=FALSE, returnpath=FALSE)
-        }	else if (multest_fmt %in% c("sqlite", "gpkg")) {
-          gpkg <- ifelse(multest_fmt == "gpkg", TRUE, FALSE)
-          if (multest.append || !overwrite_dsn) {
-            multest_dsn <- DBtestSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
-			showlist=FALSE, returnpath=FALSE, createnew=TRUE)
-          } else {
-            multest_dsn <- DBcreateSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
-			overwrite=overwrite_dsn, returnpath=FALSE, outfn.date=outfn.date)
-          }
+#        }
+#        if (multest_fmt == "gdb") {
+#          multest_dsn <- DBtestESRIgdb(gdbfn=multest_dsn, outfolder=outfolder, 
+#			overwrite=overwrite_dsn, showlist=FALSE, returnpath=FALSE)
+#        }	else if (multest_fmt %in% c("sqlite", "gpkg")) {
+#          gpkg <- ifelse(multest_fmt == "gpkg", TRUE, FALSE)
+#          if (multest.append || !overwrite_dsn) {
+#            multest_dsn <- DBtestSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
+#			showlist=FALSE, returnpath=FALSE, createnew=TRUE)
+#          } else {
+#            multest_dsn <- DBcreateSQLite(SQLitefn=multest_dsn, gpkg=gpkg, outfolder=outfolder, 
+#			overwrite=overwrite_dsn, returnpath=FALSE, outfn.date=outfn.date)
+#          }
         }	
       }
     }

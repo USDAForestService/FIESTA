@@ -51,7 +51,6 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
       }
     }
   }
- 
   ###########################################################################
   ## Extract FIA data and model data
   ###########################################################################
@@ -82,6 +81,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
   if (multest_fmt == "csv") {
     multest_layer <- paste0("multest_", multest_layer)
   }
+
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, esttype="AREA", landarea="FOREST", 
  	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=rawdata, 
@@ -91,7 +91,6 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
 	multest.append=multest.append, multest.AOIonly=multest.AOIonly, 
 	overwrite_layer=TRUE, append_layer=append_layer, outfn.pre=outfn.pre,
  	addSAdomsdf=addSAdomsdf, save4testing=save4testing)
-
   if (is.null(SAareadat)) return(NULL)
   SAestlst[[outnm]] <- SAareadat$est
   SAmultestlst[[outnm]] <- SAareadat$dunit_multest
