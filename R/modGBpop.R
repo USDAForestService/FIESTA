@@ -111,8 +111,8 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
         list.items <- c("states", "plt", "cond")
       }
       if (popType == "LULC") {
-      #  list.items <- c(list.items, "lulcx")
-      #}
+        list.items <- c(list.items, "lulcx")
+      }
       if (popType == "P2VEG") {
         list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
       }
