@@ -280,7 +280,6 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   if (!is.null(unitvar2)) {
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
- 
   if (adj == "samp") {
     adjfacdata <- getadjfactorGB(condx=condx, treex=treef, seedx=seedf,
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
@@ -294,13 +293,12 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     expcondtab <- adjfacdata$expcondtab
     vcondsppf <- adjfacdata$vcondsppx
     vcondstrf <- adjfacdata$vcondstrx
+    setorderv(stratalut, c(unitvars, strvar))
   } 
-
-
+  
   ###################################################################################
   ## Return population data objects
   ###################################################################################
-  setkeyv(stratalut, strunitvars)
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(popType=popType, bndx=bndx,
 	condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid, 

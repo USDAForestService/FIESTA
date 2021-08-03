@@ -176,7 +176,6 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
   #condx[, names(condx)[grep("ADJ_FACTOR_", names(condx))]:= NULL] 
   #condx[, names(condx)[grep("_UNADJ", names(condx))]:= NULL] 
 
-  unitlut <- setkeyv(unitlut, strunitvars)
   adjfacdata <- list(condx=condx, unitlut=unitlut)
   adjfacdata$expcondtab <- expcondtab
   if (!is.null(treex)) adjfacdata$treex <- treex 
