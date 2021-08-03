@@ -213,6 +213,10 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   message("smallbnd...")
   #print(st_drop_geometry(smallbndx))
 
+
+  ## Add AOI attribute to smallbndx
+  smallbndx$AOI <- 1
+
   #############################################################################
   ## maxbnd
   #############################################################################
@@ -360,7 +364,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   #############################################################################
 
   ## Add AOI attribute to smallbndx
-  smallbndx$AOI <- 1
+  #smallbndx$AOI <- 1
 
   ## Display smallbnd
 #  if (showsteps) {
