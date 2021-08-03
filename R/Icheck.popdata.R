@@ -1254,7 +1254,9 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     }
  
     ## Merge pltassgnx.P2VEG to subp_condx - inner join
-    subp_condf <- merge(pltassgnx.P2VEG, subp_condx, by="PLT_CN")
+    subp_vars <- unique(c("PLT_CN", 
+			names(subp_condx)[!names(subp_condx) %in% names(pltassgnx.P2VEG)]))
+    subp_condf <- merge(pltassgnx.P2VEG, subp_condx[, subp_vars, with=FALSE] , by="PLT_CN")
 
     #############################################################################
     ## Define and apply subp.nonsamp.filter 
