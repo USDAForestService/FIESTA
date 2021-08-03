@@ -289,6 +289,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## 3) Continuous raster layers - Extract values and get zonal statistics
   ###############################################################################
   if (!is.null(rastlst.cont)) {
+ 
     ## Extract values from continuous raster layers
     #############################################################################
     extdat.rast.cont <- spExtractRast(sppltx, uniqueid=uniqueid,

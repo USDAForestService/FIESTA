@@ -92,6 +92,12 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(SApltdat)) {
+SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
+		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=xy_datsource, 
+		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
+		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
+ 		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=TRUE)
+
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
 		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=xy_datsource, 
 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 

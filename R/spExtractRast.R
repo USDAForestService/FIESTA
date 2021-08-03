@@ -273,13 +273,15 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
       if (statistic == "value") statistic <- NULL
       rast.NODATA <- inputs.rast[j, rast.NODATA]
 
-      dat <- suppressWarnings(extractPtsFromRaster(ptdata=sppltxy, 
+      dat <- unique(suppressWarnings(extractPtsFromRaster(ptdata=sppltxy, 
 			rasterfile=rastfn, band=band, var.name=var.name, 
-			interpolate=interpolate, windowsize=windowsize, statistic=statistic))
+			interpolate=interpolate, windowsize=windowsize, statistic=statistic)))
       cname <- names(dat)[2]
       outnames <- c(outnames, cname)
 
-      if ("data.table" %in% class(sppltx)) stop("xyplt cannot be sf data.table")
+      if ("data.table" %in% class(sppltx)) {
+        stop("xyplt cannot be sf data.table")
+      }
       sppltx <- merge(sppltx, dat, by.x=uniqueid, by.y="pid")
 
       ## Remove rast.NODATA values from point data
