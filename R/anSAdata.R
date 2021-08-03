@@ -96,7 +96,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=xy_datsource, 
 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
- 		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=savexy, ...)
+ 		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=TRUE, ...)
     if (is.null(SApltdat)) return(NULL)
     if (saveobj) {
       message("saving SApltdat object to: ", file.path(outfolder, "SApltdat.rda"), "...")
@@ -141,7 +141,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     par(mar=mar)
   }
 
-  if (savesteps) {
+  if (savesteps && !is.null(spxy)) {
     ## Set plotting margins
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
@@ -151,7 +151,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     jpeg(jpgfn, res=400, units="in", width=8, height=10)
     plot(sf::st_geometry(SAdoms), border="grey")
     #plot(sf::st_geometry(bnd), add=TRUE)
-    plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=.25)
+    plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.25)
     if (!is.null(smallbnd)) {
       plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
     }
@@ -174,7 +174,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     message("ALL AOIs have 2 plots or less... no estimates generated")
     return(NULL)
   }
-
+ 
   ####################################################################
   ## Get model data
   ####################################################################

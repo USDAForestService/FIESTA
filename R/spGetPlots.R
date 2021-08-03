@@ -224,7 +224,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       outfn.date <- FALSE
     }
   }
-
+ 
   ########################################################################
   ### DO THE WORK
   ########################################################################

@@ -382,7 +382,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 #    #plot(sf::st_geometry(smallbndx), add=TRUE) 
 #  } 
 
-
   #############################################################################
   ### DO THE WORK
   #############################################################################
@@ -409,7 +408,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndxlst <- list(smallbnd=smallbndx)
   }
 
-
   ###########################################################################
   ## Aggregate (dissolve) polygons on DOMAIN and calculate area on dissolved polygons
   ###########################################################################
@@ -427,8 +425,10 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     } 
 
     ## Merge other attributes (smallbnd.domain) to SAdoms
+    smallbndvars <- unique(c(smallbnd.domain, 
+		names(smallbndxlst[[i]])[!names(smallbndxlst[[i]]) %in% names(SAdomslst[[i]])]))
     SAdomslst[[i]] <- merge(SAdomslst[[i]], 
-		sf::st_drop_geometry(smallbndxlst[[i]]), 
+		sf::st_drop_geometry(smallbndxlst[[i]][, smallbndvars]), 
 		by.x="DOMAIN", by.y=smallbnd.domain, all.x=TRUE)
 
 #    SAdomslst[[i]] <- merge(SAdomslst[[i]], 

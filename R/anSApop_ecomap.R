@@ -38,7 +38,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
     outfolder <- pcheck.outfolder(outfolder)
   }
     
-
   ## Set parameters
   helperbnd=FIESTA::ecomap
   helperbnd.unique="SUBSECTION"
@@ -55,7 +54,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 #smallbnd.domain=NULL
 #smallbnd.ecofilter <- getfilter("PROVINCE", RAVG.ecoprov)
 #nbrdom.min=10
-
  
   #############################################################################
   ## SA domains

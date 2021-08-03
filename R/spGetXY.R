@@ -191,7 +191,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       ###########################################################
       dbconn <- suppressWarnings(DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE))
       tablst <- DBI::dbListTables(dbconn)
- 
+
       if (is.null(xy)) {
         xytabs <- tablst[grepl("xy", tablst)]
         if (length(xytabs) == 0) {
@@ -298,7 +298,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       }
     }   # xy_datsource == "sqlite"
   }
-
+ 
   if (clipxy) {
     clipdat <- spClipPoint(spxy, clippolyv=bndx)
     spxy <- clipdat$clip_xyplt 
