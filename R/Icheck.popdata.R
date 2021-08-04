@@ -10,7 +10,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 	areaunits="acres", unit.action="keep", removetext="unitarea", 
 	stratalut=NULL, strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL, 
 	stratcombine=TRUE, prednames=NULL, predfac=NULL, ACI=FALSE, nonsamp.pfilter=NULL, 
-	nonsamp.cfilter=NULL, nonsamp.vfilter=NULL, nullcheck=FALSE, 
+	nonsamp.cfilter=NULL, nonsamp.vfilter.fixed=FALSE, nullcheck=FALSE, 
 	pvars2keep=NULL, cvars2keep=NULL, ppsanm="pop_plot_stratum_assgn", gui=FALSE){
 
   ###################################################################################
@@ -80,7 +80,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
 	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD=
-	SUBPCOND_PROP=MACRCOND_PROP=tpropvars <- NULL
+	SUBPCOND_PROP=MACRCOND_PROP=tpropvars=vcondsppf=vcondstrf <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -1285,8 +1285,13 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     ## Define and apply p2veg.nonsamp.filter 
     #############################################################################
     if ("P2VEG_SUBP_STATUS_CD" %in% names(subp_condf)) {
-      p2veg.nonsamp.filter <- "(SAMP_METHOD_CD == 1 & P2VEG_SUBP_STATUS_CD == 1 |
- 		is.na(P2VEG_SUBP_STATUS_CD)) | SAMP_METHOD_CD == 2"
+      if (nonsamp.vfilter.fixed) {
+        p2veg.nonsamp.filter <- "(SAMP_METHOD_CD == 1 & P2VEG_SUBP_STATUS_CD == 1) | 
+			SAMP_METHOD_CD == 2"
+      } else {
+        p2veg.nonsamp.filter <- "(SAMP_METHOD_CD == 1 & P2VEG_SUBP_STATUS_CD == 1 |
+ 			is.na(P2VEG_SUBP_STATUS_CD)) | SAMP_METHOD_CD == 2"
+      }
 
       ## It should be this after database is fixed 
       ## So, when SAMP_METHOD_CD == 1 & P2VEG_SUBP_STATUS_CD == 1, 
@@ -1382,7 +1387,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       setkeyv(vsubpstrf, c(subpuniqueid, condid))
 
       ## Summarize vsubpsppf columns and divide by 4 (subplots) by condition
-      covpctnm <- findnm("COVER_PCT", names(vsubpsppf))
+      covpctnm <- findnm("COVER_PCT", names(vsubpstrf))
       vcols <- c("GROWTH_HABIT_CD", "LAYER")
       vcols <- vcols[vcols %in% names(vsubpstrf)]
       vcondstrf <- vsubpstrf[, list(COVER_PCT_SUM = sum(get(covpctnm), na.rm=TRUE)/4/100), 
@@ -1432,7 +1437,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       returnlst$vcondsppf <- vcondsppf
       returnlst$vuniqueid <- vuniqueid
     }
-    if (!is.null(vsubpstrf)) {
+    if (!is.null(vcondstrf)) {
       returnlst$vcondstrf <- vcondstrf
       returnlst$vuniqueid <- vuniqueid
     }

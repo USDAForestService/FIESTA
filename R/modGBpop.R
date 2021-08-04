@@ -9,7 +9,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", 
 	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL,
  	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE,
-	GBdata=NULL, pltdat=NULL, GBstratdat=NULL, gui=FALSE){
+	GBdata=NULL, pltdat=NULL, GBstratdat=NULL, nonsamp.vfilter.fixed=FALSE, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -33,7 +33,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(FIESTA::modGBpop)) 
+  formallst <- names(formals(modGBpop)) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -170,7 +170,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       } 
     }
   } 
- 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -184,6 +184,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, 
 	invyrs=invyrs, adj=adj, intensity=intensity, ACI=ACI, 
 	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter,
+	nonsamp.vfilter.fixed=nonsamp.vfilter.fixed,
  	unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
 	areaunits=areaunits, unit.action=unit.action, strata=strata, 
 	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
@@ -245,10 +246,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	minplotnum.unit=minplotnum.unit, unit.action=unit.action,
 	strata=strata, auxlut=stratalut, strvar=strvar,  
 	nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
-	minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 						getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
+	minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 				getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
+  unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
   unitvars <- auxdat$unitvars
   strvar <- auxdat$strvar
@@ -295,7 +297,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     vcondstrf <- adjfacdata$vcondstrx
     setorderv(stratalut, c(unitvars, strvar))
   } 
-  
+
   ###################################################################################
   ## Return population data objects
   ###################################################################################

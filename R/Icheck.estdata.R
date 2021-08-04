@@ -34,6 +34,20 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
   ## Set global variables
   rawfolder <- NULL
 
+
+  #############################################################################
+  ## Check esttype
+  #############################################################################
+  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC", "P2VEG")
+  esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
+	checklst=esttypelst, caption="Esttype?")
+
+  ## Check totals
+  if (esttype %in% c("AREA", "TREE")) {
+    totals <- FIESTA::pcheck.logical(totals, varnm="totals", 
+		title="Totals?", first="NO", gui=gui, stopifnull=TRUE)
+  }
+
   ###########################################################################
   ## Apply pcfilter (plot and cond filters) to pltcondf table
   ###########################################################################
@@ -108,19 +122,6 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
       message(paste(ACI.filter, "removed all records"))
       return(NULL)
     }
-  }
-
-  #############################################################################
-  ## Check esttype
-  #############################################################################
-  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC", "P2VEG")
-  esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
-	checklst=esttypelst, caption="Esttype?")
-
-  ## Check totals
-  if (esttype %in% c("AREA", "TREE")) {
-    totals <- FIESTA::pcheck.logical(totals, varnm="totals", 
-		title="Totals?", first="NO", gui=gui, stopifnull=TRUE)
   }
 
   #####################################################################################

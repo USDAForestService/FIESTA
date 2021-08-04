@@ -17,7 +17,7 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="str", landarea="FOREST",
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::modGBarea)),
+  formallst <- c(names(formals(modGBp2veg)),
 		names(formals(FIESTA::modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
@@ -48,8 +48,8 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="str", landarea="FOREST",
   options.old <- options()
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE)
-  esttype <- "AREA" 
   nonresp <- FALSE
+  esttype <- "P2VEG"
   substrvar <- NULL
   returnGBpopdat <- TRUE 
   parameters <- FALSE
@@ -96,7 +96,8 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="str", landarea="FOREST",
 
   vcondsppx <- GBpopdat$vcondsppx
   vcondstrx <- GBpopdat$vcondstrx
-  estvar.name <- "COVER_PCT_SUM_ADJ"
+  estvar <- "COVER_PCT_SUM"
+  vuniqueid <- "PLT_CN"
 
   ## Check p2vegtype 
   ########################################################
@@ -107,6 +108,13 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="str", landarea="FOREST",
     vcondx <- vcondstrx
   } else {
     vcondx <- vcondsppx
+  }
+
+  ########################################
+  ## Check stratalut
+  ########################################
+  if (!"strwt" %in% names(stratalut)) {
+    stop("strwt not in stratalut")
   }
   
   ########################################
@@ -164,7 +172,7 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="str", landarea="FOREST",
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=vcondf, condf=pltcondf, 
+  rowcolinfo <- check.rowcol(gui=gui, esttype="TREE", treef=vcondf, condf=pltcondf, 
 	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
 	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
 	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby, 
@@ -202,12 +210,11 @@ modGBp2veg <- function(GBpopdat=NULL, p2vegtype="str", landarea="FOREST",
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
-  adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
   treedat <- check.tree(gui=gui, treef=vcondf, 
 	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=vuniqueid, 
 	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, estvarn.TPA=FALSE, 
 	estvarn.filter=vfilter, esttotn=TRUE, tdomvar=tdomvar, 
-	tdomvar2=tdomvar2, adjtree=TRUE, adjvar="ADJ_FACTOR_P2VEG_SUBP", metric=metric)
+	tdomvar2=tdomvar2, adjtree=TRUE, adjvar="cadjfac", metric=metric)
   if (is.null(treedat)) return(NULL) 
 
   tdomdat <- treedat$tdomdat

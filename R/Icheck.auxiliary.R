@@ -411,15 +411,17 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ##################################################################################
   ## Calculate weights
   ################################################################################## 
-  if (module %in% c("GB", "PB")) {
+  #if (module %in% c("GB", "PB")) {
+  if (strata) {
     if (getwt) {
       ## Caculate weight
       if (is.character(auxlut[[getwtvar]]) && sum(grepl(",", auxlut[[getwtvar]]) > 0)) {
         auxlut[[getwtvar]] <- as.numeric(gsub(",", "", auxlut[[getwtvar]]))
       }
-      auxlut[, list(strwt=prop.table(get(getwtvar))), by=unitvar]
-#     auxlut <- auxlut[, list(strwt = sum(strwt/.N, na.rm=TRUE)), by=c(unitvar, strvar)]
+      setkeyv(auxlut, c(unitvar, strvar))
+      suppressWarnings(auxlut[, strwt := prop.table(get(getwtvar)), by=unitvar])
       strwtvar <- "strwt"
+
     } else {
       ## Check for strwt
       if (!strwtvar %in% names(auxlut)) {
