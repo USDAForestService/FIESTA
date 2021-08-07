@@ -22,7 +22,7 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
 	multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
 	barplot.compare = FALSE, title.ref = NULL, save4testing = FALSE, 
-	SAdomdat = NULL, SAdata = NULL, SApopdat = NULL)
+	SAdomdat = NULL, SAdata = NULL, SApopdat = NULL, addPS = FALSE)
 }
 \arguments{
   \item{RAVG}{ String. RAVG layer. } 
@@ -75,6 +75,7 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
   \item{SAdomdat}{ R list object. SA domain data. }
   \item{SAdata}{ R list object. FIA plot data and model data within SA domain. }
   \item{SApopdat}{ R list object. FIA population data within SA domain. }
+  \item{addPS}{ Logical. If TRUE, adds post-strat estimates to multest. }
 }
  
 \value{

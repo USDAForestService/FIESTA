@@ -22,7 +22,7 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
 	allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, 
 	savebnd = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "csv", 
 	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = FALSE, append_layer = FALSE, spXYdat = NULL, xyids = NULL, 
+	overwrite_layer = FALSE, append_layer = FALSE, spXYdat = NULL, 
 	stbnd.att = "COUNTYFIPS")
 }
 \arguments{

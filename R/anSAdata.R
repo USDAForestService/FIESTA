@@ -159,7 +159,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)
   }
-print("TEST")
 
   ## Check number of plots (Note: must be greater than 2 plots)
   polyvarlst <- unique(c("DOMAIN", "AOI")[!c("DOMAIN", "AOI") %in% names(spxy)])

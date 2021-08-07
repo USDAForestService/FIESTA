@@ -187,7 +187,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
     return(NULL)
   } else {
     message("getting estimates... ")
-    save.append <- ifelse (i == 1, FALSE, TRUE)
 
     ## Get SA estimates
     ##############################################
@@ -247,13 +246,15 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
         if (estvar == "TPA_UNADJ") {
           estvar <- "COUNT"
         }
-        multestvar <- paste0(estvar, "_live")
+        estvar <- paste0(estvar, "_live")
+        multestvar <- estvar
+      } else if (estvar == "CONDPROP_ADJ") {
+        multestvar <- "FOREST_prop"
       }
-
       ## Export dunit_multest
       overwrite_layer <- ifelse(save.append, FALSE, TRUE)
-      datExportData(multest[[multestvar]], out_fmt="sqlite", outfolder=outfolder, 
- 		out_dsn=multest_dsn, out_layer=multestvar, 
+      datExportData(multest[[estvar]], out_fmt="sqlite", outfolder=outfolder, 
+ 		out_dsn="SAmultest_subsect", out_layer=multestvar, 
 		overwrite_layer=overwrite_layer, append_layer=save.append)
     }
   }
