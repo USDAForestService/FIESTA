@@ -170,6 +170,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
     outfilenm <- outfn.base
   } 
   if (!noext) {
+    ext <- ifelse(ext=="sqlite", "db", ext)
     if (substring(ext, 1, 1) == ".") {
       outfilenm <- paste0(outfilenm, ext)
     } else {
@@ -510,6 +511,10 @@ findnm <- function(x, xvect, returnNULL=FALSE) {
 
 strat.pivot <- function(x, strvar, unitvars, strwtvar="Prop", strat.levels=NULL) {
   ## DESCRIPTION: translates strata table from spGetAuxiliary() to spGetStrata() format 
+
+  if (!"data.table" %in% class(x)) {
+    x <- setDT(x)
+  } 
   nmlst <- names(x)
   PScols <- nmlst[grep(strvar, nmlst)]
   PSvalslst <- sapply(strsplit(PScols, paste0(strvar, ".")), "[[", 2)

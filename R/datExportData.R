@@ -6,7 +6,7 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
   ## DESCRIPTION: Exports a data.frame to file or database.
   ## out_fmt	Output format ('csv', 'sqlite', 'gpkg', 'shp')		
   ## out_dsn	Database file path (including extension or outfolder
-  ## out_layer	Only include if out_dsn is a database (e.g., *.sqlite, *.gdb)
+  ## out_layer	Only include if out_dsn is a database (e.g., *.db, *.gdb)
   ##			If NULL, basename of out_dsn is used
   ## outfn.pre	Add a prefix to layer name
   ## index.unique Unique index for dfobj (if out_fmt = "sqlite")

@@ -35,7 +35,6 @@ DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
   if (!dir.exists(dirname(SQLitefn))) {
     stop("invalid directory path") 
   }
-
   SQLitepath <- getoutfn(SQLitefn, outfn.date=outfn.date, 
 		outfolder=outfolder, overwrite=overwrite, ext="sqlite")
 

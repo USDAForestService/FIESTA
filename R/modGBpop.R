@@ -82,7 +82,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Load data
   ###################################################################################
   if (!is.null(GBdata)) {
-    list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
+    list.items <- c("cond", "unitarea", "unitvar")
     GBdata <- FIESTA::pcheck.object(GBdata, "GBdata", list.items=list.items)
     #bnd <- GBdata$bnd
     plt <- GBdata$plt
@@ -95,6 +95,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     areavar <- GBdata$areavar
     stratalut <- GBdata$stratalut
     strvar <- GBdata$strvar
+    strwtvar <- GBdata$strwtvar
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
 
@@ -171,6 +172,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     }
   } 
 
+  if (strwtvar != "strwt") {
+    names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
+    strwtvar <- "strwt"
+  }
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -246,7 +252,8 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	minplotnum.unit=minplotnum.unit, unit.action=unit.action,
 	strata=strata, auxlut=stratalut, strvar=strvar,  
 	nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
-	minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 				getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
+	minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 				
+	getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
   pltassgnx <- auxdat$pltx
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut

@@ -76,7 +76,8 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
   SAmultestlst <- list()
 
   message("calculating estimates...")
-  outnm <- paste(SApackage, "CONDPROP_ADJ", sep="_")
+  #outnm <- paste(SApackage, "CONDPROP_ADJ", sep="_")
+  outnm <- "CONDPROP_ADJ"
   multest_layer <- outnm
   if (multest_fmt == "csv") {
     multest_layer <- paste0("multest_", multest_layer)
@@ -85,7 +86,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, esttype="AREA", landarea="FOREST", 
  	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=rawdata, 
-	multest=savemultest, savemultest=savemultest, multest_fmt=multest_fmt,
+	multest=TRUE, savemultest=savemultest, multest_fmt=multest_fmt,
  	multest_dsn=multest_dsn, multest_layer=multest_layer, returntitle=TRUE,
  	outfolder=outfolder, multest_outfolder=multest_outfolder, 
 	multest.append=multest.append, multest.AOIonly=multest.AOIonly, 
@@ -107,7 +108,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
       dunitlut <- merge(SAdomsdf, dunitlut, by=c("DOMAIN", "AOI"))
     }
   }
-
+ 
   #if (esttype == "TREE") {
     for (j in 1:length(estvarlst)) {
       estvar <- estvarlst[j]
@@ -120,6 +121,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
 
         estvarnm <- ifelse(estvar == "TPA_UNADJ", "COUNT", estvar)
         outnm <- paste(SApackage, estvarnm, tfilter, sep="_")
+        outnm <- paste(estvarnm, tfilter, sep="_")
         multest_layer <- outnm
         if (multest_fmt == "csv") {
           multest_layer <- paste0("multest_", multest_layer)
@@ -130,7 +132,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
 			SAmethod=SAmethod, esttype="TREE", landarea=landarea, 
 			pcfilter=pcfilter, estvar=estvar, estvar.filter=estvar.filter,
  			smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
-			multest=savemultest, savemultest=savemultest, multest_fmt=multest_fmt,
+			multest=TRUE, savemultest=savemultest, multest_fmt=multest_fmt,
  			multest_dsn=multest_dsn, multest_layer=multest_layer, returntitle=TRUE,
  			outfolder=outfolder, multest_outfolder=multest_outfolder,
  			multest.append=multest.append, multest.AOIonly=multest.AOIonly,

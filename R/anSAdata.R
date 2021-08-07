@@ -92,12 +92,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(SApltdat)) {
-SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
-		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=xy_datsource, 
-		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
-		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
- 		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=TRUE)
-
     SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
 		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=xy_datsource, 
 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
@@ -165,6 +159,7 @@ SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn,
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)
   }
+print("TEST")
 
   ## Check number of plots (Note: must be greater than 2 plots)
   polyvarlst <- unique(c("DOMAIN", "AOI")[!c("DOMAIN", "AOI") %in% names(spxy)])
@@ -174,13 +169,14 @@ SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn,
   test <- test[AOI == 1, .N, by="DOMAIN"]
 
   message("checking number of plots in domain...")
-  print(test)
 
-  if (all(test$N <= 2)) {
+  if (nrow(test) == 0) {
+    message("No plots in AOI... no estimates generated")
+  } else if (all(test$N <= 2)) {
     message("ALL AOIs have 2 plots or less... no estimates generated")
+    print(test)
     return(NULL)
   }
- 
   ####################################################################
   ## Get model data
   ####################################################################
@@ -201,9 +197,15 @@ SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn,
   areavar <- SAmodeldat$areavar
   pltassgnid <- SAmodeldat$pltassgnid
 
+
+  
   ##########################################
   ## Create output list
   ##########################################
+  #pltdat <- SApltdat
+  #pltdat$spxy=pltdat$xypltx=xy.uniqueid <- NULL
+
+
   SAdata <- list(SAdoms=SAdoms, smallbnd=smallbnd, plt=pltx, 
 	pltassgn=pltassgn, cond=condx, 
 	dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 

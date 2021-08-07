@@ -7,7 +7,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
  	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="RAVG_SAmultest", 
  	multest.append=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	append_layer=FALSE, barplot.compare=FALSE, title.ref=NULL, save4testing=FALSE, 
-	SAdomdat=NULL, SAdata=NULL, SApopdat=NULL) {
+	SAdomdat=NULL, SAdata=NULL, SApopdat=NULL, addPS=FALSE) {
 
 
   ## Set global variables
@@ -151,9 +151,9 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
   ## Check outfolder
   outfolder <- pcheck.outfolder(outfolder)
-  if (!dir.exists(file.path(outfolder, "RAVG.ecoprov"))) {
-    dir.create(file.path(outfolder, RAVG.ecoprov))
-    outfolder <- file.path(outfolder, RAVG.ecoprov)
+  ecofolder <- file.path(outfolder, RAVG.ecoprov)
+  if (!dir.exists(ecofolder)) {
+    dir.create(ecofolder)
   }
 
   ##################################################################################
@@ -170,7 +170,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
  		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		showsteps=showsteps, savedata=savedata, savexy=savexy, savesteps=savedata,
- 		saveobj=saveobj, outfolder=outfolder, out_fmt="sqlite", out_dsn="SApopdat", 
+ 		saveobj=saveobj, outfolder=ecofolder, out_fmt="sqlite", out_dsn="SApopdat", 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
 		SAdomdat=SAdomdat, SAdata=SAdata)
 
@@ -178,29 +178,88 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
      returnlst$SApopdat <- SApop$SApopdat
      SApopdat <- SApop$SApopdat
   }
-  #SAdata <- SApop$SAdata
 
-  if (is.null(SApopdat)) {
-    return(NULL)
-  }
- 
+
   ####################################################################
   ## Get estimates
   ####################################################################
-#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modSAest.R")
-#source("C:\\_tsf\\_GitHub\\FIESTA\\R\\anSAest_custom.R")
-  SAestdat <- anSAest_custom(SApopdat=SApopdat, SAmethod="combo", estvarlst=estvarlst, 
-		savedata=TRUE, outfolder=outfolder, append_layer=append_layer,
-		savemultest=TRUE, multest_fmt=multest_fmt, 
-		multest.append=multest.append, multest_outfolder=multest_outfolder,
-		save4testing=save4testing, testfolder=outfolder)
-  SAest <- SAestdat$SAest
-  SAmultest <- SAestdat$SAmultest
+  if (is.null(SApopdat)) {
+    return(NULL)
+  } else {
+    message("getting estimates... ")
+    save.append <- ifelse (i == 1, FALSE, TRUE)
+
+    ## Get SA estimates
+    ##############################################
+    SAest <- anSAest_custom(SApopdat=SApopdat, 
+		estvarlst=estvarlst, showsteps=showsteps, 
+		savedata=savedata, outfolder=ecofolder, AOIonly=TRUE, 
+		save4testing=TRUE, save4testing.append=save.append,	
+		testfolder=outfolder)
+    multest <- SAest$SAmultest
+
+    if (addPS) {
+      SAdata <- SApop$SAdata
+
+      ## Convert SAdata to GBdata
+      dunitlut <- SAdata$dunitlut
+      SAdata$stratalut <- strat.pivot(dunitlut, strvar="tnt", unitvars=c("DOMAIN", "AOI"))
+      SAdata$strvar <- "tnt"
+      SAdata$strwtvar <- "Prop"
+      names(SAdata)[names(SAdata) == "dunitarea"] <- "unitarea"
+      names(SAdata)[names(SAdata) == "dunitvar"] <- "unitvar"
+
+      ## Green-book - Post-strat
+      GBpopdatPS <- modGBpop(GBdata=SAdata, strata=TRUE, minplotnum.unit=0)
+      GBest <- modGBarea(GBpopdat=GBpopdatPS, landarea="FOREST", 
+			rawdata=TRUE, rawonly=TRUE)$raw$unit_totest
+      GBest$nhat.se <- sqrt(GBest$nhat.var)
+      GBest <- GBest[, c("DOMAIN", "nhat", "nhat.se")]
+      setnames(GBest, c("DOMAIN", "PS", "PS.se"))
+
+      multest[["CONDPROP_ADJ"]] <- merge(multest[["CONDPROP_ADJ"]], GBest, 
+		by="DOMAIN", all.x=TRUE, all.y=TRUE)
 
 
+      ## Get GB post-strat estimates
+      ##############################################
+      for (estvar in estvarlst) {
+        ## Green-book - Post-strat
+        GBpopdatPS <- modGBpop(GBdata=SAdata, strata=TRUE, minplotnum.unit=0)
+        GBest <- modGBtree(GBpopdat=GBpopdatPS, landarea="FOREST", 
+			estvar=estvar, estvar.filter="STATUSCD == 1", 
+			rawdata=TRUE, rawonly=TRUE)$raw$unit_totest
+        GBest$nhat.se <- sqrt(GBest$nhat.var)
+        GBest <- GBest[, c("DOMAIN", "nhat", "nhat.se")]
+        setnames(GBest, c("DOMAIN", "PS", "PS.se"))
+
+        if (estvar == "TPA_UNADJ") {
+          estvar <- "COUNT"
+        }
+        multestvar <- paste0(estvar, "_live")
+        multest[[multestvar]] <- merge(multest[[multestvar]], GBest, 
+		by="DOMAIN", all.x=TRUE, all.y=TRUE)
+      } 
+    } 
+
+    for (estvar in c("CONDPROP_ADJ", estvarlst)) {
+      if (estvar %in% estvarlst) {
+        if (estvar == "TPA_UNADJ") {
+          estvar <- "COUNT"
+        }
+        multestvar <- paste0(estvar, "_live")
+      }
+
+      ## Export dunit_multest
+      overwrite_layer <- ifelse(save.append, FALSE, TRUE)
+      datExportData(multest[[multestvar]], out_fmt="sqlite", outfolder=outfolder, 
+ 		out_dsn=multest_dsn, out_layer=multestvar, 
+		overwrite_layer=overwrite_layer, append_layer=save.append)
+    }
+  }
 
   returnlst$SAest <- SAest
-  returnlst$SAmultest <- SAmultest
+  returnlst$SAmultest <- multest
 
   return(returnlst)
 }

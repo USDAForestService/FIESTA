@@ -78,6 +78,7 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut, cuniqueid,
     est <- rbindlist(list(est, est.NA))
     setorderv(est, dunitvar)
   }
+  return(est)
 }
 
 
@@ -141,12 +142,11 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     return(est)
   }  
 
-
   if (standardize) {
     ## Standardize predictors at the scale at which borrowing occurs (e.g., PROVINCE/SECTION)
     ## So, not standardized at national level
-    pltdat.dom[, (prednames) := lapply(.SD, function(x) x / max(x)), .SDcols=prednames]
-    dunitlut[, (prednames) := lapply(.SD, function(x) x / max(x)), .SDcols=prednames]
+    pltdat.dom[, (prednames) := lapply(.SD, function(x) x / max(abs(x))), .SDcols=prednames]
+    dunitlut[, (prednames) := lapply(.SD, function(x) x / max(abs(x))), .SDcols=prednames]
   }
  
   # variable selection for unit-level model for largebnd value

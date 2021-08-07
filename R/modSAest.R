@@ -251,8 +251,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     if (multest) {
       multest_outfolder <- FIESTA::pcheck.outfolder(multest_outfolder, gui)
       if (is.null(multest_outfolder)) multest_outfolder <- outfolder
-print("XXXXX")
-print(multest_outfolder)
       multest.append <- FIESTA::pcheck.logical(multest.append, varnm="multest.append", 
 		title="Append multest data?", first="NO", gui=gui) 
 
@@ -480,10 +478,10 @@ print(multest_outfolder)
     estkey <- estkey[estkey %in% names(dunit_multest)]
     setkeyv(dunit_multest, estkey)
 
-    dunit_multest[, JoSAE := ifelse(is.na(dunit_multest$JFH), JU.EBLUP, JFH)]  
-    dunit_multest[, JoSAE.se := ifelse(is.na(dunit_multest$JFH), JU.EBLUP, JU.EBLUP.se.1)]
+    #dunit_multest[, JoSAE := ifelse(is.na(dunit_multest$JFH), JU.EBLUP, JFH)]  
+    #dunit_multest[, JoSAE.se := ifelse(is.na(dunit_multest$JFH), JU.EBLUP, JU.EBLUP.se.1)]
 
-    SAcombo.vars <- c("JoSAE", "JoSAE.se")  
+    #SAcombo.vars <- c("JoSAE", "JoSAE.se")  
 
   } else {
     dunit_multest <- NULL
@@ -627,9 +625,11 @@ print(multest_outfolder)
       }
       if (is.null(multest_layer)) {
         if (multest_fmt == "csv") {
-          multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
+          #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
+          multest_layer <- paste0("SAmultest_", response, ".csv")
         } else {
-          multest_layer <- paste0(SApackage, "_", response)
+          #multest_layer <- paste0(SApackage, "_", response)
+          multest_layer <- response
         }
       }
       ## Export dunit_multest

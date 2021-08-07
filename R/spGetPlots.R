@@ -388,7 +388,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 
       ## Get pltids from xyids
       xyids1 <- datFilter(xyids, xfilter=measEndyr.filter)$xf
-      message ("there are ", nrow(xyids1), " plots where ", measEndyr.filter)
+      nbrxy <- ifelse (is.null(xyids1), 0, nrow(xyids1)) 
+      message ("there are ", nbrxy, " plots where ", measEndyr.filter)
       xyids2 <- datFilter(xyids, xfilter=paste0("!", measEndyr.filter))$xf
     }
   }
@@ -457,7 +458,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ################################################
         ## Subset FIA plot data to xyids1 
         ################################################
-        if (nrow(xyids1) > 0) {
+        if (nbrxy) {
  
           ## ## Query plots - measCur=TRUE and measEndyr
           pfromqry <- getpfromqry(plotCur=TRUE, Endyr=measEndyr, 
@@ -843,7 +844,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         ################################################
         ## Subset FIA plot data to xyids1 
         ################################################
-        if (nrow(xyids1) > 0) {
+        if (nbrxy > 0) {
 
           plt1 <- plt[plt[[pjoinid]] %in% xyids1[[xyjoinid]], ]
           pltids1 <- plt1[[puniqueid]]
@@ -900,19 +901,19 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
           } 
         } else {
-          plt2=cond2 <- NULL
+          plt1=cond1 <- NULL
           if (istree)
-            tree2 <- NULL
+            tree1 <- NULL
           if (isseed)
-            seed2 <- NULL
+            seed1 <- NULL
           if (savePOP) {
-            pop_plot_stratum_assgn2 <- NULL
+            pop_plot_stratum_assgn1 <- NULL
           }
           if (!is.null(other_layers)) {
             for (i in 1:length(other_layers)) {
               layer <- other_layers[i]
               if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(paste0(layer, "2"), NULL)
+                assign(paste0(layer, "1"), NULL)
               }
             }
           }
@@ -1040,7 +1041,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
             }
           }
         }
-
         plt <- rbind(plt1, plt2)
         cond <- rbind(cond1, cond2)
         if (istree)
