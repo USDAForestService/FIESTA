@@ -110,6 +110,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 		toString(SApltdat.names[!SApltdat.names %in% names(SApltdat)])) 
     }
   }
+ 
   ## Extract list objects
   spxy <- SApltdat$spxy
   xyplt <- SApltdat$xypltx
@@ -219,7 +220,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   }
 
   if (savexy) {
-    SAdata$xyplt <- xyplt
+    SAdata$spxy <- spxy
     SAdata$xy.uniqueid <- xy.uniqueid
   }
 

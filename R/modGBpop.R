@@ -303,7 +303,18 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     vcondsppf <- adjfacdata$vcondsppx
     vcondstrf <- adjfacdata$vcondstrx
     setorderv(stratalut, c(unitvars, strvar))
-  } 
+
+  } else if (adj == "plot") {
+    adjtree <- TRUE
+    bycond <- FALSE
+    adjfacdata <- FIESTA::getadjfactorPLOT(treex=treef, condx=condx, 
+		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
+    condx <- adjfacdata$condx
+    treef <- adjfacdata$treex
+    seedf <- adjfacdata$seedx
+  } else {
+    setkeyv(condx, c(cuniqueid, condid))
+  }
 
   ###################################################################################
   ## Return population data objects

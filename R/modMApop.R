@@ -335,8 +335,8 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     bycond <- FALSE
     adjfacdata <- FIESTA::getadjfactorPLOT(treex=treef, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
-    condx <- adjfacdata$condadj
-    treef <- adjfacdata$treeadj
+    condx <- adjfacdata$condx
+    treef <- adjfacdata$treex
     seedf <- adjfacdata$seedx
 
   } else {
