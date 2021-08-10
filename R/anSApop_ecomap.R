@@ -71,7 +71,7 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
  		largebnd.threshold=largebnd.threshold, nbrdom.min=nbrdom.min,
 		savedata=TRUE, showsteps=showsteps, savesteps=savesteps, 
 		outfolder=outfolder, out_fmt="shp", overwrite_dsn=overwrite_dsn, 
-		overwrite_layer=overwrite_layer)
+		overwrite_layer=overwrite_layer, addstate=TRUE)
     if (is.null(SAdomdat)) return(NULL)
 
     if (saveobj) {

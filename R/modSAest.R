@@ -424,8 +424,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   if (!is.null(largebnd.att) && !is.null(SAdomsdf)) {
     cdomdat <- merge(cdomdat, 
 		setDT(SAdomsdf)[, c(smallbnd.att, largebnd.att), with=FALSE], by=smallbnd.att)
-    addSAdomsdf <- TRUE
-    SAdomvars <- unique(c(SAdomvars, largebnd.att))
+    #addSAdomsdf <- TRUE
+    #SAdomvars <- unique(c(SAdomvars, largebnd.att))
   } else {
     cdomdat$LARGEBND <- 1
     largebnd.att <- "LARGEBND"

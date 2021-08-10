@@ -184,12 +184,11 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
   					var_est = TRUE, var_method = var_method, 
 					datatype = "means", 
 					lambda = "lambda.min", 
-					B = 1000, strata = NULL),
+					B = 1000),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
 				} )
-
   preds <- names(estgregEN$coefficients[estgregEN$coefficients > 0][-1])
   #message("predictors used for estimate: ", toString(preds))
   #print(paste("predictors used for estimate:", toString(preds)))

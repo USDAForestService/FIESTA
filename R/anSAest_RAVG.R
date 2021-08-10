@@ -194,7 +194,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		estvarlst=estvarlst, showsteps=showsteps, 
 		savedata=savedata, outfolder=ecofolder, AOIonly=TRUE, 
 		save4testing=TRUE, save4testing.append=multest.append,	
-		testfolder=outfolder)
+		testfolder=outfolder, SAdomvars=c("STATECD",largebnd.unique))
     multest <- SAest$SAmultest
 
     if (addPS) {
