@@ -5,13 +5,14 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
  	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="SAmultest", 
 	multest.append=FALSE, multest.AOIonly=TRUE, overwrite=FALSE, 
 	barplot.compare=FALSE, smallbnd.att=NULL, title.ref=NULL, 
-	save4testing=FALSE, save4testing.append=FALSE, testfolder=NULL, ...) {
+	save4testing=FALSE, save4testing.append=FALSE, testfolder=NULL, 
+	addSAdomsdf=FALSE, SAdomvars=NULL, ...) {
 
 
   ## Set global variables
   gui=gettitle <- FALSE
   plt=measyear=measyear.filter <- NULL
-  addSAdomsdf <- FALSE
+  #addSAdomsdf <- FALSE
   rawdata <- TRUE
 
   if (is.null(title.ref)) gettitle <- TRUE
@@ -92,7 +93,8 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
  	outfolder=outfolder, multest_outfolder=multest_outfolder, 
 	multest.append=multest.append, multest.AOIonly=multest.AOIonly, 
 	overwrite_layer=TRUE, append_layer=append_layer, outfn.pre=outfn.pre,
- 	addSAdomsdf=addSAdomsdf, save4testing=save4testing, showsteps=showsteps)
+ 	addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, 
+	save4testing=save4testing, showsteps=showsteps)
   if (is.null(SAareadat)) return(NULL)
   SAestlst[[outnm]] <- SAareadat$est
   SAmultestlst[[outnm]] <- SAareadat$dunit_multest
@@ -139,7 +141,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
  			returntitle=TRUE, outfolder=outfolder, multest_outfolder=multest_outfolder,
  			multest.append=multest.append, multest.AOIonly=multest.AOIonly,
  			overwrite_layer=TRUE, outfn.pre=outfn.pre, save4testing=save4testing,
- 			addSAdomsdf=addSAdomsdf, showsteps=showsteps)
+ 			addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, showsteps=showsteps)
         response <- SAestdat$raw$estvar
         rowvar <- SAestdat$raw$rowvar
 

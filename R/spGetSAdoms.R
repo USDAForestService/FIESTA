@@ -7,7 +7,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 	largebnd.threshold=10, multiSAdoms=FALSE, showsteps=TRUE, savedata=FALSE, 
 	savesteps=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, outfolder=NULL, 
 	out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
-	overwrite_dsn=FALSE, overwrite_layer=TRUE) {
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, addstate=FALSE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -162,7 +162,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- crsdat$ycrs
 
     ## Intersect smallbnd with statebnd
-    smallbndx2 <- selectByIntersects(smallbndx, stunitcof, 30)
+    smallbndx2 <- selectByIntersects(smallbndx, stunitcof, 49.999)
     if (showsteps) {
       plot(sf::st_geometry(stunitcof))
       plot(sf::st_geometry(smallbndx2), add=TRUE, border="red")
@@ -443,6 +443,10 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     if (!largeishelper && !is.null(largebndx) && !largebnd.unique %in% names(SAdomslst[[i]])) {
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					largebndx[, largebnd.unique], largest=TRUE))
+    }
+    if (addstate) {
+      SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
+					stunitco[, "STATECD"], largest=TRUE))
     }
     if (showsteps) {
       plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")

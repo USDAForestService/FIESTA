@@ -424,6 +424,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   if (!is.null(largebnd.att) && !is.null(SAdomsdf)) {
     cdomdat <- merge(cdomdat, 
 		setDT(SAdomsdf)[, c(smallbnd.att, largebnd.att), with=FALSE], by=smallbnd.att)
+    addSAdomsdf <- TRUE
+    SAdomvars <- unique(c(SAdomvars, largebnd.att))
   } else {
     cdomdat$LARGEBND <- 1
     largebnd.att <- "LARGEBND"
@@ -652,11 +654,11 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     #dunit_multest[, JoSAE.pse := get(nhat.se)/get(nhat) * 100]
 
     ## Merge SAdom attributes to dunit_multest
-    if (addSAdomsdf) {
+    if (addSAdomsdf && is.null(SAdomvars)) {
       dunit_multest[, AOI := NULL]
       dunit_multest <- merge(SAdomsdf, dunit_multest, by="DOMAIN")
       dunit_multest <- dunit_multest[order(-dunit_multest$AOI, dunit_multest$DOMAIN),]
-    } else if (!is.null(SAdomvars)) {
+    } else if (addSAdomsdf && !is.null(SAdomvars)) {
       invars <- SAdomvars[SAdomvars %in% names(SAdomsdf)]
       if (length(invars) == 0) stop("invalid SAdomvars")
       dunit_multest <- merge(SAdomsdf[, unique(c("DOMAIN", SAdomvars)), with=FALSE], 
