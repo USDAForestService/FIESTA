@@ -766,6 +766,23 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   ## Save objects for testing
   if (save4testing) {
     message("saving object for testing")
+
+    pdomdat <- tdomdattot
+
+    ## Subset tomdattot to TOTAL=1
+    pdomdat <- setDT(tdomdattot[TOTAL == 1, 
+	c(largebnd.att, dunitvar, cuniqueid, "TOTAL", estvar.name), with=FALSE]) 
+    setkeyv(pdomdat, c(dunitvar, cuniqueid))
+
+    pltassgnx <- unique(tdomdattot[, c(dunitvar, cuniqueid, prednames), with=FALSE])
+    setkeyv(pltassgnx, c(dunitvar, cuniqueid))
+    pdomdat <- pdomdat[pltassgnx]
+
+    tmp <- pdomdat[, list(mean=mean(get(estvar.name), na.rm=TRUE), 
+		mean.var=var(get(estvar.name), na.rm=TRUE)), by=dunitvar]
+    setnames(tmp, c(dunitvar, estvar.name, paste0(estvar.name, "_var")))
+    dunitlut <- dunitlut[tmp]
+
     returnlst$pdomdat <- tdomdattot
     returnlst$dunitlut <- dunitlut
     returnlst$cuniqueid <- cuniqueid

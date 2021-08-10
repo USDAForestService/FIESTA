@@ -194,7 +194,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       ## alpha=1, indicates 
       mod1 <- suppressMessages(mase::gregElasticNet(y=pltdat.dom[[yn]], 
 		xsample=setDF(pltdat.dom[,prednames, with=FALSE]), 
-		xpop=setDF(dunitlut.dom), pi = NULL, alpha = 1,
+		xpop=setDF(dunitlut.dom), pi = NULL, alpha = .2,
   		model = "linear", pi2 = NULL, var_est = FALSE,
   		var_method = "LinHB", datatype = "raw", N = NULL,
   		lambda = "lambda.1se", B = 1000, cvfolds = 10))
@@ -242,13 +242,13 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       }
       ylab <- ifelse(yn == "CONDPROP_ADJ", "FOREST_prob", 
 			ifelse(yn == "TPA_UNADJ", "COUNT", yn))
-      plot(dunitlut.dom[[yn]], dunitlut.dom[[pred]], ylab=ylab, xlab=pred, main=main, ylim=c(0,1))
+      plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], ylab=ylab, xlab=pred, main=main)
    
       if (savesteps) {
         out_layer <- paste0("SApred_", ylab, "_", pred)
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
         jpeg(jpgfn, res=300, units="in", width=8, height=10)
-          plot(dunitlut.dom[[yn]], dunitlut.dom[[pred]], ylab=ylab, xlab=pred, main=main, ylim=c(0,1))
+          plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], ylab=ylab, xlab=pred, main=main)
         dev.off()
         #message("Writing jpg to ", jpgfn, "\n")
       } 
@@ -363,10 +363,10 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.att,
   ## get unique domains
   doms <- sort(as.character(na.omit(unique(dat.large[[domain]]))))
 
-#dat=dat.large
-#dunitlut=dunitlut.large
-#pltassgn=pltassgn.large
-#dom=doms[1]
+dat=dat.large
+dunitlut=dunitlut.large
+pltassgn=pltassgn.large
+dom=doms[1]
 
   estlst <- lapply(doms, SAest.dom, 
 			dat=dat.large, cuniqueid=cuniqueid, pltassgn=pltassgn.large,
