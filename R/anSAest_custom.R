@@ -1,5 +1,5 @@
-anSAest_custom <- function(SApopdat, SApackage="JoSAE", 
-	SAmethod="unit", landarea="FOREST", pcfilter=NULL, estvarlst=NULL, 
+anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit", 
+	largebnd.att=NULL, landarea="FOREST", pcfilter=NULL, estvarlst=NULL, 
 	tfilterlst="live", showsteps=FALSE, savedata=FALSE, append_layer=FALSE,
 	savemultest=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
  	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="SAmultest", 
@@ -84,14 +84,15 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
   }
 
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
-	SAmethod=SAmethod, esttype="AREA", landarea="FOREST", 
- 	smallbnd.att=smallbnd.att, savedata=savedata, rawdata=rawdata, 
-	multest=TRUE, savemultest=savemultest, multest_fmt=multest_fmt,
+	SAmethod=SAmethod, largebnd.att=largebnd.att, smallbnd.att=smallbnd.att, 
+	esttype="AREA", landarea="FOREST", 
+	savedata=savedata, rawdata=rawdata, multest=TRUE, 
+	savemultest=savemultest, multest_fmt=multest_fmt,
  	multest_dsn=multest_dsn, multest_layer=multest_layer, returntitle=TRUE,
  	outfolder=outfolder, multest_outfolder=multest_outfolder, 
 	multest.append=multest.append, multest.AOIonly=multest.AOIonly, 
 	overwrite_layer=TRUE, append_layer=append_layer, outfn.pre=outfn.pre,
- 	addSAdomsdf=addSAdomsdf, save4testing=save4testing)
+ 	addSAdomsdf=addSAdomsdf, save4testing=save4testing, showsteps=showsteps)
   if (is.null(SAareadat)) return(NULL)
   SAestlst[[outnm]] <- SAareadat$est
   SAmultestlst[[outnm]] <- SAareadat$dunit_multest
@@ -127,26 +128,27 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE",
           multest_layer <- paste0("multest_", multest_layer)
           chkfn <- paste0(file.path(multest_outfolder, multest_layer), ".csv")
           multest.append <- ifelse(file.exists(chkfn), TRUE, FALSE)
-        }  
+        } 
+
         SAestdat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
-			SAmethod=SAmethod, esttype="TREE", landarea=landarea, 
-			pcfilter=pcfilter, estvar=estvar, estvar.filter=estvar.filter,
- 			smallbnd.att=smallbnd.att, savedata=savedata, rawdata=TRUE, 
-			multest=TRUE, savemultest=savemultest, multest_fmt=multest_fmt,
- 			multest_dsn=multest_dsn, multest_layer=multest_layer, returntitle=TRUE,
- 			outfolder=outfolder, multest_outfolder=multest_outfolder,
+			SAmethod=SAmethod, smallbnd.att=smallbnd.att, largebnd.att=largebnd.att, 
+			esttype="TREE", landarea=landarea, pcfilter=pcfilter, 
+			estvar=estvar, estvar.filter=estvar.filter,
+ 			savedata=savedata, rawdata=TRUE, multest=TRUE, savemultest=savemultest,
+ 			multest_fmt=multest_fmt, multest_dsn=multest_dsn, multest_layer=multest_layer,
+ 			returntitle=TRUE, outfolder=outfolder, multest_outfolder=multest_outfolder,
  			multest.append=multest.append, multest.AOIonly=multest.AOIonly,
  			overwrite_layer=TRUE, outfn.pre=outfn.pre, save4testing=save4testing,
- 			addSAdomsdf=addSAdomsdf)
+ 			addSAdomsdf=addSAdomsdf, showsteps=showsteps)
         response <- SAestdat$raw$estvar
         rowvar <- SAestdat$raw$rowvar
- 
+
         if (save4testing) {
           pltdom <- merge(pltdom, 
 			SAestdat$pdomdat[, c("DOMAIN", cuniqueid, rowvar, response), with=FALSE], 
 			by=c("DOMAIN", cuniqueid, rowvar))
           dunitlut <- merge(dunitlut, 
-			SAestdat$dunitlut[, c("DOMAIN", "AOI", response), with=FALSE], 
+			SAestdat$dunitlut[, c("DOMAIN", "AOI"), with=FALSE], 
 			by=c("DOMAIN", "AOI"))
         }
 

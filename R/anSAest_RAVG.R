@@ -193,7 +193,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
     SAest <- anSAest_custom(SApopdat=SApopdat, 
 		estvarlst=estvarlst, showsteps=showsteps, 
 		savedata=savedata, outfolder=ecofolder, AOIonly=TRUE, 
-		save4testing=TRUE, save4testing.append=save.append,	
+		save4testing=TRUE, save4testing.append=multest.append,	
 		testfolder=outfolder)
     multest <- SAest$SAmultest
 
@@ -209,7 +209,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       names(SAdata)[names(SAdata) == "dunitvar"] <- "unitvar"
 
       ## Green-book - Post-strat
-      GBpopdatPS <- modGBpop(GBdata=SAdata, strata=TRUE, minplotnum.unit=0)
+      GBpopdatPS <- modGBpop(GBdata=SAdata, strata=TRUE, minplotnum.unit=0, adj="plot")
+
       GBest <- modGBarea(GBpopdat=GBpopdatPS, landarea="FOREST", 
 			rawdata=TRUE, rawonly=TRUE)$raw$unit_totest
       GBest$nhat.se <- sqrt(GBest$nhat.var)
@@ -224,7 +225,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       ##############################################
       for (estvar in estvarlst) {
         ## Green-book - Post-strat
-        GBpopdatPS <- modGBpop(GBdata=SAdata, strata=TRUE, minplotnum.unit=0)
         GBest <- modGBtree(GBpopdat=GBpopdatPS, landarea="FOREST", 
 			estvar=estvar, estvar.filter="STATUSCD == 1", 
 			rawdata=TRUE, rawonly=TRUE)$raw$unit_totest
@@ -240,7 +240,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		by="DOMAIN", all.x=TRUE, all.y=TRUE)
       } 
     } 
-
+    
     for (estvar in c("CONDPROP_ADJ", estvarlst)) {
       if (estvar %in% estvarlst) {
         if (estvar == "TPA_UNADJ") {
@@ -251,11 +251,15 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       } else if (estvar == "CONDPROP_ADJ") {
         multestvar <- "FOREST_prop"
       }
+
+      ## Add province name to multest
+      multest[[estvar]]$PROVINCE <- ecoprov
+
       ## Export dunit_multest
-      overwrite_layer <- ifelse(save.append, FALSE, TRUE)
+      overwrite_layer <- ifelse(multest.append, FALSE, TRUE)
       datExportData(multest[[estvar]], out_fmt="sqlite", outfolder=outfolder, 
  		out_dsn="SAmultest_subsect", out_layer=multestvar, 
-		overwrite_layer=overwrite_layer, append_layer=save.append)
+		overwrite_layer=overwrite_layer, append_layer=multest.append)
     }
   }
 

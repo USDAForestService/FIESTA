@@ -106,6 +106,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   rowgrp=FALSE
   rowgrpnm=NULL
   rowgrpord=NULL 
+  showsteps=FALSE
+  savesteps=TRUE
 
 
   ## Check SApackage 
@@ -169,21 +171,24 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   estvar.area <- SApopdat$estvar.area
   predfac <- SApopdat$predfac
 
+
+
+  ## check smallbnd.att
+  ########################################################
+  if (is.null(smallbnd.att)) {
+    smallbnd.att <- "DOMAIN"
+  }
+  smallbnd.att <- FIESTA::pcheck.varchar(var2check=smallbnd.att, varnm="smallbnd.att", 
+		checklst=names(dunitlut), caption="smallbnd attribute for output?", 
+		multiple=FALSE)
+
   ## check SAdomsdf
   ########################################################
   SAdomsdf <- pcheck.table(SAdomsdf, tabnm="SAdomsdf", caption="SAdoms?")
   if (is.null(SAdomsdf) && addSAdomsdf) {
     message("need to add SAdomsdf when addSAdomsdf = TRUE")
     addSAdomsdf <- FALSE
-  }
-
-  ## check smallbnd.att
-  ########################################################
-  smallbnd.att <- FIESTA::pcheck.varchar(var2check=smallbnd.att, varnm="smallbnd.att", 
-		checklst=names(SAdomsdf), caption="smallbnd attribute for output?", 
-		multiple=FALSE, stopifnull=FALSE)
-  if (is.null(smallbnd.att)) smallbnd.att <- "DOMAIN"
-
+  } 
 
   ## Check prednames
   if (is.null(prednames)) {
@@ -278,6 +283,13 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
       }
     }
   }
+  if (savesteps) {
+    outfolder <- pcheck.outfolder(outfolder) 
+    stepfolder <- file.path(outfolder, "SApred_steps")
+    if (!dir.exists(stepfolder)) {
+      dir.create(stepfolder)
+    }
+  }
  
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
@@ -363,7 +375,9 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
-  if (is.null(title.dunitvar)) title.dunitvar <- smallbnd.att
+  if (is.null(title.dunitvar)) {
+    title.dunitvar <- smallbnd.att
+  }
   alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, estseed=estseed, 
 	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
 	title.rowvar=title.rowvar, title.colvar=title.colvar, 
@@ -404,55 +418,64 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   # set up formula with user-defined response and predictors
   fmla <- as.formula(paste(response," ~ ", paste(prednames, collapse= "+")))
 
-  ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
-  pdomdat <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
 
-  ## Add mean response to dunitlut for Area-level estimates
-  estmean <- pdomdat[, list(mean=mean(get(estvar.name), na.rm=TRUE),
-			mean.var=var(get(estvar.name), na.rm=TRUE)), by="DOMAIN"]
-  setkey(estmean, "DOMAIN")
-  dunitlut <- merge(dunitlut, estmean)
-  setnames(dunitlut, c("mean", "mean.var"), c(estvar.name, paste0(estvar.name, ".var")))
-  domain <- rowvar
- 
-  if (is.null(largebnd.att)) {
-    pdomdat$LARGEBND <- 1
+  ## check largebnd.att
+  ########################################################
+  if (!is.null(largebnd.att) && !is.null(SAdomsdf)) {
+    cdomdat <- merge(cdomdat, 
+		setDT(SAdomsdf)[, c(smallbnd.att, largebnd.att), with=FALSE], by=smallbnd.att)
+  } else {
+    cdomdat$LARGEBND <- 1
     largebnd.att <- "LARGEBND"
-  }   
+  }
   ## get unique largebnd values
-  largebnd.vals <- sort(unique(pdomdat[[largebnd.att]]))
-  largebnd.vals <- largebnd.vals[table(pdomdat[[largebnd.att]]) > 30]
- 
+  largebnd.vals <- sort(unique(cdomdat[[largebnd.att]]))
+  largebnd.vals <- largebnd.vals[table(cdomdat[[largebnd.att]]) > 30]
+
+
+  ## Get estimate for total
+  ######################################
+  ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
+  tdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(largebnd.att, dunitvar, cuniqueid, "TOTAL", prednames), .SDcols=estvar.name]
+  domain <- "TOTAL"
+
   ## get estimate by domain, by largebnd value
   message("generating unit-level estimates for ", response, " using ", SApackage, "...")
-  dunit_multest.unit <- 
+
+  dunit_multest.unitlst <- 
 	tryCatch(
-		do.call(rbind, lapply(largebnd.vals, SAest.large, 
-			dat=pdomdat, cuniqueid=cuniqueid, 
+		lapply(largebnd.vals, SAest.large, 
+			dat=tdomdattot, cuniqueid=cuniqueid, 
 			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
 			SApackage=SApackage, SAmethod="unit", 
-			prednames=prednames, fmla=fmla, domain=domain,
-			response=response)),
+			prednames=prednames, fmla=fmla, domain="TOTAL",
+			response=response, showsteps=showsteps, savesteps=FALSE,
+			stepfolder=stepfolder),
      	 error=function(e) {
 			message("error with unit-level estimates of ", response, "...")
 			message(e, "\n")
-			return(NULL) }) 
- 
+			return(NULL) })
+  dunit_multest.unit <- do.call(rbind, dunit_multest.unitlst)[,1]$est.large
+  prednames.select <- do.call(rbind, dunit_multest.unitlst)[,2]$prednames.select
+
   ## get estimate by domain, by largebnd value
   message("generating area-level estimates for ", response, "...")
-  dunit_multest.area <- 
+  dunit_multest.arealst <- 
 	tryCatch(
-    		do.call(rbind, lapply(largebnd.vals, SAest.large, 
-			dat=pdomdat, cuniqueid=cuniqueid, 
+    		lapply(largebnd.vals, SAest.large, 
+			dat=tdomdattot, cuniqueid=cuniqueid, 
 			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
 			SApackage=SApackage, SAmethod="area", 
-			prednames=prednames, fmla=fmla, domain=domain,
-			response=response)),
+			prednames=prednames, fmla=fmla, domain="TOTAL",
+			response=response, showsteps=showsteps, savesteps=savesteps,
+			stepfolder=stepfolder),
      	 error=function(e) {
 			message("error with area-level estimates of ", response, "...")
 			message(e, "\n")
 			return(NULL) })  
+  dunit_multest.area <- do.call(rbind, dunit_multest.arealst)[,1]$est.large
+  prednames.select <- do.call(rbind, dunit_multest.arealst)[,2]$prednames.select
 
   if (!is.null(dunit_multest.unit)) {
     if (ncol(dunit_multest.unit) == 1) {
@@ -467,7 +490,48 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     }
     SAarea.vars <- c("JFH", "JFH.se", "JA.synth", "JA.synth.se")
   }
+
+
+  if (rowvar != "TOTAL") {
+    ## NOT DONE YET!!
+
+    ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
+    tdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(largebnd.att, dunitvar, cuniqueid, rowvar, prednames), .SDcols=estvar.name]
  
+    ## get estimate by domain, by largebnd value
+    message("generating unit-level estimates for ", response, " using ", SApackage, "...")
+    dunit_multest.unit <- 
+	tryCatch(
+		do.call(rbind, lapply(largebnd.vals, SAest.large, 
+			dat=tdomdatsum, cuniqueid=cuniqueid, 
+			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
+			SApackage=SApackage, SAmethod="unit", 
+			prednames=prednames, fmla=fmla, domain=rowvar,
+			response=response, showsteps=showsteps, savesteps=savesteps,
+			stepfolder=outfolder)),
+     	 error=function(e) {
+			message("error with unit-level estimates of ", response, "...")
+			message(e, "\n")
+			return(NULL) }) 
+ 
+    ## get estimate by domain, by largebnd value
+    message("generating area-level estimates for ", response, "...")
+    dunit_multest.area <- 
+	tryCatch(
+    		do.call(rbind, lapply(largebnd.vals, SAest.large, 
+			dat=tdomdatsum, cuniqueid=cuniqueid, 
+			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
+			SApackage=SApackage, SAmethod="area", 
+			prednames=prednames, fmla=fmla, domain=rowvar,
+			response=response, showsteps=showsteps, savesteps=savesteps,
+			stepfolder=outfolder)),
+     	 error=function(e) {
+			message("error with area-level estimates of ", response, "...")
+			message(e, "\n")
+			return(NULL) })  
+  }
+
   if (!is.null(dunit_multest.unit) && !is.null(dunit_multest.area)) {
     dunit_multest <- merge(
 		dunit_multest.unit[, c(domain, "AOI", dunitvar, "NBRPLT", "NBRPLT.gt0", 
@@ -584,8 +648,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 
     dunit_multest <- merge(dunit_multest, 
 		dunitarea[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
-    dunit_multest[, JoSAE.total := get(nhat) * AREAUSED]
-    dunit_multest[, JoSAE.pse := get(nhat.se)/get(nhat) * 100]
+    #dunit_multest[, JoSAE.total := get(nhat) * AREAUSED]
+    #dunit_multest[, JoSAE.pse := get(nhat.se)/get(nhat) * 100]
 
     ## Merge SAdom attributes to dunit_multest
     if (addSAdomsdf) {
@@ -678,6 +742,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     rawdat$esttype <- esttype
     rawdat$SApackage <- SApackage
     rawdat$SAmethod <- SAmethod
+    rawdat$prednames.select <- prednames.select
     if (esttype == "TREE") {
       rawdat$estvar <- response
       rawdat$estvar.filter <- estvar.filter
@@ -699,7 +764,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   ## Save objects for testing
   if (save4testing) {
     message("saving object for testing")
-    returnlst$pdomdat <- pdomdat
+    returnlst$pdomdat <- tdomdattot
     returnlst$dunitlut <- dunitlut
     returnlst$cuniqueid <- cuniqueid
   }

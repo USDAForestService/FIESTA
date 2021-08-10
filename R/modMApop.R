@@ -81,7 +81,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Load data
   ###################################################################################
   if (!is.null(MAdata)) {
-    list.items <- c("bnd", "plt", "cond", "unitarea", "unitvar")
+    list.items <- c("plt", "cond", "unitarea", "unitvar")
     MAdata <- FIESTA::pcheck.object(MAdata, "MAdata", list.items=list.items)
     #bnd <- MAdata$bnd
     plt <- MAdata$plt

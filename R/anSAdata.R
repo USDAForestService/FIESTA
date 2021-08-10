@@ -238,7 +238,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }
     if (savexy) {
-      datExportData(sf::st_drop_geometry(xyplt), outfolder=outfolder, 
+      datExportData(sf::st_drop_geometry(spxy), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyplt", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }

@@ -6,10 +6,10 @@ MAest.ht <- function(y, N, FIA=TRUE) {
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "lin_HTSRS"
+  var_method <- "LinHTSRS"
   estht <- mase::horvitzThompson(y, pi = NULL, N = N, pi2 = NULL, 
 						var_est = TRUE, var_method = var_method, 
-						B = 1000, strata = NULL)
+						B = 1000)
 
   estht <- data.table(estht$pop_mean, estht$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estht, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
@@ -30,19 +30,19 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "unconditional_SRS"
+  var_method <- "SRSunconditional"
+
   estps <- tryCatch(mase::postStrat(	  y = y, 
-					   x_sample = x_sample, 
-					   x_pop = x_pop, 
+					   xsample = x_sample, 
+					   xpop = x_pop, 
 					   pi = NULL, N = N, pi2 = NULL, 
 					   var_est = TRUE, var_method = var_method,
-					   data_type = "means", 
-					   B = 1000, strata = NULL),
+					   datatype = "means", 
+					   B = 1000),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
 				} )
-
   if (is.null(estps)) {
     if (save4testing) {
       message("saving objects to working directory for testing: y, x_sample, x_pop, N")
@@ -78,17 +78,17 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "lin_HTSRS"
+  var_method <- "LinHTSRS"
   estgreg <- tryCatch(mase::greg(	y = y, 
-					x_sample = x_sample, 
-					x_pop = x_pop, 
+					xsample = x_sample, 
+					xpop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
 					model = "linear", 
   					var_est = TRUE, var_method = var_method, 
-					data_type = "means", 
-  					model_select = FALSE, 
+					datatype = "means", 
+  					modelselect = FALSE, 
 					lambda = "lambda.min", 
-					B = 1000, strata = NULL),
+					B = 1000),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -127,14 +127,15 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "lin_HTSRS"
+  var_method <- "LinHTSRS"
+
   estratio <- tryCatch(mase::ratioEstimator(	y = y, 
-					x_sample = x_sample, 
-					x_pop = x_pop, 
+					xsample = x_sample, 
+					xpop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
 					var_est = TRUE, var_method = var_method, 
-					data_type = "means", 
-					B = 1000, strata = NULL),
+					datatype = "means", 
+					B = 1000),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -174,14 +175,14 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
 
   NBRPLT <- length(y)
   NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "lin_HTSRS"
+  var_method <- "LinHTSRS"
   estgregEN <- tryCatch(mase::gregElasticNet(	y = y, 
-					x_sample = x_sample, 
-					x_pop = x_pop, 
+					xsample = x_sample, 
+					xpop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
 					model = model, 
   					var_est = TRUE, var_method = var_method, 
-					data_type = "means", 
+					datatype = "means", 
 					lambda = "lambda.min", 
 					B = 1000, strata = NULL),
 				error=function(err) {
@@ -302,7 +303,6 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
 
 #dom <- doms[1]
 #yn=response
-#pltdat.dom=dat.dom
 
   ## Apply function to each dom
   domest <- data.table(dom, suppressMessages(MAest(yn=response, 
