@@ -75,6 +75,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   ####################################################################
   SAestlst <- list()
   SAmultestlst <- list()
+  SApredselectlst <- list()
 
   message("calculating estimates...")
   #outnm <- paste(SApackage, "CONDPROP_ADJ", sep="_")
@@ -98,6 +99,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   if (is.null(SAareadat)) return(NULL)
   SAestlst[[outnm]] <- SAareadat$est
   SAmultestlst[[outnm]] <- SAareadat$dunit_multest
+  SApredselectlst[[outnm]] <- SAareadat$raw$prednames.select
   response <- SAareadat$raw$estvar
 
   if (save4testing) {
@@ -158,10 +160,13 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
           message("no estimates for ", outnm)
           SAestlst[[outnm]] <- NA
           SAmultestlst[[outnm]] <- NA
+          SApredselectlst[[outnm]] <- NA
+
         } else {
           SAestlst[[outnm]] <- SAestdat$est
           SAmultestlst[[outnm]] <- SAestdat$dunit_multest
- 
+          SApredselectlst[[outnm]] <- SAestdat$raw$prednames.select
+
           if (barplot.compare) {
             ## build plots
             FIESTA_SAmod_demo_plots(estvar=estvar, prednames=SApopdat$prednames, 
@@ -187,6 +192,6 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
     }
   }
 
-  return(list(SAest=SAestlst, SAmultest=SAmultestlst))
+  return(list(SAest=SAestlst, SAmultest=SAmultestlst, SApredselect=SApredselectlst))
 }
 		

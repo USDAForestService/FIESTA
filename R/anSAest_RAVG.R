@@ -176,7 +176,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
      ## Return SA population data
      returnlst$SApopdat <- SApop$SApopdat
-     SApopdat <- SApop$SApopdat
   }
 
 
@@ -190,55 +189,57 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 
     ## Get SA estimates
     ##############################################
-    SAest <- anSAest_custom(SApopdat=SApopdat, 
+    SAest <- anSAest_custom(SApopdat=SApop$SApopdat, 
 		estvarlst=estvarlst, showsteps=showsteps, 
 		savedata=savedata, outfolder=ecofolder, AOIonly=TRUE, 
 		save4testing=TRUE, save4testing.append=multest.append,	
 		testfolder=outfolder, addSAdomsdf=TRUE, 
-		SAdomvars=c("STATECD",largebnd.unique))
+		SAdomvars="PROVINCE")
     multest <- SAest$SAmultest
 
     if (addPS) {
-      SAdata <- SApop$SAdata
-
       ## Convert SAdata to GBdata
-      dunitlut <- SAdata$dunitlut
-      SAdata$stratalut <- strat.pivot(dunitlut, strvar="tnt", unitvars=c("DOMAIN", "AOI"))
-      SAdata$strvar <- "tnt"
-      SAdata$strwtvar <- "Prop"
-      names(SAdata)[names(SAdata) == "dunitarea"] <- "unitarea"
-      names(SAdata)[names(SAdata) == "dunitvar"] <- "unitvar"
+      GBdata <- SApop$SAdata
+      dunitlut <- GBdata$dunitlut
+      GBdata$stratalut <- strat.pivot(dunitlut, strvar="tnt", unitvars=c("DOMAIN", "AOI"))
+      GBdata$strvar <- "tnt"
+      GBdata$strwtvar <- "Prop"
+      names(GBdata)[names(GBdata) == "dunitarea"] <- "unitarea"
+      names(GBdata)[names(GBdata) == "dunitvar"] <- "unitvar"
 
       ## Green-book - Post-strat
-      GBpopdatPS <- modGBpop(GBdata=SAdata, strata=TRUE, minplotnum.unit=0, adj="plot")
+      GBpopdatPS <- modGBpop(GBdata=GBdata, strata=TRUE, minplotnum.unit=0, adj="plot")
 
-      GBest <- modGBarea(GBpopdat=GBpopdatPS, landarea="FOREST", 
+      ## Area estimate - GB - PS
+      GBestPS <- modGBarea(GBpopdat=GBpopdatPS, landarea="FOREST", 
 			rawdata=TRUE, rawonly=TRUE)$raw$unit_totest
-      GBest$nhat.se <- sqrt(GBest$nhat.var)
-      GBest <- GBest[, c("DOMAIN", "nhat", "nhat.se")]
-      setnames(GBest, c("DOMAIN", "PS", "PS.se"))
+      GBestPS$nhat.se <- sqrt(GBestPS$nhat.var)
+      GBestPS <- GBestPS[, c("DOMAIN", "nhat", "nhat.se")]
+      setnames(GBestPS, c("DOMAIN", "PS", "PS.se"))
 
-      multest[["CONDPROP_ADJ"]] <- merge(multest[["CONDPROP_ADJ"]], GBest, 
-		by="DOMAIN", all.x=TRUE, all.y=TRUE)
+      multest[["CONDPROP_ADJ"]] <- merge(multest[["CONDPROP_ADJ"]], GBestPS, 
+		by="DOMAIN", all.x=TRUE)
 
 
       ## Get GB post-strat estimates
       ##############################################
       for (estvar in estvarlst) {
         ## Green-book - Post-strat
-        GBest <- modGBtree(GBpopdat=GBpopdatPS, landarea="FOREST", 
+        GBestPS <- modGBtree(GBpopdat=GBpopdatPS, landarea="FOREST", 
 			estvar=estvar, estvar.filter="STATUSCD == 1", 
 			rawdata=TRUE, rawonly=TRUE)$raw$unit_totest
-        GBest$nhat.se <- sqrt(GBest$nhat.var)
-        GBest <- GBest[, c("DOMAIN", "nhat", "nhat.se")]
-        setnames(GBest, c("DOMAIN", "PS", "PS.se"))
+        GBestPS$nhat.se <- sqrt(GBestPS$nhat.var)
+        GBestPS <- GBestPS[, c("DOMAIN", "nhat", "nhat.se")]
+        setnames(GBestPS, c("DOMAIN", "PS", "PS.se"))
 
         if (estvar == "TPA_UNADJ") {
           estvar <- "COUNT"
         }
         multestvar <- paste0(estvar, "_live")
-        multest[[multestvar]] <- merge(multest[[multestvar]], GBest, 
-		by="DOMAIN", all.x=TRUE, all.y=TRUE)
+
+        ## Append GB-PS estimate to multest
+        multest[[multestvar]] <- merge(multest[[multestvar]], GBestPS, 
+		by="DOMAIN", all.x=TRUE)
       } 
     } 
     
@@ -259,13 +260,18 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       ## Export dunit_multest
       overwrite_layer <- ifelse(multest.append, FALSE, TRUE)
       datExportData(multest[[estvar]], out_fmt="sqlite", outfolder=outfolder, 
- 		out_dsn="SAmultest_subsect", out_layer=multestvar, 
+ 		out_dsn=multest_dsn, out_layer=multestvar, 
 		overwrite_layer=overwrite_layer, append_layer=multest.append)
     }
   }
 
+  ## Save selected predictors to ecofolder
+  if (saveobj) {
+    saveRDS(SAest$SApredselect, file=file.path(ecofolder, "SApredselect.rds"))
+  }
   returnlst$SAest <- SAest
   returnlst$SAmultest <- multest
+  returnlst$SApredselect <- SAest$SApredselect
 
   return(returnlst)
 }
