@@ -99,7 +99,7 @@ modMAarea <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   condsampcnt <- MApopdat$condsampcnt
   states <- MApopdat$states
   invyrs <- MApopdat$invyrs
-  estvar.name <- MApopdat$estvar.area
+  estvar.area <- MApopdat$estvar.area
   stratcombinelut <- MApopdat$stratcombinelut
   predfac <- MApopdat$predfac
   strvar <- MApopdat$strvar
@@ -204,7 +204,13 @@ modMAarea <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   #####################################################################################
   setkeyv(condx, c(cuniqueid, condid))
   setkeyv(condf, c(cuniqueid, condid))
-  cdomdat <- merge(condx, condf, by=key(condx), all.x=TRUE)
+
+  estvar.name <- "AREA"
+  if (adj != "none") {
+    estvar.name <- paste0(estvar.name, "_ADJ")
+  }
+  cdomdat <- merge(condx, condf, by=c(cuniqueid, condid), all.x=TRUE)
+  cdomdat[, (estvar.name) := ifelse(is.na(TOTAL), 0, get(estvar.area))] 
 
 
   #####################################################################################

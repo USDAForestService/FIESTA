@@ -112,7 +112,7 @@ intro_text1 <- paste0("The total area of ", AOInm, " is ", format(round(totarea)
                       
 
 intro_text2 <-
-paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on small area estimators from the JoSAE package. Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Burrill et al. 2018). All percent sampling errors are reported at 68% confidence level.")
+paste0("Estimates are calculated using the Forest Inventory ESTimation and Analysis (FIESTA) R package (Frescino et al. 2015) and are based on area-level small area estimators from the JoSAE package. Data for this report were extracted from the Forest Inventory and Analysis (FIA) database for years ", invyrs2, " (Burrill et al. 2018).")
 
 
 
@@ -144,12 +144,19 @@ Table 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyrs
 ```{r est1, echo=FALSE, warning=FALSE, message=FALSE}
 
 SAareadat1 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
-	SAmethod="combo", esttype="AREA", landarea="FOREST", 
+	SAmethod="area", esttype="AREA", landarea="FOREST", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
 	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
-est1 <- SAareadat1$est
+#est1 <- SAareadat1$est
 raw1 <- SAareadat1$raw
+multest <- SAareadat1$dunit_multest
 titlelst1 <- SAareadat1$titlelst
+#est1 <- multest[, c("DOMAIN", "Incident_Name", "NBRPLT.gt0", "JFH", "JFH.se", "AREAUSED")]
+est1 <- multest[, c("DOMAIN", "Incident_Name", "NBRPLT.gt0", "JFH", "JFH.se", "AREAUSED")]
+est1$
+
+knitr::kable(est1, "simple", align=c("lrr"), digits=digits,
+             format.args=list(big.mark = ","))
 
 knitr::kable(est1, "simple", align=c("lrr"), digits=digits,
              format.args=list(big.mark = ","))
@@ -167,11 +174,16 @@ knitr::kable(est1, "simple", align=c("lrr"), digits=digits,
 ## Merge estimate to smallbnd
 smallbnd1 <- merge(smallbnd, est1, by.x=smallbnd.unique, by.y="DOMAIN")
 
-pal <- palette(brewer.pal(n=7, name = "Greens"))
+# pal <- palette(brewer.pal(n=7, name = "Greens"))
+# plot(smallbnd1['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
+# 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
+# 	pal=palette(brewer.pal(n=7, name="Greens")),
+# 	border="black", lwd=.5, main="")
+
 plot(smallbnd1['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
-	pal=palette(brewer.pal(n=7, name="Greens")),
 	border="black", lwd=.5, main="")
+
 
 ```
 Figure 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyrs2`.

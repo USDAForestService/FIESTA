@@ -1,6 +1,6 @@
 spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL, 
 	xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar=NULL, yvar=NULL, xy.crs=4269, 
-	xyjoinid=NULL, pjoinid="CN", xy_datsource=NULL, clipxy=TRUE, 
+	xyjoinid=NULL, pjoinid="CN", xy_datsource=NULL, clipxy=TRUE, plot_layer="plot",
 	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
 	showsteps=FALSE, savedata=FALSE, exportsp=FALSE, returnxy=TRUE, outfolder=NULL,
@@ -22,7 +22,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=stcds=dbconn <- NULL
+  xydat=stateFilter=statecnty=stcds=dbconn=intensitynm <- NULL
   returnlst <- {}
 
   ##################################################################
@@ -168,7 +168,6 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs)
 
   } else {			## xy_datsource in('datamart', 'sqlite')
-
     if (xy_datsource == "datamart") {
       spxy <- DBgetCoords(states=states, evalid=evalid, evalCur=evalCur,
 		evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr,
@@ -256,8 +255,12 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       if (is.null(xyjoinid)) {
         xyjoinid <- xy.uniqueid
       }
- 
-      if (!is.null(xystatenm)) {
+      if (intensity1) {
+        intensitynm <- findnm("INTENSITY", xyfields, returnNULL=TRUE)
+      }
+      if (!is.null(xystatenm) && !intensity1) {
+        stfilter <- paste("where ", xystatenm, " IN(", toString(stcds), ")")
+
         sql <- paste0("select * from ", xy, " where ", xystatenm, " IN(", 
 			toString(stcds), ")")
         xyplt <- suppressMessages(pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql))
@@ -270,16 +273,22 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
         if (!is.null(plot_layer) && length(plot_layer) == 1) {
           pltfields <- DBI::dbListFields(dbconn, plot_layer)
           pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-			gui=gui, checklst=pltfields, caption="plot joinid", stopifnull=TRUE)
+			gui=gui, checklst=pltfields, caption="plot joinid")
           if (is.null(pjoinid)) {
             pjoinid <- xyjoinid
           }
           pstatenm <- findnm("STATECD", pltfields, returnNULL=TRUE)
-
           if (!is.null(pstatenm)) {
-            sql <- paste0("select xy.* from ", xy, " xy join ", 
-			plot_layer, " p ON(xy.", xyjoinid, " = p.", pjoinid, ") where p.", 
-			pstatenm, " IN(", toString(stcds), ")")
+            stfilter <- paste0("p.", pstatenm, " IN(", toString(stcds), ")")
+            xyfromqry <- getpfromqry(plotCur=measCur, 
+			invyrs=invyrs, allyrs=allyrs, intensity1=intensity1, 
+			syntax="R", plotnm=plot_layer)
+            sql <- paste0("select xy.* from ", xyfromqry, 
+				" JOIN ", xy, " xy ON (p.", pjoinid, " = xy.", xyjoinid, ")",
+				" where ", stfilter) 
+#            sql <- paste0("select xy.* from ", xy, " xy join ", 
+#			plot_layer, " p ON(xy.", xyjoinid, " = p.", pjoinid, ") where p.", 
+#			pstatenm, " IN(", toString(stcds), ")")
             xyplt <- pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql)
 
             ## Make spatial

@@ -265,10 +265,11 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## 1) Extract values from dunit_layer
   #############################################################################
   dunitarea <- NULL
+  polyvarlst <- unique(c(dunitvar, vars2keep))[!unique(c(dunitvar, vars2keep)) %in% names(sppltx)]
   if (!dunitvar %in% names(sppltx)) { 
       ## Extract values of polygon layer to points
     extpoly <- spExtractPoly(xyplt=sppltx, polyvlst=dunit_layerx, 
-		uniqueid=uniqueid, polyvarlst=unique(c(dunitvar, vars2keep)), 
+		uniqueid=uniqueid, polyvarlst=polyvarlst, 
 		keepNA=FALSE, exportNA=exportNA)
     sppltx <- unique(extpoly$spxyext)
   } else {
@@ -390,6 +391,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
     dunitlut <- dunitlut[zonalDT.cont] 
   }
+
   ###############################################################################
   ## 4) Categorical raster layers - Extract values and get zonal probabilities
   ###############################################################################

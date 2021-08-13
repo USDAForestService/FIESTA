@@ -1,7 +1,8 @@
-anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
- 	RAVG.state=NULL, RAVG.ecoprov=NULL, RAVG.minacre=NULL, datsource="sqlite", 
-	SQLitefn, RS=NULL, largebnd.threshold=10, nbrdom.min=10, rastlst.cont=NULL,
- 	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
+anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, 
+	RAVG.year=NULL, RAVG.state=NULL, RAVG.ecoprov=NULL, RAVG.minacre=NULL, 
+	datsource="sqlite", SQLitefn, RS=NULL, largebnd.unique="PROVINCE", 
+	largebnd.threshold=10, nbrdom.min=10, rastlst.cont=NULL, 
+	rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	SApackage="JoSAE", SAmethod="unit", pcfilter=NULL, landarea="FOREST", 
 	estvarlst, savedata=FALSE, saveobj=TRUE, showsteps=FALSE, outfolder=NULL,
  	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="RAVG_SAmultest", 
@@ -164,8 +165,9 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain, 
 		smallbnd.filter=RAVG.filter, smallbnd.stfilter=RAVG.stfilter, 
 		smallbnd.ecofilter=RAVG.ecofilter, largebnd.filter=RAVG.ecofilter,
-		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold,
-		nbrdom.min=nbrdom.min, datsource=datsource, data_dsn=SQLitefn, RS=RS,
+		largebnd.threshold=largebnd.threshold, largebnd.unique=largebnd.unique,
+		maxbnd.threshold=maxbnd.threshold, nbrdom.min=nbrdom.min, 
+		datsource=datsource, data_dsn=SQLitefn, RS=RS,
  		measEndyr=measEndyr, measEndyr.filter=measEndyr.filter, 
 		rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
  		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
@@ -173,30 +175,30 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
  		saveobj=saveobj, outfolder=ecofolder, out_fmt="sqlite", out_dsn="SApopdat", 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
 		SAdomdat=SAdomdat, SAdata=SAdata)
-
      ## Return SA population data
      returnlst$SApopdat <- SApop$SApopdat
+     SApopdat <- SApop$SApopdat
   }
-
 
   ####################################################################
   ## Get estimates
   ####################################################################
-  if (is.null(SApopdat)) {
+  if (is.null(SApopdat) || all(SApopdat$dunitlut$AOI == 0)) {
+    unlink(ecofolder, force=TRUE, recursive=TRUE)    
     return(NULL)
   } else {
     message("getting estimates... ")
 
     ## Get SA estimates
     ##############################################
-    SAest <- anSAest_custom(SApopdat=SApop$SApopdat, 
+    SAest <- anSAest_custom(SApopdat=SApopdat, largebnd.att=largebnd.unique,
 		estvarlst=estvarlst, showsteps=showsteps, 
 		savedata=savedata, outfolder=ecofolder, AOIonly=TRUE, 
 		save4testing=TRUE, save4testing.append=multest.append,	
 		testfolder=outfolder, addSAdomsdf=TRUE, 
-		SAdomvars="PROVINCE")
+		SAdomvars=unique(c("PROVINCE", largebnd.unique)))
     multest <- SAest$SAmultest
-
+ 
     if (addPS) {
       ## Convert SAdata to GBdata
       GBdata <- SApop$SAdata
@@ -220,7 +222,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       multest[["CONDPROP_ADJ"]] <- merge(multest[["CONDPROP_ADJ"]], GBestPS, 
 		by="DOMAIN", all.x=TRUE)
 
-
       ## Get GB post-strat estimates
       ##############################################
       for (estvar in estvarlst) {
@@ -242,7 +243,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		by="DOMAIN", all.x=TRUE)
       } 
     } 
-    
+ 
     for (estvar in c("CONDPROP_ADJ", estvarlst)) {
       if (estvar %in% estvarlst) {
         if (estvar == "TPA_UNADJ") {
@@ -253,9 +254,9 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
       } else if (estvar == "CONDPROP_ADJ") {
         multestvar <- "FOREST_prop"
       }
-
+ 
       ## Add province name to multest
-      multest[[estvar]]$PROVINCE <- ecoprov
+      multest[[estvar]]$PROVINCE <- RAVG.ecoprov
 
       ## Export dunit_multest
       overwrite_layer <- ifelse(multest.append, FALSE, TRUE)
@@ -264,6 +265,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL, RAVG.year=NULL,
 		overwrite_layer=overwrite_layer, append_layer=multest.append)
     }
   }
+ 
 
   ## Save selected predictors to ecofolder
   if (saveobj) {

@@ -7,7 +7,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 	largebnd.threshold=10, multiSAdoms=FALSE, showsteps=TRUE, savedata=FALSE, 
 	savesteps=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, outfolder=NULL, 
 	out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, addstate=FALSE) {
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, addstate=FALSE, aggregate=FALSE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -133,15 +133,20 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   if (any(table(smallbndx[[smallbnd.unique]])) > 1) {
     message("smallbnd.unique is not unique")
   }
-
   ## Apply smallbnd.filter
   ####################################################################
   if (!is.null(smallbnd.filter))  {
     smallbndx <- subset(smallbndx, eval(parse(text = smallbnd.filter)))
   }
   smallbnd.cols <- names(smallbndx)
-
-
+ 
+  ## Aggregate all fires to one polygon
+  if (aggregate) {
+    smallbndx <- sf_dissolve(smallbndx, areacalc=FALSE)
+    smallbnd.unique <- "tmp"
+    smallbnd.domain <- "tmp"
+  }
+ 
   ## Apply smallbnd.stfilter (Just state)
   ####################################################################
   if (!is.null(smallbnd.stfilter)) {
@@ -236,18 +241,22 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       if (length(maxbndx) == 0) stop("maxbnd.filter removed all features")
     }
 
+    ## Check projections (reproject smallbndx to projection of helperbndx
+    maxbndx <- crsCompare(maxbndx, smallbndx, nolonglat=TRUE)$x
+
     ## Intersect smallbnd with ecomapf
-    smallbndx <- selectByIntersects(smallbndx, ecomapf, 49)
+    #smallbndx <- selectByIntersects(smallbndx, ecomapf, 49)
+    #maxbndx2 <- selectByIntersects(maxbndx, smallbndx, 2)
 
     ## Check projections (reproject smallbndx to projection of helperbndx
-    maxbndx <- crsCompare(maxbndx, helperbndx, nolonglat=TRUE)$x
+    maxbndx <- crsCompare(maxbndx, smallbndx, nolonglat=TRUE)$x
   
     ## Change name of maxbnd.unique if equals largebnd.unique 
-    if (identical(maxbnd.unique, c(helperbnd.unique, largebnd.unique))) {
-      tmp.unique <- checknm(maxbnd.unique, names(maxbndx))
-      names(maxbndx)[names(maxbndx) == maxbnd.unique] <- tmp.unique
-      maxbnd.unique <- tmp.unique
-    }
+    #if (identical(maxbnd.unique, c(helperbnd.unique, largebnd.unique))) {
+    #  tmp.unique <- checknm(maxbnd.unique, names(maxbndx))
+    #  names(maxbndx)[names(maxbndx) == maxbnd.unique] <- tmp.unique
+    #  maxbnd.unique <- tmp.unique
+    #}
   }
 
   #############################################################################
@@ -279,14 +288,14 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- prjdat$ycrs
 
     ## Get intersection of smallbndx
-    smallbndx <- suppressWarnings(selectByIntersects(smallbndx, largebndx, 49))
+    #smallbndx <- suppressWarnings(selectByIntersects(smallbndx, largebndx, 49))
 
     ## Change name of largebnd.unique if equals helperbnd.unique
-    if (identical(largebnd.unique, helperbnd.unique)) {
-      tmp.unique <- checknm(largebnd.unique, names(largebndx))
-      names(largebndx)[names(largebndx) == largebnd.unique] <- tmp.unique
-      largebnd.unique <- tmp.unique
-    }
+    #if (identical(largebnd.unique, helperbnd.unique)) {
+    #  tmp.unique <- checknm(largebnd.unique, names(largebndx))
+    #  names(largebndx)[names(largebndx) == largebnd.unique] <- tmp.unique
+    #  largebnd.unique <- tmp.unique
+    #}
   }
 
    

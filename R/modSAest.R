@@ -172,7 +172,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   predfac <- SApopdat$predfac
 
 
-
   ## check smallbnd.att
   ########################################################
   if (is.null(smallbnd.att)) {
@@ -332,12 +331,16 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 
  
   if (esttype == "AREA") {
-    estvar.name <- estvar.area
+    estvar.name <- "AREA"
+    if (adj != "none") {
+      estvar.name <- paste0(estvar.name, "_ADJ")
+    }
     estvarunits <- areaunits
 
     setkeyv(condx, c(cuniqueid, condid))
     setkeyv(condf, c(cuniqueid, condid))
     cdomdat <- merge(condx, condf, by=c(cuniqueid, condid), all.x=TRUE)
+    cdomdat[, (estvar.name) := ifelse(is.na(TOTAL), 0, get(estvar.area))] 
   
   } else {
     #####################################################################################
@@ -458,11 +461,19 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 			message("error with unit-level estimates of ", response, "...")
 			message(e, "\n")
 			return(NULL) })
-  dunit_multest.unit <- do.call(rbind, dunit_multest.unitlst)[,1]$est.large
-  prednames.select <- do.call(rbind, dunit_multest.unitlst)[,2]$prednames.select
+  if (length(largebnd.vals) > 1) {
+    dunit_multest.unit <- do.call(rbind, do.call(rbind, dunit_multest.unitlst)[,1])
+    prednames.select <- do.call(rbind, dunit_multest.unitlst)[,2]
+    names(prednames.select) <- largebnd.vals
+  } else {
+    dunit_multest.unit <- do.call(rbind, dunit_multest.unitlst)[,1]$est.large
+    prednames.select <- do.call(rbind, dunit_multest.unitlst)[,2]$prednames.select
+  } 
+  setkeyv(dunit_multest.unit, dunitvar)
 
   ## get estimate by domain, by largebnd value
   message("generating area-level estimates for ", response, "...")
+
   dunit_multest.arealst <- 
 	tryCatch(
     		lapply(largebnd.vals, SAest.large, 
@@ -475,9 +486,24 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
      	 error=function(e) {
 			message("error with area-level estimates of ", response, "...")
 			message(e, "\n")
-			return(NULL) })  
-  dunit_multest.area <- do.call(rbind, dunit_multest.arealst)[,1]$est.large
-  prednames.select <- do.call(rbind, dunit_multest.arealst)[,2]$prednames.select
+			return(NULL) }) 
+  if (length(largebnd.vals) > 1) {
+    dunit_multest.area <- do.call(rbind, do.call(rbind, dunit_multest.arealst)[,1])
+    prednames.select <- do.call(rbind, dunit_multest.arealst)[,2]
+    names(prednames.select) <- largebnd.vals
+    if (save4testing) {
+      pdomdat <- do.call(rbind, do.call(rbind, dunit_multest.arealst)[,3])
+      dunitlut <- do.call(rbind, do.call(rbind, dunit_multest.arealst)[,4])
+    }
+  } else {
+    dunit_multest.area <- do.call(rbind, dunit_multest.arealst)[,1]$est.large
+    prednames.select <- do.call(rbind, dunit_multest.arealst)[,2]$prednames.select
+    if (save4testing) {
+      pdomdat <- do.call(rbind, dunit_multest.arealst)[,3]$pltdat.dom
+      dunitlut <- do.call(rbind, dunit_multest.arealst)[,4]$dunitlut.dom
+    }
+  } 
+  setkeyv(dunit_multest.area, dunitvar)
 
   if (!is.null(dunit_multest.unit)) {
     if (ncol(dunit_multest.unit) == 1) {
@@ -642,6 +668,22 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     returnlst$titlelst <- alltitlelst
   }
 
+  ## Merge SAdom attributes to dunit_multest
+  if (addSAdomsdf && is.null(SAdomvars)) {
+    dunit_multest[, AOI := NULL]
+    dunit_multest <- merge(SAdomsdf, dunit_multest, by="DOMAIN")
+    dunit_multest <- dunit_multest[order(-dunit_multest$AOI, dunit_multest$DOMAIN),]
+  } else if (addSAdomsdf && !is.null(SAdomvars)) {
+    invars <- SAdomvars[SAdomvars %in% names(SAdomsdf)]
+    if (length(invars) == 0) stop("invalid SAdomvars")
+    dunit_multest <- merge(SAdomsdf[, unique(c("DOMAIN", SAdomvars)), with=FALSE], 
+					dunit_multest, by="DOMAIN")
+    dunit_multest <- dunit_multest[order(-dunit_multest$AOI, dunit_multest$DOMAIN),]
+  } else {
+    dunit_multest <- dunit_multest[order(-dunit_multest$AOI, dunit_multest$DOMAIN),]
+  }
+
+
   if (multest && !is.null(dunit_multest)) {
     ## Merge dunitarea
     #tabs <- FIESTA::check.matchclass(dunitarea, dunit_multest, dunitvar)
@@ -767,23 +809,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   if (save4testing) {
     message("saving object for testing")
 
-    pdomdat <- tdomdattot
-
-    ## Subset tomdattot to TOTAL=1
-    pdomdat <- setDT(tdomdattot[TOTAL == 1, 
-	c(largebnd.att, dunitvar, cuniqueid, "TOTAL", estvar.name), with=FALSE]) 
-    setkeyv(pdomdat, c(dunitvar, cuniqueid))
-
-    pltassgnx <- unique(tdomdattot[, c(dunitvar, cuniqueid, prednames), with=FALSE])
-    setkeyv(pltassgnx, c(dunitvar, cuniqueid))
-    pdomdat <- pdomdat[pltassgnx]
-
-    tmp <- pdomdat[, list(mean=mean(get(estvar.name), na.rm=TRUE), 
-		mean.var=var(get(estvar.name), na.rm=TRUE)), by=dunitvar]
-    setnames(tmp, c(dunitvar, estvar.name, paste0(estvar.name, "_var")))
-    dunitlut <- dunitlut[tmp]
-
-    returnlst$pdomdat <- tdomdattot
+    returnlst$pdomdat <- pdomdat
     returnlst$dunitlut <- dunitlut
     returnlst$cuniqueid <- cuniqueid
   }

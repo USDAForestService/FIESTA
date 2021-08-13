@@ -14,6 +14,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   plt=measyear=measyear.filter <- NULL
   #addSAdomsdf <- FALSE
   rawdata <- TRUE
+  dunitvar <- "DOMAIN"
 
   if (is.null(title.ref)) gettitle <- TRUE
 
@@ -84,7 +85,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   if (multest_fmt == "csv") {
     multest_layer <- paste0("multest_", multest_layer)
   }
-
+ 
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, largebnd.att=largebnd.att, smallbnd.att=smallbnd.att, 
 	esttype="AREA", landarea="FOREST", 
@@ -101,7 +102,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   SAmultestlst[[outnm]] <- SAareadat$dunit_multest
   SApredselectlst[[outnm]] <- SAareadat$raw$prednames.select
   response <- SAareadat$raw$estvar
-
+ 
   if (save4testing) {
     pltdom <- SAareadat$pdomdat
     cuniqueid <- SAareadat$cuniqueid
@@ -109,8 +110,10 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 
     if (addSAdomsdf) {
       SAdomsdf <- SApopdat$SAdomsdf
-      pltdom <- merge(SAdomsdf, pltdom, by="DOMAIN")
-      dunitlut <- merge(SAdomsdf, dunitlut, by=c("DOMAIN", "AOI"))
+      pltdom2 <- merge(setDT(SAdomsdf)[, unique(c(dunitvar, SAdomvars)), with=FALSE], 
+			pltdom, by=dunitvar)
+      dunitlut <- merge(setDT(SAdomsdf)[, unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
+			dunitlut, by=c(dunitvar, "AOI"))
     }
   }
  
@@ -149,11 +152,11 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 
         if (save4testing) {
           pltdom <- merge(pltdom, 
-			SAestdat$pdomdat[, c("DOMAIN", cuniqueid, rowvar, response), with=FALSE], 
+			SAestdat$pdomdat[, c(dunitvar, cuniqueid, rowvar, response), with=FALSE], 
 			by=c("DOMAIN", cuniqueid, rowvar))
           dunitlut <- merge(dunitlut, 
-			SAestdat$dunitlut[, c("DOMAIN", "AOI"), with=FALSE], 
-			by=c("DOMAIN", "AOI"))
+			SAestdat$dunitlut[, c(dunitvar, "AOI", response, paste0(response, ".var")),
+ 				with=FALSE], by=c(dunitvar, "AOI"))
         }
 
         if (is.null(SAestdat$est)) {

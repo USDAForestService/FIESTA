@@ -134,11 +134,12 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         spxy <- xydat$spxy
         xyids <- xydat$xyids
         states <- xydat$states
-        statecnty <- spXYdat$statecnty
-        stbnd.att <- spXYdat$stbnd.att
+        statecnty <- xydat$statecnty
+        stbnd.att <- xydat$stbnd.att
         bndx <- xydat$bndx
         xyjoinid <- xydat$xyjoinid
         pjoinid <- xydat$pjoinid
+
         stcds <- pcheck.states(states, statereturn="VALUE")
         if (is.null(spxy) || nrow(spxy) == 0) {
           stop("spxy is null")
@@ -326,7 +327,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     }
 
   } else {			## datsource in('datamart', 'sqlite')
-
     ## Initialize tables
     condx <- {}
     pltx <- {}
@@ -807,7 +807,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       }
       ## Set up query for plots
       plt.qry <- paste0("select distinct p.* from ", pfromqry, " where ", stfilter) 
-
+ 
       ## Query database for plots
       rs <- DBI::dbSendQuery(dbconn, plt.qry)
       plt <- setDT(DBI::dbFetch(rs))

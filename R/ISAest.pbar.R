@@ -56,15 +56,14 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid,
   partB <- res$est$se[,c("domain.id","se.srs")]
   dat.al <- merge(partA, partB)
 
-  est.area <- JoSAE::sae.al.f(
+  est.area <- suppressWarnings(JoSAE::sae.al.f(
     		domain.id=dat.al$domain.id, n.i=dat.al$n.i, psi.i=dat.al$se.srs^2,
     		formula=fmla.dom2, data=dat.al,
     		b.i=rep(1, nrow(dat.al)),
-    		type="RE")
+    		type="RE"))
   est <- est.area$results[,1:7]
   names(est) <- c("DOMAIN", "DIR", "DIR.se", "JFH", "JFH.se",
 			       "JA.synth", "JA.synth.se")
- 
   ## To add space to messages
   cat("\n")
 
@@ -231,30 +230,83 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       prednames.select <- preds.enet
     }
   }
-
+ 
   if (showsteps || savesteps) {
-    for (pred in prednames) {
-      main2 <- ifelse(pred %in% prednames.select, "selected", "not selected")
-      if (!is.null(largebnd.val)) { 
-        main <- paste0(largebnd.val, " - ", main2)
-      } else {
-        main <- main2
-      }
-      ylab <- ifelse(yn == "CONDPROP_ADJ", "FOREST_prob", 
+    ylab <- ifelse(yn == "CONDPROP_ADJ", "FOREST_prob", 
 			ifelse(yn == "TPA_UNADJ", "COUNT", yn))
-      plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], ylab=ylab, xlab=pred, main=main)
-   
-      if (savesteps) {
-        out_layer <- paste0("SApred_", ylab, "_", pred)
-        jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
-        jpeg(jpgfn, res=300, units="in", width=8, height=10)
-          plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], ylab=ylab, xlab=pred, main=main)
-        dev.off()
-        #message("Writing jpg to ", jpgfn, "\n")
-      } 
+    pheight <- 6
+    pwidth <- 6
+    rnbr=cbnr <- 1
+    if (length(prednames) > 1) {
+      nbrpreds <- length(prednames)
+      if (nbrpreds == 2) {
+        rnbr <- 1
+        cnbr <- 2
+        pwidth <- 8
+      } else if (nbrpreds == 3) {
+        rnbr <- 1
+        cnbr <- 3
+        pwidth <- 10
+      } else if (nbrpreds == 4) {
+        rnbr <- 2
+        cnbr <- 2
+        pwidth <- 8
+        pheight <- 8
+      } else if (nbrpreds %in% 5:6) {
+        rnbr <- 2
+        cnbr <- 3
+        pwidth <- 10
+        pheight <- 8
+      } else if (nbrpreds %in% 7:8) {
+        rnbr <- 2
+        cnbr <- 4
+        pwidth <- 12
+        pheight <- 8
+      } else if (nbrpreds %in% 9) {
+        rnbr <- 3
+        cnbr <- 3
+        pwidth <- 10
+        pheight <- 8
+      } else if (nbrpreds > 9) {
+        rnbr <- 4
+        cnbr <- 4
+        pwidth <- 12
+        pheight <- 10
+      }        
+    }
+    if (showsteps) {
+      dev.new()
+      par(mfrow=c(rnbr,cnbr)) 
+      for (pred in prednames) {
+        main2 <- ifelse(pred %in% prednames.select, "selected", "not selected")
+        if (!is.null(largebnd.val) && largebnd.val != 1) { 
+          #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
+          main <- paste0(largebnd.val, " - ", main2)
+        } else {
+          main <- main2
+        }
+        plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
+      }
+    }
+    if (savesteps) {
+      out_layer <- paste0("SApred_", ylab)
+      jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
+      jpeg(jpgfn, res=300, units="in", width=pwidth, height=pheight)
+    
+      par(mfrow=c(rnbr,cnbr)) 
+      for (pred in prednames) {
+        main2 <- ifelse(pred %in% prednames.select, "selected", "not selected")
+        if (!is.null(largebnd.val) && largebnd.val != 1) { 
+          #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
+          main <- paste0(largebnd.val, " - ", main2)
+        } else {
+          main <- main2
+        }
+        plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
+      }
+      dev.off()
     }
   }
-
 
   ## create model formula with predictors
   ## note: the variables selected can change depending on the order in original formula (fmla)
@@ -266,6 +318,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					message(err, "\n")
 					return(NULL)
 				} )
+
     if (is.null(est)) {
       est <- data.table(dunitlut.dom[[dunitvar]],
 		DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
@@ -273,7 +326,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       setnames(est, "V1", dunitvar)
     }
   }
-
+ 
   if (SAmethod == "area") {
     est <- tryCatch(SAest.area(fmla.dom, pltdat.dom, dunitlut.dom, 
 				cuniqueid, dunitvar, prednames=prednames.select, yn),
@@ -296,7 +349,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
     est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
   }
-  return(list(est=est, prednames.select=prednames.select))
+  return(list(est=est, prednames.select=prednames.select, 
+			pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
 }
 
 
@@ -363,10 +417,10 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.att,
   ## get unique domains
   doms <- sort(as.character(na.omit(unique(dat.large[[domain]]))))
 
-dat=dat.large
-dunitlut=dunitlut.large
-pltassgn=pltassgn.large
-dom=doms[1]
+#dat=dat.large
+#dunitlut=dunitlut.large
+#pltassgn=pltassgn.large
+#dom=doms[1]
 
   estlst <- lapply(doms, SAest.dom, 
 			dat=dat.large, cuniqueid=cuniqueid, pltassgn=pltassgn.large,
@@ -375,16 +429,23 @@ dom=doms[1]
 			prednames=prednames, fmla=fmla,
 			domain=domain, response=response, largebnd.val=largebnd.val,
 			showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder)
-
   if (length(doms) > 1) {
     est.large <- do.call(rbind, do.call( rbind, estlst)[,1])
-    prednames.select <- do.call( rbind, estlst)[,2]
+    prednames.select <- do.call(rbind, estlst)[,2]
     names(prednames.select) <- doms
+    pltdat.dom <- do.call(rbind, do.call(rbind, estlst)[,3])
+    dunitlut.dom <- do.call(rbind, do.call(rbind, estlst)[,4])
   } else {
     est.large <- do.call(rbind, estlst)[,1]$est
-    setkeyv(est.large, dunitvar)
     prednames.select <- do.call(rbind, estlst)[,2]$prednames.select
-  } 
-  return(list(est.large=est.large, prednames.select=prednames.select))
+    pltdat.dom <- do.call(rbind, estlst)[,3]$pltdat.dom
+    dunitlut.dom <- do.call(rbind, estlst)[,4]$dunitlut.dom
+  }
+  setkeyv(est.large, dunitvar)
+  setkeyv(setDT(pltdat.dom), dunitvar)
+  setkeyv(setDT(dunitlut.dom), dunitvar)
+
+  return(list(est.large=est.large, prednames.select=prednames.select, 
+			pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
 }       
 

@@ -1,12 +1,14 @@
 anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
-	RS=NULL, clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
+	RS=NULL, xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xyjoinid="PLOT_ID", 
+	clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
 	isseed=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
 	seed_layer="seed", puniqueid="CN", intensity1=TRUE, rastfolder=NULL, 
-	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
-	rastlst.cat.NODATA=NULL, showsteps=FALSE, cex.plots=0.5, savedata=FALSE, 
-	savexy=FALSE, savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
+	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.NODATA=NULL, 
+	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
+	showsteps=FALSE, cex.plots=0.5, savedata=FALSE, savexy=FALSE, 
+	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
-	overwrite_layer=TRUE, MApltdat=NULL, ...) {
+	overwrite_layer=TRUE, append_layer=FALSE, MApltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -31,22 +33,36 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 
   ## Check overwrite, outfolder, outfn 
   ########################################################
-  if (savedata || savexy || savesteps || saveobj) {
+  if (savedata || savexy) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
+		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+		append_layer=append_layer, createSQLite=FALSE, gui=gui)
     out_dsn <- outlst$out_dsn
     outfolder <- outlst$outfolder
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    overwrite_dsn <- outlst$overwrite_dsn
+    append_layer <- outlst$append_layer
+
+  } else if (savesteps || saveobj) {
+    outfolder <- pcheck.outfolder(outfolder)
   }
 
+  if (savesteps) {
+    stepfolder <- file.path(outfolder, "SAdoms_steps")
+    if (!dir.exists(stepfolder)) dir.create(stepfolder)
+    step_dsn <- NULL
+    step_fmt <- "shp"
+  }
 
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(MApltdat)) {
     MApltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
-		RS=RS, clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
+		RS=RS, xy_datsource=xy_datsource, xy=xy, xy_dsn=xy_dsn, xyjoinid=xyjoinid, 
+		clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
 		istree=istree, isseed=TRUE, plot_layer=plot_layer, cond_layer=cond_layer, 
 		seed_layer=seed_layer, tree_layer=tree_layer, intensity1=intensity1, 
 		savedata=FALSE, savexy=TRUE, ...)
@@ -58,33 +74,34 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   } else {
     MApltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
 		"pjoinid", "tabs")
-    if (!all(MApltdat.names %in% names(MApltdat))) 
+    if (!all(MApltdat.names %in% names(MApltdat))) {
       stop("missing components in MApltdat list: ", 
 		toString(MApltdat.names[!MApltdat.names %in% names(MApltdat)])) 
+    }
   }
 
   ## Extract list objects
+  spxy <- MApltdat$spxy
   xyplt <- MApltdat$xypltx
   xy.uniqueid <- MApltdat$xy.uniqueid
-  bnd <- MApltdat$bndx
   puniqueid <- MApltdat$puniqueid
   pjoinid <- MApltdat$pjoinid
-  plt <- MApltdat$tabs$pltx
-  cond <- MApltdat$tabs$condx
-  tree <- MApltdat$tabs$treex
+  pltx <- MApltdat$tabs$pltx
+  condx <- MApltdat$tabs$condx
+  treex <- MApltdat$tabs$treex
+  seedx <- SApltdat$tabs$seedx
+  bnd <- MApltdat$bndx
 
-  if (showsteps) {
+  if (showsteps && !is.null(spxy)) {
     ## Set plotting margins
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
-
-    plot(sf::st_geometry(bnd), border="dark grey")
-    plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=cex.plots)
-
+    plot(sf::st_geometry(bnd))
+    plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=cex.plots)
     par(mar=mar)
   }
 
-  if (savesteps) {
+  if (savesteps && !is.null(spxy)) {
     ## Set plotting margins
     mar <-  par("mar")
 
@@ -92,9 +109,8 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
     jpgfn <- paste0(outfolder, "/", out_layer, ".jpg")
     jpeg(jpgfn, res=400, units="in", width=8, height=10)
       par(mar=c(1,1,1,1))
-
       plot(sf::st_geometry(bnd))
-      plot(sf::st_geometry(xyplt), add=TRUE, col="blue", cex=.25)
+      plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.25)
     dev.off()
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)
@@ -104,11 +120,12 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  MAmodeldat <- spGetAuxiliary(xyplt=xyplt, uniqueid=xy.uniqueid, 
+  MAmodeldat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
 		dom_layer=bnd, domvar=bnd.att, rastfolder=rastfolder, 
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
+		rastlst.cont.NODATA=rastlst.cont.NODATA, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
-		rastlst.cat.NODATA=NULL, keepNA=FALSE, npixels=TRUE)
+		rastlst.cat.NODATA=rastlst.cat.NODATA, keepNA=FALSE, npixels=TRUE)
   pltassgn <- MAmodeldat$pltassgn
   dunitlut <- MAmodeldat$dunitlut
   dunitvar <- MAmodeldat$dunitvar
@@ -123,46 +140,60 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ##########################################
   ## Create output list
   ##########################################
-  MAdata <- list(bnd=bnd, plt=plt, pltassgn=pltassgn, cond=cond, tree=tree, 
+  MAdata <- list(bnd=bnd, plt=pltx, pltassgn=pltassgn, cond=condx, 
 			dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
 			dunitlut=dunitlut, prednames=prednames, predfac=predfac,
 			zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
 			pltassgnid=pltassgnid, npixelvar=npixelvar)
+  if (istree) {
+    MAdata$tree <- treex
+  }
+  if (isseed) {
+    MAdata$seed <- seedx
+  }
+
   if (savexy) {
-    MAdata$xyplt <- xyplt
+    MAdata$spxy <- spxy
     MAdata$xy.uniqueid <- xy.uniqueid
   }
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="MApopdat.rda", outfolder=outfolder, 
+    objfn <- getoutfn(outfn="MApopdat.rds", outfolder=outfolder, 
 		overwrite=overwrite_layer, outfn.date=TRUE)
-    save(MAdata, file=objfn)
+    saveRDS(MAdata, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
-   if (!is.null(RS))
+   if (!is.null(RS)) {
      datExportData(sf::st_drop_geometry(bnd), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="bnd", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-
-    if (savexy)
-      datExportData(sf::st_drop_geometry(xyplt), outfolder=outfolder, 
+    }
+    if (savexy) {
+      datExportData(sf::st_drop_geometry(spxy), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyplt", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-
+    }
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(plt, outfolder=outfolder, 
+    datExportData(pltx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plt", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(cond, outfolder=outfolder, 
+    datExportData(condx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(tree, outfolder=outfolder, 
+    if (istree) {
+      datExportData(treex, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
+    if (isseed) {
+      datExportData(seedx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
     datExportData(dunitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)

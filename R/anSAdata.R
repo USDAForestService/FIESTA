@@ -2,14 +2,13 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 	xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xyjoinid="PLOT_ID", 
 	clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
 	isseed=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
-	seed_layer="seed", puniqueid="CN", intensity1=FALSE, 
-	rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, 
-	rastlst.cont.NODATA=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
-	rastlst.cat.NODATA=NULL, vars2keep="AOI", showsteps=FALSE, 
-	savedata=FALSE, savexy=FALSE, savesteps=FALSE, saveobj=FALSE, 
-	outfolder=NULL, out_fmt="csv", out_dsn = NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
-	append_layer=FALSE, SApltdat=NULL, ...) {
+	seed_layer="seed", puniqueid="CN", intensity1=TRUE, rastfolder=NULL, 
+	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.NODATA=NULL, 
+	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
+	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
+	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+	overwrite_layer=TRUE, append_layer=FALSE, SApltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -65,7 +64,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata) {
+  if (savedata || savexy) {
     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
 		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
@@ -92,8 +91,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(SApltdat)) {
-    SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy=xy, xy_dsn=xy_dsn, 
-		xyjoinid=xyjoinid, clipxy=clipxy, xy_datsource=xy_datsource, 
+    SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy_datsource=xy_datsource, 
+		xy=xy, xy_dsn=xy_dsn, xyjoinid=xyjoinid, clipxy=clipxy, 
 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
  		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=TRUE, ...)
@@ -134,7 +133,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     par(mar=c(1,1,1,1))
 
     plot(sf::st_geometry(SAdoms), border="grey")
-    #plot(sf::st_geometry(bnd), add=TRUE)
     plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.25)
     if (!is.null(smallbnd) && "sf" %in% class(smallbnd)) { 
       plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
@@ -172,6 +170,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 
   if (nrow(test) == 0) {
     message("No plots in AOI... no estimates generated")
+    return(NULL)
   } else if (all(test$N <= 2)) {
     message("ALL AOIs have 2 plots or less... no estimates generated")
     print(test)
@@ -184,8 +183,9 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   SAmodeldat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
 		dunit_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
+		rastlst.cont.NODATA=rastlst.cont.NODATA, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
-		rastlst.cat.NODATA=NULL, keepNA=FALSE, npixels=TRUE, 
+		rastlst.cat.NODATA=rastlst.cat.NODATA, keepNA=FALSE, npixels=TRUE, 
 		vars2keep="AOI", savedata=FALSE)
   pltassgn <- SAmodeldat$pltassgn
   dunitlut <- SAmodeldat$dunitlut
@@ -197,8 +197,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   areavar <- SAmodeldat$areavar
   pltassgnid <- SAmodeldat$pltassgnid
 
-
-  
   ##########################################
   ## Create output list
   ##########################################
@@ -225,9 +223,9 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   }
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="SApopdat.rda", outfolder=outfolder, 
+    objfn <- getoutfn(outfn="SApopdat.rds", outfolder=outfolder, 
 		overwrite=overwrite_layer, outfn.date=TRUE)
-    save(SAdata, file=objfn)
+    saveRDS(SAdata, file=objfn)
     message("saving object to: ", objfn)
   } 
 
@@ -251,9 +249,16 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     datExportData(condx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(treex, outfolder=outfolder, 
+    if (istree) {
+      datExportData(treex, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
+    if (isseed) {
+      datExportData(seedx, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
+		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    }
     datExportData(dunitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
