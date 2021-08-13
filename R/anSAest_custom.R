@@ -74,18 +74,12 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   ####################################################################
   ## Get estimates
   ####################################################################
+  message("calculating estimates...") 
+
   SAestlst <- list()
   SAmultestlst <- list()
   SApredselectlst <- list()
 
-  message("calculating estimates...")
-  #outnm <- paste(SApackage, "CONDPROP_ADJ", sep="_")
-  outnm <- "CONDPROP_ADJ"
-  multest_layer <- outnm
-  if (multest_fmt == "csv") {
-    multest_layer <- paste0("multest_", multest_layer)
-  }
- 
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, largebnd.att=largebnd.att, smallbnd.att=smallbnd.att, 
 	esttype="AREA", landarea="FOREST", 
@@ -98,11 +92,15 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
  	addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, 
 	save4testing=save4testing, showsteps=showsteps)
   if (is.null(SAareadat)) return(NULL)
-  SAestlst[[outnm]] <- SAareadat$est
-  SAmultestlst[[outnm]] <- SAareadat$dunit_multest
-  SApredselectlst[[outnm]] <- SAareadat$raw$prednames.select
   response <- SAareadat$raw$estvar
+
+  SAestlst[[response]] <- SAareadat$est
+  SAmultestlst[[response]] <- SAareadat$dunit_multest
+  SApredselectlst[[response]] <- SAareadat$raw$prednames.select
  
+  if (multest_fmt == "csv") {
+    multest_layer <- paste0("multest_", response)
+  }
   if (save4testing) {
     pltdom <- SAareadat$pdomdat
     cuniqueid <- SAareadat$cuniqueid

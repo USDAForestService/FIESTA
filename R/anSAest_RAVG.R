@@ -189,6 +189,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
   } else {
     message("getting estimates... ")
 
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modSAest.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\anSAest_custom.R")
     ## Get SA estimates
     ##############################################
     SAest <- anSAest_custom(SApopdat=SApopdat, largebnd.att=largebnd.unique,
@@ -219,7 +221,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
       GBestPS <- GBestPS[, c("DOMAIN", "nhat", "nhat.se")]
       setnames(GBestPS, c("DOMAIN", "PS", "PS.se"))
 
-      multest[["CONDPROP_ADJ"]] <- merge(multest[["CONDPROP_ADJ"]], GBestPS, 
+      multest[["AREA_ADJ"]] <- merge(multest[["AREA_ADJ"]], GBestPS, 
 		by="DOMAIN", all.x=TRUE)
 
       ## Get GB post-strat estimates
@@ -244,14 +246,14 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
       } 
     } 
  
-    for (estvar in c("CONDPROP_ADJ", estvarlst)) {
+    for (estvar in c("AREA_ADJ", estvarlst)) {
       if (estvar %in% estvarlst) {
         if (estvar == "TPA_UNADJ") {
           estvar <- "COUNT"
         }
         estvar <- paste0(estvar, "_live")
         multestvar <- estvar
-      } else if (estvar == "CONDPROP_ADJ") {
+      } else if (estvar == "AREA_ADJ") {
         multestvar <- "FOREST_prop"
       }
  

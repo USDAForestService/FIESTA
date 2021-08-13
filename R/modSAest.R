@@ -670,19 +670,13 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 
   ## Merge SAdom attributes to dunit_multest
   if (addSAdomsdf && is.null(SAdomvars)) {
-    dunit_multest[, AOI := NULL]
-    dunit_multest <- merge(SAdomsdf, dunit_multest, by="DOMAIN")
-    dunit_multest <- dunit_multest[order(-dunit_multest$AOI, dunit_multest$DOMAIN),]
+    dunit_totest <- merge(SAdomsdf, dunit_totest, by="DOMAIN")
   } else if (addSAdomsdf && !is.null(SAdomvars)) {
     invars <- SAdomvars[SAdomvars %in% names(SAdomsdf)]
     if (length(invars) == 0) stop("invalid SAdomvars")
-    dunit_multest <- merge(SAdomsdf[, unique(c("DOMAIN", SAdomvars)), with=FALSE], 
-					dunit_multest, by="DOMAIN")
-    dunit_multest <- dunit_multest[order(-dunit_multest$AOI, dunit_multest$DOMAIN),]
-  } else {
-    dunit_multest <- dunit_multest[order(-dunit_multest$AOI, dunit_multest$DOMAIN),]
-  }
-
+    dunit_totest <- merge(SAdomsdf[, unique(c("DOMAIN", SAdomvars)), with=FALSE], 
+					dunit_totest, by="DOMAIN")
+  } 
 
   if (multest && !is.null(dunit_multest)) {
     ## Merge dunitarea
@@ -787,8 +781,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     rawdat$SApackage <- SApackage
     rawdat$SAmethod <- SAmethod
     rawdat$prednames.select <- prednames.select
+    rawdat$estvar <- response
     if (esttype == "TREE") {
-      rawdat$estvar <- response
       rawdat$estvar.filter <- estvar.filter
     }
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
