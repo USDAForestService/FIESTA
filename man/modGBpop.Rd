@@ -26,7 +26,7 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
 	append_layer = FALSE, GBdata = NULL, pltdat = NULL, GBstratdat = NULL, 
-	gui = FALSE)
+	nonsamp.vfilter.fixed = FALSE, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -135,6 +135,8 @@ modGBpop(popType = "VOL", cond = NULL, plt = NULL, tree = NULL, seed = NULL,
   \item{GBdata}{ R List object. Output data list components from FIESTA::anGBdata(). }
   \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
   \item{GBstratdat}{ R List object. Output data list components from FIESTA::DBgetStrata(). }
+  \item{nonsamp.vfilter.fixed}{ Logical. If TRUE and popType="P2VEG", the nonsample filter
+	is fixed in database. } 
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

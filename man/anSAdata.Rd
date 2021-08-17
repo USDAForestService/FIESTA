@@ -11,14 +11,14 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy_datsource = NULL,
 	xy = NULL, xy_dsn = NULL, xyjoinid = "PLOT_ID", clipxy = TRUE, 
 	datsource = "sqlite", data_dsn = NULL, istree = TRUE, isseed = FALSE, 
 	plot_layer = "plot", cond_layer = "cond", tree_layer = "tree", 
-	seed_layer = "seed", puniqueid = "CN", intensity1 = FALSE,
+	seed_layer = "seed", puniqueid = "CN", intensity1 = TRUE,
 	rastfolder = NULL, rastlst.cont = NULL, rastlst.cont.name = NULL, 
 	rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
 	rastlst.cat.NODATA = NULL, vars2keep = "AOI", showsteps = FALSE, 
 	savedata = FALSE, savexy = FALSE, savesteps = FALSE, saveobj = FALSE, 
 	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	append_layer = FALSE, SApltdat = NULL, ...)
+	append_layer = FALSE, pltdat = NULL, ...)
 }
 
 \arguments{
@@ -102,7 +102,7 @@ anSAdata(SAdoms, smallbnd = NULL, RS = NULL, xy_datsource = NULL,
   \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
 	or files if out_fmt = 'csv'. Note: currently cannot append layers if
 	out_fmt = "gdb". }
-  \item{SApltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
+  \item{pltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
   \item{...}{ Other parameters for DBgetPlots. }
 }
  

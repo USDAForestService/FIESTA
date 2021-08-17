@@ -108,7 +108,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 
     if (addSAdomsdf) {
       SAdomsdf <- SApopdat$SAdomsdf
-      pltdom2 <- merge(setDT(SAdomsdf)[, unique(c(dunitvar, SAdomvars)), with=FALSE], 
+      pltdom <- merge(setDT(SAdomsdf)[, unique(c(dunitvar, SAdomvars)), with=FALSE], 
 			pltdom, by=dunitvar)
       dunitlut <- merge(setDT(SAdomsdf)[, unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
 			dunitlut, by=c(dunitvar, "AOI"))

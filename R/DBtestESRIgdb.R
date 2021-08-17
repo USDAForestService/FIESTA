@@ -37,9 +37,10 @@ DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
    } else {
       #message("gdb connection successful")
     
-      tablst <- sf::st_layers(gdbpath)		## OpenFileGDB driver
-      if (showlist)
+      tablst <- sf::st_layers(gdbpath)$name		## OpenFileGDB driver
+      if (showlist) {
         print(tablst)
+      }
     }
   } 
   if (returnpath) {

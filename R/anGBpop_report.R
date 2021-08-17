@@ -42,6 +42,18 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   }
 
 
+#  ref_spcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPCD", ]
+  spcdlst <- table(GBpopdat$seedx$SPCD)[table(GBpopdat$seedx$SPCD) > 5]
+  if (!is.null(spcd) && length(spcd) > 0) {
+    if (!spcd %in% names(spcdlst)) {
+      stop("SPCD ", spcd, " not in popdat")
+    } 
+  } else {
+    spcd <- names(spcdlst[spcdlst != 999 & spcdlst == max(spcdlst)])
+  }
+#  spnm <- ref_spcd[!is.na(ref_spcd$VALUE) & 
+#				ref_spcd$VALUE == spcd, "MEANING"]
+
   if (is.null(photofn)) {
     # Lines 102 to 106
     #system(paste("sed -i '102,106d'", rmdfn)) 
@@ -61,8 +73,12 @@ anGBpop_report <- function(GBpopdat, AOInm, photofn=NULL, photo_author=NULL,
   )
 
   ## Copy report from temporary folder to outfolder
-  file.copy(reportfn, outfolder)
-  message("saving report to ", file.path(outfolder, reportnm))
+  tmp <- file.copy(reportfn, outfolder, overwrite=TRUE)
+  if (tmp) {
+    message("saving report to ", file.path(outfolder, reportnm))
+  } else {
+    message("error when copying to ", outfolder)
+  }
 
   ## Set working directory back to original working directory
   setwd(wkdir) 

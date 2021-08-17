@@ -189,8 +189,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
   } else {
     message("getting estimates... ")
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modSAest.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\anSAest_custom.R")
     ## Get SA estimates
     ##############################################
     SAest <- anSAest_custom(SApopdat=SApopdat, largebnd.att=largebnd.unique,

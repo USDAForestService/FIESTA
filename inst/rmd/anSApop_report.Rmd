@@ -8,6 +8,9 @@ params:
   pcfilter: ''
   fortypgrpcd: ''
   title.ref: ''
+  estnm: ''
+  senm: ''
+  domain: ''
   
 ---
 
@@ -22,14 +25,22 @@ AOInm <- params$AOInm
 pcfilter <- params$pcfilter
 fortypgrpcd <- params$fortypgrpcd
 title.ref <- params$title.ref
+estnm <- params$estnm
+senm <- params$senm
+domain <- params$domain
 
-digits <- c(0,3,2)
+
+digits <- c(0,0,4,4,2,0)
 
 # AOInm <- "ecoM332"
 # load("E:/workspace/FIESTA/FIESTA_SA/testfolder4/M332/SApopdat.rda")
 # pcfilter <- NULL
 # title.ref <- NULL
 # fortypgrpcd <- 200
+# estnm="JFH"
+# senm="JFH.se"
+# domain="Incident_Name"
+
 
 
 if (is.null(title.ref)) {
@@ -133,13 +144,16 @@ paste0("Estimates are calculated using the Forest Inventory ESTimation and Analy
 
 -----  
 
-# EST1 - Area of forest land by domain.
+# EST1 - Area of forest land by `r domain`.
 
 -----  
 
-Table 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
+&nbsp;  
 
-&nbsp;    
+Table 1. Area of forest land by `r domain`, `r title.ref``r title.states`, `r invyrs2`.
+
+&nbsp;  
+
 
 ```{r est1, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -149,19 +163,35 @@ SAareadat1 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
 	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
 #est1 <- SAareadat1$est
 raw1 <- SAareadat1$raw
-multest <- SAareadat1$dunit_multest
+totest1 <- raw1$dunit_totest
 titlelst1 <- SAareadat1$titlelst
-#est1 <- multest[, c("DOMAIN", "Incident_Name", "NBRPLT.gt0", "JFH", "JFH.se", "AREAUSED")]
-est1 <- multest[, c("DOMAIN", "Incident_Name", "NBRPLT.gt0", "JFH", "JFH.se", "AREAUSED")]
-est1$
 
-knitr::kable(est1, "simple", align=c("lrr"), digits=digits,
-             format.args=list(big.mark = ","))
+est1 <- totest1[!is.na(totest1[[estnm]]), 
+            c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
 
-knitr::kable(est1, "simple", align=c("lrr"), digits=digits,
+knitr::kable(est1, "simple", align=c("lrrrrr"), digits=digits,
              format.args=list(big.mark = ","))
 
 ```  
+
+
+&nbsp;  
+
+
+&nbsp; 
+
+
+```{r EST1_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
+
+est1tot <- est1
+est1tot[[estnm]] <- (est1tot[[estnm]] * est1tot$AREAUSED)
+est1tot[[senm]] <- (est1tot[[senm]] * est1tot$AREAUSED)
+
+datBarplot(x=est1tot, xvar=domain, yvar=estnm, 
+           errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", ylab="Acres")
+
+```
+<!-- Figure 1. Area of forest land by, `r domain`, `r AOInm`, `r title.states`, `r invyrs2`. -->
 
 
 &nbsp;    
@@ -169,24 +199,23 @@ knitr::kable(est1, "simple", align=c("lrr"), digits=digits,
 
 ```{r est1_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
-#anMOD_barplot(SAareadat, barplot.nplt=TRUE)
 
 ## Merge estimate to smallbnd
-smallbnd1 <- merge(smallbnd, est1, by.x=smallbnd.unique, by.y="DOMAIN")
+smallbnd1 <- merge(smallbnd, est1, by=domain)
 
-# pal <- palette(brewer.pal(n=7, name = "Greens"))
-# plot(smallbnd1['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
-# 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
-# 	pal=palette(brewer.pal(n=7, name="Greens")),
+pal <- palette(brewer.pal(n=4, name = "Greens"))
+plot(smallbnd1[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
+ 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5, 
+ 	pal=palette(brewer.pal(n=4, name="Greens")),
+ 	border="black", lwd=.5, main="")
+
+# plot(smallbnd1[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
+# 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5, 
 # 	border="black", lwd=.5, main="")
-
-plot(smallbnd1['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
-	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
-	border="black", lwd=.5, main="")
 
 
 ```
-Figure 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
+<!-- Figure 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyrs2`. -->
 
 
 \newpage    
@@ -201,45 +230,71 @@ Figure 1. Area of forest land by domain, `r title.ref``r title.states`, `r invyr
 -----  
 
 
+&nbsp; 
+
+
 Table 2. Net cubic-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
 
 &nbsp;    
 
 ```{r est2, echo=FALSE, warning=FALSE, message=FALSE}
-
+ 
 SAareadat2 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="VOLCFNET", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
 	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
-est2 <- SAareadat2$est
+#est2 <- SAareadat2$est
 raw2 <- SAareadat2$raw
+totest2 <- raw2$dunit_totest
 titlelst2 <- SAareadat2$titlelst
 
-knitr::kable(est2, "simple", align=c("lrr"), digits=digits,
+est2 <- totest2[!is.na(totest2[[estnm]]), 
+                c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+
+knitr::kable(est2, "simple", align=c("lrrrrr"), digits=digits,
              format.args=list(big.mark = ","))
+
 
 ```  
 
+
 &nbsp;    
 
------  
+
+&nbsp;    
+
+
+```{r EST2_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
+
+est2tot <- est2
+est2tot[[estnm]] <- (est2tot[[estnm]] * est2tot$AREAUSED)
+est2tot[[senm]] <- (est2tot[[senm]] * est2tot$AREAUSED)
+
+datBarplot(x=est2tot, xvar=domain, yvar=estnm, 
+           errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", 
+           ylab="Acres", divideby="million")
+
+```
+
+
+&nbsp;  
+
 
 ```{r est2_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
-#anMOD_barplot(SAareadat, barplot.nplt=TRUE)
-
 ## Merge estimate to smallbnd
-smallbnd2 <- merge(smallbnd, est2, by.x=smallbnd.unique, by.y="DOMAIN")
+smallbnd2 <- merge(smallbnd, est2, by=domain)
 
-plot(smallbnd2['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3),
-	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5,
-#	pal=palette(brewer.pal(n=6, name="Blues")),
-	border="black", lwd=.5, main="")
+pal <- palette(brewer.pal(n=4, name = "Reds"))
+plot(smallbnd1[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
+ 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5, 
+ 	pal=palette(brewer.pal(n=4, name="Reds")),
+ 	border="black", lwd=.5, main="")
 
 
 ```
-Figure 2. Net cubic-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
+<!-- Figure 2. Net cubic-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`. -->
 
 
 \newpage 
@@ -257,41 +312,60 @@ Table 3. Square-feet basal area of live trees on forest land by domain, `r AOInm
 &nbsp;    
 
 ```{r est3, echo=FALSE, warning=FALSE, message=FALSE}
+
 SAareadat3 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="BA", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
 	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
-est3 <- SAareadat3$est
 raw3 <- SAareadat3$raw
+totest3 <- raw3$dunit_totest
 titlelst3 <- SAareadat3$titlelst
 
-knitr::kable(est3, "simple", align=c("lrr"), digits=digits,
+est3 <- totest3[!is.na(totest3[[estnm]]), 
+            c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+
+knitr::kable(est3, "simple", align=c("lrrrrr"), digits=digits,
              format.args=list(big.mark = ","))
 
 ```  
 
 
+&nbsp;  
+
+
+&nbsp;   
+
+
+```{r EST3_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
+
+est3tot <- est3
+est3tot[[estnm]] <- (est3tot[[estnm]] * est3tot$AREAUSED)
+est3tot[[senm]] <- (est3tot[[senm]] * est3tot$AREAUSED)
+
+datBarplot(x=est3tot, xvar=domain, yvar=estnm, 
+           errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", 
+           ylab="Acres", divideby="million")
+
+```
+
+
 &nbsp;    
+
 
 ```{r est3_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
-#anMOD_barplot(SAareadat, barplot.nplt=TRUE)
+smallbnd3 <- merge(smallbnd, est3, by=domain)
 
-## Merge estimate to smallbnd
-smallbnd3 <- merge(smallbnd, est3, by.x=smallbnd.unique, by.y="DOMAIN")
+pal <- palette(brewer.pal(n=4, name = "Blues"))
+plot(smallbnd3[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
+ 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5, 
+ 	#pal=palette(brewer.pal(n=7, name="Greens")),
+ 	border="black", lwd=.5, main="")
 
-# plot(smallbnd3['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
-# 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
-# 	pal=palette(brewer.pal(n=6, name = "Oranges")),
-# 	border="black", lwd=.5, main="")
-
-plot(smallbnd3['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
-	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=7, 
-	border="black", lwd=.5, main="")
 
 ```
-Figure 3. Square-feet basal area of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
+<!-- Figure 3. Square-feet basal area of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`. -->
 
 
 \newpage    
@@ -318,35 +392,54 @@ SAareadat4 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
 	estvar="VOLBFNET", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
 	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
-est4 <- SAareadat4$est
 raw4 <- SAareadat4$raw
+totest4 <- raw4$dunit_totest
 titlelst4 <- SAareadat4$titlelst
 
-knitr::kable(est4, "simple", align=c("lrr"), digits=digits,
+est4 <- totest4[!is.na(totest4[[estnm]]), 
+            c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+
+knitr::kable(est4, "simple", align=c("lrrrrr"), digits=digits,
              format.args=list(big.mark = ","))
 
 ```  
 
+
 &nbsp;    
 
 
------  
+&nbsp;    
+
+
+```{r EST4_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
+
+est4tot <- est4
+est4tot[[estnm]] <- (est4tot[[estnm]] * est4tot$AREAUSED)
+est4tot[[senm]] <- (est4tot[[senm]] * est4tot$AREAUSED)
+
+datBarplot(x=est4tot, xvar=domain, yvar=estnm, 
+           errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", 
+           ylab="Acres", divideby="million")
+
+```
+
+
+&nbsp;    
+
 
 ```{r est4_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
-#anMOD_barplot(SAareadat4, barplot.nplt=TRUE)
-
 ## Merge estimate to smallbnd
-smallbnd4 <- merge(smallbnd, est4, by.x=smallbnd.unique, by.y="DOMAIN")
+smallbnd4 <- merge(smallbnd, est4, by=domain)
 
-plot(smallbnd4['Estimate'], key.pos=1, axes=TRUE, key.width=lcm(1.3),
+plot(smallbnd4[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3),
 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5,
 #	pal=palette(brewer.pal(n=6, name="Blues")),
 	border="black", lwd=.5, main="")
 
 
 ```
-Figure 4. Net board-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`.
+<!-- Figure 4. Net board-foot volume of live trees on forest land by domain, `r title.ref``r title.states`, `r invyrs2`. -->
 
 
 \newpage 

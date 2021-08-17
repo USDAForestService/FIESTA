@@ -8,7 +8,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
 	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, append_layer=FALSE, SApltdat=NULL, ...) {
+	overwrite_layer=TRUE, append_layer=FALSE, pltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -90,37 +90,37 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
-  if (is.null(SApltdat)) {
-    SApltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy_datsource=xy_datsource, 
+  if (is.null(pltdat)) {
+    pltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy_datsource=xy_datsource, 
 		xy=xy, xy_dsn=xy_dsn, xyjoinid=xyjoinid, clipxy=clipxy, 
 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
  		isseed=isseed, intensity1=intensity1, savedata=FALSE, savexy=TRUE, ...)
-    if (is.null(SApltdat)) return(NULL)
+    if (is.null(pltdat)) return(NULL)
     if (saveobj) {
-      message("saving SApltdat object to: ", file.path(outfolder, "SApltdat.rda"), "...")
-      save(SApltdat, file=file.path(outfolder, "SApltdat.rda"))
+      message("saving pltdat object to: ", file.path(outfolder, "pltdat.rda"), "...")
+      save(pltdat, file=file.path(outfolder, "pltdat.rda"))
     }
   } else {
-    SApltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
+    pltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
 		"pjoinid", "tabs")
-    if (!all(SApltdat.names %in% names(SApltdat))) {
-      stop("missing components in SApltdat list: ", 
-		toString(SApltdat.names[!SApltdat.names %in% names(SApltdat)])) 
+    if (!all(pltdat.names %in% names(pltdat))) {
+      stop("missing components in pltdat list: ", 
+		toString(pltdat.names[!pltdat.names %in% names(pltdat)])) 
     }
   }
  
   ## Extract list objects
-  spxy <- SApltdat$spxy
-  xyplt <- SApltdat$xypltx
-  xy.uniqueid <- SApltdat$xy.uniqueid
-  puniqueid <- SApltdat$puniqueid
-  pjoinid <- SApltdat$pjoinid
-  pltx <- SApltdat$tabs$pltx
-  condx <- SApltdat$tabs$condx
-  treex <- SApltdat$tabs$treex
-  seedx <- SApltdat$tabs$seedx
-  SAdoms <- SApltdat$bndx
+  spxy <- pltdat$spxy
+  xyplt <- pltdat$xypltx
+  xy.uniqueid <- pltdat$xy.uniqueid
+  puniqueid <- pltdat$puniqueid
+  pjoinid <- pltdat$pjoinid
+  pltx <- pltdat$tabs$pltx
+  condx <- pltdat$tabs$condx
+  treex <- pltdat$tabs$treex
+  seedx <- pltdat$tabs$seedx
+  SAdoms <- pltdat$bndx
 
   ## Check SAdoms
   #if (!all(c("DOMAIN", "AOI") %in% names(SAdoms))) {
@@ -160,6 +160,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   }
 
   ## Check number of plots (Note: must be greater than 2 plots)
+  ## If all AOIs have less than 2 plots, return NULL
   polyvarlst <- unique(c("DOMAIN", "AOI")[!c("DOMAIN", "AOI") %in% names(spxy)])
   extpoly <- spExtractPoly(xyplt=spxy, polyvlst=SAdoms, 
 		uniqueid=xy.uniqueid, polyvarlst=polyvarlst, keepNA=FALSE)
@@ -180,34 +181,34 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  SAmodeldat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
+  auxdat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
 		dunit_layer=SAdoms, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cont.NODATA=rastlst.cont.NODATA, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		rastlst.cat.NODATA=rastlst.cat.NODATA, keepNA=FALSE, npixels=TRUE, 
 		vars2keep="AOI", savedata=FALSE)
-  pltassgn <- SAmodeldat$pltassgn
-  dunitlut <- SAmodeldat$dunitlut
-  dunitvar <- SAmodeldat$dunitvar
-  prednames <- SAmodeldat$prednames
-  zonalnames <- SAmodeldat$zonalnames
-  predfac <- SAmodeldat$predfac
-  dunitarea <- SAmodeldat$dunitarea
-  areavar <- SAmodeldat$areavar
-  pltassgnid <- SAmodeldat$pltassgnid
+  pltassgn <- auxdat$pltassgn
+  dunitzonal <- auxdat$dunitzonal
+  dunitvar <- auxdat$dunitvar
+  prednames <- auxdat$prednames
+  zonalnames <- auxdat$zonalnames
+  predfac <- auxdat$predfac
+  dunitarea <- auxdat$dunitarea
+  areavar <- auxdat$areavar
+  pltassgnid <- auxdat$pltassgnid
 
   ##########################################
   ## Create output list
   ##########################################
-  #pltdat <- SApltdat
+  #pltdat <- pltdat
   #pltdat$spxy=pltdat$xypltx=xy.uniqueid <- NULL
 
 
   SAdata <- list(SAdoms=SAdoms, smallbnd=smallbnd, plt=pltx, 
 	pltassgn=pltassgn, cond=condx, 
 	dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
-	dunitlut=dunitlut, prednames=prednames, predfac=predfac,
+	dunitzonal=dunitzonal, prednames=prednames, predfac=predfac,
 	zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
 	pltassgnid=pltassgnid)
   if (istree) {
@@ -262,8 +263,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     datExportData(dunitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(dunitlut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
+    datExportData(dunitzonal, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitzonal", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
    	

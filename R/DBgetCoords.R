@@ -231,7 +231,7 @@ DBgetCoords <- function (states=NULL, invtype="ANNUAL",
   ## Generate queries
   ##################################################################################
   ## VARIABLES
-  XYvarlst <- c("CN", "LON", "LAT", "STATECD", "UNITCD", "COUNTYCD", "PLOT")
+  XYvarlst <- c("CN", "LON", "LAT", "STATECD", "UNITCD", "COUNTYCD", "PLOT", "INTENSITY")
   xycoords.qry <- paste0("select ", 
 		toString(paste0("p.", XYvarlst)), 
 		" from ", xyfromqry,

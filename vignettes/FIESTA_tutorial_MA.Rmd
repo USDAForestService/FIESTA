@@ -162,8 +162,8 @@ rastlst.cat <- fornffn
 rastlst.cat.name="fornf"
 
 ## Generate datasets for Model-Assisted estimation
-modeldat <- spGetModeldat(xyplt=WYspplt, uniqueid="CN", 
-  dom_layer=WYbhfn, domvar=NULL,
+modeldat <- spGetAuxiliary(xyplt=WYspplt, uniqueid="CN", 
+  dunit_layer=WYbhfn, dunitvar=NULL,
   rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, rastlst.cat=rastlst.cat,
   rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
   asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, savedata=FALSE)

@@ -39,7 +39,6 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     stop("invalid parameter: ", toString(miss))
   }
 
-
   #############################################################################
   ## Import boundary
   #############################################################################
@@ -56,12 +55,12 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   #############################################################################
   ## Set xy_datsource
   ########################################################
-  datsourcelst <- c("obj", "csv", "datamart", "sqlite")
+  datsourcelst <- c("obj", "csv", "datamart", "sqlite", "shp", "gdb")
   xy_datsource <- FIESTA::pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (is.null(xy_datsource)) {
     if (!is.null(xy) && "sf" %in% class(xy)) {
-      xy_datsource == "obj"
+      xy_datsource <- "obj"
     } else if (!is.null(xy_dsn)) {
       dsn.ext <- getext(xy_dsn)
       if (!is.na(dsn.ext) && dsn.ext != "") {
@@ -89,7 +88,6 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   ## Check measEndyr.filter
   #############################################################################
   measEndyr.filter <- check.logic(bnd, measEndyr.filter)
-
   
   ## Check savedata
   #############################################################################
@@ -143,16 +141,33 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   } else {
     stop("must include bndx or states")
   }
-
+ 
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
   if (!is.null(xy) && "sf" %in% class(xy)) {
-    xyplt <- xy
+    spxy <- xy
 
   } else if (xy_datsource == "gdb") {
-    spxy <- pcheck.table(xy, xy_dsn)
-    
+
+    ## Check for data tables in database
+    ###########################################################
+    gdbpath <- suppressWarnings(DBtestESRIgdb(xy_dsn, showlist=FALSE))
+    layerlst <- sf::st_layers(gdbpath)
+    tablst <- layerlst$name
+    if (!xy %in% tablst) {
+      stop(xy, " not in ", gdbpath)
+    }
+    geomtype <- layerlst$geomtype[layerlst$name == xy][[1]]
+    xyopen <- arcgisbinding::arc.open(paste0(xy_dsn, "/", xy))
+    statenm <- findnm("STATECD", names(xyopen@fields), returnNULL=TRUE) 
+    sql <- getfilter(statenm, stcds, syntax="sql")
+    spxy <- pcheck.spatial(xy, xy_dsn, sql=sql)
+    if (is.na(geomtype)) { 
+      spxy <- spMakeSpatialPoints(xyplt=spxy, xy.uniqueid=xy.uniqueid, 
+		xvar=xvar, yvar=yvar, xy.crs=xy.crs)
+    }
+
   } else if (xy_datsource %in% c("obj", "csv")) {
 
     ####################################################################
@@ -163,9 +178,26 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     ## Check xy table
     xyplt <- pcheck.table(xy)
 
+    ## Subset if STATECD in table
+    statenm <- findnm("STATECD", names(xyplt), returnNULL=TRUE)
+    if (!is.null(statenm)) {
+      xyplt <- datFilter(xyplt, getfilter(statenm, stcds))$xf
+    }
+
     ## Make spatial
     spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs)
+
+  } else if (xy_datsource == "shp") {
+    sqlatt <- paste("select * from ", basename.NoExt(xy), "limit 0")
+    if (!is.na(getext(xy)) && getext(xy) == "shp" && 
+		"STATECD" %in% names(st_read(xy, query=sqlatt, quiet=TRUE))) {
+      where <- getfilter("STATECD", stcds, syntax="sql")
+      sql <- paste("select * from", basename.NoExt(xy), "where", where)
+      spxy <- pcheck.spatial(xy, sql=sql)
+    } else {
+      spxy <- pcheck.spatial(xy)
+    }
 
   } else {			## xy_datsource in('datamart', 'sqlite')
     if (xy_datsource == "datamart") {
@@ -188,7 +220,8 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
 
       ## Check for data tables in database
       ###########################################################
-      dbconn <- suppressWarnings(DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE))
+      dbconn <- suppressWarnings(DBtestSQLite(xy_dsn, dbconnopen=TRUE, 
+			showlist=FALSE, createnew=FALSE, stopifnull=TRUE))
       tablst <- DBI::dbListTables(dbconn)
 
       if (is.null(xy)) {
@@ -275,7 +308,13 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
           pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
 			gui=gui, checklst=pltfields, caption="plot joinid")
           if (is.null(pjoinid)) {
-            pjoinid <- xyjoinid
+            if (xyjoinid %in% pltfields) {
+              pjoinid <- xyjoinid
+            } else if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
+              pjoinid <- "CN"
+            } else {
+              stop("invalid pjoinid")
+            }
           }
           pstatenm <- findnm("STATECD", pltfields, returnNULL=TRUE)
           if (!is.null(pstatenm)) {

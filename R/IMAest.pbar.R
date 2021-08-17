@@ -300,7 +300,6 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
     return(domest)
   }
 
-#dom <- doms[1]
 #yn=response
 
   ## Apply function to each dom
@@ -362,6 +361,7 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 #unitlut=unitlut.unit
 #pltassgn=pltassgn.unit
 #N=N.unit
+#dom=doms[1]
   unitest <- do.call(rbind, lapply(doms, MAest.dom, 
 			dat=dat.unit, cuniqueid=cuniqueid, 
 			unitlut=unitlut.unit, pltassgn=pltassgn.unit,

@@ -480,7 +480,7 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 		stopifnull=TRUE, gui=gui)
   treef <- tdat$xf
   tfilter <- tdat$xfilter
- 
+
   if (addseed || seedonly) {
     xfilter <- tryCatch( FIESTA::check.logic(seedx, tfilter),
 		error=function(e) return(NULL))

@@ -32,7 +32,7 @@ check.numeric <- function(x) {
 
 
 check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE, 
-	stopifinvalid=TRUE, removeinvalid=FALSE, returnvar=FALSE){
+	stopifinvalid=TRUE, removeinvalid=FALSE, returnvar=FALSE, xvect=FALSE){
   ## DESCRIPTION: checks logical statement
   ## ARGUMENTS"
   ## x 	- data frame to check column names
@@ -55,6 +55,11 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE,
   ## Set warning response
   filternm <- ifelse(!is.null(filternm), filternm, "filter")
   fwarning <- paste(filternm, "is invalid")
+
+  ## Check if x is data.frame or vector of names
+  if (!xvect) {
+    x <- names(x)
+  }
 
   ## Check statement, assuming not NULL
   if (!is.character(statement) | statement == "") stop(fwarning)
@@ -81,7 +86,7 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE,
       }
       ## Check if there are any variables in x that match filter
       chkparts <- sapply(parts, function(y, x){ 
-				sum(sapply(names(x), 
+				sum(sapply(x, 
 				function(xnm, y){ grepl(xnm, y) }, y)) }, x)
       if (any(chkparts == 0)) {
         if (any(chkparts > 0) && removeinvalid) {
@@ -94,7 +99,7 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE,
       }
     } else {
       ## Check if there are any variables in x that match filter
-      chk <- sum(sapply(names(x), function(x, y){ grepl(x, y) }, statement))
+      chk <- sum(sapply(x, function(x, y){ grepl(x, y) }, statement))
           
       if (chk == 0) {
         if (stopifinvalid) {
@@ -104,7 +109,7 @@ check.logic <- function(x, statement, filternm=NULL, stopifnull=FALSE,
         }
       } else {
         if (returnvar) {
-          return(names(x)[sapply(names(x), function(x, y){ grepl(x, y) }, statement)])
+          return(x[sapply(x, function(x, y){ grepl(x, y) }, statement)])
         }
       }
     } 

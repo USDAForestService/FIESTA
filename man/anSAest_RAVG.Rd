@@ -13,10 +13,10 @@
 \usage{
 anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL, 
 	RAVG.state = NULL, RAVG.ecoprov = NULL, RAVG.minacre = NULL, 
-	datsource = "sqlite", SQLitefn, RS = NULL, largebnd.threshold = 10, 
-	nbrdom.min = 10, rastlst.cont = NULL, rastlst.cont.name = NULL, 
-	rastlst.cat = NULL, rastlst.cat.name = NULL, SApackage = "JoSAE", 
-	SAmethod = "unit", pcfilter = NULL, landarea = "FOREST", 
+	datsource = "sqlite", SQLitefn, RS = NULL, largebnd.unique = "PROVINCE", 
+	largebnd.threshold = 10, nbrdom.min = 10, rastlst.cont = NULL, 
+	rastlst.cont.name = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
+	SApackage = "JoSAE", SAmethod = "unit", pcfilter = NULL, landarea = "FOREST", 
 	estvarlst, savedata = FALSE, saveobj = TRUE, showsteps = FALSE, 
 	outfolder = NULL, multest_outfolder = NULL, multest_fmt = "sqlite", 
 	multest_dsn="RAVG_SAmultest", multest.append = FALSE, 
@@ -36,6 +36,7 @@ anSAest_RAVG(RAVG, RAVG_dsn = NULL, RAVG.fire = NULL, RAVG.year = NULL,
   \item{datsource}{ String. Name of datasource ('sqlite', 'datamart'). }
   \item{SQLitefn}{ String. Full pathname to SQLite database with plot data. }
   \item{RS}{ String. Name of FIA research station to restrict states to. } 
+  \item{largebnd.unique}{ String. Unique identifier of large bound features. } 
   \item{largebnd.threshold}{ Integer. Percent threshold to use for selecting 
 	largebnds. } 
   \item{nbrdom.min}{ Integer. Set number for minimum domains for modeling. If NULL,

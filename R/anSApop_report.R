@@ -1,5 +1,5 @@
 anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL, 
-	title.ref=NULL, outfolder=NULL) {
+	title.ref=NULL, domain="DOMAIN", estnm="JFH", senm="JFH.se", outfolder=NULL) {
   ## DESCRIPTION: Creates a report using Rmarkdown 
   ## 		Adds a folder named report in the outfolder and copies all 
   ##		components of report into folder.
@@ -26,18 +26,19 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
   #}
 
   ref_fortypgrp <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "FORTYPGRPCD", ]
-  ftypgrp <- table(SApopdat$pltcondx$FORTYPGRPCD)
-  if (!is.null(fortypgrpcd)) {
-    if (!fortypgrpcd %in% names(ftypgrp)) {
+  ftypgrplst <- table(SApopdat$pltcondx$FORTYPGRPCD)
+  if (!is.null(fortypgrpcd) && length(fortypgrpcd) > 0) {
+    if (!fortypgrpcd %in% names(ftypgrplst)) {
       stop("FORTYPGRPCD ", fortypgrpcd, " not in popdat")
     } 
   } else {
-    fortypgrpcd <- names(ftypgrp[ftypgrp != 999 & ftypgrp == max(ftypgrp)])
+    fortypgrpcd <- names(ftypgrplst[ftypgrplst != 999 & ftypgrplst == max(ftypgrplst)])
   }
   fortypgrpnm <- ref_fortypgrp[!is.na(ref_fortypgrp$VALUE) & 
 				ref_fortypgrp$VALUE == fortypgrpcd, "MEANING"]
 
-  ftypgrp.prop <- round(ftypgrp[names(ftypgrp) == fortypgrpcd]/sum(ftypgrp) * 100, 2)
+  ftypgrp.prop <- round(ftypgrplst[names(ftypgrplst) == fortypgrpcd] /
+		sum(ftypgrplst) * 100, 2)
   message(fortypgrpnm, " is in approximately ", ftypgrp.prop, 
 		" percent of plots in area of interest")
   
@@ -57,7 +58,8 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
     		input = rmdfn,
     		output_file = reportfn,
     		params = list(SApopdat=SApopdat, AOInm=AOInm, 
-		pcfilter=pcfilter, fortypgrpcd=fortypgrpcd, title.ref=title.ref),
+		pcfilter=pcfilter, fortypgrpcd=fortypgrpcd, title.ref=title.ref,
+		domain=domain, estnm=estnm, senm=senm),
     		envir = parent.frame()
   	),
 	error=function(err) {
@@ -71,8 +73,12 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
 	
 
   ## Copy report from temporary folder to outfolder
-  file.copy(reportfn, outfolder)
-  message("saving report to ", file.path(outfolder, reportnm))
+  tmp <- file.copy(reportfn, outfolder, overwrite=TRUE)
+  if (tmp) {
+    message("saving report to ", file.path(outfolder, reportnm))
+  } else {
+    message("error when copying to ", outfolder)
+  }
 
   ## Set working directory back to original working directory
   setwd(wkdir) 

@@ -5,12 +5,12 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
 	invyrs=NULL, intensity=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
 	dunitvar2=NULL, dunitarea=NULL, areavar="ACRES", areaunits="acres", 
-	minplotnum.unit=0, unit.action="keep", dunitlut=NULL, 
+	minplotnum.unit=0, unit.action="keep", dunitzonal=NULL, 
 	prednames=NULL, predfac=NULL, pvars2keep=NULL, cvars2keep=NULL, 
 	saveobj=FALSE, objnm="SApopdat", savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, 
-	SAdata=NULL, pltdat=NULL, SAmodeldat=NULL, gui=FALSE){
+	SAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -89,7 +89,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   if (!is.null(SAdata)) {
     list.items <- c("SAdoms", "cond", "plt",
 		"pltassgn", "puniqueid", "pltassgnid", "pjoinid", "dunitarea",
-		"dunitvar", "areavar", "dunitlut")
+		"dunitvar", "areavar", "dunitzonal")
     SAdata <- FIESTA::pcheck.object(SAdata, "SAdata", list.items=list.items)
     SAdoms <- SAdata$SAdoms
     #smallbnd <- SAdata$smallbnd
@@ -102,7 +102,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
     dunitarea <- SAdata$dunitarea
     dunitvar <- SAdata$dunitvar
     areavar <- SAdata$areavar
-    dunitlut <- SAdata$dunitlut
+    dunitzonal <- SAdata$dunitzonal
     puniqueid <- SAdata$puniqueid
     pjoinid <- SAdata$pjoinid
     predfac <- SAdata$predfac
@@ -136,24 +136,24 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
         seed <- pltdat$seed
       }
     }
-    if (!is.null(SAmodeldat)) {
-      list.items <- c("pltassgn", "dunitlut", "dunitvar", "prednames", "dunitarea")
-      SAmodeldat <- FIESTA::pcheck.object(SAmodeldat, "SAmodeldat", list.items=list.items)
-      pltassgn <- SAmodeldat$pltassgn
-      pltassgnid <- SAmodeldat$pltassgnid
-      dunitarea <- SAmodeldat$dunitarea
-      dunitvar <- SAmodeldat$dunitvar
-      areavar <- SAmodeldat$areavar
-      dunitlut <- SAmodeldat$dunitlut
-      zonalnames <- SAmodeldat$zonalnames
-      predfac <- SAmodeldat$predfac
+    if (!is.null(auxdat)) {
+      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "prednames", "dunitarea")
+      auxdat <- FIESTA::pcheck.object(auxdat, "auxdat", list.items=list.items)
+      pltassgn <- auxdat$pltassgn
+      pltassgnid <- auxdat$pltassgnid
+      dunitarea <- auxdat$dunitarea
+      dunitvar <- auxdat$dunitvar
+      areavar <- auxdat$areavar
+      dunitzonal <- auxdat$dunitzonal
+      zonalnames <- auxdat$zonalnames
+      predfac <- auxdat$predfac
 
       if (is.null(prednames)) {
-        prednames <- SAmodeldat$prednames
+        prednames <- auxdat$prednames
       } else {
-        if (!all(prednames %in% SAmodeldat$prednames))
+        if (!all(prednames %in% auxdat$prednames))
           stop("invalid prednames: ", 
-		  toString(prednames[!prednames %in% SAmodeldat$prednames]))
+		  toString(prednames[!prednames %in% auxdat$prednames]))
         predfac <- predfac[predfac %in% prednames]
       }
     } 
@@ -219,12 +219,12 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
-		auxlut=dunitlut, prednames=prednames, predfac=predfac, makedummy=TRUE,
+		auxlut=dunitzonal, prednames=prednames, predfac=predfac, makedummy=TRUE,
 		unitarea=dunitarea, unitvar=dunitvar, areavar=areavar, 
 		minplotnum.unit=minplotnum.unit, unit.action=unit.action,
 		auxtext="dunitlut", removetext="dunitarea")  
   pltassgnx <- auxdat$pltx
-  unitarea <- auxdat$unitarea
+  dunitarea <- auxdat$unitarea
   dunitvar <- auxdat$unitvar
   dunitlut <- auxdat$auxlut
   prednames <- auxdat$prednames
@@ -272,9 +272,8 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx,
 		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
 		dunitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
-		dunitvar=dunitvar, dunitlut=dunitlut, 
-		zonalnames=zonalnames, prednames=prednames, predfac=predfac,
-		plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+		dunitvar=dunitvar, dunitlut=dunitlut, prednames=prednames, 
+		predfac=predfac, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
 		states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {

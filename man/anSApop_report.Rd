@@ -18,6 +18,9 @@ anSApop_report(SApopdat, AOInm, pcfilter = NULL, fortypgrpcd,
 	Must be in R syntax (e.g., ADFORCD == 408, COUNTYCD == 1). Optional. }
   \item{fortypgrpcd}{ Integer. A forest type group code to use as focus in the report. }
   \item{title.ref}{ String. Reference information for title and output file names. }
+  \item{domain}{ String. Name of domain to use in report tables. }
+  \item{estnm}{ String. Name of estimate variable to use in tables. }
+  \item{senm}{ String. name of standard error variable to use in tables. }
   \item{outfolder}{ String. The path of folder to output tables. }
 }
 \details{

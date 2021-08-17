@@ -3,11 +3,11 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.stat="mean", 
 	rastlst.cont.NODATA=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	rastlst.cat.NODATA=NULL, rastfolder=NULL, asptransform=FALSE, rast.asp=NULL, 
-	rast.lut=NULL, rastlut=NULL, strata=FALSE, rast.strata=NULL, areacalc=TRUE, 
-	areaunits="ACRES", keepNA=TRUE, NAto0=TRUE, npixels=TRUE, returnxy=FALSE, 	
-	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,
- 	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
+	rast.lut=NULL, rastlut=NULL, areacalc=TRUE, areaunits="ACRES", 
+	keepNA=TRUE, NAto0=TRUE, npixels=TRUE, returnxy=FALSE, 	showext=FALSE, 
+	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="csv", 
+	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
+ 	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -197,24 +197,6 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       if (is.null(rast.lut)) 
         stop("invalid lookup table for", rast.lut)
     } 
-
-    ## Check strata    
-    strata <- FIESTA::pcheck.logical(strata, varnm="strata", 
-		title="Strata?", first="NO", gui=gui)
-    if (strata) {
-      ## Check aspect raster
-      rast.stratafn <- getrastlst.rgdal(rast.strata, rastfolder, gui=gui)  
-
-      if (is.null(rast.stratafn)) {
-        stop("must identify strata raster in rastlst.catfn using rast.strata")
-      }
-      if (length(rast.stratafn) > 1) {
-        stop("only one raster allowed for strata") 
-      }
-      if (!rast.stratafn %in% rastlst.catfn) {
-        stop("rast.strata must be included in rastlst.catfn")
-      }
-    }
   }
 
   ## npixels    
@@ -277,11 +259,11 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   }
 
   #############################################################################
-  ## 2) Set up outputs - dunitlut, prednames, inputdf, zonalnames
+  ## 2) Set up outputs - dunitzonal, prednames, inputdf, zonalnames
   #############################################################################
-  dunitlut <- data.table(unique(sf::st_drop_geometry(dunit_layerx[, c(dunitvar, vars2keep),
+  dunitzonal <- data.table(unique(sf::st_drop_geometry(dunit_layerx[, c(dunitvar, vars2keep),
  		drop=FALSE])))
-  setkeyv(dunitlut, dunitvar)
+  setkeyv(dunitzonal, dunitvar)
   prednames <- {}
   inputdf <- {}
   zonalnames <- {}
@@ -344,7 +326,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-        class(zonalext[[dunitvar]]) <- class(dunitlut[[dunitvar]])        
+        class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
 
         if (!is.null(rastnm)) 
           setnames(zonalext, outname, rastnm2)
@@ -358,7 +340,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		pixelfun=eastness, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-        class(zonalext[[dunitvar]]) <- class(dunitlut[[dunitvar]])        
+        class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
         if (!is.null(rastnm2)) {
           setnames(zonalext, outname, rastnm2)
         }
@@ -377,7 +359,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-        class(zonalext[[dunitvar]]) <- class(dunitlut[[dunitvar]])        
+        class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
         if (!is.null(rastnm)) {
           setnames(zonalext, outname, rastnm)
         }
@@ -389,7 +371,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rm(zonalext)
       gc() 
     }
-    dunitlut <- dunitlut[zonalDT.cont] 
+    dunitzonal <- dunitzonal[zonalDT.cont] 
   }
 
   ###############################################################################
@@ -463,24 +445,21 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       outname <- zonaldat.rast.cat$outname
       outname[grep("npixels", outname)] <- "npixels"
       setnames(zonalext, c(dunitvar, outname))
-      class(zonalext[[dunitvar]]) <- class(dunitlut[[dunitvar]])        
+      class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
       setkeyv(zonalext, dunitvar)
       zonalDT.cat <- zonalDT.cat[zonalext] 
       zonalnames <- c(zonalnames, outname[outname != "npixels"])
-
-      ## Pivot zonalext table to generate stratalut
-      stratalut <- strat.pivot(zonalext, rastnm, unitvars=dunitvar, strwtvar="strwt")
 
       if (npixels) npixels <- FALSE
       rm(zonaldat.rast.cat)
       rm(zonalext)
       gc() 
     }
-    tabs <- check.matchclass(dunitlut, zonalDT.cat, dunitvar)
-    dunitlut <- tabs$tab1
+    tabs <- check.matchclass(dunitzonal, zonalDT.cat, dunitvar)
+    dunitzonal <- tabs$tab1
     zonalDT.cat <- tabs$tab2
 
-    dunitlut <- dunitlut[zonalDT.cat]  
+    dunitzonal <- dunitzonal[zonalDT.cat]  
   }
  
   ###################################################################################
@@ -503,25 +482,19 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
-    datExportData(dunitlut, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="dunitlut", 
+    datExportData(dunitzonal, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="dunitzonal", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
   }
     
 
-  returnlst <- list(pltassgn=pltassgn, dunitlut=setDF(dunitlut), dunitvar=dunitvar,
+  returnlst <- list(pltassgn=pltassgn, dunitzonal=setDF(dunitzonal), dunitvar=dunitvar,
 		inputdf=inputdf, prednames=prednames, zonalnames=zonalnames, 
 		predfac=predfac, npixelvar="npixels", pltassgnid=uniqueid)
   if (areacalc) {
     returnlst$dunitarea <- dunitarea
     returnlst$areavar <- areavar
-  }
-  if (strata) {
-    stratalut <- merge(stratalut, dunitlut[, c(dunitvar, vars2keep, "npixels")], by=dunitvar)
-    returnlst$stratalut <- stratalut
-    returnlst$strwtvar <- "strwt"
-    returnlst$strvar <- rastnm
   }
 
   ## Returnxy

@@ -667,15 +667,17 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   if (returntitle) {
     returnlst$titlelst <- alltitlelst
   }
-
-  ## Merge SAdom attributes to dunit_multest
+ 
+  ## Merge SAdom attributes to dunit_totest
   if (addSAdomsdf && is.null(SAdomvars)) {
     dunit_totest <- merge(SAdomsdf, dunit_totest, by="DOMAIN")
+    tabs$rawdat$unit_totest <- setDF(dunit_totest)
   } else if (addSAdomsdf && !is.null(SAdomvars)) {
     invars <- SAdomvars[SAdomvars %in% names(SAdomsdf)]
     if (length(invars) == 0) stop("invalid SAdomvars")
     dunit_totest <- merge(SAdomsdf[, unique(c("DOMAIN", SAdomvars)), with=FALSE], 
 					dunit_totest, by="DOMAIN")
+    tabs$rawdat$unit_totest <- setDF(dunit_totest)
   } 
 
   if (multest && !is.null(dunit_multest)) {

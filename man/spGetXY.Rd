@@ -12,8 +12,8 @@
 \usage{
 spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL, 
 	xy = NULL, xy_dsn = NULL, xy.uniqueid = "PLT_CN", 
-	xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL,
-	pjoinid = "CN", xy_datsource = NULL, clipxy = TRUE, evalid = NULL, 
+	xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL, pjoinid = "CN", 
+	xy_datsource = NULL, clipxy = TRUE, plot_layer = "plot", evalid = NULL, 
 	evalCur = FALSE, evalEndyr = NULL, measCur = FALSE, measEndyr = NULL, 
 	measEndyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
 	showsteps = FALSE, savedata = FALSE, exportsp = FALSE, returnxy = TRUE, 
@@ -51,6 +51,7 @@ spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
   \item{xy_datsource}{ String. Source of XY data ("obj", "csv", "datamart", "sqlite").  
 	If datsource=NULL, checks extension of xy_dsn or xy to identify datsource. }
   \item{clipxy}{ Logical. If TRUE, clips xy data to bnd. }
+  \item{plot_layer}{ String. Name of plot_layer in database. }
   \item{evalid}{ Integer. To extract data for a specific evaluation period. See notes 
 	for more information about FIA Evaluations. }
   \item{evalCur}{ Logical. If TRUE, extract plots with most current FIA Evalidation 

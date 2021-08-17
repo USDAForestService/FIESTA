@@ -342,13 +342,54 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   geomtype <- layerlst$geomtype[layerlst$name == layer][[1]]
   if (is.na(geomtype)) {
     if (!checkonly) {
-      return(pcheck.table(tab=layer, tab_dsn=dsn, tabqry=sql))
+      if (ext.dsn == "gdb") {
+        if ("arcgisbinding" %in% rownames(installed.packages())) {
+          tabS4 <- arcgisbinding::arc.open(paste0(dsn, "/", layer))
+          sql <- check.logic(names(tabS4@fields), sql, xvect=TRUE)
+          tab <- tryCatch(arcgisbinding::arc.select(tabS4, where_clause=sql),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+          if (!is.null(tab)) {
+            return(tab)
+          } else {
+            stop(layer, " is invalid")
+          }
+        } else {
+          message("sql query not used")
+          return(suppressWarnings(sf::st_read(dsn=dsn, layer=layer, 
+				stringsAsFactors=stringsAsFactors, quiet=TRUE)))
+        }
+      }
     } else {
       return(list(dsn=dsn, layer=layer))
     }
   } else {
-    splayer <- sf::st_read(dsn=dsn, layer=layer, query=sql, 
-				stringsAsFactors=stringsAsFactors, quiet=TRUE)
+    if (ext.dsn == "gdb" && !is.null(sql) && !is.na(sql) && 
+		"arcgisbinding" %in% rownames(installed.packages())) {
+      arcgisbinding::arc.check_product()
+      
+      tabS4 <- arcgisbinding::arc.open(paste0(dsn, "/", layer))
+      if (!is.na(sql) && !is.null(sql)) {
+        sql <- check.logic(names(tabS4@fields), sql, xvect=TRUE)
+        tab <- tryCatch(arcgisbinding::arc.select(tabS4, where_clause=sql),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+        if (is.null(tab)) {
+          stop(layer, " is invalid")
+        }
+        splayer <- arcgisbinding::arc.data2sf(tab)
+      } else {
+        splayer <- suppressWarnings(sf::st_read(dsn=dsn, layer=layer, 
+				stringsAsFactors=stringsAsFactors, quiet=TRUE))
+      }
+    } else {   
+      splayer <- suppressWarnings(sf::st_read(dsn=dsn, layer=layer, 
+				stringsAsFactors=stringsAsFactors, quiet=TRUE))
+    }
   }
 
   if ("sf" %in% class(splayer)) {

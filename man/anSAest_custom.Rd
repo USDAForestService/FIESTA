@@ -8,14 +8,15 @@
 	a custom-defined boundary.	
 }
 \usage{
-anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit", 
+anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit", largebnd.att = NULL, 
 	landarea = "FOREST", pcfilter = NULL, estvarlst = NULL, 
 	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, append_layer = FALSE, 
 	savemultest = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	multest_outfolder = NULL, multest_fmt = "sqlite", multest_dsn = "SAmultest", 
 	multest.append = FALSE, multest.AOIonly = TRUE, overwrite = FALSE, 
 	barplot.compare = FALSE, smallbnd.att = NULL, title.ref = NULL, 
-	save4testing = FALSE, save4testing.append = FALSE, testfolder = NULL, ...)
+	save4testing = FALSE, save4testing.append = FALSE, testfolder = NULL, 
+	addSAdomsdf = FALSE, SAdomvars = NULL, ...)
 }
 
 \arguments{
@@ -24,6 +25,7 @@ anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit",
   \item{SAmethod}{ String. small area method to use ('unit', 'area', 'combo').
 	If SAmethod='combo', a combination of area-level estimation and unit-level
 	EBLUP estimates are output. }
+  \item{largebnd.att}{ String. Name of attribute defining large bound domains. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }
@@ -55,6 +57,9 @@ anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit",
   \item{save4testing.append}{ Logical. If save4testing=TRUE, append testing data out file. }
   \item{testfolder}{ String. If save4testing=TRUE, define folder of R objects. If
 	NULL, outfolder is used. }
+  \item{addSAdomsdf}{ Logical. If TRUE, appends variables from SAdoms to multest and raw
+	data tables. }
+  \item{SAdomvars}{ String vector. If addSAdomsdf=TRUE, variables from SAdoms to append. }
   \item{...}{ Parameters for anSApop_ecomap. }
 }
  

@@ -20,13 +20,12 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
 
   ## Check filename
   SQLitepath <- checkfilenm(SQLitefn, outfolder)
-
   if (is.null(SQLitepath)) {
     if (createnew) {
       SQLitepath <- DBcreateSQLite(SQLitefn=SQLitefn, outfolder=outfolder, 
 		returnpath=TRUE)
     } else if (stopifnull) {
-      stop("SQLite database does not exist")
+      stop(SQLitefn, " does not exist")
     } else if (returnpath) {
       if (is.null(outfolder)) {
         outfolder <- normalizePath(dirname(SQLitefn))

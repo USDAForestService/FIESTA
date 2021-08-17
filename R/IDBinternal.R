@@ -445,7 +445,8 @@ getpfromqry <- function(dsn=NULL, evalid=NULL, plotCur=TRUE,
     pfromqry <- paste0(SCHEMA., "plot p")
 
   } else {
-    return(NULL)
+    message("using all plots in database")
+    pfromqry <- paste0(SCHEMA., plotnm, " p")
   }
    return(pfromqry)
 }

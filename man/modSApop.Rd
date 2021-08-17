@@ -15,12 +15,12 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
 	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, 
 	ACI = FALSE, adj = "plot", dunitvar = "DOMAIN", dunitvar2 = NULL, 
 	dunitarea = NULL, areavar = "ACRES", areaunits = "acres", 
-	minplotnum.unit = 0, unit.action = "keep", dunitlut = NULL, 
+	minplotnum.unit = 0, unit.action = "keep", dunitzonal = NULL, 
 	prednames = NULL, predfac = NULL, pvars2keep = NULL, cvars2keep = NULL, 
 	saveobj = FALSE, objnm = "SApopdat", savedata = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
-	SAdata = NULL, pltdat = NULL, SAmodeldat = NULL, gui = FALSE)
+	SAdata = NULL, pltdat = NULL, auxdat = NULL, gui = FALSE)
 }
 
 %- maybe also 'usage' for other objects documented here.
@@ -85,7 +85,7 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
   \item{unit.action}{ String. What to do if number of plots in an estimation unit 
 	is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine',
 	combines estimation unit to the following estimation unit in unitlut. }
-  \item{dunitlut}{ DF/DT. Data frame with auxiliary information by domain 
+  \item{dunitzonal}{ DF/DT. Data frame with zonal auxiliary information by domain 
 	unit. For continuous data, means by domain unit; for categorical data, 
 	proportion of class by domain unit. }
   \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
@@ -108,7 +108,7 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
 	out_fmt = "gdb". }
   \item{SAdata}{ R List object. Output data list components from FIESTA::SAdata(). }
   \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
-  \item{SAmodeldat}{ R List object. Output data list components from FIESTA::SAmodeldat(). }
+  \item{auxdat}{ R List object. Output data list components from FIESTA::spGetAuxiliary(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

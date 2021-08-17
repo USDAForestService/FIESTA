@@ -8,7 +8,7 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 	showsteps=FALSE, cex.plots=0.5, savedata=FALSE, savexy=FALSE, 
 	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
-	overwrite_layer=TRUE, append_layer=FALSE, MApltdat=NULL, ...) {
+	overwrite_layer=TRUE, append_layer=FALSE, pltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
@@ -59,38 +59,38 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
-  if (is.null(MApltdat)) {
-    MApltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
+  if (is.null(pltdat)) {
+    pltdat <- spGetPlots(bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
 		RS=RS, xy_datsource=xy_datsource, xy=xy, xy_dsn=xy_dsn, xyjoinid=xyjoinid, 
 		clipxy=clipxy, datsource=datsource, data_dsn=data_dsn, 
 		istree=istree, isseed=TRUE, plot_layer=plot_layer, cond_layer=cond_layer, 
 		seed_layer=seed_layer, tree_layer=tree_layer, intensity1=intensity1, 
 		savedata=FALSE, savexy=TRUE, ...)
-    if (is.null(MApltdat)) return(NULL)
+    if (is.null(pltdat)) return(NULL)
     if (saveobj) {
-      message("saving MApltdat object to: ", file.path(outfolder, "MApltdat.rda"), "...")
-      save(MApltdat, file=file.path(outfolder, "MApltdat.rda"))
+      message("saving pltdat object to: ", file.path(outfolder, "pltdat.rda"), "...")
+      save(pltdat, file=file.path(outfolder, "pltdat.rda"))
     }
   } else {
-    MApltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
+    pltdat.names <- c("xypltx", "bndx", "xy.uniqueid", "puniqueid",
 		"pjoinid", "tabs")
-    if (!all(MApltdat.names %in% names(MApltdat))) {
-      stop("missing components in MApltdat list: ", 
-		toString(MApltdat.names[!MApltdat.names %in% names(MApltdat)])) 
+    if (!all(pltdat.names %in% names(pltdat))) {
+      stop("missing components in pltdat list: ", 
+		toString(pltdat.names[!pltdat.names %in% names(pltdat)])) 
     }
   }
 
   ## Extract list objects
-  spxy <- MApltdat$spxy
-  xyplt <- MApltdat$xypltx
-  xy.uniqueid <- MApltdat$xy.uniqueid
-  puniqueid <- MApltdat$puniqueid
-  pjoinid <- MApltdat$pjoinid
-  pltx <- MApltdat$tabs$pltx
-  condx <- MApltdat$tabs$condx
-  treex <- MApltdat$tabs$treex
-  seedx <- SApltdat$tabs$seedx
-  bnd <- MApltdat$bndx
+  spxy <- pltdat$spxy
+  xyplt <- pltdat$xypltx
+  xy.uniqueid <- pltdat$xy.uniqueid
+  puniqueid <- pltdat$puniqueid
+  pjoinid <- pltdat$pjoinid
+  pltx <- pltdat$tabs$pltx
+  condx <- pltdat$tabs$condx
+  treex <- pltdat$tabs$treex
+  seedx <- pltdat$tabs$seedx
+  bnd <- pltdat$bndx
 
   if (showsteps && !is.null(spxy)) {
     ## Set plotting margins
@@ -120,29 +120,29 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
-  MAmodeldat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
+  auxdat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
 		dom_layer=bnd, domvar=bnd.att, rastfolder=rastfolder, 
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cont.NODATA=rastlst.cont.NODATA, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		rastlst.cat.NODATA=rastlst.cat.NODATA, keepNA=FALSE, npixels=TRUE)
-  pltassgn <- MAmodeldat$pltassgn
-  dunitlut <- MAmodeldat$dunitlut
-  dunitvar <- MAmodeldat$dunitvar
-  prednames <- MAmodeldat$prednames
-  zonalnames <- MAmodeldat$zonalnames
-  predfac <- MAmodeldat$predfac
-  dunitarea <- MAmodeldat$dunitarea
-  areavar <- MAmodeldat$areavar
-  pltassgnid <- MAmodeldat$pltassgnid
-  npixelvar <- MAmodeldat$npixelvar
+  pltassgn <- auxdat$pltassgn
+  unitzonal <- auxdat$dunitzonal
+  unitvar <- auxdat$dunitvar
+  prednames <- auxdat$prednames
+  zonalnames <- auxdat$zonalnames
+  predfac <- auxdat$predfac
+  unitarea <- auxdat$dunitarea
+  areavar <- auxdat$areavar
+  pltassgnid <- auxdat$pltassgnid
+  npixelvar <- auxdat$npixelvar
 
   ##########################################
   ## Create output list
   ##########################################
   MAdata <- list(bnd=bnd, plt=pltx, pltassgn=pltassgn, cond=condx, 
-			dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
-			dunitlut=dunitlut, prednames=prednames, predfac=predfac,
+			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+			unitzonal=unitzonal, prednames=prednames, predfac=predfac,
 			zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
 			pltassgnid=pltassgnid, npixelvar=npixelvar)
   if (istree) {
@@ -194,11 +194,11 @@ anMAdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }
-    datExportData(dunitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
+    datExportData(unitarea, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(dunitlut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
+    datExportData(unitzonal, outfolder=outfolder, 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitzonal", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
    	

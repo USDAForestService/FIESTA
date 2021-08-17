@@ -9,15 +9,16 @@
 }
 \usage{
 anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
-	RS = NULL, clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
+	RS = NULL, xy_datsource = NULL, xy = NULL, xy_dsn = NULL, 
+	xyjoinid = "PLOT_ID", clipxy = TRUE, datsource = "sqlite", data_dsn = NULL, 
 	istree = TRUE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond", 
 	tree_layer = "tree", seed_layer = "seed", puniqueid = "CN", intensity1 = TRUE, 
 	rastfolder = NULL, rastlst.cont = NULL, rastlst.cont.name = NULL, 
-	rastlst.cat = NULL, rastlst.cat.name = NULL, rastlst.cat.NODATA = NULL, 
-	showsteps = FALSE, cex.plots=0.5, savedata = FALSE, savexy = FALSE, 
-	savesteps = FALSE, saveobj=FALSE, outfolder = NULL, out_fmt = "csv", 
+	rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 
+	rastlst.cat.NODATA = NULL, showsteps = FALSE, cex.plots=0.5, savedata = FALSE, 
+	savexy = FALSE, savesteps = FALSE, saveobj=FALSE, outfolder = NULL, out_fmt = "csv", 
 	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, MApltdat=NULL, ...)
+	overwrite_layer = TRUE, append_layer = FALSE, pltdat=NULL, ...)
 }
 
 \arguments{
@@ -31,6 +32,16 @@ anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 	estimation unit(s). If NULL, bnd is default as one estimation unit. } 
   \item{bnd.filter}{ String. Filter to subset bnd SpatialPolygons layer. }
   \item{RS}{ String. Name of FIA research station to restrict states to. } 
+  \item{xy_datsource}{ String. Data source of XY data ('sqlite', 'gdb', 'csv', 'datamart') } 
+  \item{xy}{ sf R object or String. Table with xy coordinates. Can be a spatial 
+	polygon object, data frame, full pathname to a shapefile, or name of a 
+	layer within a database. }
+  \item{xy_dsn}{ String. Data source name (dsn; i.e., pathname or database name)
+	of xy. The dsn varies by driver. See gdal OGR vector formats 
+	(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R object. } 
+  \item{xyjoinid}{ String. Variable to join XY data to plot data. Not necessary to
+	be unique. If using most current XY coordinates, use identifier for a plot 
+	(e.g., PLOT_ID). }
   \item{clipxy}{ Logical. If TRUE, clip xy data. } 
   \item{datsource}{ String. Data source of FIA data ('sqlite', 'csv', 'datamart'). } 
   \item{data_dsn}{ String. Name of database where *_layers reside. }
@@ -52,6 +63,11 @@ anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   \item{rastlst.cont.name}{ String vector. Output names for continuous rasters. 
 	Optional. If NULL, name of raster is used as default or name+'_'+layer number 
 	for multi-band layers. }
+  \item{rastlst.cont.NODATA}{ Numeric vector. NODATA value for categorical rasters 
+	(See notes). These values will be converted to NA and removed from output 
+	if keepNA=FALSE. If 1 number, the same value will be used for all categorical 
+	rasters. If more than 1 number, the number of values must be equal to the 
+	number of rasters in rastlst.cont. }
   \item{rastlst.cat}{ String vector or list. A list of raster(s) with thematic 
 	(i.e., categorical) data values. The list may include file name of raster(s) or 
 	raster objects that are not InMemory. }
@@ -79,7 +95,10 @@ anMAdata(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 	(e.g., outfn_'date'.csv). }
   \item{overwrite_dsn}{ Logical. If TRUE, overwrites the out_dsn, if exists. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrites the out_layer, if exists. }
-  \item{MApltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
+  \item{append_layer}{ Logical. If TRUE, appends layers to existing out_dsn
+	or files if out_fmt = 'csv'. Note: currently cannot append layers if
+	out_fmt = "gdb". }
+  \item{pltdat}{ R object. FIA plot data, output from FIESTA::spGetPlots(). }
   \item{...}{ Parameters for spGetPlots(). }
 }
  

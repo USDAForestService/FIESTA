@@ -147,7 +147,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
       est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
     }
-    return(list(est=est, prednames.select=NULL))
+    return(list(est=est, prednames.select=NULL, pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
   }  
 
   if (standardize) {
@@ -196,7 +196,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 		xpop=setDF(dunitlut.dom), pi = NULL, alpha = .2,
   		model = "linear", pi2 = NULL, var_est = FALSE,
   		var_method = "LinHB", datatype = "raw", N = NULL,
-  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
+  		lambda = "lambda.min", B = 1000, cvfolds = 10))
       mod1$coefficients[-1]
       mod1.rank <- rank(-abs(mod1$coefficients[-1]))
       preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
@@ -216,13 +216,12 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
         }
         ## Merge NBRPLT.gt0
         est <- merge(est, NBRPLT.gt0, by="DOMAIN")
-
         ## Merge AOI
         if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
           est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
         }
-
-        return(list(est=est, prednames.select=preds.enet))
+        return(list(est=est, prednames.select=preds.enet, 
+			pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
       } else {
         prednames.select <- preds.enet
       }
@@ -326,7 +325,6 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       setnames(est, "V1", dunitvar)
     }
   }
- 
   if (SAmethod == "area") {
     est <- tryCatch(SAest.area(fmla.dom, pltdat.dom, dunitlut.dom, 
 				cuniqueid, dunitvar, prednames=prednames.select, yn),

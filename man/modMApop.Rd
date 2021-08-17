@@ -18,13 +18,13 @@ modMApop(cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
 	areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL, 
 	ACI = FALSE, adj = "samp", unitvar = NULL, unitvar2 = NULL, unitarea = NULL, 
-	areavar = "ACRES", areaunits = "acres", unitlut = NULL, minplotnum.unit = 10, 
+	areavar = "ACRES", areaunits = "acres", unitzonal = NULL, minplotnum.unit = 10, 
 	unit.action = "keep", npixelvar="npixels", prednames = NULL, predfac = NULL, 
 	strata = FALSE, strvar = NULL, stratcombine = TRUE, minplotnum.strat = 2, 
 	saveobj = FALSE, savedata = FALSE, outfolder = NULL, 
 	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
 	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
-	MAdata = NULL, pltdat = NULL, MAmodeldat = NULL, gui = FALSE)
+	MAdata = NULL, pltdat = NULL, auxdat = NULL, gui = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -81,7 +81,7 @@ modMApop(cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	of total area by estimation unit, including unitvar and areavar. }
   \item{areavar}{ String. Name of area variable in unitarea. Default="ACRES". }
   \item{areaunits}{ String. Units of areavar in unitarea ('acres', 'hectares'). }
-  \item{unitlut}{ DF/DT. Table with summarized auxiliary information by estimation 
+  \item{unitzonal}{ DF/DT. Table with  zonal auxiliary information by estimation 
 	unit. For continuous data, means by estimation unit; for categorical data, 
 	proportion of class by estimation unit. }
   \item{minplotnum.unit}{ Integer. Minimum number of plots for estimation unit. }
@@ -114,7 +114,7 @@ modMApop(cond, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL,
 	out_fmt = "gdb". }
   \item{MAdata}{ List. Data output from FIESTA::MAdata(). }
   \item{pltdat}{ R List object. Output data list components from FIESTA::spGetPlots(). }
-  \item{MAmodeldat}{ List. Modeldat output from FIESTA::spGetModeldat(). }
+  \item{auxdat}{ List. Auxiliary data output from FIESTA::spGetAuxiliary(). }
   \item{gui}{ Logical. If gui, user is prompted for parameters. }
 }
 \details{

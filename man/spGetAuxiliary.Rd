@@ -17,13 +17,12 @@ spGetAuxiliary(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
 	rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cont.stat = "mean", 
 	rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL, 	
 	rastlst.cat.NODATA = NULL, rastfolder = NULL, asptransform = FALSE, 
-	rast.asp = NULL, rast.lut = NULL, rastlut = NULL, strata = FALSE, 
-	rast.strata = NULL, areacalc = TRUE, areaunits = "ACRES", keepNA = TRUE, 
-	NAto0 = TRUE, npixels = TRUE, returnxy = FALSE, showext = FALSE, 
-	savedata = FALSE, exportsp = FALSE, exportNA = FALSE, outfolder = NULL, 
-	out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	overwrite_dsn = FALSE, overwrite_layer = TRUE, append_layer = FALSE, 
-	vars2keep = NULL, ...)
+	rast.asp = NULL, rast.lut = NULL, rastlut = NULL, areacalc = TRUE, 
+	areaunits = "ACRES", keepNA = TRUE, NAto0 = TRUE, npixels = TRUE, 
+	returnxy = FALSE, showext = FALSE, savedata = FALSE, exportsp = FALSE, 
+	exportNA = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, append_layer = FALSE, vars2keep = NULL, ...)
 }
 
 \arguments{
@@ -76,10 +75,6 @@ spGetAuxiliary(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
 	one raster is allowed. }
   \item{rastlut}{ String or raster object. The raster look up table used for 
 	collapsing rast.lut values. }
-  \item{strata}{ Logical. If TRUE, assigns a categorical raster to strata and 
-	returns a strata lookup table (stratalut) with other output. }
-  \item{rast.strata}{ String or raster object. The raster in rastlst.cat that is the
-	strata raster. }
   \item{areacalc}{ Logical. If TRUE, returns area by domvar. }
   \item{areaunits}{ String. Output area units ("ACRES", "HECTARES", "SQMETERS"). }
   \item{keepNA}{ Logical. If TRUE, returns data frame of NA values. }
@@ -103,7 +98,7 @@ spGetAuxiliary(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
   \item{append_layer}{ Logical. If TRUE, appends to csv (if out_fmt="csv")
 	or appends to layers in dsn. }
   \item{vars2keep}{ String vector. Attributes in SAdoms, other than domvar to
-	include in dunitlut output and extract to pltassgn points. }
+	include in dunitzonal output and extract to pltassgn points. }
   \item{...}{ Other parameters for spMakeSpatialPoints. }
 }
 \details{
@@ -117,7 +112,7 @@ spGetAuxiliary(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN",
 }
 \value{
   \item{pltassgn}{ sf object. xyplt data with extracted values from rastlst*. }
-  \item{dunitlut}{ Data frame. Number of pixels and zonal statistics from 
+  \item{dunitzonal}{ Data frame. Number of pixels and zonal statistics from 
 	continuous rasters or zonal proportions from categorical raster for each 
 	domain (i.e., estimation unit). }
   \item{dunitvar}{ Data frame. Domain (i.e., estimation unit) name. }

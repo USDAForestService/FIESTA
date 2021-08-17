@@ -3,13 +3,13 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
 	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, intensity=NULL, 
 	ACI=FALSE, adj="samp", unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
-	areavar="ACRES", areaunits="acres", unitlut=NULL, minplotnum.unit=10, 
+	areavar="ACRES", areaunits="acres", unitzonal=NULL, minplotnum.unit=10, 
 	unit.action="keep", npixelvar="npixels", prednames=NULL, predfac=NULL, 
 	strata=FALSE, strvar=NULL, stratcombine=TRUE, minplotnum.strat=2, 
 	saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
 	overwrite_layer=TRUE, append_layer=FALSE, MAdata=NULL, pltdat=NULL, 
-	MAmodeldat=NULL, gui=FALSE){
+	auxdat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -81,7 +81,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Load data
   ###################################################################################
   if (!is.null(MAdata)) {
-    list.items <- c("plt", "cond", "unitarea", "unitvar")
+    list.items <- c("plt", "cond", "unitarea", "unitvar", "unitzonal")
     MAdata <- FIESTA::pcheck.object(MAdata, "MAdata", list.items=list.items)
     #bnd <- MAdata$bnd
     plt <- MAdata$plt
@@ -92,8 +92,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     pltassgnid <- MAdata$pltassgnid
     unitarea <- MAdata$unitarea
     areavar <- MAdata$areavar
-    unitlut <- MAdata$unitlut
-    #npixelvar <- MAdata$npixelvar
+    unitzonal <- MAdata$unitzonal
     puniqueid <- MAdata$puniqueid
     pjoinid <- MAdata$pjoinid
 
@@ -102,7 +101,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       unitvar2 <- MAdata$unitvar2
     } 
     if (is.null(npixelvar)) {
-      npixelvar <- MAmodeldat$npixelvar
+      npixelvar <- auxdat$npixelvar
     }
     if (is.null(prednames)) {
       prednames <- MAdata$prednames
@@ -111,33 +110,11 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
         stop("invalid prednames: ", 
 	 	toString(prednames[!prednames %in% MAdata$prednames]))
     }
-
-    #if (is.null(prednames)) {
-    #  stop("must include prednames")
-    #}
     if (is.null(predfac)) {
       predfac <- MAdata$predfac
     }
     predfac <- predfac[predfac %in% prednames]
     
-    if (strata) {
-      if (is.null(strvar)) {
-        strvar <- MAdata$strvar
-      }
-      if (is.null(strvar)) {
-        stop("must include strvar if strata=TRUE")
-      }
-      if (!strvar %in% predfac) {
-        predfac <- c(predfac, strvar)
-      }
-      stratalut <- MAdata$stratalut
-      strwtvar <- MAdata$strwtvar
-      strunitvars <- c(unitvar, unitvar2, strvar)
-      if ("strwt" %in% names(stratalut)) {
-        setnames(stratalut, "strwt", "Prop")
-      }
-    }
-
   } else {
     if (!is.null(pltdat)) {
       list.items <- c("bndx", "tabs", "xypltx")
@@ -159,57 +136,53 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
         seed <- pltdat$seed
       }
     }
-    if (!is.null(MAmodeldat)) {
-      list.items <- c("pltassgn", "dunitlut", "dunitvar", "predfac", "npixelvar", 
+    if (!is.null(auxdat)) {
+      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "predfac", "npixelvar", 
 		"pltassgnid", "dunitarea", "areavar")
-      MAmodeldat <- FIESTA::pcheck.object(MAmodeldat, "MAmodeldat", list.items=list.items)
-      pltassgn <- MAmodeldat$pltassgn
-      pltassgnid <- MAmodeldat$pltassgnid
-      unitlut <- MAmodeldat$dunitlut
-      unitvar <- MAmodeldat$dunitvar
-      unitvar2 <- MAmodeldat$dunitvar2
-      unitarea <- MAmodeldat$dunitarea
-      areavar <- MAmodeldat$areavar
-      #npixelvar <- MAmodeldat$npixelvar
+      auxdat <- FIESTA::pcheck.object(auxdat, "auxdat", list.items=list.items)
+      pltassgn <- auxdat$pltassgn
+      pltassgnid <- auxdat$pltassgnid
+      unitzonal <- auxdat$dunitzonal
+      unitvar <- auxdat$dunitvar
+      unitvar2 <- auxdat$dunitvar2
+      unitarea <- auxdat$dunitarea
+      areavar <- auxdat$areavar
 
       if (is.null(npixelvar)) {
-        npixelvar <- MAmodeldat$npixelvar
+        npixelvar <- auxdat$npixelvar
       }
       if (is.null(prednames)) {
-        prednames <- MAmodeldat$prednames
+        prednames <- auxdat$prednames
       } else {
-        if (!all(prednames %in% MAmodeldat$prednames))
+        if (!all(prednames %in% auxdat$prednames))
           stop("invalid prednames: ", 
-	 	toString(prednames[!prednames %in% MAmodeldat$prednames]))
+	 	toString(prednames[!prednames %in% auxdat$prednames]))
       }
-
-      #if (is.null(prednames)) {
-      #  message("no prednames included")
-      #}
-
       if (is.null(predfac)) {
-        predfac <- MAmodeldat$predfac
+        predfac <- auxdat$predfac
       }
       predfac <- predfac[predfac %in% prednames]
-      if (strata) {
-        if (is.null(strvar)) {
-          strvar <- MAmodeldat$strvar
-        }
-        if (is.null(strvar)) {
-          stop("must include strvar if strata=TRUE")
-        }
-        if (!strvar %in% predfac) {
-          predfac <- c(predfac, strvar)
-        }
-        stratalut <- MAmodeldat$stratalut
-        strwtvar <- MAmodeldat$strwtvar
-        strunitvars <- c(unitvar, unitvar2, strvar)
-        if ("strwt" %in% names(stratalut)) {
-          setnames(stratalut, "strwt", "Prop")
-        }
-      }
     }
   } 
+
+  if (strata) {
+    if (is.null(strvar)) {    
+      if (!is.null(predfac) && length(predfac) == 1) {
+        strvar <- predfac
+      } else {
+        stop("must include strvar if strata=TRUE")
+      }
+    } else {
+      if (!strvar %in% predfac) {
+        stop("strvar must be included in predfac")
+      }
+    } 
+    strwtvar <- "Prop"
+    prednames <- NULL
+    stratalut <- strat.pivot(unitzonal, strvar, unitvars=c(unitvar, unitvar2), 
+		strwtvar=strwtvar)
+  }
+
 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
@@ -269,10 +242,9 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ###################################################################################
   if (strata) {
       auxlut <- stratalut
-      strwtvar <- "Prop"
       makedummy <- FALSE
   } else {
-      auxlut <- unitlut
+      auxlut <- unitzonal
       makedummy <- TRUE
   }
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 

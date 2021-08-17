@@ -168,47 +168,36 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 
   ## Check strata, strvars
   ###################################################################################
-  if (module == "GB" || (module == "MA" && strata)) {
-    strata <- FIESTA::pcheck.logical(strata, varnm="strata", 
+  strata <- FIESTA::pcheck.logical(strata, varnm="strata", 
 		title="Post stratify?", first="YES", gui=gui, stopifnull=TRUE)
  
-    if (strata) {
-      if (is.null(strvar)) stop("must include strvar for post-strat estimates")
-      if (length(strvar) > 1) stop("invalid strvar... only 1 variable allowed")
-      pvars2keep <- unique(c(pvars2keep, strvar))
+  if (strata) {
+    if (is.null(strvar)) stop("must include strvar for post-strat estimates")
+    if (length(strvar) > 1) stop("invalid strvar... only 1 variable allowed")
+    pvars2keep <- unique(c(pvars2keep, strvar))
 
-      if (module == "MA" && strata) {
-        if (!strvar %in% predfac) predfac <- strvar
-        prednames <- NULL 
-      }
-
-      ## Check nonresp
-      nonresp <- FIESTA::pcheck.logical(nonresp, varnm="nonresp", 
+    ## Check nonresp
+    nonresp <- FIESTA::pcheck.logical(nonresp, varnm="nonresp", 
 		title="Post stratify?", first="YES", gui=gui)
-      if (nonresp) {
-        pvars2keep <- c(pvars2keep, substrvar)
-      } else {
-        substrvar <- NULL
-      }
+    if (nonresp) {
+      pvars2keep <- c(pvars2keep, substrvar)
+    } else {
+      substrvar <- NULL
+    }
 
-      ## Check stratcombine 
-      ########################################################
-      stratcombine <- FIESTA::pcheck.logical(stratcombine, varnm="stratcombine", 
+    ## Check stratcombine 
+    ########################################################
+    stratcombine <- FIESTA::pcheck.logical(stratcombine, varnm="stratcombine", 
 		title="Combine strata?", first="YES", gui=gui, stopifnull=TRUE)
 
-    } else {
-      strvar <- NULL
-    }
-#  } else if (module == "MA" && !strata) {
-#    if (!is.null(strvar)) strvar <- NULL
-#    #if (!is.null(prednames)) prednames <- NULL
-#    if (!is.null(predfac)) predfac <- NULL
   } else {
     strvar <- NULL
     if (is.null(prednames)) {
       stop("no prednames included\n")
     }
     pvars2keep <- unique(c(pvars2keep, prednames))
+
+    
   }
  
   ## Check predfac

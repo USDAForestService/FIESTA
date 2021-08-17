@@ -1,7 +1,7 @@
 spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 	RS=NULL, xyids=NULL, xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", 
 	xvar=NULL, yvar=NULL, xy.crs=4269, xyjoinid=NULL, pjoinid=NULL, 
-	clipxy=TRUE, datsource="datamart", data_dsn=NULL, istree=FALSE, isseed=FALSE, 
+	clipxy=TRUE, datsource=NULL, data_dsn=NULL, istree=FALSE, isseed=FALSE, 
 	plot_layer="plot", cond_layer="cond", tree_layer="tree", seed_layer="seed",
  	ppsa_layer="pop_plot_stratum_assgn", other_layers=NULL, puniqueid="CN", 
 	savePOP=FALSE, evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
@@ -74,14 +74,14 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
     if (!is.null(bndx)) {
       bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
     } 
-
+ 
     ## Check xyids
     xyids <- pcheck.table(xyids)
 
     if (!is.null(xyids)) {
       ## Check xyjoinid
       xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		checklst=names(xyids), gui=gui, caption="JoinID in xyids?")  
+		checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=TRUE)  
 
       ## Check pjoinid
       pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
@@ -107,6 +107,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       } else {
         stcds <- sort(unique(pcheck.states(xyids[[stbnd.att]], statereturn="VALUE")))
       }
+      states <- pcheck.states(stcds)
 
     } else { 	## is.null(xyids)
 
@@ -124,7 +125,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (is.null(xy) && is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
-        xydat <- spGetXY(bnd=bnd, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter, 
+        xydat <- spGetXY(bnd=bndx, 
 		states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
  		xy_datsource=xy_datsource, clipxy=clipxy, evalid=evalid, evalCur=evalCur,
@@ -188,22 +189,44 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
   }
   #xyids <- spxy[[xyjoinid]]
  
+
   #############################################################################
   ## Set datsource
   ########################################################
-  datsourcelst <- c("obj", "csv", "datamart", "sqlite")
+  datsourcelst <- c("obj", "csv", "datamart", "sqlite", "gdb")
   datsource <- FIESTA::pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
-  if (datsource == "sqlite") {
-    if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
-	 message("RSQLite and DBI packages are required to run SQLite queries")
+  if (is.null(datsource)) {
+    if (!is.null(data_dsn) && file.exists(data_dsn)) {
+      dsn.ext <- getext(data_dsn)
+      if (!is.na(dsn.ext) && dsn.ext != "") {
+        datsource <- ifelse(dsn.ext == "gdb", "gdb", 
+		ifelse(dsn.ext %in% c("db", "db3", "sqlite", "sqlite3"), "sqlite", 
+             ifelse(dsn.ext == "csv", "csv",
+			ifelse(dsn.ext == "shp", "shp", "datamart"))))
+      } 
+    } else {
+      stop("datsource is invalid")
+    }
+  } else if (datsource %in% c("sqlite", "gdb")) {
+    if (is.null(data_dsn)) {
+      stop("data_dsn is NULL")
+    }
+    if (!file.exists(data_dsn)) {
+      stop(data_dsn, " is invalid")
+    }
+    if (datsource == "sqlite") {
+      if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
+	   message("RSQLite and DBI packages are required to run SQLite queries")
+      }
+    }
+    if (datsource == "gdb") {
+      if (!"arcgisbinding" %in% rownames(installed.packages())) {
+	   message("RSQLite and DBI packages are required to run SQLite queries")
+      }
     }
   } 
-  if (datsource %in% c("sqlite", "gdb")) {
-    if (is.null(data_dsn)) stop("data_dsn is NULL")
-    if (!file.exists(data_dsn)) stop(data_dsn, " is invalid")
-  }  
-   
+ 
   ## Check savedata
   #############################################################################
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -393,7 +416,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
       xyids2 <- datFilter(xyids, xfilter=paste0("!", measEndyr.filter))$xf
     }
   }
- 
+
   if (datsource == "datamart") {
     for (i in 1:length(states)) { 
       state <- states[i]
@@ -648,7 +671,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
           assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
         }
       }
-      if (showsteps && !is.null(xyids)) {
+      if (showsteps && !is.null(spxy)) {
         ## Set plotting margins
         mar <-  par("mar")
         par(mar=c(1,1,1,1))
