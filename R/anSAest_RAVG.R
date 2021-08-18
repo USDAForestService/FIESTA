@@ -202,8 +202,8 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
     if (addPS) {
       ## Convert SAdata to GBdata
       GBdata <- SApop$SAdata
-      dunitlut <- GBdata$dunitlut
-      GBdata$stratalut <- strat.pivot(dunitlut, strvar="tnt", unitvars=c("DOMAIN", "AOI"))
+      dunitzonal <- GBdata$dunitzonal
+      GBdata$stratalut <- strat.pivot(dunitzonal, strvar="tnt", unitvars=c("DOMAIN", "AOI"))
       GBdata$strvar <- "tnt"
       GBdata$strwtvar <- "Prop"
       names(GBdata)[names(GBdata) == "dunitarea"] <- "unitarea"

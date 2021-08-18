@@ -1317,8 +1317,8 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     stname.att <- FIESTA::pcheck.varchar(var2check=stname.att, varnm="stname.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
-    states <- stateint[[stbnd.att]]
-
+    states <- stateint[[stbnd.att]][!is.na(stateint[[stbnd.att]])]
+ 
     if (showsteps) {
       mar <-  par("mar")
       par(mar=c(1,1,1,1))
@@ -1329,8 +1329,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     }
   } else {
     stop("stbnd invalid... must include states")
-  }
-  
+  }  
   statenames <- pcheck.states(states)
   if (!all(states %in% FIESTA::ref_statecd$MEANING)) {
     if (stbnd.att == "COUNTYFIPS") {
@@ -1338,13 +1337,13 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
 			unique(as.numeric(substr(states, 1,2))), "MEANING"]
     }    
   }
-
+ 
   ## Check statenames
   if (is.null(RS)) {
     statenameslst <- FIESTA::ref_statecd$MEANING
     statenames <- pcheck.varchar(var2check=statenames, varnm="states", gui=gui, 
 		checklst=statenameslst, caption="States", stopifnull=TRUE, multiple=TRUE)
-
+ 
   } else { 
     statenameslst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]
 

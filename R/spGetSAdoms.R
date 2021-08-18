@@ -7,7 +7,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 	largebnd.threshold=10, multiSAdoms=FALSE, showsteps=TRUE, savedata=FALSE, 
 	savesteps=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, outfolder=NULL, 
 	out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, addstate=FALSE, aggregate=FALSE) {
+	overwrite_dsn=FALSE, overwrite_layer=TRUE, addstate=FALSE, dissolve=FALSE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -141,7 +141,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   smallbnd.cols <- names(smallbndx)
  
   ## Aggregate all fires to one polygon
-  if (aggregate) {
+  if (dissolve) {
     smallbndx <- sf_dissolve(smallbndx, areacalc=FALSE)
     smallbnd.unique <- "tmp"
     smallbnd.domain <- "tmp"

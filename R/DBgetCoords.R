@@ -1,4 +1,4 @@
-DBgetCoords <- function (states=NULL, invtype="ANNUAL", 
+DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL", 
 	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalAll=FALSE, 
 	measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
 	invyrs=NULL, intensity1=FALSE, issp=FALSE, returndata=TRUE, 
@@ -51,7 +51,7 @@ DBgetCoords <- function (states=NULL, invtype="ANNUAL",
 		caption="Inventory Type", gui=gui)
 
   ## Get states, Evalid and/or invyrs info
-  evalInfo <- DBgetEvalid(states=states, invtype=invtype, 
+  evalInfo <- DBgetEvalid(states=states, RS=RS, invtype=invtype, 
 	evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, evalAll=evalAll)
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states

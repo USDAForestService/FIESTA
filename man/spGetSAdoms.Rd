@@ -23,7 +23,7 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,
 	showsteps = TRUE, savedata = FALSE, savesteps = FALSE, maxbnd.addtext=TRUE,
  	largebnd.addtext=FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, 
 	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = TRUE, addstate = FALSE, aggregate = FALSE)
+	overwrite_layer = TRUE, addstate = FALSE, dissolve = FALSE)
 }
 \arguments{
   \item{smallbnd}{ sf R object or String. Small area of interest boundary. 
@@ -118,7 +118,7 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,
   \item{overwrite_dsn}{ Logical. If TRUE, overwrite dsn. }
   \item{overwrite_layer}{ Logical. If TRUE, overwrite layer(s) in dsn. }
   \item{addstate}{ Logical. If TRUE, appends state attribute to SAdoms. }
-  \item{aggregate}{ Logical. If TRUE, aggregates polygons to smallbnd.domain
+  \item{dissolve}{ Logical. If TRUE, aggregates polygons to smallbnd.domain
 	or smallbnd.unique. }
 }
  

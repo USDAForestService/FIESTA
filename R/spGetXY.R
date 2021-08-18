@@ -223,7 +223,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       dbconn <- suppressWarnings(DBtestSQLite(xy_dsn, dbconnopen=TRUE, 
 			showlist=FALSE, createnew=FALSE, stopifnull=TRUE))
       tablst <- DBI::dbListTables(dbconn)
-
+ 
       if (is.null(xy)) {
         xytabs <- tablst[grepl("xy", tablst)]
         if (length(xytabs) == 0) {
@@ -329,7 +329,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
 #			plot_layer, " p ON(xy.", xyjoinid, " = p.", pjoinid, ") where p.", 
 #			pstatenm, " IN(", toString(stcds), ")")
             xyplt <- pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql)
-
+ 
             ## Make spatial
             spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
 			xvar=xvar, yvar=yvar, xy.crs=xy.crs)            

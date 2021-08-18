@@ -125,6 +125,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         if (is.null(xy) && is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
+
         xydat <- spGetXY(bnd=bndx, 
 		states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,

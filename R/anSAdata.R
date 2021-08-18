@@ -86,7 +86,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     step_dsn <- NULL
     step_fmt <- "shp"
   }
-
+ 
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
@@ -126,7 +126,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   #if (!all(c("DOMAIN", "AOI") %in% names(SAdoms))) {
   #  stop("invalid SAdoms...  need to include DOMAIN and AOI attributes")
   #}
-
+ 
   if (showsteps && !is.null(spxy)) {
     ## Set plotting margins
     mar <-  par("mar")

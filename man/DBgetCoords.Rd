@@ -8,7 +8,7 @@
 	of each plot in the database.
 }
 \usage{
-DBgetCoords(states = NULL, invtype = "ANNUAL", 
+DBgetCoords(states = NULL, RS = NULL, invtype = "ANNUAL", 
 	evalid = NULL, evalCur = FALSE, evalEndyr = NULL, evalAll = FALSE, 
 	measCur = FALSE, measEndyr = NULL, allyrs = FALSE, invyrs = NULL, 
 	intensity1 = FALSE, issp = FALSE, returndata = TRUE, 
@@ -20,6 +20,8 @@ DBgetCoords(states = NULL, invtype = "ANNUAL",
   \item{states}{ String or numeric vector. Name (e.g., 'Arizona','New Mexico') or 
 	code (e.g., 4, 35) of state(s) for evalid. If all states in one or more FIA Research
 	Station is desired, set states=NULL and use RS argument to define RS. }
+  \item{RS}{ String vector. Name of research station(s) ('RMRS','SRS','NCRS','NERS','PNWRS').
+	Do not use if states is populated. }
   \item{invtype}{ String. Type of FIA inventory to extract ('PERIODIC', 'ANNUAL').  
 	Only one inventory type (PERIODIC/ANNUAL) at a time. }
   \item{evalid}{ Integer. Inventory span defining variable. Extract data for a 
