@@ -1,6 +1,6 @@
 SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior = NULL) {
   
-  if (SApackage = "JoSAE") {
+  if (SApackage == "JoSAE") {
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
     dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=pltdat.dom, random=~1|DOMAIN)))
@@ -19,7 +19,7 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
     return(est)
   }
   
-  if (SApackage = "sae") {
+  if (SApackage == "sae") {
     xpop <- as.data.frame(dunitlut.dom[,c('DOMAIN', prednames)])
     popsize <- as.data.frame(dunitlut.dom[, c("DOMAIN", "npixels")])
     
@@ -41,7 +41,7 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
     return(est)
   }
   
-  if (SApackage = "hbsae") {
+  if (SApackage == "hbsae") {
     xpophb <- model.matrix(fmla.dom[-2], dunitlut.dom)
     rownames(xpophb) <- dunitlut.dom$DOMAIN
     
