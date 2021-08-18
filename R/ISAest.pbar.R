@@ -1,91 +1,205 @@
-SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn) {
-
-  ## create linear mixed model
-  ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
-  dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=pltdat.dom, random=~1|DOMAIN)))
+SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior = NULL) {
+  
+  if (SApackage = "JoSAE") {
+    ## create linear mixed model
+    ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
+    dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=pltdat.dom, random=~1|DOMAIN)))
     
-  ## calculate the variance of the EBLUP estimate
-  est.unit <- JoSAE::eblup.mse.f.wrap(domain.data = dunitlut.dom, 
-				lme.obj = dom.lme, debug=FALSE)
-
-  ## subset dataframe before returning
-  est <- est.unit[,c("DOMAIN.domain", 
-					yn, "sample.se", "Synth", 
-					"GREG", "GREG.se",
-					"EBLUP","EBLUP.se.1", "n.i.sample")]
-  names(est) <- c("DOMAIN", "DIR", "DIR.se", "JU.Synth", "JU.GREG",
-			       "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", "NBRPLT")
-  return(est)
+    ## calculate the variance of the EBLUP estimate
+    est.unit <- JoSAE::eblup.mse.f.wrap(domain.data = dunitlut.dom, 
+                                        lme.obj = dom.lme, debug=FALSE)
+    
+    ## subset dataframe before returning
+    est <- est.unit[,c("DOMAIN.domain", 
+                       yn, "sample.se", "Synth", 
+                       "GREG", "GREG.se",
+                       "EBLUP","EBLUP.se.1", "n.i.sample")]
+    names(est) <- c("DOMAIN", "DIR", "DIR.se", "JU.Synth", "JU.GREG",
+                    "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", "NBRPLT")
+    return(est)
+  }
+  
+  if (SApackage = "sae") {
+    xpop <- as.data.frame(dunitlut.dom[,c('DOMAIN', prednames)])
+    popsize <- as.data.frame(dunitlut.dom[, c("DOMAIN", "npixels")])
+    
+    est.unit <- sae::pbmseBHF(formula = fmla.dom,
+                              dom = DOMAIN,
+                              selectdom = unique(xpop$DOMAIN),
+                              meanxpop = xpop,
+                              popnsize = popsize,
+                              method = "REML",
+                              data = pltdat.dom,
+                              B = 200)
+    
+    est <- data.frame(
+      domain = est.unit$est$eblup$domain,
+      estimate = est.unit$est$eblup$eblup,
+      standard_error = sqrt(est.unit$mse[["mse"]])
+    )
+    
+    return(est)
+  }
+  
+  if (SApackage = "hbsae") {
+    xpophb <- model.matrix(fmla.dom[-2], dunitlut.dom)
+    rownames(xpophb) <- dunitlut.dom$DOMAIN
+    
+    if (is.null(prior)) {
+      est.unit <- hbsae::fSAE.Unit(
+        y = pltdat.dom[[yn]],
+        X = model.matrix(fmla.dom[-2], pltdat.dom),
+        area = pltdat.dom[["DOMAIN"]],
+        Narea = dunitlut.dom[, c("npixels")],
+        Xpop = xpophb 
+      )
+    } else {
+      est.unit <- hbsae::fSAE.Unit(
+        y = pltdat.dom[[yn]],
+        X = model.matrix(fmla.dom[-2], pltdat.dom),
+        area = pltdat.dom[["DOMAIN"]],
+        Narea = dunitlut.dom[, c("npixels")],
+        Xpop = xpophb,
+        prior = prior
+      )
+    }
+    
+    est <- data.frame(
+      domain = est.unit$sampledAreaNames,
+      estimate = est.unit$est,
+      standard_error = sqrt(est.unit$mse)
+    )
+    
+    return(est)
+  }
 
 }
 
 SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid, 
-	dunitvar, prednames, yn) {
-  ## Remove response values equal to 1
-#  dunitlut.dom.NA <- dunitlut.dom[is.na(dunitlut.dom$mean.var) | dunitlut.dom$mean.var == 0 |
-#		dunitlut.dom$n.total < 2, ]
-
-  dunitlut.dom <- setDT(dunitlut.dom)
-  nm.var <- paste0(yn, ".var")
-  dunitlut.NA <- dunitlut.dom[is.na(dunitlut.dom[[nm.var]]) | dunitlut.dom[[nm.var]] == 0, ]
-  dunitNAids <- dunitlut.NA[[dunitvar]]
-  dunitids <-  dunitlut.dom[!dunitlut.dom[[dunitvar]] %in% dunitNAids, 
-			dunitvar, with=FALSE][[1]]
-  dunitlut.area <- dunitlut.dom[dunitlut.dom[[dunitvar]] %in% dunitids, ]
-  pltdat.area <- pltdat.dom[pltdat.dom[[dunitvar]] %in% dunitids, ]
-
-  xpop.dom <- paste0(prednames, ".X.pop")
-  fmla.dom2 <- as.formula(paste(paste0(yn, ".ybar.i"), 
-				paste(xpop.dom, collapse= "+"), sep="~"))
-  res <-
-    JoSAE::sae.ul.f(samp.data = pltdat.area,
-             population.data = dunitlut.area,
-             k.ij = rep(1,nrow(pltdat.area)),
-             formula = fmla.dom,
-             domain.col = "DOMAIN",
-             sample.id.col = cuniqueid,
-             neg.sfrac = TRUE)
-
-  ## To add space to messages
-  cat("\n")
-
-  #building pieces		
-  partA <- res$data$samp.agg.X.pop[,c("domain.id","n.i",
-				paste0(yn,".ybar.i"),
-				xpop.dom)]
-  partB <- res$est$se[,c("domain.id","se.srs")]
-  dat.al <- merge(partA, partB)
-
-  est.area <- suppressWarnings(JoSAE::sae.al.f(
-    		domain.id=dat.al$domain.id, n.i=dat.al$n.i, psi.i=dat.al$se.srs^2,
-    		formula=fmla.dom2, data=dat.al,
-    		b.i=rep(1, nrow(dat.al)),
-    		type="RE"))
-  est <- est.area$results[,1:7]
-  names(est) <- c("DOMAIN", "DIR", "DIR.se", "JFH", "JFH.se",
-			       "JA.synth", "JA.synth.se")
-  ## To add space to messages
-  cat("\n")
-
-  est <- merge(est, dat.al[, c("domain.id", "n.i")], 
-		by.x="DOMAIN", by.y="domain.id") 
-  names(est)[names(est) == "n.i"] <- "NBRPLT"
-
-  if (nrow(dunitlut.NA) > 0) {
-    est.NA <- data.table(dunitlut.NA[[dunitvar]], DIR=NA, DIR.se=NA, 
-		JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, NBRPLT=dunitlut.NA$n.total)
-    setnames(est.NA, "V1", dunitvar)
-    est <- rbindlist(list(est, est.NA))
-    setorderv(est, dunitvar)
+	dunitvar, prednames, yn, SApackage) {
+  
+  if (SApackage == "JoSAE") {
+    ## Remove response values equal to 1
+    #  dunitlut.dom.NA <- dunitlut.dom[is.na(dunitlut.dom$mean.var) | dunitlut.dom$mean.var == 0 |
+    #		dunitlut.dom$n.total < 2, ]
+    
+    dunitlut.dom <- setDT(dunitlut.dom)
+    nm.var <- paste0(yn, ".var")
+    dunitlut.NA <- dunitlut.dom[is.na(dunitlut.dom[[nm.var]]) | dunitlut.dom[[nm.var]] == 0, ]
+    dunitNAids <- dunitlut.NA[[dunitvar]]
+    dunitids <-  dunitlut.dom[!dunitlut.dom[[dunitvar]] %in% dunitNAids, 
+                              dunitvar, with=FALSE][[1]]
+    dunitlut.area <- dunitlut.dom[dunitlut.dom[[dunitvar]] %in% dunitids, ]
+    pltdat.area <- pltdat.dom[pltdat.dom[[dunitvar]] %in% dunitids, ]
+    
+    xpop.dom <- paste0(prednames, ".X.pop")
+    fmla.dom2 <- as.formula(paste(paste0(yn, ".ybar.i"), 
+                                  paste(xpop.dom, collapse= "+"), sep="~"))
+    res <-
+      JoSAE::sae.ul.f(samp.data = pltdat.area,
+                      population.data = dunitlut.area,
+                      k.ij = rep(1,nrow(pltdat.area)),
+                      formula = fmla.dom,
+                      domain.col = "DOMAIN",
+                      sample.id.col = cuniqueid,
+                      neg.sfrac = TRUE)
+    
+    ## To add space to messages
+    cat("\n")
+    
+    #building pieces		
+    partA <- res$data$samp.agg.X.pop[,c("domain.id","n.i",
+                                        paste0(yn,".ybar.i"),
+                                        xpop.dom)]
+    partB <- res$est$se[,c("domain.id","se.srs")]
+    dat.al <- merge(partA, partB)
+    
+    est.area <- suppressWarnings(JoSAE::sae.al.f(
+      domain.id=dat.al$domain.id, n.i=dat.al$n.i, psi.i=dat.al$se.srs^2,
+      formula=fmla.dom2, data=dat.al,
+      b.i=rep(1, nrow(dat.al)),
+      type="RE"))
+    est <- est.area$results[,1:7]
+    names(est) <- c("DOMAIN", "DIR", "DIR.se", "JFH", "JFH.se",
+                    "JA.synth", "JA.synth.se")
+    ## To add space to messages
+    cat("\n")
+    
+    est <- merge(est, dat.al[, c("domain.id", "n.i")], 
+                 by.x="DOMAIN", by.y="domain.id") 
+    names(est)[names(est) == "n.i"] <- "NBRPLT"
+    
+    if (nrow(dunitlut.NA) > 0) {
+      est.NA <- data.table(dunitlut.NA[[dunitvar]], DIR=NA, DIR.se=NA, 
+                           JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, NBRPLT=dunitlut.NA$n.total)
+      setnames(est.NA, "V1", dunitvar)
+      est <- rbindlist(list(est, est.NA))
+      setorderv(est, dunitvar)
+    }
+    return(est)
   }
-  return(est)
+  
+  if (SApackage == "sae") {
+    nm.var <- paste0(yn, ".var")
+    dunitlut.dom$var <- dunitlut.dom[,..nm.var][[1]] / dunitlut.dom[,n.total][[1]] 
+    
+    est.area <- sae::mseFH(
+      formula = fmla.dom,
+      vardir = var,
+      method = "FH",
+      data = as.data.frame(dunitlut.dom)
+    )
+    
+    est <- data.frame(
+      domain = dunitlut.dom$DOMAIN,
+      estimate = est.area$est$eblup[,1],
+      standard_error = sqrt(est.area$mse)
+    )
+    
+    return(est)
+  }
+  
+  if (SApackage == "hbsae") {
+    nm.var <- paste0(yn, ".var")
+    dunitlut.dom$var <- dunitlut.dom[,..nm.var][[1]] / dunitlut.dom[,n.total][[1]] 
+    
+    y <- as.data.frame(dunitlut.dom)[[yn]]
+    names(y) <- as.data.frame(dunitlut.dom)[["DOMAIN"]]
+    
+    X <- model.matrix(fmla.dom[-2], dunitlut.dom)
+    rownames(X) <- dunitlut.dom$DOMAIN
+    
+    if (is.null(prior)) {
+      est.area <- hbsae::fSAE.Area(
+        est.init = y,
+        var.init = as.data.frame(dunitlut.dom)[["var"]],
+        X = X
+      )
+    } else {
+      est.area <- hbsae::fSAE.Area(
+        est.init = y,
+        var.init = as.data.frame(dunitlut.dom)[["var"]],
+        X = X,
+        prior = prior
+      )
+    }
+    
+    est <- data.frame(
+      domain = est.area$predAreaNames,
+      estimate = est.area$est,
+      standard_error = sqrt(est.area$mse)
+    )
+    
+    return(est)
+  }
+
 }
 
 
 SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 	dunitlut, prednames=NULL, fmla, dunitvar="DOMAIN", 
 	SAmethod="unit", SApackage="JoSAE", yd=NULL, ratiotype="PERACRE",
-	largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL) {
+	largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL, prior = NULL) {
 
   ########################################################################################
   ## DESCRIPTION: Gets estimates from JoSAE
@@ -196,7 +310,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 		xpop=setDF(dunitlut.dom), pi = NULL, alpha = .2,
   		model = "linear", pi2 = NULL, var_est = FALSE,
   		var_method = "LinHB", datatype = "raw", N = NULL,
-  		lambda = "lambda.min", B = 1000, cvfolds = 10))
+  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
       mod1$coefficients[-1]
       mod1.rank <- rank(-abs(mod1$coefficients[-1]))
       preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
@@ -312,7 +426,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   fmla.dom <- stats::as.formula(paste(yn, paste(prednames.select, collapse= "+"), sep="~"))
 
   if (SAmethod == "unit") {
-    est <- tryCatch(SAest.unit(fmla.dom, pltdat.dom, dunitlut.dom, yn),
+    est <- tryCatch(SAest.unit(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage = SApackage, prior = prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -325,9 +439,10 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       setnames(est, "V1", dunitvar)
     }
   }
+ 
   if (SAmethod == "area") {
     est <- tryCatch(SAest.area(fmla.dom, pltdat.dom, dunitlut.dom, 
-				cuniqueid, dunitvar, prednames=prednames.select, yn),
+				cuniqueid, dunitvar, prednames=prednames.select, yn, SApackage = SApackage, prior = prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
