@@ -419,7 +419,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   ## Generate models
   ############################################################################
   # set up formula with user-defined response and predictors
-  fmla <- as.formula(paste(response," ~ ", paste(prednames, collapse= "+")))
+  #fmla <- as.formula(paste(response," ~ ", paste(prednames, collapse= "+")))
 
 
   ## check largebnd.att
@@ -454,7 +454,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 			dat=tdomdattot, cuniqueid=cuniqueid, 
 			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
 			SApackage=SApackage, SAmethod="unit", 
-			prednames=prednames, fmla=fmla, domain="TOTAL",
+			prednames=prednames, domain="TOTAL",
 			response=response, showsteps=showsteps, savesteps=FALSE,
 			stepfolder=stepfolder),
      	 error=function(e) {
@@ -480,7 +480,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 			dat=tdomdattot, cuniqueid=cuniqueid, 
 			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
 			SApackage=SApackage, SAmethod="area", 
-			prednames=prednames, fmla=fmla, domain="TOTAL",
+			prednames=prednames, domain="TOTAL",
 			response=response, showsteps=showsteps, savesteps=savesteps,
 			stepfolder=stepfolder),
      	 error=function(e) {

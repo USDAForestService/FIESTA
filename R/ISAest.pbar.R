@@ -20,8 +20,8 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
   }
   
   if (SApackage == "sae") {
-    xpop <- as.data.frame(dunitlut.dom[,c('DOMAIN', prednames)])
-    popsize <- as.data.frame(dunitlut.dom[, c("DOMAIN", "npixels")])
+    xpop <- setDF(dunitlut.dom)[,c('DOMAIN', prednames)]
+    popsize <- setDF(dunitlut.dom)[, c("DOMAIN", "npixels")]
     
     est.unit <- sae::pbmseBHF(formula = fmla.dom,
                               dom = DOMAIN,
@@ -33,9 +33,9 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
                               B = 200)
     
     est <- data.frame(
-      domain = est.unit$est$eblup$domain,
-      estimate = est.unit$est$eblup$eblup,
-      standard_error = sqrt(est.unit$mse[["mse"]])
+      DOMAIN = est.unit$est$eblup$domain,
+      est = est.unit$est$eblup$eblup,
+      est.se = sqrt(est.unit$mse[["mse"]])
     )
     
     return(est)
@@ -65,9 +65,9 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
     }
     
     est <- data.frame(
-      domain = est.unit$sampledAreaNames,
-      estimate = est.unit$est,
-      standard_error = sqrt(est.unit$mse)
+      DOMAIN = est.unit$sampledAreaNames,
+      est = est.unit$est,
+      est.se = sqrt(est.unit$mse)
     )
     
     return(est)
@@ -76,7 +76,7 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
 }
 
 SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid, 
-	dunitvar, prednames, yn, SApackage) {
+	dunitvar, prednames, yn, SApackage, prior=NULL) {
   
   if (SApackage == "JoSAE") {
     ## Remove response values equal to 1
@@ -121,7 +121,7 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid,
       type="RE"))
     est <- est.area$results[,1:7]
     names(est) <- c("DOMAIN", "DIR", "DIR.se", "JFH", "JFH.se",
-                    "JA.synth", "JA.synth.se")
+                    	"JA.synth", "JA.synth.se")
     ## To add space to messages
     cat("\n")
     
@@ -131,7 +131,8 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid,
     
     if (nrow(dunitlut.NA) > 0) {
       est.NA <- data.table(dunitlut.NA[[dunitvar]], DIR=NA, DIR.se=NA, 
-                           JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, NBRPLT=dunitlut.NA$n.total)
+				JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, 
+				NBRPLT=dunitlut.NA$n.total)
       setnames(est.NA, "V1", dunitvar)
       est <- rbindlist(list(est, est.NA))
       setorderv(est, dunitvar)
@@ -192,12 +193,11 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid,
     
     return(est)
   }
-
 }
 
 
 SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
-	dunitlut, prednames=NULL, fmla, dunitvar="DOMAIN", 
+	dunitlut, prednames=NULL, dunitvar="DOMAIN", 
 	SAmethod="unit", SApackage="JoSAE", yd=NULL, ratiotype="PERACRE",
 	largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL, prior = NULL) {
 
@@ -234,6 +234,17 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   setkey(datmean, "DOMAIN")
   dunitlut.dom <- merge(dunitlut, datmean, by=dunitvar)
   setnames(dunitlut.dom, c("mean", "mean.var"), c(yn, paste0(yn, ".var")))
+
+print("TEST")
+###################
+##### TESTING #####
+###################
+  if (!"data.table" %in% class(pltdat.dom)) {
+    pltdat.dom <- setDT(pltdat.dom)
+  } 
+  if (!"data.table" %in% class(dunitlut.dom)) {
+    dunitlut.dom <- setDT(dunitlut.dom)
+  } 
 
   ## Calculate number of non-zero plots
   NBRPLT.gt0 <- pltdat.dom[, sum(get(yn) > 0), by=dunitvar]
@@ -288,13 +299,15 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   ###################################################################
   prednames.select <- prednames
   if (variable.select) {
+    pltdat.dom <- setDF(pltdat.dom)
+    dunitlut.dom <- setDF(dunitlut.dom)
     #cor(std.plt.dom[, prednames])
 
     ## select predictor variables from Elastic Net procedure
     ## alpha=1, indicates 
     mod1 <- suppressMessages(mase::gregElasticNet(y=pltdat.dom[[yn]], 
-		xsample=setDF(pltdat.dom[,prednames, with=FALSE]), 
-		xpop=setDF(dunitlut.dom), pi = NULL, alpha = 0.5,
+		xsample=pltdat.dom[,prednames], 
+		xpop=dunitlut.dom[,prednames], pi = NULL, alpha = 0.5,
   		model = "linear", pi2 = NULL, var_est = FALSE,
   		var_method = "LinHB", datatype = "raw", N = NULL,
   		lambda = "lambda.1se", B = 1000, cvfolds = 10))
@@ -306,8 +319,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       ## select predictor variables from Elastic Net procedure
       ## alpha=1, indicates 
       mod1 <- suppressMessages(mase::gregElasticNet(y=pltdat.dom[[yn]], 
-		xsample=setDF(pltdat.dom[,prednames, with=FALSE]), 
-		xpop=setDF(dunitlut.dom), pi = NULL, alpha = .2,
+		xsample=pltdat.dom[,prednames], 
+		xpop=dunitlut.dom[,prednames], pi = NULL, alpha = .2,
   		model = "linear", pi2 = NULL, var_est = FALSE,
   		var_method = "LinHB", datatype = "raw", N = NULL,
   		lambda = "lambda.1se", B = 1000, cvfolds = 10))
@@ -426,7 +439,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   fmla.dom <- stats::as.formula(paste(yn, paste(prednames.select, collapse= "+"), sep="~"))
 
   if (SAmethod == "unit") {
-    est <- tryCatch(SAest.unit(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage = SApackage, prior = prior),
+    est <- tryCatch(SAest.unit(fmla.dom, pltdat.dom, dunitlut.dom, yn, 
+				SApackage = SApackage, prior = prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -441,8 +455,11 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   }
  
   if (SAmethod == "area") {
+#prednames=prednames.select
+print("XXXXX")
     est <- tryCatch(SAest.area(fmla.dom, pltdat.dom, dunitlut.dom, 
-				cuniqueid, dunitvar, prednames=prednames.select, yn, SApackage = SApackage, prior = prior),
+				cuniqueid, dunitvar, prednames=prednames.select, yn, 
+				SApackage = SApackage, prior = prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -471,7 +488,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 ## By domain
 ########################################################################
 SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN", 
-		SApackage, SAmethod, prednames=NULL, fmla, domain, response=NULL,
+		SApackage, SAmethod, prednames=NULL, domain, response=NULL,
 		largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL) {
 
   ## Subset tomdat to domain=dom
@@ -496,7 +513,7 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
   ## Apply function to each dom
   domest <- SAest(yn=response, 
 			dat.dom=dat.dom, cuniqueid=cuniqueid, pltassgn=pltassgn,
-			dunitlut=dunitlut, prednames=prednames, fmla=fmla, 
+			dunitlut=dunitlut, prednames=prednames, 
 			SApackage=SApackage, SAmethod=SAmethod, largebnd.val=largebnd.val,
 			showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder)
   domest$est <- data.table(dom, domest$est)
@@ -510,7 +527,7 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
 ########################################################################
 SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.att, 
 		dunitlut, dunitvar="DOMAIN", SApackage="JoSAE", 
-		SAmethod="unit", fmla, domain, response, prednames=NULL,
+		SAmethod="unit", domain, response, prednames=NULL,
 		showsteps=FALSE, savesteps=FALSE, stepfolder=NULL) {
 
   ## subset datasets by largebnd value (e.g., ecosection)
@@ -538,8 +555,7 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.att,
   estlst <- lapply(doms, SAest.dom, 
 			dat=dat.large, cuniqueid=cuniqueid, pltassgn=pltassgn.large,
      			dunitlut=dunitlut.large, dunitvar=dunitvar,
-			SApackage=SApackage, SAmethod=SAmethod, 
-			prednames=prednames, fmla=fmla,
+			SApackage=SApackage, SAmethod=SAmethod, prednames=prednames, 
 			domain=domain, response=response, largebnd.val=largebnd.val,
 			showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder)
   if (length(doms) > 1) {
