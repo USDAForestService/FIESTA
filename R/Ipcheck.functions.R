@@ -10,33 +10,33 @@
 #pcheck.areaunits
 
 
-pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES", 
+pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES",
 	gui=FALSE, stopifnull=FALSE) {
   ## DESCRIPTION: Checks logical function parameters
 
-  msg <- ifelse (!is.null(varnm), paste(varnm, "must be logical"), 
+  msg <- ifelse (!is.null(varnm), paste(varnm, "must be logical"),
 	"variable must be logical")
-  second <- ifelse(toupper(first) == "YES", "NO", "YES") 
+  second <- ifelse(toupper(first) == "YES", "NO", "YES")
   if (is.null(var2check)) {
     if (gui) {
       resp <- select.list(c(first, second), title=title, multiple=FALSE)
       if (resp == "") stop("")
       var2check <- ifelse(resp == "YES", TRUE, FALSE)
-    } else { 
-      if (stopifnull) { 
+    } else {
+      if (stopifnull) {
         stop(paste(varnm, "is invalid"))
       } else {
         return(NULL)
       }
     }
-  } else if (!is.logical(var2check)) { 
+  } else if (!is.logical(var2check)) {
     stop(varnm, " must be logical")
   }
   return(var2check)
 }
 
 
-pcheck.unique <- function(tab, uniqueid, gui=FALSE, tabnm=NULL, 
+pcheck.unique <- function(tab, uniqueid, gui=FALSE, tabnm=NULL,
 	warn=NULL, stopifnull=FALSE, stopifinvalid=TRUE, multiple=FALSE, ...){
   ## DESCRIPTION: Checks string variable parameter
 
@@ -55,35 +55,35 @@ pcheck.unique <- function(tab, uniqueid, gui=FALSE, tabnm=NULL,
 }
 
 
-pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=NULL, 
+pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=NULL,
 	warn=NULL, stopifnull=FALSE, stopifinvalid=TRUE, multiple=FALSE, ...){
   ## DESCRIPTION: Checks string variable parameter
 
-  if (is.null(varnm)) { 
-    varnm <- "varnm" 
+  if (is.null(varnm)) {
+    varnm <- "varnm"
   } else {
     if (!is.character(varnm)) {
       warning("varnm must be a string")
     }
-  } 
+  }
   #if (is.null(var2check) && stopifnull) stop(paste(varnm, "is NULL"))
   if (is.null(caption)) {
-    caption <- paste0(varnm, "?") 
+    caption <- paste0(varnm, "?")
   }
   if (is.null(warn)) {
-    warn <- ifelse(!is.null(checklst) && length(checklst) < 6, 
+    warn <- ifelse(!is.null(checklst) && length(checklst) < 6,
 		paste(varnm, "must be in following list:", toString(checklst)),
 		paste(varnm, "is invalid"))
   }
-  if (is.null(var2check) || is.na(var2check) || length(var2check) == 0 || 
-	gsub(" ", "", var2check) == "") {
+  if (is.null(var2check) || (TRUE %in% is.na(var2check)) || length(var2check) == 0 ||
+	(TRUE %in% gsub(" ", "", var2check) == "")) {
     if (gui) {
       var2check <- select.list(checklst, title=caption, multiple=multiple, ...)
       if (length(var2check) == 0 || var2check == "") {
         stop("NULL")
       }
     } else {
-      if (stopifnull) { 
+      if (stopifnull) {
         stop(paste(varnm, "is NULL"))
       } else {
         return(NULL)
@@ -109,8 +109,8 @@ pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=N
     } else {
       if (stopifinvalid) {
         if (multiple) {
-          warn <- message("invalid variable: ", 
-				toString(var2check[which(!var2check %in% checklst)]), 
+          warn <- message("invalid variable: ",
+				toString(var2check[which(!var2check %in% checklst)]),
 				"\n possible values: ", toString(checklst))
         }
         stop(warn)
@@ -129,7 +129,7 @@ pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
   }
   if (!file.exists(dsn)) {
     extlst <- c("shp", "csv", "sqlite", "gpkg", "gdb", "db", "db3")
-    ext <- extlst[sapply(extlst, function(x, dsn) 
+    ext <- extlst[sapply(extlst, function(x, dsn)
 				file.exists(paste(dsn, x, sep=".")), dsn)]
     if (length(ext) == 1)
       dsn <- paste(dsn, ext, sep=".")
@@ -141,7 +141,7 @@ pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
   if (tabext %in% c("sqlite", "gpkg")) {
     return(DBtestSQLite(dsn, dbconnopen=dbconnopen))
   } else if (tabext == "shp") {
-    return(dsn) 
+    return(dsn)
   } else {
     if (!file.exists(dsn)) stop("file does not exist")
     #stop("file format currently not supported")
@@ -149,17 +149,17 @@ pcheck.dsn <- function(dsn, dbconnopen=TRUE) {
 }
 
 
-pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL, 
-	caption=NULL, returnsf=TRUE, factors=FALSE, returnDT=TRUE, warn=NULL, 
+pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
+	caption=NULL, returnsf=TRUE, factors=FALSE, returnDT=TRUE, warn=NULL,
 	stopifnull=FALSE, nullcheck=FALSE, obj=FALSE, gui=FALSE){
 
-  ## DESCRIPTION: This function checks the table parameter..  if NULL, it prompts the 
+  ## DESCRIPTION: This function checks the table parameter..  if NULL, it prompts the
   ##      user with gui options to select the table of interest.
-  ## ARGUMENTS: 
+  ## ARGUMENTS:
   ## tab - Dataframe or layer name in tab_dsn
   ## tab_dsn - String. data source name where tab resides
   ## tabqry - Database query for extracting tab (if tab_dsn != NULL)
-  ## caption  String. Caption 
+  ## caption  String. Caption
   ## shp  Logical. If TRUE and tab is a shapefile, return a shapefile.
 
   ## Set global variables
@@ -169,13 +169,13 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     options.old <- options()
     options(stringsAsFactors=FALSE)
     on.exit(options(options.old), add=TRUE)
-  } 
+  }
 
   ## Check for installed packages
   if (!"sf" %in% rownames(installed.packages())) {
     message("importing spatial layers requires package sf")
   }
- 
+
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
     Filters=rbind(Filters,shp=c("Shapefiles (*.shp)", "*.shp"))
@@ -187,15 +187,15 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   tabdblst <- c("sqlite", "sqlite3", "db", "db3", "gpkg")
 
   if (is.null(tabnm)) {
-    tabnm <- "tab" 
+    tabnm <- "tab"
   }
   if (is.null(caption)) {
     caption <- "Table?"
-  } 
-   
+  }
+
   selectlst <- c("NONE", "R Object", "csv", "database")
   if (returnsf) {
-    selectlst <- c(selectlst, "*.shp" ) 
+    selectlst <- c(selectlst, "*.shp" )
   }
   ## Check gui
   if (gui && !.Platform$OS.type=="windows") {
@@ -209,43 +209,43 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       } else if (tabresp == "NONE") {
         tabx <- NULL
       } else if (tabresp == "R Object") {
-        objlst <- c(ls(pos=1, all.names=TRUE), 
+        objlst <- c(ls(pos=1, all.names=TRUE),
 		ls(envir=as.environment("package:FIESTA"), pattern="WY"))
         objlst <- objlst[sapply(objlst, function(x) is.data.frame(get(x)))]
         tabobj <- select.list(objlst, title=caption, multiple=FALSE)
-        if (tabobj == "") stop("") 
+        if (tabobj == "") stop("")
         tabx <- get(tabobj, pos=1)
         if (sum(grepl("Spatial", class(tab)) > 0))
           if (!returnsf) tabx <- tabx$data
       } else if (tabresp == "csv") {
-        tabfn <- choose.files(default=getwd(), caption=caption, 
+        tabfn <- choose.files(default=getwd(), caption=caption,
 			filters=Filters[c("csv", "All"),], multi=FALSE)
         if (tabfn == "") stop("")
       } else if (tabresp == "shp") {
-        shpfn <- choose.files(default=getwd(), caption="Select point shapefile", 
+        shpfn <- choose.files(default=getwd(), caption="Select point shapefile",
             filters=Filters[c("shp", "All"),], multi=FALSE)
         if (is.null(shpfn)) stop("")
       } else if (tabresp == "database") {
-        tab_dsn <- choose.files(default=getwd(), caption="Select database file", 
+        tab_dsn <- choose.files(default=getwd(), caption="Select database file",
             filters=Filters[c(tabdblst, "All"),], multi=FALSE)
         if (tab_dsn == "") stop("")
       }
-    } 
+    }
     if (is.null(tabx) && stopifnull) {
       stop(paste(tabnm, "is NULL"))
       return(NULL)
     }
-  } 
+  }
 
   if (!is.null(tab)) {
     if (is.character(tab)) {
       if (obj && exists(tab, envir=.GlobalEnv) && is.data.frame(get(tab))) {
         #message(tab, " exists in Global Environment")
-        return(get(tab))  
+        return(get(tab))
       } else if (file.exists(tab)) {
         tab_dsn <- tab
-      } 
-    } 
+      }
+    }
     if ("sf" %in% class(tab)) {
       if (returnsf) {
         return(tab)
@@ -272,14 +272,14 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       } else {
         if (returnDT) {
           if (!"data.table" %in% class(tab)) tab <- data.table(tab)
-        } else { 
+        } else {
           if ("data.table" %in% class(tab)) tab <- setDF(tab)
         }
         return(tab)
       }
     } else if (!is.character(tab)) {
-      stop(tabnm, " must be an sf object or character layer name") 
-    } 
+      stop(tabnm, " must be an sf object or character layer name")
+    }
   }
   if (is.null(tab_dsn)) {
     tab_dsn <- tab
@@ -287,7 +287,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
 
   if (!is.null(tab_dsn) && !file.exists(tab_dsn)) {
     extlst <- c("shp", "csv", "sqlite", "sqlite3", "db", "db3", "gpkg", "gdb")
-    ext <- extlst[sapply(extlst, function(x, tab_dsn) 
+    ext <- extlst[sapply(extlst, function(x, tab_dsn)
 				file.exists(paste(tab_dsn, x, sep=".")), tab_dsn)]
     if (length(ext) == 1)
         tab_dsn <- paste(tab_dsn, ext, sep=".")
@@ -302,7 +302,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       tabext <- getext(tab_dsn)
     } else {
       stop(tabnm, " is invalid")
-    } 
+    }
   }
 
   if (tabext == "shp") {
@@ -317,7 +317,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
       if (!"RSQLite" %in% rownames(installed.packages())) {
         message("importing spatial layers requires package RSQLite")
       }
-      dbconn <- DBtestSQLite(tab_dsn, dbconnopen=TRUE, showlist=FALSE) 
+      dbconn <- DBtestSQLite(tab_dsn, dbconnopen=TRUE, showlist=FALSE)
       tablst <- DBI::dbListTables(dbconn)
       if (!tab %in% tablst) {
         if (tolower(tab) %in% tablst) {
@@ -335,7 +335,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     } else {
       stop("file format currently not supported")
     }
-  } else {    
+  } else {
     tabx <- tryCatch(data.table::fread(tab_dsn, integer64="numeric"),
 			error=function(e) {
 			print(e)
@@ -343,7 +343,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
     if (is.null(tabx)) stop("file format is currently not supported")
   }
 
-  if (nullcheck) { 
+  if (nullcheck) {
     if (sum(apply(tabx, 1, function(x) sum(is.na(x) | x=="NA" | x=="")) == ncol(x)) > 0)
       tabx <- tabx[apply(tabx, 1, function(x) sum(is.na(x) | x=="NA" | x=="")) != ncol(x),]
   }
@@ -389,9 +389,9 @@ pcheck.outfolder <- function(outfolder, default=getwd(), gui=FALSE) {
 }
 
 
-pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL, 
+pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
 	stopifnull=FALSE, ...) {
-  ## DESCRIPTION: 
+  ## DESCRIPTION:
   ## Check states and return in proper format
   ##
   ## ARGUMENTS:
@@ -410,7 +410,7 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
     } else {
       warning("RS is invalid")
     }
-  } 
+  }
 
   ## If NULL and gui=TRUE, prompt user
   if (is.null(states)) {
@@ -418,7 +418,7 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
       states <- select.list(ref_state[[statereturn]], title="States", multiple=TRUE, ...)
       if (length(states) == 0) stop("")
     } else {
-      if (!is.null(RS)) { 
+      if (!is.null(RS)) {
         states <- ref_state[[statereturn]]
         message(paste("returning all states in", paste(RS, collapse=",")))
       } else {
@@ -426,10 +426,10 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
         return(NULL)
       }
     }
-  } 
+  }
 
   ## Check state name(s)
-  if (!is.vector(states)) 
+  if (!is.vector(states))
     stop("states must be vector of codes or names")
 
   if (!all(states %in% c(ref_state$VALUE, ref_state$ABBR, ref_state$MEANING))) {
@@ -441,29 +441,29 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
 
       if (!all(states2 %in% c(ref_state$VALUE, ref_state$ABBR, ref_state$MEANING))) {
         if (stopifnull) {
-          states.miss <- states[which(!states %in% c(ref_state$VALUE, ref_state$ABBR, 
-		  ref_state$MEANING))] 
+          states.miss <- states[which(!states %in% c(ref_state$VALUE, ref_state$ABBR,
+		  ref_state$MEANING))]
           stop("invalid states: ", states.miss)
         } else {
           return(NULL)
         }
-      }     
+      }
     }
     states <- states2
   }
 
   if (all(states %in% ref_state$VALUE) && is.character(states))
-    states <- as.numeric(states) 
+    states <- as.numeric(states)
 
   ## Set column where state name is from
-  col <- ifelse(all(states %in% ref_state$VALUE), "VALUE", 
-		ifelse(all(states %in% ref_state$ABBR), "ABBR", 
+  col <- ifelse(all(states %in% ref_state$VALUE), "VALUE",
+		ifelse(all(states %in% ref_state$ABBR), "ABBR",
 			ifelse(all(states %in% ref_state$MEANING), "MEANING")))
   if (col == "VALUE") states <- as.numeric(states)
 
   ## Get states to return
   if (statereturn != col) {
-    states2return <- ref_state[ref_state[,col] %in% states, 
+    states2return <- ref_state[ref_state[,col] %in% states,
 		statereturn]
   } else {
     states2return <- states
@@ -474,25 +474,25 @@ pcheck.states <- function (states, statereturn="MEANING", gui=FALSE, RS=NULL,
 
 
 
-pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL, 
+pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
 	stopifnull=FALSE, gui=FALSE, list.items=NULL){
-  ## DESCRIPTION: checks object name 
+  ## DESCRIPTION: checks object name
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
     Filters=rbind(Filters,shp=c("R Objects (*.rda)", "*.rda")) }
 
- 
+
   ## Set global variables
   objx <- NULL
 
-  if (is.null(objnm)) objnm <- "obj" 
-  if (is.null(caption)) caption <- "Object?" 
-   
+  if (is.null(objnm)) objnm <- "obj"
+  if (is.null(caption)) caption <- "Object?"
+
   selectlst <- c("NONE", "object", "rda")
 
   ## Check gui
-  if (gui && !.Platform$OS.type=="windows") 
+  if (gui && !.Platform$OS.type=="windows")
     stop("gui not supported")
   if (is.null(obj)) {
     if (gui) {
@@ -502,15 +502,15 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
       } else if (objresp == "NONE") {
         objx <- NULL
       } else if (objresp == "R Object") {
-        objlst <- c(ls(pos=1, all.names=TRUE), 
+        objlst <- c(ls(pos=1, all.names=TRUE),
 		ls(envir=as.environment("package:FIESTA"), pattern="WY"))
         objlst <- objlst[sapply(objlst, function(x) is.data.frame(get(x)))]
         obj <- select.list(objlst, title=caption, multiple=FALSE)
-        if (obj == "") stop("") 
+        if (obj == "") stop("")
         objx <- get(obj, pos=1)
         if (!is.list(objx)) stop("must be list object")
       } else if (objresp == "rda") {
-        objfn <- choose.files(default=getwd(), caption=caption, 
+        objfn <- choose.files(default=getwd(), caption=caption,
 			filters=Filters[c("rda", "All"),], multi=FALSE)
         if (objfn == "") stop("")
         objx <- get(load(objfn))
@@ -519,33 +519,33 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
     }
     if (is.null(objx) && stopifnull) stop(paste(objnm, "is NULL"))
       return(NULL)
-  } 
- 
+  }
+
   if (!is.null(obj)) {
     if (is.character(obj)) {
       if (exists(obj, envir=.GlobalEnv) && is.list(get(obj))) {
         #message(tab, " exists in Global Environment")
-        return(get(obj))  
+        return(get(obj))
       } else if (!is.na(getext(obj)) && file.exists(obj)) {
         objx <- get(load(obj))
         if (!is.list(objx)) stop("must be list object")
       } else if (!is.na(getext(obj)) && !file.exists(obj)) {
-        stop("file does not exist") 
+        stop("file does not exist")
       } else if (is.na(getext(obj))) {
-        stop(objnm, " must be a list object or filename") 
+        stop(objnm, " must be a list object or filename")
       } else {
-        stop(objnm, " must be a list object or filename") 
+        stop(objnm, " must be a list object or filename")
       }
     } else if (!is.list(obj)) {
-      stop(objnm, " must be a list object or filename") 
+      stop(objnm, " must be a list object or filename")
     } else {
       objx <- obj
     }
   }
- 
+
   if (!is.null(list.items)) {
-    if (!all(list.items %in% names(objx))) { 
-      missitems <- list.items[!list.items %in% names(objx)] 
+    if (!all(list.items %in% names(objx))) {
+      missitems <- list.items[!list.items %in% names(objx)]
       stop(objnm, " must include the following item in list: ", toString(missitems))
     }
   }
@@ -554,15 +554,15 @@ pcheck.object <- function(obj=NULL, objnm=NULL, warn=NULL, caption=NULL,
 }
 
 
-pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, add_layer=TRUE, append_layer=FALSE, 
+pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
+	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
+	overwrite_layer=TRUE, add_layer=TRUE, append_layer=FALSE,
 	createSQLite=TRUE, gui=FALSE) {
 
   ## Check out_fmt
   ###########################################################
   out_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp')
-  out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst, 
+  out_fmt <- pcheck.varchar(out_fmt, varnm="out_fmt", checklst=out_fmtlst,
 		caption="Out format", gui=gui)
 
   ## Check for necessary packages
@@ -581,25 +581,25 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
     }
     arcgisbinding::arc.check_product()
   }
- 
+
   ## check outfn.date
-  outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date", 
+  outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date",
 		title="outfn.date", first="NO", gui=gui)
 
   ## check overwrite_dsn
-  overwrite_dsn <- FIESTA::pcheck.logical(overwrite_dsn, varnm="overwrite_dsn", 
+  overwrite_dsn <- FIESTA::pcheck.logical(overwrite_dsn, varnm="overwrite_dsn",
 		title="overwrite_dsn", first="NO", gui=gui)
 
   ## check overwrite_layer
-  overwrite_layer <- FIESTA::pcheck.logical(overwrite_layer, varnm="overwrite_layer", 
+  overwrite_layer <- FIESTA::pcheck.logical(overwrite_layer, varnm="overwrite_layer",
 		title="overwrite_layer", first="NO", gui=gui)
 
   ## check add_layer
-  add_layer <- FIESTA::pcheck.logical(add_layer, varnm="add_layer", 
+  add_layer <- FIESTA::pcheck.logical(add_layer, varnm="add_layer",
 		title="add data to dsn", first="NO", gui=gui)
 
   ## check append_layer
-  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer", 
+  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer",
 		title="append data", first="NO", gui=gui)
 
 
@@ -607,7 +607,7 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
   if (!is.null(outfn.pre) && (!is.vector(outfn.pre) || length(outfn.pre) > 1)) {
     stop("invalid outfn.pre")
   }
- 
+
   ## check layer.pre
   #if (!is.null(layer.pre) && (!is.vector(layer.pre) || length(layer.pre) > 1)) {
   #  stop("invalid layer.pre")
@@ -615,10 +615,10 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
 
   if (out_fmt %in% c("csv", "shp")) {
     outfolder <- pcheck.outfolder(outfolder)
-    return(list(out_dsn=NULL, outfolder=outfolder, out_fmt=out_fmt, 
+    return(list(out_dsn=NULL, outfolder=outfolder, out_fmt=out_fmt,
 		overwrite_layer=overwrite_layer, append_layer=append_layer,
 		outfn.date=outfn.date, outfn.pre=outfn.pre))
-  } 
+  }
 
   ## Check file name
   ###########################################################
@@ -640,7 +640,7 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
         i <- i + 1
       }
     }
-  } 
+  }
   if (is.null(chkfn) || overwrite_dsn || !overwrite_dsn) {
     out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
 		outfn.date=outfn.date, overwrite=overwrite_dsn, outfn.default="data",
@@ -648,7 +648,7 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
 
     if (out_fmt %in% c("sqlite", "gpkg") && createSQLite) {
       gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
-      out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg) 
+      out_dsn <- DBcreateSQLite(out_dsn, gpkg=gpkg)
     }
   } else {
     out_dsn <- chkfn
@@ -666,9 +666,9 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
   }
 
   return(list(out_fmt=out_fmt, outfolder=outfolder, out_dsn=out_dsn,
-	overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+	overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
 	add_layer=add_layer, append_layer=append_layer, outfn.date=outfn.date))
-} 
+}
 
 
 pcheck.colors <- function(colorlst, n) {
@@ -686,26 +686,26 @@ pcheck.colors <- function(colorlst, n) {
    if (length(colorlst) == 1 && colorlst %in% brewerlst) {
      if (n < 3) {
        stop("minimum number for brewer palettes is 3")
-     }      
+     }
      colorlst <- RColorBrewer::brewer.pal(n, colorlst)
    } else if (length(colorlst) != n) {
      stop("number of colors is invalid")
    }
    return(colorlst)
 }
-  
+
 
 pcheck.areaunits <- function(unitarea, areavar, areaunits, metric=FALSE) {
   ## Description: check areaunits for conversions
 
   gui <- FALSE
 #  ## Check outunits
-#  outunits <- FIESTA::pcheck.varchar(var2check=outunits, varnm="outunits", 
-#	gui=gui, checklst=c("ENGLISH", "METRIC"), caption="Area output units?", 
+#  outunits <- FIESTA::pcheck.varchar(var2check=outunits, varnm="outunits",
+#	gui=gui, checklst=c("ENGLISH", "METRIC"), caption="Area output units?",
 #	stopifnull=TRUE)
 
   ## check metric
-  metric <- FIESTA::pcheck.logical(metric, varnm="metric", 
+  metric <- FIESTA::pcheck.logical(metric, varnm="metric",
 		title="Metric units", first="NO", gui=gui)
   if (metric) {
     outunits <- "hectares"
@@ -721,10 +721,10 @@ pcheck.areaunits <- function(unitarea, areavar, areaunits, metric=FALSE) {
     } else if (areaunits == "hectares" && outunits == "acres") {
       unitarea[[areausedvar]] <- unitarea[[areausedvar]] / 0.4046860
     } else {
-      stop("invalid units... cannot convert ", areaunits, " to ", outunits) 
-    } 
-  } 
-  areavar <- areausedvar 
+      stop("invalid units... cannot convert ", areaunits, " to ", outunits)
+    }
+  }
+  areavar <- areausedvar
   return(list(unitarea=unitarea, areavar=areavar, outunits=outunits))
 }
 
