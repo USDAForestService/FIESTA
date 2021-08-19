@@ -2,19 +2,27 @@
 
 <b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson, Paul L.; Toney, Chris; Freeman, Elizabeth A.
 
+# FIESTA
+
+## Overview
+
 The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. The FIESTA package contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. Check Wiki for installation instructions.
 
-<b>License:</b> This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
+## License:
+
+This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
 
 
-<b>Installation:<b>
+## Installation:
 
-<b>1. Install Rtools<b>
+### 1. Install Rtools
+
 If Windows OS, in order to install source code from GitHub, you must install Rtools from 
 the CRAN website (https://cran.r-project.org/). Go to Download R for Windows and Install the most current Rtools for Windows 64-bit.
 
 
-<b>2. Create token for GitHub<b>
+### 2. Create token for GitHub
+
 For ease of installing and updating FIESTA, generate a token from GitHub settings.
 Note: FIESTA is frequently updated. You will use this token each time you update 
 FIESTA (until public release).
@@ -28,7 +36,8 @@ FIESTA (until public release).
 7. Save token (~30 character string) to a file and as an R object.
 
 
-<b>3. Install FIESTA suggested packages<b>
+### 3. Install FIESTA suggested packages
+
 - Checks to make sure all FIESTA dependent packages are installed
 - Removes old version of FIESTA from current R library
 - pkginstalled <- installed.packages()
@@ -100,7 +109,8 @@ lapply(sp.pkgs, chkpkg)
 ```
 
 
-<b>install FIESTA package from source code<b>
+### 4. Install FIESTA package from source code
+
 If you are updating FIESTA, first make sure the FIESTA library is not attached, 
 then uninstall from your library.
 
@@ -133,7 +143,7 @@ xcode-select --install
 ```
 
 
-<b>HELP and vignettes<b>
+## HELP and vignettes
 
 To get help for fiesta package
 ```
