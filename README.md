@@ -2,7 +2,7 @@
 
 <b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson, Paul L.; Toney, Chris; Freeman, Elizabeth A.
 
-# FIESTA
+# FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=175 />
 
 ## Overview
 
