@@ -13,7 +13,7 @@
 spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
 	xyids = NULL, xy_datsource = NULL, xy = NULL, xy_dsn = NULL,
 	xy.uniqueid = "PLT_CN", xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL,
-	pjoinid = NULL, clipxy = TRUE, datsource = "datamart", data_dsn = NULL,
+	pjoinid = NULL, clipxy = TRUE, datsource = NULL, data_dsn = NULL,
 	istree = FALSE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond",
 	tree_layer = "tree", seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn",
 	other_layers = NULL, puniqueid = "CN", savePOP = FALSE,
@@ -172,7 +172,7 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
 	before export using an internal function (trunc10shp). If Spatial object has
 	more than 1 record, it will be returned but not exported.
 
-  If datsource="datmart", (default), data are imported from FIA DataMart.
+  If datsource="datmart", data are imported from FIA DataMart.
 	The plot coordinates have been altered for privacy
 	(See https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php for details).
 	The zip files are extracted on-the-fly from the online website. Web server connections
