@@ -10,3 +10,4 @@ docs
 .Rproj.user
 .Rproj.user/shared/notebooks/paths
 .DS_Store
+.Rhistory
