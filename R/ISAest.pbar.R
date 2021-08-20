@@ -367,15 +367,35 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       if (length(preds.enet) == 0) {
         message("no predictors were selected for model")
         if (SAmethod == "unit") {
-          est <- data.table(dunitlut.dom[[dunitvar]],
+          if (SApackage == "JoSAE") {
+            est <- data.table(dunitlut.dom[[dunitvar]],
 			DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
 			JU.EBLUP=NA, JU.EBLUP.se.1=NA, NBRPLT=dunitlut.dom$n.total)
-          setnames(est, "V1", dunitvar)
+            setnames(est, "V1", dunitvar)
+         } else if (SApackage == "sae") {
+            est <- data.table(dunitlut.dom[[dunitvar]],
+			saeU=NA, saeU.se=NA, NBRPLT=dunitlut.dom$n.total)
+            setnames(est, "V1", dunitvar)
+         } else if (SApackage == "hbsae") {  
+            est <- data.table(dunitlut.dom[[dunitvar]],
+			hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total)
+            setnames(est, "V1", dunitvar)
+         }
         } else {
-          est <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+          if (SApackage == "JoSAE") {
+            est <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 			DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
 			JA.synth.se=NA, NBRPLT=dunitlut.dom$n.total)
-          setnames(est, "V1", dunitvar)
+            setnames(est, "V1", dunitvar)
+         } else if (SApackage == "sae") {
+            est <- data.table(dunitlut.dom[[dunitvar]],
+			saeA=NA, saeA.se=NA, NBRPLT=dunitlut.dom$n.total)
+            setnames(est, "V1", dunitvar)
+         } else if (SApackage == "hbsae") {  
+            est <- data.table(dunitlut.dom[[dunitvar]],
+			hbsaeA=NA, hbsaeA.se=NA, NBRPLT=dunitlut.dom$n.total)
+            setnames(est, "V1", dunitvar)
+         }
         }
         ## Merge NBRPLT.gt0
         est <- merge(est, NBRPLT.gt0, by="DOMAIN")
