@@ -75,7 +75,7 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
       hbsaeU = est.unit$est,
       hbsaeU.se = sqrt(est.unit$mse)
     )
-    est <- merge(est, dunitlut.area[, c(dunitvar, "n.total")], 
+    est <- merge(est, dunitlut.dom[, c(dunitvar, "n.total")], 
                  by.x="DOMAIN", by.y=dunitvar) 
     names(est)[names(est) == "n.total"] <- "NBRPLT"
 
@@ -94,8 +94,8 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid,
 
   dunitlut.dom <- setDF(dunitlut.dom)
   nm.var <- paste0(yn, ".var")
-  #dunitlut.NA <- dunitlut.dom[is.na(dunitlut.dom[[nm.var]]) | dunitlut.dom[[nm.var]] < 0.001, ]
-  dunitlut.NA <- dunitlut.dom[is.na(dunitlut.dom[[nm.var]]) | dunitlut.dom[[nm.var]] == 0, ]
+  dunitlut.NA <- dunitlut.dom[is.na(dunitlut.dom[[nm.var]]) | dunitlut.dom[[nm.var]] < 0.001, ]
+  #dunitlut.NA <- dunitlut.dom[is.na(dunitlut.dom[[nm.var]]) | dunitlut.dom[[nm.var]] == 0, ]
   dunitNAids <- dunitlut.NA[[dunitvar]]
   dunitids <-  dunitlut.dom[!dunitlut.dom[[dunitvar]] %in% dunitNAids, dunitvar]
   dunitlut.area <- dunitlut.dom[dunitlut.dom[[dunitvar]] %in% dunitids, ]
