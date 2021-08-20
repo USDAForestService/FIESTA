@@ -446,14 +446,14 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   domain <- "TOTAL"
 
   ## get estimate by domain, by largebnd value
-  message("generating unit-level estimates for ", response, " using ", SApackage, "...")
+  message("generating JoSAE unit-level estimates for ", response, " using ", SApackage, "...")
 
   dunit_multest.unitlst <- 
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
 			dat=tdomdattot, cuniqueid=cuniqueid, 
 			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
-			SApackage=SApackage, SAmethod="unit", 
+			SApackage="JoSAE", SAmethod="unit", 
 			prednames=prednames, domain="TOTAL",
 			response=response, showsteps=showsteps, savesteps=FALSE,
 			stepfolder=stepfolder),
@@ -472,14 +472,14 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   setkeyv(dunit_multest.unit, dunitvar)
 
   ## get estimate by domain, by largebnd value
-  message("generating area-level estimates for ", response, "...")
+  message("generating JoSAE area-level estimates for ", response, "...")
 
   dunit_multest.arealst <- 
 	tryCatch(
     		lapply(largebnd.vals, SAest.large, 
 			dat=tdomdattot, cuniqueid=cuniqueid, 
 			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
-			SApackage=SApackage, SAmethod="area", 
+			SApackage="JoSAE", SAmethod="area", 
 			prednames=prednames, domain="TOTAL",
 			response=response, showsteps=showsteps, savesteps=savesteps,
 			stepfolder=stepfolder),
@@ -518,6 +518,71 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     }
     SAarea.vars <- c("JFH", "JFH.se", "JA.synth", "JA.synth.se")
   }
+
+  message("generating sae, area-level estimates for ", response, "...")
+  dunit_multest.sae.arealst <- 
+	tryCatch(
+    		lapply(largebnd.vals, SAest.large, 
+			dat=tdomdattot, cuniqueid=cuniqueid, 
+			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
+			SApackage="sae", SAmethod="area", 
+			prednames=prednames, domain="TOTAL",
+			response=response, showsteps=showsteps, savesteps=savesteps,
+			stepfolder=stepfolder),
+     	 error=function(e) {
+			message("error with area-level estimates of ", response, "...")
+			message(e, "\n")
+			return(NULL) }) 
+  if (length(largebnd.vals) > 1) {
+    dunit_multest.sae.area <- do.call(rbind, do.call(rbind, dunit_multest.sae.arealst)[,1])
+  } else {
+    dunit_multest.sae.area <- do.call(rbind, dunit_multest.sae.arealst)[,1]$est.large
+  } 
+  setkeyv(dunit_multest.sae.area, dunitvar)
+
+
+  message("generating hbsae, unit-level estimates for ", response, "...")
+  dunit_multest.hbsae.unitlst <- 
+	tryCatch(
+    		lapply(largebnd.vals, SAest.large, 
+			dat=tdomdattot, cuniqueid=cuniqueid, 
+			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
+			SApackage="hbsae", SAmethod="unit", 
+			prednames=prednames, domain="TOTAL",
+			response=response, showsteps=showsteps, savesteps=savesteps,
+			stepfolder=stepfolder),
+     	 error=function(e) {
+			message("error with area-level estimates of ", response, "...")
+			message(e, "\n")
+			return(NULL) }) 
+  if (length(largebnd.vals) > 1) {
+    dunit_multest.hbsae.unit <- do.call(rbind, do.call(rbind, dunit_multest.hbsae.unitlst)[,1])
+  } else {
+    dunit_multest.hbsae.unit <- do.call(rbind, dunit_multest.hbsae.unitlst)[,1]$est.large
+  } 
+  setkeyv(dunit_multest.hbsae.unit, dunitvar)
+
+
+  message("generating hbsae, area-level estimates for ", response, "...")
+  dunit_multest.hbsae.arealst <- 
+	tryCatch(
+    		lapply(largebnd.vals, SAest.large, 
+			dat=tdomdattot, cuniqueid=cuniqueid, 
+			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
+			SApackage="hbsae", SAmethod="area", 
+			prednames=prednames, domain="TOTAL",
+			response=response, showsteps=showsteps, savesteps=savesteps,
+			stepfolder=stepfolder),
+     	 error=function(e) {
+			message("error with area-level estimates of ", response, "...")
+			message(e, "\n")
+			return(NULL) }) 
+  if (length(largebnd.vals) > 1) {
+    dunit_multest.hbsae.area <- do.call(rbind, do.call(rbind, dunit_multest.hbsae.arealst)[,1])
+  } else {
+    dunit_multest.hbsae.area <- do.call(rbind, dunit_multest.hbsae.arealst)[,1]$est.large
+  } 
+  setkeyv(dunit_multest.hbsae.area, dunitvar)
 
 
   if (rowvar != "TOTAL") {
@@ -569,6 +634,25 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
     estkey <- c(domain, largebnd.att, dunitvar)
     estkey <- estkey[estkey %in% names(dunit_multest)]
     setkeyv(dunit_multest, estkey)
+
+    if  (!is.null(dunit_multest.sae.area)) {
+      dunit_multest <- merge(dunit_multest, 
+		dunit_multest.sae.area[, c(domain, dunitvar, "saeA", "saeA.se"), with=FALSE], 
+		by=c(domain, dunitvar)) 
+    }
+      
+    if  (!is.null(dunit_multest.hbsae.unit)) {
+      dunit_multest <- merge(dunit_multest, 
+		dunit_multest.hbsae.unit[, c(domain, dunitvar, "hbsaeU", "hbsaeU.se"), with=FALSE], 
+		by=c(domain, dunitvar)) 
+    }
+
+    if  (!is.null(dunit_multest.hbsae.area)) {
+      dunit_multest <- merge(dunit_multest, 
+		dunit_multest.hbsae.area[, c(domain, dunitvar, "hbsaeA", "hbsaeA.se"), with=FALSE], 
+		by=c(domain, dunitvar)) 
+    }
+
 
     #dunit_multest[, JoSAE := ifelse(is.na(dunit_multest$JFH), JU.EBLUP, JFH)]  
     #dunit_multest[, JoSAE.se := ifelse(is.na(dunit_multest$JFH), JU.EBLUP, JU.EBLUP.se.1)]
@@ -714,7 +798,8 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
       ## Subset dunit_multest, where AOI = 1
       dunit_multest <- dunit_multest[dunit_multest$AOI == 1, ]
     }
-
+print("TEST")
+print(head(dunit_multest))
     ## Save multest table
     if (savemultest) {
 

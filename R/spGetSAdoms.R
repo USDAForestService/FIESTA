@@ -343,14 +343,14 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 
     if (any(table(helperbndx[[helperbnd.unique]])) > 1) {
       message("helperbnd.unique is not unique")
-    }
-    polyunion <- TRUE
-  
+    }  
     ## Change name of helperbnd.unique if equals smallbnd.unique
     if (identical(helperbnd.unique, smallbnd.unique)) {
       tmp.unique <- checknm(helperbnd.unique, names(helperbndx))
       names(helperbndx)[names(helperbndx) == helperbnd.unique] <- tmp.unique     
       helperbnd.unique <- tmp.unique
+    } else {
+      polyunion <- TRUE
     }
   }
 
