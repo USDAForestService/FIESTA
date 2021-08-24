@@ -1,10 +1,10 @@
 SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, 
-	dunitvar, prior = NULL) {
+	dunitvar, prednames, prior = NULL) {
 
   if (SApackage == "JoSAE") {
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
-    dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=pltdat.dom, random=~1|DOMAIN)))
+    dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=setDF(pltdat.dom), random=~1|DOMAIN)))
     
     ## calculate the variance of the EBLUP estimate
     est.unit <- JoSAE::eblup.mse.f.wrap(domain.data = dunitlut.dom, 
@@ -24,7 +24,7 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage,
     xpop <- setDF(dunitlut.dom)[,c('DOMAIN', prednames)]
     popsize <- setDF(dunitlut.dom)[, c("DOMAIN", "npixels")]
     
-    est.unit <- suppressMessage(sae::pbmseBHF(formula = fmla.dom,
+    est.unit <- suppressMessages(sae::pbmseBHF(formula = fmla.dom,
                               dom = DOMAIN,
                               selectdom = unique(xpop$DOMAIN),
                               meanxpop = xpop,
@@ -39,7 +39,7 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage,
       saeU.se = sqrt(est.unit$mse[["mse"]])
     )
 
-    est <- merge(est, dunitlut.area[, c(dunitvar, "n.total")], 
+    est <- merge(est, dunitlut.dom[, c(dunitvar, "n.total")], 
                  by.x="DOMAIN", by.y=dunitvar) 
     names(est)[names(est) == "n.total"] <- "NBRPLT"
     
@@ -512,7 +512,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   if (SAmethod == "unit") {
     est <- tryCatch(SAest.unit(fmla.dom=fmla.dom, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, yn=yn, SApackage=SApackage, 
-				dunitvar=dunitvar, prior=prior),
+				dunitvar=dunitvar, prednames=prednames.select, prior=prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
