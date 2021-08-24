@@ -350,7 +350,11 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   }
  
   if (clipxy) {
-    clipdat <- spClipPoint(spxy, clippolyv=bndx)
+    xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
+		checklst=names(spxy), caption="UniqueID variable of xy data", 
+		warn=paste(xy.uniqueid, "not in xy data"), stopifnull=TRUE)
+
+    clipdat <- spClipPoint(spxy, clippolyv=bndx, uniqueid=xy.uniqueid)
     spxy <- clipdat$clip_xyplt 
     if (length(spxy) == 0) stop("xy does not overlap bndx")
 

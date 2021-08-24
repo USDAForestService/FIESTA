@@ -178,6 +178,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
      ## Return SA population data
      returnlst$SApopdat <- SApop$SApopdat
      SApopdat <- SApop$SApopdat
+     SAdata <- SApop$SAdata
   }
 
   ####################################################################
@@ -198,10 +199,12 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
 		testfolder=outfolder, addSAdomsdf=TRUE, 
 		SAdomvars=unique(c("PROVINCE", largebnd.unique)))
     multest <- SAest$SAmultest
+    rm(SApopdat)
+    gc()
  
     if (addPS) {
       ## Convert SAdata to GBdata
-      GBdata <- SApop$SAdata
+      GBdata <- SAdata
       dunitzonal <- GBdata$dunitzonal
       GBdata$stratalut <- strat.pivot(dunitzonal, strvar="tnt", unitvars=c("DOMAIN", "AOI"))
       GBdata$strvar <- "tnt"
@@ -243,7 +246,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
 		by="DOMAIN", all.x=TRUE)
       } 
     } 
- 
     for (estvar in c("AREA_ADJ", estvarlst)) {
       if (estvar %in% estvarlst) {
         if (estvar == "TPA_UNADJ") {
@@ -254,7 +256,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
       } else if (estvar == "AREA_ADJ") {
         multestvar <- "FOREST_prop"
       }
- 
       ## Add province name to multest
       multest[[estvar]]$PROVINCE <- RAVG.ecoprov
 
@@ -266,7 +267,6 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
     }
   }
  
-
   ## Save selected predictors to ecofolder
   if (saveobj) {
     saveRDS(SAest$SApredselect, file=file.path(ecofolder, "SApredselect.rds"))
@@ -276,7 +276,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
   returnlst$SApredselect <- SAest$SApredselect
 
   rm(multest)
-  rm(SAdata)
+  rm(SAest)
   rm(GBdata)
   gc()
 

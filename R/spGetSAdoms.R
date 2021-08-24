@@ -423,9 +423,11 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   SAdomslst <- lapply(SAdomslst, sf_dissolve, c("DOMAIN", "AOI"))
   #SAdomslst <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
 
-  ## Set plotting margins
-  mar <-  par("mar")
-  par(mar=c(1,1,1,1))
+  if (showsteps) {
+    ## Set plotting margins
+    mar <-  par("mar")
+    par(mar=c(1,1,1,1))
+  }
 
   for (i in 1:length(SAdomslst)) {   
     ## Check domain
@@ -485,7 +487,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       message("Writing jpg to ", jpgfn, "\n")
     }
   }
-  par(mar=mar)
+  if (showsteps) {
+    par(mar=mar)
+  }
 
   rm(smallbndx)
   rm(helperbndx)
