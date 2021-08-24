@@ -269,20 +269,20 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   }
 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx,
+  returnlst <- append(returnlst, list(condx=setDF(condx), pltcondx=setDF(pltcondx),
 		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
-		dunitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
+		dunitarea=setDF(dunitarea), areavar=areavar, areaunits=areaunits, 
 		dunitvar=dunitvar, dunitlut=dunitlut, prednames=prednames, 
 		predfac=predfac, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
 		states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
-    returnlst$treex <- treef
+    returnlst$treex <- setDF(treef)
     returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
   }
   if (!is.null(seedf)) {
-    returnlst$seedx <- seedf
+    returnlst$seedx <- setDF(seedf)
   }
 
   if (saveobj) {

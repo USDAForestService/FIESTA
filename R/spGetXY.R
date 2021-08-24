@@ -185,8 +185,10 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     }
 
     ## Make spatial
-    spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
+    if (!"sf" %in% class(xyplt)) {
+      spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs)
+    }
 
   } else if (xy_datsource == "shp") {
     sqlatt <- paste("select * from ", basename.NoExt(xy), "limit 0")

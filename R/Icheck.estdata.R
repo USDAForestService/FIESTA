@@ -238,7 +238,7 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
 
   ## Set up list of variables to return
   ######################################################################################
-  returnlst <- list(pltcondf=pltcondf, cuniqueid=cuniqueid, sumunits=sumunits, 
+  returnlst <- list(pltcondf=setDT(pltcondf), cuniqueid=cuniqueid, sumunits=sumunits, 
 	TPA=TPA, allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
 	addtitle=addtitle, returntitle=returntitle, estround=estround, pseround=pseround,
  	landarea=landarea, rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
@@ -253,13 +253,13 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
     ## Check that the values of tuniqueid in treex are all in cuniqueid in condf
     treef <- check.matchval(treex, pltcondf, tuniqueid, cuniqueid, tab1txt="tree", 
 		tab2txt="cond", subsetrows=TRUE)
-    returnlst$treef <- treef
+    returnlst$treef <- setDT(treef)
     returnlst$tuniqueid <- tuniqueid
 
     if (!is.null(seedx)) {
       seedf <- check.matchval(seedx, pltcondf, tuniqueid, cuniqueid, tab1txt="seed", 
 		tab2txt="seed", subsetrows=TRUE)
-      returnlst$seedf <- seedf
+      returnlst$seedf <- setDT(seedf)
       returnlst$tuniqueid <- tuniqueid
     }
 

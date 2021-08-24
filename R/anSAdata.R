@@ -205,17 +205,17 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   #pltdat$spxy=pltdat$xypltx=xy.uniqueid <- NULL
 
 
-  SAdata <- list(SAdoms=SAdoms, smallbnd=smallbnd, plt=pltx, 
-	pltassgn=pltassgn, cond=condx, 
-	dunitarea=dunitarea, dunitvar=dunitvar, areavar=areavar, 
-	dunitzonal=dunitzonal, prednames=prednames, predfac=predfac,
+  SAdata <- list(SAdoms=SAdoms, smallbnd=smallbnd, plt=setDF(pltx), 
+	pltassgn=setDF(pltassgn), cond=setDF(condx), 
+	dunitarea=setDF(dunitarea), dunitvar=dunitvar, areavar=areavar, 
+	dunitzonal=setDF(dunitzonal), prednames=prednames, predfac=predfac,
 	zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
 	pltassgnid=pltassgnid)
   if (istree) {
-    SAdata$tree <- treex
+    SAdata$tree <- setDF(treex)
   }
   if (isseed) {
-    SAdata$seed <- seedx
+    SAdata$seed <- setDF(seedx)
   }
 
   if (savexy) {

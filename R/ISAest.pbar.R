@@ -1,5 +1,6 @@
-SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior = NULL) {
-  
+SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, 
+	dunitvar, prior = NULL) {
+
   if (SApackage == "JoSAE") {
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
@@ -54,19 +55,21 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
       est.unit <- hbsae::fSAE.Unit(
         y = pltdat.dom[[yn]],
         X = model.matrix(fmla.dom[-2], pltdat.dom),
-        area = pltdat.dom[[dunitvar]],
+        area = pltdat.dom$DOMAIN,
         #Narea = dunitlut.dom$npixels,
-        Xpop = xpophb 
+        Xpop = xpophb, 
+        silent = FALSE 
       )
     } else {
       est.unit <- hbsae::fSAE.Unit(
         y = pltdat.dom[[yn]],
         X = model.matrix(fmla.dom[-2], pltdat.dom),
-        area = pltdat.dom[[dunitvar]],
+        area = pltdat.dom$DOMAIN,
         #Narea = dunitlut.dom$npixels,
         fpc = FALSE,
         Xpop = xpophb,
-        prior = prior
+        prior = prior, 
+        silent = FALSE
       )
     }
     
@@ -79,6 +82,10 @@ SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, prior 
                  by.x="DOMAIN", by.y=dunitvar) 
     names(est)[names(est) == "n.total"] <- "NBRPLT"
 
+    rm(dunitlut.dom)
+    rm(fmla.dom)
+    rm(pltdat.dom)
+    gc()
     
     return(est)
   }
@@ -147,6 +154,12 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid,
       est <- rbindlist(list(est, est.NA))
       setorderv(est, dunitvar)
     }
+
+    rm(dunitlut.dom)
+    rm(fmla.dom)
+    rm(pltdat.dom)
+    gc()
+
     return(est)
   }
   
@@ -198,14 +211,16 @@ SAest.area <- function(fmla.dom, pltdat.dom, dunitlut.dom, cuniqueid,
       est.area <- hbsae::fSAE.Area(
         est.init = y,
         var.init = dunitlut.area[["var"]],
-        X = X
+        X = X,
+        silent=TRUE
       )
     } else {
       est.area <- hbsae::fSAE.Area(
         est.init = y,
         var.init = dunitlut.area[["var"]],
         X = X,
-        prior = prior
+        prior = prior,
+        silent=TRUE
       )
     }
     
@@ -267,8 +282,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 
   ## Add mean response to dunitlut for Area-level estimates
   datmean <- pltdat.dom[, list(mean=mean(get(yn), na.rm=TRUE),
-			mean.var=var(get(yn), na.rm=TRUE)), by="DOMAIN"]
-  setkey(datmean, "DOMAIN")
+			mean.var=var(get(yn), na.rm=TRUE)), by=dunitvar]
+  setkeyv(datmean, dunitvar)
   dunitlut.dom <- merge(dunitlut, datmean, by=dunitvar)
   setnames(dunitlut.dom, c("mean", "mean.var"), c(yn, paste0(yn, ".var")))
 
@@ -320,7 +335,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     dunitlut.dom[, (prednames) := lapply(.SD, function(x) (x-min(x)) / (max(x) - min(x))), .SDcols=prednames]
   }
  
-  # variable selection for unit-level model for largebnd value
+  # variable selection 
   #mod.dom <- stats::lm(fmla, data=pltdat.dom)
   #mod.dom.step <- stats::step(mod.dom, trace=FALSE)
   #mod.summary <- summary(mod.dom.step)
@@ -495,8 +510,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   fmla.dom <- stats::as.formula(paste(yn, paste(prednames.select, collapse= "+"), sep="~"))
 
   if (SAmethod == "unit") {
-    est <- tryCatch(SAest.unit(fmla.dom, pltdat.dom, dunitlut.dom, yn, 
-				SApackage = SApackage, prior = prior),
+    est <- tryCatch(SAest.unit(fmla.dom=fmla.dom, pltdat.dom=pltdat.dom, 
+				dunitlut.dom=dunitlut.dom, yn=yn, SApackage=SApackage, 
+				dunitvar=dunitvar, prior=prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -520,9 +536,10 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
  
   if (SAmethod == "area") {
 #prednames=prednames.select
-    est <- tryCatch(SAest.area(fmla.dom, pltdat.dom, dunitlut.dom, 
-				cuniqueid, dunitvar, prednames=prednames.select, yn, 
-				SApackage = SApackage, prior = prior),
+    est <- tryCatch(SAest.area(fmla.dom=fmla.dom, pltdat.dom=pltdat.dom, 
+				dunitlut.dom=dunitlut.dom, cuniqueid=cuniqueid, 
+				dunitvar=dunitvar, prednames=prednames.select, 
+				yn=yn, SApackage=SApackage, prior=prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -601,7 +618,7 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
   ## Apply function to each dom
   domest <- SAest(yn=response, 
 			dat.dom=dat.dom, cuniqueid=cuniqueid, pltassgn=pltassgn,
-			dunitlut=dunitlut, prednames=prednames, 
+			dunitlut=dunitlut, dunitvar=dunitvar, prednames=prednames, 
 			SApackage=SApackage, SAmethod=SAmethod, largebnd.val=largebnd.val,
 			showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder)
   domest$est <- data.table(dom, domest$est)
@@ -661,6 +678,9 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.att,
   setkeyv(est.large, dunitvar)
   setkeyv(setDT(pltdat.dom), dunitvar)
   setkeyv(setDT(dunitlut.dom), dunitvar)
+  
+  rm(estlst)
+  gc()
 
   return(list(est.large=est.large, prednames.select=prednames.select, 
 			pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))

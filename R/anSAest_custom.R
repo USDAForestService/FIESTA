@@ -79,7 +79,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   SAestlst <- list()
   SAmultestlst <- list()
   SApredselectlst <- list()
-
+ 
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, largebnd.att=largebnd.att, smallbnd.att=smallbnd.att, 
 	esttype="AREA", landarea="FOREST", 
@@ -91,6 +91,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 	overwrite_layer=TRUE, append_layer=append_layer, outfn.pre=outfn.pre,
  	addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, 
 	save4testing=save4testing, showsteps=showsteps)
+
   if (is.null(SAareadat)) return(NULL)
   response <- SAareadat$raw$estvar
 
@@ -136,7 +137,6 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
           chkfn <- paste0(file.path(multest_outfolder, multest_layer), ".csv")
           multest.append <- ifelse(file.exists(chkfn), TRUE, FALSE)
         } 
-
         SAestdat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 			SAmethod=SAmethod, smallbnd.att=smallbnd.att, largebnd.att=largebnd.att, 
 			esttype="TREE", landarea=landarea, pcfilter=pcfilter, 
@@ -177,9 +177,12 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 			outfolder=outfolder, showimg=TRUE)
           }
         }
-      }
-    }
+        rm(SAestdat)
+        gc()
+      }   ## k loop
+    }  ## j loop
   #}
+ 
   if (save4testing) {
     if (!is.null(outfn.pre)) {
       saveRDS(dunitlut, file=file.path(testfolder, paste(outfn.pre, "_dunitlut.rds")))

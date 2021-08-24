@@ -129,7 +129,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
   if (is.null(SAdata$SAdoms)) {
     return(NULL)
   }
- 
   ####################################################################
   ## Get population data
   ####################################################################
@@ -137,7 +136,6 @@ anSApop_ecomap <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique,
 		smallbnd.unique=smallbnd.unique)
   names(SApopdat)
   returnlst$SApopdat <- SApopdat
-
 
   if (saveobj) {
     saveRDS(SApopdat, file=file.path(outfolder, "SApopdat.rds"))
