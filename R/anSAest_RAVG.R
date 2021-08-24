@@ -210,7 +210,7 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
       names(GBdata)[names(GBdata) == "dunitvar"] <- "unitvar"
 
       ## Green-book - Post-strat
-      GBpopdatPS <- modGBpop(GBdata=GBdata, strata=TRUE, minplotnum.unit=0, adj="plot")
+      GBpopdatPS <- modGBpop(GBdata=GBdata, strata=TRUE, minplotnum.unit=2, adj="plot")
 
       ## Area estimate - GB - PS
       GBestPS <- modGBarea(GBpopdat=GBpopdatPS, landarea="FOREST", 
@@ -274,6 +274,11 @@ anSAest_RAVG <- function(RAVG, RAVG_dsn=NULL, RAVG.fire=NULL,
   returnlst$SAest <- SAest
   returnlst$SAmultest <- multest
   returnlst$SApredselect <- SAest$SApredselect
+
+  rm(multest)
+  rm(SAdata)
+  rm(GBdata)
+  gc()
 
   return(returnlst)
 }
