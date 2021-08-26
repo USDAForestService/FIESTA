@@ -191,7 +191,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     ## Dissolve filtered ecomap layer
     ecomapf <- sf_dissolve(ecomapf, areacalc=FALSE)
     ecomap.cols <- names(ecomapf)
- 
+
     ## Check projections
     crsdat <- crsCompare(ecomapf, smallbndx, nolonglat=TRUE)
     ecomapf <- crsdat$x

@@ -192,9 +192,9 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 
   } else {
     strvar <- NULL
-    if (is.null(prednames)) {
-      stop("no prednames included\n")
-    }
+    #if (is.null(prednames)) {
+    #  stop("no prednames included\n")
+    #}
     pvars2keep <- unique(c(pvars2keep, prednames))
 
     

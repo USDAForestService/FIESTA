@@ -176,7 +176,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
     strwtvar <- "strwt"
   }
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -236,7 +236,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     vcondstrf <- popcheck$vcondstrf
     areawt <- "SUBP_CONDPROP_UNADJ"
   }
- 
+
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################

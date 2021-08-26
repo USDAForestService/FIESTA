@@ -101,7 +101,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       unitvar2 <- MAdata$unitvar2
     } 
     if (is.null(npixelvar)) {
-      npixelvar <- auxdat$npixelvar
+      npixelvar <- MAdata$npixelvar
     }
     if (is.null(prednames)) {
       prednames <- MAdata$prednames
@@ -179,7 +179,9 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     } 
     strwtvar <- "Prop"
     prednames <- NULL
-    stratalut <- strat.pivot(unitzonal, strvar, unitvars=c(unitvar, unitvar2), 
+    pivotvars <- c(unitvar, unitvar2, "AOI", "npixels")
+    unitvars <- pivotvars[pivotvars %in% names(unitzonal)]
+    stratalut <- strat.pivot(unitzonal, strvar, unitvars=unitvars, 
 		strwtvar=strwtvar)
   }
 
