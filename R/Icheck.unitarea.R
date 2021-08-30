@@ -12,6 +12,9 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
   ## Set global variables
   MATCH <- NULL
 
+  ## check unitarea
+  unitarea <- pcheck.table(unitarea)
+
 
   ## Get pltx names
   pltx <- FIESTA::pcheck.table(pltx, gui=gui, tabnm="plt", returnsf=FALSE)

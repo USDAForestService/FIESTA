@@ -5,7 +5,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 	strwtvar='strwt', P2POINTCNT=NULL, npixelvar=NULL, stratcombine=FALSE, 
 	minplotnum.unit=10, unit.action="keep", minplotnum.strat=2, na.rm=TRUE,
  	removeifnostrata=FALSE, auxtext="auxlut", removetext="unitarea", 
-	pvars2keep=NULL){
+	pvars2keep=NULL, standardize=TRUE){
 
   ##################################################################################
   ## DESCRIPTION: 
@@ -228,6 +228,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     ############################################################################
     if (npixelvar %in% auxnmlst) {
       npixels <- unique(auxlut[, c(unitvar, npixelvar), with=FALSE])
+      auxlut$npixels <- NULL
     }
   }
  
@@ -458,7 +459,14 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 #		auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, strvar=strvar,
 #		prednames=prednames, predfac=predfac)
 
-  returnlst <- list(pltx=pltx, auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, 
+  if (!is.null(prednames) && standardize) {
+    standardized <- preds.standardize(plt=pltx, aux=auxlut, prednames=prednames)
+    pltx <- standardized$plt
+    auxlut <- standardized$aux
+  }
+
+  returnlst <- list(pltx=as.data.frame(pltx), auxlut=as.data.frame(auxlut), 
+		unitarea=as.data.frame(unitarea), unitvar=unitvar, 
 		prednames=prednames, predfac=predfac, unitvars=unitvars)
 
   if (strata) {

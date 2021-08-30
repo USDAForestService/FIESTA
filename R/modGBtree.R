@@ -246,6 +246,7 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=tdomdattot <- NULL
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlst) && length(tdomvarlst) > 1)), TRUE, FALSE)
+  stratalut <- setDT(stratalut)
 
   ## Note: tdomdat is the summed response by condition (not domain)
   #if (addtotal) {

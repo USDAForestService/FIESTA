@@ -22,6 +22,9 @@
 # recodelut
 # findnm
 # strat.pivot
+# preds.standardize
+# preds.select
+
 
 checkfilenm <- function(fn, outfolder=NULL, ext=NULL, 
 	stopifnull=FALSE) {
@@ -87,7 +90,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
 
   ## Check ext
   extlst <- c("sqlite", "sqlite3", "db", "db3", "csv", "txt", "gdb", 
-		"shp", "gpkg", "jpg", "png", "tif", "img", "pdf", "rda")
+		"shp", "gpkg", "jpg", "png", "tif", "img", "pdf", "rda", "rds")
   if (!is.na(extfn) && extfn %in% extlst) {
     ext <- extfn
   } else if (!is.null(ext)) {
@@ -530,5 +533,71 @@ strat.pivot <- function(x, strvar, unitvars, strwtvar="Prop", strat.levels=NULL)
   strvars <- strvar
   return(strlut)
 }    
+
+
+
+preds.standardize <- function(plt, aux, prednames) {
+  ## DESCRIPTION: standardize predictors in plt and aux tables
+  ## Standardize to the mean and SD of plot-level predictor values in population
+
+  plt.mean <- as.matrix(setDT(plt)[, lapply(.SD, mean, na.rm=TRUE), .SDcols=prednames])
+  plt.sd <- as.matrix(plt[, lapply(.SD, sd, na.rm=TRUE), .SDcols=prednames])
+
+  aux.mean.mat <- matrix(rep(plt.mean, nrow(aux)), byrow=TRUE, ncol=length(prednames))
+  aux.sd.mat <- matrix(rep(plt.sd, nrow(aux)), byrow=TRUE, ncol=length(prednames))
+
+  plt.mean.mat <- matrix(rep(plt.mean, nrow(plt)), byrow=TRUE, ncol=length(prednames))
+  plt.sd.mat <- matrix(rep(plt.sd, nrow(plt)), byrow=TRUE, ncol=length(prednames))
+
+
+  aux.mat <- as.matrix(setDF(aux)[, prednames])
+  plt.mat <- as.matrix(setDF(plt)[, prednames])
+  aux[,prednames] <- (aux.mat - aux.mean.mat) / aux.sd.mat
+  plt[,prednames] <- (plt.mat - plt.mean.mat) / plt.sd.mat
+
+  return(list(plt=plt, aux=aux))
+}
+
+
+preds.select <- function(y, plt, aux, prednames) {
+
+  ## Variable selection using area-level Elastic net
+  ###################################################################
+  prednames.select <- prednames
+
+  plt <- setDF(plt)
+  aux <- setDF(aux)
+ 
+  ## select predictor variables from Elastic Net procedure
+  ## alpha=1, indicates 
+  mod1 <- suppressMessages(mase::gregElasticNet(y=plt[[y]], 
+		xsample=plt[,prednames], 
+		xpop=aux[,prednames], pi = NULL, alpha = 0.5,
+  		model = "linear", pi2 = NULL, var_est = FALSE,
+  		var_method = "LinHB", datatype = "raw", N = NULL,
+  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
+  mod1$coefficients[-1]
+  mod1.rank <- rank(-abs(mod1$coefficients[-1]))
+  preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
+
+  if (length(preds.enet) == 0) {
+    ## select predictor variables from Elastic Net procedure
+    ## alpha=1, indicates 
+    mod1 <- suppressMessages(mase::gregElasticNet(y=plt[[y]], 
+		xsample=plt[,prednames], 
+		xpop=aux[,prednames], pi = NULL, alpha = .2,
+  		model = "linear", pi2 = NULL, var_est = FALSE,
+  		var_method = "LinHB", datatype = "raw", N = NULL,
+  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
+    mod1$coefficients[-1]
+    mod1.rank <- rank(-abs(mod1$coefficients[-1]))
+    preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
+  }
+  return(preds.enet)
+}
+ 
+
+
+
 
   

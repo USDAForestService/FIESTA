@@ -1,7 +1,11 @@
 SAest.unit <- function(fmla.dom, pltdat.dom, dunitlut.dom, yn, SApackage, 
 	dunitvar, prednames, prior = NULL) {
 
+  ## Set global variables
+  DOMAIN <- NULL
+
   if (SApackage == "JoSAE") {
+
     ## create linear mixed model
     ## note: see http://www.win-vector.com/blog/2018/09/r-tip-how-to-pass-a-formula-to-lm/
     dom.lme <- eval(bquote( nlme::lme(.(fmla.dom), data=setDF(pltdat.dom), random=~1|DOMAIN)))
@@ -290,6 +294,19 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 ###################
 ##### TESTING #####
 ###################
+#pltdom <- fread("E:/workspace/FIESTA/FIESTA_SA/ecosubsection_test/pltdom.csv")
+#dunitlut <- fread("E:/workspace/FIESTA/FIESTA_SA/ecosubsection_test/dunitlut.csv")
+#pltdat.dom <- pltdom[pltdom$PROVINCE == 251, ]
+#dunitlut.dom <- dunitlut[dunitlut$PROVINCE == 251, ]
+#dunitvar <- "DOMAIN"
+#yn <- "DRYBIO_AG_TPA_ADJ"
+#prednames <- c("tcc", "elev", "ppt", "tmean", "tmin01", "tnt2")
+#standardize <- TRUE
+#variable.select <- TRUE
+#SApackage <- "JoSAE"
+#SAmethod <- "area"
+#cuniqueid <- "PLT_CN"
+
   if (!"data.table" %in% class(pltdat.dom)) {
     pltdat.dom <- setDT(pltdat.dom)
   } 
@@ -326,107 +343,57 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     return(list(est=est, prednames.select=NULL, pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
   }  
  
-  if (standardize) {
-    ## Standardize predictors at the scale at which borrowing occurs (e.g., PROVINCE/SECTION)
-    ## So, not standardized at national level
-    #pltdat.dom[, (prednames) := lapply(.SD, function(x) x / max(abs(x))), .SDcols=prednames]
-    #dunitlut.dom[, (prednames) := lapply(.SD, function(x) x / max(abs(x))), .SDcols=prednames]
-    pltdat.dom[, (prednames) := lapply(.SD, function(x) (x-min(x)) / (max(x) - min(x))), .SDcols=prednames]
-    dunitlut.dom[, (prednames) := lapply(.SD, function(x) (x-min(x)) / (max(x) - min(x))), .SDcols=prednames]
-  }
- 
-  # variable selection 
-  #mod.dom <- stats::lm(fmla, data=pltdat.dom)
-  #mod.dom.step <- stats::step(mod.dom, trace=FALSE)
-  #mod.summary <- summary(mod.dom.step)
-  #preds.dom <- names(mod.dom.step$model[-1])
-
-  #if (length(preds.dom) == 0) {
-  #  message("no predictors were selected for model")
-  #  return(NULL)
-  #}
- 
+  
   ## Variable selection using area-level Elastic net
   ###################################################################
-  prednames.select <- prednames
   if (variable.select) {
-    pltdat.dom <- setDF(pltdat.dom)
-    dunitlut.dom <- setDF(dunitlut.dom)
-    #cor(std.plt.dom[, prednames])
-
-    ## select predictor variables from Elastic Net procedure
-    ## alpha=1, indicates 
-    mod1 <- suppressMessages(mase::gregElasticNet(y=pltdat.dom[[yn]], 
-		xsample=pltdat.dom[,prednames], 
-		xpop=dunitlut.dom[,prednames], pi = NULL, alpha = 0.5,
-  		model = "linear", pi2 = NULL, var_est = FALSE,
-  		var_method = "LinHB", datatype = "raw", N = NULL,
-  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
-    mod1$coefficients[-1]
-    mod1.rank <- rank(-abs(mod1$coefficients[-1]))
-    preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
-
-    if (length(preds.enet) == 0) {
-      ## select predictor variables from Elastic Net procedure
-      ## alpha=1, indicates 
-      mod1 <- suppressMessages(mase::gregElasticNet(y=pltdat.dom[[yn]], 
-		xsample=pltdat.dom[,prednames], 
-		xpop=dunitlut.dom[,prednames], pi = NULL, alpha = .2,
-  		model = "linear", pi2 = NULL, var_est = FALSE,
-  		var_method = "LinHB", datatype = "raw", N = NULL,
-  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
-      mod1$coefficients[-1]
-      mod1.rank <- rank(-abs(mod1$coefficients[-1]))
-      preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
- 
-      if (length(preds.enet) == 0) {
-        message("no predictors were selected for model")
-        if (SAmethod == "unit") {
-          if (SApackage == "JoSAE") {
-            est <- data.table(dunitlut.dom[[dunitvar]],
+    prednames.select <- preds.select(y=yn, plt=pltdat.dom, aux=dunitlut.dom, prednames=prednames)
+    if (length(prednames.select) == 0) {
+      message("no predictors were selected for model")
+      if (SAmethod == "unit") {
+        if (SApackage == "JoSAE") {
+          est <- data.table(dunitlut.dom[[dunitvar]],
 			DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
 			JU.EBLUP=NA, JU.EBLUP.se.1=NA, NBRPLT=dunitlut.dom$n.total)
-            setnames(est, "V1", dunitvar)
-         } else if (SApackage == "sae") {
-            est <- data.table(dunitlut.dom[[dunitvar]],
+          setnames(est, "V1", dunitvar)
+        } else if (SApackage == "sae") {
+          est <- data.table(dunitlut.dom[[dunitvar]],
 			saeU=NA, saeU.se=NA, NBRPLT=dunitlut.dom$n.total)
-            setnames(est, "V1", dunitvar)
-         } else if (SApackage == "hbsae") {  
-            est <- data.table(dunitlut.dom[[dunitvar]],
+          setnames(est, "V1", dunitvar)
+        } else if (SApackage == "hbsae") {  
+          est <- data.table(dunitlut.dom[[dunitvar]],
 			hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total)
-            setnames(est, "V1", dunitvar)
-         }
-        } else {
-          if (SApackage == "JoSAE") {
-            est <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+          setnames(est, "V1", dunitvar)
+        }
+      } else {
+        if (SApackage == "JoSAE") {
+          est <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 			DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
 			JA.synth.se=NA, NBRPLT=dunitlut.dom$n.total)
-            setnames(est, "V1", dunitvar)
-         } else if (SApackage == "sae") {
-            est <- data.table(dunitlut.dom[[dunitvar]],
+          setnames(est, "V1", dunitvar)
+        } else if (SApackage == "sae") {
+          est <- data.table(dunitlut.dom[[dunitvar]],
 			saeA=NA, saeA.se=NA, NBRPLT=dunitlut.dom$n.total)
-            setnames(est, "V1", dunitvar)
-         } else if (SApackage == "hbsae") {  
-            est <- data.table(dunitlut.dom[[dunitvar]],
+          setnames(est, "V1", dunitvar)
+        } else if (SApackage == "hbsae") {  
+          est <- data.table(dunitlut.dom[[dunitvar]],
 			hbsaeA=NA, hbsaeA.se=NA, NBRPLT=dunitlut.dom$n.total)
-            setnames(est, "V1", dunitvar)
-         }
+          setnames(est, "V1", dunitvar)
         }
-        ## Merge NBRPLT.gt0
-        est <- merge(est, NBRPLT.gt0, by="DOMAIN")
-        ## Merge AOI
-        if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
-          est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
-        }
-        return(list(est=est, prednames.select=preds.enet, 
-			pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
-      } else {
-        prednames.select <- preds.enet
       }
-    } else {
-      prednames.select <- preds.enet
-    }
-  }
+      ## Merge NBRPLT.gt0
+      est <- merge(est, NBRPLT.gt0, by="DOMAIN")
+
+      ## Merge AOI
+      if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
+        est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
+      }    
+      return(list(est=est, prednames.select=prednames.select, 
+			pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
+    } 
+  } else {
+    prednames.select <- prednames
+  } 
  
   if (showsteps || savesteps) {
     ylab <- ifelse(yn == "CONDPROP_ADJ", "FOREST_prob", 

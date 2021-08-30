@@ -254,7 +254,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
 	nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
 	minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 				
 	getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
-  pltassgnx <- auxdat$pltx
+  pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
   unitarea <- auxdat$unitarea

@@ -69,7 +69,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
     returnMApopdat <- FALSE
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
-		"npixelvar", "expcondtab", "plotsampcnt", "condsampcnt")
+		"npixelvar", "plotsampcnt", "condsampcnt")
     #if (MAmethod == "PS") {
     #  list.items <- c(list.items, "strvar")
     #}

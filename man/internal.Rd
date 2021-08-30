@@ -85,6 +85,8 @@
 \alias{recodelut}
 \alias{findnm}
 \alias{strat.pivot}
+\alias{preds.standardize}
+\alias{preds.select}
 
 \alias{DBvars.default}
 \alias{DBgetfn}

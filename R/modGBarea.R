@@ -219,6 +219,7 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   unit_totest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit=tdomdattot <- NULL
   addtotal <- ifelse(rowvar == "TOTAL" || length(unique(condf[[rowvar]])) > 1, TRUE, FALSE)
   #estvar.name <- estvar 
+  stratalut <- setDT(stratalut)
 
   message("getting estimates using GB...")
 #  if (addtotal) {

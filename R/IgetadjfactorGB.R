@@ -39,6 +39,10 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
       paste0(nm, "_ADJ")
     }
   }
+
+  ## check tables
+  unitlut <- pcheck.table(unitlut)
+  unitarea <- pcheck.table(unitarea)
     
   strunitvars <- c(unitvars, strvars)
   keycondx <- key(condx)

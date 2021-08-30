@@ -222,8 +222,8 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
 		auxlut=dunitzonal, prednames=prednames, predfac=predfac, makedummy=TRUE,
 		unitarea=dunitarea, unitvar=dunitvar, areavar=areavar, 
 		minplotnum.unit=minplotnum.unit, unit.action=unit.action,
-		auxtext="dunitlut", removetext="dunitarea")  
-  pltassgnx <- auxdat$pltx
+		auxtext="dunitlut", removetext="dunitarea", standardize=TRUE)  
+  pltassgnx <- setDT(auxdat$pltx)
   dunitarea <- auxdat$unitarea
   dunitvar <- auxdat$unitvar
   dunitlut <- auxdat$auxlut
@@ -269,20 +269,21 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   }
 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- append(returnlst, list(condx=setDF(condx), pltcondx=setDF(pltcondx),
-		cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
-		dunitarea=setDF(dunitarea), areavar=areavar, areaunits=areaunits, 
-		dunitvar=dunitvar, dunitlut=dunitlut, prednames=prednames, 
+  returnlst <- append(returnlst, list(condx=as.data.frame(condx), 
+		pltcondx=as.data.frame(pltcondx), cuniqueid=cuniqueid, 
+		condid=condid, ACI.filter=ACI.filter, 
+		dunitarea=as.data.frame(dunitarea), areavar=areavar, areaunits=areaunits, 
+		dunitvar=dunitvar, dunitlut=as.data.frame(dunitlut), prednames=prednames, 
 		predfac=predfac, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
 		states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
-    returnlst$treex <- setDF(treef)
+    returnlst$treex <- as.data.frame(treef)
     returnlst$tuniqueid <- tuniqueid
     returnlst$adjtree <- adjtree
   }
   if (!is.null(seedf)) {
-    returnlst$seedx <- setDF(seedf)
+    returnlst$seedx <- as.data.frame(seedf)
   }
 
   if (saveobj) {

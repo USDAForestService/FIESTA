@@ -265,6 +265,7 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
   unit_totest=unit_grpest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlstn) && length(tdomvarlstn) > 1)), TRUE, FALSE)
+  stratalut <- setDT(stratalut)
 
   ## Transpose rows if tdomvar2 is not NULL
   if (!is.null(tdomvar2)) {
@@ -294,6 +295,9 @@ modGBratio <- function(GBpopdat=NULL, estseed="none", ratiotype="PERACRE",
       tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
     }
+#saveRDS(tdomdattot, "E:/workspace/FIESTA/FIESTA_MA/data_v1/tdomdattot_volcf_ndead_dlive.rds")
+#saveRDS(stratalut, "E:/workspace/FIESTA/FIESTA_MA/data_v1/stratalut.rds")
+
     unit_totest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdattot, 
 		esttype=esttype, ratiotype=ratiotype, uniqueid=cuniqueid,
 		stratalut=stratalut, unitvar=unitvar, strvar=strvar, domain="TOTAL")

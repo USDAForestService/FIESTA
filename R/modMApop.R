@@ -184,8 +184,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     stratalut <- strat.pivot(unitzonal, strvar, unitvars=unitvars, 
 		strwtvar=strwtvar)
   }
-
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -248,15 +247,15 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   } else {
       auxlut <- unitzonal
       makedummy <- TRUE
-  }
+  } 
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
         	module="MA", strata=strata, unitvar=unitvar, unitvar2=unitvar2, 
 		unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit,
  		unit.action=unit.action, auxlut=auxlut, prednames=prednames, 
 		strvar=strvar, predfac=predfac, makedummy=makedummy, npixelvar=npixelvar, 
 		strwtvar="Prop", stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
-		removeifnostrata=TRUE)
-  pltassgnx <- auxdat$pltx
+		removeifnostrata=TRUE, standardize=TRUE)
+  pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
   unitvars <- auxdat$unitvars
@@ -268,7 +267,6 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   strvar <- auxdat$strvar
   unitNA <- auxdat$unitNA
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
-
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
@@ -316,7 +314,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   } else {
     setkeyv(condx, c(cuniqueid, condid))
   }
-
+ 
   ###################################################################################
   ## Return population data objects
   ###################################################################################
@@ -347,9 +345,6 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       returnlst$stratcombinelut <- stratcombinelut
     }
   }
-
-    returnlst$prednames <- prednames
-    returnlst$predfac <- predfac
 
 
   ###################################################################################

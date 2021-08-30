@@ -69,7 +69,8 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 }
 
 
-MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
+MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
+			modelselect=FALSE) {
 
 #y <- yn.vect
 
@@ -86,7 +87,7 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 					model = "linear", 
   					var_est = TRUE, var_method = var_method, 
 					datatype = "means", 
-  					modelselect = FALSE, 
+  					modelselect = modelselect, 
 					lambda = "lambda.min", 
 					B = 1000),
 				error=function(err) {
@@ -223,7 +224,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
 ########################################################################
 MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL, 
 	pltassgn, esttype="ACRES", MAmethod, strvar=NULL, prednames=NULL, 
-	yd=NULL, ratiotype="PERACRE", N, FIA=TRUE) {
+	yd=NULL, ratiotype="PERACRE", N, FIA=TRUE, modelselect=FALSE) {
 
   ########################################################################################
   ## DESCRIPTION: Gets estimates from mase::horvitzThompson
@@ -243,11 +244,19 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   ########################################################################################
 
   ## Merge dat.dom to pltassgn
-  pltdat.dom <- dat.dom[pltassgn]
+  pltdat.dom <- as.data.frame(dat.dom[pltassgn])
+  pltdat.dom[is.na(pltdat.dom[[yn]]), yn] <- 0
 
   ## Subset response vector and change NA values of response to 0
   yn.vect <- pltdat.dom[[yn]]
-  yn.vect[is.na(yn.vect)] <- 0
+
+
+  if (MAmethod == "greg") { 
+    ## Note: GREG cannot have more predictors than plots
+    if (length(yn.vect) <= length(prednames)) {
+      prednames <- prednames[1:(length(yn.vect)-1)] 
+    }
+  }
 
   if (MAmethod == "HT") {
     est <- MAest.ht(yn.vect, N, FIA=FIA)
@@ -259,20 +268,21 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
 
   } else {
 
-    x_sample <- setDF(pltdat.dom[, prednames, with=FALSE])
-    x_pop <- setDF(unitlut[, prednames, with=FALSE])
+    x_sample <- pltdat.dom[, prednames]
+    x_pop <- setDF(unitlut)[, prednames]
 
     if (MAmethod == "greg") {
-      est <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA)
+      est <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA, 
+		modelselect=modelselect)
 
     } else if (MAmethod == "gregEN") {
       est <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
     } else if (MAmethod == "ratio") {
-      if (length(prednames) > 1) {
+      if (length(prednames.select) > 1) {
         stop("only one continuous predictor is allowed")
       } else {
-        x_sample <- x_sample[[prednames]]
+        x_sample <- x_sample[[prednames.select]]
       }
       est <- MAest.ratio(yn.vect, N, x_sample, x_pop, FIA=FIA)
   
@@ -289,7 +299,8 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
 ## By domain
 ########################################################################
 MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod, 
-		strvar=NULL, prednames=NULL, domain, N, response=NULL, FIA=TRUE) {
+		strvar=NULL, prednames=NULL, domain, N, response=NULL, FIA=TRUE,
+		modelselect=FALSE) {
 
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
@@ -307,7 +318,7 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
 		dat.dom=dat.dom, pltassgn=pltassgn, 
 		cuniqueid=cuniqueid, esttype=esttype, unitlut=unitlut, 
 		strvar=strvar, prednames=prednames, 
-		MAmethod=MAmethod, N=N, FIA=FIA)))
+		MAmethod=MAmethod, N=N, FIA=FIA, modelselect=modelselect)))
   setnames(domest, "dom", domain)
   return(domest)
 }
@@ -319,7 +330,7 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
 ########################################################################
 MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar, 
 		esttype, MAmethod="HT", strvar=NULL, prednames=NULL, 
-		domain, response, npixels, FIA=TRUE) {
+		domain, response, npixels, FIA=TRUE, modelselect=TRUE) {
 ## testing
 #unit=1
 #unit="1701020805"
@@ -368,7 +379,7 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 			esttype=esttype, MAmethod=MAmethod, 
 			strvar=strvar, prednames=prednames, 
 			domain=domain, N=N.unit, response=response,
-			FIA=FIA))
+			FIA=FIA, modelselect=modelselect))
   unitest <- data.table(unit=unit, unitest)
   setnames(unitest, "unit", unitvar)
   return(unitest)
