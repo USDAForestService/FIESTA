@@ -78,7 +78,8 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 
   SAestlst <- list()
   SAmultestlst <- list()
-  SApredselectlst <- list()
+  SApredunit <- list()
+  SApredarea <- list()
  
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, largebnd.att=largebnd.att, smallbnd.att=smallbnd.att, 

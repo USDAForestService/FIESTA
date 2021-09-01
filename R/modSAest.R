@@ -464,21 +464,21 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 			message(e, "\n")
 			return(NULL) })
   if (length(largebnd.vals) > 1) {
-    dunit_multest <- do.call(rbind, do.call(rbind, dunit_multestlst)[,1])
+    dunit_multest <- do.call(rbind, do.call(rbind, dunit_multestlst)[,"est.large"])
     prednames.unit <- do.call(rbind, dunit_multestlst)[,"prednames.unit"]
     prednames.area <- do.call(rbind, dunit_multestlst)[,"prednames.area"]
     names(prednames.select) <- largebnd.vals
     if (save4testing) {
-      pdomdat <- do.call(rbind, do.call(rbind, dunit_multestlst)[,3])
-      dunitlut <- do.call(rbind, do.call(rbind, dunit_multestlst)[,4])
+      pdomdat <- do.call(rbind, do.call(rbind, dunit_multestlst)[,"pltdat.dom"])
+      dunitlut <- do.call(rbind, do.call(rbind, dunit_multestlst)[,"dunitlut.dom"])
     }
   } else {
     dunit_multest <- do.call(rbind, dunit_multestlst)[,"est.large"]$est.large
     prednames.unit <- do.call(rbind, dunit_multestlst)[,"prednames.unit"]$prednames.unit
     prednames.area <- do.call(rbind, dunit_multestlst)[,"prednames.area"]$prednames.area
     if (save4testing) {
-      pdomdat <- do.call(rbind, dunit_multestlst)[,3]$pltdat.dom
-      dunitlut <- do.call(rbind, dunit_multestlst)[,4]$dunitlut.dom
+      pdomdat <- do.call(rbind, dunit_multestlst)[,"pltdat.dom"]$pltdat.dom
+      dunitlut <- do.call(rbind, dunit_multestlst)[,"dunitlut.dom"]$dunitlut.dom
     }
   } 
  
