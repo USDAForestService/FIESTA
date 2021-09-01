@@ -279,10 +279,10 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
       est <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
     } else if (MAmethod == "ratio") {
-      if (length(prednames.select) > 1) {
+      if (length(prednames) > 1) {
         stop("only one continuous predictor is allowed")
       } else {
-        x_sample <- x_sample[[prednames.select]]
+        x_sample <- x_sample[[prednames]]
       }
       est <- MAest.ratio(yn.vect, N, x_sample, x_pop, FIA=FIA)
   

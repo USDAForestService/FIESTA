@@ -491,7 +491,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
       dev.new()
       par(mfrow=c(rnbr,cnbr)) 
       for (pred in prednames) {
-        main2 <- ifelse(pred %in% prednames..area, "selected", "not selected")
+        main2 <- ifelse(pred %in% prednames.area, "selected", "not selected")
         if (!is.null(largebnd.val) && largebnd.val != 1) { 
           #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
           main <- paste0(largebnd.val, " - ", main2)
@@ -549,9 +549,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   ###  Unit-level estimates
   ############################################
   ## NOTE: changed prednames=prednames.select to prednames
-  unit.JoSAE <- tryCatch(SAest.unit(fmla.dom=fmla.dom.unit, pltdat.dom=pltdat.dom, 
+  unit.JoSAE <- tryCatch(SAest.unit(fmla.dom.unit=fmla.dom.unit, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, yn=yn, SApackage="JoSAE", 
-				dunitvar=dunitvar, prednames=prednames.unit, prior=prior),
+				dunitvar=dunitvar, prednames.unit=prednames.unit, prior=prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -563,9 +563,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     setnames(unit.JoSAE, "V1", dunitvar)
   }
 
-  unit.hbsae <- tryCatch(SAest.unit(fmla.dom=fmla.dom.unit, pltdat.dom=pltdat.dom, 
+  unit.hbsae <- tryCatch(SAest.unit(fmla.dom.unit=fmla.dom.unit, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, yn=yn, SApackage="hbsae", 
-				dunitvar=dunitvar, prednames=prednames.unit, prior=prior),
+				dunitvar=dunitvar, prednames.unit=prednames.unit, prior=prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
@@ -585,9 +585,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
  
   ###  Area-level estimates
   ############################################
-  area.JoSAE <- tryCatch(SAest.area(fmla.dom=fmla.dom.area, pltdat.dom=pltdat.dom, 
+  area.JoSAE <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, cuniqueid=cuniqueid, 
-				dunitvar=dunitvar, prednames=prednames.area, 
+				dunitvar=dunitvar, prednames.area=prednames.area, 
 				yn=yn, SApackage="JoSAE"),
 				error=function(err) {
 					message(err, "\n")
@@ -602,9 +602,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   ## Merge estimates
   est <- merge(est, area.JoSAE[, c("DOMAIN", "JFH", "JFH.se", "JA.synth", "JA.synth.se")], by="DOMAIN")
 
-  area.sae <- tryCatch(SAest.area(fmla.dom=fmla.dom.area, pltdat.dom=pltdat.dom, 
+  area.sae <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, cuniqueid=cuniqueid, 
-				dunitvar=dunitvar, prednames=prednames.area, 
+				dunitvar=dunitvar, prednames.area=prednames.area, 
 				yn=yn, SApackage="sae"),
 				error=function(err) {
 					message(err, "\n")
@@ -617,9 +617,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   }
   est <- merge(est, area.sae[, c("DOMAIN", "saeA", "saeA.se")], by="DOMAIN")
 
-  area.hbsae <- tryCatch(SAest.area(fmla.dom=fmla.dom.area, pltdat.dom=pltdat.dom, 
+  area.hbsae <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, cuniqueid=cuniqueid, 
-				dunitvar=dunitvar, prednames=prednames.area, 
+				dunitvar=dunitvar, prednames.area=prednames.area, 
 				yn=yn, SApackage="hbsae", prior=prior),
 				error=function(err) {
 					message(err, "\n")
