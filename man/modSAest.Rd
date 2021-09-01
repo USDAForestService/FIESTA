@@ -11,8 +11,8 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
 	SAmethod = "area", esttype = "TREE", totals = FALSE, estseed = "none", 
 	largebnd.att = NULL, landarea = "FOREST", pcfilter = NULL, estvar = NULL, 
 	estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, metric = FALSE, 
-	estround = 3, pseround = 3, estnull = 0, psenull = "--", divideby = NULL, 
-	savedata = FALSE, rawdata = FALSE, rawonly = FALSE, multest = TRUE, 
+	variable.select=TRUE, estround = 3, pseround = 3, estnull = 0, psenull = "--", 
+	divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE, multest = TRUE, 
 	addSAdomsdf = TRUE, SAdomvars = NULL, outfolder = NULL, outfn.pre = NULL, 
 	outfn.date = FALSE, addtitle = TRUE, raw_fmt = "csv", raw_dsn = "rawdata", 
 	savemultest = FALSE, multest_fmt = "csv", multest_outfolder = NULL, 
@@ -49,6 +49,7 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
   \item{metric}{ Logical. If TRUE, output area is in metric units (hectares). }
+  \item{variable.select}{ Logical. If TRUE, selects useful predictors using mase:ElasticNet. }
   \item{estround}{ Integer. Number of decimal places for estimates. }
   \item{pseround}{ Integer. Number of decimal places for percent sampling error. }
   \item{estnull}{ Number or character. The number or symbol to use to indicate 'not sampled'

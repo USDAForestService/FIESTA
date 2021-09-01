@@ -97,7 +97,8 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 
   SAestlst[[response]] <- SAareadat$est
   SAmultestlst[[response]] <- SAareadat$dunit_multest
-  SApredselectlst[[response]] <- SAareadat$raw$prednames.select
+  SApredunit[[response]] <- SAareadat$raw$prednames.unit
+  SApredarea[[response]] <- SAareadat$raw$prednames.area
  
   if (multest_fmt == "csv") {
     multest_layer <- paste0("multest_", response)
@@ -163,12 +164,14 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
           message("no estimates for ", outnm)
           SAestlst[[outnm]] <- NA
           SAmultestlst[[outnm]] <- NA
-          SApredselectlst[[outnm]] <- NA
+          SApredunit[[outnm]] <- NA
+          SApredarea[[outnm]] <- NA
 
         } else {
           SAestlst[[outnm]] <- SAestdat$est
           SAmultestlst[[outnm]] <- SAestdat$dunit_multest
-          SApredselectlst[[outnm]] <- SAestdat$raw$prednames.select
+          SApredunit[[outnm]] <- SAestdat$raw$prednames.unit
+          SApredarea[[outnm]] <- SAestdat$raw$prednames.area
 
           if (barplot.compare) {
             ## build plots
@@ -198,6 +201,6 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
     }
   }
 
-  return(list(SAest=SAestlst, SAmultest=SAmultestlst, SApredselect=SApredselectlst))
+  return(list(SAest=SAestlst, SAmultest=SAmultestlst, SApredunit=SApredunit, SApredarea=SApredarea))
 }
 		

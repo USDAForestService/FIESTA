@@ -565,17 +565,23 @@ preds.select <- function(y, plt, aux, prednames) {
   ###################################################################
   prednames.select <- prednames
 
+
+  if (!"npixels" %in% names(aux)) {
+    stop("need npixels in auxiliary lut")
+  }
+  N <- sum(aux$npixels)
+  xpop <- aux[, lapply(.SD, mean), .SDcols=prednames]
+
   plt <- setDF(plt)
   aux <- setDF(aux)
- 
+
   ## select predictor variables from Elastic Net procedure
-  ## alpha=1, indicates 
   mod1 <- suppressMessages(mase::gregElasticNet(y=plt[[y]], 
 		xsample=plt[,prednames], 
-		xpop=aux[,prednames], pi = NULL, alpha = 0.5,
+		xpop=xpop, pi = NULL, alpha = 0.5,
   		model = "linear", pi2 = NULL, var_est = FALSE,
-  		var_method = "LinHB", datatype = "raw", N = NULL,
-  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
+  		datatype = "means", N = N,
+  		lambda = "lambda.1se", cvfolds = 10))
   mod1$coefficients[-1]
   mod1.rank <- rank(-abs(mod1$coefficients[-1]))
   preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
@@ -585,10 +591,10 @@ preds.select <- function(y, plt, aux, prednames) {
     ## alpha=1, indicates 
     mod1 <- suppressMessages(mase::gregElasticNet(y=plt[[y]], 
 		xsample=plt[,prednames], 
-		xpop=aux[,prednames], pi = NULL, alpha = .2,
+		xpop=xpop, pi = NULL, alpha = 0.2,
   		model = "linear", pi2 = NULL, var_est = FALSE,
-  		var_method = "LinHB", datatype = "raw", N = NULL,
-  		lambda = "lambda.1se", B = 1000, cvfolds = 10))
+  		datatype = "means", N = N,
+  		lambda = "lambda.1se", cvfolds = 10))
     mod1$coefficients[-1]
     mod1.rank <- rank(-abs(mod1$coefficients[-1]))
     preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
