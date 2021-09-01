@@ -369,8 +369,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     return(list(est=est, prednames.unit=NULL, prednames.area=NULL, 
 		pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
   }  
- 
-  
+   
   ## Variable selection for area and unit-level estimators
   ###################################################################
   if (variable.select) {
@@ -394,6 +393,14 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 			hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total)
         setnames(est, "V1", dunitvar)
       }
+
+      ## Merge NBRPLT.gt0
+      est <- merge(est, NBRPLT.gt0, by="DOMAIN")
+
+      ## Merge AOI
+      if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
+        est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
+      } 
     }
 
     ## use the domain level means as response
@@ -416,14 +423,15 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 			hbsaeA=NA, hbsaeA.se=NA, NBRPLT=dunitlut.dom$n.total)
         setnames(est, "V1", dunitvar)
       }
-    }
-    ## Merge NBRPLT.gt0
-    est <- merge(est, NBRPLT.gt0, by="DOMAIN")
 
-    ## Merge AOI
-    if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
-      est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
-    }  
+      ## Merge NBRPLT.gt0
+      est <- merge(est, NBRPLT.gt0, by="DOMAIN")
+
+      ## Merge AOI
+      if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
+        est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
+      } 
+    } 
   } else {
     prednames.area <- prednames
     prednames.unit <- prednames

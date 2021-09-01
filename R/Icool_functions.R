@@ -565,6 +565,8 @@ preds.select <- function(y, plt, aux, prednames) {
   ###################################################################
   prednames.select <- prednames
 
+  plt <- setDT(plt)
+  aux <- setDT(aux)
 
   if (!"npixels" %in% names(aux)) {
     stop("need npixels in auxiliary lut")

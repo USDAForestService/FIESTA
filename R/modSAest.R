@@ -460,7 +460,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 			response=response, showsteps=showsteps, savesteps=FALSE,
 			stepfolder=stepfolder, prior=prior, variable.select=variable.select),
      	 error=function(e) {
-			message("error with unit-level estimates of ", response, "...")
+			message("error with estimates of ", response, "...")
 			message(e, "\n")
 			return(NULL) })
   if (length(largebnd.vals) > 1) {
@@ -481,7 +481,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
       dunitlut <- do.call(rbind, dunit_multestlst)[,4]$dunitlut.dom
     }
   } 
-
+ 
   if (SAmethod == "unit") {
     nhat <- "JU.EBLUP"
     nhat.se <- "JU.EBLUP.se.1"
