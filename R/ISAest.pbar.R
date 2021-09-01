@@ -377,38 +377,12 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     prednames.unit <- suppressWarnings(preds.select(y=yn, 
 		plt=pltdat.dom, aux=dunitlut.dom, prednames=prednames))
 
-    if (length(prednames.unit) == 0) {
-      message("no predictors were selected for unit-level model")
-      if (SApackage == "JoSAE") {
-        est <- data.table(dunitlut.dom[[dunitvar]],
-			DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
-			JU.EBLUP=NA, JU.EBLUP.se.1=NA, NBRPLT=dunitlut.dom$n.total)
-        setnames(est, "V1", dunitvar)
-      } else if (SApackage == "sae") {
-        est <- data.table(dunitlut.dom[[dunitvar]],
-			saeU=NA, saeU.se=NA, NBRPLT=dunitlut.dom$n.total)
-        setnames(est, "V1", dunitvar)
-      } else if (SApackage == "hbsae") {  
-        est <- data.table(dunitlut.dom[[dunitvar]],
-			hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total)
-        setnames(est, "V1", dunitvar)
-      }
-
-      ## Merge NBRPLT.gt0
-      est <- merge(est, NBRPLT.gt0, by="DOMAIN")
-
-      ## Merge AOI
-      if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
-        est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
-      } 
-    }
-
     ## use the domain level means as response
     prednames.area <- suppressWarnings(preds.select(y=yn, 
 		plt=dunitlut.dom, aux=dunitlut.dom, prednames=prednames))
 
     if (length(prednames.area) == 0) {
-      message("no predictors were selected for model")
+      message("no predictors were selected for area-level model... returning NAs")
       if (SApackage == "JoSAE") {
         est <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 			DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
@@ -423,177 +397,193 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 			hbsaeA=NA, hbsaeA.se=NA, NBRPLT=dunitlut.dom$n.total)
         setnames(est, "V1", dunitvar)
       }
-
-      ## Merge NBRPLT.gt0
-      est <- merge(est, NBRPLT.gt0, by="DOMAIN")
-
-      ## Merge AOI
-      if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
-        est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
-      } 
     } 
   } else {
     prednames.area <- prednames
     prednames.unit <- prednames
   } 
 
-  if (showsteps || savesteps) {
-    ylab <- ifelse(yn == "CONDPROP_ADJ", "FOREST_prob", 
+  if (length(prednames.area) > 0 || length(prednames.unit) > 0) {
+    if (showsteps || savesteps) {
+      ylab <- ifelse(yn == "CONDPROP_ADJ", "FOREST_prob", 
 			ifelse(yn == "TPA_UNADJ", "COUNT", yn))
-    pheight <- 6
-    pwidth <- 6
-    rnbr=cbnr <- 1
-    if (length(prednames) > 1) {
-      nbrpreds <- length(prednames)
-      if (nbrpreds == 2) {
-        rnbr <- 1
-        cnbr <- 2
-        pwidth <- 8
-      } else if (nbrpreds == 3) {
-        rnbr <- 1
-        cnbr <- 3
-        pwidth <- 10
-      } else if (nbrpreds == 4) {
-        rnbr <- 2
-        cnbr <- 2
-        pwidth <- 8
-        pheight <- 8
-      } else if (nbrpreds %in% 5:6) {
-        rnbr <- 2
-        cnbr <- 3
-        pwidth <- 10
-        pheight <- 8
-      } else if (nbrpreds %in% 7:8) {
-        rnbr <- 2
-        cnbr <- 4
-        pwidth <- 12
-        pheight <- 8
-      } else if (nbrpreds %in% 9) {
-        rnbr <- 3
-        cnbr <- 3
-        pwidth <- 10
-        pheight <- 8
-      } else if (nbrpreds > 9) {
-        rnbr <- 4
-        cnbr <- 4
-        pwidth <- 12
-        pheight <- 10
+      pheight <- 6
+      pwidth <- 6
+      rnbr=cbnr <- 1
+      if (length(prednames) > 1) {
+        nbrpreds <- length(prednames)
+        if (nbrpreds == 2) {
+          rnbr <- 1
+          cnbr <- 2
+          pwidth <- 8
+        } else if (nbrpreds == 3) {
+          rnbr <- 1
+          cnbr <- 3
+          pwidth <- 10
+        } else if (nbrpreds == 4) {
+          rnbr <- 2
+          cnbr <- 2
+          pwidth <- 8
+          pheight <- 8
+        } else if (nbrpreds %in% 5:6) {
+          rnbr <- 2
+          cnbr <- 3
+          pwidth <- 10
+          pheight <- 8
+        } else if (nbrpreds %in% 7:8) {
+          rnbr <- 2
+          cnbr <- 4
+          pwidth <- 12
+          pheight <- 8
+        } else if (nbrpreds %in% 9) {
+          rnbr <- 3
+          cnbr <- 3
+          pwidth <- 10
+          pheight <- 8
+        } else if (nbrpreds > 9) {
+          rnbr <- 4
+          cnbr <- 4
+          pwidth <- 12
+          pheight <- 10
+        }
       }        
-    }
-    if (showsteps) {
-      ## unit-level selection
-      dev.new()
-      par(mfrow=c(rnbr,cnbr)) 
-      for (pred in prednames) {
-        main2 <- ifelse(pred %in% prednames.unit, "selected", "not selected")
-        if (!is.null(largebnd.val) && largebnd.val != 1) { 
-          #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
-          main <- paste0(largebnd.val, " - ", main2)
-        } else {
-          main <- main2
+      if (showsteps) {
+        if (length(prednames.unit) > 0) {
+          ## unit-level selection
+          dev.new()
+          par(mfrow=c(rnbr,cnbr)) 
+          for (pred in prednames) {
+            main2 <- ifelse(pred %in% prednames.unit, "selected", "not selected")
+            if (!is.null(largebnd.val) && largebnd.val != 1) { 
+              #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
+              main <- paste0(largebnd.val, " - ", main2)
+            } else {
+              main <- main2
+            }
+            plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
+          }
         }
-        plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
+
+        if (length(prednames.area) > 0) {
+          ## area-level selection
+          dev.new()
+          par(mfrow=c(rnbr,cnbr)) 
+          for (pred in prednames) {
+            main2 <- ifelse(pred %in% prednames.area, "selected", "not selected")
+            if (!is.null(largebnd.val) && largebnd.val != 1) { 
+              #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
+              main <- paste0(largebnd.val, " - ", main2)
+            } else {
+              main <- main2
+            }
+            plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
+          }
+        }
       }
 
-      ## area-level selection
-      dev.new()
-      par(mfrow=c(rnbr,cnbr)) 
-      for (pred in prednames) {
-        main2 <- ifelse(pred %in% prednames.area, "selected", "not selected")
-        if (!is.null(largebnd.val) && largebnd.val != 1) { 
-          #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
-          main <- paste0(largebnd.val, " - ", main2)
-        } else {
-          main <- main2
-        }
-        plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
-      }
-
-    }
-    if (savesteps) {
-      ## unit-level selection
-      out_layer <- paste0("SApred_unit_", ylab)
-      jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
-      jpeg(jpgfn, res=300, units="in", width=pwidth, height=pheight)
+      if (savesteps) {
+        if (length(prednames.unit) > 0) {
+          ## unit-level selection
+          out_layer <- paste0("SApred_unit_", ylab)
+          jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
+          jpeg(jpgfn, res=300, units="in", width=pwidth, height=pheight)
     
-      par(mfrow=c(rnbr,cnbr)) 
-      for (pred in prednames) {
-        main2 <- ifelse(pred %in% prednames.unit, "selected", "not selected")
-        if (!is.null(largebnd.val) && largebnd.val != 1) { 
-          #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
-          main <- paste0(largebnd.val, " - ", main2)
-        } else {
-          main <- main2
+          par(mfrow=c(rnbr,cnbr)) 
+          for (pred in prednames) {
+            main2 <- ifelse(pred %in% prednames.unit, "selected", "not selected")
+            if (!is.null(largebnd.val) && largebnd.val != 1) { 
+              #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
+              main <- paste0(largebnd.val, " - ", main2)
+            } else {
+              main <- main2
+            }
+            plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
+          }
+          dev.off()
         }
-        plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
-      }
-      dev.off()
 
-      ## unit-level selection
-      out_layer <- paste0("SApred_area", ylab)
-      jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
-      jpeg(jpgfn, res=300, units="in", width=pwidth, height=pheight)
+        if (length(prednames.area) > 0) {
+     
+          ## area-level selection
+          out_layer <- paste0("SApred_area", ylab)
+          jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
+          jpeg(jpgfn, res=300, units="in", width=pwidth, height=pheight)
     
-      par(mfrow=c(rnbr,cnbr)) 
-      for (pred in prednames) {
-        main2 <- ifelse(pred %in% prednames.area, "selected", "not selected")
-        if (!is.null(largebnd.val) && largebnd.val != 1) { 
-          #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
-          main <- paste0(largebnd.val, " - ", main2)
-        } else {
-          main <- main2
+          par(mfrow=c(rnbr,cnbr)) 
+          for (pred in prednames) {
+            main2 <- ifelse(pred %in% prednames.area, "selected", "not selected")
+            if (!is.null(largebnd.val) && largebnd.val != 1) { 
+              #main <- paste0(largebnd.val, ": ", ylab, " - ", main2)
+              main <- paste0(largebnd.val, " - ", main2)
+            } else {
+              main <- main2
+            }
+            plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
+          }
+          dev.off()
         }
-        plot(dunitlut.dom[[pred]], dunitlut.dom[[yn]], xlab=pred, ylab=ylab, main=main)
       }
-      dev.off()
-
     }
   }
 
-  ## create model formula with predictors
-  ## note: the variables selected can change depending on the order in original formula (fmla)
-  fmla.dom.unit <- stats::as.formula(paste(yn, paste(prednames.unit, collapse= "+"), sep="~"))
+  if (length(prednames.unit) > 0) {
+    ## create model formula with predictors
+    ## note: the variables selected can change depending on the order in original formula (fmla)
+    fmla.dom.unit <- stats::as.formula(paste(yn, paste(prednames.unit, collapse= "+"), sep="~"))
 
-  ###  Unit-level estimates
-  ############################################
-  ## NOTE: changed prednames=prednames.select to prednames
-  unit.JoSAE <- tryCatch(SAest.unit(fmla.dom.unit=fmla.dom.unit, pltdat.dom=pltdat.dom, 
+    ###  Unit-level estimates
+    ############################################
+    ## NOTE: changed prednames=prednames.select to prednames
+    unit.JoSAE <- tryCatch(SAest.unit(fmla.dom.unit=fmla.dom.unit, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, yn=yn, SApackage="JoSAE", 
 				dunitvar=dunitvar, prednames.unit=prednames.unit, prior=prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
 				} )
-  if (is.null(unit.JoSAE)) {
-    unit.JoSAE <- data.table(dunitlut.dom[[dunitvar]],
+    if (is.null(unit.JoSAE)) {
+      unit.JoSAE <- data.table(dunitlut.dom[[dunitvar]],
 		DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
 		JU.EBLUP=NA, JU.EBLUP.se.1=NA, NBRPLT=dunitlut.dom$n.total)
-    setnames(unit.JoSAE, "V1", dunitvar)
-  }
+      setnames(unit.JoSAE, "V1", dunitvar)
+    }
 
-  unit.hbsae <- tryCatch(SAest.unit(fmla.dom.unit=fmla.dom.unit, pltdat.dom=pltdat.dom, 
+    unit.hbsae <- tryCatch(SAest.unit(fmla.dom.unit=fmla.dom.unit, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, yn=yn, SApackage="hbsae", 
 				dunitvar=dunitvar, prednames.unit=prednames.unit, prior=prior),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
 				} )
-  if (is.null(unit.hbsae)) {
-    unit.hbsae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+    if (is.null(unit.hbsae)) {
+      unit.hbsae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 		hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total) 
-    setnames(unit.hbsae, "V1", dunitvar)
+      setnames(unit.hbsae, "V1", dunitvar)
+    }
+
+    ## Merge estimates
+    est <- merge(unit.JoSAE, unit.hbsae[, c(dunitvar, "hbsaeU", "hbsaeU.se")], by=dunitvar)
+
+  } else {
+
+    message("no predictors were selected for unit-level model... returning NAs")
+    est <- data.table(dunitlut.dom[[dunitvar]],
+			DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
+			JU.EBLUP=NA, JU.EBLUP.se.1=NA, 
+			saeU=NA, saeU.se=NA, 
+			hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total)
+    setnames(est, "V1", dunitvar)
   }
-  ## Merge estimates
-  est <- merge(unit.JoSAE, unit.hbsae[, c("DOMAIN", "hbsaeU", "hbsaeU.se")], by="DOMAIN")
 
+  if (length(prednames.area) > 0) {
 
-  ## create model formula with predictors
-  ## note: the variables selected can change depending on the order in original formula (fmla)
-  fmla.dom.area <- stats::as.formula(paste(yn, paste(prednames.area, collapse= "+"), sep="~"))
+    ## create model formula with predictors
+    ## note: the variables selected can change depending on the order in original formula (fmla)
+    fmla.dom.area <- stats::as.formula(paste(yn, paste(prednames.area, collapse= "+"), sep="~"))
  
-  ###  Area-level estimates
-  ############################################
-  area.JoSAE <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
+    ###  Area-level estimates
+    ############################################
+    area.JoSAE <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, cuniqueid=cuniqueid, 
 				dunitvar=dunitvar, prednames.area=prednames.area, 
 				yn=yn, SApackage="JoSAE"),
@@ -601,16 +591,17 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					message(err, "\n")
 					return(NULL)
 				} )
-  if (is.null(area.JoSAE)) {
-    area.JoSAE <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+    if (is.null(area.JoSAE)) {
+      area.JoSAE <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 		DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
 		JA.synth.se=NA, NBRPLT=dunitlut.dom$n.total)
-    setnames(area.JoSAE, "V1", dunitvar)
-  }
-  ## Merge estimates
-  est <- merge(est, area.JoSAE[, c("DOMAIN", "JFH", "JFH.se", "JA.synth", "JA.synth.se")], by="DOMAIN")
+      setnames(area.JoSAE, "V1", dunitvar)
+    }
+    ## Merge estimates
+    est <- merge(est, area.JoSAE[, c("DOMAIN", "JFH", "JFH.se", "JA.synth", "JA.synth.se")], 
+		by=dunitvar)
 
-  area.sae <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
+    area.sae <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, cuniqueid=cuniqueid, 
 				dunitvar=dunitvar, prednames.area=prednames.area, 
 				yn=yn, SApackage="sae"),
@@ -618,14 +609,14 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					message(err, "\n")
 					return(NULL)
 				} )
-  if (is.null(area.sae)) {
-    area.sae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+    if (is.null(area.sae)) {
+      area.sae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 		saeA=NA, saeA.se=NA, NBRPLT=dunitlut.dom$n.total) 
-    setnames(area.sae, "V1", dunitvar)
-  }
-  est <- merge(est, area.sae[, c("DOMAIN", "saeA", "saeA.se")], by="DOMAIN")
+      setnames(area.sae, "V1", dunitvar)
+    }
+    est <- merge(est, area.sae[, c("DOMAIN", "saeA", "saeA.se")], by="DOMAIN")
 
-  area.hbsae <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
+    area.hbsae <- tryCatch(SAest.area(fmla.dom.area=fmla.dom.area, pltdat.dom=pltdat.dom, 
 				dunitlut.dom=dunitlut.dom, cuniqueid=cuniqueid, 
 				dunitvar=dunitvar, prednames.area=prednames.area, 
 				yn=yn, SApackage="hbsae", prior=prior),
@@ -633,12 +624,23 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					message(err, "\n")
 					return(NULL)
 				} )
-  if (is.null(area.hbsae)) {
-    area.hbsae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+    if (is.null(area.hbsae)) {
+      area.hbsae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 		hbsaeA=NA, hbsaeA.se=NA, NBRPLT=dunitlut.dom$n.total) 
-    setnames(area.hbsae, "V1", dunitvar)
+      setnames(area.hbsae, "V1", dunitvar)
+    }
+    est <- merge(est, area.hbsae[, c("DOMAIN", "hbsaeA", "hbsaeA.se")], by="DOMAIN")
+
+  } else {
+    message("no predictors were selected for area-level model... returning NAs")
+    est.NA <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+			JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, 
+			saeA=NA, saeA.se=NA, 
+			hbsaeA=NA, hbsaeA.se=NA)
+    setnames(est.NA, "V1", dunitvar)
+
+    est <- merge(est, est.NA, by="DOMAIN")
   }
-  est <- merge(est, area.hbsae[, c("DOMAIN", "hbsaeA", "hbsaeA.se")], by="DOMAIN")
 
   ## Merge NBRPLT.gt0
   est <- merge(est, NBRPLT.gt0, by="DOMAIN")
