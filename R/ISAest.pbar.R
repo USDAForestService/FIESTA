@@ -381,23 +381,6 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     prednames.area <- suppressWarnings(preds.select(y=yn, 
 		plt=dunitlut.dom, aux=dunitlut.dom, prednames=prednames))
 
-    if (length(prednames.area) == 0) {
-      message("no predictors were selected for area-level model... returning NAs")
-      if (SApackage == "JoSAE") {
-        est <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
-			DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
-			JA.synth.se=NA, NBRPLT=dunitlut.dom$n.total)
-        setnames(est, "V1", dunitvar)
-      } else if (SApackage == "sae") {
-        est <- data.table(dunitlut.dom[[dunitvar]],
-			saeA=NA, saeA.se=NA, NBRPLT=dunitlut.dom$n.total)
-        setnames(est, "V1", dunitvar)
-      } else if (SApackage == "hbsae") {  
-        est <- data.table(dunitlut.dom[[dunitvar]],
-			hbsaeA=NA, hbsaeA.se=NA, NBRPLT=dunitlut.dom$n.total)
-        setnames(est, "V1", dunitvar)
-      }
-    } 
   } else {
     prednames.area <- prednames
     prednames.unit <- prednames
@@ -527,6 +510,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   }
 
   if (length(prednames.unit) > 0) {
+    message("using following predictors for unit-level models...", toString(prednames.unit))
+
     ## create model formula with predictors
     ## note: the variables selected can change depending on the order in original formula (fmla)
     fmla.dom.unit <- stats::as.formula(paste(yn, paste(prednames.unit, collapse= "+"), sep="~"))
@@ -566,7 +551,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 
   } else {
 
-    message("no predictors were selected for unit-level model... returning NAs")
+    message("no predictors were selected for unit-level models... returning NAs")
     est <- data.table(dunitlut.dom[[dunitvar]],
 			DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
 			JU.EBLUP=NA, JU.EBLUP.se.1=NA, 
@@ -576,6 +561,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   }
 
   if (length(prednames.area) > 0) {
+    message("using following predictors for area-level models...", toString(prednames.unit))
 
     ## create model formula with predictors
     ## note: the variables selected can change depending on the order in original formula (fmla)
@@ -632,7 +618,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     est <- merge(est, area.hbsae[, c("DOMAIN", "hbsaeA", "hbsaeA.se")], by="DOMAIN")
 
   } else {
-    message("no predictors were selected for area-level model... returning NAs")
+    message("no predictors were selected for area-level models... returning NAs")
     est.NA <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 			JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, 
 			saeA=NA, saeA.se=NA, 
