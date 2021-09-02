@@ -555,7 +555,6 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     est <- data.table(dunitlut.dom[[dunitvar]],
 			DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
 			JU.EBLUP=NA, JU.EBLUP.se.1=NA, 
-			saeU=NA, saeU.se=NA, 
 			hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total)
     setnames(est, "V1", dunitvar)
   }
@@ -643,6 +642,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   rm(area.hbsae)
   gc()
 
+print("TEST")
+print(est)
   return(list(est=est, prednames.unit=prednames.unit, 
 		prednames.area=prednames.area,
 		pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
@@ -659,35 +660,16 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
 
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
+        
 
   if (nrow(dat.dom) == 0 || sum(!is.na(dat.dom[[domain]])) == 0) {
-    if (SAmethod == "unit") {
-      if (SApackage == "JoSAE") {
-        domest <- data.table(dom, matrix(c(rep(NA,7), 0, 0), 1,9))
-        setnames(domest, c(domain, "DIR", "DIR.se", "JU.Synth", "JU.GREG",
-		"JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", "NBRPLT", "NBRPLT.gt0"))
-      } else if (SApackage == "sae") {
-        domest <- data.table(dom, matrix(c(rep(NA,2), 0, 0), 1, 4))
-        setnames(domest, c(domain, "saeU", "saeU.se"))
-      } else if (SApackage == "hbsae") {
-        domest <- data.table(dom, matrix(c(rep(NA,2), 0, 0), 1, 4))
-        setnames(domest, c(domain, "hbsaeU", "hbsaeU.se"))
-      }
-
-    } else if (SAmethod == "area") {
-      if (SApackage == "JoSAE") {
-        domest <- data.table(dom, matrix(c(rep(NA,6), 0, 0), 1,8))
-        setnames(domest, c(domain, "DIR", "DIR.se", "JFH", "JFH.se",
-		"JA.synth", "JA.synth.se", "NBRPLT", "NBRPLT.gt0"))
-      } else if (SApackage == "sae") {
-        domest <- data.table(dom, matrix(c(rep(NA,2), 0, 0), 1, 4))
-        setnames(domest, c(domain, "saeA", "saeA.se"))
-      } else if (SApackage == "hbsae") {
-        domest <- data.table(dom, matrix(c(rep(NA,2), 0, 0), 1, 4))
-        setnames(domest, c(domain, "hbsaeA", "hbsaeA.se"))
-      }
-
-    } 
+    domest <- data.table(dom, matrix(c(rep(NA,7), 0), 1, 8), NA, NA, 1, 
+			NA, NA, NA, NA, NA, NA, NA, NA, 0)
+    setnames(domest, c(domain, "DIR", "DIR.se", "JU.Synth", "JU.GREG",
+		"JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", "NBRPLT", 
+		"hbsaeU", "hbsaeU.se", "AOI", "JFH", "JFH.se",
+		"JA.synth", "JA.synth.se", "saeA", "saeA.se", 
+		"hbsaeA", "hbsaeA.se", "NBRPLT.gt0"))
     return(list(domest, prednames.unit=NULL, prednames.area=NULL, dunitlut.dom=NULL))
   }
 
