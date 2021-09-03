@@ -12,15 +12,15 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
 	largebnd.att = NULL, landarea = "FOREST", pcfilter = NULL, estvar = NULL, 
 	estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, metric = FALSE, 
 	variable.select=TRUE, estround = 3, pseround = 3, estnull = 0, psenull = "--", 
-	divideby = NULL, savedata = FALSE, rawdata = FALSE, rawonly = FALSE, multest = TRUE, 
-	addSAdomsdf = TRUE, SAdomvars = NULL, outfolder = NULL, outfn.pre = NULL, 
-	outfn.date = FALSE, addtitle = TRUE, raw_fmt = "csv", raw_dsn = "rawdata", 
-	savemultest = FALSE, multest_fmt = "csv", multest_outfolder = NULL, 
-	multest_dsn = NULL, multest_layer = NULL, multest.append = FALSE, 
-	multest.AOIonly = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-	append_layer = FALSE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-	title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, 
-	save4testing=FALSE, ...)
+	divideby = NULL, savedata = FALSE, savesteps = FALSE, rawdata = FALSE, 
+	rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
+	outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, addtitle = TRUE, 
+	raw_fmt = "csv", raw_dsn = "rawdata", savemultest = FALSE, multest_fmt = "csv",
+ 	multest_outfolder = NULL, multest_dsn = NULL, multest_layer = NULL, 
+	multest.append = FALSE, multest.AOIonly = FALSE, overwrite_dsn = FALSE, 
+	overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
+	title.main = NULL, title.ref = NULL, title.dunitvar = NULL, title.estvar = NULL, 
+	title.filter = NULL, save4testing=FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -58,6 +58,8 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
 	for percent standard errror. }
   \item{divideby}{ String. Conversion number for output ('hundred', 'thousand', 'million'). }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
+  \item{savesteps}{ Logical. Saves graphs of predictors and response with labels 
+	whether selected or not for both area- and unit-level models. }
   \item{rawdata}{ Logical. If TRUE, returns a list of raw data tables that are used
 	for estimation (See Value). If savedata = TRUE, also written to outfolder. }
   \item{rawonly}{ Logical. If TRUE, output rawdata only. If dataset includes

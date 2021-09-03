@@ -10,11 +10,11 @@
 \usage{
 anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit", largebnd.att = NULL, 
 	landarea = "FOREST", pcfilter = NULL, estvarlst = NULL, 
-	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, append_layer = FALSE, 
-	savemultest = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = FALSE, 
-	multest_outfolder = NULL, multest_fmt = "sqlite", multest_dsn = "SAmultest", 
-	multest.append = FALSE, multest.AOIonly = TRUE, overwrite = FALSE, 
-	barplot.compare = FALSE, smallbnd.att = NULL, title.ref = NULL, 
+	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, savesteps = FALSE, 
+	append_layer = FALSE, savemultest = FALSE, outfolder = NULL, outfn.pre = NULL, 
+	outfn.date = FALSE, multest_outfolder = NULL, multest_fmt = "sqlite", 
+	multest_dsn = "SAmultest", multest.append = FALSE, multest.AOIonly = TRUE, 
+	overwrite = FALSE, barplot.compare = FALSE, smallbnd.att = NULL, title.ref = NULL, 
 	save4testing = FALSE, save4testing.append = FALSE, testfolder = NULL, 
 	addSAdomsdf = FALSE, SAdomvars = NULL, ...)
 }
@@ -36,6 +36,8 @@ anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit", largebnd.att = 
   \item{showsteps}{ Logical. If TRUE, clipped points are displayed.
 	If savedata=TRUE, the display is saved as *.jpg to outfolder. }
   \item{savedata}{ Logical. If TRUE, saves table(s) to outfolder. }
+  \item{savesteps}{ Logical. Saves graphs of predictors and response with labels 
+	whether selected or not for both area- and unit-level models. }
   \item{append_layer}{ String. If TRUE, append output to file. }
   \item{savemultest}{ Logical. If TRUE, saves multest table to multest_outfolder. }
   \item{outfolder}{ String. The outfolder to write files to. If NULL, files are 

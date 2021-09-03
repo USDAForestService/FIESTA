@@ -18,12 +18,12 @@ SAest.unit <- function(fmla.dom.unit, pltdat.dom, dunitlut.dom, yn, SApackage,
                                         lme.obj = dom.lme, debug=FALSE)
     
     ## subset dataframe before returning
-    est <- est.unit[,c("DOMAIN.domain", 
+    est <- est.unit[,c("DOMAIN.domain", "n.i.sample",
                        yn, "sample.se", "Synth", 
                        "GREG", "GREG.se",
-                       "EBLUP","EBLUP.se.1", "n.i.sample")]
-    names(est) <- c("DOMAIN", "DIR", "DIR.se", "JU.Synth", "JU.GREG",
-                    "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", "NBRPLT")
+                       "EBLUP","EBLUP.se.1")]
+    names(est) <- c("DOMAIN", "NBRPLT", "DIR", "DIR.se", "JU.Synth", "JU.GREG",
+                    "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1")
 
     rm(dunitlut.unit)
     rm(fmla.dom.unit)
@@ -54,8 +54,9 @@ SAest.unit <- function(fmla.dom.unit, pltdat.dom, dunitlut.dom, yn, SApackage,
 
     est <- merge(est, dunitlut.unit[, c(dunitvar, "n.total")], 
                  by.x="DOMAIN", by.y=dunitvar) 
+    names(est)[names(est) == "DOMAIN"] <- dunitvar
     names(est)[names(est) == "n.total"] <- "NBRPLT"
-    
+    est <- est[, c("NBRPLT", "saeU", "saeU.se")]
 
     rm(dunitlut.unit)
     rm(fmla.dom.unit)
@@ -101,6 +102,7 @@ SAest.unit <- function(fmla.dom.unit, pltdat.dom, dunitlut.dom, yn, SApackage,
                  by.x="DOMAIN", by.y=dunitvar) 
     names(est)[names(est) == "DOMAIN"] <- dunitvar
     names(est)[names(est) == "n.total"] <- "NBRPLT"
+    est <- est[, c(dunitvar, "NBRPLT", "hbsaeU", "hbsaeU.se")]
 
     rm(dunitlut.unit)
     rm(fmla.dom.unit)
@@ -163,12 +165,15 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
     
     est <- merge(est, dat.al[, c("domain.id", "n.i")], 
                  by.x="DOMAIN", by.y="domain.id") 
+    names(est)[names(est) == "DOMAIN"] <- dunitvar
     names(est)[names(est) == "n.i"] <- "NBRPLT"
+    est <- est[, c(dunitvar, "NBRPLT", "DIR", "DIR.se", "JFH", "JFH.se",
+				"JA.synth", "JA.synth.se")]
     
     if (nrow(dunitlut.NA) > 0) {
-      est.NA <- data.table(dunitlut.NA[[dunitvar]], DIR=NA, DIR.se=NA, 
-				JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, 
-				NBRPLT=dunitlut.NA$n.total)
+      est.NA <- data.table(dunitlut.NA[[dunitvar]], NBRPLT=dunitlut.NA$n.total,
+				DIR=NA, DIR.se=NA, 
+				JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA)
       setnames(est.NA, "V1", dunitvar)
       est <- rbindlist(list(est, est.NA))
       setorderv(est, dunitvar)
@@ -204,11 +209,12 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
                  by.x="DOMAIN", by.y=dunitvar) 
     names(est)[names(est) == "DOMAIN"] <- dunitvar
     names(est)[names(est) == "n.total"] <- "NBRPLT"
+    est <- est[, c(dunitvar, "NBRPLT", "saeA", "saeA.se")]
 
        
     if (nrow(dunitlut.NA) > 0) {
-      est.NA <- data.table(dunitlut.NA[[dunitvar]], saeA=NA, saeA.se=NA, 
-				NBRPLT=dunitlut.NA$n.total)
+      est.NA <- data.table(dunitlut.NA[[dunitvar]], NBRPLT=dunitlut.NA$n.total,
+			saeA=NA, saeA.se=NA)
       setnames(est.NA, "V1", dunitvar)
       est <- rbindlist(list(est, est.NA))
       setorderv(est, dunitvar)
@@ -257,13 +263,14 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
     )
 
     est <- merge(est, dunitlut.area[, c(dunitvar, "n.total")], 
-                 by.x="DOMAIN", by.y=dunitvar) 
+                 by.x="DOMAIN", by.y=dunitvar)
+    names(est)[names(est) == "DOMAIN"] <- dunitvar
     names(est)[names(est) == "n.total"] <- "NBRPLT"
-
-       
+    est <- est[, c(dunitvar, "NBRPLT", "hbsaeA", "hbsaeA.se")]
+      
     if (nrow(dunitlut.NA) > 0) {
-      est.NA <- data.table(dunitlut.NA[[dunitvar]], hbsaeA=NA, hbsaeA.se=NA, 
-				NBRPLT=dunitlut.NA$n.total)
+      est.NA <- data.table(dunitlut.NA[[dunitvar]], NBRPLT=dunitlut.NA$n.total,
+		hbsaeA=NA, hbsaeA.se=NA)
       setnames(est.NA, "V1", dunitvar)
       est <- rbindlist(list(est, est.NA))
       setorderv(est, dunitvar)
@@ -527,10 +534,11 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					return(NULL)
 				} )
     if (is.null(unit.JoSAE)) {
-      unit.JoSAE <- data.table(dunitlut.dom[[dunitvar]],
+      unit.JoSAE <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]], 
+		NBRPLT=dunitlut.dom$n.total,
 		DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
-		JU.EBLUP=NA, JU.EBLUP.se.1=NA, NBRPLT=dunitlut.dom$n.total)
-      setnames(unit.JoSAE, "V1", dunitvar)
+		JU.EBLUP=NA, JU.EBLUP.se.1=NA)
+      setnames(unit.JoSAE, "DOMAIN", dunitvar)
     }
 
     unit.hbsae <- tryCatch(SAest.unit(fmla.dom.unit=fmla.dom.unit, pltdat.dom=pltdat.dom, 
@@ -541,9 +549,10 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					return(NULL)
 				} )
     if (is.null(unit.hbsae)) {
-      unit.hbsae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
-		hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total) 
-      setnames(unit.hbsae, "V1", dunitvar)
+      unit.hbsae <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]],
+		NBRPLT=dunitlut.dom$n.total,
+		hbsaeU=NA, hbsaeU.se=NA) 
+      setnames(unit.hbsae, "DOMAIN", dunitvar)
     }
 
     ## Merge estimates
@@ -552,11 +561,11 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   } else {
 
     message("no predictors were selected for unit-level models... returning NAs")
-    est <- data.table(dunitlut.dom[[dunitvar]],
+    est <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]],
 			DIR=NA, DIR.se=NA, JU.Synth=NA, JU.GREG=NA, JU.GREG.se=NA, 
 			JU.EBLUP=NA, JU.EBLUP.se.1=NA, 
 			hbsaeU=NA, hbsaeU.se=NA, NBRPLT=dunitlut.dom$n.total)
-    setnames(est, "V1", dunitvar)
+    setnames(est, "DOMAIN", dunitvar)
   }
 
   if (length(prednames.area) > 0) {
@@ -577,10 +586,10 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					return(NULL)
 				} )
     if (is.null(area.JoSAE)) {
-      area.JoSAE <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
-		DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, 
-		JA.synth.se=NA, NBRPLT=dunitlut.dom$n.total)
-      setnames(area.JoSAE, "V1", dunitvar)
+      area.JoSAE <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]], 
+		NBRPLT=dunitlut.dom$n.total,
+		DIR=NA, DIR.se=NA, JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA)
+      setnames(area.JoSAE, "DOMAIN", dunitvar)
     }
     ## Merge estimates
     est <- merge(est, area.JoSAE[, c("DOMAIN", "JFH", "JFH.se", "JA.synth", "JA.synth.se")], 
@@ -595,9 +604,10 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					return(NULL)
 				} )
     if (is.null(area.sae)) {
-      area.sae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
-		saeA=NA, saeA.se=NA, NBRPLT=dunitlut.dom$n.total) 
-      setnames(area.sae, "V1", dunitvar)
+      area.sae <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]], 
+		NBRPLT=dunitlut.dom$n.total,
+		saeA=NA, saeA.se=NA) 
+      setnames(area.sae, "DOMAIN", dunitvar)
     }
     est <- merge(est, area.sae[, c("DOMAIN", "saeA", "saeA.se")], by="DOMAIN")
 
@@ -610,19 +620,20 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 					return(NULL)
 				} )
     if (is.null(area.hbsae)) {
-      area.hbsae <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
-		hbsaeA=NA, hbsaeA.se=NA, NBRPLT=dunitlut.dom$n.total) 
-      setnames(area.hbsae, "V1", dunitvar)
+      area.hbsae <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]], 
+		NBRPLT=dunitlut.dom$n.total,
+		hbsaeA=NA, hbsaeA.se=NA) 
+      setnames(area.hbsae, "DOMAIN", dunitvar)
     }
     est <- merge(est, area.hbsae[, c("DOMAIN", "hbsaeA", "hbsaeA.se")], by="DOMAIN")
 
   } else {
     message("no predictors were selected for area-level models... returning NAs")
-    est.NA <- data.table(dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
+    est.NA <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 			JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, 
 			saeA=NA, saeA.se=NA, 
 			hbsaeA=NA, hbsaeA.se=NA)
-    setnames(est.NA, "V1", dunitvar)
+    setnames(est.NA, "DOMAIN", dunitvar)
 
     est <- merge(est, est.NA, by="DOMAIN")
   }
@@ -642,8 +653,6 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   rm(area.hbsae)
   gc()
 
-print("TEST")
-print(est)
   return(list(est=est, prednames.unit=prednames.unit, 
 		prednames.area=prednames.area,
 		pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
@@ -663,13 +672,12 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
         
 
   if (nrow(dat.dom) == 0 || sum(!is.na(dat.dom[[domain]])) == 0) {
-    domest <- data.table(dom, matrix(c(rep(NA,7), 0), 1, 8), NA, NA, 1, 
-			NA, NA, NA, NA, NA, NA, NA, NA, 0)
-    setnames(domest, c(domain, "DIR", "DIR.se", "JU.Synth", "JU.GREG",
-		"JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", "NBRPLT", 
-		"hbsaeU", "hbsaeU.se", "AOI", "JFH", "JFH.se",
+    domest <- data.table(dom, matrix(c(0, rep(NA,17)), 1, 18), 0, 1) 
+    setnames(domest, c(domain, "NBRPLT", "DIR", "DIR.se", 
+		"JU.Synth", "JU.GREG", "JU.GREG.se", "JU.EBLUP", "JU.EBLUP.se.1", 
+		"hbsaeU", "hbsaeU.se", "JFH", "JFH.se",
 		"JA.synth", "JA.synth.se", "saeA", "saeA.se", 
-		"hbsaeA", "hbsaeA.se", "NBRPLT.gt0"))
+		"hbsaeA", "hbsaeA.se", "NBRPLT.gt0", "AOI"))
     return(list(domest, prednames.unit=NULL, prednames.area=NULL, dunitlut.dom=NULL))
   }
 

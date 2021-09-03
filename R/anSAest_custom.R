@@ -1,10 +1,10 @@
 anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit", 
 	largebnd.att=NULL, landarea="FOREST", pcfilter=NULL, estvarlst=NULL, 
-	tfilterlst="live", showsteps=FALSE, savedata=FALSE, append_layer=FALSE,
-	savemultest=FALSE, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
- 	multest_outfolder=NULL, multest_fmt="sqlite", multest_dsn="SAmultest", 
-	multest.append=FALSE, multest.AOIonly=TRUE, overwrite=FALSE, 
-	barplot.compare=FALSE, smallbnd.att=NULL, title.ref=NULL, 
+	tfilterlst="live", showsteps=FALSE, savedata=FALSE, savesteps=FALSE, 
+	append_layer=FALSE, savemultest=FALSE, outfolder=NULL, outfn.pre=NULL, 
+	outfn.date=FALSE, multest_outfolder=NULL, multest_fmt="sqlite", 
+	multest_dsn="SAmultest", multest.append=FALSE, multest.AOIonly=TRUE, 
+	overwrite=FALSE, barplot.compare=FALSE, smallbnd.att=NULL, title.ref=NULL, 
 	save4testing=FALSE, save4testing.append=FALSE, testfolder=NULL, 
 	addSAdomsdf=FALSE, SAdomvars=NULL, ...) {
 
@@ -91,7 +91,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 	multest.append=multest.append, multest.AOIonly=multest.AOIonly, 
 	overwrite_layer=TRUE, append_layer=append_layer, outfn.pre=outfn.pre,
  	addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, 
-	save4testing=save4testing, showsteps=showsteps)
+	save4testing=save4testing, showsteps=showsteps, savesteps=savesteps)
 
   if (is.null(SAareadat)) return(NULL)
   response <- SAareadat$raw$estvar
@@ -148,7 +148,8 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
  			returntitle=TRUE, outfolder=outfolder, multest_outfolder=multest_outfolder,
  			multest.append=multest.append, multest.AOIonly=multest.AOIonly,
  			overwrite_layer=TRUE, outfn.pre=outfn.pre, save4testing=save4testing,
- 			addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, showsteps=showsteps)
+ 			addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, showsteps=showsteps,
+			savesteps=savesteps)
         response <- SAestdat$raw$estvar
         rowvar <- SAestdat$raw$rowvar
 

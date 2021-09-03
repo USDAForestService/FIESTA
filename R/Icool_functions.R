@@ -575,15 +575,22 @@ preds.select <- function(y, plt, aux, prednames) {
   xpop <- aux[, lapply(.SD, mean), .SDcols=prednames]
 
   plt <- setDF(plt)
-  aux <- setDF(aux)
+  xpop <- setDF(xpop)
 
   ## select predictor variables from Elastic Net procedure
-  mod1 <- suppressMessages(mase::gregElasticNet(y=plt[[y]], 
+  mod1 <- tryCatch(suppressMessages(mase::gregElasticNet(y=plt[[y]], 
 		xsample=plt[,prednames], 
 		xpop=xpop, pi = NULL, alpha = 0.5,
   		model = "linear", pi2 = NULL, var_est = FALSE,
   		datatype = "means", N = N,
-  		lambda = "lambda.1se", cvfolds = 10))
+  		lambda = "lambda.1se", cvfolds = 10)),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+  if (is.null(mod1)) {
+    return(NULL)
+  }
   mod1$coefficients[-1]
   mod1.rank <- rank(-abs(mod1$coefficients[-1]))
   preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
@@ -591,12 +598,19 @@ preds.select <- function(y, plt, aux, prednames) {
   if (length(preds.enet) == 0) {
     ## select predictor variables from Elastic Net procedure
     ## alpha=1, indicates 
-    mod1 <- suppressMessages(mase::gregElasticNet(y=plt[[y]], 
+    mod1 <- tryCatch(suppressMessages(mase::gregElasticNet(y=plt[[y]], 
 		xsample=plt[,prednames], 
 		xpop=xpop, pi = NULL, alpha = 0.2,
   		model = "linear", pi2 = NULL, var_est = FALSE,
   		datatype = "means", N = N,
-  		lambda = "lambda.1se", cvfolds = 10))
+  		lambda = "lambda.1se", cvfolds = 10)),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+    if (is.null(mod1)) {
+      return(NULL)
+    }
     mod1$coefficients[-1]
     mod1.rank <- rank(-abs(mod1$coefficients[-1]))
     preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]

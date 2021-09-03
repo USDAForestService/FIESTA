@@ -4,7 +4,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 	estvar=NULL, estvar.filter=NULL, smallbnd.att=NULL, allin1=FALSE, 
 	metric=FALSE, variable.select=TRUE, estround=3, pseround=3, 
 	estnull=0, psenull="--", divideby=NULL, savedata=FALSE, 
-	rawdata=FALSE, rawonly=FALSE, multest=TRUE, 
+	savesteps=FALSE, rawdata=FALSE, rawonly=FALSE, multest=TRUE, 
 	addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, addtitle=TRUE, raw_fmt="csv", raw_dsn="rawdata", 
 	savemultest=FALSE, multest_fmt="csv", multest_outfolder=NULL, 
@@ -109,8 +109,6 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   rowgrpnm=NULL
   rowgrpord=NULL 
   showsteps=FALSE
-  savesteps=TRUE
-
 
   ## Check SApackage 
   SApackagelst <- c("JoSAE", "sae")
@@ -457,7 +455,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
 			dat=tdomdattot, cuniqueid=cuniqueid, 
 			largebnd.att=largebnd.att, dunitlut=dunitlut, dunitvar=dunitvar,
 			prednames=prednames, domain="TOTAL",
-			response=response, showsteps=showsteps, savesteps=FALSE,
+			response=response, showsteps=showsteps, savesteps=savesteps,
 			stepfolder=stepfolder, prior=prior, variable.select=variable.select),
      	 error=function(e) {
 			message("error with estimates of ", response, "...")
