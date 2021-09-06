@@ -11,7 +11,7 @@
 DBgetCoords(states = NULL, RS = NULL, invtype = "ANNUAL",
 	evalid = NULL, evalCur = FALSE, evalEndyr = NULL, evalAll = FALSE,
 	measCur = FALSE, measEndyr = NULL, allyrs = FALSE, invyrs = NULL,
-	intensity1 = FALSE, issp = FALSE, returndata = TRUE,
+	measyrs = NULL, intensity1 = FALSE, issp = FALSE, returndata = TRUE,
 	savedata = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL,
 	out_layer = "xyplt", append_layer = FALSE, outfn.pre = NULL,
 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer=TRUE)
@@ -43,6 +43,10 @@ DBgetCoords(states = NULL, RS = NULL, invtype = "ANNUAL",
 	inventory years in database for each state. }
   \item{invyrs}{ YYYY vector. Inventory span defining variable. Extract data by
 	state for the specified inventory year(s) (e.g., c(2000, 2001, 2002)). If more
+	than one state and different inventory years are desired, input a named list object
+	with years labeled by state (e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)). }
+  \item{measyrs}{ YYYY vector. Measurement year span defining variable. Extract data by
+	state for the specified measurement year(s) (e.g., c(2000, 2001, 2002)). If more
 	than one state and different inventory years are desired, input a named list object
 	with years labeled by state (e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)). }
   \item{intensity1}{ Logical. If TRUE, includes only plots where INTENSITY = 1. }

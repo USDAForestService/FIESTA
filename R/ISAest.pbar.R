@@ -190,15 +190,16 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
   if (SApackage == "sae") {
     nm.var <- paste0(yn, ".var")
     dunitlut.area$var <- dunitlut.area[[nm.var]] / (dunitlut.area$n.total)
-    
+
     est.area <- sae::mseFH(
       formula = fmla.dom.area,
       vardir = var,
       #method = "FH",
       method = "REML",
-      data = dunitlut.area
+      data = dunitlut.area,
+      MAXITER=250
     )
-    
+
     est <- data.frame(
       DOMAIN = dunitlut.area[[dunitvar]],
       saeA = est.area$est$eblup[,1],

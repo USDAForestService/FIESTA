@@ -6,7 +6,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
  	ppsa_layer="pop_plot_stratum_assgn", other_layers=NULL, puniqueid="CN", 
 	savePOP=FALSE, evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
 	measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, 
-	allyrs=FALSE, intensity1=FALSE, showsteps=FALSE, savedata=FALSE, 
+	measyrs=NULL, allyrs=FALSE, intensity1=FALSE, showsteps=FALSE, savedata=FALSE, 
 	savebnd=FALSE, savexy=TRUE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
 	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=FALSE,  
 	append_layer=FALSE, spXYdat=NULL, stbnd.att="COUNTYFIPS") {
@@ -131,8 +131,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
  		xy_datsource=xy_datsource, clipxy=clipxy, evalid=evalid, evalCur=evalCur,
  		evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr, 
-		measEndyr.filter=measEndyr.filter, invyrs=invyrs, allyrs=allyrs, 
-		intensity1=intensity1, showsteps=showsteps, returnxy=TRUE)
+		measEndyr.filter=measEndyr.filter, invyrs=invyrs, measyrs=measyrs, 
+		allyrs=allyrs, intensity1=intensity1, showsteps=showsteps, returnxy=TRUE)
         spxy <- xydat$spxy
         xyids <- xydat$xyids
         states <- xydat$states
@@ -441,7 +441,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL,
         dat <- DBgetPlots(states=stcd, datsource="datamart", stateFilter=stateFilter, 
 			allyrs=allyrs, evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, 
 			evalType=evalType, measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, 
-			istree=istree, isseed=isseed, othertables=other_layers, 
+			measyrs=measyrs, istree=istree, isseed=isseed, othertables=other_layers, 
 			intensity1=intensity1, savePOP=savePOP)
       }
       PLOT <- dat$plt

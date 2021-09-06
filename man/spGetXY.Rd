@@ -15,11 +15,11 @@ spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
 	xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL, pjoinid = "CN", 
 	xy_datsource = NULL, clipxy = TRUE, plot_layer = "plot", evalid = NULL, 
 	evalCur = FALSE, evalEndyr = NULL, measCur = FALSE, measEndyr = NULL, 
-	measEndyr.filter = NULL, invyrs = NULL, allyrs = FALSE, intensity1 = FALSE, 
-	showsteps = FALSE, savedata = FALSE, exportsp = FALSE, returnxy = TRUE, 
-	outfolder = NULL, out_fmt = "csv", out_dsn = NULL, out_layer = "xyplt", 
-	outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE, 
-	overwrite_layer = FALSE, append_layer = FALSE)
+	measEndyr.filter = NULL, invyrs = NULL, measyrs = NULL, allyrs = FALSE, 
+	intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, exportsp = FALSE, 
+	returnxy = TRUE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+	out_layer = "xyplt", outfn.pre = NULL, outfn.date = FALSE, 
+	overwrite_dsn = FALSE, overwrite_layer = FALSE, append_layer = FALSE)
 }
 \arguments{
   \item{bnd}{ sf R object, Area of Interest (AOI) boundary. Can be a spatial 
@@ -64,7 +64,10 @@ spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
   \item{measEndyr.filter}{ Filter. If measCur=TRUE and measEndyr != NULL, a filter 
 	for bnd to identify and area to use measEndyr, such as disturbed areas
 	where you want to exclude plots measured after disturbance. }
-  \item{invyrs}{ Integer vector. Defining specific years of data (e.g., 2010:2015). }
+  \item{invyrs}{ Integer vector. Defining specific inventory years of data 
+	(e.g., 2010:2015). }
+  \item{measyrs}{ Integer vector. Defining specific measurement years of data 
+	(e.g., 2010:2015). }
   \item{allyrs}{ Logical. If TRUE, selects all years (annual inventory) in database. }
   \item{intensity1}{ Logical. If TRUE, include only single intensity plots 
 	(i.e., INTENSITY = 1). }

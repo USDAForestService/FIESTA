@@ -19,8 +19,8 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
 	other_layers = NULL, puniqueid = "CN", savePOP = FALSE,
 	evalid = NULL, evalCur = FALSE, evalEndyr = NULL, evalType = "VOL",
 	measCur = FALSE, measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL,
-	allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, savedata = FALSE,
-	savebnd = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "csv",
+	measyrs = NULL, allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, 
+	savedata = FALSE, savebnd = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "csv",
 	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE,
 	overwrite_layer = FALSE, append_layer = FALSE, spXYdat = NULL,
 	stbnd.att = "COUNTYFIPS")
@@ -97,7 +97,10 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
   \item{measEndyr.filter}{ Filter. If measCur=TRUE and measEndyr != NULL, a filter
 	for bnd to identify and area to use measEndyr, such as disturbed areas
 	where you want to exclude plots measured after disturbance. }
-  \item{invyrs}{ Integer vector. Defining specific years of data (e.g., 2010:2015). }
+  \item{invyrs}{ Integer vector. Defining specific inventory years of data 
+	(e.g., 2010:2015). }
+  \item{measyrs}{ Integer vector. Defining specific measurement years of data 
+	(e.g., 2010:2015). }
   \item{allyrs}{ Logical. If TRUE, selects all years (annual inventory) in database. }
   \item{intensity1}{ Logical. If TRUE, include only single intensity plots
 	(i.e., INTENSITY = 1). }

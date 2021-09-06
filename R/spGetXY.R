@@ -2,7 +2,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
 	xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar=NULL, yvar=NULL, xy.crs=4269, 
 	xyjoinid=NULL, pjoinid="CN", xy_datsource=NULL, clipxy=TRUE, plot_layer="plot",
 	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, measCur=FALSE, measEndyr=NULL, 
-	measEndyr.filter=NULL, invyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
+	measEndyr.filter=NULL, invyrs=NULL, measyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
 	showsteps=FALSE, savedata=FALSE, exportsp=FALSE, returnxy=TRUE, outfolder=NULL,
  	out_fmt="csv", out_dsn=NULL, out_layer="xyplt", outfn.pre=NULL, outfn.date=FALSE, 
 	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE) {
@@ -110,7 +110,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       outfn.date <- FALSE
     }
   }
- 
+
   ########################################################################
   ### DO THE WORK
   ########################################################################
@@ -348,7 +348,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
       }
     }   # xy_datsource == "sqlite"
   }
- 
+
   if (clipxy) {
     xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
 		checklst=names(spxy), caption="UniqueID variable of xy data", 
@@ -368,7 +368,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   stunitco.names <- c("STATECD", "UNITCD", "COUNTYCD", "COUNTYFIPS")
   statevars <- stunitco.names[!stunitco.names %in% names(spxy)]
   if (length(statevars) > 0) {
-    spxy <- spExtractPoly(spxy, polyvlst=FIESTA::stunitco, 
+    spxy <- spExtractPoly(spxy, uniqueid=xy.uniqueid, polyvlst=FIESTA::stunitco, 
 			polyvarlst=statevars)$spxyext
   }
 

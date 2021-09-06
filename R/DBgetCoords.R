@@ -1,7 +1,7 @@
 DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL", 
 	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalAll=FALSE, 
-	measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
-	invyrs=NULL, intensity1=FALSE, issp=FALSE, returndata=TRUE, 
+	measCur=FALSE, measEndyr=NULL, allyrs=FALSE, invyrs=NULL,
+	measyrs=NULL, intensity1=FALSE, issp=FALSE, returndata=TRUE, 
 	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
 	out_layer="xyplt", append_layer=FALSE, outfn.pre=NULL, 
 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
@@ -64,7 +64,7 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
     iseval <- TRUE
   }
   survey <- evalInfo$SURVEY
-    
+
   ## Get state abbreviations and codes 
   ###########################################################
   stabbrlst <- FIESTA::pcheck.states(states, statereturn="ABBR")
@@ -112,7 +112,8 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
     ## Check INVYR(S) 
     ###########################################################
     if (!measCur) {
-      if ((is.null(invyrs) || length(invyrs) == 0)) {
+      if ((is.null(invyrs) || length(invyrs) == 0) && 
+			(is.null(measyrs) || length(measyrs) == 0)) {
         invyrs <- sapply(states, function(x) NULL)
         for (state in states) { 
           stabbr <- FIESTA::pcheck.states(state, "ABBR")
@@ -152,6 +153,28 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
           if (!all(invyrs[[state]] %in% stinvyrlst))
             stop("inventory years do not match database")
         }
+      } else if (!is.null(measyrs)) {
+        if (class(measyrs) != "list") {
+          if (is.vector(measyrs) && is.numeric(measyrs)) {
+            measyrs <- list(measyrs)
+            if (length(states) == 1) {
+              names(measyrs) <- states
+            } else {
+              warning("using specified invyrs for all states")
+              yrs <- measyrs
+              measyrs <- sapply(states, function(x) NULL)
+              for (st in states) measyrs[st] <- yrs
+            } 
+          }
+        } else if (length(measyrs) != length(states)) {
+          stop("check measyrs list.. does not match number of states")
+        }
+        ## Check inventory years
+        for (state in states) {
+          stinvyrlst <- invyrtab[invyrtab$STATENM == state, "INVYR"]
+          if (!all(measyrs[[state]] %in% stinvyrlst))
+            stop("measurement years do not match database")
+        }
       }
     }
 
@@ -167,13 +190,11 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
   } else {
     allyrs <- FALSE
   }
-    
-
+ 
   ## Check savedata
   ###########################################################
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data to outfolder?", first="YES", gui=gui)
-
 
   ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
@@ -201,12 +222,16 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
   if (iseval) {
     pfromqry <- paste0(SCHEMA., "POP_PLOT_STRATUM_ASSGN ppsa")
     xyfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-			"PLOT p ON (p.PLT_CN = ppsa.PLT_CN)")
-    evalFilter <- paste0("p.EVALID IN(", toString(unlist(evalidlist)), ")")
+			"PLOT p ON (p.CN = ppsa.PLT_CN)")
+    evalFilter <- paste0("ppsa.EVALID IN(", toString(unlist(evalidlist)), ")")
 
-  } else if (length(invyrs) > 1) {
+  } else if (length(unlist(invyrs)) > 1) {
     xyfromqry <- paste0(SCHEMA., "PLOT p")
-    evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(invyrs), ")")
+    evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(unlist(invyrs)), ")")
+
+  } else if (length(unlist(measyrs)) > 1) {
+    xyfromqry <- paste0(SCHEMA., "PLOT p")
+    evalFilter <- paste0(stFilter, " and p.MEASYEAR IN(", toString(unlist(measyrs)), ")")
 
   } else {
     if (measCur) {
@@ -227,6 +252,10 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
   ## Get PLOT table  
   PLOT <- FIESTA::DBgetCSV("PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
 
+  if (iseval) {
+    POP_PLOT_STRATUM_ASSGN <- FIESTA::DBgetCSV("POP_PLOT_STRATUM_ASSGN", 
+		stabbr, returnDT=TRUE, stopifnull=FALSE)
+  }
 
   ## Generate queries
   ##################################################################################
@@ -238,7 +267,6 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 		" where ", evalFilter)
   xyx <- tryCatch( sqldf::sqldf(xycoords.qry), 
 			error=function(e) {
-                  message("invalid xy query\n")
                   message(e)
                   return(NULL) })
 
@@ -295,7 +323,6 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 		outfn.pre=outfn.pre)
   }
 
-       
   ## GENERATE RETURN LIST
   ###########################################################
   if (returndata) {

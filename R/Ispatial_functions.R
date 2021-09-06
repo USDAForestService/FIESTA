@@ -1260,6 +1260,14 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   #############################################################################
   bndx <- pcheck.spatial(layer=bnd_layer, dsn=bnd_dsn, caption="boundary",
 		stopifnull=TRUE)
+
+  gtypes <- c("POLYGON", "GEOMETRYCOLLECTION", "MULTIPOLYGON")
+  geotype <- unique(sf::st_geometry_type(bndx))
+
+  ## Check geometry type
+  if (!geotype %in% gtypes || geotype == "GEOMETRYCOLLECTION" && 		length(sf::st_collection_extract(bndx, "POLYGON") == 0)) {
+    stop("invalid geometry type")
+  }
  
   ## bnd.filter
   bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
