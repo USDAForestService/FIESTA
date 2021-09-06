@@ -11,7 +11,7 @@
 DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
 	invtype = "ANNUAL", evalid = NULL, evalCur = FALSE, evalEndyr = NULL,
 	evalAll=FALSE, evalType = "VOL", measCur = FALSE, measEndyr = NULL,
-	allyrs = FALSE, invyrs = NULL, xymeasCur = FALSE, istree = FALSE,
+	allyrs = FALSE, invyrs = NULL, measyrs = NULL, xymeasCur = FALSE, istree = FALSE,
 	isseed = FALSE, isveg = FALSE, issubp = FALSE, islulc = FALSE, isdwm = FALSE,
 	plotgeom = FALSE, othertables = NULL, issp = FALSE, spcond = FALSE,
 	spcondid1 = FALSE, defaultVars = TRUE, regionVars = FALSE, regionVarsRS = "RMRS",
@@ -60,6 +60,10 @@ DBgetPlots(states = NULL, datsource = "datamart", data_dsn = NULL, RS = NULL,
   \item{invyrs}{ YYYY vector. Inventory span defining variable. Extract data by
 	state for the specified inventory year(s) (e.g., c(2000, 2001, 2002)). If more
 	than one state and different inventory years are desired, input a named list object
+	with years labeled by state (e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)). }
+  \item{measyrs}{ YYYY vector. Measurement year span defining variable. Extract data by
+	state for the specified measurement year(s) (e.g., c(2000, 2001, 2002)). If more
+	than one state and different measurement years are desired, input a named list object
 	with years labeled by state (e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)). }
   \item{xymeasCur}{ Logical. If TRUE, and more than one plot measured at same location,
 	only the most current coordinate is returned for the plot. }

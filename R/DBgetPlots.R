@@ -1,12 +1,12 @@
 DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL, 
 	RS=NULL, invtype="ANNUAL", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
 	evalAll=FALSE, evalType="VOL", measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
-	invyrs=NULL, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, isveg=FALSE, 
-	issubp=FALSE, islulc=FALSE, isdwm=FALSE, plotgeom=FALSE, othertables=NULL, 
-	issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, regionVars=FALSE, 
-	regionVarsRS="RMRS", ACI=FALSE, subcycle99=FALSE, intensity1=FALSE, 
-	stateFilter=NULL, allFilter=NULL, alltFilter=NULL, savedata=FALSE, 
-	saveqry=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
+	invyrs=NULL, measyrs=measyrs, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, 
+	isveg=FALSE, issubp=FALSE, islulc=FALSE, isdwm=FALSE, plotgeom=FALSE, 
+	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, 
+	regionVars=FALSE, regionVarsRS="RMRS", ACI=FALSE, subcycle99=FALSE, 
+	intensity1=FALSE, stateFilter=NULL, allFilter=NULL, alltFilter=NULL, 
+	savedata=FALSE, saveqry=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
 	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
  	overwrite_layer=TRUE, savePOP=FALSE, returndata=TRUE) {
 
@@ -253,10 +253,11 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       measEndyr=measEndyr.filter <- NULL
     }
 
-    ## Check INVYR(S) 
+    ## Check INVYR(S) of MEASYR(S)
     ###########################################################
     if (!measCur) {
-      if ((is.null(invyrs) || length(invyrs) == 0)) {
+      if ((is.null(invyrs) || length(invyrs) == 0) && 
+		(is.null(measyrs) || length(measyrs) == 0)) {
         if (is.null(invyrtab)) {
           stop("must include INVYR in plot")
         } 
@@ -306,6 +307,38 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
           if (!all(invyrs[[state]] %in% stinvyrlst)) {
             invyrs[[state]] <- invyrs[[state]][invyrs[[state]] %in% stinvyrlst]
             missyr <- invyrs[[state]][!invyrs[[state]] %in% stinvyrlst]
+            message(state, " missing following inventory years: ", toString(missyr))
+          }
+        }
+      } else if (!is.null(measyrs)) {
+        if (class(measyrs) != "list") {
+          if (is.vector(measyrs) && is.numeric(measyrs)) {
+            measyrs <- list(measyrs)
+            if (length(states) == 1) {
+              names(measyrs) <- states
+            } else {
+              message("using specified measurement year for all states")
+              yrs <- measyrs
+              measyrs <- sapply(states, function(x) NULL)
+              for (st in states) measyrs[st] <- yrs
+            } 
+          }
+        } else if (length(measyrs) != length(states)) {
+          stop("check measyrs list.. does not match number of states")
+        }
+        ## Check inventory years
+        for (state in states) {
+          stcd <- FIESTA::pcheck.states(state, "VALUE")
+          if ("STATENM" %in% names(invyrtab)) {
+            stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
+          } else if ("STATECD" %in% names(invyrtab)) {
+            stinvyrlst <- sort(invyrtab[invyrtab$STATECD == stcd, "INVYR"])
+          } else {
+            stop("invyrtab is invalid")
+          }
+          if (!all(measyrs[[state]] %in% stinvyrlst)) {
+            measyrs[[state]] <- measyrs[[state]][measyrs[[state]] %in% stinvyrlst]
+            missyr <- measyrs[[state]][!measyrs[[state]] %in% stinvyrlst]
             message(state, " missing following inventory years: ", toString(missyr))
           }
         }
@@ -763,19 +796,15 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
       } 
     } else {
-      if (measCur) {
-        evalFilter <- stFilter 
-   
-      } else {
-        if (length(invyrs) > 1){
-          invyr <- invyrs[[state]]
-        } else {
-          invyr <- invyrs[[1]]
-        }
-        invyrFilter <- paste0("p.INVYR IN(", toString(invyr), ")")
+      evalFilter <- stFilter 
+      if (length(invyrs) > 0){
+        invyr <- invyrs[[state]]
         evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(invyr), ")")
+
+      } else if (length(measyrs) > 0) {
+        measyr <- measyrs[[state]]
+        evalFilter <- paste0(stFilter, " and p.MEASYEAR IN(", toString(measyr), ")")
       }
- 
       if (!subcycle99) {
         evalFilter <- paste(evalFilter, "and p.SUBCYCLE <> 99")
       }
