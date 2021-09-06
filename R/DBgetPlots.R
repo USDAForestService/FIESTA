@@ -1,7 +1,7 @@
 DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL, 
 	RS=NULL, invtype="ANNUAL", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
 	evalAll=FALSE, evalType="VOL", measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
-	invyrs=NULL, measyrs=measyrs, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, 
+	invyrs=NULL, measyrs=NULL, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, 
 	isveg=FALSE, issubp=FALSE, islulc=FALSE, isdwm=FALSE, plotgeom=FALSE, 
 	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, 
 	regionVars=FALSE, regionVarsRS="RMRS", ACI=FALSE, subcycle99=FALSE, 

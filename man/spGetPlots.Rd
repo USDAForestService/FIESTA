@@ -182,6 +182,34 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
 	will affect download speeds.
 
 }
+
+\examples{
+
+
+  ## Get polygon vector layer from FIESTA external data
+  WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+
+  ## Extract data from FIA datamart for measurement years 2013 thru 2015
+  dat <- spGetPlots(bnd=WYbhfn, datsource="datamart", measyrs=2013:2015)
+  names(dat)
+  tabs <- dat$tabs
+  names(tabs)
+  head(tabs$pltx)
+
+  table(tabs$pltx$MEASYEAR)
+
+
+  ## Extract data from FIA datamart for most current evaluation
+  datCur <- spGetPlots(bnd=WYbhfn, datsource="datamart", evalCur=TRUE)
+  names(datCur)
+  tabsCur <- datCur$tabs
+  names(tabsCur)
+  head(tabsCur$pltx)
+
+  table(tabsCur$pltx$MEASYEAR)
+
+}
+
 \author{
 	Tracey S. Frescino
 }

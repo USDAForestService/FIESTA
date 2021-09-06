@@ -203,11 +203,13 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
 
   } else {			## xy_datsource in('datamart', 'sqlite')
     if (xy_datsource == "datamart") {
-      spxy <- DBgetCoords(states=states, evalid=evalid, evalCur=evalCur,
+      spxy <- DBgetCoords(states=stcds, evalid=evalid, evalCur=evalCur,
 		evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr,
-		allyrs=allyrs, invyrs=invyrs, intensity1=intensity1, issp=TRUE)[[1]]
+		allyrs=allyrs, invyrs=invyrs, measyrs=measyrs, intensity1=intensity1, 
+		issp=TRUE)[[1]]
 
       xy.uniqueid <- "PLT_CN"
+      xyjoinid <- "PLT_CN"
   
     } else if (xy_datsource == "sqlite") {
 
