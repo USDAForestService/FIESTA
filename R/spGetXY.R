@@ -1,6 +1,6 @@
 spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL, 
 	xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar=NULL, yvar=NULL, xy.crs=4269, 
-	xyjoinid=NULL, pjoinid="CN", xy_datsource=NULL, clipxy=TRUE, plot_layer="plot",
+	xyjoinid=NULL, pjoinid="CN", xy_datsource="datamart", clipxy=TRUE, plot_layer="plot",
 	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, measCur=FALSE, measEndyr=NULL, 
 	measEndyr.filter=NULL, invyrs=NULL, measyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
 	showsteps=FALSE, savedata=FALSE, exportsp=FALSE, returnxy=TRUE, outfolder=NULL,
@@ -22,7 +22,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=stcds=dbconn=intensitynm <- NULL
+  xydat=stateFilter=countyfips=stcds=dbconn=intensitynm <- NULL
   returnlst <- {}
 
   ##################################################################
@@ -132,8 +132,8 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     stbnd.att <- statedat$stbnd.att
     statenames <- statedat$statenames
     if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
-      statecnty <- statedat$states
-      stcds <- unique(as.numeric(substr(statecnty, 1,2)))
+      countyfips <- statedat$states
+      stcds <- unique(as.numeric(substr(countyfips, 1,2)))
     } else {
       stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
     }
@@ -375,7 +375,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   }
 
   ## Subset columns of spxy
-  spxy <- spxy[, unique(c(xy.uniqueid, xyjoinid, stunitco.names))]
+  #spxy <- spxy[, unique(c(xy.uniqueid, xyjoinid, stunitco.names))]
 
   #############################################################################
   ## measEndyr.filter
@@ -417,16 +417,17 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     par(mar=mar)
   }
  
+  xyids <- sf::st_drop_geometry(spxy)
+  xyids <- xyids[,which(!names(xyids) %in% c(xvar, yvar))]
+
   if (returnxy) {
     returnlst$spxy <- spxy
-  }
-  returnlst$xyids <- sf::st_drop_geometry(spxy)
+  } 
+  returnlst$xyids <- xyids
   returnlst$bndx <- bndx
   returnlst$xy.uniqueid <- xy.uniqueid
-  returnlst$xyjoinid <- xyjoinid
-  returnlst$pjoinid <- pjoinid
   returnlst$states <- statenames
-  returnlst$statecnty <- statecnty
+  returnlst$countyfips <- countyfips
   returnlst$stbnd.att <- stbnd.att
   return(returnlst)
 }

@@ -13,7 +13,7 @@
 spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL, 
 	xy = NULL, xy_dsn = NULL, xy.uniqueid = "PLT_CN", 
 	xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL, pjoinid = "CN", 
-	xy_datsource = NULL, clipxy = TRUE, plot_layer = "plot", evalid = NULL, 
+	xy_datsource = "datamart", clipxy = TRUE, plot_layer = "plot", evalid = NULL, 
 	evalCur = FALSE, evalEndyr = NULL, measCur = FALSE, measEndyr = NULL, 
 	measEndyr.filter = NULL, invyrs = NULL, measyrs = NULL, allyrs = FALSE, 
 	intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, exportsp = FALSE, 
@@ -74,7 +74,7 @@ spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
   \item{showsteps}{ Logical. If TRUE, display data in device window. }
   \item{savedata}{ Logical. If TRUE, saves data to outfolder. }
   \item{exportsp}{ Logical. If TRUE, exports spatial data to outfolder. }
-  \item{returnxy}{ Logical. If TRUE, returns xy coordinates. }
+  \item{returnxy}{ Logical. If TRUE, returns a spatial sf object. }
   \item{outfolder}{ String. If savedata=TRUE or savexy=TRUE, savebnd=TRUE, 
 	name of output folder. If NULL, the working directory is used. }
   \item{out_fmt}{ String. Format for output ('csv', 'sqlite', 'db', 'sqlite3', 
@@ -94,14 +94,16 @@ spGetXY(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
 	out_fmt = "gdb". }
 }
 \value{
-  \item{xypltx}{ sf object. Input xy data clipped to boundary. }
+  \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }
+  \item{xyids}{ data frame. A table of pltids that are within bnd. }
   \item{bndx}{ sf object. Input bnd. }
-  \item{tabs}{ list object. List of input layers clipped to boundary (pltx,condx,etc.). }
-  \item{xy.uniqueid}{ String. Name of unique identifier of xy. }
-  \item{puniqueid}{ String. Name of unique identifier of plot in plt. }
-  \item{pjoinid}{ String. Name of unique identifier of plot in plt. }
+  \item{xy.uniqueid}{ String. Unique identifier of plots in xy. }
+  \item{states}{ String. Vector of states that intersect bnd. }
+  \item{countyfips}{ String. Vector of countyfips values that intersect bnd. }
+  \item{stbnd.att}{ String. Name of state attribute used to select plots. }
 
-  If savedata=TRUE, outdat data frame is saved to outfolder.    
+  If savedata=TRUE, the xyids data frame is saved to outfolder.\cr
+  If exportsp=TRUE, the spxy sf object is exported as shapefile to outfolder.\cr  
 }
 \details{
 

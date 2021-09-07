@@ -10,10 +10,10 @@
   	- Clip spatial coordinates and other tables to boundary (spClipPoint)
 }
 \usage{
-spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NULL,
+spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, RS = NULL,
 	xyids = NULL, xy_datsource = NULL, xy = NULL, xy_dsn = NULL,
 	xy.uniqueid = "PLT_CN", xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL,
-	pjoinid = NULL, clipxy = TRUE, datsource = NULL, data_dsn = NULL,
+	pjoinid = NULL, clipxy = TRUE, datsource = "datamart", data_dsn = NULL,
 	istree = FALSE, isseed = FALSE, plot_layer = "plot", cond_layer = "cond",
 	tree_layer = "tree", seed_layer = "seed", ppsa_layer = "pop_plot_stratum_assgn",
 	other_layers = NULL, puniqueid = "CN", savePOP = FALSE,
@@ -22,8 +22,7 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
 	measyrs = NULL, allyrs = FALSE, intensity1 = FALSE, showsteps = FALSE, 
 	savedata = FALSE, savebnd = FALSE, savexy = TRUE, outfolder = NULL, out_fmt = "csv",
 	out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE, overwrite_dsn = FALSE,
-	overwrite_layer = FALSE, append_layer = FALSE, spXYdat = NULL,
-	stbnd.att = "COUNTYFIPS")
+	overwrite_layer = FALSE, append_layer = FALSE, spXYdat = NULL)
 }
 \arguments{
   \item{bnd}{ sf R object, Area of Interest (AOI) boundary. Can be a spatial
@@ -33,7 +32,6 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
 	vector formats (https://www.gdal.org/ogr_formats.html). Optional if bnd
 	is an R object. }
   \item{bnd.filter}{ String. Filter to subset bnd spatial layer. }
-  \item{states}{ String. The name of state(s) for tables (e.g., "Vermont", "Utah"). }
   \item{RS}{ String. Name of FIA research station to restrict states to
 	('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are included. }
   \item{xyids}{ Data frame. Non-spatial plot identificators within bnd). }
@@ -126,9 +124,6 @@ spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, RS = NU
 	or files if out_fmt = 'csv'. Note: currently cannot append layers if
 	out_fmt = "gdb". }
   \item{spXYdat}{ R list object. Output from FIESTA::spGetXY(). }
-  \item{stbnd.att}{ String. Name of variable in xyids data frame that identifies
-	states (e.g., 'COUNTYFIPS', 'STATECD'). }
-
 }
 \value{
   \item{xypltx}{ sf object. Input xy data clipped to boundary. }
