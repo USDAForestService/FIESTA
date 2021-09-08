@@ -12,7 +12,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 
   ## Set global variables
   gui <- FALSE
-  plt=strvar=stratalut <- NULL
+  plt=strvar=stratalut=strwtvar <- NULL
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -75,7 +75,7 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   }
 
   ## Extract list objects
-  xyplt <- GBpltdat$xypltx
+  xyplt <- GBpltdat$spxy
   xy.uniqueid <- GBpltdat$xy.uniqueid
   bnd <- GBpltdat$bndx
   puniqueid <- GBpltdat$puniqueid
@@ -121,13 +121,13 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
 		unit_layer=bnd, unitvar=bnd.att, strattype=strattype, 
 		strat_layer=strat_layer, strat_dsn=strat_dsn, strvar=strvar, 
 		rast.NODATA=0) 
-
     pltassgn <- setDT(stratdat$pltassgn)
     unitarea <- stratdat$unitarea
     unitvar <- stratdat$unitvar
     areavar <- stratdat$areavar
     stratalut <- stratdat$stratalut
     strvar <- stratdat$strvar
+    strwtvar <- stratdat$strwtvar
     pltassgnid <- stratdat$pltassgnid
 
   } else {
@@ -146,8 +146,8 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   ##########################################
   GBdata <- list(bnd=bnd, plt=pltx, pltassgn=pltassgn, cond=condx,
 			unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
-			stratalut=stratalut, strvar=strvar, puniqueid=puniqueid,
-			pjoinid=pjoinid, pltassgnid=pltassgnid)
+			stratalut=stratalut, strvar=strvar, strwtvar=strwtvar,
+ 			puniqueid=puniqueid, pjoinid=pjoinid, pltassgnid=pltassgnid)
   if (istree) {
     GBdata$tree <- treex
   }

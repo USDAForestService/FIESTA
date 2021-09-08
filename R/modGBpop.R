@@ -172,9 +172,14 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     }
   } 
 
-  if (strwtvar != "strwt") {
-    names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
-    strwtvar <- "strwt"
+  if (strata) {
+    if (is.null(strwtvar)) {
+      stop("missing strwtvar")
+    }
+    if (strwtvar != "strwt") {
+      names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
+      strwtvar <- "strwt"
+    }
   }
  
   ###################################################################################
