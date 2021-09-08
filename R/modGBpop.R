@@ -152,7 +152,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       }
     }
     if (!is.null(GBstratdat)) {
-      list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
+      list.items <- c("pltassgn", "unitarea", "unitvar")
       GBstratdat <- FIESTA::pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
       bndx <- GBstratdat$bndx
       pltassgn <- GBstratdat$pltassgn
