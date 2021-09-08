@@ -67,6 +67,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
     if (is.null(xyids) && (is.null(spxy) || nrow(spxy)) == 0) {
       stop("spxy is null")
     } 
+
+    ## Check xyjoinid
     xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 	 checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
     if (is.null(xyjoinid)) {
@@ -141,7 +143,14 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
         statecnty <- xydat$statecnty
         stbnd.att <- xydat$stbnd.att
         bndx <- xydat$bndx
-        xyjoinid <- xydat$xyjoinid
+
+        ## Check xyjoinid
+        xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+	     checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
+        if (is.null(xyjoinid)) {
+          message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
+          xyjoinid <- xy.uniqueid
+        } 
 
         stcds <- pcheck.states(states, statereturn="VALUE")
         if (is.null(spxy) || nrow(spxy) == 0) {
