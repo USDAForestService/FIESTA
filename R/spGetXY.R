@@ -429,5 +429,6 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
   returnlst$stbnd.att <- stbnd.att
+  returnlst$xyjoinid <- xyjoinid
   return(returnlst)
 }

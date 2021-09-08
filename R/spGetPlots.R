@@ -53,7 +53,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
   ## Define list of pop_tables (without PLT_CN)
   pop_tables <- c("POP_ESTN_UNIT", "POP_EVAL", "POP_EVAL_ATTRIBUTE", "POP_EVAL_GRP", 
 	"POP_EVAL_TYP", "POP_STRATUM", "SURVEY") 
-    
+ 
   ## Check spXYdat
   if (!is.null(spXYdat)) {
     spxy <- spXYdat$spxy
@@ -84,7 +84,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
  
     ## Check xyids
     xyids <- pcheck.table(xyids)
-
     if (!is.null(xyids)) {
       ## Check xyjoinid
       xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
@@ -762,7 +761,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
 
     ## Check pjoinid
     pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-		checklst=pltfields, gui=gui, caption="Joinid in plot?")  
+		checklst=pltfields, gui=gui, caption="Joinid in plot?")
+ 
     if (is.null(pjoinid)) {
       if (xyjoinid %in% pltfields) {
         pjoinid  <- xyjoinid
