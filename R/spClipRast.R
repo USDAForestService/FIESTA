@@ -153,11 +153,11 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
   }
 
   ## Check extents
-  #names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
-  #bbox1 <- sf::st_bbox(clippolyvprj)
-  #bbox2 <- sf::st_bbox(rast.bbox, crs=rast.prj)
-  #check.extents(bbox1, bbox2, showext, layer1nm="clippolyv", layer2nm="rast",
-#			stopifnotin=TRUE)
+  names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
+  bbox1 <- sf::st_bbox(clippolyvprj)
+  bbox2 <- sf::st_bbox(rast.bbox, crs=rast.prj)
+  check.extents(bbox1, bbox2, showext, layer1nm="clippolyv", layer2nm="rast",
+			stopifnotin=TRUE)
 
 
   ## Clip raster
