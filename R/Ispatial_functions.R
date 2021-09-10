@@ -604,8 +604,16 @@ check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL,
   bbox2sf <- sf::st_as_sf(bbox2sfc)
 
   bbox1sf$fld <- 1
-  intpct <- suppressWarnings(tabulateIntersections(layer1=bbox1sf, 
-			layer1fld="fld", layer2=bbox2sf))$int.pct
+  bbox2sf$fld <- 1
+
+  ## bbox2 within bbox1
+  intpct1 <- suppressWarnings(tabulateIntersections(layer1=bbox2sf, 
+			layer1fld="fld", layer2=bbox1sf))$int.pct
+
+  ## bbox1 within bbox2
+#  intpct2 <- suppressWarnings(tabulateIntersections(layer1=bbox1sf, 
+#			layer1fld="fld", layer2=bbox2sf))$int.pct
+
 
   if (showext) {
     bbox12sfc <- append(bbox1sfc, bbox2sfc)
@@ -623,8 +631,8 @@ check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL,
       return(NULL)
     }
   } else {
-    if (intpct < 100 && !quiet) {
-      message(layer1nm, " is not completely contained within ", layer2nm)
+    if (intpct1 < 100 && !quiet) {
+      message(layer2nm, " is not completely contained within ", layer1nm)
       message("...intersection of ", intpct, "%")
     }
     return(intpct)

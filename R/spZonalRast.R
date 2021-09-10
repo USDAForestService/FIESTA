@@ -115,6 +115,8 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
   names(rast.bbox) <- c("xmin", "ymin", "xmax", "ymax")
   bbox1 <- sf::st_bbox(rast.bbox, crs=rast.prj)
   bbox2 <- sf::st_bbox(spobjprj)
+
+  ## check if bbox2 is within bbox1
   check.extents(bbox1, bbox2, showext, layer1nm=rastnm, layer2nm="polv",
 			stopifnotin=TRUE)
   dtype <- rasterInfo(rastfn)$datatype
