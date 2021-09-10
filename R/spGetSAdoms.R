@@ -127,7 +127,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbnd.unique <- "SMALLAREA"
   } else if (is.null(smallbnd.unique)) {
     smallbnd.unique <- smallbnd.domain
-  } else {
+  } else if (is.null(smallbnd.domain)) {
     smallbnd.domain <- smallbnd.unique
   }    
   if (any(table(smallbndx[[smallbnd.unique]])) > 1) {
@@ -145,6 +145,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- sf_dissolve(smallbndx, areacalc=FALSE)
     smallbnd.unique <- "tmp"
     smallbnd.domain <- "tmp"
+  } else {
+    smallbndx <- sf_dissolve(smallbndx, col=smallbnd.domain, areacalc=FALSE)
   }
  
   ## Apply smallbnd.stfilter (Just state)
