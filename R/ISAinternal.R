@@ -203,7 +203,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   if (largeishelper) {
     helperbndx <- largebndx
   }
-
+ 
   #################################################################
   ## Get helper domains
   #################################################################
@@ -262,8 +262,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           stop("no largebnds for maxbnd: ", mbnd[j])
         largebndx.intd <- sf_dissolve(largebndx.int, largebnd.unique, areacalc=FALSE)
 
-      } else {
- 
+      } else { 
         ## get intersection of largebndx and smallbndx
  #       largebndx.intd <- getIntersect(largebndx, smallbndxd, largebnd.unique, layer2fld="AOI")
         largebndx.intd <- getIntersect(largebndx, sbnd, largebnd.unique, layer2fld="AOI")

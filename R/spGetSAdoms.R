@@ -241,15 +241,12 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       if (length(maxbndx) == 0) stop("maxbnd.filter removed all features")
     }
 
-    ## Check projections (reproject smallbndx to projection of helperbndx
+    ## Check projections (reproject maxbndx to projection of smallbndx
     maxbndx <- crsCompare(maxbndx, smallbndx, nolonglat=TRUE)$x
 
     ## Intersect smallbnd with ecomapf
     #smallbndx <- selectByIntersects(smallbndx, ecomapf, 49)
     #maxbndx2 <- selectByIntersects(maxbndx, smallbndx, 2)
-
-    ## Check projections (reproject smallbndx to projection of helperbndx
-    maxbndx <- crsCompare(maxbndx, smallbndx, nolonglat=TRUE)$x
   
     ## Change name of maxbnd.unique if equals largebnd.unique 
     #if (identical(maxbnd.unique, c(helperbnd.unique, largebnd.unique))) {
@@ -258,7 +255,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     #  maxbnd.unique <- tmp.unique
     #}
   }
-
+ 
   #############################################################################
   ## largebnd
   #############################################################################
@@ -282,10 +279,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       if (length(largebndx) == 0) stop("largebnd.filter removed all features")
     }
 
-    ## Check projections (reproject largebndx to projection of helperbndx
-    prjdat <- crsCompare(largebndx, smallbndx, nolonglat=TRUE)
-    largebndx <- prjdat$x
-    smallbndx <- prjdat$ycrs
+    ## Check projections (reproject largebndx to projection of smallbndx
+    largebndx <- crsCompare(largebndx, smallbndx, nolonglat=TRUE)$x
 
     ## Get intersection of smallbndx
     #smallbndx <- suppressWarnings(selectByIntersects(smallbndx, largebndx, 49))
@@ -297,7 +292,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     #  largebnd.unique <- tmp.unique
     #}
   }
-
    
   #############################################################################
   ## helperbnd
@@ -361,10 +355,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       helperbndx <- subset(helperbndx, eval(parse(text = helperbnd.filter)))
     }
 
-    ## Check projections (reproject smallbndx to projection of helperbndx
-    prjlst <- crsCompare(smallbndx, helperbndx)
-    smallbndx <- prjlst$x
-    helperbndx <- prjlst$ycrs
+    ## Check projections (reproject helperbndx to projection of smallbndx
+    helperbndx <- crsCompare(helperbndx, smallbndx, nolonglat=TRUE)$x
   }
   helperbndx.prj <- sf::st_crs(helperbndx)
 
@@ -395,6 +387,9 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ### DO THE WORK
   #############################################################################
   if (helper_autoselect) { 
+    if (is.null(helperbndx)) {
+      stop("invalid helperbnd for autoselection")
+    }
     autoselectlst <- helper.select(smallbndx, smallbnd.unique, smallbnd.domain=smallbnd.domain,
  		helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, largebndx=largebndx, 
 		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
@@ -428,13 +423,13 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
   }
-
+ 
   for (i in 1:length(SAdomslst)) {   
     ## Check domain
     if (any(table(SAdomslst[[i]]$DOMAIN) > 1)) {
       stop("check smallbnd.domain.. may not be unique")
     } 
-
+ 
     ## Merge other attributes (smallbnd.domain) to SAdoms
     smallbndvars <- unique(c(smallbnd.domain, 
 		names(smallbndxlst[[i]])[!names(smallbndxlst[[i]]) %in% names(SAdomslst[[i]])]))
@@ -451,14 +446,22 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					maxbndx[, maxbnd.unique], largest=TRUE))
     }
+
     if (!largeishelper && !is.null(largebndx) && !largebnd.unique %in% names(SAdomslst[[i]])) {
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					largebndx[, largebnd.unique], largest=TRUE))
     }
+
     if (addstate) {
+      ## Check projections (reproject largebndx to projection of helperbndx
+      prjdat <- crsCompare(SAdomslst[[i]], stunitco, nolonglat=TRUE)
+      SAdomslst[[i]] <- prjdat$x
+      stunitco <- prjdat$ycrs
+
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					stunitco[, "STATECD"], largest=TRUE))
     }
+
     if (showsteps) {
       plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
       plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1, color="translucent")

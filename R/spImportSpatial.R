@@ -6,10 +6,16 @@ spImportSpatial <- function(layer=NULL, dsn=NULL, sql=NULL, polyfix=FALSE, gui=F
   ## spobj  simple feature (sf) object
   ####################################################################################
 
-  if (is.null(sql)) sql <- NA
+  if (is.null(sql)) {
+    sql <- NA
+  }
 
   ## Check sql
-  spobj <- pcheck.spatial(dsn=dsn, layer=layer, polyfix=polyfix, sql=sql, gui=gui)
+  spobj <- tryCatch(pcheck.spatial(dsn=dsn, layer=layer, 
+			polyfix=polyfix, sql=sql, gui=gui),
+     	 error=function(e) {
+			message("invalid spatial layer\n")
+			return(NULL) })
 
   return(spobj)
 }
