@@ -682,7 +682,7 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
     return(list(domest, prednames.unit=NULL, prednames.area=NULL, dunitlut.dom=NULL))
   }
 
-#yn=response
+yn=response
 
   ## Apply function to each dom
   domest <- SAest(yn=response, 
@@ -723,10 +723,10 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.att,
   ## get unique domains
   doms <- sort(as.character(na.omit(unique(dat.large[[domain]]))))
 
-#dat=dat.large
-#dunitlut=dunitlut.large
-#pltassgn=pltassgn.large
-#dom=doms[1]
+dat=dat.large
+dunitlut=dunitlut.large
+pltassgn=pltassgn.large
+dom=doms[1]
 
   estlst <- lapply(doms, SAest.dom, 
 			dat=dat.large, cuniqueid=cuniqueid, pltassgn=pltassgn.large,

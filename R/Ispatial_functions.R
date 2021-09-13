@@ -623,7 +623,7 @@ check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL,
     plot(sf::st_geometry(bbox1sfc), add=TRUE, border="red")
   }
 
-  if (is.na(intpct) || intpct == 0) {
+  if (is.na(intpct1) || intpct1 == 0) {
     msg <- paste(layer1nm, "does not overlap", layer2nm)
     if (stopifnotin) {
       stop(msg)
@@ -633,9 +633,9 @@ check.extents <- function(bbox1, bbox2, showext=FALSE, layer1nm=NULL,
   } else {
     if (intpct1 < 100 && !quiet) {
       message(layer2nm, " is not completely contained within ", layer1nm)
-      message("...intersection of ", intpct, "%")
+      message("...intersection of ", intpct1, "%")
     }
-    return(intpct)
+    return(intpct1)
   } 
 }
 

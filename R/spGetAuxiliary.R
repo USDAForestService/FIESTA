@@ -4,7 +4,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	rastlst.cont.NODATA=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
 	rastlst.cat.NODATA=NULL, rastfolder=NULL, asptransform=FALSE, rast.asp=NULL, 
 	rast.lut=NULL, rastlut=NULL, areacalc=TRUE, areaunits="ACRES", 
-	keepNA=TRUE, NAto0=TRUE, npixels=TRUE, returnxy=FALSE, 	showext=FALSE, 
+	keepNA=TRUE, NAto0=TRUE, npixels=TRUE, returnxy=FALSE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
  	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
@@ -378,6 +378,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## 4) Categorical raster layers - Extract values and get zonal probabilities
   ###############################################################################
   if (!is.null(rastlst.cat)) {
+    predfac.levels <- list()
 
     ## Extract values from categorical raster layers
     ######################################################
@@ -449,7 +450,8 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       setkeyv(zonalext, dunitvar)
       zonalDT.cat <- zonalDT.cat[zonalext] 
       zonalnames <- c(zonalnames, outname[outname != "npixels"])
-
+      predfac.levels[[rastnm]] <- as.numeric(sapply(strsplit(outname[outname != "npixels"], 
+							paste0(rastnm,".")), '[', 2))
       if (npixels) npixels <- FALSE
       rm(zonaldat.rast.cat)
       rm(zonalext)
@@ -492,6 +494,9 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   returnlst <- list(pltassgn=pltassgn, dunitzonal=setDF(dunitzonal), dunitvar=dunitvar,
 		inputdf=inputdf, prednames=prednames, zonalnames=zonalnames, 
 		predfac=predfac, npixelvar="npixels", pltassgnid=uniqueid)
+  if (length(predfac) > 0) {
+    returnlst$predfac.levels <- predfac.levels
+  }
   if (areacalc) {
     returnlst$dunitarea <- dunitarea
     returnlst$areavar <- areavar

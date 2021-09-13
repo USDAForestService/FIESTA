@@ -542,13 +542,11 @@ preds.standardize <- function(plt, aux, prednames) {
 
   plt.mean <- as.matrix(setDT(plt)[, lapply(.SD, mean, na.rm=TRUE), .SDcols=prednames])
   plt.sd <- as.matrix(plt[, lapply(.SD, sd, na.rm=TRUE), .SDcols=prednames])
-
   aux.mean.mat <- matrix(rep(plt.mean, nrow(aux)), byrow=TRUE, ncol=length(prednames))
   aux.sd.mat <- matrix(rep(plt.sd, nrow(aux)), byrow=TRUE, ncol=length(prednames))
 
   plt.mean.mat <- matrix(rep(plt.mean, nrow(plt)), byrow=TRUE, ncol=length(prednames))
   plt.sd.mat <- matrix(rep(plt.sd, nrow(plt)), byrow=TRUE, ncol=length(prednames))
-
 
   aux.mat <- as.matrix(setDF(aux)[, prednames])
   plt.mat <- as.matrix(setDF(plt)[, prednames])

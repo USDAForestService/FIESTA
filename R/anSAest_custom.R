@@ -80,7 +80,7 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   SAmultestlst <- list()
   SApredunit <- list()
   SApredarea <- list()
- 
+
   SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
 	SAmethod=SAmethod, largebnd.att=largebnd.att, smallbnd.att=smallbnd.att, 
 	esttype="AREA", landarea="FOREST", 

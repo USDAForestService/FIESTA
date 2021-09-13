@@ -388,8 +388,12 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #        FIDpct <- helperbndx.tmppct$FID[helperbndx.tmppct$int.pct > largebnd.threshold]
 #        helperbndx.tmp <- helperbndx.tmp[helperbndx.tmp$FID %in% FIDpct,]
 
-        helperbndx.tmppct <- suppressWarnings(tabulateIntersections(layer1=helperbndx.tmp, 
-			layer1fld=helperbnd.unique, layer2=largebnd_select))
+        helperbndx.tmppct <- tryCatch(suppressWarnings(tabulateIntersections(layer1=helperbndx.tmp, 
+			layer1fld=helperbnd.unique, layer2=largebnd_select)),
+     	 			error=function(e) {
+					message("helperbnd intersection...")
+					stop(e, "\n")})
+
         helperbnd.pct <- helperbndx.tmppct[[helperbnd.unique]][
 			helperbndx.tmppct$int.pct > largebnd.threshold]
         helperbndx.tmp <- helperbndx.tmp[helperbndx.tmp[[helperbnd.unique]] %in% helperbnd.pct,]

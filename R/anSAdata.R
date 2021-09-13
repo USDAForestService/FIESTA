@@ -217,6 +217,9 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   if (isseed) {
     SAdata$seed <- setDF(seedx)
   }
+  if (length(predfac) > 0) {
+    SAdata$predfac.levels <- auxdat$predfac.levels
+  }  
 
   if (savexy) {
     SAdata$spxy <- spxy

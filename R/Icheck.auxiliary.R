@@ -179,9 +179,11 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
    
     ## Check predictors
     ############################################################################
-    missvars <- c(missvars, 
+    if (length(c(strvar, predfac)) > 0) {
+      missvars <- c(missvars, 
 		predfac[sapply(c(strvar, predfac), 
 			function(x) sum(grepl(x, auxnmlst)) == 0)])
+    }
 
     ## Check continuous variables
     ############################################################################
@@ -325,23 +327,24 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       unitstrgrplut <- collapse$unitstrgrplut
     }
   } 
-
+ 
   ###################################################################################
   ## Check categorical (predfac) variables
   ###################################################################################
   if (!module %in% c("GB", "PB") && !strata) {
+    predvariance <- pltx[, lapply(.SD, var), .SDcols=prednames]
+
+    ## Remove predictors with variance = 0
+    if (any(predvariance == 0)) {
+      predvariance0 <- names(predvariance)[predvariance == 0]
+      message("predictor has variance equal to 0... removing from analysis: ", toString(predvariance0))
+      prednames <- prednames[!prednames %in% predvariance0]
+      predfac <- predfac[!predfac %in% predvariance0]
+    }
     auxnmlst <- names(auxlut)
     predfac <- unique(c(strvar, predfac))
 
     if (length(predfac) > 0) {
-      notfac <- predfac[!pltx[, lapply(.SD, is.factor), .SDcols=predfac][[1]]]
-      if (length(notfac) > 0) {
-        for (fac in notfac) {
-          fac.levels <- sort(unique(pltx[[fac]]))
-          pltx[[fac]] <- factor(pltx[[fac]], levels=fac.levels) 
-        }
-      }
-
       ## Check for missing variables and factor values
       for (fac in predfac) {
         pltvals <- sort(unique(pltx[[fac]]))
@@ -355,7 +358,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
         ## Set up dummy variables for strvar
         if (makedummy) {
           ## Get factor levels
-          fac.levels <- sort(unique(pltx[[fac]]))
+          fac.levels <- as.numeric(sapply(strsplit(facnmlst, 
+			paste0(fac,".")), '[', 2))
+          pltx[[fac]] <- factor(pltx[[fac]], levels=fac.levels)
 
           ## Set factor levels to keep and delete from auxlut.
           fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
@@ -365,7 +370,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
           ## Rename factor variables and add names to predictor list
           facs <- paste0(fac, fac.levels[-1])
           names(auxlut)[names(auxlut) %in% fac.unitcol.keep] <- facs
-          unitpreds <- c(prednames[prednames != fac], facs)
+          unitpreds <- unique(c(prednames[prednames != fac], facs))
 
           ## Create dummy variables for factor levels - 1
           dtfac <- pltx[, as.data.table(model.matrix(~., 
@@ -387,7 +392,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       }
     }
   }
-
+ 
   ##################################################################################
   ## If more than one unitvar, concatenate into 1 unitvar
   ##################################################################################
@@ -403,7 +408,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     }
     unitvar <- unitvar12
   }
- 
+
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea
   ##################################################################################
@@ -464,7 +469,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     pltx <- standardized$plt
     auxlut <- standardized$aux
   }
-
   returnlst <- list(pltx=as.data.frame(pltx), auxlut=as.data.frame(auxlut), 
 		unitarea=as.data.frame(unitarea), unitvar=unitvar, 
 		prednames=prednames, predfac=predfac, unitvars=unitvars)

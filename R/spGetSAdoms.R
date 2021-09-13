@@ -139,7 +139,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbndx <- subset(smallbndx, eval(parse(text = smallbnd.filter)))
   }
   smallbnd.cols <- names(smallbndx)
- 
+
   ## Aggregate all fires to one polygon
   if (dissolve) {
     smallbndx <- sf_dissolve(smallbndx, areacalc=FALSE)
@@ -147,6 +147,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     smallbnd.domain <- "tmp"
   } else {
     smallbndx <- sf_dissolve(smallbndx, col=smallbnd.domain, areacalc=FALSE)
+    smallbnd.unique <- smallbnd.domain
   }
  
   ## Apply smallbnd.stfilter (Just state)
@@ -392,7 +393,8 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     if (is.null(helperbndx)) {
       stop("invalid helperbnd for autoselection")
     }
-    autoselectlst <- helper.select(smallbndx, smallbnd.unique, smallbnd.domain=smallbnd.domain,
+    autoselectlst <- helper.select(smallbndx, smallbnd.unique=smallbnd.unique,
+ 		smallbnd.domain=smallbnd.domain,
  		helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, largebndx=largebndx, 
 		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
  		nbrdom.min=nbrdom.min, maxislarge=maxislarge, largeishelper=largeishelper, 
@@ -426,12 +428,12 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     par(mar=c(1,1,1,1))
   }
  
-  for (i in 1:length(SAdomslst)) {   
+  for (i in 1:length(SAdomslst)) { 
+  
     ## Check domain
     if (any(table(SAdomslst[[i]]$DOMAIN) > 1)) {
       stop("check smallbnd.domain.. may not be unique")
     } 
- 
     ## Merge other attributes (smallbnd.domain) to SAdoms
     smallbndvars <- unique(c(smallbnd.domain, 
 		names(smallbndxlst[[i]])[!names(smallbndxlst[[i]]) %in% names(SAdomslst[[i]])]))

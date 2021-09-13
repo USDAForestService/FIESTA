@@ -106,9 +106,10 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     if (is.null(prednames)) {
       prednames <- MAdata$prednames
     } else {
-      if (!all(prednames %in% MAdata$prednames))
+      if (!all(prednames %in% MAdata$prednames)) {
         stop("invalid prednames: ", 
 	 	toString(prednames[!prednames %in% MAdata$prednames]))
+      }
     }
     if (is.null(predfac)) {
       predfac <- MAdata$predfac
@@ -247,7 +248,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   } else {
       auxlut <- unitzonal
       makedummy <- TRUE
-  } 
+  }
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
         	module="MA", strata=strata, unitvar=unitvar, unitvar2=unitvar2, 
 		unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit,
@@ -267,6 +268,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   strvar <- auxdat$strvar
   unitNA <- auxdat$unitNA
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
+
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
