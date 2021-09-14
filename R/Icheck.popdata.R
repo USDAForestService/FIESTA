@@ -195,9 +195,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     #if (is.null(prednames)) {
     #  stop("no prednames included\n")
     #}
-    pvars2keep <- unique(c(pvars2keep, prednames))
-
-    
+    pvars2keep <- unique(c(pvars2keep, prednames))   
   }
  
   ## Check predfac
