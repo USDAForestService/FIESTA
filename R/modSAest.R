@@ -24,6 +24,7 @@ modSAest <- function(SApopdat=NULL, SAdomsdf=NULL, prednames=NULL,
   ######################################################################################
   gui <- FALSE
   returnlst <- list()
+  set.seed(66)
 
   ## Check input parameters
 #  input.params <- names(as.list(match.call()))[-1]
