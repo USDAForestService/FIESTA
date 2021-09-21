@@ -8,8 +8,7 @@
 }
 \usage{
 anSApop_report(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
-	title.ref=NULL, domain="DOMAIN", estnm="JFH",
-	senm="JFH.se", outfolder=NULL)
+	title.ref=NULL, domain="DOMAIN", estnm="JFH", totals=TRUE, outfolder=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,7 +20,7 @@ anSApop_report(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
   \item{title.ref}{ String. Reference information for title and output file names. }
   \item{domain}{ String. Name of domain to use in report tables. }
   \item{estnm}{ String. Name of estimate variable to use in tables. }
-  \item{senm}{ String. name of standard error variable to use in tables. }
+  \item{totals}{ Logical. If TRUE, per acre estimates are multiplied by acres. }
   \item{outfolder}{ String. The path of folder to output tables. }
 }
 \details{

@@ -197,7 +197,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
   }
   #xyids <- spxy[[xyjoinid]]
  
-
   #############################################################################
   ## Set datsource
   ########################################################
@@ -726,8 +725,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
       seedchk <- chkdbtab(tablst, seed_layer)
       if (is.null(seedchk) && seed_layer == "seed") {
         seedchk <- chkdbtab(tablst, "seedling")
-        if (is.null(seedchk) && seed_layer == "seedling") {
-          seed_layer <- chkdbtab(tablst, "seedling", stopifnull=TRUE)
+        if (is.null(seedchk)) {
+          message("no seedling data in database...")
+          isseed <- FALSE
         } else {
           seed_layer <- seedchk
         }
@@ -762,6 +762,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
       } else {
         message("database does not include all states: ", toString(statemiss))
         stcds <- stcds[!stcds %in% statemiss]
+        bndx <- spGetStates(bndx, states=stcds)$bndx
+        plot(st_geometry(bndx))
       }  
     }
 
@@ -867,7 +869,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
         }
         plt <- plt[, head(.SD, 1), by=pjoinid]
       }
-
+ 
       ## Get most current plots in database for measEndyr.filter & !measEndyr.filter
       #######################################################################
       p2fromqry <- pfromqry
@@ -1089,7 +1091,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
           }
         }
       } else {    ## measEndyr.filter = NULL
- 
         if (nrow(xyids) > 0) {
           plt <- plt[plt[[pjoinid]] %in% xyids[[xyjoinid]], ]
           pltids <- plt[[puniqueid]]
@@ -1100,7 +1101,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
           rs <- DBI::dbSendQuery(dbconn, cond.qry)
           cond <- suppressWarnings(DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
-
           if (istree) {
             tree.qry <- paste0("select tree.* from ", p2fromqry,
 			" join tree on(tree.PLT_CN = p.CN) where ", stfilter, 

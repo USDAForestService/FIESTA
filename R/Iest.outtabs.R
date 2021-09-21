@@ -84,7 +84,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       if (!is.null(char.width) && char.width == -Inf) char.width <- 0
     }
   }
-
+ 
   if (!is.null(unit_rowest)) {
     if (esttype == "RATIO") {
       unit_rowest <- suppressWarnings(FIESTA::getrhat(unit_rowest))

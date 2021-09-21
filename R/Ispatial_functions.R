@@ -1257,11 +1257,11 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   ## clipped to RS states.
   ##############################################################################
 
- 
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
   gui <- FALSE
+  clipbnd <- FALSE
 
   #############################################################################
   ## Import boundary
@@ -1292,7 +1292,6 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   ## Get intersecting states
   #############################################################################
   if (!is.null(stbnd) || !is.null(stbnd_dsn)) {
-
     stbnd <- pcheck.spatial(layer=stbnd, dsn=stbnd_dsn)
     stbnd.att <- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
@@ -1334,8 +1333,26 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     stname.att <- FIESTA::pcheck.varchar(var2check=stname.att, varnm="stname.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
-    states <- stateint[[stbnd.att]][!is.na(stateint[[stbnd.att]])]
- 
+    statenamesint <- stateint[[stbnd.att]][!is.na(stateint[[stbnd.att]])]
+    if (!is.null(states)) {
+      states <- pcheck.states(states)
+      if (!all(states %in% statenamesint)) {
+        statesmiss <- states[!states %in% statenamesint]
+        if (length(statesmiss) == length(states)) {
+          stop("no states intersect boundary")
+        } else {
+          message("not all states intersect boundary: ", statesmiss)
+          states <- states[states %in% statenamesint]
+          stateint <- stateint[stateint$STATENM %in% states, ]
+          clipbnd <- TRUE
+        }
+      } else if (length(states) < length(statenamesint)) {
+        clipbnd <- TRUE
+      }
+      statenames <- states
+    } else {
+      states <- statenamesint
+    }
     if (showsteps) {
       mar <-  par("mar")
       par(mar=c(1,1,1,1))
@@ -1345,44 +1362,41 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
       par(mar=mar)
     }
   } else {
-    stop("stbnd invalid... must include states")
+    states <- pcheck.states(states)
   }  
-  statenames <- pcheck.states(states)
   if (!all(states %in% FIESTA::ref_statecd$MEANING)) {
     if (stbnd.att == "COUNTYFIPS") {
       statenames <- FIESTA::ref_statecd[FIESTA::ref_statecd$VALUE %in% 
 			unique(as.numeric(substr(states, 1,2))), "MEANING"]
     }    
   }
- 
   ## Check statenames
-  if (is.null(RS)) {
+  if (is.null(RS) && !clipbnd) {
     statenameslst <- FIESTA::ref_statecd$MEANING
     statenames <- pcheck.varchar(var2check=statenames, varnm="states", gui=gui, 
 		checklst=statenameslst, caption="States", stopifnull=TRUE, multiple=TRUE)
  
   } else { 
-    statenameslst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]
+    if (!is.null(RS)) {
+      statenameslst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS == RS, "MEANING"]
+      if (!all(statenames %in% statenameslst)) {
+        statesout <- statenames[which(!statenames %in% statenameslst)] 
+        statenames <- statenames[which(statenames %in% statenameslst)]  
+        message(paste0("states are outside ", RS, " region: ", toString(statesout)))
 
-    if (!all(statenames %in% statenameslst)) {
-      statesout <- statenames[which(!statenames %in% statenameslst)] 
-      statenames <- statenames[which(statenames %in% statenameslst)]  
- 
-      message(paste0("states are outside ", RS, " region: ", toString(statesout)))
-
-      if (length(statenames) == 0) {
-        stop("no states in RMRS")
-      }   
-      message("clipping boundary to ", RS, " states: ", toString(statenames))
-
-      if (!is.null(stname.att)) {
-        bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[[stname.att]] %in% statenames, ])
-        if (nrow(bndx) == 0) stop("invalid stname.att")
+        if (length(statenames) == 0) {
+          stop("no states in RMRS")
+        }   
+        message("clipping boundary to ", RS, " states: ", toString(statenames))
       }
-      if (stbnd.att == "COUNTYFIPS") {
-        stcds <- FIESTA::ref_statecd[FIESTA::ref_statecd$MEANING %in% statenames, "VALUE"]
-        states <- states[as.numeric(substr(states, 1, 2)) %in% stcds]
-      }
+    }
+    if (!is.null(stname.att)) {
+      bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[[stname.att]] %in% statenames, ])
+      if (nrow(bndx) == 0) stop("invalid stname.att")
+    }
+    if (stbnd.att == "COUNTYFIPS") {
+      stcds <- FIESTA::ref_statecd[FIESTA::ref_statecd$MEANING %in% statenames, "VALUE"]
+      states <- states[as.numeric(substr(states, 1, 2)) %in% stcds]
     }
   }
 

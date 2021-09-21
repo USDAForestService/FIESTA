@@ -14,6 +14,17 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   gui <- FALSE
   plt=AOI <- NULL
 
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(anSAdata)), 
+		names(formals(FIESTA::spGetPlots)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
 ## TESTING
 #clipxy=TRUE
 #plot_layer="plot"
@@ -120,7 +131,9 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   condx <- pltdat$tabs$condx
   treex <- pltdat$tabs$treex
   seedx <- pltdat$tabs$seedx
-  SAdoms <- pltdat$bndx
+  if (is.null(SAdoms)) {
+    SAdoms <- pltdat$bndx
+  }
 
   ## Check SAdoms
   #if (!all(c("DOMAIN", "AOI") %in% names(SAdoms))) {
@@ -211,10 +224,10 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 	dunitzonal=setDF(dunitzonal), prednames=prednames, predfac=predfac,
 	zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
 	pltassgnid=pltassgnid)
-  if (istree) {
+  if (istree && !is.null(treex)) {
     SAdata$tree <- setDF(treex)
   }
-  if (isseed) {
+  if (isseed && !is.null(seedx)) {
     SAdata$seed <- setDF(seedx)
   }
   if (length(predfac) > 0) {
@@ -253,12 +266,12 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     datExportData(condx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    if (istree) {
+    if (istree && !is.null(treex)) {
       datExportData(treex, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }
-    if (isseed) {
+    if (isseed && !is.null(seedx)) {
       datExportData(seedx, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)

@@ -124,7 +124,6 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     statenames <- states
     stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% states]
   } else if (!is.null(bndx)) {
- 
     ## Get intersecting states
     statedat <- spGetStates(bndx, stbnd=NULL, stbnd_dsn=NULL, 
 			stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)

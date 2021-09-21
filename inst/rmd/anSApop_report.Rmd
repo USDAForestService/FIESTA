@@ -9,7 +9,7 @@ params:
   fortypgrpcd: ''
   title.ref: ''
   estnm: ''
-  senm: ''
+  totals: ''
   domain: ''
   
 ---
@@ -26,8 +26,8 @@ pcfilter <- params$pcfilter
 fortypgrpcd <- params$fortypgrpcd
 title.ref <- params$title.ref
 estnm <- params$estnm
-senm <- params$senm
 domain <- params$domain
+totals <- params$totals
 
 
 digits <- c(0,0,4,4,2,0)
@@ -41,10 +41,14 @@ digits <- c(0,0,4,4,2,0)
 # senm="JFH.se"
 # domain="Incident_Name"
 
-
+## Create senm
+senm <- paste0(estnm, ".se")
 
 if (is.null(title.ref)) {
   title.ref <- AOInm
+}
+if (is.null(domain)) {
+  domain <- "DOMAIN"
 }
 
 
@@ -109,17 +113,18 @@ Figure 1. Small area of interest, `r title.ref``r title.states`, `r invyrs2`.
 dunitlut <- SApopdat$dunitlut
 dunitarea <- SApopdat$dunitarea
 areavar <- SApopdat$areavar
-dominfo <- merge(dunitlut[, c("DOMAIN", "n.total")], dunitarea, by="DOMAIN")
+dominfo <- merge(dunitlut[, c("DOMAIN", "AOI", "n.total")], 
+                  dunitarea, by="DOMAIN")
 nbrdoms <- nrow(dominfo)
-totarea <- sum(dunitarea[[areavar]])
+totarea <- sum(dominfo[dominfo$AOI == 1, areavar])
 
 #knitr::kable(dominfo, "simple", align=c("lrr"),
 #              digits=digits, format.args=list(big.mark = ","))
 
 
 intro_text1 <- paste0("The total area of ", AOInm, " is ", format(round(totarea), big.mark=","), 
-        " acres with ", nbrdoms, " unique small areas. The area intersects ", length(states), 
-        " states (", toString(states), ").") 
+        " acres with ", nbrdoms, " unique small areas. The area intersects ",
+        length(states), " states (", toString(states), ").") 
                       
 
 intro_text2 <-
@@ -162,12 +167,18 @@ SAareadat1 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
 	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
 #est1 <- SAareadat1$est
-raw1 <- SAareadat1$raw
-totest1 <- raw1$dunit_totest
+multest1 <- SAareadat1$dunit_multest
 titlelst1 <- SAareadat1$titlelst
 
-est1 <- totest1[!is.na(totest1[[estnm]]), 
-            c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+multest1$pse <- multest1[[senm]] / multest1[[estnm]] * 100
+est1 <- multest1[multest1$AOI == 1, c("DOMAIN", "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+names(est1)[names(est1) == "DOMAIN"] <- domain
+
+if (totals) {
+  est1[[estnm]] <- est1[[estnm]] * est1$AREAUSED
+  est1[[senm]] <- est1[[senm]] * est1$AREAUSED
+}
+ 
 
 knitr::kable(est1, "simple", align=c("lrrrrr"), digits=digits,
              format.args=list(big.mark = ","))
@@ -184,11 +195,15 @@ knitr::kable(est1, "simple", align=c("lrrrrr"), digits=digits,
 ```{r EST1_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
 
 est1tot <- est1
-est1tot[[estnm]] <- (est1tot[[estnm]] * est1tot$AREAUSED)
-est1tot[[senm]] <- (est1tot[[senm]] * est1tot$AREAUSED)
+if (totals) {
+  ylab <- "Acres"
+} else {
+  ylab <- "Per Acre"
+}
 
-datBarplot(x=est1tot, xvar=domain, yvar=estnm, 
-           errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", ylab="Acres")
+horiz <- ifelse(nrow(est1tot) > 10, TRUE, FALSE)
+datBarplot(x=est1tot, xvar=domain, yvar=estnm, horiz=horiz,
+           errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", ylab=ylab)
 
 ```
 <!-- Figure 1. Area of forest land by, `r domain`, `r AOInm`, `r title.states`, `r invyrs2`. -->
@@ -201,7 +216,7 @@ datBarplot(x=est1tot, xvar=domain, yvar=estnm,
 
 
 ## Merge estimate to smallbnd
-smallbnd1 <- merge(smallbnd, est1, by=domain)
+smallbnd1 <- merge(smallbnd, est1, by.x=smallbnd.unique, by.y=domain)
 
 pal <- palette(brewer.pal(n=4, name = "Greens"))
 plot(smallbnd1[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
@@ -243,18 +258,22 @@ SAareadat2 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="VOLCFNET", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
-	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
+	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
 #est2 <- SAareadat2$est
-raw2 <- SAareadat2$raw
-totest2 <- raw2$dunit_totest
+multest2 <- SAareadat2$dunit_multest
 titlelst2 <- SAareadat2$titlelst
 
-est2 <- totest2[!is.na(totest2[[estnm]]), 
-                c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+multest2$pse <- multest2[[senm]] / multest2[[estnm]] * 100
+est2 <- multest2[multest2$AOI == 1, c("DOMAIN", "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+names(est2)[names(est2) == "DOMAIN"] <- domain
+
+if (totals) {
+  est2[[estnm]] <- est2[[estnm]] * est2$AREAUSED
+  est2[[senm]] <- est2[[senm]] * est2$AREAUSED
+}
 
 knitr::kable(est2, "simple", align=c("lrrrrr"), digits=digits,
              format.args=list(big.mark = ","))
-
 
 ```  
 
@@ -268,12 +287,18 @@ knitr::kable(est2, "simple", align=c("lrrrrr"), digits=digits,
 ```{r EST2_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
 
 est2tot <- est2
-est2tot[[estnm]] <- (est2tot[[estnm]] * est2tot$AREAUSED)
-est2tot[[senm]] <- (est2tot[[senm]] * est2tot$AREAUSED)
+if (totals) {
+  divideby <- "million"
+  ylab <- "Acres"
+} else {
+  divideby <- NULL
+  ylab <- "Per Acre"
+}
 
-datBarplot(x=est2tot, xvar=domain, yvar=estnm, 
+horiz <- ifelse(nrow(est1tot) > 10, TRUE, FALSE)
+datBarplot(x=est2tot, xvar=domain, yvar=estnm, horiz=horiz,
            errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", 
-           ylab="Acres", divideby="million")
+           ylab=ylab, divideby=divideby)
 
 ```
 
@@ -284,11 +309,11 @@ datBarplot(x=est2tot, xvar=domain, yvar=estnm,
 ```{r est2_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
 ## Merge estimate to smallbnd
-smallbnd2 <- merge(smallbnd, est2, by=domain)
+smallbnd2 <- merge(smallbnd, est2, by.x=smallbnd.unique, by.y=domain)
 
 pal <- palette(brewer.pal(n=4, name = "Reds"))
-plot(smallbnd1[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
- 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5, 
+plot(smallbnd2[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
+ 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=4, 
  	pal=palette(brewer.pal(n=4, name="Reds")),
  	border="black", lwd=.5, main="")
 
@@ -317,15 +342,21 @@ SAareadat3 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="BA", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
-	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
-raw3 <- SAareadat3$raw
-totest3 <- raw3$dunit_totest
+	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
+multest3 <- SAareadat3$dunit_multest
 titlelst3 <- SAareadat3$titlelst
 
-est3 <- totest3[!is.na(totest3[[estnm]]), 
-            c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+multest3$pse <- multest3[[senm]] / multest3[[estnm]] * 100
+est3 <- multest3[multest3$AOI == 1, c("DOMAIN", "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+names(est3)[names(est3) == "DOMAIN"] <- domain
 
-knitr::kable(est3, "simple", align=c("lrrrrr"), digits=digits,
+if (totals) {
+  est3[[estnm]] <- est3[[estnm]] * est3$AREAUSED
+  est3[[senm]] <- est3[[senm]] * est3$AREAUSED
+}
+
+
+knitr::kable(est3, "simple", align=c("lrrrr"), digits=digits,
              format.args=list(big.mark = ","))
 
 ```  
@@ -340,12 +371,17 @@ knitr::kable(est3, "simple", align=c("lrrrrr"), digits=digits,
 ```{r EST3_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
 
 est3tot <- est3
-est3tot[[estnm]] <- (est3tot[[estnm]] * est3tot$AREAUSED)
-est3tot[[senm]] <- (est3tot[[senm]] * est3tot$AREAUSED)
+if (totals) {
+  divideby <- "million"
+  ylab <- "Acres"
+} else {
+  divideby <- NULL
+  ylab <- "Per acre"
+}
 
 datBarplot(x=est3tot, xvar=domain, yvar=estnm, 
            errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", 
-           ylab="Acres", divideby="million")
+           ylab=ylab, divideby=divideby)
 
 ```
 
@@ -355,7 +391,7 @@ datBarplot(x=est3tot, xvar=domain, yvar=estnm,
 
 ```{r est3_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
-smallbnd3 <- merge(smallbnd, est3, by=domain)
+smallbnd3 <- merge(smallbnd, est3, by.x=smallbnd.unique, by.y=domain)
 
 pal <- palette(brewer.pal(n=4, name = "Blues"))
 plot(smallbnd3[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3), 
@@ -391,13 +427,18 @@ SAareadat4 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE",
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="VOLBFNET", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
-	returntitle=TRUE, multest=FALSE, title.ref=title.ref)
-raw4 <- SAareadat4$raw
-totest4 <- raw4$dunit_totest
+	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
+multest4 <- SAareadat4$dunit_multest
 titlelst4 <- SAareadat4$titlelst
 
-est4 <- totest4[!is.na(totest4[[estnm]]), 
-            c(domain, "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+multest4$pse <- multest4[[senm]] / multest4[[estnm]] * 100
+est4 <- multest4[multest4$AOI == 1, c("DOMAIN", "NBRPLT.gt0", estnm, senm, "pse", "AREAUSED")]
+names(est4)[names(est4) == "DOMAIN"] <- domain
+
+if (totals) {
+  est4[[estnm]] <- est3[[estnm]] * est3$AREAUSED
+  est4[[senm]] <- est3[[senm]] * est3$AREAUSED
+}
 
 knitr::kable(est4, "simple", align=c("lrrrrr"), digits=digits,
              format.args=list(big.mark = ","))
@@ -414,12 +455,17 @@ knitr::kable(est4, "simple", align=c("lrrrrr"), digits=digits,
 ```{r EST4_Barplot, echo=FALSE, warning=FALSE, message=FALSE}
 
 est4tot <- est4
-est4tot[[estnm]] <- (est4tot[[estnm]] * est4tot$AREAUSED)
-est4tot[[senm]] <- (est4tot[[senm]] * est4tot$AREAUSED)
+if (totals) {
+  divideby <- "million"
+  ylab <- "Acres"
+} else {
+  divideby <- NULL
+  ylab <- "Per acre"
+}
 
 datBarplot(x=est4tot, xvar=domain, yvar=estnm, 
            errbars=TRUE, sevar=senm, toplabelvar="NBRPLT.gt0", 
-           ylab="Acres", divideby="million")
+           ylab=ylab, divideby=divideby)
 
 ```
 
@@ -430,7 +476,7 @@ datBarplot(x=est4tot, xvar=domain, yvar=estnm,
 ```{r est4_map, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
 ## Merge estimate to smallbnd
-smallbnd4 <- merge(smallbnd, est4, by=domain)
+smallbnd4 <- merge(smallbnd, est4, by.x=smallbnd.unique, by.y=domain)
 
 plot(smallbnd4[estnm], key.pos=1, axes=TRUE, key.width=lcm(1.3),
 	graticule=TRUE, key.length=1.0, breaks="equal", nbreaks=5,

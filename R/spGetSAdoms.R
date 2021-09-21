@@ -61,6 +61,15 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 #    maxbnd.threshold = 51
 #    largebnd.threshold = 10
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(spGetSAdoms))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################

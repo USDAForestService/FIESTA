@@ -10,7 +10,7 @@
   	- Clip spatial coordinates and other tables to boundary (spClipPoint)
 }
 \usage{
-spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, RS = NULL,
+spGetPlots(bnd = NULL, bnd_dsn = NULL, bnd.filter = NULL, RS = NULL, 
 	xyids = NULL, xy_datsource = NULL, xy = NULL, xy_dsn = NULL,
 	xy.uniqueid = "PLT_CN", xvar = NULL, yvar = NULL, xy.crs = 4269, xyjoinid = NULL,
 	pjoinid = NULL, clipxy = TRUE, datsource = "datamart", data_dsn = NULL,

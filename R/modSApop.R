@@ -262,9 +262,16 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
     returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)
   }
   if (!is.null(smallbnd)) {
+    if (is.null(smallbnd.unique)) {
+      if ("DOMAIN" %in% names(smallbnd)) {
+        smallbnd.unique <- "DOMAIN"
+      } else if (length(names(sf::st_drop_geometry(smallbnd))) == 1) {
+        smallbnd.unique <- names(sf::st_drop_geometry(smallbnd))
+      } else {
+        stop("must include smallbnd.unique for smallbnd")
+      }
+    } 
     returnlst$smallbnd <- smallbnd
-  }
-  if (!is.null(smallbnd.unique)) {
     returnlst$smallbnd.unique <- smallbnd.unique
   }
 

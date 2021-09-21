@@ -12,9 +12,18 @@ allin1f <- function(x, y, char.width=NULL, estnull="--", psenull="--",
 	estround=NULL, pseround=NULL) {
   ## DESCRIPTION: Gets estimate (% standard error)
 
-  if (all(is.na(x))) x <- estnull
-  if (all(x == 0) && (all(y == 0) || all(y == psenull))) x <- estnull
-  if (all(y == 0)) y <- psenull
+  if (all(is.na(x))) {
+    x <- estnull
+  }
+  if (all(is.na(y))) {
+    y <- estnull
+  }
+  if (all(x == 0) && (all(y == 0) || all(y == psenull))) {
+    x <- estnull
+  }
+  if (all(y == 0)) {
+    y <- psenull
+  }
 
   if (is.numeric(estnull) || !all(x == estnull)) {
     x <- as.numeric(x)  
@@ -60,9 +69,9 @@ crosstabx <- function(x, xvar, estnm, psenm, allin1=FALSE, char.width=NULL,
   x[NBRPLT.gt0 == 0, (psenm) := psenull]
 
   if (allin1) {
-    if (is.null(char.width)) 
+    if (is.null(char.width)) {
       char.width <- max(nchar(na.omit(x[[psenm]])))
-
+    }
     estpse <- mapply(allin1f, x=x[[estnm]], y=x[[psenm]], 
 		MoreArgs=list(char.width=char.width, estnull=estnull, psenull=psenull, 
 		estround=estround, pseround=pseround))

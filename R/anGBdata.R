@@ -14,6 +14,16 @@ anGBdata <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL,
   gui <- FALSE
   plt=strvar=stratalut=strwtvar <- NULL
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(anGBdata)), 
+		names(formals(FIESTA::spGetPlots)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui) 

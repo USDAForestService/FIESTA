@@ -1,5 +1,5 @@
 anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL, 
-	title.ref=NULL, domain="DOMAIN", estnm="JFH", senm="JFH.se", outfolder=NULL) {
+	title.ref=NULL, domain="DOMAIN", estnm="JFH", totals=TRUE, outfolder=NULL) {
   ## DESCRIPTION: Creates a report using Rmarkdown 
   ## 		Adds a folder named report in the outfolder and copies all 
   ##		components of report into folder.
@@ -13,7 +13,18 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
   SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", 
 		list.items=c("treex", "seedx"))
 
+  ## Check estnm
+  if (is.null(estnm)) {
+    stop("must include estnm")
+  }
+
+  ## Check totals
+  totals <- FIESTA::pcheck.logical(totals, varnm="totals", title="Totals?", first="YES", gui=gui)
+
+  ## Check outfolder 
   outfolder <- pcheck.outfolder(outfolder)
+
+  ## Create temporary folder for report
   reportfolder <- tempdir()
   reportrmd <- system.file("rmd", "anSApop_report.Rmd", package="FIESTA")
 
@@ -59,7 +70,7 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
     		output_file = reportfn,
     		params = list(SApopdat=SApopdat, AOInm=AOInm, 
 		pcfilter=pcfilter, fortypgrpcd=fortypgrpcd, title.ref=title.ref,
-		domain=domain, estnm=estnm, senm=senm),
+		domain=domain, estnm=estnm, totals=totals),
     		envir = parent.frame()
   	),
 	error=function(err) {

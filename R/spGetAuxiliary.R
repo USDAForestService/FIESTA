@@ -100,9 +100,14 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check continuous rasters
   ###################################################################
-  rastlst.contfn <- suppressWarnings(getrastlst.rgdal(rastlst.cont, 
-	rastfolder, gui=gui, quiet=TRUE, stopifLonLat=TRUE))
-
+  rastlst.contfn <- tryCatch(suppressWarnings(getrastlst.rgdal(rastlst.cont, 
+	rastfolder, quiet=TRUE, gui=gui)),
+     	 	error=function(e) {
+			message(e, "\n")
+			return("stop") })
+  if (!is.null(rastlst.contfn) && rastlst.contfn == "stop") {
+    stop()
+  }
   if (!is.null(rastlst.contfn)) {
     band.cont <- sapply(rastlst.contfn, function(x) rasterInfo(x)$nbands)
     nlayers.cont <- sum(band.cont)
@@ -157,9 +162,14 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  
   ## Check categorical rasters
   ###################################################################
-  rastlst.catfn <- suppressWarnings(getrastlst.rgdal(rastlst.cat, 
-	rastfolder, quiet=TRUE, gui=gui))
-
+  rastlst.catfn <- tryCatch(suppressWarnings(getrastlst.rgdal(rastlst.cat, 
+	rastfolder, quiet=TRUE, gui=gui)),
+     	 	error=function(e) {
+			message(e, "\n")
+			return("stop") })
+  if (!is.null(rastlst.catfn) && rastlst.catfn == "stop") {
+    stop()
+  }
   if (!is.null(rastlst.catfn)) {
     band.cat <- sapply(rastlst.catfn, function(x) rasterInfo(x)$nbands)
     nlayers.cat <- sum(band.cat)
