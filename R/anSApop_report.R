@@ -1,4 +1,4 @@
-anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL, 
+anSApop_report <- function(SApopdatlst, AOInm, pcfilter=NULL, fortypgrpcd=NULL, 
 	title.ref=NULL, domain="DOMAIN", estnm="JFH", totals=TRUE, outfolder=NULL) {
   ## DESCRIPTION: Creates a report using Rmarkdown 
   ## 		Adds a folder named report in the outfolder and copies all 
@@ -10,8 +10,11 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
   report_imagefn <- NULL
 
   ## Check SApopdat
-  SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", 
+  for (SApopdat in SApopdatlst) {
+    ## Check SApopdat
+    SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", 
 		list.items=c("treex", "seedx"))
+  }
 
   ## Check estnm
   if (is.null(estnm)) {
@@ -19,7 +22,7 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
   }
 
   ## Check totals
-  totals <- FIESTA::pcheck.logical(totals, varnm="totals", title="Totals?", first="YES", gui=gui)
+  totals <- FIESTA::pcheck.logical(totals, varnm="totals", title="Totals?", first="YES")
 
   ## Check outfolder 
   outfolder <- pcheck.outfolder(outfolder)
@@ -37,7 +40,14 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
   #}
 
   ref_fortypgrp <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "FORTYPGRPCD", ]
-  ftypgrplst <- table(SApopdat$pltcondx$FORTYPGRPCD)
+
+  ftypgrpdf <- {}
+  for (i in 1:length(SApopdatlst)) {
+    SApopdatlst[[i]]$treex
+    ftypgrpdf <- rbind(ftypgrpdf, SApopdatlst[[i]]$pltcondx[, c("PLT_CN", "FORTYPGRPCD")])
+  }
+
+  ftypgrplst <- table(ftypgrpdf$FORTYPGRPCD)
   if (!is.null(fortypgrpcd) && length(fortypgrpcd) > 0) {
     if (!fortypgrpcd %in% names(ftypgrplst)) {
       stop("FORTYPGRPCD ", fortypgrpcd, " not in popdat")
@@ -68,7 +78,7 @@ anSApop_report <- function(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
   	rmarkdown::render(
     		input = rmdfn,
     		output_file = reportfn,
-    		params = list(SApopdat=SApopdat, AOInm=AOInm, 
+    		params = list(SApopdatlst=SApopdatlst, AOInm=AOInm, 
 		pcfilter=pcfilter, fortypgrpcd=fortypgrpcd, title.ref=title.ref,
 		domain=domain, estnm=estnm, totals=totals),
     		envir = parent.frame()

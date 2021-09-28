@@ -552,8 +552,8 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 		title.filter="cond.nonsamp.filter")$xf
     adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
-    condx <- adjfacdata$condadj
-    treef <- adjfacdata$treeadj
+    condx <- adjfacdata$condx
+    treef <- adjfacdata$treex
     if (addseed) {
       seedf <- adjfacdata$seedx
     }   

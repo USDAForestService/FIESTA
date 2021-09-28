@@ -880,8 +880,8 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
     adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
-    condx <- adjfacdata$condadj
-    treef2 <- adjfacdata$treeadj
+    condx <- adjfacdata$condx
+    treef <- adjfacdata$treex
     if (addseed) {
       seedf <- adjfacdata$seedx
     }

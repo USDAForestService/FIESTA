@@ -7,7 +7,7 @@
 	Compile population data for input to the modSA* modules. }
 
 \usage{    
-modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL, 
+modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.domain = NULL, 
 	cond = NULL, plt = NULL, tree = NULL, seed = NULL, pltassgn = NULL, 
 	dsn = NULL, puniqueid = "CN", pltassgnid = "PLT_CN", pjoinid = "CN", 
 	tuniqueid="PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID", 
@@ -27,7 +27,7 @@ modSApop(SAdoms = NULL, smallbnd = NULL, smallbnd.unique = NULL,
 \arguments{
   \item{SAdoms}{sf object. SA domains with attributes for joining. }
   \item{smallbnd}{sf object. small bound. }
-  \item{smallbnd.unique}{ String. Name of attribute defining unique attribute. }
+  \item{smallbnd.domain}{ String. Name of attribute defining domain attribute. }
   \item{cond}{ DF/DT, comma-separated values (CSV) file (*.csv), or layer in dsn. 
 	The condition-level variables with one record per condition, including or 
 	excluding nonsampled conditions. Plot variables and strata/estimation unit 

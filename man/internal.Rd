@@ -4,6 +4,8 @@
 \alias{change10char}
 \alias{check.logic}
 \alias{check.estdata}
+\alias{check.estfilters}
+\alias{check.outparams}
 \alias{check.popdata}
 \alias{check.estdataPB}
 \alias{check.popdataPB}

@@ -7,13 +7,13 @@
 	Generates a set of core tables based on a small area of interest.
 }
 \usage{
-anSApop_core(SApopdat, title.ref, xlsx = FALSE, outfolder = NULL, 
+anSApop_core(SApopdatlst, title.ref, xlsx = FALSE, outfolder = NULL, 
 	outfn.pre = NULL, outfn.date = FALSE, overwrite = FALSE, 
 	fortypgrpcd = 220, divideby.vol = "million")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{SApopdat}{ R object. Population data from database, returned from 
+  \item{SApopdatlst}{ R object. Population data from database, returned from 
 	modSApop() function for a specified area of interest. }
   \item{title.ref}{ String. Reference information for title and output file names. }
   \item{xlsx}{ Logical. If TRUE, adds all tables to Excel spreadsheet. }

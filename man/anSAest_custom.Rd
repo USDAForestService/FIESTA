@@ -8,7 +8,7 @@
 	a custom-defined boundary.	
 }
 \usage{
-anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit", largebnd.att = NULL, 
+anSAest_custom(SApopdatlst, SApackage = "JoSAE", SAmethod = "unit", largebnd.unique = NULL, 
 	landarea = "FOREST", pcfilter = NULL, estvarlst = NULL, 
 	tfilterlst = "live", showsteps = FALSE, savedata = FALSE, savesteps = FALSE, 
 	append_layer = FALSE, savemultest = FALSE, outfolder = NULL, outfn.pre = NULL, 
@@ -20,12 +20,13 @@ anSAest_custom(SApopdat, SApackage = "JoSAE", SAmethod = "unit", largebnd.att = 
 }
 
 \arguments{
-  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
+  \item{SApopdatlst}{ List of list. One or more population data objects returned 
+	from modSApop(). }
   \item{SApackage}{ String. small area package to use ('JoSAE', 'sae') }
   \item{SAmethod}{ String. small area method to use ('unit', 'area', 'combo').
 	If SAmethod='combo', a combination of area-level estimation and unit-level
 	EBLUP estimates are output. }
-  \item{largebnd.att}{ String. Name of attribute defining large bound domains. }
+  \item{largebnd.unique}{ String. Name of attribute defining large bound unique domains. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
 	to SITECLCD in(1:6) and RESERVCD = 0. }

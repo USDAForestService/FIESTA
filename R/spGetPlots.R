@@ -83,9 +83,9 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
     if (!is.null(bndx)) {
       bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
     } 
- 
     ## Check xyids
     xyids <- pcheck.table(xyids)
+
     if (!is.null(xyids)) {
       ## Check xyjoinid
       xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
@@ -129,7 +129,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
         if (is.null(xy) && is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
-
         xydat <- spGetXY(bnd=bndx, 
 		states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
 		xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
@@ -1220,7 +1219,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
 		overwrite_layer=overwrite_layer, add_layer=TRUE, 
 		append_layer=append_layer)   
     }
-    for (tab in c(xyids, tabs2save)) {
+
+    datExportData(xyids, outfolder=outfolder, out_fmt=out_fmt, 
+		out_dsn=out_dsn, out_layer="xyids", outfn.date=outfn.date, 
+		overwrite_layer=overwrite_layer, add_layer=TRUE, 
+		append_layer=append_layer)
+
+    for (tab in tabs2save) {
       datExportData(get(tab), outfolder=outfolder, out_fmt=out_fmt, 
 		out_dsn=out_dsn, out_layer=tab, outfn.date=outfn.date, 
 		overwrite_layer=overwrite_layer, add_layer=TRUE, 

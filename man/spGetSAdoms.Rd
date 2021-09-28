@@ -34,11 +34,11 @@ spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,
 	vector formats (https://www.gdal.org/ogr_formats.html). Optional if smallbnd
 	is an R object. } 
   \item{smallbnd.unique}{ String. The attribute in smallbnd that defines unique 
-	identifier in smallbnd that defines the unique small area(s). If NULL,
+	domain identifier in smallbnd that defines the unique small area(s). If NULL,
 	an attribute is appended to smallbnd attribute table and used as smallbnd.unique, 
 	defining one polygon (SMALLAREA="SMALLAREA"). } 
-  \item{smallbnd.domain}{ String. A different attribute to use as for modeling domains.
-	If NULL, smallbnd.domain=smallbnd.unique. }
+  \item{smallbnd.domain}{ String. A different attribute to use as for grouped 
+	modeling domains (optional). If NULL, smallbnd.domain=smallbnd.unique. }
   \item{smallbnd.filter}{ String. A filter for smallbnd. Must be R syntax. } 
   \item{smallbnd.stfilter}{ String. A spatial filter for smallbnd to include
 	only smallbnd polygons that intersect (or overlap >= 30%) the filter 

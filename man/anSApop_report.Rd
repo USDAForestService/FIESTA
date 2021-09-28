@@ -7,12 +7,12 @@
 	Generates a standard report based on area of interest.
 }
 \usage{
-anSApop_report(SApopdat, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
+anSApop_report(SApopdatlst, AOInm, pcfilter=NULL, fortypgrpcd=NULL,
 	title.ref=NULL, domain="DOMAIN", estnm="JFH", totals=TRUE, outfolder=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{SApopdat}{ List object. Population data from FIESTA::modGBpop(). }
+  \item{SApopdatlst}{ List object. Population data from FIESTA::modGBpop(). }
   \item{AOInm}{ String. Name of area of interest. }
   \item{pcfilter}{ String. Name of variable or string to filter plots or conditions.
 	Must be in R syntax (e.g., ADFORCD == 408, COUNTYCD == 1). Optional. }

@@ -260,9 +260,16 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   polyvarlst <- unique(c(dunitvar, vars2keep))[!unique(c(dunitvar, vars2keep)) %in% names(sppltx)]
   if (!dunitvar %in% names(sppltx)) { 
       ## Extract values of polygon layer to points
-    extpoly <- spExtractPoly(xyplt=sppltx, polyvlst=dunit_layerx, 
+    extpoly <- tryCatch(spExtractPoly(xyplt=sppltx, polyvlst=dunit_layerx, 
 		uniqueid=uniqueid, polyvarlst=polyvarlst, 
-		keepNA=FALSE, exportNA=exportNA)
+		keepNA=FALSE, exportNA=exportNA),
+     	 error=function(e) {
+			message(e, "\n")
+			return(NULL) })
+    if (is.null(extpoly)) {
+      return(NULL)
+      stop()
+    }
     sppltx <- unique(extpoly$spxyext)
   } else {
     message(dunitvar, " already in spplt... not extracting from dunit_layer")
@@ -290,6 +297,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
 		keepNA=keepNA, exportNA=exportNA, outfolder=outfolder, 
 		overwrite_layer=overwrite_layer)
+
     sppltx <- unique(extdat.rast.cont$spplt)
     prednames.cont <- extdat.rast.cont$outnames
     inputdf.cont <- extdat.rast.cont$inputdf
@@ -317,6 +325,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     setnames(zonalDT.cont, "DOMAIN", dunitvar)
     setkeyv(zonalDT.cont, dunitvar)
     #zonalDT.cont.names <- {}
+    message(paste("extracting zonal statistics...")) 
 
     for (i in 1:length(rastlst.contfn)) {
       rastfn <- rastlst.contfn[i]

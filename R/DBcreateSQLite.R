@@ -44,7 +44,8 @@ DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
       file.remove(SQLitepath) 
       message("overwriting database... ", SQLitepath)
     } else {
-      sqlconn <- DBtestSQLite(SQLitefn=SQLitefn, gpkg=gpkg, dbconnopen=dbconnopen)
+      sqlconn <- DBtestSQLite(SQLitefn=SQLitefn, gpkg=gpkg, dbconnopen=dbconnopen,
+		showlist=FALSE)
       if (dbconnopen) return(sqlconn)    
     }
   } else {

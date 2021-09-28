@@ -3,7 +3,7 @@ output:
   word_document:
     reference_docx: anGBtemplate.docx
 params:
-  SApopdat: ''
+  SApopdatlst: ''
   AOInm: ''
   pcfilter: ''
   fortypgrpcd: ''
@@ -20,7 +20,7 @@ params:
 library(FIESTA)
 library(RColorBrewer)
 
-SApopdat <- params$SApopdat
+SApopdatlst <- params$SApopdatlst
 AOInm <- params$AOInm
 pcfilter <- params$pcfilter
 fortypgrpcd <- params$fortypgrpcd
@@ -33,7 +33,7 @@ totals <- params$totals
 digits <- c(0,0,4,4,2,0)
 
 # AOInm <- "ecoM332"
-# load("E:/workspace/FIESTA/FIESTA_SA/testfolder4/M332/SApopdat.rda")
+# load("E:/workspace/FIESTA/FIESTA_SA/testfolder4/M332/SApopdatlst.rda")
 # pcfilter <- NULL
 # title.ref <- NULL
 # fortypgrpcd <- 200
@@ -52,22 +52,40 @@ if (is.null(domain)) {
 }
 
 
-## Get states in GBpopdat or that pcfilter
-states <- SApopdat$states
-invyrs <- unique(unlist(SApopdat$invyrs))
-
-if (!is.null(pcfilter) && 'STATECD' %in% names(SApopdat$pltcondx)) {
-  pltcondf <- datFilter(SApopdat$pltcondx, xfilter=pcfilter)$xf
-  states <- FIESTA::pcheck.states(unique(pltcondf$STATECD))
-  invyrs <- unique(pltcondf$INVYR)
+## pcfilter
+for (i in 1:length(SApopdatlst)) {
+  if (!is.null(pcfilter) && 'STATECD' %in% names(SApopdat$pltcondx)) {
+    pltcondf <- datFilter(SApopdat$pltcondx, xfilter=pcfilter)$xf
+    states <- FIESTA::pcheck.states(unique(pltcondf$STATECD))
+    invyrs <- unique(pltcondf$INVYR)
+  }
 }
+
+## Get all states and inventory years in SApopdatlst 
+states <- {}
+invyrs <- {}
+for (i in 1:length(SApopdatlst)) {
+  if (!is.null(pcfilter) && 'STATECD' %in% names(SApopdatlst[[i]]$pltcondx)) {
+    pltcondf <- datFilter(SApopdatlst[[i]]$pltcondx, xfilter=pcfilter)$xf
+    states <- sort(c(states, FIESTA::pcheck.states(unique(pltcondf$STATECD))))
+    invyrs <- sort(unique(c(invyrs, pltcondf$INVYR)))
+  } else {
+    states <- sort(unique(c(states, SApopdatlst[[i]]$states)))
+    invyrs <- sort(unique(c(invyrs, unlist(SApopdatlst[[i]]$invyrs))))
+  }
+}
+
 
 if (is.null(pcfilter)) {
   title.statesx=title.states <- NULL
   title.filter <- NULL
 } else {
-  title.statesx <- paste(states, collapse=" and ")
-  title.states <- paste0(", ", paste(states, collapse=" and "))
+  if (length(states) < 3) {
+    title.statesx <- paste(states, collapse=" and ")
+    title.states <- paste0(", ", paste(states, collapse=" and "))
+  } else {
+    title.statesx=title.states <- NULL 
+  }
   title.filter <- AOInm
 }
 invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
@@ -91,9 +109,13 @@ Rocky Mountain Research Station, Forest Inventory and Analysis  | `r format(Sys.
 
 ```{r smallbnd, echo=FALSE, warning=FALSE, message=FALSE, fig.width=7.5}
 
-smallbnd <- SApopdat$smallbnd
-smallbnd.unique <- SApopdat$smallbnd.unique
-plot(st_geometry(smallbnd), border="black", main="")
+smallbnd <- {}
+for (i in 1:length(SApopdatlst)) {
+  smallbnd <- rbind(smallbnd, SApopdatlst[[i]]$smallbnd)
+  smallbnd.unique <- SApopdatlst[[i]]$smallbnd.unique
+}  
+plot(sf::st_geometry(smallbnd), border="black", main="")
+
 
 ```
 Figure 1. Small area of interest, `r title.ref``r title.states`, `r invyrs2`.
@@ -110,9 +132,15 @@ Figure 1. Small area of interest, `r title.ref``r title.states`, `r invyrs2`.
 
 ```{r Summary_Info, echo=FALSE, include=FALSE}
  
-dunitlut <- SApopdat$dunitlut
-dunitarea <- SApopdat$dunitarea
-areavar <- SApopdat$areavar
+
+dunitlut <- {}
+dunitarea <- {}
+for (i in 1:length(SApopdatlst)) {
+  dunitlut <- rbind(dunitlut, SApopdatlst[[i]]$dunitlut)
+  dunitarea <- rbind(dunitarea, SApopdatlst[[i]]$dunitarea)
+  areavar <- SApopdatlst[[i]]$areavar
+}
+  
 dominfo <- merge(dunitlut[, c("DOMAIN", "AOI", "n.total")], 
                   dunitarea, by="DOMAIN")
 nbrdoms <- nrow(dominfo)
@@ -162,7 +190,7 @@ Table 1. Area of forest land by `r domain`, `r title.ref``r title.states`, `r in
 
 ```{r est1, echo=FALSE, warning=FALSE, message=FALSE}
 
-SAareadat1 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
+SAareadat1 <- modSAest(SApopdatlst=SApopdatlst, SApackage="JoSAE", 
 	SAmethod="area", esttype="AREA", landarea="FOREST", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
 	returntitle=TRUE, multest=TRUE, title.ref=title.ref)
@@ -254,7 +282,7 @@ Table 2. Net cubic-foot volume of live trees on forest land by domain, `r title.
 
 ```{r est2, echo=FALSE, warning=FALSE, message=FALSE}
  
-SAareadat2 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
+SAareadat2 <- modSAest(SApopdatlst=SApopdatlst, SApackage="JoSAE", 
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="VOLCFNET", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
@@ -338,7 +366,7 @@ Table 3. Square-feet basal area of live trees on forest land by domain, `r AOInm
 
 ```{r est3, echo=FALSE, warning=FALSE, message=FALSE}
 
-SAareadat3 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
+SAareadat3 <- modSAest(SApopdatlst=SApopdatlst, SApackage="JoSAE", 
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="BA", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,
@@ -423,7 +451,7 @@ Table 4. Net board-foot volume of live trees on forest land by domain, `r title.
 
 ```{r est4, echo=FALSE, warning=FALSE, message=FALSE}
 
-SAareadat4 <- modSAest(SApopdat=SApopdat, SApackage="JoSAE", 
+SAareadat4 <- modSAest(SApopdatlst=SApopdatlst, SApackage="JoSAE", 
 	SAmethod="area", esttype="TREE", landarea="FOREST", 
 	estvar="VOLBFNET", estvar.filter="STATUSCD == 1", 
  	smallbnd.att=NULL, savedata=FALSE, rawdata=TRUE,

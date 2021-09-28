@@ -619,10 +619,11 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
 		overwrite_layer=overwrite_layer, append_layer=append_layer,
 		outfn.date=outfn.date, outfn.pre=outfn.pre))
   }
-
+ 
   ## Check file name
   ###########################################################
   chkfn <- checkfilenm(out_dsn, outfolder=outfolder)
+
   if (is.null(chkfn)) {
     if (is.null(out_dsn)) {
       stop("out_dsn is NULL")
@@ -641,6 +642,7 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
       }
     }
   }
+ 
   if (is.null(chkfn) || overwrite_dsn || !overwrite_dsn) {
     out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
 		outfn.date=outfn.date, overwrite=overwrite_dsn, outfn.default="data",

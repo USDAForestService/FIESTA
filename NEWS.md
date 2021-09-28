@@ -1,3 +1,12 @@
+FIESTA_3.0.30 (Release date: 2021-09-27)
+==============
+created anGetData(), to deprecate (anSAdata, anGBdata, anMAdata)
+
+removed anSApop_ecomap()
+removed anSApop_RAVG()
+
+
+
 FIESTA_3.0.29 (Release date: 2021-08-02)
 ==============
 added new function, spGetXY(), to clip XY coordinates before getting plot data.

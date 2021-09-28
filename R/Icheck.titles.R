@@ -1,4 +1,4 @@
-check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL, 
+check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts=NULL, 
 	ratiotype="PERACRE", tabtype="PCT", sumunits=FALSE, title.main=NULL, 
 	title.pre=NULL, title.ref=NULL, title.rowvar=NULL, title.rowgrp=NULL, 
 	title.colvar=NULL, title.unitvar=NULL, title.filter=NULL, title.unitsn=NULL,
@@ -31,11 +31,17 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 		ifelse (landarea == "TIMBERLAND", "timberland",
 			ifelse (landarea == "CHANGE", "change", ""))))
   if (addtitle || returntitle) {
-    title.unitvar.out <- NULL
-    if (!sumunits && length(unique(dat[[unitvar]])) > 1) 
-      title.unitvar.out <- paste("by", title.unitvar)
-    if (!is.null(title.unitvar.out) && !is.null(unitvar2)) 
-      title.unitvar.out <- paste(title.unitvar.out, "and", unitvar2)
+    if (!is.null(dat)) {
+      title.unitvar.out <- NULL
+      if (!sumunits && length(unique(dat[[unitvar]])) > 1) {
+        title.unitvar.out <- paste("by", title.unitvar)
+      }  
+      if (!is.null(title.unitvar.out) && !is.null(unitvar2)) { 
+        title.unitvar.out <- paste(title.unitvar.out, "and", unitvar2)
+      }
+    } else {
+      title.unitvar.out <- title.unitvar
+    }
 
     #####  TITLE INFO FOR OUTPUT TABLES
     ########################################################
@@ -208,7 +214,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
       ## title.part2
       ####################################################################
       title.rowgrp2 <- if(!is.null(title.rowgrp)) paste(" and", title.rowgrp) 
-      if (rowvar == "TOTAL") {
+      if (!is.null(rowvar) && rowvar == "TOTAL") {
         title.part2 <- ""
       } else {
         title.part2 <- tolower(paste0("by ", title.rowvar, title.rowgrp2))
@@ -252,6 +258,7 @@ check.titles <- function(dat, esttype, estseed="none", phototype=NULL, Npts=NULL
 
         if (rowvar == "TOTAL" || 
 		(colvar == "NONE" && sumunits) || 
+ 		(colvar == "NONE" && is.null(dat)) ||
 		(colvar == "NONE" && length(unique(dat[[unitvar]])) == 1)) {
 
           if (rowvar == "TOTAL") {

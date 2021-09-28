@@ -84,8 +84,9 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
       stop("outfn and outfn.default is null")
     }
   }
-  if (!is.character(outfn))
+  if (!is.character(outfn)) {
     stop("outfn must be a character string")
+  }
   extfn <- getext(outfn) 
 
   ## Check ext

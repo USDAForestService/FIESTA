@@ -1,4 +1,4 @@
-modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL, 
+modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL, 
 	cond=NULL, plt=NULL, tree=NULL, seed=NULL, pltassgn=NULL, dsn=NULL, 
 	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", tuniqueid="PLT_CN",  
 	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", 
@@ -87,11 +87,11 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   ## Load data
   ###################################################################################
   if (!is.null(SAdata)) {
-    list.items <- c("SAdoms", "cond", "plt",
+    list.items <- c("bnd", "cond", "plt",
 		"pltassgn", "puniqueid", "pltassgnid", "pjoinid", "dunitarea",
 		"dunitvar", "areavar", "dunitzonal")
     SAdata <- FIESTA::pcheck.object(SAdata, "SAdata", list.items=list.items)
-    SAdoms <- SAdata$SAdoms
+    SAdoms <- SAdata$bnd
     #smallbnd <- SAdata$smallbnd
     plt <- SAdata$plt
     cond <- SAdata$cond
@@ -262,17 +262,17 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
     returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)
   }
   if (!is.null(smallbnd)) {
-    if (is.null(smallbnd.unique)) {
+    if (is.null(smallbnd.domain)) {
       if ("DOMAIN" %in% names(smallbnd)) {
-        smallbnd.unique <- "DOMAIN"
+        smallbnd.domain <- "DOMAIN"
       } else if (length(names(sf::st_drop_geometry(smallbnd))) == 1) {
-        smallbnd.unique <- names(sf::st_drop_geometry(smallbnd))
+        smallbnd.domain <- names(sf::st_drop_geometry(smallbnd))
       } else {
-        stop("must include smallbnd.unique for smallbnd")
+        stop("must include smallbnd.domain for smallbnd")
       }
     } 
     returnlst$smallbnd <- smallbnd
-    returnlst$smallbnd.unique <- smallbnd.unique
+    returnlst$smallbnd.domain <- smallbnd.domain
   }
 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
@@ -296,7 +296,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.unique=NULL,
   if (saveobj) {
     objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
 		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
-    save(returnlst, file=objfn)
+    saveRDS(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 

@@ -79,6 +79,11 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   csumvar <- FIESTA::pcheck.varchar(var2check=csumvar, varnm="csumvar", 
 		checklst=condnmlst, caption="csumvar(s)", multiple=TRUE,
 		stopifnull=TRUE, gui=gui)
+  if (any(csumvar == "CONDPROP_UNADJ")) {
+    condx$CONDPROP <- 1
+    csumvar[csumvar == "CONDPROP_UNADJ"] <- "CONDPROP"
+  }
+
 
   ## Check csumvarnm
   if (is.null(csumvarnm)) csumvarnm <- paste(csumvar, "PLT", sep="_")
@@ -125,8 +130,13 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   ################################################################################  
 
   if (getadjplot) {
+    if ("COND_STATUS_CD" %in% names(condx)) {
+      condx <- condx[condx$COND_STATUS_CD != 5,]
+    } else {
+      message("assuming no nonsampled condition in dataset")
+    }
     adjfacdata <- getadjfactorPLOT(condx=condx, cuniqueid=cuniqueid)
-    condx <- adjfacdata$condadj
+    condx <- adjfacdata$condx
   }
 
   ## Filter cond
@@ -135,14 +145,13 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   condf <- cdat$xf
   cfilter <- cdat$xfilter
 
-  if (adjcond) {
+  if (getadjplot) {
     if ("cadjcnd" %in% names(condf))
       stop("cadjcnd not in cond... must get adjustment factor")
     csumvarnm <- paste0(csumvarnm, "_ADJ")
     condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_ADJ, na.rm=TRUE)),
  		by=cuniqueid, .SDcols=csumvar]
   } else {
-    csumvar2 <- csumvar[csumvar != "CONDPROP_UNADJ"] 
     condf.sum <- condf[, lapply(.SD, function(x) sum(x * CONDPROP_UNADJ, na.rm=TRUE)),
  		by=cuniqueid, .SDcols=csumvar]
   }
@@ -155,8 +164,9 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
       setkeyv(pltx, puniqueid)
     }
     condf.sum <- merge(pltx, condf.sum, by.x=puniqueid, by.y=cuniqueid)
-    if (NAto0)
+    if (NAto0) {
       for (col in csumvarnm) set(condf.sum, which(is.na(condf.sum[[col]])), col, 0)
+    }
   }
 
 

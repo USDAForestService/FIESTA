@@ -1,61 +1,35 @@
-anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL, 
-	xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xyjoinid="PLOT_ID", 
-	clipxy=TRUE, datsource="sqlite", data_dsn=NULL, istree=TRUE, 
+anGetData_tsum <- function(bnd_layer, bnd_dsn=NULL, bnd.att=NULL, bnd.filter=NULL, 
+	RS=NULL, xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xyjoinid="PLOT_ID", 
+	clipxy=TRUE, datsource="sqlite", data_dsn=NULL, 
 	isseed=FALSE, plot_layer="plot", cond_layer="cond", tree_layer="tree", 
-	seed_layer="seed", puniqueid="CN", intensity1=TRUE, rastfolder=NULL, 
-	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.NODATA=NULL, 
+	seed_layer="seed", puniqueid="CN", intensity1=TRUE, 
+	estvarlst=NULL, estvar.filter="STATUSCD == 1", TPA=TRUE, getadjplot=TRUE,
+ 	rastfolder=NULL, rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.NODATA=NULL, 
 	rastlst.cat=NULL, rastlst.cat.name=NULL, rastlst.cat.NODATA=NULL, 
-	vars2keep="AOI", showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
-	savesteps=FALSE, saveobj=FALSE, outfolder=NULL, out_fmt="csv", 
+	strata=FALSE, strvar=NULL,
+	vars2keep=NULL, minplots=0, showsteps=FALSE, savedata=FALSE, savexy=FALSE, 
+	savesteps=FALSE, saveobj=FALSE, objnm="tsumdat", outfolder=NULL, out_fmt="csv", 
 	out_dsn = NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
 	overwrite_layer=TRUE, append_layer=FALSE, pltdat=NULL, ...) {
 
   ## Set global variables
   gui <- FALSE
   plt=AOI <- NULL
+  istree <- TRUE
 
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(anSAdata)), 
+  formallst <- c(names(formals(anGetData_tsum)), 
 		names(formals(FIESTA::spGetPlots)))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 
-
-## TESTING
-#clipxy=TRUE
-#plot_layer="plot"
-#cond_layer="cond"
-#tree_layer="tree"
-#puniqueid="CN"
-#measCur=TRUE
-#bnd=SAdoms
-#bnd.filter=measEndyr.filter=NULL
-#bnd_dsn=NULL
-#stbnd.att="COUNTYFIPS"
-#states=NULL
-#RS=NULL
-#stbnd=NULL
-#stbnd_dsn=NULL
-#savebnd=FALSE
-#xy=NULL
-#istree=FALSE
-#other_layers=NULL
-#allyrs=FALSE
-#measEndyr=NULL
-#evalid=NULL
-#evalEndyr=NULL
-#evalCur=FALSE
-#intensity1=FALSE
-#isseed=FALSE
-#savePOP=FALSE
-#xyjoinid="PLOT_ID"
-#xy.uniqueid="PLT_CN"
-#xy_dsn=NULL
-
+  ## Check strata 
+  strata <- FIESTA::pcheck.logical(strata, varnm="strata", 
+		title="Add stratalut?", first="NO", gui=gui, stopifnull=TRUE)
 
   ## Check savedata 
   savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
@@ -97,12 +71,13 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     step_dsn <- NULL
     step_fmt <- "shp"
   }
- 
+
   ####################################################################
   ## Get FIA plot data from SQLite within boundary
   ####################################################################
   if (is.null(pltdat)) {
-    pltdat <- spGetPlots(bnd=SAdoms, RS=RS, xy_datsource=xy_datsource, 
+    pltdat <- spGetPlots(bnd=bnd_layer, bnd_dsn=bnd_dsn, bnd.filter=bnd.filter,
+		RS=RS, xy_datsource=xy_datsource, 
 		xy=xy, xy_dsn=xy_dsn, xyjoinid=xyjoinid, clipxy=clipxy, 
 		datsource=datsource, data_dsn=data_dsn, istree=istree, plot_layer=plot_layer, 
 		cond_layer=cond_layer, tree_layer=tree_layer, seed_layer=seed_layer, 
@@ -120,7 +95,7 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 		toString(pltdat.names[!pltdat.names %in% names(pltdat)])) 
     }
   }
- 
+
   ## Extract list objects
   spxy <- pltdat$spxy
   xyplt <- pltdat$xypltx
@@ -131,9 +106,19 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   condx <- pltdat$tabs$condx
   treex <- pltdat$tabs$treex
   seedx <- pltdat$tabs$seedx
-  if (is.null(SAdoms)) {
-    SAdoms <- pltdat$bndx
-  }
+  bndx <- pltdat$bndx
+
+  ## Check bnd.att
+  bnd.att <- FIESTA::pcheck.varchar(var2check=bnd.att, varnm="bnd.att", 
+	 checklst=names(bndx), gui=gui, caption="Boundary attribute", stopifnull=FALSE)
+  if (is.null(bnd.att)) {
+    if ("DOMAIN" %in% names(bndx)) {
+      bnd.att <- "DOMAIN"
+    } else {
+      stop("must include bnd.att")
+    }
+  } 
+
 
   ## Check SAdoms
   #if (!all(c("DOMAIN", "AOI") %in% names(SAdoms))) {
@@ -145,11 +130,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
 
-    plot(sf::st_geometry(SAdoms), border="grey")
+    plot(sf::st_geometry(bndx), border="grey")
     plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.25)
-    if (!is.null(smallbnd) && "sf" %in% class(smallbnd)) { 
-      plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
-    }
     par(mar=mar)
   }
 
@@ -161,46 +143,57 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     out_layer <- paste0("SAdoms_plots")
     jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
     jpeg(jpgfn, res=400, units="in", width=8, height=10)
-    plot(sf::st_geometry(SAdoms), border="grey")
-    #plot(sf::st_geometry(bnd), add=TRUE)
+
+    plot(sf::st_geometry(bndx), border="grey")
     plot(sf::st_geometry(spxy), add=TRUE, col="blue", cex=.25)
-    if (!is.null(smallbnd)) {
-      plot(sf::st_geometry(smallbnd), add=TRUE, border="red")
-    }
     dev.off()
     message("Writing jpg to ", jpgfn, "\n")
     par(mar=mar)
   }
-
-  ## Check number of plots (Note: must be greater than 2 plots)
+ 
+  ## Check number of plots (Note: must be greater than minplots)
   ## If all AOIs have less than 2 plots, return NULL
-  polyvarlst <- unique(c("DOMAIN", "AOI")[!c("DOMAIN", "AOI") %in% names(spxy)])
-  extpoly <- spExtractPoly(xyplt=spxy, polyvlst=SAdoms, 
-		uniqueid=xy.uniqueid, polyvarlst=polyvarlst, keepNA=FALSE)
-  test <- data.table(st_drop_geometry((extpoly$spxyext)))
-  test <- test[AOI == 1, .N, by="DOMAIN"]
-
+  polyvarlst <- unique(c(bnd.att, vars2keep)[!c(bnd.att, vars2keep) %in% names(spxy)])
+  if (length(polyvarlst) > 0) {
+    extpoly <- tryCatch(spExtractPoly(xyplt=spxy, polyvlst=bndx, 
+		uniqueid=xy.uniqueid, polyvarlst=polyvarlst, keepNA=FALSE),
+     	 error=function(e) {
+			message(e, "\n")
+			return(NULL) })
+    if (is.null(extpoly)) {
+      return(NULL)
+      stop()
+    }
+    test <- data.table(st_drop_geometry((extpoly$spxyext)))
+  } else {
+    test <- data.table(st_drop_geometry((spxy)))
+  }
+  if (!"AOI" %in% names(test)) {
+    test$AOI <- 1 
+  }
+  test <- test[AOI == 1, .N, by=bnd.att]
   message("checking number of plots in domain...")
 
   if (nrow(test) == 0) {
     message("No plots in AOI... no estimates generated")
     return(NULL)
-  } else if (all(test$N <= 2)) {
-    message("ALL AOIs have 2 plots or less... no estimates generated")
+  } else if (all(test$N <= minplots)) {
+    message("ALL AOIs have ", minplots, " plots or less... no estimates generated")
     print(test)
     return(NULL)
   }
+
   ####################################################################
   ## Get model data
   ####################################################################
   message("summarizing auxiliary model data...")
   auxdat <- spGetAuxiliary(xyplt=spxy, uniqueid=xy.uniqueid, 
-		dunit_layer=SAdoms, rastfolder=rastfolder,
+		dunit_layer=bndx, dunitvar=bnd.att, rastfolder=rastfolder,
 	  	rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, 
 		rastlst.cont.NODATA=rastlst.cont.NODATA, 
 		rastlst.cat=rastlst.cat, rastlst.cat.name=rastlst.cat.name, 
 		rastlst.cat.NODATA=rastlst.cat.NODATA, keepNA=FALSE, npixels=TRUE, 
-		vars2keep="AOI", savedata=FALSE)
+		vars2keep=vars2keep, savedata=FALSE)
   pltassgn <- auxdat$pltassgn
   dunitzonal <- auxdat$dunitzonal
   dunitvar <- auxdat$dunitvar
@@ -210,6 +203,8 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   dunitarea <- auxdat$dunitarea
   areavar <- auxdat$areavar
   pltassgnid <- auxdat$pltassgnid
+  npixelvar <- auxdat$npixelvar
+
 
   ##########################################
   ## Create output list
@@ -217,38 +212,74 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
   #pltdat <- pltdat
   #pltdat$spxy=pltdat$xypltx=xy.uniqueid <- NULL
 
+  adjtree <- ifelse(getadjplot, TRUE, FALSE)
+#  for (j in 1:length(estvarlst)) {
+#    estvar <- estvarlst[j]
+#    for (k in 1:length(tfilterlst)) {
+#      tfilter <- tfilterlst[k]
+#      message("generating estimates for ", estvar, " - ", tfilter, "...")
+#
+#      estvar.filter <- ifelse(tfilter == "live", "STATUSCD == 1", 
+#			ifelse(tfilter == "dead", "STATUSCD == 2 & STANDING_DEAD_CD == 1", NULL)) 
+#
+#      plt <- datSumTree(tree=tree, cond=cond, plt=plt, TPA=TPA, 
+#			getadjplot=getadjplot, adjtree=adjtree,
+#			tsumvarlst=estvar, tfilter="STATUSCD == 1")
+#  }
 
-  SAdata <- list(SAdoms=SAdoms, smallbnd=smallbnd, plt=setDF(pltx), 
-	pltassgn=setDF(pltassgn), cond=setDF(condx), 
+  pdat <- datSumCond(cond=condx, plt=pltassgn, adjcond=TRUE, NAto0=TRUE, 
+		csumvar="CONDPROP_UNADJ", cfilter="COND_STATUS_CD == 1",
+		csumvarnm="FOREST_PROP", getadjplot=getadjplot,
+		puniqueid=pltassgnid)
+  pltassgn <- pdat$condsum
+  sumvars <- pdat$csumvarnm
+  
+  tdat <- datSumTree(tree=treex, cond=condx, plt=pltassgn, TPA=TPA, 
+			getadjplot=getadjplot, adjtree=adjtree, NAto0=TRUE, 
+			tsumvarlst=estvarlst, tfilter=estvar.filter, puniqueid=pltassgnid)
+  pltassgn <- tdat$treedat
+  sumvars <- c(sumvars, tdat$sumvars)
+
+  if (!is.null(strvar) && !strvar %in% predfac) {
+    stop(strvar, " not in rastlst.cat")
+  }
+ 
+  if (strata) {
+    stratalut <- strat.pivot(dunitzonal, strvar=strvar, unitvars=dunitvar)
+  }
+
+
+  returnlst <- list(bnd=bndx, pltassgn=setDF(pltassgn), plt=setDF(pltx), 
 	dunitarea=setDF(dunitarea), dunitvar=dunitvar, areavar=areavar, 
 	dunitzonal=setDF(dunitzonal), prednames=prednames, predfac=predfac,
 	zonalnames=zonalnames, puniqueid=puniqueid, pjoinid=pjoinid, 
-	pltassgnid=pltassgnid)
-  if (istree && !is.null(treex)) {
-    SAdata$tree <- setDF(treex)
-  }
-  if (isseed && !is.null(seedx)) {
-    SAdata$seed <- setDF(seedx)
-  }
+	pltassgnid=pltassgnid, npixelvar=npixelvar, sumvars=sumvars,
+	stratalut=stratalut, strvar=strvar)
+#  if (istree && !is.null(treex)) {
+#    returnlst$tree <- setDF(treex)
+#  }
+#  if (isseed && !is.null(seedx)) {
+#    returnlst$seed <- setDF(seedx)
+#  }
   if (length(predfac) > 0) {
-    SAdata$predfac.levels <- auxdat$predfac.levels
+    returnlst$predfac.levels <- auxdat$predfac.levels
   }  
 
   if (savexy) {
-    SAdata$spxy <- spxy
-    SAdata$xy.uniqueid <- xy.uniqueid
+    returnlst$spxy <- spxy
+    returnlst$xy.uniqueid <- xy.uniqueid
   }
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="anSAdata.rds", outfolder=outfolder, 
-		overwrite=overwrite_layer, outfn.date=TRUE)
-    saveRDS(SAdata, file=objfn)
+    objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
+		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=TRUE)
+    saveRDS(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
     if (!is.null(RS)) {
-      datExportData(sf::st_drop_geometry(SAdoms), outfolder=outfolder, 
+      datExportData(sf::st_drop_geometry(bndx), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="SAdoms", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
     }
@@ -260,22 +291,6 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
     datExportData(pltassgn, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(pltx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plt", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(condx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    if (istree && !is.null(treex)) {
-      datExportData(treex, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    }
-    if (isseed && !is.null(seedx)) {
-      datExportData(seedx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    }
     datExportData(dunitarea, outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
@@ -284,5 +299,5 @@ anSAdata <- function(SAdoms, smallbnd=NULL, RS=NULL,
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
    	
-  return(SAdata)
+  return(returnlst)
 }

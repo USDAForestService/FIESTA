@@ -1,5 +1,5 @@
-anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit", 
-	largebnd.att=NULL, landarea="FOREST", pcfilter=NULL, estvarlst=NULL, 
+anSAest_custom <- function(SApopdatlst, SApackage="JoSAE", SAmethod="unit", 
+	largebnd.unique=NULL, landarea="FOREST", pcfilter=NULL, estvarlst=NULL, 
 	tfilterlst="live", showsteps=FALSE, savedata=FALSE, savesteps=FALSE, 
 	append_layer=FALSE, savemultest=FALSE, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, multest_outfolder=NULL, multest_fmt="sqlite", 
@@ -56,20 +56,13 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   ###########################################################################
   ## Extract FIA data and model data
   ###########################################################################
-  if (is.null(SApopdat)) {
+  if (is.null(SApopdatlst)) {
     stop("must include population data - anSApop*()")
+  } else {
+    if (class(SApopdatlst) != "list") {
+      SApopdatlst <- list(SApopdatlst) 
+    }
   }
-
-  ##################################################################################
-  ## modSAtree() default parameters
-  ##################################################################################
-  if (is.null(SApopdat)) {
-    SApop <- anSApop_ecomap(showsteps=showsteps, savedata=savedata, 
-		outfolder=outfolder, outfn.pre=outfn.pre, ...)
-
-    SApopdat <- SApop$SApopdat
-    #SAdata <- SApop$SAdata
-  } 
 
   ####################################################################
   ## Get estimates
@@ -81,8 +74,8 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
   SApredunit <- list()
   SApredarea <- list()
 
-  SAareadat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
-	SAmethod=SAmethod, largebnd.att=largebnd.att, smallbnd.att=smallbnd.att, 
+  SAareadat <- modSAest(SApopdatlst=SApopdatlst, SApackage=SApackage, 
+	SAmethod=SAmethod, largebnd.unique=largebnd.unique, 
 	esttype="AREA", landarea="FOREST", 
 	savedata=savedata, rawdata=rawdata, multest=TRUE, 
 	savemultest=savemultest, multest_fmt=multest_fmt,
@@ -92,15 +85,14 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 	overwrite_layer=TRUE, append_layer=append_layer, outfn.pre=outfn.pre,
  	addSAdomsdf=addSAdomsdf, SAdomvars=SAdomvars, 
 	save4testing=save4testing, showsteps=showsteps, savesteps=savesteps)
-
   if (is.null(SAareadat)) return(NULL)
   response <- SAareadat$raw$estvar
 
   SAestlst[[response]] <- SAareadat$est
-  SAmultestlst[[response]] <- SAareadat$dunit_multest
-  SApredunit[[response]] <- SAareadat$raw$prednames.unit
-  SApredarea[[response]] <- SAareadat$raw$prednames.area
- 
+  SAmultestlst[[response]] <- SAareadat$multest
+  SApredunit[[response]] <- SAareadat$raw$predselect.unit
+  SApredarea[[response]] <- SAareadat$raw$predselect.area
+
   if (multest_fmt == "csv") {
     multest_layer <- paste0("multest_", response)
   }
@@ -108,16 +100,6 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
     pltdom <- SAareadat$pdomdat
     cuniqueid <- SAareadat$cuniqueid
     dunitlut <- SAareadat$dunitlut
-
-    if (addSAdomsdf) {
-      SAdomsdf <- SApopdat$SAdomsdf
-      pltdom <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, largebnd.att, SAdomvars)), with=FALSE], 
-			pltdom, by=dunitvar)
-      dunitlut <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, "AOI", largebnd.att, SAdomvars)), with=FALSE], 
-			dunitlut, by=c(dunitvar, "AOI"))
-    }
   }
  
   #if (esttype == "TREE") {
@@ -139,8 +121,8 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
           chkfn <- paste0(file.path(multest_outfolder, multest_layer), ".csv")
           multest.append <- ifelse(file.exists(chkfn), TRUE, FALSE)
         } 
-        SAestdat <- modSAest(SApopdat=SApopdat, SApackage=SApackage, 
-			SAmethod=SAmethod, smallbnd.att=smallbnd.att, largebnd.att=largebnd.att, 
+        SAestdat <- modSAest(SApopdatlst=SApopdatlst, SApackage=SApackage, 
+			SAmethod=SAmethod, smallbnd.att=smallbnd.att, largebnd.unique=largebnd.unique, 
 			esttype="TREE", landarea=landarea, pcfilter=pcfilter, 
 			estvar=estvar, estvar.filter=estvar.filter,
  			savedata=savedata, rawdata=TRUE, multest=TRUE, savemultest=savemultest,
@@ -153,14 +135,14 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
         response <- SAestdat$raw$estvar
         rowvar <- SAestdat$raw$rowvar
 
-        if (save4testing) {
-          pltdom <- merge(pltdom, 
-			SAestdat$pdomdat[, c(dunitvar, cuniqueid, rowvar, response), with=FALSE], 
-			by=c("DOMAIN", cuniqueid, rowvar))
-          dunitlut <- merge(dunitlut, 
-			SAestdat$dunitlut[, c(dunitvar, "AOI", response, paste0(response, ".var")),
- 				with=FALSE], by=c(dunitvar, "AOI"))
-        }
+#        if (save4testing) {
+#          pltdom <- merge(pltdom, 
+#			SAestdat$pdomdat[, c(dunitvar, cuniqueid, rowvar, response), with=FALSE], 
+#			by=c("DOMAIN", cuniqueid, rowvar))
+#          dunitlut <- merge(dunitlut, 
+#			SAestdat$dunitlut[, c(dunitvar, "AOI", response, paste0(response, ".var")),
+# 				with=FALSE], by=c(dunitvar, "AOI"))
+#        }
 
         if (is.null(SAestdat$est)) {
           message("no estimates for ", outnm)
@@ -171,13 +153,13 @@ anSAest_custom <- function(SApopdat, SApackage="JoSAE", SAmethod="unit",
 
         } else {
           SAestlst[[outnm]] <- SAestdat$est
-          SAmultestlst[[outnm]] <- SAestdat$dunit_multest
-          SApredunit[[outnm]] <- SAestdat$raw$prednames.unit
-          SApredarea[[outnm]] <- SAestdat$raw$prednames.area
+          SAmultestlst[[outnm]] <- SAestdat$multest
+          SApredunit[[outnm]] <- SAestdat$raw$predselect.unit
+          SApredarea[[outnm]] <- SAestdat$raw$predselect.area
 
           if (barplot.compare) {
             ## build plots
-            FIESTA_SAmod_demo_plots(estvar=estvar, prednames=SApopdat$prednames, 
+            FIESTA_SAmod_demo_plots(estvar=estvar, prednames=SApopdatlst$prednames, 
 			est.com=SAestdat$dunit.multest, title.ref=title.ref, saveimg=TRUE, 
 			outfolder=outfolder, showimg=TRUE)
           }

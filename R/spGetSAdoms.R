@@ -120,6 +120,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   #############################################################################
   smallbndx <- pcheck.spatial(layer=smallbnd, dsn=smallbnd_dsn, caption="small boundary",
 		stopifnull=TRUE)
+  smallbndx <- checksf.longlat(smallbndx)
   smallbndx.prj <- sf::st_crs(smallbndx)
   smallbndnmlst <- names(smallbndx)
   smallbnd.unique <- pcheck.varchar(var2check=smallbnd.unique, varnm="smallbnd.unique", 
@@ -151,12 +152,11 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 
   ## Aggregate all fires to one polygon
   if (dissolve) {
-    smallbndx <- sf_dissolve(smallbndx, areacalc=FALSE)
-    smallbnd.unique <- "tmp"
-    smallbnd.domain <- "tmp"
+    smallbndx$ONEDOM <- 1
+    smallbnd.unique <- "ONEDOM"
+    smallbnd.domain <- "ONEDOM"
   } else {
-    smallbndx <- sf_dissolve(smallbndx, col=smallbnd.domain, areacalc=FALSE)
-    smallbnd.unique <- smallbnd.domain
+   smallbndx <- sf_dissolve(smallbndx, unique(c(smallbnd.unique, smallbnd.domain)))
   }
  
   ## Apply smallbnd.stfilter (Just state)
@@ -328,6 +328,11 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
         helper_autoselect <- FALSE
       }
     }
+  }
+  
+  if (is.null(maxbndx)) {
+    maxbndx <- largebndx
+    maxbnd.unique <- largebnd.unique
   }
  
   ## Check helperbnd.unique
@@ -520,6 +525,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   #}  
 
   returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
-		smallbnd.unique=smallbnd.unique)
+		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain)
   return(returnlst)
 }

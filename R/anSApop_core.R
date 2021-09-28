@@ -1,4 +1,4 @@
-anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE, 
+anSApop_core <- function(SApopdatlst, title.ref, xlsx=FALSE, 
 		outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
 		fortypgrpcd=220, divideby.vol="million") {
 
@@ -38,14 +38,14 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   ## CHECK INPUT PARAMETERS
   ##################################################################
 
-  ## Check GBpopdat
-  ########################################################
-  SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", 
+  ## Check SApopdat
+  for (SApopdat in SApopdatlst) {
+    ## Check SApopdat
+    SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", 
 		list.items=c("treex", "seedx"))
-
+  }
 
   ## Check outfolder 
-  ########################################################
   outfolder <- FIESTA::pcheck.outfolder(outfolder)
 
   ## Check xlsx 
@@ -110,11 +110,12 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   ## New Variables
   #######################################################################################
 
-
   ## Diameter class for DIA - DIACL
-  treedia.brks=c(0,5,10,15,20,25,50,100)
-  datlut <- datLUTclass(x=SApopdat$treex, xvar="DIA", cutbreaks=treedia.brks) 
-  SApopdat$treex <- datlut$xLUT
+  for (i in 1:length(SApopdatlst)) {
+    treedia.brks=c(0,5,10,15,20,25,50,100)
+    datlut <- datLUTclass(x=SApopdatlst[[i]]$treex, xvar="DIA", cutbreaks=treedia.brks) 
+    SApopdatlst[[i]]$treex <- datlut$xLUT
+  }
 
 
   #######################################################################################
@@ -126,7 +127,7 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "TPA_UNADJ"
   estvar.filter <- "STATUSCD == 1"
 
-  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea,
+  estdat <- modSAest(SApopdatlst=SApopdatlst, esttype="TREE", landarea=landarea,
            estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 
@@ -155,7 +156,7 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "VOLCFNET"
   estvar.filter <- "STATUSCD == 1 & DIA >= 5"
 
-  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea,
+  estdat <- modSAest(SApopdatlst=SApopdatlst, esttype="TREE", landarea=landarea,
            estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 
@@ -184,7 +185,7 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "BA"
   estvar.filter <- "STATUSCD == 1 & DIA >= 1"
 
-  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea,
+  estdat <- modSAest(SApopdatlst=SApopdatlst, esttype="TREE", landarea=landarea,
            estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 
@@ -214,7 +215,7 @@ anSApop_core <- function(SApopdat, title.ref, xlsx=FALSE,
   estvar <- "BA"
   estvar.filter <- "STATUSCD == 1 & DIA >= 1"
 
-  estdat <- modSAest(SApopdat=SApopdat, esttype="TREE", landarea=landarea, 
+  estdat <- modSAest(SApopdatlst=SApopdatlst, esttype="TREE", landarea=landarea, 
 		pcfilter=pcfilter, estvar=estvar, estvar.filter=estvar.filter,
 		rawdata=rawdata, savedata=savedata, returntitle=returntitle, 
 		allin1=allin1, title.ref=title.ref, title.dunitvar="fire", 

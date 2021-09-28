@@ -7,10 +7,10 @@
 	Generates small area estimates by domain and/or tree domain (and estimation unit). 	 
 }
 \usage{    
-modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
+modSAest(SApopdatlst = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", 
 	SAmethod = "area", esttype = "TREE", totals = FALSE, estseed = "none", 
-	largebnd.att = NULL, landarea = "FOREST", pcfilter = NULL, estvar = NULL, 
-	estvar.filter = NULL, smallbnd.att = NULL, allin1 = FALSE, metric = FALSE, 
+	largebnd.unique = NULL, landarea = "FOREST", pcfilter = NULL, estvar = NULL, 
+	estvar.filter = NULL, allin1 = FALSE, metric = FALSE, 
 	variable.select=TRUE, estround = 3, pseround = 3, estnull = 0, psenull = "--", 
 	divideby = NULL, savedata = FALSE, savesteps = FALSE, rawdata = FALSE, 
 	rawonly = FALSE, multest = TRUE, addSAdomsdf = TRUE, SAdomvars = NULL, 
@@ -24,7 +24,7 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{SApopdat}{ List. Population data objects returned from modSApop(). }
+  \item{SApopdatlst}{ List. List of population data objects returned from modSApop(). }
   \item{SAdomsdf}{ DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
 	with attributes from smallbnd to add to estimation table. }
   \item{prednames}{ String vector. Name(s) of predictor variables to use in model. }
@@ -34,7 +34,7 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
   \item{totals}{ Logical. If TRUE, returns total estimate (mean * AREAUSED). }
   \item{estseed}{ String. Use seedling data only or add to tree data. Seedling 
 	estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add'). }
-  \item{largebnd.att}{ String. Name of the large boundary attribute to define plots
+  \item{largebnd.unique}{ String. Name of the large boundary unique identifer to define plots
 	within a model extent. If NULL, all plots are used for model extent. }
   \item{landarea}{ String. The sample area filter for estimates ('ALL', 'FOREST', 'TIMBERLAND'). 
 	If landarea=FOREST, filtered to COND_STATUS_CD = 1; If landarea=TIMBERLAND, filtered 
@@ -44,8 +44,6 @@ modSAest(SApopdat = NULL, SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE"
   \item{estvar}{ String. Name of the tree estimate variable. }
   \item{estvar.filter}{ String. A tree filter for estimate variable. Must be R syntax 
 	(e.g., "STATUSCD == 1"). }
-  \item{smallbnd.att}{ String. Attribute in smallbnd, alternative to DOMAIN, to output
-	in estimation table. }
   \item{allin1}{ Logical. If TRUE, both estimates and percent sample error are output
 	in one table as: estimates (percent sample error). }
   \item{metric}{ Logical. If TRUE, output area is in metric units (hectares). }

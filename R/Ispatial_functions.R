@@ -229,6 +229,13 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
  
   ## Check layer - if sf object
   if (!is.null(layer)) {
+    if (length(class(layer) == "list") && class(layer) == "list") {
+      if (length(layer) != 1) {
+        stop("invalid layer")
+      } else {
+        layer <- layer[[1]]
+      }
+    }
     if (any(c("sf", "data.frame") %in% class(layer))) {
       if (nrow(layer) == 0) {
         if (checkonly) {

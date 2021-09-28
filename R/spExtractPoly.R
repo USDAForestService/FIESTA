@@ -65,7 +65,6 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
 		function(layer, polyv_dsn, gui) pcheck.spatial(layer, dsn=polyv_dsn, gui=gui),
  		polyv_dsn, gui)
 
-
   ## Check polyvarlst
   if (!is.null(polyvarlst)) {
     if (is.list(polyvarlst)) {
@@ -82,7 +81,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     polyvarlst <- lapply(polyvlst, function(x) names(x)[!names(x) %in% attr(x, "sf_column")])
     names(polyvarlst) <- names(polyvlst)
   } 
-
+ 
   if (!is.null(polyvarnmlst)) {
     if (length(polyvarlst) != length(polyvarnmlst))
       stop("the length of polyvarnmlst must correspond with the length of polyvarlst") 
@@ -135,6 +134,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     if (is.null(polyvnm)) {
       polyvnm <- paste0("poly", i)
     }
+
     ## Check projections of inlayer point layer vs. polygon layer. 
     ## If different, reproject sppltx to polygon projection.
     prjdat <- crsCompare(sppltx, polyv, nolonglat=TRUE) 
@@ -154,8 +154,14 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
     polyvars <- polyvarlst[[i]]
     if (!all(polyvars %in% names(polyv))) {
       miss <- polyvars[!polyvars %in% names(polyv)]
-      stop("polyvars not in polyv: ", toString(miss))
+      if (length(miss) == length(polyvars)) {
+        stop("polyvars not in polyv: ", toString(miss))
+      } else {
+        message("polyvars not in polyv: ", toString(miss), "... removing from list")
+        polyvars <- polyvars[polyvars != miss]
+      }
     }
+
     vars2remove <- names(polyv)[!names(polyv) %in% polyvars]
     if (length(vars2remove) == length(names(polyv))) {
        message("polyvarlst is invalid... extracting all variables")
