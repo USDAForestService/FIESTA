@@ -53,16 +53,6 @@ anSAest_custom <- function(SApopdatlst, SApackage="JoSAE", SAmethod="unit",
       }
     }
   }
-  ###########################################################################
-  ## Extract FIA data and model data
-  ###########################################################################
-  if (is.null(SApopdatlst)) {
-    stop("must include population data - anSApop*()")
-  } else {
-    if (class(SApopdatlst) != "list") {
-      SApopdatlst <- list(SApopdatlst) 
-    }
-  }
 
   ####################################################################
   ## Get estimates

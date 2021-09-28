@@ -140,14 +140,18 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     stop("need to include SApopdatlst... from modSApop")
     #SApopdatlst <- modSApop(gui=gui, prednames=prednames, ...)
   } else {
-    if (class(SApopdatlst) != "list") {
-      SApopdatlst <- list(SApopdatlst) 
-    }
-    returnSApopdat <- FALSE
-
-    list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
+    if (class(SApopdatlst) == "list") {
+      list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
 		"prednames", "plotsampcnt", "condsampcnt")
+      popchk <- tryCatch(pcheck.object(SApopdatlst, list.items=list.items),
+     	 	error=function(e) {
+			return(NULL) })
+      if (!is.null(popchk)) {
+        SApopdatlst <- list(SApopdatlst)
+      }
+    }
+    returnSApopdat <- FALSE
   }
 
     
@@ -246,6 +250,9 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
  
   for (i in 1:length(SApopdatlst)) {
     SApopdatnm <- names(SApopdatlst)[i]
+    if (is.null(SApopdatnm)) {
+      SApopdatnm <- paste0("SApopdat", i)
+    }
     SApopdat <- SApopdatlst[[i]]
     SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", list.items=list.items)
     if (is.null(SApopdat)) {
