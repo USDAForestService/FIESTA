@@ -307,7 +307,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
         SAdomsdfbind <- rbind(SAdomsdfbind, SAdomsdf)
       }
     } 
-
+ 
     ## Check prednames
     if (is.null(prednames)) {
       prednames <- SApopdat$prednames
@@ -327,7 +327,6 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     areaunits <- unitchk$outunits
     dunitareabind <- rbind(dunitareabind, unitchk$unitarea)
     
-
 
     ###################################################################################
     ## Check filter parameters and apply plot and condition filters
@@ -533,7 +532,6 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   }    #### end SApopdat loop
 
 
-
   ## Generate estimates
   #################################################################################
   dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
@@ -554,7 +552,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     SAdomvars <- unique(SAdomvars[!SAdomvars %in% multestdf])
     
     if (length(SAdomvars) == 0) stop("invalid SAdomvars")
-    multestdf <- merge(setDF(SAdomsdfbind)[, unique(c(dunitvar, SAdomvars)), with=FALSE], 
+    multestdf <- merge(setDF(SAdomsdfbind)[, unique(c(dunitvar, SAdomvars))], 
 					multestdf, by=dunitvar)
     multestdf <- multestdf[order(-multestdf$AOI, multestdf[[dunitvar]]),]
   } else {
