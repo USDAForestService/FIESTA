@@ -7,7 +7,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	keepNA=TRUE, NAto0=TRUE, npixels=TRUE, returnxy=FALSE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
- 	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
+ 	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, strvars=NULL, ...){
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -27,7 +27,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (gui) {uniqueid=savedata <- NULL}
 
   ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=strvars2 <- NULL
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
@@ -450,8 +450,9 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       rast.cat.NODATA <- rastlst.cat.NODATA[i]
 
       zonalstat <- "proportion"
-      if (i == 1 && npixels)
-        zonalstat <- c("npixels", zonalstat)        
+      if (i == 1 && npixels) {
+        zonalstat <- c("npixels", zonalstat) 
+      }       
       if (identical(rast.lutfn, rastfn)) {
         zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, rast.NODATA=rast.cat.NODATA, 
  		polyv.att=dunitvar, zonalstat=zonalstat, rastlut=rastlut, outname=names(rastlut)[2],
@@ -471,6 +472,12 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       zonalnames <- c(zonalnames, outname[outname != "npixels"])
       predfac.levels[[rastnm]] <- as.numeric(sapply(strsplit(outname[outname != "npixels"], 
 							paste0(rastnm,".")), '[', 2))
+
+      if (!is.null(strvars)) {
+        if (any(rastfn %in% strvars)) {
+          strvars2 <- c(strvars2, rastnm)
+        }
+      }
       if (npixels) npixels <- FALSE
       rm(zonaldat.rast.cat)
       rm(zonalext)
@@ -481,6 +488,14 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     zonalDT.cat <- tabs$tab2
 
     dunitzonal <- dunitzonal[zonalDT.cat]  
+  }
+
+  if (!is.null(strvars)) {
+    if (!all(strvars %in% predfac)) {
+      strvars.miss <- strvars[!strvars %in% predfac]
+      strvars <- strvars[!strvars %in% strvars.miss]
+      message("strvars not in ", toString(predfac), "...", toString(strvars.miss))
+    }
   }
  
   ###################################################################################
@@ -520,6 +535,20 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     returnlst$dunitarea <- dunitarea
     returnlst$areavar <- areavar
   }
+  if (length(strvars2) > 0) {
+    for (i in 1:length(strvars2)) {
+      strvar <- strvars2[i]
+      if (i == 1) {
+        returnlst$strvar <- strvar
+        returnlst$stratalut <- strat.pivot(dunitzonal, strvar, unitvars=dunitvar, strwtvar="strwt")
+      } else {
+        assign(returnlst[[paste0("stratalut", i)]], 
+			strat.pivot(dunitzonal, strvar, unitvars=dunitvar, strwtvar="strwt"))
+        assign(returnlst[[paste0(strvar, i)]], strvar)
+      }
+    }
+  }
+   
 
   ## Returnxy
   if (returnxy) {

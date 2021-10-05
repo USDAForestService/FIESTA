@@ -518,7 +518,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 		list(predselect.unit=predselect.unit, predselect.area=predselect.area)
     if (save4testing) {
       ## Merge SAdom attributes to dunit_totest
-      if (addSAdomsdf && is.null(SAdomvars)) {
+      if (addSAdomsdf) {
         pdomdat <- merge(setDT(SAdomsdf)[, 
 			unique(c(dunitvar, largebnd.unique, SAdomvars)), with=FALSE], 
 			pdomdat, by=dunitvar)

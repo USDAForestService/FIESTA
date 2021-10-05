@@ -142,13 +142,26 @@ There are several reference tables stored in FIESTA, including table variable de
 ## By Bighorn National Forest ##
 # Get estimation unit acres and strata information for Bighorn National Forest.
 ######################################################################################
-stratdat.bh <- spGetStrata(xyplt=WYplt, uniqueid="CN", 
+stratdat.bh2 <- spGetStrata(xyplt=WYplt, uniqueid="CN", 
     xvar="LON_PUBLIC", yvar="LAT_PUBLIC", prj="longlat", datum="NAD83", 
     unit_layer=WYbhfn, strat_layer=fornffn)
+    
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetAuxiliary.R")
+stratdat.bh <- spGetAuxiliary(xyplt=WYplt, uniqueid="CN", 
+    xvar="LON_PUBLIC", yvar="LAT_PUBLIC", prj="longlat", datum="NAD83", 
+    dunit_layer=WYbhfn, dunitvar=NULL, rastlst.cat=fornffn, rastlst.cat.name="STRATUMCD",
+    strvars="STRATUMCD")
+    
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetAuxiliary.R")
+stratdat.bh <- spGetAuxiliary(xyplt=WYplt, uniqueid="CN", 
+    xvar="LON_PUBLIC", yvar="LAT_PUBLIC", prj="longlat", datum="NAD83", 
+    dunit_layer=WYbhfn, dunitvar=NULL, rastlst.cat=fornffn,
+    strvars=fornffn, rastlst.cat.name="STRATUMCD")
+
 
 names(stratdat.bh)
 pltassgn.bh <- stratdat.bh$pltassgn
-unitarea.bh <- stratdat.bh$unitarea
+dunitarea.bh <- stratdat.bh$dunitarea
 stratalut.bh <- stratdat.bh$stratalut
 strvar.bh <- stratdat.bh$strvar
 unitvar.bh <- stratdat.bh$unitvar
