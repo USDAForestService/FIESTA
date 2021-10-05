@@ -1,3 +1,42 @@
+#' Data - Generates a pivot table.
+#' 
+#' Generates a pivot table of values by x row and y column.
+#' 
+#' 
+#' @param x Dataframe. Table with pivot variables.
+#' @param pvar String. The name of the variable for pivot table values.
+#' @param xvar String. The name of the variable for rows.
+#' @param yvar String. The name of the variable for columns.
+#' @param pfun Function. The name of the function to use for pivot table values
+#' (ex. sum, mean, max).
+#' @param xfilter String. A filter to subset the datatable table x before
+#' pivoting (ex. "STATUSCD == 1").
+#' @param NAto0 Logical. If TRUE, converts NA values to 0.
+#' @param dropNAxvar Logical. If TRUE, removes columns that are NA.
+#' @param dropNAyvar Logical. If TRUE, removes rows that have NA values.
+#' @param pvar.round Integer. Number to round pvar values to.
+#' @param savedata Logical. If TRUE, writes output data to outfolder.
+#' @param outfolder String. The name of the output folder. If savedata=TRUE,
+#' all output saved to the outfolder. If savedata=FALSE, only a text file of
+#' input parameters is saved.
+#' @param outfn String. The name of the output file if savedata=TRUE (*.csv).
+#' Do not include extension. If NULL, the file will be named pivot_'date'.csv
+#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
+#' @param overwrite Logical. If TRUE, overwrite existing file.
+#' @return
+#' 
+#' \item{ptab}{ Matrix. The pivot table. }
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 	datPivot(x=FIESTA::WYcond, pvar="CONDPROP_UNADJ", xvar="FORTYPCD", yvar="STDSZCD")
+#' 
+#' 	datPivot(x=FIESTA::WYtree, pvar="TPA_UNADJ", xvar="SPCD", yvar="STATUSCD", 
+#' 		pfun=mean, NAto0=FALSE)
+#' 
+#' 
+#' @export datPivot
 datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL, 
 	NAto0=TRUE, dropNAxvar=TRUE, dropNAyvar=TRUE, pvar.round=2, 
 	savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.date=FALSE,

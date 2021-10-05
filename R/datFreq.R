@@ -1,3 +1,42 @@
+#' Data - Get frequency table for specified variable(s).
+#' 
+#' Generates a frequency table from a data frame, including number of records
+#' by a specified variable or variables in the data frame with optional totals
+#' and/or subtotals.
+#' 
+#' If no parameters, then user is prompted for input. If partial parameters,
+#' default parameter values are used.
+#' 
+#' @param x Data frame or comma-delimited file (*.csv). The table with the
+#' variable(s).
+#' @param xvar String (vector).* The name of the variable(s) to summarize.
+#' @param total Logical. If TRUE, a row is added to bottom of table with a
+#' total for the whole table.
+#' @param subtotal Logical. If TRUE, a row is added to bottom of each section
+#' for subtotals.
+#' @param subtotalcol Logical. If subtotal=TRUE, the column(s) to generate
+#' subtotals.
+#' @param savedata Logical. If TRUE, writes output data to outfolder.
+#' @param outfolder String. The name of the output folder, if savedata=TRUE.
+#' @param outfn String. The name of the output file if savedata=TRUE (*.csv).
+#' Do not include extension. If NULL, the file will be named Freq_'date'.csv
+#' @return \item{freqtable}{ Data frame. The frequency table. } If
+#' savedata=TRUE, a comma-delimited file of the frequency table is written to
+#' the outfolder.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1), 
+#' 		FORTYPCD=c(182,184,201,221,221,184,221,182,182,201,182,221)))
+#' 	datFreq(x=tab, xvar=c("CONDCLASS", "FORTYPCD"))
+#' 	datFreq(x=tab, xvar=c("CONDCLASS", "FORTYPCD"), total=TRUE, subtotal=TRUE)
+#' 	datFreq(x=tab, xvar="FORTYPCD")
+#' 
+#'  	datFreq(x=FIESTA::WYtree, xvar=c("SPGRPCD", "SPCD", "STATUSCD"), 
+#' 		subtotal=TRUE, subtotalcol="SPCD")
+#' 
+#' @export datFreq
 datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, subtotalcol=NULL,
 	savedata=FALSE, outfolder=NULL, outfn=NULL){
   #####################################################################################

@@ -1,3 +1,59 @@
+#' Data - Filters data table.
+#' 
+#' Subsets a data table by specified filter(s).
+#' 
+#' If no parameters, then user is prompted for input. If partial parameters,
+#' default parameter values are used.
+#' 
+#' @param x Data frame, sf data frame or comma-delimited file (*.csv). A data
+#' frame to filter.
+#' @param xfilter String. A filter expression. Must be R syntax.  (e.g.,
+#' "STATUSCD == 1", "INVYR %in% 2002:2005"). Use single quotes for strings
+#' within double quotes (e.g., "SPP == 'Lodgepole'"). If NULL, a window pops up
+#' to select filter variable(s) and filter value(s).
+#' @param xfiltervar String. The filtervar if you know what it is. If NULL, a
+#' window will pop up to select filter value(s).
+#' @param othertabnms String vector. Name(s) of the objects or comma-delimited
+#' files to subset.  Names must be in quotes (e.g., othertables=c('tree',
+#' 'cond')).
+#' @param uniqueid String. Unique identifier of x. Only needed if othertables
+#' != NULL.  The uniqueid must be the same for all tables except if PLT_CN and
+#' CN.
+#' @param vardelete String vector. Vector of variables you would like deleted
+#' from filter list. Mostly used for internal queries.
+#' @param title.filter String. Title of the filter query window. Mostuly used
+#' for internal queries.
+#' @param savedata Logical. If TRUE, writes output data to outfolder.
+#' @param outfolder String. Name of output folder if savedata=TRUE.
+#' @param outfn String. Name of output file if savedata=TRUE (*.csv). Do not
+#' include extension. If NULL, the file will be named xfiltered_'date'.csv
+#' @param outfn.pre String. Prefix for output table names.
+#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
+#' @param overwrite Logical. If TRUE, overwrites file if exists.
+#' @param filternm String. Optional. Name of filter, for feedback purposes.
+#' @param stopifnull Logical. If TRUE, stop if output is NULL.
+#' @param returnDT Logical. If TRUE, returns a data table. If FALSE, returns a
+#' data frame.
+#' @param xnm String. Name for filter attribute. Used for warning messages.
+#' @param gui Logical. If TRUE, pop-up windows will appear for user-interface.
+#' @return A list of the following items:
+#' 
+#' \item{xf}{ A data frame of filtered x. } \item{xfilter}{ The xfilter. } If
+#' othertables != NULL, the other tables, named with 'in' prefix
+#' @note If message returned is 'filter removed all records', either the filter
+#' removed all records in x or the filter is incorrect.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1), 
+#' 			FORTYPCD = c(182,184,201,221,221,184,221,182,182,201,182,221)))
+#' 	datFilter(x = tab, xfilter = "FORTYPCD != 182")
+#' 
+#' 	datFilter(x = FIESTA::WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
+#' 
+#' 
+#' @export datFilter
 datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL, 
 	uniqueid="PLT_CN", vardelete=NULL, title.filter=NULL, savedata=FALSE, 
 	outfolder=NULL, outfn="datf", outfn.pre=NULL, outfn.date=FALSE, 

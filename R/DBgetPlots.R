@@ -1,3 +1,449 @@
+#' Database - Extracts inventory plot data from FIA DataMart.
+#' 
+#' Extracts data from FIA's online publicly-available DataMart
+#' (https://apps.fs.usda.gov/fia/datamart/CSV/datamart_csv.html).
+#' 
+#' \bold{FIA forest land definition}
+#' 
+#' *Current*\cr Forested plots include plots with >= 10 percent cover (or
+#' equivalent stocking) by live trees of any size, including land that formerly
+#' had such tree cover and that will be naturally or artificially regenerated.
+#' To qualify, the area must be >= 1.0 acre in size and 120.0 feet wide (See
+#' Woudenberg et al. 2011).
+#' 
+#' *ACI (All Condition Inventory)*\cr RMRS National Forest plots. For nonforest
+#' conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 1),
+#' if trees exist on the condition, the data exist in the tree table. If you do
+#' not want these trees included, ACI=FALSE. This will filter the data to only
+#' forested conditions (COND_STATUS_CD = 1)
+#' 
+#' *Nevada*\cr In 2016, we changed the population area of Nevada to exclude the
+#' large restricted area owned by Department of Defense (Area 51) from the
+#' sample. Prior to 2016, the plots within this area were observed using aerial
+#' photos and if they were definitely nonforest the plots were entered in the
+#' database with nonforest information.  If they were observed as forested or
+#' potentially forested, they were given a PLOT_STATUS_CD=3 because they were
+#' Denied Access. From 2016 on, all plots within this area are removed from the
+#' sample, and thus, removed from database.
+#' 
+#' \bold{FIA DataMart Data}
+#' 
+#' FIA data available on FIA DataMart include the following information.\cr
+#' \tabular{ll}{ \tab - the PLOT variable is renumbered.\cr \tab - the LON/LAT
+#' coordinates are fuzzed & swapped.\cr \tab - the OWNERCD variable is based on
+#' fuzzed & swapped locations.\cr \tab - ECOSUBCD, CONGCD, ELEV, and EMAP_HEX
+#' are GIS-extracted values based on fuzzed & swapped locations.\cr \tab - For
+#' annual data, forested plots represent the current definition of >= 10
+#' percent cover...\cr \tab - For periodic data, forested plots are defined by
+#' a definition of Other Wooded Land (OWL), including >= 5 percent cover...\cr
+#' }
+#' 
+#' *FIADB Table Extraction*\cr \tabular{lll}{ \tab \bold{Argument} \tab
+#' \bold{Table Name(s)}\cr \tab istree \tab TREE\cr \tab isveg \tab
+#' P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE\cr \tab issubp \tab SUBPLOT,
+#' SUBP_COND\cr \tab isdwm \tab COND_DWM_CALC\cr \tab isgrm \tab
+#' TREE_GRM_COMPONENT\cr \tab issccm \tab SUBP_COND_CHNG_MTRX\cr }
+#' 
+#' \bold{FIA Evaluations}
+#' 
+#' An evaluation is a group of plots within the FIA database that is used for
+#' generating population estimates, representing different inventory spans of
+#' data with different stratification or area adjustments. Each evaluation is
+#' determined by the type of estimation (evalType) including: area and tree
+#' estimates; growth, removal, and mortality estimates; and area change
+#' estimates (EVAL_TYPE). These plots are identified by an evalid, which is a
+#' unique identifier in the format of a 2-digit State code, a 2-digit year
+#' code, and a 2-digit evaluation type code. For example, EVALID '491601'
+#' represents the Utah 2016 evaluation for current area estimates.
+#' 
+#' \bold{FIA Evaluation Types}
+#' 
+#' Define one or more Evaluation Type for evalCur=TRUE or evalEndyr=YYYY. An
+#' Evaluation type is used to identify a specific set of plots for a particular
+#' response that can be used to a make a statistically valid sample-based
+#' estimate. If evalType="ALL", the evaluation includes all sampled and
+#' nonsampled plots or plots that were missed in an inventory year.
+#' 
+#' Regional differences may occur on how missed plots are represented in a FIA
+#' Evaluation.  For example, RMRS Evaluations are static; missed plots are
+#' included in an Evaluation as nonsampled, and when measured, are included in
+#' a following Evaluation.  Therefore, the number of nonsampled plots in
+#' previous Evaluations may change, depending on when missed plot are measured.
+#' In the PNW Research Station, plots are brought forward to replace missed
+#' plots in an evaluation, depending on the evalType.
+#' 
+#' EVAL_TYP\cr \tabular{llll}{ \tab \bold{EVALIDCD} \tab \bold{EVAL_TYP} \tab
+#' \bold{Description}\cr \tab 00 \tab EXPALL \tab All area\cr \tab 01 \tab
+#' EXPVOL/EXPCURR \tab Area/Volume\cr \tab 03 \tab
+#' EXPCHNG/EXPGROW/EXPMORT/EXPREMV \tab Area Change/GRM\cr \tab 07 \tab EXPDWM
+#' \tab DWM\cr \tab 08 \tab EXPREGEN \tab Regeneration\cr \tab 09 \tab EXPINV
+#' \tab Invasive\cr \tab 10 \tab EXPP2VEG \tab Veg profile\cr \tab 12 \tab
+#' EXPCRWN \tab Crown\cr }
+#' 
+#' \bold{Inventory span defining variables}
+#' 
+#' Data can be extracted using FIA Evaluations or a custom-defined Evaluation
+#' for one or more states, one or more FIA Research Stations (RS), or all
+#' available states in database (states=NULL, RS=NULL).
+#' 
+#' *FIA Evaluation*\cr \tabular{lll}{ \tab \bold{Argument} \tab
+#' \bold{Description}\cr \tab EVALID \tab Specified FIA EVALID (e.g.,
+#' 491801)\cr \tab evalCur \tab Most current FIA Evaluation\cr \tab evalEndyr
+#' \tab End year of an FIA Evaluation (e.g., 2018)\cr \tab evalAll \tab All
+#' evaluations in database\cr \tab evalType \tab Type of FIA Evaluation
+#' (response)\cr }
+#' 
+#' *Custom evaluation*\cr \tabular{lll}{ \tab \bold{Argument} \tab
+#' \bold{Description}\cr \tab measCur \tab Most current measurement of plot in
+#' database\cr \tab measEndyr \tab Most current measurement of plot in database
+#' in or before year\cr \tab allyrs \tab All years for invtype
+#' (ANNUAL/PERIODIC)\cr \tab invyrs \tab Specified inventory years (e.g.,
+#' 2015:2018)\cr }
+#' 
+#' \bold{Spatial data}
+#' 
+#' If issp=TRUE, an sf spatial object of plot-level attributes is generated
+#' from public coordinates, with NAD83 Geographic Coordinate Reference System.
+#' 
+#' *Exporting*\cr If savedata=TRUE and out_fmt="shp", the spatial object is
+#' exported to the outfolder using the ESRI Shapefile driver. The driver
+#' truncates variable names to 10 characters or less. Variable names are
+#' changed using an internal function.  The name changes are written to a csv
+#' file and saved to the outfolder (shpfile_newnames.csv).
+#' 
+#' *spcond*\cr Only one condition per plot is used for spatial representation
+#' of condition attributes. IF CONDID1=TRUE, condition 1 is selected. If
+#' CONDID1=FALSE, the condition is selected based on the following criteria. A
+#' column named CONDMETHOD is added to the attribute table to show the method
+#' and steps used, identified by the abbreviation in parentheses.
+#' 
+#' \tabular{ll}{ \tab (1) minimum COND_STATUS_CD (_ST)\cr \tab (2) maximum
+#' condition proportion (_CP)\cr \tab (3) maximum live_canopy_cvr_pct (_CC)\cr
+#' \tab (4) minimum STDSZCD (_SZ)\cr \tab (5) minimum CONDID (_C1)\cr }
+#' 
+#' \bold{Derived Variables}
+#' 
+#' If defaultVars=TRUE, the following derived variables are calculated after
+#' extracting data from the FIA database.
+#' 
+#' Plot-level variables:\cr \tabular{ll}{ \tab NBRCND - Number of conditions on
+#' plot, including nonsampled conditions (COND_STATUS_CD = 5)\cr \tab
+#' NBRCNDSAMP - Number of sampled conditions on plot.\cr \tab NBRCNDFOR -
+#' Number of sampled forested conditions on plot.\cr \tab NBRCNDFTYP - Number
+#' of sampled forested conditions with different forest types on plot.\cr \tab
+#' NBRCNDFGRP - Number of sampled forested conditions with different forest
+#' type groups on plot.\cr \tab CCLIVEPLT - Percent live canopy cover of
+#' condition aggregated to plot-level (LIVE_CANOPY_CVR_PCT *
+#' CONDPROP_UNADJ).\cr \tab PLOT_ID - Unique Identifier for a plot ('ID' +
+#' STATECD(2) + UNITCD(2) + COUNTYCD(3) + PLOT(5)).  This variable can be used
+#' to identify multiple records for each measurement of plot.\cr }
+#' 
+#' Condition-level variables:\cr \tabular{ll}{ \tab FORTYPGRP - TYPGRPCD merged
+#' to FORTYPCD\cr \tab FLDTYPGRP - TYPGRPCD merged to FLDTYPCD\cr \tab
+#' FORNONSAMP - Combination of PLOT_STATUS_CD and PLOT_NONSAMPLE_REASN_CD\cr
+#' \tab QMD - Quadratic Mean Diameter\cr }
+#' 
+#' Tree-level variables:\cr \tabular{ll}{ \tab BA - the basal area of a tree
+#' (BA = DIA * DIA * 0.005454)\cr }
+#' 
+#' \tabular{ll}{ \tab TREE AGE Notes:\cr \tab - Available for live timber and
+#' woodland trees in the following states: AZ,CO,ID,MT,NV,UT,OR,WA.\cr \tab -
+#' BHAGE - Breast height age (4.5' above ground) of timber trees.\cr \tab - PNW
+#' - one tree is sampled for each species, within each crown class, and for
+#' each condition class present on plot. Age of saplings (<5.0" DIA) may be
+#' aged by counting branch whorls above 4.5ft. No timber hardwood species other
+#' than red alder are bored for age.\cr \tab - RMRS - one tree is sampled for
+#' each species and broad diameter class present on plot.\cr }
+#' 
+#' \tabular{ll}{ \tab DRYBIO Notes:\cr \tab DRYBIO_AG - Aboveground oven-dry
+#' biomass, in pounds (DRYBIO_AG = (DRYBIO_BOLE + DRYBIO_STUMP + DRYBIO_TOP +
+#' DRYBIO_SAPLING + DRYBIO_WDLD_SPP).\cr \tab - Available for both timber and
+#' woodland species, live trees >= 1.0" DIA and dead trees >= 5.0" DIA. Summed
+#' dry biomass of the top, bole, and stump of a tree, excluding foliage based
+#' on component ratio method (Heath and others, 2009).\cr \tab - DRYBIO_BOLE -
+#' dry biomass of sound wood in live and dead trees, including bark, from a
+#' 1-foot stump to a min 4-inch top DIA of central stem (Calculated for timber
+#' trees >= 5.0" DIA).\cr \tab - DRYBIO_STUMP - dry biomass in the tree stump,
+#' including the portion of the tree from the ground to the bottom of
+#' merchantable bole, 1-foot (Calculated for live and dead trees >= 5.0"
+#' DIA).\cr \tab - DRYBIO_TOP - dry biomass in the top of the tree, including
+#' the portion of the tree above merchantable bole, 4-inch top, and all
+#' branches, excludes foliage (Calculated for live and dead trees >= 5.0"
+#' DIA).\cr \tab - DRYBIO_SAPLING - dry biomass of saplings, including
+#' aboveground portion, excluding foliage, of live timber trees >=1.0" and
+#' <5.0" DIA.\cr \tab - DRYBIO_WDLD_SPP - dry biomass of woodland trees, live
+#' or dead, including the aboveground portion, excluding foliage, the top of
+#' the tree above 1.5" DIA, and a portion of the stump from ground to DRC
+#' (Calculated for woodland trees >= 1.0" DIA.\cr }
+#' 
+#' ABOVEGROUND CARBON ESTIMATES (IN POUNDS)\cr Available for both timber and
+#' woodland species, live trees >= 1.0" DIA and dead trees >= 5.0" DIA.
+#' Calculated as 1/2 of the aboveground esimates of biomass: \cr CARBON_AG =
+#' 0.5 * (DRYBIO_AG)
+#' 
+#' TREE AGE DATA ONLY IN FOR ("AZ", "CO", "ID", "MT", "NV", "UT") \cr FMORTCFAL
+#' includes trees >= 5.0" DIA and greater and is not populated for states("CA",
+#' "OR", "WA", "OK") \cr Mortality variables only available in: AZ, CO, ID, MT,
+#' NV, NM, UT, WY, ND, SD, NE, KS, OK.
+#' 
+#' \bold{TPA} If TPA=TRUE and istree=TRUE or isseed=TRUE, the following
+#' tree/seedling variables are multiplied by trees-per-acre (TPA_UNADJ).
+#' TPA_UNADJ is set to a constant derived from the plot size and equals
+#' 6.018046 for trees sampled on subplots, 74.965282 for trees sampled on
+#' microplots, and 0.999188 for trees sampled on macroplots. Variable-radius
+#' plots were often used in earlier inventories, so the value in TPA_UNADJ
+#' decreases as the tree diameter increases (FIADB User Guide)
+#' 
+#' Variables: VOLCFNET, VOLCFGRS, GROWCFGS, GROWCFAL, FGROWCFGS, FGROWCFAL,
+#' MORTCFGS, MORTCFAL, FMORTCFGS, FMORTCFAL, REMVCFGS, REMVCFAL, FREMVCFGS,
+#' FREMVCFAL, DRYBIO_BOLE, DRYBIO_STUMP, DRYBIO_TOP, DRYBIO_SAPLING,
+#' DRYBIO_WDLD_SPP, DRYBIO_BG, CARBON_BG, CARBON_AG
+#' 
+#' \bold{MISC}
+#' 
+#' For regions outside RMRS, there is no OWNCD attached to nonforest lands.
+#' 
+#' @param states String or numeric vector. Name (e.g., 'Arizona','New Mexico')
+#' or code (e.g., 4, 35) of state(s) for evalid. If all states in one or more
+#' FIA Research Station is desired, set states=NULL and use RS argument to
+#' define RS.
+#' @param datsource String. Source of data ('datamart', 'sqlite').
+#' @param data_dsn String. If datsource='sqlite', the name of SQLite database
+#' (*.sqlite).
+#' @param RS String vector. Name of research station(s)
+#' ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states is populated.
+#' @param invtype String. Type of FIA inventory to extract ('PERIODIC',
+#' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
+#' @param evalid Integer. Inventory span defining variable. Extract data for a
+#' specific evaluation period (See details for more information about FIA
+#' Evaluations).
+#' @param evalCur Logical. Inventory span defining variable. If TRUE, extract
+#' data for the most current FIA Evalidation for each state.
+#' @param evalEndyr YYYY. Inventory span defining variable. Extract data for
+#' the Evaluation(s) ending in the specified evalEndyr(s). If more than one
+#' state and different Evaluations by state are desired, input a named list
+#' object with evalEndyr by state (e.g., list(Utah=2014, Colorado=2013).
+#' @param evalAll Logical. Inventory span defining variable. If TRUE, extract
+#' data for all Evaluations for each state.
+#' @param evalType String vector. The type(s) of evaluation of interest ('ALL',
+#' 'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
+#' 'ALL' includes nonsampled plots; 'CURR' includes plots used for area
+#' estimates; 'VOL' includes plots used for area and/or tree estimates; The
+#' evalType 'GRM' includes plots used for growth, removals, mortality, and
+#' change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
+#' are accepted. See details below and FIA database manual for regional
+#' availability and/or differences. Note: do not use if EVALID is specified.
+#' @param measCur Logical. Inventory span defining variable. If TRUE, extract
+#' plots with most current measurement for state(s).
+#' @param measEndyr Logical. Inventory span defining variable. If TRUE, extract
+#' plots with most current measurement for state(s) for years measured in or
+#' before measEndyr.
+#' @param allyrs Logical. Inventory span defining variable. If TRUE, extract
+#' all annual inventory years in database for each state.
+#' @param invyrs YYYY vector. Inventory span defining variable. Extract data by
+#' state for the specified inventory year(s) (e.g., c(2000, 2001, 2002)). If
+#' more than one state and different inventory years are desired, input a named
+#' list object with years labeled by state (e.g., list(Utah=2000:2009,
+#' Colorado=c(2002,2003,2005)).
+#' @param measyrs YYYY vector. Measurement year span defining variable. Extract
+#' data by state for the specified measurement year(s) (e.g., c(2000, 2001,
+#' 2002)). If more than one state and different measurement years are desired,
+#' input a named list object with years labeled by state (e.g.,
+#' list(Utah=2000:2009, Colorado=c(2002,2003,2005)).
+#' @param xymeasCur Logical. If TRUE, and more than one plot measured at same
+#' location, only the most current coordinate is returned for the plot.
+#' @param istree Logical. If TRUE, tree data are extracted from TREE table in
+#' database.
+#' @param isseed Logical. If TRUE, seedling data are extracted from SEEDLING
+#' table in database.
+#' @param isveg Logical. If TRUE, understory vegetation tables are extracted
+#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE).
+#' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
+#' database (SUBPLOT, SUBP_COND).
+#' @param islulc Logical. If TRUE, condition-level land use/land cover data are
+#' for current and previous years are extracted from FIA database.
+#' @param isdwm Logical. If TRUE, summarized condition-level down woody debris
+#' data are extracted from FIA database (COND_DWM_CALC).
+#' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
+#' appended to the plot table.
+#' @param othertables String Vector. Name of other table(s) in FIADB to include
+#' in output. The table must have PLT_CN as unique identifier of a plot.
+#' @param issp Logical. If TRUE, an sf spatial object is generated from the
+#' public X/Y coordinates in the plot table.
+#' @param spcond Logical. If TRUE, a set of condition-level attributes (e.g.,
+#' FORTYPCD) represented at the plot-level are extracted from FIA DataMart COND
+#' table.  (See Notes for more info on how condition attributes were added).
+#' @param spcondid1 Logical. If TRUE and issp=TRUE and spcond=TRUE, condition
+#' variables are determined by condition 1 attributes. If FALSE, an algorithm
+#' is used to select the condition to use (See details for alorithm used).
+#' @param defaultVars Logical. If TRUE, a set of default variables are selected
+#' in query.  See notes for variable descriptions.
+#' @param regionVars Logical. If TRUE, regional variables are included in query
+#' (e.g., SDI_RMRS, SDIPCT_RMRS, SDIMAX_RMRS, QMD_RMRS).
+#' @param regionVarsRS String. Region for regionVars
+#' ('RMRS','SRS','NCRS','NERS','PNWRS').
+#' @param ACI Logical. If TRUE, the data from All Condition Inventories (ACI)
+#' are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
+#' details.
+#' @param subcycle99 Logical. If TRUE, excludes plots with SUBCYCLE = 99. These
+#' plots are plots that are measured more than once and are not included in the
+#' estimation process.
+#' @param intensity1 Logical. If TRUE, includes only plots where INTENSITY = 1.
+#' @param stateFilter Character string or Named list. Logical statement to use
+#' as plot and filter in sql query. Must include plot alias ('p.') and be sql
+#' syntax (e.g., 'p.COUNTYCD = 1'). If more than 1 state, stateFilter must be a
+#' named list with names as state(s) (e.g., list(Utah='p.COUNTYCD = 1').
+#' @param allFilter String. An overall filter for plot or condition data in all
+#' states in query. The expression must be R syntax (e.g., 'PLOT_STATUS_CD ==
+#' 1').
+#' @param alltFilter String. If istree=TRUE, an overall filter for tree data in
+#' all states (e.g., only Whitebark pine trees - 'SPCD == 101'). Note: returns
+#' only plots with trees included in filter.
+#' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
+#' file (*.csv).  No objects are returned. If FALSE, the data are saved as R
+#' objects and returned to user.  See details for caveats.
+#' @param saveqry Logical. If TRUE, saves queries to outfolder (by state).
+#' @param outfolder String. The output folder path. If NULL and savedata=TRUE
+#' or saveqry=TRUE, outfolder is the working directory.
+#' @param out_fmt String. File format for output ('csv', 'sqlite','gpkg',
+#' 'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
+#' installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
+#' installed.
+#' @param out_dsn String. Data source name for output. If extension is not
+#' included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param append_layer Logical. If TRUE, appends to existing out_dsn. The
+#' out_dsn a database or shapefile. If FALSE, the out_dsn will be overwritten
+#' if exists.
+#' @param outfn.pre String. The name used for prefix of outfiles (e.g.,
+#' outfn.pre'_plt*').
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param overwrite_dsn Logical. If TRUE and out_fmt = 'sqlite', the out_dsn is
+#' overwritten.
+#' @param overwrite_layer Logical. If TRUE and out_fmt = 'csv', files are
+#' overwritten.  If out_fmt != 'csv', the layer in database is overwritten.
+#' @param savePOP Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
+#' table.
+#' @param returndata Logical. If TRUE, returns data objects.
+#' @return fiadat - a list of the following objects: \item{states}{ Vector.
+#' Input state(s) (full state names: Arizona). } \item{plt}{ Data frame. Plot
+#' variables from FIA DataMart PLOT table.  See FIESTA::ref_plt for variable
+#' definitions. } \item{cond}{ Data frame. Condition variables from FIA
+#' DataMart COND table.  See FIESTA::ref_cond for variable definitions. }
+#' \item{tree}{ Data frame. If istree=TRUE, tree variables from FIA Datamart
+#' TREE table.  See FIESTA::ref_tree for variable definitions. If number of
+#' states > 3, tree data are saved to outfolder, but not returned to
+#' accommodate R memory issues. } \item{seed}{ Data frame. If isseed=TRUE,
+#' seedling variables from FIA DataMart SEEDLING table. } \item{vsubpspp}{ Data
+#' frame. If isveg=TRUE, Subplot-level understory vegetation variables from FIA
+#' DataMart P2VEG_SUBPLOT_SPP table. } \item{vsubpstr}{ Data frame. If
+#' isveg=TRUE, Subplot-level cover and layer understory vegetation variables
+#' from FIA DataMart P2VEG_SUBP_STRUCTURE table. } \item{lulc}{ Data frame. If
+#' islulc=TRUE, Condition-level data including data from previous measurements
+#' for land use and land cover. } \item{spplt_*}{ sf object. If issp=TRUE, a
+#' simple feature(sf) object with plot attributes. } \item{spcond}{ If
+#' spcond=TRUE, condition variables representing plot, for spatial display. }
+#' \item{evalid}{ Number. If evalCur=TRUE or evalEndyr is not NULL, the
+#' Evalidation ID is output. } \item{pltcnt}{ Data frame. Number of plots
+#' (NBRPLOTS) by state, cycle, inventory year, and plot status. }
+#' \item{pop_plot_stratum_assgn}{ Data frame. If savePOP=TRUE, and Evaluations
+#' are used to extract data from database, return the POP_PLOT_STRATUM_ASSGN
+#' table or, if more than one evalType and savePOP=FALSE. If more than one
+#' evalType, only the records for the evalTypes are returned, otherwise all
+#' evalTypes for the state evaluation are returned. }
+#' 
+#' \tabular{ll}{ \tab - If parameters=TRUE, text file of parameters used. This
+#' file can be used to run program again (DBgetPlots_parameters*.txt).\cr \tab
+#' - If outSQLitefn is defined, all data (with added UNIQUE INDEX) are written
+#' to a SQLite database (*.sqlite) or geopackage (*.gpkg) (if gpkg=TRUE) with
+#' this name.\cr \tab - CSV file of plot and condition counts (pltcnt*.txt).\cr
+#' \tab - Tables or CSV files of output data.\cr \tab - If issp=TRUE, a feature
+#' class or ESRI shapefile of plot-level level attributes (spplt_PUBLIC*.shp).
+#' Variable names are truncated to 10 characters or less. \cr \tab - If
+#' issp=TRUE and outSQLitefn=NULL, a CSV file of truncated names for conversion
+#' to shapefile (spplt_PUBLIC_newnames.shp). See notes for more info.\cr }
+#' 
+#' To deal with limitations of R object size and/or computer memory issues, if
+#' istree=TRUE and more than three states are desired, the tree data are saved
+#' to a CSV file, with no tree data object returned. \cr
+#' @note
+#' 
+#' If no parameters are included, the user is prompted for input. If partial
+#' parameters, the default parameter values are used for those not specified.
+#' 
+#' \bold{Data Access} All data are downloaded from FIA's publicly-available
+#' online Datamart
+#' (https://apps.fs.usda.gov/fia/datamart/CSV/datamart_csv.html).
+#' 
+#' Because of FIA's confidentiality agreement to protect the privacy of
+#' landowners as well as protecting the scientific integrity of FIA's sample
+#' design, the exact coordinates of the sample plot locations are not included.
+#' The X/Y coordinates (LON_PUBLIC/LAT_PUBLIC) for download are perturbed up to
+#' a mile from the original location
+#' (https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php).  If the
+#' exact location of the plots are necessary for your analysis, contact FIA's
+#' Spatial Data Services
+#' (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
+#' @author Tracey S. Frescino
+#' @references DeBlander, Larry T.; Shaw, John D.; Witt, Chris; Menlove, Jim;
+#' Thompson, Michael T.; Morgan, Todd A.; DeRose, R. Justin; Amacher, Michael,
+#' C. 2010. Utah's forest resources, 2000-2005. Resour. Bull. RMRS-RB-10. Fort
+#' Collins, CO; U.S. Department of Agriculture, Forest Service, Rocky Mountain
+#' Research Station. 144 p.
+#' 
+#' Heath, L.S.; Hansen, M. H.; Smith, J.E. [and others]. 2009. Investigation
+#' into calculating tree biomass and carbon in the FIADB using a biomass
+#' expansion factor approach. In: Forest Inventory and Analysis (FIA) Symposium
+#' 2008. RMRS-P-56CD. Fort Collins, CO: U.S. Department of Agriculture, Forest
+#' Service, Rocky Mountain Research Station. 1 CD.
+#' 
+#' Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J.,
+#' Christiansen, G., Conkling, B.L., Winnie, D., 2018. Forest Inventory and
+#' Analysis Database [WWW Document].  St Paul MN US Dep. Agric. For. Serv.
+#' North. Res. Stn.  URL http://apps.fs.fed.us/fiadb-downloads/datamart.html
+#' (accessed 3.6.21).
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'   # Extract the most current evaluation of data for Utah
+#'   UTdat <- DBgetPlots(states="Utah", evalCur=TRUE)
+#'   names(UTdat)
+#'   head(UTdat$plt)
+#'   head(UTdat$cond)
+#'   UTdat$pltcnt
+#' 
+#'   ## Look at number of plots by inventory year
+#'   table(UTdat$plt$INVYR)
+#' 
+#'   # Note: see FIESTA::ref_plt and FIESTA::ref_cond for variable descriptions
+#'   #Or consult FIA Database documentation
+#'   #\link{https://www.fia.fs.fed.us/library/database-documentation/index.php}
+#' 
+#' 
+#'   # Extract specified inventory years 2012:2014 and spatial information
+#'   UTdat2 <- DBgetPlots(states="Utah", invyrs=2012:2014, issp=TRUE)
+#'   names(UTdat2)
+#'   UTdat2$pltcnt
+#'   UTdat2$spxy_PUBLIC
+#' 
+#'   ## Display plots by inventory year (INVYR)
+#'   # plot(sf::st_geometry(UTdat2$spxy_PUBLIC['INVYR']),
+#' 	# col=sf.colors(length(unique(UTdat2$spxy_PUBLIC[["INVYR"]]))))
+#' 
+#' 
+#'   # Extract and display plots with aspen forest type
+#'   UTdat3 <- DBgetPlots(states="Utah", invyrs=2012:2014, issp=TRUE,
+#' 		allFilter="FORTYPCD == 901")
+#'   names(UTdat3)
+#'   UTdat3$pltcnt
+#' 
+#'   plot(sf::st_geometry(FIESTA::stunitco[FIESTA::stunitco$STATENM == "Utah",]),
+#' 		border="light grey")
+#'   plot(sf::st_geometry(UTdat3$spxy_PUBLIC), add=TRUE, pch=18, cex=.5)
+#' 
+#' 
+#' @export DBgetPlots
 DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL, 
 	RS=NULL, invtype="ANNUAL", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
 	evalAll=FALSE, evalType="VOL", measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 

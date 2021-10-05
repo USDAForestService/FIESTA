@@ -1,3 +1,23 @@
+#' Database - Create a new SQLite database.
+#' 
+#' Create a new SQLite database.
+#' 
+#' 
+#' @param SQLitefn String. Name of SQLite database (*.sqlite).
+#' @param gpkg Logical. If TRUE, Sqlite geopackage database.
+#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
+#' @param outfolder String. Optional. Name of output folder. If NULL, export to
+#' working directory.
+#' @param outfn.pre String. Prefix for out_dsn.
+#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
+#' @param overwrite Logical. If TRUE, overwrites out_dsn.
+#' @param returnpath Logical. If TRUE, returns full path to SQLite file name.
+#' If FALSE, returns SQLitefn
+#' @param stopifnull Logical. If TRUE, and SQLitefn is NULL, stops execution of
+#' program.  If FALSE, returns NULL
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export DBcreateSQLite
 DBcreateSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE, 
 	outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
 	returnpath=TRUE, stopifnull=FALSE) {

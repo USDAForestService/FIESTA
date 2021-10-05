@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // RasterizePolygon
 int RasterizePolygon(int nRasterXSize, int nRasterYSize, const Rcpp::IntegerVector& ivPartSizes, const Rcpp::NumericVector& dvX, const Rcpp::NumericVector& dvY, Rcpp::Function fnRasterIO, double dBurnValue, Rcpp::String sAttrValue);
 RcppExport SEXP _FIESTA_RasterizePolygon(SEXP nRasterXSizeSEXP, SEXP nRasterYSizeSEXP, SEXP ivPartSizesSEXP, SEXP dvXSEXP, SEXP dvYSEXP, SEXP fnRasterIOSEXP, SEXP dBurnValueSEXP, SEXP sAttrValueSEXP) {

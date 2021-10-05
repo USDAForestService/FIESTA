@@ -1,3 +1,162 @@
+#' Spatial - Generate a set of model domain units for Small Area Estimation
+#' (SAE) strategies.
+#' 
+#' Spatial process to generate a set of model domains (i.e., helper polygons)
+#' for Small Area Estimation (SAE) strategies. If helper_autoselect=TRUE, an
+#' automated process is used to select helper polygons within a large area
+#' overlapping the small area. The helper polygons are unioned with the small
+#' area polygons, resulting in a set of model domains that can be used for SAE.
+#' 
+#' \bold{optional boundaries}
+#' 
+#' The helperbnd, largebnd, and maxbnd are optional. If helperbnd=NULL, the
+#' smallbnd polygons are used for model domain units. If largebnd=NULL, the
+#' maxbnd is used to define the large area. If maxbnd=NULL, the largebnd is
+#' used to restrain the model extent. If both, largebnd=NULL and maxbnd=NULL,
+#' the extent of the smallbnd or helperbnd is used for defining and restraining
+#' the model extent.
+#' 
+#' \bold{nbrdom.min}
+#' 
+#' The number of helper polygons selected are defined by nbrdom.min parameter.
+#' If nbrdom.min=NULL, all helper polygons within the large area extent are
+#' selected.
+#' 
+#' \bold{multiSAdoms}
+#' 
+#' Use multiSAdoms parameter when small area of interest has multiple polygon
+#' features and the small area polygons overlap (within maxbnd.threshold) more
+#' than one maxbnd polygon. If multiSAdoms=TRUE, more than one set of model
+#' domain units are generated; one for each maxbnd where overlap is within
+#' maxbnd.threshold. If multiSAdoms=FALSE, only one set of model domain units
+#' are generated, using the maxbnd with the greatest overlap.
+#' 
+#' \bold{AOI attribute}
+#' 
+#' A variable named 'AOI' is appended to the SAdoms attribute table to
+#' distinguish between the small area of interest polygons and the helper
+#' domain units.
+#' 
+#' @param smallbnd sf R object or String. Small area of interest boundary.  Can
+#' be a spatial polygon object, full pathname to a shapefile, or name of a
+#' layer within a database.
+#' @param smallbnd_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' pathname) of smallbnd. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). Optional if smallbnd is an R
+#' object.
+#' @param smallbnd.unique String. The attribute in smallbnd that defines unique
+#' domain identifier in smallbnd that defines the unique small area(s). If
+#' NULL, an attribute is appended to smallbnd attribute table and used as
+#' smallbnd.unique, defining one polygon (SMALLAREA="SMALLAREA").
+#' @param smallbnd.domain String. A different attribute to use as for grouped
+#' modeling domains (optional). If NULL, smallbnd.domain=smallbnd.unique.
+#' @param smallbnd.filter String. A filter for smallbnd. Must be R syntax.
+#' @param smallbnd.stfilter String. A spatial filter for smallbnd to include
+#' only smallbnd polygons that intersect (or overlap >= 30%) the filter
+#' boundary. The filter is based on the stunitco internal R object, with
+#' attributes: STATECD, STATENM, UNITCD, UNITNM, COUNTYCD, COUNTYNM. The filter
+#' should include one of these attributes and must be R syntax.
+#' @param smallbnd.ecofilter String. A spatial filter for smallbnd to include
+#' only smallbnd polygons that intersect (or overlap >= 30%) the filter
+#' boundary. The filter is based on the ecomap internal R object, with
+#' attributes: PROVINCE, SECTION, SUBSECTION. The filter should include one of
+#' these attributes and must be R syntax.
+#' @param helperbnd sf R object or String. Name of polygon spatial layer
+#' delineating helper polygons for small area models. Can be a spatial polygon
+#' object, full pathname to a shapefile, or name of a layer within a database.
+#' @param helperbnd_dsn String. Data source name (dsn; e.g., sqlite or
+#' shapefile pathname) of helperbnd. The dsn varies by driver. See gdal OGR
+#' vector formats (https://www.gdal.org/ogr_formats.html). Optional if
+#' helperbnd is an R object.
+#' @param helperbnd.unique String. The attribute in helper polygon layer that
+#' defines unique helper polygons.
+#' @param helperbnd.filter String. A filter for helperbnd. Must be R syntax.
+#' @param largebnd sf R object or String. Name of large area polygon spatial
+#' layer, defining the model data extent for building small are models.  Can be
+#' a spatial polygon object, full pathname to a shapefile, or name of a layer
+#' within a database.
+#' @param largebnd_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' pathname) of largebnd. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). Optional if largebnd is an R
+#' object.
+#' @param largebnd.unique String. The attribute in largebnd polygon layer that
+#' defines unique large area polygon(s).
+#' @param largebnd.filter String. A filter for largebnd. Must be R syntax.
+#' @param maxbnd sf R object or String. Name of polygon spatial layer, defining
+#' the maximum model data restraint for adding more helper polygons for
+#' building small are models. Can be a spatial polygon object, full pathname to
+#' a shapefile, or name of a layer within a database.
+#' @param maxbnd_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' pathname) of maxbnd. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). Optional if maxbnd is an R object.
+#' @param maxbnd.unique String. The attribute in maxbnd polygon layer that
+#' defines unique max restraint area(s).
+#' @param maxbnd.filter String. A filter for maxbnd. Must be R syntax.
+#' @param helper_autoselect Logical. If TRUE, the helper boundaries are
+#' automatically selected based on intersection with maxbnd and/or largebnd and
+#' number of helperbnds defined by nbrdom.min.
+#' @param nbrdom.min Integer. Set number for minimum domains for modeling. If
+#' NULL, all domains within largebnd are selected.
+#' @param maxbnd.threshold Integer. Percent for including additional maxbnds
+#' for selecting helperbnds. If multiSAdoms=FALSE, the maxbnd with greatest
+#' percentage over the maxbnd.threshold is selected.
+#' @param largebnd.threshold Integer. Percent for including additional
+#' largebnds for selecting helperbnds.
+#' @param multiSAdoms Logical. If TRUE, and the percent intersect of smallbnd
+#' with maxbnd is greater than maxbnd.threshold, more than 1 SAdoms will be
+#' output in list.
+#' @param showsteps Logical. If TRUE, intermediate steps of selection process
+#' are displayed.
+#' @param savedata Logical. If TRUE, save SAdoms spatial layer to outfolder.
+#' @param savesteps Logical. If TRUE, save steps spatial intermediate layers
+#' and JPG images. All spatial layers are output as *.shp format in a separate
+#' folder (SAdoms_steps).
+#' @param maxbnd.addtext Logical. If TRUE, adds text to intermediate step plots
+#' for maxbnd displays.
+#' @param largebnd.addtext Logical. If TRUE, adds text to intermediate step
+#' plots for largebnd displays.
+#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
+#' folder.  If NULL, the working directory is used.
+#' @param out_fmt String. Format for output tables ('shp', 'sqlite', 'gpkg',
+#' 'gdb').  If out_fmt='gdb', must install arcgisbinding package and ArcGIS
+#' R-Bridge.
+#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg',
+#' 'gdb').
+#' @param outfn.pre String. If out_fmt = "shp", a new folder is created within
+#' outfolder named outfn.pre. If out_fmt != "shp", a prefix is concatenated to
+#' out_dsn, using an underscore as separator.
+#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
+#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
+#' @param overwrite_layer Logical. If TRUE, overwrite layer(s) in dsn.
+#' @param addstate Logical. If TRUE, appends state attribute to SAdoms.
+#' @param dissolve Logical. If TRUE, aggregates polygons to smallbnd.domain or
+#' smallbnd.unique.
+#' @return \item{SAdomslst}{ List object. Set(s) of model domain units. If
+#' multiSAdoms=TRUE, the list may have more than one set of model domain units.
+#' } \item{smallbndlst}{ List object. smallbnd(s). If multiSAdoms=TRUE, the
+#' list may have more than one set of smallbnd. }
+#' 
+#' If exportsp=TRUE, the SAdoms spatial object(s) is exported to outfolder,
+#' with format specified by out_fmt.
+#' @note
+#' 
+#' If exportsp=TRUE and out_fmt="shp":\cr The writeOGR (rgdal) function is
+#' called. The ArcGIS driver truncates variable names to 10 characters or less.
+#' Variable names are changed before export using an internal function
+#' (trunc10shp). If Spatial object has more than 1 record, it will be returned
+#' but not exported.
+#' 
+#' The spTransform (rgdal) method is used for on-the-fly map projection
+#' conversion and datum transformation using PROJ.4 arguments. Datum
+#' transformation only occurs if the +datum tag is present in the both the from
+#' and to PROJ.4 strings. The +towgs84 tag is used when no datum transformation
+#' is needed. PROJ.4 transformations assume NAD83 and WGS84 are identical
+#' unless other transformation parameters are specified.  Be aware, providing
+#' inaccurate or incomplete CRS information may lead to erroneous data shifts
+#' when reprojecting. See spTransform help documentation for more details.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export spGetSAdoms
 spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL, 
 	smallbnd.domain=NULL, smallbnd.filter=NULL, smallbnd.stfilter=NULL, 
 	smallbnd.ecofilter=NULL, helperbnd=NULL, helperbnd_dsn=NULL, helperbnd.unique=NULL, 

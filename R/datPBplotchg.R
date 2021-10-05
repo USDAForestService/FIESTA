@@ -1,3 +1,18 @@
+#' Data - Generates barplot of photo-based change estimates.
+#' 
+#' Generate a bar plot of net change for photo-based estimates of land use /
+#' land cover change.
+#' 
+#' 
+#' @param gainloss Data frame or comma-delimited file (*.csv) - table with gain
+#' loss estimates.
+#' @param CI Number. Confidence Interval to include on plot.
+#' @param figTitle String. Title of figure.
+#' @return Outputs barplot to display window.
+#' @note If savedata = TRUE, writes a jpg and pdf of barplot to outfolder.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export datPBplotchg
 datPBplotchg <- function(gainloss, CI=95, figTitle="") {
   ## DESCRIPTION: Generates a plot with gain and loss estimates and confidence intervals.
   ## --> function to plot net changes in classes for LU and LC

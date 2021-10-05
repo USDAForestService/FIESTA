@@ -1,3 +1,86 @@
+#' Data - Create a variable with classified values.
+#' 
+#' Merge a look-up table to define categories of continuous data in x (e.g.,
+#' DIA).  Adds a variable (LUTclassnm) to x, defining as: xvar >= MIN (and xvar
+#' <= MAX).
+#' 
+#' Use datLUTclass() to prompt for input.
+#' 
+#' @param x Data frame or comma-delimited file (*.csv). The data table with
+#' variable to classify.
+#' @param xvar String. Name of variable in the data table to join to.
+#' @param LUT Data frame or comma-delimited file (*.csv). Name of the look-up
+#' table with collapsed classes. Lookup table should include minimum values for
+#' classes, maximum values for classes, and a name of class (i.e., LUTclassnm).
+#' Maximum values and names are optional.
+#' @param minvar String. If LUT is not null, name of variable with minimimum
+#' class value (>= minvar).
+#' @param maxvar String. Optional. If LUT is not null, name of variable with
+#' maximum class value (<= maxvar).
+#' @param cutbreaks Numeric vector. Vector of numbers for minimum class values.
+#' @param cutlabels String vector. Optional. Vector of names for classes. If
+#' NULL, class names are generated from cutbreaks.
+#' @param LUTclassnm String. Optional. Name of classified variable in x. If LUT
+#' is not null and class names are included, this is the name of variable with
+#' class names. If NULL, a class names are generated from minvar or minvar and
+#' maxvar with default name equal to 'xvar'CL.
+#' @param label.dec Integer. Number of decimals to include in label.
+#' @param NAto0 Logical. If TRUE, converts NA values to 0 before
+#' classification.
+#' @param vars2keep String vector. Variable names from LUT to keep (append) to
+#' x.
+#' @param keepcutbreaks Logical. If TRUE, the cutbreaks used for creating
+#' classes are appended to dataset.
+#' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
+#' file (*.csv).
+#' @param outfolder String.* The output folder path. If NULL and savedata=TRUE,
+#' the outfolder is the working directory.
+#' @param outfn String.* Output file name. If NULL and savedata=TRUE, outfn =
+#' datlut_'date'.csv.
+#' @return \item{xLUT}{ Input data table with look-up table variable(s). }
+#' \item{LUTclassnm}{ Name of the classified variable. } \item{LUT}{ Look-up
+#' table with categories. }
+#' 
+#' If savedata = TRUE, a comma-delimited file is output to the outfolder as
+#' outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.
+#' @note The look-up table format must be similar to the following table Set
+#' LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.
+#' 
+#' \tabular{llll}{ \tab \bold{MIN} \tab \bold{MAX} \tab \bold{VARCLNM} \cr \tab
+#' 1.0 \tab 4.9 \tab 1 \cr \tab 5.0 \tab 9.9 \tab 2 \cr \tab 10.0 \tab 15.0
+#' \tab 3 \cr \tab 15.0 \tab 19.9 \tab 4 \cr \tab 20.0 \tab 24.9 \tab 5 \cr
+#' \tab 25.0 \tab 49.9 \tab 6 \cr }
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 	head(FIESTA::ref_diacl2in)
+#' 	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=FIESTA::ref_diacl2in, 
+#' 		LUTclassnm="DIACL2IN")
+#' 	names(WYtreelut)
+#' 	head(WYtreelut$xLUT)
+#' 	table(WYtreelut$xLUT$DIACL2IN)
+#' 
+#' 	WYtreelut2 <- datLUTclass(WYtree, xvar="DIA", cutbreaks=c(1,5,25,50,100), 
+#' 		LUTclassnm="DIACL2IN")
+#' 	names(WYtreelut2)
+#' 	head(WYtreelut2$xLUT)
+#' 	table(WYtreelut2$xLUT$DIACL2IN)
+#' 
+#' 	## Create look-up table of stand age classes
+#' 	MIN <- c(0, 20, 40, 60, 80, 101)
+#' 	STDAGENM <- c("0-20", "21-40", "41-60", "61-80", "81-100", "101+") 
+#' 	stdagelut <- data.frame(MIN=MIN, STDAGENM=STDAGENM)
+#' 	stdagelut
+#' 
+#' 	WYcondlut <- datLUTclass(WYcond, xvar="STDAGE", LUT=stdagelut, 
+#' 		LUTclassnm="STDAGENM")
+#' 	names(WYcondlut)
+#' 	head(WYcondlut$xLUT)
+#' 	table(WYcondlut$xLUT$STDAGENM)
+#' 
+#' 
+#' @export datLUTclass
 datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL, 
 	cutbreaks=NULL, cutlabels=NULL, LUTclassnm=NULL, label.dec=1, 
 	NAto0=FALSE, vars2keep=NULL, keepcutbreaks=FALSE, savedata=FALSE, 

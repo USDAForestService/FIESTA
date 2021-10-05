@@ -1,3 +1,83 @@
+#' Data - Generates line graph.
+#' 
+#' Generate a line plot of multiple estimates.
+#' 
+#' If parameters = NULL, then it will prompt user for input.
+#' 
+#' @param x Data frame or comma-delimited file (*.csv) - a frequency table.
+#' @param xvar String. Name of X variable.
+#' @param yvar String. Name of the y variable (e.g., FREQ).
+#' @param plotCI Logical. If TRUE, adds confidence intervals to plot as dotted
+#' lines.
+#' @param sevar String. Name of the variable with standard error values.
+#' @param CIlst String. Numeric vector. If plotCI=TRUE, identifies percent
+#' confidence interval to add to plot.
+#' @param CIcolorlst String. Character vector. If plotCI=TRUE, identifies
+#' colors to plot confidence interval lines. Must be same length as CIlst and
+#' from colors() list.
+#' @param addshade Logical. If TRUE, adds a light grey shading between the
+#' large confidence interval lines.
+#' @param device.type String. Type(s) of device for plotting ("dev.new", "jpg",
+#' "pdf").
+#' @param jpeg.res Integer. Resolution for jpeg image.
+#' @param device.height Integer. Height (in inches) of barplot, if writing to
+#' file.
+#' @param device.width Integer. Width (in inches) of barplot, if writing to
+#' file.
+#' @param ylim Number. A vector of min and max values, c(min,max) for the y
+#' axis (or x axis if horiz=TRUE). If NULL, defaults to maximum y value. If
+#' errbars=TRUE, the ylim defaults to the maximum y value plus the standard
+#' error.
+#' @param divideby String. Conversion number for output ('hundred', 'thousand',
+#' 'million').
+#' @param ylabel String. Label for the y axis (same as ylab).
+#' @param xlabel String. Label for the x axis (same as xlab).
+#' @param xticks Numeric vector. Vector of tick marks for x axis.
+#' @param mar See par.. A numerical vector representing number of lines for
+#' margins (c(bottom, left, top, right).
+#' @param addlegend Logical. If TRUE, adds legend to bar plot (only applicable
+#' if grouping).
+#' @param main String. Title for plot.
+#' @param cex.main Number. Expansion factor for title.
+#' @param cex.label Number. A number representing cex in barplot (size
+#' expansion of x and/or ylabels.
+#' @param cex.names Number. Expansion factor for axis names (bar labels) (e.g.,
+#' 0.5 represents half the size.
+#' @param las.xnames Number. The direction of x variable names (0,1,3).
+#' 0:diagonal (Default), 1:horizontal; 3:vertical.
+#' @param las.ynames Number. The direction of y variable names (0,1,3).
+#' 0:diagonal (Default), 1:horizontal; 3:vertical.
+#' @param savedata Logical. If TRUE, writes output data to outfolder (jpg and
+#' pdf).
+#' @param outfolder String. The name of the output folder. If savedata=TRUE,
+#' all output saved to the outfolder. If savedata=FALSE, only a text file of
+#' input parameters is saved.
+#' @param outfn String. The name of the output file if savedata=TRUE (*.csv).
+#' Do not include extension. If NULL, the file will be named
+#' BARPLOT_'yvar_date'.csv
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param overwrite Logical. If TRUE and exportshp=TRUE, overwrite files in
+#' outfolder.
+#' @param ...  additional arguments to pass to barplot(), including a list of
+#' arguments for legend() arguments (e.g., args.legend=list(x="topleft",
+#' "bty="n"), for moving legend to topleft and removing box around legend).
+#' @return Outputs barplot to display window.
+#' @note If savedata = TRUE, writes a jpg and pdf of barplot to outfolder.
+#' 
+#' To add legend parameters, add a parameter named args.legend, defined as a
+#' list of specific legend parameters (see ?legend)...  ex. ..,
+#' args.legend=list(x="topright"). If specifying x and y, x defines the lower
+#' right corner of legend box and y defines the upper right corner of box.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 	#ftyptab <- data.frame(cbind(FORTYPCD=c(182,184,201,221,265), FREQ=c(110,7,900,410,155)))
+#' 	#datBarplot(x=ftyptab, xvar="FORTYPCD")
+#' 
+#' @export datLineplot
 datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL, 
 	CIlst=c(68,95), CIcolorlst=c("dark grey", "black"), addshade=FALSE, 
 	device.type="dev.new", jpeg.res=300, device.height=5, device.width=8, 

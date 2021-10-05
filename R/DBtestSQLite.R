@@ -1,3 +1,22 @@
+#' Database - Checks access to a SQLite database.
+#' 
+#' Checks a SQLite database.
+#' 
+#' 
+#' @param SQLitefn String. Name of SQLite database (*.sqlite).
+#' @param gpkg Logical. If TRUE, Sqlite geopackage database.
+#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
+#' @param outfolder String. Optional. Name of output folder. If NULL, export to
+#' working directory.
+#' @param showlist Logical. If TRUE, shows list of tables in database.
+#' @param returnpath Logical. If TRUE, returns full path to SQLite file name.
+#' If FALSE, returns SQLitefn.
+#' @param createnew If TRUE, creates new SQLite database.
+#' @param stopifnull Logical. If TRUE, stops if SQLite database doesn't exist.
+#' @param overwrite Logical. If TRUE, overwrites data.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export DBtestSQLite
 DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE, 
 	outfolder=NULL, showlist=TRUE, returnpath=TRUE, createnew=TRUE,
 	stopifnull=FALSE, overwrite=TRUE) {

@@ -1,3 +1,35 @@
+#' Database - Queries FIA Online Database.
+#' 
+#' Downloads, extracts, and queries compressed comma-delimited file(s) (*.zip)
+#' from FIA DataMart
+#' (https://apps.fs.usda.gov/fia/datamart/CSV/datamart_csv.html).  (Note: must
+#' use SQL syntax).
+#' 
+#' The compressed data files are downloaded from FIA DataMart; saved to a
+#' temporary space; extracted and imported; and deleted from temporary space.
+#' Accessibility and download time depends on access and speed of internet
+#' connection.
+#' 
+#' @param sql String. A sql query. Must be appropriate sql syntax.
+#' @param states String vector. Name of state(s) in query. If not by state, set
+#' to NULL.
+#' @param sqltables String vector. Name of table(s) in sql statement to
+#' download.  The sqltables must match tables in the sql statement (i.e.,
+#' case-sensitive).
+#' @return Returns a data frame from resulting query.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'   # Number of plots by inventory year for the state of Wyoming
+#'   sql <- "select INVYR, count(*) AS NBRPLOTS 
+#'           from plot 
+#'           where statecd=56 group by INVYR"
+#'   DBqryCSV(sql=sql, states="Wyoming", sqltables="plot")
+#' 
+#' 
+#' @export DBqryCSV
 DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
 
   if (!"sqldf" %in% rownames(installed.packages())) {

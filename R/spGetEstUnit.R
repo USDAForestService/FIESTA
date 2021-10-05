@@ -1,3 +1,102 @@
+#' Spatial - Extracts point attribute values and area from a SpatialPolygons or
+#' raster estimation unit layer.
+#' 
+#' Wrapper to get point attribute values and area from a SpatialPolygons or
+#' raster layer of estimation units and calculates area. Points are reprojected
+#' on-the-fly to projection of unitlayer using PROJ.4 transformation parameters
+#' and rgdal spTransform function.  - Point attribute extraction from
+#' SpatialPolygons (spExtractPoly) or from raster (spExtractRast) - Calulate
+#' area by estimation unit(s) (areacalc.poly/areacalc.pixel)
+#' 
+#' *If variable = NULL, then it will prompt user for input.
+#' 
+#' If there is a raster and SpatialPolygon layer, and the projection of the
+#' SpatialPolygons is different than the projection of the raster, the
+#' SpatialPolygons object is reprojected to the projection of raster (See note
+#' about on-the-fly projection conversion).
+#' 
+#' @param xyplt Data frame object or String. Name of layer with xy coordinates
+#' and unique identifier. Can be layer with xy_dsn, full pathname, including
+#' extension, or file name (with extension) in xy_dsn folder.
+#' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
+#' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
+#' @param uniqueid String.* Unique identifier of xyplt rows.
+#' @param unittype String. Spatial layer type of unitlayer ("POLY", "RASTER").
+#' @param unit_layer String or S4 object. The name of the estimation unit
+#' spatial polygons layer. The layer name may be a full pathname to a file, the
+#' basename to a file, a spatial layer name from a database, or a
+#' SpatialPolygons object with a defined projection.
+#' @param unit_dsn String. The data source name (dsn; i.e., folder or database
+#' name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). Optional.
+#' @param unitvar String. Name of estimation unit variable in unitlayer.
+#' @param unit.filter String. Filter to subset unit_layer spatial layer.
+#' @param areavar String. Name of area variable unit variable in unitlayer. If
+#' NULL, calculates area by unitvar.
+#' @param areaunits String. Output area units ("ACRES", "HECTARES",
+#' "SQMETERS").
+#' @param rast.NODATA Numeric. NODATA value if stratlayer is raster. These
+#' values will be removed from output strata table, assuming outside boundary.
+#' @param keepNA Logical. If TRUE, returns data frame of NA values.
+#' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
+#' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param savedata Logical. If TRUE, the input data with extracted values are
+#' saved to outfolder.
+#' @param exportsp Logical. If TRUE, the extracted strata point data are
+#' exported to outfolder.
+#' @param exportNA Logical. If TRUE, NA values are exported to outfolder.
+#' @param outfolder String. If savedata=TRUE or exportshp=TRUE, name of output
+#' folder.  If NULL, the working directory is used.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
+#' @param out_layer String. Name of layer in out_dsn if database.
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
+#' @param overwrite_layer Logical. If TRUE, overwrite layer(s) in dsn.
+#' @param append_layer Logical. If TRUE, appends to csv (if out_fmt="csv") or
+#' appends to layers in dsn.
+#' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
+#' include in dunitlut output and extract to pltassgn points.
+#' @param ...  Other parameters for spMakeSpatialPoints.
+#' @return \item{pltunit}{ Data frame. Input point data with extracted
+#' estimation unit and strata values appended. } \item{sppltunit}{
+#' SpatialPointsDataframe. Spatial point data with extracted estimation unit
+#' values appended. } \item{unitarea}{ Data frame. Area by estimation unit. }
+#' \item{unitvar}{ Data frame. Variable name for estimation unit in unitarea. }
+#' \item{acrevar}{ Data frame. Variable name for area in unitarea. }
+#' \item{pltassgnid}{ String. Unique identifier of plot. }
+#' 
+#' If savedata=TRUE, pltstrat and unitarea are saved to outfolder (Default
+#' name: *_'date'.csv).  If exportshp=TRUE, the SpatialPointsDataFrame object
+#' is exported to outfolder (Default name: datext_'date'.shp). Variable names
+#' are truncated to 10 characters or less (See note below). Name changes are
+#' output to 'outfn'_newnames_'data'.csv in outfolder.
+#' @note
+#' 
+#' If exportsp=TRUE:\cr If out_fmt="shp", the writeOGR (rgdal) function is
+#' called. The ArcGIS driver truncates variable names to 10 characters or less.
+#' Variable names are changed before export using an internal function
+#' (trunc10shp). If Spatial object has more than 1 record, it will be returned
+#' but not exported.
+#' 
+#' On-the-fly projection conversion\cr The spTransform (rgdal) method is used
+#' for on-the-fly map projection conversion and datum transformation using
+#' PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
+#' present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
+#' when no datum transformation is needed. PROJ.4 transformations assume NAD83
+#' and WGS84 are identical unless other transformation parameters are
+#' specified.  Be aware, providing inaccurate or incomplete CRS information may
+#' lead to erroneous data shifts when reprojecting. See spTransform help
+#' documentation for more details.
+#' 
+#' unitarea\cr Area by estimation unit is calculated and returned as object
+#' named unitarea.  Area is based on the projection of unit_layer. If no
+#' unit_layer input, than area is calculated from pixel counts.
+#' @author Tracey S. Frescino, Chris Toney
+#' @keywords data
+#' @export spGetEstUnit
 spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  	unittype="POLY", unit_layer, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter = NULL, areavar=NULL, areaunits="ACRES", rast.NODATA=NULL, 

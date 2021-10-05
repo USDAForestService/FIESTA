@@ -1,3 +1,189 @@
+#' Small-Area module - Compile population data for SA module.
+#' 
+#' Compile population data for input to the modSA* modules.
+#' 
+#' If variables are NULL, then it will prompt user to input variables.
+#' 
+#' Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
+#' \bold{Variable} \tab \bold{Description}\cr \tab tree \tab tuniqueid \tab
+#' Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
+#' \tab CONDID \tab Unique identifier of each condition on plot, to link to
+#' cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
+#' \tab Number of trees per acre each sample tree represents (ex. DESIGNCD=1:
+#' TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on
+#' microplot).\cr \tab cond \tab cuniqueid \tab Unique identifier for each
+#' plot, to link to pltassgn (ex. PLT_CN).\cr \tab \tab CONDID \tab Unique
+#' identfier of each condition on plot.  Set CONDID=1, if only 1 condition per
+#' plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on
+#' each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr \tab \tab
+#' COND_STATUS_CD \tab Status of each forested condition on plot (i.e.
+#' accessible forest, nonforest, water, etc.)\cr \tab \tab NF_COND_STATUS_CD
+#' \tab If ACI=TRUE. Status of each nonforest condition on plot (i.e.
+#' accessible nonforest, nonsampled nonforest)\cr \tab \tab SITECLCD \tab If
+#' landarea=TIMBERLAND. Measure of site productivity.\cr \tab \tab RESERVCD
+#' \tab If landarea=TIMBERLAND. Reserved status.\cr \tab \tab SUBPROP_UNADJ
+#' \tab Unadjusted proportion of subplot conditions on each plot.  Set
+#' SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr \tab \tab
+#' MICRPROP_UNADJ \tab If microplot tree attributes. Unadjusted proportion of
+#' microplot conditions on each plot. Set MICRPROP_UNADJ=1, if only 1 condition
+#' per microplot.\cr \tab \tab MACRPROP_UNADJ \tab If macroplot tree
+#' attributes. Unadjusted proportion of macroplot conditions on each plot. Set
+#' MACRPROP_UNADJ=1, if only 1 condition per macroplot.\cr \tab pltassgn \tab
+#' puniqueid \tab Unique identifier for each plot, to link to cond (ex. CN).\cr
+#' \tab \tab STATECD \tab Identifies state each plot is located in.\cr \tab
+#' \tab INVYR \tab Identifies inventory year of each plot.\cr \tab \tab
+#' PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled).  If not
+#' included, all plots are assumed as sampled.\cr }
+#' 
+#' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
+#' 
+#' @param SAdoms sf object. SA domains with attributes for joining.
+#' @param smallbnd sf object. small bound.
+#' @param smallbnd.domain String. Name of attribute defining domain attribute.
+#' @param cond DF/DT, comma-separated values (CSV) file (*.csv), or layer in
+#' dsn.  The condition-level variables with one record per condition, including
+#' or excluding nonsampled conditions. Plot variables and strata/estimation
+#' unit variable(s) may be included if plt and pltassgn=NULL. See details for
+#' necessary variables to include.
+#' @param plt DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
+#' Can also be a shapefile(*.shp) with one record per plot, a spatial layer in
+#' dsn, or a sf R object. Plot-level variables. If nonsampled plots are
+#' included, PLOT_STATUS_CD variable must be in table. Optional.
+#' @param tree DF/DT, comma-delimited file(*.csv), or layer in dsn. If
+#' esttype="TREE", tree-level variables to aggregate to condition-level. See
+#' details for necessary variables to include.
+#' @param seed DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Seedling data with one record for each seedling count.
+#' @param pltassgn DF/DT, comma-separated values (CSV) file(*.csv), or layer in
+#' dsn, Can also be a shapefile(*.shp) with one record per plot, a spatial
+#' layer in dsn, or a sf R object. Plot-level assignment of estimation unit
+#' and/or strata. Optional.
+#' @param dsn String. Name of database where tree, cond, and pltassgn tables
+#' reside.  The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html).
+#' @param puniqueid String. Unique identifier of plot in plt.
+#' @param pltassgnid String. Unique identifier of plot in pltassgn.
+#' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
+#' need to be uniqueid. If using most current XY coordinates for plot
+#' assignments, use identifier for plot (e.g., PLOT_ID).
+#' @param tuniqueid String. Unique identifier of plot in tree and seed.
+#' @param cuniqueid String. Unique identifier of plot in cond.
+#' @param condid String. Unique identifier of plot conditions (e.g., CONDID).
+#' If no condid in cond, the data are assumed to have 1 condition per plot.  A
+#' CONDID=1 is automatically added.
+#' @param areawt String. Name of variable for summarizing area weights (e.g.,
+#' CONDPROP_UNADJ).
+#' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
+#' @param intensity Integer code. Code(s) indicating intensity to use for
+#' population.
+#' @param measCur Logical. If TRUE, extract plots with most current measurement
+#' for state(s).
+#' @param measEndyr Logical. If TRUE, extract plots with most current
+#' measurement for state(s) for years measured before measEndyr.
+#' @param measEndyr.filter Filter for extracting plots using measEndyr. Must be
+#' in R syntax (e.g., 'AOI == 1').
+#' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
+#' Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
+#' be included.
+#' @param adj String. How to calculate adjustment factors for nonsampled
+#' (nonresponse) conditions based on summed proportions for by plot ('samp',
+#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
+#' (i.e., domain unit) level; 'plot' - adjustments are calculated at
+#' plot-level. Adjustments are only calculated for annual inventory plots
+#' (designcd=1).
+#' @param dunitvar String. Name of the domain unit variable in cond, plt, or
+#' pltassgn with domain unit assignment for each plot.
+#' @param dunitvar2 String. Name of a second domain unit variable in cond, plt,
+#' or pltassgn with assignment for each plot (e.g., 'STATECD').
+#' @param dunitarea Numeric or DF. Total area by domain unit.
+#' @param areavar String. Name of acre variable in unitarea. Default="ACRES".
+#' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
+#' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
+#' @param unit.action String. What to do if number of plots in an estimation
+#' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
+#' unit.action='combine', combines estimation unit to the following estimation
+#' unit in unitlut.
+#' @param dunitzonal DF/DT. Data frame with zonal auxiliary information by
+#' domain unit. For continuous data, means by domain unit; for categorical
+#' data, proportion of class by domain unit.
+#' @param prednames String vector. Name(s) of predictor variables to use in
+#' model.
+#' @param predfac String vector. Name(s) of factor predictor variables to use
+#' in model.
+#' @param pvars2keep String vector. Additional plot variables to keep in
+#' dataset.
+#' @param cvars2keep String vector. Additional condition variables to keep in
+#' dataset.
+#' @param saveobj Logical. If TRUE, save SApopdat object to outfolder.
+#' @param objnm String. Name of *.rda object.
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param outfolder String. The outfolder to write files to. If NULL, files are
+#' written to working directory, or if gui, a window to browse.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
+#' exists.
+#' @param append_layer Logical. If TRUE, appends layers to existing out_dsn or
+#' files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
+#' "gdb".
+#' @param SAdata R List object. Output data list components from
+#' FIESTA::SAdata().
+#' @param pltdat R List object. Output data list components from
+#' FIESTA::spGetPlots().
+#' @param auxdat R List object. Output data list components from
+#' FIESTA::spGetAuxiliary().
+#' @param gui Logical. If gui, user is prompted for parameters.
+#' @return A list with population data for Small-Area estimates.
+#' 
+#' \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer.
+#' Includes DOMAIN and AOI attributes. DOMAIN represents modeling domains.  AOI
+#' identifies the small area of interest. } \item{condx}{ Data frame.
+#' Condition-level data with condition proportions, domain and predictor
+#' assignments, and adjusted condition proportions, if adj in('samp', 'plot').
+#' } \item{pltcondx}{ Data frame. Plot/Condition data used for estimation. }
+#' \item{cuniqueid}{ String. Unique identifier of plot in condx and pltcondx. }
+#' \item{condid}{ String. Unique identifier of condition in condx and pltcondx.
+#' } \item{treex}{ Data frame. If esttype='TREE', tree-level data, including
+#' adjustment factors, if adj in('samp', 'plot'). } \item{tuniqueid}{ String.
+#' If esttype='TREE', unique identifier of plot in treex. } \item{ACI.filter}{
+#' String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" . } \item{dunitarea}{
+#' Data frame. Area by model domain unit. } \item{areavar}{ String. Name of
+#' area variable in dunitarea. } \item{dunitvar}{ String. Name of variable
+#' defining model domain units in dunitarea. } \item{dunitlut}{ Data frame.
+#' Table of model domain units with zonal statistics of predictor values,
+#' number of plots by domain unit. } \item{prednames}{ String vector. Name of
+#' variables in dunitlut and condx defining potential predictors for small area
+#' estimation. } \item{plotsampcnt}{ Data frame. Number of plots by
+#' PLOT_STATUS_CD. } \item{condsampcnt}{ Data frame. Number of conditions by
+#' COND_STATUS_CD. } \item{states}{ String. State names in dataset. }
+#' \item{invyrs}{ String. Range of inventory years in dataset. }
+#' \item{adjtree}{ Logical. If TRUE, treex includes adjustment factors. }
+#' @note
+#' 
+#' ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for
+#' nonsampled conditions.  For model-based estimation, we calculate adjustment
+#' factors by plot.
+#' 
+#' It is calculated by dividing 1 / summed condition proportions by plot. An
+#' adjustment factor is determined for each tree based on the size of the plot
+#' it was measured on. This is identified using TPA_UNADJ as follows:
+#' 
+#' \tabular{llr}{ \tab \bold{PLOT SIZE} \tab \bold{TPA_UNADJ} \cr \tab SUBPLOT
+#' \tab 6.018046 \cr \tab MICROPLOT \tab 74.965282 \cr \tab MACROPLOT \tab
+#' 0.999188 \cr }
+#' 
+#' If ACI=FALSE, only nonsampled forest conditions are accounted for in the
+#' adjustment factor. \cr If ACI=TRUE, the nonsampled nonforest conditions are
+#' removed as well and accounted for in adjustment factor.  This is if you are
+#' interested in estimates for all lands or nonforest lands in the
+#' All-Condition-Inventory.
+#' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
+#' @keywords data
+#' @export modSApop
 modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL, 
 	cond=NULL, plt=NULL, tree=NULL, seed=NULL, pltassgn=NULL, dsn=NULL, 
 	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", tuniqueid="PLT_CN",  

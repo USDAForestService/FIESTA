@@ -1,3 +1,20 @@
+#' Data - Transpose point data to plot-level percent by domain.
+#' 
+#' Calculates percent point by plot and domain and transpose to plot level.
+#' 
+#' 
+#' @param pnt DF/DT or comma-delimited file (*.csv). Point-level table with one
+#' record per point. If NULL, aggregated point counts must be in pntcnt.
+#' @param uniqueid String. Name of unique identifier of plot in pnt.
+#' @param tvar String. Name of variable to transpose.
+#' @param othervars String vector. Name(s) of plot-level variables to merge
+#' with transposed data.
+#' @return
+#' 
+#' \item{pltdom.pct}{ Data frame with transposed data. }
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export datPBpnt2pct
 datPBpnt2pct <- function(pnt, uniqueid, tvar, othervars=NULL) {
   ## DESCRIPTION: calculates percent of points by tvar and plot and 
   ##	transpose to plot level. 

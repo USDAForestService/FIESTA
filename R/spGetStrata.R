@@ -1,3 +1,134 @@
+#' Spatial wrapper - Extracts point attribute values and pixel counts for
+#' strata and estimation unit spatial layers.
+#' 
+#' Wrapper to extract attribute and area from a polygon or raster estimation
+#' unit layer and a polygon or raster layer with strata pixel categories.
+#' 
+#' *If variable = NULL, then it will prompt user for input.
+#' 
+#' If spatial layers have different projections, the polygon spatial layer is
+#' reprojected to the projection of raster (See note about on-the-fly
+#' projection conversion). If both layers are long/lat coordinate system, they
+#' are reprojected to default coordinate system (Conus Albers, NAD83).
+#' 
+#' @param xyplt Data frame, sf object, full pathname to *.csv or *shp, or layer
+#' name in a geodatabase. Includes XY coordinates and unique identifier.  If
+#' non-spatial, include parameters for FIESTA::spMakeSpatialPoints().
+#' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
+#' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
+#' @param uniqueid String.* Unique identifier of xyplt records.
+#' @param unittype String. Spatial layer type of unitlayer ("POLY", "RASTER").
+#' Note: raster unit layers are converted to polygon.
+#' @param unit_layer sf R object or String. Name of estimation unit spatial
+#' layer. Can be a spatial polygon object, full pathname to a shapefile, name
+#' of a polygon layer within a database, or a full pathname to raster file.
+#' @param unit_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' pathname) of unit_layer. The dsn varies by driver. See gdal OGR vector
+#' formats (https://www.gdal.org/ogr_formats.html). Optional if unit_layer is
+#' sf object.
+#' @param unitvar String. If unittype="POLY", name of attribute in unit_layer
+#' defining estimation units. If NULL, the unit_layer represents one estimation
+#' unit.
+#' @param unit.filter String. Filter to subset unit_layer spatial layer.
+#' @param strattype String. Spatial layer type of stratlayer ("POLY",
+#' "RASTER").  Note: polygon strata layers are converted to raster.
+#' @param strat_layer sf R object or full pathname of spatial stratification
+#' layer.  Can be a spatial polygon object, full pathname to a shapefile, name
+#' of a polygon layer within a database, or a full pathname to raster file.
+#' @param strat_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' pathname) of strat_layer. The dsn varies by driver. See gdal OGR vector
+#' formats (https://www.gdal.org/ogr_formats.html). Optional if unit_layer is
+#' sf object.
+#' @param strvar String. If strattype="POLY", name of strata attribute in
+#' strat_layer.
+#' @param strat_lut Data frame. A look-up table of codes to aggregate. The
+#' format of table includes 2 columns, one column same name as strvar.  If
+#' strattype="RASTER", strvar="value".
+#' @param areaunits String. Output area units ("ACRES", "HECTARES",
+#' "SQMETERS").
+#' @param rast.NODATA Numeric. NODATA value if stratlayer is raster (See
+#' notes). This values will be converted to NA and removed from output.  if
+#' keepNA=TRUE, NA values will not be in included in stratalut but will remain
+#' in pltassgn table.
+#' @param keepNA Logical. If TRUE, returns data frame of NA values.
+#' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
+#' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param savedata Logical. If TRUE, the input data with extracted values are
+#' saved to outfolder.
+#' @param exportsp Logical. If TRUE, the extracted strata point data are
+#' exported to outfolder.
+#' @param exportNA Logical. If TRUE and keepNA=TRUE, NA values are exported to
+#' outfolder as a point shapefile.
+#' @param outfolder String. If savedata=TRUE or exportshp=TRUE, name of output
+#' folder.  If NULL, the working directory is used.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
+#' @param out_layer String. Name of layer in out_dsn if database.
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
+#' @param overwrite_layer Logical. If TRUE, overwrite csv (if out_fmt="csv") or
+#' overwrite layers in dsn.
+#' @param append_layer Logical. If TRUE, appends to csv (if out_fmt="csv") or
+#' appends to layers in dsn.
+#' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
+#' include in dunitlut output and extract to pltassgn points.
+#' @param ...  Other parameters for spMakeSpatialPoints.
+#' @return \item{pltassgn}{ Data frame. Input xyplt data with extracted
+#' estimation unit and strata values appended. } \item{unitarea}{ Data frame.
+#' Area by estimation unit. } \item{unitvar}{ Data frame. Variable name for
+#' estimation unit in unitarea. } \item{acrevar}{ Data frame. Variable name for
+#' area in unitarea. } \item{stratalut}{ Data frame. Strata proportions
+#' (weights) by estimation unit and strata. } \item{strvar}{ Data frame.
+#' Variable name for strata values in stratalut. } \item{NAlst}{ sf List. If
+#' keepNA=TRUE, and NA values exist after data extraction, the spatial NA
+#' points are returned. } \item{pltassgnid}{ String. Unique identifier of plot.
+#' } \item{spxy}{ Simple feature. If returnxy=TRUE, Spatial coordinates. }
+#' \item{xy.uniqueid}{ String. If returnxy=TRUE, unique identifier of spxy. }
+#' 
+#' If savedata=TRUE, pltassgn and unitarea are saved to outfolder.\cr If
+#' exportsp=TRUE, the spatial sf points object is exported to outfolder.\cr.
+#' If exportNA=TRUE and NA values exist after data extraction, the spatial NA
+#' points are exported to outfolder.
+#' @note
+#' 
+#' rast.NODATA\cr NODATA values are raster pixel values that have no data of
+#' interest, including pixels within the extent of the layer, but outside the
+#' area of interest. Sometimes these pixels have been defined previously. The
+#' defined NODATA pixels are imported to R as NULL values. When not previously
+#' defined, the pixels outside the area of interest will be the minimum or
+#' maximum value depending on the data type (e.g., 16-bit signed: min=-32,768;
+#' max=32,768) or byte size (1 byte: min=0; max=255).  These NODATA values will
+#' be added to the zonal statistic calculations if not specified in
+#' rast.NODATA.
+#' 
+#' If exportsp=TRUE:\cr If out_fmt="shp", the writeOGR (rgdal) function is
+#' called. The ArcGIS driver truncates variable names to 10 characters or less.
+#' Variable names are changed before export using an internal function
+#' (trunc10shp). If Spatial object has more than 1 record, it will be returned
+#' but not exported.
+#' 
+#' On-the-fly projection conversion\cr The spTransform (rgdal) method is used
+#' for on-the-fly map projection conversion and datum transformation using
+#' PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
+#' present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
+#' when no datum transformation is needed. PROJ.4 transformations assume NAD83
+#' and WGS84 are identical unless other transformation parameters are
+#' specified.  Be aware, providing inaccurate or incomplete CRS information may
+#' lead to erroneous data shifts when reprojecting. See spTransform help
+#' documentation for more details.
+#' 
+#' unitarea\cr Area by estimation unit is calculated and returned as object
+#' named unitarea.  Area is based on the projection of unit_layer. If no
+#' unit_layer input, than area is calculated from pixel counts.
+#' 
+#' polygon to raster\cr If strattype="POLY", a raster template is created based
+#' on the masked extent of strat_layer, with strat_layer projected coordinate
+#' system and 30 meter pixel size.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export spGetStrata
 spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
 	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter=NULL, strattype="RASTER", strat_layer=NULL, 

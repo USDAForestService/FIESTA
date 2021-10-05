@@ -1,3 +1,94 @@
+#' Spatial - Subsets a raster to a polygon extent or boundary.
+#' 
+#' Subsets a raster to the extent or masked boundary of a spatial polygon
+#' object or shapefile (*.shp), with option to write the new file to the
+#' outfolder with specified format (fmt).
+#' 
+#' Use spClipRast() to prompt for input.
+#' 
+#' If the projection of polyv is different than the projection of rast, the
+#' polyv SpatialPolygons object is converted to the projection of rast (See
+#' note about on-the-fly projection conversion).
+#' 
+#' @param clippolyv SpatialPolygons class R object or String. Name of the
+#' polygon spatial layer to use for clipping.
+#' @param clippolyv_dsn String. The data source name (dsn; i.e., pathname or
+#' database name) of clippolyv. The dsn varies by driver. See gdal OGR vector
+#' formats (https://www.gdal.org/ogr_formats.html). Optional if polyv_layer is
+#' an R object.
+#' @param clippolyv.filter String. Filter to subset clippolyv spatial layer.
+#' @param rast String or Raster. Raster name, including extension. Option to
+#' include full path.
+#' @param rastfolder String. Name of the raster folder. Optional.
+#' @param rast.crs EPSG code or PROJ.4 string. Defined coordinate reference
+#' system if rast has no crs defined.
+#' @param bands Numeric vector. If rast is a multi-layer raster and only 1 or
+#' some layers are desired, specify layer number(s) in a vector format. If
+#' NULL, all layers are summed.
+#' @param NODATA Number. The NODATA value for background values. If NODATA is
+#' set for input raster it is default, else 0 is default.
+#' @param buffdist Number. The distance to buffer the polygon before clipping
+#' raster, in units of raster.
+#' @param maskByPolygons Logical. If TRUE, rast is clipped to boundary of
+#' polygon.  If FALSE, rast is clipped to extent of polygon.
+#' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param fmt String. Format for exported raster. Default is format of unput
+#' raster.  ("raster", "ascii", "SAGA", "IDRISI", "CDF", "GTiff", "ENVI",
+#' "EHdr", "HFA", "VRT").  VRT is a virtual raster (See note below).
+#' @param outfolder String. The output folder.
+#' @param outfn String. Name of output data file. If NULL, default is
+#' 'rastclip'.  If no extension, a default is provided to match output format.
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param overwrite Logical. If TRUE, overwrite files in outfolder.
+#' @return \item{value}{ Spatial S4 object. A clipped raster file. }
+#' 
+#' The clipped raster is written to outfolder with specified format or same
+#' format as input raster.
+#' @note On-the-fly projection conversion\cr The spTransform (rgdal) method is
+#' used for on-the-fly map projection conversion and datum transformation using
+#' PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
+#' present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
+#' when no datum transformation is needed. PROJ.4 transformations assume NAD83
+#' and WGS84 are identical unless other transformation parameters are
+#' specified.  Be aware, providing inaccurate or incomplete CRS information may
+#' lead to erroneous data shifts when reprojecting. See spTransform help
+#' documentation for more details.
+#' 
+#' VRT format Virtual raster format is a pointer to a temporary file, commonly
+#' used as an intermediate step between processes. The VRT format ignores
+#' option to maskByPolygons.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'   ## Get polygon vector layer from FIESTA external data
+#'   WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+#'   WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
+#'   WYbhdist
+#' 
+#'   ## Get raster layers from FIESTA external data
+#'   demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
+#'   sp::plot(raster::raster(demfn))
+#' 
+#' 
+#'   ## Clip raster to district = '03'
+#'   dem03 <- spClipRast(rast=demfn, clippolyv=WYbhdistfn, 
+#' 		clippolyv.filter="DISTRICTNU == '03'", overwrite=TRUE)
+#'   sp::plot(raster::raster(dem03))
+#' 
+#' 
+#'   ## Clip raster to district = '06'
+#'   dem06 <- spClipRast(rast=demfn, clippolyv=WYbhdistfn, 
+#' 		clippolyv.filter="DISTRICTNU == '06'", overwrite=TRUE)
+#' 
+#'   ## Plot extracted values of national forest district
+#'   sp::plot(raster::raster(dem06), add=TRUE)
+#' 
+#' 
+#' @export spClipRast
 spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL, 
 	clippolyv.filter=NULL, rast.crs=NULL, bands=NULL, NODATA=NULL, buffdist=NULL,
  	maskByPolygons=TRUE, showext=FALSE, fmt="HFA", outfolder=NULL,

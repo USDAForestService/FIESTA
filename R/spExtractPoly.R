@@ -1,3 +1,107 @@
+#' Spatial - Extracts point attribute values from SpatialPolygons layer(s).
+#' 
+#' Extracts values from one or more polygon layers and appends to input
+#' SpatialPoints layer or data frame. Points are reprojected on-the-fly to
+#' projection of SpatialPolygons using PROJ.4 transformation parameters and
+#' rgdal spTransform function.
+#' 
+#' *If variable = NULL, then it will prompt user for input.
+#' 
+#' keepnull\cr If keepnull=FALSE, points are excluded when all extracted
+#' variables from any one SpatialPolygons are NULL, returning the points that
+#' fall within the ' intersecting polygons.
+#' 
+#' @param xyplt Data frame object or String. Name of layer with xy coordinates
+#' and unique identifier. Can be layer with xy_dsn, full pathname, including
+#' extension, or file name (with extension) in xy_dsn folder.
+#' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
+#' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
+#' @param uniqueid String.* Unique identifier of xyplt rows.
+#' @param polyvlst sf R object or String. Name(s) of polygon layers to extract
+#' values. A spatial polygon object, full path to shapefile, or name of a layer
+#' within a database.
+#' @param polyv_dsn String. Data source name (dsn) where polyvlst layers are
+#' found (e.g., *.sqlite, *.gdb, folder name). The dsn varies by driver.  See
+#' gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
+#' @param polyvarlst String vector or list. The name(s) of variable(s) to
+#' extract from polygon(s). If extracting multiple variables from more than one
+#' polygon, specify names in a list format, corresponding to polyvlst.
+#' @param polyvarnmlst String vector or list. Output name(s) of variable(s)
+#' extracted from polygon(s). If extracting multiple variables from more than
+#' one polygon, specify names in a list format, corresponding to polyvlst. The
+#' number of names must match the number of variables in polyvarlst.
+#' @param keepNA Logical. If TRUE, keep NA values.
+#' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param savedata Logical. If TRUE, the input data with extracted values are
+#' saved to outfolder.
+#' @param exportsp Logical. If TRUE, the extracted point data are exported to
+#' outfolder.
+#' @param exportNA Logical. If TRUE, NULL values are exported to outfolder.
+#' @param out_fmt String. File format for output ('sqlite','gpkg','shp','gdb').
+#' If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed.  If
+#' out_fmt='gdb', argisbinding package must be installed and functional.
+#' @param out_dsn String. Name of dsn for output data (e.g., sqlite database or
+#' full pathname to shapefile).
+#' @param out_layer String. Name of layer in out_dsn if database.
+#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
+#' folder.  If NULL, the working directory is used.
+#' @param outfn.pre String. A prefix for out_dsn.
+#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
+#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
+#' @param overwrite_layer Logical. If TRUE, overwrite layer(s) in dsn.
+#' @param ...  Other parameters for spMakeSpatialPoints.
+#' @return \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
+#' point data with extracted raster values appended. For multi-part polygons,
+#' more than 1 row per point may be output. } \item{var.name}{ String vector.
+#' Variable names of extracted variables. }
+#' 
+#' If savedata=TRUE, outdat data frame is saved to outfolder (Default name:
+#' datext_'date'.csv).  If exportsp=TRUE, the SpatialPointsDataFrame object is
+#' exported to outfolder (Default name: datext_'date'.shp). Variable names are
+#' truncated to 10 characters or less (See note below). Name changes are output
+#' to 'outfn'_newnames_'data'.csv in outfolder.
+#' @note
+#' 
+#' If exportshp=TRUE:\cr The writeOGR (rgdal) function is called. The ArcGIS
+#' driver truncates variable names to 10 characters or less. Variable names are
+#' changed before export using an internal function (trunc10shp). If Spatial
+#' object has more than 1 record, it will be returned but not exported.
+#' 
+#' The spTransform (rgdal) method is used for on-the-fly map projection
+#' conversion and datum transformation using PROJ.4 arguments. Datum
+#' transformation only occurs if the +datum tag is present in the both the from
+#' and to PROJ.4 strings. The +towgs84 tag is used when no datum transformation
+#' is needed. PROJ.4 transformations assume NAD83 and WGS84 are identical
+#' unless other transformation parameters are specified.  Be aware, providing
+#' inaccurate or incomplete CRS information may lead to erroneous data shifts
+#' when reprojecting. See spTransform help documentation for more details.
+#' 
+#' Any names in polygon layers that are the same as in xyplt are renamed to
+#' name'_1'.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'   ## Get point data from WYplt data in FIESTA
+#'   WYplt <- FIESTA::WYplt
+#' 
+#'   ## Get polygon vector layer from FIESTA external data
+#'   WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+#' 
+#'   ## Extract points from polygon vector layer
+#'   xyext <- spExtractPoly(xyplt=WYplt, polyvlst=WYbhdistfn,
+#' 		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+#'   names(xyext)
+#'   xyext$outnames
+#'   spxyext <- xyext$spxyext
+#'   head(spxyext)
+#'   NAlst <- xyext$NAlst
+#' 
+#'   ## Plot extracted values of national forest district
+#'   plot(spxyext["DISTRICTNU"])
+#' 
+#' @export spExtractPoly
 spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst, 
 	polyv_dsn=NULL, polyvarlst=NULL, polyvarnmlst=NULL, keepNA=FALSE, 
 	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, out_fmt="shp", 

@@ -1,3 +1,13 @@
+#' Database - Test a SQLite database table.
+#' 
+#' Checks a SQLite database.
+#' 
+#' 
+#' @param dbname String. Name of PostgreSQL database.
+#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export DBtestPostgreSQL
 DBtestPostgreSQL <- function(dbname, dbconnopen=TRUE) {
 
   if (!"DBI" %in% rownames(installed.packages())) {

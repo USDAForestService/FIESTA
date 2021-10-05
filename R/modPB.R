@@ -1,3 +1,263 @@
+#' Photo-Based module - Generate photo-based estimates.
+#' 
+#' Generates percent, area or ratio-of-means estimates, with associated
+#' sampling error by domain (and estimation unit). Calculations are based on
+#' Patterson (2012) photo-based estimators for the Nevada photo-based
+#' inventory.
+#' 
+#' If variables are NULL, then it will prompt user to input variables.
+#' 
+#' @param PBpopdat List. Population data objects returned from modPBpop().
+#' @param tabtype String. Type of units for the table ("PCT", "AREA").
+#' @param sumunits Logical. If TRUE, estimation units are combined to one table
+#' for output. Note: only available if tabtype="AREA". Acres
+#' @param strata Logical. If TRUE, add data information for stratification.
+#' @param strtype String. If strata=TRUE, the type of strata ('POST', 'PRE').
+#' Note: the variance equations are slighlty different.
+#' @param ratio Logical. If TRUE, ratio estimates are generated.
+#' @param landarea String. Sample area for estimates ("ALL", "CHANGE"). Used to
+#' describe landarea.filter.
+#' @param landarea.filter String. filter for land area. Must be R syntax.
+#' @param nonsamp.pntfilter String. An expression for filtering nonsampled
+#' points (e.g., cloud coverage). Must be R syntax.
+#' @param pntfilter String. A global filter for the pnt file. Must be R syntax.
+#' @param pfilter String. A global filter for the plt file. Must be R syntax.
+#' @param rowvar String. Name of domain variable in pnt used for output
+#' estimation table rows. If only 1 domain, must be rowvar. If no domain,
+#' rowvar=NULL.
+#' @param colvar String. Name of domain variable in pnt used for output
+#' estimation table columns. If only 1 domain, colvar=NULL.
+#' @param row.orderby String. Name of the variable to use to sort the table
+#' rows with.  If NULL, rowvar is used.
+#' @param col.orderby String. Name of the variable to use to sort the table
+#' columns with.  If NULL, colvar is used. Only use if colvar is not NULL.
+#' @param ratioden String. ("ROWVAR" or "COLVAR"). If ratio, defines whether
+#' the rowvar or colvar in estimation output table is the denominator.
+#' @param row.add0 Logical. If TRUE, add the rows that have 0 values.
+#' @param col.add0 Logical. If TRUE, add the columns that have 0 values.
+#' @param rowlut Data frame. A lookup table with variable codes and
+#' descriptions to include in rows of output table (See notes for more
+#' information and format).
+#' @param collut Data frame. A lookup table with variable codes and
+#' descriptions to include in columns of output table (See notes for more
+#' information and format).
+#' @param domlut DF/DT or comma-delimited (*.csv). Look-up table to define the
+#' variables in the pnt table with category codes (DOMCODE) and code names
+#' (DOMNAME), and to set a pretty name for the variable to use in output table
+#' (DOMTITLE). This table is also used to populate rowvar/colvar,
+#' row.orderby/col.orderby, and title.rowvar/title.colvar parameters. Optional.
+#' @param domvarlst String vector. A vector of variable names that can be row
+#' or column domains (codes and names). Optional.
+#' @param allin1 Logical. If TRUE, one table with both estimates and percent
+#' standard error will be output: estimates (percent standard error).
+#' @param estround Integer. Number of decimal places for estimates.
+#' @param pseround Integer. Number of decimal places for percent standard
+#' error.
+#' @param estnull Integer or String. Value to replace NULL values for
+#' estimates.
+#' @param psenull Integer or String. Value to replace NULL values for percent
+#' standard error.
+#' @param divideby String. Conversion number for output ('hundred', 'thousand',
+#' 'million').
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param outfolder String. The outfolder to write files to. If NULL, files are
+#' written to working directory, or if gui, a window to browse.
+#' @param outfn.pre String. If savedata=TRUE, prefix for output files. If
+#' rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
+#' raw_fmt != 'csv').
+#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
+#' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
+#' @param rawdata Logical. If TRUE, returns a list of raw data tables that are
+#' used for estimation (See Value). If savedata = TRUE, tables are written to
+#' outfolder (if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv').
+#' @param rawonly Logical. If TRUE, only rawdata are output. If dataset
+#' includes many estimation units, and only raw data tables are desired, it is
+#' more efficient to output raw data only.
+#' @param raw_fmt String. Format for output rawdata tables ('sqlite',
+#' 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').
+#' @param raw_dsn String. Data source name for rawdata output. If extension is
+#' not included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the output. If
+#' rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
+#' out_layers in raw_dsn (if raw_fmt != 'csv').
+#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data to
+#' existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
+#' 'csv".
+#' @param returntitle Logical. If TRUE, returns a character string of the title
+#' of the output data frame.
+#' @param title.main String. Complete title used for table. If title=NULL and
+#' addtitle=TRUE, the title.* parameters are used to generate title string.
+#' @param title.ref String. TITLE: The ending text of the table title (i.e.
+#' Nevada, 2004-2005).  If NULL, = "".
+#' @param title.rowvar String. TITLE: pretty name for the row domain variable.
+#' If NULL, = rowvar.
+#' @param title.colvar String. TITLE: pretty name for the column domain
+#' variable.  If NULL, = colvar.
+#' @param title.unitvar String. TITLE: pretty name for the estimation unit
+#' variable.  If NULL, = unitvar.
+#' @param title.filter String. TITLE, if savedata=TRUE: pretty name for the
+#' filters.  If NULL, = "".
+#' @param title.units String. TITLE, if savedata=TRUE: title name for area
+#' units.  If NULL, title.units = "acres".
+#' @param gainloss Logical. If TRUE, a table with the difference of gain and
+#' loss along with the variance and standard error, in percent, is generated.
+#' @param gainloss.vals String vector. A vector of names for values in gainloss
+#' table.
+#' @param gui Logical. If gui, user is prompted for parameters.
+#' @param ...  Parameters for modPBpop() if PBpopdat is NULL.
+#' @return A list with estimates with percent sampling error for rowvar (and
+#' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
+#' is returned.  Otherwise, a list object is returned with the following
+#' information.  If savedata=TRUE, all data frames are written to outfolder.
+#' 
+#' \item{est}{ DF. Estimated percent cover or area by rowvar, colvar, (and
+#' estimation unit).  } \item{pse}{ DF. Percent sampling error of estimates by
+#' rowvar, colvar (and estimation unit). } \item{titlelst}{ List with 1 or 2
+#' string vectors. If returntitle=TRUE a list with table title(s). The list
+#' contains one title if est and pse are in the same table and two titles if
+#' est and pse are in separate tables. Row and column tables are also included
+#' in list. } \item{raw}{ List of data frames. If rawdata=TRUE, a list
+#' including the processing data used for estimation including: number of plots
+#' and conditions; stratification information; and 1 to 8 tables with
+#' calculated values for table cells and totals (See processing data below). }
+#' 
+#' Raw data
+#' 
+#' \item{pntsampcnt}{ Table. Number of points by rowvar/colvar (sampled and
+#' nonsampled). }
+#' 
+#' \item{stratdat}{ Data frame. Strata information by estimation unit. }
+#' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description}\cr \tab unitvar
+#' \tab estimation unit\cr \tab strvar \tab strata \cr \tab areavar \tab If
+#' tabtype='AREA', area by strata for estimation unit\cr \tab n.strata \tab
+#' number of plots in strata (after totally nonsampled plots removed) \cr \tab
+#' n.total \tab number of plots for estimation unit \cr \tab TOTAREA \tab If
+#' tabtype='AREA', total area for estimation unit \cr \tab strwt \tab
+#' proportion of area (or number of plots) by strata (strata weight) \cr }
+#' 
+#' \item{processing data}{ Data frames. Separate data frames of variables used
+#' in estimation process for the rowvar, colvar and combination of rowvar and
+#' colvar (if colvar is not NULL), and grand total by estimation unit
+#' (unit.rowest, unit.colest, unit.grpest, respectively) and summed estimation
+#' units, if FIA=TRUE (rowest, colest, grpest, respectively).
+#' 
+#' The data frames include the following information: \tabular{lll}{ \tab
+#' \bold{Variable} \tab \bold{Description}\cr \tab phat \tab estimated
+#' proportion of covered land \cr \tab phat.var \tab variance of estimated
+#' proportion of covered land \cr \tab areavar \tab If tabtype='AREA', total
+#' area for estimation unit\cr \tab est \tab If tabtype='AREA', estimated area
+#' of land phat*areavar If tabtype='PCT', estimated percent cover of land
+#' phat*100 \cr \tab est.var \tab variance of estimated area of land
+#' phat.var*areavar \cr If tabtype='PCT', estimated percent cover of land
+#' phat.var*100 \cr \tab est.se \tab standard error of estimated area or
+#' percent cover sqrt(est.var) \cr \tab est.cv \tab coefficient of variance of
+#' estimated area or percent cover est.se/est \cr \tab est.pse \tab percent
+#' sampling error of estimated area of percent cover est.cv*100 \cr \tab
+#' CI99left \tab left tail of 99 percent confidence interval for estimate \cr
+#' \tab CI99right \tab right tail of 99 percent confidence interval for
+#' estimate \cr \tab CI95left \tab left tail of 95 percent confidence interval
+#' for estimate \cr \tab CI95right \tab right tail of 95 percent confidence
+#' interval for estimate \cr \tab CI67left \tab left tail of 67 percent
+#' confidence interval for estimate \cr \tab CI67right \tab right tail of 67
+#' percent confidence interval for estimate \cr }
+#' 
+#' if ratio=TRUE: \tabular{lll}{ \tab \bold{Variable} \tab
+#' \bold{Description}\cr \tab phat.n \tab estimated proportion of covered land,
+#' for numerator (colvar) \cr \tab phat.var.n \tab variance of estimated
+#' proportion of covered land, for numerator (colvar) \cr \tab phat.d \tab
+#' estimated proportion of covered land, for denominator (rowvar) \cr \tab
+#' phat.var.d \tab variance of estimated proportion of covered land, for
+#' denominator (rowvar) \cr \tab covar \tab covariance of estimated proportion
+#' of numerator (rowvar) and denominator (colvar) \cr \tab rhat \tab ratio of
+#' estimated proportions (numerator-colvar / denominator-rowvar) \cr \tab
+#' rhat.var \tab variance of ratio of estimated proportions \cr \tab rhat.se
+#' \tab standard error of ratio of estimated proportions sqrt(rhat.var) \cr
+#' \tab rhat.cv \tab coefficient of variation of ratio of estimated proportions
+#' rhat.se/rhat \cr \tab areavar \tab If tabtype='AREA', total area for
+#' estimation unit\cr \tab est \tab If tabtype='AREA', estimated area of land
+#' rhat*areavar If tabtype='PCT', estimated percent cover of land rhat*100 \cr
+#' \tab est.var \tab variance of estimated area of land rhat.var*areavar \cr If
+#' tabtype='PCT', estimated percent cover of land rhat.var*100 \cr \tab est.se
+#' \tab standard error of estimated area or percent cover sqrt(est.var) \cr
+#' \tab est.cv \tab coefficient of variance of estimated area or percent cover
+#' est.se/est \cr \tab est.pse \tab percent sampling error of estimated area of
+#' percent cover est.cv*100 \cr \tab CI99left \tab left tail of 99 percent
+#' confidence interval for estimated area \cr \tab CI99right \tab right tail of
+#' 99 percent confidence interval for estimated area \cr \tab CI95left \tab
+#' left tail of 95 percent confidence interval for estimated area \cr \tab
+#' CI95right \tab right tail of 95 percent confidence interval for estimated
+#' area \cr \tab CI67left \tab left tail of 67 percent confidence interval for
+#' estimated area \cr \tab CI67right \tab right tail of 67 percent confidence
+#' interval for estimated area \cr } }
+#' @note
+#' 
+#' STRATA:\cr Stratification is used to reduce variance in population estimates
+#' by partitioning the population into homogenous classes (strata), such as
+#' forest and nonforest. For stratified sampling methods, the strata sizes
+#' (weights) must be either known or estimated. Remotely-sensed data is often
+#' used to generate strata weights with proporation of pixels by strata. If
+#' stratification is desired (strata=TRUE), the required data include: stratum
+#' assignment for the center location of each plot, stored in either pltassgn
+#' or cond; and a look-up table with the area or proportion of the total area
+#' of each strata value by estimation unit, making sure the name of the strata
+#' (and estimation unit) variable and values match the plot assignment name(s)
+#' and value(s).
+#' 
+#' sumunits:\cr An estimation unit is a population, or area of interest, with
+#' known area and number of plots. Individual counties or combined
+#' Super-counties are common estimation units for FIA. An estimation unit may
+#' also be a subpopulation of a larger population (e.g., Counties within a
+#' State). Subpopulations are mutually exclusive and independent within a
+#' population, therefore estimated totals and variances are additive. For
+#' example, State-level estimates are generated by summing estimates from all
+#' subpopulations within the State (Bechtold and Patterson. 2005. Chapter 2).
+#' Each plot must be assigned to only one estimation unit.
+#' 
+#' If sumunits=TRUE, estimates are generated by estimation unit, summed
+#' together, and returned as one estimate. If rawdata=TRUE, estimates by
+#' individual estimation unit are also returned.
+#' 
+#' If sumunits=FALSE, estimates are generated and returned by estimation unit
+#' as one data frame. If savedata=TRUE, a separate file is written for each
+#' estimation unit.
+#' 
+#' stratcombine:\cr If TRUE and less than 2 plots in any one estimation unit,
+#' all estimation units with 10 or less plots are combined. The current method
+#' for combining is to group the estimation unit with less than 10 plots with
+#' the estimation unit following in consecutive order (numeric or
+#' alphabetical), restrained by survey unit (UNITCD) if included in dataset,
+#' and continuing until the number of plots equals 10. If there are no
+#' estimation units following in order, it is combined with the estimation unit
+#' previous in order.
+#' 
+#' rowlut/collut:\cr There are several objectives for including rowlut/collut
+#' look-up tables: 1) to include descriptive names that match row/column codes
+#' in the input table; 2) to use number codes that match row/column names in
+#' the input table for ordering rows; 3) to add rows and/or columns with 0
+#' values for consistency. No duplicate names are allowed.
+#' 
+#' Include 2 columns in the table:\cr 1-the merging variable with same name as
+#' the variable in the input merge table;\cr 2-the ordering or descriptive
+#' variable.\cr If the ordering variable is the rowvar/colvar in the input
+#' table and the descriptive variable is in rowlut/collut, set
+#' row.orderby/col.orderby equal to rowvar/colvar. If the descriptive variable
+#' is the rowvar/colvar in the input table, and the ordering code variable is
+#' in rowlut/collut, set row.orderby/col.orderby equal to the variable name of
+#' the code variable in rowlut/collut.
+#' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
+#' @references Frescino, Tracey S.; Moisen, Gretchen G.; Megown, Kevin A.;
+#' Nelson, Val J.; Freeman, Elizabeth A.; Patterson, Paul L.; Finco, Mark;
+#' Brewer, Ken; Menlove, James 2009.  Nevada Photo-Based Inventory Pilot (NPIP)
+#' photo sampling procedures. Gen. Tech. Rep.  RMRS-GTR-222. Fort Collins, CO:
+#' U.S. Department of Agriculture, Forest Service, Rocky Mountain Research
+#' Station. 30 p.
+#' 
+#' Patterson, Paul L. 2012. Photo-based estimators for the Nevada photo-based
+#' inventory.  Res. Pap. RMRS-RP-92. Fort Collins, CO: U.S. Department of
+#' Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.
+#' @keywords data
+#' @export modPB
 modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
 	strtype="POST", ratio=FALSE, landarea="ALL", landarea.filter=NULL,
  	nonsamp.pntfilter=NULL, pntfilter=NULL, pfilter=NULL, 

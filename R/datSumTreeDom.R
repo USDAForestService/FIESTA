@@ -1,3 +1,172 @@
+#' Data - Aggregates numeric tree data by tree domain (i.e. species) to plot or
+#' condition-level.
+#' 
+#' Aggregates numeric tree domain data (e.g., SPCD) to plot or condition,
+#' including options for filtering tree data or extrapolating to plot acre by
+#' multiplying by TPA. Includes options for generating barplots, proportion
+#' data, and cover data.
+#' 
+#' If variable = NULL, then it will prompt user for input.
+#' 
+#' If you want to get trees-per-acre information aggregated to plot or
+#' condition level, you need to include a TPA variable in tree table. \cr For
+#' tsumvars = GROWCFGS, GROWBFSL, GROWCFAL, FGROWCFGS, FGROWBFSL, or FGROWCFAL,
+#' you must have TPAGROW_UNADJ \cr For tsumvars = MORTCFGS, MORTBFSL, MORTCFAL,
+#' FMORTCFGS, FMORTBFSL, or FMORTCFAL, you must have TPAMORT_UNADJ \cr For
+#' tsumvars = REMVCFGS, REMVBFSL, REMVCFAL, FREMVCFGS, FREMVBFSL, or FREMVCFAL,
+#' you must have TPAREMV_UNADJ \cr
+#' 
+#' If you want to adjust plot-level information by condition proportions, you
+#' need to include CONDID & CONDPROP_UNADJ in cond or tree table. \cr
+#' 
+#' If you want to adjust the aggregated tree data by the area of the strata
+#' (estimation unit), you need to either have a variable in your tree data
+#' named adjfact or you need to included the following variables in your
+#' datasets: \cr Condition table: STATECD, CONDID, STRATA, ESTUNIT,
+#' SUBPPROP_UNADJ, MICRPROP_UNADJ (if microplot trees) MACRPROP_UNADJ (if
+#' macroplot trees). \cr Tree table: TPA_UNADJ
+#' 
+#' All trees where DIA=NA are removed from analysis. These are trees that were
+#' remeasured but are no longer in inventory (ex. a tree that is dead and not
+#' standing in the current inventory).
+#' 
+#' @param tree Data frame or comma-delimited file (*.csv). The tree-level table
+#' with tree domain data.
+#' @param seed Data frame or comma-delimited file (*.csv). The seedling table
+#' with tree seedling counts. Only applicable for counts (tsumvar="PLT_CN").
+#' @param cond Data frame or comma-delimited file (*.csv). Condition-level
+#' table to join the aggregated tree data to, if bycond=TRUE. This table also
+#' may be used for condition proportion or strata variables used if adjcond or
+#' adjstrata = TRUE (See details below).  This table is optional. If included,
+#' CONDID must be present in table.
+#' @param plt Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
+#' database file. Plot-level table to join the aggregated tree data to (if
+#' bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.
+#' @param plt_dsn String. The data source name (dsn; i.e., folder or database
+#' name) of plt. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). Optional.
+#' @param tuniqueid String. Unique identifier of the tree table.  If including
+#' seedling table, this should be the same for seed.
+#' @param cuniqueid String. Unique identifier of the cond table if cond is NOT
+#' NULL.
+#' @param puniqueid String. Unique identifier of the plt table if plt is NOT
+#' NULL.
+#' @param bycond Logical. If TRUE, data are aggregated to the condition level
+#' (by: uniqueid, CONDID). If FALSE, data are aggregated to the plot level (by:
+#' uniqueid).
+#' @param condid String. Unique identifier for conditions.
+#' @param bysubp Logical. If TRUE, data are aggregated to the subplot level.
+#' @param subpid String. Unique identifier of each subplot.
+#' @param presence Logical. If TRUE, an additional table is output with tree
+#' domain values as presence/absence (1/0).
+#' @param tsumvar String. Name of the variable to aggregate (e.g., "BA"). For
+#' summing number of trees, use tsumvar="PLT_CN" with tfun=sum.
+#' @param TPA Logical. If TRUE, tsumvarlst variable(s) are multiplied by the
+#' respective trees-per-acre variable (see details) to get per-acre
+#' measurements.
+#' @param tfun Function. Name of the function to use to aggregate the data
+#' (e.g., sum, mean, max).
+#' @param ACI Logical. If TRUE, if ACI (All Condition Inventory) plots exist,
+#' any trees on these plots will be included in summary. If FALSE, you must
+#' include condition table.
+#' @param tfilter String. A filter to subset the tree data before aggregating
+#' (e.g., "STATUSCD == 1"). This must be in R syntax. If tfilter=NULL, user is
+#' prompted.  Use tfilter="NONE" if no filters.
+#' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
+#' pounds to tons.
+#' @param metric Logical. If TRUE, converts response to metric units based on
+#' FIESTA::ref_conversion, if tsumvar is in FIESTA::ref_estvar. Note: if TPA,
+#' TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)).
+#' @param tdomvar String. The tree domain (tdom) variable used to aggregate by
+#' (e.g., "SPCD", "SPGRPCD").
+#' @param tdomvarlst String (vector). List of specific tree domains of tdomvar
+#' to aggregate (ex. c(108, 202)). If NULL, all domains of tdomvar are used.
+#' @param tdomvar2 String. A second tree domain variable to use to aggregate by
+#' (ex. "DIACL").  The variables, tdomvar and tdomvar2 will be concatenated
+#' before summed.
+#' @param tdomvar2lst String (vector). List of specific tree domains of
+#' tdomvar2 to aggregate.  If NULL, all domains of tdomvar2 are used.
+#' @param tdomprefix String. The prefix used for naming the aggregated tree
+#' data, before numeric codes (e.g., "SP" = SP102, SP746).
+#' @param tdombarplot Logical. If TRUE and pivot=TRUE, calls datBarplot() and
+#' outputs a barplot of tdom distributions. If savedata=TRUE, barplots are
+#' written to outfolder.
+#' @param tdomtot Logical. If TRUE and pivot=TRUE a total of all tree domains
+#' in tdomvarlst is calculated and added to output data frame.
+#' @param tdomtotnm String. If tdomtot=TRUE, the variable name for the total
+#' column in output data frame. If NULL, the default will be tdomvar + 'TOT'.
+#' @param FIAname Logical. If TRUE, changes names of columns for SPCD and
+#' SPGRPCD from code to FIA names.
+#' @param addseed Logical. If TRUE, add seedling counts to tree counts. Note:
+#' tdomvar must be 'SPCD' or 'SPGRPCD'.
+#' @param pivot Logical. If TRUE, tdomvar data are transposed (pivoted) to
+#' separate columns.
+#' @param proportion Logical. If TRUE and pivot=TRUE, an additional table will
+#' be output with tree domain data as proportions of total tsumvar.
+#' @param cover Logical. If TRUE and pivot=TRUE, , an additional table will be
+#' output with tree domain data as percent cover, based on proportions of
+#' tsumvar (see proportion) and tree canopy cover variable in cond
+#' (LIVE_CANOPY_CVR_PCT) or in plt (CCLIVEPLT).  Does not include seedlings.
+#' @param getadjplot Logical. If TRUE, adjustments are calculated for
+#' nonsampled conditions on plot.
+#' @param adjtree Logical. If TRUE, trees are individually adjusted by
+#' adjustment factors.  Adjustment factors must be included in tree table (see
+#' adjvar).
+#' @param adjvar String. If adjtree=TRUE, the name of the variable to use for
+#' multiplying by adjustment (e.g., tadjfac).
+#' @param adjTPA Numeric. A tree-per-acre adjustment. Use for DESIGNCD=1
+#' (annual inventory), if using less than 4 subplots. If using only 1 sublot
+#' for estimate, adjTPA=4. The default is 1.
+#' @param NAto0 Logical. If TRUE, convert NA values to 0.
+#' @param savedata Logical. If TRUE, writes output data to outfolder.
+#' @param outfolder String. Name of the output folder. If savedata=TRUE, output
+#' is saved to the outfolder.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Data source name for output. If extension is not
+#' included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param out_layer String. Name of output layer in database or *.csv file, if
+#' savedata=TRUE. If NULL, the file will be named tsum_'date'.csv.
+#' @param outfn.pre String. Prefix for out_dsn.
+#' @param layer.pre String. Prefix for out_layer.
+#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
+#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer in raw_dsn
+#' or *.csv raw data layer, if datsource="csv".
+#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data
+#' data frames to existing out_dsn layer or *.csv file.
+#' @param tround Number. The number of digits to round to. If NULL, default=6.
+#' @param checkNA Logical. If TRUE, checks if NA values exist in necessary
+#' variables.
+#' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
+#' returns data.frame object(s).
+#' @return tdomdata - a list of the following objects:
+#' 
+#' \item{tdomdat}{ Data frame. Plot or condition-level table with aggregated
+#' tree domain (tdom) attributes (filtered). } \item{tdomsum}{ Data frame. The
+#' tdom look-up table with data aggregated by species. } \item{tdomvar}{
+#' String. Name of the tdom variable used to aggregate by. } \item{tsumvar}{
+#' String. Name of the aggregated output variable. } \item{tdomlst}{ Vector.
+#' List of the aggregated tree data in tdomdat. } \item{tdomdat.pres}{ Data
+#' frame. Plot or condition-level table with aggregated tree domain attributes
+#' represented as presence/absence (1/0). } \item{tdomdat.prop}{ Data frame.
+#' Plot or condition-level table with aggregated tree domain attributes
+#' represented as proportion of total by plot. } \item{tdomdat.cov}{ Data
+#' frame. Plot or condition-level table with aggregated tree domain attributes
+#' represented as percent cover, multipying cover attribute by tdom proportion
+#' by plot. }
+#' 
+#' If savedata=TRUE\cr - tdomdat will be saved to the outfolder
+#' ('tdomprefix'_DAT.csv). \cr - a text file of input parameters is saved to
+#' outfolder ('outfn'_parameters_'date'.txt). \cr - if presence=TRUE,
+#' tdomdat.prop is saved to outfolder ('tdomprefix'_PRESDAT.csv) - if
+#' proportion=TRUE, tdomdat.prop is saved to outfolder
+#' ('tdomprefix'_PROPDAT.csv) - if cover=TRUE, tdomdat.prop is saved to
+#' outfolder ('tdomprefix'_COVDAT.csv)
+#' @note This function can be used to get tree domain data. This data can be
+#' used for mapping tree domain distributions.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export datSumTreeDom
 datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 	tuniqueid="PLT_CN", cuniqueid="PLT_CN", puniqueid="CN", bycond=FALSE, 
 	condid="CONDID", bysubp=FALSE, subpid="SUBP", tsumvar=NULL, TPA=TRUE, tfun=sum, 

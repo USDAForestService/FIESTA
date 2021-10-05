@@ -1,3 +1,53 @@
+#' Spatial - Generates an S4 SpatialPoints object from X/Y coordinates.
+#' 
+#' Generates an S4 SpatialPoints object with defined projection from a data
+#' table or matrix including X and Y coordinates, with option to export as an
+#' ArcGIS shapefile (*.shp).
+#' 
+#' 
+#' @param xyplt Data frame object or String. Name of layer with xy coordinates
+#' and unique identifier. Can be layer with xy_dsn, full pathname, including
+#' extension, or file name (with extension) in xy_dsn folder.
+#' @param xyplt_dsn String. Name of database or folder were xyplt is. The dsn
+#' varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html).
+#' @param xy.uniqueid String. Unique identifier of xyplt rows.
+#' @param xvar String. Name of variable in xyplt defining x coordinate.
+#' @param yvar String. Name of variable in xyplt defining y coordinate.
+#' @param xy.crs PROJ.4 String or CRS object or Integer EPSG code defining
+#' Coordinate Reference System. (e.g., EPSG:4269-Geodetic coordinate system for
+#' North America, NAD83).
+#' @param prj String. Projection, or coordinate system of the X/Y coordinates
+#' ("longlat", "utm", "aea"). If other, include PROJ.4 string in prj4str.
+#' @param datum String. Datum of projection ("WGS84", "NAD83", "NAD27").
+#' @param zone Integer. If prj="utm", the UTM zone.
+#' @param zoneS Logical. If prj="utm", if the UTM zone is in the Southern
+#' hemisphere.
+#' @param aea.param String. If prj="aea", the associated lat/lon parameters
+#' (USGS: " +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0").  If
+#' other, include PROJ.4 string in prj4str.
+#' @param addxy Logical. If TRUE, adds x and y variables to spatial sf object.
+#' @param exportsp Logical. If TRUE, exports spatial object.
+#' @param ...  Parameters for spExportSpatial.
+#' @return \item{spplt}{ sf obect with spatial points and defined CRS. }
+#' 
+#' If exportsp = TRUE, the sf object is written to specified output.
+#' @note If exportsp=TRUE and a shp output format is specified:\cr The ESRI
+#' shapefile driver truncates variable names to 10 characters or less.
+#' Variable names are changed before export using an internal function
+#' (trunc10shp). Name changes are output to the outfolder,
+#' 'outshpnm'_newnames.csv.  The returned Spatial object will have original
+#' names, before truncating.
+#' 
+#' If Spatial object has more than 1 record, it cannot be exported.
+#' 
+#' Common Datums and associated spheroid (ellipsoid):\cr NAD27 - North American
+#' Datum of 1927 - Clarke 1866 spheroid\cr NAD83 - North American Datum of 1983
+#' - GRS 1980 spheroid\cr WGS84 - World Geodetic System of 1984 - WGS 1984
+#' spheroid\cr
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export spMakeSpatialPoints
 spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL, 
 	xvar=NULL, yvar=NULL, xy.crs=4269, prj=NULL, datum=NULL, zone=NULL, 
 	zoneS=FALSE, aea.param="USGS", addxy=FALSE, exportsp=FALSE, ...){

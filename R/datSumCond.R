@@ -1,3 +1,69 @@
+#' Data - Aggregates numeric condition data to plot level.
+#' 
+#' Aggregates CONDPROP_UNADJ variable or other continuous condition variables
+#' to plot level with option to apply condition filters. If condition variable
+#' is not CONDPROP_UNADJ the variable is multiplied by CONDPROP_UNADJ for
+#' weighted sum.
+#' 
+#' If variable = NULL, then it will prompt user for input.
+#' 
+#' @param cond Data frame or comma-delimited file (*.csv). Condition-level
+#' table with aggregate variable and CONDPROP_UNADJ.
+#' @param plt Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
+#' database file. Plot-level table to join the aggregated tree data to (if
+#' bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.
+#' @param plt_dsn String. The data source name (dsn; i.e., folder or database
+#' name) of plt. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). Optional.
+#' @param cuniqueid String. Unique identifier of cond (default = "PLT_CN").
+#' @param puniqueid String. Unique identifier of plt (default = "CN").
+#' @param csumvar String. One or more variable names to sum to plot level.
+#' @param csumvarnm String. Name of the resulting aggregated plot-level
+#' variable(s).  Default = csumvar + '_PLT'.
+#' @param cfilter String. A filter to subset the cond data before aggregating
+#' (e.g., "COND_STATUS_CD == 1"). Must be R syntax.
+#' @param getadjplot Logical. If TRUE, adjustments are calculated for
+#' nonsampled conditions on plot.
+#' @param adjcond Logical. If TRUE, csumvar condition variables are adjusted
+#' for nonsampled conditions by plot.
+#' @param NAto0 Logical. If TRUE, convert NA values to 0.
+#' @param savedata Logical. If TRUE, writes output data to outfolder.
+#' @param outfolder String. Name of the output folder. If savedata=TRUE, output
+#' is saved to the outfolder.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Data source name for output. If extension is not
+#' included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param out_layer String. Name of output layer in database or *.csv file, if
+#' savedata=TRUE. If NULL, the file will be named tsum_'date'.csv.
+#' @param outfn.pre String. Prefix for out_dsn.
+#' @param layer.pre String. Prefix for out_layer.
+#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
+#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer in raw_dsn
+#' or *.csv raw data layer, if datsource="csv".
+#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data
+#' data frames to existing out_dsn layer or *.csv file.
+#' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
+#' returns data.frame object(s).
+#' @return A list of the following items: \item{condsum}{ Data frame.
+#' Plot-level table with aggregated condition attribute. } \item{cfilter}{
+#' Condition filter. }
+#' 
+#' If savedata=TRUE, condsum is saved to the outfolder.
+#' @note Nonsampled plots are removed from table.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'   ## Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
+#'   condsum <- datSumCond(cond=FIESTA::WYcond, csumvar="LIVE_CANOPY_CVR_PCT")$condsum
+#' 
+#'   ## Check results
+#'   condsum[condsum$PLT_CN == 40404737010690,]
+#'   FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
+#' 
+#' @export datSumCond
 datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN", 
 	puniqueid="CN", csumvar=NULL, csumvarnm=NULL, cfilter=NULL, getadjplot=FALSE, 
 	adjcond=FALSE, NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv",

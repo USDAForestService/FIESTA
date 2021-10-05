@@ -1,3 +1,32 @@
+#' Database - Get plot counts.
+#' 
+#' Extract plot counts by inventory year and state.
+#' 
+#' 
+#' @param plt Data frame. Table of plot-level variables to count plots. If
+#' using this table, it must include INVYR.
+#' @param yrtype String. Type of year to categorize data ("INVYR", "MEASYEAR").
+#' @param states String vector.  The states in plt table.
+#' @param designcd Logical. If TRUE, includes FIA design codes in the table.
+#' @param forsamp Logical. If TRUE, includes forest/nonforest/nonsampled codes
+#' in the table.
+#' @param total Logical. If TRUE, a row is added to bottom of table with a
+#' total for the whole table.
+#' @param subtotal Logical. If TRUE, a row is added to bottom of each section
+#' for subtotals.
+#' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
+#' file (*.csv).  No objects are returned. If FALSE, the data are saved as R
+#' objects and returned to user.  See details for caveats.
+#' @param outfolder String. The output folder path. If NULL and savedata=TRUE
+#' or parameters=TRUE, outfolder is the working directory.
+#' @param outfn String. The name of the output file. If NULL, defaults to
+#' pltcnt_'date'.csv
+#' @param gui Logical. If TRUE, gui windows pop up for parameter selection.
+#' @return pltcnt - a dataframe of counts (YEAR, STABBR, STCD, PLOTS,
+#' NONSAMPLED, FOREST, NONFOREST)
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export datPlotcnt
 datPlotcnt <- function(plt, yrtype="INVYR", states=NULL, designcd=FALSE, forsamp=TRUE, 
 	total=TRUE, subtotal=TRUE, savedata=FALSE, outfolder=NULL, outfn=NULL, gui=FALSE){
 

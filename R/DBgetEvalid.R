@@ -1,3 +1,101 @@
+#' Database - Gets or checks FIA EVALIDs and/or gets inventory years from FIA's
+#' online publicly-available DataMart
+#' (https://apps.fs.usda.gov/fia/datamart/CSV/datamart_csv.html).
+#' 
+#' Extracts FIA EVALIDs for identifying an estimation group of plots. EVALIDs
+#' may be extracted by most current evaluation (evalCur=TRUE) or by the end
+#' year of an evaluation (evalEndyr) or all evaluations in the database for one
+#' or more states. See details for more information.
+#' 
+#' 
+#' FIA Evaluation\cr An Evaluation defines a group of plots in the FIA Database
+#' used for state-level estimates, representing different spans of data and
+#' different stratification and area adjustments. An Evaluation Type (evalType)
+#' is used to identify a specific set of plots for a particular response to be
+#' able to ensure a sample-based estimate for a population. See FIA's Database
+#' documentation for current available Evaluation Types and descriptions
+#' (https://www.fia.fs.fed.us/library/database-documentation/index.php).
+#' 
+#' EVALID\cr An EVALID is a unique code defining an Evaluation, generally in
+#' the format of a 2-digit State code, a 2-digit year code, and a 2-digit
+#' Evaluation Type code.
+#' 
+#' EVAL_TYP\cr \tabular{llll}{ \tab \bold{EVALIDCD} \tab \bold{EVAL_TYP} \tab
+#' \bold{Description}\cr \tab 00 \tab EXPALL \tab All area\cr \tab 01 \tab
+#' EXPVOL/EXPCURR \tab Area/Volume\cr \tab 03 \tab
+#' EXPCHNG/EXPGROW/EXPMORT/EXPREMV \tab Area Change/GRM\cr \tab 07 \tab EXPDWM
+#' \tab DWM\cr \tab 08 \tab EXPREGEN \tab Regeneration\cr \tab 09 \tab EXPINV
+#' \tab Invasive\cr \tab 10 \tab EXPP2VEG \tab Veg profile\cr \tab 12 \tab
+#' EXPCRWN \tab Crown\cr }
+#' 
+#' @param states String or numeric vector. Name (e.g., 'Arizona','New Mexico')
+#' or code (e.g., 4, 35) of state(s) for evalid. If all states in one or more
+#' FIA Research Station is desired, set states=NULL and use RS argument to
+#' define RS.
+#' @param RS String vector. Name of research station(s)
+#' ('RMRS','SRS','NCRS','NERS','PNWRS').  Do not use if states is populated.
+#' @param datsource Source of data ('datamart', 'sqlite').
+#' @param data_dsn If datsource='sqlite', the file name (data source name) of
+#' the sqlite database (*.sqlite).
+#' @param invtype String. The type of FIA data to extract ('PERIODIC',
+#' 'ANNUAL').  See further details below.
+#' @param evalCur Logical. If TRUE, the most current evalidation is extracted
+#' for state(s).
+#' @param evalEndyr Number. The end year of the evaluation period of interest.
+#' Selects only sampled plots and conditions for the evalidation period. If
+#' more than one state, create a named list object with evalEndyr labeled for
+#' each state (e.g., list(Utah=2014, Colorado=2013).
+#' @param evalid Integer. One or more EVALID to check if exists.
+#' @param evalAll Logical. If TRUE, gets all EVALIDs for invtype.
+#' @param evalType String vector. The type(s) of evaluation of interest ('ALL',
+#' 'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
+#' 'ALL' includes nonsampled plots; 'CURR' includes plots used for area
+#' estimates; 'VOL' includes plots used for area and/or tree estimates; The
+#' evalType 'GRM' includes plots used for growth, removals, mortality, and
+#' change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
+#' are accepted. See details below and FIA database manual for regional
+#' availability and/or differences.
+#' @param invyrtab Data frame. A data frame including inventory years by state.
+#' If NULL, it is generated from SURVEY table from FIA database based on states
+#' and invtype.
+#' @param ppsanm String. Name of pop_plot_assgn_layer in database.
+#' @param gui Logical. If TRUE, gui windows pop up for parameter selection.
+#' @return A list of the following objects: \item{states}{ String vector. State
+#' names. } \item{rslst}{ String vector. FIA research station names included in
+#' output. } \item{evalidlist}{ Named list. evalid by state. } \item{invtype}{
+#' String. Inventory type for states(s) (ANNUAL/PERIODIC). } \item{invyrtab}{
+#' Data frame. Inventory years by state for evalidlist. } \item{evalTypelist}{
+#' Named list. Evaluation type(s) by state. } \item{invyrs}{ Named list.
+#' Inventory years by state for evalidlist. } \item{SURVEY}{ Data frame. If
+#' returnPOP=TRUE, the SURVEY table from FIADB. }
+#' @note FIA database tables used:\cr 1. SURVEY - To get latest inventory year,
+#' invyrtab = NULL\cr 2. POP_EVAL - To get EVALID and EVALID years
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'     ## Get evalid and inventory years for Wyoming
+#'     WYeval <- DBgetEvalid(states="Wyoming")
+#'     names(WYeval)
+#' 
+#'     WYeval$evalidlist
+#'     WYeval$invtype
+#'     WYeval$invyrtab
+#'     WYeval$evalType
+#'     WYeval$invyrs
+#' 
+#' 
+#'     ## Get evalid for Utah and Wyoming 
+#'     DBgetEvalid(states=c("Wyoming", "Utah"))
+#' 
+#'     ## Get evalid for an FIA Research Station
+#'     RSevalid <- DBgetEvalid(RS="NERS")
+#'     names(RSevalid)
+#'     RSevalid$evalidlist
+#' 
+#' 
+#' @export DBgetEvalid
 DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NULL, 
 	invtype="ANNUAL", evalCur=TRUE, evalEndyr=NULL, evalid=NULL, evalAll=FALSE, 
 	evalType="VOL", invyrtab=NULL, ppsanm="pop_plot_stratum_assgn", gui=FALSE) {

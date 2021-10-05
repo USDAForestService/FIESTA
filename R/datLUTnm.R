@@ -1,3 +1,64 @@
+#' Data - Gets variable description or class.
+#' 
+#' Merge a look-up table to append new variables, names, or categories to x.
+#' 
+#' 
+#' @param x Data frame or comma-delimited file (*.csv). The data table with
+#' variable to classify.
+#' @param xvar String. Name of variable in the data table to join to.
+#' @param LUT Data frame or comma-delimited file (*.csv). Name of the file with
+#' collapsed classes (If FIAname=FALSE).
+#' @param LUTvar String. Name of variable in LUT with values matching that
+#' xvar.  If LUTvar=NULL, LUTvar=xvar.
+#' @param LUTnewvar String. Name(s) of other variable(s) in the look-up table
+#' to include in join. If NULL, all other variables in table will be included.
+#' @param LUTnewvarnm String. Different name(s) for LUTnewvar. If NULL, names
+#' will default to LUTnewvar. The length of LUTnewvarnm must equal the length
+#' for LUTnewvar.
+#' @param FIAname Logical. If TRUE, get FIA reference name based on (ref_codes)
+#' within FIESTA.
+#' @param NAclass String. NA values in xvar will be changed to NAclass.
+#' @param group Logical. If TRUE, the group variables in reference table
+#' (ref_codes) are merged to data table (GROUPCD, GROUPNM).
+#' @param stopifmiss Logical. IF TRUE, stops function if missing codes in LUTx.
+#' @param add0 Logical. IF TRUE, keep all codes in look up table. If FALSE,
+#' only include codes that are in x.
+#' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
+#' file (*.csv).
+#' @param outfolder String.* The output folder path. If NULL and savedata=TRUE,
+#' the outfolder is the working directory.
+#' @param outfn String.* Output file name. If NULL and savedata=TRUE, outfn =
+#' datlut_'date'.csv.
+#' @param xtxt String.* Name of x table for more useful information in
+#' warnings.
+#' @return \item{xLUT}{ The input data table with look-up table variable(s). }
+#' \item{xLUTnm}{ Name of the new variable(s). } \item{LUT}{ Look up table with
+#' categories. }
+#' 
+#' If savedata = TRUE, a comma-delimited file is output to the outfolder as
+#' outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.
+#' @note For available reference tables:
+#' sort(unique(FIESTA::ref_codes$VARIABLE))
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 	## Append forest type names using the reference table above
+#' 	ref_fortypcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "FORTYPCD",]
+#' 	WYcondlut <- datLUTnm(FIESTA::WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, 
+#' 		LUTvar="VALUE", LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
+#' 	names(WYcondlut)
+#' 	WYcond2 <- WYcondlut$xLUT
+#' 	head(WYcond2[WYcond2$FORTYPCD > 0, ])
+#' 
+#' 	## Append forest type names the FIAname parameter. If the xvar is in the stored 
+#' 	##    reference table, the name and values will automatically be appended.
+#' 	WYcondlut2 <- datLUTnm(FIESTA::WYcond, xvar="FORTYPCD", FIAname=TRUE)
+#' 	names(WYcondlut2)
+#' 	WYcond3 <- WYcondlut2$xLUT
+#' 	head(WYcond3[WYcond3$FORTYPCD > 0, ])
+#' 
+#' @export datLUTnm
 datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL, 
 	LUTnewvarnm=NULL, FIAname=FALSE, NAclass="Other", group=FALSE, add0=FALSE, 
 	stopifmiss=FALSE, savedata=FALSE, outfolder=NULL, outfn="datlut", xtxt=NULL){

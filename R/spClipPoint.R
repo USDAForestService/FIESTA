@@ -1,3 +1,97 @@
+#' Spatial - Clip (intersect) point vector layer with polygon vector layer.
+#' 
+#' Wrapper for sf::st_intersection, to clip (intersect) point vector layer with
+#' a polygon vector layer.
+#' 
+#' The sf::st_intersection function is used to clip points. \cr
+#' 
+#' If the projection of clippolyv is not the same as the xyplt, the xyplt layer
+#' layer will be reprojected to the same projection as the clippoly before
+#' intersection.
+#' 
+#' @param xyplt sf R object or String. Point data to clip. Can be a spatial
+#' points object, full pathname to a shapefile, or name of a layer within a
+#' database.
+#' @param xyplt_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' pathname) of layer to clip. The dsn varies by driver. See gdal OGR vector
+#' formats (https://www.gdal.org/ogr_formats.html).
+#' @param uniqueid String.* Unique identifier of xyplt rows.
+#' @param clippolyv sf R object or String. Name of clipping polygon spatial
+#' polygon object, full path to shapefile, or name of a layer within a
+#' database.
+#' @param clippolyv_dsn String. Data source name (dsn; e.g., sqlite or
+#' shapefile pathname) of clipping polygon. The dsn varies by driver. See gdal
+#' OGR vector formats (https://www.gdal.org/ogr_formats.html).
+#' @param clippolyv.filter String. Filter to subset clippolyv spatial layer.
+#' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param keepNA Logical. If TRUE, keep NA values after data intersection.
+#' @param savedata Logical. If TRUE, save data to outfolder.
+#' @param returnsp Logical. If TRUE, returns sf object of points. If FALSE,
+#' returns data frame of points (i.e., drops sf geometry).
+#' @param exportsp Logical. If TRUE, the clipped spatial point data are
+#' exported.
+#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
+#' folder.  If NULL, the working directory is used.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
+#' @param out_layer String. Name of layer in out_dsn if database.
+#' @param outfn.pre String. A prefix for output dsn.
+#' @param outfn.date Logical. If TRUE, adds current date to out_dsn.
+#' @param overwrite Logical. If TRUE, overwrites out_layer, if exists.
+#' @param othertabnms String vector. Name(s) of R objects, comma-delimited
+#' files, or database layers to subset. Must include quotes (e.g.,
+#' othertabnms=c("tree", "cond")).
+#' @param stopifnotin Logical. If TRUE, stops if boundaries do not overlap.  If
+#' FALSE, returns NULL.
+#' @param ...  Arguments to be passed to spMakeSpatialPoints.
+#' @return A list of the following objects:
+#' 
+#' \item{clip_xyplt}{ sf object. The input xyplt, clipped to polygon boundary
+#' layer.  The projection will be same as clippolyv projection. }
+#' \item{xy.uniqueid}{ String. Unique identifier of clip_xy. }
+#' \item{clip_polyv}{ SpatialPolygonsDataFrame. The polygon boundary layer used
+#' for clipping. } \item{clip_tabs}{ Data frame(s). Other tables in intabs
+#' clipped to boundary. }
+#' 
+#' If exportsp=TRUE, the sf object will be written to out_dsn (See note).
+#' @note On-the-fly projection conversion\cr The spTransform (rgdal) method is
+#' used for on-the-fly map projection conversion and datum transformation using
+#' PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
+#' present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
+#' when no datum transformation is needed. PROJ.4 transformations assume NAD83
+#' and WGS84 are identical unless other transformation parameters are
+#' specified.  Be aware, providing inaccurate or incomplete CRS information may
+#' lead to erroneous data shifts when reprojecting. See spTransform help
+#' documentation for more details.
+#' 
+#' ESRI Shapefile Driver\cr If exportsp=TRUE:\cr The writeOGR (rgdal) function
+#' is called. If out_fmt="shp", the ESRI Shapefile driver truncates variable
+#' names to 10 characters or less. Variable names are changed before export
+#' using an internal function (trunc10shp). If sf object has more than 1
+#' record, it will be returned but not exported.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'   ## Get point data from WYplt data in FIESTA
+#'   WYplt <- FIESTA::WYplt
+#' 
+#'   ## Get polygon vector layer from FIESTA external data
+#'   WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+#' 
+#'   ## Extract points from polygon vector layer
+#'   xyext <- spClipPoint(xyplt=WYplt, clippolyv=WYbhdistfn, clippolyv.filter="DISTRICTNU == '03'", 
+#' 		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+#'   names(xyext)
+#'   xyplt <- xyext$clip_xyplt
+#'   polyv <- xyext$clip_polyv
+#' 
+#'   ## Plot extracted values of national forest district
+#'   plot(st_geometry(polyv))
+#'   plot(st_geometry(xyplt), add=TRUE)
+#' 
+#' @export spClipPoint
 spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
 	clippolyv, clippolyv_dsn=NULL, clippolyv.filter=NULL, showext=FALSE, 
 	keepNA=FALSE, savedata=FALSE, returnsp=TRUE, exportsp=FALSE, 

@@ -1,3 +1,109 @@
+#' Data - Generates frequency barplot.
+#' 
+#' Generate a barplot of frequencies in order from most to least.
+#' 
+#' # Note: This function uses a customized lengthwise axis (y axis if horiz=F,
+#' x axis if horiz=T) # Therefore to modify this axis by par commands (other
+#' than the # ones specifically included above) may require changing the
+#' function. For example par(yaxp) # may not work.  # # # The arguments bar.lab
+#' and bar.lim are equivalent to xlab/ylab, xlim/ylim, controlling # whichever
+#' is the lengthwise axis in the bar charts (as detrmined by horiz).  # # #
+#' bar.ratio is only used when bar.lim is specified, it controls what
+#' percentage of the # plot area will be occupied by the specified range of the
+#' chart itself. For example, setting # bar.lim=c(0,80) and bar.ratio=0.75 will
+#' result in the 80% tick mark occuring 75% of the way # across the plot
+#' region, leaving 25% of the plot region for the legend. (Note, if any of #
+#' the bars are taller than 80% they will still overlap the legend.)  # # If
+#' bar.lim is not specified, the function will automatically scale the
+#' lengthwise axis so # that all the bars are as tall as possible, but none of
+#' the bars over lap the legend.  # # The main purpose of specifying bar.lim is
+#' if you want multiple forest types to be shown at # the same scale,
+#' sacrificing individual forest type details to make the graphs comparable #
+#' across forest types. Then you may need to fiddle with bar.ratio till the
+#' plots all look good.
+#' 
+#' @param x Data frame or comma-delimited file (*.csv) - table of values to be
+#' plotted.
+#' @param main.attribute String. The column to be used for each bar.
+#' @param sub.attribute String. The column to be used to subdivide each bar.
+#' @param response String. The column of values to be plotted. Currently
+#' defaults to "phat".
+#' @param percent Logical. If TRUE, values cover values in a stack are
+#' converted to percent of stack.
+#' @param LUT.color Data frame or comma-delimited file (*.csv) - look up table
+#' for colors.  Must contain column with same name as sub.attribute.
+#' @param color String. Automated color selection ("rainbow", "topo", "heat",
+#' "terrain", "cm").
+#' @param device.type String. The type(s) of device for ploting ("default",
+#' "jpg", "pdf", or "ps").
+#' @param jpeg.res Integer. The resolution for jpeg image.
+#' @param device.width Integer. The width of output device (in inches)'
+#' @param device.height Integer. The height of output device (in inches)'
+#' @param mar See par.. A numerical vector representing number of lines for
+#' margins (c(bottom, left, top, right).
+#' @param horiz Logical. See barplot. If FALSE, the bars are drawn vertically
+#' with the first bar to the left. If TRUE, the bars are drawn horizontally
+#' with the first bar at the bottom.
+#' @param bar.lim Number vector. Equivalent to xlim or ylim, for whichever is
+#' the lengthwise axis in barcharts (ex. c(0,10)). Warning: for lower limits
+#' other than zero (ex. c(20,100), will behave strangely because par(xpd) is
+#' set to NA.
+#' @param bar.ratio Proportion of figure area taken up by barplot vs taken by
+#' legend.
+#' @param ylabel String. A label for the y axis (same as ylab).
+#' @param xlabel String. A label for the x axis (same as xlab).
+#' @param las.xnames Number. The direction of x variable names (0,1,2,3).
+#' 0:Default, parallel; 1:horizontal; 2:perpendicular; 3:vertical.
+#' @param main.order String vector. A vector of main.attribute names in desired
+#' order for bars. May also be 'DESC' or 'ASC'.
+#' @param sub.order String vector. Avector of sub.attribute names in desired
+#' order for stack, with the first name used as the column in each stack. If
+#' NULL, the order is based on the overall cover of each sub.attribute. May
+#' also be 'DESC' or 'ASC'.
+#' @param legend.fit Logical. Should bar.lim be changed to fit the legend of
+#' the plot.  Will only be used if the legend is on the right side of a
+#' horizontal plot or the top of a vertical plot. (i.e. horiz=FALSE).
+#' @param legend.cex Number. Expansion factor for legend text.
+#' @param legend.x See legend. The x coordinate to be used to position the
+#' legend. If horiz=TRUE, suggested options include "topright" or
+#' "bottomright". If horiz=FALSE, suggested options include "topleft" or
+#' "topright".
+#' @param legend.y See legend. The y coordinate to be used to position the
+#' legend.
+#' @param legend.title See legend. A title for the legend.
+#' @param legend.bty See legend. the type of box to be drawn around the legend.
+#' @param legend.bg See legend. The background color for the legend box.
+#' @param legend.inset See legend. The distance from the margins as a fraction
+#' of the plot region.
+#' @param legend.xpd See legend.
+#' @param main String. Title for plot.
+#' @param cex.main Number. Expansion factor for title.
+#' @param cex.label Number. A number representing cex in barplot (size
+#' expansion of x and/or ylabels.
+#' @param cex.names Number. Expansion factor for axis names (bar labels). Ex.
+#' 0.5 represents half the size.
+#' @param sub.add0 Logical. If TRUE, adds categories with 0 values to
+#' sub.attribute legend.
+#' @param savedata Logical. If TRUE, writes output data to outfolder (jpg and
+#' pdf).
+#' @param outfolder String. The name of the output folder. If savedata=TRUE,
+#' all output saved to the outfolder. If savedata=FALSE, only a text file of
+#' input parameters is saved.
+#' @param outfn String. The name of the output file if savedata=TRUE (*.csv).
+#' Do not include extension. If NULL, the file will be named
+#' BARPLOT_'yvar_date'.csv
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param overwrite Logical. If TRUE and exportshp=TRUE, overwrite files in
+#' outfolder.
+#' @param ...  list of additional arguments to pass to barplot(); names of the
+#' list are used as argument names.
+#' @return Outputs stacked barplot to display window.
+#' @note If savedata = TRUE, writes a jpg and pdf of barplot to outfolder.
+#' @author Elizabeth Freeman, Tracey S. Frescino
+#' @keywords data
+#' @export datBarStacked
 datBarStacked <- function(x, main.attribute, sub.attribute, response="phat", 
 	percent=FALSE, LUT.color=NULL, color="rainbow", device.type="default", jpeg.res=300,
 	device.width=9, device.height=6, mar=NULL, horiz=TRUE, bar.lim=NULL, bar.ratio=1, 

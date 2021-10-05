@@ -1,3 +1,22 @@
+#' Database - Test access to an ESRI geodatabase.
+#' 
+#' Checks gdb access (See note below).
+#' 
+#' 
+#' @param gdbfn String. Name of ESRI geodatabase (*.gdb).
+#' @param outfolder String. Optional. Name of output folder. If NULL, export to
+#' working directory.
+#' @param outfn.pre String. Prefix for out_dsn.
+#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
+#' @param overwrite Logical. If TRUE, overwrites the geodatabase, if exists.
+#' @param showlist Logical. If TRUE, shows list of tables in database.
+#' @param returnpath Logical. If TRUE, returns full path to gdb file name.  If
+#' FALSE, returns gdbfn
+#' @note Must have a functioning installation of ArcGIS or environment
+#' variables for ArcGIS.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export DBtestESRIgdb
 DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
 				outfn.date=FALSE, overwrite=FALSE, showlist=TRUE,
 				returnpath=TRUE) {

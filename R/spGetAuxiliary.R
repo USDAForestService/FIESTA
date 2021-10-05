@@ -1,3 +1,143 @@
+#' Spatial wrapper - Extracts and compiles auxiliary data within a specified
+#' boundary.
+#' 
+#' Wrapper to extract and compile auxiliary data by domain (i.e, estimation
+#' unit or small area domain). The following information is compiled:\cr -
+#' Attribute defining domain (i.e., estimation unit) from domain layer\cr -
+#' Area by domain (i.e., estimation unit)\cr - Zonal statistics by domain
+#' (i.e., estimation unit) - spZonalRast()\cr
+#' 
+#' *If variable = NULL, then it will prompt user for input.
+#' 
+#' If there is a raster and SpatialPolygon layer, and the projection of the
+#' SpatialPolygons is different than the projection of the raster, the
+#' SpatialPolygons object is reprojected to the projection of raster (See note
+#' about on-the-fly projection conversion).
+#' 
+#' @param xyplt Data frame object or String. Name of layer with xy coordinates
+#' and unique identifier. Can be layer with xy_dsn, full pathname, including
+#' extension, or file name (with extension) in xy_dsn folder.
+#' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
+#' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
+#' @param uniqueid String.* Unique identifier of xyplt records.
+#' @param dunittype String. Type of spatial layer dunit_layer is ("POLY",
+#' "RASTER").
+#' @param dunit_layer sf R object or String. Name of the domain spatial layer.
+#' Can be a spatial polygon object, full pathname to a shapefile, name of a
+#' polygon layer within a database, or a full pathname to raster file.
+#' @param dunit_dsn String. The data source name (dsn; i.e., folder or database
+#' name) of dunit_layer. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). Optional.
+#' @param dunitvar String. Name of domain variable in domlayer. If NULL,
+#' assuming one domain. An attribute names ONEUNIT is added to layer with
+#' value=1.
+#' @param rastlst.cont String vector or list. A list of raster(s) with
+#' continuous data values (e.g., DEM). The list may include file name of
+#' raster(s) or raster objects that are not InMemory.
+#' @param rastlst.cont.name String vector. Output names for continuous rasters.
+#' Optional. If NULL, name of raster is used as default or name+'_'+layer
+#' number for multi-band layers.
+#' @param rastlst.cont.stat String. Zonal statistic for continuous rasters.
+#' @param rastlst.cont.NODATA Numeric vector. NODATA value for continuous
+#' rasters (See notes). These values will be converted to NA and removed from
+#' output if keepNA=FALSE. If 1 number, the same value will be used for all
+#' categorical rasters. If more than 1 number, the number of values must be
+#' equal to the number of rasters in rastlst.cont.
+#' @param rastlst.cat String vector or list. A list of raster(s) with thematic
+#' (i.e., categorical) data values. The list may include file name of raster(s)
+#' or raster objects that are not InMemory.
+#' @param rastlst.cat.name String vector. Output names for categorical rasters.
+#' If NULL, name of raster is used as default or name+'_'+layer number for
+#' multi-band layers.
+#' @param rastlst.cat.NODATA Numeric vector. NODATA value for categorical
+#' rasters (See notes). These values will be converted to NA and removed from
+#' output if keepNA=FALSE. If 1 number, the same value will be used for all
+#' categorical rasters. If more than 1 number, the number of values must be
+#' equal to the number of rasters in rastlst.cat.
+#' @param rastfolder String. Name of the folder with raster layers. Optional.
+#' Useful if all raster layers are in same folder.
+#' @param asptransform Logical. If TRUE, transforms aspect to Northness and
+#' Eastness indices using sin and cosine functions.
+#' @param rast.asp String or raster object. The raster in rastlst.cont that is
+#' the aspect raster (Note: aspect must have units in degrees).
+#' @param rast.lut String. A raster in rastlst.cat to group class values. Only
+#' one raster is allowed.
+#' @param rastlut String or raster object. The raster look up table used for
+#' collapsing rast.lut values.
+#' @param areacalc Logical. If TRUE, returns area by domvar.
+#' @param areaunits String. Output area units ("ACRES", "HECTARES",
+#' "SQMETERS").
+#' @param keepNA Logical. If TRUE, returns data frame of NA values.
+#' @param NAto0 Logical. If TRUE, converts extracted NA values to 0.
+#' @param npixels Logical. If TRUE, include number of pixels.
+#' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
+#' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param savedata Logical. If TRUE, the input data with extracted values are
+#' saved to outfolder.
+#' @param exportsp Logical. If TRUE, the extracted raster point data are
+#' exported to outfolder.
+#' @param exportNA Logical. If TRUE, NA values are exported to outfolder.
+#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
+#' folder.  If NULL, the working directory is used.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
+#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
+#' @param overwrite_layer Logical. If TRUE, overwrite layer(s) in dsn.
+#' @param append_layer Logical. If TRUE, appends to csv (if out_fmt="csv") or
+#' appends to layers in dsn.
+#' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
+#' include in dunitzonal output and extract to pltassgn points.
+#' @param ...  Other parameters for spMakeSpatialPoints.
+#' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
+#' rastlst*. } \item{dunitzonal}{ Data frame. Number of pixels and zonal
+#' statistics from continuous rasters or zonal proportions from categorical
+#' raster for each domain (i.e., estimation unit). } \item{dunitvar}{ Data
+#' frame. Domain (i.e., estimation unit) name. } \item{inputdf}{ Data frame.
+#' Raster information input to zonal summaries. } \item{prednames}{ String
+#' vector. Name(s) of predictor variable(s). } \item{zonalnames}{ String
+#' vector. Name(s) of zonal variable(s). } \item{predfac}{ String vector.
+#' Name(s) of categorical (i.e. factor) variable(s). } \item{npixelvar}{
+#' String. Name of variable describing number of pixels. } \item{dunitarea}{
+#' Data frame. Area by domain (i.e., estimation unit). } \item{areavar}{
+#' String. Name of variable describing acres in domarea. } \item{pltassgnid}{
+#' String. Unique identifier of plot. } \item{spxy}{ Simple feature. If
+#' returnxy=TRUE, Spatial coordinates. } \item{xy.uniqueid}{ String. If
+#' returnxy=TRUE, unique identifier of spxy. }
+#' 
+#' If savedata=TRUE, datstrat and unitarea are saved to outfolder.  If
+#' exportsp=TRUE, the sf object is exported to outfolder.
+#' @note
+#' 
+#' rast.NODATA\cr NODATA values are raster pixel values that have no data of
+#' interest, including pixels within the extent of the layer, but outside the
+#' area of interest. Sometimes these pixels have been defined previously. The
+#' defined NODATA pixels are imported to R as NULL values. When not previously
+#' defined, the pixels outside the area of interest will be the minimum or
+#' maximum value depending on the data type (e.g., 16-bit signed: min=-32,768;
+#' max=32,768) or byte size (1 byte: min=0; max=255).  These NODATA values will
+#' be added to the zonal statistic calculations if not specified in
+#' rast.NODATA.
+#' 
+#' If exportsp=TRUE:\cr If out_fmt="shp", the writeOGR (rgdal) function is
+#' called. The ArcGIS driver truncates variable names to 10 characters or less.
+#' Variable names are changed before export using an internal function
+#' (trunc10shp). If Spatial object has more than 1 record, it will be returned
+#' but not exported.
+#' 
+#' On-the-fly projection conversion\cr The spTransform (rgdal) method is used
+#' for on-the-fly map projection conversion and datum transformation using
+#' PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
+#' present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
+#' when no datum transformation is needed. PROJ.4 transformations assume NAD83
+#' and WGS84 are identical unless other transformation parameters are
+#' specified.  Be aware, providing inaccurate or incomplete CRS information may
+#' lead to erroneous data shifts when reprojecting. See spTransform help
+#' documentation for more details.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export spGetAuxiliary
 spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  	dunittype="POLY", dunit_layer=NULL, dunit_dsn=NULL, dunitvar="DOMAIN",
  	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.stat="mean", 

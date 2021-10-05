@@ -1,3 +1,300 @@
+#' Green-Book module - Generate area estimates.
+#' 
+#' Generates area estimates by domain (and estimation unit). Calculations are
+#' based on Scott et al. 2005 ('the green-book') for mapped forest inventory
+#' plots. The non-ratio estimator for estimating area by stratum and domain is
+#' used. Plots that are totally nonsampled are excluded from estimation
+#' dataset. Next, an adjustment factor is calculated by strata to adjust for
+#' nonsampled (nonresponse) conditions that have proportion less than 1. The
+#' attribute is the proportion of the plot which is divided by the adjustment
+#' factor, and averaged by stratum. Strata means are combined using the strata
+#' weights and then expanded to area using the total land area in the
+#' population.
+#' 
+#' If variables are NULL, then it will prompt user to input variables.
+#' 
+#' Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
+#' \bold{Variable} \tab \bold{Description}\cr \tab cond \tab cuniqueid \tab
+#' Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
+#' \tab CONDID \tab Unique identfier of each condition on plot.  Set CONDID=1,
+#' if only 1 condition per plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted
+#' proportion of condition on each plot.  Set CONDPROP_UNADJ=1, if only 1
+#' condition per plot.\cr \tab \tab COND_STATUS_CD \tab Status of each forested
+#' condition on plot (i.e. accessible forest, nonforest, water, etc.)\cr \tab
+#' \tab NF_COND_STATUS_CD \tab If ACI=TRUE. Status of each nonforest condition
+#' on plot (i.e. accessible nonforest, nonsampled nonforest)\cr \tab \tab
+#' SITECLCD \tab If landarea=TIMBERLAND. Measure of site productivity.\cr \tab
+#' \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr
+#' 
+#' \tab pltassgn \tab puniqueid \tab Unique identifier for each plot, to link
+#' to cond (ex. CN).\cr \tab \tab STATECD \tab Identifies state each plot is
+#' located in.\cr \tab \tab INVYR \tab Identifies inventory year of each
+#' plot.\cr \tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled,
+#' nonsampled).  If not included, all plots are assumed as sampled.\cr }
+#' 
+#' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
+#' 
+#' @param GBpopdat List. Population data objects returned from modGBpop().
+#' @param landarea String. The sample area filter for estimates ("ALL",
+#' "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
+#' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
+#' @param pcfilter String. A filter for plot or cond attributes (including
+#' pltassgn).  Must be R logical syntax.
+#' @param rowvar String. Name of row domain variable in cond. If only one
+#' domain, rowvar = domain variable. If more than one domain, include colvar.
+#' If no domain, rowvar = NULL.
+#' @param colvar String. Name of column domain variable in cond.
+#' @param row.FIAname Logical. If TRUE, gets FIA reference names for row
+#' variable based on ref_codes. Only available for certain variables.
+#' @param col.FIAname Logical. If TRUE, gets FIA reference names for column
+#' variable based on ref_codes. Only available for certain variables.
+#' @param row.orderby String. Name of variable to sort table rows. If
+#' row.FIAname=TRUE and a ref_* exists for rowvar, the rowvar code is used to
+#' sort. If NULL, the table is sorted by rowvar.
+#' @param col.orderby String. Name of variable to sort table columns. If
+#' col.FIAname=TRUE and a ref_* exists for colvar, the colvar code is used to
+#' sort. If NULL, the table is sorted by colvar.
+#' @param row.add0 Logical. If TRUE, add the rows that have 0 values.
+#' @param col.add0 Logical. If TRUE, add the columns that have 0 values.
+#' @param rowlut Data frame. A lookup table with variable codes and
+#' descriptions to include in rows of output table (See notes for more
+#' information and format).
+#' @param collut Data frame. A lookup table with variable codes and
+#' descriptions to include in columns of output table (See notes for more
+#' information and format).
+#' @param rowgrp Logical. If TRUE, appends row groups to first column of table.
+#' Only available if group category exists in ref_codes table (e.g.,
+#' FORTYPGRPCD, OWNGRPCD).
+#' @param rowgrpnm String. Name of row group variable.
+#' @param rowgrpord String. Name of row group variable to sort table rows.
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
+#' @param allin1 Logical. If TRUE, both estimates and percent sample error are
+#' output in one table as: estimates (percent sample error).
+#' @param metric Logical. If TRUE, output area is in metric units (hectares).
+#' @param estround Integer. Number of decimal places for estimates.
+#' @param pseround Integer. Number of decimal places for percent sampling
+#' error.
+#' @param estnull Number or character. The number or symbol to use to indicate
+#' 'not sampled' for estimate.
+#' @param psenull Number or character. The number or symbol to use to indicate
+#' 'not sampled' for percent standard errror.
+#' @param divideby String. Conversion number for output ('hundred', 'thousand',
+#' 'million').
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param outfolder String. The outfolder to write files to. If NULL, files are
+#' written to working directory, or if gui, a window to browse.
+#' @param outfn.pre String. If savedata=TRUE, prefix for output files. If
+#' rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
+#' raw_fmt != 'csv').
+#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
+#' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
+#' @param rawdata Logical. If TRUE, returns a list of raw data tables that are
+#' used for estimation (See Value). If savedata = TRUE, tables are written to
+#' outfolder (if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv').
+#' @param rawonly Logical. If TRUE, only rawdata are output. If dataset
+#' includes many estimation units, and only raw data tables are desired, it is
+#' more efficient to output raw data only.
+#' @param raw_fmt String. Format for output rawdata tables ('sqlite',
+#' 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').
+#' @param raw_dsn String. Data source name for rawdata output. If extension is
+#' not included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the output. If
+#' rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
+#' out_layers in raw_dsn (if raw_fmt != 'csv').
+#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data to
+#' existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
+#' 'csv".
+#' @param returntitle Logical. If TRUE, returns title(s) of the estimation
+#' table(s).
+#' @param title.main String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' the complete title used for table. If title.main=NULL, the title.*
+#' parameters are used to generate title string. Note: if title.ref is not
+#' NULL, it is added to title.main.
+#' @param title.ref String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".
+#' @param title.rowvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' pretty name for the row domain variable. If NULL, = rowvar.
+#' @param title.colvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' pretty name for the column domain variable. If NULL, = colvar.
+#' @param title.unitvar String. TITLE, if savedata=TRUE and/or
+#' returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
+#' unitvar.
+#' @param title.filter String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' pretty name for filter(s). If title.filter=NULL, a default is generated from
+#' cfilter.  If title.filter="", no title.filter is used.
+#' @param gui Logical. If gui, user is prompted for parameters.
+#' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
+#' @return A list with estimates with percent sampling error for rowvar (and
+#' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
+#' is returned.  Otherwise, a list object is returned with the following
+#' information.  If savedata=TRUE, all data frames are written to outfolder.
+#' 
+#' \item{est}{ Data frame. Area estimates, in area units (e.g., acres), by
+#' rowvar, colvar (and estimation unit). If sumunits=TRUE or one estimation
+#' unit and colvar=NULL, or allin1=TRUE, estimates and percent sampling error
+#' are in one data frame. } \item{pse}{ Data frame. Percent sampling errors
+#' (Confidence level 68%) for estimates by rowvar and colvar (and estimation
+#' unit). } \item{titlelst}{ List. If returntitle=TRUE a list with table
+#' title(s). The list contains one title if est and pse are in the same table
+#' and two titles if est and pse are in separate tables. Row and column tables
+#' are also included in list. } \item{raw}{ List. If rawdata=TRUE, a list
+#' including the processing data used for estimation including: number of plots
+#' and conditions; stratification information; and 1 to 8 tables with
+#' calculated values for table cells and totals (See processing data below). }
+#' 
+#' Raw data
+#' 
+#' \item{plotsampcnt}{ Table. Number of plots by plot status (e.g., sampled
+#' forest on plot, sampled nonforest, nonsampled). } \item{condsampcnt}{ DF.
+#' Number of conditions by condition status (forest land, nonforest land,
+#' noncensus water, census water, nonsampled). } \item{unitarea}{ DF. Area by
+#' estimation unit. } \item{expcondtab}{ DF. Condition-level area expansion
+#' factors. } \item{domdat}{ DF. Final data table used for estimation. }
+#' 
+#' \item{stratdat}{ Data frame. Strata information by estimation unit. }
+#' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description} \cr \tab unitvar
+#' \tab estimation unit \cr \tab strvar \tab stratum value \cr \tab strwtvar
+#' \tab number of pixels by strata and estimation unit \cr \tab n.strata \tab
+#' number of plots in strata (after totally nonsampled plots removed) \cr \tab
+#' n.total \tab number of plots for estimation unit \cr \tab strwt \tab
+#' proportion of area (or plots) by strata and estimation unit (strata weight)
+#' \cr \tab CONDPROP_UNADJ_SUM \tab summed condition proportion by strata and
+#' estimation unit \cr \tab CONDPROP_ADJFAC \tab adjusted condition proportion
+#' by strata after nonresponse plots removed \cr \tab AREA \tab total area for
+#' estimation unit \cr \tab CONDPROP_ADJFAC \tab average area \cr }
+#' 
+#' \item{processing data}{ Data frames. Separate data frames containing
+#' calculated variables used in estimation process. The number of processing
+#' tables depends on the input parameters. The tables include: total by
+#' estimation unit (unit.totest); rowvar totals (unit.rowest), colvar totals,
+#' if not NULL (unit.colvar); and a combination of rowvar and colvar, if colvar
+#' is not NULL (unit.grpvar). If sumunits=TRUE, the raw data for the summed
+#' estimation units are also included (totest, rowest, colest, grpest,
+#' respectively).  These tables do not included estimate proportions (nhat and
+#' nhat.var).
+#' 
+#' The data frames include the following information: \tabular{lll}{ \tab
+#' \bold{Variable} \tab \bold{Description}\cr \tab nhat \tab estimate
+#' proportion of land \cr \tab nhat.var \tab variance estimate of estimated
+#' proportion of land \cr \tab NBRPLT.gt0 \tab Number of non-zero plots used in
+#' estimates \cr \tab AREA \tab total area for estimation unit \cr \tab est
+#' \tab estimated area of land nhat*areavar \cr \tab est.var \tab variance
+#' estimate of estimate acres of land nhat.var*areavar^2 \cr \tab est.se \tab
+#' standard error of estimated area of land sqrt(est.var) \cr \tab est.cv \tab
+#' coefficient of variation of estimated area of land est.se/est \cr \tab pse
+#' \tab percent sampling error of estimate est.cv*100 \cr \tab CI99left \tab
+#' left tail of 99 percent confidence interval for estimated area \cr \tab
+#' CI99right \tab right tail of 99 percent confidence interval for estimated
+#' area \cr \tab CI95left \tab left tail of 95 percent confidence interval for
+#' estimated area \cr \tab CI95right \tab right tail of 95 percent confidence
+#' interval for estimated area \cr \tab CI67left \tab left tail of 67 percent
+#' confidence interval for estimated area \cr \tab CI67right \tab right tail of
+#' 67 percent confidence interval for estimated area \cr } }
+#' 
+#' savedata\cr if savedata=TRUE...\cr tables with estimate and percent standard
+#' error will be written as *csv files to outfolder.  if rawdata=TRUE, the
+#' rawdata will be output to the outfolder in a folder named rawdata (if
+#' raw_fmt="csv") or a database in the outfolder, if (raw_fmt != "csv").
+#' 
+#' if outfn.pre is not null...\cr a prefix is added to output files if raw_fmt
+#' = 'csv', prefix is added to file names in rawdata folder if raw_fmt !=
+#' 'csv', prefix is added to dsn name
+#' @note
+#' 
+#' ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for
+#' nonsampled conditions. It is calculated for each estimation unit by strata
+#' by summing the unadjusted condition proportions (CONDPROP_UNADJ) and
+#' dividing by the number of plots in the strata/estimation unit.
+#' 
+#' If ACI=FALSE, only nonsampled forest conditions are accounted for in the
+#' adjustment factor. \cr If ACI=TRUE, the nonsampled nonforest conditions are
+#' removed as well and accounted for in adjustment factor. This is if you are
+#' interested in estimates for all lands or nonforest lands in the
+#' All-Condition-Inventory.
+#' 
+#' STRATA:\cr Stratification is used to reduce variance in population estimates
+#' by partitioning the population into homogenous classes (strata), such as
+#' forest and nonforest. For stratified sampling methods, the strata sizes
+#' (weights) must be either known or estimated. Remotely-sensed data is often
+#' used to generate strata weights with proporation of pixels by strata. If
+#' stratification is desired (strata=TRUE), the required data include: stratum
+#' assignment for the center location of each plot, stored in either pltassgn
+#' or cond; and a look-up table with the area or proportion of the total area
+#' of each strata value by estimation unit, making sure the name of the strata
+#' (and estimation unit) variable and values match the plot assignment name(s)
+#' and value(s).
+#' 
+#' sumunits:\cr An estimation unit is a population, or area of interest, with
+#' known area and number of plots. Individual counties or combined
+#' Super-counties are common estimation units for FIA. An estimation unit may
+#' also be a subpopulation of a larger population (e.g., Counties within a
+#' State). Subpopulations are mutually exclusive and independent within a
+#' population, therefore estimated totals and variances are additive. For
+#' example, State-level estimates are generated by summing estimates from all
+#' subpopulations within the State (Bechtold and Patterson. 2005. Chapter 2).
+#' Each plot must be assigned to only one estimation unit.
+#' 
+#' If sumunits=TRUE, estimates are generated by estimation unit, summed
+#' together, and returned as one estimate. If rawdata=TRUE, estimates by
+#' individual estimation unit are also returned.
+#' 
+#' If sumunits=FALSE, estimates are generated and returned by estimation unit
+#' as one data frame. If savedata=TRUE, a separate file is written for each
+#' estimation unit.
+#' 
+#' stratcombine:\cr If TRUE and less than 2 plots in any one estimation unit,
+#' all estimation units with 10 or less plots are combined. The current method
+#' for combining is to group the estimation unit with less than 10 plots with
+#' the estimation unit following in consecutive order (numeric or
+#' alphabetical), restrained by survey unit (UNITCD) if included in dataset,
+#' and continuing until the number of plots equals 10. If there are no
+#' estimation units following in order, it is combined with the estimation unit
+#' previous in order.
+#' 
+#' rowlut/collut:\cr There are several objectives for including rowlut/collut
+#' look-up tables: 1) to include descriptive names that match row/column codes
+#' in the input table; 2) to use number codes that match row/column names in
+#' the input table for ordering rows; 3) to add rows and/or columns with 0
+#' values for consistency. No duplicate names are allowed.
+#' 
+#' Include 2 columns in the table:\cr 1-the merging variable with same name as
+#' the variable in the input merge table;\cr 2-the ordering or descriptive
+#' variable.\cr If the ordering variable is the rowvar/colvar in the input
+#' table and the descriptive variable is in rowlut/collut, set
+#' row.orderby/col.orderby equal to rowvar/colvar. If the descriptive variable
+#' is the rowvar/colvar in the input table, and the ordering code variable is
+#' in rowlut/collut, set row.orderby/col.orderby equal to the variable name of
+#' the code variable in rowlut/collut.
+#' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
+#' @references Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;
+#' Smith, William D.; Westfall, James A.; Hansen, Mark H.; Moisen, Gretchen G.
+#' 2005. Sample-based estimators used by the Forest Inventory and Analysis
+#' national information management system. Gen. Tech. Rep. SRS-80.  Asheville,
+#' NC: U.S. Department of Agriculture, Forest Service, Southern Research
+#' Station, p.53-77.
+#' @keywords data
+#' @examples
+#' 
+#' 
+#'   ## Rows only; combine estimation units (sumunits=TRUE)
+#'   MODest <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+#' 	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, 
+#' 	sumunits=TRUE, landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE)
+#'   names(MODest)
+#'   MODest$est
+#'   
+#'   ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
+#'   MODest <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+#' 	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut,
+#'  	sumunits=TRUE, landarea="FOREST", 
+#' 	rowvar="FORTYPCD", row.FIAname=TRUE, allin1=TRUE)
+#'   names(MODest)
+#'   MODest$est
+#' 
+#' 
+#' @export modGBarea
 modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL, 
 	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE, 
 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 

@@ -1,3 +1,46 @@
+#' Data - Generates ratio of tree domain variables.
+#' 
+#' Generates ratio of tree domain summaries from FIESTA::datSumTreedom().
+#' 
+#' 
+#' @param ndat Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+#' Table from FIESTA::datSumTreeDomRatio() with numerator tree domain
+#' variables.
+#' @param ddat Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
+#' Table from FIESTA::datSumTreeDomRatio() with numerator tree domain
+#' variables.
+#' @param uniqueid String. The unique identifier of both tables (default =
+#' "PLT_CN").
+#' @param nprefix String. The prefix variable identifier of numerator domain
+#' variables in ndat.
+#' @param dprefix String. The prefix variable identifier of denominator domain
+#' variables in ddat.
+#' @param rprefix String. The prefix variable identifier of new ratio variables
+#' (default="r").
+#' @param datround Integer. Number of digits to round ratio values to.
+#' @param savedata Logical. If TRUE, writes output data to outfolder.
+#' @param outfolder String. Name of the output folder. If savedata=TRUE, output
+#' is saved to the outfolder.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Data source name for output. If extension is not
+#' included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param out_layer String. Name of output layer in database or *.csv file, if
+#' savedata=TRUE. If NULL, the file will be named tsum_'date'.csv.
+#' @param outfn.pre String. Prefix for out_dsn.
+#' @param layer.pre String. Prefix for out_layer.
+#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
+#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer in raw_dsn
+#' or *.csv raw data layer, if datsource="csv".
+#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data
+#' data frames to existing out_dsn layer or *.csv file.
+#' @return \item{rdat}{ Data frame. Table with ratio values (ndat / ddat). }
+#' \item{rvars}{ String vector. Variable names in rdat. }
+#' 
+#' If savedata=TRUE, the data table will be saved to the outfolder: \cr
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export datSumTreeDomRatio
 datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dprefix=NULL, 
 	rprefix="r", datround=NULL, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=FALSE, 

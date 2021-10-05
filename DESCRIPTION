@@ -1,8 +1,8 @@
 Package: FIESTA
 Type: Package
 Title: Forest Inventory ESTimation and Analysis
-Version:  3.1.00
-Date:  2021-10-05
+Version: 3.1.00
+Date: 2021-10-05
 Imports: methods, grDevices, graphics, utils, sp, rgdal, Rcpp(>= 1.0.7)
 Suggests: knitr, rmarkdown, rJava, xlsx, JoSAE, mase, RSQLite, DBI, rgeos,	
 	sqldf, raster, units, nlme, xml2, RPostgreSQL, arcgisbinding, pheatmap, RColorBrewer, hbsae, sae
@@ -15,4 +15,5 @@ License: file LICENSE
 LazyData: true
 LinkingTo: Rcpp
 SystemRequirements: C++11
-
+Encoding: UTF-8
+RoxygenNote: 7.1.2

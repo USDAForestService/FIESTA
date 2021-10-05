@@ -1,3 +1,48 @@
+#' Spatial - Converts SpatialPolygons layer to raster.
+#' 
+#' Converts SpatialPolygons layer to raster.
+#' 
+#' 
+#' @param polyv sf R object or String. Polygon data to convert to raster.  Can
+#' be a spatial polygon object, full pathname to a shapefile, or name of a
+#' layer within a database.
+#' @param polyv_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' pathname) of layer to convert. The dsn varies by driver. See gdal OGR vector
+#' formats (https://www.gdal.org/ogr_formats.html). Optional if polyv is sf
+#' object.
+#' @param polyv.att String. Name of attribute in polyv to rasterize.
+#' @param polyv.lut Data frame. Look up table of codes, if polyv.att is
+#' character or want to group codes.
+#' @param rastfn.template String. Full path name of raster to use as template
+#' for new raster.
+#' @param outfolder String. If exportshp=TRUE, name of output folder. If NULL,
+#' the working directory is used.
+#' @param outfn String. Name of output raster. If NULL, default is 'polyrast'.
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param outext String. Name of raster extension (fmt).
+#' @param overwrite Logical. If TRUE and exportshp=TRUE, overwrite files in
+#' outfolder.
+#' @note
+#' 
+#' On-the-fly projection conversion\cr The spTransform (rgdal) method is used
+#' for on-the-fly map projection conversion and datum transformation using
+#' PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
+#' present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
+#' when no datum transformation is needed. PROJ.4 transformations assume NAD83
+#' and WGS84 are identical unless other transformation parameters are
+#' specified.  Be aware, providing inaccurate or incomplete CRS information may
+#' lead to erroneous data shifts when reprojecting. See spTransform help
+#' documentation for more details.
+#' 
+#' If exportshp=TRUE:\cr The writeOGR (rgdal) function is called. The ArcGIS
+#' driver truncates variable names to 10 characters or less. Variable names are
+#' changed before export using an internal function (trunc10shp). If Spatial
+#' object has more than 1 record, it will be returned but not exported.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export spPoly2Rast
 spPoly2Rast <- function(polyv, polyv_dsn=NULL, polyv.att, polyv.lut=NULL, 
 	rastfn.template=NULL, outfolder=NULL, outfn="polyrast", outext="img", 
 	outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE) {

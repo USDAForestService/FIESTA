@@ -1,3 +1,268 @@
+#' Green-Book module - Generate population data for GB module.
+#' 
+#' Generates population data for generating 'green-book' estimates (Scott et
+#' al. 2005).  Plots that are totally nonsampled are excluded from estimation
+#' dataset. Next, an adjustment factor is calculated by strata to adjust for
+#' nonsampled (nonresponse) conditions that have proportion less than 1.
+#' Attributes adjusted to a per-acre value are summed by plot, divided by the
+#' adjustment factor, and averaged by stratum.  Strata means are combined using
+#' the strata weights and then expanded to using the total land area in the
+#' population.
+#' 
+#' Population types \cr \tabular{lll}{ \tab \bold{popType}
+#' \bold{Description}\cr \tab ALL \tab Population data, inluding nonsampled
+#' plots.\cr \tab CURR \tab Population data for area estimates, excluding
+#' nonsampled plots.\cr \tab VOL \tab Population data for area/tree estimates,
+#' excluding nonsampled plots.\cr \tab LULC \tab Population data for land
+#' use/land cover transitional estimates, including only plots with previous
+#' measurements and excluding nonsampled plots.\cr }
+#' 
+#' If variables are NULL, then it will prompt user to input variables.
+#' 
+#' Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
+#' \bold{Variable} \tab \bold{Description}\cr \tab tree \tab tuniqueid \tab
+#' Unique identifier for each plot in tree table.\cr \tab \tab CONDID \tab
+#' Unique identifier of each condition on plot.  Set CONDID=1, if only 1
+#' condition per plot.\cr \tab \tab TPA_UNADJ \tab Number of trees per acre
+#' each sample tree represents (e.g., DESIGNCD=1: TPA_UNADJ=6.018046 for trees
+#' on subplot; 74.965282 for trees on microplot).\cr \tab cond \tab cuniqueid
+#' \tab Unique identifier for each plot in cond table.\cr \tab \tab CONDID \tab
+#' Unique identfier of each condition on plot.  Set CONDID=1, if only 1
+#' condition per plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion
+#' of condition on each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per
+#' plot.\cr \tab \tab COND_STATUS_CD \tab Status of each forested condition on
+#' plot (i.e. accessible forest, nonforest, water, etc.)\cr \tab \tab
+#' NF_COND_STATUS_CD \tab If ACI=TRUE. Status of each nonforest condition on
+#' plot (i.e. accessible nonforest, nonsampled nonforest)\cr \tab \tab SITECLCD
+#' \tab If landarea=TIMBERLAND. Measure of site productivity.\cr \tab \tab
+#' RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr \tab \tab
+#' SUBPROP_UNADJ \tab Unadjusted proportion of subplot conditions on each plot.
+#' Set SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr \tab \tab
+#' MICRPROP_UNADJ \tab If microplot tree attributes. Unadjusted proportion of
+#' microplot conditions on each plot. Set MICRPROP_UNADJ=1, if only 1 condition
+#' per microplot.\cr \tab \tab MACRPROP_UNADJ \tab If macroplot tree
+#' attributes. Unadjusted proportion of macroplot conditions on each plot. Set
+#' MACRPROP_UNADJ=1, if only 1 condition per macroplot.\cr \tab pltassgn \tab
+#' pltassgnid \tab Unique identifier for each plot in pltassgn.\cr \tab \tab
+#' STATECD \tab Identifies state each plot is located in.\cr \tab \tab INVYR
+#' \tab Identifies inventory year of each plot.\cr \tab \tab PLOT_STATUS_CD
+#' \tab Status of each plot (i.e. sampled, nonsampled).  If not included, all
+#' plots are assumed as sampled.\cr }
+#' 
+#' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
+#' 
+#' @param popType String. Type of evaluation(s) to include in population data.
+#' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
+#' below for descriptions of each.
+#' @param cond DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Condition-level data with one record for each condition, including or
+#' excluding nonsampled conditions. Plot variables and strata/estimation unit
+#' variable(s) may be included if plt and pltassgn=NULL. See details for
+#' necessary variables to include.
+#' @param plt DF/DT, Optional. R object, sf R object, comma-delimited
+#' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp).  Plot-level
+#' data with one record for each plot, including or excluding nonsampled
+#' conditions. If nonsampled plots are included, PLOT_STATUS_CD variable must
+#' be in table or a filter defined in plt.nonsamp.filter.
+#' @param tree DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Tree-level data with one record for each tree. Tree data are aggregated to
+#' condition-level. See details for necessary variables to include.
+#' @param seed DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Seedling data with one record for each seedling count.
+#' @param vsubpspp DF/DT, R object, comma-delimited file(*.csv), or layer in
+#' dsn.  Vegetation species-level data with one record for each species
+#' (P2VEG_SUBPLOT_SPP).
+#' @param vsubpstr DF/DT, R object, comma-delimited file(*.csv), or layer in
+#' dsn.  Vegetation species-structure data with one record for each species
+#' (P2VEG_SUBP_STRUCTURE).
+#' @param subplot DF/DT, R object, comma-delimited file(*.csv), or layer in
+#' dsn.  Subplot-level data with one record for each species (SUBPLOT).
+#' @param subp_cond DF/DT, R object, comma-delimited file(*.csv), or layer in
+#' dsn.  Subplot condition-level data with one record for each species
+#' (SUBP_COND).
+#' @param lulc DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+#' Land use/Land cover data with current and previous observations.
+#' @param pltassgn DF/DT, Optional. R object, sf R object, comma-delimited
+#' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
+#' assignment of estimation unit and/or strata, with one record for each plot.
+#' @param dsn String. Name of database where tree, cond, and plot-level tables
+#' reside.  The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html).
+#' @param puniqueid String. Unique identifier of plot in plt.
+#' @param pltassgnid String. Unique identifier of plot in pltassgn.
+#' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
+#' need to be uniqueid. If using most current XY coordinates for plot
+#' assignments, use identifier for plot (e.g., PLOT_ID).
+#' @param tuniqueid String. Unique identifier of plot in tree and seed.
+#' @param cuniqueid String. Unique identifier of plot in cond.
+#' @param condid String. Unique identifier of plot conditions (e.g., CONDID).
+#' If no condid in cond, the data are assumed to have 1 condition per plot.  A
+#' CONDID=1 is automatically added.
+#' @param areawt String. Name of variable for summarizing area weights (e.g.,
+#' CONDPROP_UNADJ).
+#' @param evalid Numeric. FIA Evaluation identifier for subsetting plots for
+#' population.
+#' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
+#' @param intensity Integer code. Code(s) indicating intensity to use for
+#' population.
+#' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
+#' Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
+#' be included.
+#' @param adj String. How to calculate adjustment factors for nonsampled
+#' (nonresponse) conditions based on summed proportions for by plot ('samp',
+#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
+#' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
+#' only calculated for annual inventory plots (DESIGNCD=1).
+#' @param unitvar String. Name of the estimation unit variable in unitarea and
+#' cond or pltassgn data frame with estimation unit assignment for each plot
+#' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
+#' @param unitvar2 String. Name of a second level estimation unit variable in
+#' unitarea and cond or pltassgn with assignment for each plot (e.g.,
+#' 'STATECD').
+#' @param unitarea Numeric or DF. Total area by estimation unit. If only 1
+#' estimation unit, include number of total acreage for the area of interest or
+#' a data frame with area and estimation unit. If more than one estimation
+#' unit, provide a data frame of total area by estimation unit, including
+#' unitvar and areavar.
+#' @param areavar String. Name of area variable in unitarea. Default="ACRES".
+#' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
+#' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
+#' @param unit.action String. What to do if number of plots in an estimation
+#' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
+#' unit.action='combine', combines estimation unit to the following estimation
+#' unit in unitlut.
+#' @param strata Logical. If TRUE, include information for post-stratification.
+#' @param stratalut DF/DT. If strata=TRUE, look-up table with pixel counts or
+#' area by strata or proportion or area ('strwt') by strata (and estimation
+#' unit).  If 'strwt' is not included, set getwt=TRUE and getwtvar as the name
+#' of variable to calculate weights from (e.g., pixel counts).
+#' @param strvar String. If strata=TRUE, name of the strata variable in
+#' stratalut and cond or pltassgn data frame with stratum assignment for each
+#' plot (Default = 'STRATUMCD').
+#' @param getwt Logical. If TRUE, calculates strata weights from stratatlut
+#' getwtvar.  If FALSE, strwtvar variable must be in stratalut.
+#' @param getwtvar String. If getwt=TRUE, name of variable in stratalut to
+#' calculate weights (Default = 'P1POINTCNT').
+#' @param strwtvar String. If getwt=FALSE, name of variable in stratalut with
+#' calculated weights (Default = 'strwt').
+#' @param stratcombine Logical. If strata=TRUE, if TRUE, automatically combines
+#' strata categories if less than 2 plots in any one stratum. See notes for
+#' more info.
+#' @param minplotnum.strat Integer. Minimum number of plots for a stratum
+#' within an estimation unit.
+#' @param saveobj Logical. If TRUE, saves GBpopdat object to outfolder.
+#' @param objnm String. Name of *.rda object.
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param outfolder String. The outfolder to write files to. If NULL, files are
+#' written to working directory, or if gui, a window to browse.
+#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
+#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
+#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
+#' exists.
+#' @param append_layer Logical. If TRUE, appends layers to existing out_dsn or
+#' files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
+#' "gdb".
+#' @param GBdata R List object. Output data list components from
+#' FIESTA::anGBdata().
+#' @param pltdat R List object. Output data list components from
+#' FIESTA::spGetPlots().
+#' @param GBstratdat R List object. Output data list components from
+#' FIESTA::DBgetStrata().
+#' @param nonsamp.vfilter.fixed Logical. If TRUE and popType="P2VEG", the
+#' nonsample filter is fixed in database.
+#' @param gui Logical. If gui, user is prompted for parameters.
+#' @return A list with population data for Green-Book estimates.
+#' 
+#' \item{condx}{ Data frame. Condition-level data including plot-level
+#' assignment of estimation unit and stratum (if strata=TRUE), condition
+#' proportion adjustment factor (cadjfac), and adjusted condition proportions
+#' (CONDPROP_ADJ). } \item{cuniqueid}{ String. Unique identifier of plot in
+#' condx and pltcondx. } \item{condid}{ String. Unique identifier of condition
+#' in condx and pltcondx. } \item{treex}{ Data frame. Tree data within
+#' population, used for estimation, including trees per acre adjustment factor
+#' (tadjfac), and adjusted trees per acre (TPA_ADJ) (if treef is included). }
+#' \item{tuniqueid}{ String. Unique identifier of plot in treex (if treef is
+#' included). } \item{ACI.filter}{ String. If ACI=FALSE,
+#' ACI.filter="COND_STATUS_CD == 1" . } \item{unitarea}{ String. Returned table
+#' of area by estimation unit. } \item{unitvar}{ String. Variable name for
+#' estimation unit. } \item{strlut}{ String. Strata-level table with pixel
+#' counts by strata (P1POINTCNT), strata weights (strwt), number of plots by
+#' strata (n.strata), total number of plots in estimation unit (n.total), sum
+#' of condition proportions (*_UNADJ_SUM), area adjustments (*_ADJFAC), total
+#' area, and area expansion by strata (EXPNS). } \item{strvar}{ String.
+#' Variable name for strata. If strata=FALSE, strvar="ONESTRAT". }
+#' \item{expcondtab}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" .
+#' } \item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. }
+#' \item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. }
+#' \item{states}{ String. State names in dataset. } \item{invyrs}{ String.
+#' Range of inventory years in dataset. }
+#' 
+#' \item{stratdat}{ Data frame. Strata information by estimation unit. }
+#' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description}\cr \tab unitvar
+#' \tab estimation unit \cr \tab strvar \tab stratum value \cr \tab strwtvar
+#' \tab number of pixels by strata and estimation unit \cr \tab n.strata \tab
+#' number of plots in strata (after totally nonsampled plots removed) \cr \tab
+#' n.total \tab number of plots for estimation unit \cr \tab strwt \tab
+#' proportion of area (or plots) by strata and estimation unit (i.e., strata
+#' weight) \cr \tab CONDPROP_UNADJ_SUM \tab summed condition proportion by
+#' strata and estimation unit \cr \tab CONDPROP_ADJFAC \tab adjusted condition
+#' proportion by strata after nonsampled plots removed \cr \tab AREA_USED \tab
+#' total area of estimation unit \cr \tab expfac \tab strata-level expansion
+#' factor after nonsampled plots and conditions removed (AREA_USED/n.strata)
+#' \cr \tab EXPNS \tab strata-level area expansions (expfac * strwt)\cr }
+#' 
+#' Table(s) are also written to outfolder.
+#' @note
+#' 
+#' ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for
+#' nonsampled conditions. It is calculated for each estimation unit by strata.
+#' by summing the unadjusted proportions of the subplot, microplot, and
+#' macroplot (i.e. *PROP_UNADJ) and dividing by the number of plots in the
+#' strata/estimation unit).
+#' 
+#' An adjustment factor is determined for each tree based on the size of the
+#' plot it was measured on. This is identified using TPA_UNADJ as follows:
+#' 
+#' \tabular{llr}{ \tab \bold{PLOT SIZE} \tab \bold{TPA_UNADJ} \cr \tab SUBPLOT
+#' \tab 6.018046 \cr \tab MICROPLOT \tab 74.965282 \cr \tab MACROPLOT \tab
+#' 0.999188 \cr }
+#' 
+#' If ACI=FALSE, only nonsampled forest conditions are accounted for in the
+#' adjustment factor. \cr If ACI=TRUE, the nonsampled nonforest conditions are
+#' removed as well and accounted for in adjustment factor.  This is if you are
+#' interested in estimates for all lands or nonforest lands in the
+#' All-Condition-Inventory.
+#' 
+#' unitcombine:\cr If TRUE and less than 2 plots in any one estimation unit,
+#' all estimation units with 10 or less plots are combined. The current method
+#' for combining is to group the estimation unit with less than 10 plots with
+#' the estimation unit following in consecutive order (numeric or
+#' alphabetical), restrained by survey unit (UNITCD) if included in dataset,
+#' and continuing until the number of plots equals 10. If there are no
+#' estimation units following in order, it is combined with the estimation unit
+#' previous in order.
+#' 
+#' stratcombine:\cr If TRUE and less than 2 plots in any one strata class
+#' within an esimation unit, all strata classes with 2 or less plots are
+#' combined. The current method for combining is to group the strata with less
+#' than 2 plots with the strata class following in consecutive order (numeric
+#' or alphabetical), restrained by estimation unit (if unitcombine=FALSE), and
+#' continuing until the number of plots equals 10. If there are no strata
+#' classes following in order, it is combined with the estimation unit previous
+#' in order.
+#' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
+#' @references Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;
+#' Smith, William D.; Westfall, James A.; Hansen, Mark H.; Moisen, Gretchen G.
+#' 2005. Sample-based estimators used by the Forest Inventory and Analysis
+#' national information management system. Gen. Tech. Rep. SRS-80. Asheville,
+#' NC: U.S. Department of Agriculture, Forest Service, Southern Research
+#' Station, p.53-77.
+#' @keywords data
+#' @export modGBpop
 modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL, 
 	vsubpspp=NULL, vsubpstr=NULL, subplot=NULL, subp_cond=NULL, lulc=NULL, 
 	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", 

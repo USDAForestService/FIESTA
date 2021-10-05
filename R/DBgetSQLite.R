@@ -1,3 +1,16 @@
+#' Database - Queries a SQLite database table.
+#' 
+#' Extracts and queries data from a SQLite (*.sqlite) database (Note: must use
+#' SQL syntax).
+#' 
+#' 
+#' @param states String. Vector of one or more state names.
+#' @param outfolder String. The output folder path. If NULL, outfolder is the
+#' working directory.
+#' @return Returns nothing.
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export DBgetSQLite
 DBgetSQLite <- function (states=NULL, outfolder=NULL) {
 
 

@@ -1,3 +1,197 @@
+#' Small area module - Generate small area tree estimates.
+#' 
+#' Generates small area estimates by domain and/or tree domain (and estimation
+#' unit).
+#' 
+#' If variables are NULL, then it will prompt user to input variables.
+#' 
+#' Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
+#' \bold{Variable} \tab \bold{Description}\cr \tab tree \tab tuniqueid \tab
+#' Unique identifier for each plot, to link to pltstrat (ex. PLT_CN).\cr \tab
+#' \tab CONDID \tab Unique identifier of each condition on plot, to link to
+#' cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
+#' \tab Number of trees per acre each sample tree represents (ex. DESIGNCD=1:
+#' TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on
+#' microplot).\cr \tab cond \tab cuniqueid \tab Unique identifier for each
+#' plot, to link to pltstrat (ex. PLT_CN).\cr \tab \tab CONDID \tab Unique
+#' identfier of each condition on plot.  Set CONDID=1, if only 1 condition per
+#' plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on
+#' each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per plot.\cr \tab \tab
+#' COND_STATUS_CD \tab Status of each forested condition on plot (i.e.
+#' accessible forest, nonforest, water, etc.)\cr \tab \tab NF_COND_STATUS_CD
+#' \tab If ACI=TRUE. Status of each nonforest condition on plot (i.e.
+#' accessible nonforest, nonsampled nonforest)\cr \tab \tab SITECLCD \tab If
+#' landarea=TIMBERLAND. Measure of site productivity.\cr \tab \tab RESERVCD
+#' \tab If landarea=TIMBERLAND. Reserved status.\cr \tab \tab SUBPROP_UNADJ
+#' \tab Unadjusted proportion of subplot conditions on each plot.  Set
+#' SUBPROP_UNADJ=1, if only 1 condition per subplot.\cr \tab \tab
+#' MICRPROP_UNADJ \tab If microplot tree attributes. Unadjusted proportion of
+#' microplot conditions on each plot. Set MICRPROP_UNADJ=1, if only 1 condition
+#' per microplot.\cr \tab \tab MACRPROP_UNADJ \tab If macroplot tree
+#' attributes. Unadjusted proportion of macroplot conditions on each plot. Set
+#' MACRPROP_UNADJ=1, if only 1 condition per macroplot.\cr \tab pltassign \tab
+#' puniqueid \tab Unique identifier for each plot, to link to cond (ex. CN).\cr
+#' \tab \tab STATECD \tab Identifies state each plot is located in.\cr \tab
+#' \tab INVYR \tab Identifies inventory year of each plot.\cr \tab \tab
+#' PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled).  If not
+#' included, all plots are assumed as sampled.\cr }
+#' 
+#' Reference names are available for the following variables: \cr ADFORCD,
+#' AGENTCD, CCLCD, DECAYCD, DSTRBCD, KINDCD, OWNCD, OWNGRPCD, FORTYPCD,
+#' FLDTYPCD, FORTYPCDCALC, TYPGRPCD, FORINDCD, RESERVCD, LANDCLCD, STDSZCD,
+#' FLDSZCD, PHYSCLCD, MIST_CL_CD, PLOT_STATUS_CD, STATECD, TREECLCD, TRTCD,
+#' SPCD, SPGRPCD
+#' 
+#' @param SApopdatlst List. List of population data objects returned from
+#' modSApop().
+#' @param SAdomsdf DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
+#' with attributes from smallbnd to add to estimation table.
+#' @param prednames String vector. Name(s) of predictor variables to use in
+#' model.
+#' @param SApackage String. Small area package to use ('JoSAE', 'sae')
+#' @param SAmethod String. Small area method to use ('unit', 'area')
+#' @param esttype String. Estimation type ('TREE', 'AREA').
+#' @param totals Logical. If TRUE, returns total estimate (mean * AREAUSED).
+#' @param estseed String. Use seedling data only or add to tree data. Seedling
+#' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
+#' @param largebnd.unique String. Name of the large boundary unique identifer
+#' to define plots within a model extent. If NULL, all plots are used for model
+#' extent.
+#' @param landarea String. The sample area filter for estimates ('ALL',
+#' 'FOREST', 'TIMBERLAND').  If landarea=FOREST, filtered to COND_STATUS_CD =
+#' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
+#' @param pcfilter String. A filter for plot or cond attributes (including
+#' pltassgn).  Must be R logical syntax.
+#' @param estvar String. Name of the tree estimate variable.
+#' @param estvar.filter String. A tree filter for estimate variable. Must be R
+#' syntax (e.g., "STATUSCD == 1").
+#' @param allin1 Logical. If TRUE, both estimates and percent sample error are
+#' output in one table as: estimates (percent sample error).
+#' @param metric Logical. If TRUE, output area is in metric units (hectares).
+#' @param variable.select Logical. If TRUE, selects useful predictors using
+#' mase:ElasticNet.
+#' @param estround Integer. Number of decimal places for estimates.
+#' @param pseround Integer. Number of decimal places for percent sampling
+#' error.
+#' @param estnull Number or character. The number or symbol to use to indicate
+#' 'not sampled' for estimate.
+#' @param psenull Number or character. The number or symbol to use to indicate
+#' 'not sampled' for percent standard errror.
+#' @param divideby String. Conversion number for output ('hundred', 'thousand',
+#' 'million').
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param savesteps Logical. Saves graphs of predictors and response with
+#' labels whether selected or not for both area- and unit-level models.
+#' @param rawdata Logical. If TRUE, returns a list of raw data tables that are
+#' used for estimation (See Value). If savedata = TRUE, also written to
+#' outfolder.
+#' @param rawonly Logical. If TRUE, output rawdata only. If dataset includes
+#' many estimation units, and only raw data tables are needed, it is more
+#' efficient to output raw data only.
+#' @param multest Logical. If TRUE, returns a data frame of SA estimates using
+#' both unit-level and area-level estimates.
+#' @param addSAdomsdf Logical. If TRUE, sppends SAdomdf to unit.multest table
+#' for output.
+#' @param SAdomvars String vector. List of attributes from SAdoms to include in
+#' multest output.
+#' @param outfolder String. The outfolder to write files to. If NULL, files are
+#' written to working directory, or if gui, a window to browse.
+#' @param outfn.pre String. A prefix for outfile name, if savedata=TRUE.
+#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
+#' outfn_'date'.csv).
+#' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
+#' @param raw_fmt String. Format for raw output tables ('csv', 'sqlite',
+#' 'gpkg').
+#' @param raw_dsn String. Name of database if raw_fmt = c('sqlite', 'gpkg').
+#' @param savemultest Logical. If TRUE, save table with area- and unit-level
+#' estimates.
+#' @param multest_fmt String. Format for multest output tables ('csv',
+#' 'sqlite', 'gpkg').
+#' @param multest_outfolder String. Outfolder for multest. If NULL, same as
+#' outfolder.
+#' @param multest_dsn String. Name of database if multest_fmt = c('sqlite',
+#' 'gpkg').
+#' @param multest_layer String. Name of database layer if multest_fmt =
+#' c('sqlite', 'gpkg').
+#' @param multest.append Logical. If TRUE, appends multest dataframe to output.
+#' @param multest.AOIonly Logical. If TRUE, appends multest dataframe (AOI=1)
+#' to output.
+#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
+#' @param overwrite_layer Logical. If TRUE, overwrites the output. If
+#' rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
+#' out_layers in raw_dsn (if raw_fmt != 'csv').
+#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data to
+#' existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
+#' 'csv".
+#' @param returntitle Logical. If TRUE, returns title(s) of the estimation
+#' table(s).
+#' @param title.main String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' the complete title used for table. If title.main=NULL, the title.*
+#' parameters are used to generate title string. Note: if title.ref is not
+#' NULL, it is added to title.main.
+#' @param title.ref String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".
+#' @param title.dunitvar String. TITLE, if savedata=TRUE and/or
+#' returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
+#' unitvar.
+#' @param title.estvar String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
+#' pretty name for the estimate variable. If NULL, title.estvar = estvar.name.
+#' @param title.filter String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' pretty name for filter(s). If title.filter=NULL, a default is generated from
+#' cfilter.  If title.filter="", no title.filter is used.
+#' @param save4testing Logical. If TRUE, saves intermediate steps as R objects
+#' to outfolder for testing (pdomdat, dunitlut).
+#' @param ...  Parameters for modSApop() if SApopdat is NULL.
+#' @return \item{est}{ Data frame. Tree estimates and percent sampling error by
+#' domain.  Estimates are based on the SApackage and SAmethod parameters
+#' defined. } \item{titlelst}{ List. List of titles used for table output. }
+#' \item{raw}{ List of raw data. If rawdata=TRUE, a list including raw data
+#' components used for calculating estimate. } \item{dunit.multest}{ Data
+#' frame. Table comparing different estimation strategies for SAE. }
+#' 
+#' Raw data
+#' 
+#' \item{domdat}{ Data frame. Domain-level data used for estimation. }
+#' \item{estvar}{ String. Name of estimation variable. } \item{estvar.filter}{
+#' String. Logical filter specified for tree data. } \item{dunit.totest}{
+#' String. Table of estimates, including more details. }
+#' @note
+#' 
+#' ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for
+#' nonsampled conditions.  For model-based estimation, we calculate adjustment
+#' factors by plot.
+#' 
+#' It is calculated by dividing 1 / summed condition proportions by plot. An
+#' adjustment factor is determined for each tree based on the size of the plot
+#' it was measured on. This is identified using TPA_UNADJ as follows:
+#' 
+#' \tabular{llr}{ \tab \bold{PLOT SIZE} \tab \bold{TPA_UNADJ} \cr \tab SUBPLOT
+#' \tab 6.018046 \cr \tab MICROPLOT \tab 74.965282 \cr \tab MACROPLOT \tab
+#' 0.999188 \cr }
+#' 
+#' If ACI=FALSE, only nonsampled forest conditions are accounted for in the
+#' adjustment factor. \cr If ACI=TRUE, the nonsampled nonforest conditions are
+#' removed as well and accounted for in adjustment factor.  This is if you are
+#' interested in estimates for all lands or nonforest lands in the
+#' All-Condition-Inventory.
+#' 
+#' Common tree filters for estvar.filter: \cr
+#' 
+#' \tabular{llr}{ \tab \bold{FILTER} \tab \bold{DESCRIPTION} \cr \tab "STATUSCD
+#' == 1" \tab Live trees \cr \tab "STATUSCD == 2" \tab Dead trees \cr \tab
+#' "TPAMORT_UNADJ > 0" \tab Mortality trees \cr \tab "STATUSCD == 2 & DIA >=
+#' 5.0" \tab Dead trees >= 5.0 inches diameter \cr \tab "STATUSCD == 2 &
+#' AGENTCD == 30" \tab Dead trees from fire \cr }
+#' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
+#' @references Breidenbach, J. 2018. JoSAE: Unit-Level and Area-Level Small
+#' Area Estimation.  R package version 0.3.0.
+#' https://CRAN.R-project.org/package=JoSAE.
+#' 
+#' Molina I, Marhuenda Y. 2015. sae: An R Package for Small Area Estimation.
+#' The R Journal 7(1), 81-98.
+#' https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.
+#' @keywords data
+#' @export modSAest
 modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL, 
 	SApackage="JoSAE", SAmethod="area", esttype="TREE", totals=FALSE, 
 	estseed="none", largebnd.unique=NULL, landarea="FOREST", pcfilter=NULL, 
