@@ -145,9 +145,9 @@
 #' calculate weights (Default = 'P1POINTCNT').
 #' @param strwtvar String. If getwt=FALSE, name of variable in stratalut with
 #' calculated weights (Default = 'strwt').
-#' @param stratcombine Logical. If strata=TRUE, if TRUE, automatically combines
-#' strata categories if less than 2 plots in any one stratum. See notes for
-#' more info.
+#' @param stratcombine Logical. If TRUE, and strata=TRUE, automatically combines
+#' strata categories if less than minplotnum.strat plots in any one stratum. 
+#' See notes for more info.
 #' @param minplotnum.strat Integer. Minimum number of plots for a stratum
 #' within an estimation unit.
 #' @param saveobj Logical. If TRUE, saves GBpopdat object to outfolder.
@@ -590,10 +590,14 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Return population data objects
   ###################################################################################
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- append(returnlst, list(popType=popType, bndx=bndx,
-	condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, condid=condid, 
-	ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar, 
-	areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, 
+  returnlst$popType <- popType
+  if (!is.null(bndx)) {
+    returnlst$bndx <- bndx
+  }
+  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
+	cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+	unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
+	unitvar=unitvar, unitvars=unitvars, 
 	strata=strata, stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
 	expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
 	states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
