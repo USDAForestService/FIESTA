@@ -643,8 +643,13 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   est <- merge(est, NBRPLT.gt0, by="DOMAIN")
 
   ## Merge AOI
-  if (!"AOI" %in% names(est) && "AOI" %in% names(dunitlut.dom)) {
-    est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
+  if ("AOI" %in% names(dunitlut.dom)) {
+    if (!"AOI" %in% names(est)) {
+      est <- merge(est, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
+    }
+    if (!"AOI" %in% names(pltdat.dom)) {
+      pltdat.dom <- merge(pltdat.dom, dunitlut.dom[, c("DOMAIN", "AOI")], by="DOMAIN")
+    }
   }
   
   rm(unit.JoSAE)
