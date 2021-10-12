@@ -194,9 +194,9 @@ calculate weights (Default = 'P1POINTCNT').}
 \item{strwtvar}{String. If getwt=FALSE, name of variable in stratalut with
 calculated weights (Default = 'strwt').}
 
-\item{stratcombine}{Logical. If strata=TRUE, if TRUE, automatically combines
-strata categories if less than 2 plots in any one stratum. See notes for
-more info.}
+\item{stratcombine}{Logical. If TRUE, and strata=TRUE, automatically combines
+strata categories if less than minplotnum.strat plots in any one stratum. 
+See notes for more info.}
 
 \item{minplotnum.strat}{Integer. Minimum number of plots for a stratum
 within an estimation unit.}
