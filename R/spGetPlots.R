@@ -254,7 +254,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
     } 
 
     ## Check xyjoinid
-    xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+    xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 	 checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
     if (is.null(xyjoinid)) {
       message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
@@ -273,11 +273,11 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
 
     if (!is.null(xyids)) {
       ## Check xyjoinid
-      xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+      xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 		checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=TRUE)  
  
       ## Check stbnd.att
-      stbnd.att <- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
+      stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
 		checklst=names(xyids), gui=gui, caption="State attribute?") 
       
       ## Get state codes
@@ -301,7 +301,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
     } else { 	## is.null(xyids)
 
       ## Check clipxy
-      clipxy <- FIESTA::pcheck.logical(clipxy, varnm="clipxy", 
+      clipxy <- pcheck.logical(clipxy, varnm="clipxy", 
 		title="Clip xy?", first="NO", gui=gui)  
 
       if (clipxy) {
@@ -329,7 +329,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
         bndx <- xydat$bndx
 
         ## Check xyjoinid
-        xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+        xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 	     checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
         if (is.null(xyjoinid)) {
           message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
@@ -348,7 +348,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
         }
       
         ## Check xyjoinid
-        xyjoinid <- FIESTA::pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
+        xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 		checklst=names(spxy), gui=gui, caption="JoinID in xy?", stopifnull=TRUE)  
 
 
@@ -385,7 +385,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
   ## Set datsource
   ########################################################
   datsourcelst <- c("obj", "csv", "datamart", "sqlite", "gdb")
-  datsource <- FIESTA::pcheck.varchar(var2check=datsource, varnm="datsource", 
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (is.null(datsource)) {
     if (!is.null(data_dsn) && file.exists(data_dsn)) {
@@ -420,7 +420,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
  
   ## Check savedata
   #############################################################################
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="NO", gui=gui)  
  
   ## Check overwrite, outfn.date, outfolder, outfn 
@@ -493,7 +493,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
     }
 
     ## Check pjoinid
-    pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
+    pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
 		checklst=names(pltx), gui=gui, caption="Joinid in plot?")  
 
     ## Define pjoinid
@@ -659,7 +659,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
 
       ## Check pjoinid
       pltfields <- names(PLOT)
-      pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
+      pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
 		checklst=pltfields, gui=gui, caption="Joinid in plot?")  
       if (is.null(pjoinid)) {
         if (xyjoinid %in% pltfields) {
@@ -955,7 +955,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
     pltfields <- DBI::dbListFields(dbconn, "plot")
 
     ## Check pjoinid
-    pjoinid <- FIESTA::pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
+    pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
 		checklst=pltfields, gui=gui, caption="Joinid in plot?")
  
     if (is.null(pjoinid)) {

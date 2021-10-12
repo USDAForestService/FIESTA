@@ -249,11 +249,11 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   auxvars <- NULL
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check saveobj 
-  saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
+  saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
  
   ## Check output
@@ -271,7 +271,7 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 
     if (!is.null(PBstratdat)) {
       list.items <- c("pltassgn", "unitarea", "unitvar", "stratalut", "strvar")
-      PBstratdat <- FIESTA::pcheck.object(PBstratdat, "PBstratdat", list.items=list.items)
+      PBstratdat <- pcheck.object(PBstratdat, "PBstratdat", list.items=list.items)
       pltassgn <- PBstratdat$pltassgn
       pltassgnid <- PBstratdat$pltassgnid
       unitarea <- PBstratdat$unitarea

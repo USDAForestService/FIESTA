@@ -171,7 +171,7 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     out_layer <- basename.NoExt(out_dsn)
     
     ## Truncate variable names to 10 characters or less
-    sfobjdat <- FIESTA::trunc10shp(sfobj)
+    sfobjdat <- trunc10shp(sfobj)
     sfobj <- sfobjdat$shp
     newnms <- sfobjdat$newnms
 

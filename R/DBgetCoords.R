@@ -162,7 +162,7 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 
   ## Check invtype
   invtypelst <- c('ANNUAL', 'PERIODIC')
-  invtype <- FIESTA::pcheck.varchar(invtype, varnm="invtype", checklst=invtypelst, 
+  invtype <- pcheck.varchar(invtype, varnm="invtype", checklst=invtypelst, 
 		caption="Inventory Type", gui=gui)
 
   ## Get states, Evalid and/or invyrs info
@@ -182,8 +182,8 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 
   ## Get state abbreviations and codes 
   ###########################################################
-  stabbrlst <- FIESTA::pcheck.states(states, statereturn="ABBR")
-  stcdlst <- FIESTA::pcheck.states(states, statereturn="VALUE")
+  stabbrlst <- pcheck.states(states, statereturn="ABBR")
+  stcdlst <- pcheck.states(states, statereturn="VALUE")
 
   ## Get number of states 
   nbrstates <- length(states)
@@ -194,7 +194,7 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 
     ### Check measCur
     ###########################################################
-    measCur <- FIESTA::pcheck.logical(measCur, varnm="measCur", 
+    measCur <- pcheck.logical(measCur, varnm="measCur", 
 			title="Current measyear?", first="YES", gui=gui)
 
     ### Check measEndyr
@@ -214,11 +214,11 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 
     ### GET allyrs
     ###########################################################
-    allyrs <- FIESTA::pcheck.logical(allyrs, varnm="allyrs", 
+    allyrs <- pcheck.logical(allyrs, varnm="allyrs", 
 		title="All years?", first="YES", gui=gui)
     if (allyrs) {
       ## xymeasCur
-      xymeasCur <- FIESTA::pcheck.logical(xymeasCur, varnm="xymeasCur", 
+      xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
 		title="Most current XY?", first="YES", gui=gui)
       measCur <- FALSE
       measEndyr=measEndyr.filter <- NULL
@@ -231,7 +231,7 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 			(is.null(measyrs) || length(measyrs) == 0)) {
         invyrs <- sapply(states, function(x) NULL)
         for (state in states) { 
-          stabbr <- FIESTA::pcheck.states(state, "ABBR")
+          stabbr <- pcheck.states(state, "ABBR")
           stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
 
           if (allyrs) {
@@ -297,7 +297,7 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
     ###########################################################
     ## For periodic data, the INTENSITY variable does not equal 1
     if (invtype == "ANNUAL") {
-      intensity1 <- FIESTA::pcheck.logical(intensity1, varnm="intensity1", 
+      intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
 		title="Intensity = 1?", first="YES", gui=gui)
     } else {
       intensity1 <- FALSE
@@ -308,7 +308,7 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
  
   ## Check savedata
   ###########################################################
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data to outfolder?", first="YES", gui=gui)
 
   ## Check outfolder, outfn.date, overwrite_dsn
@@ -327,10 +327,10 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
   ## Build filter
   ###########################################################################
   ## Create filter for state
-  stcds <- FIESTA::pcheck.states(states, "VALUE")
+  stcds <- pcheck.states(states, "VALUE")
   stFilter <- paste0("p.STATECD IN(", toString(stcds), ")")
   evalFilter=xyfromqry <- NULL
-  stabbr <- FIESTA::pcheck.states(states, "ABBR")
+  stabbr <- pcheck.states(states, "ABBR")
   SCHEMA. <- NULL
 
   ## PLOT from/join query
@@ -350,7 +350,7 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
 
   } else {
     if (measCur) {
-      xyfromqry <- FIESTA::getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA., 
+      xyfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA., 
 				intensity1=intensity1, popSURVEY=TRUE, plotnm="PLOT")
     } else {
       xyfromqry <- paste0(SCHEMA., "PLOT p")

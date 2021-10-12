@@ -29,10 +29,10 @@ DBgetSQLite <- function (states=NULL, outfolder=NULL) {
     stop("state must be a character vector")
 
   ## Check state and get in proper format (abbr)
-  stabbrs <- FIESTA::pcheck.states(states, "ABBR")
+  stabbrs <- pcheck.states(states, "ABBR")
 
   ## Check outfolder
-  outfolder <- FIESTA::pcheck.outfolder(outfolder)
+  outfolder <- pcheck.outfolder(outfolder)
 
   for (st in stabbrs) {
     ## Create file name to download

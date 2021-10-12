@@ -308,7 +308,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 
   ## Check SApackage 
   SApackagelst <- c("JoSAE", "sae")
-  SApackage <- FIESTA::pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
+  SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
 		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
 
   ## Check for JoSAE library
@@ -324,7 +324,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 
   ## Check SAmethod 
   SAmethodlst <- c("unit", "area", "combo")
-  SAmethod <- FIESTA::pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
+  SAmethod <- pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
 		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
 
   ###################################################################################
@@ -379,7 +379,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 
   ## Check multest 
   ########################################################
-  multest <- FIESTA::pcheck.logical(multest, varnm="multest", 
+  multest <- pcheck.logical(multest, varnm="multest", 
 		title="Multiple estimates?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check output for multest 
@@ -388,12 +388,12 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     fmtlst <- c("sqlite", "sqlite3", "db", "db3", "gpkg", "csv", "gdb")
 
     if (multest) {
-      multest_outfolder <- FIESTA::pcheck.outfolder(multest_outfolder, gui)
+      multest_outfolder <- pcheck.outfolder(multest_outfolder, gui)
       if (is.null(multest_outfolder)) multest_outfolder <- outfolder
-      multest.append <- FIESTA::pcheck.logical(multest.append, varnm="multest.append", 
+      multest.append <- pcheck.logical(multest.append, varnm="multest.append", 
 		title="Append multest data?", first="NO", gui=gui) 
 
-      multest_fmt <- FIESTA::pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
+      multest_fmt <- pcheck.varchar(var2check=multest_fmt, varnm="multest_fmt", 
 		checklst=fmtlst, gui=gui, caption="Output multest format?") 
       if (multest_fmt == "csv") {
         multest_dsn <- NULL
@@ -448,7 +448,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
       SApopdatnm <- paste0("SApopdat", i)
     }
     SApopdat <- SApopdatlst[[i]]
-    SApopdat <- FIESTA::pcheck.object(SApopdat, "SApopdat", list.items=list.items)
+    SApopdat <- pcheck.object(SApopdat, "SApopdat", list.items=list.items)
     if (is.null(SApopdat)) {
       break
     }
@@ -486,7 +486,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 #    if (is.null(smallbnd.dom)) {
 #      smallbnd.dom <- "DOMAIN"
 #    }
-#    smallbnd.dom <- FIESTA::pcheck.varchar(var2check=smallbnd.dom, 
+#    smallbnd.dom <- pcheck.varchar(var2check=smallbnd.dom, 
 #    		varnm="smallbnd.dom", checklst=names(dunitlut), 
 #		caption="smallbnd attribute for output?", multiple=FALSE)
 
@@ -780,7 +780,7 @@ print(head(pdomdat))
   setkeyv(dunit_totest, dunitvar)
 
   ## Merge dunitarea
-  tabs <- FIESTA::check.matchclass(dunitareabind, dunit_totest, dunitvar)
+  tabs <- check.matchclass(dunitareabind, dunit_totest, dunitvar)
   dunitareabind <- tabs$tab1
   dunit_totest <- tabs$tab2
   dunit_totest <- merge(dunit_totest, 
@@ -869,7 +869,7 @@ print(head(pdomdat))
 
   if (multest && !is.null(multestdf)) {
     ## Merge dunitarea
-    #tabs <- FIESTA::check.matchclass(dunitarea, multestdf, dunitvar)
+    #tabs <- check.matchclass(dunitarea, multestdf, dunitvar)
     #dunitarea <- tabs$tab1
     #dunit_multest <- tabs$tab2
  

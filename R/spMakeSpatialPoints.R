@@ -71,7 +71,7 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
 
   ## check xy.uniqueid
   xypltnmlst <- names(xypltx)
-  xy.uniqueid <- FIESTA::pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
+  xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
 		checklst=xypltnmlst, caption="UniqueID variable - xyplt", 
 		warn="xy.uniqueid not in xyplt", gui=gui, stopifnull=TRUE)
 
@@ -81,9 +81,9 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
     warning("plt records are not unique")
 
   ## check xvar and yvar
-  x <- FIESTA::pcheck.varchar(xvar, varnm="xvar", checklst=xypltnmlst, 
+  x <- pcheck.varchar(xvar, varnm="xvar", checklst=xypltnmlst, 
 		caption="X variable", gui=gui, stopifnull=TRUE)
-  y <- FIESTA::pcheck.varchar(yvar, varnm="yvar", checklst=xypltnmlst, 
+  y <- pcheck.varchar(yvar, varnm="yvar", checklst=xypltnmlst, 
 		caption="Y variable", gui=gui, stopifnull=TRUE)
 
   ## check if x = y
@@ -108,11 +108,11 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
 		zoneS=zoneS, aea.param=aea.param, gui=gui) 
   }  
   ### check exportsp
-  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
 		title="Export spatial layer?", first="NO", gui=gui)
 
   ### check addxy
-  addxy <- FIESTA::pcheck.logical(addxy, varnm="addxy", 
+  addxy <- pcheck.logical(addxy, varnm="addxy", 
 		title="Add xy variables?", first="NO", gui=gui)
 
   ##################################################################

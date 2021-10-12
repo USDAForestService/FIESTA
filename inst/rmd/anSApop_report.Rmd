@@ -56,7 +56,7 @@ if (is.null(domain)) {
 for (i in 1:length(SApopdatlst)) {
   if (!is.null(pcfilter) && 'STATECD' %in% names(SApopdat$pltcondx)) {
     pltcondf <- datFilter(SApopdat$pltcondx, xfilter=pcfilter)$xf
-    states <- FIESTA::pcheck.states(unique(pltcondf$STATECD))
+    states <- pcheck.states(unique(pltcondf$STATECD))
     invyrs <- unique(pltcondf$INVYR)
   }
 }
@@ -67,7 +67,7 @@ invyrs <- {}
 for (i in 1:length(SApopdatlst)) {
   if (!is.null(pcfilter) && 'STATECD' %in% names(SApopdatlst[[i]]$pltcondx)) {
     pltcondf <- datFilter(SApopdatlst[[i]]$pltcondx, xfilter=pcfilter)$xf
-    states <- sort(c(states, FIESTA::pcheck.states(unique(pltcondf$STATECD))))
+    states <- sort(c(states, pcheck.states(unique(pltcondf$STATECD))))
     invyrs <- sort(unique(c(invyrs, pltcondf$INVYR)))
   } else {
     states <- sort(unique(c(states, SApopdatlst[[i]]$states)))

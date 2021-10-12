@@ -105,14 +105,14 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
 
   ## Check datx
   ########################################################
-  datx <- FIESTA::pcheck.table(x, gui=gui, caption="Data table?", returnDT=TRUE)
+  datx <- pcheck.table(x, gui=gui, caption="Data table?", returnDT=TRUE)
   issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
   if (issf) datx <- setDT(datx)    
 
   ## Check xvar
   ##########################################
   datnmlst <- names(datx)
-  xvar <- FIESTA::pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
+  xvar <- pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
 		caption="Join variable in dat", stopifnull=TRUE)
   if (!is.numeric(datx[[xvar]])) stop("xvar must be a numeric vector in x")
 
@@ -160,7 +160,7 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
     if (is.null(minvar) && grepl("MIN", LUTnmlst, ignore.case=TRUE)) {
       minvar <- "MIN"
     }
-    minvar <- FIESTA::pcheck.varchar(minvar, "minvar", LUTnmlst, gui=gui,
+    minvar <- pcheck.varchar(minvar, "minvar", LUTnmlst, gui=gui,
 		caption="LUT min variable", stopifnull=TRUE)
     if (all(LUTx[[minvar]] > xvar.max)) {
       stop("all minvar values are greter than max xvar value")
@@ -169,7 +169,7 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
     if (is.null(maxvar) && grepl("MAX", LUTnmlst, ignore.case=TRUE)) {
       maxvar <- "MAX"
     }
-    maxvar <- FIESTA::pcheck.varchar(maxvar, "maxvar", LUTnmlst, gui=gui,
+    maxvar <- pcheck.varchar(maxvar, "maxvar", LUTnmlst, gui=gui,
 		caption="LUT max variable", stopifnull=FALSE)
     if (!is.null(maxvar)) {
       if (all(LUTx[[maxvar]] < xvar.min)) 
@@ -185,7 +185,7 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
     ## Check LUTclassnm - get cutlabels
     ########################################################
     LUTnmlst <- LUTnmlst[LUTnmlst != maxvar]
-    LUTclassnm <- FIESTA::pcheck.varchar(LUTclassnm, "LUTclassnm", LUTnmlst, gui=gui,
+    LUTclassnm <- pcheck.varchar(LUTclassnm, "LUTclassnm", LUTnmlst, gui=gui,
 		caption="LUT class name")
 
     ## If LUTclassnm=NULL, create a class
@@ -197,7 +197,7 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
   }
 
   ### Check NAto0
-  NAto0 <- FIESTA::pcheck.logical(NAto0, varnm="NAequal10", 
+  NAto0 <- pcheck.logical(NAto0, varnm="NAequal10", 
 		title="Change NA values to 0?", first="YES", gui=gui)
 
   ## Check vars2keep
@@ -209,12 +209,12 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
   }
 
   ### Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", title="Save data tables?", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data tables?", 
 		first="NO", gui=gui)
 
   ## GET OUTFOLDER IF NULL
   if (savedata) 
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outfolder <- pcheck.outfolder(outfolder, gui)
 
 
   ############################################################################

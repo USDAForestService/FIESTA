@@ -105,7 +105,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
 		caption="Polygon zones?") 
  
   ## Check polyv.att 
-  polyv.att <- FIESTA::pcheck.varchar(var2check=polyv.att, varnm="polyv.att", 
+  polyv.att <- pcheck.varchar(var2check=polyv.att, varnm="polyv.att", 
 		gui=gui, checklst=names(spobj), caption="Zonal attribute",  
 		warn=paste(polyv.att, "not in polyv"), stopifnull=TRUE) 
     
@@ -128,7 +128,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
   ## Check zonalstat     
   zonalstatlst <- c("mean", "sum", "majority", "minority", "variety", 
 	"npixels", "count", "proportion") 
-  zonalstat <- FIESTA::pcheck.varchar(var2check=zonalstat, varnm="zonalstat", 
+  zonalstat <- pcheck.varchar(var2check=zonalstat, varnm="zonalstat", 
 	gui=gui, checklst=zonalstatlst, caption="Zonal statistic(s)", 
 	stopifnull=TRUE, multiple=TRUE) 
     
@@ -163,22 +163,22 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
   } 
 
   ## Check showext     
-  showext <- FIESTA::pcheck.logical(showext, varnm="showext",  
+  showext <- pcheck.logical(showext, varnm="showext",  
 		title="Plot extents?", first="YES", gui=gui) 
   
   ## Check savedata  
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata",  
+  savedata <- pcheck.logical(savedata, varnm="savedata",  
 		title="Save data extraction?", first="NO", gui=gui)    
 
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+    overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+    outfn.date <- pcheck.logical(outfn.date , varnm="outfn.date", 
 		title="Add date to outfiles?", first="YES", gui=gui)  
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outfolder <- pcheck.outfolder(outfolder, gui)
   }
  
   ######################################################################## 
@@ -226,7 +226,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
       setkey(zstats, "zoneid") 
 
       ## Check if class of key(zstats) in zstats matches class of key(zonalext) in zonalext
-      tabs <- FIESTA::check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
+      tabs <- check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
       zonalext <- tabs$tab1
       zstats <- tabs$tab2
 
@@ -246,7 +246,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
       setkey(zstats, "zoneid") 
 
       ## Check if class of key(zstats) in zstats matches class of key(zonalext) in zonalext
-      tabs <- FIESTA::check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
+      tabs <- check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
       zonalext <- tabs$tab1
       zstats <- tabs$tab2
 
@@ -263,7 +263,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
       setkey(zstats, "zoneid") 
 
       ## Check if class of key(zstats) in zstats matches class of key(zonalext) in zonalext
-      tabs <- FIESTA::check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
+      tabs <- check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
       zonalext <- tabs$tab1
       zstats <- tabs$tab2
 
@@ -280,7 +280,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
       setkey(zstats, "zoneid") 
 
       ## Check if class of key(zstats) in zstats matches class of key(zonalext) in zonalext
-      tabs <- FIESTA::check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
+      tabs <- check.matchclass(zonalext, zstats, key(zonalext), key(zstats))
       zonalext <- tabs$tab1
       zstats <- tabs$tab2
 
@@ -322,7 +322,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
         setkey(zstats.cnt, "zoneid") 
 
         ## Check if class of key(zstats.cnt) in zstats.cnt matches class of key(zonalext) in zonalext
-        tabs <- FIESTA::check.matchclass(zonalext, zstats.cnt, key(zonalext), key(zstats.cnt))
+        tabs <- check.matchclass(zonalext, zstats.cnt, key(zonalext), key(zstats.cnt))
         zonalext <- tabs$tab1
         zstats.cnt <- tabs$tab2
 
@@ -344,7 +344,7 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
         setkey(zstats.prop, "zoneid") 
 
         ## Check if class of key(zstats.prop) in zstats.prop matches class of key(zonalext) in zonalext
-        tabs <- FIESTA::check.matchclass(zonalext, zstats.prop, key(zonalext), key(zstats.prop))
+        tabs <- check.matchclass(zonalext, zstats.prop, key(zonalext), key(zstats.prop))
         zonalext <- tabs$tab1
         zstats.prop <- tabs$tab2
 

@@ -464,24 +464,24 @@ build.prj4str <- function(prj, datum=NULL, ellps=NULL, zone=NULL, zoneS=FALSE,
   zonelst <- c(1:60)
 
 
-  prj <- FIESTA::pcheck.varchar(var2check=prj, varnm="prj", checklst=prjlst, 
+  prj <- pcheck.varchar(var2check=prj, varnm="prj", checklst=prjlst, 
 		caption="Projection?", gui=gui, stopifnull=TRUE)
   if (prj == "latlong") prj <- "longlat"
 
-#  datum <- FIESTA::pcheck.varchar(var2check=datum, varnm="datum", checklst=datumlst, 
+#  datum <- pcheck.varchar(var2check=datum, varnm="datum", checklst=datumlst, 
 #		caption="Datum?", gui=gui)
   ellps.gui <- ifelse(is.null(datum), TRUE, FALSE)
-  ellps <- FIESTA::pcheck.varchar(var2check=ellps, varnm="ellps", checklst=ellpslst, 
+  ellps <- pcheck.varchar(var2check=ellps, varnm="ellps", checklst=ellpslst, 
 		caption="Ellipse?", gui=ellps.gui)
   if (is.null(ellps)) 
     stop("both datum and ellpse are NULL.. cannot reproject")
 
   if (prj == "utm") {
-    zone <- FIESTA::pcheck.varchar(var2check=as.character(zone), varnm="zone", 
+    zone <- pcheck.varchar(var2check=as.character(zone), varnm="zone", 
 		checklst=zonelst, caption="UTM zone?", gui=gui)
     if (is.null(zone)) stop("must include zone number")
 
-    zoneS <- FIESTA::pcheck.logical(zoneS, varn="zoneS", title="UTM South?", 
+    zoneS <- pcheck.logical(zoneS, varn="zoneS", title="UTM South?", 
       	first="NO", gui=gui)
   }
 
@@ -691,7 +691,7 @@ areacalc.poly <- function(polyv, polyv_dsn=NULL, areaprj="aea", zone=NULL,
   polyv <- pcheck.spatial(layer=polyv, dsn=polyv_dsn)
 
   unitlst <- c("ACRES", "HECTARES", "SQMETERS", "SQKM")
-  unit <- FIESTA::pcheck.varchar(var2check=unit, varnm="unit", 
+  unit <- pcheck.varchar(var2check=unit, varnm="unit", 
 		checklst=unitlst, caption="area units?", stopifnull=TRUE)
   if (is.null(areavar)) areavar <- paste0(unit, "_GIS")
 
@@ -777,7 +777,7 @@ areacalc.pixel <- function(rastfn, unit="ACRES", rast.NODATA=NULL, na.rm=TRUE) {
 
        
   ## Get raster units
-  rast.units <- FIESTA::getprjatt(rast.prj, "units")
+  rast.units <- getprjatt(rast.prj, "units")
   if (is.null(rast.units)) {
     message("no units defined in proj4string... assuming meters")
     rast.units <- "m"
@@ -1141,7 +1141,7 @@ clip.othertables <- function(inids, othertabnms, othertabs=NULL, uniqueid="PLT_C
 
   ## Check savedata
   #############################################################################
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="NO", gui=gui) 
   if (savedata && out_fmt %in% c("sqlite", "gpkg")) {
     gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
@@ -1293,14 +1293,14 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   ### DO THE WORK
   ########################################################################
   RSlst <- unique(FIESTA::ref_statecd$RS)
-  RS <- FIESTA::pcheck.varchar(var2check=RS, varnm="RS", 
+  RS <- pcheck.varchar(var2check=RS, varnm="RS", 
 		checklst=RSlst, gui=gui, caption="Research Station extent?") 
 
   ## Get intersecting states
   #############################################################################
   if (!is.null(stbnd) || !is.null(stbnd_dsn)) {
     stbnd <- pcheck.spatial(layer=stbnd, dsn=stbnd_dsn)
-    stbnd.att <- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
+    stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stbnd.att, "not in stbnd"))
     if (is.null(stbnd.att)) {
@@ -1315,7 +1315,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   } else if (exists("stunitco")) {
     stbnd <- FIESTA::stunitco			## longlat-NAD83 projection
 
-    stbnd.att<- FIESTA::pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
+    stbnd.att<- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stbnd.att, "not in stunitco"))
     if (is.null(stbnd.att)) stbnd.att <- "STATENM"
@@ -1337,7 +1337,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
 				overlapThreshold=overlap))
 
     ## Check name of attribute identifying state
-    stname.att <- FIESTA::pcheck.varchar(var2check=stname.att, varnm="stname.att", 
+    stname.att <- pcheck.varchar(var2check=stname.att, varnm="stname.att", 
 		gui=gui, checklst=names(stbnd), caption="State name attribute", 
 		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
     statenamesint <- stateint[[stbnd.att]][!is.na(stateint[[stbnd.att]])]

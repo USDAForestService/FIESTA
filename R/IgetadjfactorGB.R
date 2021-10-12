@@ -148,7 +148,7 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
 
   ## Calculate expansion factors (strata-level and cond-level)
   if (!is.null(unitarea)) {
-    tabs <- FIESTA::check.matchclass(unitlut, unitarea, unitvars)
+    tabs <- check.matchclass(unitlut, unitarea, unitvars)
     unitlut <- tabs$tab1
     unitarea <- tabs$tab2
 

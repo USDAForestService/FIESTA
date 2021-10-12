@@ -104,9 +104,9 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
 
 
   ### Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, "Save data tables?", "NO")
+  savedata <- pcheck.logical(savedata, "Save data tables?", "NO")
   if (savedata) 
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outfolder <- pcheck.outfolder(outfolder, gui)
   
 
   ################################################################################  
@@ -117,7 +117,7 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   if (!is.null(xfilter)) {
     if (!is.character(xfilter)) stop("xfilter must be a character string")
     ## Check logical statement
-    xfilter <- FIESTA::check.logic(datx, xfilter, filternm=filternm)
+    xfilter <- check.logic(datx, xfilter, filternm=filternm)
 
     ## Apply filter
     #indat <- datx[eval(parse(text = xfilter)),]
@@ -197,7 +197,7 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
             title <- "Filter value(s)"
             if (!is.null(title.filter)) title <- paste(title, "-", title.filter)
             xfilterval <- select.list(xfiltervals, title = title, multiple = TRUE)
-            xfiltertxt <- paste(xfiltervar, "%in% c(", FIESTA::addcommas(xfilterval, 
+            xfiltertxt <- paste(xfiltervar, "%in% c(", addcommas(xfilterval, 
 				quotes = TRUE), ")")
           }
 		
@@ -235,7 +235,7 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
       stop("invalid othertabnms: ", paste(miss, collapse=", "))
     }
     othertabs <- lapply(othertabnms, function(x) get(x, envir=environment()))
-    intabs <- FIESTA::clip.othertables(indatids, othertabnms, othertabs=othertabs, 
+    intabs <- clip.othertables(indatids, othertabnms, othertabs=othertabs, 
 		savedata=savedata, outfolder=outfolder, overwrite=overwrite, 
 		outfn.pre=outfn.pre, outfn.date=outfn.date)
   }

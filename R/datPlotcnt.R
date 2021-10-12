@@ -42,43 +42,43 @@ datPlotcnt <- function(plt, yrtype="INVYR", states=NULL, designcd=FALSE, forsamp
   ########################################################################
 
   ## Check plt table
-  pltx <- FIESTA::pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
+  pltx <- pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
   if (is.null(pltx) || nrow(pltx) == 0) 
     stop("must have plt table")
 
   ## Check yrtype
-  yrtype <- FIESTA::pcheck.varchar(var2check=yrtype, varnm="yrtype", gui=gui, 
+  yrtype <- pcheck.varchar(var2check=yrtype, varnm="yrtype", gui=gui, 
 		checklst=c("INVYR", "MEASYEAR"), caption="Year type?")
 
   ## Check states
   if (is.null(states))
     if ("STATECD" %in% names(pltx)) states <- unique(pltx[["STATECD"]])    
-  stabbr <- FIESTA::pcheck.states(states, statereturn="ABBR")
+  stabbr <- pcheck.states(states, statereturn="ABBR")
 
   ## Check designcd
-  designcd <- FIESTA::pcheck.logical(designcd, varnm="designcd", 
+  designcd <- pcheck.logical(designcd, varnm="designcd", 
 	title="Include designcd?", first="NO", gui=gui)
 
 
   ## Check total
   ###########################################################
-  total <- FIESTA::pcheck.logical(total, varnm="total", 
+  total <- pcheck.logical(total, varnm="total", 
 		title="Include totals?", first="YES", gui=gui)
 
   ## Check subtotal
   ###########################################################
-  subtotal <- FIESTA::pcheck.logical(subtotal, varnm="subtotal", 
+  subtotal <- pcheck.logical(subtotal, varnm="subtotal", 
 		title="Include subtotals?", first="YES", gui=gui)
 
   ## Check savedata
   ###########################################################
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables to outfolder?", first="YES", gui=gui)
 
   ## Check outfolder
   ###########################################################
   if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui=gui)
+    outfolder <- pcheck.outfolder(outfolder, gui=gui)
     if (is.null(outfn) || gsub(" ", "", outfn) == "") outfn <- "pltcnt"
   }
 

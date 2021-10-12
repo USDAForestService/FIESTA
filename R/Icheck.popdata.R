@@ -102,7 +102,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   ## Check estimator module 
   ########################################################
   modulelst <- c("GB", "MA", "SA")
-  module <- FIESTA::pcheck.varchar(var2check=module, varnm="module", gui=gui, 
+  module <- pcheck.varchar(var2check=module, varnm="module", gui=gui, 
 		checklst=modulelst, caption="FIESTA module", stopifnull=TRUE)
 
 #  ## Check method 
@@ -113,7 +113,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 #	   message("MA module requires package mase")
 #      }
 #      methodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-#      method <- FIESTA::pcheck.varchar(var2check=method, varnm="method", gui=gui, 
+#      method <- pcheck.varchar(var2check=method, varnm="method", gui=gui, 
 #		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
 #      if (any(method == "PS")) {
 #        strata <- TRUE
@@ -130,13 +130,13 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   ## Check popType
   ########################################################
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG")
-  popType <- FIESTA::pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
+  popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
 		checklst=evalTyplst, caption="popType", multiple=TRUE, stopifnull=TRUE)
  
   ## Check adj
   ########################################################
   adjlst <- c("samp", "plot", "none")
-  adj <- FIESTA::pcheck.varchar(var2check=adj, varnm="adj", gui=gui, 
+  adj <- pcheck.varchar(var2check=adj, varnm="adj", gui=gui, 
 		checklst=adjlst, caption="adj", multiple=FALSE, stopifnull=TRUE)
 
   ## Check adj
@@ -155,7 +155,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 
   ## Check ACI (if ACI=FALSE, need to filter COND_STATUS_CD == 1)
   ###################################################################################
-  ACI <- FIESTA::pcheck.logical(ACI, varnm="ACI", title="ACI?", first="NO", gui=gui)
+  ACI <- pcheck.logical(ACI, varnm="ACI", title="ACI?", first="NO", gui=gui)
   if (ACI) {
     pdoms2keep <- unique(c(pdoms2keep, "NF_PLOT_STATUS_CD"))
   }
@@ -163,12 +163,12 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   ## Check unit.action
   ########################################################
   unit.actionlst <- c("keep", "remove", "combine")
-  unit.action <- FIESTA::pcheck.varchar(var2check=unit.action, varnm="unit.action", gui=gui, 
+  unit.action <- pcheck.varchar(var2check=unit.action, varnm="unit.action", gui=gui, 
 		checklst=unit.actionlst, caption="unit.action", multiple=FALSE, stopifnull=TRUE)
 
   ## Check strata, strvars
   ###################################################################################
-  strata <- FIESTA::pcheck.logical(strata, varnm="strata", 
+  strata <- pcheck.logical(strata, varnm="strata", 
 		title="Post stratify?", first="YES", gui=gui, stopifnull=TRUE)
  
   if (strata) {
@@ -177,7 +177,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     pvars2keep <- unique(c(pvars2keep, strvar))
 
     ## Check nonresp
-    nonresp <- FIESTA::pcheck.logical(nonresp, varnm="nonresp", 
+    nonresp <- pcheck.logical(nonresp, varnm="nonresp", 
 		title="Post stratify?", first="YES", gui=gui)
     if (nonresp) {
       pvars2keep <- c(pvars2keep, substrvar)
@@ -187,7 +187,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 
     ## Check stratcombine 
     ########################################################
-    stratcombine <- FIESTA::pcheck.logical(stratcombine, varnm="stratcombine", 
+    stratcombine <- pcheck.logical(stratcombine, varnm="stratcombine", 
 		title="Combine strata?", first="YES", gui=gui, stopifnull=TRUE)
 
   } else {
@@ -714,12 +714,12 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   invyrs <- NULL
   if ("STATECD" %in% names(pltcondx)) {
     stcds <- unique(pltcondx[["STATECD"]])
-    states <- FIESTA::pcheck.states(stcds)
+    states <- pcheck.states(stcds)
     if ("INVYR" %in% names(pltcondx)) {
       invyrtab <- unique(pltcondx[, c("STATECD", "INVYR")])
       setorderv(invyrtab, c("STATECD", "INVYR"))
       invyrs <- as.list(by(invyrtab$INVYR, invyrtab$STATECD, I))
-      names(invyrs) <- FIESTA::pcheck.states(names(invyrs))
+      names(invyrs) <- pcheck.states(names(invyrs))
     }
   } 
 
@@ -987,7 +987,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     treenmlst <- names(treex)
 
     ## Check unique identifiers
-    tuniqueid <- FIESTA::pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui, 
+    tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui, 
 		checklst=treenmlst, caption="UniqueID variable of plot", 
 		warn=paste(tuniqueid, "not in tree"), stopifnull=TRUE)
 
@@ -1018,7 +1018,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     setkeyv(treex, c(tuniqueid, condid))
 
     ## Check if class of tuniqueid in treex matches class of cuniqueid in condx
-    tabs <- FIESTA::check.matchclass(pltcondx, treex, cuniqueid, tuniqueid)
+    tabs <- check.matchclass(pltcondx, treex, cuniqueid, tuniqueid)
     pltcondx <- tabs$tab1
     treex <- tabs$tab2
 
@@ -1076,7 +1076,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     seednmlst <- names(seedx)
 
     ## Check unique identifiers
-    tuniqueid <- FIESTA::pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui, 
+    tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui, 
 		checklst=treenmlst, caption="UniqueID variable of plot", 
 		warn=paste(tuniqueid, "not in tree"), stopifnull=TRUE)
 
@@ -1107,7 +1107,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     setkeyv(seedx, c(tuniqueid, condid))
 
     ## Check if class of tuniqueid in seedx matches class of cuniqueid in condx
-    tabs <- FIESTA::check.matchclass(pltcondx, seedx, cuniqueid, tuniqueid)
+    tabs <- check.matchclass(pltcondx, seedx, cuniqueid, tuniqueid)
     pltcondx <- tabs$tab1
     seedx <- tabs$tab2
 
@@ -1167,14 +1167,14 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     subpid <- "SUBP"
 
     if (!is.null(subplotx)) {
-      subpuniqueid <- FIESTA::pcheck.varchar(var2check=subpuniqueid, varnm="subpuniqueid", 
+      subpuniqueid <- pcheck.varchar(var2check=subpuniqueid, varnm="subpuniqueid", 
 		checklst=names(subplotx), caption="UniqueID variable of subplot", 
 		warn=paste(subpuniqueid, "not in subplot"), stopifnull=TRUE)
       ## Check for NA values in subpuniqueid
       subp.na <- sum(is.na(subplotx[[subpuniqueid]]))
       if (subp.na > 0) stop("NA values in ", subpuniqueid)
 
-      subpid <- FIESTA::pcheck.varchar(var2check=subpid, varnm="subpid", 
+      subpid <- pcheck.varchar(var2check=subpid, varnm="subpid", 
 		checklst=names(subplotx), caption="ID of subplot", 
 		warn=paste(subpid, "not in subplot"), stopifnull=TRUE)
       ## Check for NA values in subpuniqueid
@@ -1190,14 +1190,14 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       }
     }
     if (!is.null(subp_condx)) {
-      subpuniqueid <- FIESTA::pcheck.varchar(var2check=subpuniqueid, varnm="subpuniqueid", 
+      subpuniqueid <- pcheck.varchar(var2check=subpuniqueid, varnm="subpuniqueid", 
 		checklst=names(subp_condx), caption="UniqueID variable of subp_cond", 
 		warn=paste(subpuniqueid, "not in sub_cond"), stopifnull=TRUE)
       ## Check for NA values in necessary variables in subp_cond table
       subpc.na <- sum(is.na(subp_condx[[subpuniqueid]]))
       if (subpc.na > 0) stop("NA values in ", subpuniqueid) 
 
-      subpid <- FIESTA::pcheck.varchar(var2check=subpid, varnm="subpid", 
+      subpid <- pcheck.varchar(var2check=subpid, varnm="subpid", 
 		checklst=names(subp_condx), caption="ID of subplot", 
 		warn=paste(subpid, "not in subp_cond"), stopifnull=TRUE)
       ## Check for NA values in subpuniqueid
@@ -1212,7 +1212,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
 
       if (!is.null(subplotx)) {
         ## Check if class of tuniqueid in treex matches class of cuniqueid in condx
-        tabs <- FIESTA::check.matchclass(subplotx, subp_condx, 
+        tabs <- check.matchclass(subplotx, subp_condx, 
 		matchcol=c(subpuniqueid, subpid))
         subplotx <- tabs$tab1
         subp_condx <- tabs$tab2
@@ -1313,7 +1313,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       vsubpsppnmlst <- names(vsubpsppx)
 
       ## Check unique identifiers
-      vuniqueid <- FIESTA::pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
+      vuniqueid <- pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
 		checklst=vsubpsppnmlst, caption="UniqueID variable of veg spp", 
 		warn=paste(vuniqueid, "not in vegspspp"), stopifnull=TRUE)
       cvars2keep <- c(cvars2keep, "SUBPCOND_PROP")
@@ -1351,7 +1351,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       vsubpstrnmlst <- names(vsubpstrx)
 
       ## Check unique identifiers
-      vuniqueid <- FIESTA::pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
+      vuniqueid <- pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
 		checklst=vsubpstrnmlst, caption="UniqueID variable of veg structure", 
 		warn=paste(vuniqueid, "not in vegspstr"), stopifnull=TRUE)
     

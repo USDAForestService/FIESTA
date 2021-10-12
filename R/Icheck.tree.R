@@ -19,12 +19,12 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 
   ## GET TREE ESTIMATION VARIABLE AND CHECK IF IN TREE DATA SET (NUMERATOR)
   varnm <- ifelse(esttype == "TREE", "estvar", "estvarn")
-  estvarn <- FIESTA::pcheck.varchar(var2check=estvarn, varnm=varnm, gui=gui, 
+  estvarn <- pcheck.varchar(var2check=estvarn, varnm=varnm, gui=gui, 
 		checklst=estvarlst, caption=paste0("Est variable (NUM)"), 
 		warn=paste(estvarn, "not in tree table"), stopifnull=TRUE)
 
   ## GETS TPA (NUMERATOR)
-  estvarn.TPA <- FIESTA::pcheck.logical(estvarn.TPA, varnm="estvarn.TPA", 
+  estvarn.TPA <- pcheck.logical(estvarn.TPA, varnm="estvarn.TPA", 
 		title=paste0("Calculate TPA (NUM)"), first="YES", gui=gui)
   if (!grepl("TPA", estvarn)) {
     if (estvarn.TPA) message("multiplying ", estvarn, " by TPA")
@@ -134,7 +134,7 @@ check.tree <- function(gui, treef, seedf=NULL, estseed="none", condf=NULL,
 
     ## GET TREE ESTIMATION VARIABLE (DENOMINATOR) AND CHECK IF IN TREE DATA SET
     if (is.null(estvard)) 
-      estvard <- FIESTA::pcheck.varchar(var2check=estvard, varnm="estvard", gui=gui, 
+      estvard <- pcheck.varchar(var2check=estvard, varnm="estvard", gui=gui, 
 		checklst=estvarlst, caption=paste0("Est variable (DEN)"), 
 		warn=paste(estvard, "not in tree table"), stopifnull=TRUE)
 

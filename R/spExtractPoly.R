@@ -147,7 +147,7 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)
-    uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
+    uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
@@ -197,23 +197,23 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst,
   }
 
    ## Check showext    
-  showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
+  showext <- pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
  
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui) 
 
   ## Check exportsp 
-  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
 		title="Export spatial layer?", first="NO", gui=gui)  
 
   ## Check keepNA
-  keepNA <- FIESTA::pcheck.logical(keepNA, varnm="keepNA", 
+  keepNA <- pcheck.logical(keepNA, varnm="keepNA", 
 		title="Keep NA values?", first="YES", gui=gui)
 
   ## Check exportNA
-  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+  exportNA <- pcheck.logical(exportNA, varnm="exportNA", 
 		title="Export NA values?", first="YES", gui=gui)
 
 

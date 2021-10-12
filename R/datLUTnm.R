@@ -84,7 +84,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   ## Check datx
   ########################################################
   isdatatable <- FALSE
-  datx <- FIESTA::pcheck.table(x, gui=gui, caption="Data table?")
+  datx <- pcheck.table(x, gui=gui, caption="Data table?")
   if ("data.table" %in% class(datx)) {
     isdatatable <- TRUE
     datkey <- key(datx)
@@ -94,7 +94,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   ## Check xvar
   ##########################################
   datnmlst <- names(datx)
-  xvar <- FIESTA::pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
+  xvar <- pcheck.varchar(xvar, "xvar", datnmlst, gui=gui,
 		caption="Join variable in dat", stopifnull=TRUE)
 
  
@@ -104,12 +104,12 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
     LUTx <- data.table(LUT)
     setnames(LUTx, xvar)
   } else {
-    LUTx <- FIESTA::pcheck.table(LUT, gui=gui, tabnm="LUT", caption="Look up table?")
+    LUTx <- pcheck.table(LUT, gui=gui, tabnm="LUT", caption="Look up table?")
   }
 
   ## Check FIAname
   ########################################################
-  FIAname <- FIESTA::pcheck.logical(FIAname, varnm="FIAname", 
+  FIAname <- pcheck.logical(FIAname, varnm="FIAname", 
 		title="FIA reference table?", first="YES", gui=gui)
   if (is.null(LUTx) && !FIAname) {
     message("LUT is null and FIAname=FALSE")
@@ -118,13 +118,13 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
  
   if (FIAname) {
     ## Get FIA reference table for xvar
-    xvar.ref <- FIESTA::getRefobject(toupper(xvar))
+    xvar.ref <- getRefobject(toupper(xvar))
     if (is.null(xvar.ref)) 
       stop(paste("no reference name for", xvar))
   }
 
   ## Check group
-  group <- FIESTA::pcheck.logical(group, varnm="group", title="Variable group?", 
+  group <- pcheck.logical(group, varnm="group", title="Variable group?", 
 		first="NO", gui=gui)
 
   #######################################################################
@@ -133,7 +133,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   LUTnmlst <- names(LUTx)
 
   if (!FIAname) {
-    LUTvar <- FIESTA::pcheck.varchar(LUTvar, "LUTvar", LUTnmlst, gui=gui,
+    LUTvar <- pcheck.varchar(LUTvar, "LUTvar", LUTnmlst, gui=gui,
 		caption="Join variable in LUT")
     if (is.null(LUTvar)) {
       if (xvar %in% LUTnmlst) {
@@ -151,7 +151,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
     if (length(LUTnmlst) == 0) {
       LUTnewvar <- NULL
     } else {
-      LUTnewvar <- FIESTA::pcheck.varchar(LUTnewvar, "LUTnewvar", LUTnmlst, gui=gui,
+      LUTnewvar <- pcheck.varchar(LUTnewvar, "LUTnewvar", LUTnmlst, gui=gui,
 		caption="New variable(s)", multiple=TRUE)
       if (length(LUTnewvar) == 0) LUTnewvar <- LUTnmlst
     }
@@ -166,10 +166,10 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
 #    } else {
 #      
 #      ## To get a name other than MEANING
-#      nameslst <- FIESTA::getnm(xvar, group=group)
+#      nameslst <- getnm(xvar, group=group)
 #      if ("MEANING" %in% names(LUTx)) {
 #        LUTnewvarnm <- nameslst$LUTnewvarnm 
-#        LUTnewvarnm <- FIESTA::checknm(LUTnewvarnm, names(datx))              
+#        LUTnewvarnm <- checknm(LUTnewvarnm, names(datx))              
 #        setnames(LUTx, "MEANING", LUTnewvarnm)
 #        LUTnewvar <- c(LUTnewvar, LUTnewvarnm)
 #      }
@@ -177,7 +177,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
 #      if (group) {
 #        grpcode <- nameslst$grpcode
 #        grpname <- nameslst$grpname
-#        grpnames <- sapply(c(grpcode, grpname), FIESTA::checknm, names(datx))     
+#        grpnames <- sapply(c(grpcode, grpname), checknm, names(datx))     
 #        setnames(LUTx, c("GROUPCD", "GROUPNM"), grpnames) 
 #        LUTnewvar <- c(LUTnewvar, grpnames)
 #      }
@@ -200,7 +200,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
 
     ## Get FIA reference table for xvar
     #################################################
-   # xvar.ref <- FIESTA::getRefobject(toupper(LUTvar))
+   # xvar.ref <- getRefobject(toupper(LUTvar))
     #if (is.null(xvar.ref)) message(paste("no reference name for", xvar))
 
     lutvars <- c("VALUE", "MEANING")
@@ -218,16 +218,16 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
       LUTnewvarlst <- names(LUTx)
 
       ## To get a name other than MEANING
-      nameslst <- FIESTA::getnm(xvar, group=group)
+      nameslst <- getnm(xvar, group=group)
       LUTnewvar <- nameslst$xvarnm
-      LUTnewvar <- FIESTA::checknm(LUTnewvar, names(datx))         
+      LUTnewvar <- checknm(LUTnewvar, names(datx))         
       setnames(LUTx, lutvars, c(xvar, LUTnewvar))
 
       ## set new names
       if (group) {
         grpcode <- nameslst$grpcode
         grpname <- nameslst$grpname
-        grpnames <- sapply(c(grpcode, grpname), FIESTA::checknm, names(datx))     
+        grpnames <- sapply(c(grpcode, grpname), checknm, names(datx))     
         setnames(LUTx, grpvars, grpnames)
         LUTnewvar <- c(LUTnewvar, grpnames)
       }        
@@ -240,7 +240,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
         ## To get a name other than MEANING
         nameslst <- getnm(LUTvar, group=group)
         LUTnewvar <- nameslst$xvarnm
-        LUTnewvar <- FIESTA::checknm(LUTnewvar, names(datx))  
+        LUTnewvar <- checknm(LUTnewvar, names(datx))  
         setnames(LUTx, lutvars, c(xvar, LUTnewvar))
         LUTvar <- xvar
 
@@ -248,7 +248,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
         if (group) {
           grpcode <- nameslst$grpcode
           grpname <- nameslst$grpname
-          grpnames <- sapply(c(grpcode, grpname), FIESTA::checknm, names(datx))     
+          grpnames <- sapply(c(grpcode, grpname), checknm, names(datx))     
           setnames(LUTx, grpvars, grpnames)
           LUTnewvar <- c(LUTnewvar, grpnames)
         } 
@@ -297,12 +297,12 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   }
  
   ### GET savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", title="Save data tables?", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data tables?", 
 		first="NO", gui=gui)
 
   ## GET OUTFOLDER IF NULL
   if (savedata)
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outfolder <- pcheck.outfolder(outfolder, gui)
 
 
   ############################################################################
@@ -316,12 +316,12 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
 		stopifmiss=stopifmiss)
 
     ## Check if class of xvar in datx matches class of xvar in LUTx
-    tabs <- FIESTA::check.matchclass(datx, LUTx, xvar, LUTvar, 
+    tabs <- check.matchclass(datx, LUTx, xvar, LUTvar, 
 		tab1txt=xtxt, tab2txt=LUTvar)
     datx <- tabs$tab1
     LUTx <- tabs$tab2
 
-    LUTnewvar2 <- sapply(LUTnewvar, FIESTA::checknm, names(datx))
+    LUTnewvar2 <- sapply(LUTnewvar, checknm, names(datx))
     if (!identical(LUTnewvar2, LUTnewvar)) {
       setnames(LUTx, LUTnewvar, LUTnewvar2)
       LUTnewvar <- LUTnewvar2

@@ -241,17 +241,17 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 
   ## Check savedata
   #############################################################################
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save SAdoms?", first="YES", gui=gui) 
 
   ## Check showsteps
   #############################################################################
-  showsteps <- FIESTA::pcheck.logical(showsteps, varnm="showsteps", 
+  showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
 		title="Show steps?", first="YES", gui=gui) 
 
   ## Check savesteps
   #############################################################################
-  savesteps <- FIESTA::pcheck.logical(savesteps, varnm="savesteps", 
+  savesteps <- pcheck.logical(savesteps, varnm="savesteps", 
 		title="Save step data?", first="YES", gui=gui)  
 
   ## Check overwrite, outfn.date, outfolder, outfn 
@@ -400,14 +400,14 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
  
   ## Check maxbndx
   if (!is.null(maxbndx)) {
-    maxbnd.unique <- FIESTA::pcheck.varchar(var2check=maxbnd.unique, 
+    maxbnd.unique <- pcheck.varchar(var2check=maxbnd.unique, 
 		varnm="maxbnd.unique", gui=gui, checklst=names(maxbndx), 
 		caption="max areas attribute", 
 		warn=paste(maxbnd.unique, "not in maxbnd"), stopifnull=TRUE)
   
     ## Apply maxbnd.filter
     if (!is.null(maxbndx) && !is.null(maxbnd.filter)) {
-      FIESTA::check.logic(maxbndx, maxbnd.filter, "maxbndfilter")
+      check.logic(maxbndx, maxbnd.filter, "maxbndfilter")
       maxbndx <- subset(maxbndx, eval(parse(text = maxbnd.filter)))
       if (length(maxbndx) == 0) stop("maxbnd.filter removed all features")
     }
@@ -438,14 +438,14 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     if (is.null(maxbnd)) {
       maxislarge <- TRUE
     }
-    largebnd.unique <- FIESTA::pcheck.varchar(var2check=largebnd.unique, 
+    largebnd.unique <- pcheck.varchar(var2check=largebnd.unique, 
 		varnm="largebnd.unique", gui=gui, checklst=names(largebndx), 
 		caption="max areas attribute", 
 		warn=paste(largebnd.unique, "not in largebnd"), stopifnull=TRUE)
   
     ## Apply largebnd.filter
     if (!is.null(largebndx) && !is.null(largebnd.filter)) {
-      FIESTA::check.logic(largebndx, largebnd.filter, "largebnd.filter")
+      check.logic(largebndx, largebnd.filter, "largebnd.filter")
       largebndx <- subset(largebndx, eval(parse(text = largebnd.filter)))
       if (length(largebndx) == 0) stop("largebnd.filter removed all features")
     }
@@ -475,7 +475,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 		checklst=names(helperbndx), stopifinvalid=FALSE))
     if (!is.null(largebnd.unique)) {
       if (!is.null(largebnd.filter)) {
-        FIESTA::check.logic(helperbndx, largebnd.filter, "largebndfilter")
+        check.logic(helperbndx, largebnd.filter, "largebndfilter")
         largebndx <- subset(helperbndx, eval(parse(text = largebnd.filter)))
         if (length(largebndx) == 0) stop("largebnd.filter removed all features")
       } else {
@@ -506,7 +506,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       helperbnd.unique <- smallbnd.unique
     }
   } else {
-    helperbnd.unique <- FIESTA::pcheck.varchar(var2check=helperbnd.unique, 
+    helperbnd.unique <- pcheck.varchar(var2check=helperbnd.unique, 
 		varnm="helperbnd.unique", gui=gui, checklst=names(helperbndx), 
 		caption="Helper areas attribute", 
 		warn=paste(helperbnd.unique, "not in helperbnd"), stopifnull=TRUE)
@@ -527,7 +527,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   if (!smallishelper) {
     ## Apply helperbnd.filter
     if (!is.null(helperbnd.filter)) {
-      FIESTA::check.logic(helperbndx, helperbnd.filter, "helperbnd filter")
+      check.logic(helperbndx, helperbnd.filter, "helperbnd filter")
       helperbndx <- subset(helperbndx, eval(parse(text = helperbnd.filter)))
     }
 

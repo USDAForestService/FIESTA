@@ -95,11 +95,11 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   ##################################################################
 
   ## Check cond table
-  condx <- FIESTA::pcheck.table(cond, caption="Condition table?", stopifnull=TRUE)
+  condx <- pcheck.table(cond, caption="Condition table?", stopifnull=TRUE)
 
   ## Check cuniqueid
   condnmlst <- names(condx)
-  cuniqueid <- FIESTA::pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
+  cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
 	checklst=condnmlst, caption="UniqueID variable - cond", 
 	warn="cuniqueid not in cond table", stopifnull=TRUE)
 
@@ -128,7 +128,7 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
     ## Check puniqueid
     pltnmlst <- names(pltx)
     nmlst <- names(pltx)
-    puniqueid <- FIESTA::pcheck.varchar(var2check=puniqueid, varnm="puniqueid", 
+    puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", 
 		checklst=pltnmlst, caption="UniqueID variable - plt", 
 		warn="puniqueid not in plot table", stopifnull=TRUE)
 
@@ -142,7 +142,7 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   }
 
   ## Check csumvar
-  csumvar <- FIESTA::pcheck.varchar(var2check=csumvar, varnm="csumvar", 
+  csumvar <- pcheck.varchar(var2check=csumvar, varnm="csumvar", 
 		checklst=condnmlst, caption="csumvar(s)", multiple=TRUE,
 		stopifnull=TRUE, gui=gui)
   if (any(csumvar == "CONDPROP_UNADJ")) {
@@ -156,18 +156,18 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   condnmlst <- sapply(csumvarnm, checknm, condnmlst)
 
   ## Check getadjplot
-  getadjplot <- FIESTA::pcheck.logical(getadjplot, varnm="getadjplot", 
+  getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
 		title="Get plot adjustment?", first="NO", gui=gui)
   if (getadjplot && is.null(condx)) 
     stop("must include condx to adjust to plot")
 
   ## Check adjcond
-  adjcond <- FIESTA::pcheck.logical(adjcond, varnm="adjcond", 
+  adjcond <- pcheck.logical(adjcond, varnm="adjcond", 
 		title="Adjust conditions?", first="NO", gui=gui)
 
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="NO", gui=gui)
 
   ## If savedata, check output file names

@@ -548,7 +548,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   ## Set datsource
   ########################################################
   datsourcelst <- c("datamart", "sqlite")
-  datsource <- FIESTA::pcheck.varchar(var2check=datsource, varnm="datsource", 
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (datsource == "sqlite") {
     if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
@@ -586,11 +586,11 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     isgrm <- ifelse(any(datatabs == "grm"), TRUE, FALSE)
     issccm <- ifelse(any(datatabs == "sccm"), TRUE, FALSE)
   } else {
-    istree <- FIESTA::pcheck.logical(istree, varnm="istree", 
+    istree <- pcheck.logical(istree, varnm="istree", 
 		title="Tree variables?", first="YES", gui=gui)
-    isseed <- FIESTA::pcheck.logical(isseed, varnm="isseed", 
+    isseed <- pcheck.logical(isseed, varnm="isseed", 
 		title="Seedling variables?", first="YES", gui=gui)
-    isveg <- FIESTA::pcheck.logical(isveg, varnm="isveg", 
+    isveg <- pcheck.logical(isveg, varnm="isveg", 
 		title="Understory veg variables?", first="YES", gui=gui)
     if (isveg && invtype == "PERIODIC") {
       message("understory vegetation data only available for annual data\n")
@@ -600,14 +600,14 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     if (isveg) {
       issubp <- TRUE
     } else {
-      issubp <- FIESTA::pcheck.logical(issubp, varnm="issubp", 
+      issubp <- pcheck.logical(issubp, varnm="issubp", 
 		title="Subplot tables?", first="YES", gui=gui)
     }
-    isdwm <- FIESTA::pcheck.logical(isdwm, varnm="isdwm", 
+    isdwm <- pcheck.logical(isdwm, varnm="isdwm", 
 		title="DWM variables?", first="YES", gui=gui)
-    isgrm <- FIESTA::pcheck.logical(isgrm, varnm="isgrm", 
+    isgrm <- pcheck.logical(isgrm, varnm="isgrm", 
 		title="GRM variables?", first="YES", gui=gui)
-    issccm <- FIESTA::pcheck.logical(issccm, varnm="issccm", 
+    issccm <- pcheck.logical(issccm, varnm="issccm", 
 		title="Subplot Change variables?", first="YES", gui=gui)
   }
 
@@ -656,8 +656,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
      
   ## Get state abbreviations and codes 
   ###########################################################
-  stabbrlst <- FIESTA::pcheck.states(states, statereturn="ABBR")
-  stcdlst <- FIESTA::pcheck.states(states, statereturn="VALUE")
+  stabbrlst <- pcheck.states(states, statereturn="ABBR")
+  stcdlst <- pcheck.states(states, statereturn="VALUE")
 
   ## Get number of states 
   nbrstates <- length(states)  ##  Check whether to return tree data
@@ -666,7 +666,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   if (!iseval) {  
     ### Check measCur
     ###########################################################
-    measCur <- FIESTA::pcheck.logical(measCur, varnm="measCur", 
+    measCur <- pcheck.logical(measCur, varnm="measCur", 
 		title="Current measyear?", first="YES", gui=gui)
 
     ### Check measEndyr
@@ -689,11 +689,11 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
     ## Check allyrs
     ###########################################################
-    allyrs <- FIESTA::pcheck.logical(allyrs, varnm="allyrs", title="All years?", 
+    allyrs <- pcheck.logical(allyrs, varnm="allyrs", title="All years?", 
 		first="YES", gui=gui)
     if (allyrs) {
       ## xymeasCur
-      xymeasCur <- FIESTA::pcheck.logical(xymeasCur, varnm="xymeasCur", 
+      xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
 		title="Most current XY?", first="YES", gui=gui)
       measCur <- FALSE
       measEndyr=measEndyr.filter <- NULL
@@ -709,7 +709,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         } 
         invyrs <- sapply(states, function(x) NULL)
         for (state in states) { 
-          stabbr <- FIESTA::pcheck.states(state, "ABBR")
+          stabbr <- pcheck.states(state, "ABBR")
           stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
 
           if (allyrs) {
@@ -742,7 +742,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         }
         ## Check inventory years
         for (state in states) {
-          stcd <- FIESTA::pcheck.states(state, "VALUE")
+          stcd <- pcheck.states(state, "VALUE")
           if ("STATENM" %in% names(invyrtab)) {
             stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
           } else if ("STATECD" %in% names(invyrtab)) {
@@ -774,7 +774,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
         }
         ## Check inventory years
         for (state in states) {
-          stcd <- FIESTA::pcheck.states(state, "VALUE")
+          stcd <- pcheck.states(state, "VALUE")
           if ("STATENM" %in% names(invyrtab)) {
             stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
           } else if ("STATECD" %in% names(invyrtab)) {
@@ -793,14 +793,14 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
     ## Check subcycle99
     ###########################################################
-    subcycle99 <- FIESTA::pcheck.logical(subcycle99, varnm="subcycle99", 
+    subcycle99 <- pcheck.logical(subcycle99, varnm="subcycle99", 
 		title="Keep SUBCYCLE 99?", first="NO", gui=gui)
 
     ## Check intensity1
     ###########################################################
     ## For periodic data, the INTENSITY variable does not equal 1
     if (invtype == "ANNUAL") {
-      intensity1 <- FIESTA::pcheck.logical(intensity1, varnm="intensity1", 
+      intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
 		title="Intensity = 1?", first="YES", gui=gui)
     } else {
       message("note: periodic data includes forested plots >= 5% cover")
@@ -809,7 +809,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
     ## Check ACI
     ###########################################################
-    ACI <- FIESTA::pcheck.logical(ACI, varnm="ACI", 
+    ACI <- pcheck.logical(ACI, varnm="ACI", 
 		title="ACI conditions?", first="NO", gui=gui)
 
   } else {
@@ -841,12 +841,12 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
   ## Check defaultVars
   ###########################################################
-  defaultVars <- FIESTA::pcheck.logical(defaultVars, varnm="defaultVars", 
+  defaultVars <- pcheck.logical(defaultVars, varnm="defaultVars", 
 		title="Default variables?", first="YES", gui=gui)
 
   ## Check regionalVars
   ###########################################################
-  regionVars <- FIESTA::pcheck.logical(regionVars, varnm="regionVars", 
+  regionVars <- pcheck.logical(regionVars, varnm="regionVars", 
 		title="Regional variables?", first="NO", gui=gui)
 
   ## Check stateFilter
@@ -878,13 +878,13 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
   ## Check issp
   ###########################################################
-  issp <- FIESTA::pcheck.logical(issp, varnm="issp", 
+  issp <- pcheck.logical(issp, varnm="issp", 
 		title="SpatialPoints of plot vars?", first="NO", gui=gui)
 
   if (spcond) {
     ## Check spcondid1
     ###########################################################
-    spcondid1 <- FIESTA::pcheck.logical(spcondid1, varnm="spcondid1", 
+    spcondid1 <- pcheck.logical(spcondid1, varnm="spcondid1", 
 		title="Use cond1 for spatial?", first="YES", gui=gui)
   }
 
@@ -894,19 +894,19 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   ########################################################################
 
   ## Check savedata
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data to outfolder?", first="YES", gui=gui)
 
   ## Check saveqry
-  saveqry <- FIESTA::pcheck.logical(saveqry, varnm="saveqry", 
+  saveqry <- pcheck.logical(saveqry, varnm="saveqry", 
 		title="Save queries to outfolder?", first="YES", gui=gui)
 
   ## Check parameters
-  parameters <- FIESTA::pcheck.logical(parameters, varnm="parameters", 
+  parameters <- pcheck.logical(parameters, varnm="parameters", 
 		title="Save parameters", first="NO", gui=gui)
 
   ## Check savePOP
-  savePOP <- FIESTA::pcheck.logical(savePOP, varnm="savePOP", 
+  savePOP <- pcheck.logical(savePOP, varnm="savePOP", 
 		title="Return POP table", first="NO", gui=gui)
  
 
@@ -1206,8 +1206,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     evalid <- NULL
     state <- states[i]
     message("getting data from ", state)
-    stcd <- FIESTA::pcheck.states(state, "VALUE")
-    stabbr <- FIESTA::pcheck.states(state, "ABBR")
+    stcd <- pcheck.states(state, "VALUE")
+    stabbr <- pcheck.states(state, "ABBR")
     pltx=condx=treex=seedx=vsubpsppx=vsubpstrx=subpx=subpcx=dwmx=sccmx=
 		ppsax=spconddatx=lulcx <- NULL   
 
@@ -1787,7 +1787,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			"DRYBIO_SAPLING", "DRYBIO_WDLD_SPP", "BHAGE")
             if (any(nbrvars %in% names(treex)))
               nbrvars <- nbrvars[which(nbrvars %in% names(treex))]
-            treex[, (nbrvars) := lapply(.SD, FIESTA::check.numeric), .SDcols=nbrvars]
+            treex[, (nbrvars) := lapply(.SD, check.numeric), .SDcols=nbrvars]
 
             ## Change NA values to 0 values
             #if (any(names(treex) %in% treenavars)) 
@@ -1923,7 +1923,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 #          if (saveqry) {
 #            seedqryfnbase <- DBgetfn("seed", invtype, outfn.pre, stabbr, 
 #			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-#            seedqryfn <- FIESTA::fileexistsnm(outfolder, seedqryfnbase, "txt")
+#            seedqryfn <- fileexistsnm(outfolder, seedqryfnbase, "txt")
 #            outfile <- file(paste0(outfolder, "/", seedqryfn, ".txt"), "w")
 #              cat(  paste0(seedqry, xfilter), "\n", file=outfile)
 #            close(outfile)
@@ -1931,7 +1931,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
           ## Change NA values to 0 values
 #          if (any(names(seedx) %in% seednavars)) 
-#            seedx <- FIESTA::DT_NAto0(seedx, seednavars)
+#            seedx <- DT_NAto0(seedx, seednavars)
      
           if (defaultVars && "TREECOUNT_CALC" %in% names(seedx)) {
             ## Create variable, SEEDCNT6, where a value of 6 means 6 or more seeds (per SUBP) 
@@ -2228,7 +2228,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 #        if (saveqry) {
 #          ppsaqryfnbase <- DBgetfn("ppsa", invtype, outfn.pre, stabbr, 
 #			evalid=evalid, qry=TRUE, outfn.date=outfn.date)
-#          ppsaqryfn <- FIESTA::fileexistsnm(outfolder, ppsaqryfnbase, "txt")
+#          ppsaqryfn <- fileexistsnm(outfolder, ppsaqryfnbase, "txt")
 #          outfile <- file(paste0(outfolder, "/", ppsaqryfn, ".txt"), "w")
 #          cat(  paste0(ppsaqry, xfilter), "\n", file=outfile)
 #          close(outfile)
@@ -2447,7 +2447,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     outparamfn <- paste0("DBgetPlots_parameters_", stabbrfn, "_", 
 		format(Sys.time(), "%Y%m%d"))
     if (!overwrite)
-      outparamfn <- FIESTA::fileexistsnm(outfolder, outparamfn, "txt")  
+      outparamfn <- fileexistsnm(outfolder, outparamfn, "txt")  
     statesout <- toString(paste0("'", params$states, "'"))
     rsout <- toString(paste0("'", params$RS, "'"))
     stateFilter <- ifelse(is.null(params$stateFilter), FALSE, TRUE)
@@ -2456,15 +2456,15 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     cat(  "states <- c(", statesout, ")", "\n", 
       "RS <- c(", rsout, ")", "\n", 
       "invtype <- \"", params$invtype, "\"", "\n",
-      "evalid <- ", FIESTA::getlistparam(params$evalid), "\n",  
+      "evalid <- ", getlistparam(params$evalid), "\n",  
       "evalCur <- ", params$evalCur, "\n",
-      "evalEndyr <- ", FIESTA::getlistparam(params$evalEndyr), "\n",
+      "evalEndyr <- ", getlistparam(params$evalEndyr), "\n",
       "evalAll <- ", params$evalAll, "\n",    
-      "evalType <- \"", FIESTA::getlistparam(params$evalType), "\"", "\n",
+      "evalType <- \"", getlistparam(params$evalType), "\"", "\n",
       "measCur <- ", params$measCur, "\n",
-      "measEndyr <- ", FIESTA::getlistparam(params$measEndyr), "\n",
+      "measEndyr <- ", getlistparam(params$measEndyr), "\n",
       "allyrs <- ", params$allyrs, "\n",
-      "invyrs <- ", FIESTA::getlistparam(params$invyrs), "\n",  
+      "invyrs <- ", getlistparam(params$invyrs), "\n",  
       "istree <- ", params$istree, "\n",
       "isseed <- ", params$isseed, "\n",
       "isveg <- ", params$isveg, "\n",
@@ -2601,7 +2601,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
   if (!is.null(evalidlist)) {
     evaliddf <- data.frame(do.call(rbind, evalidlist))
-    stcds <- FIESTA::pcheck.states(row.names(evaliddf), "VALUE")
+    stcds <- pcheck.states(row.names(evaliddf), "VALUE")
     evaliddf <- data.frame(stcds, row.names(evaliddf), evaliddf, row.names=NULL)
     names(evaliddf) <- c("STATECD", "STATE", "EVALID")
     evaliddf <- evaliddf[order(evaliddf$STATECD), ]

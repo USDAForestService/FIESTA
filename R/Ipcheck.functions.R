@@ -583,23 +583,23 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
   }
 
   ## check outfn.date
-  outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date",
+  outfn.date <- pcheck.logical(outfn.date, varnm="outfn.date",
 		title="outfn.date", first="NO", gui=gui)
 
   ## check overwrite_dsn
-  overwrite_dsn <- FIESTA::pcheck.logical(overwrite_dsn, varnm="overwrite_dsn",
+  overwrite_dsn <- pcheck.logical(overwrite_dsn, varnm="overwrite_dsn",
 		title="overwrite_dsn", first="NO", gui=gui)
 
   ## check overwrite_layer
-  overwrite_layer <- FIESTA::pcheck.logical(overwrite_layer, varnm="overwrite_layer",
+  overwrite_layer <- pcheck.logical(overwrite_layer, varnm="overwrite_layer",
 		title="overwrite_layer", first="NO", gui=gui)
 
   ## check add_layer
-  add_layer <- FIESTA::pcheck.logical(add_layer, varnm="add_layer",
+  add_layer <- pcheck.logical(add_layer, varnm="add_layer",
 		title="add data to dsn", first="NO", gui=gui)
 
   ## check append_layer
-  append_layer <- FIESTA::pcheck.logical(append_layer, varnm="append_layer",
+  append_layer <- pcheck.logical(append_layer, varnm="append_layer",
 		title="append data", first="NO", gui=gui)
 
 
@@ -702,12 +702,12 @@ pcheck.areaunits <- function(unitarea, areavar, areaunits, metric=FALSE) {
 
   gui <- FALSE
 #  ## Check outunits
-#  outunits <- FIESTA::pcheck.varchar(var2check=outunits, varnm="outunits",
+#  outunits <- pcheck.varchar(var2check=outunits, varnm="outunits",
 #	gui=gui, checklst=c("ENGLISH", "METRIC"), caption="Area output units?",
 #	stopifnull=TRUE)
 
   ## check metric
-  metric <- FIESTA::pcheck.logical(metric, varnm="metric",
+  metric <- pcheck.logical(metric, varnm="metric",
 		title="Metric units", first="NO", gui=gui)
   if (metric) {
     outunits <- "hectares"

@@ -123,7 +123,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
         chkvars <- c(xvar, xvar2)
       }
 
-      xchk <- FIESTA::check.matchclass(uniquex.exp, x, chkvars)
+      xchk <- check.matchclass(uniquex.exp, x, chkvars)
       uniquex.exp <- xchk$tab1
       x <- xchk$tab2
 
@@ -133,7 +133,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
     } else if (xvar.add0) {
 
       ## Merge uniquex
-      xchk <- FIESTA::check.matchclass(uniquex, x, xvar)
+      xchk <- check.matchclass(uniquex, x, xvar)
       uniquex <- xchk$tab1
       x <- xchk$tab2
 
@@ -149,7 +149,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       }
      
       ## Merge uniquex2
-      xchk <- FIESTA::check.matchclass(uniquex, x, xvar2)
+      xchk <- check.matchclass(uniquex, x, xvar2)
       uniquex2 <- xchk$tab1
       x <- xchk$tab2
 
@@ -159,7 +159,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
     } else if (xvar2.add0) {
 
       ## Merge uniquex2
-      xchk <- FIESTA::check.matchclass(uniquex2, x, xvar2)
+      xchk <- check.matchclass(uniquex2, x, xvar2)
       uniquex2 <- xchk$tab1
       x <- xchk$tab2
 
@@ -175,7 +175,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       }
 
       ## Merge uniquex
-      xchk <- FIESTA::check.matchclass(uniquex, x, xvar)
+      xchk <- check.matchclass(uniquex, x, xvar)
       uniquex <- xchk$tab1
       x <- xchk$tab2
 
@@ -183,12 +183,12 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       x[is.na(x)] <- 0
 
     } else {
-      xchk <- FIESTA::check.matchclass(uniquex, x, xvar)
+      xchk <- check.matchclass(uniquex, x, xvar)
       uniquex <- xchk$tab1
       x <- xchk$tab2
       x <- merge(uniquex, x, by=xvar)
 
-      xchk <- FIESTA::check.matchclass(uniquex2, x, xvar2)
+      xchk <- check.matchclass(uniquex2, x, xvar2)
       uniquex2 <- xchk$tab1
       x <- xchk$tab2
       x <- merge(uniquex2, x, by=xvar2)
@@ -199,7 +199,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
   } else {  ## is.null(xvar2)
     if (xvar.add0) {
-      xchk <- FIESTA::check.matchclass(uniquex, x, byvars)
+      xchk <- check.matchclass(uniquex, x, byvars)
       uniquex <- xchk$tab1
       x <- xchk$tab2
 
@@ -215,7 +215,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       }
     } else {
 
-      xchk <- FIESTA::check.matchclass(uniquex, x, byvars)
+      xchk <- check.matchclass(uniquex, x, byvars)
       uniquex <- xchk$tab1
       x <- xchk$tab2
 
@@ -587,7 +587,7 @@ crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL,
         if (savedata) { 
           ## SAVE TABLE
           suppressWarnings(
-          FIESTA::save1tab(tab=estpsetab, tab.title=title.estpse.unit,
+          save1tab(tab=estpsetab, tab.title=title.estpse.unit,
  		outfolder=outfolder, allin1=TRUE, coltitlerow=FALSE,
  		rnames=rnames, outfn=outfn.estpse.unit, addtitle=addtitle,
 		outfn.date=outfn.date, overwrite=overwrite))
@@ -628,7 +628,7 @@ crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL,
       if(savedata){
         if (esttype == "PHOTO" && phototype == "PCT") {
           suppressWarnings(
-          FIESTA::save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
+          save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
 		tab2.title=title.pse.unit, outfolder=outfolder, coltitlerow=TRUE,
  		coltitle=title.colvar, rnames=rnames, outfn.estpse=outfn.estpse.unit, 
 		addtitle=addtitle, rowtotal=FALSE, outfn.date=outfn.date,

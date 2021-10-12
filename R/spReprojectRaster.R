@@ -172,7 +172,7 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   if (!is.null(dtype.new)) {
     dtypelst <- c("Byte", "Int16", "UInt16", "Uint32", "Int32", "Float32",
 		"Float64", "CInt16", "CInt32", "CFloat32", "CFloat64")
-    dtype <- FIESTA::pcheck.varchar(var2check=dtypelst, 
+    dtype <- pcheck.varchar(var2check=dtypelst, 
 	varnm="dtypelst", gui=gui, checklst=dtypelst, caption="Data type?")
     if (dtype != dtype.new)
       message("changing data type from ", dtype, " to ", dtype.new)
@@ -196,13 +196,13 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   ## Check resamp.method
   resamp.methodlst <- c("near", "bilinear", "cubic", "cubicspline", 
 	"lanczos", "average", "mode", "min", "max", "med", "q1", "q3")
-  r <- FIESTA::pcheck.varchar(var2check=resamp.method, 
+  r <- pcheck.varchar(var2check=resamp.method, 
 	varnm="resamp.methodlst", gui=gui,
 	checklst=resamp.methodlst, caption="Resample method?")
 
   ## Check compression
   compresslst <- c("LZW", "PACKBITS", "DEFLATE")
-  compress <- FIESTA::pcheck.varchar(var2check=compress, 
+  compress <- pcheck.varchar(var2check=compress, 
 	varnm="compress", gui=gui,
 	checklst=compresslst, caption="Compress output?")
   co <- paste0("COMPRESS=", compress)
@@ -238,7 +238,7 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   ## DO WORK
   ##################################################################
 
-  FIESTA::reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
+  reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
 	t_srs=t_srs, s_srs=s_srs, of=of, ot=ot, r=r, co=co, dstnodata=dstnodata)
 
   return(outfilenm)

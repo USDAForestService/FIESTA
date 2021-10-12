@@ -248,16 +248,16 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
 
   ## Check tree  
-  treex <- FIESTA::pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
+  treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
 
   ## Check seed 
-  seedx <- FIESTA::pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
+  seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
 
   ## Check cond 
-  condx <- FIESTA::pcheck.table(cond, gui=gui, tabnm="cond", caption="Condition table?")
+  condx <- pcheck.table(cond, gui=gui, tabnm="cond", caption="Condition table?")
 
   ## Check addseed
-  addseed <- FIESTA::pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
+  addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
 		first="NO", gui=gui)
 
   if (is.null(treex) && is.null(seedx)) {
@@ -277,33 +277,33 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
   ## Check bycond
   ###################################################################################
-  bycond <- FIESTA::pcheck.logical(bycond, varnm="bycond", title="By condition?", 
+  bycond <- pcheck.logical(bycond, varnm="bycond", title="By condition?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check bysubp
   ###################################################################################
-  bysubp <- FIESTA::pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
+  bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check lbs2tons
   ###################################################################################
-  lbs2tons <- FIESTA::pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
+  lbs2tons <- pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check metric
   ###################################################################################
-  metric <- FIESTA::pcheck.logical(metric, varnm="metric", title="Metric?", 
+  metric <- pcheck.logical(metric, varnm="metric", title="Metric?", 
 		first="NO", gui=gui, stopifnull=TRUE)
 
   ## Check checkNA
   ###################################################################################
-  NAto0 <- FIESTA::pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
+  NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
 		first="YES", gui=gui)
   if (is.null(NAto0)) NAto0 <- FALSE
 
   ## Check checkNA
   ###################################################################################
-  checkNA <- FIESTA::pcheck.logical(checkNA, varnm="checkNA", title="Check NA values?", 
+  checkNA <- pcheck.logical(checkNA, varnm="checkNA", title="Check NA values?", 
 		first="YES", gui=gui)
   if (is.null(checkNA)) checkNA <- FALSE
 
@@ -312,7 +312,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ###################################################################################
    
   ## Check tuniqueid
-  tuniqueid <- FIESTA::pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", 	
+  tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", 	
 		checklst=names(treex), caption="UniqueID variable - tree", 
 		warn=paste(tuniqueid, "not in tree table"))
   setkeyv(treex, tuniqueid)
@@ -332,7 +332,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     noplt <- TRUE
 
     ## Check condid in tree table
-    condid <- FIESTA::pcheck.varchar(var2check=condid, varnm="condid", 
+    condid <- pcheck.varchar(var2check=condid, varnm="condid", 
 		checklst=names(treex), caption="Cond ID - tree", 
 		warn=paste(condid, "not in tree table"))
     if (is.null(condid)) {
@@ -364,7 +364,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
       ## Check cuniqueid and condid in cond table
       condnmlst <- names(condx)
-      cuniqueid <- FIESTA::pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
+      cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
 		checklst=condnmlst, caption="UniqueID variable - cond", 
 		warn=paste(cuniqueid, "not in cond table"))
       if (is.null(cuniqueid)) {
@@ -387,19 +387,19 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
       checkNAcvars <- c(checkNAcvars, csumuniqueid)
 
       ## Check that values of tuniqueid in treex are all in puniqueid in pltx
-      treex <- FIESTA::check.matchval(treex, condx, tsumuniqueid, csumuniqueid,
+      treex <- check.matchval(treex, condx, tsumuniqueid, csumuniqueid,
 		tab1txt="tree", tab2txt="cond")
 
       if (addseed) {
         setkeyv(seedx, tsumuniqueid)
 
         ## Check if class of tuniqueid matches class of cuniqueid
-        tabs <- FIESTA::check.matchclass(seedx, condx, tuniqueid, cuniqueid)
+        tabs <- check.matchclass(seedx, condx, tuniqueid, cuniqueid)
         seedx <- tabs$tab1
         condx <- tabs$tab2
 
         ## Check that values of tuniqueid in treex are all in puniqueid in pltx
-        seedx <- FIESTA::check.matchval(seedx, condx, tsumuniqueid, csumuniqueid)
+        seedx <- check.matchval(seedx, condx, tsumuniqueid, csumuniqueid)
       }
     } 
   } else {   ## byplt
@@ -411,7 +411,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     nocond <- TRUE
 
     ## Check condid in tree table and setkey to tuniqueid, condid
-    subpid <- FIESTA::pcheck.varchar(var2check=subpid, varnm="subpid", 
+    subpid <- pcheck.varchar(var2check=subpid, varnm="subpid", 
 		checklst=names(treex), caption="subplot ID - tree", 
 		warn=paste(subpid, "not in tree table"))
     if (is.null(subpid)) {
@@ -440,7 +440,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
  
   ## Check plt
-  pltx <- FIESTA::pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
+  pltx <- pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
 
   if (!is.null(pltx)) {
     noplt <- FALSE
@@ -457,7 +457,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
     ## Check puniqueid
     pltnmlst <- names(pltx)
-    puniqueid <- FIESTA::pcheck.varchar(var2check=puniqueid, varnm="puniqueid", 
+    puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", 
 		checklst=pltnmlst, caption="UniqueID variable - plt", 
 		warn=paste(puniqueid, "not in plot table"), stopifnull=TRUE)
 
@@ -468,16 +468,16 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     }
 
     ## Check if class of tuniqueid matches class of puniqueid
-    tabs <- FIESTA::check.matchclass(treex, pltx, tuniqueid, puniqueid)
+    tabs <- check.matchclass(treex, pltx, tuniqueid, puniqueid)
     treex <- tabs$tab1
     pltx <- tabs$tab2
 
     ## Check that the values of tuniqueid in treex are all in puniqueid in pltx
-    treex <- FIESTA::check.matchval(treex, pltx, tuniqueid, puniqueid)
+    treex <- check.matchval(treex, pltx, tuniqueid, puniqueid)
 
     if (addseed) {
       ## Check if class of tuniqueid matches class of puniqueid
-      tabs <- FIESTA::check.matchclass(seedx, pltx, tuniqueid, puniqueid)
+      tabs <- check.matchclass(seedx, pltx, tuniqueid, puniqueid)
       seedx <- tabs$tab1
       pltx <- tabs$tab2
 
@@ -488,7 +488,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     ## Check that the values of cuniqueid in condx are all in puniqueid in pltx
     if (!is.null(condx)) 
       ## Check that the values of tuniqueid in treex are all in puniqueid in pltx
-      FIESTA::check.matchval(condx, pltx, cuniqueid, puniqueid)
+      check.matchval(condx, pltx, cuniqueid, puniqueid)
 
     ## Change uniqueid in plt table to match tree uniqueid
 #    if (puniqueid == "CN" && tuniqueid == "PLT_CN") {
@@ -503,7 +503,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   ## Check ACI. If TRUE, include all trees, If FALSE, filter for forested plots only 
   ## (COND_STATUS_CD = 1)
   ######################################################################################
-  ACI <- FIESTA::pcheck.logical(ACI, varnm="ACI", title="Include ACI tree data?", 
+  ACI <- pcheck.logical(ACI, varnm="ACI", title="Include ACI tree data?", 
 		first="NO", gui=gui)
   if (!ACI) {
     if (is.null(condx) || (!"COND_STATUS_CD" %in% names(condx))) {
@@ -538,13 +538,13 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## Check getadjplot
-  getadjplot <- FIESTA::pcheck.logical(getadjplot, varnm="getadjplot", 
+  getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
 		title="Get plot adjustment?", first="NO", gui=gui)
   if (getadjplot && is.null(condx)) 
     stop("must include condx to adjust to plot")
 
   ## Check adjtree
-  adjtree <- FIESTA::pcheck.logical(adjtree, varnm="adjtree", title="Area adjustment", 
+  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Area adjustment", 
 		first="NO", gui=gui)
   if (is.null(adjtree)) adjtree <- FALSE
 
@@ -611,7 +611,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }   
 
   ## CHECK TPA and tsumvars
-  TPA <- FIESTA::pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", gui=gui)
+  TPA <- pcheck.logical(TPA, varnm="TPA", title="Calculate TPA?", first="NO", gui=gui)
   if (TPA) {
     if (tsumvar %in% mortvars) {
       if (!"TPAMORT_UNADJ" %in% names(treex)) {
@@ -733,7 +733,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## Check tdomvar 
-  tdomvar <- FIESTA::pcheck.varchar(var2check=tdomvar, varnm="tdomvar", gui=gui, 
+  tdomvar <- pcheck.varchar(var2check=tdomvar, varnm="tdomvar", gui=gui, 
 		checklst=sort(names(treef)), caption="Tree domain name?", 
 		warn=paste(tdomvar, "not in tree table"), stopifnull=TRUE)
 
@@ -799,7 +799,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
 
   ## Check if want to include totals (tdomtot) and check for a totals name
   ## Check tdomtot
-  tdomtot <- FIESTA::pcheck.logical(tdomtot, varnm="tdomtot", "Total for domains?", 
+  tdomtot <- pcheck.logical(tdomtot, varnm="tdomtot", "Total for domains?", 
 		first="NO", gui=gui)
 
   ## Check tdomtotnm
@@ -949,23 +949,23 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## Check pivot
-  pivot <- FIESTA::pcheck.logical(pivot, varnm="pivot", title="Pivot columns?", 
+  pivot <- pcheck.logical(pivot, varnm="pivot", title="Pivot columns?", 
 		first="NO", gui=gui)
   if (!pivot) {
     presence=proportion=cover <- FALSE
 
   } else {
     ## Check presence
-    presence <- FIESTA::pcheck.logical(presence, varnm="presence", title="Presence only?", 
+    presence <- pcheck.logical(presence, varnm="presence", title="Presence only?", 
 		first="NO", gui=gui)
 
     ## Check proportion (proportion of all tree domains, values 0-1)
-    proportion <- FIESTA::pcheck.logical(proportion, varnm="proportion", title="Proportions?", 
+    proportion <- pcheck.logical(proportion, varnm="proportion", title="Proportions?", 
 		first="NO", gui=gui)
 
     ## Check cover (proportion of LIVE_CANOPY_CVR_PCT per tree domain)
     ## Note: total of all tree domains will equal LIVE_CANOPY_CVR_PCT for plot/condition
-    cover <- FIESTA::pcheck.logical(cover, varnm="cover", title="As Cover?", 
+    cover <- pcheck.logical(cover, varnm="cover", title="As Cover?", 
 		first="NO", gui=gui)
   }
 
@@ -986,7 +986,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## Check tdombarplot
-  tdombarplot <- FIESTA::pcheck.logical(tdombarplot, varnm="tdombarplot", 
+  tdombarplot <- pcheck.logical(tdombarplot, varnm="tdombarplot", 
 	title="Barplot of tdomains?", first="NO", gui=gui)
 
   ## Check tround
@@ -996,7 +996,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
   }
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="NO", gui=gui)
 
   ## If savedata, check output file names
@@ -1251,7 +1251,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     setnames(tdoms, tdomscolstot, matchnames)
 
     ## Check if class of cuniqueid matches class of cuniqueid
-    tabs <- FIESTA::check.matchclass(condx, tdoms, c(cuniqueid, condid))
+    tabs <- check.matchclass(condx, tdoms, c(cuniqueid, condid))
     condx <- tabs$tab1
     tdoms <- tabs$tab2
      
@@ -1286,7 +1286,7 @@ datSumTreeDom <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NUL
     setnames(tdoms, tdomscolstot, matchnames)
 
     ## Check if class of cuniqueid matches class of cuniqueid
-    tabs <- FIESTA::check.matchclass(pltx, tdoms, puniqueid, cuniqueid)
+    tabs <- check.matchclass(pltx, tdoms, puniqueid, cuniqueid)
     pltx <- tabs$tab1
     tdoms <- tabs$tab2
 

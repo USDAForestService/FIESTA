@@ -306,11 +306,11 @@ modFAOpop <- function(FAOdata=NULL, base=NULL, cluster=NULL, tree=NULL,
   #bcfilter <- pcfilter
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check saveobj 
-  saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
+  saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
 
 

@@ -30,19 +30,19 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
   ###############################################################
 
   ## Check pltx
-  pltx <- FIESTA::pcheck.table(pltx, gui=gui, tabnm="pltx")
+  pltx <- pcheck.table(pltx, gui=gui, tabnm="pltx")
 
   ## Check unitlut
   ############################################################################
-  unitlut <- FIESTA::pcheck.table(unitlut, gui=gui, tabnm="unitlut",
+  unitlut <- pcheck.table(unitlut, gui=gui, tabnm="unitlut",
  	caption="Strata table?", nullcheck=TRUE, stopifnull=TRUE)
 
   ## GET savedata, outfolder, outfn
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", title="Save data?", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data?", 
 		first="YES", gui=gui)
 
   if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outfolder <- pcheck.outfolder(outfolder, gui)
     if (is.null(outfn)) outfn <- "stratacnt"
   }
 

@@ -63,10 +63,10 @@ DBgetCSV <- function(DBtable, states=NULL, returnDT=FALSE,
   }
 
   ## Check states and get in proper format (abbr)
-  stabbrs <- FIESTA::pcheck.states(states, "ABBR")
+  stabbrs <- pcheck.states(states, "ABBR")
 
   ## Check ZIP
-  ZIP <- FIESTA::pcheck.logical(ZIP, varnm="ZIP", title="Zip files?",
+  ZIP <- pcheck.logical(ZIP, varnm="ZIP", title="Zip files?",
     first="YES")
 
   ###################################################################

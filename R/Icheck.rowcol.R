@@ -50,7 +50,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   ## DEFINE DOMAIN VARIABLES LISTS (VARIABLES TO KEEP AND EXCLUDE)
 
   ## CHECK domlut
-  domlut <- FIESTA::pcheck.table(domlut, tabnm="domlut", nullcheck=TRUE, gui=gui)
+  domlut <- pcheck.table(domlut, tabnm="domlut", nullcheck=TRUE, gui=gui)
 
   if (!is.null(domlut)) {
     domlutvars <- c("DOMCODE", "DOMNAME")
@@ -110,13 +110,13 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
  
   ## Check row.add0 and col.add0
   ########################################################
-  row.add0 <- FIESTA::pcheck.logical(row.add0, varnm="row.add0", 
+  row.add0 <- pcheck.logical(row.add0, varnm="row.add0", 
 		title="Add 0 for row?", first="NO", gui=gui)
-  col.add0 <- FIESTA::pcheck.logical(col.add0, varnm="col.add0", 
+  col.add0 <- pcheck.logical(col.add0, varnm="col.add0", 
 		title="Add 0 for column?", first="NO", gui=gui)
-  rowgrp <- FIESTA::pcheck.logical(rowgrp, varnm="rowgrp", title="Row groups?", 
+  rowgrp <- pcheck.logical(rowgrp, varnm="rowgrp", title="Row groups?", 
 		first="NO", gui=gui)
-  row.FIAname <- FIESTA::pcheck.logical(row.FIAname, varnm="row.FIAname", 
+  row.FIAname <- pcheck.logical(row.FIAname, varnm="row.FIAname", 
 		title="Row names?", first="NO", gui=gui)
   if (rowgrp && is.null(rowgrpnm) && !row.FIAname) {
      stop("either row.FIAname must be TRUE or rowgrpnm != NULL to add row groups")
@@ -126,7 +126,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   ### ROW VARIABLE
   ##############################################################
   uniquerow <- NULL
-  rowvar <- FIESTA::pcheck.varchar(var2check=rowvar, varnm="rowvar", gui=gui, 
+  rowvar <- pcheck.varchar(var2check=rowvar, varnm="rowvar", gui=gui, 
 		checklst=c("NONE", varlst), caption="Row variable", 
 		warn=paste(rowvar, "not found"))
   if (is.null(rowvar)) rowvar <- "NONE"
@@ -190,7 +190,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
         rowlut <- data.table(rowlut)
         setnames(rowlut, rowvar)
       } else {
-        rowlut <- FIESTA::pcheck.table(rowlut, gui=gui, tabnm=rowlut, caption="Row look up?")
+        rowlut <- pcheck.table(rowlut, gui=gui, tabnm=rowlut, caption="Row look up?")
       }
     }
 
@@ -302,8 +302,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
             condf[get(row.orderby) == "", (row.orderby) := "Undefined"]
           }
         }
-        condf <- FIESTA::DT_NAto0(DT=condf, cols=rowvar)
-        condf <- FIESTA::DT_NAto0(DT=condf, cols=row.orderby)
+        condf <- DT_NAto0(DT=condf, cols=rowvar)
+        condf <- DT_NAto0(DT=condf, cols=row.orderby)
       }
 
       ## rowvar.filter
@@ -430,8 +430,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           estseed[[row.orderby]] <- seedclord
         } 
 
-        treef <- FIESTA::DT_NAto0(DT=treef, cols=rowvar)
-        treef <- FIESTA::DT_NAto0(DT=treef, cols=row.orderby)
+        treef <- DT_NAto0(DT=treef, cols=rowvar)
+        treef <- DT_NAto0(DT=treef, cols=row.orderby)
       } else {
         if (estseed == "add" && !is.null(seedf) && rowvar=="DIACL" && 
 		!"DIACL" %in% names(seedf)) { 
@@ -459,7 +459,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   ##############################################################
   uniquecol <- NULL
   varlst <- varlst[which(!varlst %in% rowvar)]
-  colvar <- FIESTA::pcheck.varchar(var2check=colvar, varnm="colvar", gui=gui, 
+  colvar <- pcheck.varchar(var2check=colvar, varnm="colvar", gui=gui, 
 		checklst=c("NONE", varlst), caption="Column variable", 
 		warn=paste(colvar, "not found"))
   if (is.null(colvar)) colvar <- "NONE"
@@ -485,7 +485,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
         collut <- data.table(collut)
         setnames(collut, colvar)
       } else {
-        collut <- FIESTA::pcheck.table(collut, gui=gui, tabnm=collut, caption="Column look up?")
+        collut <- pcheck.table(collut, gui=gui, tabnm=collut, caption="Column look up?")
       }
     }
 
@@ -563,8 +563,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           }
         }
 
-        condf <- FIESTA::DT_NAto0(DT=condf, cols=colvar)
-        condf <- FIESTA::DT_NAto0(DT=condf, cols=col.orderby)
+        condf <- DT_NAto0(DT=condf, cols=colvar)
+        condf <- DT_NAto0(DT=condf, cols=col.orderby)
       } 
 
       ## colvar.filter
@@ -654,8 +654,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           estseed[[col.orderby]] <- seedclord
         } 
 
-        treef <- FIESTA::DT_NAto0(DT=treef, cols=colvar)
-        treef <- FIESTA::DT_NAto0(DT=treef, cols=col.orderby)
+        treef <- DT_NAto0(DT=treef, cols=colvar)
+        treef <- DT_NAto0(DT=treef, cols=col.orderby)
       } else {
         if (estseed == "add" && !is.null(seedf) && colvar=="DIACL" && 
 		!"DIACL" %in% names(seedf)) { 

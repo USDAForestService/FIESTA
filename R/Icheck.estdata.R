@@ -39,12 +39,12 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
   ## Check esttype
   #############################################################################
   esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC", "P2VEG")
-  esttype <- FIESTA::pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
+  esttype <- pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
 	checklst=esttypelst, caption="Esttype?")
 
   ## Check totals
   if (esttype %in% c("AREA", "TREE")) {
-    totals <- FIESTA::pcheck.logical(totals, varnm="totals", 
+    totals <- pcheck.logical(totals, varnm="totals", 
 		title="Totals?", first="NO", gui=gui, stopifnull=TRUE)
   }
 
@@ -70,7 +70,7 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
   if (esttype == "LULC") {
     landarealst <- c(landarealst, "CHANGE")
   }
-  landarea <- FIESTA::pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
+  landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	checklst=landarealst, caption="Sample land area?")
 
 
@@ -132,18 +132,18 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
   ########################################################
   dividebylst <- c("hundred", "thousand", "million")
   if (!is.null(divideby) || gui) {
-    divideby <- FIESTA::pcheck.varchar(var2check=divideby, varnm="divideby", 
+    divideby <- pcheck.varchar(var2check=divideby, varnm="divideby", 
 		gui=gui, checklst=dividebylst, caption="Divide estimates?")
   }
 
   ## Check sumunits 
   ########################################################
-  sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
+  sumunits <- pcheck.logical(sumunits, varnm="sumunits", 
 		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check TPA 
   ########################################################
-  TPA <- FIESTA::pcheck.logical(TPA, varnm="TPA", 
+  TPA <- pcheck.logical(TPA, varnm="TPA", 
 		title="TPA?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check tpavar
@@ -162,27 +162,27 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
 
   ## Check allin1
   ########################################################
-  allin1 <- FIESTA::pcheck.logical(allin1, varnm="allin1", 
+  allin1 <- pcheck.logical(allin1, varnm="allin1", 
 		title="All 1 table - Est (%error)?", first="NO", gui=gui)
 
   ### Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
 
   ### Check addtitle 
-  addtitle <- FIESTA::pcheck.logical(addtitle, varnm="addtitle", 
+  addtitle <- pcheck.logical(addtitle, varnm="addtitle", 
 		title="Add title to output?", first="YES", gui=gui, stopifnull=TRUE)
 
   ### Check returntitle 
-  returntitle <- FIESTA::pcheck.logical(returntitle, varnm="returntitle", 
+  returntitle <- pcheck.logical(returntitle, varnm="returntitle", 
 		title="Save output titles?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check rawtable
-  rawdata <- FIESTA::pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?", 
+  rawdata <- pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?", 
 		first="NO", gui=gui, stopifnull=TRUE)
 
   ## Check rawonly
-  rawonly <- FIESTA::pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?", 
+  rawonly <- pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?", 
 		first="NO", gui=gui, stopifnull=TRUE)
   if (rawonly && !rawdata) rawdata <- TRUE
 
@@ -266,7 +266,7 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
     ## Check estseed 
     ########################################################
     estseedlst <- c("none", "only", "add")
-    estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
+    estseed <- pcheck.varchar(var2check=estseed, varnm="estseed", 
 		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
     if (estseed == "none") {
       seedx <- NULL

@@ -58,17 +58,17 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   ##################################################################
 
   ## Check x
-  datx <- FIESTA::pcheck.table(x, gui=gui, tabnm="x", caption="Table with variable(s)?",
+  datx <- pcheck.table(x, gui=gui, tabnm="x", caption="Table with variable(s)?",
 		stopifnull=TRUE)
   xnamelst <- names(datx)
   
   ## Check pvar
-  pvar <- FIESTA::pcheck.varchar(var2check=pvar, varnm="pvar", checklst=xnamelst, 
+  pvar <- pcheck.varchar(var2check=pvar, varnm="pvar", checklst=xnamelst, 
 	caption="Pivot variable", warn="pvar not in data table", stopifnull=TRUE) 
 
   ## Check xvar
   if (is.null(xvar)) {
-    xvar <- FIESTA::pcheck.varchar(var2check=xvar, varnm="xvar", checklst=xnamelst, 
+    xvar <- pcheck.varchar(var2check=xvar, varnm="xvar", checklst=xnamelst, 
 		caption="X variable", warn="xvar not in data table", multiple=TRUE, 
 		stopifnull=TRUE, gui=gui)
   } else if (!all(xvar %in% xnamelst)) {
@@ -78,11 +78,11 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   xvar.class <- lapply(datx[,xvar, with=FALSE], class)
 
   ## Check yvar
-  yvar <- FIESTA::pcheck.varchar(var2check=yvar, varnm="yvar", checklst=xnamelst, 
+  yvar <- pcheck.varchar(var2check=yvar, varnm="yvar", checklst=xnamelst, 
 	caption="Y variable", warn="yvar not in data table", stopifnull=TRUE) 
 
   ## Check NAto0
-  NAto0 <- FIESTA::pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
+  NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
 		first="YES", gui=gui)
 
   ## Check function (pfun) used for aggregation
@@ -107,7 +107,7 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   ## Check outfolder
   ###########################################################
   if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui=gui)
+    outfolder <- pcheck.outfolder(outfolder, gui=gui)
     if (is.null(outfn) || gsub(" ", "", outfn) == "") 
       outfn <- "pivot"
   }
@@ -145,7 +145,7 @@ datPivot <- function(x, pvar, xvar, yvar, pfun=sum, xfilter=NULL,
   } 
 
   if (savedata) {
-    FIESTA::write2csv(ptab, outfolder=outfolder, outfilenm=outfn, 
+    write2csv(ptab, outfolder=outfolder, outfilenm=outfn, 
 		outfn.date=outfn.date, overwrite=overwrite)
   }
     

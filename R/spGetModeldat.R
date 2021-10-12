@@ -195,7 +195,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)
-    uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
+    uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
@@ -203,7 +203,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check domtype
   ###################################################################
   domtypelst <- c("POLY", "RASTER") 
-  domtype <- FIESTA::pcheck.varchar(var2check=domtype, varnm="domtype", gui=gui,
+  domtype <- pcheck.varchar(var2check=domtype, varnm="domtype", gui=gui,
 	checklst=domtypelst, caption="Estimation unit type?", stopifnull=TRUE)
 
   ## Check domlayer and domvar
@@ -214,7 +214,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		caption="Domain spatial polygons?", stopifnull=TRUE)
 
     ## Check domvar
-    domvar <- FIESTA::pcheck.varchar(var2check=domvar, varnm="domvar", gui=gui, 
+    domvar <- pcheck.varchar(var2check=domvar, varnm="domvar", gui=gui, 
 		checklst=names(domlayerx), caption="Domain variable", 
 		warn=paste(domvar, "not in domlayer"))
     if (is.null(domvar)) {
@@ -241,7 +241,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
     ## Check rastlst.cont.stat
     rastlst.cont.statlst <- c("mean", "sum") 
-    rastlst.cont.stat <- FIESTA::pcheck.varchar(var2check=rastlst.cont.stat, 
+    rastlst.cont.stat <- pcheck.varchar(var2check=rastlst.cont.stat, 
 		varnm="rastlst.cont.stat", gui=gui, checklst=rastlst.cont.statlst, 
 		caption="Raster zonal stat?")
     if (is.null(rastlst.cont.stat)) rastlst.cont.stat <- "mean"
@@ -267,7 +267,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     ## Check asptransform    
-    asptransform <- FIESTA::pcheck.logical(asptransform, varnm="asptransform", 
+    asptransform <- pcheck.logical(asptransform, varnm="asptransform", 
 		title="Transform aspect layer?", first="YES", gui=gui)
 
     ## Transform aspect 
@@ -321,7 +321,7 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         stop("rast.lut must be included in rastlst.catfn")
 
       ## Check rastlut
-      rastlutx <- FIESTA::pcheck.table(rastlut, gui=gui, caption="Data table?", 
+      rastlutx <- pcheck.table(rastlut, gui=gui, caption="Data table?", 
 		returnDT=TRUE)
       if (is.null(rast.lut)) 
         stop("invalid lookup table for", rast.lut)
@@ -329,27 +329,27 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   }
 
   ## npixels    
-  npixels <- FIESTA::pcheck.logical(npixels, varnm="npixels", 
+  npixels <- pcheck.logical(npixels, varnm="npixels", 
 		title="Number of pixels?", first="YES", gui=gui)
 
   ## Check showext    
-  showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
+  showext <- pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
 
   ## Check keepNA    
-  keepNA <- FIESTA::pcheck.logical(keepNA, varnm="keepNA", 
+  keepNA <- pcheck.logical(keepNA, varnm="keepNA", 
 		title="Keep NA values?", first="YES", gui=gui)
 
   ## Check exportNA    
-  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+  exportNA <- pcheck.logical(exportNA, varnm="exportNA", 
 		title="Export NA values?", first="YES", gui=gui)
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
   ## Check exportsp 
-  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
 		title="Export spatial?", first="NO", gui=gui)  
 
 
@@ -527,11 +527,11 @@ spGetModeldat <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         stop("must have variable named ", rast.lutnm, " in rastlut")
       }
       ## Check that all values of sppltx are in rastlut
-      FIESTA::check.matchval(sppltx, rastlut, rast.lutnm, tab1txt="sppltx", 
+      check.matchval(sppltx, rastlut, rast.lutnm, tab1txt="sppltx", 
 		tab2txt="rastlut")
 
       ## Check if class of rast.lutnm in rastlut matches class of rast.lutnm in sppltx
-      tabs <- FIESTA::check.matchclass(sppltx, rastlut, uniqueid, rast.lutnm)
+      tabs <- check.matchclass(sppltx, rastlut, uniqueid, rast.lutnm)
       sppltx <- tabs$tab1
       rastlut <- tabs$tab2
 

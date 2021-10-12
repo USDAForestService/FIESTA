@@ -46,7 +46,7 @@ write2xlsx <- function(esttab, psetab=NULL, wbnm=NULL, sheetnm=NULL, tabtitle=NU
 
   ## Check Excel workbook
   ###############################################################
-  wbnm <- FIESTA::pcheck.xlsx(wbnm)
+  wbnm <- pcheck.xlsx(wbnm)
   wb <- xlsx::loadWorkbook(file=wbnm)
 
   if (is.null(sheetnm)) {

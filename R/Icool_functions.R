@@ -164,7 +164,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
       message("overwriting ", nm, "...")
     } 
   } else if (!append && !add) {
-    outfn.base <- FIESTA::fileexistsnm(outfolder, outfn.base, ext)
+    outfn.base <- fileexistsnm(outfolder, outfn.base, ext)
   }
   if (!baseonly) {
     ## Check outfolder

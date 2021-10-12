@@ -47,10 +47,10 @@ DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
 
 
   ## Check states and sqltables
-  states <- FIESTA::pcheck.states(states)
+  states <- pcheck.states(states)
 
   ## Check ZIP (note: this was previously set up as a parameter)
-  ZIP <- FIESTA::pcheck.logical(ZIP, varnm="ZIP", title="Zip files?", first="YES")
+  ZIP <- pcheck.logical(ZIP, varnm="ZIP", title="Zip files?", first="YES")
 
   if (is.null(sqltables)) {
     stop("must include sqltables")

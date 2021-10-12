@@ -318,11 +318,11 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   returnlst <- list()
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check saveobj 
-  saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
+  saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
  
   ## Check output
@@ -348,7 +348,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ###################################################################################
   if (!is.null(GBdata)) {
     list.items <- c("cond", "unitarea", "unitvar")
-    GBdata <- FIESTA::pcheck.object(GBdata, "GBdata", list.items=list.items)
+    GBdata <- pcheck.object(GBdata, "GBdata", list.items=list.items)
     #bnd <- GBdata$bnd
     plt <- GBdata$plt
     cond <- GBdata$cond
@@ -382,7 +382,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
       if (popType == "P2VEG") {
         list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
       }
-      pltdat <- FIESTA::pcheck.object(pltdat, "pltdat", list.items=list.items)
+      pltdat <- pcheck.object(pltdat, "pltdat", list.items=list.items)
 
       ## Extract list objects
       puniqueid <- pltdat$puniqueid
@@ -418,7 +418,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     }
     if (!is.null(GBstratdat)) {
       list.items <- c("pltassgn", "unitarea", "unitvar")
-      GBstratdat <- FIESTA::pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
+      GBstratdat <- pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
       bndx <- GBstratdat$bndx
       pltassgn <- GBstratdat$pltassgn
       pltassgnid <- GBstratdat$pltassgnid
@@ -577,7 +577,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   } else if (adj == "plot") {
     adjtree <- TRUE
     bycond <- FALSE
-    adjfacdata <- FIESTA::getadjfactorPLOT(treex=treef, condx=condx, 
+    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condx
     treef <- adjfacdata$treex
