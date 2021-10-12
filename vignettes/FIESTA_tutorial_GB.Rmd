@@ -28,19 +28,19 @@ Functions are organized by type or objective and are named with a corresponding 
 
 **Analysis Functions**
 
-* Analysis functions (an) - wrapper functions for steam-lining estimation processes.
+* Analysis functions (an) - wrapper functions for steam-lining estimation processes. These functions reside in the FIESTAnalysis package. 
 
 
 
-### Green-Book (GB) module overview
+## Green-Book (GB) module overview
 FIESTA's Green-Book (GB) module calculates population estimates and their sampling errors based on Bechtold and Patterson's (2005), 'Green-Book' for FIA's nationally-consistent, systematic annual sample design, chapter 4 (Scott et al. 2005). FIA's sample design is based on 2 phases: the first phase uses remotely-sensed data to stratify the land area to increase precision of estimates; while the 2nd phase obtains photo and ground observations and measurements for a suite of information across a hexagonal grid, each approximately 6000 acres in size. The associated estimators and variance estimators are used for area and tree attribute totals with the assumption of a simple random, stratified design and double sampling for stratification. Adjustment factors are calculated by estimation unit and strata to account for nonsampled (nonresponse) conditions.   
 
 Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, FIESTA adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA's publicly-available online tool (EVALIDator - https://apps.fs.usda.gov/Evalidator/evalidator.jsp) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).
 
-### Objective of tutorial
-The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates and estimated variances using the 'Green Book' estimators with FIA's plot and standard population data from the FIA database (FIADB). This tutorial steps through the following topics to help use FIESTA's GB module. 
+## Objective of tutorial
+The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates and estimated variances using FIA's 'Green Book' estimators with FIA's standard state-level population data (i.e., Evaluation) from the FIA database (FIADB), including FIA plot data, strata proportions, and area of estimation units. This tutorial steps through the following topics to help use FIESTA's GB module. 
 
-* [FIESTA parameters](#input)
+* [Green-Book parameters](#input)
 * [Required variables for input tables](#required)
 * [FIESTA output from Green-Book module](#output)
 * [Reference tables](#ref)
@@ -50,7 +50,8 @@ The main objective of this tutorial is to demonstrate how to use FIESTA for gene
 
 <a name="input"></a>
 
-## FIESTA Green-Book Parameters - modGBarea(), modGBtree(), modGBratio()
+## Green-Book Parameters
+
 
 The parameters for GB functions are organized by different categories based on population data and estimation output.
 
@@ -71,6 +72,10 @@ Estimation output:
 4. [Output table information](#out1)
 5. [Output table specifications](#out2)
 6. [Output table title(s)](#title)
+
+
+
+### Population Data
 
 
 <a name="ptyp"></a>
@@ -104,7 +109,7 @@ The required data tables are from the FIA national database. Plot-level informat
 
 Define information for area estimation.
 
-* **areawt**    - Variable to use for calculating area estimates (e.g., CONDPROP_UNADJ). This may change for other population types.
+* **areawt**    - Variable to use for calculating area estimates (e.g., CONDPROP_UNADJ). This may be different for other population types.
 * **adj**       - Adjustment for nonresponse ('none', 'samp', 'plot'). Note: adj='samp', expands area across strata and estimation unit(s), based on the summed proportions of sampled conditions divided by the total plots in the strata/estimation unit; adj='plot', expands area across plot based on 1 divided by the summed proportions of sampled conditions in plot.
 
 
@@ -137,7 +142,9 @@ An estimation unit is a population, or area of interest, with known area and num
 * **unitvar2** - Name of a second estimation unit variable in cond or pltassgn with assignment for each plot (e.g., 'STATECD').
 * **unitarea**  - Total acres by estimation unit. If only 1 estimation unit, include a number representing total acreage for the area of interest. If more than one estimation unit, provide a data frame/data table of total acres by estimation unit, with variables defined by unitvar and areavar. 
 * **areavar**   - Name of acre variable in unitarea (Default = "ACRES").
-* **unitcombine** - TRUE, an automated procedure occurs to combine estimation units if less than 10 plots (See note below for more details).
+* **areaunits** - Units of areavar in unitarea ('acres', 'hectares').
+* **minplotnum.unit** - Minimum number of plots for estimation unit (Default=10).
+* **unit.action** - What to do if number of plots in an estimation unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine', combines estimation unit to the following estimation unit in unitlut.
 
 
 <a name="strat"></a>
@@ -149,14 +156,17 @@ Stratification is used to reduce variance in population estimates by partitionin
 * **stratalut** - Look-up table with pixel counts, area, or proportions (strwt) by strata (and estimation unit).
 * **strvar**    - Name of strata variable in stratalut and pltassgn or cond table with strata assignment for each plot.
 * **getwt**     - If TRUE, calculates strata weights from getwtvar in stratalut.
-* **getwtvar**  - Name of variable in stratalut to calculate weights (e.g., pixels counts). Default="P1POINTCNT". 
-* **nonresp**   - TRUE, if substrata are used to minimize bias of nonresponse (currently not available).
-* **substrvar** - Name of substrata variable in stratalut and table with substrata assignment for each plot (currently not available).
-* **stratcombine** - TRUE, an automated procedure occurs to combine strata within estimation units if less than 2 plots (See note below for more details).
+* **getwtvar**  - If getwt=TRUE, name of variable in stratalut to calculate weights Default="P1POINTCNT". 
+* **strwtvar**  - If getwt=FALSE, name of variable in stratalut with calculated weights (Default = 'strwt'). 
+* **stratcombine** - TRUE, and strata=TRUE, an automated procedure occurs to combine strata within estimation units if less than minplotnum.strat (See note below for more details).
+* **minplotnum.strat** - Integer. Minimum number of plots for a stratum within an estimation unit (Default=2). 
 
 
 Note: 
-A minimum of 2 plots per strata is necessary for stratification. If there are less than 2 plots in any strata/estimation combination, an error occurs with a message to collapse classes. If autocombine=TRUE, an automated procedure occurs to collapse all strata/estimation unit combinations that have 10 or less plots (Westfall and others, 2011). The procedure collapses classes based on the order of estimation units in stratalut. If an estimation unit has 10 or less plots, it is grouped with the estimation unit following in the table. If it is the last estimation unit in the table, it is grouped with the estimation unit prededing in the table.  
+If there are less than minplotnum.strat plots (default=2 plots) in any strata/estimation combination: if stratcombine=FALSE, an error occurs with a message to collapse classes; if stratcombine=TRUE, an automated procedure occurs to collapse all strata less than minplotnum.strat. The function collapses classes based on the order of strata in stratatlut. If a strata within in estimation unit is less than minplotnum.strat, it is grouped with the next strata class in stratalut. If there are less than minplotnum.unit plots in an estimation unit: if unit.action='keep', NA is returned for the estimation unit; if unit.action='remove', the estimation unit is removed from the returned output; if unit.action='combine', an automated procedure occurs to group estimation units with less tha 10 plots with the next estimation unit in the stratalut. If it is the last estimation unit in the table, it is grouped with the estimation unit preceeding in the table. A recommended number of plots is provided as defaults (Westfall and others, 2011). 
+
+
+### Estimation output
 
 
 <a name="filt"></a>
@@ -426,12 +436,12 @@ getestvar()
 
 <a name="GBfun"></a>
 
-## GB Functions and Examples
+### GB Examples
 
-The following examples are for generating FIA's traditional, state-level estimate, using standard FIA Evaluation data from FIA's National database, including associated Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
+The following examples are for generating FIA's traditional, state-level estimate, using standard FIA Evaluation data from FIA's National database, including FIA plot data and associated estimation unit and stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
 
 
-## Example data - Wyoming (WY), Inventory Years 2011-2013
+Example data - Wyoming (WY), Inventory Years 2011-2013
 
 Data Frame  | Description
 :-----------| :-----------------------------------------------------------------------------------
@@ -452,10 +462,9 @@ WYbighorn_districtbnd.shp | Polygon shapefile of WY Bighorn National Forest Dist
 
 
 
-#### Set up for examples
+### Set up for examples
 
-
-```
+```{r}
 
 ## Set options
 options(scipen=6)
@@ -478,49 +487,27 @@ if (.Platform$OS.type == "windows") {
   outfolder <- "outfolder"
 }
 
-
 ```
 
 
-#### GB Functions
+### GB Functions
 * [modGBarea()](#modGBarea)
 * [modGBtree()](#modGBtree)
 * [modGBratio()](#modGBratio)
 * [modGBpop()](#modGBpop)
 
+
 <a name="modGBpop"></a>
 
-#### modGBpop
+### modGBpop()
 
-```
-######################################################################################
-# Usage:
-# modGBpop(popType="VOL", cond, plt = NULL, tree = NULL, seed = NULL, 
-#   vspspp = NULL, subplot = NULL, subp_cond = NULL, lulc = NULL, pltassgn = NULL,   
-#   dsn = NULL, puniqueid = "CN", pltassgnid = "CN", pjoinid = "CN",      
-#   tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", condid = "CONDID",   
-#   areawt = "CONDPROP_UNADJ", adj = "samp", evalid = NULL, invyrs = NULL,      
-#   intensity = NULL, ACI = FALSE, unitvar = NULL, unitvar2 = NULL, 
-#   unitarea = NULL, areavar = "ACRES", areaunits="acres", unitcombine = FALSE, 
-#   minplotnum.unit = 10, strata = TRUE, stratalut = NULL, strvar = "STRATUMCD", 
-#   getwt = TRUE, getwtvar = "P1POINTCNT", strwtvar = "strwt", stratcombine = TRUE,    
-#   minplotnum.strat = 2, saveobj = FALSE, objnm = "GBpopdat", savedata = FALSE,  
-#   outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL,   
-#   outfn.date = TRUE, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-#   GBdata = NULL, pltdat = NULL, GBstratdat = NULL, gui = FALSE)
-# 
-# Description:
-# Generates population data for input to modGB* estimation modules. Data includes
-# strata weights, number of plots by strata and estimation unit, strata-level
-# expansion factors, and sample-based area adjustment factors.  
-# - checks input parameters and data tables
-# - checks unitarea data
-# - checks auxiliary data (i.e., stratification data)
-# - calculates adjustment factors for nonresponse
-########################################################################################
+FIESTA's population functions (mod*pop) check input data and perform population-level calculations, such as: summing number of sampled plots; adjusting for partial nonresponse; and standardizing auxiliary data. These functions are specific to each FIESTA module and are run prior to or within a module.
 
-help(modGBpop)
+For FIESTA's GB Module, the modGBpop function calculates and outputs: number of plots, adjustment factors, and the expansion factor by strata, similar to data found in FIADB's pop_stratum table.
 
+In this example, we use the sample WY data (2013 Evaluation) in FIESTA to generate population data for GB module. We check this output with the FIADB pop_stratum table from FIA DataMart for 561301 Evalid, using the FIESTA::DBqryCSV function.
+
+```{r}
 
 ## Get population data for Wyoming area of interest using post-stratification
 ########################################################################################
@@ -530,12 +517,12 @@ GBpopdat <- modGBpop(cond=WYcond, tree=WYtree, pltassgn=WYpltassgn, pltassgnid="
 ## Get names of list components
 names(GBpopdat)
 
-## Look at population data
+## Look at output from GBpopdat
 names(GBpopdat)
-GBpopdat$plotsampcnt	# Number of plots after plot filter
-GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
+GBpopdat$plotsampcnt	# Number of plots by plot status
+GBpopdat$condsampcnt	# Number of conditions by condition status
 
-# Strata information and adjustment factors
+# Strata-level population data, including number of plots and adjustment factors
 head(GBpopdat$stratalut)    
 
 ## Adjustment factors added to condition-level data
@@ -545,93 +532,147 @@ head(GBpopdat$condx)
 head(GBpopdat$treex)
 
 
+## Compare with FIADB pop_stratum table
+qry <- "select estn_unit, stratumcd, p1pointcnt, p2pointcnt, expns, 
+          adj_factor_macr, adj_factor_subp, adj_factor_micr from pop_stratum 
+        where evalid = 561301 order by estn_unit, stratumcd"
+pop_stratum <- DBqryCSV(qry, states="Wyoming", sqltables="pop_stratum")
+
+head(pop_stratum)
+head(GBpopdat$stratalut)
+
 ```
 
 
 
 <a name="modGBarea"></a>
 
-#### modGBarea
+### modGBarea()
 
-```
-######################################################################################
-# Usage:
-# modGBarea(GBpopdat = NULL, landarea = "FOREST", pcfilter = NULL,    
-#   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE,    
-#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE,   
-#   rowlut = NULL, collut = NULL, rowgrp = NULL, rowgrpnm = NULL, rowgrpord = NULL, 
-#   sumunits = FALSE, allin1 = FALSE, metric = FALSE, estround = 0, pseround = 2, 
-#   estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, outfolder = NULL,  
-#   outfn.pre = NULL, outfn.date = TRUE, addtitle = TRUE, rawdata = FALSE, 
-#   rawonly = FALSE, raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = NULL,  
-#   overwrite_layer = TRUE, append_layer = FALSE, returntitle = FALSE, 
-#   title.main = NULL, title.ref = NULL, title.rowvar = NULL, title.colvar = NULL,  
-#   title.unitvar = NULL, title.filter = NULL, gui = FALSE, ...)
-# 
-# Description:
-# Generates acre estimates by domain (and estimation unit). Calculations are based on 
-# Scott et al. 2005 ('the green-book') for mapped forest inventory plots. The non-ratio 
-# estimator for estimating area by stratum and domain is used. Plots that are totally 
-# nonsampled are excluded from estimation dataset. Next, an adjustment factor is 
-# calculated by strata to adjust for nonsampled (nonresponse) conditions that have 
-# proportion less than 1. The attribute is the proportion of the plot which is divided 
-# by the adjustment factor, and averaged by stratum. Strata means are combined using the
-# strata weights and then expanded to acres using the total land area in the population.  
-########################################################################################
+FIESTA's modGBarea function generates acre estimates by domain (e.g., Forest type). Calculations are based on Scott et al. 2015 ('Green-Book') for mapped forest inventory plots. The non-ratio estimator for estimating area by stratum and domain is used. Plots that are totally nonsampled are excluded from the estimation dataset. Next, an adjustment factor is calculated by strata to adjust for nonsampled (nonresponse) conditions that have proportion less than 1. The attribute is the proportion of the plot which is divided by the adjustment factor, and averaged by stratum. Strata means are combined using the strata weights and then expanded to acres using the total land area in the population.
 
-#help(modGBarea)
+Parameters are defined based on category: population data (pop); estimation information (est); and output details (out).
 
 
-## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
-########################################################################################
-area1 <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", unitarea=WYunitarea, 
-    unitvar="ESTN_UNIT", stratalut=WYstratalut, landarea="FOREST", sumunits=TRUE)
+```{r}
 
-## Get names of list components
+## Generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY)
+## Return raw data and titles
+## Area of forest land, Wyoming, 2011-2013 (sum estimation units)
+###########################################################################
+area1 <- modGBarea(
+    cond=WYcond,             ## pop - FIA plot/condition data
+    pltassgn=WYpltassgn,     ## pop - plot assignments
+    pltassgnid="CN",         ## pop - uniqueid of plots
+    unitarea=WYunitarea,     ## pop - area by estimation units
+    unitvar="ESTN_UNIT",     ## pop - name of estimation unit
+    stratalut=WYstratalut,   ## pop - strata classes and pixels counts
+    landarea="FOREST",       ## est - forest land filter
+    sumunits=TRUE,           ## est - sum estimation units to population
+    rawdata=TRUE,            ## out - return raw data 
+    returntitle=TRUE)        ## out - return title information
+
+## Look at output list from modGBarea()
 names(area1)
 
-## Look at estimate table from area1 list
+## Estimate and percent sampling error of estimate
 area1$est
 
 
-## Area of forest land and % sampling error, Wyoming, 2011-2013 (sum estimation units)
-## Add raw data and return title
-#######################################################################################
-area1 <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", unitarea=WYunitarea, 
-  unitvar="ESTN_UNIT", stratalut=WYstratalut, landarea="FOREST", sumunits=TRUE,
-  rawdata=TRUE, returntitle=TRUE)
+## Raw data (list object) for estimate
+raw <- area1$raw
+names(raw)
+raw$unit_totest       ## estimates by estimation unit (i.e., ESTN_UNIT)
+raw$totest            ## estimates for population (i.e., WY)
 
-## Get names of list components
-names(area1)
 
-## Look at estimate table from area1 list
-area1$est
-
-## Get list of raw data from area1 list components and look at names
-raw.tot <- area1$raw
-names(raw.tot)
-raw.tot$unit_totest	# Raw data for total estimates by estimation unit
-raw.tot$totest		  # Raw data for total estimates by estimation unit summed to one estimate
-
-## Look at population data
+## Population data (list object) for estimate
 GBpopdat <- area1$GBpopdat
 names(GBpopdat)
-GBpopdat$plotsampcnt	# Number of plots after plot filter
-GBpopdat$condsampcnt	# Number of conditions after plot filter, before cond filters
-GBpopdat$stratalut    # Strata information and adjustment factors
-
-## Look at titles
-area1$titlelst
 
 
-## Add table rows:
-## Area of forest land and % sampling error by forest type, Wyoming, 2011-2013
-####################################################################################
-## Rows only; combine estimation units (sumunits=TRUE)
-area2a <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
+## Titles (list object) for estimate
+titlelst <- area1$titlelst
+names(titlelst)
+titlelst
+
+
+
+## Add rows to output:
+## Area of forest land by forest type, Wyoming, 2011-2013
+area2 <- modGBarea(
+    cond=WYcond,             ## pop - FIA plot/condition data
+    pltassgn=WYpltassgn,     ## pop - plot assignments
+    pltassgnid="CN",         ## pop - uniqueid of plots
+    unitarea=WYunitarea,     ## pop - area by estimation units
+    unitvar="ESTN_UNIT",     ## pop - name of estimation unit
+    stratalut=WYstratalut,   ## pop - strata classes and pixels counts
+    landarea="FOREST",       ## est - forest land filter
+    sumunits=TRUE,           ## est - sum estimation units to population
+    rowvar="FORTYPCD",       ## est - row domain
+    rawdata=TRUE,            ## out - return raw data 
+    returntitle=TRUE)        ## out - return title information
+
+
+## Look at output list from modGBarea()
+names(area2)
+
+## Estimate and percent sampling error of estimate
+area2$est
+
+
+## Raw data (list object) for estimate
+raw <- area2$raw
+names(raw)
+raw$unit_totest       ## estimates by estimation unit (i.e., ESTN_UNIT)
+raw$totest            ## estimates for population (i.e., WY)
+raw$unit_rowest
+raw$rowest
+
+
+## Population data (list object) for estimate
+GBpopdat <- area2$GBpopdat
+names(GBpopdat)
+
+
+## Titles (list object) for estimate
+titlelst <- area2$titlelst
+names(titlelst)
+titlelst
+
+
+## Add row and columns to output
+## Return output with estimates (est) and percent standard error (pse) in same cell - est(pse)
+## Save data to outfolder:
+## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
+area3 <- modGBarea(
+    cond=WYcond,             ## pop - FIA plot/condition data
+    pltassgn=WYpltassgn,     ## pop - plot assignments
+    pltassgnid="CN",         ## pop - uniqueid of plots
+    unitarea=WYunitarea,     ## pop - area by estimation units
+    unitvar="ESTN_UNIT",     ## pop - name of estimation unit
+    stratalut=WYstratalut,   ## pop - strata classes and pixels counts
+    landarea="FOREST",       ## est - forest land filter
+    sumunits=TRUE,           ## est - sum estimation units to population
+    rowvar="FORTYPCD",       ## est - row domain
+    colvar="STDSZCD",        ## est - column domain
+    rawdata=TRUE,            ## out - return raw data 
+    returntitle=TRUE,        ## out - return title information
+    allin1=TRUE,             ## out - return output with est(pse)
+    savedata=TRUE,           ## out - save data to outfolder
+    outfolder="outfolder")   ## out - outfolder for saving data
+
+## Look at output list from modGBarea()
+names(area3)
+
+## Estimate and percent sampling error of estimate
+area3$est
+
+  
+  cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
   unitvar="ESTN_UNIT", unitarea=WYunitarea, stratalut=WYstratalut, landarea="FOREST", 
-  rowvar="FORTYPCD", row.FIAname=TRUE, sumunits=TRUE, savedata=TRUE, 
-  returntitle=TRUE, outfolder="outfolder")
+  rowvar="FORTYPCD", row.FIAname=TRUE, sumunits=TRUE, returntitle=TRUE, 
+  savedata=TRUE, outfolder="outfolder")
 area2a$est
 
 ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
