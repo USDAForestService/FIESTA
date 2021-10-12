@@ -148,7 +148,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 	keepNA=TRUE, NAto0=TRUE, npixels=TRUE, returnxy=FALSE, showext=FALSE, 
 	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="csv", 
 	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
- 	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, strvars=NULL, ...){
+ 	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -168,7 +168,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (gui) {uniqueid=savedata <- NULL}
 
   ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=strvars2 <- NULL
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
@@ -613,12 +613,6 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       zonalnames <- c(zonalnames, outname[outname != "npixels"])
       predfac.levels[[rastnm]] <- as.numeric(sapply(strsplit(outname[outname != "npixels"], 
 							paste0(rastnm,".")), '[', 2))
-
-      if (!is.null(strvars)) {
-        if (any(rastfn %in% strvars)) {
-          strvars2 <- c(strvars2, rastnm)
-        }
-      }
       if (npixels) npixels <- FALSE
       rm(zonaldat.rast.cat)
       rm(zonalext)
@@ -631,14 +625,10 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     dunitzonal <- dunitzonal[zonalDT.cat]  
   }
 
-  if (!is.null(strvars)) {
-    if (!all(strvars %in% predfac)) {
-      strvars.miss <- strvars[!strvars %in% predfac]
-      strvars <- strvars[!strvars %in% strvars.miss]
-      message("strvars not in ", toString(predfac), "...", toString(strvars.miss))
-    }
-  }
- 
+  ## Check if any auxiliary data included. If no return estimation unit info only
+  noaux <- ifelse (is.null(rastlst.contfn) && is.null(rastlst.catfn), TRUE, FALSE)
+    
+    
   ###################################################################################
   ## Get totacres from domain polygons (if areacalc = TRUE)
   ###################################################################################
@@ -651,6 +641,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     names(dunitarea) <- c(dunitvar, areavar)
   }
 
+
   ## Write data frames to CSV files
   #######################################
   pltassgn <- sf::st_drop_geometry(sppltx)
@@ -659,35 +650,26 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 		out_dsn=out_dsn, out_layer="pltassgn", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
-    datExportData(dunitzonal, outfolder=outfolder, out_fmt=out_fmt, 
+    if (!noaux) {
+      datExportData(dunitzonal, outfolder=outfolder, out_fmt=out_fmt, 
 		out_dsn=out_dsn, out_layer="dunitzonal", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
 		add_layer=TRUE, append_layer=append_layer)
+    }
   }
     
-
-  returnlst <- list(pltassgn=pltassgn, dunitzonal=setDF(dunitzonal), dunitvar=dunitvar,
-		inputdf=inputdf, prednames=prednames, zonalnames=zonalnames, 
-		predfac=predfac, npixelvar="npixels", pltassgnid=uniqueid)
-  if (length(predfac) > 0) {
-    returnlst$predfac.levels <- predfac.levels
-  }
+  returnlst <- list(pltassgn=pltassgn, dunitvar=dunitvar, pltassgnid=uniqueid)
   if (areacalc) {
     returnlst$dunitarea <- dunitarea
     returnlst$areavar <- areavar
   }
-  if (length(strvars2) > 0) {
-    for (i in 1:length(strvars2)) {
-      strvar <- strvars2[i]
-      if (i == 1) {
-        returnlst$strvar <- strvar
-        returnlst$stratalut <- strat.pivot(dunitzonal, strvar, unitvars=dunitvar, strwtvar="strwt")
-      } else {
-        assign(returnlst[[paste0("stratalut", i)]], 
-			strat.pivot(dunitzonal, strvar, unitvars=dunitvar, strwtvar="strwt"))
-        assign(returnlst[[paste0(strvar, i)]], strvar)
-      }
-    }
+  if (!noaux) {
+    append(returnlst, list(dunitzonal=setDF(dunitzonal), 
+		inputdf=inputdf, prednames=prednames, zonalnames=zonalnames, 
+		predfac=predfac, npixelvar="npixels"))
+  }
+  if (length(predfac) > 0) {
+    returnlst$predfac.levels <- predfac.levels
   }
    
 
