@@ -89,6 +89,7 @@
 #' appends to layers in dsn.
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in dunitzonal output and extract to pltassgn points.
+#' @param strvars Tracey: please add a description of this parameter.
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
 #' rastlst*. } \item{dunitzonal}{ Data frame. Number of pixels and zonal

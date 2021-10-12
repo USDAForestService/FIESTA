@@ -162,6 +162,8 @@ appends to layers in dsn.}
 \item{vars2keep}{String vector. Attributes in SAdoms, other than domvar to
 include in dunitzonal output and extract to pltassgn points.}
 
+\item{strvars}{Tracey: please add a description of this parameter.}
+
 \item{...}{Other parameters for spMakeSpatialPoints.}
 }
 \value{
