@@ -707,6 +707,8 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
         dunitlut <- do.call(rbind, dunit_multestlst)[,"dunitlut.dom"]$dunitlut.dom
       }
     }
+print("TEST")
+print(head(pdomdat))
     multestlst[[SApopdatnm]] <- dunit_multest
     predselectlst[[SApopdatnm]] <- 
 		list(predselect.unit=predselect.unit, predselect.area=predselect.area)
@@ -714,8 +716,8 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
       ## Merge SAdom attributes to dunit_totest
       if (addSAdomsdf) {
         pdomdat <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, largebnd.unique, SAdomvars)), with=FALSE], 
-			pdomdat, by=dunitvar)
+			unique(c(dunitvar, "AOI", largebnd.unique, SAdomvars)), with=FALSE], 
+			pdomdat, by=c(dunitvar, "AOI"))
         dunitlut <- merge(setDT(SAdomsdf)[, 
 			unique(c(dunitvar, "AOI", largebnd.unique, SAdomvars)), with=FALSE], 
 			dunitlut, by=c(dunitvar, "AOI"))
