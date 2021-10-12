@@ -12,4 +12,5 @@
 #' @importFrom methods as new slot canCoerce
 #' @importFrom rgdal readOGR GDALinfo GDAL.open GDAL.close getRasterBand 
 #' @importFrom rgdal saveDataset getRasterData getDriverName putRasterData getProjectionRef
+#' @export RasterizePolygon
 NULL
