@@ -107,7 +107,7 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
   ########################################################
   datx <- FIESTA::pcheck.table(x, gui=gui, caption="Data table?", returnDT=TRUE)
   issf <- ifelse ("sf" %in% class(datx), TRUE, FALSE)
-  if (issf) datx <- setDT(datx)    
+  if (issf) datx <- data.table(datx)    
 
   ## Check xvar
   ##########################################

@@ -399,7 +399,7 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
   ## Return list
   ########################################################
   if (isdatatable) {
-    xLUT <- setDT(xLUT)
+    xLUT <- data.table(xLUT)
     setkeyv(xLUT, datkey)
   }
   xLUTlst <- list(xLUT=xLUT)

@@ -251,7 +251,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
         return(tab)
       } else {
         tab <- sf::st_drop_geometry(tab)
-        if (returnDT) tab <- setDT(tab)
+        if (returnDT) tab <- data.table(tab)
         return(tab)
       }
     } else if (canCoerce(tab, "sf")) {
@@ -260,7 +260,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
         return(tabx)
       } else {
         tab <- sf::st_drop_geometry(tab)
-        if (returnDT) tab <- setDT(tab)
+        if (returnDT) tab <- data.table(tab)
         return(tab)
       }
     } else if (is.data.frame(tab)) {
@@ -327,9 +327,9 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
         }
       }
       if (!is.null(tabqry) && !is.na(tabqry)) {
-        tabx <- setDT(DBI::dbGetQuery(dbconn, tabqry))
+        tabx <- data.table(DBI::dbGetQuery(dbconn, tabqry))
       } else {
-        tabx <- setDT(DBI::dbReadTable(dbconn, tab))
+        tabx <- data.table(DBI::dbReadTable(dbconn, tab))
       }
       DBI::dbDisconnect(dbconn)
     } else {
@@ -353,7 +353,7 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   } else {
     if (returnDT) {
       if (!is.data.table(tabx)) {
-        return(setDT(tabx))
+        return(data.table(tabx))
       } else {
         return(tabx)
       }

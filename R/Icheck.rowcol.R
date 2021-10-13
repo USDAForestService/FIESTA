@@ -355,7 +355,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           rowlut <- rowLUT$LUT
           rowLUTnm <- rowLUT$xLUTnm
 
-          if (estseed == "add" && !is.null(seedf)) {
+          if (estseed %in% c("add", "only") && !is.null(seedf)) {
             if (rowvar %in% names(seedf)) {
               rowLUT <- FIESTA::datLUTnm(x=seedf, xvar=rowvar, LUT=rowlut,
 				FIAname=row.FIAname, group=rowLUTgrp, add0=row.add0, xtxt="seed")
@@ -392,7 +392,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
               }
             } 
           } else if (row.orderby == rowvar) {
-            if (estseed == "add") {
+            if (estseed %in% "add") {
               estseed[[row.orderby]] <- min(treef[[row.orderby]]) - 0.5
             } 
              rowvar <- rowLUTnm
