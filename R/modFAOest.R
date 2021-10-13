@@ -402,7 +402,7 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
     returnFAOpopdat <- FALSE
     list.items <- c("basex", "clustbasex", "treex", "buniqueid", "baseid", 
 		"unitarea", "areavar", "unitlevel1", "unitvars", "stratalut")
-    FAOpopdat <- FIESTA::pcheck.object(FAOpopdat, "FAOpopdat", list.items=list.items)
+    FAOpopdat <- pcheck.object(FAOpopdat, "FAOpopdat", list.items=list.items)
   }	
   if (is.null(FAOpopdat)) return(NULL)
   basex <- FAOpopdat$basex
@@ -453,7 +453,7 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
     list.items <- c("basex", "clustbasex", "treex", "buniqueid", "baseid", 
 		"tuniqueid", "unitarea", "unitlevel1", "stratalut", "strvar",
 		"plotsampcnt", "condsampcnt")
-    FAOpopdat <- FIESTA::pcheck.object(FAOpopdat, "FAOpopdat", list.items=list.items)
+    FAOpopdat <- pcheck.object(FAOpopdat, "FAOpopdat", list.items=list.items)
   }		
   if (is.null(FAOpopdat)) return(NULL)
   condx <- FAOpopdat$basex
@@ -667,12 +667,12 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
     unit_totest <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdattot, uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, 
 		strvar=strvar, domain="TOTAL")
-    tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
     setkeyv(unit_totest, unitvar)
     unit_totest <- unit_totest[unitarea, nomatch=0]
-    unit_totest <- FIESTA::getarea(unit_totest, areavar=areavar, esttype=esttype)
+    unit_totest <- getarea(unit_totest, areavar=areavar, esttype=esttype)
   }
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
@@ -704,9 +704,9 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
-    unit_rowest <- FIESTA::add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_rowest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
     setkeyv(unit_rowest, unitvar)
@@ -716,14 +716,14 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
   }
 
   if (!is.null(unit_colest)) {
-    unit_colest <- FIESTA::add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
 		unitvar=unitvar, xvar.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_colest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- FIESTA::getarea(unit_colest, areavar=areavar, esttype=esttype)
+    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
     setkeyv(unit_colest, c(unitvar, colvar))
   }
 
@@ -731,12 +731,12 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
     unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_grpest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- FIESTA::getarea(unit_grpest, areavar=areavar, esttype=esttype)
+    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
@@ -772,12 +772,12 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
 
     rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
-    tabs <- FIESTA::check.matchclass(unitacres2, rowunit, "ONEUNIT")
+    tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     rowunit <- tabs$tab2
     setkeyv(rowunit, "ONEUNIT")
     rowunit <- rowunit[unitacres2, nomatch=0]
-    rowunit <- FIESTA::getarea(rowunit, areavar=areavar, esttype=esttype)
+    rowunit <- getarea(rowunit, areavar=areavar, esttype=esttype)
     setkeyv(rowunit, c("ONEUNIT", rowvar))
 
     ## Calculate grand total for all units
@@ -786,12 +786,12 @@ modFAOest <- function(FAOpopdat=NULL, estseed="none", esttype="RATIO",
     totunit <- Ratio2Size(sumyn=estvarn.name, sumyd=estvard.name, 
 		ysum=tdomdatsum, uniqueid=cuniqueid, 
 		stratalut=strlut2, unitvar="ONEUNIT", domain="TOTAL")
-    tabs <- FIESTA::check.matchclass(unitacres2, totunit, "ONEUNIT")
+    tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
     totunit <- totunit[unitacres2, nomatch=0]
-    totunit <- FIESTA::getarea(totunit, areavar=areavar, esttype=esttype)
+    totunit <- getarea(totunit, areavar=areavar, esttype=esttype)
   }          
 
   ###################################################################################

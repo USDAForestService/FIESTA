@@ -40,7 +40,7 @@ pcheck.xlsx <- function(wbnm, savewb=TRUE, outfn=NULL, outfolder=NULL,
       } else {  
         message(paste(wbnm, "does not exist... creating new workbook"))
         wb <- xlsx::createWorkbook(type="xlsx")
-        outfn <- FIESTA::basename.NoExt(wb.basenm)
+        outfn <- basename.NoExt(wb.basenm)
         newwb <- TRUE
       } 
     } else {     
@@ -54,17 +54,17 @@ pcheck.xlsx <- function(wbnm, savewb=TRUE, outfn=NULL, outfolder=NULL,
     if (newwb) {
 
       ## Check outfn.date
-      outfn.date <- FIESTA::pcheck.logical(outfn.date, varnm="outfn.date", 
+      outfn.date <- pcheck.logical(outfn.date, varnm="outfn.date", 
 		title="Add date to filenm?", first="YES")
       if (outfn.date)
         outfn <- paste0(outfn, "_", format(Sys.time(), "%Y%m%d"))
 
       ## Check overwrite
-      overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+      overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite file?", first="YES")
 
       if (!overwrite) {
-        outfn <- FIESTA::fileexistsnm(outfolder, outfn, "xlsx")
+        outfn <- fileexistsnm(outfolder, outfn, "xlsx")
         if (!is.null(outfolder))
           outfn <- paste(outfolder, outfn, sep="/")
       } else {
@@ -144,9 +144,9 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
     treex <- pcheck.table(tree, caption="Tree table?", gui=FALSE, stopifnull=TRUE)
   }
 
-  rowgrp <- FIESTA::pcheck.logical(rowgrp, varnm="rowgrp", title="Row groups?", 
+  rowgrp <- pcheck.logical(rowgrp, varnm="rowgrp", title="Row groups?", 
 		first="NO")
-  colgrp <- FIESTA::pcheck.logical(colgrp, varnm="rowgrp", title="Column groups?", 
+  colgrp <- pcheck.logical(colgrp, varnm="rowgrp", title="Column groups?", 
 		first="NO")
   if (!colgrp) colgrptot <- FALSE
   subtotal <- rowgrp.subtot
@@ -855,7 +855,7 @@ setCells <- function(datsheet, estgrp, psegrp, nbrgrps=1, startrow=1, endrow=NUL
     if (addSEcol) {
       psegrp.cells <- xlsx::getCells(tab.rows, colIndex=psecols)
       psegrp <- data.frame(lapply(psegrp, function(x) gsub("--", 0, x)), stringsAsFactors=FALSE)
-      psegrp[, (tabcols) := lapply(.SD, suppressMessages(FIESTA::check.numeric)), .SDcols=tabcols]
+      psegrp[, (tabcols) := lapply(.SD, suppressMessages(check.numeric)), .SDcols=tabcols]
       value.cells <- mapply(xlsx::setCellValue, psegrp.cells, 
 			t(as.matrix(psegrp[, tabcols])))
       style.cells <- lapply(psegrp.cells, 

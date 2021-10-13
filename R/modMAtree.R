@@ -384,7 +384,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
 
   ## Check MAmethod 
   MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-  MAmethod <- FIESTA::pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
+  MAmethod <- pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
 		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
 
@@ -404,7 +404,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
     #if (MAmethod == "greg") {
     #  list.items <- c(list.items, "prednames")
     #}
-    MApopdat <- FIESTA::pcheck.object(MApopdat, "MApopdat", list.items=list.items)
+    MApopdat <- pcheck.object(MApopdat, "MApopdat", list.items=list.items)
   }	
   if (is.null(MApopdat)) return(NULL)	
   condx <- MApopdat$condx
@@ -573,7 +573,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
-  alltitlelst <- FIESTA::check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
+  alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
 	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
  	title.unitvar=title.unitvar, title.filter=title.filter, title.unitsn=estunits, 
@@ -622,7 +622,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
 		dat=tdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
 		domain="TOTAL", response=response, npixels=npixels, FIA=FIA))
-    tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
     setkeyv(unit_totest, unitvar)
@@ -666,26 +666,26 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
-    unit_rowest <- FIESTA::add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_rowest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
-    unit_rowest <- FIESTA::getarea(unit_rowest, areavar=areavar, esttype=esttype)
+    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
  
   if (!is.null(unit_colest)) {
-    unit_colest <- FIESTA::add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
 		unitvar=unitvar, xvar.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_colest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- FIESTA::getarea(unit_colest, areavar=areavar, esttype=esttype)
+    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
     setkeyv(unit_colest, c(unitvar, colvar))
   }
 
@@ -693,12 +693,12 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
     unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_grpest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- FIESTA::getarea(unit_grpest, areavar=areavar, esttype=esttype)
+    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
  

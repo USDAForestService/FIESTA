@@ -80,7 +80,7 @@ spReprojectVector <- function(layer, dsn=NULL, crs.new, exportsp=FALSE, ...){
 
 
   ## Check savedata 
-  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
 	title="Export spatial layer?", first="YES", gui=gui)
 
 

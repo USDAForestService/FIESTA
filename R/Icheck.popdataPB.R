@@ -74,18 +74,18 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ## Check unit.action
   ########################################################
   unit.actionlst <- c("keep", "remove", "combine")
-  unit.action <- FIESTA::pcheck.varchar(var2check=unit.action, varnm="unit.action", gui=gui, 
+  unit.action <- pcheck.varchar(var2check=unit.action, varnm="unit.action", gui=gui, 
 		checklst=unit.actionlst, caption="unit.action", multiple=FALSE, stopifnull=TRUE)
 
   ## Check sumunits 
   ########################################################
-  sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
+  sumunits <- pcheck.logical(sumunits, varnm="sumunits", 
 		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
 
 
   ## Check strata, strvars
   ###################################################################################
-  strata <- FIESTA::pcheck.logical(strata, varnm="strata", 
+  strata <- pcheck.logical(strata, varnm="strata", 
 		title="Post stratify?", first="YES", gui=gui, stopifnull=TRUE)
   if (strata) {
     if (is.null(strvar)) stop("must include strvar for post-strat estimates")
@@ -93,12 +93,12 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
     pvars2keep <- unique(c(pvars2keep, strvar))
 
     ## Check strtype
-    strtype <- FIESTA::pcheck.varchar(var2check=strtype, varnm="strtype", gui=gui, 
+    strtype <- pcheck.varchar(var2check=strtype, varnm="strtype", gui=gui, 
 		checklst=c("POST", "PRE"), caption="Strata type", 
 		warn="invalid strtype")
 
     ## Check stratcombine
-    stratcombine <- FIESTA::pcheck.logical(stratcombine, varnm="stratcombine", 
+    stratcombine <- pcheck.logical(stratcombine, varnm="stratcombine", 
 		title="Combine strata?", first="YES", gui=gui, stopifnull=TRUE)
 
   } else {
@@ -115,9 +115,9 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ##################################################################
   ## Import and check pnt or pltpct tables 
   ##################################################################
-  pntx <- FIESTA::pcheck.table(pnt, gui=gui, tabnm="pnt", caption="Point table?", 
+  pntx <- pcheck.table(pnt, gui=gui, tabnm="pnt", caption="Point table?", 
 		nullcheck=TRUE)
-  pltpctx <- FIESTA::pcheck.table(pltpct, gui=gui, tabnm="pltpct", 
+  pltpctx <- pcheck.table(pltpct, gui=gui, tabnm="pltpct", 
 		caption="Point counts?", nullcheck=TRUE)
 
   if (is.null(pntx) && is.null(pltpctx)) 
@@ -132,7 +132,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 
     ## Check unique identifiers of pnt table (puniqueid and condid)
     #############################################################################
-    plotid <- FIESTA::pcheck.varchar(var2check=plotid, varnm="plotid", gui=gui, 
+    plotid <- pcheck.varchar(var2check=plotid, varnm="plotid", gui=gui, 
 		checklst=pltpctvarlst, caption="UniqueID variable for pltpct", 
 		warn="plotid not in pltpct table", stopifnull=TRUE)
     setkeyv(pltpctx, plotid) 
@@ -149,7 +149,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
     ## Check pltpctvarsT1
     ##############################################################################
     pltpctvarlst <- pltpctvarlst[pltpctvarlst != plotid]
-    pltpctvars <- FIESTA::pcheck.varchar(pltpctvars, varnm="pltpctvars", 
+    pltpctvars <- pcheck.varchar(pltpctvars, varnm="pltpctvars", 
 		checklst=pltpctvars, gui=gui, caption="Variable list", 
 		warn="invalid variable names", stopifnull=TRUE, multiple=TRUE)
     if (is.null(pltpctvars)) {
@@ -159,7 +159,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 
     ## Transpose pltpctvars to rows
     ##############################################################################
-    pntprop <- FIESTA::transpose2row(pltpctx, plotid, tvars=pltpctvars, na.rm=TRUE)
+    pntprop <- transpose2row(pltpctx, plotid, tvars=pltpctvars, na.rm=TRUE)
     pntprop[, p.pltdom := value/100][, value := NULL]
     rowvar <- "variable"
     PBvars2keep <- "p.pltdom"
@@ -174,11 +174,11 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
 
     ## Check unique identifiers of pnt table (puniqueid and pntid)
     #############################################################################
-    plotid <- FIESTA::pcheck.varchar(var2check=plotid, varnm="plotid", gui=gui, 
+    plotid <- pcheck.varchar(var2check=plotid, varnm="plotid", gui=gui, 
 		checklst=pntnmlst, caption="UniqueID variable for plot - pnt", 
 		warn="plotid not in pnt table", stopifnull=TRUE)
     
-    pntid <- FIESTA::pcheck.varchar(var2check=pntid, varnm="pntid", gui=gui, 
+    pntid <- pcheck.varchar(var2check=pntid, varnm="pntid", gui=gui, 
 		checklst=pntnmlst[pntnmlst != plotid], caption="UniqueID variable for points - pnt", 
 		warn="pntid not in pnt table", stopifnull=TRUE)
     setkeyv(pntx, c(plotid, pntid)) 
@@ -203,7 +203,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ####################################################################################
   ## Import and check plot and pltassgn tables (optional), check unique identifiers
   ####################################################################################
-  pltx <- FIESTA::pcheck.table(plt, gui=gui, tabnm="plt", 
+  pltx <- pcheck.table(plt, gui=gui, tabnm="plt", 
 	caption="plt table?", nullcheck=TRUE)
   pltassgnx <- pcheck.table(pltassgn, tabnm="pltassgn", 
 		caption="plot assignments?", nullcheck=TRUE, gui=gui)

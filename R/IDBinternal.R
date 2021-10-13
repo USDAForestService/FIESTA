@@ -230,7 +230,7 @@ DBgetfn <- function(tab, invtype, outfn.pre, stabbrlst=NULL, evalid=NULL, qry=FA
     fn <- paste0(fn, "_", format(Sys.time(), "%Y%m%d"))
 
   if (!overwrite)
-    fn <- FIESTA::fileexistsnm(outfolder, fn, ext)
+    fn <- fileexistsnm(outfolder, fn, ext)
   
   path.fn <- paste0(outfolder, "/", fn, paste0(".", ext))
   return(path.fn)

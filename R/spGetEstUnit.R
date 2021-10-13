@@ -149,7 +149,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)
-    uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
+    uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
@@ -159,37 +159,37 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check unittype
   ###################################################################
   typelst <- c("POLY", "RASTER") 
-  unittype <- FIESTA::pcheck.varchar(var2check=unittype, varnm="unittype", 
+  unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", 
 	gui=gui, checklst=typelst, caption="Estimation unit type?", stopifnull=TRUE)
 
   ###################################################################
   areaunitslst <- c("ACRES", "HECTARES", "SQMETERS") 
-  areaunits <- FIESTA::pcheck.varchar(var2check=areaunits, varnm="areaunits", 
+  areaunits <- pcheck.varchar(var2check=areaunits, varnm="areaunits", 
 	gui=gui, checklst=areaunitslst, caption="Area units?", stopifnull=TRUE)
 
 
   ## Check showext    
-  showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
+  showext <- pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
 
   ## Check keepNA    
-  keepNA <- FIESTA::pcheck.logical(keepNA, varnm="keepNA", 
+  keepNA <- pcheck.logical(keepNA, varnm="keepNA", 
 		title="Keep NULL values?", first="YES", gui=gui)
 
   ## Check exportNA 
-  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+  exportNA <- pcheck.logical(exportNA, varnm="exportNA", 
 		title="Export NA values?", first="NO", gui=gui)
 
   ## Check returnxy 
-  returnxy <- FIESTA::pcheck.logical(returnxy, varnm="returnxy", 
+  returnxy <- pcheck.logical(returnxy, varnm="returnxy", 
 		title="Return XY spatial data?", first="NO", gui=gui)  
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
   ## Check exportsp 
-  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
 		title="Export spatial?", first="NO", gui=gui)  
   
 
@@ -222,7 +222,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (unittype == "POLY") {
 
     ## Check unitvar
-    unitvar <- FIESTA::pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
+    unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		checklst=names(unitlayerx), caption="Estimation unit variable", 
 		warn=paste(unitvar, "not in unitlayer"))
     if (is.null(unitvar)) {
@@ -240,7 +240,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
 
     ## Check areavar
-    areavar <- FIESTA::pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
+    areavar <- pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
 		checklst=names(unitlayerx), caption="Area variable", 
 		warn=paste(areavar, "not in arealayer"))
     if (is.null(areavar)) {
@@ -271,7 +271,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## Calculate area
     if (areacalc) {
       areavar <- "ACRES_GIS"
-      unitlayerx <- FIESTA::areacalc.poly(unitlayerx, unit=areaunits,
+      unitlayerx <- areacalc.poly(unitlayerx, unit=areaunits,
 		areavar=areavar)
     } 
 
@@ -298,7 +298,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
         
     ## Calculate area
-    unitarea <- FIESTA::areacalc.pixel(unitlayerx, units=areaunits) 
+    unitarea <- areacalc.pixel(unitlayerx, units=areaunits) 
   }
 
   if (!is.null(vars2keep)) {

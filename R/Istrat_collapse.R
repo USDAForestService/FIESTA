@@ -35,7 +35,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 #    strlut[, n.strata := NULL][, n.total := NULL]
 #
 #    ## Check again for number of plots by strata. If < 2 plots still with 1 strata, stop.
-#    stratacnts2 <- FIESTA::check.pltcnt(pltx=pltstratx, puniqueid=puniqueid, 
+#    stratacnts2 <- check.pltcnt(pltx=pltstratx, puniqueid=puniqueid, 
 #		unitlut=strlut, unitvars=unitvar, strvars=strvar)
 #    stratacnt <- stratacnts2$unitlut
 #    errtab <- stratacnts2$errtab
@@ -120,7 +120,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
 
     if (!is.null(unitarea)) {
       ## unitarea: Check if estunit1nm class match
-      tabs <- FIESTA::check.matchclass(unitarea, unitgrplut, unitjoinvars)
+      tabs <- check.matchclass(unitarea, unitgrplut, unitjoinvars)
       unitarea <- tabs$tab1
       unitgrplut <- tabs$tab2
 
@@ -184,7 +184,7 @@ strat.collapse <- function(stratacnt, errtab, pltstratx, minplotnum.unit=10,
     setkeyv(pltstratx, unitstrjoinvars)
     setkeyv(unitgrplut, unitvar)
 
-    tabs <- FIESTA::check.matchclass(pltstratx, unitstrgrplut, unitstrjoinvars)
+    tabs <- check.matchclass(pltstratx, unitstrgrplut, unitstrjoinvars)
     pltstratx <- tabs$tab1
     unitstrgrplut <- tabs$tab2
 

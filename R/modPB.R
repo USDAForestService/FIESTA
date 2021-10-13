@@ -426,14 +426,14 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
   ###################################################################################
   ## MERGE FILTERED DATA TO ALL PLOTS
   ###################################################################################
-  tabs <- FIESTA::check.matchclass(PBx, pltassgnx, plotid, pltassgnid,
+  tabs <- check.matchclass(PBx, pltassgnx, plotid, pltassgnid,
 			tab1txt="pnt", tab2txt="pltassgn")
   PBx <- tabs$tab1
   pltassgnx <- tabs$tab2
   PBall <- merge(PBx, pltassgnx, by.x=plotid, by.y=pltassgnid, all.x=TRUE)
 
   if (ratio) {
-    tabs <- FIESTA::check.matchclass(PBx.d, pltassgnx, plotid, pltassgnid,
+    tabs <- check.matchclass(PBx.d, pltassgnx, plotid, pltassgnid,
 			tab1txt="pnt.d", tab2txt="pltassgn")
     PBx.d <- tabs$tab1
     pltassgnx <- tabs$tab2
@@ -541,7 +541,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
       setkeyv(pltdom.n, c(strunitvars, plotid))
 
       ## Check if class of join columns in pltdom.n matches pltdom.d
-      tabs <- FIESTA::check.matchclass(pltdom.d, pltdom.n, 
+      tabs <- check.matchclass(pltdom.d, pltdom.n, 
 			c(strunitvars, plotid, domain))
       pltdom.d <- tabs$tab1
       pltdom.n <- tabs$tab2
@@ -576,14 +576,14 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
       setkeyv(unit_totest, c(unitvar, totvar))
 
       ## Merge NBRPNTS
-      tabs <- FIESTA::check.matchclass(unit_totest, totest.pntcnt, c(unitvar, totvar))
+      tabs <- check.matchclass(unit_totest, totest.pntcnt, c(unitvar, totvar))
       unit_totest <- tabs$tab1
       totest.pntcnt <- tabs$tab2
       unit_totest <- unit_totest[totest.pntcnt, nomatch=0]
     
       ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
       if (tabtype == "AREA" || sumunits) {
-        tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
+        tabs <- check.matchclass(unitarea, unit_totest, unitvar)
         unitarea <- tabs$tab1
         unit_totest <- tabs$tab2
         setkeyv(unit_totest, unitvar)
@@ -668,7 +668,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
   if (!is.null(unit_rowest)) {
     if (getprop) {
       ## Merge number of points
-      tabs <- FIESTA::check.matchclass(unit_rowest, rowest.pntcnt, c(unitvar, rowvar))
+      tabs <- check.matchclass(unit_rowest, rowest.pntcnt, c(unitvar, rowvar))
       unit_rowest <- tabs$tab1
       rowest.pntcnt <- tabs$tab2
       unit_rowest <- unit_rowest[rowest.pntcnt, nomatch=0]
@@ -678,13 +678,13 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
     unit_rowest <- unit_rowest[get(eval(rowvar)) != row.filterval,]
 
     ## Merge uniquerow
-    unit_rowest <- FIESTA::add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
     if (!is.null(unit_rowest) && !ratio) {
       if (tabtype == "AREA" || sumunits) {
-        tabs <- FIESTA::check.matchclass(unitarea, unit_rowest, unitvar)
+        tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
         unitarea <- tabs$tab1
         unit_rowest <- tabs$tab2
         setkeyv(unit_rowest, unitvar)
@@ -699,7 +699,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
 
   if (!is.null(unit_colest) && !ratio) {
     ## Merge number of points
-    tabs <- FIESTA::check.matchclass(unit_colest, colest.pntcnt, c(unitvar, colvar))
+    tabs <- check.matchclass(unit_colest, colest.pntcnt, c(unitvar, colvar))
     unit_colest <- tabs$tab1
     colest.pntcnt <- tabs$tab2
     unit_colest <- unit_colest[colest.pntcnt, nomatch=0]
@@ -708,12 +708,12 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
     unit_colest <- unit_colest[get(eval(colvar)) != col.filterval,]
 
     ## Merge uniquecol
-    unit_colest <- FIESTA::add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
 		unitvar=unitvar, xvar.add0=col.add0)
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
     if (tabtype == "AREA" || sumunits) {
-      tabs <- FIESTA::check.matchclass(unitarea, unit_colest, unitvar)
+      tabs <- check.matchclass(unitarea, unit_colest, unitvar)
       unitarea <- tabs$tab1
       unit_colest <- tabs$tab2
       setkeyv(unit_colest, unitvar)
@@ -730,7 +730,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
 		xvar2.add0=col.add0)
 
     if (tabtype == "AREA" || sumunits) {
-      tabs <- FIESTA::check.matchclass(unitarea, unit_grpest, unitvar)
+      tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
       unitarea <- tabs$tab1
       unit_grpest <- tabs$tab2
       setkeyv(unit_grpest, unitvar)
@@ -763,14 +763,14 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
 
     ## CALCULATE UNIT TOTALS FOR ROWVAR
     pltdom.prop <- getpltdom.prop(PBall, uniqueid=plotid, domain=rowvar, strunitvars2)
-    rowunit <- FIESTA::PBest.pbar(dom.prop=pltdom.prop, uniqueid=plotid, 
+    rowunit <- PBest.pbar(dom.prop=pltdom.prop, uniqueid=plotid, 
 		domain=rowvar, strtype="post", stratalut=stratalut2, strunitvars=strunitvars2,
  		unitvars="ONEUNIT", strvar=strvar)$est.unit
-    rowunit <- FIESTA::add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
+    rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
     if (tabtype == "AREA") {
-      tabs <- FIESTA::check.matchclass(rowunit, unitarea2, "ONEUNIT")
+      tabs <- check.matchclass(rowunit, unitarea2, "ONEUNIT")
       rowunit <- tabs$tab1
       unitarea2 <- tabs$tab2
       setkeyv(rowunit, "ONEUNIT")
@@ -783,14 +783,14 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
     }  
 
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
-    pltdom.prop <- FIESTA::getpltdom.prop(PBall, uniqueid=plotid, domain="TOTAL", 
+    pltdom.prop <- getpltdom.prop(PBall, uniqueid=plotid, domain="TOTAL", 
 		strunitvars2)
-    totunit <- FIESTA::PBest.pbar(dom.prop=pltdom.prop, uniqueid=plotid, 
+    totunit <- PBest.pbar(dom.prop=pltdom.prop, uniqueid=plotid, 
 		domain="TOTAL", strtype="post", stratalut=stratalut2, strunitvars=strunitvars2,
  		unitvars="ONEUNIT", strvar=strvar)$est.unit
 
     ## Add acres (tabtype="AREA") or round values (tabtype="PCT")
-    tabs <- FIESTA::check.matchclass(totunit, unitarea2, "ONEUNIT")
+    tabs <- check.matchclass(totunit, unitarea2, "ONEUNIT")
     totunit <- tabs$tab1
     unitarea2 <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
@@ -870,17 +870,17 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
 
         if (ncol(uniquerow) > 1 && ncol(uniquecol) > 1) {
           if (unitvar %in% names(plotsampcnt)) {
-            plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
+            plotsampcnt <- add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
 			unitvar=unitvar, xvar2=mergevar.col, uniquex2=uniquecol, xvar.add0=row.add0)
           } else {
-            plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
+            plotsampcnt <- add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
 			xvar2=mergevar.col, uniquex2=uniquecol, xvar.add0=row.add0)
           }
         } else if (ncol(uniquerow) > 1) {
-          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
+          plotsampcnt <- add0unit(x=plotsampcnt, xvar=mergevar.row, uniquex=uniquerow, 
 			xvar.add0=row.add0)
         } else if (ncol(uniquecol) > 1) {
-          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=mergevar.col, uniquex=uniquecol, 
+          plotsampcnt <- add0unit(x=plotsampcnt, xvar=mergevar.col, uniquex=uniquecol, 
 			xvar.add0=col.add0)
         }
 
@@ -888,7 +888,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
  
         if (!is.null(uniquerow) && ncol(uniquerow) > 1) {
           xvar <- ifelse (rowvar %in% names(plotsampcnt), rowvar, row.orderby)
-          plotsampcnt <- FIESTA::add0unit(x=plotsampcnt, xvar=xvar, uniquex=uniquerow, 
+          plotsampcnt <- add0unit(x=plotsampcnt, xvar=xvar, uniquex=uniquerow, 
 			xvar.add0=row.add0)
         }
       }
@@ -979,7 +979,7 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
 		pltdom.grp, plotid, rowvar, colvar, stratalut, unitvars, strvar,
 		tabtype, areavar, unitarea, sumunits)))
     } else {
-      est.gainloss <- data.frame(t(sapply(gainloss.vals, FIESTA::getgainloss, 
+      est.gainloss <- data.frame(t(sapply(gainloss.vals, getgainloss, 
 		pltdom.grp, plotid, rowvar, colvar, stratalut, unitvars, strvar,
 		tabtype, areavar, unitarea, sumunits)))
     }
@@ -989,15 +989,15 @@ modPB <- function(PBpopdat=NULL, tabtype="PCT", sumunits=FALSE, strata=FALSE,
     ## Add 95 and 68% confidence intervals for gain.est, loss.est, diff.est
     CInames <- c("CI95left", "CI95right", "CI68left", "CI68right")
 
-    est.gainloss <- FIESTA::addCI(est.gainloss, estnm="gain.est", 
+    est.gainloss <- addCI(est.gainloss, estnm="gain.est", 
 		senm="gain.se", gainloss=gainloss)
     setnames(est.gainloss, CInames, paste0("gain.", CInames))
 
-    est.gainloss <- FIESTA::addCI(est.gainloss, estnm="loss.est", 
+    est.gainloss <- addCI(est.gainloss, estnm="loss.est", 
 		senm="loss.se", gainloss=gainloss)
     setnames(est.gainloss, CInames, paste0("loss.", CInames))
 
-    est.gainloss <- FIESTA::addCI(est.gainloss, estnm="diff.est", 
+    est.gainloss <- addCI(est.gainloss, estnm="diff.est", 
 		senm="diff.se", gainloss=gainloss)
     setnames(est.gainloss, CInames, paste0("diff.", CInames))
 

@@ -60,18 +60,18 @@ datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, subtotalcol=NULL,
   if (gui) x=savedata=total=subtotal <- NULL
 
   ## Check x
-  datx <- FIESTA::pcheck.table(x, gui=gui, tabnm="x", caption="Table with variable(s)?",
+  datx <- pcheck.table(x, gui=gui, tabnm="x", caption="Table with variable(s)?",
 		stopifnull=TRUE)
 
   ## Check xvar
-  xvar <- FIESTA::pcheck.varchar(var2check=xvar, varnm="xvar", gui=gui, 
+  xvar <- pcheck.varchar(var2check=xvar, varnm="xvar", gui=gui, 
 		checklst=names(datx), caption="X Variable", multiple=TRUE, 
 		stopifnull=TRUE)
 
   ## Check total and subtotal
-  total <- FIESTA::pcheck.logical(total, varnm="total", title="Add totals?", 
+  total <- pcheck.logical(total, varnm="total", title="Add totals?", 
 		first="YES", gui=gui)
-  subtotal <- FIESTA::pcheck.logical(subtotal, varnm="subtotal", 
+  subtotal <- pcheck.logical(subtotal, varnm="subtotal", 
 		title="Add subtotals?", first="YES", gui=gui)
 
   if (subtotal) {
@@ -84,17 +84,17 @@ datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, subtotalcol=NULL,
   }
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", "Save data tables?", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", "Save data tables?", 
 		first="NO", gui=gui)
 
   ## Check outfolder
   ###########################################################
   if (savedata) {
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui=gui)
+    outfolder <- pcheck.outfolder(outfolder, gui=gui)
     if (is.null(outfn) || gsub(" ", "", outfn) == "")
       outfn <- "Freq"
 
-    freqfn <- FIESTA::fileexistsnm(outfolder, outfn, "csv")
+    freqfn <- fileexistsnm(outfolder, outfn, "csv")
     freqfnout <- paste0(outfolder, "/", freqfn, ".csv")
   }
 
@@ -147,7 +147,7 @@ datFreq <- function(x, xvar=NULL, total=FALSE, subtotal=FALSE, subtotalcol=NULL,
   ###########################################
   if (savedata)
     ## WRITE TO FILE
-    FIESTA::write2csv(freqtab.tot, outfilenm=freqfnout)
+    write2csv(freqtab.tot, outfilenm=freqfnout)
 
   return(freqtab.tot)
 }

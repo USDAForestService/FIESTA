@@ -14,7 +14,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
 
 
   ## Get pltx names
-  pltx <- FIESTA::pcheck.table(pltx, gui=gui, tabnm="plt", returnsf=FALSE)
+  pltx <- pcheck.table(pltx, gui=gui, tabnm="plt", returnsf=FALSE)
   pltnames <- names(pltx)
 
   ## Check estimation unit variables
@@ -32,7 +32,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
   nbrunits <- length(unit.vals) 
 
   ## Check areaunits
-  areaunits <- FIESTA::pcheck.varchar(var2check=areaunits, varnm="areaunits", 
+  areaunits <- pcheck.varchar(var2check=areaunits, varnm="areaunits", 
 	gui=gui, checklst=c("acres", "hectares"), caption="Area units?", 
 	stopifnull=TRUE)
 
@@ -72,7 +72,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
         unitarea$ONEUNIT <- 1
       }
       ## Check areavar from strata table.
-      areavar <- FIESTA::pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
+      areavar <- pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
 		checklst=names(unitarea), caption="Area variable?", stopifnull=TRUE)
 
       if (nrow(unitarea) >  1) {
@@ -104,11 +104,11 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
       stop("plots have more than one estimation unit with no acres specified")
  
     ## Check unitarea
-    unitarea <- FIESTA::pcheck.table(unitarea, gui=gui, tabnm="unitarea", 
+    unitarea <- pcheck.table(unitarea, gui=gui, tabnm="unitarea", 
 		nullcheck=TRUE, stopifnull=TRUE)
 
     ## Check areavar from strata table.
-    areavar <- FIESTA::pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
+    areavar <- pcheck.varchar(var2check=areavar, varnm="areavar", gui=gui, 
 		checklst=names(unitarea), caption="Area variable?", stopifnull=TRUE)
 
     ## Check if areavar column is numeric
@@ -129,7 +129,7 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
     }
       
     ## Check the class of unitvars in unitarea matches unitvars in pltx
-    tabs <- FIESTA::check.matchclass(pltx, unitarea, unitvars)
+    tabs <- check.matchclass(pltx, unitarea, unitvars)
     pltx <- tabs$tab1
     unitarea <- tabs$tab2
  

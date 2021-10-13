@@ -38,7 +38,7 @@ invyrs <- unique(unlist(GBpopdat$invyrs))
 
 if (!is.null(pcfilter) && 'STATECD' %in% names(GBpopdat$pltcondx)) {
   pltcondf <- datFilter(GBpopdat$pltcondx, xfilter=pcfilter)$xf
-  states <- FIESTA::pcheck.states(unique(pltcondf$STATECD))
+  states <- pcheck.states(unique(pltcondf$STATECD))
   invyrs <- unique(pltcondf$INVYR)
 }
 
@@ -51,7 +51,7 @@ if (is.null(pcfilter)) {
   title.filter <- AOInm
 }
 invyrs2 <- paste0(min(invyrs), "-", max(invyrs))
-stcd <- FIESTA::pcheck.states(states, statereturn="VALUE")
+stcd <- pcheck.states(states, statereturn="VALUE")
 
 ## Check species
 ref_codes <- FIESTA::ref_codes

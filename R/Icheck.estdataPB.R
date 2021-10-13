@@ -26,7 +26,7 @@ check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## Check logical parameters
   ###################################################################################      
   ## Check ratio
-  ratio <- FIESTA::pcheck.logical(ratio, varnm="ratio", title="ratio estimates", 
+  ratio <- pcheck.logical(ratio, varnm="ratio", title="ratio estimates", 
 	first="NO", gui=gui)
 
 
@@ -34,7 +34,7 @@ check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   ## Check landarea 
   #############################################################################
   landarealst <- c("ALL", "CHANGE")
-  landarea <- FIESTA::pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
+  landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	checklst=landarealst, caption="Sample land area?")
 
 
@@ -91,7 +91,7 @@ check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt",
 
   ## Check sumunits 
   ########################################################
-  sumunits <- FIESTA::pcheck.logical(sumunits, varnm="sumunits", 
+  sumunits <- pcheck.logical(sumunits, varnm="sumunits", 
 		title="Sum estimation units?", first="YES", gui=gui)
   if (!is.null(sumunits) && sumunits && tabtype == "PCT") {
     warning("must include unitarea to calculate unit weights for summing units")
@@ -99,31 +99,31 @@ check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   }
 
   ## Check allin1
-  allin1 <- FIESTA::pcheck.logical(allin1, varnm="allin1", 
+  allin1 <- pcheck.logical(allin1, varnm="allin1", 
 		title="All 1 table - Est (%error)?", first="NO", gui=gui)
 
   ## Check divideby
   ########################################################
   dividebylst <- c("hundred", "thousand", "million")
   if (!is.null(divideby) || gui) {
-    divideby <- FIESTA::pcheck.varchar(var2check=divideby, varnm="divideby", 
+    divideby <- pcheck.varchar(var2check=divideby, varnm="divideby", 
 		gui=gui, checklst=dividebylst, caption="Divide estimates?")
   }
 
   ## Check addtitle 
-  addtitle <- FIESTA::pcheck.logical(addtitle, varnm="addtitle", 
+  addtitle <- pcheck.logical(addtitle, varnm="addtitle", 
 		title="Add title to output?", first="YES", gui=gui)
 
   ## Check returntitle 
-  returntitle <- FIESTA::pcheck.logical(returntitle, varnm="returntitle", 
+  returntitle <- pcheck.logical(returntitle, varnm="returntitle", 
 		title="Save output titles?", first="YES", gui=gui)
 
   ## Check rawtable
-  rawdata <- FIESTA::pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?", 
+  rawdata <- pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?", 
 		first="NO", gui=gui, stopifnull=TRUE)
 
   ## Check rawonly
-  rawonly <- FIESTA::pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?", 
+  rawonly <- pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?", 
 		first="NO", gui=gui, stopifnull=TRUE)
   if (rawonly && !rawdata) rawdata <- TRUE
 

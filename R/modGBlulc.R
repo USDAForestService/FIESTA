@@ -340,7 +340,7 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
   returnlst <- list()
 
   ## Check gainloss 
-  gainloss <- FIESTA::pcheck.logical(gainloss, varnm="gainloss", 
+  gainloss <- pcheck.logical(gainloss, varnm="gainloss", 
 		title="Gain-loss estimates?", first="NO", gui=gui) 
   if (gainloss) {
     rawdata <- TRUE
@@ -358,7 +358,7 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
     returnGBpopdat <- FALSE
     list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"unitarea", "unitvar", "stratalut", "strvar", "plotsampcnt", "condsampcnt")
-    GBpopdat <- FIESTA::pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
+    GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   }		
   if (is.null(GBpopdat)) return(NULL)
   condx <- GBpopdat$condx
@@ -499,12 +499,12 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
     unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
 		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
 		domain="TOTAL")
-    tabs <- FIESTA::check.matchclass(unitarea, unit_totest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
     setkeyv(unit_totest, unitvar)
     unit_totest <- unit_totest[unitarea, nomatch=0]
-    unit_totest <- FIESTA::getarea(unit_totest, areavar=areavar, esttype=esttype)
+    unit_totest <- getarea(unit_totest, areavar=areavar, esttype=esttype)
 #  }
 
   ## Get row estimate  
@@ -538,36 +538,36 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
   if (!is.null(unit_rowest)) {
     unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_rowest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
-    unit_rowest <- FIESTA::getarea(unit_rowest, areavar=areavar, esttype=esttype)
+    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
 
   if (!is.null(unit_colest)) {
     unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
 		unitvar=unitvar, xvar.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_colest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- FIESTA::getarea(unit_colest, areavar=areavar, esttype=esttype)
+    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
     setkeyv(unit_colest, c(unitvar, colvar))
   }
   if (!is.null(unit_grpest)) {
     unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
-    tabs <- FIESTA::check.matchclass(unitarea, unit_grpest, unitvar)
+    tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- FIESTA::getarea(unit_grpest, areavar=areavar, esttype=esttype)
+    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
@@ -602,14 +602,14 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
     rowunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
 		uniqueid=cuniqueid, stratalut=stratalut2, unitvar="ONEUNIT", strvar=strvar, 
 		domain=rowvar)
-    rowunit <- FIESTA::add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
+    rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
-    tabs <- FIESTA::check.matchclass(unitacres2, rowunit, "ONEUNIT")
+    tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     rowunit <- tabs$tab2
     setkeyv(rowunit, "ONEUNIT")
     rowunit <- rowunit[unitacres2, nomatch=0]
-    rowunit <- FIESTA::getarea(rowunit, areavar=areavar, esttype=esttype)
+    rowunit <- getarea(rowunit, areavar=areavar, esttype=esttype)
     setkeyv(rowunit, c("ONEUNIT", rowvar))
 
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
@@ -618,12 +618,12 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
     totunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
 		uniqueid=cuniqueid, stratalut=stratalut2, unitvar="ONEUNIT", strvar=strvar, 
 		domain="TOTAL")
-    tabs <- FIESTA::check.matchclass(unitacres2, totunit, "ONEUNIT")
+    tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
     totunit <- totunit[unitacres2, nomatch=0]
-    totunit <- FIESTA::getarea(totunit, areavar=areavar, esttype=esttype)
+    totunit <- getarea(totunit, areavar=areavar, esttype=esttype)
   }          
  
   ###################################################################################
@@ -693,15 +693,15 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
     ## Add 95 and 68% confidence intervals for gain.est, loss.est, diff.est
     CInames <- c("CI95left", "CI95right", "CI68left", "CI68right")
 ####################
-    est.gainloss <- FIESTA::addCI(est.gainloss, estnm="gain.est", 
+    est.gainloss <- addCI(est.gainloss, estnm="gain.est", 
 		senm="gain.se", gainloss=gainloss)
     setnames(est.gainloss, CInames, paste0("gain.", CInames))
 
-    est.gainloss <- FIESTA::addCI(est.gainloss, estnm="loss.est", 
+    est.gainloss <- addCI(est.gainloss, estnm="loss.est", 
 		senm="loss.se", gainloss=gainloss)
     setnames(est.gainloss, CInames, paste0("loss.", CInames))
 
-    est.gainloss <- FIESTA::addCI(est.gainloss, estnm="diff.est", 
+    est.gainloss <- addCI(est.gainloss, estnm="diff.est", 
 		senm="diff.se", gainloss=gainloss)
     setnames(est.gainloss, CInames, paste0("diff.", CInames))
 

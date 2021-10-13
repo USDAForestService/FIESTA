@@ -187,7 +187,7 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 
     ## Check uniqueid
     ########################################################
-    uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", 
+    uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", 
 		gui=gui, checklst=names(datx), caption="UniqueID variable", 
 		warn=paste(uniqueid, "not in dat"))
     if (is.null(uniqueid)) stop("")
@@ -202,7 +202,7 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 
     ## Check if user-defined state is in dataset
     datx.stcd <- sort(unique(datx[["STATECD"]]))
-    datx.states <- FIESTA::pcheck.states(datx.stcd, "MEANING")
+    datx.states <- pcheck.states(datx.stcd, "MEANING")
 
     if (!is.null(states)) {
       if (!all(states %in% datx.states)) {
@@ -266,12 +266,12 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   
   ## Check savedata
   ###########################################################
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data to outfolder?", first="YES", gui=gui)
 
   ## Check parameters
   ###########################################################
-  parameters <- FIESTA::pcheck.logical(parameters, varnm="parameters", 
+  parameters <- pcheck.logical(parameters, varnm="parameters", 
 		title="Save parameters", first="YES", gui=gui)
 
   ## Check outfolder/outfn
@@ -293,8 +293,8 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   ## Get stcd
   ########################################################
   ## Get state abbreviations
-  stabbrlst <- FIESTA::pcheck.states(states, statereturn="ABBR", gui=TRUE)
-  stcds <- FIESTA::pcheck.states(states, statereturn="VALUE", gui=TRUE)
+  stabbrlst <- pcheck.states(states, statereturn="ABBR", gui=TRUE)
+  stcds <- pcheck.states(states, statereturn="VALUE", gui=TRUE)
 
   ## Define variables
   POP_ESTN_UNIT_VARS <- c("STATECD", "ESTN_UNIT", "ESTN_UNIT_DESCR", "AREA_USED", "EVALID")
@@ -385,7 +385,7 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
     ## strassgn query - strata assignments
     ######################################################################
     if (PLTdups) {
-      stcdlst <- FIESTA::pcheck.states(states, "VALUE")
+      stcdlst <- pcheck.states(states, "VALUE")
       strassgn_qry <- paste0("select ", paste0(POP_PLOT_STRATUM_ASSGN_VARS, collapse=", "),
   		" from ", SCHEMA., "POP_PLOT_STRATUM_ASSGN where STATECD in (", stcdlst, ")",
 		" and EVALID like '%0'")
@@ -404,12 +404,12 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
     ## if datx != NULL, merge strata assignments to dat
     if (!is.null(datx)) {
       ## Check if class of uniqueid in POP_PLOT_STRATUM_ASSGN matches class of cuniqueid in condx
-      tabs <- FIESTA::check.matchclass(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN")
+      tabs <- check.matchclass(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN")
       datx <- tabs$tab1
       POP_PLOT_STRATUM_ASSGN <- tabs$tab2
 
       ## Check that the values of PLT_CN in POP_PLOT_STRATUM_ASSGN are all in datx
-      FIESTA::check.matchval(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN",
+      check.matchval(datx, POP_PLOT_STRATUM_ASSGN, uniqueid, "PLT_CN",
 		tab1txt="dat", tab2txt="POP_PLOT_STRATUM_ASSGN")
 
       ## Attribute sampled plots outside of evaluation with the values from the 

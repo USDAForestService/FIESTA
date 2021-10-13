@@ -184,7 +184,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   ## Set xy_datsource
   ########################################################
   datsourcelst <- c("obj", "csv", "datamart", "sqlite", "shp", "gdb")
-  xy_datsource <- FIESTA::pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
+  xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   if (is.null(xy_datsource)) {
     if (!is.null(xy) && "sf" %in% class(xy)) {
@@ -219,7 +219,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   
   ## Check savedata
   #############################################################################
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="NO", gui=gui) 
  
   ## Check overwrite, outfn.date, outfolder, outfn 

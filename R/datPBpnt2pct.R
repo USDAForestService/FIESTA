@@ -27,7 +27,7 @@ datPBpnt2pct <- function(pnt, uniqueid, tvar, othervars=NULL) {
   ###################################################################################
   ## Check inputs
   ###################################################################################
-  pntx <- FIESTA::pcheck.table(pnt, gui=gui, tabnm="pnt", caption="point table?", 
+  pntx <- pcheck.table(pnt, gui=gui, tabnm="pnt", caption="point table?", 
 		nullcheck=TRUE, returnsf=FALSE)
 
   pntvars <- names(pntx)
@@ -75,7 +75,7 @@ datPBpnt2pct <- function(pnt, uniqueid, tvar, othervars=NULL) {
   if (!is.null(othervars)) {
 
     ## Check if class of puniqueid in pltx matches class of puniqueid in condx
-    tabs <- FIESTA::check.matchclass(pntx, tpltdom, uniqueid)
+    tabs <- check.matchclass(pntx, tpltdom, uniqueid)
     pntx <- tabs$tab1
     tpltdom <- tabs$tab2
 

@@ -79,20 +79,20 @@ spUnionPoly <- function(polyv1, polyv1_dsn=NULL, polyv2, polyv2_dsn=NULL,
 		caption="Polygon2?")
 
   ## Check areacalc
-  areacalc <- FIESTA::pcheck.logical(areacalc, "Calculate area?", "YES")
+  areacalc <- pcheck.logical(areacalc, "Calculate area?", "YES")
 
   ## Check exportsp
-  exportsp <- FIESTA::pcheck.logical(exportsp, "Export to shapefile?", "YES")
+  exportsp <- pcheck.logical(exportsp, "Export to shapefile?", "YES")
 
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (exportsp) {
-    overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+    overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+    outfn.date <- pcheck.logical(outfn.date , varnm="outfn.date", 
 		title="Add date to outfiles?", first="YES", gui=gui)  
-    outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+    outfolder <- pcheck.outfolder(outfolder, gui)
   }
 
 
@@ -106,7 +106,7 @@ spUnionPoly <- function(polyv1, polyv1_dsn=NULL, polyv2, polyv2_dsn=NULL,
   polyv1x <- prjdat$ycrs
 
   ## Check extents
-#  msg <- FIESTA::check.extents(polyv1x, polyv2prj, showext, layer1nm="polyv1x", 
+#  msg <- check.extents(polyv1x, polyv2prj, showext, layer1nm="polyv1x", 
 #		layer2nm="polyv2x")
 #  if (msg == "non-overlapping extents") stop("msg")
 

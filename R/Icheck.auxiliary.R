@@ -47,7 +47,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ## Check auxlut
   #stopifnull <- ifelse((module == "SA" || (module == "MA" && any(MAmethod != "HT"))),
 #				TRUE, FALSE)
-  auxlut <- FIESTA::pcheck.table(auxlut, gui=gui, tabnm="auxlut",
+  auxlut <- pcheck.table(auxlut, gui=gui, tabnm="auxlut",
  		caption="Strata table?", nullcheck=TRUE)
 
   #######################################################################
@@ -55,7 +55,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   #######################################################################
   if (strata && module != "SA") {
     auxnmlst <- names(auxlut)
-    strvar <- FIESTA::pcheck.varchar(var2check=strvar, varnm="strvar", 
+    strvar <- pcheck.varchar(var2check=strvar, varnm="strvar", 
 		gui=gui, checklst=c("NONE", names(auxlut)), caption="Strata variable?", 
 		warn="strata variable not in auxlut", stopifnull=TRUE) 
 
@@ -87,7 +87,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       #############################################################
       ## Remove strvar from strlutnmlst
       auxnmlst <- auxnmlst[which(!auxnmlst %in% strvar)]
-      substrvar <- FIESTA::pcheck.varchar(var2check=substrvar, varnm="substrvar", 
+      substrvar <- pcheck.varchar(var2check=substrvar, varnm="substrvar", 
 		gui=gui, checklst=auxnmlst, caption="Substrata variable?", 
 		warn="substrata variable not in strata table", stopifnull=TRUE)
       #strvars <- c(strvars, substrvar)
@@ -120,7 +120,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 
 
     ## Check if class of unitvar in auxlut matches class of unitvar in pltx
-    tabs <- FIESTA::check.matchclass(pltx, auxlut, c(unitvars, strvars),
+    tabs <- check.matchclass(pltx, auxlut, c(unitvars, strvars),
 		tab1txt="pltassgn", tab2txt="auxlut")
     pltx <- tabs$tab1
     auxlut <- tabs$tab2
@@ -136,7 +136,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 
     ## Check getwt and calculate strata weights (proportion by estimation unit)
     ###################################################################################
-    getwt <- FIESTA::pcheck.logical(getwt, varnm="getwt", title="Get strata weights?", 
+    getwt <- pcheck.logical(getwt, varnm="getwt", title="Get strata weights?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
     if (getwt) {
@@ -223,7 +223,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     auxnmlst <- names(auxlut)
     ## Check npixelvar from strata table.
     ############################################################################
-    npixelvar <- FIESTA::pcheck.varchar(var2check=npixelvar, varnm="npixelvar", gui=gui, 
+    npixelvar <- pcheck.varchar(var2check=npixelvar, varnm="npixelvar", gui=gui, 
 		checklst=auxnmlst, caption="Acre variable?", stopifinvalid=TRUE)
  
     ## Create data frame of number of pixels by estimation unit
@@ -239,7 +239,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   if (!is.null(P2POINTCNT) && !P2POINTCNT %in% names(auxlut)) {
 
     ## Check if class of unitvar in auxlut matches class of unitvar in P2POINTCNT
-    tabs <- FIESTA::check.matchclass(P2POINTCNT, auxlut, strunitvars,
+    tabs <- check.matchclass(P2POINTCNT, auxlut, strunitvars,
 		tab1txt="P2POINTCNT", tab2txt="auxlut")
     P2POINTCNT <- tabs$tab1
     auxlut <- tabs$tab2

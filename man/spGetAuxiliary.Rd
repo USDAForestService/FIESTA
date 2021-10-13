@@ -44,7 +44,6 @@ spGetAuxiliary(
   overwrite_layer = TRUE,
   append_layer = FALSE,
   vars2keep = NULL,
-  strvars = NULL,
   ...
 )
 }
@@ -162,9 +161,9 @@ appends to layers in dsn.}
 \item{vars2keep}{String vector. Attributes in SAdoms, other than domvar to
 include in dunitzonal output and extract to pltassgn points.}
 
-\item{strvars}{Tracey: please add a description of this parameter.}
-
 \item{...}{Other parameters for spMakeSpatialPoints.}
+
+\item{strvars}{Tracey: please add a description of this parameter.}
 }
 \value{
 \item{pltassgn}{ sf object. xyplt data with extracted values from

@@ -38,7 +38,7 @@ check.estfilters <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
   if (esttype == "LULC") {
     landarealst <- c(landarealst, "CHANGE")
   }
-  landarea <- FIESTA::pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
+  landarea <- pcheck.varchar(var2check=landarea, varnm="landarea", gui=gui,
 	checklst=landarealst, caption="Sample land area?")
 
 
@@ -113,7 +113,7 @@ check.estfilters <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
     ## Check estseed 
     ########################################################
     estseedlst <- c("none", "only", "add")
-    estseed <- FIESTA::pcheck.varchar(var2check=estseed, varnm="estseed", 
+    estseed <- pcheck.varchar(var2check=estseed, varnm="estseed", 
 		checklst=estseedlst, caption="Seedlings", stopifnull=TRUE)
     if (estseed == "none") {
       seedx <- NULL
@@ -126,7 +126,7 @@ check.estfilters <- function(esttype, pltcondf=NULL, cuniqueid="PLT_CN",
 
     ## Check TPA 
     ########################################################
-    TPA <- FIESTA::pcheck.logical(TPA, varnm="TPA", 
+    TPA <- pcheck.logical(TPA, varnm="TPA", 
 		title="TPA?", first="YES", gui=gui, stopifnull=TRUE)
     returnlst$TPA <- TPA
 

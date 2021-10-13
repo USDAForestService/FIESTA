@@ -101,10 +101,10 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
 
 
   ## Check areacalc
-  areacalc <- FIESTA::pcheck.logical(areacalc, "Calculate area?", "YES")
+  areacalc <- pcheck.logical(areacalc, "Calculate area?", "YES")
 
   ## Check exportsp
-  exportsp <- FIESTA::pcheck.logical(exportsp, "Export sf?", "YES")
+  exportsp <- pcheck.logical(exportsp, "Export sf?", "YES")
 
 
   ##################################################################

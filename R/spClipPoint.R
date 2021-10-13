@@ -135,7 +135,7 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   } else {
     ## GET uniqueid
     sppntnames <- names(sppntx)
-    uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, 
+    uniqueid <- pcheck.varchar(var2check=uniqueid, 
 		varnm="uniqueid", gui=gui, 
 		checklst=sppntnames, caption="UniqueID of xyplt", 
 		warn=paste(uniqueid, "not in xyplt"), stopifnull=TRUE)
@@ -153,16 +153,16 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   clippolyvx <- datFilter(clippolyvx, xfilter=clippolyv.filter, stopifnull=TRUE)$xf
 
    ## Check showext    
-  showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
+  showext <- pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
   ## Check returnsp
-  returnsp <- FIESTA::pcheck.logical(returnsp, "Return spatial object?", "YES", gui=gui)
+  returnsp <- pcheck.logical(returnsp, "Return spatial object?", "YES", gui=gui)
 
   ## Check keepNA
-  keepNA <- FIESTA::pcheck.logical(keepNA, "Keep null values?", "NO", gui=gui)
+  keepNA <- pcheck.logical(keepNA, "Keep null values?", "NO", gui=gui)
 
   ## Check exportsp
-  exportsp <- FIESTA::pcheck.logical(exportsp, "Export spatial?", "YES", gui=gui)
+  exportsp <- pcheck.logical(exportsp, "Export spatial?", "YES", gui=gui)
 
 
   if (!is.null(othertabnms) && !is.character(othertabnms)) 

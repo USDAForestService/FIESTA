@@ -45,7 +45,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   ## DEFINE DOMAIN VARIABLES LISTS (VARIABLES TO KEEP AND EXCLUDE)
 
   ## CHECK domlut
-  domlut <- FIESTA::pcheck.table(domlut, tabnm="domlut", nullcheck=TRUE, gui=gui)
+  domlut <- pcheck.table(domlut, tabnm="domlut", nullcheck=TRUE, gui=gui)
 
   if (!is.null(domlut)) {
     domlutvars <- c("DOMCODE", "DOMNAME")
@@ -70,16 +70,16 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
  
   ## Check row.add0 and col.add0
   ########################################################
-  row.add0 <- FIESTA::pcheck.logical(row.add0, varnm="row.add0", 
+  row.add0 <- pcheck.logical(row.add0, varnm="row.add0", 
 		title="Add 0 for row?", first="NO", gui=gui)
-  col.add0 <- FIESTA::pcheck.logical(col.add0, varnm="col.add0", 
+  col.add0 <- pcheck.logical(col.add0, varnm="col.add0", 
 		title="Add 0 for column?", first="NO", gui=gui)
 
   ##############################################################
   ### ROW VARIABLE
   ##############################################################
   uniquerow <- NULL
-  rowvar <- FIESTA::pcheck.varchar(var2check=rowvar, varnm="rowvar", gui=gui, 
+  rowvar <- pcheck.varchar(var2check=rowvar, varnm="rowvar", gui=gui, 
 		checklst=c("NONE", varlst), caption="Row variable", 
 		warn=paste(rowvar, "not found"))
   if (is.null(rowvar)) rowvar <- "NONE"
@@ -115,7 +115,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
         rowlut <- data.table(rowlut)
         setnames(rowlut, rowvar)
       } else {
-        rowlut <- FIESTA::pcheck.table(rowlut, gui=gui, tabnm=rowlut, caption="Row look up?")
+        rowlut <- pcheck.table(rowlut, gui=gui, tabnm=rowlut, caption="Row look up?")
       }
     }
 
@@ -186,7 +186,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
   ##############################################################
   uniquecol <- NULL
   varlst <- varlst[which(!varlst %in% rowvar)]
-  colvar <- FIESTA::pcheck.varchar(var2check=colvar, varnm="colvar", gui=gui, 
+  colvar <- pcheck.varchar(var2check=colvar, varnm="colvar", gui=gui, 
 		checklst=c("NONE", varlst), caption="Column variable", 
 		warn=paste(colvar, "not found"))
   if (is.null(colvar)) colvar <- "NONE"
@@ -202,7 +202,7 @@ check.rowcolPB <- function(gui, esttype, ratio=FALSE, PBx, plotid="PLT_CN",
         collut <- data.table(collut)
         setnames(collut, colvar)
       } else {
-        collut <- FIESTA::pcheck.table(collut, gui=gui, tabnm=collut, caption="Column look up?")
+        collut <- pcheck.table(collut, gui=gui, tabnm=collut, caption="Column look up?")
       }
     }
 

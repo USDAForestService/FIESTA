@@ -194,7 +194,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
   }
 
   invtypelst <- c("ANNUAL", "PERIODIC")
-  invtype <- FIESTA::pcheck.varchar(var2check=invtype, varnm="invtype", 
+  invtype <- pcheck.varchar(var2check=invtype, varnm="invtype", 
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
   ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
 
@@ -228,7 +228,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       stop("invalid evalid")
     }
     stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
-    states <- FIESTA::pcheck.states(stcdlst, "MEANING")
+    states <- pcheck.states(stcdlst, "MEANING")
   } else if (!is.null(invyrtab)) {
     if (!all(class(invyrtab) %in% c("data.frame", "data.table"))) {
       stop("invyrtab must be a data frame or data table") 
@@ -237,10 +237,10 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       stop("STATECD must be in invyrtab")
     } else {
       stcdlst <- unique(invyrtab[["STATECD"]])
-      states <- FIESTA::pcheck.states(stcdlst, "MEANING")
+      states <- pcheck.states(stcdlst, "MEANING")
     }
   } else {
-    RS <- FIESTA::pcheck.varchar(var2check=RS, varnm="RS", 
+    RS <- pcheck.varchar(var2check=RS, varnm="RS", 
 		checklst=rslst, caption="Research Unit?", gui=gui, multiple=TRUE)
     if (!is.null(RS) && !is.null(states)) {     
       RSstatelst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS %in% RS,"MEANING"]
@@ -256,12 +256,12 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
         }
       }
     } else {
-      states <- FIESTA::pcheck.states(states, RS=RS)
+      states <- pcheck.states(states, RS=RS)
       if (is.null(states)) {
-        states <- FIESTA::pcheck.states(states, RS=rslst)
+        states <- pcheck.states(states, RS=rslst)
       }
     }
-    stcdlst <- FIESTA::pcheck.states(states, "VALUE")
+    stcdlst <- pcheck.states(states, "VALUE")
   }
   rslst <- unique(FIESTA::ref_statecd[match(states, FIESTA::ref_statecd$MEANING), 
 		"RS"])
@@ -395,7 +395,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
           eval <- evalid[[i]]
           st <- substr(eval, 1, nchar(eval)-4)
           etypcd <- substr(eval, nchar(eval)-1, nchar(eval))
-          state <- FIESTA::pcheck.states(st, "MEANING")
+          state <- pcheck.states(st, "MEANING")
           pop_eval <- POP_EVAL[POP_EVAL$EVALID == eval,]
           startyr <- unique(min(pop_eval$START_INVYR))
           endyr <- unique(min(pop_eval$END_INVYR))
@@ -475,7 +475,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       stop("INVYR must be in invyrtab")
     }
     evalEndyr <- as.list(tapply(invyrtab$INVYR, invyrtab$STATECD, max))
-    names(evalEndyr) <- FIESTA::pcheck.states(as.numeric(names(evalEndyr)), 
+    names(evalEndyr) <- pcheck.states(as.numeric(names(evalEndyr)), 
 		statereturn="MEANING")
 
     if (!is.null(evalid)) {
@@ -493,7 +493,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
   if (!is.null(invyrtab)) {
     ## Get possible range of inventory years from invyrtab
     stinvyr.vals <- as.list(by(invyrtab$INVYR, invyrtab$STATECD, range))
-    names(stinvyr.vals) <- FIESTA::pcheck.states(names(stinvyr.vals), "MEANING")
+    names(stinvyr.vals) <- pcheck.states(names(stinvyr.vals), "MEANING")
     stinvyr.min <- lapply(stinvyr.vals, '[[', 1)
     stinvyr.max <- lapply(stinvyr.vals, '[[', 2)
     invyr.min <- min(unlist(stinvyr.min))
@@ -501,7 +501,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 
     if (!all(states %in% names(stinvyr.vals))) {
       missnames <- states[!states %in% names(stinvyr.vals)]
-      misscodes <- FIESTA::pcheck.states(missnames, "VALUE")
+      misscodes <- pcheck.states(missnames, "VALUE")
       message("there is no data in the database for: ", toString(missnames))
       stcdlst <- stcdlst[!stcdlst %in% misscodes]
       states <- states[!states %in% missnames]
@@ -511,12 +511,12 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
   if (is.null(evalEndyr)) {
     ## Check evalAll
     ###########################################################
-    evalAll <- FIESTA::pcheck.logical(evalAll, varnm="evalAll", 
+    evalAll <- pcheck.logical(evalAll, varnm="evalAll", 
 		title="All evaluations?", first="YES", gui=gui)
 
     if (is.null(evalAll) || !evalAll) {
       ## Check evalCur
-      evalCur <- FIESTA::pcheck.logical(evalCur, varnm="evalCur", 
+      evalCur <- pcheck.logical(evalCur, varnm="evalCur", 
 		title="Most current evaluation?", first="YES", gui=gui)
       if (evalCur) evalresp <- TRUE
     } else {
@@ -570,7 +570,7 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
   ## Get last year of evaluation period and the evaluation type
   if (evalresp) {
     ## Get the evalidation type
-    evalType <- FIESTA::pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
+    evalType <- pcheck.varchar(var2check=evalType, varnm="evalType", gui=gui, 
 		checklst=evalTypelst, caption="Evaluation type", multiple=TRUE, 
 		preselect="VOL")
     if (is.null(evalType)) {
@@ -679,8 +679,8 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
       evalTypelist <- lapply(evalTypelist, function(x) paste0("EXP", x))
 
       for (stcd in stcdlst) {
-        state <- FIESTA::pcheck.states(stcd, "MEANING")
-        stabbr <- FIESTA::pcheck.states(stcd, "ABBR")
+        state <- pcheck.states(stcd, "MEANING")
+        stabbr <- pcheck.states(stcd, "ABBR")
         stinvyrs <- unique(stinvyr.vals[[state]])
         invtype.invyrs <- setDT(invyrtab)[invyrtab$STATECD == stcd][["INVYR"]]
 

@@ -244,11 +244,11 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
 
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check saveobj 
-  saveobj <- FIESTA::pcheck.logical(saveobj, varnm="saveobj", 
+  saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check output
@@ -276,7 +276,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
     list.items <- c("bnd", "cond", "plt",
 		"pltassgn", "puniqueid", "pltassgnid", "pjoinid", "dunitarea",
 		"dunitvar", "areavar", "dunitzonal")
-    SAdata <- FIESTA::pcheck.object(SAdata, "SAdata", list.items=list.items)
+    SAdata <- pcheck.object(SAdata, "SAdata", list.items=list.items)
     SAdoms <- SAdata$bnd
     #smallbnd <- SAdata$smallbnd
     plt <- SAdata$plt
@@ -324,7 +324,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
     }
     if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "dunitzonal", "dunitvar", "prednames", "dunitarea")
-      auxdat <- FIESTA::pcheck.object(auxdat, "auxdat", list.items=list.items)
+      auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid
       dunitarea <- auxdat$dunitarea

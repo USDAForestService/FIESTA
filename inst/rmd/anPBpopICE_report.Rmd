@@ -142,7 +142,7 @@ if (is.null(outfn.pre) || outfn.pre == "") outfn.pre <- AOInm
 
 
 ## Import ICE QAQC data
-#ice.QAQC <- FIESTA::pcheck.table(ice.QAQCfn)
+#ice.QAQC <- pcheck.table(ice.QAQCfn)
 if (is.null(ice.QAQCfn) || ice.QAQCfn == "") {
   ice.QAQC <- NULL
 } else {

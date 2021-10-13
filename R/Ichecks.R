@@ -244,10 +244,10 @@ check.matchval <- function(tab1, tab2, var1, var2=NULL, tab1txt=NULL, tab2txt=NU
   nbr.missval=missval=MATCH <- NULL
 
   ## Check tables
-  tab1 <- FIESTA::pcheck.table(tab1, gui=gui)
+  tab1 <- pcheck.table(tab1, gui=gui)
   if (is.null(tab1)) stop("tab1 is NULL")
 
-  tab2 <- FIESTA::pcheck.table(tab2, gui=gui)
+  tab2 <- pcheck.table(tab2, gui=gui)
   if (is.null(tab2)) stop("tab2 is NULL")
 
   if (is.null(tab1txt)) tab1txt <- "tab1"

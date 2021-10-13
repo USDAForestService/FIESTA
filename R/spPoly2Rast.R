@@ -75,7 +75,7 @@ spPoly2Rast <- function(polyv, polyv_dsn=NULL, polyv.att, polyv.lut=NULL,
   polyvx <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, caption="Poly to clip?")
 
   ## Check polyv.att
-  polyv.att <- FIESTA::pcheck.varchar(var2check=polyv.att, varnm="polyv.att", gui=gui, 
+  polyv.att <- pcheck.varchar(var2check=polyv.att, varnm="polyv.att", gui=gui, 
 		checklst=names(polyvx), caption="Polygon attribute to rasterize", 
 		warn=paste(polyv.att, "not in polyvx"), stopifnull=TRUE)
 
@@ -99,11 +99,11 @@ spPoly2Rast <- function(polyv, polyv_dsn=NULL, polyv.att, polyv.lut=NULL,
     
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+  overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite files?", first="NO", gui=gui)  
-  outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+  outfn.date <- pcheck.logical(outfn.date , varnm="outfn.date", 
 		title="Add date to outfiles?", first="YES", gui=gui)  
-  outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+  outfolder <- pcheck.outfolder(outfolder, gui)
 
   ## Check outext and outfilenm
   outext.tmp <- unlist(strsplit(outext, "\\."))

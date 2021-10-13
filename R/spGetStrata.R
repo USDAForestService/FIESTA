@@ -171,7 +171,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     sppltnames <- names(sppltx)
   } else {
     ## GET uniqueid
-    uniqueid <- FIESTA::pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
+    uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
 		checklst=names(sppltx), caption="UniqueID of spplt", 
 		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
   }
@@ -183,7 +183,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check strattype
   ###################################################################
-  strattype <- FIESTA::pcheck.varchar(var2check=strattype, varnm="strattype", 
+  strattype <- pcheck.varchar(var2check=strattype, varnm="strattype", 
 	gui=gui, checklst=typelst, caption="Strata type?", stopifnull=TRUE)
 
 
@@ -197,31 +197,31 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check unittype
   ###################################################################
-  unittype <- FIESTA::pcheck.varchar(var2check=unittype, varnm="unittype", 
+  unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", 
 	gui=gui, checklst=typelst, caption="Estimation unit type?")
 
   ## Check showext    
-  showext <- FIESTA::pcheck.logical(showext, varnm="showext", 
+  showext <- pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)
 
   ## Check keepNA    
-  keepNA <- FIESTA::pcheck.logical(keepNA, varnm="keepNA", 
+  keepNA <- pcheck.logical(keepNA, varnm="keepNA", 
 		title="Keep NA values?", first="YES", gui=gui)
 
   ## Check exportNA    
-  exportNA <- FIESTA::pcheck.logical(exportNA, varnm="exportNA", 
+  exportNA <- pcheck.logical(exportNA, varnm="exportNA", 
 		title="Export NA values?", first="YES", gui=gui)
 
   ## Check returnxy 
-  returnxy <- FIESTA::pcheck.logical(returnxy, varnm="returnxy", 
+  returnxy <- pcheck.logical(returnxy, varnm="returnxy", 
 		title="Return XY spatial data?", first="NO", gui=gui)  
 
   ## Check savedata 
-  savedata <- FIESTA::pcheck.logical(savedata, varnm="savedata", 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
   ## Check exportsp 
-  exportsp <- FIESTA::pcheck.logical(exportsp, varnm="exportsp", 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
 		title="Export spatial?", first="NO", gui=gui)  
 
 
@@ -310,7 +310,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     
     if (!nounit) {
       ## Check unitvar
-      unitvar <- FIESTA::pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
+      unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		checklst=names(unitlayerx), caption="Estimation unit variable", 
 		warn=paste(unitvar, "not in unitlayer"))
       if (is.null(unitvar)) {

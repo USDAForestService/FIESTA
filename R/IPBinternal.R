@@ -179,7 +179,7 @@ getgainloss <- function(val, pltdom.prop, plotid, rowvar, colvar, strlut,
 
 
   if (tabtype == "AREA" || sumunits) {
-    tabs <- FIESTA::check.matchclass(unitacres, val.byunit, unitvar)
+    tabs <- check.matchclass(unitacres, val.byunit, unitvar)
     unitacres <- tabs$tab1
     val.byunit <- tabs$tab2
     setkeyv(val.byunit, unitvar)

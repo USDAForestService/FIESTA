@@ -69,7 +69,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ## sumunits = FALSE
   if (!is.null(unit_totest)) {
     if (esttype == "RATIO") {
-      unit_totest <- suppressWarnings(FIESTA::getrhat(unit_totest))
+      unit_totest <- suppressWarnings(getrhat(unit_totest))
     } else {
       if (!is.null(dividebynum)) {
         unit_totest[[estnmd]] <- unit_totest[[estnm2]] / dividebynum
@@ -87,7 +87,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
  
   if (!is.null(unit_rowest)) {
     if (esttype == "RATIO") {
-      unit_rowest <- suppressWarnings(FIESTA::getrhat(unit_rowest))
+      unit_rowest <- suppressWarnings(getrhat(unit_rowest))
     } else {
       if (!is.null(dividebynum)) {
         unit_rowest[[estnmd]] <- unit_rowest[[estnm2]] / dividebynum
@@ -105,7 +105,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
   if (!is.null(unit_colest)) {
     if (esttype == "RATIO") {
-      unit_colest <- suppressWarnings(FIESTA::getrhat(unit_colest))
+      unit_colest <- suppressWarnings(getrhat(unit_colest))
     } else {
       if (!is.null(dividebynum)) {
         unit_colest[[estnmd]] <- unit_colest[[estnm2]] / dividebynum
@@ -123,7 +123,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
   if (!is.null(unit_grpest)) {
     if (esttype == "RATIO") {
-      unit_grpest <- suppressWarnings(FIESTA::getrhat(unit_grpest))
+      unit_grpest <- suppressWarnings(getrhat(unit_grpest))
     } else {
       if (!is.null(dividebynum)) {
         unit_grpest[[estnmd]] <- unit_grpest[[estnm2]] / dividebynum
@@ -262,7 +262,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           estpse <- data.frame(names(estcross), estcross, 
 					stringsAsFactors=FALSE, row.names=NULL)
           if (rowgrp)
-            estpse <- FIESTA::addrowgrp(estpse, uniquerow, rowvar, rowgrpnm)
+            estpse <- addrowgrp(estpse, uniquerow, rowvar, rowgrpnm)
           names(estpse) <- c(title.rnames, title.yhatpse)
 
           if (!is.null(totest)) {
@@ -279,7 +279,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           names(estpse) <- c(rowvar, title.yhat, title.yhat.pse)
 
           if (rowgrp)
-            estpse <- FIESTA::addrowgrp(estpse, uniquerow, rowvar, rowgrpnm)
+            estpse <- addrowgrp(estpse, uniquerow, rowvar, rowgrpnm)
           names(estpse) <- c(title.rnames, title.yhat, title.yhat.pse)
 
           if (!is.null(totest)) {
@@ -371,7 +371,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
         if (savedata) 
           suppressWarnings(
-          FIESTA::save1tab(tab=est2return, tab.title=title.estpse, 
+          save1tab(tab=est2return, tab.title=title.estpse, 
 			outfn=outfn.estpse, outfolder=outfolder, allin1=allin1, 
 			coltitlerow=FALSE, rowtotal=FALSE, addtitle=addtitle,
 			outfn.date=outfn.date, overwrite=overwrite, cols2format=title.yhat))
@@ -380,7 +380,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
         if (!is.null(rowunit)) {
           if (esttype == "RATIO") {
-            rowunit <- suppressWarnings(FIESTA::getrhat(rowunit))
+            rowunit <- suppressWarnings(getrhat(rowunit))
           } else {
             if (!is.null(divideby)) {
               rowunit[, (estnmd) := get(estnm2) / dividebynum]
@@ -458,7 +458,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             if (savedata)
               ## SAVE TO FILE
               suppressWarnings(
-              FIESTA::save1tab(tab=estpsecross, tab.title=title.estpse,
+              save1tab(tab=estpsecross, tab.title=title.estpse,
  				outfn=outfn.estpse, outfolder=outfolder, allin1=TRUE, 
 				coltitlerow=FALSE, coltitle=title.unitvar, rowtotal=TRUE, 
 				addtitle=addtitle, outfn.date=outfn.date, overwrite=overwrite,
@@ -476,7 +476,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             if (savedata)
             ## SAVE TO FILE
              suppressWarnings(
-              FIESTA::save2tabs(tab1=est2return, tab2=pse2return, 
+              save2tabs(tab1=est2return, tab2=pse2return, 
 				tab1.title=title.est, tab2.title=title.pse, outfn.estpse=outfn.estpse,
  				outfolder=outfolder, coltitlerow=TRUE, coltitle=title.unitvar, 
 				addtitle=addtitle, rowtotal=rowtotal, rnames=rnames, 
@@ -548,7 +548,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     ## Append totest to rawdat
     if (!is.null(unit_totest)) {
       if (esttype == "RATIO") {
-        unit_totest <- FIESTA::getrhat(unit_totest)
+        unit_totest <- getrhat(unit_totest)
       }
       ## Remove total column
       if ("TOTAL" %in% names(unit_totest)) {
@@ -640,7 +640,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     }
 
     if (CI) {
-      rawdat[rawdat.tabs] <- lapply(rawdat[rawdat.tabs], FIESTA::addCI, estnm=estnm2)
+      rawdat[rawdat.tabs] <- lapply(rawdat[rawdat.tabs], addCI, estnm=estnm2)
     }
   }
 

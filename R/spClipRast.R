@@ -134,7 +134,7 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
   rastfn <- getrastlst.rgdal(rast, rastfolder, gui=gui)
 
   ## Get names of raster
-  rastnm <- FIESTA::basename.NoExt(rastfn)
+  rastnm <- basename.NoExt(rastfn)
 
   ## Import raster
   rast_info2 <- suppressWarnings(rgdal::GDALinfo(rastfn))
@@ -197,19 +197,19 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
     if (!is.numeric(buffdist)) stop("invalid buffdist... must be numeric")
   
   ## Check maskByPolygons
-  maskByPolygons <- FIESTA::pcheck.logical(maskByPolygons, varnm="maskByPolygons", 
+  maskByPolygons <- pcheck.logical(maskByPolygons, varnm="maskByPolygons", 
 		title="Mask by polygon?", first="NO", gui=gui)
 
   ## Check showext
-  showext <- FIESTA::pcheck.logical(showext, varnm="showext", title="Show Extents?", 
+  showext <- pcheck.logical(showext, varnm="showext", title="Show Extents?", 
 		first="NO", gui=gui)
 
   ## Check setNODATA
-#  setNODATA <- FIESTA::pcheck.logical(setNODATA, varnm="setNODATA", title="Set NODATA?", 
+#  setNODATA <- pcheck.logical(setNODATA, varnm="setNODATA", title="Set NODATA?", 
 #		first="NO", gui=gui)
 
   ## Check fmt
-  fmt <- FIESTA::pcheck.varchar(var2check=fmt, varnm="fmt", gui=gui, 
+  fmt <- pcheck.varchar(var2check=fmt, varnm="fmt", gui=gui, 
 		checklst=drivers$fmt, caption="Export format")
   if (is.null(fmt)) {
     message("no format specified... using format of input rast")
@@ -220,11 +220,11 @@ spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL,
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  overwrite <- FIESTA::pcheck.logical(overwrite, varnm="overwrite", 
+  overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
 		title="Overwrite files?", first="NO", gui=gui)  
-  outfn.date <- FIESTA::pcheck.logical(outfn.date , varnm="outfn.date", 
+  outfn.date <- pcheck.logical(outfn.date , varnm="outfn.date", 
 		title="Add date to outfiles?", first="YES", gui=gui)  
-  outfolder <- FIESTA::pcheck.outfolder(outfolder, gui)
+  outfolder <- pcheck.outfolder(outfolder, gui)
 
 
   outfilenm <- getoutfn(outfn=outfn, outfolder=outfolder, outfn.pre=outfn.pre, 
