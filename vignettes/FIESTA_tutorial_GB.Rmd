@@ -487,6 +487,14 @@ if (.Platform$OS.type == "windows") {
   outfolder <- "outfolder"
 }
 
+if (.Platform$OS.type == "unix") {
+  dir.create("FIESTA")
+  if (!file.exists("outfolder")) {
+    dir.create(paste0(getwd(),"/FIESTA", "/outfolder"))
+    }
+  outfolder <- paste0(getwd(),"/FIESTA", "/outfolder")
+}
+
 ```
 
 
@@ -658,7 +666,7 @@ area3 <- modGBarea(
     returntitle=TRUE,          # out - return title information
     allin1=TRUE,               # out - return output with est(pse)
     savedata=TRUE,             # out - save data to outfolder
-    outfolder="outfolder",     # out - outfolder for saving data
+    outfolder=outfolder,       # out - outfolder for saving data
     outfn.pre="WY"             # out - prefix for output files
     )
 
@@ -689,8 +697,8 @@ titlelst
 
 
 ## List output files in outfolder
-list.files("outfolder", pattern="WY_area")
-list.files("outfolder/rawdata", pattern="WY_area")
+list.files(outfolder, pattern="WY_area")
+list.files(paste0(outfolder, "/rawdata"), pattern="WY_area")
 
 
 ```
@@ -812,7 +820,7 @@ tree3 <- modGBtree(
     returntitle=TRUE,          # out - return title information
     allin1=TRUE,               # out - return output with est(pse)
     savedata=TRUE,             # out - save data to outfolder
-    outfolder="outfolder",     # out - outfolder for saving data
+    outfolder=outfolder,       # out - outfolder for saving data
     outfn.pre="WY"             # out - prefix for output files
     )
 
@@ -843,8 +851,8 @@ titlelst
 
 
 ## List output files in outfolder
-list.files("outfolder", pattern="WY_tree")
-list.files("outfolder/rawdata", pattern="WY_tree")
+list.files(outfolder, pattern="WY_tree")
+list.files(paste0(outfolder, "/rawdata"), pattern="WY_tree")
 
 
 ```
@@ -1231,7 +1239,7 @@ ratio3 <- modGBratio(
     returntitle=TRUE,          # out - return title information
     allin1=TRUE,               # out - return output with est(pse)
     savedata=TRUE,             # out - save data to outfolder
-    outfolder="outfolder",     # out - outfolder for saving data
+    outfolder=outfolder,       # out - outfolder for saving data
     outfn.pre="WY"             # out - prefix for output files
     )
 
@@ -1262,8 +1270,8 @@ titlelst
 
 
 ## List output files in outfolder
-list.files("outfolder", pattern="WY_ratio")
-list.files("outfolder/rawdata", pattern="WY_ratio")
+list.files(outfolder, pattern="WY_ratio")
+list.files(paste0(outfolder, "/rawdata"), pattern="WY_ratio")
 
 
 ```
@@ -1411,8 +1419,8 @@ ratio6 <- modGBratio(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea="FOREST",         # est - forest land filter
     sumunits=TRUE,             # est - sum estimation units to population
-    estvar="VOLCFNET",         # est - number of trees per acre, numerator 
-    estvar.filter="STATUSCD == 2 & STANDING_DEAD_CD == 1",    # est - standing dead trees only, numerator
+    estvarn="VOLCFNET",         # est - number of trees per acre, numerator 
+    estvarn.filter="STATUSCD == 2 & STANDING_DEAD_CD == 1",    # est - standing dead trees only, numerator
     rowvar="SPCD",             # est - row domain
     row.FIAname=TRUE,          # est - row domain names
     colvar="AGENTCD",          # est - column domain
@@ -1737,7 +1745,7 @@ area.nostrat <- modGBarea(
     pltassgnid="CN",           # pop - uniqueid of plots
     unitarea=WYunitarea,       # pop - area by estimation units
     unitvar="ESTN_UNIT",       # pop - name of estimation unit
-    strata=TRUE,               # pop - if using post-stratification
+    strata=FALSE,              # pop - if using post-stratification
     landarea="FOREST",         # est - forest land filter
     sumunits=TRUE,             # est - sum estimation units to population
     rowvar="FORTYPCD",         # est - row domain
