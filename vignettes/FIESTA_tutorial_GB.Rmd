@@ -30,15 +30,15 @@ Functions are organized by type or objective and are named with a corresponding 
 
 * Analysis functions (`an*`) - wrapper functions for steam-lining estimation processes. These functions reside in the `FIESTAnalysis` package. 
 
-
-
 ## Green-Book (GB) module overview
+
 `FIESTA`'s Green-Book (GB) module calculates population estimates and their sampling errors based on Bechtold and Patterson's (2005), 'Green-Book' for FIA's nationally-consistent, systematic annual sample design, chapter 4 (Scott et al. 2005). FIA's sample design is based on 2 phases: the first phase uses remotely-sensed data to stratify the land area to increase precision of estimates; while the 2nd phase obtains photo and ground observations and measurements for a suite of information across a hexagonal grid, each approximately 6000 acres in size. The associated estimators and variance estimators are used for area and tree attribute totals with the assumption of a simple random, stratified design and double sampling for stratification. Adjustment factors are calculated by estimation unit and strata to account for nonsampled (nonresponse) conditions.   
 
-Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, FIESTA adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA's publicly-available online tool (EVALIDator - https://apps.fs.usda.gov/Evalidator/evalidator.jsp) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).
+Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, `FIESTA` adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA's publicly-available online tool (EVALIDator - https://apps.fs.usda.gov/Evalidator/evalidator.jsp) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).
 
 ## Objective of tutorial
-The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates and estimated variances using FIA's 'Green Book' estimators with FIA's standard state-level population data (i.e., Evaluation) from the FIA database (FIADB), including FIA plot data, strata proportions, and area of estimation units. This tutorial steps through the following topics to help use FIESTA's GB module. 
+
+The main objective of this tutorial is to demonstrate how to use `FIESTA` for generating estimates and estimated variances using FIA's 'Green Book' estimators with FIA's standard state-level population data (i.e., Evaluation) from the FIA database (FIADB), including FIA plot data, strata proportions, and area of estimation units. This tutorial steps through the following topics to help use FIESTA's GB module. 
 
 * [Green-Book parameters](#input)
 * [Required variables for input tables](#required)

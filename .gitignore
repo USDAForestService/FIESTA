@@ -4,3 +4,5 @@ FIESTA.Rproj
 .DS_Store
 .Rhistory
 docs
+/doc/
+/Meta/
