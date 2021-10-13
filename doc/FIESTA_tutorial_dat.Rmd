@@ -1,0 +1,652 @@
+---
+title: "FIESTA - Data Tools"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FIESTA - Data Tools}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+## FIESTA Overview
+The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data like that from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+
+
+Functions are organized by type or objective and are named with a corresponding prefix: 
+
+**Core Functions**
+
+* Database tools (DB) - functions for querying and extracting data from FIA's national database.
+* Data tools (dat) - functions for summarizing and exploring FIA data.
+* Spatial tools (sp) - functions for manipulating and summarizing spatial data.
+
+**Estimation Modules**
+
+* Green-Book (GB) - functions for FIA’s standard ‘Green-Book’ estimators.
+* Photo-Based (PB) - functions for supplementary photo-based estimators.
+* Small Area (SA) - functions for integration with available small area estimators (SAE).
+* Model-Assisted (MA) - functions for integration with available Model-Assisted estimators.
+
+**Analysis Tools**
+
+* Analysis tools (an) - wrapper functions for stream-lining estimation processes.
+
+
+
+### Overview of FIESTA data (dat) tools
+FIESTA's dat tools assist with customizing variables as well as summarizing and visualizing FIA data. The datLUTclass and datLUTnm functions help with merging look-up tables to support new variables, standard FIA code names or unique names, or groupings of discrete or continuous data values. The datSum* functions provide tools for aggregating FIA data for estimation, mapping, or exploratory data analyses. 
+
+The Green-Book (GB) tree estimators require tree data summarized to the condition (base unit) level and extrapolated to an acre to account for trees sampled from different plot sizes. An adjustment factor is applied (adjsamp=TRUE) to adjust for nonsampled plots within the area of interest. 
+
+### Objective of tutorial
+The objective of this tutorial is to demonstrate the use of FIESTA's dat tools for customizing, summarizing, and visualizing FIA data. The examples use data from two inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
+
+
+FUNCTION  | DESCRIPTION
+-------------- | ---------------------------------------------------------------
+[datFilter()](#datFilter) | Subsets a data table by specified filter(s).
+[datFreq()](#datFreq) | Generates frequency table.
+[datPivot()](#datPivot) | Generates pivot table.
+[datBarplot()](#datBarplot) | Generates bar plot.
+[datBarplotStacked()](#datBarplotStacked) | Generates stacked bar plot.
+[datPiechart()](#datPiechart) | Generates pie chart.
+[datLUTclass()](#datLUTclass) | Merge look-up table for classifying continuous data (e.g., DIA).
+[datLUTnm()](#datLUTnm) | Merge look-up table to append names or categories.
+[datSumCond()](#datSumCond) | Aggregates numeric condition data to plot level.
+[datSumTree()](#datSumTree) | Aggregates numeric tree data to the plot or condition-level.
+[datSumTreeDom()](#datSumTreeDom) | Aggregates numeric tree data by tree domain to plot or condition level.
+
+
+### EXAMPLES
+
+Set up for examples
+```
+# Load library
+library(FIESTA)
+
+## If not on windows platform, set up an outfolder to output from examples
+if (.Platform$OS.type == "windows") {
+  # Set workspace to FIESTA folder (create if doesn't exist)
+  if (!file.exists("C:/FIESTA"))  {
+    dir.create("C:/FIESTA")
+  }
+  setwd("C:/FIESTA")
+
+  if (!file.exists("outfolder")) {
+    dir.create("outfolder")
+  }
+  outfolder <- "outfolder"
+}
+
+
+```
+
+The following examples use FIA data from Wyoming for inventory years 2011-2013.
+
+#### <a name="datFilter"/>datFilter()
+```
+######################################################################################
+# Usage:
+# datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL, 
+#	    uniqueid = "PLT_CN", vardelete = NULL, title.filter = NULL, savedata = FALSE, 
+#   	outfolder = NULL, outfn = "datf", outfn.pre = NULL, outfn.date = FALSE, 
+#	    overwrite = FALSE, filternm = NULL, stopifnull = FALSE, returnDT = TRUE, 
+#	    xnm = NULL, gui = FALSE) 
+# 
+# Description:
+# Subsets a data table by specified filter(s) or logical statement.
+#
+# Returns a list of the filtered data table and the filter.
+######################################################################################
+
+## Subset National Forest conditions in Wyoming
+WYconddat.nfs <- datFilter(WYcond, "ADFORCD > 0")
+names(WYconddat.nfs)
+WYcond.nfs <- WYconddat.nfs$xf
+dim(WYcond.nfs)
+head(WYcond.nfs)
+
+
+
+## Subset trees that are standing dead aspen trees in WYoming
+WYtreedat.dead <- datFilter(WYtree, "STATUSCD == 2 & STANDING_DEAD_CD == 1 & SPCD == 746")
+names(WYtreedat.dead)
+WYtree.deadasp <- WYtreedat.dead$xf
+head(WYtree.deadasp)
+dim(WYtree.deadasp)
+
+dim(WYtree)
+
+
+## Subset trees that are standing dead aspens in WYoming, and subset other tables to match
+WYtreedat.dead2 <- datFilter(WYtree, "STATUSCD == 2 & STANDING_DEAD_CD == 1 & SPCD == 746",
+    othertabnms=c("WYplt", "WYcond"))
+names(WYtreedat.dead2)
+WYtree.deadasp2 <- WYtreedat.dead2$xf
+head(WYtree.deadasp2)
+dim(WYtree.deadasp2)
+
+WYtree.deadasptabs <- WYtreedat.dead2$cliptabs
+names(WYtree.deadasptabs)
+WYplt.deadasp <- WYtree.deadasptabs$clip_WYplt
+WYcond.deadasp <- WYtree.deadasptabs$clip_WYcond
+
+dim(WYplt.deadasp)
+dim(WYcond.deadasp)
+
+
+```
+
+
+#### <a name="datFreq"/>datFreq()
+```
+######################################################################################
+# Usage:
+# datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, subtotalcol = NULL,
+#     savedata = FALSE, outfolder = NULL, outfn = NULL) 
+# 
+#	Generates a frequency table from a data frame, including number of records
+#	by a specified variable or variables in the data frame with optional
+#	totals and/or subtotals. 
+######################################################################################
+
+## Get number of plots by county
+datFreq(WYplt, xvar="COUNTYCD")
+
+## Get number of plots by county and plot status
+datFreq(WYplt, xvar=c("COUNTYCD", "PLOT_STATUS_CD"))
+
+## Get number of plots by county and plot status with subtotals
+datFreq(WYplt, xvar=c("COUNTYCD", "PLOT_STATUS_CD"), subtotal=TRUE)
+
+
+## Get number of plots by county and plot status with subtotals
+datFreq(WYplt, xvar=c("COUNTYCD", "PLOT_STATUS_CD"), subtotal=TRUE, subtotalcol="COUNTYCD")
+
+
+```
+
+
+#### <a name="datPivot"/>datPivot()
+```
+######################################################################################
+# Usage:
+# datPivot(x, pvar, xvar, yvar, pfun = sum, xfilter = NULL, pvar.round = 2,
+#   savedata = FALSE, outfolder = NULL, outfn = NULL) 
+# 
+#	Generates a pivot table. 
+######################################################################################
+## Get summed condition proportions by forest type class and stand size class
+datPivot(WYcond, pvar="CONDPROP_UNADJ", xvar="FORTYPCD", yvar="STDSZCD")
+
+
+## Get average height by species group code and status code
+datPivot(WYtree, "HT", "SPGRPCD", "TREECLCD", pfun=mean)
+
+
+```
+
+
+#### <a name="datLUTclass"/>datLUTclass()
+```
+######################################################################################
+# Usage:
+# datLUTclass(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL, minvar="MIN",
+#     maxvar="MAX", varclassnm=NULL, getvarclassnm=FALSE, savedata=FALSE, 
+#     outfolder=NULL, outfn=NULL) 
+# 
+# Description:
+# Merge a look-up table to define categories of continuous data in x (e.g., DIACL).
+#	Adds a variable to x, setting the variable to VARCLNM where: 
+#     xvar >= MIN and xvar < MAX.
+######################################################################################
+
+## Reference table stored in FIESTA with 2-inch diameter classes.
+ref_diacl2in
+
+WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=ref_diacl2in, LUTclassnm="DIACL2IN")
+names(WYtreelut)
+WYtree2 <- WYtreelut$xLUT
+head(WYtree2)
+dim(WYtree)
+dim(WYtree2)
+
+## Create new reference table and merge to tree table
+diacl25 <- data.frame(MIN=c(5,25), MAX=c(25, 100), DIACL25=c("5.0-24.9", "25.0+" ))
+diacl25
+
+WYtreelut2 <- datLUTclass(WYtree, xvar="DIA", LUT=diacl25, LUTclassnm="DIACL25")
+names(WYtreelut2)
+WYtree2 <- WYtreelut2$xLUT
+head(WYtree2)
+dim(WYtree)
+dim(WYtree2)
+
+
+## Use cutbreaks to classify LIVE_CANOPY_CVR_PCT variable from WYcond table
+cutbreaks <- c(0,25,50,100)
+WYcondlut <- datLUTclass(x=WYcond, xvar="LIVE_CANOPY_CVR_PCT", cutbreaks=cutbreaks)
+names(WYcondlut)
+
+head(WYcondlut$xLUT)
+WYcondlut$LUT
+
+
+```
+
+#### <a name="datLUTnm"/>datLUTnm()
+```
+######################################################################################
+# Usage:
+# datLUTnm(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL, LUTnewvarnm = NULL,
+#     FIAname = FALSE, NAclass = "OtherNA", group = FALSE, add0 = FALSE,
+#     stopifmiss = FALSE, savedata = FALSE, outfolder = NULL, outfn = "datlut",
+#     xtxt = NULL) 
+# 
+# Description:
+# Merge a look-up table to append new variables, names, or categories to x.
+######################################################################################
+
+## Reference table stored in FIESTA with code descriptions of common FIA attributes.
+head(ref_codes)
+unique(ref_codes$VARIABLE)
+
+## Codes descriptions for FIA disturbance variable
+ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD",]
+head(ref_dstrbcd)
+
+
+## Append forest type names using the reference table above
+WYcondlut <- datLUTnm(WYcond, xvar="DSTRBCD1", LUT=ref_dstrbcd, LUTvar="VALUE",
+      LUTnewvar="MEANING", LUTnewvarnm="DSTRB1NM")
+names(WYcondlut)
+WYcond2 <- WYcondlut$xLUT
+head(WYcond2[WYcond2$DSTRBCD1 > 0, ])
+
+
+## Now, append forest type names using datLUTnm(). If the xvar is in the stored 
+##    reference table, the name and values will automatically be appended.
+WYcondlut2 <- datLUTnm(WYcond, xvar="DSTRBCD1", FIAname=TRUE)
+names(WYcondlut2)
+WYcond3 <- WYcondlut2$xLUT
+head(WYcond3[WYcond3$DSTRBCD1 > 0, ])
+
+
+```
+
+#### <a name="datSumCond"/>datSumCond()
+```
+######################################################################################
+# Usage:
+# datSumCond(cond = NULL, plt = NULL, plt_dsn = NULL, cuniqueid="PLT_CN", 
+#     puniqueid = "CN", csumvar = NULL, csvumvarn = NULL, cfilter = NULL, 
+#     getadjplot = FALSE, adjcond = FALSE, NAto0 = FALSE, savedata = FALSE, 
+#     outfolder = NULL, out_layer = NULL, outfn.date = TRUE, overwrite = FALSE,
+#     returnDT = TRUE) 
+# 
+# Description:
+# Aggregates CONDPROP_UNADJ variable or other continuous condition variables
+#	to plot level with option to apply condition filters. If condition variable
+#	is not CONDPROP_UNADJ the variable is multiplied by CONDPROP_UNADJ for 
+#	weighted sum.
+#
+# Returns a list of the following:
+#   condsum - plot-level table with aggregated condition attribute.
+#   cfilter - condition filter
+######################################################################################
+
+## Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
+condsumdat <- datSumCond(cond=WYcond, csumvar="LIVE_CANOPY_CVR_PCT")
+condsum <- condsumdat$condsum
+head(condsum)
+
+## Check results
+condsum[condsum$PLT_CN == 40405596010690,]
+WYcond[WYcond$PLT_CN == 40405596010690,]
+
+
+## Append results to plot table
+condsum <- datSumCond(cond=WYcond, plt=WYplt, csumvar="LIVE_CANOPY_CVR_PCT")$condsum
+head(condsum)
+
+
+## Add a filter
+condsum <- datSumCond(cond=WYcond, plt=WYplt, csumvar="LIVE_CANOPY_CVR_PCT",
+              cfilter="STDSZCD == 1" )$condsum
+head(condsum)
+
+## Check results
+condsum[condsum$CN == 40405596010690,]
+WYcond[WYcond$PLT_CN == 40405596010690,]
+
+
+## Summed nonforest condition proportions by plot
+condnf <- datSumCond(cond=WYcond, plt=WYplt, csumvar="CONDPROP_UNADJ", 
+        csumvarnm="cond_nf", cfilter="COND_STATUS_CD %in% c(2,3)")$condsum
+condnf[condnf$CN == 40404737010690,]
+WYcond[WYcond$PLT_CN == 40404737010690,]
+
+
+## Summed reserved condition proportions by plot
+condres <- datSumCond(cond=WYcond, plt=WYplt, csumvar="CONDPROP_UNADJ", 
+        csumvarnm="cond_reserved", cfilter="RESERVCD == 1")$condsum
+WYcond[WYcond$PLT_CN == 46792188020004,]
+
+
+```
+
+#### <a name="datSumTree"/>datSumTree()
+```
+######################################################################################
+# Usage:
+# datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
+#   tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE, 
+#   condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvarlst = NULL, 
+#   tsumvarnmlst = NULL, TPA = TRUE, tfun = sum, ACI = FALSE, tfilter = NULL,  
+#   addseed = FALSE, lbs2tons = TRUE, metric = FALSE, getadjplot = FALSE,   
+#   adjtree = FALSE, adjTPA = 1, NAto0 = TRUE, savedata = FALSE, outfolder = NULL, 
+#   outfolder = NULL, out_fmt = "csv", out_dsn = NULL, out_layer = NULL, 
+#   outfn.pre = NULL, layer.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE,
+#   overwrite_layer = FALSE, append_layer = FALSE, tround = 6, checkNA = FALSE, 
+#   returnDT = TRUE) 
+# 
+# Description:
+# Aggregates tree-level data to plot or condition, including options for
+# filtering tree data or extrapolating to plot acre by multiplying by 
+# trees per acre (TPA*). 
+#
+# Returns a list of the following:
+#   treedat - plot or condition-level table with aggregated tree attribute(s).
+#   sumvars - Name(s) of the output aggregated tree attributes.
+######################################################################################
+
+## Sum of basal area and net cubic-foot volume of live trees by plot (TPA=FALSE)
+treesumdat1 <- datSumTree(WYtree, plt=WYplt, tsumvarlst=c("BA", "VOLCFNET"),
+	      TPA=FALSE, tfilter="STATUSCD == 1", bycond=FALSE, savedata=FALSE,
+	      tround=2)
+names(treesumdat1)
+treesum1 <- treesumdat1$treedat
+head(treesum1)
+treesumdat1$sumvars
+
+
+## Sum of basal area per acre and net cubic-foot volume per acre of live trees by plot (TPA=TRUE)
+treesumdat2 <- datSumTree(WYtree, plt=WYplt, tsumvarlst=c("BA", "VOLCFNET"),
+	      TPA=TRUE, tfilter="STATUSCD == 1", bycond=FALSE, savedata=FALSE,
+	      tround=2)
+names(treesumdat2)
+treesum2 <- treesumdat2$treedat
+head(treesum2)
+
+
+## Test BA results for 1 plot
+checkvars <- c("PLT_CN", "CONDID", "SUBP", "TREE", "STATUSCD", "SPCD", "DIA", "HT", 
+    "BA", "VOLCFNET", "TPA_UNADJ")
+testplt <- WYtree[WYtree$PLT_CN == 40404758010690, checkvars]
+testplt
+sum(testplt[testplt$STATUSCD == 1, "BA"], na.rm=TRUE)
+sum(testplt[testplt$STATUSCD == 1, "BA"] * testplt[testplt$STATUSCD == 1, "TPA_UNADJ"], na.rm=TRUE)
+
+treesum1[treesum1$CN == 40404758010690,]
+treesum2[treesum2$CN == 40404758010690,]
+
+
+## Average diameter and height of live trees by plot
+treesumdat3 <- datSumTree(WYtree, plt=WYplt, tsumvarlst=c("DIA", "HT"),
+	      TPA=FALSE, tfun=mean, tfilter="STATUSCD == 1", bycond=FALSE, savedata=FALSE,
+	      tround=2)
+names(treesumdat3)
+treesum3 <- treesumdat3$treedat
+head(treesum3)
+
+## Test DIA and HT results for 1 plot
+testplt
+mean(testplt[testplt$STATUSCD == 1, "DIA"], na.rm=TRUE)
+mean(testplt[testplt$STATUSCD == 1, "HT"], na.rm=TRUE)
+
+treesum3[treesum3$CN == 40404758010690,]
+
+
+## Number of live trees by plot (TPA=TRUE)
+treesumdat4 <- datSumTree(WYtree, plt=WYplt, tsumvarlst="TPA_UNADJ",
+	      TPA=TRUE, tfilter="STATUSCD == 1", bycond=FALSE, tround=2)
+names(treesumdat4)
+treesum4 <- treesumdat4$treedat
+head(treesum4)
+
+
+## Adjust summed live tree volume to account for nonsampled conditions on plot
+## Note: Must include condition table for condition proportion variables
+treesumdat4a <- datSumTree(WYtree, plt=WYplt, cond=WYcond, tsumvarlst="VOLCFNET",
+	      tfilter="STATUSCD == 1", bycond=FALSE, getadjplot=TRUE)
+names(treesumdat4a)
+treesum4a <- treesumdat4a$treedat
+head(treesum4a)
+
+
+## Compare with unadjusted estimate for plot where 25% of plot is nonsampled 
+## (COND_STATUS_CD = 5 and CONDPROP_UNADJ = 0.25)
+treesumdat4b <- datSumTree(WYtree, plt=WYplt, cond=WYcond, tsumvarlst="VOLCFNET",
+	      tfilter="STATUSCD == 1", bycond=FALSE, getadjplot=FALSE)
+treesum4b <- treesumdat4b$treedat
+
+cn <- 40407815010690
+WYcond[WYcond$PLT_CN == cn, ]
+WYtree[WYtree$PLT_CN == cn, c(1:8,16,23)]
+treesum4a[treesum4a$CN == cn, ]
+treesum4b[treesum4b$CN == cn, ]
+
+
+
+## Number of live trees plus seedlings by plot (TPA=TRUE)
+treesumdat5 <- datSumTree(WYtree, plt=WYplt, seed=WYseed, tsumvarlst="TPA_UNADJ",
+	      TPA=TRUE, addseed=TRUE, tfilter="STATUSCD == 1", bycond=FALSE, tround=2)
+names(treesumdat5)
+treesum5 <- treesumdat5$treedat
+head(treesum5)
+
+treesum5[treesum5$CN %in% cn,]
+WYseed[WYseed$PLT_CN == cn,]
+
+
+## Number of live trees plus seedlings by plot (TPA=TRUE) - adjusted
+treesumdat5b <- datSumTree(WYtree, plt=WYplt, cond=WYcond, seed=WYseed, tsumvarlst="TPA_UNADJ",
+	      TPA=TRUE, addseed=TRUE, tfilter="STATUSCD == 1", bycond=FALSE, tround=2,
+	      getadjplot=TRUE)
+names(treesumdat5b)
+treesum5b <- treesumdat5b$treedat
+head(treesum5b)
+
+treesum5[treesum5$CN %in% cn,]
+treesum5b[treesum5b$CN %in% cn,]
+WYcond[WYcond$PLT_CN %in% cn,]
+
+
+```
+
+#### <a name="datSumTreeDom"/>datSumTreeDom()
+```
+######################################################################################
+# Usage:
+# datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
+#   tuniqueid = "PLT_CN", cuniqueid = "PLT_CN", puniqueid = "CN", bycond = FALSE,   
+#   condid = "CONDID", bysubp = FALSE, subpid = "SUBP", tsumvar = NULL, TPA = FALSE, 
+#   tfun = sum, ACI = FALSE, tfilter = NULL, lbs2tons = TRUE, metric = FALSE, 
+#   tdomvar = "SPCD", tdomvarlst = NULL, tdomvar2 = NULL, tdomvarl2lst = NULL, 
+#   tdomprefix = NULL, tdombarplot = FALSE, tdomtot = FALSE, tdomtotnm = NULL, 
+#   FIAname = FALSE, addseed = FALSE, pivot = TRUE, presence = FALSE, 
+#   proportion = FALSE, cover = FALSE, getadjplot = FALSE, adjtree = FALSE, 
+#   NAto0 = TRUE, adjtpa = 1, savedata = FALSE, outfolder = NULL, out_fmt = "csv",
+#   out_dsn = NULL, out_layer = NULL, outfn.pre = NULL, layer.pre = NULL, 
+#   outfn.date = TRUE, overwrite_dsn = FALSE, overwrite+layer = FALSE, 
+#   append_layer = FALSE, tround = 6, checkNA = FALSE, returnDT = TRUE) 
+# 
+# Description:
+# Aggregates tree-level data to plot or condition, including options for
+# filtering tree data or extrapolating to plot acre by multiplying by TPA.
+#
+# Returns a list of the following:
+#   tdomdat - plot or condition-level table with aggregated tree domain attributes.
+#   tdomsum - the tdom look-up table with data aggregated by species.
+#   tsumvar - name of aggregated output variable.
+#   tdomlst - list of the aggregated data in tdomdat.
+#   tdomdat.pres - if presence=TRUE, plot or condition-level table with aggregated
+#         domain attributes represented as presence/absence (1/0).
+#   tdomdat.prop - if presence=TRUE, plot or condition-level table with aggregated
+#         domain attributes represented as proportion of total by plot.
+#   tdomdat.pres - if presence=TRUE, plot or condition-level table with aggregated
+#         domain attributes represented as percent cover, multipying cover attribute 
+#         by tdom proportion by plot.
+######################################################################################
+
+## Sum of live basal area per acre by species
+treedomBA <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, puniqueid="CN", 
+	    bycond=FALSE, tsumvar="BA", TPA=TRUE, tdomtot=TRUE, tdomtotnm="BA_LIVE",
+	    tdomprefix="BA_LIVE", savedata=FALSE, tround=2, tfilter="STATUSCD==1")
+names(treedomBA)
+tdomdat <- treedomBA$tdomdat
+tdomvarlut <- treedomBA$tdomvarlut
+tdomlst <- treedomBA$tdomlst
+tdomtotnm <- treedomBA$tdomtotnm
+
+head(tdomdat)
+tdomvarlut
+tdomlst
+tdomtotnm
+
+dim(WYplt)
+dim(tdomdat)
+
+
+## Number of live trees by species
+treedomCNT <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, puniqueid="CN", 
+	    bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE, 
+	    tdomprefix="CNT", savedata=FALSE, tround=0, tfilter="STATUSCD==1")
+names(treedomCNT)
+tdomdat.tree <- treedomCNT$tdomdat
+tdomvarlut <- treedomCNT$tdomvarlut
+tdomlst <- treedomCNT$tdomlst
+tdomtotnm <- treedomCNT$tdomtotnm
+
+head(tdomdat.tree)
+
+## Number of live trees by species - seedlings
+treedomCNTs <- datSumTreeDom(cond=WYcond, plt=WYplt, seed=WYseed, 
+	    puniqueid="CN", bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE,
+	    tdomprefix="CNT", savedata=FALSE, tround=0)
+names(treedomCNTs)
+tdomdat.seed <- treedomCNTs$tdomdat
+tdomvarlut <- treedomCNTs$tdomvarlut
+tdomlst <- treedomCNTs$tdomlst
+tdomtotnm <- treedomCNTs$tdomtotnm
+
+head(tdomdat.seed)
+
+
+## Number of live trees by species, including seedlings
+treedomCNTs <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, seed=WYseed, 
+	    puniqueid="CN", bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE,
+	    tdomprefix="CNT", savedata=FALSE, tround=0, tfilter="STATUSCD==1",
+		  addseed=TRUE)
+names(treedomCNTs)
+tdomdat.treeseed <- treedomCNTs$tdomdat
+tdomvarlut <- treedomCNTs$tdomvarlut
+tdomlst <- treedomCNTs$tdomlst
+tdomtotnm <- treedomCNTs$tdomtotnm
+
+head(tdomdat.treeseed)
+
+cn <- 40404730010690
+tdomdat.tree[tdomdat.tree$CN == cn,]
+tdomdat.seed[tdomdat.seed$CN == cn,]
+tdomdat.treeseed[tdomdat.treeseed$CN == cn,]
+
+
+#####
+## Presence of live trees by species, including seedlings
+treedomCNTs <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, seed=WYseed, 
+	    puniqueid="CN", bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE,
+	    tdomprefix="CNT", savedata=FALSE, tfilter="STATUSCD==1",
+		  addseed=TRUE, presence=TRUE)
+names(treedomCNTs)
+tdomdat.pres <- treedomCNTs$tdomdat.pres
+
+head(tdomdat.pres)
+
+
+## Presence and proportion of live trees by species, including seedlings.
+treedomCNTs <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, seed=WYseed, 
+	    puniqueid="CN", bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE,
+	    tdomprefix="CNT", savedata=FALSE, tround=0, tfilter="STATUSCD==1",
+		  addseed=TRUE, presence=TRUE, proportion=TRUE)
+names(treedomCNTs)
+tdomdat.pres <- treedomCNTs$tdomdat.pres
+tdomdat.prop <- treedomCNTs$tdomdat.prop
+
+head(tdomdat.pres)
+
+
+## Presence and proportion and cover of live trees by species, including seedlings. Add barplot.
+treedomCNTs <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, seed=WYseed, 
+	    puniqueid="CN", bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE,
+	    tdomprefix="CNT", savedata=FALSE, tround=0, tfilter="STATUSCD==1",
+		  addseed=TRUE, presence=TRUE, proportion=TRUE, cover=TRUE, tdombarplot=TRUE)
+names(treedomCNTs)
+tdomdat.pres <- treedomCNTs$tdomdat.pres
+tdomdat.prop <- treedomCNTs$tdomdat.prop
+tdomdat.cov <- treedomCNTs$tdomdat.cov
+
+cn=40404742010690
+tdomdat.tree[tdomdat.tree$CN == cn,]
+tdomdat.seed[tdomdat.seed$CN == cn,]
+tdomdat.treeseed[tdomdat.treeseed$CN == cn,]
+tdomdat.pres[tdomdat.pres$CN == cn,]
+tdomdat.prop[tdomdat.prop$CN == cn,]
+tdomdat.cov[tdomdat.cov$CN == cn,]
+
+
+## Presence and proportion of live trees by species, including seedlings. Add barplot.
+treedomCNTs <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt, seed=WYseed, 
+	    puniqueid="CN", bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE,
+	    tdomprefix="CNT", savedata=FALSE, tround=0, tfilter="STATUSCD==1",
+		  addseed=TRUE, presence=TRUE, proportion=TRUE, tdombarplot=TRUE)
+names(treedomCNTs)
+tdomdat.pres <- treedomCNTs$tdomdat.pres
+tdomdat.prop <- treedomCNTs$tdomdat.prop
+
+head(tdomdat.pres)
+
+
+## Total basal area per acre of limber pine (SPCD=113) trees >= 1.0 DIA.
+treedomBA <- datSumTreeDom(tree=WYtree, cond=WYcond, plt=WYplt,  
+	    puniqueid="CN", bycond=FALSE, tsumvar="BA", TPA=TRUE, 
+	    tdomprefix="BA", tdomvarlst=113, savedata=FALSE, tround=2, 
+	     tfilter="STATUSCD==1")
+names(treedomBA)
+ba.limber <- treedomBA$tdomdat
+
+head(ba.limber)
+
+
+## Total basal area per acre by species and diameter class
+DIALUT <- FIESTA::ref_diacl2in[FIESTA::ref_diacl2in$MIN <= 37, ]
+names(DIALUT)[names(DIALUT) == "MEANING"] <- "DIACL2IN"
+
+## Append diameter classes to tree table
+datlut <- FIESTA::datLUTclass(x=WYtree, xvar="DIA", LUT=DIALUT, LUTclassnm="DIACL2IN")
+WYtree2 <- datlut$xLUT
+
+## Species and diameter class
+treedomDIACNTs <- datSumTreeDom(tree=WYtree2, cond=WYcond, plt=WYplt, 
+	    puniqueid="CN", bycond=FALSE, tsumvar="PLT_CN", TPA=TRUE, tdomtot=TRUE,
+	    tdomprefix="CNT", savedata=FALSE, tround=2, tfilter="STATUSCD==1 & DIA > 30",
+		  presence=TRUE, proportion=TRUE, tdomvar2="DIACL2IN", tdombarplot=TRUE)
+names(treedomDIACNTs)
+tdomdat.pres <- treedomDIACNTs$tdomdat.pres
+tdomdat.prop <- treedomDIACNTs$tdomdat.prop
+
+head(tdomdat.pres)
+
+
+```
+

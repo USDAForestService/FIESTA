@@ -1,0 +1,664 @@
+---
+title: "FIESTA - Model-Assisted Estimators"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FIESTA - Model-Assisted Estimators}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+## FIESTA Overview
+The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+
+
+Functions are organized by type or objective and are named with a corresponding prefix: 
+
+**Core Functions**
+
+* Database tools (DB) - functions for querying and extracting data from FIA's national database.
+* Data tools (dat) - functions for summarizing and exploring FIA data.
+* Spatial tools (sp) - functions for manipulating and summarizing spatial data.
+
+**Estimation Modules (mod)**
+
+* Green-Book (modGB) - functions for FIA's standard Green-Book estimators.
+* Photo-Based (modPB) - functions for supplementary photo-based estimators.
+* Small Area (modSA) - functions for integration with available small area estimators (SAE).
+* Model-Assisted (modMA) - functions for integration with available Model-Assisted estimators.
+
+**Analysis Tools**
+
+* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
+
+
+
+### Model-Assisted (MA) module overview
+The Model-Assisted (GB) module takes advantage of available model-assisted survey estimators from the mase R package (McConville, et al. 2018).
+
+
+### Objective of tutorial
+The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates using estimators from mase. The following examples are for generating estimates and estimated variances using standard FIA Evaluation data from FIA's National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
+
+
+## Example data - Wyoming (WY), Inventory Years 2011-2012
+
+Data Frame | Description
+-----------| --------------------------------------------------------------------------------
+WYplt      | WY plot-level data
+WYcond     | WY condition-level data
+WYtree     | WY tree-level data
+
+External data            | Description
+-------------------------| ------------------------------------------------------------------
+WYbighorn_adminbnd.shp   | Polygon shapefile of WY Bighorn National Forest Administrative boundary*
+WYbighorn_districtbnd.shp| Polygon shapefile of WY Bighorn National Forest District boundaries**
+WYbighorn_forest_nonforest_250m.tif| GeoTIFF raster of predicted forest/nonforest (1/0) for stratification*** 
+WYbighorn_dem_250m.img   | Erdas Imagine raster of elevation change, in meters****
+
+*USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.AdministrativeForest (http://data.fs.usda.gov/geodata/edw). Description: An area encompassing all the National Forest System lands administered by an administrative unit. The area encompasses private lands, other governmental agency lands, and may contain National Forest System lands within the proclaimed boundaries of another administrative unit. All National Forest System lands fall within one and only one Administrative Forest Area.
+
+**USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (http://data.fs.usda.gov/geodata/edw). Description: A depiction of the boundary that encompasses a Ranger District.
+
+***Based on MODIS-based classified map resampled from 250m to 500m resolution and reclassified from 3 to 2 classes: 1:forest; 2:nonforest. Projected in Albers Conical Equal Area, Datum NAD27 (Ruefenacht et al. 2008). Clipped to extent of WYbighorn_adminbnd.shp.
+
+****USGS National Elevation Dataset (NED), resampled from 30m resolution to 250m. Projected in Albers Conical Equal Area, Datum NAD27 (U.S. Geological Survey 2017). Clipped to boundary of WYbighorn_adminbnd.shp.
+
+
+FUNCTION  | DESCRIPTION
+-------------- | ---------------------------------------------------------------
+[spGetModeldat()](#spGetModeldat) | Gets spatial model data.
+[modMAtree()](#modMAtree)| Model-assisted estimates of trees.
+
+
+### EXAMPLES
+
+Set up for examples
+```
+# Load libraries
+library(FIESTA)
+library(mase)
+
+## If not on windows platform, set up an outfolder to output from examples
+if (.Platform$OS.type == "windows") {
+  # Set workspace to FIESTA folder (create if doesn't exist)
+  if (!file.exists("C:/FIESTA"))  {
+    dir.create("C:/FIESTA")
+  }
+  setwd("C:/FIESTA")
+
+  if (!file.exists("outfolder")) {
+    dir.create("outfolder")
+  }
+  outfolder <- "outfolder"
+}
+
+# File names for external spatial data
+WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
+demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
+
+# Derive new layers from dem
+library(raster)
+dem <- raster(demfn)
+slp <- terrain(dem, opt="slope", unit="degrees", filename=paste0(outfolder, "/WYbh_slp.img"), overwrite=TRUE)
+asp <- terrain(dem, opt="aspect", unit="degrees", filename=paste0(outfolder, "/WYbh_asp.img"), overwrite=TRUE)
+
+
+```
+
+
+<a name="ref"></a>
+
+## Reference Tables in FIESTA
+
+There are several reference tables stored in FIESTA, including table variable descriptions, code definitions, and estimation categories. 
+
+* Table variable descriptions - ref_plt, ref_cond, ref_tree
+* Code definitions - ref_codes
+
+
+<a name="auxiliary"></a>
+
+
+#### <a name="spGetModeldat"/>spGetModeldat()
+```
+######################################################################################
+# Usage:
+# spGetModeldat(xyplt = NULL, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
+#   domtype = "POLY", dom_layer = NULL, dom_dsn = NULL, domvar = "DOMAIN", 
+#   rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cont.stat = "MEAN", 
+#   rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL,
+#	  rastlst.cat.NODATA = NULL, rastfolder = NULL,  
+#   asptransform = FALSE, rast.asp = NULL, rast.lut = NULL, rastlut = NULL, 
+#   areacalc = TRUE, areaunits = "ACRES", keepNA = TRUE, NAto0 = FALSE,
+#   npixels = TRUE, showext = TRUE, savedata = FALSE, exportsp = FALSE, 
+#   exportNA = FALSE, outfolder = NULL, out_fmt = "csv", out_dsn = NULL, 
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite_dsn = FALSE, 
+#   overwrite_layer = TRUE, vars2keep = NULL, ...) 
+# 
+# Description:
+# Get data extraction and zonal statistics for Model-assisted or
+#		Model-based (Small Area) Estimation. The major steps are as follows:
+#   1) Check parameters 
+#   2) Extract point values from domlayer
+#   3) Set up output data structures
+#   4) Extract point values and get zonal statistics from continuous raster layers
+#   5) Extract point values and get zonal statistics from categorical raster layers
+#   6) Get total acres from domlayer (if areacalc=TRUE)
+######################################################################################
+
+
+## Generate a SpatialPoints object from the WY plot data, public coordinates 
+## (x=LON_PUBLIC, y=LAT_PUBLIC) 
+## Note: The public coordinate projection information is: prj=longlat, datum=NAD83.
+WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC",
+        prj="longlat", datum="NAD83")
+
+rastlst.cont <- c(demfn, slp, asp)
+rastlst.cont.name <- c("dem", "slp", "asp")
+rastlst.cat <- fornffn
+rastlst.cat.name="fornf"
+
+## Generate datasets for Model-Assisted estimation
+modeldat <- spGetAuxiliary(xyplt=WYspplt, uniqueid="CN", 
+  dunit_layer=WYbhfn, dunitvar=NULL,
+  rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, rastlst.cat=rastlst.cat,
+  rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
+  asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, savedata=FALSE)
+names(modeldat)
+
+pltassgn <- modeldat$pltassgn
+pltassgnid <- modeldat$pltassgnid
+unitlut <- modeldat$domzonal
+unitarea <- modeldat$domarea
+unitvar <- modeldat$domvar
+areavar <- modeldat$areavar
+prednames <- modeldat$prednames
+zonalnames <- modeldat$zonalnames
+
+
+## Total area by estimation unit
+unitarea
+unitvar
+areavar
+
+## Zonal mean (for continuous rasters) or proportion (for categorical rasters)
+unitlut
+zonalnames
+
+## Plot assignments of predictor variables
+head(pltassgn)
+pltassgnid
+prednames
+
+
+```
+
+
+#### <a name="modMApop"/>modMApop()
+```
+######################################################################################
+# Usage:
+# modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, 
+#   pltassgn = NULL, dsn = NULL, puniqueid = "CN", pltassgnid = "CN", 
+#   pjoinid = "CN", tuniqueid = "PLT_CN",  cuniqueid = "PLT_CN", condid = "CONDID",    
+#   areawt = "CONDPROP_UNADJ", evalid = NULL, invyrs = NULL, intensity = NULL,  
+#   ACI = FALSE, adj = "samp", plt.nonsamp.filter = NULL, cond.nonsamp.filter = NULL,     
+#   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",   
+#   areaunits = "acres", unitcombine = FALSE, minplotnum.unit = 10, unitlut = NULL, 
+#   npixelvar = "npixels", prednames = NULL, predfac = NULL, PSstrvar = NULL,    
+#   stratcombine = TRUE, saveobj = FALSE, savedata = FALSE, outfolder = NULL,  
+#   out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = TRUE,  
+#   overwrite_dsn = FALSE, overwrite_layer = TRUE, MAdata = NULL, 
+#   MAmodeldat = NULL, gui = FALSE)
+# 
+# Description:
+# Generates population data for input to modMA* estimation modules. Data includes
+# unit-level zonal statistics and number of plots by estimation unit. 
+# Note: population data must be generated by method. 
+# - checks input parameters and data tables
+# - checks unitarea data
+# - checks auxiliary data 
+# - calculates adjustment factors for nonresponse
+########################################################################################
+
+help(modMApop)
+
+## Population data for MAmethod='HT' (Horvitz-Thompson)
+MApopdat.ht <- modMApop(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+    adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut)
+names(MApopdat.ht)
+
+MApopdat.ht$MAmethod
+MApopdat.ht$unitarea
+MApopdat.ht$unitlut
+MApopdat.ht$estvar.area
+MApopdat.ht$plotsampcnt
+MApopdat.ht$condsampcnt
+
+
+## Population data for MAmethod='PS' (Post-stratification)
+MApopdat.ps <- modMApop(MAmethod="PS", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, PSstrvar="fornf",
+  	prednames=prednames, predfac="fornf")
+names(MApopdat.ps)
+
+MApopdat.ps$MAmethod
+MApopdat.ps$unitlut
+MApopdat.ps$PSstrvar
+
+## Population data for MAmethod='greg' (generalized regression)
+MApopdat.greg <- modMApop(MAmethod="greg", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, predfac="fornf",
+  	prednames=prednames)
+names(MApopdat.greg)
+
+MApopdat.greg$MAmethod
+MApopdat.greg$unitlut
+MApopdat.greg$prednames
+
+
+```
+
+
+#### <a name="modMAarea"/>modMAarea()
+```
+######################################################################################
+# Usage:
+# modMAarea(MAmethod = "greg", prednames = NULL, 
+#   landarea = "ALL", pfilter = NULL, cfilter = NULL, rowvar = NULL, colvar = NULL, 
+#   row.FIAname = FALSE, col.FIAname = FALSE, row.orderby = NULL, col.orderby = NULL, 
+#   row.add0 = FALSE, col.add0 = FALSE, rowlut = NULL, collut = NULL, rowgrp = FALSE, 
+#   rowgrpnm = NULL, rowgrpord = NULL, sumunits = FALSE, allin1 = FALSE,   
+# 	estround = 0, pseround = 3, estnull = 0, psenull = "--", divideby = NULL,  
+#   savedata = FALSE, rawdata = FALSE, rawonly = FALSE, outfolder = NULL, 
+#   outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, addtitle = TRUE, 
+#   returntitle = FALSE, title.main = NULL, title.ref = NULL, title.rowvar = NULL,  
+#   title.colvar = NULL, title.unitvar = NULL, title.filter = NULL, 
+#   MApopdat = NULL, gui = FALSE, ...)
+#   
+# Description:
+# Generates model-assisted estimates by estimation unit
+######################################################################################
+
+#########################################################################################
+## modMAarea - MAmethod='HT' (Horvitz-Thompson)
+#########################################################################################
+
+# Live tree basal area for Bighorn National Forest
+# - MAmethod='HT'
+
+
+## Area of forest land for Bighorn, National Forest
+area1.ht <- modMAarea(MAmethod="HT", cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, 
+  	landarea="FOREST", rawdata=TRUE)
+names(area1.ht)
+area1.ht$est
+
+
+## Area of forest land for Bighorn, National Forest
+## Using population data object (MApopdat.ht)
+area1.ht <- modMAarea(MApopdat=MApopdat.ht, MAmethod="HT", landarea="FOREST", rawdata=TRUE)
+names(area1.ht)
+area1.ht$est
+
+
+
+
+## Area by forest type and stand-size class on forest land, Bighorn, National Forest
+area2.ht <- modMAarea(MAmethod="HT", cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, 
+  	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+names(area2.ht)
+area2.ht$est
+area2.ht$pse
+
+
+## Compare with modGBarea() results
+########################################################################################
+
+## Area by forest type and stand-size class on forest land, Bighorn, National Forest
+area2.ht.gb <- modGBarea(cond=WYcond, pltassgn=pltassgn, pltassgnid=pltassgnid, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, strata=FALSE, 
+  	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+names(area2.ht.gb)
+area2.ht.gb$est
+area2.ht.gb$pse
+
+area2.ht$est
+area2.ht.gb$est
+
+area2.ht$pse
+area2.ht.gb$pse
+
+
+
+#########################################################################################
+## modMAarea - MAmethod='PS' (Post-stratification)
+#########################################################################################
+
+## Area by forest type on forest land, Bighorn, National Forest
+area.ps <- modMAarea(MAmethod="PS", cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, PSstrvar="fornf",
+  	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(area.ps)
+area.ps$est
+
+
+## Area by forest type on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.ht)
+area.ps <- modMAarea(MApopdat=MApopdat.ps, MAmethod="PS",  
+  	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(area.ps)
+area.ps$est
+
+
+
+## Area by forest type and stand-size class on forest land, Bighorn, National Forest
+area2.ps <- modMAarea(MAmethod="PS", cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, PSstrvar="fornf",
+  	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+names(area2.ps)
+area2.ps$est
+area2.ps$pse
+
+
+## Compare with modGBarea() results
+########################################################################################
+stratalut <- data.frame(unitlut[[unitvar]], c(1,2),
+      t(unitlut[, names(unitlut)[startsWith(names(unitlut), "fornf")]]), row.names=NULL)
+names(stratalut) <- c(unitvar, "fornf", "strwt")
+stratalut
+
+## Area by forest type and stand-size class on forest land, Bighorn, National Forest
+area2.ps.gb <- modGBarea(cond=WYcond, pltassgn=pltassgn, pltassgnid=pltassgnid,
+  	strata=TRUE, unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+  	stratalut=stratalut, strvar="fornf", 
+  	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+area2.ps.gb$est
+area2.ps.gb$pse
+
+area2.ps$est
+area2.ps.gb$est
+
+area2.ps$pse
+area2.ps.gb$pse
+
+
+
+#########################################################################################
+## modGBarea - MAmethod='GREG' (generalized regression)
+#########################################################################################
+
+## Area by forest type and stand-size class on forest land, Bighorn, National Forest
+area.greg <- modMAarea(MAmethod="greg", cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, 
+    prednames=prednames, predfac="fornf", landarea="FOREST", 
+    rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE)
+area.greg$est
+area.greg$pse
+
+
+## Area by forest type and stand-size class on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.ht)
+area.greg <- modMAarea(MApopdat=MApopdat.greg, MAmethod="greg",  
+  	landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+area.greg$est
+
+
+```
+
+
+#### <a name="modMAtree"/>modMAtree()
+```
+######################################################################################
+# Usage:
+# modMAtree(MAmethod = "GREG", prednames = NULL, 
+#   landarea = "ALL", pfilter = NULL, cfilter = NULL, estvar=NULL, estvar.filter=NULL,
+#   rowvar = NULL, colvar = NULL, row.FIAname = FALSE, col.FIAname = FALSE, 
+#   row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
+#   rowlut = NULL, collut = NULL, rowgrp = FALSE, rowgrpnm = NULL, rowgrpord = NULL, 
+#   sumunits = FALSE, allin1 = FALSE,  estround = 0, pseround = 3,  
+# 	estnull = 0, psenull = "--", divideby = NULL, savedata = FALSE, rawdata = FALSE,  
+#   rawonly = FALSE, outfolder = NULL, outfn.pre = NULL, outfn.date = TRUE, 
+#   overwrite = FALSE, addtitle = TRUE, returntitle = FALSE, title.main = NULL, 
+#   title.ref = NULL, title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL,  
+#   title.estvar = NULL, title.filter = NULL, MApopdat = NULL, gui = FALSE, ...)
+# 
+# Description:
+# Generates model-assisted estimates by estimation unit
+######################################################################################
+
+
+#########################################################################################
+## modMAtree - MAmethod='HT' (Horvitz-Thompson)
+#########################################################################################
+estvar <- "BA"
+estvar.filter <- "STATUSCD == 1"
+
+
+## Live basal area by forest type on forest land, Bighorn, National Forest
+tree.ht <- modMAtree(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
+  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, 
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter, 
+  	rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(tree.ht)
+tree.ht$est
+
+
+## Live basal area by forest type on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.ht)
+tree.ht <- modMAtree(MApopdat=MApopdat.ht, MAmethod="HT",  
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter, 
+  	rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(tree.ht)
+tree.ht$est
+
+
+# Live tree basal area for Bighorn National Forest
+tree1.ht <- modMAtree(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+    pltassgnid="CN", adj="samp", unitvar=unitvar, unitarea=unitarea, areavar=areavar, 
+  	unitlut=unitlut, landarea="FOREST",  
+  	estvar=estvar, estvar.filter=estvar.filter)
+names(tree1.ht)
+tree1.ht$est
+
+
+## Live basal area by forest type and stand-size class on forest land, for Bighorn, National Forest
+tree2.ht <- modMAtree(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+    pltassgnid="CN", adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+  	unitlut=unitlut, landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+names(tree2.ht)
+tree2.ht$est
+tree2.ht$pse
+
+
+## Compare with modGBtree() results
+########################################################################################
+tree2.ht.gb <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, pltassgnid=pltassgnid, 
+    adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, strata=FALSE, 
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter, 
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+names(tree2.ht.gb)
+tree2.ht.gb$est
+tree2.ht.gb$pse
+
+tree2.ht$est
+tree2.ht.gb$est
+
+tree2.ht$pse
+tree2.ht.gb$pse
+
+
+
+#########################################################################################
+## modMAtree - MAmethod='PS' (Post-stratification)
+#########################################################################################
+
+## Live basal area by forest type on forest land, Bighorn, National Forest
+tree.ps <- modMAtree(MAmethod="PS", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+    adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+    unitlut=unitlut, PSstrvar="fornf",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(tree.ps)
+tree.ps$est
+
+
+## Live basal area by forest type on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.ps)
+tree.ps <- modMAtree(MApopdat=MApopdat.ps, MAmethod="PS",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(tree.ps)
+tree.ps$est
+
+
+
+## Live basal area by forest type and stand-size class on forest land, Bighorn, National Forest
+tree2.ps <- modMAtree(MApopdat=MApopdat.ps, MAmethod="PS",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+names(tree2.ps)
+tree2.ps$est
+tree2.ps$pse
+
+
+
+## Compare with modGBtree() results
+########################################################################################
+stratalut <- data.frame(unitlut[[unitvar]], c(1,2),
+      t(unitlut[, names(unitlut)[startsWith(names(unitlut), "fornf")]]), row.names=NULL)
+names(stratalut) <- c(unitvar, "fornf", "strwt")
+stratalut
+
+## Live basal area by forest type and stand-size class on forest land, Bighorn, National Forest
+tree2.ps.gb <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, pltassgnid=pltassgnid,
+  	strata=TRUE, unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+  	stratalut=stratalut, strvar="fornf", 
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+tree2.ps.gb$est
+tree2.ps.gb$pse
+
+tree2.ps$est
+tree2.ps.gb$est
+
+tree2.ps$pse
+tree2.ps.gb$pse
+
+
+tree3.ps <- modMAtree(MApopdat=MApopdat.ps, MAmethod="PS",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="SPCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+names(tree3.ps)
+tree3.ps$est
+tree3.ps$pse
+
+## Compare with modGBtree() results
+########################################################################################
+## Test with Green-book estimates
+tree3.ps.gb <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=pltassgn, pltassgnid=pltassgnid,
+  	strata=TRUE, unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+  	stratalut=stratalut, strvar="fornf", 
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="SPCD", col.FIAname=TRUE,
+  	rawdata=TRUE)
+  	
+tree3.ps.gb$est
+tree3.ps.gb$pse
+
+tree3.ps$est
+tree3.ps.gb$est
+
+tree3.ps$pse
+tree3.ps.gb$pse
+
+tree3.ps.gb$raw$unit_grpest
+
+
+
+
+
+#########################################################################################
+## modGBtree - MAmethod='GREG' (generalized regression)
+#########################################################################################
+estvar <- "BA"
+estvar.filter <- "STATUSCD == 1"
+
+
+## Live basal area by forest type on forest land, Bighorn, National Forest
+tree.greg <- modMAtree(MAmethod="greg", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+    adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, 
+  	unitlut=unitlut, prednames=prednames, predfac="fornf",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(tree.greg)
+tree.greg$est
+
+
+## Live basal area by forest type on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.greg)
+tree.greg <- modMAtree(MApopdat=MApopdat.greg, MAmethod="greg",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(tree.greg)
+tree.greg$est
+
+
+## Live basal area by forest type on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.greg), changing predictor list
+tree2.greg <- modMAtree(MApopdat=MApopdat.greg, MAmethod="greg",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	prednames=c("dem", "fornf"),
+  	rowvar="FORTYPCD", row.FIAname=TRUE, rawdata=TRUE)
+names(tree2.greg)
+tree2.greg$est
+
+
+
+## Live basal area by forest type and stand-size class on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.greg), changing predictor list
+tree3.greg <- modMAtree(MApopdat=MApopdat.greg, MAmethod="greg",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="STDSZCD", col.FIAname=TRUE, rawdata=TRUE)
+names(tree3.greg)
+tree3.greg$est
+
+
+## Live basal area by forest type and species on forest land, Bighorn, National Forest
+## Using population data object (MApopdat.greg), changing predictor list
+tree4.greg <- modMAtree(MApopdat=MApopdat.greg, MAmethod="greg",
+  	landarea="FOREST", estvar=estvar, estvar.filter=estvar.filter,
+  	rowvar="FORTYPCD", row.FIAname=TRUE, colvar="SPCD", col.FIAname=TRUE, rawdata=TRUE)
+names(tree4.greg)
+tree4.greg$est
+
+
+
+```
+
+## References
+
+Bechtold, William A.; Patterson, Paul L., Editors. 2005. The enhanced Forest Inventory and Analysis program—national sampling design and estimation procedures. Gen. Tech. Rep. SRS-80. Asheville, NC: U.S. Department of Agriculture, Forest Service, Southern Research Station. 85 p.
+
+McConville, Kelly; Tang, Becky; Zhu, George; Cheung, Shirley; Li, Sida (2017). mase: Model-Assisted Survey Estimation. R package version 0.1.1 https://github.com/Swarthmore-Statistics/mase
+
+Ruefenacht, B.; Finco, M.V.; Nelson, M.D.; Czaplewski, R.; Helmer, E.H.; Blackard, J. A.; Holden, G.R.; Lister, A.J.; Salajanu, D.; Weyermann, D.; Winterberger, K. 2008. Conterminous U.S. and Alaska Forest Type Mapping Using Forest Inventory and Analysis Data.  Photogrammetric Engineering &amp; Remote 
+Sensing Vol. 74, No. 11, November 2008, pp. 1379-1388.}
+
+U.S. Geological Survey, 2017, 1/3rd arc-second Digital Elevation Models (DEMs) - USGS National Map 3DEP Downloadable Data Collection: U.S. Geological Survey
+
