@@ -45,17 +45,14 @@ The main objective of this tutorial is to demonstrate how to use `FIESTA` for ge
 * [FIESTA output from Green-Book module](#output)
 * [Reference tables](#ref)
 * [GB Functions and Examples](#GBfun)
- 
 
 
-<a name="input"></a>
-
-## Green-Book Parameters
+## Green-Book Parameters {#input}
 
 
 The parameters for GB functions are organized by different categories based on population data and estimation output.
 
-Population data:
+[Population data](#popdat):
 
 1. [Population type](#ptyp)  
 2. [Data tables and unique identifiers of plot](#dtab)  
@@ -64,7 +61,7 @@ Population data:
 5. [Estimation unit information](#estunit)
 6. [Stratification information](#strat)
 
-Estimation output:
+[Estimation output](#estout):
 
 1. [Plot/condition filters to subset table records](#filt)
 2. [Tree information for tree estimates - modGBtree()](#tree) 
@@ -75,7 +72,7 @@ Estimation output:
 
 
 
-### Population Data
+### Population Data {#popdat}
 
 
 <a name="ptyp"></a>
@@ -166,7 +163,7 @@ Note:
 If there are less than minplotnum.strat plots (default=2 plots) in any strata/estimation combination: if stratcombine=FALSE, an error occurs with a message to collapse classes; if stratcombine=TRUE, an automated procedure occurs to collapse all strata less than minplotnum.strat. The function collapses classes based on the order of strata in stratatlut. If a strata within in estimation unit is less than minplotnum.strat, it is grouped with the next strata class in stratalut. If there are less than minplotnum.unit plots in an estimation unit: if unit.action='keep', NA is returned for the estimation unit; if unit.action='remove', the estimation unit is removed from the returned output; if unit.action='combine', an automated procedure occurs to group estimation units with less tha 10 plots with the next estimation unit in the stratalut. If it is the last estimation unit in the table, it is grouped with the estimation unit preceeding in the table. A recommended number of plots is provided as defaults (Westfall and others, 2011). 
 
 
-### Estimation output
+### Estimation output {#estout}
 
 
 <a name="filt"></a>
@@ -319,6 +316,7 @@ A list object with one or more of the following components. If savedata=TRUE, al
 
 
 ### Population data used for producing estimates (GBpopdat$):
+
 * **GBpopdat$condx**       - Data frame of condition data within population, including plot assignments, condition proportion adjustment factor (cadjfac), and adjusted condition proportions (CONDPROP_ADJ).
 * **GBpopdat$pltcondx**    - Data frame of plot/condition data within population, used for estimation.
 * **GBpopdat$cuniqueid**   - Unique identifier of plot in condx and pltcondx.
@@ -604,7 +602,7 @@ area1$est
 ## Raw data (list object) for estimate
 raw <- area1$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
 raw$totest            # estimates for population (i.e., WY)
 
 
@@ -636,10 +634,10 @@ area2$est
 ## Raw data (list object) for estimate
 raw <- area2$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
 raw$totest            # estimates for population (i.e., WY)
-raw$unit_rowest       # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-raw$rowest            # estimates by row for population (i.e., WY)
+head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw$rowest)      # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -674,20 +672,20 @@ area3 <- modGBarea(
 names(area3)
 
 ## Estimate and percent sampling error of estimate
-area3$est
+head(area3$est)
 
 
 ## Raw data (list object) for estimate
 raw <- area3$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
-raw$totest            # estimates for population (i.e., WY)
-raw$unit_rowest       # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-raw$rowest            # estimates by row for population (i.e., WY)
-raw$unit_colest       # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-raw$colest            # estimates by column for population (i.e., WY)
-raw$unit_grpest       # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-raw$grpest            # estimates by row and column for population (i.e., WY)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$totest)      # estimates for population (i.e., WY)
+head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw$rowest)      # estimates by row for population (i.e., WY)
+head(raw$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
+head(raw$colest)      # estimates by column for population (i.e., WY)
+head(raw$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
+head(raw$grpest)      # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -699,8 +697,6 @@ titlelst
 ## List output files in outfolder
 list.files(outfolder, pattern="WY_area")
 list.files(paste0(outfolder, "/rawdata"), pattern="WY_area")
-
-
 ```
 
 
@@ -752,8 +748,8 @@ tree1$est
 ## Raw data (list object) for estimate
 raw <- tree1$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
-raw$totest            # estimates for population (i.e., WY)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$totest)      # estimates for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -788,10 +784,10 @@ tree2$est
 ## Raw data (list object) for estimate
 raw <- tree2$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
-raw$totest            # estimates for population (i.e., WY)
-raw$unit_rowest       # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-raw$rowest            # estimates by row for population (i.e., WY)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$totest)      # estimates for population (i.e., WY)
+head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw$rowest)      # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -834,14 +830,14 @@ tree3$est
 ## Raw data (list object) for estimate
 raw <- tree3$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
-raw$totest            # estimates for population (i.e., WY)
-raw$unit_rowest       # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-raw$rowest            # estimates by row for population (i.e., WY)
-raw$unit_colest       # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-raw$colest            # estimates by column for population (i.e., WY)
-raw$unit_grpest       # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-raw$grpest            # estimates by row and column for population (i.e., WY)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$totest)      # estimates for population (i.e., WY)
+head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw$rowest)      # estimates by row for population (i.e., WY)
+head(raw$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
+head(raw$colest)      # estimates by column for population (i.e., WY)
+head(raw$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
+head(raw$grpest)      # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -853,8 +849,6 @@ titlelst
 ## List output files in outfolder
 list.files(outfolder, pattern="WY_tree")
 list.files(paste0(outfolder, "/rawdata"), pattern="WY_tree")
-
-
 ```
 
 
@@ -883,8 +877,6 @@ names(tree4a)
 
 ## Estimate and percent sampling error of estimate
 tree4a$est
-
-
 ```
 
 
@@ -918,8 +910,6 @@ tree4b$est
 ## Compare estimates with and without seedlings
 head(tree4a$est)
 head(tree4b$est)
-
-
 ```
 
 
@@ -928,7 +918,6 @@ Only seedlings...
 Note: seedling data are only available for number of trees (estvar=TPA_UNADJ)
 Note: must include seedling data in population data calculations
 ```{r}
-
 ## Number of live trees seedlings by species
 tree4c <- modGBtree(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -954,14 +943,11 @@ tree4c$est
 head(tree4a$est)
 head(tree4b$est)
 head(tree4c$est)
-
-
 ```
 
 
 Using tree domain in estimation output columns...
 ```{r}
-
 ## Number of live trees (at least 1 inch diameter) by forest type and species
 tree5 <- modGBtree(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -982,17 +968,13 @@ tree5 <- modGBtree(
 names(tree5)
 
 ## Estimate and percent sampling error of estimate
-tree5$est
-
-
+head(tree5$est)
 ```
 
 
 
 Dead trees...
 ```{r}
-
-
 ## Net cubic-foot volume of dead trees (at least 5 inches diameter) by species and cause of death, 
 ##    Wyoming, 2011-2013
 tree6 <- modGBtree(
@@ -1014,9 +996,7 @@ tree6 <- modGBtree(
 names(tree6)
 
 ## Estimate and percent sampling error of estimate
-tree6$est
-
-
+head(tree6$est)
 ```
 
 
@@ -1024,7 +1004,6 @@ tree6$est
 Add diameter classes to population tree data...
 
 ```{r}
-
 ## Look at tree data in GBpopdat
 head(GBpopdat$treex)
 
@@ -1053,14 +1032,10 @@ head(GBpopdat$treex)
 
 ## Look at table of new diameter classes (DIACL)
 table(GBpopdat$treex$DIACL)
-
-
 ```
 
 
 ```{r}
-
-
 ## Number of live trees by species group and diameter class (DIACL2IN)
 tree7 <- modGBtree(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1080,7 +1055,7 @@ tree7 <- modGBtree(
 names(tree7)
 
 ## Estimate and percent sampling error of estimate
-tree7$est
+head(tree7$est)
 
 
 ## Number of live trees by species group and diameter class (DIACL)
@@ -1102,7 +1077,7 @@ tree8 <- modGBtree(
 names(tree8)
 
 ## Estimate and percent sampling error of estimate
-tree8$est
+head(tree8$est)
 
 
 
@@ -1126,9 +1101,7 @@ tree9 <- modGBtree(
 names(tree9)
 
 ## Estimate and percent sampling error of estimate
-tree9$est
-
-
+head(tree9$est)
 ```
 
 
@@ -1145,8 +1118,6 @@ Parameters defined in the following examples are organized by category: populati
 
 
 ```{r}
-
-
 ## Generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY)
 ## Return raw data and titles
 ## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
@@ -1165,14 +1136,14 @@ ratio1 <- modGBratio(
 names(ratio1)
 
 ## Estimate and percent sampling error of estimate
-ratio1$est
+head(ratio1$est)
 
 
 ## Raw data (list object) for estimate
 raw <- ratio1$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
-raw$totest            # estimates for population (i.e., WY)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$totest)      # estimates for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -1201,16 +1172,16 @@ ratio2 <- modGBratio(
 names(ratio2)
 
 ## Estimate and percent sampling error of estimate
-ratio2$est
+head(ratio2$est)
 
 
 ## Raw data (list object) for estimate
 raw <- ratio2$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
-raw$totest            # estimates for population (i.e., WY)
-raw$unit_rowest       # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-raw$rowest            # estimates by row for population (i.e., WY)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$totest)      # estimates for population (i.e., WY)
+head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw$rowest)      # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -1247,20 +1218,20 @@ ratio3 <- modGBratio(
 names(ratio3)
 
 ## Estimate and percent sampling error of estimate
-ratio3$est
+head(ratio3$est)
 
 
 ## Raw data (list object) for estimate
 raw <- ratio3$raw      # extract raw data list object from output
 names(raw)
-raw$unit_totest       # estimates by estimation unit (i.e., ESTN_UNIT)
-raw$totest            # estimates for population (i.e., WY)
-raw$unit_rowest       # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-raw$rowest            # estimates by row for population (i.e., WY)
-raw$unit_colest       # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-raw$colest            # estimates by column for population (i.e., WY)
-raw$unit_grpest       # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-raw$grpest            # estimates by row and column for population (i.e., WY)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw$totest)      # estimates for population (i.e., WY)
+head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw$rowest)      # estimates by row for population (i.e., WY)
+head(raw$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
+head(raw$colest)      # estimates by column for population (i.e., WY)
+head(raw$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
+head(raw$grpest)      # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
@@ -1272,8 +1243,6 @@ titlelst
 ## List output files in outfolder
 list.files(outfolder, pattern="WY_ratio")
 list.files(paste0(outfolder, "/rawdata"), pattern="WY_ratio")
-
-
 ```
 
 
@@ -1283,7 +1252,6 @@ More examples...
 
 Using tree domain in estimation output rows...
 ```{r}
-
 ## Number of live trees (at least 1 inch diameter) by species
 ratio4a <- modGBratio(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1302,9 +1270,7 @@ ratio4a <- modGBratio(
 names(ratio4a)
 
 ## Estimate and percent sampling error of estimate
-ratio4a$est
-
-
+head(ratio4a$est)
 ```
 
 
@@ -1312,7 +1278,6 @@ Add seedlings...
 Note: seedling data are only available for number of trees (estvarn=TPA_UNADJ)
 Note: must include seedling data in population data calculations
 ```{r}
-
 ## Number of live trees by species, including seedlings
 ratio4b <- modGBratio(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1332,14 +1297,12 @@ ratio4b <- modGBratio(
 names(ratio4b)
 
 ## Estimate and percent sampling error of estimate
-ratio4b$est
+head(ratio4b$est)
 
 
 ## Compare estimates with and without seedlings
 head(ratio4a$est)
 head(ratio4b$est)
-
-
 ```
 
 
@@ -1348,7 +1311,6 @@ Only seedlings...
 Note: seedling data are only available for number of trees (estvarn=TPA_UNADJ)
 Note: must include seedling data in population data calculations
 ```{r}
-
 ## Number of live seedlings by species
 ratio4c <- modGBratio(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1367,21 +1329,18 @@ ratio4c <- modGBratio(
 names(ratio4c)
 
 ## Estimate and percent sampling error of estimate
-ratio4c$est
+head(ratio4c$est)
 
 
 ## Compare estimates with, without, and only seedlings
 head(ratio4a$est)
 head(ratio4b$est)
 head(ratio4c$est)
-
-
 ```
 
 
 Using tree domain in estimation output columns...
 ```{r}
-
 ## Number of live trees (at least 1 inch diameter) by forest type and species
 ratio5 <- modGBratio(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1402,17 +1361,13 @@ ratio5 <- modGBratio(
 names(ratio5)
 
 ## Estimate and percent sampling error of estimate
-ratio5$est
-
-
+head(ratio5$est)
 ```
 
 
 
 Dead trees...
 ```{r}
-
-
 ## Net cubic-foot volume of dead trees (at least 5 inches diameter) by species and cause of death, 
 ##    Wyoming, 2011-2013
 ratio6 <- modGBratio(
@@ -1434,17 +1389,13 @@ ratio6 <- modGBratio(
 names(ratio6)
 
 ## Estimate and percent sampling error of estimate
-ratio6$est
-
-
+head(ratio6$est)
 ```
 
 
 Using tree domain in estimation output rows and columns...
 
 ```{r}
-
-
 ## Number of live trees by species group and diameter class (DIACL2IN)
 ratio7 <- modGBratio(
     GBpopdat=GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1464,7 +1415,7 @@ ratio7 <- modGBratio(
 names(ratio7)
 
 ## Estimate and percent sampling error of estimate
-ratio7$est
+head(ratio7$est)
 
 
 ## Number of live trees by species group and diameter class (DIACL)
@@ -1486,7 +1437,7 @@ ratio8 <- modGBratio(
 names(ratio8)
 
 ## Estimate and percent sampling error of estimate
-ratio8$est
+head(ratio8$est)
 
 
 
@@ -1510,16 +1461,13 @@ ratio9 <- modGBratio(
 names(ratio9)
 
 ## Estimate and percent sampling error of estimate
-ratio9$est
-
-
+head(ratio9$est)
 ```
 
 
 
 Tree ratios...
 ```{r}
-
 ## Net cubic-foot volume of live trees (at least 5 inches diameter) divided by net cubic-foot volume of all trees 
 ##    by forest type, Wyoming, 2011-2013
 ratio10 <- modGBratio(
@@ -1541,9 +1489,7 @@ ratio10 <- modGBratio(
 names(ratio10)
 
 ## Estimate and percent sampling error of estimate
-ratio10$est
-
-
+head(ratio10$est)
 ```
 
 
@@ -1553,8 +1499,6 @@ ratio10$est
 If you want to exclude post-stratification (i.e., simple random sample, Horvitz-Thompson), you must generate a new population dataset using the modGBpop function by setting strata=FALSE.
 
 ```{r}
-
-
 ## Get population data for Wyoming estimates, with no post-stratification
 GBpopdat.strat <- modGBpop(
     cond=WYcond,               # FIA plot/condition data
@@ -1673,9 +1617,6 @@ ratio.nostrat <- modGBratio(
 ## Compare estimates and percent standard errors with and without post-stratification
 head(ratio.strat$est)
 head(ratio.nostrat$est)
-
-
-
 ```
 
 
@@ -1685,7 +1626,6 @@ If you just wanted estimates by estimation unit and did not want to sum them, se
 
 
 ```{r}
-
 ## By estimation unit
 ## Area of forest land by forest type and stand-size class and Estimation Unit,
 ##    Wyoming, 2011-2013
@@ -1716,7 +1656,6 @@ unique(area.unit$est$unit)
 If you were only interested in a couple estimates for a population, you could calculate population data within a module by including all information directly into the estimation module. The modGBpop function is called if the GBpopdat list object is not included as a parameter.
 
 ```{r}
-
 ## Get population data for Wyoming, with post-stratification
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
 area.strat <- modGBarea( 
@@ -1758,8 +1697,6 @@ area.nostrat <- modGBarea(
 ## Compare estimates and percent standard errors with and without post-stratification
 head(area.strat$est)
 head(area.nostrat$est)
-
-
 ```
 
 
