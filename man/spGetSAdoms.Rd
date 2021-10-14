@@ -12,7 +12,6 @@ spGetSAdoms(
   smallbnd.domain = NULL,
   smallbnd.filter = NULL,
   smallbnd.stfilter = NULL,
-  smallbnd.ecofilter = NULL,
   helperbnd = NULL,
   helperbnd_dsn = NULL,
   helperbnd.unique = NULL,
@@ -71,12 +70,6 @@ only smallbnd polygons that intersect (or overlap >= 30%) the filter
 boundary. The filter is based on the stunitco internal R object, with
 attributes: STATECD, STATENM, UNITCD, UNITNM, COUNTYCD, COUNTYNM. The filter
 should include one of these attributes and must be R syntax.}
-
-\item{smallbnd.ecofilter}{String. A spatial filter for smallbnd to include
-only smallbnd polygons that intersect (or overlap >= 30%) the filter
-boundary. The filter is based on the ecomap internal R object, with
-attributes: PROVINCE, SECTION, SUBSECTION. The filter should include one of
-these attributes and must be R syntax.}
 
 \item{helperbnd}{sf R object or String. Name of polygon spatial layer
 delineating helper polygons for small area models. Can be a spatial polygon
