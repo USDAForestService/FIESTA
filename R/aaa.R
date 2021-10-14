@@ -9,6 +9,7 @@
 #' @importFrom stats median var complete.cases ave model.matrix
 #' @importFrom utils download.file select.list unzip write.table head 
 #' @importFrom utils tail setTxtProgressBar txtProgressBar installed.packages capture.output
+#' @importFrom utils choose.files choose.dir 
 #' @importFrom methods as new slot canCoerce
 #' @importFrom rgdal readOGR GDALinfo GDAL.open GDAL.close getRasterBand 
 #' @importFrom rgdal saveDataset getRasterData getDriverName putRasterData getProjectionRef

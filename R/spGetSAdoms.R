@@ -56,11 +56,6 @@
 #' boundary. The filter is based on the stunitco internal R object, with
 #' attributes: STATECD, STATENM, UNITCD, UNITNM, COUNTYCD, COUNTYNM. The filter
 #' should include one of these attributes and must be R syntax.
-#' @param smallbnd.ecofilter String. A spatial filter for smallbnd to include
-#' only smallbnd polygons that intersect (or overlap >= 30%) the filter
-#' boundary. The filter is based on the ecomap internal R object, with
-#' attributes: PROVINCE, SECTION, SUBSECTION. The filter should include one of
-#' these attributes and must be R syntax.
 #' @param helperbnd sf R object or String. Name of polygon spatial layer
 #' delineating helper polygons for small area models. Can be a spatial polygon
 #' object, full pathname to a shapefile, or name of a layer within a database.
@@ -159,7 +154,7 @@
 #' @export spGetSAdoms
 spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL, 
 	smallbnd.domain=NULL, smallbnd.filter=NULL, smallbnd.stfilter=NULL, 
-	smallbnd.ecofilter=NULL, helperbnd=NULL, helperbnd_dsn=NULL, helperbnd.unique=NULL, 
+	helperbnd=NULL, helperbnd_dsn=NULL, helperbnd.unique=NULL, 
 	helperbnd.filter=NULL, largebnd=NULL, largebnd_dsn=NULL, largebnd.unique=NULL, 
 	largebnd.filter=NULL, maxbnd=NULL, maxbnd_dsn=NULL, maxbnd.unique=NULL, 
 	maxbnd.filter=NULL, helper_autoselect=TRUE, nbrdom.min=NULL, maxbnd.threshold=20, 
@@ -176,7 +171,6 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ##  2) Apply filters to small area boundary
   ##	   - smallbnd.filter	 - filter using attribute in smallbnd
   ##	   - smallbnd.stfilter	 - filter boundary by state (e.g., c('Idaho', 'Montana'))
-  ##	   - smallbnd.ecofilter	- filter boundary by eco (e.g. PROVINCE == 'M332')
   ##  3) Import helper boundary (modeling domains)
   ##  4) Apply filter for helper boundary
   ##	   - helperbnd.filter	- filter using attribute in helperbnd
@@ -332,7 +326,7 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     ## Need to dissolve because small area could be in multiple counties
     stunitcof <- sf_dissolve(stunitcof, areacalc=FALSE)
 
-    ## Check projections
+    ## Check projections... project stunitco to smallbnd projections
     crsdat <- crsCompare(stunitcof, smallbndx, nolonglat=TRUE)
     stunitcof <- crsdat$x
     smallbndx <- crsdat$ycrs
@@ -355,39 +349,38 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
  
   ## Apply smallbnd.ecofilter
   ####################################################################
-  if (!is.null(smallbnd.ecofilter)) {
-    ecomap <- FIESTA::ecomap
-    ecomapf <- datFilter(ecomap, smallbnd.ecofilter, stopifnull=TRUE)$xf
+#  if (!is.null(smallbnd.ecofilter)) {
+#    ecomap <- FIESTA::ecomap
+#    ecomapf <- datFilter(ecomap, smallbnd.ecofilter, stopifnull=TRUE)$xf
+#
+#    ## Dissolve filtered ecomap layer
+#    ecomapf <- sf_dissolve(ecomapf, areacalc=FALSE)
+#    ecomap.cols <- names(ecomapf)
+#
+#    ## Check projections
+#    crsdat <- crsCompare(ecomapf, smallbndx, nolonglat=TRUE)
+#    ecomapf <- crsdat$x
+#    smallbndx <- crsdat$ycrs
+#
+#    ## Intersect smallbnd with ecomapf
+#    #smallbndx2 <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
+#    smallbndx2 <- selectByIntersects(smallbndx, ecomapf, 50)
+#
+#    if (is.null(smallbndx2) || nrow(smallbndx2) == 0) {
+#      message("the smallbnd has less than 50% overlap with the ecomap boundary... returning NULL")
+#      return(NULL)
+#    } else {
+#      smallbndx <- smallbndx2
+#      rm(smallbndx2)
+#    }
+#    if (showsteps) {
+#      plot(sf::st_geometry(ecomapf))
+#      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
+#    }
+#  }
 
-    ## Dissolve filtered ecomap layer
-    ecomapf <- sf_dissolve(ecomapf, areacalc=FALSE)
-    ecomap.cols <- names(ecomapf)
-
-    ## Check projections
-    crsdat <- crsCompare(ecomapf, smallbndx, nolonglat=TRUE)
-    ecomapf <- crsdat$x
-    smallbndx <- crsdat$ycrs
-
-    ## Intersect smallbnd with ecomapf
-    #smallbndx2 <- suppressWarnings(selectByIntersects(sf::st_make_valid(smallbndx), ecomapf, 49))
-    smallbndx2 <- selectByIntersects(smallbndx, ecomapf, 50)
-
-    if (is.null(smallbndx2) || nrow(smallbndx2) == 0) {
-      message("the smallbnd has less than 50% overlap with the ecomap boundary... returning NULL")
-      return(NULL)
-    } else {
-      smallbndx <- smallbndx2
-      rm(smallbndx2)
-    }
-    if (showsteps) {
-      plot(sf::st_geometry(ecomapf))
-      plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
-    }
-  }
-  smallbndx.prj <- sf::st_crs(smallbndx)
-
-  message("smallbnd...")
-  #print(st_drop_geometry(smallbndx))
+#  message("smallbnd...")
+#  #print(st_drop_geometry(smallbndx))
 
 
   ## Add AOI attribute to smallbndx
