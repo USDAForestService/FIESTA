@@ -25,7 +25,7 @@
 # strat.pivot
 # preds.standardize
 # preds.select
-
+# chkdbtab
 
 getext <- function(x) {
   xbasename <- basename(x)
@@ -623,6 +623,28 @@ preds.select <- function(y, plt, aux, prednames) {
   return(preds.enet)
 }
  
+
+chkdbtab <- function(dbtablst, tab, stopifnull=FALSE) {
+  ## DESCRIPTION: checks if table exists in list of database tables
+  ## 		If doesn't exist, returns NULL, else returns table name
+  if (is.null(tab)) { 
+    if (stopifnull) {
+      stop(tab, "is NULL")
+    } else {
+      return(NULL)
+    }
+  }
+  if (tolower(tab) %in% dbtablst) {
+    return(tolower(tab)) 
+  } else if (toupper(tab) %in% dbtablst) {
+    return(toupper(tab))
+  } else {
+    if (stopifnull) {
+      stop(tab, " does not exist in database")
+    }
+    return(NULL)
+  }
+}
 
 
 
