@@ -9,7 +9,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 		maxbnd.threshold=0, largebnd.threshold=30, multiSAdoms=TRUE, 
 		maxbnd.addtext=TRUE, largebnd.addtext=FALSE, overwrite=TRUE) {
   ## DESCRIPTION:: Automate selection of helperbnd polygons for modeling.
-  ## maxbnd - maximum constraint for modeling extent (e.g., ECOMAP Province)
+  ## maxbnd - maximum constraint for modeling extent (e.g., Province)
   ## if maxbnd, maxbnd is intersected with smallbnd and dissolved by maxbnd.unique (*maxbnd_select)
   ## if (smallbnd intersects more than 1 maxbnd by greater than the set threshold... 
   ## 		if multiSAdoms=TRUE, more than 1 SAdoms is returned as a list.

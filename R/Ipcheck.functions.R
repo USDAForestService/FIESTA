@@ -1,13 +1,14 @@
-#pcheck.logical	- Checks logical function parameters
-#pcheck.unique	- Check for unique records
-#pcheck.varchar	- Checks string variable parameter
-#pcheck.table
-#pcheck.outfolder
-#pcheck.states
-#pcheck.object
-#pcheck.output
-#pcheck.colors
-#pcheck.areaunits
+# pcheck.logical	- Checks logical function parameters
+# pcheck.unique	- Check for unique records
+# pcheck.varchar	- Checks string variable parameter
+# pcheck.table
+# pcheck.outfolder
+# pcheck.states
+# pcheck.object
+# pcheck.output
+# pcheck.colors
+# pcheck.areaunits
+# pcheck.spatial - checks or gets Vector layer from file name or spatial object
 
 
 pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES",
@@ -729,4 +730,262 @@ pcheck.areaunits <- function(unitarea, areavar, areaunits, metric=FALSE) {
   areavar <- areausedvar
   return(list(unitarea=unitarea, areavar=areavar, outunits=outunits))
 }
+
+
+pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
+	caption=NULL, stopifnull=FALSE, gui=FALSE, polyfix=FALSE, asSpatial=FALSE,
+	dropgeom=FALSE, stopifnoCRS=TRUE, checkonly=FALSE) {
+  ## DESCRIPTION: checks or gets Vector layer from file name or spatial object.
+  ## ARGUMENTS:
+  ## dsn		String. The name of the database or path of shapefile (data source name)
+  ##				or R Spatial Object.
+  ## layer  	String. The name of layer in database or R Spatial Object.
+  ## caption  	String. The text to add for gui window caption.
+  ## checkonly	Logical. If TRUE, check layer only, do not return.
+
+  ## Adds to file filters to Cran R Filters table.
+  if (.Platform$OS.type == "windows") {
+    Filters <- rbind(Filters,shp=c("Shapefiles (*.shp)", "*.shp"))
+    Filters <- rbind(Filters,gpkg=c("GeoPackages (*.gpkg)", "*.gpkg"))
+    Filters <- rbind(Filters,gdb=c("Esri file geodatabase (*.gdb)", "*.gdb"))
+    Filters <- rbind(Filters,sqlite=c("SQLite/Spatialite (*.sqlite)", "*.sqlite"))
+  }
+
+  ## Check for installed packages
+  if (!is.null(fmt)) {
+    if (fmt == "gdb") {
+      if (!"arcgisbinding" %in% rownames(utils::installed.packages())) {
+        message("importing spatial layers from *gdb requires package arcgisbinding")
+      }
+    }
+  }
+  fmtlst <- c("shp", "sqlite", "gpkg", "gdb")
+  stringsAsFactors <- FALSE
+
+  if (is.null(tabnm)) tabnm <- "layer"
+  if (is.null(caption)) caption <- ""
+
+  ## Return NULL
+  if (is.null(layer) && is.null(dsn)) {
+    if (checkonly) {
+      return(FALSE)
+    } else {
+      return(NULL)
+    }
+  }
+
+  ## Check layer - if sf object
+  if (!is.null(layer)) {
+    if (length(class(layer) == "list") && class(layer) == "list") {
+      if (length(layer) != 1) {
+        stop("invalid layer")
+      } else {
+        layer <- layer[[1]]
+      }
+    }
+    if (any(c("sf", "data.frame") %in% class(layer))) {
+      if (nrow(layer) == 0) {
+        if (checkonly) {
+          return(FALSE)
+        } else {
+          stop("no rows in layer")
+        }
+      } else {
+        if (checkonly) {
+          return(TRUE)
+        } else {
+          return(layer)
+        }
+      }
+    } else if (methods::canCoerce(layer, "sf")) {
+      return(sf::st_as_sf(layer, stringsAsFactors=stringsAsFactors))
+    } else if (is.character(layer) && file.exists(layer)) {
+      dsn <- layer
+    }
+  }
+
+  if (!is.null(dsn)) {
+    ext.dsn <- getext(dsn)
+    if (!file.exists(dsn) && (is.na(ext.dsn) || ext.dsn == "NA")) {
+      if (!is.null(fmt) && fmt %in% fmtlst)
+        dsn <- paste(dsn, fmt, sep=".")
+      if (!file.exists(dsn)) dsn <- NULL
+    }
+    if (ext.dsn %in% c("shp", "csv")) {
+      layer <- basename.NoExt(dsn)
+    } else if (!gui && is.null(layer)) {
+      stop("layer is NULL")
+    }
+  } else {
+    ext.layer <- getext(layer)
+    if (!is.na(ext.layer) && ext.layer != "NA" && file.exists(layer)) {
+      if (ext.layer %in% c("shp", "csv")) {
+        dsn <- layer
+        layer <- basename.NoExt(dsn)
+      } else {
+        stop(ext.layer, " not supported")
+      }
+    }
+  }
+
+  ######################################################
+  ## Check dsn
+  ######################################################
+  if (gui && .Platform$OS.type=="windows") {
+    if (is.null(dsn)) {
+      fmt <- utils::select.list(fmtlst, title="dsn format?", multiple=FALSE)
+      if (fmt == "gdb") {
+        dsn <- choose.dir(default=getwd(), caption="Select database")
+      } else if (fmt %in% c("sqlite", "gpkg")) {
+        dsn <- choose.files(default=getwd(), caption="Select database")
+      } else if (fmt == "shp") {
+        dsn <- choose.files(default=getwd(), caption="Select database")
+      } else {
+        stop("format not currently supported")
+      }
+    } else {
+      fmt <- ext.dsn
+    }
+    if (fmt %in% c("shp", "csv")) {
+      layer <- basename.NoExt(dsn)
+    } else {
+      layerlst <- sf::st_layers(dsn)$name
+      layer <- utils::select.list(layerlst, title="Select layer", multiple=FALSE)
+    }
+  }
+  if (is.null(dsn)) {
+    message("dsn is NULL")
+    if (checkonly) {
+      return(FALSE)
+    } else {
+      stop("dsn is NULL")
+    }
+  }
+
+  ######################################################
+  ## Check layer
+  ######################################################
+  layerlst <- tryCatch(sf::st_layers(dsn),
+				error=function(err) {
+					#message("", "\n")
+					return(NULL)
+				} )
+  if (is.null(layerlst)) {
+    if (file.exists(dsn)) {
+      stop("file exists... but not spatial")
+    } else {
+      stop("file does not exist")
+    }
+  }
+
+  ## Note: if dsn is a SpatiaLite database, only spatial layers are listed
+  if (!layer %in% layerlst$name) {
+    if (checkonly) {
+      return(FALSE)
+    }
+    if (ext.dsn == "sqlite") {
+      return(pcheck.table(tab=layer, tab_dsn=dsn))
+    } else {
+      stop(layer, " is not in database")
+    }
+  } else {
+    if (checkonly) {
+      return(TRUE)
+    }
+  }
+  geomtype <- layerlst$geomtype[layerlst$name == layer][[1]]
+  if (is.na(geomtype)) {
+    if (!checkonly) {
+      if (ext.dsn == "gdb") {
+        if ("arcgisbinding" %in% rownames(utils::installed.packages())) {
+          tabS4 <- arcgisbinding::arc.open(paste0(dsn, "/", layer))
+          sql <- check.logic(names(tabS4@fields), sql, xvect=TRUE)
+          tab <- tryCatch(arcgisbinding::arc.select(tabS4, where_clause=sql),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+          if (!is.null(tab)) {
+            return(tab)
+          } else {
+            stop(layer, " is invalid")
+          }
+        } else {
+          message("sql query not used")
+          return(suppressWarnings(sf::st_read(dsn=dsn, layer=layer,
+				stringsAsFactors=stringsAsFactors, quiet=TRUE)))
+        }
+      }
+    } else {
+      return(list(dsn=dsn, layer=layer))
+    }
+  } else {
+    if (ext.dsn == "gdb" && !is.null(sql) && !is.na(sql) &&
+		"arcgisbinding" %in% rownames(utils::installed.packages())) {
+      arcgisbinding::arc.check_product()
+
+      tabS4 <- arcgisbinding::arc.open(paste0(dsn, "/", layer))
+      if (!is.na(sql) && !is.null(sql)) {
+        sql <- check.logic(names(tabS4@fields), sql, xvect=TRUE)
+        tab <- tryCatch(arcgisbinding::arc.select(tabS4, where_clause=sql),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+        if (is.null(tab)) {
+          stop(layer, " is invalid")
+        }
+        splayer <- arcgisbinding::arc.data2sf(tab)
+      } else {
+        splayer <- suppressWarnings(sf::st_read(dsn=dsn, layer=layer,
+				stringsAsFactors=stringsAsFactors, quiet=TRUE))
+      }
+    } else {
+      splayer <- suppressWarnings(sf::st_read(dsn=dsn, layer=layer,
+				stringsAsFactors=stringsAsFactors, quiet=TRUE))
+    }
+  }
+
+  if ("sf" %in% class(splayer)) {
+
+    if (nrow(splayer) == 0 && stopifnull) {
+      msg <- "layer has 0 records"
+      if (stopifnull) {
+        stop(msg)
+      } else {
+        message(msg)
+      }
+    }
+
+    ## Check if projection
+    ############################################################
+    if (is.na(sf::st_crs(splayer))) {
+      msg <- paste("projection is not defined for:", dsn)
+      if (stopifnoCRS) {
+        stop(msg)
+      } else {
+        message(msg)
+      }
+    }
+
+    ## If polyfix
+    ############################################################
+    if (polyfix) {
+      splayer <- polyfix.sf(splayer)
+    }
+
+    ## Drop geometry in table
+    ############################################################
+    if (dropgeom) {
+      splayer <- sf::st_drop_geometry(splayer)
+    }
+  }
+
+  if (checkonly) {
+    return(list(dsn=dsn, layer=layer))
+  } else {
+    return(splayer)
+  }
+}
+
 

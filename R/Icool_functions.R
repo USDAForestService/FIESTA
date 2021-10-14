@@ -1,3 +1,4 @@
+# getext - get extent of filename
 # checkfilenm
 # getoutfn
 # addcommas
@@ -25,6 +26,11 @@
 # preds.standardize
 # preds.select
 
+
+getext <- function(x) {
+  xbasename <- basename(x)
+  strsplit(xbasename, paste0(basename.NoExt(xbasename), "."))[[1]][2]
+}
 
 checkfilenm <- function(fn, outfolder=NULL, ext=NULL, 
 	stopifnull=FALSE) {

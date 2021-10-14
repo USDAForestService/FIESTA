@@ -298,7 +298,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
         
     ## Calculate area
-    unitarea <- areacalc.pixel(unitlayerx, units=areaunits) 
+    unitarea <- areacalc.pixel(unitlayerx, unit=areaunits) 
   }
 
   if (!is.null(vars2keep)) {
