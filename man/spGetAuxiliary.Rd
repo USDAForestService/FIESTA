@@ -162,8 +162,6 @@ appends to layers in dsn.}
 include in dunitzonal output and extract to pltassgn points.}
 
 \item{...}{Other parameters for spMakeSpatialPoints.}
-
-\item{strvars}{Tracey: please add a description of this parameter.}
 }
 \value{
 \item{pltassgn}{ sf object. xyplt data with extracted values from
