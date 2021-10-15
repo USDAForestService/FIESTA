@@ -185,7 +185,6 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     stop("invalid parameter: ", toString(miss))
   }
 
-
   ##################################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################################
@@ -625,9 +624,8 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   }
 
   ## Check if any auxiliary data included. If no return estimation unit info only
-  noaux <- ifelse (is.null(rastlst.contfn) && is.null(rastlst.catfn), TRUE, FALSE)
-    
-    
+  noaux <- ifelse (is.null(rastlst.contfn) && is.null(rastlst.catfn), TRUE, FALSE) 
+ 
   ###################################################################################
   ## Get totacres from domain polygons (if areacalc = TRUE)
   ###################################################################################
@@ -663,14 +661,16 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     returnlst$areavar <- areavar
   }
   if (!noaux) {
-    append(returnlst, list(dunitzonal=setDF(dunitzonal), 
-		inputdf=inputdf, prednames=prednames, zonalnames=zonalnames, 
-		predfac=predfac, npixelvar="npixels"))
+    returnlst$dunitzonal <- setDF(dunitzonal)
+    returnlst$inputdf <- inputdf
+    returnlst$prednames <- prednames
+    returnlst$zonalnames <- zonalnames
+    returnlst$predfac <- predfac
+    returnlst$npixelvar <- "npixels"    
   }
   if (length(predfac) > 0) {
     returnlst$predfac.levels <- predfac.levels
   }
-   
 
   ## Returnxy
   if (returnxy) {

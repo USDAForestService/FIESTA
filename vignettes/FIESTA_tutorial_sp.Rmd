@@ -85,7 +85,7 @@ WYbighorn_dem_250m.img   | Erdas Imagine raster of elevation change, in meters**
 ### EXAMPLES
 
 Set up for examples
-```
+```{r}
 # Load library
 library(FIESTA)
 
@@ -123,7 +123,7 @@ WYco <- USAco[USAco$NAME_1 == "Wyoming",]
 
 
 #### <a name="spImportShape"/>spImportShape()
-```
+```{r}
 ###################################################################################
 # Usage:
 # spImportSpatial(layer = NULL, dsn = NULL, polyfix = FALSE, gui = FALSE) 

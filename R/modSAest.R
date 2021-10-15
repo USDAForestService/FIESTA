@@ -651,26 +651,26 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
  		by=smallbnd.dom)
       #addSAdomsdf <- TRUE
       #SAdomvars <- unique(c(SAdomvars, largebnd.unique))
+      lunique <- largebnd.unique
     } else {
       cdomdat$LARGEBND <- 1
-      largebnd.unique <- "LARGEBND"
+      lunique <- "LARGEBND"
     }
-    ## get unique largebnd values
-    largebnd.vals <- sort(unique(cdomdat[[largebnd.unique]]))
-    largebnd.vals <- largebnd.vals[table(cdomdat[[largebnd.unique]]) > 30]
 
+    ## get unique largebnd values
+    largebnd.vals <- sort(unique(cdomdat[[lunique]]))
+    largebnd.vals <- largebnd.vals[table(cdomdat[[lunique]]) > 30]
 
     ## Get estimate for total
     ######################################
     ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
     tdomdattot <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(largebnd.unique, dunitvar, cuniqueid, "TOTAL", prednames), 
+		by=c(lunique, dunitvar, cuniqueid, "TOTAL", prednames), 
 		.SDcols=estvar.name]
     domain <- "TOTAL"
 
     ## get estimate by domain, by largebnd value
     #message("generating JoSAE unit-level estimates for ", response, " using ", SApackage, "...")
-
 
 #dunitlut <- data.table(SApopdat$dunitlut)
 #dat=tdomdattot
@@ -681,7 +681,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
 			dat=tdomdattot, cuniqueid=cuniqueid, 
-			largebnd.unique=largebnd.unique, dunitlut=dunitlut, dunitvar=dunitvar,
+			largebnd.unique=lunique, dunitlut=dunitlut, dunitvar=dunitvar,
 			prednames=prednames, domain="TOTAL",
 			response=response, showsteps=showsteps, savesteps=savesteps,
 			stepfolder=stepfolder, prior=prior, variable.select=variable.select),
@@ -707,8 +707,7 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
         dunitlut <- do.call(rbind, dunit_multestlst)[,"dunitlut.dom"]$dunitlut.dom
       }
     }
-print("TEST")
-print(head(pdomdat))
+
     multestlst[[SApopdatnm]] <- dunit_multest
     predselectlst[[SApopdatnm]] <- 
 		list(predselect.unit=predselect.unit, predselect.area=predselect.area)
@@ -716,10 +715,10 @@ print(head(pdomdat))
       ## Merge SAdom attributes to dunit_totest
       if (addSAdomsdf) {
         pdomdat <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, "AOI", largebnd.unique, SAdomvars)), with=FALSE], 
+			unique(c(dunitvar, "AOI", lunique, SAdomvars)), with=FALSE], 
 			pdomdat, by=c(dunitvar, "AOI"))
         dunitlut <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, "AOI", largebnd.unique, SAdomvars)), with=FALSE], 
+			unique(c(dunitvar, "AOI", lunique, SAdomvars)), with=FALSE], 
 			dunitlut, by=c(dunitvar, "AOI"))
       }
       pdomdatlst[[SApopdatnm]] <- pdomdat
@@ -773,6 +772,10 @@ print(head(pdomdat))
     nhat.var <- "JoSAE.var"
     nhat.cv <- "JoSAE.cv"
   } 
+
+print("XXXXXXXXXXX")
+print(head(multestdf))
+print(nhat)
 
   ## Subset multest to estimation output
   dunit_totest <- setDT(multestdf)[AOI==1, 
@@ -830,6 +833,8 @@ print(head(pdomdat))
   outfn.estpse <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
 
 
+print("TEST")
+print(dunit_totest)
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################
