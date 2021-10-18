@@ -211,8 +211,9 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
   for (b in bands) { 
      
     prename <- outname 
-    if (!is.null(prename) && rast.nbands > 1)  
+    if (!is.null(prename) && rast.nbands > 1) {
       prename <- paste(prename, b, sep="_") 
+    }
 
     if (any(zonalstat %in% c("mean", "sum", "npixels"))) { 
       atts <- zonalstat[which(zonalstat %in% c("mean", "min", "max", "sum", "npixels"))] 
@@ -291,6 +292,10 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
     if (any(zonalstat %in% c("count", "proportion"))) { 
       zstats <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att, 
 		rasterfile=rastfn, band=b, na.rm=na.rm, ignoreValue=rast.NODATA)) 
+      newvar <- "value" 
+
+      zstats2 <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att, 
+		rasterfile=rastfn, band=b, na.rm=FALSE, ignoreValue=rast.NODATA)) 
       newvar <- "value" 
 
       if (!is.null(rastlut)) { 

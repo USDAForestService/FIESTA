@@ -600,7 +600,6 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, rast.NODATA=rast.cat.NODATA, 
  		polyv.att=dunitvar, outname=rastnm, zonalstat=zonalstat, na.rm=TRUE)
       }
-
       zonalext <- setDT(zonaldat.rast.cat$zonalext)
       outname <- zonaldat.rast.cat$outname
       outname[grep("npixels", outname)] <- "npixels"

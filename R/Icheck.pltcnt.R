@@ -114,7 +114,8 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
 
     ## ## Remove NBRSTRATA and merge to unitlut
     unitlut <- merge(unitlut, pltcnt[, c(joinvars, "n.total"), with=FALSE], 
-		by=joinvars)
+		by=joinvars, all.x=TRUE)
+    unitlut <- DT_NAto0(unitlut, "n.total")
     pvars <- pvars[pvars %in% names(unitlut)]
     othervars <- names(unitlut)[!names(unitlut) %in% unique(c(pvars, unitvars))]
     setcolorder(unitlut, c(unique(c(pvars, unitvars)), othervars))
