@@ -44,8 +44,8 @@
 #' @param strat_lut Data frame. A look-up table of codes to aggregate. The
 #' format of table includes 2 columns, one column same name as strvar.  If
 #' strattype="RASTER", strvar="value".
-#' @param areaunits String. Output area units ("ACRES", "HECTARES",
-#' "SQMETERS").
+#' @param areaunits String. Output area units ("acres", "hectares",
+#' "sqmeters").
 #' @param rast.NODATA Numeric. NODATA value if stratlayer is raster (See
 #' notes). This values will be converted to NA and removed from output.  if
 #' keepNA=TRUE, NA values will not be in included in stratalut but will remain
@@ -132,7 +132,7 @@
 spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
 	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
 	unit.filter=NULL, strattype="RASTER", strat_layer=NULL, 
-	strat_dsn=NULL, strvar=NULL, strat_lut=NULL, areaunits="ACRES", 
+	strat_dsn=NULL, strvar=NULL, strat_lut=NULL, areaunits="acres", 
 	rast.NODATA=NULL, keepNA=FALSE, returnxy=FALSE, 
 	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
 	outfolder=NULL, out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
@@ -199,6 +199,12 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ###################################################################
   unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", 
 	gui=gui, checklst=typelst, caption="Estimation unit type?")
+
+  ## check areaunits
+  areaunitslst <- c("acres", "hectares", "sqmeters") 
+  areaunits <- pcheck.varchar(var2check=areaunits, varnm="areaunits", 
+	gui=gui, checklst=areaunitslst, caption="Area units?", stopifnull=TRUE)
+  areaunits <- toupper(areaunits)
 
   ## Check showext    
   showext <- pcheck.logical(showext, varnm="showext", 
@@ -473,7 +479,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   
   returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 
 		pltassgnid=uniqueid, unitarea=setDF(unitarea), 
-		unitvar=unitvar, areavar=areavar, 
+		unitvar=unitvar, areavar=areavar, areaunits=areaunits,
 		stratalut=setDF(stratalut), strvar=strvar, 
 		getwt=FALSE, strwtvar="strwt")
   if (!is.null(NAlst)) {

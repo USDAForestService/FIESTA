@@ -773,10 +773,6 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     nhat.cv <- "JoSAE.cv"
   } 
 
-print("XXXXXXXXXXX")
-print(head(multestdf))
-print(nhat)
-
   ## Subset multest to estimation output
   dunit_totest <- setDT(multestdf)[AOI==1, 
 		unique(c(dunitvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
@@ -833,8 +829,6 @@ print(nhat)
   outfn.estpse <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
 
 
-print("TEST")
-print(dunit_totest)
   ###################################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################################

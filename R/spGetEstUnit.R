@@ -33,8 +33,8 @@
 #' @param unit.filter String. Filter to subset unit_layer spatial layer.
 #' @param areavar String. Name of area variable unit variable in unitlayer. If
 #' NULL, calculates area by unitvar.
-#' @param areaunits String. Output area units ("ACRES", "HECTARES",
-#' "SQMETERS").
+#' @param areaunits String. Output area units ("acres", "hectares",
+#' "sqmeters").
 #' @param rast.NODATA Numeric. NODATA value if stratlayer is raster. These
 #' values will be removed from output strata table, assuming outside boundary.
 #' @param keepNA Logical. If TRUE, returns data frame of NA values.
@@ -99,7 +99,7 @@
 #' @export spGetEstUnit
 spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
  	unittype="POLY", unit_layer, unit_dsn=NULL, unitvar=NULL, 
-	unit.filter = NULL, areavar=NULL, areaunits="ACRES", rast.NODATA=NULL, 
+	unit.filter = NULL, areavar=NULL, areaunits="acres", rast.NODATA=NULL, 
 	keepNA=FALSE, returnxy=FALSE, showext=FALSE, savedata=FALSE, 
 	exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="shp", 
 	out_dsn=NULL, out_layer="unit_assgn", outfn.date=FALSE, outfn.pre=NULL, 
@@ -162,10 +162,11 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", 
 	gui=gui, checklst=typelst, caption="Estimation unit type?", stopifnull=TRUE)
 
-  ###################################################################
-  areaunitslst <- c("ACRES", "HECTARES", "SQMETERS") 
+  ## check areaunits
+  areaunitslst <- c("acres", "hectares", "sqmeters") 
   areaunits <- pcheck.varchar(var2check=areaunits, varnm="areaunits", 
 	gui=gui, checklst=areaunitslst, caption="Area units?", stopifnull=TRUE)
+  areaunits <- toupper(areaunits)
 
 
   ## Check showext    
@@ -340,7 +341,7 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   
   returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 
 		pltassgnid=uniqueid, unitarea=setDF(unitarea), 
-		unitvar=unitvar, areavar=areavar)
+		unitvar=unitvar, areavar=areavar, areaunits=areaunits)
   if (!is.null(NAlst)) {
     returnlst$NAlst <- NAlst
   }

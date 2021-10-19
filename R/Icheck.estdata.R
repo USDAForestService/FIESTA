@@ -186,6 +186,14 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
 		first="NO", gui=gui, stopifnull=TRUE)
   if (rawonly && !rawdata) rawdata <- TRUE
 
+  ## Check raw_fmt
+  if (rawdata) {
+    raw_fmtlst <- c('sqlite', 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp')
+    raw_fmt <- pcheck.varchar(raw_fmt, varnm="raw_fmt", checklst=raw_fmtlst,
+		caption="Out raw format", gui=gui)
+  }
+
+
   ## Check output info 
   ########################################################
   if (savedata) { 
