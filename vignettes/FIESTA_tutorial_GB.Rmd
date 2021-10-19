@@ -13,6 +13,7 @@ knitr::opts_chunk$set(message = F, warning = F)
 ```
 
 ```{r, include=FALSE}
+# Sets up output folding
 hooks = knitr::knit_hooks$get()
 hook_foldable = function(type) {
   force(type)
@@ -545,7 +546,9 @@ For `FIESTA`'s GB Module, the `modGBpop` function calculates and outputs: number
 
 In this example, we use the sample WY data (2013 Evaluation) in `FIESTA` to generate population data for the GB module. We check this output with the FIADB pop_stratum table from FIA DataMart for 561301 Evalid, using the `FIESTA::DBqryCSV` function.
 
-#### Example 1
+#### Example 1: Getting Population Data for Wyoming Area and Tree Estimates, Using Post-Stratification
+<details>
+  <summary>View Example</summary>
 
 First, we get population data for Wyoming area and tree estimates, using post-stratification with the `modGBpop` function:
 
@@ -600,7 +603,7 @@ head(pop_stratum)
 head(GBpopdat$stratalut)
 ```
 
-
+</details>
 
 <a name="modGBarea"></a>
 
@@ -612,7 +615,9 @@ If there are more than one estimation unit (i.e., subpopulation) within the popu
 
 Parameters defined in the following examples are organized by category: population data (pop); estimation information (est); and output details (out).
 
-#### Example 1
+#### Example 1: Generate Estimate by Estimation Unit and Sun to Population
+<details>
+  <summary>View Example</summary>
 
 First, with the `modGBarea` function we generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY). `FIESTA` then returns raw data and titles for area of forest land, Wyoming, 2011-2013 (sum estimation units).
 
@@ -654,7 +659,11 @@ names(titlelst)
 titlelst
 ```
 
-#### Example 2
+</details>
+
+#### Example 2: Adding Rows to the Output
+<details>
+  <summary>View Example</summary>
 
 In this example, we look at adding rows to the output: 
 
@@ -701,7 +710,11 @@ names(titlelst)
 titlelst
 ```
 
-#### Example 3
+</details>
+
+#### Example 3: Adding Rows and Columns to the Output
+<details>
+  <summary>View Example</summary>
 
 In this example, we look at adding rows and columns to output, including FIA names. We also output estimates and percent standard error in the same cell with the `allin1` argument and save data to an outfolder with the `outfolder` argument. 
 
@@ -758,8 +771,7 @@ list.files(outfolder, pattern = "WY_area")
 list.files(paste0(outfolder, "/rawdata"), pattern = "WY_area")
 ```
 
-
-
+</details>
 
 <a name="modGBtree"></a>
 
@@ -777,7 +789,9 @@ The following reference table can be used for defining `estvar` and `estvar.filt
 ref_estvar[, c("ESTTITLE", "ESTVAR", "ESTFILTER", "ESTUNITS")]
 ```
 
-#### Example 1
+#### Example 1: Generate Estimates by Estimation Unit and Sum to Population
+<details>
+  <summary>View Example</summary>
 
 Now, we can generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY) with `modGBtree`: 
 
@@ -818,7 +832,11 @@ names(titlelst)
 titlelst
 ```
 
-#### Example 2
+</details>
+
+#### Example 2: Add Rows to Output
+<details>
+  <summary>View Example</summary>
 
 This example adds rows to the output for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013. We also choose the return raw data and titles with `rawdata = TRUE` and `returntitle = TRUE`. 
 
@@ -859,7 +877,11 @@ names(titlelst)
 titlelst
 ```
 
-#### Example 3
+</details>
+
+#### Example 3: Add Rows and Columns to Output
+<details>
+  <summary>View Example</summary>
 
 This examples adds rows and columns to the output, including FIA names, for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, Wyoming, 2011-2013. We also return output with estimates (est) and percent standard error (pse) in same cell - est(pse) with `allin1 = TRUE` and save data to an outfolder with `savedata = TRUE` and `outfolder = outfolder`. 
 
@@ -917,8 +939,11 @@ list.files(outfolder, pattern = "WY_tree")
 list.files(paste0(outfolder, "/rawdata"), pattern = "WY_tree")
 ```
 
+</details>
 
-#### Example 4a
+#### Example 4a: Use Tree Domain in Estimation Output Rows
+<details>
+  <summary>View Example</summary>
 
 We can use tree domain in estimation output rows:
 
@@ -948,7 +973,11 @@ names(tree4a)
 tree4a$est
 ```
 
-#### Example 4b
+</details>
+
+#### Example 4b: Add Seedlings
+<details>
+  <summary>View Example</summary>
 
 We can also add seedlings. 
 
@@ -988,7 +1017,11 @@ head(tree4a$est)
 head(tree4b$est)
 ```
 
-#### Example 4c
+</details>
+
+#### Example 4c: Only Seedlings
+<details>
+  <summary>View Example</summary>
 
 Of course, we can also look at *only* seedlings.
 
@@ -1027,7 +1060,11 @@ head(tree4b$est)
 head(tree4c$est)
 ```
 
-#### Example 5
+</details>
+
+#### Example 5: Use Tree Domain in Estimation Output Columns
+<details>
+  <summary>View Example</summary>
 
 We can also use tree domain in estimation output columns:
 
@@ -1059,7 +1096,11 @@ names(tree5)
 head(tree5$est)
 ```
 
-#### Example 6
+</details>
+
+#### Example 6: Examine Dead Trees with a Filter
+<details>
+  <summary>View Example</summary>
 
 We can also examine dead trees with the filter `estvar.filter = "STATUSCD == 2 & STANDING_DEAD_CD == 1"`. 
 
@@ -1092,7 +1133,11 @@ names(tree6)
 head(tree6$est)
 ```
 
+</details>
 
+#### Not sure where this piece should go...
+<details>
+  <summary>View Example</summary>
 
 Add diameter classes to population tree data...
 
@@ -1127,6 +1172,13 @@ head(GBpopdat$treex)
 table(GBpopdat$treex$DIACL)
 ```
 
+</details>
+
+#### Example 7: Number of Live Trees by Species Groups and Diameter Class
+<details>
+  <summary>View Example</summary>
+
+We can also look at the number of live trees by species group and diameter class (DIACL2IN):
 
 ```{r}
 ## Number of live trees by species group and diameter class (DIACL2IN)
@@ -1143,14 +1195,28 @@ tree7 <- modGBtree(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+Outputs:
+
+```{r}
 ## Look at output list
 names(tree7)
 
 ## Estimate and percent sampling error of estimate
 head(tree7$est)
 
+```
 
+</details>
+
+#### Example 8: Number of Live Trees by Species Groups and a Different Diameter Class
+<details>
+  <summary>View Example</summary>
+
+Next, we can look at number of live trees by species group and diameter class (DIACL):
+
+```{r}
 ## Number of live trees by species group and diameter class (DIACL)
 tree8 <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1165,15 +1231,27 @@ tree8 <- modGBtree(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+Outputs:
+
+```{r}
 ## Look at output list
 names(tree8)
 
 ## Estimate and percent sampling error of estimate
 head(tree8$est)
+```
 
+</details>
 
+#### Example 9: Add Seedlings
+<details>
+  <summary>View Example</summary>
 
+Finally, we add seedlings to Example 8:
+
+```{r}
 ## Number of live trees by species group and diameter class (DIACL), add seedlings
 tree9 <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1189,7 +1267,11 @@ tree9 <- modGBtree(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+And look at the outputs:
+
+```{r}
 ## Look at output list
 names(tree9)
 
@@ -1197,7 +1279,7 @@ names(tree9)
 head(tree9$est)
 ```
 
-
+</details>
 
 <a name="modGBratio"></a>
 
@@ -1209,9 +1291,13 @@ If there are more than one estimation unit (i.e., subpopulation) within the popu
 
 Parameters defined in the following examples are organized by category: population data (pop); estimation information (est); and output details (out).
 
+#### Example 1: Generate Estimates by Estimation Unit and Sum to Population
+<details>
+  <summary>View Example</summary>
+
+We generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY):
 
 ```{r}
-## Generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY)
 ## Return raw data and titles
 ## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
 ratio1 <- modGBratio(
@@ -1223,8 +1309,11 @@ ratio1 <- modGBratio(
     rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE           # out - return title information
     )
+```
 
+And we can look at our output:
 
+```{r}
 ## Look at output list
 names(ratio1)
 
@@ -1243,11 +1332,17 @@ head(raw$totest)      # estimates for population (i.e., WY)
 titlelst <- ratio1$titlelst
 names(titlelst)
 titlelst
+```
 
+</details>
 
+#### Example 2: Add Rows
+<details>
+  <summary>View Example</summary>
 
+We can also add rows to the output:
 
-## Add rows to output
+```{r}
 ## Net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013
 ## Return raw data and titles
 ratio2 <- modGBratio(
@@ -1260,7 +1355,11 @@ ratio2 <- modGBratio(
     rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE           # out - return title information
     )
+```
 
+And of course view our outputs:
+
+```{r}
 ## Look at output list
 names(ratio2)
 
@@ -1281,10 +1380,17 @@ head(raw$rowest)      # estimates by row for population (i.e., WY)
 titlelst <- ratio2$titlelst
 names(titlelst)
 titlelst
+```
 
+</details>
 
+#### Example 3: Add Rows and Columns
+<details>
+  <summary>View Example</summary>
 
-## Add row and columns to output, including FIA names
+We can also add row and columns to output, including FIA names:
+
+```{r}
 ## Return output with estimates (est) and percent standard error (pse) in same cell - est(pse)
 ## Save data to outfolder:
 ## Net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, 
@@ -1306,7 +1412,11 @@ ratio3 <- modGBratio(
     outfolder = outfolder,       # out - outfolder for saving data
     outfn.pre = "WY"             # out - prefix for output files
     )
+```
 
+And look at our output again:
+
+```{r}
 ## Look at output list from modGBarea()
 names(ratio3)
 
@@ -1338,12 +1448,14 @@ list.files(outfolder, pattern = "WY_ratio")
 list.files(paste0(outfolder, "/rawdata"), pattern = "WY_ratio")
 ```
 
+</details>
 
+#### Example 4a: Use Tree Domain in Estimation Output Rows
+<details>
+  <summary>View Example</summary>
 
-More examples...
+We can also use tree domain in estimation output rows:
 
-
-Using tree domain in estimation output rows...
 ```{r}
 ## Number of live trees (at least 1 inch diameter) by species
 ratio4a <- modGBratio(
@@ -1358,7 +1470,11 @@ ratio4a <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = FALSE,              # out - return output with est and pse
     )
+```
 
+And we can look at our output:
+
+```{r}
 ## Look at output list
 names(ratio4a)
 
@@ -1366,10 +1482,18 @@ names(ratio4a)
 head(ratio4a$est)
 ```
 
+</details>
 
-Add seedlings...  
-Note: seedling data are only available for number of trees (estvarn = TPA_UNADJ)
-Note: must include seedling data in population data calculations
+#### Example 4b: Add Seedlings
+<details>
+  <summary>View Example</summary>
+
+Now, we can add seedlings. 
+
+Note: seedling data are only available for number of trees (`estvarn = TPA_UNADJ`).
+
+Note: must include seedling data in population data calculations.
+
 ```{r}
 ## Number of live trees by species, including seedlings
 ratio4b <- modGBratio(
@@ -1385,24 +1509,34 @@ ratio4b <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = FALSE,              # out - return output with est and pse
     )
+```
 
+Output and comparison:
+
+```{r}
 ## Look at output list
 names(ratio4b)
 
 ## Estimate and percent sampling error of estimate
 head(ratio4b$est)
 
-
 ## Compare estimates with and without seedlings
 head(ratio4a$est)
 head(ratio4b$est)
 ```
 
+</details>
 
+#### Example 4c: Only Seedlings
+<details>
+  <summary>View Example</summary>
 
-Only seedlings...  
-Note: seedling data are only available for number of trees (estvarn = TPA_UNADJ)
-Note: must include seedling data in population data calculations
+We could also consider only seedlings.
+
+Note: seedling data are only available for number of trees (`estvarn = TPA_UNADJ`).
+
+Note: must include seedling data in population data calculations.
+
 ```{r}
 ## Number of live seedlings by species
 ratio4c <- modGBratio(
@@ -1417,13 +1551,16 @@ ratio4c <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = FALSE,              # out - return output with est and pse
     )
+```
 
+Output and comparisons:
+
+```{r}
 ## Look at output list
 names(ratio4c)
 
 ## Estimate and percent sampling error of estimate
 head(ratio4c$est)
-
 
 ## Compare estimates with, without, and only seedlings
 head(ratio4a$est)
@@ -1431,8 +1568,14 @@ head(ratio4b$est)
 head(ratio4c$est)
 ```
 
+</details>
 
-Using tree domain in estimation output columns...
+#### Example 5: Use Tree Domain in Estimation Output Columns
+<details>
+  <summary>View Example</summary>
+
+We can also use tree domain in estimation output columns:
+
 ```{r}
 ## Number of live trees (at least 1 inch diameter) by forest type and species
 ratio5 <- modGBratio(
@@ -1449,7 +1592,11 @@ ratio5 <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+And view our output:
+
+```{r}
 ## Look at output list
 names(ratio5)
 
@@ -1457,9 +1604,14 @@ names(ratio5)
 head(ratio5$est)
 ```
 
+</details>
 
+#### Example 6: Dead Trees
+<details>
+  <summary>View Example</summary>
 
-Dead trees...
+Next, we look at dead trees: 
+
 ```{r}
 ## Net cubic-foot volume of dead trees (at least 5 inches diameter) by species and cause of death, 
 ##    Wyoming, 2011-2013
@@ -1477,7 +1629,11 @@ ratio6 <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+And we can see our output:
+
+```{r}
 ## Look at output list
 names(ratio6)
 
@@ -1485,8 +1641,13 @@ names(ratio6)
 head(ratio6$est)
 ```
 
+</details>
 
-Using tree domain in estimation output rows and columns...
+#### Example 7: Tree Domain in Estimation Output Rows and Columns
+<details>
+  <summary>View Example</summary>
+
+We can also use tree domain in estimation output rows and columns:
 
 ```{r}
 ## Number of live trees by species group and diameter class (DIACL2IN)
@@ -1503,15 +1664,27 @@ ratio7 <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+And examine our output:
+
+```{r}
 ## Look at output list
 names(ratio7)
 
 ## Estimate and percent sampling error of estimate
 head(ratio7$est)
+```
 
+</details>
 
-## Number of live trees by species group and diameter class (DIACL)
+#### Example 8: Number of Live Trees by Species Group and Diameter Class
+<details>
+  <summary>View Example</summary>
+
+Next, we can look at the number of live trees by species group and diameter class (`DIACL`):
+
+```{r}
 ratio8 <- modGBratio(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
@@ -1525,16 +1698,27 @@ ratio8 <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+And of course examine our output:
+
+```{r}
 ## Look at output list
 names(ratio8)
 
 ## Estimate and percent sampling error of estimate
 head(ratio8$est)
+```
 
+</details>
 
+#### Example 9: Number of Live Trees by Species Groups and Diameter Class, and Add Seedlings
+<details>
+  <summary>View Example</summary>
 
-## Number of live trees by species group and diameter class (DIACL), add seedlings
+Now, we look at the number of live trees by species group and diameter class (`DIACL`), and add seedlings:
+
+```{r}
 ratio9 <- modGBratio(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     estseed = "add",             # est - add seedling data
@@ -1549,7 +1733,11 @@ ratio9 <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+And we again look at our output:
+
+```{r}
 ## Look at output list
 names(ratio9)
 
@@ -1557,9 +1745,14 @@ names(ratio9)
 head(ratio9$est)
 ```
 
+</details>
 
+#### Example 10: Tree Ratios
+<details>
+  <summary>View Example</summary>
 
-Tree ratios...
+Next, we look at tree ratios:
+
 ```{r}
 ## Net cubic-foot volume of live trees (at least 5 inches diameter) divided by net cubic-foot volume of all trees 
 ##    by forest type, Wyoming, 2011-2013
@@ -1577,7 +1770,11 @@ ratio10 <- modGBratio(
     returntitle = TRUE,          # out - return title information
     allin1 = TRUE,               # out - return output with est(pse)
     )
+```
 
+And examine the output:
+
+```{r}
 ## Look at output list
 names(ratio10)
 
@@ -1585,11 +1782,14 @@ names(ratio10)
 head(ratio10$est)
 ```
 
-
+</details>
 
 ### No strata
 
-If you want to exclude post-stratification (i.e., simple random sample, Horvitz-Thompson), you must generate a new population dataset using the `modGBpop` function by setting strata = FALSE.
+If you want to exclude post-stratification (i.e., simple random sample, Horvitz-Thompson), you must generate a new population dataset using the `modGBpop` function by setting `strata = FALSE`.
+
+<details>
+  <summary>View Code</summary>
 
 ```{r}
 ## Get population data for Wyoming estimates, with no post-stratification
@@ -1617,8 +1817,9 @@ GBpopdat.nostrat <- modGBpop(
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = FALSE               # if using post-stratification
     )
+```
 
-
+```{r}
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013, with post-stratification
 area.strat <- modGBarea( 
     GBpopdat = GBpopdat.strat,         # pop - population calculations for WY, post-stratification
@@ -1640,14 +1841,15 @@ area.nostrat <- modGBarea(
     rawdata = TRUE,              # out - return raw data 
     allin1 = FALSE               # out - return output with est(pse)
     )   
+```
 
-
+```{r}
 ## Compare estimates and percent standard errors with and without post-stratification
 head(area.strat$est)
 head(area.nostrat$est)
+```
 
-
-
+```{r}
 ## Number of live trees by species, Wyoming, 2011-2013, with post-stratification
 tree.strat <- modGBtree( 
     GBpopdat = GBpopdat.strat,   # pop - population calculations for WY, post-stratification
@@ -1673,13 +1875,15 @@ tree.nostrat <- modGBtree(
     rawdata = TRUE,              # out - return raw data 
     allin1 = FALSE               # out - return output with est(pse)
     )   
+```
 
-
+```{r}
 ## Compare estimates and percent standard errors with and without post-stratification
 head(tree.strat$est)
 head(tree.nostrat$est)
+```
 
-
+```{r}
 ## Number of live trees per acre by species, Wyoming, 2011-2013, with post-stratification
 ratio.strat <- modGBratio( 
     GBpopdat = GBpopdat.strat,   # pop - population calculations for WY, post-stratification
@@ -1704,19 +1908,23 @@ ratio.nostrat <- modGBratio(
     row.FIAname = TRUE,          # est - row domain names
     rawdata = TRUE,              # out - return raw data 
     allin1 = FALSE               # out - return output with est(pse)
-    )   
+    )  
+```
 
-
+```{r}
 ## Compare estimates and percent standard errors with and without post-stratification
 head(ratio.strat$est)
 head(ratio.nostrat$est)
 ```
 
+</details>
 
-### By estimation unit (sumunits = FALSE)
+### By estimation unit (`sumunits = FALSE`)
 
-If you just wanted estimates by estimation unit and did not want to sum them, set sumunits = FALSE. If sumunits = FALSE, the estimates and percent standard errors returned are by estimation unit, with an attribute, named 'unit' appended to data frame, with the unit value. The raw data returned will look the same as if sumunits = TRUE. 
+If you just wanted estimates by estimation unit and did not want to sum them, set `sumunits = FALSE`. If `sumunits = FALSE`, the estimates and percent standard errors returned are by estimation unit, with an attribute, named 'unit' appended to data frame, with the unit value. The raw data returned will look the same as if `sumunits = TRUE`. 
 
+<details>
+  <summary>View Code</summary>
 
 ```{r}
 ## By estimation unit
@@ -1739,14 +1947,16 @@ head(area.unit$est)
 
 ## Unique estimation units
 unique(area.unit$est$unit)
-
 ```
 
-
+</details>
 
 ### Population data included in estimation module
 
 If you were only interested in a couple estimates for a population, you could calculate population data within a module by including all information directly into the estimation module. The `modGBpop` function is called if the GBpopdat list object is not included as a parameter.
+
+<details>
+  <summary>View Code</summary>
 
 ```{r}
 ## Get population data for Wyoming, with post-stratification
@@ -1792,7 +2002,7 @@ head(area.strat$est)
 head(area.nostrat$est)
 ```
 
-
+</details>
 
 ## References
 
