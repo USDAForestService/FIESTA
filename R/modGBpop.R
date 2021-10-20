@@ -347,7 +347,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Load data
   ###################################################################################
   if (!is.null(GBdata)) {
-    list.items <- c("cond", "unitarea", "unitvar")
+    list.items <- c("cond", "dunitarea", "dunitvar")
     GBdata <- pcheck.object(GBdata, "GBdata", list.items=list.items)
     #bnd <- GBdata$bnd
     plt <- GBdata$plt
@@ -356,19 +356,23 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     seed <- GBdata$seed
     pltassgn <- GBdata$pltassgn
     pltassgnid <- GBdata$pltassgnid 
-    unitarea <- GBdata$unitarea
+    unitarea <- GBdata$dunitarea
     areavar <- GBdata$areavar
-    stratalut <- GBdata$stratalut
-    strvar <- GBdata$strvar
-    strwtvar <- GBdata$strwtvar
+    unitzonal <- GBdata$dunitzonal
+
+#    stratalut <- GBdata$stratalut
+#    strvar <- GBdata$strvar
+#    strwtvar <- GBdata$strwtvar
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
 
     if (is.null(unitvar)) {
-      unitvar <- GBdata$unitvar
-      unitvar2 <- GBdata$unitvar2
+      unitvar <- GBdata$dunitvar
+      unitvar2 <- GBdata$dunitvar2
     } 
-
+    strwtvar <- "strwt"
+    stratalut <- strat.pivot(unitzonal, strvar, unitvars=c(unitvar, unitvar2), 
+		strwtvar=strwtvar)
   } else {
     if (!is.null(pltdat)) {
       if ("tabs" %in% names(pltdat)) {

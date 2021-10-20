@@ -313,7 +313,7 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   ## Load data
   ###################################################################################
   if (!is.null(MAdata)) {
-    list.items <- c("plt", "cond", "unitarea", "unitvar", "unitzonal")
+    list.items <- c("plt", "cond", "dunitarea", "dunitvar", "dunitzonal")
     MAdata <- pcheck.object(MAdata, "MAdata", list.items=list.items)
     #bnd <- MAdata$bnd
     plt <- MAdata$plt
@@ -322,15 +322,15 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
     seed <- MAdata$seed
     pltassgn <- MAdata$pltassgn
     pltassgnid <- MAdata$pltassgnid
-    unitarea <- MAdata$unitarea
+    unitarea <- MAdata$dunitarea
     areavar <- MAdata$areavar
-    unitzonal <- MAdata$unitzonal
+    unitzonal <- MAdata$dunitzonal
     puniqueid <- MAdata$puniqueid
     pjoinid <- MAdata$pjoinid
 
     if (is.null(unitvar)) {
-      unitvar <- MAdata$unitvar
-      unitvar2 <- MAdata$unitvar2
+      unitvar <- MAdata$dunitvar
+      unitvar2 <- MAdata$dunitvar2
     } 
     if (is.null(npixelvar)) {
       npixelvar <- MAdata$npixelvar
