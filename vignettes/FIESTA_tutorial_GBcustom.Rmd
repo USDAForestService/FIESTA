@@ -84,19 +84,9 @@ Set up for examples
 # Load library
 library(FIESTA)
 
-## If not on windows platform, set up an outfolder to output from examples
-if (.Platform$OS.type == "windows") {
-  # Set workspace to FIESTA folder (create if doesn't exist)
-  if (!file.exists("C:/FIESTA"))  {
-    dir.create("C:/FIESTA")
-  }
-  setwd("C:/FIESTA")
-
-  if (!file.exists("outfolder")) {
-    dir.create("outfolder")
-  }
-  outfolder <- "outfolder"
-}
+dir.create("FIESTA")
+dir.create(paste0(getwd(),"/FIESTA", "/outfolder"))
+outfolder <- paste0(getwd(),"/FIESTA", "/outfolder")
 
 # File names for external spatial data
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
@@ -818,4 +808,12 @@ Patterson, Paul L. 2012. Photo-based estimators for the Nevada photo-based inven
 
 Ruefenacht, B.; Finco, M.V.; Nelson, M.D.; Czaplewski, R.; Helmer, E.H.; Blackard, J. A.; Holden, G.R.; Lister, A.J.; Salajanu, D.; Weyermann, D.; Winterberger, K. 2008. Conterminous U.S. and Alaska Forest Type Mapping Using Forest Inventory and Analysis Data.  Photogrammetric Engineering &amp; Remote 
 Sensing Vol. 74, No. 11, November 2008, pp. 1379-1388.}
+
+```{r, include = FALSE}
+# deletes old outfolder from examples
+unlink(substr(outfolder,
+              1,
+              nchar(outfolder)-10),
+       recursive = TRUE)
+```
 
