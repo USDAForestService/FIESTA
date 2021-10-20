@@ -19,7 +19,7 @@ spGetStrata(
   strat_dsn = NULL,
   strvar = NULL,
   strat_lut = NULL,
-  areaunits = "ACRES",
+  areaunits = "acres",
   rast.NODATA = NULL,
   keepNA = FALSE,
   returnxy = FALSE,
@@ -87,8 +87,8 @@ strat_layer.}
 format of table includes 2 columns, one column same name as strvar.  If
 strattype="RASTER", strvar="value".}
 
-\item{areaunits}{String. Output area units ("ACRES", "HECTARES",
-"SQMETERS").}
+\item{areaunits}{String. Output area units ("acres", "hectares",
+"sqmeters").}
 
 \item{rast.NODATA}{Numeric. NODATA value if stratlayer is raster (See
 notes). This values will be converted to NA and removed from output.  if

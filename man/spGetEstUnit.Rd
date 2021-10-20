@@ -15,7 +15,7 @@ spGetEstUnit(
   unitvar = NULL,
   unit.filter = NULL,
   areavar = NULL,
-  areaunits = "ACRES",
+  areaunits = "acres",
   rast.NODATA = NULL,
   keepNA = FALSE,
   returnxy = FALSE,
@@ -64,8 +64,8 @@ name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 \item{areavar}{String. Name of area variable unit variable in unitlayer. If
 NULL, calculates area by unitvar.}
 
-\item{areaunits}{String. Output area units ("ACRES", "HECTARES",
-"SQMETERS").}
+\item{areaunits}{String. Output area units ("acres", "hectares",
+"sqmeters").}
 
 \item{rast.NODATA}{Numeric. NODATA value if stratlayer is raster. These
 values will be removed from output strata table, assuming outside boundary.}
