@@ -36,7 +36,6 @@ knitr::knit_hooks$set(
 ```
 
 ## `FIESTA` Overview
-
 The `R` package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
 Functions are organized by type or objective and are named with a corresponding prefix. `FIESTA` core functions facilitate data extraction and compilation of data input information and are used independently or within the `FIESTA` estimation modules. `FIESTA` estimation modules combine multiple functions from `FIESTA` or other packages to generate population estimates using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations (e.g., adjustments for nonresponse) for a custom boundary and can be used for generating multiple estimates. `FIESTA` analysis functions, found in the `FIESTAnalysis` package, streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
@@ -101,8 +100,7 @@ The parameters for GB functions are organized by different categories based on p
 
 
 ### Population Data {#popdat}
-<details>
-  <summary>View Population Data</summary>
+
 
 <a name="ptyp"></a>
 **Population type**
@@ -191,11 +189,9 @@ Stratification is used to reduce variance in population estimates by partitionin
 Note: 
 If there are less than minplotnum.strat plots (default=2 plots) in any strata/estimation combination: if stratcombine=FALSE, an error occurs with a message to collapse classes; if stratcombine=TRUE, an automated procedure occurs to collapse all strata less than minplotnum.strat. The function collapses classes based on the order of strata in stratatlut. If a strata within in estimation unit is less than minplotnum.strat, it is grouped with the next strata class in stratalut. If there are less than minplotnum.unit plots in an estimation unit: if unit.action='keep', NA is returned for the estimation unit; if unit.action='remove', the estimation unit is removed from the returned output; if unit.action='combine', an automated procedure occurs to group estimation units with less tha 10 plots with the next estimation unit in the stratalut. If it is the last estimation unit in the table, it is grouped with the estimation unit preceeding in the table. A recommended number of plots is provided as defaults (Westfall and others, 2011). 
 
-</details>
 
-### Estimation Output {#estout}
-<details>
-  <summary>View Estimation Output</summary>
+### Estimation output {#estout}
+
 
 <a name="filt"></a>
 **Estimation Filters**
@@ -285,7 +281,6 @@ If saving to a folder, and a title is desired, there are parameters for includin
 * **title.estvar**  - Pretty name for estvar for table title (If NULL, default = estvar). For ratio estimates, title.estvarn (default = estvarn) and title.estvard (default = estvard).
 * **title.filter**  - Pretty name for any filters for table title.
 
-</details>
 
 <a name="required"></a>
 
@@ -346,8 +341,6 @@ A list object with one or more of the following components. If savedata=TRUE, al
 
 
 ### Population data used for producing estimates (GBpopdat$):
-<details>
-  <summary>View Population Data</summary>
 
 * **GBpopdat$condx**       - Data frame of condition data within population, including plot assignments, condition proportion adjustment factor (cadjfac), and adjusted condition proportions (CONDPROP_ADJ).
 * **GBpopdat$pltcondx**    - Data frame of plot/condition data within population, used for estimation.
@@ -390,12 +383,7 @@ kable(stratdat.lut,
 
 ```
 
-</details>
-
 ### Raw data used for producing estimates (If rawdata=TRUE, raw$):
-<details>
-  <summary>View Raw Data</summary>
-
 The raw data includes the domain-level data set used for estimation and separate data frames with calculated variables used in estimation process. The number of processing tables depends on the input parameters. The tables include:
 
 * **raw$domdat**      - Plot domain data used for estimation.
@@ -411,6 +399,8 @@ The raw data includes the domain-level data set used for estimation and separate
 
 
 ```{r, results = 'asis', echo=FALSE}
+
+
 nonratio <- data.frame(Variable = c("nhat", "nhat.var", "est", "est.var"), Description = c("Estimated proportion", "Variance estimate of estimated proportion", "Estimated acres { nhat * ACRES }", "Variance estimate of estimated acres { nhat * ACRES^2 }"), stringsAsFactors = FALSE)
 
 ratio <- data.frame(Variable = c("nhat", "nhat.var", "dhat", "dhat.var", "covar", "estn", "estd", "estn.var", "estn.se", "estn.cv", "estn.pse", "estd.var", "estd.se", "estd.cv", "estd.pse", "est.covar", "rhat", "rhat.var", "rhat.se", "rhat.cv", "est", "est.var"), Description = c("Estimated proportion of land, for numerator", "Variance estimate of estimated proportion of land, for numerator", "Estimated proportion of land, for denominator", "Variance estimate of estimated proportion of land, for denominator", "Covariance of estimated proportion of numerator and denominator", "Estimated acres, for numerator", "Estimated acres, for denominator", "Variance estimate of estimate acres, for numerator", "Standard error estimated acres, for numerator", "Coeffiecient of variation of estimated acres, for numerator", "Percent sampling error of estimate, for numerator", "Variance estimate of estimate acres, for denominator", "Standard error estimated acres, for denominator", "Coefficient of variation of estimated acres, for denominator", "Percent sampling error of estimate, for denominator", "Covariance of estimated acres of numerator and denominator", "Ratio of estimated proportions (numerator/denominator)", "Variance of ratio of estimated proportions", "Standard error of ratio of estimated proportions { rhat.se/rhat }", "Coefficient of variation of ratio of estimated proportions { sqrt(rhat.var) }", "Estimated percent cover of land { rhat*100 }", "Variance of estimated percent cover of land { rhat.var*100^2 }"), stringsAsFactors = FALSE)
@@ -450,7 +440,6 @@ kable(all,
 
 ```
 
-</details>
 
 <a name="ref"></a>
 
