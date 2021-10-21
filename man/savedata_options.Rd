@@ -9,21 +9,11 @@ savedata_options(
   outfn.pre = NULL,
   outfn.date = FALSE,
   addtitle = TRUE,
-  rawdata = FALSE,
-  rawonly = FALSE,
   raw_fmt = "csv",
   raw_dsn = NULL,
   overwrite_dsn = FALSE,
   overwrite_layer = TRUE,
   append_layer = FALSE,
-  returntitle = FALSE,
-  title.main = NULL,
-  title.ref = NULL,
-  title.rowvar = NULL,
-  title.colvar = NULL,
-  title.unitvar = NULL,
-  title.estvar = NULL,
-  title.filter = NULL,
   ...
 )
 }
@@ -38,14 +28,6 @@ raw_fmt != 'csv').}
 \item{outfn.date}{Logical. If TRUE, add current date to out_dsn.}
 
 \item{addtitle}{Logical. If TRUE and savedata=TRUE, adds title to outfile.}
-
-\item{rawdata}{Logical. If TRUE, returns a list of raw data tables that are
-used for estimation (See Value). If savedata = TRUE, tables are written to
-outfolder (if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv').}
-
-\item{rawonly}{Logical. If TRUE, only rawdata are output. If dataset
-includes many estimation units, and only raw data tables are desired, it is
-more efficient to output raw data only.}
 
 \item{raw_fmt}{String. Format for output rawdata tables ('sqlite',
 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').}
@@ -62,34 +44,6 @@ out_layers in raw_dsn (if raw_fmt != 'csv').}
 \item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data to
 existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
 'csv".}
-
-\item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
-table(s).}
-
-\item{title.main}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the complete title used for table. If title.main=NULL, the title.*
-parameters are used to generate title string. Note: if title.ref is not
-NULL, it is added to title.main.}
-
-\item{title.ref}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".}
-
-\item{title.rowvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the row domain variable. If NULL, = rowvar.}
-
-\item{title.colvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the column domain variable. If NULL, = colvar.}
-
-\item{title.unitvar}{String. TITLE, if savedata=TRUE and/or
-returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-unitvar.}
-
-\item{title.estvar}{String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
-
-\item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for filter(s). If title.filter=NULL, a default is generated from
-cfilter.  If title.filter="", no title.filter is used.}
 
 \item{...}{For extendibility.}
 }
