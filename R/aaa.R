@@ -1,5 +1,6 @@
-#' @import Rcpp data.table sf utils
+#' @import data.table sf utils
 #' @useDynLib FIESTA
+#' @importFrom Rcpp sourceCpp
 #' @importFrom grDevices colors dev.new dev.off jpeg pdf
 #' @importFrom grDevices png postscript rainbow terrain.colors
 #' @importFrom grDevices is.raster cm.colors hcl.colors heat.colors topo.colors
