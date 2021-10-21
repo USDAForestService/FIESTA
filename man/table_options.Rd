@@ -34,6 +34,8 @@ table_options(
   title.unitvar = NULL,
   title.estvar = NULL,
   title.filter = NULL,
+  gainloss = FALSE,
+  gainloss.vals = NULL,
   ...
 )
 }
@@ -143,6 +145,13 @@ pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
 \item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 pretty name for filter(s). If title.filter=NULL, a default is generated from
 cfilter.  If title.filter="", no title.filter is used.}
+
+\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
+loss along with the variance and standard error, in percent, is generated.
+Used in modGBlulc.}
+
+\item{gainloss.vals}{String vector. A vector of names for values in gainloss
+table. Used in modGBlulc.}
 
 \item{...}{For extendibility.}
 }

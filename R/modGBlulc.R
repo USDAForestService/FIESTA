@@ -44,87 +44,12 @@
 #' domain, rowvar = domain variable. If more than one domain, include colvar.
 #' If no domain, rowvar = NULL.
 #' @param colvar String. Name of column domain variable in cond.
-#' @param row.FIAname Logical. If TRUE, gets FIA reference names for row
-#' variable based on ref_codes. Only available for certain variables.
-#' @param col.FIAname Logical. If TRUE, gets FIA reference names for column
-#' variable based on ref_codes. Only available for certain variables.
-#' @param row.orderby String. Name of variable to sort table rows. If
-#' row.FIAname=TRUE and a ref_* exists for rowvar, the rowvar code is used to
-#' sort. If NULL, the table is sorted by rowvar.
-#' @param col.orderby String. Name of variable to sort table columns. If
-#' col.FIAname=TRUE and a ref_* exists for colvar, the colvar code is used to
-#' sort. If NULL, the table is sorted by colvar.
-#' @param row.add0 Logical. If TRUE, add the rows that have 0 values.
-#' @param col.add0 Logical. If TRUE, add the columns that have 0 values.
-#' @param rowlut Data frame. A lookup table with variable codes and
-#' descriptions to include in rows of output table (See notes for more
-#' information and format).
-#' @param collut Data frame. A lookup table with variable codes and
-#' descriptions to include in columns of output table (See notes for more
-#' information and format).
-#' @param rowgrp Logical. If TRUE, appends row groups to first column of table.
-#' Only available if group category exists in ref_codes table (e.g.,
-#' FORTYPGRPCD, OWNGRPCD).
-#' @param rowgrpnm String. Name of row group variable.
-#' @param rowgrpord String. Name of row group variable to sort table rows.
-#' @param sumunits Logical. If TRUE, estimation units are summed and returned
-#' in one table.
-#' @param allin1 Logical. If TRUE, both estimates and percent sample error are
-#' output in one table as: estimates (percent sample error).
-#' @param estround Integer. Number of decimal places for estimates.
-#' @param pseround Integer. Number of decimal places for percent sampling
-#' error.
-#' @param estnull Number or character. The number or symbol to use to indicate
-#' 'not sampled' for estimate.
-#' @param psenull Number or character. The number or symbol to use to indicate
-#' 'not sampled' for percent standard errror.
-#' @param divideby String. Conversion number for output ('hundred', 'thousand',
-#' 'million').
-#' @param gainloss Logical. If TRUE, a table with the difference of gain and
-#' loss along with the variance and standard error, in percent, is generated.
-#' @param gainloss.vals String vector. A vector of names for values in gainloss
-#' table.
-#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param outfolder String. The outfolder to write files to. If NULL, files are
-#' written to working directory, or if gui, a window to browse.
-#' @param overwrite Logical. If TRUE, overwrites estimates in outfolder.
-#' @param outfn.pre String. Prefix for out_dsn or csv file, if out_fmt=".csv".
-#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
-#' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
-#' @param rawdata Logical. If TRUE, returns a list of raw data tables that are
-#' used for estimation (See Value). If savedata = TRUE, also written to
-#' outfolder.
-#' @param rawonly Logical. If TRUE, output rawdata only. If dataset includes
-#' many estimation units, and only raw data tables are needed, it is more
-#' efficient to output raw data only.
-#' @param raw_fmt String. Format for output rawdata tables ('csv', 'sqlite',
-#' 'gpkg').
-#' @param raw_dsn String. Data source name for rawdata output. If extension is
-#' not included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer in raw_dsn
-#' or *.csv raw data layer, if datsource="csv".
-#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data
-#' data frames to existing out_dsn layer or *.csv file.
-#' @param returntitle Logical. If TRUE, returns title(s) of the estimation
-#' table(s).
-#' @param title.main String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' the complete title used for table. If title.main=NULL, the title.*
-#' parameters are used to generate title string. Note: if title.ref is not
-#' NULL, it is added to title.main.
-#' @param title.ref String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".
-#' @param title.rowvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the row domain variable. If NULL, = rowvar.
-#' @param title.colvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the column domain variable. If NULL, = colvar.
-#' @param title.unitvar String. TITLE, if savedata=TRUE and/or
-#' returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-#' unitvar.
-#' @param title.filter String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for filter(s). If title.filter=NULL, a default is generated from
-#' cfilter.  If title.filter="", no title.filter is used.
 #' @param gui Logical. If gui, user is prompted for parameters.
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param savedata_opts List. See help(FIESTA::savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
+#' @param table_opts List. See help(FIESTA::table_options()) for a list of
+#' options.
 #' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
 #' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
@@ -287,16 +212,9 @@
 #' 
 #' @export modGBlulc
 modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL, 
-	rowvar=NULL, colvar=NULL, row.FIAname=FALSE, col.FIAname=FALSE,
- 	row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, col.add0=FALSE, 
-	rowlut=NULL, collut=NULL, rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, 
-	sumunits=TRUE, allin1=FALSE, estround=1, pseround=2, estnull="--", psenull="--",
- 	divideby=NULL, gainloss=FALSE, gainloss.vals=NULL, savedata=FALSE, outfolder=NULL,
- 	overwrite=FALSE, outfn.pre=NULL, outfn.date=FALSE, addtitle=TRUE, rawdata=FALSE,
- 	rawonly=FALSE, raw_fmt="csv", raw_dsn=NULL, overwrite_dsn=FALSE,
- 	overwrite_layer=TRUE, append_layer=FALSE, returntitle=FALSE, title.main=NULL, 
-	title.ref=NULL, title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL, 
-	title.filter=NULL, gui=FALSE, ...){
+                      rowvar=NULL, colvar=NULL, gui=FALSE, savedata=FALSE,
+                      savedata_opts = savedata_options(),
+                      table_opts = table_options(),...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -327,6 +245,34 @@ modGBlulc <- function(GBpopdat=NULL, landarea="ALL", pcfilter=NULL,
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ## Set table defaults
+  table_defaults_list <- formals(FIESTA::table_options)[-length(formals(FIESTA::table_options))]
+  
+  for (i in 1:length(table_defaults_list)) {
+    assign(names(table_defaults_list)[[i]], table_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied table values
+  if (length(table_opts) > 0) {
+    for (i in 1:length(table_opts)) {
+      assign(names(table_opts)[[i]], table_opts[[i]])
+    }
+  }
 
   ###################################################################################
   ## INITIALIZE SETTINGS

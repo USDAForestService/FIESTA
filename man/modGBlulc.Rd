@@ -10,47 +10,10 @@ modGBlulc(
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  row.FIAname = FALSE,
-  col.FIAname = FALSE,
-  row.orderby = NULL,
-  col.orderby = NULL,
-  row.add0 = FALSE,
-  col.add0 = FALSE,
-  rowlut = NULL,
-  collut = NULL,
-  rowgrp = FALSE,
-  rowgrpnm = NULL,
-  rowgrpord = NULL,
-  sumunits = TRUE,
-  allin1 = FALSE,
-  estround = 1,
-  pseround = 2,
-  estnull = "--",
-  psenull = "--",
-  divideby = NULL,
-  gainloss = FALSE,
-  gainloss.vals = NULL,
-  savedata = FALSE,
-  outfolder = NULL,
-  overwrite = FALSE,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  addtitle = TRUE,
-  rawdata = FALSE,
-  rawonly = FALSE,
-  raw_fmt = "csv",
-  raw_dsn = NULL,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
-  returntitle = FALSE,
-  title.main = NULL,
-  title.ref = NULL,
-  title.rowvar = NULL,
-  title.colvar = NULL,
-  title.unitvar = NULL,
-  title.filter = NULL,
   gui = FALSE,
+  savedata = FALSE,
+  savedata_opts = savedata_options(),
+  table_opts = table_options(),
   ...
 )
 }
@@ -70,127 +33,15 @@ If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of column domain variable in cond.}
 
-\item{row.FIAname}{Logical. If TRUE, gets FIA reference names for row
-variable based on ref_codes. Only available for certain variables.}
-
-\item{col.FIAname}{Logical. If TRUE, gets FIA reference names for column
-variable based on ref_codes. Only available for certain variables.}
-
-\item{row.orderby}{String. Name of variable to sort table rows. If
-row.FIAname=TRUE and a ref_* exists for rowvar, the rowvar code is used to
-sort. If NULL, the table is sorted by rowvar.}
-
-\item{col.orderby}{String. Name of variable to sort table columns. If
-col.FIAname=TRUE and a ref_* exists for colvar, the colvar code is used to
-sort. If NULL, the table is sorted by colvar.}
-
-\item{row.add0}{Logical. If TRUE, add the rows that have 0 values.}
-
-\item{col.add0}{Logical. If TRUE, add the columns that have 0 values.}
-
-\item{rowlut}{Data frame. A lookup table with variable codes and
-descriptions to include in rows of output table (See notes for more
-information and format).}
-
-\item{collut}{Data frame. A lookup table with variable codes and
-descriptions to include in columns of output table (See notes for more
-information and format).}
-
-\item{rowgrp}{Logical. If TRUE, appends row groups to first column of table.
-Only available if group category exists in ref_codes table (e.g.,
-FORTYPGRPCD, OWNGRPCD).}
-
-\item{rowgrpnm}{String. Name of row group variable.}
-
-\item{rowgrpord}{String. Name of row group variable to sort table rows.}
-
-\item{sumunits}{Logical. If TRUE, estimation units are summed and returned
-in one table.}
-
-\item{allin1}{Logical. If TRUE, both estimates and percent sample error are
-output in one table as: estimates (percent sample error).}
-
-\item{estround}{Integer. Number of decimal places for estimates.}
-
-\item{pseround}{Integer. Number of decimal places for percent sampling
-error.}
-
-\item{estnull}{Number or character. The number or symbol to use to indicate
-'not sampled' for estimate.}
-
-\item{psenull}{Number or character. The number or symbol to use to indicate
-'not sampled' for percent standard errror.}
-
-\item{divideby}{String. Conversion number for output ('hundred', 'thousand',
-'million').}
-
-\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
-loss along with the variance and standard error, in percent, is generated.}
-
-\item{gainloss.vals}{String vector. A vector of names for values in gainloss
-table.}
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
+\item{savedata_opts}{List. See help(FIESTA::savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
-\item{overwrite}{Logical. If TRUE, overwrites estimates in outfolder.}
-
-\item{outfn.pre}{String. Prefix for out_dsn or csv file, if out_fmt=".csv".}
-
-\item{outfn.date}{Logical. If TRUE, add current date to out_dsn.}
-
-\item{addtitle}{Logical. If TRUE and savedata=TRUE, adds title to outfile.}
-
-\item{rawdata}{Logical. If TRUE, returns a list of raw data tables that are
-used for estimation (See Value). If savedata = TRUE, also written to
-outfolder.}
-
-\item{rawonly}{Logical. If TRUE, output rawdata only. If dataset includes
-many estimation units, and only raw data tables are needed, it is more
-efficient to output raw data only.}
-
-\item{raw_fmt}{String. Format for output rawdata tables ('csv', 'sqlite',
-'gpkg').}
-
-\item{raw_dsn}{String. Data source name for rawdata output. If extension is
-not included, out_fmt is used. Use full path if outfolder=NULL.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites raw_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the out_layer in raw_dsn
-or *.csv raw data layer, if datsource="csv".}
-
-\item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data
-data frames to existing out_dsn layer or *.csv file.}
-
-\item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
-table(s).}
-
-\item{title.main}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the complete title used for table. If title.main=NULL, the title.*
-parameters are used to generate title string. Note: if title.ref is not
-NULL, it is added to title.main.}
-
-\item{title.ref}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".}
-
-\item{title.rowvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the row domain variable. If NULL, = rowvar.}
-
-\item{title.colvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the column domain variable. If NULL, = colvar.}
-
-\item{title.unitvar}{String. TITLE, if savedata=TRUE and/or
-returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-unitvar.}
-
-\item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for filter(s). If title.filter=NULL, a default is generated from
-cfilter.  If title.filter="", no title.filter is used.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
+\item{table_opts}{List. See help(FIESTA::table_options()) for a list of
+options.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }
