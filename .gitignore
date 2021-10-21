@@ -6,3 +6,6 @@ FIESTA.Rproj
 docs
 /doc/
 /Meta/
+src/*.o
+src/*.so
+src/*.dll
