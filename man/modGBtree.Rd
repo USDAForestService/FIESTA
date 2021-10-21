@@ -15,8 +15,8 @@ modGBtree(
   colvar = NULL,
   gui = FALSE,
   savedata = FALSE,
-  savedata_opts = list(),
-  table_opts = list(),
+  savedata_opts = savedata_options(),
+  table_opts = table_options(),
   ...
 )
 }

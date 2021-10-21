@@ -253,7 +253,8 @@
 #' @export modGBtree
 modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", 
 	pcfilter=NULL, estvar=NULL, estvar.filter=NULL, rowvar=NULL, colvar=NULL, 
-	gui=FALSE, savedata=FALSE, savedata_opts=list(), table_opts=list(), ...){
+	gui=FALSE, savedata=FALSE, savedata_opts=savedata_options(),
+	table_opts=table_options(), ...){
 
   ##################################################################################
   ## DESCRIPTION:
