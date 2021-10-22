@@ -108,7 +108,19 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
                           title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL,
                           title.estvar=NULL, title.filter=NULL, gainloss=FALSE,
                           gainloss.vals=NULL, ...) {
+  # set up list of parameters
   l <- as.list(match.call())
   l <- l[-1]
+  
+  # this evaluates objects in the user's global environment and saves them back
+  # into the list in order to pass them correctly to other functions
+  objs <- ls(envir = globalenv())
+  for (i in 1:length(l)) {
+    if (l[i] %in% objs) {
+      l[i] <- eval(l[i][[1]], envir = globalenv())
+    }
+  }
+  
+  # returns the list
   return(l)
 }

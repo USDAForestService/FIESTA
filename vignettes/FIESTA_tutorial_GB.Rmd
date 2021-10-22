@@ -607,15 +607,17 @@ Parameters defined in the following examples are organized by category: populati
 <details>
   <summary>View Example</summary>
 
-First, with the `modGBarea` function we generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY). `FIESTA` then returns raw data and titles for area of forest land, Wyoming, 2011-2013 (sum estimation units).
+First, with the `modGBarea` function we generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY). `FIESTA` then returns raw data and titles for area of forest land, Wyoming, 2011-2013 (sum estimation units). Note that we set some options for our table output with the `table_opts` argument. For a full list of possible table options, you can run `help(table_options)`.
 
 ```{r}
 area1 <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
-    rawdata = TRUE,              # out - return raw data 
-    returntitle = TRUE           # out - return title information
+    table_opts = table_options(  # set up options for table output
+      sumunits = TRUE,             # est - sum estimation units to population
+      rawdata = TRUE,            # out - return raw data
+      returntitle = TRUE         # out - return title information
+      )
     )
 ```
 
@@ -660,10 +662,12 @@ In this example, we look at adding rows to the output:
 area2  <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     rowvar = "FORTYPCD",         # est - row domain
-    rawdata = TRUE,              # out - return raw data 
-    returntitle = TRUE           # out - return title information
+    table_opts = table_options(  # set up options for table output
+      sumunits = TRUE,           # out - sum estimation units to population
+      rawdata = TRUE,            # out - return raw data
+      returntitle = TRUE         # out - return title information
+      )
     )
 ```
 
@@ -704,24 +708,28 @@ titlelst
 <details>
   <summary>View Example</summary>
 
-In this example, we look at adding rows and columns to output, including FIA names. We also output estimates and percent standard error in the same cell with the `allin1` argument and save data to an outfolder with the `outfolder` argument. 
+In this example, we look at adding rows and columns to output, including FIA names. We also output estimates and percent standard error in the same cell with the `allin1` argument in `table_options` and save data to an outfolder with the `outfolder` argument in `savedata_options`. 
 
 ```{r}
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
 area3 <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "STDSZCD",          # est - column domain
-    col.FIAname = TRUE,          # est - column domain names
-    rawdata = TRUE,              # out - return raw data 
-    returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
     savedata = TRUE,             # out - save data to outfolder
-    outfolder = outfolder,       # out - outfolder for saving data
-    outfn.pre = "WY"             # out - prefix for output files
+    savedata_opts = savedata_opts(
+      outfolder = outfolder,       # out - outfolder for saving data
+      outfn.pre = "WY"             # out - prefix for output files
+      ),
+    table_opts = table_options(
+      sumunits = TRUE,             # est - sum estimation units to population
+      row.FIAname = TRUE,          # est - row domain names
+      col.FIAname = TRUE,          # est - column domain names
+      rawdata = TRUE,              # out - return raw data 
+      returntitle = TRUE,          # out - return title information
+      allin1 = TRUE                # out - return output with est(pse)
+      )
     )
 ```
 

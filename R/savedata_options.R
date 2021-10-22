@@ -36,7 +36,20 @@ savedata_options <- function(outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
                              addtitle=TRUE, raw_fmt="csv",
                              raw_dsn=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE,
                              append_layer=FALSE, ...) {
+  # set up list of parameters
   l <- as.list(match.call())
   l <- l[-1]
+  
+  # this evaluates objects in the user's global environment and saves them back
+  # into the list in order to pass them correctly to other functions
+  objs <- ls(envir = globalenv())
+  for (i in 1:length(l)) {
+    if (l[i] %in% objs) {
+      l[i] <- eval(l[i][[1]], envir = globalenv())
+    }
+  }
+  
+  # returns the list
   return(l)
 }
+
