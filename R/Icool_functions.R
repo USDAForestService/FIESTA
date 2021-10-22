@@ -564,7 +564,7 @@ preds.standardize <- function(plt, aux, prednames) {
 }
 
 
-preds.select <- function(y, plt, aux, prednames) {
+pred.select <- function(y, plt, aux, prednames) {
 
   ## Variable selection using area-level Elastic net
   ###################################################################
@@ -622,6 +622,33 @@ preds.select <- function(y, plt, aux, prednames) {
   }
   return(preds.enet)
 }
+
+
+##############
+gretEN.select <- function(y, x_sample, x_pop, N, alpha=0.5) {
+
+  ## select predictor variables from Elastic Net procedure
+  mod <- tryCatch(suppressMessages(mase::gregElasticNet(y=y, 
+		xsample=x_sample, 
+		xpop=x_pop, pi = NULL, alpha = 0.5,
+  		model = "linear", pi2 = NULL, var_est = FALSE,
+  		datatype = "means", N = N,
+  		lambda = "lambda.min", cvfolds = 10)),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+  if (is.null(mod)) {
+    return(NULL)
+  }
+  mod$coefficients[-1]
+  mod.rank <- rank(-abs(mod$coefficients[-1]))
+  preds <- mod$coefficients[-1][order(rank(-abs(mod$coefficients[-1])))]
+  preds.enet <- names(preds[abs(preds)>0])
+
+  return(preds.enet)
+}
+
  
 
 chkdbtab <- function(dbtablst, tab, stopifnull=FALSE) {

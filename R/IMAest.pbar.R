@@ -19,7 +19,7 @@ MAest.ht <- function(y, N, FIA=TRUE) {
     estht[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
 
-  return(estht)
+  return(list(est=estht))
 }
 
 
@@ -65,35 +65,59 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estps[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(estps)
+  return(list(est=estps))
 }
 
 
 MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
 			modelselect=FALSE) {
 
-#y <- yn.vect
+  #y <- yn.vect
 
-  ## Set global variables
-  nhat.var <- NULL
+  ## define empty data frame for storing selected predictors
+  predselect <- x_pop[FALSE, ]
 
-  NBRPLT <- length(y)
-  NBRPLT.gt0 <- sum(y > 0)
-  var_method <- "LinHTSRS"
-  estgreg <- tryCatch(mase::greg(	y = y, 
+
+  if (modelselect) {
+    ## Get model-selected variables using mase::gregElasticNet()
+    preds.selected <- gregEN.select(y, x_sample, x_pop, N, alpha=0.5)
+  } else {
+    preds.selected <- names(predselect)
+  }
+
+  ## Note: GREG cannot have more predictors than plots
+  if (length(y) <= length(names(predselect))) {
+    preds.selected <- na.omit(preds.selected[1:(length(y)-1)])
+  }
+
+  if (length(preds.selected) > 0) {
+    xsample <- x_sample[, preds.selected, drop=FALSE]
+    xpop <- x_pop[, preds.selected, drop=FALSE]
+
+
+    ## Set global variables
+    nhat.var <- NULL
+
+    NBRPLT <- length(y)
+    NBRPLT.gt0 <- sum(y > 0)
+    var_method <- "LinHTSRS"
+    estgreg <- tryCatch(mase::greg(	y = y, 
 					xsample = x_sample, 
 					xpop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
 					model = "linear", 
   					var_est = TRUE, var_method = var_method, 
 					datatype = "means", 
-  					modelselect = modelselect, 
+  					modelselect = FALSE, 
 					lambda = "lambda.min", 
 					B = 1000),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
 				} )
+  } else {
+    estgreg <- NULL
+  }
   if (is.null(estgreg)) {
     if (save4testing) {
       message("saving objects to working directory for testing: y, x_sample, x_pop, N")
@@ -106,8 +130,13 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
     message("multicolinearity exists in predictor data set...  try MAmethod = gregEN")
     estgreg <- data.table(matrix(c(NA, NA, NBRPLT, NBRPLT.gt0), 1,4))
     setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
-    return(estgreg)
+    predselect[1,] <- NA
+    return(list(est=estgreg, predselect=predselect))
   }
+
+  selected <- data.frame(t(estgreg$coefficients))[,-1]
+  predselect <- rbindlist(list(predselect, aa), fill=TRUE)
+
   estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
  
@@ -115,7 +144,7 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estgreg[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(estgreg)
+  return(list(est=estgreg, predselect=predselect))
 }
 
 
@@ -163,7 +192,7 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estratio[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(estratio)
+  return(list(est=estratio))
 }
 
 
@@ -171,6 +200,11 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4testing=TRUE) {
 
 #y <- yn.vect
+
+  ## define empty data frame for storing selected predictors
+  predselect <- x_pop[FALSE, ]
+
+
   ## Set global variables
   nhat.var <- NULL
 
@@ -190,10 +224,6 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
 					message(err, "\n")
 					return(NULL)
 				} )
-  preds <- names(estgregEN$coefficients[estgregEN$coefficients > 0][-1])
-  #message("predictors used for estimate: ", toString(preds))
-  #print(paste("predictors used for estimate:", toString(preds)))
-
   if (is.null(estgregEN)) {
     if (save4testing) {
       message("saving objects to working directory for testing: y, x_sample, x_pop, N")
@@ -204,10 +234,16 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
       save(N, file=file.path(getwd(), "N.rda"))
     }
     message("error in mase::gregElasticNet function... returning NA")
+
     estgregEN <- data.table(matrix(c(NA, NA, NBRPLT, NBRPLT.gt0), 1,4))
     setnames(estgregEN, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
-    return(estgregEN)
+    predselect[1,] <- NA
+    return(list(est=estgregEN, predselect=predselect))
   }
+
+  selected <- data.frame(t(estgreg$coefficients))[,-1]
+  predselect <- rbindlist(list(predselect, aa), fill=TRUE)
+
   estgregEN <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estgregEN, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
  
@@ -215,7 +251,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estgregEN[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(estgregEN)
+  return(list(est=estgregEN, predselect=predselect))
 }
 
 
@@ -250,33 +286,25 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   ## Subset response vector and change NA values of response to 0
   yn.vect <- pltdat.dom[[yn]]
 
-
-  if (MAmethod == "greg") { 
-    ## Note: GREG cannot have more predictors than plots
-    if (length(yn.vect) <= length(prednames)) {
-      prednames <- prednames[1:(length(yn.vect)-1)] 
-    }
-  }
-
   if (MAmethod == "HT") {
-    est <- MAest.ht(yn.vect, N, FIA=FIA)
+    estlst <- MAest.ht(yn.vect, N, FIA=FIA)
 
   } else if (MAmethod == "PS") {
     x_sample <- pltdat.dom[, strvar, with=FALSE][[1]]
     x_pop <- unitlut[, c(strvar, "Prop"), with=FALSE]
-    est <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
+    estlst <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
   } else {
 
-    x_sample <- pltdat.dom[, prednames]
-    x_pop <- setDF(unitlut)[, prednames]
+    x_sample <- pltdat.dom[, prednames, drop=FALSE]
+    x_pop <- setDF(unitlut)[, prednames, drop=FALSE]
 
     if (MAmethod == "greg") {
-      est <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA, 
+      estlst <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA, 
 		modelselect=modelselect)
 
     } else if (MAmethod == "gregEN") {
-      est <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
+      estlst <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
 
     } else if (MAmethod == "ratio") {
       if (length(prednames) > 1) {
@@ -291,7 +319,7 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
     }
   }
 
-  return(est)
+  return(estlst)
 }
 
 
@@ -308,19 +336,20 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
   if (nrow(dat.dom) == 0 || sum(!is.na(dat.dom[[domain]])) == 0) {
     domest <- data.table(dom, matrix(c(NA, NA, 0, 0), 1,4))
     setnames(domest, c(domain, "nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
-    return(domest)
+    return(list(est=domest, preselect=unitlut[FALSE, prednames]))
   }
 
 #yn=response
 
   ## Apply function to each dom
-  domest <- data.table(dom, suppressMessages(MAest(yn=response, 
-		dat.dom=dat.dom, pltassgn=pltassgn, 
+  domestlst <- MAest(yn=response, dat.dom=dat.dom, pltassgn=pltassgn, 
 		cuniqueid=cuniqueid, esttype=esttype, unitlut=unitlut, 
 		strvar=strvar, prednames=prednames, 
-		MAmethod=MAmethod, N=N, FIA=FIA, modelselect=modelselect)))
-  setnames(domest, "dom", domain)
-  return(domest)
+		MAmethod=MAmethod, N=N, FIA=FIA, modelselect=modelselect)
+  domestlst <- lapply(domestlst, function(x, dom, domain) {
+		dt <- data.table(dom, x) 
+           setnames(dt, "dom", domain) }, dom, domain)
+  return(domestlst)
 }
 
 
@@ -373,16 +402,27 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 #pltassgn=pltassgn.unit
 #N=N.unit
 #dom=doms[1]
-  unitest <- do.call(rbind, lapply(doms, MAest.dom, 
+
+  unitestlst <- lapply(doms, MAest.dom, 
 			dat=dat.unit, cuniqueid=cuniqueid, 
 			unitlut=unitlut.unit, pltassgn=pltassgn.unit,
 			esttype=esttype, MAmethod=MAmethod, 
 			strvar=strvar, prednames=prednames, 
 			domain=domain, N=N.unit, response=response,
-			FIA=FIA, modelselect=modelselect))
-  unitest <- data.table(unit=unit, unitest)
+			FIA=FIA, modelselect=modelselect)
+
+  unitest <- data.table(unit=unit, do.call(rbind, sapply(unitestlst, '[', "est")))
   setnames(unitest, "unit", unitvar)
-  return(unitest)
+
+  returnlst <- list(unitest=unitest)
+
+  if (MAmethod %in% c("greg", "gregEN")) {
+    predselect <- data.table(unit=unit, do.call(rbind, sapply(unitestlst, '[', "predselect")))
+    setnames(predselect, "unit", unitvar)
+    returnlst$predselect <- predselect
+  }
+
+  return(returnlst)
 }
 
 

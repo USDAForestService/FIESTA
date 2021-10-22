@@ -326,7 +326,7 @@
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
 #' @export modMAtree
-modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL, 
+modMAtree <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL, 
 	estseed="none", landarea="FOREST", pcfilter=NULL, estvar=NULL, 
 	estvar.filter=NULL, rowvar=NULL, colvar=NULL, row.FIAname=FALSE, 
 	col.FIAname=FALSE, row.orderby=NULL, col.orderby=NULL, row.add0=FALSE, 
@@ -377,7 +377,6 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   on.exit(options(options.old), add=TRUE) 
   minplotnum <- 10
   esttype="TREE"
-  returnMApopdat <- TRUE
   parameters <- FALSE
   returnlst <- list()
 
@@ -387,15 +386,14 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   MAmethod <- pcheck.varchar(var2check=MAmethod, varnm="MAmethod", gui=gui, 
 		checklst=MAmethodlst, caption="MAmethod", multiple=FALSE, stopifnull=TRUE)
 
+  if (MAmethod %in% c("greg", "gregEN")) {
+    predselectlst <- list()
+  }
 
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
-  if (is.null(MApopdat)) {
-    MApopdat <- modMApop(gui=gui, prednames=prednames, ...)
-  } else {
-    returnMApopdat <- FALSE
-    list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
+  list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
 		"ACI.filter", "unitarea", "unitvar", "unitlut", "npixels",
 		"npixelvar", "plotsampcnt", "condsampcnt")
     #if (MAmethod == "PS") {
@@ -404,8 +402,8 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
     #if (MAmethod == "greg") {
     #  list.items <- c(list.items, "prednames")
     #}
-    MApopdat <- pcheck.object(MApopdat, "MApopdat", list.items=list.items)
-  }	
+  MApopdat <- pcheck.object(MApopdat, "MApopdat", list.items=list.items)
+  	
   if (is.null(MApopdat)) return(NULL)	
   condx <- MApopdat$condx
   pltcondx <- MApopdat$pltcondx
@@ -618,10 +616,15 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
     ## Get total estimate and merge area
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=response]
-    unit_totest <- do.call(rbind, lapply(estunits, MAest.unit, 
+
+    unit_totestlst <- lapply(estunits, MAest.unit, 
 		dat=tdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain="TOTAL", response=response, npixels=npixels, FIA=FIA))
+		domain="TOTAL", response=response, npixels=npixels, FIA=FIA)
+    unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
+    if (MAmethod %in% c("greg", "gregEN")) {
+      predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
+    }
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -634,29 +637,39 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, rowvar, strvar, prednames), .SDcols=response]
-    unit_rowest <- do.call(rbind, lapply(estunits, MAest.unit, 
+    unit_rowestlst <- lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar,
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain=rowvar, response=response, npixels=npixels, FIA=FIA))
-    #unit_rowest <- unit_rowest[!is.na(unit_rowest[[rowvar]]), ]
+		domain=rowvar, response=response, npixels=npixels, FIA=FIA)
+    unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
+    if (MAmethod %in% c("greg", "gregEN")) {
+      predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
+    }
 
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, colvar, strvar, prednames), .SDcols=response]
-      unit_colest <- do.call(rbind, lapply(estunits, MAest.unit, 
+      unit_colestlst <- lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain=colvar, response=response, npixels=npixels, FIA=FIA))
-      #unit_colest <- unit_colest[!is.na(unit_colest[[colvar]]), ]
+		domain=colvar, response=response, npixels=npixels, FIA=FIA)
+      unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
+      if (MAmethod %in% c("greg", "gregEN")) {
+        predselectlst$colest <- do.call(rbind, sapply(unit_colestlst, '[', "predselect"))
+      }
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, grpvar, strvar, prednames), .SDcols=response]
       tdomdatsum[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
 
-      unit_grpest <- do.call(rbind, lapply(estunits, MAest.unit,
+      unit_grpestlst <- lapply(estunits, MAest.unit,
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain="grpvar", response=response, npixels=npixels, FIA=FIA))
+		domain="grpvar", response=response, npixels=npixels, FIA=FIA)
+      unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
+      if (MAmethod %in% c("greg", "gregEN")) {
+        predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
+      }
       unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
     }
   }
@@ -770,6 +783,7 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
     }
     rawdat$esttype <- "TREE"
     rawdat$MAmethod <- MAmethod
+    rawdat$predselectlst <- predselectlst
     rawdat$estvar <- estvar
     rawdat$estvar.filter <- estvar.filter
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
@@ -777,9 +791,6 @@ modMAtree <- function(MApopdat=NULL, MAmethod, FIA=TRUE, prednames=NULL,
     rawdat$areaunits <- areaunits
     rawdat$estunits <- estunits
     returnlst$raw <- rawdat
-  }
-  if (returnMApopdat) {
-    returnlst$MApopdat <- MApopdat
   }
   if ("STATECD" %in% names(pltcondf)) {
     returnlst$statecd <- sort(unique(pltcondf$STATECD))

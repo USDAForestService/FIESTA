@@ -382,11 +382,11 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   ###################################################################
   if (variable.select) {
     ## use the plot level data as response
-    predselect.unit <- suppressWarnings(preds.select(y=yn, 
+    predselect.unit <- suppressWarnings(pred.select(y=yn, 
 		plt=pltdat.dom, aux=dunitlut.dom, prednames=prednames))
 
     ## use the domain level means as response
-    predselect.area <- suppressWarnings(preds.select(y=yn, 
+    predselect.area <- suppressWarnings(pred.select(y=yn, 
 		plt=dunitlut.dom, aux=dunitlut.dom, prednames=prednames))
 
   } else {
