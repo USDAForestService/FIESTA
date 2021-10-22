@@ -5,7 +5,7 @@
 \title{Model-Assisted module - Generate model-assisted area estimates.}
 \usage{
 modMAarea(
-  MApopdat = NULL,
+  MApopdat,
   MAmethod,
   FIA = TRUE,
   prednames = NULL,

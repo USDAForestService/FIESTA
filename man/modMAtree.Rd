@@ -5,7 +5,7 @@
 \title{Model-Assisted module - Generate model-assisted tree estimates.}
 \usage{
 modMAtree(
-  MApopdat = NULL,
+  MApopdat,
   MAmethod,
   FIA = TRUE,
   prednames = NULL,
