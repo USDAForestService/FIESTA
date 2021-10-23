@@ -32,6 +32,7 @@
 #' pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html). Optional if bnd is an R object.
 #' @param bnd.filter String. Filter to subset bnd spatial layer.
+#' @param states String. The name of state(s) for tables (e.g., "Vermont", "Utah").
 #' @param RS String. Name of FIA research station to restrict states to
 #' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 #' included.
@@ -183,7 +184,7 @@
 #' 
 #' 
 #' @export spGetPlots
-spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
+spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
 	xyids=NULL, xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", 
 	xvar=NULL, yvar=NULL, xy.crs=4269, xyjoinid=NULL, pjoinid=NULL, 
 	clipxy=TRUE, datsource="datamart", data_dsn=NULL, istree=FALSE, isseed=FALSE, 
@@ -299,6 +300,11 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, RS=NULL,
       states <- pcheck.states(as.numeric(stcds))
 
     } else { 	## is.null(xyids)
+
+      ## Check states
+      if (!is.null(states)) {
+        if (!all(states %in% FIESTA::ref_statecd$MEANING)) stop("states is invalid")
+      }
 
       ## Check clipxy
       clipxy <- pcheck.logical(clipxy, varnm="clipxy", 

@@ -325,6 +325,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   dunitlut.dom <- merge(dunitlut, datmean, by=dunitvar)
   setnames(dunitlut.dom, c("mean", "mean.var"), c(yn, paste0(yn, ".var")))
 
+
 ###################
 ##### TESTING #####
 ###################
@@ -347,6 +348,10 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   if (!"data.table" %in% class(dunitlut.dom)) {
     dunitlut.dom <- setDT(dunitlut.dom)
   } 
+
+  ## define empty data tables for storing selected predictors
+  predselect.unitdt <- dunitlut[FALSE, prednames, with=FALSE, drop=FALSE]
+  predselect.areadt <- dunitlut[FALSE, prednames, with=FALSE, drop=FALSE]
 
   ## Calculate number of non-zero plots
   NBRPLT.gt0 <- pltdat.dom[, sum(get(yn) > 0), by=dunitvar]
@@ -381,13 +386,15 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   ## Variable selection for area and unit-level estimators
   ###################################################################
   if (variable.select) {
-    ## use the plot level data as response
-    predselect.unit <- suppressWarnings(pred.select(y=yn, 
+    predselect.unitlst <- suppressWarnings(preds.select(y=yn, 
 		plt=pltdat.dom, aux=dunitlut.dom, prednames=prednames))
+    predselect.unit <- predselect.unitlst$preds.enet
+    predselect.unit.coef <- predselect.unitlst$preds.coef
 
-    ## use the domain level means as response
-    predselect.area <- suppressWarnings(pred.select(y=yn, 
+    predselect.arealst <- suppressWarnings(preds.select(y=yn, 
 		plt=dunitlut.dom, aux=dunitlut.dom, prednames=prednames))
+    predselect.area <- predselect.arealst$preds.enet
+    predselect.area.coef <- predselect.arealst$preds.coef
 
   } else {
     predselect.area <- prednames
@@ -659,8 +666,23 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   rm(area.hbsae)
   gc()
 
-  return(list(est=est, predselect.unit=predselect.unit, 
-		predselect.area=predselect.area,
+  if (variable.select) {
+    predselect.areadt <- rbindlist(list(predselect.areadt, 
+		data.frame(t(predselect.area.coef))), fill=TRUE)
+    predselect.unitdt <- rbindlist(list(predselect.unitdt, 
+		data.frame(t(predselect.unit.coef))), fill=TRUE)
+  } else {
+    preds.area <- data.frame(t(ifelse(names(predselect.areadt) %in% predselect.area, 1, 0)))
+    setnames(preds.area, names(predselect.areadt))
+    predselect.areadt <- rbindlist(list(predselect.areadt, preds.area), fill=TRUE)
+
+    preds.unit <- data.frame(t(ifelse(names(predselect.unitdt) %in% predselect.unit, 1, 0)))
+    setnames(preds.unit, names(predselect.unitdt))
+    predselect.unitdt <- rbindlist(list(predselect.unitdt, preds.unit), fill=TRUE)
+  }
+
+  return(list(est=est, predselect.unit=predselect.unitdt, 
+		predselect.area=predselect.areadt,
 		pltdat.dom=pltdat.dom, dunitlut.dom=dunitlut.dom))
 }
 
@@ -698,6 +720,11 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
 			prior=prior, variable.select=variable.select)
   domest$est <- data.table(dom, domest$est)
   setnames(domest$est, "dom", domain)
+  domest$predselect.unit <- data.table(dom, domest$predselect.unit)
+  setnames(domest$predselect.unit, "dom", domain)
+  domest$predselect.area <- data.table(dom, domest$predselect.area)
+  setnames(domest$predselect.area, "dom", domain)
+
   return(domest)
 }
 
@@ -742,19 +769,42 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.unique,
 			prior=prior, variable.select=variable.select)
  
   if (length(doms) > 1) {
-    est.large <- do.call(rbind, do.call(rbind, estlst)[,"est"])
-    predselect.unit <- do.call(rbind, estlst)[,"predselect.unit"]
-    predselect.area <- do.call(rbind, estlst)[,"predselect.area"]
-    names(predselect.unit) <- doms
-    names(predselect.area) <- doms
-    pltdat.dom <- do.call(rbind, do.call(rbind, estlst)[,"pltdat.dom"])
-    dunitlut.dom <- do.call(rbind, do.call(rbind, estlst)[,"dunitlut.dom"])
+    est.large <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, do.call(rbind, estlst)[,"est"]))
+    setnames(est.large, "largebnd", largebnd.unique)
+
+    predselect.unit <- data.table(largebnd.val, 
+				do.call(rbind, estlst)[,"predselect.unit"])
+    setnames(predselect.unit, "largebnd", largebnd.unique)
+
+    predselect.area <- data.table(largebnd.val, 
+				do.call(rbind, estlst)[,"predselect.area"])
+    setnames(predselect.area, "largebnd", largebnd.unique)
+
+    pltdat.dom <- data.table(largebnd.val, do.call(rbind, 
+				do.call(rbind, estlst)[,"pltdat.dom"]))
+    dunitlut.dom <- data.table(largebnd.val, do.call(rbind, 
+				do.call(rbind, estlst)[,"dunitlut.dom"]))
   } else {
-    est.large <- do.call(rbind, estlst)[,"est"]$est
-    predselect.unit <- do.call(rbind, estlst)[,"predselect.unit"]$predselect.unit
-    predselect.area <- do.call(rbind, estlst)[,"predselect.area"]$predselect.area
-    pltdat.dom <- do.call(rbind, estlst)[,"pltdat.dom"]$pltdat.dom
-    dunitlut.dom <- do.call(rbind, estlst)[,"dunitlut.dom"]$dunitlut.dom
+    est.large <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, estlst)[,"est"]$est)
+    setnames(est.large, "largebnd", largebnd.unique)
+
+    predselect.unit <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, estlst)[,"predselect.unit"]$predselect.unit)
+    setnames(predselect.unit, "largebnd", largebnd.unique)
+
+    predselect.area <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, estlst)[,"predselect.area"]$predselect.area)
+    setnames(predselect.area, "largebnd", largebnd.unique)
+
+    pltdat.dom <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, estlst)[,"pltdat.dom"]$pltdat.dom)
+    setnames(pltdat.dom, "largebnd", largebnd.unique)
+
+    dunitlut.dom <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, estlst)[,"dunitlut.dom"]$dunitlut.dom)
+    setnames(dunitlut.dom, "largebnd", largebnd.unique)
   }
   setkeyv(est.large, dunitvar)
   setkeyv(setDT(pltdat.dom), dunitvar)

@@ -24,6 +24,7 @@
 # findnm
 # strat.pivot
 # preds.standardize
+# gregEN.select
 # preds.select
 # chkdbtab
 
@@ -564,68 +565,7 @@ preds.standardize <- function(plt, aux, prednames) {
 }
 
 
-pred.select <- function(y, plt, aux, prednames) {
-
-  ## Variable selection using area-level Elastic net
-  ###################################################################
-  prednames.select <- prednames
-
-  plt <- setDT(plt)
-  aux <- setDT(aux)
-
-  if (!"npixels" %in% names(aux)) {
-    stop("need npixels in auxiliary lut")
-  }
-  N <- sum(aux$npixels)
-  xpop <- aux[, lapply(.SD, mean), .SDcols=prednames]
-
-  plt <- setDF(plt)
-  xpop <- setDF(xpop)
-
-  ## select predictor variables from Elastic Net procedure
-  mod1 <- tryCatch(suppressMessages(mase::gregElasticNet(y=plt[[y]], 
-		xsample=plt[,prednames], 
-		xpop=xpop, pi = NULL, alpha = 0.5,
-  		model = "linear", pi2 = NULL, var_est = FALSE,
-  		datatype = "means", N = N,
-  		lambda = "lambda.1se", cvfolds = 10)),
-				error=function(err) {
-					message(err, "\n")
-					return(NULL)
-				} )
-  if (is.null(mod1)) {
-    return(NULL)
-  }
-  mod1$coefficients[-1]
-  mod1.rank <- rank(-abs(mod1$coefficients[-1]))
-  preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
-
-  if (length(preds.enet) == 0) {
-    ## select predictor variables from Elastic Net procedure
-    ## alpha=1, indicates 
-    mod1 <- tryCatch(suppressMessages(mase::gregElasticNet(y=plt[[y]], 
-		xsample=plt[,prednames], 
-		xpop=xpop, pi = NULL, alpha = 0.2,
-  		model = "linear", pi2 = NULL, var_est = FALSE,
-  		datatype = "means", N = N,
-  		lambda = "lambda.1se", cvfolds = 10)),
-				error=function(err) {
-					message(err, "\n")
-					return(NULL)
-				} )
-    if (is.null(mod1)) {
-      return(NULL)
-    }
-    mod1$coefficients[-1]
-    mod1.rank <- rank(-abs(mod1$coefficients[-1]))
-    preds.enet <- names(mod1$coefficients[-1])[abs(mod1$coefficients[-1])>0]
-  }
-  return(preds.enet)
-}
-
-
-##############
-gretEN.select <- function(y, x_sample, x_pop, N, alpha=0.5) {
+gregEN.select <- function(y, x_sample, x_pop, N, alpha=0.5, returncoef=FALSE) {
 
   ## select predictor variables from Elastic Net procedure
   mod <- tryCatch(suppressMessages(mase::gregElasticNet(y=y, 
@@ -643,12 +583,53 @@ gretEN.select <- function(y, x_sample, x_pop, N, alpha=0.5) {
   }
   mod$coefficients[-1]
   mod.rank <- rank(-abs(mod$coefficients[-1]))
-  preds <- mod$coefficients[-1][order(rank(-abs(mod$coefficients[-1])))]
-  preds.enet <- names(preds[abs(preds)>0])
+  preds.coef <- mod$coefficients[-1][order(rank(-abs(mod$coefficients[-1])))]
+  preds.enet <- names(preds.coef[abs(preds.coef)>0])
 
-  return(preds.enet)
+  if (returncoef) {
+    return(preds.coef)
+  } else {
+    return(preds.enet)
+  }
 }
 
+preds.select <- function(y, plt, aux, prednames) {
+
+  ## Description: Variable selection using area-level Elastic net, where
+  ##		y values are mean values (i.e., Small Area y values).
+
+  prednames.select <- prednames
+
+  plt <- setDT(plt)
+  aux <- setDT(aux)
+
+  if (!"npixels" %in% names(aux)) {
+    stop("need npixels in auxiliary lut")
+  }
+  N <- sum(aux$npixels)
+  x_pop <- aux[, lapply(.SD, mean), .SDcols=prednames]
+
+  plt <- setDF(plt)
+  x_pop <- setDF(x_pop)
+  x_sample <- plt[, prednames, drop=FALSE]
+  y <- plt[[y]]
+
+  ## Variable selection using mase:gregElasticNet()
+  preds.coef <- gregEN.select(y=y, x_sample=x_sample, x_pop=x_pop, N=N, alpha=0.5,
+		returncoef=TRUE) 
+  preds.enet <- names(preds.coef[abs(preds.coef)>0])
+
+
+  if (length(preds.enet) == 0) {
+    ## select predictor variables from Elastic Net procedure using lower alpha
+    ## alpha=0, indicates no variable selection
+
+    preds.coef <- gregEN.select(y=y, x_sample=x_sample, x_pop=x_pop, N=N, alpha=0.2,
+		returncoef=TRUE) 
+    preds.enet <- names(preds.coef[abs(preds.coef)>0])
+  }
+  return(list(preds.coef=preds.coef, preds.enet=preds.enet))
+}
  
 
 chkdbtab <- function(dbtablst, tab, stopifnull=FALSE) {

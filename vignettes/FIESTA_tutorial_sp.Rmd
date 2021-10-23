@@ -122,15 +122,12 @@ WYco <- USAco[USAco$NAME_1 == "Wyoming",]
 ```
 
 
-#### <a name="spImportShape"/>spImportShape()
+### <a name="spImportShape"/>spImportShape()
+
+Description:
+Import a spatial layer (e.g., ESRI Shapefile) to a simple feature (sf) object.
+
 ```{r}
-###################################################################################
-# Usage:
-# spImportSpatial(layer = NULL, dsn = NULL, polyfix = FALSE, gui = FALSE) 
-# 
-# Description:
-# Import a spatial layer (e.g., ESRI Shapefile) to a simple feature (sf) object.
-###################################################################################
 
 ## Import external data shapefiles
 WYbh <- FIESTA::spImportSpatial(WYbhfn)
@@ -144,8 +141,8 @@ plot(sf::st_geometry(WYbh), add=TRUE)
 ```
 
 
-#### <a name="spExportSpatial"/>spExportSpatial()
-```
+### <a name="spExportSpatial"/>spExportSpatial()
+```{r}
 ###################################################################################
 # Usage:
 # spExportSpatial(sfobj, out_fmt = "shp", outfolder = NULL, out_dsn = NULL,   
@@ -157,7 +154,8 @@ plot(sf::st_geometry(WYbh), add=TRUE)
 ###################################################################################
 
 ## Export Spatial Polygons layer to a shapefile
-FIESTA::spExportSpatial(WYbh, out_dsn="WYbh.shp", outfolder=outfolder, overwrite_dsn=TRUE)
+FIESTA::spExportSpatial(WYbh, out_dsn="WYbh.shp", 
+                        outfolder=outfolder, overwrite_dsn=TRUE)
 
 ## Check outfolder and display in ArcMap
 
@@ -165,8 +163,8 @@ FIESTA::spExportSpatial(WYbh, out_dsn="WYbh.shp", outfolder=outfolder, overwrite
 ```
 
 
-#### <a name="spMakeSpatialPoints"/>spMakeSpatialPoints()
-```
+### <a name="spMakeSpatialPoints"/>spMakeSpatialPoints()
+```{r}
 ###################################################################################
 # Usage:
 # spMakeSpatialPoints(xyplt, xyplt_dsn = NULL, xy.uniqueid = NULL, 
@@ -208,8 +206,8 @@ WYspplt <- spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC",
 
 ```
 
-#### <a name="spReprojectVector"/>spReprojectVector()
-```
+### <a name="spReprojectVector"/>spReprojectVector()
+```{r}
 ###################################################################################
 # Usage:
 # spReprojectVector(layer, dsn = NULL, crs.new = NULL, prj.new = NULL, 
@@ -233,8 +231,8 @@ sf::st_crs(WYspplt.utm12)
 
 ```
 
-#### <a name="spClipPoint"/>spClipPoint()
-```
+### <a name="spClipPoint"/>spClipPoint()
+```{r}
 ###################################################################################
 # Usage:
 # spClipPoint(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
@@ -297,8 +295,8 @@ names(WYbhptslst)
 
 ```
 
-#### <a name="spClipPoly"/>spClipPoly()
-```
+### <a name="spClipPoly"/>spClipPoly()
+```{r}
 ###################################################################################
 # Usage:
 # spClipPoly(polyv, polyv_dsn = NULL, clippolyv, clippolyv_dsn = NULL, 
@@ -324,8 +322,8 @@ text(coords[,"X"], coords[,"Y"], WYbhco[["NAME_2"]])
 ```
 
 
-#### <a name="spClipRast"/>spClipRast()
-```
+### <a name="spClipRast"/>spClipRast()
+```{r}
 ######################################################################################
 # Usage:
 # spClipRast(rast, rastfolder = NULL, clippolyv, clippolyv_dsn = NULL, 
@@ -353,15 +351,15 @@ WYbhMW.fornf <- FIESTA::spClipRast(fornffn, clippolyv=WYbhMW, outfolder=outfolde
 
 
 ## Display results
-WYbhMWprj <- FIESTA::crsCompare(WYbhMW, rasterInfo(WYbhMW.fornf)$crs)$x
+WYbhMWprj <- FIESTA:::crsCompare(WYbhMW, FIESTA:::rasterInfo(WYbhMW.fornf)$crs)$x
 raster::plot(raster::raster(WYbhMW.fornf))
 plot(st_geometry(WYbhMWprj), border="red", add=TRUE)
 
 
 ```
 
-#### <a name="spExtractPoly"/>spExtractPoly()
-```
+### <a name="spExtractPoly"/>spExtractPoly()
+```{r}
 ######################################################################################
 # Usage:
 # spExtractPoly(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", polyvlst,
@@ -377,7 +375,7 @@ plot(st_geometry(WYbhMWprj), border="red", add=TRUE)
 
 ## Extract polygon attributes from WYbighorn to WYpts, keeping NULL values
 extpolylst <- FIESTA::spExtractPoly(WYspplt, uniqueid="CN", polyvlst=WYbhdist)
-WYspplt_bh <- extpolylst$sppltext
+WYspplt_bh <- extpolylst$spxyext
 
 dim(WYspplt)
 dim(WYspplt_bh)
@@ -395,7 +393,7 @@ plot(WYspplt_bh["DISTRICTNA"], pch=8)
 ## Extract a subset of polygon attributes from WYbighorn to WYpts, not keeping NULL values
 extpolylst <- FIESTA::spExtractPoly(WYspplt, uniqueid="CN", polyvlst=WYbh, 
           polyvarlst=c("FORESTNUMB", "FORESTNAME"), keepNA=FALSE)
-WYspplt_bh2 <- extpolylst$sppltext
+WYspplt_bh2 <- extpolylst$spxyext
 
 dim(WYspplt)
 dim(WYspplt_bh2)
@@ -406,8 +404,8 @@ head(WYspplt_bh2)
 ```
 
 
-#### <a name="spExtractRast"/>spExtractRast()
-```
+### <a name="spExtractRast"/>spExtractRast()
+```{r}
 ######################################################################################
 # Usage:
 # spExtractRast(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", rastlst, 
@@ -434,8 +432,8 @@ head(WYspplt_dem)
 
 ```
 
-#### <a name="spGetPlots"/>spGetPlots()
-```
+### <a name="spGetPlots"/>spGetPlots()
+```{r}
 ######################################################################################
 # Usage:
 # spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL, 
@@ -465,8 +463,8 @@ names(WYbhdat)
 ```
 
 
-#### <a name="spGetModeldat"/>spGetModeldat()
-```
+### <a name="spGetAuxiliary"/>spGetAuxiliary()
+```{r}
 ######################################################################################
 # Usage:
 # spGetAuxiliary(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
@@ -544,8 +542,8 @@ zonalnames
 
 
 
-#### <a name="spGetEstUnit"/>spGetEstUnit()
-```
+### <a name="spGetEstUnit"/>spGetEstUnit()
+```{r}
 ######################################################################################
 # Usage:
 # spGetEstUnit(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY", 
@@ -603,8 +601,8 @@ areavar.bhdist
 ```
 
 
-#### <a name="spGetStrata"/>spGetStrata()
-```
+### <a name="spGetStrata"/>spGetStrata()
+```{r}
 ######################################################################################
 # Usage:
 # spGetStrata(xyplt, xyplt_dsn = NULL, uniqueid = "PLT_CN", unittype = "POLY",
@@ -655,8 +653,8 @@ stratlst$unitvar
 
 ```
 
-#### <a name="spUnionPoly"/>spUnionPoly()
-```
+### <a name="spUnionPoly"/>spUnionPoly()
+```{r}
 ######################################################################################
 # Usage:
 # spUnionPoly(polyv1, polyv1_dsn = NULL, polyv2, polyv2_dsn = NULL, showext = TRUE,
@@ -677,8 +675,8 @@ head(polyUnion)
 
 ```
 
-#### <a name="spZonalRast"/>spZonalRast()
-```
+### <a name="spZonalRast"/>spZonalRast()
+```{r}
 ######################################################################################
 # Usage:
 # spZonalRast(polyv, polyv_dsn = NULL, polyv.att = NULL, rast, rastfolder = NULL, 

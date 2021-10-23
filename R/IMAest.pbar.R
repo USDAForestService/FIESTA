@@ -74,6 +74,12 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
 
   #y <- yn.vect
 
+  ## Set global variables
+  nhat.var <- NULL
+
+  NBRPLT <- length(y)
+  NBRPLT.gt0 <- sum(y > 0)
+
   ## define empty data frame for storing selected predictors
   predselect <- x_pop[FALSE, ]
 
@@ -90,16 +96,10 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
     preds.selected <- na.omit(preds.selected[1:(length(y)-1)])
   }
 
-  if (length(preds.selected) > 0) {
+  if (!is.null(preds.selected) && length(preds.selected) > 0) {
     xsample <- x_sample[, preds.selected, drop=FALSE]
     xpop <- x_pop[, preds.selected, drop=FALSE]
 
-
-    ## Set global variables
-    nhat.var <- NULL
-
-    NBRPLT <- length(y)
-    NBRPLT.gt0 <- sum(y > 0)
     var_method <- "LinHTSRS"
     estgreg <- tryCatch(mase::greg(	y = y, 
 					xsample = x_sample, 
@@ -135,7 +135,7 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
   }
 
   selected <- data.frame(t(estgreg$coefficients))[,-1]
-  predselect <- rbindlist(list(predselect, aa), fill=TRUE)
+  predselect <- rbindlist(list(predselect, selected), fill=TRUE)
 
   estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
@@ -242,7 +242,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
   }
 
   selected <- data.frame(t(estgreg$coefficients))[,-1]
-  predselect <- rbindlist(list(predselect, aa), fill=TRUE)
+  predselect <- rbindlist(list(predselect, selected), fill=TRUE)
 
   estgregEN <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
   setnames(estgregEN, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
