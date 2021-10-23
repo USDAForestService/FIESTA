@@ -104,10 +104,8 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
                           rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits=TRUE,
                           allin1=FALSE, metric=FALSE, estround=1, pseround=2,
                           estnull="--", psenull="--", divideby=NULL,
-                          returntitle=FALSE, title.main=NULL, title.ref=NULL,
-                          title.rowvar=NULL, title.colvar=NULL, title.unitvar=NULL,
-                          title.estvar=NULL, title.filter=NULL, gainloss=FALSE,
-                          gainloss.vals=NULL, ...) {
+                          returntitle=FALSE, gainloss=FALSE, gainloss.vals=NULL,
+                          ...) {
   # set up list of parameters
   l <- as.list(match.call())
   l <- l[-1]
@@ -116,7 +114,7 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
   # into the list in order to pass them correctly to other functions
   objs <- ls(envir = globalenv())
   for (i in 1:length(l)) {
-    if (class(l[i]) == "name") {
+    if (class(l[[i]]) == "name") {
       if (l[i] %in% objs) {
         l[i] <- eval(l[i][[1]], envir = globalenv())
       }

@@ -27,13 +27,6 @@ table_options(
   psenull = "--",
   divideby = NULL,
   returntitle = FALSE,
-  title.main = NULL,
-  title.ref = NULL,
-  title.rowvar = NULL,
-  title.colvar = NULL,
-  title.unitvar = NULL,
-  title.estvar = NULL,
-  title.filter = NULL,
   gainloss = FALSE,
   gainloss.vals = NULL,
   ...
@@ -121,6 +114,15 @@ error.}
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}
 
+\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
+loss along with the variance and standard error, in percent, is generated.
+Used in modGBlulc.}
+
+\item{gainloss.vals}{String vector. A vector of names for values in gainloss
+table. Used in modGBlulc.}
+
+\item{...}{For extendibility.}
+
 \item{title.main}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 the complete title used for table. If title.main=NULL, the title.*
 parameters are used to generate title string. Note: if title.ref is not
@@ -145,15 +147,6 @@ pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
 \item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 pretty name for filter(s). If title.filter=NULL, a default is generated from
 cfilter.  If title.filter="", no title.filter is used.}
-
-\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
-loss along with the variance and standard error, in percent, is generated.
-Used in modGBlulc.}
-
-\item{gainloss.vals}{String vector. A vector of names for values in gainloss
-table. Used in modGBlulc.}
-
-\item{...}{For extendibility.}
 }
 \value{
 A list of user-supplied parameters and parameter values for outputting

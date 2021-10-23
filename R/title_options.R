@@ -45,7 +45,7 @@ title_options <- function(title.main=NULL, title.ref=NULL, title.rowvar=NULL,
   # into the list in order to pass them correctly to other functions
   objs <- ls(envir = globalenv())
   for (i in 1:length(l)) {
-    if (class(l[i]) == "name") {
+    if (class(l[[i]]) == "name") {
       if (l[i] %in% objs) {
         l[i] <- eval(l[i][[1]], envir = globalenv())
       }
