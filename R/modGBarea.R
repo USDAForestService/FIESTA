@@ -260,6 +260,7 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
 	rawfolder <- NULL
+  rawdata <- TRUE
   #estvar <- "CONDPROP_ADJ"
   
   ## Set savedata defaults

@@ -304,6 +304,7 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=rowvar.filter=colvar.filter=
 	variable <- NULL
+  rawdata <- TRUE
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]

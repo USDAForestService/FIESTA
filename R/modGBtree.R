@@ -291,6 +291,7 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  rawdata <- TRUE
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
