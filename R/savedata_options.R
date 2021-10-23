@@ -36,6 +36,41 @@ savedata_options <- function(outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
                              addtitle=TRUE, raw_fmt="csv",
                              raw_dsn=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE,
                              append_layer=FALSE, ...) {
+  ## Check addtitle
+  addtitle <- pcheck.logical(addtitle, varnm="addtitle",
+                             title="Add title to output?", first="YES", gui=gui, stopifnull=TRUE)
+  ## Check output info
+  ########################################################
+  if (savedata) {
+    if (!rawonly) {
+      outlst <- pcheck.output(out_fmt="csv", outfolder=outfolder,
+                              outfn.pre=outfn.pre, outfn.date=outfn.date,
+                              overwrite_layer=overwrite_layer, append_layer=append_layer, gui=gui)
+      outfolder <- outlst$outfolder
+      overwrite_layer <- outlst$overwrite_layer
+      outfn.pre <- outfn.pre
+    }
+    if (rawdata) {
+      if (!is.null(raw_fmt) && raw_fmt == "csv") {
+        rawfolder <- paste(outfolder, "rawdata", sep="/")
+        if (!file.exists(rawfolder)) dir.create(rawfolder)
+      } else {
+        if (is.null(raw_dsn)) {
+          raw_dsn <- "rawdata"
+        }
+        outlst <- pcheck.output(out_dsn=raw_dsn, out_fmt=raw_fmt,
+                                outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date,
+                                overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                                append_layer=append_layer, gui=gui)
+        rawfolder <- outlst$outfolder
+        raw_fmt <- outlst$out_fmt
+        raw_dsn <- outlst$out_dsn
+        overwrite_layer <- outlst$overwrite_layer
+      }
+    }
+  }
+  
+  
   # set up list of parameters
   l <- as.list(match.call())
   l <- l[-1]

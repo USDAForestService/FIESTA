@@ -13,7 +13,6 @@ table_options(
   col.add0 = FALSE,
   rowlut = NULL,
   collut = NULL,
-  rawdata = FALSE,
   rawonly = FALSE,
   rowgrp = FALSE,
   rowgrpnm = NULL,
@@ -67,10 +66,6 @@ format).}
 \item{collut}{Data frame. A lookup table with variable codes and code names
 to include as columns of output table (See notes for more information and
 format).}
-
-\item{rawdata}{Logical. If TRUE, returns a list of raw data tables that are
-used for estimation (See Value). If savedata = TRUE, tables are written to
-outfolder (if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv').}
 
 \item{rawonly}{Logical. If TRUE, only rawdata are output. If dataset
 includes many estimation units, and only raw data tables are desired, it is
