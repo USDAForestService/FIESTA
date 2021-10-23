@@ -10,6 +10,7 @@ modGBarea(
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
+  sumunits = TRUE,
   returntitle = FALSE,
   savedata = FALSE,
   table_opts = table_options(),
@@ -34,6 +35,9 @@ domain, rowvar = domain variable. If more than one domain, include colvar.
 If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of column domain variable in cond.}
+
+\item{sumunits}{Logical. If TRUE, estimation units are summed and returned
+in one table.}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}

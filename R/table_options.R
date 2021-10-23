@@ -45,8 +45,6 @@
 #' be included in same input table as rowvar.
 #' @param rowgrpord String. Name of variable to sort row group variable.
 #' Variable must be included in same input table as rowgrpnm.
-#' @param sumunits Logical. If TRUE, estimation units are summed and returned
-#' in one table.
 #' @param allin1 Logical. If TRUE, both estimates and percent sample error are
 #' output in one table as: estimates (percent sample error).
 #' @param metric Logical. If TRUE, output area is in metric units (hectares).
@@ -73,7 +71,7 @@
 table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL,
                           col.orderby=NULL, row.add0=FALSE, col.add0=FALSE,
                           rowlut=NULL, collut=NULL, rawonly=FALSE,
-                          rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits=TRUE,
+                          rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL,
                           allin1=FALSE, metric=FALSE, estround=1, pseround=2,
                           estnull="--", psenull="--", divideby=NULL, ...) {
   ## Check divideby
@@ -131,6 +129,11 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
       warning("check pseround... very high number, setting to ", pseround)
     }
   }
+  ## Check allin1
+  ########################################################
+  allin1 <- pcheck.logical(allin1, varnm="allin1",
+                           title="All 1 table - Est (%error)?", first="NO", gui=gui)
+  
   
   # set up list of parameters
   l <- as.list(match.call())

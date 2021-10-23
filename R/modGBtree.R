@@ -66,6 +66,8 @@
 #' @param colvar String. Optional. If rowvar != NULL, name of domain variable
 #' to group estvar by for columns in table output. Colvar must be included in
 #' an input data frame (i.e., plt, cond, tree).
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -256,9 +258,9 @@
 #' @export modGBtree
 modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
                       landarea="FOREST", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
-	                    returntitle=FALSE, savedata=FALSE, table_opts=table_options(), 
-	                    title_opts=title_options(), savedata_opts=savedata_options(),
-                      gui=FALSE, ...){
+                      sumunits=TRUE, returntitle=FALSE, savedata=FALSE,
+                      table_opts=table_options(), title_opts=title_options(),
+                      savedata_opts=savedata_options(), gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:

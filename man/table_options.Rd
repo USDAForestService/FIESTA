@@ -17,7 +17,6 @@ table_options(
   rowgrp = FALSE,
   rowgrpnm = NULL,
   rowgrpord = NULL,
-  sumunits = TRUE,
   allin1 = FALSE,
   metric = FALSE,
   estround = 1,
@@ -80,9 +79,6 @@ be included in same input table as rowvar.}
 
 \item{rowgrpord}{String. Name of variable to sort row group variable.
 Variable must be included in same input table as rowgrpnm.}
-
-\item{sumunits}{Logical. If TRUE, estimation units are summed and returned
-in one table.}
 
 \item{allin1}{Logical. If TRUE, both estimates and percent sample error are
 output in one table as: estimates (percent sample error).}

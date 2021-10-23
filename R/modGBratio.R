@@ -60,6 +60,8 @@
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
 #' @param colvar String. Name of the column domain variable in cond or tree.
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -268,7 +270,7 @@
 #' @export modGBratio
 modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE", 
 	landarea="FOREST", pcfilter=NULL, estvarn=NULL, estvarn.filter=NULL, 
-	estvard=NULL, estvard.filter=NULL, rowvar=NULL, colvar=NULL, 
+	estvard=NULL, estvard.filter=NULL, rowvar=NULL, colvar=NULL, sumunits=TRUE,
 	returntitle=FALSE, savedata=FALSE, table_opts=table_options(), 
 	title_opts=title_options(), savedata_opts=savedata_options(), gui=FALSE, ...){
 

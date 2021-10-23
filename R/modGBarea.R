@@ -44,6 +44,8 @@
 #' domain, rowvar = domain variable. If more than one domain, include colvar.
 #' If no domain, rowvar = NULL.
 #' @param colvar String. Name of column domain variable in cond.
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -224,7 +226,7 @@
 #' 
 #' @export modGBarea
 modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL, 
-	rowvar=NULL, colvar=NULL, returntitle=FALSE, savedata=FALSE, 
+	rowvar=NULL, colvar=NULL, sumunits=TRUE, returntitle=FALSE, savedata=FALSE, 
 	table_opts=table_options(), title_opts=title_options(),
 	savedata_opts=savedata_options(), gui=FALSE, ...){
 
