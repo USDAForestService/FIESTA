@@ -74,67 +74,6 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
                           rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL,
                           allin1=FALSE, metric=FALSE, estround=1, pseround=2,
                           estnull="--", psenull="--", divideby=NULL, ...) {
-  ## Check divideby
-  ########################################################
-  dividebylst <- c("hundred", "thousand", "million")
-  if (!is.null(divideby) || gui) {
-    divideby <- pcheck.varchar(
-      var2check = divideby,
-      varnm = "divideby",
-      gui = gui,
-      checklst = dividebylst,
-      caption = "Divide estimates?"
-    )
-  }
-  ## Check metric
-  metric <- pcheck.logical(
-    metricvarnm = "metric",
-    title = "Metric?",
-    first = "NO",
-    gui = gui,
-    stopifnull = TRUE
-  )
-  if (rawonly && !rawdata)
-    rawdata <- TRUE
-  ## Check rawonly
-  rawonly <-
-    pcheck.logical(
-      rawonly,
-      varnm = "rawonly",
-      title = "Raw data only?",
-      first = "NO",
-      gui = gui,
-      stopifnull = TRUE
-    )
-  if (rawonly && !rawdata)
-    rawdata <- TRUE
-  ## Check rounding variables
-  if (is.null(estround)) {
-    estround <- ifelse(allin1, 0, 6)
-  } else {
-    if (!is.numeric(estround))
-      stop("estround must be a numeric")
-    if (estround > 16) {
-      estround <- ifelse(allin1, 0, 6)
-      message("check estround... very high number, setting to ", estround)
-    }
-  }
-  if (is.null(pseround)) {
-    pseround <- ifelse(allin1, 0, 6)
-  } else {
-    if (!is.numeric(pseround))
-      stop("pseround must be a numeric")
-    if (pseround > 16) {
-      pseround <- ifelse(allin1, 0, 6)
-      warning("check pseround... very high number, setting to ", pseround)
-    }
-  }
-  ## Check allin1
-  ########################################################
-  allin1 <- pcheck.logical(allin1, varnm="allin1",
-                           title="All 1 table - Est (%error)?", first="NO", gui=gui)
-  
-  
   # set up list of parameters
   l <- as.list(match.call())
   l <- l[-1]
