@@ -26,9 +26,6 @@ table_options(
   estnull = "--",
   psenull = "--",
   divideby = NULL,
-  returntitle = FALSE,
-  gainloss = FALSE,
-  gainloss.vals = NULL,
   ...
 )
 }
@@ -111,42 +108,7 @@ error.}
 \item{divideby}{String. Conversion number for output ('hundred', 'thousand',
 'million').}
 
-\item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
-table(s).}
-
-\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
-loss along with the variance and standard error, in percent, is generated.
-Used in modGBlulc.}
-
-\item{gainloss.vals}{String vector. A vector of names for values in gainloss
-table. Used in modGBlulc.}
-
 \item{...}{For extendibility.}
-
-\item{title.main}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the complete title used for table. If title.main=NULL, the title.*
-parameters are used to generate title string. Note: if title.ref is not
-NULL, it is added to title.main.}
-
-\item{title.ref}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".}
-
-\item{title.rowvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the row domain variable. If NULL, = rowvar.}
-
-\item{title.colvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the column domain variable. If NULL, = colvar.}
-
-\item{title.unitvar}{String. TITLE, if savedata=TRUE and/or
-returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-unitvar.}
-
-\item{title.estvar}{String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
-
-\item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for filter(s). If title.filter=NULL, a default is generated from
-cfilter.  If title.filter="", no title.filter is used.}
 }
 \value{
 A list of user-supplied parameters and parameter values for outputting

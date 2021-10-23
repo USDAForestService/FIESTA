@@ -48,6 +48,10 @@
 #' 
 #' @param GBpopdat List. Population data objects returned from
 #' FIESTA::modGBpop().
+#' @param estvar String. Name of the tree-level estimate variable (e.g.,
+#' 'VOLCFNET').
+#' @param estvar.filter String. A tree-level filter for estvar. Must be R
+#' syntax (e.g., 'STATUSCD == 1').
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param landarea String. The condition-level filter for defining land area
@@ -55,10 +59,6 @@
 #' if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.
 #' @param pcfilter String. A filter for plot or cond attributes (including
 #' pltassgn).  Must be R logical syntax.
-#' @param estvar String. Name of the tree-level estimate variable (e.g.,
-#' 'VOLCFNET').
-#' @param estvar.filter String. A tree-level filter for estvar. Must be R
-#' syntax (e.g., 'STATUSCD == 1').
 #' @param rowvar String. Optional. Name of domain variable to group estvar by
 #' for rows in table output. Rowvar must be included in an input data frame
 #' (i.e., plt, cond, tree). If no rowvar is included, an estimate is returned
@@ -66,12 +66,15 @@
 #' @param colvar String. Optional. If rowvar != NULL, name of domain variable
 #' to group estvar by for columns in table output. Colvar must be included in
 #' an input data frame (i.e., plt, cond, tree).
-#' @param gui Logical. If gui, user is prompted for parameters.
+#' @param returntitle Logical. If TRUE, returns title(s) of the estimation
+#' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param savedata_opts List. See help(FIESTA::savedata_options()) for a list
-#' of options. Only used when savedata = TRUE.  
-#' @param table_opts List. See help(FIESTA::table_options()) for a list of
+#' @param table_opts List. See help(table_options()) for a list of
 #' options.
+#' @param title_opts List. See help(title_options()) for a list of options.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
 #' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
@@ -251,10 +254,11 @@
 #' 
 #' 
 #' @export modGBtree
-modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST", 
-	pcfilter=NULL, estvar=NULL, estvar.filter=NULL, rowvar=NULL, colvar=NULL, 
-	gui=FALSE, savedata=FALSE, savedata_opts=savedata_options(),
-	table_opts=table_options(), ...){
+modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
+                      landarea="FOREST", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
+	                    returntitle=FALSE, savedata=FALSE, table_opts=table_options(), 
+	                    title_opts=title_options(), savedata_opts=savedata_options(),
+                      gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -313,6 +317,20 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
       assign(names(table_opts)[[i]], table_opts[[i]])
     }
   }
+  
+  ## Set title defaults
+  title_defaults_list <- formals(FIESTA::title_options)[-length(formals(FIESTA::title_options))]
+  
+  for (i in 1:length(title_defaults_list)) {
+    assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied title values
+  if (length(title_opts) > 0) {
+    for (i in 1:length(title_opts)) {
+      assign(names(title_opts)[[i]], title_opts[[i]])
+    }
+  }
 
   ###################################################################################
   ## INITIALIZE SETTINGS
@@ -321,7 +339,6 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE)
   esttype <- "TREE"
-  returnGBpopdat <- TRUE 
   parameters <- FALSE
   returnlst <- list()
 
@@ -329,15 +346,12 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
-  if (is.null(GBpopdat)) {
-    GBpopdat <- modGBpop(gui=gui, ...)
-  } else {
-    returnGBpopdat <- FALSE
-    list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
-		"tuniqueid", "ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
-		"plotsampcnt", "condsampcnt")
-    GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
-  }		
+
+  list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
+	                "tuniqueid", "ACI.filter", "unitarea", "unitvar", "stratalut",
+                  "strvar", "plotsampcnt", "condsampcnt")
+  GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
+  
   if (is.null(GBpopdat)) return(NULL)
   condx <- GBpopdat$condx
   pltcondx <- GBpopdat$pltcondx
@@ -725,9 +739,6 @@ modGBtree <- function(GBpopdat=NULL, estseed="none", landarea="FOREST",
     rawdat$areaunits <- areaunits
     rawdat$estunits <- estunits
     returnlst$raw <- rawdat
-  }
-  if (returnGBpopdat) {
-    returnlst$GBpopdat <- GBpopdat
   }
   if ("STATECD" %in% names(pltcondf)) {
     returnlst$statecd <- sort(unique(pltcondf$STATECD))

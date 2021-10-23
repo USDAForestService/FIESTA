@@ -5,24 +5,32 @@
 \title{Green-Book module - Generate tree estimates.}
 \usage{
 modGBtree(
-  GBpopdat = NULL,
+  GBpopdat,
+  estvar,
+  estvar.filter = NULL,
   estseed = "none",
   landarea = "FOREST",
   pcfilter = NULL,
-  estvar = NULL,
-  estvar.filter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  gui = FALSE,
+  returntitle = FALSE,
   savedata = FALSE,
-  savedata_opts = savedata_options(),
   table_opts = table_options(),
+  title_opts = title_options(),
+  savedata_opts = savedata_options(),
+  gui = FALSE,
   ...
 )
 }
 \arguments{
 \item{GBpopdat}{List. Population data objects returned from
 FIESTA::modGBpop().}
+
+\item{estvar}{String. Name of the tree-level estimate variable (e.g.,
+'VOLCFNET').}
+
+\item{estvar.filter}{String. A tree-level filter for estvar. Must be R
+syntax (e.g., 'STATUSCD == 1').}
 
 \item{estseed}{String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
@@ -34,12 +42,6 @@ if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.}
 \item{pcfilter}{String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.}
 
-\item{estvar}{String. Name of the tree-level estimate variable (e.g.,
-'VOLCFNET').}
-
-\item{estvar.filter}{String. A tree-level filter for estvar. Must be R
-syntax (e.g., 'STATUSCD == 1').}
-
 \item{rowvar}{String. Optional. Name of domain variable to group estvar by
 for rows in table output. Rowvar must be included in an input data frame
 (i.e., plt, cond, tree). If no rowvar is included, an estimate is returned
@@ -49,15 +51,20 @@ for the total estimation unit. Include colvar for grouping by 2 variables.}
 to group estvar by for columns in table output. Colvar must be included in
 an input data frame (i.e., plt, cond, tree).}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
+\item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
+table(s).}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{savedata_opts}{List. See help(FIESTA::savedata_options()) for a list
+\item{table_opts}{List. See help(table_options()) for a list of
+options.}
+
+\item{title_opts}{List. See help(title_options()) for a list of options.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{table_opts}{List. See help(FIESTA::table_options()) for a list of
-options.}
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }

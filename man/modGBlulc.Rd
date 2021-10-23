@@ -5,15 +5,19 @@
 \title{Green-Book module - Generate land use/land cover estimates.}
 \usage{
 modGBlulc(
-  GBpopdat = NULL,
+  GBpopdat,
   landarea = "ALL",
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  gui = FALSE,
+  gainloss = FALSE,
+  gainloss.vals = NULL,
+  returntitle = FALSE,
   savedata = FALSE,
-  savedata_opts = savedata_options(),
   table_opts = table_options(),
+  title_opts = title_options(),
+  savedata_opts = savedata_options(),
+  gui = FALSE,
   ...
 )
 }
@@ -33,15 +37,27 @@ If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of column domain variable in cond.}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
+\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
+loss along with the variance and standard error, in percent, is generated.
+Used in modGBlulc.}
+
+\item{gainloss.vals}{String vector. A vector of names for values in gainloss
+table. Used in modGBlulc.}
+
+\item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
+table(s).}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{savedata_opts}{List. See help(FIESTA::savedata_options()) for a list
+\item{table_opts}{List. See help(table_options()) for a list of
+options.}
+
+\item{title_opts}{List. See help(title_options()) for a list of options.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{table_opts}{List. See help(FIESTA::table_options()) for a list of
-options.}
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }

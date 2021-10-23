@@ -5,7 +5,7 @@
 \title{Green-Book module - Generate ratio estimates.}
 \usage{
 modGBratio(
-  GBpopdat = NULL,
+  GBpopdat,
   estseed = "none",
   ratiotype = "PERACRE",
   landarea = "FOREST",
@@ -16,10 +16,12 @@ modGBratio(
   estvard.filter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  gui = FALSE,
+  returntitle = FALSE,
   savedata = FALSE,
-  savedata_opts = savedata_options(),
   table_opts = table_options(),
+  title_opts = title_options(),
+  savedata_opts = savedata_options(),
+  gui = FALSE,
   ...
 )
 }
@@ -54,15 +56,20 @@ colvar. If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of the column domain variable in cond or tree.}
 
-\item{gui}{Logical. If gui, user is prompted for parameters.}
+\item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
+table(s).}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{savedata_opts}{List. See help(FIESTA::savedata_options()) for a list
+\item{table_opts}{List. See help(table_options()) for a list of
+options.}
+
+\item{title_opts}{List. See help(title_options()) for a list of options.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
-\item{table_opts}{List. See help(FIESTA::table_options()) for a list of
-options.}
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modGBpop() if GBpopdat is NULL.}
 }

@@ -62,31 +62,6 @@
 #' 'not sampled' for percent standard errror.
 #' @param divideby String. Conversion number for output ('hundred', 'thousand',
 #' 'million').
-#' @param returntitle Logical. If TRUE, returns title(s) of the estimation
-#' table(s).
-#' @param title.main String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' the complete title used for table. If title.main=NULL, the title.*
-#' parameters are used to generate title string. Note: if title.ref is not
-#' NULL, it is added to title.main.
-#' @param title.ref String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".
-#' @param title.rowvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the row domain variable. If NULL, = rowvar.
-#' @param title.colvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the column domain variable. If NULL, = colvar.
-#' @param title.unitvar String. TITLE, if savedata=TRUE and/or
-#' returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-#' unitvar.
-#' @param title.estvar String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the estimate variable. If NULL, title.estvar = estvar.name.
-#' @param title.filter String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for filter(s). If title.filter=NULL, a default is generated from
-#' cfilter.  If title.filter="", no title.filter is used.
-#' @param gainloss Logical. If TRUE, a table with the difference of gain and
-#' loss along with the variance and standard error, in percent, is generated.
-#' Used in modGBlulc.
-#' @param gainloss.vals String vector. A vector of names for values in gainloss
-#' table. Used in modGBlulc.
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for outputting
 #' tables with custom aesthetics.
@@ -103,9 +78,7 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
                           rowlut=NULL, collut=NULL, rawdata=FALSE, rawonly=FALSE,
                           rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL, sumunits=TRUE,
                           allin1=FALSE, metric=FALSE, estround=1, pseround=2,
-                          estnull="--", psenull="--", divideby=NULL,
-                          returntitle=FALSE, gainloss=FALSE, gainloss.vals=NULL,
-                          ...) {
+                          estnull="--", psenull="--", divideby=NULL, ...) {
   # set up list of parameters
   l <- as.list(match.call())
   l <- l[-1]

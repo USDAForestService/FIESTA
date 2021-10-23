@@ -44,12 +44,15 @@
 #' domain, rowvar = domain variable. If more than one domain, include colvar.
 #' If no domain, rowvar = NULL.
 #' @param colvar String. Name of column domain variable in cond.
-#' @param gui Logical. If gui, user is prompted for parameters.
+#' @param returntitle Logical. If TRUE, returns title(s) of the estimation
+#' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param savedata_opts List. See help(FIESTA::savedata_options()) for a list
-#' of options. Only used when savedata = TRUE.  
-#' @param table_opts List. See help(FIESTA::table_options()) for a list of
+#' @param table_opts List. See help(table_options()) for a list of
 #' options.
+#' @param title_opts List. See help(title_options()) for a list of options.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
 #' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
@@ -220,9 +223,10 @@
 #' 
 #' 
 #' @export modGBarea
-modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL, 
-	rowvar=NULL, colvar=NULL, gui=FALSE, savedata=FALSE, 
-	savedata_opts=savedata_options(), table_opts=table_options(), ...){
+modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL, 
+	rowvar=NULL, colvar=NULL, returntitle=FALSE, savedata=FALSE, 
+	table_opts=table_options(), title_opts=title_options(),
+	savedata_opts=savedata_options(), gui=FALSE, ...){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -283,6 +287,20 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
       assign(names(table_opts)[[i]], table_opts[[i]])
     }
   }
+  
+  ## Set title defaults
+  title_defaults_list <- formals(FIESTA::title_options)[-length(formals(FIESTA::title_options))]
+  
+  for (i in 1:length(title_defaults_list)) {
+    assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied title values
+  if (length(title_opts) > 0) {
+    for (i in 1:length(title_opts)) {
+      assign(names(title_opts)[[i]], title_opts[[i]])
+    }
+  }
 
   ###################################################################################
   ## INITIALIZE SETTINGS
@@ -293,7 +311,6 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   esttype <- "AREA" 
   nonresp <- FALSE
   substrvar <- NULL
-  returnGBpopdat <- TRUE 
   parameters <- FALSE
   returnlst <- list()
 
@@ -301,15 +318,11 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
-  if (is.null(GBpopdat)) {
-    GBpopdat <- modGBpop(gui=gui, ...)
-  } else {
-    returnGBpopdat <- FALSE
-    list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
-		"ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
-		"plotsampcnt", "condsampcnt")
-    GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
-  }
+
+  list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
+  "ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
+  "plotsampcnt", "condsampcnt")
+  GBpopdat <- pcheck.object(GBpopdat, "GBpopdat", list.items=list.items)
   if (is.null(GBpopdat)) return(NULL)
   condx <- GBpopdat$condx
   pltcondx <- GBpopdat$pltcondx
@@ -659,9 +672,6 @@ modGBarea <- function(GBpopdat=NULL, landarea="FOREST", pcfilter=NULL,
     if (!is.null(colvar)) rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits
     returnlst$raw <- rawdat
-  }
-  if (returnGBpopdat) {
-    returnlst$GBpopdat <- GBpopdat
   }
   if ("STATECD" %in% names(pltcondf)) {
     returnlst$statecd <- sort(unique(pltcondf$STATECD))
