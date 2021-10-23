@@ -613,8 +613,8 @@ First, with the `modGBarea` function we generate estimates by estimation unit (i
 area1 <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
+    sumunits = TRUE,             # est - sum estimation units to population
     table_opts = table_options(  # set up options for table output
-      sumunits = TRUE,             # est - sum estimation units to population
       rawdata = TRUE,            # out - return raw data
       returntitle = TRUE         # out - return title information
       )
