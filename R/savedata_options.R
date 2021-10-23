@@ -15,6 +15,9 @@
 #' 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').
 #' @param raw_dsn String. Data source name for rawdata output. If extension is
 #' not included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param rawfolder String. If preferred, user can set the destination of the
+#' rawfolder. By default, rawfolder is set within the first level of the
+#' outfolder.
 #' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
 #' @param overwrite_layer Logical. If TRUE, overwrites the output. If
 #' rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
@@ -33,9 +36,9 @@
 #' @export savedata_options
 
 savedata_options <- function(outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
-                             addtitle=TRUE, raw_fmt="csv",
-                             raw_dsn=NULL, overwrite_dsn=FALSE, overwrite_layer=TRUE,
-                             append_layer=FALSE, ...) {
+                             addtitle=TRUE, raw_fmt="csv", raw_dsn=NULL,
+                             rawfolder=NULL, overwrite_dsn=FALSE, 
+                             overwrite_layer=TRUE, append_layer=FALSE, ...) {
   ## Check addtitle
   addtitle <- pcheck.logical(
     addtitle,

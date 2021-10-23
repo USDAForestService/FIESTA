@@ -11,6 +11,7 @@ savedata_options(
   addtitle = TRUE,
   raw_fmt = "csv",
   raw_dsn = NULL,
+  rawfolder = NULL,
   overwrite_dsn = FALSE,
   overwrite_layer = TRUE,
   append_layer = FALSE,
@@ -34,6 +35,10 @@ raw_fmt != 'csv').}
 
 \item{raw_dsn}{String. Data source name for rawdata output. If extension is
 not included, out_fmt is used. Use full path if outfolder=NULL.}
+
+\item{rawfolder}{String. If preferred, user can set the destination of the
+rawfolder. By default, rawfolder is set within the first level of the
+outfolder.}
 
 \item{overwrite_dsn}{Logical. If TRUE, overwrites raw_dsn, if exists.}
 
