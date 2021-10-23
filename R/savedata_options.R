@@ -44,8 +44,10 @@ savedata_options <- function(outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
   # into the list in order to pass them correctly to other functions
   objs <- ls(envir = globalenv())
   for (i in 1:length(l)) {
-    if (l[i] %in% objs) {
-      l[i] <- eval(l[i][[1]], envir = globalenv())
+    if (class(l[i]) == "name") {
+      if (l[i] %in% objs) {
+        l[i] <- eval(l[i][[1]], envir = globalenv())
+      }
     }
   }
   

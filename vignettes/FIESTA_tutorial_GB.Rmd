@@ -718,7 +718,7 @@ area3 <- modGBarea(
     rowvar = "FORTYPCD",         # est - row domain
     colvar = "STDSZCD",          # est - column domain
     savedata = TRUE,             # out - save data to outfolder
-    savedata_opts = savedata_opts(
+    savedata_opts = savedata_options(
       outfolder = outfolder,       # out - outfolder for saving data
       outfn.pre = "WY"             # out - prefix for output files
       ),
