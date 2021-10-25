@@ -663,8 +663,8 @@ area2  <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     rowvar = "FORTYPCD",         # est - row domain
+    sumunits = TRUE,           # out - sum estimation units to population
     table_opts = table_options(  # set up options for table output
-      sumunits = TRUE,           # out - sum estimation units to population
       rawdata = TRUE,            # out - return raw data
       returntitle = TRUE         # out - return title information
       )
@@ -717,17 +717,16 @@ area3 <- modGBarea(
     landarea = "FOREST",         # est - forest land filter
     rowvar = "FORTYPCD",         # est - row domain
     colvar = "STDSZCD",          # est - column domain
+    sumunits = TRUE,             # est - sum estimation units to population
     savedata = TRUE,             # out - save data to outfolder
+    returntitle = TRUE,          # out - return title information
     savedata_opts = savedata_options(
       outfolder = outfolder,       # out - outfolder for saving data
       outfn.pre = "WY"             # out - prefix for output files
       ),
     table_opts = table_options(
-      sumunits = TRUE,             # est - sum estimation units to population
       row.FIAname = TRUE,          # est - row domain names
       col.FIAname = TRUE,          # est - column domain names
-      rawdata = TRUE,              # out - return raw data 
-      returntitle = TRUE,          # out - return title information
       allin1 = TRUE                # out - return output with est(pse)
       )
     )
@@ -800,7 +799,6 @@ tree1 <- modGBtree(
     sumunits = TRUE,             # est - sum estimation units to population
     estvar = "VOLCFNET",               # est - net cubic-foot volume
     estvar.filter = "STATUSCD == 1",   # est - live trees only
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE           # out - return title information
     )
 ```
@@ -834,7 +832,7 @@ titlelst
 <details>
   <summary>View Example</summary>
 
-This example adds rows to the output for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013. We also choose the return raw data and titles with `rawdata = TRUE` and `returntitle = TRUE`. 
+This example adds rows to the output for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013. We also choose to return titles with `returntitle = TRUE`. 
 
 ```{r}
 tree2 <- modGBtree(
@@ -844,7 +842,6 @@ tree2 <- modGBtree(
     estvar = "VOLCFNET",               # est - net cubic-foot volume
     estvar.filter = "STATUSCD == 1",   # est - live trees only
     rowvar = "FORTYPCD",         # est - row domain 
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE           # out - return title information
     )
 ```
@@ -879,7 +876,7 @@ titlelst
 <details>
   <summary>View Example</summary>
 
-This examples adds rows and columns to the output, including FIA names, for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, Wyoming, 2011-2013. We also return output with estimates (est) and percent standard error (pse) in same cell - est(pse) with `allin1 = TRUE` and save data to an outfolder with `savedata = TRUE` and `outfolder = outfolder`. 
+This examples adds rows and columns to the output, including FIA names, for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, Wyoming, 2011-2013. We also use the `*_options` functions to return output with estimates (est) and percent standard error (pse) in same cell - est(pse) with `allin1 = TRUE` and save data to an outfolder with `savedata = TRUE` and `outfolder = outfolder`. 
 
 ```{r}
 tree3 <- modGBtree(
@@ -889,15 +886,18 @@ tree3 <- modGBtree(
     estvar = "VOLCFNET",               # est - net cubic-foot volume
     estvar.filter = "STATUSCD  == 1",   # est - live trees only
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "STDSZCD",          # est - column domain
-    col.FIAname = TRUE,          # est - column domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
     savedata = TRUE,             # out - save data to outfolder
-    outfolder = outfolder,       # out - outfolder for saving data
-    outfn.pre = "WY"             # out - prefix for output files
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      col.FIAname = TRUE,          # est - column domain names
+      allin1 = TRUE                # out - return output with est(pse)
+    ),
+    savedata_opts = savedata_options(
+      outfolder = outfolder,       # out - outfolder for saving data
+      outfn.pre = "WY"             # out - prefix for output files
+      )
     )
 ```
 
@@ -952,10 +952,11 @@ tree4a <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = FALSE,              # out - return output with est and pse
+    table_opts = table_options(    
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE               # out - return output with est and pse
+      )
     )
 ```
 
@@ -991,10 +992,11 @@ tree4b <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = FALSE,              # out - return output with est and pse
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE,              # out - return output with est and pse
+      )
     )
 ```
 
@@ -1032,12 +1034,13 @@ tree4c <- modGBtree(
     estseed = "only",            # est - add seedling data
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
-    estvar = "TPA_UNADJ",               # est - number of trees per acre 
+    estvar = "TPA_UNADJ",        # est - number of trees per acre 
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = FALSE,              # out - return output with est and pse
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE               # out - return output with est and pse
+      )
     )
 ```
 
@@ -1065,6 +1068,13 @@ head(tree4c$est)
 We can also use tree domain in estimation output columns:
 
 ```{r}
+## First, we can save our table options for the next few examples
+tab_opts <- table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      col.FIAname = TRUE,          # est - column domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      )
+
 ## Number of live trees (at least 1 inch diameter) by forest type and species
 tree5 <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1073,12 +1083,9 @@ tree5 <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "SPCD",             # est - column domain
-    col.FIAname = TRUE,          # est - column domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = tab_opts
     )
 ```
 
@@ -1110,12 +1117,9 @@ tree6 <- modGBtree(
     estvar = "VOLCFNET",         # est - number of trees per acre 
     estvar.filter = "STATUSCD == 2 & STANDING_DEAD_CD == 1",    # est - standing dead trees only
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "AGENTCD",          # est - column domain
-    col.FIAname = TRUE,          # est - column domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = tab_opts
     )
 ```
 
@@ -1131,11 +1135,9 @@ head(tree6$est)
 
 </details>
 
-#### Not sure where this piece should go...
+#### Adding diameter classes to population tree data (for `modGBtree` and `modGBratio` examples 7-9)
 <details>
   <summary>View Example</summary>
-
-Add diameter classes to population tree data...
 
 ```{r}
 ## Look at tree data in GBpopdat
@@ -1177,6 +1179,7 @@ table(GBpopdat$treex$DIACL)
 We can also look at the number of live trees by species group and diameter class (DIACL2IN):
 
 ```{r}
+## not sure why this isn't working -- might want to check in w/ Tracey
 ## Number of live trees by species group and diameter class (DIACL2IN)
 tree7 <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1185,11 +1188,12 @@ tree7 <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPGRPCD",          # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "DIACL2IN",         # est - column domain
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1213,6 +1217,7 @@ head(tree7$est)
 Next, we can look at number of live trees by species group and diameter class (DIACL):
 
 ```{r}
+## not sure why this isn't working -- might want to check in w/ Tracey
 ## Number of live trees by species group and diameter class (DIACL)
 tree8 <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1221,11 +1226,12 @@ tree8 <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPGRPCD",          # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "DIACL",            # est - column domain
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1248,6 +1254,7 @@ head(tree8$est)
 Finally, we add seedlings to Example 8:
 
 ```{r}
+## again -- not working -- check with tracey
 ## Number of live trees by species group and diameter class (DIACL), add seedlings
 tree9 <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
@@ -1257,11 +1264,12 @@ tree9 <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPGRPCD",          # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "DIACL",            # est - column domain
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1302,7 +1310,6 @@ ratio1 <- modGBratio(
     sumunits = TRUE,             # est - sum estimation units to population
     estvarn = "VOLCFNET",               # est - net cubic-foot volume, numerator
     estvarn.filter = "STATUSCD == 1",   # est - live trees only, numerator
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE           # out - return title information
     )
 ```
@@ -1348,7 +1355,6 @@ ratio2 <- modGBratio(
     estvarn = "VOLCFNET",               # est - net cubic-foot volume
     estvarn.filter = "STATUSCD == 1",   # est - live trees only
     rowvar = "FORTYPCD",         # est - row domain 
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE           # out - return title information
     )
 ```
@@ -1398,15 +1404,18 @@ ratio3 <- modGBratio(
     estvarn = "VOLCFNET",               # est - net cubic-foot volume, numerator
     estvarn.filter = "STATUSCD == 1",   # est - live trees only, numerator
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "STDSZCD",          # est - column domain
-    col.FIAname = TRUE,          # est - column domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
     savedata = TRUE,             # out - save data to outfolder
-    outfolder = outfolder,       # out - outfolder for saving data
-    outfn.pre = "WY"             # out - prefix for output files
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      col.FIAname = TRUE,          # est - column domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      ),
+    savedata_opts = savedata_options(
+      outfolder = outfolder,       # out - outfolder for saving data
+      outfn.pre = "WY"             # out - prefix for output files
+      )
     )
 ```
 
@@ -1461,10 +1470,11 @@ ratio4a <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = FALSE,              # out - return output with est and pse
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE,              # out - return output with est and pse
+      )
     )
 ```
 
@@ -1500,10 +1510,11 @@ ratio4b <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = FALSE,              # out - return output with est and pse
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE               # out - return output with est and pse
+      )
     )
 ```
 
@@ -1542,10 +1553,11 @@ ratio4c <- modGBratio(
     sumunits = TRUE,             # est - sum estimation units to population
     estvarn = "TPA_UNADJ",       # est - number of trees per acre, numerator 
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = FALSE,              # out - return output with est and pse
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE               # out - return output with est and pse
+      )
     )
 ```
 
@@ -1581,12 +1593,13 @@ ratio5 <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "SPCD",             # est - column domain
-    col.FIAname = TRUE,          # est - column domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      col.FIAname = TRUE,          # est - column domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1618,12 +1631,13 @@ ratio6 <- modGBratio(
     estvarn = "VOLCFNET",         # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 2 & STANDING_DEAD_CD == 1",    # est - standing dead trees only, numerator
     rowvar = "SPCD",             # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "AGENTCD",          # est - column domain
-    col.FIAname = TRUE,          # est - column domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      col.FIAname = TRUE,          # est - column domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1654,11 +1668,12 @@ ratio7 <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "SPGRPCD",          # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "DIACL2IN",         # est - column domain
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = TRUE,               # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1688,11 +1703,12 @@ ratio8 <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "SPGRPCD",          # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "DIACL",            # est - column domain
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = TRUE,               # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1723,11 +1739,12 @@ ratio9 <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPGRPCD",          # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
     colvar = "DIACL",            # est - column domain
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = TRUE,               # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1761,10 +1778,11 @@ ratio10 <- modGBratio(
     estvarn.filter = "STATUSCD == 1",    # est - live trees only
     estvard = "VOLCFNET",                # est - net cubic-foot volume, numerator
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE,               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = TRUE,               # out - return output with est(pse)
+      )
     )
 ```
 
@@ -1822,9 +1840,10 @@ area.strat <- modGBarea(
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
-    allin1 = FALSE               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE                # out - return output with est(pse)
+      )
     )   
 
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013, no post-stratification
@@ -1833,9 +1852,10 @@ area.nostrat <- modGBarea(
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
-    allin1 = FALSE               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE                # out - return output with est(pse)
+      )
     )   
 ```
 
@@ -1854,9 +1874,10 @@ tree.strat <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvar.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
-    allin1 = FALSE               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE                # out - return output with est(pse)
+      )
     )   
 
 ## Number of live trees by species, Wyoming, 2011-2013, no post-stratification
@@ -1867,9 +1888,10 @@ tree.nostrat <- modGBtree(
     estvar = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvar.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
-    allin1 = FALSE               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE                # out - return output with est(pse)
+      )
     )   
 ```
 
@@ -1888,9 +1910,10 @@ ratio.strat <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
-    allin1 = FALSE               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE                # out - return output with est(pse)
+      )
     )   
 
 ## Number of live trees per acre by species, Wyoming, 2011-2013, no post-stratification
@@ -1901,9 +1924,10 @@ ratio.nostrat <- modGBratio(
     estvarn = "TPA_UNADJ",               # est - number of trees per acre, numerator 
     estvarn.filter = "STATUSCD == 1",    # est - live trees only, numerator
     rowvar = "FORTYPCD",         # est - row domain
-    row.FIAname = TRUE,          # est - row domain names
-    rawdata = TRUE,              # out - return raw data 
-    allin1 = FALSE               # out - return output with est(pse)
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      allin1 = FALSE                # out - return output with est(pse)
+      )
     )  
 ```
 
@@ -1933,9 +1957,8 @@ area.unit <- modGBarea(
     sumunits = FALSE,            # est - sum estimation units to population
     rowvar = "FORTYPCD",         # est - row domain
     colvar = "STDSZCD",          # est - column domain
-    rawdata = TRUE,              # out - return raw data 
     returntitle = TRUE,          # out - return title information
-    allin1 = TRUE                # out - return output with est(pse)
+    table_opts = table_options(allin1 = TRUE)              # out - return output with est(pse)
     )
 
 ## Estimate and percent sampling error of estimate (first 6 rows)
@@ -1947,56 +1970,56 @@ unique(area.unit$est$unit)
 
 </details>
 
-### Population data included in estimation module
+<!-- ### Population data included in estimation module -->
 
-If you were only interested in a couple estimates for a population, you could calculate population data within a module by including all information directly into the estimation module. The `modGBpop` function is called if the GBpopdat list object is not included as a parameter.
+<!-- If you were only interested in a couple estimates for a population, you could calculate population data within a module by including all information directly into the estimation module. The `modGBpop` function is called if the GBpopdat list object is not included as a parameter. -->
 
-<details>
-  <summary>View Code</summary>
+<!-- <details> -->
+<!--   <summary>View Code</summary> -->
 
-```{r}
-## Get population data for Wyoming, with post-stratification
-## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
-area.strat <- modGBarea( 
-    cond = WYcond,               # pop - FIA plot/condition data
-    tree = WYtree,               # pop - FIA tree data
-    pltassgn = WYpltassgn,       # pop - plot assignments
-    pltassgnid = "CN",           # pop - uniqueid of plots
-    unitarea = WYunitarea,       # pop - area by estimation units
-    unitvar = "ESTN_UNIT",       # pop - name of estimation unit
-    strata = TRUE,               # pop - if using post-stratification
-    stratalut = WYstratalut,     # strata classes and pixels counts
-    landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
-    rowvar = "FORTYPCD",         # est - row domain
-    colvar = "STDSZCD",          # est - column domain
-    allin1 = TRUE                # out - return output with est(pse)
-    )   
-
-
-## Get population data for Wyoming, with no post-stratification
-## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
-area.nostrat <- modGBarea( 
-    cond = WYcond,               # pop - FIA plot/condition data
-    tree = WYtree,               # pop - FIA tree data
-    pltassgn = WYpltassgn,       # pop - plot assignments
-    pltassgnid = "CN",           # pop - uniqueid of plots
-    unitarea = WYunitarea,       # pop - area by estimation units
-    unitvar = "ESTN_UNIT",       # pop - name of estimation unit
-    strata = FALSE,              # pop - if using post-stratification
-    landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
-    rowvar = "FORTYPCD",         # est - row domain
-    colvar = "STDSZCD",          # est - column domain
-    rawdata = TRUE,              # out - return raw data 
-    allin1 = TRUE                # out - return output with est(pse)
-    )   
+<!-- ```{r} -->
+<!-- ## Get population data for Wyoming, with post-stratification -->
+<!-- ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013 -->
+<!-- area.strat <- modGBarea(  -->
+<!--     cond = WYcond,               # pop - FIA plot/condition data -->
+<!--     tree = WYtree,               # pop - FIA tree data -->
+<!--     pltassgn = WYpltassgn,       # pop - plot assignments -->
+<!--     pltassgnid = "CN",           # pop - uniqueid of plots -->
+<!--     unitarea = WYunitarea,       # pop - area by estimation units -->
+<!--     unitvar = "ESTN_UNIT",       # pop - name of estimation unit -->
+<!--     strata = TRUE,               # pop - if using post-stratification -->
+<!--     stratalut = WYstratalut,     # strata classes and pixels counts -->
+<!--     landarea = "FOREST",         # est - forest land filter -->
+<!--     sumunits = TRUE,             # est - sum estimation units to population -->
+<!--     rowvar = "FORTYPCD",         # est - row domain -->
+<!--     colvar = "STDSZCD",          # est - column domain -->
+<!--     table_opts = table_options(allin1 = TRUE)               # out - return output with est(pse) -->
+<!--     )    -->
 
 
-## Compare estimates and percent standard errors with and without post-stratification
-head(area.strat$est)
-head(area.nostrat$est)
-```
+<!-- ## Get population data for Wyoming, with no post-stratification -->
+<!-- ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013 -->
+<!-- area.nostrat <- modGBarea(  -->
+<!--     cond = WYcond,               # pop - FIA plot/condition data -->
+<!--     tree = WYtree,               # pop - FIA tree data -->
+<!--     pltassgn = WYpltassgn,       # pop - plot assignments -->
+<!--     pltassgnid = "CN",           # pop - uniqueid of plots -->
+<!--     unitarea = WYunitarea,       # pop - area by estimation units -->
+<!--     unitvar = "ESTN_UNIT",       # pop - name of estimation unit -->
+<!--     strata = FALSE,              # pop - if using post-stratification -->
+<!--     landarea = "FOREST",         # est - forest land filter -->
+<!--     sumunits = TRUE,             # est - sum estimation units to population -->
+<!--     rowvar = "FORTYPCD",         # est - row domain -->
+<!--     colvar = "STDSZCD",          # est - column domain -->
+<!--     rawdata = TRUE,              # out - return raw data  -->
+<!--     allin1 = TRUE                # out - return output with est(pse) -->
+<!--     )    -->
+
+
+<!-- ## Compare estimates and percent standard errors with and without post-stratification -->
+<!-- head(area.strat$est) -->
+<!-- head(area.nostrat$est) -->
+<!-- ``` -->
 
 </details>
 
