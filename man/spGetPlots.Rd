@@ -8,6 +8,7 @@ spGetPlots(
   bnd = NULL,
   bnd_dsn = NULL,
   bnd.filter = NULL,
+  states = NULL,
   RS = NULL,
   xyids = NULL,
   xy_datsource = NULL,
@@ -67,6 +68,8 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if bnd is an R object.}
 
 \item{bnd.filter}{String. Filter to subset bnd spatial layer.}
+
+\item{states}{String. The name of state(s) for tables (e.g., "Vermont", "Utah").}
 
 \item{RS}{String. Name of FIA research station to restrict states to
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are

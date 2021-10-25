@@ -11,6 +11,7 @@ title_options(
   title.colvar = NULL,
   title.unitvar = NULL,
   title.estvar = NULL,
+  title.estvarn = NULL,
   title.filter = NULL,
   ...
 )
@@ -35,6 +36,9 @@ returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
 unitvar.}
 
 \item{title.estvar}{String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
+pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
+
+\item{title.estvarn}{String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
 pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
 
 \item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
