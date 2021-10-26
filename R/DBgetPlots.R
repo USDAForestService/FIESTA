@@ -922,12 +922,12 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, append_layer=append_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
-    outfolder <- outlst$outfolder
-    out_fmt <- outlst$out_fmt
+    outfolder <- pcheck.outfolder(outfolder)
+#    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+#		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+#		overwrite_dsn=overwrite_dsn, append_layer=append_layer, gui=gui)
+#    out_dsn <- outlst$out_dsn
+#    out_fmt <- outlst$out_fmt
   }
  
   ###########################################################################
@@ -1140,6 +1140,8 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
     }
     xfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				"SUBX x ON (x.PLT_CN = p.CN)")
+    xfromqry_plotgeom <- paste0(pfromqry, " JOIN ", SCHEMA., 
+				"SUBX x ON (x.CN = p.CN)")
     xfromqry2 <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				"SUBX x ON (x.STATECD = p.STATECD
 						and x.UNITCD = p.UNITCD
@@ -2136,6 +2138,10 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
           xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
 			"where", xfilterpop)
 
+        } else if (othertable == "PLOTGEOM") {
+          joinid <- "CN"
+          xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry_plotgeom), 
+			"where", xfilter)
         } else {
           joinid <- "PLT_CN"
           xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
@@ -2276,9 +2282,19 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 			exportsp=savedata, out_dsn=out_dsn, out_fmt=out_fmt_sp, 
 			outfolder=outfolder, out_layer=spxynm, outfn.date=outfn.date,
  			overwrite_layer=overwrite_layer, append_layer=TRUE,
-			outfn.pre=outfn.pre))
+			outfn.pre=outfn.pre, overwrite_dsn=overwrite_dsn))
         }
-      }       
+      } else {
+        ## output parameters
+        ###########################################################
+        if (savedata | saveqry | parameters | !treeReturn | !returndata) {
+          outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+		  outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		  overwrite_dsn=overwrite_dsn, append_layer=append_layer, gui=gui)
+          out_dsn <- outlst$out_dsn
+          out_fmt <- outlst$out_fmt
+        } 
+      }
 
       if (savedata && !issp) {
         xycoords <- getcoords(coords)

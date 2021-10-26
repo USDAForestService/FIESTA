@@ -62,9 +62,19 @@
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.
 #' @param pcfilter String. A filter for plot or cond attributes (including
 #' pltassgn).  Must be R logical syntax.
-#' @param estvar String. Name of the tree estimate variable.
-#' @param estvar.filter String. A tree filter for estimate variable. Must be R
-#' syntax (e.g., "STATUSCD == 1").
+#' @param rowvar String. Name of the row domain variable in cond or tree. If
+#' only one domain, rowvar = domain variable. If more than one domain, include
+#' colvar. If no domain, rowvar = NULL.
+#' @param colvar String. Name of the column domain variable in cond or tree.
+#' @param row.FIAname Logical. If TRUE, gets FIA reference names for row
+#' variable based on ref_codes. Only available for certain variables.
+#' @param row.orderby String. Name of variable to sort table rows. If
+#' row.FIAname=TRUE and a ref_* exists for rowvar, the rowvar code is used to
+#' sort. If NULL, the table is sorted by rowvar.
+#' @param row.add0 Logical. If TRUE, add the rows that have 0 values.
+#' @param rowlut Data frame. A lookup table with variable codes and
+#' descriptions to include in rows of output table (See notes for more
+#' information and format).
 #' @param allin1 Logical. If TRUE, both estimates and percent sample error are
 #' output in one table as: estimates (percent sample error).
 #' @param metric Logical. If TRUE, output area is in metric units (hectares).
@@ -131,11 +141,11 @@
 #' NULL, it is added to title.main.
 #' @param title.ref String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 #' the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".
+#' @param title.rowvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+#' pretty name for the row domain variable. If NULL, = rowvar.
 #' @param title.dunitvar String. TITLE, if savedata=TRUE and/or
 #' returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
 #' unitvar.
-#' @param title.estvar String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the estimate variable. If NULL, title.estvar = estvar.name.
 #' @param title.filter String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 #' pretty name for filter(s). If title.filter=NULL, a default is generated from
 #' cfilter.  If title.filter="", no title.filter is used.
@@ -195,8 +205,9 @@
 modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL, 
 	SApackage="JoSAE", SAmethod="area", totals=FALSE, 
 	estseed="none", largebnd.unique=NULL, landarea="FOREST", pcfilter=NULL, 
+	rowvar=NULL, row.FIAname=FALSE, row.orderby=NULL, row.add0=FALSE, rowlut=NULL, 
 	allin1=FALSE, metric=FALSE, variable.select=TRUE, estround=3, pseround=3, 
-	estnull=0, psenull="--", divideby=NULL, savedata=FALSE, 
+	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, 
 	savesteps=FALSE, rawdata=FALSE, rawonly=FALSE, multest=TRUE, 
 	addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
 	outfn.date=FALSE, addtitle=TRUE, raw_fmt="csv", raw_dsn="rawdata", 
@@ -204,7 +215,7 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, 
 	multest.AOIonly=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
 	append_layer=FALSE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
-	title.dunitvar=NULL, title.estvar=NULL, title.filter=NULL, 
+	title.rowvar=NULL, title.dunitvar=NULL, title.filter=NULL, 
 	save4testing=FALSE, ...){
 
 
@@ -230,7 +241,7 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 #  }
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(SApopdat)) {
+  if (nargs() == 0 && is.null(SApopdatlst)) {
     gui <- TRUE
   } 
 
@@ -290,13 +301,9 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   sumunits=FALSE
   prior=NULL
 
-  rowvar=NULL
   colvar=NULL
-  row.FIAname=FALSE
   col.FIAname=FALSE
-  row.orderby=NULL
   col.orderby=NULL
-  row.add0=FALSE
   col.add0=FALSE
   rowlut=NULL
   collut=NULL
@@ -431,6 +438,7 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   #setnames(cdomdat, dunitvar, "DOMAIN")
 
 
+  ## Define empty lists
   multestlst <- list()
   predselectlst <- list()
   dunitareabind <- {}
@@ -441,6 +449,16 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     pdomdatlst <- list()
     dunitlutlst <- list()
   }
+
+  if (!is.null(rowvar)) {
+    multestlst_row <- list()
+    predselectlst_row <- list()
+    if (save4testing) {
+      pdomdatlst_row <- list()
+      dunitlutlst_row <- list()
+    }
+  }
+    
  
   for (i in 1:length(SApopdatlst)) {
     SApopdatnm <- names(SApopdatlst)[i]
@@ -461,14 +479,8 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     SAdomsdf <- SApopdat$SAdomsdf
     condx <- setDT(copy(SApopdat$condx))
     pltcondx <- copy(SApopdat$pltcondx)
-    treex <- copy(SApopdat$treex)
-    seedx <- copy(SApopdat$seedx)
-    if (is.null(treex) && is.null(seedx)) {
-      stop("must include tree data for tree estimates")
-    }
     cuniqueid <- SApopdat$cuniqueid
     condid <- SApopdat$condid
-    tuniqueid <- SApopdat$tuniqueid
     ACI.filter <- SApopdat$ACI.filter
     dunitarea <- setDT(SApopdat$dunitarea)
     areavar <- SApopdat$areavar
@@ -535,14 +547,6 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     if (is.null(estdat)) return(NULL)
     pltcondf <- estdat$pltcondf
     landarea <- estdat$landarea
-    if (esttype %in% c("TREE", "RATIO")) {
-      treef <- estdat$treef
-      seedf <- estdat$seedf
-      estseed <- estdat$estseed
-    }
-    if (esttype == "P2VEG") {
-      vcondf <- estdat$vcondf
-    }
 
  
     ###################################################################################
@@ -550,36 +554,17 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     ###################################################################################
     if (!sumunits) col.add0 <- TRUE
     if (!is.null(rowvar) && rowvar == "TOTAL") rowvar <- NULL
-    rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
+    rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
 		condf=pltcondf, cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
 		colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
 		col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby,
  		row.add0=row.add0, col.add0=col.add0, title.rowvar=title.rowvar, 
 		title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
 		rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea) 
-    treef <- rowcolinfo$treef
-    seedf <- rowcolinfo$seedf
-    condf <- rowcolinfo$condf
-    uniquerow <- rowcolinfo$uniquerow
-    uniquecol <- rowcolinfo$uniquecol
-    domainlst <- rowcolinfo$domainlst
-    rowvar <- rowcolinfo$rowvar
-    colvar <- rowcolinfo$colvar
-    row.orderby <- rowcolinfo$row.orderby
-    col.orderby <- rowcolinfo$col.orderby
-    row.add0 <- rowcolinfo$row.add0
-    col.add0 <- rowcolinfo$col.add0
-    title.rowvar <- rowcolinfo$title.rowvar
-    title.colvar <- rowcolinfo$title.colvar
-    bytdom <- rowcolinfo$bytdom
-    tdomvar <- rowcolinfo$tdomvar
-    tdomvar2 <- rowcolinfo$tdomvar2
-    grpvar <- rowcolinfo$grpvar
-
     #rm(rowcolinfo)  
 
     ## Generate a uniquecol for estimation units
-    if (!sumunits && colvar == "NONE") {
+    if (!sumunits && rowcolinfo$colvar == "NONE") {
       uniquecol <- data.table(dunitarea[[dunitvar]])
       setnames(uniquecol, dunitvar)
       uniquecol[[dunitvar]] <- factor(uniquecol[[dunitvar]])
@@ -594,8 +579,8 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
       estvarunits <- areaunits
 
       setkeyv(condx, c(cuniqueid, condid))
-      setkeyv(condf, c(cuniqueid, condid))
-      cdomdat <- merge(condx, condf, by=c(cuniqueid, condid), all.x=TRUE)
+      setkeyv(rowcolinfo$condf, c(cuniqueid, condid))
+      cdomdat <- merge(condx, rowcolinfo$condf, by=c(cuniqueid, condid), all.x=TRUE)
       cdomdat[, (estvar.name) := ifelse(is.na(TOTAL), 0, get(estvar.area))] 
     }
  
@@ -603,6 +588,8 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     ## GENERATE ESTIMATES
     #####################################################################################
     dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
+    addtotal <- ifelse(rowcolinfo$rowvar == "TOTAL" || 
+		length(unique(condf[[rowcolinfo$rowvar]])) > 1, TRUE, FALSE)
     response <- estvar.name
     #setnames(cdomdat, dunitvar, "DOMAIN")
 
@@ -611,7 +598,7 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
       message("using the following predictors...", toString(prednames))
     }
 
-    ############################################################################
+
     ## Generate models
     ############################################################################
     ## Note: not sure why you would want to run by largebnd.unique
@@ -634,6 +621,7 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     ## get unique largebnd values
     largebnd.vals <- sort(unique(cdomdat[[lunique]]))
     largebnd.vals <- largebnd.vals[table(cdomdat[[lunique]]) > 30]
+
 
     ## Get estimate for total
     ######################################
@@ -698,35 +686,108 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
       pdomdatlst[[SApopdatnm]] <- pdomdat
       dunitlutlst[[SApopdatnm]] <- dunitlut
     }
+
+    if (rowcolinfo$rowvar != "TOTAL") {
+      cdomdatsum <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
+		by=c(lunique, dunitvar, cuniqueid, rowcolinfo$rowvar, prednames), 
+		.SDcols=estvar.name]
+
+      dunit_multestlst_row <- 
+		tryCatch(
+			lapply(largebnd.vals, SAest.large, 
+				dat=cdomdatsum, cuniqueid=cuniqueid, 
+				largebnd.unique=lunique, dunitlut=dunitlut, dunitvar=dunitvar,
+				prednames=prednames, domain=rowcolinfo$rowvar,
+				response=response, showsteps=showsteps, savesteps=savesteps,
+				stepfolder=stepfolder, prior=prior, variable.select=variable.select),
+     	 	error=function(e) {
+			message("error with estimates of ", response, "...")
+			message(e, "\n")
+			return(NULL) })
+      if (length(largebnd.vals) > 1) {
+        dunit_multest_row <- do.call(rbind, do.call(rbind, dunit_multestlst_row)[,"est.large"])
+        predselect.unit_row <- do.call(rbind, dunit_multestlst_row)[,"predselect.unit"]
+        predselect.area_row <- do.call(rbind, dunit_multestlst_row)[,"predselect.area"]
+        #names(prednames.select) <- largebnd.vals
+        if (save4testing) {
+          pdomdat_row <- do.call(rbind, do.call(rbind, dunit_multestlst_row)[,"pltdat.dom"])
+          dunitlut_row <- do.call(rbind, do.call(rbind, dunit_multestlst_row)[,"dunitlut.dom"])
+        }
+      } else {
+        dunit_multest_row <- do.call(rbind, dunit_multestlst_row)[,"est.large"]$est.large
+        predselect.unit_row <- do.call(rbind, dunit_multestlst_row)[,"predselect.unit"]$predselect.unit
+        predselect.area_row <- do.call(rbind, dunit_multestlst_row)[,"predselect.area"]$predselect.area
+        if (save4testing) {
+          pdomdat_row <- do.call(rbind, dunit_multestlst_row)[,"pltdat.dom"]$pltdat.dom
+          dunitlut_row <- do.call(rbind, dunit_multestlst_row)[,"dunitlut.dom"]$dunitlut.dom
+        }
+      }
+
+      multestlst_row[[SApopdatnm]] <- dunit_multest_row
+      predselectlst_row[[SApopdatnm]] <- 
+		list(predselect.unit=predselect.unit_row, predselect.area=predselect.area_row)
+      if (save4testing) {
+        ## Merge SAdom attributes to dunit_totest
+        if (addSAdomsdf) {
+          pdomdat_row <- merge(setDT(SAdomsdf)[, 
+			unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
+			pdomdat_row, by=c(dunitvar, "AOI"))
+          dunitlut_row <- merge(setDT(SAdomsdf)[, 
+			unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
+			dunitlut_row, by=c(dunitvar, "AOI"))
+        }
+        pdomdatlst_row[[SApopdatnm]] <- pdomdat_row
+        dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
+      }
+    }
+
   }    #### end SApopdat loop
 
 
-  ## Generate estimates
+  ## Combine estimates
   #################################################################################
-  dunit_totest=dunit_rowest=dunit_colest=dunit_grpest=rowunit=totunit <- NULL
-  response <- estvar.name
-
-  ## rbind multiple esimates
-  #########################################################
   multestdf <- do.call(rbind, multestlst)
 
   ## Merge SAdom attributes to multestdf
   if (addSAdomsdf && is.null(SAdomvars)) {
-    SAdomvars <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% multestdf])
+    SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% multestdf])
     multestdf[, AOI := NULL]
-    multestdf <- merge(setDF(SAdomsdfbind)[,SAdomvars], multestdf, by=dunitvar)
+    multestdf <- merge(setDF(SAdomsdfbind)[,SAdomvars2], multestdf, by=dunitvar)
     multestdf <- multestdf[order(-multestdf$AOI, multestdf[[dunitvar]]),]
   } else if (addSAdomsdf && !is.null(SAdomvars)) {
-    SAdomvars <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
-    SAdomvars <- unique(SAdomvars[!SAdomvars %in% multestdf])
+    SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
+    SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% multestdf])
     
-    if (length(SAdomvars) == 0) stop("invalid SAdomvars")
-    multestdf <- merge(setDF(SAdomsdfbind)[, unique(c(dunitvar, SAdomvars))], 
+    if (length(SAdomvars2) == 0) stop("invalid SAdomvars")
+    multestdf <- merge(setDF(SAdomsdfbind)[, unique(c(dunitvar, SAdomvars2))], 
 					multestdf, by=dunitvar)
     multestdf <- multestdf[order(-multestdf$AOI, multestdf[[dunitvar]]),]
   } else {
     multestdf <- multestdf[order(-multestdf$AOI, multestdf[[dunitvar]]),]
   }
+
+  if (rowcolinfo$rowvar != "TOTAL") {
+    multestdf_row <- do.call(rbind, multestlst_row)
+
+    ## Merge SAdom attributes to multestdf_row
+    if (addSAdomsdf && is.null(SAdomvars)) {
+      SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% multestdf_row])
+      multestdf_row[, AOI := NULL]
+      multestdf_row <- merge(setDF(SAdomsdfbind)[,SAdomvars2], multestdf_row, by=dunitvar)
+      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[[dunitvar]]),]
+    } else if (addSAdomsdf && !is.null(SAdomvars)) {
+      SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
+      SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% multestdf_row])
+    
+      if (length(SAdomvars) == 0) stop("invalid SAdomvars")
+      multestdf_row <- merge(setDF(SAdomsdfbind)[, unique(c(dunitvar, SAdomvars2))], 
+					multestdf_row, by=dunitvar)
+      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[[dunitvar]]),]
+    } else {
+      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[[dunitvar]]),]
+    }
+  }
+
 
   if (SAmethod == "unit") {
     nhat <- "JU.EBLUP"
@@ -772,19 +833,47 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     }
   }
 
+  if (rowvar != "TOTAL") {
+    ## Subset multest to estimation output
+    dunit_rowest <- setDT(multestdf_row)[AOI==1, 
+		unique(c(dunitvar, rowcolinfo$rowvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
+    setkeyv(dunit_rowest, dunitvar)
+
+    ## Merge dunitarea
+    tabs <- check.matchclass(dunitareabind, dunit_rowest, dunitvar)
+    dunitareabind <- tabs$tab1
+    dunit_rowest <- tabs$tab2
+    dunit_rowest <- merge(dunit_rowest, 
+		dunitareabind[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+
+    if (!is.null(dunit_rowest)) {
+      if (totals) {
+        dunit_rowest <- getarea(dunit_rowest, areavar=areavar, esttype=esttype,
+				nhatcol=nhat, nhatcol.var=nhat.var)
+        estnm <- "est"
+      } else {
+        dunit_rowest[, (nhat.var) := get(nhat.se)^2]
+        dunit_rowest[, (nhat.cv) := get(nhat.se)/get(nhat)]
+        dunit_rowest[, pse := get(nhat.cv) * 100]
+        estnm <- nhat
+      }
+    }
+  }
+
+
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
   if (is.null(title.dunitvar)) {
     title.dunitvar <- smallbnd.dom
   }
-  alltitlelst <- check.titles(esttype=esttype, estseed=estseed, 
+  alltitlelst <- check.titles(esttype=esttype, 
 	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
-	title.rowvar=title.rowvar, title.colvar=title.colvar, 
+	title.rowvar=rowcolinfo$title.rowvar, title.colvar=rowcolinfo$title.colvar, 
 	title.unitvar=title.dunitvar, title.filter=title.filter, 
-	title.unitsn=estvarunits, title.estvarn=title.estvar, unitvar=dunitvar, 
-	rowvar=rowvar, colvar=colvar, estvarn=estvar, 
-	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
+	title.unitsn=estvarunits, unitvar=dunitvar, 
+	rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
+	addtitle=addtitle, returntitle=returntitle, 
 	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
 	pcfilter=pcfilter, allin1=allin1, divideby=divideby, parameters=FALSE, 
 	outfn.pre=outfn.pre)
@@ -793,6 +882,7 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   title.pse <- alltitlelst$title.pse
   title.estpse <- alltitlelst$title.estpse
   title.ref <- alltitlelst$title.ref
+  title.rowvar <- alltitlelst$title.rowvar
   outfn.estpse <- alltitlelst$outfn.estpse
   outfn.param <- alltitlelst$outfn.param
   if (rawdata) {
@@ -809,33 +899,34 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   message("getting output...")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	unitvar=smallbnd.dom, unit_totest=dunit_totest, unit_rowest=dunit_rowest, 
-	unit_colest=dunit_colest, unit_grpest=dunit_grpest, rowvar=rowvar, colvar=colvar, 
-	uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
+	unit_colest=dunit_colest, unit_grpest=dunit_grpest, rowvar=rowcolinfo$rowvar, 
+	colvar=rowcolinfo$colvar, uniquerow=rowcolinfo$uniquerow, 
+	uniquecol=rowcolinfo$uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
 	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
 	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
-	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar,
- 	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
-	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, estround=estround, 
-	pseround=pseround, divideby=divideby, returntitle=returntitle,
-	estnull=estnull, psenull=psenull) 
+	title.rowvar=rowcolinfo$title.rowvar, title.rowgrp=title.rowgrp, 
+	title.unitvar=title.dunitvar, title.estpse=title.estpse, title.est=title.est, 
+	title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse,
+ 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
+	estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
+	returntitle=returntitle, estnull=estnull, psenull=psenull) 
 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
-  if (!is.null(est2return)) {
-    est2return[is.na(est2return$Estimate), "Estimate"] <- estnull 
-    if ("Percent Sampling Error" %in% names(est2return)) {
-      est2return[is.na(est2return$"Percent Sampling Error"), 
-		"Percent Sampling Error"] <- psenull 
-    }
+# if (!is.null(est2return)) {
+#    est2return[is.na(est2return$Estimate), "Estimate"] <- estnull 
+#    if ("Percent Sampling Error" %in% names(est2return)) {
+#      est2return[is.na(est2return$"Percent Sampling Error"), 
+#		"Percent Sampling Error"] <- psenull 
+#    }
     returnlst$est <- est2return
-  } 
+#  } 
   if (!is.null(pse2return)) {
-    if ("Percent Sampling Error" %in% names(pse2return)) {
-      pse2return[is.na(pse2return$"Percent Sampling Error"), 
-		"Percent Sampling Error"] <- psenull 
-    }
+#    if ("Percent Sampling Error" %in% names(pse2return)) {
+#      pse2return[is.na(pse2return$"Percent Sampling Error"), 
+#		"Percent Sampling Error"] <- psenull 
+#    }
     returnlst$pse <- pse2return 
   }
   if (returntitle) {
@@ -892,9 +983,60 @@ modSAarea <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     }
   } 
 
+  if (multest && rowvar != "TOTAL" && !is.null(multestdf_row)){
+    ## Merge dunitarea
+    #tabs <- check.matchclass(dunitarea, multestdf, dunitvar)
+    #dunitarea <- tabs$tab1
+    #dunit_multest <- tabs$tab2
+ 
+    multestdf_row <- merge(multestdf_row, 
+		dunitareabind[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+    #multestdf[, JoSAE.total := get(nhat) * AREAUSED]
+    #multestdf[, JoSAE.pse := get(nhat.se)/get(nhat) * 100]
+
+    ## Remove TOTAL column from multestdf
+    if (domain == "TOTAL" && "TOTAL" %in% names(multestdf_row)) {
+      multestdf_row[, TOTAL := NULL]
+    }
+    if (multest.AOIonly) {
+      ## Subset multestdf_row, where AOI = 1
+      multestdf_row <- multestdf_row[multestdf_row$AOI == 1, ]
+    }
+    ## Save multest table
+    if (savemultest) {
+
+      ## Remove TOTAL column from est
+      if (domain == "TOTAL" && "TOTAL" %in% names(multestdf_row)) {
+        multestdf_row[, TOTAL := NULL]
+      }
+      ## Remove column headings if appending to csv file
+      if (multest.append && multest_fmt == "csv") {
+        multestdf_row <- setDF(multestdf_row)
+        colnames(multestdf_row) <- NULL
+      }
+      if (is.null(multest_layer)) {
+        if (multest_fmt == "csv") {
+          #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
+          multest_layer_row <- paste0("SAmultest_", response, "_", rowvar, ".csv")
+        } else {
+          #multest_layer <- paste0(SApackage, "_", response)
+          multest_layer_row <- paste0(response, "_", rowvar)
+        }
+      }
+ 
+      ## Export multestdf
+      overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
+      datExportData(multestdf_row, out_fmt=multest_fmt, outfolder=multest_outfolder, 
+ 		out_dsn=multest_dsn, out_layer=multest_layer_row, overwrite_layer=overwrite_layer, 
+		append_layer=multest.append)
+    }
+  } 
+
+
   if (rawdata) {
     rawdat <- tabs$rawdat
     names(rawdat)[names(rawdat) == "unit_totest"] <- "dunit_totest"
+    names(rawdat)[names(rawdat) == "unit_rowest"] <- "dunit_rowest"
     rawdat$domdat <- setDF(cdomdat)
 
     if (savedata) {

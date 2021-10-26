@@ -336,7 +336,9 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
   if (nrow(dat.dom) == 0 || sum(!is.na(dat.dom[[domain]])) == 0) {
     domest <- data.table(dom, matrix(c(NA, NA, 0, 0), 1,4))
     setnames(domest, c(domain, "nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
-    return(list(est=domest, preselect=unitlut[FALSE, prednames]))
+    predselect <- data.table(dom, unitlut[FALSE, prednames])
+    setnames(predselect, "dom", domain)
+    return(list(est=domest, predselect=predselect))
   }
 
 #yn=response
@@ -377,7 +379,11 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 		NBRPLT=0, NBRPLT.gt0=0)
     }  
     setnames(unitest, c("unit", "domain"), c(unitvar, domain)) 
-    return(unitest)
+
+    predselect <- data.table(unit=unit, domain=1, unitlut[FALSE, prednames])
+    setnames(predselect, c("unit", "domain"), c(unitvar, domain)) 
+
+    return(list(unitest=unitest, predselect=predselect))
   }
   setkeyv(dat.unit, cuniqueid)
   pltassgn.unit <- unique(dat[dat[[unitvar]] == unit, c(cuniqueid, strvar, prednames),

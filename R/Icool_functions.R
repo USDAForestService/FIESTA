@@ -615,19 +615,37 @@ preds.select <- function(y, plt, aux, prednames) {
   y <- plt[[y]]
 
   ## Variable selection using mase:gregElasticNet()
-  preds.coef <- gregEN.select(y=y, x_sample=x_sample, x_pop=x_pop, N=N, alpha=0.5,
-		returncoef=TRUE) 
+  preds.coef <- tryCatch(gregEN.select(y=y, x_sample=x_sample, x_pop=x_pop, 
+		N=N, alpha=0.5, returncoef=TRUE),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+  if (is.null(preds.coef)) {
+    #preds.coef <- x_sample[FALSE, ]
+    preds.coef <- rep(0, ncol(x_sample))
+    names(preds.coef) <- names(x_sample)
+  }
   preds.enet <- names(preds.coef[abs(preds.coef)>0])
-
 
   if (length(preds.enet) == 0) {
     ## select predictor variables from Elastic Net procedure using lower alpha
     ## alpha=0, indicates no variable selection
 
-    preds.coef <- gregEN.select(y=y, x_sample=x_sample, x_pop=x_pop, N=N, alpha=0.2,
-		returncoef=TRUE) 
+    preds.coef <- tryCatch(gregEN.select(y=y, x_sample=x_sample, x_pop=x_pop, 
+		N=N, alpha=0.2, returncoef=TRUE),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+    if (is.null(preds.coef)) {
+      #preds.coef <- x_sample[FALSE, ]
+      preds.coef <- rep(0, ncol(x_sample))
+      names(preds.coef) <- names(x_sample)
+    }
     preds.enet <- names(preds.coef[abs(preds.coef)>0])
   }
+
   return(list(preds.coef=preds.coef, preds.enet=preds.enet))
 }
  

@@ -394,6 +394,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           unit_totest <- add0unit(x=unit_totest, xvar=unitvar, uniquex=uniquecol, 
 			xvar.add0=TRUE)
         }
+ 
         ## Get table of estimates
         estpsecross <- crossxtab(group.est=unit_rowest, rowvar.est=rowunit, 
 			colvar.est=unit_totest, total.est=totunit, rowvar=rowvar, 
@@ -408,7 +409,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             totest <- sum(unit_totest[[estnm2]], na.rm=TRUE)
 
             ## GET SUM OF ESTIMATES TO COMPARE TO TOTAL
-            sumest <- sum(unit_rowest[[estnm]])
+            sumest <- sum(unit_rowest[[estnm]], na.rm=TRUE)
             if (!(sumest < (totest + 100) & sumest > (totest - 100)))
               warning("the total estimate does not match sum of attributes.. difference of ", 
 			abs(sumest-totest))  

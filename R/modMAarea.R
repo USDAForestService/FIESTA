@@ -547,7 +547,6 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
     ## Get total estimate and merge area
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=estvar.name]
-
     unit_totestlst <- lapply(estunits, MAest.unit, 
 		dat=cdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames,

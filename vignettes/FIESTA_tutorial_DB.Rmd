@@ -209,7 +209,7 @@ names(eval.cur)
 eval.cur$evalidlist
 
 ## Get most current evaluation for New York and Texas for areavol and grm evalTypes
-NYTXeval.cur <- DBgetEvalid(states=c("New York", "Texas"), evalType=c("AREAVOL", "GRM"))
+NYTXeval.cur <- DBgetEvalid(states=c("New York", "Texas"), evalType=c("VOL", "GRM"))
 names(NYTXeval.cur)
 NYTXeval.cur$evalidlist
 NYTXeval.cur$evalTypelist
@@ -362,7 +362,7 @@ WYdat <- DBgetPlots(states="Wyoming", evalCur=TRUE, istree=FALSE, issp=TRUE,
 names(WYdat)
 WYsubp.evalCur00 <- WYdat$SUBPLOT
 WYpgeom.evalCur00 <- WYdat$PLOTGEOM
-WYppsa.evalCur00 <- WYdat$POP_PLOT_STRATUM_ASSGN
+WYppsa.evalCur00 <- WYdat$pop_plot_stratum_assgn
 
 
 ## The SUBPLOT table includes individual subplot-level data for each plot.
@@ -392,7 +392,7 @@ table(WYppsa.evalCur00$EVALID)
 ## Note: if issp=TRUE and out_fmt='csv', a shapefile is saved to outfolder
 WYdat <- DBgetPlots(states="Wyoming", evalCur=TRUE, istree=TRUE, issp=TRUE,
               othertables=c("SUBPLOT", "PLOTGEOM"), savePOP=TRUE, savedata=TRUE, 
-              outfolder=outfolder, out_fmt="csv", overwrite=TRUE)
+              outfolder=outfolder, out_fmt="csv", overwrite_layer=TRUE)
 
 ## Read in data
 plt <- read.csv(file.path(outfolder, "plot.csv"), stringsAsFactors=FALSE)
@@ -404,11 +404,11 @@ head(plt)
 ## Save to SQLite database ("C:/FIESTA/data.sqlite")
 WYdat <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=FALSE, istree=FALSE,
               othertables=c("SUBPLOT", "PLOTGEOM"), savePOP=TRUE, savedata=TRUE, 
-              outfolder=outfolder, out_fmt="sqlite", out_dsn="data.sqlite", 
-              overwrite=TRUE)
+              outfolder=outfolder, out_fmt="sqlite", out_dsn="data.db", 
+              overwrite_layer=TRUE)
  
 ## Connect to database and list tables
-sqlitefn <- file.path(outfolder, "data.sqlite")
+sqlitefn <- file.path(outfolder, "data.db")
 conn <- DBI::dbConnect(RSQLite::SQLite(), sqlitefn)
 DBI::dbListTables(conn)
 
@@ -432,12 +432,12 @@ DBI::dbDisconnect(conn)
 ## Save to SpatiaLite database ("C:/FIESTA/datasp.sqlite")
 ## Note: SpatiaLite is an extension to SQLite, providing vector geodatabase functionality.
 WYdat <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, istree=FALSE,
-              othertables=c("SUBPLOT", "PLOTGEOM"), savePOP=TRUE, savedata=TRUE, 
-              outfolder=outfolder, out_fmt="sqlite", out_dsn="datasp.sqlite", 
-              overwrite=TRUE)
+              othertables="PLOTGEOM", savePOP=TRUE, savedata=TRUE, 
+              outfolder=outfolder, out_fmt="sqlite", out_dsn="datasp.db", 
+              overwrite_layer=TRUE, overwrite_dsn=TRUE)
  
 ## Connect to database and list tables
-splitefn <- file.path(outfolder, "datasp.sqlite")
+splitefn <- file.path(outfolder, "datasp.db")
 conn <- DBI::dbConnect(RSQLite::SQLite(), splitefn)
 DBI::dbListTables(conn)
 
@@ -507,9 +507,9 @@ table(plt$STATECD)
 ##################################################################################
 
 
-# Most current evaluation for multiple evalTypes ('ALL', 'AREAVOL', 'GRM') 
+# Most current evaluation for multiple evalTypes ('ALL', 'VOL', 'GRM') 
 ##################################################################################
-WYdat1 <- DBgetPlots(states="Wyoming", evalCur=TRUE, evalType=c("ALL", "AREAVOL", "GRM"),
+WYdat1 <- DBgetPlots(states="Wyoming", evalCur=TRUE, evalType=c("ALL", "VOL", "GRM"),
                 istree=TRUE)
 names(WYdat1)
 
@@ -527,7 +527,7 @@ table(WYppsa1$EVALID)
 
 
 ## To get data for an EVALID, subset using the POP_PLOT_STRATUM_ASSGN table
-## PLT_CN values for Evaluation 561901 (evalType - AREAVOL)
+## PLT_CN values for Evaluation 561901 (evalType - VOL)
 ids01 <- WYppsa1$PLT_CN[WYppsa1$EVALID == 561901]
 
 ## Get plots for Evaluation 561901 and check plot count with POP_PLOT_STRATUM_ASSGN count

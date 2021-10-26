@@ -386,12 +386,12 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   ## Variable selection for area and unit-level estimators
   ###################################################################
   if (variable.select) {
-    predselect.unitlst <- suppressWarnings(preds.select(y=yn, 
+    predselect.unitlst <- suppressMessages(preds.select(y=yn, 
 		plt=pltdat.dom, aux=dunitlut.dom, prednames=prednames))
     predselect.unit <- predselect.unitlst$preds.enet
     predselect.unit.coef <- predselect.unitlst$preds.coef
 
-    predselect.arealst <- suppressWarnings(preds.select(y=yn, 
+    predselect.arealst <- suppressMessages(preds.select(y=yn, 
 		plt=dunitlut.dom, aux=dunitlut.dom, prednames=prednames))
     predselect.area <- predselect.arealst$preds.enet
     predselect.area.coef <- predselect.arealst$preds.coef
@@ -566,6 +566,9 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     ## Merge estimates
     est <- merge(unit.JoSAE, unit.hbsae[, c(dunitvar, "hbsaeU", "hbsaeU.se")], by=dunitvar)
 
+    rm(unit.JoSAE)
+    rm(unit.hbsae)
+
   } else {
 
     message("no predictors were selected for unit-level models... returning NAs")
@@ -635,6 +638,11 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     }
     est <- merge(est, area.hbsae[, c("DOMAIN", "hbsaeA", "hbsaeA.se")], by="DOMAIN")
 
+
+    rm(area.JoSAE)
+    rm(area.sae)
+    rm(area.hbsae)
+
   } else {
     message("no predictors were selected for area-level models... returning NAs")
     est.NA <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
@@ -659,11 +667,6 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     }
   }
   
-  rm(unit.JoSAE)
-  rm(unit.hbsae)
-  rm(area.JoSAE)
-  rm(area.sae)
-  rm(area.hbsae)
   gc()
 
   if (variable.select) {
@@ -694,6 +697,8 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
 		SApackage, SAmethod, prednames=NULL, domain, response=NULL,
 		largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL,
 		prior=NULL, variable.select=TRUE) {
+
+print(dom)
 
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
@@ -755,10 +760,10 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.unique,
   ## get unique domains
   doms <- sort(as.character(na.omit(unique(dat.large[[domain]]))))
 
-#dat=dat.large
-#dunitlut=dunitlut.large
-#pltassgn=pltassgn.large
-#dom=doms[1]
+dat=dat.large
+dunitlut=dunitlut.large
+pltassgn=pltassgn.large
+#dom=doms[i]
 
   estlst <- lapply(doms, SAest.dom, 
 			dat=dat.large, cuniqueid=cuniqueid, pltassgn=pltassgn.large,
@@ -773,12 +778,12 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.unique,
 				do.call(rbind, do.call(rbind, estlst)[,"est"]))
     setnames(est.large, "largebnd", largebnd.unique)
 
-    predselect.unit <- data.table(largebnd.val, 
-				do.call(rbind, estlst)[,"predselect.unit"])
+    predselect.unit <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, do.call(rbind, estlst)[,"predselect.unit"]))
     setnames(predselect.unit, "largebnd", largebnd.unique)
 
-    predselect.area <- data.table(largebnd.val, 
-				do.call(rbind, estlst)[,"predselect.area"])
+    predselect.area <- data.table(largebnd=largebnd.val, 
+				do.call(rbind, do.call(rbind, estlst)[,"predselect.area"]))
     setnames(predselect.area, "largebnd", largebnd.unique)
 
     pltdat.dom <- data.table(largebnd.val, do.call(rbind, 
