@@ -230,13 +230,21 @@ Tree information is used for calculating per-acre ratio estimates (numerator) an
 * **estvard.name**   - Denominator - A name for aggregated estvar (Default = estvard'_SUM').
 
 
+**misc**
+
+* **rowvar**        - Name of row variable (domain). If area estimate, rowvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, rowvar can be from cond or tree (e.g., SPCD).
+* **colvar**        - Name of column variable (domain). If area estimate, colvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, colvar can be from cond or tree (e.g, SPCD).
+* **sumunits**  - TRUE, sum estimates by estimation units (sub-populations) into one estimate (e.g., Counties to State).
+* **cvround**    - Number of digits to round % sample error to (for modGBarea and modGBtree, default=3; for modGBratio, default=3).
+* **savedata**   - TRUE, save data to outfolder.
+* **outfn**      - Name of file for output data (Default = 'esttype_'estvar.name'_'rowvar'_'date'.csv').
+
+
 <a name="out1"></a>
 **Output table information**
 
 The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the rowvar must be populated, leaving the colvar=NULL. Row and columns may be ordered in a particular way, defined by row.orderby and col.orderby variables. A default set of code names are stored internally (`FIESTA::ref_codes`). If row.FIAname/col.FIAname = TRUE and the respective rowvar/colvar is in ref_codes, the default code description is used in output tables.
 
-* **rowvar**        - Name of row variable (domain). If area estimate, rowvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, rowvar can be from cond or tree (e.g., SPCD).
-* **colvar**        - Name of column variable (domain). If area estimate, colvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, colvar can be from cond or tree (e.g, SPCD).
 * **row.FIAname**   - TRUE, gets FIA reference name for rowvar, if available.
 * **col.FIAname**   - TRUE, gets FIA reference name for colvar, if available.
 * **row.orderby**   - Name of variable to order values of rowvar (if row.FIAname=FALSE).
@@ -245,6 +253,9 @@ The following parameters define how estimates will be generated (i.e., by domain
 * **col.add0**      - TRUE, add 0 values in table for column values that occur in input dataset or in rowlut, but are not in final estimate.
 * **rowlut**        - A lookup table with variable codes and descriptions to include in rows of output table (See note following for more details).
 * **collut**        - A lookup table with specific variable codes and descriptions to include in columns of output table (See note following for more details).
+* **allin1**     - TRUE, table cells include: estimates (% sample error).
+* **estround**   - Number of digits to round estimates to (for modGBarea and modGBtree, default=0; for modGBratio, default=3).
+
 
 Note: 
 rowlut/collut - There are several objectives for including rowlut/collut look-up tables: 1) to include descriptive names that match row/column codes in the input table; 2) to use number codes that match row/column names in the input table for ordering rows; 3) to add rows and/or columns with 0 values for consistency. No duplicate names are allowed.
@@ -255,16 +266,12 @@ Include 2 columns in the table: 1-the merging variable with same name as the var
 <a name="out2"></a>
 **Output table specifications**
 
-The final parameters dictate what the output will look like, such as: how to display the sample error; how many digits to round values to; whether to include a title; and whether to write the output to a folder or only return as R objects.  
+<!-- The final parameters dictate what the output will look like, such as: how to display the sample error; how many digits to round values to; whether to include a title; and whether to write the output to a folder or only return as R objects.   -->
 
-* **sumunits**  - TRUE, sum estimates by estimation units (sub-populations) into one estimate (e.g., Counties to State).
-* **allin1**     - TRUE, table cells include: estimates (% sample error).
-* **estround**   - Number of digits to round estimates to (for modGBarea and modGBtree, default=0; for modGBratio, default=3).
-* **cvround**    - Number of digits to round % sample error to (for modGBarea and modGBtree, default=3; for modGBratio, default=3).
-* **savedata**   - TRUE, save data to outfolder.
-* **rawdata**    - TRUE, if output of raw data information is desired. See output values for details.
+savedata stuff
+
+
 * **outfolder**  - Name of folder to output data to (Default = working directory or window to browse).
-* **outfn**      - Name of file for output data (Default = 'esttype_'estvar.name'_'rowvar'_'date'.csv').
 * **outfn.pre**  - Add a prefix to output name (e.g., '01_*').
 * **outfn.date** - Add a date to output name (e.g., '*_20200220').
 * **overwrite**  - TRUE, overwrites existing files.
@@ -275,7 +282,7 @@ The final parameters dictate what the output will look like, such as: how to dis
 <a name="title"></a>
 **Title parameters**
 
-If saving to a folder, and a title is desired, there are parameters for including a specific title or for generating a title based on pieces of information. 
+If saving to a folder, and a title is desired, there are parameters for including a specific title or for generating a title based on pieces of information. These parameters are set by supplying a list to the `title_opts` parameter. The possible parameters that can be set within the `title_opts` parameter can be seen by running `help(title_options)`.
 
 * **title.main** - Full title for table.
 * **title.ref**  - The ending text for table title. If not NULL, included with title.main.

@@ -15,12 +15,17 @@ modSAarea(
   largebnd.unique = NULL,
   landarea = "FOREST",
   pcfilter = NULL,
+  rowvar = NULL,
+  row.FIAname = FALSE,
+  row.orderby = NULL,
+  row.add0 = FALSE,
+  rowlut = NULL,
   allin1 = FALSE,
   metric = FALSE,
   variable.select = TRUE,
   estround = 3,
   pseround = 3,
-  estnull = 0,
+  estnull = "--",
   psenull = "--",
   divideby = NULL,
   savedata = FALSE,
@@ -49,8 +54,8 @@ modSAarea(
   returntitle = FALSE,
   title.main = NULL,
   title.ref = NULL,
+  title.rowvar = NULL,
   title.dunitvar = NULL,
-  title.estvar = NULL,
   title.filter = NULL,
   save4testing = FALSE,
   ...
@@ -85,6 +90,23 @@ extent.}
 
 \item{pcfilter}{String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.}
+
+\item{rowvar}{String. Name of the row domain variable in cond or tree. If
+only one domain, rowvar = domain variable. If more than one domain, include
+colvar. If no domain, rowvar = NULL.}
+
+\item{row.FIAname}{Logical. If TRUE, gets FIA reference names for row
+variable based on ref_codes. Only available for certain variables.}
+
+\item{row.orderby}{String. Name of variable to sort table rows. If
+row.FIAname=TRUE and a ref_* exists for rowvar, the rowvar code is used to
+sort. If NULL, the table is sorted by rowvar.}
+
+\item{row.add0}{Logical. If TRUE, add the rows that have 0 values.}
+
+\item{rowlut}{Data frame. A lookup table with variable codes and
+descriptions to include in rows of output table (See notes for more
+information and format).}
 
 \item{allin1}{Logical. If TRUE, both estimates and percent sample error are
 output in one table as: estimates (percent sample error).}
@@ -186,12 +208,12 @@ NULL, it is added to title.main.}
 \item{title.ref}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".}
 
+\item{title.rowvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
+pretty name for the row domain variable. If NULL, = rowvar.}
+
 \item{title.dunitvar}{String. TITLE, if savedata=TRUE and/or
 returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
 unitvar.}
-
-\item{title.estvar}{String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
 
 \item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 pretty name for filter(s). If title.filter=NULL, a default is generated from
@@ -204,10 +226,7 @@ to outfolder for testing (pdomdat, dunitlut).}
 
 \item{esttype}{String. Estimation type ('TREE', 'AREA').}
 
-\item{estvar}{String. Name of the tree estimate variable.}
-
-\item{estvar.filter}{String. A tree filter for estimate variable. Must be R
-syntax (e.g., "STATUSCD == 1").}
+\item{colvar}{String. Name of the column domain variable in cond or tree.}
 }
 \value{
 \item{est}{ Data frame. Tree estimates and percent sampling error by
