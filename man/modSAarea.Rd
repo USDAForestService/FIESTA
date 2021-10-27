@@ -16,47 +16,18 @@ modSAarea(
   landarea = "FOREST",
   pcfilter = NULL,
   rowvar = NULL,
-  row.FIAname = FALSE,
-  row.orderby = NULL,
-  row.add0 = FALSE,
-  rowlut = NULL,
-  allin1 = FALSE,
-  metric = FALSE,
   variable.select = TRUE,
-  estround = 3,
-  pseround = 3,
-  estnull = "--",
-  psenull = "--",
-  divideby = NULL,
   savedata = FALSE,
   savesteps = FALSE,
-  rawdata = FALSE,
-  rawonly = FALSE,
   multest = TRUE,
   addSAdomsdf = TRUE,
   SAdomvars = NULL,
-  outfolder = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  addtitle = TRUE,
-  raw_fmt = "csv",
-  raw_dsn = "rawdata",
   savemultest = FALSE,
-  multest_fmt = "csv",
-  multest_outfolder = NULL,
-  multest_dsn = NULL,
-  multest_layer = NULL,
-  multest.append = FALSE,
-  multest.AOIonly = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
   returntitle = FALSE,
-  title.main = NULL,
-  title.ref = NULL,
-  title.rowvar = NULL,
-  title.dunitvar = NULL,
-  title.filter = NULL,
+  table_opts = table_options(),
+  title_opts = title_options(),
+  savedata_opts = savedata_options(),
+  multest_opts = multest_options(),
   save4testing = FALSE,
   ...
 )
@@ -95,53 +66,13 @@ pltassgn).  Must be R logical syntax.}
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.}
 
-\item{row.FIAname}{Logical. If TRUE, gets FIA reference names for row
-variable based on ref_codes. Only available for certain variables.}
-
-\item{row.orderby}{String. Name of variable to sort table rows. If
-row.FIAname=TRUE and a ref_* exists for rowvar, the rowvar code is used to
-sort. If NULL, the table is sorted by rowvar.}
-
-\item{row.add0}{Logical. If TRUE, add the rows that have 0 values.}
-
-\item{rowlut}{Data frame. A lookup table with variable codes and
-descriptions to include in rows of output table (See notes for more
-information and format).}
-
-\item{allin1}{Logical. If TRUE, both estimates and percent sample error are
-output in one table as: estimates (percent sample error).}
-
-\item{metric}{Logical. If TRUE, output area is in metric units (hectares).}
-
 \item{variable.select}{Logical. If TRUE, selects useful predictors using
 mase:ElasticNet.}
-
-\item{estround}{Integer. Number of decimal places for estimates.}
-
-\item{pseround}{Integer. Number of decimal places for percent sampling
-error.}
-
-\item{estnull}{Number or character. The number or symbol to use to indicate
-'not sampled' for estimate.}
-
-\item{psenull}{Number or character. The number or symbol to use to indicate
-'not sampled' for percent standard errror.}
-
-\item{divideby}{String. Conversion number for output ('hundred', 'thousand',
-'million').}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
 \item{savesteps}{Logical. Saves graphs of predictors and response with
 labels whether selected or not for both area- and unit-level models.}
-
-\item{rawdata}{Logical. If TRUE, returns a list of raw data tables that are
-used for estimation (See Value). If savedata = TRUE, also written to
-outfolder.}
-
-\item{rawonly}{Logical. If TRUE, output rawdata only. If dataset includes
-many estimation units, and only raw data tables are needed, it is more
-efficient to output raw data only.}
 
 \item{multest}{Logical. If TRUE, returns a data frame of SA estimates using
 both unit-level and area-level estimates.}
@@ -152,72 +83,22 @@ for output.}
 \item{SAdomvars}{String vector. List of attributes from SAdoms to include in
 multest output.}
 
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
-
-\item{outfn.pre}{String. A prefix for outfile name, if savedata=TRUE.}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{addtitle}{Logical. If TRUE and savedata=TRUE, adds title to outfile.}
-
-\item{raw_fmt}{String. Format for raw output tables ('csv', 'sqlite',
-'gpkg').}
-
-\item{raw_dsn}{String. Name of database if raw_fmt = c('sqlite', 'gpkg').}
-
 \item{savemultest}{Logical. If TRUE, save table with area- and unit-level
 estimates.}
-
-\item{multest_fmt}{String. Format for multest output tables ('csv',
-'sqlite', 'gpkg').}
-
-\item{multest_outfolder}{String. Outfolder for multest. If NULL, same as
-outfolder.}
-
-\item{multest_dsn}{String. Name of database if multest_fmt = c('sqlite',
-'gpkg').}
-
-\item{multest_layer}{String. Name of database layer if multest_fmt =
-c('sqlite', 'gpkg').}
-
-\item{multest.append}{Logical. If TRUE, appends multest dataframe to output.}
-
-\item{multest.AOIonly}{Logical. If TRUE, appends multest dataframe (AOI=1)
-to output.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites raw_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the output. If
-rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
-out_layers in raw_dsn (if raw_fmt != 'csv').}
-
-\item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data to
-existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
-'csv".}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}
 
-\item{title.main}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the complete title used for table. If title.main=NULL, the title.*
-parameters are used to generate title string. Note: if title.ref is not
-NULL, it is added to title.main.}
+\item{table_opts}{List. See help(table_options()) for a list of
+options.}
 
-\item{title.ref}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".}
+\item{title_opts}{List. See help(title_options()) for a list of options.}
 
-\item{title.rowvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the row domain variable. If NULL, = rowvar.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
-\item{title.dunitvar}{String. TITLE, if savedata=TRUE and/or
-returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-unitvar.}
-
-\item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for filter(s). If title.filter=NULL, a default is generated from
-cfilter.  If title.filter="", no title.filter is used.}
+\item{multest_opts}{List. See help(multest_options()) for a list of options.
+Only used when multest = TRUE.}
 
 \item{save4testing}{Logical. If TRUE, saves intermediate steps as R objects
 to outfolder for testing (pdomdat, dunitlut).}

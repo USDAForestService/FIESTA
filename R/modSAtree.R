@@ -69,91 +69,28 @@
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
 #' @param colvar String. Name of the column domain variable in cond or tree.
-#' @param row.FIAname Logical. If TRUE, gets FIA reference names for row
-#' variable based on ref_codes. Only available for certain variables.
-#' @param row.orderby String. Name of variable to sort table rows. If
-#' row.FIAname=TRUE and a ref_* exists for rowvar, the rowvar code is used to
-#' sort. If NULL, the table is sorted by rowvar.
-#' @param row.add0 Logical. If TRUE, add the rows that have 0 values.
-#' @param rowlut Data frame. A lookup table with variable codes and
-#' descriptions to include in rows of output table (See notes for more
-#' information and format).
-#' @param allin1 Logical. If TRUE, both estimates and percent sample error are
-#' output in one table as: estimates (percent sample error).
-#' @param metric Logical. If TRUE, output area is in metric units (hectares).
 #' @param variable.select Logical. If TRUE, selects useful predictors using
 #' mase:ElasticNet.
-#' @param estround Integer. Number of decimal places for estimates.
-#' @param pseround Integer. Number of decimal places for percent sampling
-#' error.
-#' @param estnull Number or character. The number or symbol to use to indicate
-#' 'not sampled' for estimate.
-#' @param psenull Number or character. The number or symbol to use to indicate
-#' 'not sampled' for percent standard errror.
-#' @param divideby String. Conversion number for output ('hundred', 'thousand',
-#' 'million').
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param savesteps Logical. Saves graphs of predictors and response with
 #' labels whether selected or not for both area- and unit-level models.
-#' @param rawdata Logical. If TRUE, returns a list of raw data tables that are
-#' used for estimation (See Value). If savedata = TRUE, also written to
-#' outfolder.
-#' @param rawonly Logical. If TRUE, output rawdata only. If dataset includes
-#' many estimation units, and only raw data tables are needed, it is more
-#' efficient to output raw data only.
 #' @param multest Logical. If TRUE, returns a data frame of SA estimates using
 #' both unit-level and area-level estimates.
 #' @param addSAdomsdf Logical. If TRUE, sppends SAdomdf to unit.multest table
 #' for output.
 #' @param SAdomvars String vector. List of attributes from SAdoms to include in
 #' multest output.
-#' @param outfolder String. The outfolder to write files to. If NULL, files are
-#' written to working directory, or if gui, a window to browse.
-#' @param outfn.pre String. A prefix for outfile name, if savedata=TRUE.
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
-#' @param raw_fmt String. Format for raw output tables ('csv', 'sqlite',
-#' 'gpkg').
-#' @param raw_dsn String. Name of database if raw_fmt = c('sqlite', 'gpkg').
 #' @param savemultest Logical. If TRUE, save table with area- and unit-level
 #' estimates.
-#' @param multest_fmt String. Format for multest output tables ('csv',
-#' 'sqlite', 'gpkg').
-#' @param multest_outfolder String. Outfolder for multest. If NULL, same as
-#' outfolder.
-#' @param multest_dsn String. Name of database if multest_fmt = c('sqlite',
-#' 'gpkg').
-#' @param multest_layer String. Name of database layer if multest_fmt =
-#' c('sqlite', 'gpkg').
-#' @param multest.append Logical. If TRUE, appends multest dataframe to output.
-#' @param multest.AOIonly Logical. If TRUE, appends multest dataframe (AOI=1)
-#' to output.
-#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the output. If
-#' rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
-#' out_layers in raw_dsn (if raw_fmt != 'csv').
-#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data to
-#' existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
-#' 'csv".
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
-#' @param title.main String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' the complete title used for table. If title.main=NULL, the title.*
-#' parameters are used to generate title string. Note: if title.ref is not
-#' NULL, it is added to title.main.
-#' @param title.ref String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".
-#' @param title.estvar String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the estimate variable. If NULL, title.estvar = estvar.name.
-#' @param title.filter String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for filter(s). If title.filter=NULL, a default is generated from
-#' cfilter.  If title.filter="", no title.filter is used.
-#' @param title.rowvar String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-#' pretty name for the row domain variable. If NULL, = rowvar.
-#' @param title.dunitvar String. TITLE, if savedata=TRUE and/or
-#' returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-#' unitvar.
+#' @param table_opts List. See help(table_options()) for a list of
+#' options.
+#' @param title_opts List. See help(title_options()) for a list of options.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
+#' @param multest_opts List. See help(multest_options()) for a list of options.
+#' Only used when multest = TRUE.
 #' @param save4testing Logical. If TRUE, saves intermediate steps as R objects
 #' to outfolder for testing (pdomdat, dunitlut).
 #' @param ...  Parameters for modSApop() if SApopdat is NULL.
@@ -208,21 +145,13 @@
 #' @keywords data
 #' @export modSAest
 modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL, 
-	SApackage="JoSAE", SAmethod="area", totals=FALSE, 
-	estseed="none", largebnd.unique=NULL, landarea="FOREST", pcfilter=NULL, 
-	estvar=NULL, estvar.filter=NULL, 
-	rowvar=NULL, row.FIAname=FALSE, row.orderby=NULL, row.add0=FALSE, rowlut=NULL, 
-	allin1=FALSE, metric=FALSE, variable.select=TRUE, estround=3, pseround=3, 
-	estnull="--", psenull="--", divideby=NULL, savedata=FALSE, 
-	savesteps=FALSE, rawdata=FALSE, rawonly=FALSE, multest=TRUE, 
-	addSAdomsdf=TRUE, SAdomvars=NULL, outfolder=NULL, outfn.pre=NULL, 
-	outfn.date=FALSE, addtitle=TRUE, raw_fmt="csv", raw_dsn="rawdata", 
-	savemultest=FALSE, multest_fmt="csv", multest_outfolder=NULL, 
-	multest_dsn=NULL, multest_layer=NULL, multest.append=FALSE, 
-	multest.AOIonly=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, 
-	append_layer=FALSE, returntitle=FALSE, title.main=NULL, title.ref=NULL, 
-	title.dunitvar=NULL, title.estvar=NULL, title.filter=NULL, 
-	save4testing=FALSE, ...){
+	SApackage="JoSAE", SAmethod="area", totals=FALSE, estseed="none",
+	largebnd.unique=NULL, landarea="FOREST", pcfilter=NULL, estvar=NULL, 
+	estvar.filter=NULL, rowvar=NULL, variable.select=TRUE, savedata=FALSE,
+	savesteps=FALSE, multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL,
+	savemultest=FALSE, returntitle=FALSE, table_opts=table_options(),
+	title_opts=title_options(), savedata_opts=savedata_options(),
+	multest_opts=multest_options(), save4testing=FALSE, ...){
 
 
   ######################################################################################
@@ -262,7 +191,63 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
 	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
 	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf <- NULL
-
+  rawdata <- TRUE
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ## Set table defaults
+  table_defaults_list <- formals(FIESTA::table_options)[-length(formals(FIESTA::table_options))]
+  
+  for (i in 1:length(table_defaults_list)) {
+    assign(names(table_defaults_list)[[i]], table_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied table values
+  if (length(table_opts) > 0) {
+    for (i in 1:length(table_opts)) {
+      assign(names(table_opts)[[i]], table_opts[[i]])
+    }
+  }
+  
+  ## Set title defaults
+  title_defaults_list <- formals(FIESTA::title_options)[-length(formals(FIESTA::title_options))]
+  
+  for (i in 1:length(title_defaults_list)) {
+    assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied title values
+  if (length(title_opts) > 0) {
+    for (i in 1:length(title_opts)) {
+      assign(names(title_opts)[[i]], title_opts[[i]])
+    }
+  }
+  
+  ## Set multest defaults
+  multest_defaults_list <- formals(FIESTA::multest_options)[-length(formals(FIESTA::multest_options))]
+  
+  for (i in 1:length(multest_defaults_list)) {
+    assign(names(multest_defaults_list)[[i]], multest_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied multest values
+  if (length(multest_opts) > 0) {
+    for (i in 1:length(multest_opts)) {
+      assign(names(multest_opts)[[i]], multest_opts[[i]])
+    }
+  }
 
   ##################################################################
   ## INITIALIZE SETTINGS
