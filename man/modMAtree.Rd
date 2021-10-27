@@ -16,45 +16,12 @@ modMAtree(
   estvar.filter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  row.FIAname = FALSE,
-  col.FIAname = FALSE,
-  row.orderby = NULL,
-  col.orderby = NULL,
-  row.add0 = FALSE,
-  col.add0 = FALSE,
-  rowlut = NULL,
-  collut = NULL,
-  rowgrp = FALSE,
-  rowgrpnm = NULL,
-  rowgrpord = NULL,
   sumunits = FALSE,
-  allin1 = FALSE,
-  metric = FALSE,
-  estround = 1,
-  pseround = 2,
-  estnull = "--",
-  psenull = "--",
-  divideby = NULL,
-  savedata = FALSE,
-  outfolder = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  addtitle = TRUE,
-  rawdata = FALSE,
-  rawonly = FALSE,
-  raw_fmt = "csv",
-  raw_dsn = NULL,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
   returntitle = FALSE,
-  title.main = NULL,
-  title.ref = NULL,
-  title.rowvar = NULL,
-  title.colvar = NULL,
-  title.unitvar = NULL,
-  title.estvar = NULL,
-  title.filter = NULL,
+  savedata = FALSE,
+  table_opts = table_options(),
+  title_opts = title_options(),
+  savedata_opts = savedata_options(),
   gui = FALSE,
   ...
 )
@@ -96,140 +63,21 @@ for the total estimation unit. Include colvar for grouping by 2 variables.}
 to group estvar by for columns in table output. Colvar must be included in
 an input data frame (i.e., plt, cond, tree).}
 
-\item{row.FIAname}{Logical. If TRUE, retrieves default FIA reference names
-for rowvar located in FIESTA::ref_codes data frame. Names are only available
-for certain variables (Check sort(unique(FIESTA::ref_codes$VARIABLE)) for
-available names.  If row.FIAname = TRUE and rowvar is in FIESTA::ref_codes,
-the rowvar name is used for the output table, and the rowvar code is used to
-sort.}
-
-\item{col.FIAname}{Logical. If TRUE, retrieves default FIA reference names
-for colvar located in FIESTA::ref_codes data frame. Names are only available
-for certain variables. Check: sort(unique(FIESTA::ref_codes$VARIABLE)) for
-available names.  If col.FIAname = TRUE and rowvar is in FIESTA::ref_codes,
-the colvar name is used for the output table, and the colvar code is used to
-sort.}
-
-\item{row.orderby}{String. Optional. Name of variable to sort table rows.
-Both the rowvar and row.orderby variables must be included in the same input
-data.frame.  if NULL, and row.FIAname=FALSE or rowvar is not in
-FIESTA::ref_codes, the rows are ordered by rowvar.}
-
-\item{col.orderby}{String. Optional. Name of variable to sort table columns.
-Both the colvar and col.orderby variables must be included in the same input
-data.frame.  if NULL, and col.FIAname=FALSE or colvar is not in
-FIESTA::ref_codes, the columns are ordered by colvar.}
-
-\item{row.add0}{Logical. If TRUE, include rows with 0 values to the output
-table.}
-
-\item{col.add0}{Logical. If TRUE, include columns with 0 values to the
-output table.}
-
-\item{rowlut}{Data frame. A lookup table with variable codes and code names
-to include as rows of output table (See notes for more information and
-format).}
-
-\item{collut}{Data frame. A lookup table with variable codes and code names
-to include as columns of output table (See notes for more information and
-format).}
-
-\item{rowgrp}{Logical. If TRUE, appends row groups to first column of table.
-Only available if group category exists in ref_codes table or defined in
-rowgrpnm (e.g., FORTYPGRPCD, OWNGRPCD).}
-
-\item{rowgrpnm}{String. Name of variable for grouping rowvar. Variable must
-be included in same input table as rowvar.}
-
-\item{rowgrpord}{String. Name of variable to sort row group variable.
-Variable must be included in same input table as rowgrpnm.}
-
 \item{sumunits}{Logical. If TRUE, estimation units are summed and returned
 in one table.}
-
-\item{allin1}{Logical. If TRUE, both estimates and percent sample error are
-output in one table as: estimates (percent sample error).}
-
-\item{metric}{Logical. If TRUE, output area is in metric units (hectares).}
-
-\item{estround}{Integer. Number of decimal places for estimates.}
-
-\item{pseround}{Integer. Number of decimal places for percent sampling
-error.}
-
-\item{estnull}{Number or character. The number or symbol to use to indicate
-'not sampled' for estimate.}
-
-\item{psenull}{Number or character. The number or symbol to use to indicate
-'not sampled' for percent standard errror.}
-
-\item{divideby}{String. Conversion number for output ('hundred', 'thousand',
-'million').}
-
-\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
-
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
-
-\item{outfn.pre}{String. If savedata=TRUE, prefix for output files. If
-rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
-raw_fmt != 'csv').}
-
-\item{outfn.date}{Logical. If TRUE, add current date to out_dsn.}
-
-\item{addtitle}{Logical. If TRUE and savedata=TRUE, adds title to outfile.}
-
-\item{rawdata}{Logical. If TRUE, returns a list of raw data tables that are
-used for estimation (See Value). If savedata = TRUE, tables are written to
-outfolder (if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv').}
-
-\item{rawonly}{Logical. If TRUE, only rawdata are output. If dataset
-includes many estimation units, and only raw data tables are desired, it is
-more efficient to output raw data only.}
-
-\item{raw_fmt}{String. Format for output rawdata tables ('sqlite',
-'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').}
-
-\item{raw_dsn}{String. Data source name for rawdata output. If extension is
-not included, out_fmt is used. Use full path if outfolder=NULL.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites raw_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the output. If
-rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
-out_layers in raw_dsn (if raw_fmt != 'csv').}
-
-\item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data to
-existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
-'csv".}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}
 
-\item{title.main}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the complete title used for table. If title.main=NULL, the title.*
-parameters are used to generate title string. Note: if title.ref is not
-NULL, it is added to title.main.}
+\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{title.ref}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-the ending text of the table title (e.g., Nevada, 2004-2005). If NULL, = "".}
+\item{table_opts}{List. See help(table_options()) for a list of
+options.}
 
-\item{title.rowvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the row domain variable. If NULL, = rowvar.}
+\item{title_opts}{List. See help(title_options()) for a list of options.}
 
-\item{title.colvar}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the column domain variable. If NULL, = colvar.}
-
-\item{title.unitvar}{String. TITLE, if savedata=TRUE and/or
-returntitle=TRUE: pretty name for the estimation unit variable. If NULL, =
-unitvar.}
-
-\item{title.estvar}{String. TITLE: if savedata=TRUE and/or returntitle=TRUE:
-pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
-
-\item{title.filter}{String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
-pretty name for filter(s). If title.filter=NULL, a default is generated from
-cfilter.  If title.filter="", no title.filter is used.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
