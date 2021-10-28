@@ -6,23 +6,10 @@
 \usage{
 modGBpop(
   popType = "VOL",
-  cond = NULL,
-  plt = NULL,
-  tree = NULL,
-  seed = NULL,
-  vsubpspp = NULL,
-  vsubpstr = NULL,
-  subplot = NULL,
-  subp_cond = NULL,
-  lulc = NULL,
-  pltassgn = NULL,
+  data_tables = data_tables_list(),
+  data_uniqueids = data_uniqueids_list(),
   dsn = NULL,
-  puniqueid = "CN",
-  pltassgnid = "PLT_CN",
   pjoinid = "CN",
-  tuniqueid = "PLT_CN",
-  cuniqueid = "PLT_CN",
-  condid = "CONDID",
   areawt = "CONDPROP_UNADJ",
   adj = "samp",
   evalid = NULL,
@@ -37,29 +24,14 @@ modGBpop(
   minplotnum.unit = 10,
   unit.action = "keep",
   strata = TRUE,
-  stratalut = NULL,
-  strvar = "STRATUMCD",
-  getwt = TRUE,
-  getwtvar = "P1POINTCNT",
-  strwtvar = "strwt",
-  stratcombine = TRUE,
-  minplotnum.strat = 2,
-  saveobj = FALSE,
-  objnm = "GBpopdat",
   savedata = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
+  strata_opts = strata_options(),
+  savedata_opts = savedata_options(),
   GBdata = NULL,
   pltdat = NULL,
   GBstratdat = NULL,
-  nonsamp.vfilter.fixed = FALSE,
-  gui = FALSE
+  gui = FALSE,
+  ...
 )
 }
 \arguments{
@@ -67,66 +39,20 @@ modGBpop(
 Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
 below for descriptions of each.}
 
-\item{cond}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Condition-level data with one record for each condition, including or
-excluding nonsampled conditions. Plot variables and strata/estimation unit
-variable(s) may be included if plt and pltassgn=NULL. See details for
-necessary variables to include.}
+\item{data_tables}{List of data tables the user would like returned.
+See help(data_tables_list()) for a list of options.}
 
-\item{plt}{DF/DT, Optional. R object, sf R object, comma-delimited
-file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp).  Plot-level
-data with one record for each plot, including or excluding nonsampled
-conditions. If nonsampled plots are included, PLOT_STATUS_CD variable must
-be in table or a filter defined in plt.nonsamp.filter.}
-
-\item{tree}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Tree-level data with one record for each tree. Tree data are aggregated to
-condition-level. See details for necessary variables to include.}
-
-\item{seed}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Seedling data with one record for each seedling count.}
-
-\item{vsubpspp}{DF/DT, R object, comma-delimited file(*.csv), or layer in
-dsn.  Vegetation species-level data with one record for each species
-(P2VEG_SUBPLOT_SPP).}
-
-\item{vsubpstr}{DF/DT, R object, comma-delimited file(*.csv), or layer in
-dsn.  Vegetation species-structure data with one record for each species
-(P2VEG_SUBP_STRUCTURE).}
-
-\item{subplot}{DF/DT, R object, comma-delimited file(*.csv), or layer in
-dsn.  Subplot-level data with one record for each species (SUBPLOT).}
-
-\item{subp_cond}{DF/DT, R object, comma-delimited file(*.csv), or layer in
-dsn.  Subplot condition-level data with one record for each species
-(SUBP_COND).}
-
-\item{lulc}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Land use/Land cover data with current and previous observations.}
-
-\item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited
-file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
-assignment of estimation unit and/or strata, with one record for each plot.}
+\item{data_uniqueids}{List of unique IDs corresponding to the data tables
+that the user has requested. See help(data_uniqueids_list()) for a list of
+options.}
 
 \item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).}
 
-\item{puniqueid}{String. Unique identifier of plot in plt.}
-
-\item{pltassgnid}{String. Unique identifier of plot in pltassgn.}
-
 \item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
 need to be uniqueid. If using most current XY coordinates for plot
 assignments, use identifier for plot (e.g., PLOT_ID).}
-
-\item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
-
-\item{cuniqueid}{String. Unique identifier of plot in cond.}
-
-\item{condid}{String. Unique identifier of plot conditions (e.g., CONDID).
-If no condid in cond, the data are assumed to have 1 condition per plot.  A
-CONDID=1 is automatically added.}
 
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
@@ -176,57 +102,13 @@ unit in unitlut.}
 
 \item{strata}{Logical. If TRUE, include information for post-stratification.}
 
-\item{stratalut}{DF/DT. If strata=TRUE, look-up table with pixel counts or
-area by strata or proportion or area ('strwt') by strata (and estimation
-unit).  If 'strwt' is not included, set getwt=TRUE and getwtvar as the name
-of variable to calculate weights from (e.g., pixel counts).}
-
-\item{strvar}{String. If strata=TRUE, name of the strata variable in
-stratalut and cond or pltassgn data frame with stratum assignment for each
-plot (Default = 'STRATUMCD').}
-
-\item{getwt}{Logical. If TRUE, calculates strata weights from stratatlut
-getwtvar.  If FALSE, strwtvar variable must be in stratalut.}
-
-\item{getwtvar}{String. If getwt=TRUE, name of variable in stratalut to
-calculate weights (Default = 'P1POINTCNT').}
-
-\item{strwtvar}{String. If getwt=FALSE, name of variable in stratalut with
-calculated weights (Default = 'strwt').}
-
-\item{stratcombine}{Logical. If TRUE, and strata=TRUE, automatically combines
-strata categories if less than minplotnum.strat plots in any one stratum. 
-See notes for more info.}
-
-\item{minplotnum.strat}{Integer. Minimum number of plots for a stratum
-within an estimation unit.}
-
-\item{saveobj}{Logical. If TRUE, saves GBpopdat object to outfolder.}
-
-\item{objnm}{String. Name of *.rda object.}
-
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
+\item{strata_opts}{List. See help(strata_options()) for a list of options.
+Only used when strata = TRUE.}
 
-\item{out_fmt}{String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-
-\item{out_dsn}{String. Name of database if out_fmt = c('sqlite', 'gpkg').}
-
-\item{outfn.pre}{String. Add a prefix to output name (e.g., "01").}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites the out_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the out_layer, if
-exists.}
-
-\item{append_layer}{Logical. If TRUE, appends layers to existing out_dsn or
-files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-"gdb".}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
 \item{GBdata}{R List object. Output data list components from
 FIESTA::anGBdata().}
@@ -237,10 +119,9 @@ FIESTA::spGetPlots().}
 \item{GBstratdat}{R List object. Output data list components from
 FIESTA::DBgetStrata().}
 
-\item{nonsamp.vfilter.fixed}{Logical. If TRUE and popType="P2VEG", the
-nonsample filter is fixed in database.}
-
 \item{gui}{Logical. If gui, user is prompted for parameters.}
+
+\item{...}{For extendibility.}
 }
 \value{
 A list with population data for Green-Book estimates.

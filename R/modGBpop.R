@@ -54,52 +54,24 @@
 #' @param popType String. Type of evaluation(s) to include in population data.
 #' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
 #' below for descriptions of each.
-#' @param cond DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Condition-level data with one record for each condition, including or
-#' excluding nonsampled conditions. Plot variables and strata/estimation unit
-#' variable(s) may be included if plt and pltassgn=NULL. See details for
-#' necessary variables to include.
-#' @param plt DF/DT, Optional. R object, sf R object, comma-delimited
-#' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp).  Plot-level
-#' data with one record for each plot, including or excluding nonsampled
-#' conditions. If nonsampled plots are included, PLOT_STATUS_CD variable must
-#' be in table or a filter defined in plt.nonsamp.filter.
-#' @param tree DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Tree-level data with one record for each tree. Tree data are aggregated to
-#' condition-level. See details for necessary variables to include.
-#' @param seed DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Seedling data with one record for each seedling count.
-#' @param vsubpspp DF/DT, R object, comma-delimited file(*.csv), or layer in
-#' dsn.  Vegetation species-level data with one record for each species
-#' (P2VEG_SUBPLOT_SPP).
-#' @param vsubpstr DF/DT, R object, comma-delimited file(*.csv), or layer in
-#' dsn.  Vegetation species-structure data with one record for each species
-#' (P2VEG_SUBP_STRUCTURE).
-#' @param subplot DF/DT, R object, comma-delimited file(*.csv), or layer in
-#' dsn.  Subplot-level data with one record for each species (SUBPLOT).
-#' @param subp_cond DF/DT, R object, comma-delimited file(*.csv), or layer in
-#' dsn.  Subplot condition-level data with one record for each species
-#' (SUBP_COND).
-#' @param lulc DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Land use/Land cover data with current and previous observations.
-#' @param pltassgn DF/DT, Optional. R object, sf R object, comma-delimited
-#' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
-#' assignment of estimation unit and/or strata, with one record for each plot.
+#' @param data_tables List of data tables the user would like returned.
+#'  See help(data_tables_list()) for a list of options.
+#' @param data_uniqueids List of unique IDs corresponding to the data tables
+#' that the user has requested. See help(data_uniqueids_list()) for a list of
+#' options.
 #' @param dsn String. Name of database where tree, cond, and plot-level tables
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html).
-#' @param puniqueid String. Unique identifier of plot in plt.
-#' @param pltassgnid String. Unique identifier of plot in pltassgn.
 #' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
 #' need to be uniqueid. If using most current XY coordinates for plot
 #' assignments, use identifier for plot (e.g., PLOT_ID).
-#' @param tuniqueid String. Unique identifier of plot in tree and seed.
-#' @param cuniqueid String. Unique identifier of plot in cond.
-#' @param condid String. Unique identifier of plot conditions (e.g., CONDID).
-#' If no condid in cond, the data are assumed to have 1 condition per plot.  A
-#' CONDID=1 is automatically added.
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
+#' @param adj String. How to calculate adjustment factors for nonsampled
+#' (nonresponse) conditions based on summed proportions for by plot ('samp',
+#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
+#' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
+#' only calculated for annual inventory plots (DESIGNCD=1).
 #' @param evalid Numeric. FIA Evaluation identifier for subsetting plots for
 #' population.
 #' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
@@ -108,11 +80,6 @@
 #' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
 #' Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
 #' be included.
-#' @param adj String. How to calculate adjustment factors for nonsampled
-#' (nonresponse) conditions based on summed proportions for by plot ('samp',
-#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
-#' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
-#' only calculated for annual inventory plots (DESIGNCD=1).
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
@@ -132,47 +99,19 @@
 #' unit.action='combine', combines estimation unit to the following estimation
 #' unit in unitlut.
 #' @param strata Logical. If TRUE, include information for post-stratification.
-#' @param stratalut DF/DT. If strata=TRUE, look-up table with pixel counts or
-#' area by strata or proportion or area ('strwt') by strata (and estimation
-#' unit).  If 'strwt' is not included, set getwt=TRUE and getwtvar as the name
-#' of variable to calculate weights from (e.g., pixel counts).
-#' @param strvar String. If strata=TRUE, name of the strata variable in
-#' stratalut and cond or pltassgn data frame with stratum assignment for each
-#' plot (Default = 'STRATUMCD').
-#' @param getwt Logical. If TRUE, calculates strata weights from stratatlut
-#' getwtvar.  If FALSE, strwtvar variable must be in stratalut.
-#' @param getwtvar String. If getwt=TRUE, name of variable in stratalut to
-#' calculate weights (Default = 'P1POINTCNT').
-#' @param strwtvar String. If getwt=FALSE, name of variable in stratalut with
-#' calculated weights (Default = 'strwt').
-#' @param stratcombine Logical. If TRUE, and strata=TRUE, automatically combines
-#' strata categories if less than minplotnum.strat plots in any one stratum. 
-#' See notes for more info.
-#' @param minplotnum.strat Integer. Minimum number of plots for a stratum
-#' within an estimation unit.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param outfolder String. The outfolder to write files to. If NULL, files are
-#' written to working directory, or if gui, a window to browse.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
-#' exists.
-#' @param append_layer Logical. If TRUE, appends layers to existing out_dsn or
-#' files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-#' "gdb".
+#' @param strata_opts List. See help(strata_options()) for a list of options.
+#' Only used when strata = TRUE. 
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
 #' @param GBdata R List object. Output data list components from
 #' FIESTA::anGBdata().
 #' @param pltdat R List object. Output data list components from
 #' FIESTA::spGetPlots().
 #' @param GBstratdat R List object. Output data list components from
 #' FIESTA::DBgetStrata().
-#' @param nonsamp.vfilter.fixed Logical. If TRUE and popType="P2VEG", the
-#' nonsample filter is fixed in database.
 #' @param gui Logical. If gui, user is prompted for parameters.
+#' @param ... For extendibility.
 #' @return A list with population data for Green-Book estimates.
 #' 
 #' \item{condx}{ Data frame. Condition-level data including plot-level
@@ -261,19 +200,17 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @export modGBpop
-modGBpop <- function(popType="VOL", 
-	data_tables = list(cond=NULL, plt=NULL, pltassgn=NULL, tree=NULL, seed=NULL, 
-	vsubpspp=NULL, vsubpstr=NULL, subplot=NULL, subp_cond=NULL, lulc=NULL),
-	data_uniqueids = list(cuniqueid="PLT_CN", puniqueid="CN", 
-	pltassgnid="PLT_CN", tuniqueid="PLT_CN", suniqueid="PLT_CN", vuniqueid="PLT_CN", 
-	subpuniqueid="PLT_CN", lulcuniqueid="PLT_CN", condid="CONDID"),
-	dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", adj="samp", 
-	evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
-	areaunits="acres", minplotnum.unit=10, unit.action="keep", 
-	strata=TRUE, savedata=FALSE, strata_opts=strata_options()),
- 	savedata_opts=savedata_options(), 
-	GBdata=NULL, pltdat=NULL, GBstratdat=NULL, gui=FALSE){
+modGBpop <- function(popType="VOL",
+                     data_tables = data_tables_list(),
+                     data_uniqueids = data_uniqueids_list(),
+                     dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ",
+                     adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL,
+                     ACI=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
+                     areavar="ACRES", areaunits="acres", minplotnum.unit=10,
+                     unit.action="keep", strata=TRUE, savedata=FALSE,
+                     strata_opts=strata_options(), 
+                     savedata_opts=savedata_options(),
+                     GBdata=NULL, pltdat=NULL, GBstratdat=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -306,6 +243,10 @@ modGBpop <- function(popType="VOL",
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
 	treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
+  
+  ## Set parameter defaults
+  setup_list_parameters(c("data_tables", "data_uniqueids", "savedata_opts",
+                          "strata_opts"))
 
   ## SET OPTIONS
   options.old <- options()

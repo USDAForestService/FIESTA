@@ -83,7 +83,7 @@ Variable must be included in same input table as rowgrpnm.}
 \item{allin1}{Logical. If TRUE, both estimates and percent sample error are
 output in one table as: estimates (percent sample error).}
 
-\item{metric}{Logical. If TRUE, output area is in metric units (hectares).}
+\item{metric}{Logical. If TRUE, output if returned in metric units.}
 
 \item{estround}{Integer. Number of decimal places for estimates.}
 
@@ -94,7 +94,7 @@ error.}
 'not sampled' for estimate.}
 
 \item{psenull}{Number or character. The number or symbol to use to indicate
-'not sampled' for percent standard errror.}
+'not sampled' for percent standard error.}
 
 \item{divideby}{String. Conversion number for output ('hundred', 'thousand',
 'million').}

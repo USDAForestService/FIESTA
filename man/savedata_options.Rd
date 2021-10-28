@@ -6,6 +6,8 @@
 \usage{
 savedata_options(
   outfolder = NULL,
+  out_fmt = "csv",
+  out_dsn = NULL,
   outfn.pre = NULL,
   outfn.date = FALSE,
   addtitle = TRUE,
@@ -14,12 +16,19 @@ savedata_options(
   overwrite_dsn = FALSE,
   overwrite_layer = TRUE,
   append_layer = FALSE,
+  saveobj = FALSE,
+  objnm = NULL,
   ...
 )
 }
 \arguments{
 \item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
+written to working directory, or if gui=TRUE, a window to browse.}
+
+\item{out_fmt}{String. Format for output tables ('sqlite', 'gpkg', 'csv', 'gdb').}
+
+\item{out_dsn}{String. Data source name for output. If extension is
+not included, out_fmt is used. Use full path if outfolder=NULL.}
 
 \item{outfn.pre}{String. If savedata=TRUE, prefix for output files. If
 rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
@@ -30,7 +39,7 @@ raw_fmt != 'csv').}
 \item{addtitle}{Logical. If TRUE and savedata=TRUE, adds title to outfile.}
 
 \item{raw_fmt}{String. Format for output rawdata tables ('sqlite',
-'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').}
+'gpkg', 'csv', 'gdb').}
 
 \item{raw_dsn}{String. Data source name for rawdata output. If extension is
 not included, out_fmt is used. Use full path if outfolder=NULL.}
@@ -44,6 +53,10 @@ out_layers in raw_dsn (if raw_fmt != 'csv').}
 \item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data to
 existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
 'csv".}
+
+\item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}
+
+\item{objnm}{String. Name of *.rds object.}
 
 \item{...}{For extendibility.}
 }
