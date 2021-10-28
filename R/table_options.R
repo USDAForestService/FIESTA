@@ -47,14 +47,14 @@
 #' Variable must be included in same input table as rowgrpnm.
 #' @param allin1 Logical. If TRUE, both estimates and percent sample error are
 #' output in one table as: estimates (percent sample error).
-#' @param metric Logical. If TRUE, output area is in metric units (hectares).
+#' @param metric Logical. If TRUE, output if returned in metric units.
 #' @param estround Integer. Number of decimal places for estimates.
 #' @param pseround Integer. Number of decimal places for percent sampling
 #' error.
 #' @param estnull Number or character. The number or symbol to use to indicate
 #' 'not sampled' for estimate.
 #' @param psenull Number or character. The number or symbol to use to indicate
-#' 'not sampled' for percent standard errror.
+#' 'not sampled' for percent standard error.
 #' @param divideby String. Conversion number for output ('hundred', 'thousand',
 #' 'million').
 #' @param ... For extendibility.

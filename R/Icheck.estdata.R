@@ -124,22 +124,11 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
     }
   }
 
-  #####################################################################################
-  ### Check other table parameters
-  #####################################################################################
-
-  ## Check divideby
-  ########################################################
-  dividebylst <- c("hundred", "thousand", "million")
-  if (!is.null(divideby) || gui) {
-    divideby <- pcheck.varchar(var2check=divideby, varnm="divideby", 
-		gui=gui, checklst=dividebylst, caption="Divide estimates?")
-  }
-
   ## Check sumunits 
   ########################################################
   sumunits <- pcheck.logical(sumunits, varnm="sumunits", 
 		title="Sum estimation units?", first="YES", gui=gui, stopifnull=TRUE)
+
 
   ## Check TPA 
   ########################################################
@@ -159,24 +148,6 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
     tpavar <- NULL
   }
 
-
-  ## Check allin1
-  ########################################################
-  allin1 <- pcheck.logical(allin1, varnm="allin1", 
-		title="All 1 table - Est (%error)?", first="NO", gui=gui)
-
-  ### Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", 
-		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ### Check addtitle 
-  addtitle <- pcheck.logical(addtitle, varnm="addtitle", 
-		title="Add title to output?", first="YES", gui=gui, stopifnull=TRUE)
-
-  ### Check returntitle 
-  returntitle <- pcheck.logical(returntitle, varnm="returntitle", 
-		title="Save output titles?", first="YES", gui=gui, stopifnull=TRUE)
-
   ## Check rawtable
   rawdata <- pcheck.logical(rawdata, varnm="rawdata", title="Output raw data?", 
 		first="NO", gui=gui, stopifnull=TRUE)
@@ -185,6 +156,32 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
   rawonly <- pcheck.logical(rawonly, varnm="rawonly", title="Raw data only?", 
 		first="NO", gui=gui, stopifnull=TRUE)
   if (rawonly && !rawdata) rawdata <- TRUE
+
+
+  ## Check divideby
+  dividebylst <- c("hundred", "thousand", "million")
+  if (!is.null(divideby) || gui) {
+    divideby <- pcheck.varchar(var2check=divideby, varnm="divideby", 
+		gui=gui, checklst=dividebylst, caption="Divide estimates?")
+  }
+
+  ## Check allin1
+  allin1 <- pcheck.logical(allin1, varnm="allin1", 
+		title="All 1 table - Est (%error)?", first="NO", gui=gui)
+
+
+  ## Check returntitle 
+  returntitle <- pcheck.logical(returntitle, varnm="returntitle", 
+		title="Save output titles?", first="YES", gui=gui, stopifnull=TRUE)
+
+  ## Check savedata 
+  savedata <- pcheck.logical(savedata, varnm="savedata", 
+		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
+
+
+  ## Check addtitle 
+  addtitle <- pcheck.logical(addtitle, varnm="addtitle", 
+		title="Add title to output?", first="YES", gui=gui, stopifnull=TRUE)
 
   ## Check raw_fmt
   if (rawdata) {

@@ -230,31 +230,41 @@ Tree information is used for calculating per-acre ratio estimates (numerator) an
 * **estvard.name**   - Denominator - A name for aggregated estvar (Default = estvard'_SUM').
 
 
-**misc**
+**Table estimates**
 
-* **rowvar**        - Name of row variable (domain). If area estimate, rowvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, rowvar can be from cond or tree (e.g., SPCD).
-* **colvar**        - Name of column variable (domain). If area estimate, colvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, colvar can be from cond or tree (e.g, SPCD).
+Estimates can be broken down by categorical domains for further detail about a population. These details are presented as rows or rows and columns in a matrix table, with a separate, associated sampling error for each cell in the table. If the area of interest (i.e., population) has more than one estimation unit (i.e., subpopulation), estimates may be presented by estimation unit or summed to the population. 
+
+* **rowvar**    - Name of row variable (domain). If area estimate, rowvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, rowvar can be from cond or tree (e.g., SPCD).
+* **colvar**    - Name of column variable (domain). If area estimate, colvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, colvar can be from cond or tree (e.g, SPCD).
 * **sumunits**  - TRUE, sum estimates by estimation units (sub-populations) into one estimate (e.g., Counties to State).
-* **cvround**    - Number of digits to round % sample error to (for modGBarea and modGBtree, default=3; for modGBratio, default=3).
-* **savedata**   - TRUE, save data to outfolder.
-* **outfn**      - Name of file for output data (Default = 'esttype_'estvar.name'_'rowvar'_'date'.csv').
 
 
-<a name="out1"></a>
-**Output table information**
+**Other**
 
-The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the rowvar must be populated, leaving the colvar=NULL. Row and columns may be ordered in a particular way, defined by row.orderby and col.orderby variables. A default set of code names are stored internally (`FIESTA::ref_codes`). If row.FIAname/col.FIAname = TRUE and the respective rowvar/colvar is in ref_codes, the default code description is used in output tables.
+* **returntitle**  - TRUE, return table titles (See title_opts for more title parameters)
+* **savedata**  - TRUE, save data to outfolder (See savedata_opts for more savedata parameters).
 
-* **row.FIAname**   - TRUE, gets FIA reference name for rowvar, if available.
-* **col.FIAname**   - TRUE, gets FIA reference name for colvar, if available.
+
+<a name="table_opts"></a>
+**Output table options**
+
+The following parameters provide more detail about the presentation and aesthetics of the final output table, including: using code names instead of codes; applying specific ordering; adding categories not in the data set with 0 values; displaying percent standard errors and estimates together or separate; and rounding options. These parameters are set by supplying a list to the `table_opts` parameter. The possible parameters that can be set within the `table_opts` parameter can be seen by running `help(table_options)`.
+
+* **row.FIAname**   - TRUE, gets FIA reference name for rowvar, if available (`FIESTA::getRefcodes(rowvar)` for availability).
+* **col.FIAname**   - TRUE, gets FIA reference name for colvar, if available (`FIESTA::getRefcodes(rowvar)` for availability).
 * **row.orderby**   - Name of variable to order values of rowvar (if row.FIAname=FALSE).
 * **col.orderby**   - Name of variable to order values of colvar (if col.FIAname=FALSE).
-* **row.add0**      - TRUE, add 0 values in table for row values that occur in input dataset or in rowlut, but are not in final estimate.
-* **col.add0**      - TRUE, add 0 values in table for column values that occur in input dataset or in rowlut, but are not in final estimate.
+* **row.add0**      - TRUE, add 0 value in table for row values that occur in data set or in rowlut, but are not in final estimate.
+* **col.add0**      - TRUE, add 0 value in table for column values that occur in data set or in rowlut, but are not in final estimate.
 * **rowlut**        - A lookup table with variable codes and descriptions to include in rows of output table (See note following for more details).
 * **collut**        - A lookup table with specific variable codes and descriptions to include in columns of output table (See note following for more details).
 * **allin1**     - TRUE, table cells include: estimates (% sample error).
-* **estround**   - Number of digits to round estimates to (for modGBarea and modGBtree, default=0; for modGBratio, default=3).
+* **metric**     - TRUE, output is returned in metric units.
+* **estround**   - Number of digits to round estimates to.
+* **pseround**   - Number of digits to round percent sample error (pse) to.
+* **estnull**    - Number or character to indicate 'not sampled' for estimate.
+* **psenull**    - Number or character to indicate 'not sampled' for percent sample error (pse).
+* **divideby**   - Conversion of output numbers ('hundred', 'thousand', 'million').
 
 
 Note: 
@@ -263,26 +273,10 @@ rowlut/collut - There are several objectives for including rowlut/collut look-up
 Include 2 columns in the table: 1-the merging variable with same name as the variable in the input merge table; 2-the ordering or descriptive variable. If the ordering variable is the rowvar/colvar in the input table and the descriptive variable is in rowlut/collut, set row.orderby/col.orderby equal to rowvar/colvar. If the descriptive variable is the rowvar/colvar in the input table, and the ordering code variable is in rowlut/collut, set row.orderby/col.orderby equal to the variable name of the code variable in rowlut/collut. 
 
 
-<a name="out2"></a>
-**Output table specifications**
-
-<!-- The final parameters dictate what the output will look like, such as: how to display the sample error; how many digits to round values to; whether to include a title; and whether to write the output to a folder or only return as R objects.   -->
-
-savedata stuff
-
-
-* **outfolder**  - Name of folder to output data to (Default = working directory or window to browse).
-* **outfn.pre**  - Add a prefix to output name (e.g., '01_*').
-* **outfn.date** - Add a date to output name (e.g., '*_20200220').
-* **overwrite**  - TRUE, overwrites existing files.
-* **addtitle**   - TRUE, add title to tables.
-* **returntitle**  - TRUE, return table titles.
-
-
-<a name="title"></a>
+<a name="title_opts"></a>
 **Title parameters**
 
-If saving to a folder, and a title is desired, there are parameters for including a specific title or for generating a title based on pieces of information. These parameters are set by supplying a list to the `title_opts` parameter. The possible parameters that can be set within the `title_opts` parameter can be seen by running `help(title_options)`.
+If returntitle=TRUE, a default title is generated based on the estimation parameters above. The following parameters allow user-defined inputs for generating customized titles. These parameters are set by supplying a list to the `title_opts` parameter. The possible parameters that can be set within the `title_opts` parameter can be seen by running `help(title_options)`.
 
 * **title.main** - Full title for table.
 * **title.ref**  - The ending text for table title. If not NULL, included with title.main.
@@ -291,6 +285,27 @@ If saving to a folder, and a title is desired, there are parameters for includin
 * **title.unitvar** - Pretty name for unitvar for table title (If NULL and sumunits=FALSE, default = unitvar).
 * **title.estvar**  - Pretty name for estvar for table title (If NULL, default = estvar). For ratio estimates, title.estvarn (default = estvarn) and title.estvard (default = estvard).
 * **title.filter**  - Pretty name for any filters for table title.
+
+
+<a name="savedata_opts"></a>
+**Saving data specifications**
+
+If savedata=TRUE, output is saved using default settings. The following parameters specify different options for saving output. These parameters are set by supplying a list to the `savedata_opts` parameter. The possible parameters that can be set within the `savedata_opts` parameter can be seen by running `help(savedata_options)`.
+
+* **outfolder**  - Name of folder to output data to (Default = working directory or window to browse).
+* **out_fmt**    - Format of output data tables ('sqlite', 'gpkg', 'csv', 'gdb').
+* **out_dsn**    - TRUE, data source name of database to output data tables.
+* **outfn.pre**  - Add a prefix to output name (e.g., '01_*').
+* **outfn.date** - Add date (YYYYMMDD) to output name (e.g., '*_20200220').
+* **addtitle**   - TRUE, add title to tables.
+* **raw_fmt**    - Format of raw data tables ('sqlite', 'gpkg', 'csv', 'gdb').
+* **raw_dsn**    - TRUE, data source name of database to output raw data tables.
+* **overwrite_dsn**  - TRUE, overwrites existing data source name database files (e.g., sqlite).
+* **overwrite_layer**  - TRUE, overwrites layer within a database or file in outfolder, if exists.
+* **append_layer**  - TRUE, appends output to existing layer in database or file in outfolder.
+
+
+
 
 </details>
 

@@ -150,8 +150,6 @@
 #' See notes for more info.
 #' @param minplotnum.strat Integer. Minimum number of plots for a stratum
 #' within an estimation unit.
-#' @param saveobj Logical. If TRUE, saves GBpopdat object to outfolder.
-#' @param objnm String. Name of *.rda object.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param outfolder String. The outfolder to write files to. If NULL, files are
 #' written to working directory, or if gui, a window to browse.
@@ -263,18 +261,19 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @export modGBpop
-modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL, 
-	vsubpspp=NULL, vsubpstr=NULL, subplot=NULL, subp_cond=NULL, lulc=NULL, 
-	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", 
-	adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
-	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", areaunits="acres",
-	minplotnum.unit=10, unit.action="keep", strata=TRUE, stratalut=NULL, 
-	strvar="STRATUMCD", getwt=TRUE, getwtvar="P1POINTCNT", strwtvar="strwt",
-	stratcombine=TRUE, minplotnum.strat=2, saveobj=FALSE, objnm="GBpopdat", 
-	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL,
- 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE,
-	GBdata=NULL, pltdat=NULL, GBstratdat=NULL, nonsamp.vfilter.fixed=FALSE, gui=FALSE){
+modGBpop <- function(popType="VOL", 
+	data_tables = list(cond=NULL, plt=NULL, pltassgn=NULL, tree=NULL, seed=NULL, 
+	vsubpspp=NULL, vsubpstr=NULL, subplot=NULL, subp_cond=NULL, lulc=NULL),
+	data_uniqueids = list(cuniqueid="PLT_CN", puniqueid="CN", 
+	pltassgnid="PLT_CN", tuniqueid="PLT_CN", suniqueid="PLT_CN", vuniqueid="PLT_CN", 
+	subpuniqueid="PLT_CN", lulcuniqueid="PLT_CN", condid="CONDID"),
+	dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", adj="samp", 
+	evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
+	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES", 
+	areaunits="acres", minplotnum.unit=10, unit.action="keep", 
+	strata=TRUE, savedata=FALSE, strata_opts=strata_options()),
+ 	savedata_opts=savedata_options(), 
+	GBdata=NULL, pltdat=NULL, GBstratdat=NULL, gui=FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -315,6 +314,7 @@ modGBpop <- function(popType="VOL", cond=NULL, plt=NULL, tree=NULL, seed=NULL,
   adjtree <- FALSE
   nonresp=FALSE
   substrvar=nonsamp.pfilter=nonsamp.cfilter <- NULL
+  nonsamp.vfilter.fixed <- FALSE
   returnlst <- list()
 
   ## Check savedata 
