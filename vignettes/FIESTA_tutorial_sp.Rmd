@@ -175,8 +175,6 @@ WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
 ## Display boundary
 plot(sf::st_geometry(WYbhdist), border="blue")
 plot(sf::st_geometry(WYbh), add=TRUE)
-
-
 ```
 
 </details>
