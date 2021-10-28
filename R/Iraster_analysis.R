@@ -35,6 +35,7 @@
 ## rasterInfo
 ## reprojectRaster
 ## rasterFromRaster
+## rasterFromVectorExtent
 ## rasterizePolygons
 ## polygonizeRaster
 ## clipRaster
@@ -440,7 +441,8 @@ rasterInfo <- function(srcfile) {
 	return(ri)
 }
 
-reprojectRaster <- function(srcfile, dstfile, t_srs, s_srs=NULL, of=NULL, ot=NULL,
+reprojectRaster <- function(srcfile, dstfile, t_srs, overwrite=TRUE,
+							s_srs=NULL, of=NULL, ot=NULL,
 							te=NULL, tr=NULL, r=NULL, 
 							dstnodata=NULL, co=NULL, addOptions=NULL) {
 
@@ -454,6 +456,8 @@ reprojectRaster <- function(srcfile, dstfile, t_srs, s_srs=NULL, of=NULL, ot=NUL
 #t_srs: <srs def> target spatial reference. EPSG:code, PROJ.4 declaration, or 
 #	.prj file containing WKT. For example, PROJ.4:
 #	t_srs = "+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+#s_srs: <srs def> source spatial reference. Normally read from the source file.
+#overwrite: <TRUE/FALSE> If TRUE, overwrite the target dataset if it already exists.
 #of: <format> output raster format, e.g., HFA, GTiff, ...
 #ot: <type> Force an output data type (i.e., Byte, Int16, ...)
 #te: <xmin ymin xmax ymax> georeferenced extents of output file to be created.
@@ -473,9 +477,9 @@ reprojectRaster <- function(srcfile, dstfile, t_srs, s_srs=NULL, of=NULL, ot=NUL
 
 
 	opt = c("-t_srs", t_srs)
-	if (!is.null(s_srs)) {
-		opt = c(opt, "-s_srs", s_srs)
-  	}  
+	if(!is.null(s_srs)) {
+		opt = c(opt, "-s_srs", as.character(s_srs))
+	}
 	if(!is.null(of)) {
 		opt = c(opt, "-of", as.character(of))
 	}
@@ -497,10 +501,12 @@ reprojectRaster <- function(srcfile, dstfile, t_srs, s_srs=NULL, of=NULL, ot=NUL
 	if(!is.null(co)) {
 		opt = c(opt, "-co", as.character(co))
 	}
-	opt = c(opt, "-overwrite")
-
+	if(overwrite) {
+		opt = c(opt, "-overwrite")
+	}
+    opt = c(opt, "-ovr", "NONE")
 	opt = c(opt, addOptions)
-	#print(opt)
+	print(opt)
 	
 	return(sf::gdal_utils(util="warp", source=srcfile, destination=dstfile, options=opt))
 
@@ -540,7 +546,7 @@ rasterFromRaster <- function(srcfile, dstfile, fmt=NULL, nbands=NULL,
 		dtName = getGDALDataTypeName(dtNum)
 	}
 	#srs = .Call("RGDAL_GetProjectionRef", src_ds, PACKAGE="rgdal")
-	srs = getProjectionRef(src_ds)
+	srs = rgdal::getProjectionRef(src_ds)
 	rgdal::GDAL.close(src_ds)
 
 	drv = new("GDALDriver", fmt)
@@ -832,7 +838,7 @@ clipRaster <- function(dsn=NULL, layer=NULL, src=NULL,
 	dtName = getGDALDataTypeName(dtNum)
 	
 	#srs = .Call("RGDAL_GetProjectionRef", src_ds, PACKAGE="rgdal")
-	srs = getProjectionRef(src_ds)
+	srs = rgdal::getProjectionRef(src_ds)
 
 	#create dst raster file
 	drv = new("GDALDriver", fmt)
@@ -896,7 +902,7 @@ rasterCalc <- function(calc, rasterfiles, bands=NULL, var.names=NULL,
 						nodata_value=NULL, setRasterNodataValue=FALSE,
 						usePixelLonLat=FALSE) {
 						
-#Raster calculater
+#Raster calculator
 #Evaluate an R expression for each pixel in a raster layer or stack of layers.
 
 #Layers are defined by: raster file, band, variable name.
@@ -1083,7 +1089,7 @@ rasterCombine <- function(rasterfiles, var.names=NULL, bands=NULL,
 	#ymin = ymax + gt[6] * nrows
 	cellsize = gt[2] #assuming square pixels
 	#srs = .Call("RGDAL_GetProjectionRef", ds, PACKAGE="rgdal")
-	srs = getProjectionRef(ds)
+	srs = rgdal::getProjectionRef(ds)
 	rgdal::GDAL.close(ds)
 
 	# list of GDAL dataset objects for each raster	
@@ -1538,13 +1544,13 @@ zonalFreq <- function(dsn=NULL, layer=NULL, src=NULL, attribute,
 	firstcols = c("zoneid","value")
 	df_out <- df_out[, c(firstcols, setdiff(names(df_out), firstcols))]
 	if(na.rm) df_out = df_out[!is.na(df_out$value),]
-	if(!is.null(ignoreValue)) df_out = df_out[!(df_out$value %in% ignoreValue),]
+	if(!is.null(ignoreValue)) df_out = df_out[(df_out$value != ignoreValue),]
 	if (!is.null(aggfun)){
 		df_agg <- aggregate(count ~ zoneid, df_out, aggfun)
 		df_out <- merge(df_agg, df_out)
 	}
 	else {
-		df_out <- transform(df_out, zoneprop = ave(count, zoneid, FUN = function(x) round(x/sum(x), 4)))
+		df_out <- transform(df_out, zoneprop = ave(count, zoneid, FUN = function(x) round(x/sum(x), 9)))
 	}
 	
 	src <- NULL
