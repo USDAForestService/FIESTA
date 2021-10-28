@@ -117,17 +117,29 @@ The population types (i.e., Eval_Type) currently available for `FIESTA` estimati
 
 The required data tables are from the FIA national database. Plot-level information, such as: state, county, or strata assignment may be included in the pltassgn table, or cond table (with pltassgn=NULL). The data table inputs can be the name of a comma-delimited file (\*.csv), a layer within a database, (e.g., SQLite), or an R data frame or data table object already loaded into R. The pltassgn table can also be a point shapefile (\*.shp), a spatial layer within a database, or a sf R object with one point per plot. The unique identifier for a plot must be provided in the corresponding parameter for each input table. See required variables section for a list of variables necessary to include for estimation.
 
-* **tree**      - Tree-level data, with 1 record per tree - *required for modGBtree() or modGBratio() tree estimates*.
+* **data_tables**   - A list of data tables used for estimates (cond, plt, pltassgn, tree, seed, vsubpspp, vsubpstr, subplot, subp_cond, lulc). See below for more details about tables.
+
+
 * **cond**      - Condition-level data, with 1 record per condition, including nonsampled conditions. May include estimation unit and strata assignment if plt=NULL and pltassgn=NULL - *required for all estimates*. 
+* **tree**      - Tree-level data, with 1 record per tree - *required for modGBtree() or modGBratio() tree estimates*.
 * **plt**       - Plot-level data, with 1 record per plot, including nonsampled conditions. May include nonsampled plots if PLOT_STATUS_CD variable is in dataset. May include estimation unit and strata assignment if pltassgn=NULL - *optional for all estimates*. 
 * **pltassgn**  - Plot-level data, with 1 record per plot and plot assignment of estimation unit and strata, if applying stratification. If nonsampled plots are included, PLOT_STATUS_CD variable must be in table. These plots are excluded from the analysis.       - *optional for all estimates*.
 * **seed**      - Seedling data, with 1 record per seedling count - *required for modGBtree() or modGBratio() seedling estimates*.
-* **dsn**       - Data source name of database where data table layers reside.
-* **tuniqueid** - Unique identifier for plot in tree or seed.
-* **cuniqueid** - Unique identifier for plot in cond.
+
+* **data_uniqueids**   - A list of data tables used for estimates (cuniqueid, puniqueid, pltassgnid, tuniqueid, vuniqueid, subpuniqueid="PLT_CN", lulcuniqueid="PLT_CN", condid="CONDID"). See below for more details about tables.
+
+* **cuniqueid** - Unique identifier for plot in cond (default="PLT_CN").
+* **puniqueid** - Unique identifier for plot in plt (default="CN").
+* **pltassgnid**- Unique identifier for plot in pltassgn (default="PLT_CN").
+* **tuniqueid** - Unique identifier for plot in tree or vsubpspp or vsubpstr.
+* **vuniqueid** - Unique identifier for plot in tree or seed.
+* **subpuniqueid** - Unique identifier for plot in subplot or subp_cond.
 * **condid**    - Unique identifier for conditions in cond (default="CONDID").
-* **pltassgnid**- Unique identifier for plot in pltassgn, if pltassgn is included.
+
+
+* **dsn**       - Data source name of database where data table layers reside.
 * **pjoinid**   - Join variable in plot to match pltassgnid. Does not need to be unique.
+
 
 
 <a name="edata"></a>
@@ -150,19 +162,10 @@ Population filters subset the plot data set before population calculations are g
 * **ACI**       - Logical. If TRUE, includes All Condition Inventory (ACI) conditions and associated tree data in estimates. If FALSE, a filter, is applied to remove nonsampled nonforest conditions (see cond.nonsamp.filter).
 
 
-<a name="nonsamp"></a>
-**Nonsample filters**
-
-Nonsample filters remove nonsample (i.e., nonresponse) conditions from the dataset. Nonsample filters are defined internally, unless otherwise specified.
-
-* **plt.nonsamp.filter** - A predefined filter for nonsampled (nonresponse) plots (PLOT_STATUS_CD != 3).
-* **cond.nonsamp.filter** - A predefined filter for nonsampled (nonresponse) conditions (COND_STATUS_CD != 5; or if ACI=TRUE: is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5). 
-
-
 <a name="estunit"></a>
 **Estimation unit information**
 
-An estimation unit is a population, or area of interest, with known area and number of plots. As an example, in Interior-West FIA, an estimation unit is generally an individual county. An estimation unit may be a subpopulation of a larger population (e.g., Counties within a State). Subpopulations are mutually exclusive and independent within a population, therefore estimated totals and variances are additive. Each plot is assigned to only one estimation unit based on plot center and can be stored in either pltassgn or cond. 
+An estimation unit is a population, or area of interest, with known area and number of plots. As an example, for RMRS FIA states, an estimation unit is generally an individual county. An estimation unit may be a subpopulation of a larger population (e.g., Counties within a State). Subpopulations are mutually exclusive and independent within a population, therefore estimated totals and variances are additive. Each plot is assigned to only one estimation unit based on plot center and can be stored in either pltassgn or cond. 
 
 * **unitvar** - Name of the estimation unit variable in cond or pltassgn with assignment for each plot (e.g., 'ESTN_UNIT').
 * **unitvar2** - Name of a second estimation unit variable in cond or pltassgn with assignment for each plot (e.g., 'STATECD').
@@ -173,12 +176,17 @@ An estimation unit is a population, or area of interest, with known area and num
 * **unit.action** - What to do if number of plots in an estimation unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If unit.action='combine', combines estimation unit to the following estimation unit in unitlut.
 
 
-<a name="strat"></a>
-**Strata information**
+**Other**
+
+* **strata**  - TRUE, use post-stratification for reducing variance in estimates (see strata_opts for strata parameters.
+* **savedata**  - TRUE, save data to outfolder (See savedata_opts for savedata parameters).
+
+
+<a name="strata_opts"></a>
+**Post-stratification information**
 
 Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.
 
-* **strata**    - TRUE, use stratification for variance reduction.
 * **stratalut** - Look-up table with pixel counts, area, or proportions (strwt) by strata (and estimation unit).
 * **strvar**    - Name of strata variable in stratalut and pltassgn or cond table with strata assignment for each plot.
 * **getwt**     - If TRUE, calculates strata weights from getwtvar in stratalut.
@@ -190,6 +198,69 @@ Stratification is used to reduce variance in population estimates by partitionin
 
 Note: 
 If there are less than minplotnum.strat plots (default=2 plots) in any strata/estimation combination: if stratcombine=FALSE, an error occurs with a message to collapse classes; if stratcombine=TRUE, an automated procedure occurs to collapse all strata less than minplotnum.strat. The function collapses classes based on the order of strata in stratatlut. If a strata within in estimation unit is less than minplotnum.strat, it is grouped with the next strata class in stratalut. If there are less than minplotnum.unit plots in an estimation unit: if unit.action='keep', NA is returned for the estimation unit; if unit.action='remove', the estimation unit is removed from the returned output; if unit.action='combine', an automated procedure occurs to group estimation units with less tha 10 plots with the next estimation unit in the stratalut. If it is the last estimation unit in the table, it is grouped with the estimation unit preceeding in the table. A recommended number of plots is provided as defaults (Westfall and others, 2011). 
+
+
+<a name="Data objects"></a>
+**Input data objects**
+
+Data object parameters allow a user to use other functions from FIESTA to input parameters directly. 
+
+* **GBdata**   - Output data list components from FIESTA::anGBdata().
+* **pltdat**   - Output data list components from FIESTA::pltdat().
+* **GBstratdat**  - Output data list components from FIESTA::GBstratdat(). 
+
+
+
+<a name="Population Output"></a>
+
+## Output values from `FIESTA` Green-Book module - modGBpop()
+
+<details>
+  <summary>View Population Data</summary>
+
+* **condx**       - Data frame of condition data within population, including plot assignments, condition proportion adjustment factor (cadjfac), and adjusted condition proportions (CONDPROP_ADJ).
+* **pltcondx**    - Data frame of plot/condition data within population, used for estimation.
+* **treex**       - Data frame of tree data within population, used for estimation, including trees per acre adjustment factor (tadjfac), and adjusted trees per acre (TPA_ADJ).
+* **cuniqueid**   - Unique identifier of plot in condx and pltcondx.
+* **tuniqueid**   - Unique identifier of plot in treex.
+* **condid**      - Unique identifier of condition in condx and pltcondx.
+* **ACI.filter**  - Filter used for excluding ACI plots if ACI=FALSE.
+* **unitvar**     - Name of estimation unit variable in unitarea and condx.
+* **unitarea**    - Data frame with area by estimation unit.
+* **areavar**     - Name of area variable in unitarea.
+* **stratalut**      - Data frame of stratification information by estimation unit. See below for variable descriptions.
+* **strvar**      - Name of strata variable in stratalut and condx 
+* **expcondtab**  - Data frame of condition-level area expansion factors.
+* **plotsampcnt** - Number of plots by plot status.
+* **condsampcnt** - Number of conditions by condition status.
+* **states**      - States of FIA plot data used in estimation (for title reference).
+* **invyrs**      - Inventory years of FIA plot data used in estimation (for title reference).
+
+
+```{r, results = 'asis', echo=FALSE}
+
+#stratdat.lut <- read.csv("C:/_tsf/_GitHub/meta/stratdat_variables.csv", stringsAsFactors=FALSE)
+#source("C:/_tsf/_GitHub/meta/undataframe.R")
+#stratdat.lut <- undataframe(stratdat.lut)
+
+stratdat.lut <- data.frame(
+Variable = c("ESTN_UNIT", "STRATUMCD", "P1POINTCNT", "P2POINTCNT", "n.strata", "n.total", "strwt", "CONDPROP_UNADJ_SUM", "cadjfac", "ACRES", "expfac", "EXPNS"), 
+Description = c("Estimation unit", "Strata value", "Number of pixels by strata and estimation unit", "Number of P2 plots in population data", "Number of sampled plots in strata", "Number of sampled plots for estimation unit", "Proportion of pixels in strata (strata weight)", "Summed condition proportion in strata", "Adjustment factor for nonsampled plots in strata (CONDPROP_UNADJ_SUM/n.strata)", "Total acres for estimation unit", "Expansion factor, in acres, area in strata divided by number of sampled plots", "Expanded area, in acres, expfac multiplied by strwt"), 
+    stringsAsFactors = FALSE)
+
+
+kable(stratdat.lut,
+  format = "pandoc",   # default
+  caption = "Description of variables in stratdat.",
+  col.names = names(stratdat.lut),
+  row.names = FALSE,
+  align = c("l"),       # align = c("c", "c", "c", "r")
+  # padding = 2         # inner spacing
+) 
+
+```
+
+
 
 </details>
 
@@ -364,53 +435,8 @@ A list object with one or more of the following components. If savedata=TRUE, al
 * **$pse** - Data frame with percent sampling errors corresponding to est.
 * **$titlelst** - If returntitle=TRUE, a list with one or two titles for est and pse, depending on number of output data frames (see below for list components).
 * **$raw** - If rawdata=TRUE, a list of raw data used in the estimation process.
-* **$GBpopdat** - If GBpopdat=NULL, list of the population data used for estimation is returned (see below for list components). This object can be to modGB* estimation modules for efficiency.
 
 
-### Population data used for producing estimates (GBpopdat$):
-<details>
-  <summary>View Population Data</summary>
-
-* **GBpopdat$condx**       - Data frame of condition data within population, including plot assignments, condition proportion adjustment factor (cadjfac), and adjusted condition proportions (CONDPROP_ADJ).
-* **GBpopdat$pltcondx**    - Data frame of plot/condition data within population, used for estimation.
-* **GBpopdat$cuniqueid**   - Unique identifier of plot in condx and pltcondx.
-* **GBpopdat$condid**      - Unique identifier of condition in condx and pltcondx.
-* **GBpopdat$treex**       - Data frame of tree data within population, used for estimation, including trees per acre adjustment factor (tadjfac), and adjusted trees per acre (TPA_ADJ).
-* **GBpopdat$tuniqueid**   - Unique identifier of plot in treex.
-* **GBpopdat$ACI.filter**  - Filter used for excluding ACI plots if ACI=FALSE.
-* **GBpopdat$unitarea**    - Data frame with area by estimation unit.
-* **GBpopdat$areavar**     - Name of area variable in unitarea.
-* **GBpopdat$unitvar**     - Name of estimation unit variable in unitarea and condx.
-* **GBpopdat$stratalut**      - Data frame of stratification information by estimation unit. See below for variable descriptions.
-* **GBpopdat$strvar**      - Name of strata variable in stratalut and condx 
-* **GBpopdat$expcondtab**  - Data frame of condition-level area expansion factors.
-* **GBpopdat$plotsampcnt** - Number of plots by plot status.
-* **GBpopdat$condsampcnt** - Number of conditions by condition status.
-* **GBpopdat$states**      - States of FIA plot data used in estimation (for title reference).
-* **GBpopdat$invyrs**      - Inventory years of FIA plot data used in estimation (for title reference).
-
-```{r, results = 'asis', echo=FALSE}
-
-#stratdat.lut <- read.csv("C:/_tsf/_GitHub/meta/stratdat_variables.csv", stringsAsFactors=FALSE)
-#source("C:/_tsf/_GitHub/meta/undataframe.R")
-#stratdat.lut <- undataframe(stratdat.lut)
-
-stratdat.lut <- data.frame(
-Variable = c("ESTN_UNIT", "STRATUMCD", "P1POINTCNT", "P2POINTCNT", "n.strata", "n.total", "strwt", "CONDPROP_UNADJ_SUM", "cadjfac", "ACRES", "expfac", "EXPNS"), 
-Description = c("Estimation unit", "Strata value", "Number of pixels by strata and estimation unit", "Number of P2 plots in population data", "Number of sampled plots in strata", "Number of sampled plots for estimation unit", "Proportion of pixels in strata (strata weight)", "Summed condition proportion in strata", "Adjustment factor for nonsampled plots in strata (CONDPROP_UNADJ_SUM/n.strata)", "Total acres for estimation unit", "Expansion factor, in acres, area in strata divided by number of sampled plots", "Expanded area, in acres, expfac multiplied by strwt"), 
-    stringsAsFactors = FALSE)
-
-
-kable(stratdat.lut,
-  format = "pandoc",   # default
-  caption = "Description of variables in stratdat.",
-  col.names = names(stratdat.lut),
-  row.names = FALSE,
-  align = c("l"),       # align = c("c", "c", "c", "r")
-  # padding = 2         # inner spacing
-) 
-
-```
 
 </details>
 
@@ -471,6 +497,7 @@ kable(all,
 ) 
 
 ```
+
 
 </details>
 
