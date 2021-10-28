@@ -7,6 +7,33 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+```{r setup, include = F}
+library(knitr)
+knitr::opts_chunk$set(message = F, warning = F)
+```
+
+```{r, include=FALSE}
+# Sets up output folding
+hooks = knitr::knit_hooks$get()
+hook_foldable = function(type) {
+  force(type)
+  function(x, options) {
+    res = hooks[[type]](x, options)
+    
+    if (isFALSE(options[[paste0("fold.", type)]])) return(res)
+    
+    paste0(
+      "<details><summary>", type, "</summary>\n\n",
+      res,
+      "\n\n</details>"
+    )
+  }
+}
+knitr::knit_hooks$set(
+  output = hook_foldable("output"),
+  plot = hook_foldable("plot")
+)
+```
 
 ## FIESTA Overview
 The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data like that from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
@@ -57,58 +84,39 @@ FUNCTION  | DESCRIPTION
 [datSumTreeDom()](#datSumTreeDom) | Aggregates numeric tree data by tree domain to plot or condition level.
 
 
-### EXAMPLES
+### Set up
 
-Set up for examples
-```
+We just load the `FIESTA` library to get started with the examples.
+```{r, message = F, warning = F}
 # Load library
 library(FIESTA)
-
-## If not on windows platform, set up an outfolder to output from examples
-if (.Platform$OS.type == "windows") {
-  # Set workspace to FIESTA folder (create if doesn't exist)
-  if (!file.exists("C:/FIESTA"))  {
-    dir.create("C:/FIESTA")
-  }
-  setwd("C:/FIESTA")
-
-  if (!file.exists("outfolder")) {
-    dir.create("outfolder")
-  }
-  outfolder <- "outfolder"
-}
-
-
 ```
 
 The following examples use FIA data from Wyoming for inventory years 2011-2013.
 
-#### <a name="datFilter"/>datFilter()
-```
-######################################################################################
-# Usage:
-# datFilter(x, xfilter = NULL, xfiltervar = NULL, othertabnms = NULL, 
-#	    uniqueid = "PLT_CN", vardelete = NULL, title.filter = NULL, savedata = FALSE, 
-#   	outfolder = NULL, outfn = "datf", outfn.pre = NULL, outfn.date = FALSE, 
-#	    overwrite = FALSE, filternm = NULL, stopifnull = FALSE, returnDT = TRUE, 
-#	    xnm = NULL, gui = FALSE) 
-# 
-# Description:
-# Subsets a data table by specified filter(s) or logical statement.
-#
-# Returns a list of the filtered data table and the filter.
-######################################################################################
+### <a name="datFilter"/>`datFilter()`
 
-## Subset National Forest conditions in Wyoming
+The `datFilter` function subsets a data table by specified filter(s) or logical statement and returns a list of the filtered data table and the filter.
+
+#### Example 1: Subset National Forest Conditions in Wyoming
+<details>
+  <summary>View Example</summary>
+  
+```{r}
 WYconddat.nfs <- datFilter(WYcond, "ADFORCD > 0")
 names(WYconddat.nfs)
 WYcond.nfs <- WYconddat.nfs$xf
 dim(WYcond.nfs)
 head(WYcond.nfs)
+```
 
+</details>
 
+#### Example 2: Subset Trees That Are Standing Dead Aspen Trees in Wyoming
+<details>
+  <summary>View Example</summary>
 
-## Subset trees that are standing dead aspen trees in WYoming
+```{r}
 WYtreedat.dead <- datFilter(WYtree, "STATUSCD == 2 & STANDING_DEAD_CD == 1 & SPCD == 746")
 names(WYtreedat.dead)
 WYtree.deadasp <- WYtreedat.dead$xf
@@ -116,9 +124,16 @@ head(WYtree.deadasp)
 dim(WYtree.deadasp)
 
 dim(WYtree)
+```
+
+</details>
 
 
-## Subset trees that are standing dead aspens in WYoming, and subset other tables to match
+#### Example 3: Subset Trees That Are Standing Dead Aspens in Wyoming, and Subset Other Tables to Match
+<details>
+  <summary>View Example</summary>
+  
+```{r}
 WYtreedat.dead2 <- datFilter(WYtree, "STATUSCD == 2 & STANDING_DEAD_CD == 1 & SPCD == 746",
     othertabnms=c("WYplt", "WYcond"))
 names(WYtreedat.dead2)
@@ -133,23 +148,20 @@ WYcond.deadasp <- WYtree.deadasptabs$clip_WYcond
 
 dim(WYplt.deadasp)
 dim(WYcond.deadasp)
-
-
 ```
 
+</details>
 
-#### <a name="datFreq"/>datFreq()
-```
-######################################################################################
-# Usage:
-# datFreq(x, xvar = NULL, total = FALSE, subtotal = FALSE, subtotalcol = NULL,
-#     savedata = FALSE, outfolder = NULL, outfn = NULL) 
-# 
-#	Generates a frequency table from a data frame, including number of records
-#	by a specified variable or variables in the data frame with optional
-#	totals and/or subtotals. 
-######################################################################################
 
+### <a name="datFreq"/>`datFreq()` 
+
+The `datFreq` function generates a frequency table from a data frame, including number of records by a specified variable or variables in the data frame with optional totals and/or subtotals. 
+
+#### Example: Multiple Uses
+<details>
+  <summary>View Example</summary>
+
+```{r}
 ## Get number of plots by county
 datFreq(WYplt, xvar="COUNTYCD")
 
@@ -159,49 +171,42 @@ datFreq(WYplt, xvar=c("COUNTYCD", "PLOT_STATUS_CD"))
 ## Get number of plots by county and plot status with subtotals
 datFreq(WYplt, xvar=c("COUNTYCD", "PLOT_STATUS_CD"), subtotal=TRUE)
 
-
 ## Get number of plots by county and plot status with subtotals
-datFreq(WYplt, xvar=c("COUNTYCD", "PLOT_STATUS_CD"), subtotal=TRUE, subtotalcol="COUNTYCD")
-
-
+datFreq(WYplt, xvar=c("COUNTYCD", "PLOT_STATUS_CD"), subtotal=TRUE,
+        subtotalcol="COUNTYCD")
 ```
 
+</details>
 
-#### <a name="datPivot"/>datPivot()
-```
-######################################################################################
-# Usage:
-# datPivot(x, pvar, xvar, yvar, pfun = sum, xfilter = NULL, pvar.round = 2,
-#   savedata = FALSE, outfolder = NULL, outfn = NULL) 
-# 
-#	Generates a pivot table. 
-######################################################################################
+
+### <a name="datPivot"/>`datPivot()`
+
+The `datPivot` function generates a pivot table. 
+
+#### Example: Multiple Uses
+<details>
+  <summary>View Example</summary>
+  
+```{r}
 ## Get summed condition proportions by forest type class and stand size class
 datPivot(WYcond, pvar="CONDPROP_UNADJ", xvar="FORTYPCD", yvar="STDSZCD")
 
-
 ## Get average height by species group code and status code
 datPivot(WYtree, "HT", "SPGRPCD", "TREECLCD", pfun=mean)
-
-
 ```
 
+</details>
 
-#### <a name="datLUTclass"/>datLUTclass()
-```
-######################################################################################
-# Usage:
-# datLUTclass(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL, minvar="MIN",
-#     maxvar="MAX", varclassnm=NULL, getvarclassnm=FALSE, savedata=FALSE, 
-#     outfolder=NULL, outfn=NULL) 
-# 
-# Description:
-# Merge a look-up table to define categories of continuous data in x (e.g., DIACL).
-#	Adds a variable to x, setting the variable to VARCLNM where: 
-#     xvar >= MIN and xvar < MAX.
-######################################################################################
 
-## Reference table stored in FIESTA with 2-inch diameter classes.
+### <a name="datLUTclass"/>`datLUTclass()`
+
+The `datLUTclass` function merges a look-up table to define categories of continuous data in x (e.g., DIACL). Adds a variable to x, setting the variable to VARCLNM where: xvar >= MIN and xvar < MAX.
+
+#### Example 1: Reference Table Stored in `FIESTA` with 2-inch Diameter Classes
+<details>
+  <summary>View Example</summary>
+  
+```{r}
 ref_diacl2in
 
 WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=ref_diacl2in, LUTclassnm="DIACL2IN")
@@ -210,8 +215,15 @@ WYtree2 <- WYtreelut$xLUT
 head(WYtree2)
 dim(WYtree)
 dim(WYtree2)
+```
 
-## Create new reference table and merge to tree table
+</details>
+
+#### Example 2: Create New Reference Table and Merge to Tree Table
+<details>
+  <summary>View Example</summary>
+
+```{r}
 diacl25 <- data.frame(MIN=c(5,25), MAX=c(25, 100), DIACL25=c("5.0-24.9", "25.0+" ))
 diacl25
 
@@ -221,21 +233,27 @@ WYtree2 <- WYtreelut2$xLUT
 head(WYtree2)
 dim(WYtree)
 dim(WYtree2)
+```
 
+</details>
 
-## Use cutbreaks to classify LIVE_CANOPY_CVR_PCT variable from WYcond table
+#### Example 3: Use Cutbreaks to Classify `LIVE_CANOPY_CVR_PCT` variable from `WYcond` Table
+<details>
+  <summary>View Example</summary>
+
+```{r}
 cutbreaks <- c(0,25,50,100)
 WYcondlut <- datLUTclass(x=WYcond, xvar="LIVE_CANOPY_CVR_PCT", cutbreaks=cutbreaks)
 names(WYcondlut)
 
 head(WYcondlut$xLUT)
 WYcondlut$LUT
-
-
 ```
+
+</details>
 
 #### <a name="datLUTnm"/>datLUTnm()
-```
+```{r}
 ######################################################################################
 # Usage:
 # datLUTnm(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL, LUTnewvarnm = NULL,
@@ -275,7 +293,7 @@ head(WYcond3[WYcond3$DSTRBCD1 > 0, ])
 ```
 
 #### <a name="datSumCond"/>datSumCond()
-```
+```{r}
 ######################################################################################
 # Usage:
 # datSumCond(cond = NULL, plt = NULL, plt_dsn = NULL, cuniqueid="PLT_CN", 
@@ -336,7 +354,7 @@ WYcond[WYcond$PLT_CN == 46792188020004,]
 ```
 
 #### <a name="datSumTree"/>datSumTree()
-```
+```{r}
 ######################################################################################
 # Usage:
 # datSumTree(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
@@ -465,7 +483,7 @@ WYcond[WYcond$PLT_CN %in% cn,]
 ```
 
 #### <a name="datSumTreeDom"/>datSumTreeDom()
-```
+```{r}
 ######################################################################################
 # Usage:
 # datSumTreeDom(tree = NULL, seed = NULL, cond = NULL, plt = NULL, plt_dsn = NULL, 
