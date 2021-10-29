@@ -1,4 +1,4 @@
-#' List of data table unique IDs.
+#' List of population table unique IDs.
 #' 
 #' Returns a list of user-supplied parameters and parameter values for data 
 #' table unique IDs to be supplied to *pop functions. 
@@ -19,11 +19,11 @@
 #' @keywords list
 #' @examples
 #' 
-#' data_uniqueid_list()
+#' popTableIDs()
 #' 
-#' @export data_uniqueids_list
+#' @export popTableIDs
 
-data_uniqueids_list <- function(cuniqueid="PLT_CN",  puniqueid="CN", 
+popTableIDs <- function(cuniqueid="PLT_CN",  puniqueid="CN", 
                                pltassgnid="PLT_CN", tuniqueid="PLT_CN",
                                vuniqueid="PLT_CN", subpuniqueid="PLT_CN",
                                lulcuniqueid="PLT_CN", condid="CONDID", ...) {

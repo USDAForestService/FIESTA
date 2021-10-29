@@ -1,18 +1,22 @@
 ## this function sets up the list-binning parameter functions
 
-setup_list_parameters <- function(parameters) {
+setup_list_parameters <- function(parameters, savedata_opts2=savedata_opts,
+                                  table_opts2=table_opts, title_opts2=title_opts,
+                                  strata_opts2=strata_opts, data_tables2=data_tables,
+                                  data_uniqueids2=data_uniqueids
+                                  ) {
   if ("savedata_opts" %in% parameters) {
     ## Set savedata defaults
     savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
-    
+
     for (i in 1:length(savedata_defaults_list)) {
       assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
     }
-    
+
     ## Set user-supplied savedata values
-    if (length(savedata_opts) > 0) {
-      for (i in 1:length(savedata_opts)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    if (length(savedata_opts2) > 0) {
+      for (i in 1:length(savedata_opts2)) {
+        assign(names(savedata_opts2)[[i]], savedata_opts2[[i]])
       }
     }
   }
@@ -26,9 +30,9 @@ setup_list_parameters <- function(parameters) {
     }
     
     ## Set user-supplied table values
-    if (length(table_opts) > 0) {
-      for (i in 1:length(table_opts)) {
-        assign(names(table_opts)[[i]], table_opts[[i]])
+    if (length(table_opts2) > 0) {
+      for (i in 1:length(table_opts2)) {
+        assign(names(table_opts2)[[i]], table_opts2[[i]])
       }
     }
   }
@@ -42,9 +46,9 @@ setup_list_parameters <- function(parameters) {
     }
     
     ## Set user-supplied title values
-    if (length(title_opts) > 0) {
-      for (i in 1:length(title_opts)) {
-        assign(names(title_opts)[[i]], title_opts[[i]])
+    if (length(title_opts2) > 0) {
+      for (i in 1:length(title_opts2)) {
+        assign(names(title_opts2)[[i]], title_opts2[[i]])
       }
     }
   }
@@ -58,43 +62,43 @@ setup_list_parameters <- function(parameters) {
     }
     
     ## Set user-supplied strata values
-    if (length(strata_opts) > 0) {
-      for (i in 1:length(strata_opts)) {
-        assign(names(strata_opts)[[i]], strata_opts[[i]])
+    if (length(strata_opts2) > 0) {
+      for (i in 1:length(strata_opts2)) {
+        assign(names(strata_opts2)[[i]], strata_opts2[[i]])
       }
     }
   }
   
-  if ("data_tables" %in% parameters) {
-    ## Set data_tables defaults
-    data_tables_defaults_list <- formals(FIESTA::data_tables_list)[-length(formals(FIESTA::data_tables_list))]
-    
-    for (i in 1:length(data_tables_defaults_list)) {
-      assign(names(data_tables_defaults_list)[[i]], data_tables_defaults_list[[i]])
-    }
-    
-    ## Set user-supplied strata values
-    if (length(data_tables) > 0) {
-      for (i in 1:length(data_tables)) {
-        assign(names(data_tables)[[i]], data_tables[[i]])
-      }
-    }
-  }
-  
-  if ("data_uniqueids" %in% parameters) {
-    ## Set data_uniqueids defaults
-    data_uniqueids_defaults_list <- formals(FIESTA::data_uniqueids_list)[-length(formals(FIESTA::data_uniqueids_list))]
-    
-    for (i in 1:length(data_uniqueids_defaults_list)) {
-      assign(names(data_uniqueids_defaults_list)[[i]], data_uniqueids_defaults_list[[i]])
-    }
-    
-    ## Set user-supplied strata values
-    if (length(data_uniqueids) > 0) {
-      for (i in 1:length(data_uniqueids)) {
-        assign(names(data_uniqueids)[[i]], data_uniqueids[[i]])
-      }
-    }
-  }
+  # if ("data_tables" %in% parameters) {
+  #   ## Set data_tables defaults
+  #   data_tables_defaults_list <- formals(FIESTA::data_tables_list)[-length(formals(FIESTA::data_tables_list))]
+  #   
+  #   for (i in 1:length(data_tables_defaults_list)) {
+  #     assign(names(data_tables_defaults_list)[[i]], data_tables_defaults_list[[i]])
+  #   }
+  #   
+  #   ## Set user-supplied strata values
+  #   if (length(data_tables2) > 0) {
+  #     for (i in 1:length(data_tables2)) {
+  #       assign(names(data_tables2)[[i]], data_tables2[[i]])
+  #     }
+  #   }
+  # }
+  # 
+  # if ("data_uniqueids" %in% parameters) {
+  #   ## Set data_uniqueids defaults
+  #   data_uniqueids_defaults_list <- formals(FIESTA::data_uniqueids_list)[-length(formals(FIESTA::data_uniqueids_list))]
+  #   
+  #   for (i in 1:length(data_uniqueids_defaults_list)) {
+  #     assign(names(data_uniqueids_defaults_list)[[i]], data_uniqueids_defaults_list[[i]])
+  #   }
+  #   
+  #   ## Set user-supplied strata values
+  #   if (length(data_uniqueids2) > 0) {
+  #     for (i in 1:length(data_uniqueids2)) {
+  #       assign(names(data_uniqueids2)[[i]], data_uniqueids2[[i]])
+  #     }
+  #   }
+  # }
 }
 

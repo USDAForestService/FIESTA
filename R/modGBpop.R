@@ -54,10 +54,10 @@
 #' @param popType String. Type of evaluation(s) to include in population data.
 #' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
 #' below for descriptions of each.
-#' @param data_tables List of data tables the user would like returned.
-#'  See help(data_tables_list()) for a list of options.
-#' @param data_uniqueids List of unique IDs corresponding to the data tables
-#' that the user has requested. See help(data_uniqueids_list()) for a list of
+#' @param popTabs List of population tables the user would like returned.
+#'  See help(popTabs()) for a list of options.
+#' @param popTabIDs List of unique IDs corresponding to the population tables
+#' that the user has requested. See help(popTabIDs()) for a list of
 #' options.
 #' @param dsn String. Name of database where tree, cond, and plot-level tables
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
@@ -201,8 +201,8 @@
 #' @keywords data
 #' @export modGBpop
 modGBpop <- function(popType="VOL",
-                     data_tables = data_tables_list(),
-                     data_uniqueids = data_uniqueids_list(),
+                     popTabs = popTables(),
+                     popTabIDs = popTableIDs(),
                      dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ",
                      adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL,
                      ACI=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
@@ -244,9 +244,61 @@ modGBpop <- function(popType="VOL",
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
 	treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
   
-  ## Set parameter defaults
-  setup_list_parameters(c("data_tables", "data_uniqueids", "savedata_opts",
-                          "strata_opts"))
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ## Set strata defaults
+  strata_defaults_list <- formals(FIESTA::strata_options)[-length(formals(FIESTA::strata_options))]
+  
+  for (i in 1:length(strata_defaults_list)) {
+    assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied strata values
+  if (length(strata_opts) > 0) {
+    for (i in 1:length(strata_opts)) {
+      assign(names(strata_opts)[[i]], strata_opts[[i]])
+    }
+  }
+  
+  ## Set popTables defaults
+  popTables_defaults_list <- formals(FIESTA::popTables)[-length(formals(FIESTA::popTables))]
+  
+  for (i in 1:length(popTables_defaults_list)) {
+    assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied popTable values
+  if (length(popTabs) > 0) {
+    for (i in 1:length(popTabs)) {
+      assign(names(popTabs)[[i]], popTabs[[i]])
+    }
+  }
+  
+  ## Set popTabIDs defaults
+  popTableIDs_defaults_list <- formals(FIESTA::popTableIDs)[-length(formals(FIESTA::popTableIDs))]
+  
+  for (i in 1:length(popTableIDs_defaults_list)) {
+    assign(names(popTableIDs_defaults_list)[[i]], popTableIDs_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied popTabIDs values
+  if (length(popTabIDs) > 0) {
+    for (i in 1:length(popTabIDs)) {
+      assign(names(popTabIDs)[[i]], popTabIDs[[i]])
+    }
+  }
 
   ## SET OPTIONS
   options.old <- options()

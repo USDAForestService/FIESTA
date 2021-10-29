@@ -591,16 +591,16 @@ First, we get population data for Wyoming area and tree estimates, using post-st
 
 ```{r, results = FALSE, message = F}
 GBpopdat <- modGBpop(
-    cond = WYcond,               # FIA plot/condition data
-    tree = WYtree,               # FIA tree data
-    seed = WYseed,               # FIA seedling data
-    pltassgn = WYpltassgn,       # plot assignments
-    pltassgnid = "CN",           # uniqueid of plots
-    unitarea = WYunitarea,       # area by estimation units
-    unitvar = "ESTN_UNIT",       # name of estimation unit
-    strata = TRUE,               # if using post-stratification
-    stratalut = WYstratalut      # strata classes and pixels counts
-    )
+  data_tables = data_tables_list(cond = WYcond,             # FIA plot/condition data
+                                 tree = WYtree,             # FIA tree data
+                                 seed = WYseed,             # FIA seedling data
+                                 pltassgn = WYpltassgn),    # plot assignments
+  data_uniqueids = data_uniqueids_list(pltassgnid = "CN"),  # uniqueid of plots
+  unitarea = WYunitarea,       # area by estimation units
+  unitvar = "ESTN_UNIT",       # name of estimation unit
+  strata = TRUE,               # if using post-stratification
+  strata_opts = strata_options(stratalut = WYstratalut)     # strata classes and pixels counts
+  )
 ```
 
 To get the names of the list components associated with the output of our call of `modGBpop`, we run the following code:

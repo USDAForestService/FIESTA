@@ -1,4 +1,4 @@
-#' List of data tables.
+#' List of population tables.
 #' 
 #' Returns a list of user-supplied parameters and parameter values for data 
 #' tables to be supplied to *pop functions. 
@@ -42,11 +42,11 @@
 #' @keywords list
 #' @examples
 #' 
-#' data_tables_list()
+#' popTables()
 #' 
-#' @export data_tables_list
+#' @export popTables
 
-data_tables_list <- function(cond=NULL, plt=NULL, pltassgn=NULL, tree=NULL,
+popTables <- function(cond=NULL, plt=NULL, pltassgn=NULL, tree=NULL,
                              seed=NULL, vsubpspp=NULL, vsubpstr=NULL, 
                              subplot=NULL, subp_cond=NULL, lulc=NULL, ...) {
   # set up list of parameters

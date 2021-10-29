@@ -6,8 +6,8 @@
 \usage{
 modGBpop(
   popType = "VOL",
-  data_tables = data_tables_list(),
-  data_uniqueids = data_uniqueids_list(),
+  popTabs = popTables(),
+  popTabIDs = popTableIDs(),
   dsn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
@@ -39,11 +39,11 @@ modGBpop(
 Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
 below for descriptions of each.}
 
-\item{data_tables}{List of data tables the user would like returned.
-See help(data_tables_list()) for a list of options.}
+\item{popTabs}{List of population tables the user would like returned.
+See help(popTabs()) for a list of options.}
 
-\item{data_uniqueids}{List of unique IDs corresponding to the data tables
-that the user has requested. See help(data_uniqueids_list()) for a list of
+\item{popTabIDs}{List of unique IDs corresponding to the population tables
+that the user has requested. See help(popTabIDs()) for a list of
 options.}
 
 \item{dsn}{String. Name of database where tree, cond, and plot-level tables
