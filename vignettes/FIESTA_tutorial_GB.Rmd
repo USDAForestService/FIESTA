@@ -209,14 +209,14 @@ Data object parameters allow a user to use other functions from FIESTA to input 
 * **pltdat**   - Output data list components from FIESTA::pltdat().
 * **GBstratdat**  - Output data list components from FIESTA::GBstratdat(). 
 
-
+</details>
 
 <a name="Population Output"></a>
 
-## Output values from `FIESTA` Green-Book module - modGBpop()
+### Output values from `FIESTA` Green-Book module - modGBpop()
 
 <details>
-  <summary>View Population Data</summary>
+  <summary>View Output Values</summary>
 
 * **condx**       - Data frame of condition data within population, including plot assignments, condition proportion adjustment factor (cadjfac), and adjusted condition proportions (CONDPROP_ADJ).
 * **pltcondx**    - Data frame of plot/condition data within population, used for estimation.
@@ -376,8 +376,6 @@ If savedata=TRUE, output is saved using default settings. The following paramete
 * **append_layer**  - TRUE, appends output to existing layer in database or file in outfolder.
 
 
-
-
 </details>
 
 <a name="required"></a>
@@ -437,8 +435,6 @@ A list object with one or more of the following components. If savedata=TRUE, al
 * **$raw** - If rawdata=TRUE, a list of raw data used in the estimation process.
 
 
-
-</details>
 
 ### Raw data used for producing estimates (If rawdata=TRUE, raw$):
 <details>
@@ -590,16 +586,17 @@ In this example, we use the sample WY data (2013 Evaluation) in `FIESTA` to gene
 First, we get population data for Wyoming area and tree estimates, using post-stratification with the `modGBpop` function:
 
 ```{r, results = FALSE, message = F}
+conditiontable <- WYcond
 GBpopdat <- modGBpop(
-  data_tables = data_tables_list(cond = WYcond,             # FIA plot/condition data
-                                 tree = WYtree,             # FIA tree data
-                                 seed = WYseed,             # FIA seedling data
-                                 pltassgn = WYpltassgn),    # plot assignments
-  data_uniqueids = data_uniqueids_list(pltassgnid = "CN"),  # uniqueid of plots
+  popTabs = list(cond = conditiontable,             # FIA plot/condition data
+                      tree = FIESTA::WYtree,             # FIA tree data
+                      seed = FIESTA::WYseed,             # FIA seedling data
+                      pltassgn = FIESTA::WYpltassgn),    # plot assignments
+  popTabIDs = popTableIDs(pltassgnid = "CN"),  # uniqueid of plots
   unitarea = WYunitarea,       # area by estimation units
   unitvar = "ESTN_UNIT",       # name of estimation unit
   strata = TRUE,               # if using post-stratification
-  strata_opts = strata_options(stratalut = WYstratalut)     # strata classes and pixels counts
+  strata_opts = list(stratalut = WYstratalut)     # strata classes and pixels counts
   )
 ```
 
@@ -1857,25 +1854,27 @@ If you want to exclude post-stratification (i.e., simple random sample, Horvitz-
 ```{r}
 ## Get population data for Wyoming estimates, with no post-stratification
 GBpopdat.strat <- modGBpop(
+  popTabs = list(
     cond = WYcond,               # FIA plot/condition data
     tree = WYtree,               # FIA tree data
     seed = WYtree,               # FIA seedling data
-    pltassgn = WYpltassgn,       # plot assignments
-    pltassgnid = "CN",           # uniqueid of plots
+    pltassgn = WYpltassgn),       # plot assignments
+    popTabIDs = popTableIDs(pltassgnid = "CN"),             # uniqueid of plots
     unitarea = WYunitarea,       # area by estimation units
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = TRUE,               # if using post-stratification
-    stratalut = WYstratalut      # strata classes and pixels counts
+    strata_opts = list(stratalut = WYstratalut)       # strata classes and pixels counts
     )
 
 
 ## Get population data for Wyoming estimates, with no post-stratification
 GBpopdat.nostrat <- modGBpop(
+    popTabs = list(
     cond = WYcond,               # FIA plot/condition data
     tree = WYtree,               # FIA tree data
     seed = WYtree,               # FIA seedling data
-    pltassgn = WYpltassgn,       # plot assignments
-    pltassgnid = "CN",           # uniqueid of plots
+    pltassgn = WYpltassgn),       # plot assignments
+    popTabIDs = popTableIDs(pltassgnid = "CN"),             # uniqueid of plots
     unitarea = WYunitarea,       # area by estimation units
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = FALSE               # if using post-stratification
