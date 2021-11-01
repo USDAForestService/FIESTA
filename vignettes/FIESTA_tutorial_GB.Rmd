@@ -588,7 +588,7 @@ First, we get population data for Wyoming area and tree estimates, using post-st
 ```{r, results = FALSE, message = F}
 conditiontable <- WYcond
 GBpopdat <- modGBpop(
-  popTabs = list(cond = conditiontable,             # FIA plot/condition data
+  popTabs = popTables(cond = conditiontable,             # FIA plot/condition data
                       tree = FIESTA::WYtree,             # FIA tree data
                       seed = FIESTA::WYseed,             # FIA seedling data
                       pltassgn = FIESTA::WYpltassgn),    # plot assignments
@@ -596,7 +596,8 @@ GBpopdat <- modGBpop(
   unitarea = WYunitarea,       # area by estimation units
   unitvar = "ESTN_UNIT",       # name of estimation unit
   strata = TRUE,               # if using post-stratification
-  strata_opts = list(stratalut = WYstratalut)     # strata classes and pixels counts
+  strata_opts = strata_options(
+    stratalut = WYstratalut)   # strata classes and pixels counts
   )
 ```
 
@@ -1854,7 +1855,7 @@ If you want to exclude post-stratification (i.e., simple random sample, Horvitz-
 ```{r}
 ## Get population data for Wyoming estimates, with no post-stratification
 GBpopdat.strat <- modGBpop(
-  popTabs = list(
+  popTabs = popTables(
     cond = WYcond,               # FIA plot/condition data
     tree = WYtree,               # FIA tree data
     seed = WYtree,               # FIA seedling data
@@ -1863,13 +1864,14 @@ GBpopdat.strat <- modGBpop(
     unitarea = WYunitarea,       # area by estimation units
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = TRUE,               # if using post-stratification
-    strata_opts = list(stratalut = WYstratalut)       # strata classes and pixels counts
+    strata_opts = strata_options(
+      stratalut = WYstratalut)   # strata classes and pixels counts
     )
 
 
 ## Get population data for Wyoming estimates, with no post-stratification
 GBpopdat.nostrat <- modGBpop(
-    popTabs = list(
+    popTabs = popTables(
     cond = WYcond,               # FIA plot/condition data
     tree = WYtree,               # FIA tree data
     seed = WYtree,               # FIA seedling data
