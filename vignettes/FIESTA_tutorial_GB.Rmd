@@ -556,9 +556,7 @@ Next, you'll need to set up an "outfolder". This is just a file path to a folder
 options(scipen=6)
 options(stringsAsFactors=FALSE)
 
-dir.create("FIESTA")
-dir.create(paste0(getwd(),"/FIESTA", "/outfolder"))
-outfolder <- paste0(getwd(),"/FIESTA", "/outfolder")
+outfolder <- tempdir()
 ```
 
 
@@ -2080,12 +2078,4 @@ Bechtold, William A.; Patterson, Paul L., Editors. 2005. The enhanced Forest Inv
 Patterson, Paul L. 2012. Photo-based estimators for the Nevada photo-based inventory. Res. Pap. RMRS-RP-92. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.
 
 Westfall, James A.; Patterson, Paul L.; Coulston, John W. 2011. Post-stratified estimation: with-in strata and total sample size recommendations. Canadian Journal of Forest Research. 41: 1130-1139.
-
-```{r, include = FALSE}
-# deletes old outfolder from examples
-unlink(substr(outfolder,
-              1,
-              nchar(outfolder)-10),
-       recursive = TRUE)
-```
 
