@@ -30,23 +30,9 @@
 multest_options <- function(multest_fmt="csv", multest_outfolder=NULL, 
                           multest_dsn=NULL, multest_layer=NULL,
                           multest.append=FALSE, multest.AOIonly=FALSE, ...) {
-  # set up list of parameters
-  l <- as.list(match.call())
-  l <- l[-1]
+  # create list from input parameters
+  l <- c(as.list(environment()), list(...))
   
-  # this evaluates objects in the user's global environment and saves them back
-  # into the list in order to pass them correctly to other functions
-  objs <- ls(envir = globalenv())
-  if (length(l) > 0) {
-    for (i in 1:length(l)) {
-      if (class(l[[i]]) == "name") {
-        if (l[i] %in% objs) {
-          l[i] <- eval(l[i][[1]], envir = globalenv())
-        }
-      }
-    }
-  }
-  
-  # returns the list
+  # return list
   return(l)
 }
