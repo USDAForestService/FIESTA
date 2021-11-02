@@ -39,7 +39,7 @@ knitr::knit_hooks$set(
 
 The `R` package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
-Functions are organized by type or objective and are named with a corresponding prefix. `FIESTA` core functions facilitate data extraction and compilation of data input information and are used independently or within the `FIESTA` estimation modules. `FIESTA` estimation modules combine multiple functions from `FIESTA` or other packages to generate population estimates using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations (e.g., adjustments for nonresponse) for a custom boundary and can be used for generating multiple estimates. `FIESTA` analysis functions, found in the `FIESTAnalysis` package, streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
+Functions are organized by type or objective and are named with a corresponding prefix (Fig. 1). `FIESTA` core functions (CORE) facilitate data extraction and compilation of data input information and are used independently or within the `FIESTA` estimation modules. `FIESTA` estimation modules (MODULE) combine multiple functions from `FIESTA` or other packages to generate population estimates using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations (e.g., adjustments for nonresponse, standardizing auxiliary data) for a custom boundary and can be used for generating multiple estimates. `FIESTA` analysis functions, found in the `FIESTAnalysis` package, streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
 
 **Core Functions**
 
@@ -66,7 +66,7 @@ Functions include non-ratio estimators for area and tree estimates by domain and
 
 ## Objective of tutorial
 
-The main objective of this tutorial is to demonstrate how to use `FIESTA` for generating estimates and estimated variances using FIA's 'Green Book' estimators with FIA's standard state-level population data (i.e., Evaluation) from the FIA database (FIADB), including FIA plot data, strata proportions, and area of estimation units. This tutorial steps through the following topics to help use `FIESTA`'s GB module. 
+The Green-Book estimators can be used with FIA's standard state-level population data (i.e, Evaluation) from the FIA database (FIADB) and also population data from a custom boundary. The population data includes a set of FIA plot data and summarized auxiliary information for post-stratification, including a table of area by estimation unit within the population, and a table of strata proportions by estimation unit. This tutorial steps through using FIESTA's Green Book module for either situation.
 
 * [Green-Book parameters](#input)
 * [Required variables for input tables](#required)
@@ -113,11 +113,11 @@ The population types (i.e., Eval_Type) currently available for `FIESTA` estimati
 
 
 <a name="dtab"></a>
-**Data tables and unique identifiers**
+**Population data tables and unique identifiers**
 
 The required data tables are from the FIA national database. Plot-level information, such as: state, county, or strata assignment may be included in the pltassgn table, or cond table (with pltassgn=NULL). The data table inputs can be the name of a comma-delimited file (\*.csv), a layer within a database, (e.g., SQLite), or an R data frame or data table object already loaded into R. The pltassgn table can also be a point shapefile (\*.shp), a spatial layer within a database, or a sf R object with one point per plot. The unique identifier for a plot must be provided in the corresponding parameter for each input table. See required variables section for a list of variables necessary to include for estimation.
 
-* **data_tables**   - A list of data tables used for estimates (cond, plt, pltassgn, tree, seed, vsubpspp, vsubpstr, subplot, subp_cond, lulc). See below for more details about tables.
+* **poptables**   - A list of data tables used for estimates (cond, plt, pltassgn, tree, seed, vsubpspp, vsubpstr, subplot, subp_cond, lulc). See below for more details about tables.
 
 
 * **cond**      - Condition-level data, with 1 record per condition, including nonsampled conditions. May include estimation unit and strata assignment if plt=NULL and pltassgn=NULL - *required for all estimates*. 
@@ -126,7 +126,7 @@ The required data tables are from the FIA national database. Plot-level informat
 * **pltassgn**  - Plot-level data, with 1 record per plot and plot assignment of estimation unit and strata, if applying stratification. If nonsampled plots are included, PLOT_STATUS_CD variable must be in table. These plots are excluded from the analysis.       - *optional for all estimates*.
 * **seed**      - Seedling data, with 1 record per seedling count - *required for modGBtree() or modGBratio() seedling estimates*.
 
-* **data_uniqueids**   - A list of data tables used for estimates (cuniqueid, puniqueid, pltassgnid, tuniqueid, vuniqueid, subpuniqueid="PLT_CN", lulcuniqueid="PLT_CN", condid="CONDID"). See below for more details about tables.
+* **popTableIDs**   - A list of data tables used for estimates (cuniqueid, puniqueid, pltassgnid, tuniqueid, vuniqueid, subpuniqueid="PLT_CN", lulcuniqueid="PLT_CN", condid="CONDID"). See below for more details about tables.
 
 * **cuniqueid** - Unique identifier for plot in cond (default="PLT_CN").
 * **puniqueid** - Unique identifier for plot in plt (default="CN").
@@ -185,7 +185,9 @@ An estimation unit is a population, or area of interest, with known area and num
 <a name="strata_opts"></a>
 **Post-stratification information**
 
-Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.
+Post-stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.
+
+In FIESTA, the plot assignments, strata proportions, and area are provided by the user and may be obtained through FIESTA or other means, given the proper format.
 
 * **stratalut** - Look-up table with pixel counts, area, or proportions (strwt) by strata (and estimation unit).
 * **strvar**    - Name of strata variable in stratalut and pltassgn or cond table with strata assignment for each plot.
@@ -517,27 +519,34 @@ getestvar()
 
 ### GB Examples
 
-The following examples are for generating FIA's traditional, state-level estimates using standard FIA Evaluation data from FIA's National database, including FIA plot data and associated estimation unit and stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in `FIESTA`.
+The following examples are for generating FIA's traditional, state-level estimates using standard FIA Evaluation data from FIA's National database, including FIA plot data and associated estimation unit and stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in `FIESTA`. Estimates using population data from FIADB can be compared with EVALIDator estimates, using the 2013 evaluation (https://apps.fs.usda.gov/Evalidator/evalidator.jsp).
 
 
 Example data - Wyoming (WY), Inventory Years 2011-2013
 
 Data Frame  | Description
 :-----------| :-----------------------------------------------------------------------------------
-WYpltassgn  | WY plot-level data with strata and estimation unit assignments
+WYplt       | WY plot-level data
 WYcond      | WY condition-level data
 WYtree      | WY tree-level data
-WYunitarea | WY estimation unit look-up table with total acres by estimation unit (ESTUNIT)
+WYpltassgn  | WY plot-level data with strata and estimation unit assignments
+WYunitarea  | WY estimation unit look-up table with total acres by estimation unit (ESTUNIT)
 WYstratalut    | WY strata look-up table with pixel counts (P1POINTCNT) by strata and estimation unit
 
 External data             | Description
 :-------------------------| :------------------------------------------------------------------------
 WYbighorn_adminbnd.shp    | Polygon shapefile of WY Bighorn National Forest Administrative boundary^1^
 WYbighorn_districtbnd.shp | Polygon shapefile of WY Bighorn National Forest District boundaries^2^
+WYbighorn_forest_nonforest_250m.tif| GeoTIFF raster of predicted forest/nonforest (1/0)^3^ 
+WYbighorn_dem_250m.img    | Erdas Imagine raster of elevation change, in meters^4^
 
 ^1^USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.AdministrativeForest (http://data.fs.usda.gov/geodata/edw). Description: An area encompassing all the National Forest System lands administered by an administrative unit. The area encompasses private lands, other governmental agency lands, and may contain National Forest System lands within the proclaimed boundaries of another administrative unit. All National Forest System lands fall within one and only one Administrative Forest Area.
 
 ^2^USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (http://data.fs.usda.gov/geodata/edw). Description: A depiction of the boundary that encompasses a Ranger District.
+
+^3^Based on 250m resolution, Moderate Resolution Imaging Spectroradiometer (MODIS), classified map, reclassified from 3 to 2 classes: 1:forest; 2:nonforest. Projected in Albers Conical Equal Area, Datum NAD27 (Ruefenacht et al. 2008).
+
+^4^USGS National Elevation Dataset (NED), resampled from 30m resolution to 250m. Projected in Albers Conical Equal Area, Datum NAD27 (U.S. Geological Survey 2017).
 
 
 
@@ -556,7 +565,102 @@ Next, you'll need to set up an "outfolder". This is just a file path to a folder
 options(scipen=6)
 options(stringsAsFactors=FALSE)
 
-outfolder <- tempdir()
+if (!dir.exists(paste0(getwd(),"/FIESTA"))) {
+  dir.create(paste0(getwd(),"/FIESTA"))
+}
+if (!dir.exists(paste0(getwd(),"/FIESTA", "/outfolder"))) {
+  dir.create(paste0(getwd(),"/FIESTA", "/outfolder"))
+}
+outfolder <- paste0(getwd(),"/FIESTA", "/outfolder")
+
+```
+
+
+### Set up for custom examples
+
+The FIESTA *spGetStrata* function is a spatial wrapper function to facilitate extraction and summary of given spatial data used for post-stratification. The function uses the FIESTA *spExtractPoly* and *spExtractRast* functions to extract values from estimation unit (i.e., polygon) and strata values (i.e., raster) to plot locations, respectively, and other internal spatial function to calculate pixel counts and area by estimation unit. If a polygon strata layer is given, the FIESTA *spPoly2Rast* function converts the polygon layer to raster before calculating strata weights. 
+
+Bighorn National Forest
+```{r}
+
+# File names for external spatial data
+WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
+WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+WYbhdist.att <- "DISTRICTNA"
+
+fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
+demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
+
+
+# Get estimation unit and strata information for Bighorn National Forest.
+stratdat.bh <- spGetStrata(
+      xyplt=WYplt,
+      uniqueid="CN", 
+      xvar="LON_PUBLIC", 
+      yvar="LAT_PUBLIC", 
+      prj="longlat", 
+      datum="NAD83", 
+      unit_layer=WYbhfn, 
+      strat_layer=fornffn
+      )
+
+## Get names of output list components
+names(stratdat.bh)
+
+
+## Plot assignment of strata and estimation unit (ONEUNIT, STRATUMCD)
+head(stratdat.bh$pltassgn)
+
+## Area by estimation unit
+stratdat.bh$unitarea
+
+## Pixel counts and strata weights (strwt) by strata and estimation unit
+stratdat.bh$stratalut
+
+## Variable names
+stratdat.bh$unitvar        # Estimation unit variable
+stratdat.bh$strvar         # Strata variable
+stratdat.bh$areavar        # Area variable
+
+
+```
+
+
+Bighorn National Forest Districts
+```{r}
+
+# Get estimation unit and strata information for Bighorn National Forest Districts
+stratdat.bhdist <- spGetStrata(
+      xyplt=WYplt,
+      uniqueid="CN", 
+      xvar="LON_PUBLIC", 
+      yvar="LAT_PUBLIC", 
+      prj="longlat", 
+      datum="NAD83", 
+      unit_layer=WYbhdistfn, 
+      unitvar="DISTRICTNA",
+      strat_layer=fornffn
+      )
+
+## Get names of output list components
+names(stratdat.bhdist)
+
+
+## Plot assignment of strata and estimation unit (DISTRICTNA, STRATUMCD)
+head(stratdat.bhdist$pltassgn)
+
+## Area by estimation units (Districts)
+stratdat.bhdist$unitarea
+
+## Pixel counts and strata weights (strwt) by strata and estimation unit
+stratdat.bhdist$stratalut
+
+
+## Variable names
+stratdat.bhdist$unitvar        # Estimation unit variable
+stratdat.bhdist$strvar         # Strata variable
+stratdat.bhdist$areavar        # Area variable
+
 ```
 
 
@@ -575,18 +679,21 @@ outfolder <- tempdir()
 
 For `FIESTA`'s GB Module, the `modGBpop` function calculates and outputs: number of plots, adjustment factors, and an expansion factor by strata. The outputs are similar to data found in FIADB's pop_stratum table. The output from `modGBpop` can be used for one or more estimates from `modGBarea`, `modGBtree`, or `modGBratio` functions.
 
-In this example, we use the sample WY data (2013 Evaluation) in `FIESTA` to generate population data for the GB module. We check this output with the FIADB pop_stratum table from FIA DataMart for 561301 Evalid, using the `FIESTA::DBqryCSV` function.
 
-#### Example 1: Getting Population Data for Wyoming Area and Tree Estimates, Using Post-Stratification
+
+#### Example 1: Getting Population Data for Wyoming Area and Tree Estimates, Using Post-Stratification (FIADB match)
+
+In this example, we use the sample WY data (2013 Evaluation) in `FIESTA` to generate population data for the GB module. We check this output with the FIADB pop_stratum table from FIA DataMart for 561301 Evalid, using the `FIESTA::DBqryCSV` function.
 <details>
   <summary>View Example</summary>
 
-First, we get population data for Wyoming area and tree estimates, using post-stratification with the `modGBpop` function:
+```{r, results = FALSE, message = F}
+```
+
 
 ```{r, results = FALSE, message = F}
-conditiontable <- WYcond
 GBpopdat <- modGBpop(
-  popTabs = popTables(cond = conditiontable,             # FIA plot/condition data
+  popTabs = popTables(cond = FIESTA::WYcond,             # FIA plot/condition data
                       tree = FIESTA::WYtree,             # FIA tree data
                       seed = FIESTA::WYseed,             # FIA seedling data
                       pltassgn = FIESTA::WYpltassgn),    # plot assignments
@@ -597,6 +704,7 @@ GBpopdat <- modGBpop(
   strata_opts = strata_options(
     stratalut = WYstratalut)   # strata classes and pixels counts
   )
+
 ```
 
 To get the names of the list components associated with the output of our call of `modGBpop`, we run the following code:
@@ -638,7 +746,118 @@ head(GBpopdat$stratalut)
 
 </details>
 
-<a name="modGBarea"></a>
+
+
+#### Example 2: Getting Population Data for Wyoming Area and Tree Estimates, Using Post-Stratification (Custom boundary)
+
+In this example, we use the sample WY plot data (2013 Evaluation) in FIESTA and output from spGetStrata to generate population data for the Bighorn National Forest and for the Bighorn National Forest Districts.
+
+If the FIESTA spGetStrata function is used to obtain stratification data, the output list object can be input directly into modGBpop through the GBstratdat parameter. If other methods are used, the data are input through individual parameters.
+<details>
+  <summary>View Example</summary>
+
+```{r, results = FALSE, message = F}
+```
+
+
+Bighorn National Forest
+```{r}
+
+## Population data for Bighorn National Forest
+
+## Using output list from spGetStrata()
+GBpopdat.bh <- modGBpop(
+      popTabs=list(plt=WYplt, cond=WYcond, tree=WYtree, seed=WYseed),
+      GBstratdat=stratdat.bh)
+
+## Get names of output list components
+names(GBpopdat.bh)
+
+## Using output as individual parameter inputs
+GBpopdat.bh <- modGBpop(
+      popTabs=list(plt=WYplt, cond=WYcond, tree=WYtree, seed=WYseed), 
+      pltassgn=pltassgn.bh, 
+      pltassgnid="CN", 
+      unitvar=unitvar.bh, 
+      unitarea=unitarea.bh, 
+      areavar=areavar.bh, 
+      stratalut=stratalut.bh, 
+      strvar=strvar.bh, 
+      getwt=FALSE)
+
+## Get names of output list components
+names(GBpopdat.bh)
+
+## Condition information with adjusted condition proportions for area
+head(GBpopdat.bh$condx)
+
+## Tree information with tree-level adjustment factors
+head(GBpopdat.bh$treex)
+
+## Seedling information with adjustment factors
+head(GBpopdat.bh$seedx)
+
+## Strata-level information, including number of plots by strata and strata-level adjustment factors
+GBpopdat.bh$stratalut
+
+
+```
+
+
+Bighorn National Forest Districts
+```{r}
+
+## Population data for Bighorn National Forest Districts
+
+## Using output list from spGetStrata()
+GBpopdat.bhdist <- modGBpop(
+      plt=WYplt, 
+      cond=WYcond, 
+      tree=WYtree, 
+      seed=WYseed, 
+      GBstratdat=stratdat.bhdist)
+
+## Get names of output list components
+names(GBpopdat.bhdist)
+
+
+GBpopdat.bhdist <- modGBpop(
+      plt=WYplt, 
+      cond=WYcond, 
+      tree=WYtree, 
+      seed=WYtree, 
+      pltassgn=pltassgn.bhdist, 
+      pltassgnid="CN", 
+      unitvar=unitvar.bhdist, 
+      unitarea=unitarea.bhdist, 
+      areavar=areavar.bhdist, 
+      stratalut=stratalut.bhdist, 
+      strvar=strvar.bhdist, 
+      getwt=FALSE)
+
+## Get names of output list components
+names(GBpopdat.bhdist)
+ 
+## Condition information with adjusted condition proportions for area
+head(GBpopdat.bhdist$condx)
+
+## Tree information with tree-level adjustment factors
+head(GBpopdat.bhdist$treex)
+
+## Seedling information with adjustment factors
+head(GBpopdat.bhdist$seedx)
+
+## Strata-level information, including number of plots by strata and strata-level adjustment factors
+GBpopdat.bhdist$stratalut
+
+```
+
+</details>
+
+
+
+
+<a name="modGBarea()"></a>
 
 ### modGBarea()
 
@@ -648,14 +867,16 @@ If there are more than one estimation unit (i.e., subpopulation) within the popu
 
 Parameters defined in the following examples are organized by category: population data (pop); estimation information (est); and output details (out).
 
-#### Example 1: Generate Estimate by Estimation Unit and Sun to Population
+#### Example 1a: Generate Estimate by Estimation Unit and Sum to Population (FIADB match)
 <details>
   <summary>View Example</summary>
 
-First, with the `modGBarea` function we generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY). `FIESTA` then returns raw data and titles for area of forest land, Wyoming, 2011-2013 (sum estimation units). Note that we set some options for our table output with the `table_opts` argument. For a full list of possible table options, you can run `help(table_options)`.
+Using the `modGBarea` function we generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY). `FIESTA` then returns raw data and titles for area of forest land, Wyoming, 2011-2013 (sum estimation units). Note that we set some options for our table output with the `table_opts` argument. For a full list of possible table options, you can run `help(table_options)`.
+
+The following estimates match output from Evalidator (https://apps.fs.usda.gov/Evalidator/evalidator.jsp) using the WY 2013 Evaluation. 
 
 ```{r}
-area1 <- modGBarea(
+area1a <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
@@ -669,34 +890,34 @@ area1 <- modGBarea(
 To get the names of the list components associated with the output of our call of `modGBarea`, we run the following code:
 
 ```{r, results = T}
-names(area1)
+names(area1a)
 ```
 
 To easily access our estimate and percent sampling error of estimate we can just grab the `est` object from out ouputted list: 
 
 ```{r, results = T}
-area1$est
+area1a$est
 ```
 
 We can also look at raw data and titles for estimate, as shown below:
 
 ```{r, results = TRUE}
 ## Raw data (list object) for estimate
-raw <- area1$raw      # extract raw data list object from output
+raw <- area1a$raw      # extract raw data list object from output
 names(raw)
 head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
 raw$totest            # estimates for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst <- area1$titlelst
+titlelst <- area1a$titlelst
 names(titlelst)
 titlelst
 ```
 
 </details>
 
-#### Example 2: Adding Rows to the Output
+#### Example 1b: Adding Rows to the Output (FIADB match)
 <details>
   <summary>View Example</summary>
 
@@ -704,7 +925,7 @@ In this example, we look at adding rows to the output:
 
 ```{r}
 ## Area of forest land by forest type, Wyoming, 2011-2013
-area2  <- modGBarea(
+area1b  <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     rowvar = "FORTYPCD",         # est - row domain
@@ -719,14 +940,14 @@ area2  <- modGBarea(
 Again, we can look at the contents of the output list:
 
 ```{r}
-names(area2)
+names(area1b)
 ```
 
 And the estimates: 
 
 ```{r}
 ## Estimate and percent sampling error of estimate
-area2$est
+area1b$est
 ```
 
 Along with raw data and titles:
@@ -749,7 +970,7 @@ titlelst
 
 </details>
 
-#### Example 3: Adding Rows and Columns to the Output
+#### Example 1c: Adding Rows and Columns to the Output (FIADB match)
 <details>
   <summary>View Example</summary>
 
@@ -810,6 +1031,69 @@ titlelst
 list.files(outfolder, pattern = "WY_area")
 list.files(paste0(outfolder, "/rawdata"), pattern = "WY_area")
 ```
+
+
+#### Example 2a: Generate Estimate for Bighorn National Forest
+<details>
+  <summary>View Example</summary>
+
+Area by forest type and stand-size class, Bighorn National Forest
+
+```{r}
+area1 <- modGBarea(
+    GBpopdat=GBpopdat.bh,        # pop - population calculations for Bighorn NF, post-stratification
+    landarea = "FOREST",         # est - forest land filter
+    rowvar="FORTYPCD",           # est - row domain
+    colvar="STDSZCD",            # est - column domain
+    table_opts = table_options(  # set up options for table output
+      row.FIAname=TRUE,          # out - return FIA row names
+      col.FIAname=TRUE,          # out - return FIA column names
+      rawdata = TRUE,            # out - return raw data
+      returntitle = TRUE         # out - return title information
+      )
+    )
+```
+
+To get the names of the list components associated with the output of our call of `modGBarea`, we run the following code:
+
+```{r, results = T}
+names(area1)
+```
+
+To easily access our estimate and percent sampling error of estimate we can just grab the `est` object from out ouputted list: 
+
+```{r, results = T}
+area1$est
+```
+
+We can also look at raw data and titles for estimate, as shown below:
+
+```{r, results = TRUE}
+## Raw data (list object) for estimate
+raw <- area1$raw      # extract raw data list object from output
+names(raw)
+head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+raw$totest            # estimates for population (i.e., WY)
+
+
+## Titles (list object) for estimate
+titlelst <- area1$titlelst
+names(titlelst)
+titlelst
+```
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
 
 </details>
 
@@ -2078,4 +2362,12 @@ Bechtold, William A.; Patterson, Paul L., Editors. 2005. The enhanced Forest Inv
 Patterson, Paul L. 2012. Photo-based estimators for the Nevada photo-based inventory. Res. Pap. RMRS-RP-92. Fort Collins, CO: U.S. Department of Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.
 
 Westfall, James A.; Patterson, Paul L.; Coulston, John W. 2011. Post-stratified estimation: with-in strata and total sample size recommendations. Canadian Journal of Forest Research. 41: 1130-1139.
+
+```{r, include = FALSE}
+# deletes old outfolder from examples
+unlink(substr(outfolder,
+              1,
+              nchar(outfolder)-10),
+       recursive = TRUE)
+```
 

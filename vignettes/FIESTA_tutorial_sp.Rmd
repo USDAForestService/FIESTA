@@ -151,9 +151,14 @@ Finally, you'll need to set up an "outfolder". This is just a file path to a fol
 options(scipen=6)
 options(stringsAsFactors=FALSE)
 
-dir.create("FIESTA")
-dir.create(paste0(getwd(),"/FIESTA", "/outfolder"))
+if (!dir.exists(paste0(getwd(),"/FIESTA"))) {
+  dir.create(paste0(getwd(),"/FIESTA"))
+}
+if (!dir.exists(paste0(getwd(),"/FIESTA", "/outfolder"))) {
+  dir.create(paste0(getwd(),"/FIESTA", "/outfolder"))
+}
 outfolder <- paste0(getwd(),"/FIESTA", "/outfolder")
+
 ```
 
 ## Examples
@@ -289,7 +294,7 @@ WYbhptslst <- FIESTA::spClipPoint(xyplt = WYplt,
                                   datum = "NAD83")
 names(WYbhptslst)
 WYbhspplt <- WYbhptslst$clip_xyplt
-WYbhprj <- WYbhptslst$clip_poly
+WYbhprj <- WYbhptslst$clip_polyv
 ```
 
 Next we check and display the output:
