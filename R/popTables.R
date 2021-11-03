@@ -15,9 +15,6 @@
 #' data with one record for each plot, including or excluding nonsampled
 #' conditions. If nonsampled plots are included, PLOT_STATUS_CD variable must
 #' be in table or a filter defined in plt.nonsamp.filter.
-#' @param pltassgn DF/DT, Optional. R object, sf R object, comma-delimited
-#' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
-#' assignment of estimation unit and/or strata, with one record for each plot.
 #' @param tree DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Tree-level data with one record for each tree. Tree data are aggregated to
 #' condition-level. See details for necessary variables to include.
@@ -46,7 +43,7 @@
 #' 
 #' @export popTables
 
-popTables <- function(cond=NULL, plt=NULL, pltassgn=NULL, tree=NULL,
+popTables <- function(cond=NULL, plt=NULL, tree=NULL,
                              seed=NULL, vsubpspp=NULL, vsubpstr=NULL, 
                              subplot=NULL, subp_cond=NULL, lulc=NULL, ...) {
   # create list from input parameters

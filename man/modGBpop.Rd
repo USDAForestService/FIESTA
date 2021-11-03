@@ -8,6 +8,8 @@ modGBpop(
   popType = "VOL",
   popTabs = popTables(),
   popTabIDs = popTableIDs(),
+  pltassgn = NULL,
+  pltassgnid = "PLT_CN",
   dsn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
@@ -45,6 +47,12 @@ See help(popTabs()) for a list of options.}
 \item{popTabIDs}{List of unique IDs corresponding to the population tables
 that the user has requested. See help(popTabIDs()) for a list of
 options.}
+
+\item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited
+file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
+assignment of estimation unit and/or strata, with one record for each plot.}
+
+\item{pltassgnid}{String.}
 
 \item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats

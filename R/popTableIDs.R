@@ -7,7 +7,6 @@
 #' 
 #' @param cuniqueid String. Unique identifier of plot in cond.
 #' @param puniqueid String. Unique identifier of plot in plt.
-#' @param pltassgnid String. 
 #' @param tuniqueid String. Unique identifier of plot in tree and seed.
 #' @param vuniqueid String.
 #' @param subpuniqueid String.
@@ -24,7 +23,7 @@
 #' @export popTableIDs
 
 popTableIDs <- function(cuniqueid="PLT_CN",  puniqueid="CN", 
-                               pltassgnid="PLT_CN", tuniqueid="PLT_CN",
+                              tuniqueid="PLT_CN",
                                vuniqueid="PLT_CN", subpuniqueid="PLT_CN",
                                lulcuniqueid="PLT_CN", condid="CONDID", ...) {
   # create list from input parameters

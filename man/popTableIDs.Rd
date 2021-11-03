@@ -7,7 +7,6 @@
 popTableIDs(
   cuniqueid = "PLT_CN",
   puniqueid = "CN",
-  pltassgnid = "PLT_CN",
   tuniqueid = "PLT_CN",
   vuniqueid = "PLT_CN",
   subpuniqueid = "PLT_CN",
@@ -20,8 +19,6 @@ popTableIDs(
 \item{cuniqueid}{String. Unique identifier of plot in cond.}
 
 \item{puniqueid}{String. Unique identifier of plot in plt.}
-
-\item{pltassgnid}{String.}
 
 \item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
 
