@@ -5,30 +5,36 @@
 \title{List of population table unique IDs.}
 \usage{
 popTableIDs(
-  cuniqueid = "PLT_CN",
-  puniqueid = "CN",
-  tuniqueid = "PLT_CN",
-  vuniqueid = "PLT_CN",
-  subpuniqueid = "PLT_CN",
-  lulcuniqueid = "PLT_CN",
-  condid = "CONDID",
+  cond = "PLT_CN",
+  plt = "CN",
+  tree = "PLT_CN",
+  seed = "PLT_CN",
+  vsubpspp = "PLT_CN",
+  vsubpstr = "PLT_CN",
+  subplot = "PLT_CN",
+  subp_cond = "PLT_CN",
+  lulc = "PLT_CN",
   ...
 )
 }
 \arguments{
-\item{cuniqueid}{String. Unique identifier of plot in cond.}
+\item{cond}{String. Unique identifier of plot in cond.}
 
-\item{puniqueid}{String. Unique identifier of plot in plt.}
+\item{plt}{String. Unique identifier of plot in plt.}
 
-\item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
+\item{tree}{String. Unique identifier of plot in tree and seed.}
 
-\item{vuniqueid}{String.}
+\item{seed}{String.}
 
-\item{subpuniqueid}{String.}
+\item{vsubpspp}{String.}
 
-\item{lulcuniqueid}{String.}
+\item{vsubpstr}{String.}
 
-\item{condid}{String.}
+\item{subplot}{String.}
+
+\item{subp_cond}{String.}
+
+\item{lulc}{String.}
 
 \item{...}{For extendibility.}
 }

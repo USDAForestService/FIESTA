@@ -249,6 +249,7 @@ modGBpop <- function(popType="VOL",
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
 	treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
+  condid <- "CONDID"
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -296,13 +297,65 @@ modGBpop <- function(popType="VOL",
   popTableIDs_defaults_list <- formals(FIESTA::popTableIDs)[-length(formals(FIESTA::popTableIDs))]
   
   for (i in 1:length(popTableIDs_defaults_list)) {
-    assign(names(popTableIDs_defaults_list)[[i]], popTableIDs_defaults_list[[i]])
+    if (names(popTableIDs_defaults_list)[[i]] == "cond") {
+      assign("cuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "plt") {
+      assign("puniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "tree") {
+      assign("tuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "seed") {
+      assign("suniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "vsubpspp") {
+      assign("vsppuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "vsubpstr") {
+      assign("vstruniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "subplot") {
+      assign("subpuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "subp_cond") {
+      assign("subcuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "lulc") {
+      assign("lulcuniqueid", popTableIDs_defaults_list[[i]])
+    }
   }
   
   ## Set user-supplied popTabIDs values
   if (length(popTabIDs) > 0) {
     for (i in 1:length(popTabIDs)) {
-      assign(names(popTabIDs)[[i]], popTabIDs[[i]])
+      if (names(popTabIDs)[[i]] == "cond") {
+        assign("cuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "plt") {
+        assign("puniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "tree") {
+        assign("tuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "seed") {
+        assign("suniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpspp") {
+        assign("vsppuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpstr") {
+        assign("vstruniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subplot") {
+        assign("subpuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subp_cond") {
+        assign("subcuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "lulc") {
+        assign("lulcuniqueid", popTabIDs[[i]])
+      }
     }
   }
 
