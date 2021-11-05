@@ -807,7 +807,8 @@ names(GBpopdat.bh)
 
 ## Using output as individual parameter inputs
 GBpopdat.bh <- modGBpop(
-      popTabs=list(plt=WYplt, cond=WYcond, tree=WYtree, seed=WYseed), 
+      popTabs=list(plt=WYplt, cond=WYcond, tree=WYtree, seed=WYseed),
+      popTabIDs=list(plt="CN"),
       pltassgn=stratdat.bh$pltassgn, 
       pltassgnid="CN", 
       unitvar=stratdat.bh$unitvar, 
@@ -914,7 +915,7 @@ If there are more than one estimation unit (i.e., subpopulation) within the popu
 
 Parameters defined in the following examples are organized by category: population data (pop); estimation information (est); and output details (out).
 
-#### POP1a: FIADB POPULATION - Generate Estimate by Estimation Unit and Sum to Population
+#### POP1: FIADB POPULATION - Generate Estimate by Estimation Unit and Sum to Population
 <details>
   <summary>View Example</summary>
 
@@ -955,7 +956,7 @@ raw1a$totest               # estimates for population (i.e., WY)
 
 </details>
 
-#### POP1b: FIADB POPULATION - Adding rows to the estimation output
+#### POP1: FIADB POPULATION - Adding rows to the estimation output
 <details>
   <summary>View Example</summary>
 
@@ -999,13 +1000,13 @@ head(raw1b$rowest)      # estimates by row for population (i.e., WY)
 
 ## Titles (list object) for estimate
 titlelst1b <- area1b$titlelst
-names(titlels1bt)
+names(titlelst1b)
 titlelst1b
 ```
 
 </details>
 
-#### POP1c: FIADB POPULATION - Adding rows and columns to the estimation output
+#### POP1: FIADB POPULATION - Adding rows and columns to the estimation output
 <details>
   <summary>View Example</summary>
 
@@ -1068,7 +1069,7 @@ list.files(paste0(outfolder, "/rawdata"), pattern = "WY_area")
 ```
 
 
-#### POP2a: CUSTOM POPULATION - Generate estimate for Bighorn National Forest
+#### POP2: CUSTOM POPULATION - Generate area estimates for Bighorn National Forest
 <details>
   <summary>View Example</summary>
 
@@ -1125,7 +1126,7 @@ titlelst2a
 </details>
 
 
-#### POP2b: CUSTOM POPULATION - Generate estimate for Bighorn National Forest
+#### POP2: CUSTOM POPULATION - Generate area estimates for Bighorn National Forest
 <details>
   <summary>View Example</summary>
 
@@ -1134,14 +1135,6 @@ Note: Since we only have one estimation unit within the population of interest, 
   Let's also add a few more table options to control the forest type groups displayed in the table (rowlut) and fill the NULL values with 0s (estnull).
 
 ```{r}
-
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\table_options.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\datLUTnm.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Icheck.rowcol.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Iest.outtabs.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Itable_functions.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\IGBest.pbar.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modGBarea.R")
 
 area2b <- modGBarea(
     GBpopdat = GBpopdat.bh,        # pop - population calculations for Bighorn NF, post-stratification
@@ -1197,18 +1190,20 @@ titlelst2b
 
 
 
-#### POP2b: CUSTOM POPULATION - Generate Estimate for Bighorn National Forest
+#### POP3: CUSTOM POPULATION - Generate Estimate for Bighorn National Forest
 <details>
   <summary>View Example</summary>
 
 Area by forest type group and primary disturbance class, Bighorn National Forest Districts
 
+In this example, we add a filter to remove from the table output, where there is no visible disturbance. This filter does not change the population data set the estimates are derived from, it only changes the output.
+
 ```{r}
-area3a <- modGBarea(
+area3 <- modGBarea(
     GBpopdat = GBpopdat.bhdist,    # pop - population calculations for Bighorn NF, post-stratification
     landarea = "FOREST",           # est - forest land filter
     sumunits = TRUE,               # est - sum estimation units to population
-    #pcfilter = "DSTRBCD1 > 0",     # est - condition filter for table output
+    pcfilter = "DSTRBCD1 > 0",     # est - condition filter for table output
     rowvar = "FORTYPGRPCD",        # est - row domain
     colvar = "DSTRBCD1",           # est - column domain
     returntitle = TRUE,            # out - return title information
@@ -1225,29 +1220,32 @@ area3a <- modGBarea(
 To get the names of the list components associated with the output of our call of `modGBarea`, we run the following code:
 
 ```{r, results = T}
-names(area2b)
+names(area3)
 ```
 
 To easily access our estimate and percent sampling error of estimate we can just grab the `est` object from our ouputted list: 
 
 ```{r, results = T}
-area2b$est
+area3$est
 ```
 
 We can also look at raw data and titles for estimate, as shown below:
 
 ```{r, results = TRUE}
 ## Raw data (list object) for estimate
-raw2b <- area2b$raw       # extract raw data list object from output
-names(raw2b)
-head(raw2b$unit_totest)   # estimates by estimation unit (i.e., ESTN_UNIT)
-raw2b$totest              # estimates for population (i.e., WY)
+raw3 <- area3$raw       # extract raw data list object from output
+names(raw3)
+head(raw3$unit_rowest)   # estimates by estimation unit for row domains
+raw3$rowest              # estimates for population for row domains
+
+head(raw3$unit_colest)   # estimates by estimation unit for column domains
+raw3$colest              # estimates for population for column domains
 
 
 ## Titles (list object) for estimate
-titlelst2b <- area2b$titlelst
-names(titlelst2b)
-titlelst2b
+titlelst3 <- area3$titlelst
+names(titlelst3)
+titlelst3
 
 ```
 
@@ -1274,7 +1272,7 @@ The following reference table can be used for defining `estvar` and `estvar.filt
 ref_estvar[, c("ESTTITLE", "ESTVAR", "ESTFILTER", "ESTUNITS")]
 ```
 
-#### Example 1: Generate Estimates by Estimation Unit and Sum to Population
+#### POP1: FIADB POPULATION - Generate Estimates by Estimation Unit and Sum to Population
 <details>
   <summary>View Example</summary>
 
@@ -1283,7 +1281,7 @@ Now, we can generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to p
 ```{r}
 ## Return raw data and titles
 ## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
-tree1 <- modGBtree(
+tree1a <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
@@ -1297,35 +1295,35 @@ We can now take a look at the output list, estimates and percent sampling errors
 
 ```{r}
 ## Look at output list
-names(tree1)
+names(tree1a)
 
 ## Estimate and percent sampling error of estimate
-tree1$est
+tree1a$est
 
 
 ## Raw data (list object) for estimate
-raw <- tree1$raw      # extract raw data list object from output
-names(raw)
-head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw$totest)      # estimates for population (i.e., WY)
+raw1a <- tree1a$raw      # extract raw data list object from output
+names(raw1a)
+head(raw1a$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw1a$totest)      # estimates for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst <- tree1$titlelst
-names(titlelst)
-titlelst
+titlelst1a <- tree1a$titlelst
+names(titlelst1a)
+titlelst1a
 ```
 
 </details>
 
-#### Example 2: Add Rows to Output
+#### POP1: FIADB POPULATION - Add Rows to Output
 <details>
   <summary>View Example</summary>
 
 This example adds rows to the output for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013. We also choose to return titles with `returntitle = TRUE`. 
 
 ```{r}
-tree2 <- modGBtree(
+tree1b <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
@@ -1340,36 +1338,36 @@ Again, we investigate the output of the returned list:
 
 ```{r}
 ## Look at output list
-names(tree2)
+names(tree1b)
 
 ## Estimate and percent sampling error of estimate
-tree2$est
+tree1b$est
 
 ## Raw data (list object) for estimate
-raw <- tree2$raw      # extract raw data list object from output
-names(raw)
-head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw$totest)      # estimates for population (i.e., WY)
-head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw$rowest)      # estimates by row for population (i.e., WY)
+raw1b <- tree1b$raw      # extract raw data list object from output
+names(raw1b)
+head(raw1b$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw1b$totest)      # estimates for population (i.e., WY)
+head(raw1b$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw1b$rowest)      # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst <- tree2$titlelst
-names(titlelst)
-titlelst
+titlelst1b <- tree1b$titlelst
+names(titlelst1b)
+titlelst1b
 ```
 
 </details>
 
-#### Example 3: Add Rows and Columns to Output
+#### POP1: FIADB POPULATION - Add Rows and Columns to Output
 <details>
   <summary>View Example</summary>
 
 This examples adds rows and columns to the output, including FIA names, for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, Wyoming, 2011-2013. We also use the `*_options` functions to return output with estimates (est) and percent standard error (pse) in same cell - est(pse) with `allin1 = TRUE` and save data to an outfolder with `savedata = TRUE` and `outfolder = outfolder`. 
 
 ```{r}
-tree3 <- modGBtree(
+tree1c <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
@@ -1395,29 +1393,29 @@ Again, we investigate the output of the returned list:
 
 ```{r}
 ## Look at output list from modGBarea()
-names(tree3)
+names(tree1c)
 
 ## Estimate and percent sampling error of estimate
-tree3$est
+tree1c$est
 
 
 ## Raw data (list object) for estimate
-raw <- tree3$raw      # extract raw data list object from output
-names(raw)
-head(raw$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw$totest)      # estimates for population (i.e., WY)
-head(raw$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw$rowest)      # estimates by row for population (i.e., WY)
-head(raw$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-head(raw$colest)      # estimates by column for population (i.e., WY)
-head(raw$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-head(raw$grpest)      # estimates by row and column for population (i.e., WY)
+raw1c <- tree1c$raw      # extract raw data list object from output
+names(raw1c)
+head(raw1c$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw1c$totest)      # estimates for population (i.e., WY)
+head(raw1c$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw1c$rowest)      # estimates by row for population (i.e., WY)
+head(raw1c$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
+head(raw1c$colest)      # estimates by column for population (i.e., WY)
+head(raw1c$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
+head(raw1c$grpest)      # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst <- tree3$titlelst
-names(titlelst)
-titlelst
+titlelst1c <- tree1c$titlelst
+names(titlelst1c)
+titlelst1c
 
 
 ## List output files in outfolder
@@ -1427,7 +1425,7 @@ list.files(paste0(outfolder, "/rawdata"), pattern = "WY_tree")
 
 </details>
 
-#### Example 4a: Use Tree Domain in Estimation Output Rows
+#### POP1: FIADB POPULATION - Use Tree Domain in Estimation Output Rows
 <details>
   <summary>View Example</summary>
 
@@ -1435,7 +1433,7 @@ We can use tree domain in estimation output rows:
 
 ```{r}
 ## Number of live trees (at least 1 inch diameter) by species
-tree4a <- modGBtree(
+tree1d <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
@@ -1454,15 +1452,15 @@ We can also look at the output list and estimates again:
 
 ```{r}
 ## Look at output list
-names(tree4a)
+names(tree1d)
 
 ## Estimate and percent sampling error of estimate
-tree4a$est
+tree1d$est
 ```
 
 </details>
 
-#### Example 4b: Add Seedlings
+#### POP1: FIADB POPULATION - Add Seedlings
 <details>
   <summary>View Example</summary>
 
@@ -1474,7 +1472,7 @@ Note: must include seedling data in population data calculations.
 
 ```{r}
 ## Number of live trees by species, including seedlings
-tree4b <- modGBtree(
+tree1e <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     estseed = "add",             # est - add seedling data
     landarea = "FOREST",         # est - forest land filter
@@ -1494,20 +1492,20 @@ And again we can look at our outputs and compare estimates:
 
 ```{r}
 ## Look at output list
-names(tree4b)
+names(tree1e)
 
 ## Estimate and percent sampling error of estimate
-tree4b$est
+tree1e$est
 
 
 ## Compare estimates with and without seedlings
-head(tree4a$est)
-head(tree4b$est)
+head(tree1d$est)
+head(tree1e$est)
 ```
 
 </details>
 
-#### Example 4c: Only Seedlings
+#### POP1: FIADB POPULATION - Only Seedlings
 <details>
   <summary>View Example</summary>
 
@@ -1519,7 +1517,7 @@ Note: must include seedling data in population data calculations.
 
 ```{r}
 ## Number of live trees seedlings by species
-tree4c <- modGBtree(
+tree1f <- modGBtree(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     estseed = "only",            # est - add seedling data
     landarea = "FOREST",         # est - forest land filter
@@ -1538,15 +1536,15 @@ And again we can look at our outputs and compare estimates:
 
 ```{r}
 ## Look at output list
-names(tree4c)
+names(tree1f)
 
 ## Estimate and percent sampling error of estimate
-tree4c$est
+tree1f$est
 
 ## Compare estimates with, without, and only seedlings
-head(tree4a$est)
-head(tree4b$est)
-head(tree4c$est)
+head(tree1d$est)
+head(tree1e$est)
+head(tree1f$est)
 ```
 
 </details>
@@ -2301,9 +2299,9 @@ GBpopdat.strat <- modGBpop(
   popTabs = popTables(
     cond = WYcond,               # FIA plot/condition data
     tree = WYtree,               # FIA tree data
-    seed = WYtree,               # FIA seedling data
-    pltassgn = WYpltassgn),       # plot assignments
-    popTabIDs = popTableIDs(pltassgnid = "CN"),             # uniqueid of plots
+    seed = WYseed),              # FIA seedling data
+    pltassgn = WYpltassgn,       # plot assignments
+    pltassgnid = "CN",           # uniqueid of plots
     unitarea = WYunitarea,       # area by estimation units
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = TRUE,               # if using post-stratification
@@ -2317,9 +2315,9 @@ GBpopdat.nostrat <- modGBpop(
     popTabs = popTables(
     cond = WYcond,               # FIA plot/condition data
     tree = WYtree,               # FIA tree data
-    seed = WYtree,               # FIA seedling data
-    pltassgn = WYpltassgn),       # plot assignments
-    popTabIDs = popTableIDs(pltassgnid = "CN"),             # uniqueid of plots
+    seed = WYseed),              # FIA seedling data
+    pltassgn = WYpltassgn,       # plot assignments
+    pltassgnid = "CN",           # uniqueid of plots
     unitarea = WYunitarea,       # area by estimation units
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = FALSE               # if using post-stratification
@@ -2329,24 +2327,24 @@ GBpopdat.nostrat <- modGBpop(
 ```{r}
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013, with post-stratification
 area.strat <- modGBarea( 
-    GBpopdat = GBpopdat.strat,         # pop - population calculations for WY, post-stratification
-    landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
-    rowvar = "FORTYPCD",         # est - row domain
+    GBpopdat = GBpopdat.strat,      # pop - population calculations for WY, post-stratification
+    landarea = "FOREST",            # est - forest land filter
+    sumunits = TRUE,                # est - sum estimation units to population
+    rowvar = "FORTYPCD",            # est - row domain
     table_opts = table_options(
-      row.FIAname = TRUE,          # est - row domain names
+      row.FIAname = TRUE,           # est - row domain names
       allin1 = FALSE                # out - return output with est(pse)
       )
     )   
 
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013, no post-stratification
 area.nostrat <- modGBarea( 
-    GBpopdat = GBpopdat.nostrat, # pop - population calculations for WY, no post-stratification
-    landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
-    rowvar = "FORTYPCD",         # est - row domain
+    GBpopdat = GBpopdat.nostrat,    # pop - population calculations for WY, no post-stratification
+    landarea = "FOREST",            # est - forest land filter
+    sumunits = TRUE,                # est - sum estimation units to population
+    rowvar = "FORTYPCD",            # est - row domain
     table_opts = table_options(
-      row.FIAname = TRUE,          # est - row domain names
+      row.FIAname = TRUE,           # est - row domain names
       allin1 = FALSE                # out - return output with est(pse)
       )
     )   
@@ -2361,7 +2359,7 @@ head(area.nostrat$est)
 ```{r}
 ## Number of live trees by species, Wyoming, 2011-2013, with post-stratification
 tree.strat <- modGBtree( 
-    GBpopdat = GBpopdat.strat,   # pop - population calculations for WY, post-stratification
+    GBpopdat = GBpopdat.strat,      # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
     estvar = "TPA_UNADJ",               # est - number of trees per acre, numerator 
@@ -2444,6 +2442,9 @@ If you just wanted estimates by estimation unit and did not want to sum them, se
 ## Area of forest land by forest type and stand-size class and Estimation Unit,
 ##    Wyoming, 2011-2013
 ##################################################################################
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Itable_functions.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Iest.outtabs.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modGBarea.R")
 area.unit <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
@@ -2451,7 +2452,8 @@ area.unit <- modGBarea(
     rowvar = "FORTYPCD",         # est - row domain
     colvar = "STDSZCD",          # est - column domain
     returntitle = TRUE,          # out - return title information
-    table_opts = table_options(allin1 = TRUE)              # out - return output with est(pse)
+    table_opts = list(
+      allin1 = TRUE)             # out - return output with est(pse)
     )
 
 ## Estimate and percent sampling error of estimate (first 6 rows)

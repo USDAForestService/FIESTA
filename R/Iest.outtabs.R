@@ -507,7 +507,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         pse2return <- tabs[[2]]
 
     } else {  ## colvar != "NONE" & sumunits == FALSE
-
       units <- unique(unit_grpest[[unitvar]])
       numunits <- length(units)
       tabs <- lapply(units, crossxbyunit, unit_grpest, unit_rowest, unit_colest, 
@@ -518,6 +517,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		outfn.estpse, title.estpse, title.est, title.pse, title.ref,
 		outfolder, outfn.date, overwrite, esttype, phototype,
 		rnames, title.colvar, title.unitvar)
+
       names(tabs) <- units
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
       if (!allin1) {

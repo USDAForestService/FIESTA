@@ -112,7 +112,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
 
     if (xvar.add0 && xvar2.add0) {
-      uniquex.exp <- expand.grid(uniquex[[xvar]], uniquex2[[xvar2]])
+      uniquex.exp <- expand.grid(uniquex[[xvar]], uniquex2[[xvar2]], stringsAsFactors=FALSE)
       if (!is.null(unitvar)) {
         uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
 			each=nrow(uniquex.exp)), uniquex.exp)
@@ -132,7 +132,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
     } else if (xvar.add0) {
 
-      uniquex.exp <- expand.grid(uniquex[[xvar]], x[[xvar2]])
+      uniquex.exp <- expand.grid(uniquex[[xvar]], x[[xvar2]], stringsAsFactors=FALSE)
       if (!is.null(unitvar)) {
         uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
 			each=nrow(uniquex.exp)), uniquex.exp)
@@ -162,15 +162,17 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
     } else if (xvar2.add0) {
 
-      uniquex.exp <- expand.grid(uniquex2[[xvar2]], x[[xvar]])
+      uniquex.exp <- expand.grid(uniquex2[[xvar2]], x[[xvar]], stringsAsFactors=FALSE)
       if (!is.null(unitvar)) {
         uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
 			each=nrow(uniquex.exp)), uniquex.exp)
-        setnames(uniquex.exp, c(unitvar, xvar, xvar2))
-        chkvars <- c(unitvar, xvar, xvar2)
+        setnames(uniquex.exp, c(unitvar, xvar2, xvar))
+        chkvars <- c(unitvar, xvar2, xvar)
+        ordvars <- c(unitvar, xvar, xvar2)
       } else {
-        setnames(uniquex.exp, c(xvar, xvar2))
-        chkvars <- c(xvar, xvar2)
+        setnames(uniquex.exp, c(xvar2, xvar))
+        chkvars <- c(xvar2, xvar)
+        ordvars <- c(xvar, xvar2)
       }
 
       ## Merge uniquex
@@ -180,7 +182,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
       ## Merge uniquex.exp
       x <- unique(merge(x, uniquex.exp, by=chkvars, all.y=TRUE))
-      setcolorder(x, c(chkvars, names(x)[!names(x) %in% chkvars]))
+      setcolorder(x, c(ordvars, names(x)[!names(x) %in% ordvars]))
 
       #setnames(x, unitvar, "uvar")
       #x <- x[uniquex[rep(1:nrow(uniquex.exp), uniqueN(x$uvar)), 
@@ -560,7 +562,7 @@ crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL,
     }
   }  
   if (nrow(group.est) == 0) return(NULL)
-
+ 
   ## Get cross tables
   #########################################################
   tabs <- crossxtab(group.est=group.est, rowvar.est=rowvar.est, 
