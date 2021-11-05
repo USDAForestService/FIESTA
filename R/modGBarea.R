@@ -548,7 +548,7 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   }
 
   if (!is.null(unit_grpest)) {
-    unit_grpest2 <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
 		xvar2.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
