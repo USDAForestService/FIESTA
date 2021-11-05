@@ -507,17 +507,20 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         pse2return <- tabs[[2]]
 
     } else {  ## colvar != "NONE" & sumunits == FALSE
+
       units <- unique(unit_grpest[[unitvar]])
       numunits <- length(units)
       tabs <- lapply(units, crossxbyunit, unit_grpest, unit_rowest, unit_colest, 
 		unit_totest, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
-		estnm=estnmd, psenm=psenm, allin1, char.width, estnull, psenull, 
-		estround=estround, pseround=pseround,  
-		rowgrp, rowgrpnm, title.rnames, numunits, savedata, addtitle, returntitle, 
-		outfn.estpse, title.estpse, title.est, title.pse, title.ref,
-		outfolder, outfn.date, overwrite, esttype, phototype,
-		rnames, title.colvar, title.unitvar)
-
+		estnm=estnmd, psenm=psenm, allin1=allin1, char.width=char.width, 
+		estnull=estnull, psenull=psenull, estround=estround, pseround=pseround,  
+		rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames, 
+		numunits=numunits, savedata=savedata, addtitle=addtitle, 
+		returntitle=returntitle, outfn.estpse=outfn.estpse, 
+		title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
+		title.ref=title.ref, outfolder=outfolder, outfn.date=outfn.date, 
+		overwrite=overwrite, esttype=esttype, phototype=phototype,
+		rnames=rnames, title.colvar=title.colvar, title.unitvar=title.unitvar)
       names(tabs) <- units
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
       if (!allin1) {

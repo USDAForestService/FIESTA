@@ -112,7 +112,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
 
     if (xvar.add0 && xvar2.add0) {
-      uniquex.exp <- expand.grid(uniquex[[xvar]], uniquex2[[xvar2]], stringsAsFactors=FALSE)
+       uniquex.exp <- expand.grid(uniquex[[xvar]], uniquex2[[xvar2]], stringsAsFactors=FALSE)
       if (!is.null(unitvar)) {
         uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
 			each=nrow(uniquex.exp)), uniquex.exp)
@@ -132,13 +132,12 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
     } else if (xvar.add0) {
 
-      uniquex.exp <- expand.grid(uniquex[[xvar]], x[[xvar2]], stringsAsFactors=FALSE)
       if (!is.null(unitvar)) {
-        uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
-			each=nrow(uniquex.exp)), uniquex.exp)
+        uniquex.exp <- x[, expand.grid(uniquex[[xvar]], get(xvar2)), by=unitvar]
         setnames(uniquex.exp, c(unitvar, xvar, xvar2))
         chkvars <- c(unitvar, xvar, xvar2)
       } else {
+        uniquex.exp <- x[, expand.grid(uniquex[[xvar]], get(xvar2))]
         setnames(uniquex.exp, c(xvar, xvar2))
         chkvars <- c(xvar, xvar2)
       }
@@ -161,28 +160,23 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       x[is.na(x)] <- 0
 
     } else if (xvar2.add0) {
-
-      uniquex.exp <- expand.grid(uniquex2[[xvar2]], x[[xvar]], stringsAsFactors=FALSE)
       if (!is.null(unitvar)) {
-        uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
-			each=nrow(uniquex.exp)), uniquex.exp)
+        uniquex.exp <- x[, expand.grid(uniquex2[[xvar2]], get(xvar)), by=unitvar]
         setnames(uniquex.exp, c(unitvar, xvar2, xvar))
-        chkvars <- c(unitvar, xvar2, xvar)
-        ordvars <- c(unitvar, xvar, xvar2)
+        chkvars <- c(unitvar, xvar, xvar2)
       } else {
+        uniquex.exp <- x[, expand.grid(uniquex2[[xvar2]], get(xvar))]
         setnames(uniquex.exp, c(xvar2, xvar))
-        chkvars <- c(xvar2, xvar)
-        ordvars <- c(xvar, xvar2)
+        chkvars <- c(xvar, xvar2)
       }
 
       ## Merge uniquex
       xchk <- check.matchclass(uniquex.exp, x, chkvars)
       uniquex.exp <- xchk$tab1
       x <- xchk$tab2
-
+ 
       ## Merge uniquex.exp
-      x <- unique(merge(x, uniquex.exp, by=chkvars, all.y=TRUE))
-      setcolorder(x, c(ordvars, names(x)[!names(x) %in% ordvars]))
+      x <- merge(uniquex.exp, x, by=chkvars, all.x=TRUE)
 
       #setnames(x, unitvar, "uvar")
       #x <- x[uniquex[rep(1:nrow(uniquex.exp), uniqueN(x$uvar)), 
@@ -232,6 +226,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       x <- merge(uniquex, x, by=byvars)
     }
   }
+ 
   if (is.factor(uniquex[[xvar]])) {
     x[[xvar]] <- factor(x[[xvar]], levels=levels(uniquex[[xvar]]))
   }
@@ -240,7 +235,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
   } else {
     ordervars <- c(unitvar, byvars)
   }
-
+ 
   setorderv(x, ordervars)
   setcolorder(x, c(xnames, names(x)[!names(x) %in% xnames]))
   return(x)   
@@ -353,14 +348,16 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   #pse <- xtabs(get(psenm) ~ get(rowvar) + get(colvar), group.est)
 
   if (rowgrp) {
-    est <- dcast(group.est, get(rowgrpnm) + get(rowvar) ~ get(colvar), value.var=estnm,
-		fill=estnull)
-    pse <- dcast(group.est, get(rowgrpnm) + get(rowvar) ~ get(colvar), value.var=psenm,
-		fill=psenull)
+    est <- dcast(group.est, get(rowgrpnm) + get(rowvar) ~ get(colvar), 
+		fun.aggregate=length, value.var=estnm, fill=estnull)
+    pse <- dcast(group.est, get(rowgrpnm) + get(rowvar) ~ get(colvar), 
+		fun.aggregate=length, value.var=psenm, fill=psenull)
     crnames <- c("rowgrpnm", "rowvar")
   } else {
-    est <- dcast(group.est, get(rowvar) ~ get(colvar), value.var=estnm, fill=estnull)
-    pse <- dcast(group.est, get(rowvar) ~ get(colvar), value.var=psenm, fill=psenull)
+    est <- dcast(group.est, get(rowvar) ~ get(colvar), 
+		fun.aggregate=length, value.var=estnm, fill=estnull)
+    pse <- dcast(group.est, get(rowvar) ~ get(colvar), 
+		fun.aggregate=length, value.var=psenm, fill=psenull)
     crnames <- "rowvar"
   }
 

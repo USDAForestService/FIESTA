@@ -1151,7 +1151,6 @@ area2b <- modGBarea(
       col.FIAname = TRUE,          # table - return FIA column names
       estnull = 0,
       rowlut = c(180, 200, 220, 260, 280, 900, 999),
-      row.add0=TRUE,
       raw.keep0 = TRUE
       )
     )
