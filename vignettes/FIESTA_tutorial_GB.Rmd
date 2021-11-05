@@ -2443,9 +2443,6 @@ If you just wanted estimates by estimation unit and did not want to sum them, se
 ## Area of forest land by forest type and stand-size class and Estimation Unit,
 ##    Wyoming, 2011-2013
 ##################################################################################
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Itable_functions.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Iest.outtabs.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modGBarea.R")
 area.unit <- modGBarea(
     GBpopdat = GBpopdat,         # pop - population calculations for WY, post-stratification
     landarea = "FOREST",         # est - forest land filter
