@@ -823,7 +823,7 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder,
  	overwrite=overwrite_layer, outfn.date=outfn.date, estnm=estnm, estround=estround,
  	pseround=pseround, divideby=divideby, returntitle=returntitle, 
-	estnull=estnull, psenull=psenull) 
+	estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
   

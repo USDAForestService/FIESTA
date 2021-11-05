@@ -546,6 +546,7 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
     unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
     setkeyv(unit_colest, c(unitvar, colvar))
   }
+
   if (!is.null(unit_grpest)) {
     unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
@@ -627,7 +628,7 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
  	title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
 	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
 	estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
-	returntitle=returntitle, estnull=estnull, psenull=psenull) 
+	returntitle=returntitle, estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 

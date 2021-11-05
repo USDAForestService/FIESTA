@@ -8,7 +8,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 	outfolder=NULL, outfn.date=TRUE, overwrite=FALSE, estnm, psenm="pse", 
 	estround=0, pseround=2, estnull="--", psenull="--", divideby=NULL, 
 	coltitlerow=TRUE, rowtotal=TRUE, rawdata=FALSE, CI=TRUE, rawdat=NULL, 
-	char.width=NULL, rawonly=FALSE){ 
+	char.width=NULL, rawonly=FALSE, raw.keep0=FALSE){ 
 
   ## Set global variables
   estn=pse=keepvars=TOTAL=totest=rowest=colest=grpest <- NULL
@@ -613,9 +613,10 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           rawdat$colest <- setDF(colest)
           rawdat.tabs <- c(rawdat.tabs, "colest")
         }  
-      }  
+      } 
+ 
       if (!is.null(unit_grpest)) { 
-        if ("NBRPLT.gt0" %in% names(unit_grpest)) { 
+        if (!raw.keep0 && "NBRPLT.gt0" %in% names(unit_grpest)) { 
           unit_grpest <- unit_grpest[unit_grpest[["NBRPLT.gt0"]] > 0,] 
         }
         setorderv(unit_grpest, c(unitvar, rowvar, colvar))  

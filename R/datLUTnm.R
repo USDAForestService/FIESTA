@@ -214,7 +214,8 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
       if (!xvar %in% names(LUTx)) stop(paste(xvar, "not in LUT"))
 
       if (is.factor(LUTx[[xvar]])) LUTx[[xvar]] <- as.character(LUTx[[xvar]])
-      LUTx <- ref[is.na(VALUE) | VALUE %in% LUTx[[xvar]],]
+      #LUTx <- ref[is.na(VALUE) | VALUE %in% LUTx[[xvar]],]
+      LUTx <- ref[VALUE %in% LUTx[[xvar]],]
       LUTnewvarlst <- names(LUTx)
 
       ## To get a name other than MEANING
@@ -231,7 +232,6 @@ datLUTnm <- function(x, xvar=NULL, LUT=NULL, LUTvar=NULL, LUTnewvar=NULL,
         setnames(LUTx, grpvars, grpnames)
         LUTnewvar <- c(LUTnewvar, grpnames)
       }        
-
     } else {    
       LUTx <- ref
       LUTnewvarlst <- names(LUTx)

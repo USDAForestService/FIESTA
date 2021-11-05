@@ -689,7 +689,7 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
 	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
 	outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, estround=estround,
  	pseround=pseround, divideby=divideby, returntitle=returntitle, 
-	estnull=estnull, psenull=psenull) 
+	estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 

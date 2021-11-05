@@ -247,12 +247,14 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
               rowLUTgrp <- TRUE
             }
           }
+
           if (!is.null(rowlut)) row.add0 <- TRUE
           rowLUT <- datLUTnm(x=condf, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
 		  		group=rowLUTgrp, add0=row.add0)
 
           condf <- rowLUT$xLUT
           rowlut <- rowLUT$LUT
+
           rowLUTnm <- rowLUT$xLUTnm
           if (rowgrp) {
             rowgrpord <- rowLUT$grpcode

@@ -132,54 +132,62 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
     } else if (xvar.add0) {
 
-      ## Merge uniquex
-      xchk <- check.matchclass(uniquex, x, xvar)
-      uniquex <- xchk$tab1
-      x <- xchk$tab2
-
+      uniquex.exp <- expand.grid(uniquex[[xvar]], x[[xvar2]])
       if (!is.null(unitvar)) {
-        setnames(x, unitvar, "uvar")
-        x <- x[uniquex[rep(1:nrow(uniquex), uniqueN(x$uvar)), 
-		c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex))))], 
-		on=c("uvar", xvar)]
-        setnames(x, "uvar", unitvar)
-        x[is.na(x)] <- 0
+        uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
+			each=nrow(uniquex.exp)), uniquex.exp)
+        setnames(uniquex.exp, c(unitvar, xvar, xvar2))
+        chkvars <- c(unitvar, xvar, xvar2)
       } else {
-        x <- merge(uniquex, x, by=xvar)
+        setnames(uniquex.exp, c(xvar, xvar2))
+        chkvars <- c(xvar, xvar2)
       }
-     
-      ## Merge uniquex2
-      xchk <- check.matchclass(uniquex, x, xvar2)
-      uniquex2 <- xchk$tab1
+
+      ## Merge uniquex
+      xchk <- check.matchclass(uniquex.exp, x, chkvars)
+      uniquex.exp <- xchk$tab1
       x <- xchk$tab2
 
-      x <- merge(uniquex2, x, by=xvar2)
+      ## Merge uniquex.exp
+      x <- unique(merge(x, uniquex.exp, by=chkvars, all.y=TRUE))
+      setcolorder(x, c(chkvars, names(x)[!names(x) %in% chkvars]))
+
+      #setnames(x, unitvar, "uvar")
+      #x <- x[uniquex[rep(1:nrow(uniquex.exp), uniqueN(x$uvar)), 
+	 #	c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex.exp))))], 
+	 #	on=c("uvar", xvar)]
+
+      ## Set NA values to 0
       x[is.na(x)] <- 0
 
     } else if (xvar2.add0) {
 
-      ## Merge uniquex2
-      xchk <- check.matchclass(uniquex2, x, xvar2)
-      uniquex2 <- xchk$tab1
-      x <- xchk$tab2
-
+      uniquex.exp <- expand.grid(uniquex2[[xvar2]], x[[xvar]])
       if (!is.null(unitvar)) {
-        setnames(x, unitvar, "uvar")
-        x <- x[uniquex2[rep(1:nrow(uniquex2), uniqueN(x$uvar)), 
-		c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex2))))], 
-		on=c("uvar", xvar2)]
-        setnames(x, "uvar", unitvar)
-        x[is.na(x)] <- 0
+        uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
+			each=nrow(uniquex.exp)), uniquex.exp)
+        setnames(uniquex.exp, c(unitvar, xvar, xvar2))
+        chkvars <- c(unitvar, xvar, xvar2)
       } else {
-        x <- merge(uniquex2, x, by=xvar2)
+        setnames(uniquex.exp, c(xvar, xvar2))
+        chkvars <- c(xvar, xvar2)
       }
 
       ## Merge uniquex
-      xchk <- check.matchclass(uniquex, x, xvar)
-      uniquex <- xchk$tab1
+      xchk <- check.matchclass(uniquex.exp, x, chkvars)
+      uniquex.exp <- xchk$tab1
       x <- xchk$tab2
 
-      x <- merge(uniquex, x, by=xvar)
+      ## Merge uniquex.exp
+      x <- unique(merge(x, uniquex.exp, by=chkvars, all.y=TRUE))
+      setcolorder(x, c(chkvars, names(x)[!names(x) %in% chkvars]))
+
+      #setnames(x, unitvar, "uvar")
+      #x <- x[uniquex[rep(1:nrow(uniquex.exp), uniqueN(x$uvar)), 
+	 #	c(.SD, list(uvar=rep(unique(x$uvar), each=nrow(uniquex.exp))))], 
+	 #	on=c("uvar", xvar)]
+
+      ## Set NA values to 0
       x[is.na(x)] <- 0
 
     } else {
@@ -283,7 +291,7 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   }
   group.est[NBRPLT.gt0 == 0, (estnm) := estnull]
   group.est[NBRPLT.gt0 == 0, (psenm) := psenull]
-
+ 
   if (!is.null(rowvar.est)) {
     if (!is.null(estround) && is.numeric(rowvar.est[[estnm]]))
       rowvar.est[[estnm]] <- round(rowvar.est[[estnm]], estround)
