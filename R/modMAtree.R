@@ -365,12 +365,12 @@ modMAtree <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
   condid <- MApopdat$condid
   tuniqueid <- MApopdat$tuniqueid
   ACI.filter <- MApopdat$ACI.filter
-  unitarea <- MApopdat$unitarea
+  unitarea <- MApopdat$dunitarea
   areavar <- MApopdat$areavar
   areaunits <- MApopdat$areaunits
-  unitvar <- MApopdat$unitvar
-  unitlut <- MApopdat$unitlut
-  unitvars <- MApopdat$unitvars
+  unitvar <- MApopdat$dunitvar
+  unitlut <- MApopdat$dunitlut
+  unitvars <- MApopdat$dunitvars
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
   expcondtab <- MApopdat$expcondtab

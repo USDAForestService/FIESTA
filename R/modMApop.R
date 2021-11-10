@@ -43,29 +43,21 @@
 #' 
 #' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
 #' 
-#' @param cond DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Condition-level data with one record for each condition, including or
-#' excluding nonsampled conditions. Plot variables and strata/estimation unit
-#' variable(s) may be included if plt and pltassgn=NULL. See details for
-#' necessary variables to include.
-#' @param plt DF/DT, Optional. R object, sf R object, comma-delimited
-#' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp).  Plot-level
-#' data with one record for each plot, including or excluding nonsampled
-#' conditions. If nonsampled plots are included, PLOT_STATUS_CD variable must
-#' be in table or a filter defined in nonsamp.pfilter.
-#' @param tree DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Tree-level data with one record for each tree. Tree data are aggregated to
-#' condition-level. See details for necessary variables to include.
-#' @param seed DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Seedling data with one record for each seedling count.
+#' @param popType String. Type of evaluation(s) to include in population data.
+#' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
+#' below for descriptions of each.
+#' @param popTabs List of population tables the user would like returned.
+#'  See help(popTabs()) for a list of options.
+#' @param popTabIDs List of unique IDs corresponding to the population tables
+#' that the user has requested. See help(popTabIDs()) for a list of
+#' options.
 #' @param pltassgn DF/DT, Optional. R object, sf R object, comma-delimited
 #' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
 #' assignment of estimation unit and/or strata, with one record for each plot.
+#' @param pltassgnid String.
 #' @param dsn String. Name of database where tree, cond, and plot-level tables
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html).
-#' @param puniqueid String. Unique identifier of plot in plt.
-#' @param pltassgnid String. Unique identifier of plot in pltassgn.
 #' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
 #' need to be uniqueid. If using most current XY coordinates for plot
 #' assignments, use identifier for plot (e.g., PLOT_ID).
@@ -76,6 +68,11 @@
 #' CONDID=1 is automatically added.
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
+#' @param adj String. How to calculate adjustment factors for nonsampled
+#' (nonresponse) conditions based on summed proportions for by plot ('samp',
+#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
+#' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
+#' only calculated for annual inventory plots (DESIGNCD=1).
 #' @param evalid Numeric. FIA Evaluation identifier for subsetting plots for
 #' population.
 #' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
@@ -84,11 +81,6 @@
 #' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
 #' Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
 #' be included.
-#' @param adj String. How to calculate adjustment factors for nonsampled
-#' (nonresponse) conditions based on summed proportions for by plot ('samp',
-#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
-#' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
-#' only calculated for annual inventory plots (DESIGNCD=1).
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
@@ -109,7 +101,7 @@
 #' @param unit.action String. What to do if number of plots in an estimation
 #' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
 #' unit.action='combine', combines estimation unit to the following estimation
-#' unit in unitlut.
+#' unit in unitzonal.
 #' @param npixelvar String. Name of variable in unitlut defining number of
 #' pixels by estimation unit.
 #' @param prednames String vector. Name(s) of predictor variables to include in
@@ -117,33 +109,19 @@
 #' @param predfac String vector. Name(s) of prednames that are factors (i.e.,
 #' categorical).
 #' @param strata Logical. If TRUE, use MAmethod='poststrat' from mase.
-#' @param strvar String. Name of strata variable in stratalut and table with
-#' strata assignment for each plot. Default="STRATUMCD".
-#' @param stratcombine Logical. If strata=TRUE, if TRUE, automatically combines
-#' strata categories if less than 2 plots in any one stratum. See notes for
-#' more info.
-#' @param minplotnum.strat Integer. Minimum number of plots for a stratum
-#' within an estimation unit.
+#' @param strata_opts List. See help(strata_options()) for a list of options.
+#' Only used when strata = TRUE. If stratalut=NULL, it is generated from 
+#' unitzonal, using predfac variables.
 #' @param saveobj Logical. If TRUE, saves SApopdat object to outfolder.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param outfolder String. The outfolder to write files to. If NULL, files are
-#' written to working directory, or if gui, a window to browse.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
-#' exists.
-#' @param append_layer Logical. If TRUE, appends layers to existing out_dsn or
-#' files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-#' "gdb".
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
 #' @param MAdata List. Data output from FIESTA::MAdata().
 #' @param pltdat R List object. Output data list components from
 #' FIESTA::spGetPlots().
 #' @param auxdat List. Auxiliary data output from FIESTA::spGetAuxiliary().
 #' @param gui Logical. If gui, user is prompted for parameters.
+#' @param ... For extendibility.
 #' @return A list with population data for Green-Book estimates.
 #' 
 #' \item{condx}{ Data frame. Condition-level data including plot-level
@@ -230,18 +208,20 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @export modMApop
-modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL, 
-	pltassgn=NULL, dsn=NULL, puniqueid="CN", pltassgnid="CN", pjoinid="CN", 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", condid="CONDID", 
-	areawt="CONDPROP_UNADJ", evalid=NULL, invyrs=NULL, intensity=NULL, 
-	ACI=FALSE, adj="samp", unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
+modMApop <- function(popType="VOL",
+                     popTabs = popTables(),
+                     popTabIDs = popTableIDs(), 
+                     pltassgn=NULL,
+                     pltassgnid="PLT_CN",
+	dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", 
+	adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, 
+	ACI=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
 	areavar="ACRES", areaunits="acres", unitzonal=NULL, minplotnum.unit=10, 
-	unit.action="keep", npixelvar="npixels", prednames=NULL, predfac=NULL, 
-	strata=FALSE, strvar=NULL, stratcombine=TRUE, minplotnum.strat=2, 
-	saveobj=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, append_layer=FALSE, MAdata=NULL, pltdat=NULL, 
-	auxdat=NULL, gui=FALSE){
+	unit.action="keep", npixelvar="npixels", prednames=NULL, predfac=NULL,
+	strata=TRUE, savedata=FALSE, 
+	strata_opts=strata_options(), 
+	savedata_opts=savedata_options(),
+	MAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -273,6 +253,115 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
  
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=strwtvar <- NULL
+
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ## Set strata defaults
+  strata_defaults_list <- formals(FIESTA::strata_options)[-length(formals(FIESTA::strata_options))]
+  
+  for (i in 1:length(strata_defaults_list)) {
+    assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied strata values
+  if (length(strata_opts) > 0) {
+    for (i in 1:length(strata_opts)) {
+      assign(names(strata_opts)[[i]], strata_opts[[i]])
+    }
+  }
+  
+  ## Set popTables defaults
+  popTables_defaults_list <- formals(FIESTA::popTables)[-length(formals(FIESTA::popTables))]
+  
+  for (i in 1:length(popTables_defaults_list)) {
+    assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied popTable values
+  if (length(popTabs) > 0) {
+    for (i in 1:length(popTabs)) {
+      assign(names(popTabs)[[i]], popTabs[[i]])
+    }
+  }
+  
+  ## Set popTabIDs defaults
+  popTableIDs_defaults_list <- formals(FIESTA::popTableIDs)[-length(formals(FIESTA::popTableIDs))]
+  
+  for (i in 1:length(popTableIDs_defaults_list)) {
+    if (names(popTableIDs_defaults_list)[[i]] == "cond") {
+      assign("cuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "plt") {
+      assign("puniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "tree") {
+      assign("tuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "seed") {
+      assign("suniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "vsubpspp") {
+      assign("vsppuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "vsubpstr") {
+      assign("vstruniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "subplot") {
+      assign("subpuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "subp_cond") {
+      assign("subcuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "lulc") {
+      assign("lulcuniqueid", popTableIDs_defaults_list[[i]])
+    }
+  }
+  
+  ## Set user-supplied popTabIDs values
+  if (length(popTabIDs) > 0) {
+    for (i in 1:length(popTabIDs)) {
+      if (names(popTabIDs)[[i]] == "cond") {
+        assign("cuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "plt") {
+        assign("puniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "tree") {
+        assign("tuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "seed") {
+        assign("suniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpspp") {
+        assign("vsppuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpstr") {
+        assign("vstruniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subplot") {
+        assign("subpuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subp_cond") {
+        assign("subcuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "lulc") {
+        assign("lulcuniqueid", popTabIDs[[i]])
+      }
+    }
+  }
+
 
   ## SET OPTIONS
   options.old <- options()
@@ -410,12 +499,16 @@ modMApop <- function(cond=NULL, plt=NULL, tree=NULL, seed=NULL,
         stop("strvar must be included in predfac")
       }
     } 
-    strwtvar <- "Prop"
+    if (is.null(strwtvar)) {
+      strwtvar <- "Prop"
+    }
     prednames <- NULL
     pivotvars <- c(unitvar, unitvar2, "AOI", "npixels")
     unitvars <- pivotvars[pivotvars %in% names(unitzonal)]
-    stratalut <- strat.pivot(unitzonal, strvar, unitvars=unitvars, 
+    if (is.null(stratalut)) {
+      stratalut <- strat.pivot(unitzonal, strvar, unitvars=unitvars, 
 		strwtvar=strwtvar)
+    }
   }
  
   ###################################################################################

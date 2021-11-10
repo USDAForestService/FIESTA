@@ -342,12 +342,12 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
   cuniqueid <- MApopdat$cuniqueid
   condid <- MApopdat$condid
   ACI.filter <- MApopdat$ACI.filter
-  unitarea <- MApopdat$unitarea
+  unitarea <- MApopdat$dunitarea
   areavar <- MApopdat$areavar
   areaunits <- MApopdat$areaunits
-  unitvar <- MApopdat$unitvar
-  unitvars <- MApopdat$unitvars
-  unitlut <- MApopdat$unitlut
+  unitvar <- MApopdat$dunitvar
+  unitvars <- MApopdat$dunitvars
+  unitlut <- MApopdat$dunitlut
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
   expcondtab <- MApopdat$expcondtab

@@ -99,9 +99,9 @@
 #' @param areavar String. Name of acre variable in unitarea. Default="ACRES".
 #' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
 #' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
-#' @param unit.action String. What to do if number of plots in an estimation
+#' @param dunit.action String. What to do if number of plots in an estimation
 #' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-#' unit.action='combine', combines estimation unit to the following estimation
+#' dunit.action='combine', combines estimation unit to the following estimation
 #' unit in unitlut.
 #' @param dunitzonal DF/DT. Data frame with zonal auxiliary information by
 #' domain unit. For continuous data, means by domain unit; for categorical
@@ -191,7 +191,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
 	invyrs=NULL, intensity=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
 	dunitvar2=NULL, dunitarea=NULL, areavar="ACRES", areaunits="acres", 
-	minplotnum.unit=0, unit.action="keep", dunitzonal=NULL, 
+	minplotnum.unit=0, dunit.action="keep", dunitzonal=NULL, 
 	prednames=NULL, predfac=NULL, pvars2keep=NULL, cvars2keep=NULL, 
 	saveobj=FALSE, objnm="SApopdat", savedata=FALSE, outfolder=NULL, 
 	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
@@ -362,7 +362,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
 	measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, ACI=ACI, adj=adj, 
 	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
 	unitarea=dunitarea, areavar=areavar, areaunits=areaunits, unitvar=dunitvar, 
-	unitvar2=dunitvar2, unit.action=unit.action, prednames=prednames, 
+	unitvar2=dunitvar2, unit.action=dunit.action, prednames=prednames, 
 	predfac=predfac, pvars2keep=pvars2keep, cvars2keep=cvars2keep)
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
@@ -380,7 +380,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
   dunitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
   areaunits <- popcheck$areaunits
-  unit.action <- popcheck$unit.action
+  dunit.action <- popcheck$unit.action
   prednames <- popcheck$prednames
   predfac <- popcheck$predfac
   plotsampcnt <- popcheck$plotsampcnt
@@ -402,12 +402,12 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
   ## - if < 2 plots, an error occurs, must collapse plots.
   ## - if 2-10 plots, a warning is displayed, with suggestion to collapse plots. 
   ## - if stratcombine=TRUE, combines strata classes to reach minplotnum.strat. 
-  ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
+  ## - if dunit.action='combine', combines estimation units to reach minplotnum.unit.
   ###################################################################################
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
 		auxlut=dunitzonal, prednames=prednames, predfac=predfac, makedummy=TRUE,
 		unitarea=dunitarea, unitvar=dunitvar, areavar=areavar, 
-		minplotnum.unit=minplotnum.unit, unit.action=unit.action,
+		minplotnum.unit=minplotnum.unit, unit.action=dunit.action,
 		auxtext="dunitlut", removetext="dunitarea", standardize=TRUE)  
   pltassgnx <- setDT(auxdat$pltx)
   dunitarea <- auxdat$unitarea
