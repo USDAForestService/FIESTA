@@ -104,25 +104,30 @@ token each time you update `FIESTA` (until public release).
 Use the following function to check and install packages for `FIESTA`.
 Note: copy/paste function into RStudio or RGui
 
-    chkpkg <- function(pkg) {
-      ## DESCRIPTION: Function to check if package exists
-      ## If package does not exist, it will install the package
-      if (!require(pkg, character.only = TRUE)) {
-        message("installing ", pkg, " package...")
-        install.packages(pkg, dependencies=TRUE)
-      }
-      if (!require(pkg, character.only = TRUE)) {
-        stop("load failure: ", pkg)
-      } 
-    }
+``` r
+chkpkg <- function(pkg) {
+  ## DESCRIPTION: Function to check if package exists
+  ## If package does not exist, it will install the package
+  if (!require(pkg, character.only = TRUE)) {
+    message("installing ", pkg, " package...")
+    install.packages(pkg, dependencies=TRUE)
+  }
+  if (!require(pkg, character.only = TRUE)) {
+    stop("load failure: ", pkg)
+  } 
+}
+```
 
 `FIESTA` dependent and imported packages are installed when you install
 the source code from GitHub.
 
 If you are not installing the source code and it is the first time using
 `FIESTA`, you must install the following packages:
-`depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp')`
-`lapply(depend.pkgs, chkpkg)`
+
+``` r
+depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp')
+lapply(depend.pkgs, chkpkg)
+```
 
 You will need to install suggested packages even if installing the
 source code. Installing suggested packages is optional, depending on how
@@ -130,60 +135,65 @@ you are using `FIESTA`.
 
 NOTE: select closest CRAN mirror for download
 
-    ## Load suggests packages
-    misc.pkgs <- c('devtools', 'units')
-    lapply(misc.pkgs, chkpkg)
+``` r
+## Load suggests packages
+misc.pkgs <- c('devtools', 'units')
+lapply(misc.pkgs, chkpkg)
 
+## For database extraction
+db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite')
+lapply(db.pkgs, chkpkg)
 
-    ## For database extraction
-    db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite')
-    lapply(db.pkgs, chkpkg)
+## For model-assisted estimation
+ma.pkgs <- c('mase')
+lapply(ma.pkgs, chkpkg)
 
-    ## For model-assisted estimation
-    ma.pkgs <- c('mase')
-    lapply(ma.pkgs, chkpkg)
+## For small-area estimation
+sa.pkgs <- c('sae', 'JoSAE', 'nlme')
+lapply(sa.pkgs, chkpkg)
 
-    ## For small-area estimation
-    sa.pkgs <- c('sae', 'JoSAE', 'nlme')
-    lapply(sa.pkgs, chkpkg)
+## For xlsx output
+xlsx.pkgs <- c('rJava', 'xlsx')
+lapply(xlsx.pkgs, chkpkg)
 
-    ## For xlsx output
-    xlsx.pkgs <- c('rJava', 'xlsx')
-    lapply(xlsx.pkgs, chkpkg)
+## For reports
+report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer')
+lapply(report.pkgs, chkpkg)
 
-    ## For reports
-    report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer')
-    lapply(report.pkgs, chkpkg)
+## For PB module reports
+pbreport.pkgs <- c('pheatmap')
+lapply(pbreport.pkgs, chkpkg)
 
-    ## For PB module reports
-    pbreport.pkgs <- c('pheatmap')
-    lapply(pbreport.pkgs, chkpkg)
-
-    ## For spatial manipulation
-    sp.pkgs <- c('rgeos', 'raster')
-    lapply(sp.pkgs, chkpkg)
+## For spatial manipulation
+sp.pkgs <- c('rgeos', 'raster')
+lapply(sp.pkgs, chkpkg)
+```
 
 ### 4. Install FIESTA package from source code
 
 If you are updating `FIESTA`, first make sure the `FIESTA` library is
 not attached, then uninstall from your library.
 
-    detach("package:FIESTA", unload=TRUE)
-    remove.packages("FIESTA", lib=.libPaths()) 
+``` r
+detach("package:FIESTA", unload=TRUE)
+remove.packages("FIESTA", lib=.libPaths()) 
+```
 
 Next install `FIESTA` from GitHub, using the token you saved as an R
 object.
 
-    ## Set your token to an R character object, in quotes (Replace your_token with ~30 character string)
-    token <- "your_token"
+``` r
+## Set your token to an R character object, in quotes (Replace your_token with ~30 character string)
+token <- "your_token"
 
-    ## Install from github
-    Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
-    devtools::install_github("https://github.com/USDAForestService/FIESTA", 
-            auth_token = token,
-            build_vignettes = TRUE,
-            INSTALL_opts = c("--compile-both"),
-            dependencies=c("Depends", "Imports"))
+## Install from github
+Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
+devtools::install_github("https://github.com/USDAForestService/FIESTA", 
+        auth_token = token,
+        build_vignettes = TRUE,
+        INSTALL_opts = c("--compile-both"),
+        dependencies=c("Depends", "Imports"))
+```
 
 Note: For Macintosh computers, you may need to install xcode developer
 tools first Open Terminal and run the following code:
@@ -192,24 +202,32 @@ tools first Open Terminal and run the following code:
 
 ## HELP and vignettes
 
-To get help for fiesta package
+To get help for the `FIESTA` package
 
-    help(package="FIESTA")
+``` r
+help(package="FIESTA")
+```
 
 To get tutorials from `FIESTA` package
 
-    vignette(package="FIESTA")
+``` r
+vignette(package="FIESTA")
+```
 
 Core functions
 
-    vignette("FIESTA_tutorial_DB", package="FIESTA")
-    vignette("FIESTA_tutorial_dat", package="FIESTA")
-    vignette("FIESTA_tutorial_sp", package="FIESTA")
+``` r
+vignette("FIESTA_tutorial_DB", package="FIESTA")
+vignette("FIESTA_tutorial_dat", package="FIESTA")
+vignette("FIESTA_tutorial_sp", package="FIESTA")
+```
 
 Modules
 
-    vignette("FIESTA_tutorial_GB", package="FIESTA")
-    vignette("FIESTA_tutorial_GBcustom", package="FIESTA")
-    vignette("FIESTA_tutorial_PB", package="FIESTA")
-    vignette("FIESTA_tutorial_SA", package="FIESTA")
-    vignette("FIESTA_tutorial_MA", package="FIESTA")
+``` r
+vignette("FIESTA_tutorial_GB", package="FIESTA")
+vignette("FIESTA_tutorial_GBcustom", package="FIESTA")
+vignette("FIESTA_tutorial_PB", package="FIESTA")
+vignette("FIESTA_tutorial_SA", package="FIESTA")
+vignette("FIESTA_tutorial_MA", package="FIESTA")
+```

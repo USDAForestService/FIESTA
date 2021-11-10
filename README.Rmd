@@ -81,7 +81,7 @@ Note: `FIESTA` is frequently updated. You will use this token each time you upda
 
 Use the following function to check and install packages for `FIESTA`.
 Note: copy/paste function into RStudio or RGui 
-```
+```{r, eval = F}
 chkpkg <- function(pkg) {
   ## DESCRIPTION: Function to check if package exists
   ## If package does not exist, it will install the package
@@ -100,19 +100,20 @@ from GitHub.
 
 If you are not installing the source code and it is the first time using `FIESTA`, 
 you must install the following packages:
-`depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp')`
-`lapply(depend.pkgs, chkpkg)`
+```{r, eval = F}
+depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp')
+lapply(depend.pkgs, chkpkg)
+```
 
 You will need to install suggested packages even if installing the source code.
 Installing suggested packages is optional, depending on how you are using `FIESTA`. 
 
 NOTE: select closest CRAN mirror for download
 
-```
+```{r, eval = F}
 ## Load suggests packages
 misc.pkgs <- c('devtools', 'units')
 lapply(misc.pkgs, chkpkg)
-
 
 ## For database extraction
 db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite')
@@ -141,7 +142,6 @@ lapply(pbreport.pkgs, chkpkg)
 ## For spatial manipulation
 sp.pkgs <- c('rgeos', 'raster')
 lapply(sp.pkgs, chkpkg)
-
 ```
 
 
@@ -150,14 +150,14 @@ lapply(sp.pkgs, chkpkg)
 If you are updating `FIESTA`, first make sure the `FIESTA` library is not attached, 
 then uninstall from your library.
 
-```
+```{r, eval = F}
 detach("package:FIESTA", unload=TRUE)
 remove.packages("FIESTA", lib=.libPaths()) 
 ```
 
 Next install `FIESTA` from GitHub, using the token you saved as an R object.
 
-```
+```{r, eval = F}
 ## Set your token to an R character object, in quotes (Replace your_token with ~30 character string)
 token <- "your_token"
 
@@ -181,25 +181,25 @@ xcode-select --install
 
 ## HELP and vignettes
 
-To get help for fiesta package
-```
+To get help for the `FIESTA` package
+```{r, eval = F}
 help(package="FIESTA")
 ```
 
 To get tutorials from `FIESTA` package
-```
+```{r, eval = F}
 vignette(package="FIESTA")
 ```
 
 Core functions
-```
+```{r, eval = F}
 vignette("FIESTA_tutorial_DB", package="FIESTA")
 vignette("FIESTA_tutorial_dat", package="FIESTA")
 vignette("FIESTA_tutorial_sp", package="FIESTA")
 ```
 
 Modules
-```
+```{r, eval = F}
 vignette("FIESTA_tutorial_GB", package="FIESTA")
 vignette("FIESTA_tutorial_GBcustom", package="FIESTA")
 vignette("FIESTA_tutorial_PB", package="FIESTA")
