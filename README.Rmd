@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 <b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson, Paul L.; Toney, Chris; White, Grayson W.
 
-# FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
+# FIESTA `r emo::ji("popper")` <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
 ## `FIESTA` Overview
 
@@ -40,8 +40,6 @@ Functions are organized by type or objective and are named with a corresponding 
 
 * Analysis functions (`an*`) - wrapper functions for steam-lining estimation processes. These functions reside in the `FIESTAnalysis` package. 
 
-
-
 ## License:
 
 This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
@@ -51,8 +49,7 @@ This code was written and prepared by a U.S. Government employee on official tim
 
 ### 1. Install Rtools
 
-If Windows OS, in order to install source code from GitHub, you must install Rtools from 
-the CRAN website (https://cran.r-project.org/). Go to Download R for Windows and Install the most current Rtools for Windows 64-bit.
+If Windows OS, in order to install source code from GitHub, you must install Rtools from [CRAN](https://cran.r-project.org/). Install the most current Rtools for Windows 64-bit at [this link](https://cran.r-project.org/bin/windows/Rtools/). 
 
 
 ### 2. Create token for GitHub

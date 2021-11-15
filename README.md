@@ -5,7 +5,7 @@ Super-Linter](https://github.com/USDAForestService/FIESTA/workflows/Lint%20Code%
 <b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson,
 Paul L.; Toney, Chris; White, Grayson W.
 
-# FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
+# FIESTA 🎉 <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
 ## `FIESTA` Overview
 
@@ -73,9 +73,9 @@ to copyright.
 ### 1. Install Rtools
 
 If Windows OS, in order to install source code from GitHub, you must
-install Rtools from the CRAN website (<https://cran.r-project.org/>). Go
-to Download R for Windows and Install the most current Rtools for
-Windows 64-bit.
+install Rtools from [CRAN](https://cran.r-project.org/). Install the
+most current Rtools for Windows 64-bit at [this
+link](https://cran.r-project.org/bin/windows/Rtools/).
 
 ### 2. Create token for GitHub
 
