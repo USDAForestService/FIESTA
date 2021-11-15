@@ -30,17 +30,17 @@ Suggests:
     RSQLite,
     DBI,
     rgeos,
-	  sqldf,
-	  raster,
-	  units,
-	  nlme,
-	  xml2,
-	  RPostgreSQL,
-	  arcgisbinding,
-	  pheatmap,
-	  RColorBrewer,
-	  hbsae,
-	  sae
+    sqldf,
+    raster,
+    units,
+    nlme,
+    xml2,
+    RPostgreSQL,
+    arcgisbinding,
+    pheatmap,
+    RColorBrewer,
+    hbsae,
+    sae
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
