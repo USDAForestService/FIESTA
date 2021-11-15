@@ -14,6 +14,7 @@ table_options(
   rowlut = NULL,
   collut = NULL,
   rawonly = FALSE,
+  raw.keep0 = FALSE,
   rowgrp = FALSE,
   rowgrpnm = NULL,
   rowgrpord = NULL,
@@ -69,6 +70,8 @@ format).}
 \item{rawonly}{Logical. If TRUE, only rawdata are output. If dataset
 includes many estimation units, and only raw data tables are desired, it is
 more efficient to output raw data only.}
+
+\item{raw.keep0}{Logical. If TRUE, keep 0 values in raw data tables.}
 
 \item{rowgrp}{Logical. If TRUE, appends row groups to first column of table.
 Only available if group category exists in ref_codes table or defined in

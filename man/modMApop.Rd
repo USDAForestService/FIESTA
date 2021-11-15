@@ -5,24 +5,19 @@
 \title{Model-Assisted module - Generate population data for MA module.}
 \usage{
 modMApop(
-  cond = NULL,
-  plt = NULL,
-  tree = NULL,
-  seed = NULL,
+  popType = "VOL",
+  popTabs = popTables(),
+  popTabIDs = popTableIDs(),
   pltassgn = NULL,
+  pltassgnid = "PLT_CN",
   dsn = NULL,
-  puniqueid = "CN",
-  pltassgnid = "CN",
   pjoinid = "CN",
-  tuniqueid = "PLT_CN",
-  cuniqueid = "PLT_CN",
-  condid = "CONDID",
   areawt = "CONDPROP_UNADJ",
+  adj = "samp",
   evalid = NULL,
   invyrs = NULL,
   intensity = NULL,
   ACI = FALSE,
-  adj = "samp",
   unitvar = NULL,
   unitvar2 = NULL,
   unitarea = NULL,
@@ -34,72 +29,51 @@ modMApop(
   npixelvar = "npixels",
   prednames = NULL,
   predfac = NULL,
-  strata = FALSE,
-  strvar = NULL,
-  stratcombine = TRUE,
-  minplotnum.strat = 2,
-  saveobj = FALSE,
+  strata = TRUE,
   savedata = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
+  strata_opts = strata_options(),
+  savedata_opts = savedata_options(),
   MAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
-  gui = FALSE
+  gui = FALSE,
+  ...
 )
 }
 \arguments{
-\item{cond}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Condition-level data with one record for each condition, including or
-excluding nonsampled conditions. Plot variables and strata/estimation unit
-variable(s) may be included if plt and pltassgn=NULL. See details for
-necessary variables to include.}
+\item{popType}{String. Type of evaluation(s) to include in population data.
+Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
+below for descriptions of each.}
 
-\item{plt}{DF/DT, Optional. R object, sf R object, comma-delimited
-file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp).  Plot-level
-data with one record for each plot, including or excluding nonsampled
-conditions. If nonsampled plots are included, PLOT_STATUS_CD variable must
-be in table or a filter defined in nonsamp.pfilter.}
+\item{popTabs}{List of population tables the user would like returned.
+See help(popTabs()) for a list of options.}
 
-\item{tree}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Tree-level data with one record for each tree. Tree data are aggregated to
-condition-level. See details for necessary variables to include.}
-
-\item{seed}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Seedling data with one record for each seedling count.}
+\item{popTabIDs}{List of unique IDs corresponding to the population tables
+that the user has requested. See help(popTabIDs()) for a list of
+options.}
 
 \item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited
 file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
 assignment of estimation unit and/or strata, with one record for each plot.}
 
+\item{pltassgnid}{String.}
+
 \item{dsn}{String. Name of database where tree, cond, and plot-level tables
 reside.  The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html).}
-
-\item{puniqueid}{String. Unique identifier of plot in plt.}
-
-\item{pltassgnid}{String. Unique identifier of plot in pltassgn.}
 
 \item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
 need to be uniqueid. If using most current XY coordinates for plot
 assignments, use identifier for plot (e.g., PLOT_ID).}
 
-\item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
-
-\item{cuniqueid}{String. Unique identifier of plot in cond.}
-
-\item{condid}{String. Unique identifier of plot conditions (e.g., CONDID).
-If no condid in cond, the data are assumed to have 1 condition per plot.  A
-CONDID=1 is automatically added.}
-
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
+
+\item{adj}{String. How to calculate adjustment factors for nonsampled
+(nonresponse) conditions based on summed proportions for by plot ('samp',
+'plot').  'samp' - adjustments are calculated at strata/estimation unit
+level; 'plot' - adjustments are calculated at plot-level. Adjustments are
+only calculated for annual inventory plots (DESIGNCD=1).}
 
 \item{evalid}{Numeric. FIA Evaluation identifier for subsetting plots for
 population.}
@@ -112,12 +86,6 @@ population.}
 \item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.
 Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
 be included.}
-
-\item{adj}{String. How to calculate adjustment factors for nonsampled
-(nonresponse) conditions based on summed proportions for by plot ('samp',
-'plot').  'samp' - adjustments are calculated at strata/estimation unit
-level; 'plot' - adjustments are calculated at plot-level. Adjustments are
-only calculated for annual inventory plots (DESIGNCD=1).}
 
 \item{unitvar}{String. Name of the estimation unit variable in unitarea and
 cond or pltassgn data frame with estimation unit assignment for each plot
@@ -146,7 +114,7 @@ proportion of class by estimation unit.}
 \item{unit.action}{String. What to do if number of plots in an estimation
 unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
 unit.action='combine', combines estimation unit to the following estimation
-unit in unitlut.}
+unit in unitzonal.}
 
 \item{npixelvar}{String. Name of variable in unitlut defining number of
 pixels by estimation unit.}
@@ -159,40 +127,14 @@ categorical).}
 
 \item{strata}{Logical. If TRUE, use MAmethod='poststrat' from mase.}
 
-\item{strvar}{String. Name of strata variable in stratalut and table with
-strata assignment for each plot. Default="STRATUMCD".}
-
-\item{stratcombine}{Logical. If strata=TRUE, if TRUE, automatically combines
-strata categories if less than 2 plots in any one stratum. See notes for
-more info.}
-
-\item{minplotnum.strat}{Integer. Minimum number of plots for a stratum
-within an estimation unit.}
-
-\item{saveobj}{Logical. If TRUE, saves SApopdat object to outfolder.}
-
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
+\item{strata_opts}{List. See help(strata_options()) for a list of options.
+Only used when strata = TRUE. If stratalut=NULL, it is generated from 
+unitzonal, using predfac variables.}
 
-\item{out_fmt}{String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-
-\item{out_dsn}{String. Name of database if out_fmt = c('sqlite', 'gpkg').}
-
-\item{outfn.pre}{String. Add a prefix to output name (e.g., "01").}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites the out_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the out_layer, if
-exists.}
-
-\item{append_layer}{Logical. If TRUE, appends layers to existing out_dsn or
-files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-"gdb".}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
 \item{MAdata}{List. Data output from FIESTA::MAdata().}
 
@@ -202,6 +144,18 @@ FIESTA::spGetPlots().}
 \item{auxdat}{List. Auxiliary data output from FIESTA::spGetAuxiliary().}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
+
+\item{...}{For extendibility.}
+
+\item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
+
+\item{cuniqueid}{String. Unique identifier of plot in cond.}
+
+\item{condid}{String. Unique identifier of plot conditions (e.g., CONDID).
+If no condid in cond, the data are assumed to have 1 condition per plot.  A
+CONDID=1 is automatically added.}
+
+\item{saveobj}{Logical. If TRUE, saves SApopdat object to outfolder.}
 }
 \value{
 A list with population data for Green-Book estimates.
