@@ -15,9 +15,9 @@ knitr::opts_chunk$set(
 
 <b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson, Paul L.; Toney, Chris; White, Grayson W.
 
-# FIESTA `r emo::ji("popper")` <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
+# `r emo::ji("popper")` FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
-The `R` package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+The R package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
 Functions are organized by type or objective and are named with a corresponding prefix (Fig. 1). `FIESTA` core functions (CORE) facilitate data extraction and compilation of data input information and are used independently or within the `FIESTA` estimation modules. `FIESTA` estimation modules (MODULE) combine multiple functions from `FIESTA` or other packages to generate population estimates using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations (e.g., adjustments for nonresponse, standardizing auxiliary data) for a custom boundary and can be used for generating multiple estimates. `FIESTA` analysis functions, found in the `FIESTAnalysis` package, streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
 
@@ -38,16 +38,12 @@ Functions are organized by type or objective and are named with a corresponding 
 
 * Analysis functions (`an*`) - wrapper functions for steam-lining estimation processes. These functions reside in the `FIESTAnalysis` package. 
 
-### License
-
-------------------------------------------------------------------------
+## License
 
 This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
 
 
-### Installation
-
-------------------------------------------------------------------------
+## Installation
 
 Currently, to install `FIESTA`, you must go through a few steps: 
 
@@ -59,7 +55,6 @@ If you are using macOS, you'll need to install xcode developer tools. To do so, 
 ```
 xcode-select --install
 ```
-
 
 #### 2. Create token for GitHub
 
@@ -174,6 +169,19 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
 		dependencies=c("Depends", "Imports"))
 ```
 
+##### 5. Load FIESTA
+
+Then, you can load `FIESTA`:
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+devtools::load_all()
+```
+
+```{r, eval = F}
+library(FIESTA)
+```
+
+
 
 <!-- ## HELP and vignettes -->
 
@@ -203,8 +211,25 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
 <!-- vignette("FIESTA_tutorial_MA", package="FIESTA") -->
 <!-- ``` -->
 
-### Examples 
+## Examples 
 
-------------------------------------------------------------------------
+<!-- This is where a few basic examples will go (maybe one for each of `dat`, `DB`, `mod`, and `sp`). -->
 
-This is where a few basic examples will go (maybe one for each of `dat`, `DB`, `mod`, and `sp`).
+These examples make use of vignettes that come with `FIESTA`, and these vignettes can be found by calling `vignette(package = "FIESTA")`. The data used in these examples come with the `FIESTA` package and are from Wyoming, inventory years 2011-2013 (Evaluation 561301). 
+
+```{r, message = FALSE, warning = F}
+GBpopdat <- modGBpop(popTabs = popTables(cond = FIESTA::WYcond,
+                                         tree = FIESTA::WYtree,
+                                         seed = FIESTA::WYseed),
+                     popTabIDs = popTableIDs(cuniqueid = "PLT_CN"),
+                     pltassgn = FIESTA::WYpltassgn,
+                     pltassgnid = "CN",
+                     pjoinid = "PLT_CN",
+                     unitarea = WYunitarea,
+                     unitvar = "ESTN_UNIT",
+                     strata = TRUE,
+                     strata_opts = strata_options(stratalut = FIESTA::WYstratalut))
+
+summary(GBpopdat)
+```
+

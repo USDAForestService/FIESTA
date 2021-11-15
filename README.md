@@ -4,10 +4,10 @@
 <b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson,
 Paul L.; Toney, Chris; White, Grayson W.
 
-# FIESTA 🎉 <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
+# 🎉 FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
-The `R` package, `FIESTA` (Forest Inventory ESTimation and Analysis) is
-a research estimation tool for analysts that work with sample-based
+The R package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a
+research estimation tool for analysts that work with sample-based
 inventory data from the U.S. Department of Agriculture, Forest Service,
 Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA’s
 traditional state-wide estimates while also accommodate: unique
@@ -59,17 +59,13 @@ other functions for a specific purpose.
     estimation processes. These functions reside in the `FIESTAnalysis`
     package.
 
-### License
-
-------------------------------------------------------------------------
+## License
 
 This code was written and prepared by a U.S. Government employee on
 official time, and therefore it is in the public domain and not subject
 to copyright.
 
-### Installation
-
-------------------------------------------------------------------------
+## Installation
 
 Currently, to install `FIESTA`, you must go through a few steps:
 
@@ -202,6 +198,14 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
         dependencies=c("Depends", "Imports"))
 ```
 
+##### 5. Load FIESTA
+
+Then, you can load `FIESTA`:
+
+``` r
+library(FIESTA)
+```
+
 <!-- ## HELP and vignettes -->
 <!-- To get help for the `FIESTA` package -->
 <!-- ```{r, eval = F} -->
@@ -226,9 +230,54 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
 <!-- vignette("FIESTA_tutorial_MA", package="FIESTA") -->
 <!-- ``` -->
 
-### Examples
+## Examples
 
-------------------------------------------------------------------------
+<!-- This is where a few basic examples will go (maybe one for each of `dat`, `DB`, `mod`, and `sp`). -->
 
-This is where a few basic examples will go (maybe one for each of `dat`,
-`DB`, `mod`, and `sp`).
+These examples make use of vignettes that come with `FIESTA`, and these
+vignettes can be found by calling `vignette(package = "FIESTA")`. The
+data used in these examples come with the `FIESTA` package and are from
+Wyoming, inventory years 2011-2013 (Evaluation 561301).
+
+``` r
+GBpopdat <- modGBpop(popTabs = popTables(cond = FIESTA::WYcond,
+                                         tree = FIESTA::WYtree,
+                                         seed = FIESTA::WYseed),
+                     popTabIDs = popTableIDs(cuniqueid = "PLT_CN"),
+                     pltassgn = FIESTA::WYpltassgn,
+                     pltassgnid = "CN",
+                     pjoinid = "PLT_CN",
+                     unitarea = WYunitarea,
+                     unitvar = "ESTN_UNIT",
+                     strata = TRUE,
+                     strata_opts = strata_options(stratalut = FIESTA::WYstratalut))
+
+summary(GBpopdat)
+#>             Length Class      Mode     
+#> popType      1     -none-     character
+#> condx       13     data.table list     
+#> pltcondx    41     data.table list     
+#> cuniqueid    1     -none-     character
+#> condid       1     -none-     character
+#> ACI.filter   1     -none-     character
+#> unitarea     2     data.frame list     
+#> areavar      1     -none-     character
+#> areaunits    1     -none-     character
+#> unitvar      1     -none-     character
+#> unitvars     1     -none-     character
+#> strata       1     -none-     logical  
+#> stratalut   18     data.table list     
+#> strvar       1     -none-     character
+#> strwtvar     1     -none-     character
+#> expcondtab  12     data.table list     
+#> plotsampcnt  3     data.table list     
+#> condsampcnt  3     data.table list     
+#> states       1     -none-     character
+#> invyrs       1     by         list     
+#> estvar.area  1     -none-     character
+#> adj          1     -none-     character
+#> treex       30     data.table list     
+#> tuniqueid    1     -none-     character
+#> adjtree      1     -none-     logical  
+#> seedx       12     data.table list
+```
