@@ -3,13 +3,44 @@ Type: Package
 Title: Forest Inventory ESTimation and Analysis
 Version: 3.2.00
 Date: 2021-10-05
-Imports: methods, grDevices, graphics, utils, sp, rgdal, Rcpp(>= 1.0.7)
-Suggests: knitr, rmarkdown, rJava, xlsx, JoSAE, mase, RSQLite, DBI, rgeos,	
-	sqldf, raster, units, nlme, xml2, RPostgreSQL, arcgisbinding, pheatmap, RColorBrewer, hbsae, sae
-Depends: R(>= 4.0), data.table, sf
-Description: A research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. 
 Author: Tracey S. Frescino, Gretchen G. Moisen, Paul L. Patterson, Chris Toney, Elizabeth A. Freeman 
 Maintainer: Tracey Frescino <tracey.frescino@usda.gov>
+Description: A research estimation tool for analysts that work with sample-based
+    inventory data from the U.S. Department of Agriculture, Forest Service,
+    Forest Inventory and Analysis (FIA) Program. 
+Depends: 
+    R (>= 4.0),
+    data.table,
+    sf
+Imports: 
+    methods,
+    grDevices,
+    graphics,
+    utils,
+    sp,
+    rgdal,
+    Rcpp(>= 1.0.7)
+Suggests: 
+    knitr,
+    rmarkdown,
+    rJava,
+    xlsx,
+    JoSAE,
+    mase,
+    RSQLite,
+    DBI,
+    rgeos,	
+	  sqldf,
+	  raster,
+	  units,
+	  nlme,
+	  xml2,
+	  RPostgreSQL,
+	  arcgisbinding,
+	  pheatmap,
+	  RColorBrewer,
+	  hbsae,
+	  sae
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
