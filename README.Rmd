@@ -17,42 +17,51 @@ knitr::opts_chunk$set(
 
 # FIESTA `r emo::ji("popper")` <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
-## `FIESTA` Overview
-
 The `R` package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
 Functions are organized by type or objective and are named with a corresponding prefix (Fig. 1). `FIESTA` core functions (CORE) facilitate data extraction and compilation of data input information and are used independently or within the `FIESTA` estimation modules. `FIESTA` estimation modules (MODULE) combine multiple functions from `FIESTA` or other packages to generate population estimates using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations (e.g., adjustments for nonresponse, standardizing auxiliary data) for a custom boundary and can be used for generating multiple estimates. `FIESTA` analysis functions, found in the `FIESTAnalysis` package, streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
 
-**Core Functions**
+##### Core Functions
 
 * Database tools (`DB*`) - functions for querying and extracting data from FIA's national database.
 * Data tools (`dat*`) - functions for summarizing and exploring FIA data.
 * Spatial tools (`sp*`) - functions for manipulating and summarizing spatial data.
 
-**Estimation Modules (mod) **
+##### Estimation Modules (mod)
 
 * Green-Book (`modGB*`) - functions for FIA's standard Green-Book estimators.
 * Photo-Based (`modPB*`) - functions for supplementary photo-based estimators.
 * Small Area (`modSA*`) - functions for integration with available small area estimators (SAE).
 * Model-Assisted (`modMA*`) - functions for integration with available Model-Assisted estimators.
 
-**Analysis Functions**
+##### Analysis Functions
 
 * Analysis functions (`an*`) - wrapper functions for steam-lining estimation processes. These functions reside in the `FIESTAnalysis` package. 
 
-## License:
+### License
+
+------------------------------------------------------------------------
 
 This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
 
 
-## Installation:
+### Installation
 
-### 1. Install Rtools
+------------------------------------------------------------------------
 
-If Windows OS, in order to install source code from GitHub, you must install Rtools from [CRAN](https://cran.r-project.org/). Install the most current Rtools for Windows 64-bit at [this link](https://cran.r-project.org/bin/windows/Rtools/). 
+Currently, to install `FIESTA`, you must go through a few steps: 
+
+#### 1. Install Rtools or xcode
+
+If you are using the Windows OS, in order to install source code from GitHub, you must install Rtools from [CRAN](https://cran.r-project.org/). Install the most current Rtools for Windows 64-bit at [this link](https://cran.r-project.org/bin/windows/Rtools/). 
+
+If you are using macOS, you'll need to install xcode developer tools. To do so, run the following code in your terminal (not the R console):
+```
+xcode-select --install
+```
 
 
-### 2. Create token for GitHub
+#### 2. Create token for GitHub
 
 For ease of installing and updating `FIESTA`, generate a token from GitHub settings.
 Note: `FIESTA` is frequently updated. You will use this token each time you update 
@@ -67,7 +76,7 @@ Note: `FIESTA` is frequently updated. You will use this token each time you upda
 7. Save token (~30 character string) to a file and as an R object.
 
 
-### 3. Install FIESTA suggested packages
+#### 3. Install FIESTA suggested packages
 
 - Checks to make sure all `FIESTA` dependent packages are installed
 - Removes old version of `FIESTA` from current R library
@@ -140,7 +149,7 @@ lapply(sp.pkgs, chkpkg)
 ```
 
 
-### 4. Install FIESTA package from source code
+#### 4. Install FIESTA package from source code
 
 If you are updating `FIESTA`, first make sure the `FIESTA` library is not attached, 
 then uninstall from your library.
@@ -166,38 +175,36 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
 ```
 
 
+<!-- ## HELP and vignettes -->
 
-Note: For Macintosh computers, you may need to install xcode developer tools first
-Open Terminal and run the following code:
-```
-xcode-select --install
-```
+<!-- To get help for the `FIESTA` package -->
+<!-- ```{r, eval = F} -->
+<!-- help(package="FIESTA") -->
+<!-- ``` -->
 
+<!-- To get tutorials from `FIESTA` package -->
+<!-- ```{r, eval = F} -->
+<!-- vignette(package="FIESTA") -->
+<!-- ``` -->
 
-## HELP and vignettes
+<!-- Core functions -->
+<!-- ```{r, eval = F} -->
+<!-- vignette("FIESTA_tutorial_DB", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_dat", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_sp", package="FIESTA") -->
+<!-- ``` -->
 
-To get help for the `FIESTA` package
-```{r, eval = F}
-help(package="FIESTA")
-```
+<!-- Modules -->
+<!-- ```{r, eval = F} -->
+<!-- vignette("FIESTA_tutorial_GB", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_GBcustom", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_PB", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_SA", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_MA", package="FIESTA") -->
+<!-- ``` -->
 
-To get tutorials from `FIESTA` package
-```{r, eval = F}
-vignette(package="FIESTA")
-```
+### Examples 
 
-Core functions
-```{r, eval = F}
-vignette("FIESTA_tutorial_DB", package="FIESTA")
-vignette("FIESTA_tutorial_dat", package="FIESTA")
-vignette("FIESTA_tutorial_sp", package="FIESTA")
-```
+------------------------------------------------------------------------
 
-Modules
-```{r, eval = F}
-vignette("FIESTA_tutorial_GB", package="FIESTA")
-vignette("FIESTA_tutorial_GBcustom", package="FIESTA")
-vignette("FIESTA_tutorial_PB", package="FIESTA")
-vignette("FIESTA_tutorial_SA", package="FIESTA")
-vignette("FIESTA_tutorial_MA", package="FIESTA")
-```
+This is where a few basic examples will go (maybe one for each of `dat`, `DB`, `mod`, and `sp`).
