@@ -152,7 +152,7 @@ ma.pkgs <- c('mase')
 lapply(ma.pkgs, chkpkg)
 
 ## For small-area estimation
-sa.pkgs <- c('sae', 'JoSAE', 'nlme')
+sa.pkgs <- c('sae', 'JoSAE', 'nlme', 'hbsae')
 lapply(sa.pkgs, chkpkg)
 
 ## For xlsx output
@@ -198,7 +198,7 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
         dependencies=c("Depends", "Imports"))
 ```
 
-##### 5. Load FIESTA
+#### 5. Load FIESTA
 
 Then, you can load `FIESTA`:
 
@@ -232,16 +232,12 @@ library(FIESTA)
 
 ## Examples
 
-<!-- This is where a few basic examples will go (maybe one for each of `dat`, `DB`, `mod`, and `sp`). -->
-
 These examples make use of vignettes that come with `FIESTA`, and these
 vignettes can be found by calling `vignette(package = "FIESTA")`. The
 data used in these examples come with the `FIESTA` package and are from
 Wyoming, inventory years 2011-2013 (Evaluation 561301).
 
-### Estimation modules (`mod*`)
-
-#### Green-book estimation
+### Example 1: Green-book estimation
 
 In order to produce estimates based on the Green-book, we first use the
 `GBpopdat` function to produce population data for our areas of
@@ -255,7 +251,7 @@ GBpopdat <- modGBpop(popTabs = popTables(cond = FIESTA::WYcond,
                      pltassgn = FIESTA::WYpltassgn,
                      pltassgnid = "CN",
                      pjoinid = "PLT_CN",
-                     unitarea = WYunitarea,
+                     unitarea = FIESTA::WYunitarea,
                      unitvar = "ESTN_UNIT",
                      strata = TRUE,
                      strata_opts = strata_options(stratalut = FIESTA::WYstratalut))
@@ -298,14 +294,48 @@ plots and adjustment factors (`stratalut`), and the adjustment factors
 added to the condition-level, tree-level, and seedling data (`condx`,
 `treex`, and `seedx`, respectfully).
 
-#### Model-assisted estimation
+Now, with the `GBpopdat` object, we can quickly produce estimates of
+forest land (`landarea = "FOREST"`) by forest type
+(`rowvar = "FORTYPCD`) in Wyoming for the 2011-2013 years.
 
-#### Small area estimation
+``` r
+area_estimates <- modGBarea(
+    GBpopdat = GBpopdat,
+    landarea = "FOREST",
+    rowvar = "FORTYPCD"
+    )
+```
 
-#### Photo-based estimation
+We again output a list, now with estimates/standard errors, raw data,
+state code, and inventory year:
 
-### Data tools (`dat*`)
+``` r
+str(area_estimates, max.level = 2)
+#> List of 4
+#>  $ est    :'data.frame': 19 obs. of  3 variables:
+#>   ..$ Forest type           : chr [1:19] "182" "184" "185" "201" ...
+#>   ..$ Estimate              : chr [1:19] "632481.7" "339749.8" "14854.7" "881189" ...
+#>   ..$ Percent Sampling Error: chr [1:19] "17.28" "23.85" "100" "14.21" ...
+#>  $ raw    :List of 9
+#>   ..$ unit_totest:'data.frame':  23 obs. of  17 variables:
+#>   ..$ totest     :'data.frame':  1 obs. of  13 variables:
+#>   ..$ unit_rowest:'data.frame':  135 obs. of  18 variables:
+#>   ..$ rowest     :'data.frame':  18 obs. of  13 variables:
+#>   ..$ domdat     :'data.frame':  590 obs. of  15 variables:
+#>   ..$ esttype    : chr "AREA"
+#>   ..$ rowvar     : chr "FORTYPCD"
+#>   ..$ colvar     : chr "NONE"
+#>   ..$ areaunits  : chr "acres"
+#>  $ statecd: int 56
+#>  $ invyr  : int [1:3] 2011 2012 2013
+```
 
-### Spatial data tools (`sp*`)
+### Example 2:
 
-### Database tools (`DB*`)
+Pull in data with `spGetPlots` and `FIESTAnalysis::ecomap` and then
+produce MA and SAE estimates for those ecoregions.
+
+### Example 3:
+
+Maybe something photo-based? We also may want to stick with just two
+relatively simple examples.
