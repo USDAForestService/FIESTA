@@ -97,82 +97,65 @@ token each time you update `FIESTA` (until public release).
 6.  Check all boxes
 7.  Save token (\~30 character string) to a file and as an R object.
 
-#### 3. Install FIESTA suggested packages
+<!-- #### 3. Install FIESTA suggested packages -->
+<!-- - Checks to make sure all `FIESTA` dependent packages are installed -->
+<!-- - Removes old version of `FIESTA` from current R library -->
+<!-- - `pkginstalled <- installed.packages()` -->
+<!-- - `if ("FIESTA" %in% row.names(pkginstalled)) remove.packages("FIESTA")` -->
+<!-- Use the following function to check and install packages for `FIESTA`. -->
+<!-- Note: copy/paste function into RStudio or RGui  -->
+<!-- ```{r, eval = F} -->
+<!-- chkpkg <- function(pkg) { -->
+<!--   ## DESCRIPTION: Function to check if package exists -->
+<!--   ## If package does not exist, it will install the package -->
+<!--   if (!require(pkg, character.only = TRUE)) { -->
+<!--     message("installing ", pkg, " package...") -->
+<!--     install.packages(pkg, dependencies=TRUE) -->
+<!--   } -->
+<!--   if (!require(pkg, character.only = TRUE)) { -->
+<!--     stop("load failure: ", pkg) -->
+<!--   }  -->
+<!-- } -->
+<!-- ``` -->
+<!-- `FIESTA` dependent and imported packages are installed when you install the source code  -->
+<!-- from GitHub. -->
+<!-- If you are not installing the source code and it is the first time using `FIESTA`,  -->
+<!-- you must install the following packages: -->
+<!-- ```{r, eval = F} -->
+<!-- depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp') -->
+<!-- lapply(depend.pkgs, chkpkg) -->
+<!-- ``` -->
+<!-- You will need to install suggested packages even if installing the source code. -->
+<!-- Installing suggested packages is optional, depending on how you are using `FIESTA`.  -->
+<!-- NOTE: select closest CRAN mirror for download -->
+<!-- ```{r, eval = F} -->
+<!-- ## Load suggests packages -->
+<!-- misc.pkgs <- c('devtools', 'units') -->
+<!-- lapply(misc.pkgs, chkpkg) -->
+<!-- ## For database extraction -->
+<!-- db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite') -->
+<!-- lapply(db.pkgs, chkpkg) -->
+<!-- ## For model-assisted estimation -->
+<!-- ma.pkgs <- c('mase') -->
+<!-- lapply(ma.pkgs, chkpkg) -->
+<!-- ## For small-area estimation -->
+<!-- sa.pkgs <- c('sae', 'JoSAE', 'nlme', 'hbsae') -->
+<!-- lapply(sa.pkgs, chkpkg) -->
+<!-- ## For xlsx output -->
+<!-- xlsx.pkgs <- c('rJava', 'xlsx') -->
+<!-- lapply(xlsx.pkgs, chkpkg) -->
+<!-- ## For reports -->
+<!-- report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer') -->
+<!-- lapply(report.pkgs, chkpkg) -->
+<!-- ## For PB module reports -->
+<!-- pbreport.pkgs <- c('pheatmap') -->
+<!-- lapply(pbreport.pkgs, chkpkg) -->
+<!-- ## For spatial manipulation -->
+<!-- sp.pkgs <- c('rgeos', 'raster') -->
+<!-- lapply(sp.pkgs, chkpkg) -->
+<!-- ``` -->
 
--   Checks to make sure all `FIESTA` dependent packages are installed
--   Removes old version of `FIESTA` from current R library
--   `pkginstalled <- installed.packages()`
--   `if ("FIESTA" %in% row.names(pkginstalled)) remove.packages("FIESTA")`
-
-Use the following function to check and install packages for `FIESTA`.
-Note: copy/paste function into RStudio or RGui
-
-``` r
-chkpkg <- function(pkg) {
-  ## DESCRIPTION: Function to check if package exists
-  ## If package does not exist, it will install the package
-  if (!require(pkg, character.only = TRUE)) {
-    message("installing ", pkg, " package...")
-    install.packages(pkg, dependencies=TRUE)
-  }
-  if (!require(pkg, character.only = TRUE)) {
-    stop("load failure: ", pkg)
-  } 
-}
-```
-
-`FIESTA` dependent and imported packages are installed when you install
-the source code from GitHub.
-
-If you are not installing the source code and it is the first time using
-`FIESTA`, you must install the following packages:
-
-``` r
-depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp')
-lapply(depend.pkgs, chkpkg)
-```
-
-You will need to install suggested packages even if installing the
-source code. Installing suggested packages is optional, depending on how
-you are using `FIESTA`.
-
-NOTE: select closest CRAN mirror for download
-
-``` r
-## Load suggests packages
-misc.pkgs <- c('devtools', 'units')
-lapply(misc.pkgs, chkpkg)
-
-## For database extraction
-db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite')
-lapply(db.pkgs, chkpkg)
-
-## For model-assisted estimation
-ma.pkgs <- c('mase')
-lapply(ma.pkgs, chkpkg)
-
-## For small-area estimation
-sa.pkgs <- c('sae', 'JoSAE', 'nlme', 'hbsae')
-lapply(sa.pkgs, chkpkg)
-
-## For xlsx output
-xlsx.pkgs <- c('rJava', 'xlsx')
-lapply(xlsx.pkgs, chkpkg)
-
-## For reports
-report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer')
-lapply(report.pkgs, chkpkg)
-
-## For PB module reports
-pbreport.pkgs <- c('pheatmap')
-lapply(pbreport.pkgs, chkpkg)
-
-## For spatial manipulation
-sp.pkgs <- c('rgeos', 'raster')
-lapply(sp.pkgs, chkpkg)
-```
-
-#### 4. Install FIESTA package from source code
+#### 3. Install FIESTA package from source code
 
 If you are updating `FIESTA`, first make sure the `FIESTA` library is
 not attached, then uninstall from your library.
@@ -198,7 +181,7 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
         dependencies=c("Depends", "Imports"))
 ```
 
-#### 5. Load FIESTA
+#### 4. Load FIESTA
 
 Then, you can load `FIESTA`:
 
