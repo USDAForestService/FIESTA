@@ -19,28 +19,28 @@ Imports:
     utils,
     sp,
     rgdal,
+    JoSAE,
+    mase,
+    sae,
+    hbsae,
+    nlme,
+    xml2,
+    raster,
+    units,
+    DBI,
+    RSQLite,
+    sqldf,
+    RPostgreSQL,
+    xlsx,
+    RColorBrewer,
     Rcpp(>= 1.0.7)
 Suggests: 
     knitr,
     rmarkdown,
     rJava,
-    xlsx,
-    JoSAE,
-    mase,
-    RSQLite,
-    DBI,
     rgeos,
-    sqldf,
-    raster,
-    units,
-    nlme,
-    xml2,
-    RPostgreSQL,
     arcgisbinding,
-    pheatmap,
-    RColorBrewer,
-    hbsae,
-    sae
+    pheatmap
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
