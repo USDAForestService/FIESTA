@@ -356,10 +356,11 @@ modSApop <- function(	popType="VOL",
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
-  popcheck <- check.popdata(gui=gui, module="SA", tree=tree, cond=cond, plt=plt, 
-	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
-	condid="CONDID", puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
-	measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, ACI=ACI, adj=adj, 
+  popcheck <- check.popdata(gui=gui, module="SA", popType=popType, 
+ 	tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
+	pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
+	evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
+	intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
 	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
 	unitarea=dunitarea, areavar=areavar, areaunits=areaunits, unitvar=dunitvar, 
 	unitvar2=dunitvar2, unit.action=dunit.action, prednames=prednames, 
