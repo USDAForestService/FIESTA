@@ -23,9 +23,9 @@ modMApop(
   unitarea = NULL,
   areavar = "ACRES",
   areaunits = "acres",
-  unitzonal = NULL,
   minplotnum.unit = 10,
   unit.action = "keep",
+  unitzonal = NULL,
   npixelvar = "npixels",
   prednames = NULL,
   predfac = NULL,
@@ -105,16 +105,16 @@ unitvar and areavar.}
 
 \item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
 
-\item{unitzonal}{DF/DT. Table with zonal auxiliary information by estimation
-unit. For continuous data, means by estimation unit; for categorical data,
-proportion of class by estimation unit.}
-
 \item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
 
 \item{unit.action}{String. What to do if number of plots in an estimation
 unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
 unit.action='combine', combines estimation unit to the following estimation
-unit in unitzonal.}
+unit, ordered in unitzonal or stratalut.}
+
+\item{unitzonal}{DF/DT. Table with zonal auxiliary information by estimation
+unit. For continuous data, means by estimation unit; for categorical data,
+proportion of class by estimation unit.}
 
 \item{npixelvar}{String. Name of variable in unitlut defining number of
 pixels by estimation unit.}

@@ -8,6 +8,7 @@ savedata_options(
   outfolder = NULL,
   out_fmt = "csv",
   out_dsn = NULL,
+  out_layer = NULL,
   outfn.pre = NULL,
   outfn.date = FALSE,
   addtitle = TRUE,

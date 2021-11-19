@@ -35,15 +35,9 @@ spGetAuxiliary(
   savedata = FALSE,
   exportsp = FALSE,
   exportNA = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
+  savedata_opts = savedata_options(),
   vars2keep = NULL,
+  gui = FALSE,
   ...
 )
 }
@@ -140,26 +134,13 @@ exported to outfolder.}
 
 \item{exportNA}{Logical. If TRUE, NA values are exported to outfolder.}
 
-\item{outfolder}{String. If savedata=TRUE or exportsp=TRUE, name of output
-folder.  If NULL, the working directory is used.}
-
-\item{out_fmt}{String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-
-\item{out_dsn}{String. Name of database if out_fmt = c('sqlite', 'gpkg').}
-
-\item{outfn.pre}{String. Add a prefix to output name (e.g., "01").}
-
-\item{outfn.date}{Logical. If TRUE, adds current date to outfile name.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrite dsn.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrite layer(s) in dsn.}
-
-\item{append_layer}{Logical. If TRUE, appends to csv (if out_fmt="csv") or
-appends to layers in dsn.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
 \item{vars2keep}{String vector. Attributes in SAdoms, other than domvar to
 include in dunitzonal output and extract to pltassgn points.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Other parameters for spMakeSpatialPoints.}
 }

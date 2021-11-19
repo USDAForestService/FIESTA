@@ -9,9 +9,10 @@ modMAtree(
   MAmethod,
   FIA = TRUE,
   prednames = NULL,
-  estseed = "none",
+  modelselect = FALSE,
   landarea = "FOREST",
   pcfilter = NULL,
+  estseed = "none",
   estvar = NULL,
   estvar.filter = NULL,
   rowvar = NULL,
@@ -38,15 +39,15 @@ estimator to match FIA estimates.}
 \item{prednames}{String vector. Name(s) of predictor variables to include in
 model.}
 
-\item{estseed}{String. Use seedling data only or add to tree data. Seedling
-estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
-
 \item{landarea}{String. The condition-level filter for defining land area
 ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
 if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.}
 
 \item{pcfilter}{String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.}
+
+\item{estseed}{String. Use seedling data only or add to tree data. Seedling
+estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
 
 \item{estvar}{String. Name of the tree-level estimate variable (e.g.,
 'VOLCFNET').}
@@ -163,7 +164,7 @@ Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
 Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
 \tab CONDID \tab Unique identifier of each condition on plot, to link to
 cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
-\tab Number of trees per acre each sample tree represents (ex. DESIGNCD=1:
+\tab Number of trees per acre each sample tree represents (e.g., DESIGNCD=1:
 TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on
 microplot).\cr \tab cond \tab cuniqueid \tab Unique identifier for each
 plot, to link to pltassgn (ex. PLT_CN).\cr \tab \tab CONDID \tab Unique

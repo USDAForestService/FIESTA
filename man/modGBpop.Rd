@@ -25,13 +25,15 @@ modGBpop(
   areaunits = "acres",
   minplotnum.unit = 10,
   unit.action = "keep",
+  unitzonal = NULL,
   strata = TRUE,
   savedata = FALSE,
   strata_opts = strata_options(),
   savedata_opts = savedata_options(),
   GBdata = NULL,
   pltdat = NULL,
-  GBstratdat = NULL,
+  stratdat = NULL,
+  auxdat = NULL,
   gui = FALSE,
   ...
 )
@@ -106,7 +108,11 @@ unitvar and areavar.}
 \item{unit.action}{String. What to do if number of plots in an estimation
 unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
 unit.action='combine', combines estimation unit to the following estimation
-unit in unitlut.}
+unit, ordered in unitzonal or stratalut.}
+
+\item{unitzonal}{DF/DT. Table with zonal auxiliary information by estimation
+unit. For continuous data, means by estimation unit; for categorical data,
+proportion of class by estimation unit.}
 
 \item{strata}{Logical. If TRUE, include information for post-stratification.}
 
@@ -124,12 +130,12 @@ FIESTA::anGBdata().}
 \item{pltdat}{R List object. Output data list components from
 FIESTA::spGetPlots().}
 
-\item{GBstratdat}{R List object. Output data list components from
-FIESTA::DBgetStrata().}
-
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{For extendibility.}
+
+\item{GBstratdat}{R List object. Output data list components from
+FIESTA::DBgetStrata().}
 }
 \value{
 A list with population data for Green-Book estimates.

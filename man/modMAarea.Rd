@@ -9,13 +9,14 @@ modMAarea(
   MAmethod,
   FIA = TRUE,
   prednames = NULL,
+  modelselect = FALSE,
   landarea = "FOREST",
   pcfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
   sumunits = FALSE,
-  savedata = FALSE,
   returntitle = FALSE,
+  savedata = FALSE,
   table_opts = table_options(),
   title_opts = title_options(),
   savedata_opts = savedata_options(),
@@ -51,10 +52,10 @@ colvar. If no domain, rowvar = NULL.}
 \item{sumunits}{Logical. If TRUE, estimation units are summed and returned
 in one table.}
 
-\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
-
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}
+
+\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
 \item{table_opts}{List. See help(table_options()) for a list of
 options.}
