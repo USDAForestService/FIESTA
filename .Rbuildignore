@@ -13,3 +13,6 @@
 ^pkgdown$
 ^figs$
 _pkgdown.yml
+^README\.Rmd$
+^README\.md$
+

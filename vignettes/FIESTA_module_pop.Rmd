@@ -1,5 +1,5 @@
 ---
-title: "FIESTA - Module Population Data"
+title: "`FIESTA` - Module Population Data"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{FIESTA - Module Population Data}
@@ -37,11 +37,11 @@ knitr::knit_hooks$set(
 
 ## Overview
 
-FIESTA's Estimation Modules combine multiple functions from FIESTA or other packages to generate estimates across a user-defined population(s) using different estimation strategies. Each module has an associated mod\*pop function for compiling the population data and calculations, including adjustments for nonresponse and standardizing auxiliary data. The output form the mod\*pop functions are input directly into the mod\* estimation modules.
+`FIESTA`'s Estimation Modules combine multiple functions from `FIESTA` or other packages to generate estimates across a user-defined population(s) using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations, including adjustments for nonresponse and standardizing auxiliary data. The output form the `mod*pop` functions are input directly into the `mod*estimation` modules.
 
 All Population functions require similar data inputs, including a set of inventory response data and summarized auxiliary data for post-stratification or other model-assisted and model-based (i.e., small area) estimation strategies. 
 
-This vignette describes the required input data sets, parameter inputs, and outputs from the mod\*pop functions, Refer to the FIESTA_module_estimates vignette for more information on other parameter inputs to the mod\* Estimation Modules and the following vignettes for running specific examples.
+This vignette describes the required input data sets, parameter inputs, and outputs from the `mod*pop` functions. Refer to the FIESTA_module_estimates vignette for more information on other parameter inputs to the `mod*` Estimation Modules and the following vignettes for running specific examples:
 
 
 * FIESTA_tutorial_GB
@@ -52,31 +52,30 @@ This vignette describes the required input data sets, parameter inputs, and outp
 ## Module Parameters {#input}
 
 
-The parameters for FIESTA modules are organized by different categories based on population data and resulting estimates.
+The parameters for `FIESTA` modules are organized by different categories based on population data and resulting estimates.
 
 [Population data](#popdat):
 
 1. [Population type](#ptyp)  
-2. [Data tables and unique identifiers of plot](#dtab)  
-3. [Estimation data](#edata)   
-4. [Nonsample filters](#nonsamp)
-5. [Estimation unit information](#estunit)
-6. [Stratification information](#strat)
-
+2. [Population data tables and unique identifiers](#dtab)  
+3. [Estimation area info](#edata)
+4. [Population filters](#popfilters)
+5. [Estimation unit info](#estunit)
+6. [Other](#other)
+7. [Post-stratification information (strata_opts)](#strata_opts)
+8. [Model-Assisted/Small Area information](#model_opts)
+9. [Input data objects](#dataobjects)
 
 
 ### Population Data {#popdat}
 
-<a name="ptyp"></a>
-**Population type**
+#### Population type {#ptyp}
 
 The population types (i.e., Eval_Type) currently available for `FIESTA` estimation. The population type defines the set of sampled plots and data used for estimation. For example, if you are only interested in area estimates (popType='CURR'), you do not need the tree data. Other population types will be available in the future, including GRM (Growth, mortality, removals), P2VEG (understory vegetation), CHNG (Change), and DWM (down woody material). These population types may have different sets of plots based on what was sampled.
 
 * **popType**    - Population type ('ALL', 'CURR', 'VOL').
 
-
-<a name="dtab"></a>
-**Population data tables and unique identifiers**
+#### Population data tables and unique identifiers {#dtab}
 
 The required data tables include forest inventory data from the FIA national database (Burrill et al. 2018). Data table inputs can be the name of a comma-delimited file (\*.csv), a layer within a database, (e.g., SQLite), or an R data frame or data table object already loaded into R. The `pltassgn` table can also be a point shapefile (\*.shp), a spatial layer within a database, or an `sf` R object with one point per plot. The unique identifier for a plot must be provided in the corresponding parameter for each input table, match default variable names. See required variables section for a list of variables necessary to include for estimation. All modules require at least one table. 
 
@@ -106,8 +105,7 @@ The required data tables include forest inventory data from the FIA national dat
 
 
 
-<a name="edata"></a>
-**Estimation area info**
+#### Estimation area info {#edata}
 
 Define information for area estimation.
 
@@ -115,8 +113,7 @@ Define information for area estimation.
 * **adj**       - Adjustment for nonresponse ('none', 'samp', 'plot'). Note: adj='samp', expands area across strata and estimation unit(s), based on the summed proportions of sampled conditions divided by the total plots in the strata/estimation unit; adj='plot', expands area across plot based on 1 divided by the summed proportions of sampled conditions in plot.
 
 
-<a name="popfilters"></a>
-**Population filters**
+#### Population filters {#popfilters}
 
 Population filters subset the plot data set before population calculations are generated. 
 
@@ -126,8 +123,7 @@ Population filters subset the plot data set before population calculations are g
 * **ACI**       - Logical. If TRUE, includes All Condition Inventory (ACI) conditions and associated tree data in estimates. If FALSE, a filter, is applied to remove nonsampled nonforest conditions (see cond.nonsamp.filter).
 
 
-<a name="estunit"></a>
-**Estimation unit information**
+#### Estimation unit information {#estunit}
 
 An estimation unit is a population, or area of interest, with known area and number of plots. As an example, for RMRS FIA, an estimation unit is generally an individual county. An estimation unit may be a sub-population of a larger population (e.g., Counties within a State). For post-stratified estimation, sub-populations are mutually exclusive and independent within a population, therefore estimated totals and variances are additive. Each plot is assigned to only one estimation unit based on plot center and can be stored in either `pltassgn` or `cond`. For model-based, small area estimators, an estimation unit is a sub-population, referred to as a model domain unit, where each domain unit is a component in a model.
 
@@ -144,14 +140,13 @@ Note:
 If there are less than minplotnum.unit plots in an estimation/domain unit: if unit.action/dunit.action='keep', NA is returned for the estimation/domain unit; if unit.action/dunit.action='remove', the estimation/domain unit is removed from the returned output; if unit.action/dunit.action='combine', an automated procedure occurs to group estimation/domain units with less than minplotnum.unit plots with the next estimation/domain unit in the stratalut or unitzonal table. If it is the last estimation/domain unit in the table, it is grouped with the estimation/domain unit preceding in the table. A recommended number of plots for post-stratified estimation is provided as defaults (Westfall and others, 2011). 
 
 
-**Other**
+#### Other {#other}
 
 * **strata**  - TRUE, use post-stratification for reducing variance in estimates (see strata_opts for strata parameters). For use in GB or MA modules.
 * **savedata**  - TRUE, save data to outfolder (See savedata_opts for savedata parameters).
 
 
-<a name="strata_opts"></a>
-**Post-stratification information (strata_opts)**
+#### Post-stratification information (strata_opts) {#strata_opts}
 
 Post-stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.
 
@@ -171,8 +166,7 @@ Note:
 If there are less than minplotnum.strat plots (default=2 plots) in any strata/estimation unit combination: if stratcombine=FALSE, an error occurs with a message to collapse classes; if stratcombine=TRUE, an automated procedure occurs to collapse all strata less than minplotnum.strat. The function collapses classes based on the order of strata in stratatlut. If a strata within in estimation unit is less than minplotnum.strat, it is grouped with the next strata class in stratalut.  
 
 
-<a name="model_opts"></a>
-**Model-Assisted/Small Area information**
+#### Model-Assisted/Small Area information {#model_opts}
 
 Other Model-Assisted and Small Area estimation strategies require unit/dunit-level information, including auxiliary data summaries and predictor names. The following parameters are used to provide this information in the MA and SA `FIESTA` modules. 
 
@@ -182,8 +176,7 @@ Other Model-Assisted and Small Area estimation strategies require unit/dunit-lev
 * **predfac**   - Name(s) of predictors in unitzonal that are categorical (or factor) variables.  
 
 
-<a name="Data objects"></a>
-**Input data objects**
+#### Input data objects {#dataobjects}
 
 Data object parameters allow a user to use other functions from FIESTA to input parameters directly. 
 
@@ -195,9 +188,7 @@ Data object parameters allow a user to use other functions from FIESTA to input 
 
 
 
-<a name="Population Output"></a>
-
-### Output values from `FIESTA` module population functions (mod*pop)
+## Output values from `FIESTA` module population functions (`mod*pop`) {#populationoutput}
 
 * **condx**       - Data frame of condition data within population, including plot assignments, condition proportion adjustment factor (cadjfac), and adjusted condition proportions (CONDPROP_ADJ).
 * **pltcondx**    - Data frame of plot/condition data within population, used for estimation.
@@ -242,10 +233,7 @@ kable(stratdat.lut,
 ```
 
 
-
-<a name="required"></a>
-
-## Required variables in input data tables
+## Required variables in input data tables {#required}
 
 
 The following variables by data table are required for successful `FIESTA` output.

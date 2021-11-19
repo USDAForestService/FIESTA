@@ -34,7 +34,7 @@ modSApop(
   areavar = "ACRES",
   areaunits = "acres",
   minplotnum.unit = 0,
-  unit.action = "keep",
+  dunit.action = "keep",
   dunitzonal = NULL,
   prednames = NULL,
   predfac = NULL,
@@ -149,9 +149,9 @@ or pltassgn with assignment for each plot (e.g., 'STATECD').}
 
 \item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
 
-\item{unit.action}{String. What to do if number of plots in an estimation
+\item{dunit.action}{String. What to do if number of plots in an estimation
 unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-unit.action='combine', combines estimation unit to the following estimation
+dunit.action='combine', combines estimation unit to the following estimation
 unit in unitlut.}
 
 \item{dunitzonal}{DF/DT. Data frame with zonal auxiliary information by

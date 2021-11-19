@@ -1,48 +1,62 @@
-[![GitHub Super-Linter](https://github.com/USDAForestService/FIESTA/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+<!-- [![GitHub Super-Linter](https://github.com/USDAForestService/FIESTA/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter) -->
 
 <b>Authors:</b> Frescino, Tracey S.; Moisen, Gretchen G.; Patterson, Paul L.; Toney, Chris; White, Grayson W.
 
-# FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
+# `r emo::ji("popper")` FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
-## `FIESTA` Overview
-
-The `R` package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+The R package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
 Functions are organized by type or objective and are named with a corresponding prefix (Fig. 1). `FIESTA` core functions (CORE) facilitate data extraction and compilation of data input information and are used independently or within the `FIESTA` estimation modules. `FIESTA` estimation modules (MODULE) combine multiple functions from `FIESTA` or other packages to generate population estimates using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations (e.g., adjustments for nonresponse, standardizing auxiliary data) for a custom boundary and can be used for generating multiple estimates. `FIESTA` analysis functions, found in the `FIESTAnalysis` package, streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
 
-**Core Functions**
+##### Core Functions
 
 * Database tools (`DB*`) - functions for querying and extracting data from FIA's national database.
 * Data tools (`dat*`) - functions for summarizing and exploring FIA data.
 * Spatial tools (`sp*`) - functions for manipulating and summarizing spatial data.
 
-**Estimation Modules (mod) **
+##### Estimation Modules (mod)
 
 * Green-Book (`modGB*`) - functions for FIA's standard Green-Book estimators.
 * Photo-Based (`modPB*`) - functions for supplementary photo-based estimators.
 * Small Area (`modSA*`) - functions for integration with available small area estimators (SAE).
 * Model-Assisted (`modMA*`) - functions for integration with available Model-Assisted estimators.
 
-**Analysis Functions**
+##### Analysis Functions
 
 * Analysis functions (`an*`) - wrapper functions for steam-lining estimation processes. These functions reside in the `FIESTAnalysis` package. 
 
-
-
-## License:
+## License
 
 This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
 
 
-## Installation:
+## Installation
 
-### 1. Install Rtools
+Currently, to install `FIESTA`, you must go through a few steps: 
 
-If Windows OS, in order to install source code from GitHub, you must install Rtools from 
-the CRAN website (https://cran.r-project.org/). Go to Download R for Windows and Install the most current Rtools for Windows 64-bit.
+#### 1. Install Rtools or xcode
 
+If you are using the Windows OS, in order to install source code from GitHub, you must install Rtools from [CRAN](https://cran.r-project.org/). Install the most current Rtools for Windows 64-bit at [this link](https://cran.r-project.org/bin/windows/Rtools/). 
 
-### 2. Create token for GitHub
+If you are using macOS, you'll need to install xcode developer tools. To do so, run the following code in your terminal (not the R console):
+```
+xcode-select --install
+```
+
+#### 2. Create token for GitHub
 
 For ease of installing and updating `FIESTA`, generate a token from GitHub settings.
 Note: `FIESTA` is frequently updated. You will use this token each time you update 
@@ -57,92 +71,92 @@ Note: `FIESTA` is frequently updated. You will use this token each time you upda
 7. Save token (~30 character string) to a file and as an R object.
 
 
-### 3. Install FIESTA suggested packages
+<!-- #### 3. Install FIESTA suggested packages -->
 
-- Checks to make sure all `FIESTA` dependent packages are installed
-- Removes old version of `FIESTA` from current R library
-- `pkginstalled <- installed.packages()`
-- `if ("FIESTA" %in% row.names(pkginstalled)) remove.packages("FIESTA")`
+<!-- - Checks to make sure all `FIESTA` dependent packages are installed -->
+<!-- - Removes old version of `FIESTA` from current R library -->
+<!-- - `pkginstalled <- installed.packages()` -->
+<!-- - `if ("FIESTA" %in% row.names(pkginstalled)) remove.packages("FIESTA")` -->
 
-Use the following function to check and install packages for `FIESTA`.
-Note: copy/paste function into RStudio or RGui 
-```
-chkpkg <- function(pkg) {
-  ## DESCRIPTION: Function to check if package exists
-  ## If package does not exist, it will install the package
-  if (!require(pkg, character.only = TRUE)) {
-    message("installing ", pkg, " package...")
-    install.packages(pkg, dependencies=TRUE)
-  }
-  if (!require(pkg, character.only = TRUE)) {
-    stop("load failure: ", pkg)
-  } 
-}
-```
+<!-- Use the following function to check and install packages for `FIESTA`. -->
+<!-- Note: copy/paste function into RStudio or RGui  -->
+<!-- ```{r, eval = F} -->
+<!-- chkpkg <- function(pkg) { -->
+<!--   ## DESCRIPTION: Function to check if package exists -->
+<!--   ## If package does not exist, it will install the package -->
+<!--   if (!require(pkg, character.only = TRUE)) { -->
+<!--     message("installing ", pkg, " package...") -->
+<!--     install.packages(pkg, dependencies=TRUE) -->
+<!--   } -->
+<!--   if (!require(pkg, character.only = TRUE)) { -->
+<!--     stop("load failure: ", pkg) -->
+<!--   }  -->
+<!-- } -->
+<!-- ``` -->
 
-`FIESTA` dependent and imported packages are installed when you install the source code 
-from GitHub.
+<!-- `FIESTA` dependent and imported packages are installed when you install the source code  -->
+<!-- from GitHub. -->
 
-If you are not installing the source code and it is the first time using `FIESTA`, 
-you must install the following packages:
-`depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp')`
-`lapply(depend.pkgs, chkpkg)`
+<!-- If you are not installing the source code and it is the first time using `FIESTA`,  -->
+<!-- you must install the following packages: -->
+<!-- ```{r, eval = F} -->
+<!-- depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp') -->
+<!-- lapply(depend.pkgs, chkpkg) -->
+<!-- ``` -->
 
-You will need to install suggested packages even if installing the source code.
-Installing suggested packages is optional, depending on how you are using `FIESTA`. 
+<!-- You will need to install suggested packages even if installing the source code. -->
+<!-- Installing suggested packages is optional, depending on how you are using `FIESTA`.  -->
 
-NOTE: select closest CRAN mirror for download
+<!-- NOTE: select closest CRAN mirror for download -->
 
-```
-## Load suggests packages
-misc.pkgs <- c('devtools', 'units')
-lapply(misc.pkgs, chkpkg)
+<!-- ```{r, eval = F} -->
+<!-- ## Load suggests packages -->
+<!-- misc.pkgs <- c('devtools', 'units') -->
+<!-- lapply(misc.pkgs, chkpkg) -->
 
+<!-- ## For database extraction -->
+<!-- db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite') -->
+<!-- lapply(db.pkgs, chkpkg) -->
 
-## For database extraction
-db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite')
-lapply(db.pkgs, chkpkg)
+<!-- ## For model-assisted estimation -->
+<!-- ma.pkgs <- c('mase') -->
+<!-- lapply(ma.pkgs, chkpkg) -->
 
-## For model-assisted estimation
-ma.pkgs <- c('mase')
-lapply(ma.pkgs, chkpkg)
+<!-- ## For small-area estimation -->
+<!-- sa.pkgs <- c('sae', 'JoSAE', 'nlme', 'hbsae') -->
+<!-- lapply(sa.pkgs, chkpkg) -->
 
-## For small-area estimation
-sa.pkgs <- c('sae', 'JoSAE', 'nlme')
-lapply(sa.pkgs, chkpkg)
+<!-- ## For xlsx output -->
+<!-- xlsx.pkgs <- c('rJava', 'xlsx') -->
+<!-- lapply(xlsx.pkgs, chkpkg) -->
 
-## For xlsx output
-xlsx.pkgs <- c('rJava', 'xlsx')
-lapply(xlsx.pkgs, chkpkg)
+<!-- ## For reports -->
+<!-- report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer') -->
+<!-- lapply(report.pkgs, chkpkg) -->
 
-## For reports
-report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer')
-lapply(report.pkgs, chkpkg)
+<!-- ## For PB module reports -->
+<!-- pbreport.pkgs <- c('pheatmap') -->
+<!-- lapply(pbreport.pkgs, chkpkg) -->
 
-## For PB module reports
-pbreport.pkgs <- c('pheatmap')
-lapply(pbreport.pkgs, chkpkg)
-
-## For spatial manipulation
-sp.pkgs <- c('rgeos', 'raster')
-lapply(sp.pkgs, chkpkg)
-
-```
+<!-- ## For spatial manipulation -->
+<!-- sp.pkgs <- c('rgeos', 'raster') -->
+<!-- lapply(sp.pkgs, chkpkg) -->
+<!-- ``` -->
 
 
-### 4. Install FIESTA package from source code
+#### 3. Install FIESTA package from source code
 
 If you are updating `FIESTA`, first make sure the `FIESTA` library is not attached, 
 then uninstall from your library.
 
-```
+```{r, eval = F}
 detach("package:FIESTA", unload=TRUE)
 remove.packages("FIESTA", lib=.libPaths()) 
 ```
 
 Next install `FIESTA` from GitHub, using the token you saved as an R object.
 
-```
+```{r, eval = F}
 ## Set your token to an R character object, in quotes (Replace your_token with ~30 character string)
 token <- "your_token"
 
@@ -155,39 +169,97 @@ devtools::install_github("https://github.com/USDAForestService/FIESTA",
 		dependencies=c("Depends", "Imports"))
 ```
 
+#### 4. Load FIESTA
 
+Then, you can load `FIESTA`:
 
-Note: For Macintosh computers, you may need to install xcode developer tools first
-Open Terminal and run the following code:
-```
-xcode-select --install
-```
-
-
-## HELP and vignettes
-
-To get help for fiesta package
-```
-help(package="FIESTA")
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+devtools::load_all()
 ```
 
-To get tutorials from `FIESTA` package
-```
-vignette(package="FIESTA")
-```
-
-Core functions
-```
-vignette("FIESTA_tutorial_DB", package="FIESTA")
-vignette("FIESTA_tutorial_dat", package="FIESTA")
-vignette("FIESTA_tutorial_sp", package="FIESTA")
+```{r, eval = F}
+library(FIESTA)
 ```
 
-Modules
+
+
+<!-- ## HELP and vignettes -->
+
+<!-- To get help for the `FIESTA` package -->
+<!-- ```{r, eval = F} -->
+<!-- help(package="FIESTA") -->
+<!-- ``` -->
+
+<!-- To get tutorials from `FIESTA` package -->
+<!-- ```{r, eval = F} -->
+<!-- vignette(package="FIESTA") -->
+<!-- ``` -->
+
+<!-- Core functions -->
+<!-- ```{r, eval = F} -->
+<!-- vignette("FIESTA_tutorial_DB", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_dat", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_sp", package="FIESTA") -->
+<!-- ``` -->
+
+<!-- Modules -->
+<!-- ```{r, eval = F} -->
+<!-- vignette("FIESTA_tutorial_GB", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_GBcustom", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_PB", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_SA", package="FIESTA") -->
+<!-- vignette("FIESTA_tutorial_MA", package="FIESTA") -->
+<!-- ``` -->
+
+## Examples 
+
+These examples make use of vignettes that come with `FIESTA`, and these vignettes can be found by calling `vignette(package = "FIESTA")`. The data used in these examples come with the `FIESTA` package and are from Wyoming, inventory years 2011-2013 (Evaluation 561301).
+
+### Example 1: Green-book estimation
+
+In order to produce estimates based on the Green-book, we first use the `GBpopdat` function to produce population data for our areas of interest. We can look at a summary of the population data below. 
+
+```{r, message = FALSE, warning = F}
+GBpopdat <- modGBpop(popTabs = popTables(cond = FIESTA::WYcond,
+                                         tree = FIESTA::WYtree,
+                                         seed = FIESTA::WYseed),
+                     popTabIDs = popTableIDs(cuniqueid = "PLT_CN"),
+                     pltassgn = FIESTA::WYpltassgn,
+                     pltassgnid = "CN",
+                     pjoinid = "PLT_CN",
+                     unitarea = FIESTA::WYunitarea,
+                     unitvar = "ESTN_UNIT",
+                     strata = TRUE,
+                     strata_opts = strata_options(stratalut = FIESTA::WYstratalut))
+
+summary(GBpopdat)
 ```
-vignette("FIESTA_tutorial_GB", package="FIESTA")
-vignette("FIESTA_tutorial_GBcustom", package="FIESTA")
-vignette("FIESTA_tutorial_PB", package="FIESTA")
-vignette("FIESTA_tutorial_SA", package="FIESTA")
-vignette("FIESTA_tutorial_MA", package="FIESTA")
+
+Note that the `GBpopdat` list generated by `modGBpop` contains many items. Some examples include the number of plots by plot status (`plotsampcnt`), the number of conditions by condition status (`condsampcnt`), the strata-level population data, including number of plots and adjustment factors (`stratalut`), and the adjustment factors added to the condition-level, tree-level, and seedling data (`condx`, `treex`, and `seedx`, respectfully).
+
+Now, with the `GBpopdat` object, we can quickly produce estimates of forest land (`landarea = "FOREST"`) by forest type (`rowvar = "FORTYPCD`) in Wyoming for the 2011-2013 years.
+
+```{r, message = FALSE, warning = F}
+area_estimates <- modGBarea(
+    GBpopdat = GBpopdat,
+    landarea = "FOREST",
+    rowvar = "FORTYPCD"
+    )
 ```
+
+We again output a list, now with estimates/standard errors, raw data, state code, and inventory year:
+
+```{r}
+str(area_estimates, max.level = 2)
+```
+
+### Example 2: 
+
+Pull in data with `spGetPlots` and `FIESTAnalysis::ecomap` and then produce MA and SAE estimates for those ecoregions.
+
+### Example 3: 
+
+Maybe something photo-based? We also may want to stick with just two relatively simple examples. 
+
+
+
