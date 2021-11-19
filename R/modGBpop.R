@@ -207,20 +207,28 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @export modGBpop
-modGBpop <- function(	popType="VOL",
-                     	popTabs = popTables(),
-                     	popTabIDs = popTableIDs(), 
-			     	popFilter = popFilters(),
-                     	pltassgn=NULL,
-                     	pltassgnid="PLT_CN",
-                     	dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", adj="samp", 
-                     	unitvar=NULL, unitarea=NULL, 
-				strata=TRUE, 
-				savedata=FALSE,
-                    	unit_opts=unit_options(),
-                     	strata_opts=strata_options(), 
-                     	savedata_opts=savedata_options(),
-                     	GBdata=NULL, pltdat=NULL, stratdat=NULL, auxdat=NULL, gui=FALSE, ...){
+modGBpop <- function(popType = "VOL",
+                     popTabs = popTables(),
+                     popTabIDs = popTableIDs(), 
+			     	         popFilter = popFilters(),
+                     pltassgn = NULL,
+                     pltassgnid = "PLT_CN",
+                     dsn = NULL, 
+			     	         pjoinid = "CN",
+			     	         areawt = "CONDPROP_UNADJ",
+			     	         adj = "samp", 
+                     unitvar = NULL,
+			     	         unitarea = NULL, 
+				             strata = TRUE, 
+				             savedata = FALSE,
+                     unit_opts = unit_options(),
+                     strata_opts = strata_options(), 
+                     savedata_opts = savedata_options(),
+                     GBdata = NULL,
+				             pltdat = NULL,
+				             stratdat = NULL,
+				             auxdat = NULL,
+				             gui = FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -254,6 +262,34 @@ modGBpop <- function(	popType="VOL",
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
 	treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
   condid <- "CONDID"
+  
+  ## Set unit defaults
+  unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
+  
+  for (i in 1:length(unit_defaults_list)) {
+    assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied unit values
+  if (length(unit_opts) > 0) {
+    for (i in 1:length(unit_opts)) {
+      assign(names(unit_opts)[[i]], unit_opts[[i]])
+    }
+  }
+  
+  ## Set popFilters defaults
+  popFilters_defaults_list <- formals(FIESTA::popFilters)[-length(formals(FIESTA::popFilters))]
+  
+  for (i in 1:length(popFilters_defaults_list)) {
+    assign(names(popFilters_defaults_list)[[i]], popFilters_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied popFilters values
+  if (length(popFilter) > 0) {
+    for (i in 1:length(popFilter)) {
+      assign(names(popFilter)[[i]], popFilter[[i]])
+    }
+  }
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]

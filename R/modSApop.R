@@ -184,18 +184,32 @@
 #' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
 #' @keywords data
 #' @export modSApop
-modSApop <- function(	popType="VOL",
-                     	popTabs = popTables(),
-                     	popTabIDs = popTableIDs(),
-				popFilter = popFilters(),
-                     	pltassgn=NULL,
-                     	pltassgnid="PLT_CN",
-				dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", adj="plot", 
-				dunitvar=NULL, dunitarea=NULL, dunitzonal=NULL.
-				prednames=NULL, predfac=NULL,
-				savedata=FALSE,
-				SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
-				SAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE, ...) 
+modSApop <- function(popType="VOL",
+                     popTabs = popTables(),
+                     popTabIDs = popTableIDs(),
+				             popFilter = popFilters(),
+                     pltassgn = NULL,
+                     pltassgnid = "PLT_CN",
+				             dsn = NULL,
+				             pjoinid = "CN",
+				             areawt = "CONDPROP_UNADJ",
+				             adj = "plot", 
+				             dunitvar = NULL,
+				             dunitarea = NULL,
+				             dunitzonal = NULL,
+				             prednames = NULL,
+				             predfac = NULL,
+				             savedata = FALSE,
+				             unit_opts = unit_options(),
+				             savedata_opts = savedata_options(),
+				             SAdoms = NULL, 
+				             smallbnd = NULL,
+				             smallbnd.domain = NULL,
+				             SAdata = NULL,
+				             pltdat = NULL,
+				             auxdat = NULL,
+				             gui = FALSE,
+				             ...) {
 
   ##################################################################################
   ## DESCRIPTION:
@@ -224,6 +238,48 @@ modSApop <- function(	popType="VOL",
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
+  
+  ## Set unit defaults
+  unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
+  
+  for (i in 1:length(unit_defaults_list)) {
+    assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied unit values
+  if (length(unit_opts) > 0) {
+    for (i in 1:length(unit_opts)) {
+      assign(names(unit_opts)[[i]], unit_opts[[i]])
+    }
+  }
+  
+  ## Set popFilters defaults
+  popFilters_defaults_list <- formals(FIESTA::popFilters)[-length(formals(FIESTA::popFilters))]
+  
+  for (i in 1:length(popFilters_defaults_list)) {
+    assign(names(popFilters_defaults_list)[[i]], popFilters_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied popFilters values
+  if (length(popFilter) > 0) {
+    for (i in 1:length(popFilter)) {
+      assign(names(popFilter)[[i]], popFilter[[i]])
+    }
+  }
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
 
   ## SET OPTIONS
   options.old <- options()

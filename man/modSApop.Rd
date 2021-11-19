@@ -5,64 +5,93 @@
 \title{Small-Area module - Compile population data for SA module.}
 \usage{
 modSApop(
-  SAdoms = NULL,
-  smallbnd = NULL,
-  smallbnd.domain = NULL,
-  cond = NULL,
-  plt = NULL,
-  tree = NULL,
-  seed = NULL,
+  popType = "VOL",
+  popTabs = popTables(),
+  popTabIDs = popTableIDs(),
+  popFilter = popFilters(),
   pltassgn = NULL,
-  dsn = NULL,
-  puniqueid = "CN",
   pltassgnid = "PLT_CN",
+  dsn = NULL,
   pjoinid = "CN",
-  tuniqueid = "PLT_CN",
-  cuniqueid = "PLT_CN",
-  condid = "CONDID",
   areawt = "CONDPROP_UNADJ",
-  invyrs = NULL,
-  intensity = NULL,
-  measCur = FALSE,
-  measEndyr = NULL,
-  measEndyr.filter = NULL,
-  ACI = FALSE,
   adj = "plot",
-  dunitvar = "DOMAIN",
-  dunitvar2 = NULL,
+  dunitvar = NULL,
   dunitarea = NULL,
-  areavar = "ACRES",
-  areaunits = "acres",
-  minplotnum.unit = 0,
-  dunit.action = "keep",
   dunitzonal = NULL,
   prednames = NULL,
   predfac = NULL,
-  pvars2keep = NULL,
-  cvars2keep = NULL,
-  saveobj = FALSE,
-  objnm = "SApopdat",
   savedata = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
+  unit_opts = unit_options(),
+  savedata_opts = savedata_options(),
+  SAdoms = NULL,
+  smallbnd = NULL,
+  smallbnd.domain = NULL,
   SAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
-  gui = FALSE
+  gui = FALSE,
+  ...
 )
 }
 \arguments{
+\item{pltassgn}{DF/DT, comma-separated values (CSV) file(*.csv), or layer in
+dsn, Can also be a shapefile(*.shp) with one record per plot, a spatial
+layer in dsn, or a sf R object. Plot-level assignment of estimation unit
+and/or strata. Optional.}
+
+\item{pltassgnid}{String. Unique identifier of plot in pltassgn.}
+
+\item{dsn}{String. Name of database where tree, cond, and pltassgn tables
+reside.  The dsn varies by driver. See gdal OGR vector formats
+(https://www.gdal.org/ogr_formats.html).}
+
+\item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
+need to be uniqueid. If using most current XY coordinates for plot
+assignments, use identifier for plot (e.g., PLOT_ID).}
+
+\item{areawt}{String. Name of variable for summarizing area weights (e.g.,
+CONDPROP_UNADJ).}
+
+\item{adj}{String. How to calculate adjustment factors for nonsampled
+(nonresponse) conditions based on summed proportions for by plot ('samp',
+'plot').  'samp' - adjustments are calculated at strata/estimation unit
+(i.e., domain unit) level; 'plot' - adjustments are calculated at
+plot-level. Adjustments are only calculated for annual inventory plots
+(designcd=1).}
+
+\item{dunitvar}{String. Name of the domain unit variable in cond, plt, or
+pltassgn with domain unit assignment for each plot.}
+
+\item{dunitarea}{Numeric or DF. Total area by domain unit.}
+
+\item{dunitzonal}{DF/DT. Data frame with zonal auxiliary information by
+domain unit. For continuous data, means by domain unit; for categorical
+data, proportion of class by domain unit.}
+
+\item{prednames}{String vector. Name(s) of predictor variables to use in
+model.}
+
+\item{predfac}{String vector. Name(s) of factor predictor variables to use
+in model.}
+
+\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
+
 \item{SAdoms}{sf object. SA domains with attributes for joining.}
 
 \item{smallbnd}{sf object. small bound.}
 
 \item{smallbnd.domain}{String. Name of attribute defining domain attribute.}
+
+\item{SAdata}{R List object. Output data list components from
+FIESTA::SAdata().}
+
+\item{pltdat}{R List object. Output data list components from
+FIESTA::spGetPlots().}
+
+\item{auxdat}{R List object. Output data list components from
+FIESTA::spGetAuxiliary().}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{cond}{DF/DT, comma-separated values (CSV) file (*.csv), or layer in
 dsn.  The condition-level variables with one record per condition, including
@@ -82,22 +111,7 @@ details for necessary variables to include.}
 \item{seed}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Seedling data with one record for each seedling count.}
 
-\item{pltassgn}{DF/DT, comma-separated values (CSV) file(*.csv), or layer in
-dsn, Can also be a shapefile(*.shp) with one record per plot, a spatial
-layer in dsn, or a sf R object. Plot-level assignment of estimation unit
-and/or strata. Optional.}
-
-\item{dsn}{String. Name of database where tree, cond, and pltassgn tables
-reside.  The dsn varies by driver. See gdal OGR vector formats
-(https://www.gdal.org/ogr_formats.html).}
-
 \item{puniqueid}{String. Unique identifier of plot in plt.}
-
-\item{pltassgnid}{String. Unique identifier of plot in pltassgn.}
-
-\item{pjoinid}{String. Join variable in plot to match pltassgnid. Does not
-need to be uniqueid. If using most current XY coordinates for plot
-assignments, use identifier for plot (e.g., PLOT_ID).}
 
 \item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
 
@@ -106,9 +120,6 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 \item{condid}{String. Unique identifier of plot conditions (e.g., CONDID).
 If no condid in cond, the data are assumed to have 1 condition per plot.  A
 CONDID=1 is automatically added.}
-
-\item{areawt}{String. Name of variable for summarizing area weights (e.g.,
-CONDPROP_UNADJ).}
 
 \item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
 
@@ -128,20 +139,8 @@ in R syntax (e.g., 'AOI == 1').}
 Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
 be included.}
 
-\item{adj}{String. How to calculate adjustment factors for nonsampled
-(nonresponse) conditions based on summed proportions for by plot ('samp',
-'plot').  'samp' - adjustments are calculated at strata/estimation unit
-(i.e., domain unit) level; 'plot' - adjustments are calculated at
-plot-level. Adjustments are only calculated for annual inventory plots
-(designcd=1).}
-
-\item{dunitvar}{String. Name of the domain unit variable in cond, plt, or
-pltassgn with domain unit assignment for each plot.}
-
 \item{dunitvar2}{String. Name of a second domain unit variable in cond, plt,
 or pltassgn with assignment for each plot (e.g., 'STATECD').}
-
-\item{dunitarea}{Numeric or DF. Total area by domain unit.}
 
 \item{areavar}{String. Name of acre variable in unitarea. Default="ACRES".}
 
@@ -154,16 +153,6 @@ unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
 dunit.action='combine', combines estimation unit to the following estimation
 unit in unitlut.}
 
-\item{dunitzonal}{DF/DT. Data frame with zonal auxiliary information by
-domain unit. For continuous data, means by domain unit; for categorical
-data, proportion of class by domain unit.}
-
-\item{prednames}{String vector. Name(s) of predictor variables to use in
-model.}
-
-\item{predfac}{String vector. Name(s) of factor predictor variables to use
-in model.}
-
 \item{pvars2keep}{String vector. Additional plot variables to keep in
 dataset.}
 
@@ -173,8 +162,6 @@ dataset.}
 \item{saveobj}{Logical. If TRUE, save SApopdat object to outfolder.}
 
 \item{objnm}{String. Name of *.rda object.}
-
-\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
 \item{outfolder}{String. The outfolder to write files to. If NULL, files are
 written to working directory, or if gui, a window to browse.}
@@ -196,17 +183,6 @@ exists.}
 \item{append_layer}{Logical. If TRUE, appends layers to existing out_dsn or
 files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
 "gdb".}
-
-\item{SAdata}{R List object. Output data list components from
-FIESTA::SAdata().}
-
-\item{pltdat}{R List object. Output data list components from
-FIESTA::spGetPlots().}
-
-\item{auxdat}{R List object. Output data list components from
-FIESTA::spGetAuxiliary().}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 A list with population data for Small-Area estimates.

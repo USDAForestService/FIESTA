@@ -8,30 +8,20 @@ modMApop(
   popType = "VOL",
   popTabs = popTables(),
   popTabIDs = popTableIDs(),
+  popFilter = popFilters(),
   pltassgn = NULL,
   pltassgnid = "PLT_CN",
   dsn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
-  adj = "samp",
-  evalid = NULL,
-  invyrs = NULL,
-  intensity = NULL,
-  ACI = FALSE,
+  adj = "plot",
   unitvar = NULL,
-  unitvar2 = NULL,
   unitarea = NULL,
-  areavar = "ACRES",
-  areaunits = "acres",
-  minplotnum.unit = 10,
-  unit.action = "keep",
   unitzonal = NULL,
-  npixelvar = "npixels",
   prednames = NULL,
   predfac = NULL,
-  strata = TRUE,
   savedata = FALSE,
-  strata_opts = strata_options(),
+  unit_opts = unit_options(),
   savedata_opts = savedata_options(),
   MAdata = NULL,
   pltdat = NULL,
@@ -75,25 +65,9 @@ CONDPROP_UNADJ).}
 level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 only calculated for annual inventory plots (DESIGNCD=1).}
 
-\item{evalid}{Numeric. FIA Evaluation identifier for subsetting plots for
-population.}
-
-\item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
-
-\item{intensity}{Integer code. Code(s) indicating intensity to use for
-population.}
-
-\item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.
-Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
-be included.}
-
 \item{unitvar}{String. Name of the estimation unit variable in unitarea and
 cond or pltassgn data frame with estimation unit assignment for each plot
 (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.}
-
-\item{unitvar2}{String. Name of a second level estimation unit variable in
-unitarea and cond or pltassgn with assignment for each plot (e.g.,
-'STATECD').}
 
 \item{unitarea}{Numeric or DF. Total area by estimation unit. If only 1
 estimation unit, include number of total acreage for the area of interest or
@@ -101,23 +75,9 @@ a data frame with area and estimation unit. If more than one estimation
 unit, provide a data frame of total area by estimation unit, including
 unitvar and areavar.}
 
-\item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
-
-\item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
-
-\item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
-
-\item{unit.action}{String. What to do if number of plots in an estimation
-unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-unit.action='combine', combines estimation unit to the following estimation
-unit, ordered in unitzonal or stratalut.}
-
 \item{unitzonal}{DF/DT. Table with zonal auxiliary information by estimation
 unit. For continuous data, means by estimation unit; for categorical data,
 proportion of class by estimation unit.}
-
-\item{npixelvar}{String. Name of variable in unitlut defining number of
-pixels by estimation unit.}
 
 \item{prednames}{String vector. Name(s) of predictor variables to include in
 model.}
@@ -125,13 +85,7 @@ model.}
 \item{predfac}{String vector. Name(s) of prednames that are factors (i.e.,
 categorical).}
 
-\item{strata}{Logical. If TRUE, use MAmethod='poststrat' from mase.}
-
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
-
-\item{strata_opts}{List. See help(strata_options()) for a list of options.
-Only used when strata = TRUE. If stratalut=NULL, it is generated from 
-unitzonal, using predfac variables.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
@@ -154,6 +108,42 @@ FIESTA::spGetPlots().}
 \item{condid}{String. Unique identifier of plot conditions (e.g., CONDID).
 If no condid in cond, the data are assumed to have 1 condition per plot.  A
 CONDID=1 is automatically added.}
+
+\item{evalid}{Numeric. FIA Evaluation identifier for subsetting plots for
+population.}
+
+\item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
+
+\item{intensity}{Integer code. Code(s) indicating intensity to use for
+population.}
+
+\item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.
+Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
+be included.}
+
+\item{unitvar2}{String. Name of a second level estimation unit variable in
+unitarea and cond or pltassgn with assignment for each plot (e.g.,
+'STATECD').}
+
+\item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
+
+\item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
+
+\item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
+
+\item{unit.action}{String. What to do if number of plots in an estimation
+unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
+unit.action='combine', combines estimation unit to the following estimation
+unit, ordered in unitzonal or stratalut.}
+
+\item{npixelvar}{String. Name of variable in unitlut defining number of
+pixels by estimation unit.}
+
+\item{strata}{Logical. If TRUE, use MAmethod='poststrat' from mase.}
+
+\item{strata_opts}{List. See help(strata_options()) for a list of options.
+Only used when strata = TRUE. If stratalut=NULL, it is generated from 
+unitzonal, using predfac variables.}
 
 \item{saveobj}{Logical. If TRUE, saves SApopdat object to outfolder.}
 }

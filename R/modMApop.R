@@ -211,16 +211,26 @@
 modMApop <- function(popType="VOL",
                      popTabs = popTables(),
                      popTabIDs = popTableIDs(), 
-			     popFilter = popFilters(),
-                     pltassgn=NULL,
-                     pltassgnid="PLT_CN",
-				dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", adj="plot", 
-				unitvar=NULL, unitarea=NULL, unitzonal=NULL,
-				prednames=NULL, predfac=NULL,
-				savedata=FALSE, 
-                    	unit_opts=unit_options(),
-				savedata_opts=savedata_options(),
-				MAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE, ...){
+			               popFilter = popFilters(),
+                     pltassgn = NULL,
+                     pltassgnid = "PLT_CN",
+				             dsn = NULL, 
+				             pjoinid = "CN", 
+				             areawt = "CONDPROP_UNADJ",
+				             adj = "plot", 
+				             unitvar = NULL,
+				             unitarea = NULL,
+				             unitzonal = NULL,
+				             prednames = NULL,
+				             predfac = NULL,
+				             savedata = FALSE, 
+                     unit_opts = unit_options(),
+				             savedata_opts = savedata_options(),
+				             MAdata = NULL, 
+				             pltdat = NULL, 
+				             auxdat = NULL, 
+				             gui = FALSE,
+				             ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -252,6 +262,34 @@ modMApop <- function(popType="VOL",
  
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=strwtvar <- NULL
+  
+  ## Set unit defaults
+  unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
+  
+  for (i in 1:length(unit_defaults_list)) {
+    assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied unit values
+  if (length(unit_opts) > 0) {
+    for (i in 1:length(unit_opts)) {
+      assign(names(unit_opts)[[i]], unit_opts[[i]])
+    }
+  }
+  
+  ## Set popFilters defaults
+  popFilters_defaults_list <- formals(FIESTA::popFilters)[-length(formals(FIESTA::popFilters))]
+  
+  for (i in 1:length(popFilters_defaults_list)) {
+    assign(names(popFilters_defaults_list)[[i]], popFilters_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied popFilters values
+  if (length(popFilter) > 0) {
+    for (i in 1:length(popFilter)) {
+      assign(names(popFilter)[[i]], popFilter[[i]])
+    }
+  }
 
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
