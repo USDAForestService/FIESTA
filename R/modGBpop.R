@@ -207,20 +207,20 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @export modGBpop
-modGBpop <- function(popType="VOL",
-                     popTabs = popTables(),
-                     popTabIDs = popTableIDs(), 
-                     pltassgn=NULL,
-                     pltassgnid="PLT_CN",
-                     dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ",
-                     adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
-                     unitvar=NULL, unitvar2=NULL, 
-                     unitarea=NULL, areavar="ACRES", areaunits="acres", 
-				minplotnum.unit=10, unit.action="keep", unitzonal=NULL,
-				strata=TRUE, savedata=FALSE,
-                     strata_opts=strata_options(), 
-                     savedata_opts=savedata_options(),
-                     GBdata=NULL, pltdat=NULL, stratdat=NULL, auxdat=NULL, gui=FALSE, ...){
+modGBpop <- function(	popType="VOL",
+                     	popTabs = popTables(),
+                     	popTabIDs = popTableIDs(), 
+			     	popFilter = popFilters(),
+                     	pltassgn=NULL,
+                     	pltassgnid="PLT_CN",
+                     	dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", adj="samp", 
+                     	unitvar=NULL, unitarea=NULL, 
+				strata=TRUE, 
+				savedata=FALSE,
+                    	unit_opts=unit_options(),
+                     	strata_opts=strata_options(), 
+                     	savedata_opts=savedata_options(),
+                     	GBdata=NULL, pltdat=NULL, stratdat=NULL, auxdat=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:

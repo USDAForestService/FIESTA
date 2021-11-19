@@ -184,19 +184,18 @@
 #' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
 #' @keywords data
 #' @export modSApop
-modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL, 
-	cond=NULL, plt=NULL, tree=NULL, seed=NULL, pltassgn=NULL, dsn=NULL, 
-	puniqueid="CN", pltassgnid="PLT_CN", pjoinid="CN", tuniqueid="PLT_CN",  
-	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", 
-	invyrs=NULL, intensity=NULL, measCur=FALSE, measEndyr=NULL,
-	measEndyr.filter=NULL, ACI=FALSE, adj="plot", dunitvar="DOMAIN", 
-	dunitvar2=NULL, dunitarea=NULL, areavar="ACRES", areaunits="acres", 
-	minplotnum.unit=0, dunit.action="keep", dunitzonal=NULL, 
-	prednames=NULL, predfac=NULL, pvars2keep=NULL, cvars2keep=NULL, 
-	saveobj=FALSE, objnm="SApopdat", savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, 
-	SAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE){
+modSApop <- function(	popType="VOL",
+                     	popTabs = popTables(),
+                     	popTabIDs = popTableIDs(),
+				popFilter = popFilters(),
+                     	pltassgn=NULL,
+                     	pltassgnid="PLT_CN",
+				dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", adj="plot", 
+				dunitvar=NULL, dunitarea=NULL, dunitzonal=NULL.
+				prednames=NULL, predfac=NULL,
+				savedata=FALSE,
+				SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
+				SAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE, ...) 
 
   ##################################################################################
   ## DESCRIPTION:
@@ -234,6 +233,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
   returnSApopdat <- FALSE
   nonsamp.pfilter=nonsamp.cfilter <- NULL 
   returnlst <- list()
+  pvars2keep=cvars2keep=NULL
 
 # dunitvar2=NULL
 # pvars2keep=NULL
@@ -358,7 +358,7 @@ modSApop <- function(SAdoms=NULL, smallbnd=NULL, smallbnd.domain=NULL,
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="SA", tree=tree, cond=cond, plt=plt, 
 	seed=seed, pltassgn=pltassgn, dsn=dsn, tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
-	condid=condid, puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
+	condid="CONDID", puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid,
 	measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, ACI=ACI, adj=adj, 
 	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
 	unitarea=dunitarea, areavar=areavar, areaunits=areaunits, unitvar=dunitvar, 
