@@ -240,11 +240,15 @@
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
 #' @export modMAtree
-modMAtree <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL, 
-	estseed="none", landarea="FOREST", pcfilter=NULL, estvar=NULL, 
-	estvar.filter=NULL, rowvar=NULL, colvar=NULL, sumunits=FALSE, 
-	returntitle=FALSE, savedata=FALSE, table_opts=table_options(),
-	title_opts=title_options(), savedata_opts=savedata_options(), gui=FALSE, ...){
+modMAtree <- function(MApopdat, MAmethod, 
+		FIA=TRUE, prednames=NULL, modelselect=FALSE,
+	    	landarea="FOREST", pcfilter=NULL, 
+		estseed="none", estvar=NULL, estvar.filter=NULL, 
+		rowvar=NULL, colvar=NULL, 
+		sumunits=FALSE, returntitle=FALSE, savedata=FALSE, 
+		table_opts=table_options(),
+		title_opts=title_options(), 
+		savedata_opts=savedata_options(), gui=FALSE, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -591,7 +595,8 @@ modMAtree <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
     unit_rowestlst <- lapply(estunits, MAest.unit, 
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar,
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain=rowvar, response=response, npixels=npixels, FIA=FIA)
+		domain=rowvar, response=response, npixels=npixels, FIA=FIA,
+		modelselect=modelselect, )
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
@@ -616,7 +621,8 @@ modMAtree <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
       unit_grpestlst <- lapply(estunits, MAest.unit,
 		dat=tdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain="grpvar", response=response, npixels=npixels, FIA=FIA)
+		domain="grpvar", response=response, npixels=npixels, FIA=FIA,
+		modelselect=modelselect, )
       unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))

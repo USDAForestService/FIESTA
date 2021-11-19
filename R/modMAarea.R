@@ -222,10 +222,14 @@
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
 #' @export modMAarea
-modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL, 
-	landarea="FOREST", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
-	sumunits=FALSE, savedata=FALSE, returntitle=FALSE, table_opts=table_options(),
-	title_opts=title_options(), savedata_opts=savedata_options(), gui=FALSE, ...){
+modMAarea <- function(MApopdat, MAmethod, 
+		FIA=TRUE, prednames=NULL, modelselect=FALSE,
+		landarea="FOREST", pcfilter=NULL, 
+		rowvar=NULL, colvar=NULL, 
+		sumunits=FALSE, returntitle=FALSE, savedata=FALSE, 
+		table_opts=table_options(),
+		title_opts=title_options(), 
+		savedata_opts=savedata_options(), gui=FALSE, ...){
 
   ########################################################################################
   ## DESCRIPTION: 
@@ -371,8 +375,6 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
       predfac <- predfac[predfac %in% prednames]
     }
   } 
-print("TEST")
-print(unitarea)
 
   ########################################
   ## Check area units
@@ -383,7 +385,6 @@ print(unitarea)
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
 
-print("TEST2")
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -422,10 +423,6 @@ print("TEST2")
     invyr <- sort(unique(pltcondf$INVYR))
   }
 
-print("TEST3")
-print(rowvar)
-print(colvar)
-
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
@@ -453,11 +450,6 @@ print(colvar)
   grpvar <- rowcolinfo$grpvar
   rm(rowcolinfo)  
 
-print("TEST4")
-print(head(unitarea))
-print(colvar)
-print(sumunits)
-
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
@@ -465,8 +457,6 @@ print(sumunits)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
   
-print("TEST5")
-
   ## Merge filtered condition data (condf) to all conditions (condx)
   #####################################################################################
   setkeyv(setDT(condx), c(cuniqueid, condid))
@@ -527,7 +517,8 @@ print("TEST5")
     unit_totestlst <- lapply(estunits, MAest.unit, 
 		dat=cdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames,
- 		domain="TOTAL", response=estvar.name, npixels=npixels, FIA=FIA)
+ 		domain="TOTAL", response=estvar.name, npixels=npixels, FIA=FIA,
+		modelselect=modelselect, getweights=TRUE)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
@@ -548,7 +539,8 @@ print("TEST5")
     unit_rowestlst <- lapply(estunits, MAest.unit, 
 		dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain=rowvar, response=estvar.name, npixels=npixels, FIA=FIA)
+		domain=rowvar, response=estvar.name, npixels=npixels, FIA=FIA,
+		modelselect=modelselect)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
@@ -561,7 +553,8 @@ print("TEST5")
     unit_colest <- lapply(estunits, MAest.unit, 
 		dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain=colvar, response=estvar.name, npixels=npixels, FIA=FIA)
+		domain=colvar, response=estvar.name, npixels=npixels, FIA=FIA,
+		modelselect=modelselect)
     unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
@@ -574,7 +567,8 @@ print("TEST5")
     unit_grpestlst <- lapply(estunits, MAest.unit, 
 		dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain="grpvar", response=estvar.name, npixels=npixels, FIA=FIA)
+		domain="grpvar", response=estvar.name, npixels=npixels, FIA=FIA,
+		modelselect=modelselect)
     unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
     preds_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
     unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
