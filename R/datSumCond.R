@@ -229,7 +229,7 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
       setkeyv(condf.sum, cuniqueid)
       setkeyv(pltx, puniqueid)
     }
-    condf.sum <- merge(pltx, condf.sum, by.x=puniqueid, by.y=cuniqueid)
+    condf.sum <- merge(pltx, condf.sum, by.x=puniqueid, by.y=cuniqueid, all.x=TRUE)
     if (NAto0) {
       for (col in csumvarnm) set(condf.sum, which(is.na(condf.sum[[col]])), col, 0)
     }

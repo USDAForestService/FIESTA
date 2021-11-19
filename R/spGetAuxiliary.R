@@ -77,18 +77,11 @@
 #' @param exportsp Logical. If TRUE, the extracted raster point data are
 #' exported to outfolder.
 #' @param exportNA Logical. If TRUE, NA values are exported to outfolder.
-#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
-#' folder.  If NULL, the working directory is used.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
-#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
-#' @param overwrite_layer Logical. If TRUE, overwrite layer(s) in dsn.
-#' @param append_layer Logical. If TRUE, appends to csv (if out_fmt="csv") or
-#' appends to layers in dsn.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in dunitzonal output and extract to pltassgn points.
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
 #' rastlst*. } \item{dunitzonal}{ Data frame. Number of pixels and zonal
@@ -139,15 +132,19 @@
 #' @keywords data
 #' @export spGetAuxiliary
 spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
- 	dunittype="POLY", dunit_layer=NULL, dunit_dsn=NULL, dunitvar="DOMAIN",
- 	rastlst.cont=NULL, rastlst.cont.name=NULL, rastlst.cont.stat="mean", 
-	rastlst.cont.NODATA=NULL, rastlst.cat=NULL, rastlst.cat.name=NULL, 
-	rastlst.cat.NODATA=NULL, rastfolder=NULL, asptransform=FALSE, rast.asp=NULL, 
-	rast.lut=NULL, rastlut=NULL, areacalc=TRUE, areaunits="ACRES", 
-	keepNA=TRUE, NAto0=TRUE, npixels=TRUE, returnxy=FALSE, showext=FALSE, 
-	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
- 	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
+ 			dunittype="POLY", dunit_layer=NULL, dunit_dsn=NULL, dunitvar="DOMAIN",
+ 			rastlst.cont=NULL, rastlst.cont.name=NULL, 
+			rastlst.cont.stat="mean", rastlst.cont.NODATA=NULL, 
+			rastlst.cat=NULL, rastlst.cat.name=NULL, 
+			rastlst.cat.NODATA=NULL, rastfolder=NULL, 
+			asptransform=FALSE, rast.asp=NULL, 
+			rast.lut=NULL, rastlut=NULL, 
+			areacalc=TRUE, areaunits="ACRES", 
+			keepNA=TRUE, NAto0=TRUE, npixels=TRUE, 
+			returnxy=FALSE, showext=FALSE, 
+			savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
+                savedata_opts=savedata_options(), 
+			vars2keep=NULL, gui=FALSE, ...) {
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -163,11 +160,8 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
-
   if (gui) {uniqueid=savedata <- NULL}
 
-  ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
@@ -184,6 +178,24 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
+
+  ## Set global variables
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
+
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+
 
   ##################################################################################
   ## CHECK INPUT PARAMETERS

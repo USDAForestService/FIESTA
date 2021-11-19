@@ -267,6 +267,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     #minplotnum.unit <- 2
   }
   if (minplotnum.strat > minplotnum.unit) minplotnum.strat <- minplotnum.unit
+
   pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid, 
 		unitlut=auxlut, unitvars=unitvar, strvars=strvar, 
 		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit, 
@@ -286,9 +287,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
         pltx <- pltx[!pltx[[unitvar]] %in% unitlessthan, ] 
         unitarea <- unitarea[!unitarea[[unitvar]] %in% unitlessthan, ] 
         errtab <- errtab[!errtab[[unitvar]] %in% unitlessthan, ] 
-      } else {
+      } else if (unit.action == "keep") {
         minplotnum.unit <- 0
-        errtab <- errtab[, errtyp := "none"] 
+        #errtab <- errtab[, errtyp := "none"] 
       }
     }
   }
@@ -308,6 +309,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       vars2combine <- vars2combine[vars2combine %in% names(auxlut)]
     }
     unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
+
     collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx, 
 		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat, 
 		unitarea=unitarea, areavar=areavar, unitvar=unitvar,
@@ -337,7 +339,8 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     ## Remove predictors with variance = 0
     if (any(predvariance == 0)) {
       predvariance0 <- names(predvariance)[predvariance == 0]
-      message("predictor has variance equal to 0... removing from analysis: ", toString(predvariance0))
+      message("predictor has variance equal to 0... removing from analysis: ", 
+		toString(predvariance0))
       prednames <- prednames[!prednames %in% predvariance0]
       predfac <- predfac[!predfac %in% predvariance0]
     }

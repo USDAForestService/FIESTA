@@ -94,14 +94,14 @@
 #' unitvar and areavar.
 #' @param areavar String. Name of area variable in unitarea. Default="ACRES".
 #' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
-#' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
-#' unit. For continuous data, means by estimation unit; for categorical data,
-#' proportion of class by estimation unit.
 #' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
 #' @param unit.action String. What to do if number of plots in an estimation
 #' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
 #' unit.action='combine', combines estimation unit to the following estimation
-#' unit in unitzonal.
+#' unit, ordered in unitzonal or stratalut.
+#' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
+#' unit. For continuous data, means by estimation unit; for categorical data,
+#' proportion of class by estimation unit.
 #' @param npixelvar String. Name of variable in unitlut defining number of
 #' pixels by estimation unit.
 #' @param prednames String vector. Name(s) of predictor variables to include in
@@ -213,15 +213,16 @@ modMApop <- function(popType="VOL",
                      popTabIDs = popTableIDs(), 
                      pltassgn=NULL,
                      pltassgnid="PLT_CN",
-	dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", 
-	adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, 
-	ACI=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL, 
-	areavar="ACRES", areaunits="acres", unitzonal=NULL, minplotnum.unit=10, 
-	unit.action="keep", npixelvar="npixels", prednames=NULL, predfac=NULL,
-	strata=TRUE, savedata=FALSE, 
-	strata_opts=strata_options(), 
-	savedata_opts=savedata_options(),
-	MAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE, ...){
+				dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ", 
+				adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
+				unitvar=NULL, unitvar2=NULL, 
+				unitarea=NULL, areavar="ACRES", areaunits="acres", 
+				minplotnum.unit=10, unit.action="keep", unitzonal=NULL, 
+				npixelvar="npixels", prednames=NULL, predfac=NULL,
+				strata=TRUE, savedata=FALSE, 
+				strata_opts=strata_options(), 
+				savedata_opts=savedata_options(),
+				MAdata=NULL, pltdat=NULL, auxdat=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -274,28 +275,14 @@ modMApop <- function(popType="VOL",
   for (i in 1:length(strata_defaults_list)) {
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
   }
-  
-  ## Set user-supplied strata values
-  if (length(strata_opts) > 0) {
-    for (i in 1:length(strata_opts)) {
-      assign(names(strata_opts)[[i]], strata_opts[[i]])
-    }
-  }
-  
+    
   ## Set popTables defaults
   popTables_defaults_list <- formals(FIESTA::popTables)[-length(formals(FIESTA::popTables))]
   
   for (i in 1:length(popTables_defaults_list)) {
     assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
   }
-  
-  ## Set user-supplied popTable values
-  if (length(popTabs) > 0) {
-    for (i in 1:length(popTabs)) {
-      assign(names(popTabs)[[i]], popTabs[[i]])
-    }
-  }
-  
+    
   ## Set popTabIDs defaults
   popTableIDs_defaults_list <- formals(FIESTA::popTableIDs)[-length(formals(FIESTA::popTableIDs))]
   
@@ -329,39 +316,6 @@ modMApop <- function(popType="VOL",
     }
   }
   
-  ## Set user-supplied popTabIDs values
-  if (length(popTabIDs) > 0) {
-    for (i in 1:length(popTabIDs)) {
-      if (names(popTabIDs)[[i]] == "cond") {
-        assign("cuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "plt") {
-        assign("puniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "tree") {
-        assign("tuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "seed") {
-        assign("suniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpspp") {
-        assign("vsppuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpstr") {
-        assign("vstruniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subplot") {
-        assign("subpuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subp_cond") {
-        assign("subcuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "lulc") {
-        assign("lulcuniqueid", popTabIDs[[i]])
-      }
-    }
-  }
-
 
   ## SET OPTIONS
   options.old <- options()
@@ -402,13 +356,11 @@ modMApop <- function(popType="VOL",
   ## Load data
   ###################################################################################
   if (!is.null(MAdata)) {
-    list.items <- c("plt", "cond", "dunitarea", "dunitvar", "dunitzonal")
+    list.items <- c("tabs", "dunitarea", "dunitvar", "dunitzonal")
     MAdata <- pcheck.object(MAdata, "MAdata", list.items=list.items)
     #bnd <- MAdata$bnd
-    plt <- MAdata$plt
-    cond <- MAdata$cond
-    tree <- MAdata$tree
-    seed <- MAdata$seed
+    popTabs <- MAdata$tabs
+    popTabIDs <- MAdata$tabIDs
     pltassgn <- MAdata$pltassgn
     pltassgnid <- MAdata$pltassgnid
     unitarea <- MAdata$dunitarea
@@ -439,24 +391,13 @@ modMApop <- function(popType="VOL",
     
   } else {
     if (!is.null(pltdat)) {
-      list.items <- c("bndx", "tabs", "xypltx")
-      pltdat <- pcheck.object(pltdat, "pltdat", list.items=list.items)
-
-      ## Extract list objects
-      puniqueid <- pltdat$puniqueid
-      if ("tabs" %in% names(pltdat)) {
-        pjoinid <- pltdat$pjoinid
-        plt <- pltdat$tabs$pltx
-        cond <- pltdat$tabs$condx
-        tree <- pltdat$tabs$treex
-        seed <- pltdat$tabs$seedx
-      } else {
-        pjoinid <- puniqueid
-        plt <- pltdat$plt
-        cond <- pltdat$cond
-        tree <- pltdat$tree
-        seed <- pltdat$seed
-      }
+      popTabs <- pltdat$tabs
+      popTabIDs <- pltdat$tabIDs
+      pjoinid <- pltdat$pjoinid
+      names(popTabs) <- sapply(names(popTabs), function(x) 
+		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+      names(popTabIDs) <- sapply(names(popTabIDs), function(x) 
+		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
     }
     if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "dunitzonal", "dunitvar", "predfac", "npixelvar", 
@@ -510,6 +451,58 @@ modMApop <- function(popType="VOL",
 		strwtvar=strwtvar)
     }
   }
+
+  ## Set user-supplied popTable values 
+  if (length(popTabs) > 0) {
+    for (i in 1:length(popTabs)) {
+      assign(names(popTabs)[[i]], popTabs[[i]])
+    }
+  } else {
+    stop("need to include popTabs")
+  }
+
+  list.items <- {}
+  if (popType == "LULC") {
+    list.items <- c(list.items, "lulcx")
+  }
+  if (popType == "P2VEG") {
+    list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
+  }
+  popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
+
+ 
+  ## Set user-supplied popTabIDs values
+  if (length(popTabIDs) > 0) {
+    for (i in 1:length(popTabIDs)) {
+      if (names(popTabIDs)[[i]] == "cond") {
+        assign("cuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "plt") {
+        assign("puniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "tree") {
+        assign("tuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "seed") {
+        assign("suniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpspp") {
+        assign("vsppuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpstr") {
+        assign("vstruniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subplot") {
+        assign("subpuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subp_cond") {
+        assign("subcuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "lulc") {
+        assign("lulcuniqueid", popTabIDs[[i]])
+      }
+    }
+  }
  
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
@@ -517,15 +510,16 @@ modMApop <- function(popType="VOL",
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
-  popcheck <- check.popdata(gui=gui, module="MA", popType=popType, strata=strata,
- 	tree=tree, cond=cond, plt=plt, seed=seed, pltassgn=pltassgn, dsn=dsn,
- 	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, areawt=areawt,
- 	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid,
+  popcheck <- check.popdata(gui=gui, module="MA", popType=popType, 
+ 	tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn,
+ 	condid="CONDID", areawt=areawt,
+ 	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid,
  	adj=adj, invyrs=invyrs, intensity=intensity, ACI=ACI, 
 	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
 	unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-	areaunits=areaunits, unit.action=unit.action, stratalut=stratalut, 
-	strvar=strvar, stratcombine=stratcombine, prednames=prednames, predfac=predfac)
+	areaunits=areaunits, unit.action=unit.action, strata=strata,
+	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine, 
+	prednames=prednames, predfac=predfac)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx

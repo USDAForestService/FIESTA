@@ -2533,48 +2533,82 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
   ## GENERATE RETURN LIST
   fiadatlst <- list(states=states)
 
+  tabs <- list()
+  tabIDs <- list()
   if (returndata) {
     if (!is.null(plt)) {
       nbrplots <- length(unique(plt$CN))
       if (nrow(plt) != nbrplots) warning("plt records are not unique")
-      fiadatlst$plt <- setDF(plt) 
-      fiadatlst$puniqueid <- "CN"
+      tabs$plt <- setDF(plt) 
+      tabIDs$plt <- "CN"
     }
     if (!is.null(cond)) {
       if (!is.null(plt)) {
         if (length(unique(cond$PLT_CN)) != nbrplots)
           warning("number of plots in cond table does not match plt table")
       }
-      fiadatlst$cond <- setDF(cond)
+      tabs$cond <- setDF(cond)
+      tabIDs$cond <- "PLT_CN"
     }
     notsame <- FALSE
     if (istree && !is.null(tree)) {
-      fiadatlst$tree <- setDF(tree)
+      tabs$tree <- setDF(tree)
+      tabIDs$tree <- "PLT_CN"
     }
     if (isseed && !is.null(seed)) {
-      fiadatlst$seed <- setDF(seed)
+      tabs$seed <- setDF(seed)
+      tabIDs$seed <- "PLT_CN"
     }
     if (issccm && !is.null(sccm)) {
-      fiadatlst$sccm <- setDF(sccm)
+      tabs$sccm <- setDF(sccm)
+      tabIDs$sccm <- "PLT_CN"
     }
     if (isveg) {
-      if (!is.null(vsubpspp)) fiadatlst$vsubpspp <- setDF(vsubpspp)
-      if (!is.null(vsubpstr)) fiadatlst$vsubpstr <- setDF(vsubpstr)
+      if (!is.null(vsubpspp)) {
+        tabs$vsubpspp <- setDF(vsubpspp)
+        tabIDs$vsubpspp <- "PLT_CN"
+      }
+      if (!is.null(vsubpstr)) {
+        tabs$vsubpstr <- setDF(vsubpstr)
+        tabIDs$vsubpstr <- "PLT_CN"
+      }
     }
     if (issubp) {
-      if (!is.null(subpx)) fiadatlst$subplot <- setDF(subpx)
-      if (!is.null(subpcx)) fiadatlst$subp_cond <- setDF(subpcx)
+      if (!is.null(subpx)) {
+        tabs$subplot <- setDF(subpx)
+        tabIDs$subplot <- "PLT_CN"
+      }
+      if (!is.null(subpcx)) {
+        tabs$subp_cond <- setDF(subpcx)
+        tabIDs$subp_cond <- "PLT_CN"
+      }
     }
     if (islulc) {
-      if (!is.null(lulc)) fiadatlst$lulc <- setDF(lulc)
+      if (!is.null(lulc)) {
+        tabs$lulc <- setDF(lulc)
+        tabIDs$lulc <- "PLT_CN"
+      }
     }
     if (isdwm) {
-      if (!is.null(dwm)) fiadatlst$dwm <- setDF(dwm)
+      if (!is.null(dwm)) {
+        tabs$dwm <- setDF(dwm)
+        tabIDs$dwm <- "PLT_CN"
+      }     
     }
     if (!is.null(othertables)) {
-      for (i in 1:length(othertables))
-        fiadatlst[[othertables[i]]] <- get(paste0("other", i))
+      for (i in 1:length(othertables)) {
+        tabs[[othertables[i]]] <- get(paste0("other", i))
+        if ("PLT_CN" %in% names(get(paste0("other", i)))) {
+          tabIDs[[othertables[i]]] <- "PLT_CN"
+        } else if ("CN" %in% names(get(paste0("other", i)))) {
+          tabIDs[[othertables[i]]] <- "CN"
+        } else {
+          tabIDs[[othertables[i]]] <- NA
+        }  
+      }   
     }
+    fiadatlst$tabs <- tabs
+    fiadatlst$tabIDs <- tabIDs
 
     if (issp) {
       xycoords <- getcoords(coords)

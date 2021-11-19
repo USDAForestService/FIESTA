@@ -1392,6 +1392,27 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
     DBI::dbDisconnect(dbconn)
   }  ## datsource
  
+  tabs <- lapply(tabs2save, get, envir=environment())
+  tabIDs <- list(pltx=puniqueid, condx=cuniqueid)
+  if (istree) {
+    tabIDs$treex <- tuniqueid
+  }
+  if (isseed) {
+    tabIDs$seedx <- tuniqueid
+  }
+  miss <- names(tabs)[!names(tabs) %in% names(tabIDs)]
+  if (length(miss) > 0) {
+    for (m in miss) {
+      if ("PLT_CN" %in% names(tabs[[m]])) {
+        tabIDs[[m]] <- "PLT_CN"
+      } else if ("CN" %in% names(tabs[[m]])) {
+        tabIDs[[m]] <- "CN"
+      } else {
+        tabIDs[[m]] <- NA
+      }
+    }
+  }
+ 
   #############################################################################
   ## Save tables
   #############################################################################
@@ -1440,17 +1461,18 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
 #    returnlst$clip_tabs <- lapply(tabs2save, get, envir=environment())
 #    names(returnlst$clip_tabs) <- paste0("clip_", tabs2save)
 #  } else {
-    returnlst$tabs <- lapply(tabs2save, get, envir=environment())
+    #returnlst$tabs <- lapply(tabs2save, get, envir=environment())
+    returnlst$tabs <- tabs
     names(returnlst$tabs) <- tabs2save
 #  } 
  
+  returnlst$tabIDs <- tabIDs
   if (savexy && !is.null(spxy)) {
     returnlst$spxy <- spxy
   }
   returnlst$xypltx <- xyids
   #returnlst$clip_polyv <- bndx
   returnlst$bndx <- bndx
-  returnlst$puniqueid <- puniqueid
   returnlst$xy.uniqueid <- xyjoinid
   returnlst$pjoinid <- pjoinid
   returnlst$states <- states

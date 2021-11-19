@@ -91,8 +91,8 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
     pltcnt$errtyp <- "none"
     #pltcnt[pltcnt$n.strata < minplotnum.strat & pltcnt$n.total < minplotnum.unit 
 	#	& pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
-    pltcnt[pltcnt$n.strata < minplotnum.strat & pltcnt$n.total > minplotnum.unit, 
-		"errtyp"] <- "warn"
+    pltcnt[((pltcnt$n.strata < minplotnum.strat & pltcnt$n.total > minplotnum.unit) |
+		pltcnt$n.total < minplotnum.unit), "errtyp"] <- "warn"
     pltcnt[pltcnt$n.total < minplotnum.strat & pltcnt$NBRSTRATA > 0, "errtyp"] <- "warn"
 
     ## ## Remove NBRSTRATA and merge to unitlut

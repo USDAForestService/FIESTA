@@ -38,7 +38,7 @@
 #' @export savedata_options
 
 savedata_options <- function(outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-					outfn.pre=NULL, outfn.date=FALSE,
+					out_layer=NULL, outfn.pre=NULL, outfn.date=FALSE,
 					addtitle=TRUE, raw_fmt="csv", raw_dsn=NULL,
 					overwrite_dsn=FALSE, overwrite_layer=TRUE,
 					append_layer=FALSE, saveobj=FALSE, objnm=NULL, ...) {

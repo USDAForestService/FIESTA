@@ -342,12 +342,12 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
   cuniqueid <- MApopdat$cuniqueid
   condid <- MApopdat$condid
   ACI.filter <- MApopdat$ACI.filter
-  unitarea <- MApopdat$dunitarea
+  unitarea <- MApopdat$unitarea
   areavar <- MApopdat$areavar
   areaunits <- MApopdat$areaunits
-  unitvar <- MApopdat$dunitvar
-  unitvars <- MApopdat$dunitvars
-  unitlut <- MApopdat$dunitlut
+  unitvar <- MApopdat$unitvar
+  unitvars <- MApopdat$unitvars
+  unitlut <- MApopdat$unitlut
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
   expcondtab <- MApopdat$expcondtab
@@ -371,6 +371,8 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
       predfac <- predfac[predfac %in% prednames]
     }
   } 
+print("TEST")
+print(unitarea)
 
   ########################################
   ## Check area units
@@ -381,7 +383,7 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
 
-
+print("TEST2")
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
@@ -420,6 +422,9 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
     invyr <- sort(unique(pltcondf$INVYR))
   }
 
+print("TEST3")
+print(rowvar)
+print(colvar)
 
   ###################################################################################
   ### GET ROW AND COLUMN INFO FROM condf
@@ -448,6 +453,11 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
   grpvar <- rowcolinfo$grpvar
   rm(rowcolinfo)  
 
+print("TEST4")
+print(head(unitarea))
+print(colvar)
+print(sumunits)
+
   ## Generate a uniquecol for estimation units
   if (!sumunits && colvar == "NONE") {
     uniquecol <- data.table(unitarea[[unitvar]])
@@ -455,6 +465,7 @@ modMAarea <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
   
+print("TEST5")
 
   ## Merge filtered condition data (condf) to all conditions (condx)
   #####################################################################################

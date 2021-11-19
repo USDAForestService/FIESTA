@@ -10,7 +10,7 @@
 #' Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
 #' \tab CONDID \tab Unique identifier of each condition on plot, to link to
 #' cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
-#' \tab Number of trees per acre each sample tree represents (ex. DESIGNCD=1:
+#' \tab Number of trees per acre each sample tree represents (e.g., DESIGNCD=1:
 #' TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on
 #' microplot).\cr \tab cond \tab cuniqueid \tab Unique identifier for each
 #' plot, to link to pltassgn (ex. PLT_CN).\cr \tab \tab CONDID \tab Unique
@@ -365,12 +365,12 @@ modMAtree <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
   condid <- MApopdat$condid
   tuniqueid <- MApopdat$tuniqueid
   ACI.filter <- MApopdat$ACI.filter
-  unitarea <- MApopdat$dunitarea
+  unitarea <- MApopdat$unitarea
   areavar <- MApopdat$areavar
   areaunits <- MApopdat$areaunits
-  unitvar <- MApopdat$dunitvar
-  unitlut <- MApopdat$dunitlut
-  unitvars <- MApopdat$dunitvars
+  unitvar <- MApopdat$unitvar
+  unitlut <- MApopdat$unitlut
+  unitvars <- MApopdat$unitvars
   npixels <- MApopdat$npixels
   npixelvar <- MApopdat$npixelvar
   expcondtab <- MApopdat$expcondtab
@@ -565,12 +565,14 @@ modMAtree <- function(MApopdat, MAmethod, FIA=TRUE, prednames=NULL,
     ## Get total estimate and merge area
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=response]
-
     unit_totestlst <- lapply(estunits, MAest.unit, 
 		dat=tdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
 		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain="TOTAL", response=response, npixels=npixels, FIA=FIA)
+		domain="TOTAL", response=response, npixels=npixels, FIA=FIA,
+		modelselect=modelselect, getweights=TRUE)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
+    unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
+    unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
     }

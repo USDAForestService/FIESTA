@@ -1,5 +1,5 @@
 
-MAest.ht <- function(y, N, FIA=TRUE) {
+MAest.ht <- function(y, N, FIA=TRUE, getweights=FALSE) {
 
   ## Set global variables
   nhat.var <- NULL
@@ -11,19 +11,27 @@ MAest.ht <- function(y, N, FIA=TRUE) {
 						var_est = TRUE, var_method = var_method, 
 						B = 1000)
 
-  estht <- data.table(estht$pop_mean, estht$pop_mean_var, NBRPLT, NBRPLT.gt0)
-  setnames(estht, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  esthtdt <- data.table(estht$pop_mean, estht$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(esthtdt, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  returnlst <- list(est=esthtdt)
 
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estht[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
 
-  return(list(est=estht))
+  ## Return survey weights
+  if (getweights) {
+    if (any(estht$weights < 0)) {
+      message("model resulted in negatives... indicating model instability")
+    }
+    returnlst$weights <- estht$weights / N
+  }
+  return(returnlst)
 }
 
 
-MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
+MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE, getweights=FALSE) {
 
   ## Set global variables
   nhat.var <- NULL
@@ -55,22 +63,37 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
     message("error in mase::postStrat function... returning NA")
     estps <- data.table(matrix(c(NA, NA, NBRPLT, NBRPLT.gt0), 1,4))
     setnames(estps, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
-    return(estps)
+    returnlst <- list(est=estps)
+
+    if (getweights) {
+      weights <- rep(NA, length(y))
+      returnlst$weights <- weights
+    }
+    return(returnlst)
   }
 
-  estps <- data.table(estps$pop_mean, estps$pop_mean_var, NBRPLT, NBRPLT.gt0)
-  setnames(estps, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  estpsdt <- data.table(estps$pop_mean, estps$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estpsdt, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  returnlst <- list(est=estpsdt)
 
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estps[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(list(est=estps))
+
+  ## Return survey weights
+  if (getweights) {
+    if (any(estps$weights < 0)) {
+      message("model resulted in negatives... indicating model instability")
+    }
+    returnlst$weights <- estps$weights / N
+  }
+  return(returnlst)
 }
 
 
 MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
-			modelselect=FALSE) {
+			modelselect=FALSE, getweights=FALSE) {
 
   #y <- yn.vect
 
@@ -102,7 +125,7 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
 
     var_method <- "LinHTSRS"
     estgreg <- tryCatch(mase::greg(	y = y, 
-					xsample = x_sample, 
+					xsample = xsample, 
 					xpop = x_pop, 
 					pi = NULL, N = N, pi2 = NULL,
 					model = "linear", 
@@ -131,24 +154,39 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
     estgreg <- data.table(matrix(c(NA, NA, NBRPLT, NBRPLT.gt0), 1,4))
     setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
     predselect[1,] <- NA
-    return(list(est=estgreg, predselect=predselect))
+    returnlst <- list(est=estgreg, predselect=predselect)
+
+    if (getweights) {
+      weights <- rep(NA, length(y))
+      returnlst$weights <- weights
+    }
+    return(returnlst)
   }
 
   selected <- data.frame(t(estgreg$coefficients))[,-1]
   predselect <- rbindlist(list(predselect, selected), fill=TRUE)
 
-  estgreg <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
-  setnames(estgreg, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
- 
+  estgregdt <- data.table(estgreg$pop_mean, estgreg$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estgregdt, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  returnlst <- list(est=estgregdt, predselect=predselect)
+
+  ## This takes out the finite population correction term (to estimated variance from FIA)
   if (FIA) {
-    ## This takes out the finite population correction term (to estimated variance from FIA)
     estgreg[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(list(est=estgreg, predselect=predselect))
+
+  ## Return survey weights
+  if (getweights) {
+    if (any(estgreg$weights < 0)) {
+      message("model resulted in negatives... indicating model instability")
+    }
+    returnlst$weights <- estgreg$weights / N
+  }
+  return(returnlst)
 }
 
 
-MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
+MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE, getweights=FALSE) {
 
 #y <- yn.vect
 
@@ -182,22 +220,37 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
     message("error in mase::ratioEstimator function... returning NA")
     estratio <- data.table(matrix(c(NA, NA, NBRPLT, NBRPLT.gt0), 1,4))
     setnames(estratio, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
-    return(estratio)
+    returnlst <- list(est=estratio)
+
+    if (getweights) {
+      weights <- rep(NA, length(y))
+      returnlst$weights <- weights
+    }
+    return(returnlst)
   }
 
-  estratio <- data.table(estratio$pop_mean, estratio$pop_mean_var, NBRPLT, NBRPLT.gt0)
-  setnames(estratio, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  estratiodt <- data.table(estratio$pop_mean, estratio$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estratiodt, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  returnlst <- list(est=estratiodt)
  
+  ## This takes out the finite population correction term (to estimated variance from FIA)
   if (FIA) {
-    ## This takes out the finite population correction term (to estimated variance from FIA)
     estratio[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(list(est=estratio))
+  ## Return survey weights
+  if (getweights) {
+    if (any(estratio$weights < 0)) {
+      message("model resulted in negatives... indicating model instability")
+    }
+    returnlst$weights <- estratio$weights / N
+  }
+  return(returnlst)
 }
 
 
 
-MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4testing=TRUE) {
+MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", 
+		save4testing=TRUE, getweights=FALSE) {
 
 #y <- yn.vect
 
@@ -238,20 +291,37 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
     estgregEN <- data.table(matrix(c(NA, NA, NBRPLT, NBRPLT.gt0), 1,4))
     setnames(estgregEN, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
     predselect[1,] <- NA
-    return(list(est=estgregEN, predselect=predselect))
+    returnlst <- list(est=estgregEN, predselect=predselect)
+
+    if (getweights) {
+      weights <- rep(NA, length(y))
+      returnlst$weights <- weights
+    }
+    return(returnlst)
+
   }
 
   selected <- data.frame(t(estgreg$coefficients))[,-1]
   predselect <- rbindlist(list(predselect, selected), fill=TRUE)
 
-  estgregEN <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
-  setnames(estgregEN, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
+  estgregENdt <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
+  setnames(estgregENdt, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
  
+  returnlst <- list(est=estgregENdt, predselect=predselect)
+
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
     estgregEN[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
-  return(list(est=estgregEN, predselect=predselect))
+  ## Return survey weights
+  if (getweights) {
+    if (any(estgregEN$weights < 0)) {
+      message("model resulted in negatives... indicating model instability")
+    }
+    returnlst$weights <- estgregEN$weights / N
+  }
+  return(returnlst)
+
 }
 
 
@@ -260,7 +330,8 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", save4t
 ########################################################################
 MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL, 
 	pltassgn, esttype="ACRES", MAmethod, strvar=NULL, prednames=NULL, 
-	yd=NULL, ratiotype="PERACRE", N, FIA=TRUE, modelselect=FALSE) {
+	yd=NULL, ratiotype="PERACRE", N, FIA=TRUE, modelselect=FALSE,
+	getweights=FALSE) {
 
   ########################################################################################
   ## DESCRIPTION: Gets estimates from mase::horvitzThompson
@@ -287,24 +358,27 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   yn.vect <- pltdat.dom[[yn]]
 
   if (MAmethod == "HT") {
-    estlst <- MAest.ht(yn.vect, N, FIA=FIA)
+    estlst <- MAest.ht(yn.vect, N, FIA=FIA, 
+			getweights=getweights)
 
   } else if (MAmethod == "PS") {
     x_sample <- pltdat.dom[, strvar, with=FALSE][[1]]
     x_pop <- unitlut[, c(strvar, "Prop"), with=FALSE]
-    estlst <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA)
+    estlst <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA, 
+			getweights=getweights)
 
   } else {
 
-    x_sample <- pltdat.dom[, prednames, drop=FALSE]
+    x_sample <- setDF(pltdat.dom)[, prednames, drop=FALSE]
     x_pop <- setDF(unitlut)[, prednames, drop=FALSE]
 
     if (MAmethod == "greg") {
       estlst <- MAest.greg(yn.vect, N, x_sample, x_pop, FIA=FIA, 
-		modelselect=modelselect)
+		modelselect=modelselect, getweights=getweights)
 
     } else if (MAmethod == "gregEN") {
-      estlst <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA)
+      estlst <- MAest.gregEN(yn.vect, N, x_sample, x_pop, FIA=FIA, 
+				getweights=getweights)
 
     } else if (MAmethod == "ratio") {
       if (length(prednames) > 1) {
@@ -312,11 +386,17 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
       } else {
         x_sample <- x_sample[[prednames]]
       }
-      est <- MAest.ratio(yn.vect, N, x_sample, x_pop, FIA=FIA)
+      est <- MAest.ratio(yn.vect, N, x_sample, x_pop, FIA=FIA,
+			getweights=getweights)
   
     } else {
       stop("invalid MAmethod")
     }
+  }
+
+  if (getweights) {
+    estlst$weights <- data.frame(pltdat.dom[[cuniqueid]], estlst$weights)
+    names(estlst$weights) <- c(cuniqueid, "weights")
   }
 
   return(estlst)
@@ -328,7 +408,7 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
 ########################################################################
 MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod, 
 		strvar=NULL, prednames=NULL, domain, N, response=NULL, FIA=TRUE,
-		modelselect=FALSE) {
+		modelselect=FALSE, getweights=FALSE) {
 
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
@@ -338,7 +418,14 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
     setnames(domest, c(domain, "nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
     predselect <- data.table(dom, unitlut[FALSE, prednames])
     setnames(predselect, "dom", domain)
-    return(list(est=domest, predselect=predselect))
+    returnlst <- list(est=domest, predselect=predselect)
+    if (getweights) {
+      weights <- data.frame(dom, id=cuniqueid, weights=NA)
+      setnames(weights, "id", cuniqueid)
+      setnames(weights, "dom", domain)
+      returnlst$weights <- weights
+    }
+    return(returnlst)
   }
 
 #yn=response
@@ -347,7 +434,9 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
   domestlst <- MAest(yn=response, dat.dom=dat.dom, pltassgn=pltassgn, 
 		cuniqueid=cuniqueid, esttype=esttype, unitlut=unitlut, 
 		strvar=strvar, prednames=prednames, 
-		MAmethod=MAmethod, N=N, FIA=FIA, modelselect=modelselect)
+		MAmethod=MAmethod, N=N, FIA=FIA, modelselect=modelselect,
+		getweights=getweights)
+
   domestlst <- lapply(domestlst, function(x, dom, domain) {
 		dt <- data.table(dom, x) 
            setnames(dt, "dom", domain) }, dom, domain)
@@ -361,11 +450,10 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
 ########################################################################
 MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar, 
 		esttype, MAmethod="HT", strvar=NULL, prednames=NULL, 
-		domain, response, npixels, FIA=TRUE, modelselect=TRUE) {
+		domain, response, npixels, FIA=TRUE, modelselect=TRUE,
+		getweights=FALSE) {
 ## testing
-#unit=1
-#unit="1701020805"
-#unit="0904000104"
+#unit = estunits[1]
 #domain="TOTAL"
 
   dat.unit <- dat[dat[[unitvar]] == unit, c(cuniqueid, domain, response),
@@ -382,8 +470,14 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 
     predselect <- data.table(unit=unit, domain=1, unitlut[FALSE, prednames])
     setnames(predselect, c("unit", "domain"), c(unitvar, domain)) 
+    returnlst <- list(unitest=unitest, predselect=predselect)
 
-    return(list(unitest=unitest, predselect=predselect))
+    if (getweights) {
+      weights <- data.frame(unit=unit, domain=1, id=cuniqueid, weights=NA)
+      setnames(weights, "id", cuniqueid)
+      returnlst$weights <- weights
+    }
+    return(returnlst)
   }
   setkeyv(dat.unit, cuniqueid)
   pltassgn.unit <- unique(dat[dat[[unitvar]] == unit, c(cuniqueid, strvar, prednames),
@@ -415,12 +509,18 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
 			esttype=esttype, MAmethod=MAmethod, 
 			strvar=strvar, prednames=prednames, 
 			domain=domain, N=N.unit, response=response,
-			FIA=FIA, modelselect=modelselect)
+			FIA=FIA, modelselect=modelselect, getweights=getweights)
 
   unitest <- data.table(unit=unit, do.call(rbind, sapply(unitestlst, '[', "est")))
   setnames(unitest, "unit", unitvar)
 
   returnlst <- list(unitest=unitest)
+
+  if (getweights) {
+    weights <- data.table(unit=unit, do.call(rbind, sapply(unitestlst, '[', "weights")))
+    setnames(weights, "unit", unitvar)
+    returnlst$weights <- weights
+  }
 
   if (MAmethod %in% c("greg", "gregEN")) {
     predselect <- data.table(unit=unit, do.call(rbind, sapply(unitestlst, '[', "predselect")))

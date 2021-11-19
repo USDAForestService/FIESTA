@@ -49,7 +49,7 @@ FUNCTION  | DESCRIPTION
 ### EXAMPLES
 
 Set up for examples
-```
+```{r}
 # Load library
 library(FIESTA)
 
@@ -75,7 +75,7 @@ The following examples show how to extract data from FIA's publicly-available, o
 
 
 #### <a name="DBgetCSV"/>DBgetCSV()
-```
+```{r}
 ####################################################################################
 # Usage:
 # DBgetCSV(DBtable, states = NULL, ZIP = TRUE, returnDT = TRUE, stopifnull = TRUE,
@@ -110,7 +110,7 @@ head(ref_research_station)
 
 
 #### <a name="DBqryCSV"/>DBqryCSV()
-```
+```{r}
 ####################################################################################
 # Usage:
 # DBqryCSV(sql, states = NULL, sqltables = NULL) 
@@ -278,8 +278,9 @@ WYdat.evalCur00 <- DBgetPlots(states="Wyoming", evalCur=TRUE)
 
 ## Extract and look at components in returned list object
 names(WYdat.evalCur00)
-WYplt.evalCur00 <- WYdat.evalCur00$plt
-WYcond.evalCur00 <- WYdat.evalCur00$cond
+WYtabs.evalCur00 <- WYdat.evalCur00$tabs
+WYplt.evalCur00 <- WYtabs.evalCur00$plt
+WYcond.evalCur00 <- WYtabs.evalCur00$cond
 WYdat.evalCur00$evalid
 WYdat.evalCur00$pltcnt
 
@@ -291,12 +292,14 @@ dim(WYcond.evalCur00)
 ## Include tree data and spatial data
 ##############################################
 # Now, include tree data 
-WYdat.evalCur00 <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, istree=TRUE)
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetPlots.R")
+WYdat.evalCur00 <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, istree=FALSE)
 
 ## Extract and look at components in returned list object
 names(WYdat.evalCur00)
-WYplt.evalCur00 <- WYdat.evalCur00$plt
-WYcond.evalCur00 <- WYdat.evalCur00$cond
+WYtabs.evalCur00 <- WYdat.evalCur00$tabs
+WYplt.evalCur00 <- WYtabs.evalCur00$plt
+WYcond.evalCur00 <- WYtabs.evalCur00$cond
 WYspxy.evalCur00 <- WYdat.evalCur00$spxy_PUBLIC
 WYdat.evalCur00$evalid
 WYdat.evalCur00$pltcnt
@@ -305,7 +308,7 @@ dim(WYplt)
 table(WYplt$INVYR)
 
 # Look at spatial output
-plot(st_geometry(WYspxy.evalCur00))
+plot(sf::st_geometry(WYspxy.evalCur00))
 
 
 

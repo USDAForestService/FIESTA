@@ -7,7 +7,7 @@
 #' Attributes adjusted to a per-acre value are summed by plot, divided by the
 #' adjustment factor, and averaged by stratum.  Strata means are combined using
 #' the strata weights and then expanded to using the total land area in the
-#' population.
+#' population. 
 #' 
 #' Population types \cr \tabular{lll}{ \tab \bold{popType}
 #' \bold{Description}\cr \tab ALL \tab Population data, inluding nonsampled
@@ -101,7 +101,10 @@
 #' @param unit.action String. What to do if number of plots in an estimation
 #' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
 #' unit.action='combine', combines estimation unit to the following estimation
-#' unit in unitlut.
+#' unit, ordered in unitzonal or stratalut.
+#' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
+#' unit. For continuous data, means by estimation unit; for categorical data,
+#' proportion of class by estimation unit.
 #' @param strata Logical. If TRUE, include information for post-stratification.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param strata_opts List. See help(strata_options()) for a list of options.
@@ -210,13 +213,14 @@ modGBpop <- function(popType="VOL",
                      pltassgn=NULL,
                      pltassgnid="PLT_CN",
                      dsn=NULL, pjoinid="CN", areawt="CONDPROP_UNADJ",
-                     adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL,
-                     ACI=FALSE, unitvar=NULL, unitvar2=NULL, unitarea=NULL,
-                     areavar="ACRES", areaunits="acres", minplotnum.unit=10,
-                     unit.action="keep", strata=TRUE, savedata=FALSE,
+                     adj="samp", evalid=NULL, invyrs=NULL, intensity=NULL, ACI=FALSE, 
+                     unitvar=NULL, unitvar2=NULL, 
+                     unitarea=NULL, areavar="ACRES", areaunits="acres", 
+				minplotnum.unit=10, unit.action="keep", unitzonal=NULL,
+				strata=TRUE, savedata=FALSE,
                      strata_opts=strata_options(), 
                      savedata_opts=savedata_options(),
-                     GBdata=NULL, pltdat=NULL, GBstratdat=NULL, gui=FALSE, ...){
+                     GBdata=NULL, pltdat=NULL, stratdat=NULL, auxdat=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -272,12 +276,6 @@ modGBpop <- function(popType="VOL",
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
   }
   
-  ## Set user-supplied strata values
-  if (length(strata_opts) > 0) {
-    for (i in 1:length(strata_opts)) {
-      assign(names(strata_opts)[[i]], strata_opts[[i]])
-    }
-  }
   
   ## Set popTables defaults
   popTables_defaults_list <- formals(FIESTA::popTables)[-length(formals(FIESTA::popTables))]
@@ -286,12 +284,6 @@ modGBpop <- function(popType="VOL",
     assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
   }
   
-  ## Set user-supplied popTable values
-  if (length(popTabs) > 0) {
-    for (i in 1:length(popTabs)) {
-      assign(names(popTabs)[[i]], popTabs[[i]])
-    }
-  }
   
   ## Set popTabIDs defaults
   popTableIDs_defaults_list <- formals(FIESTA::popTableIDs)[-length(formals(FIESTA::popTableIDs))]
@@ -325,40 +317,15 @@ modGBpop <- function(popType="VOL",
       assign("lulcuniqueid", popTableIDs_defaults_list[[i]])
     }
   }
-  
-  ## Set user-supplied popTabIDs values
-  if (length(popTabIDs) > 0) {
-    for (i in 1:length(popTabIDs)) {
-      if (names(popTabIDs)[[i]] == "cond") {
-        assign("cuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "plt") {
-        assign("puniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "tree") {
-        assign("tuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "seed") {
-        assign("suniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpspp") {
-        assign("vsppuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpstr") {
-        assign("vstruniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subplot") {
-        assign("subpuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subp_cond") {
-        assign("subcuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "lulc") {
-        assign("lulcuniqueid", popTabIDs[[i]])
-      }
+
+  ## Set user-supplied strata values
+  if (length(strata_opts) > 0) {
+    for (i in 1:length(strata_opts)) {
+      assign(names(strata_opts)[[i]], strata_opts[[i]])
     }
   }
 
+  
   ## SET OPTIONS
   options.old <- options()
   options(scipen=8) # bias against scientific notation
@@ -394,115 +361,173 @@ modGBpop <- function(popType="VOL",
     }
   }
 
-
   ###################################################################################
   ## Load data
   ###################################################################################
   if (!is.null(GBdata)) {
-    list.items <- c("cond", "dunitarea", "dunitvar")
+    list.items <- c("tabs", "dunitarea", "dunitvar")
     GBdata <- pcheck.object(GBdata, "GBdata", list.items=list.items)
     #bnd <- GBdata$bnd
-    plt <- GBdata$plt
-    cond <- GBdata$cond
-    tree <- GBdata$tree
-    seed <- GBdata$seed
+    popTabs <- GBdata$tabs
+    popTabIDs <- GBdata$tabIDs
     pltassgn <- GBdata$pltassgn
     pltassgnid <- GBdata$pltassgnid 
     unitarea <- GBdata$dunitarea
     areavar <- GBdata$areavar
     unitzonal <- GBdata$dunitzonal
-
-#    stratalut <- GBdata$stratalut
-#    strvar <- GBdata$strvar
-#    strwtvar <- GBdata$strwtvar
+    predfac <- GBdata$predfac
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
 
     if (is.null(unitvar)) {
       unitvar <- GBdata$dunitvar
       unitvar2 <- GBdata$dunitvar2
-    } 
-    strwtvar <- "strwt"
-    stratalut <- strat.pivot(unitzonal, strvar, unitvars=c(unitvar, unitvar2), 
-		strwtvar=strwtvar)
-  } else {
-    if (!is.null(pltdat)) {
-      if ("tabs" %in% names(pltdat)) {
-        list.items <- c("tabs", "xypltx")
-      } else {
-        list.items <- c("states", "plt", "cond")
-      }
-      if (popType == "LULC") {
-        list.items <- c(list.items, "lulcx")
-      }
-      if (popType == "P2VEG") {
-        list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
-      }
-      pltdat <- pcheck.object(pltdat, "pltdat", list.items=list.items)
-
-      ## Extract list objects
-      puniqueid <- pltdat$puniqueid
-      if ("tabs" %in% names(pltdat)) {
-        pjoinid <- pltdat$pjoinid
-        plt <- pltdat$tabs$pltx
-        cond <- pltdat$tabs$condx
-        tree <- pltdat$tabs$treex
-        seed <- pltdat$tabs$seedx
-        if (popType == "LULC") {
-          lulc <- pltdat$tabs$lulcx
-        } else if (popType == "P2VEG") {
-          vsubpspp <- pltdat$tabs$vsubpspp
-          vsubpstr <- pltdat$tabs$vsubpstr
-          subplot <- pltdat$tabs$subplot
-          subp_cond <- pltdat$tabs$subp_cond
-        }
-      } else {
-        pjoinid <- puniqueid
-        plt <- pltdat$plt
-        cond <- pltdat$cond
-        tree <- pltdat$tree
-        seed <- pltdat$seed
-        if (popType == "LULC") {
-          lulc <- pltdat$lulc
-        } else if (popType == "P2VEG") {
-          vsubpspp <- pltdat$vsubpspp
-          vsubpstr <- pltdat$vsubpstr
-          subplot <- pltdat$subplot
-          subp_cond <- pltdat$subp_cond
-        }
-      }
     }
-    if (!is.null(GBstratdat)) {
+    if (strata) { 
+      if (is.null(strvar)) {    
+        if (!is.null(predfac) && length(predfac) == 1) {
+          strvar <- predfac
+        } else {
+          stop("must include strvar if strata=TRUE")
+        }
+      } else {
+        if (!strvar %in% predfac) {
+          stop("strvar must be included in predfac")
+        }
+      } 
+      strwtvar <- "strwt" 
+      stratalut <- strat.pivot(unitzonal, strvar, unitvars=c(unitvar, unitvar2), 
+		strwtvar=strwtvar)
+    }
+  } else {
+    ## Extract list objects
+    if (!is.null(pltdat)) {
+      popTabs <- pltdat$tabs
+      popTabIDs <- pltdat$tabIDs
+      pjoinid <- pltdat$pjoinid
+      names(popTabs) <- sapply(names(popTabs), function(x) 
+		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+      names(popTabIDs) <- sapply(names(popTabIDs), function(x) 
+		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+    }
+    if (!is.null(stratdat)) {
       list.items <- c("pltassgn", "unitarea", "unitvar")
-      GBstratdat <- pcheck.object(GBstratdat, "GBstratdat", list.items=list.items)
-      bndx <- GBstratdat$bndx
-      pltassgn <- GBstratdat$pltassgn
-      pltassgnid <- GBstratdat$pltassgnid
-      unitarea <- GBstratdat$unitarea
-      areavar <- GBstratdat$areavar
-      stratalut <- GBstratdat$stratalut
-      strvar <- GBstratdat$strvar
-      getwt <- GBstratdat$getwt
-      getwtvar <- GBstratdat$getwtvar
-      strwtvar <- GBstratdat$strwtvar
+      stratdat <- pcheck.object(stratdat, "stratdat", list.items=list.items)
+      bndx <- stratdat$bndx
+      pltassgn <- stratdat$pltassgn
+      pltassgnid <- stratdat$pltassgnid
+      unitarea <- stratdat$unitarea
+      areavar <- stratdat$areavar
+      stratalut <- stratdat$stratalut
+      strvar <- stratdat$strvar
+      getwt <- stratdat$getwt
+      getwtvar <- stratdat$getwtvar
+      strwtvar <- stratdat$strwtvar
 
       if (is.null(unitvar)) {
-        unitvar <- GBstratdat$unitvar
-        unitvar2 <- GBstratdat$unitvar2
+        unitvar <- stratdat$unitvar
+        unitvar2 <- stratdat$unitvar2
       } 
+    }
+    if (strata) {
+      if (is.null(strwtvar)) {
+        stop("missing strwtvar")
+      }
+      if (strwtvar != "strwt") {
+        names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
+        strwtvar <- "strwt"
+      }
+    }
+
+    if (!is.null(auxdat)) {
+      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "predfac", 
+		"pltassgnid", "dunitarea", "areavar")
+      auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
+      pltassgn <- auxdat$pltassgn
+      pltassgnid <- auxdat$pltassgnid
+      unitzonal <- auxdat$dunitzonal
+      unitvar <- auxdat$dunitvar
+      unitvar2 <- auxdat$dunitvar2
+      unitarea <- auxdat$dunitarea
+      areavar <- auxdat$areavar
+      predfac <- auxdat$predfac
+
+      if (strata) {
+        if (is.null(strvar)) {    
+          if (!is.null(predfac) && length(predfac) == 1) {
+            strvar <- predfac
+          } else {
+            stop("must include strvar if strata=TRUE")
+          }
+        } else {
+          if (!strvar %in% predfac) {
+            stop("strvar must be included in predfac")
+          }
+        } 
+        strwtvar <- "strwt"
+        pivotvars <- c(unitvar, unitvar2)
+        unitvars <- pivotvars[pivotvars %in% names(unitzonal)]
+        if (is.null(stratalut)) {
+          stratalut <- strat.pivot(unitzonal, strvar, unitvars=unitvars, 
+			strwtvar=strwtvar)
+        }
+      }
     }
   } 
 
-  if (strata) {
-    if (is.null(strwtvar)) {
-      stop("missing strwtvar")
+
+  ## Set user-supplied popTable values 
+  if (length(popTabs) > 0) {
+    for (i in 1:length(popTabs)) {
+      assign(names(popTabs)[[i]], popTabs[[i]])
     }
-    if (strwtvar != "strwt") {
-      names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
-      strwtvar <- "strwt"
+  } else {
+    stop("need to include popTabs")
+  }
+
+  list.items <- {}
+  if (popType == "LULC") {
+    list.items <- c(list.items, "lulcx")
+  }
+  if (popType == "P2VEG") {
+    list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
+  }
+  popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
+
+ 
+  ## Set user-supplied popTabIDs values
+  if (length(popTabIDs) > 0) {
+    for (i in 1:length(popTabIDs)) {
+      if (names(popTabIDs)[[i]] == "cond") {
+        assign("cuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "plt") {
+        assign("puniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "tree") {
+        assign("tuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "seed") {
+        assign("suniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpspp") {
+        assign("vsppuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpstr") {
+        assign("vstruniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subplot") {
+        assign("subpuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subp_cond") {
+        assign("subcuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "lulc") {
+        assign("lulcuniqueid", popTabIDs[[i]])
+      }
     }
   }
- 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -510,10 +535,9 @@ modGBpop <- function(popType="VOL",
   ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="GB", popType=popType, 
-	tree=tree, cond=cond, plt=plt, seed=seed, vsubpspp=vsubpspp, vsubpstr=vsubpstr, 
-	subplot=subplot, subp_cond=subp_cond, lulc=lulc, pltassgn=pltassgn, dsn=dsn, 
-	tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, areawt=areawt, 
-	puniqueid=puniqueid, pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, 
+	tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
+	condid="CONDID", areawt=areawt, 
+	pltassgnid=pltassgnid, pjoinid=pjoinid, evalid=evalid, 
 	invyrs=invyrs, adj=adj, intensity=intensity, ACI=ACI, 
 	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter,
 	nonsamp.vfilter.fixed=nonsamp.vfilter.fixed,
@@ -588,11 +612,10 @@ modGBpop <- function(popType="VOL",
   unitvars <- auxdat$unitvars
   strvar <- auxdat$strvar
   strwtvar <- auxdat$strwtvar
-  stratcombinelut <- auxdat$unitstrgrplut
+  stratcombinelut <- auxdat$stratcombinelut
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   strunitvars <- c(unitvar, strvar)
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
-
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS

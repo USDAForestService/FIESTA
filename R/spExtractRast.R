@@ -399,14 +399,15 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
 			interpolate=interpolate, windowsize=windowsize, statistic=statistic)))
       cname <- names(dat)[2]
       outnames <- c(outnames, cname)
-
+ 
       if ("data.table" %in% class(sppltx)) {
         stop("xyplt cannot be sf data.table")
       }
       sppltx <- merge(sppltx, dat, by.x=uniqueid, by.y="pid")
 
-      ## Remove rast.NODATA values from point data
-      sppltx <- sppltx[!sppltx[[cname]] %in% rast.NODATA[[1]], ] 
+      ## Set rast.NODATA values as NA
+      #sppltx <- sppltx[!sppltx[[cname]] %in% rast.NODATA[[1]], ] 
+      sppltx[sppltx[[cname]] %in% rast.NODATA[[1]], cname] <- NA 
       
       ## Print missing values to screen
       navals <- sum(is.na(sppltx[[cname]]))

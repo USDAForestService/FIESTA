@@ -23,6 +23,7 @@
 # recodelut
 # findnm
 # strat.pivot
+# makedummy
 # preds.standardize
 # gregEN.select
 # preds.select
@@ -542,6 +543,50 @@ strat.pivot <- function(x, strvar, unitvars, strwtvar="Prop", strat.levels=NULL)
   return(strlut)
 }    
 
+makedummy <- function(dat, auxlut, predfac){
+  ## DESCRIPTION: make dummy variables for a list of factors (predfac)
+  ## dat - plot-level data, including predfac assignments
+  ## auxlut - domain zonal summaries
+  ## predfac - one or more names of factors in dat
+
+  ## get column names in auxlut
+  auxnmlst <- names(auxlut)
+
+  if (!"data.table" %in% class(dat)) {
+    dat <- data.table(dat)
+  }
+
+  facnames <- {}
+  for (fac in predfac) {
+    pltvals <- sort(unique(dat[[fac]]))
+    facnmlst <- auxnmlst[grep(fac, auxnmlst)]
+    if (length(facnmlst) == 0) {
+      message("auxvar not in tables: ", paste(fac, collapse=", "))
+    } else {
+      pivotstrat <- TRUE
+    }
+    ## Get factor levels
+    fac.levels <- as.numeric(sapply(strsplit(facnmlst, 
+			paste0(fac,".")), '[', 2))
+    dat[[fac]] <- factor(dat[[fac]], levels=fac.levels)
+
+    ## Set factor levels to keep and delete from auxlut.
+    fac.unitcol.keep <- paste(fac, fac.levels[-1], sep=".")
+    fac.unitcol.del <- paste(fac, fac.levels[1], sep=".")
+    auxlut[[fac.unitcol.del]] <- NULL
+  
+    ## Rename factor variables and add names to predictor list
+    facs <- paste0(fac, fac.levels[-1])
+    names(auxlut)[names(auxlut) %in% fac.unitcol.keep] <- facs  
+    facnames <- c(facnames, facs)
+
+    ## Create dummy variables for factor levels - 1
+    dtfac <- dat[, as.data.table(model.matrix(~., 
+				data=dat[, fac, with=FALSE]))][,-1]
+    dat <- cbind(dat, dtfac)
+  }
+  return(list(dat=dat, auxlut=auxlut, facnames=facnames))
+}
 
 
 preds.standardize <- function(plt, aux, prednames) {

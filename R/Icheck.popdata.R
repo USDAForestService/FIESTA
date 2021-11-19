@@ -1,8 +1,6 @@
-check.popdata <- function(module="GB", popType="VOL", strata=FALSE, 
-	tree=NULL, cond, subplot=NULL, subp_cond=NULL, plt=NULL, seed=NULL, 
-	vsubpspp=NULL, vsubpstr=NULL, lulc=NULL, pltassgn=NULL, dsn=NULL, tuniqueid="PLT_CN", 
-	cuniqueid="PLT_CN", condid="CONDID", areawt="CONDPROP_UNADJ", puniqueid="CN", 
-	pltassgnid="CN", pjoinid="CN", evalid=NULL, measCur=FALSE, measEndyr=NULL,
+check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE, 
+	pltassgn=NULL, pltassgnid="CN", dsn=NULL, pjoinid="CN", condid="CONDID", 
+	areawt="CONDPROP_UNADJ", evalid=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp", 
 	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA", 
 	areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
@@ -87,7 +85,6 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   ###################################################################################
   pvars2keep <- unique(c(unitvar, unitvar2, pvars2keep))
   cvars2keep <- unique(c(cvars2keep, areawt, "PROP_BASIS"))
-  vuniqueid <- "PLT_CN" 
   datindb=unitindb=stratindb <- FALSE
 
   pdoms2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "INVYR", 
@@ -133,6 +130,22 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
 		checklst=evalTyplst, caption="popType", multiple=TRUE, stopifnull=TRUE)
  
+  ## Get tables from tabs
+  for (tabnm in names(tabs)) {
+    assign(tabnm, tabs[[tabnm]])
+  }
+  puniqueid <- tabIDs[["plt"]]
+  cuniqueid <- tabIDs[["cond"]]
+  tuniqueid <- tabIDs[["tree"]]
+  suniqueid <- tabIDs[["seed"]]
+  vsubpstrid <- tabIDs[["vsubpstr"]]
+  vsubpsppid <- tabIDs[["vsubpspp"]]
+  subplotid <- tabIDs[["subplot"]]
+  subp_condid <- tabIDs[["subp_cond"]]
+  subpuniqueid <- subplotid
+  lulcid <- "PLT_CN"
+
+
   ## Check adj
   ########################################################
   adjlst <- c("samp", "plot", "none")
@@ -325,7 +338,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       }
     }
   }
- 
+
   ###################################################################################
   ## Import tables
   ###################################################################################
@@ -1313,25 +1326,25 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       vsubpsppnmlst <- names(vsubpsppx)
 
       ## Check unique identifiers
-      vuniqueid <- pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
+      vsubpsppid <- pcheck.varchar(var2check=vsubpsppid, varnm="vsubpsppid", gui=gui, 
 		checklst=vsubpsppnmlst, caption="UniqueID variable of veg spp", 
-		warn=paste(vuniqueid, "not in vegspspp"), stopifnull=TRUE)
+		warn=paste(vsubpsppid, "not in vegspspp"), stopifnull=TRUE)
       cvars2keep <- c(cvars2keep, "SUBPCOND_PROP")
     
       ## Check for NA values in necessary variables in tree table
-      vsubpsppx.na <- sum(is.na(vsubpsppx[[vuniqueid]]))
-      if (vsubpsppx.na > 0) stop("NA values in ", vuniqueid)
+      vsubpsppx.na <- sum(is.na(vsubpsppx[[vsubpsppid]]))
+      if (vsubpsppx.na > 0) stop("NA values in ", vsubpsppid)
 
-      if (vuniqueid %in% pltcondnmlst) {
-        idplace <- which(pltcondnmlst %in% vuniqueid)
+      if (vsubpsppid %in% pltcondnmlst) {
+        idplace <- which(pltcondnmlst %in% vsubpsppid)
         if (idplace != 1) { 
-	    pltcondnmlst <- c(vuniqueid, pltcondnmlst) 
+	    pltcondnmlst <- c(vsubpsppid, pltcondnmlst) 
 	    pltcondnmlst <- pltcondnmlst[-(idplace + 1)] 
         }
       } 
 
-      ## Check that the values of vuniqueid in vsubpsppx are all in cuniqueid in subp_condf
-      vsubpsppf <- check.matchval(vsubpsppx, vcondx, c(vuniqueid, condid), 
+      ## Check that the values of vsubpsppid in vsubpsppx are all in cuniqueid in subp_condf
+      vsubpsppf <- check.matchval(vsubpsppx, vcondx, c(vsubpsppid, condid), 
 		tab1txt="vsubpspp", tab2txt="subp_cond", subsetrows=TRUE)
       setkeyv(vsubpsppf, c(subpuniqueid, condid))
 
@@ -1340,7 +1353,7 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       vcols <- c("VEG_FLDSPCD", "VEG_SPCD", "GROWTH_HABIT_CD", "LAYER")
       vcols <- vcols[vcols %in% names(vsubpsppf)]
       vcondsppf <- vsubpsppf[, list(COVER_PCT_SUM = sum(get(covpctnm), na.rm=TRUE)/4/100), 
-		by=c(vuniqueid, condid, vcols)]
+		by=c(vsubpsppid, condid, vcols)]
       setkeyv(vcondsppf, c(subpuniqueid, condid))
 
       ## Merge condition sums to pltcondx
@@ -1351,24 +1364,24 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       vsubpstrnmlst <- names(vsubpstrx)
 
       ## Check unique identifiers
-      vuniqueid <- pcheck.varchar(var2check=vuniqueid, varnm="vuniqueid", gui=gui, 
+      vsubpstrid <- pcheck.varchar(var2check=vsubpstrid, varnm="vsubpstrid", gui=gui, 
 		checklst=vsubpstrnmlst, caption="UniqueID variable of veg structure", 
-		warn=paste(vuniqueid, "not in vegspstr"), stopifnull=TRUE)
+		warn=paste(vsubpstrid, "not in vegspstr"), stopifnull=TRUE)
     
       ## Check for NA values in necessary variables in tree table
-      vsubpstrx.na <- sum(is.na(vsubpstrx[[vuniqueid]]))
-      if (vsubpstrx.na > 0) stop("NA values in ", vuniqueid)
+      vsubpstrx.na <- sum(is.na(vsubpstrx[[vsubpstrid]]))
+      if (vsubpstrx.na > 0) stop("NA values in ", vsubpstrid)
 
-      if (vuniqueid %in% pltcondnmlst) {
-        idplace <- which(pltcondnmlst %in% vuniqueid)
+      if (vsubpstrid %in% pltcondnmlst) {
+        idplace <- which(pltcondnmlst %in% vsubpstrid)
         if (idplace != 1) { 
-	    pltcondnmlst <- c(vuniqueid, pltcondnmlst) 
+	    pltcondnmlst <- c(vsubpstrid, pltcondnmlst) 
 	    pltcondnmlst <- pltcondnmlst[-(idplace + 1)] 
         }
       } 
 
-      ## Check that the values of vuniqueid in vsubpsppx are all in cuniqueid in subp_condf
-      vsubpstrf <- check.matchval(vsubpstrx, vcondx, c(vuniqueid, condid), 
+      ## Check that the values of vsubpstrid in vsubpsppx are all in cuniqueid in subp_condf
+      vsubpstrf <- check.matchval(vsubpstrx, vcondx, c(vsubpstrid, condid), 
 		tab1txt="vsubpstr", tab2txt="subp_cond", subsetrows=TRUE)
       setkeyv(vsubpstrf, c(subpuniqueid, condid))
 
@@ -1377,9 +1390,9 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
       vcols <- c("GROWTH_HABIT_CD", "LAYER")
       vcols <- vcols[vcols %in% names(vsubpstrf)]
       vcondstrf <- vsubpstrf[, list(COVER_PCT_SUM = sum(get(covpctnm), na.rm=TRUE)/4/100), 
-		by=c(vuniqueid, condid, vcols)]
+		by=c(vsubpstrid, condid, vcols)]
 #      vcondstrf <- vsubpstrf[, list(COVER_PCT_SUM = sum(get(covpctnm), na.rm=TRUE)), 
-#		by=c(vuniqueid, condid, vcols)]
+#		by=c(vsubpstrid, condid, vcols)]
       setkeyv(vcondstrf, c(subpuniqueid, condid))
     }
 
@@ -1421,11 +1434,11 @@ check.popdata <- function(module="GB", popType="VOL", strata=FALSE,
     returnlst$condx <- vcondx
     if (!is.null(vcondsppf)) {
       returnlst$vcondsppf <- vcondsppf
-      returnlst$vuniqueid <- vuniqueid
+      returnlst$vcondsppid <- vcondsppid
     }
     if (!is.null(vcondstrf)) {
       returnlst$vcondstrf <- vcondstrf
-      returnlst$vuniqueid <- vuniqueid
+      returnlst$vcondstrid <- vcondstrid
     }
   }
   if (module %in% c("MA", "SA")) {

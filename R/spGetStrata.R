@@ -59,19 +59,8 @@
 #' exported to outfolder.
 #' @param exportNA Logical. If TRUE and keepNA=TRUE, NA values are exported to
 #' outfolder as a point shapefile.
-#' @param outfolder String. If savedata=TRUE or exportshp=TRUE, name of output
-#' folder.  If NULL, the working directory is used.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param out_layer String. Name of layer in out_dsn if database.
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
-#' @param overwrite_layer Logical. If TRUE, overwrite csv (if out_fmt="csv") or
-#' overwrite layers in dsn.
-#' @param append_layer Logical. If TRUE, appends to csv (if out_fmt="csv") or
-#' appends to layers in dsn.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in dunitlut output and extract to pltassgn points.
 #' @param ...  Other parameters for spMakeSpatialPoints.
@@ -130,14 +119,15 @@
 #' @keywords data
 #' @export spGetStrata
 spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
-	unittype="POLY", unit_layer=NULL, unit_dsn=NULL, unitvar=NULL, 
-	unit.filter=NULL, strattype="RASTER", strat_layer=NULL, 
-	strat_dsn=NULL, strvar=NULL, strat_lut=NULL, areaunits="acres", 
-	rast.NODATA=NULL, keepNA=FALSE, returnxy=FALSE, 
-	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-	outfolder=NULL, out_fmt="shp", out_dsn=NULL, out_layer="strat_assgn", 
-	outfn.date=FALSE, outfn.pre=NULL, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, append_layer=FALSE, vars2keep=NULL, ...){
+			unittype="POLY", unit_layer=NULL, unit_dsn=NULL, 
+			unitvar=NULL, unit.filter=NULL, 
+			strattype="RASTER", strat_layer=NULL, strat_dsn=NULL, 
+			strvar=NULL, strat_lut=NULL, areaunits="acres", 
+			rast.NODATA=NULL, keepNA=FALSE, 
+			returnxy=FALSE, showext=FALSE, 
+			savedata=FALSE, exportsp=FALSE, exportNA=FALSE,
+			savedata_opts=savedata_options(), 
+			vars2keep=NULL, gui=FALSE, ...){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
