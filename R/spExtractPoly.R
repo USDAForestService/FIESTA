@@ -37,18 +37,8 @@
 #' @param exportsp Logical. If TRUE, the extracted point data are exported to
 #' outfolder.
 #' @param exportNA Logical. If TRUE, NULL values are exported to outfolder.
-#' @param out_fmt String. File format for output ('sqlite','gpkg','shp','gdb').
-#' If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed.  If
-#' out_fmt='gdb', argisbinding package must be installed and functional.
-#' @param out_dsn String. Name of dsn for output data (e.g., sqlite database or
-#' full pathname to shapefile).
-#' @param out_layer String. Name of layer in out_dsn if database.
-#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
-#' folder.  If NULL, the working directory is used.
-#' @param outfn.pre String. A prefix for out_dsn.
-#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
-#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
-#' @param overwrite_layer Logical. If TRUE, overwrite layer(s) in dsn.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #' @return \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
 #' point data with extracted raster values appended. For multi-part polygons,
@@ -102,11 +92,11 @@
 #'   plot(spxyext["DISTRICTNU"])
 #' 
 #' @export spExtractPoly
-spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", polyvlst, 
-	polyv_dsn=NULL, polyvarlst=NULL, polyvarnmlst=NULL, keepNA=FALSE, 
-	showext=FALSE, savedata=FALSE, exportsp=FALSE, exportNA=FALSE, out_fmt="shp", 
-	out_dsn=NULL, out_layer="polyext", outfolder=NULL, outfn.pre=NULL, 
- 	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE, ...){
+spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
+		polyvlst, polyv_dsn=NULL, polyvarlst=NULL, polyvarnmlst=NULL, 
+		keepNA=FALSE, showext=FALSE, 
+		savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
+		savedata_opts=savedata_options(), gui=FALSE, ...){
   ######################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more polygon layers and appends to input spatial layer 

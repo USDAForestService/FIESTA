@@ -143,7 +143,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 			keepNA=TRUE, NAto0=TRUE, npixels=TRUE, 
 			returnxy=FALSE, showext=FALSE, 
 			savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-                savedata_opts=savedata_options(), 
+                	savedata_opts=savedata_options(), 
 			vars2keep=NULL, gui=FALSE, ...) {
 
   ##################################################################################
