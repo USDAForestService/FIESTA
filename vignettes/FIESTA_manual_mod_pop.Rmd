@@ -1,8 +1,8 @@
 ---
-title: "`FIESTA` - Module Population Data"
+title: "`FIESTA` Manual - Population Data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Module Population Data}
+  %\VignetteIndexEntry{`FIESTA` Manual - Population Data}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
