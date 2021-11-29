@@ -13,4 +13,5 @@
 #' @importFrom rgdal saveDataset getRasterData getDriverName putRasterData getProjectionRef
 #' @export RasterizePolygon
 #' @export FIESTA_SAmod_demo_plots
+#' @exportPattern "."
 NULL
