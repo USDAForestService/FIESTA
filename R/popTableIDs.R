@@ -27,6 +27,14 @@
 popTableIDs <- function(cond="PLT_CN", plt="CN", tree="PLT_CN", seed="PLT_CN",
                         vsubpspp="PLT_CN", vsubpstr="PLT_CN", subplot="PLT_CN",
                         subp_cond="PLT_CN", lulc="PLT_CN",...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::popTableIDs)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

@@ -26,6 +26,14 @@
 popFilters <- function(evalid = NULL, invyrs = NULL, intensity = NULL,
                        measCur = NULL, measEndyr = NULL, 
                        measEndyr.filter = NULL, ACI = FALSE, ...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::popFilters)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

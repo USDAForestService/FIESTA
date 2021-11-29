@@ -27,6 +27,14 @@
 
 strata_options <- function(getwt=TRUE, getwtvar="P1POINTCNT", strwtvar="strwt",
                            stratcombine=TRUE, minplotnum.strat=2, ...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::strata_options)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

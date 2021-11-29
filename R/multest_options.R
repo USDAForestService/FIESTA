@@ -30,6 +30,14 @@
 multest_options <- function(multest_fmt="csv", multest_outfolder=NULL, 
                           multest_dsn=NULL, multest_layer=NULL,
                           multest.append=FALSE, multest.AOIonly=FALSE, ...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::multest_options)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

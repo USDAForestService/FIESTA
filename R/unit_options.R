@@ -23,6 +23,14 @@
 unit_options <- function(unitvar2 = NULL, areavar = "ACRES",
                          areaunits = "acres", minplotnum.unit = 10, 
                          unit.action = "keep", npixelvar = "npixels",  ...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::unit_options)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

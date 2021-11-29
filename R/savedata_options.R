@@ -42,6 +42,14 @@ savedata_options <- function(outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 					addtitle=TRUE, raw_fmt="csv", raw_dsn=NULL,
 					overwrite_dsn=FALSE, overwrite_layer=TRUE,
 					append_layer=FALSE, saveobj=FALSE, objnm=NULL, ...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::savedata_options)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

@@ -75,6 +75,14 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
                           rowgrp=FALSE, rowgrpnm=NULL, rowgrpord=NULL,
                           allin1=FALSE, metric=FALSE, estround=1, pseround=2,
                           estnull="--", psenull="--", divideby=NULL, ...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::table_options)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

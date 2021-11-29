@@ -40,6 +40,14 @@ title_options <- function(title.main=NULL, title.ref=NULL, title.rowvar=NULL,
                           title.colvar=NULL, title.unitvar=NULL,
                           title.estvar=NULL, title.estvarn=NULL,
                           title.filter=NULL, ...) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(FIESTA::title_options)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   
