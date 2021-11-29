@@ -5,7 +5,7 @@
 \title{Unit options.}
 \usage{
 unit_options(
-  dunitvar2 = NULL,
+  unitvar2 = NULL,
   areavar = "ACRES",
   areaunits = "acres",
   minplotnum.unit = 10,
@@ -15,7 +15,7 @@ unit_options(
 )
 }
 \arguments{
-\item{dunitvar2}{}
+\item{unitvar2}{}
 
 \item{areavar}{}
 

@@ -17,14 +17,8 @@ spExtractPoly(
   savedata = FALSE,
   exportsp = FALSE,
   exportNA = FALSE,
-  out_fmt = "shp",
-  out_dsn = NULL,
-  out_layer = "polyext",
-  outfolder = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
+  savedata_opts = savedata_options(),
+  gui = FALSE,
   ...
 )
 }
@@ -67,25 +61,8 @@ outfolder.}
 
 \item{exportNA}{Logical. If TRUE, NULL values are exported to outfolder.}
 
-\item{out_fmt}{String. File format for output ('sqlite','gpkg','shp','gdb').
-If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be installed.  If
-out_fmt='gdb', argisbinding package must be installed and functional.}
-
-\item{out_dsn}{String. Name of dsn for output data (e.g., sqlite database or
-full pathname to shapefile).}
-
-\item{out_layer}{String. Name of layer in out_dsn if database.}
-
-\item{outfolder}{String. If savedata=TRUE or exportsp=TRUE, name of output
-folder.  If NULL, the working directory is used.}
-
-\item{outfn.pre}{String. A prefix for out_dsn.}
-
-\item{outfn.date}{Logical. If TRUE, adds current date to outfile name.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrite dsn.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrite layer(s) in dsn.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
 \item{...}{Other parameters for spMakeSpatialPoints.}
 }

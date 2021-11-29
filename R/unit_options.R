@@ -4,7 +4,7 @@
 #' 
 #' If no parameters, an empty list is returned.
 #' 
-#' @param dunitvar2 
+#' @param unitvar2 
 #' @param areavar 
 #' @param areaunits
 #' @param minplotnum.unit 
@@ -20,7 +20,7 @@
 #' 
 #' @export unit_options
 
-unit_options <- function(dunitvar2 = NULL, areavar = "ACRES",
+unit_options <- function(unitvar2 = NULL, areavar = "ACRES",
                          areaunits = "acres", minplotnum.unit = 10, 
                          unit.action = "keep", npixelvar = "npixels",  ...) {
   # create list from input parameters
