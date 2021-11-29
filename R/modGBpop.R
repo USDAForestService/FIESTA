@@ -106,6 +106,13 @@
 #' unit. For continuous data, means by estimation unit; for categorical data,
 #' proportion of class by estimation unit.
 #' @param strata Logical. If TRUE, include information for post-stratification.
+#' @param stratalut DF/DT. If strata=TRUE, look-up table with pixel counts or
+#' area by strata or proportion or area ('strwt') by strata (and estimation
+#' unit).  If 'strwt' is not included, set getwt=TRUE and getwtvar as the name
+#' of variable to calculate weights from (e.g., pixel counts).
+#' @param strvar String. If strata=TRUE, name of the strata variable in
+#' stratalut and cond or pltassgn data frame with stratum assignment for each
+#' plot (Default = 'STRATUMCD').
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param strata_opts List. See help(strata_options()) for a list of options.
 #' Only used when strata = TRUE. 
@@ -220,6 +227,8 @@ modGBpop <- function(popType = "VOL",
                      unitvar = NULL,
 			     	         unitarea = NULL, 
 				             strata = TRUE, 
+				             stratalut = NULL,
+				             strvar = "STRATUMCD",
 				             savedata = FALSE,
                      unit_opts = unit_options(),
                      strata_opts = strata_options(), 

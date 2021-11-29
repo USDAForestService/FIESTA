@@ -108,10 +108,6 @@
 #' model.
 #' @param predfac String vector. Name(s) of prednames that are factors (i.e.,
 #' categorical).
-#' @param strata Logical. If TRUE, use MAmethod='poststrat' from mase.
-#' @param strata_opts List. See help(strata_options()) for a list of options.
-#' Only used when strata = TRUE. If stratalut=NULL, it is generated from 
-#' unitzonal, using predfac variables.
 #' @param saveobj Logical. If TRUE, saves SApopdat object to outfolder.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list

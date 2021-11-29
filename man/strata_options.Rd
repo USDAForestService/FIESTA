@@ -5,8 +5,6 @@
 \title{Strata options.}
 \usage{
 strata_options(
-  stratalut = NULL,
-  strvar = "STRATUMCD",
   getwt = TRUE,
   getwtvar = "P1POINTCNT",
   strwtvar = "strwt",
@@ -16,15 +14,6 @@ strata_options(
 )
 }
 \arguments{
-\item{stratalut}{DF/DT. If strata=TRUE, look-up table with pixel counts or
-area by strata or proportion or area ('strwt') by strata (and estimation
-unit).  If 'strwt' is not included, set getwt=TRUE and getwtvar as the name
-of variable to calculate weights from (e.g., pixel counts).}
-
-\item{strvar}{String. If strata=TRUE, name of the strata variable in
-stratalut and cond or pltassgn data frame with stratum assignment for each
-plot (Default = 'STRATUMCD').}
-
 \item{getwt}{Logical. If TRUE, calculates strata weights from stratatlut
 getwtvar.  If FALSE, strwtvar variable must be in stratalut.}
 

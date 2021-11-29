@@ -139,12 +139,6 @@ unit, ordered in unitzonal or stratalut.}
 \item{npixelvar}{String. Name of variable in unitlut defining number of
 pixels by estimation unit.}
 
-\item{strata}{Logical. If TRUE, use MAmethod='poststrat' from mase.}
-
-\item{strata_opts}{List. See help(strata_options()) for a list of options.
-Only used when strata = TRUE. If stratalut=NULL, it is generated from 
-unitzonal, using predfac variables.}
-
 \item{saveobj}{Logical. If TRUE, saves SApopdat object to outfolder.}
 }
 \value{
