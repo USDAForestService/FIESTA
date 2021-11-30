@@ -244,18 +244,18 @@ In this example, we use the sample Wyoming data (2013 Evaluation) stored in `FIE
 
 ```{r, results = FALSE, message = F}
 GBpopdat <- modGBpop(
-  popTabs = popTables(cond = FIESTA::WYcond,             # FIA plot/condition data
-                      tree = FIESTA::WYtree,             # FIA tree data
-                      seed = FIESTA::WYseed),            # FIA seedling data
-  popTabIDs = popTableIDs(
-                      cond = "PLT_CN"),
+  popTabs = list(cond = FIESTA::WYcond,          # FIA plot/condition data
+                 tree = FIESTA::WYtree,          # FIA tree data
+                 seed = FIESTA::WYseed),         # FIA seedling data
+  popTabIDs = list(cond = "PLT_CN"),             # unique ID of plot in cond
   pltassgn = FIESTA::WYpltassgn,  # plot assignments
-  pltassgnid = "CN",
+  pltassgnid = "CN",              # unique ID of plot in pltassgn
   pjoinid = "PLT_CN",             # plot id to join to pltassgn
   unitarea = WYunitarea,          # area by estimation units
   unitvar = "ESTN_UNIT",          # name of estimation unit
   strata = TRUE,                  # if using post-stratification
-  stratalut = WYstratalut         # strata classes and pixels counts
+  stratalut = WYstratalut,        # strata classes and pixels counts
+  strata_opts = list(getwt = TRUE)              # strata options
   )
 
 ```
@@ -325,10 +325,6 @@ GBpopdat.bh <- modGBpop(
 ## Get names of output list components
 names(GBpopdat.bh)
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\unit_options.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\strata_options.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Icheck.popdata.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modGBpop.R")
 
 ## Using output as individual parameter inputs
 GBpopdat.bh <- modGBpop(
@@ -389,7 +385,7 @@ If the `FIESTA::spGetStrata` function is used to obtain stratification data, the
 ## Using output list from spGetStrata()
 GBpopdat.bhdist <- modGBpop(
       popTabs=list(plt=WYplt, cond=WYcond, tree=WYtree, seed=WYseed), 
-      GBstratdat=stratdat.bhdist)
+      stratdat=stratdat.bhdist)
 
 ## Get names of output list components
 names(GBpopdat.bhdist)

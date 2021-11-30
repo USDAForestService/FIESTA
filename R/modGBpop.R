@@ -547,10 +547,6 @@ modGBpop <- function(popType = "VOL",
     }
   }
     
-print("TEST")
-print(names(popTabIDs))
-print(popTabIDs)
-
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -609,7 +605,7 @@ print(popTabIDs)
     vcondstrf <- popcheck$vcondstrf
     areawt <- "SUBP_CONDPROP_UNADJ"
   }
-print("OOOO")
+
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
