@@ -205,7 +205,9 @@ spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
   compress <- pcheck.varchar(var2check=compress, 
 	varnm="compress", gui=gui,
 	checklst=compresslst, caption="Compress output?")
-  co <- paste0("COMPRESS=", compress)
+  if (!is.null(compress)) {
+    co <- paste0("COMPRESS=", compress)
+  }
 
   ## Check outfolder
   outfolder <- pcheck.outfolder(outfolder)
