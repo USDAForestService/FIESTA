@@ -5,7 +5,6 @@
 #' If no parameters, an empty list is returned.
 #' 
 #' @param unitvar2 
-#' @param areavar 
 #' @param areaunits
 #' @param minplotnum.unit 
 #' @param unit.action 
@@ -20,9 +19,9 @@
 #' 
 #' @export unit_options
 
-unit_options <- function(unitvar2 = NULL, areavar = "ACRES",
-                         areaunits = "acres", minplotnum.unit = 10, 
-                         unit.action = "keep", npixelvar = "npixels",  ...) {
+unit_options <- function(unitvar2 = NULL, areaunits = "acres", 
+                         minplotnum.unit = 10, unit.action = "keep", 
+                         npixelvar = "npixels",  ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::unit_options)))

@@ -226,6 +226,7 @@ modGBpop <- function(popType = "VOL",
 			     	         adj = "samp", 
                      unitvar = NULL,
 			     	         unitarea = NULL, 
+			     	         areavar = "ACRES",
 				             strata = TRUE, 
 				             stratalut = NULL,
 				             strvar = "STRATUMCD",
@@ -539,39 +540,16 @@ modGBpop <- function(popType = "VOL",
   }
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
 
- 
   ## Set user-supplied popTabIDs values
-  if (length(popTabIDs) > 0) {
-    for (i in 1:length(popTabIDs)) {
-      if (names(popTabIDs)[[i]] == "cond") {
-        assign("cuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "plt") {
-        assign("puniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "tree") {
-        assign("tuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "seed") {
-        assign("suniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpspp") {
-        assign("vsppuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpstr") {
-        assign("vstruniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subplot") {
-        assign("subpuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subp_cond") {
-        assign("subcuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "lulc") {
-        assign("lulcuniqueid", popTabIDs[[i]])
-      }
+  for (nm in names(popTabs)) {
+    if (!any(names(popTabIDs) == nm)) {
+      popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
+    
+print("TEST")
+print(names(popTabIDs))
+print(popTabIDs)
 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
@@ -579,16 +557,16 @@ modGBpop <- function(popType = "VOL",
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
-  popcheck <- check.popdata(gui=gui, module="GB", popType=popType, 
-	tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
-	pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
-	evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
-	intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
-	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter,
-	nonsamp.vfilter.fixed=nonsamp.vfilter.fixed,
- 	unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-	areaunits=areaunits, unit.action=unit.action, strata=strata, 
-	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
+  popcheck <- check.popdata(gui=gui, module="GB", popType=popType,
+                  tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
+                  pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
+                  evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
+                  intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
+                  nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
+                  nonsamp.vfilter.fixed=nonsamp.vfilter.fixed,
+                  unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
+                  areaunits=areaunits, unit.action=unit.action, strata=strata, 
+                  stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
@@ -631,7 +609,7 @@ modGBpop <- function(popType = "VOL",
     vcondstrf <- popcheck$vcondstrf
     areawt <- "SUBP_CONDPROP_UNADJ"
   }
-
+print("OOOO")
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################

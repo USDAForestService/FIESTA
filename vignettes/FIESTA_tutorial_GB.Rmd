@@ -317,14 +317,18 @@ If the `FIESTA::spGetStrata` function is used to obtain stratification data, the
 
 ## Bighorn National Forest
 
-
 ## Using output list from spGetStrata()
 GBpopdat.bh <- modGBpop(
       popTabs=list(plt=WYplt, cond=WYcond, tree=WYtree, seed=WYseed),
-      GBstratdat=stratdat.bh)
+      stratdat=stratdat.bh)
 
 ## Get names of output list components
 names(GBpopdat.bh)
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\unit_options.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\strata_options.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Icheck.popdata.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modGBpop.R")
 
 ## Using output as individual parameter inputs
 GBpopdat.bh <- modGBpop(
@@ -336,10 +340,8 @@ GBpopdat.bh <- modGBpop(
       unitarea=stratdat.bh$unitarea, 
       areavar=stratdat.bh$areavar, 
       strata=TRUE,
-      strata_opts=list(
-        stratalut=stratdat.bh$stratalut, 
-        strvar=stratdat.bh$strvar, 
-        getwt=FALSE)
+      stratalut=stratdat.bh$stratalut, 
+      strvar=stratdat.bh$strvar
       )
 
 ## Get names of output list components

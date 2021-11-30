@@ -130,6 +130,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui, 
 		checklst=evalTyplst, caption="popType", multiple=TRUE, stopifnull=TRUE)
  
+  plt=cond=tree=seed=vsubpstr=vsubpspp=subplot=subp_cond=lulc <- NULL
   ## Get tables from tabs
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])

@@ -25,7 +25,7 @@
 #' 
 #' @export strata_options
 
-strata_options <- function(getwt=TRUE, getwtvar="P1POINTCNT", strwtvar="strwt",
+strata_options <- function(getwt=FALSE, getwtvar="P1POINTCNT", strwtvar="strwt",
                            stratcombine=TRUE, minplotnum.strat=2, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
