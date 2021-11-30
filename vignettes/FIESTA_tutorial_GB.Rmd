@@ -248,15 +248,14 @@ GBpopdat <- modGBpop(
                       tree = FIESTA::WYtree,             # FIA tree data
                       seed = FIESTA::WYseed),            # FIA seedling data
   popTabIDs = popTableIDs(
-                      cuniqueid = "PLT_CN"),
+                      cond = "PLT_CN"),
   pltassgn = FIESTA::WYpltassgn,  # plot assignments
   pltassgnid = "CN",
   pjoinid = "PLT_CN",             # plot id to join to pltassgn
   unitarea = WYunitarea,          # area by estimation units
   unitvar = "ESTN_UNIT",          # name of estimation unit
   strata = TRUE,                  # if using post-stratification
-  strata_opts = strata_options(
-    stratalut = WYstratalut)      # strata classes and pixels counts
+  stratalut = WYstratalut         # strata classes and pixels counts
   )
 
 ```

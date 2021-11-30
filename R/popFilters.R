@@ -24,7 +24,7 @@
 #' @export popFilters
 
 popFilters <- function(evalid = NULL, invyrs = NULL, intensity = NULL,
-                       measCur = NULL, measEndyr = NULL, 
+                       measCur = FALSE, measEndyr = NULL, 
                        measEndyr.filter = NULL, ACI = FALSE, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
