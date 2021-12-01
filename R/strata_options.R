@@ -30,6 +30,7 @@ strata_options <- function(getwt=FALSE, getwtvar="P1POINTCNT", strwtvar="strwt",
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::strata_options)))
+
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
