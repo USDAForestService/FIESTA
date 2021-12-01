@@ -5,28 +5,8 @@
 #' Wrapper for sf::st_write function.
 #' 
 #' @param dfobj Data.frame class R object. Data frame object to export.
-#' @param outfolder String. Optional. Name of output folder. If NULL, export to
-#' working directory.
-#' @param out_fmt String. File format for output ('csv', 'sqlite','gpkg',
-#' 'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
-#' installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
-#' installed.
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param out_layer String. Name of layer in out_dsn. If NULL, basename of
-#' out_dsn is used.
-#' @param outfn.pre String. Prefix for out_dsn or csv file, if out_fmt=".csv".
-#' @param layer.pre String. Prefix for layer in database, if out_fmt != ".csv".
-#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
-#' @param create_dsn Logical. If TRUE, creates new database.
-#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
-#' exists.
-#' @param add_layer Logical. If TRUE, adds to existing out_dsn (if out_fmt !=
-#' c('csv','shp')).
-#' @param append_layer Logical. If TRUE, appends to a layer in an existing
-#' out_dsn or a csv or shapefile. Note: currently cannot append to layer in
-#' out_dsn when out_fmt="gdb".
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. 
 #' @param index.unique String. Name of variable(s) in dfobj to make unique
 #' index.
 #' @param index String. Name of variable(s) in dfobj to make (non-unique)
@@ -41,10 +21,8 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export datExportData
-datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
- 	out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=FALSE, 
-	create_dsn=FALSE, overwrite_dsn=FALSE, overwrite_layer=FALSE, 
-	add_layer=TRUE, append_layer=FALSE, index.unique=NULL, index=NULL) {
+datExportData <- function(dfobj, create_dsn=FALSE, 
+	index.unique=NULL, index=NULL, savedata_opts=savedata_options()) {
   ###########################################################################
   ## DESCRIPTION: Exports a data.frame to file or database.
   ## out_fmt	Output format ('csv', 'sqlite', 'gpkg', 'shp')		
@@ -76,6 +54,21 @@ datExportData <- function(dfobj, outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 #  } else if ("data.table" %in% class(dfobj)) {
 #    dfobj <- setDF(dfobj)
   }
+
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+
  
   ## Check output data
   outlst <- pcheck.output(out_fmt=out_fmt, outfolder=outfolder, 

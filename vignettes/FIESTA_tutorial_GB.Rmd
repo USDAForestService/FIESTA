@@ -138,7 +138,9 @@ Our custom examples demonstrate how to get data for one area of interest, or pop
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
 fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
 
-
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\datExportData.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spExportSpatial.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetStrata.R")
 # Get estimation unit and strata information for Bighorn National Forest.
 stratdat.bh <- spGetStrata(
       xyplt=WYplt,
@@ -148,7 +150,8 @@ stratdat.bh <- spGetStrata(
       prj="longlat", 
       datum="NAD83", 
       unit_layer=WYbhfn, 
-      strat_layer=fornffn
+      strat_layer=fornffn,
+      savedata=TRUE
       )
 
 ## Get names of output list components

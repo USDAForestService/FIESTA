@@ -145,6 +145,33 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(spGetStrata)), names(formals(spMakeSpatialPoints))) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+
+
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
@@ -188,13 +215,13 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check unittype
   ###################################################################
   unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", 
-	gui=gui, checklst=typelst, caption="Estimation unit type?")
+	    gui=gui, checklst=typelst, caption="Estimation unit type?")
 
   ## check areaunits
   areaunitslst <- c("acres", "hectares", "sqmeters") 
   areaunits <- pcheck.varchar(var2check=areaunits, varnm="areaunits", 
-	gui=gui, checklst=areaunitslst, caption="Area units?", stopifnull=TRUE)
-  areaunits <- toupper(areaunits)
+	    gui=gui, checklst=areaunitslst, caption="Area units?", stopifnull=TRUE)
+      areaunits <- toupper(areaunits)
 
   ## Check showext    
   showext <- pcheck.logical(showext, varnm="showext", 
@@ -335,8 +362,8 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       ## Extract values of polygon unitlayer to points
       ## Note: removing all NA values
       extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, 
-		uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
-		keepNA=FALSE, exportNA=exportNA)
+		      uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
+		      keepNA=FALSE, exportNA=exportNA)
       sppltx <- extpoly$spxyext
       unitNA <- extpoly$NAlst[[1]]
       outname <- extpoly$outname
@@ -349,7 +376,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
       ## Get pixel counts by estimation unit
       stratalut <- setDT(zonalFreq(src=unitlayerprj, attribute=unitvar, 
-			rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA))
+			    rasterfile=stratlayerfn, band=1, na.rm=TRUE, ignoreValue=rast.NODATA))
       setnames(stratalut, c("zoneid", "value", "zoneprop"), c(unitvar, strvar, "strwt"))
       strataNA <- stratalut[is.na(get(strvar)), ]
       stratalut <- stratalut[!is.na(get(strvar)), ]
@@ -373,9 +400,9 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
     ## Extract values of raster layer to points
     extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, 
-		var.name=strvar, uniqueid=uniqueid, keepNA=keepNA, exportNA=exportNA, 
-		outfolder=outfolder, overwrite_layer=overwrite_layer, 
-		rast.NODATA=rast.NODATA)
+		    var.name=strvar, uniqueid=uniqueid, 
+		    keepNA=keepNA, exportNA=exportNA, rast.NODATA=rast.NODATA, 
+		    savedata_opts=savedata_opts)
     sppltx <- extrast$spplt
     pltdat <- extrast$sppltext
     rastfnlst <- extrast$rastfnlst
@@ -443,28 +470,53 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   #setkeyv(stratalut, c(unitvar, strvar)) 
 
   if (savedata) {
-    datExportData(pltassgn, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltassgn, 
+          savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+		                        out_dsn=out_dsn, 
+		                        out_layer="pltassgn", 
+		                        outfn.date=outfn.date, 
+		                        overwrite_layer=overwrite_layer,
+		                        append_layer=append_layer,
+		                        add_layer=TRUE),
+    )
+    
+    datExportData(unitarea,           
+                  savedata_opts=list(outfolder=outfolder, 
+                                     out_fmt=out_fmt, 
+                                     out_dsn=out_dsn, 
+                                     out_layer="unitarea", 
+                                     outfn.date=outfn.date, 
+                                     overwrite_layer=overwrite_layer,
+                                     append_layer=append_layer,
+                                     add_layer=TRUE),
+    )           
 
-    datExportData(unitarea, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-
-    datExportData(stratalut, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="stratalut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(stratalut,                   
+                  savedata_opts=list(outfolder=outfolder, 
+                                     out_fmt=out_fmt, 
+                                     out_dsn=out_dsn, 
+                                     out_layer="stratalut", 
+                                     outfn.date=outfn.date, 
+                                     overwrite_layer=overwrite_layer,
+                                     append_layer=append_layer,
+                                     add_layer=TRUE),
+    )           
+    
   }
 
   ## Export to shapefile
   if (exportsp) {
-    spExportSpatial(sppltx, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer=out_layer,
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    spExportSpatial(sppltx, 
+                  savedata_opts=list(outfolder=outfolder, 
+                                     out_fmt=out_fmt, 
+		                                 out_dsn=out_dsn, 
+		                                 out_layer=out_layer,
+		                                 outfn.date=outfn.date, 
+		                                 overwrite_layer=overwrite_layer,
+		                                 append_layer=append_layer, 
+		                                 add_layer=TRUE)
+    )
   }    
   
   returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 

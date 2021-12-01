@@ -5,22 +5,8 @@
 #' Wrapper for sf::st_write function.
 #' 
 #' @param sfobj sf class R object. Spatial object to export.
-#' @param out_fmt String. File format for output ('sqlite','gpkg','shp').
-#' @param outfolder String. Optional. Name of output folder. If NULL, export to
-#' working directory.
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param out_layer String. Name of layer in out_dsn. If NULL, basename of
-#' out_dsn is used.
-#' @param outfn.pre String. Prefix for out_dsn.
-#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
-#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
-#' exists.
-#' @param add_layer Logical. If TRUE, adds to existing out_dsn (if out_fmt !=
-#' c('csv','shp')).
-#' @param append_layer Logical. If TRUE, appends to existing out_dsn. The
-#' out_dsn a database or shapefile.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options.  
 #' @return An sf spatial object is written to the out_dsn.
 #' @note If out_fmt='shp':\cr The ESRI shapefile driver truncates variable
 #' names to 10 characters or less.  Variable names are changed before export
@@ -31,10 +17,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spExportSpatial
-spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp", 
-	outfolder=NULL, out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, add_layer=TRUE, 
-	append_layer=FALSE) {
+spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
   ###########################################################################
   ## DESCRIPTION: Exports an S4 Spatial object to an ArcGIS shapefile (*.shp).
   ## out_fmt	Output format ('sqlite', 'gpkg', 'shp')		
@@ -60,6 +43,25 @@ spExportSpatial <- function(sfobj, out_layer=NULL, out_fmt="shp",
     stop("invalid parameter: ", toString(miss))
   }
  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+
+
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+
+
   ## Check sfobj
   ###########################################################
   if (is.null(sfobj)) {

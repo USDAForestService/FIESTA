@@ -22,9 +22,10 @@
 #' @param overwrite_layer Logical. If TRUE, overwrites the output. If
 #' rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
 #' out_layers in raw_dsn (if raw_fmt != 'csv').
-#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data to
-#' existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
-#' 'csv".
+#' @param append_layer Logical. If TRUE, and appends data to existing *.csv
+#' files (if *_fmt = 'csv') or *_dsn layers (if *_fmt != 'csv".
+#' @param add_layer Logical. If TRUE, adds layer to an existing out_dsn 
+#' (if out_fmt != c('csv','shp')).
 #' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
 #' @param objnm String. Name of *.rds object.
 #' @param ... For extendibility.
@@ -41,7 +42,8 @@ savedata_options <- function(outfolder=NULL, out_fmt="csv", out_dsn=NULL,
 					out_layer=NULL, outfn.pre=NULL, outfn.date=FALSE,
 					addtitle=TRUE, raw_fmt="csv", raw_dsn=NULL,
 					overwrite_dsn=FALSE, overwrite_layer=TRUE,
-					append_layer=FALSE, saveobj=FALSE, objnm=NULL, ...) {
+					append_layer=FALSE, add_layer=TRUE, layer.pre=NULL, 
+					saveobj=FALSE, objnm=NULL, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::savedata_options)))
