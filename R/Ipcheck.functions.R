@@ -9,6 +9,7 @@
 # pcheck.colors
 # pcheck.areaunits
 # pcheck.spatial - checks or gets Vector layer from file name or spatial object
+# pcheck.params - function to check input list parameters
 
 
 pcheck.logical <- function (var2check, varnm=NULL, title=NULL, first="YES",
@@ -988,4 +989,75 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
   }
 }
 
+
+
+pcheck.params <- function(input.params, strata_opts=NULL, 
+			unit_opts=NULL, table_opts=NULL, savedata_opts=NULL) {
+  ## DESCRIPTION: function to check input list parameters
+
+  if (!is.null(strata_opts)) {
+    if ("strata_opts" %in% input.params) {
+      if (!is.list(strata_opts)) {
+        strata_opts <- as.list(strata_opts)
+      }
+      if (is.null(names(strata_opts))) {
+        stop("invalid strata_opts... see strata_options()")
+      }
+      formallst.strata <- names(formals(FIESTA::strata_options))[-length(formals(FIESTA::strata_options))]
+      strata.params <- names(strata_opts)
+      if (!all(strata.params %in% formallst.strata)) {
+        miss <- strata.params[!strata.params %in% formallst.strata]
+        stop("invalid parameter: ", toString(miss))
+      }
+    }
+  }
+  if (!is.null(unit_opts)) {
+    if ("unit_opts" %in% input.params) {
+      if (!is.list(unit_opts)) {
+        unit_opts <- as.list(unit_opts)
+      }
+      if (is.null(names(unit_opts))) {
+        stop("invalid unit_opts... see unit_options()")
+      }
+      formallst.unit <- names(formals(FIESTA::unit_options))[-length(formals(FIESTA::unit_options))]
+      unit.params <- names(unit_opts)
+      if (!all(unit.params %in% formallst.unit)) {
+        miss <- unit.params[!unit.params %in% formallst.unit]
+        stop("invalid parameter: ", toString(miss))
+      }
+    }
+  }
+  if (!is.null(table_opts)) {
+    if ("table_opts" %in% input.params) {
+      if (!is.list(unit_opts)) {
+        table_opts <- as.list(table_opts)
+      }
+      if (is.null(names(table_opts))) {
+        stop("invalid table_opts... see table_options()")
+      }
+      formallst.table <- names(formals(FIESTA::table_options))[-length(formals(FIESTA::table_options))]
+      table.params <- names(table_opts)
+      if (!all(table.params %in% formallst.table)) {
+        miss <- table.params[!table.params %in% formallst.table]
+        stop("invalid parameter: ", toString(miss))
+      }
+    }
+  }
+  if (!is.null(savedata_opts)) {
+    if ("savedata_opts" %in% input.params) {
+      if (!is.list(savedata_opts)) {
+        savedata_opts <- as.list(savedata_opts)
+      }
+      if (is.null(names(savedata_opts))) {
+        stop("invalid savedata_opts... see savedata_options()")
+      }
+      formallst.savedata <- names(formals(FIESTA::savedata_options))[-length(formals(FIESTA::savedata_options))]
+      savedata.params <- names(savedata_opts)
+      if (!all(savedata.params %in% formallst.savedata)) {
+        miss <- savedata.params[!savedata.params %in% formallst.savedata]
+        stop("invalid parameter: ", toString(miss))
+      }
+    }
+  }
+}
 
