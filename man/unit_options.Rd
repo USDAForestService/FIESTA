@@ -6,7 +6,6 @@
 \usage{
 unit_options(
   unitvar2 = NULL,
-  areavar = "ACRES",
   areaunits = "acres",
   minplotnum.unit = 10,
   unit.action = "keep",
@@ -15,15 +14,21 @@ unit_options(
 )
 }
 \arguments{
-\item{unitvar2}{}
+\item{unitvar2}{String. Name of a second level estimation unit variable in
+unitarea and cond or pltassgn with assignment for each plot (e.g.,
+'STATECD').}
 
-\item{areavar}{}
+\item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
 
-\item{minplotnum.unit}{}
+\item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
 
-\item{unit.action}{}
+\item{unit.action}{String. What to do if number of plots in an estimation
+unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
+unit.action='combine', combines estimation unit to the following estimation
+unit, ordered in unitzonal or stratalut.}
 
-\item{npixelvar}{}
+\item{npixelvar}{String. Name of variable in unitlut defining number of
+pixels by estimation unit.}
 
 \item{...}{For extendibility.}
 }

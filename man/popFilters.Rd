@@ -8,7 +8,7 @@ popFilters(
   evalid = NULL,
   invyrs = NULL,
   intensity = NULL,
-  measCur = NULL,
+  measCur = FALSE,
   measEndyr = NULL,
   measEndyr.filter = NULL,
   ACI = FALSE,

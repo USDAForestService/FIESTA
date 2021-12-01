@@ -5,7 +5,7 @@
 \title{Strata options.}
 \usage{
 strata_options(
-  getwt = TRUE,
+  getwt = FALSE,
   getwtvar = "P1POINTCNT",
   strwtvar = "strwt",
   stratcombine = TRUE,

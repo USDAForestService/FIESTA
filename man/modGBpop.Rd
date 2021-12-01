@@ -17,6 +17,7 @@ modGBpop(
   adj = "samp",
   unitvar = NULL,
   unitarea = NULL,
+  areavar = "ACRES",
   strata = TRUE,
   stratalut = NULL,
   strvar = "STRATUMCD",
@@ -77,6 +78,8 @@ a data frame with area and estimation unit. If more than one estimation
 unit, provide a data frame of total area by estimation unit, including
 unitvar and areavar.}
 
+\item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
+
 \item{strata}{Logical. If TRUE, include information for post-stratification.}
 
 \item{stratalut}{DF/DT. If strata=TRUE, look-up table with pixel counts or
@@ -89,6 +92,8 @@ stratalut and cond or pltassgn data frame with stratum assignment for each
 plot (Default = 'STRATUMCD').}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
+
+\item{unit_opts}{List. See help(unit_options()) for a list of options.}
 
 \item{strata_opts}{List. See help(strata_options()) for a list of options.
 Only used when strata = TRUE.}
@@ -117,21 +122,6 @@ population.}
 \item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.
 Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
 be included.}
-
-\item{unitvar2}{String. Name of a second level estimation unit variable in
-unitarea and cond or pltassgn with assignment for each plot (e.g.,
-'STATECD').}
-
-\item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
-
-\item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
-
-\item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
-
-\item{unit.action}{String. What to do if number of plots in an estimation
-unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-unit.action='combine', combines estimation unit to the following estimation
-unit, ordered in unitzonal or stratalut.}
 
 \item{unitzonal}{DF/DT. Table with zonal auxiliary information by estimation
 unit. For continuous data, means by estimation unit; for categorical data,

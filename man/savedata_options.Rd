@@ -17,6 +17,8 @@ savedata_options(
   overwrite_dsn = FALSE,
   overwrite_layer = TRUE,
   append_layer = FALSE,
+  add_layer = TRUE,
+  layer.pre = NULL,
   saveobj = FALSE,
   objnm = NULL,
   ...
@@ -51,9 +53,11 @@ not included, out_fmt is used. Use full path if outfolder=NULL.}
 rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
 out_layers in raw_dsn (if raw_fmt != 'csv').}
 
-\item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data to
-existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
-'csv".}
+\item{append_layer}{Logical. If TRUE, and appends data to existing *.csv
+files (if *_fmt = 'csv') or *_dsn layers (if *_fmt != 'csv".}
+
+\item{add_layer}{Logical. If TRUE, adds layer to an existing out_dsn 
+(if out_fmt != c('csv','shp')).}
 
 \item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}
 
