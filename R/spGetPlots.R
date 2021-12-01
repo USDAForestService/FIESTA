@@ -293,7 +293,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
       }
       if (stbnd.att == "COUNTYFIPS") {
         statecnty <- sort(unique(xyids[[stbnd.att]]))
-        stcds <- sort(unique(substr(statecnty, 1, 2)))
+        stcds <- as.numeric(sort(unique(substr(statecnty, 1, 2))))
       } else {
         stcds <- sort(unique(pcheck.states(xyids[[stbnd.att]], statereturn="VALUE")))
       }
@@ -386,6 +386,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
     }
   }
   #xyids <- spxy[[xyjoinid]]
+
  
   #############################################################################
   ## Set datsource
@@ -460,14 +461,27 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
     ## 2) Clip xy (for all states) to boundary
     ## 3) Subset other data with clipped xy joinid
     ####################################################################
+    tabs2save <- {}
 
     ## plot data
     obj <- ifelse (datsource == "obj", TRUE, FALSE)
-    pltx <- pcheck.table(plot_layer, obj=obj, stopifnull=TRUE)
+    pltx <- pcheck.table(plot_layer, obj=obj, stopifnull=FALSE)
+    if (!is.null(pltx)) {
+      pltfields <- names(pltx)
+      tabs2save <- c(tabs2save, "pltx")
+    }
 
     ## condition data
     condx <- pcheck.table(cond_layer, obj=obj, stopifnull=TRUE)
-    tabs2save <- c("pltx", "condx")
+    if (!is.null(condx)) {
+      if (is.null(pltx)) {
+        pltx <- condx
+        pltfields <- names(condx)
+        tabs2save <- c(tabs2save, "pltx")
+      } else {
+        tabs2save <- c(tabs2save, "condx")
+      }
+    }
 
     ## tree data
     if (istree) {
@@ -503,7 +517,6 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
 		checklst=names(pltx), gui=gui, caption="Joinid in plot?")  
 
     ## Define pjoinid
-    pltfields <- names(plt)
     if (is.null(pjoinid)) {
       if (xyjoinid %in% pltfields) {
         pjoinid  <- xyjoinid
@@ -516,8 +529,14 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
       }
     }
 
+    ## Check if class of pjoinid in pltx matches class of xyjoinid in xyids
+    tabs <- check.matchclass(pltx, xyids, pjoinid, xyjoinid)
+    pltx <- tabs$tab1
+    xyids <- tabs$tab2
+     
+
     ## Subset plot data
-    pltx <- pltx[pltx[[pjoinid]] %in% xyids[[xyjoinid]],]
+    pltx2 <- pltx[pltx[[pjoinid]] %in% xyids[[xyjoinid]],]
     if (nrow(pltx) == 0) stop("xyjoinid invalid")
     tabs2save <- c(tabs2save, "pltx")
 
@@ -646,14 +665,15 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
 			measyrs=measyrs, istree=istree, isseed=isseed, othertables=other_layers, 
 			intensity1=intensity1, savePOP=savePOP)
       }
-      PLOT <- dat$plt
-      cond <- dat$cond
+      tabs <- dat$tabs
+      PLOT <- tabs$plt
+      cond <- tabs$cond
       if (istree) 
-        tree <- dat$tree
+        tree <- tabs$tree
       if (isseed)
-        seed <- dat$seed
+        seed <- tabs$seed
       if (savePOP) {
-        pop_plot_stratum_assgn <- dat[[chkdbtab(names(dat), "POP_PLOT_STRATUM_ASSGN")]]
+        pop_plot_stratum_assgn <- tabs[[chkdbtab(names(dat), "POP_PLOT_STRATUM_ASSGN")]]
       }
       puniqueid <- "CN"
 
@@ -678,7 +698,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
           }
         }
       }
-    
+ 
       ## Get most current plots in database for !measEndyr.filter
       #######################################################
       if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
@@ -942,7 +962,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
     dbstcds <- DBI::dbGetQuery(dbconn, paste("select distinct statecd from", 
 			plot_layer))[[1]]
 
-    if (!is.null(stcds) && !all(stcds %in% dbstcds)) {
+    if (!is.null(stcds) && !all(as.numeric(stcds) %in% as.numeric(dbstcds))) {
       statemiss <- stcds[!stcds %in% dbstcds]
       #message("database does not include all states: ", toString(statemiss))
           

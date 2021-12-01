@@ -4,11 +4,17 @@
 #' 
 #' If no parameters, an empty list is returned.
 #' 
-#' @param unitvar2 
-#' @param areaunits
-#' @param minplotnum.unit 
-#' @param unit.action 
-#' @param npixelvar 
+#' @param unitvar2 String. Name of a second level estimation unit variable in
+#' unitarea and cond or pltassgn with assignment for each plot (e.g.,
+#' 'STATECD').
+#' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
+#' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
+#' @param unit.action String. What to do if number of plots in an estimation
+#' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
+#' unit.action='combine', combines estimation unit to the following estimation
+#' unit, ordered in unitzonal or stratalut.
+#' @param npixelvar String. Name of variable in unitlut defining number of
+#' pixels by estimation unit.
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Grayson W. White

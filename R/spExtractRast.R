@@ -48,16 +48,8 @@
 #' @param exportsp Logical. If TRUE, the extracted raster point data are
 #' exported to outfolder.
 #' @param exportNA Logical. If TRUE, NA values are exported to outfolder.
-#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
-#' folder.  If NULL, the working directory is used.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param out_layer String. Name of layer in out_dsn if database.
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE, overwrite dsn.
-#' @param overwrite_layer Logical. If TRUE, overwrite layer(s) in dsn.
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #' @return \item{sppltext}{ sf object or data frame. Input xyplt data with
 #' extracted raster values appended. } \item{outnames}{ String vector. Raster
@@ -119,12 +111,13 @@
 #'   plot(sppltext["dem"])
 #' 
 #' @export spExtractRast
-spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst, 
- 	rastfolder=NULL, rast.crs=NULL, bandlst=NULL, var.name=NULL, interpolate=FALSE, 
- 	windowsize=1, windowstat=NULL, rast.NODATA=NULL, keepNA=TRUE, showext=FALSE, 
-	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, outfolder=NULL, out_fmt="shp", 
-	out_dsn=NULL, out_layer="rastext", outfn.pre=NULL, outfn.date=TRUE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, ...){
+spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
+	rastlst, rastfolder=NULL, rast.crs=NULL, 
+	bandlst=NULL, var.name=NULL, interpolate=FALSE, 
+ 	windowsize=1, windowstat=NULL, rast.NODATA=NULL, 
+	keepNA=TRUE, showext=FALSE, 
+	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
+	savedata_opts=savedata_options(), gui=FALSE, ...){
   #####################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more raster layers and appends to input spatial layer 
@@ -146,6 +139,21 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
+
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -432,7 +440,7 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", rastlst,
 
   if (savedata) {
     datExportData(sppltx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
+		out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer, 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
   }
 

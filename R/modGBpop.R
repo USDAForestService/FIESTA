@@ -87,21 +87,12 @@
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
-#' @param unitvar2 String. Name of a second level estimation unit variable in
-#' unitarea and cond or pltassgn with assignment for each plot (e.g.,
-#' 'STATECD').
 #' @param unitarea Numeric or DF. Total area by estimation unit. If only 1
 #' estimation unit, include number of total acreage for the area of interest or
 #' a data frame with area and estimation unit. If more than one estimation
 #' unit, provide a data frame of total area by estimation unit, including
 #' unitvar and areavar.
 #' @param areavar String. Name of area variable in unitarea. Default="ACRES".
-#' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
-#' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
-#' @param unit.action String. What to do if number of plots in an estimation
-#' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-#' unit.action='combine', combines estimation unit to the following estimation
-#' unit, ordered in unitzonal or stratalut.
 #' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
 #' unit. For continuous data, means by estimation unit; for categorical data,
 #' proportion of class by estimation unit.
@@ -114,6 +105,7 @@
 #' stratalut and cond or pltassgn data frame with stratum assignment for each
 #' plot (Default = 'STRATUMCD').
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param unit_opts List. See help(unit_options()) for a list of options.
 #' @param strata_opts List. See help(strata_options()) for a list of options.
 #' Only used when strata = TRUE. 
 #' @param savedata_opts List. See help(savedata_options()) for a list
