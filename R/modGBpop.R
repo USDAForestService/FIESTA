@@ -260,6 +260,11 @@ modGBpop <- function(popType = "VOL",
     stop("invalid parameter: ", toString(miss))
   }
 
+  ## Check parameter lists
+  pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
+		savedata_opts=savedata_opts)
+
+
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
 	treef=seedf=vcondsppf=vcondstrf=bndx <- NULL

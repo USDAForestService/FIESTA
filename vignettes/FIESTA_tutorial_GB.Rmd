@@ -243,6 +243,7 @@ In this example, we use the sample Wyoming data (2013 Evaluation) stored in `FIE
 
 
 ```{r, results = FALSE, message = F}
+
 GBpopdat <- modGBpop(
   popTabs = list(cond = FIESTA::WYcond,          # FIA plot/condition data
                  tree = FIESTA::WYtree,          # FIA tree data
@@ -390,19 +391,18 @@ GBpopdat.bhdist <- modGBpop(
 ## Get names of output list components
 names(GBpopdat.bhdist)
 
-
 GBpopdat.bhdist <- modGBpop(
       popTabs=list(plt=WYplt, cond=WYcond, tree=WYtree, seed=WYseed), 
       pltassgn=stratdat.bhdist$pltassgn, 
       pltassgnid="CN", 
       unitvar=stratdat.bhdist$unitvar, 
       unitarea=stratdat.bhdist$unitarea, 
-      areavar=stratdat.bhdist$areavar, 
-      strata_opts=list(
-        stratalut=stratdat.bhdist$stratalut, 
-        strvar=stratdat.bhdist$strvar, 
-        getwt=FALSE)
+      areavar=stratdat.bhdist$areavar,
+      strata=TRUE,
+      stratalut=stratdat.bhdist$stratalut, 
+      strvar=stratdat.bhdist$strvar
       )
+
 
 ## Get names of output list components
 names(GBpopdat.bhdist)
