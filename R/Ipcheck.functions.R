@@ -1011,7 +1011,8 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid strata_opts... see strata_options()")
       }
       formallst.strata <- names(formals(FIESTA::strata_options))[-length(formals(FIESTA::strata_options))]
-      strata.params <- names(strata_opts)[names(strata_opts) != c("formallst", "input.params")]
+
+      strata.params <- names(strata_opts)[!names(strata_opts) %in% c("formallst", "input.params")]
       if (!all(strata.params %in% formallst.strata)) {
         miss <- strata.params[!strata.params %in% formallst.strata]
         stop("invalid parameter: ", toString(miss))
@@ -1043,13 +1044,14 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid table_opts... see table_options()")
       }
       formallst.table <- names(formals(FIESTA::table_options))[-length(formals(FIESTA::table_options))]
-      table.params <- names(table_opts)[names(table_opts) != c("formallst", "input.params")]
+      table.params <- names(table_opts)[!names(table_opts) %in% c("formallst", "input.params")]
       if (!all(table.params %in% formallst.table)) {
         miss <- table.params[!table.params %in% formallst.table]
         stop("invalid parameter: ", toString(miss))
       }
     }
   }
+ 
   if (!is.null(savedata_opts)) {
     if ("savedata_opts" %in% input.params) {
       if (!is.list(savedata_opts)) {
@@ -1059,7 +1061,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid savedata_opts... see savedata_options()")
       }
       formallst.savedata <- names(formals(FIESTA::savedata_options))[-length(formals(FIESTA::savedata_options))]
-      savedata.params <- names(savedata_opts)[names(savedata_opts) != c("formallst", "input.params")]
+      savedata.params <- names(savedata_opts)[!names(savedata_opts) %in% c("formallst", "input.params")]
       if (!all(savedata.params %in% formallst.savedata)) {
         miss <- savedata.params[!savedata.params %in% formallst.savedata]
         stop("invalid parameter: ", toString(miss))

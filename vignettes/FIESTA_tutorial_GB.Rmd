@@ -243,7 +243,6 @@ In this example, we use the sample Wyoming data (2013 Evaluation) stored in `FIE
 
 
 ```{r, results = FALSE, message = F}
-
 GBpopdat <- modGBpop(
   popTabs = list(cond = FIESTA::WYcond,          # FIA plot/condition data
                  tree = FIESTA::WYtree,          # FIA tree data
@@ -256,24 +255,7 @@ GBpopdat <- modGBpop(
   unitvar = "ESTN_UNIT",          # name of estimation unit
   strata = TRUE,                  # if using post-stratification
   stratalut = WYstratalut,        # strata classes and pixels counts
-  strata_opts = list(getwt = TRUE)              # strata options
-  )
-
-
-GBpopdat <- modGBpop(
-  popTabs = list(cond = FIESTA::WYcond,          # FIA plot/condition data
-                 tree = FIESTA::WYtree,          # FIA tree data
-                 seed = FIESTA::WYseed),         # FIA seedling data
-  popTabIDs = list(cond = "PLT_CN"),             # unique ID of plot in cond
-  pltassgn = FIESTA::WYpltassgn,  # plot assignments
-  pltassgnid = "CN",              # unique ID of plot in pltassgn
-  pjoinid = "PLT_CN",             # plot id to join to pltassgn
-  unitarea = WYunitarea,          # area by estimation units
-  unitvar = "ESTN_UNIT",          # name of estimation unit
-  strata = TRUE,                  # if using post-stratification
-  stratalut = WYstratalut,        # strata classes and pixels counts
-  strata_opts = list(getwt = TRUE),              # strata options
-  savedata_opts = list(outfolder=outfolder)
+  strata_opts = strata_options(getwt = TRUE)              # strata options
   )
 
 
