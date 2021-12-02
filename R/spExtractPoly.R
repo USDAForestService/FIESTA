@@ -40,6 +40,7 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param ...  Other parameters for spMakeSpatialPoints.
+#'
 #' @return \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
 #' point data with extracted raster values appended. For multi-part polygons,
 #' more than 1 row per point may be output. } \item{var.name}{ String vector.

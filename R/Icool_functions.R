@@ -51,6 +51,7 @@ checkfilenm <- function(fn, outfolder=NULL, ext=NULL,
   }
 
   outfolder <- pcheck.outfolder(outfolder)
+
   if (file.exists(file.path(outfolder, fn))) {
     return(file.path(outfolder, fn))
   } else if (!is.null(ext)) {
@@ -151,6 +152,7 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
    
   if (overwrite) {
     nm <- paste0(outfilenm, ".", ext)
+
     if (file.exists(nm)) {
       test <- tryCatch(
         file.remove(nm),
@@ -160,8 +162,9 @@ getoutfn <- function(outfn, outfolder=NULL, outfn.pre=NULL, outfn.date=FALSE,
 			}, error=function(err) {
 					message(err)
 			} )
-      if (is.null(test)) 
+      if (is.null(test)) {
         stop("permission denied") 
+      }
       message("overwriting ", nm, "...")
     } 
   } else if (!append && !add) {

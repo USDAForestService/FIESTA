@@ -138,9 +138,7 @@ Our custom examples demonstrate how to get data for one area of interest, or pop
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
 fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\datExportData.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spExportSpatial.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetStrata.R")
+
 # Get estimation unit and strata information for Bighorn National Forest.
 stratdat.bh <- spGetStrata(
       xyplt=WYplt,
@@ -151,7 +149,6 @@ stratdat.bh <- spGetStrata(
       datum="NAD83", 
       unit_layer=WYbhfn, 
       strat_layer=fornffn,
-      savedata=TRUE
       )
 
 ## Get names of output list components
@@ -261,6 +258,24 @@ GBpopdat <- modGBpop(
   stratalut = WYstratalut,        # strata classes and pixels counts
   strata_opts = list(getwt = TRUE)              # strata options
   )
+
+
+GBpopdat <- modGBpop(
+  popTabs = list(cond = FIESTA::WYcond,          # FIA plot/condition data
+                 tree = FIESTA::WYtree,          # FIA tree data
+                 seed = FIESTA::WYseed),         # FIA seedling data
+  popTabIDs = list(cond = "PLT_CN"),             # unique ID of plot in cond
+  pltassgn = FIESTA::WYpltassgn,  # plot assignments
+  pltassgnid = "CN",              # unique ID of plot in pltassgn
+  pjoinid = "PLT_CN",             # plot id to join to pltassgn
+  unitarea = WYunitarea,          # area by estimation units
+  unitvar = "ESTN_UNIT",          # name of estimation unit
+  strata = TRUE,                  # if using post-stratification
+  stratalut = WYstratalut,        # strata classes and pixels counts
+  strata_opts = list(getwt = TRUE),              # strata options
+  savedata_opts = list(outfolder=outfolder)
+  )
+
 
 ```
 
@@ -1418,12 +1433,12 @@ ratio3 <- modGBratio(
     colvar = "STDSZCD",          # est - column domain
     returntitle = TRUE,          # out - return title information
     savedata = TRUE,             # out - save data to outfolder
-    table_opts = table_options(
+    table_opts = list(
       row.FIAname = TRUE,          # est - row domain names
       col.FIAname = TRUE,          # est - column domain names
       allin1 = TRUE                # out - return output with est(pse)
       ),
-    savedata_opts = savedata_options(
+    savedata_opts = list(
       outfolder = outfolder,       # out - outfolder for saving data
       outfn.pre = "WY"             # out - prefix for output files
       )

@@ -223,9 +223,9 @@ modGBpop <- function(popType = "VOL",
 				             stratalut = NULL,
 				             strvar = "STRATUMCD",
 				             savedata = FALSE,
-                     unit_opts = unit_options(),
-                     strata_opts = strata_options(), 
-                     savedata_opts = savedata_options(),
+                     unit_opts = NULL,
+                     strata_opts = NULL, 
+                     savedata_opts = NULL,
                      GBdata = NULL,
 				             pltdat = NULL,
 				             stratdat = NULL,
@@ -307,6 +307,9 @@ modGBpop <- function(popType = "VOL",
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
@@ -731,52 +734,115 @@ modGBpop <- function(popType = "VOL",
   } 
 
   if (savedata) {
-    datExportData(condx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="condx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(pltcondx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcondx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(condx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="condx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+    )
+    datExportData(pltcondx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="pltcondx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+    )
 
     if (!is.null(treef)) {
-      datExportData(treef, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(treef, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="treex",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+      )
     }
     if (!is.null(seedf)) {
-      datExportData(seedf, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(seedf, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="seedx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+      )
     }
     if (!is.null(vcondstrf)) {
-      datExportData(vcondstrf, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vcondstrx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(vcondstrf, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="vcondstrx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+      )
     }
     if (!is.null(vcondsppf)) {
-      datExportData(vcondsppf, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vcondsppx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(vcondsppf, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="vcondsppx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+      )
     }
 
-    datExportData(pltassgnx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(unitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(stratalut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltassgnx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="pltassgn",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+    )
+    datExportData(unitarea, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="unitarea",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+    )
+    datExportData(stratalut, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="stratalut",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE)
+    )
   }
 
   return(returnlst)

@@ -38,12 +38,12 @@
 #' 
 #' @export savedata_options
 
-savedata_options <- function(outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-					out_layer=NULL, outfn.pre=NULL, outfn.date=FALSE,
-					addtitle=TRUE, raw_fmt="csv", raw_dsn=NULL,
-					overwrite_dsn=FALSE, overwrite_layer=TRUE,
-					append_layer=FALSE, add_layer=TRUE, layer.pre=NULL, 
-					saveobj=FALSE, objnm=NULL, ...) {
+savedata_options <- function(outfolder=NULL, out_fmt="csv", 
+			out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, outfn.date=FALSE,
+			addtitle=TRUE, raw_fmt="csv", raw_dsn=NULL,
+			overwrite_dsn=FALSE, overwrite_layer=TRUE,
+			append_layer=FALSE, add_layer=TRUE, layer.pre=NULL, 
+			saveobj=FALSE, objnm=NULL, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::savedata_options)))

@@ -227,8 +227,7 @@
 #' @export modGBarea
 modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL, 
 	rowvar=NULL, colvar=NULL, sumunits=TRUE, returntitle=FALSE, savedata=FALSE, 
-	table_opts=table_options(), title_opts=title_options(),
-	savedata_opts=savedata_options(), gui=FALSE, ...){
+	table_opts=NULL, title_opts=NULL, savedata_opts=NULL, gui=FALSE, ...){
 
   ###################################################################################
   ## DESCRIPTION: 
@@ -263,6 +262,11 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   rawdata <- TRUE
   #estvar <- "CONDPROP_ADJ"
   
+  
+  ## Check parameter lists
+  pcheck.params(input.params, table_opts=table_opts, savedata_opts=savedata_opts)
+  
+  
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
   
@@ -272,6 +276,9 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
@@ -368,14 +375,16 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 	condid=condid, sumunits=sumunits, landarea=landarea, ACI.filter=ACI.filter, 
- 	pcfilter=pcfilter, allin1=allin1, estround=estround, pseround=pseround, 
-	divideby=divideby, addtitle=addtitle, returntitle=returntitle,
- 	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder, 
-	overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, outfn.pre=outfn.pre,
- 	outfn.date=outfn.date, append_layer=append_layer, raw_fmt=raw_fmt, 
-	raw_dsn=raw_dsn, gui=gui)
+  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
+                cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
+                landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter,
+   	            allin1=allin1, estround=estround, pseround=pseround, 
+	              divideby=divideby, addtitle=addtitle, returntitle=returntitle,
+ 	              rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+                outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre,
+ 	              outfn.date=outfn.date, append_layer=append_layer, 
+                raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -406,13 +415,17 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, condf=pltcondf, 
-	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
-	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
-	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby, 
-	row.add0=row.add0, col.add0=col.add0, title.rowvar=title.rowvar, 
-	title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-	rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
+                  condf=pltcondf, cuniqueid=cuniqueid, 
+                  rowvar=rowvar, rowvar.filter=rowvar.filter, 
+	                colvar=colvar, colvar.filter=colvar.filter, 
+                  row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+                  row.orderby=row.orderby, col.orderby=col.orderby, 
+	                row.add0=row.add0, col.add0=col.add0, 
+                  title.rowvar=title.rowvar, title.colvar=title.colvar, 
+                  rowlut=rowlut, collut=collut, 
+                  rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+                  landarea=landarea)
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -453,13 +466,16 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   ###################################################################################
   ### Get titles for output tables
   ###################################################################################
-  alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, sumunits=sumunits,
- 	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
- 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
-	title.filter=title.filter, title.unitsn=areaunits, unitvar=unitvar, rowvar=rowvar,
- 	colvar=colvar, addtitle=addtitle, rawdata=rawdata, states=states, invyrs=invyrs,
- 	landarea=landarea, pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
-	outfn.pre=outfn.pre)
+  alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, 
+                  sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+                  title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+                  title.colvar=title.colvar, title.unitvar=title.unitvar,
+	                title.filter=title.filter, title.unitsn=areaunits, 
+                  unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
+                  addtitle=addtitle, returntitle=returntitle, 
+                  rawdata=rawdata, states=states, invyrs=invyrs,
+ 	                landarea=landarea, pcfilter=pcfilter, 
+                  allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -619,17 +635,17 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
   estnm <- "est" 
  
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-	unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
- 	rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol,
- 	rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
-	allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
- 	title.rowvar=title.rowvar, title.colvar=title.colvar, title.rowgrp=title.rowgrp,
- 	title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est,
- 	title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
-	estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
-	returntitle=returntitle, estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
+	      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+	      unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
+ 	      rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol,
+ 	      rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+	      allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
+ 	      title.rowvar=title.rowvar, title.colvar=title.colvar, title.rowgrp=title.rowgrp,
+ 	      title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est,
+ 	      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
+	      outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
+	      estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
+	      returntitle=returntitle, estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
@@ -659,17 +675,22 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
         outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
         if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
           write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			outfn.date=outfn.date, overwrite=overwrite_layer)
+			        outfn.date=outfn.date, overwrite=overwrite_layer)
         } else if (is.data.frame(rawtab)) {
           if (raw_fmt != "csv") {
             out_layer <- tabnm 
           } else {
             out_layer <- outfn.rawtab
           }
-          datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, 
-			overwrite_layer=overwrite_layer, add_layer=TRUE, 
-			append_layer=append_layer)
+          datExportData(rawtab, 
+                        savedata_opts=list(outfolder=rawfolder, 
+                                           out_fmt=raw_fmt, 
+                                           out_dsn=raw_dsn, 
+                                           out_layer=out_layer,
+                                           overwrite_layer=overwrite_layer,
+                                           append_layer=append_layer,
+                                           add_layer=TRUE)
+          )
         }
       }
     }

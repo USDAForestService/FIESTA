@@ -259,8 +259,8 @@
 modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
                       landarea="FOREST", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
                       sumunits=TRUE, returntitle=FALSE, savedata=FALSE,
-                      table_opts=table_options(), title_opts=title_options(),
-                      savedata_opts=savedata_options(), gui=FALSE, ...){
+                      table_opts=NULL, title_opts=NULL,
+                      savedata_opts=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -293,6 +293,11 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
   rawdata <- TRUE
   
+  print("TEST")
+  ## Check parameter lists
+  pcheck.params(input.params, table_opts=table_opts, savedata_opts=savedata_opts)
+  
+  
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
   
@@ -302,6 +307,9 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
@@ -398,14 +406,17 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 	condid=condid, treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits,
- 	landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
-	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
- 	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly,
- 	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn,
- 	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date,
- 	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
+                cuniqueid=cuniqueid, condid=condid, 
+                treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
+                landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+	              allin1=allin1, estround=estround, pseround=pseround, 
+                divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+                rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+                outfolder=outfolder, overwrite_dsn=overwrite_dsn,
+                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+                outfn.date=outfn.date, append_layer=append_layer, 
+                raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -442,13 +453,17 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ### Check row and column data
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
-	condf=pltcondf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, estseed=estseed,
-	rowvar=rowvar, rowvar.filter=rowvar.filter, colvar=colvar, 
-	colvar.filter=colvar.filter, row.FIAname=row.FIAname, col.FIAname=col.FIAname,
- 	row.orderby=row.orderby, col.orderby=col.orderby, row.add0=row.add0, 
-	col.add0=col.add0, title.rowvar=title.rowvar, title.colvar=title.colvar, 
-	rowlut=rowlut, collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-	rowgrpord=rowgrpord, landarea=landarea)
+	                condf=pltcondf, cuniqueid=cuniqueid, 
+	                tuniqueid=tuniqueid, estseed=estseed,
+	                rowvar=rowvar, rowvar.filter=rowvar.filter, 
+	                colvar=colvar, colvar.filter=colvar.filter, 
+	                row.FIAname=row.FIAname, col.FIAname=col.FIAname,
+ 	                row.orderby=row.orderby, col.orderby=col.orderby, 
+	                row.add0=row.add0, col.add0=col.add0, 
+	                title.rowvar=title.rowvar, title.colvar=title.colvar, 
+	                rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
+	                rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+	                landarea=landarea)
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
@@ -482,11 +497,12 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ### Get estimation data from tree table
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
-	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
-	cuniqueid=cuniqueid, esttype=esttype, estvarn=estvar, 
-	estvarn.filter=estvar.filter, esttotn=TRUE, tdomvar=tdomvar, 
-	tdomvar2=tdomvar2, adjtree=adjtree, metric=metric)
+  treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed,
+                  bycond=TRUE, condf=condf, bytdom=bytdom, 
+                  tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
+                  esttype=esttype, estvarn=estvar, estvarn.filter=estvar.filter, 
+                  esttotn=TRUE, tdomvar=tdomvar, tdomvar2=tdomvar2, 
+                  adjtree=adjtree, metric=metric)
   if (is.null(treedat)) return(NULL) 
 
   tdomdat <- treedat$tdomdat
@@ -512,14 +528,16 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ### Get titles for output tables
   #####################################################################################
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
-	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
-	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
- 	title.unitvar=title.unitvar, title.filter=title.filter, title.unitsn=estunits, 
-	title.estvarn=title.estvar, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
- 	estvarn=estvar, estvarn.filter=estvar.filter, addtitle=addtitle,
- 	returntitle=returntitle, rawdata=rawdata, states=states, invyrs=invyrs,
- 	landarea=landarea, pcfilter=pcfilter, allin1=allin1, divideby=divideby,
- 	outfn.pre=outfn.pre)
+	                sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+	                title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+	                title.colvar=title.colvar, title.unitvar=title.unitvar, 
+	                title.filter=title.filter, title.unitsn=estunits, title.estvarn=title.estvar, 
+	                unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
+ 	                estvarn=estvar, estvarn.filter=estvar.filter, 
+	                addtitle=addtitle, returntitle=returntitle, 
+	                rawdata=rawdata, states=states, invyrs=invyrs,
+	                landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
+	                divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -543,10 +561,10 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   #if (addtotal) {
     ## Get estimate for total
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
+		    by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
     unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdattot, 
-		esttype=esttype, uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, 
-		strvar=strvar, domain="TOTAL")
+		    esttype=esttype, uniqueid=cuniqueid, stratalut=stratalut, 
+		    unitvar=unitvar, strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -558,24 +576,24 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ## Get row, column, cell estimate and merge area if row or column in cond table 
   if (rowvar != "TOTAL") {
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
+		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
     unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=rowvar)
+		    uniqueid=cuniqueid, stratalut=stratalut, 
+		    unitvar=unitvar, strvar=strvar, domain=rowvar)
     if (colvar != "NONE") {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
+		      by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
       tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
       unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=colvar)
+		      uniqueid=cuniqueid, stratalut=stratalut, 
+		      unitvar=unitvar, strvar=strvar, domain=colvar)
 
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
+		      by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
       unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=grpvar)
+		      uniqueid=cuniqueid, stratalut=stratalut, 
+		      unitvar=unitvar, strvar=strvar, domain=grpvar)
     }
   }
 
@@ -584,8 +602,8 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
-    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
-		unitvar=unitvar, xvar.add0=row.add0)
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow,
+                        unitvar=unitvar, xvar.add0=row.add0)
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
@@ -596,8 +614,8 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   }
 
   if (!is.null(unit_colest)) {
-    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
-		unitvar=unitvar, xvar.add0=col.add0)
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol,
+                        unitvar=unitvar, xvar.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
@@ -608,9 +626,9 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   }
 
   if (!is.null(unit_grpest)) {
-    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
-		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
-		xvar2.add0=col.add0)
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow,
+                        unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, 
+                        uniquex2=uniquecol, xvar2.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
@@ -679,17 +697,17 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   message("getting output...")
   estnm <- "est"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, unit_rowest=unit_rowest, 
-	unit_colest=unit_colest, unit_grpest=unit_grpest, rowvar=rowvar, colvar=colvar, 
-	uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
-	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
-	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
- 	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
-	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
-	outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, estround=estround,
- 	pseround=pseround, divideby=divideby, returntitle=returntitle, 
-	estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
+	      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+	      unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
+	      rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
+	      rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+	      allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
+	      title.colvar=title.colvar, title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+	      title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est, 
+	      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
+	      outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
+	      estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
+	      returntitle=returntitle, estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
@@ -727,10 +745,15 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
           } else {
             out_layer <- outfn.rawtab
           }
-          datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, 
-			overwrite_layer=overwrite_layer, add_layer=TRUE, 
-			append_layer=append_layer)
+          datExportData(rawtab, 
+                        savedata_opts=list(outfolder=rawfolder, 
+                                           out_fmt=raw_fmt, 
+                                           out_dsn=raw_dsn, 
+                                           out_layer=out_layer,
+                                           overwrite_layer=overwrite_layer,
+                                           append_layer=append_layer,
+                                           add_layer=TRUE)
+          )
         }
       }
     }

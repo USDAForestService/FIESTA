@@ -271,14 +271,15 @@
 modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE", 
 	landarea="FOREST", pcfilter=NULL, estvarn=NULL, estvarn.filter=NULL, 
 	estvard=NULL, estvard.filter=NULL, rowvar=NULL, colvar=NULL, sumunits=TRUE,
-	returntitle=FALSE, savedata=FALSE, table_opts=table_options(), 
-	title_opts=title_options(), savedata_opts=savedata_options(), gui=FALSE, ...){
+	returntitle=FALSE, savedata=FALSE, table_opts=NULL, 
+	title_opts=NULL, savedata_opts=NULL, gui=FALSE, ...){
 
   ##################################################################################
   ## DESCRIPTION: 
   ## Generates per-acre or per-tree estimates by domain using ratio estimators
   ##################################################################################
 
+ 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::modGBratio)),
@@ -306,6 +307,10 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
 	variable <- NULL
   rawdata <- TRUE
   
+  ## Check parameter lists
+  pcheck.params(input.params, table_opts=table_opts, savedata_opts=savedata_opts)
+  
+  
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
   
@@ -315,6 +320,9 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
@@ -410,14 +418,17 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 	condid=condid, treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
-	landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
-	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
-	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
+                cuniqueid=cuniqueid, condid=condid, 
+                treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
+                landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+	              allin1=allin1, estround=estround, pseround=pseround, 
+                divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+                rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+                outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+	              overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+                outfn.date=outfn.date, append_layer=append_layer, 
+                raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -453,13 +464,16 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
   ### Check row and column data
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
-	condf=pltcondf, cuniqueid=cuniqueid, tuniqueid=tuniqueid, estseed=estseed, 
-	rowvar=rowvar, rowvar.filter=rowvar.filter, colvar=colvar, 
-	colvar.filter=colvar.filter, row.FIAname=row.FIAname, col.FIAname=col.FIAname,
- 	row.orderby=row.orderby, col.orderby=col.orderby, row.add0=row.add0, 
-	col.add0=col.add0, title.rowvar=title.rowvar, title.colvar=title.colvar, 
-	rowlut=rowlut, collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-	rowgrpord=rowgrpord, landarea=landarea)
+	                condf=pltcondf, cuniqueid=cuniqueid, 
+	                tuniqueid=tuniqueid, estseed=estseed, 
+	                rowvar=rowvar, rowvar.filter=rowvar.filter, 
+	                colvar=colvar, colvar.filter=colvar.filter, 
+	                row.FIAname=row.FIAname, col.FIAname=col.FIAname,
+ 	                row.orderby=row.orderby, col.orderby=col.orderby, 
+	                row.add0=row.add0, col.add0=col.add0, 
+	                title.rowvar=title.rowvar, title.colvar=title.colvar, 
+	                rowlut=rowlut, collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
+	                rowgrpord=rowgrpord, landarea=landarea)
   treef <- rowcolinfo$treef
   seedf <- rowcolinfo$seedf
   condf <- rowcolinfo$condf
@@ -495,12 +509,15 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
   ### Get estimation data from tree table
   #####################################################################################
   adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
-  treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed, 
-	bycond=TRUE, condf=condf, bytdom=bytdom, tuniqueid=tuniqueid, 
-	cuniqueid=cuniqueid, esttype=esttype, ratiotype=ratiotype, 
-	estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
- 	estvard.filter=estvard.filter, esttotn=TRUE, esttotd=TRUE, 
-	tdomvar=tdomvar, tdomvar2=tdomvar2, adjtree=adjtree, metric=metric)
+  treedat <- check.tree(gui=gui, treef=treef, seedf=seedf, estseed=estseed,
+                  bycond=TRUE, condf=condf, bytdom=bytdom, 
+                  tuniqueid=tuniqueid, cuniqueid=cuniqueid, 
+                  esttype=esttype, ratiotype=ratiotype,
+                  estvarn=estvarn, estvarn.filter=estvarn.filter, 
+                  estvard=estvard, estvard.filter=estvard.filter, 
+                  esttotn=TRUE, esttotd=TRUE, 
+                  tdomvar=tdomvar, tdomvar2=tdomvar2, 
+                  adjtree=adjtree, metric=metric)
   if (is.null(treedat)) return(NULL)
  
   tdomdat <- treedat$tdomdat
@@ -540,14 +557,19 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
   ### Get titles for output tables
   #####################################################################################
   alltitlelst <- check.titles(dat=tdomdat, esttype=esttype, estseed=estseed, 
-	ratiotype=ratiotype, sumunits=sumunits, title.main=title.main, title.ref=title.ref,
- 	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.colvar=title.colvar,
- 	title.unitvar=title.unitvar, title.filter=title.filter, title.unitsn=estunitsn,
- 	title.unitsd=estunitsd, title.estvarn=title.estvarn,
- 	unitvar=unitvar, rowvar=rowvar, colvar=colvar,
- 	estvarn=estvarn, estvarn.filter=estvarn.filter, estvard=estvard,
- 	estvard.filter=estvard.filter, addtitle=addtitle, rawdata=rawdata, states=states,
- 	invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
+                    ratiotype=ratiotype, sumunits=sumunits, 
+                    title.main=title.main, title.ref=title.ref,
+ 	                  title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+                    title.colvar=title.colvar, title.unitvar=title.unitvar, 
+                    title.filter=title.filter, title.unitsn=estunitsn,
+                    title.unitsd=estunitsd, title.estvarn=title.estvarn,
+                    unitvar=unitvar, rowvar=rowvar, colvar=colvar,
+                    estvarn=estvarn, estvarn.filter=estvarn.filter, 
+                    estvard=estvard, estvard.filter=estvard.filter, 
+                    addtitle=addtitle, returntitle=returntitle,
+                    rawdata=rawdata, states=states, invyrs=invyrs, 
+                    landarea=landarea, pcfilter=pcfilter, 
+                    allin1=allin1, 
 	divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
@@ -600,8 +622,8 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
 #saveRDS(stratalut, "E:/workspace/FIESTA/FIESTA_MA/data_v1/stratalut.rds")
 
     unit_totest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdattot, 
-		esttype=esttype, ratiotype=ratiotype, uniqueid=cuniqueid,
-		stratalut=stratalut, unitvar=unitvar, strvar=strvar, domain="TOTAL")
+		    esttype=esttype, ratiotype=ratiotype, uniqueid=cuniqueid,
+		    stratalut=stratalut, unitvar=unitvar, strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -619,22 +641,22 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
       } else {
         if (tdomvar == rowvar) {
           tdomdatsum <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
- 			tvars=tdomvarlstn)
+ 			        tvars=tdomvarlstn)
           setnames(tdomdatsum, c("variable", "value"), c(rowvar, estvarn.name))
           tdomdatsum <- tdomdatsum[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
+              by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
         } else {  
           tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
+              by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
         }
       }
       if (rowvar %in% names(cdomdat)) {
         cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvard.name]
+            by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvard.name]
         tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid, rowvar))
       } else {
-        cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
+        cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE),
+            by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
         tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid))
       }
     } else {
@@ -643,46 +665,46 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
     }
 
     #tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
-    unit_rowest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
+    unit_rowest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name,
+                      ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype,
+                      uniqueid=cuniqueid, stratalut=stratalut, 
+                      unitvar=unitvar, strvar=strvar, 
 		domain=rowvar)
  
     if (colvar != "NONE") {
       if (!is.null(tdomvar)) {
         if (!is.null(tdomvar2)) {
           tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]    
+                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]    
         } else {
           if (tdomvar == colvar) {
             tdomdatsum <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
- 			tvars=tdomvarlstn)
+                  tvars=tdomvarlstn)
             setnames(tdomdatsum, c("variable", "value"), c(colvar, estvarn.name))
             tdomdatsum <- tdomdatsum[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
+                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
           } else {     
-            tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
+            tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE),
+                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
           }
         }
         if (colvar %in% names(cdomdat)) {
-          cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, colvar), .SDcols=estvard.name]
+          cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE),
+                  by=c(strunitvars, cuniqueid, colvar), .SDcols=estvard.name]
           tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid, colvar))
         } else {
           cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
+                  by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
           tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid))
         }
       } else {
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
+                  by=c(strunitvars, cuniqueid, colvar), .SDcols=c(estvarn.name, estvard.name)]
       }
       #tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[colvar]]),]
-      unit_colest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=colvar)
+      unit_colest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdatsum, 
+                esttype=esttype, ratiotype=ratiotype, uniqueid=cuniqueid, 
+                stratalut=stratalut, unitvar=unitvar, strvar=strvar, domain=colvar)
 
       if (!is.null(tdomvar)) {
         if (!is.null(tdomvar2)) {
@@ -691,30 +713,29 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
         } else {
           ddomvar <- grpvar[grpvar != tdomvar]
           tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlstn]
+              by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlstn]
           tdomdatsum <- transpose2row(tdomdatsum, uniqueid=c(strunitvars, cuniqueid, ddomvar),
- 			tvars=tdomvarlstn)
+              tvars=tdomvarlstn)
           setnames(tdomdatsum, c("variable", "value"), c(tdomvar, estvarn.name))      
 
           if (any(grpvar %in% names(cdomdat))) {
             mergevar <- grpvar[grpvar %in% names(cdomdat)]
             cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid, mergevar), .SDcols=estvard.name]
+                  by=c(strunitvars, cuniqueid, mergevar), .SDcols=estvard.name]
             tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid, mergevar))
           } else {
             cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-			by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
+                  by=c(strunitvars, cuniqueid), .SDcols=estvard.name]
             tdomdatsum <- merge(tdomdatsum, cdomdatsum, by=c(strunitvars, cuniqueid))
           }
         }
       } else {
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-	 	by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
+            by=c(strunitvars, cuniqueid, grpvar), .SDcols=c(estvarn.name, estvard.name)]
       }
-      unit_grpest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, 
-		ysum=tdomdatsum, esttype=esttype, ratiotype=ratiotype, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=grpvar)
+      unit_grpest <- GBest.pbar(sumyn=estvarn.name, sumyd=estvard.name, ysum=tdomdatsum, 
+            esttype=esttype, ratiotype=ratiotype, uniqueid=cuniqueid, 
+            stratalut=stratalut, unitvar=unitvar, strvar=strvar, domain=grpvar)
     }
   }
   
@@ -813,17 +834,17 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
   message("getting output...")
   estnm <- "estn"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, unit_rowest=unit_rowest, 
-	unit_colest=unit_colest, unit_grpest=unit_grpest, rowvar=rowvar, colvar=colvar, 
-	uniquerow=uniquerow, uniquecol=uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
-	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
-	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, title.unitvar=title.unitvar,
- 	title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
-	rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder,
- 	overwrite=overwrite_layer, outfn.date=outfn.date, estnm=estnm, estround=estround,
- 	pseround=pseround, divideby=divideby, returntitle=returntitle, 
-	estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
+	      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+	      unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
+	      rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
+	      rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+	      allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
+	      title.colvar=title.colvar, title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+	      title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est, 
+	      title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
+	      outfolder=outfolder, overwrite=overwrite_layer, outfn.date=outfn.date, 
+	      estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
+	      returntitle=returntitle, estnull=estnull, psenull=psenull, raw.keep0=raw.keep0) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
   
@@ -865,10 +886,15 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
           } else {
             out_layer <- outfn.rawtab
           }
-          datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, 
-			overwrite_layer=overwrite_layer, add_layer=TRUE, 
-			append_layer=append_layer)
+          datExportData(rawtab, 
+                        savedata_opts=list(outfolder=rawfolder, 
+                                           out_fmt=raw_fmt, 
+                                           out_dsn=raw_dsn, 
+                                           out_layer=out_layer,
+                                           overwrite_layer=overwrite_layer,
+                                           append_layer=append_layer,
+                                           add_layer=TRUE)
+          )
         }
       }
     }

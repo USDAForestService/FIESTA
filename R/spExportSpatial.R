@@ -6,12 +6,12 @@
 #' 
 #' @param sfobj sf class R object. Spatial object to export.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options.  
-#' @return An sf spatial object is written to the out_dsn.
+#' of options for saving data. If out_layer = NULL, default = 'outsp'.
+#' @return An sf spatial object is written to outfolder.
 #' @note If out_fmt='shp':\cr The ESRI shapefile driver truncates variable
-#' names to 10 characters or less.  Variable names are changed before export
+#' names to 10 characters or less. Variable names are changed before export
 #' using an internal function (trunc10shp). Name changes are output to the
-#' outfolder, 'outshpnm'_newnames.csv.
+#' outfolder, 'out_layer'_newnames.csv.
 #' 
 #' If sf object has more than 1 record, it cannot be exported to a shapefile.
 #' @author Tracey S. Frescino
@@ -88,9 +88,11 @@ spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
   outfn.date <- outlst$outfn.date
   outfn.pre <- outlst$outfn.pre
 
+  out_fmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
+
   ## Check out_layer
   if (is.null(out_layer)) {
-    out_layer <- "outfile"
+    out_layer <- "outsp"
   } 
   
   ## Write sf layer
@@ -113,6 +115,7 @@ spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
 		dataset_options="SPATIALITE=YES", layer_options="GEOMETRY_NAME = geometry",
 		delete_dsn=overwrite_dsn, delete_layer=overwrite_layer, quiet=FALSE) 
     } else {
+   
       ## If file exists, check if spatiaLite database
       if (DBI::dbCanConnect(RSQLite::SQLite(), out_dsn)) {
         sqlconn <- DBI::dbConnect(RSQLite::SQLite(), out_dsn, loadable.extensions = TRUE)
@@ -121,6 +124,13 @@ spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
           stop(paste(out_dsn, "is a Spatialite database... "))
         }
       } 
+      if (out_layer %in% tablst) {
+        if (overwrite_layer) {
+          message("overwriting ", out_layer, " in ", basename(out_dsn), "...")
+        } else {
+          stop(out_layer, " exists in ", basename(out_dsn), " and overwrite_layer = FALSE")
+        }
+      }
       sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, driver="SQLite", append=FALSE,
 		layer_options="GEOMETRY_NAME = geometry",
 		delete_dsn=overwrite_dsn, delete_layer=TRUE, quiet=FALSE) 

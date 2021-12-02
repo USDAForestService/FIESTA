@@ -28,7 +28,8 @@
 #' other, include PROJ.4 string in prj4str.
 #' @param addxy Logical. If TRUE, adds x and y variables to spatial sf object.
 #' @param exportsp Logical. If TRUE, exports spatial object.
-#' @param ...  Parameters for spExportSpatial.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when exportsp = TRUE.  
 #' @return \item{spplt}{ sf obect with spatial points and defined CRS. }
 #' 
 #' If exportsp = TRUE, the sf object is written to specified output.
@@ -50,7 +51,8 @@
 #' @export spMakeSpatialPoints
 spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL, 
 	xvar=NULL, yvar=NULL, xy.crs=4269, prj=NULL, datum=NULL, zone=NULL, 
-	zoneS=FALSE, aea.param="USGS", addxy=FALSE, exportsp=FALSE, ...){
+	zoneS=FALSE, aea.param="USGS", addxy=FALSE, exportsp=FALSE, 
+	savedata_opts=savedata_options){
   ##############################################################################
   ## DESCRIPTION:
   ## Generates sf points object with defined projection.
@@ -62,6 +64,20 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(FIESTA::spMakeSpatialPoints))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  
+  
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
@@ -136,7 +152,7 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
   }
 
   if (exportsp) {
-    spExportSpatial(spplt, ...) 
+    spExportSpatial(spplt, savedata_opts=savedata_opts) 
   }   
   return(spplt)
 }

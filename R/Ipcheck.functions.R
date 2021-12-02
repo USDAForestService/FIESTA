@@ -573,11 +573,11 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
     if (!"sf" %in% rownames(installed.packages())) {
       message("sf package is required for spExportSpatial")
     }
-  } else if (out_fmt %in% c("sqlite", "gpkg")) {
+  } else if (out_fmt %in% c('sqlite', 'sqlite3', 'db', 'db3')) {
     if (!"RSQLite" %in% rownames(installed.packages())) {
       message("RSQLite package is required for exporting to sqlite or gpkg formats")
     }
-  } else if (out_fmt %in% c("gdb")) {
+  } else if (out_fmt %in% c('gdb')) {
     if (!"arcgisbinding" %in% rownames(installed.packages())) {
       message("arcgisbinding package is required for exporting to gdb format")
     }
@@ -626,7 +626,9 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
   ###########################################################
   chkfn <- checkfilenm(out_dsn, outfolder=outfolder)
 
+
   if (is.null(chkfn)) {
+    ext <- "db"
     if (is.null(out_dsn)) {
       stop("out_dsn is NULL")
     }
@@ -638,17 +640,22 @@ pcheck.output <- function(out_fmt="csv", out_dsn=NULL, outfolder=NULL,
       }
       i <- 1
       while (is.null(chkfn) && i <= length(extlst)) {
-        ext <- extlst[i]
-        chkfn <- checkfilenm(out_dsn, outfolder=outfolder, ext=ext)
+        exttest <- extlst[i]
+        chkfn <- checkfilenm(out_dsn, outfolder=outfolder, ext=exttest)
+        if (!is.null(chkfn)) {
+          ext <- exttest
+        }
         i <- i + 1
       }
     }
+  } else {
+    ext <- getext(chkfn)
   }
- 
+
   if (is.null(chkfn) || overwrite_dsn || !overwrite_dsn) {
     out_dsn <- getoutfn(out_dsn, outfn.pre=outfn.pre, outfolder=outfolder,
 		outfn.date=outfn.date, overwrite=overwrite_dsn, outfn.default="data",
-		ext=out_fmt, add=add_layer, append=append_layer)
+		ext=ext, add=add_layer, append=append_layer)
 
     if (out_fmt %in% c("sqlite", "gpkg") && createSQLite) {
       gpkg <- ifelse(out_fmt == "gpkg", TRUE, FALSE)
@@ -1004,7 +1011,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid strata_opts... see strata_options()")
       }
       formallst.strata <- names(formals(FIESTA::strata_options))[-length(formals(FIESTA::strata_options))]
-      strata.params <- names(strata_opts)
+      strata.params <- names(strata_opts)[names(strata_opts) != c("formallst", "input.params")]
       if (!all(strata.params %in% formallst.strata)) {
         miss <- strata.params[!strata.params %in% formallst.strata]
         stop("invalid parameter: ", toString(miss))
@@ -1020,7 +1027,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid unit_opts... see unit_options()")
       }
       formallst.unit <- names(formals(FIESTA::unit_options))[-length(formals(FIESTA::unit_options))]
-      unit.params <- names(unit_opts)
+      unit.params <- names(unit_opts)[names(unit_opts) != c("formallst", "input.params")]
       if (!all(unit.params %in% formallst.unit)) {
         miss <- unit.params[!unit.params %in% formallst.unit]
         stop("invalid parameter: ", toString(miss))
@@ -1036,7 +1043,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid table_opts... see table_options()")
       }
       formallst.table <- names(formals(FIESTA::table_options))[-length(formals(FIESTA::table_options))]
-      table.params <- names(table_opts)
+      table.params <- names(table_opts)[names(table_opts) != c("formallst", "input.params")]
       if (!all(table.params %in% formallst.table)) {
         miss <- table.params[!table.params %in% formallst.table]
         stop("invalid parameter: ", toString(miss))
@@ -1052,12 +1059,13 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid savedata_opts... see savedata_options()")
       }
       formallst.savedata <- names(formals(FIESTA::savedata_options))[-length(formals(FIESTA::savedata_options))]
-      savedata.params <- names(savedata_opts)
+      savedata.params <- names(savedata_opts)[names(savedata_opts) != c("formallst", "input.params")]
       if (!all(savedata.params %in% formallst.savedata)) {
         miss <- savedata.params[!savedata.params %in% formallst.savedata]
         stop("invalid parameter: ", toString(miss))
       }
     }
   }
+
 }
 
