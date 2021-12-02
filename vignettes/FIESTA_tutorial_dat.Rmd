@@ -522,7 +522,7 @@ treesum2[treesum2$CN == 40404758010690,]
 
 </details>
 
-Example 3: Average Diameter and Height of Live Trees by Plot
+### Example 3: Average Diameter and Height of Live Trees by Plot
 <details>
   <summary>View Example</summary>
 
