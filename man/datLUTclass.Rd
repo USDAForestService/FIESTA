@@ -18,8 +18,8 @@ datLUTclass(
   vars2keep = NULL,
   keepcutbreaks = FALSE,
   savedata = FALSE,
-  outfolder = NULL,
-  outfn = "datlut"
+  savedata_opts = NULL,
+  gui = FALSE
 )
 }
 \arguments{
@@ -60,14 +60,13 @@ x.}
 \item{keepcutbreaks}{Logical. If TRUE, the cutbreaks used for creating
 classes are appended to dataset.}
 
-\item{savedata}{Logical. If TRUE, saves data to outfolder as comma-delimited
-file (*.csv).}
+\item{savedata}{Logical. If TRUE, saves data to outfolder.}
 
-\item{outfolder}{String.* The output folder path. If NULL and savedata=TRUE,
-the outfolder is the working directory.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'datlutcl'.}
 
-\item{outfn}{String.* Output file name. If NULL and savedata=TRUE, outfn =
-datlut_'date'.csv.}
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{xLUT}{ Input data table with look-up table variable(s). }

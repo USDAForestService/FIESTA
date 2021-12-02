@@ -74,18 +74,9 @@ statistic calculations.}
 
 \item{savedata}{Logical. If TRUE, the zonal data are saved to outfolder.}
 
-\item{outfolder}{String. The output folder.}
-
-\item{outfn}{String. Name of output data file. If NULL, default is
-'zonalext.csv'.}
-
-\item{outfn.pre}{String. Add a prefix to output name (e.g., "01").}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite}{Logical. If TRUE and exportshp=TRUE, overwrite files in
-outfolder.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'zonalext'.}
 }
 \value{
 \item{zonalext}{ Data frame. Zonal statistics by polygon attribute

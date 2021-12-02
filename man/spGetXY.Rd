@@ -35,15 +35,7 @@ spGetXY(
   savedata = FALSE,
   exportsp = FALSE,
   returnxy = TRUE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  out_layer = "xyplt",
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = FALSE,
-  append_layer = FALSE
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -134,31 +126,8 @@ database.}
 
 \item{returnxy}{Logical. If TRUE, returns a spatial sf object.}
 
-\item{outfolder}{String. If savedata=TRUE or savexy=TRUE, savebnd=TRUE, name
-of output folder. If NULL, the working directory is used.}
-
-\item{out_fmt}{String. Format for output ('csv', 'sqlite', 'db', 'sqlite3',
-'db3', 'gpkg', 'gdb'). If out_fmt='gdb', must have ArcGIS license and
-install arcgisbinding package.}
-
-\item{out_dsn}{String. Name of database if out_fmt != 'csv'.}
-
-\item{out_layer}{String. Name of layer in database if out_fmt != 'csv'.}
-
-\item{outfn.pre}{String. Add a prefix to output name (e.g., "01").}
-
-\item{outfn.date}{Logical. If TRUE, adds current date to out_dsn name or
-file name if out_fmt = 'csv'.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites out_dsn. Note: cannot
-overwrite out_fmt="gdb".}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites layers in out_dsn or
-files if out_fmt = 'csv'.}
-
-\item{append_layer}{Logical. If TRUE, appends layers to existing out_dsn or
-files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-"gdb".}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 }
 \value{
 \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }

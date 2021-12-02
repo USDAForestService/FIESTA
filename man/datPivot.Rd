@@ -16,10 +16,8 @@ datPivot(
   dropNAyvar = TRUE,
   pvar.round = 2,
   savedata = FALSE,
-  outfolder = NULL,
-  outfn = NULL,
-  outfn.date = FALSE,
-  overwrite = TRUE
+  savedata_opts = NULL,
+  gui = FALSE
 )
 }
 \arguments{
@@ -47,16 +45,11 @@ pivoting (ex. "STATUSCD == 1").}
 
 \item{savedata}{Logical. If TRUE, writes output data to outfolder.}
 
-\item{outfolder}{String. The name of the output folder. If savedata=TRUE,
-all output saved to the outfolder. If savedata=FALSE, only a text file of
-input parameters is saved.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.  If out_layer = NULL, 
+default = 'datpivot'.}
 
-\item{outfn}{String. The name of the output file if savedata=TRUE (*.csv).
-Do not include extension. If NULL, the file will be named pivot_'date'.csv}
-
-\item{outfn.date}{Logical. If TRUE, add current date to out_dsn.}
-
-\item{overwrite}{Logical. If TRUE, overwrite existing file.}
+\item{gui}{Logical. If TRUE, pop-up windows will appear for user-interface.}
 }
 \value{
 \item{ptab}{ Matrix. The pivot table. }

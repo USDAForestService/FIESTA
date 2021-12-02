@@ -4,7 +4,13 @@
 \alias{spReprojectVector}
 \title{Spatial - Reprojects an sf spatial object.}
 \usage{
-spReprojectVector(layer, dsn = NULL, crs.new, exportsp = FALSE, ...)
+spReprojectVector(
+  layer,
+  dsn = NULL,
+  crs.new,
+  exportsp = FALSE,
+  savedata_opts = NULL
+)
 }
 \arguments{
 \item{layer}{sf class R object or String. The spatial layer must have a
@@ -22,7 +28,8 @@ system (e.g., "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80
 \item{exportsp}{Logical. If TRUE, the spatial reprojected object is exported
 to outfolder (see spExportSpatial for details).}
 
-\item{...}{Parameters for spExportSpatial.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options for saving data. If out_layer = NULL, default = 'layerprj'.}
 }
 \value{
 \item{layerprj}{ sf object. Reprojected spatial layer. }

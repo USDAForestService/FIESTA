@@ -13,9 +13,9 @@ spClipPoly(
   showext = FALSE,
   areacalc = FALSE,
   areaunits = "ACRES",
-  exportsp = FALSE,
   nolonglat = TRUE,
-  ...
+  exportsp = FALSE,
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -47,13 +47,14 @@ append to attribute table (See details).}
 append to attribute table ("ACRES", "HECTARES", "SQKM"). If NULL, units of
 polyv.}
 
-\item{exportsp}{Logical. If TRUE, the spatial clipped object is exported to
-outfolder (see spExportSpatial for details).}
-
 \item{nolonglat}{Logical. If TRUE, and both layer's coordinate system is
 long/lat, the layers are converted to a projected CRS before clipping.}
 
-\item{...}{Parameters for spExportSpatial.}
+\item{exportsp}{Logical. If TRUE, the spatial clipped object is exported to
+outfolder (see spExportSpatial for details).}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options for saving data. If out_layer = NULL, default = 'polyclip'.}
 }
 \value{
 sf object of clipped polygon. If polyv and clippolyv have different

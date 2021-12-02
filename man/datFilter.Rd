@@ -13,15 +13,11 @@ datFilter(
   vardelete = NULL,
   title.filter = NULL,
   savedata = FALSE,
-  outfolder = NULL,
-  outfn = "datf",
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite = FALSE,
   filternm = NULL,
   stopifnull = FALSE,
   returnDT = TRUE,
   xnm = NULL,
+  savedata_opts = NULL,
   gui = FALSE
 )
 }
@@ -53,17 +49,6 @@ for internal queries.}
 
 \item{savedata}{Logical. If TRUE, writes output data to outfolder.}
 
-\item{outfolder}{String. Name of output folder if savedata=TRUE.}
-
-\item{outfn}{String. Name of output file if savedata=TRUE (*.csv). Do not
-include extension. If NULL, the file will be named xfiltered_'date'.csv}
-
-\item{outfn.pre}{String. Prefix for output table names.}
-
-\item{outfn.date}{Logical. If TRUE, adds current date to outfile name.}
-
-\item{overwrite}{Logical. If TRUE, overwrites file if exists.}
-
 \item{filternm}{String. Optional. Name of filter, for feedback purposes.}
 
 \item{stopifnull}{Logical. If TRUE, stop if output is NULL.}
@@ -72,6 +57,10 @@ include extension. If NULL, the file will be named xfiltered_'date'.csv}
 data frame.}
 
 \item{xnm}{String. Name for filter attribute. Used for warning messages.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.  If out_layer = NULL, 
+default = 'datf'.}
 
 \item{gui}{Logical. If TRUE, pop-up windows will appear for user-interface.}
 }

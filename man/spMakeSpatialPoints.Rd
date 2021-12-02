@@ -18,7 +18,7 @@ spMakeSpatialPoints(
   aea.param = "USGS",
   addxy = FALSE,
   exportsp = FALSE,
-  ...
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -58,7 +58,8 @@ other, include PROJ.4 string in prj4str.}
 
 \item{exportsp}{Logical. If TRUE, exports spatial object.}
 
-\item{...}{Parameters for spExportSpatial.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when exportsp = TRUE.}
 }
 \value{
 \item{spplt}{ sf obect with spatial points and defined CRS. }

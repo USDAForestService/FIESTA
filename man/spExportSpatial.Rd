@@ -4,16 +4,16 @@
 \alias{spExportSpatial}
 \title{Spatial - Exports an sf object.}
 \usage{
-spExportSpatial(sfobj, savedata_opts = savedata_options())
+spExportSpatial(sfobj, savedata_opts = NULL)
 }
 \arguments{
 \item{sfobj}{sf class R object. Spatial object to export.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
-of options.}
+of options for saving data. If out_layer = NULL, default = 'datsp'.}
 }
 \value{
-An sf spatial object is written to the out_dsn.
+An sf spatial object is written to outfolder.
 }
 \description{
 Exports an sf object to a specified output.
@@ -23,9 +23,9 @@ Wrapper for sf::st_write function.
 }
 \note{
 If out_fmt='shp':\cr The ESRI shapefile driver truncates variable
-names to 10 characters or less.  Variable names are changed before export
+names to 10 characters or less. Variable names are changed before export
 using an internal function (trunc10shp). Name changes are output to the
-outfolder, 'outshpnm'_newnames.csv.
+outfolder, 'out_layer'_newnames.csv.
 
 If sf object has more than 1 record, it cannot be exported to a shapefile.
 }

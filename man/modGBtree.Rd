@@ -16,9 +16,9 @@ modGBtree(
   sumunits = TRUE,
   returntitle = FALSE,
   savedata = FALSE,
-  table_opts = table_options(),
-  title_opts = title_options(),
-  savedata_opts = savedata_options(),
+  table_opts = NULL,
+  title_opts = NULL,
+  savedata_opts = NULL,
   gui = FALSE,
   ...
 )

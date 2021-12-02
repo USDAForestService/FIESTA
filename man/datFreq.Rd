@@ -11,8 +11,8 @@ datFreq(
   subtotal = FALSE,
   subtotalcol = NULL,
   savedata = FALSE,
-  outfolder = NULL,
-  outfn = NULL
+  savedata_opts = NULL,
+  gui = FALSE
 )
 }
 \arguments{
@@ -32,10 +32,11 @@ subtotals.}
 
 \item{savedata}{Logical. If TRUE, writes output data to outfolder.}
 
-\item{outfolder}{String. The name of the output folder, if savedata=TRUE.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'datfreq'.}
 
-\item{outfn}{String. The name of the output file if savedata=TRUE (*.csv).
-Do not include extension. If NULL, the file will be named Freq_'date'.csv}
+\item{gui}{Logical. If TRUE, pop-up windows will appear for user-interface.}
 }
 \value{
 \item{freqtable}{ Data frame. The frequency table. } If

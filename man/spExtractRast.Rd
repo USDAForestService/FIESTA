@@ -86,7 +86,10 @@ exported to outfolder.}
 \item{exportNA}{Logical. If TRUE, NA values are exported to outfolder.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
-of options. Only used when savedata = TRUE.}
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'rastext'.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Other parameters for spMakeSpatialPoints.}
 }

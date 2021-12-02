@@ -16,10 +16,10 @@ datLUTnm(
   group = FALSE,
   add0 = FALSE,
   stopifmiss = FALSE,
+  xtxt = NULL,
   savedata = FALSE,
-  outfolder = NULL,
-  outfn = "datlut",
-  xtxt = NULL
+  savedata_opts = NULL,
+  gui = FALSE
 )
 }
 \arguments{
@@ -54,17 +54,16 @@ only include codes that are in x.}
 
 \item{stopifmiss}{Logical. IF TRUE, stops function if missing codes in LUTx.}
 
-\item{savedata}{Logical. If TRUE, saves data to outfolder as comma-delimited
-file (*.csv).}
-
-\item{outfolder}{String.* The output folder path. If NULL and savedata=TRUE,
-the outfolder is the working directory.}
-
-\item{outfn}{String.* Output file name. If NULL and savedata=TRUE, outfn =
-datlut_'date'.csv.}
-
 \item{xtxt}{String.* Name of x table for more useful information in
 warnings.}
+
+\item{savedata}{Logical. If TRUE, saves data to outfolder.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'datlut'.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 \item{xLUT}{ The input data table with look-up table variable(s). }

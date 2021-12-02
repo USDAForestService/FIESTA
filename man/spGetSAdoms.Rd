@@ -34,13 +34,7 @@ spGetSAdoms(
   savesteps = FALSE,
   maxbnd.addtext = TRUE,
   largebnd.addtext = FALSE,
-  outfolder = NULL,
-  out_fmt = "shp",
-  out_dsn = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
+  savedata_opts = NULL,
   addstate = FALSE,
   dissolve = FALSE
 )
@@ -147,25 +141,8 @@ for maxbnd displays.}
 \item{largebnd.addtext}{Logical. If TRUE, adds text to intermediate step
 plots for largebnd displays.}
 
-\item{outfolder}{String. If savedata=TRUE or exportsp=TRUE, name of output
-folder.  If NULL, the working directory is used.}
-
-\item{out_fmt}{String. Format for output tables ('shp', 'sqlite', 'gpkg',
-'gdb').  If out_fmt='gdb', must install arcgisbinding package and ArcGIS
-R-Bridge.}
-
-\item{out_dsn}{String. Name of database if out_fmt = c('sqlite', 'gpkg',
-'gdb').}
-
-\item{outfn.pre}{String. If out_fmt = "shp", a new folder is created within
-outfolder named outfn.pre. If out_fmt != "shp", a prefix is concatenated to
-out_dsn, using an underscore as separator.}
-
-\item{outfn.date}{Logical. If TRUE, adds current date to outfile name.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrite dsn.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrite layer(s) in dsn.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
 \item{addstate}{Logical. If TRUE, appends state attribute to SAdoms.}
 

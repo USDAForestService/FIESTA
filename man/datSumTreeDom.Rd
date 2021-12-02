@@ -44,20 +44,12 @@ datSumTreeDom(
   adjvar = "tadjfac",
   NAto0 = FALSE,
   adjTPA = 1,
-  savedata = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  out_layer = NULL,
-  outfn.pre = NULL,
-  layer.pre = NULL,
-  outfn.date = TRUE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = FALSE,
-  append_layer = FALSE,
   tround = 16,
   checkNA = FALSE,
-  returnDT = TRUE
+  returnDT = TRUE,
+  savedata = FALSE,
+  savedata_opts = NULL,
+  gui = FALSE
 )
 }
 \arguments{
@@ -187,40 +179,20 @@ multiplying by adjustment (e.g., tadjfac).}
 (annual inventory), if using less than 4 subplots. If using only 1 sublot
 for estimate, adjTPA=4. The default is 1.}
 
-\item{savedata}{Logical. If TRUE, writes output data to outfolder.}
-
-\item{outfolder}{String. Name of the output folder. If savedata=TRUE, output
-is saved to the outfolder.}
-
-\item{out_fmt}{String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-
-\item{out_dsn}{String. Data source name for output. If extension is not
-included, out_fmt is used. Use full path if outfolder=NULL.}
-
-\item{out_layer}{String. Name of output layer in database or *.csv file, if
-savedata=TRUE. If NULL, the file will be named tsum_'date'.csv.}
-
-\item{outfn.pre}{String. Prefix for out_dsn.}
-
-\item{layer.pre}{String. Prefix for out_layer.}
-
-\item{outfn.date}{Logical. If TRUE, adds current date to outfile name.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites raw_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the out_layer in raw_dsn
-or *.csv raw data layer, if datsource="csv".}
-
-\item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data
-data frames to existing out_dsn layer or *.csv file.}
-
 \item{tround}{Number. The number of digits to round to. If NULL, default=6.}
 
 \item{checkNA}{Logical. If TRUE, checks if NA values exist in necessary
 variables.}
 
 \item{returnDT}{Logical. If TRUE, returns data.table object(s). If FALSE,
-returns data.frame object(s).}
+returns data.frame object(s).
+#' @param savedata Logical. If TRUE, saves data to outfolder.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,
+default = 'tdomsum'.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 }
 \value{
 tdomdata - a list of the following objects:

@@ -35,7 +35,7 @@ spGetAuxiliary(
   savedata = FALSE,
   exportsp = FALSE,
   exportNA = FALSE,
-  savedata_opts = savedata_options(),
+  savedata_opts = NULL,
   vars2keep = NULL,
   gui = FALSE,
   ...

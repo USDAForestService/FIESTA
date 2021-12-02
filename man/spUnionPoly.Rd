@@ -14,6 +14,7 @@ spUnionPoly(
   areacalc = FALSE,
   areavar = "ACRES_GIS",
   exportsp = FALSE,
+  savedata_opts = NULL,
   ...
 )
 }
@@ -46,7 +47,9 @@ append to attribute table (See details).}
 \item{exportsp}{Logical. If TRUE, the spatial unioned object is exported to
 outfolder (see spExportSpatial for details).}
 
-\item{...}{Parameters for spExportSpatial.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when export = TRUE. If out_layer = NULL,
+default = 'polyunion'.}
 }
 \value{
 sf object of unioned polygon. If polyv1 and polyv2 have different

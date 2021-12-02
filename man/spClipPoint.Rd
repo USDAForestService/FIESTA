@@ -13,18 +13,12 @@ spClipPoint(
   clippolyv.filter = NULL,
   showext = FALSE,
   keepNA = FALSE,
-  savedata = FALSE,
   returnsp = TRUE,
-  exportsp = FALSE,
-  outfolder = NULL,
-  out_fmt = "shp",
-  out_dsn = NULL,
-  out_layer = "pnt",
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite = FALSE,
   othertabnms = NULL,
   stopifnotin = TRUE,
+  savedata = FALSE,
+  exportsp = FALSE,
+  savedata_opts = NULL,
   ...
 )
 }
@@ -53,28 +47,8 @@ OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
 \item{keepNA}{Logical. If TRUE, keep NA values after data intersection.}
 
-\item{savedata}{Logical. If TRUE, save data to outfolder.}
-
 \item{returnsp}{Logical. If TRUE, returns sf object of points. If FALSE,
 returns data frame of points (i.e., drops sf geometry).}
-
-\item{exportsp}{Logical. If TRUE, the clipped spatial point data are
-exported.}
-
-\item{outfolder}{String. If savedata=TRUE or exportsp=TRUE, name of output
-folder.  If NULL, the working directory is used.}
-
-\item{out_fmt}{String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-
-\item{out_dsn}{String. Name of database if out_fmt = c('sqlite', 'gpkg').}
-
-\item{out_layer}{String. Name of layer in out_dsn if database.}
-
-\item{outfn.pre}{String. A prefix for output dsn.}
-
-\item{outfn.date}{Logical. If TRUE, adds current date to out_dsn.}
-
-\item{overwrite}{Logical. If TRUE, overwrites out_layer, if exists.}
 
 \item{othertabnms}{String vector. Name(s) of R objects, comma-delimited
 files, or database layers to subset. Must include quotes (e.g.,
@@ -82,6 +56,14 @@ othertabnms=c("tree", "cond")).}
 
 \item{stopifnotin}{Logical. If TRUE, stops if boundaries do not overlap.  If
 FALSE, returns NULL.}
+
+\item{savedata}{Logical. If TRUE, save data to outfolder.}
+
+\item{exportsp}{Logical. If TRUE, the clipped spatial point data are
+exported.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options for saving data. If out_layer = NULL, default = 'pntclip'.}
 
 \item{...}{Arguments to be passed to spMakeSpatialPoints.}
 }
