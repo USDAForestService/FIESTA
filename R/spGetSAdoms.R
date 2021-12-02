@@ -152,16 +152,43 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spGetSAdoms
-spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL, 
-	smallbnd.domain=NULL, smallbnd.filter=NULL, smallbnd.stfilter=NULL, 
-	helperbnd=NULL, helperbnd_dsn=NULL, helperbnd.unique=NULL, 
-	helperbnd.filter=NULL, largebnd=NULL, largebnd_dsn=NULL, largebnd.unique=NULL, 
-	largebnd.filter=NULL, maxbnd=NULL, maxbnd_dsn=NULL, maxbnd.unique=NULL, 
-	maxbnd.filter=NULL, helper_autoselect=TRUE, nbrdom.min=NULL, maxbnd.threshold=20, 
-	largebnd.threshold=10, multiSAdoms=FALSE, showsteps=TRUE, savedata=FALSE, 
-	savesteps=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, outfolder=NULL, 
-	out_fmt="shp", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE,  
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, addstate=FALSE, dissolve=FALSE) {
+spGetSAdoms <- function(smallbnd, 
+                        smallbnd_dsn = NULL, 
+                        smallbnd.unique = NULL, 
+                        smallbnd.domain = NULL, 
+                        smallbnd.filter = NULL, 
+                        smallbnd.stfilter = NULL, 
+                        helperbnd = NULL, 
+                        helperbnd_dsn = NULL, 
+                        helperbnd.unique = NULL, 
+                        helperbnd.filter = NULL, 
+                        largebnd = NULL, 
+                        largebnd_dsn = NULL, 
+                        largebnd.unique = NULL, 
+                        largebnd.filter = NULL, 
+                        maxbnd = NULL, 
+                        maxbnd_dsn = NULL, 
+                        maxbnd.unique = NULL, 
+                        maxbnd.filter = NULL, 
+                        helper_autoselect = TRUE, 
+                        nbrdom.min = NULL, 
+                        maxbnd.threshold = 20, 
+                        largebnd.threshold = 10, 
+                        multiSAdoms = FALSE, 
+                        showsteps = TRUE, 
+                        savedata = FALSE, 
+                        savesteps = FALSE, 
+                        maxbnd.addtext = TRUE, 
+                        largebnd.addtext = FALSE, 
+                        outfolder=NULL, 
+                        out_fmt="shp", 
+                        out_dsn=NULL, 
+                        outfn.pre=NULL, 
+                        outfn.date=FALSE,  
+                        overwrite_dsn=FALSE, 
+                        overwrite_layer=TRUE, 
+                        addstate=FALSE, 
+                        dissolve=FALSE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -214,6 +241,12 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
 #    maxbnd.threshold = 51
 #    largebnd.threshold = 10
 
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- names(formals(spGetSAdoms))
@@ -222,6 +255,23 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
     stop("invalid parameter: ", toString(miss))
   }
 
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -251,15 +301,18 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || savesteps) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		createSQLite=FALSE, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
-
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    
     if (savesteps) {
       stepfolder <- file.path(outfolder, "SAdoms_steps")
       if (!dir.exists(stepfolder)) dir.create(stepfolder)
@@ -560,15 +613,19 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
       stop("invalid helperbnd for autoselection")
     }
     autoselectlst <- helper.select(smallbndx, smallbnd.unique=smallbnd.unique,
- 		smallbnd.domain=smallbnd.domain,
- 		helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, largebndx=largebndx, 
-		largebnd.unique=largebnd.unique, maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
- 		nbrdom.min=nbrdom.min, maxislarge=maxislarge, largeishelper=largeishelper, 
-		polyunion=polyunion, showsteps=showsteps, savesteps=savesteps, 
-		stepfolder=stepfolder, step_dsn=step_dsn, out_fmt=step_fmt, multiSAdoms=multiSAdoms, 
-		maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
-		maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
-		overwrite=overwrite_layer)
+ 		      smallbnd.domain=smallbnd.domain,
+ 		      helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, 
+ 		      largebndx=largebndx, largebnd.unique=largebnd.unique, 
+ 		      maxbndx=maxbndx, maxbnd.unique=maxbnd.unique,
+ 		      nbrdom.min=nbrdom.min, 
+ 		      maxislarge=maxislarge, largeishelper=largeishelper, 
+		      polyunion=polyunion, 
+		      showsteps=showsteps, savesteps=savesteps, 
+		      stepfolder=stepfolder, step_dsn=step_dsn, 
+		      out_fmt=step_fmt, multiSAdoms=multiSAdoms,
+		      maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
+		      maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
+		      overwrite=overwrite_layer)
     SAdomslst <- autoselectlst$SAdomslst
     helperbndxlst <- autoselectlst$helperbndxlst
     smallbndxlst <- autoselectlst$smallbndxlst
@@ -643,12 +700,27 @@ spGetSAdoms <- function(smallbnd, smallbnd_dsn=NULL, smallbnd.unique=NULL,
         SAdoms_layer <- paste0(SAdoms_layer, i)
         smallbnd_layer <- paste0(smallbnd_layer, i)
       }
-      spExportSpatial(SAdomslst[[i]], outfolder=outfolder, out_fmt=out_fmt, 
-			out_dsn=out_dsn, out_layer=SAdoms_layer, append_layer=TRUE,
-			overwrite_layer=overwrite_layer)
-      spExportSpatial(smallbndxlst[[i]], outfolder=outfolder, out_fmt=out_fmt, 
-			out_dsn=out_dsn, out_layer=smallbnd_layer, append_layer=TRUE,
-			overwrite_layer=overwrite_layer)
+      spExportSpatial(SAdomslst[[i]], 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer=SAdoms_layer,
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=TRUE, 
+                              add_layer=TRUE))
+      
+      spExportSpatial(smallbndxlst[[i]], 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer=smallbnd_layer,
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=TRUE, 
+                              add_layer=TRUE))
     }
 
     if (savesteps) {

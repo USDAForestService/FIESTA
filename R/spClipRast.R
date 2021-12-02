@@ -92,10 +92,24 @@
 #' 
 #' @export spClipRast
 
-spClipRast <- function(rast, rastfolder=NULL, clippolyv, clippolyv_dsn=NULL, 
-                       clippolyv.filter=NULL, rast.crs=NULL, bands=NULL, NODATA=NULL, buffdist=NULL,
-                       maskByPolygons=TRUE, showext=FALSE, fmt="HFA", compress = NULL, outfolder=NULL,
-                       outfn="rastclip", outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE) {
+spClipRast <- function(rast, 
+                       rastfolder = NULL, 
+                       clippolyv, 
+                       clippolyv_dsn = NULL, 
+                       clippolyv.filter = NULL, 
+                       rast.crs = NULL, 
+                       bands = NULL, 
+                       NODATA = NULL, 
+                       buffdist = NULL,
+                       maskByPolygons = TRUE, 
+                       showext = FALSE, 
+                       fmt = "HFA", 
+                       compress = NULL, 
+                       outfolder = NULL,
+                       outfn = "rastclip", 
+                       out_layer.pre = NULL, 
+                       outfn.date = FALSE, 
+                       overwrite = FALSE) {
   
   #####################################################################################
   ## DESCRIPTION: 

@@ -83,6 +83,7 @@
 #' include in dunitzonal output and extract to pltassgn points.
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Other parameters for spMakeSpatialPoints.
+#'
 #' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
 #' rastlst*. } \item{dunitzonal}{ Data frame. Number of pixels and zonal
 #' statistics from continuous rasters or zonal proportions from categorical
@@ -131,20 +132,39 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spGetAuxiliary
-spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
- 			dunittype="POLY", dunit_layer=NULL, dunit_dsn=NULL, dunitvar="DOMAIN",
- 			rastlst.cont=NULL, rastlst.cont.name=NULL, 
-			rastlst.cont.stat="mean", rastlst.cont.NODATA=NULL, 
-			rastlst.cat=NULL, rastlst.cat.name=NULL, 
-			rastlst.cat.NODATA=NULL, rastfolder=NULL, 
-			asptransform=FALSE, rast.asp=NULL, 
-			rast.lut=NULL, rastlut=NULL, 
-			areacalc=TRUE, areaunits="ACRES", 
-			keepNA=TRUE, NAto0=TRUE, npixels=TRUE, 
-			returnxy=FALSE, showext=FALSE, 
-			savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-                	savedata_opts=savedata_options(), 
-			vars2keep=NULL, gui=FALSE, ...) {
+spGetAuxiliary <- function(xyplt, 
+                           xyplt_dsn = NULL, 
+                           uniqueid = "PLT_CN", 
+                           dunittype = "POLY", 
+                           dunit_layer = NULL, 
+                           dunit_dsn = NULL, 
+                           dunitvar = "DOMAIN", 
+                           rastlst.cont = NULL, 
+                           rastlst.cont.name = NULL, 
+                           rastlst.cont.stat = "mean", 
+                           rastlst.cont.NODATA = NULL, 
+                           rastlst.cat = NULL, 
+                           rastlst.cat.name = NULL, 
+                           rastlst.cat.NODATA = NULL, 
+                           rastfolder = NULL, 
+                           asptransform = FALSE, 
+                           rast.asp = NULL, 
+                           rast.lut = NULL, 
+                           rastlut = NULL, 
+                           areacalc = TRUE, 
+                           areaunits = "ACRES", 
+                           keepNA = TRUE, 
+                           NAto0 = TRUE, 
+                           npixels = TRUE, 
+                           returnxy = FALSE, 
+                           showext = FALSE, 
+                           savedata = FALSE, 
+                           exportsp = FALSE, 
+                           exportNA = FALSE, 
+                           savedata_opts = NULL, 
+                           vars2keep = NULL, 
+                           gui = FALSE, 
+                           ...) {
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -170,6 +190,14 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     Filters=rbind(Filters,tif=c("Raster tif files (*.tif)", "*.tif"))
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
+  ## Set global variables
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(spGetAuxiliary)), 
@@ -178,9 +206,9 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-
-  ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
 
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -198,7 +226,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
 
   ##################################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER INPUTS
   ##################################################################################
 
   ## Spatial points for data extraction.. 
@@ -392,12 +420,17 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   }
 
   ##################################################################
@@ -444,10 +477,12 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     ## Extract values from continuous raster layers
     #############################################################################
     extdat.rast.cont <- spExtractRast(sppltx, uniqueid=uniqueid,
-		rastlst=rastlst.contfn, interpolate=FALSE, showext=showext,
-		var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
-		keepNA=keepNA, exportNA=exportNA, outfolder=outfolder, 
-		overwrite_layer=overwrite_layer)
+		            rastlst=rastlst.contfn, interpolate=FALSE, showext=showext,
+		            var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
+		            keepNA=keepNA, exportNA=exportNA, 
+		            savedata_opts = list(outfolder=outfolder, 
+		                      overwrite_layer=overwrite_layer)
+                )
 
     sppltx <- unique(extdat.rast.cont$spplt)
     prednames.cont <- extdat.rast.cont$outnames
@@ -491,9 +526,10 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
           zonalstat <- c("npixels", rastlst.cont.stat) 
           rastnm2 <- c("npixels", rastnm2)
         }  
-        zonaldat.rast.cont <- spZonalRast(dunit_layerx, rastfn=rastfn, polyv.att=dunitvar, 
-		zonalstat=zonalstat, pixelfun=northness, rast.NODATA=rast.cont.NODATA,
-		na.rm=TRUE)
+        zonaldat.rast.cont <- spZonalRast(dunit_layerx, rastfn=rastfn, 
+                                polyv.att=dunitvar, zonalstat=zonalstat, 
+                                pixelfun=northness, 
+                                rast.NODATA=rast.cont.NODATA, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
         class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
@@ -506,8 +542,9 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         rastnm2 <- ifelse(is.null(rastnm), "asp_sin", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
         zonaldat.rast.cont <- spZonalRast(dunit_layerx, rastfn=rastfn, 
-		rast.NODATA=rast.cont.NODATA, polyv.att=dunitvar, zonalstat=rastlst.cont.stat, 
-		pixelfun=eastness, na.rm=TRUE)
+                                   rast.NODATA=rast.cont.NODATA, 
+                                   polyv.att=dunitvar, zonalstat=rastlst.cont.stat,
+                                   pixelfun=eastness, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
         class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
@@ -525,8 +562,9 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
           }
         } 
         zonaldat.rast.cont <- spZonalRast(dunit_layerx, rastfn=rastfn, 
-		rast.NODATA=rast.cont.NODATA, polyv.att=dunitvar, zonalstat=zonalstat, 
-		showext=showext, na.rm=TRUE)
+                                    rast.NODATA=rast.cont.NODATA, 
+                                    polyv.att=dunitvar, zonalstat=zonalstat, 
+                                    showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
         class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
@@ -552,10 +590,12 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
     ## Extract values from categorical raster layers
     ######################################################
-    extdat.rast.cat <- spExtractRast(sppltx, uniqueid=uniqueid, rastlst=rastlst.catfn, 
-		interpolate=FALSE, var.name=rastlst.cat.name, rast.NODATA=rastlst.cat.NODATA,
-		keepNA=keepNA, exportNA=exportNA, outfolder=outfolder, 
-		overwrite_layer=overwrite_layer)
+    extdat.rast.cat <- spExtractRast(sppltx, uniqueid=uniqueid, 
+                rastlst=rastlst.catfn, 
+		            interpolate=FALSE, var.name=rastlst.cat.name, 
+		            rast.NODATA=rastlst.cat.NODATA,
+		            keepNA=keepNA, exportNA=exportNA, outfolder=outfolder, 
+		            overwrite_layer=overwrite_layer)
     sppltx <- extdat.rast.cat$sppltext
     prednames.cat <- extdat.rast.cat$outnames
     inputdf.cat <- extdat.rast.cat$inputdf
@@ -576,8 +616,7 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         stop("must have variable named ", rast.lutnm, " in rastlut")
       }
       ## Check that all values of sppltx are in rastlut
-      check.matchval(sppltx, rastlut, rast.lutnm, tab1txt="sppltx", 
-		tab2txt="rastlut")
+      check.matchval(sppltx, rastlut, rast.lutnm, tab1txt="sppltx", tab2txt="rastlut")
 
       ## Check if class of rast.lutnm in rastlut matches class of rast.lutnm in sppltx
       tabs <- check.matchclass(sppltx, rastlut, uniqueid, rast.lutnm)
@@ -605,12 +644,16 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         zonalstat <- c("npixels", zonalstat) 
       }       
       if (identical(rast.lutfn, rastfn)) {
-        zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, rast.NODATA=rast.cat.NODATA, 
- 		polyv.att=dunitvar, zonalstat=zonalstat, rastlut=rastlut, outname=names(rastlut)[2],
-		na.rm=TRUE)
+        zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, 
+                                  rast.NODATA=rast.cat.NODATA, 
+                                  polyv.att=dunitvar, zonalstat=zonalstat, 
+                                  rastlut=rastlut, 
+                                  outname=names(rastlut)[2], na.rm=TRUE)
       } else {
-        zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, rast.NODATA=rast.cat.NODATA, 
- 		polyv.att=dunitvar, outname=rastnm, zonalstat=zonalstat, na.rm=TRUE)
+        zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, 
+                                  rast.NODATA=rast.cat.NODATA, 
+                                  polyv.att=dunitvar, outname=rastnm, 
+                                  zonalstat=zonalstat, na.rm=TRUE)
       }
       zonalext <- setDT(zonaldat.rast.cat$zonalext)
       outname <- zonaldat.rast.cat$outname
@@ -654,15 +697,27 @@ spGetAuxiliary <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   #######################################
   pltassgn <- sf::st_drop_geometry(sppltx)
   if (savedata) {
-    datExportData(pltassgn, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltassgn, 
+      savedata_opts=list(outfolder=outfolder, 
+                          out_fmt=out_fmt, 
+                          out_dsn=out_dsn, 
+                          out_layer="pltassgn",
+                          outfn.pre=outfn.pre, 
+                          outfn.date=outfn.date, 
+                          overwrite_layer=overwrite_layer,
+                          append_layer=append_layer,
+                          add_layer=TRUE)) 
     if (!noaux) {
-      datExportData(dunitzonal, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="dunitzonal", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(dunitzonal, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="dunitzonal",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
     }
   }
     

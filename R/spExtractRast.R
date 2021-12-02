@@ -49,8 +49,11 @@
 #' exported to outfolder.
 #' @param exportNA Logical. If TRUE, NA values are exported to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options. Only used when savedata = TRUE.  
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'rastext'.
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Other parameters for spMakeSpatialPoints.
+#'
 #' @return \item{sppltext}{ sf object or data frame. Input xyplt data with
 #' extracted raster values appended. } \item{outnames}{ String vector. Raster
 #' output names. } \item{rastfnlst}{ String vector. Raster pathnames. }
@@ -111,13 +114,26 @@
 #'   plot(sppltext["dem"])
 #' 
 #' @export spExtractRast
-spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
-	rastlst, rastfolder=NULL, rast.crs=NULL, 
-	bandlst=NULL, var.name=NULL, interpolate=FALSE, 
- 	windowsize=1, windowstat=NULL, rast.NODATA=NULL, 
-	keepNA=TRUE, showext=FALSE, 
-	savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-	savedata_opts=savedata_options(), gui=FALSE, ...){
+spExtractRast <- function(xyplt, 
+                          xyplt_dsn = NULL, 
+                          uniqueid = "PLT_CN", 
+                          rastlst, 
+                          rastfolder = NULL, 
+                          rast.crs = NULL, 
+                          bandlst = NULL, 
+                          var.name = NULL, 
+                          interpolate = FALSE, 
+                          windowsize = 1, 
+                          windowstat = NULL, 
+                          rast.NODATA = NULL, 
+                          keepNA = TRUE, 
+                          showext = FALSE, 
+                          savedata = FALSE, 
+                          exportsp = FALSE, 
+                          exportNA = FALSE, 
+                          savedata_opts = savedata_options(), 
+                          gui = FALSE, 
+                          ...){
   #####################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more raster layers and appends to input spatial layer 
@@ -131,6 +147,11 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) xyplt=bfun=focalrast=ffun=focalsave=extrtype <- NULL
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(spExtractRast)), 
@@ -139,6 +160,12 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
 
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -156,9 +183,9 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
-
+  ## CHECK PARAMETER INPUTS
+  ##################################################################  
+  
   ## Spatial points for data extraction.. 
   ##################################################################################
   sppltx <- pcheck.table(tab=xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
@@ -196,12 +223,20 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "rastext"
+    }
   }
  
   ## Verify rasters
@@ -425,9 +460,17 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
         if (exportNA) {
           sppltna <- sppltx[is.na(sppltx[[cname]]),]
           outfn.na <- paste(var.name, "na", sep="_")
-          spExportSpatial(sppltna, out_layer=outfn.na, outfolder=outfolder, 
-			out_dsn=out_dsn, outfn.pre=outfn.pre, outfn.date=outfn.date,
- 			overwrite_layer=overwrite_layer)
+          
+          spExportSpatial(sppltna, 
+              savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=outfn.na,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer, 
+                                  add_layer=TRUE))
         }
       }
 
@@ -439,15 +482,29 @@ spExtractRast <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   }
 
   if (savedata) {
-    datExportData(sppltx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer, 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    datExportData(sppltx, 
+      savedata_opts=list(outfolder=outfolder, 
+                          out_fmt=out_fmt, 
+                          out_dsn=out_dsn, 
+                          out_layer=out_layer,
+                          outfn.pre=outfn.pre, 
+                          outfn.date=outfn.date, 
+                          overwrite_layer=overwrite_layer,
+                          append_layer=append_layer,
+                          add_layer=TRUE)) 
   }
 
   if (exportsp) {
-    spExportSpatial(sppltx, out_layer=out_layer, outfolder=outfolder, 
-		outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer)
+    spExportSpatial(sppltx, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer=out_layer,
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
   }
 
   returnlst <- list(sppltext=sppltx, outnames=outnames, rastfnlst=rastfnlst, 

@@ -1825,8 +1825,10 @@ GBpopdat.strat <- modGBpop(
     unitarea = WYunitarea,       # area by estimation units
     unitvar = "ESTN_UNIT",       # name of estimation unit
     strata = TRUE,               # if using post-stratification
-    strata_opts = strata_options(
-      stratalut = WYstratalut)   # strata classes and pixels counts
+    stratalut = WYstratalut,     # strata classes and pixels counts
+    strata_opts = list(
+      getwt=TRUE,                # calculate strata weights
+      getwtvar="P1POINTCNT")     # use P1POINTCNT in stratalut to calculate weights
     )
 
 

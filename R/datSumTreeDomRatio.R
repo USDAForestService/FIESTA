@@ -18,22 +18,12 @@
 #' @param rprefix String. The prefix variable identifier of new ratio variables
 #' (default="r").
 #' @param datround Integer. Number of digits to round ratio values to.
-#' @param savedata Logical. If TRUE, writes output data to outfolder.
-#' @param outfolder String. Name of the output folder. If savedata=TRUE, output
-#' is saved to the outfolder.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param out_layer String. Name of output layer in database or *.csv file, if
-#' savedata=TRUE. If NULL, the file will be named tsum_'date'.csv.
-#' @param outfn.pre String. Prefix for out_dsn.
-#' @param layer.pre String. Prefix for out_layer.
-#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
-#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer in raw_dsn
-#' or *.csv raw data layer, if datsource="csv".
-#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data
-#' data frames to existing out_dsn layer or *.csv file.
+#' #@param savedata Logical. If TRUE, saves data to outfolder.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'tsumrat'. 
+#' @param gui Logical. If gui, user is prompted for parameters.
+#'
 #' @return \item{rdat}{ Data frame. Table with ratio values (ndat / ddat). }
 #' \item{rvars}{ String vector. Variable names in rdat. }
 #' 
@@ -41,11 +31,16 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export datSumTreeDomRatio
-datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dprefix=NULL, 
-	rprefix="r", datround=NULL, savedata=FALSE, outfolder=NULL, out_fmt="csv", 
-	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE){
-
+datSumTreeDomRatio = function(ndat, 
+                              ddat, 
+                              uniqueid = "PLT_CN", 
+                              nprefix = NULL, 
+                              dprefix = NULL, 
+                              rprefix = "r", 
+                              datround = NULL, 
+                              savedata = FALSE, 
+                              savedata_opts = NULL,
+                              gui = FALSE){
   ## DESCRIPTION: Generates ratio of tree domain summaries from FIESTA::datSumTreedom().
   ##
   ## ARGUMENTS:
@@ -61,9 +56,37 @@ datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dpref
 
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER NAMES
   ##################################################################
-
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(datSumTreeDomRatio)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ################################################################## 
   ### ndat TABLE
   ndatx <- pcheck.table(ndat, caption="Numerator table?")
 
@@ -88,24 +111,27 @@ datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dpref
     newprefix <- "r"
   }
 
-  ## GET outfolder
+  ## Check savedata 
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
+                             first="NO", gui=gui)
+  
+  ## Check output parameters
   if (savedata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, append_layer=append_layer)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
-
-    ## out_layer
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
     if (is.null(out_layer)) {
-      out_layer <- paste(newprefix, "dat", sep="_")
-    }
-    if (!is.null(layer.pre)) {
-      out_layer <- paste(layer.pre, out_layer, sep="_")
+      out_layer <- "tsumrat"
     }
   }
-
 	
   ################################################################################	
   ### DO WORK
@@ -150,12 +176,19 @@ datSumTreeDomRatio = function(ndat, ddat, uniqueid="PLT_CN", nprefix=NULL, dpref
   }
   
 
-
   if (savedata) {
-    datExportData(datx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer, 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		index.unique=uniqueid)
+   datExportData(datx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer=out_layer,
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE,
+                              index.unique=uniqueid)) 
+    
   }
 
 

@@ -87,13 +87,27 @@
 #' @author Tracey S. Frescino, Chris Toney
 #' @keywords data
 #' @export spGetEstUnit
-spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
- 		unittype="POLY", unit_layer, unit_dsn=NULL, unitvar=NULL, 
-		unit.filter = NULL, areavar=NULL, areaunits="acres", 
-		rast.NODATA=NULL, keepNA=FALSE, returnxy=FALSE, showext=FALSE, 
-		savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-		savedata_opts=savedata_options(), 
-		vars2keep=NULL, gui=FALSE, ...){
+spGetEstUnit <- function(xyplt, 
+                         xyplt_dsn = NULL, 
+                         uniqueid = "PLT_CN", 
+                         unittype = "POLY", 
+                         unit_layer, 
+                         unit_dsn = NULL, 
+                         unitvar = NULL, 
+                         unit.filter = NULL, 
+                         areavar = NULL, 
+                         areaunits = "acres", 
+                         rast.NODATA = NULL, 
+                         keepNA = FALSE, 
+                         returnxy = FALSE, 
+                         showext = FALSE, 
+                         savedata = FALSE, 
+                         exportsp = FALSE, 
+                         exportNA = FALSE, 
+                         savedata_opts = NULL, 
+                         vars2keep = NULL, 
+                         gui = FALSE, 
+                         ...){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -112,6 +126,11 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     Filters=rbind(Filters,tif=c("Raster tif files (*.tif)", "*.tif"))
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::spGetEstUnit)), 
@@ -122,10 +141,27 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   }
 
 
-  ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
-
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  
+  ##################################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################################
   ## Spatial points for data extraction.. 
   ##################################################################################
   sppltx <- pcheck.table(tab=xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
@@ -186,18 +222,17 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata || exportsp || exportNA) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
-		createSQLite=FALSE, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
-    if (out_fmt != "csv") {
-      outfn.date <- FALSE
-    }
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   }
 
   ##################################################################
@@ -273,10 +308,15 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   } else { # unittype = "RASTER"
  
     ## Extract values of raster layer to points
-    extrast <- spExtractRast(sppltx, rastlst=unitlayerx, var.name=unitvar, 
-			uniqueid=uniqueid, keepNA=keepNA, exportNA=exportNA, 
-			outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-			overwrite_layer=overwrite_layer)
+    extrast <- spExtractRast(sppltx, rastlst=unitlayerx, 
+                      var.name=unitvar, uniqueid=uniqueid, 
+                      keepNA=keepNA, exportNA=exportNA, 
+                      savedata_opts = list(
+			                    outfolder=outfolder, 
+			                    outfn.pre=outfn.pre, 
+			                    outfn.date=outfn.date, 
+			                    overwrite_layer=overwrite_layer)
+                      )
     sppltx <- extrast$spplt
     NAlst <- extrast$NAlst[[1]]
 
@@ -286,7 +326,6 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       plot(sf::st_geometry(NAlst), add=TRUE, col="red", cex=1, pch=16)
     }
 
-        
     ## Calculate area
     unitarea <- areacalc.pixel(unitlayerx, unit=areaunits) 
   }
@@ -304,23 +343,41 @@ spGetEstUnit <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   pltassgn <- sf::st_drop_geometry(sppltx)
 
   if (savedata) {
-    datExportData(pltassgn, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-
-    datExportData(unitarea, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltassgn, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="pltassgn",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
+    
+    datExportData(unitarea, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="unitarea",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
   }
 
   ## Export to shapefile
   if (exportsp) {
-    spExportSpatial(sppltx, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer=out_layer,
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    spExportSpatial(sppltx, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="bnd",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
   }
 
   if (showext) {

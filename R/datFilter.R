@@ -24,18 +24,16 @@
 #' @param title.filter String. Title of the filter query window. Mostuly used
 #' for internal queries.
 #' @param savedata Logical. If TRUE, writes output data to outfolder.
-#' @param outfolder String. Name of output folder if savedata=TRUE.
-#' @param outfn String. Name of output file if savedata=TRUE (*.csv). Do not
-#' include extension. If NULL, the file will be named xfiltered_'date'.csv
-#' @param outfn.pre String. Prefix for output table names.
-#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
-#' @param overwrite Logical. If TRUE, overwrites file if exists.
 #' @param filternm String. Optional. Name of filter, for feedback purposes.
 #' @param stopifnull Logical. If TRUE, stop if output is NULL.
 #' @param returnDT Logical. If TRUE, returns a data table. If FALSE, returns a
 #' data frame.
 #' @param xnm String. Name for filter attribute. Used for warning messages.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  If out_layer = NULL, 
+#' default = 'datf'.
 #' @param gui Logical. If TRUE, pop-up windows will appear for user-interface.
+#'
 #' @return A list of the following items:
 #' 
 #' \item{xf}{ A data frame of filtered x. } \item{xfilter}{ The xfilter. } If
@@ -54,17 +52,21 @@
 #' 
 #' 
 #' @export datFilter
-datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL, 
-	uniqueid="PLT_CN", vardelete=NULL, title.filter=NULL, savedata=FALSE, 
-	outfolder=NULL, outfn="datf", outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=FALSE, filternm=NULL, stopifnull=FALSE, returnDT=TRUE, xnm=NULL,
-	gui=FALSE) {
+datFilter <- function(x, 
+                      xfilter = NULL, 
+                      xfiltervar = NULL, 
+                      othertabnms = NULL, 
+	                    uniqueid = "PLT_CN", 
+                      vardelete = NULL, 
+                      title.filter = NULL, 
+                      savedata = FALSE, 
+	                    filternm = NULL, 
+                      stopifnull = FALSE, 
+                      returnDT = TRUE, 
+                      xnm = NULL,
+	                    savedata_opts = NULL, 
+                      gui = FALSE) {
 
-  ## DESCRIPTION: subsets data table x with filter(s), and other tables if specified.
-  ## VALUE: Return:
-  ##		xf - data table with applied filter
-  ##		xfilter - filter
-  ## If gui and 
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0 | gui, TRUE, FALSE)
@@ -74,17 +76,40 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
   if (.Platform$OS.type == "windows")
     Filters = rbind(Filters,csv = c("Comma-delimited files (*.csv)", "*.csv"))
 
-  isdt <- FALSE
-  if (is.data.table(x) && !is.null(key(x))) {
-    isdt <- TRUE
-    xkey <- key(x)
+
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(datFilter)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
   }
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER INPUTS
   ##################################################################
   intabs <- NULL
-
 
   ## Check filternm
   if (is.null(filternm)) filternm <- "filter"
@@ -97,18 +122,38 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
     xfilter <- NULL
   }
 
-  ## Check inputs
-  ##############################################
+  ## Check x
+  isdt <- FALSE
+  if (is.data.table(x) && !is.null(key(x))) {
+    isdt <- TRUE
+    xkey <- key(x)
+  }
   datx <- pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE, 
 			tabnm=xnm)
 
 
-  ### Check savedata 
-  savedata <- pcheck.logical(savedata, "Save data tables?", "NO")
-  if (savedata) 
-    outfolder <- pcheck.outfolder(outfolder, gui)
-  
+  ## Check savedata 
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
+		first="NO", gui=gui)
 
+  ## Check output parameters
+  if (savedata) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+		    overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+		    add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "datf"
+    }
+  }
+  
   ################################################################################  
   ### DO WORK
   ################################################################################
@@ -236,15 +281,25 @@ datFilter <- function(x, xfilter=NULL, xfiltervar=NULL, othertabnms=NULL,
     }
     othertabs <- lapply(othertabnms, function(x) get(x, envir=environment()))
     intabs <- clip.othertables(indatids, othertabnms, othertabs=othertabs, 
-		savedata=savedata, outfolder=outfolder, overwrite=overwrite, 
-		outfn.pre=outfn.pre, outfn.date=outfn.date)
+		      savedata=savedata, outfolder=outfolder, overwrite=overwrite, 
+		      outfn.pre=outfn.pre, outfn.date=outfn.date)
   }
 
   #### WRITE TO FILE 
   #############################################################
-  if (savedata)
-    write2csv(indat, outfilenm=outfn, overwrite=overwrite, outfn.date=outfn.date)
-
+  if (savedata) {
+    datExportData(indat, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer=out_layer,
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                add_layer=TRUE))
+  }
+  
   if (!returnDT) {
     indat <- setDF(indat)  
   } else {

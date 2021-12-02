@@ -31,12 +31,12 @@
 #' x.
 #' @param keepcutbreaks Logical. If TRUE, the cutbreaks used for creating
 #' classes are appended to dataset.
-#' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
-#' file (*.csv).
-#' @param outfolder String.* The output folder path. If NULL and savedata=TRUE,
-#' the outfolder is the working directory.
-#' @param outfn String.* Output file name. If NULL and savedata=TRUE, outfn =
-#' datlut_'date'.csv.
+#' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'datlutcl'. 
+#' @param gui Logical. If gui, user is prompted for parameters.
+#'
 #' @return \item{xLUT}{ Input data table with look-up table variable(s). }
 #' \item{LUTclassnm}{ Name of the classified variable. } \item{LUT}{ Look-up
 #' table with categories. }
@@ -81,10 +81,21 @@
 #' 
 #' 
 #' @export datLUTclass
-datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL, 
-	cutbreaks=NULL, cutlabels=NULL, LUTclassnm=NULL, label.dec=1, 
-	NAto0=FALSE, vars2keep=NULL, keepcutbreaks=FALSE, savedata=FALSE, 
-	outfolder=NULL, outfn="datlut"){
+datLUTclass <- function(x, 
+                        xvar = NULL, 
+                        LUT = NULL, 
+                        minvar = NULL, 
+                        maxvar = NULL, 
+	                      cutbreaks = NULL, 
+                        cutlabels = NULL, 
+                        LUTclassnm = NULL, 
+                        label.dec = 1, 
+	                      NAto0 = FALSE, 
+                        vars2keep = NULL, 
+                        keepcutbreaks = FALSE, 
+                        savedata = FALSE,
+	                      savedata_opts = NULL, 
+                        gui = FALSE){
   #################################################################################
   ## DESCRIPTION: Function to get variable name from a table stored within FIESTA 
   ##      or a look-up table (*.csv FILE).
@@ -100,7 +111,36 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
     Filters <- rbind(Filters, csv=c("Comma-delimited files (*.csv)", "*.csv"))
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(datLUTclass)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
   ##################################################################
 
   ## Check datx
@@ -208,14 +248,27 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
       stop("vars2keep variables invalid: ", toString(vars2keep))
   }
 
-  ### Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data tables?", 
-		first="NO", gui=gui)
-
-  ## GET OUTFOLDER IF NULL
-  if (savedata) 
-    outfolder <- pcheck.outfolder(outfolder, gui)
-
+  ## Check savedata 
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
+                             first="NO", gui=gui)
+  
+  ## Check output parameters
+  if (savedata) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+        overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+        add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "datlutcl"
+    }
+  }
 
   ############################################################################
   ## DO THE WORK 
@@ -270,12 +323,32 @@ datLUTclass <- function(x, xvar=NULL, LUT=NULL, minvar=NULL, maxvar=NULL,
   xLUTlst$LUT <- LUTx2
 
   
+  #### WRITE TO FILE 
+  #############################################################
   if (savedata) {
     if ("sf" %in% class(datx)) {
-      spExportSpatial(datx, outfolder=outfolder, out_layer=outfn)
+      spExportSpatial(datx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=outsp_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=out_layer,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer, 
+                                  add_layer=TRUE))
     } else {
-      ## WRITE DATA TO OUTFOLDER
-      write2csv(datx, outfilenm=outfn, outfolder=outfolder)
+      datExportData(datx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=out_layer,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  add_layer=TRUE))
+      
     }
   }
 

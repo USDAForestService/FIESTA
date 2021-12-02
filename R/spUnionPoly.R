@@ -34,7 +34,10 @@
 #' @param areavar String. Name of area variable.
 #' @param exportsp Logical. If TRUE, the spatial unioned object is exported to
 #' outfolder (see spExportSpatial for details).
-#' @param ...  Parameters for spExportSpatial.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when export = TRUE. If out_layer = NULL,
+#' default = 'polyunion'.
+#' 
 #' @return sf object of unioned polygon. If polyv1 and polyv2 have different
 #' projections, the projection of returned object will have the same projection
 #' as poly1 (See note about on-the-fly projection conversion).
@@ -60,8 +63,16 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spUnionPoly
-spUnionPoly <- function(polyv1, polyv1_dsn=NULL, polyv2, polyv2_dsn=NULL, 
-	showext=FALSE, areacalc=FALSE, areavar="ACRES_GIS", exportsp=FALSE, ...) {
+spUnionPoly <- function(polyv1, 
+                        polyv1_dsn = NULL, 
+                        polyv2, 
+                        polyv2_dsn = NULL, 
+                        showext = FALSE, 
+                        areacalc = FALSE, 
+                        areavar = "ACRES_GIS", 
+                        exportsp = FALSE, 
+                        savedata_opts = NULL,
+                        ...) {
 
   #####################################################################################
   ## DESCRIPTION: 
@@ -73,6 +84,39 @@ spUnionPoly <- function(polyv1, polyv1_dsn=NULL, polyv2, polyv2_dsn=NULL,
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
 
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(spUnionPoly))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ##################################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################################
   polyv1x <- pcheck.spatial(layer=polyv1, dsn=polyv1_dsn, gui=gui, 
 		caption="Polygon1?")
   polyv2x <- pcheck.spatial(layer=polyv2, dsn=polyv2_dsn, gui=gui, 
@@ -88,11 +132,20 @@ spUnionPoly <- function(polyv1, polyv1_dsn=NULL, polyv2, polyv2_dsn=NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (exportsp) {
-    overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="YES", gui=gui)  
-    outfolder <- pcheck.outfolder(outfolder, gui)
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+          add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "polyunion"
+    }
   }
 
 
@@ -116,13 +169,24 @@ spUnionPoly <- function(polyv1, polyv1_dsn=NULL, polyv2, polyv2_dsn=NULL,
 
    
   ## Calculate area
-  if (areacalc) 
+  if (areacalc) {
     upoly <- areacalc.poly(upoly, areavar=areavar)
-
+  }
 
   ## Output shapefile to outfolder
-  if (exportsp) 
-    spExportSpatial(upoly, ...)
+  if (exportsp) {
+    spExportSpatial(upoly, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="spxyplt",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
+  }
+    
 
   return(upoly)
 

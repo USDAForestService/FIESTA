@@ -69,7 +69,6 @@ datExportData <- function(dfobj, create_dsn=FALSE,
     }
   }
 
- 
   ## Check output data
   outlst <- pcheck.output(out_fmt=out_fmt, outfolder=outfolder, 
 	out_dsn=out_dsn, overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
@@ -81,14 +80,19 @@ datExportData <- function(dfobj, create_dsn=FALSE,
   overwrite_layer <- outlst$overwrite_layer
   append_layer <- outlst$append_layer
 
+
   ## Check out_layer
   ####################################################
+  if (is.null(out_dsn) && is.null(out_layer)) {
+    stop("out_layer and out_dsn are NULL")
+  }
   if (is.null(out_layer)) {
     out_layer <- basename.NoExt(out_dsn)
   }
   if (!is.null(layer.pre)) {
     out_layer <- paste0(layer.pre, "_", out_layer)
   }
+
 
   ## Write data frame
   ########################################################

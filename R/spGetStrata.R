@@ -119,16 +119,31 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spGetStrata
-spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
-			unittype="POLY", unit_layer=NULL, unit_dsn=NULL, 
-			unitvar=NULL, unit.filter=NULL, 
-			strattype="RASTER", strat_layer=NULL, strat_dsn=NULL, 
-			strvar=NULL, strat_lut=NULL, areaunits="acres", 
-			rast.NODATA=NULL, keepNA=FALSE, 
-			returnxy=FALSE, showext=FALSE, 
-			savedata=FALSE, exportsp=FALSE, exportNA=FALSE,
-			savedata_opts=savedata_options(), 
-			vars2keep=NULL, gui=FALSE, ...){
+spGetStrata <- function(xyplt, 
+                        xyplt_dsn = NULL, 
+                        uniqueid = "PLT_CN", 
+                        unittype = "POLY", 
+                        unit_layer = NULL, 
+                        unit_dsn = NULL, 
+                        unitvar = NULL, 
+                        unit.filter = NULL, 
+                        strattype = "RASTER", 
+                        strat_layer = NULL, 
+                        strat_dsn = NULL, 
+                        strvar = NULL, 
+                        strat_lut = NULL, 
+                        areaunits = "acres", 
+                        rast.NODATA = NULL, 
+                        keepNA = FALSE, 
+                        returnxy = FALSE, 
+                        showext = FALSE, 
+                        savedata = FALSE, 
+                        exportsp = FALSE, 
+                        exportNA = FALSE, 
+                        savedata_opts = NULL, 
+                        vars2keep = NULL, 
+                        gui = FALSE, 
+                        ...){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -145,6 +160,10 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     Filters=rbind(Filters,tif=c("Raster tif files (*.tif)", "*.tif"))
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
@@ -156,7 +175,6 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)
-
 
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -251,28 +269,21 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
-		createSQLite=FALSE, gui=gui)
-    out_dsn <- outlst$out_dsn
+  if (savedata || exportsp || exportNA) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
-    if (out_fmt != "csv") {
-      outfn.date <- FALSE
-    }
-  }
-  if (exportsp || exportNA) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=outsp_fmt, 
-                              outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-                              overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
-                              createSQLite=FALSE, gui=gui)
-    outsp_fmt <- outlst$out_fmt
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   }
 
+  
   ##################################################################
   ## DO WORK
   ##################################################################
@@ -308,7 +319,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
       message("converting strat_layer to raster...")
 
       polyrast <- spPoly2Rast(polyv=strat_layer, polyv_dsn=strat_dsn, 
-		polyv.att=strvar, outfolder=outfolder)
+		                  polyv.att=strvar, outfolder=outfolder)
       strat_layer <- polyrast$rastfn
       polyv.lut <- polyrast$polyv.lut
       strat_dsn <- NULL
@@ -481,7 +492,7 @@ spGetStrata <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   if (exportsp) {
     spExportSpatial(sppltx, 
           savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=outsp_fmt, 
+                              out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
                               out_layer=out_layer,
                               outfn.pre=outfn.pre, 

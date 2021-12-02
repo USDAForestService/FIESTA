@@ -25,25 +25,20 @@
 #' @param clippolyv.filter String. Filter to subset clippolyv spatial layer.
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param keepNA Logical. If TRUE, keep NA values after data intersection.
-#' @param savedata Logical. If TRUE, save data to outfolder.
 #' @param returnsp Logical. If TRUE, returns sf object of points. If FALSE,
 #' returns data frame of points (i.e., drops sf geometry).
-#' @param exportsp Logical. If TRUE, the clipped spatial point data are
-#' exported.
-#' @param outfolder String. If savedata=TRUE or exportsp=TRUE, name of output
-#' folder.  If NULL, the working directory is used.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param out_layer String. Name of layer in out_dsn if database.
-#' @param outfn.pre String. A prefix for output dsn.
-#' @param outfn.date Logical. If TRUE, adds current date to out_dsn.
-#' @param overwrite Logical. If TRUE, overwrites out_layer, if exists.
 #' @param othertabnms String vector. Name(s) of R objects, comma-delimited
 #' files, or database layers to subset. Must include quotes (e.g.,
 #' othertabnms=c("tree", "cond")).
 #' @param stopifnotin Logical. If TRUE, stops if boundaries do not overlap.  If
 #' FALSE, returns NULL.
+#' @param savedata Logical. If TRUE, save data to outfolder.
+#' @param exportsp Logical. If TRUE, the clipped spatial point data are
+#' exported.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options for saving data. If out_layer = NULL, default = 'pntclip'.
 #' @param ...  Arguments to be passed to spMakeSpatialPoints.
+#'
 #' @return A list of the following objects:
 #' 
 #' \item{clip_xyplt}{ sf object. The input xyplt, clipped to polygon boundary
@@ -92,13 +87,21 @@
 #'   plot(st_geometry(xyplt), add=TRUE)
 #' 
 #' @export spClipPoint
-spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
-	clippolyv, clippolyv_dsn=NULL, clippolyv.filter=NULL, showext=FALSE, 
-	keepNA=FALSE, savedata=FALSE, returnsp=TRUE, exportsp=FALSE, 
-	outfolder=NULL, out_fmt="shp", out_dsn=NULL, out_layer="pnt", 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite=FALSE, 
-	othertabnms=NULL, stopifnotin=TRUE, ...) {
-
+spClipPoint <- function(xyplt, 
+                        xyplt_dsn = NULL, 
+                        uniqueid = "PLT_CN", 
+                        clippolyv, 
+                        clippolyv_dsn = NULL, 
+                        clippolyv.filter = NULL, 
+                        showext = FALSE, 
+                        keepNA = FALSE, 
+                        returnsp = TRUE, 
+                        othertabnms=NULL,
+                        stopifnotin=TRUE, 
+                        savedata = FALSE, 
+                        exportsp = FALSE, 
+                        savedata_opts = NULL,
+                        ...){
   ###################################################################################
   ## DESCRIPTION: 
   ## Clip (intersect) point vector layer with polygon vector layer. 
@@ -108,6 +111,11 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) xyplt=uniqueid=exportsp <- NULL
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::spClipPoint)), 
@@ -117,10 +125,26 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     stop("invalid parameter: ", toString(miss))
   }
 
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################  
   intabs <- NULL
 
   ## Spatial points for clipping.. 
@@ -161,14 +185,33 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   ## Check keepNA
   keepNA <- pcheck.logical(keepNA, "Keep null values?", "NO", gui=gui)
 
-  ## Check exportsp
-  exportsp <- pcheck.logical(exportsp, "Export spatial?", "YES", gui=gui)
-
-
-  if (!is.null(othertabnms) && !is.character(othertabnms)) 
+  ## Check exportsp 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", title="Export spatial layer?", 
+                             first="NO", gui=gui)
+  
+  ## Check output parameters
+  if (exportsp || savedata) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+          add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "pntclip"
+    }
+  }
+  
+  if (!is.null(othertabnms) && !is.character(othertabnms)) {
     stop("othertabnms must be a string vector of object or file names")
+  }
 
-
+  
   ##################################################################
   ## DO WORK
   ##################################################################
@@ -197,8 +240,9 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   }
 
   ## Get outside points
-  if (keepNA)
+  if (keepNA) {
     outpnt <- sppntx[!sppntx[[uniqueid]] %in% injoin[[uniqueid]],]
+  }
 
   ## Clip othertables
   if (!is.null(othertabnms)) {
@@ -215,21 +259,46 @@ spClipPoint <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Write data to outfolder
   if (exportsp) {
-    if (out_fmt == "shp" && nrow(inpnts) > length(unique(inpnts[[uniqueid]])))
+    if (out_fmt == "shp" && nrow(inpnts) > length(unique(inpnts[[uniqueid]]))) {
       message("cannot export shapefile... more than 1 record per uniqueid")
-    spExportSpatial(inpnts, out_layer=out_layer, out_dsn=out_dsn, 
-		out_fmt=out_fmt, outfolder=outfolder, outfn.pre=outfn.pre, 
-		outfn.date=outfn.date, overwrite_layer=overwrite, append_layer=TRUE) 
- 
-    spExportSpatial(clippolyvx, out_layer="bnd", out_dsn=out_dsn, 
-		out_fmt=out_fmt, outfolder=outfolder, outfn.pre=outfn.pre, 
-		outfn.date=outfn.date, overwrite_layer=overwrite, append_layer=TRUE)       
+    }
+    
+    spExportSpatial(inpnts, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer=out_layer,
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
+    
+    spExportSpatial(clippolyvx, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="bnd",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
   } 
 
-  if (savedata)
-    write2csv(inpnts, outfolder=outfolder, outfilenm=out_layer,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite=overwrite)
-   		
+  if (savedata) {
+    datExportData(inpnts, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer=out_layer,
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
+  }
+    
 
   if (!returnsp) inpnts <- sf::st_drop_geometry(inpnts)
   returnlst <- list(clip_xyplt=inpnts, uniqueid=uniqueid, clip_polyv=clippolyvx)

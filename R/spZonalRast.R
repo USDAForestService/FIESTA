@@ -42,14 +42,10 @@
 #' @param na.rm Logical. If TRUE, Null values are removed before zonal
 #' statistic calculations.
 #' @param savedata Logical. If TRUE, the zonal data are saved to outfolder.
-#' @param outfolder String. The output folder.
-#' @param outfn String. Name of output data file. If NULL, default is
-#' 'zonalext.csv'.
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite Logical. If TRUE and exportshp=TRUE, overwrite files in
-#' outfolder.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'zonalext'.
+#'
 #' @return \item{zonalext}{ Data frame. Zonal statistics by polygon attribute
 #' (attribute). } \item{outname}{ String vector. Names of zonal statistic
 #' variables generated in zonalext data frame. } \item{rasterfile}{ String
@@ -79,11 +75,25 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spZonalRast
-spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn, 
-	rastfolder=NULL, bands=NULL, zonalstat, pixelfun=NULL, outname=NULL, 
-	showext=FALSE, rastlut=NULL, rast.NODATA=NULL, na.rm=TRUE, savedata=FALSE, 
-	outfolder=NULL, outfn="zonalext", outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite=FALSE) { 
+spZonalRast <- function(polyv, 
+                        polyv_dsn = NULL, 
+                        polyv.att = NULL, 
+                        rastfn, 
+                        rastfolder = NULL, 
+                        bands = NULL, 
+                        zonalstat, 
+                        pixelfun = NULL, 
+                        outname = NULL, 
+                        showext = FALSE, 
+                        rastlut = NULL, 
+                        rast.NODATA = NULL, 
+                        na.rm = TRUE, 
+                        savedata = FALSE, 
+                        outfolder = NULL, 
+                        outfn = "zonalext", 
+                        outfn.pre = NULL, 
+                        outfn.date = FALSE, 
+                        overwrite = FALSE) { 
   ##################################################################################### 
   ## DESCRIPTION:  
   ## Extracts summary statistics by polygon (i.e., zone).  
@@ -174,11 +184,20 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
-    overwrite <- pcheck.logical(overwrite, varnm="overwrite", 
-		title="Overwrite files?", first="NO", gui=gui)  
-    outfn.date <- pcheck.logical(outfn.date , varnm="outfn.date", 
-		title="Add date to outfiles?", first="YES", gui=gui)  
-    outfolder <- pcheck.outfolder(outfolder, gui)
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+          add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "zonalext"
+    }
   }
  
   ######################################################################## 
@@ -219,8 +238,9 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
       atts <- zonalstat[which(zonalstat %in% c("mean", "min", "max", "sum", "npixels"))] 
 #      atts[atts == "sum"] <- "sumvalues" 
       atts[atts == "count"] <- "npixels"  
-      zstats <- setDT(zonalStats(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,  
- 		pixelfun=pixelfun, band=b, na.rm=TRUE, ignoreValue=rast.NODATA)) 
+      zstats <- setDT(zonalStats(src=spobjprj, attribute=polyv.att, 
+                            rasterfile=rastfn, pixelfun=pixelfun, band=b, na.rm=TRUE, 
+                            ignoreValue=rast.NODATA)) 
       zstats <- zstats[, c("zoneid", atts), with=FALSE] 
       var.name <- paste(prename, atts, sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -256,8 +276,9 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
     }  
 
     if (any(zonalstat == "minority")) { 
-      zstats <- setDT(zonalMinority(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,
-		band=b, na.rm=TRUE, ignoreValue=rast.NODATA)) 
+      zstats <- setDT(zonalMinority(src=spobjprj, attribute=polyv.att, 
+                            rasterfile=rastfn, band=b, na.rm=TRUE, 
+                            ignoreValue=rast.NODATA)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "minority", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -273,8 +294,9 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
     }  
 
     if (any(zonalstat == "variety")) { 
-      zstats <- setDT(zonalVariety(src=spobjprj, attribute=polyv.att, rasterfile=rastfn,
-		band=b, na.rm=TRUE, ignoreValue=rast.NODATA)) 
+      zstats <- setDT(zonalVariety(src=spobjprj, attribute=polyv.att, 
+                            rasterfile=rastfn, band=b, na.rm=TRUE, 
+                            ignoreValue=rast.NODATA)) 
       zstats <- zstats[, c("zoneid", "value")] 
       var.name <- paste(prename, "variety", sep=".") 
       setnames(zstats, names(zstats)[-1], var.name) 
@@ -290,12 +312,12 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
     }  
   
     if (any(zonalstat %in% c("count", "proportion"))) { 
-      zstats <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att, 
-		rasterfile=rastfn, band=b, na.rm=na.rm, ignoreValue=rast.NODATA)) 
+      zstats <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att,
+                          rasterfile=rastfn, band=b, na.rm=na.rm, ignoreValue=rast.NODATA)) 
       newvar <- "value" 
 
       zstats2 <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att, 
-		rasterfile=rastfn, band=b, na.rm=FALSE, ignoreValue=rast.NODATA)) 
+                          rasterfile=rastfn, band=b, na.rm=FALSE, ignoreValue=rast.NODATA)) 
       newvar <- "value" 
 
       if (!is.null(rastlut)) { 
@@ -303,10 +325,10 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
         newvar <- names(rastlut)[2]  
 
         ## Check that all values are in table and that class of merging variable matches 
-        check.matchval(zstats, rastlut, "value", LUTvar, tab1txt="zstats", 
-			tab2txt="rastlut") 
+        check.matchval(zstats, rastlut, "value", LUTvar, 
+                                tab1txt="zstats", tab2txt="rastlut") 
         tabs <- check.matchclass(zstats, rastlut, "value", LUTvar,  
- 			tab1txt="zstats", tab2txt="rastlut") 
+                                tab1txt="zstats", tab2txt="rastlut") 
         zstats <- tabs$tab1 
         rastlut <- tabs$tab2 
                   
@@ -361,11 +383,20 @@ spZonalRast <- function(polyv, polyv_dsn=NULL, polyv.att=NULL, rastfn,
     gc() 
   }  
 
-  if (savedata)
-    write2csv(zonalext, outfolder=outfolder, outfilenm=outfn, outfn.pre=outfn.pre,
-		outfn.date=outfn.date, overwrite=overwrite)
- 
-
+  if (savedata) {
+    datExportData(zonalext, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer=out_layer,
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
+  }
+  
+  
   returnlst <- list(zonalext=setDF(zonalext), outname=outnames,  
 					rasterfile=rep(rastfn, length(outnames))) 
   return(returnlst) 

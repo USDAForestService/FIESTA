@@ -84,27 +84,17 @@
 #' (annual inventory), if using less than 4 subplots. If using only 1 sublot
 #' for estimate, adjTPA=4. The default is 1.
 #' @param NAto0 Logical. If TRUE, convert NA values to 0.
-#' @param savedata Logical. If TRUE, writes output data to outfolder.
-#' @param outfolder String. Name of the output folder. If savedata=TRUE, output
-#' is saved to the outfolder.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param out_layer String. Name of output layer in database or *.csv file, if
-#' savedata=TRUE. If NULL, the file will be named tsum_'date'.csv.
-#' @param outfn.pre String. Prefix for out_dsn.
-#' @param layer.pre String. Prefix for out_layer.
-#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
-#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer in raw_dsn
-#' or *.csv raw data layer, if datsource="csv".
-#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data
-#' data frames to existing out_dsn layer or *.csv file.
 #' @param tround Number. The number of digits to round to. If NULL, default=6.
 #' @param checkNA Logical. If TRUE, checks if NA values exist in necessary
 #' variables.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
 #' returns data.frame object(s).
+#' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'treesum'. 
+#' @param gui Logical. If gui, user is prompted for parameters.
+#' 
 #' @return A list of the following items: \item{treedat}{ Data frame. Plot or
 #' condition-level table with aggregated tree attributes. } \item{sumvars}{
 #' String vector. Name(s) of the output aggregated tree attributes. }
@@ -127,15 +117,38 @@
 #'   FIESTA::WYtree[FIESTA::WYtree$PLT_CN == 40404737010690,]
 #' 
 #' @export datSumTree
-datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL, 
-	tuniqueid="PLT_CN", cuniqueid="PLT_CN", puniqueid="CN", bycond=FALSE, 
-	condid="CONDID", bysubp=FALSE, subpid="SUBP", tsumvarlst=NULL, 
-	tsumvarnmlst=NULL, TPA=TRUE, tfun=sum, ACI=FALSE, tfilter=NULL, 
-	addseed=FALSE, lbs2tons=TRUE, metric=FALSE, getadjplot=FALSE, adjtree=FALSE, 
-	adjvar="tadjfac", adjTPA=1, NAto0=FALSE, savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL,
- 	outfn.date=TRUE, overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, 
-	tround=16, checkNA=FALSE, returnDT=TRUE){
+datSumTree <- function(tree = NULL, 
+                       seed = NULL, 
+                       cond = NULL, 
+                       plt = NULL, 
+                       plt_dsn = NULL, 
+                       tuniqueid = "PLT_CN", 
+                       cuniqueid = "PLT_CN", 
+                       puniqueid = "CN", 
+                       bycond = FALSE, 
+                       condid = "CONDID", 
+                       bysubp = FALSE, 
+                       subpid = "SUBP", 
+                       tsumvarlst = NULL, 
+                       tsumvarnmlst = NULL, 
+                       TPA = TRUE, 
+                       tfun = sum, 
+                       ACI = FALSE, 
+                       tfilter = NULL, 
+                       addseed = FALSE, 
+                       lbs2tons = TRUE, 
+                       metric = FALSE, 
+                       getadjplot = FALSE, 
+                       adjtree = FALSE, 
+                       adjvar = "tadjfac", 
+                       adjTPA = 1, 
+                       NAto0 = FALSE, 
+                       tround = 16, 
+                       checkNA = FALSE, 
+                       returnDT = TRUE,
+                       savedata = FALSE, 
+                       savedata_opts = NULL,
+                       gui = FALSE) {
   ####################################################################################
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
   ##        using specified tree filters (ex. live trees only)
@@ -184,8 +197,37 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
 
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER NAMES
   ##################################################################
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(datSumTree)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################  
   noplt=nocond <- TRUE
   pltsp <- FALSE
 
@@ -629,28 +671,27 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
   }
 
   ## Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", 
-		title="Save data tables?", first="NO", gui=gui)
-
-  ## If savedata, check output file names
-  ################################################################
-  if (savedata) { 
-    outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer)
-    out_dsn <- outlst$out_dsn
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
+                             first="NO", gui=gui)
+  
+  ## Check output parameters
+  if (savedata) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+        overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+        add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
-
-    ## outfn
-    if (is.null(out_layer) || gsub(" ", "", out_layer) == "") {
-      out_layer <- "tsum"
-    }
-    if (!is.null(layer.pre)) {
-      out_layer <- paste(layer.pre, out_layer, sep="_")
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "treesum"
     }
   }
-
+  
   ################################################################################  
   ################################################################################  
   ### DO WORK
@@ -854,68 +895,86 @@ datSumTree <- function(tree=NULL, seed=NULL, cond=NULL, plt=NULL, plt_dsn=NULL,
     ## Change NA values TO 0
     for (col in tsumvarnmlst2) set(sumdat, which(is.na(sumdat[[col]])), col, 0) 
 
-  if (savedata && parameters) {
-    ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
-    ###########################################################
-    outfn.param <- paste(out_layer, "parameters", sep="_")
-    outparamfnbase <- paste(outfn.param, format(Sys.time(), "%Y%m%d"), sep="_")
-    outparamfn <- fileexistsnm(outfolder, outparamfnbase, "txt")
+#   if (savedata && parameters) {
+#     ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
+#     ###########################################################
+#     outfn.param <- paste(out_layer, "parameters", sep="_")
+#     outparamfnbase <- paste(outfn.param, format(Sys.time(), "%Y%m%d"), sep="_")
+#     outparamfn <- fileexistsnm(outfolder, outparamfnbase, "txt")
+# 
+#     tsumvarlstout <- addcommas(sapply(tsumvarlst, function(x) {paste0("'", x, "'")}))
+#     tsumvarnmlstout <- addcommas(sapply(tsumvarnmlst, function(x) {paste0("'", x, "'")}))
+#     strunitvars <- addcommas(sapply(strunitvars, function(x) {paste0("'", x, "'")}))
+# 
+#     outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
+#     cat(  "tree = ", as.character(bquote(tree)), "\n",
+#       "cond = ", as.character(bquote(cond)), "\n",
+#       "plt = ", as.character(bquote(plt)), "\n",
+#       "plt_dsn = \"", plt_dsn, "\"", "\n",
+#       "tuniqueid = \"", tuniqueid, "\"", "\n",
+#       "cuniqueid = \"", cuniqueid, "\"", "\n",
+#       "puniqueid = \"", puniqueid, "\"", "\n",
+#       "bycond = ", bycond, "\n",
+#       "condid = \"", condid, "\"", "\n",
+#       "bysubp = ", bysubp, "\n",
+#       "subpid = \"", subpid, "\"", "\n",
+#       "tsumvarlst = c(", tsumvarlstout, ")", "\n",
+#       "tsumvarnmlst = c(", tsumvarnmlstout, ")", "\n",  
+#       "TPA = ", TPA, "\n",
+#       "tfun = ", noquote(tfunstr), "\n",
+#       "ACI = ", ACI, "\n",
+#       "tfilter = \"", tfilter, "\"", "\n",
+#       "lbs2tons = ", lbs2tons, "\n",
+#       "getadjplot = ", getadjplot, "\n",
+#       "adjtree = ", adjtree, "\n",
+#       "adjTPA = ", adjTPA, "\n",
+#       "NAto0 = ", NAto0, "\n",
+#       "savedata = ", savedata, "\n",
+#       "outfolder = \"", outfolder, "\"", "\n",
+#       "out_layer = ", out_layer, "\n",
+#       "outfn.date = ", outfn.date, "\n",
+#       "overwrite_dsn = ", overwrite_dsn, "\n",
+#       "tround = \"", tround, "\"", "\n", "\n",
+#     file = outfile, sep="")
+# 
+#     cat(  "sumdat <- datSumTree(tree=tree, cond=cond, plt=plt, plt_dsn=plt_dsn,
+# 	tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, 
+# 	condid=condid, bysubp=bysubp, subpid=subpid, tsumvarlst=tsumvarlst, 
+# 	tsumvarnmlst=tsumvarnmlst, TPA=TPA, tfun=tfun, ACI=ACI, tfilter=tfilter, 
+# 	lbs2tons=lbs2tons, getadjplot=getadjplot, adjtree=adjtree, adjTPA=adjTPA, 
+# 	NAto0=NAto0, savedata=savedata, outfolder=outfolder, out_layer=out_layer, 
+# 	outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, tround=tround)",
+#     file = outfile, sep="")
+#     close(outfile)
+#   }
 
-    tsumvarlstout <- addcommas(sapply(tsumvarlst, function(x) {paste0("'", x, "'")}))
-    tsumvarnmlstout <- addcommas(sapply(tsumvarnmlst, function(x) {paste0("'", x, "'")}))
-    strunitvars <- addcommas(sapply(strunitvars, function(x) {paste0("'", x, "'")}))
 
-    outfile <- file(paste0(outfolder, "/", outparamfn, ".txt"), "w")
-    cat(  "tree = ", as.character(bquote(tree)), "\n",
-      "cond = ", as.character(bquote(cond)), "\n",
-      "plt = ", as.character(bquote(plt)), "\n",
-      "plt_dsn = \"", plt_dsn, "\"", "\n",
-      "tuniqueid = \"", tuniqueid, "\"", "\n",
-      "cuniqueid = \"", cuniqueid, "\"", "\n",
-      "puniqueid = \"", puniqueid, "\"", "\n",
-      "bycond = ", bycond, "\n",
-      "condid = \"", condid, "\"", "\n",
-      "bysubp = ", bysubp, "\n",
-      "subpid = \"", subpid, "\"", "\n",
-      "tsumvarlst = c(", tsumvarlstout, ")", "\n",
-      "tsumvarnmlst = c(", tsumvarnmlstout, ")", "\n",  
-      "TPA = ", TPA, "\n",
-      "tfun = ", noquote(tfunstr), "\n",
-      "ACI = ", ACI, "\n",
-      "tfilter = \"", tfilter, "\"", "\n",
-      "lbs2tons = ", lbs2tons, "\n",
-      "getadjplot = ", getadjplot, "\n",
-      "adjtree = ", adjtree, "\n",
-      "adjTPA = ", adjTPA, "\n",
-      "NAto0 = ", NAto0, "\n",
-      "savedata = ", savedata, "\n",
-      "outfolder = \"", outfolder, "\"", "\n",
-      "out_layer = ", out_layer, "\n",
-      "outfn.date = ", outfn.date, "\n",
-      "overwrite_dsn = ", overwrite_dsn, "\n",
-      "tround = \"", tround, "\"", "\n", "\n",
-    file = outfile, sep="")
-
-    cat(  "sumdat <- datSumTree(tree=tree, cond=cond, plt=plt, plt_dsn=plt_dsn,
-	tuniqueid=tuniqueid, cuniqueid=cuniqueid, puniqueid=puniqueid, bycond=bycond, 
-	condid=condid, bysubp=bysubp, subpid=subpid, tsumvarlst=tsumvarlst, 
-	tsumvarnmlst=tsumvarnmlst, TPA=TPA, tfun=tfun, ACI=ACI, tfilter=tfilter, 
-	lbs2tons=lbs2tons, getadjplot=getadjplot, adjtree=adjtree, adjTPA=adjTPA, 
-	NAto0=NAto0, savedata=savedata, outfolder=outfolder, out_layer=out_layer, 
-	outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, tround=tround)",
-    file = outfile, sep="")
-    close(outfile)
-
-    #### WRITE TO FILE 
-    #############################################################
+  #### WRITE TO FILE 
+  #############################################################
+  if (savedata) {
     if (pltsp) {
-      spExportSpatial(sumdat, out_dsn=plt_dsn, out_layer=out_layer, 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-		append_layer=append_layer)
+      spExportSpatial(sumdat, 
+            savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=out_layer,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer, 
+                                  add_layer=TRUE))
+    } else {
+      datExportData(sumdat, 
+            savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=out_layer,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  add_layer=TRUE)) 
     }
-    datExportData(sumdat, outfolder=outfolder, out_fmt=out_fmt, out_dsn=out_dsn,
-		out_layer=out_layer, outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer, append_layer=append_layer)
   } 
 
   if (!returnDT) {     

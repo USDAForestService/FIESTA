@@ -193,10 +193,14 @@ The `spExportSpatial` function exports an `sf` object.
   
 ```{r}
 ## Export Spatial Polygons layer to a shapefile
-FIESTA::spExportSpatial(WYbh,
+spExportSpatial(WYbh,
+                  savedata_opts = list(
                         out_dsn = "WYbh.shp", 
                         outfolder = outfolder,
-                        overwrite_dsn = TRUE)
+                        overwrite_dsn = TRUE
+                        )
+                )
+
 ```
 
 </details>
@@ -223,8 +227,12 @@ head(WYspplt)
 We can also use EPSG code with `spMakeSpatialPoints`.
 
 ```{r}        
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt=WYplt, xy.uniqueid="CN", xvar="LON_PUBLIC", 
-        yvar="LAT_PUBLIC", xy.crs=4269)
+WYspplt <- FIESTA::spMakeSpatialPoints(xyplt = WYplt, 
+                                       xy.uniqueid = "CN", 
+                                       xvar = "LON_PUBLIC", 
+                                       yvar = "LAT_PUBLIC", 
+                                       xy.crs = 4269
+                                       )
 WYspplt 
 ```        
 
@@ -248,11 +256,13 @@ WYspplt <- spMakeSpatialPoints(xyplt = WYplt,
                                yvar = "LAT_PUBLIC",
                                xy.crs = 4269,
                                exportsp = TRUE,
-                               out_dsn = "spplt",
-                               out_fmt = "shp",
-                               outfolder = outfolder,
-                               out_layer = "WYplots",
-                               overwrite_layer = TRUE)
+                               savedata_opts = list(
+                                    out_dsn = "spplt",
+                                    out_fmt = "shp",
+                                    outfolder = outfolder,
+                                    out_layer = "WYplots",
+                                    overwrite_layer = TRUE)
+                               )
 ```
 
 </details>
@@ -285,13 +295,33 @@ The `spClipPoint` function subsets `SpatialPoints` or point file with a Spatial 
 
 ```{r}
 ## Get points within Bighorn National Forest boundary (project on the fly)
+
 WYbhptslst <- FIESTA::spClipPoint(xyplt = WYplt, 
                                   uniqueid = "CN",
                                   clippolyv = WYbh, 
                                   xvar = "LON_PUBLIC", 
                                   yvar = "LAT_PUBLIC", 
                                   prj = "longlat", 
-                                  datum = "NAD83")
+                                  datum = "NAD83"
+                                  )
+
+WYbhptslst <- spClipPoint(xyplt = WYplt, 
+                                  uniqueid = "CN",
+                                  clippolyv = WYbh, 
+                                  xvar = "LON_PUBLIC", 
+                                  yvar = "LAT_PUBLIC", 
+                                  prj = "longlat", 
+                                  datum = "NAD83",
+                                  savedata = TRUE,
+                                  exportsp = TRUE,
+                                  savedata_opts = list(
+                                        outfolder=outfolder,
+                                        out_layer = "WYbh"
+                                        )
+                                  )
+
+
+
 names(WYbhptslst)
 WYbhspplt <- WYbhptslst$clip_xyplt
 WYbhprj <- WYbhptslst$clip_polyv
@@ -335,15 +365,17 @@ Next, we can export clipped points.
 ```{r} 
 ## Export clipped points
 FIESTA::spExportSpatial(WYbhspplt,
-                        out_layer = "WYbhpts", 
-                        outfolder = outfolder, 
-                        overwrite_layer = TRUE)
+                        savedata_opts = list(
+                            out_layer = "WYbhpts", 
+                            outfolder = outfolder, 
+                            overwrite_layer = TRUE)
+                        )
 ```
 
 Finally, we can get points within Bighorn National Forest boundary (project on the fly) and save to an outfolder. 
 
 ```{r}
-WYbhptslst <- FIESTA::spClipPoint(xyplt = WYplt,
+WYbhptslst <- spClipPoint(xyplt = WYplt,
                                   uniqueid = "CN",
                                   clippolyv = WYbh, 
                                   xvar = "LON_PUBLIC",
@@ -352,9 +384,11 @@ WYbhptslst <- FIESTA::spClipPoint(xyplt = WYplt,
                                   datum = "NAD83",
                                   othertabnms = c("WYcond", "WYtree"),
                                   exportsp = TRUE,
-                                  outfolder = outfolder, 
-                                  overwrite = TRUE,
-                                  outfn.pre = "clip")
+                                  savedata_opts = list(
+                                        outfolder = outfolder, 
+                                        overwrite_layer = TRUE,
+                                        outfn.pre = "clip")
+                                  )
 names(WYbhptslst)
 ```
 

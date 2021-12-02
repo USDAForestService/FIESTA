@@ -38,7 +38,8 @@
 #' outfolder.
 #' @param exportNA Logical. If TRUE, NULL values are exported to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options. Only used when savedata = TRUE.  
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'polyext'.
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #'
 #' @return \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
@@ -93,11 +94,21 @@
 #'   plot(spxyext["DISTRICTNU"])
 #' 
 #' @export spExtractPoly
-spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN", 
-		polyvlst, polyv_dsn=NULL, polyvarlst=NULL, polyvarnmlst=NULL, 
-		keepNA=FALSE, showext=FALSE, 
-		savedata=FALSE, exportsp=FALSE, exportNA=FALSE, 
-		savedata_opts=savedata_options(), gui=FALSE, ...){
+spExtractPoly <- function(xyplt, 
+                          xyplt_dsn = NULL, 
+                          uniqueid = "PLT_CN", 
+                          polyvlst, 
+                          polyv_dsn = NULL, 
+                          polyvarlst = NULL, 
+                          polyvarnmlst = NULL, 
+                          keepNA = FALSE, 
+                          showext = FALSE, 
+                          savedata = FALSE, 
+                          exportsp = FALSE, 
+                          exportNA = FALSE, 
+                          savedata_opts = savedata_options(), 
+                          gui = FALSE, 
+                          ...){
   ######################################################################################
   ## DESCRIPTION: 
   ## Extracts values from one or more polygon layers and appends to input spatial layer 
@@ -111,6 +122,11 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
   if (gui) showext=savedata=exportsp <- NULL
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(FIESTA::spExtractPoly)), 
@@ -120,10 +136,27 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     stop("invalid parameter: ", toString(miss))
   }
 
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
   ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
-
+  ## CHECK PARAMETER INPUTS
+  ##################################################################  
+  
   ## Spatial points for data extraction.. 
   ##################################################################################
 #  sppltx <- pcheck.table(xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
@@ -210,13 +243,20 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
 
   ## Check outfolder
   if (savedata || exportsp || exportNA) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, createSQLite=FALSE, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+          add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "polyext"
+    }
   }
 
   ########################################################################
@@ -313,10 +353,17 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
     }
 
     if (exportNA) {
-      spExportSpatial(sppltout, out_dsn=out_dsn, 
-		out_layer=paste0(out_layer, "_", polyvnm, "_NAvals"), 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer)
+      outfn.na <- paste0(out_layer, "_", polyvnm, "_NAvals")
+      spExportSpatial(sppltout, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer=outfn.na,
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer, 
+                              add_layer=TRUE))
     }
  
     if (!keepNA) {
@@ -327,17 +374,31 @@ spExtractPoly <- function(xyplt, xyplt_dsn=NULL, uniqueid="PLT_CN",
   }
 
   if (savedata) {
-    datExportData(spxyext, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE)
+    datExportData(spxyext, 
+      savedata_opts=list(outfolder=outfolder, 
+                          out_fmt=out_fmt, 
+                          out_dsn=out_dsn, 
+                          out_layer=out_layer,
+                          outfn.pre=outfn.pre, 
+                          outfn.date=outfn.date, 
+                          overwrite_layer=overwrite_layer,
+                          append_layer=append_layer,
+                          add_layer=TRUE)) 
   }
 
   ## Export to shapefile
   if (exportsp) {
-    spExportSpatial(spxyext, outfolder=outfolder, out_layer=out_layer, 
-		outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer)
+    spExportSpatial(spxyext, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer=out_layer,
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
+    
   }
   
   returnlst <- list(spxyext=spxyext, outnames=unlist(polyvarnmlst))

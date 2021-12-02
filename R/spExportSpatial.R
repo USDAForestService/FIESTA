@@ -6,7 +6,8 @@
 #' 
 #' @param sfobj sf class R object. Spatial object to export.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options for saving data. If out_layer = NULL, default = 'outsp'.
+#' of options for saving data. If out_layer = NULL, default = 'datsp'.
+#' 
 #' @return An sf spatial object is written to outfolder.
 #' @note If out_fmt='shp':\cr The ESRI shapefile driver truncates variable
 #' names to 10 characters or less. Variable names are changed before export
@@ -17,7 +18,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spExportSpatial
-spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
+spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   ###########################################################################
   ## DESCRIPTION: Exports an S4 Spatial object to an ArcGIS shapefile (*.shp).
   ## out_fmt	Output format ('sqlite', 'gpkg', 'shp')		
@@ -45,7 +46,6 @@ spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
  
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)
-
 
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -75,10 +75,11 @@ spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
 
   ## Check out_fmt
   ###########################################################
-  outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, outfolder=outfolder,
-	outfn.pre=outfn.pre, outfn.date=outfn.date, overwrite_dsn=overwrite_dsn,
-	overwrite_layer=overwrite_layer, add_layer=add_layer, append_layer=append_layer,
- 	createSQLite=FALSE)
+  outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+                outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
+                add_layer=add_layer, append_layer=append_layer,
+ 	              createSQLite=FALSE)
   out_fmt <- outlst$out_fmt
   out_dsn <- outlst$out_dsn
   outfolder <- outlst$outfolder
@@ -92,7 +93,7 @@ spExportSpatial <- function(sfobj, savedata_opts=savedata_options()) {
 
   ## Check out_layer
   if (is.null(out_layer)) {
-    out_layer <- "outsp"
+    out_layer <- "datsp"
   } 
   
   ## Write sf layer

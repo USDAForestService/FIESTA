@@ -126,13 +126,42 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spGetXY
-spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL, 
-	xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", xvar=NULL, yvar=NULL, xy.crs=4269, 
-	xyjoinid=NULL, pjoinid="CN", xy_datsource="datamart", clipxy=TRUE, plot_layer="plot",
-	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, measCur=FALSE, measEndyr=NULL, 
-	measEndyr.filter=NULL, invyrs=NULL, measyrs=NULL, allyrs=FALSE, intensity1=FALSE, 
-	showsteps=FALSE, savedata=FALSE, exportsp=FALSE, returnxy=TRUE, outfolder=NULL,
- 	out_fmt="csv", out_dsn=NULL, out_layer="xyplt", outfn.pre=NULL, outfn.date=FALSE, 
+spGetXY <- function(bnd, 
+                    bnd_dsn = NULL, 
+                    bnd.filter = NULL, 
+                    states = NULL, 
+                    RS = NULL, 
+                    xy = NULL, 
+                    xy_dsn = NULL, 
+                    xy.uniqueid = "PLT_CN", 
+                    xvar = NULL, 
+                    yvar = NULL, 
+                    xy.crs = 4269, 
+                    xyjoinid = NULL, 
+                    pjoinid = "CN", 
+                    xy_datsource = "datamart", 
+                    clipxy = TRUE, 
+                    plot_layer = "plot",
+                    evalid = NULL, 
+                    evalCur = FALSE, 
+                    evalEndyr = NULL, 
+                    measCur = FALSE, 
+                    measEndyr = NULL, 
+                    measEndyr.filter = NULL, 
+                    invyrs = NULL, 
+                    measyrs = NULL, 
+                    allyrs = FALSE, 
+                    intensity1 = FALSE, 
+                    showsteps = FALSE, 
+                    savedata = FALSE, 
+                    exportsp = FALSE, 
+                    returnxy = TRUE, 
+                    outfolder=NULL, 
+                    out_fmt="csv", 
+                    out_dsn=NULL, 
+                    out_layer="xyplt", 
+                    outfn.pre=NULL, 
+                    outfn.date=FALSE, 
 	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE) {
 
   ##############################################################################
@@ -153,12 +182,14 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   xydat=stateFilter=countyfips=stcds=dbconn=intensitynm <- NULL
   returnlst <- {}
 
-  ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
   gui <- FALSE
   coordtype <- "public"
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- names(formals(spGetXY))
@@ -166,10 +197,32 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
+  
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ##################################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################################
+  
 
-  #############################################################################
   ## Import boundary
-  #############################################################################
+  ########################################################
   bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
  
   if (!is.null(bndx)) {
@@ -180,7 +233,6 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
     clipxy <- FALSE
   }
  
-  #############################################################################
   ## Set xy_datsource
   ########################################################
   datsourcelst <- c("obj", "csv", "datamart", "sqlite", "shp", "gdb")
@@ -225,19 +277,20 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
-		createSQLite=FALSE, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
-    if (out_fmt != "csv") {
-      outfn.date <- FALSE
-    }
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   }
+  
+  
 
   ########################################################################
   ### DO THE WORK
@@ -331,9 +384,9 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   } else {			## xy_datsource in('datamart', 'sqlite')
     if (xy_datsource == "datamart") {
       spxy <- DBgetCoords(states=stcds, evalid=evalid, evalCur=evalCur,
-		evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr,
-		allyrs=allyrs, invyrs=invyrs, measyrs=measyrs, intensity1=intensity1, 
-		issp=TRUE)[[1]]
+		            evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr,
+		            allyrs=allyrs, invyrs=invyrs, measyrs=measyrs, intensity1=intensity1, 
+		            issp=TRUE)[[1]]
 
       xy.uniqueid <- "PLT_CN"
       xyjoinid <- "PLT_CN"
@@ -415,7 +468,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
 
       ## check xyjoinid (variable to join to plot table)
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		gui=gui, checklst=xyfields, caption="xyjoinid", stopifnull = FALSE)
+		      gui=gui, checklst=xyfields, caption="xyjoinid", stopifnull = FALSE)
       if (is.null(xyjoinid)) {
         xyjoinid <- xy.uniqueid
       }
@@ -426,7 +479,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
         stfilter <- paste("where ", xystatenm, " IN(", toString(stcds), ")")
 
         sql <- paste0("select * from ", xy, " where ", xystatenm, " IN(", 
-			toString(stcds), ")")
+			    toString(stcds), ")")
         xyplt <- suppressMessages(pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql))
 
         ## Make spatial
@@ -437,7 +490,7 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
         if (!is.null(plot_layer) && length(plot_layer) == 1) {
           pltfields <- DBI::dbListFields(dbconn, plot_layer)
           pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-			gui=gui, checklst=pltfields, caption="plot joinid")
+			      gui=gui, checklst=pltfields, caption="plot joinid")
           if (is.null(pjoinid)) {
             if (xyjoinid %in% pltfields) {
               pjoinid <- xyjoinid
@@ -520,16 +573,35 @@ spGetXY <- function(bnd, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
   ## Save tables
   #############################################################################
   if (savedata) {
+    datExportData(sf::st_drop_geometry(spxy), 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="xyids",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
+    
+   
+    
     datExportData(sf::st_drop_geometry(spxy), outfolder=outfolder, 
 		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyids", 
 		outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
 		add_layer=TRUE, append_layer=append_layer)
   } 
   if (exportsp) {
-    spExportSpatial(spxy, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer, 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-		add_layer=TRUE, append_layer=append_layer)
+    spExportSpatial(spxy, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="spxyplt",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
   }    
 
   if (showsteps) {

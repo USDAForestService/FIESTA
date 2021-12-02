@@ -84,10 +84,21 @@
 #' @author Tracey S. Frescino, Chris Toney
 #' @keywords spatial
 #' @export spReprojectRaster
-spReprojectRaster <- function(rastfn, bands=NULL, crs=NULL, crs.new=NULL,
-    	res.new=NULL, bbox.new=NULL, dtype.new=NULL, NODATA.new=NULL,
- 	resamp.method="near", crs.default="EPSG:5070", compress=NULL, outfolder=NULL, 
-	outfn=NULL, outext=NULL, overwrite=FALSE) {
+spReprojectRaster <- function(rastfn, 
+                              bands = NULL, 
+                              crs = NULL, 
+                              crs.new = NULL, 
+                              res.new = NULL, 
+                              bbox.new = NULL, 
+                              dtype.new = NULL, 
+                              NODATA.new = NULL, 
+                              resamp.method = "near", 
+                              crs.default = "EPSG:5070", 
+                              compress = NULL, 
+                              outfolder = NULL, 
+                              outfn = NULL, 
+                              outext = NULL, 
+                              overwrite = FALSE){
 
   ##################################################################################
   ## DESCRIPTION: reproject raster. If crs.new is not defined, uses crs.default. 	

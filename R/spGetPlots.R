@@ -116,23 +116,11 @@
 #' @param savebnd Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 #' SpatiaLite database.
 #' @param savexy Logical. If TRUE, save xy coordinates to outfolder.
-#' @param outfolder String. If savedata=TRUE or savexy=TRUE, savebnd=TRUE, name
-#' of output folder. If NULL, the working directory is used.
-#' @param out_fmt String. Format for output ('csv', 'sqlite', 'db', 'sqlite3',
-#' 'db3', 'gpkg', 'gdb'). If out_fmt='gdb', must have ArcGIS license and
-#' install arcgisbinding package.
-#' @param out_dsn String. Name of database if out_fmt != 'csv'.
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, adds current date to out_dsn name or
-#' file name if out_fmt = 'csv'.
-#' @param overwrite_dsn Logical. If TRUE, overwrites out_dsn. Note: cannot
-#' overwrite out_fmt="gdb".
-#' @param overwrite_layer Logical. If TRUE, overwrites layers in out_dsn or
-#' files if out_fmt = 'csv'.
-#' @param append_layer Logical. If TRUE, appends layers to existing out_dsn or
-#' files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-#' "gdb".
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'rastext'.
 #' @param spXYdat R list object. Output from FIESTA::spGetXY().
+#' 
 #' @return \item{xypltx}{ sf object. Input xy data clipped to boundary. }
 #' \item{bndx}{ sf object. Input bnd. } \item{tabs}{ list object. List of input
 #' layers clipped to boundary (pltx,condx,etc.). } \item{xy.uniqueid}{ String.
@@ -184,18 +172,51 @@
 #' 
 #' 
 #' @export spGetPlots
-spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=NULL,
-	xyids=NULL, xy_datsource=NULL, xy=NULL, xy_dsn=NULL, xy.uniqueid="PLT_CN", 
-	xvar=NULL, yvar=NULL, xy.crs=4269, xyjoinid=NULL, pjoinid=NULL, 
-	clipxy=TRUE, datsource="datamart", data_dsn=NULL, istree=FALSE, isseed=FALSE, 
-	plot_layer="plot", cond_layer="cond", tree_layer="tree", seed_layer="seed",
- 	ppsa_layer="pop_plot_stratum_assgn", other_layers=NULL, puniqueid="CN", 
-	savePOP=FALSE, evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalType="VOL", 
-	measCur=FALSE, measEndyr=NULL, measEndyr.filter=NULL, invyrs=NULL, 
-	measyrs=NULL, allyrs=FALSE, intensity1=FALSE, showsteps=FALSE, savedata=FALSE, 
-	savebnd=FALSE, savexy=TRUE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-	outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=FALSE,  
-	append_layer=FALSE, spXYdat=NULL) {
+spGetPlots <- function(bnd = NULL, 
+                       bnd_dsn = NULL, 
+                       bnd.filter = NULL, 
+                       states = NULL, 
+                       RS = NULL, 
+                       xyids = NULL, 
+                       xy_datsource = NULL, 
+                       xy = NULL, 
+                       xy_dsn = NULL, 
+                       xy.uniqueid = "PLT_CN", 
+                       xvar = NULL, 
+                       yvar = NULL, 
+                       xy.crs = 4269, 
+                       xyjoinid = NULL, 
+                       pjoinid = NULL, 
+                       clipxy = TRUE, 
+                       datsource = "datamart", 
+                       data_dsn =NULL, 
+                       istree = FALSE, 
+                       isseed = FALSE, 
+                       plot_layer = "plot", 
+                       cond_layer = "cond", 
+                       tree_layer = "tree", 
+                       seed_layer = "seed", 
+                       ppsa_layer = "pop_plot_stratum_assgn", 
+                       other_layers = NULL, 
+                       puniqueid = "CN", 
+                       savePOP = FALSE, 
+                       evalid = NULL, 
+                       evalCur = FALSE, 
+                       evalEndyr = NULL, 
+                       evalType = "VOL", 
+                       measCur = FALSE, 
+                       measEndyr = NULL, 
+                       measEndyr.filter = NULL, 
+                       invyrs = NULL, 
+                       measyrs =NULL, 
+                       allyrs = FALSE, 
+                       intensity1 = FALSE, 
+                       showsteps = FALSE, 
+                       savedata = FALSE, 
+                       savebnd = FALSE, 
+                       savexy = TRUE, 
+                       savedata_opts = NULL,
+                       spXYdat = NULL) {
 
   ##############################################################################
   ## DESCRIPTION
@@ -221,11 +242,13 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
   returnlst <- list()
   #clipdat <- list()
 
-  ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
   gui <- FALSE
   coordtype <- "public"
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
@@ -235,7 +258,29 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  
+  ##################################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################################
+  
   ## Define list of pop_tables (without PLT_CN)
   pop_tables <- c("POP_ESTN_UNIT", "POP_EVAL", "POP_EVAL_ATTRIBUTE", "POP_EVAL_GRP", 
 	"POP_EVAL_TYP", "POP_STRATUM", "SURVEY") 
@@ -308,7 +353,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
 
       ## Check clipxy
       clipxy <- pcheck.logical(clipxy, varnm="clipxy", 
-		title="Clip xy?", first="NO", gui=gui)  
+                            title="Clip xy?", first="NO", gui=gui)  
 
       if (clipxy) {
         ###########################################################################
@@ -321,12 +366,12 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
           xy_dsn <- data_dsn
         } 
         xydat <- spGetXY(bnd=bndx, 
-		states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
-		xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
- 		xy_datsource=xy_datsource, clipxy=clipxy, evalid=evalid, evalCur=evalCur,
- 		evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr, 
-		measEndyr.filter=measEndyr.filter, invyrs=invyrs, measyrs=measyrs, 
-		allyrs=allyrs, intensity1=intensity1, showsteps=showsteps, returnxy=TRUE)
+		        states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
+		        xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
+ 		        xy_datsource=xy_datsource, clipxy=clipxy, evalid=evalid, evalCur=evalCur,
+ 		        evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr, 
+		        measEndyr.filter=measEndyr.filter, invyrs=invyrs, measyrs=measyrs, 
+		        allyrs=allyrs, intensity1=intensity1, showsteps=showsteps, returnxy=TRUE)
         spxy <- xydat$spxy
         xyids <- xydat$xyids
         states <- xydat$states
@@ -336,7 +381,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
 
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-	     checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
+	            checklst=names(xyids), gui=gui, caption="JoinID in xyids?", 
+	            stopifnull=FALSE) 
         if (is.null(xyjoinid)) {
           message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
           xyjoinid <- xy.uniqueid
@@ -355,7 +401,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
       
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		checklst=names(spxy), gui=gui, caption="JoinID in xy?", stopifnull=TRUE)  
+		        checklst=names(spxy), gui=gui, caption="JoinID in xy?", 
+		        stopifnull=TRUE)  
 
 
         ## Check projections. Reproject points to clippolyv projection.
@@ -365,12 +412,12 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
 
         ## Check if extents overlap... if not and stopifnotin=TRUE, return NULL
         chk <- check.extents(sf::st_bbox(bndx), sf::st_bbox(spxy), 
-			layer1nm="bndx", layer2nm="spxy", stopifnotin=TRUE, quiet=TRUE)
+			      layer1nm="bndx", layer2nm="spxy", stopifnotin=TRUE, quiet=TRUE)
         if (is.null(chk)) return(NULL)
 
         ## Get intersecting states
         statedat <- spGetStates(bndx, stbnd=NULL, stbnd_dsn=NULL, 
-			stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)
+			        stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)
         bndx <- statedat$bndx
         stbnd.att <- statedat$stbnd.att
         statenames <- statedat$statenames
@@ -433,18 +480,17 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, append_layer=append_layer, 
-		createSQLite=FALSE, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
-    if (out_fmt != "csv") {
-      outfn.date <- FALSE
-    }
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   }
  
   ########################################################################
@@ -656,14 +702,14 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
       ###############################
       if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
         dat <- DBgetPlots(states=stcd, datsource="datamart", stateFilter=stateFilter, 
-			allyrs=TRUE, istree=istree, isseed=isseed, othertables=other_layers, 
-			intensity1=intensity1, savePOP=savePOP)
+			        allyrs=TRUE, istree=istree, isseed=isseed, othertables=other_layers, 
+			        intensity1=intensity1, savePOP=savePOP)
       } else {
         dat <- DBgetPlots(states=stcd, datsource="datamart", stateFilter=stateFilter, 
-			allyrs=allyrs, evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, 
-			evalType=evalType, measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, 
-			measyrs=measyrs, istree=istree, isseed=isseed, othertables=other_layers, 
-			intensity1=intensity1, savePOP=savePOP)
+			        allyrs=allyrs, evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, 
+			        evalType=evalType, measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, 
+			        measyrs=measyrs, istree=istree, isseed=isseed, othertables=other_layers, 
+			        intensity1=intensity1, savePOP=savePOP)
       }
       tabs <- dat$tabs
       PLOT <- tabs$plt
@@ -686,7 +732,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
       ## Check pjoinid
       pltfields <- names(PLOT)
       pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-		checklst=pltfields, gui=gui, caption="Joinid in plot?")  
+		                  checklst=pltfields, gui=gui, caption="Joinid in plot?")  
       if (is.null(pjoinid)) {
         if (xyjoinid %in% pltfields) {
           pjoinid  <- xyjoinid
@@ -709,8 +755,7 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
         if (nbrxy) {
  
           ## ## Query plots - measCur=TRUE and measEndyr
-          pfromqry <- getpfromqry(plotCur=TRUE, Endyr=measEndyr, 
-				syntax="R", plotnm="PLOT")
+          pfromqry <- getpfromqry(plotCur=TRUE, Endyr=measEndyr, syntax="R", plotnm="PLOT")
           plt.qry <- paste0("select distinct p.* from ", pfromqry) 
           PLOT1 <- setDT(sqldf::sqldf(plt.qry))
 
@@ -1019,8 +1064,8 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
       if (evalCur) {
         ppsa_layer<- chkdbtab(tablst, ppsa_layer, stopifnull=TRUE)
         evalidlst <- DBgetEvalid(states=stcd, datsource="sqlite", 
-			data_dsn=data_dsn, evalid=evalid, evalEndyr=evalEndyr,
-			evalCur=evalCur, evalType=evalType, ppsanm=ppsa_layer)
+			          data_dsn=data_dsn, evalid=evalid, evalEndyr=evalEndyr,
+			          evalCur=evalCur, evalType=evalType, ppsanm=ppsa_layer)
         evalidst <- unlist(evalidlst$evalidlist)
       }
  
@@ -1438,30 +1483,54 @@ spGetPlots <- function(bnd=NULL, bnd_dsn=NULL, bnd.filter=NULL, states=NULL, RS=
   #############################################################################
   if (savedata) {
     if (savebnd) {
-      spfmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
-      spExportSpatial(bndx, outfolder=outfolder, out_fmt=spfmt,
-		out_dsn=out_dsn, out_layer="bnd", outfn.date=outfn.date,
-		overwrite_layer=overwrite_layer, add_layer=TRUE, 
-		append_layer=append_layer)   
+      spExportSpatial(bndx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="bnd",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer, 
+                              add_layer=TRUE))
+      
     }
     if (savexy && !is.null(spxy)) {
-      spfmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
-      spExportSpatial(spxy, outfolder=outfolder, out_fmt=spfmt,
-		out_dsn=out_dsn, out_layer="spxyplt", outfn.date=outfn.date,
-		overwrite_layer=overwrite_layer, add_layer=TRUE, 
-		append_layer=append_layer)   
+      spExportSpatial(spxy, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="spxyplt",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer, 
+                              add_layer=TRUE))
     }
 
-    datExportData(xyids, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer="xyids", outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer, add_layer=TRUE, 
-		append_layer=append_layer)
+    
+    datExportData(xyids, 
+      savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="xyids",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE)) 
 
     for (tab in tabs2save) {
-      datExportData(get(tab), outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer=tab, outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer, add_layer=TRUE, 
-		append_layer=append_layer)
+      datExportData(get(tab), 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer=tab,
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE)) 
     }
   } 
 

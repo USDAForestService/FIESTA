@@ -43,9 +43,17 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spPoly2Rast
-spPoly2Rast <- function(polyv, polyv_dsn=NULL, polyv.att, polyv.lut=NULL, 
-	rastfn.template=NULL, outfolder=NULL, outfn="polyrast", outext="img", 
-	outfn.pre=NULL, outfn.date=TRUE, overwrite=FALSE) {
+spPoly2Rast <- function(polyv, 
+                        polyv_dsn = NULL, 
+                        polyv.att, 
+                        polyv.lut = NULL, 
+                        rastfn.template = NULL, 
+                        outfolder = NULL, 
+                        outfn = "polyrast", 
+                        outext = "img", 
+                        outfn.pre = NULL, 
+                        outfn.date = TRUE, 
+                        overwrite = FALSE){
 
   #####################################################################################
   ## DESCRIPTION: 
@@ -133,8 +141,9 @@ spPoly2Rast <- function(polyv, polyv_dsn=NULL, polyv.att, polyv.lut=NULL,
 
 
     ## Create virtual raster by clipping raster template to extent of polyvx
-    rastclip <- spClipRast(rast=rastfn, clippolyv=polyvx, maskByPolygons=FALSE, 
-			outfolder=outfolder, outfn="tmp", fmt="VRT")
+    rastclip <- spClipRast(rast=rastfn, clippolyv=polyvx, 
+                           maskByPolygons=FALSE, 
+                           outfolder=outfolder, outfn="tmp", fmt="VRT")
 
     ## Create blank raster from clipped virtual raster
     rast.fmt <- drivers[drivers$DefaultExt == outext, "fmt"]

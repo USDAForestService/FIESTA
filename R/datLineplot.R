@@ -63,6 +63,7 @@
 #' @param ...  additional arguments to pass to barplot(), including a list of
 #' arguments for legend() arguments (e.g., args.legend=list(x="topleft",
 #' "bty="n"), for moving legend to topleft and removing box around legend).
+#'
 #' @return Outputs barplot to display window.
 #' @note If savedata = TRUE, writes a jpg and pdf of barplot to outfolder.
 #' 

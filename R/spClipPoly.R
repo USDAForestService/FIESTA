@@ -29,11 +29,13 @@
 #' @param areaunits String. If TRUE, calculate area of clipped polygons and
 #' append to attribute table ("ACRES", "HECTARES", "SQKM"). If NULL, units of
 #' polyv.
-#' @param exportsp Logical. If TRUE, the spatial clipped object is exported to
-#' outfolder (see spExportSpatial for details).
 #' @param nolonglat Logical. If TRUE, and both layer's coordinate system is
 #' long/lat, the layers are converted to a projected CRS before clipping.
-#' @param ...  Parameters for spExportSpatial.
+#' @param exportsp Logical. If TRUE, the spatial clipped object is exported to
+#' outfolder (see spExportSpatial for details).
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options for saving data. If out_layer = NULL, default = 'polyclip'.
+#' 
 #' @return sf object of clipped polygon. If polyv and clippolyv have different
 #' projections, the projection of returned object will have the same projection
 #' as polyv (See note about on-the-fly projection conversion).
@@ -59,9 +61,17 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spClipPoly
-spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL, 
-	clippolyv.filter=NULL, showext=FALSE, areacalc=FALSE, areaunits="ACRES",
- 	exportsp=FALSE, nolonglat=TRUE, ...) {
+spClipPoly <- function(polyv, 
+                       polyv_dsn = NULL, 
+                       clippolyv, 
+                       clippolyv_dsn = NULL, 
+                       clippolyv.filter = NULL, 
+                       showext = FALSE, 
+                       areacalc = FALSE, 
+                       areaunits = "ACRES", 
+                       nolonglat = TRUE,
+                       exportsp = FALSE, 
+                       savedata_opts = NULL) {
 
   #####################################################################################
   ## DESCRIPTION: 
@@ -76,19 +86,41 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
   ## If gui.. set variables to NULL
   if(gui){polyv=clippolyv=exportsp=areacalc <- NULL}
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-#  formallst <- c(names(formals(FIESTA::spClipPoly)), 
-#		names(formals(FIESTA::spMakeSpatialPoints)))
-#  if (!all(input.params %in% formallst)) {
-#    miss <- input.params[!input.params %in% formallst]
-#    stop("invalid parameter: ", toString(miss))
-#  }
+  formallst <- names(formals(FIESTA::spClipPoly))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
 
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  
   ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
-
+  ## CHECK PARAMETER INPUTS
+  ##################################################################  
+  
   ## Get poly and clippoly layers
   polyvx <- pcheck.spatial(layer=polyv, dsn=polyv_dsn, gui=gui, 
 	caption="Poly to clip?")
@@ -103,9 +135,27 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
   ## Check areacalc
   areacalc <- pcheck.logical(areacalc, "Calculate area?", "YES")
 
-  ## Check exportsp
-  exportsp <- pcheck.logical(exportsp, "Export sf?", "YES")
-
+  ## Check exportsp 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", title="Export spatial layer?", 
+                             first="NO", gui=gui)
+  
+  ## Check output parameters
+  if (exportsp) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                            add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "polyclip"
+    }
+  }
 
   ##################################################################
   ## DO WORK
@@ -134,7 +184,16 @@ spClipPoly <- function(polyv, polyv_dsn=NULL, clippolyv, clippolyv_dsn=NULL,
  
   ## Export clipped poly
   if (exportsp) {
-    spExportSpatial(ipoly, ...)
+    spExportSpatial(ipoly, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="bnd",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer, 
+                              add_layer=TRUE))
   }
 
   return(ipoly)    

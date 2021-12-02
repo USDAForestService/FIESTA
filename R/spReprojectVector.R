@@ -14,7 +14,9 @@
 #' +towgs84=0,0,0").
 #' @param exportsp Logical. If TRUE, the spatial reprojected object is exported
 #' to outfolder (see spExportSpatial for details).
-#' @param ...  Parameters for spExportSpatial.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options for saving data. If out_layer = NULL, default = 'layerprj'.
+#'
 #' @return \item{layerprj}{ sf object. Reprojected spatial layer. }
 #' 
 #' If exportsp = TRUE, a spatial layer is written to outfolder (See note).
@@ -63,7 +65,11 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spReprojectVector
-spReprojectVector <- function(layer, dsn=NULL, crs.new, exportsp=FALSE, ...){
+spReprojectVector <- function(layer, 
+                              dsn = NULL, 
+                              crs.new, 
+                              exportsp = FALSE, 
+                              savedata_opts = NULL){
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -71,17 +77,64 @@ spReprojectVector <- function(layer, dsn=NULL, crs.new, exportsp=FALSE, ...){
   ## If gui.. set variables to NULL
   if (gui) savedata <- NULL
 
+  
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER NAMES
   ##################################################################
-
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(spReprojectVector)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
   ## Check spatial file  
   layerx <- pcheck.spatial(layer=layer, dsn=dsn, gui=gui, caption="Spatial Object?")
 
 
-  ## Check savedata 
-  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
-	title="Export spatial layer?", first="YES", gui=gui)
+  ## Check exportsp 
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", title="Export spatial layer?", 
+                    first="NO", gui=gui)
+  
+  ## Check output parameters
+  if (exportsp) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+                  out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                  overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                  add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
+      out_layer <- "layerprj"
+    }
+  }
 
 
   ##################################################################
@@ -92,8 +145,18 @@ spReprojectVector <- function(layer, dsn=NULL, crs.new, exportsp=FALSE, ...){
 
   
   ## Output shapefile to outfolder
-  if (exportsp)
-    spExportSpatial(layerxprj, ...)
+  if (exportsp) {
+    spExportSpatial(layerxprj, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer=out_layer,
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer, 
+                            add_layer=TRUE))
+  }
 
   return(layerxprj)
 

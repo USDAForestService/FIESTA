@@ -27,24 +27,14 @@
 #' @param adjcond Logical. If TRUE, csumvar condition variables are adjusted
 #' for nonsampled conditions by plot.
 #' @param NAto0 Logical. If TRUE, convert NA values to 0.
-#' @param savedata Logical. If TRUE, writes output data to outfolder.
-#' @param outfolder String. Name of the output folder. If savedata=TRUE, output
-#' is saved to the outfolder.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param out_layer String. Name of output layer in database or *.csv file, if
-#' savedata=TRUE. If NULL, the file will be named tsum_'date'.csv.
-#' @param outfn.pre String. Prefix for out_dsn.
-#' @param layer.pre String. Prefix for out_layer.
-#' @param outfn.date Logical. If TRUE, adds current date to outfile name.
-#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer in raw_dsn
-#' or *.csv raw data layer, if datsource="csv".
-#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data
-#' data frames to existing out_dsn layer or *.csv file.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
 #' returns data.frame object(s).
+#' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
+#' default = 'condsum'. 
+#' @param gui Logical. If gui, user is prompted for parameters.
+#' 
 #' @return A list of the following items: \item{condsum}{ Data frame.
 #' Plot-level table with aggregated condition attribute. } \item{cfilter}{
 #' Condition filter. }
@@ -64,11 +54,22 @@
 #'   FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
 #' 
 #' @export datSumCond
-datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN", 
-	puniqueid="CN", csumvar=NULL, csumvarnm=NULL, cfilter=NULL, getadjplot=FALSE, 
-	adjcond=FALSE, NAto0=FALSE, savedata=FALSE, outfolder=NULL, out_fmt="csv",
-	out_dsn=NULL, out_layer=NULL, outfn.pre=NULL, layer.pre=NULL, outfn.date=TRUE, 
-	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE, returnDT=TRUE){
+datSumCond <- function(cond = NULL, 
+                       plt = NULL, 
+                       plt_dsn = NULL, 
+                       cuniqueid = "PLT_CN",
+                       puniqueid = "CN", 
+                       csumvar = NULL, 
+                       csumvarnm = NULL, 
+                       cfilter = NULL, 
+                       getadjplot = FALSE,
+                       adjcond = FALSE, 
+                       NAto0 = FALSE, 
+                       returnDT = TRUE,
+                       savedata = FALSE, 
+                       savedata_opts = NULL,
+                       gui = FALSE){
+  
   #####################################################################################
   ## DESCRIPTION: Aggregates CONDPROP_UNADJ variable or other continuous condition 
   ##	variables to plot level with option to apply condition filters. If condition 
@@ -82,16 +83,45 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   ## If gui.. set variables to NULL
   if(gui){ puniqueid=cuniqueid=csumvarnm=savedata <- NULL }
 
-  ## SET OPTIONS
+  ## Set options
   options(scipen = 6) # bias against scientific notation
   options(stringsAsFactors=FALSE)
 
-  ## SET glopbal variables
+  ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ <- NULL
 
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(datSumCond)) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
   ##################################################################
 
   ## Check cond table
@@ -167,28 +197,27 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
 
 
   ## Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", 
-		title="Save data tables?", first="NO", gui=gui)
-
-  ## If savedata, check output file names
-  ################################################################
-  if (savedata) { 
-    outlst <- pcheck.output(gui=gui, out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer)
-    out_dsn <- outlst$out_dsn
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
+                             first="NO", gui=gui)
+  
+  ## Check output parameters
+  if (savedata) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+        overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+        add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
-
-    ## outfn
-    if (is.null(out_layer) || gsub(" ", "", out_layer) == "") {
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+    if (is.null(out_layer)) {
       out_layer <- "condsum"
-      if (!is.null(layer.pre)) {
-        out_layer <- paste(layer.pre, out_layer, sep="_")
-      }
     }
   }
-
+  
 
 
   ################################################################################  
@@ -240,14 +269,28 @@ datSumCond <- function(cond=NULL, plt=NULL, plt_dsn=NULL, cuniqueid="PLT_CN",
   #############################################################
   if (savedata) {
     if (pltsp) {
-      spExportSpatial(condf.sum, out_dsn=plt_dsn, out_layer=out_layer,
-			outfolder=outfolder, outfn.date=outfn.date, 
-			overwrite_layer=overwrite_layer, append_layer=append_layer)
+      spExportSpatial(condf.sum, 
+              savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=out_layer,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer, 
+                                  add_layer=TRUE))
+    } else {
+      datExportData(condf.sum, 
+              savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=out_layer,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  add_layer=TRUE)) 
     }
-    datExportData(condf.sum, outfolder=outfolder, out_fmt=out_fmt, 
-		out_dsn=out_dsn, out_layer=out_layer, outfn.date=outfn.date, 
-		overwrite_layer=overwrite_layer, append_layer=append_layer)
-    
   }  
 
   if (!returnDT) {     

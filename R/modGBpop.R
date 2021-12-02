@@ -259,14 +259,11 @@ modGBpop <- function(popType = "VOL",
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-print("TEST")
-print(input.params)
 
   ## Check parameter lists
   pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
 		savedata_opts=savedata_opts)
 
-print("TEST2")
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
@@ -746,8 +743,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-    )
+		                          add_layer=TRUE))
     datExportData(pltcondx, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -757,8 +753,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-    )
+		                          add_layer=TRUE))
 
     if (!is.null(treef)) {
       datExportData(treef, 
@@ -770,8 +765,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-      )
+		                          add_layer=TRUE))
     }
     if (!is.null(seedf)) {
       datExportData(seedf, 
@@ -783,8 +777,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-      )
+		                          add_layer=TRUE))
     }
     if (!is.null(vcondstrf)) {
       datExportData(vcondstrf, 
@@ -796,8 +789,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-      )
+		                          add_layer=TRUE))
     }
     if (!is.null(vcondsppf)) {
       datExportData(vcondsppf, 
@@ -809,8 +801,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-      )
+		                          add_layer=TRUE))
     }
 
     datExportData(pltassgnx, 
@@ -822,8 +813,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-    )
+		                          add_layer=TRUE))
     datExportData(unitarea, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -833,8 +823,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-    )
+		                          add_layer=TRUE))
     datExportData(stratalut, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -844,8 +833,7 @@ print("TEST2")
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-    )
+		                          add_layer=TRUE))
   }
 
   return(returnlst)
