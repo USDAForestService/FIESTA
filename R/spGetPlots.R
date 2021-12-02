@@ -1088,10 +1088,10 @@ spGetPlots <- function(bnd = NULL,
       if (is.null(pfromqry)) {
         message("no time frame specified... including all years")
         allyrs <- TRUE
-        pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalidst, plotCur=measCur, 
-			Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
-			intensity1=intensity1, syntax="R", plotnm=plot_layer, 
-			ppsanm=ppsa_layer, chk=TRUE)
+        pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalidst, 
+            plotCur=measCur, Endyr=measEndyr, invyrs=invyrs, 
+            allyrs=allyrs, intensity1=intensity1, syntax="R", 
+            plotnm=plot_layer, ppsanm=ppsa_layer, chk=TRUE)
       }
       ## Set up query for plots
       plt.qry <- paste0("select distinct p.* from ", pfromqry, " where ", stfilter) 
@@ -1215,7 +1215,7 @@ spGetPlots <- function(bnd = NULL,
           ## Get most current evalid
           if (evalCur) {
             evalidst <- getEvalid.ppsa(ppsa=ppsa_layer, states=stcd, 
-				evalCur=evalCur, evalType=evalType)
+				        evalCur=evalCur, evalType=evalType)
           }
           ## Get evalid filter
           if (!is.null(evalidst)) {
@@ -1226,8 +1226,8 @@ spGetPlots <- function(bnd = NULL,
           }
           ## get pfromqry
           pfromqry2 <- getpfromqry(evalid=evalidst, plotCur=measCur, 
-			invyrs=invyrs, allyrs=allyrs, intensity1=intensity1, 
-			syntax="R", plotnm=plot_layer, ppsanm=ppsa_layer)
+			          invyrs=invyrs, allyrs=allyrs, intensity1=intensity1, 
+			          syntax="R", plotnm=plot_layer, ppsanm=ppsa_layer)
           ## Set up query for plots
           plt2.qry <- paste0("select distinct p.* from ", pfromqry2, " where ", stfilter) 
 
