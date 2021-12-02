@@ -275,8 +275,7 @@ spGetPlots <- function(bnd = NULL,
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
   }
-  
-  
+
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################
@@ -301,7 +300,7 @@ spGetPlots <- function(bnd = NULL,
 
     ## Check xyjoinid
     xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-	 checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
+	      checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
     if (is.null(xyjoinid)) {
       message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
       xyjoinid <- xy.uniqueid
@@ -1508,7 +1507,6 @@ spGetPlots <- function(bnd = NULL,
                               add_layer=TRUE))
     }
 
-    
     datExportData(xyids, 
       savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -1562,6 +1560,7 @@ spGetPlots <- function(bnd = NULL,
   returnlst$xypltx <- xyids
   #returnlst$clip_polyv <- bndx
   returnlst$bndx <- bndx
+  returnlst$puniqueid <- puniqueid
   returnlst$xy.uniqueid <- xyjoinid
   returnlst$pjoinid <- pjoinid
   returnlst$states <- states

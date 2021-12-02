@@ -83,23 +83,9 @@
 #' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param exportsp Logical. If TRUE, exports spatial data to outfolder.
 #' @param returnxy Logical. If TRUE, returns a spatial sf object.
-#' @param outfolder String. If savedata=TRUE or savexy=TRUE, savebnd=TRUE, name
-#' of output folder. If NULL, the working directory is used.
-#' @param out_fmt String. Format for output ('csv', 'sqlite', 'db', 'sqlite3',
-#' 'db3', 'gpkg', 'gdb'). If out_fmt='gdb', must have ArcGIS license and
-#' install arcgisbinding package.
-#' @param out_dsn String. Name of database if out_fmt != 'csv'.
-#' @param out_layer String. Name of layer in database if out_fmt != 'csv'.
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, adds current date to out_dsn name or
-#' file name if out_fmt = 'csv'.
-#' @param overwrite_dsn Logical. If TRUE, overwrites out_dsn. Note: cannot
-#' overwrite out_fmt="gdb".
-#' @param overwrite_layer Logical. If TRUE, overwrites layers in out_dsn or
-#' files if out_fmt = 'csv'.
-#' @param append_layer Logical. If TRUE, appends layers to existing out_dsn or
-#' files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-#' "gdb".
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
+#'
 #' @return \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }
 #' \item{xyids}{ data frame. A table of pltids that are within bnd. }
 #' \item{bndx}{ sf object. Input bnd. } \item{xy.uniqueid}{ String. Unique
@@ -156,14 +142,7 @@ spGetXY <- function(bnd,
                     savedata = FALSE, 
                     exportsp = FALSE, 
                     returnxy = TRUE, 
-                    outfolder=NULL, 
-                    out_fmt="csv", 
-                    out_dsn=NULL, 
-                    out_layer="xyplt", 
-                    outfn.pre=NULL, 
-                    outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=FALSE, append_layer=FALSE) {
-
+                    savedata_opts = NULL){
   ##############################################################################
   ## DESCRIPTION
   ## Get FIA plots within the boundary population (area of interest)

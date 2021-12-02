@@ -49,10 +49,20 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spMakeSpatialPoints
-spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL, 
-	xvar=NULL, yvar=NULL, xy.crs=4269, prj=NULL, datum=NULL, zone=NULL, 
-	zoneS=FALSE, aea.param="USGS", addxy=FALSE, exportsp=FALSE, 
-	savedata_opts=savedata_options){
+spMakeSpatialPoints <- function(xyplt, 
+                                xyplt_dsn = NULL, 
+                                xy.uniqueid = NULL, 
+                                xvar = NULL, 
+                                yvar = NULL, 
+                                xy.crs = 4269, 
+                                prj = NULL, 
+                                datum = NULL, 
+                                zone = NULL, 
+                                zoneS = FALSE, 
+                                aea.param = "USGS", 
+                                addxy = FALSE, 
+                                exportsp = FALSE, 
+                                savedata_opts = NULL){
   ##############################################################################
   ## DESCRIPTION:
   ## Generates sf points object with defined projection.
@@ -76,7 +86,7 @@ spMakeSpatialPoints <- function(xyplt, xyplt_dsn=NULL, xy.uniqueid=NULL,
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
-  
+
   
   ##################################################################
   ## CHECK INPUT PARAMETERS

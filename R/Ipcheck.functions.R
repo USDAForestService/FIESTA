@@ -1051,7 +1051,6 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       }
     }
   }
- 
   if (!is.null(savedata_opts)) {
     if ("savedata_opts" %in% input.params) {
       if (!is.list(savedata_opts)) {
