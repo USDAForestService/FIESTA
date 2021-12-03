@@ -2311,20 +2311,25 @@ DBgetPlots <- function (states = NULL,
 
           ## Generate shapefile
           out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
-          assign(spxynm, spMakeSpatialPoints(xyplt=xyplt, xvar=xycoords[1], 
-			yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
-			exportsp=savedata, out_dsn=out_dsn, out_fmt=out_fmt_sp, 
-			outfolder=outfolder, out_layer=spxynm, outfn.date=outfn.date,
- 			overwrite_layer=overwrite_layer, append_layer=TRUE,
-			outfn.pre=outfn.pre, overwrite_dsn=overwrite_dsn))
+          assign(spxynm, spMakeSpatialPoints(xyplt=xyplt, 
+                              xvar=xycoords[1], yvar=xycoords[2], 
+                              xy.uniqueid="PLT_CN", xy.crs=4269, 
+                              addxy=TRUE, exportsp=savedata, 
+                              savedata_opts=list(
+                                out_dsn=out_dsn, out_fmt=out_fmt_sp, 
+                                outfolder=outfolder, out_layer=spxynm, 
+                                outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
+                                append_layer=TRUE, outfn.pre=outfn.pre, 
+                                overwrite_dsn=overwrite_dsn)))
         }
       } else {
         ## output parameters
         ###########################################################
         if (savedata | saveqry | parameters | !treeReturn | !returndata) {
           outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		  outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		  overwrite_dsn=overwrite_dsn, append_layer=append_layer, gui=gui)
+                          outfolder=outfolder, outfn.pre=outfn.pre, 
+                          outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, 
+                          append_layer=append_layer, gui=gui)
           out_dsn <- outlst$out_dsn
           out_fmt <- outlst$out_fmt
         } 
