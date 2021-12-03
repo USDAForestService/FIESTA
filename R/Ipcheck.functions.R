@@ -1012,7 +1012,6 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid strata_opts... see strata_options()")
       }
       formallst.strata <- names(formals(FIESTA::strata_options))[-length(formals(FIESTA::strata_options))]
-
       strata.params <- names(strata_opts)[!names(strata_opts) %in% c("formallst", "input.params")]
       if (!all(strata.params %in% formallst.strata)) {
         miss <- strata.params[!strata.params %in% formallst.strata]
@@ -1020,6 +1019,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       }
     }
   }
+print("OOOO")
   if (!is.null(unit_opts)) {
     if ("unit_opts" %in% input.params) {
       if (!is.list(unit_opts)) {
@@ -1029,7 +1029,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
         stop("invalid unit_opts... see unit_options()")
       }
       formallst.unit <- names(formals(FIESTA::unit_options))[-length(formals(FIESTA::unit_options))]
-      unit.params <- names(unit_opts)[names(unit_opts) != c("formallst", "input.params")]
+      unit.params <- names(unit_opts)[!names(unit_opts) %in% c("formallst", "input.params")]
       if (!all(unit.params %in% formallst.unit)) {
         miss <- unit.params[!unit.params %in% formallst.unit]
         stop("invalid parameter: ", toString(miss))
