@@ -21,8 +21,8 @@ modMApop(
   prednames = NULL,
   predfac = NULL,
   savedata = FALSE,
-  unit_opts = unit_options(),
-  savedata_opts = savedata_options(),
+  unit_opts = NULL,
+  savedata_opts = NULL,
   MAdata = NULL,
   pltdat = NULL,
   auxdat = NULL,
@@ -87,6 +87,8 @@ categorical).}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
+\item{unit_opts}{List. See help(unit_options()) for a list of options.}
+
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
@@ -101,14 +103,6 @@ FIESTA::spGetPlots().}
 
 \item{...}{For extendibility.}
 
-\item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
-
-\item{cuniqueid}{String. Unique identifier of plot in cond.}
-
-\item{condid}{String. Unique identifier of plot conditions (e.g., CONDID).
-If no condid in cond, the data are assumed to have 1 condition per plot.  A
-CONDID=1 is automatically added.}
-
 \item{evalid}{Numeric. FIA Evaluation identifier for subsetting plots for
 population.}
 
@@ -121,25 +115,12 @@ population.}
 Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
 be included.}
 
-\item{unitvar2}{String. Name of a second level estimation unit variable in
-unitarea and cond or pltassgn with assignment for each plot (e.g.,
-'STATECD').}
-
 \item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
 
-\item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
-
-\item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
-
-\item{unit.action}{String. What to do if number of plots in an estimation
-unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-unit.action='combine', combines estimation unit to the following estimation
-unit, ordered in unitzonal or stratalut.}
-
-\item{npixelvar}{String. Name of variable in unitlut defining number of
-pixels by estimation unit.}
-
 \item{saveobj}{Logical. If TRUE, saves SApopdat object to outfolder.}
+
+\item{strata_opts}{List. See help(strata_options()) for a list of options.
+Only used when strata = TRUE.}
 }
 \value{
 A list with population data for Green-Book estimates.

@@ -13,6 +13,7 @@ title_options(
   title.estvar = NULL,
   title.estvarn = NULL,
   title.filter = NULL,
+  title.units = "acres",
   ...
 )
 }

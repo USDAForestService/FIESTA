@@ -15,33 +15,20 @@ modPBpop(
   puniqueid = "CN",
   pltassgnid = "CN",
   nonsamp.pfilter = NULL,
-  strata = FALSE,
   sumunits = FALSE,
   unitvar = NULL,
-  unitvar2 = NULL,
   unitarea = NULL,
   areavar = "ACRES",
-  areaunits = "acres",
-  minplotnum.unit = 10,
-  unit.action = "keep",
+  strata = FALSE,
   stratalut = NULL,
   strvar = "STRATUMCD",
-  getwt = TRUE,
-  getwtvar = "P1POINTCNT",
-  strwtvar = "strwt",
-  stratcombine = TRUE,
-  minplotnum.strat = 2,
   pvars2keep = NULL,
   saveobj = FALSE,
   objnm = "PBpopdat",
   savedata = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
+  unit_opts = NULL,
+  strata_opts = NULL,
+  savedata_opts = NULL,
   PBstratdat = NULL,
   gui = FALSE
 )
@@ -78,17 +65,12 @@ All values must match plotid values if pnt is not NULL.}
 \item{nonsamp.pfilter}{String. An expression for filtering nonsampled plots.
 Must be R syntax.}
 
-\item{strata}{Logical. If TRUE, add data information for stratification.}
-
 \item{sumunits}{Logical. If TRUE, estimation units are combined to one table
 for output. Note: only available if tabtype="AREA". Acres}
 
 \item{unitvar}{String. Name of the estimation unit variable in cond or
 pltassgn with estimation unit assignment for each plot (e.g., 'ESTN_UNIT').
 If one estimation unit, set unitvar=NULL.}
-
-\item{unitvar2}{String. Name of a second estimation unit variable in cond or
-pltassgn with assignment for each plot (e.g., 'STATECD').}
 
 \item{unitarea}{Numeric or DF. Total area by estimation unit. If only 1
 estimation unit, include number of total acreage for the area of interest or
@@ -97,38 +79,12 @@ frame of total area by estimation unit, including unitvar and areavar.}
 
 \item{areavar}{String. Name of acre variable in unitarea. Default="ACRES".}
 
-\item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
-
-\item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
-
-\item{unit.action}{String. What to do if number of plots in an estimation
-unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-unit.action='combine', combines estimation unit to the following estimation
-unit in unitlut.}
+\item{strata}{Logical. If TRUE, add data information for stratification.}
 
 \item{stratalut}{DF/DT. If strata=TRUE, look-up table with strata
 proportions ('strwt') by strata (and estimation unit). To calculate 'strwt',
 set getwt=TRUE and getwtvar= name of variable with information to calculate
 weights from (e.g., pixel counts)}
-
-\item{strvar}{String. Name of strata variable in stratalut and table with
-strata assignment for each plot. Default="STRATUMCD".}
-
-\item{getwt}{Logical. If TRUE, calculates strata weights from stratatlut
-getwtvar.  If FALSE, 'strwt' variable must be in stratalut.}
-
-\item{getwtvar}{String. Name of variable in stratalut to calculate weights
-(strwt).  Default="P1POINTCNT".}
-
-\item{strwtvar}{String. If getwt=FALSE, name of variable in stratalut with
-calculated weights (Default = 'strwt').}
-
-\item{stratcombine}{Logical. If TRUE, automatically combines estimation
-units if less than 2 plots in any one estimation unit. See notes for more
-info.}
-
-\item{minplotnum.strat}{Integer. Minimum number of plots for a stratum
-within an estimation unit.}
 
 \item{pvars2keep}{String vector. Additional plot variables to keep in
 dataset.}
@@ -139,22 +95,13 @@ dataset.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
+\item{unit_opts}{List. See help(unit_options()) for a list of options.}
 
-\item{out_fmt}{String. Format for output tables ('csv', 'sqlite', 'gpkg').}
+\item{strata_opts}{List. See help(strata_options()) for a list of options.
+Only used when strata = TRUE.}
 
-\item{out_dsn}{String. Name of database if out_fmt = c('sqlite', 'gpkg').}
-
-\item{outfn.pre}{String. Add a prefix to output name (e.g., "01").}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites the out_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the out_layer, if
-exists.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 
 \item{PBstratdat}{R List object. Output data list components from
 FIESTA::DBgetStrata().}

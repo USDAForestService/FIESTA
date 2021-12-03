@@ -21,15 +21,7 @@ DBgetCoords(
   issp = FALSE,
   returndata = TRUE,
   savedata = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  out_layer = "xyplt",
-  append_layer = FALSE,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -92,35 +84,8 @@ query.}
 \item{savedata}{Logical. If TRUE, saves data to outfolder as comma-delimited
 file (*.csv).}
 
-\item{outfolder}{String. The output folder path. If NULL and savedata=TRUE
-or parameters=TRUE or isshp=TRUE, outfolder is the working directory.}
-
-\item{out_fmt}{String. File format for output ('csv', 'sqlite','gpkg',
-'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
-installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
-installed.}
-
-\item{out_dsn}{String. Data source name for output. If extension is not
-included, out_fmt is used. Use full path if outfolder=NULL.}
-
-\item{out_layer}{String. Name of file, out_fmt = 'csv', or name of layer in
-out_dsn, if out_fmt != 'csv'.}
-
-\item{append_layer}{Logical. If TRUE, appends to existing out_dsn. The
-out_dsn a database or shapefile. If FALSE, the out_dsn will be overwritten
-if exists.}
-
-\item{outfn.pre}{String. The name used for prefix of outfiles (e.g.,
-outfn.pre'_plt*'.)}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite_dsn}{Logical. If TRUE and out_fmt = 'sqlite', the out_dsn is
-overwritten.}
-
-\item{overwrite_layer}{Logical. If TRUE and out_fmt = 'csv', files are
-overwritten.  If out_fmt != 'csv', the layer in database is overwritten.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
 }
 \value{
 fiadat - a list of the following objects: \item{xy*_ACTUAL}{ Data

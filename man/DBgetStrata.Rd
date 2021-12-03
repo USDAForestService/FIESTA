@@ -14,16 +14,9 @@ DBgetStrata(
   evalAll = FALSE,
   evalType = "VOL",
   savedata = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
   getassgn = TRUE,
-  POP_PLOT_STRATUM_ASSGN = NULL
+  POP_PLOT_STRATUM_ASSGN = NULL,
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -57,35 +50,17 @@ See notes for more information on evalType.}
 
 \item{savedata}{Logical. If TRUE, writes output to outfolder.}
 
-\item{outfolder}{String.* If savedata=TRUE, name of the output folder. If
-NULL, data are saved to the working directory.}
-
-\item{out_fmt}{String. File format for output ('csv', 'sqlite','gpkg',
-'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
-installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
-installed.}
-
-\item{out_dsn}{String. Data source name for output. If extension is not
-included, out_fmt is used. Use full path if outfolder=NULL.}
-
-\item{outfn.pre}{String. The name used for prefix of outfiles (e.g.,
-outfn.pre'_plt*').}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrite database or csv files.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrite layer in a database.}
-
-\item{append_layer}{Logical. If TRUE, appends data to layer in a database or
-*.csv file.}
-
 \item{getassgn}{Logical. If TRUE, extracts plot assignments from
 POP_PLOT_STRATUM_ASSGN table in database.}
 
 \item{POP_PLOT_STRATUM_ASSGN}{Data frame. The POP_PLOT_STRATUM_ASSGN for
 state(s).}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
+
+\item{append_layer}{Logical. If TRUE, appends data to layer in a database or
+*.csv file.}
 }
 \value{
 FIAstrata - a list of the following objects: \item{pltassgn}{ Data

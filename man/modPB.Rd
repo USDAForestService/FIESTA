@@ -18,43 +18,15 @@ modPB(
   pfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
-  row.orderby = NULL,
-  col.orderby = NULL,
-  row.add0 = FALSE,
-  col.add0 = FALSE,
-  rowlut = NULL,
-  collut = NULL,
   domlut = NULL,
   domvarlst = NULL,
   ratioden = "ROWVAR",
-  allin1 = FALSE,
-  estround = 3,
-  pseround = 3,
-  estnull = 0,
-  psenull = "--",
-  divideby = NULL,
-  savedata = FALSE,
-  outfolder = NULL,
-  outfn.pre = NULL,
-  outfn.date = TRUE,
-  addtitle = TRUE,
-  rawdata = FALSE,
-  rawonly = FALSE,
-  raw_fmt = "csv",
-  raw_dsn = NULL,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
-  append_layer = FALSE,
-  returntitle = FALSE,
-  title.main = NULL,
-  title.ref = NULL,
-  title.rowvar = NULL,
-  title.colvar = NULL,
-  title.unitvar = NULL,
-  title.filter = NULL,
-  title.units = "acres",
   gainloss = FALSE,
   gainloss.vals = NULL,
+  savedata = FALSE,
+  table_opts = NULL,
+  title_opts = NULL,
+  savedata_opts = NULL,
   gui = FALSE,
   ...
 )
@@ -93,6 +65,30 @@ rowvar=NULL.}
 \item{colvar}{String. Name of domain variable in pnt used for output
 estimation table columns. If only 1 domain, colvar=NULL.}
 
+\item{domlut}{DF/DT or comma-delimited (*.csv). Look-up table to define the
+variables in the pnt table with category codes (DOMCODE) and code names
+(DOMNAME), and to set a pretty name for the variable to use in output table
+(DOMTITLE). This table is also used to populate rowvar/colvar,
+row.orderby/col.orderby, and title.rowvar/title.colvar parameters. Optional.}
+
+\item{domvarlst}{String vector. A vector of variable names that can be row
+or column domains (codes and names). Optional.}
+
+\item{ratioden}{String. ("ROWVAR" or "COLVAR"). If ratio, defines whether
+the rowvar or colvar in estimation output table is the denominator.}
+
+\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
+loss along with the variance and standard error, in percent, is generated.}
+
+\item{gainloss.vals}{String vector. A vector of names for values in gainloss
+table.}
+
+\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
+
+\item{...}{Parameters for modPBpop() if PBpopdat is NULL.}
+
 \item{row.orderby}{String. Name of the variable to use to sort the table
 rows with.  If NULL, rowvar is used.}
 
@@ -111,18 +107,6 @@ information and format).}
 descriptions to include in columns of output table (See notes for more
 information and format).}
 
-\item{domlut}{DF/DT or comma-delimited (*.csv). Look-up table to define the
-variables in the pnt table with category codes (DOMCODE) and code names
-(DOMNAME), and to set a pretty name for the variable to use in output table
-(DOMTITLE). This table is also used to populate rowvar/colvar,
-row.orderby/col.orderby, and title.rowvar/title.colvar parameters. Optional.}
-
-\item{domvarlst}{String vector. A vector of variable names that can be row
-or column domains (codes and names). Optional.}
-
-\item{ratioden}{String. ("ROWVAR" or "COLVAR"). If ratio, defines whether
-the rowvar or colvar in estimation output table is the denominator.}
-
 \item{allin1}{Logical. If TRUE, one table with both estimates and percent
 standard error will be output: estimates (percent standard error).}
 
@@ -139,8 +123,6 @@ standard error.}
 
 \item{divideby}{String. Conversion number for output ('hundred', 'thousand',
 'million').}
-
-\item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
 \item{outfolder}{String. The outfolder to write files to. If NULL, files are
 written to working directory, or if gui, a window to browse.}
@@ -200,16 +182,6 @@ filters.  If NULL, = "".}
 
 \item{title.units}{String. TITLE, if savedata=TRUE: title name for area
 units.  If NULL, title.units = "acres".}
-
-\item{gainloss}{Logical. If TRUE, a table with the difference of gain and
-loss along with the variance and standard error, in percent, is generated.}
-
-\item{gainloss.vals}{String vector. A vector of names for values in gainloss
-table.}
-
-\item{gui}{Logical. If gui, user is prompted for parameters.}
-
-\item{...}{Parameters for modPBpop() if PBpopdat is NULL.}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and

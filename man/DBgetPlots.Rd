@@ -41,18 +41,11 @@ DBgetPlots(
   stateFilter = NULL,
   allFilter = NULL,
   alltFilter = NULL,
+  returndata = TRUE,
   savedata = FALSE,
   saveqry = FALSE,
-  outfolder = NULL,
-  out_fmt = "csv",
-  out_dsn = NULL,
-  append_layer = FALSE,
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite_dsn = FALSE,
-  overwrite_layer = TRUE,
   savePOP = FALSE,
-  returndata = TRUE
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -188,43 +181,19 @@ states in query. The expression must be R syntax (e.g., 'PLOT_STATUS_CD ==
 all states (e.g., only Whitebark pine trees - 'SPCD == 101'). Note: returns
 only plots with trees included in filter.}
 
+\item{returndata}{Logical. If TRUE, returns data objects.}
+
 \item{savedata}{Logical. If TRUE, saves data to outfolder as comma-delimited
 file (*.csv).  No objects are returned. If FALSE, the data are saved as R
 objects and returned to user.  See details for caveats.}
 
 \item{saveqry}{Logical. If TRUE, saves queries to outfolder (by state).}
 
-\item{outfolder}{String. The output folder path. If NULL and savedata=TRUE
-or saveqry=TRUE, outfolder is the working directory.}
-
-\item{out_fmt}{String. File format for output ('csv', 'sqlite','gpkg',
-'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
-installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
-installed.}
-
-\item{out_dsn}{String. Data source name for output. If extension is not
-included, out_fmt is used. Use full path if outfolder=NULL.}
-
-\item{append_layer}{Logical. If TRUE, appends to existing out_dsn. The
-out_dsn a database or shapefile. If FALSE, the out_dsn will be overwritten
-if exists.}
-
-\item{outfn.pre}{String. The name used for prefix of outfiles (e.g.,
-outfn.pre'_plt*').}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite_dsn}{Logical. If TRUE and out_fmt = 'sqlite', the out_dsn is
-overwritten.}
-
-\item{overwrite_layer}{Logical. If TRUE and out_fmt = 'csv', files are
-overwritten.  If out_fmt != 'csv', the layer in database is overwritten.}
-
 \item{savePOP}{Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
 table.}
 
-\item{returndata}{Logical. If TRUE, returns data objects.}
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE. If out_layer = NULL,}
 }
 \value{
 fiadat - a list of the following objects: \item{states}{ Vector.
