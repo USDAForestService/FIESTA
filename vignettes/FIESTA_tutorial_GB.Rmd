@@ -132,6 +132,11 @@ Our custom examples demonstrate how to get data for one area of interest, or pop
 
 
 **Bighorn National Forest**
+
+
+<details>
+  <summary>View Getting Strata Data</summary>
+  
 ```{r}
 
 # File names for spatial layers, stored as external data objects in FIESTA. 
@@ -172,8 +177,13 @@ stratdat.bh$areavar        # Area variable
 
 ```
 
+</details>
 
 **Bighorn National Forest Districts**
+
+<details>
+  <summary>View Getting Strata Data (Districts)</summary>
+  
 ```{r}
 # File names for external spatial data 
 WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
@@ -214,6 +224,7 @@ stratdat.bhdist$areavar        # Area variable
 
 ```
 
+</details>
 
 ### GB Module
 * [modGBpop()](#modGBpop)
@@ -234,9 +245,10 @@ For `FIESTA`'s GB Module, the `modGBpop` function calculates and outputs: number
 
 #### POP1: FIADB POPULATION - Get population data for area and tree estimates for Wyoming, using post-stratification
 
-In this example, we use the sample Wyoming data (2013 Evaluation) stored in `FIESTA` to generate population data for the GB module. We check this output with the FIADB pop_stratum table from FIA DataMart for 561301 Evalid, using the `FIESTA::DBqryCSV` function.
 <details>
   <summary>View Example</summary>
+  
+In this example, we use the sample Wyoming data (2013 Evaluation) stored in `FIESTA` to generate population data for the GB module. We check this output with the FIADB pop_stratum table from FIA DataMart for 561301 Evalid, using the `FIESTA::DBqryCSV` function.
 
 ```{r, results = FALSE, message = F}
 ```
@@ -303,11 +315,12 @@ head(GBpopdat$stratalut)
 
 #### POP2: CUSTOM POPULATION - Get population data for area and tree estimates for the Bighorn National Forest, using post-stratification
 
+<details>
+  <summary>View Example</summary>
+  
 In this example, we use the sample WY plot data (2013 Evaluation) in FIESTA and output from `spGetStrata` to generate population data for the Bighorn National Forest. Here, we have only one estimation unit within the population of interest (i.e., Bighorn National Forest), therefore strata and pixel counts are summarized to the population.
 
 If the `FIESTA::spGetStrata` function is used to obtain stratification data, the output list object can be input directly into `modGBpop` through the `GBstratdat` parameter. If other methods are used, the data are input through individual parameters.
-<details>
-  <summary>View Example</summary>
 
 ```{r, results = FALSE, message = F}
 ```
@@ -367,11 +380,12 @@ GBpopdat.bh$stratalut
 
 #### POP3: CUSTOM SUB-POPULATIONS - Get sub-population data for area and tree estimates for the Bighorn National Forest Districts, using post-stratification
 
+<details>
+  <summary>View Example</summary>
+
 In this example, we use the sample Wyoming plot data (2013 Evaluation) stored in FIESTA and output from `spGetStrata` to generate sub-population data for Bighorn National Forest Districts. Here, we have more than one estimation unit (i.e., sub-population) within the population of interest (i.e., Bighorn National Forest Districts), therefore strata and pixel counts are summarized by each District within the population.
 
 If the `FIESTA::spGetStrata` function is used to obtain stratification data, the output list object can be input directly into `modGBpop` through the `GBstratdat` parameter. If other methods are used, the data are input through individual parameters.
-<details>
-  <summary>View Example</summary>
 
 ```{r, results = FALSE, message = F}
 ```
