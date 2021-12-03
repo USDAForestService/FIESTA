@@ -25,6 +25,7 @@
 #' @param title.filter String. TITLE, if savedata=TRUE and/or returntitle=TRUE:
 #' pretty name for filter(s). If title.filter=NULL, a default is generated from
 #' cfilter.  If title.filter="", no title.filter is used.
+#' @param title.units String. 
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for outputting
 #' titles with custom aesthetics.
