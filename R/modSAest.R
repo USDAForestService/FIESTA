@@ -909,9 +909,13 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
  
       ## Export multestdf
       overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
-      datExportData(multestdf, out_fmt=multest_fmt, outfolder=multest_outfolder, 
- 		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite_layer, 
-		append_layer=multest.append)
+      datExportData(multestdf, 
+            savedata_opts=list(out_fmt=multest_fmt, 
+                               outfolder=multest_outfolder, 
+                               out_dsn=multest_dsn, 
+                               out_layer=multest_layer, 
+                               overwrite_layer=overwrite_layer, 
+                               append_layer=multest.append))
     }
   } 
 
@@ -942,10 +946,14 @@ modSAest <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
             } else {
               out_layer <- outfn.rawtab
             }
-            datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, 
-			overwrite_layer=overwrite_layer, add_layer=TRUE, 
-			append_layer=append_layer)
+            datExportData(rawtab, 
+                  savedata_opts=list(out_fmt=raw_fmt, 
+                                     outfolder=rawfolder, 
+                                     out_dsn=raw_dsn, 
+                                     out_layer=out_layer, 
+                                     overwrite_layer=overwrite_layer, 
+                                     add_layer=TRUE, 
+                                     append_layer=append_layer))
           }
         }
       }

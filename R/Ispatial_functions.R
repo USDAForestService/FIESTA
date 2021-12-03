@@ -671,9 +671,13 @@ clip.othertables <- function(inids, othertabnms, othertabs=NULL, uniqueid="PLT_C
         ## Subset data frame
         assign(returnnm, otab[otab[[otabid]] %in% inids, ])
         if (savedata) {
-          datExportData(get(returnnm), out_fmt=out_fmt, outfolder=outfolder, 
-			out_dsn=out_dsn, out_layer=outnm, overwrite_layer=overwrite,
-			index.unique=idx.unique)
+          datExportData(get(returnnm), 
+                savedata_opts=list(out_fmt=out_fmt, 
+                                   outfolder=outfolder, 
+                                   out_dsn=out_dsn, 
+                                   out_layer=outnm, 
+                                   overwrite_layer=overwrite,
+                                   index.unique=idx.unique))
         }
         intablst[[returnnm]] <- get(returnnm)
 

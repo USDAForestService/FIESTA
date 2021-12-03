@@ -562,13 +562,6 @@ spGetXY <- function(bnd,
                             overwrite_layer=overwrite_layer,
                             append_layer=append_layer,
                             add_layer=TRUE)) 
-    
-   
-    
-    datExportData(sf::st_drop_geometry(spxy), outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="xyids", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-		add_layer=TRUE, append_layer=append_layer)
   } 
   if (exportsp) {
     spExportSpatial(spxy, 
