@@ -1019,7 +1019,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       }
     }
   }
-print("OOOO")
+ 
   if (!is.null(unit_opts)) {
     if ("unit_opts" %in% input.params) {
       if (!is.list(unit_opts)) {
