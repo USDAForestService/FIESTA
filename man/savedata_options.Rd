@@ -33,6 +33,8 @@ written to working directory, or if gui=TRUE, a window to browse.}
 \item{out_dsn}{String. Data source name for output. If extension is
 not included, out_fmt is used. Use full path if outfolder=NULL.}
 
+\item{out_layer}{outlayer.}
+
 \item{outfn.pre}{String. If savedata=TRUE, prefix for output files. If
 rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
 raw_fmt != 'csv').}
@@ -58,6 +60,8 @@ files (if *_fmt = 'csv') or *_dsn layers (if *_fmt != 'csv".}
 
 \item{add_layer}{Logical. If TRUE, adds layer to an existing out_dsn 
 (if out_fmt != c('csv','shp')).}
+
+\item{layer.pre}{Layer prefix.}
 
 \item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}
 

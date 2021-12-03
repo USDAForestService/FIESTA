@@ -65,6 +65,8 @@ outfolder.}
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'polyext'.}
 
+\item{gui}{Logical. If gui, user is prompted for parameters.}
+
 \item{...}{Other parameters for spMakeSpatialPoints.}
 }
 \value{

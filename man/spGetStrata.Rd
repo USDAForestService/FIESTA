@@ -109,6 +109,8 @@ of options. Only used when savedata = TRUE.}
 \item{vars2keep}{String vector. Attributes in SAdoms, other than domvar to
 include in dunitlut output and extract to pltassgn points.}
 
+\item{gui}{Logical. If gui, user is prompted for parameters.}
+
 \item{...}{Other parameters for spMakeSpatialPoints.}
 }
 \value{

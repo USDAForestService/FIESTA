@@ -7,3 +7,8 @@ utils::globalVariables(names(formals(multest_options)[1:(length(formals(multest_
 utils::globalVariables(names(formals(popFilters)[1:(length(formals(popFilters))-1)]))
 utils::globalVariables(names(formals(popTableIDs)[1:(length(formals(popTableIDs))-1)]))
 utils::globalVariables(names(formals(popTables)[1:(length(formals(popTables))-1)]))
+utils::globalVariables(c("treex", "seedx", "condx", "strata_opts", "condf",
+                         "count", "estgreg", "estvar.filter", "freqtab.tot",
+                         "outsp_fmt", "overwrite", "ref_codes",
+                         "unit_colestlst", "vcondsppid", "vcondstrid",
+                         "zone_ds"))

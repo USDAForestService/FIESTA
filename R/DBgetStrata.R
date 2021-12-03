@@ -47,8 +47,6 @@
 #' @param POP_PLOT_STRATUM_ASSGN Data frame. The POP_PLOT_STRATUM_ASSGN for
 #' state(s).
 #' @param savedata Logical. If TRUE, writes output to outfolder.
-#' @param append_layer Logical. If TRUE, appends data to layer in a database or
-#' *.csv file.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' 

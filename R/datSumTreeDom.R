@@ -123,7 +123,7 @@
 #' variables.
 #' @param returnDT Logical. If TRUE, returns data.table object(s). If FALSE,
 #' returns data.frame object(s).
-#' #' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'tdomsum'. 

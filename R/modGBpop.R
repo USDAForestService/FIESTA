@@ -76,14 +76,6 @@
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
 #' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 #' only calculated for annual inventory plots (DESIGNCD=1).
-#' @param evalid Numeric. FIA Evaluation identifier for subsetting plots for
-#' population.
-#' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
-#' @param intensity Integer code. Code(s) indicating intensity to use for
-#' population.
-#' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
-#' Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
-#' be included.
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
@@ -93,9 +85,6 @@
 #' unit, provide a data frame of total area by estimation unit, including
 #' unitvar and areavar.
 #' @param areavar String. Name of area variable in unitarea. Default="ACRES".
-#' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
-#' unit. For continuous data, means by estimation unit; for categorical data,
-#' proportion of class by estimation unit.
 #' @param strata Logical. If TRUE, include information for post-stratification.
 #' @param stratalut DF/DT. If strata=TRUE, look-up table with pixel counts or
 #' area by strata or proportion or area ('strwt') by strata (and estimation
@@ -114,8 +103,6 @@
 #' FIESTA::anGBdata().
 #' @param pltdat R List object. Output data list components from
 #' FIESTA::spGetPlots().
-#' @param GBstratdat R List object. Output data list components from
-#' FIESTA::DBgetStrata().
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ... For extendibility.
 #' @return A list with population data for Green-Book estimates.

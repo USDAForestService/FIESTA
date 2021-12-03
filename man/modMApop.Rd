@@ -42,6 +42,9 @@ See help(popTabs()) for a list of options.}
 that the user has requested. See help(popTabIDs()) for a list of
 options.}
 
+\item{popFilter}{List of population filters. See help(popFilters()) for a 
+list of options.}
+
 \item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited
 file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
 assignment of estimation unit and/or strata, with one record for each plot.}
@@ -102,25 +105,6 @@ FIESTA::spGetPlots().}
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{For extendibility.}
-
-\item{evalid}{Numeric. FIA Evaluation identifier for subsetting plots for
-population.}
-
-\item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
-
-\item{intensity}{Integer code. Code(s) indicating intensity to use for
-population.}
-
-\item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.
-Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
-be included.}
-
-\item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
-
-\item{saveobj}{Logical. If TRUE, saves SApopdat object to outfolder.}
-
-\item{strata_opts}{List. See help(strata_options()) for a list of options.
-Only used when strata = TRUE.}
 }
 \value{
 A list with population data for Green-Book estimates.

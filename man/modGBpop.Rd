@@ -110,25 +110,6 @@ FIESTA::spGetPlots().}
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{For extendibility.}
-
-\item{evalid}{Numeric. FIA Evaluation identifier for subsetting plots for
-population.}
-
-\item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
-
-\item{intensity}{Integer code. Code(s) indicating intensity to use for
-population.}
-
-\item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.
-Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
-be included.}
-
-\item{unitzonal}{DF/DT. Table with zonal auxiliary information by estimation
-unit. For continuous data, means by estimation unit; for categorical data,
-proportion of class by estimation unit.}
-
-\item{GBstratdat}{R List object. Output data list components from
-FIESTA::DBgetStrata().}
 }
 \value{
 A list with population data for Green-Book estimates.

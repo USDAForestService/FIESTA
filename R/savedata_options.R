@@ -9,6 +9,7 @@
 #' @param out_fmt String. Format for output tables ('sqlite', 'gpkg', 'csv', 'gdb').
 #' @param out_dsn String. Data source name for output. If extension is
 #' not included, out_fmt is used. Use full path if outfolder=NULL.
+#' @param out_layer outlayer.
 #' @param outfn.pre String. If savedata=TRUE, prefix for output files. If
 #' rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
 #' raw_fmt != 'csv').
@@ -26,6 +27,7 @@
 #' files (if *_fmt = 'csv') or *_dsn layers (if *_fmt != 'csv".
 #' @param add_layer Logical. If TRUE, adds layer to an existing out_dsn 
 #' (if out_fmt != c('csv','shp')).
+#' @param layer.pre Layer prefix. 
 #' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
 #' @param objnm String. Name of *.rds object.
 #' @param ... For extendibility.

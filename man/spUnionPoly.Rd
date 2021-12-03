@@ -50,6 +50,8 @@ outfolder (see spExportSpatial for details).}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when export = TRUE. If out_layer = NULL,
 default = 'polyunion'.}
+
+\item{...}{For extendibility.}
 }
 \value{
 sf object of unioned polygon. If polyv1 and polyv2 have different

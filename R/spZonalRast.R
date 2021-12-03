@@ -89,11 +89,7 @@ spZonalRast <- function(polyv,
                         rast.NODATA = NULL, 
                         na.rm = TRUE, 
                         savedata = FALSE, 
-                        outfolder = NULL, 
-                        outfn = "zonalext", 
-                        outfn.pre = NULL, 
-                        outfn.date = FALSE, 
-                        overwrite = FALSE) { 
+                        savedata_opts = NULL) { 
   ##################################################################################### 
   ## DESCRIPTION:  
   ## Extracts summary statistics by polygon (i.e., zone).  
@@ -106,6 +102,20 @@ spZonalRast <- function(polyv,
  
   ## Set global variables
   count <- NULL
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
 
   ################################################################## 
   ## CHECK INPUT PARAMETERS 

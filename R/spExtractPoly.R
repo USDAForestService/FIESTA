@@ -40,6 +40,7 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'polyext'.
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #'
 #' @return \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input

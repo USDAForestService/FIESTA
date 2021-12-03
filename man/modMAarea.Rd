@@ -36,6 +36,8 @@ estimator to match FIA estimates.}
 \item{prednames}{String vector. Name(s) of predictor variables to include in
 model.}
 
+\item{modelselect}{Boolean. TRUE if you want model selection to occur.}
+
 \item{landarea}{String. The sample area filter for estimates ('ALL',
 'FOREST', 'TIMBERLAND').  If landarea=FOREST, filtered to COND_STATUS_CD =
 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.}

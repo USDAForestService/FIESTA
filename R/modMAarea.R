@@ -40,6 +40,7 @@
 #' estimator to match FIA estimates.
 #' @param prednames String vector. Name(s) of predictor variables to include in
 #' model.
+#' @param modelselect Boolean. TRUE if you want model selection to occur. 
 #' @param landarea String. The sample area filter for estimates ('ALL',
 #' 'FOREST', 'TIMBERLAND').  If landarea=FOREST, filtered to COND_STATUS_CD =
 #' 1; If landarea=TIMBERLAND, filtered to SITECLCD in(1:6) and RESERVCD = 0.

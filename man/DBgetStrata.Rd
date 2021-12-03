@@ -58,9 +58,6 @@ state(s).}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
-
-\item{append_layer}{Logical. If TRUE, appends data to layer in a database or
-*.csv file.}
 }
 \value{
 FIAstrata - a list of the following objects: \item{pltassgn}{ Data

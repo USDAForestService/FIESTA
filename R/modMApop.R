@@ -51,6 +51,8 @@
 #' @param popTabIDs List of unique IDs corresponding to the population tables
 #' that the user has requested. See help(popTabIDs()) for a list of
 #' options.
+#' @param popFilter List of population filters. See help(popFilters()) for a 
+#' list of options. 
 #' @param pltassgn DF/DT, Optional. R object, sf R object, comma-delimited
 #' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
 #' assignment of estimation unit and/or strata, with one record for each plot.
@@ -68,14 +70,6 @@
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
 #' level; 'plot' - adjustments are calculated at plot-level. Adjustments are
 #' only calculated for annual inventory plots (DESIGNCD=1).
-#' @param evalid Numeric. FIA Evaluation identifier for subsetting plots for
-#' population.
-#' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
-#' @param intensity Integer code. Code(s) indicating intensity to use for
-#' population.
-#' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
-#' Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
-#' be included.
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
@@ -84,7 +78,6 @@
 #' a data frame with area and estimation unit. If more than one estimation
 #' unit, provide a data frame of total area by estimation unit, including
 #' unitvar and areavar.
-#' @param areavar String. Name of area variable in unitarea. Default="ACRES".
 #' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
 #' unit. For continuous data, means by estimation unit; for categorical data,
 #' proportion of class by estimation unit.
@@ -92,11 +85,8 @@
 #' model.
 #' @param predfac String vector. Name(s) of prednames that are factors (i.e.,
 #' categorical).
-#' @param saveobj Logical. If TRUE, saves SApopdat object to outfolder.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param unit_opts List. See help(unit_options()) for a list of options.
-#' @param strata_opts List. See help(strata_options()) for a list of options.
-#' Only used when strata = TRUE. 
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param MAdata List. Data output from FIESTA::MAdata().

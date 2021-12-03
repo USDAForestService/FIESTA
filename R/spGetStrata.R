@@ -63,6 +63,7 @@
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in dunitlut output and extract to pltassgn points.
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #'
 #' @return \item{pltassgn}{ Data frame. Input xyplt data with extracted

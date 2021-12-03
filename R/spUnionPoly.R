@@ -37,6 +37,7 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when export = TRUE. If out_layer = NULL,
 #' default = 'polyunion'.
+#' @param ... For extendibility.
 #' 
 #' @return sf object of unioned polygon. If polyv1 and polyv2 have different
 #' projections, the projection of returned object will have the same projection

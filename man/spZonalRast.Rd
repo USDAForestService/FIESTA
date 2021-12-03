@@ -19,11 +19,7 @@ spZonalRast(
   rast.NODATA = NULL,
   na.rm = TRUE,
   savedata = FALSE,
-  outfolder = NULL,
-  outfn = "zonalext",
-  outfn.pre = NULL,
-  outfn.date = FALSE,
-  overwrite = FALSE
+  savedata_opts = NULL
 )
 }
 \arguments{

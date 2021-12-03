@@ -187,8 +187,7 @@ SpatiaLite database.}
 \item{savexy}{Logical. If TRUE, save xy coordinates to outfolder.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
-of options. Only used when savedata = TRUE. If out_layer = NULL,
-default = 'rastext'.}
+of options. Only used when savedata = TRUE.}
 
 \item{spXYdat}{R list object. Output from FIESTA::spGetXY().}
 }

@@ -5,6 +5,7 @@
 #' Wrapper for sf::st_write function.
 #' 
 #' @param dfobj Data.frame class R object. Data frame object to export.
+#' @param create_dsn Boolean.  
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. 
 #' @param index.unique String. Name of variable(s) in dfobj to make unique

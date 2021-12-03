@@ -15,6 +15,8 @@ datExportData(
 \arguments{
 \item{dfobj}{Data.frame class R object. Data frame object to export.}
 
+\item{create_dsn}{Boolean.}
+
 \item{index.unique}{String. Name of variable(s) in dfobj to make unique
 index.}
 

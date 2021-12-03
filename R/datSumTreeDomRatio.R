@@ -18,7 +18,7 @@
 #' @param rprefix String. The prefix variable identifier of new ratio variables
 #' (default="r").
 #' @param datround Integer. Number of digits to round ratio values to.
-#' #@param savedata Logical. If TRUE, saves data to outfolder.
+#' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' default = 'tsumrat'. 
