@@ -16,19 +16,25 @@ popFilters(
 )
 }
 \arguments{
-\item{evalid}{}
+\item{evalid}{Numeric. FIA Evaluation identifier for subsetting plots for
+population.}
 
-\item{invyrs}{}
+\item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
 
-\item{intensity}{}
+\item{intensity}{Integer code. Code(s) indicating intensity to use for
+population.}
 
-\item{measCur}{}
+\item{measCur}{Logical. Inventory span defining variable. If TRUE, extract
+plots with most current measurement for state(s).}
 
-\item{measEndyr}{}
+\item{measEndyr}{Logical. Inventory span defining variable. If TRUE, extract
+plots with most current measurement for state(s) for years measured in or
+before measEndyr.}
 
-\item{measEndyr.filter}{}
+\item{measEndyr.filter}{Filter for extracting plots using measEndyr. Must be
+in R syntax (e.g., 'AOI == 1').}
 
-\item{ACI}{}
+\item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.}
 
 \item{...}{For extendibility.}
 }

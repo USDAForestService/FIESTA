@@ -5,13 +5,19 @@
 #' 
 #' If no parameters, an empty list is returned.
 #' 
-#' @param evalid 
-#' @param invyrs 
-#' @param intensity 
-#' @param measCur 
-#' @param measEndyr 
-#' @param measEndyr.filter 
-#' @param ACI 
+#' @param evalid Numeric. FIA Evaluation identifier for subsetting plots for
+#' population.
+#' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
+#' @param intensity Integer code. Code(s) indicating intensity to use for
+#' population.
+#' @param measCur Logical. Inventory span defining variable. If TRUE, extract
+#' plots with most current measurement for state(s).
+#' @param measEndyr Logical. Inventory span defining variable. If TRUE, extract
+#' plots with most current measurement for state(s) for years measured in or
+#' before measEndyr.
+#' @param measEndyr.filter Filter for extracting plots using measEndyr. Must be
+#' in R syntax (e.g., 'AOI == 1').
+#' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for population
 #' data filters.

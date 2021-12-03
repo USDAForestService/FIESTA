@@ -46,6 +46,8 @@ pretty name for the estimate variable. If NULL, title.estvar = estvar.name.}
 pretty name for filter(s). If title.filter=NULL, a default is generated from
 cfilter.  If title.filter="", no title.filter is used.}
 
+\item{title.units}{String.}
+
 \item{...}{For extendibility.}
 }
 \value{
