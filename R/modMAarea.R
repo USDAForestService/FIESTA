@@ -222,20 +222,60 @@
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
 #' @export modMAarea
-modMAarea <- function(MApopdat, MAmethod, 
-		FIA=TRUE, prednames=NULL, modelselect=FALSE,
-		landarea="FOREST", pcfilter=NULL, 
-		rowvar=NULL, colvar=NULL, 
-		sumunits=FALSE, returntitle=FALSE, savedata=FALSE, 
-		table_opts=table_options(),
-		title_opts=title_options(), 
-		savedata_opts=savedata_options(), gui=FALSE, ...){
+modMAarea <- function(MApopdat, 
+                      MAmethod, 
+                      FIA = TRUE, 
+                      prednames = NULL, 
+                      modelselect = FALSE, 
+                      landarea = "FOREST", 
+                      pcfilter = NULL, 
+                      rowvar = NULL, 
+                      colvar = NULL, 
+                      sumunits = FALSE, 
+                      returntitle = FALSE, 
+                      savedata = FALSE, 
+                      table_opts = NULL, 
+                      title_opts = NULL, 
+                      savedata_opts = NULL, 
+                      gui = FALSE, 
+                      ...){
 
   ########################################################################################
   ## DESCRIPTION: 
   ## Generates model-assisted estimates by domain (and estimation unit)
   ###################################################################################### 
 
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  if (nargs() == 0 && is.null(MApopdat)) {
+    gui <- TRUE
+  } 
+  
+  ## If gui.. set variables to NULL
+  if (gui) { 
+    landarea=strvar=areavar <- NULL
+    if (!row.FIAname) row.FIAname <- NULL
+    if (!col.FIAname) col.FIAname <- NULL
+  }
+  
+  ## INITIALIZE SETTINGS
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE) 
+  minplotnum <- 10
+  title.rowgrp=NULL
+  esttype="AREA"
+  parameters <- FALSE
+  returnlst <- list()
+  
+  
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  rawdata <- TRUE
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(modMAarea)),
@@ -245,21 +285,10 @@ modMAarea <- function(MApopdat, MAmethod,
     stop("invalid parameter: ", toString(miss))
   }
 
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(MApopdat)) {
-    gui <- TRUE
-  } 
- 
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    landarea=strvar=areavar <- NULL
-    if (!row.FIAname) row.FIAname <- NULL
-    if (!col.FIAname) col.FIAname <- NULL
-  }
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
-  rawdata <- TRUE
+  ## Check parameter lists
+  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
+                savedata_opts=savedata_opts)
+  
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -304,18 +333,9 @@ modMAarea <- function(MApopdat, MAmethod,
   }
 
 
-  ###################################################################################
-  ## INITIALIZE SETTINGS
-  ###################################################################################
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
-  minplotnum <- 10
-  title.rowgrp=NULL
-  esttype="AREA"
-  parameters <- FALSE
-  returnlst <- list()
-
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
 
   ## Check MAmethod 
   MAmethodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
@@ -389,13 +409,15 @@ modMAarea <- function(MApopdat, MAmethod,
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
-	cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
-	landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
-	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
-	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
-	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
- 	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date, 
- 	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+                  cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
+                  landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+                  allin1=allin1, estround=estround, pseround=pseround, divideby=divideby, 
+                  addtitle=addtitle, returntitle=returntitle, 
+                  rawdata=rawdata, rawonly=rawonly, 
+                  savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+                  overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+                  outfn.date=outfn.date, append_layer=append_layer, 
+                  raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -427,12 +449,14 @@ modMAarea <- function(MApopdat, MAmethod,
   ### GET ROW AND COLUMN INFO FROM condf
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, condf=pltcondf, 
-	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, colvar=colvar,
- 	colvar.filter=colvar.filter, row.FIAname=row.FIAname, col.FIAname=col.FIAname,
- 	row.orderby=row.orderby, col.orderby=col.orderby, row.add0=row.add0, 
-	col.add0=col.add0, title.rowvar=title.rowvar, title.colvar=title.colvar,
-	rowlut=rowlut, collut=collut, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-	rowgrpord=rowgrpord, landarea=landarea)
+                    cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
+                    colvar=colvar, colvar.filter=colvar.filter, 
+                    row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+                    row.orderby=row.orderby, col.orderby=col.orderby, 
+                    row.add0=row.add0, col.add0=col.add0, 
+                    title.rowvar=title.rowvar, title.colvar=title.colvar, 
+                    rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
+                    rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -474,12 +498,13 @@ modMAarea <- function(MApopdat, MAmethod,
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
   alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, sumunits=sumunits, 
- 	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
- 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
-	title.filter=title.filter, title.unitsn=areaunits, unitvar=unitvar, rowvar=rowvar, 
-	colvar=colvar, addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
-	invyrs=invyrs, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
-	divideby=divideby, outfn.pre=outfn.pre)
+                    title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar, 
+                    title.rowgrp=title.rowgrp, title.colvar=title.colvar, 
+                    title.unitvar=title.unitvar, title.filter=title.filter, 
+                    title.unitsn=areaunits, unitvar=unitvar, 
+                    rowvar=rowvar, colvar=colvar, addtitle=addtitle, returntitle=returntitle, 
+                    rawdata=rawdata, invyrs=invyrs, landarea=landarea, 
+                    pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -515,10 +540,11 @@ modMAarea <- function(MApopdat, MAmethod,
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, "TOTAL", strvar, prednames), .SDcols=estvar.name]
     unit_totestlst <- lapply(estunits, MAest.unit, 
-		dat=cdomdattot, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames,
- 		domain="TOTAL", response=estvar.name, npixels=npixels, FIA=FIA,
-		modelselect=modelselect, getweights=TRUE)
+                          dat=cdomdattot, cuniqueid=cuniqueid, 
+                          unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
+                          MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
+                          domain="TOTAL", response=estvar.name, npixels=npixels, 
+                          FIA=FIA, modelselect=modelselect, getweights=TRUE)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
@@ -537,10 +563,11 @@ modMAarea <- function(MApopdat, MAmethod,
 		by=c(unitvar, cuniqueid, rowvar, strvar, prednames), .SDcols=estvar.name]
 
     unit_rowestlst <- lapply(estunits, MAest.unit, 
-		dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain=rowvar, response=estvar.name, npixels=npixels, FIA=FIA,
-		modelselect=modelselect)
+                        dat=cdomdatsum, cuniqueid=cuniqueid, 
+                        unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
+                        MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
+                        domain=rowvar, response=estvar.name, npixels=npixels, 
+                        FIA=FIA, modelselect=modelselect)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
@@ -551,10 +578,11 @@ modMAarea <- function(MApopdat, MAmethod,
 		by=c(unitvar, cuniqueid, colvar, strvar, prednames), .SDcols=estvar.name]
 
     unit_colest <- lapply(estunits, MAest.unit, 
-		dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain=colvar, response=estvar.name, npixels=npixels, FIA=FIA,
-		modelselect=modelselect)
+                      dat=cdomdatsum, cuniqueid=cuniqueid, 
+                      unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
+                      MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
+                      domain=colvar, response=estvar.name, npixels=npixels, 
+                      FIA=FIA, modelselect=modelselect)
     unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
@@ -565,10 +593,11 @@ modMAarea <- function(MApopdat, MAmethod,
     cdomdatsum[, grpvar := do.call(paste, c(.SD, sep="#")), .SDcols=grpvar]
 
     unit_grpestlst <- lapply(estunits, MAest.unit, 
-		dat=cdomdatsum, cuniqueid=cuniqueid, unitlut=unitlut, unitvar=unitvar, 
-		esttype=esttype, MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
-		domain="grpvar", response=estvar.name, npixels=npixels, FIA=FIA,
-		modelselect=modelselect)
+                        dat=cdomdatsum, cuniqueid=cuniqueid, 
+                        unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
+                        MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
+                        domain="grpvar", response=estvar.name, npixels=npixels, 
+                        FIA=FIA, modelselect=modelselect)
     unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
     preds_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
     unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
@@ -620,17 +649,18 @@ modMAarea <- function(MApopdat, MAmethod,
   message("getting output...")
   estnm <- "est"
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-	unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
- 	rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
-	rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
-	allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
- 	title.colvar=title.colvar, title.rowvar=title.rowvar, title.rowgrp=title.rowgrp,
- 	title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est,
- 	title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
-	estnm=estnm, estround=estround, pseround=pseround, divideby=divideby,
-	returntitle=returntitle, estnull=estnull, psenull=psenull) 
+                unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
+                unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
+                rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
+                rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+                allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref, 
+                title.colvar=title.colvar, title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+                title.unitvar=title.unitvar, title.estpse=title.estpse, 
+                title.est=title.est, title.pse=title.pse, rawdata=rawdata, 
+                rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
+                outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
+                estround=estround, pseround=pseround, divideby=divideby, returntitle=returntitle, 
+                estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
@@ -662,17 +692,21 @@ modMAarea <- function(MApopdat, MAmethod,
           outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
           if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
             write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			outfn.date=outfn.date, overwrite=overwrite_layer)
+                    outfn.date=outfn.date, overwrite=overwrite_layer)
           } else if (is.data.frame(rawtab)) {
             if (raw_fmt != "csv") {
               out_layer <- tabnm 
             } else {
               out_layer <- outfn.rawtab
             }
-            datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, 
-			overwrite_layer=overwrite_layer, add_layer=TRUE, 
-			append_layer=append_layer)
+            datExportData(rawtab, 
+                  savedata_opts=list(outfolder=rawfolder, 
+                                      out_fmt=raw_fmt, 
+                                      out_dsn=raw_dsn, 
+                                      out_layer=out_layer,
+                                      overwrite_layer=overwrite_layer,
+                                      append_layer=append_layer,
+                                      add_layer=TRUE))
           }
         }
       }

@@ -219,41 +219,70 @@
 #' 
 #' 
 #' @export modGBlulc
-modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL, 
-                      rowvar=NULL, colvar=NULL, gainloss=FALSE,
-                      gainloss.vals=NULL, returntitle=FALSE, savedata=FALSE,
-                      table_opts = table_options(), title_opts = title_options(),
-                      savedata_opts = savedata_options(), gui=FALSE, ...){
+modGBlulc <- function(GBpopdat, 
+                      landarea = "ALL", 
+                      pcfilter = NULL, 
+                      rowvar = NULL, 
+                      colvar = NULL, 
+                      gainloss = FALSE,
+                      gainloss.vals = NULL, 
+                      returntitle = FALSE, 
+                      savedata = FALSE,
+                      table_opts = NULL, 
+                      title_opts = NULL,
+                      savedata_opts = NULL, 
+                      gui = FALSE, 
+                      ...){
 
   ##################################################################################
   ## DESCRIPTION:
   ## Generates estimates of trees by domain using non-ratio estimators.
   ##################################################################################
 
+  
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  if (nargs() == 0 && is.null(GBpopdat)) {
+    gui <- TRUE
+  } 
+  
+  ## If gui.. set variables to NULL
+  if (gui) { 
+    landarea=strvar=areavar=sumunits=adjplot=strata=getwt=cuniqueid=ACI=
+      tuniqueid=savedata=addtitle=returntitle=rawdata=rawonly=unitvar <- NULL
+    #if (!row.FIAname) row.FIAname <- NULL 
+    #if (!col.FIAname) col.FIAname <- NULL 
+  }
+  
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  
+  
+ ## INITIALIZE SETTINGS
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE)
+  esttype <- "LULC"
+  parameters <- FALSE
+  returnlst <- list()
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(modGBlulc)),
-		names(formals(FIESTA::modGBpop))) 
+		names(formals(modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(GBpopdat)) {
-    gui <- TRUE
-  } 
-
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    landarea=strvar=areavar=sumunits=adjplot=strata=getwt=cuniqueid=ACI=
-	tuniqueid=savedata=addtitle=returntitle=rawdata=rawonly=unitvar <- NULL
-    #if (!row.FIAname) row.FIAname <- NULL 
-    #if (!col.FIAname) col.FIAname <- NULL 
-  }
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts, 
+                table_opts=table_opts, title_opts=title_opts)
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -296,17 +325,11 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
       assign(names(title_opts)[[i]], title_opts[[i]])
     }
   }
-
-  ###################################################################################
-  ## INITIALIZE SETTINGS
-  ###################################################################################
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
-  esttype <- "LULC"
-  parameters <- FALSE
-  returnlst <- list()
-
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   ## Check gainloss 
   gainloss <- pcheck.logical(gainloss, varnm="gainloss", 
 		title="Gain-loss estimates?", first="NO", gui=gui) 
@@ -351,14 +374,16 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
-  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, cuniqueid=cuniqueid,
- 	condid=condid, sumunits=sumunits, landarea=landarea, pcfilter=pcfilter,
- 	allin1=allin1, estround=estround, pseround=pseround,
- 	divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder, 
-	overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, outfn.pre=outfn.pre,
- 	outfn.date=outfn.date, append_layer=append_layer, raw_fmt=raw_fmt, 
-	raw_dsn=raw_dsn, gui=gui)
+  estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
+                  cuniqueid=cuniqueid, condid=condid, 
+                  sumunits=sumunits, landarea=landarea, pcfilter=pcfilter, 
+                  allin1=allin1, estround=estround, pseround=pseround, 
+                  divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+                  rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+                  outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+                  overwrite_layer=overwrite_layer, outfn.pre=outfn.pre,
+                  outfn.date=outfn.date, append_layer=append_layer, 
+                  raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
   cuniqueid <- estdat$cuniqueid
@@ -389,13 +414,17 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
   ###################################################################################
   ### Check row and column data
   ###################################################################################
-  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, condf=pltcondf, 
-	cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
-	colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
-	col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby, 
-	row.add0=row.add0, col.add0=col.add0, title.rowvar=title.rowvar, 
-	title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-	rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea)
+  rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
+                    condf=pltcondf, cuniqueid=cuniqueid, 
+                    rowvar=rowvar, rowvar.filter=rowvar.filter, 
+                    colvar=colvar, colvar.filter=colvar.filter, 
+                    row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+                    row.orderby=row.orderby, col.orderby=col.orderby, 
+                    row.add0=row.add0, col.add0=col.add0, 
+                    title.rowvar=title.rowvar, title.colvar=title.colvar, 
+                    rowlut=rowlut, collut=collut, 
+                    rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+                    landarea=landarea)
   condf <- rowcolinfo$condf
   uniquerow <- rowcolinfo$uniquerow
   uniquecol <- rowcolinfo$uniquecol
@@ -435,11 +464,15 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
   ### Get titles for output tables
   #####################################################################################
   alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, sumunits=sumunits,
- 	title.main=title.main, title.ref=title.ref, title.rowvar=title.rowvar,
- 	title.rowgrp=title.rowgrp, title.colvar=title.colvar, title.unitvar=title.unitvar,
-	title.filter=title.filter, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
-	addtitle=addtitle, rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
-	pcfilter=pcfilter, allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
+                    title.main=title.main, title.ref=title.ref, 
+                    title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+                    title.colvar=title.colvar, title.unitvar=title.unitvar,
+	                  title.filter=title.filter, unitvar=unitvar, 
+                    rowvar=rowvar, colvar=colvar, 
+	                  addtitle=addtitle, rawdata=rawdata, 
+                    states=states, invyrs=invyrs, landarea=landarea, 
+                    pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
+                    outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -478,8 +511,8 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=rowvar)
+		                    uniqueid=cuniqueid, stratalut=stratalut, 
+		                    unitvar=unitvar, strvar=strvar, domain=rowvar)
   }
 
   ## Get column (and cell) estimate  
@@ -487,14 +520,14 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
     unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=colvar)
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=colvar)
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
     unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=grpvar)
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=grpvar)
   }
 
   ###################################################################################
@@ -566,8 +599,8 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, cuniqueid, rowvar), .SDcols=estvar.name]
     rowunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut2, unitvar="ONEUNIT", strvar=strvar, 
-		domain=rowvar)
+                    uniqueid=cuniqueid, stratalut=stratalut2, 
+                    unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
     rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
     tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
@@ -582,8 +615,8 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, cuniqueid, "TOTAL"), .SDcols=estvar.name]
     totunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut2, unitvar="ONEUNIT", strvar=strvar, 
-		domain="TOTAL")
+                    uniqueid=cuniqueid, stratalut=stratalut2, 
+                    unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2
@@ -598,17 +631,18 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
   message("getting output...")
   estnm <- "est" 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
-	unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
- 	rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol,
- 	rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
-	allin1=allin1, savedata=savedata, addtitle=addtitle, title.ref=title.ref,
- 	title.colvar=title.colvar, title.rowvar=title.rowvar, title.rowgrp=title.rowgrp,
- 	title.unitvar=title.unitvar, title.estpse=title.estpse, title.est=title.est,
- 	title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
-	estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
-	returntitle=returntitle, estnull=estnull, psenull=psenull) 
+	        unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest,
+	        unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,
+ 	        rowvar=rowvar, colvar=colvar, uniquerow=uniquerow, uniquecol=uniquecol, 
+	        rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+	        allin1=allin1, savedata=savedata, addtitle=addtitle, 
+	        title.ref=title.ref, title.colvar=title.colvar, title.rowvar=title.rowvar, 
+	        title.rowgrp=title.rowgrp, title.unitvar=title.unitvar, 
+	        title.estpse=title.estpse, title.est=title.est, title.pse=title.pse, 
+	        rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
+	        outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
+	        estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
+	        returntitle=returntitle, estnull=estnull, psenull=psenull) 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
@@ -672,9 +706,16 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
     setnames(est.gainloss, CInames, paste0("diff.", CInames))
 
     if (savedata) {
-      datExportData(est.gainloss, out_fmt=raw_fmt, outfolder=rawfolder, 
- 		out_dsn=raw_dsn, out_layer="gainloss", overwrite_layer=overwrite_layer, 
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(est.gainloss,                   
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="gainloss", 
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
     }
   }
 
@@ -702,17 +743,23 @@ modGBlulc <- function(GBpopdat, landarea="ALL", pcfilter=NULL,
         outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
         if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
           write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			outfn.date=outfn.date, overwrite=overwrite_layer)
+                    outfn.date=outfn.date, overwrite=overwrite_layer)
         } else if (is.data.frame(rawtab)) {
           if (raw_fmt != "csv") {
             out_layer <- tabnm 
           } else {
             out_layer <- outfn.rawtab
           }
-          datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, 
-			overwrite_layer=overwrite_layer, add_layer=TRUE, 
-			append_layer=append_layer)
+          datExportData(rawtab,                   
+              savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=out_layer, 
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  add_layer=TRUE))
         }
       }
     }

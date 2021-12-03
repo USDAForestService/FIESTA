@@ -47,27 +47,9 @@
 #' query.
 #' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
 #' file (*.csv).
-#' @param outfolder String. The output folder path. If NULL and savedata=TRUE
-#' or parameters=TRUE or isshp=TRUE, outfolder is the working directory.
-#' @param out_fmt String. File format for output ('csv', 'sqlite','gpkg',
-#' 'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
-#' installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
-#' installed.
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param out_layer String. Name of file, out_fmt = 'csv', or name of layer in
-#' out_dsn, if out_fmt != 'csv'.
-#' @param append_layer Logical. If TRUE, appends to existing out_dsn. The
-#' out_dsn a database or shapefile. If FALSE, the out_dsn will be overwritten
-#' if exists.
-#' @param outfn.pre String. The name used for prefix of outfiles (e.g.,
-#' outfn.pre'_plt*'.)
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE and out_fmt = 'sqlite', the out_dsn is
-#' overwritten.
-#' @param overwrite_layer Logical. If TRUE and out_fmt = 'csv', files are
-#' overwritten.  If out_fmt != 'csv', the layer in database is overwritten.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
+#'
 #' @return fiadat - a list of the following objects: \item{xy*_ACTUAL}{ Data
 #' frame. XY data from FS_FIADB_NIMS_*.SDS_PLOT.  xyCur_ACTUAL - if
 #' measCur=TRUE, xy_ACTUAL otherwise. } \item{xyqry}{ String. Query to extract
@@ -113,13 +95,23 @@
 #'   COxylst$xyqry
 #' 
 #' @export DBgetCoords
-DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL", 
-	evalid=NULL, evalCur=FALSE, evalEndyr=NULL, evalAll=FALSE, 
-	measCur=FALSE, measEndyr=NULL, allyrs=FALSE, invyrs=NULL,
-	measyrs=NULL, intensity1=FALSE, issp=FALSE, returndata=TRUE, 
-	savedata=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-	out_layer="xyplt", append_layer=FALSE, outfn.pre=NULL, 
-	outfn.date=FALSE, overwrite_dsn=FALSE, overwrite_layer=TRUE) {
+DBgetCoords <- function (states = NULL, 
+                         RS = NULL, 
+                         invtype = "ANNUAL", 
+                         evalid = NULL, 
+                         evalCur = FALSE, 
+                         evalEndyr = NULL, 
+                         evalAll = FALSE, 
+                         measCur = FALSE, 
+                         measEndyr = NULL, 
+                         allyrs = FALSE, 
+                         invyrs = NULL, 
+                         measyrs = NULL, 
+                         intensity1 = FALSE, 
+                         issp = FALSE, 
+                         returndata = TRUE, 
+                         savedata = FALSE, 
+                         savedata_opts = NULL){
 
   ## DESCRIPTION: Get the most current coordinates in the FIA database
   
@@ -128,35 +120,55 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
     evalCur=evalAll=measCur=allyrs=intensity1=
 	savedata=parameters=out_fmt=overwrite <- NULL
   }
-
-  ##################################################################
-  ## CHECK INPUT PARAMETERS
-  ##################################################################
+  
+  ## Check for installed packages
   if (!"sqldf" %in% rownames(installed.packages())) {
     message("the sqldf package is required when datsource='ORACLE'")
   }
-
+  
   ## SET OPTIONS
   options.old <- options()
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
-
+  
+  
+  ## Set global variables
+  parameters <- FALSE
+  xymeasCur <- FALSE
+  coords <- "PUBLIC"
+  
+  
+  ##################################################################
+  ## CHECK INPUT PARAMETERS
+  ##################################################################
 
   ## Check arguments
-  ###########################################################
   input.params <- names(as.list(match.call()))[-1]
   if (!all(input.params %in% names(formals(DBgetCoords)))) {
     miss <- input.params[!input.params %in% formals(DBgetCoords)]
     stop("invalid parameter: ", toString(miss))
   } 
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
 
-  ## Define variables
-  parameters <- FALSE
-  xymeasCur <- FALSE
-  coords <- "PUBLIC"
 
   ########################################################################
-  ### GET PARAMETERS 
+  ### GET PARAMETER INPUTS 
   ########################################################################
   iseval <- FALSE
 
@@ -314,12 +326,17 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
   ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
   if (savedata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, append_layer=append_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+          out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+          overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+          add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   } 
 
 
@@ -417,12 +434,12 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
     ## Generate shapefile
     out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
     assign(spxynm, spMakeSpatialPoints(xyplt=xyx, xvar="LON_PUBLIC", 
-		yvar="LAT_PUBLIC", xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
-		exportsp=savedata, out_dsn=out_dsn, out_fmt=out_fmt_sp, 
-		outfolder=outfolder, out_layer=spxynm, outfn.date=outfn.date,
- 		overwrite_layer=overwrite_layer, append_layer=TRUE,
-		outfn.pre=outfn.pre))
-
+		        yvar="LAT_PUBLIC", xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
+		        exportsp=savedata, 
+		        savedata_opts=list(out_dsn=out_dsn, out_fmt=out_fmt_sp, 
+		                  outfolder=outfolder, out_layer=spxynm, 
+		                  outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
+		                  append_layer=TRUE, outfn.pre=outfn.pre) ))
   }
      
   ###############################################################################
@@ -431,11 +448,17 @@ DBgetCoords <- function (states=NULL, RS=NULL, invtype="ANNUAL",
   if (savedata) {
  
     index.unique.xyplt <- "PLT_CN"
-    FIESTA::datExportData(get(xynm), outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer=out_layer, 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		index.unique=index.unique.xyplt, append_layer=append_layer,
-		outfn.pre=outfn.pre)
+    
+    datExportData(get(xynm),           
+                  savedata_opts=list(outfolder=outfolder, 
+                                     out_fmt=out_fmt, 
+                                     out_dsn=out_dsn, 
+                                     out_layer="unitarea",
+                                     outfn.pre=outfn.pre, 
+                                     outfn.date=outfn.date, 
+                                     overwrite_layer=overwrite_layer,
+                                     append_layer=append_layer,
+                                     add_layer=TRUE))
   }
 
   ## GENERATE RETURN LIST

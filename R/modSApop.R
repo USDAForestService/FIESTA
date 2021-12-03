@@ -200,8 +200,8 @@ modSApop <- function(popType="VOL",
 				             prednames = NULL,
 				             predfac = NULL,
 				             savedata = FALSE,
-				             unit_opts = unit_options(),
-				             savedata_opts = savedata_options(),
+				             unit_opts = NULL,
+				             savedata_opts = NULL,
 				             SAdoms = NULL, 
 				             smallbnd = NULL,
 				             smallbnd.domain = NULL,
@@ -228,6 +228,32 @@ modSApop <- function(popType="VOL",
   if (gui) {
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
+  
+  ## Set options
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE)
+  adjtree <- FALSE
+  returnSApopdat <- FALSE
+  nonsamp.pfilter=nonsamp.cfilter <- NULL 
+  returnlst <- list()
+  pvars2keep=cvars2keep=NULL
+  
+  # dunitvar2=NULL
+  # pvars2keep=NULL
+  # cvars2keep=NULL
+  # adj="plot"
+  # ACI=FALSE
+  # gui <- FALSE 
+ 
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
+  
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
@@ -236,8 +262,10 @@ modSApop <- function(popType="VOL",
     stop("invalid parameter: ", toString(miss))
   }
 
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
+  
+  ## Check parameter lists
+  pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
+                savedata_opts=savedata_opts)
   
   ## Set unit defaults
   unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
@@ -281,24 +309,11 @@ modSApop <- function(popType="VOL",
     }
   }
 
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
-  adjtree <- FALSE
-  returnSApopdat <- FALSE
-  nonsamp.pfilter=nonsamp.cfilter <- NULL 
-  returnlst <- list()
-  pvars2keep=cvars2keep=NULL
-
-# dunitvar2=NULL
-# pvars2keep=NULL
-# cvars2keep=NULL
-# adj="plot"
-# ACI=FALSE
-# gui <- FALSE 
-
-
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
@@ -310,18 +325,17 @@ modSApop <- function(popType="VOL",
   ## Check output
   ########################################################
   if (savedata || saveobj) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
-		append_layer=append_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+                  out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                  overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                  add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
-    if (out_fmt != "csv") {
-      outfn.date <- FALSE
-    }
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   } 
 
 

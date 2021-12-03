@@ -61,11 +61,6 @@
 #' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
 #' need to be uniqueid. If using most current XY coordinates for plot
 #' assignments, use identifier for plot (e.g., PLOT_ID).
-#' @param tuniqueid String. Unique identifier of plot in tree and seed.
-#' @param cuniqueid String. Unique identifier of plot in cond.
-#' @param condid String. Unique identifier of plot conditions (e.g., CONDID).
-#' If no condid in cond, the data are assumed to have 1 condition per plot.  A
-#' CONDID=1 is automatically added.
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
 #' @param adj String. How to calculate adjustment factors for nonsampled
@@ -84,32 +79,24 @@
 #' @param unitvar String. Name of the estimation unit variable in unitarea and
 #' cond or pltassgn data frame with estimation unit assignment for each plot
 #' (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.
-#' @param unitvar2 String. Name of a second level estimation unit variable in
-#' unitarea and cond or pltassgn with assignment for each plot (e.g.,
-#' 'STATECD').
 #' @param unitarea Numeric or DF. Total area by estimation unit. If only 1
 #' estimation unit, include number of total acreage for the area of interest or
 #' a data frame with area and estimation unit. If more than one estimation
 #' unit, provide a data frame of total area by estimation unit, including
 #' unitvar and areavar.
 #' @param areavar String. Name of area variable in unitarea. Default="ACRES".
-#' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
-#' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
-#' @param unit.action String. What to do if number of plots in an estimation
-#' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-#' unit.action='combine', combines estimation unit to the following estimation
-#' unit, ordered in unitzonal or stratalut.
 #' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
 #' unit. For continuous data, means by estimation unit; for categorical data,
 #' proportion of class by estimation unit.
-#' @param npixelvar String. Name of variable in unitlut defining number of
-#' pixels by estimation unit.
 #' @param prednames String vector. Name(s) of predictor variables to include in
 #' model.
 #' @param predfac String vector. Name(s) of prednames that are factors (i.e.,
 #' categorical).
 #' @param saveobj Logical. If TRUE, saves SApopdat object to outfolder.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param unit_opts List. See help(unit_options()) for a list of options.
+#' @param strata_opts List. See help(strata_options()) for a list of options.
+#' Only used when strata = TRUE. 
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param MAdata List. Data output from FIESTA::MAdata().
@@ -220,8 +207,8 @@ modMApop <- function(popType="VOL",
 				             prednames = NULL,
 				             predfac = NULL,
 				             savedata = FALSE, 
-                     unit_opts = unit_options(),
-				             savedata_opts = savedata_options(),
+                     unit_opts = NULL,
+				             savedata_opts = NULL,
 				             MAdata = NULL, 
 				             pltdat = NULL, 
 				             auxdat = NULL, 
@@ -247,7 +234,24 @@ modMApop <- function(popType="VOL",
   if (gui) {
     areavar=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
+  
+  ## Set options
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE)
+  adjtree <- FALSE
+  popType <- "VOL"
+  nonsamp.pfilter=nonsamp.cfilter <- NULL
+  returnlst <- list()
 
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=expcondtab=strwtvar <- NULL
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- names(formals(modMApop)) 
@@ -256,8 +260,9 @@ modMApop <- function(popType="VOL",
     stop("invalid parameter: ", toString(miss))
   }
  
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=expcondtab=strwtvar <- NULL
+  ## Check parameter lists
+  pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
+                savedata_opts=savedata_opts)
   
   ## Set unit defaults
   unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
@@ -349,15 +354,10 @@ modMApop <- function(popType="VOL",
   }
   
 
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
-  adjtree <- FALSE
-  popType <- "VOL"
-  nonsamp.pfilter=nonsamp.cfilter <- NULL
-  returnlst <- list()
-
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
@@ -369,18 +369,17 @@ modMApop <- function(popType="VOL",
   ## Check output
   ########################################################
   if (savedata || saveobj) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
-		append_layer=append_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
-    if (out_fmt != "csv") {
-      outfn.date <- FALSE
-    }
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   } 
 
 
@@ -543,15 +542,15 @@ modMApop <- function(popType="VOL",
   ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="MA", popType=popType, 
- 	tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
- 	pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
-	evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
-	intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
-	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
-	unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-	areaunits=areaunits, unit.action=unit.action, strata=strata,
-	stratalut=stratalut, strvar=strvar, stratcombine=stratcombine, 
-	prednames=prednames, predfac=predfac)
+                    tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
+                    pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
+                    evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
+                    intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
+                    nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
+                    unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
+                    areaunits=areaunits, unit.action=unit.action, strata=strata, 
+                    stratalut=stratalut, strvar=strvar, stratcombine=stratcombine, 
+                    prednames=prednames, predfac=predfac)
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
@@ -601,12 +600,12 @@ modMApop <- function(popType="VOL",
       makedummy <- TRUE
   }
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
-        	module="MA", strata=strata, unitvar=unitvar, unitvar2=unitvar2, 
-		unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit,
- 		unit.action=unit.action, auxlut=auxlut, prednames=prednames, 
-		strvar=strvar, predfac=predfac, makedummy=makedummy, npixelvar=npixelvar, 
-		strwtvar="Prop", stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
-		removeifnostrata=TRUE, standardize=TRUE)
+                  module="MA", strata=strata, unitvar=unitvar, unitvar2=unitvar2, 
+                  unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit, 
+                  unit.action=unit.action, auxlut=auxlut, prednames=prednames, 
+                  strvar=strvar, predfac=predfac, makedummy=makedummy, npixelvar=npixelvar, 
+                  strwtvar="Prop", stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
+                  removeifnostrata=TRUE, standardize=TRUE)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -673,11 +672,11 @@ modMApop <- function(popType="VOL",
   ###################################################################################
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
-	condid=condid, ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar,
-	areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, 
-	npixels=npixels, npixelvar=npixelvar, prednames=prednames, 
-	expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-	states=states, invyrs=invyrs, estvar.area=estvar.area, strata=strata, adj=adj)
+          condid=condid, ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar, 
+          areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, 
+          npixels=npixels, npixelvar=npixelvar, prednames=prednames, 
+          expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+          states=states, invyrs=invyrs, estvar.area=estvar.area, strata=strata, adj=adj)
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
@@ -706,46 +705,88 @@ modMApop <- function(popType="VOL",
 
   if (saveobj) {
     objfn <- getoutfn(outfn="MApopdat", outfolder=outfolder, 
-		overwrite=overwrite_layer, outfn.date=outfn.date, ext="rda")
+		      overwrite=overwrite_layer, outfn.date=outfn.date, ext="rda")
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
-    datExportData(condx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="condx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(pltcondx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcondx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(condx, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="condx",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE))
+    datExportData(pltcondx, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="pltcondx",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE))
 
     if (!is.null(treef)) {
-      datExportData(treef, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(treef, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="treex",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
     }
     if (!is.null(seedf)) {
-      datExportData(seedf, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(seedf, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="seedx",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
     }
 
-    datExportData(pltassgnx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(unitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(unitlut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(pltassgnx, 
+         savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="pltassgn",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(unitarea, 
+         savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="unitarea",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(stratalut, 
+                  savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="stratalut",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
   }
 
   return(returnlst)

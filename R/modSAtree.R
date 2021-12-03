@@ -144,16 +144,33 @@
 #' https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.
 #' @keywords data
 #' @export modSAest
-modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL, 
-	SApackage="JoSAE", SAmethod="area", totals=FALSE, estseed="none",
-	largebnd.unique=NULL, landarea="FOREST", pcfilter=NULL, estvar=NULL, 
-	estvar.filter=NULL, rowvar=NULL, variable.select=TRUE, savedata=FALSE,
-	savesteps=FALSE, multest=TRUE, addSAdomsdf=TRUE, SAdomvars=NULL,
-	savemultest=FALSE, returntitle=FALSE, table_opts=table_options(),
-	title_opts=title_options(), savedata_opts=savedata_options(),
-	multest_opts=multest_options(), save4testing=FALSE, ...){
-
-
+modSAtree <- function(SApopdatlst = NULL, 
+                      SAdomsdf = NULL, 
+                      prednames = NULL, 
+                      SApackage = "JoSAE", 
+                      SAmethod = "area", 
+                      totals = FALSE, 
+                      estseed = "none", 
+                      largebnd.unique = NULL, 
+                      landarea = "FOREST", 
+                      pcfilter = NULL, 
+                      estvar = NULL, 
+                      estvar.filter = NULL, 
+                      rowvar = NULL, 
+                      variable.select = TRUE, 
+                      savedata = FALSE, 
+                      savesteps = FALSE, 
+                      multest = TRUE, 
+                      addSAdomsdf = TRUE, 
+                      SAdomvars = NULL, 
+                      savemultest = FALSE, 
+                      returntitle = FALSE, 
+                      table_opts = NULL, 
+                      title_opts = NULL, 
+                      savedata_opts = NULL, 
+                      multest_opts = NULL, 
+                      save4testing = FALSE, 
+                      ...){
   ######################################################################################
   ## DESCRIPTION: 
   ## Generates model-assisted estimates by domain (and estimation unit)
@@ -161,19 +178,33 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   ##			named as raw_dsn. If raw_fmt != 'csv', a database is created
   ##			within the outfolder names as raw_dsn. 
   ######################################################################################
+  
+  ## Set options
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE) 
+  title.rowgrp <- NULL
+  pvars2keep <- c("DOMAIN", "AOI")
+  returnSApopdat <- TRUE
+  sumunits=FALSE
+  prior=NULL
+  
+  colvar=NULL
+  col.FIAname=FALSE
+  col.orderby=NULL
+  col.add0=FALSE
+  collut=NULL
+  rowgrp=FALSE
+  rowgrpnm=NULL
+  rowgrpord=NULL 
+  showsteps=FALSE
+  sumunits=FALSE
+  
   gui <- FALSE
   returnlst <- list()
   set.seed(66)
   esttype="TREE"
 
-  ## Check input parameters
-#  input.params <- names(as.list(match.call()))[-1]
-#  formallst <- c(names(formals(FIESTA::modSAtree)),
-#		names(formals(FIESTA::modSApop))) 
-#  if (!all(input.params %in% formallst)) {
-#    miss <- input.params[!input.params %in% formallst]
-#    stop("invalid parameter: ", toString(miss))
-#  }
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0 && is.null(SApopdat)) {
@@ -192,6 +223,24 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
 	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
 	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf <- NULL
   rawdata <- TRUE
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(modSAtree)),
+                 names(formals(modSApop))) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
+                savedata_opts=savedata_opts)
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -249,59 +298,10 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     }
   }
 
-  ##################################################################
-  ## INITIALIZE SETTINGS
-  ##################################################################
-# divideby=NULL
-# allin1=FALSE
-# addtitle=FALSE
-# returntitle=TRUE
-# rawdata=TRUE
-# estround=0
-# pseround=3
-# rowvar=NULL
-# colvar=NULL
-# row.FIAname=FALSE
-# col.FIAname=FALSE
-# row.orderby=NULL
-# col.orderby=NULL
-# row.add0=FALSE
-# col.add0=FALSE
-# rowlut=NULL
-# collut=NULL
-# rowgrp=FALSE
-# rowgrpnm=NULL
-# rowgrpord=NULL
-# title.rowvar=NULL
-# title.colvar=NULL
-# title.main=NULL
-# title.ref=NULL
-# title.rowvar=NULL
-# title.colvar=NULL
-# title.dunitvar=NULL
-# title.estvar=NULL
-# title.filter=NULL
 
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
-  title.rowgrp <- NULL
-  pvars2keep <- c("DOMAIN", "AOI")
-  returnSApopdat <- TRUE
-  sumunits=FALSE
-  prior=NULL
-
-  colvar=NULL
-  col.FIAname=FALSE
-  col.orderby=NULL
-  col.add0=FALSE
-  collut=NULL
-  rowgrp=FALSE
-  rowgrpnm=NULL
-  rowgrpord=NULL 
-  showsteps=FALSE
-  sumunits=FALSE
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
 
   ## Check SApackage 
   SApackagelst <- c("JoSAE", "sae")
@@ -349,12 +349,14 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   ###################################################################################
   ## Check output parameters 
   ###################################################################################
-  outparams <- check.outparams(esttype=esttype, totals=totals,
-	allin1=allin1, estround=estround, pseround=pseround, divideby=divideby,
- 	addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, rawonly=rawonly, 
-	savedata=savedata, outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-	overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-	append_layer=append_layer, raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
+  outparams <- check.outparams(esttype=esttype, totals=totals, 
+                  allin1=allin1, estround=estround, pseround=pseround, 
+                  divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+                  rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+                  outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
+                  overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+                  outfn.date=outfn.date, append_layer=append_layer, 
+                  raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   sumunits <- outparams$sumunits
   allin1 <- outparams$allin1
   estround <- outparams$estround
@@ -558,13 +560,17 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     ###################################################################################
     if (!sumunits) col.add0 <- TRUE
     if (!is.null(rowvar) && rowvar == "TOTAL") rowvar <- NULL
-    rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf,
-		condf=pltcondf, cuniqueid=cuniqueid, rowvar=rowvar, rowvar.filter=rowvar.filter, 
-		colvar=colvar, colvar.filter=colvar.filter, row.FIAname=row.FIAname, 
-		col.FIAname=col.FIAname, row.orderby=row.orderby, col.orderby=col.orderby,
- 		row.add0=row.add0, col.add0=col.add0, title.rowvar=title.rowvar, 
-		title.colvar=title.colvar, rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
-		rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, landarea=landarea) 
+    rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, treef=treef, seedf=seedf, 
+                      condf=pltcondf, cuniqueid=cuniqueid, rowvar=rowvar, 
+                      rowvar.filter=rowvar.filter, 
+                      colvar=colvar, colvar.filter=colvar.filter, 
+                      row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
+                      row.orderby=row.orderby, col.orderby=col.orderby, 
+                      row.add0=row.add0, col.add0=col.add0, 
+                      title.rowvar=title.rowvar, title.colvar=title.colvar, 
+                      rowlut=rowlut, collut=collut, rowgrp=rowgrp, 
+                      rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
+                      landarea=landarea) 
     treef <- rowcolinfo$treef
     seedf <- rowcolinfo$seedf
     condf <- rowcolinfo$condf
@@ -599,11 +605,11 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
       #####################################################################################
       adjtree <- ifelse(adj %in% c("samp", "plot"), TRUE, FALSE)
       treedat <- check.tree(gui=gui, treef=rowcolinfo$treef, 
-		seedf=rowcolinfo$seedf, estseed=estseed, 
-		bycond=TRUE, condf=rowcolinfo$condf, bytdom=rowcolinfo$bytdom, 
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, 
-		estvarn=estvar, estvarn.filter=estvar.filter, esttotn=TRUE, 
-		tdomvar=rowcolinfo$tdomvar, adjtree=adjtree, metric=metric)
+                        seedf=rowcolinfo$seedf, estseed=estseed, 
+                        bycond=TRUE, condf=rowcolinfo$condf, bytdom=rowcolinfo$bytdom, 
+                        tuniqueid=tuniqueid, cuniqueid=cuniqueid, esttype=esttype, 
+                        estvarn=estvar, estvarn.filter=estvar.filter, esttotn=TRUE, 
+                        tdomvar=rowcolinfo$tdomvar, adjtree=adjtree, metric=metric)
       if (is.null(treedat)) return(NULL) 
       estvar <- treedat$estvar
       estvar.name <- treedat$estvar.name
@@ -882,15 +888,16 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
     title.dunitvar <- smallbnd.dom
   }
   alltitlelst <- check.titles(esttype=esttype, estseed=rowcolinfo$estseed, 
-	sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
-	title.rowvar=rowcolinfo$title.rowvar, title.colvar=title.colvar, 
-	title.unitvar=title.dunitvar, title.filter=title.filter, 
-	title.unitsn=estvarunits, title.estvarn=title.estvar, unitvar=dunitvar, 
-	rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, estvarn=estvar, 
-	estvarn.filter=estvar.filter, addtitle=addtitle, returntitle=returntitle, 
-	rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
-	pcfilter=pcfilter, allin1=allin1, divideby=divideby, parameters=FALSE, 
-	outfn.pre=outfn.pre)
+                    sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
+                    title.rowvar=rowcolinfo$title.rowvar, title.colvar=title.colvar, 
+                    title.unitvar=title.dunitvar, title.filter=title.filter, 
+                    title.unitsn=estvarunits, title.estvarn=title.estvar, 
+                    unitvar=dunitvar, rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
+                    estvarn=estvar, estvarn.filter=estvar.filter, 
+                    addtitle=addtitle, returntitle=returntitle, 
+                    rawdata=rawdata, states=states, invyrs=invyrs, landarea=landarea, 
+                    pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
+                    parameters=FALSE, outfn.pre=outfn.pre)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -912,18 +919,20 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
   ###################################################################################
   message("getting output...")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-	unitvar=smallbnd.dom, unit_totest=dunit_totest, unit_rowest=dunit_rowest, 
-	unit_colest=dunit_colest, unit_grpest=dunit_grpest, rowvar=rowcolinfo$rowvar, 
-	colvar=rowcolinfo$colvar, uniquerow=rowcolinfo$uniquerow, 
-	uniquecol=rowcolinfo$uniquecol, rowgrp=rowgrp, rowgrpnm=rowgrpnm, 
-	rowunit=rowunit, totunit=totunit, allin1=allin1, savedata=savedata, 
-	addtitle=addtitle, title.ref=title.ref, title.colvar=title.colvar, 
-	title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
-	title.unitvar=title.dunitvar, title.estpse=title.estpse, title.est=title.est, 
-	title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, outfn.estpse=outfn.estpse, 
-	outfolder=outfolder, outfn.date=outfn.date, overwrite=overwrite_layer, 
-	estnm=estnm, estround=estround, pseround=pseround, divideby=divideby, 
-	returntitle=returntitle, estnull=estnull, psenull=psenull) 
+              unitvar=smallbnd.dom, unit_totest=dunit_totest, unit_rowest=dunit_rowest, 
+              unit_colest=dunit_colest, unit_grpest=dunit_grpest, 
+              rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
+              uniquerow=rowcolinfo$uniquerow, uniquecol=rowcolinfo$uniquecol, 
+              rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowunit=rowunit, totunit=totunit, 
+              allin1=allin1, savedata=savedata, addtitle=addtitle, 
+              title.ref=title.ref, title.colvar=title.colvar, 
+              title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
+              title.unitvar=title.dunitvar, title.estpse=title.estpse, 
+              title.est=title.est, title.pse=title.pse, rawdata=rawdata, 
+              rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
+              outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
+              estround=estround, pseround=pseround, divideby=divideby, 
+              returntitle=returntitle, estnull=estnull, psenull=psenull) 
 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
@@ -991,9 +1000,16 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
  
       ## Export multestdf
       overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
-      datExportData(multestdf, out_fmt=multest_fmt, outfolder=multest_outfolder, 
- 		out_dsn=multest_dsn, out_layer=multest_layer, overwrite_layer=overwrite_layer, 
-		append_layer=multest.append)
+      datExportData(multestdf, 
+                    savedata_opts=list(outfolder=multest_outfolder, 
+                                       out_fmt=multest_fmt, 
+                                       out_dsn=multest_dsn, 
+                                       out_layer=multest_layer,
+                                       outfn.pre=outfn.pre, 
+                                       outfn.date=outfn.date, 
+                                       overwrite_layer=overwrite_layer,
+                                       append_layer=multest.append,
+                                       add_layer=TRUE))
     }
   } 
 
@@ -1040,9 +1056,16 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
  
       ## Export multestdf
       overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
-      datExportData(multestdf_row, out_fmt=multest_fmt, outfolder=multest_outfolder, 
- 		out_dsn=multest_dsn, out_layer=multest_layer_row, overwrite_layer=overwrite_layer, 
-		append_layer=multest.append)
+      datExportData(multestdf_row, 
+            savedata_opts=list(outfolder=multest_outfolder, 
+                                out_fmt=multest_fmt, 
+                                out_dsn=multest_dsn, 
+                                out_layer=multest_layer_row,
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=multest.append,
+                                add_layer=TRUE))
     }
   } 
 
@@ -1068,17 +1091,23 @@ modSAtree <- function(SApopdatlst=NULL, SAdomsdf=NULL, prednames=NULL,
           outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
           if (tabnm %in% c("plotsampcnt", "condsampcnt")) {
             write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			outfn.date=outfn.date, overwrite=overwrite_layer)
+                    outfn.date=outfn.date, overwrite=overwrite_layer)
           } else if (is.data.frame(rawtab)) {
             if (raw_fmt != "csv") {
               out_layer <- tabnm 
             } else {
               out_layer <- outfn.rawtab
             }
-            datExportData(rawtab, out_fmt=raw_fmt, outfolder=rawfolder, 
- 			out_dsn=raw_dsn, out_layer=out_layer, 
-			overwrite_layer=overwrite_layer, add_layer=TRUE, 
-			append_layer=append_layer)
+            datExportData(rawtab, 
+                  savedata_opts=list(outfolder=rawfolder, 
+                                      out_fmt=raw_fmt, 
+                                      out_dsn=raw_dsn, 
+                                      out_layer=out_layer,
+                                      outfn.pre=outfn.pre, 
+                                      outfn.date=outfn.date, 
+                                      overwrite_layer=overwrite_layer,
+                                      append_layer=append_layer,
+                                      add_layer=TRUE))
           }
         }
       }

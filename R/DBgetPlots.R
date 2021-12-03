@@ -299,32 +299,16 @@
 #' @param alltFilter String. If istree=TRUE, an overall filter for tree data in
 #' all states (e.g., only Whitebark pine trees - 'SPCD == 101'). Note: returns
 #' only plots with trees included in filter.
+#' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
 #' file (*.csv).  No objects are returned. If FALSE, the data are saved as R
 #' objects and returned to user.  See details for caveats.
 #' @param saveqry Logical. If TRUE, saves queries to outfolder (by state).
-#' @param outfolder String. The output folder path. If NULL and savedata=TRUE
-#' or saveqry=TRUE, outfolder is the working directory.
-#' @param out_fmt String. File format for output ('csv', 'sqlite','gpkg',
-#' 'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
-#' installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
-#' installed.
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param append_layer Logical. If TRUE, appends to existing out_dsn. The
-#' out_dsn a database or shapefile. If FALSE, the out_dsn will be overwritten
-#' if exists.
-#' @param outfn.pre String. The name used for prefix of outfiles (e.g.,
-#' outfn.pre'_plt*').
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE and out_fmt = 'sqlite', the out_dsn is
-#' overwritten.
-#' @param overwrite_layer Logical. If TRUE and out_fmt = 'csv', files are
-#' overwritten.  If out_fmt != 'csv', the layer in database is overwritten.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' @param savePOP Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
 #' table.
-#' @param returndata Logical. If TRUE, returns data objects.
+#' 
 #' @return fiadat - a list of the following objects: \item{states}{ Vector.
 #' Input state(s) (full state names: Arizona). } \item{plt}{ Data frame. Plot
 #' variables from FIA DataMart PLOT table.  See FIESTA::ref_plt for variable
@@ -444,17 +428,47 @@
 #' 
 #' 
 #' @export DBgetPlots
-DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL, 
-	RS=NULL, invtype="ANNUAL", evalid=NULL, evalCur=FALSE, evalEndyr=NULL, 
-	evalAll=FALSE, evalType="VOL", measCur=FALSE, measEndyr=NULL, allyrs=FALSE, 
-	invyrs=NULL, measyrs=NULL, xymeasCur=FALSE, istree=FALSE, isseed=FALSE, 
-	isveg=FALSE, issubp=FALSE, islulc=FALSE, isdwm=FALSE, plotgeom=FALSE, 
-	othertables=NULL, issp=FALSE, spcond=FALSE, spcondid1=FALSE, defaultVars=TRUE, 
-	regionVars=FALSE, regionVarsRS="RMRS", ACI=FALSE, subcycle99=FALSE, 
-	intensity1=FALSE, stateFilter=NULL, allFilter=NULL, alltFilter=NULL, 
-	savedata=FALSE, saveqry=FALSE, outfolder=NULL, out_fmt="csv", out_dsn=NULL, 
-	append_layer=FALSE, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE,
- 	overwrite_layer=TRUE, savePOP=FALSE, returndata=TRUE) {
+DBgetPlots <- function (states = NULL, 
+                        datsource = "datamart", 
+                        data_dsn = NULL, 
+                        RS = NULL, 
+                        invtype = "ANNUAL", 
+                        evalid = NULL, 
+                        evalCur = FALSE, 
+                        evalEndyr = NULL, 
+                        evalAll = FALSE, 
+                        evalType = "VOL", 
+                        measCur = FALSE, 
+                        measEndyr = NULL, 
+                        allyrs = FALSE, 
+                        invyrs = NULL, 
+                        measyrs = NULL, 
+                        xymeasCur = FALSE, 
+                        istree = FALSE, 
+                        isseed = FALSE, 
+                        isveg = FALSE, 
+                        issubp = FALSE, 
+                        islulc = FALSE, 
+                        isdwm = FALSE, 
+                        plotgeom = FALSE, 
+                        othertables = NULL, 
+                        issp = FALSE, 
+                        spcond = FALSE, 
+                        spcondid1 = FALSE, 
+                        defaultVars = TRUE, 
+                        regionVars = FALSE, 
+                        regionVarsRS = "RMRS", 
+                        ACI = FALSE, 
+                        subcycle99 = FALSE, 
+                        intensity1 = FALSE, 
+                        stateFilter = NULL, 
+                        allFilter = NULL, 
+                        alltFilter = NULL,
+                        returndata = TRUE,
+                        savedata = FALSE, 
+                        saveqry = FALSE, 
+                        savePOP = FALSE,
+                        savedata_opts = NULL) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
@@ -504,14 +518,34 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
       ACTUAL = c("LON_ACTUAL", "LAT_ACTUAL"),
       PUBLIC = c("LON_PUBLIC", "LAT_PUBLIC"))
   }  
-
-  ## Check arguments
-  ###########################################################
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
   input.params <- names(as.list(match.call()))[-1]
   if (!all(input.params %in% names(formals(DBgetPlots)))) {
     miss <- input.params[!input.params %in% formals(DBgetPlots)]
     stop("invalid parameter: ", toString(miss))
   }
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
 
   ## Define variables
   actual=getinvyr <- FALSE
@@ -534,7 +568,7 @@ DBgetPlots <- function (states=NULL, datsource="datamart", data_dsn=NULL,
 
 
   ########################################################################
-  ### GET PARAMETERS 
+  ### GET PARAMETER INPUTS
   ########################################################################
   iseval <- FALSE
   subsetPOP <- FALSE

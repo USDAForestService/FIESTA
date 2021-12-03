@@ -225,47 +225,73 @@
 #' 
 #' 
 #' @export modGBarea
-modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL, 
-	rowvar=NULL, colvar=NULL, sumunits=TRUE, returntitle=FALSE, savedata=FALSE, 
-	table_opts=NULL, title_opts=NULL, savedata_opts=NULL, gui=FALSE, ...){
+modGBarea <- function(GBpopdat, 
+                      landarea = "FOREST", 
+                      pcfilter = NULL, 
+                      rowvar = NULL, 
+                      colvar = NULL, 
+                      sumunits = TRUE, 
+                      returntitle = FALSE, 
+                      savedata = FALSE, 
+                      table_opts = NULL, 
+                      title_opts = NULL, 
+                      savedata_opts = NULL, 
+                      gui = FALSE, 
+                      ...){
 
   ###################################################################################
   ## DESCRIPTION: 
   ## Generates acre estimates by domain (and estimation unit)
   ###################################################################################
 
+  
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  if (nargs() == 0 && is.null(GBpopdat)) {
+    gui <- TRUE
+  } 
+  
+  ## If gui.. set variables to NULL
+  if (gui) { 
+    landarea=strvar=areavar=sumunits=adj=strata=getwt=cuniqueid=ACI=
+      puniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
+    #if (!row.FIAname) row.FIAname <- NULL
+    #if (!col.FIAname) col.FIAname <- NULL
+  }
+  
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
+    rawfolder <- NULL
+  rawdata <- TRUE
+  #estvar <- "CONDPROP_ADJ"
+  
+  
+  ## INITIALIZE SETTINGS
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE)
+  esttype <- "AREA" 
+  nonresp <- FALSE
+  substrvar <- NULL
+  parameters <- FALSE
+  returnlst <- list()
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::modGBarea)),
-		names(formals(FIESTA::modGBpop))) 
+  formallst <- c(names(formals(modGBarea)),
+		names(formals(modGBpop))) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(GBpopdat)) {
-    gui <- TRUE
-  } 
-	
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    landarea=strvar=areavar=sumunits=adj=strata=getwt=cuniqueid=ACI=
-	puniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
-    #if (!row.FIAname) row.FIAname <- NULL
-    #if (!col.FIAname) col.FIAname <- NULL
-  }
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
-	rawfolder <- NULL
-  rawdata <- TRUE
-  #estvar <- "CONDPROP_ADJ"
-  
-  
   ## Check parameter lists
-  pcheck.params(input.params, table_opts=table_opts, savedata_opts=savedata_opts)
-  
+  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
+                savedata_opts=savedata_opts)
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -312,23 +338,11 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
     }
   }
 
-  ###################################################################################
-  ## INITIALIZE SETTINGS
-  ###################################################################################
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
-  esttype <- "AREA" 
-  nonresp <- FALSE
-  substrvar <- NULL
-  parameters <- FALSE
-  returnlst <- list()
-
-
-  ###################################################################################
-  ## Check data and generate population information 
-  ###################################################################################
-
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
   "ACI.filter", "unitarea", "unitvar", "stratalut", "strvar",
   "plotsampcnt", "condsampcnt")
@@ -501,8 +515,8 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
     cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvar.name]
     unit_totest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdattot, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain="TOTAL")
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
@@ -516,8 +530,8 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=rowvar)
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=rowvar)
   }
 
   ## Get column (and cell) estimate  
@@ -525,14 +539,14 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, colvar), .SDcols=estvar.name]
     unit_colest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=colvar)
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=colvar)
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars, cuniqueid, grpvar), .SDcols=estvar.name]
     unit_grpest <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut, unitvar=unitvar, strvar=strvar, 
-		domain=grpvar)
+                        uniqueid=cuniqueid, stratalut=stratalut, 
+                        unitvar=unitvar, strvar=strvar, domain=grpvar)
   }
 
   ###################################################################################
@@ -602,8 +616,8 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, cuniqueid, rowvar), .SDcols=estvar.name]
     rowunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut2, unitvar="ONEUNIT", strvar=strvar, 
-		domain=rowvar)
+                    uniqueid=cuniqueid, stratalut=stratalut2, 
+                    unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
     rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
     tabs <- check.matchclass(unitacres2, rowunit, "ONEUNIT")
@@ -618,8 +632,8 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, cuniqueid, "TOTAL"), .SDcols=estvar.name]
     totunit <- GBest.pbar(sumyn=estvar.name, ysum=cdomdatsum, 
-		uniqueid=cuniqueid, stratalut=stratalut2, unitvar="ONEUNIT", strvar=strvar, 
-		domain="TOTAL")
+                    uniqueid=cuniqueid, stratalut=stratalut2, 
+                    unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2
@@ -683,14 +697,13 @@ modGBarea <- function(GBpopdat, landarea="FOREST", pcfilter=NULL,
             out_layer <- outfn.rawtab
           }
           datExportData(rawtab, 
-                        savedata_opts=list(outfolder=rawfolder, 
-                                           out_fmt=raw_fmt, 
-                                           out_dsn=raw_dsn, 
-                                           out_layer=out_layer,
-                                           overwrite_layer=overwrite_layer,
-                                           append_layer=append_layer,
-                                           add_layer=TRUE)
-          )
+                savedata_opts=list(outfolder=rawfolder, 
+                                    out_fmt=raw_fmt, 
+                                    out_dsn=raw_dsn, 
+                                    out_layer=out_layer,
+                                    overwrite_layer=overwrite_layer,
+                                    append_layer=append_layer,
+                                    add_layer=TRUE))
         }
       }
     }

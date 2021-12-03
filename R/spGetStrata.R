@@ -192,7 +192,7 @@ spGetStrata <- function(xyplt,
 
 
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER INPUTS
   ##################################################################
 
   ## Spatial points for data extraction.. 
@@ -513,9 +513,8 @@ spGetStrata <- function(xyplt,
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
-		                          add_layer=TRUE)
-    )
-    
+		                          add_layer=TRUE))
+
     datExportData(unitarea,           
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -525,8 +524,7 @@ spGetStrata <- function(xyplt,
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer,
-                              add_layer=TRUE)
-    )           
+                              add_layer=TRUE))
 
     datExportData(stratalut,                   
             savedata_opts=list(outfolder=outfolder, 
@@ -537,9 +535,7 @@ spGetStrata <- function(xyplt,
                             outfn.date=outfn.date, 
                             overwrite_layer=overwrite_layer,
                             append_layer=append_layer,
-                            add_layer=TRUE)
-    )           
-    
+                            add_layer=TRUE))
   }
   
   returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 

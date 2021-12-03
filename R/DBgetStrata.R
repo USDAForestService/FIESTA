@@ -42,27 +42,16 @@
 #' are accepted. See details below and FIA database manual for regional
 #' availability and/or differences. Note: do not use if EVALID is specified.
 #' See notes for more information on evalType.
-#' @param savedata Logical. If TRUE, writes output to outfolder.
-#' @param outfolder String.* If savedata=TRUE, name of the output folder. If
-#' NULL, data are saved to the working directory.
-#' @param out_fmt String. File format for output ('csv', 'sqlite','gpkg',
-#' 'gdb').  If out_fmt %in% c('sqlite','gpkg'), RSQLite package must be
-#' installed. If out_fmt='gdb', arcgisbinding package and R-Bridge must be
-#' installed.
-#' @param out_dsn String. Data source name for output. If extension is not
-#' included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param outfn.pre String. The name used for prefix of outfiles (e.g.,
-#' outfn.pre'_plt*').
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE, overwrite database or csv files.
-#' @param overwrite_layer Logical. If TRUE, overwrite layer in a database.
-#' @param append_layer Logical. If TRUE, appends data to layer in a database or
-#' *.csv file.
 #' @param getassgn Logical. If TRUE, extracts plot assignments from
 #' POP_PLOT_STRATUM_ASSGN table in database.
 #' @param POP_PLOT_STRATUM_ASSGN Data frame. The POP_PLOT_STRATUM_ASSGN for
 #' state(s).
+#' @param savedata Logical. If TRUE, writes output to outfolder.
+#' @param append_layer Logical. If TRUE, appends data to layer in a database or
+#' *.csv file.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
+#' 
 #' @return FIAstrata - a list of the following objects: \item{pltassgn}{ Data
 #' frame. Plot-level strata/estimation unit assignment.  If dat is not NULL,
 #' strata/estimation unit variables are appended to dat. } \item{pltassgnid}{
@@ -136,11 +125,18 @@
 #' #  WYstrat4$evalid
 #' 
 #' @export DBgetStrata
-DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL, 
-	evalCur=TRUE, evalEndyr=NULL, evalAll=FALSE, evalType="VOL", savedata=FALSE, 
-	outfolder=NULL, out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, 
-	overwrite_dsn=FALSE, overwrite_layer=TRUE, append_layer=FALSE, getassgn=TRUE, 
-	POP_PLOT_STRATUM_ASSGN=NULL){
+DBgetStrata <- function(dat = NULL, 
+                        uniqueid = "CN", 
+                        states = NULL, 
+                        evalid = NULL, 
+                        evalCur = TRUE, 
+                        evalEndyr = NULL, 
+                        evalAll = FALSE, 
+                        evalType = "VOL", 
+                        savedata = FALSE, 
+                        getassgn = TRUE, 
+                        POP_PLOT_STRATUM_ASSGN = NULL,
+                        savedata_opts = NULL){
   ######################################################################################
   ## DESCRIPTION: This function gets the strata info and area by estimation unit from 
   ##		FIA Database, extracts and merges plot-level assignments to data file, and 
@@ -175,10 +171,39 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
 
-  #######################################################3###################
+  ##################################################################
   ## CHECK INPUT PARAMETERS
-  ###########################################################################
-
+  ##################################################################
+  
+  ## Check arguments
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% names(formals(DBgetStrata)))) {
+    miss <- input.params[!input.params %in% formals(DBgetStrata)]
+    stop("invalid parameter: ", toString(miss))
+  } 
+ 
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   ## Check dat
   ########################################################
   datx <- pcheck.table(dat, gui=gui, caption="Data table?", returnDT=TRUE)
@@ -276,13 +301,17 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
 
   ## Check outfolder/outfn
   if (savedata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
-		append_layer=append_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   }
 
 
@@ -469,21 +498,40 @@ DBgetStrata <- function(dat=NULL, uniqueid="CN", states=NULL, evalid=NULL,
   }
 
   if (savedata) {
-     datExportData(unitarea, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			append_layer=append_layer, outfn.pre=outfn.pre)
-
-    datExportData(stratalut, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			append_layer=append_layer, outfn.pre=outfn.pre)
+    datExportData(unitarea,           
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="unitarea",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    
+    datExportData(stratalut,           
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="stratalut",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    
 
     if (getassgn) {
-      datExportData(datstrat, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			append_layer=append_layer, outfn.pre=outfn.pre)
+      datExportData(datstrat,           
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="pltassgn",
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                add_layer=TRUE))
     }
   }
 

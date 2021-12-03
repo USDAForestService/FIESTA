@@ -96,10 +96,19 @@
 #' 
 #' 
 #' @export DBgetEvalid
-DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NULL, 
-	invtype="ANNUAL", evalCur=TRUE, evalEndyr=NULL, evalid=NULL, evalAll=FALSE, 
-	evalType="VOL", invyrtab=NULL, ppsanm="pop_plot_stratum_assgn", gui=FALSE) {
-
+DBgetEvalid <- function(states = NULL, 
+                        RS = NULL, 
+                        datsource = "datamart", 
+                        data_dsn = NULL, 
+                        invtype = "ANNUAL", 
+                        evalCur = TRUE, 
+                        evalEndyr = NULL, 
+                        evalid = NULL, 
+                        evalAll = FALSE, 
+                        evalType = "VOL", 
+                        invyrtab = NULL, 
+                        ppsanm = "pop_plot_stratum_assgn", 
+                        gui = FALSE) {
   ###############################################################################
   ## DESCRIPTION: Get or check evalid from FIA database.
   ## You must have the following variables in dat: STATECD, INVYR, a uniqueid.
@@ -120,25 +129,27 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
     evalCur=evalAll=evalType <- NULL
   }
   
-  ## Set global variables
-  EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR=POP_EVAL=POP_EVAL_GRP=
-		POP_EVAL_TYP=SURVEY=evaltyp <- NULL
-
   ## SET OPTIONS
   options.old <- options()
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
-
-  ## Define variables
-  SCHEMA. <- ""
-
+  
+  
   ## Set global variables
+  EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR=POP_EVAL=POP_EVAL_GRP=
+		POP_EVAL_TYP=SURVEY=evaltyp <- NULL
   EVALID=evalidlist=evalTypelist=invyrs <- NULL
   #evalresp <- TRUE
   evalresp <- FALSE
   isgrm=issccm <- FALSE 
   returnevalid <- FALSE
   nopoptables <- TRUE
+  
+
+  ## Define variables
+  SCHEMA. <- ""
+
+  ## Set global variables
 
   ## Define evalTypee choices
   evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "DWM", "CHNG")
@@ -146,8 +157,10 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 #		"CRWN", "INV", "P2VEG")
 
 
-  ## Check arguments
-  ###########################################################
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
   input.params <- names(as.list(match.call()))[-1]
   if (!all(input.params %in% names(formals(DBgetEvalid)))) {
     miss <- input.params[!input.params %in% formals(DBgetEvalid)]
@@ -198,8 +211,9 @@ DBgetEvalid <- function(states=NULL, RS=NULL, datsource="datamart", data_dsn=NUL
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
   ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
 
+  
   ##################################################################
-  ## CHECK INPUT PARAMETERS
+  ## CHECK PARAMETER INPUTS
   ##################################################################
   if (!"sqldf" %in% rownames(installed.packages())) {
     message("the sqldf package is required")

@@ -17,9 +17,13 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export DBtestESRIgdb
-DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
-				outfn.date=FALSE, overwrite=FALSE, showlist=TRUE,
-				returnpath=TRUE) {
+DBtestESRIgdb <- function(gdbfn = NULL, 
+                          outfolder = NULL, 
+                          outfn.pre = NULL, 
+                          outfn.date = FALSE, 
+                          overwrite = FALSE, 
+                          showlist = TRUE, 
+                          returnpath = TRUE) {
   ## DESCRIPTION: 
   ## Test gdb access
 
@@ -33,6 +37,17 @@ DBtestESRIgdb <- function(gdbfn=NULL, outfolder=NULL, outfn.pre=NULL,
   gdbpath <- getoutfn(gdbfn, outfn.pre=outfn.pre, outfn.date=outfn.date, 
 		overwrite=overwrite, outfolder=outfolder, ext=getext(gdbfn))
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% names(formals(DBtestESRIgdb)))) {
+    miss <- input.params[!input.params %in% formals(DBtestESRIgdb)]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  
 #  if (is.na(getext(gdbfn)) || getext(gdbfn) == "NA") {
 #    gdbfn <- paste0(gdbfn, ".gdb")
 #  }

@@ -17,9 +17,15 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export DBtestSQLite
-DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE, 
-	outfolder=NULL, showlist=TRUE, returnpath=TRUE, createnew=TRUE,
-	stopifnull=FALSE, overwrite=TRUE) {
+DBtestSQLite <- function(SQLitefn = NULL, 
+                         gpkg = FALSE, 
+                         dbconnopen = FALSE, 
+                         outfolder = NULL, 
+                         showlist = TRUE, 
+                         returnpath = TRUE, 
+                         createnew = TRUE, 
+                         stopifnull = FALSE, 
+                         overwrite = TRUE) {
   ## DESCRIPTION: 
   ## Test SQLite connection (SQLite or Geopackage database)
   ## ARGUMENTS:
@@ -34,6 +40,16 @@ DBtestSQLite <- function(SQLitefn=NULL, gpkg=FALSE, dbconnopen=FALSE,
     message("accessing SQLite databases requires package RSQLite")
   }
 
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% names(formals(DBtestSQLite)))) {
+    miss <- input.params[!input.params %in% formals(DBtestSQLite)]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   ## Check gpkg
   dbext <- ifelse(gpkg, ".gpkg", ".db")
 

@@ -268,49 +268,78 @@
 #'   MODest$est
 #' 
 #' @export modGBratio
-modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE", 
-	landarea="FOREST", pcfilter=NULL, estvarn=NULL, estvarn.filter=NULL, 
-	estvard=NULL, estvard.filter=NULL, rowvar=NULL, colvar=NULL, sumunits=TRUE,
-	returntitle=FALSE, savedata=FALSE, table_opts=NULL, 
-	title_opts=NULL, savedata_opts=NULL, gui=FALSE, ...){
+modGBratio <- function(GBpopdat, 
+                       estseed = "none", 
+                       ratiotype = "PERACRE", 
+                       landarea = "FOREST", 
+                       pcfilter = NULL, 
+                       estvarn = NULL, 
+                       estvarn.filter = NULL, 
+                       estvard = NULL, 
+                       estvard.filter = NULL, 
+                       rowvar = NULL, 
+                       colvar = NULL, 
+                       sumunits = TRUE, 
+                       returntitle = FALSE, 
+                       savedata = FALSE, 
+                       table_opts = NULL, 
+                       title_opts = NULL, 
+                       savedata_opts = NULL, 
+                       gui = FALSE, 
+                       ...){
 
   ##################################################################################
   ## DESCRIPTION: 
   ## Generates per-acre or per-tree estimates by domain using ratio estimators
   ##################################################################################
 
- 
-  ## Check input parameters
-  input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::modGBratio)),
-		names(formals(FIESTA::modGBpop))) 
-  if (!all(input.params %in% formallst)) {
-    miss <- input.params[!input.params %in% formallst]
-    stop("invalid parameter: ", toString(miss))
-  }
-
+  
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0 && is.null(GBpopdat)) {
     gui <- TRUE
   } 
-
+  
   ## If gui.. set variables to NULL
   if (gui) { 
     tree=landarea=strvar=areavar=sumunits=adj=strata=getwt=cuniqueid=ACI=
-	tuniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
+      tuniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
     #if (!row.FIAname) row.FIAname <- NULL 
     #if (!col.FIAname) col.FIAname <- NULL  
   }
+  
+  ## INITIALIZE SETTINGS
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE) 
+  rowcol.total <- TRUE
+  esttype <- "RATIO"
+  parameters <- FALSE
+  returnlst <- list()
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=rowvar.filter=colvar.filter=
-	variable <- NULL
+    variable <- NULL
   rawdata <- TRUE
   
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+ 
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(modGBratio)),
+		names(formals(modGBpop))) 
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
   ## Check parameter lists
-  pcheck.params(input.params, table_opts=table_opts, savedata_opts=savedata_opts)
+  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
+                savedata_opts=savedata_opts)
   
-  
+
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
   
@@ -356,21 +385,11 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
     }
   }
 
-  ###################################################################################
-  ## INITIALIZE SETTINGS
-  ###################################################################################
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
-  rowcol.total <- TRUE
-  esttype <- "RATIO"
-  parameters <- FALSE
-  returnlst <- list()
 
-  ###################################################################################
-  ## Check data and generate population information 
-  ###################################################################################
-
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 	                "tuniqueid", "ACI.filter", "unitarea", "unitvar", "stratalut",
                   "strvar", "plotsampcnt", "condsampcnt")
@@ -610,13 +629,13 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
     ## Get estimate for total
     if (!is.null(tdomvar)) {
       tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvarn.name]
+                        by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvarn.name]
       cdomdattot <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvard.name]   
+                        by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=estvard.name]   
       tdomdattot <- merge(tdomdattot, cdomdattot, by=c(strunitvars, cuniqueid, "TOTAL"))
     } else {
       tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
+                        by=c(strunitvars, cuniqueid, "TOTAL"), .SDcols=c(estvarn.name, estvard.name)]
     }
 #saveRDS(tdomdattot, "E:/workspace/FIESTA/FIESTA_MA/data_v1/tdomdattot_volcf_ndead_dlive.rds")
 #saveRDS(stratalut, "E:/workspace/FIESTA/FIESTA_MA/data_v1/stratalut.rds")
@@ -879,7 +898,7 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
         outfn.rawtab <- paste0(outfn.rawdat, "_", tabnm) 
         if (tabnm %in% c("plotsampcnt", "condsampcnt", "stratcombinelut")) {
           write2csv(rawtab, outfolder=rawfolder, outfilenm=outfn.rawtab, 
-			outfn.date=outfn.date, overwrite=overwrite_layer)
+                  outfn.date=outfn.date, overwrite=overwrite_layer)
         } else if (is.data.frame(rawtab)) {
           if (raw_fmt != "csv") {
             out_layer <- tabnm 
@@ -887,14 +906,13 @@ modGBratio <- function(GBpopdat, estseed="none", ratiotype="PERACRE",
             out_layer <- outfn.rawtab
           }
           datExportData(rawtab, 
-                        savedata_opts=list(outfolder=rawfolder, 
-                                           out_fmt=raw_fmt, 
-                                           out_dsn=raw_dsn, 
-                                           out_layer=out_layer,
-                                           overwrite_layer=overwrite_layer,
-                                           append_layer=append_layer,
-                                           add_layer=TRUE)
-          )
+                savedata_opts=list(outfolder=rawfolder, 
+                                    out_fmt=raw_fmt, 
+                                    out_dsn=raw_dsn, 
+                                    out_layer=out_layer,
+                                    overwrite_layer=overwrite_layer,
+                                    append_layer=append_layer,
+                                    add_layer=TRUE))
         }
       }
     }

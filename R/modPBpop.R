@@ -64,57 +64,31 @@
 #' All values must match plotid values if pnt is not NULL.
 #' @param nonsamp.pfilter String. An expression for filtering nonsampled plots.
 #' Must be R syntax.
-#' @param strata Logical. If TRUE, add data information for stratification.
 #' @param sumunits Logical. If TRUE, estimation units are combined to one table
 #' for output. Note: only available if tabtype="AREA". Acres
 #' @param unitvar String. Name of the estimation unit variable in cond or
 #' pltassgn with estimation unit assignment for each plot (e.g., 'ESTN_UNIT').
 #' If one estimation unit, set unitvar=NULL.
-#' @param unitvar2 String. Name of a second estimation unit variable in cond or
-#' pltassgn with assignment for each plot (e.g., 'STATECD').
 #' @param unitarea Numeric or DF. Total area by estimation unit. If only 1
 #' estimation unit, include number of total acreage for the area of interest or
 #' a data frame with areavar. If more than one estimation unit, provide a data
 #' frame of total area by estimation unit, including unitvar and areavar.
 #' @param areavar String. Name of acre variable in unitarea. Default="ACRES".
-#' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
-#' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
-#' @param unit.action String. What to do if number of plots in an estimation
-#' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-#' unit.action='combine', combines estimation unit to the following estimation
-#' unit in unitlut.
+#' @param strata Logical. If TRUE, add data information for stratification.
 #' @param stratalut DF/DT. If strata=TRUE, look-up table with strata
 #' proportions ('strwt') by strata (and estimation unit). To calculate 'strwt',
 #' set getwt=TRUE and getwtvar= name of variable with information to calculate
 #' weights from (e.g., pixel counts)
-#' @param strvar String. Name of strata variable in stratalut and table with
-#' strata assignment for each plot. Default="STRATUMCD".
-#' @param getwt Logical. If TRUE, calculates strata weights from stratatlut
-#' getwtvar.  If FALSE, 'strwt' variable must be in stratalut.
-#' @param getwtvar String. Name of variable in stratalut to calculate weights
-#' (strwt).  Default="P1POINTCNT".
-#' @param strwtvar String. If getwt=FALSE, name of variable in stratalut with
-#' calculated weights (Default = 'strwt').
-#' @param stratcombine Logical. If TRUE, automatically combines estimation
-#' units if less than 2 plots in any one estimation unit. See notes for more
-#' info.
-#' @param minplotnum.strat Integer. Minimum number of plots for a stratum
-#' within an estimation unit.
 #' @param pvars2keep String vector. Additional plot variables to keep in
 #' dataset.
 #' @param saveobj Logical. If TRUE, saves SApopdat object to outfolder.
 #' @param objnm String. Name of *.rda object.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param outfolder String. The outfolder to write files to. If NULL, files are
-#' written to working directory, or if gui, a window to browse.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
-#' exists.
+#' @param unit_opts List. See help(unit_options()) for a list of options.
+#' @param strata_opts List. See help(strata_options()) for a list of options.
+#' Only used when strata = TRUE. 
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savedata = TRUE.  
 #' @param PBstratdat R List object. Output data list components from
 #' FIESTA::DBgetStrata().
 #' @param gui Logical. If gui, user is prompted for parameters.
@@ -204,15 +178,32 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @export modPBpop
-modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL, 
-	pltpctvars=NULL, plt=NULL, pltassgn=NULL, puniqueid="CN", pltassgnid="CN",
- 	nonsamp.pfilter=NULL, strata=FALSE, sumunits=FALSE, unitvar=NULL, unitvar2=NULL, 
-	unitarea=NULL, areavar="ACRES", areaunits="acres", minplotnum.unit=10, 
- 	unit.action="keep", stratalut=NULL, strvar="STRATUMCD", getwt=TRUE, 
-	getwtvar="P1POINTCNT", strwtvar="strwt", stratcombine=TRUE, minplotnum.strat=2, 
-	pvars2keep=NULL, saveobj=FALSE, objnm="PBpopdat", savedata=FALSE, outfolder=NULL, 
-	out_fmt="csv", out_dsn=NULL, outfn.pre=NULL, outfn.date=FALSE, overwrite_dsn=FALSE, 
-	overwrite_layer=TRUE, PBstratdat=NULL, gui=FALSE){
+modPBpop <- function(pntdat = NULL, 
+                     pltpct = NULL, 
+                     plotid = "plot_id", 
+                     pntid = NULL, 
+                     pltpctvars = NULL, 
+                     plt = NULL, 
+                     pltassgn = NULL, 
+                     puniqueid = "CN", 
+                     pltassgnid = "CN", 
+                     nonsamp.pfilter = NULL, 
+                     sumunits = FALSE, 
+                     unitvar = NULL, 
+                     unitarea = NULL, 
+                     areavar = "ACRES",
+                     strata = FALSE, 
+                     stratalut = NULL, 
+                     strvar = "STRATUMCD", 
+                     pvars2keep = NULL, 
+                     saveobj = FALSE, 
+                     objnm = "PBpopdat", 
+                     savedata = FALSE, 
+                     unit_opts = NULL,
+                     strata_opts = NULL,
+                     savedata_opts = NULL,
+                     PBstratdat = NULL, 
+                     gui = FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -231,14 +222,7 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   if (gui) { 
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
-  ## Check input parameters
-#  input.params <- names(as.list(match.call()))[-1]
-#  formallst <- names(formals(FIESTA::modPBpop))
-#  if (!all(input.params %in% formallst)) {
-#    miss <- input.params[!input.params %in% formallst]
-#    stop("invalid parameter: ", toString(miss))
-#  }
- 
+
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt <- NULL
 
@@ -248,6 +232,60 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   on.exit(options(options.old), add=TRUE) 
   auxvars <- NULL
 
+  
+  # Check input parameters
+   input.params <- names(as.list(match.call()))[-1]
+   formallst <- names(formals(modPBpop))
+   if (!all(input.params %in% formallst)) {
+     miss <- input.params[!input.params %in% formallst]
+     stop("invalid parameter: ", toString(miss))
+   }
+
+  ## Check parameter lists
+  pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
+                savedata_opts=savedata_opts)
+  
+  
+  ## Set unit defaults
+  unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
+  
+  for (i in 1:length(unit_defaults_list)) {
+    assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied unit values
+  if (length(unit_opts) > 0) {
+    for (i in 1:length(unit_opts)) {
+      assign(names(unit_opts)[[i]], unit_opts[[i]])
+    }
+  }
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  ## Set strata defaults
+  strata_defaults_list <- formals(FIESTA::strata_options)[-length(formals(FIESTA::strata_options))]
+  
+  for (i in 1:length(strata_defaults_list)) {
+    assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
+  }
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
@@ -259,14 +297,17 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ## Check output
   ########################################################
   if (savedata || saveobj) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+            add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
-    overwrite_dsn <- outlst$overwrite_dsn
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   } 
 
     if (!is.null(PBstratdat)) {
@@ -296,10 +337,14 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
   ###################################################################################
   unitcombine <- ifelse(unit.action == "combine", TRUE, FALSE)
   popcheck <- check.popdataPB(gui=gui, pnt=pntdat, pltpct=pltpct, pltpctvars=pltpctvars, 
-	plt=plt, pltassgn=pltassgn, plotid=plotid, pntid=pntid, puniqueid=puniqueid, 
-	pltassgnid=pltassgnid, nonsamp.pfilter=nonsamp.pfilter, unitvar=unitvar, 
-	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, areaunits=areaunits, 	unit.action=unit.action, auxvars=auxvars, strata=strata, strvar=strvar, 
-	stratcombine=stratcombine, pvars2keep=pvars2keep, sumunits=sumunits)
+                      plt=plt, pltassgn=pltassgn, plotid=plotid, pntid=pntid, 
+                      puniqueid=puniqueid, pltassgnid=pltassgnid, 
+                      nonsamp.pfilter=nonsamp.pfilter, 
+                      unitvar=unitvar, unitvar2=unitvar2, 
+                      unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
+                      unit.action=unit.action, auxvars=auxvars, 
+                      strata=strata, strvar=strvar, stratcombine=stratcombine, 
+                      pvars2keep=pvars2keep, sumunits=sumunits)
   PBx <- popcheck$PBx
   pltassgnx <- popcheck$pltassgnx
   plotid <- popcheck$plotid
@@ -367,25 +412,54 @@ modPBpop <- function(pntdat=NULL, pltpct=NULL, plotid="plot_id", pntid=NULL,
 
   if (saveobj) {
     objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
-		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
+                  overwrite=overwrite_layer, outfn.pre=outfn.pre, 
+                  outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
 
   if (savedata) {
-    datExportData(PBx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="PBx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
- 
-    datExportData(pltassgnx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(unitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="unitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(stratalut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="stratalut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
+    datExportData(PBx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="PBx",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+   
+    datExportData(pltassgnx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="pltassgn",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(unitarea, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="unitarea",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(stratalut, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="stratalut",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
   }
 
   return(returnlst)

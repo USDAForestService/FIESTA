@@ -32,30 +32,41 @@
 #' 
 #' 
 #' @export DBgetCSV
-DBgetCSV <- function(DBtable, states=NULL, returnDT=FALSE, 
-			stopifnull=TRUE, noIDate=TRUE) {
+DBgetCSV <- function(DBtable, 
+                     states = NULL, 
+                     returnDT = FALSE, 
+                     stopifnull = TRUE, 
+                     noIDate = TRUE) {
   # DESCRIPTION: Import data tables from FIA Datamart
 
   # Stop if no arguments passed. No GUI available for this function
   if (nargs() == 0) {
     stop("must include DBtable")
   }
+  
+  ## Set global variables
+  ZIP <- TRUE
+  
+  ## Set URL where data files are
+  downloadfn <- "https://apps.fs.usda.gov/fia/datamart/CSV/"
+
+  
+    
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
 
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% names(formals(FIESTA::DBgetCSV)))) {
-    miss <- input.params[!input.params %in% formals(FIESTA::DBgetCSV)]
+  if (!all(input.params %in% names(formals(DBgetCSV)))) {
+    miss <- input.params[!input.params %in% formals(DBgetCSV)]
     stop("invalid parameter: ", toString(miss))
   }
 
 
-  ## Set URL where data files are
-  downloadfn <- "https://apps.fs.usda.gov/fia/datamart/CSV/"
-
   ###################################################################
-  ## CHECK PARAMETERS
+  ## CHECK PARAMETER INPUTS
   ###################################################################
-  ZIP <- TRUE
 
   ## Check DBtable
   if (!is.vector(DBtable) || !is.character(DBtable) || !length(DBtable) == 1) {

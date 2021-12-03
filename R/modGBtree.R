@@ -267,6 +267,37 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
   ## Generates estimates of trees by domain using non-ratio estimators.
   ##################################################################################
 
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  if (nargs() == 0 && is.null(GBpopdat)) {
+    gui <- TRUE
+  } 
+  
+  ## If gui.. set variables to NULL
+  if (gui) { 
+    landarea=strvar=areavar=sumunits=adjplot=strata=getwt=cuniqueid=ACI=
+      tuniqueid=savedata=addtitle=returntitle=rawdata=rawonly=unitvar <- NULL
+    #if (!row.FIAname) row.FIAname <- NULL 
+    #if (!col.FIAname) col.FIAname <- NULL 
+  }
+  
+  ## INITIALIZE SETTINGS
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE)
+  esttype <- "TREE"
+  parameters <- FALSE
+  returnlst <- list()
+  
+  
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
+  rawdata <- TRUE
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(modGBtree)),
@@ -275,27 +306,10 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(GBpopdat)) {
-    gui <- TRUE
-  } 
-
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    landarea=strvar=areavar=sumunits=adjplot=strata=getwt=cuniqueid=ACI=
-	tuniqueid=savedata=addtitle=returntitle=rawdata=rawonly=unitvar <- NULL
-    #if (!row.FIAname) row.FIAname <- NULL 
-    #if (!col.FIAname) col.FIAname <- NULL 
-  }
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
-  rawdata <- TRUE
   
-  print("TEST")
   ## Check parameter lists
-  pcheck.params(input.params, table_opts=table_opts, savedata_opts=savedata_opts)
+  pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
+                savedata_opts=savedata_opts)
   
   
   ## Set savedata defaults
@@ -343,21 +357,11 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
     }
   }
 
-  ###################################################################################
-  ## INITIALIZE SETTINGS
-  ###################################################################################
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
-  esttype <- "TREE"
-  parameters <- FALSE
-  returnlst <- list()
 
-
-  ###################################################################################
-  ## Check data and generate population information 
-  ###################################################################################
-
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 	                "tuniqueid", "ACI.filter", "unitarea", "unitvar", "stratalut",
                   "strvar", "plotsampcnt", "condsampcnt")
@@ -664,8 +668,8 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, rowvar), .SDcols=estvar.name]
     rowunit <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, esttype=esttype, 
-			uniqueid=tuniqueid, stratalut=stratalut2, 
-			unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
+			            uniqueid=tuniqueid, stratalut=stratalut2, 
+			            unitvar="ONEUNIT", strvar=strvar, domain=rowvar)
 
     rowunit <- add0unit(x=rowunit, xvar=rowvar, uniquex=uniquerow, 
 		unitvar="ONEUNIT", xvar.add0=row.add0)
@@ -681,8 +685,8 @@ modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(strunitvars2, tuniqueid, "TOTAL"), .SDcols=estvar.name]
     totunit <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, esttype=esttype, 
-			uniqueid=tuniqueid, stratalut=stratalut2, 
-			unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
+			            uniqueid=tuniqueid, stratalut=stratalut2, 
+			            unitvar="ONEUNIT", strvar=strvar, domain="TOTAL")
     tabs <- check.matchclass(unitacres2, totunit, "ONEUNIT")
     unitacres2 <- tabs$tab1
     totunit <- tabs$tab2

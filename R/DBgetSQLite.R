@@ -11,9 +11,20 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export DBgetSQLite
-DBgetSQLite <- function (states=NULL, outfolder=NULL) {
+DBgetSQLite <- function (states = NULL, 
+                         outfolder = NULL) {
 
 
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  input.params <- names(as.list(match.call()))[-1]
+  if (!all(input.params %in% names(formals(DBgetSQLite)))) {
+    miss <- input.params[!input.params %in% formals(DBgetSQLite)]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  
   ## Stop if no arguments passed. No GUI available for this function
   if (nargs() == 0) stop("must include states")
 

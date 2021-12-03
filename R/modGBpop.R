@@ -252,6 +252,21 @@ modGBpop <- function(popType = "VOL",
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
 
+  ## Set options
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
+  on.exit(options(options.old), add=TRUE) 
+  adjtree <- FALSE
+  nonresp=FALSE
+  substrvar=nonsamp.pfilter=nonsamp.cfilter <- NULL
+  nonsamp.vfilter.fixed <- FALSE
+  returnlst <- list()
+  
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- names(formals(modGBpop)) 
@@ -372,16 +387,10 @@ modGBpop <- function(popType = "VOL",
   }
 
   
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
-  adjtree <- FALSE
-  nonresp=FALSE
-  substrvar=nonsamp.pfilter=nonsamp.cfilter <- NULL
-  nonsamp.vfilter.fixed <- FALSE
-  returnlst <- list()
-
+  ##################################################################
+  ## CHECK PARAMETER INPUTS
+  ##################################################################
+  
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data tables?", first="YES", gui=gui, stopifnull=TRUE)
@@ -393,18 +402,17 @@ modGBpop <- function(popType = "VOL",
   ## Check output
   ########################################################
   if (savedata || saveobj) {
-    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-		overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
-		append_layer=append_layer, gui=gui)
-    out_dsn <- outlst$out_dsn
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+                  out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                  overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                  add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
     overwrite_layer <- outlst$overwrite_layer
     append_layer <- outlst$append_layer
-    if (out_fmt != "csv") {
-      outfn.date <- FALSE
-    }
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
   }
 
   ###################################################################################
@@ -616,13 +624,15 @@ modGBpop <- function(popType = "VOL",
   ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, unitvar=unitvar, 
-	unitvar2=unitvar2, unitarea=unitarea, areavar=areavar, 
-	minplotnum.unit=minplotnum.unit, unit.action=unit.action,
-	strata=strata, auxlut=stratalut, strvar=strvar,  
-	nonresp=nonresp, substrvar=substrvar, stratcombine=stratcombine, 
-	minplotnum.strat=minplotnum.strat, removeifnostrata=TRUE, getwt=getwt, 				
-	getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
+  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
+                    unitvar=unitvar, unitvar2=unitvar2, 
+                    unitarea=unitarea, areavar=areavar, 
+                    minplotnum.unit=minplotnum.unit, unit.action=unit.action, 
+                    strata=strata, auxlut=stratalut, strvar=strvar, 
+                    nonresp=nonresp, substrvar=substrvar, 
+                    stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
+                    removeifnostrata=TRUE, getwt=getwt, 
+                    getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   stratalut <- auxdat$auxlut
@@ -659,10 +669,10 @@ modGBpop <- function(popType = "VOL",
   }
   if (adj == "samp") {
     adjfacdata <- getadjfactorGB(condx=condx, treex=treef, seedx=seedf,
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
-		vcondsppx=vcondsppf, vcondstrx=vcondstrf, vuniqueid=vuniqueid, 
-		unitlut=stratalut, unitvars=unitvar, strvars=strvar, 
-		unitarea=unitarea, areavar=areavar, areawt=areawt, tpropvars=tpropvars)
+		        tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
+		        vcondsppx=vcondsppf, vcondstrx=vcondstrf, vuniqueid=vuniqueid, 
+		        unitlut=stratalut, unitvars=unitvar, strvars=strvar, 
+		        unitarea=unitarea, areavar=areavar, areawt=areawt, tpropvars=tpropvars)
     condx <- adjfacdata$condx
     stratalut <- adjfacdata$unitlut
     treef <- adjfacdata$treex
@@ -693,12 +703,12 @@ modGBpop <- function(popType = "VOL",
     returnlst$bndx <- bndx
   }
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
-	cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
-	unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
-	unitvar=unitvar, unitvars=unitvars, 
-	strata=strata, stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
-	expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-	states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+	      cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+	      unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
+	      unitvar=unitvar, unitvars=unitvars, 
+	      strata=strata, stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
+	      expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+	      states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
@@ -728,7 +738,7 @@ modGBpop <- function(popType = "VOL",
   ###################################################################################
   if (saveobj) {
     objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
-		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
+		          overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)
   } 
