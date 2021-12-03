@@ -999,7 +999,8 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
 
 
 pcheck.params <- function(input.params, strata_opts=NULL, 
-			unit_opts=NULL, table_opts=NULL, savedata_opts=NULL) {
+			unit_opts=NULL, table_opts=NULL, title_opts=NULL, 
+			savedata_opts=NULL) {
   ## DESCRIPTION: function to check input list parameters
 
   if (!is.null(strata_opts)) {
@@ -1037,7 +1038,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
   }
   if (!is.null(table_opts)) {
     if ("table_opts" %in% input.params) {
-      if (!is.list(unit_opts)) {
+      if (!is.list(table_opts)) {
         table_opts <- as.list(table_opts)
       }
       if (is.null(names(table_opts))) {
@@ -1047,6 +1048,22 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       table.params <- names(table_opts)[!names(table_opts) %in% c("formallst", "input.params")]
       if (!all(table.params %in% formallst.table)) {
         miss <- table.params[!table.params %in% formallst.table]
+        stop("invalid parameter: ", toString(miss))
+      }
+    }
+  }
+  if (!is.null(title_opts)) {
+    if ("title_opts" %in% input.params) {
+      if (!is.list(title_opts)) {
+        title_opts <- as.list(title_opts)
+      }
+      if (is.null(names(title_opts))) {
+        stop("invalid title_opts... see title_options()")
+      }
+      formallst.title <- names(formals(FIESTA::title_options))[-length(formals(FIESTA::title_options))]
+      title.params <- names(title_opts)[!names(title_opts) %in% c("formallst", "input.params")]
+      if (!all(title.params %in% formallst.title)) {
+        miss <- title.params[!title.params %in% formallst.title]
         stop("invalid parameter: ", toString(miss))
       }
     }

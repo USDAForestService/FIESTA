@@ -427,14 +427,15 @@ modSApop <- function(popType="VOL",
   ## Applies plot and condition filters
   ###################################################################################
   popcheck <- check.popdata(gui=gui, module="SA", popType=popType, 
- 	tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
-	pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
-	evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
-	intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
-	nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
-	unitarea=dunitarea, areavar=areavar, areaunits=areaunits, unitvar=dunitvar, 
-	unitvar2=dunitvar2, unit.action=dunit.action, prednames=prednames, 
-	predfac=predfac, pvars2keep=pvars2keep, cvars2keep=cvars2keep)
+                  tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
+                  pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
+                  evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
+                  intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
+                  nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
+                  unitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
+                  unitvar=dunitvar, unitvar2=dunitvar2, unit.action=dunit.action, 
+                  prednames=prednames, predfac=predfac, 
+                  pvars2keep=pvars2keep, cvars2keep=cvars2keep)
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
@@ -475,11 +476,11 @@ modSApop <- function(popType="VOL",
   ## - if stratcombine=TRUE, combines strata classes to reach minplotnum.strat. 
   ## - if dunit.action='combine', combines estimation units to reach minplotnum.unit.
   ###################################################################################
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA",
-		auxlut=dunitzonal, prednames=prednames, predfac=predfac, makedummy=TRUE,
-		unitarea=dunitarea, unitvar=dunitvar, areavar=areavar, 
-		minplotnum.unit=minplotnum.unit, unit.action=dunit.action,
-		auxtext="dunitlut", removetext="dunitarea", standardize=TRUE)  
+  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA", 
+                    auxlut=dunitzonal, prednames=prednames, predfac=predfac, makedummy=TRUE, 
+                    unitarea=dunitarea, unitvar=dunitvar, areavar=areavar, 
+                    minplotnum.unit=minplotnum.unit, unit.action=dunit.action, 
+                    auxtext="dunitlut", removetext="dunitarea", standardize=TRUE)  
   pltassgnx <- setDT(auxdat$pltx)
   dunitarea <- auxdat$unitarea
   dunitvar <- auxdat$unitvar
@@ -534,12 +535,13 @@ modSApop <- function(popType="VOL",
 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(condx=as.data.frame(condx), 
-		pltcondx=as.data.frame(pltcondx), cuniqueid=cuniqueid, 
-		condid=condid, ACI.filter=ACI.filter, 
-		dunitarea=as.data.frame(dunitarea), areavar=areavar, areaunits=areaunits, 
-		dunitvar=dunitvar, dunitlut=as.data.frame(dunitlut), prednames=prednames, 
-		predfac=predfac, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-		states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+		  pltcondx=as.data.frame(pltcondx), cuniqueid=cuniqueid, 
+		  condid=condid, ACI.filter=ACI.filter, 
+		  dunitarea=as.data.frame(dunitarea), areavar=areavar, areaunits=areaunits, 
+		  dunitvar=dunitvar, dunitlut=as.data.frame(dunitlut), 
+		  prednames=prednames, predfac=predfac, 
+		  plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+		  states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- as.data.frame(treef)
@@ -558,39 +560,82 @@ modSApop <- function(popType="VOL",
   } 
 
   if (savedata) {
-    datExportData(condx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="condx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(pltcondx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcondx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    datExportData(condx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="condx",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(pltcondx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="pltcondx",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
 
     if (!is.null(treef)) {
-      datExportData(treef, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="treex", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(treef, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="treex",
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                add_layer=TRUE))
     }
     if (!is.null(seedf)) {
-      datExportData(seedf, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seedx", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+      datExportData(seedf, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="seedx",
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                add_layer=TRUE))
     }
-
-    datExportData(pltassgnx, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltassgn", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
-    datExportData(dunitarea, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitarea", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer)
-    datExportData(dunitlut, outfolder=outfolder, 
-		out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dunitlut", 
-		outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-		add_layer=TRUE, append_layer=append_layer)
+    
+    datExportData(pltassgnx, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="pltassgn",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(dunitarea, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="dunitarea",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+    datExportData(dunitlut, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="dunitlut",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
   }
 
   return(returnlst)
