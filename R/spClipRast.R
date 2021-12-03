@@ -107,7 +107,7 @@ spClipRast <- function(rast,
                        compress = NULL, 
                        outfolder = NULL,
                        outfn = "rastclip", 
-                       out_layer.pre = NULL, 
+                       outfn.pre = NULL, 
                        outfn.date = FALSE, 
                        overwrite = FALSE) {
   

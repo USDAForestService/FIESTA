@@ -594,8 +594,10 @@ spGetAuxiliary <- function(xyplt,
                 rastlst=rastlst.catfn, 
 		            interpolate=FALSE, var.name=rastlst.cat.name, 
 		            rast.NODATA=rastlst.cat.NODATA,
-		            keepNA=keepNA, exportNA=exportNA, outfolder=outfolder, 
-		            overwrite_layer=overwrite_layer)
+		            keepNA=keepNA, exportNA=exportNA, 
+		            savedata_opts = list(outfolder=outfolder,
+		                                 overwrite_layer=overwrite_layer)
+		            )
     sppltx <- extdat.rast.cat$sppltext
     prednames.cat <- extdat.rast.cat$outnames
     inputdf.cat <- extdat.rast.cat$inputdf
