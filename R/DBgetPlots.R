@@ -2343,109 +2343,182 @@ DBgetPlots <- function (states = NULL,
         if (!is.null(xyplt)) {
           index.unique.xyplt <- NULL
           if (!append_layer) index.unique.xyplt <- "PLT_CN"
-          datExportData(xyplt, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer=xynm, 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.xyplt, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+          datExportData(xyplt, 
+              savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer=xynm,
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  add_layer=TRUE,
+                                  index.unique=index.unique.xyplt)) 
         }
       }  
  
       if (savedata && !is.null(spconddatx)) {
         index.unique.spconddat <- NULL
         if (!append_layer) index.unique.spconddat <- "PLT_CN"
-        datExportData(spconddat, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="spconddat", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.spconddat, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(spconddat, 
+              savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer="spconddat",
+                                  outfn.pre=outfn.pre, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  outfn.date=outfn.date, 
+                                  add_layer=TRUE,
+                                  index.unique=index.unique.spconddat)) 
       }
       if (savedata && !is.null(pltx)) {
         index.unique.pltx <- NULL
         if (i == 1) index.unique.pltx <- "CN"
-        datExportData(pltx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="plot", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.pltx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(pltx, 
+              savedata_opts=list(outfolder=outfolder, 
+                                    out_fmt=out_fmt, 
+                                    out_dsn=out_dsn, 
+                                    out_layer="plot",
+                                    outfn.pre=outfn.pre, 
+                                    overwrite_layer=overwrite_layer,
+                                    append_layer=append_layer,
+                                    outfn.date=outfn.date, 
+                                    add_layer=TRUE,
+                                    index.unique=index.unique.pltx)) 
       }
       if (savedata && !is.null(condx)) {
         index.unique.condx <- NULL
         if (!append_layer) index.unique.condx <- c("PLT_CN", "CONDID")
-        datExportData(condx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="cond", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.condx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(condx, 
+              savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer="cond",
+                                  outfn.pre=outfn.pre, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  outfn.date=outfn.date, 
+                                  add_layer=TRUE,
+                                  index.unique=index.unique.condx)) 
       }
       if (savedata && !is.null(lulcx)) {
         index.unique.lulcx <- NULL
         if (!append_layer) index.unique.lulcx <- c("PLT_CN", "CONDID")
-        datExportData(lulcx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="lulc", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.lulcx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(lulcx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="lulc",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE.
+                                index.unique=index.unique.lulcx)) 
       } 
       if ((savedata || !treeReturn) && !is.null(treex)) {
         index.unique.treex <- NULL
         if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
-        datExportData(treex, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="tree", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.treex, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(treex, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="tree",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE,
+                                index.unique=index.unique.treex)) 
       }
       if (savedata && !is.null(seedx)) {
         index.unique.seedx <- NULL
         if (!append_layer) index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
-        datExportData(seedx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="seed", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.seedx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(seedx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="seed",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE,
+                                index.unique=index.unique.seedx)) 
       } 
       if (savedata && !is.null(vsubpsppx)) {
         index.unique.vsubpsppx <- NULL
         if (!append_layer) index.unique.vsubpsppx <- c("PLT_CN", "CONDID")
-        datExportData(vsubpsppx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vsubpspp", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.vsubpsppx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(vsubpsppx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="vsubpspp",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE,
+                                index.unique=index.unique.vsubpsppx)) 
 
         index.unique.vsubpstrx <- NULL
         if (!append_layer) index.unique.vsubpstrx <- c("PLT_CN", "CONDID")
-        datExportData(vsubpstrx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="vsubpstr", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.vsubpstrx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(vsubpstrx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="vsubpstr",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE,
+                                index.unique=index.unique.vsubpstrx)) 
       }
       if (savedata && !is.null(subpx)) {
         index.unique.subpx <- NULL
         if (!append_layer) index.unique.subpx <- "PLT_CN"
-        datExportData(subpx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="subplot", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.subpx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(subpx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="subplot",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE,
+                                index.unique=index.unique.subpx)) 
 
         index.unique.subpcx <- NULL
         if (!append_layer) index.unique.subpcx <- c("PLT_CN", "CONDID")
-        datExportData(subpcx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="subp_cond", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			index.unique=index.unique.subpcx, append_layer=append_layer,
-			outfn.pre=outfn.pre)
+        datExportData(subpcx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="subp_cond",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE,
+                                index.unique=index.unique.subpcx)) 
       }  
       if (savedata && !is.null(dwmx)) {
         index.unique.dwmx <- NULL
         if (!append_layer) index.unique.dwmx <- c("PLT_CN", "CONDID")
-        datExportData(dwmx, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="dwm_calc", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			append_layer=append_layer, outfn.pre=outfn.pre)
+        datExportData(dwmx, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="dwm_calc",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE,
+                                index.unique=index.unique.dwmx)) 
       } 
 
       if (savedata && !is.null(othertables)) {
@@ -2459,22 +2532,33 @@ DBgetPlots <- function (states = NULL,
             if (othertable == "SUBPLOT") {
               index.unique.other <- c("PLT_CN", "SUBP")
             }
-            datExportData(get(othertablexnm), outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer=tolower(othertable), 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-			index.unique=index.unique.other, append_layer=append_layer, 
-			outfn.pre=outfn.pre)
+            datExportData(get(othertablexnm), 
+                savedata_opts=list(outfolder=outfolder, 
+                                    out_fmt=out_fmt, 
+                                    out_dsn=out_dsn, 
+                                    out_layer=tolower(othertable),
+                                    outfn.pre=outfn.pre, 
+                                    overwrite_layer=overwrite_layer,
+                                    append_layer=append_layer,
+                                    outfn.date=outfn.date, 
+                                    add_layer=TRUE,
+                                    index.unique=index.unique.other))
           }
         }
       }  
       if (savedata && savePOP && !is.null(ppsax)) {
         #index.unique.ppsax <- NULL
         #if (i == 1) index.unique.ppsax <- "PLT_CN"
-        datExportData(ppsax, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pop_plot_stratum_assgn", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			append_layer=append_layer, outfn.pre=outfn.pre)
-
+        datExportData(ppsax, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="pop_plot_stratum_assgn",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE)) 
       }
     }
     if (returndata) {
@@ -2557,10 +2641,16 @@ DBgetPlots <- function (states = NULL,
  
   ## Write out plot/condition counts to comma-delimited file.
   if (savedata) {
-    datExportData(pltcnt, outfolder=outfolder, 
-			out_fmt=out_fmt, out_dsn=out_dsn, out_layer="pltcnt", 
-			outfn.date=outfn.date, overwrite_layer=overwrite_layer,
-			append_layer=append_layer, outfn.pre=outfn.pre)
+    datExportData(pltcnt, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="pltcnt",
+                            outfn.pre=outfn.pre, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            outfn.date=outfn.date, 
+                            add_layer=TRUE)) 
   }
 
 
@@ -2649,14 +2739,16 @@ DBgetPlots <- function (states = NULL,
       if (xymeasCur) {
         spxyCurnm <- paste0("spxyCur_", coords)
         assign(spxyCurnm, 
-		spMakeSpatialPoints(xyplt=get(paste0("xyCur_", coords)), 
-		xvar=xycoords[1], yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269))
+		        spMakeSpatialPoints(xyplt=get(paste0("xyCur_", coords)), 
+		              xvar=xycoords[1], yvar=xycoords[2], 
+		              xy.uniqueid="PLT_CN", xy.crs=4269))
         fiadatlst[[spxyCurnm]] <- get(spxyCurnm)
       } else {  
         spxynm <- paste0("spxy_", coords)
         assign(spxynm, 
-		spMakeSpatialPoints(xyplt=get(paste0("xy_", coords)), 
-		xvar=xycoords[1], yvar=xycoords[2], xy.uniqueid="PLT_CN", xy.crs=4269))
+		        spMakeSpatialPoints(xyplt=get(paste0("xy_", coords)), 
+		              xvar=xycoords[1], yvar=xycoords[2], 
+		              xy.uniqueid="PLT_CN", xy.crs=4269))
         fiadatlst[[spxynm]] <- get(spxynm)
       }
     } else {
