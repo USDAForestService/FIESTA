@@ -2414,7 +2414,7 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE.
+                                add_layer=TRUE,
                                 index.unique=index.unique.lulcx)) 
       } 
       if ((savedata || !treeReturn) && !is.null(treex)) {
