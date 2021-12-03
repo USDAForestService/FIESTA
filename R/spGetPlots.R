@@ -117,8 +117,7 @@
 #' SpatiaLite database.
 #' @param savexy Logical. If TRUE, save xy coordinates to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options. Only used when savedata = TRUE. If out_layer = NULL,
-#' default = 'rastext'.
+#' of options. Only used when savedata = TRUE. 
 #' @param spXYdat R list object. Output from FIESTA::spGetXY().
 #' 
 #' @return \item{xypltx}{ sf object. Input xy data clipped to boundary. }
