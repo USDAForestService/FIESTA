@@ -221,29 +221,31 @@ Bighorn National Forest
 
 ## Using output list from spGetStrata()
 GBpopdat.bh <- modGBpop(
-      plt=WYplt, 
-      cond=WYcond, 
-      tree=WYtree, 
-      seed=WYseed, 
-      GBstratdat=stratdat.bh)
+  popTabs = list(plt=WYplt, 
+                cond=WYcond, 
+                tree=WYtree, 
+                seed=WYseed),
+  stratdat=stratdat.bh)
 
 ## Get names of output list components
 names(GBpopdat.bh)
 
 ## Using output as individual parameter inputs
 GBpopdat.bh <- modGBpop(
-      plt=WYplt, 
-      cond=WYcond, 
-      tree=WYtree, 
-      seed=WYseed, 
-      pltassgn=pltassgn.bh, 
-      pltassgnid="CN", 
-      unitvar=unitvar.bh, 
-      unitarea=unitarea.bh, 
-      areavar=areavar.bh, 
-      stratalut=stratalut.bh, 
-      strvar=strvar.bh, 
-      getwt=FALSE)
+  popTabs = list(
+    plt=WYplt, 
+    cond=WYcond, 
+    tree=WYtree, 
+    seed=WYseed
+  ),
+  pltassgn=pltassgn.bh, 
+  pltassgnid="CN", 
+  unitvar=unitvar.bh, 
+  unitarea=unitarea.bh, 
+  areavar=areavar.bh, 
+  stratalut=stratalut.bh, 
+  strvar=strvar.bh, 
+  strata_opts = list(getwt=FALSE))
 
 ## Get names of output list components
 names(GBpopdat.bh)
@@ -271,29 +273,34 @@ Bighorn National Forest Districts
 
 ## Using output list from spGetStrata()
 GBpopdat.bhdist <- modGBpop(
+  popTabs = list(
       plt=WYplt, 
       cond=WYcond, 
       tree=WYtree, 
-      seed=WYseed, 
-      GBstratdat=stratdat.bhdist)
+      seed=WYseed 
+  ),
+  stratdat=stratdat.bhdist)
 
 ## Get names of output list components
 names(GBpopdat.bhdist)
 
 
 GBpopdat.bhdist <- modGBpop(
-      plt=WYplt, 
-      cond=WYcond, 
-      tree=WYtree, 
-      seed=WYtree, 
-      pltassgn=pltassgn.bhdist, 
-      pltassgnid="CN", 
-      unitvar=unitvar.bhdist, 
-      unitarea=unitarea.bhdist, 
-      areavar=areavar.bhdist, 
-      stratalut=stratalut.bhdist, 
-      strvar=strvar.bhdist, 
-      getwt=FALSE)
+  popTabs = list(
+    plt=WYplt, 
+    cond=WYcond, 
+    tree=WYtree, 
+    seed=WYtree
+  ),
+  pltassgn=pltassgn.bhdist, 
+  pltassgnid="CN", 
+  unitvar=unitvar.bhdist, 
+  unitarea=unitarea.bhdist, 
+  areavar=areavar.bhdist, 
+  stratalut=stratalut.bhdist, 
+  strvar=strvar.bhdist, 
+  strata_opts = list(getwt=FALSE)
+  )
 
 ## Get names of output list components
 names(GBpopdat.bhdist)
@@ -334,14 +341,13 @@ Bighorn National Forest
 # Area by forest type and stand-size class for Bighorn National Forest
 area.bh <- modGBarea(
         GBpopdat=GBpopdat.bh, 
-        cond=WYcond, 
+        # cond=WYcond, 
         rowvar="FORTYPCD", 
-        row.FIAname=TRUE, 
         colvar="STDSZCD", 
-        col.FIAname=TRUE,
-        rawdata=TRUE, 
+        table_opts = list(row.FIAname=TRUE, 
+                          col.FIAname=TRUE),
         returntitle=TRUE, 
-        title.ref="Bighorn National Forest"
+        title_opts = list(title.ref="Bighorn National Forest")
         )
 
 ## Estimates and percent sampling error
@@ -380,14 +386,13 @@ Bighorn National Forest Districts
 area.bhdist <- modGBarea(
       GBpopdat=GBpopdat.bhdist, 
       rowvar="FORTYPGRPCD", 
-      row.FIAname=TRUE, 
-      colvar="DSTRBCD1", 
-      col.FIAname=TRUE,
-      rawdata=TRUE, 
+      colvar="DSTRBCD1",
+      table_opts = list(row.FIAname=TRUE, 
+                        col.FIAname=TRUE),
       returntitle=TRUE, 
-      title.ref="Bighorn National Forest",
+      title_opts = list(title.ref="Bighorn National Forest"),
       savedata=TRUE, 
-      outfn.pre="bhdist"
+      savedata_opts = list(outfn.pre="bhdist")
       )
 
 ## Estimates and percent sampling error
@@ -422,12 +427,11 @@ area.bh2 <- modGBarea(
       GBpopdat=GBpopdat.bh, 
       rowvar="RDDISTCD", 
       colvar="RESERVCD", 
-      row.FIAname=TRUE, 
-      col.FIAname=TRUE,
-      rawdata=TRUE, 
+      table_opts = list(row.FIAname=TRUE, 
+                        col.FIAname=TRUE,
+                        allin1=TRUE),
       returntitle=TRUE, 
-      title.ref="Bighorn National Forest",
-      allin1=TRUE)
+      title_opts = list(title.ref="Bighorn National Forest"))
 area.bh2$est
 
 
