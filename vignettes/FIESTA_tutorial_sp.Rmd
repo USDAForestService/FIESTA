@@ -150,15 +150,7 @@ Finally, you'll need to set up an "outfolder". This is just a file path to a fol
 ## Set options
 options(scipen=6)
 options(stringsAsFactors=FALSE)
-
-if (!dir.exists(paste0(getwd(),"/FIESTA"))) {
-  dir.create(paste0(getwd(),"/FIESTA"))
-}
-if (!dir.exists(paste0(getwd(),"/FIESTA", "/outfolder"))) {
-  dir.create(paste0(getwd(),"/FIESTA", "/outfolder"))
-}
-outfolder <- paste0(getwd(),"/FIESTA", "/outfolder")
-
+outfolder <- tempdir()
 ```
 
 ## Examples
@@ -800,12 +792,6 @@ rasterfile
 </details>
 
 ```{r, include = FALSE}
-# deletes old outfolder from examples
-unlink(substr(outfolder,
-              1,
-              nchar(outfolder)-10),
-       recursive = TRUE)
-
 # deletes raster data
 unlink("gadm36_USA_2_sp.rds")
 ```
