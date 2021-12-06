@@ -14,6 +14,8 @@
 #' example, PROJ.4: "+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84
 #' +datum=WGS84 +units=m +no_defs".  If NULL, and the CRS of rastfn is not
 #' defined, uses crs.default.
+#' @param rast.ref String or Raster. File name(s) with extensions, or raster
+#' object to use as reference raster.
 #' @param crs.new Coordinate Reference System. New CRS for rastfn.  EPSG:code,
 #' PROJ.4 declaration, or .prj file containing WKT. For example, PROJ.4:
 #' "+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m
@@ -86,7 +88,8 @@
 #' @export spReprojectRaster
 spReprojectRaster <- function(rastfn, 
                               bands = NULL, 
-                              crs = NULL, 
+                              crs = NULL,
+                   		   rast.ref = NULL, 
                               crs.new = NULL, 
                               res.new = NULL, 
                               bbox.new = NULL, 
@@ -145,6 +148,15 @@ spReprojectRaster <- function(rastfn,
     bands <- 1
   if (!is.numeric(bands) || any(bands > 1:rast.nbands))
     stop("invalid bands... must be integer(s) less than ", rast.nbands)
+
+  ## Check rast.ref
+  rast.ref <- getrastlst.rgdal(rast.ref, gui=gui)
+  if (!is.null(rast.ref)) {
+    info.ref <- rasterInfo(rast.ref)
+    bbox.new <- info.ref$bbox
+    crs.new <- info.ref$crs
+    res.new <- info.ref$cellsize
+  }
 
   ## Check resolution
   rast.res <- srcinfo$cellsize
@@ -252,7 +264,9 @@ spReprojectRaster <- function(rastfn,
   ##################################################################
 
   reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
-	t_srs=t_srs, s_srs=s_srs, of=of, ot=ot, r=r, co=co, dstnodata=dstnodata)
+	t_srs=t_srs, s_srs=s_srs, tr=tr, 
+	of=of, ot=ot, r=r, co=co, dstnodata=dstnodata,
+	addOptions=c("-ovr", "NONE"))
 
   return(outfilenm)
  

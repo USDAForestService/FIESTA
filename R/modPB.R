@@ -36,16 +36,30 @@
 #' row.orderby/col.orderby, and title.rowvar/title.colvar parameters. Optional.
 #' @param domvarlst String vector. A vector of variable names that can be row
 #' or column domains (codes and names). Optional.
+<<<<<<< Updated upstream
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+=======
+>>>>>>> Stashed changes
 #' @param gainloss Logical. If TRUE, a table with the difference of gain and
 #' loss along with the variance and standard error, in percent, is generated.
 #' @param gainloss.vals String vector. A vector of names for values in gainloss
 #' table.
+<<<<<<< Updated upstream
+=======
+#' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
+#' @param returntitle Logical. If TRUE, returns a character string of the title
+#' of the output data frame.
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+>>>>>>> Stashed changes
 #' @param table_opts List. See help(table_options()) for a list of
 #' options.
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
+<<<<<<< Updated upstream
 #' of options.
+=======
+#' of options. Only used when savedata = TRUE.  
+>>>>>>> Stashed changes
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modPBpop() if PBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
@@ -218,6 +232,8 @@ modPB <- function(PBpopdat = NULL,
                   ratioden="ROWVAR",
                   gainloss=FALSE, 
                   gainloss.vals=NULL, 
+                  addtitle = addtitle, 
+                  returntitle = returntitle,
                   savedata=FALSE,
                   table_opts = NULL,
                   title_opts = NULL,
@@ -244,9 +260,9 @@ modPB <- function(PBpopdat = NULL,
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
   minplotnum <- 10
-  returnPBpopdat <- TRUE 
   parameters <- FALSE
   returnlst <- list()
+  rawdata <- TRUE
   
   ## Set global variables
   TOTAL=ONEUNIT=n.total=n.strata=strwt=NBRPNTS=psq.pltdom=
@@ -271,20 +287,6 @@ modPB <- function(PBpopdat = NULL,
   pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
                 savedata_opts=savedata_opts)
   
-  
-  ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
-  
-  for (i in 1:length(savedata_defaults_list)) {
-    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied savedata values
-  if (length(savedata_opts) > 0) {
-    for (i in 1:length(savedata_opts)) {
-      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-    }
-  }
   
   ## Set table defaults
   table_defaults_list <- formals(FIESTA::table_options)[-length(formals(FIESTA::table_options))]
@@ -314,24 +316,31 @@ modPB <- function(PBpopdat = NULL,
     }
   }
   
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
- 
-  if (is.null(PBpopdat)) {
-    PBpopdat <- modPBpop(strata=strata, sumunits=sumunits, gui=gui, ...)
-  } else {
-    returnPBpopdat <- FALSE
-    if (!is.list(PBpopdat))
-      stop("PBpopdat must be a list")
-    listitems <- c("PBx", "plotid", "pntid", "getprop")
-    if (!all(listitems %in% names(PBpopdat))) {
-      items.miss <- listitems[!listitems %in% names(PBpopdat)]
-      stop("invalid PBpopdat... missing items: ", paste(items.miss, collapse=", "))
-    }   
+  if (!is.list(PBpopdat))
+    stop("PBpopdat must be a list")
+  listitems <- c("PBx", "plotid", "pntid", "getprop")
+  if (!all(listitems %in% names(PBpopdat))) {
+    items.miss <- listitems[!listitems %in% names(PBpopdat)]
+    stop("invalid PBpopdat... missing items: ", paste(items.miss, collapse=", "))
   }	
-  if (is.null(PBpopdat)) return(NULL)	
   PBx <- PBpopdat$PBx
   pltassgnx <- PBpopdat$pltassgnx
   plotid <- PBpopdat$plotid

@@ -202,28 +202,29 @@
 modGBpop <- function(popType = "VOL",
                      popTabs = popTables(),
                      popTabIDs = popTableIDs(), 
-			     	         popFilter = popFilters(),
+                     popFilter = popFilters(),
                      pltassgn = NULL,
                      pltassgnid = "PLT_CN",
                      dsn = NULL, 
-			     	         pjoinid = "CN",
-			     	         areawt = "CONDPROP_UNADJ",
-			     	         adj = "samp", 
-                     unitvar = NULL,
-			     	         unitarea = NULL, 
-			     	         areavar = "ACRES",
-				             strata = TRUE, 
-				             stratalut = NULL,
-				             strvar = "STRATUMCD",
-				             savedata = FALSE,
+                     pjoinid = "CN", 
+                     areawt = "CONDPROP_UNADJ", 
+                     adj = "samp", 
+                     unitvar = NULL, 
+                     unitarea = NULL, 
+                     areavar = "ACRES", 
+                     strata = TRUE, 
+                     stratalut = NULL, 
+                     strvar = "STRATUMCD", 
+                     savedata = FALSE,
                      unit_opts = NULL,
                      strata_opts = NULL, 
-                     savedata_opts = NULL,
-                     GBdata = NULL,
-				             pltdat = NULL,
-				             stratdat = NULL,
-				             auxdat = NULL,
-				             gui = FALSE, ...){
+                     savedata_opts = NULL, 
+                     GBdata = NULL, 
+                     pltdat = NULL, 
+                     stratdat = NULL, 
+                     auxdat = NULL, 
+                     gui = FALSE, 
+                     ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -256,6 +257,12 @@ modGBpop <- function(popType = "VOL",
   returnlst <- list()
   
   
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
+    treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
+  condid <- "CONDID"
+  
+  
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -272,10 +279,6 @@ modGBpop <- function(popType = "VOL",
   pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
 		savedata_opts=savedata_opts)
 
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-	treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
-  condid <- "CONDID"
   
   ## Set unit defaults
   unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]

@@ -167,6 +167,9 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   ## Set global variables
   x=tabx <- NULL
 
+  ## Define accepted file format extents
+  extlst <- c("shp", "csv", "sqlite", "sqlite3", "db", "db3", "gpkg", "gdb")
+
   if (!factors) {
     options.old <- options()
     options(stringsAsFactors=FALSE)
@@ -288,7 +291,6 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   }
 
   if (!is.null(tab_dsn) && !file.exists(tab_dsn)) {
-    extlst <- c("shp", "csv", "sqlite", "sqlite3", "db", "db3", "gpkg", "gdb")
     ext <- extlst[sapply(extlst, function(x, tab_dsn)
 				file.exists(paste(tab_dsn, x, sep=".")), tab_dsn)]
     if (length(ext) == 1)
@@ -340,9 +342,15 @@ pcheck.table <- function(tab=NULL, tab_dsn=NULL, tabnm=NULL, tabqry=NULL,
   } else {
     tabx <- tryCatch(data.table::fread(tab_dsn, integer64="numeric"),
 			error=function(e) {
-			print(e)
+			#print(e)
 			return(NULL)})
-    if (is.null(tabx)) stop("file format is currently not supported")
+    if (is.null(tabx)) {
+      if (!tabext %in% extlst) {
+        stop("file format is currently not supported")
+      } else {
+        stop("file is invalid or does not exist")
+      }
+    }
   }
 
   if (nullcheck) {
