@@ -111,8 +111,6 @@ Only used when multest = TRUE.}
 to outfolder for testing (pdomdat, dunitlut).}
 
 \item{...}{Parameters for modSApop() if SApopdat is NULL.}
-
-\item{colvar}{String. Name of the column domain variable in cond or tree.}
 }
 \value{
 \item{est}{ Data frame. Tree estimates and percent sampling error by

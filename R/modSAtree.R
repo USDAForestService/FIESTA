@@ -67,7 +67,6 @@
 #' @param rowvar String. Name of the row domain variable in cond or tree. If
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
-#' @param colvar String. Name of the column domain variable in cond or tree.
 #' @param variable.select Logical. If TRUE, selects useful predictors using
 #' mase:ElasticNet.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
