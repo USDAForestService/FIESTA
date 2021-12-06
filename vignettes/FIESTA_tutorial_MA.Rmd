@@ -185,7 +185,7 @@ prednames
 
 
 #### <a name="modMApop"/>modMApop()
-```{r}
+```
 ######################################################################################
 # Usage:
 # modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, 

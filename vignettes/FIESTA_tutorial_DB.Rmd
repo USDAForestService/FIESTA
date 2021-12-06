@@ -110,7 +110,7 @@ head(ref_research_station)
 
 
 #### <a name="DBqryCSV"/>DBqryCSV()
-```{r}
+```
 ####################################################################################
 # Usage:
 # DBqryCSV(sql, states = NULL, sqltables = NULL) 
