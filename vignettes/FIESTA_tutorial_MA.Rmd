@@ -74,24 +74,11 @@ FUNCTION  | DESCRIPTION
 ### EXAMPLES
 
 Set up for examples
-```
+```{r}
 # Load libraries
 library(FIESTA)
-library(mase)
 
-## If not on windows platform, set up an outfolder to output from examples
-if (.Platform$OS.type == "windows") {
-  # Set workspace to FIESTA folder (create if doesn't exist)
-  if (!file.exists("C:/FIESTA"))  {
-    dir.create("C:/FIESTA")
-  }
-  setwd("C:/FIESTA")
-
-  if (!file.exists("outfolder")) {
-    dir.create("outfolder")
-  }
-  outfolder <- "outfolder"
-}
+outfolder <- tempdir()
 
 # File names for external spatial data
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
@@ -123,7 +110,7 @@ There are several reference tables stored in FIESTA, including table variable de
 
 
 #### <a name="spGetModeldat"/>spGetModeldat()
-```
+```{r}
 ######################################################################################
 # Usage:
 # spGetModeldat(xyplt = NULL, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
@@ -198,7 +185,7 @@ prednames
 
 
 #### <a name="modMApop"/>modMApop()
-```
+```{r}
 ######################################################################################
 # Usage:
 # modMApop(MAmethod, cond, plt = NULL, tree = NULL, seed = NULL, 
@@ -227,6 +214,11 @@ prednames
 help(modMApop)
 
 ## Population data for MAmethod='HT' (Horvitz-Thompson)
+# MApopdat.ht <- modMApop(popTabs = list(tree=WYtree, cond=WYcond),
+#                         pltassgn=pltassgn, 
+#                         adj="samp", 
+#                         unitarea=unitarea,
+#                         unitvar=unitvar)
 MApopdat.ht <- modMApop(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
     adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut)
 names(MApopdat.ht)
