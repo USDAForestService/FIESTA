@@ -79,6 +79,9 @@
 #' proportions ('strwt') by strata (and estimation unit). To calculate 'strwt',
 #' set getwt=TRUE and getwtvar= name of variable with information to calculate
 #' weights from (e.g., pixel counts)
+#' @param strvar String. If strata=TRUE, name of the strata variable in
+#' stratalut and cond or pltassgn data frame with stratum assignment for each
+#' plot (Default = 'STRATUMCD').
 #' @param pvars2keep String vector. Additional plot variables to keep in
 #' dataset.
 #' @param saveobj Logical. If TRUE, saves SApopdat object to outfolder.

@@ -34,6 +34,20 @@ modSApop(
 )
 }
 \arguments{
+\item{popType}{String. Type of evaluation(s) to include in population data.
+Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
+below for descriptions of each.}
+
+\item{popTabs}{List of population tables the user would like returned.
+See help(popTabs()) for a list of options.}
+
+\item{popTabIDs}{List of unique IDs corresponding to the population tables
+that the user has requested. See help(popTabIDs()) for a list of
+options.}
+
+\item{popFilter}{List of population filters. See help(popFilters()) for a 
+list of options.}
+
 \item{pltassgn}{DF/DT, comma-separated values (CSV) file(*.csv), or layer in
 dsn, Can also be a shapefile(*.shp) with one record per plot, a spatial
 layer in dsn, or a sf R object. Plot-level assignment of estimation unit
@@ -76,6 +90,11 @@ in model.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
+\item{unit_opts}{List. See help(unit_options()) for a list of options.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options.}
+
 \item{SAdoms}{sf object. SA domains with attributes for joining.}
 
 \item{smallbnd}{sf object. small bound.}
@@ -93,96 +112,7 @@ FIESTA::spGetAuxiliary().}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
-\item{cond}{DF/DT, comma-separated values (CSV) file (*.csv), or layer in
-dsn.  The condition-level variables with one record per condition, including
-or excluding nonsampled conditions. Plot variables and strata/estimation
-unit variable(s) may be included if plt and pltassgn=NULL. See details for
-necessary variables to include.}
-
-\item{plt}{DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-Can also be a shapefile(*.shp) with one record per plot, a spatial layer in
-dsn, or a sf R object. Plot-level variables. If nonsampled plots are
-included, PLOT_STATUS_CD variable must be in table. Optional.}
-
-\item{tree}{DF/DT, comma-delimited file(*.csv), or layer in dsn. If
-esttype="TREE", tree-level variables to aggregate to condition-level. See
-details for necessary variables to include.}
-
-\item{seed}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Seedling data with one record for each seedling count.}
-
-\item{puniqueid}{String. Unique identifier of plot in plt.}
-
-\item{tuniqueid}{String. Unique identifier of plot in tree and seed.}
-
-\item{cuniqueid}{String. Unique identifier of plot in cond.}
-
-\item{condid}{String. Unique identifier of plot conditions (e.g., CONDID).
-If no condid in cond, the data are assumed to have 1 condition per plot.  A
-CONDID=1 is automatically added.}
-
-\item{invyrs}{Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).}
-
-\item{intensity}{Integer code. Code(s) indicating intensity to use for
-population.}
-
-\item{measCur}{Logical. If TRUE, extract plots with most current measurement
-for state(s).}
-
-\item{measEndyr}{Logical. If TRUE, extract plots with most current
-measurement for state(s) for years measured before measEndyr.}
-
-\item{measEndyr.filter}{Filter for extracting plots using measEndyr. Must be
-in R syntax (e.g., 'AOI == 1').}
-
-\item{ACI}{Logical. If TRUE, including All Condition Inventory (ACI) plots.
-Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
-be included.}
-
-\item{dunitvar2}{String. Name of a second domain unit variable in cond, plt,
-or pltassgn with assignment for each plot (e.g., 'STATECD').}
-
-\item{areavar}{String. Name of acre variable in unitarea. Default="ACRES".}
-
-\item{areaunits}{String. Units of areavar in unitarea ('acres', 'hectares').}
-
-\item{minplotnum.unit}{Integer. Minimum number of plots for estimation unit.}
-
-\item{dunit.action}{String. What to do if number of plots in an estimation
-unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-dunit.action='combine', combines estimation unit to the following estimation
-unit in unitlut.}
-
-\item{pvars2keep}{String vector. Additional plot variables to keep in
-dataset.}
-
-\item{cvars2keep}{String vector. Additional condition variables to keep in
-dataset.}
-
-\item{saveobj}{Logical. If TRUE, save SApopdat object to outfolder.}
-
-\item{objnm}{String. Name of *.rda object.}
-
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
-
-\item{out_fmt}{String. Format for output tables ('csv', 'sqlite', 'gpkg').}
-
-\item{out_dsn}{String. Name of database if out_fmt = c('sqlite', 'gpkg').}
-
-\item{outfn.pre}{String. Add a prefix to output name (e.g., "01").}
-
-\item{outfn.date}{Logical. If TRUE, add date to end of outfile (e.g.,
-outfn_'date'.csv).}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites the out_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the out_layer, if
-exists.}
-
-\item{append_layer}{Logical. If TRUE, appends layers to existing out_dsn or
-files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-"gdb".}
+\item{...}{For extendibility.}
 }
 \value{
 A list with population data for Small-Area estimates.

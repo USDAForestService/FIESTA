@@ -105,8 +105,6 @@ to outfolder for testing (pdomdat, dunitlut).}
 
 \item{...}{Parameters for modSApop() if SApopdat is NULL.}
 
-\item{esttype}{String. Estimation type ('TREE', 'AREA').}
-
 \item{colvar}{String. Name of the column domain variable in cond or tree.}
 }
 \value{

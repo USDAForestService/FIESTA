@@ -49,6 +49,7 @@
 #' estimator to match FIA estimates.
 #' @param prednames String vector. Name(s) of predictor variables to include in
 #' model.
+#' @param modelselect Boolean. If TRUE, variable selection occurs. 
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param landarea String. The condition-level filter for defining land area

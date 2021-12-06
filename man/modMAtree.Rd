@@ -39,6 +39,8 @@ estimator to match FIA estimates.}
 \item{prednames}{String vector. Name(s) of predictor variables to include in
 model.}
 
+\item{modelselect}{Boolean. If TRUE, variable selection occurs.}
+
 \item{landarea}{String. The condition-level filter for defining land area
 ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
 if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.}

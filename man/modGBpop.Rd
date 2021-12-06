@@ -45,6 +45,9 @@ See help(popTabs()) for a list of options.}
 that the user has requested. See help(popTabIDs()) for a list of
 options.}
 
+\item{popFilter}{List of population filters. See help(popFilters()) for a 
+list of options.}
+
 \item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited
 file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
 assignment of estimation unit and/or strata, with one record for each plot.}
@@ -106,6 +109,12 @@ FIESTA::anGBdata().}
 
 \item{pltdat}{R List object. Output data list components from
 FIESTA::spGetPlots().}
+
+\item{stratdat}{R List object. Output data list components from
+FIESTA::spGetStrata().}
+
+\item{auxdat}{R List object. Output data list components from
+FIESTA::spGetAuxiliary().}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 

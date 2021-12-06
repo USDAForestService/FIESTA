@@ -85,103 +85,17 @@ table.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
+\item{table_opts}{List. See help(table_options()) for a list of
+options.}
+
+\item{title_opts}{List. See help(title_options()) for a list of options.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options.}
+
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modPBpop() if PBpopdat is NULL.}
-
-\item{row.orderby}{String. Name of the variable to use to sort the table
-rows with.  If NULL, rowvar is used.}
-
-\item{col.orderby}{String. Name of the variable to use to sort the table
-columns with.  If NULL, colvar is used. Only use if colvar is not NULL.}
-
-\item{row.add0}{Logical. If TRUE, add the rows that have 0 values.}
-
-\item{col.add0}{Logical. If TRUE, add the columns that have 0 values.}
-
-\item{rowlut}{Data frame. A lookup table with variable codes and
-descriptions to include in rows of output table (See notes for more
-information and format).}
-
-\item{collut}{Data frame. A lookup table with variable codes and
-descriptions to include in columns of output table (See notes for more
-information and format).}
-
-\item{allin1}{Logical. If TRUE, one table with both estimates and percent
-standard error will be output: estimates (percent standard error).}
-
-\item{estround}{Integer. Number of decimal places for estimates.}
-
-\item{pseround}{Integer. Number of decimal places for percent standard
-error.}
-
-\item{estnull}{Integer or String. Value to replace NULL values for
-estimates.}
-
-\item{psenull}{Integer or String. Value to replace NULL values for percent
-standard error.}
-
-\item{divideby}{String. Conversion number for output ('hundred', 'thousand',
-'million').}
-
-\item{outfolder}{String. The outfolder to write files to. If NULL, files are
-written to working directory, or if gui, a window to browse.}
-
-\item{outfn.pre}{String. If savedata=TRUE, prefix for output files. If
-rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
-raw_fmt != 'csv').}
-
-\item{outfn.date}{Logical. If TRUE, add current date to out_dsn.}
-
-\item{addtitle}{Logical. If TRUE and savedata=TRUE, adds title to outfile.}
-
-\item{rawdata}{Logical. If TRUE, returns a list of raw data tables that are
-used for estimation (See Value). If savedata = TRUE, tables are written to
-outfolder (if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv').}
-
-\item{rawonly}{Logical. If TRUE, only rawdata are output. If dataset
-includes many estimation units, and only raw data tables are desired, it is
-more efficient to output raw data only.}
-
-\item{raw_fmt}{String. Format for output rawdata tables ('sqlite',
-'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').}
-
-\item{raw_dsn}{String. Data source name for rawdata output. If extension is
-not included, out_fmt is used. Use full path if outfolder=NULL.}
-
-\item{overwrite_dsn}{Logical. If TRUE, overwrites raw_dsn, if exists.}
-
-\item{overwrite_layer}{Logical. If TRUE, overwrites the output. If
-rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
-out_layers in raw_dsn (if raw_fmt != 'csv').}
-
-\item{append_layer}{Logical. If TRUE, and rawdata=TRUE, appends raw data to
-existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
-'csv".}
-
-\item{returntitle}{Logical. If TRUE, returns a character string of the title
-of the output data frame.}
-
-\item{title.main}{String. Complete title used for table. If title=NULL and
-addtitle=TRUE, the title.* parameters are used to generate title string.}
-
-\item{title.ref}{String. TITLE: The ending text of the table title (i.e.
-Nevada, 2004-2005).  If NULL, = "".}
-
-\item{title.rowvar}{String. TITLE: pretty name for the row domain variable.
-If NULL, = rowvar.}
-
-\item{title.colvar}{String. TITLE: pretty name for the column domain
-variable.  If NULL, = colvar.}
-
-\item{title.unitvar}{String. TITLE: pretty name for the estimation unit
-variable.  If NULL, = unitvar.}
-
-\item{title.filter}{String. TITLE, if savedata=TRUE: pretty name for the
-filters.  If NULL, = "".}
-
-\item{title.units}{String. TITLE, if savedata=TRUE: title name for area
-units.  If NULL, title.units = "acres".}
 }
 \value{
 A list with estimates with percent sampling error for rowvar (and

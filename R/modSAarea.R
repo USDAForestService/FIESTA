@@ -50,7 +50,6 @@
 #' model.
 #' @param SApackage String. Small area package to use ('JoSAE', 'sae')
 #' @param SAmethod String. Small area method to use ('unit', 'area')
-#' @param esttype String. Estimation type ('TREE', 'AREA').
 #' @param totals Logical. If TRUE, returns total estimate (mean * AREAUSED).
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').

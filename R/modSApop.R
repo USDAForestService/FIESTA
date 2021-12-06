@@ -37,23 +37,19 @@
 #' 
 #' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
 #' 
+#' @param popType String. Type of evaluation(s) to include in population data.
+#' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
+#' below for descriptions of each.
+#' @param popTabs List of population tables the user would like returned.
+#'  See help(popTabs()) for a list of options.
+#' @param popTabIDs List of unique IDs corresponding to the population tables
+#' that the user has requested. See help(popTabIDs()) for a list of
+#' options.
+#' @param popFilter List of population filters. See help(popFilters()) for a 
+#' list of options. 
 #' @param SAdoms sf object. SA domains with attributes for joining.
 #' @param smallbnd sf object. small bound.
 #' @param smallbnd.domain String. Name of attribute defining domain attribute.
-#' @param cond DF/DT, comma-separated values (CSV) file (*.csv), or layer in
-#' dsn.  The condition-level variables with one record per condition, including
-#' or excluding nonsampled conditions. Plot variables and strata/estimation
-#' unit variable(s) may be included if plt and pltassgn=NULL. See details for
-#' necessary variables to include.
-#' @param plt DF/DT, comma-separated values (CSV) file(*.csv), or layer in dsn,
-#' Can also be a shapefile(*.shp) with one record per plot, a spatial layer in
-#' dsn, or a sf R object. Plot-level variables. If nonsampled plots are
-#' included, PLOT_STATUS_CD variable must be in table. Optional.
-#' @param tree DF/DT, comma-delimited file(*.csv), or layer in dsn. If
-#' esttype="TREE", tree-level variables to aggregate to condition-level. See
-#' details for necessary variables to include.
-#' @param seed DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-#' Seedling data with one record for each seedling count.
 #' @param pltassgn DF/DT, comma-separated values (CSV) file(*.csv), or layer in
 #' dsn, Can also be a shapefile(*.shp) with one record per plot, a spatial
 #' layer in dsn, or a sf R object. Plot-level assignment of estimation unit
@@ -61,30 +57,12 @@
 #' @param dsn String. Name of database where tree, cond, and pltassgn tables
 #' reside.  The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html).
-#' @param puniqueid String. Unique identifier of plot in plt.
 #' @param pltassgnid String. Unique identifier of plot in pltassgn.
 #' @param pjoinid String. Join variable in plot to match pltassgnid. Does not
 #' need to be uniqueid. If using most current XY coordinates for plot
 #' assignments, use identifier for plot (e.g., PLOT_ID).
-#' @param tuniqueid String. Unique identifier of plot in tree and seed.
-#' @param cuniqueid String. Unique identifier of plot in cond.
-#' @param condid String. Unique identifier of plot conditions (e.g., CONDID).
-#' If no condid in cond, the data are assumed to have 1 condition per plot.  A
-#' CONDID=1 is automatically added.
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
-#' @param invyrs Integer vector. Inventory year(s) (e.g., c(2000, 2001, 2002)).
-#' @param intensity Integer code. Code(s) indicating intensity to use for
-#' population.
-#' @param measCur Logical. If TRUE, extract plots with most current measurement
-#' for state(s).
-#' @param measEndyr Logical. If TRUE, extract plots with most current
-#' measurement for state(s) for years measured before measEndyr.
-#' @param measEndyr.filter Filter for extracting plots using measEndyr. Must be
-#' in R syntax (e.g., 'AOI == 1').
-#' @param ACI Logical. If TRUE, including All Condition Inventory (ACI) plots.
-#' Removes nonsampled nonforest lands (NF_COND_STATUS_CD = 5). Tree data must
-#' be included.
 #' @param adj String. How to calculate adjustment factors for nonsampled
 #' (nonresponse) conditions based on summed proportions for by plot ('samp',
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
@@ -93,16 +71,7 @@
 #' (designcd=1).
 #' @param dunitvar String. Name of the domain unit variable in cond, plt, or
 #' pltassgn with domain unit assignment for each plot.
-#' @param dunitvar2 String. Name of a second domain unit variable in cond, plt,
-#' or pltassgn with assignment for each plot (e.g., 'STATECD').
 #' @param dunitarea Numeric or DF. Total area by domain unit.
-#' @param areavar String. Name of acre variable in unitarea. Default="ACRES".
-#' @param areaunits String. Units of areavar in unitarea ('acres', 'hectares').
-#' @param minplotnum.unit Integer. Minimum number of plots for estimation unit.
-#' @param dunit.action String. What to do if number of plots in an estimation
-#' unit is less than minplotnum.unit ('keep', 'remove' 'combine'). If
-#' dunit.action='combine', combines estimation unit to the following estimation
-#' unit in unitlut.
 #' @param dunitzonal DF/DT. Data frame with zonal auxiliary information by
 #' domain unit. For continuous data, means by domain unit; for categorical
 #' data, proportion of class by domain unit.
@@ -110,26 +79,10 @@
 #' model.
 #' @param predfac String vector. Name(s) of factor predictor variables to use
 #' in model.
-#' @param pvars2keep String vector. Additional plot variables to keep in
-#' dataset.
-#' @param cvars2keep String vector. Additional condition variables to keep in
-#' dataset.
-#' @param saveobj Logical. If TRUE, save SApopdat object to outfolder.
-#' @param objnm String. Name of *.rda object.
-#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param outfolder String. The outfolder to write files to. If NULL, files are
-#' written to working directory, or if gui, a window to browse.
-#' @param out_fmt String. Format for output tables ('csv', 'sqlite', 'gpkg').
-#' @param out_dsn String. Name of database if out_fmt = c('sqlite', 'gpkg').
-#' @param outfn.pre String. Add a prefix to output name (e.g., "01").
-#' @param outfn.date Logical. If TRUE, add date to end of outfile (e.g.,
-#' outfn_'date'.csv).
-#' @param overwrite_dsn Logical. If TRUE, overwrites the out_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the out_layer, if
-#' exists.
-#' @param append_layer Logical. If TRUE, appends layers to existing out_dsn or
-#' files if out_fmt = 'csv'. Note: currently cannot append layers if out_fmt =
-#' "gdb".
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder. 
+#' @param unit_opts List. See help(unit_options()) for a list of options.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options.
 #' @param SAdata R List object. Output data list components from
 #' FIESTA::SAdata().
 #' @param pltdat R List object. Output data list components from
@@ -137,6 +90,7 @@
 #' @param auxdat R List object. Output data list components from
 #' FIESTA::spGetAuxiliary().
 #' @param gui Logical. If gui, user is prompted for parameters.
+#' @param ... For extendibility. 
 #' @return A list with population data for Small-Area estimates.
 #' 
 #' \item{SAdomsdf}{ Data frame. Attribute table from SAdoms spatial layer.

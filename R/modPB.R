@@ -27,20 +27,8 @@
 #' rowvar=NULL.
 #' @param colvar String. Name of domain variable in pnt used for output
 #' estimation table columns. If only 1 domain, colvar=NULL.
-#' @param row.orderby String. Name of the variable to use to sort the table
-#' rows with.  If NULL, rowvar is used.
-#' @param col.orderby String. Name of the variable to use to sort the table
-#' columns with.  If NULL, colvar is used. Only use if colvar is not NULL.
 #' @param ratioden String. ("ROWVAR" or "COLVAR"). If ratio, defines whether
 #' the rowvar or colvar in estimation output table is the denominator.
-#' @param row.add0 Logical. If TRUE, add the rows that have 0 values.
-#' @param col.add0 Logical. If TRUE, add the columns that have 0 values.
-#' @param rowlut Data frame. A lookup table with variable codes and
-#' descriptions to include in rows of output table (See notes for more
-#' information and format).
-#' @param collut Data frame. A lookup table with variable codes and
-#' descriptions to include in columns of output table (See notes for more
-#' information and format).
 #' @param domlut DF/DT or comma-delimited (*.csv). Look-up table to define the
 #' variables in the pnt table with category codes (DOMCODE) and code names
 #' (DOMNAME), and to set a pretty name for the variable to use in output table
@@ -48,62 +36,16 @@
 #' row.orderby/col.orderby, and title.rowvar/title.colvar parameters. Optional.
 #' @param domvarlst String vector. A vector of variable names that can be row
 #' or column domains (codes and names). Optional.
-#' @param allin1 Logical. If TRUE, one table with both estimates and percent
-#' standard error will be output: estimates (percent standard error).
-#' @param estround Integer. Number of decimal places for estimates.
-#' @param pseround Integer. Number of decimal places for percent standard
-#' error.
-#' @param estnull Integer or String. Value to replace NULL values for
-#' estimates.
-#' @param psenull Integer or String. Value to replace NULL values for percent
-#' standard error.
-#' @param divideby String. Conversion number for output ('hundred', 'thousand',
-#' 'million').
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-#' @param outfolder String. The outfolder to write files to. If NULL, files are
-#' written to working directory, or if gui, a window to browse.
-#' @param outfn.pre String. If savedata=TRUE, prefix for output files. If
-#' rawdata=TRUE, prefix for rawdata files (if raw_fmt = 'csv') or raw_dsn (if
-#' raw_fmt != 'csv').
-#' @param outfn.date Logical. If TRUE, add current date to out_dsn.
-#' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
-#' @param rawdata Logical. If TRUE, returns a list of raw data tables that are
-#' used for estimation (See Value). If savedata = TRUE, tables are written to
-#' outfolder (if raw_fmt='csv') or raw_dsn (if raw_fmt != 'csv').
-#' @param rawonly Logical. If TRUE, only rawdata are output. If dataset
-#' includes many estimation units, and only raw data tables are desired, it is
-#' more efficient to output raw data only.
-#' @param raw_fmt String. Format for output rawdata tables ('sqlite',
-#' 'sqlite3', 'db', 'db3', 'gpkg', 'csv', 'gdb', 'shp').
-#' @param raw_dsn String. Data source name for rawdata output. If extension is
-#' not included, out_fmt is used. Use full path if outfolder=NULL.
-#' @param overwrite_dsn Logical. If TRUE, overwrites raw_dsn, if exists.
-#' @param overwrite_layer Logical. If TRUE, overwrites the output. If
-#' rawdata=TRUE, overwrites out_layer in rawdata folder (if raw_fmt = 'csv') or
-#' out_layers in raw_dsn (if raw_fmt != 'csv').
-#' @param append_layer Logical. If TRUE, and rawdata=TRUE, appends raw data to
-#' existing *.csv files (if raw_fmt = 'csv') or raw_dsn layers (if raw_fmt !=
-#' 'csv".
-#' @param returntitle Logical. If TRUE, returns a character string of the title
-#' of the output data frame.
-#' @param title.main String. Complete title used for table. If title=NULL and
-#' addtitle=TRUE, the title.* parameters are used to generate title string.
-#' @param title.ref String. TITLE: The ending text of the table title (i.e.
-#' Nevada, 2004-2005).  If NULL, = "".
-#' @param title.rowvar String. TITLE: pretty name for the row domain variable.
-#' If NULL, = rowvar.
-#' @param title.colvar String. TITLE: pretty name for the column domain
-#' variable.  If NULL, = colvar.
-#' @param title.unitvar String. TITLE: pretty name for the estimation unit
-#' variable.  If NULL, = unitvar.
-#' @param title.filter String. TITLE, if savedata=TRUE: pretty name for the
-#' filters.  If NULL, = "".
-#' @param title.units String. TITLE, if savedata=TRUE: title name for area
-#' units.  If NULL, title.units = "acres".
 #' @param gainloss Logical. If TRUE, a table with the difference of gain and
 #' loss along with the variance and standard error, in percent, is generated.
 #' @param gainloss.vals String vector. A vector of names for values in gainloss
 #' table.
+#' @param table_opts List. See help(table_options()) for a list of
+#' options.
+#' @param title_opts List. See help(title_options()) for a list of options.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options.
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modPBpop() if PBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
