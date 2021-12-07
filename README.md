@@ -230,14 +230,15 @@ interest. We can look at a summary of the population data below.
 GBpopdat <- modGBpop(popTabs = popTables(cond = FIESTA::WYcond,
                                          tree = FIESTA::WYtree,
                                          seed = FIESTA::WYseed),
-                     popTabIDs = popTableIDs(cuniqueid = "PLT_CN"),
+                     popTabIDs = popTableIDs(cond = "PLT_CN"),
                      pltassgn = FIESTA::WYpltassgn,
                      pltassgnid = "CN",
                      pjoinid = "PLT_CN",
                      unitarea = FIESTA::WYunitarea,
                      unitvar = "ESTN_UNIT",
                      strata = TRUE,
-                     strata_opts = strata_options(stratalut = FIESTA::WYstratalut))
+                     stratalut = FIESTA::WYstratalut,
+                     strata_opts = strata_options(getwt = TRUE))
 
 summary(GBpopdat)
 #>             Length Class      Mode     
