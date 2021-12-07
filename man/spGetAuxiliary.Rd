@@ -9,10 +9,10 @@ spGetAuxiliary(
   xyplt,
   xyplt_dsn = NULL,
   uniqueid = "PLT_CN",
-  dunittype = "POLY",
-  dunit_layer = NULL,
-  dunit_dsn = NULL,
-  dunitvar = "DOMAIN",
+  unittype = "POLY",
+  unit_layer = NULL,
+  unit_dsn = NULL,
+  unitvar = "DOMAIN",
   rastlst.cont = NULL,
   rastlst.cont.name = NULL,
   rastlst.cont.stat = "mean",
@@ -51,18 +51,18 @@ driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
 \item{uniqueid}{String.* Unique identifier of xyplt records.}
 
-\item{dunittype}{String. Type of spatial layer dunit_layer is ("POLY",
+\item{unittype}{String. Type of spatial layer unit_layer is ("POLY",
 "RASTER").}
 
-\item{dunit_layer}{sf R object or String. Name of the domain spatial layer.
+\item{unit_layer}{sf R object or String. Name of the domain spatial layer.
 Can be a spatial polygon object, full pathname to a shapefile, name of a
 polygon layer within a database, or a full pathname to raster file.}
 
-\item{dunit_dsn}{String. The data source name (dsn; i.e., folder or database
-name) of dunit_layer. The dsn varies by driver. See gdal OGR vector formats
+\item{unit_dsn}{String. The data source name (dsn; i.e., folder or database
+name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional.}
 
-\item{dunitvar}{String. Name of domain variable in domlayer. If NULL,
+\item{unitvar}{String. Name of domain variable in domlayer. If NULL,
 assuming one domain. An attribute names ONEUNIT is added to layer with
 value=1.}
 
@@ -138,7 +138,7 @@ exported to outfolder.}
 of options. Only used when savedata = TRUE.}
 
 \item{vars2keep}{String vector. Attributes in SAdoms, other than domvar to
-include in dunitzonal output and extract to pltassgn points.}
+include in unitzonal output and extract to pltassgn points.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
@@ -146,15 +146,15 @@ include in dunitzonal output and extract to pltassgn points.}
 }
 \value{
 \item{pltassgn}{ sf object. xyplt data with extracted values from
-rastlst*. } \item{dunitzonal}{ Data frame. Number of pixels and zonal
+rastlst*. } \item{unitzonal}{ Data frame. Number of pixels and zonal
 statistics from continuous rasters or zonal proportions from categorical
-raster for each domain (i.e., estimation unit). } \item{dunitvar}{ Data
+raster for each domain (i.e., estimation unit). } \item{unitvar}{ Data
 frame. Domain (i.e., estimation unit) name. } \item{inputdf}{ Data frame.
 Raster information input to zonal summaries. } \item{prednames}{ String
 vector. Name(s) of predictor variable(s). } \item{zonalnames}{ String
 vector. Name(s) of zonal variable(s). } \item{predfac}{ String vector.
 Name(s) of categorical (i.e. factor) variable(s). } \item{npixelvar}{
-String. Name of variable describing number of pixels. } \item{dunitarea}{
+String. Name of variable describing number of pixels. } \item{unitarea}{
 Data frame. Area by domain (i.e., estimation unit). } \item{areavar}{
 String. Name of variable describing acres in domarea. } \item{pltassgnid}{
 String. Unique identifier of plot. } \item{spxy}{ Simple feature. If
