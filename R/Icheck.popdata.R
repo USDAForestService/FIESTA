@@ -449,9 +449,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       setkeyv(pltassgnx, pltassgnid)
  
       ## Check if class of pjoinid in pltx matches class of pltassgnid in pltassgnx
-      tabs <- check.matchclass(pltx, pltassgnx, pjoinid, pltassgnid)
-      pltx <- tabs$tab1
-      pltassgnx <- tabs$tab2
+      tabchk <- check.matchclass(pltx, pltassgnx, pjoinid, pltassgnid)
+      pltx <- tabchk$tab1
+      pltassgnx <- tabchk$tab2
 
 
 #################
@@ -568,9 +568,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         }
 
         ## Check if class of puniqueid in lulcx matches class of cuniqueid in condx
-        tabs <- check.matchclass(lulcx, condx, cuniqueid, cuniqueid)
-        lulcx <- tabs$tab1
-        condx <- tabs$tab2
+        tabchk <- check.matchclass(lulcx, condx, cuniqueid, cuniqueid)
+        lulcx <- tabchk$tab1
+        condx <- tabchk$tab2
                 
         ## Check for matching unique identifiers of lulcx and condx
         lulcx <- check.matchval(lulcx, condx, cuniqueid, cuniqueid, tab1txt="lulc",
@@ -590,9 +590,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       }   
       
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
-      tabs <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
-      condx <- tabs$tab1
-      pltx <- tabs$tab2
+      tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
+      condx <- tabchk$tab1
+      pltx <- tabchk$tab2
 
       ## Check for matching unique identifiers of condx and pltx
       condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, 
@@ -630,9 +630,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       setkeyv(condx, cuniqueid)
 
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
-      tabs <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
-      condx <- tabs$tab1
-      pltx <- tabs$tab2
+      tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
+      condx <- tabchk$tab1
+      pltx <- tabchk$tab2
 
       ## Check for matching unique identifiers of condx and pltx
       condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, tab1txt="cond",
@@ -1032,9 +1032,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     setkeyv(treex, c(tuniqueid, condid))
 
     ## Check if class of tuniqueid in treex matches class of cuniqueid in condx
-    tabs <- check.matchclass(pltcondx, treex, cuniqueid, tuniqueid)
-    pltcondx <- tabs$tab1
-    treex <- tabs$tab2
+    tabchk <- check.matchclass(pltcondx, treex, cuniqueid, tuniqueid)
+    pltcondx <- tabchk$tab1
+    treex <- tabchk$tab2
 
     ## Check for missing tvars2keep 
     tmissvars <- tvars2keep[which(!tvars2keep %in% treenmlst)]
@@ -1121,9 +1121,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     setkeyv(seedx, c(tuniqueid, condid))
 
     ## Check if class of tuniqueid in seedx matches class of cuniqueid in condx
-    tabs <- check.matchclass(pltcondx, seedx, cuniqueid, tuniqueid)
-    pltcondx <- tabs$tab1
-    seedx <- tabs$tab2
+    tabchk <- check.matchclass(pltcondx, seedx, cuniqueid, tuniqueid)
+    pltcondx <- tabchk$tab1
+    seedx <- tabchk$tab2
 
     ## Check for missing tvars2keep 
     smissvars <- svars2keep[which(!svars2keep %in% seednmlst)]
@@ -1226,10 +1226,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
       if (!is.null(subplotx)) {
         ## Check if class of tuniqueid in treex matches class of cuniqueid in condx
-        tabs <- check.matchclass(subplotx, subp_condx, 
-		matchcol=c(subpuniqueid, subpid))
-        subplotx <- tabs$tab1
-        subp_condx <- tabs$tab2
+        tabchk <- check.matchclass(subplotx, subp_condx, matchcol=c(subpuniqueid, subpid))
+        subplotx <- tabchk$tab1
+        subp_condx <- tabchk$tab2
 
         cols <- c(names(subp_condx)[!names(subp_condx) %in% names(subplotx)],
 				subpuniqueid, subpid)

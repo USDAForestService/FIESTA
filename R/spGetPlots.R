@@ -1530,6 +1530,8 @@ spGetPlots <- function(bnd = NULL,
                               add_layer=TRUE)) 
     }
   } 
+  
+
 
 #  if (showsteps) {
 #    ## Set plotting margins

@@ -86,6 +86,8 @@
 #' @param predfac String vector. Name(s) of prednames that are factors (i.e.,
 #' categorical).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
+#' @param objnm String. Name of *.rds object.
 #' @param unit_opts List. See help(unit_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
@@ -196,7 +198,9 @@ modMApop <- function(popType="VOL",
 				             unitzonal = NULL,
 				             prednames = NULL,
 				             predfac = NULL,
-				             savedata = FALSE, 
+				             savedata = FALSE,
+				             saveobj = FALSE,
+				             objnm = "MApopdat",
                      unit_opts = NULL,
 				             savedata_opts = NULL,
 				             MAdata = NULL, 
@@ -355,6 +359,11 @@ modMApop <- function(popType="VOL",
   ## Check saveobj 
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+  
+  ## Check objnm
+  if (saveobj && is.null(objnm)) {
+    objnm <- "MApopdat"
+  }
 
   ## Check output
   ########################################################
@@ -692,7 +701,7 @@ modMApop <- function(popType="VOL",
   ###################################################################################
 
   if (saveobj) {
-    objfn <- getoutfn(outfn="MApopdat", outfolder=outfolder, 
+    objfn <- getoutfn(outfn=objnm, outfolder=outfolder, 
 		      overwrite=overwrite_layer, outfn.date=outfn.date, ext="rda")
     save(returnlst, file=objfn)
     message("saving object to: ", objfn)

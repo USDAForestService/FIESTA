@@ -80,6 +80,8 @@
 #' @param predfac String vector. Name(s) of factor predictor variables to use
 #' in model.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder. 
+#' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
+#' @param objnm String. Name of *.rds object.
 #' @param unit_opts List. See help(unit_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options.
@@ -154,6 +156,8 @@ modSApop <- function(popType="VOL",
 				             prednames = NULL,
 				             predfac = NULL,
 				             savedata = FALSE,
+				             saveobj = FALSE,
+				             objnm = "SApopdat",
 				             unit_opts = NULL,
 				             savedata_opts = NULL,
 				             SAdoms = NULL, 
@@ -274,6 +278,11 @@ modSApop <- function(popType="VOL",
   ## Check saveobj 
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+  
+  ## Check objnm
+  if (saveobj && is.null(objnm)) {
+    objnm <- "SApopdat"
+  }
 
   ## Check output
   ########################################################

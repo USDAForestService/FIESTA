@@ -96,6 +96,8 @@
 #' stratalut and cond or pltassgn data frame with stratum assignment for each
 #' plot (Default = 'STRATUMCD').
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
+#' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
+#' @param objnm String. Name of *.rds object.
 #' @param unit_opts List. See help(unit_options()) for a list of options.
 #' @param strata_opts List. See help(strata_options()) for a list of options.
 #' Only used when strata = TRUE. 
@@ -216,6 +218,8 @@ modGBpop <- function(popType = "VOL",
                      stratalut = NULL, 
                      strvar = "STRATUMCD", 
                      savedata = FALSE,
+                     saveobj = FALSE, 
+                     objnm = "GBpopdat",
                      unit_opts = NULL,
                      strata_opts = NULL, 
                      savedata_opts = NULL, 
@@ -393,6 +397,11 @@ modGBpop <- function(popType = "VOL",
   ## Check saveobj 
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+  
+  ## Check objnm
+  if (saveobj && is.null(objnm)) {
+    objnm <- "GBpopdat"
+  }
  
   ## Check output
   ########################################################
@@ -455,9 +464,9 @@ modGBpop <- function(popType = "VOL",
       popTabIDs <- pltdat$tabIDs
       pjoinid <- pltdat$pjoinid
       names(popTabs) <- sapply(names(popTabs), function(x) 
-		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+		      {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
       names(popTabIDs) <- sapply(names(popTabIDs), function(x) 
-		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+		      {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
     }
     if (!is.null(stratdat)) {
       list.items <- c("pltassgn", "unitarea", "unitvar")
