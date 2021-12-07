@@ -20,15 +20,15 @@
 #' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
 #' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
 #' @param uniqueid String.* Unique identifier of xyplt records.
-#' @param dunittype String. Type of spatial layer dunit_layer is ("POLY",
+#' @param unittype String. Type of spatial layer unit_layer is ("POLY",
 #' "RASTER").
-#' @param dunit_layer sf R object or String. Name of the domain spatial layer.
+#' @param unit_layer sf R object or String. Name of the domain spatial layer.
 #' Can be a spatial polygon object, full pathname to a shapefile, name of a
 #' polygon layer within a database, or a full pathname to raster file.
-#' @param dunit_dsn String. The data source name (dsn; i.e., folder or database
-#' name) of dunit_layer. The dsn varies by driver. See gdal OGR vector formats
+#' @param unit_dsn String. The data source name (dsn; i.e., folder or database
+#' name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html). Optional.
-#' @param dunitvar String. Name of domain variable in domlayer. If NULL,
+#' @param unitvar String. Name of domain variable in domlayer. If NULL,
 #' assuming one domain. An attribute names ONEUNIT is added to layer with
 #' value=1.
 #' @param rastlst.cont String vector or list. A list of raster(s) with
@@ -80,20 +80,20 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
-#' include in dunitzonal output and extract to pltassgn points.
+#' include in unitzonal output and extract to pltassgn points.
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Other parameters for spMakeSpatialPoints.
 #'
 #' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
-#' rastlst*. } \item{dunitzonal}{ Data frame. Number of pixels and zonal
+#' rastlst*. } \item{unitzonal}{ Data frame. Number of pixels and zonal
 #' statistics from continuous rasters or zonal proportions from categorical
-#' raster for each domain (i.e., estimation unit). } \item{dunitvar}{ Data
+#' raster for each domain (i.e., estimation unit). } \item{unitvar}{ Data
 #' frame. Domain (i.e., estimation unit) name. } \item{inputdf}{ Data frame.
 #' Raster information input to zonal summaries. } \item{prednames}{ String
 #' vector. Name(s) of predictor variable(s). } \item{zonalnames}{ String
 #' vector. Name(s) of zonal variable(s). } \item{predfac}{ String vector.
 #' Name(s) of categorical (i.e. factor) variable(s). } \item{npixelvar}{
-#' String. Name of variable describing number of pixels. } \item{dunitarea}{
+#' String. Name of variable describing number of pixels. } \item{unitarea}{
 #' Data frame. Area by domain (i.e., estimation unit). } \item{areavar}{
 #' String. Name of variable describing acres in domarea. } \item{pltassgnid}{
 #' String. Unique identifier of plot. } \item{spxy}{ Simple feature. If
@@ -135,10 +135,10 @@
 spGetAuxiliary <- function(xyplt, 
                            xyplt_dsn = NULL, 
                            uniqueid = "PLT_CN", 
-                           dunittype = "POLY", 
-                           dunit_layer = NULL, 
-                           dunit_dsn = NULL, 
-                           dunitvar = "DOMAIN", 
+                           unittype = "POLY", 
+                           unit_layer = NULL, 
+                           unit_dsn = NULL, 
+                           unitvar = "DOMAIN", 
                            rastlst.cont = NULL, 
                            rastlst.cont.name = NULL, 
                            rastlst.cont.stat = "mean", 
@@ -170,11 +170,11 @@ spGetAuxiliary <- function(xyplt,
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
   ##		Model-based (Small Area) Estimation. The major steps are as follows:
   ## 1) Check parameters 
-  ## 2) Extract point values from dunit_layer
+  ## 2) Extract point values from unit_layer
   ## 3) Set up output data structures
   ## 4) Extract point values and get zonal statistics from continuous raster layers
   ## 5) Extract point values and get zonal statistics from categorical raster layers
-  ## 6) Get total acres from dunit_layer (if areacalc=TRUE)
+  ## 6) Get total acres from unit_layer (if areacalc=TRUE)
   ##################################################################################
 
 
@@ -247,34 +247,34 @@ spGetAuxiliary <- function(xyplt,
   }
   sppltx.names <- names(sf::st_drop_geometry(sppltx))
 
-  ## Check dunittype
+  ## Check unittype
   ###################################################################
-  dunittypelst <- c("POLY", "RASTER") 
-  dunittype <- pcheck.varchar(var2check=dunittype, varnm="dunittype", gui=gui,
-	checklst=dunittypelst, caption="Estimation unit type?", stopifnull=TRUE)
+  unittypelst <- c("POLY", "RASTER") 
+  unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", gui=gui,
+	checklst=unittypelst, caption="Estimation unit type?", stopifnull=TRUE)
 
-  ## Check dunit_layer and dunitvar
+  ## Check unit_layer and unitvar
   ###################################################################
-  if (dunittype == "POLY") {
-    ## Check dunit_layer
-    dunit_layerx <- pcheck.spatial(layer=dunit_layer, dsn=dunit_dsn, gui=gui, 
+  if (unittype == "POLY") {
+    ## Check unit_layer
+    unit_layerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
 		caption="Domain spatial polygons?", stopifnull=TRUE)
 
-    ## Check dunitvar
-    dunitvar <- pcheck.varchar(var2check=dunitvar, varnm="dunitvar", gui=gui, 
-		checklst=names(dunit_layerx), caption="Domain variable", 
-		warn=paste(dunitvar, "not in dunit_layer"))
-    if (is.null(dunitvar)) {
-      dunitvar <- "ONEUNIT"
-      dunit_layerx[[dunitvar]] <- 1
+    ## Check unitvar
+    unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
+		checklst=names(unit_layerx), caption="Domain variable", 
+		warn=paste(unitvar, "not in unit_layer"))
+    if (is.null(unitvar)) {
+      unitvar <- "ONEUNIT"
+      unit_layerx[[unitvar]] <- 1
     }
 
-    varsmiss <- vars2keep[which(!vars2keep %in% names(dunit_layerx))]
+    varsmiss <- vars2keep[which(!vars2keep %in% names(unit_layerx))]
     if (length(varsmiss) > 0) {
       stop("missing variables: ", paste(varsmiss, collapse=", "))
     }
   } else {
-    stop("under construction... please convert dunit_layer to POLY")
+    stop("under construction... please convert unit_layer to POLY")
   }
 
   ## Check continuous rasters
@@ -282,8 +282,8 @@ spGetAuxiliary <- function(xyplt,
   rastlst.contfn <- tryCatch(suppressWarnings(getrastlst.rgdal(rastlst.cont, 
 	rastfolder, quiet=TRUE, gui=gui)),
      	 	error=function(e) {
-			message(e, "\n")
-			return("stop") })
+			      message(e, "\n")
+			      return("stop") })
   if (!is.null(rastlst.contfn) && rastlst.contfn == "stop") {
     stop()
   }
@@ -344,8 +344,8 @@ spGetAuxiliary <- function(xyplt,
   rastlst.catfn <- tryCatch(suppressWarnings(getrastlst.rgdal(rastlst.cat, 
 	rastfolder, quiet=TRUE, gui=gui)),
      	 	error=function(e) {
-			message(e, "\n")
-			return("stop") })
+			      message(e, "\n")
+			      return("stop") })
   if (!is.null(rastlst.catfn) && rastlst.catfn == "stop") {
     stop()
   }
@@ -365,8 +365,7 @@ spGetAuxiliary <- function(xyplt,
       if (length(rastlst.cat.NODATA) == 1 && nlayers.cat > 1) {
         message("using same rastlst.cat.NODATA value for each raster in rastlst.cat")
         rastlst.cat.NODATA <- rep(rastlst.cat.NODATA, nlayers.cat)
-      } else if (length(rastlst.cat.NODATA) > 1 && 
-		length(rastlst.cat.NODATA) != nlayers.cat) {
+      } else if (length(rastlst.cat.NODATA) > 1 && length(rastlst.cat.NODATA) != nlayers.cat) {
         stop("rastlst.cat.NODATA must be same length as rastlst.cat: ", nlayers.cat)
       }
     }
@@ -438,13 +437,13 @@ spGetAuxiliary <- function(xyplt,
   ##################################################################
 
   #############################################################################
-  ## 1) Extract values from dunit_layer
+  ## 1) Extract values from unit_layer
   #############################################################################
-  dunitarea <- NULL
-  polyvarlst <- unique(c(dunitvar, vars2keep))[!unique(c(dunitvar, vars2keep)) %in% names(sppltx)]
-  if (!dunitvar %in% names(sppltx)) { 
+  unitarea <- NULL
+  polyvarlst <- unique(c(unitvar, vars2keep))[!unique(c(unitvar, vars2keep)) %in% names(sppltx)]
+  if (!unitvar %in% names(sppltx)) { 
       ## Extract values of polygon layer to points
-    extpoly <- tryCatch(spExtractPoly(xyplt=sppltx, polyvlst=dunit_layerx, 
+    extpoly <- tryCatch(spExtractPoly(xyplt=sppltx, polyvlst=unit_layerx, 
 		uniqueid=uniqueid, polyvarlst=polyvarlst, 
 		keepNA=FALSE, exportNA=exportNA),
      	 error=function(e) {
@@ -456,15 +455,15 @@ spGetAuxiliary <- function(xyplt,
     }
     sppltx <- unique(extpoly$spxyext)
   } else {
-    message(dunitvar, " already in spplt... not extracting from dunit_layer")
+    message(unitvar, " already in spplt... not extracting from unit_layer")
   }
 
   #############################################################################
-  ## 2) Set up outputs - dunitzonal, prednames, inputdf, zonalnames
+  ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
-  dunitzonal <- data.table(unique(sf::st_drop_geometry(dunit_layerx[, c(dunitvar, vars2keep),
+  unitzonal <- data.table(unique(sf::st_drop_geometry(unit_layerx[, c(unitvar, vars2keep),
  		drop=FALSE])))
-  setkeyv(dunitzonal, dunitvar)
+  setkeyv(unitzonal, unitvar)
   prednames <- {}
   inputdf <- {}
   zonalnames <- {}
@@ -507,9 +506,9 @@ spGetAuxiliary <- function(xyplt,
  
     ## Extract zonal means from continuous raster layers
     #############################################################################
-    zonalDT.cont <- data.table(DOMAIN = unique(dunit_layerx[[dunitvar]]))
-    setnames(zonalDT.cont, "DOMAIN", dunitvar)
-    setkeyv(zonalDT.cont, dunitvar)
+    zonalDT.cont <- data.table(DOMAIN = unique(unit_layerx[[unitvar]]))
+    setnames(zonalDT.cont, "DOMAIN", unitvar)
+    setkeyv(zonalDT.cont, unitvar)
     #zonalDT.cont.names <- {}
     message(paste("extracting zonal statistics...")) 
 
@@ -526,32 +525,32 @@ spGetAuxiliary <- function(xyplt,
           zonalstat <- c("npixels", rastlst.cont.stat) 
           rastnm2 <- c("npixels", rastnm2)
         }  
-        zonaldat.rast.cont <- spZonalRast(dunit_layerx, rastfn=rastfn, 
-                                polyv.att=dunitvar, zonalstat=zonalstat, 
+        zonaldat.rast.cont <- spZonalRast(unit_layerx, rastfn=rastfn, 
+                                polyv.att=unitvar, zonalstat=zonalstat, 
                                 pixelfun=northness, 
                                 rast.NODATA=rast.cont.NODATA, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-        class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
+        class(zonalext[[unitvar]]) <- class(unitzonal[[unitvar]])        
 
         if (!is.null(rastnm)) 
           setnames(zonalext, outname, rastnm2)
-        setkeyv(zonalext, dunitvar)
+        setkeyv(zonalext, unitvar)
         zonalDT.cont <- zonalDT.cont[zonalext] 
   
         rastnm2 <- ifelse(is.null(rastnm), "asp_sin", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
-        zonaldat.rast.cont <- spZonalRast(dunit_layerx, rastfn=rastfn, 
+        zonaldat.rast.cont <- spZonalRast(unit_layerx, rastfn=rastfn, 
                                    rast.NODATA=rast.cont.NODATA, 
-                                   polyv.att=dunitvar, zonalstat=rastlst.cont.stat,
+                                   polyv.att=unitvar, zonalstat=rastlst.cont.stat,
                                    pixelfun=eastness, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-        class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
+        class(zonalext[[unitvar]]) <- class(unitzonal[[unitvar]])        
         if (!is.null(rastnm2)) {
           setnames(zonalext, outname, rastnm2)
         }
-        setkeyv(zonalext, dunitvar)
+        setkeyv(zonalext, unitvar)
         zonalDT.cont <- zonalDT.cont[zonalext]
  
       } else {
@@ -561,17 +560,17 @@ spGetAuxiliary <- function(xyplt,
             rastnm <- c("npixels", rastnm)
           }
         } 
-        zonaldat.rast.cont <- spZonalRast(dunit_layerx, rastfn=rastfn, 
+        zonaldat.rast.cont <- spZonalRast(unit_layerx, rastfn=rastfn, 
                                     rast.NODATA=rast.cont.NODATA, 
-                                    polyv.att=dunitvar, zonalstat=zonalstat, 
+                                    polyv.att=unitvar, zonalstat=zonalstat, 
                                     showext=showext, na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
-        class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
+        class(zonalext[[unitvar]]) <- class(unitzonal[[unitvar]])        
         if (!is.null(rastnm)) {
           setnames(zonalext, outname, rastnm)
         }
-        setkeyv(zonalext, dunitvar)
+        setkeyv(zonalext, unitvar)
         zonalDT.cont <- zonalDT.cont[zonalext] 
       }
       if (npixels) npixels <- FALSE
@@ -579,7 +578,7 @@ spGetAuxiliary <- function(xyplt,
       rm(zonalext)
       gc() 
     }
-    dunitzonal <- dunitzonal[zonalDT.cont] 
+    unitzonal <- unitzonal[zonalDT.cont] 
   }
 
   ###############################################################################
@@ -632,9 +631,9 @@ spGetAuxiliary <- function(xyplt,
       
     ## Extract zonal proportions from categorical raster layers
     #############################################################################
-    zonalDT.cat <- data.table(DOMAIN = unique(dunit_layerx[[dunitvar]]))
-    setnames(zonalDT.cat, "DOMAIN", dunitvar)
-    setkeyv(zonalDT.cat, dunitvar)
+    zonalDT.cat <- data.table(DOMAIN = unique(unit_layerx[[unitvar]]))
+    setnames(zonalDT.cat, "DOMAIN", unitvar)
+    setkeyv(zonalDT.cat, unitvar)
     for (i in 1:length(rastlst.catfn)) {
       rastfn <- rastlst.catfn[i]
       rastnm <- inputdf.cat[inputdf.cat$rasterfile == rastfn, "var.name"][[1]]
@@ -646,23 +645,23 @@ spGetAuxiliary <- function(xyplt,
         zonalstat <- c("npixels", zonalstat) 
       }       
       if (identical(rast.lutfn, rastfn)) {
-        zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, 
+        zonaldat.rast.cat <- spZonalRast(unit_layerx, rastfn=rastfn, 
                                   rast.NODATA=rast.cat.NODATA, 
-                                  polyv.att=dunitvar, zonalstat=zonalstat, 
+                                  polyv.att=unitvar, zonalstat=zonalstat, 
                                   rastlut=rastlut, 
                                   outname=names(rastlut)[2], na.rm=TRUE)
       } else {
-        zonaldat.rast.cat <- spZonalRast(dunit_layerx, rastfn=rastfn, 
+        zonaldat.rast.cat <- spZonalRast(unit_layerx, rastfn=rastfn, 
                                   rast.NODATA=rast.cat.NODATA, 
-                                  polyv.att=dunitvar, outname=rastnm, 
+                                  polyv.att=unitvar, outname=rastnm, 
                                   zonalstat=zonalstat, na.rm=TRUE)
       }
       zonalext <- setDT(zonaldat.rast.cat$zonalext)
       outname <- zonaldat.rast.cat$outname
       outname[grep("npixels", outname)] <- "npixels"
-      setnames(zonalext, c(dunitvar, outname))
-      class(zonalext[[dunitvar]]) <- class(dunitzonal[[dunitvar]])        
-      setkeyv(zonalext, dunitvar)
+      setnames(zonalext, c(unitvar, outname))
+      class(zonalext[[unitvar]]) <- class(unitzonal[[unitvar]])        
+      setkeyv(zonalext, unitvar)
       zonalDT.cat <- zonalDT.cat[zonalext] 
       zonalnames <- c(zonalnames, outname[outname != "npixels"])
       predfac.levels[[rastnm]] <- as.numeric(sapply(strsplit(outname[outname != "npixels"], 
@@ -672,11 +671,11 @@ spGetAuxiliary <- function(xyplt,
       rm(zonalext)
       gc() 
     }
-    tabs <- check.matchclass(dunitzonal, zonalDT.cat, dunitvar)
-    dunitzonal <- tabs$tab1
+    tabs <- check.matchclass(unitzonal, zonalDT.cat, unitvar)
+    unitzonal <- tabs$tab1
     zonalDT.cat <- tabs$tab2
 
-    dunitzonal <- dunitzonal[zonalDT.cat]  
+    unitzonal <- unitzonal[zonalDT.cat]  
   }
 
   ## Check if any auxiliary data included. If no return estimation unit info only
@@ -686,12 +685,12 @@ spGetAuxiliary <- function(xyplt,
   ## Get totacres from domain polygons (if areacalc = TRUE)
   ###################################################################################
   if (areacalc) {
-    dunit_layerx <- areacalc.poly(dunit_layerx, unit=areaunits)
+    unit_layerx <- areacalc.poly(unit_layerx, unit=areaunits)
     areavar <- paste0(areaunits, "_GIS")
 
-    dunitarea <- dunit_layerx[, c(dunitvar, areavar)]
-    dunitarea <- aggregate(dunitarea[[areavar]], list(dunitarea[[dunitvar]]), sum)
-    names(dunitarea) <- c(dunitvar, areavar)
+    unitarea <- unit_layerx[, c(unitvar, areavar)]
+    unitarea <- aggregate(unitarea[[areavar]], list(unitarea[[unitvar]]), sum)
+    names(unitarea) <- c(unitvar, areavar)
   }
 
 
@@ -710,11 +709,11 @@ spGetAuxiliary <- function(xyplt,
                           append_layer=append_layer,
                           add_layer=TRUE)) 
     if (!noaux) {
-      datExportData(dunitzonal, 
+      datExportData(unitzonal, 
         savedata_opts=list(outfolder=outfolder, 
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 
-                            out_layer="dunitzonal",
+                            out_layer="unitzonal",
                             outfn.pre=outfn.pre, 
                             outfn.date=outfn.date, 
                             overwrite_layer=overwrite_layer,
@@ -723,13 +722,13 @@ spGetAuxiliary <- function(xyplt,
     }
   }
     
-  returnlst <- list(pltassgn=pltassgn, dunitvar=dunitvar, pltassgnid=uniqueid)
+  returnlst <- list(pltassgn=pltassgn, unitvar=unitvar, pltassgnid=uniqueid)
   if (areacalc) {
-    returnlst$dunitarea <- dunitarea
+    returnlst$unitarea <- unitarea
     returnlst$areavar <- areavar
   }
   if (!noaux) {
-    returnlst$dunitzonal <- setDF(dunitzonal)
+    returnlst$unitzonal <- setDF(unitzonal)
     returnlst$inputdf <- inputdf
     returnlst$prednames <- prednames
     returnlst$zonalnames <- zonalnames

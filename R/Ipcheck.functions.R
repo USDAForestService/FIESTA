@@ -77,8 +77,8 @@ pcheck.varchar <- function(var2check, varnm=NULL, checklst, gui=FALSE, caption=N
 		paste(varnm, "must be in following list:", toString(checklst)),
 		paste(varnm, "is invalid"))
   }
-  if (is.null(var2check) || (TRUE %in% is.na(var2check)) || length(var2check) == 0 ||
-	(TRUE %in% gsub(" ", "", var2check) == "")) {
+
+  if (is.null(var2check) || is.na(var2check) || length(var2check) == 0 || gsub(" ", "", var2check) == "") {
     if (gui) {
       var2check <- select.list(checklst, title=caption, multiple=multiple, ...)
       if (length(var2check) == 0 || var2check == "") {

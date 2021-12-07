@@ -1455,6 +1455,10 @@ spGetPlots <- function(bnd = NULL,
     DBI::dbDisconnect(dbconn)
   }  ## datsource
  
+  
+  print("TEST")
+  print(names(tabs2save))
+  
   tabs <- lapply(tabs2save, get, envir=environment())
   tabIDs <- list(pltx=puniqueid, condx=cuniqueid)
   if (istree) {
@@ -1475,6 +1479,9 @@ spGetPlots <- function(bnd = NULL,
       }
     }
   }
+
+  names(tabs) <- sapply(tabs2save, function(x) substr(x, 1, nchar(x)-1))
+  names(tabIDs) <- sapply(names(tabIDs), function(x) substr(x, 1, nchar(x)-1))
  
   #############################################################################
   ## Save tables
@@ -1551,16 +1558,15 @@ spGetPlots <- function(bnd = NULL,
 #  } else {
     #returnlst$tabs <- lapply(tabs2save, get, envir=environment())
     returnlst$tabs <- tabs
-    names(returnlst$tabs) <- tabs2save
 #  } 
  
   returnlst$tabIDs <- tabIDs
   if (savexy && !is.null(spxy)) {
     returnlst$spxy <- spxy
   }
-  returnlst$xypltx <- xyids
+  returnlst$xyplt <- xyids
   #returnlst$clip_polyv <- bndx
-  returnlst$bndx <- bndx
+  returnlst$bnd <- bndx
   returnlst$puniqueid <- puniqueid
   returnlst$xy.uniqueid <- xyjoinid
   returnlst$pjoinid <- pjoinid

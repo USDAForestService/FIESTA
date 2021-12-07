@@ -146,11 +146,11 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     condf$TOTAL <- 1
 
     returnlst <- list(treef=treef, condf=condf[,c(cuniqueid, condid, "TOTAL"), with=FALSE], 
-		seedf=seedf, uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
-		rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, 
-		col.orderby=col.orderby, row.add0=row.add0, col.add0=col.add0,
- 		title.rowvar=title.rowvar, title.colvar=title.colvar, tdomvar=tdomvar, 
-		concat=concat)
+                seedf=seedf, uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom, 
+                rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, col.orderby=col.orderby, 
+                row.add0=row.add0, col.add0=col.add0, 
+                title.rowvar=title.rowvar, title.colvar=title.colvar, 
+                tdomvar=tdomvar, concat=concat)
     return(returnlst)
   }
 

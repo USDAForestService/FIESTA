@@ -386,22 +386,22 @@ modMApop <- function(popType="VOL",
   ## Load data
   ###################################################################################
   if (!is.null(MAdata)) {
-    list.items <- c("tabs", "dunitarea", "dunitvar", "dunitzonal")
+    list.items <- c("tabs", "unitarea", "unitvar", "unitzonal")
     MAdata <- pcheck.object(MAdata, "MAdata", list.items=list.items)
     #bnd <- MAdata$bnd
     popTabs <- MAdata$tabs
     popTabIDs <- MAdata$tabIDs
     pltassgn <- MAdata$pltassgn
     pltassgnid <- MAdata$pltassgnid
-    unitarea <- MAdata$dunitarea
+    unitarea <- MAdata$unitarea
     areavar <- MAdata$areavar
-    unitzonal <- MAdata$dunitzonal
+    unitzonal <- MAdata$unitzonal
     puniqueid <- MAdata$puniqueid
     pjoinid <- MAdata$pjoinid
 
     if (is.null(unitvar)) {
-      unitvar <- MAdata$dunitvar
-      unitvar2 <- MAdata$dunitvar2
+      unitvar <- MAdata$unitvar
+      unitvar2 <- MAdata$unitvar2
     } 
     if (is.null(npixelvar)) {
       npixelvar <- MAdata$npixelvar
@@ -410,8 +410,7 @@ modMApop <- function(popType="VOL",
       prednames <- MAdata$prednames
     } else {
       if (!all(prednames %in% MAdata$prednames)) {
-        stop("invalid prednames: ", 
-	 	toString(prednames[!prednames %in% MAdata$prednames]))
+        stop("invalid prednames: ", toString(prednames[!prednames %in% MAdata$prednames]))
       }
     }
     if (is.null(predfac)) {
@@ -424,20 +423,16 @@ modMApop <- function(popType="VOL",
       popTabs <- pltdat$tabs
       popTabIDs <- pltdat$tabIDs
       pjoinid <- pltdat$pjoinid
-      names(popTabs) <- sapply(names(popTabs), function(x) 
-		      {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
-      names(popTabIDs) <- sapply(names(popTabIDs), function(x) 
-		      {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
     }
     if (!is.null(auxdat)) {
-      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "prednames", "dunitarea")
+      list.items <- c("pltassgn", "unitzonal", "unitvar", "prednames", "unitarea")
       auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid
-      unitzonal <- auxdat$dunitzonal
-      unitvar <- auxdat$dunitvar
-      unitvar2 <- auxdat$dunitvar2
-      unitarea <- auxdat$dunitarea
+      unitzonal <- auxdat$unitzonal
+      unitvar <- auxdat$unitvar
+      unitvar2 <- auxdat$unitvar2
+      unitarea <- auxdat$unitarea
       areavar <- auxdat$areavar
 
       if (is.null(npixelvar)) {

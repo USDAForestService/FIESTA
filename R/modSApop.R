@@ -305,8 +305,8 @@ modSApop <- function(popType="VOL",
   ## Load data
   ###################################################################################
   if (!is.null(SAdata)) {
-    list.items <- c("tabs", "pltassgn", "pltassgnid", "pjoinid", "dunitarea",
-		"dunitvar", "areavar", "dunitzonal")
+    list.items <- c("tabs", "pltassgn", "pltassgnid", "pjoinid", "unitarea",
+		                "unitvar", "areavar", "unitzonal")
     SAdata <- pcheck.object(SAdata, "SAdata", list.items=list.items)
     SAdoms <- SAdata$bnd
     #smallbnd <- SAdata$smallbnd
@@ -314,10 +314,10 @@ modSApop <- function(popType="VOL",
     popTabIDs <- SAdata$tabIDs
     pltassgn <- SAdata$pltassgn
     pltassgnid <- SAdata$pltassgnid
-    dunitarea <- SAdata$dunitarea
-    dunitvar <- SAdata$dunitvar
+    dunitarea <- SAdata$unitarea
+    dunitvar <- SAdata$unitvar
     areavar <- SAdata$areavar
-    dunitzonal <- SAdata$dunitzonal
+    dunitzonal <- SAdata$unitzonal
     puniqueid <- SAdata$puniqueid
     pjoinid <- SAdata$pjoinid
     predfac <- SAdata$predfac
@@ -336,20 +336,16 @@ modSApop <- function(popType="VOL",
       popTabs <- pltdat$tabs
       popTabIDs <- pltdat$tabIDs
       pjoinid <- pltdat$pjoinid
-      names(popTabs) <- sapply(names(popTabs), function(x) 
-            {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
-      names(popTabIDs) <- sapply(names(popTabIDs), function(x) 
-            {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
     }
     if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "dunitzonal", "dunitvar", "prednames", "dunitarea")
       auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid
-      dunitarea <- auxdat$dunitarea
-      dunitvar <- auxdat$dunitvar
+      dunitarea <- auxdat$unitarea
+      dunitvar <- auxdat$unitvar
       areavar <- auxdat$areavar
-      dunitzonal <- auxdat$dunitzonal
+      dunitzonal <- auxdat$unitzonal
       zonalnames <- auxdat$zonalnames
       predfac <- auxdat$predfac
 
