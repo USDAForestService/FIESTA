@@ -238,7 +238,7 @@ modSAtree <- function(SApopdatlst = NULL,
   
   ## Check parameter lists
   pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
-                savedata_opts=savedata_opts)
+                savedata_opts=savedata_opts, multest_opts=multest_opts)
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]

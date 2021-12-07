@@ -416,13 +416,12 @@ modMApop <- function(popType="VOL",
       popTabIDs <- pltdat$tabIDs
       pjoinid <- pltdat$pjoinid
       names(popTabs) <- sapply(names(popTabs), function(x) 
-		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+		      {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
       names(popTabIDs) <- sapply(names(popTabIDs), function(x) 
-		{ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+		      {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
     }
     if (!is.null(auxdat)) {
-      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "predfac", "npixelvar", 
-		"pltassgnid", "dunitarea", "areavar")
+      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "prednames", "dunitarea")
       auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid
@@ -439,8 +438,7 @@ modMApop <- function(popType="VOL",
         prednames <- auxdat$prednames
       } else {
         if (!all(prednames %in% auxdat$prednames))
-          stop("invalid prednames: ", 
-	 	toString(prednames[!prednames %in% auxdat$prednames]))
+          stop("invalid prednames: ", toString(prednames[!prednames %in% auxdat$prednames]))
       }
       if (is.null(predfac)) {
         predfac <- auxdat$predfac

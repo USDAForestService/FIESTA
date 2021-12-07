@@ -235,7 +235,7 @@ modSAarea <- function(SApopdatlst = NULL,
   
   ## Check parameter lists
   pcheck.params(input.params, table_opts=table_opts, title_opts=title_opts, 
-                savedata_opts=savedata_opts)
+                savedata_opts=savedata_opts, multest_opts=multest_opts)
   
   
   ## Set savedata defaults
@@ -552,7 +552,6 @@ modSAarea <- function(SApopdatlst = NULL,
                     rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
                     landarea=landarea) 
     #rm(rowcolinfo)  
-
     ## Generate a uniquecol for estimation units
     if (!sumunits && rowcolinfo$colvar == "NONE") {
       uniquecol <- data.table(dunitarea[[dunitvar]])

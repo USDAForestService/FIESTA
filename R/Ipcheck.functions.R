@@ -1008,7 +1008,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
 
 pcheck.params <- function(input.params, strata_opts=NULL, 
 			unit_opts=NULL, table_opts=NULL, title_opts=NULL, 
-			savedata_opts=NULL) {
+			savedata_opts=NULL, multest_opts=NULL) {
   ## DESCRIPTION: function to check input list parameters
 
   if (!is.null(strata_opts)) {
@@ -1088,6 +1088,23 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       savedata.params <- names(savedata_opts)[!names(savedata_opts) %in% c("formallst", "input.params")]
       if (!all(savedata.params %in% formallst.savedata)) {
         miss <- savedata.params[!savedata.params %in% formallst.savedata]
+        stop("invalid parameter: ", toString(miss))
+      }
+    }
+  }
+  
+  if (!is.null(multest_opts)) {
+    if ("multest_opts" %in% input.params) {
+      if (!is.list(multest_opts)) {
+        multest_opts <- as.list(multest_opts)
+      }
+      if (is.null(names(multest_opts))) {
+        stop("invalid multest_opts... see multest_options()")
+      }
+      formallst.multest <- names(formals(FIESTA::multest_options))[-length(formals(FIESTA::multest_options))]
+      multest.params <- names(multest_opts)[!names(multest_opts) %in% c("formallst", "input.params")]
+      if (!all(multest.params %in% formallst.multest)) {
+        miss <- multest.params[!multest.params %in% formallst.multest]
         stop("invalid parameter: ", toString(miss))
       }
     }

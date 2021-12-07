@@ -2,7 +2,7 @@ check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt",
 	tabtype="PCT", ratio=FALSE, pfilter=NULL, landarea="ALL", landarea.filter=NULL, 
 	nonsamp.pntfilter=NULL, pntfilter=NULL, sumunits=FALSE, allin1=FALSE, 
 	estround=3, pseround=3, divideby=NULL, addtitle=TRUE, returntitle=TRUE, 
-	rawdata=FALSE, rawonly=FALSE, savedata=FALSE, outfolder=NULL, 
+	rawdata=FALSE, rawonly=FALSE, gainloss=FALSE, savedata=FALSE, outfolder=NULL, 
 	overwrite_dsn=FALSE, overwrite_layer=TRUE, outfn.pre=NULL, outfn.date=TRUE, 
 	append_layer=FALSE, raw_fmt="csv", raw_dsn=NULL, gui=FALSE){
 
@@ -88,6 +88,14 @@ check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt",
   #####################################################################################
   ### Check other table parameters
   #####################################################################################
+
+  ## Check gainloss
+  if (!ratio) {
+    gainloss <- FIESTA::pcheck.logical(gainloss, varnm="gainloss", 
+		title="gainloss estimates", first="NO", gui=gui)
+  } else {
+    gainloss <- FALSE
+  }
 
   ## Check sumunits 
   ########################################################
@@ -186,7 +194,7 @@ check.estdataPB <- function(PBx=NULL, plotid="plot_id", pntid="dot_cnt",
 	pseround=pseround, divideby=divideby, addtitle=addtitle, returntitle=returntitle,
  	rawdata=rawdata, rawonly=rawonly, savedata=savedata, outfolder=outfolder,
  	overwrite_layer=overwrite_layer, append_layer=append_layer, rawfolder=rawfolder, 
-	raw_fmt=raw_fmt, raw_dsn=raw_dsn, tabtype=tabtype)
+	raw_fmt=raw_fmt, raw_dsn=raw_dsn, tabtype=tabtype, ratio=ratio, gainloss=gainloss)
 
 
   return(returnlst)

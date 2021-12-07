@@ -218,18 +218,18 @@ modPB <- function(PBpopdat = NULL,
                   pfilter = NULL, 
                   rowvar = NULL, 
                   colvar = NULL, 
-                  domlut=NULL, 
-                  domvarlst=NULL, 
-                  ratioden="ROWVAR",
-                  gainloss=FALSE, 
-                  gainloss.vals=NULL, 
+                  domlut = NULL, 
+                  domvarlst = NULL, 
+                  ratioden = "ROWVAR",
+                  gainloss = FALSE, 
+                  gainloss.vals = NULL, 
                   addtitle = addtitle, 
                   returntitle = returntitle,
-                  savedata=FALSE,
+                  savedata = FALSE,
                   table_opts = NULL,
                   title_opts = NULL,
                   savedata_opts = NULL,
-                  gui=FALSE, 
+                  gui = FALSE, 
                   ...){
   ###################################################################################
   ## DESCRIPTION: 
@@ -261,7 +261,7 @@ modPB <- function(PBpopdat = NULL,
     value=p.pltdom=PBvars2keep=title.est=title.pse=title.estpse=
     outfn.estpse <- NULL
   
-  
+
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -321,7 +321,6 @@ modPB <- function(PBpopdat = NULL,
     }
   }
   
-print("XXXXXXXXX")  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
@@ -360,7 +359,8 @@ print("XXXXXXXXX")
   }
   strunitvars <- c(unitvar, strvar)
 
-  ###################################################################################
+
+    ###################################################################################
   ## Check parameters and apply plot and pnt filters
   ###################################################################################
   estdat <- check.estdataPB(PBx=PBx, plotid=plotid, pntid=pntid, 
@@ -370,7 +370,7 @@ print("XXXXXXXXX")
                   pntfilter=pntfilter, sumunits=sumunits, 
                   allin1=allin1, estround=estround, pseround=pseround, 
                   divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
-                  rawdata=rawdata, rawonly=rawonly, 
+                  rawdata=rawdata, rawonly=rawonly, gainloss=gainloss,
                   savedata=savedata, outfolder=outfolder, 
                   overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
                   outfn.pre=outfn.pre, outfn.date=outfn.date, append_layer=append_layer, 
@@ -396,6 +396,8 @@ print("XXXXXXXXX")
   raw_dsn <- estdat$raw_dsn
   rawfolder <- estdat$rawfolder
   tabtype <- estdat$tabtype
+  ratio <- estdat$ratio
+  gainloss <- estdat$gainloss
 
   if (tabtype == "AREA" && is.null(unitarea)) {
     stop("must include unitarea in population data for area table")
@@ -429,6 +431,7 @@ print("XXXXXXXXX")
   if (ratio) {
     PBx.d <- rowcolinfo$PBx.d
   }
+
 
   ###################################################################################
   ## MERGE FILTERED DATA TO ALL PLOTS
@@ -482,6 +485,7 @@ print("XXXXXXXXX")
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
+  
   ###########################################################
   ## DO WORK
   ###########################################################
@@ -508,7 +512,7 @@ print("XXXXXXXXX")
       if (rowvar != "Total") {
         pltdom.row <- getpltdom.prop(PBall, uniqueid=plotid, domain=rowvar, strunitvars)
         rowest.pntcnt <- pltdom.row[get(rowvar) != "NOTinDOMAIN", 
-			list(NBRPNTS=sum(nbrpts.pltdom)), by=c(unitvar, rowvar)]
+                list(NBRPNTS=sum(nbrpts.pltdom)), by=c(unitvar, rowvar)]
         setkeyv(rowest.pntcnt, c(unitvar, rowvar))
 
         ## for kelly
@@ -521,13 +525,13 @@ print("XXXXXXXXX")
         grpvar <- c(rowvar, colvar)
         pltdom.col <- getpltdom.prop(PBall, uniqueid=plotid, domain=colvar, strunitvars)
         pltdom.grp <- getpltdom.prop(PBall, uniqueid=plotid, domain=grpvar, strunitvars)
-
+ 
         colest.pntcnt <- pltdom.col[get(colvar) != "NOTinDOMAIN", 
-			list(NBRPNTS=sum(nbrpts.pltdom)), by=c(unitvar, colvar)]
+        list(NBRPNTS=sum(nbrpts.pltdom)), by=c(unitvar, colvar)]
         setkeyv(colest.pntcnt, c(unitvar, colvar)) 
 
-        grpest.pntcnt <- pltdom.grp[get(grpvar) != "NOTinDOMAIN", 
-			list(NBRPNTS=sum(nbrpts.pltdom)), by=c(unitvar, grpvar)]
+        grpest.pntcnt <- pltdom.grp[(get(rowvar) != "NOTinDOMAIN" & get(colvar) != "NOTinDOMAIN"), 
+                list(NBRPNTS=sum(nbrpts.pltdom)), by=c(unitvar, grpvar)]
         setkeyv(grpest.pntcnt, c(unitvar, grpvar)) 
       }
 
@@ -979,7 +983,7 @@ print("XXXXXXXXX")
       }
     }
   }
-
+ 
   ## GAIN/LOSS
   if (gainloss) {
 

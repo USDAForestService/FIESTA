@@ -202,7 +202,7 @@ modSApop <- function(popType="VOL",
  
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
-  
+  dunitvar2=NULL
   
   
   ##################################################################
@@ -218,8 +218,7 @@ modSApop <- function(popType="VOL",
 
   
   ## Check parameter lists
-  pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
-                savedata_opts=savedata_opts)
+  pcheck.params(input.params, unit_opts=unit_opts, savedata_opts=savedata_opts)
   
   ## Set unit defaults
   unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
@@ -297,16 +296,13 @@ modSApop <- function(popType="VOL",
   ## Load data
   ###################################################################################
   if (!is.null(SAdata)) {
-    list.items <- c("bnd", "cond", "plt",
-		"pltassgn", "puniqueid", "pltassgnid", "pjoinid", "dunitarea",
+    list.items <- c("tabs", "pltassgn", "pltassgnid", "pjoinid", "dunitarea",
 		"dunitvar", "areavar", "dunitzonal")
     SAdata <- pcheck.object(SAdata, "SAdata", list.items=list.items)
     SAdoms <- SAdata$bnd
     #smallbnd <- SAdata$smallbnd
-    plt <- SAdata$plt
-    cond <- SAdata$cond
-    tree <- SAdata$tree
-    seed <- SAdata$seed
+    popTabs <- SAdata$tabs
+    popTabIDs <- SAdata$tabIDs
     pltassgn <- SAdata$pltassgn
     pltassgnid <- SAdata$pltassgnid
     dunitarea <- SAdata$dunitarea
@@ -328,23 +324,13 @@ modSApop <- function(popType="VOL",
     }
   } else {
     if (!is.null(pltdat)) {
-      list.items <- c("bndx", "tabs", "xypltx")
-
-      ## Extract list objects
-      puniqueid <- pltdat$puniqueid
-      if ("tabs" %in% names(pltdat)) {
-        pjoinid <- pltdat$pjoinid
-        plt <- pltdat$tabs$pltx
-        cond <- pltdat$tabs$condx
-        tree <- pltdat$tabs$treex
-        seed <- pltdat$tabs$seedx
-      } else {
-        pjoinid <- puniqueid
-        plt <- pltdat$plt
-        cond <- pltdat$cond
-        tree <- pltdat$tree
-        seed <- pltdat$seed
-      }
+      popTabs <- pltdat$tabs
+      popTabIDs <- pltdat$tabIDs
+      pjoinid <- pltdat$pjoinid
+      names(popTabs) <- sapply(names(popTabs), function(x) 
+            {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
+      names(popTabIDs) <- sapply(names(popTabIDs), function(x) 
+            {ifelse(endsWith(x, "x"), substr(x, 1, nchar(x)-1), x)})
     }
     if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "dunitzonal", "dunitvar", "prednames", "dunitarea")
@@ -362,17 +348,69 @@ modSApop <- function(popType="VOL",
         prednames <- auxdat$prednames
       } else {
         if (!all(prednames %in% auxdat$prednames))
-          stop("invalid prednames: ", 
-		  toString(prednames[!prednames %in% auxdat$prednames]))
+          stop("invalid prednames: ", toString(prednames[!prednames %in% auxdat$prednames]))
         predfac <- predfac[predfac %in% prednames]
       }
     } 
+  }
+  
+  ## Set user-supplied popTable values 
+  if (length(popTabs) > 0) {
+    for (i in 1:length(popTabs)) {
+      assign(names(popTabs)[[i]], popTabs[[i]])
+    }
+  } else {
+    stop("need to include popTabs")
+  }
+  
+  list.items <- {}
+  if (popType == "LULC") {
+    list.items <- c(list.items, "lulcx")
+  }
+  if (popType == "P2VEG") {
+    list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
+  }
+  popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
+  
+  
+  ## Set user-supplied popTabIDs values
+  if (length(popTabIDs) > 0) {
+    for (i in 1:length(popTabIDs)) {
+      if (names(popTabIDs)[[i]] == "cond") {
+        assign("cuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "plt") {
+        assign("puniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "tree") {
+        assign("tuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "seed") {
+        assign("suniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpspp") {
+        assign("vsppuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "vsubpstr") {
+        assign("vstruniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subplot") {
+        assign("subpuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "subp_cond") {
+        assign("subcuniqueid", popTabIDs[[i]])
+      }
+      if (names(popTabIDs)[[i]] == "lulc") {
+        assign("lulcuniqueid", popTabIDs[[i]])
+      }
+    }
   }
 
   ## Check SAdoms
   if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {
     stop("invalid SAdoms")
   }
+ 
  
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
@@ -386,8 +424,8 @@ modSApop <- function(popType="VOL",
                   evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
                   intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
                   nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
-                  unitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
-                  unitvar=dunitvar, unitvar2=dunitvar2, unit.action=dunit.action, 
+                  unitarea=dunitarea, unitvar=dunitvar, areavar=areavar,  
+                  unitvar2=unitvar2, unit.action=unit.action, areaunits=areaunits, 
                   prednames=prednames, predfac=predfac, 
                   pvars2keep=pvars2keep, cvars2keep=cvars2keep)
   condx <- popcheck$condx	
