@@ -40,7 +40,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   RSlst <- c("ALL", unique(ref_statecd$RS))
   RS <- pcheck.varchar(var2check=RS, varnm="RS",
 		checklst=RSlst, gui=gui, caption="Research Station extent?")
-  if (RS == "ALL") {
+  if (!is.null(RS) && RS == "ALL") {
     RS <- NULL
   }
 

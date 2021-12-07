@@ -414,7 +414,7 @@ modGBpop <- function(popType = "VOL",
   ## Load data
   ###################################################################################
   if (!is.null(GBdata)) {
-    list.items <- c("tabs", "dunitarea", "dunitvar")
+    list.items <- c("tabs", "dunitarea")
     GBdata <- pcheck.object(GBdata, "GBdata", list.items=list.items)
     #bnd <- GBdata$bnd
     popTabs <- GBdata$tabs
@@ -424,6 +424,7 @@ modGBpop <- function(popType = "VOL",
     unitarea <- GBdata$dunitarea
     areavar <- GBdata$areavar
     unitzonal <- GBdata$dunitzonal
+    stratalut <- GBdata$stratalut
     predfac <- GBdata$predfac
     puniqueid <- GBdata$puniqueid
     pjoinid <- GBdata$pjoinid
@@ -432,6 +433,7 @@ modGBpop <- function(popType = "VOL",
       unitvar <- GBdata$dunitvar
       unitvar2 <- GBdata$dunitvar2
     }
+    
     if (strata) { 
       if (is.null(strvar)) {    
         if (!is.null(predfac) && length(predfac) == 1) {
@@ -439,14 +441,12 @@ modGBpop <- function(popType = "VOL",
         } else {
           stop("must include strvar if strata=TRUE")
         }
-      } else {
-        if (!strvar %in% predfac) {
-          stop("strvar must be included in predfac")
-        }
       } 
       strwtvar <- "strwt" 
-      stratalut <- strat.pivot(unitzonal, strvar, unitvars=c(unitvar, unitvar2), 
-		strwtvar=strwtvar)
+      if (!is.null(unitzonal) && is.null(stratalut)) {
+        stratalut <- strat.pivot(unitzonal, unitvars=c(unitvar, unitvar2), 
+                      strvar, strwtvar=strwtvar)
+      }
     }
   } else {
     ## Extract list objects
@@ -508,22 +508,17 @@ modGBpop <- function(popType = "VOL",
           } else {
             stop("must include strvar if strata=TRUE")
           }
-        } else {
-          if (!strvar %in% predfac) {
-            stop("strvar must be included in predfac")
-          }
         } 
         strwtvar <- "strwt"
         pivotvars <- c(unitvar, unitvar2)
         unitvars <- pivotvars[pivotvars %in% names(unitzonal)]
         if (is.null(stratalut)) {
-          stratalut <- strat.pivot(unitzonal, strvar, unitvars=unitvars, 
-			strwtvar=strwtvar)
+          stratalut <- strat.pivot(unitzonal, unitvars=unitvars, 
+                              strvar, strwtvar=strwtvar)
         }
       }
     }
   } 
-
 
   ## Set user-supplied popTable values 
   if (length(popTabs) > 0) {
@@ -549,6 +544,7 @@ modGBpop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
+  
     
   ###################################################################################
   ## CHECK PARAMETERS AND DATA

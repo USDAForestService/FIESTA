@@ -27,8 +27,6 @@
 #' rowvar=NULL.
 #' @param colvar String. Name of domain variable in pnt used for output
 #' estimation table columns. If only 1 domain, colvar=NULL.
-#' @param ratioden String. ("ROWVAR" or "COLVAR"). If ratio, defines whether
-#' the rowvar or colvar in estimation output table is the denominator.
 #' @param domlut DF/DT or comma-delimited (*.csv). Look-up table to define the
 #' variables in the pnt table with category codes (DOMCODE) and code names
 #' (DOMNAME), and to set a pretty name for the variable to use in output table
@@ -36,32 +34,25 @@
 #' row.orderby/col.orderby, and title.rowvar/title.colvar parameters. Optional.
 #' @param domvarlst String vector. A vector of variable names that can be row
 #' or column domains (codes and names). Optional.
-<<<<<<< Updated upstream
-#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
-=======
->>>>>>> Stashed changes
+#' @param ratioden String. ("ROWVAR" or "COLVAR"). If ratio, defines whether
+#' the rowvar or colvar in estimation output table is the denominator.
 #' @param gainloss Logical. If TRUE, a table with the difference of gain and
 #' loss along with the variance and standard error, in percent, is generated.
 #' @param gainloss.vals String vector. A vector of names for values in gainloss
 #' table.
-<<<<<<< Updated upstream
-=======
+#' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param addtitle Logical. If TRUE and savedata=TRUE, adds title to outfile.
 #' @param returntitle Logical. If TRUE, returns a character string of the title
 #' of the output data frame.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
->>>>>>> Stashed changes
 #' @param table_opts List. See help(table_options()) for a list of
 #' options.
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-<<<<<<< Updated upstream
-#' of options.
-=======
 #' of options. Only used when savedata = TRUE.  
->>>>>>> Stashed changes
 #' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modPBpop() if PBpopdat is NULL.
+#' 
 #' @return A list with estimates with percent sampling error for rowvar (and
 #' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
 #' is returned.  Otherwise, a list object is returned with the following
@@ -330,7 +321,7 @@ modPB <- function(PBpopdat = NULL,
     }
   }
   
-  
+print("XXXXXXXXX")  
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
