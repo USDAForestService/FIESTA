@@ -30,7 +30,8 @@ modPBpop(
   strata_opts = NULL,
   savedata_opts = NULL,
   PBstratdat = NULL,
-  gui = FALSE
+  gui = FALSE,
+  ...
 )
 }
 \arguments{

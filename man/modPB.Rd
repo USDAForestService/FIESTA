@@ -23,6 +23,8 @@ modPB(
   ratioden = "ROWVAR",
   gainloss = FALSE,
   gainloss.vals = NULL,
+  addtitle = addtitle,
+  returntitle = returntitle,
   savedata = FALSE,
   table_opts = NULL,
   title_opts = NULL,
@@ -83,6 +85,11 @@ loss along with the variance and standard error, in percent, is generated.}
 \item{gainloss.vals}{String vector. A vector of names for values in gainloss
 table.}
 
+\item{addtitle}{Logical. If TRUE and savedata=TRUE, adds title to outfile.}
+
+\item{returntitle}{Logical. If TRUE, returns a character string of the title
+of the output data frame.}
+
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
 \item{table_opts}{List. See help(table_options()) for a list of
@@ -91,7 +98,7 @@ options.}
 \item{title_opts}{List. See help(title_options()) for a list of options.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
-of options.}
+of options. Only used when savedata = TRUE.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 

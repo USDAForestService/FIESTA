@@ -8,6 +8,7 @@ spReprojectRaster(
   rastfn,
   bands = NULL,
   crs = NULL,
+  rast.ref = NULL,
   crs.new = NULL,
   res.new = NULL,
   bbox.new = NULL,
@@ -35,6 +36,9 @@ defined.  EPSG:code, PROJ.4 declaration, or .prj file containing WKT. For
 example, PROJ.4: "+proj=moll +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84
 +datum=WGS84 +units=m +no_defs".  If NULL, and the CRS of rastfn is not
 defined, uses crs.default.}
+
+\item{rast.ref}{String or Raster. File name(s) with extensions, or raster
+object to use as reference raster.}
 
 \item{crs.new}{Coordinate Reference System. New CRS for rastfn.  EPSG:code,
 PROJ.4 declaration, or .prj file containing WKT. For example, PROJ.4:

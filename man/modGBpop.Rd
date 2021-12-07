@@ -22,6 +22,8 @@ modGBpop(
   stratalut = NULL,
   strvar = "STRATUMCD",
   savedata = FALSE,
+  saveobj = FALSE,
+  objnm = "GBpopdat",
   unit_opts = NULL,
   strata_opts = NULL,
   savedata_opts = NULL,
@@ -95,6 +97,10 @@ stratalut and cond or pltassgn data frame with stratum assignment for each
 plot (Default = 'STRATUMCD').}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
+
+\item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}
+
+\item{objnm}{String. Name of *.rds object.}
 
 \item{unit_opts}{List. See help(unit_options()) for a list of options.}
 

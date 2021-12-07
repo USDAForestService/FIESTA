@@ -21,6 +21,8 @@ modSApop(
   prednames = NULL,
   predfac = NULL,
   savedata = FALSE,
+  saveobj = FALSE,
+  objnm = "SApopdat",
   unit_opts = NULL,
   savedata_opts = NULL,
   SAdoms = NULL,
@@ -89,6 +91,10 @@ model.}
 in model.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
+
+\item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}
+
+\item{objnm}{String. Name of *.rds object.}
 
 \item{unit_opts}{List. See help(unit_options()) for a list of options.}
 

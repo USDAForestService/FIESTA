@@ -19,8 +19,6 @@ savedata_options(
   append_layer = FALSE,
   add_layer = TRUE,
   layer.pre = NULL,
-  saveobj = FALSE,
-  objnm = NULL,
   ...
 )
 }
@@ -62,10 +60,6 @@ files (if *_fmt = 'csv') or *_dsn layers (if *_fmt != 'csv".}
 (if out_fmt != c('csv','shp')).}
 
 \item{layer.pre}{Layer prefix.}
-
-\item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}
-
-\item{objnm}{String. Name of *.rds object.}
 
 \item{...}{For extendibility.}
 }
