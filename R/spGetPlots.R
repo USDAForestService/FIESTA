@@ -312,6 +312,7 @@ spGetPlots <- function(bnd = NULL,
     if (!is.null(bndx)) {
       bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
     } 
+
     ## Check xyids
     xyids <- pcheck.table(xyids)
 
@@ -431,7 +432,6 @@ spGetPlots <- function(bnd = NULL,
     }
   }
   #xyids <- spxy[[xyjoinid]]
-
  
   #############################################################################
   ## Set datsource
@@ -1454,11 +1454,7 @@ spGetPlots <- function(bnd = NULL,
     }  ## End of looping thru states
     DBI::dbDisconnect(dbconn)
   }  ## datsource
- 
-  
-  print("TEST")
-  print(names(tabs2save))
-  
+   
   tabs <- lapply(tabs2save, get, envir=environment())
   tabIDs <- list(pltx=puniqueid, condx=cuniqueid)
   if (istree) {
@@ -1538,8 +1534,6 @@ spGetPlots <- function(bnd = NULL,
     }
   } 
   
-
-
 #  if (showsteps) {
 #    ## Set plotting margins
 #    mar <-  par("mar")

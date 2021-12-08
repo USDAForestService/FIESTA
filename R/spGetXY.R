@@ -268,9 +268,7 @@ spGetXY <- function(bnd,
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   }
-  
-  
-
+ 
   ########################################################################
   ### DO THE WORK
   ########################################################################
@@ -285,6 +283,7 @@ spGetXY <- function(bnd,
     stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% states]
   } else if (!is.null(bndx)) {
     ## Get intersecting states
+ 
     statedat <- spGetStates(bndx, stbnd=NULL, stbnd_dsn=NULL, 
 			stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)
     bndx <- statedat$bndx
@@ -300,7 +299,7 @@ spGetXY <- function(bnd,
   } else {
     stop("must include bndx or states")
   }
- 
+
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################

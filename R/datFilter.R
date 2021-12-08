@@ -303,9 +303,10 @@ datFilter <- function(x,
   if (!returnDT) {
     indat <- data.frame(indat)  
   } else {
-    indat <- data.table(indat)
-    if (isdt && !is.null(xkey)) 
+    if (isdt && !is.null(xkey)) {
+      indat <- data.table(indat)
       setkeyv(indat, xkey)
+    }
   }
     
   returnlst <- list(xf = indat, xfilter = xfilters)

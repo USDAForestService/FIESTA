@@ -31,7 +31,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   }
 
   ## bnd.filter
-  bndx <- FIESTA::datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
+  bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
 
 
   ########################################################################
