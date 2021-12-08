@@ -153,11 +153,10 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
             }
             title.estvarn <- ref_estvarn[as.numeric(gfind.max), "ESTTITLE"]
           }
-
           ## Get title.yvar
           title.yvar <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, "ESTTITLE1"]
           if (!is.null(title.unitsn)) {
-            title.yvar <- paste0(title.yvar, ", in ", title.unitsn)
+            title.yvar <- paste0(title.yvar, ", in ", title.unitsn[1])
           }
           if (esttype == "RATIO" && ratiotype == "PERACRE") {
             title.estvarn <- paste(title.estvarn, "per acre")
@@ -209,6 +208,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
         title.unitsn2 <- ifelse (is.null(divideby), paste0(", in ", title.unitsn), 
 		paste0(", in ", divideby, " ", title.unitsn))
         title.part1 <- paste0(title.part1, title.unitsn2)
+        title.unitsn <- title.unitsn[1]
       } 
  
       ## title.part2

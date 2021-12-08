@@ -301,8 +301,9 @@ datFilter <- function(x,
   }
   
   if (!returnDT) {
-    indat <- setDF(indat)  
+    indat <- data.frame(indat)  
   } else {
+    indat <- data.table(indat)
     if (isdt && !is.null(xkey)) 
       setkeyv(indat, xkey)
   }

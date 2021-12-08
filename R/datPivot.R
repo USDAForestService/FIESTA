@@ -41,7 +41,7 @@ datPivot <- function(x,
                      yvar, 
                      pfun = sum, 
                      xfilter = NULL, 
-	                   NAto0 = TRUE, 
+				NAto0 = TRUE, 
                      dropNAxvar = TRUE, 
                      dropNAyvar = TRUE, 
                      pvar.round = 2, 
@@ -139,7 +139,7 @@ datPivot <- function(x,
 
   ## Check xfilter
   ##################################################################
-  datxf <- FIESTA::datFilter(x=datx, xfilter=xfilter, gui=gui)$xf
+  datxf <- datFilter(x=datx, xfilter=xfilter, gui=gui)$xf
 
   ## Check savedata 
   savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
@@ -170,6 +170,7 @@ datPivot <- function(x,
     datxf <- na.omit(datxf, cols=yvar)
   if (dropNAxvar)
     datxf <- na.omit(datxf, cols=xvar)
+
   datxf[, concatx := do.call(paste, c(.SD, sep="#")), .SDcols=xvar]
   
   if (NAto0) {
@@ -191,9 +192,9 @@ datPivot <- function(x,
   setkeyv(ptab, xvar)
 
   ## Define class of xvar and yvar
-  for (x in xvar) {
-    class(ptab[[x]]) <- xvar.class[[x]]
-  } 
+  #for (x in xvar) {
+  #  class(ptab[[x]]) <- xvar.class[[x]]
+  #} 
 
   #### WRITE TO FILE 
   #############################################################
@@ -210,5 +211,5 @@ datPivot <- function(x,
                               add_layer=TRUE))
   }
     
-  return(ptab)
+  return(data.table(ptab))
 }

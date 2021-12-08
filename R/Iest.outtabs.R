@@ -494,8 +494,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     ###############################################
     if (sumunits) {
       numunits <- length(units)
-      tabs <- crossxbyunit(unit=NULL, grpest, rowest, colest, 
-		totest, unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
+      tabs <- crossxbyunit(unit=NULL, unit_grpest=grpest, 
+		unit_rowest=rowest, unit_colest=colest, unit_totest=totest,
+		unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
 		estnm=estnmd, psenm=psenm, allin1, char.width, estnull, psenull,
 		estround=estround, pseround=pseround,  
 		rowgrp, rowgrpnm, title.rnames, numunits, savedata, addtitle, 

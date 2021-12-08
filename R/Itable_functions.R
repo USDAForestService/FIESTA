@@ -349,15 +349,15 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
 
   if (rowgrp) {
     est <- dcast(group.est, get(rowgrpnm) + get(rowvar) ~ get(colvar), 
-		fun.aggregate=length, value.var=estnm, fill=estnull)
+		fun.aggregate=I, value.var=estnm, fill=estnull)
     pse <- dcast(group.est, get(rowgrpnm) + get(rowvar) ~ get(colvar), 
-		fun.aggregate=length, value.var=psenm, fill=psenull)
+		fun.aggregate=I, value.var=psenm, fill=psenull)
     crnames <- c("rowgrpnm", "rowvar")
   } else {
     est <- dcast(group.est, get(rowvar) ~ get(colvar), 
-		fun.aggregate=length, value.var=estnm, fill=estnull)
+		fun.aggregate=I, value.var=estnm, fill=estnull)
     pse <- dcast(group.est, get(rowvar) ~ get(colvar), 
-		fun.aggregate=length, value.var=psenm, fill=psenull)
+		fun.aggregate=I, value.var=psenm, fill=psenull)
     crnames <- "rowvar"
   }
 
