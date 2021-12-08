@@ -360,7 +360,7 @@ modPB <- function(PBpopdat = NULL,
   strunitvars <- c(unitvar, strvar)
 
 
-    ###################################################################################
+  ###################################################################################
   ## Check parameters and apply plot and pnt filters
   ###################################################################################
   estdat <- check.estdataPB(PBx=PBx, plotid=plotid, pntid=pntid, 
@@ -432,7 +432,7 @@ modPB <- function(PBpopdat = NULL,
     PBx.d <- rowcolinfo$PBx.d
   }
 
-
+  
   ###################################################################################
   ## MERGE FILTERED DATA TO ALL PLOTS
   ###################################################################################
@@ -485,7 +485,7 @@ modPB <- function(PBpopdat = NULL,
     outfn.rawdat <- alltitlelst$outfn.rawdat
   }
 
-  
+
   ###########################################################
   ## DO WORK
   ###########################################################
@@ -568,7 +568,7 @@ modPB <- function(PBpopdat = NULL,
   } else {
     pltdom.row <- PBall
   }
-
+ 
   ####################################################################### 
   ## GENERATE ESTIMATES
   ####################################################################### 
@@ -618,9 +618,9 @@ modPB <- function(PBpopdat = NULL,
     #######################################################################
     if (rowvar != "TOTAL") {
       pbar.rowest <- PBest.pbar(dom.prop=pltdom.row, uniqueid=plotid, 
-                          domain=rowvar, strtype="post", 
-                          stratalut=stratalut, strunitvars=strunitvars, 
-                          unitvars=unitvar, strvar=strvar)
+                    domain=rowvar, strtype="post", 
+                    stratalut=stratalut, strunitvars=strunitvars, 
+                    unitvars=unitvar, strvar=strvar)
       unit_rowest <- pbar.rowest$est.unit
       if (rawdata) {
         unit_rowest.str <- pbar.rowest$ybardat
@@ -634,8 +634,9 @@ modPB <- function(PBpopdat = NULL,
     ## Get column (and cell) estimate  
     if (colvar != "NONE") {
       pbar.colest <- PBest.pbar(dom.prop=pltdom.col, uniqueid=puniqueid, 
-		domain=colvar, strtype="post", stratalut=stratalut, strunitvars=strunitvars,
- 		unitvars=unitvar, strvar=strvar)
+                  domain=colvar, strtype="post", 
+                  stratalut=stratalut, strunitvars=strunitvars, 
+                  unitvars=unitvar, strvar=strvar)
       unit_colest <- pbar.colest$est.unit
       if (rawdata) { 
         unit_colest.str <- pbar.colest$ybardat
@@ -680,7 +681,7 @@ modPB <- function(PBpopdat = NULL,
     row.filterval <- ifelse (is.numeric(unit_rowest[[rowvar]]), 9999, "NOTinDOMAIN")
     col.filterval <- ifelse (is.numeric(unit_colest[[colvar]]), 9999, "NOTinDOMAIN")
   }
- 
+
   ###################################################################################
   ## Check add0 and Add acres
   ###################################################################################
@@ -824,7 +825,7 @@ modPB <- function(PBpopdat = NULL,
    # totunit[, TOTAL:= "Total"]
    # setnames(totunit, names(totunit), names(rowunit))
   }          
- 
+
   ###################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################
@@ -845,7 +846,7 @@ modPB <- function(PBpopdat = NULL,
                 outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
                 estround=estround, pseround=pseround, estnull=estnull, psenull=psenull, 
                 divideby=divideby, CI=CI) 
- 
+
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 

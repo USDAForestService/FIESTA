@@ -266,6 +266,16 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   rnbr <- length(title.rnames)
   totals <- rep("Total", rnbr)
 
+  ## Define function 
+  unAsIs <- function(X) {
+     ## Description: removes AsIs from class
+     if("AsIs" %in% class(X)) {
+         class(X) <- class(X)[-match("AsIs", class(X))]
+     }
+     X
+  }
+
+
   ##############################################################################
   ## Round values and get character width for table
   ## Note: If NBRPLT.gt0 = 0, it is replaced by null value (i.e., estnull, psenull)
@@ -288,7 +298,7 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
   }
   group.est[NBRPLT.gt0 == 0, (estnm) := estnull]
   group.est[NBRPLT.gt0 == 0, (psenm) := psenull]
- 
+
   if (!is.null(rowvar.est)) {
     if (!is.null(estround) && is.numeric(rowvar.est[[estnm]]))
       rowvar.est[[estnm]] <- round(rowvar.est[[estnm]], estround)
@@ -360,6 +370,8 @@ crossxtab <- function (group.est, rowvar.est=NULL, colvar.est=NULL, total.est=NU
 		fun.aggregate=I, value.var=psenm, fill=psenull)
     crnames <- "rowvar"
   }
+  est <- est[, lapply(.SD, unAsIs)]
+  pse <- pse[, lapply(.SD, unAsIs)]
 
   ## Set factor order
   est <- est[order(rowvar), ]
@@ -559,7 +571,7 @@ crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL,
     }
   }  
   if (nrow(group.est) == 0) return(NULL)
- 
+
   ## Get cross tables
   #########################################################
   tabs <- crossxtab(group.est=group.est, rowvar.est=rowvar.est, 
@@ -631,15 +643,23 @@ crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL,
         title.est.unit <- title.est
         title.pse.unit <- title.pse
       }
-
+ 
       if(savedata){
         if (esttype == "PHOTO" && phototype == "PCT") {
+print("MMMM")
+print(esttab)
+print(psetab)
+print(str(esttab))
+print(str(psetab))
+
           suppressWarnings(
           save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
 		tab2.title=title.pse.unit, outfolder=outfolder, coltitlerow=TRUE,
  		coltitle=title.colvar, rnames=rnames, outfn.estpse=outfn.estpse.unit, 
 		addtitle=addtitle, rowtotal=FALSE, outfn.date=outfn.date,
  		overwrite=overwrite))
+print("MMMM2")
+
         } else {
           suppressWarnings(
           save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
@@ -650,6 +670,7 @@ crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL,
         }
       }
     }
+print("TESTTTTTTTTTTT")
     if ("unit" %in% names(est2return)) {
       names(est2return)[names(est2return) == "unit"] <- title.unitvar
       if (!is.null(pse2return))

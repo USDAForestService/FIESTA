@@ -747,7 +747,6 @@ pcheck.areaunits <- function(unitarea, areavar, areaunits, metric=FALSE) {
   return(list(unitarea=unitarea, areavar=areavar, outunits=outunits))
 }
 
-
 pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
 	caption=NULL, stopifnull=FALSE, gui=FALSE, polyfix=FALSE, asSpatial=FALSE,
 	dropgeom=FALSE, stopifnoCRS=TRUE, checkonly=FALSE) {
@@ -841,6 +840,8 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       } else {
         stop(ext.layer, " not supported")
       }
+    } else {
+      stop("layer is invalid")
     }
   }
 
@@ -869,6 +870,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       layer <- utils::select.list(layerlst, title="Select layer", multiple=FALSE)
     }
   }
+ 
   if (is.null(dsn)) {
     message("dsn is NULL")
     if (checkonly) {
@@ -877,6 +879,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       stop("dsn is NULL")
     }
   }
+ 
 
   ######################################################
   ## Check layer

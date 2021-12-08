@@ -130,6 +130,15 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
   ## tab1txt - text for table 1
   ## tab2txt - text for table 2
 
+  ## Define function 
+  unAsIs <- function(X) {
+     ## Description: removes AsIs from class
+     if("AsIs" %in% class(X)) {
+         class(X) <- class(X)[-match("AsIs", class(X))]
+     }
+     X
+  }
+
   if (is.null(tab1txt)) tab1txt <- "tab1"
   if (is.null(tab2txt)) tab2txt <- "tab2"
 
@@ -154,12 +163,14 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
   }
 
   if (!is.null(var2)) {
-    if (length(matchcol) > 1) stop("only 1 matchcol allowed if different names")
+    #if (length(matchcol) > 1) stop("only 1 matchcol allowed if different names")
+    if (length(matchcol) > length(var2)) stop("number of vars in matchcol different than vars2")
   }
-  for (v in matchcol) {
+  for (i in 1:length(matchcol)) {
+    v <- matchcol[i]
     if (!is.null(var2)) {
+      v2 <- var2[i]
       v1 <- v
-      v2 <- var2
     } else {
       v1 <- v
       v2 <- v
@@ -185,6 +196,9 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
       tab2[[v2]] <- as.character(tab2[[v2]])
     }
     
+    tab1 <- tab1[, lapply(.SD, unAsIs)]
+    tab2 <- tab2[, lapply(.SD, unAsIs)]
+
     tab1.class <- class(tab1[[v1]])
     tab2.class <- class(tab2[[v2]])
  

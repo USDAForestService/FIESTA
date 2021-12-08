@@ -522,6 +522,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		title.ref=title.ref, outfolder=outfolder, outfn.date=outfn.date, 
 		overwrite=overwrite, esttype=esttype, phototype=phototype,
 		rnames=rnames, title.colvar=title.colvar, title.unitvar=title.unitvar)
+
       names(tabs) <- units
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
       if (!allin1) {
