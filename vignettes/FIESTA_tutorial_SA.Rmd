@@ -82,27 +82,11 @@ FUNCTION  | DESCRIPTION
 ### EXAMPLES
 
 Set up for examples
-```
+```{r}
 # Load library
 library(FIESTA)
-library(sae)
-library(JoSAE)
-library(nlme)
 
-
-## If not on windows platform, set up an outfolder to output from examples
-if (.Platform$OS.type == "windows") {
-  # Set workspace to FIESTA folder (create if doesn't exist)
-  if (!file.exists("C:/FIESTA"))  {
-    dir.create("C:/FIESTA")
-  }
-  setwd("C:/FIESTA")
-
-  if (!file.exists("outfolder")) {
-    dir.create("outfolder")
-  }
-  outfolder <- "outfolder"
-}
+outfolder <- tempdir()
 
 # File names for external spatial data
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
@@ -135,7 +119,7 @@ There are several reference tables stored in FIESTA, including table variable de
 
 
 #### <a name="spGetSAdoms"/>spGetSAdoms()
-```
+```{r}
 ######################################################################################
 # Usage:
 # spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,  
@@ -159,17 +143,17 @@ head(WYbhdist)
 
 ## Get spatial domains for small area estimation
 SAdomdat <- spGetSAdoms(smallbnd=WYbhdistfn, smallbnd.unique="DISTRICTNA",
-        helperbnd=ecomap, helperbnd.unique="SUBSECTION", largebnd=ecomap,
+        helperbnd=FIESTAnalysis::ecomap, helperbnd.unique="SUBSECTION", largebnd=FIESTAnalysis::ecomap,
         largebnd.unique="SECTION", nbrdom.min=10)
 SAdoms <- SAdomdat$SAdomlst$SAdoms
 
-plot(st_geometry(SAdoms))
+plot(st_geometry(SAdomdat$SAdomlst[[1]]))
 
 
 ```
 
 #### <a name="spGetPlots"/>spGetPlots()
-```
+```{r}
 ######################################################################################
 # Usage:
 # spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL, 
@@ -190,12 +174,20 @@ plot(st_geometry(SAdoms))
 
 SQLitefn = "E:/FIAdata/FIADB_USA.db"
 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetEvalid.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetPlots.R")
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
-SAdata <- spGetPlots(bnd=SAdoms, datsource="sqlite", 
-      data_dsn=SQLitefn, xy="PLOT", xy_dsn=SQLitefn, xvar="LON", yvar="LAT", 
-      xy.uniqueid="CN", invyrs=2011:2013, showsteps=TRUE, xy.joinid="CN")
+# source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetEvalid.R")
+# source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetPlots.R")
+# source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
+SAdata <- spGetPlots(bnd=SAdoms,
+                     datsource="sqlite", 
+                     data_dsn=SQLitefn,
+                     xy="PLOT",
+                     xy_dsn=SQLitefn,
+                     xvar="LON", 
+                     yvar="LAT", 
+                     xy.uniqueid="CN",
+                     invyrs=2011:2013,
+                     showsteps=TRUE,
+                     xy.joinid="CN")
       
       
 SAxy <- spGetXY(bnd=SAdoms, 
