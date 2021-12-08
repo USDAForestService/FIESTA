@@ -91,7 +91,9 @@
 #' Only used when multest = TRUE.
 #' @param save4testing Logical. If TRUE, saves intermediate steps as R objects
 #' to outfolder for testing (pdomdat, dunitlut).
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modSApop() if SApopdat is NULL.
+#' 
 #' @return \item{est}{ Data frame. Tree estimates and percent sampling error by
 #' domain.  Estimates are based on the SApackage and SAmethod parameters
 #' defined. } \item{titlelst}{ List. List of titles used for table output. }
@@ -168,6 +170,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       savedata_opts = NULL, 
                       multest_opts = NULL, 
                       save4testing = FALSE, 
+                      gui = FALSE, 
                       ...){
   ######################################################################################
   ## DESCRIPTION: 
@@ -686,15 +689,17 @@ modSAtree <- function(SApopdatlst = NULL,
     dunit_multestlst <- 
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
-			dat=tdomdattot, cuniqueid=cuniqueid, 
-			largebnd.unique=lunique, dunitlut=dunitlut, dunitvar=dunitvar,
-			prednames=prednames, domain="TOTAL",
-			response=response, showsteps=showsteps, savesteps=savesteps,
-			stepfolder=stepfolder, prior=prior, variable.select=variable.select),
-     	 error=function(e) {
-			message("error with estimates of ", response, "...")
-			message(e, "\n")
-			return(NULL) })
+			      dat=tdomdattot, 
+		       cuniqueid=cuniqueid, largebnd.unique=lunique, 
+		       dunitlut=dunitlut, dunitvar=dunitvar, 
+		       prednames=prednames, domain="TOTAL", response=response, 
+		       showsteps=showsteps, savesteps=savesteps, 
+		       stepfolder=stepfolder, prior=prior, 
+		       variable.select=variable.select),
+     	        error=function(e) {
+			        message("error with estimates of ", response, "...")
+			        message(e, "\n")
+			      return(NULL) })
     if (length(largebnd.vals) > 1) {
       dunit_multest <- do.call(rbind, do.call(rbind, dunit_multestlst)[,"est.large"])
       predselect.unit <- do.call(rbind, dunit_multestlst)[,"predselect.unit"]
@@ -882,9 +887,7 @@ modSAtree <- function(SApopdatlst = NULL,
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
-  if (is.null(title.dunitvar)) {
-    title.dunitvar <- smallbnd.dom
-  }
+  title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
   alltitlelst <- check.titles(esttype=esttype, estseed=rowcolinfo$estseed, 
                     sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
                     title.rowvar=rowcolinfo$title.rowvar, title.colvar=title.colvar, 

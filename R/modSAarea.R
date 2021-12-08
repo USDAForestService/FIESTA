@@ -88,7 +88,9 @@
 #' Only used when multest = TRUE.
 #' @param save4testing Logical. If TRUE, saves intermediate steps as R objects
 #' to outfolder for testing (pdomdat, dunitlut).
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modSApop() if SApopdat is NULL.
+#' 
 #' @return \item{est}{ Data frame. Tree estimates and percent sampling error by
 #' domain.  Estimates are based on the SApackage and SAmethod parameters
 #' defined. } \item{titlelst}{ List. List of titles used for table output. }
@@ -163,6 +165,7 @@ modSAarea <- function(SApopdatlst = NULL,
                       savedata_opts = NULL, 
                       multest_opts = NULL,
                       save4testing = FALSE, 
+                      gui = FALSE, 
                       ...){
 
 
@@ -534,7 +537,7 @@ modSAarea <- function(SApopdatlst = NULL,
     pltcondf <- estdat$pltcondf
     landarea <- estdat$landarea
 
- 
+    
     ###################################################################################
     ### GET ROW AND COLUMN INFO FROM condf
     ###################################################################################
@@ -551,6 +554,26 @@ modSAarea <- function(SApopdatlst = NULL,
                     rowlut=rowlut, collut=collut, 
                     rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
                     landarea=landarea) 
+    treef <- rowcolinfo$treef
+    seedf <- rowcolinfo$seedf
+    condf <- rowcolinfo$condf
+    uniquerow <- rowcolinfo$uniquerow
+    uniquecol <- rowcolinfo$uniquecol
+    domainlst <- rowcolinfo$domainlst
+    rowvar <- rowcolinfo$rowvar
+    colvar <- rowcolinfo$colvar
+    row.orderby <- rowcolinfo$row.orderby
+    col.orderby <- rowcolinfo$col.orderby
+    row.add0 <- rowcolinfo$row.add0
+    col.add0 <- rowcolinfo$col.add0
+    title.rowvar <- rowcolinfo$title.rowvar
+    title.colvar <- rowcolinfo$title.colvar
+    bytdom <- rowcolinfo$bytdom
+    tdomvar <- rowcolinfo$tdomvar
+    tdomvar2 <- rowcolinfo$tdomvar2
+    grpvar <- rowcolinfo$grpvar
+    
+    
     #rm(rowcolinfo)  
     ## Generate a uniquecol for estimation units
     if (!sumunits && rowcolinfo$colvar == "NONE") {
@@ -572,7 +595,7 @@ modSAarea <- function(SApopdatlst = NULL,
       cdomdat <- merge(condx, rowcolinfo$condf, by=c(cuniqueid, condid), all.x=TRUE)
       cdomdat[, (estvar.name) := ifelse(is.na(TOTAL), 0, get(estvar.area))] 
     }
- 
+
     #####################################################################################
     ## GENERATE ESTIMATES
     #####################################################################################
@@ -628,18 +651,21 @@ modSAarea <- function(SApopdatlst = NULL,
 #largebnd.val=largebnd.vals
 #domain="TOTAL"
 
+
     dunit_multestlst <- 
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
-			dat=tdomdattot, cuniqueid=cuniqueid, 
-			largebnd.unique=lunique, dunitlut=dunitlut, dunitvar=dunitvar,
-			prednames=prednames, domain="TOTAL",
-			response=response, showsteps=showsteps, savesteps=savesteps,
-			stepfolder=stepfolder, prior=prior, variable.select=variable.select),
-     	 error=function(e) {
-			message("error with estimates of ", response, "...")
-			message(e, "\n")
-			return(NULL) })
+			    dat=tdomdattot, 
+			    cuniqueid=cuniqueid, largebnd.unique=lunique, 
+			    dunitlut=dunitlut, dunitvar=dunitvar,
+			    prednames=prednames, domain="TOTAL", response=response, 
+			    showsteps=showsteps, savesteps=savesteps,
+			    stepfolder=stepfolder, prior=prior, 
+			    variable.select=variable.select),
+     	      error=function(e) {
+			      message("error with estimates of ", response, "...")
+			      message(e, "\n")
+			    return(NULL) })
     if (length(largebnd.vals) > 1) {
       dunit_multest <- do.call(rbind, do.call(rbind, dunit_multestlst)[,"est.large"])
       predselect.unit <- do.call(rbind, dunit_multestlst)[,"predselect.unit"]
@@ -684,15 +710,17 @@ modSAarea <- function(SApopdatlst = NULL,
       dunit_multestlst_row <- 
 		tryCatch(
 			lapply(largebnd.vals, SAest.large, 
-				dat=cdomdatsum, cuniqueid=cuniqueid, 
-				largebnd.unique=lunique, dunitlut=dunitlut, dunitvar=dunitvar,
-				prednames=prednames, domain=rowcolinfo$rowvar,
-				response=response, showsteps=showsteps, savesteps=savesteps,
-				stepfolder=stepfolder, prior=prior, variable.select=variable.select),
-     	 	error=function(e) {
-			message("error with estimates of ", response, "...")
-			message(e, "\n")
-			return(NULL) })
+				    dat=cdomdatsum, 
+				    cuniqueid=cuniqueid, largebnd.unique=lunique, 
+				    dunitlut=dunitlut, dunitvar=dunitvar, 
+				    prednames=prednames, domain=rowcolinfo$rowvar, response=response, 
+				    showsteps=showsteps, savesteps=savesteps, 
+				    stepfolder=stepfolder, prior=prior, 
+				    variable.select=variable.select), 
+			        error=function(e) {
+			        message("error with estimates of ", response, "...")
+			        message(e, "\n")
+			      return(NULL) })
       if (length(largebnd.vals) > 1) {
         dunit_multest_row <- do.call(rbind, do.call(rbind, dunit_multestlst_row)[,"est.large"])
         predselect.unit_row <- do.call(rbind, dunit_multestlst_row)[,"predselect.unit"]
@@ -853,9 +881,7 @@ modSAarea <- function(SApopdatlst = NULL,
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
-  if (is.null(title.dunitvar)) {
-    title.dunitvar <- smallbnd.dom
-  }
+  title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
   alltitlelst <- check.titles(esttype=esttype, 
 	      sumunits=sumunits, title.main=title.main, 
 	      title.ref=title.ref, title.rowvar=rowcolinfo$title.rowvar, 
@@ -880,7 +906,6 @@ modSAarea <- function(SApopdatlst = NULL,
   } 
   ## Append name of package and method to outfile name
   outfn.estpse <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
-
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES

@@ -698,8 +698,6 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
 		largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL,
 		prior=NULL, variable.select=TRUE) {
 
-print(dom)
-
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
         
