@@ -149,18 +149,29 @@ rastlst.cat <- fornffn
 rastlst.cat.name="fornf"
 
 ## Generate datasets for Model-Assisted estimation
-modeldat <- spGetAuxiliary(xyplt=WYspplt, uniqueid="CN", 
-  dunit_layer=WYbhfn, dunitvar=NULL,
-  rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, rastlst.cat=rastlst.cat,
-  rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
-  asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, savedata=FALSE)
+modeldat <- spGetAuxiliary(
+  xyplt = WYspplt,
+  uniqueid = "CN",
+  unit_layer = WYbhfn,
+  unitvar = NULL,
+  rastlst.cont = rastlst.cont,
+  rastlst.cont.name = rastlst.cont.name,
+  rastlst.cat = rastlst.cat,
+  rastlst.cat.name = rastlst.cat.name,
+  rastlst.cont.stat = "mean",
+  asptransform = TRUE,
+  rast.asp = asp,
+  keepNA = FALSE,
+  showext = FALSE,
+  savedata = FALSE
+)
 names(modeldat)
 
 pltassgn <- modeldat$pltassgn
 pltassgnid <- modeldat$pltassgnid
-unitlut <- modeldat$domzonal
-unitarea <- modeldat$domarea
-unitvar <- modeldat$domvar
+unitlut <- modeldat$unitzonal # not sure if this is right...
+unitarea <- modeldat$unitarea
+unitvar <- modeldat$unitvar
 areavar <- modeldat$areavar
 prednames <- modeldat$prednames
 zonalnames <- modeldat$zonalnames
@@ -222,6 +233,11 @@ help(modMApop)
 MApopdat.ht <- modMApop(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
     adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut)
 names(MApopdat.ht)
+
+
+modMApop(popTabs = popTables(tree = WYtree, cond = WYcond),
+         pltassgn = pltassgn, adj = "samp", unitarea = unitarea,
+         unitvar = unitvar, unitzonal = unitlut)
 
 MApopdat.ht$MAmethod
 MApopdat.ht$unitarea

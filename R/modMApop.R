@@ -240,6 +240,7 @@ modMApop <- function(popType="VOL",
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=strwtvar <- NULL
+  strata <- FALSE
   
   
   ##################################################################
@@ -255,7 +256,7 @@ modMApop <- function(popType="VOL",
   }
  
   ## Check parameter lists
-  pcheck.params(input.params, strata_opts=strata_opts, unit_opts=unit_opts, 
+  pcheck.params(input.params, unit_opts=unit_opts, 
                 savedata_opts=savedata_opts)
   
   ## Set unit defaults
