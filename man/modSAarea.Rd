@@ -29,6 +29,7 @@ modSAarea(
   savedata_opts = NULL,
   multest_opts = NULL,
   save4testing = FALSE,
+  gui = FALSE,
   ...
 )
 }
@@ -102,6 +103,8 @@ Only used when multest = TRUE.}
 
 \item{save4testing}{Logical. If TRUE, saves intermediate steps as R objects
 to outfolder for testing (pdomdat, dunitlut).}
+
+\item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Parameters for modSApop() if SApopdat is NULL.}
 }
