@@ -145,7 +145,7 @@ head(WYbhdist)
 SAdomdat <- spGetSAdoms(smallbnd=WYbhdistfn, smallbnd.unique="DISTRICTNA",
         helperbnd=FIESTAnalysis::ecomap, helperbnd.unique="SUBSECTION", largebnd=FIESTAnalysis::ecomap,
         largebnd.unique="SECTION", nbrdom.min=10)
-SAdoms <- SAdomdat$SAdomlst$SAdoms
+SAdoms <- SAdomdat$SAdomlst[[1]]
 
 plot(st_geometry(SAdomdat$SAdomlst[[1]]))
 

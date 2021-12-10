@@ -149,18 +149,29 @@ rastlst.cat <- fornffn
 rastlst.cat.name="fornf"
 
 ## Generate datasets for Model-Assisted estimation
-modeldat <- spGetAuxiliary(xyplt=WYspplt, uniqueid="CN", 
-  dunit_layer=WYbhfn, dunitvar=NULL,
-  rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name, rastlst.cat=rastlst.cat,
-  rastlst.cat.name=rastlst.cat.name, rastlst.cont.stat="mean",
-  asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE, savedata=FALSE)
+modeldat <- spGetAuxiliary(
+  xyplt = WYspplt,
+  uniqueid = "CN",
+  unit_layer = WYbhfn,
+  unitvar = NULL,
+  rastlst.cont = rastlst.cont,
+  rastlst.cont.name = rastlst.cont.name,
+  rastlst.cat = rastlst.cat,
+  rastlst.cat.name = rastlst.cat.name,
+  rastlst.cont.stat = "mean",
+  asptransform = TRUE,
+  rast.asp = asp,
+  keepNA = FALSE,
+  showext = FALSE,
+  savedata = FALSE
+)
 names(modeldat)
 
 pltassgn <- modeldat$pltassgn
 pltassgnid <- modeldat$pltassgnid
-unitlut <- modeldat$domzonal
-unitarea <- modeldat$domarea
-unitvar <- modeldat$domvar
+unitlut <- modeldat$unitzonal # not sure if this is right...
+unitarea <- modeldat$unitarea
+unitvar <- modeldat$unitvar
 areavar <- modeldat$areavar
 prednames <- modeldat$prednames
 zonalnames <- modeldat$zonalnames
@@ -213,50 +224,54 @@ prednames
 
 help(modMApop)
 
-## Population data for MAmethod='HT' (Horvitz-Thompson)
-# MApopdat.ht <- modMApop(popTabs = list(tree=WYtree, cond=WYcond),
-#                         pltassgn=pltassgn, 
-#                         adj="samp", 
-#                         unitarea=unitarea,
-#                         unitvar=unitvar)
-MApopdat.ht <- modMApop(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
-    adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut)
-names(MApopdat.ht)
+# the old call --
+# MApopdat.ht <- modMApop(MAmethod="HT", tree=WYtree, cond=WYcond, pltassgn=pltassgn, 
+#     adj="samp", unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut)
+# names(MApopdat.ht)
 
-MApopdat.ht$MAmethod
-MApopdat.ht$unitarea
-MApopdat.ht$unitlut
-MApopdat.ht$estvar.area
-MApopdat.ht$plotsampcnt
-MApopdat.ht$condsampcnt
+MApopdat <- modMApop(popTabs = popTables(tree = WYtree, cond = WYcond),
+         pltassgn = pltassgn, 
+         pltassgnid = "CN",
+         adj = "samp",
+         unitarea = unitarea,
+         unitvar = unitvar,
+         unitzonal = unitlut,
+         prednames = prednames)
 
-
-## Population data for MAmethod='PS' (Post-stratification)
-MApopdat.ps <- modMApop(MAmethod="PS", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
-  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, PSstrvar="fornf",
-  	prednames=prednames, predfac="fornf")
-names(MApopdat.ps)
-
-MApopdat.ps$MAmethod
-MApopdat.ps$unitlut
-MApopdat.ps$PSstrvar
-
-## Population data for MAmethod='greg' (generalized regression)
-MApopdat.greg <- modMApop(MAmethod="greg", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
-  	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, predfac="fornf",
-  	prednames=prednames)
-names(MApopdat.greg)
-
-MApopdat.greg$MAmethod
-MApopdat.greg$unitlut
-MApopdat.greg$prednames
+# MApopdat.ht$MAmethod
+# MApopdat.ht$unitarea
+# MApopdat.ht$unitlut
+# MApopdat.ht$estvar.area
+# MApopdat.ht$plotsampcnt
+# MApopdat.ht$condsampcnt
+# 
+# 
+# ## Population data for MAmethod='PS' (Post-stratification)
+# MApopdat.ps <- modMApop(MAmethod="PS", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
+#   	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, PSstrvar="fornf",
+#   	prednames=prednames, predfac="fornf")
+# names(MApopdat.ps)
+# 
+# MApopdat.ps$MAmethod
+# MApopdat.ps$unitlut
+# MApopdat.ps$PSstrvar
+# 
+# ## Population data for MAmethod='greg' (generalized regression)
+# MApopdat.greg <- modMApop(MAmethod="greg", tree=WYtree, cond=WYcond, pltassgn=pltassgn, adj="samp", 
+#   	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, predfac="fornf",
+#   	prednames=prednames)
+# names(MApopdat.greg)
+# 
+# MApopdat.greg$MAmethod
+# MApopdat.greg$unitlut
+# MApopdat.greg$prednames
 
 
 ```
 
 
 #### <a name="modMAarea"/>modMAarea()
-```
+```{r}
 ######################################################################################
 # Usage:
 # modMAarea(MAmethod = "greg", prednames = NULL, 
@@ -284,7 +299,14 @@ MApopdat.greg$prednames
 
 
 ## Area of forest land for Bighorn, National Forest
-area1.ht <- modMAarea(MAmethod="HT", cond=WYcond, pltassgn=pltassgn, adj="samp", 
+area1.ht <- modMAarea(
+  MApopdat = MApopdat,
+  MAmethod = "HT",
+  landarea = "FOREST")
+  
+  
+  
+  modMAarea(MAmethod="HT", cond=WYcond, pltassgn=pltassgn, adj="samp", 
   	unitarea=unitarea, unitvar=unitvar, areavar=areavar, unitlut=unitlut, 
   	landarea="FOREST", rawdata=TRUE)
 names(area1.ht)
