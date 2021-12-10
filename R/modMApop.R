@@ -228,7 +228,7 @@ modMApop <- function(popType="VOL",
 
   ## If gui.. set variables to NULL
   if (gui) {
-    areavar=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
+    areavar=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
   
   ## Set options
@@ -241,7 +241,7 @@ modMApop <- function(popType="VOL",
   returnlst <- list()
 
   ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=expcondtab=strwtvar <- NULL
+  ONEUNIT=n.total=expcondtab <- NULL
   strata <- FALSE
   
   
@@ -258,8 +258,7 @@ modMApop <- function(popType="VOL",
   }
  
   ## Check parameter lists
-  pcheck.params(input.params, unit_opts=unit_opts, 
-                savedata_opts=savedata_opts)
+  pcheck.params(input.params, unit_opts=unit_opts, savedata_opts=savedata_opts)
   
   ## Set unit defaults
   unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
@@ -305,7 +304,7 @@ modMApop <- function(popType="VOL",
   
   ## Set strata defaults
   strata_defaults_list <- formals(FIESTA::strata_options)[-length(formals(FIESTA::strata_options))]
-  
+
   for (i in 1:length(strata_defaults_list)) {
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
   }
@@ -671,7 +670,7 @@ modMApop <- function(popType="VOL",
           areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, 
           npixels=npixels, npixelvar=npixelvar, prednames=prednames, 
           expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-          states=states, invyrs=invyrs, estvar.area=estvar.area, strata=strata, adj=adj)
+          states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj)
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

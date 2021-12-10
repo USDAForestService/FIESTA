@@ -17,7 +17,10 @@ MAest.ht <- function(y, N, FIA=TRUE, getweights=FALSE) {
 
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
+<<<<<<< Updated upstream
     print(esthtdt)
+=======
+>>>>>>> Stashed changes
     esthtdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
 
@@ -79,7 +82,7 @@ MAest.ps <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE, getweig
 
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
-    estps[, nhat.var := nhat.var / (1 - length(y) / N)]
+    estpsdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
 
   ## Return survey weights
@@ -173,7 +176,7 @@ MAest.greg <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE,
 
   ## This takes out the finite population correction term (to estimated variance from FIA)
   if (FIA) {
-    estgreg[, nhat.var := nhat.var / (1 - length(y) / N)]
+    estgregdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
 
   ## Return survey weights
@@ -236,7 +239,7 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE, getw
  
   ## This takes out the finite population correction term (to estimated variance from FIA)
   if (FIA) {
-    estratio[, nhat.var := nhat.var / (1 - length(y) / N)]
+    estratiodt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
   ## Return survey weights
   if (getweights) {

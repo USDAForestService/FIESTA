@@ -256,11 +256,22 @@
 #' 
 #' 
 #' @export modGBtree
-modGBtree <- function(GBpopdat, estvar, estvar.filter=NULL, estseed="none",
-                      landarea="FOREST", pcfilter=NULL, rowvar=NULL, colvar=NULL, 
-                      sumunits=TRUE, returntitle=FALSE, savedata=FALSE,
-                      table_opts=NULL, title_opts=NULL,
-                      savedata_opts=NULL, gui=FALSE, ...){
+modGBtree <- function(GBpopdat, 
+                      estvar, 
+                      estvar.filter=NULL, 
+                      estseed="none", 
+                      landarea="FOREST", 
+                      pcfilter=NULL, 
+                      rowvar=NULL, 
+                      colvar=NULL, 
+                      sumunits=TRUE, 
+                      returntitle=FALSE, 
+                      savedata=FALSE, 
+                      table_opts=NULL, 
+                      title_opts=NULL, 
+                      savedata_opts=NULL, 
+                      gui=FALSE, 
+                      ...){
 
   ##################################################################################
   ## DESCRIPTION:

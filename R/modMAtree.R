@@ -44,12 +44,11 @@
 #' 
 #' @param MApopdat List. Population data objects returned from modMApop().
 #' @param MAmethod String. mase (i.e., model-assisted) method to use ('HT',
-#' 'PS', 'greg', 'gregEN').
-#' @param FIA Logical. If TRUE, the finite population term is removed from
-#' estimator to match FIA estimates.
-#' @param prednames String vector. Name(s) of predictor variables to include in
-#' model.
-#' @param modelselect Boolean. If TRUE, variable selection occurs. 
+#' 'PS', 'greg', 'gregEN', 'ratio').
+#' @param estvar String. Name of the tree-level estimate variable (e.g.,
+#' 'VOLCFNET').
+#' @param estvar.filter String. A tree-level filter for estvar. Must be R
+#' syntax (e.g., 'STATUSCD == 1').
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param landarea String. The condition-level filter for defining land area
@@ -57,10 +56,6 @@
 #' if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.
 #' @param pcfilter String. A filter for plot or cond attributes (including
 #' pltassgn).  Must be R logical syntax.
-#' @param estvar String. Name of the tree-level estimate variable (e.g.,
-#' 'VOLCFNET').
-#' @param estvar.filter String. A tree-level filter for estvar. Must be R
-#' syntax (e.g., 'STATUSCD == 1').
 #' @param rowvar String. Optional. Name of domain variable to group estvar by
 #' for rows in table output. Rowvar must be included in an input data frame
 #' (i.e., plt, cond, tree). If no rowvar is included, an estimate is returned
@@ -68,8 +63,13 @@
 #' @param colvar String. Optional. If rowvar != NULL, name of domain variable
 #' to group estvar by for columns in table output. Colvar must be included in
 #' an input data frame (i.e., plt, cond, tree).
+#' @param prednames String vector. Name(s) of predictor variables to include in
+#' model.
+#' @param modelselect Boolean. If TRUE, variable selection occurs. 
 #' @param sumunits Logical. If TRUE, estimation units are summed and returned
 #' in one table.
+#' @param FIA Logical. If TRUE, the finite population term is removed from
+#' estimator to match FIA estimates.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -243,17 +243,17 @@
 #' @export modMAtree
 modMAtree <- function(MApopdat, 
                       MAmethod, 
-                      FIA = TRUE, 
-                      prednames = NULL, 
-                      modelselect = FALSE, 
+                      estvar, 
+                      estvar.filter = NULL, 
+                      estseed = "none", 
                       landarea = "FOREST", 
                       pcfilter = NULL, 
-                      estseed = "none", 
-                      estvar = NULL, 
-                      estvar.filter = NULL, 
                       rowvar = NULL, 
                       colvar = NULL, 
+                      prednames = NULL, 
+                      modelselect = FALSE, 
                       sumunits = FALSE, 
+                      FIA = TRUE, 
                       returntitle = FALSE, 
                       savedata = FALSE, 
                       table_opts = NULL, 
@@ -743,6 +743,8 @@ modMAtree <- function(MApopdat,
   if (rawdata) {
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat)
+    #rawdat$expcondtab <- unit_weights
+    rawdat$plotweights <- unit_weights
     rawdat$estvar <- estvar.name
     rawdat$estvar.filter <- estvar.filter
   

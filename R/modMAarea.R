@@ -547,6 +547,8 @@ modMAarea <- function(MApopdat,
                           domain="TOTAL", response=estvar.name, npixels=npixels, 
                           FIA=FIA, modelselect=modelselect, getweights=TRUE)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
+    unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
+    unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
     }
@@ -678,6 +680,8 @@ modMAarea <- function(MApopdat,
   if (rawdata) {
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(cdomdat)
+    #rawdat$expcondtab <- unit_weights
+    rawdat$plotweights <- unit_weights
   
     if (savedata) {
       if (!is.null(title.estpse)) {
