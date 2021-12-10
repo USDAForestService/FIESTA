@@ -78,6 +78,7 @@
 #' a data frame with area and estimation unit. If more than one estimation
 #' unit, provide a data frame of total area by estimation unit, including
 #' unitvar and areavar.
+#' @param areavar String. Name of area variable in unitarea. Default="ACRES".
 #' @param unitzonal DF/DT. Table with zonal auxiliary information by estimation
 #' unit. For continuous data, means by estimation unit; for categorical data,
 #' proportion of class by estimation unit.
@@ -195,6 +196,7 @@ modMApop <- function(popType="VOL",
 				             adj = "plot", 
 				             unitvar = NULL,
 				             unitarea = NULL,
+				             areavar = "ACRES", 
 				             unitzonal = NULL,
 				             prednames = NULL,
 				             predfac = NULL,
