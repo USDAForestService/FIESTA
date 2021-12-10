@@ -129,6 +129,7 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
   ## var2 - if the matching variable is named different
   ## tab1txt - text for table 1
   ## tab2txt - text for table 2
+ 
 
   ## Define function 
   unAsIs <- function(X) {
@@ -138,6 +139,9 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
      }
      X
   }
+ 
+  tab1 <- pcheck.table(tab1)
+  tab2 <- pcheck.table(tab2)
 
   if (is.null(tab1txt)) tab1txt <- "tab1"
   if (is.null(tab2txt)) tab2txt <- "tab2"
@@ -195,7 +199,7 @@ check.matchclass <- function(tab1, tab2, matchcol, var2=NULL, tab1txt=NULL, tab2
     } else if (class(tab2[[v2]]) == "factor") {  
       tab2[[v2]] <- as.character(tab2[[v2]])
     }
-    
+   
     tab1 <- tab1[, lapply(.SD, unAsIs)]
     tab2 <- tab2[, lapply(.SD, unAsIs)]
 

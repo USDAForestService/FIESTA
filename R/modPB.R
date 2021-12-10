@@ -403,6 +403,7 @@ modPB <- function(PBpopdat = NULL,
     stop("must include unitarea in population data for area table")
   }
 
+  
   #################################################################################
   ### GET ROW AND COLUMN INFO
   #################################################################################
@@ -432,12 +433,13 @@ modPB <- function(PBpopdat = NULL,
     PBx.d <- rowcolinfo$PBx.d
   }
 
-  
+ 
   ###################################################################################
   ## MERGE FILTERED DATA TO ALL PLOTS
   ###################################################################################
   tabs <- check.matchclass(PBx, pltassgnx, plotid, pltassgnid,
 			tab1txt="pnt", tab2txt="pltassgn")
+
   PBx <- tabs$tab1
   pltassgnx <- tabs$tab2
   PBall <- merge(PBx, pltassgnx, by.x=plotid, by.y=pltassgnid, all.x=TRUE)
@@ -826,7 +828,7 @@ modPB <- function(PBpopdat = NULL,
    # setnames(totunit, names(totunit), names(rowunit))
   }          
 
-  ###################################################################
+    ###################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################
   CI <- TRUE

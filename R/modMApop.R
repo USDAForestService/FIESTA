@@ -47,11 +47,11 @@
 #' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
 #' below for descriptions of each.
 #' @param popTabs List of population tables the user would like returned.
-#'  See help(popTabs()) for a list of options.
+#'  See help(popTables) for a list of options.
 #' @param popTabIDs List of unique IDs corresponding to the population tables
-#' that the user has requested. See help(popTabIDs()) for a list of
+#' that the user has requested. See help(popTableIDs) for a list of
 #' options.
-#' @param popFilter List of population filters. See help(popFilters()) for a 
+#' @param popFilter List of population filters. See help(popFilters) for a 
 #' list of options. 
 #' @param pltassgn DF/DT, Optional. R object, sf R object, comma-delimited
 #' file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level

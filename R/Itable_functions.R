@@ -646,20 +646,12 @@ crossxbyunit <- function(unit=NULL, unit_grpest=NULL, unit_rowest=NULL,
  
       if(savedata){
         if (esttype == "PHOTO" && phototype == "PCT") {
-print("MMMM")
-print(esttab)
-print(psetab)
-print(str(esttab))
-print(str(psetab))
-
           suppressWarnings(
           save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
 		tab2.title=title.pse.unit, outfolder=outfolder, coltitlerow=TRUE,
  		coltitle=title.colvar, rnames=rnames, outfn.estpse=outfn.estpse.unit, 
 		addtitle=addtitle, rowtotal=FALSE, outfn.date=outfn.date,
  		overwrite=overwrite))
-print("MMMM2")
-
         } else {
           suppressWarnings(
           save2tabs(tab1=esttab, tab2=psetab, tab1.title=title.est.unit, 
@@ -670,7 +662,7 @@ print("MMMM2")
         }
       }
     }
-print("TESTTTTTTTTTTT")
+ 
     if ("unit" %in% names(est2return)) {
       names(est2return)[names(est2return) == "unit"] <- title.unitvar
       if (!is.null(pse2return))

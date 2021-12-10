@@ -7,14 +7,20 @@ wrapSE <- function(x) {
 }
 
 
-tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar, 
-	colvar=NULL, pcfilter=NULL, rowgrp=FALSE, colgrp=FALSE, collut=NULL,
-	colgrpcd=NULL, rowgrpnm=NULL, rowgrpord=NULL, estvar.filter=NULL, 
-	title.rowvar=NULL, title.rowgrp=NULL, row.FIAname=FALSE, allin1=FALSE, 
-	row.add0=FALSE, col.add0=FALSE, rowgrptot=TRUE, colgrptot=TRUE, sumunits=TRUE,
- 	unitvar="ESTN_UNIT", rowgrp.subtot=TRUE, rowgrp2.subtot=FALSE, row.orderby=NULL, 
-	title.colvar=NULL, title.colgrp=NULL, landarea="ALL", col.orderby=NULL, 
-	estnull="--", psenull="--", GBpopdat=NULL, ...) {
+tabgrp <- function(GBpopdat=NULL, esttype, 
+                   rowvar, colvar=NULL, pcfilter=NULL, 
+                   rowgrp=FALSE, colgrp=FALSE, collut=NULL, 
+                   colgrpcd=NULL, rowgrpnm=NULL, rowgrpord=NULL, 
+                   estvar=NULL, estvar.filter=NULL, 
+                   title.rowvar=NULL, title.rowgrp=NULL, 
+                   row.FIAname=FALSE, col.FIAname=FALSE, 
+                   allin1=FALSE, row.add0=FALSE, col.add0=FALSE, 
+                   rowgrptot=TRUE, colgrptot=TRUE, 
+                   sumunits=TRUE, unitvar="ESTN_UNIT", 
+                   rowgrp.subtot=TRUE, rowgrp2.subtot=FALSE, 
+                   row.orderby=NULL, title.colvar=NULL, title.colgrp=NULL, 
+                   landarea="ALL", col.orderby=NULL, 
+                   estnull="--", psenull="--", divideby=NULL) {
 
   ## Arguments
   # esttype - String. Type of estimate ("AREA", "TREE", "RATIO").  
@@ -375,18 +381,33 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
           condtot.filter <- pcfilter
         }
         if (esttype == "AREA") { 
-          coltottab <- modGBarea(cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits,
-			pcfilter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby, 
-			title.rowvar=title.rowvar, allin1=allin1, row.add0=TRUE, unitvar=unitvar, 
-			rowlut=rowlut2, landarea=landarea, col.orderby=col.orderby, 
-			estnull=estnull, psenull=psenull, GBpopdat=GBpopdat, ...)$est
+          coltottab <- modGBarea(GBpopdat=GBpopdat, 
+                                 landarea=landarea, sumunits=sumunits,
+                                 pcfilter=condtot.filter, 
+                                 rowvar=rowvar, 
+                                 table_opts=list(row.orderby=row.orderby, 
+                                                 col.orderby=col.orderby, 
+                                                 row.add0=TRUE, 
+                                                 rowlut=rowlut2, 
+                                                 allin1=allin1, 
+                                                 estnull=estnull, psenull=psenull,
+                                                 divideby=divideby
+                                                 ), 
+                                 title_opts=list(title.rowvar=title.rowvar))$est
         } else if (esttype == "TREE") {
-          coltottab <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
-			pcfilter=condtot.filter, rowvar=rowvar, row.orderby=row.orderby,
- 			title.rowvar=title.rowvar, allin1=allin1, row.add0=TRUE, unitvar=unitvar, 
-			rowlut=rowlut2, estvar.filter=estvar.filter, landarea=landarea, 
-			col.orderby=col.orderby, estnull=estnull, psenull=psenull, 
-			GBpopdat=GBpopdat, ...)$est
+          coltottab <- modGBtree(GBpopdat=GBpopdat, 
+                                 landarea=landarea, sumunits=sumunits, 
+                                 pcfilter=condtot.filter, 
+                                 estvar=estvar, 
+                                 estvar.filter=estvar.filter,
+                                 rowvar=rowvar, 
+                                 table_opts=list(row.orderby=row.orderby, 
+                                                 row.add0=TRUE, 
+                                                 rowlut=rowlut2, 
+                                                 allin1=allin1, 
+                                                 estnull=estnull, psenull=psenull,
+                                                 divideby=divideby), 
+                                 title_opts=list(title.rowvar=title.rowvar))$est
         }
         if (!subtotal && rgrp != 9999 && nrow(coltottab) > 1) {
           coltottab <- coltottab[-nrow(coltottab),]
@@ -397,30 +418,48 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       }
       if (esttype == "AREA") {
         estdat <- 	tryCatch(
-        	modGBarea(cond=pltcondx, pltassgn=pltassgn, pcfilter=cond3.filter, 
-			rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, returntitle=TRUE, 
-			col.add0=TRUE, collut=collut, row.add0=TRUE, rowlut=rowlut2, allin1=allin1, 
-			title.rowvar=title.rowvar, sumunits=sumunits, unitvar=unitvar, 
-			title.filter="", landarea=landarea, title.colvar=title.colvar, 
-			col.orderby=col.orderby, estnull=estnull, psenull=psenull, 
-			GBpopdat=GBpopdat, ...),
-				error=function(err) {
-					message(err)
-					return(NULL)
-				} )
+        	modGBarea(GBpopdat=GBpopdat, 
+        	          landarea=landarea, sumunits=sumunits, 
+        	          pcfilter=cond3.filter, 
+        	          rowvar=rowvar, colvar=colvar, 
+        	          returntitle=TRUE, 
+        	          table_opts=list(row.orderby=row.orderby, 
+        	                          col.orderby=col.orderby, 
+        	                          col.add0=TRUE, row.add0=TRUE, 
+        	                          rowlut=rowlut2, collut=collut, 
+        	                          allin1=allin1, 
+        	                          estnull=estnull, psenull=psenull,
+        	                          divideby=divideby), 
+        	          title_opts=list(title.rowvar=title.rowvar, 
+        	                          title.colvar=title.colvar, 
+        	                          title.filter="")), 
+        	error=function(err) {
+					    message(err)
+					    return(NULL)
+				  } )
       } else if (esttype == "TREE") { 
  
         estdat <- 	tryCatch(
-		modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
-			unitvar=unitvar, pcfilter=cond3.filter, rowvar=rowvar, colvar=colvar,
- 			row.orderby=row.orderby, returntitle=TRUE, col.add0=TRUE, collut=collut, 
-			row.add0=TRUE, rowlut=rowlut2, title.rowvar=title.rowvar, allin1=allin1, 
-			title.filter="", estvar.filter=estvar2.filter, landarea=landarea, 
-			title.colvar=title.colvar, col.orderby=col.orderby, estnull=estnull, 
-			psenull=psenull, GBpopdat=GBpopdat, rawdata=TRUE, ...),
-				error=function(err) {
-					message(err)
-					return(NULL)
+          modGBtree(GBpopdat=GBpopdat, 
+                    landarea=landarea, sumunits=sumunits, 
+                    pcfilter=cond3.filter, 
+                    estvar=estvar,
+                    estvar.filter=estvar2.filter,
+                    rowvar=rowvar, colvar=colvar, 
+                    returntitle=TRUE, 
+                    table_opts=list(row.orderby=row.orderby, 
+                                    col.orderby=col.orderby, 
+                                    col.add0=TRUE, row.add0=TRUE, 
+                                    rowlut=rowlut2, collut=collut, 
+                                    allin1=allin1, 
+                                    estnull=estnull, psenull=psenull,
+                                    divideby=divideby),
+                    title_opts=list(title.rowvar=title.rowvar, 
+                                    title.colvar=title.colvar, 
+                                    title.filter="")), 
+          error=function(err) {
+            message(err) 
+            return(NULL)
 				} )
       }
 
@@ -457,8 +496,8 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
           pse[pse == 0] <- "--"
         } else {
           est <- cbind(est, 
-			as.data.frame(matrix(allin1f(estnull, psenull), 
-			nrow(est), estncols)))
+                       as.data.frame(matrix(allin1f(estnull, psenull), 
+                                            nrow(est), estncols)))
         }
         if (j == 1) {
           refnames <- ref_col[match(collut, ref_col$VALUE), "MEANING"]
@@ -484,8 +523,8 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
           pse <- cbind(grpnm, pse)
           names(pse)[names(pse) == rowgrpnm] <- title.rowgrp
           #psetabrow <- rbind(psetabrow, setDF(pse))
-          psetabrow <- setDF(rbindlist(list(psetabrow, pse), use.names=FALSE, 
-			fill=FALSE, idcol=FALSE))
+          psetabrow <- setDF(rbindlist(list(psetabrow, pse), 
+                                       use.names=FALSE, fill=FALSE, idcol=FALSE))
         } else {
           psetabrow <- setDF(pse)
         } 
@@ -498,19 +537,37 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
       row2.orderby <- rowgrpord
 
       if (esttype == "AREA") {
-        estdat2 <- modGBarea(cond=pltcondx, pltassgn=pltassgn, pcfilter=cond2.filter, 
-		rowvar=rowvar2, row.orderby=row2.orderby, colvar=colvar, row.FIAname=FALSE,
-		col.add0=TRUE, collut=collut, row.add0=TRUE, allin1=allin1, 
-		title.rowvar=title.rowvar, title.colvar=title.colvar, sumunits=sumunits, 
-		unitvar=unitvar, landarea=landarea, col.orderby=col.orderby, estnull=estnull,
- 		psenull=psenull, GBpopdat=GBpopdat, ...)
+        estdat2 <- modGBarea(GBpopdat=GBpopdat, 
+		                        landarea=landarea, sumunits=sumunits, 
+		                        pcfilter=cond2.filter, 
+		                        rowvar=rowvar2, colvar=colvar, 
+		                        table_opts=list(row.orderby=row2.orderby, 
+		                                        col.orderby=col.orderby, 
+		                                        row.FIAname=FALSE, 
+		                                        row.add0=TRUE, col.add0=TRUE, 
+		                                        collut=collut, 
+		                                        allin1=allin1, 
+		                                        estnull=estnull, psenull=psenull,
+		                                        divideby=divideby), 
+		                        title_opts=list(title.rowvar=title.rowvar, 
+		                                        title.colvar=title.colvar))
       } else if (esttype == "TREE") {
-        estdat2 <- modGBtree(tree=treex, cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits, 
-		unitvar=unitvar, pcfilter=cond2.filter, rowvar=rowvar2, row.orderby=row2.orderby, 
-		colvar=colvar, row.FIAname=FALSE, title.rowvar=title.rowvar, col.add0=TRUE, 
-		collut=collut, row.add0=TRUE, allin1=allin1, estvar.filter=estvar.filter, 
-		landarea=landarea, title.colvar=title.colvar, col.orderby=col.orderby, 
-		estnull=estnull, psenull=psenull, GBpopdat=GBpopdat, ...)
+        estdat2 <- modGBtree(GBpopdat=GBpopdat, 
+                             landarea=landarea, sumunits=sumunits, 
+                             pcfilter=cond2.filter,
+                             estvar=estvar,
+                             estvar.filter=estvar.filter,
+                             rowvar=rowvar2, colvar=colvar, 
+                             table_opts=list(row.orderby=row2.orderby, 
+                                             col.orderby=col.orderby, 
+                                             row.FIAname=FALSE, 
+                                             row.add0=TRUE, col.add0=TRUE, 
+                                             collut=collut, 
+                                             allin1=allin1, 
+                                             estnull=estnull, psenull=psenull,
+                                             divideby=divideby), 
+                             title_opts=list(title.rowvar=title.rowvar, 
+                                             title.colvar=title.colvar))
       }
       est2 <- estdat2$est
       if (!allin1) pse2 <- estdat2$pse
@@ -594,15 +651,19 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
   if (colgrptot) {
     if (rowgrptot) {
       if (esttype == "AREA") {
-        coltottab2 <- modGBarea(cond=pltcondx, pltassgn=pltassgn, sumunits=sumunits,
-		unitvar=unitvar, landarea=landarea, pcfilter=pcfilter, allin1=allin1, 
-		GBpopdat=GBpopdat, ...)$est
+        coltottab2 <- modGBarea(GBpopdat=GBpopdat, 
+                                landarea=landarea, sumunits=sumunits,
+                                pcfilter=pcfilter, 
+                                table_opts=list(allin1=allin1,
+                                                divideby=divideby))$est
       } else if (esttype == "TREE") {
-        coltottab2 <- modGBtree(cond=pltcondx, pltassgn=pltassgn, tree=treex, 
-			sumunits=sumunits, unitvar=unitvar, landarea=landarea, 
-			pcfilter=pcfilter, estvar.filter=estvar.filter, allin1=allin1, 
-			GBpopdat=GBpopdat, ...)$est
-
+        coltottab2 <- modGBtree(GBpopdat=GBpopdat, 
+                                landarea=landarea, sumunits=sumunits, 
+                                pcfilter=pcfilter, 
+                                estvar=estvar,
+                                estvar.filter=estvar.filter, 
+                                table_opts=list(allin1=allin1, 
+                                                divideby=divideby))$est
       }
       names(coltottab2)[names(coltottab2) == "TOTAL"] <- title.rowvar
       coltot <- rbind(coltot, coltottab2)
@@ -624,29 +685,30 @@ tabgrp <- function(esttype, cond=NULL, tree=NULL, pltassgn=NULL, rowvar,
   if (rowgrp) {
     if (colgrp) {
       esttab.title <- sub(tolower(title.rowvar), 
-		tolower(paste0(title.rowgrp, ", ", title.rowvar, ", ", title.colgrp, ",")), 
-		title.est)
+                          tolower(paste0(title.rowgrp, ", ", 
+                                         title.rowvar, ", ", title.colgrp, ",")), title.est)
     } else {
       esttab.title <- sub(tolower(title.rowvar), 
-		tolower(paste(title.rowgrp, "and", title.rowvar)), title.est)
+                          tolower(paste(title.rowgrp, "and", title.rowvar)), title.est)
     }
     if (!allin1) {
       if (colgrp) {
         psetab.title <- sub(tolower(title.rowvar), 
-		tolower(paste0(title.rowgrp, ", ", title.rowvar, ", ", title.colgrp, ",")), 
+                            tolower(paste0(title.rowgrp, ", ", 
+                                           title.rowvar, ", ", title.colgrp, ",")), 
 		title.pse)
       } else {
         psetab.title <- sub(tolower(title.rowvar), 
-		tolower(paste(title.rowgrp, "and", title.rowvar)), title.pse)
+                            tolower(paste(title.rowgrp, "and", title.rowvar)), title.pse)
       }
     }
   } else {
     if (colgrp) {
       esttab.title <- sub(tolower(title.rowvar), 
-		tolower(paste0(title.rowvar, ", ", title.colgrp, ",")), title.est)
+                          tolower(paste0(title.rowvar, ", ", title.colgrp, ",")), title.est)
       if (!allin1)
         psetab.title <- sub(tolower(title.rowvar), 
-		tolower(paste0(title.rowvar, ", ", title.colgrp, ",")), title.pse)
+                            tolower(paste0(title.rowvar, ", ", title.colgrp, ",")), title.pse)
     } else {
       esttab.title <- title.est
       if (!allin1) psetab.title <- title.pse

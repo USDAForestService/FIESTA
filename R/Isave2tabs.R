@@ -17,8 +17,6 @@ save2tabs <- function(tab1, tab2, tab1.title, tab2.title, outfolder, coltitlerow
   tab1 <- pcheck.table(tab1)
   tab2 <- pcheck.table(tab2)
 
-print("WWWWWW")
-print(str(tab2))
   ## REMOVE COLUMNS WITH 0 VALUES.
  # if (rowtotal) {
  #   tab1 <- tab1[, tab1[tab1[,1] == "Total",] != 0]
@@ -28,8 +26,6 @@ print(str(tab2))
   ## Get number of row names
   rnbr <- length(rnames)
  
-print("XXXX")
-print(coltitlerow)
   ## ADD TITLE AND FORMAT TABLE
   ###########################################
   if (coltitlerow) {
@@ -38,23 +34,12 @@ print(coltitlerow)
 	#	function(x) {format(x[!is.na(suppressWarnings(as.numeric(x)))], big.mark=",")} ))
     tab1 <- tab1[, lapply(.SD, function(x) ifelse(is.na(suppressWarnings(as.numeric(x))),  
 		x, format(suppressWarnings(as.numeric(x)), big.mark=",")))]
-print("AAA")
-print(tab1)
     tab1 <- rbindlist(list(setDT(as.list(colnames(tab1)))[], tab1), use.names=FALSE)
     colnames(tab1) <- c(rep(" ", rnbr), coltitle, rep(" ", ncol(tab1)- (rnbr+1)))
-print("BBB")
-print(tab1)
-print(str(tab1))
-print(str(tab2))
-print(rnbr)
-save(tab2, file="F:/FIESTA_testing/tab2.rda")
-load("F:/FIESTA_testing/tab2.rda")
     tab2b <- rbindlist(list(setDT(as.list(colnames(tab2)))[], tab2), use.names=FALSE)
 
     tab2 <- rbindlist(list(setDT(as.list(colnames(tab2)))[], tab2), use.names=FALSE)
     colnames(tab2) <- c(rep(" ", rnbr), coltitle, rep(" ", ncol(tab2)- (rnbr+1)))
-print("CCC")
-print(tab1)
   }
 
   ## Get outfile name
@@ -83,7 +68,7 @@ print(tab1)
   outfile <- write2csv(tab2, outfile=outfile, appendfile=TRUE, closefn=FALSE)
   close(outfile)
   
-    message("###################################\n", 
+  message("###################################\n", 
 			"Table written to: ", outfilenm, 
 		"\n###################################")
 }
