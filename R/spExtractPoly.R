@@ -97,7 +97,7 @@
 #' @export spExtractPoly
 spExtractPoly <- function(xyplt, 
                           xyplt_dsn = NULL, 
-                          uniqueid = "PLT_CN", 
+                          xy.uniqueid = "PLT_CN", 
                           polyvlst, 
                           polyv_dsn = NULL, 
                           polyvarlst = NULL, 
@@ -167,7 +167,7 @@ spExtractPoly <- function(xyplt,
 
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=uniqueid, 
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=xy.uniqueid, 
 		exportsp=FALSE, ...)
   } else {
     ## GET uniqueid
@@ -259,7 +259,7 @@ spExtractPoly <- function(xyplt,
       out_layer <- "polyext"
     }
   }
-
+ 
   ########################################################################
   ### DO THE WORK
   ########################################################################

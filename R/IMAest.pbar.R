@@ -17,10 +17,6 @@ MAest.ht <- function(y, N, FIA=TRUE, getweights=FALSE) {
 
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
-<<<<<<< Updated upstream
-    print(esthtdt)
-=======
->>>>>>> Stashed changes
     esthtdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
 

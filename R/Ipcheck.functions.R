@@ -818,7 +818,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       dsn <- layer
     }
   }
-
+ 
   if (!is.null(dsn)) {
     ext.dsn <- getext(dsn)
     if (!file.exists(dsn) && (is.na(ext.dsn) || ext.dsn == "NA")) {
@@ -826,7 +826,14 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
         dsn <- paste(dsn, fmt, sep=".")
       if (!file.exists(dsn)) dsn <- NULL
     }
-    if (ext.dsn %in% c("shp", "csv")) {
+    if (ext.dsn %in% c("shp")) {
+      if (checkonly) {
+        return(TRUE)
+      } else {
+        layer <- basename.NoExt(dsn)
+        return(spImportSpatial(layer=layer, dsn=dsn))
+      }
+    } else if (ext.dsn %in% c("csv")) {
       layer <- basename.NoExt(dsn)
     } else if (!gui && is.null(layer)) {
       stop("layer is NULL")
@@ -878,9 +885,8 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
     } else {
       stop("dsn is NULL")
     }
-  }
+  } 
  
-
   ######################################################
   ## Check layer
   ######################################################
@@ -913,7 +919,8 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
     }
   }
   geomtype <- layerlst$geomtype[layerlst$name == layer][[1]]
-  if (is.na(geomtype)) {
+
+  if (!is.na(geomtype)) {
     if (!checkonly) {
       if (ext.dsn == "gdb") {
         if ("arcgisbinding" %in% rownames(utils::installed.packages())) {
