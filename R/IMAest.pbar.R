@@ -17,7 +17,8 @@ MAest.ht <- function(y, N, FIA=TRUE, getweights=FALSE) {
 
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
-    estht[, nhat.var := nhat.var / (1 - length(y) / N)]
+    print(esthtdt)
+    esthtdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
 
   ## Return survey weights
@@ -395,6 +396,9 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   }
 
   if (getweights) {
+    print(pltdat.dom[[cuniqueid]])
+    print(estlst$weights)
+    print(estlst)
     estlst$weights <- data.frame(pltdat.dom[[cuniqueid]], estlst$weights)
     names(estlst$weights) <- c(cuniqueid, "weights")
   }
