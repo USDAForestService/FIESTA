@@ -142,9 +142,14 @@ WYbhdist <- spImportSpatial(WYbhdistfn)
 head(WYbhdist)
 
 ## Get spatial domains for small area estimation
-SAdomdat <- spGetSAdoms(smallbnd=WYbhdistfn, smallbnd.unique="DISTRICTNA",
-        helperbnd=FIESTAnalysis::ecomap, helperbnd.unique="SUBSECTION", largebnd=FIESTAnalysis::ecomap,
-        largebnd.unique="SECTION", nbrdom.min=10)
+SAdomdat <- spGetSAdoms(
+  smallbnd = WYbhdistfn,
+  smallbnd.domain = "DISTRICTNA",
+  # helperbnd = FIESTAnalysis::ecomap,
+  # helperbnd.unique = "SUBSECTION",
+  largebnd = FIESTAnalysis::ecomap,
+  largebnd.unique = "SECTION"
+)
 SAdoms <- SAdomdat$SAdomlst[[1]]
 
 plot(st_geometry(SAdomdat$SAdomlst[[1]]))
