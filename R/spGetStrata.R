@@ -382,7 +382,7 @@ spGetStrata <- function(xyplt,
       ## Extract values of polygon unitlayer to points
       ## Note: removing all NA values
       extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerprj, 
-		        uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
+		        xy.uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
 		        keepNA=FALSE, exportNA=exportNA)
       sppltx <- extpoly$spxyext
       unitNA <- extpoly$NAlst[[1]]
@@ -420,7 +420,7 @@ spGetStrata <- function(xyplt,
 
     ## Extract values of raster layer to points
     extrast <- spExtractRast(sppltx, rastlst=stratlayerfn, 
-		    var.name=strvar, uniqueid=uniqueid, 
+		    var.name=strvar, xy.uniqueid=uniqueid, 
 		    keepNA=keepNA, exportNA=exportNA, rast.NODATA=rast.NODATA, 
 		    savedata_opts=savedata_opts)
     sppltx <- extrast$spplt

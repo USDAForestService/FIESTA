@@ -16,7 +16,7 @@
 #' extension, or file name (with extension) in xy_dsn folder.
 #' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
 #' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
-#' @param uniqueid String.* Unique identifier of xyplt rows.
+#' @param xy.uniqueid String.* Unique identifier of xyplt rows.
 #' @param polyvlst sf R object or String. Name(s) of polygon layers to extract
 #' values. A spatial polygon object, full path to shapefile, or name of a layer
 #' within a database.
@@ -84,7 +84,7 @@
 #' 
 #'   ## Extract points from polygon vector layer
 #'   xyext <- spExtractPoly(xyplt=WYplt, polyvlst=WYbhdistfn,
-#' 		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+#' 		xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
 #'   names(xyext)
 #'   xyext$outnames
 #'   spxyext <- xyext$spxyext
@@ -153,28 +153,28 @@ spExtractPoly <- function(xyplt,
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
   }
-  
+ 
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################  
-  
   ## Spatial points for data extraction.. 
   ##################################################################################
 #  sppltx <- pcheck.table(xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
 #			caption="XY coordinates?", stopifnull=TRUE)
   sppltx <- pcheck.spatial(xyplt, dsn=xyplt_dsn, tabnm="xyplt", 
 			caption="XY coordinates?", stopifnull=TRUE)
+ 
 
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
     sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=xy.uniqueid, 
 		exportsp=FALSE, ...)
   } else {
-    ## GET uniqueid
+    ## GET xy.uniqueid
     sppltnames <- names(sppltx)
-    uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
+    xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
-		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
+		warn=paste(xy.uniqueid, "not in spplt"), stopifnull=TRUE)
   }
 
   ## Verify polygons
@@ -190,10 +190,11 @@ spExtractPoly <- function(xyplt,
   } else if (!"sf" %in% unlist(lapply(polyvlst, class))) {
     stop("invalid list object")
   }
+
   polyvlst <- lapply(polyvlst, 
 		function(layer, polyv_dsn, gui) pcheck.spatial(layer, dsn=polyv_dsn, gui=gui),
  		polyv_dsn, gui)
-
+ 
   ## Check polyvarlst
   if (!is.null(polyvarlst)) {
     if (is.list(polyvarlst)) {
@@ -338,7 +339,7 @@ spExtractPoly <- function(xyplt,
 
     ## Check points outside poly
     ########################################################  
-    #sppltout <- sppltx[!sppltx[[uniqueid]] %in% spxyext[[uniqueid]],]
+    #sppltout <- sppltx[!sppltx[[xy.uniqueid]] %in% spxyext[[xy.uniqueid]],]
 
     ## Check null values
     ######################################################## 

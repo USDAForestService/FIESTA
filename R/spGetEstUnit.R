@@ -282,8 +282,8 @@ spGetEstUnit <- function(xyplt,
   
     ## Extract values of polygon unitlayer to points
     extpoly <- spExtractPoly(sppltx, polyvlst=unitlayerx, 
-		uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
-		keepNA=keepNA, exportNA=exportNA)
+                        xy.uniqueid=uniqueid, polyvarlst=unique(c(unitvar, vars2keep)), 
+                        keepNA=keepNA, exportNA=exportNA)
     sppltx <- extpoly$spxyext
     NAlst <- extpoly$NAlst[[1]]
     outname <- extpoly$outname
@@ -310,7 +310,7 @@ spGetEstUnit <- function(xyplt,
  
     ## Extract values of raster layer to points
     extrast <- spExtractRast(sppltx, rastlst=unitlayerx, 
-                      var.name=unitvar, uniqueid=uniqueid, 
+                      var.name=unitvar, xy.uniqueid=uniqueid, 
                       keepNA=keepNA, exportNA=exportNA, 
                       savedata_opts = list(
 			                    outfolder=outfolder, 

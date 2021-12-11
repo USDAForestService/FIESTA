@@ -818,7 +818,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       dsn <- layer
     }
   }
- 
+
   if (!is.null(dsn)) {
     ext.dsn <- getext(dsn)
     if (!file.exists(dsn) && (is.na(ext.dsn) || ext.dsn == "NA")) {
@@ -831,7 +831,8 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
         return(TRUE)
       } else {
         layer <- basename.NoExt(dsn)
-        return(spImportSpatial(layer=layer, dsn=dsn))
+        splayer <- suppressWarnings(sf::st_read(dsn=dsn, layer=layer,
+				stringsAsFactors=stringsAsFactors, quiet=TRUE))
       }
     } else if (ext.dsn %in% c("csv")) {
       layer <- basename.NoExt(dsn)

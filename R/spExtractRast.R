@@ -13,7 +13,7 @@
 #' extension, or file name (with extension) in xy_dsn folder.
 #' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
 #' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
-#' @param uniqueid String. Unique identifier of xyplt rows.
+#' @param xy.uniqueid String. Unique identifier of xyplt rows.
 #' @param rastlst String vector or list or strings and/or rasters. File name(s)
 #' with extensions, or raster object(s). Note: raster objects must be written
 #' to file.
@@ -100,7 +100,7 @@
 #' 
 #'   ## Extract points from raster
 #'   xyext <- spExtractRast(xyplt=WYplt, rastlst=c(fornffn, demfn), var.name=c("fornf", "dem"),
-#' 		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+#' 		xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
 #'   names(xyext)
 #'   xyext$outnames
 #'   sppltext <- xyext$sppltext
@@ -116,7 +116,7 @@
 #' @export spExtractRast
 spExtractRast <- function(xyplt, 
                           xyplt_dsn = NULL, 
-                          uniqueid = "PLT_CN", 
+                          xy.uniqueid = "PLT_CN", 
                           rastlst, 
                           rastfolder = NULL, 
                           rast.crs = NULL, 
@@ -193,14 +193,14 @@ spExtractRast <- function(xyplt,
  
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=uniqueid, 
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=xy.uniqueid, 
 		exportsp=FALSE, ...)
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)
-    uniqueid <- pcheck.varchar(var2check=uniqueid, varnm="uniqueid", gui=gui, 
+    xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
 		checklst=sppltnames, caption="UniqueID of spplt", 
-		warn=paste(uniqueid, "not in spplt"), stopifnull=TRUE)
+		warn=paste(xy.uniqueid, "not in spplt"), stopifnull=TRUE)
   }
  
   ## Check showext    
@@ -408,8 +408,8 @@ spExtractRast <- function(xyplt,
     sppltprj <- crsCompare(sppltx, rast.prj, crs.default=rast.crs)$x
     
     ## Subset Spatial data frame to just id, x, y
-    sppltxy <- data.frame(sppltprj[[uniqueid]], sf::st_coordinates(sppltprj))
-    names(sppltxy)[1] <- uniqueid
+    sppltxy <- data.frame(sppltprj[[xy.uniqueid]], sf::st_coordinates(sppltprj))
+    names(sppltxy)[1] <- xy.uniqueid
 
     ## Check extents
     if (showext) {
@@ -446,7 +446,7 @@ spExtractRast <- function(xyplt,
       if ("data.table" %in% class(sppltx)) {
         stop("xyplt cannot be sf data.table")
       }
-      sppltx <- merge(sppltx, dat, by.x=uniqueid, by.y="pid")
+      sppltx <- merge(sppltx, dat, by.x=xy.uniqueid, by.y="pid")
 
       ## Set rast.NODATA values as NA
       #sppltx <- sppltx[!sppltx[[cname]] %in% rast.NODATA[[1]], ] 

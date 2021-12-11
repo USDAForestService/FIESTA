@@ -444,7 +444,7 @@ spGetAuxiliary <- function(xyplt,
   if (!unitvar %in% names(sppltx)) { 
       ## Extract values of polygon layer to points
     extpoly <- tryCatch(spExtractPoly(xyplt=sppltx, polyvlst=unit_layerx, 
-		uniqueid=uniqueid, polyvarlst=polyvarlst, 
+                              xy.uniqueid=uniqueid, polyvarlst=polyvarlst, 
 		keepNA=FALSE, exportNA=exportNA),
      	 error=function(e) {
 			message(e, "\n")
@@ -475,7 +475,7 @@ spGetAuxiliary <- function(xyplt,
  
     ## Extract values from continuous raster layers
     #############################################################################
-    extdat.rast.cont <- spExtractRast(sppltx, uniqueid=uniqueid,
+    extdat.rast.cont <- spExtractRast(sppltx, xy.uniqueid=uniqueid,
 		            rastlst=rastlst.contfn, interpolate=FALSE, showext=showext,
 		            var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
 		            keepNA=keepNA, exportNA=exportNA, 
