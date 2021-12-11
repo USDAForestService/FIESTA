@@ -7,7 +7,7 @@
 spExtractRast(
   xyplt,
   xyplt_dsn = NULL,
-  uniqueid = "PLT_CN",
+  xy.uniqueid = "PLT_CN",
   rastlst,
   rastfolder = NULL,
   rast.crs = NULL,
@@ -35,7 +35,7 @@ extension, or file name (with extension) in xy_dsn folder.}
 \item{xyplt_dsn}{String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
-\item{uniqueid}{String. Unique identifier of xyplt rows.}
+\item{xy.uniqueid}{String. Unique identifier of xyplt rows.}
 
 \item{rastlst}{String vector or list or strings and/or rasters. File name(s)
 with extensions, or raster object(s). Note: raster objects must be written
@@ -149,7 +149,7 @@ when reprojecting. See spTransform help documentation for more details.
 
   ## Extract points from raster
   xyext <- spExtractRast(xyplt=WYplt, rastlst=c(fornffn, demfn), var.name=c("fornf", "dem"),
-		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+		xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
   names(xyext)
   xyext$outnames
   sppltext <- xyext$sppltext

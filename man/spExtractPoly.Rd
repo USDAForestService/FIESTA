@@ -30,6 +30,8 @@ extension, or file name (with extension) in xy_dsn folder.}
 \item{xyplt_dsn}{String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
+\item{xy.uniqueid}{String.* Unique identifier of xyplt rows.}
+
 \item{polyvlst}{sf R object or String. Name(s) of polygon layers to extract
 values. A spatial polygon object, full path to shapefile, or name of a layer
 within a database.}
@@ -66,8 +68,6 @@ default = 'polyext'.}
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
 \item{...}{Other parameters for spMakeSpatialPoints.}
-
-\item{uniqueid}{String.* Unique identifier of xyplt rows.}
 }
 \value{
 \item{pltdat}{ SpatialPointsDataFrame object or data frame. Input
@@ -123,7 +123,7 @@ name'_1'.
 
   ## Extract points from polygon vector layer
   xyext <- spExtractPoly(xyplt=WYplt, polyvlst=WYbhdistfn,
-		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+		xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
   names(xyext)
   xyext$outnames
   spxyext <- xyext$spxyext
