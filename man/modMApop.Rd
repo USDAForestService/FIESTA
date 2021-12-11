@@ -17,6 +17,7 @@ modMApop(
   adj = "plot",
   unitvar = NULL,
   unitarea = NULL,
+  areavar = "ACRES",
   unitzonal = NULL,
   prednames = NULL,
   predfac = NULL,
@@ -38,13 +39,13 @@ Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
 below for descriptions of each.}
 
 \item{popTabs}{List of population tables the user would like returned.
-See help(popTabs()) for a list of options.}
+See help(popTables) for a list of options.}
 
 \item{popTabIDs}{List of unique IDs corresponding to the population tables
-that the user has requested. See help(popTabIDs()) for a list of
+that the user has requested. See help(popTableIDs) for a list of
 options.}
 
-\item{popFilter}{List of population filters. See help(popFilters()) for a 
+\item{popFilter}{List of population filters. See help(popFilters) for a 
 list of options.}
 
 \item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited
@@ -79,6 +80,8 @@ estimation unit, include number of total acreage for the area of interest or
 a data frame with area and estimation unit. If more than one estimation
 unit, provide a data frame of total area by estimation unit, including
 unitvar and areavar.}
+
+\item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
 
 \item{unitzonal}{DF/DT. Table with zonal auxiliary information by estimation
 unit. For continuous data, means by estimation unit; for categorical data,
