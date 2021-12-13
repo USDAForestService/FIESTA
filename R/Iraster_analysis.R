@@ -11,6 +11,7 @@
 #library(Rcpp)
 #library(sf)
 #library(xml2)
+#library(parallel)
 #sourceCpp("r_rasterize.cpp")
 #sourceCpp("r_cmb_table.cpp")
 #sourceCpp("r_running_stats.cpp")
@@ -24,12 +25,14 @@
 ## getGDALformat
 ## basename.NoExt
 ## Mode
+## Modes
 ## northness
 ## eastness
 ## roughness
 ## TRI
 ## TPI
 ## getPixelValue
+## .getPixelValue
 ## extractPtsFromRaster
 ## extractPtsFromRasterList
 ## rasterInfo
@@ -95,11 +98,17 @@ basename.NoExt <- function(filepath) {
 }
 
 Mode <- function(x, na.rm=FALSE) {
-	#Ties handled arbitrarily
-	#TODO: return a vector with 1 or modal values
+	#Ties handled as first-appearing value
 	if(na.rm) x = na.omit(x)
 	ux <- unique(x)
 	ux[which.max(tabulate(match(x, ux)))]
+}
+
+Modes <- function(x, na.rm=FALSE) {
+	if(na.rm) x = na.omit(x)
+	ux <- unique(x)
+	tab <- tabulate(match(x, ux))
+	ux[tab == max(tab)]
 }
 
 northness <- function(asp_deg) {
@@ -151,7 +160,8 @@ TPI <- function(x, na.rm=FALSE, asInt=TRUE) {
 	ifelse(asInt, round(i), i)
 }
 
-getPixelValue <- function(pt, ds, band=1, interpolate=FALSE, windowsize=1, statistic=NULL, na.rm=TRUE) {
+getPixelValue <- function(pt, ds, band=1, interpolate=FALSE,
+							windowsize=1, statistic=NULL, na.rm=TRUE) {
 	# pt - vector containing a single coordinate c(x,y)
 	# ds - GDAL dataset object for the raster
 	# if interpolate is TRUE return an interpolated value for pt
@@ -174,8 +184,8 @@ getPixelValue <- function(pt, ds, band=1, interpolate=FALSE, windowsize=1, stati
 		statistic = NULL
 	}
 
-	ptX = as.numeric(pt[1])
-	ptY = as.numeric(pt[2])
+	ptX = pt[1]
+	ptY = pt[2]
 
 	nrows = .Call("RGDAL_GetRasterYSize", ds, PACKAGE="rgdal")
 	ncols = .Call("RGDAL_GetRasterXSize", ds, PACKAGE="rgdal")
@@ -199,22 +209,22 @@ getPixelValue <- function(pt, ds, band=1, interpolate=FALSE, windowsize=1, stati
 
 	#get pixel offsets
 	if (windowsize == 1) {
-		offX = trunc(getOffset(ptX, xmin, cellsizeX))
-		offY = trunc(getOffset(ptY, ymax, cellsizeY))
+		offX = floor(getOffset(ptX, xmin, cellsizeX))
+		offY = floor(getOffset(ptY, ymax, cellsizeY))
 	}
 	else {
 		if (interpolate) {
 			# 2x2 window for bilinear interpolation
-			offX = trunc(getOffset(ptX, xmin, cellsizeX) - 0.5)
-			offY = trunc(getOffset(ptY, ymax, cellsizeY) - 0.5)
+			offX = floor(getOffset(ptX, xmin, cellsizeX) - 0.5)
+			offY = floor(getOffset(ptY, ymax, cellsizeY) - 0.5)
 		}
 		else {
-			offX = trunc(getOffset(ptX, xmin, cellsizeX)) - trunc(windowsize/2)
-			offY = trunc(getOffset(ptY, ymax, cellsizeY)) - trunc(windowsize/2)
+			offX = floor(getOffset(ptX, xmin, cellsizeX)) - trunc(windowsize/2)
+			offY = floor(getOffset(ptY, ymax, cellsizeY)) - trunc(windowsize/2)
 		}
 		#entire window should be inside else return NA
 		#TODO: option to use a partial window
-		if (offX < 0 || offX > ncols || offY < 0 || offY > nrows) {
+		if (offX < 0 || (offX+windowsize-1) > ncols || offY < 0 || (offY+windowsize-1) > nrows) {
 			warning("window is not completely within raster extent", call.=FALSE)
 			return(NA)
 		}
@@ -223,14 +233,6 @@ getPixelValue <- function(pt, ds, band=1, interpolate=FALSE, windowsize=1, stati
 	#get pixel value(s)
 	a = rgdal::getRasterData(ds, band=band, offset=c(offY,offX), 
 							region.dim=c(windowsize,windowsize), as.is=TRUE)
-
-	#make sure nodata is set to NA
-	#TODO: this is probably unnecessary, confirm in rgdal
-	b = rgdal::getRasterBand(ds, band)
-	noDataValue = .Call("RGDAL_GetNoDataValue", b, PACKAGE="rgdal")
-	if(is.numeric(noDataValue)) {
-		a[a==noDataValue] = NA
-	}
 
 	if (interpolate) {
 		#return interpolated value at pt
@@ -288,6 +290,7 @@ getPixelValue <- function(pt, ds, band=1, interpolate=FALSE, windowsize=1, stati
 		}
 		else if (statistic == "mode") {
 			# TODO: NA handling
+			# TODO: use Modes() and add option to return ties?
 			if (length(a[!is.na(a)]) > 0) {
 				pixelValue = Mode(a)
 			}
@@ -308,12 +311,53 @@ getPixelValue <- function(pt, ds, band=1, interpolate=FALSE, windowsize=1, stati
 	return(pixelValue)
 }
 
+.getPixelValue <- function(pt, rasterfile, ds, ...) {
+	if (!missing(rasterfile)) {
+		ds = rgdal::GDAL.open(rasterfile, read.only=TRUE, silent=TRUE)
+		return(getPixelValue(pt, ds, ...))
+	}
+	else if (missing(ds)) {
+		if (exists(".cl_ds")) {
+			# use the GDAL dataset opened on a cluster node
+			return(getPixelValue(pt, ds=.cl_ds, ...))
+		}
+		else {
+			stop("GDAL dataset object does not exist")
+		}
+	}
+	else {
+		return(getPixelValue(pt, ds, ...))
+	}
+}
+
 extractPtsFromRaster <- function(ptdata, rasterfile, band=NULL, var.name=NULL,
-						interpolate=FALSE, windowsize=1, statistic=NULL, na.rm=TRUE) {
+						interpolate=FALSE, windowsize=1, statistic=NULL, na.rm=TRUE,
+						ncores=1) {
 	# ptdata is a dataframe with three columns: col1=point id, col2=x, col3=y
 	# see getPixelValue()
-
-	ds = rgdal::GDAL.open(rasterfile, read.only=TRUE, silent=TRUE)
+	
+	ri = rasterInfo(rasterfile)
+	if (is.null(ri)) {
+		print(rasterfile)
+		stop("open raster failed")
+	}
+	
+	if (ncores > 1) {
+		if (!isNamespaceLoaded("parallel")) {
+			stop("ncores > 1 requires 'parallel' namespace")
+		}
+		cl = parallel::makeCluster(ncores)
+		parallel::clusterEvalQ(cl, library(rgdal))
+		# open GDAL datasets on the cluster
+		parallel::clusterExport(cl, "rasterfile", envir=environment())
+		parallel::clusterEvalQ(cl, {.cl_ds = rgdal::GDAL.open(rasterfile,
+									 read.only=TRUE, silent=TRUE); NULL})
+		# export functions needed by .getPixelValue
+		parallel::clusterExport(cl, c("getOffset", "getPixelValue", "Mode"))
+	}	
+	else {
+		ds = rgdal::GDAL.open(rasterfile, read.only=TRUE, silent=TRUE)
+	}
 	
 	df.out = data.frame(pid = ptdata[,1])
 	
@@ -321,7 +365,8 @@ extractPtsFromRaster <- function(ptdata, rasterfile, band=NULL, var.name=NULL,
 		var.name = basename.NoExt(rasterfile)
 	}
 	if (is.null(band)) {
-		nbands = .Call("RGDAL_GetRasterCount", ds, PACKAGE="rgdal")
+		#nbands = .Call("RGDAL_GetRasterCount", ds, PACKAGE="rgdal")
+		nbands = ri$nbands
 		bands = 1:nbands
 	}
 	else {
@@ -333,8 +378,16 @@ extractPtsFromRaster <- function(ptdata, rasterfile, band=NULL, var.name=NULL,
 		if (length(bands) > 1) {
 			this.name = paste0(var.name,"_b",b)
 		}
-		values = apply(ptdata[-1], 1, getPixelValue, ds=ds, band=b, 
-					interpolate=interpolate, windowsize=windowsize, statistic=statistic, na.rm=na.rm)
+		if (ncores > 1) {
+			values = parallel::parApply(cl, ptdata[-1], 1, .getPixelValue, band=b,
+						interpolate=interpolate, windowsize=windowsize, 
+						statistic=statistic, na.rm=na.rm)
+		}
+		else {
+			values = apply(ptdata[-1], 1, getPixelValue, ds=ds, band=b, 
+						interpolate=interpolate, windowsize=windowsize, 
+						statistic=statistic, na.rm=na.rm)
+		}
 		if (windowsize > 1 && is.null(statistic)) {
 			# raw pixel values from a window, values as an array
 			for (p in 1:(windowsize*windowsize)) {
@@ -347,14 +400,20 @@ extractPtsFromRaster <- function(ptdata, rasterfile, band=NULL, var.name=NULL,
 		}
 	}
 	
-	rgdal::GDAL.close(ds)
+	if (ncores > 1) {
+		parallel::clusterEvalQ(cl, rgdal::GDAL.close(.cl_ds))
+		parallel::stopCluster(cl)
+	}
+	else {
+		rgdal::GDAL.close(ds)
+	}
 
 	return(df.out)
 }
 
-
 extractPtsFromRasterList <- function(ptdata, rasterfiles, bands=NULL, var.names=NULL,
-							interpolate=FALSE, windowsizes=NULL, statistics=NULL, na.rm=TRUE) {
+							interpolate=FALSE, windowsizes=NULL, statistics=NULL, na.rm=TRUE,
+							ncores=1) {
 	# call extractPtsFromRaster for a list of rasters
 	# allows for specific bands, or specific var.names by band, etc.
 
@@ -396,7 +455,8 @@ extractPtsFromRasterList <- function(ptdata, rasterfiles, bands=NULL, var.names=
 
 	for (n in 1:nrasters) {
 		df.tmp = extractPtsFromRaster(ptdata, rasterfiles[n], band=bands[n], var.name=var.names[n], 
-					interpolate=interpolate, windowsize=windowsizes[n], statistic=statistics[n], na.rm=na.rm)
+					interpolate=interpolate, windowsize=windowsizes[n], statistic=statistics[n], na.rm=na.rm,
+					ncores=ncores)
 		df.out = merge(df.out, df.tmp)
 	}
 
@@ -430,12 +490,20 @@ rasterInfo <- function(srcfile) {
 	ri$crs = rgdal::getProjectionRef(src_ds)
 	ri$nbands = .Call("RGDAL_GetRasterCount", src_ds, PACKAGE="rgdal")
 	ri$datatype = c()
+	ri$has_nodata_value = c()
 	ri$nodata_value = c()
 	for (b in 1:ri$nbands) {
 		band = rgdal::getRasterBand(src_ds, b)
 		dtNum = .Call("RGDAL_GetBandType", band, PACKAGE="rgdal")
 		ri$datatype = c(ri$datatype, getGDALDataTypeName(dtNum))
-		ri$nodata_value = c(ri$nodata_value, .Call("RGDAL_GetNoDataValue", band, PACKAGE="rgdal"))
+		nodata_value = .Call("RGDAL_GetNoDataValue", band, PACKAGE="rgdal")
+		if (is.null(nodata_value)) {
+			ri$has_nodata_value = c(ri$has_nodata_value, FALSE)
+		}
+		else {
+			ri$has_nodata_value = c(ri$has_nodata_value, TRUE)
+		}
+		ri$nodata_value = c(ri$nodata_value, nodata_value)
 	}
 	rgdal::GDAL.close(src_ds)
 	return(ri)
@@ -506,7 +574,7 @@ reprojectRaster <- function(srcfile, dstfile, t_srs, overwrite=TRUE,
 	}
     opt = c(opt, "-ovr", "NONE")
 	opt = c(opt, addOptions)
-	print(opt)
+	#print(opt)
 	
 	return(sf::gdal_utils(util="warp", source=srcfile, destination=dstfile, options=opt))
 

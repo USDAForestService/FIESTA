@@ -439,12 +439,15 @@ spExtractRast <- function(xyplt,
 
       dat <- unique(suppressWarnings(extractPtsFromRaster(ptdata=sppltxy, 
 			rasterfile=rastfn, band=band, var.name=var.name, 
-			interpolate=interpolate, windowsize=windowsize, statistic=statistic)))
+			interpolate=interpolate, windowsize=windowsize, statistic=statistic, ncores=1)))
       cname <- names(dat)[2]
       outnames <- c(outnames, cname)
  
       if ("data.table" %in% class(sppltx)) {
         stop("xyplt cannot be sf data.table")
+      }
+      if (nrow(dat) == 0) {
+        stop("no data in ", cname)
       }
       sppltx <- merge(sppltx, dat, by.x=xy.uniqueid, by.y="pid")
 

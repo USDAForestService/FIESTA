@@ -211,7 +211,7 @@ spGetAuxiliary <- function(xyplt,
   pcheck.params(input.params, savedata_opts=savedata_opts)
 
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -488,7 +488,7 @@ spGetAuxiliary <- function(xyplt,
     inputdf.cont <- extdat.rast.cont$inputdf
     rm(extdat.rast.cont)
     gc() 
-
+ 
     if (NAto0) {
       for (col in prednames.cont) set(sppltx, which(is.na(sppltx[[col]])), col, 0)
     }
@@ -589,7 +589,7 @@ spGetAuxiliary <- function(xyplt,
 
     ## Extract values from categorical raster layers
     ######################################################
-    extdat.rast.cat <- spExtractRast(sppltx, uniqueid=uniqueid, 
+    extdat.rast.cat <- spExtractRast(sppltx, xy.uniqueid=uniqueid, 
                 rastlst=rastlst.catfn, 
 		            interpolate=FALSE, var.name=rastlst.cat.name, 
 		            rast.NODATA=rastlst.cat.NODATA,
