@@ -41,13 +41,13 @@ Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
 below for descriptions of each.}
 
 \item{popTabs}{List of population tables the user would like returned.
-See help(popTabs()) for a list of options.}
+See help(popTables) for a list of options.}
 
 \item{popTabIDs}{List of unique IDs corresponding to the population tables
-that the user has requested. See help(popTabIDs()) for a list of
+that the user has requested. See help(popTableIDs) for a list of
 options.}
 
-\item{popFilter}{List of population filters. See help(popFilters()) for a 
+\item{popFilter}{List of population filters. See help(popFilters) for a 
 list of options.}
 
 \item{pltassgn}{DF/DT, Optional. R object, sf R object, comma-delimited

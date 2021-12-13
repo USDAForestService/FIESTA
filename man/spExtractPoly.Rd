@@ -7,7 +7,7 @@
 spExtractPoly(
   xyplt,
   xyplt_dsn = NULL,
-  uniqueid = "PLT_CN",
+  xy.uniqueid = "PLT_CN",
   polyvlst,
   polyv_dsn = NULL,
   polyvarlst = NULL,
@@ -30,7 +30,7 @@ extension, or file name (with extension) in xy_dsn folder.}
 \item{xyplt_dsn}{String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
-\item{uniqueid}{String.* Unique identifier of xyplt rows.}
+\item{xy.uniqueid}{String.* Unique identifier of xyplt rows.}
 
 \item{polyvlst}{sf R object or String. Name(s) of polygon layers to extract
 values. A spatial polygon object, full path to shapefile, or name of a layer
@@ -123,7 +123,7 @@ name'_1'.
 
   ## Extract points from polygon vector layer
   xyext <- spExtractPoly(xyplt=WYplt, polyvlst=WYbhdistfn,
-		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+		xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
   names(xyext)
   xyext$outnames
   spxyext <- xyext$spxyext

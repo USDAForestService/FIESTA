@@ -7,17 +7,17 @@
 modMAtree(
   MApopdat,
   MAmethod,
-  FIA = TRUE,
-  prednames = NULL,
-  modelselect = FALSE,
+  estvar,
+  estvar.filter = NULL,
+  estseed = "none",
   landarea = "FOREST",
   pcfilter = NULL,
-  estseed = "none",
-  estvar = NULL,
-  estvar.filter = NULL,
   rowvar = NULL,
   colvar = NULL,
+  prednames = NULL,
+  modelselect = FALSE,
   sumunits = FALSE,
+  FIA = TRUE,
   returntitle = FALSE,
   savedata = FALSE,
   table_opts = NULL,
@@ -31,15 +31,16 @@ modMAtree(
 \item{MApopdat}{List. Population data objects returned from modMApop().}
 
 \item{MAmethod}{String. mase (i.e., model-assisted) method to use ('HT',
-'PS', 'greg', 'gregEN').}
+'PS', 'greg', 'gregEN', 'ratio').}
 
-\item{FIA}{Logical. If TRUE, the finite population term is removed from
-estimator to match FIA estimates.}
+\item{estvar}{String. Name of the tree-level estimate variable (e.g.,
+'VOLCFNET').}
 
-\item{prednames}{String vector. Name(s) of predictor variables to include in
-model.}
+\item{estvar.filter}{String. A tree-level filter for estvar. Must be R
+syntax (e.g., 'STATUSCD == 1').}
 
-\item{modelselect}{Boolean. If TRUE, variable selection occurs.}
+\item{estseed}{String. Use seedling data only or add to tree data. Seedling
+estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
 
 \item{landarea}{String. The condition-level filter for defining land area
 ('ALL', 'FOREST', 'TIMBERLAND'). If landarea='FOREST', COND_STATUS_CD = 1;
@@ -47,15 +48,6 @@ if landarea='TIMBERLAND', SITECLCD in(1:6) & RESERVCD = 0.}
 
 \item{pcfilter}{String. A filter for plot or cond attributes (including
 pltassgn).  Must be R logical syntax.}
-
-\item{estseed}{String. Use seedling data only or add to tree data. Seedling
-estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}
-
-\item{estvar}{String. Name of the tree-level estimate variable (e.g.,
-'VOLCFNET').}
-
-\item{estvar.filter}{String. A tree-level filter for estvar. Must be R
-syntax (e.g., 'STATUSCD == 1').}
 
 \item{rowvar}{String. Optional. Name of domain variable to group estvar by
 for rows in table output. Rowvar must be included in an input data frame
@@ -66,8 +58,16 @@ for the total estimation unit. Include colvar for grouping by 2 variables.}
 to group estvar by for columns in table output. Colvar must be included in
 an input data frame (i.e., plt, cond, tree).}
 
+\item{prednames}{String vector. Name(s) of predictor variables to include in
+model.}
+
+\item{modelselect}{Boolean. If TRUE, variable selection occurs.}
+
 \item{sumunits}{Logical. If TRUE, estimation units are summed and returned
 in one table.}
+
+\item{FIA}{Logical. If TRUE, the finite population term is removed from
+estimator to match FIA estimates.}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}
