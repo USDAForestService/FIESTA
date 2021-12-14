@@ -93,12 +93,13 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
 
   ## Change name of condition adjustment factor to cadjfac
   ## Note: CONDPPROP_UNADJ is the same as below (combination of MACR and SUBP)
-  setnames(condx, areaadj, "cadjfac")
-  setnames(unitlut, areaadj, "cadjfac")
+  cadjfacnm <- suppressMessages(checknm("cadjfac", names(condx)))
+  setnames(condx, areaadj, cadjfacnm)
+  setnames(unitlut, areaadj, cadjfacnm)
       
   ## Calculate adjusted condition proportion for plots
   areawtnm <- adjnm(areawt)
-  condx[, (areawtnm) := get(areawt) * cadjfac]
+  condx[, (areawtnm) := get(areawt) * get(cadjfacnm)]
   setkeyv(condx, c(cuniqueid, condid))
 
   ## Calculate adjusted condition proportions for different size plots for trees
@@ -134,17 +135,19 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
 
   if (!is.null(vcondsppx)) { 
     setkeyv(vcondsppx, c(vuniqueid, condid))
-    vcondsppx <- merge(vcondsppx, condx[, c(key(condx), "cadjfac"), with=FALSE], 
+    vcondsppx <- merge(vcondsppx, condx[, c(key(condx), cadjfacnm), with=FALSE], 
 		by=key(condx))
     vcondsppx[, COVER_PCT_SUM := COVER_PCT_SUM]
   } 
   if (!is.null(vcondstrx)) { 
     setkeyv(vcondstrx, c(vuniqueid, condid))
-    vcondstrx <- merge(vcondstrx, condx[, c(key(condx), "cadjfac"), with=FALSE], 
+    vcondstrx <- merge(vcondstrx, condx[, c(key(condx), cadjfacnm), with=FALSE], 
 		by=key(condx))
     vcondstrx[, COVER_PCT_SUM := COVER_PCT_SUM]
   } 
-  setnames(unitlut, "cadjfac", "ADJ_FACTOR_P2VEG_SUBP")
+  if (!is.null(vcondsppx) || !is.null(vcondstrx)) { 
+    setnames(unitlut, cadjfacnm, "ADJ_FACTOR_P2VEG_SUBP")
+  }
 
   ## Calculate expansion factors (strata-level and cond-level)
   if (!is.null(unitarea)) {
@@ -175,6 +178,10 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
       setkeyv(expcondtab, c(cuniqueid, condid))
     }
   } 
+
+
+  ## Remove summed variables from condx
+  condx[, (c(varsumlst, cadjfacnm)) := NULL]
 
   ## Remove *_ADJFAC and *_UNADJ columns in condx 
   #condx[, names(condx)[grep("ADJ_FACTOR_", names(condx))]:= NULL] 

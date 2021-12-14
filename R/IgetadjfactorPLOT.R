@@ -42,6 +42,11 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, seedx=NULL, cuniqueid="PLT_
   varsumlst <- areasum
   varadjlst <- areaadj
 
+  ## Check tables
+  condx <- pcheck.table(condx)
+  treex <- pcheck.table(treex)
+  seedx <- pcheck.table(seedx)
+
   ## Get list of condition-level variables to calculate adjustments for
   if (!is.null(treex)) {  
     tvarlst <- unlist(tpropvars)
@@ -77,14 +82,16 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, seedx=NULL, cuniqueid="PLT_
 	function(x) ifelse((is.na(x) | x==0), 0, 1/x)), .SDcols=varsumlst]
   condx <- condx[pltadj]
 
+
   ## Change name of condition adjustment factor to cadjfac
   ## Note: CONDPPROP_UNADJ is the same as below (combination of MACR and SUBP)
-  setnames(condx, areaadj, "cadjfac")
+  cadjfacnm <- suppressMessages(checknm("cadjfac", names(condx)))
+  setnames(condx, areaadj, cadjfacnm)
 
 
   ## Calculate adjusted condition proportion for plots
   areawtnm <- adjnm(areawt)
-  condx[, (areawtnm) := get(areawt) * cadjfac]
+  condx[, (areawtnm) := get(areawt) * get(cadjfacnm)]
   setkeyv(condx, c(cuniqueid, condid))
 
 
@@ -113,6 +120,10 @@ getadjfactorPLOT <- function(condx=NULL, treex=NULL, seedx=NULL, cuniqueid="PLT_
       seedx[, tadjfac := ifelse(tadjfac > 0, tadjfac, 1)]
     }  
   } 
+
+  ## Remove summed variables from condx
+  condx[, (c(varsumlst, cadjfacnm)) := NULL]
+  
 
   adjfacdata <- list(condx = condx)
   if (!is.null(treex)) adjfacdata$treex <- treex 

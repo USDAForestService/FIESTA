@@ -285,7 +285,7 @@ modGBpop <- function(popType = "VOL",
 
   
   ## Set unit defaults
-  unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
+  unit_defaults_list <- formals(unit_options)[-length(formals(unit_options))]
   
   for (i in 1:length(unit_defaults_list)) {
     assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
@@ -299,7 +299,7 @@ modGBpop <- function(popType = "VOL",
   }
   
   ## Set popFilters defaults
-  popFilters_defaults_list <- formals(FIESTA::popFilters)[-length(formals(FIESTA::popFilters))]
+  popFilters_defaults_list <- formals(popFilters)[-length(formals(popFilters))]
   
   for (i in 1:length(popFilters_defaults_list)) {
     assign(names(popFilters_defaults_list)[[i]], popFilters_defaults_list[[i]])
@@ -313,7 +313,7 @@ modGBpop <- function(popType = "VOL",
   }
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -330,7 +330,7 @@ modGBpop <- function(popType = "VOL",
   }
   
   ## Set strata defaults
-  strata_defaults_list <- formals(FIESTA::strata_options)[-length(formals(FIESTA::strata_options))]
+  strata_defaults_list <- formals(strata_options)[-length(formals(strata_options))]
   
   for (i in 1:length(strata_defaults_list)) {
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
@@ -338,7 +338,7 @@ modGBpop <- function(popType = "VOL",
   
   
   ## Set popTables defaults
-  popTables_defaults_list <- formals(FIESTA::popTables)[-length(formals(FIESTA::popTables))]
+  popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
   
   for (i in 1:length(popTables_defaults_list)) {
     assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])

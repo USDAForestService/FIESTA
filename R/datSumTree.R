@@ -720,6 +720,7 @@ datSumTree <- function(tree = NULL,
     }
     condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
+
     adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condx
@@ -851,12 +852,12 @@ datSumTree <- function(tree = NULL,
 
   if (seedonly) {
     datvars <- seedf[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
-		by=key(seedf), .SDcols=tsumvarlst2]
+		by=tsumuniqueid, .SDcols=tsumvarlst2]
     setnames(datvars, c(tsumuniqueid, tsumvarnmlst2))
   } else {
     datvars <- treef[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
-		by=key(treef), .SDcols=tsumvarlst2]
-    setnames(datvars, c(tsumuniqueid, tsumvarnmlst2))
+		by=tsumuniqueid, .SDcols=tsumvarlst2]
+    setnames(datvars, unique(c(tsumuniqueid, tsumvarnmlst2)))
 
     if (addseed && !is.null(seedcountvar)) {
       sdatvars <- seedf[, lapply(.SD, function(x) round(tfun(x, na.rm=TRUE), tround) ), 
