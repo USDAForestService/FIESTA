@@ -365,12 +365,19 @@ spGetPlots <- function(bnd = NULL,
           xy_dsn <- data_dsn
         } 
         xydat <- spGetXY(bnd=bndx, 
-		        states=states, RS=RS, xy=xy, xy_dsn=xy_dsn, xy.uniqueid=xy.uniqueid, 
-		        xvar=xvar, yvar=yvar, xy.crs=xy.crs, xyjoinid=xyjoinid, pjoinid=pjoinid,
- 		        xy_datsource=xy_datsource, clipxy=clipxy, evalid=evalid, evalCur=evalCur,
- 		        evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr, 
-		        measEndyr.filter=measEndyr.filter, invyrs=invyrs, measyrs=measyrs, 
-		        allyrs=allyrs, intensity1=intensity1, showsteps=showsteps, returnxy=TRUE)
+                         states=states, RS=RS, 
+                         xy=xy, xy_dsn=xy_dsn, 
+                         xy.uniqueid=xy.uniqueid, 
+                         xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
+                         xyjoinid=xyjoinid, pjoinid=pjoinid, 
+                         xy_datsource=xy_datsource, 
+                         clipxy=clipxy, evalid=evalid, 
+                         evalCur=evalCur, evalEndyr=evalEndyr, 
+                         measCur=measCur, measEndyr=measEndyr, 
+                         measEndyr.filter=measEndyr.filter, 
+                         invyrs=invyrs, measyrs=measyrs, allyrs=allyrs, 
+                         intensity1=intensity1, showsteps=showsteps, 
+                         returnxy=TRUE)
         spxy <- xydat$spxy
         xyids <- xydat$xyids
         states <- xydat$states
@@ -699,15 +706,19 @@ spGetPlots <- function(bnd = NULL,
       ## Get plot data
       ###############################
       if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
-        dat <- DBgetPlots(states=stcd, datsource="datamart", stateFilter=stateFilter, 
-			        allyrs=TRUE, istree=istree, isseed=isseed, othertables=other_layers, 
-			        intensity1=intensity1, savePOP=savePOP)
+        dat <- DBgetPlots(states=stcd, datsource="datamart", 
+                          stateFilter=stateFilter, allyrs=TRUE, 
+                          istree=istree, isseed=isseed, othertables=other_layers, 
+                          intensity1=intensity1, savePOP=savePOP)
       } else {
-        dat <- DBgetPlots(states=stcd, datsource="datamart", stateFilter=stateFilter, 
-			        allyrs=allyrs, evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, 
-			        evalType=evalType, measCur=measCur, measEndyr=measEndyr, invyrs=invyrs, 
-			        measyrs=measyrs, istree=istree, isseed=isseed, othertables=other_layers, 
-			        intensity1=intensity1, savePOP=savePOP)
+        dat <- DBgetPlots(states=stcd, datsource="datamart", 
+                          stateFilter=stateFilter, allyrs=allyrs, 
+                          evalid=evalid, evalCur=evalCur, 
+                          evalEndyr=evalEndyr, evalType=evalType, 
+                          measCur=measCur, measEndyr=measEndyr, 
+                          invyrs=invyrs, measyrs=measyrs, 
+                          istree=istree, isseed=isseed, othertables=other_layers, 
+                          intensity1=intensity1, savePOP=savePOP)
       }
       tabs <- dat$tabs
       PLOT <- tabs$plt
@@ -838,8 +849,7 @@ spGetPlots <- function(bnd = NULL,
           if (isseed)
             seed2 <- seed[seed[["PLT_CN"]] %in% pltids2, ]
           if (savePOP) {
-            pop_plot_stratum_assgn2 <- 
-			pop_plot_stratum_assgn[pop_plot_stratum_assgn[["PLT_CN"]] %in% pltids2, ]
+            pop_plot_stratum_assgn2 <- pop_plot_stratum_assgn[pop_plot_stratum_assgn[["PLT_CN"]] %in% pltids2, ]
           }
           if (!is.null(other_layers)) {
             for (layer in other_layers) {
@@ -1496,9 +1506,10 @@ spGetPlots <- function(bnd = NULL,
                               add_layer=TRUE))
       
     }
-    if (savexy && !is.null(spxy)) {
-      spExportSpatial(spxy, 
-          savedata_opts=list(outfolder=outfolder, 
+    if (savexy) {
+      if(!is.null(spxy)) {
+        spExportSpatial(spxy, 
+            savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
                               out_layer="spxyplt",
@@ -1507,10 +1518,10 @@ spGetPlots <- function(bnd = NULL,
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer, 
                               add_layer=TRUE))
-    }
-
-    datExportData(xyids, 
-      savedata_opts=list(outfolder=outfolder, 
+      }
+    
+      datExportData(xyids, 
+        savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
                               out_layer="xyids",
@@ -1519,6 +1530,7 @@ spGetPlots <- function(bnd = NULL,
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer,
                               add_layer=TRUE)) 
+    }
 
     for (tab in tabs2save) {
       datExportData(get(tab), 

@@ -276,9 +276,10 @@ DBgetStrata <- function(dat = NULL,
   }
  
   ## Get Evalid
-  evalInfo <- DBgetEvalid(states=states, invyrtab=invyrtab, evalid=evalid, 
-		evalCur=evalCur, evalEndyr=evalEndyr, evalAll=evalAll, evalType=evalType, 
-		gui=gui)
+  evalInfo <- DBgetEvalid(states=states, 
+                          invyrtab=invyrtab, evalid=evalid, 
+                          evalCur=evalCur, evalEndyr=evalEndyr, 
+                          evalAll=evalAll, evalType=evalType, gui=gui)
   states <- evalInfo$states
   rslst <- evalInfo$rslst
   evalidlist <- evalInfo$evalidlist

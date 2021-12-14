@@ -178,8 +178,10 @@ DBgetCoords <- function (states = NULL,
 		caption="Inventory Type", gui=gui)
 
   ## Get states, Evalid and/or invyrs info
-  evalInfo <- DBgetEvalid(states=states, RS=RS, invtype=invtype, 
-	evalid=evalid, evalCur=evalCur, evalEndyr=evalEndyr, evalAll=evalAll)
+  evalInfo <- DBgetEvalid(states=states, 
+                          RS=RS, invtype=invtype, 
+                          evalid=evalid, evalCur=evalCur, 
+                          evalEndyr=evalEndyr, evalAll=evalAll)
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   rslst <- evalInfo$rslst
@@ -253,7 +255,7 @@ DBgetCoords <- function (states = NULL,
 
             ## GET INVENTORY YEAR(S) FROM USER
             invyr <- select.list(as.character(stinvyrlst), 
-			title=paste("Inventory year(s) -", stabbr), multiple=TRUE)
+                        title=paste("Inventory year(s) -", stabbr), multiple=TRUE)
             if (length(invyr) == 0) stop("")
           }
           invyrs[[state]] <- as.numeric(invyr)
@@ -310,7 +312,7 @@ DBgetCoords <- function (states = NULL,
     ## For periodic data, the INTENSITY variable does not equal 1
     if (invtype == "ANNUAL") {
       intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
-		title="Intensity = 1?", first="YES", gui=gui)
+                            title="Intensity = 1?", first="YES", gui=gui)
     } else {
       intensity1 <- FALSE
     }
@@ -446,19 +448,18 @@ DBgetCoords <- function (states = NULL,
   ## SAVE data
   ###############################################################################
   if (savedata) {
- 
     index.unique.xyplt <- "PLT_CN"
-    
     datExportData(get(xynm),           
-                  savedata_opts=list(outfolder=outfolder, 
-                                     out_fmt=out_fmt, 
-                                     out_dsn=out_dsn, 
-                                     out_layer="unitarea",
-                                     outfn.pre=outfn.pre, 
-                                     outfn.date=outfn.date, 
-                                     overwrite_layer=overwrite_layer,
-                                     append_layer=append_layer,
-                                     add_layer=TRUE))
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="unitarea",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer, 
+                              index.unique=index.unique.xyplt, 
+                              add_layer=TRUE))
   }
 
   ## GENERATE RETURN LIST

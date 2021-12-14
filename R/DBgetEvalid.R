@@ -761,15 +761,12 @@ DBgetEvalid <- function(states = NULL,
             evalTypelist[[state]] <- evalTypelist[[state]][!evalTypelist[[state]] %in% eType.invalid]
           }
           evalidall <- popevaltab$EVALID[!is.na(popevaltab$EVALID)]
-          evalidlist[[state]] <- 
-		sort(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]])
-          invyrs[[state]]  <- 
-		min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
+          evalidlist[[state]] <- sort(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]])
+          invyrs[[state]] <- min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
         } else {
           if (!all(evalTypelist[[state]] %in% evalType.chklst)) { 
             evalid.min <- min(popevaltab$EVALID)
-            evalTypelist[[state]] <- popevaltab[popevaltab$EVALID == min(popevaltab$EVALID),
-			"EVAL_TYP"][1]
+            evalTypelist[[state]] <- popevaltab[popevaltab$EVALID == min(popevaltab$EVALID), "EVAL_TYP"][1]
             message(paste("invalid evalType for", state, "...using", evalTypelist[[state]]))
           }
           evalidlist[[state]] <- 
@@ -797,9 +794,11 @@ DBgetEvalid <- function(states = NULL,
     DBI::dbDisconnect(dbconn)
   }
 
-  returnlst <- list(states=states, rslst=rslst, evalidlist=evalidlist, 
-		invtype=invtype, invyrtab=invyrtab, evalTypelist=evalTypelist,
-		evalEndyrlist=evalEndyrlist)
+  returnlst <- list(states=states, rslst=rslst, 
+                    evalidlist=evalidlist, 
+                    invtype=invtype, invyrtab=invyrtab, 
+                    evalTypelist=evalTypelist, 
+                    evalEndyrlist=evalEndyrlist)
   if (!is.null(invyrs)) returnlst$invyrs <- invyrs
 
   ## Return population information

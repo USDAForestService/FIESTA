@@ -284,8 +284,13 @@ spGetXY <- function(bnd,
   } else if (!is.null(bndx)) {
     ## Get intersecting states
  
-    statedat <- spGetStates(bndx, stbnd=NULL, stbnd_dsn=NULL, 
-			stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)
+    statedat <- spGetStates(bndx, 
+                            stbnd=NULL, 
+                            stbnd_dsn=NULL, 
+                            stbnd.att="COUNTYFIPS", 
+                            RS=RS, 
+                            states=states, 
+                            showsteps=showsteps)
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att
     statenames <- statedat$statenames
@@ -322,8 +327,11 @@ spGetXY <- function(bnd,
     sql <- getfilter(statenm, stcds, syntax="sql")
     spxy <- pcheck.spatial(xy, xy_dsn, sql=sql)
     if (is.na(geomtype)) { 
-      spxy <- spMakeSpatialPoints(xyplt=spxy, xy.uniqueid=xy.uniqueid, 
-		xvar=xvar, yvar=yvar, xy.crs=xy.crs)
+      spxy <- spMakeSpatialPoints(xyplt=spxy, 
+                                  xy.uniqueid=xy.uniqueid, 
+                                  xvar=xvar, 
+                                  yvar=yvar, 
+                                  xy.crs=xy.crs)
     }
 
   } else if (xy_datsource %in% c("obj", "csv")) {
@@ -361,10 +369,17 @@ spGetXY <- function(bnd,
 
   } else {			## xy_datsource in('datamart', 'sqlite')
     if (xy_datsource == "datamart") {
-      spxy <- DBgetCoords(states=stcds, evalid=evalid, evalCur=evalCur,
-		            evalEndyr=evalEndyr, measCur=measCur, measEndyr=measEndyr,
-		            allyrs=allyrs, invyrs=invyrs, measyrs=measyrs, intensity1=intensity1, 
-		            issp=TRUE)[[1]]
+      spxy <- DBgetCoords(states=stcds, 
+                          evalid=evalid, 
+                          evalCur=evalCur, 
+                          evalEndyr=evalEndyr, 
+                          measCur=measCur, 
+                          measEndyr=measEndyr, 
+                          allyrs=allyrs, 
+                          invyrs=invyrs, 
+                          measyrs=measyrs, 
+                          intensity1=intensity1, 
+                          issp=TRUE)[[1]]
 
       xy.uniqueid <- "PLT_CN"
       xyjoinid <- "PLT_CN"
@@ -461,8 +476,11 @@ spGetXY <- function(bnd,
         xyplt <- suppressMessages(pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql))
 
         ## Make spatial
-        spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
-			xvar=xvar, yvar=yvar, xy.crs=xy.crs) 
+        spxy <- spMakeSpatialPoints(xyplt=xyplt, 
+                                    xy.uniqueid=xy.uniqueid, 
+                                    xvar=xvar, 
+                                    yvar=yvar, 
+                                    xy.crs=xy.crs) 
       } else {
         plot_layer <- findnm("plot", tablst, returnNULL=TRUE)
         if (!is.null(plot_layer) && length(plot_layer) == 1) {
@@ -482,8 +500,11 @@ spGetXY <- function(bnd,
           if (!is.null(pstatenm)) {
             stfilter <- paste0("p.", pstatenm, " IN(", toString(stcds), ")")
             xyfromqry <- getpfromqry(plotCur=measCur, 
-			invyrs=invyrs, allyrs=allyrs, intensity1=intensity1, 
-			syntax="R", plotnm=plot_layer)
+                                     invyrs=invyrs, 
+                                     allyrs=allyrs, 
+                                     intensity1=intensity1, 
+                                     syntax="R", 
+                                     plotnm=plot_layer)
             sql <- paste0("select xy.* from ", xyfromqry, 
 				" JOIN ", xy, " xy ON (p.", pjoinid, " = xy.", xyjoinid, ")",
 				" where ", stfilter) 

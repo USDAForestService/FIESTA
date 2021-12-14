@@ -73,5 +73,5 @@ getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
   ## Change all na values to 0 values
   #xdat[is.na(xdat)] <- 0
 
-  return(xdat)
+  return(data.table(xdat))
 }    

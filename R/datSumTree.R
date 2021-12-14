@@ -293,7 +293,7 @@ datSumTree <- function(tree = NULL,
   setkeyv(treex, tuniqueid)
   checkNAtvars <- c(checkNAtvars, tuniqueid)
   setkeyv(treex, tuniqueid)
-
+ 
   if (addseed) {
     if (!tuniqueid %in% names(seedx)) {
       stop("must included tree uniqueid in seed table: ", tuniqueid)
@@ -310,6 +310,7 @@ datSumTree <- function(tree = NULL,
     condid <- pcheck.varchar(var2check=condid, varnm="condid", 
 		checklst=names(treex), caption="cond ID - tree", 
 		warn=paste(condid, "not in tree table"))
+ 
     if (is.null(condid)) {
       message("assuming all 1 condition plots")
       treex$CONDID <- 1
@@ -342,6 +343,7 @@ datSumTree <- function(tree = NULL,
       cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
 		checklst=condnmlst, caption="UniqueID variable - cond", 
 		warn=paste(cuniqueid, "not in cond table"))
+
       if (is.null(cuniqueid)) {
         if (tuniqueid %in% condnmlst) {
           cuniqueid <- tuniqueid
@@ -474,7 +476,6 @@ datSumTree <- function(tree = NULL,
     setkeyv(pltx, puniqueid)
     checkNApvars <- c(checkNApvars, puniqueid)
   } 
-
 
   ## Check ACI. If TRUE, include all trees, If FALSE, filter for forested plots only 
   ## (COND_STATUS_CD = 1)

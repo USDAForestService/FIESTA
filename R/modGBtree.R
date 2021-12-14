@@ -593,6 +593,7 @@ modGBtree <- function(GBpopdat,
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		    by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvar.name]
     tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
+
     unit_rowest <- GBest.pbar(sumyn=estvar.name, ysum=tdomdatsum, 
 		    uniqueid=cuniqueid, stratalut=stratalut, 
 		    unitvar=unitvar, strvar=strvar, domain=rowvar)

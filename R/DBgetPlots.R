@@ -2495,8 +2495,8 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE,
                                 index.unique=index.unique.subpx)) 
-
         index.unique.subpcx <- NULL
+        
         if (!append_layer) index.unique.subpcx <- c("PLT_CN", "CONDID")
         datExportData(subpcx, 
             savedata_opts=list(outfolder=outfolder, 
