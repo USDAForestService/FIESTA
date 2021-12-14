@@ -1570,8 +1570,7 @@ DBgetPlots <- function (states = NULL,
         pltx <- nbrcnd[pltx]
 
         nbrcndlst <- c("NBRCND", "NBRCNDSAMP", "NBRCNDFOR", "NBRCNDFTYP")
-        pltvarlst2 <- c(pltvarlst2, nbrcndlst)
-      
+        pltvarlst2 <- c(pltvarlst2, nbrcndlst)      
 
         ## CCLIVEPLT:
         ## A plot level canopy cover variable based on LIVE_CANOPY_CVR_PCT
@@ -1584,7 +1583,7 @@ DBgetPlots <- function (states = NULL,
           pltx <- ccliveplt[pltx]
           pltvarlst2 <- c(pltvarlst2, "CCLIVEPLT")
         }
-
+ 
         ## Regional variables 
         ######################################################################
         if (isRMRS && regionVars) {
@@ -1641,7 +1640,6 @@ DBgetPlots <- function (states = NULL,
           	formatC(pltx$PLOT, width=5, digits=5, flag=0))] 
         pltvarlst2 <- c(pltvarlst2, "PLOT_ID")
 
-
         ## Additional condition variables
         ######################################################################
         ref_fortypgrp <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "FORTYPCD",]
@@ -1685,6 +1683,7 @@ DBgetPlots <- function (states = NULL,
       setnames(pltx, "PLT_CN", "CN")
       setkeyv(pltx, "CN")
     }
+    pltx <- pltx[, pltvarlst2, with=FALSE]
  
     ## Create combined unique identifier to subset other tables
     pcondID <- condx[, paste(PLT_CN, CONDID)]
@@ -1919,6 +1918,8 @@ DBgetPlots <- function (states = NULL,
       } 
     }
  
+print("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+print(head(pltx))
     ##############################################################
     ## Seedling data (SEEDLING)
     ##############################################################
