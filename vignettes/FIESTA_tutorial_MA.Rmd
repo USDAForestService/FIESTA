@@ -1,0 +1,328 @@
+---
+title: "FIESTA - Model-Assisted Estimators - GW"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FIESTA - Model-Assisted Estimators - GW}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## Model-Assisted (MA) module overview
+
+`FIESTA`'s Model-Assisted (MA) module calculates population estimates and their sampling errors by taking advantage of available model-assisted survey estimators from the `mase` R package (McConville, et al. 2018). These estimators can use a variety of auxiliary data to build models and predict over a response variable of interest, while using a bias-correction term so that the bias of the model does not depend on model mis-specification. 
+
+Functions in `FIESTA` used for fitting model-assisted estimators include the `modMAarea` function for area estimates and `modMAtree` for tree estimates. The `modMApop` function is used to get population data needed for model-assisted estimation. Below is a description and table of contents for the sections related to these functions:
+
+FUNCTION  | DESCRIPTION
+-------------- | ---------------------------------------------------------------
+[modMApop](#modMApop) | Creates population data for model-assisted estimation.
+[modMAarea](#modMAarea) | Produces area level estimates through model-assisted estimation.
+[modMAtree](#modMAtree) | Produces tree level estimates through model-assisted estimation.
+<!-- [spGetModeldat()](#spGetModeldat) | Gets spatial model data. -->
+<!-- [modMAtree()](#modMAtree)| Model-assisted estimates of trees. -->
+
+## Objective of tutorial
+
+The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates using estimators from `mase`. The model-assisted estimators can be used with FIA's standard state-level population data (i.e, Evaluation) from the FIA database (FIADB) and also population data from a custom boundary. 
+
+The following examples are for generating estimates and estimated variances using standard FIA Evaluation data from FIA's National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
+
+<!-- The Green-Book estimators can be used with FIA's standard state-level population data (i.e, Evaluation) from the FIA database (FIADB) and also population data from a custom boundary. The population data includes a set of FIA plot data and summarized auxiliary information for post-stratification, including a table of area by estimation unit within the population, and a table of strata proportions by estimation unit. This tutorial steps through several examples using FIESTA's Green Book module, for three different populations: (POP1) an FIA standard Evaluation, Wyoming 561301; (POP2) a custom boundary with one population, Bighorn National Forest; and (POP3) a custom boundary with sub-populations, Bighorn National Forest Districts. All examples can be used with any population, standard or custom. -->
+
+
+## Example data - Wyoming (WY), Inventory Years 2011-2012
+
+Data Frame | Description
+-----------| --------------------------------------------------------------------------------
+WYplt      | WY plot-level data
+WYcond     | WY condition-level data
+WYtree     | WY tree-level data
+
+External data            | Description
+-------------------------| ------------------------------------------------------------------
+WYbighorn_adminbnd.shp   | Polygon shapefile of WY Bighorn National Forest Administrative boundary*
+WYbighorn_districtbnd.shp| Polygon shapefile of WY Bighorn National Forest District boundaries**
+WYbighorn_forest_nonforest_250m.tif| GeoTIFF raster of predicted forest/nonforest (1/0) for stratification*** 
+WYbighorn_dem_250m.img   | Erdas Imagine raster of elevation change, in meters****
+
+*USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.AdministrativeForest (http://data.fs.usda.gov/geodata/edw). Description: An area encompassing all the National Forest System lands administered by an administrative unit. The area encompasses private lands, other governmental agency lands, and may contain National Forest System lands within the proclaimed boundaries of another administrative unit. All National Forest System lands fall within one and only one Administrative Forest Area.
+
+**USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (http://data.fs.usda.gov/geodata/edw). Description: A depiction of the boundary that encompasses a Ranger District.
+
+***Based on MODIS-based classified map resampled from 250m to 500m resolution and reclassified from 3 to 2 classes: 1:forest; 2:nonforest. Projected in Albers Conical Equal Area, Datum NAD27 (Ruefenacht et al. 2008). Clipped to extent of WYbighorn_adminbnd.shp.
+
+****USGS National Elevation Dataset (NED), resampled from 30m resolution to 250m. Projected in Albers Conical Equal Area, Datum NAD27 (U.S. Geological Survey 2017). Clipped to boundary of WYbighorn_adminbnd.shp.
+
+### Set up 
+
+First, you'll need to load the `FIESTA` library:
+
+```{r, warning = F, message = F}
+library(FIESTA)
+```
+
+Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For this vignette, we have saved our outfolder file path as the `outfolder` object in a temporary directory. We also set a few default options preferred for this vignette.
+
+```{r}
+## Set options
+options(scipen = 6)
+options(stringsAsFactors = FALSE)
+
+## Set outfolder
+outfolder <- tempdir()
+```
+
+
+### Get data for examples
+
+Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data and predictor layers stored in `FIESTA` and derive new predictor layers using the `raster` package. 
+
+```{r}
+# File names for external spatial data
+WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp",
+                      package = "FIESTA")
+WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp",
+                          package = "FIESTA")
+
+## predictor variables
+fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif",
+                       package = "FIESTA")
+demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img",
+                     package = "FIESTA")
+
+# Derive new predictor layers from dem
+library(raster)
+dem <- raster(demfn)
+slp <- terrain(dem,
+               opt = "slope",
+               unit = "degrees",
+               filename = paste0(outfolder, "/WYbh_slp.img"), 
+               overwrite = TRUE)
+asp <- terrain(dem,
+               opt = "aspect",
+               unit = "degrees", 
+               filename = paste0(outfolder, "/WYbh_asp.img"),
+               overwrite = TRUE)
+```
+
+Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spMakeSpatialPoints` function from `FIESTA`. For more information on how to use this function, please see the `sp` vignette included with `FIESTA` (link). 
+
+```{r}
+WYspplt <- spMakeSpatialPoints(
+  xyplt = WYplt,
+  xy.uniqueid = "CN",
+  xvar = "LON_PUBLIC",
+  yvar = "LAT_PUBLIC",
+  prj = "longlat",
+  datum = "NAD83"
+)
+
+rastlst.cont <- c(demfn, slp, asp)
+rastlst.cont.name <- c("dem", "slp", "asp")
+rastlst.cat <- fornffn
+rastlst.cat.name="fornf"
+```
+
+Next, we must generate dataset for model-assisted estimation. We can do this with the `spGetAuxiliary` function from `FIESTA`. Again, see the `sp` vignette for further information on this function. 
+ 
+```{r, results='hide'}
+modeldat <- spGetAuxiliary(
+  xyplt = WYspplt,
+  uniqueid = "CN",
+  unit_layer = WYbhfn,
+  unitvar = NULL,
+  rastlst.cont = rastlst.cont,
+  rastlst.cont.name = rastlst.cont.name,
+  rastlst.cat = rastlst.cat,
+  rastlst.cat.name = rastlst.cat.name,
+  rastlst.cont.stat = "mean",
+  asptransform = TRUE,
+  rast.asp = asp,
+  keepNA = FALSE,
+  showext = FALSE,
+  savedata = FALSE)
+```
+```{r}
+str(modeldat, max.level = 1)
+```
+
+## Examples
+
+### `modMApop`
+ 
+Finally, we can create our population data for model-assited estimation. To do so, we use the `modMApop` function in `FIESTA`. We must assign our population tables with the `popTabs` argument (and unique identifiers for these tables with the `popTabIDs` argument if they are not the default), the plot assignment with the `pltassgn` argument, and in auxiliary dataset we just created with the `auxdat` argument. 
+ 
+```{r}
+MApopdat <- modMApop(popTabs = list(tree = WYtree, cond = WYcond),
+                     pltassgn = WYpltassgn,
+                     auxdat = modeldat)
+```
+
+The `modMApop` function returns a list with lots of information and data for us to use. For a quick look at what this list includes we use the `str` function: 
+
+```{r}
+str(MApopdat, max.level = 1)
+```
+
+### `modMAarea`
+
+#### Example 1: Area of forest land, Wyoming, 2011-2013
+
+In this example, we look at estimating the area of forest land in Wyoming from 2011 to 2013 summed to the population unit (`sumunit = TRUE`) with the generalized regression estimator (`MAmethod = "greg"`). `FIESTA` returns raw data for area of forest land, Wyoming, 2011-2013 (sum estimation units). We can look at the structure of this output with `str` and the estimates below. 
+
+```{r}
+area1.1 <- modMAarea(
+  MApopdat = MApopdat,
+  MAmethod = "greg",
+  landarea = "FOREST",
+  sumunit = TRUE)
+
+str(area1.1, max.level = 1)
+
+area1.1$est
+```
+
+#### Example 2: Area by forest type on forest land, Wyoming, 2011-2013 
+
+In this example, we look at adding rows to the output and include returntitle=TRUE to return title information.
+
+```{r}
+area1.2 <- modMAarea(
+    MApopdat = MApopdat,         # pop - population calculations for WY, post-stratification
+    MAmethod = "greg",           # est - model-assisted method
+    landarea = "FOREST",         # est - forest land filter
+    rowvar = "FORTYPCD",         # est - row domain
+    sumunits = TRUE,             # est - sum estimation units to population
+    returntitle = TRUE           # out - return title information
+    )
+```
+
+Again, we can look at the contents of the output list. The output now includes titlelst, a list of associated titles.
+
+```{r}
+str(area1.2, max.level = 1)
+```
+
+And the estimates: 
+
+```{r}
+## Estimate and percent sampling error of estimate
+area1.2$est
+```
+
+Along with raw data and titles:
+
+```{r}
+## Raw data (list object) for estimate
+raw1.2 <- area1.2$raw      # extract raw data list object from output
+names(raw1.2)
+head(raw1.2$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+raw1.2$totest            # estimates for population (i.e., WY)
+head(raw1.2$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw1.2$rowest)      # estimates by row for population (i.e., WY)
+
+
+## Titles (list object) for estimate
+titlelst1.2 <- area1.2$titlelst
+names(titlelst1.2)
+titlelst1.2
+```
+
+#### Example 3: Area by forest type and stand-size class on forest land, Wyoming, 2011-2013
+
+In this example, we look at adding rows and columns to output, including FIA names. We also output estimates and percent standard error in the same cell with the `allin1` argument in `table_options` and save data to an outfolder with the `outfolder` argument in `savedata_options`. 
+
+```{r}
+## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
+area1.3 <- modMAarea(
+    MApopdat = MApopdat,         # pop - population calculations for WY, post-stratification
+    MAmethod = "greg",           # est - model-assisted method
+    landarea = "FOREST",         # est - forest land filter
+    rowvar = "FORTYPCD",         # est - row domain
+    colvar = "STDSZCD",          # est - column domain
+    sumunits = TRUE,             # est - sum estimation units to population
+    savedata = TRUE,             # out - save data to outfolder
+    returntitle = TRUE,          # out - return title information
+    table_opts = list(
+      row.FIAname = TRUE,          # table - row domain names
+      col.FIAname = TRUE,          # table - column domain names
+      allin1 = TRUE                # table - return output with est(pse)
+      ),
+    savedata_opts = list(
+      outfolder = outfolder,       # save - outfolder for saving data
+      outfn.pre = "WY"             # save - prefix for output files
+      )
+    )
+
+area1.3$est
+```
+
+We can again look at the output list, estimates, raw data, and titles:
+
+```{r}
+## Look at output list
+names(area1.3)
+
+## Estimate and percent sampling error of estimate
+head(area1.3$est)
+
+
+## Raw data (list object) for estimate
+raw1.3 <- area1.3$raw      # extract raw data list object from output
+names(raw1.3)
+head(raw1.3$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw1.3$totest)      # estimates for population (i.e., WY)
+head(raw1.3$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw1.3$rowest)      # estimates by row for population (i.e., WY)
+head(raw1.3$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
+head(raw1.3$colest)      # estimates by column for population (i.e., WY)
+head(raw1.3$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
+head(raw1.3$grpest)      # estimates by row and column for population (i.e., WY)
+
+
+## Titles (list object) for estimate
+titlelst1.3 <- area1.3$titlelst
+names(titlelst1.3)
+titlelst1.3
+
+
+## List output files in outfolder
+list.files(outfolder, pattern = "WY_area")
+list.files(paste0(outfolder, "/rawdata"), pattern = "WY_area")
+```
+
+
+### `modMAtree`
+
+We will set our estimate variable and filter now. We set `estvar` to `"VOLCFNET"` for net cubic foot volume, and filter with `estvar.filter` set to `"STATUSCD == 1"` so we only consider live trees in our estimation.  
+
+```{r}
+estvar <- "VOLCFNET"
+live_trees <- "STATUSCD == 1"
+```
+
+
+#### Example 4: Net cubic-foot volume of live trees, Wyoming, 2011-2013
+
+We now will generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY) with `modGBtree`.
+
+```{r}
+## Return raw data and titles
+## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
+tree1.1 <- modMAtree(
+    MApopdat = MApopdat,         # pop - population calculations
+    MAmethod = "greg",           # est - model-assisted method
+    landarea = "FOREST",         # est - forest land filter
+    sumunits = TRUE,             # est - sum estimation units to population
+    estvar = estvar,             # est - net cubic-foot volume
+    estvar.filter = live_trees,  # est - live trees only
+    returntitle = TRUE           # out - return title information
+    )
+
+names(tree1.1)
+tree1.1$raw$unit_totest
+```
