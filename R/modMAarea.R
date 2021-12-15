@@ -579,7 +579,7 @@ modMAarea <- function(MApopdat,
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
 		by=c(unitvar, cuniqueid, colvar, strvar, prednames), .SDcols=estvar.name]
 
-    unit_colest <- lapply(estunits, MAest.unit, 
+    unit_colestlst <- lapply(estunits, MAest.unit, 
                       dat=cdomdatsum, cuniqueid=cuniqueid, 
                       unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                       MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
