@@ -30,8 +30,7 @@ modMAtree(
 \arguments{
 \item{MApopdat}{List. Population data objects returned from modMApop().}
 
-\item{MAmethod}{String. mase (i.e., model-assisted) method to use ('HT',
-'PS', 'greg', 'gregEN', 'ratio').}
+\item{MAmethod}{String. mase (i.e., model-assisted) method to use ('greg', 'gregEN', 'ratio').}
 
 \item{estvar}{String. Name of the tree-level estimate variable (e.g.,
 'VOLCFNET').}
