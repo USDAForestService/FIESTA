@@ -43,8 +43,7 @@
 #' SPCD, SPGRPCD
 #' 
 #' @param MApopdat List. Population data objects returned from modMApop().
-#' @param MAmethod String. mase (i.e., model-assisted) method to use ('HT',
-#' 'PS', 'greg', 'gregEN', 'ratio').
+#' @param MAmethod String. mase (i.e., model-assisted) method to use ('greg', 'gregEN', 'ratio').
 #' @param estvar String. Name of the tree-level estimate variable (e.g.,
 #' 'VOLCFNET').
 #' @param estvar.filter String. A tree-level filter for estvar. Must be R
