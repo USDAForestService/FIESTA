@@ -468,6 +468,7 @@ spGetXY <- function(bnd,
       if (intensity1) {
         intensitynm <- findnm("INTENSITY", xyfields, returnNULL=TRUE)
       }
+
       if (!is.null(xystatenm) && !intensity1) {
         stfilter <- paste("where ", xystatenm, " IN(", toString(stcds), ")")
 
@@ -482,6 +483,7 @@ spGetXY <- function(bnd,
                                     yvar=yvar, 
                                     xy.crs=xy.crs) 
       } else {
+
         plot_layer <- findnm("plot", tablst, returnNULL=TRUE)
         if (!is.null(plot_layer) && length(plot_layer) == 1) {
           pltfields <- DBI::dbListFields(dbconn, plot_layer)
@@ -496,6 +498,7 @@ spGetXY <- function(bnd,
               stop("invalid pjoinid")
             }
           }
+ 
           pstatenm <- findnm("STATECD", pltfields, returnNULL=TRUE)
           if (!is.null(pstatenm)) {
             stfilter <- paste0("p.", pstatenm, " IN(", toString(stcds), ")")
@@ -511,7 +514,15 @@ spGetXY <- function(bnd,
 #            sql <- paste0("select xy.* from ", xy, " xy join ", 
 #			plot_layer, " p ON(xy.", xyjoinid, " = p.", pjoinid, ") where p.", 
 #			pstatenm, " IN(", toString(stcds), ")")
+
             xyplt <- pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql)
+            if (nrow(xyplt) == 0) {
+              if (!is.null(xyjoinid) && pjoinid != xyjoinid) {
+                message("check if xyjoinid (", xyjoinid, ") in ", xy, 
+				" matches pjoinid (", pjoinid, ") in ", plot_layer)
+              }     
+              stop("invalid xy query")
+            }
  
             ## Make spatial
             spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
