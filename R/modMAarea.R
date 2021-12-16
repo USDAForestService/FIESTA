@@ -587,7 +587,7 @@ modMAarea <- function(MApopdat,
                       FIA=FIA, modelselect=modelselect)
     unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
-      predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
+      predselectlst$grpest <- do.call(rbind, sapply(unit_grpest, '[', "predselect"))
     }
 
     cdomdatsum <- cdomdat[, lapply(.SD, sum, na.rm=TRUE), 
