@@ -194,6 +194,7 @@ str(area1, max.level = 1)
 area1$est
 ```
 
+#### Testing gregEN
 
 ```{r}
 test <- modMAarea(
