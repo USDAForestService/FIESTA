@@ -301,7 +301,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear",
 
   }
 
-  selected <- data.frame(t(estgreg$coefficients))[,-1]
+  selected <- data.frame(t(estgregEN$coefficients))[,-1]
   predselect <- rbindlist(list(predselect, selected), fill=TRUE)
 
   estgregENdt <- data.table(estgregEN$pop_mean, estgregEN$pop_mean_var, NBRPLT, NBRPLT.gt0)
@@ -311,7 +311,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear",
 
   if (FIA) {
     ## This takes out the finite population correction term (to estimated variance from FIA)
-    estgregEN[, nhat.var := nhat.var / (1 - length(y) / N)]
+    estgregENdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
   ## Return survey weights
   if (getweights) {
