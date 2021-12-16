@@ -1019,7 +1019,8 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
 
 pcheck.params <- function(input.params, strata_opts=NULL, 
 			unit_opts=NULL, table_opts=NULL, title_opts=NULL, 
-			savedata_opts=NULL, multest_opts=NULL) {
+			savedata_opts=NULL, multest_opts=NULL, 
+			spMakeSpatial_opts=NULL) {
   ## DESCRIPTION: function to check input list parameters
 
   if (!is.null(strata_opts)) {
@@ -1120,6 +1121,24 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       }
     }
   }
+
+  if (!is.null(spMakeSpatial_opts)) {
+    if ("spMakeSpatial_opts" %in% input.params) {
+      if (!is.list(spMakeSpatial_opts)) {
+        spMakeSpatial_opts <- as.list(spMakeSpatial_opts)
+      }
+      if (is.null(names(spMakeSpatial_opts))) {
+        stop("invalid spMakeSpatial_opts... see spMakeSpatial_options()")
+      }
+      formallst.spMakeSpatial<- names(formals(FIESTA::spMakeSpatial_options))[-length(formals(FIESTA::spMakeSpatial_options))]
+      spMakeSpatial.params <- names(spMakeSpatial_opts)[!names(spMakeSpatial_opts) %in% c("formallst", "input.params")]
+      if (!all(spMakeSpatial.params %in% formallst.unit)) {
+        miss <- spMakeSpatial.params[!spMakeSpatial.params %in% formallst.spMakeSpatial]
+        stop("invalid parameter: ", toString(miss))
+      }
+    }
+  }
+
 
 }
 

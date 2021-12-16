@@ -35,9 +35,10 @@
 #' @param savedata Logical. If TRUE, save data to outfolder.
 #' @param exportsp Logical. If TRUE, the clipped spatial point data are
 #' exported.
+#' @param spMakeSpatial_opts List. See help(spMakeSpatial_options()) for a list
+#' of options. Use to convert X/Y values to simple feature (sf) coordinates.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options for saving data. If out_layer = NULL, default = 'pntclip'.
-#' @param ...  Arguments to be passed to spMakeSpatialPoints.
 #'
 #' @return A list of the following objects:
 #' 
@@ -100,8 +101,8 @@ spClipPoint <- function(xyplt,
                         stopifnotin=TRUE, 
                         savedata = FALSE, 
                         exportsp = FALSE, 
-                        savedata_opts = NULL,
-                        ...){
+                        spMakeSpatial_opts = NULL,
+                        savedata_opts = NULL){
   ###################################################################################
   ## DESCRIPTION: 
   ## Clip (intersect) point vector layer with polygon vector layer. 
@@ -118,15 +119,29 @@ spClipPoint <- function(xyplt,
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::spClipPoint)), 
-		names(formals(FIESTA::spMakeSpatialPoints)))
+  formallst <- names(formals(FIESTA::spClipPoint))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
 
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, savedata_opts=savedata_opts)
+  
+  
+  ## Set spMakeSpatial defaults
+  spMakeSpatial_defaults_list <- formals(FIESTA::spMakeSpatial_options)[-length(formals(FIESTA::spMakeSpatial_options))]
+  
+  for (i in 1:length(spMakeSpatial_defaults_list)) {
+    assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(spMakeSpatial_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
+    }
+  }
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
@@ -141,6 +156,7 @@ spClipPoint <- function(xyplt,
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
   }
+  
 
   ##################################################################
   ## CHECK PARAMETER INPUTS

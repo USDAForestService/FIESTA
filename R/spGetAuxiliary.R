@@ -77,12 +77,13 @@
 #' @param exportsp Logical. If TRUE, the extracted raster point data are
 #' exported to outfolder.
 #' @param exportNA Logical. If TRUE, NA values are exported to outfolder.
+#' @param spMakeSpatial_opts List. See help(spMakeSpatial_options()) for a list
+#' of options. Use to convert X/Y values to simple feature (sf) coordinates.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param vars2keep String vector. Attributes in SAdoms, other than domvar to
 #' include in unitzonal output and extract to pltassgn points.
 #' @param gui Logical. If gui, user is prompted for parameters.
-#' @param ...  Other parameters for spMakeSpatialPoints.
 #'
 #' @return \item{pltassgn}{ sf object. xyplt data with extracted values from
 #' rastlst*. } \item{unitzonal}{ Data frame. Number of pixels and zonal
@@ -161,10 +162,10 @@ spGetAuxiliary <- function(xyplt,
                            savedata = FALSE, 
                            exportsp = FALSE, 
                            exportNA = FALSE, 
+                           spMakeSpatial_opts = NULL,
                            savedata_opts = NULL, 
                            vars2keep = NULL, 
-                           gui = FALSE, 
-                           ...) {
+                           gui = FALSE) {
 
   ##################################################################################
   ## DESCRIPTION: Get data extraction and zonal statistics for Model-assisted or
@@ -200,15 +201,29 @@ spGetAuxiliary <- function(xyplt,
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(spGetAuxiliary)), 
-		names(formals(FIESTA::spMakeSpatialPoints)))
+  formallst <- names(formals(spGetAuxiliary))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
  
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, savedata_opts=savedata_opts)
+  
+  
+  ## Set spMakeSpatial defaults
+  spMakeSpatial_defaults_list <- formals(FIESTA::spMakeSpatial_options)[-length(formals(FIESTA::spMakeSpatial_options))]
+  
+  for (i in 1:length(spMakeSpatial_defaults_list)) {
+    assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(spMakeSpatial_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
+    }
+  }
 
   ## Set savedata defaults
   savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
