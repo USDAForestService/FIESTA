@@ -64,7 +64,7 @@
 #' an input data frame (i.e., plt, cond, tree).
 #' @param prednames String vector. Name(s) of predictor variables to include in
 #' model.
-#' @param modelselect Boolean. If TRUE, variable selection occurs. 
+#' @param modelselect Logical. If TRUE, variable selection occurs. 
 #' @param sumunits Logical. If TRUE, estimation units are summed and returned
 #' in one table.
 #' @param FIA Logical. If TRUE, the finite population term is removed from
@@ -592,7 +592,8 @@ modMAtree <- function(MApopdat,
   message("generating estimates using mase::", masemethod, " function...\n")
   if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
-  } 
+  }
+  getweights <- ifelse(MAmethod %in% c("greg", "PS", "HT"), TRUE, FALSE) 
 
 #  if (addtotal) {
     ## Get total estimate and merge area
@@ -627,7 +628,7 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain=rowvar, response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, )
+                        FIA=FIA, modelselect=modelselect)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))

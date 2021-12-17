@@ -560,7 +560,7 @@ spGetXY <- function(bnd,
   stunitco.names <- c("STATECD", "UNITCD", "COUNTYCD", "COUNTYFIPS")
   statevars <- stunitco.names[!stunitco.names %in% names(spxy)]
   if (length(statevars) > 0) {
-    spxy <- spExtractPoly(spxy, uniqueid=xy.uniqueid, polyvlst=FIESTA::stunitco, 
+    spxy <- spExtractPoly(spxy, xy.uniqueid=xy.uniqueid, polyvlst=FIESTA::stunitco, 
 			polyvarlst=statevars)$spxyext
   }
 

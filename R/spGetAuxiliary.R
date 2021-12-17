@@ -251,8 +251,16 @@ spGetAuxiliary <- function(xyplt,
 
   if (!"sf" %in% class(sppltx)) { 
     ## Create spatial object from xyplt coordinates
-    sppltx <- spMakeSpatialPoints(xyplt=sppltx, xy.uniqueid=uniqueid, 
-		exportsp=FALSE, ...)
+    sppltx <- spMakeSpatialPoints(xyplt=sppltx, 
+                                  xy.uniqueid=uniqueid, 
+                                  xvar=xvar, 
+                                  yvar=yvar,
+                                  xy.crs=xy.crs,
+                                  prj=prj,
+                                  datum=datum,
+                                  zone=zone,
+                                  zoneS=zoneS,
+                                  aea.param=aea.param)
   } else {
     ## GET uniqueid
     sppltnames <- names(sppltx)

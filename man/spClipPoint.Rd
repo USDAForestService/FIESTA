@@ -18,8 +18,8 @@ spClipPoint(
   stopifnotin = TRUE,
   savedata = FALSE,
   exportsp = FALSE,
-  savedata_opts = NULL,
-  ...
+  spMakeSpatial_opts = NULL,
+  savedata_opts = NULL
 )
 }
 \arguments{
@@ -62,10 +62,11 @@ FALSE, returns NULL.}
 \item{exportsp}{Logical. If TRUE, the clipped spatial point data are
 exported.}
 
+\item{spMakeSpatial_opts}{List. See help(spMakeSpatial_options()) for a list
+of options. Use to convert X/Y values to simple feature (sf) coordinates.}
+
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options for saving data. If out_layer = NULL, default = 'pntclip'.}
-
-\item{...}{Arguments to be passed to spMakeSpatialPoints.}
 }
 \value{
 A list of the following objects:

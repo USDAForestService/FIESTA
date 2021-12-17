@@ -21,6 +21,7 @@ modMApop(
   unitzonal = NULL,
   prednames = NULL,
   predfac = NULL,
+  standardize = TRUE,
   savedata = FALSE,
   saveobj = FALSE,
   objnm = "MApopdat",

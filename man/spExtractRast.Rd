@@ -22,9 +22,9 @@ spExtractRast(
   savedata = FALSE,
   exportsp = FALSE,
   exportNA = FALSE,
-  savedata_opts = savedata_options(),
-  gui = FALSE,
-  ...
+  spMakeSpatial_opts = NULL,
+  savedata_opts = NULL,
+  gui = FALSE
 )
 }
 \arguments{
@@ -85,13 +85,14 @@ exported to outfolder.}
 
 \item{exportNA}{Logical. If TRUE, NA values are exported to outfolder.}
 
+\item{spMakeSpatial_opts}{List. See help(spMakeSpatial_options()) for a list
+of options. Use to convert X/Y values to simple feature (sf) coordinates.}
+
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE. If out_layer = NULL,
 default = 'rastext'.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
-
-\item{...}{Other parameters for spMakeSpatialPoints.}
 }
 \value{
 \item{sppltext}{ sf object or data frame. Input xyplt data with

@@ -482,20 +482,19 @@ modGBpop <- function(popType = "VOL",
         unitvar <- stratdat$unitvar
         unitvar2 <- stratdat$unitvar2
       } 
-    }
-    if (strata) {
-      if (is.null(strwtvar)) {
-        stop("missing strwtvar")
+    
+      if (strata) {
+        if (is.null(strwtvar)) {
+          stop("missing strwtvar")
+        }
+        if (strwtvar != "strwt") {
+          names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
+          strwtvar <- "strwt"
+        }
       }
-      if (strwtvar != "strwt") {
-        names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
-        strwtvar <- "strwt"
-      }
-    }
-
-    if (!is.null(auxdat)) {
-      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "predfac", 
-		"pltassgnid", "dunitarea", "areavar")
+    } else if (!is.null(auxdat)) {
+      list.items <- c("pltassgn", "unitzonal", "unitvar", "predfac", 
+		"pltassgnid", "unitarea", "areavar")
       auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid
