@@ -12,7 +12,8 @@ spMakeSpatial_options(
   datum = NULL,
   zone = NULL,
   zoneS = FALSE,
-  aea.param = "USGS"
+  aea.param = "USGS",
+  ...
 )
 }
 \arguments{
