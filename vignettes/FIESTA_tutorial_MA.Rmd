@@ -189,21 +189,38 @@ area1 <- modMAarea(
 We can look at the structure of this output with `str` and the estimates below. Note that again `FIESTA` outputs a list. 
 
 ```{r}
-str(area1, max.level = 1)
+str(area1, max.level = 2)
 
 area1$est
 ```
 
-#### Testing gregEN
+#### Area of forest land, Wyoming, 2011-2013, using the Elastic Net for variable selection
+
+Here, we fit the same model as the above example, but rather than using `"greg"` are our model-assisted method, we can use `"gregEN"` where the EN stands for "elastic net". The elastic net performs variable selection for us, grabbing predictors it finds to be most useful in the model. 
 
 ```{r}
-test <- modMAarea(
+area2 <- modMAarea(
   MApopdat = MApopdat, # pop - population calculations for WY, post-stratification
   MAmethod = "gregEN", # est - model-assisted method
   landarea = "FOREST", # est - forest land filter
   sumunits = TRUE # est - sum estimation units to population
   )
 ```
+
+We can again see that the structure of the list is very similar to that in the above example:
+
+```{r}
+str(area2, max.level = 2)
+```
+
+However now the `raw` list has an item call `predselectlst`. We can look at this item now:
+
+```{r}
+area2$raw$predselectlst
+```
+
+Notably, we can see that `dem`, `slp`, `asp_cos`, and `asp_sin` were removed from the model. 
+
 
 #### Example 3: Area by forest type on forest land, Wyoming, 2011-2013 
 
