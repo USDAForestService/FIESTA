@@ -407,7 +407,6 @@ modGBtree <- function(GBpopdat,
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
  
-
   ########################################
   ## Check area units
   ########################################

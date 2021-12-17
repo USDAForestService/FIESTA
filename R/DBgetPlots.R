@@ -1918,8 +1918,6 @@ DBgetPlots <- function (states = NULL,
       } 
     }
  
-print("XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-print(head(pltx))
     ##############################################################
     ## Seedling data (SEEDLING)
     ##############################################################

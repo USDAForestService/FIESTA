@@ -611,8 +611,11 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 #        }
 #      } else {
         pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-        pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
-				by.x=cuniqueid, by.y=puniqueid)
+#        pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
+#				by.x=cuniqueid, by.y=puniqueid)
+        pltcondx <- merge(pltx[, pltcols, with=FALSE], condx, 
+				by.x=puniqueid, by.y=cuniqueid)
+        setnames(pltcondx, "CN", "PLT_CN")
 #      }
       nrow.after <- length(unique(pltcondx[[cuniqueid]]))
       if (nrow.after < nrow.before) {
@@ -641,8 +644,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       nrow.before <- nrow(pltx)
 
       pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
-				by.x=cuniqueid, by.y=puniqueid)
+#      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
+#				by.x=cuniqueid, by.y=puniqueid)
+      pltcondx <- merge(pltx[, pltcols, with=FALSE], condx, 
+				by.x=puniqueid, by.y=cuniqueid)
+      setnames(pltcondx, "CN", "PLT_CN")
+
       nrow.after <- length(unique(pltcondx[[cuniqueid]]))
       if (nrow.after < nrow.before) {
         message(abs(nrow.after - nrow.before), " plots were removed from population")

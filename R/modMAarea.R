@@ -534,6 +534,7 @@ modMAarea <- function(MApopdat,
   if (!MAmethod %in% c("HT", "PS")) {
     message("using the following predictors...", toString(prednames))
   } 
+  getweights <- ifelse(MAmethod %in% c("greg", "PS", "HT"), TRUE, FALSE) 
 
   if (addtotal) {
     ## Get total estimate and merge area

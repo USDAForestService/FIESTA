@@ -334,8 +334,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ## Check categorical (predfac) variables
   ###################################################################################
   if (!module %in% c("GB", "PB") && !strata) {
-    predvariance <- pltx[, lapply(.SD, var), .SDcols=prednames]
-
+    predvariance <- pltx[, lapply(.SD, var, na.rm=TRUE), .SDcols=prednames]
     ## Remove predictors with variance = 0
     if (any(predvariance == 0)) {
       predvariance0 <- names(predvariance)[predvariance == 0]
@@ -459,22 +458,24 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   setkeyv(auxlut, strunitvars)
   setkeyv(pltx, puniqueid)
 
-  if (!is.null(unitarea)) {
-    setkeyv(unitarea, unitvar)
-  }
+  returnlst <- list(pltx=as.data.frame(pltx), 
+		auxlut=as.data.frame(auxlut), 
+		unitvar=unitvar, unitvars=unitvars,
+		prednames=prednames, predfac=predfac)
 
-#  returnlst <- list(pltx=pltx[,c(puniqueid, unitvar, prednames, strvar), with=FALSE], 
-#		auxlut=auxlut, unitarea=unitarea, unitvar=unitvar, strvar=strvar,
-#		prednames=prednames, predfac=predfac)
+  if (!is.null(unitarea)) {
+    returnlst$unitarea <- data.frame(unitarea)
+  } 
+  if (!is.null(npixelvar)) {
+    returnlst$npixels <- data.frame(npixels)
+    returnlst$npixelvar <- npixelvar
+  }
 
   if (!is.null(prednames) && standardize) {
     standardized <- preds.standardize(plt=pltx, aux=auxlut, prednames=prednames)
     pltx <- standardized$plt
     auxlut <- standardized$aux
   }
-  returnlst <- list(pltx=as.data.frame(pltx), auxlut=as.data.frame(auxlut), 
-		unitarea=as.data.frame(unitarea), unitvar=unitvar, 
-		prednames=prednames, predfac=predfac, unitvars=unitvars)
 
   if (strata) {
     returnlst$strvar <- strvar
@@ -494,11 +495,6 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       returnlst$stratcombinelut <- unitstrgrplut
     }
   } 
-
-  if (!is.null(npixelvar)) {
-    returnlst$npixels <- npixels
-    returnlst$npixelvar <- npixelvar
-  }
 
   return(returnlst)
 }

@@ -187,29 +187,30 @@
 modMApop <- function(popType="VOL",
                      popTabs = popTables(),
                      popTabIDs = popTableIDs(), 
-			               popFilter = popFilters(),
+                     popFilter = popFilters(),
                      pltassgn = NULL,
-                     pltassgnid = "PLT_CN",
-				             dsn = NULL, 
-				             pjoinid = "CN", 
-				             areawt = "CONDPROP_UNADJ",
-				             adj = "plot", 
-				             unitvar = NULL,
-				             unitarea = NULL,
-				             areavar = "ACRES", 
-				             unitzonal = NULL,
-				             prednames = NULL,
-				             predfac = NULL,
-				             savedata = FALSE,
-				             saveobj = FALSE,
-				             objnm = "MApopdat",
-                     unit_opts = NULL,
-				             savedata_opts = NULL,
-				             MAdata = NULL, 
-				             pltdat = NULL, 
-				             auxdat = NULL, 
-				             gui = FALSE,
-				             ...){
+                     pltassgnid = "PLT_CN", 
+                     dsn = NULL, 
+                     pjoinid = "CN", 
+                     areawt = "CONDPROP_UNADJ", 
+                     adj = "plot", 
+                     unitvar = NULL, 
+                     unitarea = NULL, 
+                     areavar = "ACRES", 
+                     unitzonal = NULL, 
+                     prednames = NULL, 
+                     predfac = NULL, 
+                     standardize = TRUE,
+                     savedata = FALSE, 
+                     saveobj = FALSE, 
+                     objnm = "MApopdat", 
+                     unit_opts = NULL, 
+                     savedata_opts = NULL, 
+                     MAdata = NULL, 
+                     pltdat = NULL, 
+                     auxdat = NULL, 
+                     gui = FALSE, 
+                     ...){
 
   ##################################################################################
   ## DESCRIPTION:
@@ -599,7 +600,7 @@ modMApop <- function(popType="VOL",
                   unit.action=unit.action, auxlut=auxlut, prednames=prednames, 
                   strvar=strvar, predfac=predfac, makedummy=makedummy, npixelvar=npixelvar, 
                   strwtvar="Prop", stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
-                  removeifnostrata=TRUE, standardize=TRUE)
+                  removeifnostrata=TRUE, standardize=standardize)
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -612,7 +613,6 @@ modMApop <- function(popType="VOL",
   strvar <- auxdat$strvar
   unitNA <- auxdat$unitNA
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
-
 
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS

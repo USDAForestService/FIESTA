@@ -222,10 +222,10 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE, getw
     setnames(estratio, c("nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
     returnlst <- list(est=estratio)
 
-    if (getweights) {
-      weights <- rep(NA, length(y))
-      returnlst$weights <- weights
-    }
+#    if (getweights) {
+#      weights <- rep(NA, length(y))
+#      returnlst$weights <- weights
+#    }
     return(returnlst)
   }
 
@@ -250,7 +250,7 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE, getw
 
 
 MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", 
-		save4testing=TRUE, getweights=FALSE) {
+		save4testing=TRUE) {
 
 #y <- yn.vect
 
@@ -277,6 +277,7 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear",
 					message(err, "\n")
 					return(NULL)
 				} )
+
   if (is.null(estgregEN)) {
     if (save4testing) {
       message("saving objects to working directory for testing: y, x_sample, x_pop, N")
@@ -298,7 +299,6 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear",
       returnlst$weights <- weights
     }
     return(returnlst)
-
   }
 
   selected <- data.frame(t(estgregEN$coefficients))[,-1]
@@ -314,12 +314,12 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear",
     estgregENdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
   ## Return survey weights
-  if (getweights) {
-    if (any(estgregEN$weights < 0)) {
-      message("model resulted in negatives... indicating model instability")
-    }
-    returnlst$weights <- estgregEN$weights / N
-  }
+#  if (getweights) {
+#    if (any(estgregEN$weights < 0)) {
+#      message("model resulted in negatives... indicating model instability")
+#    }
+#    returnlst$weights <- estgregEN$weights / N
+#  }
   return(returnlst)
 
 }
@@ -362,8 +362,9 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
 			getweights=getweights)
 
   } else if (MAmethod == "PS") {
-    x_sample <- pltdat.dom[, strvar, with=FALSE][[1]]
+    x_sample <- pltdat.dom[, strvar][[1]]
     x_pop <- unitlut[, c(strvar, "Prop"), with=FALSE]
+
     estlst <- MAest.ps(yn.vect, N, x_sample, x_pop, FIA=FIA, 
 			getweights=getweights)
 
@@ -385,6 +386,7 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
         stop("only one continuous predictor is allowed")
       } else {
         x_sample <- x_sample[[prednames]]
+        x_pop <- x_pop[[prednames]]
       }
       est <- MAest.ratio(yn.vect, N, x_sample, x_pop, FIA=FIA,
 			getweights=getweights)
@@ -395,11 +397,17 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   }
 
   if (getweights) {
+<<<<<<< Updated upstream
     # TESTING 
     print(pltdat.dom[[cuniqueid]])
     print(estlst$weights)
     print(estlst)
     # TESTING
+=======
+    #print(pltdat.dom[[cuniqueid]])
+    #print(estlst$weights)
+    #print(estlst)
+>>>>>>> Stashed changes
     estlst$weights <- data.frame(pltdat.dom[[cuniqueid]], estlst$weights)
     names(estlst$weights) <- c(cuniqueid, "weights")
   }
@@ -421,7 +429,9 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
   if (nrow(dat.dom) == 0 || sum(!is.na(dat.dom[[domain]])) == 0) {
     domest <- data.table(dom, matrix(c(NA, NA, 0, 0), 1,4))
     setnames(domest, c(domain, "nhat", "nhat.var", "NBRPLT", "NBRPLT.gt0"))
-    predselect <- data.table(dom, unitlut[FALSE, prednames])
+
+    predselect <- data.table(dom, unitlut[FALSE, 
+				unique(c(prednames, strvar), with=FALSE)])
     setnames(predselect, "dom", domain)
     returnlst <- list(est=domest, predselect=predselect)
     if (getweights) {
@@ -441,7 +451,7 @@ MAest.dom <- function(dom, dat, cuniqueid, unitlut, pltassgn, esttype, MAmethod,
 		strvar=strvar, prednames=prednames, 
 		MAmethod=MAmethod, N=N, FIA=FIA, modelselect=modelselect,
 		getweights=getweights)
-
+ 
   domestlst <- lapply(domestlst, function(x, dom, domain) {
 		dt <- data.table(dom, x) 
            setnames(dt, "dom", domain) }, dom, domain)
@@ -473,7 +483,8 @@ MAest.unit <- function(unit, dat, cuniqueid, unitlut, unitvar,
     }  
     setnames(unitest, c("unit", "domain"), c(unitvar, domain)) 
 
-    predselect <- data.table(unit=unit, domain=1, unitlut[FALSE, prednames])
+    predselect <- data.table(unit=unit, domain=1, 
+				unitlut[FALSE, c(prednames,strvar), with=FALSE])
     setnames(predselect, c("unit", "domain"), c(unitvar, domain)) 
     returnlst <- list(unitest=unitest, predselect=predselect)
 
