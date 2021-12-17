@@ -397,17 +397,6 @@ MAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, unitlut=NULL,
   }
 
   if (getweights) {
-<<<<<<< Updated upstream
-    # TESTING 
-    print(pltdat.dom[[cuniqueid]])
-    print(estlst$weights)
-    print(estlst)
-    # TESTING
-=======
-    #print(pltdat.dom[[cuniqueid]])
-    #print(estlst$weights)
-    #print(estlst)
->>>>>>> Stashed changes
     estlst$weights <- data.frame(pltdat.dom[[cuniqueid]], estlst$weights)
     names(estlst$weights) <- c(cuniqueid, "weights")
   }
