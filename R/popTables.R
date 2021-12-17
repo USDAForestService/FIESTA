@@ -48,7 +48,7 @@ popTables <- function(cond=NULL, plt=NULL, tree=NULL,
                              subplot=NULL, subp_cond=NULL, lulc=NULL, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::popTables)))
+  formallst <- c(names(formals(popTables)))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))

@@ -30,7 +30,7 @@ unit_options <- function(unitvar2 = NULL, areaunits = "acres",
                          npixelvar = "npixels",  ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::unit_options)))
+  formallst <- c(names(formals(unit_options)))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))

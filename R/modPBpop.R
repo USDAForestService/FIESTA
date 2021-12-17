@@ -251,7 +251,7 @@ modPBpop <- function(pntdat = NULL,
   
   
   ## Set unit defaults
-  unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
+  unit_defaults_list <- formals(unit_options)[-length(formals(unit_options))]
   
   for (i in 1:length(unit_defaults_list)) {
     assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
@@ -265,7 +265,7 @@ modPBpop <- function(pntdat = NULL,
   }
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -279,7 +279,7 @@ modPBpop <- function(pntdat = NULL,
   }
   
   ## Set strata defaults
-  strata_defaults_list <- formals(FIESTA::strata_options)[-length(formals(FIESTA::strata_options))]
+  strata_defaults_list <- formals(strata_options)[-length(formals(strata_options))]
   
   for (i in 1:length(strata_defaults_list)) {
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])

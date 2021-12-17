@@ -88,8 +88,8 @@
 #' @export spReprojectRaster
 spReprojectRaster <- function(rastfn, 
                               bands = NULL, 
-                              crs = NULL,
-                   		   rast.ref = NULL, 
+                              crs = NULL, 
+                              rast.ref = NULL, 
                               crs.new = NULL, 
                               res.new = NULL, 
                               bbox.new = NULL, 

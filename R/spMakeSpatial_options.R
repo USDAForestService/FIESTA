@@ -33,7 +33,7 @@ spMakeSpatial_options <- function(xvar=NULL, yvar=NULL, xy.crs=4269,
                                   zoneS=FALSE, aea.param="USGS", ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(FIESTA::spMakeSpatial_options)))
+  formallst <- c(names(formals(spMakeSpatial_options)))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))

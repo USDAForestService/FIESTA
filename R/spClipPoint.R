@@ -138,7 +138,7 @@ spClipPoint <- function(xyplt,
   
   ## Set user-supplied savedata values
   if (length(spMakeSpatial_opts) > 0) {
-    for (i in 1:length(savedata_opts)) {
+    for (i in 1:length(spMakeSpatial_opts)) {
       assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
     }
   }

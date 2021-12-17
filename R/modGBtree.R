@@ -341,7 +341,7 @@ modGBtree <- function(GBpopdat,
   }
 
   ## Set table defaults
-  table_defaults_list <- formals(FIESTA::table_options)[-length(formals(FIESTA::table_options))]
+  table_defaults_list <- formals(table_options)[-length(formals(table_options))]
   
   for (i in 1:length(table_defaults_list)) {
     assign(names(table_defaults_list)[[i]], table_defaults_list[[i]])
@@ -355,7 +355,7 @@ modGBtree <- function(GBpopdat,
   }
   
   ## Set title defaults
-  title_defaults_list <- formals(FIESTA::title_options)[-length(formals(FIESTA::title_options))]
+  title_defaults_list <- formals(title_options)[-length(formals(title_options))]
   
   for (i in 1:length(title_defaults_list)) {
     assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])

@@ -1031,7 +1031,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       if (is.null(names(strata_opts))) {
         stop("invalid strata_opts... see strata_options()")
       }
-      formallst.strata <- names(formals(FIESTA::strata_options))[-length(formals(FIESTA::strata_options))]
+      formallst.strata <- names(formals(strata_options))[-length(formals(strata_options))]
       strata.params <- names(strata_opts)[!names(strata_opts) %in% c("formallst", "input.params")]
       if (!all(strata.params %in% formallst.strata)) {
         miss <- strata.params[!strata.params %in% formallst.strata]
@@ -1048,7 +1048,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       if (is.null(names(unit_opts))) {
         stop("invalid unit_opts... see unit_options()")
       }
-      formallst.unit <- names(formals(FIESTA::unit_options))[-length(formals(FIESTA::unit_options))]
+      formallst.unit <- names(formals(unit_options))[-length(formals(unit_options))]
       unit.params <- names(unit_opts)[!names(unit_opts) %in% c("formallst", "input.params")]
       if (!all(unit.params %in% formallst.unit)) {
         miss <- unit.params[!unit.params %in% formallst.unit]
@@ -1064,7 +1064,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       if (is.null(names(table_opts))) {
         stop("invalid table_opts... see table_options()")
       }
-      formallst.table <- names(formals(FIESTA::table_options))[-length(formals(FIESTA::table_options))]
+      formallst.table <- names(formals(table_options))[-length(formals(table_options))]
       table.params <- names(table_opts)[!names(table_opts) %in% c("formallst", "input.params")]
       if (!all(table.params %in% formallst.table)) {
         miss <- table.params[!table.params %in% formallst.table]
@@ -1080,7 +1080,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       if (is.null(names(title_opts))) {
         stop("invalid title_opts... see title_options()")
       }
-      formallst.title <- names(formals(FIESTA::title_options))[-length(formals(FIESTA::title_options))]
+      formallst.title <- names(formals(title_options))[-length(formals(title_options))]
       title.params <- names(title_opts)[!names(title_opts) %in% c("formallst", "input.params")]
       if (!all(title.params %in% formallst.title)) {
         miss <- title.params[!title.params %in% formallst.title]
@@ -1096,7 +1096,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       if (is.null(names(savedata_opts))) {
         stop("invalid savedata_opts... see savedata_options()")
       }
-      formallst.savedata <- names(formals(FIESTA::savedata_options))[-length(formals(FIESTA::savedata_options))]
+      formallst.savedata <- names(formals(savedata_options))[-length(formals(savedata_options))]
       savedata.params <- names(savedata_opts)[!names(savedata_opts) %in% c("formallst", "input.params")]
       if (!all(savedata.params %in% formallst.savedata)) {
         miss <- savedata.params[!savedata.params %in% formallst.savedata]
@@ -1113,7 +1113,7 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       if (is.null(names(multest_opts))) {
         stop("invalid multest_opts... see multest_options()")
       }
-      formallst.multest <- names(formals(FIESTA::multest_options))[-length(formals(FIESTA::multest_options))]
+      formallst.multest <- names(formals(multest_options))[-length(formals(multest_options))]
       multest.params <- names(multest_opts)[!names(multest_opts) %in% c("formallst", "input.params")]
       if (!all(multest.params %in% formallst.multest)) {
         miss <- multest.params[!multest.params %in% formallst.multest]
@@ -1130,9 +1130,9 @@ pcheck.params <- function(input.params, strata_opts=NULL,
       if (is.null(names(spMakeSpatial_opts))) {
         stop("invalid spMakeSpatial_opts... see spMakeSpatial_options()")
       }
-      formallst.spMakeSpatial<- names(formals(FIESTA::spMakeSpatial_options))[-length(formals(FIESTA::spMakeSpatial_options))]
+      formallst.spMakeSpatial <- names(formals(spMakeSpatial_options))[-length(formals(spMakeSpatial_options))]
       spMakeSpatial.params <- names(spMakeSpatial_opts)[!names(spMakeSpatial_opts) %in% c("formallst", "input.params")]
-      if (!all(spMakeSpatial.params %in% formallst.unit)) {
+      if (!all(spMakeSpatial.params %in% formallst.spMakeSpatial)) {
         miss <- spMakeSpatial.params[!spMakeSpatial.params %in% formallst.spMakeSpatial]
         stop("invalid parameter: ", toString(miss))
       }

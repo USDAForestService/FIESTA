@@ -78,7 +78,7 @@ spMakeSpatialPoints <- function(xyplt,
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
 
-  formallst <- names(formals(FIESTA::spMakeSpatialPoints))
+  formallst <- names(formals(spMakeSpatialPoints))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
