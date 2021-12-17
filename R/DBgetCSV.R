@@ -93,12 +93,16 @@ DBgetCSV <- function(DBtable,
         message(paste("downloading", DBtable, "for", stabbr, "..."))
       }
       tab <- tryCatch(
-			  fread(fn, integer64="numeric"),
+			  fread(fn, integer64="character"),
 		  	  error=function(e) {
 				  warning(basename(fn), " does not exist")
   			  return(NULL)
              }
       )
+      if (any(tabclass == "integer64")) { 
+        int64vars <- names(tabclass)[tabclass == "integer64"]
+        tab[, (int64vars) := lapply(.SD, as.character), .SDcols=int64vars]
+      }
       if (noIDate) {
         cols <- names(tab)[unlist(lapply(tab, function(x) any(class(x) == "IDate")))]
         tab[, (cols) := lapply(.SD, as.character), .SDcols=cols]
@@ -138,7 +142,13 @@ DBgetCSV <- function(DBtable,
       }
 
       filenm <- utils::unzip(temp, exdir=tempdir)
-      tab <- suppressWarnings(fread(filenm, integer64="numeric"))
+      tab <- fread(filenm, integer64="character")
+
+      tabclass <- unlist(lapply(tab, class))
+      if (any(tabclass == "integer64")) { 
+        int64vars <- names(tabclass)[tabclass == "integer64"]
+        tab[, (int64vars) := lapply(.SD, as.character), .SDcols=int64vars]
+      }
       if (noIDate) {
         cols <- names(tab)[unlist(lapply(tab, function(x) any(class(x) == "IDate")))]
         tab[, (cols) := lapply(.SD, as.character), .SDcols=cols]

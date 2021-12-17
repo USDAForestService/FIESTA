@@ -578,6 +578,7 @@ modMApop <- function(popType="VOL",
   cvars2keep <- popcheck$cvars2keep
   pvars2keep <- popcheck$pvars2keep
 
+
   ###################################################################################
   ## CHECK ESTIMATION UNIT or STRATA
   ###################################################################################
