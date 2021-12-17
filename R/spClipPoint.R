@@ -170,8 +170,16 @@ spClipPoint <- function(xyplt,
  
   if (!"sf" %in% class(sppntx)) { 
     ## Create spatial object from xyplt coordinates
-    sppntx <- spMakeSpatialPoints(sppntx, xy.uniqueid=uniqueid, 
-		exportsp=FALSE, ...)
+    sppntx <- spMakeSpatialPoints(sppntx, 
+                                  xy.uniqueid=uniqueid, 
+                                  xvar=xvar, 
+                                  yvar=yvar,
+                                  xy.crs=xy.crs,
+                                  prj=prj,
+                                  datum=datum,
+                                  zone=zone,
+                                  zoneS=zoneS,
+                                  aea.param=aea.param)
   } else {
     ## GET uniqueid
     sppntnames <- names(sppntx)
