@@ -83,6 +83,9 @@ table_options <- function(row.FIAname=FALSE, col.FIAname=FALSE, row.orderby=NULL
     stop("invalid parameter: ", toString(miss))
   }
   
+  # removes input parameters to create l correctly
+  rm(input.params, formallst)
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   

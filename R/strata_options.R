@@ -36,6 +36,9 @@ strata_options <- function(getwt=FALSE, getwtvar="P1POINTCNT", strwtvar="strwt",
     stop("invalid parameter: ", toString(miss))
   }
   
+  # removes input parameters to create l correctly
+  rm(input.params, formallst)
+  
   # create list from input parameters
   l <- c(as.list(environment()), list(...))
   
