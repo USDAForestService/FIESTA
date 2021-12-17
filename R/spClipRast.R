@@ -121,7 +121,7 @@ spClipRast <- function(rast,
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(FIESTA::spClipRast)) 
+  formallst <- names(formals(spClipRast)) 
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))

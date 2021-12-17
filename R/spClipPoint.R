@@ -119,7 +119,7 @@ spClipPoint <- function(xyplt,
   
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(FIESTA::spClipPoint))
+  formallst <- names(formals(spClipPoint))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -130,7 +130,7 @@ spClipPoint <- function(xyplt,
   
   
   ## Set spMakeSpatial defaults
-  spMakeSpatial_defaults_list <- formals(FIESTA::spMakeSpatial_options)[-length(formals(FIESTA::spMakeSpatial_options))]
+  spMakeSpatial_defaults_list <- formals(spMakeSpatial_options)[-length(formals(spMakeSpatial_options))]
   
   for (i in 1:length(spMakeSpatial_defaults_list)) {
     assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
@@ -144,7 +144,7 @@ spClipPoint <- function(xyplt,
   }
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
