@@ -23,10 +23,10 @@ spGetEstUnit(
   savedata = FALSE,
   exportsp = FALSE,
   exportNA = FALSE,
+  spMakeSpatial_opts = NULL,
   savedata_opts = NULL,
   vars2keep = NULL,
-  gui = FALSE,
-  ...
+  gui = FALSE
 )
 }
 \arguments{
@@ -77,6 +77,9 @@ exported to outfolder.}
 
 \item{exportNA}{Logical. If TRUE, NA values are exported to outfolder.}
 
+\item{spMakeSpatial_opts}{List. See help(spMakeSpatial_options()) for a list
+of options. Use to convert X/Y values to simple feature (sf) coordinates.}
+
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
@@ -84,8 +87,6 @@ of options. Only used when savedata = TRUE.}
 include in dunitlut output and extract to pltassgn points.}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
-
-\item{...}{Other parameters for spMakeSpatialPoints.}
 }
 \value{
 \item{pltunit}{ Data frame. Input point data with extracted

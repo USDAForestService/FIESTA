@@ -60,7 +60,7 @@ an input data frame (i.e., plt, cond, tree).}
 \item{prednames}{String vector. Name(s) of predictor variables to include in
 model.}
 
-\item{modelselect}{Boolean. If TRUE, variable selection occurs.}
+\item{modelselect}{Logical. If TRUE, variable selection occurs.}
 
 \item{sumunits}{Logical. If TRUE, estimation units are summed and returned
 in one table.}
