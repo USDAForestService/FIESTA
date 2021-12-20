@@ -250,7 +250,7 @@ MAest.ratio <- function(y, N, x_sample, x_pop, FIA=TRUE, save4testing=TRUE) {
 
 
 MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear", 
-		save4testing=TRUE) {
+		save4testing=TRUE, getweights = TRUE) {
 
 #y <- yn.vect
 
@@ -294,10 +294,10 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear",
     predselect[1,] <- NA
     returnlst <- list(est=estgregEN, predselect=predselect)
 
-#    if (getweights) {
-#      weights <- rep(NA, length(y))
-#      returnlst$weights <- weights
-#    }
+   if (getweights) {
+     weights <- rep(NA, length(y))
+     returnlst$weights <- weights
+   }
     return(returnlst)
   }
 
@@ -314,12 +314,12 @@ MAest.gregEN <- function(y, N, x_sample, x_pop, FIA=TRUE, model="linear",
     estgregENdt[, nhat.var := nhat.var / (1 - length(y) / N)]
   }
   ## Return survey weights
-#  if (getweights) {
-#    if (any(estgregEN$weights < 0)) {
-#      message("model resulted in negatives... indicating model instability")
-#    }
-#    returnlst$weights <- estgregEN$weights / N
-#  }
+ if (getweights) {
+   if (any(estgregEN$weights < 0)) {
+     message("model resulted in negatives... indicating model instability")
+   }
+   returnlst$weights <- estgregEN$weights / N
+ }
   return(returnlst)
 
 }
