@@ -194,7 +194,7 @@ str(area1, max.level = 2)
 area1$est
 ```
 
-#### Area of forest land, Wyoming, 2011-2013, using the Elastic Net for variable selection
+#### Example 2: Area of forest land, Wyoming, 2011-2013, using the Elastic Net for variable selection
 
 Here, we fit the same model as the above example, but rather than using `"greg"` are our model-assisted method, we can use `"gregEN"` where the EN stands for "elastic net". The elastic net performs variable selection for us, grabbing predictors it finds to be most useful in the model. 
 
@@ -227,7 +227,7 @@ Notably, we can see that `dem`, `slp`, `asp_cos`, and `asp_sin` were removed fro
 In this example, we look at adding rows to the output and include returntitle=TRUE to return title information.
 
 ```{r}
-area2 <- modMAarea(
+area3 <- modMAarea(
     MApopdat = MApopdat,         # pop - population calculations for WY, post-stratification
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
@@ -240,41 +240,41 @@ area2 <- modMAarea(
 Again, we can look at the contents of the output list. The output now includes titlelst, a list of associated titles.
 
 ```{r}
-str(area1.2, max.level = 1)
+str(area3, max.level = 1)
 ```
 
 And the estimates: 
 
 ```{r}
 ## Estimate and percent sampling error of estimate
-area1.2$est
+area3$est
 ```
 
 Along with raw data and titles:
 
 ```{r}
 ## Raw data (list object) for estimate
-raw1.2 <- area1.2$raw      # extract raw data list object from output
-names(raw1.2)
-head(raw1.2$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
-raw1.2$totest            # estimates for population (i.e., WY)
-head(raw1.2$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.2$rowest)      # estimates by row for population (i.e., WY)
+raw3 <- area3$raw      # extract raw data list object from output
+names(raw3)
+head(raw3$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+raw3$totest            # estimates for population (i.e., WY)
+head(raw3$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw3$rowest)      # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst1.2 <- area1.2$titlelst
-names(titlelst1.2)
-titlelst1.2
+titlelst3 <- area3$titlelst
+names(titlelst3)
+titlelst3
 ```
 
-#### Example 3: Area by forest type and stand-size class on forest land, Wyoming, 2011-2013
+#### Example 4: Area by forest type and stand-size class on forest land, Wyoming, 2011-2013
 
 In this example, we look at adding rows and columns to output, including FIA names. We also output estimates and percent standard error in the same cell with the `allin1` argument in `table_options` and save data to an outfolder with the `outfolder` argument in `savedata_options`. 
 
 ```{r}
 ## Area of forest land by forest type and stand-size class, Wyoming, 2011-2013
-area1.3 <- modMAarea(
+area4 <- modMAarea(
     MApopdat = MApopdat,         # pop - population calculations for WY, post-stratification
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
@@ -294,36 +294,36 @@ area1.3 <- modMAarea(
       )
     )
 
-area1.3$est
+area4$est
 ```
 
 We can again look at the output list, estimates, raw data, and titles:
 
 ```{r}
 ## Look at output list
-names(area1.3)
+names(area4)
 
 ## Estimate and percent sampling error of estimate
-head(area1.3$est)
+head(area4$est)
 
 
 ## Raw data (list object) for estimate
-raw1.3 <- area1.3$raw      # extract raw data list object from output
-names(raw1.3)
-head(raw1.3$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$totest)      # estimates for population (i.e., WY)
-head(raw1.3$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$rowest)      # estimates by row for population (i.e., WY)
-head(raw1.3$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$colest)      # estimates by column for population (i.e., WY)
-head(raw1.3$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$grpest)      # estimates by row and column for population (i.e., WY)
+raw4 <- area4$raw      # extract raw data list object from output
+names(raw4)
+head(raw4$unit_totest) # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw4$totest)      # estimates for population (i.e., WY)
+head(raw4$unit_rowest) # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw4$rowest)      # estimates by row for population (i.e., WY)
+head(raw4$unit_colest) # estimates by column, by estimation unit (i.e., ESTN_UNIT)
+head(raw4$colest)      # estimates by column for population (i.e., WY)
+head(raw4$unit_grpest) # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
+head(raw4$grpest)      # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst1.3 <- area1.3$titlelst
-names(titlelst1.3)
-titlelst1.3
+titlelst4 <- area4$titlelst
+names(titlelst4)
+titlelst4
 
 
 ## List output files in outfolder
@@ -342,14 +342,14 @@ live_trees <- "STATUSCD == 1"
 ```
 
 
-#### Example 4: Net cubic-foot volume of live trees, Wyoming, 2011-2013
+#### Example 5: Net cubic-foot volume of live trees, Wyoming, 2011-2013
 
 We now will generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY) with `modMAtree`.
 
 ```{r}
 ## Return raw data and titles
 ## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
-tree1.1 <- modMAtree(
+tree1 <- modMAtree(
     MApopdat = MApopdat,         # pop - population calculations
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
@@ -359,16 +359,48 @@ tree1.1 <- modMAtree(
     returntitle = TRUE           # out - return title information
     )
 
-names(tree1.1)
-tree1.1$raw$unit_totest
+names(tree1)
+tree1$raw$unit_totest
 ```
 
-#### Example 5: Net cubic-foot volume of live trees by forest type, Wyoming, 2011-2013
+#### Example 6: Net cubic-foot volume of live trees, Wyoming, 2011-2013, using the Elastic Net for variable selection
+
+Here, we fit the same model as the above example, but rather than using `"greg"` are our model-assisted method, we can use `"gregEN"` where the EN stands for "elastic net". The elastic net performs variable selection for us, grabbing predictors it finds to be most useful in the model. 
+
+```{r}
+## Return raw data and titles
+## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
+tree2 <- modMAtree(
+    MApopdat = MApopdat,         # pop - population calculations
+    MAmethod = "gregEN",         # est - model-assisted method
+    landarea = "FOREST",         # est - forest land filter
+    sumunits = TRUE,             # est - sum estimation units to population
+    estvar = estvar,             # est - net cubic-foot volume
+    estvar.filter = live_trees,  # est - live trees only
+    returntitle = TRUE           # out - return title information
+    )
+```
+
+We can again see that the structure of the list is very similar to that in the above example:
+
+```{r}
+str(tree2, max.level = 2)
+```
+
+However now the `raw` list has an item call `predselectlst`. We can look at this item now:
+
+```{r}
+tree2$raw$predselectlst
+```
+
+Notably, we can see that [INSERT CORRECT PREDS] `dem`, `slp`, `asp_cos`, and `asp_sin` were removed from the model. 
+
+#### Example 7: Net cubic-foot volume of live trees by forest type, Wyoming, 2011-2013
 
 This example adds rows to the output for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013. We also choose to return titles with `returntitle = TRUE`. 
 
 ```{r}
-tree1.2 <- modMAtree(
+tree3 <- modMAtree(
     MApopdat = MApopdat,         # pop - population calculations
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
@@ -385,24 +417,24 @@ Again, we investigate the output of the returned list:
 
 ```{r}
 ## Look at output list
-names(tree1.2)
+names(tree3)
 
 ## Estimate and percent sampling error of estimate
-tree1.2$est
+tree3$est
 
 ## Raw data (list object) for estimate
-raw1.2 <- tree1.2$raw      # extract raw data list object from output
-names(raw1.2)
-head(raw1.2$unit_totest)   # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw1.2$totest)        # estimates for population (i.e., WY)
-head(raw1.2$unit_rowest)   # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.2$rowest)        # estimates by row for population (i.e., WY)
+raw3 <- tree3$raw      # extract raw data list object from output
+names(raw3)
+head(raw3$unit_totest)   # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw3$totest)        # estimates for population (i.e., WY)
+head(raw3$unit_rowest)   # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw3$rowest)        # estimates by row for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst1.2 <- tree1.2$titlelst
-names(titlelst1.2)
-titlelst1.2
+titlelst3 <- tree3$titlelst
+names(titlelst3)
+titlelst3
 ```
 
 
@@ -411,8 +443,8 @@ We can also create a simple barplot from the output:
 ```{r}
 ## Create barplot
 datBarplot(
-      raw1.2$unit_rowest, 
-      xvar = titlelst1.2$title.rowvar, 
+      raw3$unit_rowest, 
+      xvar = titlelst3$title.rowvar, 
       yvar = "est"
       )
 ```
@@ -422,26 +454,27 @@ And a fancier barplot:
 ```{r}
 ## Create fancier barplot
 datBarplot(
-      raw1.2$unit_rowest, 
-      xvar = titlelst1.2$title.rowvar, 
+      raw3$unit_rowest, 
+      xvar = titlelst3$title.rowvar, 
       yvar = "est",
       errbars = TRUE, 
       sevar = "est.se", 
-      main = wraptitle(titlelst1.2$title.row, 75),
-      ylabel = titlelst1.2$title.yvar, 
+      main = wraptitle(titlelst3$title.row, 75),
+      ylabel = titlelst3$title.yvar, 
       divideby = "million"
       )
 ```
 
 
 
-#### Example 6: Net cubic-foot volume of live trees by forest type and stand-size class, Wyoming, 2011-2013
+#### Example 8: Net cubic-foot volume of live trees by forest type and stand-size class, Wyoming, 2011-2013
 
 This examples adds rows and columns to the output, including FIA names, for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, Wyoming, 2011-2013. We also use the `*_options` functions to return output with estimates (est) and percent standard error (pse) in same cell - est(pse) with `allin1 = TRUE` and save data to an outfolder with `savedata = TRUE` and `outfolder = outfolder`. 
 
 ```{r}
-tree1.3 <- modGBtree(
-    GBpopdat = GBpopdat,         # pop - population calculations
+tree4 <- modMAtree(
+    MApopdat = MApopdat,         # pop - population calculations
+    MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
     estvar = "VOLCFNET",               # est - net cubic-foot volume
@@ -460,36 +493,35 @@ tree1.3 <- modGBtree(
       outfn.pre = "WY"             # out - prefix for output files
       )
     )
-
 ```
 
 Again, we investigate the output of the returned list:
 
 ```{r}
 ## Look at output list from modGBarea()
-names(tree1.3)
+names(tree4)
 
 ## Estimate and percent sampling error of estimate
-tree1.3$est
+tree4$est
 
 
 ## Raw data (list object) for estimate
-raw1.3 <- tree1.3$raw      # extract raw data list object from output
-names(raw1.3)
-head(raw1.3$unit_totest)   # estimates by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$totest)        # estimates for population (i.e., WY)
-head(raw1.3$unit_rowest)   # estimates by row, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$rowest)        # estimates by row for population (i.e., WY)
-head(raw1.3$unit_colest)   # estimates by column, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$colest)        # estimates by column for population (i.e., WY)
-head(raw1.3$unit_grpest)   # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
-head(raw1.3$grpest)        # estimates by row and column for population (i.e., WY)
+raw4 <- tree4$raw      # extract raw data list object from output
+names(raw4)
+head(raw4$unit_totest)   # estimates by estimation unit (i.e., ESTN_UNIT)
+head(raw4$totest)        # estimates for population (i.e., WY)
+head(raw4$unit_rowest)   # estimates by row, by estimation unit (i.e., ESTN_UNIT)
+head(raw4$rowest)        # estimates by row for population (i.e., WY)
+head(raw4$unit_colest)   # estimates by column, by estimation unit (i.e., ESTN_UNIT)
+head(raw4$colest)        # estimates by column for population (i.e., WY)
+head(raw4$unit_grpest)   # estimates by row and column, by estimation unit (i.e., ESTN_UNIT)
+head(raw4$grpest)        # estimates by row and column for population (i.e., WY)
 
 
 ## Titles (list object) for estimate
-titlelst1.3 <- tree1.3$titlelst
-names(titlelst1.3)
-titlelst1.3
+titlelst4 <- tree4$titlelst
+names(titlelst4)
+titlelst4
 
 
 ## List output files in outfolder
@@ -499,14 +531,15 @@ list.files(paste0(outfolder, "/rawdata"), pattern = "WY_tree")
 ```
 
 
-#### Example 7: Number of live trees by species, Wyoming, 2011-2013
+#### Example 9: Number of live trees by species, Wyoming, 2011-2013
 
 We can use tree domain in estimation output rows:
 
 ```{r}
 ## Number of live trees (at least 1 inch diameter) by species
-tree1.4 <- modGBtree(
-    GBpopdat = GBpopdat,         # pop - population calculations
+tree5 <- modMAtree(
+    MApopdat = MApopdat,         # pop - population calculations
+    MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
@@ -525,13 +558,13 @@ We can also look at the output list and estimates again:
 
 ```{r}
 ## Look at output list
-names(tree1.4)
+names(tree5)
 
 ## Estimate and percent sampling error of estimate
-tree1.4$est
+tree5$est
 ```
 
-#### Example 8: Number of live trees (plus seedlings) by species, Wyoming, 2011-2013
+#### Example 10: Number of live trees (plus seedlings) by species, Wyoming, 2011-2013
 
 We can also add seedlings. 
 
@@ -540,9 +573,19 @@ Note: seedling data are only available for number of trees (estvar = TPA_UNADJ).
 Note: must include seedling data in population data calculations.
 
 ```{r}
+MApopdat_seed <- modMApop(popTabs = list(tree = WYtree,
+                                         cond = WYcond,
+                                         seed = WYseed),
+                     pltassgn = WYpltassgn,
+                     auxdat = modeldat)
+```
+
+
+```{r}
 ## Number of live trees by species, including seedlings
-tree1.5 <- modGBtree(
-    GBpopdat = GBpopdat,         # pop - population calculations
+tree6 <- modMAtree(
+    MApopdat = MApopdat_seed,         # pop - population calculations
+    MAmethod = "greg",           # est - model-assisted method
     estseed = "add",             # est - add seedling data
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
@@ -562,18 +605,18 @@ And again we can look at our outputs and compare estimates:
 
 ```{r}
 ## Look at output list
-names(tree1.5)
+names(tree6)
 
 ## Estimate and percent sampling error of estimate
-tree1.5$est
+tree6$est
 
 
 ## Compare estimates with and without seedlings
-head(tree1.4$est)
-head(tree1.5$est)
+head(tree5$est)
+head(tree6$est)
 ```
 
-#### Example 9: Number of seedlings by species, Wyoming, 2011-2013
+#### Example 11: Number of seedlings by species, Wyoming, 2011-2013
 
 Of course, we can also look at *only* seedlings.
 
@@ -583,8 +626,9 @@ Note: must include seedling data in population data calculations.
 
 ```{r}
 ## Number of live trees seedlings by species
-tree1.6 <- modGBtree(
-    GBpopdat = GBpopdat,         # pop - population calculations
+tree7 <- modMAtree(
+    MApopdat = MApopdat_seed,         # pop - population calculations
+    MAmethod = "greg",           # est - model-assisted method
     estseed = "only",            # est - add seedling data
     landarea = "FOREST",         # est - forest land filter
     sumunits = TRUE,             # est - sum estimation units to population
@@ -603,15 +647,15 @@ And again we can look at our outputs and compare estimates:
 
 ```{r}
 ## Look at output list
-names(tree1.6)
+names(tree7)
 
 ## Estimate and percent sampling error of estimate
-tree1.6$est
+tree7$est
 
 ## Compare estimates with, without, and only seedlings
-head(tree1.4$est)
-head(tree1.5$est)
-head(tree1.6$est)
+head(tree5$est)
+head(tree6$est)
+head(tree7$est)
 ```
 
 
