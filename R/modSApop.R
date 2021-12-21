@@ -142,32 +142,32 @@
 #' @export modSApop
 modSApop <- function(popType="VOL",
                      popTabs = popTables(),
-                     popTabIDs = popTableIDs(),
-				             popFilter = popFilters(),
+                     popTabIDs = popTableIDs(), 
+                     popFilter = popFilters(),
                      pltassgn = NULL,
-                     pltassgnid = "PLT_CN",
-				             dsn = NULL,
-				             pjoinid = "CN",
-				             areawt = "CONDPROP_UNADJ",
-				             adj = "plot", 
-				             dunitvar = NULL,
-				             dunitarea = NULL,
-				             dunitzonal = NULL,
-				             prednames = NULL,
-				             predfac = NULL,
-				             savedata = FALSE,
-				             saveobj = FALSE,
-				             objnm = "SApopdat",
-				             unit_opts = NULL,
-				             savedata_opts = NULL,
-				             SAdoms = NULL, 
-				             smallbnd = NULL,
-				             smallbnd.domain = NULL,
-				             SAdata = NULL,
-				             pltdat = NULL,
-				             auxdat = NULL,
-				             gui = FALSE,
-				             ...) {
+                     pltassgnid = "PLT_CN", 
+                     dsn = NULL, 
+                     pjoinid = "CN", 
+                     areawt = "CONDPROP_UNADJ", 
+                     adj = "plot",
+                     dunitvar = NULL, 
+                     dunitarea = NULL, 
+                     dunitzonal = NULL, 
+                     prednames = NULL, 
+                     predfac = NULL, 
+                     savedata = FALSE, 
+                     saveobj = FALSE, 
+                     objnm = "SApopdat", 
+                     unit_opts = NULL, 
+                     savedata_opts = NULL, 
+                     SAdoms = NULL, 
+                     smallbnd = NULL, 
+                     smallbnd.domain = NULL, 
+                     SAdata = NULL, 
+                     pltdat = NULL, 
+                     auxdat = NULL, 
+                     gui = FALSE, 
+                     ...) {
 
   ##################################################################################
   ## DESCRIPTION:
@@ -338,7 +338,7 @@ modSApop <- function(popType="VOL",
       pjoinid <- pltdat$pjoinid
     }
     if (!is.null(auxdat)) {
-      list.items <- c("pltassgn", "dunitzonal", "dunitvar", "prednames", "dunitarea")
+      list.items <- c("pltassgn", "unitzonal", "unitvar", "prednames", "unitarea")
       auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid

@@ -253,6 +253,7 @@ spGetXY <- function(bnd,
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="NO", gui=gui) 
  
+ 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
@@ -268,7 +269,7 @@ spGetXY <- function(bnd,
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   }
- 
+
   ########################################################################
   ### DO THE WORK
   ########################################################################
@@ -400,7 +401,7 @@ spGetXY <- function(bnd,
       dbconn <- suppressWarnings(DBtestSQLite(xy_dsn, dbconnopen=TRUE, 
 			showlist=FALSE, createnew=FALSE, stopifnull=TRUE))
       tablst <- DBI::dbListTables(dbconn)
- 
+
       if (is.null(xy)) {
         xytabs <- tablst[grepl("xy", tablst)]
         if (length(xytabs) == 0) {

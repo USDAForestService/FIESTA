@@ -89,6 +89,9 @@ library(FIESTA)
 outfolder <- tempdir()
 
 # File names for external spatial data
+FIAplotsfn <- system.file("extdata", "FIApublic_M331B.db", package="FIESTA")
+FIAplotsfn <- "C:/_tsf/_GitHub/FIESTA/inst/extdata/FIA_data/FIApublic_M331B.db"
+
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
 WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
 WYbhdist.att <- "DISTRICTNA"
@@ -97,11 +100,11 @@ fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif",
 demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
 
 # Derive new layers from dem
-library(raster)
-dem <- raster(demfn)
-slp <- terrain(dem, opt="slope", unit="degrees", filename=paste0(outfolder, "/WYbh_slp.img"), overwrite=TRUE)
-asp <- terrain(dem, opt="aspect", unit="degrees", filename=paste0(outfolder, "/WYbh_asp.img"), overwrite=TRUE)
+aspfn <- file.path(outfolder, "WYbh_asp.img")
+gdalUtils::gdaldem("aspect", input_dem=demfn, output=aspfn, of="GTiff")
 
+slpfn <- file.path(outfolder, "WYbh_slp.img")
+gdalUtils::gdaldem("slope", input_dem=demfn, output=aspfn, of="GTiff")
 
 ```
 
@@ -145,8 +148,8 @@ head(WYbhdist)
 SAdomdat <- spGetSAdoms(
   smallbnd = WYbhdistfn,
   smallbnd.domain = "DISTRICTNA",
-  # helperbnd = FIESTAnalysis::ecomap,
-  # helperbnd.unique = "SUBSECTION",
+  helperbnd = FIESTAnalysis::ecomap,
+  helperbnd.unique = "SUBSECTION",
   largebnd = FIESTAnalysis::ecomap,
   largebnd.unique = "SECTION"
 )
@@ -177,22 +180,93 @@ plot(st_geometry(SAdomdat$SAdomlst[[1]]))
 # Extract data from FIA database for plots within a given boundary.
 ######################################################################################
 
-SQLitefn = "E:/FIAdata/FIADB_USA.db"
+dbconn <- DBI::dbConnect(RSQLite::SQLite(), FIAplotsfn)
+DBI::dbListTables(dbconn)
+DBI::dbListFields(dbconn, "xyplt")
+DBI::dbDisconnect(dbconn)
 
-# source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetEvalid.R")
-# source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetPlots.R")
-# source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetXY.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
+
+## Extracting data through FIA's DataMart (https://apps.fs.usda.gov/fia/datamart/datamart.html).
+## Here, data are downloaded for all states intersecting boundary, then subset to boundary
+
+SApltdat <- spGetPlots(bnd = WYbhdistfn,
+                     datsource = "datamart",
+                     istree = TRUE,
+                     isseed = TRUE,
+                     invyrs = 2011:2013,
+                     showsteps = TRUE)
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetXY.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
+SApltdat2 <- spGetPlots(bnd = WYbhdistfn,
+                     xy_datsource = "obj",
+                     xy = WYplt,
+                     xy.uniqueid = "CN",
+                     xvar = "LON_PUBLIC",
+                     yvar = "LAT_PUBLIC",
+                     xy.crs = 4269, 
+                     datsource = "obj",
+                     istree = TRUE,
+                     isseed = TRUE,
+                     plot_layer = WYplt,
+                     cond_layer = WYcond,
+                     tree_layer = WYtree,
+                     seed_layer = WYseed,
+                     invyrs = 2011:2013,
+                     showsteps = TRUE)
+
+
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetXY.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
+SApltdat <- spGetPlots(bnd = WYbhdistfn,
+                     xy_datsource = "sqlite",
+                     xy = "xyplt",
+                     xvar = "LON_PUBLIC",
+                     yvar = "LAT_PUBLIC",
+                     xy.crs = 4269, 
+                     datsource = "sqlite",
+                     istree = TRUE,
+                     isseed = TRUE,
+                     data_dsn = FIAplotsfn,
+                     invyrs = 2011:2013,
+                     showsteps = TRUE)
+
+FIAplotsfn <- "F:/FIESTA_testing/outfolder/FIAplots.db"
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetXY.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
 SAdata <- spGetPlots(bnd=SAdoms,
+                     datsource="datamart",
+                     istree=TRUE,
+                     isseed=TRUE,
+                     data_dsn=FIAplotsfn,
+                     invyrs=2011:2013,
+                     showsteps=TRUE,
+                     savedata=TRUE,
+                     savexy=TRUE,
+                     savedata_opts=list(outfolder=outfolder, out_fmt="sqlite", out_dsn="FIAplots3.db"))
+    
+
+    
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\Icool_functions.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBtestSQLite.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetXY.R")
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\spGetPlots.R")
+SA <- spGetPlots(bnd=SAdoms,
                      datsource="sqlite", 
-                     data_dsn=SQLitefn,
-                     xy="PLOT",
-                     xy_dsn=SQLitefn,
+                     data_dsn=FIAplotsfn,
+                     xy="xyids",
+                     xy_dsn=FIAplotsfn,
                      xvar="LON", 
                      yvar="LAT", 
                      xy.uniqueid="CN",
                      invyrs=2011:2013,
                      showsteps=TRUE,
-                     xy.joinid="CN")
+                     xyjoinid="CN")
       
       
 SAxy <- spGetXY(bnd=SAdoms, 
@@ -301,69 +375,57 @@ table(SAplt$INVYR)
 ```
 
 
-#### <a name="spGetModeldat"/>spGetModeldat()
-```
-######################################################################################
-# Usage:
-# spGetModeldat(xyplt = NULL, xyplt_dsn = NULL, uniqueid = "PLT_CN", 
-#   domtype = "POLY", dom_layer = NULL, dom_dsn = NULL, domvar = "DOMAIN", 
-#   rastlst.cont = NULL, rastlst.cont.name = NULL, rastlst.cont.stat = "MEAN", 
-#   rastlst.cont.NODATA = NULL, rastlst.cat = NULL, rastlst.cat.name = NULL,
-#	  rastlst.cat.NODATA = NULL, rastfolder = NULL,  
-#   asptransform = FALSE, rast.asp = NULL, rast.lut = NULL, rastlut = NULL, 
-#   areacalc = TRUE, areaunits = "ACRES", keepNA = TRUE, NAto0 = FALSE,
-#   showext = TRUE, savedata = FALSE, exportsp = FALSE, exportNA = FALSE,
-#   outfolder = NULL, out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL,
-#   outfn.date = TRUE, overwrite = FALSE, vars2keep = NULL, ...) 
-# 
-# Description:
-# Get data extraction and zonal statistics for Model-assisted or
-#		Model-based (Small Area) Estimation. The major steps are as follows:
-#   1) Check parameters 
-#   2) Extract point values from domlayer
-#   3) Set up output data structures
-#   4) Extract point values and get zonal statistics from continuous raster layers
-#   5) Extract point values and get zonal statistics from categorical raster layers
-#   6) Get total acres from domlayer (if areacalc=TRUE)
-######################################################################################
+#### <a name="spGetAuxiliary"/>spGetAuxiliary()
+```{r}
 
 ## Extract from raster predictor layers
 #######################################################
-rastlst.cont <- c(demfn, slp, asp)
+rastlst.cont <- c(demfn, slpfn, aspfn)
 rastlst.cont.name <- c("dem", "slp", "asp")
 
-modeldat <- spGetModeldat(xyplt=SAxy, uniqueid=xy.uniqueid, dom_layer=SAbnd,
-  domvar="DOMAIN", rastlst.cont=rastlst.cont, rastlst.cont.name=rastlst.cont.name,
-  rastlst.cont.stat="mean", rastlst.cont.NODATA=0, 
-  asptransform=TRUE, rast.asp=asp, keepNA=FALSE, showext=FALSE,
-  savedata=FALSE, vars2keep="AOI")
-names(modeldat)
+#unit_layer = SAdoms,
+#unitvar = "DOMAIN", 
 
-pltassgn <- modeldat$pltassgn
-dunitlut <- modeldat$domzonal
-dunitarea <- modeldat$domarea
-dunitvar <- modeldat$domvar
-areavar <- modeldat$areavar
-inputdf <- modeldat$inputdf
-prednames <- modeldat$prednames
-dunitnames <- modeldat$zonalnames
-predfac <- modeldat$predfac
-pltassgnid <- modeldat$pltassgnid
+unit_layer <- WYbhdistfn
+unitvar = "DISTRICTNA"
 
-dunitlut
-dunitvar
-areavar
-head(pltassgn)
-prednames
-dunitnames
-dunitarea
-pltassgnid
+auxdat <- spGetAuxiliary(xyplt = "xyplt", 
+                         xyplt_dsn = FIAplotsfn,
+                         spMakeSpatial_opts = list(xvar="LON_PUBLIC", yvar="LAT_PUBLIC"),
+                         uniqueid = "PLT_CN", 
+                         unit_layer = unit_layer,
+                         unitvar = "DISTRICTNA", 
+                         rastlst.cont = rastlst.cont, 
+                         rastlst.cont.name = rastlst.cont.name, 
+                         rastlst.cont.stat = "mean", 
+                         rastlst.cont.NODATA = 0, 
+                         asptransform = TRUE, 
+                         rast.asp = aspfn, 
+                         keepNA = FALSE, 
+                         showext = FALSE, 
+                         savedata = FALSE)
+names(auxdat)
+
+
+
+```
+
+
+
+#### <a name="modSApop"/>modSApop()
+```{r}
+
+source("C:\\_tsf\\_GitHub\\FIESTA\\R\\modSApop.R")
+SApopdat <- modSApop(pltdat=SApltdat, auxdat=auxdat, smallbnd=smallbnd,
+		smallbnd.domain=smallbnd.unique)
+names(SApopdat)
+
 
 
 ```
 
 #### <a name="modSAtree"/>modSAtree()
-```
+```{r}
 ######################################################################################
 # Usage:
 # modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "unit",   

@@ -55,6 +55,7 @@ DBtestSQLite <- function(SQLitefn = NULL,
 
   ## Check filename
   SQLitepath <- checkfilenm(SQLitefn, outfolder)
+
   if (is.null(SQLitepath)) {
     if (createnew) {
       SQLitepath <- DBcreateSQLite(SQLitefn=SQLitefn, outfolder=outfolder, 

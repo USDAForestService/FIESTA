@@ -49,9 +49,14 @@ checkfilenm <- function(fn, outfolder=NULL, ext=NULL,
       fn <- basename(fn)
     } 
   }
-
-  outfolder <- pcheck.outfolder(outfolder)
-
+ 
+  outfolder <- tryCatch(pcheck.outfolder(outfolder),
+     	 	error=function(e) {
+			return(NULL) })
+  if (is.null(outfolder)) {
+    stop("invalid outfolder or file name")
+  }
+				
   if (file.exists(file.path(outfolder, fn))) {
     return(file.path(outfolder, fn))
   } else if (!is.null(ext)) {

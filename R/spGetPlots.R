@@ -116,6 +116,8 @@
 #' @param savebnd Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 #' SpatiaLite database.
 #' @param savexy Logical. If TRUE, save xy coordinates to outfolder.
+#' @param exportsp Logical. If savexy=TRUE, if TRUE, saves xy data as 
+#' spatial data. If FALSE, saves xy data as table.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. 
 #' @param spXYdat R list object. Output from FIESTA::spGetXY().
@@ -213,7 +215,8 @@ spGetPlots <- function(bnd = NULL,
                        showsteps = FALSE, 
                        savedata = FALSE, 
                        savebnd = FALSE, 
-                       savexy = TRUE, 
+                       savexy = FALSE, 
+                       exportsp = FALSE, 
                        savedata_opts = NULL,
                        spXYdat = NULL) {
 
@@ -361,7 +364,7 @@ spGetPlots <- function(bnd = NULL,
         if (is.null(xy_datsource)) {
           xy_datsource <- datsource
         } 
-        if (is.null(xy) && is.null(xy_dsn)) {
+        if (is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
 
@@ -910,8 +913,7 @@ spGetPlots <- function(bnd = NULL,
           if (!is.null(other_layers)) {
             for (layer in other_layers) {
               if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(layer, 
-				get(layer)[get(layer)[["PLT_CN"]] %in% pltids, ])
+                assign(layer, get(layer)[get(layer)[["PLT_CN"]] %in% pltids, ])
               }
             }
           }
@@ -1118,7 +1120,7 @@ spGetPlots <- function(bnd = NULL,
           message(toString(zids[which(!zids %in% names(plt))]), " not in plt")
         } else {
           plt[, PLOT_ID := paste0("ID", 
-			formatC(plt$STATECD, width=2, digits=2, flag=0), 
+              formatC(plt$STATECD, width=2, digits=2, flag=0), 
           		formatC(plt$UNITCD, width=2, digits=2, flag=0),
           		formatC(plt$COUNTYCD, width=3, digits=3, flag=0),
           		formatC(plt$PLOT, width=5, digits=5, flag=0))] 
@@ -1493,7 +1495,7 @@ spGetPlots <- function(bnd = NULL,
   #############################################################################
   ## Save tables
   #############################################################################
-  if (savedata) {
+  if (savedata || savexy) {
     if (savebnd) {
       spExportSpatial(bndx, 
           savedata_opts=list(outfolder=outfolder, 
@@ -1508,19 +1510,34 @@ spGetPlots <- function(bnd = NULL,
       
     }
     if (savexy) {
-      if(!is.null(spxy)) {
-        spExportSpatial(spxy, 
-            savedata_opts=list(outfolder=outfolder, 
+     
+      if (!is.null(spxy)) {
+        if (exportsp) {
+          spExportSpatial(spxy,
+                savedata_opts=list(outfolder=outfolder,
+                              out_fmt=out_fmt,
+                              out_dsn=out_dsn,
+                              out_layer="spxyplt",
+                              outfn.pre=outfn.pre,
+                              outfn.date=outfn.date,
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer,
+                              add_layer=TRUE))
+        } else {
+          datExportData(sf::st_drop_geometry(spxy), 
+                        savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
-                              out_layer="spxyplt",
+                              out_layer="xyplt",
                               outfn.pre=outfn.pre, 
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
-                              append_layer=append_layer, 
-                              add_layer=TRUE))
+                              append_layer=append_layer,
+                              add_layer=TRUE)) 
+        }
       }
-    
+    } else {
+
       datExportData(xyids, 
         savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -1533,12 +1550,12 @@ spGetPlots <- function(bnd = NULL,
                               add_layer=TRUE)) 
     }
 
-    for (tab in tabs2save) {
-      datExportData(get(tab), 
+    for (tabnm in names(tabs)) {
+      datExportData(get(tabnm), 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
-                              out_layer=tab,
+                              out_layer=tabnm,
                               outfn.pre=outfn.pre, 
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,

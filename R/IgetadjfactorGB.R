@@ -179,9 +179,12 @@ getadjfactorGB <- function(condx=NULL, treex=NULL, seedx=NULL, vcondsppx=NULL,
     }
   } 
 
-
   ## Remove summed variables from condx
-  condx[, (c(varsumlst, cadjfacnm)) := NULL]
+  vars2remove <- c(varsumlst, cadjfacnm)
+  vars2remove <- vars2remove[vars2remove %in% names(condx)]
+  if (length(vars2remove) > 0) {
+    condx[, (c(varsumlst, cadjfacnm)) := NULL]
+  }
 
   ## Remove *_ADJFAC and *_UNADJ columns in condx 
   #condx[, names(condx)[grep("ADJ_FACTOR_", names(condx))]:= NULL] 

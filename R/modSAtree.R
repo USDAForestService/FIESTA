@@ -536,7 +536,6 @@ modSAtree <- function(SApopdatlst = NULL,
     areaunits <- unitchk$outunits
     dunitareabind <- rbind(dunitareabind, unitchk$unitarea)
     
-
     ###################################################################################
     ## Check filter parameters and apply plot and condition filters
     ###################################################################################
@@ -555,7 +554,6 @@ modSAtree <- function(SApopdatlst = NULL,
       vcondf <- estdat$vcondf
     }
 
- 
     ###################################################################################
     ### GET ROW AND COLUMN INFO FROM condf
     ###################################################################################
@@ -632,7 +630,7 @@ modSAtree <- function(SApopdatlst = NULL,
       cdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
       #cdomdat <- DT_NAto0(tdomdat, estvar.name, 0)
     }
- 
+
     #####################################################################################
     ## GENERATE ESTIMATES
     #####################################################################################
@@ -888,7 +886,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
   title.dunitvar <- ifelse(is.null(title.unitvar), smallbnd.dom, title.unitvar)
-  alltitlelst <- check.titles(esttype=esttype, estseed=rowcolinfo$estseed, 
+  alltitlelst <- check.titles(esttype=esttype, estseed=estseed, 
                     sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
                     title.rowvar=rowcolinfo$title.rowvar, title.colvar=title.colvar, 
                     title.unitvar=title.dunitvar, title.filter=title.filter, 
