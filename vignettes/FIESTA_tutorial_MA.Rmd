@@ -11,6 +11,29 @@ vignette: >
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
+```{r, include=FALSE}
+# Sets up output folding
+hooks = knitr::knit_hooks$get()
+hook_foldable = function(type) {
+  force(type)
+  function(x, options) {
+    res = hooks[[type]](x, options)
+    
+    if (isFALSE(options[[paste0("fold.", type)]])) return(res)
+    
+    paste0(
+      "<details><summary>", type, "</summary>\n\n",
+      res,
+      "\n\n</details>"
+    )
+  }
+}
+knitr::knit_hooks$set(
+  output = hook_foldable("output"),
+  plot = hook_foldable("plot")
+)
+```
+
 ## Model-Assisted (MA) module overview
 
 `FIESTA`'s Model-Assisted (MA) module calculates population estimates and their sampling errors by taking advantage of available model-assisted survey estimators from the `mase` R package (McConville, et al. 2018). These estimators can use a variety of auxiliary data to build models and predict over a response variable of interest, while using a bias-correction term so that the bias of the model does not depend on model mis-specification. 
@@ -35,6 +58,10 @@ The following examples are for generating estimates and estimated variances usin
 
 ## Example data - Wyoming (WY), Inventory Years 2011-2012
 
+<details>
+  <summary>View MA Example Data</summary>
+
+
 Data Frame | Description
 -----------| --------------------------------------------------------------------------------
 WYplt      | WY plot-level data
@@ -55,6 +82,8 @@ WYbighorn_dem_250m.img   | Erdas Imagine raster of elevation change, in meters**
 ***Based on MODIS-based classified map resampled from 250m to 500m resolution and reclassified from 3 to 2 classes: 1:forest; 2:nonforest. Projected in Albers Conical Equal Area, Datum NAD27 (Ruefenacht et al. 2008). Clipped to extent of WYbighorn_adminbnd.shp.
 
 ****USGS National Elevation Dataset (NED), resampled from 30m resolution to 250m. Projected in Albers Conical Equal Area, Datum NAD27 (U.S. Geological Survey 2017). Clipped to boundary of WYbighorn_adminbnd.shp.
+
+</details>
 
 ### Set up 
 
@@ -77,6 +106,9 @@ outfolder <- tempdir()
 
 
 ### Get data for examples
+
+<details>
+  <summary>View Getting Data</summary>
 
 Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data and predictor layers stored in `FIESTA` and derive new predictor layers using the `raster` package. 
 
@@ -149,11 +181,16 @@ modeldat <- spGetAuxiliary(
 str(modeldat, max.level = 1)
 ```
 
+</details>
+
 ## Examples
 
 ### `modMApop`
 
 #### Example 1: Creating our population dataset with `modMApop`
+
+<details>
+  <summary>View Example</summary>
  
 We can create our population data for model-assisted estimation. To do so, we use the `modMApop` function in `FIESTA`. We must assign our population tables with the `popTabs` argument (and unique identifiers for these tables with the `popTabIDs` argument if they are not the default), the plot assignment with the `pltassgn` argument, and in auxiliary dataset we just created with the `auxdat` argument. The `spGetAuxiliary` function has done much of the hard work for us so far, so we can just run a simple call to `modMApop`:
  
@@ -171,9 +208,14 @@ str(MApopdat, max.level = 1)
 
 Now that we've created our population dataset, we can move on to estimation. 
 
+</details>
+
 ### `modMAarea`
 
 #### Example 2: Area of forest land, Wyoming, 2011-2013
+
+<details>
+  <summary>View Example</summary>
 
 In this example, we look at estimating the area of forest land in Wyoming from 2011 to 2013 summed to the population unit (`sumunit = TRUE`) with the generalized regression estimator (`MAmethod = "greg"`). `FIESTA` returns raw data for area of forest land, Wyoming, 2011-2013 (sum estimation units). 
 
@@ -194,7 +236,12 @@ str(area1, max.level = 2)
 area1$est
 ```
 
-#### Example 2: Area of forest land, Wyoming, 2011-2013, using the Elastic Net for variable selection
+</details>
+
+#### Example 3: Area of forest land, Wyoming, 2011-2013, using the Elastic Net for variable selection
+
+<details>
+  <summary>View Example</summary>
 
 Here, we fit the same model as the above example, but rather than using `"greg"` are our model-assisted method, we can use `"gregEN"` where the EN stands for "elastic net". The elastic net performs variable selection for us, grabbing predictors it finds to be most useful in the model. 
 
@@ -221,8 +268,12 @@ area2$raw$predselectlst
 
 Notably, we can see that `dem`, `slp`, `asp_cos`, and `asp_sin` were removed from the model. 
 
+</details>
 
-#### Example 3: Area by forest type on forest land, Wyoming, 2011-2013 
+#### Example 4: Area by forest type on forest land, Wyoming, 2011-2013 
+
+<details>
+  <summary>View Example</summary>
 
 In this example, we look at adding rows to the output and include returntitle=TRUE to return title information.
 
@@ -268,7 +319,12 @@ names(titlelst3)
 titlelst3
 ```
 
-#### Example 4: Area by forest type and stand-size class on forest land, Wyoming, 2011-2013
+</details>
+
+#### Example 5: Area by forest type and stand-size class on forest land, Wyoming, 2011-2013
+
+<details>
+  <summary>View Example</summary>
 
 In this example, we look at adding rows and columns to output, including FIA names. We also output estimates and percent standard error in the same cell with the `allin1` argument in `table_options` and save data to an outfolder with the `outfolder` argument in `savedata_options`. 
 
@@ -331,6 +387,7 @@ list.files(outfolder, pattern = "WY_area")
 list.files(paste0(outfolder, "/rawdata"), pattern = "WY_area")
 ```
 
+</details>
 
 ### `modMAtree`
 
@@ -342,7 +399,10 @@ live_trees <- "STATUSCD == 1"
 ```
 
 
-#### Example 5: Net cubic-foot volume of live trees, Wyoming, 2011-2013
+#### Example 6: Net cubic-foot volume of live trees, Wyoming, 2011-2013
+
+<details>
+  <summary>View Example</summary>
 
 We now will generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY) with `modMAtree`.
 
@@ -363,7 +423,12 @@ names(tree1)
 tree1$raw$unit_totest
 ```
 
-#### Example 6: Net cubic-foot volume of live trees, Wyoming, 2011-2013, using the Elastic Net for variable selection
+</details>
+
+#### Example 7: Net cubic-foot volume of live trees, Wyoming, 2011-2013, using the Elastic Net for variable selection
+
+<details>
+  <summary>View Example</summary>
 
 Here, we fit the same model as the above example, but rather than using `"greg"` are our model-assisted method, we can use `"gregEN"` where the EN stands for "elastic net". The elastic net performs variable selection for us, grabbing predictors it finds to be most useful in the model. 
 
@@ -395,7 +460,12 @@ tree2$raw$predselectlst
 
 Notably, we can see that [INSERT CORRECT PREDS] `dem`, `slp`, `asp_cos`, and `asp_sin` were removed from the model. 
 
-#### Example 7: Net cubic-foot volume of live trees by forest type, Wyoming, 2011-2013
+</details>
+
+#### Example 8: Net cubic-foot volume of live trees by forest type, Wyoming, 2011-2013
+
+<details>
+  <summary>View Example</summary>
 
 This example adds rows to the output for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type, Wyoming, 2011-2013. We also choose to return titles with `returntitle = TRUE`. 
 
@@ -465,9 +535,12 @@ datBarplot(
       )
 ```
 
+</details>
 
+#### Example 9: Net cubic-foot volume of live trees by forest type and stand-size class, Wyoming, 2011-2013
 
-#### Example 8: Net cubic-foot volume of live trees by forest type and stand-size class, Wyoming, 2011-2013
+<details>
+  <summary>View Example</summary>
 
 This examples adds rows and columns to the output, including FIA names, for net cubic-foot volume of live trees (at least 5 inches diameter) by forest type and stand-size class, Wyoming, 2011-2013. We also use the `*_options` functions to return output with estimates (est) and percent standard error (pse) in same cell - est(pse) with `allin1 = TRUE` and save data to an outfolder with `savedata = TRUE` and `outfolder = outfolder`. 
 
@@ -530,8 +603,13 @@ list.files(paste0(outfolder, "/rawdata"), pattern = "WY_tree")
 
 ```
 
+</details>
 
-#### Example 9: Number of live trees by species, Wyoming, 2011-2013
+
+#### Example 10: Number of live trees by species, Wyoming, 2011-2013
+
+<details>
+  <summary>View Example</summary>
 
 We can use tree domain in estimation output rows:
 
@@ -564,7 +642,12 @@ names(tree5)
 tree5$est
 ```
 
-#### Example 10: Number of live trees (plus seedlings) by species, Wyoming, 2011-2013
+</details>
+
+#### Example 11: Number of live trees (plus seedlings) by species, Wyoming, 2011-2013
+
+<details>
+  <summary>View Example</summary>
 
 We can also add seedlings. 
 
@@ -595,10 +678,8 @@ tree6 <- modMAtree(
     returntitle = TRUE,          # out - return title information
     table_opts = table_options(
       row.FIAname = TRUE,          # est - row domain names
-      allin1 = FALSE,              # out - return output with est and pse
-      )
+      allin1 = FALSE)              # out - return output with est and pse
     )
-
 ```
 
 And again we can look at our outputs and compare estimates:
@@ -616,46 +697,48 @@ head(tree5$est)
 head(tree6$est)
 ```
 
-#### Example 11: Number of seedlings by species, Wyoming, 2011-2013
+</details>
 
-Of course, we can also look at *only* seedlings.
+<!-- #### Example 11: Number of seedlings by species, Wyoming, 2011-2013 -->
 
-Note: seedling data are only available for number of trees (estvar = TPA_UNADJ).
+<!-- Of course, we can also look at *only* seedlings. -->
 
-Note: must include seedling data in population data calculations.
+<!-- Note: seedling data are only available for number of trees (estvar = TPA_UNADJ). -->
 
-```{r}
-## Number of live trees seedlings by species
-tree7 <- modMAtree(
-    MApopdat = MApopdat_seed,         # pop - population calculations
-    MAmethod = "greg",           # est - model-assisted method
-    estseed = "only",            # est - add seedling data
-    landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
-    estvar = "TPA_UNADJ",        # est - number of trees per acre 
-    rowvar = "SPCD",             # est - row domain
-    returntitle = TRUE,          # out - return title information
-    table_opts = table_options(
-      row.FIAname = TRUE,          # est - row domain names
-      allin1 = FALSE               # out - return output with est and pse
-      )
-    )
+<!-- Note: must include seedling data in population data calculations. -->
 
-```
+<!-- ```{r} -->
+<!-- ## Number of live trees seedlings by species -->
+<!-- tree7 <- modMAtree( -->
+<!--     MApopdat = MApopdat_seed,         # pop - population calculations -->
+<!--     MAmethod = "greg",           # est - model-assisted method -->
+<!--     estseed = "only",            # est - add seedling data -->
+<!--     landarea = "FOREST",         # est - forest land filter -->
+<!--     sumunits = TRUE,             # est - sum estimation units to population -->
+<!--     estvar = "TPA_UNADJ",        # est - number of trees per acre  -->
+<!--     rowvar = "SPCD",             # est - row domain -->
+<!--     returntitle = TRUE,          # out - return title information -->
+<!--     table_opts = table_options( -->
+<!--       row.FIAname = TRUE,          # est - row domain names -->
+<!--       allin1 = FALSE               # out - return output with est and pse -->
+<!--       ) -->
+<!--     ) -->
 
-And again we can look at our outputs and compare estimates:
+<!-- ``` -->
 
-```{r}
-## Look at output list
-names(tree7)
+<!-- And again we can look at our outputs and compare estimates: -->
 
-## Estimate and percent sampling error of estimate
-tree7$est
+<!-- ```{r} -->
+<!-- ## Look at output list -->
+<!-- names(tree7) -->
 
-## Compare estimates with, without, and only seedlings
-head(tree5$est)
-head(tree6$est)
-head(tree7$est)
-```
+<!-- ## Estimate and percent sampling error of estimate -->
+<!-- tree7$est -->
+
+<!-- ## Compare estimates with, without, and only seedlings -->
+<!-- head(tree5$est) -->
+<!-- head(tree6$est) -->
+<!-- head(tree7$est) -->
+<!-- ``` -->
 
 
