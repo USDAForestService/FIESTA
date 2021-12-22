@@ -663,7 +663,7 @@ modGBpop <- function(popType = "VOL",
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
   if (adj == "samp") {
-    adjfacdata <- getadjfactorGB(condx=condx, treex=treef, seedx=seedf,
+    adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
 		        tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
 		        vcondsppx=vcondsppf, vcondstrx=vcondstrf, vuniqueid=vuniqueid, 
 		        unitlut=stratalut, unitvars=unitvar, strvars=strvar, 
@@ -680,7 +680,7 @@ modGBpop <- function(popType = "VOL",
   } else if (adj == "plot") {
     adjtree <- TRUE
     bycond <- FALSE
-    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, 
+    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, seedx=seedf,
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condx
     treef <- adjfacdata$treex

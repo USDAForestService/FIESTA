@@ -148,14 +148,13 @@ fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif",
 
 # Get estimation unit and strata information for Bighorn National Forest.
 stratdat.bh <- spGetStrata(
-      xyplt=WYplt,
-      uniqueid="CN", 
-      xvar="LON_PUBLIC", 
-      yvar="LAT_PUBLIC", 
-      prj="longlat", 
-      datum="NAD83", 
-      unit_layer=WYbhfn, 
-      strat_layer=fornffn,
+      xyplt = WYplt,
+      uniqueid = "CN", 
+      unit_layer = WYbhfn, 
+      strat_layer = fornffn,
+      spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                yvar = "LAT_PUBLIC", 
+                                xy.crs = 4269)
       )
 
 ## Get names of output list components
@@ -194,15 +193,14 @@ fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif",
 
 # Get estimation unit and strata information for Bighorn National Forest Districts
 stratdat.bhdist <- spGetStrata(
-      xyplt=WYplt,
-      uniqueid="CN", 
-      xvar="LON_PUBLIC", 
-      yvar="LAT_PUBLIC", 
-      prj="longlat", 
-      datum="NAD83", 
+      xyplt = WYplt,
+      uniqueid = "CN", 
       unit_layer=WYbhdistfn, 
       unitvar=WYbhdist.att,
-      strat_layer=fornffn
+      strat_layer=fornffn,
+      spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                yvar = "LAT_PUBLIC", 
+                                xy.crs = 4269)
       )
 
 ## Get names of output list components
@@ -464,6 +462,7 @@ area1.1 <- modGBarea(
     landarea = "FOREST",      # est - forest land filter
     sumunits = TRUE,          # est - sum estimation units to population
     )
+
 ```
 
 To get the names of the list components associated with the output of our call of `modGBarea`, we run the following code:
@@ -506,6 +505,7 @@ area1.2 <- modGBarea(
     sumunits = TRUE,             # est - sum estimation units to population
     returntitle = TRUE           # out - return title information
     )
+
 ```
 
 Again, we can look at the contents of the output list. The output now includes titlelst, a list of associated titles.

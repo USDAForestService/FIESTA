@@ -242,7 +242,7 @@ modMApop <- function(popType="VOL",
   returnlst <- list()
 
   ## Set global variables
-  ONEUNIT=n.total=expcondtab <- NULL
+  ONEUNIT=n.total=expcondtab=bndx <- NULL
   strata <- FALSE
   
   
@@ -262,7 +262,7 @@ modMApop <- function(popType="VOL",
   pcheck.params(input.params, unit_opts=unit_opts, savedata_opts=savedata_opts)
   
   ## Set unit defaults
-  unit_defaults_list <- formals(FIESTA::unit_options)[-length(formals(FIESTA::unit_options))]
+  unit_defaults_list <- formals(unit_options)[-length(formals(unit_options))]
   
   for (i in 1:length(unit_defaults_list)) {
     assign(names(unit_defaults_list)[[i]], unit_defaults_list[[i]])
@@ -276,7 +276,7 @@ modMApop <- function(popType="VOL",
   }
   
   ## Set popFilters defaults
-  popFilters_defaults_list <- formals(FIESTA::popFilters)[-length(formals(FIESTA::popFilters))]
+  popFilters_defaults_list <- formals(popFilters)[-length(formals(popFilters))]
   
   for (i in 1:length(popFilters_defaults_list)) {
     assign(names(popFilters_defaults_list)[[i]], popFilters_defaults_list[[i]])
@@ -290,7 +290,7 @@ modMApop <- function(popType="VOL",
   }
 
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -304,21 +304,21 @@ modMApop <- function(popType="VOL",
   }
   
   ## Set strata defaults
-  strata_defaults_list <- formals(FIESTA::strata_options)[-length(formals(FIESTA::strata_options))]
+  strata_defaults_list <- formals(strata_options)[-length(formals(strata_options))]
 
   for (i in 1:length(strata_defaults_list)) {
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
   }
     
   ## Set popTables defaults
-  popTables_defaults_list <- formals(FIESTA::popTables)[-length(formals(FIESTA::popTables))]
+  popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
   
   for (i in 1:length(popTables_defaults_list)) {
     assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
   }
     
   ## Set popTabIDs defaults
-  popTableIDs_defaults_list <- formals(FIESTA::popTableIDs)[-length(formals(FIESTA::popTableIDs))]
+  popTableIDs_defaults_list <- formals(popTableIDs)[-length(formals(popTableIDs))]
   
   for (i in 1:length(popTableIDs_defaults_list)) {
     if (names(popTableIDs_defaults_list)[[i]] == "cond") {
@@ -383,7 +383,6 @@ modMApop <- function(popType="VOL",
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   } 
-
 
   ###################################################################################
   ## Load data
@@ -498,38 +497,12 @@ modMApop <- function(popType="VOL",
 
  
   ## Set user-supplied popTabIDs values
-  if (length(popTabIDs) > 0) {
-    for (i in 1:length(popTabIDs)) {
-      if (names(popTabIDs)[[i]] == "cond") {
-        assign("cuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "plt") {
-        assign("puniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "tree") {
-        assign("tuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "seed") {
-        assign("suniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpspp") {
-        assign("vsppuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpstr") {
-        assign("vstruniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subplot") {
-        assign("subpuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subp_cond") {
-        assign("subcuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "lulc") {
-        assign("lulcuniqueid", popTabIDs[[i]])
-      }
+  for (nm in names(popTabs)) {
+    if (!any(names(popTabIDs) == nm)) {
+      popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
- 
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -652,7 +625,7 @@ modMApop <- function(popType="VOL",
   } else if (adj == "plot") {
     adjtree <- TRUE
     bycond <- FALSE
-    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, 
+    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, seedx=seedf,
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condx
     treef <- adjfacdata$treex
@@ -666,12 +639,17 @@ modMApop <- function(popType="VOL",
   ## Return population data objects
   ###################################################################################
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
-          condid=condid, ACI.filter=ACI.filter, unitarea=unitarea, areavar=areavar, 
-          areaunits=areaunits, unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, 
-          npixels=npixels, npixelvar=npixelvar, prednames=prednames, 
-          expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-          states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj)
+  returnlst$popType <- popType
+  if (!is.null(bndx)) {
+    returnlst$bndx <- bndx
+  }
+  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
+	      cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+	      unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
+	      unitvar=unitvar, unitvars=unitvars, 
+	      unitlut=unitlut, npixels=npixels, npixelvar=npixelvar, prednames=prednames, 
+	      expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+	      states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef

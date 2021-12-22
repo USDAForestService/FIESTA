@@ -1551,7 +1551,7 @@ spGetPlots <- function(bnd = NULL,
     }
 
     for (tabnm in names(tabs)) {
-      datExportData(get(tabnm), 
+      datExportData(tabs[[tabnm]], 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
