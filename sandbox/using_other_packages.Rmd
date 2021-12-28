@@ -1,0 +1,14 @@
+---
+title: "Using other packages in FIESTA"
+author: "Grayson White"
+date: "12/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Using other packages
+
+This will be a writeup on using other packages within our R package `FIESTA`, best practices for Depends/Imports/Suggests, and the use of `::` and `:::`. 
