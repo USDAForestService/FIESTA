@@ -64,9 +64,33 @@ spGetPlots <- function(bnd = NULL,
 }
 ```
 
-There are some nice ways we could bin these parameters. The `_layer` parameters in particular would be nice to bin into a list. 
+There are some nice ways we could bin these parameters. The `_layer` parameters in particular would be nice to bin into a list. We could do that like this:
 
 ```{r}
+layer_filenames <- function(plot_layer = "plot",
+                            cond_layer = "cond",
+                            tree_layer = "tree",
+                            seed_layer = "seed",
+                            ppsa_layer = "pop_plot_stratum_assgn",
+                            other_layers = NULL) {
+  # Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- c(names(formals(title_options)))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  # removes input parameters to create l correctly
+  rm(input.params, formallst)
+  
+  # create list from input parameters
+  l <- c(as.list(environment()), list(...))
+  
+  # return list
+  return(l)
+}
+
 spGetPlots <- function(bnd = NULL, 
                        bnd_dsn = NULL, 
                        bnd.filter = NULL, 
@@ -87,7 +111,7 @@ spGetPlots <- function(bnd = NULL,
                        data_dsn =NULL, 
                        istree = FALSE, 
                        isseed = FALSE, 
-                       layer_filenames = layer_fns(),
+                       layer_fns = layer_filenames(),
                        puniqueid = "CN", 
                        savePOP = FALSE, 
                        evalid = NULL, 
@@ -110,17 +134,8 @@ spGetPlots <- function(bnd = NULL,
                        spXYdat = NULL) {
   NULL
 }
-
-
-layer_fns <- function() {
-  list(plot_layer = "plot", 
-       cond_layer = "cond", 
-       tree_layer = "tree", 
-       seed_layer = "seed", 
-       ppsa_layer = "pop_plot_stratum_assgn", 
-       other_layers = NULL)
-}
-                       
 ```
+
+This cuts us down a tad on number of parameters, but really doesn't help *that* much. However, I think it does make sense to bin those. Outside of those, I think it is a stretch to bin anything else. 
 
 
