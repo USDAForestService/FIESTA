@@ -93,13 +93,27 @@ WYbhdist.att <- "DISTRICTNA"
 fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
 demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
 
-# Derive new layers from dem
-aspfn <- file.path(outfolder, "WYbh_asp.img")
-gdalUtils::gdaldem("aspect", input_dem=demfn, output=aspfn, of="GTiff")
+# # Derive new layers from dem
+# aspfn <- file.path(outfolder, "WYbh_asp.img")
+# gdalUtils::gdaldem("aspect", input_dem=demfn, output=aspfn, of="GTiff")
+# 
+# slpfn <- file.path(outfolder, "WYbh_slp.img")
+# gdalUtils::gdaldem("slope", input_dem=demfn, output=slpfn, of="GTiff")
 
-slpfn <- file.path(outfolder, "WYbh_slp.img")
-gdalUtils::gdaldem("slope", input_dem=demfn, output=slpfn, of="GTiff")
 
+# Derive new predictor layers from dem
+library(raster)
+dem <- raster(demfn)
+slp <- terrain(dem,
+               opt = "slope",
+               unit = "degrees",
+               filename = paste0(outfolder, "/WYbh_slp.img"), 
+               overwrite = TRUE)
+asp <- terrain(dem,
+               opt = "aspect",
+               unit = "degrees", 
+               filename = paste0(outfolder, "/WYbh_asp.img"),
+               overwrite = TRUE)
 ```
 
 <a name="ref"></a>
@@ -214,7 +228,7 @@ SApltdat <- spGetPlots(bnd = WYbhdistfn,
 
 ## Extract from raster predictor layers
 #######################################################
-rastlst.cont <- c(demfn, slpfn, aspfn)
+rastlst.cont <- c(dem, slp, asp)
 rastlst.cont.name <- c("dem", "slp", "asp")
 
 #unit_layer = SAdoms,
@@ -232,7 +246,7 @@ auxdat <- spGetAuxiliary(xyplt = SApltdat$spxy,
                          rastlst.cont.stat = "mean", 
                          rastlst.cont.NODATA = 0, 
                          asptransform = TRUE, 
-                         rast.asp = aspfn, 
+                         rast.asp = asp, 
                          keepNA = FALSE, 
                          showext = FALSE, 
                          savedata = FALSE)
