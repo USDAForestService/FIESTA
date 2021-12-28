@@ -15,4 +15,4 @@
 _pkgdown.yml
 ^README\.Rmd$
 ^README\.md$
-
+^sandbox$

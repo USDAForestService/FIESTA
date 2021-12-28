@@ -1,0 +1,66 @@
+---
+title: "spGetPlots_Parameters"
+author: "Grayson White"
+date: "12/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## `spGetPlots`
+
+Currently, `spGetPlots` has a healty number of parameters at 46. This document explores ways in which we could cut that number down. First, here is the current state of `spGetPlots`.
+
+```{r}
+spGetPlots <- function(bnd = NULL, 
+                       bnd_dsn = NULL, 
+                       bnd.filter = NULL, 
+                       states = NULL, 
+                       RS = NULL, 
+                       xyids = NULL, 
+                       xy_datsource = NULL, 
+                       xy = NULL, 
+                       xy_dsn = NULL, 
+                       xy.uniqueid = "PLT_CN", 
+                       xvar = NULL, 
+                       yvar = NULL, 
+                       xy.crs = 4269, 
+                       xyjoinid = NULL, 
+                       pjoinid = NULL, 
+                       clipxy = TRUE, 
+                       datsource = "datamart", 
+                       data_dsn =NULL, 
+                       istree = FALSE, 
+                       isseed = FALSE, 
+                       plot_layer = "plot", 
+                       cond_layer = "cond", 
+                       tree_layer = "tree", 
+                       seed_layer = "seed", 
+                       ppsa_layer = "pop_plot_stratum_assgn", 
+                       other_layers = NULL, 
+                       puniqueid = "CN", 
+                       savePOP = FALSE, 
+                       evalid = NULL, 
+                       evalCur = FALSE, 
+                       evalEndyr = NULL, 
+                       evalType = "VOL", 
+                       measCur = FALSE, 
+                       measEndyr = NULL, 
+                       measEndyr.filter = NULL, 
+                       invyrs = NULL, 
+                       measyrs =NULL, 
+                       allyrs = FALSE, 
+                       intensity1 = FALSE, 
+                       showsteps = FALSE, 
+                       savedata = FALSE, 
+                       savebnd = FALSE, 
+                       savexy = FALSE, 
+                       exportsp = FALSE, 
+                       savedata_opts = NULL,
+                       spXYdat = NULL) {
+  NULL
+}
+```
+

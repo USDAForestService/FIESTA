@@ -1,8 +1,8 @@
 ---
-title: "FIESTA - Model-Assisted Estimators - GW"
+title: "FIESTA - Model-Assisted Estimators"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{FIESTA - Model-Assisted Estimators - GW}
+  %\VignetteIndexEntry{FIESTA - Model-Assisted Estimators}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

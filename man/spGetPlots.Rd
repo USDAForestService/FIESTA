@@ -47,7 +47,8 @@ spGetPlots(
   showsteps = FALSE,
   savedata = FALSE,
   savebnd = FALSE,
-  savexy = TRUE,
+  savexy = FALSE,
+  exportsp = FALSE,
   savedata_opts = NULL,
   spXYdat = NULL
 )
@@ -185,6 +186,9 @@ database.}
 SpatiaLite database.}
 
 \item{savexy}{Logical. If TRUE, save xy coordinates to outfolder.}
+
+\item{exportsp}{Logical. If savexy=TRUE, if TRUE, saves xy data as 
+spatial data. If FALSE, saves xy data as table.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}

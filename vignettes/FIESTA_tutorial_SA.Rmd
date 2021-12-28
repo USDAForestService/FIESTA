@@ -1,12 +1,6 @@
 ---
 title: "FIESTA - Small Area Estimators"
-#output: rmarkdown::html_vignette
-
-output:
-  rmarkdown::html_vignette:
-    smart: FALSE
-    toc: TRUE
- #   toc_float: TRUE
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{FIESTA - Small Area Estimators}
   %\VignetteEngine{knitr::rmarkdown}
