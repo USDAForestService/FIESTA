@@ -94,6 +94,8 @@ model.}
 \item{predfac}{String vector. Name(s) of prednames that are factors (i.e.,
 categorical).}
 
+\item{standardize}{Logical. If TRUE, predictors are standardized.}
+
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
 \item{saveobj}{Logical. If TRUE, saves returned list object to outfolder.}

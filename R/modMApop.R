@@ -86,6 +86,7 @@
 #' model.
 #' @param predfac String vector. Name(s) of prednames that are factors (i.e.,
 #' categorical).
+#' @param standardize Logical. If TRUE, predictors are standardized. 
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
 #' @param objnm String. Name of *.rds object.

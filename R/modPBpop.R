@@ -206,8 +206,7 @@ modPBpop <- function(pntdat = NULL,
                      strata_opts = NULL,
                      savedata_opts = NULL,
                      PBstratdat = NULL, 
-                     gui = FALSE,
-                     ...){
+                     gui = FALSE){
 
   ##################################################################################
   ## DESCRIPTION:
