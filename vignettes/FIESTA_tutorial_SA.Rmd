@@ -7,37 +7,25 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-
-## FIESTA Overview
-The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other ancillary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
-
-
-Functions are organized by type or objective and are named with a corresponding prefix: 
-
-**Core Functions**
-
-* Database tools (DB) - functions for querying and extracting data from FIA's national database.
-* Data tools (dat) - functions for summarizing and exploring FIA data.
-* Spatial tools (sp) - functions for manipulating and summarizing spatial data.
-
-**Estimation Modules**
-
-* Green-Book (GB) - functions for FIA's standard Green-Book estimators.
-* Photo-Based (PB) - functions for supplementary photo-based estimators.
-* Small Area (SA) - functions for integration with available small area estimators (SAE).
-* Model-Assisted (MA) - functions for integration with available Model-Assisted estimators.
-
-**Analysis Tools**
-
-* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
-
-
-
 ### Small Area (SA) module overview
-FIESTA's Small Area (SA) module was set up as a platform to integrate with current Small Area Estimators available on CRAN including the JoSAE (Breidenbach 2015) and sae (Molina and Marhuenda 2015) packages that use unit-level and area-level Empirical Best Linear Unbiased Prediction (EBLUP) estimation strategy for balancing potential bias of synthetic estimators against the instability of a direct estimator (Rao 2003). The module includes functional steps for checking, compiling, and formatting FIA plot data and ancillary spatial information for input to R packages, such as JoSAE (Breidenbach 2015) or sae (Molina and Marhuenda 2015) and translates integrated package output to FIESTA output format. 
+
+`FIESTA`'s Small Area (SA) module was set up as a platform to integrate with current Small Area Estimators available on CRAN including the `JoSAE` (Breidenbach 2015), `sae` (Molina and Marhuenda 2015), and `hbsae` (Boonstra 2012) packages that use unit-level and area-level models such as the Empirical Best Linear Unbiased Prediction (EBLUP) estimation strategy and the hierarchical Bayesian estimation strategy. Rao (2003) discusses the benefits of the EBLUP for balancing potential bias of synthetic estimators against the instability of a direct estimator. White et al (2021) discusses the benefits of Small Area Estimation in a hierarchical Bayesian context, especially for forestry data. The module includes functional steps for checking, compiling, and formatting FIA plot data and ancillary spatial information for input to R packages, such as `JoSAE` (Breidenbach 2015), `sae` (Molina and Marhuenda 2015), or `hbsae` (Boonstra 2012) and translates integrated package output to `FIESTA` output format. 
+
+Functions in `FIESTA` used for fitting Small Area Estimators include the `modMAarea` function for area estimates and `modMAtree` for tree estimates. The `modMApop` function is used to get population data needed for model-assisted estimation. Below is a description and table of contents for the sections related to these functions:
+
+<!-- FUNCTION  | DESCRIPTION -->
+<!-- -------------- | --------------------------------------------------------------- -->
+<!-- [modMApop](#modMApop) | Creates population data for model-assisted estimation. -->
+<!-- [modMAarea](#modMAarea) | Produces area level estimates through model-assisted estimation. -->
+<!-- [modMAtree](#modMAtree) | Produces tree level estimates through model-assisted estimation. -->
 
 ### Objective of tutorial
+
 The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates using estimators from JoSAE and sae. The following examples are for generating estimates and estimated variances using standard FIA Evaluation data from FIA's National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
+
+<!-- The main objective of this tutorial is to demonstrate how to use `FIESTA` for generating estimates using estimators from `mase`. The model-assisted estimators can be used with FIA's standard state-level population data (i.e, Evaluation) from the FIA database (FIADB) and also population data from a custom boundary.  -->
+
+<!-- The following examples are for generating estimates and estimated variances using standard FIA Evaluation data from FIA's National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in `FIESTA`. -->
 
 
 ## Example data - Wyoming (WY), Inventory Years 2011-2012
@@ -217,9 +205,8 @@ SApltdat <- spGetPlots(bnd = WYbhdistfn,
                      seed_layer = WYseed,
                      invyrs = 2011:2013,
                      showsteps = TRUE,
-                     savexy=TRUE)
-
-
+                     savexy=TRUE,
+                     savedata_opts = savedata_options(outfolder = outfolder))
 ```
 
 
@@ -294,6 +281,15 @@ adjplot=TRUE
 SAmethod="area"
 SApackage="JoSAE"
 
+
+area1 <- modSAtree(
+  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+  SAdomsdf = NULL,
+  prednames = "slp",
+  SApackage = "JoSAE",
+  SAmethod = "area",
+  estvar = estvar
+  )
 
 SAdat <- modSAtree(tree=SAtree, cond=SAcond, pltassgn=pltassgn,
   pltassgnid=pltassgnid, dunitarea=dunitarea, areavar=areavar, 
