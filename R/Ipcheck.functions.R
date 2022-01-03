@@ -818,7 +818,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       dsn <- layer
     }
   }
-
+ 
   if (!is.null(dsn)) {
     ext.dsn <- getext(dsn)
     if (!file.exists(dsn) && (is.na(ext.dsn) || ext.dsn == "NA")) {
@@ -887,7 +887,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
       stop("dsn is NULL")
     }
   } 
- 
+
   ######################################################
   ## Check layer
   ######################################################
@@ -947,7 +947,7 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
           stop(layer, " is invalid")
         }
       } else {
-        message("sql query not used")
+        #message("sql query not used")
         return(suppressWarnings(sf::st_read(dsn=dsn, layer=layer,
 				stringsAsFactors=stringsAsFactors, quiet=TRUE)))
       }

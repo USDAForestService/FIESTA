@@ -418,7 +418,7 @@ modGBpop <- function(popType = "VOL",
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   }
-
+ 
   ###################################################################################
   ## Load data
   ###################################################################################
@@ -548,8 +548,7 @@ modGBpop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
-  
-    
+      
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions

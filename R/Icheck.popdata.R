@@ -378,7 +378,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       stop("must include vsubpspp and/or vsubpstr tables for popType='P2VEG'")
     }
   }
-
+ 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
   ###################################################################################
@@ -453,7 +453,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       pltx <- tabchk$tab1
       pltassgnx <- tabchk$tab2
 
-
 #################
       ## Check for matching unique identifiers of pltx with pltassgnx
       ## Subset pltx to pltassgnx ids
@@ -469,7 +468,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       pltx <- pltassgnx
       puniqueid <- pltassgnid
     }
-
+ 
     ##################################################################################
     ## Filter for population data
     ##################################################################################
@@ -517,7 +516,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         } 
       }     
     }
- 
+
     ## Merge plot data to cond (and lulc to cond)
     #########################################################
     if (!is.null(condx)) {
@@ -600,7 +599,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 			tab2txt=paste0("plt-", puniqueid), subsetrows=TRUE)
       
       nrow.before <- nrow(pltx)
-
+ 
        ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
 #      if (keepplots) {
 #        condcols <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)]))
@@ -615,7 +614,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 #				by.x=cuniqueid, by.y=puniqueid)
         pltcondx <- merge(pltx[, pltcols, with=FALSE], condx, 
 				by.x=puniqueid, by.y=cuniqueid)
-        setnames(pltcondx, "CN", "PLT_CN")
+        if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
+          setnames(pltcondx, "CN", "PLT_CN")
+        }
 #      }
       nrow.after <- length(unique(pltcondx[[cuniqueid]]))
       if (nrow.after < nrow.before) {
@@ -655,7 +656,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         message(abs(nrow.after - nrow.before), " plots were removed from population")
       }
     }
- 
+
     if (is.null(condx)) {
       pltcondx <- pltx
       cuniqueid <- puniqueid
@@ -669,7 +670,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   } else {
     pltcondx <- condx
   }
-
+ 
   ###################################################################################
   ###################################################################################
   ## Check plot data
