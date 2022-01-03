@@ -923,25 +923,33 @@ pcheck.spatial <- function(layer=NULL, dsn=NULL, sql=NA, fmt=NULL, tabnm=NULL,
 
   if (!is.na(geomtype)) {
     if (!checkonly) {
+      chkarc <- NULL
       if (ext.dsn == "gdb") {
         if ("arcgisbinding" %in% rownames(utils::installed.packages())) {
-          tabS4 <- arcgisbinding::arc.open(paste0(dsn, "/", layer))
-          sql <- check.logic(names(tabS4@fields), sql, xvect=TRUE)
-          tab <- tryCatch(arcgisbinding::arc.select(tabS4, where_clause=sql),
+          chkarc <- tryCatch(arc.check_product(),
 				error=function(err) {
 					message(err, "\n")
 					return(NULL)
 				} )
-          if (!is.null(tab)) {
-            return(tab)
-          } else {
-            stop(layer, " is invalid")
-          }
-        } else {
-          message("sql query not used")
-          return(suppressWarnings(sf::st_read(dsn=dsn, layer=layer,
-				stringsAsFactors=stringsAsFactors, quiet=TRUE)))
         }
+      }
+      if (ext.dsn == "gdb" && !is.null(chkarc)) {
+        tabS4 <- arcgisbinding::arc.open(paste0(dsn, "/", layer))
+        sql <- check.logic(names(tabS4@fields), sql, xvect=TRUE)
+        tab <- tryCatch(arcgisbinding::arc.select(tabS4, where_clause=sql),
+				error=function(err) {
+					message(err, "\n")
+					return(NULL)
+				} )
+        if (!is.null(tab)) {
+          return(tab)
+        } else {
+          stop(layer, " is invalid")
+        }
+      } else {
+        message("sql query not used")
+        return(suppressWarnings(sf::st_read(dsn=dsn, layer=layer,
+				stringsAsFactors=stringsAsFactors, quiet=TRUE)))
       }
     } else {
       return(list(dsn=dsn, layer=layer))

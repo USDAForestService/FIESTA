@@ -42,6 +42,7 @@
 #' rast.NODATA value should coincide with number of rasters in rastfnlst. If
 #' only one rast.NODATA, the same NODATA value is used for all rasters.
 #' @param keepNA Logical. If TRUE, keeps NA values after data extraction.
+#' @param ncores Integer. Number of cores to use for extracting values. 
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param savedata Logical. If TRUE, the input data with extracted values are
 #' saved to outfolder.
@@ -128,6 +129,7 @@ spExtractRast <- function(xyplt,
                           windowstat = NULL, 
                           rast.NODATA = NULL, 
                           keepNA = TRUE, 
+                          ncores = 1,
                           showext = FALSE, 
                           savedata = FALSE, 
                           exportsp = FALSE, 
@@ -462,8 +464,13 @@ spExtractRast <- function(xyplt,
       rast.NODATA <- inputs.rast[j, rast.NODATA]
 
       dat <- unique(suppressWarnings(extractPtsFromRaster(ptdata=sppltxy, 
-			rasterfile=rastfn, band=band, var.name=var.name, 
-			interpolate=interpolate, windowsize=windowsize, statistic=statistic, ncores=1)))
+			                rasterfile=rastfn, 
+			                band=band, 
+			                var.name=var.name, 
+			                interpolate=interpolate, 
+			                windowsize=windowsize, 
+			                statistic=statistic, 
+			                ncores=ncores))
       cname <- names(dat)[2]
       outnames <- c(outnames, cname)
  
@@ -474,6 +481,8 @@ spExtractRast <- function(xyplt,
         stop("no data in ", cname)
       }
       sppltx <- merge(sppltx, dat, by.x=xy.uniqueid, by.y="pid")
+      rm(dat)
+      gc()
 
       ## Set rast.NODATA values as NA
       #sppltx <- sppltx[!sppltx[[cname]] %in% rast.NODATA[[1]], ] 

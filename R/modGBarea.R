@@ -385,7 +385,6 @@ modGBarea <- function(GBpopdat,
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
 
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################

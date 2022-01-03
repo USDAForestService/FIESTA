@@ -68,6 +68,7 @@
 #' @param areaunits String. Output area units ("ACRES", "HECTARES",
 #' "SQMETERS").
 #' @param keepNA Logical. If TRUE, returns data frame of NA values.
+#' @param ncores Integer. Number of cores to use for extracting values.
 #' @param NAto0 Logical. If TRUE, converts extracted NA values to 0.
 #' @param npixels Logical. If TRUE, include number of pixels.
 #' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
@@ -155,6 +156,7 @@ spGetAuxiliary <- function(xyplt,
                            areacalc = TRUE, 
                            areaunits = "ACRES", 
                            keepNA = TRUE, 
+                           ncores = 1,
                            NAto0 = TRUE, 
                            npixels = TRUE, 
                            returnxy = FALSE, 
@@ -208,7 +210,8 @@ spGetAuxiliary <- function(xyplt,
   }
  
   ## Check parameter lists
-  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, savedata_opts=savedata_opts)
+  pcheck.params(input.params, spMakeSpatial_opts=spMakeSpatial_opts, 
+                    savedata_opts=savedata_opts)
   
   
   ## Set spMakeSpatial defaults
@@ -466,8 +469,10 @@ spGetAuxiliary <- function(xyplt,
   polyvarlst <- unique(c(unitvar, vars2keep))[!unique(c(unitvar, vars2keep)) %in% names(sppltx)]
   if (!unitvar %in% names(sppltx)) { 
       ## Extract values of polygon layer to points
-    extpoly <- tryCatch(spExtractPoly(xyplt=sppltx, polyvlst=unit_layerx, 
-                              xy.uniqueid=uniqueid, polyvarlst=polyvarlst, 
+    extpoly <- tryCatch(spExtractPoly(xyplt=sppltx,
+                                      polyvlst=unit_layerx, 
+                                      xy.uniqueid=uniqueid, 
+                                      polyvarlst=polyvarlst, 
 		keepNA=FALSE, exportNA=exportNA),
      	 error=function(e) {
 			message(e, "\n")
@@ -480,7 +485,9 @@ spGetAuxiliary <- function(xyplt,
   } else {
     message(unitvar, " already in spplt... not extracting from unit_layer")
   }
-
+  rm(extpoly)
+  gc()
+  
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
@@ -498,13 +505,18 @@ spGetAuxiliary <- function(xyplt,
  
     ## Extract values from continuous raster layers
     #############################################################################
-    extdat.rast.cont <- spExtractRast(sppltx, xy.uniqueid=uniqueid,
-		            rastlst=rastlst.contfn, interpolate=FALSE, showext=showext,
-		            var.name=rastlst.cont.name, rast.NODATA=rastlst.cont.NODATA, 
-		            keepNA=keepNA, exportNA=exportNA, 
-		            savedata_opts = list(outfolder=outfolder, 
-		                      overwrite_layer=overwrite_layer)
-                )
+    extdat.rast.cont <- spExtractRast(sppltx, 
+                              xy.uniqueid=uniqueid, 
+                              rastlst=rastlst.contfn, 
+                              interpolate=FALSE, 
+                              showext=showext, 
+                              var.name=rastlst.cont.name, 
+                              rast.NODATA=rastlst.cont.NODATA, 
+                              keepNA=keepNA, 
+                              exportNA=exportNA, 
+                              savedata_opts = list(outfolder=outfolder, 
+                                      overwrite_layer=overwrite_layer)
+                              )
 
     sppltx <- unique(extdat.rast.cont$spplt)
     prednames.cont <- extdat.rast.cont$outnames
@@ -548,10 +560,13 @@ spGetAuxiliary <- function(xyplt,
           zonalstat <- c("npixels", rastlst.cont.stat) 
           rastnm2 <- c("npixels", rastnm2)
         }  
-        zonaldat.rast.cont <- spZonalRast(unit_layerx, rastfn=rastfn, 
-                                polyv.att=unitvar, zonalstat=zonalstat, 
-                                pixelfun=northness, 
-                                rast.NODATA=rast.cont.NODATA, na.rm=TRUE)
+        zonaldat.rast.cont <- spZonalRast(unit_layerx, 
+                                    rastfn=rastfn, 
+                                    polyv.att=unitvar, 
+                                    zonalstat=zonalstat, 
+                                    pixelfun=northness, 
+                                    rast.NODATA=rast.cont.NODATA, 
+                                    na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
         class(zonalext[[unitvar]]) <- class(unitzonal[[unitvar]])        
@@ -563,10 +578,13 @@ spGetAuxiliary <- function(xyplt,
   
         rastnm2 <- ifelse(is.null(rastnm), "asp_sin", paste0(rastnm, "_sin"))
         zonalstat <- c(rastlst.cont.stat) 
-        zonaldat.rast.cont <- spZonalRast(unit_layerx, rastfn=rastfn, 
-                                   rast.NODATA=rast.cont.NODATA, 
-                                   polyv.att=unitvar, zonalstat=rastlst.cont.stat,
-                                   pixelfun=eastness, na.rm=TRUE)
+        zonaldat.rast.cont <- spZonalRast(unit_layerx, 
+                                    rastfn=rastfn, 
+                                    rast.NODATA=rast.cont.NODATA, 
+                                    polyv.att=unitvar, 
+                                    zonalstat=rastlst.cont.stat,
+                                    pixelfun=eastness, 
+                                    na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
         class(zonalext[[unitvar]]) <- class(unitzonal[[unitvar]])        
@@ -583,10 +601,13 @@ spGetAuxiliary <- function(xyplt,
             rastnm <- c("npixels", rastnm)
           }
         } 
-        zonaldat.rast.cont <- spZonalRast(unit_layerx, rastfn=rastfn, 
-                                    rast.NODATA=rast.cont.NODATA, 
-                                    polyv.att=unitvar, zonalstat=zonalstat, 
-                                    showext=showext, na.rm=TRUE)
+        zonaldat.rast.cont <- spZonalRast(unit_layerx, 
+                                      rastfn=rastfn, 
+                                      rast.NODATA=rast.cont.NODATA, 
+                                      polyv.att=unitvar, 
+                                      zonalstat=zonalstat, 
+                                      showext=showext, 
+                                      na.rm=TRUE)
         zonalext <- setDT(zonaldat.rast.cont$zonalext)
         outname <- zonaldat.rast.cont$outname
         class(zonalext[[unitvar]]) <- class(unitzonal[[unitvar]])        
@@ -612,12 +633,16 @@ spGetAuxiliary <- function(xyplt,
 
     ## Extract values from categorical raster layers
     ######################################################
-    extdat.rast.cat <- spExtractRast(sppltx, xy.uniqueid=uniqueid, 
-                rastlst=rastlst.catfn, 
-		            interpolate=FALSE, var.name=rastlst.cat.name, 
-		            rast.NODATA=rastlst.cat.NODATA,
-		            keepNA=keepNA, exportNA=exportNA, 
-		            savedata_opts = list(outfolder=outfolder,
+    extdat.rast.cat <- spExtractRast(sppltx, 
+                                     xy.uniqueid=uniqueid, 
+                                     rastlst=rastlst.catfn, 
+                                     interpolate=FALSE, 
+                                     var.name=rastlst.cat.name, 
+                                     rast.NODATA=rastlst.cat.NODATA, 
+                                     keepNA=keepNA, 
+                                     ncores=ncores,
+                                     exportNA=exportNA, 
+                                     savedata_opts = list(outfolder=outfolder,
 		                                 overwrite_layer=overwrite_layer)
 		            )
     sppltx <- extdat.rast.cat$sppltext
@@ -668,16 +693,22 @@ spGetAuxiliary <- function(xyplt,
         zonalstat <- c("npixels", zonalstat) 
       }       
       if (identical(rast.lutfn, rastfn)) {
-        zonaldat.rast.cat <- spZonalRast(unit_layerx, rastfn=rastfn, 
-                                  rast.NODATA=rast.cat.NODATA, 
-                                  polyv.att=unitvar, zonalstat=zonalstat, 
-                                  rastlut=rastlut, 
-                                  outname=names(rastlut)[2], na.rm=TRUE)
+        zonaldat.rast.cat <- spZonalRast(unit_layerx, 
+                                    rastfn=rastfn, 
+                                    rast.NODATA=rast.cat.NODATA, 
+                                    polyv.att=unitvar, 
+                                    zonalstat=zonalstat, 
+                                    rastlut=rastlut, 
+                                    outname=names(rastlut)[2], 
+                                    na.rm=TRUE)
       } else {
-        zonaldat.rast.cat <- spZonalRast(unit_layerx, rastfn=rastfn, 
-                                  rast.NODATA=rast.cat.NODATA, 
-                                  polyv.att=unitvar, outname=rastnm, 
-                                  zonalstat=zonalstat, na.rm=TRUE)
+        zonaldat.rast.cat <- spZonalRast(unit_layerx, 
+                                    rastfn=rastfn, 
+                                    rast.NODATA=rast.cat.NODATA, 
+                                    polyv.att=unitvar, 
+                                    outname=rastnm, 
+                                    zonalstat=zonalstat,
+                                    na.rm=TRUE)
       }
       zonalext <- setDT(zonaldat.rast.cat$zonalext)
       outname <- zonaldat.rast.cat$outname
@@ -737,6 +768,18 @@ spGetAuxiliary <- function(xyplt,
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 
                             out_layer="unitzonal",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
+    }
+    if (areacalc) {
+      datExportData(unitarea, 
+        savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="unitarea",
                             outfn.pre=outfn.pre, 
                             outfn.date=outfn.date, 
                             overwrite_layer=overwrite_layer,

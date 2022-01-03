@@ -112,7 +112,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
 
     if (xvar.add0 && xvar2.add0) {
-       uniquex.exp <- expand.grid(uniquex[[xvar]], uniquex2[[xvar2]], stringsAsFactors=FALSE)
+       uniquex.exp <- unique(expand.grid(uniquex[[xvar]], uniquex2[[xvar2]], stringsAsFactors=FALSE))
       if (!is.null(unitvar)) {
         uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
 			each=nrow(uniquex.exp)), uniquex.exp)
@@ -133,11 +133,11 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
     } else if (xvar.add0) {
 
       if (!is.null(unitvar)) {
-        uniquex.exp <- x[, expand.grid(uniquex[[xvar]], get(xvar2)), by=unitvar]
+        uniquex.exp <- unique(x[, expand.grid(uniquex[[xvar]], get(xvar2)), by=unitvar])
         setnames(uniquex.exp, c(unitvar, xvar, xvar2))
         chkvars <- c(unitvar, xvar, xvar2)
       } else {
-        uniquex.exp <- x[, expand.grid(uniquex[[xvar]], get(xvar2))]
+        uniquex.exp <- unique(x[, expand.grid(uniquex[[xvar]], get(xvar2))])
         setnames(uniquex.exp, c(xvar, xvar2))
         chkvars <- c(xvar, xvar2)
       }
@@ -161,11 +161,11 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
 
     } else if (xvar2.add0) {
       if (!is.null(unitvar)) {
-        uniquex.exp <- x[, expand.grid(uniquex2[[xvar2]], get(xvar)), by=unitvar]
+        uniquex.exp <- unique(x[, expand.grid(uniquex2[[xvar2]], get(xvar)), by=unitvar])
         setnames(uniquex.exp, c(unitvar, xvar2, xvar))
         chkvars <- c(unitvar, xvar, xvar2)
       } else {
-        uniquex.exp <- x[, expand.grid(uniquex2[[xvar2]], get(xvar))]
+        uniquex.exp <- unique(x[, expand.grid(uniquex2[[xvar2]], get(xvar))])
         setnames(uniquex.exp, c(xvar2, xvar))
         chkvars <- c(xvar, xvar2)
       }
