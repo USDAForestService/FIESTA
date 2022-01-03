@@ -21,7 +21,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   ## - cond (cvars2keep) - areawt
   ## - module in("GB", "MA", "SA")
   ## - if (module="MA") method in("HT", "PS", "greg", "gregEN", "ratio")
-  ## - if (module="SA") SApackage <- c("JoSAE", "sae"); method <- c("unit", "area")
+  ## - if (module="SA") SApackage <- c("JoSAE", "sae", "hbsae"); method <- c("unit", "area")
   ## Check logical parameters: ACI, strata, stratcombine (if strata=TRUE)
   ## - If ACI, add NF_PLOT_STATUS_CD to pvars2keep and NF_COND_STATUS_CD to cvars2keep
   ## - If unit.action='combine', estimation units are combined if less than 10 plots

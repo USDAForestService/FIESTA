@@ -44,8 +44,6 @@
 #' 
 #' @param SApopdatlst List. List of population data objects returned from
 #' modSApop().
-#' @param SAdomsdf DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
-#' with attributes from smallbnd to add to estimation table.
 #' @param prednames String vector. Name(s) of predictor variables to use in
 #' model.
 #' @param SApackage String. Small area package to use ('JoSAE', 'sae')
@@ -142,7 +140,6 @@
 #' @keywords data
 #' @export modSAest
 modSAarea <- function(SApopdatlst = NULL, 
-                      SAdomsdf = NULL, 
                       prednames = NULL, 
                       SApackage = "JoSAE", 
                       SAmethod = "area", 
@@ -198,6 +195,7 @@ modSAarea <- function(SApopdatlst = NULL,
   returnSApopdat <- TRUE
   sumunits=FALSE
   prior=NULL
+  SAdomsdf = NULL
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
@@ -303,7 +301,7 @@ modSAarea <- function(SApopdatlst = NULL,
   ##################################################################
   
   ## Check SApackage 
-  SApackagelst <- c("JoSAE", "sae")
+  SApackagelst <- c("JoSAE", "sae", "hbsae")
   SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
 		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
 
@@ -487,7 +485,7 @@ modSAarea <- function(SApopdatlst = NULL,
 
     ## check smallbnd.dom
     ########################################################
-    smallbnd.dom <- "DOMAIN"
+    smallbnd.dom <- dunitvar
 #    if (is.null(smallbnd.dom)) {
 #      smallbnd.dom <- "DOMAIN"
 #    }
@@ -615,7 +613,7 @@ modSAarea <- function(SApopdatlst = NULL,
     ############################################################################
     ## Note: not sure why you would want to run by largebnd.unique
     ## Maybe, if generated SAdoms by province, but want to run by section.
-
+ 
     ## check largebnd.unique
     ########################################################
     if (!is.null(largebnd.unique) && !is.null(SAdomsdf)) {
@@ -652,6 +650,20 @@ modSAarea <- function(SApopdatlst = NULL,
 #domain="TOTAL"
 
 
+    if (!"DOMAIN" %in% names(tdomdattot)) {
+      tdomdattot$DOMAIN <- tdomdattot[[dunitvar]]
+      tdomdattot[[dunitvar]] <- NULL
+      dunitlut$DOMAIN <- dunitlut[[dunitvar]]
+      dunitlut[[dunitvar]] <- NULL
+      dunitareabind$DOMAIN <- dunitareabind[[dunitvar]]
+      dunitareabind[[dunitvar]] <- NULL
+      dunitvar <- "DOMAIN"
+    }
+    if (!"AOI" %in% names(tdomdattot)) {
+      tdomdattot$AOI <- 1
+      dunitlut$AOI <- 1
+    }
+    
     dunit_multestlst <- 
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
@@ -666,6 +678,10 @@ modSAarea <- function(SApopdatlst = NULL,
 			      message("error with estimates of ", response, "...")
 			      message(e, "\n")
 			    return(NULL) })
+    if (is.null(dunit_multestlst)) {
+      return(NULL)
+    }
+
     if (length(largebnd.vals) > 1) {
       dunit_multest <- do.call(rbind, do.call(rbind, dunit_multestlst)[,"est.large"])
       predselect.unit <- do.call(rbind, dunit_multestlst)[,"predselect.unit"]
@@ -759,7 +775,7 @@ modSAarea <- function(SApopdatlst = NULL,
     }
 
   }    #### end SApopdat loop
-
+  
 
   ## Combine estimates
   #################################################################################
@@ -805,7 +821,6 @@ modSAarea <- function(SApopdatlst = NULL,
     }
   }
 
-
   if (SAmethod == "unit") {
     nhat <- "JU.EBLUP"
     nhat.se <- "JU.EBLUP.se.1"
@@ -813,22 +828,45 @@ modSAarea <- function(SApopdatlst = NULL,
     nhat.cv <- "JU.EBLUP.cv"
 
   } else if (SAmethod == "area") {
-    nhat <- "JFH"
-    nhat.se <- "JFH.se"
-    nhat.var <- "JFH.var"
-    nhat.cv <- "JFH.cv"
-
+    if (SApackage == "JoSAE") {
+      nhat <- "JFH"
+      nhat.se <- "JFH.se"
+      nhat.var <- "JFH.var"
+      nhat.cv <- "JFH.cv"
+    } else if (SApackage == "sae") {
+      nhat <- "saeA"
+      nhat.se <- "saeA.se"
+      nhat.var <- "saeA.var"
+      nhat.cv <- "saeA.cv"
+    } else if (SApackage == "hbsae") {
+      nhat <- "hbsaeA"
+      nhat.se <- "hbsaeA.se"
+      nhat.var <- "hbsaeA.var"
+      nhat.cv <- "hbsaeA.cv"
+    }
+    
   } else if (SAmethod == "combo") {
     nhat <- "JoSAE"
     nhat.se <- "JoSAE.se"
     nhat.var <- "JoSAE.var"
     nhat.cv <- "JoSAE.cv"
   } 
-
+  
+  if (is.na(multestdf[[nhat]])) {
+    message("SAmethod returned NA values... returning direct estimate (DIR)")
+    SAmethod <- "DIR"
+    nhat <- "DIR"
+    nhat.se <- "DIR.se"
+    nhat.var <- "DIR.var"
+    nhat.cv <- "DIR.cv"
+  }
+  
+  
   ## Subset multest to estimation output
   dunit_totest <- setDT(multestdf)[AOI==1, 
 		unique(c(dunitvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
   setkeyv(dunit_totest, dunitvar)
+
 
   ## Merge dunitarea
   tabs <- check.matchclass(dunitareabind, dunit_totest, dunitvar)
@@ -877,7 +915,6 @@ modSAarea <- function(SApopdatlst = NULL,
     }
   }
 
-
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
@@ -912,7 +949,7 @@ modSAarea <- function(SApopdatlst = NULL,
   ###################################################################################
   message("getting output...")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-            unitvar=smallbnd.dom, unit_totest=dunit_totest, 
+            unitvar=dunitvar, unit_totest=dunit_totest, 
             unit_rowest=dunit_rowest, unit_colest=dunit_colest, 
             unit_grpest=dunit_grpest, rowvar=rowcolinfo$rowvar, 
             colvar=rowcolinfo$colvar, uniquerow=rowcolinfo$uniquerow, 
@@ -951,7 +988,6 @@ modSAarea <- function(SApopdatlst = NULL,
     returnlst$titlelst <- alltitlelst
   }
  
-
   if (multest && !is.null(multestdf)) {
     ## Merge dunitarea
     #tabs <- check.matchclass(dunitarea, multestdf, dunitvar)

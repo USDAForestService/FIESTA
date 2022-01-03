@@ -44,8 +44,6 @@
 #' 
 #' @param SApopdatlst List. List of population data objects returned from
 #' modSApop().
-#' @param SAdomsdf DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
-#' with attributes from smallbnd to add to estimation table.
 #' @param prednames String vector. Name(s) of predictor variables to use in
 #' model.
 #' @param SApackage String. Small area package to use ('JoSAE', 'sae')
@@ -145,7 +143,6 @@
 #' @keywords data
 #' @export modSAest
 modSAtree <- function(SApopdatlst = NULL, 
-                      SAdomsdf = NULL, 
                       prednames = NULL, 
                       SApackage = "JoSAE", 
                       SAmethod = "area", 
@@ -189,6 +186,7 @@ modSAtree <- function(SApopdatlst = NULL,
   returnSApopdat <- TRUE
   sumunits=FALSE
   prior=NULL
+  SAdomsdf = NULL
   
   colvar=NULL
   col.FIAname=FALSE
@@ -305,7 +303,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ##################################################################
 
   ## Check SApackage 
-  SApackagelst <- c("JoSAE", "sae")
+  SApackagelst <- c("JoSAE", "sae", "hbsae")
   SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
 		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
 
@@ -679,6 +677,20 @@ modSAtree <- function(SApopdatlst = NULL,
     ## get estimate by domain, by largebnd value
     #message("generating JoSAE unit-level estimates for ", response, " using ", SApackage, "...")
 
+    if (!"DOMAIN" %in% names(tdomdattot)) {
+      tdomdattot$DOMAIN <- tdomdattot[[dunitvar]]
+      tdomdattot[[dunitvar]] <- NULL
+      dunitlut$DOMAIN <- dunitlut[[dunitvar]]
+      dunitlut[[dunitvar]] <- NULL
+      dunitareabind$DOMAIN <- dunitareabind[[dunitvar]]
+      dunitareabind[[dunitvar]] <- NULL
+      dunitvar <- "DOMAIN"
+    }
+    if (!"AOI" %in% names(tdomdattot)) {
+      tdomdattot$AOI <- 1
+      dunitlut$AOI <- 1
+    }
+    
 #dunitlut <- data.table(SApopdat$dunitlut)
 #dat=tdomdattot
 #largebnd.val=largebnd.vals
@@ -698,6 +710,11 @@ modSAtree <- function(SApopdatlst = NULL,
 			        message("error with estimates of ", response, "...")
 			        message(e, "\n")
 			      return(NULL) })
+    
+    if (is.null(dunit_multestlst)) {
+      return(NULL)
+    }
+    
     if (length(largebnd.vals) > 1) {
       dunit_multest <- do.call(rbind, do.call(rbind, dunit_multestlst)[,"est.large"])
       predselect.unit <- do.call(rbind, dunit_multestlst)[,"predselect.unit"]
@@ -845,10 +862,22 @@ modSAtree <- function(SApopdatlst = NULL,
     nhat.cv <- "JU.EBLUP.cv"
 
   } else if (SAmethod == "area") {
-    nhat <- "JFH"
-    nhat.se <- "JFH.se"
-    nhat.var <- "JFH.var"
-    nhat.cv <- "JFH.cv"
+    if (SApackage == "JoSAE") {
+      nhat <- "JFH"
+      nhat.se <- "JFH.se"
+      nhat.var <- "JFH.var"
+      nhat.cv <- "JFH.cv"
+    } else if (SApackage == "sae") {
+      nhat <- "saeA"
+      nhat.se <- "saeA.se"
+      nhat.var <- "saeA.var"
+      nhat.cv <- "saeA.cv"
+    } else if (SApackage == "hbsae") {
+      nhat <- "hbsaeA"
+      nhat.se <- "hbsaeA.se"
+      nhat.var <- "hbsaeA.var"
+      nhat.cv <- "hbsaeA.cv"
+    }
 
   } else if (SAmethod == "combo") {
     nhat <- "JoSAE"
@@ -856,12 +885,22 @@ modSAtree <- function(SApopdatlst = NULL,
     nhat.var <- "JoSAE.var"
     nhat.cv <- "JoSAE.cv"
   } 
+  
+  if (is.na(multestdf[[nhat]])) {
+    message("SAmethod returned NA values... returning direct estimate (DIR)")
+    SAmethod <- "DIR"
+    nhat <- "DIR"
+    nhat.se <- "DIR.se"
+    nhat.var <- "DIR.var"
+    nhat.cv <- "DIR.cv"
+  }
 
   ## Subset multest to estimation output
   dunit_totest <- setDT(multestdf)[AOI==1, 
 		unique(c(dunitvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
   setkeyv(dunit_totest, dunitvar)
 
+ 
   ## Merge dunitarea
   tabs <- check.matchclass(dunitareabind, dunit_totest, dunitvar)
   dunitareabind <- tabs$tab1
@@ -918,7 +957,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ###################################################################################
   message("getting output...")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-              unitvar=smallbnd.dom, unit_totest=dunit_totest, unit_rowest=dunit_rowest, 
+              unitvar=dunitvar, unit_totest=dunit_totest, unit_rowest=dunit_rowest, 
               unit_colest=dunit_colest, unit_grpest=dunit_grpest, 
               rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
               uniquerow=rowcolinfo$uniquerow, uniquecol=rowcolinfo$uniquecol, 
