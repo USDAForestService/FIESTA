@@ -470,7 +470,7 @@ spExtractRast <- function(xyplt,
 			                interpolate=interpolate, 
 			                windowsize=windowsize, 
 			                statistic=statistic, 
-			                ncores=ncores))
+			                ncores=ncores)))
       cname <- names(dat)[2]
       outnames <- c(outnames, cname)
  
