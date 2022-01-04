@@ -82,7 +82,7 @@ SAest.unit <- function(fmla.dom.unit, pltdat.dom, dunitlut.dom, yn, SApackage,
   }
   
   if (SApackage == "hbsae") {
-    prior = function(x) 1 / (sqrt(x) * (1 + x))
+    #prior = function(x) 1 / (sqrt(x) * (1 + x))
     xpophb <- model.matrix(fmla.dom.unit[-2], dunitlut.unit)
     rownames(xpophb) <- dunitlut.unit[[dunitvar]]
     
@@ -348,7 +348,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 	dunitlut, prednames=NULL, dunitvar="DOMAIN", 
 	SAmethod="unit", SApackage="JoSAE", yd=NULL, ratiotype="PERACRE",
 	largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL, 
-	prior=NULL, variable.select=TRUE) {
+	prior=NULL, modelselect=TRUE) {
 
   ########################################################################################
   ## DESCRIPTION: Gets estimates from JoSAE
@@ -368,7 +368,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   #dunitvar <- "DOMAIN"
   getDIR <- FALSE
   
-  if (variable.select) {
+  if (modelselect) {
     if (!"mase" %in% rownames(installed.packages()))
     stop("variable selection requires package mase")
   }
@@ -396,7 +396,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 #yn <- "DRYBIO_AG_TPA_ADJ"
 #prednames <- c("tcc", "elev", "ppt", "tmean", "tmin01", "tnt2")
 #standardize <- TRUE
-#variable.select <- TRUE
+#modelselect <- TRUE
 #SApackage <- "JoSAE"
 #SAmethod <- "area"
 #cuniqueid <- "PLT_CN"
@@ -444,7 +444,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
    
   ## Variable selection for area and unit-level estimators
   ###################################################################
-  if (variable.select) {
+  if (modelselect) {
     predselect.unitlst <- suppressMessages(preds.select(y=yn, 
                             plt=pltdat.dom, aux=dunitlut.dom, prednames=prednames))
     predselect.unit <- predselect.unitlst$preds.enet
@@ -641,14 +641,6 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 
   if (length(predselect.area) > 0) {
     message("using following predictors for area-level models...", toString(predselect.unit))
-
-    if (getDIR) {
-      nm.var <- paste0(yn, ".var")
-      dunitlut.dom$DIR <- dunitlut.dom[[yn]]
-      dunitlut.dom$DIR.se <- sqrt(dunitlut.dom[[nm.var]] / dunitlut.dom$n.total)
-      est[match(est$DOMAIN, dunitlut.dom$DOMAIN), c("DIR", "DIR.se")] <- dunitlut.dom[,c("DIR", "DIR.se")]
-      #print(dunitlut.dom)
-    }
       
     ## create model formula with predictors
     ## note: the variables selected can change depending on the order in original formula (fmla)
@@ -718,6 +710,8 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
     rm(area.hbsae)
 
   } else {
+    getDIR <- TRUE
+
     message("no predictors were selected for area-level models... returning NAs")
     est.NA <- data.frame(DOMAIN=dunitlut.dom[[dunitvar]], AOI=dunitlut.dom$AOI,
 			JFH=NA, JFH.se=NA, JA.synth=NA, JA.synth.se=NA, 
@@ -727,6 +721,15 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 
     est <- merge(est, est.NA, by="DOMAIN")
   }
+
+  if (getDIR) {
+    nm.var <- paste0(yn, ".var")
+    dunitlut.dom$DIR <- dunitlut.dom[[yn]]
+    dunitlut.dom$DIR.se <- sqrt(dunitlut.dom[[nm.var]] / dunitlut.dom$n.total)
+    est[match(est$DOMAIN, dunitlut.dom$DOMAIN), c("DIR", "DIR.se")] <- dunitlut.dom[,c("DIR", "DIR.se")]
+    #print(dunitlut.dom)
+  }
+
 
   ## Merge NBRPLT.gt0
   est <- merge(est, NBRPLT.gt0, by="DOMAIN")
@@ -743,7 +746,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
   
   gc()
 
-  if (variable.select) {
+  if (modelselect) {
     predselect.areadt <- rbindlist(list(predselect.areadt, 
 		data.frame(t(predselect.area.coef))), fill=TRUE)
     predselect.unitdt <- rbindlist(list(predselect.unitdt, 
@@ -770,7 +773,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
 SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN", 
 		SApackage, SAmethod, prednames=NULL, domain, response=NULL,
 		largebnd.val=NULL, showsteps=FALSE, savesteps=FALSE, stepfolder=NULL,
-		prior=NULL, variable.select=TRUE) {
+		prior=NULL, modelselect=TRUE) {
 
   ## Subset tomdat to domain=dom
   dat.dom <- dat[dat[[domain]] == dom,] 
@@ -794,7 +797,7 @@ SAest.dom <- function(dom, dat, cuniqueid, dunitlut, pltassgn, dunitvar="DOMAIN"
 			dunitlut=dunitlut, dunitvar=dunitvar, prednames=prednames, 
 			SApackage=SApackage, SAmethod=SAmethod, largebnd.val=largebnd.val,
 			showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder,
-			prior=prior, variable.select=variable.select)
+			prior=prior, modelselect=modelselect)
   
   domest$est <- data.table(dom, domest$est)
   setnames(domest$est, "dom", domain)
@@ -814,7 +817,7 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.unique,
 		dunitlut, dunitvar="DOMAIN", SApackage="JoSAE", 
 		SAmethod="unit", domain, response, prednames=NULL,
 		showsteps=FALSE, savesteps=FALSE, stepfolder=NULL, 
-		prior=NULL, variable.select=TRUE) {
+		prior=NULL, modelselect=TRUE) {
 
   ## subset datasets by largebnd value (e.g., ecosection)
   dat.large <- dat[dat[[largebnd.unique]] == largebnd.val, 
@@ -844,7 +847,7 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.unique,
 			        SApackage=SApackage, SAmethod=SAmethod, prednames=prednames, 
 			        domain=domain, response=response, largebnd.val=largebnd.val,
 			        showsteps=showsteps, savesteps=savesteps, stepfolder=stepfolder,
-			        prior=prior, variable.select=variable.select)
+			        prior=prior, modelselect=modelselect)
  
   if (length(doms) > 1) {
     est.large <- data.table(largebnd=largebnd.val, 

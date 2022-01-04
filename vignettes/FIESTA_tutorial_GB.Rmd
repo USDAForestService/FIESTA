@@ -98,7 +98,7 @@ WYbighorn_forest_nonforest_250m.tif| GeoTIFF raster of predicted forest/nonfores
 
 ^1^USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.AdministrativeForest (http://data.fs.usda.gov/geodata/edw). Description: An area encompassing all the National Forest System lands administered by an administrative unit. The area encompasses private lands, other governmental agency lands, and may contain National Forest System lands within the proclaimed boundaries of another administrative unit. All National Forest System lands fall within one and only one Administrative Forest Area.
 
-^2^USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (http://data.fs.usda.gov/geodata/edw). Description: A depiction of the boundary that encompasses a Ranger District.
+^2^USDA Forest Service, Automated Lands Program (ALP). 2018. S_USA.RangerDistrict (http://data.fs.usda.gov/geodata/edw). Description: A depiction of the boundary that encompareasses a Ranger District.
 
 ^3^Based on 250m resolution, Moderate Resolution Imaging Spectroradiometer (MODIS), classified map, reclassified from 3 to 2 classes: 1:forest; 2:nonforest. Projected in Albers Conical Equal Area, Datum NAD27 (Ruefenacht et al. 2008).
 
@@ -1586,6 +1586,7 @@ list.files(paste0(outfolder, "/rawdata"), pattern = "WY_ratio")
 We can also use tree domain in estimation output rows:
 
 ```{r}
+
 ## Number of live trees (at least 1 inch diameter) by species
 ratio2.1 <- modGBratio(
     GBpopdat = GBpopdat.bh,      # pop - population calculations

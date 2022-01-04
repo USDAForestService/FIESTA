@@ -65,7 +65,7 @@
 #' @param rowvar String. Name of the row domain variable in cond or tree. If
 #' only one domain, rowvar = domain variable. If more than one domain, include
 #' colvar. If no domain, rowvar = NULL.
-#' @param variable.select Logical. If TRUE, selects useful predictors using
+#' @param modelselect Logical. If TRUE, selects useful predictors using
 #' mase:ElasticNet.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param savesteps Logical. Saves graphs of predictors and response with
@@ -154,7 +154,7 @@ modSAtree <- function(SApopdatlst = NULL,
                       estvar = NULL, 
                       estvar.filter = NULL, 
                       rowvar = NULL, 
-                      variable.select = TRUE, 
+                      modelselect = TRUE, 
                       savedata = FALSE, 
                       savesteps = FALSE, 
                       multest = TRUE, 
@@ -705,7 +705,7 @@ modSAtree <- function(SApopdatlst = NULL,
 		       prednames=prednames, domain="TOTAL", response=response, 
 		       showsteps=showsteps, savesteps=savesteps, 
 		       stepfolder=stepfolder, prior=prior, 
-		       variable.select=variable.select),
+		       modelselect=modelselect),
      	        error=function(e) {
 			        message("error with estimates of ", response, "...")
 			        message(e, "\n")
@@ -763,7 +763,7 @@ modSAtree <- function(SApopdatlst = NULL,
 				largebnd.unique=lunique, dunitlut=dunitlut, dunitvar=dunitvar,
 				prednames=prednames, domain=rowcolinfo$rowvar,
 				response=response, showsteps=showsteps, savesteps=savesteps,
-				stepfolder=stepfolder, prior=prior, variable.select=variable.select),
+				stepfolder=stepfolder, prior=prior, modelselect=modelselect),
      	 	error=function(e) {
 			message("error with estimates of ", response, "...")
 			message(e, "\n")
@@ -910,6 +910,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (!is.null(dunit_totest)) {
     if (totals) {
+      dunit_totest[, (nhat.var) := get(nhat.se)^2]
       dunit_totest <- getarea(dunit_totest, areavar=areavar, esttype=esttype,
 				nhatcol=nhat, nhatcol.var=nhat.var)
       estnm <- "est"

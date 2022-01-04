@@ -530,6 +530,11 @@ modGBtree <- function(GBpopdat,
       }
     }
   }
+  
+  ## Merge tdomdat with condx
+  xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
+  condx <- xchk$tab1
+  tdomdat <- xchk$tab2
 
   tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid))
   estvar <- treedat$estvar

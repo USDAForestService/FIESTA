@@ -81,7 +81,7 @@ FUNCTION  | DESCRIPTION
 
 
 ## Objective of tutorial
-The objective of this tutorial is to demonstrate how to use `FIESTA`'s spatial tools for manipulating and summarizing spatial data. The examples use data from two inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in `FIESTA`.
+The objective of this tutorial is to demonstrate how to use `FIESTA`'s spatial tools for manipulating and summarizing spatial data. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in `FIESTA`.
 
 ## Example data - Wyoming (WY), Inventory Years 2011-2012
 
@@ -467,7 +467,7 @@ First, we extract polygon attributes from `WYbighorn` to `WYpts`, keeping `NULL`
 
 ```{r}
 extpolylst <- FIESTA::spExtractPoly(WYspplt,
-                                    uniqueid = "CN",
+                                    xy.uniqueid = "CN",
                                     polyvlst = WYbhdist)
 WYspplt_bh <- extpolylst$spxyext
 
@@ -483,7 +483,7 @@ Next we can extract a subset of polygon attributes from `WYbighorn` to `WYpts`, 
 
 ```{r}
 extpolylst <- FIESTA::spExtractPoly(WYspplt,
-                                    uniqueid = "CN",
+                                    xy.uniqueid = "CN",
                                     polyvlst = WYbh, 
                                     polyvarlst = c("FORESTNUMB", "FORESTNAME"),
                                     keepNA = FALSE)
@@ -509,7 +509,7 @@ We can extract raster values from `WYdem` to `WYpts`, not keeping `NULL` values.
 ```{r}
 extrastlst <- FIESTA::spExtractRast(WYspplt,
                                     rastlst = c(fornffn, demfn), 
-                                    uniqueid = "CN",
+                                    xy.uniqueid = "CN",
                                     keepNA = FALSE)
 WYspplt_dem <- extrastlst$sppltext
 
@@ -592,8 +592,8 @@ rastlst.cat.name <- "fornf"
 
 modeldat <- FIESTA::spGetAuxiliary(xyplt = WYspplt,
                                    uniqueid = "CN",
-                                   dunit_layer = WYbhfn,
-                                   dunitvar = NULL,
+                                   unit_layer = WYbhfn,
+                                   unitvar = NULL,
                                    rastlst.cont = rastlst.cont, 
                                    rastlst.cont.name = rastlst.cont.name, 
                                    rastlst.cat = rastlst.cat,
@@ -607,10 +607,10 @@ modeldat <- FIESTA::spGetAuxiliary(xyplt = WYspplt,
 names(modeldat)
 
 pltassgn <- modeldat$pltassgn
-unitmodel <- modeldat$dunitlut
+unitzonal <- modeldat$unitzonal
 unitvar <- modeldat$dunitvar
 inputdf <- modeldat$inputdf
-unitarea <- modeldat$dunitarea
+unitarea <- modeldat$unitarea
 areavar <- modeldat$areavar
 inputdf <- modeldat$inputdf
 prednames <- modeldat$prednames
@@ -618,7 +618,7 @@ zonalnames <- modeldat$zonalnames
 
 unitvar
 areavar
-unitmodel
+unitzonal
 unitarea
 head(pltassgn)
 
@@ -729,27 +729,6 @@ names(stratlst)
 stratlst$stratalut
 ```
 
-Note: you can also use `spGetAuxiliary` function for getting strata info (only if strata layer is raster).
-
-```{r}
-stratlst2 <- FIESTA::spGetAuxiliary(WYspplt,
-                                    uniqueid = "CN",
-	                                  dunit_layer = WYbhfn, 
-                                    dunitvar = NULL,
-	                                  rastlst.cat = fornffn,
-                                    rastlst.cat.name = "STRATUMCD")
-stratlst2$stratalut	
-
-pltassgn <- stratlst$pltassgn
-unitarea <- stratlst$unitarea
-stratalut <- stratlst$stratalut
-
-head(pltassgn)
-unitarea
-head(stratalut)
-stratlst$strvar
-stratlst$unitvar
-```
 
 </details>
 

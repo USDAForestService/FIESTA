@@ -541,6 +541,11 @@ modMAtree <- function(MApopdat,
     }
   }
 
+  ## Merge tdomdat with condx
+  xchk <- check.matchclass(condx, tdomdat, c(cuniqueid, condid))
+  condx <- xchk$tab1
+  tdomdat <- xchk$tab2
+  
   tdomdat <- merge(condx, tdomdat, by=c(cuniqueid, condid), all.x=TRUE)
   estvar <- treedat$estvar
   estvar.name <- treedat$estvar.name

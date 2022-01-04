@@ -112,7 +112,8 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
     byvars <- c(byvars, xvar2)
 
     if (xvar.add0 && xvar2.add0) {
-       uniquex.exp <- unique(expand.grid(uniquex[[xvar]], uniquex2[[xvar2]], stringsAsFactors=FALSE))
+       uniquex.exp <- unique(expand.grid(uniquex[[xvar]], uniquex2[[xvar2]], 
+		stringsAsFactors=FALSE))
       if (!is.null(unitvar)) {
         uniquex.exp <- data.table(uvar=rep(unique(x[[unitvar]]), 
 			each=nrow(uniquex.exp)), uniquex.exp)
@@ -142,6 +143,13 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
         chkvars <- c(xvar, xvar2)
       }
 
+      if (ncol(uniquex) > 1) {
+        uniquex.exp <- merge(uniquex.exp, uniquex, by=xvar)
+      }
+      if (ncol(uniquex2) > 1) {
+        uniquex.exp <- merge(uniquex.exp, uniquex2, by=xvar2)
+      }
+
       ## Merge uniquex
       xchk <- check.matchclass(uniquex.exp, x, chkvars)
       uniquex.exp <- xchk$tab1
@@ -164,17 +172,17 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
         uniquex.exp <- unique(x[, expand.grid(uniquex2[[xvar2]], get(xvar)), by=unitvar])
         setnames(uniquex.exp, c(unitvar, xvar2, xvar))
         chkvars <- c(unitvar, xvar, xvar2)
-
-        if (ncol(uniquex) > 1) {
-          uniquex.exp <- merge(uniquex.exp, uniquex, by=xvar)
-        }
-        if (ncol(uniquex2) > 1) {
-          uniquex.exp <- merge(uniquex.exp, uniquex2, by=xvar2)
-        }
       } else {
         uniquex.exp <- unique(x[, expand.grid(uniquex2[[xvar2]], get(xvar))])
         setnames(uniquex.exp, c(xvar2, xvar))
         chkvars <- c(xvar, xvar2)
+      }
+
+      if (ncol(uniquex) > 1) {
+        uniquex.exp <- merge(uniquex.exp, uniquex, by=xvar)
+      }
+      if (ncol(uniquex2) > 1) {
+        uniquex.exp <- merge(uniquex.exp, uniquex2, by=xvar2)
       }
 
       ## Merge uniquex.exp
@@ -204,6 +212,7 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
       x <- xchk$tab2
       x <- merge(uniquex2, x, by=xvar2)
     }
+
     if (is.factor(uniquex2[[xvar2]])) {
       x[[xvar2]] <- factor(x[[xvar2]], levels=levels(uniquex2[[xvar2]]))
     }
