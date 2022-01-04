@@ -37,7 +37,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   ########################################################################
   ### DO THE WORK
   ########################################################################
-  RSlst <- c("ALL", unique(ref_statecd$RS))
+  RSlst <- c("ALL", unique(FIESTA::ref_statecd$RS))
   RS <- pcheck.varchar(var2check=RS, varnm="RS",
 		checklst=RSlst, gui=gui, caption="Research Station extent?")
   if (!is.null(RS) && RS == "ALL") {

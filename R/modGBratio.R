@@ -768,6 +768,10 @@ modGBratio <- function(GBpopdat,
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
+
+    if (!is.null(row.orderby) && row.orderby != "NONE") {
+      setorderv(unit_rowest, c(row.orderby))
+    }
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
     unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
@@ -779,6 +783,10 @@ modGBratio <- function(GBpopdat,
     tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
+
+    if (!is.null(col.orderby) && col.orderby != "NONE") {
+      setorderv(unit_colest, c(col.orderby))
+    }
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
     unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
@@ -791,6 +799,16 @@ modGBratio <- function(GBpopdat,
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
+
+    if (!is.null(row.orderby) && row.orderby != "NONE") {
+      if (!is.null(col.orderby) && col.orderby != "NONE") {
+        setorderv(unit_grpest, c(row.orderby, col.orderby))
+      } else {
+        setorderv(unit_grpest, c(row.orderby))
+      }         
+    } else if (!is.null(col.orderby) && col.orderby != "NONE") {
+      setorderv(unit_grpest, c(col.orderby))
+    }         
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
     unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
