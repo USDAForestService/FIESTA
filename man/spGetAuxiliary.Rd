@@ -28,6 +28,7 @@ spGetAuxiliary(
   areacalc = TRUE,
   areaunits = "ACRES",
   keepNA = TRUE,
+  ncores = 1,
   NAto0 = TRUE,
   npixels = TRUE,
   returnxy = FALSE,
@@ -117,6 +118,8 @@ collapsing rast.lut values.}
 "SQMETERS").}
 
 \item{keepNA}{Logical. If TRUE, returns data frame of NA values.}
+
+\item{ncores}{Integer. Number of cores to use for extracting values.}
 
 \item{NAto0}{Logical. If TRUE, converts extracted NA values to 0.}
 

@@ -282,13 +282,13 @@ SAmethod="area"
 SApackage="JoSAE"
 
 
-area1 <- modSAtree(
+area1 <- modSAarea(
   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
   SAdomsdf = NULL,
-  prednames = "slp",
-  SApackage = "JoSAE",
-  SAmethod = "area",
-  estvar = estvar
+  prednames = c("slp", "dem"),
+  SApackage = "sae",
+  SAmethod = "area"
+  # estvar = estvar
   )
 
 SAdat <- modSAtree(tree=SAtree, cond=SAcond, pltassgn=pltassgn,

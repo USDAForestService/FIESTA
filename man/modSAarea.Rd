@@ -6,7 +6,6 @@
 \usage{
 modSAarea(
   SApopdatlst = NULL,
-  SAdomsdf = NULL,
   prednames = NULL,
   SApackage = "JoSAE",
   SAmethod = "area",
@@ -36,9 +35,6 @@ modSAarea(
 \arguments{
 \item{SApopdatlst}{List. List of population data objects returned from
 modSApop().}
-
-\item{SAdomsdf}{DF/DT or comma-delimited file(*.csv). Dataframe from SAdoms
-with attributes from smallbnd to add to estimation table.}
 
 \item{prednames}{String vector. Name(s) of predictor variables to use in
 model.}

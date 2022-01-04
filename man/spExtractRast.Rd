@@ -18,6 +18,7 @@ spExtractRast(
   windowstat = NULL,
   rast.NODATA = NULL,
   keepNA = TRUE,
+  ncores = 1,
   showext = FALSE,
   savedata = FALSE,
   exportsp = FALSE,
@@ -74,6 +75,8 @@ rast.NODATA value should coincide with number of rasters in rastfnlst. If
 only one rast.NODATA, the same NODATA value is used for all rasters.}
 
 \item{keepNA}{Logical. If TRUE, keeps NA values after data extraction.}
+
+\item{ncores}{Integer. Number of cores to use for extracting values.}
 
 \item{showext}{Logical. If TRUE, layer extents are displayed in plot window.}
 
