@@ -1,42 +1,40 @@
-#' Spatial - Extracts point attribute values and area from a SpatialPolygons or
-#' raster estimation unit layer.
+#' Spatial wrapper - Extracts point attribute values and area from a simple
+#' feature or raster estimation unit layer.
 #' 
-#' Wrapper to get point attribute values and area from a SpatialPolygons or
+#' Wrapper to get point attribute values and area from a simple feature or
 #' raster layer of estimation units and calculates area. Points are reprojected
-#' on-the-fly to projection of unitlayer using PROJ.4 transformation parameters
+#' on-the-fly to projection of unit_layer using PROJ.4 transformation parameters
 #' and rgdal spTransform function.  - Point attribute extraction from
-#' SpatialPolygons (spExtractPoly) or from raster (spExtractRast) - Calulate
+#' simple feature (spExtractPoly) or from raster (spExtractRast) - Calculate
 #' area by estimation unit(s) (areacalc.poly/areacalc.pixel)
 #' 
 #' *If variable = NULL, then it will prompt user for input.
 #' 
-#' If there is a raster and SpatialPolygon layer, and the projection of the
-#' SpatialPolygons is different than the projection of the raster, the
-#' SpatialPolygons object is reprojected to the projection of raster (See note
+#' If there is a raster and simple feature layer, and the projection of the
+#' simple feature is different than the projection of the raster, the
+#' simple feature object is transformed to the projection of raster (See note
 #' about on-the-fly projection conversion).
 #' 
-#' @param xyplt Data frame object or String. Name of layer with xy coordinates
-#' and unique identifier. Can be layer with xy_dsn, full pathname, including
-#' extension, or file name (with extension) in xy_dsn folder.
+#' @param xyplt Data frame, sf object, full pathname to *.csv or *shp, or layer
+#' name in a geodatabase. Includes XY coordinates and unique identifier.  If
+#' non-spatial, include options in spMakeSpatial_opts parameter.
 #' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
 #' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
 #' @param uniqueid String.* Unique identifier of xyplt rows.
-#' @param unittype String. Spatial layer type of unitlayer ("POLY", "RASTER").
-#' @param unit_layer String or S4 object. The name of the estimation unit
-#' spatial polygons layer. The layer name may be a full pathname to a file, the
+#' @param unittype String. Spatial layer type of unit_layer ("POLY", "RASTER").
+#' @param unit_layer String or sf object. The name of the estimation unit
+#' layer. The layer name may be a full pathname to a file, the
 #' basename to a file, a spatial layer name from a database, or a
 #' SpatialPolygons object with a defined projection.
 #' @param unit_dsn String. The data source name (dsn; i.e., folder or database
 #' name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html). Optional.
-#' @param unitvar String. Name of estimation unit variable in unitlayer.
+#' @param unitvar String. Name of estimation unit variable in unit_layer.
 #' @param unit.filter String. Filter to subset unit_layer spatial layer.
-#' @param areavar String. Name of area variable unit variable in unitlayer. If
+#' @param areavar String. Name of area variable unit variable in unit_layer. If
 #' NULL, calculates area by unitvar.
 #' @param areaunits String. Output area units ("acres", "hectares",
 #' "sqmeters").
-#' @param rast.NODATA Numeric. NODATA value if stratlayer is raster. These
-#' values will be removed from output strata table, assuming outside boundary.
 #' @param keepNA Logical. If TRUE, returns data frame of NA values.
 #' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
@@ -100,7 +98,6 @@ spGetEstUnit <- function(xyplt,
                          unit.filter = NULL, 
                          areavar = NULL, 
                          areaunits = "acres", 
-                         rast.NODATA = NULL, 
                          keepNA = FALSE, 
                          returnxy = FALSE, 
                          showext = FALSE, 

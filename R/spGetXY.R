@@ -1,4 +1,4 @@
-#' Spatial - Extracts data within a given boundary.
+#' Spatial wrapper - Extracts XY coordinates within a given boundary.
 #' 
 #' Wrapper to get FIA plots within the boundary population (area of interest) -
 #' Intersect with state boundary - Get FIA plots for intersected states,
@@ -28,7 +28,7 @@
 #' 
 #' @param bnd sf R object, Area of Interest (AOI) boundary. Can be a spatial sf
 #' object, full pathname to a shapefile, or name of a layer within a database.
-#' @param bnd_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' @param bnd_dsn String. Data source name (dsn; e.g., SQLite database or shapefile
 #' pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html). Optional if bnd is an R object.
 #' @param bnd.filter String. Filter to subset bnd spatial layer.
@@ -369,6 +369,7 @@ spGetXY <- function(bnd,
     }
 
   } else {			## xy_datsource in('datamart', 'sqlite')
+
     if (xy_datsource == "datamart") {
       spxy <- DBgetCoords(states=stcds, 
                           evalid=evalid, 
@@ -381,7 +382,6 @@ spGetXY <- function(bnd,
                           measyrs=measyrs, 
                           intensity1=intensity1, 
                           issp=TRUE)[[1]]
-
       xy.uniqueid <- "PLT_CN"
       xyjoinid <- "PLT_CN"
   
@@ -541,7 +541,7 @@ spGetXY <- function(bnd,
       }
     }   # xy_datsource == "sqlite"
   }
-
+ 
   if (clipxy) {
     xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
 		checklst=names(spxy), caption="UniqueID variable of xy data", 
@@ -631,6 +631,5 @@ spGetXY <- function(bnd,
   returnlst$xy.uniqueid <- xy.uniqueid
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
-  returnlst$stbnd.att <- stbnd.att
   return(returnlst)
 }

@@ -74,8 +74,11 @@ FUNCTION  | DESCRIPTION
 [spClipRast()](#spClipRast) | Subset raster layer with a Spatial polygons layer.
 [spExtractPoly()](#spExtractPoly) | Extracts point attribute values from Spatial polygons layer(s).
 [spExtractRast()](#spExtractRast) | Extracts point attribute values from raster layer(s).
-[spGetEstUnit()](#spGetEstUnit) | Extracts point attribute values and area for estimation unit(s).
-[spGetStrata()](#spGetStrata) | Extracts point attribute values, area for estimation unit(s), and pixel counts for strata spatial layers.
+[spGetXY()](#spGetXY) | Wrapper: Extracts XY coordinates and subsets to boundary.
+[spGetPlots()](#spGetXY) | Wrapper: Extracts plot data and subsets to boundary.
+[spGetAuxiliary()](#spGetAuxiliary) | Wrapper: Extracts point attribute values, area for estimation unit(s), and zonal statitics for strata predictor layers.
+[spGetEstUnit()](#spGetEstUnit) | Wrapper: Extracts point attribute values and area for estimation unit(s).
+[spGetStrata()](#spGetStrata) | Wrapper: Extracts point attribute values, area for estimation unit(s), and pixel counts for strata spatial layer.
 [spUnionPoly()](#spUnionPoly) | Generates one Spatial polygons object from two Spatial polygons layers.
 [spZonalRast()](#spZonalRast) | Extracts summary statistics by polygon (i.e., zone) for a raster.
 
@@ -519,25 +522,6 @@ dim(WYspplt_dem)
 head(WYspplt_dem)
 ```
 
-</details>
-
-### <a name="spGetPlots"/>`spGetPlots()`
-
-The `spGetPlots` function extracts data from FIA database for plots within a given boundary.
-
-<details>
-  <summary>View Example</summary>
-  
-We can extract public coordinates within WY Bighorn NF boundary.
-
-```{r}
-WYbhdat <- spGetPlots(bnd = WYbhfn, 
-                      states = "Wyoming",
-                      datsource = "datamart", 
-                      evalCur = TRUE,
-                      istree = FALSE)
-names(WYbhdat)
-```
 
 </details>
 
@@ -625,6 +609,72 @@ head(pltassgn)
 prednames
 zonalnames
 ```
+
+
+</details>
+
+### <a name="spGetXY"/>`spGetXY()`
+
+The `spGetXY` function extracts XY data within a given boundary.
+
+<details>
+  <summary>View Example</summary>
+  
+We can extract public coordinates within WY Bighorn NF boundary, returning spatial (spxy) and nonspatial coordinates (xyids).
+
+```{r}
+
+WYbhxy <- spGetXY(bnd = WYbhfn, 
+                      xy_datsource = "datamart", 
+                      evalCur = TRUE)
+names(WYbhxy)
+
+xyids <- WYbhxy$xyids
+head(xyids)
+
+spxy <- WYbhxy$spxy
+plot(st_geometry(spxy))
+
+```
+
+
+Or, returning only nonspatial coordinates (xyids).
+
+```{r}
+
+WYbhxyids <- spGetXY(bnd = WYbhfn, 
+                      xy_datsource = "datamart", 
+                      evalCur = TRUE,
+                      returnxy = FALSE)
+names(WYbhxyids)
+
+xyids <- WYbhxyids$xyids
+head(xyids)
+
+
+```
+
+
+</details>
+
+### <a name="spGetPlots"/>`spGetPlots()`
+
+The `spGetPlots` function extracts plot data within a given boundary.
+
+<details>
+  <summary>View Example</summary>
+  
+We can extract public coordinates within WY Bighorn NF boundary.
+
+```{r}
+WYbhdat <- spGetPlots(bnd = WYbhfn, 
+                      states = "Wyoming",
+                      datsource = "datamart", 
+                      evalCur = TRUE,
+                      istree = FALSE)
+names(WYbhdat)
+```
+
 
 </details>
 

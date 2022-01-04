@@ -1,4 +1,4 @@
-#' Spatial - Generate a set of model domain units for Small Area Estimation
+#' Spatial wrapper - Generate a set of model domain units for Small Area Estimation
 #' (SAE) strategies.
 #' 
 #' Spatial process to generate a set of model domains (i.e., helper polygons)

@@ -1,4 +1,4 @@
-#' Spatial - Extracts data within a given boundary.
+#' Spatial wrapper - Extracts plot data within a given boundary.
 #' 
 #' Wrapper to get FIA plots within the boundary population (area of interest) -
 #' Intersect with state boundary - Get FIA plots for intersected states,
@@ -28,7 +28,7 @@
 #' 
 #' @param bnd sf R object, Area of Interest (AOI) boundary. Can be a spatial sf
 #' object, full pathname to a shapefile, or name of a layer within a database.
-#' @param bnd_dsn String. Data source name (dsn; e.g., sqlite or shapefile
+#' @param bnd_dsn String. Data source name (dsn; e.g., SQLite database or shapefile
 #' pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html). Optional if bnd is an R object.
 #' @param bnd.filter String. Filter to subset bnd spatial layer.
@@ -36,7 +36,7 @@
 #' @param RS String. Name of FIA research station to restrict states to
 #' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 #' included.
-#' @param xyids Data frame. Non-spatial plot identificators within bnd).
+#' @param xyids Data frame. Non-spatial plot identifiers within bnd).
 #' @param xy_datsource String. Source of XY data ("obj", "csv", "datamart",
 #' "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 #' datsource.
