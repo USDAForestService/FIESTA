@@ -7,25 +7,25 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-### Small Area (SA) module overview
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## Small Area (SA) module overview
 
 `FIESTA`'s Small Area (SA) module was set up as a platform to integrate with current Small Area Estimators available on CRAN including the `JoSAE` (Breidenbach 2015), `sae` (Molina and Marhuenda 2015), and `hbsae` (Boonstra 2012) packages that use unit-level and area-level models such as the Empirical Best Linear Unbiased Prediction (EBLUP) estimation strategy and the hierarchical Bayesian estimation strategy. Rao (2003) discusses the benefits of the EBLUP for balancing potential bias of synthetic estimators against the instability of a direct estimator. White et al (2021) discusses the benefits of Small Area Estimation in a hierarchical Bayesian context, especially for forestry data. The module includes functional steps for checking, compiling, and formatting FIA plot data and ancillary spatial information for input to R packages, such as `JoSAE` (Breidenbach 2015), `sae` (Molina and Marhuenda 2015), or `hbsae` (Boonstra 2012) and translates integrated package output to `FIESTA` output format. 
 
-Functions in `FIESTA` used for fitting Small Area Estimators include the `modMAarea` function for area estimates and `modMAtree` for tree estimates. The `modMApop` function is used to get population data needed for model-assisted estimation. Below is a description and table of contents for the sections related to these functions:
+Functions in `FIESTA` used for fitting Small Area Estimators include the `modSAarea` function for area estimates and `modSAtree` for tree estimates. The `modSApop` function is used to get population data needed for small area estimation. Below is a description and table of contents for the sections related to these functions:
 
-<!-- FUNCTION  | DESCRIPTION -->
-<!-- -------------- | --------------------------------------------------------------- -->
-<!-- [modMApop](#modMApop) | Creates population data for model-assisted estimation. -->
-<!-- [modMAarea](#modMAarea) | Produces area level estimates through model-assisted estimation. -->
-<!-- [modMAtree](#modMAtree) | Produces tree level estimates through model-assisted estimation. -->
+FUNCTION  | DESCRIPTION
+-------------- | ---------------------------------------------------------------
+[modSApop](#modSApop) | Creates population data for small area estimation.
+[modSAarea](#modSAarea) | Produces area level estimates through small area estimation.
+[modSAtree](#modSAtree) | Produces tree level estimates through small area estimation.
 
-### Objective of tutorial
+## Objective of tutorial
 
-The main objective of this tutorial is to demonstrate how to use FIESTA for generating estimates using estimators from JoSAE and sae. The following examples are for generating estimates and estimated variances using standard FIA Evaluation data from FIA's National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
-
-<!-- The main objective of this tutorial is to demonstrate how to use `FIESTA` for generating estimates using estimators from `mase`. The model-assisted estimators can be used with FIA's standard state-level population data (i.e, Evaluation) from the FIA database (FIADB) and also population data from a custom boundary.  -->
-
-<!-- The following examples are for generating estimates and estimated variances using standard FIA Evaluation data from FIA's National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in `FIESTA`. -->
+The main objective of this tutorial is to demonstrate how to use `FIESTA` for generating estimates using estimators from the `JoSAE`, `sae`, and `hbsae` R packages. The following examples are for generating estimates and estimated variances using standard FIA Evaluation data from FIA's National database, with custom Estimation unit and Stratification information. The examples use data from three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018 and stored as internal data objects in FIESTA.
 
 
 ## Example data - Wyoming (WY), Inventory Years 2011-2012
@@ -52,24 +52,31 @@ WYbighorn_dem_250m.img   | Erdas Imagine raster of elevation change, in meters**
 ****USGS National Elevation Dataset (NED), resampled from 30m resolution to 250m. Projected in Albers Conical Equal Area, Datum NAD27 (U.S. Geological Survey 2017). Clipped to boundary of WYbighorn_adminbnd.shp.
 
 
+### Set up 
 
-FUNCTION  | DESCRIPTION
--------------- | ---------------------------------------------------------------
-[spGetSAdoms()](#spGetSAdoms) | Gets small area domains for estimation.
-[spGetPlots()](#spGetPlots)| Gets data from FIA database for plots within a given boundary.
-[spGetModeldat()](#spGetModeldat)| Gets plot and spatial data for small area models.
-[modSAtree()](#modSAtree)| Generate tree estimates using Small Area Estimation (SAE) methods.
+First, you'll need to load the `FIESTA` library:
 
-
-### EXAMPLES
-
-Set up for examples
-```{r}
-# Load library
+```{r, warning = F, message = F}
 library(FIESTA)
+```
 
+Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For our purposes in this vignette, we have saved our outfolder file path as the `outfolder` object in a temporary directory. We also set a few default options preferred for this vignette.
+
+```{r}
+## Set options
+options(scipen = 6)
+options(stringsAsFactors = FALSE)
+
+## Set outfolder
 outfolder <- tempdir()
+```
 
+
+### Get data for examples
+
+Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data and predictor layers stored in `FIESTA` and derive new predictor layers using the `raster` package. 
+
+```{r}
 # File names for external spatial data
 FIAplotsfn <- system.file("extdata", "FIApublic_M331B.db", package="FIESTA")
 FIAplotsfn <- "C:/_tsf/_GitHub/FIESTA/inst/extdata/FIA_data/FIApublic_M331B.db"
@@ -104,91 +111,16 @@ asp <- terrain(dem,
                overwrite = TRUE)
 ```
 
-<a name="ref"></a>
+Next, we set up our small area domains with `FIESTA::spGetSAdoms`. For more information on how to use this function, please see the `sp` vignette included with `FIESTA` (link). 
 
-## Reference Tables in FIESTA
-
-There are several reference tables stored in FIESTA, including table variable descriptions, code definitions, and estimation categories. 
-
-* Table variable descriptions - ref_plt, ref_cond, ref_tree
-* Code definitions - ref_codes
-
-
-<a name="auxiliary"></a>
-
-
-#### <a name="spGetSAdoms"/>spGetSAdoms()
 ```{r}
-######################################################################################
-# Usage:
-# spGetSAdoms(smallbnd, smallbnd_dsn = NULL, smallbnd.unique = NULL,  
-#	  smallbnd.att = NULL, smallbnd.filter = NULL, smallbnd.stfilter = NULL,
-#   smallbnd.ecofilter = NULL, helperbnd = NULL, helperbnd_dsn = NULL, 
-#	  helperbnd.unique = NULL, helperbnd.filter = NULL, largebnd = NULL, 
-#	  largebnd_dsn = NULL, largebnd.unique = NULL, largebnd.filter = NULL, 
-#   maxbnd = NULL, maxbnd_dsn = NULL, maxbnd.unique = NULL, maxbnd.filter = NULL,
-#   helper_autoselect = FALSE, nbrdom_min = NULL, threshold=30, 
-#	  multiSAdoms = TRUE, showsteps = TRUE, savedata = FALSE, savesteps = FALSE, 
-# 	outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL,  
-# 	outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = TRUE)
-# 
-# Description:
-# Get spatial domains for small area estimation.
-######################################################################################
-# 
-# WYbhdist <- spImportSpatial(WYbhdistfn)
-# head(WYbhdist)
-# 
-# ## Get spatial domains for small area estimation
-# SAdomdat <- spGetSAdoms(
-#   smallbnd = WYbhdistfn,
-#   smallbnd.domain = "DISTRICTNA",
-#   helperbnd = FIESTAnalysis::ecomap,
-#   helperbnd.unique = "SUBSECTION",
-#   largebnd = FIESTAnalysis::ecomap,
-#   largebnd.unique = "SECTION"
-# )
-# SAdoms <- SAdomdat$SAdomlst[[1]]
-# 
-# plot(st_geometry(SAdomdat$SAdomlst[[1]]))
-
-
 smallbnd <- WYbhdistfn
 smallbnd.domain <- "DISTRICTNA"
-
 ```
 
-#### <a name="spGetPlots"/>spGetPlots()
+Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spGetPlots` function from `FIESTA`, which accesses data through [FIA's DataMart](https://apps.fs.usda.gov/fia/datamart/datamart.html). Here, data are downloaded for all states intersecting boundary, then subset to boundary. 
+
 ```{r}
-######################################################################################
-# Usage:
-# spGetPlots(bnd, bnd_dsn = NULL, bnd.filter = NULL, states = NULL, stbnd = NULL, 
-#	  stbnd_dsn = NULL, stbnd.att = NULL, RS = NULL, xy = NULL, xy_dsn = NULL, 
-#   xy.uniqueid = "PLT_CN", xvar = "LON_PUBLIC", yvar = "LAT_PUBLIC", xy.crs = 4269, 
-#	  clipxy = TRUE, datsource = "datamart", data_dsn = NULL, istree = TRUE, 
-#	  isseed = FALSE, plot_layer= "plot", cond_layer = "cond", tree_layer = "tree", 
-#   seed_layer = "seed", other_layers = NULL, puniqueid = "CN", evalid = NULL, 
-#   evalCur = FALSE, evalEndyr = NULL, evalType = "VOL", measCur = FALSE, 
-#   measEndyr = NULL, measEndyr.filter = NULL, invyrs = NULL, allyrs=FALSE,
-#	  intensity1 = FALSE, showsteps = FALSE, savedata = FALSE, savebnd = FALSE, 
-#	  savexy = FALSE, outfolder = NULL, out_fmt = "shp", out_dsn = NULL, outfn.pre = NULL, 
-#	  outfn.date = FALSE, overwrite_dsn = FALSE, overwrite_layer = FALSE, ...)
-# 
-# Description:
-# Extract data from FIA database for plots within a given boundary.
-######################################################################################
-
-
-## Extracting data through FIA's DataMart (https://apps.fs.usda.gov/fia/datamart/datamart.html).
-## Here, data are downloaded for all states intersecting boundary, then subset to boundary
-
-# SApltdat <- spGetPlots(bnd = WYbhdistfn,
-#                      datsource = "datamart",
-#                      istree = TRUE,
-#                      isseed = TRUE,
-#                      invyrs = 2011:2013,
-#                      showsteps = TRUE)
- 
 SApltdat <- spGetPlots(bnd = WYbhdistfn,
                      xy_datsource = "obj",
                      xy = WYplt,
@@ -209,20 +141,18 @@ SApltdat <- spGetPlots(bnd = WYbhdistfn,
                      savedata_opts = savedata_options(outfolder = outfolder))
 ```
 
-
-#### <a name="spGetAuxiliary"/>spGetAuxiliary()
 ```{r}
+str(SApltdat, max.level = 1)
+```
 
-## Extract from raster predictor layers
-#######################################################
+Finally, we must generate the dataset with predictors for small area estimation. We can do this with the `spGetAuxiliary` function from `FIESTA`. Again, see the `sp` vignette for further information on this function. 
+
+```{r, results='hide'}
 rastlst.cont <- c(dem, slp, asp)
 rastlst.cont.name <- c("dem", "slp", "asp")
 
-#unit_layer = SAdoms,
-#unitvar = "DOMAIN", 
-
 unit_layer <- WYbhdistfn
-unitvar = "DISTRICTNA"
+unitvar <- "DISTRICTNA"
 
 auxdat <- spGetAuxiliary(xyplt = SApltdat$spxy, 
                          uniqueid = "CN", 
@@ -237,24 +167,36 @@ auxdat <- spGetAuxiliary(xyplt = SApltdat$spxy,
                          keepNA = FALSE, 
                          showext = FALSE, 
                          savedata = FALSE)
-names(auxdat)
-
-
-
 ```
 
-
-
-#### <a name="modSApop"/>modSApop()
 ```{r}
-
-SApopdat <- modSApop(pltdat=SApltdat, auxdat=auxdat, smallbnd=WYbhdistfn,
-		smallbnd.domain=smallbnd.domain)
-names(SApopdat)
-
-
-
+str(auxdat, max.level = 1)
 ```
+
+
+## Examples
+
+### `modSApop`
+
+#### Example 1: Creating our population dataset with `modMApop`
+
+We can create our population data for model-assisted estimation. To do so, we use the `modSApop` function in `FIESTA`. We must assign our plot data with the `pltdat` argument, the auxiliary dataset with the `auxdat` argument, and set information for our small areas with the `smallbnd` and `smallbnd.domain` arguments. The `spGetPlots` and `spGetAuxiliary` functions have done much of the hard work for us so far, so we can just run a simple call to `modSApop`:
+
+```{r}
+SApopdat <- modSApop(pltdat = SApltdat, 
+                     auxdat = auxdat,
+                     smallbnd = WYbhdistfn,
+		                 smallbnd.domain = smallbnd.domain)
+```
+
+Note that the `modSApop` function returns a list with lots of information and data for us to use. For a quick look at what this list includes we can use the `str` function: 
+
+```{r}
+str(SApopdat, max.level = 1)
+```
+
+Now that we've created our population dataset, we can move on to estimation. 
+
 
 #### <a name="modSAtree"/>modSAtree()
 ```{r}
@@ -284,34 +226,11 @@ SApackage="JoSAE"
 
 area1 <- modSAarea(
   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  SAdomsdf = NULL,
   prednames = c("slp", "dem"),
   SApackage = "sae",
   SAmethod = "area"
   # estvar = estvar
   )
-
-SAdat <- modSAtree(tree=SAtree, cond=SAcond, pltassgn=pltassgn,
-  pltassgnid=pltassgnid, dunitarea=dunitarea, areavar=areavar, 
-  dunitlut=dunitlut, prednames=prednames, predfac=predfac,
-  estvar=estvar, estvar.filter=estvar.filter, rawdata=TRUE)
-
-names(SAdat)
-SAdat$est
-SAdat.raw <- SAdat$raw
-names(SAdat.raw)
-
-
-SAdat.raw$plotsampcnt
-SAdat.raw$condsampcnt
-
-SAdat.raw$dunitlut
-SAdat.raw$dunitarea
-head(SAdat.raw$dat)
-SAdat.raw$estvar
-
-SAdat.raw$dunit.multest
-SAdat.raw$dunit_totest
 
 
 ```
