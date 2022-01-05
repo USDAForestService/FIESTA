@@ -150,23 +150,30 @@ Finally, we must generate the dataset with predictors for small area estimation.
 ```{r, results='hide'}
 rastlst.cont <- c(dem, slp, asp)
 rastlst.cont.name <- c("dem", "slp", "asp")
+rastlst.cat <- fornffn
+rastlst.cat.name <- "fornf"
 
 unit_layer <- WYbhdistfn
 unitvar <- "DISTRICTNA"
 
-auxdat <- spGetAuxiliary(xyplt = SApltdat$spxy, 
-                         uniqueid = "CN", 
-                         unit_layer = unit_layer,
-                         unitvar = "DISTRICTNA", 
-                         rastlst.cont = rastlst.cont, 
-                         rastlst.cont.name = rastlst.cont.name, 
-                         rastlst.cont.stat = "mean", 
-                         rastlst.cont.NODATA = 0, 
-                         asptransform = TRUE, 
-                         rast.asp = asp, 
-                         keepNA = FALSE, 
-                         showext = FALSE, 
-                         savedata = FALSE)
+auxdat <- spGetAuxiliary(
+  xyplt = SApltdat$spxy,
+  uniqueid = "CN",
+  unit_layer = unit_layer,
+  unitvar = "DISTRICTNA",
+  rastlst.cont = rastlst.cont,
+  rastlst.cont.name = rastlst.cont.name,
+  rastlst.cont.stat = "mean",
+  rastlst.cont.NODATA = 0,
+  rastlst.cat = rastlst.cat,
+  rastlst.cat.name = rastlst.cat.name,
+  asptransform = TRUE,
+  rast.asp = asp,
+  keepNA = FALSE,
+  showext = FALSE,
+  savedata = FALSE
+)
+names(auxdat)
 ```
 
 ```{r}
@@ -199,74 +206,145 @@ Now that we've created our population dataset, we can move on to estimation.
 
 ### `modSAarea`
 
-#### Example 2: 
+#### Example 2: Area of forest land, unit-level EBLUP
 
+First, we can set up our predictors as a vector:
+
+```{r}
+all_preds <- c("slp", "dem", "asp_cos", "asp_sin", "fornf2")
+```
+
+Next, we fit the unit-level EBLUP with the `JoSAE` R package. 
 
 ```{r}
 area1 <- modSAarea(
   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-  SApackage = "JoSAE",
-  SAmethod = "area",
-  variable.select = FALSE
+  prednames = all_preds, # est - charater vector of predictors to be used in the model
+  SApackage = "JoSAE", # est - character string of the R package to do the estimation
+  SAmethod = "unit" # est - method of small area estimation. Either "unit" or "area"
   )
+```
 
+The `modSAarea` function outputs a list, and we can see our estimates and estimation method.
+
+```{r}
+str(area1, max.level = 1)
 area1$est
 area1$raw$SAmethod
 ```
 
-#### Example 3:
+#### Example 3: Area of forest land, area-level EBLUP
+
+In this example, we fit the same model as above, however now we can fit it at the area level. 
 
 ```{r}
-area1 <- modSAarea(
+area2 <- modSAarea(
   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-  SApackage = "JoSAE",
-  SAmethod = "area",
-  variable.select = FALSE
+  prednames = all_preds, # est - charater vector of predictors to be used in the model
+  SApackage = "JoSAE", # est - character string of the R package to do the estimation
+  SAmethod = "area" # est - method of small area estimation. Either "unit" or "area"
   )
-
-area1$est
-area1$raw$SAmethod
 ```
 
-#### Example 4:
+We again can see our estimates, however with this data the area level model from `JoSAE` returned `NA`, so `FIESTA` will return the direct estimate. This can be seen by looking at the `SAmethod` object in the `raw` list. 
 
 ```{r}
-test1 <- modSAarea(
+area2$est
+area2$raw$SAmethod
+```
+
+Since `FIESTA` will attempt fit all models when running `modSAarea`, we can look at all the different modeling approaches and their estimates with the `multest` object.
+
+```{r}
+area2$multest
+```
+
+Notably, area-level models return NAs with this data due to tiny values for within-area variation. So, for the rest of this vignette, we will focus on unit-level models. 
+
+#### Example 4: Area of forest land, hierarchical Bayesian models
+
+`FIESTA` also supports the use of hierarchical Bayesian (HB) models through the `hbsae` package as an alternative to EBLUPs. To fit these models, we can just change the `SApackage` argument.
+
+```{r}
+area3 <- modSAarea(
   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-  SApackage = "hbsae",
-  SAmethod = "area",
-  variable.select = FALSE,
-  totals = TRUE)
+  prednames = all_preds, # est - charater vector of predictors to be used in the model
+  SApackage = "hbsae", # est - character string of the R package to do the estimation
+  SAmethod = "unit" # est - method of small area estimation. Either "unit" or "area"
+  )
+```
 
-test2 <- modSAarea(
+We can again check our estimates and small area method. 
+
+```{r}
+area3$est
+area3$raw$SAmethod
+```
+
+#### Example 5: Ara of forest land, hierarchical Bayesian models, changing prior distribution
+
+Notably, we can also set priors on the ratio of between and within area variation with `hbsae`. By default, `FIESTA` uses a weakly informative half-Cauchy prior on this parameter as suggested by White et al (2021), but in this example we will fit the same model as before, but with a flat prior. 
+
+```{r}
+area4 <- modSAarea(
   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-  SApackage = "hbsae",
-  SAmethod = "unit",
-  variable.select = FALSE,
-  totals = TRUE)
+  prednames = all_preds, # est - charater vector of predictors to be used in the model
+  SApackage = "hbsae", # est - character string of the R package to do the estimation
+  SAmethod = "unit", # est - method of small area estimation. Either "unit" or "area"
+  prior = function(x) 1
+  )
+```
+
+Let's check our results compared to Example 3 (same model with half-Cauchy prior)
+
+```{r}
+area3$est
+area4$est
+```
+
+Due to rounding, we see the same result. However, the estimates are slightly different. 
+
+#### Example 6: Area of forest land, with model variable selection
+
+### `modSAtree`
 
 
-area1$est
-area1$raw$SAmethod
+
+```{r}
+# test1 <- modSAarea(
+#   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+#   prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+#   SApackage = "hbsae",
+#   SAmethod = "area",
+#  # variable.select = FALSE,
+#   totals = TRUE)
+# 
+# test2 <- modSAarea(
+#   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+#   prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+#   SApackage = "hbsae",
+#   SAmethod = "unit",
+#   variable.select = FALSE,
+#   totals = TRUE)
+
+# 
+# area1$est
+# area1$raw$SAmethod
 ```
 
 #### Example 5:
 
 ```{r}
-area1 <- modSAarea(
-  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-  SApackage = "hbsae",
-  SAmethod = "unit",
-  variable.select = FALSE
-  )
-
-area1$est
-area1$raw$SAmethod
+# area1 <- modSAarea(
+#   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+#   prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+#   SApackage = "hbsae",
+#   SAmethod = "unit",
+#   variable.select = FALSE
+#   )
+# 
+# area1$est
+# area1$raw$SAmethod
 ```
 
 
@@ -284,7 +362,6 @@ tree1 <- modSAtree(
   prednames = c("slp", "dem", "asp_cos", "asp_sin"),
   SApackage = "JoSAE",
   SAmethod = "unit",
-  variable.select = FALSE,
   estvar = "BA"
 )
 
