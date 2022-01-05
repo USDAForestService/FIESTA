@@ -197,41 +197,98 @@ str(SApopdat, max.level = 1)
 
 Now that we've created our population dataset, we can move on to estimation. 
 
+### `modSAarea`
+
+#### Example 2: 
+
+
+```{r}
+area1 <- modSAarea(
+  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+  SApackage = "JoSAE",
+  SAmethod = "area",
+  variable.select = FALSE
+  )
+
+area1$est
+area1$raw$SAmethod
+```
+
+#### Example 3:
+
+```{r}
+area1 <- modSAarea(
+  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+  SApackage = "JoSAE",
+  SAmethod = "area",
+  variable.select = FALSE
+  )
+
+area1$est
+area1$raw$SAmethod
+```
+
+#### Example 4:
+
+```{r}
+test1 <- modSAarea(
+  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+  SApackage = "hbsae",
+  SAmethod = "area",
+  variable.select = FALSE,
+  totals = TRUE)
+
+test2 <- modSAarea(
+  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+  SApackage = "hbsae",
+  SAmethod = "unit",
+  variable.select = FALSE,
+  totals = TRUE)
+
+
+area1$est
+area1$raw$SAmethod
+```
+
+#### Example 5:
+
+```{r}
+area1 <- modSAarea(
+  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+  SApackage = "hbsae",
+  SAmethod = "unit",
+  variable.select = FALSE
+  )
+
+area1$est
+area1$raw$SAmethod
+```
+
+
+
+
+
+
 
 #### <a name="modSAtree"/>modSAtree()
 ```{r}
-######################################################################################
-# Usage:
-# modSAtree(SAdomsdf = NULL, prednames = NULL, SApackage = "JoSAE", SAmethod = "unit",   
-#	  estseed = "none", largebnd.att = NULL, landarea = "ALL", 
-#   pfilter = NULL, cfilter = NULL, estvar = NULL, estvar.filter = NULL,  
-#   allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = "--", 
-#   divideby = NULL, savedata = FALSE, rawdata = FALSE, outfolder = NULL, 
-#   outfn = NULL, outfn.pre = NULL, outfn.date = TRUE, overwrite = FALSE, 
-#   addtitle = TRUE, returntitle = FALSE, title.main = NULL, title.ref = NULL,
-#   title.dunitvar = NULL, title.estvar = NULL, title.filter = NULL, 
-#   SApopdat = NULL, ...) 
-# 
-# Description:
-# Generate estimates for area of interest, or small boundary.
-######################################################################################
-
-## Estimates of live basal area (sq cuft) by Bighorn National Forest district
-estvar <- "BA"
-estvar.filter <- "STATUSCD == 1"
-adjplot=TRUE
-SAmethod="area"
-SApackage="JoSAE"
 
 
-area1 <- modSAarea(
+tree1 <- modSAtree(
   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = c("slp", "dem"),
-  SApackage = "sae",
-  SAmethod = "area"
-  # estvar = estvar
-  )
+  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
+  SApackage = "JoSAE",
+  SAmethod = "unit",
+  variable.select = FALSE,
+  estvar = "BA"
+)
 
+tree1$raw$SAmethod
 
 ```
 
