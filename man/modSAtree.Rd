@@ -17,7 +17,7 @@ modSAtree(
   estvar = NULL,
   estvar.filter = NULL,
   rowvar = NULL,
-  modelselect = TRUE,
+  modelselect = FALSE,
   savedata = FALSE,
   savesteps = FALSE,
   multest = TRUE,

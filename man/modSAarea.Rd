@@ -15,7 +15,7 @@ modSAarea(
   landarea = "FOREST",
   pcfilter = NULL,
   rowvar = NULL,
-  modelselect = TRUE,
+  modelselect = FALSE,
   prior = function(x) 1/(sqrt(x) * (1 + x)),
   savedata = FALSE,
   savesteps = FALSE,
