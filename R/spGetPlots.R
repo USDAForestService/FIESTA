@@ -247,7 +247,6 @@ spGetPlots <- function(bnd = NULL,
   gui <- FALSE
   coordtype <- "public"
   
-  
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -277,7 +276,7 @@ spGetPlots <- function(bnd = NULL,
       assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
   }
-
+ 
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################
@@ -605,15 +604,13 @@ spGetPlots <- function(bnd = NULL,
     ## Subset tree data
     if (istree) {
       treex <- treex[treex[[tuniqueid]] %in% pltids,]
+      tabs2save <- c(tabs2save, "treex")
     }
-    tabs2save <- c(tabs2save, "treex")
-
     ## Subset seed data
     if (isseed) {
       seedx <- seedx[seedx[[tuniqueid]] %in% pltids,]
+      tabs2save <- c(tabs2save, "seedx")
     }
-    tabs2save <- c(tabs2save, "seedx")
-
     ## other data
     if (!is.null(other_layers)) {
       for (layer in other_layers) {
@@ -969,7 +966,7 @@ spGetPlots <- function(bnd = NULL,
       }
     }  ## End of looping thru states
   }
-
+ 
 ############################################################
   if (datsource == "sqlite") {
     ####################################################################
@@ -1468,6 +1465,7 @@ spGetPlots <- function(bnd = NULL,
     DBI::dbDisconnect(dbconn)
   }  ## datsource
    
+  tabs2save <- unique(tabs2save)
   tabs <- lapply(tabs2save, get, envir=environment())
   tabIDs <- list(pltx=puniqueid, condx=cuniqueid)
   if (istree) {
@@ -1488,7 +1486,7 @@ spGetPlots <- function(bnd = NULL,
       }
     }
   }
-
+ 
   names(tabs) <- sapply(tabs2save, function(x) substr(x, 1, nchar(x)-1))
   names(tabIDs) <- sapply(names(tabIDs), function(x) substr(x, 1, nchar(x)-1))
  

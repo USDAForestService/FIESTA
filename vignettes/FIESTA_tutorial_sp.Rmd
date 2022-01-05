@@ -620,7 +620,7 @@ The `spGetXY` function extracts XY data within a given boundary.
 <details>
   <summary>View Example</summary>
   
-We can extract public coordinates within WY Bighorn NF boundary, returning spatial (spxy) and nonspatial coordinates (xyids).
+We can extract public coordinates within WY Bighorn NF boundary, returning spatial (spxy) and nonspatial plot identifiers (xyids).
 
 ```{r}
 
@@ -638,7 +638,7 @@ plot(st_geometry(spxy))
 ```
 
 
-Or, returning only nonspatial coordinates (xyids).
+Or, returning only nonspatial plot identifiers (xyids).
 
 ```{r}
 

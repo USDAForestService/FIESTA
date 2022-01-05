@@ -40,6 +40,7 @@
 #' +towgs84=0,0,0,-0,-0,-0,0 +units=m +no_defs'.
 #' @param compress String. An optional compression type ('LZW', "DEFLATE',
 #' "PACKBITS').
+#' @param BigTIFF Logical. If TRUE, compress option for big files (> 4GB).
 #' @param outfolder String. If exportsp=TRUE, name of output folder. If NULL,
 #' the working directory is used.
 #' @param outfn String. Name of output raster. If NULL, default is 'polyrast'.
@@ -98,6 +99,7 @@ spReprojectRaster <- function(rastfn,
                               resamp.method = "near", 
                               crs.default = "EPSG:5070", 
                               compress = NULL, 
+                              BigTIFF = FALSE,
                               outfolder = NULL, 
                               outfn = NULL, 
                               outext = NULL, 
@@ -218,19 +220,11 @@ spReprojectRaster <- function(rastfn,
  
   ## Check resamp.method
   resamp.methodlst <- c("near", "bilinear", "cubic", "cubicspline", 
-	"lanczos", "average", "mode", "min", "max", "med", "q1", "q3")
+	      "lanczos", "average", "mode", "min", "max", "med", "q1", "q3")
   r <- pcheck.varchar(var2check=resamp.method, 
 	varnm="resamp.methodlst", gui=gui,
 	checklst=resamp.methodlst, caption="Resample method?")
 
-  ## Check compression
-  compresslst <- c("LZW", "PACKBITS", "DEFLATE")
-  compress <- pcheck.varchar(var2check=compress, 
-	varnm="compress", gui=gui,
-	checklst=compresslst, caption="Compress output?")
-  if (!is.null(compress)) {
-    co <- paste0("COMPRESS=", compress)
-  }
 
   ## Check outfolder
   outfolder <- pcheck.outfolder(outfolder)
@@ -258,15 +252,41 @@ spReprojectRaster <- function(rastfn,
 
   ## Get output raster format
   of <- drivers[drivers$DefaultExt == outext, "fmt"]
+  
+  ## Check compression
+  compresslst <- c("LZW", "PACKBITS", "DEFLATE")
+  compress <- pcheck.varchar(var2check=compress, 
+                             varnm="compress", gui=gui,
+                             checklst=compresslst, caption="Compress output?")
+  if (!is.null(compress)) {
+    co <- paste0("COMPRESS=", compress)
+  }
+  
+  if (outext == "tif" && !is.null(co)) {
+    ## Check BigTIFF
+    BigTIFF <- pcheck.logical(BigTIFF, 
+                            varnm="BigTIFF", 
+                            title="BigTIFF compression?", 
+                            first="NO", gui=gui)
+    co <- c(co, "BIGTIFF=YES")
+  }
+  
 
   ##################################################################
   ## DO WORK
   ##################################################################
 
-  reprojectRaster(srcfile=srcfile, dstfile=outfilenm, 
-	t_srs=t_srs, s_srs=s_srs, tr=tr, 
-	of=of, ot=ot, r=r, co=co, dstnodata=dstnodata,
-	addOptions=c("-ovr", "NONE"))
+  reprojectRaster(srcfile = srcfile, 
+                  dstfile = outfilenm, 
+                  t_srs = t_srs, 
+                  s_srs = s_srs, 
+                  tr = tr, 
+                  of = of, 
+                  ot = ot, 
+                  r = r, 
+                  co = co, 
+                  dstnodata = dstnodata, 
+                  addOptions = c("-ovr", "NONE"))
 
   return(outfilenm)
  
