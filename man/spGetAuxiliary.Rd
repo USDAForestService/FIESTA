@@ -169,7 +169,7 @@ If savedata=TRUE, datstrat and unitarea are saved to outfolder.  If
 exportsp=TRUE, the sf object is exported to outfolder.
 }
 \description{
-Wrapper to extract and compile auxiliary data by domain (i.e, estimation
+Wrapper to extract and compile auxiliary data by domain unit (i.e, estimation
 unit or small area domain). The following information is compiled:\cr -
 Attribute defining domain (i.e., estimation unit) from domain layer\cr -
 Area by domain (i.e., estimation unit)\cr - Zonal statistics by domain

@@ -17,6 +17,7 @@ spReprojectRaster(
   resamp.method = "near",
   crs.default = "EPSG:5070",
   compress = NULL,
+  BigTIFF = FALSE,
   outfolder = NULL,
   outfn = NULL,
   outext = NULL,
@@ -71,6 +72,8 @@ crs.new=NULL.  The default is: EPSG:5070, Conus Albers, PRJ4='+proj=aea
 
 \item{compress}{String. An optional compression type ('LZW', "DEFLATE',
 "PACKBITS').}
+
+\item{BigTIFF}{Logical. If TRUE, compress option for big files (> 4GB).}
 
 \item{outfolder}{String. If exportsp=TRUE, name of output folder. If NULL,
 the working directory is used.}

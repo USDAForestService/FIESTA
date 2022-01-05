@@ -15,7 +15,8 @@ modSAarea(
   landarea = "FOREST",
   pcfilter = NULL,
   rowvar = NULL,
-  variable.select = TRUE,
+  modelselect = TRUE,
+  prior = function(x) 1/(sqrt(x) * (1 + x)),
   savedata = FALSE,
   savesteps = FALSE,
   multest = TRUE,
@@ -63,8 +64,10 @@ pltassgn).  Must be R logical syntax.}
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.}
 
-\item{variable.select}{Logical. If TRUE, selects useful predictors using
+\item{modelselect}{Logical. If TRUE, selects useful predictors using
 mase:ElasticNet.}
+
+\item{prior}{Function. A prior function to use for hbsae models.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 

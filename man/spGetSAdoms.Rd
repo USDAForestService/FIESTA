@@ -2,7 +2,7 @@
 % Please edit documentation in R/spGetSAdoms.R
 \name{spGetSAdoms}
 \alias{spGetSAdoms}
-\title{Spatial - Generate a set of model domain units for Small Area Estimation
+\title{Spatial wrapper - Generate a set of model domain units for Small Area Estimation
 (SAE) strategies.}
 \usage{
 spGetSAdoms(

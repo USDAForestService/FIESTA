@@ -17,7 +17,7 @@ modSAtree(
   estvar = NULL,
   estvar.filter = NULL,
   rowvar = NULL,
-  variable.select = TRUE,
+  modelselect = TRUE,
   savedata = FALSE,
   savesteps = FALSE,
   multest = TRUE,
@@ -70,7 +70,7 @@ syntax (e.g., "STATUSCD == 1").}
 only one domain, rowvar = domain variable. If more than one domain, include
 colvar. If no domain, rowvar = NULL.}
 
-\item{variable.select}{Logical. If TRUE, selects useful predictors using
+\item{modelselect}{Logical. If TRUE, selects useful predictors using
 mase:ElasticNet.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}

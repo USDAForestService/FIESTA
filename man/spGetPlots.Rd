@@ -2,7 +2,7 @@
 % Please edit documentation in R/spGetPlots.R
 \name{spGetPlots}
 \alias{spGetPlots}
-\title{Spatial - Extracts data within a given boundary.}
+\title{Spatial wrapper - Extracts plot data within a given boundary.}
 \usage{
 spGetPlots(
   bnd = NULL,
@@ -57,7 +57,7 @@ spGetPlots(
 \item{bnd}{sf R object, Area of Interest (AOI) boundary. Can be a spatial sf
 object, full pathname to a shapefile, or name of a layer within a database.}
 
-\item{bnd_dsn}{String. Data source name (dsn; e.g., sqlite or shapefile
+\item{bnd_dsn}{String. Data source name (dsn; e.g., SQLite database or shapefile
 pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if bnd is an R object.}
 
@@ -69,7 +69,7 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 included.}
 
-\item{xyids}{Data frame. Non-spatial plot identificators within bnd).}
+\item{xyids}{Data frame. Non-spatial plot identifiers within bnd).}
 
 \item{xy_datsource}{String. Source of XY data ("obj", "csv", "datamart",
 "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify

@@ -2,8 +2,8 @@
 % Please edit documentation in R/spGetEstUnit.R
 \name{spGetEstUnit}
 \alias{spGetEstUnit}
-\title{Spatial - Extracts point attribute values and area from a SpatialPolygons or
-raster estimation unit layer.}
+\title{Spatial wrapper - Extracts point attribute values and area from a simple
+feature or raster estimation unit layer.}
 \usage{
 spGetEstUnit(
   xyplt,
@@ -16,7 +16,6 @@ spGetEstUnit(
   unit.filter = NULL,
   areavar = NULL,
   areaunits = "acres",
-  rast.NODATA = NULL,
   keepNA = FALSE,
   returnxy = FALSE,
   showext = FALSE,
@@ -30,19 +29,19 @@ spGetEstUnit(
 )
 }
 \arguments{
-\item{xyplt}{Data frame object or String. Name of layer with xy coordinates
-and unique identifier. Can be layer with xy_dsn, full pathname, including
-extension, or file name (with extension) in xy_dsn folder.}
+\item{xyplt}{Data frame, sf object, full pathname to *.csv or *shp, or layer
+name in a geodatabase. Includes XY coordinates and unique identifier.  If
+non-spatial, include options in spMakeSpatial_opts parameter.}
 
 \item{xyplt_dsn}{String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
 \item{uniqueid}{String.* Unique identifier of xyplt rows.}
 
-\item{unittype}{String. Spatial layer type of unitlayer ("POLY", "RASTER").}
+\item{unittype}{String. Spatial layer type of unit_layer ("POLY", "RASTER").}
 
-\item{unit_layer}{String or S4 object. The name of the estimation unit
-spatial polygons layer. The layer name may be a full pathname to a file, the
+\item{unit_layer}{String or sf object. The name of the estimation unit
+layer. The layer name may be a full pathname to a file, the
 basename to a file, a spatial layer name from a database, or a
 SpatialPolygons object with a defined projection.}
 
@@ -50,18 +49,15 @@ SpatialPolygons object with a defined projection.}
 name) of unit_layer. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional.}
 
-\item{unitvar}{String. Name of estimation unit variable in unitlayer.}
+\item{unitvar}{String. Name of estimation unit variable in unit_layer.}
 
 \item{unit.filter}{String. Filter to subset unit_layer spatial layer.}
 
-\item{areavar}{String. Name of area variable unit variable in unitlayer. If
+\item{areavar}{String. Name of area variable unit variable in unit_layer. If
 NULL, calculates area by unitvar.}
 
 \item{areaunits}{String. Output area units ("acres", "hectares",
 "sqmeters").}
-
-\item{rast.NODATA}{Numeric. NODATA value if stratlayer is raster. These
-values will be removed from output strata table, assuming outside boundary.}
 
 \item{keepNA}{Logical. If TRUE, returns data frame of NA values.}
 
@@ -104,19 +100,19 @@ are truncated to 10 characters or less (See note below). Name changes are
 output to 'outfn'_newnames_'data'.csv in outfolder.
 }
 \description{
-Wrapper to get point attribute values and area from a SpatialPolygons or
+Wrapper to get point attribute values and area from a simple feature or
 raster layer of estimation units and calculates area. Points are reprojected
-on-the-fly to projection of unitlayer using PROJ.4 transformation parameters
+on-the-fly to projection of unit_layer using PROJ.4 transformation parameters
 and rgdal spTransform function.  - Point attribute extraction from
-SpatialPolygons (spExtractPoly) or from raster (spExtractRast) - Calulate
+simple feature (spExtractPoly) or from raster (spExtractRast) - Calculate
 area by estimation unit(s) (areacalc.poly/areacalc.pixel)
 }
 \details{
 *If variable = NULL, then it will prompt user for input.
 
-If there is a raster and SpatialPolygon layer, and the projection of the
-SpatialPolygons is different than the projection of the raster, the
-SpatialPolygons object is reprojected to the projection of raster (See note
+If there is a raster and simple feature layer, and the projection of the
+simple feature is different than the projection of the raster, the
+simple feature object is transformed to the projection of raster (See note
 about on-the-fly projection conversion).
 }
 \note{

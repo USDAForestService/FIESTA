@@ -36,14 +36,14 @@ spGetStrata(
 \arguments{
 \item{xyplt}{Data frame, sf object, full pathname to *.csv or *shp, or layer
 name in a geodatabase. Includes XY coordinates and unique identifier.  If
-non-spatial, include parameters for FIESTA::spMakeSpatialPoints().}
+non-spatial, include options in spMakeSpatial_opts parameter.}
 
 \item{xyplt_dsn}{String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
 \item{uniqueid}{String.* Unique identifier of xyplt records.}
 
-\item{unittype}{String. Spatial layer type of unitlayer ("POLY", "RASTER").
+\item{unittype}{String. Spatial layer type of unit_layer ("POLY", "RASTER").
 Note: raster unit layers are converted to polygon.}
 
 \item{unit_layer}{sf R object or String. Name of estimation unit spatial
@@ -61,7 +61,7 @@ unit.}
 
 \item{unit.filter}{String. Filter to subset unit_layer spatial layer.}
 
-\item{strattype}{String. Spatial layer type of stratlayer ("POLY",
+\item{strattype}{String. Spatial layer type of strat_layer ("POLY",
 "RASTER").  Note: polygon strata layers are converted to raster.}
 
 \item{strat_layer}{sf R object or full pathname of spatial stratification
@@ -140,9 +140,9 @@ unit layer and a polygon or raster layer with strata pixel categories.
 *If variable = NULL, then it will prompt user for input.
 
 If spatial layers have different projections, the polygon spatial layer is
-reprojected to the projection of raster (See note about on-the-fly
+transformed to the projection of raster (See note about on-the-fly
 projection conversion). If both layers are long/lat coordinate system, they
-are reprojected to default coordinate system (Conus Albers, NAD83).
+are transformed to default coordinate system (Conus Albers, NAD83).
 }
 \note{
 rast.NODATA\cr NODATA values are raster pixel values that have no data of
