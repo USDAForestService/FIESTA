@@ -304,70 +304,119 @@ area4$est
 
 Due to rounding, we see the same result. However, the estimates are slightly different. 
 
-#### Example 6: Area of forest land, with model variable selection
+#### Example 6: Area of forest land, with model variable selection, `JoSAE` unit level EBLUP
+
+This currently grabs all predictors for the unit and none for the area.
+
+```{r}
+area5 <- modSAarea(
+  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
+  prednames = all_preds, # est - charater vector of predictors to be used in the model
+  SApackage = "JoSAE", # est - character string of the R package to do the estimation
+  SAmethod = "unit", # est - method of small area estimation. Either "unit" or "area"
+  modelselect = TRUE
+  )
+```
+
+```{r}
+area5$raw$predselect.unit
+```
 
 ### `modSAtree`
 
-
+We will set our estimate variable and filter now. We set `estvar` to `"VOLCFNET"` for net cubic foot volume, and filter with `estvar.filter` set to `"STATUSCD == 1"` so we only consider live trees in our estimation.  
 
 ```{r}
-# test1 <- modSAarea(
-#   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-#   prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-#   SApackage = "hbsae",
-#   SAmethod = "area",
-#  # variable.select = FALSE,
-#   totals = TRUE)
-# 
-# test2 <- modSAarea(
-#   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-#   prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-#   SApackage = "hbsae",
-#   SAmethod = "unit",
-#   variable.select = FALSE,
-#   totals = TRUE)
-
-# 
-# area1$est
-# area1$raw$SAmethod
+estvar <- "VOLCFNET"
+live_trees <- "STATUSCD == 1"
 ```
 
-#### Example 5:
+#### Example 7: Total net cubic-foot volume of live trees (at least 5 inches diameter) 
 
 ```{r}
-# area1 <- modSAarea(
-#   SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-#   prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-#   SApackage = "hbsae",
-#   SAmethod = "unit",
-#   variable.select = FALSE
-#   )
-# 
-# area1$est
-# area1$raw$SAmethod
-```
-
-
-
-
-
-
-
-#### <a name="modSAtree"/>modSAtree()
-```{r}
-
-
 tree1 <- modSAtree(
-  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = c("slp", "dem", "asp_cos", "asp_sin"),
-  SApackage = "JoSAE",
-  SAmethod = "unit",
-  estvar = "BA"
-)
+    SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
+    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    SApackage = "JoSAE",         # est - character string of the R package to do the estimation
+    SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
+    landarea = "FOREST",         # est - forest land filter
+    estvar = estvar,             # est - net cubic-foot volume
+    estvar.filter = live_trees   # est - live trees only
+    )
 
-tree1$raw$SAmethod
-
+tree1$multest
 ```
+
+
+#### Example 8: Total net cubic-foot volume of live trees (at least 5 inches diameter), using model selection
+
+```{r}
+tree2 <- modSAtree(
+    SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
+    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    SApackage = "JoSAE",         # est - character string of the R package to do the estimation
+    SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
+    landarea = "FOREST",         # est - forest land filter
+    estvar = estvar,             # est - net cubic-foot volume
+    estvar.filter = live_trees,   # est - live trees only
+    modelselect = TRUE
+    )
+```
+
+
+
+#### Example 9: Basal area of live trees (at least 5 inches diameter)
+
+We can also use different response variables to estimate, and in this example we chose basal area. 
+
+```{r}
+tree3 <- modSAtree(
+    SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
+    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    SApackage = "JoSAE",         # est - character string of the R package to do the estimation
+    SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
+    landarea = "FOREST",         # est - forest land filter
+    estvar = "BA",               # est - net cubic-foot volume
+    estvar.filter = live_trees   # est - live trees only
+    )
+```
+
+#### Example 10: Basal area of live trees (at least 5 inches diameter), saving to an outfolder
+
+```{r}
+tree4 <- modSAtree(
+    SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
+    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    SApackage = "JoSAE",         # est - character string of the R package to do the estimation
+    SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
+    landarea = "FOREST",         # est - forest land filter
+    estvar = "BA",               # est - net cubic-foot volume
+    estvar.filter = live_trees,  # est - live trees only
+    savedata = TRUE,
+    savedata_opts = savedata_options(
+      outfolder = outfolder
+    )
+    )
+```
+
+#### Example 11: Basal area of live trees (at least 5 inches diameter), HB model
+
+```{r}
+tree4 <- modSAtree(
+    SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
+    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    SApackage = "hbsae",         # est - character string of the R package to do the estimation
+    SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
+    landarea = "FOREST",         # est - forest land filter
+    estvar = "BA",               # est - net cubic-foot volume
+    estvar.filter = live_trees,  # est - live trees only
+    savedata = TRUE,
+    savedata_opts = savedata_options(
+      outfolder = outfolder
+    )
+    )
+```
+
 
 
 
