@@ -218,10 +218,10 @@ Next, we fit the unit-level EBLUP with the `JoSAE` R package.
 
 ```{r}
 area1 <- modSAarea(
-  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = all_preds, # est - charater vector of predictors to be used in the model
-  SApackage = "JoSAE", # est - character string of the R package to do the estimation
-  SAmethod = "unit" # est - method of small area estimation. Either "unit" or "area"
+  SApopdatlst = SApopdat,        # pop - population calculations for WY, post-stratification
+  prednames = all_preds,         # est - charater vector of predictors to be used in the model
+  SApackage = "JoSAE",           # est - character string of the R package to do the estimation
+  SAmethod = "unit"              # est - method of small area estimation. Either "unit" or "area"
   )
 ```
 
@@ -233,16 +233,23 @@ area1$est
 area1$raw$SAmethod
 ```
 
+We can also look further into the `raw` list below:
+
+```{r}
+str(area1$raw, max.level = 1)
+```
+
+
 #### Example 3: Area of forest land, area-level EBLUP
 
 In this example, we fit the same model as above, however now we can fit it at the area level. 
 
 ```{r}
 area2 <- modSAarea(
-  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = all_preds, # est - charater vector of predictors to be used in the model
-  SApackage = "JoSAE", # est - character string of the R package to do the estimation
-  SAmethod = "area" # est - method of small area estimation. Either "unit" or "area"
+  SApopdatlst = SApopdat,         # pop - population calculations for WY, post-stratification
+  prednames = all_preds,          # est - charater vector of predictors to be used in the model
+  SApackage = "JoSAE",            # est - character string of the R package to do the estimation
+  SAmethod = "area"               # est - method of small area estimation. Either "unit" or "area"
   )
 ```
 
@@ -267,10 +274,10 @@ Notably, area-level models return NAs with this data due to tiny values for with
 
 ```{r}
 area3 <- modSAarea(
-  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = all_preds, # est - charater vector of predictors to be used in the model
-  SApackage = "hbsae", # est - character string of the R package to do the estimation
-  SAmethod = "unit" # est - method of small area estimation. Either "unit" or "area"
+  SApopdatlst = SApopdat,           # pop - population calculations for WY, post-stratification
+  prednames = all_preds,            # est - character vector of predictors to be used in the model
+  SApackage = "hbsae",              # est - character string of the R package to do the estimation
+  SAmethod = "unit"                 # est - method of small area estimation. Either "unit" or "area"
   )
 ```
 
@@ -287,11 +294,11 @@ Notably, we can also set priors on the ratio of between and within area variatio
 
 ```{r}
 area4 <- modSAarea(
-  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = all_preds, # est - charater vector of predictors to be used in the model
-  SApackage = "hbsae", # est - character string of the R package to do the estimation
-  SAmethod = "unit", # est - method of small area estimation. Either "unit" or "area"
-  prior = function(x) 1
+  SApopdatlst = SApopdat,           # pop - population calculations for WY, post-stratification
+  prednames = all_preds,            # est - charater vector of predictors to be used in the model
+  SApackage = "hbsae",              # est - character string of the R package to do the estimation
+  SAmethod = "unit",                # est - method of small area estimation. Either "unit" or "area"
+  prior = function(x) 1             # est - prior on ratio of between and within area variation
   )
 ```
 
@@ -306,19 +313,22 @@ Due to rounding, we see the same result. However, the estimates are slightly dif
 
 #### Example 6: Area of forest land, with model variable selection, `JoSAE` unit level EBLUP
 
-This currently grabs all predictors for the unit and none for the area.
+`FIESTA` supports model variable selection via the elastic net. To use model selection, we set the `modelselect` argument to `TRUE`. 
 
 ```{r}
 area5 <- modSAarea(
-  SApopdatlst = SApopdat, # pop - population calculations for WY, post-stratification
-  prednames = all_preds, # est - charater vector of predictors to be used in the model
-  SApackage = "JoSAE", # est - character string of the R package to do the estimation
-  SAmethod = "unit", # est - method of small area estimation. Either "unit" or "area"
-  modelselect = TRUE
+  SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
+  prednames = all_preds,       # est - charater vector of predictors to be used in the model
+  SApackage = "JoSAE",         # est - character string of the R package to do the estimation
+  SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"
+  modelselect = TRUE           # est - elastic net variable selection
   )
 ```
 
+We can now look at estimates with our subset of selected predictors and the predictors that were selected.
+
 ```{r}
+area5$est
 area5$raw$predselect.unit
 ```
 
@@ -333,22 +343,31 @@ live_trees <- "STATUSCD == 1"
 
 #### Example 7: Total net cubic-foot volume of live trees (at least 5 inches diameter) 
 
+Now, we can look at the total net cubic-foot volume of live trees, filtered for live trees that are at least 5 inches in diameter. We use the `estvar` and `live_trees` objects defined above to set our response variable and filter, and then compute the estimates. 
+
 ```{r}
 tree1 <- modSAtree(
     SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
-    prednames = all_preds,       # est - charater vector of predictors to be used in the model
+    prednames = all_preds,       # est - character vector of predictors to be used in the model
     SApackage = "JoSAE",         # est - character string of the R package to do the estimation
     SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
     estvar = estvar,             # est - net cubic-foot volume
     estvar.filter = live_trees   # est - live trees only
     )
+```
 
+With both `modSAtree` and `modSAarea`, `FIESTA` will return your requested estimates specified with the `SApackage` and `SAmethod` arguments in the `est` item, but will return all possible estimates in the `multest` item. We can see these estimates below:
+
+```{r}
+tree1$est
 tree1$multest
 ```
 
 
 #### Example 8: Total net cubic-foot volume of live trees (at least 5 inches diameter), using model selection
+
+We can bring the `modelselect` parameter into play with `modSAtree` as well as `modSAarea`. In the below code, we set `modelselect = TRUE` to use the elastic net variable selection before fitting the model. 
 
 ```{r}
 tree2 <- modSAtree(
@@ -363,11 +382,17 @@ tree2 <- modSAtree(
     )
 ```
 
+We now can look at the selected predictors and estimates. 
+
+```{r}
+tree2$raw$predselect.unit
+tree2$est
+```
 
 
 #### Example 9: Basal area of live trees (at least 5 inches diameter)
 
-We can also use different response variables to estimate, and in this example we chose basal area. 
+We can also use different response variables to estimate, and in this example we chose basal area. We also returned titles by using `returntitle = TRUE`. 
 
 ```{r}
 tree3 <- modSAtree(
@@ -377,11 +402,27 @@ tree3 <- modSAtree(
     SAmethod = "unit",           # est - method of small area estimation. Either "unit" or "area"  
     landarea = "FOREST",         # est - forest land filter
     estvar = "BA",               # est - net cubic-foot volume
-    estvar.filter = live_trees   # est - live trees only
+    estvar.filter = live_trees,  # est - live trees only
+    returntitle = TRUE
     )
 ```
 
+Now we can take a look at our estimates:
+
+```{r}
+tree3$est
+```
+
+and see our title list since we set `returntitle` to `TRUE`. 
+
+```{r}
+tree3$titlelst
+```
+
+
 #### Example 10: Basal area of live trees (at least 5 inches diameter), saving to an outfolder
+
+One may want to easily save `FIESTA` output to your computer, rather than just having it live in the R environment. `FIESTA` makes this easy with the use of the `savedata` and `savedata_opts` arguments. If `savedata = TRUE`, by default the output will be saved to your working directory, but we can set an `outfolder` in `savedata_opts` to choose where the data should be saved. There are many other `savedata_opts`, and these can be seen by looking at the help file for the `savedata_options` function (use `help(savedata_options)` with `FIESTA` loaded in your R environment). 
 
 ```{r}
 tree4 <- modSAtree(
@@ -401,6 +442,8 @@ tree4 <- modSAtree(
 
 #### Example 11: Basal area of live trees (at least 5 inches diameter), HB model
 
+We can also of course use a different model to predict basal area, and in this case we use a HB unit level model from `hbsae`. We also save to an outfolder again, this time giving a file name prefix with the `outfn.pre` arguement. 
+
 ```{r}
 tree4 <- modSAtree(
     SApopdatlst = SApopdat,      # pop - population calculations for WY, post-stratification
@@ -412,12 +455,23 @@ tree4 <- modSAtree(
     estvar.filter = live_trees,  # est - live trees only
     savedata = TRUE,
     savedata_opts = savedata_options(
-      outfolder = outfolder
+      outfolder = outfolder,
+      outfn.pre = "HB_unit"
     )
     )
 ```
 
+We can see the files in the outfolder here:
 
+```{r}
+list.files(outfolder, pattern = "HB")
+```
+
+And the estimates here:
+
+```{r}
+tree4$est
+```
 
 
 ## References
