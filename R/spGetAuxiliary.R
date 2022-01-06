@@ -555,6 +555,9 @@ spGetAuxiliary <- function(xyplt,
 
     for (i in 1:length(rastlst.contfn)) {
       rastfn <- rastlst.contfn[i]
+      if (class(rastfn) == "list") {
+        rastfn <- unlist(rastfn)
+      }
       rastnm <- inputdf.cont$var.name[inputdf.cont$rasterfile == rastfn]
       rast.cont.NODATA <- rastlst.cont.NODATA[i]
       zonalstat <- rastlst.cont.stat 
