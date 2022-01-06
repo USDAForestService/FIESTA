@@ -403,8 +403,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames,
 			estround=estround, pseround=pseround, estnull=estnull, 
 			psenull=psenull, char.width=char.width)
-print("ZZZZZZZZ")
-print(estpsecross)
 
         if (esttype != "RATIO") {
           if (!is.null(unit_totest)) {
