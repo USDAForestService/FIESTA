@@ -36,7 +36,7 @@
 #' @param RS String. Name of FIA research station to restrict states to
 #' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 #' included.
-#' @param xyids Data frame. Non-spatial plot identifiers within bnd).
+#' @param pltids Data frame. Non-spatial plot identifiers within bnd).
 #' @param xy_datsource String. Source of XY data ("obj", "csv", "datamart",
 #' "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 #' datsource.
@@ -115,8 +115,8 @@
 #' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savebnd Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 #' SpatiaLite database.
-#' @param savexy Logical. If TRUE, save xy coordinates to outfolder.
-#' @param exportsp Logical. If savexy=TRUE, if TRUE, saves xy data as 
+#' @param returnxy Logical. If TRUE, save xy coordinates to outfolder.
+#' @param exportsp Logical. If returnxy=TRUE, if TRUE, saves xy data as 
 #' spatial data. If FALSE, saves xy data as table.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. 
@@ -178,7 +178,7 @@ spGetPlots <- function(bnd = NULL,
                        bnd.filter = NULL, 
                        states = NULL, 
                        RS = NULL, 
-                       xyids = NULL, 
+                       pltids = NULL, 
                        xy_datsource = NULL, 
                        xy = NULL, 
                        xy_dsn = NULL, 
@@ -215,7 +215,7 @@ spGetPlots <- function(bnd = NULL,
                        showsteps = FALSE, 
                        savedata = FALSE, 
                        savebnd = FALSE, 
-                       savexy = FALSE, 
+                       returnxy = TRUE, 
                        exportsp = FALSE, 
                        savedata_opts = NULL,
                        spXYdat = NULL) {
@@ -288,20 +288,20 @@ spGetPlots <- function(bnd = NULL,
   ## Check spXYdat
   if (!is.null(spXYdat)) {
     spxy <- spXYdat$spxy
-    xyids <- spXYdat$xyids
+    pltids <- spXYdat$pltids
     states <- spXYdat$states
     statecnty <- spXYdat$statecnty
     stbnd.att <- spXYdat$stbnd.att
     xy.uniqueid <- spXYdat$xy.uniqueid
     bndx <- spXYdat$bndx
     stcds <- pcheck.states(states, statereturn="VALUE")
-    if (is.null(xyids) && (is.null(spxy) || nrow(spxy)) == 0) {
+    if (is.null(pltids) && (is.null(spxy) || nrow(spxy)) == 0) {
       stop("spxy is null")
     } 
 
     ## Check xyjoinid
     xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-	      checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=FALSE) 
+	      checklst=names(pltids), gui=gui, caption="JoinID in pltids?", stopifnull=FALSE) 
     if (is.null(xyjoinid)) {
       message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
       xyjoinid <- xy.uniqueid
@@ -315,37 +315,37 @@ spGetPlots <- function(bnd = NULL,
       bndx <- datFilter(bndx, xfilter=bnd.filter, stopifnull=TRUE)$xf
     } 
 
-    ## Check xyids
-    xyids <- pcheck.table(xyids)
+    ## Check pltids
+    pltids <- pcheck.table(pltids)
 
-    if (!is.null(xyids)) {
+    if (!is.null(pltids)) {
       ## Check xyjoinid
       xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		checklst=names(xyids), gui=gui, caption="JoinID in xyids?", stopifnull=TRUE)  
+		checklst=names(pltids), gui=gui, caption="JoinID in pltids?", stopifnull=TRUE)  
  
       ## Check stbnd.att
       stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att", 
-		checklst=names(xyids), gui=gui, caption="State attribute?") 
+		checklst=names(pltids), gui=gui, caption="State attribute?") 
       
       ## Get state codes
       if (is.null(stbnd.att)) {
-        stbnd.att <- findnm("COUNTYFIPS", names(xyids), returnNULL=TRUE)
+        stbnd.att <- findnm("COUNTYFIPS", names(pltids), returnNULL=TRUE)
         if (is.null(stbnd.att)) {
-          stbnd.att <- findnm("STATECD", names(xyids), returnNULL=TRUE)
+          stbnd.att <- findnm("STATECD", names(pltids), returnNULL=TRUE)
           if (is.null(stbnd.att)) {
-            stbnd.att <- findnm("STATE", names(xyids), returnNULL=TRUE)
+            stbnd.att <- findnm("STATE", names(pltids), returnNULL=TRUE)
           }
         }
       }
       if (stbnd.att == "COUNTYFIPS") {
-        statecnty <- sort(unique(xyids[[stbnd.att]]))
+        statecnty <- sort(unique(pltids[[stbnd.att]]))
         stcds <- as.numeric(sort(unique(substr(statecnty, 1, 2))))
       } else {
-        stcds <- sort(unique(pcheck.states(xyids[[stbnd.att]], statereturn="VALUE")))
+        stcds <- sort(unique(pcheck.states(pltids[[stbnd.att]], statereturn="VALUE")))
       }
       states <- pcheck.states(as.numeric(stcds))
 
-    } else { 	## is.null(xyids)
+    } else { 	## is.null(pltids)
 
       ## Check states
       if (!is.null(states)) {
@@ -382,7 +382,7 @@ spGetPlots <- function(bnd = NULL,
                          intensity1=intensity1, showsteps=showsteps, 
                          returnxy=TRUE)
         spxy <- xydat$spxy
-        xyids <- xydat$xyids
+        pltids <- xydat$pltids
         states <- xydat$states
         statecnty <- xydat$statecnty
         stbnd.att <- xydat$stbnd.att
@@ -390,7 +390,7 @@ spGetPlots <- function(bnd = NULL,
 
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-	            checklst=names(xyids), gui=gui, caption="JoinID in xyids?", 
+	            checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
 	            stopifnull=FALSE) 
         if (is.null(xyjoinid)) {
           message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
@@ -437,11 +437,11 @@ spGetPlots <- function(bnd = NULL,
           stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
         }
         message("boundary intersected states: ", toString(statenames))
-        xyids <- sf::st_drop_geometry(spxy)
+        pltids <- sf::st_drop_geometry(spxy)
       } 
     }
   }
-  #xyids <- spxy[[xyjoinid]]
+  #pltids <- spxy[[xyjoinid]]
  
   #############################################################################
   ## Set datsource
@@ -480,6 +480,11 @@ spGetPlots <- function(bnd = NULL,
     }
   } 
  
+  ## Check returnxy
+  #############################################################################
+  returnxy <- pcheck.logical(returnxy, varnm="returnxy", 
+		title="Return XY?", first="NO", gui=gui)  
+
   ## Check savedata
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
@@ -583,14 +588,14 @@ spGetPlots <- function(bnd = NULL,
       }
     }
 
-    ## Check if class of pjoinid in pltx matches class of xyjoinid in xyids
-    tabs <- check.matchclass(pltx, xyids, pjoinid, xyjoinid)
+    ## Check if class of pjoinid in pltx matches class of xyjoinid in pltids
+    tabs <- check.matchclass(pltx, pltids, pjoinid, xyjoinid)
     pltx <- tabs$tab1
-    xyids <- tabs$tab2
+    pltids <- tabs$tab2
      
 
     ## Subset plot data
-    pltx <- pltx[pltx[[pjoinid]] %in% xyids[[xyjoinid]],]
+    pltx <- pltx[pltx[[pjoinid]] %in% pltids[[xyjoinid]],]
     if (nrow(pltx) == 0) stop("xyjoinid invalid")
 
     ## Get plot ids from pltx
@@ -676,13 +681,13 @@ spGetPlots <- function(bnd = NULL,
     ## Check measEndyr.filter
     ###############################################################
     if (!is.null(measEndyr.filter)) {
-      measEndyr.filter <- check.logic(xyids, measEndyr.filter)
+      measEndyr.filter <- check.logic(pltids, measEndyr.filter)
 
-      ## Get pltids from xyids
-      xyids1 <- datFilter(xyids, xfilter=measEndyr.filter)$xf
-      nbrxy <- ifelse (is.null(xyids1), 0, nrow(xyids1)) 
+      ## Get pltids from pltids
+      pltids1 <- datFilter(pltids, xfilter=measEndyr.filter)$xf
+      nbrxy <- ifelse (is.null(pltids1), 0, nrow(pltids1)) 
       message ("there are ", nbrxy, " plots where ", measEndyr.filter)
-      xyids2 <- datFilter(xyids, xfilter=paste0("!", measEndyr.filter))$xf
+      pltids2 <- datFilter(pltids, xfilter=paste0("!", measEndyr.filter))$xf
     }
   }
 
@@ -755,7 +760,7 @@ spGetPlots <- function(bnd = NULL,
       if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
 
         ################################################
-        ## Subset FIA plot data to xyids1 
+        ## Subset FIA plot data to pltids1 
         ################################################
         if (nbrxy) {
  
@@ -774,8 +779,8 @@ spGetPlots <- function(bnd = NULL,
             PLOT1 <- PLOT1[, head(.SD, 1), by=pjoinid]
           }
 
-          ## Subset plot data to xyids1 
-          plt1 <- PLOT1[PLOT1[[pjoinid]] %in% xyids1[[xyjoinid]], ]
+          ## Subset plot data to pltids1 
+          plt1 <- PLOT1[PLOT1[[pjoinid]] %in% pltids1[[xyjoinid]], ]
           pltids1 <- plt1[[puniqueid]]
 
           cond1 <- cond[cond[["PLT_CN"]] %in% pltids1, ]
@@ -816,9 +821,9 @@ spGetPlots <- function(bnd = NULL,
 
 
         ################################################
-        ## Subset FIA plot data to xyids2 
+        ## Subset FIA plot data to pltids2 
         ################################################
-        if (nrow(xyids2) > 0) {
+        if (nrow(pltids2) > 0) {
 
           ## ## Query plots - measCur=TRUE
           pfromqry <- getpfromqry(plotCur=TRUE, syntax="R", plotnm="PLOT")
@@ -835,8 +840,8 @@ spGetPlots <- function(bnd = NULL,
             PLOT2 <- PLOT2[, head(.SD, 1), by=pjoinid]
           } 
         
-          ## Subset plot data to xyids2 
-          plt2 <- PLOT2[PLOT2[[pjoinid]] %in% xyids2[[xyjoinid]], ]
+          ## Subset plot data to pltids2 
+          plt2 <- PLOT2[PLOT2[[pjoinid]] %in% pltids2[[xyjoinid]], ]
           pltids2 <- plt2[[puniqueid]]
 
           cond2 <- cond[cond[["PLT_CN"]] %in% pltids2, ]
@@ -892,9 +897,9 @@ spGetPlots <- function(bnd = NULL,
         }
       } else {    ## measEndyr.filter = NULL
 
-        if (nrow(xyids) > 0) {
-          ## Subset data to xyids
-          plt <- PLOT[PLOT[[pjoinid]] %in% xyids[[xyjoinid]], ]
+        if (nrow(pltids) > 0) {
+          ## Subset data to pltids
+          plt <- PLOT[PLOT[[pjoinid]] %in% pltids[[xyjoinid]], ]
           pltids <- plt[[puniqueid]]
 
           cond <- cond[cond[["PLT_CN"]] %in% pltids, ]
@@ -1134,11 +1139,11 @@ spGetPlots <- function(bnd = NULL,
       if (!is.null(measEndyr.filter)) {
 
         ################################################
-        ## Subset FIA plot data to xyids1 
+        ## Subset FIA plot data to pltids1 
         ################################################
         if (nbrxy > 0) {
 
-          plt1 <- plt[plt[[pjoinid]] %in% xyids1[[xyjoinid]], ]
+          plt1 <- plt[plt[[pjoinid]] %in% pltids1[[xyjoinid]], ]
           pltids1 <- plt1[[puniqueid]]
 
           cond1.qry <- paste0("select cond.* from ", p2fromqry,
@@ -1212,9 +1217,9 @@ spGetPlots <- function(bnd = NULL,
         }
 
         ################################################
-        ## Subset FIA plot data to xyids1 
+        ## Subset FIA plot data to pltids1 
         ################################################
-        if (nrow(xyids2) > 0) {
+        if (nrow(pltids2) > 0) {
 
           ## Get most current evalid
           if (evalCur) {
@@ -1260,7 +1265,7 @@ spGetPlots <- function(bnd = NULL,
             plt2 <- plt2[, head(.SD, 1), by=pjoinid]
           }
 
-          plt2 <- plt2[plt2[[pjoinid]] %in% xyids2[[xyjoinid]], ]
+          plt2 <- plt2[plt2[[pjoinid]] %in% pltids2[[xyjoinid]], ]
           pltids2 <- plt2[[puniqueid]]
 
           cond2.qry <- paste0("select cond.* from ", p2fromqry,
@@ -1349,8 +1354,8 @@ spGetPlots <- function(bnd = NULL,
           }
         }
       } else {    ## measEndyr.filter = NULL
-        if (nrow(xyids) > 0) {
-          plt <- plt[plt[[pjoinid]] %in% xyids[[xyjoinid]], ]
+        if (nrow(pltids) > 0) {
+          plt <- plt[plt[[pjoinid]] %in% pltids[[xyjoinid]], ]
           pltids <- plt[[puniqueid]]
 
           cond.qry <- paste0("select cond.* from ", p2fromqry,
@@ -1488,7 +1493,7 @@ spGetPlots <- function(bnd = NULL,
   #############################################################################
   ## Save tables
   #############################################################################
-  if (savedata || savexy) {
+  if (savedata) {
     if (savebnd) {
       spExportSpatial(bndx, 
           savedata_opts=list(outfolder=outfolder, 
@@ -1502,7 +1507,7 @@ spGetPlots <- function(bnd = NULL,
                               add_layer=TRUE))
       
     }
-    if (savexy) {
+    if (returnxy) {
      
       if (!is.null(spxy)) {
         if (exportsp) {
@@ -1531,11 +1536,11 @@ spGetPlots <- function(bnd = NULL,
       }
     } else {
 
-      datExportData(xyids, 
+      datExportData(pltids, 
         savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
-                              out_layer="xyids",
+                              out_layer="pltids",
                               outfn.pre=outfn.pre, 
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
@@ -1562,7 +1567,7 @@ spGetPlots <- function(bnd = NULL,
 #    mar <-  par("mar")
 #    par(mar=c(1,1,1,1))
 #
-#    plot(sf::st_geometry(xyids), col="blue", cex=.5)
+#    plot(sf::st_geometry(pltids), col="blue", cex=.5)
 #    if (!is.null(bndx)) {
 #      plot(st_geometry(bndx), add=TRUE, border="black", lwd=0.75)
 #    }
@@ -1578,10 +1583,10 @@ spGetPlots <- function(bnd = NULL,
 #  } 
  
   returnlst$tabIDs <- tabIDs
-  if (savexy && !is.null(spxy)) {
+  if (returnxy && !is.null(spxy)) {
     returnlst$spxy <- spxy
   }
-  returnlst$xyplt <- xyids
+  returnlst$pltids <- pltids
   #returnlst$clip_polyv <- bndx
   returnlst$bnd <- bndx
   returnlst$puniqueid <- puniqueid

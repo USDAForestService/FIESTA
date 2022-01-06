@@ -620,17 +620,17 @@ The `spGetXY` function extracts XY data within a given boundary.
 <details>
   <summary>View Example</summary>
   
-We can extract public coordinates within WY Bighorn NF boundary, returning spatial (spxy) and nonspatial plot identifiers (xyids).
+We can extract public coordinates within WY Bighorn NF boundary, returning spatial (spxy) and nonspatial plot identifiers (pltids).
 
 ```{r}
-
 WYbhxy <- spGetXY(bnd = WYbhfn, 
                       xy_datsource = "datamart", 
-                      evalCur = TRUE)
+                      evalCur = TRUE,
+                      returnxy = TRUE)
 names(WYbhxy)
 
-xyids <- WYbhxy$xyids
-head(xyids)
+pltids <- WYbhxy$pltids
+head(pltids)
 
 spxy <- WYbhxy$spxy
 plot(st_geometry(spxy))
@@ -638,7 +638,7 @@ plot(st_geometry(spxy))
 ```
 
 
-Or, returning only nonspatial plot identifiers (xyids).
+Or, returning only nonspatial plot identifiers (pltids).
 
 ```{r}
 
@@ -648,8 +648,8 @@ WYbhxyids <- spGetXY(bnd = WYbhfn,
                       returnxy = FALSE)
 names(WYbhxyids)
 
-xyids <- WYbhxyids$xyids
-head(xyids)
+pltids <- WYbhxyids$pltids
+head(pltids)
 
 
 ```

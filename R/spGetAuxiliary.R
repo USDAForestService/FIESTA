@@ -71,12 +71,12 @@
 #' @param ncores Integer. Number of cores to use for extracting values.
 #' @param NAto0 Logical. If TRUE, converts extracted NA values to 0.
 #' @param npixels Logical. If TRUE, include number of pixels.
-#' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
 #' @param savedata Logical. If TRUE, the input data with extracted values are
 #' saved to outfolder.
-#' @param exportsp Logical. If TRUE, the extracted raster point data are
-#' exported to outfolder.
+#' @param exportsp Logical. If savedata=TRUE and returnxy=TRUE, If TRUE, the  
+#' extracted strata point data are exported to outfolder.
 #' @param exportNA Logical. If TRUE, NA values are exported to outfolder.
 #' @param spMakeSpatial_opts List. See help(spMakeSpatial_options()) for a list
 #' of options. Use to convert X/Y values to simple feature (sf) coordinates.
@@ -140,7 +140,7 @@ spGetAuxiliary <- function(xyplt,
                            unittype = "POLY", 
                            unit_layer = NULL, 
                            unit_dsn = NULL, 
-                           unitvar = "DOMAIN", 
+                           unitvar = NULL, 
                            rastlst.cont = NULL, 
                            rastlst.cont.name = NULL, 
                            rastlst.cont.stat = "mean", 
@@ -159,8 +159,8 @@ spGetAuxiliary <- function(xyplt,
                            ncores = 1,
                            NAto0 = TRUE, 
                            npixels = TRUE, 
-                           returnxy = FALSE, 
                            showext = FALSE, 
+                           returnxy = FALSE, 
                            savedata = FALSE, 
                            exportsp = FALSE, 
                            exportNA = FALSE, 
@@ -285,16 +285,21 @@ spGetAuxiliary <- function(xyplt,
     ## Check unit_layer
     unit_layerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
 		caption="Domain spatial polygons?", stopifnull=TRUE)
-
+ 
     ## Check unitvar
     unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		checklst=names(unit_layerx), caption="Domain variable", 
 		warn=paste(unitvar, "not in unit_layer"))
+      
     if (is.null(unitvar)) {
-      unitvar <- "ONEUNIT"
-      unit_layerx[[unitvar]] <- 1
+      if ("DOMAIN" %in% names(unit_layerx)) {
+        unitvar <- "DOMAIN"
+      } else {
+        unitvar <- "ONEUNIT"
+        unit_layerx[[unitvar]] <- 1
+      }
     }
-
+ 
     varsmiss <- vars2keep[which(!vars2keep %in% names(unit_layerx))]
     if (length(varsmiss) > 0) {
       stop("missing variables: ", paste(varsmiss, collapse=", "))
@@ -437,14 +442,15 @@ spGetAuxiliary <- function(xyplt,
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
-  ## Check exportsp 
-  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
-		title="Export spatial?", first="NO", gui=gui)  
-
+  if (savedata) {
+    ## Check exportsp 
+    exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
+		   title="Export spatial?", first="NO", gui=gui)  
+  }
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata || exportsp || exportNA) {
+  if (savedata || exportNA) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
@@ -751,7 +757,24 @@ spGetAuxiliary <- function(xyplt,
   ## Write data frames to CSV files
   #######################################
   pltassgn <- sf::st_drop_geometry(sppltx)
+  spxy <- sppltx[, sppltx.names]
+  
   if (savedata) {
+    ## Export to shapefile
+    if (exportsp && returnxy) {
+      spExportSpatial(spxy, 
+            savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer=out_layer,
+                                outfn.pre=outfn.pre, 
+                                outfn.date=outfn.date, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer, 
+                                add_layer=TRUE)
+      )
+    }    
+    
     datExportData(pltassgn, 
       savedata_opts=list(outfolder=outfolder, 
                           out_fmt=out_fmt, 
@@ -811,7 +834,7 @@ spGetAuxiliary <- function(xyplt,
     #xyplt <- data.frame(sf::st_coordinates(sppltx))
     #names(xy.coords) <- c(x,y)
     #sppltx <- sf::st_sf(data.frame(sppltx, xy.coords)) 
-    returnlst$spxy <- sppltx[, sppltx.names]
+    returnlst$spxy <- spxy
     returnlst[["xy.uniqueid"]] <- uniqueid
   }
 

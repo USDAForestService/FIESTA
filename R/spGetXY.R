@@ -80,22 +80,29 @@
 #' @param intensity1 Logical. If TRUE, include only single intensity plots
 #' (i.e., INTENSITY = 1).
 #' @param showsteps Logical. If TRUE, display data in device window.
-#' @param savedata Logical. If TRUE, saves data to outfolder.
-#' @param exportsp Logical. If TRUE, exports spatial data to outfolder.
-#' @param returnxy Logical. If TRUE, returns a spatial sf object.
+#' @param returnxy Logical. If TRUE, returns XY coordinates.
+#' @param savedata Logical. If TRUE, saves data to outfolder. Note:
+#' includes XY data if returnxy = TRUE.
+#' @param exportsp Logical. If savedata = TRUE and returnxy = TRUE, 
+#' if TRUE, exports XY data as spatial data.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #'
 #' @return \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }
-#' \item{xyids}{ data frame. A table of pltids that are within bnd. }
+#' \item{pltids}{ data frame. A table of pltids that are within bnd. }
+#' \item{spxy} sf data frame. If returnxy, a simple feature with pltids 
+#' within bnd. }
 #' \item{bndx}{ sf object. Input bnd. } \item{xy.uniqueid}{ String. Unique
 #' identifier of plots in xy. } \item{states}{ String. Vector of states that
 #' intersect bnd. } \item{countyfips}{ String. Vector of countyfips values that
 #' intersect bnd. } \item{stbnd.att}{ String. Name of state attribute used to
 #' select plots. }
 #' 
-#' If savedata=TRUE, the xyids data frame is saved to outfolder.\cr If
-#' exportsp=TRUE, the spxy sf object is exported as shapefile to outfolder.\cr
+#' If savedata=TRUE and returnxy=TRUE, the plt data frame, including XY 
+#' coordinates is saved to outfolder (xyplt).\cr 
+#' If savedata=TRUE and returnxy=FALSE, the plt data frame, without XY 
+#' coordinates is saved to outfolder (pltids).\cr
+#' If savedata=TRUE and returnxy=TRUE and exportsp=TRUE, the spxy sf object is exported as shapefile to outfolder.\cr
 #' @note
 #' 
 #' If savebnd=TRUE:\cr If out_fmt=c('csv','shp'), the writeOGR (rgdal) function
@@ -139,9 +146,9 @@ spGetXY <- function(bnd,
                     allyrs = FALSE, 
                     intensity1 = FALSE, 
                     showsteps = FALSE, 
+                    returnxy = TRUE, 
                     savedata = FALSE, 
                     exportsp = FALSE, 
-                    returnxy = TRUE, 
                     savedata_opts = NULL){
   ##############################################################################
   ## DESCRIPTION
@@ -248,12 +255,23 @@ spGetXY <- function(bnd,
   #############################################################################
   measEndyr.filter <- check.logic(bnd, measEndyr.filter)
   
+  ## Check returnxy
+  #############################################################################
+  returnxy <- pcheck.logical(returnxy, varnm="returnxy", 
+                             title="Return XY?", first="NO", gui=gui) 
+
   ## Check savedata
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="NO", gui=gui) 
  
  
+  if (savedata && returnxy) {
+    ## Check exportsp
+    exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
+                             title="Export spatial XY?", first="NO", gui=gui) 
+  }
+  
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
   if (savedata) {
@@ -369,7 +387,6 @@ spGetXY <- function(bnd,
     }
 
   } else {			## xy_datsource in('datamart', 'sqlite')
-
     if (xy_datsource == "datamart") {
       spxy <- DBgetCoords(states=stcds, 
                           evalid=evalid, 
@@ -526,8 +543,11 @@ spGetXY <- function(bnd,
             }
  
             ## Make spatial
-            spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
-			xvar=xvar, yvar=yvar, xy.crs=xy.crs)            
+            spxy <- spMakeSpatialPoints(xyplt=xyplt, 
+                                        xy.uniqueid=xy.uniqueid, 
+                                        xvar=xvar, 
+                                        yvar=yvar, 
+                                        xy.crs=xy.crs)            
           } else {
             stop("STATECD not in tables")
           }
@@ -541,7 +561,7 @@ spGetXY <- function(bnd,
       }
     }   # xy_datsource == "sqlite"
   }
- 
+
   if (clipxy) {
     xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
 		checklst=names(spxy), caption="UniqueID variable of xy data", 
@@ -561,8 +581,10 @@ spGetXY <- function(bnd,
   stunitco.names <- c("STATECD", "UNITCD", "COUNTYCD", "COUNTYFIPS")
   statevars <- stunitco.names[!stunitco.names %in% names(spxy)]
   if (length(statevars) > 0) {
-    spxy <- spExtractPoly(spxy, xy.uniqueid=xy.uniqueid, polyvlst=FIESTA::stunitco, 
-			polyvarlst=statevars)$spxyext
+    spxy <- spExtractPoly(spxy, 
+                          xy.uniqueid=xy.uniqueid, 
+                          polyvlst=FIESTA::stunitco, 
+                          polyvarlst=statevars)$spxyext
   }
 
   ## Subset columns of spxy
@@ -583,30 +605,47 @@ spGetXY <- function(bnd,
   #############################################################################
   ## Save tables
   #############################################################################
+  pltids <- sf::st_drop_geometry(spxy)
+  pltids <- pltids[,which(!names(pltids) %in% c(xvar, yvar))]
+  
   if (savedata) {
-    datExportData(sf::st_drop_geometry(spxy), 
-        savedata_opts=list(outfolder=outfolder, 
+    if (returnxy) {
+      datExportData(sf::st_drop_geometry(spxy), 
+         savedata_opts=list(outfolder=outfolder, 
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 
-                            out_layer="xyids",
+                            out_layer="xyplt",
                             outfn.pre=outfn.pre, 
                             outfn.date=outfn.date, 
                             overwrite_layer=overwrite_layer,
                             append_layer=append_layer,
                             add_layer=TRUE)) 
-  } 
-  if (exportsp) {
-    spExportSpatial(spxy, 
-        savedata_opts=list(outfolder=outfolder, 
+   
+      if (exportsp) {
+        spExportSpatial(spxy, 
+            savedata_opts=list(outfolder=outfolder, 
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 
-                            out_layer="spxyplt",
+                            out_layer="spxy",
                             outfn.pre=outfn.pre, 
                             outfn.date=outfn.date, 
                             overwrite_layer=overwrite_layer,
                             append_layer=append_layer, 
                             add_layer=TRUE))
-  }    
+      }
+    } else {
+      datExportData(sf::st_drop_geometry(pltids), 
+            savedata_opts=list(outfolder=outfolder, 
+                            out_fmt=out_fmt, 
+                            out_dsn=out_dsn, 
+                            out_layer="pltids",
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_layer=overwrite_layer,
+                            append_layer=append_layer,
+                            add_layer=TRUE)) 
+    }
+  }
 
   if (showsteps) {
     ## Set plotting margins
@@ -620,13 +659,10 @@ spGetXY <- function(bnd,
     par(mar=mar)
   }
  
-  xyids <- sf::st_drop_geometry(spxy)
-  xyids <- xyids[,which(!names(xyids) %in% c(xvar, yvar))]
-
   if (returnxy) {
     returnlst$spxy <- spxy
   } 
-  returnlst$xyids <- xyids
+  returnlst$pltids <- pltids
   returnlst$bndx <- bndx
   returnlst$xy.uniqueid <- xy.uniqueid
   returnlst$states <- statenames

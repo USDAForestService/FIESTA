@@ -16,9 +16,6 @@
 #' non-spatial, include options in spMakeSpatial_opts parameter.
 #' @param xyplt_dsn String. Name of database where xyplt is. The dsn varies by
 #' driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).
-#' @param uniqueid String.* Unique identifier of xyplt records.
-#' @param unittype String. Spatial layer type of unit_layer ("POLY", "RASTER").
-#' Note: raster unit layers are converted to polygon.
 #' @param unit_layer sf R object or String. Name of estimation unit spatial
 #' layer. Can be a spatial polygon object, full pathname to a shapefile, name
 #' of a polygon layer within a database, or a full pathname to raster file.
@@ -26,6 +23,9 @@
 #' pathname) of unit_layer. The dsn varies by driver. See gdal OGR vector
 #' formats (https://www.gdal.org/ogr_formats.html). Optional if unit_layer is
 #' sf object.
+#' @param uniqueid String.* Unique identifier of xyplt records.
+#' @param unittype String. Spatial layer type of unit_layer ("POLY", "RASTER").
+#' Note: raster unit layers are converted to polygon.
 #' @param unitvar String. If unittype="POLY", name of attribute in unit_layer
 #' defining estimation units. If NULL, the unit_layer represents one estimation
 #' unit.
@@ -51,12 +51,12 @@
 #' keepNA=TRUE, NA values will not be in included in stratalut but will remain
 #' in pltassgn table.
 #' @param keepNA Logical. If TRUE, returns data frame of NA values.
-#' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
+#' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
 #' @param savedata Logical. If TRUE, the input data with extracted values are
 #' saved to outfolder.
-#' @param exportsp Logical. If TRUE, the extracted strata point data are
-#' exported to outfolder.
+#' @param exportsp Logical. If savedata=TRUE and returnxy=TRUE, If TRUE, the  
+#' extracted strata point data are exported to outfolder.
 #' @param exportNA Logical. If TRUE and keepNA=TRUE, NA values are exported to
 #' outfolder as a point shapefile.
 #' @param spMakeSpatial_opts List. See help(spMakeSpatial_options()) for a list
@@ -123,10 +123,10 @@
 #' @export spGetStrata
 spGetStrata <- function(xyplt, 
                         xyplt_dsn = NULL, 
+                        unit_layer, 
+                        unit_dsn = NULL, 
                         uniqueid = "PLT_CN", 
                         unittype = "POLY", 
-                        unit_layer = NULL, 
-                        unit_dsn = NULL, 
                         unitvar = NULL, 
                         unit.filter = NULL, 
                         strattype = "RASTER", 
@@ -137,8 +137,8 @@ spGetStrata <- function(xyplt,
                         areaunits = "acres", 
                         rast.NODATA = NULL, 
                         keepNA = FALSE, 
-                        returnxy = FALSE, 
                         showext = FALSE, 
+                        returnxy = FALSE, 
                         savedata = FALSE, 
                         exportsp = FALSE, 
                         exportNA = FALSE, 
@@ -286,14 +286,15 @@ spGetStrata <- function(xyplt,
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data extraction?", first="NO", gui=gui)  
 
-  ## Check exportsp 
-  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
-		title="Export spatial?", first="NO", gui=gui)  
-
+  if (savedata) {
+    ## Check exportsp 
+    exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
+		  title="Export spatial?", first="NO", gui=gui)  
+  }
 
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata || exportsp || exportNA) {
+  if (savedata || exportNA) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
@@ -512,9 +513,14 @@ spGetStrata <- function(xyplt,
   #if (!is.data.table(stratalut)) stratalut <- setDT(stratalut)
   #setkeyv(stratalut, c(unitvar, strvar)) 
 
-  ## Export to shapefile
-  if (exportsp) {
-    spExportSpatial(sppltx, 
+  
+  spxy <- sppltx[, sppltx.names]
+  
+  if (savedata) {
+    
+    ## Export to shapefile
+    if (exportsp && returnxy) {
+      spExportSpatial(spxy, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
@@ -524,10 +530,9 @@ spGetStrata <- function(xyplt,
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer, 
                               add_layer=TRUE)
-    )
-  }    
-  
-  if (savedata) {
+      )
+    }    
+    
     datExportData(pltassgn, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
@@ -562,7 +567,7 @@ spGetStrata <- function(xyplt,
                             add_layer=TRUE))
   }
   
-  returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 
+  returnlst <- list(bnd=unitlayerx, pltassgn=setDF(pltassgn), 
 		  pltassgnid=uniqueid, unitarea=setDF(unitarea), 
 		  unitvar=unitvar, areavar=areavar, areaunits=areaunits,
 		  stratalut=setDF(stratalut), strvar=strvar, 
@@ -576,7 +581,7 @@ spGetStrata <- function(xyplt,
     #xyplt <- data.frame(sf::st_coordinates(sppltx))
     #names(xy.coords) <- c(x,y)
     #sppltx <- sf::st_sf(data.frame(sppltx, xy.coords)) 
-    returnlst$spxy <- sppltx[, sppltx.names]
+    returnlst$spxy <- spxy
     returnlst[["xy.uniqueid"]] <- uniqueid
   }
  
