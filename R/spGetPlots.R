@@ -590,26 +590,22 @@ spGetPlots <- function(bnd = NULL,
      
 
     ## Subset plot data
-    pltx2 <- pltx[pltx[[pjoinid]] %in% xyids[[xyjoinid]],]
+    pltx <- pltx[pltx[[pjoinid]] %in% xyids[[xyjoinid]],]
     if (nrow(pltx) == 0) stop("xyjoinid invalid")
-    tabs2save <- c(tabs2save, "pltx")
 
     ## Get plot ids from pltx
     pltids <- pltx[[puniqueid]]
 
     ## Subset cond data
     condx <- condx[condx[[cuniqueid]] %in% pltids,]
-    tabs2save <- c(tabs2save, "condx")
 
     ## Subset tree data
     if (istree) {
       treex <- treex[treex[[tuniqueid]] %in% pltids,]
-      tabs2save <- c(tabs2save, "treex")
     }
     ## Subset seed data
     if (isseed) {
       seedx <- seedx[seedx[[tuniqueid]] %in% pltids,]
-      tabs2save <- c(tabs2save, "seedx")
     }
     ## other data
     if (!is.null(other_layers)) {
@@ -617,7 +613,6 @@ spGetPlots <- function(bnd = NULL,
         if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
           assign(paste0(layer, "x"), get(layer)[get(layer)[["PLT_CN"]] %in% pltids, ])
         }
-        tabs2save <- c(tabs2save, layer)
       }
     }
 

@@ -310,6 +310,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       }
             
     } else {  ## colvar == NONE, sumunits = FALSE
+
       ## GET INITIAL TABLE AND TOTALS
       estnmd <- ifelse(esttype == "RATIO", "rhat", estnmd)
       senmd <- ifelse(esttype == "RATIO", "rhat.se", senmd)
@@ -402,6 +403,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 			rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames,
 			estround=estround, pseround=pseround, estnull=estnull, 
 			psenull=psenull, char.width=char.width)
+print("ZZZZZZZZ")
+print(estpsecross)
 
         if (esttype != "RATIO") {
           if (!is.null(unit_totest)) {
@@ -416,7 +419,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           }
         }
 
-        if (unitvar == "ONEUNIT" | length(unique(unit_rowest[[unitvar]])) == 1) {
+        if (unitvar == "ONEUNIT" || length(unique(unit_rowest[[unitvar]])) == 1) {
  
           if (allin1) {
             estpsetab <- estpsecross
@@ -465,7 +468,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 				addtitle=addtitle, outfn.date=outfn.date, overwrite=overwrite,
 				charvars=title.rnames))
           } else {
-
             est2return <- estpsecross$est
             pse2return <- estpsecross$pse
 
@@ -508,7 +510,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         pse2return <- tabs[[2]]
 
     } else {  ## colvar != "NONE" & sumunits == FALSE
-
       units <- unique(unit_grpest[[unitvar]])
       numunits <- length(units)
       tabs <- lapply(units, crossxbyunit, unit_grpest, unit_rowest, unit_colest, 
@@ -522,7 +523,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		title.ref=title.ref, outfolder=outfolder, outfn.date=outfn.date, 
 		overwrite=overwrite, esttype=esttype, phototype=phototype,
 		rnames=rnames, title.colvar=title.colvar, title.unitvar=title.unitvar)
-
       names(tabs) <- units
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
       if (!allin1) {
@@ -545,7 +545,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     titlelst$title.pse <- title.pse
   }
   }
-
+ 
   ## Make rawtable
   if (rawdata) {
     rawdat.tabs <- {}
@@ -586,6 +586,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
           setcolorder(unit_rowest, c(unitvars, 
 			names(unit_rowest)[!names(unit_rowest) %in% unitvars])) 
         } 
+
         setnames(unit_rowest, rowvar, title.rowvar)
         rawdat$unit_rowest <- setDF(unit_rowest)
         rawdat.tabs <- c(rawdat.tabs, "unit_rowest")
@@ -597,7 +598,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         }  
       }     
     }
- 
     if (colvar != "NONE") {
       if (!is.null(unit_colest)) {
         setorderv(unit_colest, c(unitvar, colvar))
@@ -645,7 +645,6 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         rawdat.tabs <- c(rawdat.tabs, "grpest")
       }
     }
-
     if (CI) {
       rawdat[rawdat.tabs] <- lapply(rawdat[rawdat.tabs], addCI, estnm=estnm2)
     }

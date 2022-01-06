@@ -519,8 +519,10 @@ modSAarea <- function(SApopdatlst = NULL,
     ########################################
     ## Check area units
     ########################################
-    unitchk <- pcheck.areaunits(unitarea=dunitarea, areavar=areavar, 
-			areaunits=areaunits, metric=metric)
+    unitchk <- pcheck.areaunits(unitarea=dunitarea, 
+                                areavar=areavar, 
+                                areaunits=areaunits, 
+                                metric=metric)
     dunitarea <- unitchk$unitarea
     areavar <- unitchk$areavar
     areaunits <- unitchk$outunits
@@ -530,9 +532,14 @@ modSAarea <- function(SApopdatlst = NULL,
     ###################################################################################
     ## Check filter parameters and apply plot and condition filters
     ###################################################################################
-    estdat <- check.estfilters(esttype=esttype, pltcondf=pltcondx, 
-		cuniqueid=cuniqueid, treex=treex, seedx=seedx, estseed=estseed, 
-		landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter)
+    estdat <- check.estfilters(esttype=esttype, 
+                               pltcondf=pltcondx, 
+                               cuniqueid=cuniqueid, 
+                               treex=treex, seedx=seedx, 
+                               estseed=estseed, 
+                               landarea=landarea, 
+                               ACI.filter=ACI.filter, 
+                               pcfilter=pcfilter)
     if (is.null(estdat)) return(NULL)
     pltcondf <- estdat$pltcondf
     landarea <- estdat$landarea
@@ -620,8 +627,8 @@ modSAarea <- function(SApopdatlst = NULL,
     ########################################################
     if (!is.null(largebnd.unique) && !is.null(SAdomsdf)) {
       cdomdat <- merge(cdomdat, 
-		unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
- 		by=smallbnd.dom)
+		        unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
+ 		        by=smallbnd.dom)
       #addSAdomsdf <- TRUE
       #SAdomvars <- unique(c(SAdomvars, largebnd.unique))
       lunique <- largebnd.unique
@@ -639,9 +646,8 @@ modSAarea <- function(SApopdatlst = NULL,
     ######################################
     ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
     tdomdattot <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(lunique, dunitvar, cuniqueid, "TOTAL", prednames), 
-		.SDcols=estvar.name]
-    domain <- "TOTAL"
+                            by=c(lunique, dunitvar, cuniqueid, "TOTAL", prednames), 
+                            .SDcols=estvar.name]
 
     ## get estimate by domain, by largebnd value
     #message("generating JoSAE unit-level estimates for ", response, " using ", SApackage, "...")
@@ -659,7 +665,6 @@ modSAarea <- function(SApopdatlst = NULL,
       dunitlut[[dunitvar]] <- NULL
       dunitareabind$DOMAIN <- dunitareabind[[dunitvar]]
       dunitareabind[[dunitvar]] <- NULL
-      dunitvar <- "DOMAIN"
     }
     if (!"AOI" %in% names(tdomdattot)) {
       tdomdattot$AOI <- 1
@@ -671,7 +676,7 @@ modSAarea <- function(SApopdatlst = NULL,
 		lapply(largebnd.vals, SAest.large, 
 			    dat=tdomdattot, 
 			    cuniqueid=cuniqueid, largebnd.unique=lunique, 
-			    dunitlut=dunitlut, dunitvar=dunitvar,
+			    dunitlut=dunitlut, dunitvar="DOMAIN",
 			    prednames=prednames, domain="TOTAL", response=response, 
 			    showsteps=showsteps, savesteps=savesteps,
 			    stepfolder=stepfolder, prior=prior, 
@@ -710,11 +715,11 @@ modSAarea <- function(SApopdatlst = NULL,
       ## Merge SAdom attributes to dunit_totest
       if (addSAdomsdf) {
         pdomdat <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
-			pdomdat, by=c(dunitvar, "AOI"))
+			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			pdomdat, by=c("DOMAIN", "AOI"))
         dunitlut <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
-			dunitlut, by=c(dunitvar, "AOI"))
+			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			dunitlut, by=c("DOMAIN", "AOI"))
       }
       pdomdatlst[[SApopdatnm]] <- pdomdat
       dunitlutlst[[SApopdatnm]] <- dunitlut
@@ -722,15 +727,24 @@ modSAarea <- function(SApopdatlst = NULL,
 
     if (rowcolinfo$rowvar != "TOTAL") {
       cdomdatsum <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(lunique, dunitvar, cuniqueid, rowcolinfo$rowvar, prednames), 
-		.SDcols=estvar.name]
+                    by=c(lunique, dunitvar, cuniqueid, rowcolinfo$rowvar, prednames), 
+                    .SDcols=estvar.name]
+      
+      if (!"DOMAIN" %in% names(cdomdatsum)) {
+        cdomdatsum$DOMAIN <- cdomdatsum[[dunitvar]]
+        cdomdatsum[[dunitvar]] <- NULL
+      }
+      if (!"AOI" %in% names(cdomdatsum)) {
+        cdomdatsum$AOI <- 1
+      }
+      
 
       dunit_multestlst_row <- 
 		tryCatch(
 			lapply(largebnd.vals, SAest.large, 
 				    dat=cdomdatsum, 
 				    cuniqueid=cuniqueid, largebnd.unique=lunique, 
-				    dunitlut=dunitlut, dunitvar=dunitvar, 
+				    dunitlut=dunitlut, dunitvar="DOMAIN", 
 				    prednames=prednames, domain=rowcolinfo$rowvar, response=response, 
 				    showsteps=showsteps, savesteps=savesteps, 
 				    stepfolder=stepfolder, prior=prior, 
@@ -765,11 +779,11 @@ modSAarea <- function(SApopdatlst = NULL,
         ## Merge SAdom attributes to dunit_totest
         if (addSAdomsdf) {
           pdomdat_row <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
-			pdomdat_row, by=c(dunitvar, "AOI"))
+			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			pdomdat_row, by=c("DOMAIN", "AOI"))
           dunitlut_row <- merge(setDT(SAdomsdf)[, 
-			unique(c(dunitvar, "AOI", SAdomvars)), with=FALSE], 
-			dunitlut_row, by=c(dunitvar, "AOI"))
+			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			dunitlut_row, by=c("DOMAIN", "AOI"))
         }
         pdomdatlst_row[[SApopdatnm]] <- pdomdat_row
         dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
@@ -787,18 +801,18 @@ modSAarea <- function(SApopdatlst = NULL,
   if (addSAdomsdf && is.null(SAdomvars)) {
     SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% multestdf])
     multestdf[, AOI := NULL]
-    multestdf <- merge(setDF(SAdomsdfbind)[,SAdomvars2], multestdf, by=dunitvar)
-    multestdf <- multestdf[order(-multestdf$AOI, multestdf[[dunitvar]]),]
+    multestdf <- merge(setDF(SAdomsdfbind)[,SAdomvars2], multestdf, by="DOMAIN")
+    multestdf <- multestdf[order(-multestdf$AOI, multestdf[["DOMAIN"]]),]
   } else if (addSAdomsdf && !is.null(SAdomvars)) {
     SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
     SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% multestdf])
     
     if (length(SAdomvars2) == 0) stop("invalid SAdomvars")
-    multestdf <- merge(setDF(SAdomsdfbind)[, unique(c(dunitvar, SAdomvars2))], 
-					multestdf, by=dunitvar)
-    multestdf <- multestdf[order(-multestdf$AOI, multestdf[[dunitvar]]),]
+    multestdf <- merge(setDF(SAdomsdfbind)[, unique(c("DOMAIN", SAdomvars2))], 
+					multestdf, by="DOMAIN")
+    multestdf <- multestdf[order(-multestdf$AOI, multestdf[["DOMAIN"]]),]
   } else {
-    multestdf <- multestdf[order(-multestdf$AOI, multestdf[[dunitvar]]),]
+    multestdf <- multestdf[order(-multestdf$AOI, multestdf[["DOMAIN"]]),]
   }
 
   if (rowcolinfo$rowvar != "TOTAL") {
@@ -808,18 +822,18 @@ modSAarea <- function(SApopdatlst = NULL,
     if (addSAdomsdf && is.null(SAdomvars)) {
       SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% multestdf_row])
       multestdf_row[, AOI := NULL]
-      multestdf_row <- merge(setDF(SAdomsdfbind)[,SAdomvars2], multestdf_row, by=dunitvar)
-      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[[dunitvar]]),]
+      multestdf_row <- merge(setDF(SAdomsdfbind)[,SAdomvars2], multestdf_row, by="DOMAIN")
+      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[["DOMAIN"]]),]
     } else if (addSAdomsdf && !is.null(SAdomvars)) {
       SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
       SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% multestdf_row])
     
       if (length(SAdomvars) == 0) stop("invalid SAdomvars")
-      multestdf_row <- merge(setDF(SAdomsdfbind)[, unique(c(dunitvar, SAdomvars2))], 
-					multestdf_row, by=dunitvar)
-      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[[dunitvar]]),]
+      multestdf_row <- merge(setDF(SAdomsdfbind)[, unique(c("DOMAIN", SAdomvars2))], 
+					multestdf_row, by="DOMAIN")
+      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[["DOMAIN"]]),]
     } else {
-      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[[dunitvar]]),]
+      multestdf_row <- multestdf_row[order(-multestdf_row$AOI, multestdf_row[["DOMAIN"]]),]
     }
   }
 
@@ -866,16 +880,16 @@ modSAarea <- function(SApopdatlst = NULL,
   
   ## Subset multest to estimation output
   dunit_totest <- setDT(multestdf)[AOI==1, 
-		unique(c(dunitvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
-  setkeyv(dunit_totest, dunitvar)
+		unique(c("DOMAIN", nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
+  setkeyv(dunit_totest, "DOMAIN")
 
 
   ## Merge dunitarea
-  tabs <- check.matchclass(dunitareabind, dunit_totest, dunitvar)
+  tabs <- check.matchclass(dunitareabind, dunit_totest, "DOMAIN")
   dunitareabind <- tabs$tab1
   dunit_totest <- tabs$tab2
   dunit_totest <- merge(dunit_totest, 
-		dunitareabind[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
 
   if (!is.null(dunit_totest)) {
     if (totals) {
@@ -893,15 +907,15 @@ modSAarea <- function(SApopdatlst = NULL,
   if (rowvar != "TOTAL") {
     ## Subset multest to estimation output
     dunit_rowest <- setDT(multestdf_row)[AOI==1, 
-		unique(c(dunitvar, rowcolinfo$rowvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
-    setkeyv(dunit_rowest, dunitvar)
+		unique(c("DOMAIN", rowcolinfo$rowvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
+    setkeyv(dunit_rowest, "DOMAIN")
 
     ## Merge dunitarea
-    tabs <- check.matchclass(dunitareabind, dunit_rowest, dunitvar)
+    tabs <- check.matchclass(dunitareabind, dunit_rowest, "DOMAIN")
     dunitareabind <- tabs$tab1
     dunit_rowest <- tabs$tab2
     dunit_rowest <- merge(dunit_rowest, 
-		dunitareabind[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
 
     if (!is.null(dunit_rowest)) {
       if (totals) {
@@ -927,7 +941,7 @@ modSAarea <- function(SApopdatlst = NULL,
 	      title.ref=title.ref, title.rowvar=rowcolinfo$title.rowvar, 
 	      title.colvar=rowcolinfo$title.colvar, title.unitvar=title.dunitvar, 
 	      title.filter=title.filter, title.unitsn=estvarunits, 
-	      unitvar=dunitvar, rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
+	      unitvar="DOMAIN", rowvar=rowcolinfo$rowvar, colvar=rowcolinfo$colvar, 
 	      addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 	      states=states, invyrs=invyrs, landarea=landarea, 
 	      pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
@@ -952,7 +966,7 @@ modSAarea <- function(SApopdatlst = NULL,
   ###################################################################################
   message("getting output...")
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
-            unitvar=dunitvar, unit_totest=dunit_totest, 
+            unitvar="DOMAIN", unit_totest=dunit_totest, 
             unit_rowest=dunit_rowest, unit_colest=dunit_colest, 
             unit_grpest=dunit_grpest, rowvar=rowcolinfo$rowvar, 
             colvar=rowcolinfo$colvar, uniquerow=rowcolinfo$uniquerow, 
@@ -968,7 +982,6 @@ modSAarea <- function(SApopdatlst = NULL,
             estnm=estnm, estround=estround, pseround=pseround, 
             divideby=divideby, returntitle=returntitle, 
             estnull=estnull, psenull=psenull) 
-
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
@@ -990,7 +1003,8 @@ modSAarea <- function(SApopdatlst = NULL,
   if (returntitle) {
     returnlst$titlelst <- alltitlelst
   }
- 
+
+  domain <- "TOTAL"
   if (multest && !is.null(multestdf)) {
     ## Merge dunitarea
     #tabs <- check.matchclass(dunitarea, multestdf, dunitvar)
@@ -998,7 +1012,7 @@ modSAarea <- function(SApopdatlst = NULL,
     #dunit_multest <- tabs$tab2
  
     multestdf <- merge(multestdf, 
-		dunitareabind[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
     #multestdf[, JoSAE.total := get(nhat) * AREAUSED]
     #multestdf[, JoSAE.pse := get(nhat.se)/get(nhat) * 100]
 
@@ -1047,15 +1061,15 @@ modSAarea <- function(SApopdatlst = NULL,
                                 add_layer=TRUE))
     }
   } 
-
+ 
   if (multest && rowvar != "TOTAL" && !is.null(multestdf_row)){
     ## Merge dunitarea
-    #tabs <- check.matchclass(dunitarea, multestdf, dunitvar)
+    #tabs <- check.matchclass(dunitarea, multestdf, )
     #dunitarea <- tabs$tab1
     #dunit_multest <- tabs$tab2
  
     multestdf_row <- merge(multestdf_row, 
-		dunitareabind[, c(dunitvar, "AREAUSED"), with=FALSE], by=dunitvar)
+		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
     #multestdf[, JoSAE.total := get(nhat) * AREAUSED]
     #multestdf[, JoSAE.pse := get(nhat.se)/get(nhat) * 100]
 

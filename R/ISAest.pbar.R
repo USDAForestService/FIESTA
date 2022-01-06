@@ -18,7 +18,7 @@ SAest.unit <- function(fmla.dom.unit, pltdat.dom, dunitlut.dom, yn, SApackage,
     est.unit <- tryCatch(JoSAE::eblup.mse.f.wrap(domain.data = dunitlut.unit, 
                                         lme.obj = dom.lme, debug=FALSE),
                          error=function(err) {
-                           #message(err, "\n")
+                           message("there was an error in unit-level JoSAE model", "\n")
                            return(NULL)
                          } )
     if (is.null(est.unit)) {
@@ -54,7 +54,7 @@ SAest.unit <- function(fmla.dom.unit, pltdat.dom, dunitlut.dom, yn, SApackage,
                               data = pltdat.unit,
                               B = 100)),
                          error=function(err) {
-                           #message(err, "\n")
+                           message("there was an error in unit-level sae model", "\n")
                            return(NULL)
                          } )
     if (is.null(est.unit)) {
@@ -111,7 +111,7 @@ SAest.unit <- function(fmla.dom.unit, pltdat.dom, dunitlut.dom, yn, SApackage,
         silent = FALSE
       ),
       error=function(err) {
-        #message(err, "\n")
+        message("there was an error in unit-level hbsae model", "\n")
         return(NULL)
       } )
     }
@@ -155,7 +155,7 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
   dunitids <-  dunitlut.dom[!dunitlut.dom[[dunitvar]] %in% dunitNAids, dunitvar]
   dunitlut.area <- dunitlut.dom[dunitlut.dom[[dunitvar]] %in% dunitids, ]
   pltdat.area <- data.frame(pltdat.dom[pltdat.dom[[dunitvar]] %in% dunitids, ])
-
+ 
   if (SApackage == "JoSAE") {
     xpop.dom <- paste0(predselect.area, ".X.pop")
     fmla.dom.area2 <- as.formula(paste(paste0(yn, ".ybar.i"), 
@@ -169,15 +169,13 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
                       sample.id.col = cuniqueid,
                       neg.sfrac = TRUE),
                error=function(err) {
-                 #message(err, "\n")
+                 message("there was an error in area-level JoSAE model", "\n")
                  return(NULL)
                } )
     
     if (is.null(res)) {
       return(NULL)
     }
-    
-    
     ## To add space to messages
     cat("\n")
     
@@ -187,11 +185,23 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
                                         xpop.dom)]
     partB <- res$est$se[,c("domain.id","se.srs")]
     dat.al <- merge(partA, partB)    
-    est.area <- suppressWarnings(JoSAE::sae.al.f(
-      domain.id=dat.al$domain.id, n.i=dat.al$n.i, psi.i=dat.al$se.srs^2,
-      formula=fmla.dom.area2, data=dat.al,
-      b.i=rep(1, nrow(dat.al)),
-      type="RE"))
+    est.area <- 
+      tryCatch(JoSAE::sae.al.f(
+                domain.id=dat.al$domain.id, 
+				        n.i=dat.al$n.i, 
+				        psi.i=dat.al$se.srs^2, 
+				        formula=fmla.dom.area2, 
+				        data=dat.al, 
+				        b.i=rep(1, nrow(dat.al)), 
+				        type="RE"),
+      error=function(err) {
+                message("there was an error in area-level JoSAE model", "\n")
+                return(NULL)
+              } )
+    if (is.null(est.area)) {
+      return(NULL)
+    }
+    
     est <- est.area$results[,1:7]
     names(est) <- c("DOMAIN", "DIR", "DIR.se", "JFH", "JFH.se",
                     	"JA.synth", "JA.synth.se")
@@ -236,7 +246,7 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
       MAXITER=250
       ),
       error=function(err) {
-        message(err, "\n")
+        message("there was an error in area-level sae model", "\n")
         return(NULL)
       } )
 
@@ -293,7 +303,7 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
         silent=TRUE
       ),
       error=function(err) {
-        #message(err, "\n")
+        message("there was an error in area-level hbsae model", "\n")
         return(NULL)
       } )
       
@@ -306,7 +316,7 @@ SAest.area <- function(fmla.dom.area, pltdat.dom, dunitlut.dom, cuniqueid,
         silent=TRUE
       ),
       error=function(err) {
-        #message(err, "\n")
+        message("there was an error in area-level hbsae model", "\n")
         return(NULL)
       } )
     }
@@ -666,7 +676,7 @@ SAest <- function(yn="CONDPROP_ADJ", dat.dom, cuniqueid, pltassgn,
                                JA.synth=NA, JA.synth.se=NA)
       setnames(area.JoSAE, "DOMAIN", dunitvar)
     }
-
+ 
         ## Merge estimates
     est <- merge(est, area.JoSAE[, c("DOMAIN", "JFH", "JFH.se", "JA.synth", "JA.synth.se")], 
 		by=dunitvar)
@@ -853,7 +863,7 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.unique,
     est.large <- data.table(largebnd=largebnd.val, 
 				do.call(rbind, do.call(rbind, estlst)[,"est"]))
     setnames(est.large, "largebnd", largebnd.unique)
-
+    
     predselect.unit <- data.table(largebnd=largebnd.val, 
 				do.call(rbind, do.call(rbind, estlst)[,"predselect.unit"]))
     setnames(predselect.unit, "largebnd", largebnd.unique)
@@ -896,7 +906,7 @@ SAest.large <- function(largebnd.val, dat, cuniqueid, largebnd.unique,
   
   rm(estlst)
   gc()
- 
+  
   return(list(est.large=est.large, 
 			predselect.unit=predselect.unit, 
 			predselect.area=predselect.area, 
