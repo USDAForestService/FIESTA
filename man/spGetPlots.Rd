@@ -10,7 +10,7 @@ spGetPlots(
   bnd.filter = NULL,
   states = NULL,
   RS = NULL,
-  xyids = NULL,
+  pltids = NULL,
   xy_datsource = NULL,
   xy = NULL,
   xy_dsn = NULL,
@@ -47,7 +47,7 @@ spGetPlots(
   showsteps = FALSE,
   savedata = FALSE,
   savebnd = FALSE,
-  savexy = FALSE,
+  returnxy = TRUE,
   exportsp = FALSE,
   savedata_opts = NULL,
   spXYdat = NULL
@@ -69,7 +69,7 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 included.}
 
-\item{xyids}{Data frame. Non-spatial plot identifiers within bnd).}
+\item{pltids}{Data frame. Non-spatial plot identifiers within bnd).}
 
 \item{xy_datsource}{String. Source of XY data ("obj", "csv", "datamart",
 "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
@@ -185,9 +185,9 @@ database.}
 \item{savebnd}{Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 SpatiaLite database.}
 
-\item{savexy}{Logical. If TRUE, save xy coordinates to outfolder.}
+\item{returnxy}{Logical. If TRUE, save xy coordinates to outfolder.}
 
-\item{exportsp}{Logical. If savexy=TRUE, if TRUE, saves xy data as 
+\item{exportsp}{Logical. If returnxy=TRUE, if TRUE, saves xy data as 
 spatial data. If FALSE, saves xy data as table.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list

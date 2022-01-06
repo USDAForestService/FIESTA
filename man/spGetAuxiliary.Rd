@@ -12,7 +12,7 @@ spGetAuxiliary(
   unittype = "POLY",
   unit_layer = NULL,
   unit_dsn = NULL,
-  unitvar = "DOMAIN",
+  unitvar = NULL,
   rastlst.cont = NULL,
   rastlst.cont.name = NULL,
   rastlst.cont.stat = "mean",
@@ -31,8 +31,8 @@ spGetAuxiliary(
   ncores = 1,
   NAto0 = TRUE,
   npixels = TRUE,
-  returnxy = FALSE,
   showext = FALSE,
+  returnxy = FALSE,
   savedata = FALSE,
   exportsp = FALSE,
   exportNA = FALSE,
@@ -125,15 +125,15 @@ collapsing rast.lut values.}
 
 \item{npixels}{Logical. If TRUE, include number of pixels.}
 
-\item{returnxy}{Logical. If TRUE, returns xy data as sf object (spxyplt).}
-
 \item{showext}{Logical. If TRUE, layer extents are displayed in plot window.}
+
+\item{returnxy}{Logical. If TRUE, returns xy data as sf object (spxyplt).}
 
 \item{savedata}{Logical. If TRUE, the input data with extracted values are
 saved to outfolder.}
 
-\item{exportsp}{Logical. If TRUE, the extracted raster point data are
-exported to outfolder.}
+\item{exportsp}{Logical. If savedata=TRUE and returnxy=TRUE, If TRUE, the
+extracted strata point data are exported to outfolder.}
 
 \item{exportNA}{Logical. If TRUE, NA values are exported to outfolder.}
 

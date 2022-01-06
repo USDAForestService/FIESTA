@@ -8,10 +8,10 @@ strata and estimation unit spatial layers.}
 spGetStrata(
   xyplt,
   xyplt_dsn = NULL,
+  unit_layer,
+  unit_dsn = NULL,
   uniqueid = "PLT_CN",
   unittype = "POLY",
-  unit_layer = NULL,
-  unit_dsn = NULL,
   unitvar = NULL,
   unit.filter = NULL,
   strattype = "RASTER",
@@ -22,8 +22,8 @@ spGetStrata(
   areaunits = "acres",
   rast.NODATA = NULL,
   keepNA = FALSE,
-  returnxy = FALSE,
   showext = FALSE,
+  returnxy = FALSE,
   savedata = FALSE,
   exportsp = FALSE,
   exportNA = FALSE,
@@ -41,11 +41,6 @@ non-spatial, include options in spMakeSpatial_opts parameter.}
 \item{xyplt_dsn}{String. Name of database where xyplt is. The dsn varies by
 driver. See gdal OGR vector formats (https://www.gdal.org/ogr_formats.html).}
 
-\item{uniqueid}{String.* Unique identifier of xyplt records.}
-
-\item{unittype}{String. Spatial layer type of unit_layer ("POLY", "RASTER").
-Note: raster unit layers are converted to polygon.}
-
 \item{unit_layer}{sf R object or String. Name of estimation unit spatial
 layer. Can be a spatial polygon object, full pathname to a shapefile, name
 of a polygon layer within a database, or a full pathname to raster file.}
@@ -54,6 +49,11 @@ of a polygon layer within a database, or a full pathname to raster file.}
 pathname) of unit_layer. The dsn varies by driver. See gdal OGR vector
 formats (https://www.gdal.org/ogr_formats.html). Optional if unit_layer is
 sf object.}
+
+\item{uniqueid}{String.* Unique identifier of xyplt records.}
+
+\item{unittype}{String. Spatial layer type of unit_layer ("POLY", "RASTER").
+Note: raster unit layers are converted to polygon.}
 
 \item{unitvar}{String. If unittype="POLY", name of attribute in unit_layer
 defining estimation units. If NULL, the unit_layer represents one estimation
@@ -90,15 +90,15 @@ in pltassgn table.}
 
 \item{keepNA}{Logical. If TRUE, returns data frame of NA values.}
 
-\item{returnxy}{Logical. If TRUE, returns xy data as sf object (spxyplt).}
-
 \item{showext}{Logical. If TRUE, layer extents are displayed in plot window.}
+
+\item{returnxy}{Logical. If TRUE, returns xy data as sf object (spxyplt).}
 
 \item{savedata}{Logical. If TRUE, the input data with extracted values are
 saved to outfolder.}
 
-\item{exportsp}{Logical. If TRUE, the extracted strata point data are
-exported to outfolder.}
+\item{exportsp}{Logical. If savedata=TRUE and returnxy=TRUE, If TRUE, the
+extracted strata point data are exported to outfolder.}
 
 \item{exportNA}{Logical. If TRUE and keepNA=TRUE, NA values are exported to
 outfolder as a point shapefile.}

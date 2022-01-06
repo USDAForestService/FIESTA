@@ -32,9 +32,9 @@ spGetXY(
   allyrs = FALSE,
   intensity1 = FALSE,
   showsteps = FALSE,
+  returnxy = TRUE,
   savedata = FALSE,
   exportsp = FALSE,
-  returnxy = TRUE,
   savedata_opts = NULL
 )
 }
@@ -120,26 +120,19 @@ database.}
 
 \item{showsteps}{Logical. If TRUE, display data in device window.}
 
-\item{savedata}{Logical. If TRUE, saves data to outfolder.}
+\item{returnxy}{Logical. If TRUE, returns XY coordinates.}
 
-\item{exportsp}{Logical. If TRUE, exports spatial data to outfolder.}
+\item{savedata}{Logical. If TRUE, saves data to outfolder. Note:
+includes XY data if returnxy = TRUE.}
 
-\item{returnxy}{Logical. If TRUE, returns a spatial sf object.}
+\item{exportsp}{Logical. If savedata = TRUE and returnxy = TRUE, 
+if TRUE, exports XY data as spatial data.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 }
 \value{
-\item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }
-\item{xyids}{ data frame. A table of pltids that are within bnd. }
-\item{bndx}{ sf object. Input bnd. } \item{xy.uniqueid}{ String. Unique
-identifier of plots in xy. } \item{states}{ String. Vector of states that
-intersect bnd. } \item{countyfips}{ String. Vector of countyfips values that
-intersect bnd. } \item{stbnd.att}{ String. Name of state attribute used to
-select plots. }
 
-If savedata=TRUE, the xyids data frame is saved to outfolder.\cr If
-exportsp=TRUE, the spxy sf object is exported as shapefile to outfolder.\cr
 }
 \description{
 Wrapper to get FIA plots within the boundary population (area of interest) -
