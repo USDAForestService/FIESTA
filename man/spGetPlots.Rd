@@ -21,7 +21,7 @@ spGetPlots(
   xyjoinid = NULL,
   pjoinid = NULL,
   clipxy = TRUE,
-  datsource = "datamart",
+  datsource = NULL,
   data_dsn = NULL,
   istree = FALSE,
   isseed = FALSE,
