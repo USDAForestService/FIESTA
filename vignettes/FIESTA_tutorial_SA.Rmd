@@ -137,7 +137,7 @@ SApltdat <- spGetPlots(bnd = WYbhdistfn,
                      seed_layer = WYseed,
                      invyrs = 2011:2013,
                      showsteps = TRUE,
-                     savexy=TRUE,
+                     returnxy=TRUE,
                      savedata_opts = savedata_options(outfolder = outfolder))
 ```
 
@@ -247,7 +247,7 @@ In this example, we fit the same model as above, however now we can fit it at th
 ```{r}
 area2 <- modSAarea(
   SApopdatlst = SApopdat,         # pop - population calculations for WY, post-stratification
-  prednames = all_preds,          # est - charater vector of predictors to be used in the model
+  prednames = "slp",          # est - charater vector of predictors to be used in the model
   SApackage = "JoSAE",            # est - character string of the R package to do the estimation
   SAmethod = "area"               # est - method of small area estimation. Either "unit" or "area"
   )
