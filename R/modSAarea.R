@@ -516,6 +516,14 @@ modSAarea <- function(SApopdatlst = NULL,
       }
     }
 
+    ## Check number of predictors... must be n-2 less than number of dunits
+    ########################################################################
+    maxpreds <- length(unique(dunitlut[[dunitvar]])) - 2
+    if (length(prednames) > maxpreds) {
+      maxtxt <- ifelse(maxpreds == 1, "1 predictor", paste(maxpreds, "predictors"))
+      stop("can only use ", maxtxt, " (number of domain units - 2)")
+    }
+
     ########################################
     ## Check area units
     ########################################

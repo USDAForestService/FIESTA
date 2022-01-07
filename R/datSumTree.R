@@ -517,14 +517,18 @@ datSumTree <- function(tree = NULL,
   ## Check getadjplot
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
 		title="Get plot adjustment?", first="NO", gui=gui)
-  if (getadjplot && is.null(condx)) 
+  if (getadjplot && is.null(condx)) {
     stop("must include condx to adjust to plot")
+  }
 
   ## Check adjtree
   adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
 		first="NO", gui=gui)
   if (is.null(adjtree)) adjtree <- FALSE
-
+  if (getadjplot && !adjtree) {
+    message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
+    adjtree <- TRUE
+  }
       
   ###########################################################  
   ### Check tsumvarlst
