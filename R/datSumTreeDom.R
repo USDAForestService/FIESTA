@@ -598,7 +598,10 @@ datSumTreeDom <- function(tree = NULL,
   adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Area adjustment", 
 		first="NO", gui=gui)
   if (is.null(adjtree)) adjtree <- FALSE
-
+  if (getadjplot && !adjtree) {
+    message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
+    adjtree <- TRUE
+  }
 
   ###########################################################  
   ### Check tsumvar 
