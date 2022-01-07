@@ -245,7 +245,7 @@ Extracts data from FIA's online publicly-available DataMart
 \details{
 \bold{FIA forest land definition}
 
-*Current*\cr Forested plots include plots with >= 10 percent cover (or
+\emph{Current}\cr Forested plots include plots with >= 10 percent cover (or
 equivalent stocking) by live trees of any size, including land that formerly
 had such tree cover and that will be naturally or artificially regenerated.
 To qualify, the area must be >= 1.0 acre in size and 120.0 feet wide (See
