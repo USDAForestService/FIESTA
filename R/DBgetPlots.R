@@ -72,13 +72,16 @@
 #' In the PNW Research Station, plots are brought forward to replace missed
 #' plots in an evaluation, depending on the evalType.
 #' 
-#' EVAL_TYP\cr \tabular{llll}{ \tab \bold{EVALIDCD} \tab \bold{EVAL_TYP} \tab
-#' \bold{Description}\cr \tab 00 \tab EXPALL \tab All area\cr \tab 01 \tab
-#' EXPVOL/EXPCURR \tab Area/Volume\cr \tab 03 \tab
-#' EXPCHNG/EXPGROW/EXPMORT/EXPREMV \tab Area Change/GRM\cr \tab 07 \tab EXPDWM
-#' \tab DWM\cr \tab 08 \tab EXPREGEN \tab Regeneration\cr \tab 09 \tab EXPINV
-#' \tab Invasive\cr \tab 10 \tab EXPP2VEG \tab Veg profile\cr \tab 12 \tab
-#' EXPCRWN \tab Crown\cr }
+#' EVAL_TYP\cr 
+#' \tabular{llll}{ 
+#' \tab \bold{EVALIDCD} \tab \bold{EVAL_TYP} \tab \bold{Description}\cr 
+#' \tab 00 \tab EXPALL \tab All area\cr 
+#' \tab 01 \tab EXPVOL/EXPCURR \tab Area/Volume\cr 
+#' \tab 03 \tab EXPCHNG/EXPGROW/EXPMORT/EXPREMV \tab Area Change/GRM\cr 
+#' \tab 07 \tab EXPDWM \tab DWM\cr 
+#' \tab 08 \tab EXPREGEN \tab Regeneration\cr 
+#' \tab 09 \tab EXPINV \tab Invasive\cr \tab 10 \tab EXPP2VEG \tab Veg profile\cr 
+#' \tab 12 \tab EXPCRWN \tab Crown\cr }
 #' 
 #' \bold{Inventory span defining variables}
 #' 
@@ -86,19 +89,21 @@
 #' for one or more states, one or more FIA Research Stations (RS), or all
 #' available states in database (states=NULL, RS=NULL).
 #' 
-#' *FIA Evaluation*\cr \tabular{lll}{ \tab \bold{Argument} \tab
-#' \bold{Description}\cr \tab EVALID \tab Specified FIA EVALID (e.g.,
-#' 491801)\cr \tab evalCur \tab Most current FIA Evaluation\cr \tab evalEndyr
-#' \tab End year of an FIA Evaluation (e.g., 2018)\cr \tab evalAll \tab All
-#' evaluations in database\cr \tab evalType \tab Type of FIA Evaluation
-#' (response)\cr }
+#' *FIA Evaluation*\cr 
+#' \tabular{lll}{ \tab \bold{Argument} \tab \bold{Description}\cr 
+#' \tab EVALID \tab Specified FIA EVALID (e.g., 491801)\cr 
+#' \tab evalCur \tab Most current FIA Evaluation\cr 
+#' \tab evalEndyr \tab End year of an FIA Evaluation (e.g., 2018)\cr 
+#' \tab evalAll \tab All evaluations in database\cr 
+#' \tab evalType \tab Type of FIA Evaluation (response)\cr }
 #' 
-#' *Custom evaluation*\cr \tabular{lll}{ \tab \bold{Argument} \tab
-#' \bold{Description}\cr \tab measCur \tab Most current measurement of plot in
-#' database\cr \tab measEndyr \tab Most current measurement of plot in database
-#' in or before year\cr \tab allyrs \tab All years for invtype
-#' (ANNUAL/PERIODIC)\cr \tab invyrs \tab Specified inventory years (e.g.,
-#' 2015:2018)\cr }
+#' *Custom evaluation*\cr 
+#' \tabular{lll}{ \tab \bold{Argument} \tab \bold{Description}\cr 
+#' \tab measCur \tab Most current measurement of plot in database\cr 
+#' \tab measEndyr \tab Most current measurement of plot in database in or 
+#' before year\cr 
+#' \tab allyrs \tab All years for invtype (ANNUAL/PERIODIC)\cr 
+#' \tab invyrs \tab Specified inventory years (e.g., 2015:2018)\cr }
 #' 
 #' \bold{Spatial data}
 #' 
@@ -117,74 +122,89 @@
 #' column named CONDMETHOD is added to the attribute table to show the method
 #' and steps used, identified by the abbreviation in parentheses.
 #' 
-#' \tabular{ll}{ \tab (1) minimum COND_STATUS_CD (_ST)\cr \tab (2) maximum
-#' condition proportion (_CP)\cr \tab (3) maximum live_canopy_cvr_pct (_CC)\cr
-#' \tab (4) minimum STDSZCD (_SZ)\cr \tab (5) minimum CONDID (_C1)\cr }
+#' \tabular{ll}{ 
+#' \tab (1) minimum COND_STATUS_CD (_ST)\cr 
+#' \tab (2) maximum condition proportion (_CP)\cr 
+#' \tab (3) maximum live_canopy_cvr_pct (_CC)\cr
+#' \tab (4) minimum STDSZCD (_SZ)\cr 
+#' \tab (5) minimum CONDID (_C1)\cr }
 #' 
 #' \bold{Derived Variables}
 #' 
 #' If defaultVars=TRUE, the following derived variables are calculated after
 #' extracting data from the FIA database.
 #' 
-#' Plot-level variables:\cr \tabular{ll}{ \tab NBRCND - Number of conditions on
-#' plot, including nonsampled conditions (COND_STATUS_CD = 5)\cr \tab
-#' NBRCNDSAMP - Number of sampled conditions on plot.\cr \tab NBRCNDFOR -
-#' Number of sampled forested conditions on plot.\cr \tab NBRCNDFTYP - Number
-#' of sampled forested conditions with different forest types on plot.\cr \tab
-#' NBRCNDFGRP - Number of sampled forested conditions with different forest
-#' type groups on plot.\cr \tab CCLIVEPLT - Percent live canopy cover of
-#' condition aggregated to plot-level (LIVE_CANOPY_CVR_PCT *
-#' CONDPROP_UNADJ).\cr \tab PLOT_ID - Unique Identifier for a plot ('ID' +
-#' STATECD(2) + UNITCD(2) + COUNTYCD(3) + PLOT(5)).  This variable can be used
-#' to identify multiple records for each measurement of plot.\cr }
+#' Plot-level variables:\cr 
+#' \tabular{ll}{ 
+#' \tab NBRCND - Number of conditions on plot, including nonsampled conditions 
+#' (COND_STATUS_CD = 5)\cr 
+#' \tab NBRCNDSAMP - Number of sampled conditions on plot.\cr 
+#' \tab NBRCNDFOR - Number of sampled forested conditions on plot.\cr 
+#' \tab NBRCNDFTYP - Number of sampled forested conditions with different 
+#' forest types on plot.\cr 
+#' \tab NBRCNDFGRP - Number of sampled forested conditions with different forest
+#' type groups on plot.\cr 
+#' \tab CCLIVEPLT - Percent live canopy cover of condition aggregated to plot-level 
+#' (LIVE_CANOPY_CVR_PCT * CONDPROP_UNADJ).\cr 
+#' \tab PLOT_ID - Unique Identifier for a plot ('ID' + STATECD(2) + UNITCD(2) + 
+#' COUNTYCD(3) + PLOT(5)).  This variable can be used to identify multiple records 
+#' for each measurement of plot.\cr }
 #' 
-#' Condition-level variables:\cr \tabular{ll}{ \tab FORTYPGRP - TYPGRPCD merged
-#' to FORTYPCD\cr \tab FLDTYPGRP - TYPGRPCD merged to FLDTYPCD\cr \tab
-#' FORNONSAMP - Combination of PLOT_STATUS_CD and PLOT_NONSAMPLE_REASN_CD\cr
+#' Condition-level variables:\cr 
+#' \tabular{ll}{ 
+#' \tab FORTYPGRP - TYPGRPCD merged to FORTYPCD\cr 
+#' \tab FLDTYPGRP - TYPGRPCD merged to FLDTYPCD\cr 
+#' \tab FORNONSAMP - Combination of PLOT_STATUS_CD and PLOT_NONSAMPLE_REASN_CD\cr
 #' \tab QMD - Quadratic Mean Diameter\cr }
 #' 
-#' Tree-level variables:\cr \tabular{ll}{ \tab BA - the basal area of a tree
-#' (BA = DIA * DIA * 0.005454)\cr }
+#' Tree-level variables:\cr 
+#' \tabular{ll}{ 
+#' \tab BA - the basal area of a tree (BA = DIA * DIA * 0.005454)\cr }
 #' 
-#' \tabular{ll}{ \tab TREE AGE Notes:\cr \tab - Available for live timber and
-#' woodland trees in the following states: AZ,CO,ID,MT,NV,UT,OR,WA.\cr \tab -
-#' BHAGE - Breast height age (4.5' above ground) of timber trees.\cr \tab - PNW
-#' - one tree is sampled for each species, within each crown class, and for
-#' each condition class present on plot. Age of saplings (<5.0" DIA) may be
-#' aged by counting branch whorls above 4.5ft. No timber hardwood species other
-#' than red alder are bored for age.\cr \tab - RMRS - one tree is sampled for
-#' each species and broad diameter class present on plot.\cr }
+#' \tabular{ll}{ 
+#' \tab TREE AGE Notes:\cr 
+#' \tab - Available for live timber and woodland trees in the following states: 
+#' AZ,CO,ID,MT,NV,UT,OR,WA.\cr 
+#' \tab - BHAGE - Breast height age (4.5' above ground) of timber trees.\cr 
+#' \tab - PNW - one tree is sampled for each species, within each crown class, 
+#' and for each condition class present on plot. Age of saplings (<5.0" DIA) 
+#' may be aged by counting branch whorls above 4.5ft. No timber hardwood species 
+#' other than red alder are bored for age.\cr 
+#' \tab - RMRS - one tree is sampled for each species and broad diameter 
+#' class present on plot.\cr }
 #' 
-#' \tabular{ll}{ \tab DRYBIO Notes:\cr \tab DRYBIO_AG - Aboveground oven-dry
-#' biomass, in pounds (DRYBIO_AG = (DRYBIO_BOLE + DRYBIO_STUMP + DRYBIO_TOP +
-#' DRYBIO_SAPLING + DRYBIO_WDLD_SPP).\cr \tab - Available for both timber and
-#' woodland species, live trees >= 1.0" DIA and dead trees >= 5.0" DIA. Summed
-#' dry biomass of the top, bole, and stump of a tree, excluding foliage based
-#' on component ratio method (Heath and others, 2009).\cr \tab - DRYBIO_BOLE -
-#' dry biomass of sound wood in live and dead trees, including bark, from a
-#' 1-foot stump to a min 4-inch top DIA of central stem (Calculated for timber
-#' trees >= 5.0" DIA).\cr \tab - DRYBIO_STUMP - dry biomass in the tree stump,
-#' including the portion of the tree from the ground to the bottom of
-#' merchantable bole, 1-foot (Calculated for live and dead trees >= 5.0"
-#' DIA).\cr \tab - DRYBIO_TOP - dry biomass in the top of the tree, including
-#' the portion of the tree above merchantable bole, 4-inch top, and all
-#' branches, excludes foliage (Calculated for live and dead trees >= 5.0"
-#' DIA).\cr \tab - DRYBIO_SAPLING - dry biomass of saplings, including
-#' aboveground portion, excluding foliage, of live timber trees >=1.0" and
-#' <5.0" DIA.\cr \tab - DRYBIO_WDLD_SPP - dry biomass of woodland trees, live
-#' or dead, including the aboveground portion, excluding foliage, the top of
+#' \tabular{ll}{ \tab DRYBIO Notes:\cr 
+#' \tab DRYBIO_AG - Aboveground oven-dry biomass, in pounds (DRYBIO_AG = 
+#' (DRYBIO_BOLE + DRYBIO_STUMP + DRYBIO_TOP + DRYBIO_SAPLING + DRYBIO_WDLD_SPP).\cr 
+#' \tab - Available for both timber and woodland species, live trees >= 1.0" 
+#' DIA and dead trees >= 5.0" DIA. Summed dry biomass of the top, bole, and 
+#' stump of a tree, excluding foliage based on component ratio method 
+#' (Heath and others, 2009).\cr 
+#' \tab - DRYBIO_BOLE - dry biomass of sound wood in live and dead trees, 
+#' including bark, from a 1-foot stump to a min 4-inch top DIA of central stem 
+#' (Calculated for timber trees >= 5.0" DIA).\cr 
+#' \tab - DRYBIO_STUMP - dry biomass in the tree stump, including the portion 
+#' of the tree from the ground to the bottom of merchantable bole, 1-foot 
+#' (Calculated for live and dead trees >= 5.0" DIA).\cr 
+#' \tab - DRYBIO_TOP - dry biomass in the top of the tree, including the 
+#' portion of the tree above merchantable bole, 4-inch top, and all branches, 
+#' excludes foliage (Calculated for live and dead trees >= 5.0" DIA).\cr 
+#' \tab - DRYBIO_SAPLING - dry biomass of saplings, including aboveground 
+#' portion, excluding foliage, of live timber trees >=1.0" and <5.0" DIA.\cr 
+#' \tab - DRYBIO_WDLD_SPP - dry biomass of woodland trees, live or dead, 
+#' including the aboveground portion, excluding foliage, the top of
 #' the tree above 1.5" DIA, and a portion of the stump from ground to DRC
 #' (Calculated for woodland trees >= 1.0" DIA.\cr }
 #' 
-#' ABOVEGROUND CARBON ESTIMATES (IN POUNDS)\cr Available for both timber and
-#' woodland species, live trees >= 1.0" DIA and dead trees >= 5.0" DIA.
-#' Calculated as 1/2 of the aboveground esimates of biomass: \cr CARBON_AG =
-#' 0.5 * (DRYBIO_AG)
+#' ABOVEGROUND CARBON ESTIMATES (IN POUNDS)\cr 
+#' Available for both timber and woodland species, live trees >= 1.0" DIA 
+#' and dead trees >= 5.0" DIA. Calculated as 1/2 of the aboveground 
+#' estimates of biomass: \cr CARBON_AG = 0.5 * (DRYBIO_AG)
 #' 
-#' TREE AGE DATA ONLY IN FOR ("AZ", "CO", "ID", "MT", "NV", "UT") \cr FMORTCFAL
-#' includes trees >= 5.0" DIA and greater and is not populated for states("CA",
-#' "OR", "WA", "OK") \cr Mortality variables only available in: AZ, CO, ID, MT,
-#' NV, NM, UT, WY, ND, SD, NE, KS, OK.
+#' TREE AGE DATA ONLY IN FOR ("AZ", "CO", "ID", "MT", "NV", "UT") \cr 
+#' FMORTCFAL includes trees >= 5.0" DIA and greater and is not populated 
+#' for states("CA", "OR", "WA", "OK") \cr Mortality variables only 
+#' available in: AZ, CO, ID, MT, NV, NM, UT, WY, ND, SD, NE, KS, OK.
 #' 
 #' \bold{TPA} If TPA=TRUE and istree=TRUE or isseed=TRUE, the following
 #' tree/seedling variables are multiplied by trees-per-acre (TPA_UNADJ).
