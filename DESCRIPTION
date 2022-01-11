@@ -1,18 +1,20 @@
 Package: FIESTA
 Type: Package
 Title: Forest Inventory ESTimation and Analysis
-Version: 3.2.02
+Version: 3.3.00
 Date: 2022-01-03
 Author: Tracey S. Frescino, Gretchen G. Moisen, Paul L. Patterson, Chris Toney, Grayson W. White
 Maintainer: Tracey Frescino <tracey.frescino@usda.gov>
 Description: A research estimation tool for analysts that work with sample-based
     inventory data from the U.S. Department of Agriculture, Forest Service,
     Forest Inventory and Analysis (FIA) Program. 
+Additional_repositories: https://github.com/graysonwhite/FIESTAutils
 Depends: 
     R (>= 4.0),
     data.table,
-    sf
-Imports: 
+    sf,
+    FIESTAutils
+Imports:
     methods,
     grDevices,
     graphics,
