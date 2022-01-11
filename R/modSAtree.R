@@ -141,7 +141,7 @@
 #' The R Journal 7(1), 81-98.
 #' https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.
 #' @keywords data
-#' @export modSAest
+#' @export modSAtree
 modSAtree <- function(SApopdatlst = NULL, 
                       prednames = NULL, 
                       SApackage = "JoSAE", 
@@ -524,14 +524,17 @@ modSAtree <- function(SApopdatlst = NULL,
       }
     }
 
+    # NOTE: still need to check for equivalent unit-level issue. Much less common though
     ## Check number of predictors... must be n-2 less than number of dunits
     ########################################################################
-    maxpreds <- length(unique(dunitlut[[dunitvar]])) - 2
-    if (length(prednames) > maxpreds) {
-      maxtxt <- ifelse(maxpreds == 1, "1 predictor", paste(maxpreds, "predictors"))
-      stop("can only use ", maxtxt, " (number of domain units - 2)")
+    if (SAmethod == "area") {
+      maxpreds <- length(unique(dunitlut[[dunitvar]])) - 2
+      if (length(prednames) > maxpreds) {
+        maxtxt <- ifelse(maxpreds == 1, "1 predictor", paste(maxpreds, "predictors"))
+        stop("can only use ", maxtxt, " (number of domain units - 2)")
+      }
     }
-   
+
 
     ########################################
     ## Check area units
