@@ -1,4 +1,4 @@
-#' @import data.table sf utils
+#' @import data.table sf utils FIESTAutils
 #' @useDynLib FIESTA
 #' @importFrom Rcpp sourceCpp
 #' @importFrom grDevices colors dev.new dev.off jpeg pdf
@@ -11,7 +11,4 @@
 #' @importFrom methods as new slot canCoerce
 #' @importFrom rgdal readOGR GDALinfo GDAL.open GDAL.close getRasterBand 
 #' @importFrom rgdal saveDataset getRasterData getDriverName putRasterData getProjectionRef
-#' @export RasterizePolygon
-#' @export FIESTA_SAmod_demo_plots
-#' @exportPattern "."
 NULL
