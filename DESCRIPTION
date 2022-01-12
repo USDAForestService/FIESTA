@@ -52,8 +52,7 @@ Imports:
     RSQLite,
     sqldf,
     RPostgreSQL,
-    RColorBrewer,
-    Rcpp(>= 1.0.7)
+    RColorBrewer
 Suggests: 
     knitr,
     rmarkdown,
@@ -65,7 +64,6 @@ Suggests:
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
-LinkingTo: Rcpp
 SystemRequirements: C++11
 Encoding: UTF-8
 RoxygenNote: 7.1.2

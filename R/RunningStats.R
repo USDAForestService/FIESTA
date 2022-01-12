@@ -1,1 +1,0 @@
-Rcpp::loadModule("mod_running_stats", TRUE)
