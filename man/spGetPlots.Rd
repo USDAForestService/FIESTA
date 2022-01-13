@@ -32,6 +32,7 @@ spGetPlots(
   ppsa_layer = "pop_plot_stratum_assgn",
   other_layers = NULL,
   puniqueid = "CN",
+  pltassgnid = "PLT_CN",
   savePOP = FALSE,
   evalid = NULL,
   evalCur = FALSE,
@@ -136,6 +137,8 @@ extract from database (Note: must include PLT_CN variable as unique
 identifier).}
 
 \item{puniqueid}{String. Name of unique identifier of plt.}
+
+\item{pltassgnid}{String. Name of unique identifier of pop_plot_stratum_assgn.}
 
 \item{savePOP}{Logical. If TRUE, returns and/or saves POP_PLOT_STRATUM_ASSGN
 table.}

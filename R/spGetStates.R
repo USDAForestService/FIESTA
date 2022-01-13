@@ -1,8 +1,6 @@
-#' @rdname internal_desciption
-#' @export
-spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
+spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filters=NULL,
 	stbnd=NULL, stbnd_dsn=NULL, stbnd.att=NULL, stname.att="STATENM",
-	RS=NULL, states=NULL, overlap=0, showsteps=FALSE, savebnd=FALSE,
+	RS=NULL, states=NULL, overlap=1, showsteps=FALSE, savebnd=FALSE,
 	outfolder=NULL, ...) {
 
   ##############################################################################
@@ -40,8 +38,9 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   ### DO THE WORK
   ########################################################################
   RSlst <- c("ALL", unique(FIESTAutils::ref_statecd$RS))
-  RS <- pcheck.varchar(var2check=RS, varnm="RS",
-		checklst=RSlst, gui=gui, caption="Research Station extent?")
+  RS <- pcheck.varchar(var2check=RS, varnm="RS", 
+                    checklst=RSlst, gui=gui, 
+                    caption="Research Station extent?")
   if (!is.null(RS) && RS == "ALL") {
     RS <- NULL
   }
@@ -50,9 +49,11 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   #############################################################################
   if (!is.null(stbnd) || !is.null(stbnd_dsn)) {
     stbnd <- pcheck.spatial(layer=stbnd, dsn=stbnd_dsn)
-    stbnd.att <- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att",
-		gui=gui, checklst=names(stbnd), caption="State name attribute",
-		warn=paste(stbnd.att, "not in stbnd"))
+    stbnd.att <- pcheck.varchar(var2check=stbnd.att, 
+                      varnm="stbnd.att", gui=gui, 
+                      checklst=names(stbnd), 
+                      caption="State name attribute", 
+                      warn=paste(stbnd.att, "not in stbnd"))
     if (is.null(stbnd.att)) {
       if ("NAME" %in% names(stbnd)) {
         stbnd.att <- "NAME"
@@ -65,14 +66,16 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   } else if (exists("stunitco")) {
     stbnd <- FIESTAutils::stunitco			## longlat-NAD83 projection
 
-    stbnd.att<- pcheck.varchar(var2check=stbnd.att, varnm="stbnd.att",
-		gui=gui, checklst=names(stbnd), caption="State name attribute",
-		warn=paste(stbnd.att, "not in stunitco"))
+    stbnd.att<- pcheck.varchar(var2check=stbnd.att, 
+                      varnm="stbnd.att", gui=gui, 
+                      checklst=names(stbnd), 
+                      caption="State name attribute", 
+                      warn=paste(stbnd.att, "not in stunitco"))
     if (is.null(stbnd.att)) stbnd.att <- "STATENM"
   } else if (is.null(states)) {
     stop("must include state names (states) or state boundary (stbnd) for bnd intersect")
   }
-
+ 
   if (!is.null(stbnd)) {
     ## Reproject stbnd to bnd projection
     prjdat <- crsCompare(stbnd, ycrs=bndx, nolonglat=TRUE)
@@ -87,10 +90,14 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
 				overlapThreshold=overlap))
 
     ## Check name of attribute identifying state
-    stname.att <- pcheck.varchar(var2check=stname.att, varnm="stname.att",
-		gui=gui, checklst=names(stbnd), caption="State name attribute",
-		warn=paste(stname.att, "not in stbnd"), stopifinvalid=FALSE)
+    stname.att <- pcheck.varchar(var2check=stname.att, 
+                        varnm="stname.att", gui=gui, 
+                        checklst=names(stbnd), 
+                        caption="State name attribute", 
+                        warn=paste(stname.att, "not in stbnd"), 
+                        stopifinvalid=FALSE)
     statenamesint <- stateint[[stbnd.att]][!is.na(stateint[[stbnd.att]])]
+
     if (!is.null(states)) {
       states <- pcheck.states(states)
       if (!all(states %in% statenamesint)) {
@@ -109,6 +116,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
       statenames <- states
     } else {
       states <- statenamesint
+      statenames <- states
     }
     if (showsteps) {
       mar <-  graphics::par("mar")
@@ -120,6 +128,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
     }
   } else {
     states <- pcheck.states(states)
+    statenames <- states
   }
   if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) {
     if (stbnd.att == "COUNTYFIPS") {
@@ -130,8 +139,11 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
   ## Check statenames
   if (is.null(RS) && !clipbnd) {
     statenameslst <- FIESTAutils::ref_statecd$MEANING
-    statenames <- pcheck.varchar(var2check=statenames, varnm="states", gui=gui,
-		checklst=statenameslst, caption="States", stopifnull=TRUE, multiple=TRUE)
+    statenames <- pcheck.varchar(var2check=statenames, 
+                        varnm="states", gui=gui, 
+                        checklst=statenameslst, 
+                        caption="States", 
+                        stopifnull=TRUE, multiple=TRUE)
 
   } else {
     if (!is.null(RS)) {
@@ -148,7 +160,8 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
       }
     }
     if (!is.null(stname.att)) {
-      bndx <- FIESTA::spClipPoly(bndx, clippolyv=stbnd[stbnd[[stname.att]] %in% statenames, ])
+      bndx <- FIESTA::spClipPoly(bndx, 
+                    clippolyv=stbnd[stbnd[[stname.att]] %in% statenames, ])
       if (nrow(bndx) == 0) stop("invalid stname.att")
     }
     if (stbnd.att == "COUNTYFIPS") {
@@ -159,7 +172,9 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filter=NULL,
 
   ## Save boundary
   if (savebnd) {
-    FIESTA::spExportSpatial(bndx, outfolder=outfolder, out_layer="bnd", ...)
+    FIESTA::spExportSpatial(bndx, 
+                            outfolder=outfolder, 
+                            out_layer="bnd", ...)
   }
   return(list(states=states, bndx=bndx, stbnd.att=stbnd.att, statenames=statenames))
 

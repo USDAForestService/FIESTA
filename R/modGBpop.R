@@ -49,7 +49,7 @@
 #' \tab Status of each plot (i.e. sampled, nonsampled).  If not included, all
 #' plots are assumed as sampled.\cr }
 #' 
-#' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
+#' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
 #' 
 #' @param popType String. Type of evaluation(s) to include in population data.
 #' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
@@ -662,11 +662,21 @@ modGBpop <- function(popType = "VOL",
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
   if (adj == "samp") {
-    adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
-		        tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, 
-		        vcondsppx=vcondsppf, vcondstrx=vcondstrf, vuniqueid=vuniqueid, 
-		        unitlut=stratalut, unitvars=unitvar, strvars=strvar, 
-		        unitarea=unitarea, areavar=areavar, areawt=areawt, tpropvars=tpropvars)
+    adjfacdata <- getadjfactorGB(treex=treef, 
+                                 seedx=seedf, condx=condx, 
+                                 tuniqueid=tuniqueid, 
+                                 cuniqueid=cuniqueid, 
+                                 condid=condid, 
+                                 vcondsppx=vcondsppf, 
+                                 vcondstrx=vcondstrf, 
+                                 vuniqueid=vuniqueid, 
+                                 unitlut=stratalut, 
+                                 unitvars=unitvar, 
+                                 strvars=strvar, 
+                                 unitarea=unitarea, 
+                                 areavar=areavar, 
+                                 areawt=areawt, 
+                                 tpropvars=tpropvars)
     condx <- adjfacdata$condx
     stratalut <- adjfacdata$unitlut
     treef <- adjfacdata$treex
@@ -679,8 +689,11 @@ modGBpop <- function(popType = "VOL",
   } else if (adj == "plot") {
     adjtree <- TRUE
     bycond <- FALSE
-    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, seedx=seedf,
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
+    adjfacdata <- getadjfactorPLOT(treex=treef, 
+                                   condx=condx, 
+                                   seedx=seedf, 
+                                   tuniqueid=tuniqueid, 
+                                   cuniqueid=cuniqueid)
     condx <- adjfacdata$condx
     treef <- adjfacdata$treex
     seedf <- adjfacdata$seedx
