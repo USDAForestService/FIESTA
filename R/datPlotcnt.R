@@ -105,7 +105,7 @@ datPlotcnt <- function(plt, yrtype="INVYR", states=NULL, designcd=FALSE, forsamp
 
 
   ## Add State abbreviations
-  pltx <- merge(FIESTA::ref_statecd[, c("VALUE", "ABBR")], pltx, 
+  pltx <- merge(FIESTAutils::ref_statecd[, c("VALUE", "ABBR")], pltx, 
 			by.x="VALUE", by.y="STATECD")
   setnames(pltx, c("VALUE", "ABBR"), c("STATECD", "STABBR"))
   vars <- c("STABBR", vars)

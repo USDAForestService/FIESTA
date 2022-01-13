@@ -167,7 +167,7 @@ located in.\cr \tab \tab INVYR \tab Identifies inventory year of each
 plot.\cr \tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled,
 nonsampled).  If not included, all plots are assumed as sampled.\cr }
 
-For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
+For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 }
 \note{
 ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for

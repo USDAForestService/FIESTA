@@ -349,7 +349,7 @@ spGetPlots <- function(bnd = NULL,
 
       ## Check states
       if (!is.null(states)) {
-        if (!all(states %in% FIESTA::ref_statecd$MEANING)) stop("states is invalid")
+        if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) stop("states is invalid")
       }
 
       ## Check clipxy
@@ -434,7 +434,7 @@ spGetPlots <- function(bnd = NULL,
           statecnty <- statedat$states
           stcds <- unique(as.numeric(substr(statecnty, 1,2)))
         } else {
-          stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
+          stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% statedat$states]
         }
         message("boundary intersected states: ", toString(statenames))
         pltids <- sf::st_drop_geometry(spxy)

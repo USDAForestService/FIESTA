@@ -351,7 +351,7 @@ spGetSAdoms <- function(smallbnd,
   ## Apply smallbnd.stfilter (Just state)
   ####################################################################
   if (!is.null(smallbnd.stfilter)) {
-    stunitco <- FIESTA::stunitco
+    stunitco <- FIESTAutils::stunitco
     stlst <- sort(unique(stunitco$STATENM))
     if (!all(smallbnd.stfilter %in% sort(unique(stunitco$STATENM)))) 
       stop("smallbnd.stfilter is invalid")

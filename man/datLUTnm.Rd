@@ -78,12 +78,12 @@ Merge a look-up table to append new variables, names, or categories to x.
 }
 \note{
 For available reference tables:
-sort(unique(FIESTA::ref_codes$VARIABLE))
+sort(unique(FIESTAutils::ref_codes$VARIABLE))
 }
 \examples{
 
 	## Append forest type names using the reference table above
-	ref_fortypcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "FORTYPCD",]
+	ref_fortypcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "FORTYPCD",]
 	WYcondlut <- datLUTnm(FIESTA::WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, 
 		LUTvar="VALUE", LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
 	names(WYcondlut)

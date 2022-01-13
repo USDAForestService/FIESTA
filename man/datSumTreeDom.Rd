@@ -114,7 +114,7 @@ prompted.  Use tfilter="NONE" if no filters.}
 pounds to tons.}
 
 \item{metric}{Logical. If TRUE, converts response to metric units based on
-FIESTA::ref_conversion, if tsumvar is in FIESTA::ref_estvar. Note: if TPA,
+FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_estvar. Note: if TPA,
 TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)).}
 
 \item{tdomvar}{String. The tree domain (tdom) variable used to aggregate by

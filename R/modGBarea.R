@@ -32,7 +32,7 @@
 #' plot.\cr \tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled,
 #' nonsampled).  If not included, all plots are assumed as sampled.\cr }
 #' 
-#' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
+#' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 #' 
 #' @param GBpopdat List. Population data objects returned from modGBpop().
 #' @param landarea String. The sample area filter for estimates ("ALL",

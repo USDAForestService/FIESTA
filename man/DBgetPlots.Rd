@@ -516,7 +516,7 @@ Spatial Data Services
   names(UTdat3)
   UTdat3$pltcnt
 
-  plot(sf::st_geometry(FIESTA::stunitco[FIESTA::stunitco$STATENM == "Utah",]),
+  plot(sf::st_geometry(FIESTAutils::stunitco[FIESTAutils::stunitco$STATENM == "Utah",]),
 		border="light grey")
   plot(sf::st_geometry(UTdat3$spxy_PUBLIC), add=TRUE, pch=18, cex=.5)
 

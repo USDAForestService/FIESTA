@@ -71,7 +71,7 @@
 #' pounds to tons.
 #' @param metric Logical. If TRUE, converts response to metric units based on
 #' FIESTA::ref_conversion, if any variable in tsumvarlst is in
-#' FIESTA::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
+#' FIESTAutils::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
 #' (TPH: 1 / (1/ tpavar * 0.4046860)).
 #' @param getadjplot Logical. If TRUE, adjustments are calculated for
 #' nonsampled conditions on plot.
@@ -169,7 +169,7 @@ datSumTree <- function(tree = NULL,
   checkNAcvars <- {}
   checkNAtvars <- {}
   seedonly=parameters <- FALSE
-  ref_estvar <- FIESTA::ref_estvar
+  ref_estvar <- FIESTAutils::ref_estvar
 
   ## SET OPTIONS
   options.old <- options()

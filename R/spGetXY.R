@@ -296,10 +296,10 @@ spGetXY <- function(bnd,
     stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4))) 
     savePOP <- TRUE
   } else if (!is.null(states)) {
-    if (!all(states %in% FIESTA::ref_statecd$MEANING))
+    if (!all(states %in% FIESTAutils::ref_statecd$MEANING))
       stop("states is invalid")
     statenames <- states
-    stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% states]
+    stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% states]
   } else if (!is.null(bndx)) {
     ## Get intersecting states
  
@@ -317,7 +317,7 @@ spGetXY <- function(bnd,
       countyfips <- statedat$states
       stcds <- unique(as.numeric(substr(countyfips, 1,2)))
     } else {
-      stcds <- FIESTA::ref_statecd$VALUE[FIESTA::ref_statecd$MEANING %in% statedat$states]
+      stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% statedat$states]
     }
     message("boundary intersected states: ", toString(statenames))
   } else {
@@ -583,7 +583,7 @@ spGetXY <- function(bnd,
   if (length(statevars) > 0) {
     spxy <- spExtractPoly(spxy, 
                           xy.uniqueid=xy.uniqueid, 
-                          polyvlst=FIESTA::stunitco, 
+                          polyvlst=FIESTAutils::stunitco, 
                           polyvarlst=statevars)$spxyext
   }
 

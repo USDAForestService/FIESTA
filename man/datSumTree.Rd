@@ -106,7 +106,7 @@ pounds to tons.}
 
 \item{metric}{Logical. If TRUE, converts response to metric units based on
 FIESTA::ref_conversion, if any variable in tsumvarlst is in
-FIESTA::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
+FIESTAutils::ref_estvar.  Note: if TPA, TPA is converted to trees per hectare
 (TPH: 1 / (1/ tpavar * 0.4046860)).}
 
 \item{getadjplot}{Logical. If TRUE, adjustments are calculated for

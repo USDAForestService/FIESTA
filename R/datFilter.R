@@ -1,10 +1,10 @@
 #' Data - Filters data table.
-#' 
+#'
 #' Subsets a data table by specified filter(s).
-#' 
+#'
 #' If no parameters, then user is prompted for input. If partial parameters,
 #' default parameter values are used.
-#' 
+#'
 #' @param x Data frame, sf data frame or comma-delimited file (*.csv). A data
 #' frame to filter.
 #' @param xfilter String. A filter expression. Must be R syntax.  (e.g.,
@@ -30,12 +30,12 @@
 #' data frame.
 #' @param xnm String. Name for filter attribute. Used for warning messages.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options. Only used when savedata = TRUE.  If out_layer = NULL, 
+#' of options. Only used when savedata = TRUE.  If out_layer = NULL,
 #' default = 'datf'.
 #' @param gui Logical. If TRUE, pop-up windows will appear for user-interface.
 #'
 #' @return A list of the following items:
-#' 
+#'
 #' \item{xf}{ A data frame of filtered x. } \item{xfilter}{ The xfilter. } If
 #' othertables != NULL, the other tables, named with 'in' prefix
 #' @note If message returned is 'filter removed all records', either the filter
@@ -43,28 +43,28 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
-#' 
-#' 	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1), 
+#'
+#' 	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1),
 #' 			FORTYPCD = c(182,184,201,221,221,184,221,182,182,201,182,221)))
 #' 	datFilter(x = tab, xfilter = "FORTYPCD != 182")
-#' 
-#' 	datFilter(x = FIESTA::WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
-#' 
-#' 
+#'
+#' 	datFilter(x = WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
+#'
+#'
 #' @export datFilter
-datFilter <- function(x, 
-                      xfilter = NULL, 
-                      xfiltervar = NULL, 
-                      othertabnms = NULL, 
-	                    uniqueid = "PLT_CN", 
-                      vardelete = NULL, 
-                      title.filter = NULL, 
-                      savedata = FALSE, 
-	                    filternm = NULL, 
-                      stopifnull = FALSE, 
-                      returnDT = TRUE, 
+datFilter <- function(x,
+                      xfilter = NULL,
+                      xfiltervar = NULL,
+                      othertabnms = NULL,
+	                    uniqueid = "PLT_CN",
+                      vardelete = NULL,
+                      title.filter = NULL,
+                      savedata = FALSE,
+	                    filternm = NULL,
+                      stopifnull = FALSE,
+                      returnDT = TRUE,
                       xnm = NULL,
-	                    savedata_opts = NULL, 
+	                    savedata_opts = NULL,
                       gui = FALSE) {
 
 
@@ -83,7 +83,7 @@ datFilter <- function(x,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- names(formals(datFilter)) 
+  formallst <- names(formals(datFilter))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -93,12 +93,12 @@ datFilter <- function(x,
   pcheck.params(input.params, savedata_opts=savedata_opts)
 
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
-  
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
+
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
   }
-  
+
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
     for (i in 1:length(savedata_opts)) {
@@ -128,18 +128,18 @@ datFilter <- function(x,
     isdt <- TRUE
     xkey <- key(x)
   }
-  datx <- pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE, 
+  datx <- pcheck.table(x, caption = "Data table?", gui=gui, stopifnull=TRUE,
 			tabnm=xnm)
 
 
-  ## Check savedata 
-  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?", 
+  ## Check savedata
+  savedata <- pcheck.logical(savedata, varnm="savedata", title="Save data table?",
 		first="NO", gui=gui)
 
   ## Check output parameters
   if (savedata) {
-    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
-        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn,
+        out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date,
 		    overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
 		    add_layer=add_layer, append_layer=append_layer, gui=gui)
     outfolder <- outlst$outfolder
@@ -153,8 +153,8 @@ datFilter <- function(x,
       out_layer <- "datf"
     }
   }
-  
-  ################################################################################  
+
+  ################################################################################
   ### DO WORK
   ################################################################################
   xfilters <- {}
@@ -169,14 +169,14 @@ datFilter <- function(x,
     indat <- subset(datx, eval(parse(text = xfilter)))
     xfilters <- xfilter
 
-    ## If filter removes all records, print warning. 
+    ## If filter removes all records, print warning.
     ## If gui=TRUE, use gui to prompt user; if gui=FALSE, return NULL values
     if (nrow(indat) == 0) {
       message("filter removed all records")
       if (stopifnull) stop("")
       if (!gui) {
         return(list(xf = NULL, xfilters = NULL))
-      } else { 
+      } else {
         xfilter <- xfilters <- NULL
       }
     } else if(nrow(indat) == nrow(datx)) {
@@ -207,7 +207,7 @@ datFilter <- function(x,
         cnt <- cnt + 1
         if (!is.null(xfiltervar)) response <- "NO"
         xfilterlst <- xfilterlst[!xfilterlst %in% xfiltervars]
-    
+
         if (is.null(xfiltervar)) {
           title <- "Filter variable"
           if (!is.null(title.filter)) title <- paste(title, "-", title.filter)
@@ -227,29 +227,29 @@ datFilter <- function(x,
           xfiltervars <- c(xfiltervars, xfiltervar)
           if (xfiltervar != "SPCD" && is.numeric(datx[[xfiltervar]]) && length(xfiltervals) > 50) {
             xfiltervals <- as.character(sort(unique(datx[[xfiltervar]])))
-            filterval_min <- select.list(xfiltervals, title = paste("Select MIN", xfiltervar), 
+            filterval_min <- select.list(xfiltervals, title = paste("Select MIN", xfiltervar),
               	multiple=FALSE)
             if (filterval_min == "") stop("")
             xfiltervals <- xfiltervals[as.numeric(xfiltervals) >= as.numeric(filterval_min)]
-            filterval_max <- select.list(xfiltervals, title = paste("Select MAX", xfiltervar), 
+            filterval_max <- select.list(xfiltervals, title = paste("Select MAX", xfiltervar),
               	multiple = FALSE)
             if (filterval_max == "") stop("")
 
-            xfiltertxt <- paste0("(", xfiltervar, " >= ", filterval_min, " & ", xfiltervar, 
+            xfiltertxt <- paste0("(", xfiltervar, " >= ", filterval_min, " & ", xfiltervar,
             	" <= ", filterval_max, ")")
           } else {
             xfiltervals <- sort(unique(datx[[xfiltervar]]))
             title <- "Filter value(s)"
             if (!is.null(title.filter)) title <- paste(title, "-", title.filter)
             xfilterval <- select.list(xfiltervals, title = title, multiple = TRUE)
-            xfiltertxt <- paste(xfiltervar, "%in% c(", addcommas(xfilterval, 
+            xfiltertxt <- paste(xfiltervar, "%in% c(", addcommas(xfilterval,
 				quotes = TRUE), ")")
           }
-		
+
           # Subset indat
           indat <- subset(datx, eval(parse(text = xfiltertxt)))
           #indat <- datx[eval(parse(text = xfiltertxt)),]
- 
+
           if (length(xfilters > 1)) {
             xfilters <- paste(xfilters, "&", xfiltertxt)
           } else {
@@ -271,7 +271,7 @@ datFilter <- function(x,
       indat <- datx
     }
   }
-  indatids <- indat[[uniqueid]] 
+  indatids <- indat[[uniqueid]]
 
   ## Clip othertables
   if (!is.null(othertabnms)) {
@@ -280,37 +280,37 @@ datFilter <- function(x,
       stop("invalid othertabnms: ", paste(miss, collapse=", "))
     }
     othertabs <- lapply(othertabnms, function(x) get(x, envir=environment()))
-    intabs <- clip.othertables(indatids, othertabnms, othertabs=othertabs, 
-		      savedata=savedata, outfolder=outfolder, overwrite=overwrite, 
+    intabs <- clip.othertables(indatids, othertabnms, othertabs=othertabs,
+		      savedata=savedata, outfolder=outfolder, overwrite=overwrite_layer,
 		      outfn.pre=outfn.pre, outfn.date=outfn.date)
   }
 
-  #### WRITE TO FILE 
+  #### WRITE TO FILE
   #############################################################
   if (savedata) {
-    datExportData(indat, 
-            savedata_opts=list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
+    datExportData(indat,
+            savedata_opts=list(outfolder=outfolder,
+                                out_fmt=out_fmt,
+                                out_dsn=out_dsn,
                                 out_layer=out_layer,
-                                outfn.pre=outfn.pre, 
-                                outfn.date=outfn.date, 
+                                outfn.pre=outfn.pre,
+                                outfn.date=outfn.date,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 add_layer=TRUE))
   }
-  
+
   if (!returnDT) {
-    indat <- data.frame(indat)  
+    indat <- data.frame(indat)
   } else {
     if (isdt && !is.null(xkey)) {
       indat <- data.table(indat)
       setkeyv(indat, xkey)
     }
   }
-    
+
   returnlst <- list(xf = indat, xfilter = xfilters)
   if (!is.null(intabs)) returnlst$cliptabs <- intabs
-  
+
   return(returnlst)
 }

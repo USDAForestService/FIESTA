@@ -80,7 +80,7 @@ FIESTA_3.0.21 (Release date: 2021-05-06)
 Fixed bug in spGetStrata when using more than one NODATA value.
 
 Added ability to output results in metric units.
-- Added a column to FIESTA::ref_estvar, named METRIC, to identify metric units.
+- Added a column to FIESTAutils::ref_estvar, named METRIC, to identify metric units.
 - Added a reference table (FIESTA::ref_conversion) to get conversion factors.
 - Added a logical parameter, metric (TRUE/FALSE) to datSumTree and datSumTreeDom functions 
 	to define output units as English or metric. 

@@ -257,7 +257,7 @@ DBgetEvalid <- function(states = NULL,
     RS <- pcheck.varchar(var2check=RS, varnm="RS", 
 		checklst=rslst, caption="Research Unit?", gui=gui, multiple=TRUE)
     if (!is.null(RS) && !is.null(states)) {     
-      RSstatelst <- FIESTA::ref_statecd[FIESTA::ref_statecd$RS %in% RS,"MEANING"]
+      RSstatelst <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$RS %in% RS,"MEANING"]
       if (!all(states %in% RSstatelst)) {
         msg <- paste("RS and states are invalid...", 
 			toString(states[!states %in% RSstatelst]))
@@ -277,7 +277,7 @@ DBgetEvalid <- function(states = NULL,
     }
     stcdlst <- pcheck.states(states, "VALUE")
   }
-  rslst <- unique(FIESTA::ref_statecd[match(states, FIESTA::ref_statecd$MEANING), 
+  rslst <- unique(FIESTAutils::ref_statecd[match(states, FIESTAutils::ref_statecd$MEANING), 
 		"RS"])
   rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
   rslst <- unique(rslst)

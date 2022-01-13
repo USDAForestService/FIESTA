@@ -38,13 +38,13 @@
 #' If savedata = TRUE, a comma-delimited file is output to the outfolder as
 #' outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.
 #' @note For available reference tables:
-#' sort(unique(FIESTA::ref_codes$VARIABLE))
+#' sort(unique(FIESTAutils::ref_codes$VARIABLE))
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
 #' 
 #' 	## Append forest type names using the reference table above
-#' 	ref_fortypcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "FORTYPCD",]
+#' 	ref_fortypcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "FORTYPCD",]
 #' 	WYcondlut <- datLUTnm(FIESTA::WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, 
 #' 		LUTvar="VALUE", LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
 #' 	names(WYcondlut)
@@ -121,7 +121,7 @@ datLUTnm <- function(x,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  ref_codes <- FIESTA::ref_codes
+  ref_codes <- FIESTAutils::ref_codes
 
   ## Check datx
   ########################################################

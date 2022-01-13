@@ -445,7 +445,7 @@
 #'   names(UTdat3)
 #'   UTdat3$pltcnt
 #' 
-#'   plot(sf::st_geometry(FIESTA::stunitco[FIESTA::stunitco$STATENM == "Utah",]),
+#'   plot(sf::st_geometry(FIESTAutils::stunitco[FIESTAutils::stunitco$STATENM == "Utah",]),
 #' 		border="light grey")
 #'   plot(sf::st_geometry(UTdat3$spxy_PUBLIC), add=TRUE, pch=18, cex=.5)
 #' 
@@ -1665,7 +1665,7 @@ DBgetPlots <- function (states = NULL,
 
         ## Additional condition variables
         ######################################################################
-        ref_fortypgrp <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "FORTYPCD",]
+        ref_fortypgrp <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "FORTYPCD",]
 
         ## FORTYPGRP: condition level variable grouping FORTYPCD
         cndnames <- names(condx)

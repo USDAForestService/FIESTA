@@ -187,7 +187,7 @@ puniqueid \tab Unique identifier for each plot, to link to cond (ex. CN).\cr
 PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled).  If not
 included, all plots are assumed as sampled.\cr }
 
-For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
+For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 }
 \note{
 ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for

@@ -128,7 +128,7 @@ A minimum of 2 plots per strata is necessary for stratification. If there are le
 <a name="out1"></a>
 **Output table information**
 
-The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the rowvar must be populated, leaving the colvar=NULL. Row and columns may be filtered to display specific values (rowvar.filter/colvar.filter) and may be ordered in a particular way, defined by row.orderby and col.orderby variables. A default set of code names are stored internally (FIESTA::ref_codes).
+The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the rowvar must be populated, leaving the colvar=NULL. Row and columns may be filtered to display specific values (rowvar.filter/colvar.filter) and may be ordered in a particular way, defined by row.orderby and col.orderby variables. A default set of code names are stored internally (FIESTAutils::ref_codes).
 
 * **rowvar**        - Name of row variable (domain). If area estimate, rowvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, rowvar can be from cond or tree (e.g., SPCD).
 * **rowvar.filter** - Row filter. Must be R syntax (e.g., FORTYPCD %in% 200:300).

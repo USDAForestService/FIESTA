@@ -75,7 +75,7 @@
 #' @param lbs2tons Logical. If TRUE, converts biomass or carbon variables from
 #' pounds to tons.
 #' @param metric Logical. If TRUE, converts response to metric units based on
-#' FIESTA::ref_conversion, if tsumvar is in FIESTA::ref_estvar. Note: if TPA,
+#' FIESTA::ref_conversion, if tsumvar is in FIESTAutils::ref_estvar. Note: if TPA,
 #' TPA is converted to trees per hectare (TPH: 1 / (1/ tpavar * 0.4046860)).
 #' @param tdomvar String. The tree domain (tdom) variable used to aggregate by
 #' (e.g., "SPCD", "SPGRPCD").
@@ -223,7 +223,7 @@ datSumTreeDom <- function(tree = NULL,
   checkNAtvars <- {}
   seedclnm <- "<1"
   seedonly=parameters <- FALSE
-  ref_estvar <- FIESTA::ref_estvar
+  ref_estvar <- FIESTAutils::ref_estvar
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
@@ -1274,11 +1274,11 @@ datSumTreeDom <- function(tree = NULL,
   names(tdomvarlut) <- c(byvars, newname, nvar)
 
   if (tdomvar == "SPCD") {
-    ref_spcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPCD", c("VALUE", "MEANING")]
+    ref_spcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "SPCD", c("VALUE", "MEANING")]
     tdomvarlut <- merge(ref_spcd, tdomvarlut, by.x="VALUE", by.y="SPCD")
     names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPCD", "SPNM")
   } else if (tdomvar == "SPGRPCD") {
-    ref_spgrpcd <- FIESTA::ref_codes[FIESTA::ref_codes$VARIABLE == "SPGRPCD", c("VALUE", "MEANING")]
+    ref_spgrpcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "SPGRPCD", c("VALUE", "MEANING")]
     tdomvarlut <- merge(ref_spgrpcd, tdomvarlut, by.x="VALUE", by.y="SPGRPCD")
     names(tdomvarlut)[names(tdomvarlut) %in% c("VALUE", "MEANING")] <- c("SPGRPCD", "SPGRPNM")
   }        

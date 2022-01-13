@@ -59,7 +59,7 @@ data frame.}
 \item{xnm}{String. Name for filter attribute. Used for warning messages.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
-of options. Only used when savedata = TRUE.  If out_layer = NULL, 
+of options. Only used when savedata = TRUE.  If out_layer = NULL,
 default = 'datf'.}
 
 \item{gui}{Logical. If TRUE, pop-up windows will appear for user-interface.}
@@ -83,11 +83,11 @@ removed all records in x or the filter is incorrect.
 }
 \examples{
 
-	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1), 
+	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1),
 			FORTYPCD = c(182,184,201,221,221,184,221,182,182,201,182,221)))
 	datFilter(x = tab, xfilter = "FORTYPCD != 182")
 
-	datFilter(x = FIESTA::WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
+	datFilter(x = WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
 
 
 }
