@@ -169,8 +169,8 @@ The `spImportSpatial` function imports a spatial layer (e.g., ESRI Shapefile) to
 
 ```{r}
 ## Import external data shapefiles
-WYbh <- FIESTA::spImportSpatial(WYbhfn)
-WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
+WYbh <- spImportSpatial(WYbhfn)
+WYbhdist <- spImportSpatial(WYbhdistfn)
 
 ## Display boundary
 plot(sf::st_geometry(WYbhdist), border="blue")
@@ -189,12 +189,10 @@ The `spExportSpatial` function exports an `sf` object.
   
 ```{r}
 ## Export Spatial Polygons layer to a shapefile
-spExportSpatial(WYbh,
-                  savedata_opts = list(
-                        out_dsn = "WYbh.shp", 
-                        outfolder = outfolder,
-                        overwrite_dsn = TRUE
-                        )
+spExportSpatial(WYbh, 
+                savedata_opts = list(out_dsn = "WYbh.shp", 
+                                     outfolder = outfolder, 
+                                     overwrite_dsn = TRUE)
                 )
 
 ```
@@ -211,12 +209,12 @@ The `spMakeSpatialPoints` function generates an `sf` points object with a define
 ```{r}
 head(WYplt)
 
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt = WYplt,
-                                       xy.uniqueid = "CN",
-                                       xvar = "LON_PUBLIC", 
-                                       yvar = "LAT_PUBLIC",
-                                       prj = "longlat",
-                                       datum = "NAD83")
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               prj = "longlat", 
+                               datum = "NAD83")
 head(WYspplt)
 
 ```
@@ -224,12 +222,12 @@ head(WYspplt)
 We can also use EPSG code with `spMakeSpatialPoints`.
 
 ```{r}        
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt = WYplt, 
-                                       xy.uniqueid = "CN", 
-                                       xvar = "LON_PUBLIC", 
-                                       yvar = "LAT_PUBLIC", 
-                                       xy.crs = 4269
-                                       )
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               xy.crs = 4269
+                               )
 WYspplt 
 
 ```        
@@ -276,8 +274,8 @@ The `spReprojectVector` function reprojects a spatial vector layer. Note: The la
 ```{r}
 sf::st_crs(WYspplt)
 prj <- "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
-WYspplt.utm12 <- FIESTA::spReprojectVector(layer = WYspplt,
-                                           crs.new = prj)
+WYspplt.utm12 <- spReprojectVector(layer = WYspplt, 
+                                   crs.new = prj)
         
 ## Check results
 sf::st_crs(WYspplt.utm12)
@@ -295,29 +293,27 @@ The `spClipPoint` function subsets `SpatialPoints` or point file with a Spatial 
 ```{r}
 ## Get points within Bighorn National Forest boundary (project on the fly)
 
-WYbhptslst <- FIESTA::spClipPoint(xyplt = WYplt, 
-                                  uniqueid = "CN",
-                                  clippolyv = WYbh, 
-                                  spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                        yvar = "LAT_PUBLIC", 
-                                        prj = "longlat", 
-                                        datum = "NAD83")
-                                  )
+WYbhptslst <- spClipPoint(xyplt = WYplt, 
+                          uniqueid = "CN", 
+                          clippolyv = WYbh, 
+                          spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
+                                                  yvar = "LAT_PUBLIC", 
+                                                  prj = "longlat", 
+                                                  datum = "NAD83")
+                          )
 
 WYbhptslst <- spClipPoint(xyplt = WYplt, 
-                                  uniqueid = "CN",
-                                  clippolyv = WYbh, 
-                                  savedata = TRUE,
-                                  exportsp = TRUE, 
-                                  spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                        yvar = "LAT_PUBLIC", 
-                                        prj = "longlat", 
-                                        datum = "NAD83"),
-                                  savedata_opts = list(
-                                        outfolder=outfolder,
-                                        out_layer = "WYbh"
-                                        )
-                                  )
+                          uniqueid = "CN", 
+                          clippolyv = WYbh, 
+                          savedata = TRUE, 
+                          exportsp = TRUE, 
+                          spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
+                                                  yvar = "LAT_PUBLIC", 
+                                                  prj = "longlat", 
+                                                  datum = "NAD83"), 
+                          savedata_opts = list(outfolder=outfolder, 
+                                               out_layer = "WYbh")
+                          )
 
 names(WYbhptslst)
 WYbhspplt <- WYbhptslst$clip_xyplt
@@ -338,11 +334,11 @@ Note: If the projection of spplt is not the same as the points layer, the points
 Now we generate a sf object first, then clip `sf` points with the `spClipPoint` function:
 
 ```{r}
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt = WYplt,
-                                       xy.uniqueid = "CN",
-                                       xvar = "LON_PUBLIC", 
-                                       yvar = "LAT_PUBLIC",
-                                       xy.crs = 4269)
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               xy.crs = 4269)
 WYbhptslst <- spClipPoint(xyplt = WYspplt, 
                           uniqueid = "CN",
                           clippolyv = WYbh)
@@ -351,10 +347,10 @@ WYbhptslst <- spClipPoint(xyplt = WYspplt,
 We can also subset other tales with clipped points. 
 
 ```{r}
-WYbhptslst <- FIESTA::spClipPoint(xyplt = WYspplt,
-                                  uniqueid = "CN",
-                                  clippolyv = WYbh, 
-                                  othertabnms = c("WYcond", "WYtree"))
+WYbhptslst <- spClipPoint(xyplt = WYspplt, 
+                          uniqueid = "CN", 
+                          clippolyv = WYbh, 
+                          othertabnms = c("WYcond", "WYtree"))
 
 names(WYbhptslst)
 
@@ -364,32 +360,31 @@ Next, we can export clipped points.
 
 ```{r} 
 ## Export clipped points
-FIESTA::spExportSpatial(WYbhspplt,
-                        savedata_opts = list(
-                            out_layer = "WYbhpts", 
-                            outfolder = outfolder, 
-                            overwrite_layer = TRUE)
-                        )
+spExportSpatial(WYbhspplt, 
+                savedata_opts = list(out_layer = "WYbhpts", 
+                                     outfolder = outfolder, 
+                                     overwrite_layer = TRUE)
+                )
 
 ```
 
 Finally, we can get points within Bighorn National Forest boundary (project on the fly) and save to an outfolder. 
 
 ```{r}
-WYbhptslst <- spClipPoint(xyplt = WYplt,
-                                  uniqueid = "CN",
-                                  clippolyv = WYbh, 
-                                  othertabnms = c("WYcond", "WYtree"),
-                                  exportsp = TRUE,
-                                  spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
+WYbhptslst <- spClipPoint(xyplt = WYplt, 
+                          uniqueid = "CN", 
+                          clippolyv = WYbh, 
+                          othertabnms = c("WYcond", "WYtree"), 
+                          exportsp = TRUE, 
+                          spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
                                         yvar = "LAT_PUBLIC", 
                                         prj = "longlat", 
-                                        datum = "NAD83"),
-                                  savedata_opts = list(
+                                        datum = "NAD83"), 
+                          savedata_opts = list(
                                         outfolder = outfolder, 
                                         overwrite_layer = TRUE,
                                         outfn.pre = "clip")
-                                  )
+                          )
 names(WYbhptslst)
 
 ```
@@ -405,7 +400,7 @@ The `spClipPoly` function clips (intersects) a polygon vector layer with another
 We first subsect the USAco `SpatialPolygons` layer with `WYbighorn`. Note: you must download USAco from the `raster` package. See the "Set Up" section above.
   
 ```{r}
-WYbhco <- FIESTA::spClipPoly(polyv = USAco,
+WYbhco <- spClipPoly(polyv = USAco,
                              clippolyv = WYbh)
 
 ```
@@ -442,15 +437,15 @@ plot(st_geometry(WYbhMW), border="red", add=TRUE)
 Next, we can clip the raster. Note: If the projection of `polyv` is not the same as `rast`, `polyv` will by reprojected to the same projection as `rast` before clipping (See note in the help file for more details).
 
 ```{r}
-WYbhMW.fornf <- FIESTA::spClipRast(fornffn,
-                                   clippolyv = WYbhMW,
-                                   outfolder = outfolder)
+WYbhMW.fornf <- spClipRast(fornffn, 
+                           clippolyv = WYbhMW, 
+                           outfolder = outfolder)
 ```
 
 Finally, we display the results:
 ```{r}
-WYbhMWprj <- FIESTA:::crsCompare(WYbhMW,
-                                 FIESTA:::rasterInfo(WYbhMW.fornf)$crs)$x
+WYbhMWprj <- crsCompare(WYbhMW, 
+                        rasterInfo(WYbhMW.fornf)$crs)$x
 raster::plot(raster::raster(WYbhMW.fornf))
 plot(st_geometry(WYbhMWprj), 
      border = "red", 
@@ -469,9 +464,9 @@ The `spExtractPoly` function subsets a `SpatialPolygons` layer with another `Spa
 First, we extract polygon attributes from `WYbighorn` to `WYpts`, keeping `NULL` values. Note: If the projection of `spplt` is not the same as the `SpatialPoints`, the `SpatialPoints` layer will be reprojected to the same projection as `clippolyv` before the evaluation points (See the note in help file for more details).
 
 ```{r}
-extpolylst <- FIESTA::spExtractPoly(WYspplt,
-                                    xy.uniqueid = "CN",
-                                    polyvlst = WYbhdist)
+extpolylst <- spExtractPoly(WYspplt, 
+                            xy.uniqueid = "CN", 
+                            polyvlst = WYbhdist)
 WYspplt_bh <- extpolylst$spxyext
 
 dim(WYspplt)
@@ -485,11 +480,11 @@ plot(WYspplt_bh["DISTRICTNA"], pch = 8)
 Next we can extract a subset of polygon attributes from `WYbighorn` to `WYpts`, not keeping `NULL` values.
 
 ```{r}
-extpolylst <- FIESTA::spExtractPoly(WYspplt,
-                                    xy.uniqueid = "CN",
-                                    polyvlst = WYbh, 
-                                    polyvarlst = c("FORESTNUMB", "FORESTNAME"),
-                                    keepNA = FALSE)
+extpolylst <- spExtractPoly(WYspplt, 
+                            xy.uniqueid = "CN", 
+                            polyvlst = WYbh, 
+                            polyvarlst = c("FORESTNUMB", "FORESTNAME"), 
+                            keepNA = FALSE)
 WYspplt_bh2 <- extpolylst$spxyext
 
 dim(WYspplt)
@@ -510,10 +505,10 @@ The `spExtractRast` function subsets a `SpatialPolygons` layer with another `Spa
 We can extract raster values from `WYdem` to `WYpts`, not keeping `NULL` values.
   
 ```{r}
-extrastlst <- FIESTA::spExtractRast(WYspplt,
-                                    rastlst = c(fornffn, demfn), 
-                                    xy.uniqueid = "CN",
-                                    keepNA = FALSE)
+extrastlst <- spExtractRast(WYspplt, 
+                            rastlst = c(fornffn, demfn), 
+                            xy.uniqueid = "CN", 
+                            keepNA = FALSE)
 WYspplt_dem <- extrastlst$sppltext
 
 dim(WYspplt)
@@ -542,11 +537,11 @@ The `spGetAuxiliary` function extracts data and zonal statistics for model-assis
 First we generate an `sf` object from the WY plot data, public coordinates (`xvar = "LON_PUBLIC"`, `yvar = "LAT_PUBLIC"`). Note: the public coordinate projection information is: `prj = "longlat"`, `datum = "NAD83"`.
   
 ```{r}
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt = WYplt,
-                                       xy.uniqueid = "CN",
-                                       xvar = "LON_PUBLIC", 
-                                       yvar = "LAT_PUBLIC",
-                                       xy.crs = 4269)
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               xy.crs = 4269)
 ```
 
 Next, we derive new layers from `dem`. 
@@ -574,20 +569,20 @@ rastlst.cont.name <- c("dem", "slp", "asp")
 rastlst.cat <- fornffn
 rastlst.cat.name <- "fornf"
 
-modeldat <- FIESTA::spGetAuxiliary(xyplt = WYspplt,
-                                   uniqueid = "CN",
-                                   unit_layer = WYbhfn,
-                                   unitvar = NULL,
-                                   rastlst.cont = rastlst.cont, 
-                                   rastlst.cont.name = rastlst.cont.name, 
-                                   rastlst.cat = rastlst.cat,
-                                   rastlst.cat.name = rastlst.cat.name, 
-                                   rastlst.cont.stat = "mean",
-                                   asptransform = TRUE,
-                                   rast.asp = asp,
-                                   keepNA = FALSE,
-                                   showext = FALSE, 
-                                   savedata = FALSE)
+modeldat <- spGetAuxiliary(xyplt = WYspplt, 
+                           uniqueid = "CN", 
+                           unit_layer = WYbhfn, 
+                           unitvar = NULL, 
+                           rastlst.cont = rastlst.cont, 
+                           rastlst.cont.name = rastlst.cont.name, 
+                           rastlst.cat = rastlst.cat, 
+                           rastlst.cat.name = rastlst.cat.name, 
+                           rastlst.cont.stat = "mean", 
+                           asptransform = TRUE, 
+                           rast.asp = asp, 
+                           keepNA = FALSE, 
+                           showext = FALSE, 
+                           savedata = FALSE)
 names(modeldat)
 
 pltassgn <- modeldat$pltassgn
@@ -624,9 +619,9 @@ We can extract public coordinates within WY Bighorn NF boundary, returning spati
 
 ```{r}
 WYbhxy <- spGetXY(bnd = WYbhfn, 
-                      xy_datsource = "datamart", 
-                      evalCur = TRUE,
-                      returnxy = TRUE)
+                  xy_datsource = "datamart", 
+                  evalCur = TRUE, 
+                  returnxy = TRUE)
 names(WYbhxy)
 
 pltids <- WYbhxy$pltids
@@ -643,9 +638,9 @@ Or, returning only nonspatial plot identifiers (pltids).
 ```{r}
 
 WYbhxyids <- spGetXY(bnd = WYbhfn, 
-                      xy_datsource = "datamart", 
-                      evalCur = TRUE,
-                      returnxy = FALSE)
+                     xy_datsource = "datamart", 
+                     evalCur = TRUE, 
+                     returnxy = FALSE)
 names(WYbhxyids)
 
 pltids <- WYbhxyids$pltids
@@ -687,11 +682,11 @@ The `spGetEstUnit` function extracts estimation unit values to plots and calcula
   
 First, we create a `SpatialPoints` object from `WYplt`
 ```{r}
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt = WYplt,
-                                       xy.uniqueid = "CN",
-                                       xvar = "LON_PUBLIC", 
-                                       yvar = "LAT_PUBLIC",
-                                       xy.crs = 4269)
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               xy.crs = 4269)
 xyplt <- WYspplt
 ```
 
@@ -700,14 +695,14 @@ xyplt <- WYspplt
 We now get estimation unit acres for Bighorn National Forest.
 
 ```{r}
-unitdat.bh <- FIESTA::spGetEstUnit(xyplt = WYplt, 
-                                   uniqueid = "CN", 
-                                   unit_layer = WYbhfn,
-                                   spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                        yvar = "LAT_PUBLIC", 
-                                        prj = "longlat", 
-                                        datum = "NAD83")
-                                   )
+unitdat.bh <- spGetEstUnit(xyplt = WYplt, 
+                           uniqueid = "CN", 
+                           unit_layer = WYbhfn, 
+                           spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
+                                                   yvar = "LAT_PUBLIC", 
+                                                   prj = "longlat", 
+                                                   datum = "NAD83")
+                           )
 
 names(unitdat.bh)
 unitarea.bh <- unitdat.bh$unitarea
@@ -725,15 +720,15 @@ areavar.bh
 We now get estimation unit acres and strata information for Bighorn National Forest.
 
 ```{r}
-unitdat.bhdist <- FIESTA::spGetEstUnit(xyplt = WYplt,
-                                       uniqueid = "CN",
-                                       unit_layer = WYbhdistfn,
-                                       unitvar = "DISTRICTNA",
-                                       spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
-                                          yvar = "LAT_PUBLIC", 
-                                          prj = "longlat", 
-                                          datum = "NAD83")
-                                       )
+unitdat.bhdist <- spGetEstUnit(xyplt = WYplt, 
+                               uniqueid = "CN", 
+                               unit_layer = WYbhdistfn, 
+                               unitvar = "DISTRICTNA", 
+                               spMakeSpatial_opts=list(xvar = "LON_PUBLIC", 
+                                                       yvar = "LAT_PUBLIC", 
+                                                       prj = "longlat", 
+                                                       datum = "NAD83")
+                               )
 
 names(unitdat.bhdist)
 unitarea.bhdist <- unitdat.bhdist$unitarea
@@ -759,22 +754,22 @@ The `spGetStrata` function is a wrapper to extract attribute and area from a pol
 First, we generate an `sf` object from the WY plot data, public coordinates (`xvar = "LON_PUBLIC"`, `yvar = "LAT_PUBLIC"`). Note: The public coordinate projection information is: `prj = "longlat"`, `datum = "NAD83"`.
 
 ```{r}
-WYspplt <- FIESTA::spMakeSpatialPoints(xyplt = WYplt, 
-                                       xy.uniqueid = "CN",
-                                       xvar = "LON_PUBLIC", 
-                                       yvar = "LAT_PUBLIC",
-                                       xy.crs = 4269)
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               xy.crs = 4269)
 ```
 
 Next, we extract polygon attributes from `WYbighorn` to `WYpts`, keeping `NULL` values.
 
 ```{r}
-stratlst <- FIESTA::spGetStrata(WYspplt,
-                                uniqueid = "CN", 
-                                unittype = "POLY",
-                                unit_layer = WYbhfn,
-                                strattype = "RASTER", 
-                                strat_layer = fornffn) 
+stratlst <- spGetStrata(WYspplt, 
+                        uniqueid = "CN", 
+                        unittype = "POLY", 
+                        unit_layer = WYbhfn, 
+                        strattype = "RASTER", 
+                        strat_layer = fornffn) 
 names(stratlst) 
 stratlst$stratalut
 ```
@@ -792,11 +787,11 @@ The `spUnionPoly` function generates a unioned `sf` object with polygons and att
 First, we import spatial data with `spImportSpatial`, and then extract polygon attributes from `WYbighorn` to `WYpts`, keeping `NULL` values.
   
 ```{r}
-WYbh <- FIESTA::spImportSpatial(WYbhfn)
+WYbh <- spImportSpatial(WYbhfn)
 
-polyUnion <- FIESTA::spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 
-                                 polyv2 = WYbh, 
-                                 areacalc=TRUE)
+polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 
+                         polyv2 = WYbh, 
+                         areacalc=TRUE)
 
 plot(st_geometry(polyUnion))
 head(polyUnion)
@@ -814,12 +809,12 @@ The `spZonalRast` function extracts summary statistics by polygon (i.e., zone).
 First, we import spatial data with `spImportSpatial`, and then extract polygon attributes from `WYbighorn` to `WYpts`, keeping `NULL` values.
 
 ```{r}
-WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
+WYbhdist <- spImportSpatial(WYbhdistfn)
 
-zonallst <- FIESTA::spZonalRast(polyv = WYbhdist,
-                                polyv.att = "DISTRICTNA", 
-                                rastfn = demfn, 
-                                zonalstat = c("mean", "sum")) 
+zonallst <- spZonalRast(polyv = WYbhdist, 
+                        polyv.att = "DISTRICTNA", 
+                        rastfn = demfn, 
+                        zonalstat = c("mean", "sum")) 
 names(zonallst) 
 
 zonalext <- zonallst$zonalext
