@@ -1,7 +1,47 @@
-spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filters=NULL,
-	stbnd=NULL, stbnd_dsn=NULL, stbnd.att=NULL, stname.att="STATENM",
-	RS=NULL, states=NULL, overlap=1, showsteps=FALSE, savebnd=FALSE,
-	outfolder=NULL, ...) {
+#' Spatial wrapper - Extracts states that intersect a boundary.
+#' 
+#' Wrapper to get state names that intersect a given boundary.
+#' 
+#' @param bnd_layer sf R object, Area of Interest (AOI) boundary. Can be a spatial 
+#' sf object, full pathname to a shapefile, or name of a layer within a database.
+#' @param bnd_dsn String. Data source name (dsn; e.g., SQLite database or shapefile
+#' pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html). 
+#' @param bnd.filter String. Filter to subset bnd spatial layer.
+#' @param stbnd sf R object, State boundary to use for intersection. If NULL, 
+#' FIESTAutils::stunitco is used. Can be a spatial 
+#' sf object, full pathname to a shapefile, or name of a layer within a database.
+#' @param stbnd_dsn String. Data source name (dsn; e.g., SQLite database or shapefile
+#' pathname) of stbnd. The dsn varies by driver. See gdal OGR vector formats
+#' (https://www.gdal.org/ogr_formats.html).
+#' @param stbnd.att String. Attribute in stbnd to output.
+#' @param stname.att String. Attribute in stbnd to identify state.
+#' @param RS String. Name of FIA research station to restrict states to
+#' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
+#' included.
+#' @param states String. States to subset boundary to.
+#' @param overlap Number. Percent overlap to include.
+#' @param showsteps Logical. If yes, display intersecting boundaries.
+#' @param savebnd Logical. If yes, save boundary to outfolder.
+#' @param savedata_opts List. See help(savedata_options()) for a list
+#' of options. Only used when savebnd = TRUE. 
+#'
+#' @author Tracey S. Frescino
+#' @keywords data
+#' @export spGetStates
+spGetStates <- function(bnd_layer, 
+                        bnd_dsn = NULL, 
+                        bnd.filter = NULL, 
+                        stbnd = NULL, 
+                        stbnd_dsn = NULL, 
+                        stbnd.att = "COUNTYFIPS", 
+                        stname.att = "STATENM", 
+                        RS = NULL, 
+                        states = NULL, 
+                        overlap = 1, 
+                        showsteps = FALSE, 
+                        savebnd = FALSE, 
+                        savedata_opts = NULL) {
 
   ##############################################################################
   ## DESCRIPTION
@@ -9,6 +49,59 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filters=NULL,
   ## clipped to RS states.
   ##############################################################################
 
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
+  
+  ## Check input parameters
+  input.params <- names(as.list(match.call()))[-1]
+  formallst <- names(formals(spGetStates))
+  if (!all(input.params %in% formallst)) {
+    miss <- input.params[!input.params %in% formallst]
+    stop("invalid parameter: ", toString(miss))
+  }
+  
+  
+  ## Check parameter lists
+  pcheck.params(input.params, savedata_opts=savedata_opts)
+  
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    for (i in 1:length(savedata_opts)) {
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+    }
+  }
+  
+  
+  ## Check savedata
+  #############################################################################
+  savebnd <- pcheck.logical(savebnd, varnm="savebnd", 
+                             title="Save boundary?", first="NO", gui=gui) 
+  
+  ## Check overwrite, outfn.date, outfolder, outfn 
+  ########################################################
+  if (savebnd) {
+    outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
+                            out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
+                            overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
+                            add_layer=add_layer, append_layer=append_layer, gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
+    overwrite_layer <- outlst$overwrite_layer
+    append_layer <- outlst$append_layer
+    outfn.date <- outlst$outfn.date
+    outfn.pre <- outlst$outfn.pre
+  }
+  
+  
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################
@@ -160,7 +253,7 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filters=NULL,
       }
     }
     if (!is.null(stname.att)) {
-      bndx <- FIESTA::spClipPoly(bndx, 
+      bndx <- spClipPoly(bndx, 
                     clippolyv=stbnd[stbnd[[stname.att]] %in% statenames, ])
       if (nrow(bndx) == 0) stop("invalid stname.att")
     }
@@ -172,12 +265,12 @@ spGetStates <- function(bnd_layer, bnd_dsn=NULL, bnd.filters=NULL,
 
   ## Save boundary
   if (savebnd) {
-    FIESTA::spExportSpatial(bndx, 
-                            outfolder=outfolder, 
-                            out_layer="bnd", ...)
+    spExportSpatial(bndx, 
+                    outfolder=outfolder, 
+                    out_layer="bnd")
   }
+  
   return(list(states=states, bndx=bndx, stbnd.att=stbnd.att, statenames=statenames))
-
 }
 
 
