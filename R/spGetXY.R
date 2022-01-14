@@ -295,11 +295,17 @@ spGetXY <- function(bnd,
     evalid <- unlist(evalid)
     stcds <- unique(as.numeric(substr(evalid, nchar(evalid)-6, nchar(evalid)-4))) 
     savePOP <- TRUE
+    statenames <- pcheck.states(stcds, "MEANING")
   } else if (!is.null(states)) {
     if (!all(states %in% FIESTAutils::ref_statecd$MEANING))
       stop("states is invalid")
     statenames <- states
+<<<<<<< Updated upstream
     stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% states]
+=======
+    stcds <- pcheck.states(states, "VALUE")
+
+>>>>>>> Stashed changes
   } else if (!is.null(bndx)) {
     ## Get intersecting states
  
