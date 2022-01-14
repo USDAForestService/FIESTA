@@ -102,7 +102,8 @@
 #' coordinates is saved to outfolder (xyplt).\cr 
 #' If savedata=TRUE and returnxy=FALSE, the plt data frame, without XY 
 #' coordinates is saved to outfolder (pltids).\cr
-#' If savedata=TRUE and returnxy=TRUE and exportsp=TRUE, the spxy sf object is exported as shapefile to outfolder.\cr
+#' If savedata=TRUE and returnxy=TRUE and exportsp=TRUE, the spxy sf object is 
+#' exported as shapefile to outfolder.\cr
 #' @note
 #' 
 #' If savebnd=TRUE:\cr If out_fmt=c('csv','shp'), the writeOGR (rgdal) function
@@ -116,6 +117,7 @@
 #' https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php for details).
 #' The zip files are extracted on-the-fly from the online website. Web server
 #' connections will affect download speeds.
+#' 
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @export spGetXY
@@ -189,7 +191,7 @@ spGetXY <- function(bnd,
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -206,7 +208,6 @@ spGetXY <- function(bnd,
   ## CHECK PARAMETER INPUTS
   ##################################################################################
   
-
   ## Import boundary
   ########################################################
   bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
@@ -263,8 +264,7 @@ spGetXY <- function(bnd,
   ## Check savedata
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
-		title="Save data?", first="NO", gui=gui) 
- 
+                             title="Save data?", first="NO", gui=gui) 
  
   if (savedata && returnxy) {
     ## Check exportsp
@@ -300,12 +300,8 @@ spGetXY <- function(bnd,
     if (!all(states %in% FIESTAutils::ref_statecd$MEANING))
       stop("states is invalid")
     statenames <- states
-<<<<<<< Updated upstream
-    stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% states]
-=======
     stcds <- pcheck.states(states, "VALUE")
 
->>>>>>> Stashed changes
   } else if (!is.null(bndx)) {
     ## Get intersecting states
  
