@@ -572,6 +572,7 @@ treesum4a <- treesumdat4a$treedat
 head(treesum4a)
 ```
 
+
 </details>
 
 #### Example 4b: Adjust Summed Live Tree Volume to Account for Nonsampled Conditions on Plot
@@ -617,7 +618,6 @@ treesum4c <- treesumdat4c$treedat
 
 cn <- 40407815010690
 WYcond[WYcond$PLT_CN == cn, ]
-WYtree[WYtree$PLT_CN == cn, c(1:8,16,23)]
 treesum4b[treesum4b$CN == cn, ]
 treesum4c[treesum4c$CN == cn, ]
 ```
