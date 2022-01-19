@@ -38,14 +38,14 @@
 #' If savedata = TRUE, a comma-delimited file is output to the outfolder as
 #' outfn.  If outfn = NULL, the name of the file will be datlut_'date'.csv.
 #' @note For available reference tables:
-#' sort(unique(FIESTAutils::ref_codes$VARIABLE))
+#' sort(unique(ref_codes$VARIABLE))
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
 #' 
 #' 	## Append forest type names using the reference table above
-#' 	ref_fortypcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "FORTYPCD",]
-#' 	WYcondlut <- datLUTnm(FIESTA::WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, 
+#' 	ref_fortypcd <- ref_codes[ref_codes$VARIABLE == "FORTYPCD",]
+#' 	WYcondlut <- datLUTnm(WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, 
 #' 		LUTvar="VALUE", LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
 #' 	names(WYcondlut)
 #' 	WYcond2 <- WYcondlut$xLUT
@@ -53,7 +53,7 @@
 #' 
 #' 	## Append forest type names the FIAname parameter. If the xvar is in the stored 
 #' 	##    reference table, the name and values will automatically be appended.
-#' 	WYcondlut2 <- datLUTnm(FIESTA::WYcond, xvar="FORTYPCD", FIAname=TRUE)
+#' 	WYcondlut2 <- datLUTnm(WYcond, xvar="FORTYPCD", FIAname=TRUE)
 #' 	names(WYcondlut2)
 #' 	WYcond3 <- WYcondlut2$xLUT
 #' 	head(WYcond3[WYcond3$FORTYPCD > 0, ])
@@ -64,7 +64,7 @@ datLUTnm <- function(x,
                      LUT = NULL, 
                      LUTvar = NULL, 
                      LUTnewvar = NULL, 
-	                   LUTnewvarnm = NULL, 
+                     LUTnewvarnm = NULL, 
                      FIAname = FALSE, 
                      NAclass = "Other", 
                      group = FALSE, 
@@ -105,7 +105,7 @@ datLUTnm <- function(x,
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -121,7 +121,6 @@ datLUTnm <- function(x,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  ref_codes <- FIESTAutils::ref_codes
 
   ## Check datx
   ########################################################
@@ -401,9 +400,10 @@ datLUTnm <- function(x,
   } 
  
   ## Only include xvar values that exist in x
-  if (!add0) 
+  if (!add0) {
     LUTx <-LUTx[LUTx[[LUTvar]] %in% unique(xLUT[[xvar]]), ]
-
+  }
+  
   ## Get all values of LUTx newvars
   LUTnewvar.vals <- unique(unlist(lapply(LUTx[,LUTnewvar, with=FALSE], as.character)))
 

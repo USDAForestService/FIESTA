@@ -55,16 +55,16 @@
 datFilter <- function(x,
                       xfilter = NULL,
                       xfiltervar = NULL,
-                      othertabnms = NULL,
-	                    uniqueid = "PLT_CN",
+                      othertabnms = NULL, 
+                      uniqueid = "PLT_CN",
                       vardelete = NULL,
                       title.filter = NULL,
-                      savedata = FALSE,
-	                    filternm = NULL,
+                      savedata = FALSE, 
+                      filternm = NULL,
                       stopifnull = FALSE,
                       returnDT = TRUE,
-                      xnm = NULL,
-	                    savedata_opts = NULL,
+                      xnm = NULL, 
+                      savedata_opts = NULL,
                       gui = FALSE) {
 
 
