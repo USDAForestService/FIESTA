@@ -39,7 +39,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   if (!is.null(cuniqueid) && !cuniqueid %in% names(condf)) stop("invalid cuniqueid")
   if (!is.null(treef) && !is.null(tuniqueid) && !tuniqueid %in% names(treef))
     stop("invalid tuniqueid")
-  ref_titles <- FIESTA::ref_titles
+  ref_titles <- ref_titles
   concat <- FALSE
   bytdom <- FALSE
   seedclnm <- "<1"
@@ -68,7 +68,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   if (any(c(rowvar, colvar) == "DSTRBGRP") && !"DSTRBGRP" %in% names(condf) &&
 	"DSTRBCD1" %in% names(condf)) {
     condf <- merge(condf,
-		FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")],
+		ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")],
 			by.x="DSTRBCD1", by.y="VALUE")
     names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
     domvarlst <- c(domvarlst, "DSTRBGRP")
@@ -176,8 +176,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
     ## Check row groups
     if (rowgrp && is.null(rowgrpnm)) {
-      vargrp <- unique(FIESTAutils::ref_codes[!is.na(FIESTAutils::ref_codes[["GROUPNM"]]) &
-		FIESTAutils::ref_codes[["GROUPNM"]] != "", "VARIABLE"])
+      vargrp <- unique(ref_codes[!is.na(ref_codes[["GROUPNM"]]) &
+		ref_codes[["GROUPNM"]] != "", "VARIABLE"])
       if (!rowvar %in% vargrp) {
         message("row group not available for rowvar")
         rowgrp <- FALSE
@@ -249,9 +249,9 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           }
 
           if (!is.null(rowlut)) row.add0 <- TRUE
-          rowLUT <- datLUTnm(x=condf, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
-		  		group=rowLUTgrp, add0=row.add0)
-
+          rowLUT <- datLUTnm(x=condf, xvar=rowvar, 
+                             LUT=rowlut, FIAname=row.FIAname, 
+                             group=rowLUTgrp, add0=row.add0)
           condf <- rowLUT$xLUT
           rowlut <- rowLUT$LUT
 
@@ -259,12 +259,11 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           if (rowgrp) {
             rowgrpord <- rowLUT$grpcode
             rowgrpnm <- rowLUT$grpname
-            if (all(sapply(rowlut[[rowgrpnm]], function(x) x == "")) ||
-			all(is.na(rowlut[[rowgrpnm]])))
+            if (all(sapply(rowlut[[rowgrpnm]], function(x) x == "")) || all(is.na(rowlut[[rowgrpnm]])))
               stop("no groups for ", rowvar)
 
-            title.rowgrp <- ifelse (rowgrpord %in% ref_titles[["DOMVARNM"]],
-		  	ref_titles[ref_titles[["DOMVARNM"]] == rowgrpord, "DOMTITLE"], rowgrpnm)
+            title.rowgrp <- ifelse (rowgrpord %in% ref_titles[["DOMVARNM"]], 
+                ref_titles[ref_titles[["DOMVARNM"]] == rowgrpord, "DOMTITLE"], rowgrpnm)
           }
 
           if (is.null(row.orderby) || row.orderby == "NONE") {
@@ -311,7 +310,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       ## rowvar.filter
       ########################################################
       cnrows <- nrow(condf)
-      condf <- FIESTA::datFilter(x=condf, xfilter=rowvar.filter, vardelete=domvarlst.not,
+      condf <- datFilter(x=condf, xfilter=rowvar.filter, vardelete=domvarlst.not,
 		  title.filter=rowvar)$xf
       if (nrow(condf) < cnrows) isfilter <- TRUE
 
@@ -351,7 +350,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
           }
 
           if (!is.null(rowlut)) row.add0 <- TRUE
-          rowLUT <- FIESTA::datLUTnm(x=treef, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
+          rowLUT <- datLUTnm(x=treef, xvar=rowvar, LUT=rowlut, FIAname=row.FIAname,
 		  		group=rowLUTgrp, add0=row.add0, xtxt="tree")
           treef <- rowLUT$xLUT
           rowlut <- rowLUT$LUT
@@ -359,7 +358,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
           if (estseed %in% c("add", "only") && !is.null(seedf)) {
             if (rowvar %in% names(seedf)) {
-              rowLUT <- FIESTA::datLUTnm(x=seedf, xvar=rowvar, LUT=rowlut,
+              rowLUT <- datLUTnm(x=seedf, xvar=rowvar, LUT=rowlut,
 				FIAname=row.FIAname, group=rowLUTgrp, add0=row.add0, xtxt="seed")
               seedf <- rowLUT$xLUT
             } else if (rowvar == "DIACL") {
@@ -444,7 +443,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       ## rowvar.filter
       ########################################################
       tnrows <- nrow(treef)
-      treef <- FIESTA::datFilter(x=treef, xfilter=rowvar.filter, vardelete=domvarlst.not,
+      treef <- datFilter(x=treef, xfilter=rowvar.filter, vardelete=domvarlst.not,
 		  title.filter=rowvar)$xf
       if (nrow(treef) < tnrows) isfilter <- TRUE
 
@@ -572,7 +571,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       ## colvar.filter
       ########################################################
       cnrows <- nrow(condf)
-      condf <- FIESTA::datFilter(x=condf, xfilter=colvar.filter, vardelete=domvarlst.not,
+      condf <- datFilter(x=condf, xfilter=colvar.filter, vardelete=domvarlst.not,
 		  title.filter=colvar)$xf
       if (nrow(condf) < cnrows) isfilter <- TRUE
 
@@ -607,7 +606,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
           if (estseed == "add" && !is.null(seedf)) {
             if (colvar %in% names(seedf)) {
-              colLUT <- FIESTA::datLUTnm(x=seedf, xvar=colvar, LUT=collut,
+              colLUT <- datLUTnm(x=seedf, xvar=colvar, LUT=collut,
 				FIAname=col.FIAname, add0=col.add0, xtxt="seed")
               seedf <- colLUT$xLUT
             } else if (colvar == "DIACL") {
@@ -668,7 +667,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       ## colvar.filter
       ########################################################
       tnrows <- nrow(treef)
-      treef <- FIESTA::datFilter(x=treef, xfilter=colvar.filter, vardelete=domvarlst.not,
+      treef <- datFilter(x=treef, xfilter=colvar.filter, vardelete=domvarlst.not,
 		  title.filter=colvar)$xf
       if (nrow(treef) < tnrows) isfilter <- TRUE
 
