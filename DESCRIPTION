@@ -51,7 +51,6 @@ Imports:
     DBI,
     RSQLite,
     sqldf,
-    RPostgreSQL,
     RColorBrewer
 Suggests: 
     knitr,
@@ -60,6 +59,7 @@ Suggests:
     xlsx,
     rgeos,
     arcgisbinding,
+    RPostgreSQL,
     pheatmap
 VignetteBuilder: knitr
 License: file LICENSE
