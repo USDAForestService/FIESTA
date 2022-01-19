@@ -122,6 +122,7 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. 
 #' @param spXYdat R list object. Output from FIESTA::spGetXY().
+#' @param gui Logical. If TRUE, uses gui interface. 
 #' 
 #' @return \item{xypltx}{ sf object. Input xy data clipped to boundary. }
 #' \item{bndx}{ sf object. Input bnd. } \item{tabs}{ list object. List of input
@@ -211,7 +212,7 @@ spGetPlots <- function(bnd = NULL,
                        measEndyr = NULL, 
                        measEndyr.filter = NULL, 
                        invyrs = NULL, 
-                       measyrs =NULL, 
+                       measyrs = NULL, 
                        allyrs = FALSE, 
                        intensity1 = FALSE, 
                        showsteps = FALSE, 
@@ -220,7 +221,8 @@ spGetPlots <- function(bnd = NULL,
                        returnxy = TRUE, 
                        exportsp = FALSE, 
                        savedata_opts = NULL,
-                       spXYdat = NULL) {
+                       spXYdat = NULL,
+                       gui = FALSE) {
 
   ##############################################################################
   ## DESCRIPTION
@@ -446,7 +448,6 @@ spGetPlots <- function(bnd = NULL,
   }
   #pltids <- spxy[[xyjoinid]]
 
-
   #############################################################################
   ## Set datsource
   ########################################################
@@ -466,7 +467,7 @@ spGetPlots <- function(bnd = NULL,
       stop("datsource is invalid")
     }
   }
-  if (datsource != xy_datsource) {
+  if (!is.null(xy_datsource) && datsource != xy_datsource) {
     message("datsource is not the same as xy_datsource")
   }
   if (datsource %in% c("sqlite", "gdb")) {
@@ -565,12 +566,21 @@ spGetPlots <- function(bnd = NULL,
       }
     }
     ## pop_plot_stratam_assgn data
-    if (savePOP) {
-      pop_plot_stratum_assgnx <- pcheck.table(ppsa_layer, obj=obj, stopifnull=TRUE)
-      if (!is.null(pop_plot_stratum_assgnx)) {
-        tabs2save <- c(tabs2save, "pop_plot_stratum_assgnx")
+    pop_plot_stratum_assgnx <- tryCatch(pcheck.table(ppsa_layer, obj=obj),
+     	 	error=function(e) {
+			return(NULL) })
+    if (!is.null(pop_plot_stratum_assgnx)) {
+      if (savePOP) {
+        if (!is.null(pop_plot_stratum_assgnx)) {
+          tabs2save <- c(tabs2save, "pop_plot_stratum_assgnx")
+        }
+      }
+    } else {
+      if (savePOP) {
+        stop("ppsa_layer is invalid")
       }
     }
+
     ## other data
     if (!is.null(other_layers)) {
       for (layer in other_layers) {
@@ -636,6 +646,40 @@ spGetPlots <- function(bnd = NULL,
 		pop_plot_stratum_assgnx[pop_plot_stratum_assgnx[[pltassgnid]] %in% pltids,]
     }
 
+    if (!is.null(evalid)) {
+      if (length(evalid) > 1) {
+        if (!is.null(pop_plot_stratum_assgnx)) {
+          evalidnm <- findnm("EVALID", names(pop_plot_stratum_assgnx), returnNULL=TRUE)
+          if (is.null(evalidnm)) {
+            stop("must include evalid in ppsa_layer or plt_layer")
+          } else {
+            pop_evalidlst <- unique(pop_plot_stratum_assgnx[[evalidnm]])
+            if (!all(evalid %in% pop_evalidlst)) {
+              miss <- evalid[!evalid %in% evalidlst]
+              stop(miss, " not in dataset")
+            }
+          }
+        } else if (!is.null(pltx)) {
+          evalidnm <- findnm("EVALID", names(pltx), returnNULL=TRUE)
+          if (is.null(evalidnm)) {
+            stop("must include evalid in ppsa_layer or plt_layer")
+          } else {
+            plt_evalidlst <- unique(pltx[[evalidnm]])
+            if (!all(evalid %in% plt_evalidlst)) {
+              miss <- evalid[!evalid %in% evalidlst]
+              stop(miss, " not in dataset")
+            }
+          }          
+        } else {
+          stop("need ppsa_layer with more than one evalid")
+        }
+      } else {
+        message("assuming data is ", evalid)
+      }
+
+      evalresp <- TRUE
+    }          
+    
   } else {			## datsource in('datamart', 'sqlite')
 
     ## Initialize tables
@@ -1563,8 +1607,7 @@ spGetPlots <- function(bnd = NULL,
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer, 
-                              add_layer=TRUE))
-      
+                              add_layer=TRUE))   
     }
     if (returnxy) {
      
@@ -1655,6 +1698,9 @@ spGetPlots <- function(bnd = NULL,
 
   if (savePOP) {
     returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
+  }
+  if (evalresp) {
+    returnlst$evalid <- evalid
   }
   return(returnlst)
 }

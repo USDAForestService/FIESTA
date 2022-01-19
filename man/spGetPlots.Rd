@@ -51,7 +51,8 @@ spGetPlots(
   returnxy = TRUE,
   exportsp = FALSE,
   savedata_opts = NULL,
-  spXYdat = NULL
+  spXYdat = NULL,
+  gui = FALSE
 )
 }
 \arguments{
@@ -197,6 +198,8 @@ spatial data. If FALSE, saves xy data as table.}
 of options. Only used when savedata = TRUE.}
 
 \item{spXYdat}{R list object. Output from FIESTA::spGetXY().}
+
+\item{gui}{Logical. If TRUE, uses gui interface.}
 }
 \value{
 \item{xypltx}{ sf object. Input xy data clipped to boundary. }

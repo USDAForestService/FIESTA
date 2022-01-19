@@ -476,7 +476,7 @@ DBgetEvalid <- function(states = NULL,
       invyrqry <- paste0("select distinct STATECD, STATENM, STATEAB, ANN_INVENTORY, 
 		INVYR from ", "SURVEY where STATENM IN(", 
 		toString(paste0("'", states, "'")), 
-		") and invyr <> 9999 and P3_OZONE_IND = 'N'")
+		") and invyr <> 9999 and P3_OZONE_IND = 'N' order by STATECD, INVYR")
       invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
       cat("Inventory years by state...", "\n" )
       message(paste0(utils::capture.output(invyrtab), collapse = "\n"))
@@ -485,7 +485,7 @@ DBgetEvalid <- function(states = NULL,
       invdbtab <- NULL
       if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
         invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", plotnm, 
-			"where", stfilter, "group by statecd, invyr")   
+			"where", stfilter, "group by statecd, invyr order by statecd, invyr")   
         invyrtab <- DBI::dbGetQuery(dbconn, invqry)
       }
     }
@@ -629,7 +629,7 @@ DBgetEvalid <- function(states = NULL,
 
       if (!"STATECD" %in% names(evaldt)) {
         evaldt[, STATECD := substr(EVALID, nchar(EVALID) - 5, nchar(EVALID)-4)]
-        evaldt <- evaldt[evaldt$STATECD %in% as.character(stcds),]
+        evaldt <- evaldt[evaldt$STATECD %in% as.character(stcdlst),]
       }
 
       ## Add endyr and evaltType columns to dataframe
@@ -826,7 +826,7 @@ DBgetEvalid <- function(states = NULL,
       invdbtab <- NULL
       if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
         invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", plotnm, 
-			"where", stfilter, "group by statecd, invyr")   
+			"where", stfilter, "group by statecd, invyr order by statecd, invyr")   
         invyrtab <- DBI::dbGetQuery(dbconn, invqry)
       }
     }

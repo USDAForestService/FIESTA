@@ -233,7 +233,7 @@ DBgetCoords <- function (states = NULL,
     if (allyrs) {
       ## xymeasCur
       xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
-		title="Most current XY?", first="YES", gui=gui)
+                                  title="Most current XY?", first="YES", gui=gui)
       measCur <- FALSE
       measEndyr=measEndyr.filter <- NULL
     }
@@ -369,8 +369,10 @@ DBgetCoords <- function (states = NULL,
 
   } else {
     if (measCur) {
-      xyfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA., 
-				intensity1=intensity1, popSURVEY=TRUE, plotnm="PLOT")
+      xyfromqry <- getpfromqry(Endyr=measEndyr, 
+                               SCHEMA.=SCHEMA., 
+                               intensity1=intensity1, 
+                               popSURVEY=TRUE, plotnm="PLOT")
     } else {
       xyfromqry <- paste0(SCHEMA., "PLOT p")
     }
@@ -403,12 +405,26 @@ DBgetCoords <- function (states = NULL,
 			error=function(e) {
                   message(e)
                   return(NULL) })
-
   if (is.null(xyx)) {
     message("invalid xy query\n")
     message(xycoords.qry)
     stop()
   }
+  
+  ## Remove plots that have fallen out of inventory because they were
+  ## not found or they were in the wrong place.
+# kindcd3old <- DBqryORACLE( 
+#   "SELECT bp.STATECD, bp.COUNTYCD, bp.PLOT_FIADB NEW_PLOT, 
+#         bp.START_DATE NEW_START_DATE,
+#        	bp_old.COUNTYCD OLD_COUNTYCD, bp_old.PLOT_FIADB OLD_PLOT, 
+# 	      bp_old.END_DATE OLD_END_DATE, p.CN
+#   FROM fs_nims_rmrs.NIMS_BASE_PLOT bp
+#   JOIN fs_nims_rmrs.NIMS_BASE_PLOT bp_old on (bp.PREV_NBP_CN=bp_old.CN)
+#   JOIN fs_nims_rmrs.NIMS_PLOT_RMRS_VW p on(p.NBP_CN=bp_old.CN)
+#   WHERE p.KINDCD = 1
+#   ORDER BY bp.STATECD, bp.COUNTYCD, bp_old.PLOT_FIADB"
+  xyx <- xyx[!xyx$PLT_CN %in% kindcd3old$CN, ]
+    
   setnames(xyx, "CN", "PLT_CN")
   xyx[["PLOT_ID"]] <- paste0("ID", 
 		formatC(xyx$STATECD, width=2, digits=2, flag=0), 
@@ -449,16 +465,16 @@ DBgetCoords <- function (states = NULL,
   ###############################################################################
   if (savedata) {
     index.unique.xyplt <- "PLT_CN"
-    datExportData(get(xynm),           
-          savedata_opts=list(outfolder=outfolder, 
+    datExportData(get(xynm),  
+          index.unique = index.unique.xyplt,
+          savedata_opts = list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
-                              out_layer="unitarea",
+                              out_layer=out_layer,
                               outfn.pre=outfn.pre, 
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer, 
-                              index.unique=index.unique.xyplt, 
                               add_layer=TRUE))
   }
 

@@ -688,9 +688,16 @@ DBgetPlots <- function (states = NULL,
   }
 
   ## Get states, Evalid and/or invyrs info
-  evalInfo <- DBgetEvalid(states=states, RS=RS, datsource=datsource, 
-		data_dsn=data_dsn, invtype=invtype, evalid=evalid, evalCur=evalCur, 
-		evalEndyr=evalEndyr, evalAll=evalAll, evalType=evalType, gui=gui)
+  evalInfo <- DBgetEvalid(states=states, RS=RS, 
+                          datsource=datsource, 
+                          data_dsn=data_dsn, 
+                          invtype=invtype, 
+                          evalid=evalid, 
+                          evalCur=evalCur, 
+                          evalEndyr=evalEndyr, 
+                          evalAll=evalAll, 
+                          evalType=evalType, 
+                          gui=gui)
   if (is.null(evalInfo)) return(NULL)
   states <- evalInfo$states
   rslst <- evalInfo$rslst
@@ -776,7 +783,8 @@ DBgetPlots <- function (states = NULL,
 
             ## GET INVENTORY YEAR(S) FROM USER
             invyr <- select.list(as.character(stinvyrlst), 
-			title=paste("Inventory year(s) -", stabbr), multiple=TRUE)
+                                 title=paste("Inventory year(s) -", stabbr), 
+                                 multiple=TRUE)
             if (length(invyr) == 0) stop("")
           }
           invyrs[[state]] <- as.numeric(invyr)
@@ -849,23 +857,16 @@ DBgetPlots <- function (states = NULL,
     }
 
     ## Check subcycle99
-    ###########################################################
     subcycle99 <- pcheck.logical(subcycle99, varnm="subcycle99", 
 		title="Keep SUBCYCLE 99?", first="NO", gui=gui)
 
-    ## Check intensity1
-    ###########################################################
     ## For periodic data, the INTENSITY variable does not equal 1
-    if (invtype == "ANNUAL") {
-      intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
-		title="Intensity = 1?", first="YES", gui=gui)
-    } else {
+    if (!invtype == "ANNUAL") {
       message("note: periodic data includes forested plots >= 5% cover")
       #intensity1 <- FALSE
     }
 
     ## Check ACI
-    ###########################################################
     ACI <- pcheck.logical(ACI, varnm="ACI", 
 		title="ACI conditions?", first="NO", gui=gui)
 
@@ -882,6 +883,7 @@ DBgetPlots <- function (states = NULL,
     allyrs <- FALSE
   }
 
+  
   ## Set maxstates 
   ###########################################################
   ##  The number of states to append together, while still small enough to return 
@@ -895,19 +897,23 @@ DBgetPlots <- function (states = NULL,
   ## (used to determine size of tree data)
   #nbrinvyrs <- length(unique(unlist(invyrs)))
   
-
+  
+  ## Check intensity1
+  intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
+                               title="Intensity = 1?", 
+                               first="YES", gui=gui)
+  
   ## Check defaultVars
-  ###########################################################
   defaultVars <- pcheck.logical(defaultVars, varnm="defaultVars", 
-		title="Default variables?", first="YES", gui=gui)
+                                title="Default variables?", 
+                                first="YES", gui=gui)
 
   ## Check regionalVars
-  ###########################################################
   regionVars <- pcheck.logical(regionVars, varnm="regionVars", 
-		title="Regional variables?", first="NO", gui=gui)
+                               title="Regional variables?", 
+                               first="NO", gui=gui)
 
   ## Check stateFilter
-  ###########################################################
   if (!is.null(stateFilter)) {
     if (nbrstates > 1) {
       if (!is.list(stateFilter) || is.null(names(stateFilter))) {
@@ -934,7 +940,6 @@ DBgetPlots <- function (states = NULL,
   } 
 
   ## Check issp
-  ###########################################################
   issp <- pcheck.logical(issp, varnm="issp", 
 		title="SpatialPoints of plot vars?", first="NO", gui=gui)
 
@@ -979,12 +984,17 @@ DBgetPlots <- function (states = NULL,
   ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
-    outfolder <- pcheck.outfolder(outfolder)
-#    outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-#		outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
-#		overwrite_dsn=overwrite_dsn, append_layer=append_layer, gui=gui)
-#    out_dsn <- outlst$out_dsn
-#    out_fmt <- outlst$out_fmt
+    outlst <- pcheck.output(out_dsn=out_dsn, 
+                            out_fmt=out_fmt, 
+                            outfolder=outfolder, 
+                            outfn.pre=outfn.pre, 
+                            outfn.date=outfn.date, 
+                            overwrite_dsn=overwrite_dsn, 
+                            append_layer=append_layer, 
+                            gui=gui)
+    outfolder <- outlst$outfolder
+    out_dsn <- outlst$out_dsn
+    out_fmt <- outlst$out_fmt
   }
  
   ###########################################################################
@@ -2171,7 +2181,7 @@ DBgetPlots <- function (states = NULL,
         grm <- rbind(grm, grmx)
       }
     }
- 
+
     ##############################################################
     ## Other tables
     ##############################################################
@@ -2344,17 +2354,17 @@ DBgetPlots <- function (states = NULL,
                                 append_layer=TRUE, outfn.pre=outfn.pre, 
                                 overwrite_dsn=overwrite_dsn)))
         }
-      } else {
-        ## output parameters
-        ###########################################################
-        if (savedata | saveqry | parameters | !treeReturn | !returndata) {
-          outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
-                          outfolder=outfolder, outfn.pre=outfn.pre, 
-                          outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, 
-                          append_layer=append_layer, gui=gui)
-          out_dsn <- outlst$out_dsn
-          out_fmt <- outlst$out_fmt
-        } 
+      # } else {
+      #   ## output parameters
+      #   ###########################################################
+      #   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
+      #     outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+      #                     outfolder=outfolder, outfn.pre=outfn.pre, 
+      #                     outfn.date=outfn.date, overwrite_dsn=overwrite_dsn, 
+      #                     append_layer=append_layer, gui=gui)
+      #     out_dsn <- outlst$out_dsn
+      #     out_fmt <- outlst$out_fmt
+      #   } 
       }
 
       if (savedata && !issp) {
@@ -2371,7 +2381,8 @@ DBgetPlots <- function (states = NULL,
           index.unique.xyplt <- NULL
           if (!append_layer) index.unique.xyplt <- "PLT_CN"
           datExportData(xyplt, 
-              savedata_opts=list(outfolder=outfolder, 
+              index.unique = index.unique.xyplt,
+              savedata_opts = list(outfolder=outfolder, 
                                   out_fmt=out_fmt, 
                                   out_dsn=out_dsn, 
                                   out_layer=xynm,
@@ -2379,8 +2390,7 @@ DBgetPlots <- function (states = NULL,
                                   outfn.date=outfn.date, 
                                   overwrite_layer=overwrite_layer,
                                   append_layer=append_layer,
-                                  add_layer=TRUE,
-                                  index.unique=index.unique.xyplt)) 
+                                  add_layer=TRUE)) 
         }
       }  
  
@@ -2388,7 +2398,8 @@ DBgetPlots <- function (states = NULL,
         index.unique.spconddat <- NULL
         if (!append_layer) index.unique.spconddat <- "PLT_CN"
         datExportData(spconddat, 
-              savedata_opts=list(outfolder=outfolder, 
+              index.unique = index.unique.spconddat,
+              savedata_opts = list(outfolder=outfolder, 
                                   out_fmt=out_fmt, 
                                   out_dsn=out_dsn, 
                                   out_layer="spconddat",
@@ -2396,14 +2407,14 @@ DBgetPlots <- function (states = NULL,
                                   overwrite_layer=overwrite_layer,
                                   append_layer=append_layer,
                                   outfn.date=outfn.date, 
-                                  add_layer=TRUE,
-                                  index.unique=index.unique.spconddat)) 
+                                  add_layer=TRUE)) 
       }
       if (savedata && !is.null(pltx)) {
         index.unique.pltx <- NULL
         if (i == 1) index.unique.pltx <- "CN"
         datExportData(pltx, 
-              savedata_opts=list(outfolder=outfolder, 
+              index.unique = index.unique.pltx,
+              savedata_opts = list(outfolder=outfolder, 
                                     out_fmt=out_fmt, 
                                     out_dsn=out_dsn, 
                                     out_layer="plot",
@@ -2411,14 +2422,14 @@ DBgetPlots <- function (states = NULL,
                                     overwrite_layer=overwrite_layer,
                                     append_layer=append_layer,
                                     outfn.date=outfn.date, 
-                                    add_layer=TRUE,
-                                    index.unique=index.unique.pltx)) 
+                                    add_layer=TRUE)) 
       }
       if (savedata && !is.null(condx)) {
         index.unique.condx <- NULL
         if (!append_layer) index.unique.condx <- c("PLT_CN", "CONDID")
         datExportData(condx, 
-              savedata_opts=list(outfolder=outfolder, 
+              index.unique = index.unique.condx,
+              savedata_opts = list(outfolder=outfolder, 
                                   out_fmt=out_fmt, 
                                   out_dsn=out_dsn, 
                                   out_layer="cond",
@@ -2426,14 +2437,14 @@ DBgetPlots <- function (states = NULL,
                                   overwrite_layer=overwrite_layer,
                                   append_layer=append_layer,
                                   outfn.date=outfn.date, 
-                                  add_layer=TRUE,
-                                  index.unique=index.unique.condx)) 
+                                  add_layer=TRUE)) 
       }
       if (savedata && !is.null(lulcx)) {
         index.unique.lulcx <- NULL
         if (!append_layer) index.unique.lulcx <- c("PLT_CN", "CONDID")
         datExportData(lulcx, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.lulcx,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="lulc",
@@ -2441,14 +2452,14 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.lulcx)) 
+                                add_layer=TRUE)) 
       } 
       if ((savedata || !treeReturn) && !is.null(treex)) {
         index.unique.treex <- NULL
         if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
         datExportData(treex, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.treex,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="tree",
@@ -2456,14 +2467,14 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.treex)) 
+                                add_layer=TRUE)) 
       }
       if (savedata && !is.null(seedx)) {
         index.unique.seedx <- NULL
         if (!append_layer) index.unique.seedx <- c("PLT_CN", "CONDID", "SUBP")
         datExportData(seedx, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.seedx,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="seed",
@@ -2471,14 +2482,14 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.seedx)) 
+                                add_layer=TRUE)) 
       } 
       if (savedata && !is.null(vsubpsppx)) {
         index.unique.vsubpsppx <- NULL
         if (!append_layer) index.unique.vsubpsppx <- c("PLT_CN", "CONDID")
         datExportData(vsubpsppx, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.vsubpsppx,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="vsubpspp",
@@ -2486,13 +2497,13 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.vsubpsppx)) 
+                                add_layer=TRUE)) 
 
         index.unique.vsubpstrx <- NULL
         if (!append_layer) index.unique.vsubpstrx <- c("PLT_CN", "CONDID")
         datExportData(vsubpstrx, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.vsubpstrx,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="vsubpstr",
@@ -2500,14 +2511,14 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.vsubpstrx)) 
+                                add_layer=TRUE)) 
       }
       if (savedata && !is.null(subpx)) {
         index.unique.subpx <- NULL
         if (!append_layer) index.unique.subpx <- "PLT_CN"
         datExportData(subpx, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.subpx,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="subplot",
@@ -2515,13 +2526,13 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.subpx)) 
+                                add_layer=TRUE)) 
         index.unique.subpcx <- NULL
         
         if (!append_layer) index.unique.subpcx <- c("PLT_CN", "CONDID")
         datExportData(subpcx, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.subpcx,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="subp_cond",
@@ -2529,14 +2540,14 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.subpcx)) 
+                                add_layer=TRUE)) 
       }  
       if (savedata && !is.null(dwmx)) {
         index.unique.dwmx <- NULL
         if (!append_layer) index.unique.dwmx <- c("PLT_CN", "CONDID")
         datExportData(dwmx, 
-            savedata_opts=list(outfolder=outfolder, 
+            index.unique = index.unique.dwmx,
+            savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
                                 out_layer="dwm_calc",
@@ -2544,8 +2555,7 @@ DBgetPlots <- function (states = NULL,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
-                                add_layer=TRUE,
-                                index.unique=index.unique.dwmx)) 
+                                add_layer=TRUE)) 
       } 
 
       if (savedata && !is.null(othertables)) {
@@ -2559,8 +2569,9 @@ DBgetPlots <- function (states = NULL,
             if (othertable == "SUBPLOT") {
               index.unique.other <- c("PLT_CN", "SUBP")
             }
-            datExportData(get(othertablexnm), 
-                savedata_opts=list(outfolder=outfolder, 
+            datExportData(get(othertablexnm),
+                index.unique = index.unique.other,
+                savedata_opts = list(outfolder=outfolder, 
                                     out_fmt=out_fmt, 
                                     out_dsn=out_dsn, 
                                     out_layer=tolower(othertable),
@@ -2568,8 +2579,7 @@ DBgetPlots <- function (states = NULL,
                                     overwrite_layer=overwrite_layer,
                                     append_layer=append_layer,
                                     outfn.date=outfn.date, 
-                                    add_layer=TRUE,
-                                    index.unique=index.unique.other))
+                                    add_layer=TRUE))
           }
         }
       }  

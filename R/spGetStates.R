@@ -266,8 +266,15 @@ spGetStates <- function(bnd_layer,
   ## Save boundary
   if (savebnd) {
     spExportSpatial(bndx, 
-                    outfolder=outfolder, 
-                    out_layer="bnd")
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+                              out_dsn=out_dsn, 
+                              out_layer="bnd",
+                              outfn.pre=outfn.pre, 
+                              outfn.date=outfn.date, 
+                              overwrite_layer=overwrite_layer,
+                              append_layer=append_layer, 
+                              add_layer=TRUE))
   }
   
   return(list(states=states, bndx=bndx, stbnd.att=stbnd.att, statenames=statenames))
