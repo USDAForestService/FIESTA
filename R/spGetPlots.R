@@ -1209,18 +1209,16 @@ spGetPlots <- function(bnd = NULL,
       #######################################################################
       p2fromqry <- pfromqry
       if (!is.null(measEndyr.filter)) {
-
         ################################################
         ## Subset FIA plot data to pltids1 
         ################################################
         if (nbrxy > 0) {
 
           plt1 <- plt[plt[[pjoinid]] %in% pltids1[[xyjoinid]], ]
-          pltids1 <- plt1[[puniqueid]]
-
+          xyids1 <- plt1[[puniqueid]]
           cond1.qry <- paste0("select cond.* from ", p2fromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", 
-				"p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
+				"p.", puniqueid, " in(", addcommas(xyids1, quotes=TRUE), ")")
           rs <- DBI::dbSendQuery(dbconn, cond1.qry)
           cond1 <- suppressWarnings(DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
@@ -1228,7 +1226,7 @@ spGetPlots <- function(bnd = NULL,
           if (istree) {
             tree1.qry <- paste0("select tree.* from ", p2fromqry,
 			" join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
-			" and p.", puniqueid, " in(", addcommas(pltids1, quotes=TRUE), ")")
+			" and p.", puniqueid, " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, tree1.qry)
             tree1 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
@@ -1238,7 +1236,7 @@ spGetPlots <- function(bnd = NULL,
                                 " join ", seed_layer, 
                                 " on(seed.PLT_CN = p.CN) where ", stfilter, 
                                 " and p.", puniqueid, 
-                                " in(", addcommas(pltids1, quotes=TRUE), ")")
+                                " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, seed1.qry)
             seed1 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
@@ -1247,7 +1245,7 @@ spGetPlots <- function(bnd = NULL,
             ppsa1.qry <- paste0("select ppsa.* from ", p2fromqry, 
                                 " where ", stfilter, 
                                 " and p.", puniqueid, 
-                                " in(", addcommas(pltids1, quotes=TRUE), ")")
+                                " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, ppsa1.qry)
             pop_plot_stratum_assgn1 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
@@ -1266,7 +1264,7 @@ spGetPlots <- function(bnd = NULL,
                 other.qry <- paste("select o.* from", ofromqry, 
                                    "where", stfilter, 
                                    " and p.", puniqueid, 
-                                   " in(", addcommas(pltids1, quotes=TRUE), ")")
+                                   " in(", addcommas(xyids1, quotes=TRUE), ")")
               }
               rs <- DBI::dbSendQuery(dbconn, other.qry)
               assign(paste0(layer, "1"), DBI::dbFetch(rs))
@@ -1343,11 +1341,11 @@ spGetPlots <- function(bnd = NULL,
           }
 
           plt2 <- plt2[plt2[[pjoinid]] %in% pltids2[[xyjoinid]], ]
-          pltids2 <- plt2[[puniqueid]]
+          xyids2 <- plt2[[puniqueid]]
 
           cond2.qry <- paste0("select cond.* from ", p2fromqry,
 			" join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
-				" and p.", puniqueid, " in(", addcommas(pltids2, quotes=TRUE), ")")
+				" and p.", puniqueid, " in(", addcommas(xyids2, quotes=TRUE), ")")
           rs <- DBI::dbSendQuery(dbconn, cond2.qry)
           cond2 <- suppressWarnings(DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
@@ -1356,7 +1354,7 @@ spGetPlots <- function(bnd = NULL,
             tree2.qry <- paste0("select tree.* from ", p2fromqry, 
                                 " join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
                                 " and p.", puniqueid, 
-                                " in(", addcommas(pltids2, quotes=TRUE), ")")
+                                " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, tree2.qry)
             tree2 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
@@ -1366,7 +1364,7 @@ spGetPlots <- function(bnd = NULL,
                                 " join ", seed_layer, 
                                 " on(seed.PLT_CN = p.CN) where ", stfilter, 
                                 " and p.", puniqueid, 
-                                " in(", addcommas(pltids2, quotes=TRUE), ")")
+                                " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, seed2.qry)
             seed2 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
@@ -1375,7 +1373,7 @@ spGetPlots <- function(bnd = NULL,
             ppsa2.qry <- paste0("select ppsa.* from ", p2fromqry, 
                                 " where ", stfilter, 
                                 " and p.", puniqueid, 
-                                " in(", addcommas(pltids2, quotes=TRUE), ")")
+                                " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, ppsa2.qry)
             pop_plot_stratum_assgn2 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
@@ -1395,7 +1393,7 @@ spGetPlots <- function(bnd = NULL,
                 other.qry <- paste("select o.* from", ofromqry, 
                                    "where", stfilter, 
                                    " and p.", puniqueid, 
-                                   " in(", addcommas(pltids2, quotes=TRUE), ")")
+                                   " in(", addcommas(xyids2, quotes=TRUE), ")")
               }
               rs <- DBI::dbSendQuery(dbconn, other.qry)
               assign(paste0(layer, "2"), DBI::dbFetch(rs))
