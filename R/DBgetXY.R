@@ -88,14 +88,14 @@
 #' 
 #' 
 #'   # Most current evaluation and shapefile with public coordinates
-#'   COxylst <- DBgetCoords(states="Colorado", measCur=TRUE, RS="RMRS")
+#'   COxylst <- DBgetXY(states="Colorado", measCur=TRUE, RS="RMRS")
 #'   names(COxylst)
 #' 
 #'   head(COxylst$xyCur_ACTUAL)
 #'   COxylst$xyqry
 #' 
-#' @export DBgetCoords
-DBgetCoords <- function (states = NULL, 
+#' @export DBgetXY
+DBgetXY <- function (states = NULL, 
                          RS = NULL, 
                          invtype = "ANNUAL", 
                          evalid = NULL, 
@@ -144,8 +144,8 @@ DBgetCoords <- function (states = NULL,
 
   ## Check arguments
   input.params <- names(as.list(match.call()))[-1]
-  if (!all(input.params %in% names(formals(DBgetCoords)))) {
-    miss <- input.params[!input.params %in% formals(DBgetCoords)]
+  if (!all(input.params %in% names(formals(DBgetXY)))) {
+    miss <- input.params[!input.params %in% formals(DBgetXY)]
     stop("invalid parameter: ", toString(miss))
   } 
   

@@ -390,7 +390,7 @@ spGetXY <- function(bnd,
 
   } else {			## xy_datsource in('datamart', 'sqlite')
     if (xy_datsource == "datamart") {
-      spxy <- DBgetCoords(states=stcds, 
+      spxy <- DBgetXY(states=stcds, 
                           evalid=evalid, 
                           evalCur=evalCur, 
                           evalEndyr=evalEndyr, 

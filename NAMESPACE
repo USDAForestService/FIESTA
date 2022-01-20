@@ -2,11 +2,11 @@
 
 export(DBcreateSQLite)
 export(DBgetCSV)
-export(DBgetCoords)
 export(DBgetEvalid)
 export(DBgetPlots)
 export(DBgetSQLite)
 export(DBgetStrata)
+export(DBgetXY)
 export(DBqryCSV)
 export(DBtestESRIgdb)
 export(DBtestPostgreSQL)
