@@ -287,7 +287,7 @@ spGetXY <- function(bnd,
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   }
-
+ 
   ########################################################################
   ### DO THE WORK
   ########################################################################
@@ -417,8 +417,8 @@ spGetXY <- function(bnd,
 
       ## Check for data tables in database
       ###########################################################
-      dbconn <- suppressWarnings(DBtestSQLite(xy_dsn, dbconnopen=TRUE, 
-			showlist=FALSE, createnew=FALSE, stopifnull=TRUE))
+      dbconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, 
+			showlist=FALSE, createnew=FALSE, stopifnull=TRUE)
       tablst <- DBI::dbListTables(dbconn)
 
       if (is.null(xy)) {
@@ -455,7 +455,7 @@ spGetXY <- function(bnd,
       }
       xyfields <- DBI::dbListFields(dbconn, xy)
       xystatenm <- findnm("STATECD", xyfields, returnNULL=TRUE)
-
+ 
       if (is.null(xvar) || !xvar %in% names(xyfields)) {
         if (grepl("ACTUAL", xy)) {
           xvar <- "LON_ACTUAL"
@@ -558,6 +558,7 @@ spGetXY <- function(bnd,
           spxy <- pcheck.spatial(xy, dsn=xy_dsn)
         }
       } 
+
       if (!is.null(dbconn)) {
         DBI::dbDisconnect(dbconn)
       }

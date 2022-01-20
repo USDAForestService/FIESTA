@@ -121,7 +121,7 @@
 #' spatial data. If FALSE, saves xy data as table.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE. 
-#' @param spXYdat R list object. Output from FIESTA::spGetXY().
+#' @param spXYdat R list object. Output from spGetXY().
 #' @param gui Logical. If TRUE, uses gui interface. 
 #' 
 #' @return \item{xypltx}{ sf object. Input xy data clipped to boundary. }
@@ -241,7 +241,7 @@ spGetPlots <- function(bnd = NULL,
   ##############################################################################
 
   ## Set global variables
-  xydat=stateFilter=statecnty=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
+  xydat=stateFilter=countyfips=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=states <- NULL
   cuniqueid=tuniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
@@ -295,7 +295,7 @@ spGetPlots <- function(bnd = NULL,
     spxy <- spXYdat$spxy
     pltids <- spXYdat$pltids
     states <- spXYdat$states
-    statecnty <- spXYdat$statecnty
+    countyfips <- spXYdat$countyfips
     stbnd.att <- spXYdat$stbnd.att
     xy.uniqueid <- spXYdat$xy.uniqueid
     bndx <- spXYdat$bndx
@@ -344,8 +344,8 @@ spGetPlots <- function(bnd = NULL,
         }
       }
       if (stbnd.att == "COUNTYFIPS") {
-        statecnty <- sort(unique(pltids[[stbnd.att]]))
-        stcds <- as.numeric(sort(unique(substr(statecnty, 1, 2))))
+        countyfips <- sort(unique(pltids[[stbnd.att]]))
+        stcds <- as.numeric(sort(unique(substr(countyfips, 1, 2))))
       } else {
         stcds <- sort(unique(pcheck.states(pltids[[stbnd.att]], statereturn="VALUE")))
       }
@@ -389,7 +389,7 @@ spGetPlots <- function(bnd = NULL,
         spxy <- xydat$spxy
         pltids <- xydat$pltids
         states <- xydat$states
-        statecnty <- xydat$statecnty
+        countyfips <- xydat$countyfips
         stbnd.att <- xydat$stbnd.att
         bndx <- xydat$bndx
 
@@ -436,8 +436,8 @@ spGetPlots <- function(bnd = NULL,
         stbnd.att <- statedat$stbnd.att
         statenames <- statedat$statenames
         if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
-          statecnty <- statedat$states
-          stcds <- unique(as.numeric(substr(statecnty, 1,2)))
+          countyfips <- statedat$states
+          stcds <- unique(as.numeric(substr(countyfips, 1,2)))
         } else {
           stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% statedat$states]
         }
@@ -497,10 +497,19 @@ spGetPlots <- function(bnd = NULL,
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data?", first="NO", gui=gui)  
+
+  ## Check savebnd
+  #############################################################################
+  if (!is.null(bndx)) {
+    savebnd <- pcheck.logical(savebnd, varnm="savebnd",
+		    title="Save spatial bnd?", first="NO", gui=gui)
+  } else {
+    savebnd <- FALSE
+  }
  
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata) {
+  if (savedata || savebnd) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
@@ -762,8 +771,8 @@ spGetPlots <- function(bnd = NULL,
       }
 
       ## Check for counties
-      if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(statecnty)) {
-        stcnty <- statecnty[startsWith(statecnty, formatC(stcd, width=2, flag="0"))]
+      if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
+        stcnty <- countyfips[startsWith(countyfips, formatC(stcd, width=2, flag="0"))]
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
       }
@@ -1125,8 +1134,8 @@ spGetPlots <- function(bnd = NULL,
       message(paste0("\n", state, "..."))
 
       ## Check for counties
-      if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(statecnty)) {
-        stcnty <- statecnty[startsWith(as.character(statecnty), 
+      if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
+        stcnty <- countyfips[startsWith(as.character(countyfips), 
 				formatC(stcd, width=2, flag="0"))]
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
@@ -1593,19 +1602,19 @@ spGetPlots <- function(bnd = NULL,
   #############################################################################
   ## Save tables
   #############################################################################
+  if (savebnd) {
+    spExportSpatial(bndx, 
+                    savedata_opts=list(outfolder=outfolder, 
+                                       out_fmt=out_fmt, 
+                                       out_dsn=out_dsn, 
+                                       out_layer="bnd",
+                                       outfn.pre=outfn.pre, 
+                                       outfn.date=outfn.date, 
+                                       overwrite_layer=overwrite_layer,
+                                       append_layer=append_layer, 
+                                       add_layer=TRUE))   
+  }
   if (savedata) {
-    if (savebnd) {
-      spExportSpatial(bndx, 
-          savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="bnd",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer, 
-                              add_layer=TRUE))   
-    }
     if (returnxy) {
      
       if (!is.null(spxy)) {
@@ -1687,7 +1696,10 @@ spGetPlots <- function(bnd = NULL,
   }
   returnlst$pltids <- pltids
   #returnlst$clip_polyv <- bndx
-  returnlst$bnd <- bndx
+
+  if (!is.null(bndx)) {
+    returnlst$bnd <- bndx
+  }
   returnlst$puniqueid <- puniqueid
   returnlst$xy.uniqueid <- xyjoinid
   returnlst$pjoinid <- pjoinid
