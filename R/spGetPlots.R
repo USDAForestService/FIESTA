@@ -446,7 +446,6 @@ spGetPlots <- function(bnd = NULL,
       } 
     }
   }
-  #pltids <- spxy[[xyjoinid]]
 
   #############################################################################
   ## Set datsource
