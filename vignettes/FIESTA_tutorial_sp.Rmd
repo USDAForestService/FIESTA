@@ -9,7 +9,7 @@ vignette: >
 
 ```{r setup, include = F}
 library(knitr)
-knitr::opts_chunk$set(message = F, warning = F)
+knitr::opts_chunk$set(message = F, warning = F, eval = F)
 ```
 
 ```{r, include=FALSE}
@@ -618,9 +618,9 @@ The `spGetXY` function extracts XY data within a given boundary.
 We can extract public coordinates within WY Bighorn NF boundary, returning spatial (spxy) and nonspatial plot identifiers (pltids).
 
 ```{r}
-WYbhxy <- spGetXY(bnd = WYbhfn, 
-                  xy_datsource = "datamart", 
-                  evalCur = TRUE, 
+WYbhxy <- spGetXY(bnd = WYbhfn,
+                  xy_datsource = "datamart",
+                  evalCur = TRUE,
                   returnxy = TRUE)
 names(WYbhxy)
 
@@ -637,9 +637,9 @@ Or, returning only nonspatial plot identifiers (pltids).
 
 ```{r}
 
-WYbhxyids <- spGetXY(bnd = WYbhfn, 
-                     xy_datsource = "datamart", 
-                     evalCur = TRUE, 
+WYbhxyids <- spGetXY(bnd = WYbhfn,
+                     xy_datsource = "datamart",
+                     evalCur = TRUE,
                      returnxy = FALSE)
 names(WYbhxyids)
 
