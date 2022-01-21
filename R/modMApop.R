@@ -384,7 +384,7 @@ modMApop <- function(popType="VOL",
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   } 
-
+ 
   ###################################################################################
   ## Load data
   ###################################################################################
@@ -746,16 +746,6 @@ modMApop <- function(popType="VOL",
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
                               out_layer="unitarea",
-                              outfn.pre=outfn.pre, 
-                              outfn.date=outfn.date, 
-                              overwrite_layer=overwrite_layer,
-                              append_layer=append_layer,
-                              add_layer=TRUE))
-    datExportData(stratalut, 
-                  savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
-                              out_dsn=out_dsn, 
-                              out_layer="stratalut",
                               outfn.pre=outfn.pre, 
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
