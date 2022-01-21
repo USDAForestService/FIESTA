@@ -5,7 +5,6 @@
 
 ^inst\extdata
 
-^doc$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
