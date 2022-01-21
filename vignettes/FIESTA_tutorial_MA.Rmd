@@ -226,6 +226,7 @@ area1 <- modMAarea(
   landarea = "FOREST", # est - forest land filter
   sumunits = TRUE # est - sum estimation units to population
   )
+
 ```
 
 We can look at the structure of this output with `str` and the estimates below. Note that again `FIESTA` outputs a list. 
@@ -252,6 +253,7 @@ area2 <- modMAarea(
   landarea = "FOREST", # est - forest land filter
   sumunits = TRUE # est - sum estimation units to population
   )
+
 ```
 
 We can again see that the structure of the list is very similar to that in the above example:
@@ -263,7 +265,7 @@ str(area2, max.level = 2)
 However now the `raw` list has an item call `predselectlst`. We can look at this item now:
 
 ```{r}
-area2$raw$predselectlst
+area2$raw$predselectlst$totest
 ```
 
 Notably, we can see that `dem`, `slp`, `asp_cos`, and `asp_sin` were removed from the model. 

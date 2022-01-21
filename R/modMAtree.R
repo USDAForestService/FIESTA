@@ -599,7 +599,8 @@ modMAtree <- function(MApopdat,
     message("using the following predictors...", toString(prednames))
   }
   getweights <- ifelse(MAmethod %in% c("greg", "PS", "HT"), TRUE, FALSE) 
-
+  getweights <- FALSE
+  
 #  if (addtotal) {
     ## Get total estimate and merge area
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -609,7 +610,7 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain="TOTAL", response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, getweights=TRUE)
+                        FIA=FIA, modelselect=modelselect, getweights=getweights)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
     unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
     unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
@@ -633,7 +634,7 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain=rowvar, response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect)
+                        FIA=FIA, modelselect=modelselect, getweights=getweights)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
