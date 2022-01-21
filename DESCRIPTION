@@ -57,10 +57,7 @@ Suggests:
     rmarkdown,
     rJava,
     xlsx,
-    rgeos,
-    arcgisbinding,
-    RPostgreSQL,
-    pheatmap
+    arcgisbinding
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
