@@ -552,6 +552,7 @@ modMAarea <- function(MApopdat,
       unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
       unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
     }
+
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$totest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
     }
