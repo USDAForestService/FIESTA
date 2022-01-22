@@ -40,7 +40,7 @@ modSApop().}
 \item{prednames}{String vector. Name(s) of predictor variables to use in
 model.}
 
-\item{SApackage}{String. Small area package to use ('JoSAE', 'sae')}
+\item{SApackage}{String. Small area package to use ('JoSAE', 'sae', 'hbsae')}
 
 \item{SAmethod}{String. Small area method to use ('unit', 'area')}
 

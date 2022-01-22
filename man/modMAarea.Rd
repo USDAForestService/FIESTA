@@ -26,7 +26,8 @@ modMAarea(
 \arguments{
 \item{MApopdat}{List. Population data objects returned from modMApop().}
 
-\item{MAmethod}{String. mase (i.e., model-assisted) method to use ('greg', 'gregEN').}
+\item{MAmethod}{String. mase (i.e., model-assisted) method to use 
+('greg', 'gregEN', 'ratio').}
 
 \item{FIA}{Logical. If TRUE, the finite population term is removed from
 estimator to match FIA estimates.}

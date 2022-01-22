@@ -34,7 +34,8 @@
 #' SPCD, SPGRPCD
 #' 
 #' @param MApopdat List. Population data objects returned from modMApop().
-#' @param MAmethod String. mase (i.e., model-assisted) method to use ('greg', 'gregEN').
+#' @param MAmethod String. mase (i.e., model-assisted) method to use 
+#' ('greg', 'gregEN', 'ratio').
 #' @param FIA Logical. If TRUE, the finite population term is removed from
 #' estimator to match FIA estimates.
 #' @param prednames String vector. Name(s) of predictor variables to include in

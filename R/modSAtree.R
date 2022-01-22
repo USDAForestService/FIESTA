@@ -46,7 +46,7 @@
 #' modSApop().
 #' @param prednames String vector. Name(s) of predictor variables to use in
 #' model.
-#' @param SApackage String. Small area package to use ('JoSAE', 'sae')
+#' @param SApackage String. Small area package to use ('JoSAE', 'sae', 'hbsae')
 #' @param SAmethod String. Small area method to use ('unit', 'area')
 #' @param totals Logical. If TRUE, returns total estimate (mean * AREAUSED).
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
