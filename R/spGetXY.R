@@ -92,11 +92,11 @@
 #' \item{pltids}{ data frame. A table of pltids that are within bnd. }
 #' \item{spxy} sf data frame. If returnxy, a simple feature with pltids 
 #' within bnd. }
-#' \item{bndx}{ sf object. Input bnd. } \item{xy.uniqueid}{ String. Unique
-#' identifier of plots in xy. } \item{states}{ String. Vector of states that
-#' intersect bnd. } \item{countyfips}{ String. Vector of countyfips values that
-#' intersect bnd. } \item{stbnd.att}{ String. Name of state attribute used to
-#' select plots. }
+#' \item{bndx}{ sf object. Input bnd. } 
+#' \item{xy.uniqueid}{ String. Unique identifier of plots in xy. } 
+#' \item{states}{ String. Vector of states that intersect bnd. } 
+#' \item{countyfips}{ String. Vector of countyfips values that intersect bnd. } 
+#' \item{stbnd.att}{ String. Name of state attribute used to select plots. }
 #' 
 #' If savedata=TRUE and returnxy=TRUE, the plt data frame, including XY 
 #' coordinates is saved to outfolder (xyplt).\cr 

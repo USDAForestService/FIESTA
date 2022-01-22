@@ -224,7 +224,6 @@ area1 <- modMAarea(
   MApopdat = MApopdat, # pop - population calculations for WY, post-stratification
   MAmethod = "greg", # est - model-assisted method
   landarea = "FOREST", # est - forest land filter
-  sumunits = TRUE # est - sum estimation units to population
   )
 
 ```
@@ -251,7 +250,6 @@ area2 <- modMAarea(
   MApopdat = MApopdat, # pop - population calculations for WY, post-stratification
   MAmethod = "gregEN", # est - model-assisted method
   landarea = "FOREST", # est - forest land filter
-  sumunits = TRUE # est - sum estimation units to population
   )
 
 ```
@@ -285,7 +283,6 @@ area3 <- modMAarea(
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
     rowvar = "FORTYPCD",         # est - row domain
-    sumunits = TRUE,             # est - sum estimation units to population
     returntitle = TRUE           # out - return title information
     )
 ```
@@ -338,7 +335,6 @@ area4 <- modMAarea(
     landarea = "FOREST",         # est - forest land filter
     rowvar = "FORTYPCD",         # est - row domain
     colvar = "STDSZCD",          # est - column domain
-    sumunits = TRUE,             # est - sum estimation units to population
     savedata = TRUE,             # out - save data to outfolder
     returntitle = TRUE,          # out - return title information
     table_opts = list(
@@ -415,7 +411,6 @@ tree1 <- modMAtree(
     MApopdat = MApopdat,         # pop - population calculations
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     estvar = estvar,             # est - net cubic-foot volume
     estvar.filter = live_trees,  # est - live trees only
     returntitle = TRUE           # out - return title information
@@ -441,7 +436,6 @@ tree2 <- modMAtree(
     MApopdat = MApopdat,         # pop - population calculations
     MAmethod = "gregEN",         # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     estvar = estvar,             # est - net cubic-foot volume
     estvar.filter = live_trees,  # est - live trees only
     returntitle = TRUE           # out - return title information
@@ -476,7 +470,6 @@ tree3 <- modMAtree(
     MApopdat = MApopdat,         # pop - population calculations
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     estvar = "VOLCFNET",               # est - net cubic-foot volume
     estvar.filter = "STATUSCD == 1",   # est - live trees only
     rowvar = "FORTYPCD",         # est - row domain 
@@ -551,7 +544,6 @@ tree4 <- modMAtree(
     MApopdat = MApopdat,         # pop - population calculations
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     estvar = "VOLCFNET",               # est - net cubic-foot volume
     estvar.filter = "STATUSCD  == 1",   # est - live trees only
     rowvar = "FORTYPCD",         # est - row domain
@@ -621,7 +613,6 @@ tree5 <- modMAtree(
     MApopdat = MApopdat,         # pop - population calculations
     MAmethod = "greg",           # est - model-assisted method
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPCD",             # est - row domain
@@ -673,7 +664,6 @@ tree6 <- modMAtree(
     MAmethod = "greg",           # est - model-assisted method
     estseed = "add",             # est - add seedling data
     landarea = "FOREST",         # est - forest land filter
-    sumunits = TRUE,             # est - sum estimation units to population
     estvar = "TPA_UNADJ",               # est - number of trees per acre 
     estvar.filter = "STATUSCD == 1",    # est - live trees only
     rowvar = "SPCD",             # est - row domain
@@ -716,7 +706,6 @@ head(tree6$est)
 <!--     MAmethod = "greg",           # est - model-assisted method -->
 <!--     estseed = "only",            # est - add seedling data -->
 <!--     landarea = "FOREST",         # est - forest land filter -->
-<!--     sumunits = TRUE,             # est - sum estimation units to population -->
 <!--     estvar = "TPA_UNADJ",        # est - number of trees per acre  -->
 <!--     rowvar = "SPCD",             # est - row domain -->
 <!--     returntitle = TRUE,          # out - return title information -->

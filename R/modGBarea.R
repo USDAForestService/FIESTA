@@ -424,7 +424,7 @@ modGBarea <- function(GBpopdat,
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
-
+ 
   ###################################################################################
   ### Check row and column data
   ###################################################################################
@@ -547,8 +547,7 @@ modGBarea <- function(GBpopdat,
                         uniqueid=cuniqueid, stratalut=stratalut, 
                         unitvar=unitvar, strvar=strvar, domain=grpvar)
   }
-
-  ###################################################################################
+   ###################################################################################
   ## Check add0 and Add area
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
@@ -583,7 +582,7 @@ modGBarea <- function(GBpopdat,
     unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
     setkeyv(unit_colest, c(unitvar, colvar))
   }
-
+ 
   if (!is.null(unit_grpest)) {
     unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
 		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
@@ -664,7 +663,7 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est" 
-
+ 
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
 	      unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
 	      unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest,

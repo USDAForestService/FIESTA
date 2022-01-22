@@ -1,5 +1,3 @@
-
-
 #' EcoMap SpatialPolygonsDataFrame
 #' 
 #' Contains regional geographic delineations for analysis of ecological
@@ -209,131 +207,6 @@ NULL
 
 
 
-
-
-#' Reference table - diameter 2-inch class codes (DIA).
-#' 
-#' Table with min (MIN), max (MAX), and 2-inch class diameter codes (MEANING).
-#' 
-#' 
-#' @name ref_diacl2in
-#' @docType data
-#' @format A dataframe with 3 columns, MIN, MAX, and MEANING.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source Imported from comma-delimited file.
-#' @keywords datasets
-NULL
-
-
-
-
-
-#' Reference table - ICE - land use or land cover change.
-#' 
-#' Table with land use or land cover change codes and descriptions.
-#' 
-#' 
-#' @name ref_ICE_agent
-#' @docType data
-#' @format A dataframe with 6 columns: chg_ag_2, chg_ag_2_nm, chg_ag_2_GRP,
-#' chg_ag_2_GRP_nm, change_pnt, change_pnt_nm.
-#' @source Imported from comma-delimited file.
-#' @keywords datasets
-NULL
-
-
-
-
-
-#' Reference table - ICE - land use or land cover change.
-#' 
-#' Table with land use or land cover change codes and descriptions.
-#' 
-#' 
-#' @name ref_ICE_change
-#' @docType data
-#' @format A dataframe with 4 columns: change_1_2, change_1_2_nm,
-#' change_1_2_GRP, change_1_2_GRP_nm.
-#' @source Imported from comma-delimited file.
-#' @keywords datasets
-NULL
-
-
-
-
-
-#' Reference table - ICE - land use cover.
-#' 
-#' Table with land cover codes and descriptions.
-#' 
-#' 
-#' @name ref_ICE_cover
-#' @docType data
-#' @format A dataframe with 7 columns: cover, cover_nm, cover_GRP,
-#' cover_GRP_nm, cover_GRP2, cover_GRP2_nm, COLOR.
-#' @source Imported from comma-delimited file.
-#' @keywords datasets
-NULL
-
-
-
-
-
-#' Reference table - for generating tables.
-#' 
-#' Table with row/column domain (VARNM) and their pretty names for table output
-#' (TABLENM).
-#' 
-#' 
-#' @name ref_ICE_domain
-#' @docType data
-#' @format A dataframe with 3 columns, DOMCODE, DOMNAME, DOMTITLE.
-#' @source FIA ICE look-up table.
-#' @keywords datasets
-NULL
-
-
-
-
-
-#' Reference table - ICE - land use.
-#' 
-#' Table with land use codes and descriptions.
-#' 
-#' 
-#' @name ref_ICE_use
-#' @docType data
-#' @format A dataframe with 4 columns: use, use_nm, use_FOR, use_FOR_nm.
-#' @source Imported from comma-delimited file.
-#' @keywords datasets
-NULL
-
-
-
-
-
-#' Reference table - Metadata for icepnt external dataset.
-#' 
-#' Data frame with variable names and descriptions.
-#' 
-#' 
-#' @name ref_icepnt
-#' @docType data
-#' @format A data frame with 8 rows and 2 columns VARIABLE - Variable in plt
-#' data frame DESCRIPTION - Description of variable in data frame
-#' @source FIA look-up table
-#' @keywords datasets
-NULL
-
-
-
-
-
 #' Reference table - Metadata for plt default variables output from
 #' DBgetPlots()
 #' 
@@ -354,7 +227,6 @@ NULL
 #' @source FIA look-up table
 #' @keywords datasets
 NULL
-
 
 
 
@@ -384,7 +256,6 @@ NULL
 
 
 
-
 #' Reference tables - Code definitions.
 #' 
 #' Table with species information.
@@ -407,29 +278,6 @@ NULL
 
 
 
-
-#' Reference table - 20-year stand age classes(STDAGE).
-#' 
-#' Table with min (MIN), and stand age class name (STDAGECLNM).
-#' 
-#' 
-#' @name ref_stdagecl
-#' @docType data
-#' @format A dataframe with 2 columns, MIN, and STDAGENM.
-#' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
-#' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
-#' Forest Inventory and Analysis Database: Database Description and Users
-#' Manual Version 5.1.2 for Phase 2. U.S. Department of Agriculture.
-#' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
-#' manual_5-1-2_p2_07_2012.pdf)
-#' @source Imported from comma-delimited file.
-#' @keywords datasets
-NULL
-
-
-
-
-
 #' Reference table - Variable titles.
 #' 
 #' Table with variable name (VARNM) and associated title (TITLE).
@@ -441,8 +289,6 @@ NULL
 #' @source Comma-delimited file.
 #' @keywords datasets
 NULL
-
-
 
 
 
@@ -660,6 +506,29 @@ NULL
 #' (http://fia.fs.fed.us/library/database-documentation/current/ver5-2012/FIADB_user
 #' manual_5-1-2_p2_07_2012.pdf)
 #' @source FIA Database.
+#' @keywords datasets
+NULL
+
+
+
+#' Reference table - List of RMRS plots that have fallen out of inventory
+#' because they were not found or they were in the wrong place.
+#'
+#' Table with variable codes (VALUE) and descriptions (MEANING).
+#'
+#'
+#' @name kindcd3old
+#' @docType data
+#' @format A dataframe 
+#' @source FIA query.
+#' SELECT bp.STATECD, bp.COUNTYCD, bp.PLOT_FIADB NEW_PLOT, bp.START_DATE NEW_START_DATE,
+#'       	bp_old.COUNTYCD OLD_COUNTYCD, bp_old.PLOT_FIADB OLD_PLOT, 
+#'	bp_old.END_DATE OLD_END_DATE, p.CN
+#' FROM fs_nims_rmrs.NIMS_BASE_PLOT bp
+#' JOIN fs_nims_rmrs.NIMS_BASE_PLOT bp_old on (bp.PREV_NBP_CN=bp_old.CN)
+#' JOIN fs_nims_rmrs.NIMS_PLOT_RMRS_VW p on(p.NBP_CN=bp_old.CN)
+#' WHERE p.KINDCD = 1
+#' ORDER BY bp.STATECD, bp.COUNTYCD, bp_old.PLOT_FIADB"
 #' @keywords datasets
 NULL
 

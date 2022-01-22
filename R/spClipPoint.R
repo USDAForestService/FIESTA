@@ -278,7 +278,7 @@ spClipPoint <- function(xyplt,
     intabs <- clip.othertables(inpnts[[uniqueid]], othertabnms=othertabnms,
 		othertabs=othertabs, savedata=savedata, outfn.pre=outfn.pre, 
 		outfolder=outfolder, out_dsn=out_dsn, outfn.date=outfn.date, 
-		overwrite=overwrite)
+		overwrite_layer=overwrite_layer)
   } 
 
   ## Write data to outfolder

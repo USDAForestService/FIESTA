@@ -297,7 +297,7 @@ GBpopdat$seedx
 
 One may also want to compare `FIESTA` output with FIADB pop_stratum table for WY in the 2013 evaluation to check for consistency. The can be done as follows: 
 
-```{r, results = TRUE}
+```{r, results = TRUE, eval = FALSE}
 qry <- "select estn_unit, stratumcd, p1pointcnt, p2pointcnt, expns, 
           adj_factor_macr, adj_factor_subp, adj_factor_micr from pop_stratum 
         where evalid = 561301 order by estn_unit, stratumcd"

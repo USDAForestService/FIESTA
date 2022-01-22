@@ -990,11 +990,11 @@ head(ba.limber)
 
 ```{r}
 ## Total basal area per acre by species and diameter class
-DIALUT <- FIESTA::ref_diacl2in[FIESTA::ref_diacl2in$MIN <= 37, ]
+DIALUT <- ref_diacl2in[ref_diacl2in$MIN <= 37, ]
 names(DIALUT)[names(DIALUT) == "MEANING"] <- "DIACL2IN"
 
 ## Append diameter classes to tree table
-datlut <- FIESTA::datLUTclass(
+datlut <- datLUTclass(
                     x = WYtree, 
                     xvar = "DIA", 
                     LUT = DIALUT, 

@@ -281,7 +281,7 @@ datFilter <- function(x,
     }
     othertabs <- lapply(othertabnms, function(x) get(x, envir=environment()))
     intabs <- clip.othertables(indatids, othertabnms, othertabs=othertabs,
-		      savedata=savedata, outfolder=outfolder, overwrite=overwrite_layer,
+		      savedata=savedata, outfolder=outfolder, overwrite_layer=overwrite_layer,
 		      outfn.pre=outfn.pre, outfn.date=outfn.date)
   }
 

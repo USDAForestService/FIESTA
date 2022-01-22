@@ -10,6 +10,6 @@ utils::globalVariables(names(formals(popTables)[1:(length(formals(popTables))-1)
 utils::globalVariables(names(formals(spMakeSpatial_options)[1:(length(formals(spMakeSpatial_options))-1)]))
 utils::globalVariables(c("treex", "seedx", "condx", "strata_opts", "condf",
                          "count", "estgreg", "estvar.filter", "freqtab.tot",
-                         "outsp_fmt", "overwrite", "ref_codes",
+                         "outsp_fmt", "ref_codes", "kindcd3old",
                          "unit_colestlst", "vcondsppid", "vcondstrid",
                          "zone_ds", ".cl_ds", "ref_statecd", 'tabclass'))

@@ -325,7 +325,7 @@ datSumTreeDom <- function(tree = NULL,
     seedonly <- TRUE
     treex <- seedx
   }
-
+ 
   ## Check bycond
   ###################################################################################
   bycond <- pcheck.logical(bycond, varnm="bycond", title="By condition?", 
@@ -357,7 +357,6 @@ datSumTreeDom <- function(tree = NULL,
   checkNA <- pcheck.logical(checkNA, varnm="checkNA", title="Check NA values?", 
 		first="YES", gui=gui)
   if (is.null(checkNA)) checkNA <- FALSE
-
 
   ## Check unique identifiers, set keys, and matching values/classes
   ###################################################################################
@@ -753,7 +752,7 @@ datSumTreeDom <- function(tree = NULL,
       }
     }
   }
-  
+ 
   ### Filter tree data 
   ###########################################################  
 
@@ -785,7 +784,7 @@ datSumTreeDom <- function(tree = NULL,
       seedf <- seedx
     }
   }
-
+ 
   ## Check tdomvar 
   tdomvar <- pcheck.varchar(var2check=tdomvar, varnm="tdomvar", gui=gui, 
 		checklst=sort(names(treef)), caption="Tree domain name?", 
@@ -1181,13 +1180,12 @@ datSumTreeDom <- function(tree = NULL,
     setkeyv(tdomtreef, byvars)
 
     if (addseed) { 
-
       seedname <- ifelse(TPA, seed_newname, "TREECOUNT_CALC")
       tdomseedf <- seedf[, tfun(.SD, na.rm=TRUE), by=byvars, .SDcols=seed_newname]
+
       setnames(tdomseedf, "V1", seedname)
       setkeyv(tdomseedf, byvars)
       tdomtreef <- merge(tdomtreef, tdomseedf, by=byvars, all.x=TRUE, all.y=TRUE)
-
       tdomtreef[, (paste0("TREE_", newname)) := get(newname)]
       tdomtreef[, (newname) := rowSums(.SD, na.rm=TRUE), .SDcols=c(newname, seedname)]
  

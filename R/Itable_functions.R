@@ -119,6 +119,23 @@ add0unit <- function(x, xvar, uniquex, unitvar=NULL, xvar.add0=FALSE,
         setnames(uniquex.exp, c(xvar, xvar2))
         chkvars <- c(xvar, xvar2)
       }
+      ordvars <- chkvars
+ 
+      if (ncol(uniquex) > 1) {
+        xchk <- check.matchclass(uniquex.exp, uniquex, xvar)
+        uniquex.exp <- xchk$tab1
+        uniquex <- xchk$tab2
+        uniquex.exp <- merge(uniquex.exp, uniquex, by=xvar)
+        ordvars <- c(names(uniquex), xvar2)
+      }
+
+      if (ncol(uniquex2) > 1) {
+        xchk <- check.matchclass(uniquex.exp, uniquex2, xvar2)
+        uniquex.exp <- xchk$tab1
+        uniquex2 <- xchk$tab2
+        uniquex.exp <- merge(uniquex.exp, uniquex2, by=xvar2)
+        ordvars <- c(names(uniquex), names(uniquex2))
+      }
 
       xchk <- check.matchclass(uniquex.exp, x, chkvars)
       uniquex.exp <- xchk$tab1
