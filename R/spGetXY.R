@@ -629,7 +629,7 @@ spGetXY <- function(bnd,
             savedata_opts=list(outfolder=outfolder, 
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 
-                            out_layer="spxy",
+                            out_layer="spxyplt",
                             outfn.pre=outfn.pre, 
                             outfn.date=outfn.date, 
                             overwrite_layer=overwrite_layer,
@@ -637,7 +637,7 @@ spGetXY <- function(bnd,
                             add_layer=TRUE))
       }
     } else {
-      datExportData(sf::st_drop_geometry(pltids), 
+      datExportData(pltids, 
             savedata_opts=list(outfolder=outfolder, 
                             out_fmt=out_fmt, 
                             out_dsn=out_dsn, 
