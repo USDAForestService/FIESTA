@@ -274,7 +274,7 @@ datSumTreeDom <- function(tree = NULL,
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -653,7 +653,7 @@ datSumTreeDom <- function(tree = NULL,
     if (metric) {
       metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tsumvar])
       if (estunits != metricunits) {
-        cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
+        cfactor <- ref_conversion$CONVERSION[ref_conversion$METRIC == 
 			metricunits]
         tsumvarm <- paste0(tsumvar, "_m")
         treex[, (tsumvarm) := get(eval(tsumvar)) * cfactor]
@@ -875,14 +875,14 @@ datSumTreeDom <- function(tree = NULL,
     FIAname <- ifelse(FIAnameresp == "YES", TRUE, FALSE)
   }
   if (FIAname) {
-    tdomdata <- FIESTA::datLUTnm(treef, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
+    tdomdata <- datLUTnm(treef, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
     treef <- tdomdata$xLUT
     tdomvarnm <- tdomdata$xLUTnm
     setkeyv(treef, tsumuniqueid) 
     #tdomvarlut <- unique(treef[,c(tdomvar, tdomvarnm), with=FALSE]) 
 
     if (addseed || seedonly) {
-      sdomdata <- FIESTA::datLUTnm(seedf, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
+      sdomdata <- datLUTnm(seedf, xvar=tdomvar, LUTvar="VALUE", FIAname=TRUE)
       seedf <- sdomdata$xLUT
     }
     tdomvarlst2 <- tdomvarlut[match(tdomvarlst, tdomvarlut[[tdomvar]]), 
@@ -975,7 +975,7 @@ datSumTreeDom <- function(tree = NULL,
         tdomvar2nm <- tdomdata$xLUTnm
       
         if (addseed) {
-          sdomdata <- FIESTA::datLUTnm(seedf, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
+          sdomdata <- datLUTnm(seedf, xvar=tdomvar2, LUTvar="VALUE", FIAname=TRUE)
           seedf <- sdomdata$xLUT
         }
       }

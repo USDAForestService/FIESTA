@@ -556,7 +556,7 @@ DBgetPlots <- function (states = NULL,
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -1265,7 +1265,7 @@ DBgetPlots <- function (states = NULL,
 
   ## REF_SPECIES table 
   if (istree && !is.null(sppvars)) {
-    REF_SPECIES <- FIESTA::DBgetCSV("REF_SPECIES", returnDT=TRUE, stopifnull=FALSE)
+    REF_SPECIES <- DBgetCSV("REF_SPECIES", returnDT=TRUE, stopifnull=FALSE)
   }
 
   ###################################################################################
@@ -1343,56 +1343,56 @@ DBgetPlots <- function (states = NULL,
       #################################################
 
       ## PLOT table  
-      PLOT <- FIESTA::DBgetCSV("PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
+      PLOT <- DBgetCSV("PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
  
       ## PLOTGEOM table  
       if (plotgeom) {
-        PLOTGEOM <- FIESTA::DBgetCSV("PLOTGEOM", stabbr, returnDT=TRUE, stopifnull=FALSE)
+        PLOTGEOM <- DBgetCSV("PLOTGEOM", stabbr, returnDT=TRUE, stopifnull=FALSE)
       }
 
       ## COND table 
-      COND <- FIESTA::DBgetCSV("COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
+      COND <- DBgetCSV("COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
  
       if (iseval || savePOP) {
         ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
         ## To get estimation unit & stratum assignment for each plot. 
-        POP_PLOT_STRATUM_ASSGN <- FIESTA::DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
+        POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbr, 
 		returnDT=TRUE, stopifnull=FALSE) 
       }   
       ## Seedling table
       if (isseed) {
-        SEEDLING <- FIESTA::DBgetCSV("SEEDLING", stabbr, returnDT=TRUE, 
+        SEEDLING <- DBgetCSV("SEEDLING", stabbr, returnDT=TRUE, 
 		stopifnull=FALSE)
       }
       ## Understory vegetation
       if (isveg) {
         P2VEG_SUBPLOT_SPP <- 
-		FIESTA::DBgetCSV("P2VEG_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
+		DBgetCSV("P2VEG_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
 		stopifnull=FALSE)
         P2VEG_SUBP_STRUCTURE <- 
-		FIESTA::DBgetCSV("P2VEG_SUBP_STRUCTURE", stabbr, returnDT=TRUE, 
+		DBgetCSV("P2VEG_SUBP_STRUCTURE", stabbr, returnDT=TRUE, 
 		stopifnull=FALSE)
       }
       ## Subplot data
       if (issubp) {
         SUBPLOT <- 
-		FIESTA::DBgetCSV("SUBPLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
+		DBgetCSV("SUBPLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
         SUBP_COND <- 
-		FIESTA::DBgetCSV("SUBP_COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
+		DBgetCSV("SUBP_COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
       }
       ## DWM calc table
       if (isdwm) {
-        COND_DWM_CALC <- FIESTA::DBgetCSV("COND_DWM_CALC", stabbr, returnDT=TRUE, 
+        COND_DWM_CALC <- DBgetCSV("COND_DWM_CALC", stabbr, returnDT=TRUE, 
 		stopifnull=FALSE)
       }
       ## Area change matrix table
       if (issccm || islulc) {
-        SUBP_COND_CHNG_MTRX <- FIESTA::DBgetCSV("SUBP_COND_CHNG_MTRX", stabbr, 
+        SUBP_COND_CHNG_MTRX <- DBgetCSV("SUBP_COND_CHNG_MTRX", stabbr, 
 		returnDT=TRUE, stopifnull=FALSE)
       }
       ## GRM calc table
       if (isgrm) {
-        TREE_GRM_COMPONENT <- FIESTA::DBgetCSV("TREE_GRM_COMPONENT", stabbr, 
+        TREE_GRM_COMPONENT <- DBgetCSV("TREE_GRM_COMPONENT", stabbr, 
 		returnDT=TRUE, stopifnull=FALSE)
       }
 
@@ -1400,7 +1400,7 @@ DBgetPlots <- function (states = NULL,
       if (!is.null(othertables)) {
         for (othertable in othertables) {
           assign(othertable, 
- 		FIESTA::DBgetCSV(othertable, stabbr, returnDT=TRUE, stopifnull=FALSE))
+ 		DBgetCSV(othertable, stabbr, returnDT=TRUE, stopifnull=FALSE))
         }
       }
     } 
@@ -1529,7 +1529,7 @@ DBgetPlots <- function (states = NULL,
 
       ## Filter pltcond with allFilter      
       ###########################################
-      pltcondx <- FIESTA::datFilter(x=pltcondx, xfilter=allFilter)$xf
+      pltcondx <- datFilter(x=pltcondx, xfilter=allFilter)$xf
 
       ## Tag ACI plots
       ###########################################################
@@ -1796,7 +1796,7 @@ DBgetPlots <- function (states = NULL,
     if ((istree || !is.null(alltFilter)) && !is.null(pltx)) {
       ## TREE table
       if (istree || !is.null(alltFilter)) {
-        TREE <- FIESTA::DBgetCSV("TREE", stabbr, returnDT=TRUE, stopifnull=FALSE)
+        TREE <- DBgetCSV("TREE", stabbr, returnDT=TRUE, stopifnull=FALSE)
       }
 
       message("\n",
@@ -1824,7 +1824,7 @@ DBgetPlots <- function (states = NULL,
           ## Filter treex with alltFilter      
           ###########################################
           if (!is.null(alltFilter)) {
-            treex <- FIESTA::datFilter(x=treex, xfilter=alltFilter)$xf
+            treex <- datFilter(x=treex, xfilter=alltFilter)$xf
             if (is.null(treex)) {
               pltx=condx <- NULL
             } else {

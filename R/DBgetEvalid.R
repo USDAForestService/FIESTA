@@ -334,9 +334,9 @@ DBgetEvalid <- function(states = NULL,
 
   if (datsource == "datamart") {
     nopoptables <- FALSE
-    POP_EVAL_GRP <- FIESTA::DBgetCSV("POP_EVAL_GRP", stcdlst, stopifnull=FALSE, 
+    POP_EVAL_GRP <- DBgetCSV("POP_EVAL_GRP", stcdlst, stopifnull=FALSE, 
 		returnDT=TRUE)
-    POP_EVAL <- FIESTA::DBgetCSV("POP_EVAL", stcdlst, stopifnull=FALSE, returnDT=TRUE)
+    POP_EVAL <- DBgetCSV("POP_EVAL", stcdlst, stopifnull=FALSE, returnDT=TRUE)
     if (nrow(POP_EVAL) == 0) {
       message("no data in database for ", toString(states))
       return(NULL)
@@ -349,10 +349,10 @@ DBgetEvalid <- function(states = NULL,
       }
     }    
 
-    POP_EVAL_TYP <- FIESTA::DBgetCSV("POP_EVAL_TYP", stcdlst, stopifnull=FALSE)
+    POP_EVAL_TYP <- DBgetCSV("POP_EVAL_TYP", stcdlst, stopifnull=FALSE)
     if (nrow(POP_EVAL_TYP) == 0) return(NULL)
 
-    SURVEY <- FIESTA::DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    SURVEY <- DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
     SURVEY <- SURVEY[SURVEY$ANN_INVENTORY == ann_inv, ]
     if (nrow(SURVEY) == 0) return(NULL)
   }

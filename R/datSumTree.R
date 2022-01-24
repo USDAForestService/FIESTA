@@ -212,7 +212,7 @@ datSumTree <- function(tree = NULL,
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -772,7 +772,7 @@ datSumTree <- function(tree = NULL,
       if (metric) {
         metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
         if (estunits != metricunits) {
-          cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
+          cfactor <- ref_conversion$CONVERSION[ref_conversion$METRIC == 
 			metricunits]
           tvarm <- paste0(tvar, "_m")
           treef[, (tvarm) := get(eval(tvar)) * cfactor]

@@ -15,7 +15,7 @@ DBgetStrata(
   evalType = "VOL",
   savedata = FALSE,
   getassgn = TRUE,
-  POP_PLOT_STRATUM_ASSGN = NULL,
+  pop_plot_stratum_assgn = NULL,
   savedata_opts = NULL
 )
 }
@@ -51,9 +51,9 @@ See notes for more information on evalType.}
 \item{savedata}{Logical. If TRUE, writes output to outfolder.}
 
 \item{getassgn}{Logical. If TRUE, extracts plot assignments from
-POP_PLOT_STRATUM_ASSGN table in database.}
+pop_plot_stratum_assgn table in database.}
 
-\item{POP_PLOT_STRATUM_ASSGN}{Data frame. The POP_PLOT_STRATUM_ASSGN for
+\item{pop_plot_stratum_assgn}{Data frame. The pop_plot_stratum_assgn for
 state(s).}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
