@@ -483,15 +483,15 @@ modGBpop <- function(popType = "VOL",
         unitvar2 <- stratdat$unitvar2
       } 
     
-      if (strata) {
-        if (is.null(strwtvar)) {
-          stop("missing strwtvar")
-        }
-        if (strwtvar != "strwt") {
-          names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
-          strwtvar <- "strwt"
-        }
-      }
+#      if (strata) {
+#        if (is.null(strwtvar)) {
+#          stop("missing strwtvar")
+#        }
+#        if (strwtvar != "strwt") {
+#          names(stratalut)[names(stratalut) == strwtvar] <- "strwt"
+#          strwtvar <- "strwt"
+#        }
+#      }
     } else if (!is.null(auxdat)) {
       list.items <- c("pltassgn", "unitzonal", "unitvar", "predfac", 
 		"pltassgnid", "unitarea", "areavar")
@@ -548,7 +548,7 @@ modGBpop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
-      
+
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions

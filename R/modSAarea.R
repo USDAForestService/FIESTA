@@ -711,6 +711,8 @@ modSAarea <- function(SApopdatlst = NULL,
         pdomdat <- do.call(rbind, do.call(rbind, dunit_estlst)[,"pltdat.dom"])
         dunitlut <- do.call(rbind, do.call(rbind, dunit_estlst)[,"dunitlut.dom"])
       }
+      SAobjlst <- do.call(rbind, dunit_estlst)[,"SAobjlst.dom"]
+
     } else {
       dunit_est <- do.call(rbind, dunit_estlst)[,"est.large"]$est.large
       predselect.unit <- do.call(rbind, dunit_estlst)[,"predselect.unit"]$predselect.unit
@@ -719,6 +721,7 @@ modSAarea <- function(SApopdatlst = NULL,
         pdomdat <- do.call(rbind, dunit_estlst)[,"pltdat.dom"]$pltdat.dom
         dunitlut <- do.call(rbind, dunit_estlst)[,"dunitlut.dom"]$dunitlut.dom
       }
+      SAobjlst <- do.call(rbind, dunit_estlst)[,"SAobjlst.dom"]$SAobjlst.dom
     }
 
     predselectlst[[SApopdatnm]] <- 
@@ -775,6 +778,7 @@ modSAarea <- function(SApopdatlst = NULL,
           pdomdat_row <- do.call(rbind, do.call(rbind, dunit_estlst_row)[,"pltdat.dom"])
           dunitlut_row <- do.call(rbind, do.call(rbind, dunit_estlst_row)[,"dunitlut.dom"])
         }
+        SAobjlst_row <- do.call(rbind, dunit_estlst_row)[,"SAobjlst.dom"]
       } else {
         dunit_est_row <- do.call(rbind, dunit_estlst_row)[,"est.large"]$est.large
         predselect.unit_row <- do.call(rbind, dunit_estlst_row)[,"predselect.unit"]$predselect.unit
@@ -783,6 +787,7 @@ modSAarea <- function(SApopdatlst = NULL,
           pdomdat_row <- do.call(rbind, dunit_estlst_row)[,"pltdat.dom"]$pltdat.dom
           dunitlut_row <- do.call(rbind, dunit_estlst_row)[,"dunitlut.dom"]$dunitlut.dom
         }
+        SAobjlst_row <- do.call(rbind, dunit_estlst_row)[,"SAobjlst.dom"]$SAobjlst.dom
       }
 
       predselectlst_row[[SApopdatnm]] <- 
@@ -1187,6 +1192,7 @@ modSAarea <- function(SApopdatlst = NULL,
     rawdat$SAmethod <- SAmethod
     rawdat$predselect.unit <- predselect.unit
     rawdat$predselect.area <- predselect.area
+    rawdat$SAobjlst <- SAobjlst 
     rawdat$estvar <- response
     if (esttype == "TREE") {
       rawdat$estvar.filter <- estvar.filter

@@ -394,7 +394,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       }
     }
   }
-
+ 
   ##################################################################################
   ## If more than one unitvar, concatenate into 1 unitvar
   ##################################################################################
@@ -410,7 +410,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     }
     unitvar <- unitvar12
   }
-
+ 
   ##################################################################################
   ## Check estimation unit values from auxlut with unitarea
   ##################################################################################
@@ -458,16 +458,16 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   setkeyv(auxlut, strunitvars)
   setkeyv(pltx, puniqueid)
 
-  returnlst <- list(pltx=as.data.frame(pltx),
-		auxlut=as.data.frame(auxlut),
+  returnlst <- list(pltx=as.data.table(pltx),
+		auxlut=as.data.table(auxlut),
 		unitvar=unitvar, unitvars=unitvars,
 		prednames=prednames, predfac=predfac)
 
   if (!is.null(unitarea)) {
-    returnlst$unitarea <- data.frame(unitarea)
+    returnlst$unitarea <- data.table(unitarea)
   }
   if (!is.null(npixelvar)) {
-    returnlst$npixels <- data.frame(npixels)
+    returnlst$npixels <- data.table(npixels)
     returnlst$npixelvar <- npixelvar
   }
 

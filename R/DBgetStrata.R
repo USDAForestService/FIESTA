@@ -43,8 +43,8 @@
 #' availability and/or differences. Note: do not use if EVALID is specified.
 #' See notes for more information on evalType.
 #' @param getassgn Logical. If TRUE, extracts plot assignments from
-#' POP_PLOT_STRATUM_ASSGN table in database.
-#' @param POP_PLOT_STRATUM_ASSGN Data frame. The POP_PLOT_STRATUM_ASSGN for
+#' pop_plot_stratum_assgn table in database.
+#' @param pop_plot_stratum_assgn Data frame. The pop_plot_stratum_assgn for
 #' state(s).
 #' @param savedata Logical. If TRUE, writes output to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
@@ -133,7 +133,7 @@ DBgetStrata <- function(dat = NULL,
                         evalType = "VOL", 
                         savedata = FALSE, 
                         getassgn = TRUE, 
-                        POP_PLOT_STRATUM_ASSGN = NULL,
+                        pop_plot_stratum_assgn = NULL,
                         savedata_opts = NULL){
   ######################################################################################
   ## DESCRIPTION: This function gets the strata info and area by estimation unit from 
@@ -206,6 +206,10 @@ DBgetStrata <- function(dat = NULL,
   ########################################################
   datx <- pcheck.table(dat, gui=gui, caption="Data table?", returnDT=TRUE)
 
+  ## Check pop_plot_stratum_assgn 
+  ########################################################
+  POP_PLOT_STRATUM_ASSGN <- pcheck.table(pop_plot_stratum_assgn, caption="ppsa?", returnDT=TRUE)
+
   if (!is.null(datx)) {
 
     ## Check uniqueid
@@ -274,7 +278,12 @@ DBgetStrata <- function(dat = NULL,
       }
     }
   }
- 
+
+  if (!is.null(POP_PLOT_STRATUM_ASSGN) && is.null(evalid)) {
+    evalidnm <- findnm("evalid", names(POP_PLOT_STRATUM_ASSGN))
+    evalid <- sort(unique(POP_PLOT_STRATUM_ASSGN[[evalidnm]]))
+  }
+
   ## Get Evalid
   evalInfo <- DBgetEvalid(states=states, 
                           invyrtab=invyrtab, evalid=evalid, 
@@ -286,7 +295,11 @@ DBgetStrata <- function(dat = NULL,
   invtype <- evalInfo$invtype
   invyrs <- evalInfo$invyrs
 
-  if (is.null(evalidlist)) stop("must include evalCur, evalid, or evalEndyr")
+  if (is.null(evalidlist)) {
+    stop("must include evalCur, evalid, or evalEndyr")
+  } else if (is.null(evalid)) {
+    evalid <- evalidlist
+  }
   
   ## Check savedata
   ###########################################################
@@ -333,11 +346,11 @@ DBgetStrata <- function(dat = NULL,
 ############ CSV only
 
   ## POP_ESTN_UNIT table (ZIP FILE)- To get total area by estimation unit
-  POP_ESTN_UNIT <- FIESTA::DBgetCSV("POP_ESTN_UNIT", stabbrlst, returnDT=TRUE,
+  POP_ESTN_UNIT <- DBgetCSV("POP_ESTN_UNIT", stabbrlst, returnDT=TRUE,
 		stopifnull=FALSE)
 
   ## POP_STRATUM table (ZIP FILE) - To get pixel counts by estimation unit and stratum.
-  POP_STRATUM <- FIESTA::DBgetCSV("POP_STRATUM", stabbrlst, returnDT=TRUE, 
+  POP_STRATUM <- DBgetCSV("POP_STRATUM", stabbrlst, returnDT=TRUE, 
 		stopifnull=FALSE)
 
   if (getassgn) {
@@ -359,12 +372,11 @@ DBgetStrata <- function(dat = NULL,
 		names(POP_PLOT_STRATUM_ASSGN)]
     }
     if (is.null(POP_PLOT_STRATUM_ASSGN)) {
-      POP_PLOT_STRATUM_ASSGN <- FIESTA::DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
+      POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
 		returnDT=TRUE, stopifnull=FALSE)
     }
   }
 ############ End CSV only
-
  
   ## SET VARIABLE NAMES
   strvar <- "STRATUMCD"
@@ -408,8 +420,8 @@ DBgetStrata <- function(dat = NULL,
   setnames(stratalut, toupper(names(stratalut)))
   setkeyv(stratalut, c("STATECD", "ESTN_UNIT", "STRATUMCD"))
 
-
   if (getassgn) {
+
     ## strassgn query - strata assignments
     ######################################################################
     if (PLTdups) {
@@ -423,12 +435,14 @@ DBgetStrata <- function(dat = NULL,
   		toString(unlist(evalidlist)), ")")
     }
     POP_PLOT_STRATUM_ASSGN <- sqldf::sqldf(strassgn_qry)
-
+    if (nrow(POP_PLOT_STRATUM_ASSGN) == 0) {
+      message(strassgn_qry)
+      stop("invalid POP_PLOT_STRATUM_ASSGN query... now rows selected")
+    }
     names(POP_PLOT_STRATUM_ASSGN) <- toupper(names(POP_PLOT_STRATUM_ASSGN))
     POP_PLOT_STRATUM_ASSGN <- setDT(POP_PLOT_STRATUM_ASSGN)
     setkey(POP_PLOT_STRATUM_ASSGN, PLT_CN)
   
-
     ## if datx != NULL, merge strata assignments to dat
     if (!is.null(datx)) {
       ## Check if class of uniqueid in POP_PLOT_STRATUM_ASSGN matches class of cuniqueid in condx
