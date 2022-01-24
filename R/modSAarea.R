@@ -428,7 +428,7 @@ modSAarea <- function(SApopdatlst = NULL,
 
 
   ## Define empty lists
-  multestlst <- list()
+  estlst <- list()
   predselectlst <- list()
   dunitareabind <- {}
   if (addSAdomsdf) {
@@ -440,7 +440,7 @@ modSAarea <- function(SApopdatlst = NULL,
   }
 
   if (!is.null(rowvar)) {
-    multestlst_row <- list()
+    estlst_row <- list()
     predselectlst_row <- list()
     if (save4testing) {
       pdomdatlst_row <- list()
