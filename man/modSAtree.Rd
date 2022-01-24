@@ -138,7 +138,7 @@ Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
 Unique identifier for each plot, to link to pltstrat (ex. PLT_CN).\cr \tab
 \tab CONDID \tab Unique identifier of each condition on plot, to link to
 cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
-\tab Number of trees per acre each sample tree represents (ex. DESIGNCD=1:
+\tab Number of trees per acre each sample tree represents (e.g. DESIGNCD=1:
 TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for trees on
 microplot).\cr \tab cond \tab cuniqueid \tab Unique identifier for each
 plot, to link to pltstrat (ex. PLT_CN).\cr \tab \tab CONDID \tab Unique
