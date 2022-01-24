@@ -653,7 +653,7 @@ datSumTreeDom <- function(tree = NULL,
     if (metric) {
       metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tsumvar])
       if (estunits != metricunits) {
-        cfactor <- ref_conversion$CONVERSION[ref_conversion$METRIC == 
+        cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
 			metricunits]
         tsumvarm <- paste0(tsumvar, "_m")
         treex[, (tsumvarm) := get(eval(tsumvar)) * cfactor]

@@ -772,7 +772,7 @@ datSumTree <- function(tree = NULL,
       if (metric) {
         metricunits <- unique(ref_estvar$METRICUNITS[ref_estvar$ESTVAR == tvar])
         if (estunits != metricunits) {
-          cfactor <- ref_conversion$CONVERSION[ref_conversion$METRIC == 
+          cfactor <- FIESTA::ref_conversion$CONVERSION[FIESTA::ref_conversion$METRIC == 
 			metricunits]
           tvarm <- paste0(tvar, "_m")
           treef[, (tvarm) := get(eval(tvar)) * cfactor]
