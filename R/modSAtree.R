@@ -838,10 +838,11 @@ modSAtree <- function(SApopdatlst = NULL,
 
   ## Merge SAdom attributes to estdf
   if (addSAdomsdf && is.null(SAdomvars)) {
-    SAdomvars <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% estdf])
-    estdf[, AOI := NULL]
-    estdf <- merge(setDF(SAdomsdfbind)[,SAdomvars], estdf, by="DOMAIN")
+    SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% names(estdf)])
+    estdf <- merge(setDF(SAdomsdfbind)[,c("DOMAIN", SAdomvars2)], estdf, by="DOMAIN")
     estdf <- estdf[order(-estdf$AOI, estdf[["DOMAIN"]]),]
+    #estdf$AOI <- NULL
+
   } else if (addSAdomsdf && !is.null(SAdomvars)) {
     SAdomvars <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
     SAdomvars <- unique(SAdomvars[!SAdomvars %in% names(estdf)])
@@ -862,10 +863,10 @@ modSAtree <- function(SApopdatlst = NULL,
 
     ## Merge SAdom attributes to estdf_row
     if (addSAdomsdf && is.null(SAdomvars)) {
-      SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% estdf_row])
-      estdf_row[, AOI := NULL]
-      estdf_row <- merge(setDF(SAdomsdfbind)[,SAdomvars2], estdf_row, by="DOMAIN")
+      SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% names(estdf_row)])
+      estdf_row <- merge(setDF(SAdomsdfbind)[, c("DOMAIN", SAdomvars2)], estdf_row, by="DOMAIN")
       estdf_row <- estdf_row[order(-estdf_row$AOI, estdf_row[["DOMAIN"]]),]
+
     } else if (addSAdomsdf && !is.null(SAdomvars)) {
       SAdomvars2 <- SAdomvars[SAdomvars %in% names(SAdomsdfbind)]
       SAdomvars2 <- unique(SAdomvars2[!SAdomvars2 %in% names(estdf_row)])
@@ -879,6 +880,9 @@ modSAtree <- function(SApopdatlst = NULL,
     }
   }
 
+
+  ## Define nhat
+  ##################################
   if (SAmethod == "unit") {
     nhat <- "JU.EBLUP"
     nhat.se <- "JU.EBLUP.se.1"
@@ -1216,8 +1220,8 @@ modSAtree <- function(SApopdatlst = NULL,
     if (esttype == "TREE") {
       rawdat$estvar.filter <- estvar.filter
     }
-    if (!is.null(rowvar)) rawdat$rowvar <- rowvar
-    if (!is.null(colvar)) rawdat$colvar <- colvar
+    if (rowvar != "TOTAL") rawdat$rowvar <- rowvar
+    if (colvar != "NONE") rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits
     rawdat$estunits <- estvarunits
     returnlst$raw <- rawdat  
