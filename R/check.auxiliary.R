@@ -464,6 +464,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 		prednames=prednames, predfac=predfac)
 
   if (!is.null(unitarea)) {
+    setkeyv(unitarea, unitvar)
     returnlst$unitarea <- data.table(unitarea)
   }
   if (!is.null(npixelvar)) {
