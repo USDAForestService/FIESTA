@@ -416,6 +416,10 @@ modGBtree <- function(GBpopdat,
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
 
+  if (is.null(key(unitarea))) {
+    setkeyv(unitarea, unitvar)
+  }
+  
 
   ###################################################################################
   ## Check parameters and apply plot and condition filters

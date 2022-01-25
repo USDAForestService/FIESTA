@@ -640,7 +640,6 @@ modGBpop <- function(popType = "VOL",
   strunitvars <- c(unitvar, strvar)
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
 
-
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
   ## Calculates adjustment factors for area and trees by strata (and estimation unit)
@@ -709,6 +708,9 @@ modGBpop <- function(popType = "VOL",
   returnlst$popType <- popType
   if (!is.null(bndx)) {
     returnlst$bndx <- bndx
+  }
+  if (is.null(key(unitarea))) {
+     setkeyv(unitarea, unitvar)
   }
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
 	      cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 

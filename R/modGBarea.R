@@ -385,18 +385,22 @@ modGBarea <- function(GBpopdat,
   areavar <- unitchk$areavar
   areaunits <- unitchk$outunits
 
+  if (is.null(key(unitarea))) {
+     setkeyv(unitarea, unitvar)
+  }
+
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################
   estdat <- check.estdata(esttype=esttype, pltcondf=pltcondx, 
                 cuniqueid=cuniqueid, condid=condid, sumunits=sumunits, 
-                landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter,
-   	            allin1=allin1, estround=estround, pseround=pseround, 
-	              divideby=divideby, addtitle=addtitle, returntitle=returntitle,
- 	              rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
+                landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
+                allin1=allin1, estround=estround, pseround=pseround,
+                divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
+                rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
                 outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre,
- 	              outfn.date=outfn.date, append_layer=append_layer, 
+                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+                outfn.date=outfn.date, append_layer=append_layer, 
                 raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
   pltcondf <- estdat$pltcondf
@@ -431,10 +435,10 @@ modGBarea <- function(GBpopdat,
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
                   condf=pltcondf, cuniqueid=cuniqueid, 
                   rowvar=rowvar, rowvar.filter=rowvar.filter, 
-	                colvar=colvar, colvar.filter=colvar.filter, 
+                  colvar=colvar, colvar.filter=colvar.filter, 
                   row.FIAname=row.FIAname, col.FIAname=col.FIAname, 
                   row.orderby=row.orderby, col.orderby=col.orderby, 
-	                row.add0=row.add0, col.add0=col.add0, 
+                  row.add0=row.add0, col.add0=col.add0, 
                   title.rowvar=title.rowvar, title.colvar=title.colvar, 
                   rowlut=rowlut, collut=collut, 
                   rowgrp=rowgrp, rowgrpnm=rowgrpnm, rowgrpord=rowgrpord, 
@@ -482,12 +486,12 @@ modGBarea <- function(GBpopdat,
   alltitlelst <- check.titles(dat=cdomdat, esttype=esttype, 
                   sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
                   title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
-                  title.colvar=title.colvar, title.unitvar=title.unitvar,
-	                title.filter=title.filter, title.unitsn=areaunits, 
+                  title.colvar=title.colvar, title.unitvar=title.unitvar, 
+                  title.filter=title.filter, title.unitsn=areaunits, 
                   unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
                   addtitle=addtitle, returntitle=returntitle, 
-                  rawdata=rawdata, states=states, invyrs=invyrs,
- 	                landarea=landarea, pcfilter=pcfilter, 
+                  rawdata=rawdata, states=states, invyrs=invyrs, 
+                  landarea=landarea, pcfilter=pcfilter, 
                   allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est

@@ -644,6 +644,9 @@ modMApop <- function(popType="VOL",
   if (!is.null(bndx)) {
     returnlst$bndx <- bndx
   }
+  if (is.null(key(unitarea))) {
+     setkeyv(unitarea, unitvar)
+  }
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
 	      cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
 	      unitarea=unitarea, areavar=areavar, areaunits=areaunits, 

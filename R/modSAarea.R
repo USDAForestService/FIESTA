@@ -539,6 +539,10 @@ modSAarea <- function(SApopdatlst = NULL,
     areaunits <- unitchk$outunits
     dunitareabind <- rbind(dunitareabind, unitchk$unitarea)
     
+    if (is.null(key(unitarea))) {
+      setkeyv(unitarea, unitvar)
+    }
+    
 
     ###################################################################################
     ## Check filter parameters and apply plot and condition filters

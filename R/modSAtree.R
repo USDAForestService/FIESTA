@@ -539,11 +539,15 @@ modSAtree <- function(SApopdatlst = NULL,
     ## Check area units
     ########################################
     unitchk <- pcheck.areaunits(unitarea=dunitarea, areavar=areavar, 
-			areaunits=areaunits, metric=metric)
+			      areaunits=areaunits, metric=metric)
     dunitarea <- unitchk$unitarea
     areavar <- unitchk$areavar
     areaunits <- unitchk$outunits
     dunitareabind <- rbind(dunitareabind, unitchk$unitarea)
+    
+    if (is.null(key(unitarea))) {
+      setkeyv(unitarea, unitvar)
+    }
     
     ###################################################################################
     ## Check filter parameters and apply plot and condition filters
