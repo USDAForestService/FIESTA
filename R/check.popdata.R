@@ -339,7 +339,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       }
     }
   }
-
+ 
   ###################################################################################
   ## Import tables
   ###################################################################################
@@ -595,7 +595,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
       ## Check for matching unique identifiers of condx and pltx
       condx <- check.matchval(condx, pltx, cuniqueid, puniqueid,
-			tab1txt=paste0("cond-"	, cuniqueid),
+			tab1txt=paste0("cond-", cuniqueid),
 			tab2txt=paste0("plt-", puniqueid), subsetrows=TRUE)
 
       nrow.before <- nrow(pltx)
@@ -615,9 +615,11 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         pltcondx <- merge(pltx[, pltcols, with=FALSE], condx,
 				by.x=puniqueid, by.y=cuniqueid)
         if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
-          setnames(pltcondx, "CN", "PLT_CN")
+          setnames(pltcondx, "CN", cuniqueid)
         }
+        setkeyv(pltcondx, c(cuniqueid, condid))
 #      }
+
       nrow.after <- length(unique(pltcondx[[cuniqueid]]))
       if (nrow.after < nrow.before) {
         message(abs(nrow.after - nrow.before), " plots were removed from population")
@@ -670,7 +672,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   } else {
     pltcondx <- condx
   }
-
+ 
   ###################################################################################
   ###################################################################################
   ## Check plot data
@@ -1040,7 +1042,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     setkeyv(treex, c(tuniqueid, condid))
 
     ## Check if class of tuniqueid in treex matches class of cuniqueid in condx
-    tabchk <- check.matchclass(pltcondx, treex, cuniqueid, tuniqueid)
+    tabchk <- check.matchclass(pltcondx, treex, key(pltcondx), key(treex))
     pltcondx <- tabchk$tab1
     treex <- tabchk$tab2
 
@@ -1071,6 +1073,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     ## If trees with DIA greater than MACRO_BREAKPOINT_DIA exist in database
     ##    and there is no areawt_macr defined, the areawt will be used.
     if (adj != "none") {
+
       ## Check for condition proportion variables
       propchk <- check.PROP(treex, pltcondx, cuniqueid=cuniqueid, checkNA=FALSE,
 		areawt=areawt, diavar=diavar, MICRO_BREAKPOINT_DIA=MICRO_BREAKPOINT_DIA,
@@ -1407,7 +1410,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     ## Merge condition sums to pltcondx
     #vpltcondx <- merge(pltcondx, vsubpstrf, all.x=TRUE)
   }
-
 
   ## Subset pltcondx
   #cdoms2keep <- cdoms2keep[!cdoms2keep %in% c(pvars2keep, cvars2keep)]

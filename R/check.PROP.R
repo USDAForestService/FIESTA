@@ -85,6 +85,7 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
   if ((!is.null(MACRO_BREAKPOINT_DIA) && any(treex[[diavar]] >= MACRO_BREAKPOINT_DIA)) ||
 	(is.null(MACRO_BREAKPOINT_DIA) && !is.null(macro_breakpoint) &&
 	macro_breakpoint %in% names(condx) && sum(!is.na(condx[[macro_breakpoint]])) > 0)) {
+
     areawt_macr <- findnm(areawt_macr, names(condx), returnNULL=TRUE)
     if (is.null(areawt_macr)) {
       if (nrow(condx) == length(unique(condx[[cuniqueid]]))) {
@@ -96,6 +97,7 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
         areawt_macr <- areawt
       }
     }
+
     if (is.null(MACRO_BREAKPOINT_DIA)) {
       if (!is.null(macro_breakpoint)) {
         if ("PROP_BASIS" %in% names(condx)) {
@@ -106,6 +108,7 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
 		get(diavar) >= get(macro_breakpoint), "MACR", TPROP_BASIS)]
         }
       }
+
     } else {
       treex[!is.na(get(diavar)) & get(diavar) >= MACRO_BREAKPOINT_DIA, TPROP_BASIS := "MACR"]
     }
@@ -122,7 +125,6 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
       tpropnames <- c(tpropnames, "MACR")
     }
   }
-
 
   tpropvars <- as.list(propvars)
   names(tpropvars) <- tpropnames

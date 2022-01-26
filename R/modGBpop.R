@@ -565,6 +565,7 @@ modGBpop <- function(popType = "VOL",
                   unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
                   areaunits=areaunits, unit.action=unit.action, strata=strata, 
                   stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
+
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
@@ -608,6 +609,7 @@ modGBpop <- function(popType = "VOL",
     areawt <- "SUBP_CONDPROP_UNADJ"
   }
 
+
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -640,6 +642,7 @@ modGBpop <- function(popType = "VOL",
   strunitvars <- c(unitvar, strvar)
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
 
+
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
   ## Calculates adjustment factors for area and trees by strata (and estimation unit)
@@ -655,6 +658,7 @@ modGBpop <- function(popType = "VOL",
   ## Merge plot strata info to condx
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
   condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
+
 
   ## If more than one unitvar, 
   ## split the concatenated unitvar variable to keep original columns

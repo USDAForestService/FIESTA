@@ -145,7 +145,6 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
     unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), by=unitvars,
 		.SDcols=areavar]
     setkeyv(unitarea, unitvars)
-
   }
 
   return(list(unitarea=unitarea, areavar=areavar, areaunits=areaunits))

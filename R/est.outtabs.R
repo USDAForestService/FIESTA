@@ -327,7 +327,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             setnames(estpsetot, c(title.unitvar, title.yhatpse))
         } else {
           ## GET TABLE OF ESTIMATES WITH TITLES
-          estpsetot <- unit_totest[,c(unitvar, estnmd, psenm), with=FALSE]
+          estpsetot <- data.table(unit_totest[,c(unitvar, estnmd, psenm), with=FALSE])
           estpsetot[[estnmd]] <- round(estpsetot[[estnmd]], estround)
           estpsetot[[psenm]] <- round(estpsetot[[psenm]], pseround)
           setnames(estpsetot, c(title.unitvar, title.yhat, title.yhat.pse))
@@ -360,11 +360,11 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
             names(totunit) <- c(unitvar, title.yhat, title.yhat.pse)
           }
           if (!is.null(estpsetot))
-            estpsetot <- rbind(setDF(estpsetot), totunit)
+            estpsetot <- data.frame(rbind(setDF(estpsetot), totunit))
         }
 
         ## TABLES TO RETURN
-        est2return <- setDF(estpsetot)
+        est2return <- estpsetot
         pse2return <- NULL
 
         if ((savedata & addtitle) | returntitle)
