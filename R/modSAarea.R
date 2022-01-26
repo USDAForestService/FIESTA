@@ -539,8 +539,8 @@ modSAarea <- function(SApopdatlst = NULL,
     areaunits <- unitchk$outunits
     dunitareabind <- rbind(dunitareabind, unitchk$unitarea)
     
-    if (is.null(key(unitarea))) {
-      setkeyv(unitarea, unitvar)
+    if (is.null(key(dunitarea))) {
+      setkeyv(dunitarea, dunitvar)
     }
     
 
