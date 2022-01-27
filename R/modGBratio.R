@@ -529,7 +529,7 @@ modGBratio <- function(GBpopdat,
     setnames(uniquecol, unitvar)
     uniquecol[[unitvar]] <- factor(uniquecol[[unitvar]])
   }
- 
+
   #####################################################################################
   ### Get estimation data from tree table
   #####################################################################################
@@ -847,7 +847,7 @@ modGBratio <- function(GBpopdat,
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
-
+ 
     if (!is.null(row.orderby) && row.orderby != "NONE") {
       if (!is.null(col.orderby) && col.orderby != "NONE") {
         setorderv(unit_grpest, c(row.orderby, col.orderby))

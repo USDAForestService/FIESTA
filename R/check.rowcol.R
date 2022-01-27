@@ -734,7 +734,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       if (is.factor(condf[[rowvar]])) {
         uniquerow <- as.data.table(levels(condf[[rowvar]]))
         names(uniquerow) <- rowvar
-        uniquerow[[colvar]] <- factor(uniquerow[[rowvar]], levels=levels(condf[[rowvar]]))
+        uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=levels(condf[[rowvar]]))
       } else {
         #rowvals <- na.omit(unique(condf[, rowvar, with=FALSE]))
         rowvals <- unique(condf[, rowvar, with=FALSE])
@@ -809,7 +809,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     } else {
       if (is.factor(condf[[colvar]])) {
         uniquecol <- as.data.table(levels(condf[[colvar]]))
-        uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=levels(condf[[rowvar]]))
+        uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=levels(condf[[colvar]]))
         names(uniquecol) <- colvar
       } else {
         #colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
