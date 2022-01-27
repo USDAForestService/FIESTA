@@ -734,6 +734,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       if (is.factor(condf[[rowvar]])) {
         uniquerow <- as.data.table(levels(condf[[rowvar]]))
         names(uniquerow) <- rowvar
+        uniquerow[[colvar]] <- factor(uniquerow[[rowvar]], levels=levels(condf[[rowvar]]))
       } else {
         #rowvals <- na.omit(unique(condf[, rowvar, with=FALSE]))
         rowvals <- unique(condf[, rowvar, with=FALSE])
@@ -762,21 +763,26 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       }
     } else {
       if (is.factor(treef[[rowvar]])) {
-        uniquerow <- as.data.table(levels(treef[[rowvar]]))
+        if ((estseed == "add" && !is.null(seedf)) && 
+          (rowvar %in% names(seedf) && rowvar == "DIACL")) {
+          rowlevels <- c(seedclnm, levels(treef[[rowvar]]))
+        } else {
+          rowlevels <- levels(treef[[rowvar]])
+        }
+        uniquerow <- as.data.table(rowlevels)
         names(uniquerow) <- rowvar
+        uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=rowlevels)
       } else {
-        rowvals <- na.omit(unique(treef[, rowvar, with=FALSE]))
+        if ((estseed == "add" && !is.null(seedf)) && 
+          (rowvar %in% names(seedf) && rowvar == "DIACL")) {
+          rowvals <- c(seedclnm, sort(na.omit(unique(treef[, rowvar, with=FALSE][[1]]))))
+        } else {
+          rowvals <- sort(na.omit(unique(treef[, rowvar, with=FALSE][[1]])))
+        }
         uniquerow <- as.data.table(rowvals)
         names(uniquerow) <- rowvar
+        uniquerow[[rowvar]] <- factor(uniquerow[[rowvar]], levels=rowvals)
         setkeyv(uniquerow, rowvar)
-      }
-
-      if (estseed == "add" && !is.null(seedf)) {
-        if (rowvar %in% names(seedf) && rowvar == "DIACL") {
-          if (is.factor(uniquerow[[rowvar]])) {
-            levels(uniquerow[[rowvar]]) <- c(seedclnm, levels(uniquerow[[rowvar]]))
-          }
-        }
       }
     }
   }
@@ -803,6 +809,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     } else {
       if (is.factor(condf[[colvar]])) {
         uniquecol <- as.data.table(levels(condf[[colvar]]))
+        uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=levels(condf[[rowvar]]))
         names(uniquecol) <- colvar
       } else {
         #colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
@@ -831,22 +838,27 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
         }
       }
     } else {
-      if (is.factor(condf[[colvar]])) {
-        uniquecol <- as.data.table(levels(treef[[colvar]]))
-        names(uniquecol) <- rowvar
+      if (is.factor(treef[[colvar]])) {
+        if ((estseed == "add" && !is.null(seedf)) && 
+          (colvar %in% names(seedf) && colvar == "DIACL")) {
+          collevels <- c(seedclnm, levels(treef[[colvar]]))
+        } else {
+          collevels <- levels(treef[[colvar]])
+        }
+        uniquecol <- as.data.table(collevels)
+        names(uniquecol) <- colvar
+        uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=collevels)
       } else {
-        colvals <- na.omit(unique(treef[, colvar, with=FALSE]))
+        if ((estseed == "add" && !is.null(seedf)) && 
+          (colvar %in% names(seedf) && colvar == "DIACL")) {
+          colvals <- c(seedclnm, sort(na.omit(unique(treef[, colvar, with=FALSE][[1]]))))
+        } else {
+          colvals <- sort(na.omit(unique(treef[, colvar, with=FALSE][[1]])))
+        }
         uniquecol <- as.data.table(colvals)
         names(uniquecol) <- colvar
+        uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=colvals)
         setkeyv(uniquecol, colvar)
-      }
-
-      if (estseed == "add" && !is.null(seedf)) {
-        if (colvar %in% names(seedf) && colvar == "DIACL") {
-          if (is.factor(uniquecol[[colvar]])) {
-            levels(uniquecol[[colvar]]) <- c(seedclnm, levels(uniquecol[[colvar]]))
-          }
-        }
       }
     }
   }

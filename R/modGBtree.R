@@ -428,7 +428,7 @@ modGBtree <- function(GBpopdat,
                 cuniqueid=cuniqueid, condid=condid, 
                 treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
                 landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
-	           allin1=allin1, estround=estround, pseround=pseround, 
+                allin1=allin1, estround=estround, pseround=pseround, 
                 divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
                 rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
                 outfolder=outfolder, overwrite_dsn=overwrite_dsn,
@@ -466,7 +466,7 @@ modGBtree <- function(GBpopdat,
   if ("INVYR" %in% names(pltcondf)) {
     invyr <- sort(unique(pltcondf$INVYR))
   }
- 
+  
   ###################################################################################
   ### Check row and column data
   ###################################################################################
