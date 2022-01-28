@@ -199,7 +199,7 @@ datPivot <- function(x,
   #### WRITE TO FILE 
   #############################################################
   if (savedata) {
-    datExportData(freqtab.tot, 
+    datExportData(ptab, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 

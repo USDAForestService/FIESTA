@@ -232,8 +232,8 @@ datLUTnm <- function(x,
     #################################################
     LUTvar <- ifelse (FIAname && length(grep("DSTRBCD", xvar)) == 1, "DSTRBCD", xvar)
     if (FIAname && group) {
-      if (!LUTvar %in% unique(ref_codes[!is.na(ref_codes[["GROUPNM"]]) & 
-		ref_codes[["GROUPNM"]] != "", "VARIABLE"])) {
+      if (!LUTvar %in% unique(FIESTAutils::ref_codes[!is.na(FIESTAutils::ref_codes[["GROUPNM"]]) & 
+		FIESTAutils::ref_codes[["GROUPNM"]] != "", "VARIABLE"])) {
         message (paste("row group not available for", xvar))   
         group <- FALSE
       }
@@ -247,7 +247,7 @@ datLUTnm <- function(x,
     lutvars <- c("VALUE", "MEANING")
     grpvars <- {}
     if (group) grpvars <- c("GROUPCD", "GROUPNM")  
-    ref <- setDT(ref_codes[ref_codes[["VARIABLE"]] == xvar.ref, c(lutvars, grpvars)])
+    ref <- setDT(FIESTAutils::ref_codes[FIESTAutils::ref_codes[["VARIABLE"]] == xvar.ref, c(lutvars, grpvars)])
 
     ## Check LUTx - xvar in LUTx
     #################################################

@@ -423,7 +423,7 @@ DBgetXY <- function (states = NULL,
 #   JOIN fs_nims_rmrs.NIMS_PLOT_RMRS_VW p on(p.NBP_CN=bp_old.CN)
 #   WHERE p.KINDCD = 1
 #   ORDER BY bp.STATECD, bp.COUNTYCD, bp_old.PLOT_FIADB"
-  xyx <- xyx[!xyx$CN %in% kindcd3old$CN, ]
+  xyx <- xyx[!xyx$CN %in% FIESTAutils::kindcd3old$CN, ]
     
   setnames(xyx, "CN", "PLT_CN")
   xyx[["PLOT_ID"]] <- paste0("ID", 
@@ -491,9 +491,7 @@ DBgetXY <- function (states = NULL,
 
     ## Return data list
     return(fiadatlst)
-  } else {
-    return(NULL)
-  }
+  } 
   ## Close database connection
   #DBI::dbDisconnect(dbconn)
  

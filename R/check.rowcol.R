@@ -68,7 +68,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
   if (any(c(rowvar, colvar) == "DSTRBGRP") && !"DSTRBGRP" %in% names(condf) &&
 	"DSTRBCD1" %in% names(condf)) {
     condf <- merge(condf,
-		ref_codes[ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")],
+		FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "DSTRBCD", c("VALUE", "GROUPCD")],
 			by.x="DSTRBCD1", by.y="VALUE")
     names(condf)[names(condf) == "GROUPCD"] <- "DSTRBGRP"
     domvarlst <- c(domvarlst, "DSTRBGRP")
@@ -176,8 +176,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
 
     ## Check row groups
     if (rowgrp && is.null(rowgrpnm)) {
-      vargrp <- unique(ref_codes[!is.na(ref_codes[["GROUPNM"]]) &
-		ref_codes[["GROUPNM"]] != "", "VARIABLE"])
+      vargrp <- unique(FIESTAutils::ref_codes[!is.na(FIESTAutils::ref_codes[["GROUPNM"]]) &
+		FIESTAutils::ref_codes[["GROUPNM"]] != "", "VARIABLE"])
       if (!rowvar %in% vargrp) {
         message("row group not available for rowvar")
         rowgrp <- FALSE

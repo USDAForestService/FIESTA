@@ -49,7 +49,7 @@
 #' \tab Status of each plot (i.e. sampled, nonsampled).  If not included, all
 #' plots are assumed as sampled.\cr }
 #' 
-#' For available reference tables: sort(unique(FIESTA::ref_codes$VARIABLE)) \cr
+#' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 #' 
 #' @param popType String. Type of evaluation(s) to include in population data.
 #' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details

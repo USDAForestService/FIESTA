@@ -284,7 +284,12 @@ modPBpop <- function(pntdat = NULL,
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
   }
   
-  
+  ## Set user-supplied strata values
+  if (length(strata_opts) > 0) {
+    for (i in 1:length(strata_opts)) {
+      assign(names(strata_opts)[[i]], strata_opts[[i]])
+    }
+  }
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################

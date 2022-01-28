@@ -105,22 +105,21 @@ to outfolder for testing (pdomdat, dunitlut).}
 
 \item{gui}{Logical. If gui, user is prompted for parameters.}
 
-\item{...}{Parameters for modSApop() if SApopdat is NULL.}
+\item{...}{Parameters for modSApop if SApopdat is NULL.}
 }
 \value{
 \item{est}{ Data frame. Tree estimates and percent sampling error by
-domain.  Estimates are based on the SApackage and SAmethod parameters
-defined. } \item{titlelst}{ List. List of titles used for table output. }
+domain. Estimates are based on the SApackage and SAmethod parameters defined. } 
+\item{titlelst}{ List. List of titles used for table output. }
 \item{raw}{ List of raw data. If rawdata=TRUE, a list including raw data
-components used for calculating estimate. } \item{dunit.multest}{ Data
-frame. Table comparing different estimation strategies for SAE. }
+components used for calculating estimate. } 
+\item{dunit.multest}{ Data frame. Table comparing different estimation 
+strategies for SAE. }
 
 Raw data
 
 \item{domdat}{ Data frame. Domain-level data used for estimation. }
-\item{estvar}{ String. Name of estimation variable. } \item{estvar.filter}{
-String. Logical filter specified for tree data. } \item{dunit.totest}{
-String. Table of estimates, including more details. }
+\item{dunit.totest}{String. Table of estimates, including more details. }
 }
 \description{
 Generates small area estimates by domain and/or tree domain (and estimation
@@ -184,14 +183,6 @@ adjustment factor. \cr If ACI=TRUE, the nonsampled nonforest conditions are
 removed as well and accounted for in adjustment factor.  This is if you are
 interested in estimates for all lands or nonforest lands in the
 All-Condition-Inventory.
-
-Common tree filters for estvar.filter: \cr
-
-\tabular{llr}{ \tab \bold{FILTER} \tab \bold{DESCRIPTION} \cr \tab "STATUSCD
-== 1" \tab Live trees \cr \tab "STATUSCD == 2" \tab Dead trees \cr \tab
-"TPAMORT_UNADJ > 0" \tab Mortality trees \cr \tab "STATUSCD == 2 & DIA >=
-5.0" \tab Dead trees >= 5.0 inches diameter \cr \tab "STATUSCD == 2 &
-AGENTCD == 30" \tab Dead trees from fire \cr }
 }
 \references{
 Breidenbach, J. 2018. JoSAE: Unit-Level and Area-Level Small
