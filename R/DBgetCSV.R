@@ -99,6 +99,7 @@ DBgetCSV <- function(DBtable,
   			  return(NULL)
              }
       )
+      tabclass <- unlist(lapply(tab, class))
       if (any(tabclass == "integer64")) { 
         int64vars <- names(tabclass)[tabclass == "integer64"]
         tab[, (int64vars) := lapply(.SD, as.character), .SDcols=int64vars]
