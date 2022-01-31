@@ -12,6 +12,7 @@ DBgetXY(
   evalCur = FALSE,
   evalEndyr = NULL,
   evalAll = FALSE,
+  evalType = "VOL",
   measCur = FALSE,
   measEndyr = NULL,
   allyrs = FALSE,
@@ -50,6 +51,15 @@ object with evalEndyr by state (e.g., list(Utah=2014, Colorado=2013).}
 
 \item{evalAll}{Logical. Inventory span defining variable. If TRUE, extract
 data for all Evaluations for each state.}
+
+\item{evalType}{String vector. The type(s) of evaluation of interest ('ALL',
+'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
+'ALL' includes nonsampled plots; 'CURR' includes plots used for area
+estimates; 'VOL' includes plots used for area and/or tree estimates; The
+evalType 'GRM' includes plots used for growth, removals, mortality, and
+change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
+are accepted. See details below and FIA database manual for regional
+availability and/or differences.}
 
 \item{measCur}{Logical. Inventory span defining variable. If TRUE, extract
 plots with most current measurement for state(s).}
