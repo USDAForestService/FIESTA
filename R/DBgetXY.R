@@ -23,6 +23,14 @@
 #' object with evalEndyr by state (e.g., list(Utah=2014, Colorado=2013).
 #' @param evalAll Logical. Inventory span defining variable. If TRUE, extract
 #' data for all Evaluations for each state.
+#' @param evalType String vector. The type(s) of evaluation of interest ('ALL',
+#' 'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
+#' 'ALL' includes nonsampled plots; 'CURR' includes plots used for area
+#' estimates; 'VOL' includes plots used for area and/or tree estimates; The
+#' evalType 'GRM' includes plots used for growth, removals, mortality, and
+#' change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
+#' are accepted. See details below and FIA database manual for regional
+#' availability and/or differences.
 #' @param measCur Logical. Inventory span defining variable. If TRUE, extract
 #' plots with most current measurement for state(s).
 #' @param measEndyr Logical. Inventory span defining variable. If TRUE, extract
@@ -102,6 +110,7 @@ DBgetXY <- function (states = NULL,
                          evalCur = FALSE, 
                          evalEndyr = NULL, 
                          evalAll = FALSE, 
+                         evalType = "VOL", 
                          measCur = FALSE, 
                          measEndyr = NULL, 
                          allyrs = FALSE, 
@@ -153,7 +162,7 @@ DBgetXY <- function (states = NULL,
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -178,10 +187,14 @@ DBgetXY <- function (states = NULL,
 		caption="Inventory Type", gui=gui)
 
   ## Get states, Evalid and/or invyrs info
-  evalInfo <- DBgetEvalid(states=states, 
-                          RS=RS, invtype=invtype, 
-                          evalid=evalid, evalCur=evalCur, 
-                          evalEndyr=evalEndyr, evalAll=evalAll)
+  evalInfo <- DBgetEvalid(states = states, 
+                          RS = RS, 
+                          invtype = invtype, 
+                          evalid = evalid, 
+                          evalCur = evalCur, 
+                          evalEndyr = evalEndyr, 
+                          evalAll = evalAll,
+                          evalType = evalType)
   if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   rslst <- evalInfo$rslst
