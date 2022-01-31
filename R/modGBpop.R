@@ -609,7 +609,6 @@ modGBpop <- function(popType = "VOL",
     areawt <- "SUBP_CONDPROP_UNADJ"
   }
 
-
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -665,6 +664,13 @@ modGBpop <- function(popType = "VOL",
   if (!is.null(unitvar2)) {
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
+
+## TESTING
+treex=treef
+unitlut=stratalut
+unitvars=unitvar
+strvars=strvar
+
   if (adj == "samp") {
     adjfacdata <- getadjfactorGB(treex=treef, 
                                  seedx=seedf, condx=condx, 

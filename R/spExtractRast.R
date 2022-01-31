@@ -229,6 +229,8 @@ spExtractRast <- function(xyplt,
 		warn=paste(xy.uniqueid, "not in spplt"), stopifnull=TRUE)
   }
  
+print("UUU")
+print(dim(sppltx))
   ## Check showext    
   showext <- pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)

@@ -138,7 +138,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(unit_grpest[[psenm]], pseround)))))
     }
   }
-
+ 
   if (sumunits) {
     ## Group estimates
     if (!is.null(uniquerow))
@@ -490,10 +490,12 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ### BY ROW AND COLUMN
   #######################################
   } else {    ## colvar != "NONE"
+
     ## Get cross tables
     ###############################################
     if (sumunits) {
-      numunits <- length(units)
+      estunits <- unique(unit_grpest[[unitvar]])
+      numunits <- length(estunits)
       tabs <- crossxbyunit(unit=NULL, unit_grpest=grpest,
 		unit_rowest=rowest, unit_colest=colest, unit_totest=totest,
 		unitvar=unitvar, rowvar=rowvar, colvar=colvar,
@@ -508,9 +510,9 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
         pse2return <- tabs[[2]]
 
     } else {  ## colvar != "NONE" & sumunits == FALSE
-      units <- unique(unit_grpest[[unitvar]])
-      numunits <- length(units)
-      tabs <- lapply(units, crossxbyunit, unit_grpest, unit_rowest, unit_colest,
+      estunits <- unique(unit_grpest[[unitvar]])
+      numunits <- length(estunits)
+      tabs <- lapply(estunits, crossxbyunit, unit_grpest, unit_rowest, unit_colest,
 		unit_totest, unitvar=unitvar, rowvar=rowvar, colvar=colvar,
 		estnm=estnmd, psenm=psenm, allin1=allin1, char.width=char.width,
 		estnull=estnull, psenull=psenull, estround=estround, pseround=pseround,
@@ -521,7 +523,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		title.ref=title.ref, outfolder=outfolder, outfn.date=outfn.date,
 		overwrite=overwrite, esttype=esttype, phototype=phototype,
 		rnames=rnames, title.colvar=title.colvar, title.unitvar=title.unitvar)
-      names(tabs) <- units
+      names(tabs) <- estunits
       est2return <- rbindlist(lapply(tabs, `[[`, 1), use.names=TRUE, fill=TRUE)
       if (!allin1) {
         est2return[is.na(est2return)] <- estnull
@@ -560,7 +562,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       }
       ## Split columns if unitvars exists
       if (!is.null(unitvars) && length(unitvars) > 1) {
-        unit_totest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+        suppressWarnings(unit_totest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
         unit_totest[, (unitvar) := NULL]
         setcolorder(unit_totest, c(unitvars,
 		names(unit_totest)[!names(unit_totest) %in% unitvars]))
@@ -579,7 +581,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
-          unit_rowest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+          suppressWarnings(unit_rowest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
           unit_rowest[, (unitvar) := NULL]
           setcolorder(unit_rowest, c(unitvars,
 			names(unit_rowest)[!names(unit_rowest) %in% unitvars]))
@@ -602,7 +604,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
-          unit_colest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+          suppressWarnings(unit_colest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
           unit_colest[, (unitvar) := NULL]
           setcolorder(unit_colest, c(unitvars,
 			names(unit_colest)[!names(unit_colest) %in% unitvars]))
@@ -626,7 +628,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 
         ## Split columns if unitvars exists
         if (!is.null(unitvars) && length(unitvars) > 1) {
-          unit_grpest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
+          suppressWarnings(unit_grpest[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)])
           unit_grpest[, (unitvar) := NULL]
           setcolorder(unit_grpest, c(unitvars,
 			names(unit_grpest)[!names(unit_grpest) %in% unitvars]))

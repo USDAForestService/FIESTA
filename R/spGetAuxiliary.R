@@ -467,7 +467,7 @@ spGetAuxiliary <- function(xyplt,
   ##################################################################
   ## DO WORK
   ##################################################################
-
+ 
   #############################################################################
   ## 1) Extract values from unit_layer
   #############################################################################
@@ -479,7 +479,8 @@ spGetAuxiliary <- function(xyplt,
                                       polyvlst=unit_layerx, 
                                       xy.uniqueid=uniqueid, 
                                       polyvarlst=polyvarlst, 
-		keepNA=FALSE, exportNA=exportNA),
+                                      keepNA=keepNA, 
+                                      exportNA=exportNA),
      	 error=function(e) {
 			message(e, "\n")
 			return(NULL) })
@@ -493,7 +494,7 @@ spGetAuxiliary <- function(xyplt,
   }
   rm(extpoly)
   gc()
-  
+
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
