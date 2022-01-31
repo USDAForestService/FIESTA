@@ -546,6 +546,8 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   }
   }
 
+print("TEST")
+print(unitvars)
   ## Make rawtable
   if (rawdata) {
     rawdat.tabs <- {}
