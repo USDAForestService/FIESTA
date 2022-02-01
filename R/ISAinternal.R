@@ -319,6 +319,10 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       largebnd.lt0 <- largebndx.pct[largebndx.pct$int.pct == 0, largebnd.unique]
       message(paste0(utils::capture.output(largebndx.pct), collapse = "\n"))
 
+      if (length(largebnd.gtthres) == 0) {
+        largebnd.gtthres <- largebnd.ltthres
+      }
+
       ## Select largebnd(s) that intersect more than threshold
       largebnd_select <- largebndx.intd[largebndx.intd[[largebnd.unique]] %in% largebnd.gtthres,]
 
