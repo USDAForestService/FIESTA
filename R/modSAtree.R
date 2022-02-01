@@ -523,18 +523,6 @@ modSAtree <- function(SApopdatlst = NULL,
       }
     }
 
-    # NOTE: still need to check for equivalent unit-level issue. Much less common though
-    ## Check number of predictors... must be n-2 less than number of dunits
-    ########################################################################
-    if (SAmethod == "area") {
-      maxpreds <- length(unique(dunitlut[[dunitvar]])) - 2
-      if (length(prednames) > maxpreds) {
-        maxtxt <- ifelse(maxpreds == 1, "1 predictor", paste(maxpreds, "predictors"))
-        stop("can only use ", maxtxt, " (number of domain units - 2)")
-      }
-    }
-
-
     ########################################
     ## Check area units
     ########################################
@@ -832,10 +820,10 @@ modSAtree <- function(SApopdatlst = NULL,
         dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
       }
     }
+    estlst[[SApopdatnm]] <- dunit_est
+
   }    #### end SApopdat loop
 
-
-  estlst[[SApopdatnm]] <- dunit_est
 
   ## Combine estimates
   estdf <- do.call(rbind, estlst)

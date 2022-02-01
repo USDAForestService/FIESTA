@@ -418,7 +418,6 @@ modSAarea <- function(SApopdatlst = NULL,
   #####################################################################################
   #setnames(cdomdat, dunitvar, "DOMAIN")
 
-
   ## Define empty lists
   estlst <- list()
   predselectlst <- list()
@@ -505,17 +504,6 @@ modSAarea <- function(SApopdatlst = NULL,
     } else {
       if (!all(prednames %in% SApopdat$prednames)) {
         stop("invalid prednames... must be in: ", toString(SApopdat$prednames))
-      }
-    }
-
-    # NOTE: still need to check for equivalent unit-level issue. Much less common though
-    ## Check number of predictors... must be n-2 less than number of dunits
-    ########################################################################
-    if (SAmethod == "area") {
-      maxpreds <- length(unique(dunitlut[[dunitvar]])) - 2
-      if (length(prednames) > maxpreds) {
-        maxtxt <- ifelse(maxpreds == 1, "1 predictor", paste(maxpreds, "predictors"))
-        stop("can only use ", maxtxt, " (number of domain units - 2)")
       }
     }
 
@@ -694,9 +682,6 @@ modSAarea <- function(SApopdatlst = NULL,
 			      message("error with estimates of ", response, "...")
 			      message(e, "\n")
 			    return(NULL) })
-    if (is.null(dunit_estlst)) {
-      return(NULL)
-    }
 
     if (length(largebnd.vals) > 1) {
       dunit_est <- do.call(rbind, do.call(rbind, dunit_estlst)[,"est.large"])
@@ -802,12 +787,9 @@ modSAarea <- function(SApopdatlst = NULL,
         dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
       }
     }
-
+    estlst[[SApopdatnm]] <- dunit_est
   }    #### end SApopdat loop
   
-
-  estlst[[SApopdatnm]] <- dunit_est
-
 
   ## Combine estimates
   ################################################
