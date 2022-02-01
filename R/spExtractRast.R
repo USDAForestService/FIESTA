@@ -200,6 +200,12 @@ spExtractRast <- function(xyplt,
   }
 
 
+  if (ncores > 1) {
+    if (!"parallel" %in% rownames(installed.packages())) {
+	 message("multiple cores require package parallel")
+    }
+  } 
+
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################  
@@ -229,8 +235,6 @@ spExtractRast <- function(xyplt,
 		warn=paste(xy.uniqueid, "not in spplt"), stopifnull=TRUE)
   }
  
-print("UUU")
-print(dim(sppltx))
   ## Check showext    
   showext <- pcheck.logical(showext, varnm="showext", 
 		title="Plot extents?", first="YES", gui=gui)

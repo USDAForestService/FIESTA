@@ -372,6 +372,7 @@ spGetPlots <- function(bnd = NULL,
         if (is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
+
         xydat <- spGetXY(bnd=bndx, 
                          states=states, RS=RS, 
                          xy=xy, xy_dsn=xy_dsn, 
@@ -417,7 +418,6 @@ spGetPlots <- function(bnd = NULL,
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 		        checklst=names(spxy), gui=gui, caption="JoinID in xy?", 
 		        stopifnull=TRUE)  
-
 
         ## Check projections. Reproject points to clippolyv projection.
         prjdat <- crsCompare(spxy, bndx, nolonglat=TRUE)
@@ -1127,7 +1127,7 @@ spGetPlots <- function(bnd = NULL,
         }
       }
     }
- 
+
     for (i in 1:length(stcds)) { 
       stcd <- stcds[i]
       state <- pcheck.states(stcd) 
@@ -1173,7 +1173,7 @@ spGetPlots <- function(bnd = NULL,
 			Endyr=measEndyr, invyrs=invyrs, allyrs=allyrs, 
 			intensity1=intensity1, syntax="R", plotnm=plot_layer, 
 			ppsanm=ppsa_layer)
- 
+
       if (is.null(pfromqry)) {
         message("no time frame specified... including all years")
         allyrs <- TRUE
@@ -1455,7 +1455,7 @@ spGetPlots <- function(bnd = NULL,
           cond.qry <- paste0("select distinct cond.* from ", p2fromqry, 
                              " join cond on(cond.", 
 							cuniqueid, " = p.", 
-							puniqueid, ") where ", stfilter) 
+							pjoinid, ") where ", stfilter) 
           rs <- DBI::dbSendQuery(dbconn, cond.qry)
           cond <- suppressWarnings(DBI::dbFetch(rs))
           cond <- cond[cond[[cuniqueid]] %in% xyids, ]
