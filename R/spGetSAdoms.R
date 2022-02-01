@@ -170,8 +170,8 @@ spGetSAdoms <- function(smallbnd,
                         maxbnd.addtext = TRUE, 
                         largebnd.addtext = FALSE, 
                         savedata_opts = NULL, 
-                        addstate=FALSE, 
-                        dissolve=FALSE) {
+                        addstate = FALSE, 
+                        dissolve = FALSE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -322,8 +322,9 @@ spGetSAdoms <- function(smallbnd,
 		gui=gui, checklst=smallbndnmlst, caption="Small area domain", 
 		stopifnull=FALSE, stopifinvalid=FALSE)
   if (all(is.null(smallbnd.unique), is.null(smallbnd.domain))) {
-    smallbndx$SMALLAREA <- "SMALLAREA"
-    smallbnd.unique <- "SMALLAREA"
+    warning("both smallbnd.unique and smallbnd.domain is null...  adding DOMAIN=1")
+    smallbndx$DOMAIN <- 1
+    smallbnd.unique=smallbnd.domain <- "DOMAIN"
   } else if (is.null(smallbnd.unique)) {
     smallbnd.unique <- smallbnd.domain
   } else if (is.null(smallbnd.domain)) {
