@@ -369,7 +369,7 @@ spGetSAdoms <- function(smallbnd,
     smallbndx <- crsdat$ycrs
 
     ## Intersect smallbnd with statebnd
-    smallbndx2 <- selectByIntersects(smallbndx, stunitcof, 50)
+    smallbndx2 <- suppressWarnings(selectByIntersects(smallbndx, stunitcof, 50))
     if (showsteps) {
       plot(sf::st_geometry(stunitcof))
       plot(sf::st_geometry(smallbndx2), add=TRUE, border="red")
