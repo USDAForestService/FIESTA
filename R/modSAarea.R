@@ -800,7 +800,6 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Combine estimates
   estdf <- do.call(rbind, estlst)
 
-
   ## Merge SAdom attributes to estdf
   ################################################
   if (addSAdomsdf && is.null(SAdomvars)) {
@@ -892,6 +891,7 @@ modSAarea <- function(SApopdatlst = NULL,
   
   if (multest) {
     multestdf <- estdf
+    multestdf_row <- estdf_row
   }
   
   ## Subset multest to estimation output

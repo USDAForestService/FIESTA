@@ -918,6 +918,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (multest) {
     multestdf <- estdf
+    multestdf_row <- estdf_row
   }
 
   ## Subset multest to estimation output
