@@ -720,7 +720,8 @@ modSAarea <- function(SApopdatlst = NULL,
       pdomdatlst[[SApopdatnm]] <- pdomdat
       dunitlutlst[[SApopdatnm]] <- dunitlut
     }
-
+    estlst[[SApopdatnm]] <- dunit_est
+ 
     if (rowcolinfo$rowvar != "TOTAL") {
       cdomdatsum <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
                     by=c(lunique, dunitvar, cuniqueid, rowcolinfo$rowvar, prednames), 
@@ -775,7 +776,7 @@ modSAarea <- function(SApopdatlst = NULL,
         }
         SAobjlst_row <- do.call(rbind, dunit_estlst_row)[,"SAobjlst.dom"]$SAobjlst.dom
       }
-
+ 
       predselectlst_row[[SApopdatnm]] <- 
 		list(predselect.unit=predselect.unit_row, predselect.area=predselect.area_row)
       if (save4testing) {
@@ -791,17 +792,16 @@ modSAarea <- function(SApopdatlst = NULL,
         pdomdatlst_row[[SApopdatnm]] <- pdomdat_row
         dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
       }
+      estlst_row[[SApopdatnm]] <- dunit_est_row
     }
-    estlst_row[[SApopdatnm]] <- dunit_est_row
-
   }    #### end SApopdat loop
+ 
   
-
   ## Combine estimates
-  ################################################
-  estdf_row <- do.call(rbind, estlst_row)
+  estdf <- do.call(rbind, estlst)
 
-  ## Merge SAdom attributes to estdf_row
+
+  ## Merge SAdom attributes to estdf
   ################################################
   if (addSAdomsdf && is.null(SAdomvars)) {
     SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% names(estdf)])
@@ -821,11 +821,13 @@ modSAarea <- function(SApopdatlst = NULL,
     estdf <- estdf[order(-estdf$AOI, estdf[["DOMAIN"]]),]
   }
 
-
   ################################################################################
   ## Get estimates by row
   ################################################################################
   if (rowcolinfo$rowvar != "TOTAL") {
+
+    ## Combine estimates
+    estdf_row <- do.call(rbind, estlst_row)
 
     ## Merge SAdom attributes to estdf_row
     if (addSAdomsdf && is.null(SAdomvars)) {

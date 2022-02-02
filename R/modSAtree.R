@@ -755,6 +755,7 @@ modSAtree <- function(SApopdatlst = NULL,
       pdomdatlst[[SApopdatnm]] <- pdomdat
       dunitlutlst[[SApopdatnm]] <- dunitlut
     }
+    estlst[[SApopdatnm]] <- dunit_est
 
     if (rowcolinfo$rowvar != "TOTAL") {
       cdomdatsum <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
@@ -820,15 +821,13 @@ modSAtree <- function(SApopdatlst = NULL,
         pdomdatlst_row[[SApopdatnm]] <- pdomdat_row
         dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
       }
+      estlst_row[[SApopdatnm]] <- dunit_est_row
     }
-    estlst_row[[SApopdatnm]] <- dunit_est_row
-
   }    #### end SApopdat loop
 
-
   ## Combine estimates
-  ################################################
-  estdf_row <- do.call(rbind, estlst_row)
+  estdf <- do.call(rbind, estlst)
+
 
   ## Merge SAdom attributes to estdf_row
   ################################################
@@ -851,6 +850,9 @@ modSAtree <- function(SApopdatlst = NULL,
   }
 
   if (rowcolinfo$rowvar != "TOTAL") {
+
+    ## Combine estimates
+    estdf_row <- do.call(rbind, estlst_row)
 
     ## Merge SAdom attributes to estdf_row
     if (addSAdomsdf && is.null(SAdomvars)) {
