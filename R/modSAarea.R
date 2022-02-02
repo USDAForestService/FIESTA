@@ -189,7 +189,7 @@ modSAarea <- function(SApopdatlst = NULL,
   returnSApopdat <- TRUE
   sumunits=FALSE
   prior=NULL
-  SAdomsdf = NULL
+  SAdomsdf=multestdf_row <- NULL
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
@@ -891,7 +891,9 @@ modSAarea <- function(SApopdatlst = NULL,
   
   if (multest) {
     multestdf <- estdf
-    multestdf_row <- estdf_row
+    if (rowvar != "TOTAL") {
+      multestdf_row <- estdf_row
+    }
   }
   
   ## Subset multest to estimation output
@@ -1194,6 +1196,9 @@ modSAarea <- function(SApopdatlst = NULL,
 
   if (multest) {
     returnlst$multest <- setDF(multestdf)
+    if (rowvar != "TOTAL") {
+      returnlst$multest_row <- setDF(multestdf_row)
+    }
   }
   if (returnSApopdat) {
     returnlst$SApopdat <- SApopdat

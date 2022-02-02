@@ -186,7 +186,7 @@ modSAtree <- function(SApopdatlst = NULL,
   returnSApopdat <- TRUE
   sumunits=FALSE
   prior=NULL
-  SAdomsdf = NULL
+  SAdomsdf=multestdf_row <- NULL
   
   colvar=NULL
   col.FIAname=FALSE
@@ -785,7 +785,7 @@ modSAtree <- function(SApopdatlst = NULL,
 			return(NULL) })
       
       if (length(largebnd.vals) > 1) {
-        dunit_estlst_row <- do.call(rbind, do.call(rbind, dunit_estlst_row)[,"est.large"])
+        dunit_est_row <- do.call(rbind, do.call(rbind, dunit_estlst_row)[,"est.large"])
         predselect.unit_row <- do.call(rbind, dunit_estlst_row)[,"predselect.unit"]
         predselect.area_row <- do.call(rbind, dunit_estlst_row)[,"predselect.area"]
         #names(prednames.select) <- largebnd.vals
@@ -918,7 +918,9 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (multest) {
     multestdf <- estdf
-    multestdf_row <- estdf_row
+    if (rowvar != "TOTAL") {
+      multestdf_row <- estdf_row
+    }
   }
 
   ## Subset multest to estimation output
@@ -1223,6 +1225,9 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (multest) {
     returnlst$multest <- setDF(multestdf)
+    if (rowvar != "TOTAL") {
+      returnlst$multest_row <- setDF(multestdf_row)
+    }
   }
   if (returnSApopdat) {
     returnlst$SApopdat <- SApopdat
