@@ -486,6 +486,14 @@ modSApop <- function(popType="VOL",
   predfac <- auxdat$predfac
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
 
+  ## Change names based on data.frame names
+  dunitlutcols <- which(names(dunitlut) %in% prednames)
+  pltassgnxcols <- which(names(pltassgnx) %in% prednames)
+  dfnames <- colnames(data.frame(dunitlut[, dunitlutcols, with=FALSE]))
+  names(dunitlut)[dunitlutcols] <- dfnames
+  names(pltassgnx)[pltassgnxcols] <- dfnames
+  prednames <- dfnames
+  
 
   ###################################################################################
   ## CALCULATE ADJUSTMENT FACTORS FOR NONSAMPLED CONDITIONS

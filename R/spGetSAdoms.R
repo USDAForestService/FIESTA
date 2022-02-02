@@ -543,7 +543,8 @@ spGetSAdoms <- function(smallbnd,
 
     if (any(table(helperbndx[[helperbnd.unique]])) > 1) {
       message("helperbnd.unique is not unique")
-    }  
+    } 
+ 
     ## Change name of helperbnd.unique if equals smallbnd.unique
     if (identical(helperbnd.unique, smallbnd.unique)) {
       tmp.unique <- checknm(helperbnd.unique, names(helperbndx))
@@ -596,6 +597,7 @@ spGetSAdoms <- function(smallbnd,
     if (is.null(helperbndx)) {
       stop("invalid helperbnd for autoselection")
     }
+
     autoselectlst <- helper.select(smallbndx, smallbnd.unique=smallbnd.unique,
  		      smallbnd.domain=smallbnd.domain,
  		      helperbndx=helperbndx, helperbnd.unique=helperbnd.unique, 
@@ -730,7 +732,10 @@ spGetSAdoms <- function(smallbnd,
   #if (!multiSAdoms) {
   #  SAdoms <- SAdomdat$SAdomlst[[1]]
   #  smallbnd <- SAdomdat$smallbndlst[[1]]
-  #}  
+  #} 
+
+  
+  message("Number of model domains generated: ", length(SAdomslst), "\n") 
 
   returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
 		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain)

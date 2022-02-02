@@ -691,7 +691,7 @@ modSAtree <- function(SApopdatlst = NULL,
       tdomdattot$AOI <- 1
       dunitlut$AOI <- 1
     }
-    
+
 #dunitlut <- data.table(SApopdat$dunitlut)
 #dat=tdomdattot
 #largebnd.val=largebnd.vals
@@ -776,7 +776,8 @@ modSAtree <- function(SApopdatlst = NULL,
 				largebnd.unique=lunique, dunitlut=dunitlut, dunitvar="DOMAIN",
 				prednames=prednames, domain=rowcolinfo$rowvar,
 				response=response, showsteps=showsteps, savesteps=savesteps,
-				stepfolder=stepfolder, prior=prior, modelselect=modelselect),
+				stepfolder=stepfolder, prior=prior, modelselect=modelselect,
+				multest=multest, SApackage=SApackage, SAmethod=SAmethod),
      	 	error=function(e) {
 			message("error with estimates of ", response, "...")
 			message(e, "\n")
@@ -820,15 +821,17 @@ modSAtree <- function(SApopdatlst = NULL,
         dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
       }
     }
-    estlst[[SApopdatnm]] <- dunit_est
+    estlst_row[[SApopdatnm]] <- dunit_est_row
 
   }    #### end SApopdat loop
 
 
   ## Combine estimates
-  estdf <- do.call(rbind, estlst)
+  ################################################
+  estdf_row <- do.call(rbind, estlst_row)
 
-  ## Merge SAdom attributes to estdf
+  ## Merge SAdom attributes to estdf_row
+  ################################################
   if (addSAdomsdf && is.null(SAdomvars)) {
     SAdomvars2 <- unique(names(SAdomsdfbind)[!names(SAdomsdfbind) %in% names(estdf)])
     estdf <- merge(setDF(SAdomsdfbind)[,c("DOMAIN", SAdomvars2)], estdf, by="DOMAIN")
@@ -848,10 +851,6 @@ modSAtree <- function(SApopdatlst = NULL,
   }
 
   if (rowcolinfo$rowvar != "TOTAL") {
-    estlst_row[[SApopdatnm]] <- dunit_est_row
-
-    ## rbind esimates
-    estdf_row <- do.call(rbind, estlst_row)
 
     ## Merge SAdom attributes to estdf_row
     if (addSAdomsdf && is.null(SAdomvars)) {

@@ -589,6 +589,16 @@ modMApop <- function(popType="VOL",
   unitNA <- auxdat$unitNA
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
 
+
+  ## Change names based on data.frame names
+  unitlutcols <- which(names(unitlut) %in% prednames)
+  pltassgnxcols <- which(names(pltassgnx) %in% prednames)
+  dfnames <- colnames(data.frame(unitlut[, unitlutcols, with=FALSE]))
+  names(unitlut)[unitlutcols] <- dfnames
+  names(pltassgnx)[pltassgnxcols] <- dfnames
+  prednames <- dfnames
+
+
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
   ## Calculates adjustment factors for area and trees by strata (and estimation unit)
