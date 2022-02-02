@@ -562,7 +562,7 @@ modSAarea <- function(SApopdatlst = NULL,
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
     domainlst <- rowcolinfo$domainlst
-    rowvar <- rowcolinfo$rowvar
+    #rowvar <- rowcolinfo$rowvar
     colvar <- rowcolinfo$colvar
     row.orderby <- rowcolinfo$row.orderby
     col.orderby <- rowcolinfo$col.orderby
@@ -574,7 +574,6 @@ modSAarea <- function(SApopdatlst = NULL,
     tdomvar <- rowcolinfo$tdomvar
     tdomvar2 <- rowcolinfo$tdomvar2
     grpvar <- rowcolinfo$grpvar
-    
     
     #rm(rowcolinfo)  
     ## Generate a uniquecol for estimation units
@@ -891,7 +890,7 @@ modSAarea <- function(SApopdatlst = NULL,
   
   if (multest) {
     multestdf <- estdf
-    if (rowvar != "TOTAL") {
+    if (rowcolinfo$rowvar != "TOTAL") {
       multestdf_row <- estdf_row
     }
   }
@@ -922,7 +921,7 @@ modSAarea <- function(SApopdatlst = NULL,
     }
   }
 
-  if (rowvar != "TOTAL") {
+  if (rowcolinfo$rowvar != "TOTAL") {
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
 		unique(c("DOMAIN", rowcolinfo$rowvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
@@ -1065,8 +1064,7 @@ modSAarea <- function(SApopdatlst = NULL,
       }
  
       ## Export multestdf
-      overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)
-      
+      overwrite_layer <- ifelse(multest.append, FALSE, overwrite_layer)     
       datExportData(multestdf, 
             savedata_opts=list(outfolder=multest_outfolder, 
                                 out_fmt=multest_fmt, 
@@ -1080,7 +1078,7 @@ modSAarea <- function(SApopdatlst = NULL,
     }
   } 
  
-  if (multest && rowvar != "TOTAL" && !is.null(multestdf_row)){
+  if (multest && rowcolinfo$rowvar != "TOTAL" && !is.null(multestdf_row)){
     ## Merge dunitarea
     #tabs <- check.matchclass(dunitarea, multestdf, )
     #dunitarea <- tabs$tab1
@@ -1187,7 +1185,7 @@ modSAarea <- function(SApopdatlst = NULL,
     rawdat$predselect.area <- predselect.area
     rawdat$SAobjlst <- SAobjlst 
     rawdat$estvar <- response
-    if (rowvar != "TOTAL") rawdat$rowvar <- rowvar
+    if (rowcolinfo$rowvar != "TOTAL") rawdat$rowvar <- rowvar
     if (colvar != "NONE") rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits
     rawdat$estunits <- estvarunits
@@ -1196,7 +1194,7 @@ modSAarea <- function(SApopdatlst = NULL,
 
   if (multest) {
     returnlst$multest <- setDF(multestdf)
-    if (rowvar != "TOTAL") {
+    if (rowcolinfo$rowvar != "TOTAL") {
       returnlst$multest_row <- setDF(multestdf_row)
     }
   }

@@ -577,7 +577,7 @@ modSAtree <- function(SApopdatlst = NULL,
     uniquerow <- rowcolinfo$uniquerow
     uniquecol <- rowcolinfo$uniquecol
     domainlst <- rowcolinfo$domainlst
-    rowvar <- rowcolinfo$rowvar
+    #rowvar <- rowcolinfo$rowvar
     colvar <- rowcolinfo$colvar
     row.orderby <- rowcolinfo$row.orderby
     col.orderby <- rowcolinfo$col.orderby
@@ -918,7 +918,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (multest) {
     multestdf <- estdf
-    if (rowvar != "TOTAL") {
+    if (rowcolinfo$rowvar != "TOTAL") {
       multestdf_row <- estdf_row
     }
   }
@@ -950,10 +950,11 @@ modSAtree <- function(SApopdatlst = NULL,
     }
   }
   
-  if (rowvar != "TOTAL") {
+  if (rowcolinfo$rowvar != "TOTAL") {
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
-                        unique(c("DOMAIN", rowvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
+                     unique(c("DOMAIN", rowcolinfo$rowvar, nhat, nhat.se, "NBRPLT.gt0")),
+ 				with=FALSE]
     setkeyv(dunit_rowest, "DOMAIN")
   
     ## Merge dunitarea
@@ -1106,7 +1107,7 @@ modSAtree <- function(SApopdatlst = NULL,
     }
   } 
 
-  if (multest && rowvar != "TOTAL" && !is.null(multestdf_row)){
+  if (multest && rowcolinfo$rowvar != "TOTAL" && !is.null(multestdf_row)){
     ## Merge dunitarea
     #tabs <- check.matchclass(dunitarea, multestdf, dunitvar)
     #dunitarea <- tabs$tab1
@@ -1216,7 +1217,7 @@ modSAtree <- function(SApopdatlst = NULL,
     if (esttype == "TREE") {
       rawdat$estvar.filter <- estvar.filter
     }
-    if (rowvar != "TOTAL") rawdat$rowvar <- rowvar
+    if (rowcolinfo$rowvar != "TOTAL") rawdat$rowvar <- rowvar
     if (colvar != "NONE") rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits
     rawdat$estunits <- estvarunits
@@ -1225,7 +1226,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (multest) {
     returnlst$multest <- setDF(multestdf)
-    if (rowvar != "TOTAL") {
+    if (rowcolinfo$rowvar != "TOTAL") {
       returnlst$multest_row <- setDF(multestdf_row)
     }
   }
