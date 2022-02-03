@@ -275,7 +275,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       ## Display and save image for largebnd (largebnd within maxbnd)
       ###############################################################
       if (showsteps) {
-        plot(merge.extents(largebndx.intd, sbnd), border="transparent")
+        plot(merge_extents(largebndx.intd, sbnd), border="transparent")
         plot(sf::st_geometry(largebndx.intd), add=TRUE, main=NULL, border="dark grey")
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
@@ -331,7 +331,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       ## Display and save image for largebnd_intersect
       ############################################################
       if (showsteps) {
-        plot(merge.extents(largebndx.intd, sbnd), border="transparent")
+        plot(merge_extents(largebndx.intd, sbnd), border="transparent")
         plot(sf::st_geometry(largebndx.intd), add=TRUE, main=NULL, border="dark grey")
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE)
@@ -352,7 +352,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
                                    overwrite_layer=overwrite))
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
         jpeg(jpgfn, res=300, units="in", width=8, height=10)
-          plot(merge.extents(largebndx.intd, sbnd), border="transparent")
+          plot(merge_extents(largebndx.intd, sbnd), border="transparent")
           plot(sf::st_geometry(largebndx.intd), add=TRUE, main=NULL, border="dark grey")
           plot(sf::st_geometry(sbnd), add=TRUE, border="red")
           plot(sf::st_geometry(largebnd_select), add=TRUE)
@@ -460,7 +460,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       ## Display and save image for largebnd_select
       ############################################################
       if (showsteps) {
-        plot(merge.extents(largebndx.intd, sbndlst[[i]]), border="transparent")
+        plot(merge_extents(largebndx.intd, sbndlst[[i]]), border="transparent")
         plot(sf::st_geometry(largebndx.intd), add=TRUE, main=NULL, border="dark grey")
         plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE, border="cyan2", lwd=2)
@@ -479,7 +479,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
         jpeg(jpgfn, res=300, units="in", width=8, height=10)
-          plot(merge.extents(largebndx.intd, sbndlst[[i]]), border="transparent")
+          plot(merge_extents(largebndx.intd, sbndlst[[i]]), border="transparent")
           plot(sf::st_geometry(largebndx.intd), add=TRUE, main=NULL, border="dark grey")
           plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
           plot(sf::st_geometry(largebnd_select), add=TRUE, border="cyan2", lwd=2)
@@ -497,7 +497,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       ## Display and save image for helperbnd_intersect
       ############################################################
       if (showsteps) {
-        plot(merge.extents(largebnd_select, sbnd), border="transparent")
+        plot(merge_extents(largebnd_select, sbnd), border="transparent")
         plot(sf::st_geometry(helperbndx.tmp), add=TRUE, border="grey")
         plot(sf::st_geometry(sbnd), add=TRUE, border="red")
         plot(sf::st_geometry(largebnd_select), add=TRUE)
@@ -516,7 +516,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
         jpeg(jpgfn, res=300, units="in", width=8, height=10)
-          plot(merge.extents(largebnd_select, sbnd), border="transparent")
+          plot(merge_extents(largebnd_select, sbnd), border="transparent")
           plot(sf::st_geometry(helperbndx.tmp), add=TRUE, border="grey")
           plot(sf::st_geometry(sbnd), add=TRUE, border="red", lwd=1.5)
           plot(sf::st_geometry(largebnd_select), add=TRUE)
