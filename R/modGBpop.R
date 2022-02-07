@@ -321,7 +321,7 @@ modGBpop <- function(popType = "VOL",
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
-    if (!savedata) {
+    if (!savedata && !saveobj) {
       message("savedata=FALSE with savedata parameters... no data are saved")
     }
     for (i in 1:length(savedata_opts)) {

@@ -32,23 +32,25 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   ############################################################################
   if (!is.null(maxbndx)) {
     maxbndxd <- sf_dissolve(maxbndx, maxbnd.unique, areacalc=FALSE)
+    smallbndx$DISSOLVE <- 1
+    smallbndxd <- sf_dissolve(smallbndx, "DISSOLVE", areacalc=FALSE)
+    smallbndx$DISSOLVE <- NULL
 
-    ## get intersection of maxbndx and smallbndx
-    maxbnd_intersect <-
-		suppressWarnings(tabulateIntersections(layer1=smallbndx,
-		        layer1fld=smallbnd.unique, layer2=maxbndxd, layer2fld=maxbnd.unique))
-            maxbnd_intersect <- maxbnd_intersect[!is.na(maxbnd_intersect$int.pct),
-            c(maxbnd.unique, smallbnd.unique, "int.pct")]
-    maxbndxlst <- unique(maxbnd_intersect[[maxbnd.unique]])
+    ## get intersection of maxbndx and smallbndx (dissolved as 1 polygon)
+    maxbndx_intersect <-
+		suppressWarnings(tabulateIntersections(layer1=smallbndxd,
+		        layer1fld="DISSOLVE", layer2=maxbndxd, layer2fld=maxbnd.unique))
+    maxbndx_intersect <- maxbndx_intersect[!is.na(maxbndx_intersect$int.pct),
+            c(maxbnd.unique, "DISSOLVE", "int.pct")]
+    maxbndxlst <- unique(maxbndx_intersect[[maxbnd.unique]])
 
-    ## Get the maximum overlap by province for each smallbnd.unique
-    maxbnd_max <- aggregate(maxbnd_intersect$int.pct,
-			list(maxbnd_intersect[[smallbnd.unique]]), max)
-    names(maxbnd_max) <- c(smallbnd.unique, "int.pct")
-    maxbnd_max <- merge(maxbnd_intersect, maxbnd_max)
-    maxbndxlst <- unique(maxbnd_max[[maxbnd.unique]])
+    ## Get the maximum overlap by province for smallbndx (dissolved as 1 polygon)
+    maxbndx_max <- aggregate(maxbndx_intersect$int.pct,
+			list(maxbndx_intersect[["DISSOLVE"]]), max)
+    maxbndx_max <- merge(maxbndx_intersect, maxbndx_max)
+    maxbndxlst <- unique(maxbndx_max[[maxbnd.unique]])
 
-    maxbndx.pct <- unique(maxbnd_max[order(maxbnd_max$int.pct, decreasing=TRUE),
+    maxbndx.pct <- unique(maxbndx_max[order(maxbndx_max$int.pct, decreasing=TRUE),
 					c(maxbnd.unique, "int.pct")])
     maxbnd.gtthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct >= maxbnd.threshold])
     maxbnd.ltthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct < maxbnd.threshold])
@@ -95,6 +97,19 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
       stepcnt <- stepcnt+1
     }
+
+    ## now, get intersection of maxbndx and smallbndx, by smallbnd.unique
+    maxbnd_intersect <-
+		suppressWarnings(tabulateIntersections(layer1=smallbndx,
+		        layer1fld=smallbnd.unique, layer2=maxbndx.intd, layer2fld=maxbnd.unique))
+    maxbnd_intersect <- maxbnd_intersect[!is.na(maxbnd_intersect$int.pct),
+            c(maxbnd.unique, smallbnd.unique, "int.pct")]
+
+    ## Get the maximum overlap by province for each smallbnd.unique
+    maxbnd_max <- aggregate(maxbnd_intersect$int.pct,
+			maxbnd_intersect[, c(maxbnd.unique, smallbnd.unique)], max)
+    setnames(maxbnd_max, "x", "int.pct")
+
  
     if (length(maxbnd.gtthres) > 1) {
       message("smallbnd intersects more than 1 maxbnd")
@@ -126,15 +141,17 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 				ypoly=maxbndx.intd[maxbndx.intd[[maxbnd.unique]] != lt, ],
 				ypoly.att=maxbnd.unique, nbr=1, returnsf=FALSE))
             	return(c(closest.maxbnd, lt)) }, maxbndx.intd, maxbnd.unique)
-          mbndlst <- c(maxbnd.gtthres, unlist(mltbndlst))
+          mbndlst <- unique(c(maxbnd.gtthres, unlist(mltbndlst)))
 
           ## Create list of new smallbnd(s)
-          sbndlst <- lapply(mbndlst, function(mbnd, maxbnd_max, smallbndx, smallbnd.unique) {
-            sbnd.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% mbnd, smallbnd.unique]
-            if (length(sbnd.att) == 0)
-              stop("cannot have more than one model...  check smallbnd")
-            smallbndx[smallbndx[[smallbnd.unique]] %in% sbnd.att,]
-          }, maxbnd_max, smallbndx, smallbnd.unique)
+ #         sbndlst <- lapply(mbndlst, function(mbnd, maxbnd_max, smallbndx, smallbnd.unique) {
+ #           sbnd.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% mbnd, smallbnd.unique]
+ #           if (length(sbnd.att) == 0)
+ #             stop("cannot have more than one model...  check smallbnd")
+ #           smallbndx[smallbndx[[smallbnd.unique]] %in% sbnd.att,]
+ #         }, maxbnd_max, smallbndx, smallbnd.unique)
+
+          sbndlst <- list(smallbndx)
 
         } else {
           mbndlst <- maxbndxlst[1]

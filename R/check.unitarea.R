@@ -12,7 +12,6 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
   ## Set global variables
   MATCH <- NULL
 
-
   ## Get pltx names
   pltx <- pcheck.table(pltx, gui=gui, tabnm="plt", returnsf=FALSE)
   pltnames <- names(pltx)
@@ -52,7 +51,8 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
 			nullcheck=TRUE, stopifnull=TRUE)
         }
       }
-
+    }
+    if (!any(class(unitarea) %in% c("data.table", "data.frame"))) {
       if (is.vector(unitarea) && length(unitarea) == 1) {
         if (is.na(unitarea)) {
           stop("invalid unitarea.. must be a number")
