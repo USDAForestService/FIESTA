@@ -276,6 +276,10 @@ modMApop <- function(popType="VOL",
     }
   }
   
+  if (unit.action == "combine") {
+    stop("must combine units before calculating population data")
+  }
+
   ## Set popFilters defaults
   popFilters_defaults_list <- formals(popFilters)[-length(formals(popFilters))]
   
@@ -569,6 +573,7 @@ modMApop <- function(popType="VOL",
       auxlut <- unitzonal
       makedummy <- TRUE
   }
+
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
                   module="MA", strata=strata, unitvar=unitvar, unitvar2=unitvar2, 
                   unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit, 

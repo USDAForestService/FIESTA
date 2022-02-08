@@ -572,6 +572,7 @@ spGetXY <- function(bnd,
     clipdat <- spClipPoint(spxy, clippolyv=bndx, uniqueid=xy.uniqueid)
     spxy <- clipdat$clip_xyplt 
     if (length(spxy) == 0) stop("xy does not overlap bndx")
+    bndx <- clipdat$clip_polyv
 
     if (showsteps) {
       plot(st_geometry(bndx), border="black")
@@ -585,12 +586,18 @@ spGetXY <- function(bnd,
   if (length(statevars) > 0) {
     spxy <- spExtractPoly(spxy, 
                           xy.uniqueid=xy.uniqueid, 
-                          polyvlst=FIESTAutils::stunitco, 
+                          polyvlst=stunitco, 
                           polyvarlst=statevars)$spxyext
+
+    ## Check projections of inlayer point layer vs. polygon layer. 
+    ## If different, reproject sppltx to polygon projection.
+    prjdat <- crsCompare(spxy, bndx) 
+    spxy <- prjdat$x
   }
 
   ## Subset columns of spxy
   #spxy <- spxy[, unique(c(xy.uniqueid, xyjoinid, stunitco.names))]
+
 
   #############################################################################
   ## measEndyr.filter
@@ -660,7 +667,7 @@ spGetXY <- function(bnd,
     }
     par(mar=mar)
   }
- 
+
   if (returnxy) {
     returnlst$spxy <- spxy
   } 

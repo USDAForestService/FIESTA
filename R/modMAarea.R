@@ -298,7 +298,7 @@ modMAarea <- function(MApopdat,
       assign(names(table_opts)[[i]], table_opts[[i]])
     }
   }
-  
+
   ## Set title defaults
   title_defaults_list <- formals(FIESTA::title_options)[-length(formals(FIESTA::title_options))]
   
@@ -390,7 +390,6 @@ modMAarea <- function(MApopdat,
     setkeyv(unitarea, unitvar)
   }
   
-
   ###################################################################################
   ## Check parameters and apply plot and condition filters
   ###################################################################################

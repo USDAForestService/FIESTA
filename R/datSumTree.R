@@ -954,6 +954,31 @@ datSumTree <- function(tree = NULL,
 #     close(outfile)
 #   }
 
+  ## Get metadata
+  #############################################################  
+  if (bycond) {
+    meta = ref_cond[ref_cond$VARIABLE %in% names(sumdat), ]
+    missnames <- names(sumdat)[!names(sumdat) %in% meta$VARIABLE]
+    meta2 = ref_plt[ref_plt$VARIABLE %in% missnames, ]
+    if (nrow(meta2) > 0) {
+      meta <- rbind(meta, meta2)
+    } 
+  } else {
+    meta = ref_plt[names(sumdat) %in% ref_plt$VARIABLE, ]
+  }
+  metanames <- meta$VARIABLE[meta$VARIABLE %in% names(sumdat)]
+  meta <- meta[meta$VARIABLE %in% as.vector(na.omit(metanames[match(names(sumdat), metanames)])), ]
+
+  tree_ref <- ref_tree[ref_tree$VARIABLE %in% estvarlst,]
+  tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
+  if (adjtree) {
+    tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_ADJ")
+    tree_ref$DESCRIPTION <- paste(tree_ref$DESCRIPTION, "- adjusted for partial nonresponse at plot-level")
+  }
+  if (nrow(tree_ref) > 0) {
+    meta <- rbind(meta, tree_ref)
+  }
+
 
   #### WRITE TO FILE 
   #############################################################
@@ -980,6 +1005,18 @@ datSumTree <- function(tree = NULL,
                                   overwrite_layer=overwrite_layer,
                                   append_layer=append_layer,
                                   add_layer=TRUE)) 
+
+      datExportData(meta, 
+            savedata_opts=list(outfolder=outfolder, 
+                                  out_fmt=out_fmt, 
+                                  out_dsn=out_dsn, 
+                                  out_layer="meta",
+                                  outfn.pre=outfn.pre, 
+                                  outfn.date=outfn.date, 
+                                  overwrite_layer=overwrite_layer,
+                                  append_layer=append_layer,
+                                  add_layer=TRUE)) 
+
     }
   } 
 
@@ -991,5 +1028,6 @@ datSumTree <- function(tree = NULL,
   if (!is.null(tfilter)) {
     sumtreelst$tfilter <- tfilter
   }
+  sumtreelst$meta <- meta
   return(sumtreelst)
 } 
