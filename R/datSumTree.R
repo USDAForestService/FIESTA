@@ -969,7 +969,7 @@ datSumTree <- function(tree = NULL,
   metanames <- meta$VARIABLE[meta$VARIABLE %in% names(sumdat)]
   meta <- meta[meta$VARIABLE %in% as.vector(na.omit(metanames[match(names(sumdat), metanames)])), ]
 
-  tree_ref <- ref_tree[ref_tree$VARIABLE %in% estvarlst,]
+  tree_ref <- ref_tree[ref_tree$VARIABLE %in% tsumvarlst,]
   tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
   if (adjtree) {
     tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_ADJ")
