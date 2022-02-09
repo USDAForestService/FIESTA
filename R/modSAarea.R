@@ -315,6 +315,10 @@ modSAarea <- function(SApopdatlst = NULL,
   SAmethod <- pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 
 		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
 
+  if (SApackage == "sae" && SAmethod == "unit") {
+    stop("sae unit-level estimates are not available")
+  }
+
   ###################################################################################
   ## Check data and generate population information 
   ###################################################################################
