@@ -657,7 +657,6 @@ modSAarea <- function(SApopdatlst = NULL,
 #domain="TOTAL"
 #largebnd.unique=lunique
 
-
     if (!"DOMAIN" %in% names(tdomdattot)) {
       tdomdattot$DOMAIN <- tdomdattot[[dunitvar]]
       tdomdattot[[dunitvar]] <- NULL
@@ -666,7 +665,7 @@ modSAarea <- function(SApopdatlst = NULL,
       dunitareabind$DOMAIN <- dunitareabind[[dunitvar]]
       dunitareabind[[dunitvar]] <- NULL
     }
-    
+ 
     dunit_estlst <- 
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
