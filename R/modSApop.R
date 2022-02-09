@@ -432,7 +432,7 @@ modSApop <- function(popType="VOL",
                   unitarea=dunitarea, unitvar=dunitvar, areavar=areavar,  
                   unitvar2=unitvar2, unit.action=unit.action, areaunits=areaunits, 
                   prednames=prednames, predfac=predfac, 
-                  pvars2keep=pvars2keep, cvars2keep=cvars2keep)
+                  pvars2keep=pvars2keep, cvars2keep="AOI")
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef

@@ -145,7 +145,16 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     ## Add a column for totals
     condf$TOTAL <- 1
 
-    returnlst <- list(treef=treef, condf=condf[,c(cuniqueid, condid, "TOTAL"), with=FALSE],
+    if (!is.null(cvars2keep) && length(cvars2keep) > 0) {
+      if (!all(cvars2keep %in% names(condf))) {
+        cvars2keep <- cvars2keep[cvars2keep %in% names(condf)]
+        if (length(cvars2keep) == 0) {
+          cvars2keep <- NULL
+        }
+      }
+    }
+
+    returnlst <- list(treef=treef, condf=condf[,unique(c(cuniqueid, condid, cvars2keep, "TOTAL")), with=FALSE],
                 seedf=seedf, uniquerow=NULL, uniquecol=NULL, domainlst=domainlst, bytdom=bytdom,
                 rowvar=rowvar, colvar=colvar, row.orderby=row.orderby, col.orderby=col.orderby,
                 row.add0=row.add0, col.add0=col.add0,

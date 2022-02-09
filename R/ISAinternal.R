@@ -105,17 +105,20 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     maxbnd_intersect <- maxbnd_intersect[!is.na(maxbnd_intersect$int.pct),
             c(maxbnd.unique, smallbnd.unique, "int.pct")]
 
+
     ## Get the maximum overlap by province for each smallbnd.unique
     maxbnd_max <- aggregate(maxbnd_intersect$int.pct,
-			maxbnd_intersect[, c(maxbnd.unique, smallbnd.unique)], max)
-    setnames(maxbnd_max, "x", "int.pct")
-
+			list(maxbnd_intersect[[smallbnd.unique]]), max)
+    names(maxbnd_max) <- c(smallbnd.unique, "int.pct")
+    maxbnd_max <- merge(maxbnd_intersect, maxbnd_max)
+    maxbndxlst <- maxbndxlst[maxbndxlst %in% unique(maxbnd_max[[maxbnd.unique]])]
  
     if (length(maxbnd.gtthres) > 1) {
       message("smallbnd intersects more than 1 maxbnd")
 
       if (multiSAdoms) {
-        mbndlst <- as.list(maxbnd.gtthres)
+        mbndlst <- c(maxbnd.gtthres, maxbnd.ltthres)
+        mbndlst <- as.list(mbndlst[mbndlst %in% unique(maxbnd_max[[maxbnd.unique]])])
 
         ## Create list of new smallbnd(s)
         sbndlst <- lapply(mbndlst, function(mbnd, maxbnd_max, smallbndx, smallbnd.unique) {

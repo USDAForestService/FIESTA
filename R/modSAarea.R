@@ -539,7 +539,6 @@ modSAarea <- function(SApopdatlst = NULL,
     pltcondf <- estdat$pltcondf
     landarea <- estdat$landarea
 
-    
     ###################################################################################
     ### GET ROW AND COLUMN INFO FROM condf
     ###################################################################################
@@ -611,7 +610,6 @@ modSAarea <- function(SApopdatlst = NULL,
       message("using the following predictors...", toString(prednames))
     }
 
-
     ## Generate models
     ############################################################################
     ## Note: not sure why you would want to run by largebnd.unique
@@ -636,11 +634,18 @@ modSAarea <- function(SApopdatlst = NULL,
     largebnd.vals <- largebnd.vals[table(cdomdat[[lunique]]) > 30]
 
 
+    ## Add AOI if not in data
+    ######################################
+    if (!"AOI" %in% names(cdomdat)) {
+      cdomdat$AOI <- 1
+      dunitlut$AOI <- 1
+    }
+
     ## Get estimate for total
     ######################################
     ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
     tdomdattot <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-                            by=c(lunique, dunitvar, cuniqueid, "TOTAL", prednames), 
+                            by=c(lunique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames), 
                             .SDcols=estvar.name]
 
     ## get estimate by domain, by largebnd value
@@ -660,10 +665,6 @@ modSAarea <- function(SApopdatlst = NULL,
       dunitlut[[dunitvar]] <- NULL
       dunitareabind$DOMAIN <- dunitareabind[[dunitvar]]
       dunitareabind[[dunitvar]] <- NULL
-    }
-    if (!"AOI" %in% names(tdomdattot)) {
-      tdomdattot$AOI <- 1
-      dunitlut$AOI <- 1
     }
     
     dunit_estlst <- 
@@ -890,11 +891,13 @@ modSAarea <- function(SApopdatlst = NULL,
   
   if (multest) {
     multestdf <- estdf
+    multestdf[is.na(multestdf$AOI), "AOI"] <- 0
     if (rowcolinfo$rowvar != "TOTAL") {
       multestdf_row <- estdf_row
+      multestdf_row[is.na(multestdf_row$AOI), "AOI"] <- 0
     }
   }
-  
+
   ## Subset multest to estimation output
   dunit_totest <- setDT(estdf)[AOI==1, 
 		unique(c("DOMAIN", nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
@@ -948,7 +951,7 @@ modSAarea <- function(SApopdatlst = NULL,
       }
     }
   }
-
+ 
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################
@@ -1035,12 +1038,13 @@ modSAarea <- function(SApopdatlst = NULL,
 
     ## Remove TOTAL column from multestdf
     if (domain == "TOTAL" && "TOTAL" %in% names(multestdf)) {
-      multestdf[, TOTAL := NULL]
+      multestdf$TOTAL <- NULL
     }
     if (multest.AOIonly) {
       ## Subset multestdf, where AOI = 1
       multestdf <- multestdf[multestdf$AOI == 1, ]
     }
+
     ## Save multest table
     if (savemultest) {
 

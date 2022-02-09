@@ -71,6 +71,8 @@
 #' @param ncores Integer. Number of cores to use for extracting values.
 #' @param NAto0 Logical. If TRUE, converts extracted NA values to 0.
 #' @param npixels Logical. If TRUE, include number of pixels.
+#' @param addN Logical. If TRUE, adds N to unitzonal output with number of 
+#' plots by unit.
 #' @param showext Logical. If TRUE, layer extents are displayed in plot window.
 #' @param returnxy Logical. If TRUE, returns xy data as sf object (spxyplt).
 #' @param savedata Logical. If TRUE, the input data with extracted values are
@@ -159,6 +161,7 @@ spGetAuxiliary <- function(xyplt,
                            ncores = 1,
                            NAto0 = TRUE, 
                            npixels = TRUE, 
+                           addN = FALSE,
                            showext = FALSE, 
                            returnxy = FALSE, 
                            savedata = FALSE, 
@@ -421,6 +424,10 @@ spGetAuxiliary <- function(xyplt,
   ## npixels    
   npixels <- pcheck.logical(npixels, varnm="npixels", 
 		title="Number of pixels?", first="YES", gui=gui)
+  
+  ## addN    
+  addN <- pcheck.logical(addN, varnm="addN", 
+                            title="Add N?", first="NO", gui=gui)
 
   ## Check showext    
   showext <- pcheck.logical(showext, varnm="showext", 
@@ -473,6 +480,7 @@ spGetAuxiliary <- function(xyplt,
   #############################################################################
   unitarea <- NULL
   polyvarlst <- unique(c(unitvar, vars2keep))[!unique(c(unitvar, vars2keep)) %in% names(sppltx)]
+
   if (!unitvar %in% names(sppltx)) { 
       ## Extract values of polygon layer to points
     extpoly <- tryCatch(spExtractPoly(xyplt=sppltx,
@@ -495,6 +503,7 @@ spGetAuxiliary <- function(xyplt,
   rm(extpoly)
   gc()
 
+
   #############################################################################
   ## 2) Set up outputs - unitzonal, prednames, inputdf, zonalnames
   #############################################################################
@@ -504,6 +513,24 @@ spGetAuxiliary <- function(xyplt,
   prednames <- {}
   inputdf <- {}
   zonalnames <- {}
+
+  if (addN) {
+    ## Get plot counts by domain unit
+    ##########################################################################
+    pltcnt <- data.table::data.table(sf::st_drop_geometry((sppltx)))
+    if (!"AOI" %in% names(pltcnt)) {
+      pltcnt$AOI <- 1
+    }
+    pltcnt <- pltcnt[AOI == 1, .N, by=unitvar]
+    message("checking number of plots in domain...")
+    message(paste0(utils::capture.output(pltcnt), collapse = "\n"))
+    setkeyv(pltcnt, unitvar)
+
+    ## Append plot counts to unitzonal
+    unitzonal <- unitzonal[pltcnt]
+    unitzonal[is.na(unitzonal$N), "N"] <- 0
+  }
+
 
   ###############################################################################
   ## 3) Continuous raster layers - Extract values and get zonal statistics

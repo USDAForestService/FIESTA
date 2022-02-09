@@ -31,6 +31,7 @@ spGetAuxiliary(
   ncores = 1,
   NAto0 = TRUE,
   npixels = TRUE,
+  addN = FALSE,
   showext = FALSE,
   returnxy = FALSE,
   savedata = FALSE,
@@ -124,6 +125,9 @@ collapsing rast.lut values.}
 \item{NAto0}{Logical. If TRUE, converts extracted NA values to 0.}
 
 \item{npixels}{Logical. If TRUE, include number of pixels.}
+
+\item{addN}{Logical. If TRUE, adds N to unitzonal output with number of 
+plots by unit.}
 
 \item{showext}{Logical. If TRUE, layer extents are displayed in plot window.}
 
