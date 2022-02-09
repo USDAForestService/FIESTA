@@ -312,9 +312,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
                                    out_layer=out_layer,
                                    append_layer=TRUE,
                                    overwrite_layer=overwrite))
-
         jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
         jpeg(jpgfn, res=300, units="in", width=8, height=10)
+          plot(merge_extents(largebndx.intd, sbnd), border="transparent")
           plot(sf::st_geometry(largebndx.intd), add=TRUE, main=NULL, border="dark grey")
           plot(sf::st_geometry(sbndlst[[i]]), add=TRUE, border="red")
           coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(largebndx.intd)))
