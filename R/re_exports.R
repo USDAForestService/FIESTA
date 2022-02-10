@@ -23,6 +23,9 @@ FIESTAutils::spMakeSpatial_options
 FIESTAutils::datExportData
 
 #' @export
+FIESTAutils::datFilter
+
+#' @export
 FIESTAutils::DBcreateSQLite
 
 #' @export
