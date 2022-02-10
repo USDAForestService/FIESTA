@@ -494,14 +494,16 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
     ## Get cross tables
     ###############################################
     if (sumunits) {
-      estunits <- unique(unit_grpest[[unitvar]])
-      numunits <- length(estunits)
+#      estunits <- unique(unit_grpest[[unitvar]])
+#      numunits <- length(estunits)
+      numunits <- 1
       tabs <- crossxbyunit(unit=NULL, unit_grpest=grpest,
 		unit_rowest=rowest, unit_colest=colest, unit_totest=totest,
 		unitvar=unitvar, rowvar=rowvar, colvar=colvar,
 		estnm=estnmd, psenm=psenm, allin1, char.width, estnull, psenull,
 		estround=estround, pseround=pseround,
-		rowgrp, rowgrpnm, title.rnames, numunits, savedata, addtitle,
+		rowgrp=rowgrp, rowgrpnm=rowgrpnm, title.rnames=title.rnames, 
+		numunits=numunits, savedata=savedata, addtitle,
 		returntitle, outfn.estpse, title.estpse, title.est, title.pse,
 		title.ref, outfolder, outfn.date, overwrite, esttype, phototype,
 		rnames, title.colvar, title.unitvar)
