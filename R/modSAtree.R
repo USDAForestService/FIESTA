@@ -781,7 +781,13 @@ modSAtree <- function(SApopdatlst = NULL,
       if (!"AOI" %in% names(cdomdatsum)) {
         cdomdatsum$AOI <- 1
       }
-  
+
+#dunitlut <- data.table(SApopdat$dunitlut)
+#dat=cdomdatsum
+#largebnd.val=largebnd.vals
+#domain=rowcolinfo$rowvar
+#largebnd.unique=lunique
+ 
       dunit_estlst_row <- 
 		tryCatch(
 			lapply(largebnd.vals, SAest.large, 
@@ -792,7 +798,7 @@ modSAtree <- function(SApopdatlst = NULL,
 				stepfolder=stepfolder, prior=prior, modelselect=modelselect,
 				multest=multest, SApackage=SApackage, SAmethod=SAmethod),
      	 	error=function(e) {
-			message("error with estimates of ", response, "...")
+			message("error with estimates of ", response, " by ", rowvar, "...")
 			message(e, "\n")
 			return(NULL) })
       
