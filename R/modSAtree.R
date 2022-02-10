@@ -732,8 +732,12 @@ modSAtree <- function(SApopdatlst = NULL,
     
     if (length(largebnd.vals) > 1) {
       dunit_est <- do.call(rbind, do.call(rbind, dunit_estlst)[,"est.large"])
-      predselect.unit <- do.call(rbind, dunit_estlst)[,"predselect.unit"]
-      predselect.area <- do.call(rbind, dunit_estlst)[,"predselect.area"]
+      if (multest || SAmethod == "unit") {
+        predselect.unit <- do.call(rbind, dunit_estlst)[,"predselect.unit"]
+      }
+      if (multest || SAmethod == "area") {
+        predselect.area <- do.call(rbind, dunit_estlst)[,"predselect.area"]
+      }
       #names(prednames.select) <- largebnd.vals
       if (save4testing) {
         pdomdat <- do.call(rbind, do.call(rbind, dunit_estlst)[,"pltdat.dom"])
@@ -743,8 +747,12 @@ modSAtree <- function(SApopdatlst = NULL,
 
     } else {
       dunit_est <- do.call(rbind, dunit_estlst)[,"est.large"]$est.large
-      predselect.unit <- do.call(rbind, dunit_estlst)[,"predselect.unit"]$predselect.unit
-      predselect.area <- do.call(rbind, dunit_estlst)[,"predselect.area"]$predselect.area
+      if (multest || SAmethod == "unit") {
+        predselect.unit <- do.call(rbind, dunit_estlst)[,"predselect.unit"]$predselect.unit
+      }
+      if (multest || SAmethod == "area") {
+        predselect.area <- do.call(rbind, dunit_estlst)[,"predselect.area"]$predselect.area
+      }
       if (save4testing) {
         pdomdat <- do.call(rbind, dunit_estlst)[,"pltdat.dom"]$pltdat.dom
         dunitlut <- do.call(rbind, dunit_estlst)[,"dunitlut.dom"]$dunitlut.dom
@@ -804,9 +812,12 @@ modSAtree <- function(SApopdatlst = NULL,
       
       if (length(largebnd.vals) > 1) {
         dunit_est_row <- do.call(rbind, do.call(rbind, dunit_estlst_row)[,"est.large"])
-        predselect.unit_row <- do.call(rbind, dunit_estlst_row)[,"predselect.unit"]
-        predselect.area_row <- do.call(rbind, dunit_estlst_row)[,"predselect.area"]
-        #names(prednames.select) <- largebnd.vals
+        if (multest || SAmethod == "unit") {
+          predselect.unit_row <- do.call(rbind, dunit_estlst_row)[,"predselect.unit"]
+        }
+        if (multest || SAmethod == "area") {
+          predselect.area_row <- do.call(rbind, dunit_estlst_row)[,"predselect.area"]
+        }
         if (save4testing) {
           pdomdat_row <- do.call(rbind, do.call(rbind, dunit_estlst_row)[,"pltdat.dom"])
           dunitlut_row <- do.call(rbind, do.call(rbind, dunit_estlst_row)[,"dunitlut.dom"])
@@ -814,8 +825,12 @@ modSAtree <- function(SApopdatlst = NULL,
         SAobjlst_row <- do.call(rbind, dunit_estlst_row)[,"SAobjlst.dom"]
       } else {
         dunit_est_row <- do.call(rbind, dunit_estlst_row)[,"est.large"]$est.large
-        predselect.unit_row <- do.call(rbind, dunit_estlst_row)[,"predselect.unit"]$predselect.unit
-        predselect.area_row <- do.call(rbind, dunit_estlst_row)[,"predselect.area"]$predselect.area
+        if (multest || SAmethod == "unit") {
+          predselect.unit_row <- do.call(rbind, dunit_estlst_row)[,"predselect.unit"]$predselect.unit
+        }
+        if (multest || SAmethod == "area") {
+          predselect.area_row <- do.call(rbind, dunit_estlst_row)[,"predselect.area"]$predselect.area
+        }
         if (save4testing) {
           pdomdat_row <- do.call(rbind, dunit_estlst_row)[,"pltdat.dom"]$pltdat.dom
           dunitlut_row <- do.call(rbind, dunit_estlst_row)[,"dunitlut.dom"]$dunitlut.dom
@@ -1230,8 +1245,12 @@ modSAtree <- function(SApopdatlst = NULL,
     rawdat$esttype <- esttype
     rawdat$SApackage <- SApackage
     rawdat$SAmethod <- SAmethod
-    rawdat$predselect.unit <- predselect.unit
-    rawdat$predselect.area <- predselect.area
+    if (multest || SAmethod == "unit") {
+      rawdat$predselect.unit <- predselect.unit
+    }
+    if (multest || SAmethod == "area") {
+      rawdat$predselect.area <- predselect.area
+    }
     rawdat$SAobjlst <- SAobjlst 
     rawdat$estvar <- response
     if (esttype == "TREE") {
