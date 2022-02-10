@@ -586,7 +586,7 @@ spGetXY <- function(bnd,
   if (length(statevars) > 0) {
     spxy <- spExtractPoly(spxy, 
                           xy.uniqueid=xy.uniqueid, 
-                          polyvlst=stunitco, 
+                          polyvlst=FIESTAutils::stunitco, 
                           polyvarlst=statevars)$spxyext
 
     ## Check projections of inlayer point layer vs. polygon layer. 
