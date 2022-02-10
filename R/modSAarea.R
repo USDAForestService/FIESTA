@@ -715,9 +715,15 @@ modSAarea <- function(SApopdatlst = NULL,
       }
       SAobjlst <- do.call(rbind, dunit_estlst)[,"SAobjlst.dom"]$SAobjlst.dom
     }
+    predlst <- list()
+    if (multest || SAmethod == "unit") {
+      predlst$predselect.unit <- predselect.unit
+    }
+    if (multest || SAmethod == "area") {
+      predlst$predselect.area <- predselect.area
+    }
+    predselectlst[[SApopdatnm]] <- predlst
 
-    predselectlst[[SApopdatnm]] <- 
-		list(predselect.unit=predselect.unit, predselect.area=predselect.area)
     if (save4testing) {
       ## Merge SAdom attributes to dunit_totest
       if (addSAdomsdf) {
@@ -794,9 +800,16 @@ modSAarea <- function(SApopdatlst = NULL,
         }
         SAobjlst_row <- do.call(rbind, dunit_estlst_row)[,"SAobjlst.dom"]$SAobjlst.dom
       }
- 
-      predselectlst_row[[SApopdatnm]] <- 
-		list(predselect.unit=predselect.unit_row, predselect.area=predselect.area_row)
+
+      predlst_row <- list()
+      if (multest || SAmethod == "unit") {
+        predlst_row$predselect.unit <- predselect.unit_row
+      }
+      if (multest || SAmethod == "area") {
+        predlst_row$predselect.area <- predselect.area_row
+      }
+      predselectlst_row[[SApopdatnm]] <- predlst_row
+
       if (save4testing) {
         ## Merge SAdom attributes to dunit_totest
         if (addSAdomsdf) {
@@ -1199,7 +1212,7 @@ modSAarea <- function(SApopdatlst = NULL,
         }
       }
     }
-
+ 
     rawdat$esttype <- esttype
     rawdat$SApackage <- SApackage
     rawdat$SAmethod <- SAmethod
