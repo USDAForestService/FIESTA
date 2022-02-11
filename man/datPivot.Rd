@@ -62,7 +62,7 @@ Generates a pivot table of values by x row and y column.
 	datPivot(x=FIESTA::WYcond, pvar="CONDPROP_UNADJ", xvar="FORTYPCD", yvar="STDSZCD")
 
 	datPivot(x=FIESTA::WYtree, pvar="TPA_UNADJ", xvar="SPCD", yvar="STATUSCD", 
-		pfun=mean, NAto0=FALSE)
+		pfun=mean, NAto0=TRUE)
 
 
 }

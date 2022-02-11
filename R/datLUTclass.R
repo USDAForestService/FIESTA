@@ -54,8 +54,8 @@
 #' @keywords data
 #' @examples
 #' 
-#' 	head(FIESTA::ref_diacl2in)
-#' 	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=FIESTA::ref_diacl2in, 
+#' 	head(FIESTAutils::ref_diacl2in)
+#' 	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=FIESTAutils::ref_diacl2in, 
 #' 		LUTclassnm="DIACL2IN")
 #' 	names(WYtreelut)
 #' 	head(WYtreelut$xLUT)
