@@ -818,8 +818,8 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     } else {
       if (is.factor(condf[[colvar]])) {
         uniquecol <- as.data.table(levels(condf[[colvar]]))
-        uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=levels(condf[[colvar]]))
         names(uniquecol) <- colvar
+        uniquecol[[colvar]] <- factor(uniquecol[[colvar]], levels=levels(condf[[colvar]]))
       } else {
         #colvals <- na.omit(unique(condf[, colvar, with=FALSE]))
         colvals <- unique(condf[, colvar, with=FALSE])
