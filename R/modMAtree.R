@@ -799,6 +799,7 @@ modMAtree <- function(MApopdat,
         }
       }
     }
+    rawdat$module <- "MA"
     rawdat$esttype <- "TREE"
     rawdat$MAmethod <- MAmethod
     rawdat$predselectlst <- predselectlst

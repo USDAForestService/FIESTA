@@ -881,11 +881,17 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Define nhat
   ##################################
   if (SAmethod == "unit") {
-    nhat <- "JU.EBLUP"
-    nhat.se <- "JU.EBLUP.se.1"
-    nhat.var <- "JU.EBLUP.var"
-    nhat.cv <- "JU.EBLUP.cv"
-
+    if (SApackage == "hbsae") {
+      nhat <- "hbsaeU"
+      nhat.se <- "hbsaeU.se"
+      nhat.var <- "hbsaeU.var"
+      nhat.cv <- "hbsaeU.cv"
+    } else if (SApackage == "JoSAE") {
+      nhat <- "JU.EBLUP"
+      nhat.se <- "JU.EBLUP.se.1"
+      nhat.var <- "JU.EBLUP.var"
+      nhat.cv <- "JU.EBLUP.cv"
+    }
   } else if (SAmethod == "area") {
     if (SApackage == "JoSAE") {
       nhat <- "JFH"
@@ -913,7 +919,6 @@ modSAarea <- function(SApopdatlst = NULL,
   
   if (all(is.na(estdf[[nhat]]))) {
     message("SAmethod returned all NA values... returning direct estimate (DIR)")
-    SAmethod <- "DIR"
     nhat <- "DIR"
     nhat.se <- "DIR.se"
     nhat.var <- "DIR.var"
@@ -1212,10 +1217,11 @@ modSAarea <- function(SApopdatlst = NULL,
         }
       }
     }
- 
+    rawdat$module <- "SA"
     rawdat$esttype <- esttype
     rawdat$SApackage <- SApackage
     rawdat$SAmethod <- SAmethod
+    rawdat$estnm <- estnm
     if (multest || SAmethod == "unit") {
       rawdat$predselect.unit <- predselect.unit
     }

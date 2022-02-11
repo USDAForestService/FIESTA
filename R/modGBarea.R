@@ -741,7 +741,9 @@ modGBarea <- function(GBpopdat,
         }
       }
     }
-    rawdat$esttype <- "AREA"
+    rawdat$module <- "GB"
+    rawdat$esttype <- esttype
+    rawdat$GBmethod <- ifelse(strata, "PS", "HT")
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits

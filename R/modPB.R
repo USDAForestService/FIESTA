@@ -864,6 +864,11 @@ modPB <- function(PBpopdat = NULL,
 
   if (rawdata) {
     rawdat <- tabs$rawdat
+    rawdat$module <- "PB"
+    rawdat$esttype <- ifelse(ratio, "RATIO", "AREA")
+    rawdat$PBmethod <- ifelse(strata, "PS", "HT")
+    rawdat$strtype <- strtype
+
     if (!is.null(rowvar) && rowvar != "NONE") {
       rawdat$rowvar <- rowvar
       rawdat$pltdom.row <- pltdom.row

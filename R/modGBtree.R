@@ -406,6 +406,7 @@ modGBtree <- function(GBpopdat,
   strwtvar <- GBpopdat$strwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
+
  
   ########################################
   ## Check area units
@@ -764,6 +765,9 @@ modGBtree <- function(GBpopdat,
   }
  
   if (rawdata) {
+    rawdat$module <- "GB"
+    rawdat$esttype <- esttype
+    rawdat$GBmethod <- ifelse(strata, "PS", "HT")
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat) 
     rawdat$estvar <- estvar.name
@@ -799,7 +803,6 @@ modGBtree <- function(GBpopdat,
         }
       }
     }
-    rawdat$esttype <- "TREE"
     rawdat$estvar <- estvar
     rawdat$estvar.filter <- estvar.filter
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar

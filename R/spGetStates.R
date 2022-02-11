@@ -226,7 +226,7 @@ spGetStates <- function(bnd_layer,
   if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) {
     if (stbnd.att == "COUNTYFIPS") {
       statenames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
-			unique(as.numeric(substr(states, 1,2))), "MEANING"]
+			unique(as.numeric(substr(states, 1, nchar(states)-4))), "MEANING"]
     }
   }
   ## Check statenames

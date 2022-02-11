@@ -724,7 +724,8 @@ modMAarea <- function(MApopdat,
         }
       }
     }
-    rawdat$esttype <- "AREA"
+    rawdat$module <- "MA"
+    rawdat$esttype <- esttype
     rawdat$MAmethod <- MAmethod
     rawdat$predselectlst <- predselectlst
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar

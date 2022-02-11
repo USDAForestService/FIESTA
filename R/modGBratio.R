@@ -425,6 +425,7 @@ modGBratio <- function(GBpopdat,
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
 
+
   ########################################
   ## Check area units
   ########################################
@@ -989,7 +990,9 @@ modGBratio <- function(GBpopdat,
         }
       }
     }
-    rawdat$esttype <- "RATIO"
+    rawdat$module <- "GB"
+    rawdat$esttype <- esttype
+    rawdat$GBmethod <- ifelse(strata, "PS", "HT")
     rawdat$estvarn <- estvarn
     rawdat$estvarn.filter <- estvarn.filter
     if (!is.null(estvard)) rawdat$estvard <- estvard
