@@ -274,21 +274,41 @@ AGENTCD == 30" \tab Dead trees from fire \cr }
 \examples{
 
 
-  ## Rows only; combine estimation units (sumunits=TRUE)
-  MODest <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN",
-	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE,
-	landarea="FOREST", estvar="VOLCFNET", estvar.filter="STATUSCD==1",
-	rowvar="FORTYPCD", row.FIAname=TRUE)
-  names(MODest)
-  MODest$est
+GBpopdat <- modGBpop(
+  popTabs = list(cond = FIESTA::WYcond,  
+                 tree = FIESTA::WYtree,        
+                 seed = FIESTA::WYseed),      
+  popTabIDs = list(cond = "PLT_CN"),            
+  pltassgn = FIESTA::WYpltassgn,  
+  pltassgnid = "CN",        
+  pjoinid = "PLT_CN",         
+  unitarea = FIESTA::WYunitarea,
+  unitvar = "ESTN_UNIT",        
+  strata = TRUE,           
+  stratalut = WYstratalut,    
+  strata_opts = strata_options(getwt = TRUE)   
+)
 
-  ## Rows only; by estimation units (allin1=TRUE)
-  MODest <- modGBtree(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN",
-	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE,
-	landarea="FOREST", estvar="VOLCFNET", estvar.filter="STATUSCD==1",
-	rowvar="FORTYPCD", row.FIAname=TRUE, allin1=TRUE)
-  names(MODest)
-  MODest$est
+tree1.1 <- modGBtree(
+  GBpopdat = GBpopdat,         # pop - population calculations
+  landarea = "FOREST",         # est - forest land filter
+  sumunits = TRUE,             # est - sum estimation units to population
+  estvar = "VOLCFNET",               # est - net cubic-foot volume
+  estvar.filter = "STATUSCD == 1",   # est - live trees only
+  returntitle = TRUE           # out - return title information
+)
+str(tree1.1, max.level = 1)
+
+tree1.2 <- modGBtree(
+  GBpopdat = GBpopdat,         # pop - population calculations
+  landarea = "FOREST",         # est - forest land filter
+  sumunits = TRUE,             # est - sum estimation units to population
+  estvar = "VOLCFNET",               # est - net cubic-foot volume
+  estvar.filter = "STATUSCD == 1",   # est - live trees only
+  rowvar = "FORTYPCD",         # est - row domain 
+  returntitle = TRUE           # out - return title information
+)
+str(tree1.2, max.level = 1)
 
 
 }

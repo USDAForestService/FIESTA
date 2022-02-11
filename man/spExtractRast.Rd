@@ -147,13 +147,22 @@ when reprojecting. See spTransform help documentation for more details.
   WYplt <- FIESTA::WYplt
 
   ## Get raster layers from FIESTA external data
-  fornffn <- system.file("extdata", "sp_data/WYbighorn_forest_nonforest_250m.tif", package="FIESTA")
-  demfn <- system.file("extdata", "sp_data/WYbighorn_dem_250m.img", package="FIESTA")
+  fornffn <- system.file("extdata",
+                         "sp_data/WYbighorn_forest_nonforest_250m.tif", 
+                         package="FIESTA")
+  demfn <- system.file("extdata", 
+                       "sp_data/WYbighorn_dem_250m.img", 
+                       package="FIESTA")
 
 
   ## Extract points from raster
-  xyext <- spExtractRast(xyplt=WYplt, rastlst=c(fornffn, demfn), var.name=c("fornf", "dem"),
-		xy.uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+  xyext <- spExtractRast(xyplt=WYplt,
+                         rastlst=c(fornffn, demfn), 
+                         var.name=c("fornf", "dem"),
+		                      xy.uniqueid="CN", 
+		                      spMakeSpatial_opts = list(xvar="LON_PUBLIC",
+		                                                yvar="LAT_PUBLIC", 
+		                                                xy.crs=4269))
   names(xyext)
   xyext$outnames
   sppltext <- xyext$sppltext
