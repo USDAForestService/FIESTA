@@ -197,7 +197,7 @@ spGetAuxiliary <- function(xyplt,
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv")) }
 
   ## Set global variables
-  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat <- NULL
+  value=count=ACRES=TOTPIXELCNT=rast.lutfn=predfac=aspfn=prednames.cat=AOI <- NULL
   
   
   ##################################################################
