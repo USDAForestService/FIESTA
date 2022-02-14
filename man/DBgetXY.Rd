@@ -22,6 +22,7 @@ DBgetXY(
   issp = FALSE,
   returndata = TRUE,
   savedata = FALSE,
+  exportsp = FALSE,
   savedata_opts = NULL
 )
 }
@@ -93,6 +94,8 @@ query.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder as comma-delimited
 file (*.csv).}
+
+\item{exportsp}{Logical. If TRUE, exports data as spatial.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
