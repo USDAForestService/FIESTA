@@ -55,6 +55,7 @@
 #' query.
 #' @param savedata Logical. If TRUE, saves data to outfolder as comma-delimited
 #' file (*.csv).
+#' @param exportsp Logical. If TRUE, exports data as spatial. 
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #'
@@ -120,6 +121,7 @@ DBgetXY <- function (states = NULL,
                          issp = FALSE, 
                          returndata = TRUE, 
                          savedata = FALSE, 
+                         exportsp = FALSE,
                          savedata_opts = NULL){
 
   ## DESCRIPTION: Get the most current coordinates in the FIA database
@@ -352,6 +354,10 @@ DBgetXY <- function (states = NULL,
     append_layer <- outlst$append_layer
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
+
+    if (is.null(out_layer)) {
+      out_layer <- "spxy"
+    }
   } 
 
 
@@ -460,17 +466,16 @@ DBgetXY <- function (states = NULL,
   }
  
   if (issp) {
-    spxynm <- paste0("sp_", out_layer)
-
+    spxynm <- paste0("sp", xynm)
+    
     ## Generate shapefile
-    out_fmt_sp <- ifelse(out_fmt == "csv", "shp", out_fmt)
     assign(spxynm, spMakeSpatialPoints(xyplt=xyx, xvar="LON_PUBLIC", 
 		        yvar="LAT_PUBLIC", xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
-		        exportsp=savedata, 
-		        savedata_opts=list(out_dsn=out_dsn, out_fmt=out_fmt_sp, 
+		        exportsp=exportsp, 
+		        savedata_opts=list(out_dsn=out_dsn, out_fmt=outsp_fmt, 
 		                  outfolder=outfolder, out_layer=spxynm, 
 		                  outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-		                  append_layer=TRUE, outfn.pre=outfn.pre) ))
+		                  append_layer=append_layer, outfn.pre=outfn.pre) ))
   }
      
   ###############################################################################
@@ -501,7 +506,9 @@ DBgetXY <- function (states = NULL,
       fiadatlst[[xynm]] <- get(xynm)
     }
     fiadatlst[["xyqry"]] <- xycoords.qry
-
+    fiadatlst$xvar <- "LON_PUBLIC"
+    fiadatlst$yvar <- "LAT_PUBLIC"
+    
     ## Return data list
     return(fiadatlst)
   } 
