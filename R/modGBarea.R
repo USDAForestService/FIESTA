@@ -388,6 +388,8 @@ modGBarea <- function(GBpopdat,
     nonsampplots <- GBpopdat$nonsampplots
   } 
   strunitvars <- c(unitvar, strvar)
+  strata <- GBpopdat$strata
+  
 
 
   ########################################

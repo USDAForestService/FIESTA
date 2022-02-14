@@ -426,6 +426,7 @@ modGBtree <- function(GBpopdat,
   strwtvar <- GBpopdat$strwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
+  strata <- GBpopdat$strata
 
  
   ########################################
