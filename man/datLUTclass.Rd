@@ -96,14 +96,18 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.
 \examples{
 
 	head(FIESTAutils::ref_diacl2in)
-	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=FIESTAutils::ref_diacl2in, 
-		LUTclassnm="DIACL2IN")
+	WYtreelut <- datLUTclass(FIESTA::WYtree,
+	                         xvar="DIA",
+	                         LUT=FIESTAutils::ref_diacl2in, 
+		                       LUTclassnm="DIACL2IN")
 	names(WYtreelut)
 	head(WYtreelut$xLUT)
 	table(WYtreelut$xLUT$DIACL2IN)
 
-	WYtreelut2 <- datLUTclass(WYtree, xvar="DIA", cutbreaks=c(1,5,25,50,100), 
-		LUTclassnm="DIACL2IN")
+	WYtreelut2 <- datLUTclass(FIESTA::WYtree,
+	                          xvar="DIA", 
+	                          cutbreaks=c(1,5,25,50,100), 
+		                        LUTclassnm="DIACL2IN")
 	names(WYtreelut2)
 	head(WYtreelut2$xLUT)
 	table(WYtreelut2$xLUT$DIACL2IN)
@@ -114,8 +118,10 @@ LUTclassnm = VARCLNM. MAX and VALCLNM columns are optional.
 	stdagelut <- data.frame(MIN=MIN, STDAGENM=STDAGENM)
 	stdagelut
 
-	WYcondlut <- datLUTclass(WYcond, xvar="STDAGE", LUT=stdagelut, 
-		LUTclassnm="STDAGENM")
+	WYcondlut <- datLUTclass(FIESTA::WYcond,
+	                         xvar="STDAGE",
+	                         LUT=stdagelut, 
+		                       LUTclassnm="STDAGENM")
 	names(WYcondlut)
 	head(WYcondlut$xLUT)
 	table(WYcondlut$xLUT$STDAGENM)

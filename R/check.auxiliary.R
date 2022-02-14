@@ -236,7 +236,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 
   ## Merge P2POINTCNT to auxlut
   ##################################################
-  if (!is.null(P2POINTCNT) && !P2POINTCNT %in% names(auxlut)) {
+  if (!is.null(P2POINTCNT) && !"P2POINTCNT" %in% names(auxlut)) {
 
     ## Check if class of unitvar in auxlut matches class of unitvar in P2POINTCNT
     tabs <- check.matchclass(P2POINTCNT, auxlut, strunitvars,

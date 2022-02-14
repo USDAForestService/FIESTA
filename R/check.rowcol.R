@@ -795,7 +795,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
       }
     }
   }
-  if (!is.null(landarea) && landarea == c("FOREST", "TIMBERLAND")) {
+  if (!is.null(landarea) && landarea %in% c("FOREST", "TIMBERLAND")) {
     uniquerow2 <- uniquerow[!uniquerow[[rowvar]] %in% c(0, "Nonforest"),]
   }
 

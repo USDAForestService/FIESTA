@@ -55,14 +55,18 @@
 #' @examples
 #' 
 #' 	head(FIESTAutils::ref_diacl2in)
-#' 	WYtreelut <- datLUTclass(WYtree, xvar="DIA", LUT=FIESTAutils::ref_diacl2in, 
-#' 		LUTclassnm="DIACL2IN")
+#' 	WYtreelut <- datLUTclass(FIESTA::WYtree,
+#' 	                         xvar="DIA",
+#' 	                         LUT=FIESTAutils::ref_diacl2in, 
+#' 		                       LUTclassnm="DIACL2IN")
 #' 	names(WYtreelut)
 #' 	head(WYtreelut$xLUT)
 #' 	table(WYtreelut$xLUT$DIACL2IN)
 #' 
-#' 	WYtreelut2 <- datLUTclass(WYtree, xvar="DIA", cutbreaks=c(1,5,25,50,100), 
-#' 		LUTclassnm="DIACL2IN")
+#' 	WYtreelut2 <- datLUTclass(FIESTA::WYtree,
+#' 	                          xvar="DIA", 
+#' 	                          cutbreaks=c(1,5,25,50,100), 
+#' 		                        LUTclassnm="DIACL2IN")
 #' 	names(WYtreelut2)
 #' 	head(WYtreelut2$xLUT)
 #' 	table(WYtreelut2$xLUT$DIACL2IN)
@@ -73,8 +77,10 @@
 #' 	stdagelut <- data.frame(MIN=MIN, STDAGENM=STDAGENM)
 #' 	stdagelut
 #' 
-#' 	WYcondlut <- datLUTclass(WYcond, xvar="STDAGE", LUT=stdagelut, 
-#' 		LUTclassnm="STDAGENM")
+#' 	WYcondlut <- datLUTclass(FIESTA::WYcond,
+#' 	                         xvar="STDAGE",
+#' 	                         LUT=stdagelut, 
+#' 		                       LUTclassnm="STDAGENM")
 #' 	names(WYcondlut)
 #' 	head(WYcondlut$xLUT)
 #' 	table(WYcondlut$xLUT$STDAGENM)
@@ -197,7 +203,7 @@ datLUTclass <- function(x,
     ## Check minvar and maxvar
     ########################################################
     LUTnmlst <- names(LUTx)
-    if (is.null(minvar) && grepl("MIN", LUTnmlst, ignore.case=TRUE)) {
+    if (is.null(minvar) && any(grepl("MIN", LUTnmlst, ignore.case=TRUE))) {
       minvar <- "MIN"
     }
     minvar <- pcheck.varchar(minvar, "minvar", LUTnmlst, gui=gui,
@@ -206,7 +212,7 @@ datLUTclass <- function(x,
       stop("all minvar values are greter than max xvar value")
     }
     LUTnmlst <- LUTnmlst[LUTnmlst != minvar]
-    if (is.null(maxvar) && grepl("MAX", LUTnmlst, ignore.case=TRUE)) {
+    if (is.null(maxvar) && any(grepl("MAX", LUTnmlst, ignore.case=TRUE))) {
       maxvar <- "MAX"
     }
     maxvar <- pcheck.varchar(maxvar, "maxvar", LUTnmlst, gui=gui,
