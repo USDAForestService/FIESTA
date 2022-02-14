@@ -292,22 +292,42 @@ AGENTCD == 30" \tab Dead trees from fire \cr }
 }
 \examples{
 
+GBpopdat <- modGBpop(
+popTabs = list(cond = FIESTA::WYcond,  
+               tree = FIESTA::WYtree,        
+               seed = FIESTA::WYseed),      
+popTabIDs = list(cond = "PLT_CN"),            
+pltassgn = FIESTA::WYpltassgn,  
+pltassgnid = "CN",        
+pjoinid = "PLT_CN",         
+unitarea = FIESTA::WYunitarea,
+unitvar = "ESTN_UNIT",        
+strata = TRUE,           
+stratalut = WYstratalut,    
+strata_opts = strata_options(getwt = TRUE)   
+)
 
-  ## Rows only; combine estimation units (sumunits=TRUE)
-  MODest <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn,
-	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE,
-  	landarea="FOREST", estvarn="VOLCFNET", estvarn.filter="STATUSCD==1",
-	rowvar="FORTYPCD", row.FIAname=TRUE)
-  names(MODest)
-  MODest$est
+## Total net cubic-foot volume of live trees (at least 5 inches diameter), Wyoming, 2011-2013 
+ratio1.1 <- modGBratio(
+GBpopdat = GBpopdat,         # pop - population calculations
+landarea = "TIMBERLAND",     # est - forest land filter
+sumunits = TRUE,             # est - sum estimation units to population
+estvarn = "VOLCFNET",               # est - net cubic-foot volume, numerator
+estvarn.filter = "STATUSCD == 1",   # est - live trees only, numerator
+returntitle = TRUE           # out - return title information
+)
+str(ratio1.1, max.level = 1)
 
-  ## Rows only; by estimation units (allin1=TRUE)
-  MODest <- modGBratio(tree=WYtree, cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN",
-	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, sumunits=TRUE,
-  	landarea="FOREST", estvarn="VOLCFNET", estvarn.filter="STATUSCD==1",
-	rowvar="FORTYPCD", row.FIAname=TRUE, allin1=TRUE, estround=0)
-  names(MODest)
-  MODest$est
+ratio1.2 <- modGBratio(
+GBpopdat = GBpopdat,         # pop - population calculations
+landarea = "TIMBERLAND",     # est - forest land filter
+sumunits = TRUE,             # est - sum estimation units to population
+estvarn = "VOLCFNET",               # est - net cubic-foot volume
+estvarn.filter = "STATUSCD == 1",   # est - live trees only
+rowvar = "FORTYPCD",         # est - row domain 
+returntitle = TRUE           # out - return title information
+)
+str(ratio1.2, max.level = 1)
 
 }
 \references{

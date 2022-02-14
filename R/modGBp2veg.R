@@ -207,20 +207,35 @@
 #' @examples
 #' 
 #' 
-#'   ## Rows only; combine estimation units (sumunits=TRUE)
-#'   MODest <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-#' 	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut, 
-#' 	sumunits=TRUE, landarea="FOREST", rowvar="FORTYPCD", row.FIAname=TRUE)
-#'   names(MODest)
-#'   MODest$est
-#'   
-#'   ## Rows only; combine estimation units (sumunits=TRUE; allin1=TRUE)
-#'   MODest <- modGBarea(cond=WYcond, pltassgn=WYpltassgn, pltassgnid="CN", 
-#' 	unitarea=WYunitarea, unitvar="ESTN_UNIT", stratalut=WYstrlut,
-#'  	sumunits=TRUE, landarea="FOREST", 
-#' 	rowvar="FORTYPCD", row.FIAname=TRUE, allin1=TRUE)
-#'   names(MODest)
-#'   MODest$est
+#' GBpopdat <- modGBpop(
+#' popTabs = list(cond = FIESTA::WYcond,  
+#'                tree = FIESTA::WYtree,        
+#'                seed = FIESTA::WYseed),      
+#' popTabIDs = list(cond = "PLT_CN"),            
+#' pltassgn = FIESTA::WYpltassgn,  
+#' pltassgnid = "CN",        
+#' pjoinid = "PLT_CN",         
+#' unitarea = FIESTA::WYunitarea,
+#' unitvar = "ESTN_UNIT",        
+#' strata = TRUE,           
+#' stratalut = WYstratalut,    
+#' strata_opts = strata_options(getwt = TRUE)   
+#' )
+#' 
+#' forest_area <- modGBarea(
+#' GBpopdat = GBpopdat, 
+#' landarea = "FOREST",  
+#' sumunits = TRUE,      
+#' )
+#' str(forest_area, max.level = 1)
+#' 
+#' forest_area_by_forest_type <- modGBarea(
+#' GBpopdat = GBpopdat,        
+#' landarea = "FOREST",       
+#' rowvar = "FORTYPCD",        
+#' sumunits = TRUE            
+#' )
+#' str(forest_area_by_forest_type, max.level = 1)
 #' 
 #' 
 #' @export modGBp2veg

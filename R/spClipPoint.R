@@ -74,11 +74,18 @@
 #'   WYplt <- FIESTA::WYplt
 #' 
 #'   ## Get polygon vector layer from FIESTA external data
-#'   WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+#'   WYbhdistfn <- system.file("extdata", 
+#'                             "sp_data/WYbighorn_districtbnd.shp",
+#'                              package="FIESTA")
 #' 
 #'   ## Extract points from polygon vector layer
-#'   xyext <- spClipPoint(xyplt=WYplt, clippolyv=WYbhdistfn, clippolyv.filter="DISTRICTNU == '03'", 
-#' 		uniqueid="CN", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", xy.crs=4269)
+#'   xyext <- spClipPoint(xyplt=WYplt, 
+#'                        clippolyv=WYbhdistfn, 
+#'                        clippolyv.filter="DISTRICTNU == '03'",
+#' 		                    uniqueid="CN", 
+#' 		                    spMakeSpatial_opts = list(xvar="LON_PUBLIC", 
+#' 		                                              yvar="LAT_PUBLIC",
+#' 		                                              xy.crs=4269))
 #'   names(xyext)
 #'   xyplt <- xyext$clip_xyplt
 #'   polyv <- xyext$clip_polyv
