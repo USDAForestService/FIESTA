@@ -12,7 +12,7 @@ DBgetXY(
   evalCur = FALSE,
   evalEndyr = NULL,
   evalAll = FALSE,
-  evalType = "VOL",
+  evalType = "ALL",
   measCur = FALSE,
   measEndyr = NULL,
   allyrs = FALSE,

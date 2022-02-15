@@ -43,12 +43,16 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
-#'
-#' 	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1),
-#' 			FORTYPCD = c(182,184,201,221,221,184,221,182,182,201,182,221)))
+#' # Set up data for example
+#' tab <- data.frame(cbind(CONDCLASS=c(1, 1, 2, 1, 3, 3, 3, 1, 1, 1, 2, 1),
+#' 			                   FORTYPCD = c(182, 184, 201, 221, 221, 184, 221, 182,
+#' 			                                182, 201, 182, 221)))
+#' 			                    
+#' 	# Filter for value not equal to 182
 #' 	datFilter(x = tab, xfilter = "FORTYPCD != 182")
 #'
-#' 	datFilter(x = WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
+#' # Filter on two conditions, grab xf object from list
+#' datFilter(x = WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
 #'
 #'
 #' @export datFilter
