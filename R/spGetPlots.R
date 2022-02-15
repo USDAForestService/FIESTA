@@ -345,7 +345,9 @@ spGetPlots <- function(bnd = NULL,
       }
       if (stbnd.att == "COUNTYFIPS") {
         countyfips <- sort(unique(pltids[[stbnd.att]]))
-        stcds <- as.numeric(sort(unique(substr(countyfips, 1, 2))))
+        countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
+        stcds <- sort(unique(as.numeric(sapply(countyfips, 
+				substr, nchar(countyfips)-5, nchar(countyfips)-3))))
       } else {
         stcds <- sort(unique(pcheck.states(pltids[[stbnd.att]], statereturn="VALUE")))
       }
@@ -372,7 +374,6 @@ spGetPlots <- function(bnd = NULL,
         if (is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
-
         xydat <- spGetXY(bnd=bndx, 
                          states=states, RS=RS, 
                          xy=xy, xy_dsn=xy_dsn, 
@@ -387,6 +388,7 @@ spGetPlots <- function(bnd = NULL,
                          invyrs=invyrs, measyrs=measyrs, allyrs=allyrs, 
                          intensity1=intensity1, showsteps=showsteps, 
                          returnxy=TRUE)
+
         spxy <- xydat$spxy
         pltids <- xydat$pltids
         states <- xydat$states
@@ -437,7 +439,9 @@ spGetPlots <- function(bnd = NULL,
         statenames <- statedat$statenames
         if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
           countyfips <- statedat$states
-          stcds <- unique(as.numeric(substr(countyfips, 1,2)))
+          countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
+          stcds <- sort(unique(as.numeric(sapply(countyfips, 
+				substr, nchar(countyfips)-5, nchar(countyfips)-3))))
         } else {
           stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% statedat$states]
         }
@@ -772,6 +776,7 @@ spGetPlots <- function(bnd = NULL,
 
       ## Check for counties
       if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
+        countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
         stcnty <- countyfips[startsWith(countyfips, formatC(stcd, width=2, flag="0"))]
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
@@ -1135,6 +1140,7 @@ spGetPlots <- function(bnd = NULL,
 
       ## Check for counties
       if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
+        countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
         stcnty <- countyfips[startsWith(as.character(countyfips), 
 				formatC(stcd, width=2, flag="0"))]
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))

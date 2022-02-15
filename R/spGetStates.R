@@ -225,8 +225,10 @@ spGetStates <- function(bnd_layer,
   }
   if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) {
     if (stbnd.att == "COUNTYFIPS") {
+      states <- formatC(as.numeric(states), width=5, digits=5, flag="0")
       statenames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
-			unique(as.numeric(substr(states, 1, nchar(states)-4))), "MEANING"]
+			sort(unique(as.numeric(sapply(states, 
+			substr, nchar(states)-5, nchar(states)-3)))), "MEANING"]
     }
   }
   ## Check statenames
@@ -262,6 +264,7 @@ spGetStates <- function(bnd_layer,
       states <- states[as.numeric(substr(states, 1, 2)) %in% stcds]
     }
   }
+  message("boundary intersected the following states: ", toString(statenames))
 
   ## Save boundary
   if (savebnd) {
