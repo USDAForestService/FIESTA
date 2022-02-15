@@ -28,16 +28,25 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' # Set up data for example
+#' tab <- data.frame(cbind(CONDCLASS = c(1, 1, 2, 1, 3, 3, 3, 1, 1, 1, 2, 1), 
+#' 		                     FORTYPCD = c(182, 184, 201, 221, 221, 184, 221, 182,
+#' 		                                  182, 201, 182, 221)))
 #' 
-#' 	tab <- data.frame(cbind(	CONDCLASS=c(1,1,2,1,3,3,3,1,1,1,2,1), 
-#' 		FORTYPCD=c(182,184,201,221,221,184,221,182,182,201,182,221)))
-#' 	datFreq(x=tab, xvar=c("CONDCLASS", "FORTYPCD"))
-#' 	datFreq(x=tab, xvar=c("CONDCLASS", "FORTYPCD"), total=TRUE, subtotal=TRUE)
-#' 	datFreq(x=tab, xvar="FORTYPCD")
+#' # Frequency table with "FORTYPCD"       
+#' datFreq(x = tab, xvar = "FORTYPCD")
+#' 		                                  
+#' # Frequency table with "CONDCLASS" and "FORTYPCD" 		                                   
+#' datFreq(x = tab, xvar = c("CONDCLASS", "FORTYPCD"))
 #' 
-#'  	datFreq(x=FIESTA::WYtree, xvar=c("SPGRPCD", "SPCD", "STATUSCD"), 
-#' 		subtotal=TRUE, subtotalcol="SPCD")
-#' 
+#' # Frequency table with "CONDCLASS" and "FORTYPCD", adding total and subtotal
+#' # rows 		                                   
+#' datFreq(x = tab, xvar = c("CONDCLASS", "FORTYPCD"), total = TRUE, 
+#'         subtotal = TRUE)
+#'         
+#' # Frequency table for WYtree, multiple variables, subtotal options
+#' datFreq(x = FIESTA::WYtree, xvar = c("SPGRPCD", "SPCD", "STATUSCD"), 
+#' 	       subtotal = TRUE, subtotalcol = "SPCD")
 #' @export datFreq
 datFreq <- function(x, 
                     xvar = NULL, 
