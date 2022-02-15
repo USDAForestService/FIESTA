@@ -454,9 +454,12 @@ DBgetXY <- function (states = NULL,
   xyx$COUNTYFIPS <- paste0(formatC(xyx$STATECD, width=2, digits=2, flag=0), 
           		formatC(xyx$COUNTYCD, width=3, digits=3, flag=0))
 
-  if (xymeasCur) {
+  if (measCur) {
     xynm <- paste0("xyCur_", coords)
-    assign(xynm, xyx) 
+    assign(xynm, xyx)
+  } else if (evalCur) {
+    xynm <- paste0("xyCur_", coords)
+    assign(xynm, xyx)
   } else {
     xynm <- paste0("xy_", coords)
     assign(xynm, xyx)
