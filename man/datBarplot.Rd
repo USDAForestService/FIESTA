@@ -153,10 +153,16 @@ args.legend=list(x="topright"). If specifying x and y, x defines the lower
 right corner of legend box and y defines the upper right corner of box.
 }
 \examples{
-
-	#ftyptab <- data.frame(cbind(FORTYPCD=c(182,184,201,221,265), FREQ=c(110,7,900,410,155)))
-	#datBarplot(x=ftyptab, xvar="FORTYPCD")
-
+# Set up data frame for example
+ftyptab <- data.frame(cbind(FORTYPCD = c(182, 184, 201, 221, 265),
+                            FREQ = c(110, 7, 900, 410, 155),
+                            SE = c(10, 11, 18, 14, 22)))
+                            
+# Create basic barplot                           
+datBarplot(x = ftyptab, xvar = "FORTYPCD")
+	
+# Add standard errors to basic barplot
+datBarplot(x = ftyptab, xvar = "FORTYPCD", errbars = TRUE, sevar = "SE")
 }
 \author{
 Tracey S. Frescino
