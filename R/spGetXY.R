@@ -316,7 +316,9 @@ spGetXY <- function(bnd,
     statenames <- statedat$statenames
     if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
       countyfips <- statedat$states
-      stcds <- unique(as.numeric(substr(countyfips, 1,2)))
+      countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
+      stcds <- sort(unique(as.numeric(sapply(countyfips, 
+				substr, nchar(countyfips)-5, nchar(countyfips)-3))))
     } else {
       stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% statedat$states]
     }
