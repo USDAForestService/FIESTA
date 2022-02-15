@@ -74,10 +74,8 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
-#' 
-#' 	#ftyptab <- data.frame(cbind(FORTYPCD=c(182,184,201,221,265), FREQ=c(110,7,900,410,155)))
-#' 	#datBarplot(x=ftyptab, xvar="FORTYPCD")
-#' 
+#' # Lineplot of cubic foot volume by above-ground biomass, Wyoming tree data
+#' # datLineplot(x = WYtree, xvar = "VOLCFNET", yvar = "DRYBIO_AG") # needs work
 #' @export datLineplot
 datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL, 
 	CIlst=c(68,95), CIcolorlst=c("dark grey", "black"), addshade=FALSE, 

@@ -149,10 +149,8 @@ args.legend=list(x="topright"). If specifying x and y, x defines the lower
 right corner of legend box and y defines the upper right corner of box.
 }
 \examples{
-
-	#ftyptab <- data.frame(cbind(FORTYPCD=c(182,184,201,221,265), FREQ=c(110,7,900,410,155)))
-	#datBarplot(x=ftyptab, xvar="FORTYPCD")
-
+# Lineplot of cubic foot volume by above-ground biomass, Wyoming tree data
+# datLineplot(x = WYtree, xvar = "VOLCFNET", yvar = "DRYBIO_AG") # needs work
 }
 \author{
 Tracey S. Frescino
