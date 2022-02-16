@@ -273,6 +273,7 @@
 #' 2002)). If more than one state and different measurement years are desired,
 #' input a named list object with years labeled by state (e.g.,
 #' list(Utah=2000:2009, Colorado=c(2002,2003,2005)).
+#' @param getxy Logical. If TRUE, gets separate XY table.
 #' @param xymeasCur Logical. If TRUE, and more than one plot measured at same
 #' location, only the most current coordinate is returned for the plot.
 #' @param istree Logical. If TRUE, tree data are extracted from TREE table in
@@ -466,6 +467,7 @@ DBgetPlots <- function (states = NULL,
                         allyrs = FALSE, 
                         invyrs = NULL, 
                         measyrs = NULL, 
+                        getxy = TRUE,
                         xymeasCur = FALSE, 
                         istree = FALSE, 
                         isseed = FALSE, 
@@ -939,6 +941,10 @@ DBgetPlots <- function (states = NULL,
     }
   } 
 
+  ## Check getxy
+  getxy <- pcheck.logical(getxy, varnm="getxy",
+    title="Save XY?", first="YES", gui=gui)
+  
   ## Check issp
   issp <- pcheck.logical(issp, varnm="issp", 
 		title="SpatialPoints of plot vars?", first="NO", gui=gui)
@@ -1868,7 +1874,7 @@ DBgetPlots <- function (states = NULL,
             ## Create new biomass variables
             if (!is.null(sppvars)) {
               sppsql <- paste("select SPCD,", paste(sppvars, collapse=","), 
-				"from REF_SPECIES")
+				          "from REF_SPECIES")
               ref_spp <- sqldf::sqldf(sppsql)
 
               treenames <- names(treex)
@@ -1918,37 +1924,39 @@ DBgetPlots <- function (states = NULL,
       ## xydata
       ##############################################################
       #xyx <- pltx[, c("CN", getcoords(coords), "PLOT_ID"), with=FALSE]
-      xyx <- copy(pltx)
-      setnames(xyx, "CN", "PLT_CN")
+      if (getxy) {
+        xyx <- copy(pltx)
+        setnames(xyx, "CN", "PLT_CN")
 
-      ## Get xy for the most current sampled plot
-      if (xymeasCur) {
-        xyfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA.,
-		subcycle99=subcycle99, intensity1=intensity1, plotnm="pltx")
+        ## Get xy for the most current sampled plot
+        if (xymeasCur) {
+          xyfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA.,
+		        subcycle99=subcycle99, intensity1=intensity1, plotnm="pltx")
 
-        xvars <- c("p.CN", "p.STATECD", "p.UNITCD", "p.COUNTYCD", "p.PLOT", 
-		"p.PLOT_ID", paste0("p.", getcoords(coords)))
-        xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
-        xyCurx <- sqldf::sqldf(xyx.qry)
-        names(xyCurx)[names(xyCurx) == "CN"] <- "PLT_CN"
-        xyCurx$COUNTYFIPS <- paste0(formatC(xyCurx$STATECD, width=2, digits=2, flag=0), 
+          xvars <- c("p.CN", "p.STATECD", "p.UNITCD", "p.COUNTYCD", "p.PLOT", 
+		          "p.PLOT_ID", paste0("p.", getcoords(coords)))
+          xyx.qry <- paste("select distinct", toString(xvars), "from", xyfromqry)
+          xyCurx <- sqldf::sqldf(xyx.qry)
+          names(xyCurx)[names(xyCurx) == "CN"] <- "PLT_CN"
+          xyCurx$COUNTYFIPS <- paste0(formatC(xyCurx$STATECD, width=2, digits=2, flag=0), 
           	formatC(xyCurx$COUNTYCD, width=3, digits=3, flag=0))
-        assign(paste0("xyCurx_", coords), xyCurx) 
-        if (returndata) {
-          assign(paste0("xyCur_", coords), 
-				rbind(get(paste0("xyCur_", coords)), xyCurx)) 
-        }
-      } else {
-        xyx <- xyx[, c("PLT_CN", "STATECD", "UNITCD", "COUNTYCD", "PLOT", 
-		"LON_PUBLIC", "LAT_PUBLIC", "PLOT_ID"), with=FALSE]
-        xyx$COUNTYFIPS <- paste0(formatC(xyx$STATECD, width=2, digits=2, flag=0), 
+          assign(paste0("xyCurx_", coords), xyCurx) 
+          if (returndata) {
+            assign(paste0("xyCur_", coords), 
+				  rbind(get(paste0("xyCur_", coords)), xyCurx)) 
+          }
+        } else {
+          xyx <- xyx[, c("PLT_CN", "STATECD", "UNITCD", "COUNTYCD", "PLOT", 
+		          "LON_PUBLIC", "LAT_PUBLIC", "PLOT_ID"), with=FALSE]
+          xyx$COUNTYFIPS <- paste0(formatC(xyx$STATECD, width=2, digits=2, flag=0), 
           	formatC(xyx$COUNTYCD, width=3, digits=3, flag=0))
-        assign(paste0("xyx_", coords), xyx)
-        if (returndata) {
-          assign(paste0("xy_", coords), 
-				rbind(get(paste0("xy_", coords)), xyx))
-        }
-      } 
+          assign(paste0("xyx_", coords), xyx)
+          if (returndata) {
+            assign(paste0("xy_", coords), 
+				  rbind(get(paste0("xy_", coords)), xyx))
+          }
+        } 
+      }
     }
  
     ##############################################################
@@ -2326,7 +2334,7 @@ DBgetPlots <- function (states = NULL,
         overwrite_layer <- FALSE
       }
 
-      if (savedata && issp) {
+      if (savedata && getxy && issp) {
         message("saving spatial xy data...")
         xycoords <- getcoords(coords)
 
@@ -2351,7 +2359,7 @@ DBgetPlots <- function (states = NULL,
                                 out_dsn=out_dsn, out_fmt=out_fmt_sp, 
                                 outfolder=outfolder, out_layer=spxynm, 
                                 outfn.date=outfn.date, overwrite_layer=overwrite_layer, 
-                                append_layer=TRUE, outfn.pre=outfn.pre, 
+                                append_layer=append_layer, outfn.pre=outfn.pre, 
                                 overwrite_dsn=overwrite_dsn)))
         }
       # } else {
@@ -2367,7 +2375,7 @@ DBgetPlots <- function (states = NULL,
       #   } 
       }
 
-      if (savedata && !issp) {
+      if (savedata && getxy && !issp) {
         xycoords <- getcoords(coords)
 
         if (xymeasCur) {
@@ -2396,9 +2404,10 @@ DBgetPlots <- function (states = NULL,
  
       if (savedata && !is.null(spconddatx)) {
         index.unique.spconddat <- NULL
-        if (!append_layer) index.unique.spconddat <- "PLT_CN"
-        datExportData(spconddat, 
-              index.unique = index.unique.spconddat,
+        #if (!append_layer) index.unique.spconddatx <- "PLT_CN"
+        index.unique.spconddatx <- "PLT_CN"
+        datExportData(spconddatx, 
+              index.unique = index.unique.spconddatx,
               savedata_opts = list(outfolder=outfolder, 
                                   out_fmt=out_fmt, 
                                   out_dsn=out_dsn, 
@@ -2771,7 +2780,7 @@ DBgetPlots <- function (states = NULL,
     fiadatlst$tabs <- tabs
     fiadatlst$tabIDs <- tabIDs
 
-    if (issp) {
+    if (getxy && issp) {
       xycoords <- getcoords(coords)
       if (xymeasCur) {
         spxyCurnm <- paste0("spxyCur_", coords)

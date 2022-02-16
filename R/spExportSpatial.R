@@ -139,7 +139,7 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
 
   } else if (out_fmt == "gdb") {
     if (append_layer) {
-      stop("can't append data to ", out_layer)
+      stop("can't append data to ", out_layer, " with out_fmt='gdb'")
     }
     out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 
 		overwrite=overwrite_dsn, outfn.date=outfn.date, showlist=FALSE)
