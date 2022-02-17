@@ -20,6 +20,7 @@ DBgetPlots(
   allyrs = FALSE,
   invyrs = NULL,
   measyrs = NULL,
+  getxy = TRUE,
   xymeasCur = FALSE,
   istree = FALSE,
   isseed = FALSE,
@@ -110,6 +111,8 @@ data by state for the specified measurement year(s) (e.g., c(2000, 2001,
 2002)). If more than one state and different measurement years are desired,
 input a named list object with years labeled by state (e.g.,
 list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
+
+\item{getxy}{Logical. If TRUE, gets separate XY table.}
 
 \item{xymeasCur}{Logical. If TRUE, and more than one plot measured at same
 location, only the most current coordinate is returned for the plot.}

@@ -458,7 +458,7 @@ DBgetXY <- function (states = NULL,
     xynm <- paste0("xyCur_", coords)
     assign(xynm, xyx)
   } else if (evalCur) {
-    xynm <- paste0("xyCur_", coords)
+    xynm <- paste0("xy_", coords)
     assign(xynm, xyx)
   } else {
     xynm <- paste0("xy_", coords)
