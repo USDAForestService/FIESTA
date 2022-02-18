@@ -69,7 +69,7 @@
 #' @note If savedata = TRUE, writes a jpg and pdf of barplot to outfolder.
 #' 
 #' To add legend parameters, add a parameter named args.legend, defined as a
-#' list of specific legend parameters (see ?legend)...  ex. ..,
+#' list of specific legend parameters (see ?legend)...  e.g., 
 #' args.legend=list(x="topright"). If specifying x and y, x defines the lower
 #' right corner of legend box and y defines the upper right corner of box.
 #' @author Tracey S. Frescino
@@ -219,7 +219,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
 		title="Add date to outfiles?", first="YES", gui=gui)  
     outfolder <- pcheck.outfolder(outfolder, gui)
 
-    if (is.null(outfn)) outfn <- paste0("BARPLOT_", yvar)
+    if (is.null(outfn)) outfn <- paste0("BARPLOT_", paste(yvar, collapse="_"))
 
     if (!any(device.type %in% device.typelst)) {  
       message("no export device specified..  adding jpg format")

@@ -966,8 +966,9 @@ datSumTree <- function(tree = NULL,
   } else {
     meta = FIESTA::ref_plt[names(sumdat) %in% FIESTA::ref_plt$VARIABLE, ]
   }
-  metanames <- meta$VARIABLE[meta$VARIABLE %in% names(sumdat)]
-  meta <- meta[meta$VARIABLE %in% as.vector(na.omit(metanames[match(names(sumdat), metanames)])), ]
+  metanames <- names(sumdat)[which(names(sumdat) %in% meta$VARIABLE)]
+  meta <- meta[meta$VARIABLE %in% metanames, ]
+  meta <- meta[match(metanames, meta$VARIABLE),]
 
   tree_ref <- FIESTA::ref_tree[FIESTA::ref_tree$VARIABLE %in% tsumvarlst,]
   tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")

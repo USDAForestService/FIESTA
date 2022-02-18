@@ -497,11 +497,12 @@ spGetAuxiliary <- function(xyplt,
       stop()
     }
     sppltx <- unique(extpoly$spxyext)
+
+    rm(extpoly)
+    gc()
   } else {
     message(unitvar, " already in spplt... not extracting from unit_layer")
   }
-  rm(extpoly)
-  gc()
 
 
   #############################################################################
