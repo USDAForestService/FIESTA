@@ -334,27 +334,28 @@ spGetXY <- function(bnd,
     spxy <- xy
 
   } else if (xy_datsource == "gdb") {
-
-    ## Check for data tables in database
-    ###########################################################
-    gdbpath <- suppressWarnings(DBtestESRIgdb(xy_dsn, showlist=FALSE))
-    layerlst <- sf::st_layers(gdbpath)
-    tablst <- layerlst$name
-    if (!xy %in% tablst) {
-      stop(xy, " not in ", gdbpath)
-    }
-    geomtype <- layerlst$geomtype[layerlst$name == xy][[1]]
-    xyopen <- arcgisbinding::arc.open(paste0(xy_dsn, "/", xy))
-    statenm <- findnm("STATECD", names(xyopen@fields), returnNULL=TRUE) 
-    sql <- getfilter(statenm, stcds, syntax="sql")
-    spxy <- pcheck.spatial(xy, xy_dsn, sql=sql)
-    if (is.na(geomtype)) { 
-      spxy <- spMakeSpatialPoints(xyplt=spxy, 
-                                  xy.uniqueid=xy.uniqueid, 
-                                  xvar=xvar, 
-                                  yvar=yvar, 
-                                  xy.crs=xy.crs)
-    }
+    stop("cannot write to geodatabases")
+#
+#    ## Check for data tables in database
+#    ###########################################################
+#    gdbpath <- suppressWarnings(DBtestESRIgdb(xy_dsn, showlist=FALSE))
+#    layerlst <- sf::st_layers(gdbpath)
+#    tablst <- layerlst$name
+#    if (!xy %in% tablst) {
+#      stop(xy, " not in ", gdbpath)
+#    }
+#    geomtype <- layerlst$geomtype[layerlst$name == xy][[1]]
+#    xyopen <- arcgisbinding::arc.open(paste0(xy_dsn, "/", xy))
+#    statenm <- findnm("STATECD", names(xyopen@fields), returnNULL=TRUE) 
+#    sql <- getfilter(statenm, stcds, syntax="sql")
+#    spxy <- pcheck.spatial(xy, xy_dsn, sql=sql)
+#    if (is.na(geomtype)) { 
+#      spxy <- spMakeSpatialPoints(xyplt=spxy, 
+#                                  xy.uniqueid=xy.uniqueid, 
+#                                  xvar=xvar, 
+#                                  yvar=yvar, 
+#                                  xy.crs=xy.crs)
+#    }
 
   } else if (xy_datsource %in% c("obj", "csv")) {
 

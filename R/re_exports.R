@@ -29,7 +29,4 @@ FIESTAutils::DBcreateSQLite
 FIESTAutils::DBtestPostgreSQL
 
 #' @export
-FIESTAutils::DBtestESRIgdb
-
-#' @export
 FIESTAutils::DBtestSQLite

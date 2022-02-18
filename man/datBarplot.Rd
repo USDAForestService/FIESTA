@@ -148,7 +148,7 @@ If parameters = NULL, then it will prompt user for input.
 If savedata = TRUE, writes a jpg and pdf of barplot to outfolder.
 
 To add legend parameters, add a parameter named args.legend, defined as a
-list of specific legend parameters (see ?legend)...  ex. ..,
+list of specific legend parameters (see ?legend)...  e.g., 
 args.legend=list(x="topright"). If specifying x and y, x defines the lower
 right corner of legend box and y defines the upper right corner of box.
 }

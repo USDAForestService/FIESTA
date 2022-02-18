@@ -138,22 +138,23 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
     }
 
   } else if (out_fmt == "gdb") {
-    if (append_layer) {
-      stop("can't append data to ", out_layer, " with out_fmt='gdb'")
-    }
-    out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 
-		overwrite=overwrite_dsn, outfn.date=outfn.date, showlist=FALSE)
-
-    ## Check out_layer
-    if (is.null(out_layer)) {
-      if (!is.null(out_dsn)) {
-        out_layer <- "outfile"
-      }
-    } 
-    geofld <- attr(sfobj, "sf_column")
-    sfobj <- sfobj[, c(names(sfobj)[!names(sfobj) %in% names(sfobj)[
-				grepl(geofld, names(sfobj))]], geofld)]
-    arcgisbinding::arc.write(file.path(out_dsn, out_layer), sfobj, overwrite=overwrite_layer)
+    message("cannot write to geodatabases")
+#    if (append_layer) {
+#      stop("can't append data to ", out_layer, " with out_fmt='gdb'")
+#    }
+#    out_dsn <- DBtestESRIgdb(out_dsn, outfolder=outfolder, 
+#		overwrite=overwrite_dsn, outfn.date=outfn.date, showlist=FALSE)
+#
+#    ## Check out_layer
+#    if (is.null(out_layer)) {
+#      if (!is.null(out_dsn)) {
+#        out_layer <- "outfile"
+#      }
+#    } 
+#    geofld <- attr(sfobj, "sf_column")
+#    sfobj <- sfobj[, c(names(sfobj)[!names(sfobj) %in% names(sfobj)[
+#				grepl(geofld, names(sfobj))]], geofld)]
+#    arcgisbinding::arc.write(file.path(out_dsn, out_layer), sfobj, overwrite=overwrite_layer)
 
   } else if (out_fmt == "shp") {
 
