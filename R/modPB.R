@@ -11,9 +11,6 @@
 #' @param tabtype String. Type of units for the table ("PCT", "AREA").
 #' @param sumunits Logical. If TRUE, estimation units are combined to one table
 #' for output. Note: only available if tabtype="AREA". Acres
-#' @param strata Logical. If TRUE, add data information for stratification.
-#' @param strtype String. If strata=TRUE, the type of strata ('POST', 'PRE').
-#' Note: the variance equations are slighlty different.
 #' @param ratio Logical. If TRUE, ratio estimates are generated.
 #' @param landarea String. Sample area for estimates ("ALL", "CHANGE"). Used to
 #' describe landarea.filter.
@@ -208,8 +205,6 @@
 modPB <- function(PBpopdat = NULL, 
                   tabtype = "PCT", 
                   sumunits =FALSE, 
-                  strata = FALSE, 
-                  strtype = "POST", 
                   ratio = FALSE, 
                   landarea = "ALL", 
                   landarea.filter = NULL, 
@@ -223,8 +218,8 @@ modPB <- function(PBpopdat = NULL,
                   ratioden = "ROWVAR",
                   gainloss = FALSE, 
                   gainloss.vals = NULL, 
-                  addtitle = addtitle, 
-                  returntitle = returntitle,
+                  addtitle = FALSE, 
+                  returntitle = FALSE,
                   savedata = FALSE,
                   table_opts = NULL,
                   title_opts = NULL,
@@ -343,6 +338,7 @@ modPB <- function(PBpopdat = NULL,
   areavar <- PBpopdat$areavar
   areaunits <- PBpopdat$areaunits
   strata <- PBpopdat$strata
+  strtype <- PBpopdat$strtype
   stratalut <- PBpopdat$stratalut
   strvar <- PBpopdat$strvar
   strwtvar <- PBpopdat$strwtvar
@@ -358,7 +354,21 @@ modPB <- function(PBpopdat = NULL,
     strtype <- PBpopdat$strtype
   }
   strunitvars <- c(unitvar, strvar)
+  
+  ########################################
+  ## Check area units
+  ########################################
+  if (!is.null(unitarea)) {
+    unitchk <- pcheck.areaunits(unitarea=unitarea, areavar=areavar, 
+                              areaunits=areaunits, metric=metric)
+    unitarea <- unitchk$unitarea
+    areavar <- unitchk$areavar
+    areaunits <- unitchk$outunits
 
+    if (is.null(key(unitarea))) {
+      setkeyv(unitarea, unitvar)
+    }
+  }
 
   ###################################################################################
   ## Check parameters and apply plot and pnt filters
@@ -433,7 +443,7 @@ modPB <- function(PBpopdat = NULL,
     PBx.d <- rowcolinfo$PBx.d
   }
 
- 
+
   ###################################################################################
   ## MERGE FILTERED DATA TO ALL PLOTS
   ###################################################################################
@@ -828,7 +838,7 @@ modPB <- function(PBpopdat = NULL,
    # setnames(totunit, names(totunit), names(rowunit))
   }          
 
-    ###################################################################
+  ###################################################################
   ## GENERATE OUTPUT TABLES
   ###################################################################
   CI <- TRUE
@@ -877,6 +887,9 @@ modPB <- function(PBpopdat = NULL,
       rawdat$colvar <- colvar 
       rawdat$pltdom.col <- pltdom.col
       rawdat$pltdom.grp <- pltdom.grp
+    }
+    if (!is.null(unitarea)) {
+      rawdat$areaunits <- areaunits
     }
     ## Generate sample counts by attribute
 #    if (is.null(sampcnt)) {

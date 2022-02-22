@@ -20,6 +20,7 @@ modPBpop(
   unitarea = NULL,
   areavar = "ACRES",
   strata = FALSE,
+  strtype = "POST",
   stratalut = NULL,
   strvar = "STRATUMCD",
   pvars2keep = NULL,
@@ -80,6 +81,9 @@ frame of total area by estimation unit, including unitvar and areavar.}
 \item{areavar}{String. Name of acre variable in unitarea. Default="ACRES".}
 
 \item{strata}{Logical. If TRUE, add data information for stratification.}
+
+\item{strtype}{String. If strata=TRUE, the type of strata ('POST', 'PRE').
+Note: the variance equations are slighlty different.}
 
 \item{stratalut}{DF/DT. If strata=TRUE, look-up table with strata
 proportions ('strwt') by strata (and estimation unit). To calculate 'strwt',

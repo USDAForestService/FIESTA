@@ -332,29 +332,36 @@ unitarea_utco1135.csv    | Area, in acres, by county estimation unit (ESTN_UNIT)
 strlut_utco1135.csv      | Pixel counts by strata (STRATUMCD) and estimation unit (ESTN_UNIT) 
 
 
-#### Set up for examples
+</details>
 
-```
-## Set options
-options(scipen=6)
-options(stringsAsFactors=FALSE)
+### Set up 
 
-## Load FIESTA library. 
+First, you'll need to load the `FIESTA` library:
+
+```{r, warning = F, message = F}
 library(FIESTA)
+```
 
-## If not on windows platform, set up an outfolder to output from examples
-if (.Platform$OS.type == "windows") {
-  # Set workspace to FIESTA folder (create if doesn't exist)
-  if (!file.exists("C:/FIESTA"))  {
-    dir.create("C:/FIESTA")
-  }
-  setwd("C:/FIESTA")
+Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For our purposes in this vignette, we have saved our outfolder file path as the `outfolder` object in a temporary directory. We also set a few default options preferred for this vignette.
 
-  if (!file.exists("outfolder")) {
-    dir.create("outfolder")
-  }
-  outfolder <- "outfolder"
-}
+```{r}
+## Set options
+options(scipen = 6)
+options(stringsAsFactors = FALSE)
+
+## Set outfolder
+outfolder <- tempdir()
+```
+
+
+### Get data for examples
+
+<details>
+  <summary>View Getting Data</summary>
+
+Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data stored in `FIESTA` and import into R. 
+
+```{r}
 
 
 ## Get external data file names
@@ -370,28 +377,47 @@ icepnt <- read.csv(icepntfn)
 iceplt <- read.csv(icepltfn)
 icepctcover <- read.csv(icepctcoverfn)
 
-## Check variable descriptions for icepnt
+icecover <- read.csv(icecoverfn)
+icechg_ag <- read.csv(icechg_agfn)
 
-## Look at spatial distribution by county (ESTN_UNIT)
+```
+
+
+```{r}
+str(icepnt, max.level = 1)
+```
+
+```{r}
+str(iceplt, max.level = 1)
+```
+
+```{r}
+str(icepctcover, max.level = 1)
+```
+
+
+
+Next, we can convert X/Y coordinates to a simple feature and look at the spatial distribution by county (ESTN_UNIT). 
+
+```{r}
 icepltsp <- spMakeSpatialPoints(iceplt, xy.uniqueid="plot_id", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
               prj="longlat", datum="NAD83")
 plot(icepltsp["ESTN_UNIT"])
 
+```
 
-icecover <- read.csv(icecoverfn)
-icechg_ag <- read.csv(icechg_agfn)
 
-head(icepnt)
-head(iceplt)
-head(icepctcover)
+Now, let's look at the look up tables stored in FIESTA for land use cover codes and change agent codes and create new lookup tables for Time 1 and Time 2 land use cover
+```{r}
 icecover
+```
+
+```{r}
 icechg_ag
+```
 
-unitarea <- read.csv(unitareafn)
-strlut <- read.csv(strlutfn)
-unitarea
-strlut
 
+```{r}
 # Create look-up tables for Time 1 (cover_11) and Time 2 (cover_14) classes
 icecover_1 <- icecover
 names(icecover_1) <- sub("cover", "cover_1", names(icecover_1))
@@ -400,8 +426,25 @@ names(icecover_2) <- sub("cover", "cover_2", names(icecover_2))
 icecover_1
 icecover_2
 
+```
+
+Next, let's import and look at the stratification information stored in FIESTA. 
+
+```{r}
+
+## Area by estimation unit
+unitarea <- read.csv(unitareafn)
+unitarea
 
 ```
+
+```{r}
+
+## Pixel counts by strata classes
+strlut <- read.csv(strlutfn)
+strlut
+```
+
 
 
 ### Examples
@@ -413,279 +456,433 @@ icecover_2
 5. [Simple bar plots](#barplt)
 
 
+<a name="modPBpop"></a>
 
-#### modPBpop
+### modPBpop()
 
-```
-#######################################################################################
-# Usage:
-# modPBpop(pntdat = NULL, pltpct = NULL, plotid = "plot_id", pntid = NULL, 
-#	  pltpctvars = NULL, plt = NULL, pltassgn = NULL, puniqueid = "CN", 
-#	  pltassgnid = "CN", nonsamp.pfilter = NULL, strata = FALSE, sumunits = FALSE, 
-#   unitvar = NULL, unitvar2 = NULL, unitarea = NULL, areavar = "ACRES",
-#   areaunits = "acres", unitcombine = FALSE, minplotnum.unit = 10, 
-#   stratalut = NULL, strvar = "STRATUMCD", getwt = TRUE, getwtvar = "P1POINTCNT", 
-#   strwtvar = "strwt", stratcombine = TRUE, minplotnum.strat = 2, pvars2keep = NULL, 
-#   saveobj = FALSE, objnm = "PBpopdat", savedata = FALSE, outfolder = NULL, 
-#   out_fmt = "csv", out_dsn = NULL, outfn.pre = NULL, outfn.date = FALSE,
-#   overwrite_dsn = FALSE, overwrite_layer = TRUE, PBstratdat = NULL, gui = FALSE)
-# 
-# Description:
-# Generates percent or acre estimates by domain (and estimation unit).   
-########################################################################################
-help(modPBpop)
+`FIESTA`'s population functions (`mod*pop`) check input data and perform population-level calculations, such as: summing number of sampled plots and standardizing auxiliary data. These functions are specific to each `FIESTA` module and are run prior to or within a module for any population of interest. 
 
+For `FIESTA`'s PB Module, the `modPBpop` function calculates and outputs: number of plots by strata. The output from `modPBpop` can be used for one or more estimates from `modPB`.
+
+
+```{r}
 
 ## Percent ##
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-PBpop <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt")
-names(PBpop)
-
-PBx <- PBpop$PBx
-pltassgnx <- PBpop$pltassgnx
-stratalut <- PBpop$stratalut
-
-head(PBx)
-head(pltassgnx)
-stratalut
-
+PBpopdat <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt")
+names(PBpopdat)
 
 ```
+
+
+Note that the `modPBpop` function returns a list with lots of information and data for us to use. For a quick look at what this list includes we can use the `str` function: 
+
+```{r}
+str(PBpopdat, max.level = 1)
+```
+
+
+
+Now that we've created our population dataset, we can move on to estimation. 
+
+</details>
+
+### `modPB`
+
+#### Example 1: Point-level data - Totals
+
+<details>
+  <summary>View Example</summary>
+
+In this example, we look at estimating the percent land cover at Time 1 (2011) and land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah. We will then compare the net change from Time 1 and Time 2.
+
 
 #### modPB
-
-```
-#######################################################################################
-# Usage:
-# modPB(PBpopdat=NULL, tabtype = "PCT", sumunits = FALSE, strata = FALSE, 
-#   strtype = "POST", ratio = FALSE, landarea = "ALL", landarea.filter = NULL, 
-#   nonsamp.pntfilter = NULL, pntfilter = NULL, pfilter = NULL, rowvar = NULL,    
-#   colvar = NULL, row.orderby = NULL, col.orderby = NULL, row.add0 = FALSE, col.add0 = FALSE, 
-#   rowlut = NULL, collut = NULL, domlut = NULL, domvarlst = NULL, ratioden = "ROWVAR", 
-#   allin1 = FALSE, estround = 0, pseround = 3, estnull = 0, psenull = "--", 
-#   divideby = NULL, savedata = FALSE, outfolder = NULL, outfn.pre = NULL,
-#   outfn.dat = FALSE, addtitle = TRUE, rawdata = FALSE, rawonly = FALSE, raw_fmt = "csv"
-#   raw_fmt = "csv", raw_dsn = NULL, overwrite_dsn = FALSE, overwrite_layer = TRUE, 
-#   append_layer = FALSE, returntitle = FALSE, title.main = NULL, title.ref = NULL, 
-#   title.rowvar = NULL, title.colvar = NULL, title.unitvar = NULL, title.filter = NULL,
-#   title.units="acres", gainloss=FALSE, gainloss.vals=NULL, gui = FALSE, ...)
-# 
-# Description:
-# Generates percent or acre estimates by domain (and estimation unit).   
-########################################################################################
-help(modPB)
-
-```
 
 <a name="pnttot"></a>
 
 #### Point-level data - Totals
 
+
+We first estimate the percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah. We will add a lookup table for the rows to get row names. Adding row.add0=TRUE in table_opts list assures that all categories in rowlut are included in the result. We can also add a pretty name to the output names.
+
+```{r}
+cover1 <- modPB(PBpopdat = PBpopdat, 
+                rowvar = "cover_1", 
+                table_opts = list(rowlut=icecover_1, 
+                                  row.add0=TRUE), 
+                title_opts = list(title.rowvar = "Land Cover (2011)")
+                )
+
 ```
 
-## Percent ##
-# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-cover1 <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)")
-names(cover1)
+
+We can look at the structure of this output with `str`. Note that again `FIESTA` outputs a list. 
+
+```{r}
+str(cover1, max.level = 2)
+
+```
+
+...and the estimates.
+
+```{r}
+str(cover1, max.level = 2)
+
+```
+
+The `raw` list shows more details of the estimates for row totals. See help(modPB) for variable descriptions.
+
+```{r}
+cover1$raw$unit_rowest
+
+```
+
+
+We can also look at the domain-level data used for generating the estimates, with proportion of points by category.
+
+```{r}
+head(cover1$raw$pltdom.row)
+
+```
+
+
+Note: An Uninterpretable class is included in the previous table. To remove, add nonsamp.pntfilter. Let's return a list of titles that are generated automatically.
+
+```{r}
+cover1 <- modPB(PBpopdat = PBpopdat,
+		            rowvar = "cover_1", 
+		            nonsamp.pntfilter = "cover_1 != 999",
+		            table_opts = list(rowlut=icecover_1), 
+		            title_opts = list(title.rowvar="Land Cover (2011)"),
+		            returntitle = TRUE
+                )
+
+```
+
+```{r}
 cover1$est
 
+```
+</details>
 
-# Note: pltassgn is not necessary for this estimate because strata is not included
-cover1 <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt", 
-    rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)")
-names(cover1)
-cover1$est
+#### Example 1: Point-level data - Totals - Time 1
 
+<details>
+  <summary>View Example</summary>
 
-# Now, use the object from modGBpop for more efficient results and add rawdata
-cover1 <- modPB(PBpopdat=PBpop,
-		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)",
-		rawdata=TRUE)
-names(cover1)
-cover1$est
+In this example, we estimate area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah. Note: adding area requires generating a new set of population data to include area information.
 
-cover1.raw <- cover1$raw
-names(cover1.raw)
-
-## Note: unit.totest should always equal 100% unless a filter is used to subset results
-cover1.raw$unit.totest
-
-## Detailed calculations for row estimates. See help(modPB) for variable descriptions 
-cover1.raw$unit.rowest
-
-## Name of rowvar
-cover1.raw$rowvar
-
-## The domain-level data used for estimate, with proportion of points by category
-head(cover1.raw$pltdom.row)
-
-
-# Note: An Uninterpretable class is included in the previous table. To remove, add nonsamp.pntfilter
-cover1 <- modPB(PBpopdat=PBpop,
-		rowvar="cover_1", rowlut=icecover_1, rawdata=TRUE, title.rowvar="Land Cover (2011)",
-		nonsamp.pntfilter="cover_1 != 999")
-names(cover1)
-cover1$est
-
-
-
-## Area ##
-# Area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-
+First, since we want to get estimates for the total population, let's sum the area for both counties.
+```{r}
 unitarea <- read.csv(unitareafn)
+sum(unitarea$ACRES)
+```
 
-cover1.area <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.pntfilter="cover_1 != 999", tabtype="AREA", unitarea=sum(unitarea$ACRES))
+Next, we add the total area to the `modPBpop` function
+```{r}
+PBpoparea <- modPBpop(pnt = icepnt, 
+                      pltassgn = iceplt, 
+                      pltassgnid = "plot_id", 
+                      pntid = "dot_cnt", 
+                      unitarea = sum(unitarea$ACRES)
+                      )
+
+```
+                      
+We can look at the contents of the output list. The output now includes unitarea, the total acres for the population of two counties.
+                     
+```{r}
+str(PBpoparea, max.level = 1)
+```
+
+
+Now, let's get the estimates, adding tabtype=AREA, to indicate we want area estimates.
+```{r}
+cover1.area <- modPB(PBpopdat = PBpoparea, 
+                     tabtype = "AREA",
+                     rowvar = "cover_1", 
+                     nonsamp.pntfilter = "cover_1 != 999",
+                     table_opts = list(rowlut = icecover_1), 
+                     title_opts = list(title.rowvar = "Land Cover (2011)"), 
+                     )
+
+```
+
+Again, we can look at the contents of the output list. 
+
+```{r}
+str(cover1.area, max.level = 1)
+```
+
+And the estimates: 
+
+```{r}
+## Estimate and percent sampling error of estimate
 cover1.area$est
+```
 
 
-# Note: adding area requires generating a new set of population data
-PBpoparea <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-        unitarea=sum(unitarea$ACRES))
-names(PBpoparea)
+We can now use the PBpoparea set of population data to run percent estimates as well. Let's save the data to the outfolder and return titles as well. Note: Saving data adds a new folder in outfolder that includes rawdata files.
 
-head(PBpoparea$PBx)
-head(PBpoparea$pltassgnx)
-PBpoparea$stratalut
-PBpoparea$unitarea
+```{r}
+cover1.pct <- modPB(PBpopdat = PBpoparea, 
+                tabtype = "PCT", 
+                rowvar = "cover_1", 
+                nonsamp.pntfilter="cover_1 != 999",
+                table_opts = list(rowlut=icecover_1), 
+                title_opts = list(title.rowvar="Land Cover (2011)"),
+                returntitle = TRUE, 
+                savedata = TRUE, 
+                savedata_opts = list(outfolder=outfolder)
+		            )
 
-## Area ##
-cover1.area <- modPB(PBpopdat=PBpoparea,
-		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.pntfilter="cover_1 != 999", tabtype="AREA")
-cover1.area$est
-
-
-
-## Percent ##
-# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-# Note: use the area population data for either percent or area estimates
-rowvar1 <- "cover_1"
-
-cover1 <- modPB(PBpopdat=PBpoparea,
-		rowvar=rowvar1, rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.pntfilter="cover_1 != 999")
-names(cover1)
-cover1$est
-
-## Percent ##
-# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-# Note: Save to outfolder, including rawdata (A new folder is created to store rawdata files)
-cover1 <- modPB(PBpopdat=PBpoparea,
-		rowvar=rowvar1, rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.pntfilter="cover_1 != 999", rawdata=TRUE, savedata=TRUE, outfolder=outfolder,
-		returntitle=TRUE)		
-names(cover1)
-cover1$est
-raw1 <- cover1$raw
-titlelst1 <- cover1$titlelst
-names(raw1)
-names(titlelst1)
-
-title.rowvar1 <- titlelst1$title.rowvar
-unit.rowest1 <- raw1$unit.rowest
+```
 
 
-################## Time 2
-rowvar2 <- "cover_2"
+Again, we can look at the contents of the output list. The output now includes titlelst, a list of associated titles.
 
-## Percent ##
-# Percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover2 <- modPB(PBpopdat=PBpoparea,
-		rowvar=rowvar2, rowlut=icecover_2, rawdata=TRUE, title.rowvar="Land Cover (2014)",
-		returntitle=TRUE)
-names(cover2)
+```{r}
+str(cover1.pct, max.level = 1)
+```
+
+The estimates: 
+
+```{r}
+## Estimate and percent sampling error of estimate
+cover1.pct$est
+```
+
+And titles: 
+
+```{r}
+## Estimate and percent sampling error of estimate
+cover1.pct$titlelst
+```
+
+</details>
+
+#### Example 2: Point-level data - Totals - Time 2
+
+<details>
+  <summary>View Example</summary>
+
+Now, let's generate estimates of percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah. Then we can compare the estimates. We can use the same population data for this analysis.
+
+```{r}
+cover2 <- modPB(PBpopdat = PBpoparea, 
+                rowvar = "cover_2", 
+                nonsamp.pntfilter = "cover_1 != 999",
+                table_opts = list(rowlut = icecover_2), 
+                title_opts = list(title.rowvar = "Land Cover (2014)"),
+		            returntitle = TRUE
+		            )
+
+```
+
+
+Again, we can look at the contents of the output list. The output now includes titlelst, a list of associated titles.
+
+```{r}
+str(cover2, max.level = 1)
+```
+
+And the estimates: 
+
+```{r}
+## Estimate and percent sampling error of estimate
 cover2$est
-raw2 <- cover2$raw
-titlelst2 <- cover2$titlelst
-names(raw2)
-names(titlelst2)
+```
 
-title.rowvar2 <- titlelst2$title.rowvar
-unit.rowest2 <- raw2$unit.rowest
+Now we can compare the estimates from Time 2 with estimates from Time 1 and look at net change. We will use the raw data with numeric values.
 
-
-
-
-## Compare estimates from Time 2 with estimates from Time 1
-cover2$est
-cover1$est
-
-## Net change from Time 1 to Time 2
-netchg <- data.frame(Estimate1=cover1$est$Estimate, Estimate2=cover2$est$Estimate, 
-            NetChange.1to2=cover1$est$Estimate - cover2$est$Estimate)
+```{r}
+netchg <- data.frame(Estimate1 = cover1$raw$unit_rowest$est, 
+                     Estimate2 = cover2$raw$unit_rowest$est, 
+                     NetChange.1to2 = cover1$raw$unit_rowest$est - cover2$raw$unit_rowest$est
+                     )
 netchg
 
+```
 
-## Display netchg in barplot (Time1/Time2)
+
+Now, let's create a barplot to compare net change. First, we need to set up a data frame with estimates and standard errors.
+```{r}
+
 tabvars <- c("est", "est.se")
-tab1 <- unit.rowest1[, c(rowvar1, title.rowvar1, tabvars)]
+tab1 <- cover1$raw$unit_rowest[, c("cover_1", cover1$titlelst$title.rowvar, tabvars)]
 setnames(tab1, tabvars, paste0(tabvars, ".1"))
 
-tab2 <- unit.rowest2[, c(rowvar2, title.rowvar2, tabvars)]
+tab2 <- cover2$raw$unit_rowest[, c("cover_2", cover2$titlelst$title.rowvar, tabvars)]
 setnames(tab2, tabvars, paste0(tabvars, ".2"))
 
-tabx <- merge(tab1, tab2, by.x=rowvar1, by.y=rowvar2)
+tabx <- merge(tab1, tab2, by.x="cover_1", by.y="cover_2")
+tabx
+```
+
+
+Next, the barplot.
+```{r}
+
 sevar <- names(tabx)[grepl("est.se", names(tabx))]
 yvar <- names(tabx)[grepl("est.", names(tabx)) & !names(tabx) %in% sevar]
+xvar <- cover1$titlelst$title.rowvar
 
-datBarplot(tabx, yvar=yvar, xvar=title.rowvar1, errbars=TRUE,
-		sevar=sevar, ylabel="Percent", addlegend=TRUE, 
- 		args.legend=list(x="topleft", bty="n", cex=.8, legend=c("Time1", "Time2")),
-		main=substr(titlelst1$title.row, 1, nchar(titlelst1$title.row)-7))
+datBarplot(tabx, 
+           yvar = yvar, xvar = xvar,  
+           errbars = TRUE, sevar = sevar, 
+           ylabel = "Percent", 
+           addlegend = TRUE, 
+           args.legend=list(x="topleft", 
+                            bty="n", 
+                            cex=.8, 
+                            legend=c("2011", "2014")), 
+           main = substr(cover1$titlelst$title.row, 1, nchar(cover1$titlelst$title.row)-7))
+
+```
 
 
 
-#######################################################################################
-## By Agent of Change
-#######################################################################################
+</details>
 
-## Percent ##
-# Percent land by agent of change in Davis and Salt Lake Counties, UT
-chg_ag <- modPB(PBpopdat=PBpoparea,
-		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
-		returntitle=TRUE)
+#### Example 2: Point-level data - Totals - Agent of Change
+
+<details>
+  <summary>View Example</summary>
+
+In this example, we generate estimates of percent change by agent in Davis and Salt Lake Counties, Utah. Here, we use the same population data. We also add the lookup table with agent of change code names.
+
+```{r}
+chg_ag <- modPB(PBpopdat = PBpoparea, 
+                rowvar = "chg_ag_2", 
+                table_opts = list(rowlut = icechg_ag), 
+                title_opts = list(title.rowvar="Agent of Change"),
+		            returntitle=TRUE)
+
+```
+
+Let's again look at the contents of the output list.
+
+```{r}
+str(chg_ag, max.level = 1)
+```
+
+And the estimates: 
+
+```{r}
+## Estimate and percent sampling error of estimate
+chg_ag$est
+```
+
 names(chg_ag)
 chg_ag$est
 chg_ag$titlelst
 
+Now, get area estimates. Notice, we can change the resulting area units to metric units (i.e., hectares).
 
-## Area ##
-# Area, in acres, of land by agent of change in Davis and Salt Lake Counties, UT
-chg_ag.area <- modPB(PBpopdat=PBpoparea,
-		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
-		returntitle=TRUE, tabtype="AREA", unitarea=sum(unitarea$ACRES), title.units="hectares")
-names(chg_ag.area)
+```{r}
+chg_ag.area <- modPB(PBpopdat = PBpoparea, 
+                    tabtype = "AREA",
+                    rowvar = "chg_ag_2", 
+                    table_opts = list(rowlut=icechg_ag, metric=TRUE), 
+                    title_opts = list(title.rowvar="Agent of Change"),
+		                returntitle=TRUE)
+
+```
+
+
+Again, we can look at the contents of the output list.
+
+```{r}
+str(chg_ag.area, max.level = 1)
+```
+
+And the estimates: 
+
+```{r}
+## Estimate and percent sampling error of estimate
 chg_ag.area$est
-chg_ag.area$titlelst
+```
+
+The resulting area units are identified in the raw data.
+```{r}
+chg_ag.area$raw$areaunits
+```
+
+</details>
+
+#### Example 3: Point-level data - Totals - Agent of Change - Filters
+
+<details>
+  <summary>View Example</summary>
+
+We can also apply filters to subset the resulting table. This filter subsets the plots that had observed change. Filters do not affect the population data, thus, we will continue using the same PBpoparea dataset. 
 
 
-################## Agent of Change - Filters - Percent
+Here, we generate estimates of percent land with observed change by agent of change in Davis and Salt Lake Counties, Utah
 
-## Percent ##
-# Percent land with observed change by agent of change in Davis and Salt Lake Counties, UT
-# Note: Add a landarea filter to subset dataset to only plots with observed change.
+```{r}
+# Add a landarea filter to subset dataset to only plots with observed change.
 landarea.filter <- "change_1_2 == 1"
-chg_ag.plts <- modPB(PBpopdat=PBpoparea,
-		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
-		landarea="CHANGE", landarea.filter=landarea.filter, returntitle=TRUE)
-names(chg_ag.plts)
+
+chg_ag.plts <- modPB(PBpopdat = PBpoparea, 
+                     rowvar = "chg_ag_2", 
+                     table_opts = list(rowlut=icechg_ag), 
+                     title_opts = list(title.rowvar="Agent of Change"),
+		                 landarea = "CHANGE", 
+		                 landarea.filter = landarea.filter, 
+		                 returntitle = TRUE)
+
+```
+
+The resulting estimates...
+```{r}
+## Estimate and percent sampling error of estimate
 chg_ag.plts$est
+```
+
+
+Notice, the estimate titles reflect this filter.
+```{r}
+## Estimate and percent sampling error of estimate
 chg_ag.plts$titlelst
+```
 
 
-## Percent ##
+
+Now, let's add a pntfilter to only look at points that changed.
+
+```{r}
+
 # Percent land changed by agent of change in Davis and Salt Lake Counties, UT
-# Note: Add a point filter to include observed change on points
 pntfilter <- "chg_ag_2 > 0"
-chg_ag.pnts <- modPB(PBpopdat=PBpoparea,
-		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
-		pntfilter=pntfilter, returntitle=TRUE, title.filter="observed changed")
-names(chg_ag.pnts)
+chg_ag.pnts <- modPB(PBpopdat=PBpoparea, 
+                     rowvar = "chg_ag_2", 
+                     table_opts = list(rowlut=icechg_ag), 
+                     title_opts = list(title.rowvar="Agent of Change", 
+                                       title.filter="observed changed"),
+		                 pntfilter = pntfilter, 
+		                 returntitle = TRUE
+		                 )
+```
+
+We can now compare the estimates and percent sampling errors.
+```{r}
+
+# All land
+chg_ag$titlelst$title.estpse
+chg_ag$est
+
+# Land with observed change
+chg_ag.plts$titlelst$title.estpse
+chg_ag.plts$est
+
+# Estimated change
+chg_ag.pnts$titlelst$title.estpse
 chg_ag.pnts$est
-chg_ag.pnts$titlelst
+
+```
+
 
 
 # Compare estimates
@@ -693,631 +890,747 @@ chg_ag$est
 chg_ag.plts$est
 chg_ag.pnts$est
 
+Let's create a barplot of estimated change by agent
+```{r}
 
-## Create barplot of area estimates
-unit.rowest <- chg_ag.pnts$raw$unit.rowest
-datBarplot(unit.rowest, xvar="Agent of Change", yvar="est", 
-  errbars=TRUE, sevar="est.se", ylab="Percent",
-  main=chg_ag.pnts$titlelst$title.row)
-
-
-
-
-################## Agent of Change - Filters - Area
-
-## Area ##
-# Area, in acres, of land with observed change by agent of change in Davis and Salt Lake Counties, UT
-# Note: Add a landarea filter to subset dataset to only plots with observed change.
-landarea.filter <- "change_1_2 == 1"
-chg_ag.plts.area <- modPB(PBpopdat=PBpoparea,
-		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
-		landarea="CHANGE", landarea.filter=landarea.filter, returntitle=TRUE, tabtype="AREA", 
-		unitarea=sum(unitarea$ACRES))
-names(chg_ag.plts.area)
-chg_ag.plts.area$est
-chg_ag.plts.area$titlelst
-
-
-## Area ##
-# Area, in acres, of land changed by agent of change in Davis and Salt Lake Counties, UT
-# Note: Add a point filter to include observed change on points
-pntfilter <- "chg_ag_2 > 0"
-chg_ag.pnts.area <- modPB(PBpopdat=PBpoparea,
-		rowvar="chg_ag_2", rowlut=icechg_ag, rawdata=TRUE, title.rowvar="Agent of Change",
-		pntfilter=pntfilter, returntitle=TRUE, title.filter="observed changed", 
-		tabtype="AREA", unitarea=sum(unitarea$ACRES))
-names(chg_ag.pnts.area)
-chg_ag.pnts.area$est
-chg_ag.pnts.area$titlelst
-
-
-# Compare estimates - Area
-chg_ag.area$est
-chg_ag.plts.area$est
-chg_ag.pnts.area$est
-
-
-################## Agent of Change - and by Land Cover
-
-## Percent ##
-# Percent land changed by agent of change and land cover (2011) in Davis and Salt Lake Counties, UT
-chg_ag_cover1 <- modPB(PBpopdat=PBpoparea, 
-    rowvar="chg_ag_2", rowlut=icechg_ag, colvar="cover_1", collut=icecover_1, 
-    rawdata=TRUE, title.rowvar="Change agent", title.colvar="Land cover (2011)", 
-    returntitle=TRUE)
-chg_ag_cover1$est
-
-
-## Area ##
-# Area, in acres, of land changed by agent of change and land cover (2011) in Davis and Salt Lake Counties, UT
-chg_ag_cover1.acres <- modPB(PBpopdat=PBpoparea, 
-    rowvar="chg_ag_2", rowlut=icechg_ag, colvar="cover_2", collut=icecover_2, 
-    rawdata=TRUE, title.rowvar="Change agent", title.colvar="Land cover (2011)", 
-    returntitle=TRUE, tabtype="AREA", unitarea=sum(unitarea$ACRES))
-chg_ag_cover1.acres$est
-chg_ag_cover1.acres$pse
-chg_ag_cover1.acres$titlelst
-
-
-## Percent ##
-# Percent land changed by agent of change and land cover (2014) in Davis and Salt Lake Counties, UT
-chg_ag_cover2 <- modPB(PBpopdat=PBpoparea, 
-    rowvar="chg_ag_2", rowlut=icechg_ag, colvar="cover_2", collut=icecover_2, 
-    rawdata=TRUE, title.rowvar="Change agent", title.colvar="Land cover (2014)", 
-    returntitle=TRUE)
-chg_ag_cover2$est
-chg_ag_cover2$pse
-chg_ag_cover2$titlelst
-
-
-#######################################################################################
-## By Estimation Unit
-#######################################################################################
-
-## Area by Estimation Unit ##
-# Area, in acres, of land cover at Time 1 (2011) by County for all land in Davis and Salt Lake Counties, UT
-cover1.unit.area <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id",  
-    pntid="dot_cnt", rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-    nonsamp.pntfilter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, unitvar="ESTN_UNIT", 
-    areavar="ACRES")
-cover1.unit.area$est
-cover1.unit.area$pse
-   
-   
-# Note: Need to calculate new population data for generating estimates by estimation unit
-PBpopunit <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-        unitarea=unitarea, unitvar="ESTN_UNIT")
-names(PBpopunit)
-
-head(PBpopunit$PBx)
-head(PBpopunit$pltassgnx)
-PBpopunit$stratalut
-PBpopunit$unitarea
-
-## Check PBpopunit
-cover1.unit.areab <- modPB(PBpopdat=PBpopunit,
-    rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-    nonsamp.pntfilter="cover_1 != 999", tabtype="AREA", 
-    unitarea=unitarea, unitvar="ESTN_UNIT", areavar="ACRES")
-cover1.unit.areab$est
-cover1.unit.areab$pse
-
-
-## Area by Estimation Unit ##
-# Area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-# Note: Estimates are generated by ESTN_UNIT and summed to the population.
-cover1.unitsum <- modPB(PBpopdat=PBpopunit,
-		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.pntfilter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, 
-		unitvar="ESTN_UNIT", areavar="ACRES", sumunits=TRUE, rawdata=TRUE)
-names(cover1.unitsum)
-cover1.unitsum$est
-cover1.unitsum$raw$unit.rowest
-cover1.unitsum$raw$rowest
-
-
-## Area by Estimation Unit ##
-# Area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-# Return raw data
-# Note: Estimates are generated by ESTN_UNIT and summed to the population.
-cover1.unitsum.area <- modPB(PBpopdat=PBpopunit,
-		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)", 
-		nonsamp.pntfilter="cover_1 != 999", tabtype="AREA", unitarea=unitarea, 
-		unitvar="ESTN_UNIT", areavar="ACRES", sumunits=TRUE, rawdata=TRUE)
-names(cover1.unitsum.area)
-cover1.unitsum.area$est
-
-cover1.unitsum.raw <- cover1.unitsum.area$raw
-names(cover1.unitsum.raw)
-cover1.unitsum.raw$rowest
-cover1.unitsum.raw$unit.rowest
-
+datBarplot(chg_ag.pnts$raw$unit_rowest, 
+           xvar = "Agent of Change", 
+           yvar = "est", 
+           errbars = TRUE, 
+           sevar = "est.se", 
+           ylab = "Percent", 
+           main = chg_ag.pnts$titlelst$title.row
+           )
 
 ```
+
+
+Now, let's look at at percent of land changed by agent of change and land cover (2011) in Davis and Salt Lake Counties, Utah
+
+```{r}
+chg_ag_cover1 <- modPB(PBpopdat = PBpoparea, 
+                       rowvar = "chg_ag_2", 
+                       colvar = "cover_2", 
+                       table_opts = list(rowlut=icechg_ag, collut=icecover_2), 
+                       title_opts = list(title.rowvar="Change agent", 
+                                               title.colvar="Land cover (2011)"), 
+                       returntitle = TRUE)
+                             
+```   
+
+The resulting estimates...
+```{r}
+chg_ag_cover1$est
+```
+
+And percent sampling error...
+```{r}
+chg_ag_cover1$pse
+```
+                             
+
+
+</details>
+
+#### Example 2: Point-level data - By Estimation Unit
+
+<details>
+  <summary>View Example</summary>
+
+In this example, we generate estimates by each estimation unit (i.e, County). We first, need a new set of population data to reflect this change in objective. 
+
+```{r}
+PBpopunit <- modPBpop(pnt = icepnt, 
+                      pltassgn = iceplt, 
+                      pltassgnid = "plot_id", 
+                      pntid = "dot_cnt",
+                      unitarea = unitarea, 
+                      unitvar = "ESTN_UNIT")
+names(PBpopunit)
+
+```
+
+Again, we can look at the contents of the output list. 
+
+```{r}
+str(PBpopunit, max.level = 1)
+```
+
+
+Now that we have a new set of population data, let's start with area, in acres, of land cover at Time 1 (2011) by County for all land in Davis and Salt Lake Counties, UT
+
+```{r}
+ 
+cover1.unit.area <- modPB(PBpopdat = PBpopunit, 
+                          tabtype = "AREA",
+                          rowvar = "cover_1", 
+                          nonsamp.pntfilter = "cover_1 != 999",
+                          table_opts = list(rowlut=icecover_1), 
+                          title_opts = list(title.rowvar="Land Cover (2011)")
+                          )
+
+```
+
+```{r}
+## Estimate and percent sampling error of estimate
+cover1.unit.area$est
+```
+
+```{r}
+## Percent sampling error of estimate
+cover1.unit.area$pse
+```
+
+
+If we set sumunits=TRUE, we can generate an estimate of area by county and also sum these estimates to the population. Your resulting estimate is for the entire population, but you can find estimates by county in the raw data tables. Here, we can use the sample population that was created by estimation unit (i.e., county). 
+
+```{r}
+
+cover1.unitsum <- modPB(PBpopdat = PBpopunit, 
+                        tabtype = "AREA",
+                        sumunits = TRUE,
+                        rowvar = "cover_1", 
+                        nonsamp.pntfilter = "cover_1 != 999",
+                        table_opts = list(rowlut=icecover_1), 
+                        title_opts = list(title.rowvar="Land Cover (2011)"), 
+                        )
+
+```
+
+The resulting estimate is for the total population.
+```{r}
+## Estimate and percent sampling error of estimate
+cover1.unitsum$est
+
+```
+
+
+```{r}
+str(cover1.unitsum$raw, max.level = 1)
+```
+
+Now, let's look at the raw data output. There are data frames by unit (unit_totest; unit_rowest) and two additional data frames for the total population (totest; rowest). 
+
+```{r}
+## Estimate and percent sampling error of estimate
+cover1.unitsum$raw$unit_rowest
+```
+
+```{r}
+## Estimate and percent sampling error of estimate
+cover1.unitsum$raw$rowest
+```
+
+
+</details>
+
+#### Example 5: Point-level transition data (T1 Cover - T2 Cover)
+
+<details>
+  <summary>View Example</summary>
+
+In this example, we look at the transition data at the point level, giving an estimate of what each category transitioned to. Let's look at a table of the percent land cover at Time 1 (2011) by percent land cover at Time 2 (2014) for all and in Davis and Salt Lake Counties, Utah. Here, we use the PBpoparea population data set for the entire population.
+
 
 <a name="pnttrans"></a>
 
-#### Point-level transition data (T1 Cover - T2 Cover)
+```{r}
+
+cover12 <- modPB(PBpopdat = PBpoparea, 
+                  rowvar = "cover_1", 
+                  colvar = "cover_2", 
+                  nonsamp.pntfilter = "cover_1 != 999",
+                  table_opts = list(rowlut=icecover_1, collut=icecover_2), 
+              		title_opts = list(title.rowvar="Land Cover (2011)", 
+              		                  title.colvar="Land Cover (2014)"), 
+    		          returntitle=TRUE
+    		          )
 
 ```
-## Percent ##
-# Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover12 <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2012)", 
-		nonsamp.pntfilter="cover_1 != 999", returntitle=TRUE)
-names(cover12)
+
+Now, look at the estimates.
+```{r}
 cover12$est
+```
+
+
+... and percent standard error.
+```{r}
 cover12$pse
+```
 
-## Check using PBpoparea object from modPB()
-cover12b <- modPB(PBpopdat=PBpoparea,
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2012)", 
-		nonsamp.pntfilter="cover_1 != 999", returntitle=TRUE)
-names(cover12b)
-cover12b$est
-cover12b$pse
 
-cover12.raw <- cover12$raw
-names(cover12.raw)
+We can also look at the summed proportions for each transition (i.e, row and column)
+```{r}
+head(cover12$raw$pltdom.grp)
+```
 
-## Summed proportions for row totals
-head(cover12.raw$pltdom.row)
 
-## Summed proportions for column totals
-head(cover12.raw$pltdom.col)
-
-## Summed proportions for transition (row and column)
-head(cover12.raw$pltdom.grp)
-
-## Estimates for row totals (Time 1)
-cover12.raw$unit.rowest
-
-## Estimates for column totals (Time 2)
-cover12.raw$unit.colest
+... and the raw data estimates for each transition
+```{r}
+head(cover12$raw$unit_grpest)
+```
 
 ## Estimates for transition (Time 1 by Time 2)
 cover12.raw$unit.grpest
 
-## Titles
-cover12$titlelst
+
+We can do the same for area estimates by just adding the tabtype='AREA' parameter. Area, in acres, of land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah.
+
+```{r}
+cover12.area <- modPB(PBpopdat = PBpoparea, 
+                 tabtype = "AREA",
+                 rowvar = "cover_1", 
+                 colvar = "cover_2", 
+                 nonsamp.pntfilter="cover_1 != 999",
+                 table_opts = list(rowlut=icecover_1, collut=icecover_2), 
+              	 title_opts = list(title.rowvar="Land Cover (2011)", 
+              		                  title.colvar="Land Cover (2014)"), 
+    		         returntitle = TRUE
+    		         )
+
+```
 
 
-## Area ##
-# Area, in acres, of land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover12.acres <- modPB(PBpopdat=PBpoparea,
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2012)", 
-		nonsamp.pntfilter="cover_1 != 999", tabtype="AREA", unitarea=sum(unitarea$ACRES))
-names(cover12.acres)
-cover12.acres$est
-cover12.acres$pse
+Let's check to make sure the percent standard errors (pse) match. 
+
+```{r}
+head(cover12$pse)
+head(cover12.area$pse)
+
+```
 
 
-## Check to make sure pse is the same for percent and area
-cover12$pse
-cover12.acres$pse
+We can also look at transitions by concatenating the column names. Again, let's look at the percent land cover at Time 1 (2011) by percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah. 
 
 
+First, merge the point-level data with each lookup table to get class names, then concatenate the Time 1 and Time 2 named columns. Let's make a copy of the population data and add the new category directly to the PBx data frame (PBpoparea$PBx) so we don't have to recreate the population data.
+```{r}
 
-################## Concatenate column for transitions
-
-## Percent ##
-# Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-# Note: Concatenate (paste) Time 1 and Time 2 columns (merge lookup tables first)
-icepnt2 <- merge(icepnt, icecover_1, by="cover_1")
-icepnt2 <- merge(icepnt2, icecover_2, by="cover_2")
-
-icepnt2$cover_12_nm <- paste(icepnt2$cover_1_nm, icepnt2$cover_2_nm, sep="-")
-cover12nm <- modPB(pntdat=icepnt2, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_12_nm", rawdata=TRUE, title.rowvar="Land Cover (2011-2014)",  
-		nonsamp.pntfilter="cover_1 != 999", returntitle=TRUE)
-names(cover12nm)
-
-cover12nm$est
-
-
-## Compare estimates
-cover12$est
-cover12nm$est
-cover12$pse
-
-
-################## Filter transition categories
-
-## Percent ##
-# Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-# Filter for only categories of cover_1 < 200
-cover12.lt200 <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2012)", 
-		nonsamp.pntfilter="cover_1 != 999", pntfilter="cover_1 < 200", 
-		title.filter="Vegetated land", returntitle=TRUE)
-names(cover12.lt200)
-cover12.lt200$est
-cover12.lt200$pse
-cover12.lt200$titlelst
-
-
-################## gain / loss
-
-## Percent ##
-# Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-# Return gain/loss estimates for each category in rawdata tables
-cover12b <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2014)", 
-		nonsamp.pntfilter="cover_1 != 999", gainloss=TRUE)
-names(cover12b)
-
-cover12b$est
-cover12b$pse
-cover12b.raw <- cover12b$raw
-names(cover12b.raw)
-cover12b.raw$est.gainloss
-
-## Example: the gain and loss of OtherVegetation category...
-est.gainloss <- cover12b.raw$est.gainloss
-estcat <- "OtherVegetation"
-
-## Gain estimates, with 95% confidence interval
-# Note: There was a 2.6% gain of OtherVegetation from 2011 to 2014, +- 2.0%
-est.gainloss$gain.CI95left[row.names(est.gainloss) == estcat]
-est.gainloss$gain.est[row.names(est.gainloss) == estcat]
-est.gainloss$gain.CI95right[row.names(est.gainloss) == estcat]
-
-## Loss estimates, with 95% confidence interval
-# Note: There was a 1.8% loss of OtherVegetation from 2011 to 2014, +- 1.3%
-est.gainloss$loss.CI95left[row.names(est.gainloss) == estcat]
-est.gainloss$loss.est[row.names(est.gainloss) == estcat]
-est.gainloss$loss.CI95right[row.names(est.gainloss) == estcat]
-
-## Net change (difference)
-# Note: There was a 0.85% net change of OtherVegetation from 2011 to 2014, +- 2.4%
-est.gainloss$diff.CI95left[row.names(est.gainloss) == estcat]
-est.gainloss$diff.est[row.names(est.gainloss) == estcat]
-est.gainloss$diff.CI95right[row.names(est.gainloss) == estcat]
+PBpoparea2 <- PBpoparea
+PBpoparea2$PBx <- merge(PBpoparea2$PBx, icecover_1, by="cover_1")
+PBpoparea2$PBx <- merge(PBpoparea2$PBx, icecover_2, by="cover_2")
+PBpoparea2$PBx$cover_12_nm <- paste(PBpoparea2$PBx$cover_1_nm, PBpoparea2$PBx$cover_2_nm, sep="-")
+head(PBpoparea2$PBx)
 
 
 ```
+
+
+Next, generate the estimates from the concatenated column (cover_12_nm) in PBpoparea2. 
+
+```{r}
+cover12nm <- modPB(PBpopdat = PBpoparea2,
+                   rowvar = "cover_12_nm", 
+                   nonsamp.pntfilter = "cover_1 != 999", 
+                   title_opts = list(title.rowvar="Land Cover (2011-2014)"),  
+		               returntitle = TRUE
+		               )
+
+```
+
+
+ow we can look at the estimates and compare to the method above. You can see that the estimates are the same, just presented in a different format.
+
+```{r}
+cover12nm$est
+cover12$est
+```
+
+
+We can also subset the output results by adding a pntfilter parameter. Let's look at the transition data again, except only look at what the vegetation land (cover_1 < 200) at Time 1 transitioned to in Time 2. Remember, this does not affect your population so we can use the same population dataset. We will also add a pretty name to add to the title for the filter (title.filter).
+
+```{r}
+cover12.lt200 <- modPB(PBpopdat = PBpoparea,
+                       rowvar = "cover_1", 
+                       colvar = "cover_2", 
+                       nonsamp.pntfilter = "cover_1 != 999", 
+                       pntfilter = "cover_1 < 200",
+                       table_opts = list(rowlut=icecover_1, collut=icecover_2), 
+                    	 title_opts = list(title.rowvar="Land Cover (2011)", 
+                    	                   title.colvar="Land Cover (2014)",
+                    	                   title.filter = "Vegetated land"), 
+                    	 returntitle = TRUE
+                       )
+
+```
+
+Look at the resulting estimates. You can see that 69.9 percent of the land was vegetated at Time 1 as shown by the overall Total of the table. 
+
+```{r}
+cover12.lt200$est
+```
+
+
+Now, look at the titles and see how adding the title.filter is displayed.
+```{r}
+cover12.lt200$titlelst
+
+```
+
+
+We can also look at the percent gains and losses from the transition data with associated percent sampling errors by just adding gainloss=TRUE.
+
+```{r}
+
+cover12b <- modPB(PBpopdat = PBpoparea, 
+                  rowvar = "cover_1", 
+                  colvar = "cover_2", 
+                  nonsamp.pntfilter="cover_1 != 999",
+                  table_opts = list(rowlut=icecover_1, collut=icecover_2), 
+              		title_opts = list(title.rowvar="Land Cover (2011)", 
+              		                  title.colvar="Land Cover (2014"), 
+    		          returntitle = TRUE,
+    		          gainloss = TRUE
+    		          )
+
+```
+
+
+Here, you can see a new data frame is added to the raw data (est.gainloss).
+```{r}
+str(cover12b$raw, max.level = 1)
+```
+
+Here we see estimates of gains and losses by category.
+```{r}
+cover12b$raw$est.gainloss
+```
+
+
+We can also use a bar plot to show the difference in percentage between Time 1 and Time 2 by using the FIESTA function, datPBplotchg. Here, we can easily see the percent gains and percent loss by each category, with confidence intervals.
+
+```{r}
+datPBplotchg(cover12b$raw$est.gainloss)
+
+```
+
+
+Let's look more closely at gain and loss of the OtherVegetation category. 
+```{r}
+
+## We will first subset the raw data frame and set to an object
+estcat <- "OtherVegetation"
+othveg.gainloss <- cover12b$raw$est.gainloss[row.names(cover12b$raw$est.gainloss) == estcat,]
+
+```
+
+Let's now look at gains. Here we see we are 95% confident that the gain of Other Vegetation from 2011 to 2014 was 2.6% +/- 2.0%.
+
+```{r}
+othveg.gainloss[, c("gain.CI95left", "gain.est", "gain.CI95right")]
+
+```
+
+
+Then the losses. Here we see we are 95% confident that the loss of Other Vegetation from 2011 to 2014 was 1.8% +/- 1.3%.
+
+```{r}
+othveg.gainloss[, c("loss.CI95left", "loss.est", "loss.CI95right")]
+
+```
+
+
+...and now the net change. Here we see we are 95% confident that the loss of Other Vegetation from 2011 to 2014 was 0.9% +/- 2.4%.
+
+```{r}
+othveg.gainloss[, c("diff.CI95left", "diff.est", "diff.CI95right")]
+
+```
+
+
+</details>
+
+#### Example 6: Ratio to means Estimates
+
+<details>
+  <summary>View Example</summary>
+
+In this example, we look at within category estimates, as the estimate proportion of one category within the estimated proportion of another category. Let's first look at the proportion of land cover at Time 1 (2011) within land that changed in Davis and Salt Lake Counties, Utah.
+
 
 <a name="pntrat"></a>
 
-#### Ratio Estimates
-
-```
-## Percent ##
-# Percent land cover at Time 1 (2011) within land that changed in Davis and Salt Lake Counties, UT 
-# Create lookup table with code names
+First, we create a lookup table for the points defining changed land
+```{r}
 changelut <- data.frame(change_1_2=c(0,1,2), 
                         change_1_2nm=c("No Change", "Change", "Expected Change"))
 changelut
 
-chgcover1 <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		ratio=TRUE, rowvar="change_1_2", rowlut=changelut, colvar="cover_1", 
-		collut=icecover_1, nonsamp.pntfilter="cover_1 != 999", rawdata=TRUE, 
-		title.rowvar="Change")
-chgcover1$est
-chgcover1$pse
-
-# Check sum of row estimates. Should sum to 100%.
-sum(chgcover1$est[1,-1])
-sum(chgcover1$est[2,-1])
+```
 
 
-## Percent ##
-# Percent land cover at Time 1 (2011) within land that changed in Davis and Salt Lake Counties, UT 
-# Create lookup table with collapsed code names
-# Merge lookup table to icepnt table
-changelut <- data.frame(change_1_2=c(0,1,2), change_1_2cd=c(0,1,1), 
-                change_1_2nm=c("No change", "Change", "Change"))
-icepntdat <- datLUTnm(icepnt, xvar="change_1_2", LUT=changelut)
-names(icepntdat)
-icepnt2 <- icepntdat$xLUT
-head(icepnt2)
 
-chgcover1.grp <- modPB(pntdat=icepnt2, puniqueid="plot_id", pntid="dot_cnt",
-		ratio=TRUE, rowvar="change_1_2nm", row.orderby="change_1_2cd", colvar="cover_1", 
-		collut=icecover_1, nonsamp.pntfilter="cover_1 != 999", rawdata=TRUE, 
-		title.rowvar="Change", title.colvar="Land cover (2011)", returntitle=TRUE)
-names(chgcover1.grp)
-chgcover1.grp$est
-chgcover1.grp$pse
-chgcover1.grp$titlelst
-
-# Check sum of row estimates. Should sum to 100%.
-sum(chgcover1.grp$est[1,-1])
-sum(chgcover1.grp$est[2,-1])
-
-# Compare estimates
-chgcover1$est
-chgcover1.grp$est
-
-
-## Percent ##
-# Percent land cover at Time 1 (2011) within agent of change in Davis and Salt Lake Counties, UT 
-chg_ag_cover1.rat <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		ratio=TRUE, rowvar="chg_ag_2", rowlut=icechg_ag, colvar="cover_1", collut=icecover_1, 
-		rawdata=TRUE, nonsamp.pntfilter="cover_1 != 999", title.rowvar="Change agent", 
-		title.colvar="Land cover (2011)", returntitle=TRUE)
-chg_ag_cover1.rat$est
-chg_ag_cover1.rat$pse
-chg_ag_cover1.rat$titlelst
-
-
-# Compare estimates
-chg_ag_cover1$est
-chg_ag_cover1.rat$est
-
-# Add Total column
-chg_ag_cover1.rat$est$Total <- rowSums(chg_ag_cover1.rat$est[,-1], na.rm=TRUE)
-chg_ag_cover1.rat$est
-
-
-## Area ##
-# Acres of land cover at Time 1 (2011) within agent of change in Davis and Salt Lake Counties, UT 
-chg_ag_cover1.rat.acres <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		ratio=TRUE, rowvar="chg_ag_2", rowlut=icechg_ag, colvar="cover_1", collut=icecover_1, 
-		rawdata=TRUE, nonsamp.pntfilter="cover_1 != 999", title.rowvar="Change agent", 
-		title.colvar="Land cover (2011)", returntitle=TRUE, tabtype="AREA",
-		unitarea=sum(unitarea$ACRES))
-chg_ag_cover1.rat.acres$est
-chg_ag_cover1.rat.acres$pse
-chg_ag_cover1.rat.acres$titlelst
-
-chg_ag_cover1.rat.acres$est$Total <- rowSums(chg_ag_cover1.rat.acres$est[,-1], na.rm=TRUE)
-chg_ag_cover1.rat.acres$est
-
-
-## Percent ##
-# Percent land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
-cover1_2.rat <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		ratio=TRUE, rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, nonsamp.pntfilter="cover_1 != 999", title.rowvar="Land cover (2011)", 
-		title.colvar="Land cover (2014)", returntitle=TRUE)
-cover1_2.rat$est
-cover1_2.rat$pse
-cover1_2.rat$titlelst
-
-
-## Area ##
-# Acres of land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
-cover1_2.acres.rat <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		ratio=TRUE, rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, nonsamp.pntfilter="cover_1 != 999", title.rowvar="Land cover (2011)", 
-		title.colvar="Land cover (2014)", returntitle=TRUE, tabtype="AREA",
-		unitarea=sum(unitarea$ACRES))
-cover1_2.acres.rat$est
-cover1_2.acres.rat$pse
-cover1_2.acres.rat$titlelst
-
+Now, using the PBpoparea population for both counties, let's get our ratio estimate. 
+```{r}
+chgcover1 <- modPB(PBpopdat = PBpoparea, 
+                   ratio = TRUE, 
+                   rowvar = "change_1_2", 
+                   colvar = "cover_1",
+                   nonsamp.pntfilter = "cover_1 != 999",
+                   table_opts = list(rowlut=changelut, collut=icecover_1),  
+                   title_opts = list(title.rowvar="Change")
+                   )
 
 ```
+
+Look at estimates
+```{r}
+chgcover1$est
+```
+
+And percent sampling error
+```{r}
+chgcover1$pse
+```
+
+
+Now we can check sum of row estimates. Should sum to 100%.
+```{r}
+
+sum(as.numeric(chgcover1$est[1,-1]))
+sum(as.numeric(chgcover1$est[2,-1]))
+```
+
+
+
+Next, let's generate estimates for percent land cover at Time 1 (2011) within agent of change in Davis and Salt Lake Counties, Utah.
+
+```{r}
+
+chg_ag_cover1.rat <- modPB(PBpopdat = PBpoparea, 
+                           ratio = TRUE, 
+                           rowvar = "chg_ag_2", 
+                           colvar = "cover_1", 
+                           nonsamp.pntfilter = "cover_1 != 999", 
+                           table_opts = list(rowlut=icechg_ag, collut=icecover_1), 
+                        	 title_opts = list(title.rowvar="Change agent", 
+		                                         title.colvar="Land cover (2011)"), 
+                           returntitle = TRUE
+                           )
+
+```
+
+Look at estimates
+```{r}
+chg_ag_cover1.rat$est
+```
+
+And percent sampling error
+```{r}
+chg_ag_cover1.rat$pse
+```
+
+Add Total column to ratio estimates. Note: all rows should equal 100%
+```{r}
+chg_ag_cover1.rat$est$Total <- rowSums(apply(chg_ag_cover1.rat$est[,-1], 2, as.numeric), na.rm=TRUE)
+chg_ag_cover1.rat$est
+```
+
+Now compare nonraio and ratio to means estimates
+```{r}
+
+# Nonratio estimates
+chg_ag_cover1$est
+
+# Ratio to means estimates
+chg_ag_cover1.rat$est
+```
+
+
+
+Let's look at the percent of land cover at Time 2 within the percent of land cover at Time 1 in Davis and Salt Lake Counties, to look more closely at percent transition changes within categories.
+```{r}
+cover1_2.rat <- modPB(PBpopdat = PBpoparea,
+		                  ratio = TRUE, 
+		                  rowvar = "cover_1", 
+		                  colvar = "cover_2", 
+		                  nonsamp.pntfilter="cover_1 != 999",
+		                  table_opts = list(rowlut=icecover_1, collut=icecover_2), 
+                    	title_opts = list(title.rowvar="Land cover (2011)", 
+		                                    title.colvar="Land cover (2014)"), 
+		                  returntitle=TRUE
+		                  )
+
+```
+
+Look at estimates.
+```{r}
+cover1_2.rat$est
+```
+
+We can also display the estimates in a stacked bar plot. We will use the unit_grpest table from the raw data.
+```{r}
+datBarStacked(x = cover1_2.rat$raw$unit_grpest, 
+              main.attribute = "Land cover (2011)", 
+              sub.attribute = "Land cover (2014)",
+              response = "est", 
+              xlabel = "Land Cover (2011)", 
+              legend.title = "Land Cover (2014)"
+              )
+
+```
+
+## Now, let's only look at change by subsetting the columns of unit_grpest to table cells that indicate change. In this example, change is where Land cover (2011) != Land cover (2014).
+```{r}
+x <- cover1_2.rat$raw$unit_grpest
+x <- x[x$'Land cover (2011)' != x$'Land cover (2014)',]
+
+datBarStacked(x=x, 
+              main.attribute = "Land cover (2011)", 
+              sub.attribute = "Land cover (2014)",
+              response = "est", 
+              xlabel = "Land Cover (2011)", 
+              legend.title = "Land Cover (2014)",
+              main.order = rev(c("Tree", "Shrub", "OtherVegetation", "Impervious", "Barren", "Water"))
+              )
+    
+```
+    
+
+</details>
+
+#### Example 6: Plot-level Data, with percent by domain as separate columns
+
+<details>
+  <summary>View Example</summary>
+
+This example demonstrates generating estimates from data that are already compiled from point data to percentages by plot.
+
 
 <a name="pltpct"></a>
 
-#### Plot-level Data, with percent by domain as separate columns
+
+Let's first take a look at the first six rows of the example dataset, including 133 plot records.
+```{r}
+head(icepctcover)
+dim(icepctcover)
 
 ```
-# Example dataset
-head(icepctcover)
 
-# Column names for Time 1 cover (names11) and Time 2 cover (names14)
+
+Then, rename columns for Time 1 cover (names11) and Time 2 cover (names14)
+```{r}
 names11 <- names(icepctcover)[endsWith(names(icepctcover), "11")]
 names14 <- names(icepctcover)[endsWith(names(icepctcover), "14")]
 names11
 names14
 
-
-## Percent ##
-# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-pltpct1 <- modPB(pltpct=icepctcover, pltpctvars=names11)
-names(pltpct1)
-pltpct1$est
+```
 
 
-## Percent ##
-# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-# Return raw data and titles
-pltpct1 <- modPB(pltpct=icepctcover, pltpctvars=names11, rawdata=TRUE, returntitle=TRUE,
-    title.rowvar="Land cover (2011)")
-names(pltpct1)
-pltpct1$est
-pltpct1$titlelst
-pltpct1.raw <- pltpct1$raw
-names(pltpct1.raw)
-
-pltpct1.raw$unit.rowest
-head(pltpct1.raw$pltdom.row)
-
-
-
-## Percent ##
-# Percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-# Return raw data and titles
-pltpct2 <- modPB(pltpct=icepctcover, pltpctvars=names11, rawdata=TRUE, returntitle=TRUE,
-    title.rowvar="Land cover (2014)")
-names(pltpct2)
-pltpct2$est
-pltpct2$titlelst
-
-
-## Area ##
-# Acres of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-pltpct1.acres <- modPB(pltpct=icepctcover, pltpctvars=names11, rawdata=TRUE,
-    returntitle=TRUE, title.rowvar="Land cover (2011)", tabtype="AREA",
-    unitarea=sum(unitarea$ACRES))
-names(pltpct1.acres)
-pltpct1.acres$est
-pltpct1.acres$titlelst
-pltpct1.acres$raw$unit.rowest
-
-
-## Percent - Transition
-# Percent land cover change from vegetated to non-vegetated for all land in Davis and Salt Lake Counties, UT
-names.trans <- "Veg.NonVeg"
-pltpct1.trans <- modPB(pltpct=icepctcover, pltpctvars=names.trans, rawdata=TRUE,
-    returntitle=TRUE, title.rowvar="Veg to NonVeg transition")
-names(pltpct1.trans)
-pltpct1.trans$est
-pltpct1.trans$titlelst
-
+Now, we need to create a new set of population data define the names of the columns to estimate (i.e., names11). Remember to add unitarea if you want to generate estimates of area.
+```{r}
+PBpctpop11 <- modPBpop(pltpct = icepctcover, 
+                       pltpctvars = names11,
+                       unitarea = sum(unitarea$ACRES)
+                       )
 
 ```
+
+
+Let's look at the contents of the output list.
+
+```{r}
+str(PBpctpop11, max.level = 1)
+```
+
+
+Then we can get estimates of percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah 
+```{r}
+pltpct11 <- modPB(PBpopdat = PBpctpop11, 
+                  returntitle = TRUE)
+pltpct11$est
+
+```
+
+
+We can also create a barplot with estimates and error bar, using the Percent Sampling Error column.
+```{r}
+
+datBarplot(x = pltpct11$est, 
+           xvar = "Land cover (2011)",
+           yvar = "Estimate", 
+           errbars = TRUE, 
+           psevar = "Percent Sampling Error"
+           )
+
+```
+
+This time use data from the raw data with the standard error (est.se) column and add labels and a title.
+```{r}
+
+datBarplot(x = pltpct11$raw$unit_rowest, 
+           xvar = "Land cover (2011)", 
+           yvar = "est", 
+           errbars = TRUE, 
+           sevar = "est.se", 
+           ylim = c(0,30), 
+           ylabel = "Percent of land", 
+           main = "Percent cover at Time 1 (2011)"
+           )
+
+```
+
+Now, let's get area estimates of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah by adding tabtype="AREA".
+```{r}
+pltpct11.area <- modPB(PBpopdat = PBpctpop11, 
+                       tabtype = "AREA",
+                       returntitle = TRUE)
+pltpct11.area$est
+
+```
+
+
+For 2014, we need to create a new population data set with the names14 columns before calculating estimates.
+```{r}
+PBpctpop14 <- modPBpop(pltpct = icepctcover, 
+                       pltpctvars = names14,
+                       unitarea = sum(unitarea$ACRES)
+                       )
+
+```
+
+And estimates of percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah 
+```{r}
+pltpct14 <- modPB(PBpopdat = PBpctpop14, 
+                  returntitle = TRUE)
+pltpct14$est
+
+```
+
+Or estimates of area of land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah by adding tabtype="AREA".
+```{r}
+pltpct14.area <- modPB(PBpopdat = PBpctpop14, 
+                       tabtype = "AREA",
+                       returntitle = TRUE)
+pltpct14.area$est
+
+```
+
+
+Let's also look at transitions. In this example we will generate estimates of percent land cover change from vegetated to non-vegetated for all land in Davis and Salt Lake Counties, Utah. This transition was recorded in the initial dataset (i.e., Veg.NonVeg). Again, we need to create a new population dataset defining this column of interest.
+```{r}
+PBpctpop.veg <- modPBpop(pltpct = icepctcover, 
+                       pltpctvars = "Veg.NonVeg",
+                       unitarea = sum(unitarea$ACRES)
+                       )
+
+```
+
+Then, get estimates. We can add a title in the title_opts parameter to help describe the estimate.
+```{r}
+pltpct.veg <- modPB(PBpopdat = PBpctpop.veg, 
+                       title_opts = list(title.rowvar="Veg to NonVeg transition"),
+                       returntitle = TRUE)
+pltpct.veg$est
+
+```
+
+
+</details>
+
+#### Example 7: Post-stratification
+
+<details>
+  <summary>View Example</summary>
+
+This example shows how we can add post-stratification to reduce the variance (i.e, increase precision) in the estimates.
 
 <a name="pntps"></a>
 
 #### Point-level transition data (T1 Cover - T2 Cover) - Post-Stratification
 
+
+Let's add post-stratification to our transition estimates from Time 1 to Time 2. Again, we need to create a new population dataset with information for post-stratification, including strata pixel counts and plot-level strata assignments. This information is provided with FIESTA's external data.
+
+```{r}
+
+## Plot-level assignments
+head(iceplt)
+
+## Strata weights by estimation unit
+read.csv(strlutfn)
+
+
 ```
-## Percent
-# Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
 
 
-# With post-stratification
-cover12ps <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover", strvar="STRATUMCD", stratalut=strlutfn,
-		strata=TRUE)
-names(cover12ps)
+Here we use the strata_opts parameter to calculate the strata weights from the pixel count information in strlutfn
+```{r}
+PBpopareaPS <- modPBpop(pntdat = icepnt, 
+                        pltassgn = iceplt, 
+                        pltassgnid = "plot_id", 
+                        pntid = "dot_cnt", 
+                        strata = TRUE,
+                        stratalut = strlutfn,
+                        strvar = "STRATUMCD",
+                        strata_opts = list(getwt=TRUE, 
+                                           getwtvar="P1POINTCNT"),
+                        unitarea = sum(unitarea$ACRES)
+                        )
 
-cover12ps$est
-cover12ps$pse
-raw12ps <- cover12ps$raw
-names(raw12ps)
-raw12ps$pntsampcnt
-raw12ps$pltdom.row
-raw12ps$unit.rowest
-raw12ps$unit.grpest
+```
+
+Let's look at the contents of the output list.
+
+```{r}
+str(PBpopareaPS, max.level = 1)
+```
+
+And look more closely at the resulting stratalut.
+
+```{r}
+PBpopareaPS$stratalut
+```
 
 
-## Compare estimates and percent standard errors without and with post-stratification
-#######################################################################################
+Now, the estimates.
+```{r}
+cover12ps <- modPB(PBpopdat = PBpopareaPS,
+		               rowvar = "cover_1", 
+		               colvar = "cover_2", 
+		               nonsamp.pntfilter = "cover_1 != 999",
+		               table_opts = list(rowlut=icecover_1, collut=icecover_2), 
+		               title_opts = list(title.rowvar="Land Cover")
+                   )
+
+```
+
+
+Let's again get estimates without strata. We first need to generate a new set of population data, as above.
+```{r}
+
+PBpoparea <- modPBpop(pntdat = icepnt, 
+                        pltassgn = iceplt, 
+                        pltassgnid = "plot_id", 
+                        pntid = "dot_cnt", 
+                        strata = FALSE,
+                        unitarea = sum(unitarea$ACRES)
+                        )
+
+cover12 <- modPB(PBpopdat = PBpoparea,
+		              rowvar = "cover_1", 
+		              colvar = "cover_2", 
+                  nonsamp.pntfilter = "cover_1 != 999",
+		              table_opts = list(rowlut=icecover_1, collut=icecover_2), 
+		              title_opts = list(title.rowvar="Land Cover")
+                  )
+
+```
+
+
+
+Let's compare estimates.
+```{r}
 cover12$est
 cover12ps$est
 
 cover12$pse
 cover12ps$pse
 
-
-## Percent
-# Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-# With post-stratification
-icepnt$cover_12 <- paste(icepnt$cover_1, icepnt$cover_2)
-cover12ps <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover", strvar="STRATUMCD", stratalut=strlutfn,
-		strata=TRUE)
-names(cover12ps)
-
-cover12ps$est
-cover12ps$pse
-
-
 ```
 
-<a name="barplt"></a>
-
-#### Simple Bar Plots
-
-```
-
-## Barplot of land cover, Time 1
-##############################################################################################
-# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-names11 <- names(icepctcover)[endsWith(names(icepctcover), "11")]
-pltpct1 <- modPB(pltpct=icepctcover, pltpctvars=names11, title.rowvar="Land cover (2011)",
-    rawdata=TRUE)
-x <- pltpct1$est
-
-
-## Create barplot with estimates and error bars (use Percent Sampling Error column)
-datBarplot(x=x, xvar="Land cover (2011)", yvar="Estimate", errbars=TRUE, psevar="Percent Sampling Error")
-
-## You can use data from the raw tables as well
-x2 <- pltpct1$raw$unit.rowest
-
-## Create barplot with estimates and error bars (using se column) and add labels and titles
-datBarplot(x=x2, xvar="Land cover (2011)", yvar="est", errbars=TRUE, sevar="est.se",
-  ylim=c(0,30), ylabel="Percent of land", main="Percent cover at Time 1 (2011)")
-
-
-## Barplot of land cover, Time 1 and Time 2
-##############################################################################################
-## Let's look at estimates at Time 1 compared to estimates at Time 2
-# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-cover1 <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, title.rowvar="Land Cover (2011)")
-names(cover1)
-cover1 <- cover1$est
-
-# Percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-cover2 <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		rowvar="cover_2", rowlut=icecover_2, rawdata=TRUE, title.rowvar="Land Cover (2014)")
-names(cover2)
-cover2 <- cover2$est
-
-## First, let's change the column names and merge the tables to 1 table (removing Uninterpretable class)
-setnames(cover1, c("Land Cover", "est11", "pse11"))
-setnames(cover2, c("Land Cover", "est14", "pse14"))
-cover <- merge(cover1, cover2, by="Land Cover")
-
-## Next, we will remove the Total row and reorder
-cover <- cover[c(6,4,3,1,2,7),]
-
-## Create barplot with estimates and error bars (using pse columns)
-datBarplot(x=cover, xvar="Land Cover", yvar=c("est11", "est14"), errbars=TRUE, psevar=c("pse11", "pse14"),
-  ylim=c(0,30), ylabel="Percent of land", main="Percent cover at Time 1 (2011) and Time 2 (2014)")
-  
-
-## Let's add a legend to the bar plot, specifying the location, the text, and no surrounding box
-datBarplot(x=cover, xvar="Land Cover", yvar=c("est11", "est14"), errbars=TRUE, psevar=c("pse11", "pse14"),
-  ylim=c(0,30), ylabel="Percent of land", main="Percent cover at Time 1 (2011) and Time 2 (2014)", addlegend=TRUE,
-  args.legend=list(x="topleft", legend=c("2011", "2014"), bty="n"))
-  
-
-##################
-###################
-## Ratio ## - Transitional change within category
-# Percent land cover at Time 2 (2014) within land cover at Time 1 in Davis and Salt Lake Counties, UT 
-cover1_2.rat <- modPB(pntdat=icepnt, puniqueid="plot_id", pntid="dot_cnt",
-		ratio=TRUE, rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, nonsamp.pntfilter="cover_1 != 999", title.rowvar="Land cover (2011)", 
-		title.colvar="Land cover (2014)", returntitle=TRUE)
-cover1_2.rat$raw$unit.grpest
-cover1_2.rat$titlelst
-
-x <- cover1_2.rat$raw$unit.grpest
-
-datBarStacked(x=x, main.attribute="Land cover (2011)", sub.attribute="Land cover (2014)",
-      response="est", xlabel="Land Cover (2011)", legend.title="Land Cover (2014)")
-      
- 
-## Now, let's only look at change
-x2 <- x[x$'Land cover (2011)' != x$'Land cover (2014)',]
-datBarStacked(x=x2, main.attribute="Land cover (2011)", sub.attribute="Land cover (2014)",
-      response="est", xlabel="Land Cover (2011)", legend.title="Land Cover (2014)",
-      main.order=rev(c("Tree", "Shrub", "OtherVegetation", "Impervious", "Barren", "Water")))
-    
-      
-      
-      
-## Gain / Loss ## - The difference in proportion between Time 1 and Time 2
-# Percent land cover at Time 1 (2011) by land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, UT
-# Return gain/loss estimates for each category in rawdata tables
-cover12b <- modPB(pntdat=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt",
-		rowvar="cover_1", rowlut=icecover_1, colvar="cover_2", collut=icecover_2, 
-		rawdata=TRUE, title.rowvar="Land Cover (2011)", title.colvar="Land Cover (2014)", 
-		nonsamp.pntfilter="cover_1 != 999", gainloss=TRUE)
-names(cover12b)
-gainloss <- cover12b.raw$est.gainloss
-
-## Plot gain/loss
-datPBplotchg(gainloss)
-
-
-```
 
 
 ## References

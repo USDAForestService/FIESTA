@@ -75,6 +75,8 @@
 #' frame of total area by estimation unit, including unitvar and areavar.
 #' @param areavar String. Name of acre variable in unitarea. Default="ACRES".
 #' @param strata Logical. If TRUE, add data information for stratification.
+#' @param strtype String. If strata=TRUE, the type of strata ('POST', 'PRE').
+#' Note: the variance equations are slighlty different.
 #' @param stratalut DF/DT. If strata=TRUE, look-up table with strata
 #' proportions ('strwt') by strata (and estimation unit). To calculate 'strwt',
 #' set getwt=TRUE and getwtvar= name of variable with information to calculate
@@ -196,6 +198,7 @@ modPBpop <- function(pntdat = NULL,
                      unitarea = NULL, 
                      areavar = "ACRES",
                      strata = FALSE, 
+                     strtype = "POST",
                      stratalut = NULL, 
                      strvar = "STRATUMCD", 
                      pvars2keep = NULL, 
@@ -302,6 +305,7 @@ modPBpop <- function(pntdat = NULL,
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
  
+ 
   ## Check output
   ########################################################
   if (savedata || saveobj) {
@@ -336,7 +340,7 @@ modPBpop <- function(pntdat = NULL,
         unitvar2 <- PBstratdat$unitvar2
       } 
     }
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -374,7 +378,7 @@ modPBpop <- function(pntdat = NULL,
   if (!getprop) {
     rowvar <- popcheck$rowvar
   }
- 
+
   ###################################################################################
   ## CHECK STRATA
   ###################################################################################
@@ -401,10 +405,12 @@ modPBpop <- function(pntdat = NULL,
   strunitvars <- c(unitvar, strvar)
 
   returnlst <- list(PBx=PBx, pltassgnx=pltassgnx, plotid=plotid, pntid=pntid, 
-		pltassgnid=pltassgnid, sumunits=sumunits, strata=strata, strwtvar=strwtvar,
-		unitvar=unitvar, unitvars=unitvars, unitarea=unitarea, stratalut=stratalut,
- 		strvar=strvar, plotsampcnt=plotsampcnt, getprop=getprop)
-
+		pltassgnid=pltassgnid, sumunits=sumunits, 
+		unitvar=unitvar, unitvars=unitvars, 
+		strata=strata, strtype=strtype, stratalut=stratalut, 
+		strvar=strvar, strwtvar=strwtvar, 
+ 		plotsampcnt=plotsampcnt, getprop=getprop)
+  
   if (!is.null(unitarea)) {
     returnlst$unitarea <- stratcheck$unitarea
     returnlst$areavar <- areavar
@@ -448,7 +454,8 @@ modPBpop <- function(pntdat = NULL,
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer,
                               add_layer=TRUE))
-    datExportData(unitarea, 
+    if (!is.null(unitarea)) {
+      datExportData(unitarea, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
                               out_dsn=out_dsn, 
@@ -458,6 +465,7 @@ modPBpop <- function(pntdat = NULL,
                               overwrite_layer=overwrite_layer,
                               append_layer=append_layer,
                               add_layer=TRUE))
+    }
     datExportData(stratalut, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 

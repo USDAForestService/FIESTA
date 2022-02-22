@@ -207,13 +207,14 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
 
   ## Estimate table
   ################################
-  datx <- pcheck.table(x, caption="Estimate table?", returnDT = FALSE)
+  datx <- pcheck.table(x, caption="Estimate table?")
   if(is.null(datx) || nrow(datx) == 0){
     stop("check x")
   }
 
   ### GET main.attribute and sub.attribute
   varlst <- names(datx)
+
   main.attribute <- pcheck.varchar(var2check=main.attribute, varnm="main.attribute", 
 	checklst=varlst, caption="main attribute", warn="main.attribute not in data table") 
   if (!is.character(datx[[main.attribute]])) {
@@ -248,10 +249,9 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
     dlabel <- "(thousands)"
   }
 
-  p.sub <- data.frame(  main=datx[,main.attribute],
-          sub=datx[,sub.attribute],
-          response=datx[,response])
-
+  p.sub <- data.frame(  main=datx[[main.attribute]],
+          sub=datx[[sub.attribute]],
+          response=datx[[response]])
 
   ################## NEW CODE
   main.names <- unique(p.sub$main)

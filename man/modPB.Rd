@@ -8,8 +8,6 @@ modPB(
   PBpopdat = NULL,
   tabtype = "PCT",
   sumunits = FALSE,
-  strata = FALSE,
-  strtype = "POST",
   ratio = FALSE,
   landarea = "ALL",
   landarea.filter = NULL,
@@ -23,8 +21,8 @@ modPB(
   ratioden = "ROWVAR",
   gainloss = FALSE,
   gainloss.vals = NULL,
-  addtitle = addtitle,
-  returntitle = returntitle,
+  addtitle = FALSE,
+  returntitle = FALSE,
   savedata = FALSE,
   table_opts = NULL,
   title_opts = NULL,
@@ -40,11 +38,6 @@ modPB(
 
 \item{sumunits}{Logical. If TRUE, estimation units are combined to one table
 for output. Note: only available if tabtype="AREA". Acres}
-
-\item{strata}{Logical. If TRUE, add data information for stratification.}
-
-\item{strtype}{String. If strata=TRUE, the type of strata ('POST', 'PRE').
-Note: the variance equations are slighlty different.}
 
 \item{ratio}{Logical. If TRUE, ratio estimates are generated.}
 
