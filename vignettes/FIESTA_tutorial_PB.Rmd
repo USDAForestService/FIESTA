@@ -1439,6 +1439,7 @@ str(PBpctpop11, max.level = 1)
 Then we can get estimates of percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah 
 ```{r}
 pltpct11 <- modPB(PBpopdat = PBpctpop11, 
+                  title_opts = list(title.rowvar="Land cover (2011)"),
                   returntitle = TRUE)
 pltpct11$est
 
