@@ -246,10 +246,10 @@ kable(pltdom.lut,
 #### Processing data (If rawdata=TRUE)
  Separate data frames with calculated variables used in estimation process. The number of processing tables depends on the input parameters. The tables include:
 
-* **raw$unit.totest** - Total by estimation unit 
-* **raw$unit.rowest** - If rowvar != NULL, rowvar totals
-* **raw$unit.colvar** - If colvar != NULL, colvar totals
-* **raw$unit.grpvar** - If colvar != NULL, a combination of rowvar and colvar 
+* **raw$unit_totest** - Total by estimation unit 
+* **raw$unit_rowest** - If rowvar != NULL, rowvar totals
+* **raw$unit_colvar** - If colvar != NULL, colvar totals
+* **raw$unit_grpvar** - If colvar != NULL, a combination of rowvar and colvar 
 * If sumunits=TRUE, the raw data for the summed estimation units are also included: (totest, rowest, colest, grpest, respectively). These tables do not included estimate proportions (nhat and nhat.var). See below for variable descriptions.
 
 
@@ -453,7 +453,6 @@ strlut
 3. [Ratio estimates](#pntrat)
 4. [Plot-level Data, with percent by domain as separate columns](#pltpct)
 5. [Point-level transition data (T1 Cover - T2 Cover) - Post-Stratification](#pntps)
-5. [Simple bar plots](#barplt)
 
 
 <a name="modPBpop"></a>
@@ -496,13 +495,7 @@ Now that we've created our population dataset, we can move on to estimation.
 
 In this example, we look at estimating the percent land cover at Time 1 (2011) and land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah. We will then compare the net change from Time 1 and Time 2.
 
-
-#### modPB
-
 <a name="pnttot"></a>
-
-#### Point-level data - Totals
-
 
 We first estimate the percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah. We will add a lookup table for the rows to get row names. Adding row.add0=TRUE in table_opts list assures that all categories in rowlut are included in the result. We can also add a pretty name to the output names.
 
@@ -566,7 +559,7 @@ cover1$est
 ```
 </details>
 
-#### Example 1: Point-level data - Totals - Time 1
+#### Point-level data - Totals - Time 1
 
 <details>
   <summary>View Example</summary>
@@ -662,7 +655,7 @@ cover1.pct$titlelst
 
 </details>
 
-#### Example 2: Point-level data - Totals - Time 2
+#### Point-level data - Totals - Time 2
 
 <details>
   <summary>View Example</summary>
@@ -745,7 +738,7 @@ datBarplot(tabx,
 
 </details>
 
-#### Example 2: Point-level data - Totals - Agent of Change
+#### EPoint-level data - Totals - Agent of Change
 
 <details>
   <summary>View Example</summary>
@@ -811,7 +804,7 @@ chg_ag.area$raw$areaunits
 
 </details>
 
-#### Example 3: Point-level data - Totals - Agent of Change - Filters
+#### Point-level data - Totals - Agent of Change - Filters
 
 <details>
   <summary>View Example</summary>
