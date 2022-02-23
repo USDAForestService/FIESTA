@@ -69,7 +69,7 @@ The PB module was originally developed for the Nevada Photo-Based Inventory Pilo
 <details>
   <summary>Expand Section</summary>
   
-A data table of individual or aggregated point data is required input to the modPB function. Plot-level information, such as: state, county, or strata assignment, may be included in pltassgn, pnt, or pltpct tables. If in pnt or pltpct tables set pltassgn=NULL. The parameter input can be the name of a comma-delimited file (\*.csv) or an R data frame or data table object already loaded into R. The pltassgn table can also be a point shapefile (\*.shp) or an sf spatial object with one point per plot. The unique identifier for the plots must be provided in pltassgn and pnt and the unique identifier for the points must additionally be in pnt. See the required variables section for a list of variables necessary to include for estimation.
+A data table of individual or aggregated point data is required input to the `modPB()` function. Plot-level information, such as: state, county, or strata assignment, may be included in `pltassgn`, `pnt`, or `pltpct` tables. If in `pnt` or `pltpct` tables set `pltassgn = NULL`. The parameter input can be the name of a comma-delimited file (\*.csv) or an R data frame or data table object already loaded into R. The `pltassgn` table can also be a point shapefile (\*.shp) or an `sf` spatial object with one point per plot. The unique identifier for the plots must be provided in `pltassgn` and `pnt` and the unique identifier for the points must additionally be in `pnt`. See the required variables section for a list of variables necessary to include for estimation.
 
 * **pnt**       - Point-level data, with 1 record per point. If NULL, aggregated point counts must be in pntcnt.
 * **pltpct**    - Plot-domain-level data, with 1 record per domain per plot.
@@ -128,17 +128,17 @@ An estimation unit is a population, or area of interest, with known area and num
 <details>
   <summary>Expand Section</summary>
 
-Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.
+Stratification is used to reduce variance in population estimates by partitioning the population into homogeneous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proportion of pixels by strata. If stratification is desired (`strata = TRUE`), the required data include: stratum assignment for the center location of each plot, stored in either `pltassgn` or `cond`; and a look-up table with the area, pixel count, or proportion of the total area (`strwt`) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in `cond`, all conditions in a plot must have the same strata (and estimation unit) value.
 
-* **stratalut** - Look-up table with pixel counts, area, or proportions (strwt) by strata (and estimation unit).
-* **strvar**    - Name of strata variable in stratalut and pltassgn or cond table with strata assignment for each plot.
-* **getwt**     - If TRUE, calculates strata weights from getwtvar in stratalut.
-* **getwtvar**  - Name of variable in stratalut to calculate weights (e.g., pixels counts). Default="P1POINTCNT". 
+* **stratalut** - Look-up table with pixel counts, area, or proportions (`strwt`) by strata (and estimation unit).
+* **strvar**    - Name of strata variable in `stratalut` and `pltassgn` or `cond` table with strata assignment for each plot.
+* **getwt**     - If TRUE, calculates strata weights from `getwtvar` in `stratalut.`
+* **getwtvar**  - Name of variable in `stratalut` to calculate weights (e.g., pixels counts). Default="P1POINTCNT". 
 * **autocombine** - TRUE, an automated procedure occurs to combine strata and/or estimation units if less than 2 plots (See note below for more details).
 
 
 Note: 
-A minimum of 2 plots per strata is necessary for stratification. If there are less than 2 plots in any strata/estimation combination, an error occurs with a message to collapse classes. If autocombine=TRUE, an automated procedure occurs to collapse all strata/estimation unit combinations that have 10 or less plots (Paul ref). The procedure collapses classes based on the order of estimation units in stratalut. If an estimation unit has 10 or less plots, it is grouped with the estimation unit following in the table. If it is the last estimation unit in the table, it is grouped with the estimation unit prededing in the table.   
+A minimum of 2 plots per strata is necessary for stratification. If there are less than 2 plots in any strata/estimation combination, an error occurs with a message to collapse classes. If `autocombine = TRUE`, an automated procedure occurs to collapse all strata/estimation unit combinations that have 10 or less plots (Paul ref). The procedure collapses classes based on the order of estimation units in `stratalut`. If an estimation unit has 10 or less plots, it is grouped with the estimation unit following in the table. If it is the last estimation unit in the table, it is grouped with the estimation unit preceding in the table.   
 
 </details>
 
@@ -147,23 +147,23 @@ A minimum of 2 plots per strata is necessary for stratification. If there are le
 <details>
   <summary>Expand Section</summary>
 
-The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the rowvar must be populated, leaving the colvar=NULL. Row and columns may be filtered to display specific values (rowvar.filter/colvar.filter) and may be ordered in a particular way, defined by row.orderby and col.orderby variables. A default set of code names are stored internally (FIESTAutils::ref_codes).
+The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the `rowvar` must be populated, leaving the `colvar = NULL`. Row and columns may be filtered to display specific values (`rowvar.filter` and `colvar.filter`) and may be ordered in a particular way, defined by `row.orderby` and `col.orderby` variables. A default set of code names are stored internally (see `FIESTAutils::ref_codes`).
 
-* **rowvar**        - Name of row variable (domain). If area estimate, rowvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, rowvar can be from cond or tree (e.g., SPCD).
+* **rowvar**        - Name of row variable (domain). If area estimate, `rowvar` must be from `cond` (e.g., FORTYPCD). If tree or ratio estimate, `rowvar` can be from `cond` or `tree` (e.g., SPCD).
 * **rowvar.filter** - Row filter. Must be R syntax (e.g., FORTYPCD %in% 200:300).
-* **colvar**        - Name of column variable (domain). If area estimate, colvar must be from cond (e.g., FORTYPCD). If tree or ratio estimate, colvar can be from cond or tree (e.g, SPCD).
+* **colvar**        - Name of column variable (domain). If area estimate, `colvar` must be from `cond` (e.g., FORTYPCD). If tree or ratio estimate, `colvar` can be from `cond` or tree (e.g, SPCD).
 * **colvar.filter** - Column filter. Must be R syntax (e.g., STDSZCD == 3).
-* **row.orderby**   - Name of variable to order values of rowvar (if row.FIAname=FALSE).
-* **col.orderby**   - Name of variable to order values of colvar (if col.FIAname=FALSE).
-* **row.add0**      - TRUE, add 0 values in table for row values that occur in input dataset or in rowlut, but are not in final estimate.
-* **col.add0**      - TRUE, add 0 values in table for column values that occur in input dataset or in rowlut, but are not in final estimate.
+* **row.orderby**   - Name of variable to order values of `rowvar` (if `row.FIAname = FALSE`).
+* **col.orderby**   - Name of variable to order values of `colvar` (if `col.FIAname = FALSE`).
+* **row.add0**      - TRUE, add 0 values in table for row values that occur in input dataset or in `rowlut`, but are not in final estimate.
+* **col.add0**      - TRUE, add 0 values in table for column values that occur in input dataset or in `rowlut`, but are not in final estimate.
 * **rowlut**        - A lookup table with variable codes and descriptions to include in rows of output table (See note following for more details).
 * **collut**        - A lookup table with variable codes and descriptions to include in columns of output table (See note following for more details).
 
 Note: 
-rowlut/collut - There are several objectives for including rowlut/collut look-up tables: 1) to include descriptive names that match row/column codes in the input table; 2) to use number codes that match row/column names in the input table for ordering rows; 3) to add rows and/or columns with 0 values for consistency. No duplicate names are allowed.
+`rowlut`/`collut` - There are several objectives for including `rowlut`/`collut` look-up tables: 1) to include descriptive names that match row/column codes in the input table; 2) to use number codes that match row/column names in the input table for ordering rows; 3) to add rows and/or columns with 0 values for consistency. No duplicate names are allowed.
 
-Include 2 columns in the table: 1-the merging variable with same name as the variable in the input merge table; 2-the ordering or descriptive variable. If the ordering variable is the rowvar/colvar in the input table and the descriptive variable is in rowlut/collut, set row.orderby/col.orderby equal to rowvar/colvar. If the descriptive variable is the rowvar/colvar in the input table, and the ordering code variable is in rowlut/collut, set row.orderby/col.orderby equal to the variable name of the code variable in rowlut/collut. 
+Include 2 columns in the table: 1-the merging variable with same name as the variable in the input merge table; 2-the ordering or descriptive variable. If the ordering variable is the `rowvar`/`colvar` in the input table and the descriptive variable is in `rowlut`/`collut`, set `row.orderby`/`col.orderby` equal to `rowvar`/`colvar.` If the descriptive variable is the `rowvar`/`colvar` in the input table, and the ordering code variable is in `rowlut`/`collut`, set `row.orderby`/`col.orderby` equal to the variable name of the code variable in `rowlut`/`collut`. 
 
 
 Variable names for photo point estimates. 
@@ -200,7 +200,7 @@ The final parameters dictate what the output will look like, such as: how to dis
 <details>
   <summary>Expand Section</summary>
 
-If saving to a folder, and a title is desired, there are parameters for including a specific title or for generating a title based on pieces of information. 
+If saving to a folder, and a title is desired, there are parameters for including a specific title or for generating a title based on pieces of information. These options can be changed via the `title_opts` parameter by using the `title_options()` function to provide a list of parameter options. 
 
 * **title.main** - Full title for table.
 * **title.ref**  - The ending text for table title. If not NULL, included with title.main.
