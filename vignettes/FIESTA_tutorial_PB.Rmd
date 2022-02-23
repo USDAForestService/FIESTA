@@ -7,36 +7,42 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+```{r setup, include = F}
+library(knitr)
+knitr::opts_chunk$set(message = F, warning = F)
+```
 
-## FIESTA Overview
-The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. The objectives are to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other model and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
+```{r, include=FALSE}
+# Sets up output folding
+hooks = knitr::knit_hooks$get()
+hook_foldable = function(type) {
+  force(type)
+  function(x, options) {
+    res = hooks[[type]](x, options)
+    
+    if (isFALSE(options[[paste0("fold.", type)]])) return(res)
+    
+    paste0(
+      "<details><summary>", type, "</summary>\n\n",
+      res,
+      "\n\n</details>"
+    )
+  }
+}
+knitr::knit_hooks$set(
+  output = hook_foldable("output"),
+  plot = hook_foldable("plot")
+)
+```
 
 
-Functions are organized by type or objective and are named with a corresponding prefix: 
+## Photo-based (PB) module overview
 
-**Core Functions**
+`FIESTA`'s Photo-Based (PB) module calculates population estimates and associated sampling errors based on Patterson (2012). In contrast to FIA's traditional green-book estimators which were constructed based on the finite sampling paradigm using sample plots with distinct area, the photo-based estimators were constructed based on the context of the infinite sampling paradigm, along with the concept of a support region. The sample is the set of plot centers and the information from the support region (the photo plot) are assigned to the plot centers. The photo interpreted points are used as a sample of the support region and the observations are used to estimate the information from the support region. `FIESTA` includes non-ratio estimators for area and percent cover estimates by domain, and ratio-of-means estimators for area and percent cover estimates within domain, and supports post-stratification for reducing variance.
 
-* Database tools (DB) - functions for querying and extracting data from FIA's national database.
-* Data tools (dat) - functions for summarizing and exploring FIA data.
-* Spatial tools (sp) - functions for manipulating and summarizing spatial data.
+## Objective of tutorial
 
-**Estimation Modules (mod)**
-
-* Green-Book (modGB) - functions for FIA's standard Green-Book estimators.
-* Photo-Based (modPB) - functions for supplementary photo-based estimators.
-* Small Area (modSA) - functions for integration with available small area estimators (SAE).
-* Model-Assisted (modMA) - functions for integration with available Model-Assisted estimators.
-
-**Analysis Tools**
-
-* Analysis tools (an) - wrapper functions for steam-lining estimation processes.
-
-
-### Photo-based (PB) module overview
-FIESTA's Photo-Based (PB) module calculates population estimates and associated sampling errors based on Patterson (2012). In contrast to FIA's traditional green-book estimators which were constructed based on the finite sampling paradigm using sample plots with distinct area, the photo-based estimators were constructed based on the context of the infinite sampling paradigm, along with the concept of a support region. The sample is the set of plot centers and the information from the support region (the photo plot) are assigned to the plot centers. The photo interpreted points are used as a sample of the support region and the observations are used to estimate the information from the support region. FIESTA includes non-ratio estimators for area and percent cover estimates by domain, and ratio-of-means estimators for area and percent cover estimates within domain, and supports post-stratification for reducing variance.
-
-### Objective of tutorial
-The main objective of this tutorial is to demonstrate how to use FIESTA for generating photo-based estimates, supplementary to FIA's traditional estimates, using estimators from Patterson (2012). 
+The main objective of this tutorial is to demonstrate how to use `FIESTA` for generating photo-based estimates, supplementary to FIA's traditional estimates, using estimators from Patterson (2012). 
 
 
 * [FIESTA parameters](#input)
@@ -45,9 +51,8 @@ The main objective of this tutorial is to demonstrate how to use FIESTA for gene
  
 
 
-<a name="input"></a>
 
-### FIESTA PB module parameters - modPB()
+## FIESTA PB module parameters - modPB() {#input}
 The PB module was originally developed for the Nevada Photo-Based Inventory Pilot (NPIP; Frescino et al. 2009), based on the infinite sampling paradigm. The module was since updated for use with other photo-based data that are consistent with the infinite sampling paradigm and an equal probability sample design. The PB module consists of one function that generates: 1) estimates of area or cover by domain (nonratio); or 2) estimates of area or cover within domain (ratio). The parameters for PB functions can be organized into categories defined by specific requirements or customizations: 
 
 
@@ -61,9 +66,7 @@ The PB module was originally developed for the Nevada Photo-Based Inventory Pilo
 8. [Output table title(s)](#title)
 
 
-
-<a name="dtab"></a>
-**Data tables, unique identifiers, number of points**
+#### Data tables, unique identifiers, number of points {#dtab}
 
 A data table of individual or aggregated point data is required input to the modPB function. Plot-level information, such as: state, county, or strata assignment, may be included in pltassgn, pnt, or pltpct tables. If in pnt or pltpct tables set pltassgn=NULL. The parameter input can be the name of a comma-delimited file (\*.csv) or an R data frame or data table object already loaded into R. The pltassgn table can also be a point shapefile (\*.shp) or an sf spatial object with one point per plot. The unique identifier for the plots must be provided in pltassgn and pnt and the unique identifier for the points must additionally be in pnt. See the required variables section for a list of variables necessary to include for estimation.
 
@@ -76,8 +79,7 @@ A data table of individual or aggregated point data is required input to the mod
 * **puniqueid** - Unique identifier for a plot in pltassgn, if pltassgn is not NULL. 
 
 
-<a name="etyp"></a>
-**Estimation type**
+#### Estimation type {#etyp}
 
 Define the type of estimation: output units (PCT, AREA); summed estimation units; post-stratify; if ratio estimate, what type of ratio.
 
@@ -87,8 +89,7 @@ Define the type of estimation: output units (PCT, AREA); summed estimation units
 * **strata**    - TRUE, use stratification for variance reduction.
 
 
-<a name="filt"></a>
-**Filters**
+#### Filters {#filt}
 
 Filters subset the area of the sample population. *All filter expressions must be in R syntax*.
 
@@ -99,8 +100,7 @@ Filters subset the area of the sample population. *All filter expressions must b
 * **plt.filter**      - Plot-level filter(s)
 
 
-<a name="estunit"></a>
-**Estimation unit information**
+#### Estimation unit information {#estunit}
 
 An estimation unit is a population, or area of interest, with known area and number of plots. As an example, in Interior-West FIA, an estimation unit is generally an individual county. An estimation unit may be a subpopulation of a larger population (e.g., Counties within a State). Subpopulations are mutually exclusive and independent within a population, therefore estimated totals and variances are additive. Each plot is assigned to only one estimation unit based on plot center and can be stored in either pltassgn or cond. 
 
@@ -109,8 +109,7 @@ An estimation unit is a population, or area of interest, with known area and num
 * **areavar**   - Name of acre variable in unitarea (Default = "ACRES").
 
 
-<a name="strat"></a>
-**Strata information**
+#### Strata information {#strat}
 
 Stratification is used to reduce variance in population estimates by partitioning the population into homogenous classes (strata), such as forest and nonforest. For stratified sampling methods, the strata sizes (weights) must be either known or estimated. Remotely-sensed data is often used to generate strata weights with proporation of pixels by strata. If stratification is desired (strata=TRUE), the required data include: stratum assignment for the center location of each plot, stored in either pltassgn or cond; and a look-up table with the area, pixel count, or proportion of the total area (strwt) of each strata value by estimation unit, making sure the name of the strata (and estimation unit) variable and values match the plot assignment name(s) and value(s). If strata (and estimation unit) variables are included in cond, all conditions in a plot must have the same strata (and estimation unit) value.
 
@@ -125,8 +124,7 @@ Note:
 A minimum of 2 plots per strata is necessary for stratification. If there are less than 2 plots in any strata/estimation combination, an error occurs with a message to collapse classes. If autocombine=TRUE, an automated procedure occurs to collapse all strata/estimation unit combinations that have 10 or less plots (Paul ref). The procedure collapses classes based on the order of estimation units in stratalut. If an estimation unit has 10 or less plots, it is grouped with the estimation unit following in the table. If it is the last estimation unit in the table, it is grouped with the estimation unit prededing in the table.   
 
 
-<a name="out1"></a>
-**Output table information**
+#### Output table information {#out1}
 
 The following parameters define how estimates will be generated (i.e., by domain) and how the output table will be set up (i.e., by row/column). Output tables may be: by row domain; by row domain and column domain; or for total estimates, where row and column domains are NULL. If only one domain is desired, the rowvar must be populated, leaving the colvar=NULL. Row and columns may be filtered to display specific values (rowvar.filter/colvar.filter) and may be ordered in a particular way, defined by row.orderby and col.orderby variables. A default set of code names are stored internally (FIESTAutils::ref_codes).
 
@@ -153,8 +151,8 @@ Variable names for photo point estimates.
 * **domvarlst**   - A vector of variable names that can be row or column domains.
 
 
-<a name="out2"></a>
-**Output table specifications**
+
+#### Output table specifications {#out2}
 
 The final parameters dictate what the output will look like, such as: how to display the sample error; how many digits to round values to; whether to include a title; and whether to write the output to a folder or only return as R objects.  
 
@@ -172,8 +170,7 @@ The final parameters dictate what the output will look like, such as: how to dis
 * **savetitle**  - TRUE, return full table title (Default = FALSE).
 
 
-<a name="title"></a>
-**Title parameters**
+#### Title parameters {#title}
 
 If saving to a folder, and a title is desired, there are parameters for including a specific title or for generating a title based on pieces of information. 
 
@@ -188,9 +185,7 @@ If saving to a folder, and a title is desired, there are parameters for includin
 
 
 
-<a name="output"></a>
-
-## Output values from FIESTA Photo-Based module
+## Output values from FIESTA Photo-Based module {#output}
 
 Estimates with percent sampling error for the row domain (and column domain) specified by the input parameters. This can be in the form of one table or two separate tables, depending on the number of domains and on allin1 parameter. 
 
@@ -310,9 +305,7 @@ kable(all,
 
 ```
 
-<a name="PBfun"></a>
-
-## PB Functions and Examples
+## PB Functions and Examples {#PBfun}
 
 The examples following use data from the Image-Based Change Estimation (ICE) project, from two counties, or Estimation Units (ESTN_UNIT) in the state of Utah: Davis (11); Salt Lake (35). 
 
@@ -331,8 +324,6 @@ chg_ag_LUT.csv           | ICE look-up table for change agent classes
 unitarea_utco1135.csv    | Area, in acres, by county estimation unit (ESTN_UNIT)  
 strlut_utco1135.csv      | Pixel counts by strata (STRATUMCD) and estimation unit (ESTN_UNIT) 
 
-
-</details>
 
 ### Set up 
 
@@ -455,9 +446,7 @@ strlut
 5. [Point-level transition data (T1 Cover - T2 Cover) - Post-Stratification](#pntps)
 
 
-<a name="modPBpop"></a>
-
-### modPBpop()
+### modPBpop() {#modPBpop}
 
 `FIESTA`'s population functions (`mod*pop`) check input data and perform population-level calculations, such as: summing number of sampled plots and standardizing auxiliary data. These functions are specific to each `FIESTA` module and are run prior to or within a module for any population of interest. 
 
