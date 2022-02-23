@@ -43,6 +43,10 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     maxbndx_intersect <- maxbndx_intersect[!is.na(maxbndx_intersect$int.pct),
             c(maxbnd.unique, "DISSOLVE", "int.pct")]
     maxbndxlst <- unique(maxbndx_intersect[[maxbnd.unique]])
+    if (any(maxbndxlst == "Water")) {
+      maxbndxlst <- maxbndxlst[maxbndxlst != "Water"]
+      maxbndx_intersect <- maxbndx_intersect[maxbndx_intersect[[maxbnd.unique]] != "Water",]
+    }
 
     ## Get the maximum overlap by province for smallbndx (dissolved as 1 polygon)
     maxbndx_max <- aggregate(maxbndx_intersect$int.pct,
@@ -175,8 +179,13 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       if (nrow(smallbndx) < 1000) {
         plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
       }
-      plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbnd.gtthres,]),
+      if (multiSAdoms) {
+        plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbndxlst,]),
 		add=TRUE, border="cyan2", lwd=2)
+      } else {
+        plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbnd.gtthres,]),
+		add=TRUE, border="cyan2", lwd=2)
+      }
       coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
       if (maxbnd.addtext) {
         text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
@@ -195,12 +204,20 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       jpeg(jpgfn, res=300, units="in", width=8, height=10)
         plot(sf::st_geometry(maxbndx.intd[maxbnd.unique]), main=NULL, border="dark grey",
              col=sf.colors(nrow(maxbndx.intd), categorical=TRUE, alpha=.2))
-        plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
-        plot(sf::st_geometry(maxbndx.selectd), add=TRUE, border="cyan2", lwd=2)
 
+        if (nrow(smallbndx) < 1000) {
+          plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
+        }
+        if (multiSAdoms) {
+          plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbndxlst,]),
+		add=TRUE, border="cyan2", lwd=2)
+        } else {
+          plot(sf::st_geometry(maxbndx.intd[maxbndx.intd[[maxbnd.unique]] %in% maxbnd.gtthres,]),
+		add=TRUE, border="cyan2", lwd=2)
+        }
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
         if (maxbnd.addtext) {
-          text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]])
+          text(coords[,"X"], coords[,"Y"], maxbndx.intd[[maxbnd.unique]], cex=step.cex)
         }
       dev.off()
       message("Writing jpg to ", jpgfn, "\n")

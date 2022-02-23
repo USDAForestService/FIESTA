@@ -262,9 +262,10 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       unitarea[[unitvar12]] <- paste(unitarea[[unitvar2]], unitarea[[unitvar]], sep="-")
       unitarea[, c(unitvar, unitvar2) := NULL]
     }
+    strunitvars <- unique(replace(strunitvars, which(strunitvars %in% c(unitvar, unitvar2)), unitvar12))
     unitvar <- unitvar12
   }
-
+ 
   ###################################################################################
   ## Check number of plots by unitvar
   ##	 (including partially sampled plots - COND_STATUS_CD=5)
@@ -291,7 +292,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   auxlut <- pltcnts$unitlut
   errtab <- pltcnts$errtab
   nostrat <- pltcnts$nostrat
-
+ 
   ## If unit.action="remove", remove estimation with less than minplotnum.unit plots
   if (any(auxlut$n.total < minplotnum.unit)) {
     unitlessthan <- auxlut[auxlut$n.total < minplotnum.unit][[unitvar]]
@@ -326,20 +327,25 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     }
     unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
 
-    collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, pltstratx=pltx,
-		minplotnum.unit=minplotnum.unit, minplotnum.strat=minplotnum.strat,
-		unitarea=unitarea, areavar=areavar, unitvar=unitvar,
-		strvar=strvar, stratcombine=stratcombine, unitcombine=unitcombine,
- 		vars2combine=vars2combine)
+    collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, 
+                               pltstratx=pltx, 
+                               minplotnum.unit=minplotnum.unit, 
+                               minplotnum.strat=minplotnum.strat, 
+                               unitarea=unitarea, areavar=areavar, 
+                               unitvar=unitvar, strvar=strvar, 
+                               stratcombine=stratcombine, 
+                               unitcombine=unitcombine, 
+                               vars2combine=vars2combine)
     auxlut <- collapse$strlut
     unitvar <- collapse$unitvar
     strvar <- collapse$strvar
     pltx <- collapse$pltstratx
     unitarea <- collapse$unitarea
+ 
     if (unitvar == "unitnew") {
       unitvars <- unitvar
     }
-    strunitvars <- c(unitvars, strvar)
+    strunitvars <- c(unitvar, strvar)
 
     if (stratcombine || unitcombine) {
       unitstrgrplut <- collapse$unitstrgrplut

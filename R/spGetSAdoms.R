@@ -710,7 +710,12 @@ spGetSAdoms <- function(smallbnd,
     }
 
     if (savesteps) {
-      jpgfn <- paste0(stepfolder, "/SAdoms.jpg")
+      SAdoms_layer <- "SAdoms"
+      if (length(SAdomslst) > 1) {
+        SAdoms_layer <- paste0(SAdoms_layer, i)
+      }
+
+      jpgfn <- paste0(stepfolder, "/", SAdoms_layer, ".jpg")
       jpeg(jpgfn, res=400, units="in", width=8, height=10)
           plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
           plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1)
