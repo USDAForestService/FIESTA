@@ -1448,7 +1448,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     }
     if (!is.null(vcondstrf)) {
       returnlst$vcondstrf <- vcondstrf
-      returnlst$vcondstrid <- vcondstrid
+      returnlst$vcondstrid <- vsubpstrid
     }
   }
   if (module %in% c("MA", "SA")) {

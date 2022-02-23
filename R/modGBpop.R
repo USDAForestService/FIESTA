@@ -73,6 +73,7 @@
 #' assignments, use identifier for plot (e.g., PLOT_ID).
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
+#' @param nonsamp.vfilter.fixed Logical. Temporary parameter for vegetation data fix. 
 #' @param adj String. How to calculate adjustment factors for nonsampled
 #' (nonresponse) conditions based on summed proportions for by plot ('samp',
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
@@ -210,6 +211,7 @@ modGBpop <- function(popType = "VOL",
                      dsn = NULL, 
                      pjoinid = "CN", 
                      areawt = "CONDPROP_UNADJ", 
+                     nonsamp.vfilter.fixed = TRUE,
                      adj = "samp", 
                      unitvar = NULL, 
                      unitarea = NULL, 
@@ -257,7 +259,7 @@ modGBpop <- function(popType = "VOL",
   adjtree <- FALSE
   nonresp=FALSE
   substrvar=nonsamp.pfilter=nonsamp.cfilter <- NULL
-  nonsamp.vfilter.fixed <- FALSE
+  #nonsamp.vfilter.fixed <- FALSE
   returnlst <- list()
   
   
@@ -638,7 +640,6 @@ modGBpop <- function(popType = "VOL",
   strwtvar <- auxdat$strwtvar
   stratcombinelut <- auxdat$stratcombinelut
   if (nonresp) nonsampplots <- auxdat$nonsampplots
-  strunitvars <- c(unitvar, strvar)
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
 
   ###################################################################################
@@ -655,7 +656,7 @@ modGBpop <- function(popType = "VOL",
   ###################################################################################
   ## Merge plot strata info to condx
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
-  condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
+  condx <- condx[pltassgnx[,c(pltassgnid, unitvar, strvar), with=FALSE]]
 
 
   ## If more than one unitvar, 
@@ -687,7 +688,7 @@ modGBpop <- function(popType = "VOL",
     expcondtab <- adjfacdata$expcondtab
     vcondsppf <- adjfacdata$vcondsppx
     vcondstrf <- adjfacdata$vcondstrx
-    setorderv(stratalut, c(unitvars, strvar))
+    setorderv(stratalut, c(unitvar, strvar))
 
   } else if (adj == "plot") {
     adjtree <- TRUE
