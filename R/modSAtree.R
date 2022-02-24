@@ -932,25 +932,28 @@ modSAtree <- function(SApopdatlst = NULL,
     }
   }
 
-
   ## Define nhat
   ##################################
   if (SAmethod == "unit") {
     if (SApackage == "hbsae") {
       nhat <- "hbsaeU"
+      nhat.se <- "hbsaeU.se"
     } else if (SApackage == "JoSAE") {
       nhat <- "JU.EBLUP"
+      nhat.se <- "JU.EBLUP.se.1"
     }
   } else if (SAmethod == "area") {
     if (SApackage == "JoSAE") {
       nhat <- "JFH"
+      nhat.se <- "JFH.se"
     } else if (SApackage == "sae") {
       nhat <- "saeA"
+      nhat.se <- "saeA.se"
     } else if (SApackage == "hbsae") {
       nhat <- "hbsaeA"
+      nhat.se <- "hbsaeA.se"
     }
   } 
-  nhat.se <- paste0(nhat, ".se")
   
   if (multest) {
     multestdf <- estdf
@@ -964,8 +967,8 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
   estdf[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+  estdf$estimator <- nhat
   if (na.fill != "NONE") {
-    estdf$estimator <- nhat
     estdf[is.na(estdf$est), "estimator"] <- na.fill
     na.fill.se <- paste0(na.fill, ".se")
     estdf[is.na(estdf$est), c("est", "est.se")] <- 
@@ -1001,8 +1004,8 @@ modSAtree <- function(SApopdatlst = NULL,
     ## Set up estimates. If estimate is NULL, use direct estimator
     estdf_row <- setDT(estdf_row)
     estdf_row[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+    estdf_row$estimator <- nhat
     if (na.fill != "NONE") {
-      estdf_row$estimator <- nhat
       estdf_row[is.na(estdf_row$est), "estimator"] <- na.fill
       na.fill.se <- paste0(na.fill, ".se")
       estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 

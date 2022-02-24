@@ -17,6 +17,7 @@ modSAarea(
   rowvar = NULL,
   modelselect = FALSE,
   prior = function(x) 1/(sqrt(x) * (1 + x)),
+  na.fill = "NONE",
   savedata = FALSE,
   savesteps = FALSE,
   multest = TRUE,
@@ -68,6 +69,11 @@ colvar. If no domain, rowvar = NULL.}
 mase:ElasticNet.}
 
 \item{prior}{Function. A prior function to use for hbsae models.}
+
+\item{na.fill}{String. An estimate to fill in for NA values (i.e., when 
+model is unstable or no predictors are selected). Choose from the following 
+list that does not include SApackage used ('NONE', 'DIR', 'JoSAE', 'sae', 
+'hbsae'). DIR is suggested value for no NA values.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 
