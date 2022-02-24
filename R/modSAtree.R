@@ -949,7 +949,7 @@ modSAtree <- function(SApopdatlst = NULL,
 
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
-  estdf[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+  estdf[, c("est", "est.se") := .SD, .SDcols=c("nhat", "nhat.se")]
   estdf$estimator <- nhat
   estdf[is.na(estdf$est), "estimator"] <- "DIR"
   estdf[is.na(estdf$est), c("est", "est.se")] <- estdf[is.na(estdf$est), c("DIR", "DIR.se")]
@@ -982,7 +982,7 @@ modSAtree <- function(SApopdatlst = NULL,
   if (rowcolinfo$rowvar != "TOTAL") {
     ## Set up estimates. If estimate is NULL, use direct estimator
     estdf_row <- setDT(estdf_row)
-    estdf_row[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+    estdf_row[, c("est", "est.se") := .SD, .SDcols=c("nhat", "nhat.se")]
     estdf_row$estimator <- nhat
     estdf_row[is.na(estdf_row$est), "estimator"] <- "DIR"
     estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 
