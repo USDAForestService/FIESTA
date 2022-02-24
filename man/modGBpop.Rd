@@ -14,6 +14,7 @@ modGBpop(
   dsn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
+  nonsamp.vfilter.fixed = TRUE,
   adj = "samp",
   unitvar = NULL,
   unitarea = NULL,
@@ -66,6 +67,8 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
+
+\item{nonsamp.vfilter.fixed}{Logical. Temporary parameter for vegetation data fix.}
 
 \item{adj}{String. How to calculate adjustment factors for nonsampled
 (nonresponse) conditions based on summed proportions for by plot ('samp',

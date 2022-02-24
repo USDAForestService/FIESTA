@@ -1444,7 +1444,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     returnlst$condx <- vcondx
     if (!is.null(vcondsppf)) {
       returnlst$vcondsppf <- vcondsppf
-      returnlst$vcondsppid <- vcondsppid
+      returnlst$vcondsppid <- vsubpstrid
     }
     if (!is.null(vcondstrf)) {
       returnlst$vcondstrf <- vcondstrf

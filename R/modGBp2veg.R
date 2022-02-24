@@ -47,13 +47,17 @@
 #' domain, rowvar = domain variable. If more than one domain, include colvar.
 #' If no domain, rowvar = NULL.
 #' @param colvar String. Name of column domain variable in cond.
-#' @param gui Logical. If gui, user is prompted for parameters.
+#' @param sumunits Logical. If TRUE, estimation units are summed and returned
+#' in one table.
+#' @param returntitle Logical. If TRUE, returns title(s) of the estimation
+#' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param table_opts List. See help(table_options()) for a list of
 #' options.
 #' @param title_opts List. See help(title_options()) for a list of options.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options. Only used when savedata = TRUE.  
+#' of options. Only used when savedata = TRUE. 
+#' @param gui Logical. If gui, user is prompted for parameters.
 #' @param ...  Parameters for modGBpop() if GBpopdat is NULL.
 #' @return A list with estimates with percent sampling error for rowvar (and
 #' colvar).  If sumunits=TRUE or unitvar=NULL and colvar=NULL, one data frame
@@ -246,6 +250,8 @@ modGBp2veg <- function(GBpopdat = NULL,
                        vfilter = NULL, 
                        rowvar = NULL, 
                        colvar = NULL,
+                       sumunits = TRUE,
+                       returntitle = FALSE, 
                        savedata = FALSE,
                        table_opts = NULL, 
                        title_opts = NULL,
@@ -281,6 +287,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   substrvar <- NULL
   returnGBpopdat <- TRUE 
   parameters <- FALSE
+  rawdata <- TRUE
   returnlst <- list()
   
   ## Set global variables

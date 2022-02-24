@@ -883,48 +883,19 @@ modSAarea <- function(SApopdatlst = NULL,
   if (SAmethod == "unit") {
     if (SApackage == "hbsae") {
       nhat <- "hbsaeU"
-      nhat.se <- "hbsaeU.se"
-      nhat.var <- "hbsaeU.var"
-      nhat.cv <- "hbsaeU.cv"
     } else if (SApackage == "JoSAE") {
       nhat <- "JU.EBLUP"
-      nhat.se <- "JU.EBLUP.se.1"
-      nhat.var <- "JU.EBLUP.var"
-      nhat.cv <- "JU.EBLUP.cv"
     }
   } else if (SAmethod == "area") {
     if (SApackage == "JoSAE") {
       nhat <- "JFH"
-      nhat.se <- "JFH.se"
-      nhat.var <- "JFH.var" 
-      nhat.cv <- "JFH.cv"
     } else if (SApackage == "sae") {
       nhat <- "saeA"
-      nhat.se <- "saeA.se"
-      nhat.var <- "saeA.var"
-      nhat.cv <- "saeA.cv"
     } else if (SApackage == "hbsae") {
       nhat <- "hbsaeA"
-      nhat.se <- "hbsaeA.se"
-      nhat.var <- "hbsaeA.var"
-      nhat.cv <- "hbsaeA.cv"
     }
-    
-  } else if (SAmethod == "combo") {
-    nhat <- "JoSAE"
-    nhat.se <- "JoSAE.se"
-    nhat.var <- "JoSAE.var"
-    nhat.cv <- "JoSAE.cv"
   } 
-  
-  if (all(is.na(estdf[[nhat]]))) {
-    message("SAmethod returned all NA values... returning direct estimate (DIR)")
-    nhat <- "DIR"
-    nhat.se <- "DIR.se"
-    nhat.var <- "DIR.var"
-    nhat.cv <- "DIR.cv"
-  }
-  
+    
   if (multest) {
     multestdf <- estdf
     multestdf[is.na(multestdf$AOI), "AOI"] <- 0
@@ -934,11 +905,18 @@ modSAarea <- function(SApopdatlst = NULL,
     }
   }
 
-  ## Subset multest to estimation output
-  dunit_totest <- setDT(estdf)[AOI==1, 
-		unique(c("DOMAIN", nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
-  setkeyv(dunit_totest, "DOMAIN")
+  ## Set up estimates. If estimate is NULL, use direct estimator
+  estdf <- setDT(estdf)
+  estdf[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+  estdf$estimator <- nhat
+  estdf[is.na(estdf$est), "estimator"] <- "DIR"
+  estdf[is.na(estdf$est), c("est", "est.se")] <- estdf[is.na(estdf$est), c("DIR", "DIR.se")]
+  estnm <- "est"
 
+  ## Subset multest to estimation output
+  dunit_totest <- estdf[AOI==1, 
+		unique(c("DOMAIN", "est", "est.se", "NBRPLT.gt0", "estimator")), with=FALSE]
+  setkeyv(dunit_totest, "DOMAIN")
 
   ## Merge dunitarea
   tabs <- check.matchclass(dunitareabind, dunit_totest, "DOMAIN")
@@ -948,22 +926,30 @@ modSAarea <- function(SApopdatlst = NULL,
 		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
 
   if (!is.null(dunit_totest)) {
+    dunit_totest[, est.var := est.se^2]
+
     if (totals) {
       dunit_totest <- getarea(dunit_totest, areavar=areavar, esttype=esttype,
-				nhatcol=nhat, nhatcol.var=nhat.var)
-      estnm <- "est"
+				nhatcol="est", nhatcol.var="est.var")
     } else {
-      dunit_totest[, (nhat.var) := get(nhat.se)^2]
-      dunit_totest[, (nhat.cv) := get(nhat.se)/get(nhat)]
-      dunit_totest[, pse := get(nhat.cv) * 100]
-      estnm <- nhat
+      dunit_totest[, est.cv := est.se/est]
+      dunit_totest[, pse := est.cv * 100]
     }
   }
 
   if (rowcolinfo$rowvar != "TOTAL") {
+    ## Set up estimates. If estimate is NULL, use direct estimator
+    estdf_row <- setDT(estdf_row)
+    estdf_row[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+    estdf_row$estimator <- nhat
+    estdf_row[is.na(estdf_row$est), "estimator"] <- "DIR"
+    estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 
+			estdf_row[is.na(estdf_row$est), c("DIR", "DIR.se")]
+    estnm <- "est"
+
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
-		unique(c("DOMAIN", rowcolinfo$rowvar, nhat, nhat.se, "NBRPLT.gt0")), with=FALSE]
+		unique(c("DOMAIN", rowcolinfo$rowvar, "est", "est.se", "NBRPLT.gt0", "estimator")), with=FALSE]
     setkeyv(dunit_rowest, "DOMAIN")
 
     ## Merge dunitarea
@@ -974,20 +960,18 @@ modSAarea <- function(SApopdatlst = NULL,
 		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
 
     if (!is.null(dunit_rowest)) {
+      dunit_rowest[, est.var := est.se^2]
+
       if (totals) {
-        dunit_totest[, (nhat.var) := get(nhat.se)^2]
         dunit_rowest <- getarea(dunit_rowest, areavar=areavar, esttype=esttype,
-				nhatcol=nhat, nhatcol.var=nhat.var)
-        estnm <- "est"
+				nhatcol="est", nhatcol.var="est.var")
       } else {
-        dunit_rowest[, (nhat.var) := get(nhat.se)^2]
-        dunit_rowest[, (nhat.cv) := get(nhat.se)/get(nhat)]
-        dunit_rowest[, pse := get(nhat.cv) * 100]
-        estnm <- nhat
+        dunit_rowest[, est.cv := est.se/est]
+        dunit_rowest[, pse := est.cv * 100]
       }
     }
   }
- 
+
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
   #####################################################################################

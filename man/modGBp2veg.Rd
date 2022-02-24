@@ -12,6 +12,8 @@ modGBp2veg(
   vfilter = NULL,
   rowvar = NULL,
   colvar = NULL,
+  sumunits = TRUE,
+  returntitle = FALSE,
   savedata = FALSE,
   table_opts = NULL,
   title_opts = NULL,
@@ -40,6 +42,12 @@ domain, rowvar = domain variable. If more than one domain, include colvar.
 If no domain, rowvar = NULL.}
 
 \item{colvar}{String. Name of column domain variable in cond.}
+
+\item{sumunits}{Logical. If TRUE, estimation units are summed and returned
+in one table.}
+
+\item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
+table(s).}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 

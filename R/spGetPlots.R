@@ -1120,7 +1120,7 @@ spGetPlots <- function(bnd = NULL,
     ## Check pjoinid
     pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
 		checklst=pltfields, gui=gui, caption="Joinid in plot?")
- 
+
     if (is.null(pjoinid)) {
       if (xyjoinid %in% pltfields) {
         pjoinid  <- xyjoinid
@@ -1461,9 +1461,13 @@ spGetPlots <- function(bnd = NULL,
           cond.qry <- paste0("select distinct cond.* from ", p2fromqry, 
                              " join cond on(cond.", 
 							cuniqueid, " = p.", 
-							pjoinid, ") where ", stfilter) 
+							puniqueid, ") where ", stfilter) 
           rs <- DBI::dbSendQuery(dbconn, cond.qry)
           cond <- suppressWarnings(DBI::dbFetch(rs))
+          if (nrow(cond) == 0) {
+            message(cond.qry)
+            stop("invalid query for cond... \n")          
+          }
           cond <- cond[cond[[cuniqueid]] %in% xyids, ]
           DBI::dbClearResult(rs)
 

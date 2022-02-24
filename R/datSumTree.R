@@ -751,7 +751,7 @@ datSumTree <- function(tree = NULL,
       seedf[, COUNT := 1]
     }
   }   
-
+ 
   ## ADDS '_TPA' TO VARIABLE NAME, MULTIPLIES BY TPA_UNADJ, AND DIVIDES BY adjfac
   for (tvar in tsumvarlst) {
     if (tvar %in% c(tuniqueid, tpavars)) {
@@ -966,17 +966,18 @@ datSumTree <- function(tree = NULL,
   } else {
     meta = FIESTA::ref_plt[names(sumdat) %in% FIESTA::ref_plt$VARIABLE, ]
   }
+
   metanames <- names(sumdat)[which(names(sumdat) %in% meta$VARIABLE)]
   meta <- meta[meta$VARIABLE %in% metanames, ]
   meta <- meta[match(metanames, meta$VARIABLE),]
 
   tree_ref <- FIESTA::ref_tree[FIESTA::ref_tree$VARIABLE %in% tsumvarlst,]
-  tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
-  if (adjtree) {
-    tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_ADJ")
-    tree_ref$DESCRIPTION <- paste(tree_ref$DESCRIPTION, "- adjusted for partial nonresponse at plot-level")
-  }
   if (nrow(tree_ref) > 0) {
+    tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
+    if (adjtree) {
+      tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_ADJ")
+      tree_ref$DESCRIPTION <- paste(tree_ref$DESCRIPTION, "- adjusted for partial nonresponse at plot-level")
+    }
     meta <- rbind(meta, tree_ref)
   }
 
