@@ -58,7 +58,10 @@ Estimates with percent sampling error for the row domain (and column domain) spe
 * **$titlelst** - If `returntitle = TRUE`, a list with one or two titles for est and pse, depending on number of output data frames.
 * **$raw** - If `rawdata = TRUE`, a list of raw data used in the estimation process.
 
-### Raw data used for producing estimates (If `rawdata = TRUE`):
+### Raw Data Used for Producing Estimates (If `rawdata = TRUE`)
+
+<details>
+  <summary>View Raw Data Used for Producing Estimates</summary>
 
 * **raw$pntsampcnt** - Number of points by domain for estimate.
 * **raw$stratdat**   - Data frame of strata information by estimation unit. See table below for variable descriptions. Acres is only included if `tabtype = "AREA"`).
@@ -99,7 +102,12 @@ kable(pltdom.lut,
 )
 ```
 
-#### Processing data (If `rawdata = TRUE`)
+</details>
+
+### Processing data (If `rawdata = TRUE`)
+
+<details>
+  <summary>View Processing Data</summary>
 
 Separate data frames with calculated variables used in estimation process. The number of processing tables depends on the input parameters. The tables include:
 
@@ -206,14 +214,16 @@ kable(all,
 )
 ```
 
+</details> 
+
 ## PB Functions and Examples {#PBfun}
 
 The examples following use data from the Image-Based Change Estimation (ICE) project, from two counties, or Estimation Units (ESTN_UNIT) in the state of Utah: Davis (11); Salt Lake (35). 
 
-The ICE project is an image-based inventory across FIA plots designed to supplement the FIA field-based inventory for monitoring land use and land cover change at a more timely interval than the current FIA reporting timeframe. Observations are made at two points in time across all FIA plots and point-level interpretations are made within an acre support region from plot center. Attributes of land use, land cover, change, and agent of change are recorded at each point. The dataset includes plot-level and point-level data for each plot in the sample. The following tutorial uses a subset of ICE data to demonstrate how to generate estimates from the modPB. 
+The ICE project is an image-based inventory across FIA plots designed to supplement the FIA field-based inventory for monitoring land use and land cover change at a more timely interval than the current FIA reporting timeframe. Observations are made at two points in time across all FIA plots and point-level interpretations are made within an acre support region from plot center. Attributes of land use, land cover, change, and agent of change are recorded at each point. The dataset includes plot-level and point-level data for each plot in the sample. The following tutorial uses a subset of ICE data to demonstrate how to generate estimates from the `modPB()` function. 
 
  
-## Example data - Utah, Davis and Salt Lake counties (ut1135), Time interval 2011-2014
+#### Example data - Utah, Davis and Salt Lake counties (ut1135), Time interval 2011-2014
 
 External data            | Description
 :------------------------| :------------------------------------------------------------------
@@ -254,16 +264,14 @@ outfolder <- tempdir()
 Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data needed to run the examples. First, we point to some external data stored in `FIESTA` and import into R. 
 
 ```{r}
-
-
 ## Get external data file names
-icepntfn <- system.file("extdata", "PB_data/icepnt_utco1135.csv", package="FIESTA")
-icepltfn <- system.file("extdata", "PB_data/icepltassgn_utco1135.csv", package="FIESTA")
-icepctcoverfn <- system.file("extdata", "PB_data/icepctcover_utco1135.csv", package="FIESTA")
-icechg_agfn <- system.file("extdata", "PB_data/chg_ag_LUT.csv", package="FIESTA")
-icecoverfn <- system.file("extdata", "PB_data/cover_LUT.csv", package="FIESTA")
-unitareafn <- system.file("extdata", "PB_data/unitarea_utco1135.csv", package="FIESTA")
-strlutfn <- system.file("extdata", "PB_data/strlut_utco1135.csv", package="FIESTA")
+icepntfn <- system.file("extdata", "PB_data/icepnt_utco1135.csv", package = "FIESTA")
+icepltfn <- system.file("extdata", "PB_data/icepltassgn_utco1135.csv", package = "FIESTA")
+icepctcoverfn <- system.file("extdata", "PB_data/icepctcover_utco1135.csv", package = "FIESTA")
+icechg_agfn <- system.file("extdata", "PB_data/chg_ag_LUT.csv", package = "FIESTA")
+icecoverfn <- system.file("extdata", "PB_data/cover_LUT.csv", package = "FIESTA")
+unitareafn <- system.file("extdata", "PB_data/unitarea_utco1135.csv", package = "FIESTA")
+strlutfn <- system.file("extdata", "PB_data/strlut_utco1135.csv", package = "FIESTA")
 
 icepnt <- read.csv(icepntfn)
 iceplt <- read.csv(icepltfn)
@@ -271,9 +279,7 @@ icepctcover <- read.csv(icepctcoverfn)
 
 icecover <- read.csv(icecoverfn)
 icechg_ag <- read.csv(icechg_agfn)
-
 ```
-
 
 ```{r}
 str(icepnt, max.level = 1)
@@ -288,18 +294,20 @@ str(icepctcover, max.level = 1)
 ```
 
 
-
-Next, we can convert X/Y coordinates to a simple feature and look at the spatial distribution by county (ESTN_UNIT). 
+Next, we can convert X/Y coordinates to a simple feature and look at the spatial distribution by county (ESTN_UNIT) with the `spMakeSpatialPoints()` function from `FIESTA`. 
 
 ```{r}
-icepltsp <- spMakeSpatialPoints(iceplt, xy.uniqueid="plot_id", xvar="LON_PUBLIC", yvar="LAT_PUBLIC", 
-              prj="longlat", datum="NAD83")
+icepltsp <- spMakeSpatialPoints(xyplt = iceplt,
+                                xy.uniqueid = "plot_id",
+                                xvar = "LON_PUBLIC",
+                                yvar = "LAT_PUBLIC", 
+                                prj = "longlat",
+                                datum = "NAD83")
 plot(icepltsp["ESTN_UNIT"])
-
 ```
 
+Now, let's look at the look up tables stored in `FIESTA` for land use cover codes and change agent codes and create new lookup tables for Time 1 and Time 2 land use cover.
 
-Now, let's look at the look up tables stored in FIESTA for land use cover codes and change agent codes and create new lookup tables for Time 1 and Time 2 land use cover
 ```{r}
 icecover
 ```
@@ -317,21 +325,17 @@ icecover_2 <- icecover
 names(icecover_2) <- sub("cover", "cover_2", names(icecover_2))
 icecover_1
 icecover_2
-
 ```
 
-Next, let's import and look at the stratification information stored in FIESTA. 
+Next, let's import and look at the stratification information stored in `FIESTA`.
 
 ```{r}
-
 ## Area by estimation unit
 unitarea <- read.csv(unitareafn)
 unitarea
-
 ```
 
 ```{r}
-
 ## Pixel counts by strata classes
 strlut <- read.csv(strlutfn)
 strlut
@@ -339,126 +343,58 @@ strlut
 
 
 
-### Examples
-1. [Point-level data - Totals](#pnttot) 
-2. [Point-level transition data (T1 Cover - T2 Cover)](#pnttrans)    
-3. [Ratio estimates](#pntrat)
-4. [Plot-level Data, with percent by domain as separate columns](#pltpct)
-5. [Point-level transition data (T1 Cover - T2 Cover) - Post-Stratification](#pntps)
+### PB Module
 
+The following examples are set up into two sections as follows
+
+* [modPBpop()](#modPBpop)
+* [modPB()](#modPB)
+
+where [modPBpop()](#modPBpop) contains an example which sets up the data for estimation in [modPB()](#modPB). 
 
 ### modPBpop() {#modPBpop}
 
 `FIESTA`'s population functions (`mod*pop`) check input data and perform population-level calculations, such as: summing number of sampled plots and standardizing auxiliary data. These functions are specific to each `FIESTA` module and are run prior to or within a module for any population of interest. 
 
-For `FIESTA`'s PB Module, the `modPBpop` function calculates and outputs: number of plots by strata. The output from `modPBpop` can be used for one or more estimates from `modPB`.
+#### Example 1: Population Data for estimation of percent of land cover at Time 1 (2011)
+
+<details>
+  <summary>View Example</summary>
+
+For `FIESTA`'s PB Module, the `modPBpop()` function calculates and outputs: number of plots by strata. The output from `modPBpop()` can be used for one or more estimates from `modPB()`. Here, we set up our population data for the following examples. We simply supply a few key arguments and we have our population data: 
 
 
 ```{r}
-
-## Percent ##
 # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, UT
-PBpopdat <- modPBpop(pnt=icepnt, pltassgn=iceplt, pltassgnid="plot_id", pntid="dot_cnt")
+PBpopdat <- modPBpop(pnt = icepnt, 
+                     pltassgn = iceplt,
+                     pltassgnid = "plot_id",
+                     pntid = "dot_cnt")
 names(PBpopdat)
 
 ```
 
-
-Note that the `modPBpop` function returns a list with lots of information and data for us to use. For a quick look at what this list includes we can use the `str` function: 
+Note that the `modPBpop()` function returns a list with lots of information and data for us to use. For a quick look at what this list includes we can use the `str()` function: 
 
 ```{r}
 str(PBpopdat, max.level = 1)
 ```
 
-
-
 Now that we've created our population dataset, we can move on to estimation. 
 
 </details>
 
-### `modPB`
 
-#### Example 1: Point-level data - Totals
-
-<details>
-  <summary>View Example</summary>
-
-In this example, we look at estimating the percent land cover at Time 1 (2011) and land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah. We will then compare the net change from Time 1 and Time 2.
-
-<a name="pnttot"></a>
-
-We first estimate the percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah. We will add a lookup table for the rows to get row names. Adding row.add0=TRUE in table_opts list assures that all categories in rowlut are included in the result. We can also add a pretty name to the output names.
-
-```{r}
-cover1 <- modPB(PBpopdat = PBpopdat, 
-                rowvar = "cover_1", 
-                table_opts = list(rowlut=icecover_1, 
-                                  row.add0=TRUE), 
-                title_opts = list(title.rowvar = "Land Cover (2011)")
-                )
-
-```
-
-
-We can look at the structure of this output with `str`. Note that again `FIESTA` outputs a list. 
-
-```{r}
-str(cover1, max.level = 2)
-
-```
-
-...and the estimates.
-
-```{r}
-str(cover1, max.level = 2)
-
-```
-
-The `raw` list shows more details of the estimates for row totals. See help(modPB) for variable descriptions.
-
-```{r}
-cover1$raw$unit_rowest
-
-```
-
-
-We can also look at the domain-level data used for generating the estimates, with proportion of points by category.
-
-```{r}
-head(cover1$raw$pltdom.row)
-
-```
-
-
-Note: An Uninterpretable class is included in the previous table. To remove, add nonsamp.pntfilter. Let's return a list of titles that are generated automatically.
-
-```{r}
-cover1 <- modPB(PBpopdat = PBpopdat,
-		            rowvar = "cover_1", 
-		            nonsamp.pntfilter = "cover_1 != 999",
-		            table_opts = list(rowlut=icecover_1), 
-		            title_opts = list(title.rowvar="Land Cover (2011)"),
-		            returntitle = TRUE
-                )
-
-```
-
-```{r}
-cover1$est
-
-```
-</details>
-
-#### Point-level data - Totals - Time 1
-
-<details>
-  <summary>View Example</summary>
+#### Example 2: Population data for estimation of area of land cover at Time 1 (2011)
 
 In this example, we estimate area, in acres, of land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah. Note: adding area requires generating a new set of population data to include area information.
 
 First, since we want to get estimates for the total population, let's sum the area for both counties.
 ```{r}
+# read in file 
 unitarea <- read.csv(unitareafn)
+
+# sum up the acres
 sum(unitarea$ACRES)
 ```
 
@@ -468,9 +404,7 @@ PBpoparea <- modPBpop(pnt = icepnt,
                       pltassgn = iceplt, 
                       pltassgnid = "plot_id", 
                       pntid = "dot_cnt", 
-                      unitarea = sum(unitarea$ACRES)
-                      )
-
+                      unitarea = sum(unitarea$ACRES)) # using the total number of acres
 ```
                       
 We can look at the contents of the output list. The output now includes unitarea, the total acres for the population of two counties.
@@ -478,6 +412,217 @@ We can look at the contents of the output list. The output now includes unitarea
 ```{r}
 str(PBpoparea, max.level = 1)
 ```
+
+
+#### Example 3: Population data for estimation by estimation unit
+
+In this example, we generate estimates by each estimation unit (i.e, County). We first, need a new set of population data to reflect this change in objective. 
+
+```{r}
+PBpopunit <- modPBpop(pnt = icepnt, 
+                      pltassgn = iceplt, 
+                      pltassgnid = "plot_id", 
+                      pntid = "dot_cnt",
+                      unitarea = unitarea, 
+                      unitvar = "ESTN_UNIT")
+names(PBpopunit)
+
+```
+
+Again, we can look at the contents of the output list. 
+
+```{r}
+str(PBpopunit, max.level = 1)
+```
+
+
+#### Example 4: Population data setup for plot-level data, with percent by domain as separate columns
+
+**Time 1 (2011)**
+
+Let's first take a look at the first six rows of the example dataset, including 133 plot records.
+```{r}
+head(icepctcover)
+dim(icepctcover)
+
+```
+
+
+Then, rename columns for Time 1 cover (names11) and Time 2 cover (names14)
+```{r}
+names11 <- names(icepctcover)[endsWith(names(icepctcover), "11")]
+names14 <- names(icepctcover)[endsWith(names(icepctcover), "14")]
+names11
+names14
+
+```
+
+
+Now, we need to create a new set of population data define the names of the columns to estimate (i.e., names11). Remember to add unitarea if you want to generate estimates of area.
+```{r}
+PBpctpop11 <- modPBpop(pltpct = icepctcover, 
+                       pltpctvars = names11,
+                       unitarea = sum(unitarea$ACRES)
+                       )
+
+```
+
+
+Let's look at the contents of the output list.
+
+```{r}
+str(PBpctpop11, max.level = 1)
+```
+
+**Time 2 (2014)**
+
+For 2014, we need to create a new population data set with the names14 columns before calculating estimates.
+```{r}
+PBpctpop14 <- modPBpop(pltpct = icepctcover, 
+                       pltpctvars = names14,
+                       unitarea = sum(unitarea$ACRES)
+                       )
+
+```
+
+**Transitions**
+
+Let's also look at transitions. In this example we will generate estimates of percent land cover change from vegetated to non-vegetated for all land in Davis and Salt Lake Counties, Utah. This transition was recorded in the initial dataset (i.e., Veg.NonVeg). Again, we need to create a new population dataset defining this column of interest.
+```{r}
+PBpctpop.veg <- modPBpop(pltpct = icepctcover, 
+                       pltpctvars = "Veg.NonVeg",
+                       unitarea = sum(unitarea$ACRES)
+                       )
+```
+
+#### final pops
+
+
+Let's add post-stratification to our transition estimates from Time 1 to Time 2. Again, we need to create a new population dataset with information for post-stratification, including strata pixel counts and plot-level strata assignments. This information is provided with FIESTA's external data.
+
+```{r}
+
+## Plot-level assignments
+head(iceplt)
+
+## Strata weights by estimation unit
+read.csv(strlutfn)
+
+
+```
+
+
+Here we use the strata_opts parameter to calculate the strata weights from the pixel count information in strlutfn
+```{r}
+PBpopareaPS <- modPBpop(pntdat = icepnt, 
+                        pltassgn = iceplt, 
+                        pltassgnid = "plot_id", 
+                        pntid = "dot_cnt", 
+                        strata = TRUE,
+                        stratalut = strlutfn,
+                        strvar = "STRATUMCD",
+                        strata_opts = list(getwt=TRUE, 
+                                           getwtvar="P1POINTCNT"),
+                        unitarea = sum(unitarea$ACRES)
+                        )
+
+```
+
+Let's look at the contents of the output list.
+
+```{r}
+str(PBpopareaPS, max.level = 1)
+```
+
+And look more closely at the resulting stratalut.
+
+```{r}
+PBpopareaPS$stratalut
+```
+
+
+**new pop**
+
+Let's again get estimates without strata. We first need to generate a new set of population data, as above.
+```{r}
+
+PBpoparea <- modPBpop(pntdat = icepnt, 
+                        pltassgn = iceplt, 
+                        pltassgnid = "plot_id", 
+                        pntid = "dot_cnt", 
+                        strata = FALSE,
+                        unitarea = sum(unitarea$ACRES)
+                        )
+```
+
+
+### `modPB` {#modPB}
+
+#### Example 2: Point-level data - Totals
+
+<details>
+  <summary>View Example</summary>
+
+In this example, we look at estimating the percent land cover at Time 1 (2011) and land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah. We will then compare the net change from Time 1 and Time 2.
+
+We first estimate the percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah. We will add a lookup table for the rows to get row names. Adding row.add0=TRUE in table_opts list assures that all categories in rowlut are included in the result. We can also add a pretty name to the output names.
+
+```{r}
+cover1 <- modPB(PBpopdat = PBpopdat, 
+                rowvar = "cover_1", 
+                table_opts = list(rowlut = icecover_1, 
+                                  row.add0 = TRUE), 
+                title_opts = list(title.rowvar = "Land Cover (2011)"))
+```
+
+
+We can look at the structure of this output with `str`. Note that again `FIESTA` outputs a list. 
+
+```{r}
+str(cover1, max.level = 2)
+```
+
+...and the estimates.
+
+```{r}
+str(cover1$est, max.level = 2)
+```
+
+The `raw` list shows more details of the estimates for row totals. See `help(modPB)` for variable descriptions.
+
+```{r}
+cover1$raw$unit_rowest
+```
+
+
+We can also look at the domain-level data used for generating the estimates, with proportion of points by category.
+
+```{r}
+head(cover1$raw$pltdom.row)
+```
+
+
+Note: An Uninterpretable class is included in the previous table. To remove, add nonsamp.pntfilter. Let's return a list of titles that are generated automatically.
+
+```{r}
+cover1 <- modPB(PBpopdat = PBpopdat,
+		            rowvar = "cover_1", 
+		            nonsamp.pntfilter = "cover_1 != 999", # added filter 
+		            table_opts = list(rowlut = icecover_1), 
+		            title_opts = list(title.rowvar = "Land Cover (2011)"),
+		            returntitle = TRUE)
+```
+
+```{r}
+cover1$est
+```
+
+</details>
+
+#### Example 3: Point-level data - Totals - Time 1
+
+<details>
+  <summary>View Example</summary>
 
 
 Now, let's get the estimates, adding tabtype=AREA, to indicate we want area estimates.
@@ -819,25 +964,6 @@ chg_ag_cover1$pse
 
 <details>
   <summary>View Example</summary>
-
-In this example, we generate estimates by each estimation unit (i.e, County). We first, need a new set of population data to reflect this change in objective. 
-
-```{r}
-PBpopunit <- modPBpop(pnt = icepnt, 
-                      pltassgn = iceplt, 
-                      pltassgnid = "plot_id", 
-                      pntid = "dot_cnt",
-                      unitarea = unitarea, 
-                      unitvar = "ESTN_UNIT")
-names(PBpopunit)
-
-```
-
-Again, we can look at the contents of the output list. 
-
-```{r}
-str(PBpopunit, max.level = 1)
-```
 
 
 Now that we have a new set of population data, let's start with area, in acres, of land cover at Time 1 (2011) by County for all land in Davis and Salt Lake Counties, UT
@@ -1284,40 +1410,6 @@ This example demonstrates generating estimates from data that are already compil
 <a name="pltpct"></a>
 
 
-Let's first take a look at the first six rows of the example dataset, including 133 plot records.
-```{r}
-head(icepctcover)
-dim(icepctcover)
-
-```
-
-
-Then, rename columns for Time 1 cover (names11) and Time 2 cover (names14)
-```{r}
-names11 <- names(icepctcover)[endsWith(names(icepctcover), "11")]
-names14 <- names(icepctcover)[endsWith(names(icepctcover), "14")]
-names11
-names14
-
-```
-
-
-Now, we need to create a new set of population data define the names of the columns to estimate (i.e., names11). Remember to add unitarea if you want to generate estimates of area.
-```{r}
-PBpctpop11 <- modPBpop(pltpct = icepctcover, 
-                       pltpctvars = names11,
-                       unitarea = sum(unitarea$ACRES)
-                       )
-
-```
-
-
-Let's look at the contents of the output list.
-
-```{r}
-str(PBpctpop11, max.level = 1)
-```
-
 
 Then we can get estimates of percent land cover at Time 1 (2011) for all land in Davis and Salt Lake Counties, Utah 
 ```{r}
@@ -1366,14 +1458,11 @@ pltpct11.area$est
 ```
 
 
-For 2014, we need to create a new population data set with the names14 columns before calculating estimates.
-```{r}
-PBpctpop14 <- modPBpop(pltpct = icepctcover, 
-                       pltpctvars = names14,
-                       unitarea = sum(unitarea$ACRES)
-                       )
 
-```
+pop change
+
+
+
 
 And estimates of percent land cover at Time 2 (2014) for all land in Davis and Salt Lake Counties, Utah 
 ```{r}
@@ -1393,14 +1482,9 @@ pltpct14.area$est
 ```
 
 
-Let's also look at transitions. In this example we will generate estimates of percent land cover change from vegetated to non-vegetated for all land in Davis and Salt Lake Counties, Utah. This transition was recorded in the initial dataset (i.e., Veg.NonVeg). Again, we need to create a new population dataset defining this column of interest.
-```{r}
-PBpctpop.veg <- modPBpop(pltpct = icepctcover, 
-                       pltpctvars = "Veg.NonVeg",
-                       unitarea = sum(unitarea$ACRES)
-                       )
 
-```
+pop change
+
 
 Then, get estimates. We can add a title in the title_opts parameter to help describe the estimate.
 ```{r}
@@ -1426,49 +1510,6 @@ This example shows how we can add post-stratification to reduce the variance (i.
 #### Point-level transition data (T1 Cover - T2 Cover) - Post-Stratification
 
 
-Let's add post-stratification to our transition estimates from Time 1 to Time 2. Again, we need to create a new population dataset with information for post-stratification, including strata pixel counts and plot-level strata assignments. This information is provided with FIESTA's external data.
-
-```{r}
-
-## Plot-level assignments
-head(iceplt)
-
-## Strata weights by estimation unit
-read.csv(strlutfn)
-
-
-```
-
-
-Here we use the strata_opts parameter to calculate the strata weights from the pixel count information in strlutfn
-```{r}
-PBpopareaPS <- modPBpop(pntdat = icepnt, 
-                        pltassgn = iceplt, 
-                        pltassgnid = "plot_id", 
-                        pntid = "dot_cnt", 
-                        strata = TRUE,
-                        stratalut = strlutfn,
-                        strvar = "STRATUMCD",
-                        strata_opts = list(getwt=TRUE, 
-                                           getwtvar="P1POINTCNT"),
-                        unitarea = sum(unitarea$ACRES)
-                        )
-
-```
-
-Let's look at the contents of the output list.
-
-```{r}
-str(PBpopareaPS, max.level = 1)
-```
-
-And look more closely at the resulting stratalut.
-
-```{r}
-PBpopareaPS$stratalut
-```
-
-
 Now, the estimates.
 ```{r}
 cover12ps <- modPB(PBpopdat = PBpopareaPS,
@@ -1482,17 +1523,8 @@ cover12ps <- modPB(PBpopdat = PBpopareaPS,
 ```
 
 
-Let's again get estimates without strata. We first need to generate a new set of population data, as above.
+
 ```{r}
-
-PBpoparea <- modPBpop(pntdat = icepnt, 
-                        pltassgn = iceplt, 
-                        pltassgnid = "plot_id", 
-                        pntid = "dot_cnt", 
-                        strata = FALSE,
-                        unitarea = sum(unitarea$ACRES)
-                        )
-
 cover12 <- modPB(PBpopdat = PBpoparea,
 		              rowvar = "cover_1", 
 		              colvar = "cover_2", 
