@@ -210,6 +210,10 @@ spGetSAdoms <- function(smallbnd,
   ## Check for necessary packages
   ###########################################################
 
+  ## Set par 
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   ## Set global variables
   gui <- FALSE  
 

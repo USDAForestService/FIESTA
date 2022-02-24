@@ -34,6 +34,11 @@ datPBplotchg <- function(gainloss, CI=95, figTitle="") {
   #     (basically trailing zeroes trimmed)
   #     * Input(s): a number!
   #     * Output(s): number of decimal places that would make the number "pretty"
+
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   getNPrettyDecPlaces <- function(x) {
     nPrettyDecPlaces <- 0 # default = whole numbers
     x <- as.character(abs(as.numeric(x)))

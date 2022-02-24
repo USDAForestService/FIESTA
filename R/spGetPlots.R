@@ -240,6 +240,10 @@ spGetPlots <- function(bnd = NULL,
   ## List of clipped data frames
   ##############################################################################
 
+  ## Set par 
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   ## Set global variables
   xydat=stateFilter=countyfips=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=states <- NULL

@@ -171,7 +171,7 @@ datSumTree <- function(tree = NULL,
   seedonly=parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
 
-  ## SET OPTIONS
+  ## Set options
   options.old <- options()
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 

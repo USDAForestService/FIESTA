@@ -172,6 +172,10 @@ spGetXY <- function(bnd,
   gui <- FALSE
   coordtype <- "public"
 
+  ## Set par 
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   
   ##################################################################
   ## CHECK PARAMETER NAMES

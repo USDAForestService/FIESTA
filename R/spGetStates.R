@@ -61,6 +61,10 @@ spGetStates <- function(bnd_layer,
     stop("invalid parameter: ", toString(miss))
   }
   
+  ## Set par 
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)

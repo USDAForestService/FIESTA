@@ -102,6 +102,11 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   ## Set global variables
   xlim <- NULL
 
+  ## Set par 
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   ##################################################################
   ## CHECK INPUT PARAMETERS
   ##################################################################

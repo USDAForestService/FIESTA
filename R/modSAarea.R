@@ -65,6 +65,10 @@
 #' @param modelselect Logical. If TRUE, selects useful predictors using
 #' mase:ElasticNet.
 #' @param prior Function. A prior function to use for hbsae models.
+#' @param na.fill String. An estimate to fill in for NA values (i.e., when 
+#' model is unstable or no predictors are selected). Choose from the following 
+#' list that does not include SApackage used ('NONE', 'DIR', 'JoSAE', 'sae', 
+#' 'hbsae'). DIR is suggested value for no NA values. 
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
 #' @param savesteps Logical. Saves graphs of predictors and response with
 #' labels whether selected or not for both area- and unit-level models.
@@ -144,6 +148,7 @@ modSAarea <- function(SApopdatlst = NULL,
                       rowvar = NULL, 
                       modelselect = FALSE, 
                       prior = function(x) 1/(sqrt(x)*(1+x)),
+                      na.fill = "NONE", 
                       savedata = FALSE, 
                       savesteps = FALSE, 
                       multest = TRUE, 
@@ -188,7 +193,6 @@ modSAarea <- function(SApopdatlst = NULL,
   pvars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE
   sumunits=FALSE
-  prior=NULL
   SAdomsdf=multestdf_row <- NULL
 
   ## Set global variables
@@ -318,6 +322,14 @@ modSAarea <- function(SApopdatlst = NULL,
   if (SApackage == "sae" && SAmethod == "unit") {
     stop("sae unit-level estimates are not available")
   }
+  
+  ## Check na.fill 
+  na.filllst <- c("NONE", "DIR", "JoSAE", "sae", "hbsae")
+  na.filllst <- na.filllst[na.filllst != SApackage]
+  na.fill <- pcheck.varchar(var2check=na.fill, varnm="na.fill", gui=gui, 
+                              checklst=na.filllst, caption="na.fill", 
+                              multiple=FALSE, stopifnull=TRUE)
+  
 
   ###################################################################################
   ## Check data and generate population information 
@@ -895,6 +907,7 @@ modSAarea <- function(SApopdatlst = NULL,
       nhat <- "hbsaeA"
     }
   } 
+  nhat.se <- paste0(nhat, ".se")
     
   if (multest) {
     multestdf <- estdf
@@ -907,10 +920,14 @@ modSAarea <- function(SApopdatlst = NULL,
 
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
-  estdf[, c("est", "est.se") := .SD, .SDcols=c("nhat", "nhat.se")]
-  estdf$estimator <- nhat
-  estdf[is.na(estdf$est), "estimator"] <- "DIR"
-  estdf[is.na(estdf$est), c("est", "est.se")] <- estdf[is.na(estdf$est), c("DIR", "DIR.se")]
+  estdf[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+  if (na.fill != "NONE") {
+    estdf$estimator <- nhat
+    estdf[is.na(estdf$est), "estimator"] <- na.fill
+    na.fill.se <- paste0(na.fill, ".se")
+    estdf[is.na(estdf$est), c("est", "est.se")] <- 
+            estdf[is.na(estdf$est), c(na.fill, na.fill.se)]
+  }
   estnm <- "est"
 
   ## Subset multest to estimation output
@@ -940,12 +957,16 @@ modSAarea <- function(SApopdatlst = NULL,
   if (rowcolinfo$rowvar != "TOTAL") {
     ## Set up estimates. If estimate is NULL, use direct estimator
     estdf_row <- setDT(estdf_row)
-    estdf_row[, c("est", "est.se") := .SD, .SDcols=c("nhat", "nhat.se")]
-    estdf_row$estimator <- nhat
-    estdf_row[is.na(estdf_row$est), "estimator"] <- "DIR"
-    estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 
-			estdf_row[is.na(estdf_row$est), c("DIR", "DIR.se")]
+    estdf_row[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+    if (na.fill != "NONE") {
+      estdf_row$estimator <- nhat
+      estdf_row[is.na(estdf_row$est), "estimator"] <- na.fill
+      na.fill.se <- paste0(na.fill, ".se")
+      estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 
+			          estdf_row[is.na(estdf_row$est), c(na.fill, na.fill.se)]
+    }
     estnm <- "est"
+   
 
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 

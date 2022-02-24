@@ -84,8 +84,10 @@ datSumCond <- function(cond = NULL,
   if(gui){ puniqueid=cuniqueid=csumvarnm=savedata <- NULL }
 
   ## Set options
-  options(scipen = 6) # bias against scientific notation
+  options.old <- options()
+  options(scipen=8) # bias against scientific notation
   options(stringsAsFactors=FALSE)
+  on.exit(options(options.old), add=TRUE) 
 
   ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ <- NULL

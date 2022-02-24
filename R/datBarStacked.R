@@ -180,6 +180,9 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
     x=response=color=savedata <- NULL
   }
 
+  ## Set par
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
 
   ###################################################################################
   ########################## Check Device Type ######################################
