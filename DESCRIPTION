@@ -46,7 +46,6 @@ Imports:
     hbsae,
     nlme,
     xml2,
-    raster,
     units,
     DBI,
     RSQLite,
@@ -57,7 +56,7 @@ Suggests:
     rmarkdown,
     rJava,
     xlsx,
-    arcgisbinding
+    raster
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
