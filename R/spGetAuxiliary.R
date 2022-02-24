@@ -383,6 +383,9 @@ spGetAuxiliary <- function(xyplt,
   if (!is.null(rastlst.catfn) && rastlst.catfn == "stop") {
     stop()
   }
+  if (is.null(rastlst.contfn) && is.null(rastlst.catfn)) {
+    stop("both rastlst.cont and rastlst.cat are NULL")
+  }
   if (!is.null(rastlst.catfn)) {
     band.cat <- sapply(rastlst.catfn, function(x) rasterInfo(x)$nbands)
     nlayers.cat <- sum(band.cat)

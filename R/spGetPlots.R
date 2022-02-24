@@ -1464,6 +1464,7 @@ spGetPlots <- function(bnd = NULL,
 							puniqueid, ") where ", stfilter) 
           rs <- DBI::dbSendQuery(dbconn, cond.qry)
           cond <- suppressWarnings(DBI::dbFetch(rs))
+ 
           if (nrow(cond) == 0) {
             message(cond.qry)
             stop("invalid query for cond... \n")          

@@ -110,7 +110,7 @@ NULL
 #' crossxtab getdomain getestvar crossxbyunit wrapSE tabgrp setCells write2xlsx
 #' wraptitle addclass getext getrastlst.rgdal polyfix.sf pcheck.spatial
 #' build.prj4str trunc10shp getEPSG check.extents getprjatt areacalc.poly
-#' areacalc.pixel aspect_transform spPlotRastcl checksf.longlat
+#' areacalc.pixel aspect_transform checksf.longlat
 #' checkrast.longlat crsCompare sf_dissolve closest_poly getIntersect
 #' clip.othertables spGetStates getOffset getGDALDataTypeName getGDALformat
 #' basename.NoExt Mode northness eastness getPixelValue extractPtsFromRaster
