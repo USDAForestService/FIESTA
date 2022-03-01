@@ -3,7 +3,7 @@ title: "`FIESTA` Manual - Module Estimates"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{`FIESTA` Manual - Module Estimates}
-  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 

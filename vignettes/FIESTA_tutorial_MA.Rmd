@@ -3,7 +3,7 @@ title: "FIESTA - Model-Assisted Estimators"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{FIESTA - Model-Assisted Estimators}
-  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 

@@ -3,7 +3,7 @@ title: "FIESTA - Green-book Estimators"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{FIESTA - Green-book Estimators}
-  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 

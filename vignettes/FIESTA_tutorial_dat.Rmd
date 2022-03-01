@@ -3,7 +3,7 @@ title: "FIESTA - Data Tools"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{FIESTA - Data Tools}
-  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 
