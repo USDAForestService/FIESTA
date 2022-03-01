@@ -23,11 +23,11 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   #sbndlst <- list(smallbndx)
   SAdomslst <- list()
 
-  ## Set par
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
   if (showsteps) {
+    ## Set par
+    oldpar <- par(no.readonly = TRUE)
+    on.exit(par(oldpar))
+
     par(mar=c(1,1,1,1))
   }
 

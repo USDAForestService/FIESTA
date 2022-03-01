@@ -8,10 +8,7 @@ spGetStates(
   bnd_layer,
   bnd_dsn = NULL,
   bnd.filter = NULL,
-  stbnd = NULL,
-  stbnd_dsn = NULL,
   stbnd.att = "COUNTYFIPS",
-  stname.att = "STATENM",
   RS = NULL,
   states = NULL,
   overlap = 1,
@@ -30,17 +27,8 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 
 \item{bnd.filter}{String. Filter to subset bnd spatial layer.}
 
-\item{stbnd}{sf R object, State boundary to use for intersection. If NULL, 
-FIESTAutils::stunitco is used. Can be a spatial 
-sf object, full pathname to a shapefile, or name of a layer within a database.}
-
-\item{stbnd_dsn}{String. Data source name (dsn; e.g., SQLite database or shapefile
-pathname) of stbnd. The dsn varies by driver. See gdal OGR vector formats
-(https://www.gdal.org/ogr_formats.html).}
-
-\item{stbnd.att}{String. Attribute in stbnd to output.}
-
-\item{stname.att}{String. Attribute in stbnd to identify state.}
+\item{stbnd.att}{String. Attribute in stunitco to output ('STATECD',
+'STATENM', 'COUNTYFIPS').}
 
 \item{RS}{String. Name of FIA research station to restrict states to
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
@@ -59,6 +47,20 @@ of options. Only used when savebnd = TRUE.}
 }
 \description{
 Wrapper to get state names that intersect a given boundary.
+}
+\examples{
+
+
+  ## Get polygon vector layer from FIESTA external data
+  WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+
+  ## Get intersecting statenames
+  spGetStates(WYbhdistfn)$statenames
+  
+  ## Get intersecting COUNTYFIP codes
+  spGetStates(WYbhdistfn, stbnd.att="COUNTYFIPS")$states
+
+
 }
 \author{
 Tracey S. Frescino

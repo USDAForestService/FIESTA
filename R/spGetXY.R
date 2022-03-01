@@ -171,11 +171,6 @@ spGetXY <- function(bnd,
 
   gui <- FALSE
   coordtype <- "public"
-
-  ## Set par 
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -258,6 +253,11 @@ spGetXY <- function(bnd,
   ## Check measEndyr.filter
   #############################################################################
   measEndyr.filter <- check.logic(bnd, measEndyr.filter)
+
+  ## Check showsteps
+  #############################################################################
+  showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
+                             title="Show steps?", first="NO", gui=gui) 
   
   ## Check returnxy
   #############################################################################
@@ -307,10 +307,7 @@ spGetXY <- function(bnd,
 
   } else if (!is.null(bndx)) {
     ## Get intersecting states
- 
     statedat <- spGetStates(bndx, 
-                            stbnd=NULL, 
-                            stbnd_dsn=NULL, 
                             stbnd.att="COUNTYFIPS", 
                             RS=RS, 
                             states=states, 
@@ -664,6 +661,9 @@ spGetXY <- function(bnd,
   }
 
   if (showsteps) {
+    op <- par()
+    on.exit(par(op))
+
     ## Set plotting margins
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
@@ -672,7 +672,7 @@ spGetXY <- function(bnd,
     if (!is.null(bndx)) {
       plot(st_geometry(bndx), add=TRUE, border="black", lwd=0.75)
     }
-    par(mar=mar)
+    #par(mar=mar)
   }
 
   if (returnxy) {

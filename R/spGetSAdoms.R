@@ -210,10 +210,6 @@ spGetSAdoms <- function(smallbnd,
   ## Check for necessary packages
   ###########################################################
 
-  ## Set par 
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
   ## Set global variables
   gui <- FALSE  
 
@@ -278,7 +274,7 @@ spGetSAdoms <- function(smallbnd,
   ## Check showsteps
   #############################################################################
   showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
-		title="Show steps?", first="YES", gui=gui) 
+		title="Show steps?", first="YES", gui=gui)   
 
   ## Check savesteps
   #############################################################################
@@ -636,6 +632,9 @@ spGetSAdoms <- function(smallbnd,
   #SAdomslst <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
 
   if (showsteps) {
+    op <- par()
+    on.exit(par(op))
+
     ## Set plotting margins
     mar <-  par("mar")
     par(mar=c(1,1,1,1))
@@ -727,9 +726,9 @@ spGetSAdoms <- function(smallbnd,
       message("Writing jpg to ", jpgfn, "\n")
     }
   }
-  if (showsteps) {
-    par(mar=mar)
-  }
+  #if (showsteps) {
+  #  par(mar=mar)
+  #}
 
   rm(smallbndx)
   rm(helperbndx)

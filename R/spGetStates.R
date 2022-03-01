@@ -8,14 +8,8 @@
 #' pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 #' (https://www.gdal.org/ogr_formats.html). 
 #' @param bnd.filter String. Filter to subset bnd spatial layer.
-#' @param stbnd sf R object, State boundary to use for intersection. If NULL, 
-#' FIESTAutils::stunitco is used. Can be a spatial 
-#' sf object, full pathname to a shapefile, or name of a layer within a database.
-#' @param stbnd_dsn String. Data source name (dsn; e.g., SQLite database or shapefile
-#' pathname) of stbnd. The dsn varies by driver. See gdal OGR vector formats
-#' (https://www.gdal.org/ogr_formats.html).
-#' @param stbnd.att String. Attribute in stbnd to output.
-#' @param stname.att String. Attribute in stbnd to identify state.
+#' @param stbnd.att String. Attribute in stunitco to output ('STATECD',
+#' 'STATENM', 'COUNTYFIPS').
 #' @param RS String. Name of FIA research station to restrict states to
 #' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 #' included.
@@ -28,14 +22,24 @@
 #'
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples
+#' 
+#' 
+#'   ## Get polygon vector layer from FIESTA external data
+#'   WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
+#'
+#'   ## Get intersecting statenames
+#'   spGetStates(WYbhdistfn)$statenames
+#'   
+#'   ## Get intersecting COUNTYFIP codes
+#'   spGetStates(WYbhdistfn, stbnd.att="COUNTYFIPS")$states
+#'
+#'
 #' @export spGetStates
 spGetStates <- function(bnd_layer, 
                         bnd_dsn = NULL, 
                         bnd.filter = NULL, 
-                        stbnd = NULL, 
-                        stbnd_dsn = NULL, 
                         stbnd.att = "COUNTYFIPS", 
-                        stname.att = "STATENM", 
                         RS = NULL, 
                         states = NULL, 
                         overlap = 1, 
@@ -60,12 +64,7 @@ spGetStates <- function(bnd_layer,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-  
-  ## Set par 
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
-  
+    
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
@@ -83,6 +82,10 @@ spGetStates <- function(bnd_layer,
     }
   }
   
+  ## Check showsteps
+  #############################################################################
+  showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
+                             title="Show steps?", first="NO", gui=gui) 
   
   ## Check savedata
   #############################################################################
@@ -144,129 +147,113 @@ spGetStates <- function(bnd_layer,
 
   ## Get intersecting states
   #############################################################################
-  if (!is.null(stbnd) || !is.null(stbnd_dsn)) {
-    stbnd <- pcheck.spatial(layer=stbnd, dsn=stbnd_dsn)
-    stbnd.att <- pcheck.varchar(var2check=stbnd.att, 
-                      varnm="stbnd.att", gui=gui, 
-                      checklst=names(stbnd), 
-                      caption="State name attribute", 
-                      warn=paste(stbnd.att, "not in stbnd"))
-    if (is.null(stbnd.att)) {
-      if ("NAME" %in% names(stbnd)) {
-        stbnd.att <- "NAME"
-      } else if ("STATENM" %in% names(stbnd)) {
-        stbnd.att <- "STATENM"
-      } else {
-        stop("include attribute in stbnd with state names - stbnd.att")
-      }
-    }
-  } else if (exists("stunitco")) {
-    stbnd <- FIESTAutils::stunitco			## longlat-NAD83 projection
+  ## Define stbnd
+  stbnd <- FIESTAutils::stunitco	
 
-    stbnd.att<- pcheck.varchar(var2check=stbnd.att, 
+  ## Check stbnd.att
+  stbndlst <- c("STATECD", "STATENM", "COUNTYFIPS")
+  stbnd.att<- pcheck.varchar(var2check=stbnd.att, 
                       varnm="stbnd.att", gui=gui, 
-                      checklst=names(stbnd), 
+                      checklst=stbndlst, 
                       caption="State name attribute", 
                       warn=paste(stbnd.att, "not in stunitco"))
-    if (is.null(stbnd.att)) stbnd.att <- "STATENM"
-  } else if (is.null(states)) {
-    stop("must include state names (states) or state boundary (stbnd) for bnd intersect")
-  }
- 
-  if (!is.null(stbnd)) {
-    ## Reproject stbnd to bnd projection
-    prjdat <- crsCompare(stbnd, ycrs=bndx, nolonglat=TRUE)
-    stbnd <- prjdat$x
-    bndx <- prjdat$ycrs
+  if (is.null(stbnd.att)) stbnd.att <- "COUNTYFIPS"
 
-    ## Check intersecting states
-    stbnd <- suppressWarnings(sf::st_crop(stbnd, sf::st_bbox(bndx)))
-    stated <- sf_dissolve(stbnd, stbnd.att)
+  ## Define stbnd
+  stbnd <- FIESTAutils::stunitco	
 
-    stateint <- suppressWarnings(selectByIntersects(stated, sf::st_make_valid(bndx),
+  ## Reproject stbnd to bnd projection
+  prjdat <- crsCompare(stbnd, ycrs=bndx, nolonglat=TRUE)
+  stbnd <- prjdat$x
+  bndx <- prjdat$ycrs
+
+  ## Check intersecting states
+  stbnd <- suppressWarnings(sf::st_crop(stbnd, sf::st_bbox(bndx)))
+  stated <- sf_dissolve(stbnd, stbnd.att)
+
+  stateint <- suppressWarnings(selectByIntersects(stated, sf::st_make_valid(bndx),
 				overlapThreshold=overlap))
 
-    ## Check name of attribute identifying state
-    stname.att <- pcheck.varchar(var2check=stname.att, 
-                        varnm="stname.att", gui=gui, 
-                        checklst=names(stbnd), 
-                        caption="State name attribute", 
-                        warn=paste(stname.att, "not in stbnd"), 
-                        stopifinvalid=FALSE)
-    statenamesint <- stateint[[stbnd.att]][!is.na(stateint[[stbnd.att]])]
+#  ## Check name of attribute identifying state
+#  stname.att <- pcheck.varchar(var2check=stname.att, 
+#                        varnm="stname.att", gui=gui, 
+#                        checklst=names(stbnd), 
+#                        caption="State name attribute", 
+#                        warn=paste(stname.att, "not in stbnd"), 
+#                        stopifinvalid=FALSE)
 
-    if (!is.null(states)) {
-      states <- pcheck.states(states)
-      if (!all(states %in% statenamesint)) {
-        statesmiss <- states[!states %in% statenamesint]
-        if (length(statesmiss) == length(states)) {
-          stop("no states intersect boundary")
-        } else {
-          message("not all states intersect boundary: ", statesmiss)
-          states <- states[states %in% statenamesint]
-          stateint <- stateint[stateint$STATENM %in% states, ]
-          clipbnd <- TRUE
-        }
-      } else if (length(states) < length(statenamesint)) {
+  statenamesint <- stateint[[stbnd.att]][!is.na(stateint[[stbnd.att]])]
+  if (stbnd.att == "COUNTYFIPS") {
+    statenamesint <- formatC(as.numeric(statenamesint), width=5, digits=5, flag="0")
+    stcdchk <- sort(unique(as.numeric(sapply(statenamesint, 
+			substr, nchar(statenamesint)-5, nchar(statenamesint)-3))))
+  } else if (stbnd.att == "STATECD") {
+    stcdchk <- statenamesint
+  } else if (stbnd.att == "STATENM") {
+    stcdchk <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$MEANING %in%
+			statenamesint, "VALUE"]
+  }
+
+  if (!is.null(states)) {
+    states <- pcheck.states(states, statereturn="VALUE")
+    if (is.null(states)) {
+      stop("invalid states")
+    }
+    if (!all(states %in% stcdchk)) {
+      statesmiss <- states[!states %in% stcdchk]
+      statesmiss <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
+			statesmiss, "MEANING"]
+      if (length(statesmiss) == length(states)) {
+        stop("no states intersect boundary")
+      } else {
+        message("not all states intersect boundary: ", statesmiss)
+        states <- states[states %in% stcdchk]
+        stateint <- stateint[stateint$STATENM %in% states, ]
         clipbnd <- TRUE
       }
-      statenames <- states
-    } else {
-      states <- statenamesint
-      statenames <- states
+    } else if (length(states) < length(stcdchk)) {
+      clipbnd <- TRUE
     }
-    if (showsteps) {
-      mar <-  graphics::par("mar")
-      graphics::par(mar=c(1,1,1,1))
+  } 
+  statenames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
+			stcdchk, "MEANING"]
+  if (showsteps) {
+    op <- graphics::par()
+    on.exit(par(op))
 
-      plot(sf::st_geometry(stateint))
-      plot(sf::st_geometry(bndx), add=TRUE, border="blue")
-      graphics::par(mar=mar)
-    }
-  } else {
-    states <- pcheck.states(states)
-    statenames <- states
+    mar <-  graphics::par("mar")
+    graphics::par(mar=c(1,1,1,1))
+
+    plot(sf::st_geometry(stateint))
+    plot(sf::st_geometry(bndx), add=TRUE, border="blue")
+    #graphics::par(mar=mar)
   }
-  if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) {
-    if (stbnd.att == "COUNTYFIPS") {
-      states <- formatC(as.numeric(states), width=5, digits=5, flag="0")
-      statenames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
-			sort(unique(as.numeric(sapply(states, 
-			substr, nchar(states)-5, nchar(states)-3)))), "MEANING"]
-    }
-  }
-  ## Check statenames
-  if (is.null(RS) && !clipbnd) {
-    statenameslst <- FIESTAutils::ref_statecd$MEANING
-    statenames <- pcheck.varchar(var2check=statenames, 
-                        varnm="states", gui=gui, 
-                        checklst=statenameslst, 
-                        caption="States", 
-                        stopifnull=TRUE, multiple=TRUE)
 
-  } else {
-    if (!is.null(RS)) {
-      statenameslst <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$RS == RS, "MEANING"]
-      if (!all(statenames %in% statenameslst)) {
-        statesout <- statenames[which(!statenames %in% statenameslst)]
-        statenames <- statenames[which(statenames %in% statenameslst)]
-        message(paste0("states are outside ", RS, " region: ", toString(statesout)))
+  ## IF RS is not null, check if states are outside RS
+  if (!is.null(RS)) {
+    RSstatelst <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$RS == RS, "VALUE"]
+    if (!all(stcds %in% RSstatelst)) {
+      statesout <- stcds[which(!stcds %in% RSstatelst)]
+      stcds <- stcds[which(stcds %in% RSstatelst)]
 
-        if (length(statenames) == 0) {
-          stop("no states in RMRS")
-        }
-        message("clipping boundary to ", RS, " states: ", toString(statenames))
+      statesoutnames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
+			statesout, "MEANING"]
+      message(paste0("states are outside ", RS, " region: ", toString(statesoutnames)))
+
+      if (length(stcds) == 0) {
+        stop("no states in RMRS")
       }
+      statenames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
+			stcds, "MEANING"]
+      message("clipping boundary to ", RS, " states: ", toString(statenames))
+      clipbbnd <- TRUE
     }
-    if (!is.null(stname.att)) {
-      bndx <- spClipPoly(bndx, 
-                    clippolyv=stbnd[stbnd[[stname.att]] %in% statenames, ])
-      if (nrow(bndx) == 0) stop("invalid stname.att")
-    }
-    if (stbnd.att == "COUNTYFIPS") {
-      stcds <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$MEANING %in% statenames, "VALUE"]
-      states <- states[as.numeric(substr(states, 1, 2)) %in% stcds]
-    }
+  }
+
+  ## Clip bound to states
+  if (clipbnd) {
+    bndx <- spClipPoly(bndx, clippolyv=stbnd[stbnd[["STATENM"]] %in% statenames, ])
+    #if (nrow(bndx) == 0) stop("invalid stname.att")
   }
   message("boundary intersected the following states: ", toString(statenames))
 
@@ -284,7 +271,7 @@ spGetStates <- function(bnd_layer,
                               add_layer=TRUE))
   }
   
-  return(list(states=states, bndx=bndx, stbnd.att=stbnd.att, statenames=statenames))
+  return(list(states=statenamesint, bndx=bndx, stbnd.att=stbnd.att, statenames=statenames))
 }
 
 

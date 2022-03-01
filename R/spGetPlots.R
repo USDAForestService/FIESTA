@@ -240,10 +240,6 @@ spGetPlots <- function(bnd = NULL,
   ## List of clipped data frames
   ##############################################################################
 
-  ## Set par 
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
   ## Set global variables
   xydat=stateFilter=countyfips=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
 	othertabnms=stcds=spxy=stbnd=states <- NULL
@@ -436,8 +432,9 @@ spGetPlots <- function(bnd = NULL,
         if (is.null(chk)) return(NULL)
 
         ## Get intersecting states
-        statedat <- spGetStates(bndx, stbnd=NULL, stbnd_dsn=NULL, 
-			        stbnd.att="COUNTYFIPS", RS=RS, states=states, showsteps=showsteps)
+        statedat <- spGetStates(bndx,
+			        	stbnd.att="COUNTYFIPS", 
+					RS=RS, states=states, showsteps=showsteps)
         bndx <- statedat$bndx
         stbnd.att <- statedat$stbnd.att
         statenames <- statedat$statenames
@@ -494,7 +491,12 @@ spGetPlots <- function(bnd = NULL,
 	   message("RSQLite and DBI packages are required to run SQLite queries")
       }
     }
-  } 
+  }
+
+  ## Check showsteps
+  #############################################################################
+  showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
+                             title="Show steps?", first="NO", gui=gui) 
  
   ## Check returnxy
   #############################################################################
@@ -1039,7 +1041,10 @@ spGetPlots <- function(bnd = NULL,
       }
       if (showsteps && !is.null(spxy)) {
         ## Set plotting margins
-        mar <-  par("mar")
+        #mar <-  par("mar")
+        op <- par()
+        on.exit(par(op))
+
         par(mar=c(1,1,1,1))
 
         if (i == 1) {
@@ -1050,7 +1055,7 @@ spGetPlots <- function(bnd = NULL,
           }
         }
         plot(sf::st_geometry(spxy[spxy$STATECD == stcd,]), col="blue", cex=.5, add=TRUE)
-        par(mar=mar)
+        #par(mar=mar)
       }
     }  ## End of looping thru states
   }
@@ -1062,7 +1067,7 @@ spGetPlots <- function(bnd = NULL,
     ## 1) Get most current plots from xy database that intersect state
     ## 3) Subset other data with clipped xy joinid
     ####################################################################
-
+ 
     ## Check for data tables in database
     ###########################################################
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
@@ -1072,6 +1077,7 @@ spGetPlots <- function(bnd = NULL,
     if (istree) {
       tree_layer <- chkdbtab(tablst, tree_layer, stopifnull=TRUE)
     }
+
     if (isseed) {
       seedchk <- chkdbtab(tablst, seed_layer)
       if (is.null(seedchk) && seed_layer == "seed") {
