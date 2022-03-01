@@ -27,7 +27,6 @@ Authors@R:
 Description: A research estimation tool for analysts that work with sample-based
     inventory data from the U.S. Department of Agriculture, Forest Service,
     Forest Inventory and Analysis (FIA) Program. 
-Additional_repositories: https://github.com/USDAForestService/FIESTAutils
 Depends: 
     R (>= 4.0),
     data.table,
