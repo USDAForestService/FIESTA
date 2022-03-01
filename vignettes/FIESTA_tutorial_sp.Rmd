@@ -3,7 +3,7 @@ title: "FIESTA - Spatial Tools"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{FIESTA - Spatial Tools}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{rmarkdown::render}
   \usepackage[utf8]{inputenc}
 ---
 

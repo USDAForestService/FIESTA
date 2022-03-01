@@ -3,7 +3,7 @@ title: "`FIESTA` Manual - Population Data"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{`FIESTA` Manual - Population Data}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{rmarkdown::render}
   \usepackage[utf8]{inputenc}
 ---
 

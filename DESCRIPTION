@@ -56,7 +56,7 @@ Suggests:
     rJava,
     xlsx,
     raster
-VignetteBuilder: knitr
+VignetteBuilder: rmarkdown
 License: file LICENSE
 LazyData: true
 SystemRequirements: C++11
