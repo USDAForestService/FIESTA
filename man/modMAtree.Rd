@@ -17,6 +17,7 @@ modMAtree(
   prednames = NULL,
   modelselect = FALSE,
   FIA = TRUE,
+  bootstrap = FALSE,
   returntitle = FALSE,
   savedata = FALSE,
   table_opts = NULL,
@@ -64,6 +65,10 @@ model.}
 
 \item{FIA}{Logical. If TRUE, the finite population term is removed from
 estimator to match FIA estimates.}
+
+\item{bootstrap}{Logical. If TRUE, returns bootstrap variance estimates,
+otherwise uses Horvitz-Thompson estimator under simple random sampling
+without replacement.}
 
 \item{returntitle}{Logical. If TRUE, returns title(s) of the estimation
 table(s).}

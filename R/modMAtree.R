@@ -68,6 +68,9 @@
 #' @param modelselect Logical. If TRUE, variable selection occurs. 
 #' @param FIA Logical. If TRUE, the finite population term is removed from
 #' estimator to match FIA estimates.
+#' @param bootstrap Logical. If TRUE, returns bootstrap variance estimates,
+#' otherwise uses Horvitz-Thompson estimator under simple random sampling
+#' without replacement.
 #' @param returntitle Logical. If TRUE, returns title(s) of the estimation
 #' table(s).
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder.
@@ -242,7 +245,8 @@ modMAtree <- function(MApopdat,
                       colvar = NULL, 
                       prednames = NULL, 
                       modelselect = FALSE, 
-                      FIA = TRUE, 
+                      FIA = TRUE,
+                      bootstrap = FALSE,
                       returntitle = FALSE, 
                       savedata = FALSE, 
                       table_opts = NULL, 
@@ -595,6 +599,16 @@ modMAtree <- function(MApopdat,
   getweights <- ifelse(MAmethod %in% c("greg", "PS", "HT"), TRUE, FALSE) 
   getweights <- FALSE
   
+  if(bootstrap) {
+    if(MAmethod %in% c('greg', 'gregEN', 'ratio')) {
+      var_method <- "bootstrapSRS"
+    }
+  } else {
+    if(MAmethod %in% c('greg', 'gregEN', 'ratio')) {
+      var_method <- "LinHTSRS"
+    }
+  }
+  
 #  if (addtotal) {
     ## Get total estimate and merge area
     tdomdattot <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
@@ -604,7 +618,8 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain="TOTAL", response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, getweights=getweights)
+                        FIA=FIA, modelselect=modelselect, getweights=getweights,
+                        var_method=var_method)
     unit_totest <- do.call(rbind, sapply(unit_totestlst, '[', "unitest"))
     unit_weights <- do.call(rbind, sapply(unit_totestlst, '[', "weights")) 
     unit_weights$areaweights <- unit_weights$weights * sum(unitarea[[areavar]])
@@ -628,7 +643,8 @@ modMAtree <- function(MApopdat,
                         unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                         MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                         domain=rowvar, response=response, npixels=npixels, 
-                        FIA=FIA, modelselect=modelselect, getweights=getweights)
+                        FIA=FIA, modelselect=modelselect, getweights=getweights,
+                        var_method=var_method)
     unit_rowest <- do.call(rbind, sapply(unit_rowestlst, '[', "unitest"))
     if (MAmethod %in% c("greg", "gregEN")) {
       predselectlst$rowest <- do.call(rbind, sapply(unit_totestlst, '[', "predselect"))
@@ -642,7 +658,7 @@ modMAtree <- function(MApopdat,
                             unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                             MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                             domain=colvar, response=response, npixels=npixels, 
-                            FIA=FIA, modelselect=modelselect)
+                            FIA=FIA, modelselect=modelselect, var_method=var_method)
       unit_colest <- do.call(rbind, sapply(unit_colestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$colest <- do.call(rbind, sapply(unit_colestlst, '[', "predselect"))
@@ -657,7 +673,7 @@ modMAtree <- function(MApopdat,
                                unitlut=unitlut, unitvar=unitvar, esttype=esttype, 
                                MAmethod=MAmethod, strvar=strvar, prednames=prednames, 
                                domain="grpvar", response=response, npixels=npixels, 
-                               FIA=FIA, modelselect=modelselect)
+                               FIA=FIA, modelselect=modelselect, var_method=var_method)
       unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
