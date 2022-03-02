@@ -6,6 +6,8 @@ Paul L.; Toney, Chris; White, Grayson W.
 
 # 🎉 FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
+## Overview
+
 The R package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a
 research estimation tool for analysts that work with sample-based
 inventory data from the U.S. Department of Agriculture, Forest Service,
@@ -59,12 +61,6 @@ other functions for a specific purpose.
     estimation processes. These functions reside in the `FIESTAnalysis`
     package.
 
-## License
-
-This code was written and prepared by a U.S. Government employee on
-official time, and therefore it is in the public domain and not subject
-to copyright.
-
 ## Installation
 
 Currently, to install `FIESTA`, you must go through a few steps:
@@ -96,64 +92,6 @@ token each time you update `FIESTA` (until public release).
 5.  Give your token a descriptive name.
 6.  Check all boxes
 7.  Save token (\~30 character string) to a file and as an R object.
-
-<!-- #### 3. Install FIESTA suggested packages -->
-<!-- - Checks to make sure all `FIESTA` dependent packages are installed -->
-<!-- - Removes old version of `FIESTA` from current R library -->
-<!-- - `pkginstalled <- installed.packages()` -->
-<!-- - `if ("FIESTA" %in% row.names(pkginstalled)) remove.packages("FIESTA")` -->
-<!-- Use the following function to check and install packages for `FIESTA`. -->
-<!-- Note: copy/paste function into RStudio or RGui  -->
-<!-- ```{r, eval = F} -->
-<!-- chkpkg <- function(pkg) { -->
-<!--   ## DESCRIPTION: Function to check if package exists -->
-<!--   ## If package does not exist, it will install the package -->
-<!--   if (!require(pkg, character.only = TRUE)) { -->
-<!--     message("installing ", pkg, " package...") -->
-<!--     install.packages(pkg, dependencies=TRUE) -->
-<!--   } -->
-<!--   if (!require(pkg, character.only = TRUE)) { -->
-<!--     stop("load failure: ", pkg) -->
-<!--   }  -->
-<!-- } -->
-<!-- ``` -->
-<!-- `FIESTA` dependent and imported packages are installed when you install the source code  -->
-<!-- from GitHub. -->
-<!-- If you are not installing the source code and it is the first time using `FIESTA`,  -->
-<!-- you must install the following packages: -->
-<!-- ```{r, eval = F} -->
-<!-- depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp') -->
-<!-- lapply(depend.pkgs, chkpkg) -->
-<!-- ``` -->
-<!-- You will need to install suggested packages even if installing the source code. -->
-<!-- Installing suggested packages is optional, depending on how you are using `FIESTA`.  -->
-<!-- NOTE: select closest CRAN mirror for download -->
-<!-- ```{r, eval = F} -->
-<!-- ## Load suggests packages -->
-<!-- misc.pkgs <- c('devtools', 'units') -->
-<!-- lapply(misc.pkgs, chkpkg) -->
-<!-- ## For database extraction -->
-<!-- db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite') -->
-<!-- lapply(db.pkgs, chkpkg) -->
-<!-- ## For model-assisted estimation -->
-<!-- ma.pkgs <- c('mase') -->
-<!-- lapply(ma.pkgs, chkpkg) -->
-<!-- ## For small-area estimation -->
-<!-- sa.pkgs <- c('sae', 'JoSAE', 'nlme', 'hbsae') -->
-<!-- lapply(sa.pkgs, chkpkg) -->
-<!-- ## For xlsx output -->
-<!-- xlsx.pkgs <- c('rJava', 'xlsx') -->
-<!-- lapply(xlsx.pkgs, chkpkg) -->
-<!-- ## For reports -->
-<!-- report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer') -->
-<!-- lapply(report.pkgs, chkpkg) -->
-<!-- ## For PB module reports -->
-<!-- pbreport.pkgs <- c('pheatmap') -->
-<!-- lapply(pbreport.pkgs, chkpkg) -->
-<!-- ## For spatial manipulation -->
-<!-- sp.pkgs <- c('rgeos', 'raster') -->
-<!-- lapply(sp.pkgs, chkpkg) -->
-<!-- ``` -->
 
 #### 3. Install FIESTA package from source code
 
@@ -188,6 +126,12 @@ Then, you can load `FIESTA`:
 ``` r
 library(FIESTA)
 ```
+
+## License
+
+This code was written and prepared by a U.S. Government employee on
+official time, and therefore it is in the public domain and not subject
+to copyright.
 
 <!-- ## HELP and vignettes -->
 <!-- To get help for the `FIESTA` package -->
@@ -243,12 +187,12 @@ GBpopdat <- modGBpop(popTabs = popTables(cond = FIESTA::WYcond,
 summary(GBpopdat)
 #>             Length Class      Mode     
 #> popType      1     -none-     character
-#> condx       13     data.table list     
+#> condx       12     data.table list     
 #> pltcondx    41     data.table list     
 #> cuniqueid    1     -none-     character
 #> condid       1     -none-     character
 #> ACI.filter   1     -none-     character
-#> unitarea     2     data.frame list     
+#> unitarea     2     data.table list     
 #> areavar      1     -none-     character
 #> areaunits    1     -none-     character
 #> unitvar      1     -none-     character
@@ -264,10 +208,10 @@ summary(GBpopdat)
 #> invyrs       1     by         list     
 #> estvar.area  1     -none-     character
 #> adj          1     -none-     character
-#> treex       30     data.table list     
+#> treex       21     data.table list     
 #> tuniqueid    1     -none-     character
 #> adjtree      1     -none-     logical  
-#> seedx       12     data.table list
+#> seedx       11     data.table list
 ```
 
 Note that the `GBpopdat` list generated by `modGBpop` contains many
@@ -300,13 +244,15 @@ str(area_estimates, max.level = 2)
 #>   ..$ Forest type           : chr [1:19] "182" "184" "185" "201" ...
 #>   ..$ Estimate              : chr [1:19] "632481.7" "339749.8" "14854.7" "881189" ...
 #>   ..$ Percent Sampling Error: chr [1:19] "17.28" "23.85" "100" "14.21" ...
-#>  $ raw    :List of 9
+#>  $ raw    :List of 11
 #>   ..$ unit_totest:'data.frame':  23 obs. of  17 variables:
 #>   ..$ totest     :'data.frame':  1 obs. of  13 variables:
 #>   ..$ unit_rowest:'data.frame':  135 obs. of  18 variables:
 #>   ..$ rowest     :'data.frame':  18 obs. of  13 variables:
-#>   ..$ domdat     :'data.frame':  590 obs. of  15 variables:
+#>   ..$ domdat     :'data.frame':  590 obs. of  14 variables:
+#>   ..$ module     : chr "GB"
 #>   ..$ esttype    : chr "AREA"
+#>   ..$ GBmethod   : chr "PS"
 #>   ..$ rowvar     : chr "FORTYPCD"
 #>   ..$ colvar     : chr "NONE"
 #>   ..$ areaunits  : chr "acres"

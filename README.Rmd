@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
 
 # `r emo::ji("popper")` FIESTA <img src="https://github.com/USDAForestService/FIESTA/blob/master/figs/fiesta_grey.png?raw=true" align="right" width=150 />
 
+## Overview
+
 The R package, `FIESTA` (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. `FIESTA` can generate FIA's traditional state-wide estimates while also accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN's library of packages. `FIESTA` contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
 
 Functions are organized by type or objective and are named with a corresponding prefix (Fig. 1). `FIESTA` core functions (CORE) facilitate data extraction and compilation of data input information and are used independently or within the `FIESTA` estimation modules. `FIESTA` estimation modules (MODULE) combine multiple functions from `FIESTA` or other packages to generate population estimates using different estimation strategies. Each module has an associated `mod*pop` function for compiling the population data and calculations (e.g., adjustments for nonresponse, standardizing auxiliary data) for a custom boundary and can be used for generating multiple estimates. `FIESTA` analysis functions, found in the `FIESTAnalysis` package, streamline different estimation routines by wrapping (i.e., combining) estimation modules and other functions for a specific purpose. 
@@ -37,11 +39,6 @@ Functions are organized by type or objective and are named with a corresponding 
 ##### Analysis Functions
 
 * Analysis functions (`an*`) - wrapper functions for steam-lining estimation processes. These functions reside in the `FIESTAnalysis` package. 
-
-## License
-
-This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
-
 
 ## Installation
 
@@ -69,79 +66,6 @@ Note: `FIESTA` is frequently updated. You will use this token each time you upda
 5. Give your token a descriptive name.
 6. Check all boxes
 7. Save token (~30 character string) to a file and as an R object.
-
-
-<!-- #### 3. Install FIESTA suggested packages -->
-
-<!-- - Checks to make sure all `FIESTA` dependent packages are installed -->
-<!-- - Removes old version of `FIESTA` from current R library -->
-<!-- - `pkginstalled <- installed.packages()` -->
-<!-- - `if ("FIESTA" %in% row.names(pkginstalled)) remove.packages("FIESTA")` -->
-
-<!-- Use the following function to check and install packages for `FIESTA`. -->
-<!-- Note: copy/paste function into RStudio or RGui  -->
-<!-- ```{r, eval = F} -->
-<!-- chkpkg <- function(pkg) { -->
-<!--   ## DESCRIPTION: Function to check if package exists -->
-<!--   ## If package does not exist, it will install the package -->
-<!--   if (!require(pkg, character.only = TRUE)) { -->
-<!--     message("installing ", pkg, " package...") -->
-<!--     install.packages(pkg, dependencies=TRUE) -->
-<!--   } -->
-<!--   if (!require(pkg, character.only = TRUE)) { -->
-<!--     stop("load failure: ", pkg) -->
-<!--   }  -->
-<!-- } -->
-<!-- ``` -->
-
-<!-- `FIESTA` dependent and imported packages are installed when you install the source code  -->
-<!-- from GitHub. -->
-
-<!-- If you are not installing the source code and it is the first time using `FIESTA`,  -->
-<!-- you must install the following packages: -->
-<!-- ```{r, eval = F} -->
-<!-- depend.pkgs <- c('data.table', 'sf', 'rgdal', 'Rcpp') -->
-<!-- lapply(depend.pkgs, chkpkg) -->
-<!-- ``` -->
-
-<!-- You will need to install suggested packages even if installing the source code. -->
-<!-- Installing suggested packages is optional, depending on how you are using `FIESTA`.  -->
-
-<!-- NOTE: select closest CRAN mirror for download -->
-
-<!-- ```{r, eval = F} -->
-<!-- ## Load suggests packages -->
-<!-- misc.pkgs <- c('devtools', 'units') -->
-<!-- lapply(misc.pkgs, chkpkg) -->
-
-<!-- ## For database extraction -->
-<!-- db.pkgs <- c('DBI', 'odbc', 'sqldf', 'RSQLite') -->
-<!-- lapply(db.pkgs, chkpkg) -->
-
-<!-- ## For model-assisted estimation -->
-<!-- ma.pkgs <- c('mase') -->
-<!-- lapply(ma.pkgs, chkpkg) -->
-
-<!-- ## For small-area estimation -->
-<!-- sa.pkgs <- c('sae', 'JoSAE', 'nlme', 'hbsae') -->
-<!-- lapply(sa.pkgs, chkpkg) -->
-
-<!-- ## For xlsx output -->
-<!-- xlsx.pkgs <- c('rJava', 'xlsx') -->
-<!-- lapply(xlsx.pkgs, chkpkg) -->
-
-<!-- ## For reports -->
-<!-- report.pkgs <- c('knitr', 'rmarkdown', 'RColorBrewer') -->
-<!-- lapply(report.pkgs, chkpkg) -->
-
-<!-- ## For PB module reports -->
-<!-- pbreport.pkgs <- c('pheatmap') -->
-<!-- lapply(pbreport.pkgs, chkpkg) -->
-
-<!-- ## For spatial manipulation -->
-<!-- sp.pkgs <- c('rgeos', 'raster') -->
-<!-- lapply(sp.pkgs, chkpkg) -->
-<!-- ``` -->
 
 
 #### 3. Install FIESTA package from source code
@@ -181,6 +105,9 @@ devtools::load_all()
 library(FIESTA)
 ```
 
+## License
+
+This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright. 
 
 
 <!-- ## HELP and vignettes -->
