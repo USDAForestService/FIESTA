@@ -28,15 +28,15 @@ Description: A research estimation tool for analysts that work with sample-based
     inventory data from the U.S. Department of Agriculture, Forest Service,
     Forest Inventory and Analysis (FIA) Program. 
 Depends: 
-    R (>= 4.0),
-    data.table,
-    sf,
-    FIESTAutils
+    R (>= 4.0)
 Imports:
+    data.table,
     methods,
+    FIESTAutils,
     grDevices,
     graphics,
     utils,
+    sf,
     sp,
     rgdal,
     JoSAE,
