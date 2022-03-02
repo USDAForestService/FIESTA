@@ -31,31 +31,23 @@ Depends:
     R (>= 4.0)
 Imports:
     data.table,
-    methods,
+    DBI,
     FIESTAutils,
     grDevices,
     graphics,
-    utils,
-    sf,
-    sp,
+    methods,
     rgdal,
-    JoSAE,
-    mase,
-    sae,
-    hbsae,
-    nlme,
-    xml2,
-    units,
-    DBI,
     RSQLite,
+    sf,
     sqldf,
-    RColorBrewer
+    utils
 Suggests: 
     knitr,
+    raster,
     rmarkdown,
     rJava,
-    xlsx,
-    raster
+    sp,
+    xlsx
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
