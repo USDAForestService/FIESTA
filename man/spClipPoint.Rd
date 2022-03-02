@@ -132,8 +132,8 @@ record, it will be returned but not exported.
   polyv <- xyext$clip_polyv
 
   ## Plot extracted values of national forest district
-  plot(st_geometry(polyv))
-  plot(st_geometry(xyplt), add=TRUE)
+  plot(sf::st_geometry(polyv))
+  plot(sf::st_geometry(xyplt), add=TRUE)
 
 }
 \author{
