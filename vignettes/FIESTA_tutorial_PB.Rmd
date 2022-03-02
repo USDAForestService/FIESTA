@@ -745,10 +745,10 @@ Now, let's create a barplot to compare net change. First, we need to set up a da
 ```{r}
 tabvars <- c("est", "est.se")
 tab1 <- cover1$raw$unit_rowest[, c("cover_1", cover1$titlelst$title.rowvar, tabvars)]
-setnames(tab1, tabvars, paste0(tabvars, ".1"))
+data.table::setnames(tab1, tabvars, paste0(tabvars, ".1"))
 
 tab2 <- cover2$raw$unit_rowest[, c("cover_2", cover2$titlelst$title.rowvar, tabvars)]
-setnames(tab2, tabvars, paste0(tabvars, ".2"))
+data.table::setnames(tab2, tabvars, paste0(tabvars, ".2"))
 
 tabx <- merge(tab1, tab2, by.x="cover_1", by.y="cover_2")
 tabx

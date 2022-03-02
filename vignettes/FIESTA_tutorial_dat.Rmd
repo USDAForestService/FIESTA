@@ -246,12 +246,12 @@ The `datLUTclass` function merges a look-up table to define categories of contin
   <summary>View Example</summary>
   
 ```{r}
-ref_diacl2in
+FIESTAutils::ref_diacl2in
 
 WYtreelut <- datLUTclass(
                 x = WYtree, 
                 xvar = "DIA",
-                LUT = ref_diacl2in, 
+                LUT = FIESTAutils::ref_diacl2in, 
                 LUTclassnm = "DIACL2IN"
                 )
 
@@ -324,14 +324,14 @@ The `datLUTnm` function merges a look-up table to append new variables, names, o
 First, we can look at a reference table stored in `FIESTA` with code descriptions of common FIA attributes.
 
 ```{r}
-head(ref_codes)
-unique(ref_codes$VARIABLE)
+head(FIESTAutils::ref_codes)
+unique(FIESTAutils::ref_codes$VARIABLE)
 ```
 
 Next, we set the code descriptions for FIA disturbance variable.
 
 ```{r}
-ref_dstrbcd <- ref_codes[ref_codes$VARIABLE == "DSTRBCD",]
+ref_dstrbcd <- FIESTAutils::ref_codes[FIESTAutils::ref_codes$VARIABLE == "DSTRBCD",]
 head(ref_dstrbcd)
 ```
 
@@ -990,7 +990,7 @@ head(ba.limber)
 
 ```{r}
 ## Total basal area per acre by species and diameter class
-DIALUT <- ref_diacl2in[ref_diacl2in$MIN <= 37, ]
+DIALUT <- FIESTAutils::ref_diacl2in[FIESTAutils::ref_diacl2in$MIN <= 37, ]
 names(DIALUT)[names(DIALUT) == "MEANING"] <- "DIACL2IN"
 
 ## Append diameter classes to tree table

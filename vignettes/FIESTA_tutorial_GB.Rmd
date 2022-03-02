@@ -802,7 +802,7 @@ Parameters defined in the following examples are organized by category: populati
 The following reference table can be used for defining `estvar` and `estvar.filter`:
 
 ```{r}
-ref_estvar[, c("ESTTITLE", "ESTVAR", "ESTFILTER", "ESTUNITS")]
+FIESTAutils::ref_estvar[, c("ESTTITLE", "ESTVAR", "ESTFILTER", "ESTUNITS")]
 ```
 
 
@@ -920,7 +920,7 @@ datBarplot(
       yvar = "est",
       errbars = TRUE, 
       sevar = "est.se", 
-      main = wraptitle(titlelst1.2$title.row, 75),
+      main = FIESTAutils::wraptitle(titlelst1.2$title.row, 75),
       ylabel = titlelst1.2$title.yvar, 
       divideby = "million"
       )
@@ -1209,12 +1209,12 @@ head(tree2.2$est)
 head(GBpopdat.bh$treex)
 
 ## Use reference data frame stored as an R object in FIESTA
-head(ref_diacl2in)
+head(FIESTAutils::ref_diacl2in)
 
 ## Appends a new column to GBpopdat$treex classifying the DIA variable based on MIN and MAX columns in ref_diacl2in
 dat <- datLUTclass(x = GBpopdat.bh$treex, 
                    xvar = "DIA", 
-                   LUT = ref_diacl2in, 
+                   LUT = FIESTAutils::ref_diacl2in, 
                    LUTclassnm = "DIACL2IN")
 GBpopdat.bh$treex <- dat$xLUT
 

@@ -524,7 +524,7 @@ datBarplot(
       yvar = "est",
       errbars = TRUE, 
       sevar = "est.se", 
-      main = wraptitle(titlelst3$title.row, 75),
+      main = FIESTAutils::wraptitle(titlelst3$title.row, 75),
       ylabel = titlelst3$title.yvar, 
       divideby = "million"
       )
