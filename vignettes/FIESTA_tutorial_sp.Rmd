@@ -766,7 +766,6 @@ Next, we extract polygon attributes from `WYbighorn` to `WYpts`, keeping `NULL` 
 ```{r}
 stratlst <- spGetStrata(WYspplt, 
                         uniqueid = "CN", 
-                        unittype = "POLY", 
                         unit_layer = WYbhfn, 
                         strattype = "RASTER", 
                         strat_layer = fornffn) 

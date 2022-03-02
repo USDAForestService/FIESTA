@@ -24,7 +24,6 @@
 #' formats (https://www.gdal.org/ogr_formats.html). Optional if unit_layer is
 #' sf object.
 #' @param uniqueid String.* Unique identifier of xyplt records.
-#' @param unittype String. Spatial layer type of unit_layer ("POLY", "RASTER").
 #' Note: raster unit layers are converted to polygon.
 #' @param unitvar String. If unittype="POLY", name of attribute in unit_layer
 #' defining estimation units. If NULL, the unit_layer represents one estimation
@@ -126,7 +125,6 @@ spGetStrata <- function(xyplt,
                         unit_layer, 
                         unit_dsn = NULL, 
                         uniqueid = "PLT_CN", 
-                        unittype = "POLY", 
                         unitvar = NULL, 
                         unit.filter = NULL, 
                         strattype = "RASTER", 
@@ -154,6 +152,7 @@ spGetStrata <- function(xyplt,
 
   ## Set global variables
   value=count=strwt=polyv.lut=NAlst <- NULL
+  unittype <- "POLY"
 
   ## Adds to file filters to Cran R Filters table.
   if (.Platform$OS.type=="windows") {
@@ -258,7 +257,7 @@ spGetStrata <- function(xyplt,
   ## Check unittype
   ###################################################################
   unittype <- pcheck.varchar(var2check=unittype, varnm="unittype", 
-	    gui=gui, checklst=typelst, caption="Estimation unit type?")
+	    gui=gui, checklst="POLY", caption="Estimation unit type?")
 
   ## check areaunits
   areaunitslst <- c("acres", "hectares", "sqmeters") 
@@ -329,11 +328,12 @@ spGetStrata <- function(xyplt,
   ## Note: still working on combo... until then, covert to polygon
   ##################################################################
   if (unittype == "RASTER" && !nounit) {
-    message("converting unit_layer to polygon...")
+    #message("converting unit_layer to polygon...")
+    stop("currently not available...")
 
-    unitlayerx <- polygonizeRaster(unitlayerx)
-    unitvar <- "value"
-    unittype == "POLY"
+    #unitlayerx <- polygonizeRaster(unitlayerx)
+    #unitvar <- "value"
+    #unittype == "POLY"
   }
 
   ##################################################################

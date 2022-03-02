@@ -11,7 +11,6 @@ spGetStrata(
   unit_layer,
   unit_dsn = NULL,
   uniqueid = "PLT_CN",
-  unittype = "POLY",
   unitvar = NULL,
   unit.filter = NULL,
   strattype = "RASTER",
@@ -50,9 +49,7 @@ pathname) of unit_layer. The dsn varies by driver. See gdal OGR vector
 formats (https://www.gdal.org/ogr_formats.html). Optional if unit_layer is
 sf object.}
 
-\item{uniqueid}{String.* Unique identifier of xyplt records.}
-
-\item{unittype}{String. Spatial layer type of unit_layer ("POLY", "RASTER").
+\item{uniqueid}{String.* Unique identifier of xyplt records.
 Note: raster unit layers are converted to polygon.}
 
 \item{unitvar}{String. If unittype="POLY", name of attribute in unit_layer
