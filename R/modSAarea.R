@@ -198,7 +198,8 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
 	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf <- NULL
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=
+	est=est.var=est.cv=est.se <- NULL
   rawdata <- TRUE
   
   gui <- FALSE
