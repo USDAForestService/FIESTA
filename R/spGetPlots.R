@@ -1040,10 +1040,9 @@ spGetPlots <- function(bnd = NULL,
         }
       }
       if (showsteps && !is.null(spxy)) {
-        ## Set plotting margins
-        #mar <-  par("mar")
-        op <- par()
-        on.exit(par(op))
+        ## Retain par parameters
+        mar <-  par("mar")
+        on.exit(par(mar=mar))
 
         par(mar=c(1,1,1,1))
 

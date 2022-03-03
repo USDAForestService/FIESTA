@@ -661,11 +661,10 @@ spGetXY <- function(bnd,
   }
 
   if (showsteps) {
-    op <- par()
-    on.exit(par(op))
-
-    ## Set plotting margins
+    ## Retain par parameters
     mar <-  par("mar")
+    on.exit(par(mar=mar))
+
     par(mar=c(1,1,1,1))
 
     plot(sf::st_geometry(spxy), col="blue", cex=.5)

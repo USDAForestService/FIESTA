@@ -632,11 +632,11 @@ spGetSAdoms <- function(smallbnd,
   #SAdomslst <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
 
   if (showsteps) {
-    op <- par()
-    on.exit(par(op))
+    ## Retain par parameters
+    mar <-  par("mar")
+    on.exit(par(mar=mar))
 
     ## Set plotting margins
-    mar <-  par("mar")
     par(mar=c(1,1,1,1))
   }
  
