@@ -662,9 +662,8 @@ spGetXY <- function(bnd,
 
   if (showsteps) {
     ## Retain par parameters
-    mar <-  par("mar")
-    on.exit(par(mar=mar))
-
+    mar <-  graphics::par("mar")
+    on.exit(graphics::par(mar=mar))
     par(mar=c(1,1,1,1))
 
     plot(sf::st_geometry(spxy), col="blue", cex=.5)

@@ -25,9 +25,8 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
   if (showsteps) {
     ## Set par
-    oldpar <- par(no.readonly = TRUE)
-    on.exit(par(oldpar))
-
+    mar <-  graphics::par("mar")
+    on.exit(graphics::par(mar=mar))
     par(mar=c(1,1,1,1))
   }
 

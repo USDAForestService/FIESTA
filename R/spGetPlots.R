@@ -1577,9 +1577,9 @@ spGetPlots <- function(bnd = NULL,
       }
       if (showsteps && !is.null(spxy) && !is.null(bndx)) {
         ## Set plotting margins
-        mar <-  par("mar")
-        par(mar=c(1,1,1,1))
-
+        mar <-  graphics::par("mar")
+        on.exit(graphics::par(mar=mar))
+        
         if (i == 1) {
           if (!is.null(bndx)) {
             plot(sf::st_geometry(bndx), border="black", lwd=0.75)
@@ -1588,7 +1588,6 @@ spGetPlots <- function(bnd = NULL,
           }
         }
         plot(sf::st_geometry(spxy[spxy$STATECD == stcd,]), col="blue", cex=.5, add=TRUE)
-        par(mar=mar)
       } 
     }  ## End of looping thru states
     DBI::dbDisconnect(dbconn)

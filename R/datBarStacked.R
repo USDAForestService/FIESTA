@@ -180,10 +180,11 @@ datBarStacked <- function(x, main.attribute, sub.attribute, response="phat",
     x=response=color=savedata <- NULL
   }
 
-  ## Set par
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
+  ## Set par 
+  mar <-  graphics::par("mar")
+  xpd <-  graphics::par("xpd")
+  on.exit(graphics::par(mar=mar, xpd=xpd))
+  
   ###################################################################################
   ########################## Check Device Type ######################################
   ###################################################################################

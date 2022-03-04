@@ -633,9 +633,9 @@ spGetSAdoms <- function(smallbnd,
 
   if (showsteps) {
     ## Retain par parameters
-    mar <-  par("mar")
-    on.exit(par(mar=mar))
-
+    mar <-  graphics::par("mar")
+    on.exit(graphics::par(mar=mar))
+    
     ## Set plotting margins
     par(mar=c(1,1,1,1))
   }

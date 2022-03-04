@@ -218,10 +218,8 @@ spGetStates <- function(bnd_layer,
   statenames <- FIESTAutils::ref_statecd[FIESTAutils::ref_statecd$VALUE %in%
 			stcdchk, "MEANING"]
   if (showsteps) {
-    op <- graphics::par()
-    on.exit(par(op))
-
     mar <-  graphics::par("mar")
+    on.exit(graphics::par(mar=mar))
     graphics::par(mar=c(1,1,1,1))
 
     plot(sf::st_geometry(stateint))

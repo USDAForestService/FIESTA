@@ -103,9 +103,10 @@ datLineplot <- function(x, xvar, yvar, plotCI=FALSE, sevar=NULL,
   xlim <- NULL
 
   ## Set par 
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
+  mar <-  graphics::par("mar")
+  xpd <-  graphics::par("xpd")
+  on.exit(graphics::par(mar=mar, xpd=xpd))
+  
 
   ##################################################################
   ## CHECK INPUT PARAMETERS

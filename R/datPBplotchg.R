@@ -35,9 +35,9 @@ datPBplotchg <- function(gainloss, CI=95, figTitle="") {
   #     * Input(s): a number!
   #     * Output(s): number of decimal places that would make the number "pretty"
 
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
+  mar <-  graphics::par("mar")
+  xpd <-  graphics::par("xpd")
+  on.exit(graphics::par(mar=mar, xpd=xpd))
 
   getNPrettyDecPlaces <- function(x) {
     nPrettyDecPlaces <- 0 # default = whole numbers
@@ -129,7 +129,6 @@ datPBplotchg <- function(gainloss, CI=95, figTitle="") {
 
   # add uncertainty data (95 CI)
   xcoords <- barp[,1]
-  par(xpd=NA)
   for (i in 1:length(xcoords)) {
     yLo <- min(c(barData[i], barUncData[i]))
     yHi <- max(c(barData[i], barUncData[i]))

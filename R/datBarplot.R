@@ -107,10 +107,11 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   if (.Platform$OS.type=="windows")
     Filters=rbind(Filters,csv=c("Comma-delimited files (*.csv)", "*.csv"))
 
-  ## Set par
-  oldpar <- par(no.readonly = TRUE)
-  on.exit(par(oldpar))
-
+  ## Set par 
+  mar <-  graphics::par("mar")
+  xpd <-  graphics::par("xpd")
+  on.exit(graphics::par(mar=mar, xpd=xpd))
+  
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
