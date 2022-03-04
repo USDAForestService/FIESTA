@@ -336,7 +336,7 @@ check.popdataPB <- function(gui, pnt=NULL, pltpct=NULL, pltpctvars=NULL,
   ## Returns: data table with unitvar and area by estimation unit (unitvar)
   ##	 and areavar (default="ACRES")
   ###################################################################################
-  if (is.null(unitarea) || unitarea == 0) {
+  if (is.null(unitarea)) {
     if (sumunits) {
       stop("need unitarea to combine estimation units")
     }

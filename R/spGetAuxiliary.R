@@ -318,8 +318,12 @@ spGetAuxiliary <- function(xyplt,
      	 	error=function(e) {
 			      message(e, "\n")
 			      return("stop") })
-  if (!is.null(rastlst.contfn) && rastlst.contfn == "stop") {
-    stop()
+  if (!is.null(rastlst.contfn)) {
+    if (length(rastlst.contfn) == 1) {
+      if (rastlst.contfn == "stop") {
+        stop()
+      }
+    }
   }
   if (!is.null(rastlst.contfn)) {
     band.cont <- sapply(rastlst.contfn, function(x) rasterInfo(x)$nbands)
