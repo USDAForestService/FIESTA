@@ -619,6 +619,7 @@ spGetSAdoms <- function(smallbnd,
     maxbndx <- autoselectlst$maxbndx.int
  
   } else {
+
     ## Add DOMAIN column to all rows
     helperbndx$DOMAIN <- helperbndx[[helperbnd.unique]]
     SAdomslst <- list(SAdoms=helperbndx)

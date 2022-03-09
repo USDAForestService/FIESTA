@@ -535,10 +535,10 @@ spGetAuxiliary <- function(xyplt,
     setkeyv(pltcnt, unitvar)
 
     ## Append plot counts to unitzonal
-    unitzonal <- unitzonal[pltcnt]
-    unitzonal[is.na(unitzonal$N), "N"] <- 0
+    unitzonal <- merge(unitzonal, pltcnt, by=unitvar, all.x=TRUE)
+    #unitzonal <- unitzonal[pltcnt]
+    unitzonal <- DT_NAto0(unitzonal, c("N", vars2keep))
   }
-
 
   ###############################################################################
   ## 3) Continuous raster layers - Extract values and get zonal statistics
@@ -779,19 +779,17 @@ spGetAuxiliary <- function(xyplt,
 
   ## Check if any auxiliary data included. If no return estimation unit info only
   noaux <- ifelse (is.null(rastlst.contfn) && is.null(rastlst.catfn), TRUE, FALSE) 
- 
+
   ###################################################################################
   ## Get totacres from domain polygons (if areacalc = TRUE)
   ###################################################################################
   if (areacalc) {
     unit_layerx <- areacalc.poly(unit_layerx, unit=areaunits)
     areavar <- paste0(areaunits, "_GIS")
-
-    unitarea <- unit_layerx[, c(unitvar, areavar)]
-    unitarea <- aggregate(unitarea[[areavar]], list(unitarea[[unitvar]]), sum)
-    names(unitarea) <- c(unitvar, areavar)
+    unitarea <- sf::st_drop_geometry(unit_layerx[, c(unitvar, vars2keep, areavar)])
+    unitarea <- aggregate(unitarea[[areavar]], unitarea[, c(unitvar, vars2keep), drop=FALSE], sum)
+    names(unitarea) <- c(unitvar, vars2keep, areavar)
   }
-
 
   ## Write data frames to CSV files
   #######################################
