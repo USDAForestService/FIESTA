@@ -32,67 +32,70 @@ or code (e.g., 4, 35) of state(s) for evalid. If all states in one or more
 FIA Research Station is desired, set states=NULL and use RS argument to
 define RS.}
 
-\item{RS}{String vector. Name of research station(s)
-('RMRS','SRS','NCRS','NERS','PNWRS').  Do not use if states is populated.}
+\item{RS}{String vector. Name of research station(s) to get public XY
+coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
+is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
 
-\item{evalid}{Integer. Inventory span defining variable. Extract data for a
-specific evaluation period (See details for more information about FIA
-Evaluations).}
+\item{evalid}{Integer. Inventory span defining variable. Extract public 
+XY coordinates for a specific FIA Evaluation (See details for more 
+information about FIA Evaluations).}
 
 \item{evalCur}{Logical. Inventory span defining variable. If TRUE, extract
-data for the most current FIA Evalidation for each state.}
+public XY coordinates for the most current FIA Evaluation for each state.}
 
-\item{evalEndyr}{YYYY. Inventory span defining variable. Extract data for
-the Evaluation(s) ending in the specified evalEndyr(s). If more than one
-state and different Evaluations by state are desired, input a named list
-object with evalEndyr by state (e.g., list(Utah=2014, Colorado=2013).}
+\item{evalEndyr}{YYYY. Inventory span defining variable. Extract public XY 
+coordinates for the FIA Evaluation(s) ending in the specified evalEndyr(s). 
+If more than one state and different Evaluations by state are desired, 
+input a named list object with evalEndyr by state (e.g., list(Utah=2014, 
+Colorado=2013).}
 
 \item{evalAll}{Logical. Inventory span defining variable. If TRUE, extract
-data for all Evaluations for each state.}
+public XY coordinates for all FIA Evaluations for each state.}
 
-\item{evalType}{String vector. The type(s) of evaluation of interest ('ALL',
-'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
-'ALL' includes nonsampled plots; 'CURR' includes plots used for area
-estimates; 'VOL' includes plots used for area and/or tree estimates; The
-evalType 'GRM' includes plots used for growth, removals, mortality, and
-change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
-are accepted. See details below and FIA database manual for regional
-availability and/or differences.}
+\item{evalType}{String vector. The type(s) of FIA Evaluation of interest 
+('ALL', 'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
+The evalType 'ALL' includes nonsampled plot coordinates; 'CURR' includes 
+plot coordinates used for area estimates; 'VOL' includes plot coordinates 
+used for area and/or tree estimates; 'GRM' includes plot coordinates used 
+for growth, removals, mortality, and change estimates (evalType %in% 
+c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. See details below 
+and FIA database manual for regional availability and/or differences.}
 
 \item{measCur}{Logical. Inventory span defining variable. If TRUE, extract
-plots with most current measurement for state(s).}
+public XY coordinates with most current sampled measurement for state(s).}
 
 \item{measEndyr}{Logical. Inventory span defining variable. If TRUE, extract
-plots with most current measurement for state(s) for years measured in or
-before measEndyr.}
+XY public coordinates with most current sampled measurement for state(s) 
+for years measured in or before measEndyr.}
 
 \item{allyrs}{Logical. Inventory span defining variable. If TRUE, extract
 all annual inventory years in database for each state.}
 
-\item{invyrs}{YYYY vector. Inventory span defining variable. Extract data by
-state for the specified inventory year(s) (e.g., c(2000, 2001, 2002)). If
-more than one state and different inventory years are desired, input a named
-list object with years labeled by state (e.g., list(Utah=2000:2009,
-Colorado=c(2002,2003,2005)).}
+\item{invyrs}{YYYY vector. Inventory span defining variable. Extract public
+XY coordinates by state for the specified inventory year(s) (e.g., 
+c(2000, 2001, 2002)). If more than one state and different inventory years 
+are desired, input a named list object with years labeled by state 
+(e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
 
 \item{measyrs}{YYYY vector. Measurement year span defining variable. Extract
-data by state for the specified measurement year(s) (e.g., c(2000, 2001,
-2002)). If more than one state and different inventory years are desired,
-input a named list object with years labeled by state (e.g.,
-list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
+public XY coordinates by state for the specified measurement year(s) 
+(e.g., c(2000, 2001, 2002)). If more than one state and different 
+measurement years are desired, input a named list object with years labeled 
+by state (e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
 
-\item{intensity1}{Logical. If TRUE, includes only plots where INTENSITY = 1.}
+\item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
+INTENSITY = 1 (FIA base grid).}
 
-\item{issp}{Logical. If TRUE, returns spatial data as a list object with
+\item{issp}{Logical. If TRUE, returns spatial XY data as a list object with
 query.}
 
-\item{returndata}{Logical. If TRUE, returns data as a list object with
+\item{returndata}{Logical. If TRUE, returns XY data as a list object with
 query.}
 
-\item{savedata}{Logical. If TRUE, saves data to outfolder as comma-delimited
+\item{savedata}{Logical. If TRUE, saves XY data to outfolder as comma-delimited
 file (*.csv).}
 
 \item{exportsp}{Logical. If TRUE, exports data as spatial.}
@@ -101,13 +104,18 @@ file (*.csv).}
 of options. Only used when savedata = TRUE.}
 }
 \value{
-fiadat - a list of the following objects: \item{xy*_ACTUAL}{ Data
-frame. XY data from FS_FIADB_NIMS_*.SDS_PLOT.  xyCur_ACTUAL - if
-measCur=TRUE, xy_ACTUAL otherwise. } \item{xyqry}{ String. Query to extract
-coordinates }
+if returndata=TRUE, a list of the following objects: 
+\item{xy*_PUBLIC}{ Data frame. XY data from FIA's public database. If 
+measCur=TRUE, named xyCur_PUBLIC, else named xy_PUBLIC. The data frame 
+has 10 columns ('PLT_CN', 'LON_PUBLIC', 'LAT_PUBLIC', 'STATECD', 'UNITCD',
+'COUNTYCD', 'PLOT', 'INTENSITY', 'PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT), 
+'COUNTYFIPS'. If issp=TRUE, returns an sf object. }
+\item{xyqry}{ String. Query to extract coordinates. }
+\item{xvar}{ String. Name of X variable in xy*_PUBLIC. }
+\item{yvar}{ String. Name of Y variable in xy*_PUBLIC. }
 
-If savedata=TRUE, outputs data as out_fmt to outfolder.  If out_fmt =
-'sqlite' and issp = TRUE, the output will be a SpataiLite database.
+If savedata=TRUE, outputs the xy*_PUBLIC as out_fmt to outfolder. 
+If exportsp=TRUE, the output xy data are saved as spatial layer.
 }
 \description{
 Extracts actual plot coodinates for the most current measurement of each
@@ -116,33 +124,12 @@ plot in the database.
 \note{
 If no parameters are included, the user is prompted for input. If partial
 parameters, the default parameter values are used for those not specified.
-This function will not function without a working ODBC connection to FIA's
-Oracle database or
-
-\bold{Data Access}
-
-Access to Oracle is only available through FIA's security policies and
-select permission must be granted to query Oracle's tables. Contact your
-local Oracle database manager to grant access. See details for more
-information.
-
-Access to FIA's Oracle database also requires a compliant ODBC (Open
-Database Connectivity) connection with the local TNS (Transparent Network
-Substrate) name.  ODBC refers to a database driver on the client computer
-which translates queries from client applications into commands the database
-understands.  Use DBtestOracle() to test your connection to the Oracle
-database. See your local IT or Oracle administrator if connection is
-unsuccessful.
-
-If states intersect more than one FIA Research Station (RS), you must have
-accesss to FS_FIADB::SDS_PLOT to extract coordinates. Include RS unit to use
-regional SDS tables ('FS_NIMS_FIADB_', RS, '.SDS_PLOT')
 }
 \examples{
 
 
   # Most current evaluation and shapefile with public coordinates
-  COxylst <- DBgetXY(states="Colorado", measCur=TRUE, RS="RMRS")
+  COxylst <- DBgetXY(states="Colorado", measCur=TRUE)
   names(COxylst)
 
   head(COxylst$xyCur_ACTUAL)

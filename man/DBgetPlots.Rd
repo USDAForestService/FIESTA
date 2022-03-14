@@ -60,42 +60,42 @@ define RS.}
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}
 
-\item{RS}{String vector. Name of research station(s)
-('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states is populated.}
+\item{RS}{String vector. Name of research station(s) to get public XY
+coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
+is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
 
 \item{evalid}{Integer. Inventory span defining variable. Extract data for a
-specific evaluation period (See details for more information about FIA
+specific FIA Evaluation (See details for more information about FIA
 Evaluations).}
 
 \item{evalCur}{Logical. Inventory span defining variable. If TRUE, extract
-data for the most current FIA Evalidation for each state.}
+data for the most current FIA Evaluation for each state.}
 
 \item{evalEndyr}{YYYY. Inventory span defining variable. Extract data for
-the Evaluation(s) ending in the specified evalEndyr(s). If more than one
-state and different Evaluations by state are desired, input a named list
-object with evalEndyr by state (e.g., list(Utah=2014, Colorado=2013).}
+the FIA Evaluation(s) ending in the specified evalEndyr(s). If more than one
+state and different Evaluations by state are desired, input a named list}
 
 \item{evalAll}{Logical. Inventory span defining variable. If TRUE, extract
-data for all Evaluations for each state.}
+data for all FIA Evaluations for each state.}
 
-\item{evalType}{String vector. The type(s) of evaluation of interest ('ALL',
-'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
-'ALL' includes nonsampled plots; 'CURR' includes plots used for area
-estimates; 'VOL' includes plots used for area and/or tree estimates; The
-evalType 'GRM' includes plots used for growth, removals, mortality, and
-change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
+\item{evalType}{String vector. The type(s) of FIA Evaluation of interest 
+('ALL', 'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
+The evalType 'ALL' includes nonsampled plots; 'CURR' includes plots used 
+for area estimates; 'VOL' includes plots used for area and/or tree estimates;
+'GRM' includes plots used for growth, removals, mortality, and
+change estimates (evalType %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
 are accepted. See details below and FIA database manual for regional
 availability and/or differences. Note: do not use if EVALID is specified.}
 
 \item{measCur}{Logical. Inventory span defining variable. If TRUE, extract
-plots with most current measurement for state(s).}
+plots with most current sampled measurement for state(s).}
 
 \item{measEndyr}{Logical. Inventory span defining variable. If TRUE, extract
-plots with most current measurement for state(s) for years measured in or
-before measEndyr.}
+plots with most current sampled measurement for state(s) for years measured 
+in or before measEndyr.}
 
 \item{allyrs}{Logical. Inventory span defining variable. If TRUE, extract
 all annual inventory years in database for each state.}
@@ -114,8 +114,8 @@ list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
 
 \item{getxy}{Logical. If TRUE, gets separate XY table.}
 
-\item{xymeasCur}{Logical. If TRUE, and more than one plot measured at same
-location, only the most current coordinate is returned for the plot.}
+\item{xymeasCur}{Logical. If TRUE, include XY coordinates from the most 
+current sampled measurement of each plot.}
 
 \item{istree}{Logical. If TRUE, tree data are extracted from TREE table in
 database.}
@@ -199,43 +199,59 @@ table.}
 of options. Only used when savedata = TRUE. If out_layer = NULL,}
 }
 \value{
-fiadat - a list of the following objects: \item{states}{ Vector.
-Input state(s) (full state names: Arizona). } \item{plt}{ Data frame. Plot
-variables from FIA DataMart PLOT table.  See FIESTA::ref_plt for variable
-definitions. } \item{cond}{ Data frame. Condition variables from FIA
-DataMart COND table.  See FIESTA::ref_cond for variable definitions. }
-\item{tree}{ Data frame. If istree=TRUE, tree variables from FIA Datamart
-TREE table.  See FIESTA::ref_tree for variable definitions. If number of
-states > 3, tree data are saved to outfolder, but not returned to
-accommodate R memory issues. } \item{seed}{ Data frame. If isseed=TRUE,
-seedling variables from FIA DataMart SEEDLING table. } \item{vsubpspp}{ Data
-frame. If isveg=TRUE, Subplot-level understory vegetation variables from FIA
-DataMart P2VEG_SUBPLOT_SPP table. } \item{vsubpstr}{ Data frame. If
-isveg=TRUE, Subplot-level cover and layer understory vegetation variables
-from FIA DataMart P2VEG_SUBP_STRUCTURE table. } \item{lulc}{ Data frame. If
-islulc=TRUE, Condition-level data including data from previous measurements
-for land use and land cover. } \item{spplt_*}{ sf object. If issp=TRUE, a
-simple feature(sf) object with plot attributes. } \item{spcond}{ If
-spcond=TRUE, condition variables representing plot, for spatial display. }
+if returndata=TRUE, a list of the following objects: 
+\item{states}{ Vector. Input state(s) (full state names: Arizona). } 
+\item{tabs}{ List. A list of data frames from FIA database, including 
+plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), vsubpspp
+and vsubpstr (if isveg=TRUE), lulc (if islulc=TRUE). See below 
+'Output Tables - FIA Table Names' for reference to FIA database tables. 
+See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
+If istree and the number of states > 3, tree data are saved to outfolder 
+and not returned to accommodate R memory issues. } 
+\item{xy*_PUBLIC}{ Data frame. XY data from FIA's public database. If 
+measCur=TRUE, named xyCur_PUBLIC, else named xy_PUBLIC. The data frame 
+has 10 columns ('PLT_CN', 'LON_PUBLIC', 'LAT_PUBLIC', 'STATECD', 'UNITCD',
+'COUNTYCD', 'PLOT', 'INTENSITY', 'PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT), 
+'COUNTYFIPS'. If issp=TRUE, returns an sf object. }
+\item{spconddat}{ If spcond=TRUE, the condition variables representing 
+each plot for spatial display. For plots with multiple conditions, 
+the selected condition is based on CONDID=1 (if spcondid1=TRUE) or a 
+set if criteria defined in Details - spcond (if spcondid1=FALSE). }
 \item{evalid}{ Number. If evalCur=TRUE or evalEndyr is not NULL, the
-Evalidation ID is output. } \item{pltcnt}{ Data frame. Number of plots
-(NBRPLOTS) by state, cycle, inventory year, and plot status. }
-\item{pop_plot_stratum_assgn}{ Data frame. If savePOP=TRUE, and Evaluations
+Evalidation ID from the FIA database used to define the output data. } 
+\item{pltcnt}{ Data frame. Number of plots (NBRPLOTS) by state, cycle, 
+inventory year, and plot status. }
+\item{pop_plot_stratum_assgn}{ Data frame. If savePOP=TRUE, and FIA Evaluations
 are used to extract data from database, return the POP_PLOT_STRATUM_ASSGN
 table or, if more than one evalType and savePOP=FALSE. If more than one
 evalType, only the records for the evalTypes are returned, otherwise all
 evalTypes for the state evaluation are returned. }
 
-\tabular{ll}{ \tab - If parameters=TRUE, text file of parameters used. This
-file can be used to run program again (DBgetPlots_parameters*.txt).\cr \tab
-- If outSQLitefn is defined, all data (with added UNIQUE INDEX) are written
-to a SQLite database (*.sqlite) or geopackage (*.gpkg) (if gpkg=TRUE) with
-this name.\cr \tab - CSV file of plot and condition counts (pltcnt*.txt).\cr
-\tab - Tables or CSV files of output data.\cr \tab - If issp=TRUE, a feature
-class or ESRI shapefile of plot-level level attributes (spplt_PUBLIC*.shp).
-Variable names are truncated to 10 characters or less. \cr \tab - If
-issp=TRUE and outSQLitefn=NULL, a CSV file of truncated names for conversion
-to shapefile (spplt_PUBLIC_newnames.shp). See notes for more info.\cr }
+*Output Tables - FIA Table Names*\cr \tabular{lll}{ 
+\tab \bold{tab} \tab \bold{FIA Table}\cr 
+\tab plt \tab plot\cr
+\tab cond \tab cond\cr
+\tab tree \tab tree\cr 
+\tab vsubpspp \tab P2VEG_SUBPLOT_SPP\cr 
+\tab vsubpstr \tab P2VEG_SUBP_STRUCTURE\cr 
+\tab subplot \tab SUBPLOT\cr 
+\tab subp_cond \tab SUBP_COND\cr 
+\tab dwm \tab COND_DWM_CALC\cr 
+\tab grm \tab TREE_GRM_COMPONENT\cr 
+\tab issccm \tab SUBP_COND_CHNG_MTRX\cr }
+
+
+#' Outputs to outfolder (if savedata=TRUE): 
+\tabular{ll}{ 
+\tab - If saveqry=TRUE, text file(s) of SQL queries used to extract data 
+from database (_.txt). Note: one query is used for extracting both plt
+and cond (pltcondqry*.txt). \cr
+\tab - CSV file of plot and condition counts (pltcnt*.txt).\cr 
+\tab - Layers in a database or CSV files of output tables.\cr 
+\tab - If issp=TRUE, a feature class or ESRI shapefile of plot-level 
+level attributes. If shapefile (.shp), variable names are truncated to 
+10 characters or less. See notes for more info.\cr 
+\tab - If issp=TRUE and out_fmt='sqlite', the SQLite data is SpatiaLite.\cr }
 
 To deal with limitations of R object size and/or computer memory issues, if
 istree=TRUE and more than three states are desired, the tree data are saved
@@ -260,7 +276,7 @@ if trees exist on the condition, the data exist in the tree table. If you do
 not want these trees included, ACI=FALSE. This will filter the data to only
 forested conditions (COND_STATUS_CD = 1)
 
-*Nevada*\cr In 2016, we changed the population area of Nevada to exclude the
+*Nevada*\cr In 2016, the population area of Nevada changed to exclude the
 large restricted area owned by Department of Defense (Area 51) from the
 sample. Prior to 2016, the plots within this area were observed using aerial
 photos and if they were definitely nonforest the plots were entered in the
@@ -272,20 +288,26 @@ sample, and thus, removed from database.
 \bold{FIA DataMart Data}
 
 FIA data available on FIA DataMart include the following information.\cr
-\tabular{ll}{ \tab - the PLOT variable is renumbered.\cr \tab - the LON/LAT
-coordinates are fuzzed & swapped.\cr \tab - the OWNERCD variable is based on
-fuzzed & swapped locations.\cr \tab - ECOSUBCD, CONGCD, ELEV, and EMAP_HEX
-are GIS-extracted values based on fuzzed & swapped locations.\cr \tab - For
-annual data, forested plots represent the current definition of >= 10
-percent cover...\cr \tab - For periodic data, forested plots are defined by
-a definition of Other Wooded Land (OWL), including >= 5 percent cover...\cr
+\tabular{ll}{ 
+\tab - the PLOT variable is renumbered.\cr 
+\tab - the LON/LAT coordinates are fuzzed & swapped.\cr 
+\tab - the OWNERCD variable is based on fuzzed & swapped locations.\cr 
+\tab - ECOSUBCD, CONGCD, ELEV, and EMAP_HEX are GIS-extracted values 
+based on fuzzed & swapped locations.\cr 
+\tab - For annual data, forested plots represent the current definition 
+of >= 10 percent cover...\cr 
+\tab - For periodic data, forested plots are defined by a definition 
+of Other Wooded Land (OWL), including >= 5 percent cover...\cr
 }
 
-*FIADB Table Extraction*\cr \tabular{lll}{ \tab \bold{Argument} \tab
-\bold{Table Name(s)}\cr \tab istree \tab TREE\cr \tab isveg \tab
-P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE\cr \tab issubp \tab SUBPLOT,
-SUBP_COND\cr \tab isdwm \tab COND_DWM_CALC\cr \tab isgrm \tab
-TREE_GRM_COMPONENT\cr \tab issccm \tab SUBP_COND_CHNG_MTRX\cr }
+*FIADB Table Extraction*\cr \tabular{lll}{ 
+\tab \bold{Argument} \tab \bold{Table Name(s)}\cr 
+\tab istree \tab TREE\cr 
+\tab isveg \tab P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE\cr 
+\tab issubp \tab SUBPLOT, SUBP_COND\cr 
+\tab isdwm \tab COND_DWM_CALC\cr 
+\tab isgrm \tab TREE_GRM_COMPONENT\cr 
+\tab issccm \tab SUBP_COND_CHNG_MTRX\cr }
 
 \bold{FIA Evaluations}
 
