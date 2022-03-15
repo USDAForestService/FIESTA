@@ -458,7 +458,7 @@
 #'   UTdat2$spxy_PUBLIC
 #' 
 #'   ## Display plots by inventory year (INVYR)
-#'   # plot(sf::st_geometry(UTdat2$spxy_PUBLIC['INVYR']),
+#'   # plot(sf::st_geometry(UTdat2$xy_PUBLIC['INVYR']),
 #' 	# col=sf.colors(length(unique(UTdat2$spxy_PUBLIC[["INVYR"]]))))
 #' 
 #' 
@@ -470,7 +470,7 @@
 #' 
 #'   plot(sf::st_geometry(FIESTAutils::stunitco[FIESTAutils::stunitco$STATENM == "Utah",]),
 #' 		border="light grey")
-#'   plot(sf::st_geometry(UTdat3$spxy_PUBLIC), add=TRUE, pch=18, cex=.5)
+#'   plot(sf::st_geometry(UTdat3$xy_PUBLIC), add=TRUE, pch=18, cex=.5)
 #' 
 #' 
 #' @export DBgetPlots
