@@ -507,8 +507,7 @@ Spatial Data Services
 (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
 }
 \examples{
-
-
+  \dontrun{
   # Extract the most current evaluation of data for Utah
   UTdat <- DBgetPlots(states="Utah", evalCur=TRUE)
   names(UTdat)
@@ -531,7 +530,7 @@ Spatial Data Services
 
   ## Display plots by inventory year (INVYR)
   # plot(sf::st_geometry(UTdat2$xy_PUBLIC['INVYR']),
-	# col=sf.colors(length(unique(UTdat2$spxy_PUBLIC[["INVYR"]]))))
+	 # col=sf.colors(length(unique(UTdat2$spxy_PUBLIC[["INVYR"]]))))
 
 
   # Extract and display plots with aspen forest type
@@ -540,10 +539,10 @@ Spatial Data Services
   names(UTdat3)
   UTdat3$pltcnt
 
-  plot(sf::st_geometry(FIESTAutils::stunitco[FIESTAutils::stunitco$STATENM == "Utah",]),
+  plot(sf::st_geometry(FIESTA::stunitco[FIESTA::stunitco$STATENM == "Utah",]),
 		border="light grey")
   plot(sf::st_geometry(UTdat3$xy_PUBLIC), add=TRUE, pch=18, cex=.5)
-
+  }
 
 }
 \references{

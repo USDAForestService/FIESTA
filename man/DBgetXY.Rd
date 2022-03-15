@@ -127,14 +127,15 @@ parameters, the default parameter values are used for those not specified.
 }
 \examples{
 
-
+  \dontrun{
   # Most current evaluation and shapefile with public coordinates
   COxylst <- DBgetXY(states="Colorado", measCur=TRUE)
   names(COxylst)
 
   head(COxylst$xyCur_ACTUAL)
   COxylst$xyqry
-
+  }
+  
 }
 \author{
 Tracey S. Frescino

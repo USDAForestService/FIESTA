@@ -74,7 +74,7 @@
 #' @keywords data
 #' @examples
 #' 
-#' 
+#'     \dontrun{
 #'     ## Get evalid and inventory years for Wyoming
 #'     WYeval <- DBgetEvalid(states="Wyoming")
 #'     names(WYeval)
@@ -93,7 +93,7 @@
 #'     RSevalid <- DBgetEvalid(RS="NERS")
 #'     names(RSevalid)
 #'     RSevalid$evalidlist
-#' 
+#'     }
 #' 
 #' @export DBgetEvalid
 DBgetEvalid <- function(states = NULL, 

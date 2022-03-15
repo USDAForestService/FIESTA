@@ -83,14 +83,15 @@
 #' @keywords data
 #' @examples
 #' 
-#' 
+#'   \dontrun{
 #'   # Most current evaluation and shapefile with public coordinates
 #'   COxylst <- DBgetXY(states="Colorado", measCur=TRUE)
 #'   names(COxylst)
 #' 
 #'   head(COxylst$xyCur_ACTUAL)
 #'   COxylst$xyqry
-#' 
+#'   }
+#'   
 #' @export DBgetXY
 DBgetXY <- function (states = NULL, 
                          RS = NULL, 

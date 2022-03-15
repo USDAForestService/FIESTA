@@ -111,7 +111,7 @@ invyrtab = NULL\cr 2. POP_EVAL - To get EVALID and EVALID years
 }
 \examples{
 
-
+    \dontrun{
     ## Get evalid and inventory years for Wyoming
     WYeval <- DBgetEvalid(states="Wyoming")
     names(WYeval)
@@ -130,7 +130,7 @@ invyrtab = NULL\cr 2. POP_EVAL - To get EVALID and EVALID years
     RSevalid <- DBgetEvalid(RS="NERS")
     names(RSevalid)
     RSevalid$evalidlist
-
+    }
 
 }
 \author{
