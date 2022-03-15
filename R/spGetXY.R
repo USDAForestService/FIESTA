@@ -37,6 +37,9 @@
 #' @param RS String. Name of FIA research station to restrict states to
 #' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 #' included.
+#' @param xy_datsource String. Source of XY data ("obj", "csv", "datamart",
+#' "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
+#' datsource.
 #' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
 #' polygon object, data frame, full pathname to a shapefile, or name of a layer
 #' within a database.
@@ -54,9 +57,6 @@
 #' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
 #' be unique. If using most current XY coordinates, use identifier for a plot
 #' (e.g., PLOT_ID).
-#' @param xy_datsource String. Source of XY data ("obj", "csv", "datamart",
-#' "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
-#' datsource.
 #' @param clipxy Logical. If TRUE, clips xy data to bnd.
 #' @param plot_layer String. Name of plot_layer in database.
 #' @param evalid Integer. To extract data for a specific evaluation period. See
@@ -125,6 +125,7 @@ spGetXY <- function(bnd,
                     bnd.filter = NULL, 
                     states = NULL, 
                     RS = NULL, 
+                    xy_datsource = "datamart", 
                     xy = NULL, 
                     xy_dsn = NULL, 
                     xy.uniqueid = "PLT_CN", 
@@ -133,7 +134,6 @@ spGetXY <- function(bnd,
                     xy.crs = 4269, 
                     xyjoinid = NULL, 
                     pjoinid = "CN", 
-                    xy_datsource = "datamart", 
                     clipxy = TRUE, 
                     plot_layer = "plot",
                     evalid = NULL, 
@@ -242,11 +242,6 @@ spGetXY <- function(bnd,
       }
     } else {
       stop("must include xy_datsource")
-    }
-  } 
-  if (xy_datsource == "sqlite") {
-    if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
-	 message("RSQLite and DBI packages are required to run SQLite queries")
     }
   } 
  

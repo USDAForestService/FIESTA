@@ -208,13 +208,6 @@ spExtractRast <- function(xyplt,
     }
   }
 
-
-  if (ncores > 1) {
-    if (!"parallel" %in% rownames(installed.packages())) {
-	 message("multiple cores require package parallel")
-    }
-  } 
-
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################  

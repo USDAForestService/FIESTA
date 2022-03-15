@@ -32,10 +32,6 @@
 #' @export DBqryCSV
 DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
 
-  if (!"sqldf" %in% rownames(installed.packages())) {
-    message("DBqryCSV function requires package sqldf when datsource='CSV'")
-  }
-
   ## SET OPTIONS
   options.old <- options()
   options(scipen=8) # bias against scientific notation

@@ -102,28 +102,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   module <- pcheck.varchar(var2check=module, varnm="module", gui=gui,
 		checklst=modulelst, caption="FIESTA module", stopifnull=TRUE)
 
-#  ## Check method
-#  ########################################################
-#  if (module %in% c("MA", "SA")) {
-#    if (module == "MA") {
-#      if (!"mase" %in% rownames(installed.packages())) {
-#	   message("MA module requires package mase")
-#      }
-#      methodlst <- c("HT", "PS", "greg", "gregEN", "ratio")
-#      method <- pcheck.varchar(var2check=method, varnm="method", gui=gui,
-#		checklst=methodlst, caption="method", multiple=FALSE, stopifnull=TRUE)
-#      if (any(method == "PS")) {
-#        strata <- TRUE
-#      } else {
-#        strata <- FALSE
-#      }
-#    } else if (module == "SA") {
-#      if (!any(c("JoSAE", "sae") %in% rownames(installed.packages()))) {
-#        message("SA module requires either package JoSAE or sae")
-#      }
-#    }
-#  }
-
   ## Check popType
   ########################################################
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG")

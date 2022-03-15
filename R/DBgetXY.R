@@ -119,12 +119,7 @@ DBgetXY <- function (states = NULL,
     evalCur=evalAll=measCur=allyrs=intensity1=
 	savedata=parameters=out_fmt=overwrite <- NULL
   }
-  
-  ## Check for installed packages
-  if (!"sqldf" %in% rownames(installed.packages())) {
-    message("the sqldf package is required when datsource='ORACLE'")
-  }
-  
+    
   ## SET OPTIONS
   options.old <- options()
   options(scipen=8) # bias against scientific notation

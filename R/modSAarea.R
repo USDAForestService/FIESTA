@@ -304,17 +304,6 @@ modSAarea <- function(SApopdatlst = NULL,
   SApackage <- pcheck.varchar(var2check=SApackage, varnm="SApackage", gui=gui, 
 		checklst=SApackagelst, caption="SApackage", multiple=FALSE, stopifnull=TRUE)
 
-  ## Check for JoSAE library
-  if (SApackage == "JoSAE") {
-    if (!"JoSAE" %in% rownames(installed.packages())) {
-	 message("SApackage JoSAE requires package JoSAE")
-    }
-  } else {
-    if (!"sae" %in% rownames(installed.packages())) {
-	 message("SApackage sae requires package sae")
-    }
-  }
-
   ## Check SAmethod 
   SAmethodlst <- c("unit", "area")
   SAmethod <- pcheck.varchar(var2check=SAmethod, varnm="SAmethod", gui=gui, 

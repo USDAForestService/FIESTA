@@ -215,14 +215,7 @@ DBgetEvalid <- function(states = NULL,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  if (!"sqldf" %in% rownames(installed.packages())) {
-    message("the sqldf package is required")
-  }
   if (datsource == "sqlite" && !is.null(data_dsn)) {
-    if (!"DBI" %in% rownames(installed.packages())) {
-      message("the DBI package is required")
-    }
-
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     dbtablst <- DBI::dbListTables(dbconn)
     ppsanm <- chkdbtab(dbtablst, ppsanm)

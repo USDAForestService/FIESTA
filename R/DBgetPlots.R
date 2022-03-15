@@ -630,11 +630,6 @@ DBgetPlots <- function (states = NULL,
   datsourcelst <- c("datamart", "sqlite")
   datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
-  if (datsource == "sqlite") {
-    if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
-	 message("RSQLite and DBI packages are required to run SQLite queries")
-    }
-  } 
   if (datsource %in% c("sqlite", "gdb")) {
     data_dsn <- DBtestSQLite(data_dsn)
   }

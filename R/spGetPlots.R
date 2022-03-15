@@ -481,16 +481,6 @@ spGetPlots <- function(bnd = NULL,
     if (!file.exists(data_dsn)) {
       stop(data_dsn, " is invalid")
     }
-    if (datsource == "sqlite") {
-      if (!all(c("RSQLite", "DBI") %in% rownames(installed.packages()))) {
-	   message("RSQLite and DBI packages are required to run SQLite queries")
-      }
-    }
-    if (datsource == "gdb") {
-      if (!"arcgisbinding" %in% rownames(installed.packages())) {
-	   message("RSQLite and DBI packages are required to run SQLite queries")
-      }
-    }
   }
 
   ## Check showsteps
