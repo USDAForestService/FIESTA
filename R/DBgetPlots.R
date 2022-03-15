@@ -440,7 +440,6 @@
 #'   UTdat <- DBgetPlots(states="Utah", evalCur=TRUE)
 #'   names(UTdat)
 #'   head(UTdat$plt)
-#'   head(UTdat$cond)
 #'   UTdat$pltcnt
 #' 
 #'   ## Look at number of plots by inventory year
