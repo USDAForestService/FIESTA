@@ -10,6 +10,7 @@ spGetXY(
   bnd.filter = NULL,
   states = NULL,
   RS = NULL,
+  xy_datsource = "datamart",
   xy = NULL,
   xy_dsn = NULL,
   xy.uniqueid = "PLT_CN",
@@ -18,7 +19,6 @@ spGetXY(
   xy.crs = 4269,
   xyjoinid = NULL,
   pjoinid = "CN",
-  xy_datsource = "datamart",
   clipxy = TRUE,
   plot_layer = "plot",
   evalid = NULL,
@@ -55,6 +55,10 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 included.}
 
+\item{xy_datsource}{String. Source of XY data ("obj", "csv", "datamart",
+"sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
+datsource.}
+
 \item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
 polygon object, data frame, full pathname to a shapefile, or name of a layer
 within a database.}
@@ -79,10 +83,6 @@ xyjoinid=xy.uniqueid.}
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
 (e.g., PLOT_ID).}
-
-\item{xy_datsource}{String. Source of XY data ("obj", "csv", "datamart",
-"sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
-datsource.}
 
 \item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 
