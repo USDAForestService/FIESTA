@@ -21,13 +21,13 @@
 #' @keywords data
 #' @examples
 #' 
-#' 
+#'   \dontrun{
 #'   # Number of plots by inventory year for the state of Wyoming
 #'   sql <- "select INVYR, count(*) AS NBRPLOTS 
 #'           from plot 
 #'           where statecd=56 group by INVYR"
 #'   DBqryCSV(sql=sql, states="Wyoming", sqltables="plot")
-#' 
+#'   }
 #' 
 #' @export DBqryCSV
 DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
