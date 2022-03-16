@@ -24,9 +24,7 @@
 #' @author Grayson W. White
 #' @keywords filters
 #' @examples
-#' 
 #' popFilters(ACI = TRUE)
-#' 
 #' @export popFilters
 
 popFilters <- function(evalid = NULL, invyrs = NULL, intensity = NULL,

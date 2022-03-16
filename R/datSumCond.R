@@ -44,15 +44,13 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' # Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
+#' condsum <- datSumCond(cond = FIESTA::WYcond,
+#'                       csumvar = "LIVE_CANOPY_CVR_PCT")$condsum
 #' 
-#' 
-#'   ## Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
-#'   condsum <- datSumCond(cond=FIESTA::WYcond, csumvar="LIVE_CANOPY_CVR_PCT")$condsum
-#' 
-#'   ## Check results
-#'   condsum[condsum$PLT_CN == 40404737010690,]
-#'   FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
-#' 
+#' # Check results
+#' condsum[condsum$PLT_CN == 40404737010690,]
+#' FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
 #' @export datSumCond
 datSumCond <- function(cond = NULL, 
                        plt = NULL, 

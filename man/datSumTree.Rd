@@ -182,15 +182,13 @@ If a dat table is provided, the aggregated tree data will be merged to
 table and NULL values will be output as 0.
 }
 \examples{
+# Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
+treesum <- datSumTree(tree = FIESTA::WYtree,
+                      tsumvarlst = "TPA_UNADJ")$treedat
 
-
-  ## Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
-  treesum <- datSumTree(tree=FIESTA::WYtree, tsumvarlst="TPA_UNADJ")$treedat
-
-  ## Check results
-  treesum[treesum$PLT_CN == 40404737010690,]
-  FIESTA::WYtree[FIESTA::WYtree$PLT_CN == 40404737010690,]
-
+# Check results
+treesum[treesum$PLT_CN == 40404737010690,]
+FIESTA::WYtree[FIESTA::WYtree$PLT_CN == 40404737010690,]
 }
 \author{
 Tracey S. Frescino

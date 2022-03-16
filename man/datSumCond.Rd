@@ -85,15 +85,13 @@ If variable = NULL, then it will prompt user for input.
 Nonsampled plots are removed from table.
 }
 \examples{
+# Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
+condsum <- datSumCond(cond = FIESTA::WYcond,
+                      csumvar = "LIVE_CANOPY_CVR_PCT")$condsum
 
-
-  ## Aggregate LIVE_CANOPY_CVR_PCT to plot, weighted by CONDPROP_UNADJ
-  condsum <- datSumCond(cond=FIESTA::WYcond, csumvar="LIVE_CANOPY_CVR_PCT")$condsum
-
-  ## Check results
-  condsum[condsum$PLT_CN == 40404737010690,]
-  FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
-
+# Check results
+condsum[condsum$PLT_CN == 40404737010690,]
+FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
 }
 \author{
 Tracey S. Frescino

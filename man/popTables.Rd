@@ -68,9 +68,7 @@ tables to be supplied to *pop functions.
 If no parameters, an empty list is returned.
 }
 \examples{
-
-popTables()
-
+popTables(cond = FIESTA::WYcond, seed = FIESTA::WYseed)
 }
 \author{
 Grayson W. White

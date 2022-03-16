@@ -201,6 +201,23 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
+#' @examples 
+#' GBpopdat <- modGBpop(
+#' popTabs = list(cond = FIESTA::WYcond,  
+#'                tree = FIESTA::WYtree,        
+#'                seed = FIESTA::WYseed),      
+#' popTabIDs = list(cond = "PLT_CN"),            
+#' pltassgn = FIESTA::WYpltassgn,  
+#' pltassgnid = "CN",        
+#' pjoinid = "PLT_CN",         
+#' unitarea = FIESTA::WYunitarea,
+#' unitvar = "ESTN_UNIT",        
+#' strata = TRUE,           
+#' stratalut = WYstratalut,    
+#' strata_opts = strata_options(getwt = TRUE)   
+#' )
+#' 
+#' str(GBpopdat, max.level = 1)
 #' @export modGBpop
 modGBpop <- function(popType = "VOL",
                      popTabs = popTables(),
