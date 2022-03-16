@@ -68,32 +68,29 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' # Get point data from WYplt data in FIESTA
+#' WYplt <- FIESTA::WYplt
 #' 
+#' # Get polygon vector layer from FIESTA external data
+#' WYbhdistfn <- system.file("extdata",
+#'                           "sp_data/WYbighorn_districtbnd.shp",
+#'                           package = "FIESTA")
 #' 
-#'   ## Get point data from WYplt data in FIESTA
-#'   WYplt <- FIESTA::WYplt
+#' # Extract points from polygon vector layer
+#' xyext <- spClipPoint(xyplt = WYplt,
+#'                      clippolyv = WYbhdistfn,
+#'                      clippolyv.filter = "DISTRICTNU == '03'",
+#'                      uniqueid = "CN",
+#'                      spMakeSpatial_opts = list(xvar = "LON_PUBLIC",
+#'                                                yvar = "LAT_PUBLIC",
+#'                                                xy.crs = 4269))
+#' names(xyext)
+#' xyplt <- xyext$clip_xyplt
+#' polyv <- xyext$clip_polyv
 #' 
-#'   ## Get polygon vector layer from FIESTA external data
-#'   WYbhdistfn <- system.file("extdata", 
-#'                             "sp_data/WYbighorn_districtbnd.shp",
-#'                              package="FIESTA")
-#' 
-#'   ## Extract points from polygon vector layer
-#'   xyext <- spClipPoint(xyplt=WYplt, 
-#'                        clippolyv=WYbhdistfn, 
-#'                        clippolyv.filter="DISTRICTNU == '03'",
-#' 		                    uniqueid="CN", 
-#' 		                    spMakeSpatial_opts = list(xvar="LON_PUBLIC", 
-#' 		                                              yvar="LAT_PUBLIC",
-#' 		                                              xy.crs=4269))
-#'   names(xyext)
-#'   xyplt <- xyext$clip_xyplt
-#'   polyv <- xyext$clip_polyv
-#' 
-#'   ## Plot extracted values of national forest district
-#'   plot(sf::st_geometry(polyv))
-#'   plot(sf::st_geometry(xyplt), add=TRUE)
-#' 
+#' # Plot extracted values of national forest district
+#' plot(sf::st_geometry(polyv))
+#' plot(sf::st_geometry(xyplt), add = TRUE)
 #' @export spClipPoint
 spClipPoint <- function(xyplt, 
                         xyplt_dsn = NULL, 

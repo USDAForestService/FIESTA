@@ -49,18 +49,17 @@ of options. Only used when savebnd = TRUE.}
 Wrapper to get state names that intersect a given boundary.
 }
 \examples{
+# Get polygon vector layer from FIESTA external data
+WYbhdistfn <- system.file("extdata", 
+                          "sp_data/WYbighorn_districtbnd.shp",
+                          package = "FIESTA")
 
+# Get intersecting statenames
+spGetStates(WYbhdistfn)$statenames
 
-  ## Get polygon vector layer from FIESTA external data
-  WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
-
-  ## Get intersecting statenames
-  spGetStates(WYbhdistfn)$statenames
-  
-  ## Get intersecting COUNTYFIP codes
-  spGetStates(WYbhdistfn, stbnd.att="COUNTYFIPS")$states
-
-
+# Get intersecting COUNTYFIP codes
+spGetStates(WYbhdistfn,
+            stbnd.att = "COUNTYFIPS")$states
 }
 \author{
 Tracey S. Frescino

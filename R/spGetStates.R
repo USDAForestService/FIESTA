@@ -23,18 +23,17 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' # Get polygon vector layer from FIESTA external data
+#' WYbhdistfn <- system.file("extdata", 
+#'                           "sp_data/WYbighorn_districtbnd.shp",
+#'                           package = "FIESTA")
 #' 
+#' # Get intersecting statenames
+#' spGetStates(WYbhdistfn)$statenames
 #' 
-#'   ## Get polygon vector layer from FIESTA external data
-#'   WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
-#'
-#'   ## Get intersecting statenames
-#'   spGetStates(WYbhdistfn)$statenames
-#'   
-#'   ## Get intersecting COUNTYFIP codes
-#'   spGetStates(WYbhdistfn, stbnd.att="COUNTYFIPS")$states
-#'
-#'
+#' # Get intersecting COUNTYFIP codes
+#' spGetStates(WYbhdistfn,
+#'             stbnd.att = "COUNTYFIPS")$states
 #' @export spGetStates
 spGetStates <- function(bnd_layer, 
                         bnd_dsn = NULL, 
