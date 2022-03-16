@@ -53,8 +53,6 @@
 #'
 #' # Filter on two conditions, grab xf object from list
 #' datFilter(x = WYcond, xfilter = "FORTYPCD == c(221) & STDSZCD == 3")$xf
-#'
-#'
 #' @export datFilter
 datFilter <- function(x,
                       xfilter = NULL,

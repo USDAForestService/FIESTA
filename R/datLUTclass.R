@@ -53,39 +53,36 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' head(FIESTA::ref_diacl2in)
+#' WYtreelut <- datLUTclass(FIESTA::WYtree,
+#'                          xvar = "DIA",
+#'                          LUT = FIESTA::ref_diacl2in,
+#'                          LUTclassnm = "DIACL2IN")
+#' names(WYtreelut)
+#' head(WYtreelut$xLUT)
+#' table(WYtreelut$xLUT$DIACL2IN)
 #' 
-#' 	head(FIESTAutils::ref_diacl2in)
-#' 	WYtreelut <- datLUTclass(FIESTA::WYtree,
-#' 	                         xvar="DIA",
-#' 	                         LUT=FIESTAutils::ref_diacl2in, 
-#' 		                       LUTclassnm="DIACL2IN")
-#' 	names(WYtreelut)
-#' 	head(WYtreelut$xLUT)
-#' 	table(WYtreelut$xLUT$DIACL2IN)
+#' WYtreelut2 <- datLUTclass(FIESTA::WYtree,
+#'                           xvar = "DIA",
+#'                           cutbreaks = c(1, 5, 25, 50, 100),
+#'                           LUTclassnm = "DIACL2IN")
+#' names(WYtreelut2)
+#' head(WYtreelut2$xLUT)
+#' table(WYtreelut2$xLUT$DIACL2IN)
 #' 
-#' 	WYtreelut2 <- datLUTclass(FIESTA::WYtree,
-#' 	                          xvar="DIA", 
-#' 	                          cutbreaks=c(1,5,25,50,100), 
-#' 		                        LUTclassnm="DIACL2IN")
-#' 	names(WYtreelut2)
-#' 	head(WYtreelut2$xLUT)
-#' 	table(WYtreelut2$xLUT$DIACL2IN)
+#' #' Create look-up table of stand age classes
+#' MIN <- c(0, 20, 40, 60, 80, 101)
+#' STDAGENM <- c("0-20", "21-40", "41-60", "61-80", "81-100", "101+")
+#' stdagelut <- data.frame(MIN = MIN, STDAGENM = STDAGENM)
+#' stdagelut
 #' 
-#' 	## Create look-up table of stand age classes
-#' 	MIN <- c(0, 20, 40, 60, 80, 101)
-#' 	STDAGENM <- c("0-20", "21-40", "41-60", "61-80", "81-100", "101+") 
-#' 	stdagelut <- data.frame(MIN=MIN, STDAGENM=STDAGENM)
-#' 	stdagelut
-#' 
-#' 	WYcondlut <- datLUTclass(FIESTA::WYcond,
-#' 	                         xvar="STDAGE",
-#' 	                         LUT=stdagelut, 
-#' 		                       LUTclassnm="STDAGENM")
-#' 	names(WYcondlut)
-#' 	head(WYcondlut$xLUT)
-#' 	table(WYcondlut$xLUT$STDAGENM)
-#' 
-#' 
+#' WYcondlut <- datLUTclass(FIESTA::WYcond,
+#'                          xvar = "STDAGE",
+#'                          LUT = stdagelut,
+#'                          LUTclassnm = "STDAGENM")
+#' names(WYcondlut)
+#' head(WYcondlut$xLUT)
+#' table(WYcondlut$xLUT$STDAGENM)
 #' @export datLUTclass
 datLUTclass <- function(x, 
                         xvar = NULL, 

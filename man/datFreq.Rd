@@ -59,18 +59,23 @@ tab <- data.frame(cbind(CONDCLASS = c(1, 1, 2, 1, 3, 3, 3, 1, 1, 1, 2, 1),
 		                                  182, 201, 182, 221)))
 
 # Frequency table with "FORTYPCD"       
-datFreq(x = tab, xvar = "FORTYPCD")
+datFreq(x = tab,
+        xvar = "FORTYPCD")
 		                                  
 # Frequency table with "CONDCLASS" and "FORTYPCD" 		                                   
-datFreq(x = tab, xvar = c("CONDCLASS", "FORTYPCD"))
+datFreq(x = tab,
+        xvar = c("CONDCLASS", "FORTYPCD"))
 
 # Frequency table with "CONDCLASS" and "FORTYPCD", adding total and subtotal
 # rows 		                                   
-datFreq(x = tab, xvar = c("CONDCLASS", "FORTYPCD"), total = TRUE, 
+datFreq(x = tab,
+        xvar = c("CONDCLASS", "FORTYPCD"), 
+        total = TRUE, 
         subtotal = TRUE)
         
 # Frequency table for WYtree, multiple variables, subtotal options
-datFreq(x = FIESTA::WYtree, xvar = c("SPGRPCD", "SPCD", "STATUSCD"), 
+datFreq(x = FIESTA::WYtree,
+        xvar = c("SPGRPCD", "SPCD", "STATUSCD"), 
 	       subtotal = TRUE, subtotalcol = "SPCD")
 }
 \author{
