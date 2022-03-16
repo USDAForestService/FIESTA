@@ -21,16 +21,14 @@
 #' of downloaded table(s). If more than one state, returned as one table.
 #' @author Tracey S. Frescino
 #' @examples
+#' \dontrun{
+#' # Get reference table for FIA research stations
+#' DBgetCSV(DBtable="ref_research_station")
 #' 
-#'     \dontrun{
-#'     # Get reference table for FIA research stations
-#'     DBgetCSV(DBtable="ref_research_station")
-#' 
-#'     # Get plot data for multiple states
-#'     FIAplots <- DBgetCSV("PLOT", c("Georgia", "Utah"))
-#'     table(FIAplots$STATECD)
-#'     }
-#' 
+#' # Get plot data for multiple states
+#' FIAplots <- DBgetCSV("PLOT", c("Georgia", "Utah"))
+#' table(FIAplots$STATECD)
+#' }
 #' @export DBgetCSV
 DBgetCSV <- function(DBtable, 
                      states = NULL, 

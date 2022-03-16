@@ -42,22 +42,26 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' # Append forest type names using the reference table above.
+#' ref_fortypcd <- ref_codes[ref_codes$VARIABLE == "FORTYPCD",]
+#' WYcondlut <- datLUTnm(WYcond,
+#'                       xvar = "FORTYPCD",
+#'                       LUT = ref_fortypcd,
+#'                       LUTvar = "VALUE",
+#'                       LUTnewvar = "MEANING",
+#'                       LUTnewvarnm = "FORTYPNM")
+#' names(WYcondlut)
+#' WYcond2 <- WYcondlut$xLUT
+#' head(WYcond2[WYcond2$FORTYPCD > 0, ])
 #' 
-#' 	## Append forest type names using the reference table above
-#' 	ref_fortypcd <- ref_codes[ref_codes$VARIABLE == "FORTYPCD",]
-#' 	WYcondlut <- datLUTnm(WYcond, xvar="FORTYPCD", LUT=ref_fortypcd, 
-#' 		LUTvar="VALUE", LUTnewvar="MEANING", LUTnewvarnm="FORTYPNM")
-#' 	names(WYcondlut)
-#' 	WYcond2 <- WYcondlut$xLUT
-#' 	head(WYcond2[WYcond2$FORTYPCD > 0, ])
-#' 
-#' 	## Append forest type names the FIAname parameter. If the xvar is in the stored 
-#' 	##    reference table, the name and values will automatically be appended.
-#' 	WYcondlut2 <- datLUTnm(WYcond, xvar="FORTYPCD", FIAname=TRUE)
-#' 	names(WYcondlut2)
-#' 	WYcond3 <- WYcondlut2$xLUT
-#' 	head(WYcond3[WYcond3$FORTYPCD > 0, ])
-#' 
+#' # Append forest type names the FIAname parameter. If the xvar is in the stored
+#' # reference table, the name and values will automatically be appended.
+#' WYcondlut2 <- datLUTnm(WYcond,
+#'                        xvar = "FORTYPCD",
+#'                        FIAname = TRUE)
+#' names(WYcondlut2)
+#' WYcond3 <- WYcondlut2$xLUT
+#' head(WYcond3[WYcond3$FORTYPCD > 0, ])
 #' @export datLUTnm
 datLUTnm <- function(x, 
                      xvar = NULL, 

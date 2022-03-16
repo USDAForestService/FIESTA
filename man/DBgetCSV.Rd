@@ -42,16 +42,14 @@ Accessibility and download time depends on access and speed of internet
 connection.
 }
 \examples{
+\dontrun{
+# Get reference table for FIA research stations
+DBgetCSV(DBtable="ref_research_station")
 
-    \dontrun{
-    # Get reference table for FIA research stations
-    DBgetCSV(DBtable="ref_research_station")
-
-    # Get plot data for multiple states
-    FIAplots <- DBgetCSV("PLOT", c("Georgia", "Utah"))
-    table(FIAplots$STATECD)
-    }
-
+# Get plot data for multiple states
+FIAplots <- DBgetCSV("PLOT", c("Georgia", "Utah"))
+table(FIAplots$STATECD)
+}
 }
 \author{
 Tracey S. Frescino

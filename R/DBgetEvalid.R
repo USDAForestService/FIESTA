@@ -73,28 +73,26 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
-#' 
-#'     \dontrun{
-#'     ## Get evalid and inventory years for Wyoming
-#'     WYeval <- DBgetEvalid(states="Wyoming")
-#'     names(WYeval)
-#' 
-#'     WYeval$evalidlist
-#'     WYeval$invtype
-#'     WYeval$invyrtab
-#'     WYeval$evalType
-#'     WYeval$invyrs
-#' 
-#' 
-#'     ## Get evalid for Utah and Wyoming 
-#'     DBgetEvalid(states=c("Wyoming", "Utah"))
-#' 
-#'     ## Get evalid for an FIA Research Station
-#'     RSevalid <- DBgetEvalid(RS="NERS")
-#'     names(RSevalid)
-#'     RSevalid$evalidlist
-#'     }
-#' 
+#' \dontrun{
+#' # Get evalid and inventory years for Wyoming
+#' WYeval <- DBgetEvalid(states="Wyoming")
+#' names(WYeval)
+#'
+#' WYeval$evalidlist
+#' WYeval$invtype
+#' WYeval$invyrtab
+#' WYeval$evalType
+#' WYeval$invyrs
+#'
+#'
+#' # Get evalid for Utah and Wyoming
+#' DBgetEvalid(states=c("Wyoming", "Utah"))
+#'
+#' # Get evalid for an FIA Research Station
+#' RSevalid <- DBgetEvalid(RS="NERS")
+#' names(RSevalid)
+#' RSevalid$evalidlist
+#' }
 #' @export DBgetEvalid
 DBgetEvalid <- function(states = NULL, 
                         RS = NULL, 
