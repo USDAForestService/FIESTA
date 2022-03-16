@@ -19,6 +19,16 @@ Returns nothing.
 Extracts and queries data from a SQLite (*.sqlite) database (Note: must use
 SQL syntax).
 }
+\examples{
+\dontrun{
+# Extract data from Washington state
+DBgetSQLite(states = "WA")
+
+# Extract data from Utah and California, save to an outfolder
+DBgetSQLite(states = c("UT", "CA"),
+            outfolder = tempdir()) 
+}
+}
 \author{
 Tracey S. Frescino
 }

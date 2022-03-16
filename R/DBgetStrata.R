@@ -97,31 +97,27 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
+#' \dontrun{
+#' # Get strata for the most current evaluation of a state (ex. Wyoming)
+#' WYstrat1 <- DBgetStrata(states = "Wyoming",
+#'                         evalCur = TRUE)
+#' names(WYstrat1)
 #' 
+#' head(WYstrat1$pltassgn)
+#' WYstrat1$unitarea
+#' WYstrat1$unitvar
+#' WYstrat1$areavar
+#' WYstrat1$strvar
+#' WYstrat1$evalid
 #' 
-#'   ## Get strata for the most current evaluation of a state (ex. Wyoming)
-#' #  WYstrat1 <- DBgetStrata(states="Wyoming", evalCur=TRUE)
-#' #  names(WYstrat1)
+#' # Get strata information for a specific set of plots
+#' WYstrat4 <- DBgetStrata(dat = WYplt)
+#' names(WYstrat4)
 #' 
-#' #  head(WYstrat1$pltassgn)
-#' #  WYstrat1$unitarea
-#' #  WYstrat1$unitvar
-#' #  WYstrat1$areavar
-#' #  WYstrat1$strlut
-#' #  WYstrat1$strvar
-#' #  WYstrat1$strwtvar
-#' #  WYstrat1$evalid
-#' 
-#' 
-#' #  ## Get strata information for a specific set of plots
-#' #  WYstrat4 <- DBgetStrata(dat=WYplt, datsource="CSV")
-#' #  names(WYstrat4)
-#' 
-#' #  head(WYstrat4$pltassgn)
-#' #  WYstrat4$unitarea
-#' #  WYstrat4$strlut
-#' #  WYstrat4$evalid
-#' 
+#' head(WYstrat4$pltassgn)
+#' WYstrat4$unitarea
+#' WYstrat4$evalid
+#' }
 #' @export DBgetStrata
 DBgetStrata <- function(dat = NULL, 
                         uniqueid = "CN", 
