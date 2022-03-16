@@ -25,10 +25,13 @@ spGetPlots(
   data_dsn = NULL,
   istree = FALSE,
   isseed = FALSE,
+  isveg = FALSE,
   plot_layer = "plot",
   cond_layer = "cond",
   tree_layer = "tree",
   seed_layer = "seed",
+  vsubpspp_layer = "vsubpspp",
+  vsubpstr_layer = "vsubpstr",
   ppsa_layer = "pop_plot_stratum_assgn",
   other_layers = NULL,
   puniqueid = "CN",
@@ -279,7 +282,7 @@ names(tabsCur)
 head(tabsCur$pltx)
 
 table(tabsCur$pltx$MEASYEAR)
-}
+} 
 }
 \author{
 Tracey S. Frescino
