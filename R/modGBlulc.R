@@ -200,8 +200,6 @@
 #' Station, p.53-77.
 #' @keywords data
 #' @examples
-#' 
-#' 
 #' GBpopdat <- modGBpop(
 #' popTabs = list(cond = FIESTA::WYcond,  
 #'                tree = FIESTA::WYtree,        
@@ -231,7 +229,6 @@
 #' sumunits = TRUE            
 #' )
 #' str(forest_area_by_forest_type, max.level = 1)
-#' 
 #' @export modGBlulc
 modGBlulc <- function(GBpopdat, 
                       landarea = "ALL", 

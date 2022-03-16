@@ -507,44 +507,41 @@ Spatial Data Services
 (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
 }
 \examples{
+\dontrun{
+# Extract the most current evaluation of data for Utah
+UTdat <- DBgetPlots(states = "Utah", 
+                    evalCur = TRUE)
+names(UTdat)
+head(UTdat$plt)
+UTdat$pltcnt
 
+# Look at number of plots by inventory year
+table(UTdat$plt$INVYR)
 
-  # Extract the most current evaluation of data for Utah
-  UTdat <- DBgetPlots(states="Utah", evalCur=TRUE)
-  names(UTdat)
-  head(UTdat$plt)
-  UTdat$pltcnt
+# Note: see FIESTA::ref_plt and FIESTA::ref_cond for variable descriptions
+# Or consult FIA Database documentation
+# \link{https://www.fia.fs.fed.us/library/database-documentation/index.php}
 
-  ## Look at number of plots by inventory year
-  table(UTdat$plt$INVYR)
+# Extract specified inventory years 2012:2014 and spatial information
+UTdat2 <- DBgetPlots(states = "Utah",
+                     invyrs = 2012:2014, 
+                     issp = TRUE)
+names(UTdat2)
+UTdat2$pltcnt
+UTdat2$spxy_PUBLIC
 
-  # Note: see FIESTA::ref_plt and FIESTA::ref_cond for variable descriptions
-  #Or consult FIA Database documentation
-  #\link{https://www.fia.fs.fed.us/library/database-documentation/index.php}
+# Extract and display plots with aspen forest type
+UTdat3 <- DBgetPlots(states = "Utah",
+                     invyrs = 2012:2014,
+                     issp = TRUE,
+                     allFilter = "FORTYPCD == 901")
+names(UTdat3)
+UTdat3$pltcnt
 
-
-  # Extract specified inventory years 2012:2014 and spatial information
-  UTdat2 <- DBgetPlots(states="Utah", invyrs=2012:2014, issp=TRUE)
-  names(UTdat2)
-  UTdat2$pltcnt
-  UTdat2$spxy_PUBLIC
-
-  ## Display plots by inventory year (INVYR)
-  # plot(sf::st_geometry(UTdat2$xy_PUBLIC['INVYR']),
-	# col=sf.colors(length(unique(UTdat2$spxy_PUBLIC[["INVYR"]]))))
-
-
-  # Extract and display plots with aspen forest type
-  UTdat3 <- DBgetPlots(states="Utah", invyrs=2012:2014, issp=TRUE,
-		allFilter="FORTYPCD == 901")
-  names(UTdat3)
-  UTdat3$pltcnt
-
-  plot(sf::st_geometry(FIESTAutils::stunitco[FIESTAutils::stunitco$STATENM == "Utah",]),
-		border="light grey")
-  plot(sf::st_geometry(UTdat3$xy_PUBLIC), add=TRUE, pch=18, cex=.5)
-
-
+plot(sf::st_geometry(FIESTA::stunitco[FIESTA::stunitco$STATENM == "Utah",]),
+                     border = "light grey")
+plot(sf::st_geometry(UTdat3$xy_PUBLIC), add=TRUE, pch=18, cex=.5)
+}
 }
 \references{
 DeBlander, Larry T.; Shaw, John D.; Witt, Chris; Menlove, Jim;

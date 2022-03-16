@@ -10,6 +10,15 @@
 #' @return Returns nothing.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' \dontrun{
+#' # Extract data from Washington state
+#' DBgetSQLite(states = "WA")
+#' 
+#' # Extract data from Utah and California, save to an outfolder
+#' DBgetSQLite(states = c("UT", "CA"),
+#'             outfolder = tempdir()) 
+#' }
 #' @export DBgetSQLite
 DBgetSQLite <- function (states = NULL, 
                          outfolder = NULL) {

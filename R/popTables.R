@@ -38,9 +38,7 @@
 #' @author Grayson W. White
 #' @keywords list
 #' @examples
-#' 
-#' popTables()
-#' 
+#' popTables(cond = FIESTA::WYcond, seed = FIESTA::WYseed)
 #' @export popTables
 
 popTables <- function(cond=NULL, plt=NULL, tree=NULL,

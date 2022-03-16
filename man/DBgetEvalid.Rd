@@ -110,28 +110,26 @@ FIA database tables used:\cr 1. SURVEY - To get latest inventory year,
 invyrtab = NULL\cr 2. POP_EVAL - To get EVALID and EVALID years
 }
 \examples{
+\dontrun{
+# Get evalid and inventory years for Wyoming
+WYeval <- DBgetEvalid(states="Wyoming")
+names(WYeval)
+
+WYeval$evalidlist
+WYeval$invtype
+WYeval$invyrtab
+WYeval$evalType
+WYeval$invyrs
 
 
-    ## Get evalid and inventory years for Wyoming
-    WYeval <- DBgetEvalid(states="Wyoming")
-    names(WYeval)
+# Get evalid for Utah and Wyoming
+DBgetEvalid(states=c("Wyoming", "Utah"))
 
-    WYeval$evalidlist
-    WYeval$invtype
-    WYeval$invyrtab
-    WYeval$evalType
-    WYeval$invyrs
-
-
-    ## Get evalid for Utah and Wyoming 
-    DBgetEvalid(states=c("Wyoming", "Utah"))
-
-    ## Get evalid for an FIA Research Station
-    RSevalid <- DBgetEvalid(RS="NERS")
-    names(RSevalid)
-    RSevalid$evalidlist
-
-
+# Get evalid for an FIA Research Station
+RSevalid <- DBgetEvalid(RS="NERS")
+names(RSevalid)
+RSevalid$evalidlist
+}
 }
 \author{
 Tracey S. Frescino
