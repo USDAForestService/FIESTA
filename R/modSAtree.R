@@ -958,11 +958,12 @@ modSAtree <- function(SApopdatlst = NULL,
   estdf <- setDT(estdf)
   estdf[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
   estdf$estimator <- nhat
+
   if (na.fill != "NONE") {
     estdf[is.na(estdf$est), "estimator"] <- na.fill
     na.fill.se <- paste0(na.fill, ".se")
     estdf[is.na(estdf$est), c("est", "est.se")] <- 
-      estdf[is.na(estdf$est), c(na.fill, na.fill.se)]
+      estdf[is.na(estdf$est), c(na.fill, na.fill.se), with=FALSE]
   }
   estnm <- "est"
 

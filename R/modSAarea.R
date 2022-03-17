@@ -920,7 +920,7 @@ modSAarea <- function(SApopdatlst = NULL,
     estdf[is.na(estdf$est), "estimator"] <- na.fill
     na.fill.se <- paste0(na.fill, ".se")
     estdf[is.na(estdf$est), c("est", "est.se")] <- 
-            estdf[is.na(estdf$est), c(na.fill, na.fill.se)]
+            estdf[is.na(estdf$est), c(na.fill, na.fill.se), with=FALSE]
   }
   estnm <- "est"
 
