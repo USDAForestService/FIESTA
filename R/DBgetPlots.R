@@ -12,7 +12,7 @@
 #' equivalent stocking) by live trees of any size, including land that formerly
 #' had such tree cover and that will be naturally or artificially regenerated.
 #' To qualify, the area must be >= 1.0 acre in size and 120.0 feet wide (See
-#' Woudenberg et al. 2011).
+#' Burrill et al. 2018).
 #' 
 #' *ACI (All Condition Inventory)*\cr RMRS National Forest plots. For nonforest
 #' conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 1),
@@ -47,7 +47,7 @@
 #' *FIADB Table Extraction*\cr \tabular{lll}{ 
 #' \tab \bold{Argument} \tab \bold{Table Name(s)}\cr 
 #' \tab istree \tab TREE\cr 
-#' \tab isveg \tab P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE\cr 
+#' \tab isveg \tab P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP\cr 
 #' \tab issubp \tab SUBPLOT, SUBP_COND\cr 
 #' \tab isdwm \tab COND_DWM_CALC\cr 
 #' \tab isgrm \tab TREE_GRM_COMPONENT\cr 
@@ -287,7 +287,7 @@
 #' @param isseed Logical. If TRUE, seedling data are extracted from SEEDLING
 #' table in database.
 #' @param isveg Logical. If TRUE, understory vegetation tables are extracted
-#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE).
+#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
 #' @param islulc Logical. If TRUE, condition-level land use/land cover data are
@@ -342,8 +342,8 @@
 #' @return if returndata=TRUE, a list of the following objects: 
 #' \item{states}{ Vector. Input state(s) (full state names: Arizona). } 
 #' \item{tabs}{ List. A list of data frames from FIA database, including 
-#' plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), vsubpspp
-#' and vsubpstr (if isveg=TRUE), lulc (if islulc=TRUE). See below 
+#' plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), vsubpspp,
+#' vsubpstr, and invsubp (if isveg=TRUE), lulc (if islulc=TRUE). See below 
 #' 'Output Tables - FIA Table Names' for reference to FIA database tables. 
 #' See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
 #' If istree and the number of states > 3, tree data are saved to outfolder 
@@ -374,6 +374,7 @@
 #' \tab tree \tab tree\cr 
 #' \tab vsubpspp \tab P2VEG_SUBPLOT_SPP\cr 
 #' \tab vsubpstr \tab P2VEG_SUBP_STRUCTURE\cr 
+#' \tab invsubp \tab INVASIVE_SUBPLOT_SPP\cr 
 #' \tab subplot \tab SUBPLOT\cr 
 #' \tab subp_cond \tab SUBP_COND\cr 
 #' \tab dwm \tab COND_DWM_CALC\cr 
@@ -539,7 +540,7 @@ DBgetPlots <- function (states = NULL,
   ## Set global variables  
   CN=CONDID=COND_STATUS_CD=PLT_CN=FORTYPCD=pltvarlst=condvarlst=pgeomvarlst=
 	treevarlst=tsumvarlst=seedvarlst=ssumvarlst=vsubpsppvarlst=vsubpstrvarlst=
-	subpvarlst=subpcvarlst=dwmvarlst=grmvarlst=sccmvarlst=filtervarlst=
+	invsubpvarlst=subpvarlst=subpcvarlst=dwmvarlst=grmvarlst=sccmvarlst=filtervarlst=
 	SUBPPROP_UNADJ=MICRPROP_UNADJ=TPA_UNADJ=TPAMORT_UNADJ=TPAREMV_UNADJ=
 	SEEDCNT6=TREECOUNT_CALC=SEEDSUBP=LIVE_CANOPY_CVR_PCT=CONDPROP_UNADJ=
 	PLOT_NONSAMPLE_REASN_CD=PLOT_STATUS_CD=BA=DIA=CRCOVPCT_RMRS=TIMBERCD=
@@ -1139,20 +1140,21 @@ DBgetPlots <- function (states = NULL,
   if (isveg) {
     vsub_layer <- "P2VEG_SUBPLOT_SPP"
     vstr_layer <- "P2VEG_SUBP_STRUCTURE"
+    inv_layer <- "INVASIVE_SUBPLOT_SPP"
     if (datsource == "sqlite") {
-      vsub_layer <- chkdbtab(dbtablst, "P2VEG_SUBPLOT_SPP")
-      if (is.null(vsub_layer)) {
-        isveg <- FALSE
-      }
-      vstr_layer <- chkdbtab(dbtablst, "P2VEG_SUBP_STRUCTURE")
+      vsub_layer <- chkdbtab(dbtablst, vsub_layer)
+      vstr_layer <- chkdbtab(dbtablst, vstr_layer)
       if (is.null(vstr_layer)) {
         isveg <- FALSE
       }
+      inv_layer <- chkdbtab(dbtablst, inv_layer)
     }
     vfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				vsub_layer, " v ON v.PLT_CN = p.CN")
     vstrfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				vstr_layer, " v ON v.PLT_CN = p.CN")
+    invfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
+				inv_layer, " v ON v.PLT_CN = p.CN")
   }
   ## SUBP query
   ################################################
@@ -1251,7 +1253,7 @@ DBgetPlots <- function (states = NULL,
 
   if (returndata) {
     plt=cond=pltcond=tree=seed=spconddat <- {}
-    if(isveg) { vsubpspp=vsubpstr <- {} }
+    if(isveg) { vsubpspp=vsubpstr=invsubp <- {} }
     if(issubp) { subp=subpc <- {} }
     if(isdwm) { dwm <- {} }
     if(issccm) { sccm <- {} }
@@ -1390,6 +1392,9 @@ DBgetPlots <- function (states = NULL,
 		      stopifnull=FALSE)
         P2VEG_SUBP_STRUCTURE <- 
 		      DBgetCSV("P2VEG_SUBP_STRUCTURE", stabbr, returnDT=TRUE, 
+		      stopifnull=FALSE)
+        INVASIVE_SUBPLOT_SPP <- 
+		      DBgetCSV("INVASIVE_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
       }
       ## Subplot data
@@ -1791,6 +1796,8 @@ DBgetPlots <- function (states = NULL,
 
         ## Merge to pltx
         #pltx <- merge(pltx, lulcx, all.x=TRUE, by.x="CN", by.y="PLT_CN")  
+      } else {
+        lulcx <- NULL
       }
 
       ## Write query to outfolder
@@ -2029,6 +2036,8 @@ DBgetPlots <- function (states = NULL,
             ## Create variable, SEEDSUBP6, indicating a species has 6 or more seedlings on a SUBP
             seedx[, SEEDSUBP6 := 0][TREECOUNT_CALC >= 6, SEEDSUBP6 := 1]
           }              
+        } else {
+          seedx <- NULL
         }
       }
 
@@ -2049,7 +2058,7 @@ DBgetPlots <- function (states = NULL,
       ## Get data for P2VEG_SUBPLOT_SPP
       vsubpsppvars <- toString(paste0("v.", vsubpsppvarlst))
       vsubpsppqry <- paste("select distinct", vsubpsppvars, "from", vfromqry, 
-		"where", paste0(evalFilter.veg, stateFilters))
+		                       "where", paste0(evalFilter.veg, stateFilters))
 
       if (datsource == "sqlite") {
         vsubpsppx <- DBI::dbGetQuery(dbconn, vsubpsppqry)
@@ -2063,12 +2072,14 @@ DBgetPlots <- function (states = NULL,
 
         ## Subset overall filters from condx
         vsubpsppx <- vsubpsppx[paste(vsubpsppx$PLT_CN, vsubpsppx$CONDID) %in% pcondID,]
+      } else {
+        vsubpsppx <- NULL
       }
 
       ## Get data for P2VEG_SUBP_STRUCTURE
       vsubpstrvars <- toString(paste0("v.", vsubpstrvarlst))
       vsubpstrqry <- paste("select distinct", vsubpstrvars, "from", vstrfromqry, 
-		"where", paste0(evalFilter.veg, stateFilters))
+		                       "where", paste0(evalFilter.veg, stateFilters))
       vsubpstrx <- sqldf::sqldf(vsubpstrqry, stringsAsFactors=FALSE)
 
       if(nrow(vsubpstrx) != 0){
@@ -2078,10 +2089,31 @@ DBgetPlots <- function (states = NULL,
 
         ## Subset overall filters from condx
         vsubpstrx <- vsubpstrx[paste(vsubpstrx$PLT_CN, vsubpstrx$CONDID) %in% pcondID,]
+      } else {
+        vsubpstrx <- NULL
       }
+
+      ## Get data for INVASIVE_SUBPLOT_SPP
+      invsubpvars <- toString(paste0("v.", invsubpvarlst))
+      invsubpqry <- paste("select distinct", invsubpvars, "from", invfromqry, 
+		                      "where", paste0(evalFilter.veg, stateFilters))
+      invsubpx <- sqldf::sqldf(invsubpqry, stringsAsFactors=FALSE)
+
+      if(nrow(invsubpx) != 0){
+        invsubpx <- setDT(invsubpx)
+        invsubpx[, PLT_CN := as.character(PLT_CN)]
+        setkey(invsubpx, PLT_CN)
+
+        ## Subset overall filters from condx
+        invsubpx <- invsubpx[paste(invsubpx$PLT_CN, invsubpx$CONDID) %in% pcondID,]
+      } else {
+        invsubpx <- NULL
+      }
+
       if (returndata) {
         vsubpspp <- rbind(vsubpspp, vsubpsppx)
         vsubpstr <- rbind(vsubpstr, vsubpstrx)
+        invsubp <- rbind(invsubp, invsubpx)
       }
     }
 
@@ -2109,6 +2141,8 @@ DBgetPlots <- function (states = NULL,
 
         ## Subset overall filters from condx
         subpx <- subpx[subpx$PLT_CN %in% pltx$CN,]
+      } else {
+        subpx <- NULL
       }
 
       ## Get data for SUBP_COND
@@ -2124,7 +2158,10 @@ DBgetPlots <- function (states = NULL,
 
         ## Subset overall filters from condx
         subpcx <- subpcx[paste(subpcx$PLT_CN, subpcx$CONDID) %in% pcondID,]
+      } else {
+        subpcx <- NULL
       }
+
       if (returndata) {
         subp <- rbind(subp, subpx)
         subpc <- rbind(subpc, subpcx)
@@ -2159,6 +2196,8 @@ DBgetPlots <- function (states = NULL,
 
           ## Subset overall filters from condx
           dwmx <- dwmx[paste(dwmx$PLT_CN, dwmx$CONDID) %in% pcondID,]
+        } else {
+          dwmx <- NULL
         }
       }
       if (returndata) {
@@ -2196,6 +2235,8 @@ DBgetPlots <- function (states = NULL,
           ## Subset overall filters from condx
           #grmx <- grmx[paste(grmx$PLT_CN, grmx$CONDID) %in% pcondID,]
           grmx <- grmx[grmx$PLT_CN %in% pltx$CN,]
+        } else {
+          grmx <- NULL
         }
       }
       if (returndata) {
@@ -2211,8 +2252,8 @@ DBgetPlots <- function (states = NULL,
         othertable <- othertables[j]
         othertablexnm <- paste0("otherx", j)
 
-        cat("\n",
-        "## STATUS: GETTING", othertable, "(", stabbr, ") ...", "\n")
+        message(paste0("\n",
+        "## STATUS: GETTING", othertable, " (", stabbr, ")...", "\n"))
     
         if (!is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
           xfromqry <- paste0(SCHEMA., othertable, " x")
@@ -2287,8 +2328,8 @@ DBgetPlots <- function (states = NULL,
     ## If savePOP or more than one evalType
     ##############################################################
     if ((iseval || savePOP) && !is.null(pltx)) {
-      cat("\n",
-      "## STATUS: GETTING POP_PLOT_STRATUM_ASSGN DATA(", stabbr, ") ...", "\n")
+      message(paste("\n",
+      "## STATUS: GETTING POP_PLOT_STRATUM_ASSGN DATA (", stabbr, ")...", "\n"))
     
       ppsavars <- toString(c("PLT_CN", "EVALID", "STATECD", "ESTN_UNIT", "STRATUMCD"))
       ppsaqry <- paste("select", ppsavars, "from", ppsafromqry, "where statecd =", stcd)
@@ -2478,6 +2519,7 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       } 
+ 
       if ((savedata || !treeReturn) && !is.null(treex)) {
         index.unique.treex <- NULL
         if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
@@ -2508,6 +2550,9 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       } 
+print("OOOO")
+print(vsubpsppx)
+
       if (savedata && !is.null(vsubpsppx)) {
         index.unique.vsubpsppx <- NULL
         if (!append_layer) index.unique.vsubpsppx <- c("PLT_CN", "CONDID")
@@ -2522,7 +2567,10 @@ DBgetPlots <- function (states = NULL,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
+      }
+print("OOOO2")
 
+      if (savedata && !is.null(vsubpstrx)) {
         index.unique.vsubpstrx <- NULL
         if (!append_layer) index.unique.vsubpstrx <- c("PLT_CN", "CONDID")
         datExportData(vsubpstrx, 
@@ -2537,6 +2585,25 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       }
+print("OOOO3")
+
+      if (savedata && !is.null(invsubpx)) {
+        index.unique.invsubpx <- NULL
+        if (!append_layer) index.unique.invsubpx <- c("PLT_CN", "CONDID")
+        datExportData(invsubpx, 
+            index.unique = index.unique.invsubpx,
+            savedata_opts = list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="invsubp",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE)) 
+      }
+print("OOOO4")
+
       if (savedata && !is.null(subpx)) {
         index.unique.subpx <- NULL
         if (!append_layer) index.unique.subpx <- "PLT_CN"
@@ -2565,7 +2632,9 @@ DBgetPlots <- function (states = NULL,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
-      }  
+      } 
+print("OOOO5")
+ 
       if (savedata && !is.null(dwmx)) {
         index.unique.dwmx <- NULL
         if (!append_layer) index.unique.dwmx <- c("PLT_CN", "CONDID")
@@ -2756,6 +2825,10 @@ DBgetPlots <- function (states = NULL,
       if (!is.null(vsubpstr)) {
         tabs$vsubpstr <- setDF(vsubpstr)
         tabIDs$vsubpstr <- "PLT_CN"
+      }
+      if (!is.null(invsubp)) {
+        tabs$invsubp <- setDF(invsubp)
+        tabIDs$invsubp <- "PLT_CN"
       }
     }
     if (issubp) {

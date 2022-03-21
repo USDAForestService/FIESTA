@@ -68,6 +68,8 @@
 #' @param data_dsn String. Name of database where *_layers reside.
 #' @param istree Logical. If TRUE, extract tree data from FIA database.
 #' @param isseed Logical. If TRUE, extract seedling data from FIA database.
+#' @param isveg Logical. If TRUE, understory vegetation tables are extracted
+#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).
 #' @param plot_layer String. Name of layer in database of file name of FIA plot
 #' table.
 #' @param cond_layer String. Name of layer in database of file name of FIA cond
@@ -204,6 +206,7 @@ spGetPlots <- function(bnd = NULL,
                        seed_layer = "seed", 
                        vsubpspp_layer = "vsubpspp", 
                        vsubpstr_layer = "vsubpstr", 
+                       invsubp_layer = "invsubp",
                        ppsa_layer = "pop_plot_stratum_assgn", 
                        other_layers = NULL, 
                        puniqueid = "CN", 
@@ -588,6 +591,10 @@ spGetPlots <- function(bnd = NULL,
       if (!is.null(vsubpstrx)) {
         tabs2save <- c(tabs2save, "vsubpstrx")
       }
+      invsubpx <- pcheck.table(invsubp_layer, obj=obj, stopifnull=TRUE)
+      if (!is.null(invsubpx)) {
+        tabs2save <- c(tabs2save, "invsubpx")
+      }
     }
     ## pop_plot_stratam_assgn data
     pop_plot_stratum_assgnx <- tryCatch(pcheck.table(ppsa_layer, obj=obj),
@@ -654,6 +661,18 @@ spGetPlots <- function(bnd = NULL,
     if (isseed) {
       seedx <- seedx[seedx[[tuniqueid]] %in% pltids,]
     }
+    ## Subset P2cwf data
+    if (isveg) {
+      if (!is.null(vsubpsppx)) {
+        vsubpsppx <- vsubpsppx[vsubpsppx[[tuniqueid]] %in% pltids,]
+      }
+      if (!is.null(vsubpsppx)) {
+        vsubpstrx <- vsubpstrx[vsubpstrx[[tuniqueid]] %in% pltids,]
+      }
+      if (!is.null(invsubpx)) {
+        invsubpx <- invsubpx[invsubpx[[tuniqueid]] %in% pltids,]
+      }
+    }
 
     ## other data
     if (!is.null(other_layers)) {
@@ -718,6 +737,11 @@ spGetPlots <- function(bnd = NULL,
       seedx <- {} 
       tabs2save <- c(tabs2save, "seedx")
     }
+    if (isveg) {
+      vsubpsppx=vsubpstrx=invsubpx <- {} 
+      tabs2save <- c(tabs2save, "vsubpsppx", "vsubpstrx", "invsubpx")
+    }
+    
     if (!is.null(other_layers)) {
       for (layer in other_layers) {
         assign(paste0(layer, "x"), {})
@@ -1101,7 +1125,6 @@ spGetPlots <- function(bnd = NULL,
       vsubpsppchk <- chkdbtab(tablst, vsubpspp_layer)
       if (is.null(vsubpsppchk) && vsubpspp_layer == "vsubpspp") {
         message("no vsubpspp data in database...")
-        isveg <- FALSE
       } else {
         vsubpspp_layer <- vsubpsppchk
       }
@@ -1111,6 +1134,12 @@ spGetPlots <- function(bnd = NULL,
         isveg <- FALSE
       } else {
         vsubpstr_layer <- vsubpstrchk
+      }
+      invsubpchk <- chkdbtab(tablst, invsubp_layer)
+      if (is.null(invsubpchk) && invsubp_layer == "invsubp") {
+        message("no invsubp data in database...")
+      } else {
+        invsubp_layer <- invsubpchk
       }
     }
     if (savePOP) {
@@ -1262,8 +1291,8 @@ spGetPlots <- function(bnd = NULL,
           plt1 <- plt[plt[[pjoinid]] %in% pltids1[[xyjoinid]], ]
           xyids1 <- plt1[[puniqueid]]
           cond1.qry <- paste0("select cond.* from ", p2fromqry,
-			" join cond on(cond.PLT_CN = p.CN) where ", 
-				"p.", puniqueid, " in(", addcommas(xyids1, quotes=TRUE), ")")
+			                        " join cond on(cond.PLT_CN = p.CN) where ", 
+				                      "p.", puniqueid, " in(", addcommas(xyids1, quotes=TRUE), ")")
           rs <- DBI::dbSendQuery(dbconn, cond1.qry)
           cond1 <- suppressWarnings(DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
@@ -1289,20 +1318,29 @@ spGetPlots <- function(bnd = NULL,
           if (isveg) {
             vsubpspp.qry <- paste0("select vsubpspp.* from ", p2fromqry, 
                                 " join ", vsubpspp_layer, 
-                                " on(seed.PLT_CN = p.CN) where ", stfilter, 
+                                " on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
                                 " and p.", puniqueid, 
                                 " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpspp.qry)
-            vsubpspp <- DBI::dbFetch(rs)
+            vsubpspp1 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
             
             vsubpstr.qry <- paste0("select vsubpstr.* from ", p2fromqry, 
                                    " join ", vsubpstr_layer, 
-                                   " on(seed.PLT_CN = p.CN) where ", stfilter, 
+                                   " on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpstr.qry)
-            vsubpstr <- DBI::dbFetch(rs)
+            vsubpstr1 <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
+            
+            invsubp.qry <- paste0("select invsubp.* from ", p2fromqry, 
+                                   " join ", invsubp_layer, 
+                                   " on(invsubp.PLT_CN = p.CN) where ", stfilter, 
+                                   " and p.", puniqueid, 
+                                   " in(", addcommas(xyids1, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(dbconn, invsubp.qry)
+            invsubp1 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
           }
           if (savePOP) {
@@ -1338,10 +1376,15 @@ spGetPlots <- function(bnd = NULL,
           } 
         } else {
           plt1=cond1 <- NULL
-          if (istree)
+          if (istree) {
             tree1 <- NULL
-          if (isseed)
+          }
+          if (isseed) {
             seed1 <- NULL
+          }
+          if (isveg) {
+            vsubpspp1=vsubpstr1=invsubp1 <- NULL
+          }
           if (savePOP) {
             pop_plot_stratum_assgn1 <- NULL
           }
@@ -1354,7 +1397,7 @@ spGetPlots <- function(bnd = NULL,
             }
           }
         }
-
+ 
         ################################################
         ## Subset FIA plot data to pltids1 
         ################################################
@@ -1433,6 +1476,35 @@ spGetPlots <- function(bnd = NULL,
             seed2 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
           }
+          if (isveg) {
+            vsubpspp2.qry <- paste0("select vsubpspp.* from ", p2fromqry, 
+                                   " join ", vsubpspp_layer, 
+                                   " on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
+                                   " and p.", puniqueid, 
+                                   " in(", addcommas(xyids2, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(dbconn, vsubpspp2.qry)
+            vsubpspp2 <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
+            
+            vsubpstr2.qry <- paste0("select vsubpstr.* from ", p2fromqry, 
+                                   " join ", vsubpstr_layer, 
+                                   " on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
+                                   " and p.", puniqueid, 
+                                   " in(", addcommas(xyids2, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(dbconn, vsubpstr2.qry)
+            vsubpstr2 <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
+            
+            invsubp2.qry <- paste0("select invsubp.* from ", p2fromqry, 
+                                  " join ", invsubp_layer, 
+                                  " on(invsubp.PLT_CN = p.CN) where ", stfilter, 
+                                  " and p.", puniqueid, 
+                                  " in(", addcommas(xyids2, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(dbconn, invsubp2.qry)
+            invsubp2 <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
+          }
+          
           if (savePOP) {
             ppsa2.qry <- paste0("select ppsa.* from ", p2fromqry, 
                                 " where ", stfilter, 
@@ -1467,10 +1539,15 @@ spGetPlots <- function(bnd = NULL,
           } 
         } else {
           plt2=cond2 <- NULL
-          if (istree)
+          if (istree) {
             tree2 <- NULL
-          if (isseed)
+          }
+          if (isseed) {
             seed2 <- NULL
+          }
+          if (isveg) {
+            vsubpspp2=vsubpstr2=invsubp2 <- NULL
+          }
           if (savePOP) {
             pop_plot_stratum_assgn2 <- NULL
           }
@@ -1485,10 +1562,17 @@ spGetPlots <- function(bnd = NULL,
         }
         plt <- rbind(plt1, plt2)
         cond <- rbind(cond1, cond2)
-        if (istree)
+        if (istree) {
           tree <- rbind(tree1, tree2)
-        if (isseed)
+        }
+        if (isseed) {
           seed <- rbind(seed1, seed2)
+        }
+        if (isveg) {
+          vsubpspp <- rbind(vsubpspp1, vsubpspp2)
+          vsubpstr <- rbind(vsubpstr1, vsubpstr2)
+          invsubp <- rbind(invsubp1, invsupb2)
+        }          
         if (savePOP) {
           pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
         }
@@ -1549,21 +1633,30 @@ spGetPlots <- function(bnd = NULL,
           }
           if (isveg) {
             vsubpspp.qry <- paste0("select distinct vsubpspp.* from ", p2fromqry, 
-                               " join ", vsubpspp_layer, 
-                               " on(seed.PLT_CN = p.CN) where ", stfilter, 
-                               " and p.", puniqueid, 
-                               " in(", addcommas(xyids, quotes=TRUE), ")")
+                                   " join ", vsubpspp_layer, 
+                                   " on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
+                                   " and p.", puniqueid, 
+                                   " in(", addcommas(xyids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpspp.qry)
             vsubpspp <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
             
             vsubpstr.qry <- paste0("select distinct vsubpstr.* from ", p2fromqry, 
                                    " join ", vsubpstr_layer, 
-                                   " on(seed.PLT_CN = p.CN) where ", stfilter, 
+                                   " on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpstr.qry)
             vsubpstr <- DBI::dbFetch(rs)
+            DBI::dbClearResult(rs)
+            
+            invsubp.qry <- paste0("select distinct invsubp.* from ", p2fromqry, 
+                                  " join ", invsubp_layer, 
+                                  " on(invsubp.PLT_CN = p.CN) where ", stfilter, 
+                                  " and p.", puniqueid, 
+                                  " in(", addcommas(xyids, quotes=TRUE), ")")
+            rs <- DBI::dbSendQuery(dbconn, invsubp.qry)
+            invsubp <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
           }
           
@@ -1601,10 +1694,15 @@ spGetPlots <- function(bnd = NULL,
           }
         } else {
           plt=cond <- NULL
-          if (istree)
+          if (istree) {
             tree <- NULL
-          if (isseed)
+          }
+          if (isseed) {
             seed <- NULL
+          }
+          if (isveg) {
+            vsubpspp=vsubpstr=invsubp <- NULL
+          }
           if (savePOP) {
             pop_plot_stratum_assgn2 <- NULL
           }
@@ -1630,8 +1728,8 @@ spGetPlots <- function(bnd = NULL,
       if (isveg) {
         vsubpsppx <- rbind(vsubpsppx, vsubpspp)
         vsubpstrx <- rbind(vsubpstrx, vsubpstr)
+        invsubpx <- rbind(invsubpx, invsubp)
       }
-      
       if (savePOP) {
         pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, pop_plot_stratum_assgn)
       }
@@ -1671,6 +1769,7 @@ spGetPlots <- function(bnd = NULL,
   if (isveg) {
     tabIDs$vsubpsppx <- tuniqueid
     tabIDs$vsubpstrx <- tuniqueid
+    tabIDs$invsubpx <- tuniqueid
   }
   
   miss <- names(tabs)[!names(tabs) %in% names(tabIDs)]

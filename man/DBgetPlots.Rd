@@ -124,7 +124,7 @@ database.}
 table in database.}
 
 \item{isveg}{Logical. If TRUE, understory vegetation tables are extracted
-from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE).}
+from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).}
 
 \item{issubp}{Logical. If TRUE, subplot tables are extracted from FIA
 database (SUBPLOT, SUBP_COND).}
@@ -202,8 +202,8 @@ of options. Only used when savedata = TRUE. If out_layer = NULL,}
 if returndata=TRUE, a list of the following objects: 
 \item{states}{ Vector. Input state(s) (full state names: Arizona). } 
 \item{tabs}{ List. A list of data frames from FIA database, including 
-plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), vsubpspp
-and vsubpstr (if isveg=TRUE), lulc (if islulc=TRUE). See below 
+plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), vsubpspp,
+vsubpstr, and invsubp (if isveg=TRUE), lulc (if islulc=TRUE). See below 
 'Output Tables - FIA Table Names' for reference to FIA database tables. 
 See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
 If istree and the number of states > 3, tree data are saved to outfolder 
@@ -234,6 +234,7 @@ evalTypes for the state evaluation are returned. }
 \tab tree \tab tree\cr 
 \tab vsubpspp \tab P2VEG_SUBPLOT_SPP\cr 
 \tab vsubpstr \tab P2VEG_SUBP_STRUCTURE\cr 
+\tab invsubp \tab INVASIVE_SUBPLOT_SPP\cr 
 \tab subplot \tab SUBPLOT\cr 
 \tab subp_cond \tab SUBP_COND\cr 
 \tab dwm \tab COND_DWM_CALC\cr 
@@ -268,7 +269,7 @@ Extracts data from FIA's online publicly-available DataMart
 equivalent stocking) by live trees of any size, including land that formerly
 had such tree cover and that will be naturally or artificially regenerated.
 To qualify, the area must be >= 1.0 acre in size and 120.0 feet wide (See
-Woudenberg et al. 2011).
+Burrill et al. 2018).
 
 *ACI (All Condition Inventory)*\cr RMRS National Forest plots. For nonforest
 conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 1),
@@ -303,7 +304,7 @@ of Other Wooded Land (OWL), including >= 5 percent cover...\cr
 *FIADB Table Extraction*\cr \tabular{lll}{ 
 \tab \bold{Argument} \tab \bold{Table Name(s)}\cr 
 \tab istree \tab TREE\cr 
-\tab isveg \tab P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE\cr 
+\tab isveg \tab P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP\cr 
 \tab issubp \tab SUBPLOT, SUBP_COND\cr 
 \tab isdwm \tab COND_DWM_CALC\cr 
 \tab isgrm \tab TREE_GRM_COMPONENT\cr 

@@ -32,6 +32,7 @@ spGetPlots(
   seed_layer = "seed",
   vsubpspp_layer = "vsubpspp",
   vsubpstr_layer = "vsubpstr",
+  invsubp_layer = "invsubp",
   ppsa_layer = "pop_plot_stratum_assgn",
   other_layers = NULL,
   puniqueid = "CN",
@@ -120,6 +121,9 @@ names in *_layer arguments.}
 \item{istree}{Logical. If TRUE, extract tree data from FIA database.}
 
 \item{isseed}{Logical. If TRUE, extract seedling data from FIA database.}
+
+\item{isveg}{Logical. If TRUE, understory vegetation tables are extracted
+from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).}
 
 \item{plot_layer}{String. Name of layer in database of file name of FIA plot
 table.}
