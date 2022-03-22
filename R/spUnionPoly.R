@@ -1,4 +1,4 @@
-#' Spatial - Generate a unioned sf object with polygons and attribtutes from
+#' Spatial - Generate a unioned sf object with polygons and attributes from
 #' two sf polygon objects.
 #' 
 #' Generate a unioned sf object with polygons and attribtutes from two sf
@@ -63,6 +63,23 @@
 #' record, it will be returned but not exported.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' \dontrun{
+#' # Set up data from `FIESTA` and `raster`
+#' WYbhfn <- system.file("extdata",
+#'                       "sp_data/WYbighorn_adminbnd.shp",
+#'                       package = "FIESTA")
+#' WYbh <- spImportSpatial(WYbhfn)
+#' USAco <- raster::getData("GADM", country = "USA", level = 2)    
+#' 
+#' # Generate unioned `sf` object
+#' polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 
+#'                          polyv2 = WYbh, 
+#'                          areacalc = TRUE)
+#'                          
+#' # Plot the result
+#' plot(st_geometry(polyUnion))
+#' }
 #' @export spUnionPoly
 spUnionPoly <- function(polyv1, 
                         polyv1_dsn = NULL, 

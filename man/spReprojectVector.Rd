@@ -81,6 +81,26 @@ names to 10 characters or less. Variable names are changed before export
 using an internal function (trunc10shp). If sf object has more than 1
 record, it will be returned but not exported.
 }
+\examples{
+# Set up `SpatialPoints` object
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               prj = "longlat", 
+                               datum = "NAD83")
+# Check CRS
+sf::st_crs(WYspplt)
+
+# Set up projection
+prj <- "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+
+# Use `spReprojectVector` to reproject the vector
+WYspplt.utm12 <- spReprojectVector(layer = WYspplt, 
+                                   crs.new = prj)
+# Check results
+sf::st_crs(WYspplt.utm12)
+}
 \author{
 Tracey S. Frescino
 }

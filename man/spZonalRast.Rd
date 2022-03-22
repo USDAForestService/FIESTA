@@ -115,6 +115,24 @@ specified.  Be aware, providing inaccurate or incomplete CRS information may
 lead to erroneous data shifts when reprojecting. See spTransform help
 documentation for more details.
 }
+\examples{
+# Set up data from `FIESTA`
+WYbhdistfn <- system.file("extdata",
+                          "sp_data/WYbighorn_districtbnd.shp",
+                          package = "FIESTA")
+demfn <- system.file("extdata",
+                     "sp_data/WYbighorn_dem_250m.img",
+                     package = "FIESTA")
+
+# Import spatial data with `spImportSpatial`
+WYbhdist <- spImportSpatial(WYbhdistfn)
+
+# Extract mean and sum in `WYbhdist`
+spZonalRast(polyv = WYbhdist, 
+            polyv.att = "DISTRICTNA", 
+            rastfn = demfn, 
+            zonalstat = c("mean", "sum")) 
+}
 \author{
 Tracey S. Frescino
 }
