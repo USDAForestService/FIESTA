@@ -36,6 +36,12 @@ Imports a spatial vector layer to an S4 Spatial object.
 \note{
 Wrapper for sf package... st_read function.
 }
+\examples{
+# Import data from `FIESTA`, save as object in environment
+WYbh <- spImportSpatial(system.file("extdata",
+                                    "sp_data/WYbighorn_adminbnd.shp",
+                                    package = "FIESTA"))
+}
 \author{
 Tracey S. Frescino
 }
