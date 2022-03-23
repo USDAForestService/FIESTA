@@ -87,6 +87,22 @@
 #' unit_layer input, than area is calculated from pixel counts.
 #' @author Tracey S. Frescino, Chris Toney
 #' @keywords data
+#' @examples 
+#' # Create a `SpatialPoints` object from `WYplt`
+#' WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+#'                                xy.uniqueid = "CN", 
+#'                                xvar = "LON_PUBLIC", 
+#'                                yvar = "LAT_PUBLIC", 
+#'                                xy.crs = 4269)
+#'                                
+#' # Get estimation unit acres for Bighorn National Forest
+#' spGetEstUnit(xyplt = WYplt, 
+#'              uniqueid = "CN", 
+#'              unit_layer = WYbhfn, 
+#'              spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+#'                                        yvar = "LAT_PUBLIC", 
+#'                                        prj = "longlat", 
+#'                                        datum = "NAD83"))
 #' @export spGetEstUnit
 spGetEstUnit <- function(xyplt, 
                          xyplt_dsn = NULL, 

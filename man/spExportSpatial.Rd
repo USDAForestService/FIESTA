@@ -29,6 +29,18 @@ outfolder, 'out_layer'_newnames.csv.
 
 If sf object has more than 1 record, it cannot be exported to a shapefile.
 }
+\examples{
+# Set up data from FIESTA
+WYbh <- spImportSpatial(system.file("extdata",
+                                    "sp_data/WYbighorn_adminbnd.shp",
+                                    package = "FIESTA"))
+
+# Export data with spExportSpatial
+spExportSpatial(WYbh,
+                savedata_opts = list(out_dsn = "WYbh.shp", 
+                                     outfolder = tempdir(), 
+                                     overwrite_dsn = TRUE))
+}
 \author{
 Tracey S. Frescino
 }

@@ -119,6 +119,24 @@
 #' system and 30 meter pixel size.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Create a `SpatialPoints` object from `WYplt`
+#' WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+#'                                xy.uniqueid = "CN", 
+#'                                xvar = "LON_PUBLIC", 
+#'                                yvar = "LAT_PUBLIC", 
+#'                                xy.crs = 4269)
+#' # Set up stratification from object in `FIESTA`
+#' fornffn <- system.file("extdata",
+#'                        "sp_data/WYbighorn_forest_nonforest_250m.tif",
+#'                        package = "FIESTA")
+#'                                
+#' # Run `spGetStrata`
+#' spGetStrata(WYspplt, 
+#'             uniqueid = "CN", 
+#'             unit_layer = WYbhfn, 
+#'             strattype = "RASTER", 
+#'             strat_layer = fornffn) 
 #' @export spGetStrata
 spGetStrata <- function(xyplt, 
                         xyplt_dsn = NULL, 

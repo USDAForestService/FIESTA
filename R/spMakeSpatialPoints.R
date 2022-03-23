@@ -48,6 +48,15 @@
 #' spheroid\cr
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Generate an `sf` points object with `spMakeSpatialPoints` for Wyoming plot
+#' # data, stored in `FIESTA`
+#' spMakeSpatialPoints(xyplt = WYplt, 
+#'                     xy.uniqueid = "CN", 
+#'                     xvar = "LON_PUBLIC", 
+#'                     yvar = "LAT_PUBLIC", 
+#'                     prj = "longlat", 
+#'                     datum = "NAD83")
 #' @export spMakeSpatialPoints
 spMakeSpatialPoints <- function(xyplt, 
                                 xyplt_dsn = NULL, 

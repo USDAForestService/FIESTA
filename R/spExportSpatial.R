@@ -17,6 +17,17 @@
 #' If sf object has more than 1 record, it cannot be exported to a shapefile.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Set up data from FIESTA
+#' WYbh <- spImportSpatial(system.file("extdata",
+#'                                     "sp_data/WYbighorn_adminbnd.shp",
+#'                                     package = "FIESTA"))
+#' 
+#' # Export data with spExportSpatial
+#' spExportSpatial(WYbh,
+#'                 savedata_opts = list(out_dsn = "WYbh.shp", 
+#'                                      outfolder = tempdir(), 
+#'                                      overwrite_dsn = TRUE))
 #' @export spExportSpatial
 spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   ###########################################################################

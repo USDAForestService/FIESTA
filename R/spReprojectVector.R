@@ -64,6 +64,25 @@
 #' record, it will be returned but not exported.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Set up `SpatialPoints` object
+#' WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+#'                                xy.uniqueid = "CN", 
+#'                                xvar = "LON_PUBLIC", 
+#'                                yvar = "LAT_PUBLIC", 
+#'                                prj = "longlat", 
+#'                                datum = "NAD83")
+#' # Check CRS
+#' sf::st_crs(WYspplt)
+#' 
+#' # Set up projection
+#' prj <- "+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+#' 
+#' # Use `spReprojectVector` to reproject the vector
+#' WYspplt.utm12 <- spReprojectVector(layer = WYspplt, 
+#'                                    crs.new = prj)
+#' # Check results
+#' sf::st_crs(WYspplt.utm12)
 #' @export spReprojectVector
 spReprojectVector <- function(layer, 
                               dsn = NULL, 

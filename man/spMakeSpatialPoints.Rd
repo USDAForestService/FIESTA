@@ -86,6 +86,16 @@ Datum of 1927 - Clarke 1866 spheroid\cr NAD83 - North American Datum of 1983
 - GRS 1980 spheroid\cr WGS84 - World Geodetic System of 1984 - WGS 1984
 spheroid\cr
 }
+\examples{
+# Generate an `sf` points object with `spMakeSpatialPoints` for Wyoming plot
+# data, stored in `FIESTA`
+spMakeSpatialPoints(xyplt = WYplt, 
+                    xy.uniqueid = "CN", 
+                    xvar = "LON_PUBLIC", 
+                    yvar = "LAT_PUBLIC", 
+                    prj = "longlat", 
+                    datum = "NAD83")
+}
 \author{
 Tracey S. Frescino
 }

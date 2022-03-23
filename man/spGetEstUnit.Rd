@@ -136,6 +136,23 @@ unitarea\cr Area by estimation unit is calculated and returned as object
 named unitarea.  Area is based on the projection of unit_layer. If no
 unit_layer input, than area is calculated from pixel counts.
 }
+\examples{
+# Create a `SpatialPoints` object from `WYplt`
+WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
+                               xy.uniqueid = "CN", 
+                               xvar = "LON_PUBLIC", 
+                               yvar = "LAT_PUBLIC", 
+                               xy.crs = 4269)
+                               
+# Get estimation unit acres for Bighorn National Forest
+spGetEstUnit(xyplt = WYplt, 
+             uniqueid = "CN", 
+             unit_layer = WYbhfn, 
+             spMakeSpatial_opts = list(xvar = "LON_PUBLIC", 
+                                       yvar = "LAT_PUBLIC", 
+                                       prj = "longlat", 
+                                       datum = "NAD83"))
+}
 \author{
 Tracey S. Frescino, Chris Toney
 }

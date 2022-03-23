@@ -60,6 +60,20 @@
 #' record, it will be returned but not exported.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' \dontrun{
+#' # Load in USAco data from raster package
+#' USAco <- raster::getData("GADM", country = "USA", level = 2)
+#' 
+#' # Set up data from FIESTA
+#' WYbh <- spImportSpatial(system.file("extdata",
+#'                                     "sp_data/WYbighorn_adminbnd.shp",
+#'                                     package = "FIESTA"))
+#' 
+#' # Clip polygon with WY Bighorn object from FIESTA
+#' WYbhco <- spClipPoly(polyv = USAco,
+#'                      clippolyv = WYbh)     
+#' }
 #' @export spClipPoly
 spClipPoly <- function(polyv, 
                        polyv_dsn = NULL, 

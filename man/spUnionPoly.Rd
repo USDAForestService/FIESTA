@@ -2,7 +2,7 @@
 % Please edit documentation in R/spUnionPoly.R
 \name{spUnionPoly}
 \alias{spUnionPoly}
-\title{Spatial - Generate a unioned sf object with polygons and attribtutes from
+\title{Spatial - Generate a unioned sf object with polygons and attributes from
 two sf polygon objects.}
 \usage{
 spUnionPoly(
@@ -91,6 +91,24 @@ is called. If out_fmt="shp", the ESRI Shapefile driver truncates variable
 names to 10 characters or less. Variable names are changed before export
 using an internal function (trunc10shp). If sf object has more than 1
 record, it will be returned but not exported.
+}
+\examples{
+\dontrun{
+# Set up data from `FIESTA` and `raster`
+WYbhfn <- system.file("extdata",
+                      "sp_data/WYbighorn_adminbnd.shp",
+                      package = "FIESTA")
+WYbh <- spImportSpatial(WYbhfn)
+USAco <- raster::getData("GADM", country = "USA", level = 2)    
+
+# Generate unioned `sf` object
+polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",], 
+                         polyv2 = WYbh, 
+                         areacalc = TRUE)
+                         
+# Plot the result
+plot(st_geometry(polyUnion))
+}
 }
 \author{
 Tracey S. Frescino

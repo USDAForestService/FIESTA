@@ -16,6 +16,11 @@
 #' @note Wrapper for sf package... st_read function.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Import data from `FIESTA`, save as object in environment
+#' WYbh <- spImportSpatial(system.file("extdata",
+#'                                     "sp_data/WYbighorn_adminbnd.shp",
+#'                                     package = "FIESTA"))
 #' @export spImportSpatial
 spImportSpatial <- function(layer=NULL, dsn=NULL, sql=NULL, polyfix=FALSE, gui=FALSE){
   ###################################################################################

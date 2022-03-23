@@ -119,6 +119,18 @@
 #' 
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples
+#' \dontrun{
+#' # Set up data from FIESTA
+#' WYbhfn <- system.file("extdata",
+#'                       "sp_data/WYbighorn_adminbnd.shp",
+#'                       package = "FIESTA")
+#' # Use spGetXY
+#' WYbhxy <- spGetXY(bnd = WYbhfn,
+#'                   xy_datsource = "datamart",
+#'                   evalCur = TRUE,
+#'                   returnxy = TRUE)
+#' }
 #' @export spGetXY
 spGetXY <- function(bnd, 
                     bnd_dsn = NULL, 

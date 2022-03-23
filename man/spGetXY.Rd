@@ -188,6 +188,19 @@ https://www.fia.fs.fed.us/tools-data/spatial/Policy/index.php for details).
 The zip files are extracted on-the-fly from the online website. Web server
 connections will affect download speeds.
 }
+\examples{
+\dontrun{
+# Set up data from FIESTA
+WYbhfn <- system.file("extdata",
+                      "sp_data/WYbighorn_adminbnd.shp",
+                      package = "FIESTA")
+# Use spGetXY
+WYbhxy <- spGetXY(bnd = WYbhfn,
+                  xy_datsource = "datamart",
+                  evalCur = TRUE,
+                  returnxy = TRUE)
+}
+}
 \author{
 Tracey S. Frescino
 }
