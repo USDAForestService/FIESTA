@@ -723,7 +723,7 @@ modSAtree <- function(SApopdatlst = NULL,
 		       showsteps=showsteps, savesteps=savesteps, 
 		       stepfolder=stepfolder, prior=prior, 
 		       modelselect=modelselect, multest=multest,
-			  SApackage=SApackage, SAmethod=SAmethod),
+			     SApackage=SApackage, SAmethod=SAmethod),
      	        error=function(e) {
 			        message("error with estimates of ", response, "...")
 			        message(e, "\n")
@@ -1000,7 +1000,7 @@ modSAtree <- function(SApopdatlst = NULL,
       estdf_row[is.na(estdf_row$est), "estimator"] <- na.fill
       na.fill.se <- paste0(na.fill, ".se")
       estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 
-        estdf_row[is.na(estdf_row$est), c(na.fill, na.fill.se)]
+        estdf_row[is.na(estdf_row$est), c(na.fill, na.fill.se), with=FALSE]
     }
     estnm <- "est"
 

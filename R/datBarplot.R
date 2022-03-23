@@ -258,8 +258,9 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
         }
       }
     }
-    if (!is.null(divideby)) 
+    if (!is.null(divideby)) {
       datx[, (sevar) := lapply(.SD, function(x) x / dividebynum), .SDcols=sevar]
+    }
   }
 
   ## Aggregate table with selected variables
@@ -468,7 +469,7 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
   }
 
   ## Set mar (number of lines for margins - bottom, left, top, right)
-  if (is.null(mar)) {
+  #if (is.null(mar)) {
     mar <-  par("mar")
     mar[3] <- ifelse(!is.null(main), 3, 2)		## top mar
     if (horiz) {
@@ -476,11 +477,11 @@ datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE,
       mar[2] <- xlinenum + (10/xlinenum)		## left mar
       mar[4] <- 2.5						## right mar
     } else {
-      mar[1] <- xlinenum * cex.names + 3.5		## bottom mar
+      mar[1] <- xlinenum * cex.names + 2.5		## bottom mar
       mar[2] <- ylinenum + 1.6				## left mar
       mar[4] <- 0.5						## right mar
     }
-  }
+  #}
 
   ## GENERATE BARPLOTS
   #################################################

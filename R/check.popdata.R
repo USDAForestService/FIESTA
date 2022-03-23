@@ -212,7 +212,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
     SCHEMA.=ppsanm=pltassgnqry <- NULL
-    whereqry <- ""
 
     ## Filter for population data
     if (!is.null(evalid) && !is.data.frame(pltassgn)) {
@@ -292,7 +291,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     }
     if (!is.null(subp_cond) && is.character(subp_cond) && subp_cond %in% tablst) {
       subpcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., subp_cond,
-				" subc ON (subpc.PLT_CN = p.CN)")
+				" subpc ON (subpc.PLT_CN = p.CN)")
       subp_condqry <- paste("select distinct subc.* from", subpcfromqry, whereqry)
     }
     if (!is.null(lulc) && is.character(lulc) && lulc %in% tablst) {

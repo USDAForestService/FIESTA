@@ -957,11 +957,10 @@ modSAarea <- function(SApopdatlst = NULL,
       estdf_row[is.na(estdf_row$est), "estimator"] <- na.fill
       na.fill.se <- paste0(na.fill, ".se")
       estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 
-			          estdf_row[is.na(estdf_row$est), c(na.fill, na.fill.se)]
+			  estdf_row[is.na(estdf_row$est), c(na.fill, na.fill.se), with=FALSE]
     }
     estnm <- "est"
-   
-
+ 
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
 		unique(c("DOMAIN", rowcolinfo$rowvar, "est", "est.se", "NBRPLT.gt0", "estimator")), with=FALSE]
