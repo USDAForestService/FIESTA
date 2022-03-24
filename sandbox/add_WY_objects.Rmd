@@ -1,0 +1,46 @@
+---
+title: "add_WY_objects"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(FIESTA)
+```
+
+```{r}
+WYbhdistfn <- system.file("extdata",
+                          "sp_data/WYbighorn_districtbnd.shp",
+                          package = "FIESTA")
+
+rastcont <- c("conus_dem_90m.tif",
+              "usfs_2016_CONUS_tcc_analytical_90m.tif",
+              "conus_tpi_90m.tif")
+
+rastcont_name <- c("dem", "tcc", "tpi")
+
+rastcat <- "evt14_tnt_90m.tif"
+
+rastcat_name <- "tnt"
+
+library(tidyverse)
+stunitco_WY <- FIESTA::stunitco %>%
+  filter(STATENM == "Wyoming")
+
+get_aux <- spGetAuxiliary(xyplt = FIESTA::WYpltassgn,
+               uniqueid = "CN",
+               unit_layer = stunitco_WY,
+               unitvar = "COUNTYCD",
+               rastlst.cont = rastcont,
+               rastlst.cont.name = rastcont_name,
+               rastlst.cat = rastcat,
+               rastlst.cat.name = rastcat_name,
+               spMakeSpatial_opts = spMakeSpatial_options(
+                 xvar = "LON_PUBLIC",
+                 yvar = "LAT_PUBLIC"
+               ))
+```
+
