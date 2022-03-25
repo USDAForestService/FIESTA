@@ -44,3 +44,17 @@ get_aux <- spGetAuxiliary(xyplt = FIESTA::WYpltassgn,
                ))
 ```
 
+Run this for creating data object Rda's: 
+
+```{r}
+get_aux <- readRDS("get_aux.rds")
+
+WYpltassgn <- get_aux$pltassgn
+WYunitzonal <- get_aux$unitzonal
+
+# save as RDA to data folder
+save(WYunitzonal, file = "../data/WYunitzonal.rda")
+save(WYpltassgn, file = "../data/WYpltassgn.rda")
+```
+
+

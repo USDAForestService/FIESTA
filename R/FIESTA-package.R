@@ -404,7 +404,7 @@ NULL
 #' 
 #' @name WYpltassgn
 #' @docType data
-#' @format A dataframe with 26 columns and 6336 rows.
+#' @format A dataframe with 24 columns and 3047 rows.
 #' @references O'Connell, B.M.; LaPoint, E.B.; Turner, J.A.; Ridley, T.; Boyer,
 #' D.; Wilson, A.M.; Waddell, K.L.; Christensen, G.; Conkling, B.L. 2012. The
 #' Forest Inventory and Analysis Database: Database Description and Users
@@ -511,4 +511,15 @@ NULL
 
 
 
+#' Zonal data. Zonal means for auxiliary data in counties in Wyoming.
+#' 
+#' Zonal means and pixel counts for certain auxiliary data in counties in
+#' Wyoming. Includes county code variable to distinguish counties. 
+#' 
+#' 
+#' @name WYunitzonal
+#' @docType data
+#' @format A dataframe with 7 columns and 23 rows.
+#' @keywords datasets
+NULL
 

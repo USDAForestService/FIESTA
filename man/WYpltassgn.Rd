@@ -5,7 +5,7 @@
 \alias{WYpltassgn}
 \title{FIA data. Plot-level data from FIA public database.}
 \format{
-A dataframe with 26 columns and 6336 rows.
+A dataframe with 24 columns and 3047 rows.
 }
 \source{
 FIA Database.
