@@ -126,10 +126,16 @@
 #'                                xvar = "LON_PUBLIC", 
 #'                                yvar = "LAT_PUBLIC", 
 #'                                xy.crs = 4269)
+#'                                
 #' # Set up stratification from object in `FIESTA`
 #' fornffn <- system.file("extdata",
 #'                        "sp_data/WYbighorn_forest_nonforest_250m.tif",
 #'                        package = "FIESTA")
+#'                        
+#' # Set up data from FIESTA
+#' WYbhfn <- system.file("extdata",
+#'                       "sp_data/WYbighorn_adminbnd.shp",
+#'                       package = "FIESTA")
 #'                                
 #' # Run `spGetStrata`
 #' spGetStrata(WYspplt, 

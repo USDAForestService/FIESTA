@@ -137,6 +137,11 @@ named unitarea.  Area is based on the projection of unit_layer. If no
 unit_layer input, than area is calculated from pixel counts.
 }
 \examples{
+# Set up data from FIESTA
+WYbhfn <- system.file("extdata",
+                      "sp_data/WYbighorn_adminbnd.shp",
+                      package = "FIESTA")
+                      
 # Create a `SpatialPoints` object from `WYplt`
 WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
                                xy.uniqueid = "CN", 

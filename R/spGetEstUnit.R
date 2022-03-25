@@ -88,6 +88,11 @@
 #' @author Tracey S. Frescino, Chris Toney
 #' @keywords data
 #' @examples 
+#' # Set up data from FIESTA
+#' WYbhfn <- system.file("extdata",
+#'                       "sp_data/WYbighorn_adminbnd.shp",
+#'                       package = "FIESTA")
+#'                       
 #' # Create a `SpatialPoints` object from `WYplt`
 #' WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
 #'                                xy.uniqueid = "CN", 
