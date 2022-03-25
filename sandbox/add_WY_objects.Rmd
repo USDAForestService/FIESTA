@@ -50,7 +50,8 @@ Run this for creating data object Rda's:
 get_aux <- readRDS("get_aux.rds")
 
 WYpltassgn <- get_aux$pltassgn
-WYunitzonal <- get_aux$unitzonal
+WYunitzonal <- get_aux$unitzonal %>%
+  rename(ESTN_UNIT = COUNTYCD) # so that join will be easier and cleaner for examples
 
 # save as RDA to data folder
 save(WYunitzonal, file = "../data/WYunitzonal.rda")
