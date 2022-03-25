@@ -184,6 +184,34 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
+#' @examples 
+#' # NOTE: FIA data objects used in these examples are stored in `FIESTA`, but
+#' # can be generated for populations of interest by the user with functions in
+#' # `FIESTA` such as `spGetPlots()`, `spGetAuxiliary()`, etc. For more
+#' # information, see `FIESTA`'s extensive vignettes.
+#'  
+#' # Population data for counties in Wyoming
+#' modMApop(popTabs = list(tree = FIESTA::WYtree,
+#'                         cond = FIESTA::WYcond),
+#'          pltassgn = FIESTA::WYpltassgn,
+#'          pltassgnid = "CN",
+#'          unitarea = FIESTA::WYunitarea,
+#'          unitvar = "ESTN_UNIT",
+#'          unitzonal = FIESTA::WYunitzonal,
+#'          prednames = c("dem", "tcc", "tpi"),
+#'          predfac = "tnt")
+#'          
+#' # Adding seedling data as well
+#' modMApop(popTabs = list(tree = FIESTA::WYtree,
+#'                         cond = FIESTA::WYcond,
+#'                         seed = FIESTA::WYseed),
+#'          pltassgn = FIESTA::WYpltassgn,
+#'          pltassgnid = "CN",
+#'          unitarea = FIESTA::WYunitarea,
+#'          unitvar = "ESTN_UNIT",
+#'          unitzonal = FIESTA::WYunitzonal,
+#'          prednames = c("dem", "tcc", "tpi"),
+#'          predfac = "tnt")
 #' @export modMApop
 modMApop <- function(popType="VOL",
                      popTabs = popTables(),
