@@ -205,6 +205,30 @@
 #' Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
+#' @examples 
+#' # Set up population dataset (see ?modMApop() for more information)
+#' MApopdat <- modMApop(popTabs = list(tree = FIESTA::WYtree,
+#'                                     cond = FIESTA::WYcond),
+#'                      pltassgn = FIESTA::WYpltassgn,
+#'                      pltassgnid = "CN",
+#'                      unitarea = FIESTA::WYunitarea,
+#'                      unitvar = "ESTN_UNIT",
+#'                      unitzonal = FIESTA::WYunitzonal,
+#'                      prednames = c("dem", "tcc", "tpi", "tnt"),
+#'                      predfac = "tnt")
+#'
+#' # Use GREG estimator to estimate area of forest land in our population
+#' modMAarea(MApopdat = MApopdat, 
+#'           MAmethod = "greg", 
+#'           landarea = "FOREST")
+#'           
+#' # Use GREG estimator to estimate area of forest land by forest type and
+#' # stand-size class
+#' modMAarea(MApopdat = MApopdat,
+#'           MAmethod = "greg",
+#'           landarea = "FOREST",
+#'           rowvar = "FORTYPCD",
+#'           colvar = "STDSZCD")
 #' @export modMAarea
 modMAarea <- function(MApopdat, 
                       MAmethod, 

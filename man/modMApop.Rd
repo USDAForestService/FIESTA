@@ -256,7 +256,7 @@ modMApop(popTabs = list(tree = FIESTA::WYtree,
          unitarea = FIESTA::WYunitarea,
          unitvar = "ESTN_UNIT",
          unitzonal = FIESTA::WYunitzonal,
-         prednames = c("dem", "tcc", "tpi"),
+         prednames = c("dem", "tcc", "tpi", "tnt"),
          predfac = "tnt")
          
 # Adding seedling data as well
@@ -268,7 +268,7 @@ modMApop(popTabs = list(tree = FIESTA::WYtree,
          unitarea = FIESTA::WYunitarea,
          unitvar = "ESTN_UNIT",
          unitzonal = FIESTA::WYunitzonal,
-         prednames = c("dem", "tcc", "tpi"),
+         prednames = c("dem", "tcc", "tpi", "tnt"),
          predfac = "tnt")
 }
 \references{

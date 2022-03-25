@@ -198,7 +198,7 @@
 #'          unitarea = FIESTA::WYunitarea,
 #'          unitvar = "ESTN_UNIT",
 #'          unitzonal = FIESTA::WYunitzonal,
-#'          prednames = c("dem", "tcc", "tpi"),
+#'          prednames = c("dem", "tcc", "tpi", "tnt"),
 #'          predfac = "tnt")
 #'          
 #' # Adding seedling data as well
@@ -210,7 +210,7 @@
 #'          unitarea = FIESTA::WYunitarea,
 #'          unitvar = "ESTN_UNIT",
 #'          unitzonal = FIESTA::WYunitzonal,
-#'          prednames = c("dem", "tcc", "tpi"),
+#'          prednames = c("dem", "tcc", "tpi", "tnt"),
 #'          predfac = "tnt")
 #' @export modMApop
 modMApop <- function(popType="VOL",

@@ -233,6 +233,31 @@
 #' Sida Li (2018). mase: Model-Assisted Survey Estimation. R package version
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
+#' @examples
+#' # Set up population dataset (see ?modMApop() for more information)
+#' MApopdat <- modMApop(popTabs = list(tree = FIESTA::WYtree,
+#'                                     cond = FIESTA::WYcond),
+#'                      pltassgn = FIESTA::WYpltassgn,
+#'                      pltassgnid = "CN",
+#'                      unitarea = FIESTA::WYunitarea,
+#'                      unitvar = "ESTN_UNIT",
+#'                      unitzonal = FIESTA::WYunitzonal,
+#'                      prednames = c("dem", "tcc", "tpi", "tnt"),
+#'                      predfac = "tnt")
+#'                      
+#' # Use GREG Estimator to Estimate cubic foot volume of live trees in our
+#' # population
+#' modMAtree(MApopdat = MApopdat,
+#'           MAmethod = "greg",
+#'           estvar = "VOLCFNET",
+#'           estvar.filter = "STATUSCD == 1")
+#'           
+#' # Use GREG Elastic Net Estimator to Estimate basal area of live trees in our
+#' # population
+#' modMAtree(MApopdat = MApopdat,
+#'           MAmethod = "gregEN",
+#'           estvar = "BA",
+#'           estvar.filter = "STATUSCD == 1")
 #' @export modMAtree
 modMAtree <- function(MApopdat, 
                       MAmethod, 
