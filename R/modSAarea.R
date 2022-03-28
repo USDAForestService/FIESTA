@@ -135,6 +135,37 @@
 #' The R Journal 7(1), 81-98.
 #' https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.
 #' @keywords data
+#' @examples 
+#' # Set up population dataset (see ?modSApop() for more information)
+#' SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
+#'                                     cond = FIESTA::WYcond),
+#'                      pltassgn = FIESTA::WYpltassgn,
+#'                      pltassgnid = "CN",
+#'                      dunitarea = FIESTA::WYunitarea,
+#'                      dunitvar = "ESTN_UNIT",
+#'                      dunitzonal = FIESTA::WYunitzonal,
+#'                      prednames = c("dem", "tcc", "tpi", "tnt"),
+#'                      predfac = "tnt")
+#' 
+#' # Fit a unit level EBLUP with `JoSAE`
+#' modSAarea(SApopdatlst = SApopdat,
+#'           SApackage = "JoSAE",
+#'           SAmethod = "unit",
+#'           multest = FALSE) 
+#'           
+#' # Fit an area level Fay-Herriot hierarchical Bayesian model with `hbsae`
+#' modSAarea(SApopdatlst = SApopdat,
+#'           SApackage = "hbsae",
+#'           SAmethod = "area",
+#'           multest = FALSE) 
+#'
+#' # Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net
+#' # variable selection
+#' modSAarea(SApopdatlst = SApopdat,
+#'           SApackage = "sae",
+#'           SAmethod = "area",
+#'           multest = FALSE,
+#'           modelselect = TRUE) 
 #' @export modSAarea
 modSAarea <- function(SApopdatlst = NULL, 
                       prednames = NULL, 

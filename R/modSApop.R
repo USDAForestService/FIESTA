@@ -134,6 +134,34 @@
 #' All-Condition-Inventory.
 #' @author Tracey S. Frescino, Paul L. Patterson, Elizabeth A. Freeman
 #' @keywords data
+#' @examples 
+#' # NOTE: FIA data objects used in these examples are stored in `FIESTA`, but
+#' # can be generated for populations of interest by the user with functions in
+#' # `FIESTA` such as `spGetPlots()`, `spGetAuxiliary()`, etc. For more
+#' # information, see `FIESTA`'s extensive vignettes.
+#'  
+#' # Population data for counties in Wyoming
+#' modSApop(popTabs = list(tree = FIESTA::WYtree,
+#'                         cond = FIESTA::WYcond),
+#'          pltassgn = FIESTA::WYpltassgn,
+#'          pltassgnid = "CN",
+#'          dunitarea = FIESTA::WYunitarea,
+#'          dunitvar = "ESTN_UNIT",
+#'          dunitzonal = FIESTA::WYunitzonal,
+#'          prednames = c("dem", "tcc", "tpi", "tnt"),
+#'          predfac = "tnt")
+#'          
+#' # Adding seedling data as well
+#' modSApop(popTabs = list(tree = FIESTA::WYtree,
+#'                         cond = FIESTA::WYcond,
+#'                         seed = FIESTA::WYseed),
+#'          pltassgn = FIESTA::WYpltassgn,
+#'          pltassgnid = "CN",
+#'          dunitarea = FIESTA::WYunitarea,
+#'          dunitvar = "ESTN_UNIT",
+#'          dunitzonal = FIESTA::WYunitzonal,
+#'          prednames = c("dem", "tcc", "tpi", "tnt"),
+#'          predfac = "tnt")
 #' @export modSApop
 modSApop <- function(popType="VOL",
                      popTabs = popTables(),

@@ -190,6 +190,38 @@ removed as well and accounted for in adjustment factor.  This is if you are
 interested in estimates for all lands or nonforest lands in the
 All-Condition-Inventory.
 }
+\examples{
+# Set up population dataset (see ?modSApop() for more information)
+SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
+                                    cond = FIESTA::WYcond),
+                     pltassgn = FIESTA::WYpltassgn,
+                     pltassgnid = "CN",
+                     dunitarea = FIESTA::WYunitarea,
+                     dunitvar = "ESTN_UNIT",
+                     dunitzonal = FIESTA::WYunitzonal,
+                     prednames = c("dem", "tcc", "tpi", "tnt"),
+                     predfac = "tnt")
+
+# Fit a unit level EBLUP with `JoSAE`
+modSAarea(SApopdatlst = SApopdat,
+          SApackage = "JoSAE",
+          SAmethod = "unit",
+          multest = FALSE) 
+          
+# Fit an area level Fay-Herriot hierarchical Bayesian model with `hbsae`
+modSAarea(SApopdatlst = SApopdat,
+          SApackage = "hbsae",
+          SAmethod = "area",
+          multest = FALSE) 
+
+# Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net
+# variable selection
+modSAarea(SApopdatlst = SApopdat,
+          SApackage = "sae",
+          SAmethod = "area",
+          multest = FALSE,
+          modelselect = TRUE) 
+}
 \references{
 Breidenbach, J. 2018. JoSAE: Unit-Level and Area-Level Small
 Area Estimation.  R package version 0.3.0.
