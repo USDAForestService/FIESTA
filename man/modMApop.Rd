@@ -14,7 +14,6 @@ modMApop(
   dsn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
-  adj = "plot",
   unitvar = NULL,
   unitarea = NULL,
   areavar = "ACRES",
@@ -66,12 +65,6 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
 
-\item{adj}{String. How to calculate adjustment factors for nonsampled
-(nonresponse) conditions based on summed proportions for by plot ('samp',
-'plot').  'samp' - adjustments are calculated at strata/estimation unit
-level; 'plot' - adjustments are calculated at plot-level. Adjustments are
-only calculated for annual inventory plots (DESIGNCD=1).}
-
 \item{unitvar}{String. Name of the estimation unit variable in unitarea and
 cond or pltassgn data frame with estimation unit assignment for each plot
 (e.g., 'ESTN_UNIT'). Optional if only one estimation unit.}
@@ -92,7 +85,7 @@ proportion of class by estimation unit.}
 model.}
 
 \item{predfac}{String vector. Name(s) of prednames that are factors (i.e.,
-categorical).}
+categorical). Names will change in output depending on number of categories.}
 
 \item{standardize}{Logical. If TRUE, predictors are standardized.}
 

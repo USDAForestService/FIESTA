@@ -14,9 +14,9 @@ modSApop(
   dsn = NULL,
   pjoinid = "CN",
   areawt = "CONDPROP_UNADJ",
-  adj = "plot",
   dunitvar = NULL,
   dunitarea = NULL,
+  areavar = "ACRES",
   dunitzonal = NULL,
   prednames = NULL,
   predfac = NULL,
@@ -68,17 +68,12 @@ assignments, use identifier for plot (e.g., PLOT_ID).}
 \item{areawt}{String. Name of variable for summarizing area weights (e.g.,
 CONDPROP_UNADJ).}
 
-\item{adj}{String. How to calculate adjustment factors for nonsampled
-(nonresponse) conditions based on summed proportions for by plot ('samp',
-'plot').  'samp' - adjustments are calculated at strata/estimation unit
-(i.e., domain unit) level; 'plot' - adjustments are calculated at
-plot-level. Adjustments are only calculated for annual inventory plots
-(designcd=1).}
-
 \item{dunitvar}{String. Name of the domain unit variable in cond, plt, or
 pltassgn with domain unit assignment for each plot.}
 
 \item{dunitarea}{Numeric or DF. Total area by domain unit.}
+
+\item{areavar}{String. Name of area variable in unitarea. Default="ACRES".}
 
 \item{dunitzonal}{DF/DT. Data frame with zonal auxiliary information by
 domain unit. For continuous data, means by domain unit; for categorical
@@ -88,7 +83,7 @@ data, proportion of class by domain unit.}
 model.}
 
 \item{predfac}{String vector. Name(s) of factor predictor variables to use
-in model.}
+in model. Names will change in output depending on number of categories.}
 
 \item{savedata}{Logical. If TRUE, saves table(s) to outfolder.}
 

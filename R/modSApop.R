@@ -63,22 +63,17 @@
 #' assignments, use identifier for plot (e.g., PLOT_ID).
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
-#' @param adj String. How to calculate adjustment factors for nonsampled
-#' (nonresponse) conditions based on summed proportions for by plot ('samp',
-#' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
-#' (i.e., domain unit) level; 'plot' - adjustments are calculated at
-#' plot-level. Adjustments are only calculated for annual inventory plots
-#' (designcd=1).
 #' @param dunitvar String. Name of the domain unit variable in cond, plt, or
 #' pltassgn with domain unit assignment for each plot.
 #' @param dunitarea Numeric or DF. Total area by domain unit.
+#' @param areavar String. Name of area variable in unitarea. Default="ACRES".
 #' @param dunitzonal DF/DT. Data frame with zonal auxiliary information by
 #' domain unit. For continuous data, means by domain unit; for categorical
 #' data, proportion of class by domain unit.
 #' @param prednames String vector. Name(s) of predictor variables to use in
-#' model.
+#' model. 
 #' @param predfac String vector. Name(s) of factor predictor variables to use
-#' in model.
+#' in model. Names will change in output depending on number of categories.
 #' @param savedata Logical. If TRUE, saves table(s) to outfolder. 
 #' @param saveobj Logical. If TRUE, saves returned list object to outfolder.
 #' @param objnm String. Name of *.rds object.
@@ -149,9 +144,9 @@ modSApop <- function(popType="VOL",
                      dsn = NULL, 
                      pjoinid = "CN", 
                      areawt = "CONDPROP_UNADJ", 
-                     adj = "plot",
                      dunitvar = NULL, 
                      dunitarea = NULL, 
+                     areavar = "ACRES",
                      dunitzonal = NULL, 
                      prednames = NULL, 
                      predfac = NULL, 
@@ -207,6 +202,7 @@ modSApop <- function(popType="VOL",
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=stratcombinelut <- NULL
   dunitvar2=NULL
+  adj <- "plot"
   
   
   ##################################################################
@@ -315,6 +311,7 @@ modSApop <- function(popType="VOL",
     pltassgn <- SAdata$pltassgn
     pltassgnid <- SAdata$pltassgnid
     dunitarea <- SAdata$unitarea
+    areavar <- SAdata$areavar
     dunitvar <- SAdata$unitvar
     areavar <- SAdata$areavar
     dunitzonal <- SAdata$unitzonal
@@ -348,6 +345,7 @@ modSApop <- function(popType="VOL",
       dunitzonal <- auxdat$unitzonal
       zonalnames <- auxdat$zonalnames
       predfac <- auxdat$predfac
+      areavar <- auxdat$areavar
 
       if (is.null(prednames)) {
         prednames <- auxdat$prednames
@@ -429,9 +427,9 @@ modSApop <- function(popType="VOL",
                   evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
                   intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
                   nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
-                  unitarea=dunitarea, unitvar=dunitvar, areavar=areavar,  
-                  unitvar2=unitvar2, unit.action=unit.action, areaunits=areaunits, 
-                  prednames=prednames, predfac=predfac, 
+                  unitarea=dunitarea, unitvar=dunitvar,  
+                  unitvar2=unitvar2, areavar=areavar, unit.action=unit.action,
+                  areaunits=areaunits, prednames=prednames, predfac=predfac, 
                   pvars2keep=pvars2keep, cvars2keep="AOI")
   condx <- popcheck$condx	
   pltcondx <- popcheck$pltcondx
