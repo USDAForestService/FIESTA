@@ -146,6 +146,36 @@
 #' The R Journal 7(1), 81-98.
 #' https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.
 #' @keywords data
+#' @examples 
+#' # Set up population dataset (see ?modSApop() for more information)
+#' SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
+#'                                     cond = FIESTA::WYcond),
+#'                      pltassgn = FIESTA::WYpltassgn,
+#'                      pltassgnid = "CN",
+#'                      dunitarea = FIESTA::WYunitarea,
+#'                      dunitvar = "ESTN_UNIT",
+#'                      dunitzonal = FIESTA::WYunitzonal,
+#'                      prednames = c("dem", "tcc", "tpi", "tnt"),
+#'                      predfac = "tnt")
+#' 
+#' # Use an area level Fay-Herriot model to estimate total net cubic-foot volume 
+#' # of live trees (at least 5 inches diameter) 
+#' modSAtree(SApopdatlst = SApopdat,
+#'           SApackage = "JoSAE",        
+#'           SAmethod = "unit",           
+#'           landarea = "FOREST",      
+#'           estvar = "VOLCFNET",         
+#'           estvar.filter = "STATUSCD == 1",
+#'           multest = FALSE)   
+#'           
+#' # Use a unit level EBLUP to estimate basal area of live trees (at least 5
+#' # inches diameter) 
+#' modSAtree(SApopdatlst = SApopdat,    
+#'           SApackage = "JoSAE",        
+#'           SAmethod = "unit",         
+#'           landarea = "FOREST",      
+#'           estvar = "BA",              
+#'           estvar.filter = "STATUSCD == 1")  
 #' @export modSAtree
 modSAtree <- function(SApopdatlst = NULL, 
                       prednames = NULL, 
