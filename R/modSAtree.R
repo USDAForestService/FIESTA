@@ -7,7 +7,7 @@
 #' 
 #' Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
 #' \bold{Variable} \tab \bold{Description}\cr \tab tree \tab tuniqueid \tab
-#' Unique identifier for each plot, to link to pltstrat (ex. PLT_CN).\cr \tab
+#' Unique identifier for each plot, to link to pltstrat (e.g., PLT_CN).\cr \tab
 #' \tab CONDID \tab Unique identifier of each condition on plot, to link to
 #' cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
 #' \tab Number of trees per acre each sample tree represents (e.g. DESIGNCD=1:
@@ -254,7 +254,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
 	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf <- NULL
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
   
   
   ##################################################################
