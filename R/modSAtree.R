@@ -1005,7 +1005,7 @@ modSAtree <- function(SApopdatlst = NULL,
 		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
 
   if (!is.null(dunit_totest)) {
-    #dunit_totest[, nhat.var := nhat.se^2]
+    dunit_totest[, nhat.var := nhat.se^2]
 
     if (totals) {
       dunit_totest <- getpse(dunit_totest, areavar=areavar, esttype=esttype)
@@ -1040,7 +1040,7 @@ modSAtree <- function(SApopdatlst = NULL,
                         dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
   
     if (!is.null(dunit_rowest)) {
-      #dunit_rowest[, nhat.var := nhat.se^2]
+      dunit_rowest[, nhat.var := nhat.se^2]
 
       if (totals) {
         dunit_rowest <- getpse(dunit_rowest, areavar=areavar, esttype=esttype)
