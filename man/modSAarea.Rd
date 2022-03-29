@@ -20,7 +20,7 @@ modSAarea(
   na.fill = "NONE",
   savedata = FALSE,
   savesteps = FALSE,
-  multest = TRUE,
+  multest = FALSE,
   addSAdomsdf = TRUE,
   SAdomvars = NULL,
   savemultest = FALSE,
