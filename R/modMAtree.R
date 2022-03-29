@@ -331,7 +331,7 @@ modMAtree <- function(MApopdat,
                 savedata_opts=savedata_opts)
   
   ## Set savedata defaults
-  savedata_defaults_list <- formals(FIESTA::savedata_options)[-length(formals(FIESTA::savedata_options))]
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
@@ -345,7 +345,7 @@ modMAtree <- function(MApopdat,
   }
   
   ## Set table defaults
-  table_defaults_list <- formals(FIESTA::table_options)[-length(formals(FIESTA::table_options))]
+  table_defaults_list <- formals(table_options)[-length(formals(table_options))]
   
   for (i in 1:length(table_defaults_list)) {
     assign(names(table_defaults_list)[[i]], table_defaults_list[[i]])
@@ -359,7 +359,7 @@ modMAtree <- function(MApopdat,
   }
   
   ## Set title defaults
-  title_defaults_list <- formals(FIESTA::title_options)[-length(formals(FIESTA::title_options))]
+  title_defaults_list <- formals(title_options)[-length(formals(title_options))]
   
   for (i in 1:length(title_defaults_list)) {
     assign(names(title_defaults_list)[[i]], title_defaults_list[[i]])
@@ -656,7 +656,11 @@ modMAtree <- function(MApopdat,
     unit_totest <- tabs$tab2
     setkeyv(unit_totest, unitvar)
     unit_totest <- unit_totest[unitarea, nomatch=0]
-    unit_totest <- getarea(unit_totest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_totest <- getpse(unit_totest, esttype=esttype)
+    }      
 #  }
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
@@ -723,7 +727,11 @@ modMAtree <- function(MApopdat,
     }
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
-    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_rowest <- getpse(unit_rowest, esttype=esttype)
+    }
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
  
@@ -739,7 +747,11 @@ modMAtree <- function(MApopdat,
     }
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_colest <- getpse(unit_colest, esttype=esttype)
+    }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
 
@@ -762,7 +774,11 @@ modMAtree <- function(MApopdat,
     }         
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_grpest <- getpse(unit_grpest, esttype=esttype)
+    }      
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
  

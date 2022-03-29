@@ -13,24 +13,25 @@
 #' 
 #' If variables are NULL, then it will prompt user to input variables.
 #' 
-#' Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
-#' \bold{Variable} \tab \bold{Description}\cr \tab cond \tab cuniqueid \tab
-#' Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
+#' Necessary variables:\cr 
+#' \tabular{llll}{ \tab \bold{Data} 
+#' \tab \bold{Variable} \tab \bold{Description}\cr 
+#' \tab cond \tab cuniqueid \tab Unique identifier for each plot, to link to pltassgn (ex. PLT_CN).\cr \tab
 #' \tab CONDID \tab Unique identfier of each condition on plot.  Set CONDID=1,
-#' if only 1 condition per plot.\cr \tab \tab CONDPROP_UNADJ \tab Unadjusted
-#' proportion of condition on each plot.  Set CONDPROP_UNADJ=1, if only 1
-#' condition per plot.\cr \tab \tab COND_STATUS_CD \tab Status of each forested
-#' condition on plot (i.e. accessible forest, nonforest, water, etc.)\cr \tab
+#' if only 1 condition per plot.\cr 
+#' \tab \tab CONDPROP_UNADJ \tab Unadjusted proportion of condition on each plot. Set CONDPROP_UNADJ=1, if only 1
+#' condition per plot.\cr 
+#' \tab \tab COND_STATUS_CD \tab Status of each forested condition on plot (i.e. accessible forest, nonforest, water, etc.)\cr \tab
 #' \tab NF_COND_STATUS_CD \tab If ACI=TRUE. Status of each nonforest condition
-#' on plot (i.e. accessible nonforest, nonsampled nonforest)\cr \tab \tab
-#' SITECLCD \tab If landarea=TIMBERLAND. Measure of site productivity.\cr \tab
+#' on plot (i.e. accessible nonforest, nonsampled nonforest)\cr 
+#' \tab \tab SITECLCD \tab If landarea=TIMBERLAND. Measure of site productivity.\cr \tab
 #' \tab RESERVCD \tab If landarea=TIMBERLAND. Reserved status.\cr
 #' 
 #' \tab pltassgn \tab puniqueid \tab Unique identifier for each plot, to link
-#' to cond (ex. CN).\cr \tab \tab STATECD \tab Identifies state each plot is
-#' located in.\cr \tab \tab INVYR \tab Identifies inventory year of each
-#' plot.\cr \tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled,
-#' nonsampled).  If not included, all plots are assumed as sampled.\cr }
+#' to cond (ex. CN).\cr 
+#' \tab \tab STATECD \tab Identifies state each plot is located in.\cr \tab \tab INVYR \tab Identifies inventory year of each
+#' plot.\cr 
+#' \tab \tab PLOT_STATUS_CD \tab Status of each plot (i.e. sampled, nonsampled). If not included, all plots are assumed as sampled.\cr }
 #' 
 #' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 #' 
@@ -64,36 +65,42 @@
 #' \item{est}{ Data frame. Area estimates, in area units (e.g., acres), by
 #' rowvar, colvar (and estimation unit). If sumunits=TRUE or one estimation
 #' unit and colvar=NULL, or allin1=TRUE, estimates and percent sampling error
-#' are in one data frame. } \item{pse}{ Data frame. Percent sampling errors
-#' (Confidence level 68%) for estimates by rowvar and colvar (and estimation
-#' unit). } \item{titlelst}{ List. If returntitle=TRUE a list with table
-#' title(s). The list contains one title if est and pse are in the same table
-#' and two titles if est and pse are in separate tables. Row and column tables
-#' are also included in list. } \item{raw}{ List. If rawdata=TRUE, a list
-#' including the processing data used for estimation including: number of plots
-#' and conditions; stratification information; and 1 to 8 tables with
-#' calculated values for table cells and totals (See processing data below). }
+#' are in one data frame. } 
+#' \item{pse}{ Data frame. Percent sampling errors (Confidence level 68%) 
+#' for estimates by rowvar and colvar (and estimation unit). } 
+#' \item{titlelst}{ List. If returntitle=TRUE a list with table title(s). The 
+#' list contains one title if est and pse are in the same table and two titles 
+#' if est and pse are in separate tables. Row and column tables are also included 
+#' in list. } 
+#' \item{raw}{ List. If rawdata=TRUE, a list including the processing data used 
+#' for estimation including: number of plots and conditions; stratification 
+#' information; and 1 to 8 tables with calculated values for table cells and 
+#' totals (See processing data below). }
 #' 
 #' Raw data
 #' 
 #' \item{plotsampcnt}{ Table. Number of plots by plot status (e.g., sampled
-#' forest on plot, sampled nonforest, nonsampled). } \item{condsampcnt}{ DF.
-#' Number of conditions by condition status (forest land, nonforest land,
-#' noncensus water, census water, nonsampled). } \item{unitarea}{ DF. Area by
-#' estimation unit. } \item{expcondtab}{ DF. Condition-level area expansion
-#' factors. } \item{domdat}{ DF. Final data table used for estimation. }
+#' forest on plot, sampled nonforest, nonsampled). } 
+#' \item{condsampcnt}{ DF. Number of conditions by condition status 
+#' (forest land, nonforest land, noncensus water, census water, nonsampled). } 
+#' \item{unitarea}{ DF. Area by estimation unit. } 
+#' \item{expcondtab}{ DF. Condition-level area expansion factors. } 
+#' \item{domdat}{ DF. Final data table used for estimation. }
 #' 
 #' \item{stratdat}{ Data frame. Strata information by estimation unit. }
-#' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description} \cr \tab unitvar
-#' \tab estimation unit \cr \tab strvar \tab stratum value \cr \tab strwtvar
-#' \tab number of pixels by strata and estimation unit \cr \tab n.strata \tab
-#' number of plots in strata (after totally nonsampled plots removed) \cr \tab
-#' n.total \tab number of plots for estimation unit \cr \tab strwt \tab
-#' proportion of area (or plots) by strata and estimation unit (strata weight)
-#' \cr \tab CONDPROP_UNADJ_SUM \tab summed condition proportion by strata and
-#' estimation unit \cr \tab CONDPROP_ADJFAC \tab adjusted condition proportion
-#' by strata after nonresponse plots removed \cr \tab AREA \tab total area for
-#' estimation unit \cr \tab CONDPROP_ADJFAC \tab average area \cr }
+#' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description} \cr
+#' \tab unitvar \tab estimation unit \cr \tab strvar \tab stratum value \cr 
+#' \tab strwtvar \tab number of pixels by strata and estimation unit \cr 
+#' \tab n.strata \tab number of plots in strata (after totally nonsampled 
+#' plots removed) \cr 
+#' \tab n.total \tab number of plots for estimation unit \cr 
+#' \tab strwt \tab proportion of area (or plots) by strata and estimation 
+#' unit (strata weight) \cr \tab CONDPROP_UNADJ_SUM \tab summed condition 
+#' proportion by strata and estimation unit \cr 
+#' \tab CONDPROP_ADJFAC \tab adjusted condition proportion by strata after 
+#' nonresponse plots removed \cr 
+#' \tab AREA \tab total area for estimation unit \cr 
+#' \tab CONDPROP_ADJFAC \tab average area \cr }
 #' 
 #' \item{processing data}{ Data frames. Separate data frames containing
 #' calculated variables used in estimation process. The number of processing
@@ -106,31 +113,40 @@
 #' nhat.var).
 #' 
 #' The data frames include the following information: \tabular{lll}{ \tab
-#' \bold{Variable} \tab \bold{Description}\cr \tab nhat \tab estimate
-#' proportion of land \cr \tab nhat.var \tab variance estimate of estimated
-#' proportion of land \cr \tab NBRPLT.gt0 \tab Number of non-zero plots used in
-#' estimates \cr \tab AREA \tab total area for estimation unit \cr \tab est
-#' \tab estimated area of land nhat*areavar \cr \tab est.var \tab variance
-#' estimate of estimate acres of land nhat.var*areavar^2 \cr \tab est.se \tab
-#' standard error of estimated area of land sqrt(est.var) \cr \tab est.cv \tab
-#' coefficient of variation of estimated area of land est.se/est \cr \tab pse
-#' \tab percent sampling error of estimate est.cv*100 \cr \tab CI99left \tab
-#' left tail of 99 percent confidence interval for estimated area \cr \tab
-#' CI99right \tab right tail of 99 percent confidence interval for estimated
-#' area \cr \tab CI95left \tab left tail of 95 percent confidence interval for
-#' estimated area \cr \tab CI95right \tab right tail of 95 percent confidence
-#' interval for estimated area \cr \tab CI67left \tab left tail of 67 percent
-#' confidence interval for estimated area \cr \tab CI67right \tab right tail of
-#' 67 percent confidence interval for estimated area \cr } }
+#' \bold{Variable} \tab \bold{Description}\cr 
+#' \tab nhat \tab estimate proportion of land \cr 
+#' \tab nhat.var \tab variance estimate of estimated proportion of land \cr 
+#' \tab NBRPLT.gt0 \tab Number of non-zero plots used in estimates \cr 
+#' \tab AREA \tab total area for estimation unit \cr 
+#' \tab est \tab estimated area of land nhat*areavar \cr 
+#' \tab est.var \tab variance estimate of estimate acres of land 
+#' nhat.var*areavar^2 \cr 
+#' \tab est.se \tab standard error of estimated area of land sqrt(est.var) \cr 
+#' \tab est.cv \tab coefficient of variation of estimated area of land est.se/est 
+#' \cr \tab pse \tab percent sampling error of estimate est.cv*100 \cr 
+#' \tab CI99left \tab left tail of 99 percent confidence interval for 
+#' estimated area \cr 
+#' \tab CI99right \tab right tail of 99 percent confidence interval for 
+#' estimated area \cr 
+#' \tab CI95left \tab left tail of 95 percent confidence interval for 
+#' estimated area \cr 
+#' \tab CI95right \tab right tail of 95 percent confidence interval for 
+#' estimated area \cr 
+#' \tab CI67left \tab left tail of 67 percent confidence interval for 
+#' estimated area \cr 
+#' \tab CI67right \tab right tail of 67 percent confidence interval for 
+#' estimated area \cr } }
 #' 
-#' savedata\cr if savedata=TRUE...\cr tables with estimate and percent standard
-#' error will be written as *csv files to outfolder.  if rawdata=TRUE, the
-#' rawdata will be output to the outfolder in a folder named rawdata (if
-#' raw_fmt="csv") or a database in the outfolder, if (raw_fmt != "csv").
+#' savedata\cr 
+#' if savedata=TRUE...\cr 
+#' tables with estimate and percent standard error will be written as *csv 
+#' files to outfolder.  if rawdata=TRUE, the rawdata will be output to the 
+#' outfolder in a folder named rawdata (if raw_fmt="csv") or a database in 
+#' the outfolder, if (raw_fmt != "csv").
 #' 
-#' if outfn.pre is not null...\cr a prefix is added to output files if raw_fmt
-#' = 'csv', prefix is added to file names in rawdata folder if raw_fmt !=
-#' 'csv', prefix is added to dsn name
+#' if outfn.pre is not null...\cr 
+#' a prefix is added to output files if raw_fmt = 'csv', prefix is added to 
+#' file names in rawdata folder if raw_fmt != 'csv', prefix is added to dsn name
 #' @note
 #' 
 #' ADJUSTMENT FACTOR:\cr The adjustment factor is necessary to account for
@@ -269,12 +285,6 @@ modGBarea <- function(GBpopdat,
     #if (!col.FIAname) col.FIAname <- NULL
   }
   
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
-    rawfolder <- NULL
-  rawdata <- TRUE
-  #estvar <- "CONDPROP_ADJ"
-  
   
   ## INITIALIZE SETTINGS
   options.old <- options()
@@ -285,7 +295,12 @@ modGBarea <- function(GBpopdat,
   substrvar <- NULL
   parameters <- FALSE
   returnlst <- list()
+  rawdata <- TRUE
   
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter=
+    rawfolder <- NULL
+  #estvar <- "CONDPROP_ADJ"
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -536,9 +551,14 @@ modGBarea <- function(GBpopdat,
     tabs <- check.matchclass(unitarea, unit_totest, unitvar)
     unitarea <- tabs$tab1
     unit_totest <- tabs$tab2
-    setkeyv(unit_totest, unitvar)
+    setkeyv(unit_totest, unitvar)     
     unit_totest <- unit_totest[unitarea, nomatch=0]
-    unit_totest <- getarea(unit_totest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_totest <- getpse(unit_totest, esttype=esttype)
+    } 
 #  }
 
   ## Get row estimate  
@@ -569,8 +589,9 @@ modGBarea <- function(GBpopdat,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
-    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow, 
-		unitvar=unitvar, xvar.add0=row.add0)
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, 
+                            uniquex=uniquerow, unitvar=unitvar, 
+                            xvar.add0=row.add0)
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
@@ -580,13 +601,19 @@ modGBarea <- function(GBpopdat,
     }
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
-    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_rowest <- getpse(unit_rowest, esttype=esttype)
+    }      
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
 
   if (!is.null(unit_colest)) {
-    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol, 
-		unitvar=unitvar, xvar.add0=col.add0)
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, 
+                            uniquex=uniquecol,unitvar=unitvar, 
+                            xvar.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
@@ -596,14 +623,20 @@ modGBarea <- function(GBpopdat,
     }
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_colest <- getpse(unit_colest, esttype=esttype)
+    }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
  
   if (!is.null(unit_grpest)) {
-    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow, 
-		unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, uniquex2=uniquecol,
-		xvar2.add0=col.add0)
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
+                            uniquex=uniquerow, unitvar=unitvar, 
+                            xvar.add0=row.add0, xvar2=colvar, 
+                            uniquex2=uniquecol, xvar2.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
@@ -619,7 +652,12 @@ modGBarea <- function(GBpopdat,
     }         
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_grpest <- getpse(unit_grpest, esttype=esttype)
+    }      
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
@@ -658,7 +696,11 @@ modGBarea <- function(GBpopdat,
     rowunit <- tabs$tab2
     setkeyv(rowunit, "ONEUNIT")
     rowunit <- rowunit[unitacres2, nomatch=0]
-    rowunit <- getarea(rowunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      rowunit <- getpse(rowunit, areavar=areavar, esttype=esttype)
+    } else {
+      rowunit <- getpse(rowunit, esttype=esttype)
+    }      
     setkeyv(rowunit, c("ONEUNIT", rowvar))
 
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
@@ -672,7 +714,11 @@ modGBarea <- function(GBpopdat,
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
     totunit <- totunit[unitacres2, nomatch=0]
-    totunit <- getarea(totunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      totunit <- getpse(totunit, areavar=areavar, esttype=esttype)
+    } else {
+      totunit <- getpse(totunit, esttype=esttype)
+    }      
   }          
  
   ###################################################################################

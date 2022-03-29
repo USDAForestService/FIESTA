@@ -9,7 +9,6 @@ modSAtree(
   prednames = NULL,
   SApackage = "JoSAE",
   SAmethod = "area",
-  totals = FALSE,
   estseed = "none",
   largebnd.unique = NULL,
   landarea = "FOREST",
@@ -46,8 +45,6 @@ model.}
 \item{SApackage}{String. Small area package to use ('JoSAE', 'sae', 'hbsae')}
 
 \item{SAmethod}{String. Small area method to use ('unit', 'area')}
-
-\item{totals}{Logical. If TRUE, returns total estimate (mean * AREAUSED).}
 
 \item{estseed}{String. Use seedling data only or add to tree data. Seedling
 estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').}

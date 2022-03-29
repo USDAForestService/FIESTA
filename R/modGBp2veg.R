@@ -583,7 +583,11 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_totest <- tabs$tab2
     setkeyv(unit_totest, unitvar)
     unit_totest <- unit_totest[unitarea, nomatch=0]
-    unit_totest <- getarea(unit_totest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_totest <- getpse(unit_totest, esttype=esttype)
+    }      
   #}
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
@@ -622,7 +626,11 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_rowest <- tabs$tab2
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
-    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_rowest <- getpse(unit_rowest, esttype=esttype)
+    }      
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
 
@@ -634,7 +642,11 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_colest <- tabs$tab2
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_colest <- getpse(unit_colest, esttype=esttype)
+    }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
 
@@ -647,7 +659,11 @@ modGBp2veg <- function(GBpopdat = NULL,
     unit_grpest <- tabs$tab2
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
+    if (totals) {
+      unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_grpest <- getpse(unit_grpest, esttype=esttype)
+    }      
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
@@ -687,7 +703,11 @@ modGBp2veg <- function(GBpopdat = NULL,
     rowunit <- tabs$tab2
     setkeyv(rowunit, "ONEUNIT")
     rowunit <- rowunit[unitacres2, nomatch=0]
-    rowunit <- getarea(rowunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      rowunit <- getpse(rowunit, areavar=areavar, esttype=esttype)
+    } else {
+      rowunit <- getpse(rowunit, esttype=esttype)
+    }      
     setkeyv(rowunit, c("ONEUNIT", rowvar))
 
     ## Calculate grand total for all units
@@ -701,7 +721,11 @@ modGBp2veg <- function(GBpopdat = NULL,
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
     totunit <- totunit[unitacres2, nomatch=0]
-    totunit <- getarea(totunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      totunit <- getpse(totunit, areavar=areavar, esttype=esttype)
+    } else {
+      totunit <- getpse(totunit, esttype=esttype)
+    }      
   }          
 
   ###################################################################################

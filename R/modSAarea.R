@@ -48,7 +48,6 @@
 #' model.
 #' @param SApackage String. Small area package to use ('JoSAE', 'sae', 'hbsae')
 #' @param SAmethod String. Small area method to use ('unit', 'area')
-#' @param totals Logical. If TRUE, returns total estimate (mean * AREAUSED).
 #' @param estseed String. Use seedling data only or add to tree data. Seedling
 #' estimates are only for counts (estvar='TPA_UNADJ')-('none', 'only', 'add').
 #' @param largebnd.unique String. Name of the large boundary unique identifer
@@ -171,7 +170,6 @@ modSAarea <- function(SApopdatlst = NULL,
                       prednames = NULL, 
                       SApackage = "JoSAE", 
                       SAmethod = "area", 
-                      totals = FALSE, 
                       estseed = "none", 
                       largebnd.unique = NULL, 
                       landarea = "FOREST", 
@@ -229,8 +227,7 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
 	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=
-	est=est.var=est.cv=est.se <- NULL
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf <- NULL
   rawdata <- TRUE
   
   gui <- FALSE
@@ -847,11 +844,11 @@ modSAarea <- function(SApopdatlst = NULL,
         ## Merge SAdom attributes to dunit_totest
         if (addSAdomsdf) {
           pdomdat_row <- merge(setDT(SAdomsdf)[, 
-			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			pdomdat_row, by=c("DOMAIN", "AOI"))
+			        unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			        pdomdat_row, by=c("DOMAIN", "AOI"))
           dunitlut_row <- merge(setDT(SAdomsdf)[, 
-			unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
-			dunitlut_row, by=c("DOMAIN", "AOI"))
+			        unique(c("DOMAIN", "AOI", SAdomvars)), with=FALSE], 
+			        dunitlut_row, by=c("DOMAIN", "AOI"))
         }
         pdomdatlst_row[[SApopdatnm]] <- pdomdat_row
         dunitlutlst_row[[SApopdatnm]] <- dunitlut_row
@@ -945,19 +942,18 @@ modSAarea <- function(SApopdatlst = NULL,
 
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
-  estdf[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+  estdf[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
   estdf$estimator <- nhat
   if (na.fill != "NONE") {
-    estdf[is.na(estdf$est), "estimator"] <- na.fill
+    estdf[is.na(estdf$nhat), "estimator"] <- na.fill
     na.fill.se <- paste0(na.fill, ".se")
-    estdf[is.na(estdf$est), c("est", "est.se")] <- 
+    estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
             estdf[is.na(estdf$est), c(na.fill, na.fill.se), with=FALSE]
   }
-  estnm <- "est"
 
   ## Subset multest to estimation output
   dunit_totest <- estdf[AOI==1, 
-		unique(c("DOMAIN", "est", "est.se", "NBRPLT.gt0", "estimator")), with=FALSE]
+		unique(c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")), with=FALSE]
   setkeyv(dunit_totest, "DOMAIN")
 
   ## Merge dunitarea
@@ -968,33 +964,30 @@ modSAarea <- function(SApopdatlst = NULL,
 		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
 
   if (!is.null(dunit_totest)) {
-    dunit_totest[, est.var := est.se^2]
+    #dunit_totest[, nhat.var := nhat.se^2]
 
     if (totals) {
-      dunit_totest <- getarea(dunit_totest, areavar=areavar, esttype=esttype,
-				nhatcol="est", nhatcol.var="est.var")
+      dunit_totest <- getpse(dunit_totest, areavar=areavar, esttype=esttype)
     } else {
-      dunit_totest[, est.cv := est.se/est]
-      dunit_totest[, pse := est.cv * 100]
+      dunit_totest <- getpse(dunit_totest, esttype=esttype)
     }
   }
 
   if (rowcolinfo$rowvar != "TOTAL") {
     ## Set up estimates. If estimate is NULL, use direct estimator
     estdf_row <- setDT(estdf_row)
-    estdf_row[, c("est", "est.se") := .SD, .SDcols=c(nhat, nhat.se)]
+    estdf_row[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
     estdf_row$estimator <- nhat
     if (na.fill != "NONE") {
-      estdf_row[is.na(estdf_row$est), "estimator"] <- na.fill
+      estdf_row[is.na(estdf_row$nhat), "estimator"] <- na.fill
       na.fill.se <- paste0(na.fill, ".se")
-      estdf_row[is.na(estdf_row$est), c("est", "est.se")] <- 
-			  estdf_row[is.na(estdf_row$est), c(na.fill, na.fill.se), with=FALSE]
+      estdf_row[is.na(estdf_row$nhat), c("nhat", "nhat.se")] <- 
+			  estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with=FALSE]
     }
-    estnm <- "est"
  
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
-		unique(c("DOMAIN", rowcolinfo$rowvar, "est", "est.se", "NBRPLT.gt0", "estimator")), with=FALSE]
+		unique(c("DOMAIN", rowcolinfo$rowvar, "nhat", "nhat.se", "NBRPLT.gt0", "estimator")), with=FALSE]
     setkeyv(dunit_rowest, "DOMAIN")
 
     ## Merge dunitarea
@@ -1005,14 +998,12 @@ modSAarea <- function(SApopdatlst = NULL,
 		dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
 
     if (!is.null(dunit_rowest)) {
-      dunit_rowest[, est.var := est.se^2]
+      #dunit_rowest[, nhat.var := nhat.se^2]
 
       if (totals) {
-        dunit_rowest <- getarea(dunit_rowest, areavar=areavar, esttype=esttype,
-				nhatcol="est", nhatcol.var="est.var")
+        dunit_rowest <- getpse(dunit_rowest, areavar=areavar, esttype=esttype)
       } else {
-        dunit_rowest[, est.cv := est.se/est]
-        dunit_rowest[, pse := est.cv * 100]
+        dunit_rowest <- getpse(dunit_rowest, esttype=esttype)
       }
     }
   }

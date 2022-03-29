@@ -333,11 +333,11 @@ modGBratio <- function(GBpopdat,
   esttype <- "RATIO"
   parameters <- FALSE
   returnlst <- list()
+  rawdata <- TRUE
 
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=tdom=estvar.name=rowvar.filter=colvar.filter=
     variable <- NULL
-  rawdata <- TRUE
   
   
   ##################################################################
@@ -692,7 +692,12 @@ modGBratio <- function(GBpopdat,
     unit_totest <- tabs$tab2
     setkeyv(unit_totest, unitvar)
     unit_totest <- unit_totest[unitarea, nomatch=0]
-    unit_totest <- getarea(unit_totest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_totest <- getpse(unit_totest, esttype=esttype)
+    }
   }
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
@@ -840,7 +845,12 @@ modGBratio <- function(GBpopdat,
     }
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
-    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_rowest <- getpse(unit_rowest, esttype=esttype)
+    }      
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
   if (!is.null(unit_colest)) {
@@ -855,7 +865,12 @@ modGBratio <- function(GBpopdat,
     }
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_colest <- getpse(unit_colest, esttype=esttype)
+    }
     setkeyv(unit_colest, c(unitvar, colvar))
   }
   if (!is.null(unit_grpest)) {
@@ -879,7 +894,12 @@ modGBratio <- function(GBpopdat,
     }         
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_grpest <- getpse(unit_grpest, esttype=esttype)
+    }
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
@@ -919,7 +939,11 @@ modGBratio <- function(GBpopdat,
     rowunit <- tabs$tab2
     setkey(rowunit, "ONEUNIT")
     rowunit <- rowunit[unitacres2, nomatch=0]
-    rowunit <- getarea(rowunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      rowunit <- getpse(rowunit, areavar=areavar, esttype=esttype)
+    } else {
+      rowunit <- getpse(rowunit, esttype=esttype)
+    }      
     setkeyv(rowunit, c("ONEUNIT", rowvar))
 
     ## CALCULATE GRAND TOTAL FOR ALL UNITS
@@ -937,7 +961,11 @@ modGBratio <- function(GBpopdat,
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
     totunit <- totunit[unitacres2, nomatch=0]
-    totunit <- getarea(totunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      totunit <- getpse(totunit, areavar=areavar, esttype=esttype)
+    } else {
+      totunit <- getpse(totunit, esttype=esttype)
+    }      
   }          
  
   ###################################################################

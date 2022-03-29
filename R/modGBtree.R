@@ -314,11 +314,10 @@ modGBtree <- function(GBpopdat,
   esttype <- "TREE"
   parameters <- FALSE
   returnlst <- list()
-  
+  rawdata <- TRUE  
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
-  rawdata <- TRUE
   
   
   ##################################################################
@@ -611,7 +610,12 @@ modGBtree <- function(GBpopdat,
     unit_totest <- tabs$tab2
     setkeyv(unit_totest, unitvar)
     unit_totest <- unit_totest[unitarea, nomatch=0]
-    unit_totest <- getarea(unit_totest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_totest <- getpse(unit_totest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_totest <- getpse(unit_totest, esttype=esttype)
+    } 
   #}
 
   ## Get row, column, cell estimate and merge area if row or column in cond table 
@@ -644,8 +648,9 @@ modGBtree <- function(GBpopdat,
   ###################################################################################
   if (!sumunits && nrow(unitarea) > 1) col.add0 <- TRUE
   if (!is.null(unit_rowest)) {
-    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, uniquex=uniquerow,
-                        unitvar=unitvar, xvar.add0=row.add0)
+    unit_rowest <- add0unit(x=unit_rowest, xvar=rowvar, 
+                            uniquex=uniquerow, unitvar=unitvar, 
+                            xvar.add0=row.add0)
     tabs <- check.matchclass(unitarea, unit_rowest, unitvar)
     unitarea <- tabs$tab1
     unit_rowest <- tabs$tab2
@@ -655,13 +660,19 @@ modGBtree <- function(GBpopdat,
     }
     setkeyv(unit_rowest, unitvar)
     unit_rowest <- unit_rowest[unitarea, nomatch=0]
-    unit_rowest <- getarea(unit_rowest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_rowest <- getpse(unit_rowest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_rowest <- getpse(unit_rowest, esttype=esttype)
+    }      
     setkeyv(unit_rowest, c(unitvar, rowvar))
   }
 
   if (!is.null(unit_colest)) {
-    unit_colest <- add0unit(x=unit_colest, xvar=colvar, uniquex=uniquecol,
-                        unitvar=unitvar, xvar.add0=col.add0)
+    unit_colest <- add0unit(x=unit_colest, xvar=colvar, 
+                            uniquex=uniquecol, unitvar=unitvar, 
+                            xvar.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_colest, unitvar)
     unitarea <- tabs$tab1
     unit_colest <- tabs$tab2
@@ -671,14 +682,20 @@ modGBtree <- function(GBpopdat,
     }
     setkeyv(unit_colest, unitvar)
     unit_colest <- unit_colest[unitarea, nomatch=0]
-    unit_colest <- getarea(unit_colest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_colest <- getpse(unit_colest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_colest <- getpse(unit_colest, esttype=esttype)
+    }      
     setkeyv(unit_colest, c(unitvar, colvar))
   }
 
   if (!is.null(unit_grpest)) {
-    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, uniquex=uniquerow,
-                        unitvar=unitvar, xvar.add0=row.add0, xvar2=colvar, 
-                        uniquex2=uniquecol, xvar2.add0=col.add0)
+    unit_grpest <- add0unit(x=unit_grpest, xvar=rowvar, 
+                            uniquex=uniquerow, unitvar=unitvar, 
+                            xvar.add0=row.add0, xvar2=colvar, 
+                            uniquex2=uniquecol, xvar2.add0=col.add0)
     tabs <- check.matchclass(unitarea, unit_grpest, unitvar)
     unitarea <- tabs$tab1
     unit_grpest <- tabs$tab2
@@ -694,7 +711,12 @@ modGBtree <- function(GBpopdat,
     }         
     setkeyv(unit_grpest, unitvar)
     unit_grpest <- unit_grpest[unitarea, nomatch=0]
-    unit_grpest <- getarea(unit_grpest, areavar=areavar, esttype=esttype)
+
+    if (totals) {
+      unit_grpest <- getpse(unit_grpest, areavar=areavar, esttype=esttype)
+    } else {
+      unit_grpest <- getpse(unit_grpest, esttype=esttype)
+    }      
     setkeyv(unit_grpest, c(unitvar, rowvar, colvar))
   }
 
@@ -734,7 +756,11 @@ modGBtree <- function(GBpopdat,
     rowunit <- tabs$tab2
     setkeyv(rowunit, "ONEUNIT")
     rowunit <- rowunit[unitacres2, nomatch=0]
-    rowunit <- getarea(rowunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      rowunit <- getpse(rowunit, areavar=areavar, esttype=esttype)
+    } else {
+      rowunit <- getpse(rowunit, esttype=esttype)
+    }      
     setkeyv(rowunit, c("ONEUNIT", rowvar))
 
     ## Calculate grand total for all units
@@ -748,7 +774,11 @@ modGBtree <- function(GBpopdat,
     totunit <- tabs$tab2
     setkeyv(totunit, "ONEUNIT")
     totunit <- totunit[unitacres2, nomatch=0]
-    totunit <- getarea(totunit, areavar=areavar, esttype=esttype)
+    if (totals) {
+      totunit <- getpse(totunit, areavar=areavar, esttype=esttype)
+    } else {
+      totunit <- getpse(totunit, esttype=esttype)
+    }
   }          
 
   ###################################################################################

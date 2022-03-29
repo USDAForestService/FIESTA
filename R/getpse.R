@@ -1,5 +1,6 @@
-getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
-	nhatcol.var="nhat.var", dhatcol="dhat", dhatcol.var="dhat.var"){
+getpse <- function(xdat, esttype="AREA", areavar=NULL,
+	nhatcol="nhat", nhatcol.var="nhat.var", 
+	dhatcol="dhat", dhatcol.var="dhat.var"){
 
   ########################################################################################
   ## DESCRIPTION: Calculates the following variables
@@ -20,23 +21,33 @@ getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
   estn=estd=estn.var=estn.se=estn.cv=estn.pse=estd.var=estd.se=estd.cv=estd.pse=est.covar=
 	covar <- NULL
 
-  if (is.null(areavar)) {
-    stop("need areavar")
-  }
 
   ## ESTIMATED ACRES OR PER ACRE (for ratio)
   if (!is.null(nhatcol)) {
-    xdat[, estn := get(nhatcol) * get(areavar)]
+    if (!is.null(areavar)) {
+      xdat[, estn := get(nhatcol) * get(areavar)]
+    } else {
+      xdat[, estn := get(nhatcol)]
+    }    
   }
 
   if (esttype == "RATIO") {
-    if (!is.null(dhatcol))
-      xdat[, estd := get(dhatcol) * get(areavar)]
+    if (!is.null(dhatcol)) {
+      if (!is.null(areavar)) {
+        xdat[, estd := get(dhatcol) * get(areavar)]
+      } else {
+        xdat[, estd := get(dhatcol)]
+      }
+    }
   }
 
   if (!is.null(nhatcol.var)) {
     ## Calculate variance of estimated acres, for numerator
-    xdat[, estn.var := get(nhatcol.var) * get(areavar)^2]
+    if (!is.null(areavar)) {
+      xdat[, estn.var := get(nhatcol.var) * get(areavar)^2]
+    } else {
+      xdat[, estn.var := get(nhatcol.var)]
+    }
 
     ## Calculate standard error (se), coefficient of variation (cv), and
     ##	percent sampling error (pse). for numerator
@@ -45,10 +56,13 @@ getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
 		estn.cv := estn.se/estn][,
 		estn.pse := estn.cv*100] )
 
-
     if (esttype == "RATIO" && !is.null(dhatcol.var)) {
       ## Calculate variance of estimated acres, for denominator
-      xdat[, estd.var := get(dhatcol.var) * get(areavar)^2]
+      if (!is.null(areavar)) {
+        xdat[, estd.var := get(dhatcol.var) * get(areavar)^2]
+      } else {
+        xdat[, estd.var := get(dhatcol.var)]
+      }
 
       ## Calculate standard error (se), coefficient of variation (cv), and
       ##	percent sampling error (pse). for denominator
@@ -59,7 +73,9 @@ getarea <- function(xdat, areavar="ACRES", esttype="AREA", nhatcol="nhat",
 
       if ("covar" %in% names(xdat)) {
         ## Calculate covariance of estimated acres for numerator/denominator
-        xdat[, est.covar := covar * get(areavar)^2]
+        if (!is.null(areavar)) {
+          xdat[, est.covar := covar * get(areavar)^2]
+        }
       }
     }
   }
