@@ -78,6 +78,12 @@
 #' table if istree=TRUE.
 #' @param seed_layer String. Name of layer in database of file name of FIA
 #' seedling table if isseed=TRUE.
+#' @param vsubpspp_layer String. Name of layer in database of file name of FIA
+#' P2VEG_SUBPLOT_SPP table if isveg=TRUE.
+#' @param vsubpstr_layer String. Name of layer in database of file name of FIA
+#' P2VEG_SUBP_STRUCTURE table if isveg=TRUE.
+#' @param invsubp_layer String. Name of layer in database of file name of FIA
+#' INVASIVE_SUBPLOT_SPP table if isveg=TRUE.
 #' @param ppsa_layer String. Name of layer in database of file name of FIA
 #' pop_plot_stratum_assgn table, if using evaluations.
 #' @param other_layers String. Other layer(s) in database to clip and/or
@@ -1571,7 +1577,7 @@ spGetPlots <- function(bnd = NULL,
         if (isveg) {
           vsubpspp <- rbind(vsubpspp1, vsubpspp2)
           vsubpstr <- rbind(vsubpstr1, vsubpstr2)
-          invsubp <- rbind(invsubp1, invsupb2)
+          invsubp <- rbind(invsubp1, invsubp2)
         }          
         if (savePOP) {
           pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)

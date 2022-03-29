@@ -991,7 +991,6 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
       estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }
-  estnm <- "est"
 
   ## Subset multest to estimation output
   dunit_totest <- setDT(estdf)[AOI==1, 
@@ -1026,7 +1025,6 @@ modSAtree <- function(SApopdatlst = NULL,
       estdf_row[is.na(estdf_row$nhat), c("nhat", "nhat.se")] <- 
         estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with=FALSE]
     }
-    estnm <- "est"
 
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
@@ -1042,7 +1040,7 @@ modSAtree <- function(SApopdatlst = NULL,
                         dunitareabind[, c("DOMAIN", "AREAUSED"), with=FALSE], by="DOMAIN")
   
     if (!is.null(dunit_rowest)) {
-      dunit_rowest[, nhat.var := nhat.se^2]
+      #dunit_rowest[, nhat.var := nhat.se^2]
 
       if (totals) {
         dunit_rowest <- getpse(dunit_rowest, areavar=areavar, esttype=esttype)
@@ -1051,6 +1049,7 @@ modSAtree <- function(SApopdatlst = NULL,
       }
     }
   }
+  estnm <- "est"
   
   #####################################################################################
   ### GET TITLES FOR OUTPUT TABLES
