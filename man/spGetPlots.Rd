@@ -137,6 +137,15 @@ table if istree=TRUE.}
 \item{seed_layer}{String. Name of layer in database of file name of FIA
 seedling table if isseed=TRUE.}
 
+\item{vsubpspp_layer}{String. Name of layer in database of file name of FIA
+P2VEG_SUBPLOT_SPP table if isveg=TRUE.}
+
+\item{vsubpstr_layer}{String. Name of layer in database of file name of FIA
+P2VEG_SUBP_STRUCTURE table if isveg=TRUE.}
+
+\item{invsubp_layer}{String. Name of layer in database of file name of FIA
+INVASIVE_SUBPLOT_SPP table if isveg=TRUE.}
+
 \item{ppsa_layer}{String. Name of layer in database of file name of FIA
 pop_plot_stratum_assgn table, if using evaluations.}
 
