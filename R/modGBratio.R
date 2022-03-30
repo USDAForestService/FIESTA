@@ -567,12 +567,20 @@ modGBratio <- function(GBpopdat,
   tdomdat <- treedat$tdomdat
 
   if (rowvar != "TOTAL") {
-    if (!row.add0 && any(tdomdat[[rowvar]] == 0)) {
-      tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
+    if (!row.add0) {
+      if (any(is.na(tdomdat[[rowvar]]))) {
+        tdomdat <- tdomdat[!is.na(tdomdat[[rowvar]]), ]
+      } else if (any(as.character(tdomdat[[rowvar]]) == "0")) {
+        tdomdat <- tdomdat[tdomdat[[rowvar]] != 0,]
+      }
     }
     if (colvar != "NONE") {
-      if (!col.add0 && any(tdomdat[[colvar]] == 0)) {
-        tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
+      if (!col.add0) {
+        if (any(is.na(tdomdat[[colvar]]))) {
+          tdomdat <- tdomdat[!is.na(tdomdat[[colvar]]), ]
+        } else if (any(as.character(tdomdat[[colvar]]) == "0")) {
+          tdomdat <- tdomdat[tdomdat[[colvar]] != 0,]
+        }
       }
     }
   }
@@ -625,8 +633,7 @@ modGBratio <- function(GBpopdat,
                     addtitle=addtitle, returntitle=returntitle,
                     rawdata=rawdata, states=states, invyrs=invyrs, 
                     landarea=landarea, pcfilter=pcfilter, 
-                    allin1=allin1, 
-	divideby=divideby, outfn.pre=outfn.pre)
+                    allin1=allin1, divideby=divideby, outfn.pre=outfn.pre)
   title.unitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse

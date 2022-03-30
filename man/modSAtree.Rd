@@ -141,7 +141,7 @@ If variables are NULL, then it will prompt user to input variables.
 
 Necessary variables:\cr \tabular{llll}{ \tab \bold{Data} \tab
 \bold{Variable} \tab \bold{Description}\cr \tab tree \tab tuniqueid \tab
-Unique identifier for each plot, to link to pltstrat (ex. PLT_CN).\cr \tab
+Unique identifier for each plot, to link to pltstrat (e.g., PLT_CN).\cr \tab
 \tab CONDID \tab Unique identifier of each condition on plot, to link to
 cond.  Set CONDID=1, if only 1 condition per plot.\cr \tab \tab TPA_UNADJ
 \tab Number of trees per acre each sample tree represents (e.g. DESIGNCD=1:
