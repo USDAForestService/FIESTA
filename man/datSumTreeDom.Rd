@@ -255,6 +255,46 @@ standing in the current inventory).
 This function can be used to get tree domain data. This data can be
 used for mapping tree domain distributions.
 }
+\examples{
+# Sum of Live Basal Area Per Acre by Species
+datSumTreeDom(tree = FIESTA::WYtree, 
+              cond = FIESTA::WYcond, 
+              plt = FIESTA::WYplt, 
+              puniqueid = "CN", 
+              bycond = FALSE, 
+              tsumvar = "BA", 
+              TPA = TRUE, 
+              tdomtot = TRUE, 
+              tdomtotnm = "BA_LIVE", 
+              tdomprefix = "BA_LIVE", 
+              tround = 2, 
+              tfilter = "STATUSCD==1")
+              
+# Sum of Number of Live Trees by Species
+datSumTreeDom(tree = FIESTA::WYtree, 
+              cond = FIESTA::WYcond, 
+              plt = FIESTA::WYplt, 
+              puniqueid = "CN", 
+              bycond = FALSE, 
+              tsumvar = "PLT_CN", 
+              TPA = TRUE, 
+              tdomtot = TRUE, 
+              tdomprefix = "CNT", 
+              tround = 0, 
+              tfilter = "STATUSCD==1")
+              
+# Sum of Number of Live Trees by Species, Including Seedlings
+datSumTreeDom(cond = WYcond, 
+              plt = WYplt, 
+              seed = WYseed, 
+              puniqueid = "CN", 
+              bycond = FALSE, 
+              tsumvar = "PLT_CN", 
+              TPA = TRUE, 
+              tdomtot = TRUE, 
+              tdomprefix = "CNT", 
+              tround = 0)
+}
 \author{
 Tracey S. Frescino
 }
