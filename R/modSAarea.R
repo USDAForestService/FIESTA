@@ -410,8 +410,11 @@ modSAarea <- function(SApopdatlst = NULL,
     fmtlst <- c("sqlite", "sqlite3", "db", "db3", "gpkg", "csv", "gdb")
 
     if (multest) {
-      multest_outfolder <- pcheck.outfolder(multest_outfolder, gui)
-      if (is.null(multest_outfolder)) multest_outfolder <- outfolder
+      if (is.null(multest_outfolder)) {
+        multest_outfolder <- rawfolder
+      } else {
+        multest_outfolder <- pcheck.outfolder(multest_outfolder, gui)
+      }
       multest.append <- pcheck.logical(multest.append, varnm="multest.append", 
 		title="Append multest data?", first="NO", gui=gui) 
 
@@ -939,16 +942,17 @@ modSAarea <- function(SApopdatlst = NULL,
       multestdf_row[is.na(multestdf_row$AOI), "AOI"] <- 0
     }
   }
-
+ 
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
   estdf[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
+
   estdf$estimator <- nhat
   if (na.fill != "NONE") {
     estdf[is.na(estdf$nhat), "estimator"] <- na.fill
     na.fill.se <- paste0(na.fill, ".se")
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
-            estdf[is.na(estdf$est), c(na.fill, na.fill.se), with=FALSE]
+            estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }
 
   ## Subset multest to estimation output
@@ -1022,7 +1026,7 @@ modSAarea <- function(SApopdatlst = NULL,
 	      addtitle=addtitle, returntitle=returntitle, rawdata=rawdata, 
 	      states=states, invyrs=invyrs, landarea=landarea, 
 	      pcfilter=pcfilter, allin1=allin1, divideby=divideby, 
-	      parameters=FALSE, outfn.pre=outfn.pre)
+	      parameters=FALSE)
   title.dunitvar <- alltitlelst$title.unitvar
   title.est <- alltitlelst$title.est
   title.pse <- alltitlelst$title.pse
@@ -1036,7 +1040,7 @@ modSAarea <- function(SApopdatlst = NULL,
     outfn.rawdat <- paste0(outfn.rawdat, "_modSA_", SApackage, "_", SAmethod) 
   } 
   ## Append name of package and method to outfile name
-  outfn.estpse <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
+  outfn.estpse2 <- paste0(outfn.estpse, "_modSA_", SApackage, "_", SAmethod) 
 
   ###################################################################################
   ## GENERATE OUTPUT TABLES
@@ -1054,7 +1058,7 @@ modSAarea <- function(SApopdatlst = NULL,
             title.rowgrp=title.rowgrp, title.unitvar=title.dunitvar, 
             title.estpse=title.estpse, title.est=title.est, 
             title.pse=title.pse, rawdata=rawdata, rawonly=rawonly, 
-            outfn.estpse=outfn.estpse, outfolder=outfolder, 
+            outfn.estpse=outfn.estpse2, outfolder=outfolder, 
             outfn.date=outfn.date, overwrite=overwrite_layer, 
             estnm=estnm, estround=estround, pseround=pseround, 
             divideby=divideby, returntitle=returntitle, 
@@ -1117,7 +1121,8 @@ modSAarea <- function(SApopdatlst = NULL,
       if (is.null(multest_layer)) {
         if (multest_fmt == "csv") {
           #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
-          multest_layer <- paste0("SAmultest_", response, ".csv")
+          #multest_layer <- paste0("SAmultest_", response, ".csv")
+          multest_layer <- paste0(outfn.estpse, "_multest.csv")
         } else {
           #multest_layer <- paste0(SApackage, "_", response)
           multest_layer <- response
@@ -1173,7 +1178,8 @@ modSAarea <- function(SApopdatlst = NULL,
       if (is.null(multest_layer)) {
         if (multest_fmt == "csv") {
           #multest_layer <- paste0("SAmultest_", SApackage, "_", response, ".csv")
-          multest_layer_row <- paste0("SAmultest_", response, "_", rowvar, ".csv")
+          #multest_layer_row <- paste0("SAmultest_", response, "_", rowvar, ".csv")
+          multest_layer_row <- paste0(outfn.estpse, "_multest.csv")
         } else {
           #multest_layer <- paste0(SApackage, "_", response)
           multest_layer_row <- paste0(response, "_", rowvar)
