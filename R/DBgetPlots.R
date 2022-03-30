@@ -1298,7 +1298,7 @@ DBgetPlots <- function (states = NULL,
     message("getting data from ", state)
     stcd <- pcheck.states(state, "VALUE")
     stabbr <- pcheck.states(state, "ABBR")
-    pltx=condx=treex=seedx=vsubpsppx=vsubpstrx=subpx=subpcx=dwmx=sccmx=
+    pltx=condx=treex=seedx=vsubpsppx=vsubpstrx=invsubpx=subpx=subpcx=dwmx=sccmx=
 		ppsax=spconddatx=lulcx <- NULL   
 
     if (!is.null(othertables)) {
@@ -2550,8 +2550,6 @@ DBgetPlots <- function (states = NULL,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       } 
-print("OOOO")
-print(vsubpsppx)
 
       if (savedata && !is.null(vsubpsppx)) {
         index.unique.vsubpsppx <- NULL
@@ -2568,7 +2566,6 @@ print(vsubpsppx)
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       }
-print("OOOO2")
 
       if (savedata && !is.null(vsubpstrx)) {
         index.unique.vsubpstrx <- NULL
@@ -2585,7 +2582,6 @@ print("OOOO2")
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       }
-print("OOOO3")
 
       if (savedata && !is.null(invsubpx)) {
         index.unique.invsubpx <- NULL
@@ -2602,7 +2598,6 @@ print("OOOO3")
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       }
-print("OOOO4")
 
       if (savedata && !is.null(subpx)) {
         index.unique.subpx <- NULL
@@ -2633,7 +2628,6 @@ print("OOOO4")
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
       } 
-print("OOOO5")
  
       if (savedata && !is.null(dwmx)) {
         index.unique.dwmx <- NULL
