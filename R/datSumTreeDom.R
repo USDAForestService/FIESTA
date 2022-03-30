@@ -156,6 +156,45 @@
 #' used for mapping tree domain distributions.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Sum of Live Basal Area Per Acre by Species
+#' datSumTreeDom(tree = FIESTA::WYtree, 
+#'               cond = FIESTA::WYcond, 
+#'               plt = FIESTA::WYplt, 
+#'               puniqueid = "CN", 
+#'               bycond = FALSE, 
+#'               tsumvar = "BA", 
+#'               TPA = TRUE, 
+#'               tdomtot = TRUE, 
+#'               tdomtotnm = "BA_LIVE", 
+#'               tdomprefix = "BA_LIVE", 
+#'               tround = 2, 
+#'               tfilter = "STATUSCD==1")
+#'               
+#' # Sum of Number of Live Trees by Species
+#' datSumTreeDom(tree = FIESTA::WYtree, 
+#'               cond = FIESTA::WYcond, 
+#'               plt = FIESTA::WYplt, 
+#'               puniqueid = "CN", 
+#'               bycond = FALSE, 
+#'               tsumvar = "PLT_CN", 
+#'               TPA = TRUE, 
+#'               tdomtot = TRUE, 
+#'               tdomprefix = "CNT", 
+#'               tround = 0, 
+#'               tfilter = "STATUSCD==1")
+#'               
+#' # Sum of Number of Live Trees by Species, Including Seedlings
+#' datSumTreeDom(cond = WYcond, 
+#'               plt = WYplt, 
+#'               seed = WYseed, 
+#'               puniqueid = "CN", 
+#'               bycond = FALSE, 
+#'               tsumvar = "PLT_CN", 
+#'               TPA = TRUE, 
+#'               tdomtot = TRUE, 
+#'               tdomprefix = "CNT", 
+#'               tround = 0)
 #' @export datSumTreeDom
 datSumTreeDom <- function(tree = NULL, 
                           seed = NULL, 
