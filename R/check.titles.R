@@ -94,7 +94,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
           title.unitsn <- "acres"
         }
       } else if (esttype %in% c("TREE", "RATIO")) {
-        ref_estvar <- FIESTAutils::ref_estvar
+        #ref_estvar <- FIESTAutils::ref_estvar
         if (is.null(title.unitsn)) {
           title.unitsn <- unique(ref_estvar[ref_estvar$ESTVAR == estvarn, "ESTUNITS"])
         }
@@ -155,6 +155,12 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
           }
           ## Get title.yvar
           title.yvar <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, "ESTTITLE1"]
+          filternm <- ref_estvar[ref_estvar$ESTTITLE == title.estvarn, "FILTERNM"][1]
+          if (is.null(title.filter)) {
+            if (!is.null(filternm) && !is.na(filternm) && filternm != "") {
+              title.filter <- filternm
+            }
+          }
           if (!is.null(title.unitsn)) {
             title.yvar <- paste0(title.yvar, ", in ", title.unitsn[1])
           }
@@ -410,7 +416,7 @@ check.titles <- function(dat=NULL, esttype, estseed="none", phototype=NULL, Npts
     outfn.param <- paste(outfn.estpse, "parameters", sep="_")
     titlelst$outfn.param <- outfn.param
   }
-
+ 
   if (rowvar == "TOTAL") {
     titlelst$title.tot <- title.tot
   } else {

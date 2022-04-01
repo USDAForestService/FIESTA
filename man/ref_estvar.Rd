@@ -3,17 +3,14 @@
 \docType{data}
 \name{ref_estvar}
 \alias{ref_estvar}
-\title{Reference table - for generating tables}
+\title{Reference table - for generating estimates}
 \format{
-An object of class \code{data.frame} with 39 rows and 8 columns.
-}
-\source{
-FIA look-up table
+An object of class \code{data.frame} with 30 rows and 9 columns.
 }
 \usage{
 ref_estvar
 }
 \description{
-Reference table - for generating tables
+Reference table - for generating estimates
 }
 \keyword{datasets}
