@@ -338,7 +338,7 @@ modSAarea <- function(SApopdatlst = NULL,
 		checklst=SAmethodlst, caption="SAmethod", multiple=FALSE, stopifnull=TRUE)
 
   if (SApackage == "sae" && SAmethod == "unit") {
-    stop("sae unit-level estimates are not available")
+    stop("sae unit-level estimates are not available\n")
   }
   
   ## Check na.fill 
