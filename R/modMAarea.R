@@ -635,6 +635,9 @@ modMAarea <- function(MApopdat,
                         FIA=FIA, modelselect=modelselect, var_method=var_method)
     unit_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "unitest"))
     preds_grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
+    if (any(unit_grpest$grpvar == "NA#NA")) {
+        unit_grpest <- unit_grpest[unit_grpest$grpvar != "NA#NA", ]
+    }
     unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
   }
 

@@ -719,6 +719,9 @@ modMAtree <- function(MApopdat,
       if (MAmethod %in% c("greg", "gregEN")) {
         predselectlst$grpest <- do.call(rbind, sapply(unit_grpestlst, '[', "predselect"))
       }
+      if (any(unit_grpest$grpvar == "NA#NA")) {
+        unit_grpest <- unit_grpest[unit_grpest$grpvar != "NA#NA", ]
+      }
       unit_grpest[, c(rowvar, colvar) := tstrsplit(grpvar, "#", fixed=TRUE)]
     }
   }
