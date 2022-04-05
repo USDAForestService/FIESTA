@@ -238,6 +238,7 @@ modSAtree <- function(SApopdatlst = NULL,
   set.seed(66)
   esttype="TREE"
   rawdata <- TRUE
+  lt0 <- FALSE
 
   ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   if (nargs() == 0 && is.null(SApopdat)) {
@@ -662,6 +663,11 @@ modSAtree <- function(SApopdatlst = NULL,
       estvarunits <- treedat$estunits
       tdomdat <- treedat$tdomdat
 
+      ## Check if any values of estvar are less than 0
+      if (any(na.omit(tdomdat[[estvar.name]]) < 0)) {
+        lt0 <- TRUE
+      }
+
       if (rowcolinfo$rowvar != "TOTAL") {
         if (!rowcolinfo$row.add0) {
           if (any(is.na(tdomdat[[rowcolinfo$rowvar]]))) {
@@ -1007,6 +1013,11 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
       estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }
+
+  ## Change values that are less than 0 to 0
+  if (!lt0 && any(estdf$nhat < 0)) {
+    estdf[estdf$nhat < 0, "nhat"] <- 0
+  } 
 
   ## Subset multest to estimation output
   dunit_totest <- setDT(estdf)[AOI==1, 
