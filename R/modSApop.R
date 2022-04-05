@@ -519,6 +519,13 @@ modSApop <- function(popType="VOL",
   names(pltassgnx)[pltassgnxcols] <- dfnames
   prednames <- dfnames
   
+  ## Change name of dunitvar to DOMAIN if not already
+  if (dunitvar != "DOMAIN") {
+    setnames(dunitlut, dunitvar, "DOMAIN")
+    setnames(dunitarea, dunitvar, "DOMAIN")
+    setnames(pltassgnx, dunitvar, "DOMAIN")
+    dunitvar <- "DOMAIN"
+  }
 
   ###################################################################################
   ## CALCULATE ADJUSTMENT FACTORS FOR NONSAMPLED CONDITIONS
