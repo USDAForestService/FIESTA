@@ -1,5 +1,6 @@
 check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
-	areaunits="acres", removeunits=TRUE, removetext="unitarea", gui=FALSE) {
+	areaunits="acres", removeunits=TRUE, removetext="unitarea", gui=FALSE,
+	vars2keep=NULL) {
 
   ## DESCRIPTION: Checks unitarea
   ## Check acres by estimation unit
@@ -141,9 +142,15 @@ check.unitarea <- function(unitarea, pltx, unitvars, areavar="ACRES",
     unitarea <- check.matchval(unitarea, pltx, unitvars,
 		tab1txt=removetext, tab2txt="plt", subsetrows=removeunits)
 
-    ## Sum area by unitvars
-    unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), by=unitvars,
-		.SDcols=areavar]
+    if (!is.null(vars2keep) && all(vars2keep %in% names(unitarea))) {
+      ## Sum area by unitvars
+      unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), 
+           by=c(unitvars, vars2keep), .SDcols=areavar]
+    } else {
+      ## Sum area by unitvars
+      unitarea <- unitarea[, lapply(.SD, sum, na.rm=TRUE), 
+           by=unitvars, .SDcols=areavar]
+    }
     setkeyv(unitarea, unitvars)
   }
 

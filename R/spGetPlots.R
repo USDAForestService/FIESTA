@@ -409,7 +409,7 @@ spGetPlots <- function(bnd = NULL,
         countyfips <- xydat$countyfips
         stbnd.att <- xydat$stbnd.att
         bndx <- xydat$bndx
-
+ 
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 	            checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
@@ -418,7 +418,7 @@ spGetPlots <- function(bnd = NULL,
           message("no xyjoinid defined... using the defined uniqueid: ", xy.uniqueid)
           xyjoinid <- xy.uniqueid
         } 
-
+ 
         stcds <- pcheck.states(states, statereturn="VALUE")
         if (is.null(spxy) || nrow(spxy) == 0) {
           stop("spxy is null")
@@ -648,7 +648,6 @@ spGetPlots <- function(bnd = NULL,
     pltx <- tabs$tab1
     pltids <- tabs$tab2
      
-
     ## Subset plot data
     pltx <- pltx[pltx[[pjoinid]] %in% pltids[[xyjoinid]],]
     if (nrow(pltx) == 0) stop("xyjoinid invalid")

@@ -334,7 +334,7 @@ spGetXY <- function(bnd,
   } else {
     stop("must include bndx or states")
   }
-
+ 
   #############################################################################
   ## If xy is separate file or database, and clipxy=TRUE, import first
   #############################################################################
@@ -388,16 +388,19 @@ spGetXY <- function(bnd,
     }
 
   } else if (xy_datsource == "shp") {
-    sqlatt <- paste("select * from ", basename.NoExt(xy), "limit 0")
+    #sqlatt <- paste("select * from ", basename.NoExt(xy), "limit 0")
+
     if (!is.na(getext(xy)) && getext(xy) == "shp" && 
 		"STATECD" %in% names(st_read(xy, query=sqlatt, quiet=TRUE))) {
-      where <- getfilter("STATECD", stcds, syntax="sql")
-      sql <- paste("select * from", basename.NoExt(xy), "where", where)
-      spxy <- pcheck.spatial(xy, sql=sql)
+      #where <- getfilter("STATECD", stcds, syntax="sql")
+      #sql <- paste("select * from", basename.NoExt(xy), "where", where)
+      #spxy <- pcheck.spatial(xy, sql=sql)
+      spxy <- pcheck.spatial(xy)
+      spxy <- spxy[spxy$STATECD %in% stcds, ]
+
     } else {
       spxy <- pcheck.spatial(xy)
     }
-
   } else {			## xy_datsource in('datamart', 'sqlite')
     if (xy_datsource == "datamart") {
       spxy <- DBgetXY(states=stcds, 

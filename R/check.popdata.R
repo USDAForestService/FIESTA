@@ -779,16 +779,21 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     unitvars <- unitvar
     #areavar <- NULL
   }
-
+ 
   ###################################################################################
   ## CHECK unitarea BY ESTIMATION UNIT
   ## Returns: data table with unitvar and area by estimation unit (unitvar)
   ##	 and areavar (default="ACRES")
   ###################################################################################
+  vars2keep <- NULL
+  if (module == "SA" && "AOI" %in% names(unitarea)) {
+    vars2keep <- "AOI"
+  }
   removeunits <- ifelse(unit.action == "remove", TRUE, FALSE)
   unitdat <- check.unitarea(unitarea=unitarea, pltx=pltcondx,
 	unitvars=c(unitvar, unitvar2), areavar=areavar, areaunits=areaunits,
-	removeunits=removeunits, removetext=removetext, gui=gui)
+	removeunits=removeunits, removetext=removetext, gui=gui,
+	vars2keep=vars2keep)
   unitarea <- unitdat$unitarea
   areavar <- unitdat$areavar
   areaunits <- unitdat$areaunits
