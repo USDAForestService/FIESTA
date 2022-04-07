@@ -106,6 +106,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     ## Aggregate strata by estimation unit to make sure no duplicate values exist
     sumvars <- c(getwtvar, strwtvar, npixelvar)
     sumvars <- unique(sumvars[sumvars %in% names(auxlut)])
+    auxlut[, (sumvars) := lapply(.SD, as.numeric), .SDcols=sumvars]
     if (length(sumvars) > 0) {
       auxlut <- auxlut[, lapply(.SD, sum, na.rm=TRUE),
 				by=c(unitvars, strvars), .SDcols=sumvars]

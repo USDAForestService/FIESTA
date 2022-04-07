@@ -124,7 +124,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       message("smallbnd intersects more than 1 maxbnd")
 
       if (multiSAdoms) {
-        mbndlst <- c(maxbnd.gtthres, maxbnd.ltthres)
+        mbndlst <- maxbnd.gtthres
         mbndlst <- as.list(mbndlst[mbndlst %in% unique(maxbnd_max[[maxbnd.unique]])])
 
         ## Create list of new smallbnd(s)
@@ -135,7 +135,25 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
             smallbndx[smallbndx[[smallbnd.unique]] %in% sbnd.att,]
         }, maxbnd_max, smallbndx, smallbnd.unique)
         names(sbndlst) <- mbndlst
+ 
+        ## Appends small areas from maxbnds less than threshold to maxbnds greater 
+        ## than threshold based on closest centroids
+        if (length(maxbnd.ltthres) > 0) {
 
+          for (j in 1:length(maxbnd.ltthres)) {
+            maxbndltd <- maxbndx.intd[maxbndx.intd[[maxbnd.unique]] == maxbnd.ltthres[j],]
+            maxbndlt.centroid <- suppressWarnings(sf::st_centroid(maxbndltd))
+
+            maxbndx.dist <- closest_poly(maxbndlt.centroid,
+			ypoly=maxbndx[maxbndx[[maxbnd.unique]] %in% maxbndxlst,],
+			ypoly.att=maxbnd.unique, returnsf=FALSE)
+            maxbndltnm <- names(maxbndx.dist)[names(maxbndx.dist) %in% maxbnd.gtthres][1]
+
+            sbndlt.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% maxbnd.ltthres[j], smallbnd.unique]
+            sbndlst[[maxbndltnm]] <- rbind(sbndlst[[maxbndltnm]], 
+								smallbndx[smallbndx[[smallbnd.unique]] %in% sbndlt.att,])
+          }
+        }       
       } else {
         message(paste0("smallbnd overlaps greater than ", maxbnd.threshold,
 			"% threshold in more than 1 ", maxbnd.unique, 
