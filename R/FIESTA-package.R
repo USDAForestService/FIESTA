@@ -514,12 +514,13 @@ NULL
 #' Zonal data. Zonal means for auxiliary data in counties in Wyoming.
 #' 
 #' Zonal means and pixel counts for certain auxiliary data in counties in
-#' Wyoming. Includes county code variable to distinguish counties. 
+#' Wyoming. Includes county code variable to distinguish counties, and state
+#' code variable to distinguish states. 
 #' 
 #' 
 #' @name WYunitzonal
 #' @docType data
-#' @format A dataframe with 7 columns and 23 rows.
+#' @format A dataframe with 9 columns and 23 rows.
 #' @keywords datasets
 NULL
 
