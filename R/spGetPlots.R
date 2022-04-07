@@ -1126,6 +1126,7 @@ spGetPlots <- function(bnd = NULL,
         seed_layer <- seedchk
       }
     }
+ 
     if (isveg) {
       vsubpsppchk <- chkdbtab(tablst, vsubpspp_layer)
       if (is.null(vsubpsppchk) && vsubpspp_layer == "vsubpspp") {
@@ -1182,21 +1183,6 @@ spGetPlots <- function(bnd = NULL,
     ## Get fields in plot table
     pltfields <- DBI::dbListFields(dbconn, "plot")
 
-    ## Check pjoinid
-    pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-		checklst=pltfields, gui=gui, caption="Joinid in plot?")
-
-    if (is.null(pjoinid)) {
-      if (xyjoinid %in% pltfields) {
-        pjoinid  <- xyjoinid
-      } else {
-        if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
-          pjoinid <- "CN"
-        } else {
-          stop(xyjoinid, " not in plt")
-        }
-      }
-    }
 
     for (i in 1:length(stcds)) { 
       stcd <- stcds[i]
@@ -1274,6 +1260,23 @@ spGetPlots <- function(bnd = NULL,
           		formatC(plt$PLOT, width=5, digits=5, flag=0))] 
         }
       }
+
+      ## Check pjoinid
+      pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
+		checklst=c(pltfields, "PLOT_ID"), gui=gui, caption="Joinid in plot?")
+
+      if (is.null(pjoinid)) {
+        if (xyjoinid %in% c(pltfields, "PLOT_ID")) {
+          pjoinid  <- xyjoinid
+        } else {
+          if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
+            pjoinid <- "CN"
+          } else {
+            stop(xyjoinid, " not in plt")
+          }
+        }
+      }
+
       ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
       if (nrow(plt) > length(unique(plt[[pjoinid]]))) {
         if ("INVYR" %in% names(plt)) {
@@ -1283,7 +1286,7 @@ spGetPlots <- function(bnd = NULL,
         }
         plt <- plt[, head(.SD, 1), by=pjoinid]
       }
-
+ 
       ## Get most current plots in database for measEndyr.filter & !measEndyr.filter
       #######################################################################
       p2fromqry <- pfromqry
@@ -1591,6 +1594,9 @@ spGetPlots <- function(bnd = NULL,
 
         if (nrow(pltids) > 0) {
           plt <- plt[plt[[pjoinid]] %in% pltids[[xyjoinid]], ]
+          if (nrow(pltids) > nrow(plt)) {
+            message("number of plots in database is less than XY plots: ", nrow(pltids) - nrow(plt))
+          }
           xyids <- plt[[puniqueid]]
 
 #          cond.qry <- paste0("select distinct cond.* from ", p2fromqry, 
@@ -1626,9 +1632,10 @@ spGetPlots <- function(bnd = NULL,
             tree <- tree[tree[[tuniqueid]] %in% xyids, ]
             DBI::dbClearResult(rs)
           }
+
           if (isseed) {
             seed.qry <- paste0("select distinct seed.* from ", p2fromqry, 
-                               " join ", seed_layer, 
+                               " join ", seed_layer, " seed",  
                                " on(seed.PLT_CN = p.CN) where ", stfilter, 
                                " and p.", puniqueid, 
                                " in(", addcommas(xyids, quotes=TRUE), ")")

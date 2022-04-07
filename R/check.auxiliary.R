@@ -178,6 +178,20 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     auxnmlst <- names(auxlut)
     missvars <- {}
 
+    if (is.null(auxlut)) {
+      auxlut <- unique(pltx[, c(unitvar2, unitvar), with=FALSE])
+    } else {
+      if (any(grepl("ONEUNIT", unitvars))) {
+        unittest <- unitvars[any(grepl("ONEUNIT", unitvars))]
+        if (length(unittest) > 1) {
+            stop("more than one ONEUNIT variable")
+        }
+        if (!unittest %in% names(auxlut)) {
+            auxlut[, (unittest) := 1]
+        }
+      }
+    }
+
     ## Check predictors
     ############################################################################
     if (length(c(strvar, predfac)) > 0) {
