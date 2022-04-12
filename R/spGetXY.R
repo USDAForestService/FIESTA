@@ -391,7 +391,7 @@ spGetXY <- function(bnd,
     #sqlatt <- paste("select * from ", basename.NoExt(xy), "limit 0")
 
     if (!is.na(getext(xy)) && getext(xy) == "shp" && 
-		"STATECD" %in% names(st_read(xy, query=sqlatt, quiet=TRUE))) {
+		"STATECD" %in% names(st_read(xy, quiet=TRUE))) {
       #where <- getfilter("STATECD", stcds, syntax="sql")
       #sql <- paste("select * from", basename.NoExt(xy), "where", where)
       #spxy <- pcheck.spatial(xy, sql=sql)
