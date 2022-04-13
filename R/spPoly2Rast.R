@@ -47,12 +47,13 @@
 #' WYbhdistfn <- system.file("extdata",
 #'                           "sp_data/WYbighorn_districtbnd.shp", 
 #'                           package = "FIESTA")
-#' WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
-#' WYbhdist
 #' 
-#' # Turn polygon into raster                     
+#' # Turn polygon into raster
+#' # Note: raster values must be numeric, therefore names were changed to
+#' # numeric codes based on lookup table produced from the following code.                      
 #' new_rast <- spPoly2Rast(polyv = WYbhdistfn,
-#'                     polyv.att = "DISTRICTNA")
+#'                         polyv.att = "DISTRICTNA",
+#'                         outfolder = tempdir())
 #'                     
 #' # Plot result with raster package                     
 #' raster::plot(raster::raster(new_rast$rastfn))
