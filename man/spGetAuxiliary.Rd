@@ -214,6 +214,32 @@ specified.  Be aware, providing inaccurate or incomplete CRS information may
 lead to erroneous data shifts when reprojecting. See spTransform help
 documentation for more details.
 }
+\examples{
+# Get layers from FIESTA external data
+## dem (continuous)
+demfn <- system.file("extdata",
+                     "sp_data/WYbighorn_dem_250m.img",
+                     package = "FIESTA")
+  
+## tnt (categorical)                      
+tntfn <- system.file("extdata",
+                     "sp_data/WYbighorn_forest_nonforest_250m.tif",
+                     package = "FIESTA")
+
+## unit layer
+WYbhdistfn <- system.file("extdata",
+                          "sp_data/WYbighorn_districtbnd.shp", 
+                          package = "FIESTA")
+# Get Auxiliary data                            
+spGetAuxiliary(xyplt = FIESTA::WYplt,
+               uniqueid = "CN",
+               unit_layer = WYbhdistfn,
+               unitvar = "DISTRICTNA",
+               rastlst.cont = demfn,
+               rastlst.cat = tntfn,
+               spMakeSpatial_opts = list(xvar = "LON_PUBLIC",
+                                         yvar = "LAT_PUBLIC"))
+}
 \author{
 Tracey S. Frescino
 }
