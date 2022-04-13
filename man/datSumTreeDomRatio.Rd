@@ -57,6 +57,23 @@ If savedata=TRUE, the data table will be saved to the outfolder: \cr
 \description{
 Generates ratio of tree domain summaries from FIESTA::datSumTreedom().
 }
+\examples{
+# Ratio of live and dead basal area
+# Live basal area
+live <- datSumTreeDom(tree = FIESTA::WYtree, 
+                      tuniqueid = "PLT_CN", 
+                      tsumvar = "BA", 
+                      tfilter = "STATUSCD==1")
+                      
+# Dead basal area                       
+dead <- datSumTreeDom(tree = FIESTA::WYtree, 
+                      tuniqueid = "PLT_CN", 
+                      tsumvar = "BA", 
+                      tfilter = "STATUSCD == 2 & STANDING_DEAD_CD == 1")
+                      
+datSumTreeDomRatio(ndat = dead$tdomdat,
+                   ddat = live$tdomdat)             
+}
 \author{
 Tracey S. Frescino
 }
