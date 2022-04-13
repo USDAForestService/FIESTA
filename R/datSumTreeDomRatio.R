@@ -179,10 +179,14 @@ datSumTreeDomRatio = function(ndat,
   datx = merge(ndatx[, c(uniqueid, nvars), with=FALSE], 
 			ddatx[, c(uniqueid, dvars), with=FALSE], by=uniqueid)
 
-
+  nmiss <- sub("r", "n", rvars)[!sub("r", "n", rvars) %in% nvars]
+  dmiss <- sub("r", "d", rvars)[!sub("r", "d", rvars) %in% dvars]
+  datx[, c(nmiss, dmiss) := 0]
+  
   ## Use data.table Map function to divide all nvars by dvars, including differences
-  datx[, (rvars) := Map( "/", mget(nvars), mget(dvars))]
-
+  datx[, (rvars) := Map( "/", mget(sub("r", "n", rvars)), mget(sub("r", "d", rvars)))]
+  
+  
   ## Change NA values to 0. Note, division by 0 results in Inf values
   datx <- DT_NAto0(datx, rvars, changeto=0)
   datx <- datx[, c(uniqueid, rvars), with=FALSE]
