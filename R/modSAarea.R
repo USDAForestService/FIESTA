@@ -149,21 +149,18 @@
 #' # Fit a unit level EBLUP with `JoSAE`
 #' modSAarea(SApopdatlst = SApopdat,
 #'           SApackage = "JoSAE",
-#'           SAmethod = "unit",
-#'           multest = FALSE) 
+#'           SAmethod = "unit") 
 #'           
 #' # Fit an area level Fay-Herriot hierarchical Bayesian model with `hbsae`
 #' modSAarea(SApopdatlst = SApopdat,
 #'           SApackage = "hbsae",
-#'           SAmethod = "area",
-#'           multest = FALSE) 
+#'           SAmethod = "area") 
 #'
 #' # Fit an area level Fay-Herriot EBLUP with `sae`, while using Elastic Net
 #' # variable selection
 #' modSAarea(SApopdatlst = SApopdat,
 #'           SApackage = "sae",
 #'           SAmethod = "area",
-#'           multest = FALSE,
 #'           modelselect = TRUE) 
 #' @export modSAarea
 modSAarea <- function(SApopdatlst = NULL, 

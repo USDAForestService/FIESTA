@@ -164,8 +164,7 @@
 #'           SAmethod = "unit",           
 #'           landarea = "FOREST",      
 #'           estvar = "VOLCFNET",         
-#'           estvar.filter = "STATUSCD == 1",
-#'           multest = FALSE)   
+#'           estvar.filter = "STATUSCD == 1")   
 #'           
 #' # Use a unit level EBLUP to estimate basal area of live trees (at least 5
 #' # inches diameter) 
