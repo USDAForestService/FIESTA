@@ -201,6 +201,65 @@
 #' inventory.  Res. Pap. RMRS-RP-92. Fort Collins, CO: U.S. Department of
 #' Agriculture, Forest Service, Rocky Mountain Research Station. 14 p.
 #' @keywords data
+#' @examples 
+#' # Load necessary data from FIESTA
+#' ## Point data
+#' icepntfn <- system.file("extdata",
+#'                         "PB_data/icepnt_utco1135.csv",
+#'                          package = "FIESTA")
+#' icepnt <- read.csv(icepntfn)
+#' 
+#' ## Plot data
+#' icepltfn <- system.file("extdata",
+#'                         "PB_data/icepltassgn_utco1135.csv",
+#'                          package = "FIESTA")
+#' iceplt <- read.csv(icepltfn)
+#' 
+#' ## County data
+#' unitareafn <- system.file("extdata", 
+#'                           "PB_data/unitarea_utco1135.csv",
+#'                            package = "FIESTA")
+#' unitarea <- read.csv(unitareafn)
+#' 
+#' ## ICE Cover
+#' icecoverfn <- system.file("extdata",
+#'                           "PB_data/cover_LUT.csv",
+#'                            package = "FIESTA")
+#' icecover <- read.csv(icecoverfn)
+#' names(icecover) <- sub("cover", "cover_1", names(icecover))
+#' 
+#' # Set up population data (see ?modPBpop() for more information)
+#' PBpopunit <- modPBpop(pnt = icepnt, 
+#'                       pltassgn = iceplt, 
+#'                       pltassgnid = "plot_id", 
+#'                       pntid = "dot_cnt",
+#'                       unitarea = unitarea, 
+#'                       unitvar = "ESTN_UNIT")
+#' # Photo-based estimation with point-level data by estimation unit (county)                       
+#' ## Without summing units
+#' cover1.unit.area <- modPB(
+#'   PBpopdat = PBpopunit,
+#'   tabtype = "AREA",
+#'   rowvar = "cover_1",
+#'   nonsamp.pntfilter = "cover_1 != 999",
+#'   table_opts = list(rowlut = icecover),
+#'   title_opts = list(title.rowvar = "Land Cover (2011)")
+#' ) 
+#' 
+#' cover1.unit.area$est
+#'                           
+#' ## With summing units
+#' cover1.unit.area.sum <- modPB(
+#'   PBpopdat = PBpopunit,
+#'   tabtype = "AREA",
+#'   rowvar = "cover_1",
+#'   nonsamp.pntfilter = "cover_1 != 999",
+#'   sumunits = TRUE,
+#'   table_opts = list(rowlut = icecover),
+#'   title_opts = list(title.rowvar = "Land Cover (2011)")
+#' )
+#' 
+#' cover1.unit.area.sum$est             
 #' @export modPB
 modPB <- function(PBpopdat = NULL, 
                   tabtype = "PCT", 

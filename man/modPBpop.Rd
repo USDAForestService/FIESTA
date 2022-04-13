@@ -240,6 +240,44 @@ continuing until the number of plots equals 10. If there are no strata
 classes following in order, it is combined with the estimation unit previous
 in order.
 }
+\examples{
+# Load necessary data from FIESTA
+## Point data
+icepntfn <- system.file("extdata",
+                        "PB_data/icepnt_utco1135.csv",
+                         package = "FIESTA")
+icepnt <- read.csv(icepntfn)
+
+## Plot data
+icepltfn <- system.file("extdata",
+                        "PB_data/icepltassgn_utco1135.csv",
+                         package = "FIESTA")
+iceplt <- read.csv(icepltfn)
+
+# Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake
+# Counties, UT
+PBpopdat <- modPBpop(pnt = icepnt, 
+                     pltassgn = iceplt,
+                     pltassgnid = "plot_id",
+                     pntid = "dot_cnt")
+
+str(PBpopdat, max.level = 1)
+
+# We can also create population data for estimates by estimation unit
+## Read in data for multiple estimation units
+unitareafn <- system.file("extdata", 
+                          "PB_data/unitarea_utco1135.csv",
+                           package = "FIESTA")
+unitarea <- read.csv(unitareafn)
+
+## Run modPBpop
+PBpopunit <- modPBpop(pnt = icepnt, 
+                      pltassgn = iceplt, 
+                      pltassgnid = "plot_id", 
+                      pntid = "dot_cnt",
+                      unitarea = unitarea, 
+                      unitvar = "ESTN_UNIT")
+}
 \references{
 Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;
 Smith, William D.; Westfall, James A.; Hansen, Mark H.; Moisen, Gretchen G.

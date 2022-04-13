@@ -182,6 +182,43 @@
 #' NC: U.S. Department of Agriculture, Forest Service, Southern Research
 #' Station, p.53-77.
 #' @keywords data
+#' @examples 
+#' # Load necessary data from FIESTA
+#' ## Point data
+#' icepntfn <- system.file("extdata",
+#'                         "PB_data/icepnt_utco1135.csv",
+#'                          package = "FIESTA")
+#' icepnt <- read.csv(icepntfn)
+#' 
+#' ## Plot data
+#' icepltfn <- system.file("extdata",
+#'                         "PB_data/icepltassgn_utco1135.csv",
+#'                          package = "FIESTA")
+#' iceplt <- read.csv(icepltfn)
+#' 
+#' # Percent land cover at Time 1 (2011) for all land in Davis and Salt Lake
+#' # Counties, UT
+#' PBpopdat <- modPBpop(pnt = icepnt, 
+#'                      pltassgn = iceplt,
+#'                      pltassgnid = "plot_id",
+#'                      pntid = "dot_cnt")
+#' 
+#' str(PBpopdat, max.level = 1)
+#' 
+#' # We can also create population data for estimates by estimation unit
+#' ## Read in data for multiple estimation units
+#' unitareafn <- system.file("extdata", 
+#'                           "PB_data/unitarea_utco1135.csv",
+#'                            package = "FIESTA")
+#' unitarea <- read.csv(unitareafn)
+#' 
+#' ## Run modPBpop
+#' PBpopunit <- modPBpop(pnt = icepnt, 
+#'                       pltassgn = iceplt, 
+#'                       pltassgnid = "plot_id", 
+#'                       pntid = "dot_cnt",
+#'                       unitarea = unitarea, 
+#'                       unitvar = "ESTN_UNIT")
 #' @export modPBpop
 modPBpop <- function(pntdat = NULL, 
                      pltpct = NULL, 
