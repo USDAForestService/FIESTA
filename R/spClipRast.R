@@ -244,8 +244,9 @@ spClipRast <- function(rast,
   compress <- pcheck.varchar(var2check=compress, 
                              varnm="compress", gui=gui,
                              checklst=compresslst, caption="Compress output?")
-  co <- paste0("COMPRESS=", compress)
-  
+  if (!is.null(compress)) {
+    co <- paste0("COMPRESS=", compress)
+  }  
   
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
