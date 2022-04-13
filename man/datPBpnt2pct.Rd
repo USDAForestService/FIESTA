@@ -23,6 +23,20 @@ with transposed data.}
 \description{
 Calculates percent point by plot and domain and transpose to plot level.
 }
+\examples{
+# Load necessary data from FIESTA
+## Point data
+icepntfn <- system.file("extdata",
+                        "PB_data/icepnt_utco1135.csv",
+                         package = "FIESTA")
+icepnt <- read.csv(icepntfn)
+
+# Convert to percent
+percent <- datPBpnt2pct(pnt = icepnt,
+                        uniqueid = "plot_id",
+                        tvar = "cover_1")
+head(percent)
+}
 \author{
 Tracey S. Frescino
 }

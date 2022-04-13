@@ -14,6 +14,19 @@
 #' \item{pltdom.pct}{ Data frame with transposed data. }
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Load necessary data from FIESTA
+#' ## Point data
+#' icepntfn <- system.file("extdata",
+#'                         "PB_data/icepnt_utco1135.csv",
+#'                          package = "FIESTA")
+#' icepnt <- read.csv(icepntfn)
+#' 
+#' # Convert to percent
+#' percent <- datPBpnt2pct(pnt = icepnt,
+#'                         uniqueid = "plot_id",
+#'                         tvar = "cover_1")
+#' head(percent)
 #' @export datPBpnt2pct
 datPBpnt2pct <- function(pnt, uniqueid, tvar, othervars=NULL) {
   ## DESCRIPTION: calculates percent of points by tvar and plot and 
@@ -85,5 +98,6 @@ datPBpnt2pct <- function(pnt, uniqueid, tvar, othervars=NULL) {
     pltdom.pct <- tpltdom
   }
   
-  return(setDF(pltdom.pct))
+  setDF(pltdom.pct)
+  return(pltdom.pct)
 }
