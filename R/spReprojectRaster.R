@@ -86,6 +86,28 @@
 #' reprojecting. See spTransform help documentation for more details.
 #' @author Tracey S. Frescino, Chris Toney
 #' @keywords spatial
+#' @examples 
+#' # Get raster layers from FIESTA external data
+#' demfn <- system.file("extdata",
+#'                      "sp_data/WYbighorn_dem_250m.img",
+#'                      package = "FIESTA")
+#' 
+#' # Plot original projection
+#' raster::plot(raster::raster(demfn))
+#' 
+#' # Check original projection
+#' sf::st_crs(raster::raster(demfn))$proj4string
+#' 
+#' # Reproject raster
+#' reprojected <- spReprojectRaster(rastfn = demfn,
+#'                                  crs.new = "EPSG:32613",
+#'                                  outfolder = tempdir())
+#'                                  
+#' # Plot new projection
+#' raster::plot(raster::raster(reprojected))
+#' 
+#' # Check new projection
+#' sf::st_crs(raster::raster(reprojected))$proj4string
 #' @export spReprojectRaster
 spReprojectRaster <- function(rastfn, 
                               bands = NULL, 
