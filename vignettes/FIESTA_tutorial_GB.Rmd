@@ -57,7 +57,7 @@ The Green-Book estimators can be used with FIA's standard state-level population
 
 *Example FIA plot data from FIADB*
 
-The examples use FIA plot data from FIA Evalution 561301, including three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018, and stored as internal data objects in `FIESTA`. 
+The examples use FIA plot data from FIA Evaluation 561301, including three inventory years of field measurements in the state of Wyoming, from FIADB_1.7.2.00, last updated June 20, 2018, downloaded on June 25, 2018, and stored as internal data objects in `FIESTA`. 
 
 
 
