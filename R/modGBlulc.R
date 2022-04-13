@@ -229,7 +229,6 @@
 #' sumunits = TRUE            
 #' )
 #' str(forest_area_by_forest_type, max.level = 1)
-#' @export modGBlulc
 modGBlulc <- function(GBpopdat, 
                       landarea = "ALL", 
                       pcfilter = NULL, 
