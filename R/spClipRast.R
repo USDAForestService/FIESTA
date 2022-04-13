@@ -75,7 +75,7 @@
 #' demfn <- system.file("extdata",
 #'                      "sp_data/WYbighorn_dem_250m.img",
 #'                      package = "FIESTA")
-#' sp::plot(raster::raster(demfn))
+#' raster::plot(raster::raster(demfn))
 #' 
 #' # Clip raster to district = '03'
 #' dem03 <- spClipRast(rast = demfn,
@@ -83,7 +83,7 @@
 #'                     clippolyv.filter = "DISTRICTNU == '03'",
 #'                     overwrite = TRUE,
 #'                     outfolder = tempdir())
-#' sp::plot(raster::raster(dem03))
+#' raster::plot(raster::raster(dem03))
 #' 
 #' # Clip raster to district = '06'
 #' dem06 <- spClipRast(rast = demfn,
@@ -93,7 +93,7 @@
 #'                     outfolder = tempdir())
 #' 
 #' # Plot extracted values of national forest district
-#' sp::plot(raster::raster(dem06))
+#' raster::plot(raster::raster(dem06))
 #' @export spClipRast
 
 spClipRast <- function(rast, 

@@ -70,6 +70,21 @@ driver truncates variable names to 10 characters or less. Variable names are
 changed before export using an internal function (trunc10shp). If Spatial
 object has more than 1 record, it will be returned but not exported.
 }
+\examples{
+# Get polygon vector layer from FIESTA external data
+WYbhdistfn <- system.file("extdata",
+                          "sp_data/WYbighorn_districtbnd.shp", 
+                          package = "FIESTA")
+WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
+WYbhdist
+
+# Turn polygon into raster                     
+new_rast <- spPoly2Rast(polyv = WYbhdistfn,
+                    polyv.att = "DISTRICTNA")
+                    
+# Plot result with raster package                     
+raster::plot(raster::raster(new_rast$rastfn))
+}
 \author{
 Tracey S. Frescino
 }

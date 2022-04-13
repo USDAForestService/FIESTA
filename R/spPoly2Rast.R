@@ -42,6 +42,20 @@
 #' object has more than 1 record, it will be returned but not exported.
 #' @author Tracey S. Frescino
 #' @keywords data
+#' @examples 
+#' # Get polygon vector layer from FIESTA external data
+#' WYbhdistfn <- system.file("extdata",
+#'                           "sp_data/WYbighorn_districtbnd.shp", 
+#'                           package = "FIESTA")
+#' WYbhdist <- FIESTA::spImportSpatial(WYbhdistfn)
+#' WYbhdist
+#' 
+#' # Turn polygon into raster                     
+#' new_rast <- spPoly2Rast(polyv = WYbhdistfn,
+#'                     polyv.att = "DISTRICTNA")
+#'                     
+#' # Plot result with raster package                     
+#' raster::plot(raster::raster(new_rast$rastfn))
 #' @export spPoly2Rast
 spPoly2Rast <- function(polyv, 
                         polyv_dsn = NULL, 
