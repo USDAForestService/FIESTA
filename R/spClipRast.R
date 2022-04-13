@@ -93,7 +93,7 @@
 #'                     outfolder = tempdir())
 #' 
 #' # Plot extracted values of national forest district
-#' sp::plot(raster::raster(dem06), add = TRUE)
+#' sp::plot(raster::raster(dem06))
 #' @export spClipRast
 
 spClipRast <- function(rast, 
