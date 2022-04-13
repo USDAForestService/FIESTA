@@ -240,6 +240,7 @@ spClipRast <- function(rast,
   fmt.ext <- drivers[match(fmt, drivers$fmt), "DefaultExt"]
   
   ## Check compression
+  co <- NULL
   compresslst <- c("LZW", "PACKBITS", "DEFLATE")
   compress <- pcheck.varchar(var2check=compress, 
                              varnm="compress", gui=gui,
