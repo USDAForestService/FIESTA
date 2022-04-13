@@ -44,8 +44,7 @@ Imports:
 Suggests: 
     knitr,
     raster,
-    rmarkdown,
-    sp
+    rmarkdown
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
