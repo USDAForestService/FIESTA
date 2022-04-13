@@ -45,9 +45,7 @@ Suggests:
     knitr,
     raster,
     rmarkdown,
-    rJava,
-    sp,
-    xlsx
+    sp
 VignetteBuilder: knitr
 License: file LICENSE
 LazyData: true
