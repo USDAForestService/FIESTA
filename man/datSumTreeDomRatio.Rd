@@ -71,8 +71,8 @@ dead <- datSumTreeDom(tree = FIESTA::WYtree,
                       tsumvar = "BA", 
                       tfilter = "STATUSCD == 2 & STANDING_DEAD_CD == 1")
                       
-datSumTreeDomRatio(ndat = dead$tdomdat,
-                   ddat = live$tdomdat)             
+FIESTA:::datSumTreeDomRatio(ndat = dead$tdomdat,
+                            ddat = live$tdomdat)             
 }
 \author{
 Tracey S. Frescino

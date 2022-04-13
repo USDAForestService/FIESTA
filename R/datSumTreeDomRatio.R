@@ -44,8 +44,8 @@
 #'                       tsumvar = "BA", 
 #'                       tfilter = "STATUSCD == 2 & STANDING_DEAD_CD == 1")
 #'                       
-#' datSumTreeDomRatio(ndat = dead$tdomdat,
-#'                    ddat = live$tdomdat)             
+#' FIESTA:::datSumTreeDomRatio(ndat = dead$tdomdat,
+#'                             ddat = live$tdomdat)             
 datSumTreeDomRatio = function(ndat, 
                               ddat, 
                               uniqueid = "PLT_CN", 
