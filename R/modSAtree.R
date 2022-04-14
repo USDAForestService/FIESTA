@@ -211,6 +211,24 @@ modSAtree <- function(SApopdatlst = NULL,
   ##			within the outfolder names as raw_dsn. 
   ######################################################################################
   
+  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
+  if (nargs() == 0 && is.null(SApopdat)) {
+    gui <- TRUE
+  } 
+
+  ## If gui.. set variables to NULL
+  if (gui) { 
+    tree=landarea <- NULL
+    if (!row.FIAname) row.FIAname <- NULL
+    if (!col.FIAname) col.FIAname <- NULL
+  }
+
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
+	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
+
+
   ## Set options
   options.old <- options()
   options(scipen=8) # bias against scientific notation
@@ -237,24 +255,6 @@ modSAtree <- function(SApopdatlst = NULL,
   set.seed(66)
   esttype="TREE"
   rawdata <- TRUE
-  lt0 <- FALSE
-
-  ## CHECK GUI - IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
-  if (nargs() == 0 && is.null(SApopdat)) {
-    gui <- TRUE
-  } 
-
-  ## If gui.. set variables to NULL
-  if (gui) { 
-    tree=landarea <- NULL
-    if (!row.FIAname) row.FIAname <- NULL
-    if (!col.FIAname) col.FIAname <- NULL
-  }
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
-	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
   
   
   ##################################################################
@@ -662,11 +662,6 @@ modSAtree <- function(SApopdatlst = NULL,
       estvarunits <- treedat$estunits
       tdomdat <- treedat$tdomdat
 
-      ## Check if any values of estvar are less than 0
-      if (any(na.omit(tdomdat[[estvar.name]]) < 0)) {
-        lt0 <- TRUE
-      }
-
       if (rowcolinfo$rowvar != "TOTAL") {
         if (!rowcolinfo$row.add0) {
           if (any(is.na(tdomdat[[rowcolinfo$rowvar]]))) {
@@ -1013,11 +1008,6 @@ modSAtree <- function(SApopdatlst = NULL,
       estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }
 
-  ## Change values that are less than 0 to 0
-  if (!lt0 && any(estdf$nhat < 0)) {
-    estdf[estdf$nhat < 0, "nhat"] <- 0
-  } 
-
   ## Subset multest to estimation output
   dunit_totest <- setDT(estdf)[AOI==1, 
 		unique(c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")), with=FALSE]
@@ -1045,12 +1035,18 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf_row <- setDT(estdf_row)
     estdf_row[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
     estdf_row$estimator <- nhat
+
     if (na.fill != "NONE") {
       estdf_row[is.na(estdf_row$nhat), "estimator"] <- na.fill
       na.fill.se <- paste0(na.fill, ".se")
       estdf_row[is.na(estdf_row$nhat), c("nhat", "nhat.se")] <- 
         estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with=FALSE]
     }
+
+    ## Change values that are less than 0 to 0
+    if (!lt0 && any(!is.na(estdf_row$nhat)) && any(estdf_row$nhat < 0)) {
+      estdf_row[estdf_row$nhat < 0, "nhat"] <- 0
+    } 
 
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 

@@ -210,6 +210,12 @@ modSAarea <- function(SApopdatlst = NULL,
     if (!row.FIAname) row.FIAname <- NULL
     if (!col.FIAname) col.FIAname <- NULL
   }
+
+  ## Set global variables
+  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
+	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
+	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
+
   
   ## Set options
   options.old <- options()
@@ -220,17 +226,6 @@ modSAarea <- function(SApopdatlst = NULL,
   returnSApopdat <- TRUE
   sumunits=FALSE
   SAdomsdf=multestdf_row <- NULL
-  rawdata <- TRUE
-
-  ## Set global variables
-  ONEUNIT=n.total=n.strata=strwt=TOTAL=AOI=rowvar.filter=colvar.filter=
-	title.rowvar=title.colvar=TOTAL=JoSAE=JU.EBLUP=JFH=JoSAE.se=
-	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
-  
-  gui <- FALSE
-  returnlst <- list()
-  set.seed(66)
-  esttype = "AREA"
   
   colvar=NULL
   col.FIAname=FALSE
@@ -243,6 +238,14 @@ modSAarea <- function(SApopdatlst = NULL,
   rowgrpord=NULL 
   showsteps=FALSE
   sumunits=FALSE
+
+  gui <- FALSE
+  returnlst <- list()
+  set.seed(66)
+  esttype = "AREA"
+  rawdata <- TRUE
+  lt0 <- FALSE
+
   
   ##################################################################
   ## CHECK PARAMETER NAMES
@@ -949,14 +952,19 @@ modSAarea <- function(SApopdatlst = NULL,
   ## Set up estimates. If estimate is NULL, use direct estimator
   estdf <- setDT(estdf)
   estdf[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
-
   estdf$estimator <- nhat
+
   if (na.fill != "NONE") {
     estdf[is.na(estdf$nhat), "estimator"] <- na.fill
     na.fill.se <- paste0(na.fill, ".se")
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
             estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }
+
+  ## Change values that are less than 0 to 0
+  if (!lt0 && any(!is.na(estdf$nhat)) && any(estdf$nhat < 0)) {
+    estdf[estdf$nhat < 0, "nhat"] <- 0
+  } 
 
   ## Subset multest to estimation output
   dunit_totest <- estdf[AOI==1, 
@@ -985,6 +993,7 @@ modSAarea <- function(SApopdatlst = NULL,
     estdf_row <- setDT(estdf_row)
     estdf_row[, c("nhat", "nhat.se") := .SD, .SDcols=c(nhat, nhat.se)]
     estdf_row$estimator <- nhat
+
     if (na.fill != "NONE") {
       estdf_row[is.na(estdf_row$nhat), "estimator"] <- na.fill
       na.fill.se <- paste0(na.fill, ".se")
@@ -992,6 +1001,11 @@ modSAarea <- function(SApopdatlst = NULL,
 			  estdf_row[is.na(estdf_row$nhat), c(na.fill, na.fill.se), with=FALSE]
     }
  
+    ## Change values that are less than 0 to 0
+    if (!lt0 && any(!is.na(estdf_row$nhat)) && any(estdf_row$nhat < 0)) {
+      estdf_row[estdf_row$nhat < 0, "nhat"] <- 0
+    } 
+
     ## Subset multest to estimation output
     dunit_rowest <- setDT(estdf_row)[AOI==1, 
 		unique(c("DOMAIN", rowcolinfo$rowvar, "nhat", "nhat.se", "NBRPLT.gt0", "estimator")), with=FALSE]
