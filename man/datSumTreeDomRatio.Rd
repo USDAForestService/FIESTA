@@ -70,9 +70,14 @@ dead <- datSumTreeDom(tree = FIESTA::WYtree,
                       tuniqueid = "PLT_CN", 
                       tsumvar = "BA", 
                       tfilter = "STATUSCD == 2 & STANDING_DEAD_CD == 1")
-                      
-FIESTA:::datSumTreeDomRatio(ndat = dead$tdomdat,
-                            ddat = live$tdomdat)             
+
+# Ratio of dead and live basal area                        
+ratio <- FIESTA:::datSumTreeDomRatio(ndat = dead$tdomdat,
+                                     ddat = live$tdomdat)    
+
+str(ratio, max.level = 1)
+
+head(ratio$rdat)         
 }
 \author{
 Tracey S. Frescino
