@@ -255,6 +255,7 @@ modSAtree <- function(SApopdatlst = NULL,
   set.seed(66)
   esttype="TREE"
   rawdata <- TRUE
+  lt0 <- FALSE
   
   
   ##################################################################
@@ -1007,6 +1008,11 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf[is.na(estdf$nhat), c("nhat", "nhat.se")] <- 
       estdf[is.na(estdf$nhat), c(na.fill, na.fill.se), with=FALSE]
   }
+
+  ## Change values that are less than 0 to 0
+  if (!lt0 && any(!is.na(estdf$nhat)) && any(estdf$nhat < 0)) {
+    estdf[estdf$nhat < 0, "nhat"] <- 0
+  } 
 
   ## Subset multest to estimation output
   dunit_totest <- setDT(estdf)[AOI==1, 
