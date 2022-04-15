@@ -355,17 +355,15 @@ modGBpop <- function(popType = "VOL",
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
   }
   
-  
   ## Set popTables defaults
   popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
   
   for (i in 1:length(popTables_defaults_list)) {
     assign(names(popTables_defaults_list)[[i]], popTables_defaults_list[[i]])
-  }
-  
+  }  
   
   ## Set popTabIDs defaults
-  popTableIDs_defaults_list <- formals(FIESTA::popTableIDs)[-length(formals(FIESTA::popTableIDs))]
+  popTableIDs_defaults_list <- formals(popTableIDs)[-length(formals(popTableIDs))]
   
   for (i in 1:length(popTableIDs_defaults_list)) {
     if (names(popTableIDs_defaults_list)[[i]] == "cond") {

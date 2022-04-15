@@ -337,7 +337,7 @@ spGetStrata <- function(xyplt,
   ##################################################################
   unitarea=stratalut <- NULL
 
-  ## Check unitlayer
+  ## Check unit_layer
   unitlayerx <- pcheck.spatial(layer=unit_layer, dsn=unit_dsn, gui=gui, 
 	caption="Estimation unit layer?")
   nounit <- ifelse (is.null(unitlayerx), TRUE, FALSE)
@@ -403,7 +403,7 @@ spGetStrata <- function(xyplt,
       ## Check unitvar
       unitvar <- pcheck.varchar(var2check=unitvar, varnm="unitvar", gui=gui, 
 		          checklst=names(unitlayerx), caption="Estimation unit variable", 
-		          warn=paste(unitvar, "not in unitlayer"))
+		          warn=paste(unitvar, "not in unit_layer"))
       if (is.null(unitvar)) {
         unitlayerx$ONEUNIT <- 1
         unitvar <- "ONEUNIT"
@@ -418,7 +418,7 @@ spGetStrata <- function(xyplt,
       bbox2 <- sf::st_bbox(unitlayerprj)
       if (showext) {
         check.extents(bbox1, bbox2, showext=showext, 
-			layer1nm="rast", layer2nm="unitlayer", stopifnotin=TRUE)
+			layer1nm="rast", layer2nm="unit_layer", stopifnotin=TRUE)
       }
 
       ## Check vars2keep

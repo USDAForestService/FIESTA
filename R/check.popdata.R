@@ -495,7 +495,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         }
       }
     }
-
+ 
     ## Merge plot data to cond (and lulc to cond)
     #########################################################
     if (!is.null(condx)) {
@@ -593,8 +593,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 #				by.x=cuniqueid, by.y=puniqueid)
         pltcondx <- merge(pltx[, pltcols, with=FALSE], condx,
 				by.x=puniqueid, by.y=cuniqueid)
+
         if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
           setnames(pltcondx, "CN", cuniqueid)
+        }
+        if (!cuniqueid %in% names(pltcondx) && puniqueid %in% names(pltcondx)) {
+          setnames(pltcondx, puniqueid, cuniqueid)
         }
         setkeyv(pltcondx, c(cuniqueid, condid))
 #      }
