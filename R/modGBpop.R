@@ -236,6 +236,8 @@ modGBpop <- function(popType = "VOL",
                      strata = TRUE, 
                      stratalut = NULL, 
                      strvar = "STRATUMCD", 
+                     nonresp = FALSE,
+                     substrvar = NULL,
                      savedata = FALSE,
                      saveobj = FALSE, 
                      objnm = "GBpopdat",
@@ -277,6 +279,8 @@ modGBpop <- function(popType = "VOL",
   nonsamp.pfilter=nonsamp.cfilter <- NULL
   #nonsamp.vfilter.fixed <- FALSE
   returnlst <- list()
+  nonresp <- FALSE
+  substrvar <- NULL
   
   
   ## Set global variables
