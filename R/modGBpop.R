@@ -274,8 +274,7 @@ modGBpop <- function(popType = "VOL",
   options(scipen=8) # bias against scientific notation
   on.exit(options(options.old), add=TRUE) 
   adjtree <- FALSE
-  nonresp=FALSE
-  substrvar=nonsamp.pfilter=nonsamp.cfilter <- NULL
+  nonsamp.pfilter=nonsamp.cfilter <- NULL
   #nonsamp.vfilter.fixed <- FALSE
   returnlst <- list()
   
@@ -565,7 +564,7 @@ modGBpop <- function(popType = "VOL",
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]
     }
   }
-
+ 
   ###################################################################################
   ## CHECK PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -581,7 +580,8 @@ modGBpop <- function(popType = "VOL",
                   nonsamp.vfilter.fixed=nonsamp.vfilter.fixed,
                   unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
                   areaunits=areaunits, unit.action=unit.action, strata=strata, 
-                  stratalut=stratalut, strvar=strvar, stratcombine=stratcombine)
+                  stratalut=stratalut, strvar=strvar, nonresp=nonresp, 
+                  substrvar=substrvar, stratcombine=stratcombine)
 
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
@@ -606,6 +606,7 @@ modGBpop <- function(popType = "VOL",
   strata <- popcheck$strata
   stratalut <- popcheck$stratalut
   strvar <- popcheck$strvar
+  substrvar <- popcheck$substrvar
   nonresp <- popcheck$nonresp
   P2POINTCNT <- popcheck$P2POINTCNT 
   plotsampcnt <- popcheck$plotsampcnt
