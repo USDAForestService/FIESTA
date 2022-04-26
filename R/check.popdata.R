@@ -104,7 +104,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
   ## Check popType
   ########################################################
-  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
 		checklst=evalTyplst, caption="popType", multiple=TRUE, stopifnull=TRUE)
 
@@ -358,6 +358,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       stop("must include vsubpspp and/or vsubpstr tables for popType='P2VEG'")
     }
   }
+  if (popType == "GRM") {
+    pvars2keep <- c(pvars2keep, "REMPER")
+  }
 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
@@ -448,7 +451,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       pltx <- pltassgnx
       puniqueid <- pltassgnid
     }
-
+ 
     ##################################################################################
     ## Filter for population data
     ##################################################################################
@@ -772,6 +775,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       plotsampcnt <- nfplotsampcnt
     }
   }
+
+  ## Remove plots that have not been remeasured
+  if (popType == "GRM") {
+    pltcondx <- pltcondx[!is.na(pltcondx$REMPER), ]
+  }
+
 
   ######################################################################################
   ## Check unitvar - if NULL, add unitvar=ONEUNIT to pltcondx

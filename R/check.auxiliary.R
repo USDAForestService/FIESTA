@@ -57,7 +57,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     auxnmlst <- names(auxlut)
     strvar <- pcheck.varchar(var2check=strvar, varnm="strvar",
 		gui=gui, checklst=c("NONE", names(auxlut)), caption="Strata variable?",
-		warn="strata variable not in auxlut", stopifnull=TRUE)
+		warn="strata variable not in stratalut", stopifnull=TRUE)
 
     ## Check for a total value in the last row of table..  If exists, exclude.
     lastrow <- auxlut[nrow(auxlut),]
@@ -149,7 +149,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
           #message("using strwtvar column for strata weights")
           getwt <- FALSE
         } else {
-          stop("getwtvar not in auxlut")
+          stop("getwtvar not in stratalut")
         }
       }
     }
@@ -458,7 +458,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     } else {
       ## Check for strwt
       if (!strwtvar %in% names(auxlut)) {
-        stop(strwtvar, " not in auxlut... include getwtvar and getwt=TRUE")
+        stop(strwtvar, " not in stratalut... include getwtvar and getwt=TRUE")
       }
       ## Check to see if sum(strwt) = 1
       test <- auxlut[, round(sum(get(strwtvar), na.rm=TRUE)), by=unitvar]

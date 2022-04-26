@@ -193,26 +193,30 @@ spClipRast <- function(rast,
     }
   }
   
-  ## Check NODATA
+#  ## Check NODATA
   if (is.null(NODATA)) {
-    if (!is.null(nodata) && length(unique(nodata)) == 1) {
-      NODATA <- unique(rast.df$NoDataValue)
-    } else {
-      NODATA <- 0
-    } 
-  } else {
-    if (!is.na(NODATA) && NODATA != 0) {
-      if (!is.numeric(NODATA)) {
-        message("invalid NODATA value... using 0")
-        NODATA <- 0
-      }
-      if (rast.dtyp %in% c("INT1U", "INT2U", "INT4U") && NODATA < 0) {
-        message("Cannot have a negative NODATA value for raster of datatype: ", 
-                rast.dtyp, ", using 0")
-        NODATA <- 0
-      }
+    if (!is.null(NODATA) && (!is.numeric(NODATA) || length(NODATA) > 1)) {
+      stop("NODATA must be numeric")
     }
   }
+#    if (!is.null(nodata) && length(unique(nodata)) == 1) {
+#      NODATA <- unique(rast.df$NoDataValue)
+#    } else {
+#      NODATA <- 0
+#    } 
+#  } else {
+#    if (!is.na(NODATA) && NODATA != 0) {
+#      if (!is.numeric(NODATA)) {
+#        message("invalid NODATA value... using 0")
+#        NODATA <- 0
+#      }
+#      if (rast.dtyp %in% c("INT1U", "INT2U", "INT4U") && NODATA < 0) {
+#        message("Cannot have a negative NODATA value for raster of datatype: ", 
+#                rast.dtyp, ", using 0")
+#        NODATA <- 0
+#      }
+#    }
+#  }
   
   ## Check buffdist
   if (!is.null(buffdist)) 
@@ -284,8 +288,8 @@ spClipRast <- function(rast,
   
   ## Clip raster
   clipRaster(src=clippolyvprj, srcfile=rastfn, src_band=bands, dstfile=outfilenm, 
-             fmt=fmt, init=NODATA, maskByPolygons=maskByPolygons, options = co)
-  
-  
+             fmt=fmt, maskByPolygons=maskByPolygons, init=NODATA, dstnodata=NODATA, 
+             options = co)
+   
   return(outfilenm)    
 }
