@@ -140,10 +140,14 @@ spClipPoint <- function(xyplt,
     assign(names(spMakeSpatial_defaults_list)[[i]], spMakeSpatial_defaults_list[[i]])
   }
   
-  ## Set user-supplied savedata values
+  ## Set user-supplied spMakeSpatial values
   if (length(spMakeSpatial_opts) > 0) {
     for (i in 1:length(spMakeSpatial_opts)) {
-      assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
+      if (names(spMakeSpatial_opts)[[i]] %in% names(spMakeSpatial_defaults_list)) {
+        assign(names(spMakeSpatial_opts)[[i]], spMakeSpatial_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(spMakeSpatial_opts)[[i]]))
+      }
     }
   }
   
@@ -156,8 +160,15 @@ spClipPoint <- function(xyplt,
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
-      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
+        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
+      }
     }
   }
   

@@ -314,7 +314,11 @@ modGBpop <- function(popType = "VOL",
   ## Set user-supplied unit values
   if (length(unit_opts) > 0) {
     for (i in 1:length(unit_opts)) {
-      assign(names(unit_opts)[[i]], unit_opts[[i]])
+      if (names(unit_opts)[[i]] %in% names(unit_defaults_list)) {
+        assign(names(unit_opts)[[i]], unit_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(unit_opts)[[i]]))
+      }
     }
   }
   
@@ -328,7 +332,11 @@ modGBpop <- function(popType = "VOL",
   ## Set user-supplied popFilters values
   if (length(popFilter) > 0) {
     for (i in 1:length(popFilter)) {
-      assign(names(popFilter)[[i]], popFilter[[i]])
+      if (names(popFilter)[[i]] %in% names(popFilters_defaults_list)) {
+        assign(names(popFilter)[[i]], popFilter[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(popFilter)[[i]]))
+      }
     }
   }
   
@@ -341,11 +349,15 @@ modGBpop <- function(popType = "VOL",
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
-    if (!savedata && !saveobj) {
+    if (!savedata) {
       message("savedata=FALSE with savedata parameters... no data are saved")
     }
     for (i in 1:length(savedata_opts)) {
-      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
+        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
+      }
     }
   }
   
@@ -399,9 +411,14 @@ modGBpop <- function(popType = "VOL",
   ## Set user-supplied strata values
   if (length(strata_opts) > 0) {
     for (i in 1:length(strata_opts)) {
-      assign(names(strata_opts)[[i]], strata_opts[[i]])
+      if (names(strata_opts)[[i]] %in% names(strata_defaults_list)) {
+        assign(names(strata_opts)[[i]], strata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(strata_opts)[[i]]))
+      }
     }
   }
+  
 
   
   ##################################################################
@@ -543,9 +560,14 @@ modGBpop <- function(popType = "VOL",
   } 
 
   ## Set user-supplied popTable values 
+  popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
   if (length(popTabs) > 0) {
     for (i in 1:length(popTabs)) {
-      assign(names(popTabs)[[i]], popTabs[[i]])
+      if (names(popTabs)[[i]] %in% names(popTables_defaults_list)) {
+        assign(names(popTabs)[[i]], popTabs[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(popTabs)[[i]]))
+      }
     }
   } else {
     stop("need to include popTabs")
@@ -561,6 +583,14 @@ modGBpop <- function(popType = "VOL",
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
 
   ## Set user-supplied popTabIDs values
+  ### Check for invalid parameters first
+  popTableIDs_defaults_list <- formals(popTableIDs)[-length(formals(popTableIDs))]
+  for (i in 1:length(popTabIDs)) {
+    if (!(names(popTabIDs)[[i]] %in% names(popTableIDs_defaults_list))) {
+      stop(paste("Invalid parameter: ", names(popTabIDs)[[i]]))
+    }
+  }
+  ### Then actually set the values
   for (nm in names(popTabs)) {
     if (!any(names(popTabIDs) == nm)) {
       popTabIDs[[nm]] <- popTableIDs_defaults_list[[nm]]

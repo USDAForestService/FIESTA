@@ -96,6 +96,26 @@ spMakeSpatialPoints <- function(xyplt,
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)
   
+  ## Set savedata defaults
+  savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
+  
+  for (i in 1:length(savedata_defaults_list)) {
+    assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied savedata values
+  if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
+    for (i in 1:length(savedata_opts)) {
+      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
+        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
+      }
+    }
+  }
 
   ##################################################################
   ## CHECK INPUT PARAMETERS

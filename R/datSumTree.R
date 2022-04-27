@@ -218,8 +218,15 @@ datSumTree <- function(tree = NULL,
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
-      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
+        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
+      }
     }
   }
   

@@ -299,7 +299,11 @@ modPBpop <- function(pntdat = NULL,
   ## Set user-supplied unit values
   if (length(unit_opts) > 0) {
     for (i in 1:length(unit_opts)) {
-      assign(names(unit_opts)[[i]], unit_opts[[i]])
+      if (names(unit_opts)[[i]] %in% names(unit_defaults_list)) {
+        assign(names(unit_opts)[[i]], unit_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(unit_opts)[[i]]))
+      }
     }
   }
   
@@ -312,8 +316,15 @@ modPBpop <- function(pntdat = NULL,
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
-      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
+        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
+      }
     }
   }
   
@@ -327,7 +338,11 @@ modPBpop <- function(pntdat = NULL,
   ## Set user-supplied strata values
   if (length(strata_opts) > 0) {
     for (i in 1:length(strata_opts)) {
-      assign(names(strata_opts)[[i]], strata_opts[[i]])
+      if (names(strata_opts)[[i]] %in% names(strata_defaults_list)) {
+        assign(names(strata_opts)[[i]], strata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(strata_opts)[[i]]))
+      }
     }
   }
   ##################################################################

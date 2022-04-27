@@ -343,7 +343,11 @@ modPB <- function(PBpopdat = NULL,
   ## Set user-supplied table values
   if (length(table_opts) > 0) {
     for (i in 1:length(table_opts)) {
-      assign(names(table_opts)[[i]], table_opts[[i]])
+      if (names(table_opts)[[i]] %in% names(table_defaults_list)) {
+        assign(names(table_opts)[[i]], table_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(table_opts)[[i]]))
+      }
     }
   }
   
@@ -357,7 +361,11 @@ modPB <- function(PBpopdat = NULL,
   ## Set user-supplied title values
   if (length(title_opts) > 0) {
     for (i in 1:length(title_opts)) {
-      assign(names(title_opts)[[i]], title_opts[[i]])
+      if (names(title_opts)[[i]] %in% names(title_defaults_list)) {
+        assign(names(title_opts)[[i]], title_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(title_opts)[[i]]))
+      }
     }
   }
   
@@ -370,8 +378,15 @@ modPB <- function(PBpopdat = NULL,
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
+    if (!savedata) {
+      message("savedata=FALSE with savedata parameters... no data are saved")
+    }
     for (i in 1:length(savedata_opts)) {
-      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
+        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
+      }
     }
   }
   
