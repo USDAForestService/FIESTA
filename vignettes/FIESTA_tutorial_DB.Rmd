@@ -54,18 +54,18 @@ Set up for examples
 library(FIESTA)
 
 ## If not on windows platform, set up an outfolder to output from examples
-if (.Platform$OS.type == "windows") {
-  # Set workspace to FIESTA folder (create if doesn't exist)
-  if (!file.exists("C:/FIESTA"))  {
-    dir.create("C:/FIESTA")
-  }
-  setwd("C:/FIESTA")
-
-  if (!file.exists("outfolder")) {
-    dir.create("outfolder")
-  }
-  outfolder <- "outfolder"
-}
+# if (.Platform$OS.type == "windows") {
+#   # Set workspace to FIESTA folder (create if doesn't exist)
+#   if (!file.exists("C:/FIESTA"))  {
+#     dir.create("C:/FIESTA")
+#   }
+#   setwd("C:/FIESTA")
+# 
+#   if (!file.exists("outfolder")) {
+#     dir.create("outfolder")
+#   }
+#   outfolder <- "outfolder"
+# }
 
 
 
