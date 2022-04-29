@@ -390,7 +390,7 @@ modSAtree <- function(SApopdatlst = NULL,
       SApopdatlst <- list(SApopdatlst)
     }  
 
-    if (class(SApopdatlst) == "list") {
+    if (inherits(SApopdatlst, "list")) {
       list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
 		"prednames", "plotsampcnt", "condsampcnt")
