@@ -2,7 +2,7 @@
 % Please edit documentation in R/modSApop.R
 \name{modSApop}
 \alias{modSApop}
-\title{Small-Area module - Compile population data for SA module.}
+\title{Small area module - Compile population data for SA module.}
 \usage{
 modSApop(
   popType = "VOL",

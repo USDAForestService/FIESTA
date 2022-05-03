@@ -1,4 +1,4 @@
-#' Small-Area module - Compile population data for SA module.
+#' Small area module - Compile population data for SA module.
 #' 
 #' Compile population data for input to the modSA* modules.
 #' 
