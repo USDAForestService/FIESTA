@@ -1,0 +1,12 @@
+---
+title: "FIESTA - Database Tools"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FIESTA - Database Tools}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+## FIA DataMart is currently unavailable: Database (DB) tools may not work as expected
+
+FIA DataMart is currently experiencing technical difficulties, and thus the functions in `FIESTA`'s database (DB) tools that access DataMart will not work as expected. Once DataMart has been fixed, we will update information in this vignette for using the DB tools. Thank you for your patience. 
