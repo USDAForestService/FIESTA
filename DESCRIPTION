@@ -1,6 +1,6 @@
 Package: FIESTA
 Type: Package
-Title: Forest Inventory ESTimation and Analysis
+Title: Forest Inventory Estimation and Analysis
 Version: 3.3.00
 Date: 2022-01-21
 Authors@R:
@@ -14,8 +14,7 @@ Authors@R:
              email = "gretchen.g.moisen@usda.gov"),
       person(given = "Paul",
              family = "Patterson",
-             role = "aut",
-             email = ""),
+             role = "aut"),
       person(given = "Chris",
              family = "Toney",
              role = "aut",
