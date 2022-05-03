@@ -7,35 +7,23 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+## Data base (DB) module overview
 
-## FIESTA Overview
-The R package, FIESTA (Forest Inventory ESTimation and Analysis) is a research estimation tool for analysts that work with sample-based inventory data such as that from the U.S. Department of Agriculture, Forest Service, Forest Inventory and Analysis (FIA) Program. FIESTA was designed to accommodate: unique population boundaries, different evaluation time periods, customized stratification schemes, non-standard variance equations, integration of multi-scale remotely-sensed data and other auxiliary information, and interaction with other modeling and estimation tools from CRAN R's library of packages. FIESTA contains a collection of functions that can access FIA databases, summarize and compile plot and spatial data, and generate estimates with associated sampling errors. 
-
-
-Functions are organized by type or objective and are named with a corresponding prefix: 
-
-* Database tools (DB) - functions for querying and extracting data from FIA's national database.
-
-* Data tools (dat) - functions for summarizing and exploring FIA data.
-
-* Spatial tools (sp) - functions for manipulating and summarizing spatial data.
-
-* Estimation modules (GB, PB, SA) - functions for different estimation strategies, such as FIA's standard 'Green-Book' estimators (GB); suplementary photo-based estimators (PB); integration with different available small area estimators (SAE) or other model-assisted or model-based estimation tools, such as LASSO.
-
-* Analysis tools (an) - wrapper functions for stream-lining estimation processes.
+`FIESTA`'s Green-Book (GB) module extracts data from FIA's online publicly-available, comma-delimited files (\*.csv or \*.zip). FIA's CSV files are available by state from the FIA DataMart at the following link: https://apps.fs.usda.gov/fia/datamart/datamart.html. Because of FIA's confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA's sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA's Spatial Data Services (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
 
 
+## Objective of tutorial
 
-FIESTA's DB tools extract data from FIA's online publicly-available, comma-delimited files (\*.csv or \*.zip). FIA's CSV files are available by state from the FIA DataMart at the following link: https://apps.fs.usda.gov/fia/datamart/datamart.html. Because of FIA's confidentiality agreement to protect the privacy of landowners, as well as protecting the scientific integrity of FIA's sample design, the exact coordinates of the sample plot locations are not included in the public data. If the exact coordinates are necessary for your analysis, contact FIA's Spatial Data Services (https://www.fia.fs.fed.us/tools-data/spatial/index.php).
-
-
-### Objective of tutorial
-The objective of this tutorial is to demonstrate the use of FIESTA's DB tools for accessing FIA data. These tools extract data from FIA Datamart using FIA's standard evaluations as well as customized evaluations (DBgetPlots and DBgetStrata). 
+The objective of this tutorial is to demonstrate the use of `FIESTA`'s DB tools for accessing FIA data. These tools extract data from FIA Datamart using FIA's standard evaluations as well as customized evaluations (DBgetPlots and DBgetStrata). 
 
 An FIA Evaluation is a group of plots within the FIA database that is used for population estimates. An FIA Evaluation represents different inventory spans of data with different stratification and area adjustments for nonreponse. Each Evaluation is determined by the type of estimation (evalType) including: area and tree estimates, growth and mortality estimates, and area change estimates (evalType). These plots are identified by an evalid, which is a unique identifier in the format of a 2-digit State code, a 2-digit year code, and a 2-digit evaluation type code. For example, EVALID '491601' represents the Utah 2016 evaluation for current area estimates. 
 
-Note: FIESTA database tools can extract information for all FIA Evaluation Types, but FIESTA estimates are currently only available for area and tree. 
+Note: `FIESTA` database tools can extract information for all FIA Evaluation Types, but `FIESTA` estimates are currently only available for area and tree. 
 
+
+## DB Examples
+
+The following examples show how to extract data from FIA's publicly-available, online DataMart. Data can be returned as R objects or exported to CSV (.csv) files or a SQLite (.sqlite) database.  The zip files are extracted on-the-fly from the online website. Web server connections will affect download speeds. We show examples for the following functions:
 
 FUNCTION  | DESCRIPTION
 -------------- | ---------------------------------------------------------------
@@ -46,32 +34,24 @@ FUNCTION  | DESCRIPTION
 [DBgetStrata()](#DBgetStrata) | Extracts strata information and total acres by estimation unit from FIA database, including plot-level assignment and a data frame with strata weights by estimation unit.
 
 
-### EXAMPLES
+### Set up 
 
-Set up for examples
-```{r}
-# Load library
+First, you'll need to load the `FIESTA` library:
+
+```{r, warning = F, message = F}
 library(FIESTA)
-
-## If not on windows platform, set up an outfolder to output from examples
-# if (.Platform$OS.type == "windows") {
-#   # Set workspace to FIESTA folder (create if doesn't exist)
-#   if (!file.exists("C:/FIESTA"))  {
-#     dir.create("C:/FIESTA")
-#   }
-#   setwd("C:/FIESTA")
-# 
-#   if (!file.exists("outfolder")) {
-#     dir.create("outfolder")
-#   }
-#   outfolder <- "outfolder"
-# }
-
-
-
 ```
 
-The following examples show how to extract data from FIA's publicly-available, online DataMart. Data can be returned as R objects or exported to CSV (.csv) files or a SQLite (.sqlite) database.  The zip files are extracted on-the-fly from the online website. Web server connections will affect download speeds.
+Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For this vignette, we have saved our outfolder file path as the `outfolder` object in a temporary directory. We also set a few default options preferred for this vignette.
+
+```{r}
+## Set options
+options(scipen = 6)
+options(stringsAsFactors = FALSE)
+
+## Set outfolder
+outfolder <- tempdir()
+```
 
 
 #### <a name="DBgetCSV"/>DBgetCSV()
@@ -110,7 +90,7 @@ head(ref_research_station)
 
 
 #### <a name="DBqryCSV"/>DBqryCSV()
-```
+```{r}
 ####################################################################################
 # Usage:
 # DBqryCSV(sql, states = NULL, sqltables = NULL) 
@@ -156,7 +136,7 @@ DBqryCSV(sql=sql4.csv, states=c("Utah", "Wyoming"), sqltables=c("plot", "tree"))
 
 
 #### <a name="DBgetEvalid"/>DBgetEvalid()
-```
+```{r}
 ######################################################################################
 # Usage:
 # DBgetEvalid(states = NULL, RS = NULL, invtype = "ANNUAL", evalCur = TRUE,   
@@ -218,7 +198,7 @@ NYTXeval.cur$evalTypelist
 ```
 
 #### <a name="DBgetPlots"/>DBgetPlots()
-```
+```{r}
 ######################################################################################
 # Usage:
 # DBgetPlots(states = NULL, RS = NULL, invtype = "ANNUAL", evalid = NULL, 
@@ -919,7 +899,7 @@ dim(R4ACIdat$tree)
 ```
 
 #### <a name="DBgetStrata"/>DBgetStrata()
-```
+```{r}
 ######################################################################################
 # Usage:
 # DBgetStrata(dat = NULL, uniqueid = "CN", states = NULL, evalid = NULL, 
