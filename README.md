@@ -78,45 +78,13 @@ do so, run the following code in your terminal (not the R console):
 
     xcode-select --install
 
-#### 2. Create token for GitHub
+#### 2. Install the `FIESTA` R package
 
-For ease of installing and updating `FIESTA`, generate a token from
-GitHub settings. Note: `FIESTA` is frequently updated. You will use this
-token each time you update `FIESTA` (until public release).
-
-1.  In the upper-right corner of any page, click your profile photo,
-    then click Settings in dropdown menu.
-2.  In the left sidebar, click Developer settings.
-3.  Go to Personal access tokens.
-4.  Click Generate new token.
-5.  Give your token a descriptive name.
-6.  Check all boxes
-7.  Save token (\~30 character string) to a file and as an R object.
-
-#### 3. Install FIESTA package from source code
-
-If you are updating `FIESTA`, first make sure the `FIESTA` library is
-not attached, then uninstall from your library.
+Currently, `FIESTA` is available for installation from GitHub.
 
 ``` r
-detach("package:FIESTA", unload=TRUE)
-remove.packages("FIESTA", lib=.libPaths()) 
-```
-
-Next install `FIESTA` from GitHub, using the token you saved as an R
-object.
-
-``` r
-## Set your token to an R character object, in quotes (Replace your_token with ~30 character string)
-token <- "your_token"
-
-## Install from github
-Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
-devtools::install_github("https://github.com/USDAForestService/FIESTA", 
-        auth_token = token,
-        build_vignettes = TRUE,
-        INSTALL_opts = c("--compile-both"),
-        dependencies=c("Depends", "Imports"))
+remotes::install_github("USDAForestService/FIESTA",
+                        build_vignettes = TRUE)
 ```
 
 #### 4. Load FIESTA
@@ -133,29 +101,55 @@ This code was written and prepared by a U.S. Government employee on
 official time, and therefore it is in the public domain and not subject
 to copyright.
 
-<!-- ## HELP and vignettes -->
-<!-- To get help for the `FIESTA` package -->
-<!-- ```{r, eval = F} -->
-<!-- help(package="FIESTA") -->
-<!-- ``` -->
-<!-- To get tutorials from `FIESTA` package -->
-<!-- ```{r, eval = F} -->
-<!-- vignette(package="FIESTA") -->
-<!-- ``` -->
-<!-- Core functions -->
-<!-- ```{r, eval = F} -->
-<!-- vignette("FIESTA_tutorial_DB", package="FIESTA") -->
-<!-- vignette("FIESTA_tutorial_dat", package="FIESTA") -->
-<!-- vignette("FIESTA_tutorial_sp", package="FIESTA") -->
-<!-- ``` -->
-<!-- Modules -->
-<!-- ```{r, eval = F} -->
-<!-- vignette("FIESTA_tutorial_GB", package="FIESTA") -->
-<!-- vignette("FIESTA_tutorial_GBcustom", package="FIESTA") -->
-<!-- vignette("FIESTA_tutorial_PB", package="FIESTA") -->
-<!-- vignette("FIESTA_tutorial_SA", package="FIESTA") -->
-<!-- vignette("FIESTA_tutorial_MA", package="FIESTA") -->
-<!-- ``` -->
+## Accessing Documentation (Vignettes)
+
+To see a list of vignette tutorials from `FIESTA`, you can run the
+following code:
+
+``` r
+vignette(package = "FIESTA")
+```
+
+These vignettes are split up into a few groups:
+
+### General Manuals
+
+``` r
+# Estimation manual
+vignette("FIESTA_manual_mod_est", package = "FIESTA")
+
+# Population data manual
+vignette("FIESTA_manual_mod_pop", package = "FIESTA")
+```
+
+### Core functions
+
+``` r
+# Data tools
+vignette("FIESTA_tutorial_dat", package = "FIESTA")
+
+# Database tools
+vignette("FIESTA_tutorial_DB", package = "FIESTA")
+
+# Spatial tools
+vignette("FIESTA_tutorial_sp", package = "FIESTA")
+```
+
+### Estimation Modules
+
+``` r
+# Green-Book estimation
+vignette("FIESTA_tutorial_GB", package = "FIESTA")
+
+# Model-assisted estimation
+vignette("FIESTA_tutorial_MA", package = "FIESTA")
+
+# Small area estimation
+vignette("FIESTA_tutorial_SA", package = "FIESTA")
+
+# Photo-based estimation
+vignette("FIESTA_tutorial_PB", package = "FIESTA")
+```
 
 ## Examples
 
@@ -171,15 +165,14 @@ In order to produce estimates based on the Green-book, we first use the
 interest. We can look at a summary of the population data below.
 
 ``` r
-GBpopdat <- modGBpop(popTabs = popTables(cond = FIESTA::WYcond,
-                                         tree = FIESTA::WYtree,
-                                         seed = FIESTA::WYseed),
-                     popTabIDs = popTableIDs(cond = "PLT_CN"),
+GBpopdat <- modGBpop(popTabs = list(cond = FIESTA::WYcond,  
+                                    tree = FIESTA::WYtree),      
+                     popTabIDs = list(cond = "PLT_CN"),
                      pltassgn = FIESTA::WYpltassgn,
                      pltassgnid = "CN",
                      pjoinid = "PLT_CN",
                      unitarea = FIESTA::WYunitarea,
-                     unitvar = "ESTN_UNIT",
+                     unitvar = "ESTN_UNIT", 
                      strata = TRUE,
                      stratalut = FIESTA::WYstratalut,
                      strata_opts = strata_options(getwt = TRUE))
@@ -188,7 +181,7 @@ summary(GBpopdat)
 #>             Length Class      Mode     
 #> popType      1     -none-     character
 #> condx       12     data.table list     
-#> pltcondx    41     data.table list     
+#> pltcondx    43     data.table list     
 #> cuniqueid    1     -none-     character
 #> condid       1     -none-     character
 #> ACI.filter   1     -none-     character
@@ -210,8 +203,7 @@ summary(GBpopdat)
 #> adj          1     -none-     character
 #> treex       21     data.table list     
 #> tuniqueid    1     -none-     character
-#> adjtree      1     -none-     logical  
-#> seedx       11     data.table list
+#> adjtree      1     -none-     logical
 ```
 
 Note that the `GBpopdat` list generated by `modGBpop` contains many
@@ -223,49 +215,97 @@ added to the condition-level, tree-level, and seedling data (`condx`,
 `treex`, and `seedx`, respectfully).
 
 Now, with the `GBpopdat` object, we can quickly produce estimates of
-forest land (`landarea = "FOREST"`) by forest type
-(`rowvar = "FORTYPCD`) in Wyoming for the 2011-2013 years.
+basal area (`estvar = "BA"`) by county in Wyoming for the 2011-2013
+years.
 
 ``` r
-area_estimates <- modGBarea(
-    GBpopdat = GBpopdat,
-    landarea = "FOREST",
-    rowvar = "FORTYPCD"
-    )
+GBest <- modGBtree(GBpopdat = GBpopdat,
+                   estvar = "BA",
+                   estvar.filter = "STATUSCD == 1",
+                   sumunits = FALSE)
 ```
 
 We again output a list, now with estimates/standard errors, raw data,
 state code, and inventory year:
 
 ``` r
-str(area_estimates, max.level = 2)
+str(GBest, max.level = 2)
 #> List of 4
-#>  $ est    :'data.frame': 19 obs. of  3 variables:
-#>   ..$ Forest type           : chr [1:19] "182" "184" "185" "201" ...
-#>   ..$ Estimate              : chr [1:19] "632481.7" "339749.8" "14854.7" "881189" ...
-#>   ..$ Percent Sampling Error: chr [1:19] "17.28" "23.85" "100" "14.21" ...
+#>  $ est    :'data.frame': 23 obs. of  3 variables:
+#>   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...
+#>   ..$ Estimate              : num [1:23] 35117889 24184274 8223787 73174024 16031144 ...
+#>   ..$ Percent Sampling Error: num [1:23] 11.71 26.91 32.24 8.56 31.4 ...
 #>  $ raw    :List of 11
-#>   ..$ unit_totest:'data.frame':  23 obs. of  17 variables:
-#>   ..$ totest     :'data.frame':  1 obs. of  13 variables:
-#>   ..$ unit_rowest:'data.frame':  135 obs. of  18 variables:
-#>   ..$ rowest     :'data.frame':  18 obs. of  13 variables:
-#>   ..$ domdat     :'data.frame':  590 obs. of  14 variables:
-#>   ..$ module     : chr "GB"
-#>   ..$ esttype    : chr "AREA"
-#>   ..$ GBmethod   : chr "PS"
-#>   ..$ rowvar     : chr "FORTYPCD"
-#>   ..$ colvar     : chr "NONE"
-#>   ..$ areaunits  : chr "acres"
+#>   ..$ unit_totest  :'data.frame':    23 obs. of  17 variables:
+#>   ..$ domdat       :'data.frame':    590 obs. of  14 variables:
+#>   ..$ estvar       : chr "BA"
+#>   ..$ estvar.filter: chr "STATUSCD == 1"
+#>   ..$ module       : chr "GB"
+#>   ..$ esttype      : chr "TREE"
+#>   ..$ GBmethod     : chr "PS"
+#>   ..$ rowvar       : chr "TOTAL"
+#>   ..$ colvar       : chr "NONE"
+#>   ..$ areaunits    : chr "acres"
+#>   ..$ estunits     : chr "square feet"
 #>  $ statecd: int 56
 #>  $ invyr  : int [1:3] 2011 2012 2013
 ```
 
-### Example 2:
+### Example 2: Model-assisted estimation
 
-Pull in data with `spGetPlots` and `FIESTAnalysis::ecomap` and then
-produce MA and SAE estimates for those ecoregions.
+`FIESTA` makes it easy to do estimation through techniques such as
+model-assited estimation and small area estimation. In this example, we
+use a similar process to the Green-Book estimation above to produce
+estimates for the same region, but through a generalized regression
+(GREG) model-assisted estimator. First, we get our population data:
 
-### Example 3:
+``` r
+MApopdat <- modMApop(popTabs = list(tree = FIESTA::WYtree,
+                                    cond = FIESTA::WYcond),
+                     pltassgn = FIESTA::WYpltassgn,
+                     pltassgnid = "CN",
+                     unitarea = FIESTA::WYunitarea,
+                     unitvar = "ESTN_UNIT",
+                     unitzonal = FIESTA::WYunitzonal,
+                     prednames = c("dem", "tcc", "tpi", "tnt"),
+                     predfac = "tnt")
+```
 
-Maybe something photo-based? We also may want to stick with just two
-relatively simple examples.
+Now, analogous to the `modGBtree()` function we can produce estimates
+with the `modMAtree()` function
+
+``` r
+MAest <- modMAtree(MApopdat = MApopdat,
+                   MAmethod = "greg",
+                   estvar = "BA",
+                   estvar.filter = "STATUSCD == 1")
+```
+
+and we can see the output of `modMAtree()`:
+
+``` r
+str(MAest, max.level = 2)
+#> List of 4
+#>  $ est    :Classes 'data.table' and 'data.frame':    23 obs. of  3 variables:
+#>   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...
+#>   ..$ Estimate              : num [1:23] 34769303 28493559 8260491 69278394 23200459 ...
+#>   ..$ Percent Sampling Error: num [1:23] 8.7 19.8 25.69 9.23 20.17 ...
+#>   ..- attr(*, ".internal.selfref")=<externalptr> 
+#>   ..- attr(*, "sorted")= chr "ESTN_UNIT"
+#>  $ raw    :List of 13
+#>   ..$ unit_totest  :'data.frame':    23 obs. of  18 variables:
+#>   ..$ domdat       :'data.frame':    3210 obs. of  17 variables:
+#>   ..$ plotweights  :List of 1
+#>   ..$ estvar       : chr "BA"
+#>   ..$ estvar.filter: chr "STATUSCD == 1"
+#>   ..$ module       : chr "MA"
+#>   ..$ esttype      : chr "TREE"
+#>   ..$ MAmethod     : chr "greg"
+#>   ..$ predselectlst:List of 1
+#>   ..$ rowvar       : chr "TOTAL"
+#>   ..$ colvar       : chr "NONE"
+#>   ..$ areaunits    : chr "acres"
+#>   ..$ estunits     : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...
+#>  $ statecd: int 56
+#>  $ invyr  : int [1:3] 2011 2012 2013
+```
