@@ -43,9 +43,9 @@ All Estimation Modules require similar inputs, including a set of population dat
 Refer to the following vignettes for specific examples.
 
 
-* FIESTA_tutorial_GB
-* FIESTA_tutorial_MA
-* FIESTA_tutorial_SA
+* [FIESTA_tutorial_GB](FIESTA_tutorial_GB.html)
+* [FIESTA_tutorial_MA](FIESTA_tutorial_MA.html)
+* [FIESTA_tutorial_SA](FIESTA_tutorial_SA.html)
 
 
 ## Module Parameters {#input}

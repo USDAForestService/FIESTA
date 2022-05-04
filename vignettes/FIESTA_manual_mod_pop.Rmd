@@ -44,9 +44,9 @@ All Population functions require similar data inputs, including a set of invento
 This vignette describes the required input data sets, parameter inputs, and outputs from the `mod*pop` functions. Refer to the FIESTA_module_estimates vignette for more information on other parameter inputs to the `mod*` Estimation Modules and the following vignettes for running specific examples:
 
 
-* FIESTA_tutorial_GB
-* FIESTA_tutorial_MA
-* FIESTA_tutorial_SA
+* [FIESTA_tutorial_GB](FIESTA_tutorial_GB.html)
+* [FIESTA_tutorial_MA](FIESTA_tutorial_MA.html)
+* [FIESTA_tutorial_SA](FIESTA_tutorial_SA.html)
 
 
 ## Module Parameters {#input}
