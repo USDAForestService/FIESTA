@@ -15,6 +15,10 @@
 #' character or want to group codes.
 #' @param rastfn.template String. Full path name of raster to use as template
 #' for new raster.
+#' @param NODATA Number. The NODATA value for background values. If NODATA is
+#' NULL, and a NODATA value is defined on the rastfn.template raster, the 
+#' default is the defined NODATA value, else it is defined based on its datatype 
+#' (see DEFAULT_NODATA for default data values).
 #' @param outfolder String. If exportshp=TRUE, name of output folder. If NULL,
 #' the working directory is used.
 #' @param outfn String. Name of output raster. If NULL, default is 'polyrast'.
@@ -63,6 +67,7 @@ spPoly2Rast <- function(polyv,
                         polyv.att, 
                         polyv.lut = NULL, 
                         rastfn.template = NULL, 
+                        NODATA = NULL, 
                         outfolder = NULL, 
                         outfn = "polyrast", 
                         outext = "img", 
@@ -157,7 +162,7 @@ spPoly2Rast <- function(polyv,
 
     ## Create virtual raster by clipping raster template to extent of polyvx
     rastclip <- spClipRast(rast=rastfn, clippolyv=polyvx, 
-                           maskByPolygons=FALSE, 
+                           maskByPolygons=FALSE, NODATA=NODATA, 
                            outfolder=outfolder, outfn="tmp", fmt="VRT")
 
     ## Create blank raster from clipped virtual raster
