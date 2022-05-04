@@ -284,15 +284,8 @@ modSAtree <- function(SApopdatlst = NULL,
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
-    if (!savedata) {
-      message("savedata=FALSE with savedata parameters... no data are saved")
-    }
     for (i in 1:length(savedata_opts)) {
-      if (names(savedata_opts)[[i]] %in% names(savedata_defaults_list)) {
-        assign(names(savedata_opts)[[i]], savedata_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
-      }
+      assign(names(savedata_opts)[[i]], savedata_opts[[i]])
     }
   }
   
@@ -306,11 +299,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Set user-supplied table values
   if (length(table_opts) > 0) {
     for (i in 1:length(table_opts)) {
-      if (names(table_opts)[[i]] %in% names(table_defaults_list)) {
-        assign(names(table_opts)[[i]], table_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(table_opts)[[i]]))
-      }
+      assign(names(table_opts)[[i]], table_opts[[i]])
     }
   }
   
@@ -324,11 +313,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Set user-supplied title values
   if (length(title_opts) > 0) {
     for (i in 1:length(title_opts)) {
-      if (names(title_opts)[[i]] %in% names(title_defaults_list)) {
-        assign(names(title_opts)[[i]], title_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(title_opts)[[i]]))
-      }
+      assign(names(title_opts)[[i]], title_opts[[i]])
     }
   }
   
@@ -342,11 +327,7 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Set user-supplied multest values
   if (length(multest_opts) > 0) {
     for (i in 1:length(multest_opts)) {
-      if (names(multest_opts)[[i]] %in% names(multest_defaults_list)) {
-        assign(names(multest_opts)[[i]], multest_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(multest_opts)[[i]]))
-      }
+      assign(names(multest_opts)[[i]], multest_opts[[i]])
     }
   }
 
@@ -390,7 +371,7 @@ modSAtree <- function(SApopdatlst = NULL,
       SApopdatlst <- list(SApopdatlst)
     }  
 
-    if (inherits(SApopdatlst, "list")) {
+    if (class(SApopdatlst) == "list") {
       list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
 		"prednames", "plotsampcnt", "condsampcnt")
@@ -1029,10 +1010,10 @@ modSAtree <- function(SApopdatlst = NULL,
   }
 
   ## Change values that are less than 0 to 0
-  if (!lt0 && any(!is.na(estdf$nhat)) && any(estdf$nhat < 0)) {
+  if (!lt0 && any(!is.na(estdf$nhat)) && any(na.omit(estdf$nhat) < 0)) {
     estdf[estdf$nhat < 0, "nhat"] <- 0
   } 
-
+ 
   ## Subset multest to estimation output
   dunit_totest <- setDT(estdf)[AOI==1, 
 		unique(c("DOMAIN", "nhat", "nhat.se", "NBRPLT.gt0", "estimator")), with=FALSE]
@@ -1069,7 +1050,7 @@ modSAtree <- function(SApopdatlst = NULL,
     }
 
     ## Change values that are less than 0 to 0
-    if (!lt0 && any(!is.na(estdf_row$nhat)) && any(estdf_row$nhat < 0)) {
+    if (!lt0 && any(!is.na(estdf_row$nhat)) && any(na.omit(estdf_row$nhat) < 0)) {
       estdf_row[estdf_row$nhat < 0, "nhat"] <- 0
     } 
 
