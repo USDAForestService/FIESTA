@@ -49,7 +49,9 @@ some layers are desired, specify layer number(s) in a vector format. If
 NULL, all layers are summed.}
 
 \item{NODATA}{Number. The NODATA value for background values. If NODATA is
-set for input raster it is default, else 0 is default.}
+NULL, and a NODATA value is defined on the input raster, the default is the
+defined NODATA value, else it is defined based on its datatype (see 
+DEFAULT_NODATA for default data values).}
 
 \item{buffdist}{Number. The distance to buffer the polygon before clipping
 raster, in units of raster.}
@@ -97,7 +99,8 @@ polyv SpatialPolygons object is converted to the projection of rast (See
 note about on-the-fly projection conversion).
 }
 \note{
-On-the-fly projection conversion\cr The spTransform (rgdal) method is
+On-the-fly projection conversion\cr 
+The spTransform (rgdal) method is
 used for on-the-fly map projection conversion and datum transformation using
 PROJ.4 arguments. Datum transformation only occurs if the +datum tag is
 present in the both the from and to PROJ.4 strings. The +towgs84 tag is used
