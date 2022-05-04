@@ -119,8 +119,6 @@ Next, you'll need to set up an "outfolder". This is just a file path to a folder
 ## Set options
 options(scipen = 6)
 options(stringsAsFactors = FALSE)
-
-## Set outfolder
 outfolder <- tempdir()
 ```
 
