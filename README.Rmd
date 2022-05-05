@@ -62,7 +62,7 @@ remotes::install_github("USDAForestService/FIESTA",
                         build_vignettes = TRUE)
 ```
 
-#### 4. Load FIESTA
+#### 3. Load FIESTA
 
 Then, you can load `FIESTA`:
 
