@@ -38,7 +38,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 
     ## get intersection of maxbndx and smallbndx 
     ## Note: use tabulateIntersections with fewer smallbnd polygons - faster
-    if (nrow(smallbndx) < 200) {
+#    if (nrow(smallbndx) < 200) {
       maxbndx_intersect <-
 		suppressWarnings(tabulateIntersections(layer1=smallbndx,
 		        layer1fld=smallbnd.unique, layer2=maxbndxd, layer2fld=maxbnd.unique))
@@ -46,9 +46,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
             c(maxbnd.unique, smallbnd.unique, "int.pct")]
       maxbndxlst <- unique(maxbndx_intersect[[maxbnd.unique]])
       maxbndxd.int <- maxbndxd[maxbndxd[[maxbnd.unique]] %in% maxbndxlst, ]
-    } else {
-      maxbndxd.int <- maxbndxd[unique(unlist(sf::st_intersects(smallbndx, maxbndxd))), ]
-      maxbndxlst <- maxbndxd.int[[maxbnd.unique]]
+#    } else {
+#      maxbndxd.int <- maxbndxd[unique(unlist(sf::st_intersects(smallbndx, maxbndxd))), ]
+#      maxbndxlst <- maxbndxd.int[[maxbnd.unique]]
     }
  
     if (length(maxbndxlst) < length(unique(maxbndxd[[maxbnd.unique]]))) {
