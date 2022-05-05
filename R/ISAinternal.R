@@ -50,7 +50,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       maxbndxd.int <- maxbndxd[unique(unlist(sf::st_intersects(smallbndx, maxbndxd))), ]
       maxbndxlst <- maxbndxd.int[[maxbnd.unique]]
     }
-
+ 
     if (length(maxbndxlst) < length(unique(maxbndxd[[maxbnd.unique]]))) {
       smallbndx$DISSOLVE <- 1
       smallbndxd <- sf_dissolve(smallbndx, "DISSOLVE", areacalc=FALSE)
@@ -83,13 +83,20 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 		        layer1fld=smallbnd.unique, layer2=maxbndx.intd, layer2fld=maxbnd.unique))
       maxbndx_intersect <- maxbndx_intersect[!is.na(maxbndx_intersect$int.pct),
             c(maxbnd.unique, smallbnd.unique, "int.pct")]
-
+ 
     } else {
+
+      if (!exists("maxbndx_intersect")) {
+        maxbndx_intersect <-
+		suppressWarnings(tabulateIntersections(layer1=smallbndx,
+		        layer1fld=smallbnd.unique, layer2=maxbndxd, layer2fld=maxbnd.unique))
+        maxbndx_intersect <- maxbndx_intersect[!is.na(maxbndx_intersect$int.pct),
+            c(maxbnd.unique, smallbnd.unique, "int.pct")]
+      }
 
       ## Remove water from list if it exists
       if (any(maxbndxlst == "Water")) {
         maxbndxlst <- maxbndxlst[maxbndxlst != "Water"]
-        maxbndx_intersect <- maxbndx_intersect[maxbndx_intersect[[maxbnd.unique]] != "Water",]
       }
 
       ## Subset maxbndxd to only maxbnd.unique that intersects with smallbnd
