@@ -49,7 +49,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #    } else {
 #      maxbndxd.int <- maxbndxd[unique(unlist(sf::st_intersects(smallbndx, maxbndxd))), ]
 #      maxbndxlst <- maxbndxd.int[[maxbnd.unique]]
-    }
+#    }
  
     if (length(maxbndxlst) < length(unique(maxbndxd[[maxbnd.unique]]))) {
       smallbndx$DISSOLVE <- 1
