@@ -35,32 +35,63 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   ############################################################################
   if (!is.null(maxbndx)) {
     maxbndxd <- sf_dissolve(maxbndx, maxbnd.unique, areacalc=FALSE)
-    smallbndx$DISSOLVE <- 1
-    smallbndxd <- sf_dissolve(smallbndx, "DISSOLVE", areacalc=FALSE)
-    smallbndx$DISSOLVE <- NULL
 
-    ## get intersection of maxbndx and smallbndx (dissolved as 1 polygon)
-    maxbndx_intersect <-
-		suppressWarnings(tabulateIntersections(layer1=smallbndxd,
-		        layer1fld="DISSOLVE", layer2=maxbndxd, layer2fld=maxbnd.unique))
-    maxbndx_intersect <- maxbndx_intersect[!is.na(maxbndx_intersect$int.pct),
-            c(maxbnd.unique, "DISSOLVE", "int.pct")]
-    maxbndxlst <- unique(maxbndx_intersect[[maxbnd.unique]])
-    if (any(maxbndxlst == "Water")) {
-      maxbndxlst <- maxbndxlst[maxbndxlst != "Water"]
-      maxbndx_intersect <- maxbndx_intersect[maxbndx_intersect[[maxbnd.unique]] != "Water",]
+    ## get intersection of maxbndx and smallbndx 
+    ## Note: use tabulateIntersections with fewer smallbnd polygons - faster
+    if (nrow(smallbndx) < 200) {
+      maxbndx_intersect <-
+		suppressWarnings(tabulateIntersections(layer1=smallbndx,
+		        layer1fld=smallbnd.unique, layer2=maxbndxd, layer2fld=maxbnd.unique))
+      maxbndx_intersect <- maxbndx_intersect[!is.na(maxbndx_intersect$int.pct),
+            c(maxbnd.unique, smallbnd.unique, "int.pct")]
+      maxbndxlst <- unique(maxbndx_intersect[[maxbnd.unique]])
+      maxbndxd.int <- maxbndxd[maxbndxd[[maxbnd.unique]] %in% maxbndxlst, ]
+    } else {
+      maxbndxd.int <- maxbndxd[unique(unlist(sf::st_intersects(smallbndx, maxbndxd))), ]
+      maxbndxlst <- maxbndxd.int[[maxbnd.unique]]
     }
 
-    ## Get the maximum overlap by province for smallbndx (dissolved as 1 polygon)
-    maxbndx_max <- aggregate(maxbndx_intersect$int.pct,
-			list(maxbndx_intersect[["DISSOLVE"]]), max)
-    maxbndx_max <- merge(maxbndx_intersect, maxbndx_max)
-    maxbndxlst <- unique(maxbndx_max[[maxbnd.unique]])
+    if (length(maxbndxlst) < length(unique(maxbndxd[[maxbnd.unique]]))) {
+      smallbndx$DISSOLVE <- 1
+      smallbndxd <- sf_dissolve(smallbndx, "DISSOLVE", areacalc=FALSE)
+      smallbndx$DISSOLVE <- NULL
 
-    maxbndx.pct <- unique(maxbndx_max[order(maxbndx_max$int.pct, decreasing=TRUE),
-					c(maxbnd.unique, "int.pct")])
-    maxbnd.gtthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct >= maxbnd.threshold])
-    maxbnd.ltthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct < maxbnd.threshold])
+      ## get intersection of maxbndx and smallbndx (dissolved as 1 polygon)
+      maxbndx_intersect <-
+		suppressWarnings(tabulateIntersections(layer1=smallbndxd,
+		        layer1fld="DISSOLVE", layer2=maxbndxd.int, layer2fld=maxbnd.unique))
+
+      ## Get the maximum overlap by province for smallbndx (dissolved as 1 polygon)
+      maxbndx.pct <- maxbndx_intersect[order(maxbndx_intersect$int.pct, decreasing=TRUE), ]
+
+      maxbnd.gtthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct >= maxbnd.threshold])
+      maxbnd.ltthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct < maxbnd.threshold])
+      maxbndxlst <- unique(maxbndx.pct[[maxbnd.unique]])
+
+      ## Remove water from list if it exists
+      if (any(maxbndxlst == "Water")) {
+        maxbndxlst <- maxbndxlst[maxbndxlst != "Water"]
+        maxbndx_intersect <- maxbndx_intersect[maxbndx_intersect[[maxbnd.unique]] != "Water",]
+      }
+
+      ## now, get intersection of maxbndx and smallbndx, by smallbnd.unique
+      maxbndx_intersect <-
+		suppressWarnings(tabulateIntersections(layer1=smallbndx,
+		        layer1fld=smallbnd.unique, layer2=maxbndx.intd, layer2fld=maxbnd.unique))
+      maxbndx_intersect <- maxbndx_intersect[!is.na(maxbndx_intersect$int.pct),
+            c(maxbnd.unique, smallbnd.unique, "int.pct")]
+
+    } else {
+
+      ## Remove water from list if it exists
+      if (any(maxbndxlst == "Water")) {
+        maxbndxlst <- maxbndxlst[maxbndxlst != "Water"]
+        maxbndx_intersect <- maxbndx_intersect[maxbndx_intersect[[maxbnd.unique]] != "Water",]
+      }
+
+      maxbnd.gtthres <- maxbndxlst
+      maxbnd.ltthres <- {}
+    }
 
 
     ## Subset maxbndxd to only maxbnd.unique that intersects with smallbnd
@@ -92,7 +123,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
       jpeg(jpgfn, res=300, units="in", width=8, height=10)
         plot(sf::st_geometry(maxbndx.intd[maxbnd.unique]), main=NULL, border="dark grey",
-             col=sf.colors(nrow(maxbndx.intd), categorical=TRUE, alpha=.2))
+             col=sf::sf.colors(nrow(maxbndx.intd), categorical=TRUE, alpha=.2))
         plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
 
         coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(maxbndx.intd)))
@@ -105,19 +136,11 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       stepcnt <- stepcnt+1
     }
 
-    ## now, get intersection of maxbndx and smallbndx, by smallbnd.unique
-    maxbnd_intersect <-
-		suppressWarnings(tabulateIntersections(layer1=smallbndx,
-		        layer1fld=smallbnd.unique, layer2=maxbndx.intd, layer2fld=maxbnd.unique))
-    maxbnd_intersect <- maxbnd_intersect[!is.na(maxbnd_intersect$int.pct),
-            c(maxbnd.unique, smallbnd.unique, "int.pct")]
-
-
     ## Get the maximum overlap by province for each smallbnd.unique
-    maxbnd_max <- aggregate(maxbnd_intersect$int.pct,
-			list(maxbnd_intersect[[smallbnd.unique]]), max)
+    maxbnd_max <- aggregate(maxbndx_intersect$int.pct,
+			list(maxbndx_intersect[[smallbnd.unique]]), max)
     names(maxbnd_max) <- c(smallbnd.unique, "int.pct")
-    maxbnd_max <- merge(maxbnd_intersect, maxbnd_max)
+    maxbnd_max <- merge(maxbndx_intersect, maxbnd_max)
     maxbndxlst <- maxbndxlst[maxbndxlst %in% unique(maxbnd_max[[maxbnd.unique]])]
  
     if (length(maxbnd.gtthres) > 1) {
@@ -149,9 +172,10 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 			ypoly.att=maxbnd.unique, returnsf=FALSE)
             maxbndltnm <- names(maxbndx.dist)[names(maxbndx.dist) %in% maxbnd.gtthres][1]
 
-            sbndlt.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% maxbnd.ltthres[j], smallbnd.unique]
+            sbndlt.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% maxbnd.ltthres[j], 
+				smallbnd.unique]
             sbndlst[[maxbndltnm]] <- rbind(sbndlst[[maxbndltnm]], 
-								smallbndx[smallbndx[[smallbnd.unique]] %in% sbndlt.att,])
+							smallbndx[smallbndx[[smallbnd.unique]] %in% sbndlt.att,])
           }
         }       
       } else {
@@ -196,7 +220,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     ############################################################
     if (showsteps) {
       plot(sf::st_geometry(maxbndx.intd[maxbnd.unique]), main=NULL, border="dark grey",
-		col=sf.colors(nrow(maxbndx.intd), categorical=TRUE, alpha=.2), reset=TRUE)
+		col=sf::sf.colors(nrow(maxbndx.intd), categorical=TRUE, alpha=.2), reset=TRUE)
       if (nrow(smallbndx) < 1000) {
         plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
       }
@@ -224,7 +248,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       jpgfn <- paste0(stepfolder, "/", out_layer, ".jpg")
       jpeg(jpgfn, res=300, units="in", width=8, height=10)
         plot(sf::st_geometry(maxbndx.intd[maxbnd.unique]), main=NULL, border="dark grey",
-             col=sf.colors(nrow(maxbndx.intd), categorical=TRUE, alpha=.2))
+             col=sf::sf.colors(nrow(maxbndx.intd), categorical=TRUE, alpha=.2))
 
         if (nrow(smallbndx) < 1000) {
           plot(sf::st_geometry(smallbndx), add=TRUE, border="red")
@@ -446,7 +470,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         ## Get intersecting helper polygons
         helperbndx.tmp <- suppressWarnings(sf::st_join(helperbndx,
 						sf_dissolve(largebnd_select, largebnd.unique),
-						join=st_intersects, left=FALSE))
+						join=sf::st_intersects, left=FALSE))
 
         # get percent overlap of helperbndx.int and y largebndx.int
         ############################################################
@@ -618,7 +642,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     SAdoms$DOMAIN[SAdoms$AOI == 0] <- SAdoms[[helperbnd.unique]][SAdoms$AOI == 0]
 
 #    plot(sf::st_geometry(SAdoms["DOMAIN"]), main=NULL, border="grey",
-#		col=sf.colors(nbrdom, categorical=TRUE, alpha=.2))
+#		col=sf::sf.colors(nbrdom, categorical=TRUE, alpha=.2))
 #          coords <- sf::st_coordinates(sf::st_centroid(sf::st_geometry(SAdoms)))
 #          if (largebnd.addtext) {
 #            text(coords[,"X"], coords[,"Y"], SAdoms[["DOMAIN"]], cex=.4)
