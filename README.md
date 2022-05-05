@@ -95,6 +95,15 @@ Then, you can load `FIESTA`:
 library(FIESTA)
 ```
 
+## Bug Reports
+
+To report a bug with `FIESTA`, please open an issue on the [`FIESTA`
+GitHub Repository issues
+page](https://github.com/USDAForestService/FIESTA/issues). Please
+provide a description of the bug, and a reproducible example. For help
+creating a reproducible example, see the
+[`reprex`](https://reprex.tidyverse.org/) R package.
+
 ## License
 
 This code was written and prepared by a U.S. Government employee on
