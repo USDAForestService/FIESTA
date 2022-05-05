@@ -22,7 +22,8 @@ Authors@R:
       person(given = "Grayson",
              family = "White",
              role = "aut",
-             email = "graysonwhite13@gmail.com"))
+             email = "graysonwhite13@gmail.com",
+             comment = c(ORCID = "0000-0003-4993-2792"))
 Description: A research estimation tool for analysts that work with sample-based
     inventory data from the U.S. Department of Agriculture, Forest Service,
     Forest Inventory and Analysis (FIA) Program. 
@@ -31,7 +32,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils,
+    FIESTAutils (>= 1.1.0),
     grDevices,
     graphics,
     methods,
