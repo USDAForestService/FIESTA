@@ -74,6 +74,9 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         maxbndx_intersect <- maxbndx_intersect[maxbndx_intersect[[maxbnd.unique]] != "Water",]
       }
 
+      ## Subset maxbndxd to only maxbnd.unique that intersects with smallbnd
+      maxbndx.intd <- maxbndxd[maxbndxd[[maxbnd.unique]] %in% maxbndxlst,]
+
       ## now, get intersection of maxbndx and smallbndx, by smallbnd.unique
       maxbndx_intersect <-
 		suppressWarnings(tabulateIntersections(layer1=smallbndx,
@@ -89,14 +92,12 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         maxbndx_intersect <- maxbndx_intersect[maxbndx_intersect[[maxbnd.unique]] != "Water",]
       }
 
+      ## Subset maxbndxd to only maxbnd.unique that intersects with smallbnd
+      maxbndx.intd <- maxbndxd[maxbndxd[[maxbnd.unique]] %in% maxbndxlst,]
+
       maxbnd.gtthres <- maxbndxlst
       maxbnd.ltthres <- {}
     }
-
-
-    ## Subset maxbndxd to only maxbnd.unique that intersects with smallbnd
-    maxbndx.intd <- maxbndxd[maxbndxd[[maxbnd.unique]] %in% maxbndxlst,]
-
 
     ############################################################
     ## Display and save image for maxbnd_intersect
