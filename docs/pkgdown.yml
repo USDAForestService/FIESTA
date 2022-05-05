@@ -1,0 +1,15 @@
+pandoc: 2.17.1.1
+pkgdown: 2.0.3
+pkgdown_sha: ~
+articles:
+  FIESTA_manual_mod_est: FIESTA_manual_mod_est.html
+  FIESTA_manual_mod_pop: FIESTA_manual_mod_pop.html
+  FIESTA_tutorial_DB: FIESTA_tutorial_DB.html
+  FIESTA_tutorial_GB: FIESTA_tutorial_GB.html
+  FIESTA_tutorial_MA: FIESTA_tutorial_MA.html
+  FIESTA_tutorial_PB: FIESTA_tutorial_PB.html
+  FIESTA_tutorial_SA: FIESTA_tutorial_SA.html
+  FIESTA_tutorial_dat: FIESTA_tutorial_dat.html
+  FIESTA_tutorial_sp: FIESTA_tutorial_sp.html
+last_built: 2022-05-05T21:52Z
+

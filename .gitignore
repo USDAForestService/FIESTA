@@ -3,7 +3,6 @@ FIESTA.Rproj
 .Rproj.user/shared/notebooks/paths
 .DS_Store
 .Rhistory
-docs
 /doc/
 /Meta/
 src/*.o
