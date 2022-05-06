@@ -2,7 +2,7 @@ Package: FIESTA
 Type: Package
 Title: Forest Inventory Estimation and Analysis
 Version: 3.3.0.9000
-Date: 2022-01-21
+Date: 2022-05-05
 Authors@R:
     c(person(given = "Tracey",
              family = "Frescino",
