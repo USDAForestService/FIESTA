@@ -384,13 +384,13 @@ modSAtree <- function(SApopdatlst = NULL,
     stop("need to include SApopdatlst... from modSApop")
     #SApopdatlst <- modSApop(gui=gui, prednames=prednames, ...)
   } else {
-    if (class(SApopdatlst) != "list") {
+    if (!is(SApopdatlst, "list")) {
       SApopdatlst <- list(SApopdatlst)
     } else if ("condx" %in% names(SApopdatlst)) {
       SApopdatlst <- list(SApopdatlst)
     }  
 
-    if (inherits(SApopdatlst, "list")) {
+    if (is(SApopdatlst, "list")) {
       list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
 		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
 		"prednames", "plotsampcnt", "condsampcnt")

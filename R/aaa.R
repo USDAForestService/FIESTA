@@ -6,7 +6,7 @@
 #' @importFrom graphics lines text hist split.screen screen axis abline box close.screen
 #' @importFrom stats as.formula na.omit rnorm sd xtabs aggregate 
 #' @importFrom stats median var complete.cases ave model.matrix
-#' @importFrom methods as new slot canCoerce
+#' @importFrom methods as new slot canCoerce is
 #' @importFrom rgdal readOGR GDALinfo GDAL.open GDAL.close getRasterBand 
 #' @importFrom rgdal saveDataset getRasterData getDriverName putRasterData getProjectionRef
 NULL

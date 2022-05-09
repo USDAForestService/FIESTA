@@ -266,7 +266,7 @@ DBgetXY <- function (states = NULL,
           invyrs[[state]] <- as.numeric(invyr)
         }
       } else if (!is.null(invyrs)) {
-        if (class(invyrs) != "list") {
+        if (!is(invyrs, "list")) {
           if (is.vector(invyrs) && is.numeric(invyrs)) {
             invyrs <- list(invyrs)
             if (length(states) == 1) {
@@ -288,7 +288,7 @@ DBgetXY <- function (states = NULL,
             stop("inventory years do not match database")
         }
       } else if (!is.null(measyrs)) {
-        if (class(measyrs) != "list") {
+        if (!is(measyrs, "list")) {
           if (is.vector(measyrs) && is.numeric(measyrs)) {
             measyrs <- list(measyrs)
             if (length(states) == 1) {
