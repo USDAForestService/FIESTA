@@ -306,7 +306,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       if (!is.null(evalid)) {
         unitareaqry <- paste(unitareaqry, "where evalid in(", toString(evalid), ")")
       }
+
+      unitarea <- pcheck.table(unitarea, tab_dsn=dsn, tabnm="unitarea", caption="unitarea?",
+		nullcheck=nullcheck, tabqry=unitareaqry, returnsf=FALSE)
+
     }
+ 
     if (strata && is.character(stratalut) && !is.null(chkdbtab(tablst, stratalut))) {
       stratindb <- TRUE
       stratalut_layer <- chkdbtab(tablst, stratalut)
@@ -347,8 +352,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   lulcx <- pcheck.table(lulc, tab_dsn=dsn, tabnm="lulc", caption="lulc table?",
 		nullcheck=nullcheck, tabqry=lulcqry, returnsf=FALSE)
  
-#  unitarea <- pcheck.table(unitarea, tab_dsn=dsn, tabnm="unitarea", caption="unitarea?",
-#		nullcheck=nullcheck, tabqry=unitareaqry, returnsf=FALSE)
 
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
