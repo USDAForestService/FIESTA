@@ -176,7 +176,7 @@ vignette("FIESTA_tutorial_PB", package = "FIESTA")
 ### External Data
 
 You can access documentation for external data included in `FIESTA` in
-the [`extdata-README.md` file](inst/extdata-README).
+the [`extdata-README.md` file](inst/extdata-README.md).
 
 ## Examples
 
