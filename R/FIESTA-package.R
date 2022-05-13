@@ -80,58 +80,6 @@ NULL
 
 
 
-
-
-#' Internal FIESTA Functions
-#' 
-#' Internal Subfunctions
-#' 
-#' These are not to be called by the user.
-#' 
-#' @aliases addCI addcommas change10char check.logic check.estdata
-#' check.estfilters check.outparams check.popdata check.estdataPB
-#' check.popdataPB check.nostrata check.auxiliary check.rowcol check.rowcolPB
-#' check.titles check.tree check.PROP check.unitarea check.matchclass
-#' check.matchval check.numeric check.pltcnt check.extents fileexistsnm
-#' est.outtabs getarea getadjfactorGB getadjfactorPLOT getcrossord getfunnm
-#' checkfilenm getoutfn getlt10char getRefobject getrhat getstratacnt
-#' groupEstunit groupStrata groupUnits makebrick pastevars pcheck.DBtabs
-#' pcheck.dsn pcheck.landarea pcheck.logical pcheck.outfolder pcheck.output
-#' pcheck.rowcol pcheck.states pcheck.strata pcheck.table pcheck.object
-#' pcheck.unitacres pcheck.varchar pcheck.unique pcheck.xlsx pcheck.colors
-#' pcheck.areaunits projfix save1tab save2tabs strat.collapse write2csv
-#' write2gdb write2sqlite wtcalc wtcalc.unit bp_wrap.it bp_width.jpg stopQ
-#' removecols DT_NAto0 changeNULL getdups getlistparam getnm checknm
-#' check.namedlist capfirst nbrdecimals nbrdigits getfilter filter2qry xtabf
-#' recodelut findnm strat.pivot preds.standardize preds.select DBvars.default
-#' DBgetfn getspconddat chkdbtab getpfromqry getPlotCur getEvalid.ppsa getsppnm
-#' gui_filterdf DBgetbyids PBest.pbar PBest.pbarRatio PBgetest getpltdom.prop
-#' getgainloss transpose2row transpose2col add0unit addrowgrp allin1f crosstabx
-#' crossxtab getdomain getestvar crossxbyunit wrapSE tabgrp setCells write2xlsx
-#' wraptitle addclass getext getrastlst.rgdal polyfix.sf pcheck.spatial
-#' build.prj4str trunc10shp getEPSG check.extents getprjatt areacalc.poly
-#' areacalc.pixel aspect_transform checksf.longlat
-#' checkrast.longlat crsCompare sf_dissolve closest_poly getIntersect
-#' clip.othertables spGetStates getOffset getGDALDataTypeName getGDALformat
-#' basename.NoExt Mode northness eastness getPixelValue extractPtsFromRaster
-#' extractPtsFromRasterList rasterInfo reprojectRaster rasterFromRaster
-#' rasterFromVectorExtent RasterizePolygon rasterizePolygons polygonizeRaster
-#' pixelCount clipRaster rasterCombine recodeRaster zonalMean zonalFreq
-#' zonalMajority zonalMinority zonalVariety ptCsvToVRT CmbTable RunningStats
-#' getGDALformat ptCsvToVRT rasterToVRT zonalStats DEFAULT_NODATA GDT_NAMES
-#' getDefaultNodata rasterCalc TPI TRI focalRaster roughness ptdata2sf
-#' sf2ptdata layerIntersection layerUnion tabulateIntersections
-#' selectByIntersects layerFromRasterExtent vectorTranslate Ratio2Size
-#' GBest.pbar GBest.pop MAest.pop MAest.unit MAest.dom MAest MAest.ps
-#' MAest.greg MAest.gregEN MAest.ht MAest.ratio SAest.pop SAest.large SAest.dom
-#' SAest SAest.area SAest.unit FIESTA_SAmod_demo_plots helper.select
-#' kable.table
-#' @author Tracey S. Frescino
-#' @keywords internal
-NULL
-
-
-
 #' Reference table - for Automated Land Program National Forests.
 #' 
 #' National Forest region and names from the USDA S_USA.BasicOwnershipFS
