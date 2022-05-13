@@ -63,9 +63,18 @@ other functions for a specific purpose.
 
 ## Installation
 
-Currently, to install `FIESTA`, you must go through a few steps:
+<!-- #### Stable installation -->
+<!-- You can install the current stable version of `FIESTA` from CRAN: -->
+<!-- ```{r, eval = F} -->
+<!-- install.packages("FIESTA") -->
+<!-- ``` -->
 
-#### 1. Install Rtools or xcode
+#### Developmental installation
+
+Or, if you’d like to install the developmental version of `FIESTA`, you
+can do so through a few steps:
+
+##### 1. Install Rtools or xcode
 
 If you are using the Windows OS, in order to install source code from
 GitHub, you must install Rtools from
@@ -73,26 +82,28 @@ GitHub, you must install Rtools from
 Windows 64-bit at [this
 link](https://cran.r-project.org/bin/windows/Rtools/).
 
-If you are using macOS, you’ll need to install xcode developer tools. To
-do so, run the following code in your terminal (not the R console):
+If you are using macOS, you’ll need to install xcode developer tools to
+install source code from GitHub. To do so, run the following code in
+your terminal (not the R console):
 
     xcode-select --install
 
-#### 2. Install the `FIESTA` R package
+##### 2. Install the developmental version of `FIESTA` (and `FIESTAutils`)
 
-Currently, `FIESTA` is available for installation from GitHub.
+First note that the developmental version of `FIESTA` may rely on a
+developmental version of `FIESTAutils`. For both of these installations,
+you’ll need to make sure to have the `remotes` package, and then you can
+install both packages from GitHub:
 
 ``` r
+# Install developmental FIESTAutils first
+remotes::install_github("USDAForestService/FIESTAutils",
+                        dependencies = TRUE)
+
+# Then install developmental FIESTA
 remotes::install_github("USDAForestService/FIESTA",
-                        build_vignettes = TRUE)
-```
-
-#### 3. Load FIESTA
-
-Then, you can load `FIESTA`:
-
-``` r
-library(FIESTA)
+                        build_vignettes = TRUE,
+                        dependencies = TRUE)
 ```
 
 ## Bug Reports
@@ -110,7 +121,9 @@ This code was written and prepared by a U.S. Government employee on
 official time, and therefore it is in the public domain and not subject
 to copyright.
 
-## Accessing Documentation (Vignettes)
+## Accessing Documentation
+
+### Vignettes
 
 To see a list of vignette tutorials from `FIESTA`, you can run the
 following code:
@@ -121,7 +134,7 @@ vignette(package = "FIESTA")
 
 These vignettes are split up into a few groups:
 
-### General Manuals
+#### General Manuals
 
 ``` r
 # Estimation manual
@@ -131,7 +144,7 @@ vignette("FIESTA_manual_mod_est", package = "FIESTA")
 vignette("FIESTA_manual_mod_pop", package = "FIESTA")
 ```
 
-### Core functions
+#### Core functions
 
 ``` r
 # Data tools
@@ -144,7 +157,7 @@ vignette("FIESTA_tutorial_DB", package = "FIESTA")
 vignette("FIESTA_tutorial_sp", package = "FIESTA")
 ```
 
-### Estimation Modules
+#### Estimation Modules
 
 ``` r
 # Green-Book estimation
@@ -160,12 +173,22 @@ vignette("FIESTA_tutorial_SA", package = "FIESTA")
 vignette("FIESTA_tutorial_PB", package = "FIESTA")
 ```
 
+### External Data
+
+You can access documentation for external data included in `FIESTA` in
+the [`extdata-README.md` file](inst/extdata-README).
+
 ## Examples
 
 These examples make use of vignettes that come with `FIESTA`, and these
 vignettes can be found by calling `vignette(package = "FIESTA")`. The
 data used in these examples come with the `FIESTA` package and are from
-Wyoming, inventory years 2011-2013 (Evaluation 561301).
+Wyoming, inventory years 2011-2013 (Evaluation 561301). We first load
+`FIESTA` to run these examples:
+
+``` r
+library(FIESTA)
+```
 
 ### Example 1: Green-book estimation
 
