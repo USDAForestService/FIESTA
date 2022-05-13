@@ -188,6 +188,7 @@ interested in estimates for all lands or nonforest lands in the
 All-Condition-Inventory.
 }
 \examples{
+\dontrun{
 # Set up population dataset (see ?modSApop() for more information)
 SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
                                     cond = FIESTA::WYcond),
@@ -215,6 +216,7 @@ modSAarea(SApopdatlst = SApopdat,
           SApackage = "sae",
           SAmethod = "area",
           modelselect = TRUE) 
+}
 }
 \references{
 Breidenbach, J. 2018. JoSAE: Unit-Level and Area-Level Small

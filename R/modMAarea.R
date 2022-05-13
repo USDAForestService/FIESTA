@@ -206,6 +206,7 @@
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
 #' @examples 
+#' \dontrun{
 #' # Set up population dataset (see ?modMApop() for more information)
 #' MApopdat <- modMApop(popTabs = list(tree = FIESTA::WYtree,
 #'                                     cond = FIESTA::WYcond),
@@ -229,6 +230,7 @@
 #'           landarea = "FOREST",
 #'           rowvar = "FORTYPCD",
 #'           colvar = "STDSZCD")
+#' }
 #' @export modMAarea
 modMAarea <- function(MApopdat, 
                       MAmethod, 

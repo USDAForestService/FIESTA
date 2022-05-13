@@ -135,6 +135,7 @@
 #' https://journal.r-project.org/archive/2015/RJ-2015-007/RJ-2015-007.
 #' @keywords data
 #' @examples 
+#' \dontrun{
 #' # Set up population dataset (see ?modSApop() for more information)
 #' SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
 #'                                     cond = FIESTA::WYcond),
@@ -162,6 +163,7 @@
 #'           SApackage = "sae",
 #'           SAmethod = "area",
 #'           modelselect = TRUE) 
+#' }
 #' @export modSAarea
 modSAarea <- function(SApopdatlst = NULL, 
                       prednames = NULL, 

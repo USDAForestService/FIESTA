@@ -257,6 +257,7 @@ classes following in order, it is combined with the estimation unit previous
 in order.
 }
 \examples{
+\dontrun{
 # NOTE: FIA data objects used in these examples are stored in `FIESTA`, but
 # can be generated for populations of interest by the user with functions in
 # `FIESTA` such as `spGetPlots()`, `spGetAuxiliary()`, etc. For more
@@ -284,6 +285,7 @@ modMApop(popTabs = list(tree = FIESTA::WYtree,
          unitzonal = FIESTA::WYunitzonal,
          prednames = c("dem", "tcc", "tpi", "tnt"),
          predfac = "tnt")
+}
 }
 \references{
 Scott, Charles T.; Bechtold, William A.; Reams, Gregory A.;

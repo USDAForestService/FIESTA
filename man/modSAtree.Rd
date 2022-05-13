@@ -204,6 +204,7 @@ Common tree filters for estvar.filter: \cr
 AGENTCD == 30" \tab Dead trees from fire \cr }
 }
 \examples{
+\dontrun{
 # Set up population dataset (see ?modSApop() for more information)
 SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
                                     cond = FIESTA::WYcond),
@@ -232,6 +233,7 @@ modSAtree(SApopdatlst = SApopdat,
           landarea = "FOREST",      
           estvar = "BA",              
           estvar.filter = "STATUSCD == 1")  
+}
 }
 \references{
 Breidenbach, J. 2018. JoSAE: Unit-Level and Area-Level Small

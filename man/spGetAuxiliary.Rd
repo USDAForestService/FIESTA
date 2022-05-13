@@ -215,6 +215,7 @@ lead to erroneous data shifts when reprojecting. See spTransform help
 documentation for more details.
 }
 \examples{
+\dontrun{
 # Get layers from FIESTA external data
 ## dem (continuous)
 demfn <- system.file("extdata",
@@ -239,6 +240,7 @@ spGetAuxiliary(xyplt = FIESTA::WYplt,
                rastlst.cat = tntfn,
                spMakeSpatial_opts = list(xvar = "LON_PUBLIC",
                                          yvar = "LAT_PUBLIC"))
+}
 }
 \author{
 Tracey S. Frescino

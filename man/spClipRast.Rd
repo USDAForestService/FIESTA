@@ -115,6 +115,7 @@ used as an intermediate step between processes. The VRT format ignores
 option to maskByPolygons.
 }
 \examples{
+\dontrun{
 # Get polygon vector layer from FIESTA external data
 WYbhdistfn <- system.file("extdata",
                           "sp_data/WYbighorn_districtbnd.shp", 
@@ -145,6 +146,7 @@ dem06 <- spClipRast(rast = demfn,
 
 # Plot extracted values of national forest district
 raster::plot(raster::raster(dem06))
+}
 }
 \author{
 Tracey S. Frescino

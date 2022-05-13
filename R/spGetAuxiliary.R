@@ -136,6 +136,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples 
+#' \dontrun{
 #' # Get layers from FIESTA external data
 #' ## dem (continuous)
 #' demfn <- system.file("extdata",
@@ -160,6 +161,7 @@
 #'                rastlst.cat = tntfn,
 #'                spMakeSpatial_opts = list(xvar = "LON_PUBLIC",
 #'                                          yvar = "LAT_PUBLIC"))
+#' }
 #' @export spGetAuxiliary
 spGetAuxiliary <- function(xyplt, 
                            xyplt_dsn = NULL, 
