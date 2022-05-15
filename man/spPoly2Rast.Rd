@@ -77,6 +77,7 @@ changed before export using an internal function (trunc10shp). If Spatial
 object has more than 1 record, it will be returned but not exported.
 }
 \examples{
+\dontrun{
 # Get polygon vector layer from FIESTA external data
 WYbhdistfn <- system.file("extdata",
                           "sp_data/WYbighorn_districtbnd.shp", 
@@ -91,6 +92,7 @@ new_rast <- spPoly2Rast(polyv = WYbhdistfn,
                     
 # Plot result with raster package                     
 raster::plot(raster::raster(new_rast$rastfn))
+}
 }
 \author{
 Tracey S. Frescino

@@ -87,6 +87,7 @@
 #' @author Tracey S. Frescino, Chris Toney
 #' @keywords spatial
 #' @examples 
+#' \dontrun{
 #' # Get raster layers from FIESTA external data
 #' demfn <- system.file("extdata",
 #'                      "sp_data/WYbighorn_dem_250m.img",
@@ -108,6 +109,7 @@
 #' 
 #' # Check new projection
 #' sf::st_crs(raster::raster(reprojected))$proj4string
+#' }
 #' @export spReprojectRaster
 spReprojectRaster <- function(rastfn, 
                               bands = NULL, 

@@ -65,6 +65,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples 
+#' \dontrun{
 #' # Set up `SpatialPoints` object
 #' WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
 #'                                xy.uniqueid = "CN", 
@@ -83,6 +84,7 @@
 #'                                    crs.new = prj)
 #' # Check results
 #' sf::st_crs(WYspplt.utm12)
+#' }
 #' @export spReprojectVector
 spReprojectVector <- function(layer, 
                               dsn = NULL, 

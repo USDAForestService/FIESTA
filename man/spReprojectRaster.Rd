@@ -129,6 +129,7 @@ incomplete CRS information may lead to erroneous data shifts when
 reprojecting. See spTransform help documentation for more details.
 }
 \examples{
+\dontrun{
 # Get raster layers from FIESTA external data
 demfn <- system.file("extdata",
                      "sp_data/WYbighorn_dem_250m.img",
@@ -150,6 +151,7 @@ raster::plot(raster::raster(reprojected))
 
 # Check new projection
 sf::st_crs(raster::raster(reprojected))$proj4string
+}
 }
 \author{
 Tracey S. Frescino, Chris Toney

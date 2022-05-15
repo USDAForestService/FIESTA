@@ -82,6 +82,7 @@ using an internal function (trunc10shp). If sf object has more than 1
 record, it will be returned but not exported.
 }
 \examples{
+\dontrun{
 # Set up `SpatialPoints` object
 WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
                                xy.uniqueid = "CN", 
@@ -100,6 +101,7 @@ WYspplt.utm12 <- spReprojectVector(layer = WYspplt,
                                    crs.new = prj)
 # Check results
 sf::st_crs(WYspplt.utm12)
+}
 }
 \author{
 Tracey S. Frescino
