@@ -2,11 +2,11 @@ Package: FIESTA
 Type: Package
 Title: Forest Inventory Estimation and Analysis
 Version: 3.3.0.9000
-Date: 2022-05-05
+Date: 2022-05-13
 Authors@R:
     c(person(given = "Tracey",
              family = "Frescino",
-             role = c("aut", "cre"),
+             role = "aut",
              email = "tracey.frescino@usda.gov"),
       person(given = "Gretchen",
              family = "Moisen",
@@ -21,7 +21,7 @@ Authors@R:
              email = "chris.toney@usda.gov"),
       person(given = "Grayson",
              family = "White",
-             role = "aut",
+             role = c("aut", "cre"),
              email = "graysonwhite13@gmail.com",
              comment = c(ORCID = "0000-0003-4993-2792")))
 Description: A research estimation tool for analysts that work with sample-based
@@ -32,7 +32,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils (>= 1.1.0),
+    FIESTAutils (>= 1.1.1),
     grDevices,
     graphics,
     methods,
@@ -46,8 +46,9 @@ Suggests:
     raster,
     rmarkdown
 VignetteBuilder: knitr
-License: file LICENSE
+License: GPL-3
+Copyright: See file COPYRIGHTS for details. 
 LazyData: true
 SystemRequirements: C++11
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
