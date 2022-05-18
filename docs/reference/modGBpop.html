@@ -146,7 +146,7 @@ options.</p></dd>
 list of options.</p></dd>
 <dt>pltassgn</dt>
 <dd><p>DF/DT, Optional. R object, sf R object, comma-delimited
-file(*.csv), layer or spatial layer in dsn, or shapefile(*.shp). Plot-level
+file(.csv), layer or spatial layer in dsn, or shapefile(.shp). Plot-level
 assignment of estimation unit and/or strata, with one record for each plot.</p></dd>
 <dt>pltassgnid</dt>
 <dd><p>String.</p></dd>
@@ -232,38 +232,33 @@ assignment of estimation unit and stratum (if strata=TRUE), condition
 proportion adjustment factor (cadjfac), and adjusted condition proportions
 (CONDPROP_ADJ).</p></dd>
 <dt>cuniqueid</dt>
-<dd><p>String. Unique identifier of plot in
-condx and pltcondx.</p></dd>
+<dd><p>String. Unique identifier of plot in condx and pltcondx.</p></dd>
 <dt>condid</dt>
-<dd><p>String. Unique identifier of condition
-in condx and pltcondx.</p></dd>
+<dd><p>String. Unique identifier of condition in condx and pltcondx.</p></dd>
 <dt>treex</dt>
-<dd><p>Data frame. Tree data within
-population, used for estimation, including trees per acre adjustment factor
-(tadjfac), and adjusted trees per acre (TPA_ADJ) (if treef is included).</p></dd>
+<dd><p>Data frame. Tree data within population, used for estimation, 
+including trees per acre adjustment factor (tadjfac), and adjusted trees per 
+acre (TPA_ADJ) (if treef is included).</p></dd>
 <dt>tuniqueid</dt>
 <dd><p>String. Unique identifier of plot in treex (if treef is
 included).</p></dd>
 <dt>ACI.filter</dt>
-<dd><p>String. If ACI=FALSE,
-ACI.filter="COND_STATUS_CD == 1" .</p></dd>
+<dd><p>String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1".</p></dd>
 <dt>unitarea</dt>
-<dd><p>String. Returned table
-of area by estimation unit.</p></dd>
+<dd><p>String. Returned table of area by estimation unit.</p></dd>
 <dt>unitvar</dt>
-<dd><p>String. Variable name for
-estimation unit.</p></dd>
+<dd><p>String. Variable name for estimation unit.</p></dd>
 <dt>strlut</dt>
-<dd><p>String. Strata-level table with pixel
-counts by strata (P1POINTCNT), strata weights (strwt), number of plots by
-strata (n.strata), total number of plots in estimation unit (n.total), sum
-of condition proportions (*_UNADJ_SUM), area adjustments (*_ADJFAC), total
-area, and area expansion by strata (EXPNS).</p></dd>
+<dd><p>String. Strata-level table with pixel counts by strata 
+(P1POINTCNT), strata weights (strwt), number of plots by strata (n.strata), 
+total number of plots in estimation unit (n.total), sum of condition proportions 
+(_UNADJ_SUM), area adjustments (*_ADJFAC), total area, and area expansion 
+by strata (EXPNS).</p></dd>
 <dt>strvar</dt>
-<dd><p>String.
-Variable name for strata. If strata=FALSE, strvar="ONESTRAT".</p></dd>
+<dd><p>String. Variable name for strata. If strata=FALSE, 
+strvar="ONESTRAT".</p></dd>
 <dt>expcondtab</dt>
-<dd><p>String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1" .</p></dd>
+<dd><p>String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1".</p></dd>
 <dt>plotsampcnt</dt>
 <dd><p>Data frame. Number of plots by PLOT_STATUS_CD.</p></dd>
 <dt>condsampcnt</dt>
@@ -271,40 +266,43 @@ Variable name for strata. If strata=FALSE, strvar="ONESTRAT".</p></dd>
 <dt>states</dt>
 <dd><p>String. State names in dataset.</p></dd>
 <dt>invyrs</dt>
-<dd><p>String.
-Range of inventory years in dataset.</p></dd>
+<dd><p>String. Range of inventory years in dataset.</p></dd>
 <dt>stratdat</dt>
 <dd><p>Data frame. Strata information by estimation unit.</p></dd>
-</dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>unitvar</td><td>estimation unit</td></tr><tr><td></td><td>strvar</td><td>stratum value</td></tr><tr><td></td><td>strwtvar</td><td>number of pixels by strata and estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata (after totally nonsampled plots removed)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation unit</td></tr><tr><td></td><td>strwt</td><td>proportion of area (or plots) by strata and estimation unit (i.e., strata
-weight)</td></tr><tr><td></td><td>CONDPROP_UNADJ_SUM</td><td>summed condition proportion by
-strata and estimation unit</td></tr><tr><td></td><td>CONDPROP_ADJFAC</td><td>adjusted condition
-proportion by strata after nonsampled plots removed</td></tr><tr><td></td><td>AREA_USED</td><td>total area of estimation unit</td></tr><tr><td></td><td>expfac</td><td>strata-level expansion
-factor after nonsampled plots and conditions removed (AREA_USED/n.strata)</td></tr><tr><td></td><td>EXPNS</td><td>strata-level area expansions (expfac * strwt)</td></tr></table><p>Table(s) are also written to outfolder.</p>
+</dl><table class="table table"><tr><td></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>unitvar</td><td>estimation unit</td></tr><tr><td></td><td>strvar</td><td>stratum value</td></tr><tr><td></td><td>strwtvar</td><td>number of pixels by 
+strata and estimation unit</td></tr><tr><td></td><td>n.strata</td><td>number of plots in strata (after totally nonsampled 
+plots removed)</td></tr><tr><td></td><td>n.total</td><td>number of plots for estimation unit</td></tr><tr><td></td><td>strwt</td><td>proportion of area (or plots) by strata and estimation 
+unit (i.e., strata weight)</td></tr><tr><td></td><td>CONDPROP_UNADJ_SUM</td><td>summed conditionproportion by strata and 
+estimation unit</td></tr><tr><td></td><td>CONDPROP_ADJFAC</td><td>adjusted condition proportion by strata after 
+nonsampled plots removed</td></tr><tr><td></td><td>AREA_USED</td><td>total area of estimation unit</td></tr><tr><td></td><td>expfac</td><td>strata-level expansion factor after nonsampled plots and 
+conditions removed (AREA_USED/n.strata)</td></tr><tr><td></td><td>EXPNS</td><td>strata-level area expansions (expfac * strwt)</td></tr></table><p>Table(s) are also written to outfolder.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
     <p>Population types <br></p><table class="table table"><tr><td></td><td><b>popType</b>
-<b>Description</b></td><td></td></tr><tr><td>ALL</td><td>Population data, inluding nonsampled
-plots.</td><td></td></tr><tr><td>CURR</td><td>Population data for area estimates, excluding
-nonsampled plots.</td><td></td></tr><tr><td>VOL</td><td>Population data for area/tree estimates,
-excluding nonsampled plots.</td><td></td></tr><tr><td>LULC</td><td>Population data for land
-use/land cover transitional estimates, including only plots with previous
-measurements and excluding nonsampled plots.</td><td></td></tr></table><p>If variables are NULL, then it will prompt user to input variables.</p>
-<p>Necessary variables:<br></p><table class="table table"><tr><td></td><td><b>Data</b></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>tree</td><td>tuniqueid</td><td>Unique identifier for each plot in tree table.</td></tr><tr><td></td><td></td><td>CONDID</td><td>Unique identifier of each condition on plot.  Set CONDID=1, if only 1
-condition per plot.</td></tr><tr><td></td><td></td><td>TPA_UNADJ</td><td>Number of trees per acre
-each sample tree represents (e.g., DESIGNCD=1: TPA_UNADJ=6.018046 for trees
-on subplot; 74.965282 for trees on microplot).</td></tr><tr><td></td><td>cond</td><td>cuniqueid</td><td>Unique identifier for each plot in cond table.</td></tr><tr><td></td><td></td><td>CONDID</td><td>Unique identfier of each condition on plot.  Set CONDID=1, if only 1
-condition per plot.</td></tr><tr><td></td><td></td><td>CONDPROP_UNADJ</td><td>Unadjusted proportion
-of condition on each plot.  Set CONDPROP_UNADJ=1, if only 1 condition per
-plot.</td></tr><tr><td></td><td></td><td>COND_STATUS_CD</td><td>Status of each forested condition on
-plot (i.e. accessible forest, nonforest, water, etc.)</td></tr><tr><td></td><td></td><td>NF_COND_STATUS_CD</td><td>If ACI=TRUE. Status of each nonforest condition on
-plot (i.e. accessible nonforest, nonsampled nonforest)</td></tr><tr><td></td><td></td><td>SITECLCD</td><td>If landarea=TIMBERLAND. Measure of site productivity.</td></tr><tr><td></td><td></td><td>RESERVCD</td><td>If landarea=TIMBERLAND. Reserved status.</td></tr><tr><td></td><td></td><td>SUBPROP_UNADJ</td><td>Unadjusted proportion of subplot conditions on each plot.
-Set SUBPROP_UNADJ=1, if only 1 condition per subplot.</td></tr><tr><td></td><td></td><td>MICRPROP_UNADJ</td><td>If microplot tree attributes. Unadjusted proportion of
-microplot conditions on each plot. Set MICRPROP_UNADJ=1, if only 1 condition
-per microplot.</td></tr><tr><td></td><td></td><td>MACRPROP_UNADJ</td><td>If macroplot tree
-attributes. Unadjusted proportion of macroplot conditions on each plot. Set
-MACRPROP_UNADJ=1, if only 1 condition per macroplot.</td></tr><tr><td></td><td>pltassgn</td><td>pltassgnid</td><td>Unique identifier for each plot in pltassgn.</td></tr><tr><td></td><td></td><td>STATECD</td><td>Identifies state each plot is located in.</td></tr><tr><td></td><td></td><td>INVYR</td><td>Identifies inventory year of each plot.</td></tr><tr><td></td><td></td><td>PLOT_STATUS_CD</td><td>Status of each plot (i.e. sampled, nonsampled).  If not included, all
-plots are assumed as sampled.</td></tr></table><p>For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) <br></p>
+<b>Description</b></td><td></td></tr><tr><td>ALL</td><td>Population data, inluding nonsampled plots.</td><td></td></tr><tr><td>CURR</td><td>Population data for area estimates, excluding nonsampled 
+plots.</td><td></td></tr><tr><td>VOL</td><td>Population data for area/tree estimates, excluding 
+nonsampled plots.</td><td></td></tr><tr><td>LULC</td><td>Population data for land use/land cover transitional estimates, 
+including only plots with previous measurements and excluding nonsampled 
+plots.</td><td></td></tr></table><p>If variables are NULL, then it will prompt user to input variables.</p>
+<p>Necessary variables:<br></p><table class="table table"><tr><td></td><td><b>Data</b></td><td><b>Variable</b></td><td><b>Description</b></td></tr><tr><td></td><td>tree</td><td>tuniqueid</td><td>Unique identifier for each plot in tree 
+table.</td></tr><tr><td></td><td></td><td>CONDID</td><td>Unique identifier of each condition on plot.  
+Set CONDID=1, if only 1 condition per plot.</td></tr><tr><td></td><td></td><td>TPA_UNADJ</td><td>Number of trees per acre each sample tree represents 
+(e.g., DESIGNCD=1: TPA_UNADJ=6.018046 for trees on subplot; 74.965282 for 
+trees on microplot).</td></tr><tr><td></td><td>cond</td><td>cuniqueid</td><td>Unique identifier for each plot in cond 
+table.</td></tr><tr><td></td><td></td><td>CONDID</td><td>Unique identfier of each condition on plot. Set 
+CONDID=1, if only 1 condition per plot.</td></tr><tr><td></td><td></td><td>CONDPROP_UNADJ</td><td>Unadjusted proportion of condition on each 
+plot. Set CONDPROP_UNADJ=1, if only 1 condition per plot.</td></tr><tr><td></td><td></td><td>COND_STATUS_CD</td><td>Status of each forested condition on
+plot (i.e. accessible forest, nonforest, water, etc.)</td></tr><tr><td></td><td></td><td>NF_COND_STATUS_CD</td><td>If ACI=TRUE. Status of each nonforest 
+condition on plot (i.e. accessible nonforest, nonsampled nonforest)</td></tr><tr><td></td><td></td><td>SITECLCD</td><td>If landarea=TIMBERLAND. Measure of site 
+productivity.</td></tr><tr><td></td><td></td><td>RESERVCD</td><td>If landarea=TIMBERLAND. Reserved status.</td></tr><tr><td></td><td></td><td>SUBPROP_UNADJ</td><td>Unadjusted proportion of subplot conditions 
+on each plot. Set SUBPROP_UNADJ=1, if only 1 condition per subplot.</td></tr><tr><td></td><td></td><td>MICRPROP_UNADJ</td><td>If microplot tree attributes. Unadjusted 
+proportion of microplot conditions on each plot. Set MICRPROP_UNADJ=1, 
+if only 1 condition per microplot.</td></tr><tr><td></td><td></td><td>MACRPROP_UNADJ</td><td>If macroplot tree attributes. Unadjusted 
+proportion of macroplot conditions on each plot. Set MACRPROP_UNADJ=1, 
+if only 1 condition per macroplot.</td></tr><tr><td></td><td>pltassgn</td><td>pltassgnid</td><td>Unique identifier for each plot in 
+pltassgn.</td></tr><tr><td></td><td></td><td>STATECD</td><td>Identifies state each plot is located in.</td></tr><tr><td></td><td></td><td>INVYR</td><td>Identifies inventory year of each plot.</td></tr><tr><td></td><td></td><td>PLOT_STATUS_CD</td><td>Status of each plot (i.e. sampled, nonsampled).  
+If not included, all plots are assumed as sampled.</td></tr></table><p>For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) <br></p>
     </div>
     <div id="note">
     <h2>Note</h2>
@@ -371,9 +369,6 @@ Station, p.53-77.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> DESIGNCD not in dataset.. assuming DESIGNCD = 1 (annual inventory)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> removing 14 nonsampled forest conditions</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 14 records: COND_STATUS_CD != 5</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'length(x) = 2 &gt; 1' in coercion to 'logical(1)'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'length(x) = 2 &gt; 1' in coercion to 'logical(1)'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'length(x) = 2 &gt; 1' in coercion to 'logical(1)'</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">GBpopdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 26</span>

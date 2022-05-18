@@ -136,28 +136,36 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Currently, to install <code>FIESTA</code>, you must go through a few steps:</p>
+<!-- #### Stable installation -->
+<!-- You can install the current stable version of `FIESTA` from CRAN: -->
+<!-- ```{r, eval = F} -->
+<!-- install.packages("FIESTA") -->
+<!-- ``` -->
 <div class="section level4">
-<h4 id="1-install-rtools-or-xcode">1. Install Rtools or xcode<a class="anchor" aria-label="anchor" href="#1-install-rtools-or-xcode"></a>
+<h4 id="developmental-installation">Developmental installation<a class="anchor" aria-label="anchor" href="#developmental-installation"></a>
 </h4>
+<p>Or, if you’d like to install the developmental version of <code>FIESTA</code>, you can do so through a few steps:</p>
+<div class="section level5">
+<h5 id="1-install-rtools-or-xcode">1. Install Rtools or xcode<a class="anchor" aria-label="anchor" href="#1-install-rtools-or-xcode"></a>
+</h5>
 <p>If you are using the Windows OS, in order to install source code from GitHub, you must install Rtools from <a href="https://cran.r-project.org/" class="external-link">CRAN</a>. Install the most current Rtools for Windows 64-bit at <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">this link</a>.</p>
-<p>If you are using macOS, you’ll need to install xcode developer tools. To do so, run the following code in your terminal (not the R console):</p>
+<p>If you are using macOS, you’ll need to install xcode developer tools to install source code from GitHub. To do so, run the following code in your terminal (not the R console):</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>xcode<span class="sc">-</span>select <span class="sc">--</span>install</span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="2-install-the-fiesta-r-package">2. Install the <code>FIESTA</code> R package<a class="anchor" aria-label="anchor" href="#2-install-the-fiesta-r-package"></a>
-</h4>
-<p>Currently, <code>FIESTA</code> is available for installation from GitHub.</p>
+<div class="section level5">
+<h5 id="2-install-the-developmental-version-of-fiesta-and-fiestautils">2. Install the developmental version of <code>FIESTA</code> (and <code>FIESTAutils</code>)<a class="anchor" aria-label="anchor" href="#2-install-the-developmental-version-of-fiesta-and-fiestautils"></a>
+</h5>
+<p>First note that the developmental version of <code>FIESTA</code> may rely on a developmental version of <code>FIESTAutils</code>. For both of these installations, you’ll need to make sure to have the <code>remotes</code> package, and then you can install both packages from GitHub:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"USDAForestService/FIESTA"</span>,
-                        build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="co"># Install developmental FIESTAutils first</span>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"USDAForestService/FIESTAutils"</span>,
+                        dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co"># Then install developmental FIESTA</span>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"USDAForestService/FIESTA"</span>,
+                        build_vignettes <span class="op">=</span> <span class="cn">TRUE</span>,
+                        dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="3-load-fiesta">3. Load FIESTA<a class="anchor" aria-label="anchor" href="#3-load-fiesta"></a>
-</h4>
-<p>Then, you can load <code>FIESTA</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -166,31 +174,35 @@
 <p>To report a bug with <code>FIESTA</code>, please open an issue on the <a href="https://github.com/USDAForestService/FIESTA/issues" class="external-link"><code>FIESTA</code> GitHub Repository issues page</a>. Please provide a description of the bug, and a reproducible example. For help creating a reproducible example, see the <a href="https://reprex.tidyverse.org/" class="external-link"><code>reprex</code></a> R package.</p>
 </div>
 <div class="section level2">
-<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+<h2 id="copyright-and-license">Copyright and License<a class="anchor" aria-label="anchor" href="#copyright-and-license"></a>
 </h2>
-<p>This code was written and prepared by a U.S. Government employee on official time, and therefore it is in the public domain and not subject to copyright.</p>
+<p>This code was written and prepared by U.S. Government employees on official time, and therefore it is in the public domain and not subject to copyright.</p>
+<p>License is GPL-3.</p>
 </div>
 <div class="section level2">
-<h2 id="accessing-documentation-vignettes">Accessing Documentation (Vignettes)<a class="anchor" aria-label="anchor" href="#accessing-documentation-vignettes"></a>
+<h2 id="accessing-documentation">Accessing Documentation<a class="anchor" aria-label="anchor" href="#accessing-documentation"></a>
 </h2>
+<div class="section level3">
+<h3 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
+</h3>
 <p>To see a list of vignette tutorials from <code>FIESTA</code>, you can run the following code:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></code></pre></div>
 <p>These vignettes are split up into a few groups:</p>
-<div class="section level3">
-<h3 id="general-manuals">General Manuals<a class="anchor" aria-label="anchor" href="#general-manuals"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="section level4">
+<h4 id="general-manuals">General Manuals<a class="anchor" aria-label="anchor" href="#general-manuals"></a>
+</h4>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Estimation manual</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"FIESTA_manual_mod_est"</span>, package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span>
 
 <span class="co"># Population data manual</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"FIESTA_manual_mod_pop"</span>, package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="core-functions-1">Core functions<a class="anchor" aria-label="anchor" href="#core-functions-1"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="section level4">
+<h4 id="core-functions-1">Core functions<a class="anchor" aria-label="anchor" href="#core-functions-1"></a>
+</h4>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Data tools</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"FIESTA_tutorial_dat"</span>, package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span>
 
@@ -200,10 +212,10 @@
 <span class="co"># Spatial tools</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"FIESTA_tutorial_sp"</span>, package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="estimation-modules">Estimation Modules<a class="anchor" aria-label="anchor" href="#estimation-modules"></a>
-</h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="section level4">
+<h4 id="estimation-modules">Estimation Modules<a class="anchor" aria-label="anchor" href="#estimation-modules"></a>
+</h4>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Green-Book estimation</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"FIESTA_tutorial_GB"</span>, package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span>
 
@@ -217,10 +229,18 @@
 <span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"FIESTA_tutorial_PB"</span>, package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
+<div class="section level3">
+<h3 id="external-data">External Data<a class="anchor" aria-label="anchor" href="#external-data"></a>
+</h3>
+<p>You can access documentation for external data included in <code>FIESTA</code> in the <a href="inst/extdata-README.html"><code>extdata-README.md</code> file</a>.</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
 </h2>
-<p>These examples make use of vignettes that come with <code>FIESTA</code>, and these vignettes can be found by calling <code>vignette(package = "FIESTA")</code>. The data used in these examples come with the <code>FIESTA</code> package and are from Wyoming, inventory years 2011-2013 (Evaluation 561301).</p>
+<p>These examples make use of vignettes that come with <code>FIESTA</code>, and these vignettes can be found by calling <code>vignette(package = "FIESTA")</code>. The data used in these examples come with the <code>FIESTA</code> package and are from Wyoming, inventory years 2011-2013 (Evaluation 561301). We first load <code>FIESTA</code> to run these examples:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">FIESTA</span><span class="op">)</span></code></pre></div>
 <div class="section level3">
 <h3 id="example-1-green-book-estimation">Example 1: Green-book estimation<a class="anchor" aria-label="anchor" href="#example-1-green-book-estimation"></a>
 </h3>
@@ -351,8 +371,7 @@
     <div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li>file <a href="LICENSE-text.html">LICENSE</a>
-</li>
+<li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>
 </ul>
 </div>
 
@@ -367,11 +386,11 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Tracey Frescino <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Tracey Frescino <br><small class="roles"> Author </small>  </li>
 <li>Gretchen Moisen <br><small class="roles"> Author </small>  </li>
 <li>Paul Patterson <br><small class="roles"> Author </small>  </li>
 <li>Chris Toney <br><small class="roles"> Author </small>  </li>
-<li>Grayson White <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0003-4993-2792" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Grayson White <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0003-4993-2792" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 

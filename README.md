@@ -115,11 +115,13 @@ provide a description of the bug, and a reproducible example. For help
 creating a reproducible example, see the
 [`reprex`](https://reprex.tidyverse.org/) R package.
 
-## License
+## Copyright and License
 
-This code was written and prepared by a U.S. Government employee on
+This code was written and prepared by U.S. Government employees on
 official time, and therefore it is in the public domain and not subject
 to copyright.
+
+License is GPL-3.
 
 ## Accessing Documentation
 
