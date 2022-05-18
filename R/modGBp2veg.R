@@ -244,10 +244,7 @@ modGBp2veg <- function(GBpopdat = NULL,
     #if (!col.FIAname) col.FIAname <- NULL
   }
   
-  ## INITIALIZE SETTINGS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
+  ## Set parameters
   nonresp <- FALSE
   esttype <- "P2VEG"
   substrvar <- NULL

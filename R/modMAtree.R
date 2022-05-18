@@ -299,10 +299,7 @@ modMAtree <- function(MApopdat,
     if (!col.FIAname) col.FIAname <- NULL
   }
   
-  ## INITIALIZE SETTINGS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
+  ## Set parameters
   minplotnum <- 10
   esttype="TREE"
   parameters <- FALSE

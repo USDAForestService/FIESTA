@@ -224,10 +224,7 @@ modSApop <- function(popType="VOL",
     areavar=strata=strvar=getwt=cuniqueid=ACI=tuniqueid=savedata=unitvar <- NULL
   }
   
-  ## Set options
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
+  ## Set parameters
   adjtree <- FALSE
   returnSApopdat <- FALSE
   nonsamp.pfilter=nonsamp.cfilter <- NULL 

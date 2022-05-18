@@ -550,10 +550,6 @@ DBgetPlots <- function (states = NULL,
 	PREV_PLT_CN <- NULL
 
 
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
 
   ## Define functions
   ###########################################################

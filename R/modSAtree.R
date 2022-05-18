@@ -231,10 +231,7 @@ modSAtree <- function(SApopdatlst = NULL,
 	JU.EBLUP.se.1=pse=AREAUSED=JoSAE.pse=JoSAE.total=treef=seedf=nhat.var <- NULL
 
 
-  ## Set options
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
+  ## Set parameters
   title.rowgrp <- NULL
   pvars2keep <- c("DOMAIN", "AOI")
   returnSApopdat <- TRUE

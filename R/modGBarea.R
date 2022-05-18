@@ -287,9 +287,6 @@ modGBarea <- function(GBpopdat,
   
   
   ## INITIALIZE SETTINGS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
   esttype <- "AREA" 
   nonresp <- FALSE
   substrvar <- NULL

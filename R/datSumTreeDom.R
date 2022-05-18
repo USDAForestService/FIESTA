@@ -268,11 +268,6 @@ datSumTreeDom <- function(tree = NULL,
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
 	tdombarplot=FIAname=addseed=proportion=presence=tdomtot=adjtree=tmp <- NULL
 
-  ## Set options
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
-
 
   ##################################################################
   ## SET VARIABLE LISTS

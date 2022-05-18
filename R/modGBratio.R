@@ -325,10 +325,7 @@ modGBratio <- function(GBpopdat,
     #if (!col.FIAname) col.FIAname <- NULL  
   }
   
-  ## INITIALIZE SETTINGS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
+  ## Set parameters
   rowcol.total <- TRUE
   esttype <- "RATIO"
   parameters <- FALSE

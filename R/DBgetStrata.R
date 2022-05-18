@@ -160,10 +160,6 @@ DBgetStrata <- function(dat = NULL,
   parameters <- FALSE
   PLTdups <- FALSE
 
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
 
   ##################################################################
   ## CHECK INPUT PARAMETERS

@@ -169,10 +169,6 @@ datSumTree <- function(tree = NULL,
   seedonly=parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
 
-  ## Set options
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
 
   ## SET VARIABLE LISTS
   biovars <- c("DRYBIO_AG", "DRYBIO_BG", "DRYBIO_WDLD_SPP", "DRYBIO_SAPLING",

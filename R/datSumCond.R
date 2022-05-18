@@ -81,12 +81,6 @@ datSumCond <- function(cond = NULL,
   ## If gui.. set variables to NULL
   if(gui){ puniqueid=cuniqueid=csumvarnm=savedata <- NULL }
 
-  ## Set options
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  options(stringsAsFactors=FALSE)
-  on.exit(options(options.old), add=TRUE) 
-
   ## Set global variables
   CONDPROP_ADJ=CONDPROP_UNADJ <- NULL
 

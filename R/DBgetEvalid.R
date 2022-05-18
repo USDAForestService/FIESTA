@@ -127,11 +127,6 @@ DBgetEvalid <- function(states = NULL,
     evalCur=evalAll=evalType <- NULL
   }
   
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
-  
   
   ## Set global variables
   EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR=POP_EVAL=POP_EVAL_GRP=

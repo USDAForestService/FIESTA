@@ -36,10 +36,7 @@ modGBlulc <- function(GBpopdat,
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
   
   
- ## INITIALIZE SETTINGS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
+ ## Set parameters
   esttype <- "LULC"
   parameters <- FALSE
   returnlst <- list()

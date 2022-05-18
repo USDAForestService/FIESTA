@@ -86,13 +86,39 @@
 #' # Add standard errors to basic barplot
 #' datBarplot(x = ftyptab, xvar = "FORTYPCD", errbars = TRUE, sevar = "SE")
 #' @export datBarplot
-datBarplot <- function(x, xvar=NULL, yvar="FREQ", grpvar=NULL, errbars=FALSE, 
-	x.order=NULL, sevar=NULL, psevar=NULL, device.type="dev.new", jpeg.res=300, 
-	device.height=5, device.width=8, horiz=FALSE, toplabelvar=NULL, 
-	ylim=NULL, divideby=NULL, ylabel=NULL, xlabel=NULL, mar=NULL, addlegend=FALSE, 
-	main=NULL, cex.main=1, cex.label=1, cex.names=0.8, las.xnames=0, las.ynames=1, 
-	savedata=FALSE, outfolder=NULL, outfn=NULL, outfn.pre=NULL, outfn.date=TRUE, 
-	overwrite=FALSE, ...){ 
+datBarplot <- function(x, 
+                       xvar = NULL, 
+                       yvar = "FREQ", 
+                       grpvar = NULL, 
+                       errbars = FALSE, 
+                       x.order = NULL, 
+                       sevar = NULL, 
+                       psevar = NULL, 
+                       device.type = "dev.new", 
+                       jpeg.res = 300, 
+                       device.height = 5, 
+                       device.width = 8, 
+                       horiz = FALSE, 
+                       toplabelvar = NULL, 
+                       ylim = NULL, 
+                       divideby = NULL, 
+                       ylabel = NULL, 
+                       xlabel = NULL, 
+                       mar = NULL, 
+                       addlegend = FALSE, 
+                       main = NULL, 
+                       cex.main = 1, 
+                       cex.label = 1, 
+                       cex.names = 0.8, 
+                       las.xnames = 0, 
+                       las.ynames = 1, 
+                       savedata = FALSE, 
+                       outfolder = NULL, 
+                       outfn = NULL, 
+                       outfn.pre = NULL, 
+                       outfn.date = TRUE, 
+                       overwrite = FALSE, 
+                       ...){ 
   ####################################################################################
   ## DESCRIPTION: Function to generate a barplot of frequencies ordered from most
   ##        to least.

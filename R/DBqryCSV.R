@@ -32,10 +32,6 @@
 #' @export DBqryCSV
 DBqryCSV <- function(sql, states=NULL, sqltables=NULL) {
 
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE)
   ZIP <- TRUE 
 
   ## Stop if no arguments passed. No GUI available for this function

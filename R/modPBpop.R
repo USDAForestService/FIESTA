@@ -269,10 +269,7 @@ modPBpop <- function(pntdat = NULL,
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt <- NULL
 
-  ## SET OPTIONS
-  options.old <- options()
-  options(scipen=8) # bias against scientific notation
-  on.exit(options(options.old), add=TRUE) 
+  ## Set parameters
   auxvars <- NULL
 
   
