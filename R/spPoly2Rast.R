@@ -28,6 +28,8 @@
 #' @param outext String. Name of raster extension (fmt).
 #' @param overwrite Logical. If TRUE and exportshp=TRUE, overwrite files in
 #' outfolder.
+#' @return A list containing raster and raster information derived from the
+#' original polygon.
 #' @note
 #' 
 #' On-the-fly projection conversion\cr The spTransform (rgdal) method is used

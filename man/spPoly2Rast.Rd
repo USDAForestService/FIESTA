@@ -57,6 +57,10 @@ outfn_'date'.csv).}
 \item{overwrite}{Logical. If TRUE and exportshp=TRUE, overwrite files in
 outfolder.}
 }
+\value{
+A list containing raster and raster information derived from the
+original polygon.
+}
 \description{
 Converts SpatialPolygons layer to raster.
 }

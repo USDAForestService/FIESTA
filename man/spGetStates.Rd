@@ -45,6 +45,10 @@ included.}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savebnd = TRUE.}
 }
+\value{
+A list containing states and state names that the boundary crosses,
+and boundary and attribute information for the intersecting boundary.
+}
 \description{
 Wrapper to get state names that intersect a given boundary.
 }

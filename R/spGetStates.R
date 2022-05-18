@@ -19,7 +19,8 @@
 #' @param savebnd Logical. If yes, save boundary to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savebnd = TRUE. 
-#'
+#' @return A list containing states and state names that the boundary crosses,
+#' and boundary and attribute information for the intersecting boundary. 
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples
