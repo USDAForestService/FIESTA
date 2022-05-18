@@ -96,11 +96,6 @@ library(FIESTA)
 Next, you'll need to set up an "outfolder". This is just a file path to a folder where you'd like `FIESTA` to send your data output. For our purposes in this vignette, we have saved our outfolder file path as the `outfolder` object in a temporary directory. We also set a few default options preferred for this vignette.
 
 ```{r}
-## Set options
-options(scipen = 6)
-options(stringsAsFactors = FALSE)
-
-## Set outfolder
 outfolder <- tempdir()
 ```
 
