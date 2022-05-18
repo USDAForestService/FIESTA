@@ -136,7 +136,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # Get layers from FIESTA external data
 #' ## dem (continuous)
 #' demfn <- system.file("extdata",

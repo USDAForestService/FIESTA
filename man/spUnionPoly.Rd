@@ -107,7 +107,7 @@ polyUnion <- spUnionPoly(polyv1 = USAco[USAco$NAME_1 == "Wyoming",],
                          areacalc = TRUE)
                          
 # Plot the result
-plot(st_geometry(polyUnion))
+plot(sf::st_geometry(polyUnion))
 }
 }
 \author{

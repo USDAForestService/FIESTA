@@ -281,7 +281,7 @@ Common tree filters: \cr
 AGENTCD == 30" \tab Dead trees from fire \cr }
 }
 \examples{
-\dontrun{
+\donttest{
 # Set up population dataset (see ?modMApop() for more information)
 MApopdat <- modMApop(popTabs = list(tree = FIESTA::WYtree,
                                     cond = FIESTA::WYcond),

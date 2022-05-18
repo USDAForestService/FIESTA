@@ -78,7 +78,7 @@
 #'                          areacalc = TRUE)
 #'                          
 #' # Plot the result
-#' plot(st_geometry(polyUnion))
+#' plot(sf::st_geometry(polyUnion))
 #' }
 #' @export spUnionPoly
 spUnionPoly <- function(polyv1, 

@@ -215,7 +215,7 @@ lead to erroneous data shifts when reprojecting. See spTransform help
 documentation for more details.
 }
 \examples{
-\dontrun{
+\donttest{
 # Get layers from FIESTA external data
 ## dem (continuous)
 demfn <- system.file("extdata",

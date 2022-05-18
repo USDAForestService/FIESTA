@@ -234,7 +234,7 @@
 #' 0.1.2 https://cran.r-project.org/package=mase
 #' @keywords data
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Set up population dataset (see ?modMApop() for more information)
 #' MApopdat <- modMApop(popTabs = list(tree = FIESTA::WYtree,
 #'                                     cond = FIESTA::WYcond),

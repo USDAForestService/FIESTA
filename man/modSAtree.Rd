@@ -204,7 +204,7 @@ Common tree filters for estvar.filter: \cr
 AGENTCD == 30" \tab Dead trees from fire \cr }
 }
 \examples{
-\dontrun{
+\donttest{
 # Set up population dataset (see ?modSApop() for more information)
 SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
                                     cond = FIESTA::WYcond),

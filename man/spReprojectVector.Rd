@@ -82,7 +82,7 @@ using an internal function (trunc10shp). If sf object has more than 1
 record, it will be returned but not exported.
 }
 \examples{
-\dontrun{
+\donttest{
 # Set up `SpatialPoints` object
 WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
                                xy.uniqueid = "CN", 

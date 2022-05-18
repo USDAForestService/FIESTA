@@ -115,7 +115,7 @@ used as an intermediate step between processes. The VRT format ignores
 option to maskByPolygons.
 }
 \examples{
-\dontrun{
+\donttest{
 # Get polygon vector layer from FIESTA external data
 WYbhdistfn <- system.file("extdata",
                           "sp_data/WYbighorn_districtbnd.shp", 

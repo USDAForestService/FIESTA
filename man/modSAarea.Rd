@@ -188,7 +188,7 @@ interested in estimates for all lands or nonforest lands in the
 All-Condition-Inventory.
 }
 \examples{
-\dontrun{
+\donttest{
 # Set up population dataset (see ?modSApop() for more information)
 SApopdat <- modSApop(popTabs = list(tree = FIESTA::WYtree,
                                     cond = FIESTA::WYcond),

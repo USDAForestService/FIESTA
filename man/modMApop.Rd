@@ -257,7 +257,7 @@ classes following in order, it is combined with the estimation unit previous
 in order.
 }
 \examples{
-\dontrun{
+\donttest{
 # NOTE: FIA data objects used in these examples are stored in `FIESTA`, but
 # can be generated for populations of interest by the user with functions in
 # `FIESTA` such as `spGetPlots()`, `spGetAuxiliary()`, etc. For more

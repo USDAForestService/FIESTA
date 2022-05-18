@@ -65,7 +65,7 @@
 #' @author Tracey S. Frescino
 #' @keywords data
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # Set up `SpatialPoints` object
 #' WYspplt <- spMakeSpatialPoints(xyplt = WYplt, 
 #'                                xy.uniqueid = "CN", 

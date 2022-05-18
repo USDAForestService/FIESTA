@@ -129,7 +129,7 @@ incomplete CRS information may lead to erroneous data shifts when
 reprojecting. See spTransform help documentation for more details.
 }
 \examples{
-\dontrun{
+\donttest{
 # Get raster layers from FIESTA external data
 demfn <- system.file("extdata",
                      "sp_data/WYbighorn_dem_250m.img",
