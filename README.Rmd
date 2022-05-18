@@ -75,7 +75,6 @@ remotes::install_github("USDAForestService/FIESTAutils",
 
 # Then install developmental FIESTA
 remotes::install_github("USDAForestService/FIESTA",
-                        build_vignettes = TRUE,
                         dependencies = TRUE)
 ```
 

@@ -524,8 +524,8 @@ output
 </summary><pre><code><span class="co">## List of 4</span>
 <span class="co">##  $ est    :Classes 'data.table' and 'data.frame':    1 obs. of  3 variables:</span>
 <span class="co">##   ..$ ONEUNIT               : num 1</span>
-<span class="co">##   ..$ Estimate              : num 668772</span>
-<span class="co">##   ..$ Percent Sampling Error: num 10.5</span>
+<span class="co">##   ..$ Estimate              : num 666930</span>
+<span class="co">##   ..$ Percent Sampling Error: num 10.2</span>
 <span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span>
 <span class="co">##  $ raw    :List of 9</span>
@@ -546,8 +546,8 @@ output
 <code class="sourceCode R"><span class="va">area2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselectlst</span><span class="op">$</span><span class="va">totest</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##    ONEUNIT TOTAL dem slp asp_cos asp_sin fornf2</span>
-<span class="co">## 1:       1     1   0   0       0       0      0</span></code></pre>
+</summary><pre><code><span class="co">##    ONEUNIT TOTAL          dem slp asp_cos asp_sin fornf2</span>
+<span class="co">## 1:       1     1 -0.000280812   0       0       0      0</span></code></pre>
 </details><p>Notably, we can see that <code>dem</code>, <code>slp</code>,
 <code>asp_cos</code>, and <code>asp_sin</code> were removed from the
 model.</p>
@@ -1043,7 +1043,7 @@ output
 </summary><pre><code><span class="co">## List of 5</span>
 <span class="co">##  $ est     :Classes 'data.table' and 'data.frame':   1 obs. of  3 variables:</span>
 <span class="co">##   ..$ ONEUNIT               : num 1</span>
-<span class="co">##   ..$ Estimate              : num 1326775889</span>
+<span class="co">##   ..$ Estimate              : num 1322508950</span>
 <span class="co">##   ..$ Percent Sampling Error: num 14.5</span>
 <span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span>
@@ -1082,7 +1082,7 @@ output
 output
 </summary><pre><code><span class="co">## $totest</span>
 <span class="co">##    ONEUNIT TOTAL      dem       slp asp_cos   asp_sin    fornf2</span>
-<span class="co">## 1:       1     1 0.670842 -70.64631       0 -600.5856 -1355.323</span></code></pre>
+<span class="co">## 1:       1     1 0.693188 -72.13601       0 -624.5437 -1404.337</span></code></pre>
 </details><p>Notably, we can see that [INSERT CORRECT PREDS] <code>dem</code>,
 <code>slp</code>, <code>asp_cos</code>, and <code>asp_sin</code> were
 removed from the model.</p>
