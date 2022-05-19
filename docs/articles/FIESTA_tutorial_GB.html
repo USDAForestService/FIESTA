@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
       </span>
     </div>
 
@@ -290,10 +290,7 @@ output. For this vignette, we have saved our outfolder file path as the
 <code>outfolder</code> object in a temporary directory. We also set a
 few default options preferred for this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Set options</span>
-<span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="get-auxiliary-data-for-custom-examples">Get auxiliary data for custom examples<a class="anchor" aria-label="anchor" href="#get-auxiliary-data-for-custom-examples"></a>
@@ -1266,13 +1263,13 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.1</span><span class="op">$</span><span class="va">unit_totest</span><span class="op">)</span>    <span class="co"># estimates by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT       nhat      nhat.var NBRPLT.gt0   ACRES AREAUSED      est</span>
-<span class="co">## 1         1 0.20844715 0.00042265222         24 2757613  2757613 574816.6</span>
-<span class="co">## 2         3 0.10668695 0.00044746297         12 2021729  2021729 215692.1</span>
-<span class="co">## 3         5 0.06743421 0.00035928457         14 3072988  3072988 207224.5</span>
-<span class="co">## 4         7 0.14429591 0.00007611799         36 5096959  5096959 735470.3</span>
-<span class="co">## 5         9 0.09134873 0.00027186982         18 2729653  2729653 249350.3</span>
-<span class="co">## 6        11 0.25385133 0.00055566662         26 1837124  1837124 466356.4</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT       nhat     nhat.var NBRPLT.gt0   ACRES AREAUSED      est</span>
+<span class="co">## 1         1 0.20844715 4.226522e-04         24 2757613  2757613 574816.6</span>
+<span class="co">## 2         3 0.10668695 4.474630e-04         12 2021729  2021729 215692.1</span>
+<span class="co">## 3         5 0.06743421 3.592846e-04         14 3072988  3072988 207224.5</span>
+<span class="co">## 4         7 0.14429591 7.611799e-05         36 5096959  5096959 735470.3</span>
+<span class="co">## 5         9 0.09134873 2.718698e-04         18 2729653  2729653 249350.3</span>
+<span class="co">## 6        11 0.25385133 5.556666e-04         26 1837124  1837124 466356.4</span>
 <span class="co">##      est.var   est.se     est.cv       pse  CI99left CI99right  CI95left</span>
 <span class="co">## 1 3214028956 56692.41 0.09862695  9.862695 428786.60  720846.5 463701.49</span>
 <span class="co">## 2 1828954833 42766.28 0.19827468 19.827468 105533.46  325850.7 131871.73</span>
@@ -1361,13 +1358,13 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.2</span><span class="op">$</span><span class="va">unit_totest</span><span class="op">)</span> <span class="co"># estimates by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT       nhat      nhat.var NBRPLT.gt0   ACRES AREAUSED      est</span>
-<span class="co">## 1         1 0.20844715 0.00042265222         24 2757613  2757613 574816.6</span>
-<span class="co">## 2         3 0.10668695 0.00044746297         12 2021729  2021729 215692.1</span>
-<span class="co">## 3         5 0.06743421 0.00035928457         14 3072988  3072988 207224.5</span>
-<span class="co">## 4         7 0.14429591 0.00007611799         36 5096959  5096959 735470.3</span>
-<span class="co">## 5         9 0.09134873 0.00027186982         18 2729653  2729653 249350.3</span>
-<span class="co">## 6        11 0.25385133 0.00055566662         26 1837124  1837124 466356.4</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT       nhat     nhat.var NBRPLT.gt0   ACRES AREAUSED      est</span>
+<span class="co">## 1         1 0.20844715 4.226522e-04         24 2757613  2757613 574816.6</span>
+<span class="co">## 2         3 0.10668695 4.474630e-04         12 2021729  2021729 215692.1</span>
+<span class="co">## 3         5 0.06743421 3.592846e-04         14 3072988  3072988 207224.5</span>
+<span class="co">## 4         7 0.14429591 7.611799e-05         36 5096959  5096959 735470.3</span>
+<span class="co">## 5         9 0.09134873 2.718698e-04         18 2729653  2729653 249350.3</span>
+<span class="co">## 6        11 0.25385133 5.556666e-04         26 1837124  1837124 466356.4</span>
 <span class="co">##      est.var   est.se     est.cv       pse  CI99left CI99right  CI95left</span>
 <span class="co">## 1 3214028956 56692.41 0.09862695  9.862695 428786.60  720846.5 463701.49</span>
 <span class="co">## 2 1828954833 42766.28 0.19827468 19.827468 105533.46  325850.7 131871.73</span>
@@ -1545,13 +1542,13 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">unit_totest</span><span class="op">)</span> <span class="co"># estimates by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT       nhat      nhat.var NBRPLT.gt0   ACRES AREAUSED      est</span>
-<span class="co">## 1         1 0.20844715 0.00042265222         24 2757613  2757613 574816.6</span>
-<span class="co">## 2         3 0.10668695 0.00044746297         12 2021729  2021729 215692.1</span>
-<span class="co">## 3         5 0.06743421 0.00035928457         14 3072988  3072988 207224.5</span>
-<span class="co">## 4         7 0.14429591 0.00007611799         36 5096959  5096959 735470.3</span>
-<span class="co">## 5         9 0.09134873 0.00027186982         18 2729653  2729653 249350.3</span>
-<span class="co">## 6        11 0.25385133 0.00055566662         26 1837124  1837124 466356.4</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT       nhat     nhat.var NBRPLT.gt0   ACRES AREAUSED      est</span>
+<span class="co">## 1         1 0.20844715 4.226522e-04         24 2757613  2757613 574816.6</span>
+<span class="co">## 2         3 0.10668695 4.474630e-04         12 2021729  2021729 215692.1</span>
+<span class="co">## 3         5 0.06743421 3.592846e-04         14 3072988  3072988 207224.5</span>
+<span class="co">## 4         7 0.14429591 7.611799e-05         36 5096959  5096959 735470.3</span>
+<span class="co">## 5         9 0.09134873 2.718698e-04         18 2729653  2729653 249350.3</span>
+<span class="co">## 6        11 0.25385133 5.556666e-04         26 1837124  1837124 466356.4</span>
 <span class="co">##      est.var   est.se     est.cv       pse  CI99left CI99right  CI95left</span>
 <span class="co">## 1 3214028956 56692.41 0.09862695  9.862695 428786.60  720846.5 463701.49</span>
 <span class="co">## 2 1828954833 42766.28 0.19827468 19.827468 105533.46  325850.7 131871.73</span>
@@ -1628,13 +1625,13 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">unit_colest</span><span class="op">)</span> <span class="co"># estimates by column, by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT Stand-size class        nhat      nhat.var NBRPLT.gt0 STDSZCD</span>
-<span class="co">## 1         1   Large diameter 0.077375917 0.00045606257          9       1</span>
-<span class="co">## 2         1  Medium diameter 0.061391258 0.00033378677          6       2</span>
-<span class="co">## 3         1   Small diameter 0.059978760 0.00039535962          7       3</span>
-<span class="co">## 4         1       Nonstocked 0.009701211 0.00005884949          2       5</span>
-<span class="co">## 5         3   Large diameter 0.083776075 0.00046613258          9       1</span>
-<span class="co">## 6         3  Medium diameter 0.007729145 0.00005975619          1       2</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT Stand-size class        nhat     nhat.var NBRPLT.gt0 STDSZCD</span>
+<span class="co">## 1         1   Large diameter 0.077375917 4.560626e-04          9       1</span>
+<span class="co">## 2         1  Medium diameter 0.061391258 3.337868e-04          6       2</span>
+<span class="co">## 3         1   Small diameter 0.059978760 3.953596e-04          7       3</span>
+<span class="co">## 4         1       Nonstocked 0.009701211 5.884949e-05          2       5</span>
+<span class="co">## 5         3   Large diameter 0.083776075 4.661326e-04          9       1</span>
+<span class="co">## 6         3  Medium diameter 0.007729145 5.975619e-05          1       2</span>
 <span class="co">##     ACRES AREAUSED       est    est.var   est.se    est.cv       pse CI99left</span>
 <span class="co">## 1 2757613  2757613 213372.84 3468095619 58890.54 0.2759983  27.59983 61680.86</span>
 <span class="co">## 2 2757613  2757613 169293.33 2538257910 50381.13 0.2975966  29.75966 39520.15</span>
@@ -1674,27 +1671,27 @@ output
 <span class="co">## 4         1                   Ponderosa pine   Large diameter 0.032393804</span>
 <span class="co">## 5         1 Engelmann spruce / subalpine fir   Large diameter 0.020463753</span>
 <span class="co">## 6         1 Engelmann spruce / subalpine fir  Medium diameter 0.020463753</span>
-<span class="co">##        nhat.var NBRPLT.gt0 STDSZCD FORTYPCD   ACRES AREAUSED      est</span>
-<span class="co">## 1 0.00005379211          1       1      182 2757613  2757613 19698.30</span>
-<span class="co">## 2 0.00005379211          1       3      182 2757613  2757613 19698.30</span>
-<span class="co">## 3 0.00008091800          1       1      201 2757613  2757613 28215.56</span>
-<span class="co">## 4 0.00021375968          4       1      221 2757613  2757613 89329.58</span>
-<span class="co">## 5 0.00015172126          2       1      266 2757613  2757613 56431.11</span>
-<span class="co">## 6 0.00015172126          2       2      266 2757613  2757613 56431.11</span>
-<span class="co">##      est.var   est.se    est.cv       pse CI99left CI99right CI95left CI95right</span>
-<span class="co">## 1  409058305 20225.19 1.0267481 102.67481        0  71794.93     0.00  59338.94</span>
-<span class="co">## 2  409058305 20225.19 1.0267481 102.67481        0  71794.93     0.00  59338.94</span>
-<span class="co">## 3  615335251 24805.95 0.8791587  87.91587        0  92111.45     0.00  76834.33</span>
-<span class="co">## 4 1625520387 40317.74 0.4513370  45.13370        0 193181.20 10308.25 168350.90</span>
-<span class="co">## 5 1153753595 33966.95 0.6019188  60.19188        0 143924.17     0.00 123005.11</span>
-<span class="co">## 6 1153753595 33966.95 0.6019188  60.19188        0 143924.17     0.00 123005.11</span>
-<span class="co">##    CI68left CI68right</span>
-<span class="co">## 1     0.000  39811.40</span>
-<span class="co">## 2     0.000  39811.40</span>
-<span class="co">## 3  3547.081  52884.03</span>
-<span class="co">## 4 49235.278 129423.87</span>
-<span class="co">## 5 22652.411  90209.81</span>
-<span class="co">## 6 22652.411  90209.81</span></code></pre>
+<span class="co">##       nhat.var NBRPLT.gt0 STDSZCD FORTYPCD   ACRES AREAUSED      est    est.var</span>
+<span class="co">## 1 5.379211e-05          1       1      182 2757613  2757613 19698.30  409058305</span>
+<span class="co">## 2 5.379211e-05          1       3      182 2757613  2757613 19698.30  409058305</span>
+<span class="co">## 3 8.091800e-05          1       1      201 2757613  2757613 28215.56  615335251</span>
+<span class="co">## 4 2.137597e-04          4       1      221 2757613  2757613 89329.58 1625520387</span>
+<span class="co">## 5 1.517213e-04          2       1      266 2757613  2757613 56431.11 1153753595</span>
+<span class="co">## 6 1.517213e-04          2       2      266 2757613  2757613 56431.11 1153753595</span>
+<span class="co">##     est.se    est.cv       pse CI99left CI99right CI95left CI95right  CI68left</span>
+<span class="co">## 1 20225.19 1.0267481 102.67481        0  71794.93     0.00  59338.94     0.000</span>
+<span class="co">## 2 20225.19 1.0267481 102.67481        0  71794.93     0.00  59338.94     0.000</span>
+<span class="co">## 3 24805.95 0.8791587  87.91587        0  92111.45     0.00  76834.33  3547.081</span>
+<span class="co">## 4 40317.74 0.4513370  45.13370        0 193181.20 10308.25 168350.90 49235.278</span>
+<span class="co">## 5 33966.95 0.6019188  60.19188        0 143924.17     0.00 123005.11 22652.411</span>
+<span class="co">## 6 33966.95 0.6019188  60.19188        0 143924.17     0.00 123005.11 22652.411</span>
+<span class="co">##   CI68right</span>
+<span class="co">## 1  39811.40</span>
+<span class="co">## 2  39811.40</span>
+<span class="co">## 3  52884.03</span>
+<span class="co">## 4 129423.87</span>
+<span class="co">## 5  90209.81</span>
+<span class="co">## 6  90209.81</span></code></pre>
 </details><div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">grpest</span><span class="op">)</span>      <span class="co"># estimates by row and column for population (i.e., WY)</span></code></pre></div>
 <details><summary>
@@ -1864,13 +1861,13 @@ output
 <span class="co">## 4       1                 Engelmann spruce  Medium diameter 0.017816796</span>
 <span class="co">## 5       1 Engelmann spruce / subalpine fir   Large diameter 0.044541990</span>
 <span class="co">## 6       1 Engelmann spruce / subalpine fir  Medium diameter 0.008908398</span>
-<span class="co">##        nhat.var NBRPLT.gt0 STDSZCD FORTYPCD ACRES_GIS AREAUSED       est</span>
-<span class="co">## 1 0.00032226595          1       1      201   1112401  1112401 19819.430</span>
-<span class="co">## 2 0.00032226595          1       3      201   1112401  1112401 19819.430</span>
-<span class="co">## 3 0.00067996313          3       1      265   1112401  1112401 45091.601</span>
-<span class="co">## 4 0.00032226595          1       2      265   1112401  1112401 19819.430</span>
-<span class="co">## 5 0.00069287179          3       1      266   1112401  1112401 49548.576</span>
-<span class="co">## 6 0.00008056649          1       2      266   1112401  1112401  9909.715</span>
+<span class="co">##       nhat.var NBRPLT.gt0 STDSZCD FORTYPCD ACRES_GIS AREAUSED       est</span>
+<span class="co">## 1 3.222659e-04          1       1      201   1112401  1112401 19819.430</span>
+<span class="co">## 2 3.222659e-04          1       3      201   1112401  1112401 19819.430</span>
+<span class="co">## 3 6.799631e-04          3       1      265   1112401  1112401 45091.601</span>
+<span class="co">## 4 3.222659e-04          1       2      265   1112401  1112401 19819.430</span>
+<span class="co">## 5 6.928718e-04          3       1      266   1112401  1112401 49548.576</span>
+<span class="co">## 6 8.056649e-05          1       2      266   1112401  1112401  9909.715</span>
 <span class="co">##     est.var    est.se    est.cv       pse CI99left CI99right CI95left CI95right</span>
 <span class="co">## 1 398783824 19969.572 1.0075755 100.75755        0  71257.64        0  58959.07</span>
 <span class="co">## 2 398783824 19969.572 1.0075755 100.75755        0  71257.64        0  58959.07</span>
@@ -2441,20 +2438,20 @@ output
 <span class="co">## 4         7 248.65595  711.3799         35 5096959  5096959 1267389205</span>
 <span class="co">## 5         9  72.68797  595.6953         15 2729653  2729653  198412942</span>
 <span class="co">## 6        11 361.12986 4806.0717         26 1837124  1837124  663440342</span>
-<span class="co">##             est.var    est.se    est.cv      pse  CI99left  CI99right</span>
-<span class="co">## 1  4954793496988392  70390294 0.1304075 13.04075 358458294  721085058</span>
-<span class="co">## 2 22354303280176352 149513556 0.2832463 28.32463 142735673  912978468</span>
-<span class="co">## 3  1262811553168722  35536060 0.4099689 40.99689         0  178214713</span>
-<span class="co">## 4 18480932672926752 135944594 0.1072635 10.72635 917219136 1617559274</span>
-<span class="co">## 5  4438528740003891  66622284 0.3357759 33.57759  26805310  370020574</span>
-<span class="co">## 6 16220610070395912 127360159 0.1919693 19.19693 335382313  991498371</span>
-<span class="co">##     CI95left  CI95right   CI68left  CI68right</span>
-<span class="co">## 1  401809235  677734117  469771493  609771859</span>
-<span class="co">## 2  234815887  820898255  379172137  676542005</span>
-<span class="co">## 3   17030491  156329286   51340773  122019003</span>
-<span class="co">## 4 1000942697 1533835714 1132198032 1402580378</span>
-<span class="co">## 5   67835665  328990220  132159886  264665998</span>
-<span class="co">## 6  413819018  913061667  536786028  790094656</span></code></pre>
+<span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right   CI95left</span>
+<span class="co">## 1 4.954793e+15  70390294 0.1304075 13.04075 358458294  721085058  401809235</span>
+<span class="co">## 2 2.235430e+16 149513556 0.2832463 28.32463 142735673  912978468  234815887</span>
+<span class="co">## 3 1.262812e+15  35536060 0.4099689 40.99689         0  178214713   17030491</span>
+<span class="co">## 4 1.848093e+16 135944594 0.1072635 10.72635 917219136 1617559274 1000942697</span>
+<span class="co">## 5 4.438529e+15  66622284 0.3357759 33.57759  26805310  370020574   67835665</span>
+<span class="co">## 6 1.622061e+16 127360159 0.1919693 19.19693 335382313  991498371  413819018</span>
+<span class="co">##    CI95right   CI68left  CI68right</span>
+<span class="co">## 1  677734117  469771493  609771859</span>
+<span class="co">## 2  820898255  379172137  676542005</span>
+<span class="co">## 3  156329286   51340773  122019003</span>
+<span class="co">## 4 1533835714 1132198032 1402580378</span>
+<span class="co">## 5  328990220  132159886  264665998</span>
+<span class="co">## 6  913061667  536786028  790094656</span></code></pre>
 </details><div class="sourceCode" id="cb192"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.1</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>        <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
@@ -2580,20 +2577,20 @@ output
 <span class="co">## 4         7 248.65595  711.3799         35 5096959  5096959 1267389205</span>
 <span class="co">## 5         9  72.68797  595.6953         15 2729653  2729653  198412942</span>
 <span class="co">## 6        11 361.12986 4806.0717         26 1837124  1837124  663440342</span>
-<span class="co">##             est.var    est.se    est.cv      pse  CI99left  CI99right</span>
-<span class="co">## 1  4954793496988392  70390294 0.1304075 13.04075 358458294  721085058</span>
-<span class="co">## 2 22354303280176352 149513556 0.2832463 28.32463 142735673  912978468</span>
-<span class="co">## 3  1262811553168722  35536060 0.4099689 40.99689         0  178214713</span>
-<span class="co">## 4 18480932672926752 135944594 0.1072635 10.72635 917219136 1617559274</span>
-<span class="co">## 5  4438528740003891  66622284 0.3357759 33.57759  26805310  370020574</span>
-<span class="co">## 6 16220610070395912 127360159 0.1919693 19.19693 335382313  991498371</span>
-<span class="co">##     CI95left  CI95right   CI68left  CI68right</span>
-<span class="co">## 1  401809235  677734117  469771493  609771859</span>
-<span class="co">## 2  234815887  820898255  379172137  676542005</span>
-<span class="co">## 3   17030491  156329286   51340773  122019003</span>
-<span class="co">## 4 1000942697 1533835714 1132198032 1402580378</span>
-<span class="co">## 5   67835665  328990220  132159886  264665998</span>
-<span class="co">## 6  413819018  913061667  536786028  790094656</span></code></pre>
+<span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right   CI95left</span>
+<span class="co">## 1 4.954793e+15  70390294 0.1304075 13.04075 358458294  721085058  401809235</span>
+<span class="co">## 2 2.235430e+16 149513556 0.2832463 28.32463 142735673  912978468  234815887</span>
+<span class="co">## 3 1.262812e+15  35536060 0.4099689 40.99689         0  178214713   17030491</span>
+<span class="co">## 4 1.848093e+16 135944594 0.1072635 10.72635 917219136 1617559274 1000942697</span>
+<span class="co">## 5 4.438529e+15  66622284 0.3357759 33.57759  26805310  370020574   67835665</span>
+<span class="co">## 6 1.622061e+16 127360159 0.1919693 19.19693 335382313  991498371  413819018</span>
+<span class="co">##    CI95right   CI68left  CI68right</span>
+<span class="co">## 1  677734117  469771493  609771859</span>
+<span class="co">## 2  820898255  379172137  676542005</span>
+<span class="co">## 3  156329286   51340773  122019003</span>
+<span class="co">## 4 1533835714 1132198032 1402580378</span>
+<span class="co">## 5  328990220  132159886  264665998</span>
+<span class="co">## 6  913061667  536786028  790094656</span></code></pre>
 </details><div class="sourceCode" id="cb207"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.2</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>        <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
@@ -2613,13 +2610,13 @@ output
 <span class="co">## 4         1         266 70.935057 823.576490          4 2757613  2757613</span>
 <span class="co">## 5         1         268  9.434619  68.799185          1 2757613  2757613</span>
 <span class="co">## 6         1         281 47.532459 511.473146          4 2757613  2757613</span>
-<span class="co">##         est          est.var   est.se    est.cv      pse CI99left CI99right</span>
-<span class="co">## 1   5075289   14188693396133  3766788 0.7421820 74.21820        0  14777892</span>
-<span class="co">## 2  48302710 1803339834907658 42465749 0.8791587 87.91587        0 157687230</span>
-<span class="co">## 3  93809786 1924672767891660 43871093 0.4676601 46.76601        0 206814232</span>
-<span class="co">## 4 195611436 6262829323467030 79138040 0.4045676 40.45676        0 399457517</span>
-<span class="co">## 5  26017027  523178550781145 22873097 0.8791587 87.91587        0  84934220</span>
-<span class="co">## 6 131076128 3889461458199011 62365547 0.4757964 47.57964        0 291719131</span>
+<span class="co">##         est      est.var   est.se    est.cv      pse CI99left CI99right</span>
+<span class="co">## 1   5075289 1.418869e+13  3766788 0.7421820 74.21820        0  14777892</span>
+<span class="co">## 2  48302710 1.803340e+15 42465749 0.8791587 87.91587        0 157687230</span>
+<span class="co">## 3  93809786 1.924673e+15 43871093 0.4676601 46.76601        0 206814232</span>
+<span class="co">## 4 195611436 6.262829e+15 79138040 0.4045676 40.45676        0 399457517</span>
+<span class="co">## 5  26017027 5.231786e+14 22873097 0.8791587 87.91587        0  84934220</span>
+<span class="co">## 6 131076128 3.889461e+15 62365547 0.4757964 47.57964        0 291719131</span>
 <span class="co">##   CI95left CI95right  CI68left CI68right</span>
 <span class="co">## 1        0  12458058   1329377   8821201</span>
 <span class="co">## 2        0 131534048   6072311  90533108</span>
@@ -2631,20 +2628,20 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.2</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>        <span class="co"># estimates by row for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   Forest type        est            est.var NBRPLT.gt0    est.se    est.cv</span>
-<span class="co">## 1         182  242440124   4123987159636984         34  64218277 0.2648830</span>
-<span class="co">## 2         184  230107430   5041156184490609         18  71001100 0.3085563</span>
-<span class="co">## 3         185    6261388     39204973709010          1   6261388 1.0000000</span>
-<span class="co">## 4         201 1490656736  89118943850624672         47 298527962 0.2002661</span>
-<span class="co">## 5         221 1198569953  34865937577253708         51 186724229 0.1557892</span>
-<span class="co">## 6         265 1465809264 156378289628170976         26 395446949 0.2697806</span>
-<span class="co">##         pse  CI99left  CI99right  CI95left  CI95right      CI68left  CI68right</span>
-<span class="co">## 1  26.48830  77024803  407855445 116574613  368305635  178577751.81  306302496</span>
-<span class="co">## 2  30.85563  47220716  412994144  90947831  369267029  159499826.60  300715034</span>
-<span class="co">## 3 100.00000         0   22389653         0   18533482      34701.34   12488074</span>
-<span class="co">## 4  20.02661 721699665 2259613807 905552683 2075760789 1193783251.33 1787530221</span>
-<span class="co">## 5  15.57892 717600213 1679539693 832597189 1564542716 1012880571.51 1384259334</span>
-<span class="co">## 6  26.97806 447205424 2484413104 690747486 2240871042 1072553927.85 1859064600</span></code></pre>
+</summary><pre><code><span class="co">##   Forest type        est      est.var NBRPLT.gt0    est.se    est.cv       pse</span>
+<span class="co">## 1         182  242440124 4.123987e+15         34  64218277 0.2648830  26.48830</span>
+<span class="co">## 2         184  230107430 5.041156e+15         18  71001100 0.3085563  30.85563</span>
+<span class="co">## 3         185    6261388 3.920497e+13          1   6261388 1.0000000 100.00000</span>
+<span class="co">## 4         201 1490656736 8.911894e+16         47 298527962 0.2002661  20.02661</span>
+<span class="co">## 5         221 1198569953 3.486594e+16         51 186724229 0.1557892  15.57892</span>
+<span class="co">## 6         265 1465809264 1.563783e+17         26 395446949 0.2697806  26.97806</span>
+<span class="co">##    CI99left  CI99right  CI95left  CI95right     CI68left  CI68right</span>
+<span class="co">## 1  77024803  407855445 116574613  368305635 1.785778e+08  306302496</span>
+<span class="co">## 2  47220716  412994144  90947831  369267029 1.594998e+08  300715034</span>
+<span class="co">## 3         0   22389653         0   18533482 3.470134e+04   12488074</span>
+<span class="co">## 4 721699665 2259613807 905552683 2075760789 1.193783e+09 1787530221</span>
+<span class="co">## 5 717600213 1679539693 832597189 1564542716 1.012881e+09 1384259334</span>
+<span class="co">## 6 447205424 2484413104 690747486 2240871042 1.072554e+09 1859064600</span></code></pre>
 </details><div class="sourceCode" id="cb213"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Titles (list object) for estimate</span>
 <span class="va">titlelst1.2</span> <span class="op">&lt;-</span> <span class="va">tree1.2</span><span class="op">$</span><span class="va">titlelst</span>
@@ -2847,20 +2844,20 @@ output
 <span class="co">## 4         7 248.65595  711.3799         35 5096959  5096959 1267389205</span>
 <span class="co">## 5         9  72.68797  595.6953         15 2729653  2729653  198412942</span>
 <span class="co">## 6        11 361.12986 4806.0717         26 1837124  1837124  663440342</span>
-<span class="co">##             est.var    est.se    est.cv      pse  CI99left  CI99right</span>
-<span class="co">## 1  4954793496988392  70390294 0.1304075 13.04075 358458294  721085058</span>
-<span class="co">## 2 22354303280176352 149513556 0.2832463 28.32463 142735673  912978468</span>
-<span class="co">## 3  1262811553168722  35536060 0.4099689 40.99689         0  178214713</span>
-<span class="co">## 4 18480932672926752 135944594 0.1072635 10.72635 917219136 1617559274</span>
-<span class="co">## 5  4438528740003891  66622284 0.3357759 33.57759  26805310  370020574</span>
-<span class="co">## 6 16220610070395912 127360159 0.1919693 19.19693 335382313  991498371</span>
-<span class="co">##     CI95left  CI95right   CI68left  CI68right</span>
-<span class="co">## 1  401809235  677734117  469771493  609771859</span>
-<span class="co">## 2  234815887  820898255  379172137  676542005</span>
-<span class="co">## 3   17030491  156329286   51340773  122019003</span>
-<span class="co">## 4 1000942697 1533835714 1132198032 1402580378</span>
-<span class="co">## 5   67835665  328990220  132159886  264665998</span>
-<span class="co">## 6  413819018  913061667  536786028  790094656</span></code></pre>
+<span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right   CI95left</span>
+<span class="co">## 1 4.954793e+15  70390294 0.1304075 13.04075 358458294  721085058  401809235</span>
+<span class="co">## 2 2.235430e+16 149513556 0.2832463 28.32463 142735673  912978468  234815887</span>
+<span class="co">## 3 1.262812e+15  35536060 0.4099689 40.99689         0  178214713   17030491</span>
+<span class="co">## 4 1.848093e+16 135944594 0.1072635 10.72635 917219136 1617559274 1000942697</span>
+<span class="co">## 5 4.438529e+15  66622284 0.3357759 33.57759  26805310  370020574   67835665</span>
+<span class="co">## 6 1.622061e+16 127360159 0.1919693 19.19693 335382313  991498371  413819018</span>
+<span class="co">##    CI95right   CI68left  CI68right</span>
+<span class="co">## 1  677734117  469771493  609771859</span>
+<span class="co">## 2  820898255  379172137  676542005</span>
+<span class="co">## 3  156329286   51340773  122019003</span>
+<span class="co">## 4 1533835714 1132198032 1402580378</span>
+<span class="co">## 5  328990220  132159886  264665998</span>
+<span class="co">## 6  913061667  536786028  790094656</span></code></pre>
 </details><div class="sourceCode" id="cb228"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>        <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
@@ -2880,31 +2877,31 @@ output
 <span class="co">## 4         1 Engelmann spruce / subalpine fir 70.935057 823.576490          4</span>
 <span class="co">## 5         1                    Subalpine fir  9.434619  68.799185          1</span>
 <span class="co">## 6         1                   Lodgepole pine 47.532459 511.473146          4</span>
-<span class="co">##   FORTYPCD   ACRES AREAUSED       est          est.var   est.se    est.cv</span>
-<span class="co">## 1      182 2757613  2757613   5075289   14188693396133  3766788 0.7421820</span>
-<span class="co">## 2      201 2757613  2757613  48302710 1803339834907658 42465749 0.8791587</span>
-<span class="co">## 3      221 2757613  2757613  93809786 1924672767891660 43871093 0.4676601</span>
-<span class="co">## 4      266 2757613  2757613 195611436 6262829323467030 79138040 0.4045676</span>
-<span class="co">## 5      268 2757613  2757613  26017027  523178550781145 22873097 0.8791587</span>
-<span class="co">## 6      281 2757613  2757613 131076128 3889461458199011 62365547 0.4757964</span>
-<span class="co">##        pse CI99left CI99right CI95left CI95right  CI68left CI68right</span>
-<span class="co">## 1 74.21820        0  14777892        0  12458058   1329377   8821201</span>
-<span class="co">## 2 87.91587        0 157687230        0 131534048   6072311  90533108</span>
-<span class="co">## 3 46.76601        0 206814232  7824025 179795548  50181832 137437740</span>
-<span class="co">## 4 40.45676        0 399457517 40503728 350719143 116911988 274310883</span>
-<span class="co">## 5 87.91587        0  84934220        0  70847473   3270696  48763358</span>
-<span class="co">## 6 47.57964        0 291719131  8841902 253310354  69056218 193096038</span></code></pre>
+<span class="co">##   FORTYPCD   ACRES AREAUSED       est      est.var   est.se    est.cv      pse</span>
+<span class="co">## 1      182 2757613  2757613   5075289 1.418869e+13  3766788 0.7421820 74.21820</span>
+<span class="co">## 2      201 2757613  2757613  48302710 1.803340e+15 42465749 0.8791587 87.91587</span>
+<span class="co">## 3      221 2757613  2757613  93809786 1.924673e+15 43871093 0.4676601 46.76601</span>
+<span class="co">## 4      266 2757613  2757613 195611436 6.262829e+15 79138040 0.4045676 40.45676</span>
+<span class="co">## 5      268 2757613  2757613  26017027 5.231786e+14 22873097 0.8791587 87.91587</span>
+<span class="co">## 6      281 2757613  2757613 131076128 3.889461e+15 62365547 0.4757964 47.57964</span>
+<span class="co">##   CI99left CI99right CI95left CI95right  CI68left CI68right</span>
+<span class="co">## 1        0  14777892        0  12458058   1329377   8821201</span>
+<span class="co">## 2        0 157687230        0 131534048   6072311  90533108</span>
+<span class="co">## 3        0 206814232  7824025 179795548  50181832 137437740</span>
+<span class="co">## 4        0 399457517 40503728 350719143 116911988 274310883</span>
+<span class="co">## 5        0  84934220        0  70847473   3270696  48763358</span>
+<span class="co">## 6        0 291719131  8841902 253310354  69056218 193096038</span></code></pre>
 </details><div class="sourceCode" id="cb232"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>        <span class="co"># estimates by row for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##                 Forest type FORTYPCD        est            est.var NBRPLT.gt0</span>
-<span class="co">## 1    Rocky Mountain juniper      182  242440124   4123987159636984         34</span>
-<span class="co">## 2          Juniper woodland      184  230107430   5041156184490609         18</span>
-<span class="co">## 3 Pinyon / juniper woodland      185    6261388     39204973709010          1</span>
-<span class="co">## 4               Douglas-fir      201 1490656736  89118943850624672         47</span>
-<span class="co">## 5            Ponderosa pine      221 1198569953  34865937577253708         51</span>
-<span class="co">## 6          Engelmann spruce      265 1465809264 156378289628170976         26</span>
+</summary><pre><code><span class="co">##                 Forest type FORTYPCD        est      est.var NBRPLT.gt0</span>
+<span class="co">## 1    Rocky Mountain juniper      182  242440124 4.123987e+15         34</span>
+<span class="co">## 2          Juniper woodland      184  230107430 5.041156e+15         18</span>
+<span class="co">## 3 Pinyon / juniper woodland      185    6261388 3.920497e+13          1</span>
+<span class="co">## 4               Douglas-fir      201 1490656736 8.911894e+16         47</span>
+<span class="co">## 5            Ponderosa pine      221 1198569953 3.486594e+16         51</span>
+<span class="co">## 6          Engelmann spruce      265 1465809264 1.563783e+17         26</span>
 <span class="co">##      est.se    est.cv       pse  CI99left  CI99right  CI95left  CI95right</span>
 <span class="co">## 1  64218277 0.2648830  26.48830  77024803  407855445 116574613  368305635</span>
 <span class="co">## 2  71001100 0.3085563  30.85563  47220716  412994144  90947831  369267029</span>
@@ -2912,13 +2909,13 @@ output
 <span class="co">## 4 298527962 0.2002661  20.02661 721699665 2259613807 905552683 2075760789</span>
 <span class="co">## 5 186724229 0.1557892  15.57892 717600213 1679539693 832597189 1564542716</span>
 <span class="co">## 6 395446949 0.2697806  26.97806 447205424 2484413104 690747486 2240871042</span>
-<span class="co">##        CI68left  CI68right</span>
-<span class="co">## 1  178577751.81  306302496</span>
-<span class="co">## 2  159499826.60  300715034</span>
-<span class="co">## 3      34701.34   12488074</span>
-<span class="co">## 4 1193783251.33 1787530221</span>
-<span class="co">## 5 1012880571.51 1384259334</span>
-<span class="co">## 6 1072553927.85 1859064600</span></code></pre>
+<span class="co">##       CI68left  CI68right</span>
+<span class="co">## 1 1.785778e+08  306302496</span>
+<span class="co">## 2 1.594998e+08  300715034</span>
+<span class="co">## 3 3.470134e+04   12488074</span>
+<span class="co">## 4 1.193783e+09 1787530221</span>
+<span class="co">## 5 1.012881e+09 1384259334</span>
+<span class="co">## 6 1.072554e+09 1859064600</span></code></pre>
 </details><div class="sourceCode" id="cb234"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">unit_colest</span><span class="op">)</span>   <span class="co"># estimates by column, by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
@@ -2930,13 +2927,13 @@ output
 <span class="co">## 4         1       Nonstocked   2.486640    6.001977          2       5 2757613</span>
 <span class="co">## 5         3   Large diameter 254.300842 5435.088195          9       1 2021729</span>
 <span class="co">## 6         3  Medium diameter   6.693154   44.810693          1       2 2021729</span>
-<span class="co">##   AREAUSED       est           est.var    est.se    est.cv       pse  CI99left</span>
-<span class="co">## 1  2757613 259261790  6503682918161897  80645415 0.3110578  31.10578  51532967</span>
-<span class="co">## 2  2757613 239084444  5324083824476988  72966320 0.3051906  30.51906  51135659</span>
-<span class="co">## 3  2757613  34568252   222647866874380  14921390 0.4316501  43.16501         0</span>
-<span class="co">## 4  2757613   6857191    45641607012522   6755857 0.9852223  98.52223         0</span>
-<span class="co">## 5  2021729 514127388 22215315078161408 149048029 0.2899049  28.99049 130205106</span>
-<span class="co">## 6  2021729  13531744   183158696516786  13533614 1.0001382 100.01382         0</span>
+<span class="co">##   AREAUSED       est      est.var    est.se    est.cv       pse  CI99left</span>
+<span class="co">## 1  2757613 259261790 6.503683e+15  80645415 0.3110578  31.10578  51532967</span>
+<span class="co">## 2  2757613 239084444 5.324084e+15  72966320 0.3051906  30.51906  51135659</span>
+<span class="co">## 3  2757613  34568252 2.226479e+14  14921390 0.4316501  43.16501         0</span>
+<span class="co">## 4  2757613   6857191 4.564161e+13   6755857 0.9852223  98.52223         0</span>
+<span class="co">## 5  2021729 514127388 2.221532e+16 149048029 0.2899049  28.99049 130205106</span>
+<span class="co">## 6  2021729  13531744 1.831587e+14  13533614 1.0001382 100.01382         0</span>
 <span class="co">##   CI99right  CI95left CI95right     CI68left CI68right</span>
 <span class="co">## 1 466990612 101199681 417323898 179063321.36 339460258</span>
 <span class="co">## 2 427033229  96073085 382095803 166522511.88 311646376</span>
@@ -2948,11 +2945,11 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">colest</span><span class="op">)</span>        <span class="co"># estimates by column for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   Stand-size class STDSZCD         est            est.var NBRPLT.gt0    est.se</span>
-<span class="co">## 1   Large diameter       1 11609539704 516134257304994368        297 718424845</span>
-<span class="co">## 2  Medium diameter       2  2991392861 110560963163371072        103 332507087</span>
-<span class="co">## 3   Small diameter       3   717015125  10763182569765182         98 103745759</span>
-<span class="co">## 4       Nonstocked       5    57922991    634187688300972         20  25183083</span>
+</summary><pre><code><span class="co">##   Stand-size class STDSZCD         est      est.var NBRPLT.gt0    est.se</span>
+<span class="co">## 1   Large diameter       1 11609539704 5.161343e+17        297 718424845</span>
+<span class="co">## 2  Medium diameter       2  2991392861 1.105610e+17        103 332507087</span>
+<span class="co">## 3   Small diameter       3   717015125 1.076318e+16         98 103745759</span>
+<span class="co">## 4       Nonstocked       5    57922991 6.341877e+14         20  25183083</span>
 <span class="co">##       est.cv       pse   CI99left   CI99right    CI95left   CI95right</span>
 <span class="co">## 1 0.06188228  6.188228 9758999937 13460079471 10201452883 13017626525</span>
 <span class="co">## 2 0.11115460 11.115460 2134911362  3847874361  2339690945  3643094777</span>
@@ -2981,13 +2978,13 @@ output
 <span class="co">## 4 253.0989049          4       1      221 2757613  2757613  93809786</span>
 <span class="co">## 5 615.7209626          2       1      266 2757613  2757613 113178943</span>
 <span class="co">## 6 326.3892805          2       2      266 2757613  2757613  82432493</span>
-<span class="co">##            est.var   est.se    est.cv       pse CI99left CI99right CI95left</span>
-<span class="co">## 1    4017137030928  2004280 1.0267481 102.67481        0   7114748        0</span>
-<span class="co">## 2   10283334655683  3206764 1.0267481 102.67481        0  11383300        0</span>
-<span class="co">## 3 1803339834907658 42465749 0.8791587  87.91587        0 157687230        0</span>
-<span class="co">## 4 1924672767891660 43871093 0.4676601  46.76601        0 206814232  7824025</span>
-<span class="co">## 5 4682206625418261 68426651 0.6045882  60.45882        0 289434317        0</span>
-<span class="co">## 6 2482004259148518 49819718 0.6043699  60.43699        0 210759581        0</span>
+<span class="co">##        est.var   est.se    est.cv       pse CI99left CI99right CI95left</span>
+<span class="co">## 1 4.017137e+12  2004280 1.0267481 102.67481        0   7114748        0</span>
+<span class="co">## 2 1.028333e+13  3206764 1.0267481 102.67481        0  11383300        0</span>
+<span class="co">## 3 1.803340e+15 42465749 0.8791587  87.91587        0 157687230        0</span>
+<span class="co">## 4 1.924673e+15 43871093 0.4676601  46.76601        0 206814232  7824025</span>
+<span class="co">## 5 4.682207e+15 68426651 0.6045882  60.45882        0 289434317        0</span>
+<span class="co">## 6 2.482004e+15 49819718 0.6043699  60.43699        0 210759581        0</span>
 <span class="co">##   CI95right CI68left CI68right</span>
 <span class="co">## 1   5880382        0   3945237</span>
 <span class="co">## 2   9408365        0   6312215</span>
@@ -3006,20 +3003,20 @@ output
 <span class="co">## 4          Juniper woodland   Large diameter      184       1 229692847.8</span>
 <span class="co">## 5          Juniper woodland   Small diameter      184       3    414582.3</span>
 <span class="co">## 6 Pinyon / juniper woodland   Large diameter      185       1   6261387.5</span>
-<span class="co">##            est.var NBRPLT.gt0     est.se    est.cv       pse CI99left CI99right</span>
-<span class="co">## 1 3831830754405146         28 61901783.1 0.2882885  28.82885 55273192 374170046</span>
-<span class="co">## 2  200454702458680          4 14158202.7 0.6324850  63.24850        0  58854155</span>
-<span class="co">## 3   13898581968414          3  3728080.2 0.6989980  69.89980        0  14936362</span>
-<span class="co">## 4 5040984306011804         17 70999889.5 0.3091080  30.91080 46809252 412576444</span>
-<span class="co">## 5     171878478805          1   414582.3 1.0000000 100.00000        0   1482476</span>
-<span class="co">## 6   39204973709010          1  6261387.5 1.0000000 100.00000        0  22389653</span>
-<span class="co">##   CI95left CI95right      CI68left   CI68right</span>
-<span class="co">## 1 93396354 336046885 153162902.961 276280335.4</span>
-<span class="co">## 2        0  50134609   8305305.186  36464777.7</span>
-<span class="co">## 3        0  12640366   1626044.725   9040882.2</span>
-<span class="co">## 4 90535622 368850074 159086447.996 300299247.6</span>
-<span class="co">## 5        0   1227149      2297.663    826866.9</span>
-<span class="co">## 6        0  18533482     34701.341  12488073.7</span></code></pre>
+<span class="co">##        est.var NBRPLT.gt0     est.se    est.cv       pse CI99left CI99right</span>
+<span class="co">## 1 3.831831e+15         28 61901783.1 0.2882885  28.82885 55273192 374170046</span>
+<span class="co">## 2 2.004547e+14          4 14158202.7 0.6324850  63.24850        0  58854155</span>
+<span class="co">## 3 1.389858e+13          3  3728080.2 0.6989980  69.89980        0  14936362</span>
+<span class="co">## 4 5.040984e+15         17 70999889.5 0.3091080  30.91080 46809252 412576444</span>
+<span class="co">## 5 1.718785e+11          1   414582.3 1.0000000 100.00000        0   1482476</span>
+<span class="co">## 6 3.920497e+13          1  6261387.5 1.0000000 100.00000        0  22389653</span>
+<span class="co">##   CI95left CI95right     CI68left   CI68right</span>
+<span class="co">## 1 93396354 336046885 1.531629e+08 276280335.4</span>
+<span class="co">## 2        0  50134609 8.305305e+06  36464777.7</span>
+<span class="co">## 3        0  12640366 1.626045e+06   9040882.2</span>
+<span class="co">## 4 90535622 368850074 1.590864e+08 300299247.6</span>
+<span class="co">## 5        0   1227149 2.297663e+03    826866.9</span>
+<span class="co">## 6        0  18533482 3.470134e+04  12488073.7</span></code></pre>
 </details><div class="sourceCode" id="cb242"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Titles (list object) for estimate</span>
 <span class="va">titlelst1.3</span> <span class="op">&lt;-</span> <span class="va">tree1.3</span><span class="op">$</span><span class="va">titlelst</span>
@@ -3827,39 +3824,39 @@ output
 <span class="co">## 8          Tongue Ranger District Fir / spruce / mountain hemlock group</span>
 <span class="co">## 9          Tongue Ranger District                  Lodgepole pine group</span>
 <span class="co">## 10         Tongue Ranger District                            Nonstocked</span>
-<span class="co">##          nhat      nhat.var NBRPLT.gt0 FORTYPGRPCD ACRES_GIS AREAUSED</span>
-<span class="co">## 1    0.453127     0.1959209          1         200  364522.8 364522.8</span>
-<span class="co">## 2  430.851918 43165.2254715          5         260  364522.8 364522.8</span>
-<span class="co">## 3   99.891977  3152.2296668          5         280  364522.8 364522.8</span>
-<span class="co">## 4  215.001479 31253.2387920          3         260  334333.7 334333.7</span>
-<span class="co">## 5   36.825726   695.1532390          3         280  334333.7 334333.7</span>
-<span class="co">## 6   23.045558   527.2158637          1         900  334333.7 334333.7</span>
-<span class="co">## 7    0.000000     0.0000000          0         200  413774.9 413774.9</span>
-<span class="co">## 8    1.130830     1.3832849          1         260  413774.9 413774.9</span>
-<span class="co">## 9   74.977065   537.6754203         13         280  413774.9 413774.9</span>
-<span class="co">## 10   6.910417    51.6565588          1         999  413774.9 413774.9</span>
-<span class="co">##            est          est.var     est.se    est.cv       pse CI99left</span>
-<span class="co">## 1     165175.1      26033354536   161348.5 0.9768332  97.68332        0</span>
-<span class="co">## 2  157055354.1 5735660597005672 75734144.2 0.4822131  48.22131        0</span>
-<span class="co">## 3   36412904.8  418858451342709 20466031.6 0.5620544  56.20544        0</span>
-<span class="co">## 4   71882234.1 3493455928342654 59105464.5 0.8222541  82.22541        0</span>
-<span class="co">## 5   12312080.3   77703537226167  8814961.0 0.7159603  71.59603        0</span>
-<span class="co">## 6    7704906.0   58931664551891  7676696.2 0.9963387  99.63387        0</span>
-<span class="co">## 7          0.0                0        0.0       NaN       NaN        0</span>
-<span class="co">## 8     467909.1     236831734847   486653.6 1.0400602 104.00602        0</span>
-<span class="co">## 9   31023626.1   92055222209708  9594541.3 0.3092656  30.92656  6309726</span>
-<span class="co">## 10   2859356.9    8844101513219  2973903.4 1.0400602 104.00602        0</span>
-<span class="co">##      CI99right CI95left   CI95right     CI68left   CI68right</span>
-<span class="co">## 1     580781.4        0    481412.5     4720.788    325629.5</span>
-<span class="co">## 2  352133582.0  8619159 305491549.1 81740937.384 232369770.8</span>
-<span class="co">## 3   89129908.8        0  76525589.7 16060298.247  56765511.3</span>
-<span class="co">## 4  224127821.5        0 187726815.8 13104339.082 130660129.2</span>
-<span class="co">## 5   35017915.1        0  29589086.4  3545972.847  21078187.7</span>
-<span class="co">## 6   27478765.1        0  22750954.1    70754.981  15339057.1</span>
-<span class="co">## 7          0.0        0         0.0        0.000         0.0</span>
-<span class="co">## 8    1721445.7        0   1421732.6        0.000    951865.6</span>
-<span class="co">## 9   55737526.7 12218671  49828581.4 21482258.887  40564993.3</span>
-<span class="co">## 10  10519624.4        0   8688100.5        0.000   5816778.6</span></code></pre>
+<span class="co">##          nhat     nhat.var NBRPLT.gt0 FORTYPGRPCD ACRES_GIS AREAUSED</span>
+<span class="co">## 1    0.453127 1.959209e-01          1         200  364522.8 364522.8</span>
+<span class="co">## 2  430.851918 4.316523e+04          5         260  364522.8 364522.8</span>
+<span class="co">## 3   99.891977 3.152230e+03          5         280  364522.8 364522.8</span>
+<span class="co">## 4  215.001479 3.125324e+04          3         260  334333.7 334333.7</span>
+<span class="co">## 5   36.825726 6.951532e+02          3         280  334333.7 334333.7</span>
+<span class="co">## 6   23.045558 5.272159e+02          1         900  334333.7 334333.7</span>
+<span class="co">## 7    0.000000 0.000000e+00          0         200  413774.9 413774.9</span>
+<span class="co">## 8    1.130830 1.383285e+00          1         260  413774.9 413774.9</span>
+<span class="co">## 9   74.977065 5.376754e+02         13         280  413774.9 413774.9</span>
+<span class="co">## 10   6.910417 5.165656e+01          1         999  413774.9 413774.9</span>
+<span class="co">##            est      est.var     est.se    est.cv       pse CI99left   CI99right</span>
+<span class="co">## 1     165175.1 2.603335e+10   161348.5 0.9768332  97.68332        0    580781.4</span>
+<span class="co">## 2  157055354.1 5.735661e+15 75734144.2 0.4822131  48.22131        0 352133582.0</span>
+<span class="co">## 3   36412904.8 4.188585e+14 20466031.6 0.5620544  56.20544        0  89129908.8</span>
+<span class="co">## 4   71882234.1 3.493456e+15 59105464.5 0.8222541  82.22541        0 224127821.5</span>
+<span class="co">## 5   12312080.3 7.770354e+13  8814961.0 0.7159603  71.59603        0  35017915.1</span>
+<span class="co">## 6    7704906.0 5.893166e+13  7676696.2 0.9963387  99.63387        0  27478765.1</span>
+<span class="co">## 7          0.0 0.000000e+00        0.0       NaN       NaN        0         0.0</span>
+<span class="co">## 8     467909.1 2.368317e+11   486653.6 1.0400602 104.00602        0   1721445.7</span>
+<span class="co">## 9   31023626.1 9.205522e+13  9594541.3 0.3092656  30.92656  6309726  55737526.7</span>
+<span class="co">## 10   2859356.9 8.844102e+12  2973903.4 1.0400602 104.00602        0  10519624.4</span>
+<span class="co">##    CI95left   CI95right     CI68left   CI68right</span>
+<span class="co">## 1         0    481412.5     4720.788    325629.5</span>
+<span class="co">## 2   8619159 305491549.1 81740937.384 232369770.8</span>
+<span class="co">## 3         0  76525589.7 16060298.247  56765511.3</span>
+<span class="co">## 4         0 187726815.8 13104339.082 130660129.2</span>
+<span class="co">## 5         0  29589086.4  3545972.847  21078187.7</span>
+<span class="co">## 6         0  22750954.1    70754.981  15339057.1</span>
+<span class="co">## 7         0         0.0        0.000         0.0</span>
+<span class="co">## 8         0   1421732.6        0.000    951865.6</span>
+<span class="co">## 9  12218671  49828581.4 21482258.887  40564993.3</span>
+<span class="co">## 10        0   8688100.5        0.000   5816778.6</span></code></pre>
 </details></details><p><a name="modGBratio"></a></p>
 </div>
 </div>
@@ -3927,27 +3924,27 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.1</span><span class="op">$</span><span class="va">unit_totest</span><span class="op">)</span> <span class="co"># estimates by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT      nhat  nhat.var       dhat      dhat.var     covar NBRPLT.gt0</span>
-<span class="co">## 1         1 191.27640  679.1225 0.16708433 0.00032086045 0.2285831         18</span>
-<span class="co">## 2         3 220.30963 6020.2928 0.07623130 0.00050374648 1.4161225          7</span>
-<span class="co">## 3         5  18.88212  116.3016 0.04111842 0.00023115676 0.1066769          8</span>
-<span class="co">## 4         7 223.49294  763.3171 0.12439229 0.00008557688 0.1455149         30</span>
-<span class="co">## 5         9  64.88298  579.3635 0.06862512 0.00019253920 0.1447864         12</span>
-<span class="co">## 6        11 359.09031 4863.3286 0.24597749 0.00064121617 0.7762385         25</span>
-<span class="co">##     ACRES AREAUSED       estn     estd          estn.var   estn.se   estn.cv</span>
-<span class="co">## 1 2757613  2757613  527466298 460753.9  5164338937162040  71863335 0.1362425</span>
-<span class="co">## 2 2021729  2021729  445406358 154119.0 24607273333053764 156867056 0.3521886</span>
-<span class="co">## 3 3072988  3072988   58024539 126356.4  1098265828298225  33140094 0.5711393</span>
-<span class="co">## 4 5096959  5096959 1139134377 634022.4 19830207638119344 140819770 0.1236200</span>
-<span class="co">## 5 2729653  2729653  177108024 187322.8  4316840611417018  65702668 0.3709751</span>
-<span class="co">## 6 1837124  1837124  659693430 451891.1 16413853688454070 128116563 0.1942062</span>
-<span class="co">##   estn.pse   estd.var  estd.se    estd.cv  estd.pse     est.covar      rhat</span>
-<span class="co">## 1 13.62425 2439960647 49395.96 0.10720681 10.720681 1738243875518 1144.7896</span>
-<span class="co">## 2 35.21886 2059007401 45376.29 0.29442363 29.442363 5788242135929 2890.0152</span>
-<span class="co">## 3 57.11393 2182872251 46721.22 0.36975739 36.975739 1007376897014  459.2132</span>
-<span class="co">## 4 12.36200 2223200929 47150.83 0.07436777  7.436777 3780331418363 1796.6784</span>
-<span class="co">## 5 37.09751 1434610660 37876.25 0.20219781 20.219781 1078804189568  945.4698</span>
-<span class="co">## 6 19.42062 2164120339 46520.11 0.10294538 10.294538 2619823868078 1459.8503</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT      nhat  nhat.var       dhat     dhat.var     covar NBRPLT.gt0</span>
+<span class="co">## 1         1 191.27640  679.1225 0.16708433 3.208604e-04 0.2285831         18</span>
+<span class="co">## 2         3 220.30963 6020.2928 0.07623130 5.037465e-04 1.4161225          7</span>
+<span class="co">## 3         5  18.88212  116.3016 0.04111842 2.311568e-04 0.1066769          8</span>
+<span class="co">## 4         7 223.49294  763.3171 0.12439229 8.557688e-05 0.1455149         30</span>
+<span class="co">## 5         9  64.88298  579.3635 0.06862512 1.925392e-04 0.1447864         12</span>
+<span class="co">## 6        11 359.09031 4863.3286 0.24597749 6.412162e-04 0.7762385         25</span>
+<span class="co">##     ACRES AREAUSED       estn     estd     estn.var   estn.se   estn.cv</span>
+<span class="co">## 1 2757613  2757613  527466298 460753.9 5.164339e+15  71863335 0.1362425</span>
+<span class="co">## 2 2021729  2021729  445406358 154119.0 2.460727e+16 156867056 0.3521886</span>
+<span class="co">## 3 3072988  3072988   58024539 126356.4 1.098266e+15  33140094 0.5711393</span>
+<span class="co">## 4 5096959  5096959 1139134377 634022.4 1.983021e+16 140819770 0.1236200</span>
+<span class="co">## 5 2729653  2729653  177108024 187322.8 4.316841e+15  65702668 0.3709751</span>
+<span class="co">## 6 1837124  1837124  659693430 451891.1 1.641385e+16 128116563 0.1942062</span>
+<span class="co">##   estn.pse   estd.var  estd.se    estd.cv  estd.pse    est.covar      rhat</span>
+<span class="co">## 1 13.62425 2439960647 49395.96 0.10720681 10.720681 1.738244e+12 1144.7896</span>
+<span class="co">## 2 35.21886 2059007401 45376.29 0.29442363 29.442363 5.788242e+12 2890.0152</span>
+<span class="co">## 3 57.11393 2182872251 46721.22 0.36975739 36.975739 1.007377e+12  459.2132</span>
+<span class="co">## 4 12.36200 2223200929 47150.83 0.07436777  7.436777 3.780331e+12 1796.6784</span>
+<span class="co">## 5 37.09751 1434610660 37876.25 0.20219781 20.219781 1.078804e+12  945.4698</span>
+<span class="co">## 6 19.42062 2164120339 46520.11 0.10294538 10.294538 2.619824e+12 1459.8503</span>
 <span class="co">##    rhat.var  rhat.se   rhat.cv      pse  CI99left CI99right   CI95left</span>
 <span class="co">## 1  20641.95 143.6731 0.1255017 12.55017  774.7123 1514.8669  863.19555</span>
 <span class="co">## 2 351466.67 592.8462 0.2051360 20.51360 1362.9445 4417.0859 1728.05791</span>
@@ -3966,12 +3963,12 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.1</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>      <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   TOTAL       estn           estn.var NBRPLT.gt0    estd    estd.var</span>
-<span class="co">## 1     1 9772216510 378544894771078464        281 5587398 54138597407</span>
-<span class="co">##        est.covar     rhat rhat.var  rhat.se    rhat.cv      pse CI99left</span>
-<span class="co">## 1 90841842836753 1748.974 7251.668 85.15673 0.04868952 4.868952 1529.625</span>
-<span class="co">##   CI99right CI95left CI95right CI68left CI68right</span>
-<span class="co">## 1  1968.324  1582.07  1915.879  1664.29  1833.659</span></code></pre>
+</summary><pre><code><span class="co">##   TOTAL       estn     estn.var NBRPLT.gt0    estd    estd.var    est.covar</span>
+<span class="co">## 1     1 9772216510 3.785449e+17        281 5587398 54138597407 9.084184e+13</span>
+<span class="co">##       rhat rhat.var  rhat.se    rhat.cv      pse CI99left CI99right CI95left</span>
+<span class="co">## 1 1748.974 7251.668 85.15673 0.04868952 4.868952 1529.625  1968.324  1582.07</span>
+<span class="co">##   CI95right CI68left CI68right</span>
+<span class="co">## 1  1915.879  1664.29  1833.659</span></code></pre>
 </details><div class="sourceCode" id="cb330"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Titles (list object) for estimate</span>
 <span class="va">titlelst</span> <span class="op">&lt;-</span> <span class="va">ratio1.1</span><span class="op">$</span><span class="va">titlelst</span>
@@ -4074,27 +4071,27 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.2</span><span class="op">$</span><span class="va">unit_totest</span><span class="op">)</span>    <span class="co"># estimates by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT      nhat  nhat.var       dhat      dhat.var     covar NBRPLT.gt0</span>
-<span class="co">## 1         1 191.27640  679.1225 0.16708433 0.00032086045 0.2285831         18</span>
-<span class="co">## 2         3 220.30963 6020.2928 0.07623130 0.00050374648 1.4161225          7</span>
-<span class="co">## 3         5  18.88212  116.3016 0.04111842 0.00023115676 0.1066769          8</span>
-<span class="co">## 4         7 223.49294  763.3171 0.12439229 0.00008557688 0.1455149         30</span>
-<span class="co">## 5         9  64.88298  579.3635 0.06862512 0.00019253920 0.1447864         12</span>
-<span class="co">## 6        11 359.09031 4863.3286 0.24597749 0.00064121617 0.7762385         25</span>
-<span class="co">##     ACRES AREAUSED       estn     estd          estn.var   estn.se   estn.cv</span>
-<span class="co">## 1 2757613  2757613  527466298 460753.9  5164338937162040  71863335 0.1362425</span>
-<span class="co">## 2 2021729  2021729  445406358 154119.0 24607273333053764 156867056 0.3521886</span>
-<span class="co">## 3 3072988  3072988   58024539 126356.4  1098265828298225  33140094 0.5711393</span>
-<span class="co">## 4 5096959  5096959 1139134377 634022.4 19830207638119344 140819770 0.1236200</span>
-<span class="co">## 5 2729653  2729653  177108024 187322.8  4316840611417018  65702668 0.3709751</span>
-<span class="co">## 6 1837124  1837124  659693430 451891.1 16413853688454070 128116563 0.1942062</span>
-<span class="co">##   estn.pse   estd.var  estd.se    estd.cv  estd.pse     est.covar      rhat</span>
-<span class="co">## 1 13.62425 2439960647 49395.96 0.10720681 10.720681 1738243875518 1144.7896</span>
-<span class="co">## 2 35.21886 2059007401 45376.29 0.29442363 29.442363 5788242135929 2890.0152</span>
-<span class="co">## 3 57.11393 2182872251 46721.22 0.36975739 36.975739 1007376897014  459.2132</span>
-<span class="co">## 4 12.36200 2223200929 47150.83 0.07436777  7.436777 3780331418363 1796.6784</span>
-<span class="co">## 5 37.09751 1434610660 37876.25 0.20219781 20.219781 1078804189568  945.4698</span>
-<span class="co">## 6 19.42062 2164120339 46520.11 0.10294538 10.294538 2619823868078 1459.8503</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT      nhat  nhat.var       dhat     dhat.var     covar NBRPLT.gt0</span>
+<span class="co">## 1         1 191.27640  679.1225 0.16708433 3.208604e-04 0.2285831         18</span>
+<span class="co">## 2         3 220.30963 6020.2928 0.07623130 5.037465e-04 1.4161225          7</span>
+<span class="co">## 3         5  18.88212  116.3016 0.04111842 2.311568e-04 0.1066769          8</span>
+<span class="co">## 4         7 223.49294  763.3171 0.12439229 8.557688e-05 0.1455149         30</span>
+<span class="co">## 5         9  64.88298  579.3635 0.06862512 1.925392e-04 0.1447864         12</span>
+<span class="co">## 6        11 359.09031 4863.3286 0.24597749 6.412162e-04 0.7762385         25</span>
+<span class="co">##     ACRES AREAUSED       estn     estd     estn.var   estn.se   estn.cv</span>
+<span class="co">## 1 2757613  2757613  527466298 460753.9 5.164339e+15  71863335 0.1362425</span>
+<span class="co">## 2 2021729  2021729  445406358 154119.0 2.460727e+16 156867056 0.3521886</span>
+<span class="co">## 3 3072988  3072988   58024539 126356.4 1.098266e+15  33140094 0.5711393</span>
+<span class="co">## 4 5096959  5096959 1139134377 634022.4 1.983021e+16 140819770 0.1236200</span>
+<span class="co">## 5 2729653  2729653  177108024 187322.8 4.316841e+15  65702668 0.3709751</span>
+<span class="co">## 6 1837124  1837124  659693430 451891.1 1.641385e+16 128116563 0.1942062</span>
+<span class="co">##   estn.pse   estd.var  estd.se    estd.cv  estd.pse    est.covar      rhat</span>
+<span class="co">## 1 13.62425 2439960647 49395.96 0.10720681 10.720681 1.738244e+12 1144.7896</span>
+<span class="co">## 2 35.21886 2059007401 45376.29 0.29442363 29.442363 5.788242e+12 2890.0152</span>
+<span class="co">## 3 57.11393 2182872251 46721.22 0.36975739 36.975739 1.007377e+12  459.2132</span>
+<span class="co">## 4 12.36200 2223200929 47150.83 0.07436777  7.436777 3.780331e+12 1796.6784</span>
+<span class="co">## 5 37.09751 1434610660 37876.25 0.20219781 20.219781 1.078804e+12  945.4698</span>
+<span class="co">## 6 19.42062 2164120339 46520.11 0.10294538 10.294538 2.619824e+12 1459.8503</span>
 <span class="co">##    rhat.var  rhat.se   rhat.cv      pse  CI99left CI99right   CI95left</span>
 <span class="co">## 1  20641.95 143.6731 0.1255017 12.55017  774.7123 1514.8669  863.19555</span>
 <span class="co">## 2 351466.67 592.8462 0.2051360 20.51360 1362.9445 4417.0859 1728.05791</span>
@@ -4113,12 +4110,12 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.2</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>         <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   TOTAL       estn           estn.var NBRPLT.gt0    estd    estd.var</span>
-<span class="co">## 1     1 9772216510 378544894771078464        281 5587398 54138597407</span>
-<span class="co">##        est.covar     rhat rhat.var  rhat.se    rhat.cv      pse CI99left</span>
-<span class="co">## 1 90841842836753 1748.974 7251.668 85.15673 0.04868952 4.868952 1529.625</span>
-<span class="co">##   CI99right CI95left CI95right CI68left CI68right</span>
-<span class="co">## 1  1968.324  1582.07  1915.879  1664.29  1833.659</span></code></pre>
+</summary><pre><code><span class="co">##   TOTAL       estn     estn.var NBRPLT.gt0    estd    estd.var    est.covar</span>
+<span class="co">## 1     1 9772216510 3.785449e+17        281 5587398 54138597407 9.084184e+13</span>
+<span class="co">##       rhat rhat.var  rhat.se    rhat.cv      pse CI99left CI99right CI95left</span>
+<span class="co">## 1 1748.974 7251.668 85.15673 0.04868952 4.868952 1529.625  1968.324  1582.07</span>
+<span class="co">##   CI95right CI68left CI68right</span>
+<span class="co">## 1  1915.879  1664.29  1833.659</span></code></pre>
 </details><div class="sourceCode" id="cb345"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.2</span><span class="op">$</span><span class="va">unit_rowest</span><span class="op">)</span>    <span class="co"># estimates by row, by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
@@ -4130,20 +4127,20 @@ output
 <span class="co">## 4         1         268  9.434619  68.79919 0.01023188 0.0000809180 0.07461295</span>
 <span class="co">## 5         1         281 47.532459 511.47315 0.03854903 0.0002367898 0.31057313</span>
 <span class="co">## 6         1         901  9.455198  27.28348 0.02760699 0.0002055134 0.07021793</span>
-<span class="co">##   NBRPLT.gt0   ACRES AREAUSED      estn      estd         estn.var  estn.se</span>
-<span class="co">## 1          1 2757613  2757613  48302710  28215.56 1803339834907658 42465749</span>
-<span class="co">## 2          4 2757613  2757613  93809786  89329.58 1924672767891660 43871093</span>
-<span class="co">## 3          4 2757613  2757613 195611436 112862.22 6262829323467030 79138040</span>
-<span class="co">## 4          1 2757613  2757613  26017027  28215.56  523178550781145 22873097</span>
-<span class="co">## 5          4 2757613  2757613 131076128 106303.32 3889461458199011 62365547</span>
-<span class="co">## 6          3 2757613  2757613  26073778  76129.41  207475311360084 14404003</span>
-<span class="co">##     estn.cv estn.pse   estd.var  estd.se   estd.cv estd.pse     est.covar</span>
-<span class="co">## 1 0.8791587 87.91587  615335251 24805.95 0.8791587 87.91587 1053403327133</span>
-<span class="co">## 2 0.4676601 46.76601 1625520387 40317.74 0.4513370 45.13370 1378405820888</span>
-<span class="co">## 3 0.4045676 40.45676 1999839565 44719.57 0.3962315 39.62315 3466097722146</span>
-<span class="co">## 4 0.8791587 87.91587  615335251 24805.95 0.8791587 87.91587  567388936062</span>
-<span class="co">## 5 0.4757964 47.57964 1800651626 42434.09 0.3991793 39.91793 2361731475841</span>
-<span class="co">## 6 0.5524325 55.24325 1562811900 39532.42 0.5192792 51.92792  533967320919</span>
+<span class="co">##   NBRPLT.gt0   ACRES AREAUSED      estn      estd     estn.var  estn.se</span>
+<span class="co">## 1          1 2757613  2757613  48302710  28215.56 1.803340e+15 42465749</span>
+<span class="co">## 2          4 2757613  2757613  93809786  89329.58 1.924673e+15 43871093</span>
+<span class="co">## 3          4 2757613  2757613 195611436 112862.22 6.262829e+15 79138040</span>
+<span class="co">## 4          1 2757613  2757613  26017027  28215.56 5.231786e+14 22873097</span>
+<span class="co">## 5          4 2757613  2757613 131076128 106303.32 3.889461e+15 62365547</span>
+<span class="co">## 6          3 2757613  2757613  26073778  76129.41 2.074753e+14 14404003</span>
+<span class="co">##     estn.cv estn.pse   estd.var  estd.se   estd.cv estd.pse    est.covar</span>
+<span class="co">## 1 0.8791587 87.91587  615335251 24805.95 0.8791587 87.91587 1.053403e+12</span>
+<span class="co">## 2 0.4676601 46.76601 1625520387 40317.74 0.4513370 45.13370 1.378406e+12</span>
+<span class="co">## 3 0.4045676 40.45676 1999839565 44719.57 0.3962315 39.62315 3.466098e+12</span>
+<span class="co">## 4 0.8791587 87.91587  615335251 24805.95 0.8791587 87.91587 5.673889e+11</span>
+<span class="co">## 5 0.4757964 47.57964 1800651626 42434.09 0.3991793 39.91793 2.361731e+12</span>
+<span class="co">## 6 0.5524325 55.24325 1562811900 39532.42 0.5192792 51.92792 5.339673e+11</span>
 <span class="co">##        rhat  rhat.var   rhat.se    rhat.cv       pse  CI99left CI99right</span>
 <span class="co">## 1 1711.9177      0.00   0.00000 0.00000000  0.000000 1711.9177 1711.9177</span>
 <span class="co">## 2 1050.1537 103042.75 321.00273 0.30567213 30.567213  223.3055 1877.0020</span>
@@ -4162,27 +4159,27 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.2</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>         <span class="co"># estimates by row for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   Forest type       estn           estn.var NBRPLT.gt0      estd    estd.var</span>
-<span class="co">## 1         201 1152902217  60030160448250664         36 661754.69 12118625799</span>
-<span class="co">## 2         221 1198569953  34865937577253708         51 889542.77 13008784420</span>
-<span class="co">## 3         265  902842867  82104454922199200         16 278701.09  5375334483</span>
-<span class="co">## 4         266 2433738758 156443577770076672         45 900929.05 15512198557</span>
-<span class="co">## 5         268 1309551698  65328513186367792         33 622891.26 10860191917</span>
-<span class="co">## 6         269   55531261   3207454853393306          1  19119.96   380241334</span>
-<span class="co">##        est.covar     rhat     rhat.var         rhat.se          rhat.cv</span>
-<span class="co">## 1 21580611917464 1742.190 4.936498e+04 222.18231349298 0.12753049307300</span>
-<span class="co">## 2 15745559137616 1347.400 2.028606e+04 142.42913410316 0.10570664336525</span>
-<span class="co">## 3 17932383379607 3239.467 2.874989e+05 536.18923500382 0.16551775247383</span>
-<span class="co">## 4 41767625518763 2701.366 5.418766e+04 232.78243598347 0.08617213301115</span>
-<span class="co">## 5 22571728019505 2102.376 4.747986e+04 217.89873814061 0.10364403384624</span>
-<span class="co">## 6  1104358144674 2904.361 5.470867e-09   0.00007396531 0.00000002546698</span>
-<span class="co">##               pse  CI99left CI99right CI95left CI95right CI68left CI68right</span>
-<span class="co">## 1 12.753049307300 1169.8860  2314.493 1306.720  2177.659 1521.239  1963.141</span>
-<span class="co">## 2 10.570664336525  980.5269  1714.273 1068.244  1626.556 1205.760  1489.040</span>
-<span class="co">## 3 16.551775247383 1858.3347  4620.599 2188.555  4290.378 2706.249  3772.684</span>
-<span class="co">## 4  8.617213301115 2101.7578  3300.973 2245.120  3157.611 2469.873  2932.858</span>
-<span class="co">## 5 10.364403384624 1541.1061  2663.646 1675.302  2529.450 1885.685  2319.067</span>
-<span class="co">## 6  0.000002546698 2904.3609  2904.361 2904.361  2904.361 2904.361  2904.361</span></code></pre>
+</summary><pre><code><span class="co">##   Forest type       estn     estn.var NBRPLT.gt0      estd    estd.var</span>
+<span class="co">## 1         201 1152902217 6.003016e+16         36 661754.69 12118625799</span>
+<span class="co">## 2         221 1198569953 3.486594e+16         51 889542.77 13008784420</span>
+<span class="co">## 3         265  902842867 8.210445e+16         16 278701.09  5375334483</span>
+<span class="co">## 4         266 2433738758 1.564436e+17         45 900929.05 15512198557</span>
+<span class="co">## 5         268 1309551698 6.532851e+16         33 622891.26 10860191917</span>
+<span class="co">## 6         269   55531261 3.207455e+15          1  19119.96   380241334</span>
+<span class="co">##      est.covar     rhat     rhat.var      rhat.se      rhat.cv          pse</span>
+<span class="co">## 1 2.158061e+13 1742.190 4.936498e+04 2.221823e+02 1.275305e-01 1.275305e+01</span>
+<span class="co">## 2 1.574556e+13 1347.400 2.028606e+04 1.424291e+02 1.057066e-01 1.057066e+01</span>
+<span class="co">## 3 1.793238e+13 3239.467 2.874989e+05 5.361892e+02 1.655178e-01 1.655178e+01</span>
+<span class="co">## 4 4.176763e+13 2701.366 5.418766e+04 2.327824e+02 8.617213e-02 8.617213e+00</span>
+<span class="co">## 5 2.257173e+13 2102.376 4.747986e+04 2.178987e+02 1.036440e-01 1.036440e+01</span>
+<span class="co">## 6 1.104358e+12 2904.361 5.470867e-09 7.396531e-05 2.546698e-08 2.546698e-06</span>
+<span class="co">##    CI99left CI99right CI95left CI95right CI68left CI68right</span>
+<span class="co">## 1 1169.8860  2314.493 1306.720  2177.659 1521.239  1963.141</span>
+<span class="co">## 2  980.5269  1714.273 1068.244  1626.556 1205.760  1489.040</span>
+<span class="co">## 3 1858.3347  4620.599 2188.555  4290.378 2706.249  3772.684</span>
+<span class="co">## 4 2101.7578  3300.973 2245.120  3157.611 2469.873  2932.858</span>
+<span class="co">## 5 1541.1061  2663.646 1675.302  2529.450 1885.685  2319.067</span>
+<span class="co">## 6 2904.3609  2904.361 2904.361  2904.361 2904.361  2904.361</span></code></pre>
 </details><div class="sourceCode" id="cb349"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Titles (list object) for estimate</span>
 <span class="va">titlelst</span> <span class="op">&lt;-</span> <span class="va">ratio1.2</span><span class="op">$</span><span class="va">titlelst</span>
@@ -4310,27 +4307,27 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">unit_totest</span><span class="op">)</span> <span class="co"># estimates by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT      nhat  nhat.var       dhat      dhat.var     covar NBRPLT.gt0</span>
-<span class="co">## 1         1 191.27640  679.1225 0.16708433 0.00032086045 0.2285831         18</span>
-<span class="co">## 2         3 220.30963 6020.2928 0.07623130 0.00050374648 1.4161225          7</span>
-<span class="co">## 3         5  18.88212  116.3016 0.04111842 0.00023115676 0.1066769          8</span>
-<span class="co">## 4         7 223.49294  763.3171 0.12439229 0.00008557688 0.1455149         30</span>
-<span class="co">## 5         9  64.88298  579.3635 0.06862512 0.00019253920 0.1447864         12</span>
-<span class="co">## 6        11 359.09031 4863.3286 0.24597749 0.00064121617 0.7762385         25</span>
-<span class="co">##     ACRES AREAUSED       estn     estd          estn.var   estn.se   estn.cv</span>
-<span class="co">## 1 2757613  2757613  527466298 460753.9  5164338937162040  71863335 0.1362425</span>
-<span class="co">## 2 2021729  2021729  445406358 154119.0 24607273333053764 156867056 0.3521886</span>
-<span class="co">## 3 3072988  3072988   58024539 126356.4  1098265828298225  33140094 0.5711393</span>
-<span class="co">## 4 5096959  5096959 1139134377 634022.4 19830207638119344 140819770 0.1236200</span>
-<span class="co">## 5 2729653  2729653  177108024 187322.8  4316840611417018  65702668 0.3709751</span>
-<span class="co">## 6 1837124  1837124  659693430 451891.1 16413853688454070 128116563 0.1942062</span>
-<span class="co">##   estn.pse   estd.var  estd.se    estd.cv  estd.pse     est.covar      rhat</span>
-<span class="co">## 1 13.62425 2439960647 49395.96 0.10720681 10.720681 1738243875518 1144.7896</span>
-<span class="co">## 2 35.21886 2059007401 45376.29 0.29442363 29.442363 5788242135929 2890.0152</span>
-<span class="co">## 3 57.11393 2182872251 46721.22 0.36975739 36.975739 1007376897014  459.2132</span>
-<span class="co">## 4 12.36200 2223200929 47150.83 0.07436777  7.436777 3780331418363 1796.6784</span>
-<span class="co">## 5 37.09751 1434610660 37876.25 0.20219781 20.219781 1078804189568  945.4698</span>
-<span class="co">## 6 19.42062 2164120339 46520.11 0.10294538 10.294538 2619823868078 1459.8503</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT      nhat  nhat.var       dhat     dhat.var     covar NBRPLT.gt0</span>
+<span class="co">## 1         1 191.27640  679.1225 0.16708433 3.208604e-04 0.2285831         18</span>
+<span class="co">## 2         3 220.30963 6020.2928 0.07623130 5.037465e-04 1.4161225          7</span>
+<span class="co">## 3         5  18.88212  116.3016 0.04111842 2.311568e-04 0.1066769          8</span>
+<span class="co">## 4         7 223.49294  763.3171 0.12439229 8.557688e-05 0.1455149         30</span>
+<span class="co">## 5         9  64.88298  579.3635 0.06862512 1.925392e-04 0.1447864         12</span>
+<span class="co">## 6        11 359.09031 4863.3286 0.24597749 6.412162e-04 0.7762385         25</span>
+<span class="co">##     ACRES AREAUSED       estn     estd     estn.var   estn.se   estn.cv</span>
+<span class="co">## 1 2757613  2757613  527466298 460753.9 5.164339e+15  71863335 0.1362425</span>
+<span class="co">## 2 2021729  2021729  445406358 154119.0 2.460727e+16 156867056 0.3521886</span>
+<span class="co">## 3 3072988  3072988   58024539 126356.4 1.098266e+15  33140094 0.5711393</span>
+<span class="co">## 4 5096959  5096959 1139134377 634022.4 1.983021e+16 140819770 0.1236200</span>
+<span class="co">## 5 2729653  2729653  177108024 187322.8 4.316841e+15  65702668 0.3709751</span>
+<span class="co">## 6 1837124  1837124  659693430 451891.1 1.641385e+16 128116563 0.1942062</span>
+<span class="co">##   estn.pse   estd.var  estd.se    estd.cv  estd.pse    est.covar      rhat</span>
+<span class="co">## 1 13.62425 2439960647 49395.96 0.10720681 10.720681 1.738244e+12 1144.7896</span>
+<span class="co">## 2 35.21886 2059007401 45376.29 0.29442363 29.442363 5.788242e+12 2890.0152</span>
+<span class="co">## 3 57.11393 2182872251 46721.22 0.36975739 36.975739 1.007377e+12  459.2132</span>
+<span class="co">## 4 12.36200 2223200929 47150.83 0.07436777  7.436777 3.780331e+12 1796.6784</span>
+<span class="co">## 5 37.09751 1434610660 37876.25 0.20219781 20.219781 1.078804e+12  945.4698</span>
+<span class="co">## 6 19.42062 2164120339 46520.11 0.10294538 10.294538 2.619824e+12 1459.8503</span>
 <span class="co">##    rhat.var  rhat.se   rhat.cv      pse  CI99left CI99right   CI95left</span>
 <span class="co">## 1  20641.95 143.6731 0.1255017 12.55017  774.7123 1514.8669  863.19555</span>
 <span class="co">## 2 351466.67 592.8462 0.2051360 20.51360 1362.9445 4417.0859 1728.05791</span>
@@ -4349,12 +4346,12 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>      <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   TOTAL       estn           estn.var NBRPLT.gt0    estd    estd.var</span>
-<span class="co">## 1     1 9772216510 378544894771078464        281 5587398 54138597407</span>
-<span class="co">##        est.covar     rhat rhat.var  rhat.se    rhat.cv      pse CI99left</span>
-<span class="co">## 1 90841842836753 1748.974 7251.668 85.15673 0.04868952 4.868952 1529.625</span>
-<span class="co">##   CI99right CI95left CI95right CI68left CI68right</span>
-<span class="co">## 1  1968.324  1582.07  1915.879  1664.29  1833.659</span></code></pre>
+</summary><pre><code><span class="co">##   TOTAL       estn     estn.var NBRPLT.gt0    estd    estd.var    est.covar</span>
+<span class="co">## 1     1 9772216510 3.785449e+17        281 5587398 54138597407 9.084184e+13</span>
+<span class="co">##       rhat rhat.var  rhat.se    rhat.cv      pse CI99left CI99right CI95left</span>
+<span class="co">## 1 1748.974 7251.668 85.15673 0.04868952 4.868952 1529.625  1968.324  1582.07</span>
+<span class="co">##   CI95right CI68left CI68right</span>
+<span class="co">## 1  1915.879  1664.29  1833.659</span></code></pre>
 </details><div class="sourceCode" id="cb364"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">unit_rowest</span><span class="op">)</span> <span class="co"># estimates by row, by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
@@ -4373,20 +4370,20 @@ output
 <span class="co">## 4 0.0000809180 0.07461295          1      268 2757613  2757613  26017027</span>
 <span class="co">## 5 0.0002367898 0.31057313          4      281 2757613  2757613 131076128</span>
 <span class="co">## 6 0.0002055134 0.07021793          3      901 2757613  2757613  26073778</span>
-<span class="co">##        estd         estn.var  estn.se   estn.cv estn.pse   estd.var  estd.se</span>
-<span class="co">## 1  28215.56 1803339834907658 42465749 0.8791587 87.91587  615335251 24805.95</span>
-<span class="co">## 2  89329.58 1924672767891660 43871093 0.4676601 46.76601 1625520387 40317.74</span>
-<span class="co">## 3 112862.22 6262829323467030 79138040 0.4045676 40.45676 1999839565 44719.57</span>
-<span class="co">## 4  28215.56  523178550781145 22873097 0.8791587 87.91587  615335251 24805.95</span>
-<span class="co">## 5 106303.32 3889461458199011 62365547 0.4757964 47.57964 1800651626 42434.09</span>
-<span class="co">## 6  76129.41  207475311360084 14404003 0.5524325 55.24325 1562811900 39532.42</span>
-<span class="co">##     estd.cv estd.pse     est.covar      rhat  rhat.var   rhat.se    rhat.cv</span>
-<span class="co">## 1 0.8791587 87.91587 1053403327133 1711.9177      0.00   0.00000 0.00000000</span>
-<span class="co">## 2 0.4513370 45.13370 1378405820888 1050.1537 103042.75 321.00273 0.30567213</span>
-<span class="co">## 3 0.3962315 39.62315 3466097722146 1733.1879  20052.84 141.60806 0.08170381</span>
-<span class="co">## 4 0.8791587 87.91587  567388936062  922.0810      0.00   0.00000 0.00000000</span>
-<span class="co">## 5 0.3991793 39.91793 2361731475841 1233.0389  71053.40 266.55843 0.21618006</span>
-<span class="co">## 6 0.5192792 51.92792  533967320919  342.4928   4319.64  65.72397 0.19189881</span>
+<span class="co">##        estd     estn.var  estn.se   estn.cv estn.pse   estd.var  estd.se</span>
+<span class="co">## 1  28215.56 1.803340e+15 42465749 0.8791587 87.91587  615335251 24805.95</span>
+<span class="co">## 2  89329.58 1.924673e+15 43871093 0.4676601 46.76601 1625520387 40317.74</span>
+<span class="co">## 3 112862.22 6.262829e+15 79138040 0.4045676 40.45676 1999839565 44719.57</span>
+<span class="co">## 4  28215.56 5.231786e+14 22873097 0.8791587 87.91587  615335251 24805.95</span>
+<span class="co">## 5 106303.32 3.889461e+15 62365547 0.4757964 47.57964 1800651626 42434.09</span>
+<span class="co">## 6  76129.41 2.074753e+14 14404003 0.5524325 55.24325 1562811900 39532.42</span>
+<span class="co">##     estd.cv estd.pse    est.covar      rhat  rhat.var   rhat.se    rhat.cv</span>
+<span class="co">## 1 0.8791587 87.91587 1.053403e+12 1711.9177      0.00   0.00000 0.00000000</span>
+<span class="co">## 2 0.4513370 45.13370 1.378406e+12 1050.1537 103042.75 321.00273 0.30567213</span>
+<span class="co">## 3 0.3962315 39.62315 3.466098e+12 1733.1879  20052.84 141.60806 0.08170381</span>
+<span class="co">## 4 0.8791587 87.91587 5.673889e+11  922.0810      0.00   0.00000 0.00000000</span>
+<span class="co">## 5 0.3991793 39.91793 2.361731e+12 1233.0389  71053.40 266.55843 0.21618006</span>
+<span class="co">## 6 0.5192792 51.92792 5.339673e+11  342.4928   4319.64  65.72397 0.19189881</span>
 <span class="co">##         pse  CI99left CI99right  CI95left CI95right  CI68left CI68right</span>
 <span class="co">## 1  0.000000 1711.9177 1711.9177 1711.9177 1711.9177 1711.9177 1711.9177</span>
 <span class="co">## 2 30.567213  223.3055 1877.0020  420.9999 1679.3075  730.9300 1369.3774</span>
@@ -4398,45 +4395,45 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>      <span class="co"># estimates by row for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##                        Forest type FORTYPCD       estn           estn.var</span>
-<span class="co">## 1                      Douglas-fir      201 1152902217  60030160448250664</span>
-<span class="co">## 2                   Ponderosa pine      221 1198569953  34865937577253708</span>
-<span class="co">## 3                 Engelmann spruce      265  902842867  82104454922199200</span>
-<span class="co">## 4 Engelmann spruce / subalpine fir      266 2433738758 156443577770076672</span>
-<span class="co">## 5                    Subalpine fir      268 1309551698  65328513186367792</span>
-<span class="co">## 6                      Blue spruce      269   55531261   3207454853393306</span>
-<span class="co">##   NBRPLT.gt0      estd    estd.var      est.covar     rhat     rhat.var</span>
-<span class="co">## 1         36 661754.69 12118625799 21580611917464 1742.190 4.936498e+04</span>
-<span class="co">## 2         51 889542.77 13008784420 15745559137616 1347.400 2.028606e+04</span>
-<span class="co">## 3         16 278701.09  5375334483 17932383379607 3239.467 2.874989e+05</span>
-<span class="co">## 4         45 900929.05 15512198557 41767625518763 2701.366 5.418766e+04</span>
-<span class="co">## 5         33 622891.26 10860191917 22571728019505 2102.376 4.747986e+04</span>
-<span class="co">## 6          1  19119.96   380241334  1104358144674 2904.361 5.470867e-09</span>
-<span class="co">##           rhat.se          rhat.cv             pse  CI99left CI99right CI95left</span>
-<span class="co">## 1 222.18231349298 0.12753049307300 12.753049307300 1169.8860  2314.493 1306.720</span>
-<span class="co">## 2 142.42913410316 0.10570664336525 10.570664336525  980.5269  1714.273 1068.244</span>
-<span class="co">## 3 536.18923500382 0.16551775247383 16.551775247383 1858.3347  4620.599 2188.555</span>
-<span class="co">## 4 232.78243598347 0.08617213301115  8.617213301115 2101.7578  3300.973 2245.120</span>
-<span class="co">## 5 217.89873814061 0.10364403384624 10.364403384624 1541.1061  2663.646 1675.302</span>
-<span class="co">## 6   0.00007396531 0.00000002546698  0.000002546698 2904.3609  2904.361 2904.361</span>
-<span class="co">##   CI95right CI68left CI68right</span>
-<span class="co">## 1  2177.659 1521.239  1963.141</span>
-<span class="co">## 2  1626.556 1205.760  1489.040</span>
-<span class="co">## 3  4290.378 2706.249  3772.684</span>
-<span class="co">## 4  3157.611 2469.873  2932.858</span>
-<span class="co">## 5  2529.450 1885.685  2319.067</span>
-<span class="co">## 6  2904.361 2904.361  2904.361</span></code></pre>
+</summary><pre><code><span class="co">##                        Forest type FORTYPCD       estn     estn.var NBRPLT.gt0</span>
+<span class="co">## 1                      Douglas-fir      201 1152902217 6.003016e+16         36</span>
+<span class="co">## 2                   Ponderosa pine      221 1198569953 3.486594e+16         51</span>
+<span class="co">## 3                 Engelmann spruce      265  902842867 8.210445e+16         16</span>
+<span class="co">## 4 Engelmann spruce / subalpine fir      266 2433738758 1.564436e+17         45</span>
+<span class="co">## 5                    Subalpine fir      268 1309551698 6.532851e+16         33</span>
+<span class="co">## 6                      Blue spruce      269   55531261 3.207455e+15          1</span>
+<span class="co">##        estd    estd.var    est.covar     rhat     rhat.var      rhat.se</span>
+<span class="co">## 1 661754.69 12118625799 2.158061e+13 1742.190 4.936498e+04 2.221823e+02</span>
+<span class="co">## 2 889542.77 13008784420 1.574556e+13 1347.400 2.028606e+04 1.424291e+02</span>
+<span class="co">## 3 278701.09  5375334483 1.793238e+13 3239.467 2.874989e+05 5.361892e+02</span>
+<span class="co">## 4 900929.05 15512198557 4.176763e+13 2701.366 5.418766e+04 2.327824e+02</span>
+<span class="co">## 5 622891.26 10860191917 2.257173e+13 2102.376 4.747986e+04 2.178987e+02</span>
+<span class="co">## 6  19119.96   380241334 1.104358e+12 2904.361 5.470867e-09 7.396531e-05</span>
+<span class="co">##        rhat.cv          pse  CI99left CI99right CI95left CI95right CI68left</span>
+<span class="co">## 1 1.275305e-01 1.275305e+01 1169.8860  2314.493 1306.720  2177.659 1521.239</span>
+<span class="co">## 2 1.057066e-01 1.057066e+01  980.5269  1714.273 1068.244  1626.556 1205.760</span>
+<span class="co">## 3 1.655178e-01 1.655178e+01 1858.3347  4620.599 2188.555  4290.378 2706.249</span>
+<span class="co">## 4 8.617213e-02 8.617213e+00 2101.7578  3300.973 2245.120  3157.611 2469.873</span>
+<span class="co">## 5 1.036440e-01 1.036440e+01 1541.1061  2663.646 1675.302  2529.450 1885.685</span>
+<span class="co">## 6 2.546698e-08 2.546698e-06 2904.3609  2904.361 2904.361  2904.361 2904.361</span>
+<span class="co">##   CI68right</span>
+<span class="co">## 1  1963.141</span>
+<span class="co">## 2  1489.040</span>
+<span class="co">## 3  3772.684</span>
+<span class="co">## 4  2932.858</span>
+<span class="co">## 5  2319.067</span>
+<span class="co">## 6  2904.361</span></code></pre>
 </details><div class="sourceCode" id="cb368"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">unit_colest</span><span class="op">)</span> <span class="co"># estimates by column, by estimation unit (i.e., ESTN_UNIT)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ESTN_UNIT Stand-size class       nhat    nhat.var        dhat      dhat.var</span>
-<span class="co">## 1         1   Large diameter  92.576964  854.213272 0.063089433 0.00035128489</span>
-<span class="co">## 2         1  Medium diameter  86.699781  700.129294 0.061391258 0.00033378677</span>
-<span class="co">## 3         1   Small diameter   9.615193   27.172483 0.035460400 0.00023765695</span>
-<span class="co">## 4         1       Nonstocked   2.384466    5.993908 0.007143242 0.00005379211</span>
-<span class="co">## 5         3   Large diameter 213.616471 5982.044994 0.058381005 0.00043074224</span>
-<span class="co">## 6         3  Medium diameter   6.693154   44.810693 0.007729145 0.00005975619</span>
+</summary><pre><code><span class="co">##   ESTN_UNIT Stand-size class       nhat    nhat.var        dhat     dhat.var</span>
+<span class="co">## 1         1   Large diameter  92.576964  854.213272 0.063089433 3.512849e-04</span>
+<span class="co">## 2         1  Medium diameter  86.699781  700.129294 0.061391258 3.337868e-04</span>
+<span class="co">## 3         1   Small diameter   9.615193   27.172483 0.035460400 2.376570e-04</span>
+<span class="co">## 4         1       Nonstocked   2.384466    5.993908 0.007143242 5.379211e-05</span>
+<span class="co">## 5         3   Large diameter 213.616471 5982.044994 0.058381005 4.307422e-04</span>
+<span class="co">## 6         3  Medium diameter   6.693154   44.810693 0.007729145 5.975619e-05</span>
 <span class="co">##        covar NBRPLT.gt0 STDSZCD   ACRES AREAUSED      estn      estd</span>
 <span class="co">## 1 0.46727363          7       1 2757613  2757613 255291438 173976.24</span>
 <span class="co">## 2 0.47139023          6       2 2757613  2757613 239084444 169293.33</span>
@@ -4444,48 +4441,41 @@ output
 <span class="co">## 4 0.01795619          1       5 2757613  2757613   6575434  19698.30</span>
 <span class="co">## 5 1.54026382          6       1 2021729  2021729 431874614 118030.57</span>
 <span class="co">## 6 0.05174666          1       2 2021729  2021729  13531744  15626.24</span>
-<span class="co">##            estn.var   estn.se   estn.cv  estn.pse   estd.var  estd.se   estd.cv</span>
-<span class="co">## 1  6495804570749203  80596554 0.3157041  31.57041 2671321181 51684.83 0.2970798</span>
-<span class="co">## 2  5324083824476988  72966320 0.3051906  30.51906 2538257910 50381.13 0.2975966</span>
-<span class="co">## 3   206631232062460  14374673 0.5421340  54.21340 1807245526 42511.71 0.4347420</span>
-<span class="co">## 4    45580247330972   6751314 1.0267481 102.67481  409058305 20225.19 1.0267481</span>
-<span class="co">## 5 24450939817541760 156367963 0.3620680  36.20680 1760610740 41959.63 0.3554980</span>
-<span class="co">## 6   183158696516786  13533614 1.0001382 100.01382  244246754 15628.40 1.0001382</span>
-<span class="co">##    estd.pse     est.covar      rhat     rhat.var         rhat.se</span>
-<span class="co">## 1  29.70798 3553349380658 1467.3925 6.011305e+04 245.17963004662</span>
-<span class="co">## 2  29.75966 3584653766071 1412.2496 9.129651e+03  95.54920542438</span>
-<span class="co">## 3  43.47420  515741249156  271.1530 6.255676e+03  79.09283412150</span>
-<span class="co">## 4 102.67481  136546617377  333.8072 0.000000e+00   0.00000000000</span>
-<span class="co">## 5  35.54980 6295656102089 3659.0064 1.400367e+05 374.21479619602</span>
-<span class="co">## 6 100.01382  211508669157  865.9631 5.119190e-10   0.00002262563</span>
-<span class="co">##           rhat.cv            pse   CI99left CI99right  CI95left CI95right</span>
-<span class="co">## 1 0.1670852372321 16.70852372321  835.85166 2098.9334  986.8493 1947.9358</span>
-<span class="co">## 2 0.0676574481811  6.76574481811 1166.13118 1658.3681 1224.9766 1599.5226</span>
-<span class="co">## 3 0.2916908121765 29.16908121765   67.42334  474.8826  116.1339  426.1721</span>
-<span class="co">## 4 0.0000000000000  0.00000000000  333.80722  333.8072  333.8072  333.8072</span>
-<span class="co">## 5 0.1022722442311 10.22722442311 2695.09296 4622.9198 2925.5589 4392.4539</span>
-<span class="co">## 6 0.0000000261277  0.00000261277  865.96301  865.9631  865.9630  865.9631</span>
-<span class="co">##    CI68left CI68right</span>
-<span class="co">## 1 1223.5717 1711.2134</span>
-<span class="co">## 2 1317.2300 1507.2693</span>
-<span class="co">## 3  192.4985  349.8075</span>
-<span class="co">## 4  333.8072  333.8072</span>
-<span class="co">## 5 3286.8655 4031.1473</span>
-<span class="co">## 6  865.9630  865.9631</span></code></pre>
+<span class="co">##       estn.var   estn.se   estn.cv  estn.pse   estd.var  estd.se   estd.cv</span>
+<span class="co">## 1 6.495805e+15  80596554 0.3157041  31.57041 2671321181 51684.83 0.2970798</span>
+<span class="co">## 2 5.324084e+15  72966320 0.3051906  30.51906 2538257910 50381.13 0.2975966</span>
+<span class="co">## 3 2.066312e+14  14374673 0.5421340  54.21340 1807245526 42511.71 0.4347420</span>
+<span class="co">## 4 4.558025e+13   6751314 1.0267481 102.67481  409058305 20225.19 1.0267481</span>
+<span class="co">## 5 2.445094e+16 156367963 0.3620680  36.20680 1760610740 41959.63 0.3554980</span>
+<span class="co">## 6 1.831587e+14  13533614 1.0001382 100.01382  244246754 15628.40 1.0001382</span>
+<span class="co">##    estd.pse    est.covar      rhat     rhat.var      rhat.se      rhat.cv</span>
+<span class="co">## 1  29.70798 3.553349e+12 1467.3925 6.011305e+04 2.451796e+02 1.670852e-01</span>
+<span class="co">## 2  29.75966 3.584654e+12 1412.2496 9.129651e+03 9.554921e+01 6.765745e-02</span>
+<span class="co">## 3  43.47420 5.157412e+11  271.1530 6.255676e+03 7.909283e+01 2.916908e-01</span>
+<span class="co">## 4 102.67481 1.365466e+11  333.8072 0.000000e+00 0.000000e+00 0.000000e+00</span>
+<span class="co">## 5  35.54980 6.295656e+12 3659.0064 1.400367e+05 3.742148e+02 1.022722e-01</span>
+<span class="co">## 6 100.01382 2.115087e+11  865.9631 5.119190e-10 2.262563e-05 2.612770e-08</span>
+<span class="co">##            pse   CI99left CI99right  CI95left CI95right  CI68left CI68right</span>
+<span class="co">## 1 1.670852e+01  835.85166 2098.9334  986.8493 1947.9358 1223.5717 1711.2134</span>
+<span class="co">## 2 6.765745e+00 1166.13118 1658.3681 1224.9766 1599.5226 1317.2300 1507.2693</span>
+<span class="co">## 3 2.916908e+01   67.42334  474.8826  116.1339  426.1721  192.4985  349.8075</span>
+<span class="co">## 4 0.000000e+00  333.80722  333.8072  333.8072  333.8072  333.8072  333.8072</span>
+<span class="co">## 5 1.022722e+01 2695.09296 4622.9198 2925.5589 4392.4539 3286.8655 4031.1473</span>
+<span class="co">## 6 2.612770e-06  865.96301  865.9631  865.9630  865.9631  865.9630  865.9631</span></code></pre>
 </details><div class="sourceCode" id="cb370"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">colest</span><span class="op">)</span>      <span class="co"># estimates by column for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   Stand-size class STDSZCD       estn           estn.var NBRPLT.gt0      estd</span>
-<span class="co">## 1   Large diameter       1 7064786085 355011281104108160        161 2857890.7</span>
-<span class="co">## 2  Medium diameter       2 2226735208  86600186034586000         71 1345938.0</span>
-<span class="co">## 3   Small diameter       3  446586704   7657716025907669         51 1095815.5</span>
-<span class="co">## 4       Nonstocked       5   34108514    287073004396192         11  287753.9</span>
-<span class="co">##      estd.var      est.covar      rhat  rhat.var   rhat.se    rhat.cv       pse</span>
-<span class="co">## 1 38575741797 94644194860083 2472.0281 15037.387 122.62702 0.04960584  4.960584</span>
-<span class="co">## 2 22537912872 37858886564652 1654.4115 12707.271 112.72653 0.06813694  6.813694</span>
-<span class="co">## 3 19643622069  8162301193024  407.5382  3553.742  59.61327 0.14627651 14.627651</span>
-<span class="co">## 4  5235434732   646995179515  118.5336  2502.957  50.02956 0.42207065 42.207065</span>
+</summary><pre><code><span class="co">##   Stand-size class STDSZCD       estn     estn.var NBRPLT.gt0      estd</span>
+<span class="co">## 1   Large diameter       1 7064786085 3.550113e+17        161 2857890.7</span>
+<span class="co">## 2  Medium diameter       2 2226735208 8.660019e+16         71 1345938.0</span>
+<span class="co">## 3   Small diameter       3  446586704 7.657716e+15         51 1095815.5</span>
+<span class="co">## 4       Nonstocked       5   34108514 2.870730e+14         11  287753.9</span>
+<span class="co">##      estd.var    est.covar      rhat  rhat.var   rhat.se    rhat.cv       pse</span>
+<span class="co">## 1 38575741797 9.464419e+13 2472.0281 15037.387 122.62702 0.04960584  4.960584</span>
+<span class="co">## 2 22537912872 3.785889e+13 1654.4115 12707.271 112.72653 0.06813694  6.813694</span>
+<span class="co">## 3 19643622069 8.162301e+12  407.5382  3553.742  59.61327 0.14627651 14.627651</span>
+<span class="co">## 4  5235434732 6.469952e+11  118.5336  2502.957  50.02956 0.42207065 42.207065</span>
 <span class="co">##    CI99left CI99right   CI95left CI95right   CI68left CI68right</span>
 <span class="co">## 1 2156.1618 2787.8944 2231.68355 2712.3727 2350.08069 2593.9755</span>
 <span class="co">## 2 1364.0472 1944.7758 1433.47153 1875.3514 1542.30968 1766.5133</span>
@@ -4509,52 +4499,52 @@ output
 <span class="co">## 4 326.38928 0.02046375 0.0001517213 0.22162884          2       2      266</span>
 <span class="co">## 5  68.79919 0.01023188 0.0000809180 0.07461295          1       2      268</span>
 <span class="co">## 6 512.18564 0.03069563 0.0002124098 0.32781129          3       2      281</span>
-<span class="co">##     ACRES AREAUSED      estn     estd         estn.var  estn.se   estn.cv</span>
-<span class="co">## 1 2757613  2757613  48302710 28215.56 1803339834907658 42465749 0.8791587</span>
-<span class="co">## 2 2757613  2757613  93809786 89329.58 1924672767891660 43871093 0.4676601</span>
-<span class="co">## 3 2757613  2757613 113178943 56431.11 4682206625418261 68426651 0.6045882</span>
-<span class="co">## 4 2757613  2757613  82432493 56431.11 2482004259148518 49819718 0.6043699</span>
-<span class="co">## 5 2757613  2757613  26017027 28215.56  523178550781145 22873097 0.8791587</span>
-<span class="co">## 6 2757613  2757613 130634924 84646.67 3894879568150572 62408970 0.4777357</span>
-<span class="co">##   estn.pse   estd.var  estd.se   estd.cv estd.pse     est.covar     rhat</span>
-<span class="co">## 1 87.91587  615335251 24805.95 0.8791587 87.91587 1053403327133 1711.918</span>
-<span class="co">## 2 46.76601 1625520387 40317.74 0.4513370 45.13370 1378405820888 1050.154</span>
-<span class="co">## 3 60.45882 1153753595 33966.95 0.6019188 60.19188 2313982668917 2005.613</span>
-<span class="co">## 4 60.43699 1153753595 33966.95 0.6019188 60.19188 1685360856637 1460.763</span>
-<span class="co">## 5 87.91587  615335251 24805.95 0.8791587 87.91587  567388936062  922.081</span>
-<span class="co">## 6 47.77357 1615255033 40190.24 0.4748000 47.48000 2492817826114 1543.297</span>
-<span class="co">##     rhat.var   rhat.se    rhat.cv       pse  CI99left CI99right  CI95left</span>
-<span class="co">## 1      0.000   0.00000 0.00000000  0.000000 1711.9177  1711.918 1711.9177</span>
-<span class="co">## 2 103042.751 321.00273 0.30567213 30.567213  223.3055  1877.002  420.9999</span>
-<span class="co">## 3  12954.741 113.81890 0.05675019  5.675019 1712.4345  2298.791 1782.5316</span>
-<span class="co">## 4   6309.071  79.42966 0.05437545  5.437545 1256.1660  1665.361 1305.0840</span>
-<span class="co">## 5      0.000   0.00000 0.00000000  0.000000  922.0810   922.081  922.0810</span>
-<span class="co">## 6   6660.371  81.61110 0.05288101  5.288101 1333.0805  1753.513 1383.3419</span>
-<span class="co">##   CI95right CI68left CI68right</span>
-<span class="co">## 1  1711.918 1711.918  1711.918</span>
-<span class="co">## 2  1679.308  730.930  1369.377</span>
-<span class="co">## 3  2228.693 1892.424  2118.801</span>
-<span class="co">## 4  1616.443 1381.774  1539.753</span>
-<span class="co">## 5   922.081  922.081   922.081</span>
-<span class="co">## 6  1703.252 1462.138  1624.456</span></code></pre>
+<span class="co">##     ACRES AREAUSED      estn     estd     estn.var  estn.se   estn.cv estn.pse</span>
+<span class="co">## 1 2757613  2757613  48302710 28215.56 1.803340e+15 42465749 0.8791587 87.91587</span>
+<span class="co">## 2 2757613  2757613  93809786 89329.58 1.924673e+15 43871093 0.4676601 46.76601</span>
+<span class="co">## 3 2757613  2757613 113178943 56431.11 4.682207e+15 68426651 0.6045882 60.45882</span>
+<span class="co">## 4 2757613  2757613  82432493 56431.11 2.482004e+15 49819718 0.6043699 60.43699</span>
+<span class="co">## 5 2757613  2757613  26017027 28215.56 5.231786e+14 22873097 0.8791587 87.91587</span>
+<span class="co">## 6 2757613  2757613 130634924 84646.67 3.894880e+15 62408970 0.4777357 47.77357</span>
+<span class="co">##     estd.var  estd.se   estd.cv estd.pse    est.covar     rhat   rhat.var</span>
+<span class="co">## 1  615335251 24805.95 0.8791587 87.91587 1.053403e+12 1711.918      0.000</span>
+<span class="co">## 2 1625520387 40317.74 0.4513370 45.13370 1.378406e+12 1050.154 103042.751</span>
+<span class="co">## 3 1153753595 33966.95 0.6019188 60.19188 2.313983e+12 2005.613  12954.741</span>
+<span class="co">## 4 1153753595 33966.95 0.6019188 60.19188 1.685361e+12 1460.763   6309.071</span>
+<span class="co">## 5  615335251 24805.95 0.8791587 87.91587 5.673889e+11  922.081      0.000</span>
+<span class="co">## 6 1615255033 40190.24 0.4748000 47.48000 2.492818e+12 1543.297   6660.371</span>
+<span class="co">##     rhat.se    rhat.cv       pse  CI99left CI99right  CI95left CI95right</span>
+<span class="co">## 1   0.00000 0.00000000  0.000000 1711.9177  1711.918 1711.9177  1711.918</span>
+<span class="co">## 2 321.00273 0.30567213 30.567213  223.3055  1877.002  420.9999  1679.308</span>
+<span class="co">## 3 113.81890 0.05675019  5.675019 1712.4345  2298.791 1782.5316  2228.693</span>
+<span class="co">## 4  79.42966 0.05437545  5.437545 1256.1660  1665.361 1305.0840  1616.443</span>
+<span class="co">## 5   0.00000 0.00000000  0.000000  922.0810   922.081  922.0810   922.081</span>
+<span class="co">## 6  81.61110 0.05288101  5.288101 1333.0805  1753.513 1383.3419  1703.252</span>
+<span class="co">##   CI68left CI68right</span>
+<span class="co">## 1 1711.918  1711.918</span>
+<span class="co">## 2  730.930  1369.377</span>
+<span class="co">## 3 1892.424  2118.801</span>
+<span class="co">## 4 1381.774  1539.753</span>
+<span class="co">## 5  922.081   922.081</span>
+<span class="co">## 6 1462.138  1624.456</span></code></pre>
 </details><div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw1.3</span><span class="op">$</span><span class="va">grpest</span><span class="op">)</span>      <span class="co"># estimates by row and column for population (i.e., WY)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##      Forest type Stand-size class FORTYPCD STDSZCD       estn          estn.var</span>
-<span class="co">## 1    Douglas-fir   Large diameter      201       1 1016954545 57344089638620000</span>
-<span class="co">## 2    Douglas-fir  Medium diameter      201       2  104576458  2341818759855478</span>
-<span class="co">## 3    Douglas-fir   Small diameter      201       3   31371213   571404961248505</span>
-<span class="co">## 4 Ponderosa pine   Large diameter      221       1 1139547783 35015970748032568</span>
-<span class="co">## 5 Ponderosa pine  Medium diameter      221       2   52902316  1339518083586740</span>
-<span class="co">## 6 Ponderosa pine   Small diameter      221       3    6119854    27912688572254</span>
-<span class="co">##   NBRPLT.gt0      estd    estd.var      est.covar      rhat   rhat.var  rhat.se</span>
-<span class="co">## 1         26 450541.00  8124659016 18909821689008 2257.1854  65877.821 256.6668</span>
-<span class="co">## 2          6 111576.95  2129966306  1978525254506  937.2586  40493.137 201.2291</span>
-<span class="co">## 3          6  99636.75  1792776867   618450554797  314.8559  36231.237 190.3450</span>
-<span class="co">## 4         46 786751.82 11316613869 15439676277979 1448.4209  22668.087 150.5592</span>
-<span class="co">## 5          3  46720.27   799177795   768357833217 1132.3205 285932.641 534.7267</span>
-<span class="co">## 6          3  56070.68  1071721490   126111549121  109.1454   4182.934  64.6756</span>
+</summary><pre><code><span class="co">##      Forest type Stand-size class FORTYPCD STDSZCD       estn     estn.var</span>
+<span class="co">## 1    Douglas-fir   Large diameter      201       1 1016954545 5.734409e+16</span>
+<span class="co">## 2    Douglas-fir  Medium diameter      201       2  104576458 2.341819e+15</span>
+<span class="co">## 3    Douglas-fir   Small diameter      201       3   31371213 5.714050e+14</span>
+<span class="co">## 4 Ponderosa pine   Large diameter      221       1 1139547783 3.501597e+16</span>
+<span class="co">## 5 Ponderosa pine  Medium diameter      221       2   52902316 1.339518e+15</span>
+<span class="co">## 6 Ponderosa pine   Small diameter      221       3    6119854 2.791269e+13</span>
+<span class="co">##   NBRPLT.gt0      estd    estd.var    est.covar      rhat   rhat.var  rhat.se</span>
+<span class="co">## 1         26 450541.00  8124659016 1.890982e+13 2257.1854  65877.821 256.6668</span>
+<span class="co">## 2          6 111576.95  2129966306 1.978525e+12  937.2586  40493.137 201.2291</span>
+<span class="co">## 3          6  99636.75  1792776867 6.184506e+11  314.8559  36231.237 190.3450</span>
+<span class="co">## 4         46 786751.82 11316613869 1.543968e+13 1448.4209  22668.087 150.5592</span>
+<span class="co">## 5          3  46720.27   799177795 7.683578e+11 1132.3205 285932.641 534.7267</span>
+<span class="co">## 6          3  56070.68  1071721490 1.261115e+11  109.1454   4182.934  64.6756</span>
 <span class="co">##     rhat.cv      pse  CI99left CI99right   CI95left CI95right   CI68left</span>
 <span class="co">## 1 0.1137110 11.37110 1596.0556 2918.3151 1754.12778 2760.2430 2001.94109</span>
 <span class="co">## 2 0.2146996 21.46996  418.9269 1455.5904  542.85691 1331.6604  737.14480</span>

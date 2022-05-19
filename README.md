@@ -63,11 +63,13 @@ other functions for a specific purpose.
 
 ## Installation
 
-<!-- #### Stable installation -->
-<!-- You can install the current stable version of `FIESTA` from CRAN: -->
-<!-- ```{r, eval = F} -->
-<!-- install.packages("FIESTA") -->
-<!-- ``` -->
+#### Stable installation
+
+You can install the current stable version of `FIESTA` from CRAN:
+
+``` r
+install.packages("FIESTA")
+```
 
 #### Developmental installation
 

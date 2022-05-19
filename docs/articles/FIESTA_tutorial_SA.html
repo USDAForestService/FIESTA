@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
       </span>
     </div>
 
@@ -259,12 +259,7 @@ output. For our purposes in this vignette, we have saved our outfolder
 file path as the <code>outfolder</code> object in a temporary directory.
 We also set a few default options preferred for this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Set options</span>
-<span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="co">## Set outfolder</span>
-<span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="get-data-for-examples">Get data for examples<a class="anchor" aria-label="anchor" href="#get-data-for-examples"></a>
@@ -456,7 +451,7 @@ list includes we can use the <code>str</code> function:</p>
 <details><summary>
 output
 </summary><pre><code><span class="co">## List of 24</span>
-<span class="co">##  $ smallbnd       : chr "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmp7dNJFC/temp_libpath7510363e56f7/FIESTA/extdata/sp_"| __truncated__</span>
+<span class="co">##  $ smallbnd       : chr "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpki1psw/temp_libpath854d29de02fb/FIESTA/extdata/sp_"| __truncated__</span>
 <span class="co">##  $ smallbnd.domain: chr "DISTRICTNA"</span>
 <span class="co">##  $ condx          :'data.frame': 66 obs. of  16 variables:</span>
 <span class="co">##  $ pltcondx       :'data.frame': 66 obs. of  43 variables:</span>
@@ -624,8 +619,8 @@ change the <code>SApackage</code> argument.</p>
 <details><summary>
 output
 </summary><pre><code><span class="co">## REML estimate of variance ratio: 0.09281 </span>
-<span class="co">## numerical integration of f(x):   24.85 with absolute error &lt; 0.0000079</span>
-<span class="co">## numerical integration of x*f(x): 16.63 with absolute error &lt; 0.0000082</span>
+<span class="co">## numerical integration of f(x):   24.85 with absolute error &lt; 7.9e-06</span>
+<span class="co">## numerical integration of x*f(x): 16.63 with absolute error &lt; 8.2e-06</span>
 <span class="co">## posterior mean for variance ratio: 0.6693</span></code></pre>
 </details><details><summary>
 plot
@@ -983,8 +978,8 @@ with the <code>outfn.pre</code> arguement.</p>
 <details><summary>
 output
 </summary><pre><code><span class="co">## REML estimate of variance ratio: 0.03877 </span>
-<span class="co">## numerical integration of f(x):   21.9 with absolute error &lt; 0.0000082</span>
-<span class="co">## numerical integration of x*f(x): 10.85 with absolute error &lt; 0.0000048</span>
+<span class="co">## numerical integration of f(x):   21.9 with absolute error &lt; 8.2e-06</span>
+<span class="co">## numerical integration of x*f(x): 10.85 with absolute error &lt; 4.8e-06</span>
 <span class="co">## posterior mean for variance ratio: 0.4955</span></code></pre>
 </details><details><summary>
 plot

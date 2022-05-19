@@ -19,7 +19,7 @@ outfolder with specified format (fmt)."><!-- mathjax --><script src="https://cdn
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
       </span>
     </div>
 
@@ -201,19 +201,33 @@ option to maskByPolygons.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
 <span class="r-in"><span class="co"># Get polygon vector layer from FIESTA external data</span></span>
 <span class="r-in"><span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
 <span class="r-in">                          <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, </span>
 <span class="r-in">                          package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">WYbhdist</span> <span class="op">&lt;-</span> <span class="fu">FIESTA</span><span class="fu">::</span><span class="fu"><a href="spImportSpatial.html">spImportSpatial</a></span><span class="op">(</span><span class="va">WYbhdistfn</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">WYbhdist</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Simple feature collection with 3 features and 4 fields</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Geometry type: POLYGON</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dimension:     XY</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bounding box:  xmin: -108.0056 ymin: 44.01989 xmax: -106.8408 ymax: 45.00134</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Geodetic CRS:  NAD83</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   REGION FORESTNUMB DISTRICTNU                     DISTRICTNA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     02         02         03 Medicine Wheel Ranger District</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     02         02         01   Powder River Ranger District</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     02         02         06         Tongue Ranger District</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         geometry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 POLYGON ((-107.6484 44.9788...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 POLYGON ((-106.9407 44.4999...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 POLYGON ((-107.6296 44.9795...</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Get raster layers from FIESTA external data</span></span>
 <span class="r-in"><span class="va">demfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,</span>
 <span class="r-in">                     <span class="st">"sp_data/WYbighorn_dem_250m.img"</span>,</span>
 <span class="r-in">                     package <span class="op">=</span> <span class="st">"FIESTA"</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">demfn</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-plt img"><img src="spClipRast-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Clip raster to district = '03'</span></span>
 <span class="r-in"><span class="va">dem03</span> <span class="op">&lt;-</span> <span class="fu">spClipRast</span><span class="op">(</span>rast <span class="op">=</span> <span class="va">demfn</span>,</span>
@@ -221,7 +235,20 @@ option to maskByPolygons.</p>
 <span class="r-in">                    clippolyv.filter <span class="op">=</span> <span class="st">"DISTRICTNU == '03'"</span>,</span>
 <span class="r-in">                    overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span class="r-in">                    outfolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2 records: DISTRICTNU == '03'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpki1psw/temp_libpath854d29de02fb/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  from: NAD83 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> rast is not completely contained within clippolyv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ...intersection of 49.956%</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NOT UPDATED FOR PROJ &gt;= 6</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Initializing destination raster...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Clipping to polygon layer...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> clipRaster output written to: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMIcT7h/rastclip.img</span>
 <span class="r-in"><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">dem03</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-plt img"><img src="spClipRast-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Clip raster to district = '06'</span></span>
 <span class="r-in"><span class="va">dem06</span> <span class="op">&lt;-</span> <span class="fu">spClipRast</span><span class="op">(</span>rast <span class="op">=</span> <span class="va">demfn</span>,</span>
@@ -229,10 +256,24 @@ option to maskByPolygons.</p>
 <span class="r-in">                    clippolyv.filter <span class="op">=</span> <span class="st">"DISTRICTNU == '06'"</span>,</span>
 <span class="r-in">                    overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span class="r-in">                    outfolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 2 records: DISTRICTNU == '06'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpki1psw/temp_libpath854d29de02fb/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> overwriting /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMIcT7h/rastclip.img...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  from: NAD83 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> rast is not completely contained within clippolyv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ...intersection of 42.117%</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NOT UPDATED FOR PROJ &gt;= 6</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Initializing destination raster...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Clipping to polygon layer...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> clipRaster output written to: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMIcT7h/rastclip.img</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Plot extracted values of national forest district</span></span>
 <span class="r-in"><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">dem06</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-plt img"><img src="spClipRast-3.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span class="co"># }</span></span>
 </code></pre></div>
     </div>
   </div>

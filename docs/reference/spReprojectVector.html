@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
       </span>
     </div>
 
@@ -161,7 +161,7 @@ record, it will be returned but not exported.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
 <span class="r-in"><span class="co"># Set up `SpatialPoints` object</span></span>
 <span class="r-in"><span class="va">WYspplt</span> <span class="op">&lt;-</span> <span class="fu"><a href="spMakeSpatialPoints.html">spMakeSpatialPoints</a></span><span class="op">(</span>xyplt <span class="op">=</span> <span class="va">WYplt</span>, </span>
 <span class="r-in">                               xy.uniqueid <span class="op">=</span> <span class="st">"CN"</span>, </span>
@@ -171,6 +171,27 @@ record, it will be returned but not exported.</p>
 <span class="r-in">                               datum <span class="op">=</span> <span class="st">"NAD83"</span><span class="op">)</span></span>
 <span class="r-in"><span class="co"># Check CRS</span></span>
 <span class="r-in"><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coordinate Reference System:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   User input: EPSG:4269 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   wkt:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> GEOGCRS["NAD83",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     DATUM["North American Datum 1983",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ELLIPSOID["GRS 1980",6378137,298.257222101,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             LENGTHUNIT["metre",1]]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     PRIMEM["Greenwich",0,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ANGLEUNIT["degree",0.0174532925199433]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CS[ellipsoidal,2],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         AXIS["geodetic latitude (Lat)",north,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ORDER[1],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ANGLEUNIT["degree",0.0174532925199433]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         AXIS["geodetic longitude (Lon)",east,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ORDER[2],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ANGLEUNIT["degree",0.0174532925199433]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     USAGE[</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         SCOPE["Geodesy."],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         AREA["North America - onshore and offshore: Canada - Alberta; British Columbia; Manitoba; New Brunswick; Newfoundland and Labrador; Northwest Territories; Nova Scotia; Nunavut; Ontario; Prince Edward Island; Quebec; Saskatchewan; Yukon. Puerto Rico. United States (USA) - Alabama; Alaska; Arizona; Arkansas; California; Colorado; Connecticut; Delaware; Florida; Georgia; Hawaii; Idaho; Illinois; Indiana; Iowa; Kansas; Kentucky; Louisiana; Maine; Maryland; Massachusetts; Michigan; Minnesota; Mississippi; Missouri; Montana; Nebraska; Nevada; New Hampshire; New Jersey; New Mexico; New York; North Carolina; North Dakota; Ohio; Oklahoma; Oregon; Pennsylvania; Rhode Island; South Carolina; South Dakota; Tennessee; Texas; Utah; Vermont; Virginia; Washington; West Virginia; Wisconsin; Wyoming. US Virgin Islands. British Virgin Islands."],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         BBOX[14.92,167.65,86.46,-47.74]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ID["EPSG",4269]]</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># Set up projection</span></span>
 <span class="r-in"><span class="va">prj</span> <span class="op">&lt;-</span> <span class="st">"+proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"</span></span>
@@ -180,7 +201,47 @@ record, it will be returned but not exported.</p>
 <span class="r-in">                                   crs.new <span class="op">=</span> <span class="va">prj</span><span class="op">)</span></span>
 <span class="r-in"><span class="co"># Check results</span></span>
 <span class="r-in"><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">WYspplt.utm12</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coordinate Reference System:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   User input: +proj=utm +zone=12 +ellps=GRS80 +datum=NAD83 +units=m +no_defs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   wkt:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> PROJCRS["unknown",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     BASEGEOGCRS["unknown",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         DATUM["North American Datum 1983",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ELLIPSOID["GRS 1980",6378137,298.257222101,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 LENGTHUNIT["metre",1]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",6269]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         PRIMEM["Greenwich",0,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ANGLEUNIT["degree",0.0174532925199433],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",8901]]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CONVERSION["UTM zone 12N",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         METHOD["Transverse Mercator",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",9807]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         PARAMETER["Latitude of natural origin",0,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ANGLEUNIT["degree",0.0174532925199433],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",8801]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         PARAMETER["Longitude of natural origin",-111,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ANGLEUNIT["degree",0.0174532925199433],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",8802]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         PARAMETER["Scale factor at natural origin",0.9996,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             SCALEUNIT["unity",1],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",8805]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         PARAMETER["False easting",500000,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             LENGTHUNIT["metre",1],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",8806]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         PARAMETER["False northing",0,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             LENGTHUNIT["metre",1],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ID["EPSG",8807]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ID["EPSG",16012]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CS[Cartesian,2],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         AXIS["(E)",east,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ORDER[1],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             LENGTHUNIT["metre",1,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 ID["EPSG",9001]]],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         AXIS["(N)",north,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             ORDER[2],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             LENGTHUNIT["metre",1,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 ID["EPSG",9001]]]]</span>
+<span class="r-in"><span class="co"># }</span></span>
 </code></pre></div>
     </div>
   </div>

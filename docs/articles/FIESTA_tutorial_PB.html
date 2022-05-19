@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
       </span>
     </div>
 
@@ -538,12 +538,7 @@ output. For our purposes in this vignette, we have saved our outfolder
 file path as the <code>outfolder</code> object in a temporary directory.
 We also set a few default options preferred for this vignette.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Set options</span>
-<span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>scipen <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="co">## Set outfolder</span>
-<span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">outfolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="get-data-for-examples">Get data for examples<a class="anchor" aria-label="anchor" href="#get-data-for-examples"></a>
@@ -574,7 +569,7 @@ some external data stored in <code>FIESTA</code> and import into R.</p>
 <details><summary>
 output
 </summary><pre><code><span class="co">## 'data.frame':    1305 obs. of  8 variables:</span>
-<span class="co">##  $ plot_id   : num  5540684010690 5540684010690 5540684010690 5540684010690 5540684010690 ...</span>
+<span class="co">##  $ plot_id   : num  5.54e+12 5.54e+12 5.54e+12 5.54e+12 5.54e+12 ...</span>
 <span class="co">##  $ dot_cnt   : int  1 26 31 36 41 1 26 31 36 41 ...</span>
 <span class="co">##  $ change_1_2: int  0 0 0 0 0 0 0 0 0 0 ...</span>
 <span class="co">##  $ cover_1   : int  310 310 310 310 310 140 220 140 220 140 ...</span>
@@ -587,7 +582,7 @@ output
 <details><summary>
 output
 </summary><pre><code><span class="co">## 'data.frame':    133 obs. of  5 variables:</span>
-<span class="co">##  $ plot_id   : num  5540684010690 5540696010690 5540708010690 5540720010690 5540732010690 ...</span>
+<span class="co">##  $ plot_id   : num  5.54e+12 5.54e+12 5.54e+12 5.54e+12 5.54e+12 ...</span>
 <span class="co">##  $ ESTN_UNIT : int  11 11 11 11 11 11 11 35 35 35 ...</span>
 <span class="co">##  $ STRATUMCD : int  2 2 2 2 2 2 2 2 1 2 ...</span>
 <span class="co">##  $ LON_PUBLIC: num  -112 -112 -112 -112 -112 ...</span>
@@ -597,7 +592,7 @@ output
 <details><summary>
 output
 </summary><pre><code><span class="co">## 'data.frame':    133 obs. of  15 variables:</span>
-<span class="co">##  $ plot_id          : num  5540684010690 5540696010690 5540708010690 5540720010690 5540732010690 ...</span>
+<span class="co">##  $ plot_id          : num  5.54e+12 5.54e+12 5.54e+12 5.54e+12 5.54e+12 ...</span>
 <span class="co">##  $ Change           : int  0 0 0 0 0 0 0 0 0 1 ...</span>
 <span class="co">##  $ Tree11           : int  0 0 0 0 0 0 40 20 0 0 ...</span>
 <span class="co">##  $ Shrub11          : int  0 0 20 0 0 0 0 80 0 0 ...</span>
@@ -927,13 +922,13 @@ including 133 plot records.</p>
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">icepctcover</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##         plot_id Change Tree11 Shrub11 OtherVegetation11 Barren11 Impervious11</span>
-<span class="co">## 1 5540684010690      0      0       0                 0        0            0</span>
-<span class="co">## 2 5540696010690      0      0       0                60        0           40</span>
-<span class="co">## 3 5540708010690      0      0      20                60       20            0</span>
-<span class="co">## 4 5540720010690      0      0       0                 0        0            0</span>
-<span class="co">## 5 5540732010690      0      0       0                 0        0            0</span>
-<span class="co">## 6 5540744010690      0      0       0                 0        0            0</span>
+</summary><pre><code><span class="co">##        plot_id Change Tree11 Shrub11 OtherVegetation11 Barren11 Impervious11</span>
+<span class="co">## 1 5.540684e+12      0      0       0                 0        0            0</span>
+<span class="co">## 2 5.540696e+12      0      0       0                60        0           40</span>
+<span class="co">## 3 5.540708e+12      0      0      20                60       20            0</span>
+<span class="co">## 4 5.540720e+12      0      0       0                 0        0            0</span>
+<span class="co">## 5 5.540732e+12      0      0       0                 0        0            0</span>
+<span class="co">## 6 5.540744e+12      0      0       0                 0        0            0</span>
 <span class="co">##   Water11 Tree14 Shrub14 OtherVegetation14 Barren14 Impervious14 Water14</span>
 <span class="co">## 1     100      0       0                 0        0            0     100</span>
 <span class="co">## 2       0      0       0                60        0           40       0</span>
@@ -1051,13 +1046,13 @@ FIESTA’s external data.</p>
 <span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">iceplt</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##         plot_id ESTN_UNIT STRATUMCD LON_PUBLIC LAT_PUBLIC</span>
-<span class="co">## 1 5540684010690        11         2  -112.3625   40.96010</span>
-<span class="co">## 2 5540696010690        11         2  -112.0733   41.14085</span>
-<span class="co">## 3 5540708010690        11         2  -111.8916   41.00477</span>
-<span class="co">## 4 5540720010690        11         2  -112.0735   40.96141</span>
-<span class="co">## 5 5540732010690        11         2  -112.1912   41.00827</span>
-<span class="co">## 6 5540744010690        11         2  -112.2082   40.85725</span></code></pre>
+</summary><pre><code><span class="co">##        plot_id ESTN_UNIT STRATUMCD LON_PUBLIC LAT_PUBLIC</span>
+<span class="co">## 1 5.540684e+12        11         2  -112.3625   40.96010</span>
+<span class="co">## 2 5.540696e+12        11         2  -112.0733   41.14085</span>
+<span class="co">## 3 5.540708e+12        11         2  -111.8916   41.00477</span>
+<span class="co">## 4 5.540720e+12        11         2  -112.0735   40.96141</span>
+<span class="co">## 5 5.540732e+12        11         2  -112.1912   41.00827</span>
+<span class="co">## 6 5.540744e+12        11         2  -112.2082   40.85725</span></code></pre>
 </details><div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Strata weights by estimation unit</span>
 <span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">strlutfn</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -1195,30 +1190,30 @@ totals. See <code><a href="../reference/modPB.html">help(modPB)</a></code> for v
 <code class="sourceCode R"><span class="va">cover1</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">unit_rowest</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ONEUNIT Land Cover (2011)        phat       phat.var NBRPNTS cover_1</span>
-<span class="co">## 1       1              Tree 0.176106934 0.000639568847     166     110</span>
-<span class="co">## 2       1             Shrub 0.115288221 0.000510431543     122     130</span>
-<span class="co">## 3       1   OtherVegetation 0.248955723 0.000851891761     426     140</span>
-<span class="co">## 4       1            Barren 0.117794486 0.000529212198     233     210</span>
-<span class="co">## 5       1        Impervious 0.107602339 0.000435085587     124     220</span>
-<span class="co">## 6       1             Water 0.231244779 0.001280138483     232     310</span>
-<span class="co">## 7       1   Uninterpretable 0.003007519 0.000009045169       2     999</span>
-<span class="co">##          est     est.var    est.se    est.cv       pse  CI99left CI99right</span>
-<span class="co">## 1 17.6106934  6.39568847 2.5289698 0.1436042  14.36042 11.096499 24.124888</span>
-<span class="co">## 2 11.5288221  5.10431543 2.2592732 0.1959674  19.59674  5.709320 17.348324</span>
-<span class="co">## 3 24.8955723  8.51891761 2.9187185 0.1172385  11.72385 17.377452 32.413693</span>
-<span class="co">## 4 11.7794486  5.29212198 2.3004613 0.1952945  19.52945  5.853853 17.705044</span>
-<span class="co">## 5 10.7602339  4.35085587 2.0858705 0.1938499  19.38499  5.387387 16.133080</span>
-<span class="co">## 6 23.1244779 12.80138483 3.5779023 0.1547236  15.47236 13.908412 32.340543</span>
-<span class="co">## 7  0.3007519  0.09045169 0.3007519 1.0000000 100.00000  0.000000  1.075437</span>
-<span class="co">##    CI95left  CI95right     CI68left CI68right</span>
-<span class="co">## 1 12.654004 22.5673832 15.095739403 20.125647</span>
-<span class="co">## 2  7.100728 15.9569162  9.282070002 13.775574</span>
-<span class="co">## 3 19.174989 30.6161554 21.993029656 27.798115</span>
-<span class="co">## 4  7.270627 16.2882698  9.491736793 14.067160</span>
-<span class="co">## 5  6.672003 14.8484650  8.685923525 12.834544</span>
-<span class="co">## 6 16.111918 30.1370375 19.566404719 26.682551</span>
-<span class="co">## 7  0.000000  0.8902147  0.001666802  0.599837</span></code></pre>
+</summary><pre><code><span class="co">##   ONEUNIT Land Cover (2011)        phat     phat.var NBRPNTS cover_1        est</span>
+<span class="co">## 1       1              Tree 0.176106934 6.395688e-04     166     110 17.6106934</span>
+<span class="co">## 2       1             Shrub 0.115288221 5.104315e-04     122     130 11.5288221</span>
+<span class="co">## 3       1   OtherVegetation 0.248955723 8.518918e-04     426     140 24.8955723</span>
+<span class="co">## 4       1            Barren 0.117794486 5.292122e-04     233     210 11.7794486</span>
+<span class="co">## 5       1        Impervious 0.107602339 4.350856e-04     124     220 10.7602339</span>
+<span class="co">## 6       1             Water 0.231244779 1.280138e-03     232     310 23.1244779</span>
+<span class="co">## 7       1   Uninterpretable 0.003007519 9.045169e-06       2     999  0.3007519</span>
+<span class="co">##       est.var    est.se    est.cv       pse  CI99left CI99right  CI95left</span>
+<span class="co">## 1  6.39568847 2.5289698 0.1436042  14.36042 11.096499 24.124888 12.654004</span>
+<span class="co">## 2  5.10431543 2.2592732 0.1959674  19.59674  5.709320 17.348324  7.100728</span>
+<span class="co">## 3  8.51891761 2.9187185 0.1172385  11.72385 17.377452 32.413693 19.174989</span>
+<span class="co">## 4  5.29212198 2.3004613 0.1952945  19.52945  5.853853 17.705044  7.270627</span>
+<span class="co">## 5  4.35085587 2.0858705 0.1938499  19.38499  5.387387 16.133080  6.672003</span>
+<span class="co">## 6 12.80138483 3.5779023 0.1547236  15.47236 13.908412 32.340543 16.111918</span>
+<span class="co">## 7  0.09045169 0.3007519 1.0000000 100.00000  0.000000  1.075437  0.000000</span>
+<span class="co">##    CI95right     CI68left CI68right</span>
+<span class="co">## 1 22.5673832 15.095739403 20.125647</span>
+<span class="co">## 2 15.9569162  9.282070002 13.775574</span>
+<span class="co">## 3 30.6161554 21.993029656 27.798115</span>
+<span class="co">## 4 16.2882698  9.491736793 14.067160</span>
+<span class="co">## 5 14.8484650  8.685923525 12.834544</span>
+<span class="co">## 6 30.1370375 19.566404719 26.682551</span>
+<span class="co">## 7  0.8902147  0.001666802  0.599837</span></code></pre>
 </details><p>We can also look at the domain-level data used for generating the
 estimates, with proportion of points by category.</p>
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
@@ -1987,27 +1982,27 @@ output
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cover12</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">unit_grpest</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   ONEUNIT Land Cover (2011) Land Cover (2014)         phat         phat.var</span>
-<span class="co">## 1       1              Tree              Tree 0.1781119465 0.00066963058389</span>
-<span class="co">## 2       1              Tree   OtherVegetation 0.0005012531 0.00000025125470</span>
-<span class="co">## 3       1              Tree            Barren 0.0001670844 0.00000002791719</span>
-<span class="co">## 4       1              Tree        Impervious 0.0003341688 0.00000011166876</span>
-<span class="co">## 5       1             Shrub             Shrub 0.1077694236 0.00046617645351</span>
-<span class="co">## 6       1             Shrub   OtherVegetation 0.0048454470 0.00002347835615</span>
-<span class="co">##   cover_2 cover_1         est      est.var     est.se    est.cv       pse</span>
-<span class="co">## 1     110     110 17.81119465 6.6963058389 2.58772213 0.1452863  14.52863</span>
-<span class="co">## 2     140     110  0.05012531 0.0025125470 0.05012531 1.0000000 100.00000</span>
-<span class="co">## 3     210     110  0.01670844 0.0002791719 0.01670844 1.0000000 100.00000</span>
-<span class="co">## 4     220     110  0.03341688 0.0011166876 0.03341688 1.0000000 100.00000</span>
-<span class="co">## 5     130     130 10.77694236 4.6617645351 2.15911198 0.2003455  20.03455</span>
-<span class="co">## 6     140     130  0.48454470 0.2347835615 0.48454470 1.0000000 100.00000</span>
-<span class="co">##    CI99left   CI99right  CI95left   CI95right       CI68left   CI68right</span>
-<span class="co">## 1 11.145664 24.47672515 12.739352 22.88303684 15.23781397834 20.38457533</span>
-<span class="co">## 2  0.000000  0.17923956  0.000000  0.14836912  0.00027780034  0.09997283</span>
-<span class="co">## 3  0.000000  0.05974652  0.000000  0.04945637  0.00009260011  0.03332428</span>
-<span class="co">## 4  0.000000  0.11949304  0.000000  0.09891275  0.00018520023  0.06664855</span>
-<span class="co">## 5  5.215438 16.33844626  6.545161 15.00872407  8.62979642827 12.92408828</span>
-<span class="co">## 6  0.000000  1.73264912  0.000000  1.43423485  0.00268540329  0.96640399</span></code></pre>
+</summary><pre><code><span class="co">##   ONEUNIT Land Cover (2011) Land Cover (2014)         phat     phat.var cover_2</span>
+<span class="co">## 1       1              Tree              Tree 0.1781119465 6.696306e-04     110</span>
+<span class="co">## 2       1              Tree   OtherVegetation 0.0005012531 2.512547e-07     140</span>
+<span class="co">## 3       1              Tree            Barren 0.0001670844 2.791719e-08     210</span>
+<span class="co">## 4       1              Tree        Impervious 0.0003341688 1.116688e-07     220</span>
+<span class="co">## 5       1             Shrub             Shrub 0.1077694236 4.661765e-04     130</span>
+<span class="co">## 6       1             Shrub   OtherVegetation 0.0048454470 2.347836e-05     140</span>
+<span class="co">##   cover_1         est      est.var     est.se    est.cv       pse  CI99left</span>
+<span class="co">## 1     110 17.81119465 6.6963058389 2.58772213 0.1452863  14.52863 11.145664</span>
+<span class="co">## 2     110  0.05012531 0.0025125470 0.05012531 1.0000000 100.00000  0.000000</span>
+<span class="co">## 3     110  0.01670844 0.0002791719 0.01670844 1.0000000 100.00000  0.000000</span>
+<span class="co">## 4     110  0.03341688 0.0011166876 0.03341688 1.0000000 100.00000  0.000000</span>
+<span class="co">## 5     130 10.77694236 4.6617645351 2.15911198 0.2003455  20.03455  5.215438</span>
+<span class="co">## 6     130  0.48454470 0.2347835615 0.48454470 1.0000000 100.00000  0.000000</span>
+<span class="co">##     CI99right  CI95left   CI95right     CI68left   CI68right</span>
+<span class="co">## 1 24.47672515 12.739352 22.88303684 1.523781e+01 20.38457533</span>
+<span class="co">## 2  0.17923956  0.000000  0.14836912 2.778003e-04  0.09997283</span>
+<span class="co">## 3  0.05974652  0.000000  0.04945637 9.260011e-05  0.03332428</span>
+<span class="co">## 4  0.11949304  0.000000  0.09891275 1.852002e-04  0.06664855</span>
+<span class="co">## 5 16.33844626  6.545161 15.00872407 8.629796e+00 12.92408828</span>
+<span class="co">## 6  1.73264912  0.000000  1.43423485 2.685403e-03  0.96640399</span></code></pre>
 </details><p>We also can see estimates for transition (Time 1 by Time 2).</p>
 <div class="sourceCode" id="cb152"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cover12</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">unit.grpest</span></code></pre></div>
@@ -2072,13 +2067,13 @@ the population data.</p>
 <span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">PBpoparea2</span><span class="op">$</span><span class="va">PBx</span><span class="op">)</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##    cover_2 cover_1       plot_id dot_cnt change_1_2 use_1 use_2 chg_ag_2</span>
-<span class="co">## 1:     110     110 5540756010690       1          0   400   400        0</span>
-<span class="co">## 2:     110     110 5540756010690      26          0   110   110        0</span>
-<span class="co">## 3:     110     110 5549764010690      36          0   110   110        0</span>
-<span class="co">## 4:     110     110 5549836010690       1          0   110   110        0</span>
-<span class="co">## 5:     110     110 5549836010690      26          0   110   110        0</span>
-<span class="co">## 6:     110     110 5549836010690      31          0   110   110        0</span>
+</summary><pre><code><span class="co">##    cover_2 cover_1      plot_id dot_cnt change_1_2 use_1 use_2 chg_ag_2</span>
+<span class="co">## 1:     110     110 5.540756e+12       1          0   400   400        0</span>
+<span class="co">## 2:     110     110 5.540756e+12      26          0   110   110        0</span>
+<span class="co">## 3:     110     110 5.549764e+12      36          0   110   110        0</span>
+<span class="co">## 4:     110     110 5.549836e+12       1          0   110   110        0</span>
+<span class="co">## 5:     110     110 5.549836e+12      26          0   110   110        0</span>
+<span class="co">## 6:     110     110 5.549836e+12      31          0   110   110        0</span>
 <span class="co">##    ESTN_UNIT STRATUMCD LON_PUBLIC LAT_PUBLIC cover_1_nm cover_2_nm cover_12_nm</span>
 <span class="co">## 1:        11         2  -111.8918   40.82525       Tree       Tree   Tree-Tree</span>
 <span class="co">## 2:        11         2  -111.8918   40.82525       Tree       Tree   Tree-Tree</span>
@@ -2282,12 +2277,12 @@ output
 <span class="co">## Tree             0.1579779   0.000000000     0.00000000  0.0000000000</span>
 <span class="co">## Impervious       1.7121625  -0.006150519     1.50990992  0.3672659346</span>
 <span class="co">##                 gain.CI68right loss.CI95left loss.CI95right loss.CI68left</span>
-<span class="co">## Water               0.62427124    2.36850131    10.16282702 4.28829908958</span>
-<span class="co">## OtherVegetation     3.64046159    0.48292256     3.02584937 1.10926349277</span>
-<span class="co">## Shrub               0.06664855   -0.72177743     2.22553683 0.00416700511</span>
-<span class="co">## Barren              7.71235860   -0.11519602     1.61895542 0.31193779633</span>
-<span class="co">## Tree                0.00000000   -0.09623699     0.29673824 0.00055560068</span>
-<span class="co">## Impervious          1.13649346   -0.01603950     0.04945637 0.00009260011</span>
+<span class="co">## Water               0.62427124    2.36850131    10.16282702  4.288299e+00</span>
+<span class="co">## OtherVegetation     3.64046159    0.48292256     3.02584937  1.109263e+00</span>
+<span class="co">## Shrub               0.06664855   -0.72177743     2.22553683  4.167005e-03</span>
+<span class="co">## Barren              7.71235860   -0.11519602     1.61895542  3.119378e-01</span>
+<span class="co">## Tree                0.00000000   -0.09623699     0.29673824  5.556007e-04</span>
+<span class="co">## Impervious          1.13649346   -0.01603950     0.04945637  9.260011e-05</span>
 <span class="co">##                 loss.CI68right diff.CI95left diff.CI95right diff.CI68left</span>
 <span class="co">## Water               8.24302923  -9.799372265    -1.96336792    -7.8693087</span>
 <span class="co">## OtherVegetation     2.39950844  -1.506733903     3.21099455    -0.3447239</span>

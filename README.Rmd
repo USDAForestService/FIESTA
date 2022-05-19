@@ -42,13 +42,13 @@ Functions are organized by type or objective and are named with a corresponding 
 
 ## Installation
 
-<!-- #### Stable installation -->
+#### Stable installation
 
-<!-- You can install the current stable version of `FIESTA` from CRAN: -->
+You can install the current stable version of `FIESTA` from CRAN:
 
-<!-- ```{r, eval = F} -->
-<!-- install.packages("FIESTA") -->
-<!-- ``` -->
+```{r, eval = F}
+install.packages("FIESTA")
+```
 
 #### Developmental installation
 
