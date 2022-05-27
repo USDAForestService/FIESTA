@@ -311,6 +311,8 @@ DBgetEvalid <- function(states = NULL,
         stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
         message("statecds missing in database: ", toString(stcdmiss))
       }
+    } else {
+      nopoptables <- FALSE
     }
   }
   ## create state filter
@@ -569,7 +571,7 @@ DBgetEvalid <- function(states = NULL,
         invendyr.min <- stinvyr.min[[st]]
         invendyr.max <- stinvyr.max[[st]]
 
-        if (evalendyr < invendyr.min || evalendyr > invendyr.max) {
+        if (all(evalendyr < invendyr.min) || any(evalendyr > invendyr.max)) {
           message(paste("check evalEndyr.. outside of range in database:", st))    
           evalEndyr[[st]] <- invendyr.max
           #evalresp <- FALSE
@@ -577,7 +579,7 @@ DBgetEvalid <- function(states = NULL,
       }
     } 
   }
-
+ 
   ## Get last year of evaluation period and the evaluation type
   if (evalresp) {
     ## Get the evalidation type
@@ -587,7 +589,7 @@ DBgetEvalid <- function(states = NULL,
     if (is.null(evalType)) {
       evalType <- "VOL"
     }
-
+ 
     if (datsource == "sqlite" && nopoptables) {
       ## Create lookup and get code for evalType
       evalCode <- c("00","01","01","03")
@@ -648,6 +650,7 @@ DBgetEvalid <- function(states = NULL,
         }
         evalAll <- TRUE
       }
+ 
       if (evalAll) {
         evalidlist <- getlistfromdt(evaldt, x="EVALID")
         evalEndyrlist <- getlistfromdt(evaldt, x="YEAR")
