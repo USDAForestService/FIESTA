@@ -584,7 +584,6 @@ modMApop <- function(popType="VOL",
   ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
   ## Applies plot and condition filters
   ###################################################################################
-
   popcheck <- check.popdata(gui=gui, module="MA", popType=popType, 
                     tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
                     pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
@@ -644,7 +643,6 @@ modMApop <- function(popType="VOL",
       auxlut <- unitzonal
       makedummy <- TRUE
   }
- 
   auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
                   module="MA", strata=strata, unitvar=unitvar, unitvar2=unitvar2, 
                   unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit, 

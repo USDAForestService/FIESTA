@@ -733,6 +733,7 @@ modMAarea <- function(MApopdat,
   ###################################################################################
   message("getting output...")
   estnm <- "est"
+
   tabs <- est.outtabs(esttype=esttype, sumunits=sumunits, areavar=areavar, 
                 unitvar=unitvar, unitvars=unitvars, unit_totest=unit_totest, 
                 unit_rowest=unit_rowest, unit_colest=unit_colest, unit_grpest=unit_grpest, 
@@ -745,7 +746,8 @@ modMAarea <- function(MApopdat,
                 rawonly=rawonly, outfn.estpse=outfn.estpse, outfolder=outfolder, 
                 outfn.date=outfn.date, overwrite=overwrite_layer, estnm=estnm, 
                 estround=estround, pseround=pseround, divideby=divideby, returntitle=returntitle, 
-                estnull=estnull, psenull=psenull) 
+                estnull=estnull, psenull=psenull)
+ 
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
 
