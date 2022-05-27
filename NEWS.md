@@ -1,3 +1,16 @@
+FIESTA_4.1 
+==============
+ 
+- added function to change class of columns if integer64 or IDate
+    if integer64 and columns in(CN,PLT_CN,PREV_PLT_CN) - change to character
+    	else, change to numeric
+    if IDate, change to character
+- fixed bug in DBgetPlots - when using strata from SQLite databases
+- added functionality to DBgetStrata to get data from SQLite database
+- allow spGetAuxiliary to output unitarea with no input rasters
+
+
+
 FIESTA_3.0.30 (Release date: 2021-09-27)
 ==============
 created anGetData(), to deprecate (anSAdata, anGBdata, anMAdata)
