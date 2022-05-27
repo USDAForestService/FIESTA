@@ -426,7 +426,7 @@ spGetAuxiliary <- function(xyplt,
     stop()
   }
   if (is.null(rastlst.contfn) && is.null(rastlst.catfn)) {
-    stop("both rastlst.cont and rastlst.cat are NULL")
+    message("both rastlst.cont and rastlst.cat are NULL")
   }
   if (!is.null(rastlst.catfn)) {
     band.cat <- sapply(rastlst.catfn, function(x) rasterInfo(x)$nbands)
