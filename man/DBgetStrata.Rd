@@ -7,6 +7,8 @@
 DBgetStrata(
   dat = NULL,
   uniqueid = "CN",
+  datsource = "datamart",
+  data_dsn = NULL,
   states = NULL,
   evalid = NULL,
   evalCur = TRUE,
@@ -25,6 +27,11 @@ The strata value is merged to this table and returned as a data frame. See
 details for necessary variables.}
 
 \item{uniqueid}{String. The unique plot identifier of dat (e.g., 'CN').}
+
+\item{datsource}{String. Source of data ('datamart', 'sqlite').}
+
+\item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
+(*.sqlite).}
 
 \item{states}{String or numeric vector. Name(s) (e.g., 'Arizona','New
 Mexico') or code(s) (e.g., 4, 35) of states for strata if dat=NULL.}
