@@ -631,9 +631,9 @@ DBgetPlots <- function (states = NULL,
   datsourcelst <- c("datamart", "sqlite")
   datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
-  if (datsource %in% c("sqlite", "gdb")) {
-    data_dsn <- DBtestSQLite(data_dsn)
-  }
+  #if (datsource %in% c("sqlite", "gdb")) {
+  #  data_dsn <- DBtestSQLite(data_dsn)
+  #}
   if (!is.null(data_dsn)) {
     if (getext(data_dsn) %in% c("sqlite", "db", "db3")) {
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)

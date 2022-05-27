@@ -180,11 +180,16 @@ spUnionPoly <- function(polyv1,
   polyv2x <- prjdat$x
   polyv1x <- prjdat$ycrs
 
+  #st_agr(polyv1x) <- "constant"
+  #st_agr(polyv2x) <- "constant"
+
+
   ## Check extents
 #  msg <- check.extents(polyv1x, polyv2prj, showext, layer1nm="polyv1x", 
 #		layer2nm="polyv2x")
 #  if (msg == "non-overlapping extents") stop("msg")
 
+  ## 
   ## Union polygons
   upoly <- layerUnion(polyv1x, polyv2x)
   if (showext) plot(sf::st_geometry(upoly, add=TRUE))
