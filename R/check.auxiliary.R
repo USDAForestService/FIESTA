@@ -342,7 +342,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     }
     unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
 
-    collapse <- strat.collapse(stratacnt=auxlut, errtab=errtab, 
+    collapse <- strat.collapse(stratacnt=auxlut, 
                                pltstratx=pltx, 
                                minplotnum.unit=minplotnum.unit, 
                                minplotnum.strat=minplotnum.strat, 
