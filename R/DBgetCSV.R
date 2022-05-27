@@ -97,22 +97,7 @@ DBgetCSV <- function(DBtable,
   			  return(NULL)
              }
       )
-      tabclass <- unlist(lapply(tab, class))
-      if (any(tabclass == "integer64")) { 
-        int64vars <- names(tabclass)[tabclass == "integer64"]
-        tab[, (int64vars) := lapply(.SD, as.character), .SDcols=int64vars]
-      }
-      if (noIDate) {
-        cols <- names(tab)[unlist(lapply(tab, function(x) any(class(x) == "IDate")))]
-        tab[, (cols) := lapply(.SD, as.character), .SDcols=cols]
-        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE)) {
-          tab$MODIFIED_DATE <- as.character(tab$MODIFIED_DATE)
-        }
-      } else {
-        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE)) {
-          tab$MODIFIED_DATE <- as.IDate(tab$MODIFIED_DATE)
-        }
-      }
+      tab <- changeclass(tab)
       return(tab)
     }
 
@@ -142,23 +127,7 @@ DBgetCSV <- function(DBtable,
 
       filenm <- utils::unzip(temp, exdir=tempdir)
       tab <- fread(filenm, integer64="character")
-
-      tabclass <- unlist(lapply(tab, class))
-      if (any(tabclass == "integer64")) { 
-        int64vars <- names(tabclass)[tabclass == "integer64"]
-        tab[, (int64vars) := lapply(.SD, as.character), .SDcols=int64vars]
-      }
-      if (noIDate) {
-        cols <- names(tab)[unlist(lapply(tab, function(x) any(class(x) == "IDate")))]
-        tab[, (cols) := lapply(.SD, as.character), .SDcols=cols]
-        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE)) {
-          tab$MODIFIED_DATE <- as.character(tab$MODIFIED_DATE)
-        }
-      } else {
-        if ("MODIFIED_DATE" %in% names(tab) && is.logical(tab$MODIFIED_DATE)) {
-          tab$MODIFIED_DATE <- as.IDate(tab$MODIFIED_DATE)
-        }
-      }
+      tab <- changeclass(tab)
 
       unlink(temp)
       unlink(tempdir)
