@@ -26,6 +26,9 @@
 #' The strata value is merged to this table and returned as a data frame. See
 #' details for necessary variables.
 #' @param uniqueid String. The unique plot identifier of dat (e.g., 'CN').
+#' @param datsource String. Source of data ('datamart', 'sqlite').
+#' @param data_dsn String. If datsource='sqlite', the name of SQLite database
+#' (*.sqlite).
 #' @param states String or numeric vector. Name(s) (e.g., 'Arizona','New
 #' Mexico') or code(s) (e.g., 4, 35) of states for strata if dat=NULL.
 #' @param evalid Integer. The evaluation if dat=NULL.
@@ -121,6 +124,8 @@
 #' @export DBgetStrata
 DBgetStrata <- function(dat = NULL, 
                         uniqueid = "CN", 
+                        datsource = "datamart", 
+                        data_dsn = NULL, 
                         states = NULL, 
                         evalid = NULL, 
                         evalCur = TRUE, 
@@ -194,6 +199,21 @@ DBgetStrata <- function(dat = NULL,
         stop(paste("Invalid parameter: ", names(savedata_opts)[[i]]))
       }
     }
+  }
+
+  #############################################################################
+  ## Set datsource
+  ########################################################
+  datsourcelst <- c("datamart", "sqlite")
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
+		checklst=datsourcelst, gui=gui, caption="Data source?") 
+  if (!is.null(data_dsn)) {
+    if (getext(data_dsn) %in% c("sqlite", "db", "db3")) {
+      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+      dsn_tables <- DBI::dbListTables(dbconn)
+    } else {
+      stop("only sqlite databases available currently")
+    }     
   }
   
   
@@ -285,6 +305,8 @@ DBgetStrata <- function(dat = NULL,
 
   ## Get Evalid
   evalInfo <- DBgetEvalid(states=states, 
+                          datsource=datsource,
+                          data_dsn=data_dsn,
                           invyrtab=invyrtab, evalid=evalid, 
                           evalCur=evalCur, evalEndyr=evalEndyr, 
                           evalAll=evalAll, evalType=evalType, gui=gui)
@@ -344,14 +366,30 @@ DBgetStrata <- function(dat = NULL,
 
 ############ CSV only
 
-  ## POP_ESTN_UNIT table (ZIP FILE)- To get total area by estimation unit
-  POP_ESTN_UNIT <- DBgetCSV("POP_ESTN_UNIT", stabbrlst, returnDT=TRUE,
+  if (datsource == "datamart") {
+
+    ## POP_ESTN_UNIT table (ZIP FILE)- To get total area by estimation unit
+    POP_ESTN_UNIT <- DBgetCSV("POP_ESTN_UNIT", stabbrlst, returnDT=TRUE,
 		stopifnull=FALSE)
 
-  ## POP_STRATUM table (ZIP FILE) - To get pixel counts by estimation unit and stratum.
-  POP_STRATUM <- DBgetCSV("POP_STRATUM", stabbrlst, returnDT=TRUE, 
+    ## POP_STRATUM table (ZIP FILE) - To get pixel counts by estimation unit and stratum.
+    POP_STRATUM <- DBgetCSV("POP_STRATUM", stabbrlst, returnDT=TRUE, 
 		stopifnull=FALSE)
 
+  } else if (datsource == "sqlite") {
+
+    if (!"POP_STRATUM" %in% dsn_tables) {
+      stop("POP_STRATUM not in database")
+    }
+    if (!"POP_ESTN_UNIT" %in% dsn_tables) {
+      stop("POP_ESTN_UNIT not in database")
+    }
+    POP_STRATUM <- DBI::dbReadTable(dbconn, "POP_STRATUM")
+    POP_STRATUM <- changeclass(POP_STRATUM)
+    POP_ESTN_UNIT <- DBI::dbReadTable(dbconn, "POP_ESTN_UNIT")
+    POP_ESTN_UNIT <- changeclass(POP_ESTN_UNIT)
+  }
+ 
   if (getassgn) {
     POP_PLOT_STRATUM_ASSGN_VARS <- c("PLT_CN", "UNITCD", "STATECD", "INVYR", "ESTN_UNIT", 
  		"COUNTYCD", "STRATUMCD", "EVALID")
@@ -371,8 +409,21 @@ DBgetStrata <- function(dat = NULL,
 		names(POP_PLOT_STRATUM_ASSGN)]
     }
     if (is.null(POP_PLOT_STRATUM_ASSGN)) {
-      POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
+      if (datsource == "datamart") {
+        POP_PLOT_STRATUM_ASSGN <- DBgetCSV("POP_PLOT_STRATUM_ASSGN", stabbrlst, 
 		returnDT=TRUE, stopifnull=FALSE)
+      } else {
+        if (!"POP_PLOT_STRATUM_ASSGN" %in% dsn_tables) {
+          stop("POP_PLOT_STRATUM_ASSGN not in database")
+        } 
+        POP_PLOT_STRATUM_ASSGN <- DBI::dbReadTable(dbconn, "POP_PLOT_STRATUM_ASSGN")
+        POP_PLOT_STRATUM_ASSGN <- changeclass(POP_PLOT_STRATUM_ASSGN) 
+        DBI::dbDisconnect(dbconn)
+      }      
+    } else {
+      if (datsource == "sqlite") {
+        DBI::dbDisconnect(dbconn)
+      }
     }
   }
 ############ End CSV only
@@ -441,7 +492,7 @@ DBgetStrata <- function(dat = NULL,
     names(POP_PLOT_STRATUM_ASSGN) <- toupper(names(POP_PLOT_STRATUM_ASSGN))
     POP_PLOT_STRATUM_ASSGN <- setDT(POP_PLOT_STRATUM_ASSGN)
     setkey(POP_PLOT_STRATUM_ASSGN, PLT_CN)
-  
+ 
     ## if datx != NULL, merge strata assignments to dat
     if (!is.null(datx)) {
       ## Check if class of uniqueid in POP_PLOT_STRATUM_ASSGN matches class of cuniqueid in condx
