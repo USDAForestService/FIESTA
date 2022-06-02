@@ -872,7 +872,16 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         }
       }
     }
+
+    ## Create table of number of plots by estimation unit and strata
+    P2POINTCNT <- pltcondx[, list(P2POINTCNT=uniqueN(get(cuniqueid))),
+		by=c(unitvars, strvar, substrvar)]
+    setkeyv(P2POINTCNT, c(unitvars, strvar))
+
     if (nonresp) {
+      ## Set minimum plot number of nonresp 
+      nonresp.minplotnum <- 5
+
       ## Generate table of nonsampled plots by strata (if nonresp=TRUE)
       if ("PLOT_STATUS_CD" %in% pltcondnmlst) {
         if (!3 %in% unique(pltcondx[["PLOT_STATUS_CD"]])) {
@@ -881,12 +890,34 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
         ## Create table with number of nonsampled plots by strata, substrata
         nonresplut <- pltcondx[PLOT_STATUS_CD == 3, uniqueN(get(cuniqueid)),
-					by=c(unitvars, strvar, substrvar)]
+					by=c(unitvars, strvar)]
         setnames(nonresplut, "V1", "n.nonresp")
         setkeyv(nonresplut, c(unitvars, strvar, substrvar))
       } else {
         stop("must include PLOT_STATUS_CD")
       }
+
+      P2POINTCNT <- setDF(merge(P2POINTCNT, nonresplut, all.x=TRUE))
+      P2POINTCNT[is.na(P2POINTCNT$n.nonresp), "n.nonresp"] <- 0
+
+      P2POINTCNT$n.resp <- P2POINTCNT$P2POINTCNT - P2POINTCNT$n.nonresp
+
+      ## Subset strata from FIADB that have number of plots less than nonresp.minplotnum
+      appendltmin <- FALSE
+      if (any(P2POINTCNT$n.resp <= nonresp.minplotnum)) {
+        appendltmin <- TRUE
+        unit.ltmin <- P2POINTCNT[P2POINTCNT$n.resp <= nonresp.minplotnum, unitvars]
+      } 
+
+
+      ## Check - Get number of plots byby estimation unit (maybe take out)
+      unit.N <- setDT(P2POINTCNT)[, list(n.strata=.N), by=c(unitvars)]
+      strata.N <- merge(P2POINTCNT[, c(unitvars, strvar, "P2POINTCNT"), with=FALSE],
+		unit.N, by=unitvars)
+      if (any(strata.N$P2POINTCNT < 10 & strata.N$n.strata > 1)) {
+         message("there are estimation units with > 1 strata and has strata with less than 10 plots")
+      }
+
     
       if ("SAMP_METHOD_CD" %in% pltcondnmlst) {
         ## Create table with response homogeneity groups (RHGs) 
@@ -894,33 +925,64 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 					by=c(unitvars, strvar, "SAMP_METHOD_CD")]
         setnames(RHGlut, "V1", "n.resp")
         setkeyv(RHGlut, c(unitvars, strvar, "SAMP_METHOD_CD"))
-    
-        RHGlut.N <- RHGlut[, .N, by=c(unitvars, strvar, substrvar)]
+#RHGlut[RHGlut$ESTN_UNIT <= 15,]
 
-        if (!is.factor(RHGlut$SAMP_METHOD_CD)) {
+
+#######################
+        ## TESTING - to make sure no nonresp with office visits##
+#        RHGlut.test <- pltcondx[pltcondx$PLOT_STATUS_CD == 3, uniqueN(get(cuniqueid)),
+#					by=c(unitvars, strvar, "SAMP_METHOD_CD")]
+#        setnames(RHGlut.test, "V1", "n.nonresp")
+#        setkeyv(RHGlut.test, c(unitvars, strvar, "SAMP_METHOD_CD"))
+RHGlut.test[RHGlut.test,]
+#######################
+
+        if (appendltmin) {
+          RHGlut.ltmin <- RHGlut[RHGlut[[unitvars]] %in% unit.ltmin, 
+				list(RHG="1-2", n.resp=sum(n.resp, na.rm=TRUE)), by=c(unitvar, strvar)]
+          RHGlut <- RHGlut[!RHGlut[[unitvars]] %in% unit.ltmin, ] 
+        }
+
+        ## Get number of SAMP_METHOD_CD values by estimation unit, strata
+        RHGlut.N <- RHGlut[, .N, by=c(unitvars, strvar)]
+
+
+        ## Group strata with n.resp less than or equal to minplotnum (2)
+        if (!is.factor(RHGlut2$SAMP_METHOD_CD)) {
           RHGlut$strat <- factor(RHGlut$SAMP_METHOD_CD)
         }
         RHGlut$strat <- as.numeric(RHGlut$strat)
         RHGlut$stratnew <- as.character(-1)
-        RHGgrp <- RHGlut[, groupStrata(.SD, 5, "n.resp"), by=c(unitvar, strvar)]
+        RHGgrp <- RHGlut[, groupStrata(.SD, minplotnum=nonresp.minplotnum+1, nvar="n.resp"), 
+			by=c(unitvar, strvar)]
+#RHGgrp[RHGgrp$ESTN_UNIT <= 15, ]
 
+        ## Sum n.resp to new strata groups
         RHGgrp <- RHGgrp[, lapply(.SD, sum, na.rm=TRUE), 
 				by=c(unitvars, strvar, "stratnew"), .SDcols=c("n.resp")]
         setnames(RHGgrp, "stratnew", "RHG")
+#RHGgrp[RHGgrp$ESTN_UNIT <= 15, ]
 
         ## To set strata that only have 1 category as both categories
         RHGgrp <- merge(RHGgrp, RHGlut.N, all.x=TRUE)
-        RHGgrp[RHGgrp$N == 1, RHG := "1-2"][, N := NULL] 
+        RHGgrp[RHGgrp$N == 1, RHG := "1-2"][, N := NULL]
+#RHGgrp[RHGgrp$ESTN_UNIT <= 15, ]
+
+        if (appendltmin) {
+          RHGgrp <- rbind(RHGgrp, RHGlut.ltmin)
+          setorderv(RHGgrp, c(unitvars, strvar, "RHG"))
+        }
+ 
       } else {
         stop("must include SAMP_METHOD_CD")
       }
-    }
-    P2POINTCNT <- pltcondx[, list(P2POINTCNT=uniqueN(get(cuniqueid))),
-		by=c(unitvars, strvar, substrvar)]
-    setkeyv(P2POINTCNT, c(unitvars, strvar, substrvar))
-    if (nonresp) {
-      P2POINTCNT <- merge(P2POINTCNT, nonresplut, all.x=TRUE)
-    }
+    }   ## End nonresp
+
+## TESTING 
+#RHGlut[RHGlut$ESTN_UNIT <= 15, 1:4]
+#RHGgrp[RHGgrp$ESTN_UNIT <= 15, ]
+
+
   } else {
     P2POINTCNT <- pltcondx[, uniqueN(get(cuniqueid)), unitvars]
     setnames(P2POINTCNT, "V1", "P2POINTCNT")
