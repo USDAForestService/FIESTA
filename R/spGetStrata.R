@@ -607,9 +607,6 @@ spGetStrata <- function(xyplt,
 		  unitvar=unitvar, areavar=areavar, areaunits=areaunits,
 		  stratalut=setDF(stratalut), strvar=strvar, 
 		  getwt=FALSE, strwtvar="strwt")
-  if (!is.null(NAlst)) {
-    returnlst$NAlst <- NAlst
-  }
   ## Returnxy
   if (returnxy) {
     ## Add coordinate variables
@@ -618,6 +615,14 @@ spGetStrata <- function(xyplt,
     #sppltx <- sf::st_sf(data.frame(sppltx, xy.coords)) 
     returnlst$spxy <- spxy
     returnlst[["xy.uniqueid"]] <- uniqueid
+
+    if (!is.null(NAlst)) {
+      returnlst$NAlst <- NAlst
+    }
+  } else {
+    if (!is.null(NAlst)) {
+      returnlst$NAlst <- sf::st_drop_geometry(NAlst)
+    }
   }
  
   return(returnlst)

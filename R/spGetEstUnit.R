@@ -442,9 +442,7 @@ spGetEstUnit <- function(xyplt,
   returnlst <- list(bndx=unitlayerx, pltassgn=setDF(pltassgn), 
 		pltassgnid=uniqueid, unitarea=setDF(unitarea), 
 		unitvar=unitvar, areavar=areavar, areaunits=areaunits)
-  if (!is.null(NAlst)) {
-    returnlst$NAlst <- NAlst
-  }
+
   ## Returnxy
   if (returnxy) {
     ## Add coordinate variables
@@ -453,6 +451,10 @@ spGetEstUnit <- function(xyplt,
     #sppltx <- sf::st_sf(data.frame(sppltx, xy.coords)) 
     returnlst$spxy <- sppltx[, sppltx.names]
     returnlst[["xy.uniqueid"]] <- uniqueid
+  } else {
+    if (!is.null(NAlst)) {
+      returnlst$NAlst <- sf::st_drop_geometry(NAlst)
+    }
   }
 
   return(returnlst)
