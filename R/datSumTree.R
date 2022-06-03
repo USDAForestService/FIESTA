@@ -31,6 +31,9 @@
 #' to join the aggregated tree data to, if bycond=TRUE. This table also may be
 #' used for condition proportion or strata variables used if adjcond or
 #' adjstrata = TRUE (See details below).  This table is optional.
+#' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
+#' @param data_dsn String. If datsource='sqlite', the name of SQLite database
+#' (*.sqlite).
 #' @param plt Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 #' Plot-level table to join the aggregated tree data to, if bycond=FALSE. This
 #' table is optional.
@@ -118,6 +121,8 @@
 datSumTree <- function(tree = NULL, 
                        seed = NULL, 
                        cond = NULL, 
+                       datsource = "obj", 
+                       data_dsn = NULL, 
                        plt = NULL, 
                        plt_dsn = NULL, 
                        tuniqueid = "PLT_CN", 
@@ -233,14 +238,36 @@ datSumTree <- function(tree = NULL,
   pltsp <- FALSE
 
 
+  ## Set datsource
+  ########################################################
+  datsourcelst <- c("obj", "csv", "sqlite", "gdb")
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
+		checklst=datsourcelst, gui=gui, caption="Data source?") 
+  if (is.null(datsource)) {
+    if (!is.null(data_dsn) && file.exists(data_dsn)) {
+      dsn.ext <- getext(data_dsn)
+      if (!is.na(dsn.ext) && dsn.ext != "") {
+        datsource <- ifelse(dsn.ext == "gdb", "gdb", 
+		ifelse(dsn.ext %in% c("db", "db3", "sqlite", "sqlite3"), "sqlite", 
+             ifelse(dsn.ext == "csv", "csv",
+			ifelse(dsn.ext == "shp", "shp", "datamart"))))
+      } 
+    } else {
+      stop("datsource is invalid")
+    }
+  }
+
   ## Check tree
-  treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
+  treex <- pcheck.table(tree, tab_dsn=data_dsn, gui=gui, tabnm="tree", 
+			caption="Tree table?")
 
   ## Check seed 
-  seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
+  seedx <- pcheck.table(seed, tab_dsn=data_dsn, gui=gui, tabnm="seed", 
+			caption="Seed table?")
 
   ## Check cond
-  condx <- pcheck.table(cond, tabnm="cond", gui=gui, caption="Condition table?")
+  condx <- pcheck.table(cond, tab_dsn=data_dsn, tabnm="cond", gui=gui, 
+			caption="Condition table?")
 
   ## Check addseed
   addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
@@ -416,18 +443,19 @@ datSumTree <- function(tree = NULL,
     if (addseed) {
       setkeyv(seedx, tsumuniqueid)
     }
-  }
-
-  pltx <- pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
-
+  } 
+  pltx <- pcheck.table(plt, tab_dsn=plt_dsn, gui=gui, tabnm="plt", 
+			caption="Plot table?")
+ 
   if (!is.null(pltx)) {
     noplt <- FALSE
 
     ## Remove totally nonsampled plots
     if ("PLOT_STATUS_CD" %in% names(pltx)) {
-      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]]))
-          warning(paste("There are", sum(pltx[["PLOT_STATUS_CD"]] == 3), "nonsampled plots"))
-      pltx <- pltx[plt$PLOT_STATUS_CD != 3,]
+      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]])) {
+        warning(paste("There are", sum(pltx[["PLOT_STATUS_CD"]] == 3), "nonsampled plots"))
+        pltx <- pltx[pltx[["PLOT_STATUS_CD"]] != 3,]
+      }
     }
 
     if ("sf" %in% class(pltx))
@@ -444,7 +472,6 @@ datSumTree <- function(tree = NULL,
       message("plt table has > 1 record per uniqueid... will not be merged to plt.")
       noplt <- TRUE
     }
-
 
     ## Check if class of tuniqueid matches class of puniqueid
     tabs <- check.matchclass(treex, pltx, tuniqueid, puniqueid)
@@ -463,7 +490,7 @@ datSumTree <- function(tree = NULL,
       ## Check that the values of tuniqueid in seedx are all in puniqueid in pltx
       check.matchval(seedx, pltx, tuniqueid, puniqueid)
     }
-
+ 
     ## Check that the values of cuniqueid in condx are all in puniqueid in pltx
     if (!is.null(condx)) 
       ## Check that the values of tuniqueid in treex are all in puniqueid in pltx
@@ -474,6 +501,7 @@ datSumTree <- function(tree = NULL,
 #      names(pltx)[names(pltx) == puniqueid] <- tuniqueid
 #      puniqueid <- tuniqueid
 #    }
+
     setkeyv(pltx, puniqueid)
     checkNApvars <- c(checkNApvars, puniqueid)
   } 
@@ -708,7 +736,7 @@ datSumTree <- function(tree = NULL,
     ## Remove nonsampled plots 
     if ("COND_STATUS_CD" %in% names(condx)) {
       cond.nonsamp.filter <- "COND_STATUS_CD != 5"
-      nonsampn <- sum(condx$COND_STATUS_CD == 5, na.rm=TRUE)
+      nonsampn <- sum(condx[["COND_STATUS_CD"]] == 5, na.rm=TRUE)
       if (length(nonsampn) > 0) {
         message("removing ", nonsampn, " nonsampled forest conditions")
       } else {
@@ -975,6 +1003,13 @@ datSumTree <- function(tree = NULL,
   tree_ref <- FIESTA::ref_tree[FIESTA::ref_tree$VARIABLE %in% tsumvarlst,]
   if (nrow(tree_ref) > 0) {
     tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
+    if (!is.null(tfilter)) {
+      ref <- ref_estvar[ref_estvar$ESTVAR %in% tsumvarlst, ] 
+      fname <- ref[grep(gsub(" ", "", tfilter), gsub(" ", "", ref$ESTFILTER)), "FILTERNM"]
+      if (fname == "standing-dead") fname <- "dead"
+      tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_", fname[1])
+      tree_ref$DESCRIPTION <- paste0(tree_ref$DESCRIPTION, " (", tfilter, ")")
+    }
     if (adjtree) {
       tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_ADJ")
       tree_ref$DESCRIPTION <- paste(tree_ref$DESCRIPTION, "- adjusted for partial nonresponse at plot-level")

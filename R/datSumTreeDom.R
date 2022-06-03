@@ -39,6 +39,9 @@
 #' may be used for condition proportion or strata variables used if adjcond or
 #' adjstrata = TRUE (See details below).  This table is optional. If included,
 #' CONDID must be present in table.
+#' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
+#' @param data_dsn String. If datsource='sqlite', the name of SQLite database
+#' (*.sqlite).
 #' @param plt Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
 #' database file. Plot-level table to join the aggregated tree data to (if
 #' bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.
@@ -199,6 +202,8 @@
 datSumTreeDom <- function(tree = NULL, 
                           seed = NULL, 
                           cond = NULL, 
+                          datsource = "obj", 
+                          data_dsn = NULL, 
                           plt = NULL, 
                           plt_dsn = NULL,
                           tuniqueid = "PLT_CN", 
@@ -338,15 +343,36 @@ datSumTreeDom <- function(tree = NULL,
   noplt=nocond <- TRUE
   pltsp <- FALSE
 
+  ## Set datsource
+  ########################################################
+  datsourcelst <- c("obj", "csv", "sqlite", "gdb")
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
+		checklst=datsourcelst, gui=gui, caption="Data source?") 
+  if (is.null(datsource)) {
+    if (!is.null(data_dsn) && file.exists(data_dsn)) {
+      dsn.ext <- getext(data_dsn)
+      if (!is.na(dsn.ext) && dsn.ext != "") {
+        datsource <- ifelse(dsn.ext == "gdb", "gdb", 
+		ifelse(dsn.ext %in% c("db", "db3", "sqlite", "sqlite3"), "sqlite", 
+             ifelse(dsn.ext == "csv", "csv",
+			ifelse(dsn.ext == "shp", "shp", "datamart"))))
+      } 
+    } else {
+      stop("datsource is invalid")
+    }
+  }
 
   ## Check tree  
-  treex <- pcheck.table(tree, gui=gui, tabnm="tree", caption="Tree table?")
+  treex <- pcheck.table(tree, tab_dsn=data_dsn, gui=gui, tabnm="tree", 
+			caption="Tree table?")
 
   ## Check seed 
-  seedx <- pcheck.table(seed, gui=gui, tabnm="seed", caption="Seed table?")
+  seedx <- pcheck.table(seed, tab_dsn=data_dsn, gui=gui, tabnm="seed", 
+			caption="Seed table?")
 
   ## Check cond 
-  condx <- pcheck.table(cond, gui=gui, tabnm="cond", caption="Condition table?")
+  condx <- pcheck.table(cond, tab_dsn=data_dsn, gui=gui, tabnm="cond", 
+			caption="Condition table?")
 
   ## Check addseed
   addseed <- pcheck.logical(addseed, varnm="addseed", title="Add seeds?", 
@@ -531,16 +557,18 @@ datSumTreeDom <- function(tree = NULL,
   }
  
   ## Check plt
-  pltx <- pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
+  pltx <- pcheck.table(plt, tab_dsn=plt_dsn, gui=gui, tabnm="plt", 
+			caption="Plot table?")
 
   if (!is.null(pltx)) {
     noplt <- FALSE
 
     ## Remove totally nonsampled plots
     if ("PLOT_STATUS_CD" %in% names(pltx)) {
-      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]]))
+      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]])) {
         warning(paste("There are", sum(pltx[["PLOT_STATUS_CD"]] == 3), "nonsampled plots"))
-      pltx <- pltx[pltx$PLOT_STATUS_CD != 3,]
+        pltx <- pltx[pltx[["PLOT_STATUS_CD"]] != 3,]
+      }
     }
 
     if ("sf" %in% class(pltx))

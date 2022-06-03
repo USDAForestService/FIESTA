@@ -9,6 +9,9 @@
 #' 
 #' @param cond Data frame or comma-delimited file (*.csv). Condition-level
 #' table with aggregate variable and CONDPROP_UNADJ.
+#' @param datsource String. Source of data ('obj', 'csv', 'sqlite', 'gdb').
+#' @param data_dsn String. If datsource='sqlite', the name of SQLite database
+#' (*.sqlite).
 #' @param plt Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
 #' database file. Plot-level table to join the aggregated tree data to (if
 #' bycond=FALSE). Nonsampled plots (PLOT_STATUS_CD = 3) are removed. Optional.
@@ -53,6 +56,8 @@
 #' FIESTA::WYcond[FIESTA::WYcond$PLT_CN == 40404737010690,]
 #' @export datSumCond
 datSumCond <- function(cond = NULL, 
+                       datsource = "obj", 
+                       data_dsn = NULL, 
                        plt = NULL, 
                        plt_dsn = NULL, 
                        cuniqueid = "PLT_CN",
@@ -125,8 +130,29 @@ datSumCond <- function(cond = NULL,
   ## CHECK PARAMETER INPUTS
   ##################################################################
 
+  ## Set datsource
+  ########################################################
+  datsourcelst <- c("obj", "csv", "sqlite", "gdb")
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
+		checklst=datsourcelst, gui=gui, caption="Data source?") 
+  if (is.null(datsource)) {
+    if (!is.null(data_dsn) && file.exists(data_dsn)) {
+      dsn.ext <- getext(data_dsn)
+      if (!is.na(dsn.ext) && dsn.ext != "") {
+        datsource <- ifelse(dsn.ext == "gdb", "gdb", 
+		ifelse(dsn.ext %in% c("db", "db3", "sqlite", "sqlite3"), "sqlite", 
+             ifelse(dsn.ext == "csv", "csv",
+			ifelse(dsn.ext == "shp", "shp", "datamart"))))
+      } 
+    } else {
+      stop("datsource is invalid")
+    }
+  }
+
+
   ## Check cond table
-  condx <- pcheck.table(cond, caption="Condition table?", stopifnull=TRUE)
+  condx <- pcheck.table(cond, tab_dsn=data_dsn, caption="Condition table?", 
+			stopifnull=TRUE)
 
   ## Check cuniqueid
   condnmlst <- names(condx)
@@ -141,16 +167,18 @@ datSumCond <- function(cond = NULL,
   ## Check plt table
   noplt <- TRUE
   pltsp <- FALSE
-  pltx <- pcheck.table(plt, gui=gui, tabnm="plt", caption="Plot table?")
+  pltx <- pcheck.table(plt, tab_dsn=plt_dsn, gui=gui, tabnm="plt", 
+			caption="Plot table?")
   if (!is.null(pltx)) {
     noplt <- FALSE
 
     ## Remove totally nonsampled plots
     if ("PLOT_STATUS_CD" %in% names(pltx)) {
-      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]]))
+      if (3 %in% unique(pltx[["PLOT_STATUS_CD"]])) {
         warning(paste("There are", sum(pltx[["PLOT_STATUS_CD"]] == 3), 
 		"nonsampled plots"))
-      pltx <- pltx[pltx$PLOT_STATUS_CD != 3,]
+        pltx <- pltx[pltx[["PLOT_STATUS_CD"]] != 3,]
+      }
     } 
 
     if ("sf" %in% class(pltx))
