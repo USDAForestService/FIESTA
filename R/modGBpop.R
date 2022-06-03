@@ -431,9 +431,7 @@ modGBpop <- function(popType = "VOL",
         stop(paste("Invalid parameter: ", names(strata_opts)[[i]]))
       }
     }
-  }
-  
-
+  } 
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -490,8 +488,7 @@ modGBpop <- function(popType = "VOL",
     if (is.null(unitvar)) {
       unitvar <- GBdata$unitvar
       unitvar2 <- GBdata$unitvar2
-    }
-    
+    }    
     if (strata) { 
       if (is.null(strvar)) {    
         if (!is.null(predfac) && length(predfac) == 1) {
@@ -531,7 +528,7 @@ modGBpop <- function(popType = "VOL",
         unitvar <- stratdat$unitvar
         unitvar2 <- stratdat$unitvar2
       } 
-    
+
 #      if (strata) {
 #        if (is.null(strwtvar)) {
 #          stop("missing strwtvar")
@@ -572,15 +569,16 @@ modGBpop <- function(popType = "VOL",
       }
     }
   } 
-
+ 
   ## Set user-supplied popTable values 
   popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
+
   if (length(popTabs) > 0) {
     for (i in 1:length(popTabs)) {
       if (names(popTabs)[[i]] %in% names(popTables_defaults_list)) {
         assign(names(popTabs)[[i]], popTabs[[i]])
       } else {
-        stop(paste("Invalid parameter: ", names(popTabs)[[i]]))
+        message(paste("Invalid parameter: ", names(popTabs)[[i]]))
       }
     }
   } else {
@@ -592,8 +590,9 @@ modGBpop <- function(popType = "VOL",
     list.items <- c(list.items, "lulcx")
   }
   if (popType == "P2VEG") {
-    list.items <- c(list.items, "vsubpspp", "vsubpstr", "subplot", "subp_cond")
+    list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
   }
+
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
 
   ## Set user-supplied popTabIDs values
@@ -601,7 +600,7 @@ modGBpop <- function(popType = "VOL",
   popTableIDs_defaults_list <- formals(popTableIDs)[-length(formals(popTableIDs))]
   for (i in 1:length(popTabIDs)) {
     if (!(names(popTabIDs)[[i]] %in% names(popTableIDs_defaults_list))) {
-      stop(paste("Invalid parameter: ", names(popTabIDs)[[i]]))
+      message(paste("Invalid parameter: ", names(popTabIDs)[[i]]))
     }
   }
   ### Then actually set the values

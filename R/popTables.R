@@ -41,9 +41,10 @@
 #' popTables(cond = FIESTA::WYcond, seed = FIESTA::WYseed)
 #' @export popTables
 
-popTables <- function(cond=NULL, plt=NULL, tree=NULL,
-                             seed=NULL, vsubpspp=NULL, vsubpstr=NULL, 
-                             subplot=NULL, subp_cond=NULL, lulc=NULL, ...) {
+popTables <- function(cond=NULL, plt=NULL, 
+                      tree=NULL, seed=NULL, 
+                      vsubpspp=NULL, vsubpstr=NULL, invsubp=NULL,
+                      subplot=NULL, subp_cond=NULL, lulc=NULL, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(popTables)))
