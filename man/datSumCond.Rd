@@ -6,6 +6,8 @@
 \usage{
 datSumCond(
   cond = NULL,
+  datsource = "obj",
+  data_dsn = NULL,
   plt = NULL,
   plt_dsn = NULL,
   cuniqueid = "PLT_CN",
@@ -25,6 +27,11 @@ datSumCond(
 \arguments{
 \item{cond}{Data frame or comma-delimited file (*.csv). Condition-level
 table with aggregate variable and CONDPROP_UNADJ.}
+
+\item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
+
+\item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
+(*.sqlite).}
 
 \item{plt}{Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
 database file. Plot-level table to join the aggregated tree data to (if

@@ -50,6 +50,7 @@ spGetPlots(
   allyrs = FALSE,
   intensity1 = FALSE,
   showsteps = FALSE,
+  returndata = TRUE,
   savedata = FALSE,
   savebnd = FALSE,
   returnxy = TRUE,
@@ -199,6 +200,8 @@ database.}
 (i.e., INTENSITY = 1).}
 
 \item{showsteps}{Logical. If TRUE, display data in device window.}
+
+\item{returndata}{Logical. If TRUE, returns data objects.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
 

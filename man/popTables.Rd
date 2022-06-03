@@ -11,6 +11,7 @@ popTables(
   seed = NULL,
   vsubpspp = NULL,
   vsubpstr = NULL,
+  invsubp = NULL,
   subplot = NULL,
   subp_cond = NULL,
   lulc = NULL,

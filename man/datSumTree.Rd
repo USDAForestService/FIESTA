@@ -8,6 +8,8 @@ datSumTree(
   tree = NULL,
   seed = NULL,
   cond = NULL,
+  datsource = "obj",
+  data_dsn = NULL,
   plt = NULL,
   plt_dsn = NULL,
   tuniqueid = "PLT_CN",
@@ -48,6 +50,11 @@ datSumTree(
 to join the aggregated tree data to, if bycond=TRUE. This table also may be
 used for condition proportion or strata variables used if adjcond or
 adjstrata = TRUE (See details below).  This table is optional.}
+
+\item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
+
+\item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
+(*.sqlite).}
 
 \item{plt}{Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 Plot-level table to join the aggregated tree data to, if bycond=FALSE. This
