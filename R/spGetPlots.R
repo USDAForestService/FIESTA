@@ -121,6 +121,7 @@
 #' @param intensity1 Logical. If TRUE, include only single intensity plots
 #' (i.e., INTENSITY = 1).
 #' @param showsteps Logical. If TRUE, display data in device window.
+#' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
 #' @param savebnd Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 #' SpatiaLite database.
@@ -230,6 +231,7 @@ spGetPlots <- function(bnd = NULL,
                        allyrs = FALSE, 
                        intensity1 = FALSE, 
                        showsteps = FALSE, 
+                       returndata = TRUE,
                        savedata = FALSE, 
                        savebnd = FALSE, 
                        returnxy = TRUE, 
@@ -1895,30 +1897,34 @@ spGetPlots <- function(bnd = NULL,
 #    names(returnlst$clip_tabs) <- paste0("clip_", tabs2save)
 #  } else {
     #returnlst$tabs <- lapply(tabs2save, get, envir=environment())
-    returnlst$tabs <- tabs
+    if (returndata) {
+      returnlst$tabs <- tabs
+    }
 #  } 
  
-  returnlst$tabIDs <- tabIDs
-  if (returnxy && !is.null(spxy)) {
-    returnlst$spxy <- spxy
-  }
-  returnlst$pltids <- pltids
-  #returnlst$clip_polyv <- bndx
+  if (returndata) {
+    returnlst$tabIDs <- tabIDs
+    if (returnxy && !is.null(spxy)) {
+      returnlst$spxy <- spxy
+    }
+    returnlst$pltids <- pltids
+    #returnlst$clip_polyv <- bndx
 
-  if (!is.null(bndx)) {
-    returnlst$bnd <- bndx
-  }
-  returnlst$puniqueid <- puniqueid
-  returnlst$xy.uniqueid <- xyjoinid
-  returnlst$pjoinid <- pjoinid
-  returnlst$states <- states
+    if (!is.null(bndx)) {
+      returnlst$bnd <- bndx
+    }
+    returnlst$puniqueid <- puniqueid
+    returnlst$xy.uniqueid <- xyjoinid
+    returnlst$pjoinid <- pjoinid
+    returnlst$states <- states
 
-  if (savePOP) {
-    returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
-  }
-  if (evalresp) {
-    returnlst$evalid <- evalid
-  }
-  return(returnlst)
+    if (savePOP) {
+      returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
+    }
+    if (evalresp) {
+      returnlst$evalid <- evalid
+    }
+    return(returnlst)
+  } 
 }
 
