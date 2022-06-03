@@ -8,6 +8,8 @@ FIESTA_4.1
 - fixed bug in DBgetPlots - when using strata from SQLite databases
 - added functionality to DBgetStrata to get data from SQLite database
 - allow spGetAuxiliary to output unitarea with no input rasters
+- added database inputs to datSum* functions.
+- spGetPlots - added returndata=FALSE, if exporting to database
 
 
 
