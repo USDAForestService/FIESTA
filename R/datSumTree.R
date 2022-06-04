@@ -1005,9 +1005,11 @@ datSumTree <- function(tree = NULL,
     tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
     if (!is.null(tfilter)) {
       ref <- ref_estvar[ref_estvar$ESTVAR %in% tsumvarlst, ] 
-      fname <- ref[grep(gsub(" ", "", tfilter), gsub(" ", "", ref$ESTFILTER)), "FILTERNM"]
-      if (fname == "standing-dead") fname <- "dead"
-      tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_", fname[1])
+      fname <- ref[grep(gsub(" ", "", tfilter), gsub(" ", "", ref$ESTFILTER)), "FILTERNM"][1]
+      if (!is.na(fname)) {
+        if (fname == "standing-dead") fname <- "dead"
+        tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_", fname)
+      }
       tree_ref$DESCRIPTION <- paste0(tree_ref$DESCRIPTION, " (", tfilter, ")")
     }
     if (adjtree) {
