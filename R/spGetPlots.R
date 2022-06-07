@@ -258,7 +258,7 @@ spGetPlots <- function(bnd = NULL,
 
   ## Set global variables
   xydat=stateFilter=countyfips=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
-	othertabnms=stcds=spxy=stbnd=states <- NULL
+	othertabnms=stcds=spxy=stbnd <- NULL
   cuniqueid=tuniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
   returnlst <- list()

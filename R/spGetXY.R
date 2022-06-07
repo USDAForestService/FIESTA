@@ -335,7 +335,7 @@ spGetXY <- function(bnd,
       stcds <- sort(unique(as.numeric(sapply(countyfips, 
 				substr, nchar(countyfips)-5, nchar(countyfips)-3))))
     } else {
-      stcds <- FIESTAutils::ref_statecd$VALUE[FIESTAutils::ref_statecd$MEANING %in% statedat$states]
+      stcds <- ref_statecd$VALUE[ref_statecd$MEANING %in% statedat$states]
     }
     message("boundary intersected states: ", toString(statenames))
   } else {
