@@ -1823,9 +1823,11 @@ DBgetPlots <- function (states = NULL,
     ## Tree data
     ##############################################################
     if ((istree || !is.null(alltFilter)) && !is.null(pltx)) {
-      ## TREE table
-      if (istree || !is.null(alltFilter)) {
-        TREE <- DBgetCSV("TREE", stabbr, returnDT=TRUE, stopifnull=FALSE)
+      if (datsource == "datamart") {
+        ## TREE table
+        if (istree || !is.null(alltFilter)) {
+          TREE <- DBgetCSV("TREE", stabbr, returnDT=TRUE, stopifnull=FALSE)
+        }
       }
 
       message("\n",

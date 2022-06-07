@@ -758,6 +758,12 @@ datSumTree <- function(tree = NULL,
     adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
     condx <- adjfacdata$condx
+    varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
+    if (any(varadjlst %in% names(condx))) {
+      varadjlst <- varadjlst[varadjlst %in% names(condx)]
+      condx[, (varadjlst) := NULL]
+    }
+      
     treef <- adjfacdata$treex
     if (addseed) {
       seedf <- adjfacdata$seedx

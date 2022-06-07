@@ -383,9 +383,9 @@ spGetAuxiliary <- function(xyplt,
 
     ## Check rastlst.cont.NODATA
     if (!is.null(rastlst.cont.NODATA)) {
-      if (!is.numeric(rastlst.cont.NODATA))
+      if (!is.numeric(rastlst.cont.NODATA)) {
         stop("rastlst.cont.NODATA must be numeric")
-
+      }
       if (length(rastlst.cont.NODATA) == 1 && nlayers.cont > 1) {
         message("using same rastlst.cont.NODATA value for each raster in rastlst.cont")
         rastlst.cont.NODATA <- rep(rastlst.cont.NODATA, nlayers.cont)
@@ -422,20 +422,22 @@ spGetAuxiliary <- function(xyplt,
      	 	error=function(e) {
 			      message(e, "\n")
 			      return("stop") })
-  if (!is.null(rastlst.catfn) && rastlst.catfn == "stop") {
-    stop()
-  }
   if (is.null(rastlst.contfn) && is.null(rastlst.catfn)) {
     message("both rastlst.cont and rastlst.cat are NULL")
   }
   if (!is.null(rastlst.catfn)) {
+    if (length(rastlst.catfn) == 1) {
+      if (rastlst.catfn == "stop") {
+        stop()
+      }
+    }
     band.cat <- sapply(rastlst.catfn, function(x) rasterInfo(x)$nbands)
     nlayers.cat <- sum(band.cat)
 
-    if (!is.null(rastlst.cat.name) && length(rastlst.cat.name) != length(rastlst.catfn))
+    if (!is.null(rastlst.cat.name) && length(rastlst.cat.name) != length(rastlst.catfn)) {
       stop(paste0("number of rastlst.cat.name (", length(rastlst.cat.name), ") does not ", 
 		"match number of rastlst.cat layers (", nlayers.cat, ")"))
-
+    }
     ## Check rastlst.cat.NODATA
     if (!is.null(rastlst.cat.NODATA)) {
       if (!is.numeric(rastlst.cat.NODATA))
