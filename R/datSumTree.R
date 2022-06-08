@@ -156,7 +156,7 @@ datSumTree <- function(tree = NULL,
   ## DESCRIPTION: Aggregates tree variable(s) to plot(/cond)-level, 
   ##        using specified tree filters (ex. live trees only)
   ####################################################################################
- 
+  
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
 
@@ -256,7 +256,7 @@ datSumTree <- function(tree = NULL,
       stop("datsource is invalid")
     }
   }
-
+  
   ## Check tree
   treex <- pcheck.table(tree, tab_dsn=data_dsn, gui=gui, tabnm="tree", 
 			caption="Tree table?")
@@ -754,6 +754,25 @@ datSumTree <- function(tree = NULL,
     }
     condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
+    
+    ## Check cuniqueid and condid in cond table
+    condnmlst <- names(condx)
+    cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
+                                checklst=condnmlst, caption="UniqueID variable - cond", 
+                                warn=paste(cuniqueid, "not in cond table"))
+    
+    if (is.null(cuniqueid)) {
+      if (tuniqueid %in% condnmlst) {
+        cuniqueid <- tuniqueid
+      } else {
+        stop("cuniqueid is invalid")
+      }
+    }
+    
+    ## Check if class of tuniqueid matches class of cuniqueid
+    tabs <- check.matchclass(treex, condx, tuniqueid, cuniqueid)
+    treex <- tabs$tab1
+    condx <- tabs$tab2
 
     adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
 		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
