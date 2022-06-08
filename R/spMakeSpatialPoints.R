@@ -119,7 +119,7 @@ spMakeSpatialPoints <- function(xyplt,
   ##################################################################
   ## check xyplt
   xypltx <- pcheck.table(xyplt, xyplt_dsn, tabnm="xyplt", 
-		caption="XY data table", stopifnull=TRUE, returnDT=TRUE)
+		caption="XY data table", stopifnull=TRUE, returnDT=FALSE)
 
   ## check xy.uniqueid
   xypltnmlst <- names(xypltx)
@@ -147,12 +147,13 @@ spMakeSpatialPoints <- function(xyplt,
 
   ## check for NA values
   if (any(is.na(xypltx[[x]])) || any(is.na(xypltx[[y]]))) {
+    xypltx <- setDT(xypltx)
     missCN <- xypltx[list(NA,NA), on=c(x,y), xy.uniqueid, nomatch=0, with = FALSE][[1]]
+    xypltx <- as.data.frame(xypltx)
     rowp <- ifelse(length(missCN) == 1, "row", "rows")
     message(paste("removing", length(missCN), rowp, "with", xy.uniqueid, "values = NA:", 
 		paste(missCN, collapse=", ")))
     xypltx <- xypltx[!list(NA,NA), on=c(x,y)]
-    xypltx <- as.data.frame(xypltx)
   }
 
   ## check xy.crs   
