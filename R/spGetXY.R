@@ -267,6 +267,11 @@ spGetXY <- function(bnd,
   ## Check measEndyr.filter
   #############################################################################
   measEndyr.filter <- check.logic(bnd, measEndyr.filter)
+  
+  ## Check intensity1
+  #############################################################################
+  intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
+                              title="Intensity 1?", first="NO", gui=gui) 
 
   ## Check showsteps
   #############################################################################
@@ -387,7 +392,14 @@ spGetXY <- function(bnd,
     if (!is.null(statenm)) {
       xyplt <- datFilter(xyplt, getfilter(statenm, stcds))$xf
     }
-
+    
+    # Do intensity 1?
+    if (intensity1) {
+      if ("INTENSITY" %in% names(xyplt)) {
+        xyplt <- xyplt[xyplt$INTENSITY == 1, ]
+      }
+    }
+    
     ## Make spatial
     if (!"sf" %in% class(xyplt)) {
       spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
@@ -404,6 +416,13 @@ spGetXY <- function(bnd,
       #spxy <- pcheck.spatial(xy, sql=sql)
       spxy <- pcheck.spatial(xy)
       spxy <- spxy[spxy$STATECD %in% stcds, ]
+      
+      # Do intensity 1?
+      if (intensity1) {
+        if ("INTENSITY" %in% names(spxy)) {
+          spxy <- spxy[spxy$INTENSITY == 1, ]
+        }
+      }
 
     } else {
       spxy <- pcheck.spatial(xy)
