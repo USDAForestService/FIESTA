@@ -859,7 +859,7 @@ datSumTree <- function(tree = NULL,
 
       ## Add filter name (e.g., live/dead) to newname
       if (!is.null(fname)) {
-        newname <- paste0(tvar, "_", fname, "_TPA")
+        newname <- paste0(tvar, "_TPA", "_", fname, )
       } else {
         newname <- paste0(tvar, "_TPA")
       }
