@@ -146,7 +146,7 @@ datSumTree <- function(tree = NULL,
                        adjvar = "tadjfac", 
                        adjTPA = 1, 
                        NAto0 = FALSE, 
-                       tround = 16, 
+                       tround = 5, 
                        checkNA = FALSE, 
                        returnDT = TRUE,
                        savedata = FALSE, 
@@ -162,7 +162,7 @@ datSumTree <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
-	seedf=TREECOUNT_CALC=estunits <- NULL
+	seedf=TREECOUNT_CALC=estunits=fname <- NULL
 
 
   ## If gui.. set variables to NULL
@@ -808,6 +808,14 @@ datSumTree <- function(tree = NULL,
  
   ## ADDS '_TPA' TO VARIABLE NAME, MULTIPLIES BY TPA_UNADJ, AND DIVIDES BY adjfac
   for (tvar in tsumvarlst) {
+    if (!is.null(tfilter)) {
+      ref <- ref_estvar[ref_estvar$ESTVAR %in% tvar, ] 
+      fname <- ref[grep(gsub(" ", "", tfilter), gsub(" ", "", ref$ESTFILTER)), "FILTERNM"][1]
+      if (!is.na(fname)) {
+        if (fname == "standing-dead") fname <- "dead"
+      }
+    }
+
     if (tvar %in% c(tuniqueid, tpavars)) {
       tvar <- "COUNT"
     }
@@ -835,6 +843,13 @@ datSumTree <- function(tree = NULL,
         }
       }
     } 
+ 
+    if (!is.null(fname)) {
+      newname <- paste0(tvar, "_", fname)
+    } else {
+      newname <- tvar
+    }
+
     ## MULTIPLY tvar BY TPA VARIABLE IF DESIRED
     if (TPA) {
       if (tvar %in% mortvars) {
@@ -847,7 +862,7 @@ datSumTree <- function(tree = NULL,
         #tpavar <- "TPAGROW_UNADJ"
         tpavar <- "TPA_UNADJ"
       } 
-      newname <- paste0(tvar, "_TPA")
+      newname <- paste0(newname, "_TPA")
       ## Adjust by adjTPA variable (Default is 1)
       if (adjTPA > 1) {
         treef[, (tpavar) := get(eval(tpavar)) * adjTPA]
@@ -1025,16 +1040,13 @@ datSumTree <- function(tree = NULL,
   meta <- meta[meta$VARIABLE %in% metanames, ]
   meta <- meta[match(metanames, meta$VARIABLE),]
 
-  tree_ref <- FIESTA::ref_tree[FIESTA::ref_tree$VARIABLE %in% tsumvarlst,]
+  tree_ref <- FIESTA::ref_tree[match(tsumvarlst, FIESTA::ref_tree$VARIABLE),]
+  tree_ref$VARIABLE[tree_ref$VARIABLE == "TPA_UNADJ"] <- "COUNT"
+
   if (nrow(tree_ref) > 0) {
     tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_TPA")
-    if (!is.null(tfilter)) {
-      ref <- ref_estvar[ref_estvar$ESTVAR %in% tsumvarlst, ] 
-      fname <- ref[grep(gsub(" ", "", tfilter), gsub(" ", "", ref$ESTFILTER)), "FILTERNM"][1]
-      if (!is.na(fname)) {
-        if (fname == "standing-dead") fname <- "dead"
-        tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_", fname)
-      }
+    if (!is.null(fname)) {
+      tree_ref$VARIABLE <- paste0(tree_ref$VARIABLE, "_", fname)
       tree_ref$DESCRIPTION <- paste0(tree_ref$DESCRIPTION, " (", tfilter, ")")
     }
     if (adjtree) {
@@ -1043,7 +1055,6 @@ datSumTree <- function(tree = NULL,
     }
     meta <- rbind(meta, tree_ref)
   }
-
 
   #### WRITE TO FILE 
   #############################################################
