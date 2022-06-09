@@ -856,7 +856,13 @@ datSumTree <- function(tree = NULL,
         #tpavar <- "TPAGROW_UNADJ"
         tpavar <- "TPA_UNADJ"
       } 
-      newname <- paste0(tvar, "_TPA")
+
+      ## Add filter name (e.g., live/dead) to newname
+      if (!is.null(fname)) {
+        newname <- paste0(tvar, "_", fname, "_TPA")
+      } else {
+        newname <- paste0(tvar, "_TPA")
+      }
       ## Adjust by adjTPA variable (Default is 1)
       if (adjTPA > 1) {
         treef[, (tpavar) := get(eval(tpavar)) * adjTPA]
@@ -878,13 +884,13 @@ datSumTree <- function(tree = NULL,
         seedcountvar=treecountvar <- newname
       }
     } else {
-      newname <- tvar
+      if (!is.null(fname)) {
+        newname <- paste0(tvar, "_", fname)
+        setnames(treef, tvar, newname)
+      } else {
+        newname <- tvar
+      }
     }
-
-    ## Add filter name (e.g., live/dead) to newname
-    if (!is.null(fname)) {
-      newname <- paste0(tvar, "_", fname)
-    } 
 
     ## ADJUSTMENT FACTORS
     if (adjtree) {
@@ -918,7 +924,7 @@ datSumTree <- function(tree = NULL,
       tsumvarnmlst2 <- tsumvarnmlst
     } 
   }
-
+ 
   ######################################################################## 
   ## Aggregate tree variables
   ######################################################################## 
