@@ -24,12 +24,15 @@
 #' dsn.  Vegetation species-level data with one record for each species
 #' (P2VEG_SUBPLOT_SPP).
 #' @param vsubpstr DF/DT, R object, comma-delimited file(*.csv), or layer in
-#' dsn.  Vegetation species-structure data with one record for each species
+#' dsn. Vegetation species-structure data with one record for each species
 #' (P2VEG_SUBP_STRUCTURE).
+#' #' @param invsubp DF/DT, R object, comma-delimited file(*.csv), or layer in
+#' dsn. Invasive species data with one record for each species
+#' (INVASIVE_SUBPLOT_SPP).
 #' @param subplot DF/DT, R object, comma-delimited file(*.csv), or layer in
-#' dsn.  Subplot-level data with one record for each species (SUBPLOT).
+#' dsn. Subplot-level data with one record for each species (SUBPLOT).
 #' @param subp_cond DF/DT, R object, comma-delimited file(*.csv), or layer in
-#' dsn.  Subplot condition-level data with one record for each species
+#' dsn. Subplot condition-level data with one record for each species
 #' (SUBP_COND).
 #' @param lulc DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 #' Land use/Land cover data with current and previous observations.
