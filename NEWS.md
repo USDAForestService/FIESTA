@@ -11,7 +11,8 @@ FIESTA_3.4.1
 - added database inputs to datSum* functions.
 - spGetPlots - added returndata=FALSE, if exporting to database
 - spGetXY - fixed bug when getting INTENSITY=1 plots using CSV files
-
+- datSumTree/datSumTreeDom - changed default rounding from 16 to 5
+- spGetSAdoms - added new parameter (byeach) to create SAdoms for each smallbnd
 
 
 FIESTA_3.0.30 (Release date: 2021-09-27)
