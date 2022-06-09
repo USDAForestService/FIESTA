@@ -78,7 +78,8 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
 	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD=
-	SUBPCOND_PROP=MACRCOND_PROP=tpropvars=vcondsppf=vcondstrf <- NULL
+	SUBPCOND_PROP=MACRCOND_PROP=tpropvars=vcondsppf=vcondstrf=
+  Nsampmeth=Nstrata=strat <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
