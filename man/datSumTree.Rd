@@ -33,7 +33,7 @@ datSumTree(
   adjvar = "tadjfac",
   adjTPA = 1,
   NAto0 = FALSE,
-  tround = 16,
+  tround = 5,
   checkNA = FALSE,
   returnDT = TRUE,
   savedata = FALSE,

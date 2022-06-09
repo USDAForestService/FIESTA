@@ -46,7 +46,7 @@ datSumTreeDom(
   adjvar = "tadjfac",
   NAto0 = FALSE,
   adjTPA = 1,
-  tround = 16,
+  tround = 5,
   checkNA = FALSE,
   returnDT = TRUE,
   savedata = FALSE,
