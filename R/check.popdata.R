@@ -891,7 +891,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
         ## Create table with number of nonsampled plots by strata, substrata
         nonresplut <- pltcondx[PLOT_STATUS_CD == 3, uniqueN(get(cuniqueid)),
-					by=c(unitvars, strvar)]
+					by=c(unitvars, strvar, "SAMP_METHOD_CD")]
         setnames(nonresplut, "V1", "n.nonresp")
         setkeyv(nonresplut, c(unitvars, strvar, substrvar))
       } else {
@@ -910,8 +910,8 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         unit.ltmin <- P2POINTCNT[P2POINTCNT$n.resp <= nonresp.minplotnum, unitvars]
       } 
 
-#      ## Check - Get number of plots byby estimation unit (maybe take out)
-#      unit.N <- setDT(P2POINTCNT)[, list(n.strata=.N), by=c(unitvars)]
+#      ## Check - Get number of plots by estimation unit (maybe take out)
+      unit.N <- setDT(P2POINTCNT)[, list(Nstrata =.N), by=c(unitvars)]
 #      strata.N <- merge(P2POINTCNT[, c(unitvars, strvar, "P2POINTCNT"), with=FALSE],
 #		unit.N, by=unitvars)
 #      if (any(strata.N$P2POINTCNT < 10 & strata.N$n.strata > 1)) {
@@ -936,16 +936,18 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 #RHGlut.test[RHGlut.test,]
 #######################
 
-        ## Get number of SAMP_METHOD_CD values by estimation unit, strata
-        RHGlut[, Nsampmeth := .N, by=c(unitvars, strvar)][, Nstrata := .N, by=unitvars]
+        RHGlut <- merge(RHGlut, unit.N, by=unitvars)
 
+   
+        ## Get number of SAMP_METHOD_CD values by estimation unit, strata
+        RHGlut[, Nsampmeth := .N, by=c(unitvars, strvar)]
 
         if (appendltmin) {
           RHGlut.ltmin <- RHGlut[RHGlut[[unitvars]] %in% unit.ltmin, ]
           RHGlut <- RHGlut[!RHGlut[[unitvars]] %in% unit.ltmin, ] 
         }
 
-        ## Group strata with n.resp less than or equal to nonresp.minplotnum
+        ## Group SAMP_METHOD_CD with n.resp less than or equal to nonresp.minplotnum
         if (!is.factor(RHGlut$SAMP_METHOD_CD)) {
           RHGlut$strat <- factor(RHGlut$SAMP_METHOD_CD)
         }
@@ -975,27 +977,49 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
 
         ## Create RHGgrp column based on specific criteria...
+        ## First, if the number of Nsampmeth = 2 and on of RHG <= nonresp.minplotnum, then RHGtmp = '1-2'
         ## 1) If there were both field and office plots within a stratum and one of the 
         ##    categories (field/office) had less than 5 plots, no RHG was created (A)
-        ## 2) If there was only one stratum in EU and only office plots, no RHG was created (A)
-        ## 3) If there was only one stratum in EU and only field plots, RHG = F
-        ## 4) If there was more than one strata in EU and both field and office plots within a stratum, 
+        ## 2) If there is only one stratum in EU and only office or only field plots, no RHG was created (A)
+        ## 3/4) If there was only one strata in EU and both field and office plots within a stratum, 
+        ##    if field, RHG = F; if office, RHG = O
+        ## 5/6) If there was more than one strata in EU and both field and office plots within a stratum, 
+        ##    if field, RHG = F; if office, RHG = O
+        ## 7/8) If there was more than one strata in EU and only field or only office plots within a stratum, 
         ##    and >= 5 plots: if field, RHG=F; if office, RHG = O
-        ## 5) If there was more than one strata in EU and only field or only office plots within a stratum, 
-        ##    and >= 10 plots: if field, RHG=F; if office, RHG = O
+
+
+#        RHGgrp$RHG <- with(RHGgrp, 
+#		ifelse(RHGtmp == "1-2", "A",  ## 1
+#		   #ifelse(Nstrata == 1 & Nsampmeth == 1, "A",  ## 2   (added by paul)
+#			ifelse(Nsampmeth == 2 & RHGtmp == 1, "F",  ## 3
+#				ifelse(Nsampmeth == 2 & RHGtmp == 2, "O",  ## 4
+#							ifelse(Nsampmeth == 1 & RHGtmp == 1, "F",  ## 7
+#								ifelse(Nsampmeth == 1 & RHGtmp == 2, "O",  ## 8 
+#									"Z"))))))
 
         RHGgrp$RHG <- with(RHGgrp, 
-		ifelse(RHGtmp == "1-2", "A",
-			ifelse(RHGtmp == 2 & Nsampmeth == 1 & Nstrata == 1, "A",
-				ifelse(RHGtmp == 1 & Nsampmeth == 1 & Nstrata == 1, "F",
-					ifelse(RHGtmp == 1 & Nsampmeth == 2 & Nstrata > 1 & n.resp >= 5, "F", 
-						ifelse(RHGtmp == 2 & Nsampmeth == 2 & Nstrata > 1 & n.resp >= 5, "O", 
-							ifelse(RHGtmp == 1 & Nsampmeth == 1 & Nstrata > 1 & n.resp >= 10, "F", 
-								ifelse(RHGtmp == 2 & Nsampmeth == 2 & Nstrata > 1 & n.resp >= 10, "O", "A"))))))))
-             	
+		ifelse(RHGtmp == "1-2", "A",  ## 1
+		   ifelse(Nstrata == 1 & Nsampmeth == 1, "A",  ## 2   (added by paul)
+			ifelse(Nstrata == 1 & Nsampmeth == 2 & RHGtmp == 1, "F",  ## 3
+				ifelse(Nstrata == 1 & Nsampmeth == 2 & RHGtmp == 2, "O",  ## 4
+					ifelse(Nstrata > 1 & Nsampmeth == 2 & RHGtmp == 1, "F",  ## 5 
+						ifelse(Nstrata > 1 & Nsampmeth == 2 & RHGtmp == 2, "O", ## 6
+							ifelse(Nstrata > 1 & Nsampmeth == 1 & RHGtmp == 1, "F",  ## 7
+								ifelse(Nstrata > 1 & Nsampmeth == 1 & RHGtmp == 2, "O",  ## 8 
+									"Z")))))))))
+
         ## Sum n.resp to new strata groups
         RHGgrp <- RHGgrp[, lapply(.SD, sum, na.rm=TRUE), 
 				by=c(unitvars, strvar, "RHG"), .SDcols=c("n.resp")]
+
+        ## TESTING
+        #Nsampmeth <- RHGlut[, .N, by=c(unitvars, strvar)]
+        #RHGgrp <- merge(RHGgrp, unit.N, by=unitvars)
+        #RHGgrp <- merge(RHGgrp, Nsampmeth, by=c(unitvars, strvar))
+        #setnames(RHGgrp, "N", "Nsampmeth")
+        #RHGgrp
+
       } else {
         stop("must include SAMP_METHOD_CD")
       }
