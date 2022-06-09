@@ -7,7 +7,8 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 		largeishelper=FALSE, polyunion=TRUE, showsteps=TRUE, savesteps=FALSE,
 		stepfolder=NULL, out_fmt="shp", step_dsn=NULL, step.cex=0.8,
 		maxbnd.threshold=0, largebnd.threshold=30, multiSAdoms=TRUE,
-		maxbnd.addtext=TRUE, largebnd.addtext=FALSE, overwrite=TRUE) {
+		byeach=FALSE, maxbnd.addtext=TRUE, largebnd.addtext=FALSE, 
+		overwrite=TRUE) {
   ## DESCRIPTION:: Automate selection of helperbnd polygons for modeling.
   ## maxbnd - maximum constraint for modeling extent (e.g., Province)
   ## if maxbnd, maxbnd is intersected with smallbnd and dissolved by maxbnd.unique (*maxbnd_select)
@@ -34,9 +35,10 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
   ## maxbnd
   ############################################################################
   if (!is.null(maxbndx)) {
+    message("dissolving maxbnd polygons...")
     maxbndxd <- sf_dissolve(maxbndx, maxbnd.unique, areacalc=FALSE)
 
-    ## get intersection of maxbndx and smallbndx 
+    ## get intersection of maxbndx and smallbndx to select intersecting maxbnds
     ## Note: use tabulateIntersections with fewer smallbnd polygons - faster
 #    if (nrow(smallbndx) < 200) {
       maxbndx_intersect <-
@@ -52,18 +54,23 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
 #    }
  
     if (length(maxbndxlst) < length(unique(maxbndxd[[maxbnd.unique]]))) {
-      smallbndx$DISSOLVE <- 1
-      smallbndxd <- sf_dissolve(smallbndx, "DISSOLVE", areacalc=FALSE)
-      smallbndx$DISSOLVE <- NULL
-
+      if (length(unique(smallbndx[[smallbnd.unique]])) > nrow(smallbndx)) {
+        smallbndx$DISSOLVE <- 1
+        smallbndxd <- sf_dissolve(smallbndx, "DISSOLVE", areacalc=FALSE)
+        smallbndx$DISSOLVE <- NULL
+      } else {
+        smallbndxd <- smallbndx
+        smallbndxd$DISSOLVE <- 1
+      } 
+         
       ## get intersection of maxbndx and smallbndx (dissolved as 1 polygon)
       maxbndx_intersect <-
-		suppressWarnings(tabulateIntersections(layer1=smallbndxd,
-		        layer1fld="DISSOLVE", layer2=maxbndxd.int, layer2fld=maxbnd.unique))
+	 	suppressWarnings(tabulateIntersections(layer1=smallbndxd,
+	 	        layer1fld="DISSOLVE", layer2=maxbndxd.int, layer2fld=maxbnd.unique))
 
       ## Get the maximum overlap by province for smallbndx (dissolved as 1 polygon)
       maxbndx.pct <- maxbndx_intersect[order(maxbndx_intersect$int.pct, decreasing=TRUE), ]
-
+ 
       maxbnd.gtthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct >= maxbnd.threshold])
       maxbnd.ltthres <- unique(maxbndx.pct[[maxbnd.unique]][maxbndx.pct$int.pct < maxbnd.threshold])
       maxbndxlst <- unique(maxbndx.pct[[maxbnd.unique]])
@@ -77,7 +84,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       ## Subset maxbndxd to only maxbnd.unique that intersects with smallbnd
       maxbndx.intd <- maxbndxd[maxbndxd[[maxbnd.unique]] %in% maxbndxlst,]
 
-      ## now, get intersection of maxbndx and smallbndx, by smallbnd.unique
+      ## Now, get intersection of maxbndx and smallbndx, by smallbnd.unique
       maxbndx_intersect <-
 		suppressWarnings(tabulateIntersections(layer1=smallbndx,
 		        layer1fld=smallbnd.unique, layer2=maxbndx.intd, layer2fld=maxbnd.unique))
@@ -144,7 +151,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       stepcnt <- stepcnt+1
     }
 
-    ## Get the maximum overlap by province for each smallbnd.unique
+    ## Get the maximum overlap by maxbnd.unique for each smallbnd.unique
     maxbnd_max <- aggregate(maxbndx_intersect$int.pct,
 			list(maxbndx_intersect[[smallbnd.unique]]), max)
     names(maxbnd_max) <- c(smallbnd.unique, "int.pct")
@@ -155,35 +162,46 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
       message("smallbnd intersects more than 1 maxbnd")
 
       if (multiSAdoms) {
-        mbndlst <- maxbnd.gtthres
-        mbndlst <- as.list(mbndlst[mbndlst %in% unique(maxbnd_max[[maxbnd.unique]])])
+        if (byeach) {
+          mbndlst <- maxbnd_max[[maxbnd.unique]]
+          sbndlst <- lapply(maxbnd_max[[smallbnd.unique]], 
+					function(x) smallbndx[smallbndx[[smallbnd.unique]] == x,])
+          names(sbndlst) <- mbndlst
 
-        ## Create list of new smallbnd(s)
-        sbndlst <- lapply(mbndlst, function(mbnd, maxbnd_max, smallbndx, smallbnd.unique) {
-            sbnd.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% mbnd, smallbnd.unique]
-            if (length(sbnd.att) == 0)
-              stop("cannot have more than one model...  check smallbnd")
-            smallbndx[smallbndx[[smallbnd.unique]] %in% sbnd.att,]
-        }, maxbnd_max, smallbndx, smallbnd.unique)
-        names(sbndlst) <- mbndlst
+        } else {
+          mbndlst <- maxbnd.gtthres
+          mbndlst <- as.list(mbndlst[mbndlst %in% unique(maxbnd_max[[maxbnd.unique]])])
+
+          ## Create list of new smallbnd(s)
+          sbndlst <- lapply(mbndlst, function(mbnd, maxbnd_max, smallbndx, smallbnd.unique) {
+              sbnd.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% mbnd, smallbnd.unique]
+              if (length(sbnd.att) == 0)
+                stop("cannot have more than one model...  check smallbnd")
+              smallbndx[smallbndx[[smallbnd.unique]] %in% sbnd.att,]
+          }, maxbnd_max, smallbndx, smallbnd.unique)
+          names(sbndlst) <- mbndlst
+        
  
-        ## Appends small areas from maxbnds less than threshold to maxbnds greater 
-        ## than threshold based on closest centroids
-        if (length(maxbnd.ltthres) > 0) {
+          ## Appends small areas from maxbnds less than threshold to maxbnds greater 
+          ## than threshold based on closest centroids
+          if (length(maxbnd.ltthres) > 0) {
 
-          for (j in 1:length(maxbnd.ltthres)) {
-            maxbndltd <- maxbndx.intd[maxbndx.intd[[maxbnd.unique]] == maxbnd.ltthres[j],]
-            maxbndlt.centroid <- suppressWarnings(sf::st_centroid(maxbndltd))
+            for (j in 1:length(maxbnd.ltthres)) {
+              maxbndltd <- maxbndx.intd[maxbndx.intd[[maxbnd.unique]] == maxbnd.ltthres[j],]
+              if (nrow(maxbndltd) > 0) {
+                maxbndlt.centroid <- suppressWarnings(sf::st_centroid(maxbndltd))
 
-            maxbndx.dist <- closest_poly(maxbndlt.centroid,
-			ypoly=maxbndx[maxbndx[[maxbnd.unique]] %in% maxbndxlst,],
-			ypoly.att=maxbnd.unique, returnsf=FALSE)
-            maxbndltnm <- names(maxbndx.dist)[names(maxbndx.dist) %in% maxbnd.gtthres][1]
+                maxbndx.dist <- closest_poly(maxbndlt.centroid,
+			  ypoly=maxbndx[maxbndx[[maxbnd.unique]] %in% maxbndxlst,],
+			  ypoly.att=maxbnd.unique, returnsf=FALSE)
+                maxbndltnm <- names(maxbndx.dist)[names(maxbndx.dist) %in% maxbnd.gtthres][1]
 
-            sbndlt.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% maxbnd.ltthres[j], 
+                sbndlt.att <- maxbnd_max[maxbnd_max[[maxbnd.unique]] %in% maxbnd.ltthres[j], 
 				smallbnd.unique]
-            sbndlst[[maxbndltnm]] <- rbind(sbndlst[[maxbndltnm]], 
+                sbndlst[[maxbndltnm]] <- rbind(sbndlst[[maxbndltnm]], 
 							smallbndx[smallbndx[[smallbnd.unique]] %in% sbndlt.att,])
+              }
+            }
           }
         }       
       } else {
@@ -219,7 +237,11 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
         }
       }
     } else {
-      mbndlst <- list(maxbnd.gtthres)
+      if (length(maxbnd.gtthres) == 1) {
+        mbndlst <- list(maxbnd.gtthres)
+      } else {
+        mbndlst <- list(maxbnd.ltthres)
+      }
       sbndlst <- list(smallbndx)
     }
 

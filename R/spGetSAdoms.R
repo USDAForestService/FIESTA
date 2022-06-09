@@ -113,6 +113,7 @@
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE.  
 #' @param addstate Logical. If TRUE, appends state attribute to SAdoms.
+#' @param byeach Logical. If TRUE, creates an SAdom for each smallbnd polygon.
 #' @param dissolve Logical. If TRUE, aggregates polygons to smallbnd.domain or
 #' smallbnd.unique.
 #' @return \item{SAdomslst}{ List object. Set(s) of model domain units. If
@@ -171,7 +172,8 @@ spGetSAdoms <- function(smallbnd,
                         largebnd.addtext = FALSE, 
                         savedata_opts = NULL, 
                         addstate = FALSE, 
-                        dissolve = FALSE) {
+                        dissolve = FALSE,
+                        byeach = FALSE) {
   ##############################################################################
   ## DESCRIPTION
   ## Generates small area domains for input to Small Area Module (modSA*).
@@ -272,6 +274,18 @@ spGetSAdoms <- function(smallbnd,
   maxislarge <- FALSE
   #smallishelper <- FALSE
 
+  ## Check multiSAdoms
+  #############################################################################
+  multiSAdoms <- pcheck.logical(multiSAdoms, varnm="multiSAdoms", 
+		title="More than 1 SAdom?", first="YES", gui=gui) 
+
+  ## Check byeach
+  #############################################################################
+  byeach <- pcheck.logical(byeach, varnm="byeach", 
+		title="By each smallbnd poly?", first="YES", gui=gui) 
+  if (byeach && !multiSAdoms) {
+    multiSAdoms <- TRUE
+  }
 
   ## Check savedata
   #############################################################################
@@ -615,7 +629,7 @@ spGetSAdoms <- function(smallbnd,
 		      polyunion=polyunion, 
 		      showsteps=showsteps, savesteps=savesteps, 
 		      stepfolder=stepfolder, step_dsn=step_dsn, 
-		      out_fmt=step_fmt, multiSAdoms=multiSAdoms,
+		      out_fmt=step_fmt, multiSAdoms=multiSAdoms, byeach=byeach,
 		      maxbnd.threshold=maxbnd.threshold, largebnd.threshold=largebnd.threshold, 
 		      maxbnd.addtext=maxbnd.addtext, largebnd.addtext=largebnd.addtext, 
 		      overwrite=overwrite_layer)
@@ -657,16 +671,18 @@ spGetSAdoms <- function(smallbnd,
     ## Merge other attributes (smallbnd.domain) to SAdoms
     smallbndvars <- unique(c(smallbnd.domain, 
 		names(smallbndxlst[[i]])[!names(smallbndxlst[[i]]) %in% names(SAdomslst[[i]])]))
-    SAdomslst[[i]] <- merge(SAdomslst[[i]], 
+    if (length(smallbndvars) > 1) {
+      SAdomslst[[i]] <- merge(SAdomslst[[i]], 
 		sf::st_drop_geometry(smallbndxlst[[i]][, smallbndvars]), 
 		by.x="DOMAIN", by.y=smallbnd.domain, all.x=TRUE)
+    }
 
 #    SAdomslst[[i]] <- merge(SAdomslst[[i]], 
 #		sf::st_drop_geometry(smallbndx[, c(smallbnd.unique, smallbnd.domain)]), 
 #		by.x="DOMAIN", by.y=smallbnd.unique, all.x=TRUE)
 
     ## Join maxbndx and largebndx attributes (using largest overlap)
-    if (!maxislarge && !is.null(maxbndx) && !maxbnd.unique %in% names(SAdomslst[[i]])) {
+    if (maxislarge && !is.null(maxbndx) && !maxbnd.unique %in% names(SAdomslst[[i]])) {
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					maxbndx[, maxbnd.unique], largest=TRUE))
     }
