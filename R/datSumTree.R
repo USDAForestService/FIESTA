@@ -844,12 +844,6 @@ datSumTree <- function(tree = NULL,
       }
     } 
  
-    if (!is.null(fname)) {
-      newname <- paste0(tvar, "_", fname)
-    } else {
-      newname <- tvar
-    }
-
     ## MULTIPLY tvar BY TPA VARIABLE IF DESIRED
     if (TPA) {
       if (tvar %in% mortvars) {
@@ -862,7 +856,7 @@ datSumTree <- function(tree = NULL,
         #tpavar <- "TPAGROW_UNADJ"
         tpavar <- "TPA_UNADJ"
       } 
-      newname <- paste0(newname, "_TPA")
+      newname <- paste0(tvar, "_TPA")
       ## Adjust by adjTPA variable (Default is 1)
       if (adjTPA > 1) {
         treef[, (tpavar) := get(eval(tpavar)) * adjTPA]
@@ -886,6 +880,11 @@ datSumTree <- function(tree = NULL,
     } else {
       newname <- tvar
     }
+
+    ## Add filter name (e.g., live/dead) to newname
+    if (!is.null(fname)) {
+      newname <- paste0(tvar, "_", fname)
+    } 
 
     ## ADJUSTMENT FACTORS
     if (adjtree) {
