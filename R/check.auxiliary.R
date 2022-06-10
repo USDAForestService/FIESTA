@@ -298,8 +298,9 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     warning("minplotnum.unit should be at least 2")
     #minplotnum.unit <- 2
   }
-  if (minplotnum.strat > minplotnum.unit) minplotnum.strat <- minplotnum.unit
-
+  if (minplotnum.strat > minplotnum.unit) {
+    minplotnum.strat <- minplotnum.unit
+  }
   pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid,
 		unitlut=auxlut, unitvars=unitvar, strvars=strvar,
 		stopiferror=FALSE, showwarnings=TRUE, minplotnum.unit=minplotnum.unit,
@@ -340,8 +341,16 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       vars2combine <- unique(c(vars2combine, c(getwtvar, npixelvar, strwtvar)))
       vars2combine <- vars2combine[vars2combine %in% names(auxlut)]
     }
-    unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
 
+    if (minplotnum.strat > minplotnum.unit) {
+      minplotnum.strat <- minplotnum.unit
+    }
+    unitcombine <- ifelse(unit.action == 'combine', TRUE, FALSE)
+    if (!unitcombine && any(errtab$n.total < minplotnum.unit)) {
+      stop("there are units with less than minplotnum.unit (", 
+		minplotnum.unit, ") plots:\n", 
+		toString(errtab[[unitvar]][errtab$n.total <- minplotnum.unit]))      
+    }
     collapse <- strat.collapse(stratacnt=auxlut, 
                                pltstratx=pltx, 
                                minplotnum.unit=minplotnum.unit, 
