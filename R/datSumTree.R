@@ -453,7 +453,7 @@ datSumTree <- function(tree = NULL,
     ## Remove totally nonsampled plots
     if ("PLOT_STATUS_CD" %in% names(pltx)) {
       if (3 %in% unique(pltx[["PLOT_STATUS_CD"]])) {
-        warning(paste("There are", sum(pltx[["PLOT_STATUS_CD"]] == 3), "nonsampled plots"))
+        message(paste("there are", sum(pltx[["PLOT_STATUS_CD"]] == 3), "nonsampled plots"))
         pltx <- pltx[pltx[["PLOT_STATUS_CD"]] != 3,]
       }
     }
@@ -810,7 +810,8 @@ datSumTree <- function(tree = NULL,
   for (tvar in tsumvarlst) {
     if (!is.null(tfilter)) {
       ref <- ref_estvar[ref_estvar$ESTVAR %in% tvar, ] 
-      fname <- ref[grep(gsub(" ", "", tfilter), gsub(" ", "", ref$ESTFILTER)), "FILTERNM"][1]
+      ref <- ref[grep(gsub(" ", "", tfilter), gsub(" ", "", ref$ESTFILTER)), ]
+      fname <- ref[, "FILTERNM"][1]
       if (!is.na(fname)) {
         if (fname == "standing-dead") fname <- "dead"
       }
@@ -954,7 +955,7 @@ datSumTree <- function(tree = NULL,
  
   ######################################################################## 
   ######################################################################## 
-
+ 
   ## Merge to cond or plot
   ###################################
   if (bycond && !nocond) {
