@@ -6,18 +6,21 @@
 \alias{FIESTA}
 \title{FIESTA - Forest Inventory Estimation for Analysis}
 \description{
-This package will extract data from Forest Inventory and Analysis Oracle
-database.
+FIESTA is a research estimation tool for analysts that work with sample-based 
+inventory data from the U.S. Department of Agriculture, Forest Service, 
+Forest Inventory and Analysis (FIA) Program.
 }
 \details{
-The users are intended to be FIA analysts (for now) with personal access to
-the database. The package will extract plot, condition, tree, and seedling
-information from the NIMS database for public or regional variables with
-user-defined filters of plot and/or condition data. The Tree and Seedling
-table will include variables multiplied by trees per acre.
+FIESTA can generate FIA's traditional state-wide estimates while also accommodate: 
+unique population boundaries, different evaluation time periods, customized 
+stratification schemes, non-standard variance equations, integration of 
+multi-scale remotely-sensed data and other auxiliary information, and 
+interaction with other modeling and estimation tools from CRAN's library of 
+packages. 
 
-Most functions can be used independently with external FIA mapped-plot
-datasets, but check function descriptions to determine necessary variables.
+FIESTA contains a collection of functions that can query FIA databases, 
+summarize and compile plot and spatial data, and generate estimates with 
+associated sampling errors.
 }
 \references{
 Bechtold, William A.; Patterson, Paul L.; [Editors] 2005. The enhanced
@@ -29,11 +32,11 @@ R Development Core Team (2011). R: A language and environment for
 statistical computing. R Foundation for Statistical Computing, Vienna,
 Austria. ISBN 3-900051-07-0, URL http://www.R-project.org/.
 
-Woudenberg, S.W.; Conkling, B.L.; O'Connell, B.M.; LaPoint, E.B.; Turner,
-J.A.; Waddell, K.L.; Boyer, D.; Christensen, G.; Ridley, T. 2011. The Forest
-Inventory and Analysis Database: Database Description and Users Manual
-Version 5.1 for Phase 2. U.S. Department of Agriculture.
-(http://fia.fs.fed.us/library/database-documentation/current/ver5/FIADB_user%20manual_5-1_p2_10_2011.pdf)
+Burrill, E.A., Wilson, A.M., Turner, J.A., Pugh, S.A., Menlove, J.,
+Christiansen, G., Conkling, B.L., Winnie, D., 2018. Forest Inventory and
+Analysis Database [WWW Document].  St Paul MN US Dep. Agric. For. Serv.
+North. Res. Stn.  URL http://apps.fs.fed.us/fiadb-downloads/datamart.html
+(accessed 3.6.21).
 }
 \author{
 Tracey S. Frescino Maintainer: Tracey S. Frescino
