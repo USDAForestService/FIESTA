@@ -106,6 +106,7 @@
 #' @param savesteps Logical. If TRUE, save steps spatial intermediate layers
 #' and JPG images. All spatial layers are output as *.shp format in a separate
 #' folder (SAdoms_steps).
+#' @param saveobj Logical. If TRUE, save SAdomdat object to outfolder.
 #' @param maxbnd.addtext Logical. If TRUE, adds text to intermediate step plots
 #' for maxbnd displays.
 #' @param largebnd.addtext Logical. If TRUE, adds text to intermediate step
@@ -168,6 +169,7 @@ spGetSAdoms <- function(smallbnd,
                         showsteps = TRUE, 
                         savedata = FALSE, 
                         savesteps = FALSE, 
+                        saveobj = FALSE,
                         maxbnd.addtext = TRUE, 
                         largebnd.addtext = FALSE, 
                         savedata_opts = NULL, 
@@ -302,9 +304,14 @@ spGetSAdoms <- function(smallbnd,
   savesteps <- pcheck.logical(savesteps, varnm="savesteps", 
 		title="Save step data?", first="YES", gui=gui)  
 
+  ## Check saveobj
+  saveobj <- pcheck.logical(saveobj, varnm="saveobj",
+		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
+
+
   ## Check overwrite, outfn.date, outfolder, outfn 
   ########################################################
-  if (savedata || savesteps) {
+  if (savedata) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
             out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
             overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
@@ -316,13 +323,22 @@ spGetSAdoms <- function(smallbnd,
     append_layer <- outlst$append_layer
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
-    
-    if (savesteps) {
-      stepfolder <- file.path(outfolder, "SAdoms_steps")
-      if (!dir.exists(stepfolder)) dir.create(stepfolder)
-      step_dsn <- NULL
-      step_fmt <- "shp"
+
+  } else if (savesteps || saveobj) {
+    outfolder <- pcheck.outfolder(outfolder)
+    if (is.null(out_layer)) {
+      out_layer <- "SAdoms"
     }
+    if (!is.null(outfn.pre)) {
+      out_layer <- paste0(outfn.pre, "_", out_layer)
+    }
+  }
+    
+  if (savesteps) {
+    stepfolder <- file.path(outfolder, "SAdoms_steps")
+    if (!dir.exists(stepfolder)) dir.create(stepfolder)
+    step_dsn <- NULL
+    step_fmt <- "shp"
   }
 
   #############################################################################
@@ -765,6 +781,14 @@ spGetSAdoms <- function(smallbnd,
   #  SAdoms <- SAdomdat$SAdomlst[[1]]
   #  smallbnd <- SAdomdat$smallbndlst[[1]]
   #} 
+
+
+  if (saveobj) {
+    objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
+                      overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=TRUE)
+    saveRDS(returnlst, file=objfn)
+    message("saving object to: ", objfn)
+  }
 
   
   message("Number of model domains generated: ", length(SAdomslst), "\n") 
