@@ -433,6 +433,46 @@ GBpopdat.bhdist$stratalut
 </details>
 
 
+#### POP4: FIADB POPULATION - Get population data for area and tree estimates for Rhode Island, using post-stratification, with data stored in a SQLite database
+
+<details>
+  <summary>View Example</summary>
+  
+In this example, we use the sample Rhode Island data (441901 Evaluation) stored in a SQLite database as external data in `FIESTA`. Data were extracted from the FIA database on June 6, 2022. All output can be compared with output from other FIA tools.
+
+First, let's look at the SQLite database. Use the DBI package explore the contents.
+```{r, results = FALSE, message = F}
+
+SQLitefn <- system.file("extdata", "RIdat_eval2019.db", package="FIESTA")
+
+conn <- DBI::dbConnect(RSQLite::SQLite(), SQLitefn)
+DBI::dbListTables(conn)
+DBI::dbDisconnect(conn)
+
+```
+
+
+```{r, results = FALSE, message = F}
+
+GBpopdat.RI <- modGBpop(popTabs = list(plot="plot", cond="cond", tree="tree", seed="seed"),
+                  dsn = SQLitefn,
+                  pltassgn = "pop_plot_stratum_assgn",
+                  stratalut = "pop_stratum",
+                  unitarea = "pop_estn_unit",
+                  unitvar = "ESTN_UNIT",
+                  areavar = "AREA_USED",
+                  strata_opts = list(getwt=TRUE, getwtvar="P1POINTCNT")
+                  )
+names(GBpopdat.RI)
+
+# Strata-level population data, including number of plots and adjustment factors
+GBpopdat.RI$stratalut  
+
+```
+
+</details>
+
+
 <a name="modGBarea()"></a>
 
 ### modGBarea()
@@ -718,7 +758,6 @@ titlelst2.2
 
 
 
-
 #### POP3: 3.1 Area by forest type group and primary disturbance class, Bighorn National Forest Districts
 <details>
   <summary>View Example</summary>
@@ -780,6 +819,57 @@ titlelst3.1
 </details>
 
 
+#### POP4: 4.1 Area by forest type group and stand-size class, Rhode Island, 2019
+<details>
+  <summary>View Example</summary>
+
+Note: estimates should match other FIA tools.
+```{r}
+
+area4.1 <- modGBarea(
+    GBpopdat = GBpopdat.RI,        # pop - population calculations for Bighorn NF, post-stratification
+    landarea = "FOREST",           # est - forest land filter
+    sumunits = TRUE,               # est - sum estimation units to population
+    rowvar = "FORTYPGRPCD",        # est - row domain
+    colvar = "STDSZCD",            # est - column domain
+    returntitle = TRUE,            # out - return title information
+    table_opts = list(   
+      row.FIAname = TRUE,          # table - return FIA row names
+      col.FIAname = TRUE           # table - return FIA column names
+      )
+    )
+
+```
+
+To get the names of the list components associated with the output of our call of `modGBarea`, we run the following code:
+
+```{r, results = T}
+names(area4.1)
+```
+
+To easily access our estimate and percent sampling error of estimate we can just grab the `est` object from our ouputted list: 
+
+```{r, results = T}
+area4.1$est
+```
+
+We can also look at raw data and titles for estimate, as shown below. Note the change in titles.
+
+```{r, results = TRUE}
+## Raw data (list object) for estimate
+raw4.1 <- area4.1$raw      # extract raw data list object from output
+names(raw4.1)
+head(raw4.1$unit_grpest)  # estimates by row and group domains
+
+
+## Titles (list object) for estimate
+titlelst4.1 <- area4.1$titlelst
+names(titlelst4.1)
+titlelst4.1
+
+```
+
+</details>
 
 
 </details>
@@ -1393,6 +1483,47 @@ tree3.1$est
 ## Estimate and percent sampling error by district
 tree3.1$raw$unit_rowest
 
+
+```
+
+</details>
+
+
+#### POP4: 4.1 Net cubic-foot volume of live trees by forest type group and stand-size class, Rhode Island, 2019
+<details>
+  <summary>View Example</summary>
+
+We can also look at the number of live trees by species group and diameter class (DIACL2IN):
+
+```{r}
+
+## Net cubic-foot volume of live trees by forest type and stand-size class
+tree4.1 <- modGBtree(
+    GBpopdat = GBpopdat.RI,      # pop - population calculations
+    landarea = "FOREST",         # est - forest land filter
+    sumunits = TRUE,             # est - sum estimation units to population
+    estvar = "VOLCFNET",         # est - net cubic-foot volume estimate
+    estvar.filter = "STATUSCD == 1",    # est - live trees only
+    rowvar = "FORTYPCD",         # est - row domain
+    colvar = "STDSZCD",          # est - column domain
+    returntitle = TRUE,          # out - return title information
+    table_opts = table_options(
+      row.FIAname = TRUE,          # est - row domain names
+      col.FIAname = TRUE,          # est - column domain names
+      allin1 = TRUE                # out - return output with est(pse)
+      )
+    )
+
+```
+
+Outputs:
+
+```{r}
+## Look at output list
+names(tree4.1)
+
+## Estimate and percent sampling error of estimate
+head(tree4.1$est)
 
 ```
 
