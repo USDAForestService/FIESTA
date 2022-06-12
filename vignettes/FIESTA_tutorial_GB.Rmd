@@ -443,7 +443,7 @@ In this example, we use the sample Rhode Island data (441901 Evaluation) stored 
 First, let's look at the SQLite database. Use the DBI package explore the contents.
 ```{r, results = FALSE, message = F}
 
-SQLitefn <- system.file("extdata", "RIdat_eval2019.db", package="FIESTA")
+SQLitefn <- system.file("extdata", "FIA_data/RIdat_eval2019.db", package="FIESTA")
 
 conn <- DBI::dbConnect(RSQLite::SQLite(), SQLitefn)
 DBI::dbListTables(conn)
