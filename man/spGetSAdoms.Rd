@@ -32,6 +32,7 @@ spGetSAdoms(
   showsteps = TRUE,
   savedata = FALSE,
   savesteps = FALSE,
+  saveobj = FALSE,
   maxbnd.addtext = TRUE,
   largebnd.addtext = FALSE,
   savedata_opts = NULL,
@@ -135,6 +136,8 @@ are displayed.}
 \item{savesteps}{Logical. If TRUE, save steps spatial intermediate layers
 and JPG images. All spatial layers are output as *.shp format in a separate
 folder (SAdoms_steps).}
+
+\item{saveobj}{Logical. If TRUE, save SAdomdat object to outfolder.}
 
 \item{maxbnd.addtext}{Logical. If TRUE, adds text to intermediate step plots
 for maxbnd displays.}
