@@ -70,7 +70,12 @@ check.pltcnt <- function(pltx, puniqueid=NULL, unitlut, unitvars=NULL,
 
     ## combine total counts and strata counts
     setkeyv(unitlut, strunitvars)
-    unitlut <- merge(unitlut, pltcnt, by=strunitvars)
+    unitlut <- merge(unitlut, pltcnt, by=strunitvars, all.x=TRUE)
+    cols <- c("n.total", "n.strata")
+    cols <- cols[cols %in% names(unitlut)]
+    if (length(cols) > 0) {
+      unitlut <- DT_NAto0(unitlut, cols)
+    }
 
     ## Add number of plots by unit
     #pltstrcnt <- pltx[, n.strata := sum(NBRSTRATA, na.rm=TRUE), by=strunitvars]

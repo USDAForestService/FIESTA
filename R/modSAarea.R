@@ -725,6 +725,8 @@ modSAarea <- function(SApopdatlst = NULL,
       dunitareabind$DOMAIN <- dunitareabind[[dunitvar]]
       dunitareabind[[dunitvar]] <- NULL
     }
+
+    #dunitlut$DOMAIN[!dunitlut$DOMAIN %in% unique(tdomdattot$DOMAIN)]
  
     dunit_estlst <- 
 	tryCatch(

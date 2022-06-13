@@ -751,7 +751,6 @@ modGBpop <- function(popType = "VOL",
     vcondsppf <- adjfacdata$vcondsppx
     vcondstrf <- adjfacdata$vcondstrx
     setorderv(stratalut, c(unitvar, strvar))
-
   } else if (adj == "plot") {
     adjtree <- TRUE
     bycond <- FALSE
