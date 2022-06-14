@@ -494,6 +494,8 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Define empty lists
   estlst <- list()
   predselectlst <- list()
+  predselectlst.unit <- list()
+  predselectlst.area <- list()
   SAobjlst <- list()
   dunitareabind <- {}
   if (addSAdomsdf) {
