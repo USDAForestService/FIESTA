@@ -794,6 +794,7 @@ spGetSAdoms <- function(smallbnd,
   message("Number of model domains generated: ", length(SAdomslst), "\n") 
 
   returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
-		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain)
+		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain, 
+           largebnd.unique=largebnd.unique)
   return(returnlst)
 }

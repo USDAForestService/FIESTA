@@ -690,7 +690,11 @@ modSAarea <- function(SApopdatlst = NULL,
     } else {
       cdomdat$LARGEBND <- 1
       lunique <- "LARGEBND"
+      largebnd.unique <- "LARGEBND"
     }
+    cdomdat$LARGEBND <- 1
+    lunique <- "LARGEBND"
+
 
     ## get unique largebnd values
     largebnd.vals <- sort(unique(cdomdat[[lunique]]))
