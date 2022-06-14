@@ -44,8 +44,9 @@ dsn.  Vegetation species-level data with one record for each species
 
 \item{vsubpstr}{DF/DT, R object, comma-delimited file(*.csv), or layer in
 dsn. Vegetation species-structure data with one record for each species
-(P2VEG_SUBP_STRUCTURE).
-#' @param invsubp DF/DT, R object, comma-delimited file(*.csv), or layer in
+(P2VEG_SUBP_STRUCTURE).}
+
+\item{invsubp}{DF/DT, R object, comma-delimited file(*.csv), or layer in
 dsn. Invasive species data with one record for each species
 (INVASIVE_SUBPLOT_SPP).}
 
