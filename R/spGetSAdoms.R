@@ -107,6 +107,7 @@
 #' and JPG images. All spatial layers are output as *.shp format in a separate
 #' folder (SAdoms_steps).
 #' @param saveobj Logical. If TRUE, save SAdomdat object to outfolder.
+#' @param objnm String. Name of *.rds object.
 #' @param maxbnd.addtext Logical. If TRUE, adds text to intermediate step plots
 #' for maxbnd displays.
 #' @param largebnd.addtext Logical. If TRUE, adds text to intermediate step
@@ -170,6 +171,7 @@ spGetSAdoms <- function(smallbnd,
                         savedata = FALSE, 
                         savesteps = FALSE, 
                         saveobj = FALSE,
+                        objnm = "SAdomdat",
                         maxbnd.addtext = TRUE, 
                         largebnd.addtext = FALSE, 
                         savedata_opts = NULL, 
