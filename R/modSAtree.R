@@ -735,7 +735,10 @@ modSAtree <- function(SApopdatlst = NULL,
     } else {
       cdomdat$LARGEBND <- 1
       lunique <- "LARGEBND"
+      largebnd.unique <- "LARGEBND"
     }
+    cdomdat$LARGEBND <- 1
+    lunique <- "LARGEBND"
 
     ## get unique largebnd values
     largebnd.vals <- sort(unique(cdomdat[[lunique]]))
@@ -939,8 +942,12 @@ modSAtree <- function(SApopdatlst = NULL,
   estdf <- do.call(rbind, estlst)
   predselect.unitdf <- data.frame(DOMAIN=names(predselectlst.unit), 
 					do.call(rbind, predselectlst.unit))
+  setnames(predselect.unitdf, "DOMAIN", largebnd.unique)
+  predselect.unitdf[is.na(predselect.unitdf)] <- 0
   predselect.areadf <- data.frame(DOMAIN=names(predselectlst.area), 
 					do.call(rbind, predselectlst.area))
+  setnames(predselect.areadf, "DOMAIN", largebnd.unique)
+  predselect.areadf[is.na(predselect.areadf)] <- 0
 
 
   ## Merge SAdom attributes to estdf_row
@@ -969,8 +976,12 @@ modSAtree <- function(SApopdatlst = NULL,
     estdf_row <- do.call(rbind, estlst_row)
     predselect.unitdf_row <- data.frame(DOMAIN=names(predselectlst.unit_row), 
 			do.call(rbind, predselectlst.unit_row))
+    setnames(predselect.unitdf_row, "DOMAIN", largebnd.unique)
+    predselect.unitdf_row[is.na(predselect.unitdf_row)] <- 0
     predselect.areadf_row <- data.frame(DOMAIN=names(predselectlst.area_row), 
 			do.call(rbind, predselectlst.area_row))
+    setnames(predselect.areadf_row, "DOMAIN", largebnd.unique)
+    predselect.areadf_row[is.na(predselect.areadf_row)] <- 0
 
     ## Merge SAdom attributes to estdf_row
     if (addSAdomsdf && is.null(SAdomvars)) {
