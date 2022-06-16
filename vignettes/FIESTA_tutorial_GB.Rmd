@@ -40,7 +40,7 @@ knitr::knit_hooks$set(
 
 `FIESTA`'s Green-Book (GB) module calculates population estimates and their sampling errors based on Bechtold and Patterson's (2005), 'Green-Book' for FIA's nationally-consistent, systematic annual sample design, chapter 4 (Scott et al. 2005). FIA's sample design is based on 2 phases: the first phase uses remotely-sensed data to stratify the land area to increase precision of estimates; while the 2nd phase obtains photo and ground observations and measurements for a suite of information across a hexagonal grid, each approximately 6000 acres in size. The associated estimators and variance estimators are used for area and tree attribute totals with the assumption of a simple random, stratified design and double sampling for stratification. Adjustment factors are calculated by estimation unit and strata to account for nonsampled (nonresponse) conditions.   
 
-Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, `FIESTA` adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA's publicly-available online tool (EVALIDator - https://apps.fs.usda.gov/Evalidator/evalidator.jsp) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).
+Functions include non-ratio estimators for area and tree estimates by domain and ratio-of-means estimators for per-acre and per-tree estimates within domain. In addition, `FIESTA` adjusts for nonsampled conditions, supports post-stratification for reducing variance, and reports by estimation unit or a summed combination of estimation units. Output from the Green-Book module was tested and compared to output from FIA's publicly-available online tool ([EVALIDator](https://apps.fs.usda.gov/fiadb-api/evalidator)) for state-level population estimates and associated sampling errors generated from the FIA Database (FIADB).
 
 ## Objective of tutorial
 
@@ -72,7 +72,7 @@ WYtree      | WY tree-level data
 
 *Example Auxiliary data*
 
-Auxiliary data for state-level estimates, including plot-level estimation unit and stratum assignments; area by estimation unit; and pixel counts by strata class and estimation unit, were downloaded from FIADB at the same time, from the same FIA Evaluation (i.e., 561301), and stored as internal data objects in `FIESTA`. Estimates using auxiliary data from FIADB can be compared with EVALIDator estimates, using the 2013 evaluation (https://apps.fs.usda.gov/Evalidator/evalidator.jsp).
+Auxiliary data for state-level estimates, including plot-level estimation unit and stratum assignments; area by estimation unit; and pixel counts by strata class and estimation unit, were downloaded from FIADB at the same time, from the same FIA Evaluation (i.e., 561301), and stored as internal data objects in `FIESTA`. Estimates using auxiliary data from FIADB can be compared with EVALIDator estimates, using the 2013 evaluation (https://apps.fs.usda.gov/fiadb-api/evalidator).
 
 Auxiliary data for the custom boundaries are summarized from spatial layers stored as external objects in FIESTA, originating from the USDA Forest Service, Automated Lands Program (ALP; 2018) and from a 250m resolution, Moderate Resolution Imaging Spectroradiometer (MODIS), classified map, reclassified from 3 to 2 classes: 1:forest; 2:nonforest (Ruefenacht et al. 2008)
 
@@ -489,7 +489,7 @@ Parameters defined in the following examples are organized by category: populati
 
 Using the `modGBarea` function we generate estimates by estimation unit (i.e., ESTN_UNIT) and sum to population (i.e., WY). `FIESTA` then returns raw data for area of forest land, Wyoming, 2011-2013 (sum estimation units). Note that we set some options for our table output with the `table_opts` argument. For a full list of possible table options, you can run `help(table_options)`.
 
-The following estimates match output from Evalidator (https://apps.fs.usda.gov/Evalidator/evalidator.jsp) using the WY 2013 Evaluation. 
+The following estimates match output from [EVALIDator](https://apps.fs.usda.gov/fiadb-api/evalidator) using the WY 2013 Evaluation. 
 
 ```{r}
 area1.1 <- modGBarea(
