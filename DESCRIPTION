@@ -32,7 +32,7 @@ Depends:
 Imports:
     data.table,
     DBI,
-    FIESTAutils (>= 1.1.1),
+    FIESTAutils (>= 1.1.2),
     grDevices,
     graphics,
     methods,
