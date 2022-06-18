@@ -21,7 +21,7 @@ information."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/lib
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -92,6 +92,8 @@ information.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">DBgetStrata</span><span class="op">(</span>
   dat <span class="op">=</span> <span class="cn">NULL</span>,
   uniqueid <span class="op">=</span> <span class="st">"CN"</span>,
+  datsource <span class="op">=</span> <span class="st">"datamart"</span>,
+  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
   states <span class="op">=</span> <span class="cn">NULL</span>,
   evalid <span class="op">=</span> <span class="cn">NULL</span>,
   evalCur <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -113,6 +115,11 @@ The strata value is merged to this table and returned as a data frame. See
 details for necessary variables.</p></dd>
 <dt>uniqueid</dt>
 <dd><p>String. The unique plot identifier of dat (e.g., 'CN').</p></dd>
+<dt>datsource</dt>
+<dd><p>String. Source of data ('datamart', 'sqlite').</p></dd>
+<dt>data_dsn</dt>
+<dd><p>String. If datsource='sqlite', the name of SQLite database
+(*.sqlite).</p></dd>
 <dt>states</dt>
 <dd><p>String or numeric vector. Name(s) (e.g., 'Arizona','New
 Mexico') or code(s) (e.g., 4, 35) of states for strata if dat=NULL.</p></dd>

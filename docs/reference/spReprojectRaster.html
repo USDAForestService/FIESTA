@@ -18,7 +18,7 @@ geographic or projected coordinate system, with option to save new object."><!--
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -229,7 +229,7 @@ reprojecting. See spTransform help documentation for more details.</p>
 <span class="r-in"><span class="va">reprojected</span> <span class="op">&lt;-</span> <span class="fu">spReprojectRaster</span><span class="op">(</span>rastfn <span class="op">=</span> <span class="va">demfn</span>,</span>
 <span class="r-in">                                 crs.new <span class="op">=</span> <span class="st">"EPSG:32613"</span>,</span>
 <span class="r-in">                                 outfolder <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpki1psw/temp_libpath854d29de02fb/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
 <span class="r-in">                                 </span>
 <span class="r-in"><span class="co"># Plot new projection</span></span>
 <span class="r-in"><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html" class="external-link">raster</a></span><span class="op">(</span><span class="va">reprojected</span><span class="op">)</span><span class="op">)</span></span>

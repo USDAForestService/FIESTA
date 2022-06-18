@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -390,7 +390,7 @@ list includes we can use the <code>str</code> function:</p>
 output
 </summary><pre><code><span class="co">## List of 26</span>
 <span class="co">##  $ popType    : chr "VOL"</span>
-<span class="co">##  $ condx      :Classes 'data.table' and 'data.frame':    66 obs. of  16 variables:</span>
+<span class="co">##  $ condx      :Classes 'data.table' and 'data.frame':    66 obs. of  13 variables:</span>
 <span class="co">##   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span>
 <span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="co">##  $ pltcondx   :Classes 'data.table' and 'data.frame':    66 obs. of  40 variables:</span>
@@ -475,7 +475,7 @@ output
 <span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span>
 <span class="co">##  $ raw    :List of 9</span>
 <span class="co">##   ..$ unit_totest  :'data.frame':    1 obs. of  18 variables:</span>
-<span class="co">##   ..$ domdat       :'data.frame':    66 obs. of  18 variables:</span>
+<span class="co">##   ..$ domdat       :'data.frame':    66 obs. of  15 variables:</span>
 <span class="co">##   ..$ module       : chr "MA"</span>
 <span class="co">##   ..$ esttype      : chr "AREA"</span>
 <span class="co">##   ..$ MAmethod     : chr "greg"</span>
@@ -519,13 +519,13 @@ output
 </summary><pre><code><span class="co">## List of 4</span>
 <span class="co">##  $ est    :Classes 'data.table' and 'data.frame':    1 obs. of  3 variables:</span>
 <span class="co">##   ..$ ONEUNIT               : num 1</span>
-<span class="co">##   ..$ Estimate              : num 655332</span>
-<span class="co">##   ..$ Percent Sampling Error: num 9.47</span>
+<span class="co">##   ..$ Estimate              : num 667427</span>
+<span class="co">##   ..$ Percent Sampling Error: num 9.51</span>
 <span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span>
 <span class="co">##  $ raw    :List of 9</span>
 <span class="co">##   ..$ unit_totest  :'data.frame':    1 obs. of  18 variables:</span>
-<span class="co">##   ..$ domdat       :'data.frame':    66 obs. of  18 variables:</span>
+<span class="co">##   ..$ domdat       :'data.frame':    66 obs. of  15 variables:</span>
 <span class="co">##   ..$ module       : chr "MA"</span>
 <span class="co">##   ..$ esttype      : chr "AREA"</span>
 <span class="co">##   ..$ MAmethod     : chr "gregEN"</span>
@@ -541,8 +541,8 @@ output
 <code class="sourceCode R"><span class="va">area2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselectlst</span><span class="op">$</span><span class="va">totest</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##    ONEUNIT TOTAL           dem         slp    asp_cos     asp_sin     fornf2</span>
-<span class="co">## 1:       1     1 -9.984809e-05 0.004494213 0.03128844 -0.06490436 -0.4117666</span></code></pre>
+</summary><pre><code><span class="co">##    ONEUNIT TOTAL        dem         slp asp_cos asp_sin     fornf2</span>
+<span class="co">## 1:       1     1 -0.0001939 0.006879213       0       0 -0.2483718</span></code></pre>
 </details><p>Notably, we can see that <code>dem</code>, <code>slp</code>,
 <code>asp_cos</code>, and <code>asp_sin</code> were removed from the
 model.</p>
@@ -1000,11 +1000,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span class="co">##   ONEUNIT     nhat nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED        est</span>
-<span class="co">## 1       1 1170.147 29677.11     56         34   1112412  1112412 1301686384</span>
+<span class="co">## 1       1 1170.147 29677.11     56         34   1112412  1112412 1301686385</span>
 <span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span>
-<span class="co">## 1 3.672428e+16 191635798 0.1472212 14.72212 808065281 1795307487 926087122</span>
+<span class="co">## 1 3.672428e+16 191635798 0.1472212 14.72212 808065281 1795307488 926087123</span>
 <span class="co">##    CI95right   CI68left  CI68right</span>
-<span class="co">## 1 1677285646 1111112654 1492260114</span></code></pre>
+<span class="co">## 1 1677285647 1111112655 1492260115</span></code></pre>
 </details></details>
 </div>
 <div class="section level4">
@@ -1038,8 +1038,8 @@ output
 </summary><pre><code><span class="co">## List of 5</span>
 <span class="co">##  $ est     :Classes 'data.table' and 'data.frame':   1 obs. of  3 variables:</span>
 <span class="co">##   ..$ ONEUNIT               : num 1</span>
-<span class="co">##   ..$ Estimate              : num 1.32e+09</span>
-<span class="co">##   ..$ Percent Sampling Error: num 14.6</span>
+<span class="co">##   ..$ Estimate              : num 1.33e+09</span>
+<span class="co">##   ..$ Percent Sampling Error: num 14.5</span>
 <span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="co">##   ..- attr(*, "sorted")= chr "ONEUNIT"</span>
 <span class="co">##  $ titlelst:List of 10</span>
@@ -1055,7 +1055,7 @@ output
 <span class="co">##   ..$ title.unitsn : chr "cubic feet"</span>
 <span class="co">##  $ raw     :List of 13</span>
 <span class="co">##   ..$ unit_totest  :'data.frame':    1 obs. of  18 variables:</span>
-<span class="co">##   ..$ domdat       :'data.frame':    66 obs. of  18 variables:</span>
+<span class="co">##   ..$ domdat       :'data.frame':    66 obs. of  15 variables:</span>
 <span class="co">##   ..$ plotweights  :List of 1</span>
 <span class="co">##   ..$ estvar       : chr "VOLCFNET"</span>
 <span class="co">##   ..$ estvar.filter: chr "STATUSCD == 1"</span>
@@ -1077,7 +1077,7 @@ output
 output
 </summary><pre><code><span class="co">## $totest</span>
 <span class="co">##    ONEUNIT TOTAL       dem       slp asp_cos   asp_sin    fornf2</span>
-<span class="co">## 1:       1     1 0.7028952 -72.78314       0 -634.9512 -1425.629</span></code></pre>
+<span class="co">## 1:       1     1 0.6580097 -69.79084       0 -586.8275 -1327.176</span></code></pre>
 </details><p>Notably, we can see that [INSERT CORRECT PREDS] <code>dem</code>,
 <code>slp</code>, <code>asp_cos</code>, and <code>asp_sin</code> were
 removed from the model.</p>
@@ -1115,15 +1115,15 @@ output
 <span class="va">tree3</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##   Forest type    Estimate Percent Sampling Error</span>
-<span class="co">## 1         201  14128503.6                  69.62</span>
-<span class="co">## 2         265 189616779.4                  70.65</span>
-<span class="co">## 3         266 135785846.3                  65.68</span>
-<span class="co">## 4         268  50176218.6                  71.94</span>
-<span class="co">## 5         281 911979036.1                  19.59</span>
-<span class="co">## 6         901          --                     --</span>
-<span class="co">## 7         999          --                     --</span>
-<span class="co">## 8       Total  1301686384                  14.72</span></code></pre>
+</summary><pre><code><span class="co">##   Forest type     Estimate Percent Sampling Error</span>
+<span class="co">## 1         201   14128503.8                  69.62</span>
+<span class="co">## 2         265  189616779.5                  70.65</span>
+<span class="co">## 3         266  135785846.2                  65.68</span>
+<span class="co">## 4         268   50176218.7                  71.94</span>
+<span class="co">## 5         281  911979036.5                  19.59</span>
+<span class="co">## 6         901           --                     --</span>
+<span class="co">## 7         999           --                     --</span>
+<span class="co">## 8       Total 1301686384.8                  14.72</span></code></pre>
 </details><div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Raw data (list object) for estimate</span>
 <span class="va">raw3</span> <span class="op">&lt;-</span> <span class="va">tree3</span><span class="op">$</span><span class="va">raw</span>      <span class="co"># extract raw data list object from output</span>
@@ -1139,11 +1139,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span class="co">##   ONEUNIT     nhat nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED        est</span>
-<span class="co">## 1       1 1170.147 29677.11     56         34   1112412  1112412 1301686384</span>
+<span class="co">## 1       1 1170.147 29677.11     56         34   1112412  1112412 1301686385</span>
 <span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span>
-<span class="co">## 1 3.672428e+16 191635798 0.1472212 14.72212 808065281 1795307487 926087122</span>
+<span class="co">## 1 3.672428e+16 191635798 0.1472212 14.72212 808065281 1795307488 926087123</span>
 <span class="co">##    CI95right   CI68left  CI68right</span>
-<span class="co">## 1 1677285646 1111112654 1492260114</span></code></pre>
+<span class="co">## 1 1677285647 1111112655 1492260115</span></code></pre>
 </details><div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw3</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>        <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
@@ -1155,24 +1155,24 @@ output
 output
 </summary><pre><code><span class="co">##   ONEUNIT Forest type      nhat    nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS</span>
 <span class="co">## 1       1         201  12.70078    78.19439     56          2   1112412</span>
-<span class="co">## 2       1         265 170.45548 14503.95279     56          4   1112412</span>
-<span class="co">## 3       1         266 122.06431  6427.30074     56          5   1112412</span>
+<span class="co">## 2       1         265 170.45548 14503.95281     56          4   1112412</span>
+<span class="co">## 3       1         266 122.06431  6427.30073     56          5   1112412</span>
 <span class="co">## 4       1         268  45.10577  1052.94973     56          2   1112412</span>
-<span class="co">## 5       1         281 819.82103 25803.85564     56         23   1112412</span>
+<span class="co">## 5       1         281 819.82103 25803.85567     56         23   1112412</span>
 <span class="co">## 6       1         901   0.00000     0.00000     56          0   1112412</span>
 <span class="co">##   AREAUSED       est      est.var    est.se    est.cv      pse  CI99left</span>
-<span class="co">## 1  1112412  14128504 9.676252e+13   9836794 0.6962375 69.62375         0</span>
-<span class="co">## 2  1112412 189616779 1.794808e+16 133970442 0.7065326 70.65326         0</span>
+<span class="co">## 1  1112412  14128504 9.676253e+13   9836795 0.6962375 69.62375         0</span>
+<span class="co">## 2  1112412 189616780 1.794808e+16 133970443 0.7065326 70.65326         0</span>
 <span class="co">## 3  1112412 135785846 7.953536e+15  89182597 0.6567886 65.67886         0</span>
 <span class="co">## 4  1112412  50176219 1.302984e+15  36096876 0.7194021 71.94021         0</span>
-<span class="co">## 5  1112412 911979036 3.193127e+16 178693232 0.1959401 19.59401 451695772</span>
+<span class="co">## 5  1112412 911979037 3.193127e+16 178693232 0.1959401 19.59401 451695772</span>
 <span class="co">## 6  1112412         0 0.000000e+00         0       NaN      NaN         0</span>
 <span class="co">##    CI99right  CI95left  CI95right  CI68left  CI68right</span>
-<span class="co">## 1   39466407         0   33408266   4346226   23910781</span>
+<span class="co">## 1   39466407         0   33408267   4346226   23910782</span>
 <span class="co">## 2  534701771         0  452194022  56388817  322844742</span>
 <span class="co">## 3  365504992         0  310580524  47097510  224474183</span>
-<span class="co">## 4  143155610         0  120924796  14279395   86073042</span>
-<span class="co">## 5 1372262300 561746736 1262211336 734276143 1089681930</span>
+<span class="co">## 4  143155611         0  120924796  14279396   86073042</span>
+<span class="co">## 5 1372262301 561746737 1262211336 734276143 1089681930</span>
 <span class="co">## 6          0         0          0         0          0</span></code></pre>
 </details><div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw3</span><span class="op">$</span><span class="va">rowest</span><span class="op">)</span>        <span class="co"># estimates by row for population (i.e., WY)</span></code></pre></div>
@@ -1300,32 +1300,32 @@ output
 <details><summary>
 output
 </summary><pre><code><span class="co">##                         Forest type         Large diameter</span>
-<span class="co">## 1:                      Douglas-fir  10,588,987.9 ( 88.90)</span>
-<span class="co">## 2:                 Engelmann spruce 145,816,510.2 ( 80.87)</span>
-<span class="co">## 3: Engelmann spruce / subalpine fir 115,503,288.5 ( 76.91)</span>
-<span class="co">## 4:                    Subalpine fir  50,176,218.6 ( 71.94)</span>
-<span class="co">## 5:                   Lodgepole pine 472,090,874.0 ( 33.78)</span>
+<span class="co">## 1:                      Douglas-fir  10,588,988.0 ( 88.90)</span>
+<span class="co">## 2:                 Engelmann spruce 145,816,510.3 ( 80.87)</span>
+<span class="co">## 3: Engelmann spruce / subalpine fir 115,503,288.6 ( 76.91)</span>
+<span class="co">## 4:                    Subalpine fir  50,176,218.7 ( 71.94)</span>
+<span class="co">## 5:                   Lodgepole pine 472,090,874.5 ( 33.78)</span>
 <span class="co">## 6:                            Aspen            -- (    --)</span>
 <span class="co">## 7:                       Nonstocked            -- (    --)</span>
-<span class="co">## 8:                            Total 794,175,879.4 ( 23.26)</span>
+<span class="co">## 8:                            Total 794,175,880.1 ( 23.26)</span>
 <span class="co">##           Medium diameter        Small diameter  Nonstocked</span>
 <span class="co">## 1:            -- (    --)  3,539,515.7 ( 97.00) -- (    --)</span>
 <span class="co">## 2:  43,800,269.2 (166.87)           -- (    --) -- (    --)</span>
-<span class="co">## 3:  15,317,971.9 ( 71.15)  4,964,585.9 ( 74.24) -- (    --)</span>
+<span class="co">## 3:  15,317,971.8 ( 71.15)  4,964,585.8 ( 74.24) -- (    --)</span>
 <span class="co">## 4:            -- (    --)           -- (    --) -- (    --)</span>
-<span class="co">## 5: 434,307,202.1 ( 22.81)  5,580,959.9 ( 77.79) -- (    --)</span>
+<span class="co">## 5: 434,307,202.2 ( 22.81)  5,580,959.9 ( 77.79) -- (    --)</span>
 <span class="co">## 6:            -- (    --)           -- (    --) -- (    --)</span>
 <span class="co">## 7:            -- (    --)           -- (    --) -- (    --)</span>
-<span class="co">## 8: 493,425,443.2 ( 24.11) 14,085,061.4 ( 43.49) -- (    --)</span>
+<span class="co">## 8: 493,425,443.2 ( 24.11) 14,085,061.5 ( 43.49) -- (    --)</span>
 <span class="co">##                       Total</span>
-<span class="co">## 1:    14,128,503.6 ( 69.62)</span>
-<span class="co">## 2:   189,616,779.4 ( 70.65)</span>
-<span class="co">## 3:   135,785,846.3 ( 65.68)</span>
-<span class="co">## 4:    50,176,218.6 ( 71.94)</span>
-<span class="co">## 5:   911,979,036.1 ( 19.59)</span>
+<span class="co">## 1:    14,128,503.8 ( 69.62)</span>
+<span class="co">## 2:   189,616,779.5 ( 70.65)</span>
+<span class="co">## 3:   135,785,846.2 ( 65.68)</span>
+<span class="co">## 4:    50,176,218.7 ( 71.94)</span>
+<span class="co">## 5:   911,979,036.5 ( 19.59)</span>
 <span class="co">## 6:              -- (    --)</span>
 <span class="co">## 7:              -- (    --)</span>
-<span class="co">## 8: 1,301,686,384.0 ( 14.72)</span></code></pre>
+<span class="co">## 8: 1,301,686,384.8 ( 14.72)</span></code></pre>
 </details><div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Raw data (list object) for estimate</span>
 <span class="va">raw4</span> <span class="op">&lt;-</span> <span class="va">tree4</span><span class="op">$</span><span class="va">raw</span>      <span class="co"># extract raw data list object from output</span>
@@ -1341,11 +1341,11 @@ output
 <details><summary>
 output
 </summary><pre><code><span class="co">##   ONEUNIT     nhat nhat.var NBRPLT NBRPLT.gt0 ACRES_GIS AREAUSED        est</span>
-<span class="co">## 1       1 1170.147 29677.11     56         34   1112412  1112412 1301686384</span>
+<span class="co">## 1       1 1170.147 29677.11     56         34   1112412  1112412 1301686385</span>
 <span class="co">##        est.var    est.se    est.cv      pse  CI99left  CI99right  CI95left</span>
-<span class="co">## 1 3.672428e+16 191635798 0.1472212 14.72212 808065281 1795307487 926087122</span>
+<span class="co">## 1 3.672428e+16 191635798 0.1472212 14.72212 808065281 1795307488 926087123</span>
 <span class="co">##    CI95right   CI68left  CI68right</span>
-<span class="co">## 1 1677285646 1111112654 1492260114</span></code></pre>
+<span class="co">## 1 1677285647 1111112655 1492260115</span></code></pre>
 </details><div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">totest</span><span class="op">)</span>        <span class="co"># estimates for population (i.e., WY)</span></code></pre></div>
 <details><summary>
@@ -1357,27 +1357,27 @@ output
 output
 </summary><pre><code><span class="co">##   ONEUNIT                      Forest type      nhat    nhat.var NBRPLT</span>
 <span class="co">## 1       1                      Douglas-fir  12.70078    78.19439     56</span>
-<span class="co">## 2       1                 Engelmann spruce 170.45548 14503.95279     56</span>
-<span class="co">## 3       1 Engelmann spruce / subalpine fir 122.06431  6427.30074     56</span>
+<span class="co">## 2       1                 Engelmann spruce 170.45548 14503.95281     56</span>
+<span class="co">## 3       1 Engelmann spruce / subalpine fir 122.06431  6427.30073     56</span>
 <span class="co">## 4       1                    Subalpine fir  45.10577  1052.94973     56</span>
-<span class="co">## 5       1                   Lodgepole pine 819.82103 25803.85564     56</span>
+<span class="co">## 5       1                   Lodgepole pine 819.82103 25803.85567     56</span>
 <span class="co">## 6       1                            Aspen   0.00000     0.00000     56</span>
 <span class="co">##   NBRPLT.gt0 FORTYPCD ACRES_GIS AREAUSED       est      est.var    est.se</span>
-<span class="co">## 1          2      201   1112412  1112412  14128504 9.676252e+13   9836794</span>
-<span class="co">## 2          4      265   1112412  1112412 189616779 1.794808e+16 133970442</span>
+<span class="co">## 1          2      201   1112412  1112412  14128504 9.676253e+13   9836795</span>
+<span class="co">## 2          4      265   1112412  1112412 189616780 1.794808e+16 133970443</span>
 <span class="co">## 3          5      266   1112412  1112412 135785846 7.953536e+15  89182597</span>
 <span class="co">## 4          2      268   1112412  1112412  50176219 1.302984e+15  36096876</span>
-<span class="co">## 5         23      281   1112412  1112412 911979036 3.193127e+16 178693232</span>
+<span class="co">## 5         23      281   1112412  1112412 911979037 3.193127e+16 178693232</span>
 <span class="co">## 6          0      901   1112412  1112412         0 0.000000e+00         0</span>
 <span class="co">##      est.cv      pse  CI99left  CI99right  CI95left  CI95right  CI68left</span>
-<span class="co">## 1 0.6962375 69.62375         0   39466407         0   33408266   4346226</span>
+<span class="co">## 1 0.6962375 69.62375         0   39466407         0   33408267   4346226</span>
 <span class="co">## 2 0.7065326 70.65326         0  534701771         0  452194022  56388817</span>
 <span class="co">## 3 0.6567886 65.67886         0  365504992         0  310580524  47097510</span>
-<span class="co">## 4 0.7194021 71.94021         0  143155610         0  120924796  14279395</span>
-<span class="co">## 5 0.1959401 19.59401 451695772 1372262300 561746736 1262211336 734276143</span>
+<span class="co">## 4 0.7194021 71.94021         0  143155611         0  120924796  14279396</span>
+<span class="co">## 5 0.1959401 19.59401 451695772 1372262301 561746737 1262211336 734276143</span>
 <span class="co">## 6       NaN      NaN         0          0         0          0         0</span>
 <span class="co">##    CI68right</span>
-<span class="co">## 1   23910781</span>
+<span class="co">## 1   23910782</span>
 <span class="co">## 2  322844742</span>
 <span class="co">## 3  224474183</span>
 <span class="co">## 4   86073042</span>
@@ -1393,17 +1393,17 @@ output
 <details><summary>
 output
 </summary><pre><code><span class="co">##   ONEUNIT Stand-size class      nhat    nhat.var NBRPLT NBRPLT.gt0 STDSZCD</span>
-<span class="co">## 1       1   Large diameter 713.92220 27578.97718     56         18       1</span>
-<span class="co">## 2       1  Medium diameter 443.56343 11435.49631     56         14       2</span>
+<span class="co">## 1       1   Large diameter 713.92221 27578.97721     56         18       1</span>
+<span class="co">## 2       1  Medium diameter 443.56343 11435.49632     56         14       2</span>
 <span class="co">## 3       1   Small diameter  12.66173    30.31923     56          4       3</span>
 <span class="co">## 4       1       Nonstocked   0.00000     0.00000     56          0       5</span>
 <span class="co">##   ACRES_GIS AREAUSED       est      est.var    est.se    est.cv      pse</span>
-<span class="co">## 1   1112412  1112412 794175879 3.412792e+16 184737423 0.2326153 23.26153</span>
+<span class="co">## 1   1112412  1112412 794175880 3.412792e+16 184737423 0.2326153 23.26153</span>
 <span class="co">## 2   1112412  1112412 493425443 1.415098e+16 118957906 0.2410859 24.10859</span>
 <span class="co">## 3   1112412  1112412  14085061 3.751888e+13   6125265 0.4348767 43.48767</span>
 <span class="co">## 4   1112412  1112412         0 0.000000e+00         0       NaN      NaN</span>
 <span class="co">##    CI99left  CI99right  CI95left  CI95right  CI68left CI68right</span>
-<span class="co">## 1 318323812 1270027946 432097184 1156254575 610462293 977889466</span>
+<span class="co">## 1 318323813 1270027947 432097185 1156254576 610462294 977889467</span>
 <span class="co">## 2 187010182  799840704 260272231  726578655 375126815 611724071</span>
 <span class="co">## 3         0   29862700   2079762   26090361   7993743  20176380</span>
 <span class="co">## 4         0          0         0          0         0         0</span></code></pre>
@@ -1424,11 +1424,11 @@ output
 <span class="co">## 5       1  Engelmann spruce / subalpine fir#Large diameter 103.831361</span>
 <span class="co">## 6       1 Engelmann spruce / subalpine fir#Medium diameter  13.770048</span>
 <span class="co">##       nhat.var NBRPLT NBRPLT.gt0                      Forest type</span>
-<span class="co">## 1    71.616861     56          1                      Douglas-fir</span>
-<span class="co">## 2     9.526693     56          1                      Douglas-fir</span>
-<span class="co">## 3 11237.915551     56          3                 Engelmann spruce</span>
-<span class="co">## 4  4317.089797     56          1                 Engelmann spruce</span>
-<span class="co">## 5  6377.416002     56          3 Engelmann spruce / subalpine fir</span>
+<span class="co">## 1    71.616862     56          1                      Douglas-fir</span>
+<span class="co">## 2     9.526694     56          1                      Douglas-fir</span>
+<span class="co">## 3 11237.915562     56          3                 Engelmann spruce</span>
+<span class="co">## 4  4317.089804     56          1                 Engelmann spruce</span>
+<span class="co">## 5  6377.415995     56          3 Engelmann spruce / subalpine fir</span>
 <span class="co">## 6    95.989450     56          1 Engelmann spruce / subalpine fir</span>
 <span class="co">##   Stand-size class STDSZCD FORTYPCD ACRES_GIS AREAUSED       est      est.var</span>
 <span class="co">## 1   Large diameter       1      201   1112412  1112412  10588988 8.862309e+13</span>
@@ -1439,17 +1439,17 @@ output
 <span class="co">## 6  Medium diameter       2      266   1112412  1112412  15317972 1.187832e+14</span>
 <span class="co">##      est.se    est.cv       pse CI99left CI99right CI95left CI95right</span>
 <span class="co">## 1   9413984 0.8890353  88.90353        0  34837803        0  29040057</span>
-<span class="co">## 2   3433499 0.9700476  97.00476        0  12383622        0  10269050</span>
-<span class="co">## 3 117925760 0.8087271  80.87271        0 449573139        0 376946753</span>
-<span class="co">## 4  73090569 1.6687242 166.87242        0 232069099        0 187055152</span>
+<span class="co">## 2   3433499 0.9700476  97.00476        0  12383623        0  10269050</span>
+<span class="co">## 3 117925760 0.8087271  80.87271        0 449573140        0 376946753</span>
+<span class="co">## 4  73090569 1.6687242 166.87242        0 232069099        0 187055153</span>
 <span class="co">## 5  88835832 0.7691195  76.91195        0 344329229        0 289618321</span>
 <span class="co">## 6  10898772 0.7115023  71.15023        0  43391347        0  36679172</span>
 <span class="co">##     CI68left CI68right</span>
 <span class="co">## 1  1227177.6  19950798</span>
 <span class="co">## 2   125045.8   6953986</span>
-<span class="co">## 3 28544308.3 263088712</span>
+<span class="co">## 3 28544308.2 263088712</span>
 <span class="co">## 4        0.0 116485762</span>
-<span class="co">## 5 27159794.6 203846782</span>
+<span class="co">## 5 27159794.7 203846782</span>
 <span class="co">## 6  4479602.4  26156341</span></code></pre>
 </details><div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">raw4</span><span class="op">$</span><span class="va">grpest</span><span class="op">)</span>        <span class="co"># estimates by row and column for population (i.e., WY)</span></code></pre></div>

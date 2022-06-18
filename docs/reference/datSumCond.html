@@ -20,7 +20,7 @@ weighted sum."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/li
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -89,6 +89,8 @@ weighted sum.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">datSumCond</span><span class="op">(</span>
   cond <span class="op">=</span> <span class="cn">NULL</span>,
+  datsource <span class="op">=</span> <span class="st">"obj"</span>,
+  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
   plt <span class="op">=</span> <span class="cn">NULL</span>,
   plt_dsn <span class="op">=</span> <span class="cn">NULL</span>,
   cuniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
@@ -111,6 +113,11 @@ weighted sum.</p>
     <dl><dt>cond</dt>
 <dd><p>Data frame or comma-delimited file (*.csv). Condition-level
 table with aggregate variable and CONDPROP_UNADJ.</p></dd>
+<dt>datsource</dt>
+<dd><p>String. Source of data ('obj', 'csv', 'sqlite', 'gdb').</p></dd>
+<dt>data_dsn</dt>
+<dd><p>String. If datsource='sqlite', the name of SQLite database
+(*.sqlite).</p></dd>
 <dt>plt</dt>
 <dd><p>Data frame, comma-delimited file (*.csv), shapefile (*.shp), or
 database file. Plot-level table to join the aggregated tree data to (if

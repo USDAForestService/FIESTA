@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -451,9 +451,9 @@ list includes we can use the <code>str</code> function:</p>
 <details><summary>
 output
 </summary><pre><code><span class="co">## List of 24</span>
-<span class="co">##  $ smallbnd       : chr "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpki1psw/temp_libpath854d29de02fb/FIESTA/extdata/sp_"| __truncated__</span>
+<span class="co">##  $ smallbnd       : chr "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_"| __truncated__</span>
 <span class="co">##  $ smallbnd.domain: chr "DISTRICTNA"</span>
-<span class="co">##  $ condx          :'data.frame': 66 obs. of  16 variables:</span>
+<span class="co">##  $ condx          :'data.frame': 66 obs. of  13 variables:</span>
 <span class="co">##  $ pltcondx       :'data.frame': 66 obs. of  43 variables:</span>
 <span class="co">##  $ cuniqueid      : chr "PLT_CN"</span>
 <span class="co">##  $ condid         : chr "CONDID"</span>
@@ -540,14 +540,13 @@ output
 output
 </summary><pre><code><span class="co">## List of 12</span>
 <span class="co">##  $ dunit_totest   :'data.frame': 3 obs. of  18 variables:</span>
-<span class="co">##  $ domdat         :'data.frame': 66 obs. of  20 variables:</span>
+<span class="co">##  $ domdat         :'data.frame': 66 obs. of  17 variables:</span>
 <span class="co">##  $ module         : chr "SA"</span>
 <span class="co">##  $ esttype        : chr "AREA"</span>
 <span class="co">##  $ SApackage      : chr "JoSAE"</span>
 <span class="co">##  $ SAmethod       : chr "unit"</span>
 <span class="co">##  $ estnm          : chr "est"</span>
-<span class="co">##  $ predselect.unit:Classes 'data.table' and 'data.frame':    1 obs. of  7 variables:</span>
-<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
+<span class="co">##  $ predselect.unit:'data.frame': 1 obs. of  8 variables:</span>
 <span class="co">##  $ SAobjlst       :List of 1</span>
 <span class="co">##  $ estvar         : chr "AREA_ADJ"</span>
 <span class="co">##  $ areaunits      : chr "acres"</span>
@@ -724,8 +723,10 @@ output
 <code class="sourceCode R"><span class="va">area5</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselect.unit</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##    LARGEBND TOTAL         slp           dem    asp_cos     asp_sin     fornf2</span>
-<span class="co">## 1:        1     1 0.004745915 -0.0001050103 0.03462268 -0.06178897 -0.3936355</span></code></pre>
+</summary><pre><code><span class="co">##   LARGEBND LARGEBND TOTAL         slp           dem    asp_cos     asp_sin</span>
+<span class="co">## 1 SApopdat        1     1 0.004745915 -0.0001050103 0.03462268 -0.06178897</span>
+<span class="co">##       fornf2</span>
+<span class="co">## 1 -0.3936355</span></code></pre>
 </details></details>
 </div>
 </div>
@@ -774,7 +775,7 @@ output
 </summary><pre><code><span class="co">##                            DOMAIN  Estimate Percent Sampling Error</span>
 <span class="co">## 1: Medicine Wheel Ranger District 416183748                  24.30</span>
 <span class="co">## 2:   Powder River Ranger District 378634745                  36.45</span>
-<span class="co">## 3:         Tongue Ranger District 511295195                  24.79</span></code></pre>
+<span class="co">## 3:         Tongue Ranger District 511295196                  24.79</span></code></pre>
 </details><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tree1</span><span class="op">$</span><span class="va">multest</span></code></pre></div>
 <details><summary>
@@ -811,14 +812,14 @@ variable selection before fitting the model.</p>
 <code class="sourceCode R"><span class="va">tree2</span><span class="op">$</span><span class="va">raw</span><span class="op">$</span><span class="va">predselect.unit</span></code></pre></div>
 <details><summary>
 output
-</summary><pre><code><span class="co">##    LARGEBND TOTAL       slp       dem asp_cos   asp_sin    fornf2</span>
-<span class="co">## 1:        1     1 -75.98846 0.7412908       0 -685.1538 -1506.606</span></code></pre>
+</summary><pre><code><span class="co">##   LARGEBND LARGEBND TOTAL       slp       dem asp_cos   asp_sin    fornf2</span>
+<span class="co">## 1 SApopdat        1     1 -75.98846 0.7412908       0 -685.1538 -1506.606</span></code></pre>
 </details><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tree2</span><span class="op">$</span><span class="va">est</span></code></pre></div>
 <details><summary>
 output
 </summary><pre><code><span class="co">##                            DOMAIN  Estimate Percent Sampling Error</span>
-<span class="co">## 1: Medicine Wheel Ranger District 416320589                  24.12</span>
+<span class="co">## 1: Medicine Wheel Ranger District 416320590                  24.12</span>
 <span class="co">## 2:   Powder River Ranger District 377234199                  36.11</span>
 <span class="co">## 3:         Tongue Ranger District 512279660                  24.44</span></code></pre>
 </details></details>
@@ -850,7 +851,7 @@ example we chose basal area. We also returned titles by using
 output
 </summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
 <span class="co">## 1: Medicine Wheel Ranger District 22043124                  21.61</span>
-<span class="co">## 2:   Powder River Ranger District 18865169                  32.06</span>
+<span class="co">## 2:   Powder River Ranger District 18865170                  32.06</span>
 <span class="co">## 3:         Tongue Ranger District 29693976                  19.54</span></code></pre>
 </details><p>and see our title list since we set <code>returntitle</code> to
 <code>TRUE</code>.</p>
@@ -997,7 +998,7 @@ output
 output
 </summary><pre><code><span class="co">##                            DOMAIN Estimate Percent Sampling Error</span>
 <span class="co">## 1: Medicine Wheel Ranger District 22549224                  21.66</span>
-<span class="co">## 2:   Powder River Ranger District 17699100                  26.52</span>
+<span class="co">## 2:   Powder River Ranger District 17699101                  26.52</span>
 <span class="co">## 3:         Tongue Ranger District 30499650                  17.10</span></code></pre>
 </details></details>
 </div>

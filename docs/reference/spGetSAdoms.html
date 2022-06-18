@@ -23,7 +23,7 @@ area polygons, resulting in a set of model domains that can be used for SAE."><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -119,11 +119,14 @@ area polygons, resulting in a set of model domains that can be used for SAE.</p>
   showsteps <span class="op">=</span> <span class="cn">TRUE</span>,
   savedata <span class="op">=</span> <span class="cn">FALSE</span>,
   savesteps <span class="op">=</span> <span class="cn">FALSE</span>,
+  saveobj <span class="op">=</span> <span class="cn">FALSE</span>,
+  objnm <span class="op">=</span> <span class="st">"SAdomdat"</span>,
   maxbnd.addtext <span class="op">=</span> <span class="cn">TRUE</span>,
   largebnd.addtext <span class="op">=</span> <span class="cn">FALSE</span>,
   savedata_opts <span class="op">=</span> <span class="cn">NULL</span>,
   addstate <span class="op">=</span> <span class="cn">FALSE</span>,
-  dissolve <span class="op">=</span> <span class="cn">FALSE</span>
+  dissolve <span class="op">=</span> <span class="cn">FALSE</span>,
+  byeach <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -224,6 +227,10 @@ are displayed.</p></dd>
 <dd><p>Logical. If TRUE, save steps spatial intermediate layers
 and JPG images. All spatial layers are output as *.shp format in a separate
 folder (SAdoms_steps).</p></dd>
+<dt>saveobj</dt>
+<dd><p>Logical. If TRUE, save SAdomdat object to outfolder.</p></dd>
+<dt>objnm</dt>
+<dd><p>String. Name of *.rds object.</p></dd>
 <dt>maxbnd.addtext</dt>
 <dd><p>Logical. If TRUE, adds text to intermediate step plots
 for maxbnd displays.</p></dd>
@@ -238,6 +245,8 @@ of options. Only used when savedata = TRUE.</p></dd>
 <dt>dissolve</dt>
 <dd><p>Logical. If TRUE, aggregates polygons to smallbnd.domain or
 smallbnd.unique.</p></dd>
+<dt>byeach</dt>
+<dd><p>Logical. If TRUE, creates an SAdom for each smallbnd polygon.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>

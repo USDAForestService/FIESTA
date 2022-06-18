@@ -19,7 +19,7 @@ multiplying by TPA."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -89,6 +89,8 @@ multiplying by TPA.</p>
   tree <span class="op">=</span> <span class="cn">NULL</span>,
   seed <span class="op">=</span> <span class="cn">NULL</span>,
   cond <span class="op">=</span> <span class="cn">NULL</span>,
+  datsource <span class="op">=</span> <span class="st">"obj"</span>,
+  data_dsn <span class="op">=</span> <span class="cn">NULL</span>,
   plt <span class="op">=</span> <span class="cn">NULL</span>,
   plt_dsn <span class="op">=</span> <span class="cn">NULL</span>,
   tuniqueid <span class="op">=</span> <span class="st">"PLT_CN"</span>,
@@ -112,7 +114,7 @@ multiplying by TPA.</p>
   adjvar <span class="op">=</span> <span class="st">"tadjfac"</span>,
   adjTPA <span class="op">=</span> <span class="fl">1</span>,
   NAto0 <span class="op">=</span> <span class="cn">FALSE</span>,
-  tround <span class="op">=</span> <span class="fl">16</span>,
+  tround <span class="op">=</span> <span class="fl">5</span>,
   checkNA <span class="op">=</span> <span class="cn">FALSE</span>,
   returnDT <span class="op">=</span> <span class="cn">TRUE</span>,
   savedata <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -132,6 +134,11 @@ multiplying by TPA.</p>
 to join the aggregated tree data to, if bycond=TRUE. This table also may be
 used for condition proportion or strata variables used if adjcond or
 adjstrata = TRUE (See details below).  This table is optional.</p></dd>
+<dt>datsource</dt>
+<dd><p>String. Source of data ('obj', 'csv', 'sqlite', 'gdb').</p></dd>
+<dt>data_dsn</dt>
+<dd><p>String. If datsource='sqlite', the name of SQLite database
+(*.sqlite).</p></dd>
 <dt>plt</dt>
 <dd><p>Dataframe, comma-delimited file (*.csv), or shapefile (*.shp).
 Plot-level table to join the aggregated tree data to, if bycond=FALSE. This
