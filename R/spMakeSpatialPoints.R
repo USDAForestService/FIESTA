@@ -153,7 +153,9 @@ spMakeSpatialPoints <- function(xyplt,
     rowp <- ifelse(length(missCN) == 1, "row", "rows")
     message(paste("removing", length(missCN), rowp, "with", xy.uniqueid, "values = NA:", 
 		paste(missCN, collapse=", ")))
+    setDT(xypltx)
     xypltx <- xypltx[!list(NA,NA), on=c(x,y)]
+    xypltx <- as.data.frame(xypltx)
   }
 
   ## check xy.crs   

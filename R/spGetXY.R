@@ -472,7 +472,7 @@ spGetXY <- function(bnd,
           xy <- xytabs[grepl("PUBLIC", xytabs)]
           message("xy is NULL...  using ", xy)
         } else {
-          plot_layer <- findnm("plot", xytabs, returnNULL=TRUE)
+          plot_layer <- findnm("PLOT", xytabs, returnNULL=TRUE)
           if (!is.null(plot_layer) && length(plot_layer) == 1) {
             message("xy is NULL...  using ", plot_layer, " table")
             xy <- plot_layer
@@ -543,7 +543,7 @@ spGetXY <- function(bnd,
                                     xy.crs=xy.crs) 
       } else {
 
-        plot_layer <- findnm("plot", tablst, returnNULL=TRUE)
+        plot_layer <- findnm("PLOT", tablst, returnNULL=TRUE)
         if (!is.null(plot_layer) && length(plot_layer) == 1) {
           pltfields <- DBI::dbListFields(dbconn, plot_layer)
           pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
@@ -597,6 +597,13 @@ spGetXY <- function(bnd,
           spxy <- pcheck.spatial(xy, dsn=xy_dsn)
         }
       } 
+      
+      # Do intensity 1?
+      if (intensity1) {
+        if ("INTENSITY" %in% names(spxy)) {
+          spxy <- spxy[spxy$INTENSITY == 1, ]
+        }
+      }
 
       if (!is.null(dbconn)) {
         DBI::dbDisconnect(dbconn)
