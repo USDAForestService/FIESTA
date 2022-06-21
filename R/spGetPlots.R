@@ -65,6 +65,9 @@
 #' (http://apps.fs.usda.gov/fia/datamart/datamart.html). See details for more
 #' information about plot coordinates.  If datsource="csv", specify *.csv file
 #' names in *_layer arguments.
+#' @param datamart_filetype String. Only used if datsource = "datamart". If 
+#' datamart_filetype = "csv", extracts data from CSV section of datamart. If 
+#' datamart_filetype = "sqlite", extracts data from SQLite section of datamart.
 #' @param data_dsn String. Name of database where *_layers reside.
 #' @param istree Logical. If TRUE, extract tree data from FIA database.
 #' @param isseed Logical. If TRUE, extract seedling data from FIA database.
@@ -203,6 +206,7 @@ spGetPlots <- function(bnd = NULL,
                        pjoinid = NULL, 
                        clipxy = TRUE, 
                        datsource = NULL,
+                       datamart_filetype = "csv",
                        data_dsn =NULL, 
                        istree = FALSE, 
                        isseed = FALSE, 
@@ -813,294 +817,299 @@ spGetPlots <- function(bnd = NULL,
   }
  
   if (datsource == "datamart") {
-    for (i in 1:length(states)) { 
-      state <- states[i]
-      stcd <- pcheck.states(state, statereturn="VALUE")
-      stabbr <- pcheck.states(stcd, statereturn="ABBR") 
-      message(paste0("\n", state, "..."))
-
-      if (!is.null(evalid)) {
-        evalidst <- evalid[unique(as.numeric(substr(evalid, nchar(evalid)-6, 
-					nchar(evalid)-4))) == stcd]
-      }
-
-      ## Check for counties
-      if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
-        countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
-        stcnty <- countyfips[startsWith(countyfips, formatC(stcd, width=2, flag="0"))]
-        countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
-        stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
-      }
-      ## Get plot data
-      ###############################
-      if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
-        dat <- DBgetPlots(states=stcd, datsource="datamart", 
-                          stateFilter=stateFilter, allyrs=TRUE, 
-                          istree=istree, isseed=isseed, othertables=other_layers, 
-                          intensity1=intensity1, savePOP=savePOP)
-      } else {
-        dat <- DBgetPlots(states=stcd, datsource="datamart", 
-                          stateFilter=stateFilter, allyrs=allyrs, 
-                          evalid=evalid, evalCur=evalCur, 
-                          evalEndyr=evalEndyr, evalType=evalType, 
-                          measCur=measCur, measEndyr=measEndyr, 
-                          invyrs=invyrs, measyrs=measyrs, 
-                          istree=istree, isseed=isseed, othertables=other_layers, 
-                          intensity1=intensity1, savePOP=savePOP)
-      }
-
-      tabs <- dat$tabs
-      PLOT <- tabs$plt
-      cond <- tabs$cond
-      if (istree) 
-        tree <- tabs$tree
-      if (isseed)
-        seed <- tabs$seed
-      if (savePOP) {
-        pop_plot_stratum_assgn <- dat[[chkdbtab(names(dat), "POP_PLOT_STRATUM_ASSGN")]]
-      }
-      puniqueid <- "CN"
-
-      if (!is.null(other_layers)) {
-        for (layer in other_layers) {
-          assign(layer, dat[[chkdbtab(names(dat), layer)]])
+    if (datamart_filetype == "csv") {
+      for (i in 1:length(states)) { 
+        state <- states[i]
+        stcd <- pcheck.states(state, statereturn="VALUE")
+        stabbr <- pcheck.states(stcd, statereturn="ABBR") 
+        message(paste0("\n", state, "..."))
+  
+        if (!is.null(evalid)) {
+          evalidst <- evalid[unique(as.numeric(substr(evalid, nchar(evalid)-6, 
+  					nchar(evalid)-4))) == stcd]
         }
-      }
-
-      ## Check pjoinid
-      pltfields <- names(PLOT)
-      pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-		                  checklst=pltfields, gui=gui, caption="Joinid in plot?")  
-      if (is.null(pjoinid)) {
-        if (xyjoinid %in% pltfields) {
-          pjoinid  <- xyjoinid
+  
+        ## Check for counties
+        if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
+          countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
+          stcnty <- countyfips[startsWith(countyfips, formatC(stcd, width=2, flag="0"))]
+          countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
+          stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
+        }
+        ## Get plot data
+        ###############################
+        if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
+          dat <- DBgetPlots(states=stcd, datsource="datamart", 
+                            stateFilter=stateFilter, allyrs=TRUE, 
+                            istree=istree, isseed=isseed, othertables=other_layers, 
+                            intensity1=intensity1, savePOP=savePOP)
         } else {
-          if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
-            pjoinid <- "CN"
-          } else {
-            stop(xyjoinid, " not in plt")
-          }
+          dat <- DBgetPlots(states=stcd, datsource="datamart", 
+                            stateFilter=stateFilter, allyrs=allyrs, 
+                            evalid=evalid, evalCur=evalCur, 
+                            evalEndyr=evalEndyr, evalType=evalType, 
+                            measCur=measCur, measEndyr=measEndyr, 
+                            invyrs=invyrs, measyrs=measyrs, 
+                            istree=istree, isseed=isseed, othertables=other_layers, 
+                            intensity1=intensity1, savePOP=savePOP)
         }
-      }
-
-      ## Get most current plots in database for !measEndyr.filter
-      #######################################################
-      if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
-
-        ################################################
-        ## Subset FIA plot data to pltids1 
-        ################################################
-        if (nbrxy) {
- 
-          ## ## Query plots - measCur=TRUE and measEndyr
-          pfromqry <- getpfromqry(plotCur=TRUE, Endyr=measEndyr, syntax="R", plotnm="PLOT")
-          plt.qry <- paste0("select distinct p.* from ", pfromqry) 
-          PLOT1 <- setDT(sqldf::sqldf(plt.qry))
-
-          ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
-          if (nrow(PLOT1) > length(unique(PLOT1[[puniqueid]]))) {
-            if ("INVYR" %in% names(PLOT1)) {
-              setorder(PLOT1, -INVYR)
-            } else {
-              setorderv(PLOT1, -puniqueid)
-             }
-            PLOT1 <- PLOT1[, head(.SD, 1), by=pjoinid]
-          }
-
-          ## Subset plot data to pltids1 
-          plt1 <- PLOT1[PLOT1[[pjoinid]] %in% pltids1[[xyjoinid]], ]
-          pltids1 <- plt1[[puniqueid]]
-
-          cond1 <- cond[cond[["PLT_CN"]] %in% pltids1, ]
-          if (istree)
-            tree1 <- tree[tree[["PLT_CN"]] %in% pltids1, ]
-          if (isseed)
-            seed1 <- seed[seed[["PLT_CN"]] %in% pltids1, ]
-          if (savePOP) {
-            pop_plot_stratum_assgn1 <- 
-			pop_plot_stratum_assgn[pop_plot_stratum_assgn[["PLT_CN"]] %in% pltids1, ]
-          }
-          if (!is.null(other_layers)) {
-            for (layer in other_layers) {
-              if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(paste0(layer, "2"), 
-				get(layer)[get(layer)[["PLT_CN"]] %in% pltids1, ])
-              }
-            }
-          }
-        } else {
-          plt1=cond1 <- NULL
-          if (istree)
-            tree1 <- NULL
-          if (isseed)
-            seed1 <- NULL
-          if (savePOP) {
-            pop_plot_stratum_assgn1 <- NULL
-          }
-          if (!is.null(other_layers)) {
-            for (i in 1:length(other_layers)) {
-              layer <- other_layers[i]
-              if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(paste0(layer, "1"), NULL)
-              }
-            }
-          }
-        }
-
-
-        ################################################
-        ## Subset FIA plot data to pltids2 
-        ################################################
-        if (nrow(pltids2) > 0) {
-
-          ## ## Query plots - measCur=TRUE
-          pfromqry <- getpfromqry(plotCur=TRUE, syntax="R", plotnm="PLOT")
-          plt.qry <- paste0("select distinct p.* from ", pfromqry) 
-          PLOT2 <- setDT(sqldf::sqldf(plt.qry))
-
-          ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
-          if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
-            if ("INVYR" %in% names(PLOT2)) {
-              setorder(PLOT2, -INVYR)
-            } else {
-              setorderv(PLOT2, -puniqueid)
-            }
-            PLOT2 <- PLOT2[, head(.SD, 1), by=pjoinid]
-          } 
-        
-          ## Subset plot data to pltids2 
-          plt2 <- PLOT2[PLOT2[[pjoinid]] %in% pltids2[[xyjoinid]], ]
-          pltids2 <- plt2[[puniqueid]]
-
-          cond2 <- cond[cond[[cuniqueid]] %in% pltids2, ]
-          if (istree)
-            tree2 <- tree[tree[[tuniqueid]] %in% pltids2, ]
-          if (isseed)
-            seed2 <- seed[seed[[tuniqueid]] %in% pltids2, ]
-          if (savePOP) {
-            pop_plot_stratum_assgn2 <- 
-              pop_plot_stratum_assgn[pop_plot_stratum_assgn[[pltassgnid]] %in% pltids2, ]
-          }
-          if (!is.null(other_layers)) {
-            for (layer in other_layers) {
-              if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(paste0(layer, "2"), get(layer)[get(layer)[["PLT_CN"]] %in% pltids2, ])
-              }
-            }
-          }
-        } else {
-          plt2=cond2 <- NULL
-          if (istree)
-            tree2 <- NULL
-          if (isseed)
-            seed2 <- NULL
-          if (savePOP) {
-            pop_plot_stratum_assgn2 <- NULL
-          }
-          if (!is.null(other_layers)) {
-            for (i in 1:length(other_layers)) {
-              layer <- other_layers[i]
-              if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(paste0(layer, "2"), NULL)
-              }
-            }
-          }
-        }
-        plt <- rbind(plt1, plt2)
-        cond <- rbind(cond1, cond2)
-        if (istree)
-          tree <- rbind(tree1, tree2)
+  
+        tabs <- dat$tabs
+        PLOT <- tabs$plt
+        cond <- tabs$cond
+        if (istree) 
+          tree <- tabs$tree
         if (isseed)
-          seed <- rbind(seed1, seed2)
+          seed <- tabs$seed
         if (savePOP) {
-          pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
+          pop_plot_stratum_assgn <- dat[[chkdbtab(names(dat), "POP_PLOT_STRATUM_ASSGN")]]
+        }
+        puniqueid <- "CN"
+  
+        if (!is.null(other_layers)) {
+          for (layer in other_layers) {
+            assign(layer, dat[[chkdbtab(names(dat), layer)]])
+          }
+        }
+  
+        ## Check pjoinid
+        pltfields <- names(PLOT)
+        pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
+  		                  checklst=pltfields, gui=gui, caption="Joinid in plot?")  
+        if (is.null(pjoinid)) {
+          if (xyjoinid %in% pltfields) {
+            pjoinid  <- xyjoinid
+          } else {
+            if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
+              pjoinid <- "CN"
+            } else {
+              stop(xyjoinid, " not in plt")
+            }
+          }
+        }
+  
+        ## Get most current plots in database for !measEndyr.filter
+        #######################################################
+        if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
+  
+          ################################################
+          ## Subset FIA plot data to pltids1 
+          ################################################
+          if (nbrxy) {
+   
+            ## ## Query plots - measCur=TRUE and measEndyr
+            pfromqry <- getpfromqry(plotCur=TRUE, Endyr=measEndyr, syntax="R", plotnm="PLOT")
+            plt.qry <- paste0("select distinct p.* from ", pfromqry) 
+            PLOT1 <- setDT(sqldf::sqldf(plt.qry))
+  
+            ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
+            if (nrow(PLOT1) > length(unique(PLOT1[[puniqueid]]))) {
+              if ("INVYR" %in% names(PLOT1)) {
+                setorder(PLOT1, -INVYR)
+              } else {
+                setorderv(PLOT1, -puniqueid)
+               }
+              PLOT1 <- PLOT1[, head(.SD, 1), by=pjoinid]
+            }
+  
+            ## Subset plot data to pltids1 
+            plt1 <- PLOT1[PLOT1[[pjoinid]] %in% pltids1[[xyjoinid]], ]
+            pltids1 <- plt1[[puniqueid]]
+  
+            cond1 <- cond[cond[["PLT_CN"]] %in% pltids1, ]
+            if (istree)
+              tree1 <- tree[tree[["PLT_CN"]] %in% pltids1, ]
+            if (isseed)
+              seed1 <- seed[seed[["PLT_CN"]] %in% pltids1, ]
+            if (savePOP) {
+              pop_plot_stratum_assgn1 <- 
+  			pop_plot_stratum_assgn[pop_plot_stratum_assgn[["PLT_CN"]] %in% pltids1, ]
+            }
+            if (!is.null(other_layers)) {
+              for (layer in other_layers) {
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
+                  assign(paste0(layer, "2"), 
+  				get(layer)[get(layer)[["PLT_CN"]] %in% pltids1, ])
+                }
+              }
+            }
+          } else {
+            plt1=cond1 <- NULL
+            if (istree)
+              tree1 <- NULL
+            if (isseed)
+              seed1 <- NULL
+            if (savePOP) {
+              pop_plot_stratum_assgn1 <- NULL
+            }
+            if (!is.null(other_layers)) {
+              for (i in 1:length(other_layers)) {
+                layer <- other_layers[i]
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
+                  assign(paste0(layer, "1"), NULL)
+                }
+              }
+            }
+          }
+  
+  
+          ################################################
+          ## Subset FIA plot data to pltids2 
+          ################################################
+          if (nrow(pltids2) > 0) {
+  
+            ## ## Query plots - measCur=TRUE
+            pfromqry <- getpfromqry(plotCur=TRUE, syntax="R", plotnm="PLOT")
+            plt.qry <- paste0("select distinct p.* from ", pfromqry) 
+            PLOT2 <- setDT(sqldf::sqldf(plt.qry))
+  
+            ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
+            if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
+              if ("INVYR" %in% names(PLOT2)) {
+                setorder(PLOT2, -INVYR)
+              } else {
+                setorderv(PLOT2, -puniqueid)
+              }
+              PLOT2 <- PLOT2[, head(.SD, 1), by=pjoinid]
+            } 
+          
+            ## Subset plot data to pltids2 
+            plt2 <- PLOT2[PLOT2[[pjoinid]] %in% pltids2[[xyjoinid]], ]
+            pltids2 <- plt2[[puniqueid]]
+  
+            cond2 <- cond[cond[[cuniqueid]] %in% pltids2, ]
+            if (istree)
+              tree2 <- tree[tree[[tuniqueid]] %in% pltids2, ]
+            if (isseed)
+              seed2 <- seed[seed[[tuniqueid]] %in% pltids2, ]
+            if (savePOP) {
+              pop_plot_stratum_assgn2 <- 
+                pop_plot_stratum_assgn[pop_plot_stratum_assgn[[pltassgnid]] %in% pltids2, ]
+            }
+            if (!is.null(other_layers)) {
+              for (layer in other_layers) {
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
+                  assign(paste0(layer, "2"), get(layer)[get(layer)[["PLT_CN"]] %in% pltids2, ])
+                }
+              }
+            }
+          } else {
+            plt2=cond2 <- NULL
+            if (istree)
+              tree2 <- NULL
+            if (isseed)
+              seed2 <- NULL
+            if (savePOP) {
+              pop_plot_stratum_assgn2 <- NULL
+            }
+            if (!is.null(other_layers)) {
+              for (i in 1:length(other_layers)) {
+                layer <- other_layers[i]
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
+                  assign(paste0(layer, "2"), NULL)
+                }
+              }
+            }
+          }
+          plt <- rbind(plt1, plt2)
+          cond <- rbind(cond1, cond2)
+          if (istree)
+            tree <- rbind(tree1, tree2)
+          if (isseed)
+            seed <- rbind(seed1, seed2)
+          if (savePOP) {
+            pop_plot_stratum_assgn <- rbind(pop_plot_stratum_assgn1, pop_plot_stratum_assgn2)
+          }
+          if (!is.null(other_layers)) {
+            for (i in 1:length(other_layers)) {
+              layer <- other_layers[i]
+              if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
+                assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
+              }
+            }
+          }
+        } else {    ## measEndyr.filter = NULL
+  
+          if (!is.null(pltids) && !is.null(nrow(pltids)) && nrow(pltids) > 0) {
+            ## Subset data to pltids
+            plt <- PLOT[PLOT[[pjoinid]] %in% pltids[[xyjoinid]], ]
+            pltids1 <- plt[[puniqueid]]
+  
+            cond <- cond[cond[["PLT_CN"]] %in% pltids1, ]
+            if (istree)
+              tree <- tree[tree[["PLT_CN"]] %in% pltids1, ]
+            if (isseed)
+              seed <- seed[seed[["PLT_CN"]] %in% pltids1, ]
+            if (!is.null(other_layers)) {
+              for (layer in other_layers) {
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
+                  assign(layer, get(layer)[get(layer)[["PLT_CN"]] %in% pltids1, ])
+                }
+              }
+            }
+            ## Subset pop_plot_stratum_assgn data
+            if (savePOP) {
+              pop_plot_stratum_assgn <- 
+  			pop_plot_stratum_assgn[pop_plot_stratum_assgn[[pltassgnid]] %in% pltids1,]
+            }
+          } else {
+            plt=cond <- NULL
+            if (istree)
+              tree <- NULL
+            if (isseed)
+              seed <- NULL
+            if (savePOP) {
+              pop_plot_stratum_assgn2 <- NULL
+            }
+            if (!is.null(other_layers)) {
+              for (i in 1:length(other_layers)) {
+                layer <- other_layers[i]
+                if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
+                  assign(layer, NULL)
+                }
+              }
+            }
+          }
+        }  ## if measEndyr.filter is not NULL
+  
+        pltx <- rbind(pltx, plt)
+        condx <- rbind(condx, cond)
+  
+        if (istree)
+          treex <- rbind(treex, tree)
+        if (isseed)
+          seedx <- rbind(seedx, seed)
+        if (savePOP) {
+          pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, pop_plot_stratum_assgn)
         }
         if (!is.null(other_layers)) {
           for (i in 1:length(other_layers)) {
             layer <- other_layers[i]
-            if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-              assign(paste0(layer), rbind(paste0(layer, "1"), paste0(layer, "2")))
+            assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
+          }
+        }
+        if (showsteps && !is.null(spxy)) {
+          ## Retain par parameters
+          mar <-  par("mar")
+          on.exit(par(mar=mar))
+  
+          par(mar=c(1,1,1,1))
+  
+          if (i == 1) {
+            if (!is.null(bndx)) {
+              plot(sf::st_geometry(bndx), border="black", lwd=0.75)
+            } else {
+              plot(sf::st_geometry(spxy[spxy$STATECD == stcd,]), col="transparent", cex=.5)
             }
           }
+          plot(sf::st_geometry(spxy[spxy$STATECD == stcd,]), col="blue", cex=.5, add=TRUE)
+          #par(mar=mar)
         }
-      } else {    ## measEndyr.filter = NULL
-
-        if (!is.null(pltids) && !is.null(nrow(pltids)) && nrow(pltids) > 0) {
-          ## Subset data to pltids
-          plt <- PLOT[PLOT[[pjoinid]] %in% pltids[[xyjoinid]], ]
-          pltids1 <- plt[[puniqueid]]
-
-          cond <- cond[cond[["PLT_CN"]] %in% pltids1, ]
-          if (istree)
-            tree <- tree[tree[["PLT_CN"]] %in% pltids1, ]
-          if (isseed)
-            seed <- seed[seed[["PLT_CN"]] %in% pltids1, ]
-          if (!is.null(other_layers)) {
-            for (layer in other_layers) {
-              if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(layer, get(layer)[get(layer)[["PLT_CN"]] %in% pltids1, ])
-              }
-            }
-          }
-          ## Subset pop_plot_stratum_assgn data
-          if (savePOP) {
-            pop_plot_stratum_assgn <- 
-			pop_plot_stratum_assgn[pop_plot_stratum_assgn[[pltassgnid]] %in% pltids1,]
-          }
-        } else {
-          plt=cond <- NULL
-          if (istree)
-            tree <- NULL
-          if (isseed)
-            seed <- NULL
-          if (savePOP) {
-            pop_plot_stratum_assgn2 <- NULL
-          }
-          if (!is.null(other_layers)) {
-            for (i in 1:length(other_layers)) {
-              layer <- other_layers[i]
-              if (is.null(pcheck.varchar(layer, checklst=pop_tables, stopifinvalid=FALSE))) {
-                assign(layer, NULL)
-              }
-            }
-          }
-        }
-      }  ## if measEndyr.filter is not NULL
-
-      pltx <- rbind(pltx, plt)
-      condx <- rbind(condx, cond)
-
-      if (istree)
-        treex <- rbind(treex, tree)
-      if (isseed)
-        seedx <- rbind(seedx, seed)
-      if (savePOP) {
-        pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, pop_plot_stratum_assgn)
-      }
-      if (!is.null(other_layers)) {
-        for (i in 1:length(other_layers)) {
-          layer <- other_layers[i]
-          assign(paste0(layer, "x"), rbind(paste0(layer, "x"), layer))
-        }
-      }
-      if (showsteps && !is.null(spxy)) {
-        ## Retain par parameters
-        mar <-  par("mar")
-        on.exit(par(mar=mar))
-
-        par(mar=c(1,1,1,1))
-
-        if (i == 1) {
-          if (!is.null(bndx)) {
-            plot(sf::st_geometry(bndx), border="black", lwd=0.75)
-          } else {
-            plot(sf::st_geometry(spxy[spxy$STATECD == stcd,]), col="transparent", cex=.5)
-          }
-        }
-        plot(sf::st_geometry(spxy[spxy$STATECD == stcd,]), col="blue", cex=.5, add=TRUE)
-        #par(mar=mar)
-      }
-    }  ## End of looping thru states
+      }  ## End of looping thru states
+    }
+    if (datamart_filetype == "sqlite") {
+      return("datamart_filetype 'sqlite' not yet available.")
+    }
   }
  
 ############################################################
