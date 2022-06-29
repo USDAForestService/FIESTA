@@ -487,6 +487,8 @@ spGetXY <- function(bnd,
             stop(xy, " not in ", xy_dsn) 
           }
         } 
+      } else if (!is.character(xy)) {
+        stop("invalid xy")
       } else {
         if (!xy %in% tablst) {
           stop(xy, " not in database")
