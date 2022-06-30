@@ -128,7 +128,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 
     ## Check that the strunitvars in pltx are all in auxlut
     pltx <- check.matchval(tab1=pltx, tab2=auxlut, var1=c(unitvars, strvars),
-		tab1txt="plt", tab2txt=auxtext, stopifmiss=TRUE)
+		tab1txt="plt", tab2txt=auxtext, stopifmiss=FALSE, subsetrows=TRUE)
+
+    ## Check that the strunitvars in pltx are all in auxlut
+    pltx <- check.matchval(tab1=pltx, tab2=auxlut, var1=c(unitvars, strvars),
+		tab1txt="plt", tab2txt=auxtext, stopifmiss=FALSE)
+
 
     ## Check that the strunitvars in auxlut are all in pltx
     auxlut <- check.matchval(tab1=auxlut, tab2=pltx, var1=c(unitvars, strvars),

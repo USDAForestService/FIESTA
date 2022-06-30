@@ -1053,11 +1053,19 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
   ## Check for NA values in pvars2keep variables
   pvars.na <- sapply(pvars2keep, function(x, pltcondx){
-					sum(is.na(pltcondx[, x, with=FALSE])) }, pltcondx)
+					sum(is.na(pltcondx[, x, with=FALSE])) }, 
+					unique(pltcondx[, c(cuniqueid, pvars2keep), with=FALSE]))
   if (any(pvars.na > 0)) {
-    stop(paste(pvars.na[pvars.na > 0], "NA values in variable:",
-		paste(names(pvars.na[pvars.na > 0]), collapse=", ")))
+    message("NA values in variable: ", toString(names(pvars.na)))
+    message(paste0(utils::capture.output(pvars.na), collapse = "\n"))
+
+    na.rows <- unlist(sapply(pvars2keep, function(x, pltcondx){
+					which(is.na(pltcondx[, x, with=FALSE])) }, 
+					unique(pltcondx[, c(cuniqueid, pvars2keep), with=FALSE])))
+    message("removing ", length(na.rows), " plots with NA values") 
+    pltcondx <- pltcondx[-na.rows, ]
   }
+
 
   ###################################################################################
   ###################################################################################
