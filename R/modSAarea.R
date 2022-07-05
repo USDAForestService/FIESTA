@@ -566,7 +566,14 @@ modSAarea <- function(SApopdatlst = NULL,
       prednames <- SApopdat$prednames
     } else {
       if (!all(prednames %in% SApopdat$prednames)) {
-        stop("invalid prednames... must be in: ", toString(SApopdat$prednames))
+        if (any(prednames %in% SApopdat$predfac)) {
+          predfacnames <- prednames[prednames %in% SApopdat$predfac]
+          for (nm in predfacnames) {           
+            prednames[prednames == nm] <- SApopdat$prednames[grepl(nm, SApopdat$prednames)]
+          }
+        } else {
+          stop("invalid prednames... must be in: ", toString(SApopdat$prednames))
+        }
       }
     }
 

@@ -245,7 +245,7 @@ Now that we've created our population dataset, we can move on to estimation.
 First, we can set up our predictors as a vector:
 
 ```{r}
-all_preds <- c("slp", "dem", "asp_cos", "asp_sin", "fornf2")
+all_preds <- c("slp", "dem", "asp_cos", "asp_sin", "fornf")
 ```
 
 Next, we fit the unit-level EBLUP with the `JoSAE` R package. 

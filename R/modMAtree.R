@@ -445,10 +445,16 @@ modMAtree <- function(MApopdat,
     if (is.null(prednames)) {
       prednames <- MApopdat$prednames
     } else {
-      if (!all(prednames %in% MApopdat$prednames))
-        stop("invalid prednames: ", 
-			toString(prednames[!prednames %in% MApopdat$prednames]))
-      predfac <- predfac[predfac %in% prednames]
+      if (!all(prednames %in% MApopdat$prednames)) {
+        if (any(prednames %in% MApopdat$predfac)) {
+          predfacnames <- prednames[prednames %in% MApopdat$predfac]
+          for (nm in predfacnames) {           
+            prednames[prednames == nm] <- MApopdat$prednames[grepl(nm, MApopdat$prednames)]
+          }
+        } else {
+          stop("invalid prednames... must be in: ", toString(MApopdat$prednames))
+        }
+      }
     }
   } 
 
