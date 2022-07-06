@@ -167,7 +167,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
           mbndlst <- maxbnd_max[[maxbnd.unique]]
           sbndlst <- lapply(maxbnd_max[[smallbnd.unique]], 
 					function(x) smallbndx[smallbndx[[smallbnd.unique]] == x,])
-          names(sbndlst) <- mbndlst
+          names(sbndlst) <- maxbnd_max[[smallbnd.unique]]
 
         } else {
           mbndlst <- maxbnd.gtthres
