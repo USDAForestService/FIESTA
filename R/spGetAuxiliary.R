@@ -596,6 +596,7 @@ spGetAuxiliary <- function(xyplt,
                               rast.NODATA=rastlst.cont.NODATA, 
                               keepNA=keepNA, 
                               exportNA=exportNA, 
+                              ncores=ncores,
                               savedata_opts = list(outfolder=outfolder, 
                                       overwrite_layer=overwrite_layer)
                               )
