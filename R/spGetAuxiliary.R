@@ -283,6 +283,24 @@ spGetAuxiliary <- function(xyplt,
     }
   }
 
+  ## Check ncores
+  if (!is.null(ncores)) {
+    if (length(ncores) != 1) {
+      stop("ncores must be integer vector of length = 1")
+    } else if (!is.numeric(ncores)) {
+      stop("ncores must be integer vector of length = 1")
+    } else if (ncores > 1) {
+      require("parallel")
+      nbrcores <- parallel::detectCores()
+      if (ncores > nbrcores) {
+        message("ncores is greater than number of available cores")
+        message("using ", nbrcores, " ncores")
+        ncores <- nbrcores
+      }
+    }     
+  } else {
+    ncores <- 1
+  }
 
   ##################################################################################
   ## CHECK PARAMETER INPUTS
