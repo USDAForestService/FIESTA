@@ -303,7 +303,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     if (!is.null(vsubpstr) && is.character(vsubpstr) && vsubpstr %in% tablst) {
       if (!is.null(pfromqry)) {
         vsubpstr.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vsubpstr,
-				" vsubpspp ON (vsubpstr.PLT_CN = ", palias, ".", pjoinid, ")")
+				" vsubpstr ON (vsubpstr.PLT_CN = ", palias, ".", pjoinid, ")")
       } else {
         vsubpstr.fromqry <- paste(vsubpspp, "vsubpstr")
       }
@@ -317,7 +317,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     if (!is.null(subp_cond) && is.character(subp_cond) && subp_cond %in% tablst) {
       subpcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., subp_cond,
 				" subpc ON (subpc.PLT_CN = ", palias, ".", pjoinid, ")")
-      subp_condqry <- paste("select distinct subc.* from", subpcfromqry, whereqry)
+      subp_condqry <- paste("select distinct subpc.* from", subpcfromqry, whereqry)
     }
     if (!is.null(lulc) && is.character(lulc) && lulc %in% tablst) {
       lulcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., lulc,
@@ -366,7 +366,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 		tabqry=vsubpsppqry, returnsf=FALSE)
   vsubpstrx <- pcheck.table(vsubpstr, tab_dsn=dsn, tabnm="vsubpstr",
 		caption="Veg Structure table?", nullcheck=nullcheck, gui=gui,
-		tabqry=vsubpsppqry, returnsf=FALSE)
+		tabqry=vsubpstrqry, returnsf=FALSE)
   subplotx <- pcheck.table(subplot, tab_dsn=dsn, tabnm="subplot",
 		caption="subplot table?", nullcheck=nullcheck, tabqry=subplotqry,
 		returnsf=FALSE)
@@ -975,39 +975,25 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         RHGgrp[, strat := NULL]
         setnames(RHGgrp, "stratnew", "RHGtmp")
 
-
+        #################
         ## Create RHGgrp column based on specific criteria...
-        ## First, if the number of Nsampmeth = 2 and on of RHG <= nonresp.minplotnum, then RHGtmp = '1-2'
-        ## 1) If there were both field and office plots within a stratum and one of the 
+        ## First, if the number of Nsampmeth = 2 and one of RHG <= nonresp.minplotnum, then RHGtmp = '1-2'
+        ## 1) Within a stratum, if there were both field and office plots and one of the 
         ##    categories (field/office) had less than 5 plots, no RHG was created (A)
-        ## 2) If there is only one stratum in EU and only office or only field plots, no RHG was created (A)
-        ## 3/4) If there was only one strata in EU and both field and office plots within a stratum, 
-        ##    if field, RHG = F; if office, RHG = O
-        ## 5/6) If there was more than one strata in EU and both field and office plots within a stratum, 
-        ##    if field, RHG = F; if office, RHG = O
-        ## 7/8) If there was more than one strata in EU and only field or only office plots within a stratum, 
-        ##    and >= 5 plots: if field, RHG=F; if office, RHG = O
+        ## 2) Within a stratum, if there is only office or only field plots (i.e., Nsampmeth=1), 
+        ##    no RHG is created (A)
+        ## 3) Within a stratum, if there is both office and field plots (i.e., Nsampmeth=2), 
+        ##    and both have more than minimum number of plots, then if field, RHG = F; if office, RHG = O.
+        ## 4) Else, RHG = E.
 
-
-#        RHGgrp$RHG <- with(RHGgrp, 
-#		ifelse(RHGtmp == "1-2", "A",  ## 1
-#		   #ifelse(Nstrata == 1 & Nsampmeth == 1, "A",  ## 2   (added by paul)
-#			ifelse(Nsampmeth == 2 & RHGtmp == 1, "F",  ## 3
-#				ifelse(Nsampmeth == 2 & RHGtmp == 2, "O",  ## 4
-#							ifelse(Nsampmeth == 1 & RHGtmp == 1, "F",  ## 7
-#								ifelse(Nsampmeth == 1 & RHGtmp == 2, "O",  ## 8 
-#									"Z"))))))
 
         RHGgrp$RHG <- with(RHGgrp, 
 		ifelse(RHGtmp == "1-2", "A",  ## 1
-		   ifelse(Nstrata == 1 & Nsampmeth == 1, "A",  ## 2   (added by paul)
-			ifelse(Nstrata == 1 & Nsampmeth == 2 & RHGtmp == 1, "F",  ## 3
-				ifelse(Nstrata == 1 & Nsampmeth == 2 & RHGtmp == 2, "O",  ## 4
-					ifelse(Nstrata > 1 & Nsampmeth == 2 & RHGtmp == 1, "F",  ## 5 
-						ifelse(Nstrata > 1 & Nsampmeth == 2 & RHGtmp == 2, "O", ## 6
-							ifelse(Nstrata > 1 & Nsampmeth == 1 & RHGtmp == 1, "F",  ## 7
-								ifelse(Nstrata > 1 & Nsampmeth == 1 & RHGtmp == 2, "O",  ## 8 
-									"Z")))))))))
+		   ifelse(Nsampmeth == 1, "A",  ## 2   (added by paul)
+			ifelse(Nsampmeth == 2 & RHGtmp == 1, "F",  ## 3
+				ifelse(Nsampmeth == 2 & RHGtmp == 2, "O",  ## 3
+					"E")))))
+
 
         ## Sum n.resp to new strata groups
         RHGgrp <- RHGgrp[, lapply(.SD, sum, na.rm=TRUE), 
@@ -1503,7 +1489,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
 
     #############################################################################
-    ## Check veg profile data
+    ## Check veg profile data (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)
     #############################################################################
 
     if (!is.null(vsubpsppx) && nrow(vsubpsppx) > 0) {
@@ -1616,6 +1602,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   if ("P2VEG" %in% popType) {
     returnlst$pltassgnx <- pltassgnx.P2VEG
     returnlst$condx <- vcondx
+    returnlst$areawt <- "SUBP_CONDPROP_UNADJ"
     if (!is.null(vcondsppf)) {
       returnlst$vcondsppf <- vcondsppf
       returnlst$vcondsppid <- vsubpstrid

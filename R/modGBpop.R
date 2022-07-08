@@ -669,7 +669,7 @@ modGBpop <- function(popType = "VOL",
   if (popType == "P2VEG") {
     vcondsppf <- popcheck$vcondsppf
     vcondstrf <- popcheck$vcondstrf
-    areawt <- "SUBP_CONDPROP_UNADJ"
+    areawt <- popcheck$areawt
   }
 
   ###################################################################################
@@ -783,7 +783,8 @@ modGBpop <- function(popType = "VOL",
 	      unitvar=unitvar, unitvars=unitvars, 
 	      strata=strata, stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
 	      expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-	      states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+	      states=states, invyrs=invyrs, estvar.area=estvar.area, 
+            adj=adj, areawt=areawt))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
