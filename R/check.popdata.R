@@ -105,11 +105,13 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
   ## Check popType
   ########################################################
-  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "GRM")
+  #evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "GRM", "DWM")
+  DWM_types <- c("CWD", "FWD_SM", "FWD_LG", "DUFF")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
-		checklst=evalTyplst, caption="popType", multiple=TRUE, stopifnull=TRUE)
+		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
 
-  plt=cond=tree=seed=vsubpstr=vsubpspp=subplot=subp_cond=lulc <- NULL
+  plt=cond=tree=seed=vsubpstr=vsubpspp=subplot=subp_cond=lulc=whereqry.DWM <- NULL
   ## Get tables from tabs
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])
@@ -229,6 +231,19 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         pfromqry <- getpfromqry(evalid, dsn=dsn, ppsanm=ppsanm, ppsaid=pltassgnid)
       }
       whereqry <- paste0("where ppsa.EVALID in(", toString(evalid), ")")
+      if (popType == "DWM") {
+        if (any(substr(evalid, nchar(evalid)-1, nchar(evalid)) != "07")) {
+
+          evalid[substr(evalid, nchar(evalid)-1, nchar(evalid)) != "07"] <- 
+            sapply(evalid[substr(evalid, nchar(evalid)-1, nchar(evalid)) != "07"], 
+			function(x) 
+			  {x <- as.character(x)
+             	    substr(x, nchar(x)-1, nchar(x)) <- "07"
+             	    return(x)})
+        }
+        pfromqry.DWM <- ""
+        whereqry.DWM <- paste0("where EVALID in(", toString(evalid), ")")
+      }
       pltassgnqry <- paste("select distinct ppsa.* from", pfromqry, whereqry)
     } else if (measCur) {
       palias <- "p"
@@ -319,10 +334,16 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 				" subpc ON (subpc.PLT_CN = ", palias, ".", pjoinid, ")")
       subp_condqry <- paste("select distinct subpc.* from", subpcfromqry, whereqry)
     }
-    if (!is.null(lulc) && is.character(lulc) && lulc %in% tablst) {
+    if (popType == "LULC" &&
+		!is.null(lulc) && is.character(lulc) && lulc %in% tablst) {
       lulcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., lulc,
 				" ON (lulc.PLT_CN = ", palias, ".", pjoinid, ")")
       lulcqry <- paste("select distinct lulc.* from", lulcfromqry, whereqry)
+    }
+    if (popType == "DWM" && 
+      	!is.null(cond_dwm_calc) && is.character(cond_dwm_calc) && cond_dwm_calc %in% tablst) {
+      dwmfromqry <- paste0(SCHEMA., cond_dwm_calc)
+      dwmqry <- paste("select distinct * from", dwmfromqry, whereqry.DWM)
     }
 
     if (is.character(unitarea) && !is.null(chkdbtab(tablst, unitarea))) {
@@ -373,8 +394,14 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   subp_condx <- pcheck.table(subp_cond, tab_dsn=dsn, tabnm="subp_cond",
 		caption="subp_cond table?", nullcheck=nullcheck, tabqry=subp_condqry,
 		returnsf=FALSE)
-  lulcx <- pcheck.table(lulc, tab_dsn=dsn, tabnm="lulc", caption="lulc table?",
+  if (popType == "LULC") {
+    lulcx <- pcheck.table(lulc, tab_dsn=dsn, tabnm="lulc", caption="lulc table?",
 		nullcheck=nullcheck, tabqry=lulcqry, returnsf=FALSE)
+  }
+  if (popType == "DWM") {
+    cond_dwm_calcx <- pcheck.table(cond_dwm_calc, tab_dsn=dsn, tabnm="cond_dwm_calc", 
+		caption="lulc table?", nullcheck=nullcheck, tabqry=dwmqry, returnsf=FALSE)
+  }
  
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
@@ -415,7 +442,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 		checklst=names(pltassgnx), caption="UniqueID variable of plot",
 		warn=paste(pltassgnid, "not in pltassgn"), stopifnull=TRUE)
 
-      if (!is.null(evalid) && !is.null(chkdbtab(names(pltassgnx), "EVALID"))) {
+      if (!datindb && !is.null(evalid) && !is.null(chkdbtab(names(pltassgnx), "EVALID"))) {
         evalidnm <- chkdbtab(names(pltassgnx), "EVALID")
         evalid <- unlist(evalid)
         if (!all(evalid %in% unique(pltassgnx[[evalidnm]]))) {
@@ -1571,6 +1598,17 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     #vpltcondx <- merge(pltcondx, vsubpstrf, all.x=TRUE)
   }
 
+  if (popType == "DWM") {
+    areawtvars <- c("CONDPROP_CWD", "CONDPROP_FWD_SM", "CONDPROP_FWD_LG", 
+                          "CONDPROP_DUFF", "CONDPROP_PILE")
+    condxnames <- names(condx)[names(condx) != c(cuniqueid, condid)]
+    dwmcondx <- merge(condx, cond_dwm_calcx[, c(cuniqueid, condid, areawtvars), with=FALSE]) 
+    dwmcondx[, c(condxnames) := NULL]
+
+    cond_dwm_calcf <- cond_dwm_calcx[,
+		names(cond_dwm_calcx)[!grepl("_ADJ", names(cond_dwm_calcx))], with=FALSE]
+  }
+
   ## Subset pltcondx
   #cdoms2keep <- cdoms2keep[!cdoms2keep %in% c(pvars2keep, cvars2keep)]
   #pltcondx <- pltcondx[, unique(c(cuniqueid, condid, pdoms2keep, cdoms2keep)), with=FALSE]
@@ -1599,7 +1637,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 		tab2txt="cond", subsetrows=TRUE)
     returnlst$seedf <- seedf
   }
-  if ("P2VEG" %in% popType) {
+  if (popType == "P2VEG") {
     returnlst$pltassgnx <- pltassgnx.P2VEG
     returnlst$condx <- vcondx
     returnlst$areawt <- "SUBP_CONDPROP_UNADJ"
@@ -1612,6 +1650,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       returnlst$vcondstrid <- vsubpstrid
     }
   }
+  if (popType == "DWM") {
+    returnlst$condx <- dwmcondx
+    returnlst$cond_dwm_calcf <- cond_dwm_calcf
+    returnlst$areawt <- areawtvars
+  }
+    
   if (module %in% c("MA", "SA")) {
     returnlst$prednames <- prednames
     returnlst$predfac <- predfac

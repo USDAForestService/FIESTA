@@ -47,7 +47,8 @@
 popTables <- function(cond=NULL, plt=NULL, 
                       tree=NULL, seed=NULL, 
                       vsubpspp=NULL, vsubpstr=NULL, invsubp=NULL,
-                      subplot=NULL, subp_cond=NULL, lulc=NULL, ...) {
+                      subplot=NULL, subp_cond=NULL, lulc=NULL, 
+                      cond_dwm_calc=NULL, ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(popTables)))

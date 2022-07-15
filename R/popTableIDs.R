@@ -24,7 +24,8 @@
 
 popTableIDs <- function(cond="PLT_CN", plt="CN", tree="PLT_CN", seed="PLT_CN",
                         vsubpspp="PLT_CN", vsubpstr="PLT_CN", subplot="PLT_CN",
-                        subp_cond="PLT_CN", lulc="PLT_CN",...) {
+                        subp_cond="PLT_CN", lulc="PLT_CN", 
+                        cond_dwm_calc="PLT_CN", ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(popTableIDs)))

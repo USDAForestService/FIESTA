@@ -61,8 +61,8 @@
 #' For available reference tables: sort(unique(FIESTAutils::ref_codes$VARIABLE)) \cr
 #' 
 #' @param popType String. Type of evaluation(s) to include in population data.
-#' Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
-#' below for descriptions of each.
+#' Note: currently only c('CURR', 'VOL', 'LULC', 'DWM') 
+#' are available. See details below for descriptions of each.
 #' @param popTabs List of population tables the user would like returned.
 #'  See help(popTables) for a list of options.
 #' @param popTabIDs List of unique IDs corresponding to the population tables
@@ -297,7 +297,7 @@ modGBpop <- function(popType = "VOL",
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-    treef=seedf=vcondsppf=vcondstrf=bndx <- NULL
+    treef=seedf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx <- NULL
   condid <- "CONDID"
   
   
@@ -592,6 +592,9 @@ modGBpop <- function(popType = "VOL",
   if (popType == "P2VEG") {
     list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
   }
+  if (popType == "DWM") {
+    list.items <- c(list.items, "cond_dwm_calc")
+  }
 
   popTabs <- pcheck.object(popTabs, "popTabs", list.items=list.items)
 
@@ -671,6 +674,9 @@ modGBpop <- function(popType = "VOL",
     vcondstrf <- popcheck$vcondstrf
     areawt <- popcheck$areawt
   }
+  if (popType == "DWM") {
+    cond_dwm_calcf <- popcheck$cond_dwm_calcf
+  }
 
   ###################################################################################
   ## CHECK STRATA
@@ -736,6 +742,7 @@ modGBpop <- function(popType = "VOL",
                                  vcondsppx=vcondsppf, 
                                  vcondstrx=vcondstrf, 
                                  vuniqueid=vuniqueid, 
+                                 #cond_dwm_calcx=cond_dwm_calcf,
                                  unitlut=stratalut, 
                                  unitvars=unitvar, 
                                  strvars=strvar, 

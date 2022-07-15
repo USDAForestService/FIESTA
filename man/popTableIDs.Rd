@@ -14,6 +14,7 @@ popTableIDs(
   subplot = "PLT_CN",
   subp_cond = "PLT_CN",
   lulc = "PLT_CN",
+  cond_dwm_calc = "PLT_CN",
   ...
 )
 }

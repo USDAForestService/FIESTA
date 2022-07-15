@@ -15,6 +15,7 @@ popTables(
   subplot = NULL,
   subp_cond = NULL,
   lulc = NULL,
+  cond_dwm_calc = NULL,
   ...
 )
 }

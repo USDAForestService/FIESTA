@@ -38,8 +38,8 @@ modGBpop(
 }
 \arguments{
 \item{popType}{String. Type of evaluation(s) to include in population data.
-Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
-below for descriptions of each.}
+Note: currently only c('CURR', 'VOL', 'LULC', 'DWM') 
+are available. See details below for descriptions of each.}
 
 \item{popTabs}{List of population tables the user would like returned.
 See help(popTables) for a list of options.}
