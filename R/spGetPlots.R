@@ -372,6 +372,9 @@ spGetPlots <- function(bnd = NULL,
       }
       if (stbnd.att == "COUNTYFIPS") {
         countyfips <- sort(unique(pltids[[stbnd.att]]))
+        if (sum(is.na(suppressWarnings(as.numeric(countyfips)))) > 0) {
+          stop("invalid countyfips")
+        }
         countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
         stcds <- sort(unique(as.numeric(sapply(countyfips, 
 				substr, nchar(countyfips)-5, nchar(countyfips)-3))))
