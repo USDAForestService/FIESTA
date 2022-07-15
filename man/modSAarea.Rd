@@ -80,7 +80,7 @@ labels whether selected or not for both area- and unit-level models.}
 \item{multest}{Logical. If TRUE, returns a data frame of SA estimates using
 both unit-level and area-level estimates.}
 
-\item{addSAdomsdf}{Logical. If TRUE, sppends SAdomdf to unit.multest table
+\item{addSAdomsdf}{Logical. If TRUE, appends SAdomdf to unit.multest table
 for output.}
 
 \item{SAdomvars}{String vector. List of attributes from SAdoms to include in
