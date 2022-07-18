@@ -618,7 +618,7 @@ DBgetPlots <- function (states = NULL,
   ### GET PARAMETER INPUTS
   ########################################################################
   iseval <- FALSE
-  subsetPOP <- FALSE
+  subsetPOP <- TRUE
 
   ## Check invtype
   invtypelst <- c('ANNUAL', 'PERIODIC')
