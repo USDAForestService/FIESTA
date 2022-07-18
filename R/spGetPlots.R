@@ -1612,7 +1612,6 @@ spGetPlots <- function(bnd = NULL,
           }
         }
       } else {    ## measEndyr.filter = NULL
-
         if (nrow(pltids) > 0) {
           plt <- plt[plt[[pjoinid]] %in% pltids[[xyjoinid]], ]
           if (nrow(pltids) > nrow(plt)) {
@@ -1633,7 +1632,7 @@ spGetPlots <- function(bnd = NULL,
  
           if (nrow(cond) == 0) {
             message(cond.qry)
-            stop("invalid query for cond... \n")          
+            message("invalid query for ", state, "...\n")          
           }
           cond <- cond[cond[[cuniqueid]] %in% xyids, ]
           DBI::dbClearResult(rs)
