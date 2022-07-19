@@ -1320,7 +1320,7 @@ spGetPlots <- function(bnd = NULL,
           plt1 <- plt[plt[[pjoinid]] %in% pltids1[[xyjoinid]], ]
           xyids1 <- plt1[[puniqueid]]
           cond1.qry <- paste0("select cond.* from ", p2fromqry,
-			                        " join cond on(cond.PLT_CN = p.CN) where ", 
+			                        " join ", cond_layer, " cond on(cond.PLT_CN = p.CN) where ", 
 				                      "p.", puniqueid, " in(", addcommas(xyids1, quotes=TRUE), ")")
           rs <- DBI::dbSendQuery(dbconn, cond1.qry)
           cond1 <- suppressWarnings(DBI::dbFetch(rs))
@@ -1328,7 +1328,7 @@ spGetPlots <- function(bnd = NULL,
 
           if (istree) {
             tree1.qry <- paste0("select tree.* from ", p2fromqry,
-			                        " join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
+			                        " join ", tree_layer, " tree on(tree.PLT_CN = p.CN) where ", stfilter, 
 			                        " and p.", puniqueid, " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, tree1.qry)
             tree1 <- DBI::dbFetch(rs)
@@ -1336,8 +1336,7 @@ spGetPlots <- function(bnd = NULL,
           }
           if (isseed) {
             seed1.qry <- paste0("select seed.* from ", p2fromqry, 
-                                " join ", seed_layer, 
-                                " on(seed.PLT_CN = p.CN) where ", stfilter, 
+                                " join ", seed_layer, " seed on(seed.PLT_CN = p.CN) where ", stfilter, 
                                 " and p.", puniqueid, 
                                 " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, seed1.qry)
@@ -1346,8 +1345,7 @@ spGetPlots <- function(bnd = NULL,
           }
           if (isveg) {
             vsubpspp.qry <- paste0("select vsubpspp.* from ", p2fromqry, 
-                                " join ", vsubpspp_layer, 
-                                " on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
+                                " join ", vsubpspp_layer, " vsubpspp on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
                                 " and p.", puniqueid, 
                                 " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpspp.qry)
@@ -1355,8 +1353,7 @@ spGetPlots <- function(bnd = NULL,
             DBI::dbClearResult(rs)
             
             vsubpstr.qry <- paste0("select vsubpstr.* from ", p2fromqry, 
-                                   " join ", vsubpstr_layer, 
-                                   " on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
+                                   " join ", vsubpstr_layer, " vsubpstr on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpstr.qry)
@@ -1364,8 +1361,7 @@ spGetPlots <- function(bnd = NULL,
             DBI::dbClearResult(rs)
             
             invsubp.qry <- paste0("select invsubp.* from ", p2fromqry, 
-                                   " join ", invsubp_layer, 
-                                   " on(invsubp.PLT_CN = p.CN) where ", stfilter, 
+                                   " join ", invsubp_layer, " invsubp on(invsubp.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids1, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, invsubp.qry)
@@ -1480,35 +1476,33 @@ spGetPlots <- function(bnd = NULL,
           xyids2 <- plt2[[puniqueid]]
 
           cond2.qry <- paste0("select cond.* from ", p2fromqry,
-			                          " join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
-				                        " and p.", puniqueid, " in(", addcommas(xyids2, quotes=TRUE), ")")
+			                  " join ", cond_layer, " cond on(cond.PLT_CN = p.CN) where ", stfilter, 
+				             " and p.", puniqueid, " in(", addcommas(xyids2, quotes=TRUE), ")")
           rs <- DBI::dbSendQuery(dbconn, cond2.qry)
           cond2 <- suppressWarnings(DBI::dbFetch(rs))
           DBI::dbClearResult(rs)
 
           if (istree) {
             tree2.qry <- paste0("select tree.* from ", p2fromqry, 
-                                " join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
-                                " and p.", puniqueid, 
-                                " in(", addcommas(xyids2, quotes=TRUE), ")")
+                                  " join ", tree_layer, " tree on(tree.PLT_CN = p.CN) where ", stfilter, 
+                                  " and p.", puniqueid, 
+                                  " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, tree2.qry)
             tree2 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
           }
           if (isseed) {
             seed2.qry <- paste0("select seed.* from ", p2fromqry, 
-                                " join ", seed_layer, 
-                                " on(seed.PLT_CN = p.CN) where ", stfilter, 
-                                " and p.", puniqueid, 
-                                " in(", addcommas(xyids2, quotes=TRUE), ")")
+                                  " join ", seed_layer, " seed on(seed.PLT_CN = p.CN) where ", stfilter, 
+                                  " and p.", puniqueid, 
+                                  " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, seed2.qry)
             seed2 <- DBI::dbFetch(rs)
             DBI::dbClearResult(rs)
           }
           if (isveg) {
             vsubpspp2.qry <- paste0("select vsubpspp.* from ", p2fromqry, 
-                                   " join ", vsubpspp_layer, 
-                                   " on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
+                                   " join ", vsubpspp_layer, " vsubpspp on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpspp2.qry)
@@ -1516,8 +1510,7 @@ spGetPlots <- function(bnd = NULL,
             DBI::dbClearResult(rs)
             
             vsubpstr2.qry <- paste0("select vsubpstr.* from ", p2fromqry, 
-                                   " join ", vsubpstr_layer, 
-                                   " on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
+                                   " join ", vsubpstr_layer, " vsubpstr on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpstr2.qry)
@@ -1525,8 +1518,7 @@ spGetPlots <- function(bnd = NULL,
             DBI::dbClearResult(rs)
             
             invsubp2.qry <- paste0("select invsubp.* from ", p2fromqry, 
-                                  " join ", invsubp_layer, 
-                                  " on(invsubp.PLT_CN = p.CN) where ", stfilter, 
+                                  " join ", invsubp_layer, " invsubp on(invsubp.PLT_CN = p.CN) where ", stfilter, 
                                   " and p.", puniqueid, 
                                   " in(", addcommas(xyids2, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, invsubp2.qry)
@@ -1620,11 +1612,11 @@ spGetPlots <- function(bnd = NULL,
           xyids <- plt[[puniqueid]]
 
 #          cond.qry <- paste0("select distinct cond.* from ", p2fromqry, 
-#                             " join cond on(cond.PLT_CN = p.CN) where ", stfilter, 
+#                             " join ", cond_layer, " cond on(cond.PLT_CN = p.CN) where ", stfilter, 
 #                             " and p.", puniqueid, 
 #                             " in(", addcommas(xyids, quotes=TRUE), ")")
           cond.qry <- paste0("select distinct cond.* from ", p2fromqry, 
-                             " join cond on(cond.", 
+                             " join ", cond_layer, " cond on(cond.", 
 							               cuniqueid, " = p.", 
 							               puniqueid, ") where ", stfilter) 
           rs <- DBI::dbSendQuery(dbconn, cond.qry)
@@ -1639,12 +1631,12 @@ spGetPlots <- function(bnd = NULL,
 
           if (istree) {
 #            tree.qry <- paste0("select distinct tree.* from ", p2fromqry, 
-#                               " join tree on(tree.PLT_CN = p.CN) where ", stfilter, 
+#                               " join ", tree_layer, " tree on(tree.PLT_CN = p.CN) where ", stfilter, 
 #                               " and p.", puniqueid, 
 #                               " in(", addcommas(xyids, quotes=TRUE), ")")
 
             tree.qry <- paste0("select distinct tree.* from ", p2fromqry, 
-                               " join tree on(tree.",
+                               " join ", tree_layer, " tree on(tree.",
 							tuniqueid, " = p.", 
 							puniqueid, ") where ", stfilter)
             rs <- DBI::dbSendQuery(dbconn, tree.qry)
@@ -1655,8 +1647,7 @@ spGetPlots <- function(bnd = NULL,
 
           if (isseed) {
             seed.qry <- paste0("select distinct seed.* from ", p2fromqry, 
-                               " join ", seed_layer, " seed",  
-                               " on(seed.PLT_CN = p.CN) where ", stfilter, 
+                               " join ", seed_layer, " seed on(seed.PLT_CN = p.CN) where ", stfilter, 
                                " and p.", puniqueid, 
                                " in(", addcommas(xyids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, seed.qry)
@@ -1665,8 +1656,7 @@ spGetPlots <- function(bnd = NULL,
           }
           if (isveg) {
             vsubpspp.qry <- paste0("select distinct vsubpspp.* from ", p2fromqry, 
-                                   " join ", vsubpspp_layer, 
-                                   " on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
+                                   " join ", vsubpspp_layer, " vsubpspp on(vsubpspp.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpspp.qry)
@@ -1674,8 +1664,7 @@ spGetPlots <- function(bnd = NULL,
             DBI::dbClearResult(rs)
             
             vsubpstr.qry <- paste0("select distinct vsubpstr.* from ", p2fromqry, 
-                                   " join ", vsubpstr_layer, 
-                                   " on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
+                                   " join ", vsubpstr_layer, " vsubpstr on(vsubpstr.PLT_CN = p.CN) where ", stfilter, 
                                    " and p.", puniqueid, 
                                    " in(", addcommas(xyids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, vsubpstr.qry)
@@ -1683,8 +1672,7 @@ spGetPlots <- function(bnd = NULL,
             DBI::dbClearResult(rs)
             
             invsubp.qry <- paste0("select distinct invsubp.* from ", p2fromqry, 
-                                  " join ", invsubp_layer, 
-                                  " on(invsubp.PLT_CN = p.CN) where ", stfilter, 
+                                  " join ", invsubp_layer, " invsubp on(invsubp.PLT_CN = p.CN) where ", stfilter, 
                                   " and p.", puniqueid, 
                                   " in(", addcommas(xyids, quotes=TRUE), ")")
             rs <- DBI::dbSendQuery(dbconn, invsubp.qry)

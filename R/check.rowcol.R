@@ -484,7 +484,7 @@ check.rowcol <- function(gui, esttype, treef=NULL, seedf=NULL, condf,
     if (is.null(title.colvar)) {
       title.colvar <- ifelse (colvar %in% ref_titles[["DOMVARNM"]],
 		ref_titles[ref_titles[["DOMVARNM"]] == colvar, "DOMTITLE"],
-		ifelse (sub("PREV_", "", rowvar) %in% ref_titles[["DOMVARNM"]],
+		ifelse (sub("PREV_", "", colvar) %in% ref_titles[["DOMVARNM"]],
 		paste0("Previous ", tolower(ref_titles[ref_titles[["DOMVARNM"]] ==
 			sub("PREV_", "", colvar), "DOMTITLE"])), colvar))
     }
