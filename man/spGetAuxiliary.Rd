@@ -25,6 +25,7 @@ spGetAuxiliary(
   rast.asp = NULL,
   rast.lut = NULL,
   rastlut = NULL,
+  extract = TRUE,
   areacalc = TRUE,
   areaunits = "ACRES",
   keepNA = TRUE,
@@ -112,6 +113,10 @@ one raster is allowed.}
 
 \item{rastlut}{String or raster object. The raster look up table used for
 collapsing rast.lut values.}
+
+\item{extract}{Logical. If TRUE, extracts values from rastlst.cont and 
+rastlst.cat along with values from unit_layer. If FALSE, extracts only 
+values from unit_layer.}
 
 \item{areacalc}{Logical. If TRUE, returns area by domvar.}
 
