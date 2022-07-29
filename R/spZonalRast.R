@@ -255,6 +255,12 @@ spZonalRast <- function(polyv,
 			stopifnotin=TRUE)
   dtype <- rasterInfo(rastfn)$datatype
   NODATAval <- rasterInfo(rastfn)$nodata_value
+  if (is.null(rast.NODATA) || is.na(rast.NODATA)) {
+    rast.NODATA <- NODATAval
+  }
+  if (is.na(rast.NODATA)) {
+    rast.NODATA <- NULL
+  }
 
   zonalext <- data.table(unique(spobjprj[[polyv.att]])) 
   setnames(zonalext, polyv.att) 
@@ -344,16 +350,11 @@ spZonalRast <- function(polyv,
       zonalext <- zonalext[zstats] 
       outnames <- c(outnames, var.name) 
     }  
-  
+ 
     if (any(zonalstat %in% c("count", "proportion"))) { 
       zstats <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att,
                           rasterfile=rastfn, band=b, na.rm=na.rm, ignoreValue=rast.NODATA)) 
       newvar <- "value" 
-
-      zstats2 <- setDT(zonalFreq(src=spobjprj, attribute=polyv.att, 
-                          rasterfile=rastfn, band=b, na.rm=FALSE, ignoreValue=rast.NODATA)) 
-      newvar <- "value" 
-
       if (!is.null(rastlut)) { 
         LUTvar <- names(rastlut)[1] 
         newvar <- names(rastlut)[2]  
