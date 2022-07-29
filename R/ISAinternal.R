@@ -159,7 +159,7 @@ helper.select <- function(smallbndx, smallbnd.unique, smallbnd.domain=NULL,
     maxbnd_max <- merge(maxbndx_intersect, maxbnd_max)
     maxbndxlst <- maxbndxlst[maxbndxlst %in% unique(maxbnd_max[[maxbnd.unique]])]
  
-    if (length(maxbnd.gtthres) > 1) {
+    if (length(maxbnd.gtthres) > 1 || (nrow(maxbnd_max) > 1 && byeach)) {
       message("smallbnd intersects more than 1 maxbnd")
 
       if (multiSAdoms) {
