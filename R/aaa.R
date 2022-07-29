@@ -9,4 +9,5 @@
 #' @importFrom methods as new slot canCoerce is
 #' @importFrom rgdal readOGR GDALinfo GDAL.open GDAL.close getRasterBand 
 #' @importFrom rgdal saveDataset getRasterData getDriverName putRasterData getProjectionRef
+#' @importFrom parallel detectCores
 NULL

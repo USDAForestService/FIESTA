@@ -293,7 +293,6 @@ spGetAuxiliary <- function(xyplt,
     } else if (!is.numeric(ncores)) {
       stop("ncores must be integer vector of length = 1")
     } else if (ncores > 1) {
-      require("parallel")
       nbrcores <- parallel::detectCores()
       if (ncores > nbrcores) {
         message("ncores is greater than number of available cores")
