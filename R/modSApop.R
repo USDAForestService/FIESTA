@@ -306,7 +306,7 @@ modSApop <- function(popType="VOL",
   
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
-    if (!savedata) {
+    if (!savedata && !saveobj) {
       message("savedata=FALSE with savedata parameters... no data are saved")
     }
     for (i in 1:length(savedata_opts)) {
@@ -331,14 +331,10 @@ modSApop <- function(popType="VOL",
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
   
-  ## Check objnm
-  if (saveobj && is.null(objnm)) {
-    objnm <- "SApopdat"
-  }
 
   ## Check output
   ########################################################
-  if (savedata || saveobj) {
+  if (savedata) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
                   out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
                   overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
@@ -351,6 +347,16 @@ modSApop <- function(popType="VOL",
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   } 
+
+  if (saveobj) {
+    if (is.null(objnm)) {
+      objnm <- "SApopdat"
+    }
+    #if (append_layer) overwrite_layer <- FALSE
+    if (append_layer) message("currently cannot append to object lists")
+    objfn <- getoutfn(outfn=objnm, ext="llo", outfolder=outfolder, 
+		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
+  }
 
 
   ###################################################################################
@@ -630,13 +636,21 @@ modSApop <- function(popType="VOL",
     returnlst$seedx <- as.data.frame(seedf)
   }
 
+
+  ## Save list object
+  ##################################################################
   if (saveobj) {
-    objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
-		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
-    saveRDS(returnlst, file=objfn)
-    message("saving object to: ", objfn)
+    #if (append_layer) {
+    #  message("appending list object to: ", objfn)
+    #} else {
+      message("saving list object to: ", objfn)
+    #}
+    #saveList(list(returnlst), file=objfn, append=append_layer, compress=TRUE)
+    saveList(returnlst, file=objfn, compress=TRUE)
   } 
 
+  ## Save data frames
+  ##################################################################
   if (savedata) {
     datExportData(condx, 
           savedata_opts=list(outfolder=outfolder, 
