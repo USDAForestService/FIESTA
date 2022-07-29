@@ -216,7 +216,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       for (mvar in missvars) {
         if (any(grepl(mvar, auxnmlst))) {
           mvarnm <- auxnmlst[grepl(mvar, auxnmlst)]
-          if (all(grepl("\\.", mvarnm) && mvar %in% names(pltx))) {
+          if (all(grepl("\\.", mvarnm)) && mvar %in% names(pltx)) {
             message(toString(mvarnm), " exists in auxlut... setting ", mvar, " to predfac")
             predfac <- c(predfac, mvar)
             predcon <- prednames[!prednames %in% predfac]
@@ -303,8 +303,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     warning("minplotnum.unit should be at least 2")
     #minplotnum.unit <- 2
   }
-  if (minplotnum.strat > minplotnum.unit) {
-    minplotnum.strat <- minplotnum.unit
+  if (strata) {
+    if (minplotnum.strat > minplotnum.unit) {
+      minplotnum.strat <- minplotnum.unit
+    }
+  } else {
+    minplotnum.strat <- 0
   }
   pltcnts <- check.pltcnt(pltx=pltx, puniqueid=puniqueid,
 		unitlut=auxlut, unitvars=unitvar, strvars=strvar,
