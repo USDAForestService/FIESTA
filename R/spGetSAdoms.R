@@ -783,6 +783,23 @@ spGetSAdoms <- function(smallbnd,
   #  smallbnd <- SAdomdat$smallbndlst[[1]]
   #} 
 
+  
+  message("Number of model domains generated: ", length(SAdomslst), "\n") 
+
+  returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
+		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain, 
+           largebnd.unique=largebnd.unique)
+
+  if (addstate) {
+    returnlst$stcdlst <- unique(unlist(lapply(SAdomslst, 
+				function(x) return(unique(x$STATECD)))))
+  }
+  if (!is.null(largebnd.unique)) {
+    returnlst$largebndlst <- unique(unlist(lapply(SAdomslst, function(x, largebnd.unique)
+ 		unique(x[[largebnd.unique]]), largebnd.unique)))
+    returnlst$largebndsf <- 
+		largebnd[largebnd[[largebnd.unique]] %in% returnlst$largebndlst, ]
+  }
 
   if (saveobj) {
     objfn <- getoutfn(outfn=objnm, ext="rda", outfolder=outfolder, 
@@ -791,11 +808,5 @@ spGetSAdoms <- function(smallbnd,
     message("saving object to: ", objfn)
   }
 
-  
-  message("Number of model domains generated: ", length(SAdomslst), "\n") 
-
-  returnlst <- list(SAdomlst=SAdomslst, smallbndlst=smallbndxlst, 
-		smallbnd.unique=smallbnd.unique, smallbnd.domain=smallbnd.domain, 
-           largebnd.unique=largebnd.unique)
   return(returnlst)
 }
