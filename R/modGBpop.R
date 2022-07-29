@@ -676,6 +676,9 @@ modGBpop <- function(popType = "VOL",
   }
   if (popType == "DWM") {
     cond_dwm_calcf <- popcheck$cond_dwm_calcf
+    dwmpropvars <- names(cond_dwm_calcf)[grepl("CONDPROP", names(cond_dwm_calcf), ignore.case=TRUE)]
+    #cwdcols <- names(cond_dwm_calcf)[grepl(dwmtype, names(cond_dwm_calcf), ignore.case=TRUE)]
+    #areawt <- names(condx)[grepl(dwmtype, names(condx), ignore.case=TRUE)]
   }
 
   ###################################################################################
@@ -734,6 +737,7 @@ modGBpop <- function(popType = "VOL",
   }
 
   if (adj == "samp") {
+source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\getadjfactorGB2.R")
     adjfacdata <- getadjfactorGB(treex=treef, 
                                  seedx=seedf, condx=condx, 
                                  tuniqueid=tuniqueid, 
@@ -742,7 +746,7 @@ modGBpop <- function(popType = "VOL",
                                  vcondsppx=vcondsppf, 
                                  vcondstrx=vcondstrf, 
                                  vuniqueid=vuniqueid, 
-                                 #cond_dwm_calcx=cond_dwm_calcf,
+                                 cond_dwm_calcx=cond_dwm_calcf,
                                  unitlut=stratalut, 
                                  unitvars=unitvar, 
                                  strvars=strvar, 
@@ -872,6 +876,18 @@ modGBpop <- function(popType = "VOL",
 		                          append_layer=append_layer,
 		                          add_layer=TRUE))
     }
+    if (!is.null(vcondsppf)) {
+      datExportData(vcondsppf, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="vcondsppx",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE))
+    }
     if (!is.null(vcondstrf)) {
       datExportData(vcondstrf, 
           savedata_opts=list(outfolder=outfolder, 
@@ -884,12 +900,12 @@ modGBpop <- function(popType = "VOL",
 		                          append_layer=append_layer,
 		                          add_layer=TRUE))
     }
-    if (!is.null(vcondsppf)) {
-      datExportData(vcondsppf, 
+    if (!is.null(cond_dwm_calcf)) {
+      datExportData(cond_dwm_calcf, 
           savedata_opts=list(outfolder=outfolder, 
                               out_fmt=out_fmt, 
 		                          out_dsn=out_dsn, 
-		                          out_layer="vcondsppx",
+		                          out_layer="cond_dwm_calcx",
 		                          outfn.pre=outfn.pre, 
 		                          outfn.date=outfn.date, 
 		                          overwrite_layer=overwrite_layer,
