@@ -445,14 +445,10 @@ modGBpop <- function(popType = "VOL",
   saveobj <- pcheck.logical(saveobj, varnm="saveobj", 
 		title="Save SApopdat object?", first="YES", gui=gui, stopifnull=TRUE)
   
-  ## Check objnm
-  if (saveobj && is.null(objnm)) {
-    objnm <- "GBpopdat"
-  }
  
   ## Check output
   ########################################################
-  if (savedata || saveobj) {
+  if (savedata) {
     outlst <- pcheck.output(outfolder=outfolder, out_dsn=out_dsn, 
                   out_fmt=out_fmt, outfn.pre=outfn.pre, outfn.date=outfn.date, 
                   overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer,
@@ -465,6 +461,21 @@ modGBpop <- function(popType = "VOL",
     outfn.date <- outlst$outfn.date
     outfn.pre <- outlst$outfn.pre
   }
+
+  if (saveobj) {
+    outobj_fmtlst <- c('rds', 'rda', 'llo')
+    outobj_fmt <- pcheck.varchar(var2check=outobj_fmt, varnm="outobj_fmt", gui=gui,
+		checklst=outobj_fmtlst, caption="outobj_fmt", multiple=FALSE, stopifnull=TRUE)
+
+    if (is.null(objnm)) {
+      objnm <- "GBpopdat"
+    }
+    #if (append_layer) overwrite_layer <- FALSE
+    if (append_layer) message("currently cannot append to object lists")
+    objfn <- getoutfn(outfn=objnm, ext=outobj_fmt, outfolder=outfolder, 
+		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
+  }
+
  
   ###################################################################################
   ## Load data

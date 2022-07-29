@@ -349,12 +349,16 @@ modSApop <- function(popType="VOL",
   } 
 
   if (saveobj) {
+    outobj_fmtlst <- c('rds', 'rda', 'llo')
+    outobj_fmt <- pcheck.varchar(var2check=outobj_fmt, varnm="outobj_fmt", gui=gui,
+		checklst=outobj_fmtlst, caption="outobj_fmt", multiple=FALSE, stopifnull=TRUE)
+
     if (is.null(objnm)) {
       objnm <- "SApopdat"
     }
     #if (append_layer) overwrite_layer <- FALSE
     if (append_layer) message("currently cannot append to object lists")
-    objfn <- getoutfn(outfn=objnm, ext="llo", outfolder=outfolder, 
+    objfn <- getoutfn(outfn=objnm, ext=outobj_fmt, outfolder=outfolder, 
 		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
   }
 
