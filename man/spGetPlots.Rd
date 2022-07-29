@@ -22,7 +22,6 @@ spGetPlots(
   pjoinid = NULL,
   clipxy = TRUE,
   datsource = NULL,
-  datamart_filetype = "csv",
   data_dsn = NULL,
   istree = FALSE,
   isseed = FALSE,
@@ -118,10 +117,6 @@ and extracted from FIA DataMart
 (http://apps.fs.usda.gov/fia/datamart/datamart.html). See details for more
 information about plot coordinates.  If datsource="csv", specify *.csv file
 names in *_layer arguments.}
-
-\item{datamart_filetype}{String. Only used if datsource = "datamart". If 
-datamart_filetype = "csv", extracts data from CSV section of datamart. If 
-datamart_filetype = "sqlite", extracts data from SQLite section of datamart.}
 
 \item{data_dsn}{String. Name of database where *_layers reside.}
 

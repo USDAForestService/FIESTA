@@ -65,9 +65,6 @@
 #' (http://apps.fs.usda.gov/fia/datamart/datamart.html). See details for more
 #' information about plot coordinates.  If datsource="csv", specify *.csv file
 #' names in *_layer arguments.
-#' @param datamart_filetype String. Only used if datsource = "datamart". If 
-#' datamart_filetype = "csv", extracts data from CSV section of datamart. If 
-#' datamart_filetype = "sqlite", extracts data from SQLite section of datamart.
 #' @param data_dsn String. Name of database where *_layers reside.
 #' @param istree Logical. If TRUE, extract tree data from FIA database.
 #' @param isseed Logical. If TRUE, extract seedling data from FIA database.
@@ -207,7 +204,6 @@ spGetPlots <- function(bnd = NULL,
                        pjoinid = NULL, 
                        clipxy = TRUE, 
                        datsource = NULL,
-                       datamart_filetype = "csv",
                        data_dsn =NULL, 
                        istree = FALSE, 
                        isseed = FALSE, 
@@ -825,7 +821,7 @@ spGetPlots <- function(bnd = NULL,
   }
  
   if (datsource == "datamart") {
-    if (datamart_filetype == "csv") {
+   # if (datamart_filetype == "csv") {
       for (i in 1:length(states)) { 
         state <- states[i]
         stcd <- pcheck.states(state, statereturn="VALUE")
@@ -1114,10 +1110,10 @@ spGetPlots <- function(bnd = NULL,
           #par(mar=mar)
         }
       }  ## End of looping thru states
-    }
-    if (datamart_filetype == "sqlite") {
-      return("datamart_filetype 'sqlite' not yet available.")
-    }
+    # } 
+    # if (datamart_filetype == "sqlite") {
+    #   return("datamart_filetype 'sqlite' not yet available.")
+    # }
   }
  
 ############################################################
