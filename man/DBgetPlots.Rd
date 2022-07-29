@@ -202,8 +202,8 @@ of options. Only used when savedata = TRUE. If out_layer = NULL,}
 if returndata=TRUE, a list of the following objects: 
 \item{states}{ Vector. Input state(s) (full state names: Arizona). } 
 \item{tabs}{ List. A list of data frames from FIA database, including 
-plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), vsubpspp,
-vsubpstr, and invsubp (if isveg=TRUE), lulc (if islulc=TRUE). See below 
+plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), p2veg_subplot_spp,
+p2veg_subp_structure, and invsubp (if isveg=TRUE), lulc (if islulc=TRUE). See below 
 'Output Tables - FIA Table Names' for reference to FIA database tables. 
 See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
 If istree and the number of states > 3, tree data are saved to outfolder 
@@ -232,8 +232,8 @@ evalTypes for the state evaluation are returned. }
 \tab plt \tab plot\cr
 \tab cond \tab cond\cr
 \tab tree \tab tree\cr 
-\tab vsubpspp \tab P2VEG_SUBPLOT_SPP\cr 
-\tab vsubpstr \tab P2VEG_SUBP_STRUCTURE\cr 
+\tab p2veg_subplot_spp \tab P2VEG_SUBPLOT_SPP\cr 
+\tab p2veg_subp_structure \tab P2VEG_SUBP_STRUCTURE\cr 
 \tab invsubp \tab INVASIVE_SUBPLOT_SPP\cr 
 \tab subplot \tab SUBPLOT\cr 
 \tab subp_cond \tab SUBP_COND\cr 
