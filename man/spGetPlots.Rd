@@ -27,13 +27,14 @@ spGetPlots(
   istree = FALSE,
   isseed = FALSE,
   isveg = FALSE,
+  isdwm = FALSE,
   plot_layer = "plot",
   cond_layer = "cond",
   tree_layer = "tree",
-  seed_layer = "seed",
-  vsubpspp_layer = "vsubpspp",
-  vsubpstr_layer = "vsubpstr",
-  invsubp_layer = "invsubp",
+  seed_layer = "seedling",
+  vsubpspp_layer = "p2veg_subplot_spp",
+  vsubpstr_layer = "p2veg_subp_structure",
+  invsubp_layer = "invasive_subplot_spp",
   ppsa_layer = "pop_plot_stratum_assgn",
   other_layers = NULL,
   puniqueid = "CN",
@@ -130,6 +131,8 @@ datamart_filetype = "sqlite", extracts data from SQLite section of datamart.}
 
 \item{isveg}{Logical. If TRUE, understory vegetation tables are extracted
 from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).}
+
+\item{isdwm}{Logical. If TRUE, down woody material are extracted.}
 
 \item{plot_layer}{String. Name of layer in database of file name of FIA plot
 table.}
