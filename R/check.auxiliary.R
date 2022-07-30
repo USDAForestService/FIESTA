@@ -49,6 +49,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
 #				TRUE, FALSE)
   auxlut <- pcheck.table(auxlut, gui=gui, tabnm="auxlut",
  		caption="Strata table?", nullcheck=TRUE)
+  P2POINTCNT <- pcheck.table(P2POINTCNT)
 
   #######################################################################
   ## Check strata
