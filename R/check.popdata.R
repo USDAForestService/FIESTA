@@ -6,7 +6,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 	areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
 	unitvar=NULL, unitvar2=NULL, unitarea=NULL, areavar="ACRES",
 	areaunits="acres", unit.action="keep", removetext="unitarea",
-	stratalut=NULL, strvar="STRATUMCD", nonresp=FALSE, substrvar=NULL,
+	stratalut=NULL, strvar="STRATUMCD", pivot=FALSE, nonresp=FALSE, substrvar=NULL,
 	stratcombine=TRUE, prednames=NULL, predfac=NULL, ACI=FALSE, nonsamp.pfilter=NULL,
 	nonsamp.cfilter=NULL, nonsamp.vfilter.fixed=FALSE, nullcheck=FALSE,
 	pvars2keep=NULL, cvars2keep=NULL, ppsanm="pop_plot_stratum_assgn", gui=FALSE){
@@ -170,6 +170,10 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     if (is.null(strvar)) stop("must include strvar for post-strat estimates")
     if (length(strvar) > 1) stop("invalid strvar... only 1 variable allowed")
     pvars2keep <- unique(c(pvars2keep, strvar))
+
+    ## pivot
+    pivot <- pcheck.logical(pivot, varnm="pivot",
+		title="Pivot stratalut?", first="NO", gui=gui)
 
     ## Check nonresp
     nonresp <- pcheck.logical(nonresp, varnm="nonresp",
@@ -899,6 +903,13 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
           stop("evalid in stratalut does not match evalid")
         }
       }
+    }
+    if (pivot) {
+      strwtvar <- "strwt"
+      pivotvars <- c(unitvar, unitvar2)
+      unitvars <- pivotvars[pivotvars %in% names(stratalut)]
+      stratalut <- strat.pivot(stratalut, unitvars=unitvars, 
+                              strvar, strwtvar=strwtvar)
     }
 
     ## Create table of number of plots by estimation unit and strata

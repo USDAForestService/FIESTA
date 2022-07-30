@@ -555,7 +555,7 @@ modGBpop <- function(popType = "VOL",
       auxdat <- pcheck.object(auxdat, "auxdat", list.items=list.items)
       pltassgn <- auxdat$pltassgn
       pltassgnid <- auxdat$pltassgnid
-      unitzonal <- auxdat$unitzonal
+      stratalut <- auxdat$unitzonal
       unitvar <- auxdat$unitvar
       unitvar2 <- auxdat$unitvar2
       unitarea <- auxdat$unitarea
@@ -570,13 +570,7 @@ modGBpop <- function(popType = "VOL",
             stop("must include strvar if strata=TRUE")
           }
         } 
-        strwtvar <- "strwt"
-        pivotvars <- c(unitvar, unitvar2)
-        unitvars <- pivotvars[pivotvars %in% names(unitzonal)]
-        if (is.null(stratalut)) {
-          stratalut <- strat.pivot(unitzonal, unitvars=unitvars, 
-                              strvar, strwtvar=strwtvar)
-        }
+        pivot <- TRUE
       }
     }
   } 
@@ -639,7 +633,7 @@ modGBpop <- function(popType = "VOL",
                   nonsamp.vfilter.fixed=nonsamp.vfilter.fixed,
                   unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
                   areaunits=areaunits, unit.action=unit.action, strata=strata, 
-                  stratalut=stratalut, strvar=strvar, nonresp=nonresp, 
+                  stratalut=stratalut, strvar=strvar, pivot=pivot, nonresp=nonresp, 
                   substrvar=substrvar, stratcombine=stratcombine)
 
   if (is.null(popcheck)) return(NULL)
@@ -748,7 +742,6 @@ modGBpop <- function(popType = "VOL",
   }
 
   if (adj == "samp") {
-source("C:\\_tsf\\_GitHub\\FIESTAutils\\R\\getadjfactorGB2.R")
     adjfacdata <- getadjfactorGB(treex=treef, 
                                  seedx=seedf, condx=condx, 
                                  tuniqueid=tuniqueid, 
