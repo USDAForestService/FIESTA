@@ -291,8 +291,6 @@ modGBpop <- function(popType = "VOL",
   nonsamp.pfilter=nonsamp.cfilter <- NULL
   #nonsamp.vfilter.fixed <- FALSE
   returnlst <- list()
-  nonresp <- FALSE
-  substrvar <- NULL
   
   
   ## Set global variables
@@ -634,24 +632,24 @@ modGBpop <- function(popType = "VOL",
                   unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
                   areaunits=areaunits, unit.action=unit.action, strata=strata, 
                   stratalut=stratalut, strvar=strvar, pivot=pivot, nonresp=nonresp, 
-                  substrvar=substrvar, stratcombine=stratcombine)
+                  stratcombine=stratcombine)
 
   if (is.null(popcheck)) return(NULL)
   condx <- popcheck$condx
   pltcondx <- popcheck$pltcondx
   treef <- popcheck$treef
   seedf <- popcheck$seedf
-  pltassgnx <- popcheck$pltassgnx
+  #pltassgnx <- popcheck$pltassgnx
   cuniqueid <- popcheck$cuniqueid
   condid <- popcheck$condid
   tuniqueid <- popcheck$tuniqueid
   vuniqueid <- popcheck$vuniqueid
-  pltassgnid <- popcheck$pltassgnid
+  #pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
   unitvar <- popcheck$unitvar
   unitvar2 <- popcheck$unitvar2
-  unitarea <- popcheck$unitarea
+  #unitarea <- popcheck$unitarea
   areavar <- popcheck$areavar
   areaunits <- popcheck$areaunits
   unit.action <- popcheck$unit.action
@@ -670,10 +668,7 @@ modGBpop <- function(popType = "VOL",
   pvars2keep <- popcheck$pvars2keep
   areawt <- popcheck$areawt
   tpropvars <- popcheck$tpropvars
-  if (nonresp) {
-    substrvar <- popcheck$substrvar
-  } 
-  #rm(popcheck)
+
   if (popType == "P2VEG") {
     vcondsppf <- popcheck$vcondsppf
     vcondstrf <- popcheck$vcondstrf
@@ -684,6 +679,14 @@ modGBpop <- function(popType = "VOL",
     dwmpropvars <- names(cond_dwm_calcf)[grepl("CONDPROP", names(cond_dwm_calcf), ignore.case=TRUE)]
     #cwdcols <- names(cond_dwm_calcf)[grepl(dwmtype, names(cond_dwm_calcf), ignore.case=TRUE)]
     #areawt <- names(condx)[grepl(dwmtype, names(condx), ignore.case=TRUE)]
+  }
+  if (nonresp) {
+    substrvar <- popcheck$substrvar
+    stratalut <- popcheck$RHGlut
+    getwt <- TRUE
+    getwtvar <- "n.resp"
+    nonresplut <- popcheck$nonresplut
+    P2POINTCNT <- NULL
   }
 
   ###################################################################################
@@ -696,9 +699,9 @@ modGBpop <- function(popType = "VOL",
   ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
   ## If unitvar and unitvar2, concatenates variables to 1 unitvar
   ###################################################################################
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
+  auxdat <- check.auxiliary(pltx=popcheck$pltassgnx, puniqueid=popcheck$pltassgnid, 
                     unitvar=unitvar, unitvar2=unitvar2, 
-                    unitarea=unitarea, areavar=areavar, 
+                    unitarea=popcheck$unitarea, areavar=areavar, 
                     minplotnum.unit=minplotnum.unit, unit.action=unit.action, 
                     strata=strata, auxlut=stratalut, strvar=strvar, 
                     nonresp=nonresp, substrvar=substrvar, 
@@ -718,6 +721,12 @@ modGBpop <- function(popType = "VOL",
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
 
+  strunitvars <- c(unitvars, strvar)
+  if (nonresp) {
+    adj <- "none"
+    strunitvars <- c(unitvars, strvar, "RHG")    
+  }
+
   ###################################################################################
   ## GET ADJUSTMENT FACTORS BY STRATA AND/OR ESTIMATION UNIT FOR NONSAMPLED CONDITIONS
   ## Calculates adjustment factors for area and trees by strata (and estimation unit)
@@ -732,7 +741,7 @@ modGBpop <- function(popType = "VOL",
   ###################################################################################
   ## Merge plot strata info to condx
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
-  condx <- condx[pltassgnx[,c(pltassgnid, unitvar, strvar), with=FALSE]]
+  condx <- condx[pltassgnx[,c(pltassgnid, strunitvars), with=FALSE]]
 
 
   ## If more than one unitvar, 
@@ -822,7 +831,10 @@ modGBpop <- function(popType = "VOL",
     returnlst$vcondsppx <- vcondsppf
     returnlst$vcondstrx <- vcondstrf
   }
-
+  if (nonresp) {
+    returnlst$nonresplut <- nonresplut
+    returnlst$substrvar <- "RHG"
+  }
 
   ###################################################################################
   ## Save population data objects

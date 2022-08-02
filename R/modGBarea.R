@@ -406,7 +406,7 @@ modGBarea <- function(GBpopdat,
   strwtvar <- GBpopdat$strwtvar
   if (nonresp) {
     substrvar <- GBpopdat$substrvar
-    nonsampplots <- GBpopdat$nonsampplots
+    nonresplut <- GBpopdat$nonresplut
   } 
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
