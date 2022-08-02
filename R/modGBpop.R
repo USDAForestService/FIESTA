@@ -644,7 +644,7 @@ modGBpop <- function(popType = "VOL",
   condid <- popcheck$condid
   tuniqueid <- popcheck$tuniqueid
   vuniqueid <- popcheck$vuniqueid
-  #pltassgnid <- popcheck$pltassgnid
+  pltassgnid <- popcheck$pltassgnid
   ACI.filter <- popcheck$ACI.filter
   adj <- popcheck$adj
   unitvar <- popcheck$unitvar
