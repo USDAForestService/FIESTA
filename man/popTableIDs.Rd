@@ -37,6 +37,8 @@ popTableIDs(
 
 \item{lulc}{String.}
 
+\item{cond_dwm_calc}{String.}
+
 \item{...}{For extendibility.}
 }
 \value{

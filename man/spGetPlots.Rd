@@ -35,6 +35,7 @@ spGetPlots(
   vsubpstr_layer = "p2veg_subp_structure",
   invsubp_layer = "invasive_subplot_spp",
   ppsa_layer = "pop_plot_stratum_assgn",
+  dwm_layer = "cond_dwm_calc",
   other_layers = NULL,
   puniqueid = "CN",
   pltassgnid = "PLT_CN",
