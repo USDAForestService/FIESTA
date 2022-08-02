@@ -14,6 +14,7 @@
 #' @param subplot String.
 #' @param subp_cond String. 
 #' @param lulc String. 
+#' @param cond_dwm_calc String. 
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Grayson W. White

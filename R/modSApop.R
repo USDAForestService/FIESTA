@@ -650,7 +650,7 @@ modSApop <- function(popType="VOL",
       message("saving list object to: ", objfn)
     #}
     #saveList(list(returnlst), file=objfn, append=append_layer, compress=TRUE)
-    saveList(returnlst, file=objfn, compress=TRUE)
+    largeList::saveList(returnlst, file=objfn, compress=TRUE)
   } 
 
   ## Save data frames

@@ -216,7 +216,8 @@ spGetPlots <- function(bnd = NULL,
                        vsubpspp_layer = "p2veg_subplot_spp", 
                        vsubpstr_layer = "p2veg_subp_structure", 
                        invsubp_layer = "invasive_subplot_spp",
-                       ppsa_layer = "pop_plot_stratum_assgn", 
+                       ppsa_layer = "pop_plot_stratum_assgn",
+                       dwm_layer = "cond_dwm_calc", 
                        other_layers = NULL, 
                        puniqueid = "CN", 
                        pltassgnid = "PLT_CN",
@@ -1909,10 +1910,10 @@ spGetPlots <- function(bnd = NULL,
           gc() 
         } 
 
-        if (isdwm && !is.null(dwm)) {
+        if (isdwm && !is.null(cond_dwm_calc)) {
           index.unique.dwm <- NULL
           if (!append_layer) index.unique.dwm <- c("PLT_CN", "CONDID")
-          datExportData(dwm, 
+          datExportData(cond_dwm_calc, 
               index.unique = index.unique.dwm,
               savedata_opts = list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
@@ -1923,7 +1924,7 @@ spGetPlots <- function(bnd = NULL,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
-          rm(dwm)
+          rm(cond_dwm_calc)
           gc() 
         } 
 
@@ -1934,7 +1935,7 @@ spGetPlots <- function(bnd = NULL,
 
             if (!is.null(get(layernm))) {
               index.unique.other <- NULL
-              if (othertable == "SUBPLOT") {
+              if (layer == "SUBPLOT") {
                 index.unique.other <- c("PLT_CN", "SUBP")
               }
               datExportData(get(layernm),
@@ -1967,6 +1968,9 @@ spGetPlots <- function(bnd = NULL,
           p2veg_subplot_sppx <- rbind(p2veg_subplot_sppx, p2veg_subplot_spp)
           p2veg_subp_structurex <- rbind(p2veg_subp_structurex, p2veg_subp_structure)
           invasive_subplot_sppx <- rbind(invasive_subplot_sppx, invasive_subplot_spp)
+        }
+        if (isdwm) {
+          cond_dwm_calcx <- rbind(cond_dwm_calcx, cond_dwm_calc)
         }
         if (savePOP) {
           pop_plot_stratum_assgnx <- rbind(pop_plot_stratum_assgnx, pop_plot_stratum_assgn)
@@ -2009,6 +2013,9 @@ spGetPlots <- function(bnd = NULL,
     tabIDs$p2veg_subplot_sppx <- tuniqueid
     tabIDs$p2veg_subp_structurex <- tuniqueid
     tabIDs$invasive_subplot_sppx <- tuniqueid
+  }
+  if (isdwm) {
+    tabIDs$cond_dwm_calcx <- duniqueid
   }
   
   miss <- names(tabs)[!names(tabs) %in% names(tabIDs)]
