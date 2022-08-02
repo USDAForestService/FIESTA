@@ -15,7 +15,7 @@
 #' Burrill et al. 2018).
 #' 
 #' *ACI (All Condition Inventory)*\cr RMRS National Forest plots. For nonforest
-#' conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 1),
+#' conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 
 #' if trees exist on the condition, the data exist in the tree table. If you do
 #' not want these trees included, ACI=FALSE. This will filter the data to only
 #' forested conditions (COND_STATUS_CD = 1)
@@ -706,7 +706,7 @@ DBgetPlots <- function (states = NULL,
   if (isgrm || issccm) {
     evalType <- c(evalType, "CHNG")
   }
-
+ 
   ## Get states, Evalid and/or invyrs info
   evalInfo <- DBgetEvalid(states=states, RS=RS, 
                           datsource=datsource, 
@@ -1077,7 +1077,7 @@ DBgetPlots <- function (states = NULL,
     }
     ppsafromqry <- paste0(SCHEMA., ppsa_layer, " ppsa")
   }
- 
+
   ## PLOT from/join query
   ################################################
   if (iseval) {
@@ -2059,7 +2059,7 @@ DBgetPlots <- function (states = NULL,
         seed <- rbind(seed, seedx)
       }
     }
-
+ 
     ##############################################################
     ## Understory vegetation data (P2VEG_SUBPLOT_SPP/P2VEG_SUBP_STRUCTURE
     ##############################################################
@@ -2072,12 +2072,12 @@ DBgetPlots <- function (states = NULL,
       vsubpsppvars <- toString(paste0("v.", vsubpsppvarlst))
       vsubpsppqry <- paste("select distinct", vsubpsppvars, "from", vfromqry, 
 		                       "where", paste0(evalFilter.veg, stateFilters))
-
       if (datsource == "sqlite") {
         p2veg_subplot_sppx <- DBI::dbGetQuery(dbconn, vsubpsppqry)
       } else {
         p2veg_subplot_sppx <- sqldf::sqldf(vsubpsppqry, stringsAsFactors=FALSE)
       }
+ 
       if (nrow(p2veg_subplot_sppx) != 0) {
         p2veg_subplot_sppx <- setDT(p2veg_subplot_sppx)
         p2veg_subplot_sppx[, PLT_CN := as.character(PLT_CN)]
@@ -2093,7 +2093,11 @@ DBgetPlots <- function (states = NULL,
       vsubpstrvars <- toString(paste0("v.", vsubpstrvarlst))
       vsubpstrqry <- paste("select distinct", vsubpstrvars, "from", vstrfromqry, 
 		                       "where", paste0(evalFilter.veg, stateFilters))
-      p2veg_subp_structurex <- sqldf::sqldf(vsubpstrqry, stringsAsFactors=FALSE)
+      if (datsource == "sqlite") {
+        p2veg_subp_structurex <- DBI::dbGetQuery(dbconn, vsubpstrqry)
+      } else {
+        p2veg_subp_structurex <- sqldf::sqldf(vsubpstrqry, stringsAsFactors=FALSE)
+      }
 
       if(nrow(p2veg_subp_structurex) != 0){
         p2veg_subp_structurex <- setDT(p2veg_subp_structurex)
@@ -2110,8 +2114,11 @@ DBgetPlots <- function (states = NULL,
       invsubpvars <- toString(paste0("v.", invsubpvarlst))
       invsubpqry <- paste("select distinct", invsubpvars, "from", invfromqry, 
 		                      "where", paste0(evalFilter.veg, stateFilters))
-      invasive_subplot_sppx <- sqldf::sqldf(invsubpqry, stringsAsFactors=FALSE)
-
+      if (datsource == "sqlite") {
+        invasive_subplot_sppx <- DBI::dbGetQuery(dbconn, invsubpqry)
+      } else {
+        invasive_subplot_sppx <- sqldf::sqldf(invsubpqry, stringsAsFactors=FALSE)
+      }
       if(nrow(invasive_subplot_sppx) != 0){
         invasive_subplot_sppx <- setDT(invasive_subplot_sppx)
         invasive_subplot_sppx[, PLT_CN := as.character(PLT_CN)]
@@ -2162,8 +2169,11 @@ DBgetPlots <- function (states = NULL,
       subpcvars <- toString(paste0("subpc.", subpcvarlst))
       subpcqry <- paste("select distinct", subpcvars, "from", subpcfromqry, 
 		"where", paste0(evalFilter, stateFilters))
-      subpcx <- sqldf::sqldf(subpcqry, stringsAsFactors=FALSE)
-
+      if (datsource == "sqlite") {
+        subpcx <- DBI::dbGetQuery(dbconn, subpcqry)
+      } else {
+        subpcx <- sqldf::sqldf(subpcqry, stringsAsFactors=FALSE)
+      }
       if(nrow(subpcx) != 0){
         subpcx <- setDT(subpcx)
         subpcx[, PLT_CN := as.character(PLT_CN)]
@@ -2361,7 +2371,7 @@ DBgetPlots <- function (states = NULL,
         ppsax <- tryCatch( sqldf::sqldf(ppsaqry, stringsAsFactors=FALSE), 
 			error=function(e) return(NULL))
       }
-
+ 
       if(nrow(ppsax) != 0){
         ppsax <- setDT(ppsax)
         ppsax[, PLT_CN := as.character(PLT_CN)]
