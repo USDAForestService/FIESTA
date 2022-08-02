@@ -5,7 +5,7 @@
 \alias{ref_domain}
 \title{Reference table - for generating tables.}
 \format{
-An object of class \code{data.frame} with 33 rows and 3 columns.
+An object of class \code{data.frame} with 32 rows and 3 columns.
 }
 \source{
 FIA look-up table.

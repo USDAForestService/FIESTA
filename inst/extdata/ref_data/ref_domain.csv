@@ -24,7 +24,6 @@
 "SITECLCD","Site productivity class (cuft/acre/year)","COND"
 "SPCD","Species","TREE"
 "SPGRPCD","Species group","TREE"
-"STDAGE","Stand age","COND"
 "STDORGCD","Stand origin","COND"
 "STDSZCD","Stand-size class","COND"
 "TIMBERCD","Forest-land status","COND"
