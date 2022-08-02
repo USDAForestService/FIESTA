@@ -145,7 +145,7 @@ DBgetEvalid <- function(states = NULL,
   ## Set global variables
 
   ## Define evalTypee choices
-  evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "DWM", "CHNG")
+  evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "INV", "DWM", "CHNG")
 #  evalTypelst <- c("ALL", "CURR", "VOL", "CHNG", "DWM", "GROW", "MORT", "REMV", 
 #		"CRWN", "INV", "P2VEG")
 
