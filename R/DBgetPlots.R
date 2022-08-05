@@ -1271,6 +1271,7 @@ DBgetPlots <- function (states = NULL,
     if(savePOP || iseval) ppsa <- {}  
 
     if (!is.null(othertables)) {
+      othertables2 <- othertables
       for (i in 1:length(othertables)) 
         assign(paste0("other", i), {})
     }    
@@ -2270,13 +2271,11 @@ DBgetPlots <- function (states = NULL,
     ##############################################################
     ## Other tables
     ##############################################################
-    if (!is.null(othertables) && !is.null(pltx)) {
-      for (j in 1:length(othertables)) {
+    if (!is.null(othertables) && length(othertables2) > 0 && !is.null(pltx)) {
+      for (j in 1:length(othertables2)) {
+        isref <- FALSE
         othertable <- othertables[j]
         othertablexnm <- paste0("otherx", j)
-
-        message(paste0("\n",
-        "## STATUS: GETTING ", othertable, " (", stabbr, ")...", "\n"))
     
         if (!is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
           xfromqryx <- paste0(SCHEMA., othertable, " x")
@@ -2292,12 +2291,28 @@ DBgetPlots <- function (states = NULL,
           joinid <- "CN"
           xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry_plotgeom), 
 			"where", xfilter)
+        } else if (startsWith(othertable, "REF_") || startsWith(othertable, "ref_")) {
+          xqry <- paste("select * from", othertable)
+          isref <- TRUE
         } else {
           joinid <- "PLT_CN"
           xqry <- paste("select distinct x.* from", sub("SUBX", othertable, xfromqry), 
 			"where", xfilter)
         }
+
+        if (isref) {
+          message(paste0("\n",
+          "## STATUS: GETTING ", othertable, "...", "\n"))
+        } else {
+          message(paste0("\n",
+          "## STATUS: GETTING ", othertable, " (", stabbr, ")...", "\n"))
+        }
+
         if (datsource == "sqlite") {
+          dbtabs <- DBI::dbListTables(dbconn)
+          if (!othertable %in% dbtabs) {
+            stop(othertable, " not in database")
+          } 
           tab <- tryCatch( DBI::dbGetQuery(dbconn, xqry),
 			error=function(e) return(NULL))
         } else {
@@ -2315,20 +2330,23 @@ DBgetPlots <- function (states = NULL,
 			error=function(e) return(NULL))
           }
         }
- 
-        if (is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
-          ## Subset overall filters from condx
-          if ("CONDID" %in% names(tab)) {
-            tab <- tab[paste(tab$PLT_CN, tab$CONDID) %in% pcondID,]
-          } else {
-            tab <- tab[tab[[joinid]] %in% unique(pltx$CN),]
+        if (isref) {
+          othertables2 <- othertables2[othertables2 != othertable]
+        }
+        if (!isref) {
+          if (is.null(pcheck.varchar(othertable, checklst=pop_tables, stopifinvalid=FALSE))) {
+            ## Subset overall filters from condx
+            if ("CONDID" %in% names(tab)) {
+              tab <- tab[paste(tab$PLT_CN, tab$CONDID) %in% pcondID,]
+            } else {
+              tab <- tab[tab[[joinid]] %in% unique(pltx$CN),]
+            }
+          }
+          if (nrow(tab) == 0) {
+            message("othertable must include PLT_CN")
+            tab <- NULL
           }
         }
-        if (nrow(tab) == 0) {
-          message("othertable must include PLT_CN")
-          tab <- NULL
-        }
-
         if (!is.null(tab)) {
           assign(othertablexnm, setDT(tab))
 
@@ -2338,10 +2356,11 @@ DBgetPlots <- function (states = NULL,
 
             ## Subset overall filters from pltx
             assign(othertablexnm, 
-			get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),])
+			 get(othertablexnm)[get(othertablexnm)[[joinid]] %in% unique(pltx$CN),])
           }
-          if (returndata) 
-            assign(paste0("other", j), rbind(get(paste0("other", j)), get(othertablexnm)))
+        }
+        if (returndata) {
+          assign(paste0("other", j), rbind(get(paste0("other", j)), get(othertablexnm)))
         }
       }
     }
