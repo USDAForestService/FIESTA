@@ -721,10 +721,10 @@ modGBpop <- function(popType = "VOL",
   if (nonresp) nonsampplots <- auxdat$nonsampplots
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid) 
 
-  strunitvars <- c(unitvars, strvar)
+  strunitvars <- c(unitvar, strvar)
   if (nonresp) {
     adj <- "none"
-    strunitvars <- c(unitvars, strvar, "RHG")    
+    strunitvars <- c(unitvar, strvar, "RHG")    
   }
 
   ###################################################################################
