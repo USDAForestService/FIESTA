@@ -404,13 +404,8 @@ modGBarea <- function(GBpopdat,
   estvar.name <- GBpopdat$estvar.area
   stratcombinelut <- GBpopdat$stratcombinelut
   strwtvar <- GBpopdat$strwtvar
-  if (nonresp) {
-    substrvar <- GBpopdat$substrvar
-    nonresplut <- GBpopdat$nonresplut
-  } 
   strunitvars <- c(unitvar, strvar)
   strata <- GBpopdat$strata
-  
 
 
   ########################################
