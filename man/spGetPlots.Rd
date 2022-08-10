@@ -34,8 +34,8 @@ spGetPlots(
   vsubpspp_layer = "p2veg_subplot_spp",
   vsubpstr_layer = "p2veg_subp_structure",
   invsubp_layer = "invasive_subplot_spp",
-  ppsa_layer = "pop_plot_stratum_assgn",
   dwm_layer = "cond_dwm_calc",
+  ppsa_layer = "pop_plot_stratum_assgn",
   other_layers = NULL,
   puniqueid = "CN",
   pltassgnid = "PLT_CN",
@@ -150,6 +150,9 @@ P2VEG_SUBP_STRUCTURE table if isveg=TRUE.}
 
 \item{invsubp_layer}{String. Name of layer in database of file name of FIA
 INVASIVE_SUBPLOT_SPP table if isveg=TRUE.}
+
+\item{dwm_layer}{String. Name of layer in database of file name of FIA
+COND_DWM_CALC table if isdwm=TRUE.}
 
 \item{ppsa_layer}{String. Name of layer in database of file name of FIA
 pop_plot_stratum_assgn table, if using evaluations.}
