@@ -272,7 +272,6 @@ dim(WYcond.evalCur00)
 ## Include tree data and spatial data
 ##############################################
 # Now, include tree data 
-source("C:\\_tsf\\_GitHub\\FIESTA\\R\\DBgetPlots.R")
 WYdat.evalCur00 <- DBgetPlots(states="Wyoming", evalCur=TRUE, issp=TRUE, istree=FALSE)
 
 ## Extract and look at components in returned list object

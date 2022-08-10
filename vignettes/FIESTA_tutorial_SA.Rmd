@@ -103,8 +103,6 @@ Now that we've loaded `FIESTA` and setup our outfolder, we can retrieve the data
 
 ```{r}
 # File names for external spatial data
-FIAplotsfn <- system.file("extdata", "FIApublic_M331B.db", package="FIESTA")
-FIAplotsfn <- "C:/_tsf/_GitHub/FIESTA/inst/extdata/FIA_data/FIApublic_M331B.db"
 
 WYbhfn <- system.file("extdata", "sp_data/WYbighorn_adminbnd.shp", package="FIESTA")
 WYbhdistfn <- system.file("extdata", "sp_data/WYbighorn_districtbnd.shp", package="FIESTA")
