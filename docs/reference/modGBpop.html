@@ -24,7 +24,7 @@ population."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
       </span>
     </div>
 
@@ -132,8 +132,8 @@ population.</p>
     <h2>Arguments</h2>
     <dl><dt>popType</dt>
 <dd><p>String. Type of evaluation(s) to include in population data.
-Note: currently only c('CURR', 'VOL', 'LULC') are available. See details
-below for descriptions of each.</p></dd>
+Note: currently only c('CURR', 'VOL', 'LULC', 'DWM') 
+are available. See details below for descriptions of each.</p></dd>
 <dt>popTabs</dt>
 <dd><p>List of population tables the user would like returned.
 See help(popTables) for a list of options.</p></dd>
@@ -371,7 +371,7 @@ Station, p.53-77.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> filter removed 14 records: COND_STATUS_CD != 5</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">GBpopdat</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 27</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ popType    : chr "VOL"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ condx      :Classes ‘data.table’ and 'data.frame':	3210 obs. of  12 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span>
@@ -398,20 +398,13 @@ Station, p.53-77.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ expcondtab :Classes ‘data.table’ and 'data.frame':	3210 obs. of  12 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ plotsampcnt:Classes ‘data.table’ and 'data.frame':	2 obs. of  3 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "sorted")= chr "PLOT_STATUS_CD"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ condsampcnt:Classes ‘data.table’ and 'data.frame':	5 obs. of  3 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "sorted")= chr "COND_STATUS_CD"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ plotsampcnt:'data.frame':	2 obs. of  3 variables:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ condsampcnt:'data.frame':	5 obs. of  3 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ states     : chr "Wyoming"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ invyrs     :List of 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dim")= int 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "dimnames")=List of 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "call")= language by.default(data = invyrtab$INVYR, INDICES = invyrtab$STATECD, FUN = I)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr "by"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ estvar.area: chr "CONDPROP_ADJ"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ adj        : chr "samp"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ areawt     : chr "CONDPROP_UNADJ"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ treex      :Classes ‘data.table’ and 'data.frame':	18380 obs. of  21 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "sorted")= chr [1:2] "PLT_CN" "CONDID"</span>

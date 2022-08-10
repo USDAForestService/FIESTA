@@ -23,7 +23,7 @@ Area by domain (i.e., estimation unit) - Zonal statistics by domain
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
       </span>
     </div>
 
@@ -112,6 +112,7 @@ Area by domain (i.e., estimation unit)<br> - Zonal statistics by domain
   rast.asp <span class="op">=</span> <span class="cn">NULL</span>,
   rast.lut <span class="op">=</span> <span class="cn">NULL</span>,
   rastlut <span class="op">=</span> <span class="cn">NULL</span>,
+  extract <span class="op">=</span> <span class="cn">TRUE</span>,
   areacalc <span class="op">=</span> <span class="cn">TRUE</span>,
   areaunits <span class="op">=</span> <span class="st">"ACRES"</span>,
   keepNA <span class="op">=</span> <span class="cn">TRUE</span>,
@@ -202,6 +203,10 @@ one raster is allowed.</p></dd>
 <dt>rastlut</dt>
 <dd><p>String or raster object. The raster look up table used for
 collapsing rast.lut values.</p></dd>
+<dt>extract</dt>
+<dd><p>Logical. If TRUE, extracts values from rastlst.cont and 
+rastlst.cat along with values from unit_layer. If FALSE, extracts only 
+values from unit_layer.</p></dd>
 <dt>areacalc</dt>
 <dd><p>Logical. If TRUE, returns area by domvar.</p></dd>
 <dt>areaunits</dt>
@@ -356,9 +361,9 @@ documentation for more details.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>there are 2991 null values for poly1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> savedata=FALSE with savedata parameters... no data are saved</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>                                                                                                                                    rasterfile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>    band           var.name interpolate windowsize statistic rast.NODATA</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1:    1 WYbighorn_dem_250m       FALSE          1      none          NA</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
@@ -367,15 +372,15 @@ documentation for more details.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> extracting point values from WYbighorn_dem_250m ...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2926 missing values for WYbighorn_dem_250m</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> extracting zonal statistics...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: NAD83 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> savedata=FALSE with savedata parameters... no data are saved</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>                                                                                                                                                 rasterfile</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>    band                        var.name interpolate windowsize statistic</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1:    1 WYbighorn_forest_nonforest_250m       FALSE          1      none</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>    rast.NODATA</span>
@@ -385,13 +390,15 @@ documentation for more details.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> extracting point values from WYbighorn_forest_nonforest_250m ...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2929 missing values for WYbighorn_forest_nonforest_250m</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reprojecting layer... </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  from: NAD83 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  to: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD27 +units=m +no_defs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ================================================================================</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> area can only be calculated with projected coordinate system... projecting layer</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $unitvar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "DISTRICTNA"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pltassgn</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  CN INVYR STATECD CYCLE UNITCD COUNTYCD  PLOT MEASYEAR RDDISTCD</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    40404728010690  2013      56     3      2        1 86688     2013       NA</span>
@@ -15634,9 +15641,6 @@ documentation for more details.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3046                               0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3047                               0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $unitvar</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "DISTRICTNA"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pltassgnid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "CN"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -15661,21 +15665,24 @@ documentation for more details.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $inputdf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                                 rasterfile</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:              /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_dem_250m.img</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: /private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_data/WYbighorn_forest_nonforest_250m.tif</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    band                        var.name interpolate windowsize statistic</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:    1              WYbighorn_dem_250m       FALSE          1      none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2:    1 WYbighorn_forest_nonforest_250m       FALSE          1      none</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:    1 WYbighorn_forest_nonforest_250m       FALSE          1      none</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    rast.NODATA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:          NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2:          NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:          NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $prednames</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WYbighorn_dem_250m"              "WYbighorn_forest_nonforest_250m"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $zonalnames</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WYbighorn_dem_250m"                "WYbighorn_forest_nonforest_250m.1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "WYbighorn_forest_nonforest_250m.2"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WYbighorn_dem_250m"                "WYbighorn_forest_nonforest_250m"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "WYbighorn_forest_nonforest_250m.1" "WYbighorn_forest_nonforest_250m.2"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $predfac</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "WYbighorn_forest_nonforest_250m"</span>

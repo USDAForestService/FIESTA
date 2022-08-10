@@ -20,7 +20,7 @@ boundary (spClipPoint)"><!-- mathjax --><script src="https://cdnjs.cloudflare.co
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
       </span>
     </div>
 
@@ -109,13 +109,15 @@ boundary (spClipPoint)</p>
   istree <span class="op">=</span> <span class="cn">FALSE</span>,
   isseed <span class="op">=</span> <span class="cn">FALSE</span>,
   isveg <span class="op">=</span> <span class="cn">FALSE</span>,
+  isdwm <span class="op">=</span> <span class="cn">FALSE</span>,
   plot_layer <span class="op">=</span> <span class="st">"plot"</span>,
   cond_layer <span class="op">=</span> <span class="st">"cond"</span>,
   tree_layer <span class="op">=</span> <span class="st">"tree"</span>,
-  seed_layer <span class="op">=</span> <span class="st">"seed"</span>,
-  vsubpspp_layer <span class="op">=</span> <span class="st">"vsubpspp"</span>,
-  vsubpstr_layer <span class="op">=</span> <span class="st">"vsubpstr"</span>,
-  invsubp_layer <span class="op">=</span> <span class="st">"invsubp"</span>,
+  seed_layer <span class="op">=</span> <span class="st">"seedling"</span>,
+  vsubpspp_layer <span class="op">=</span> <span class="st">"p2veg_subplot_spp"</span>,
+  vsubpstr_layer <span class="op">=</span> <span class="st">"p2veg_subp_structure"</span>,
+  invsubp_layer <span class="op">=</span> <span class="st">"invasive_subplot_spp"</span>,
+  dwm_layer <span class="op">=</span> <span class="st">"cond_dwm_calc"</span>,
   ppsa_layer <span class="op">=</span> <span class="st">"pop_plot_stratum_assgn"</span>,
   other_layers <span class="op">=</span> <span class="cn">NULL</span>,
   puniqueid <span class="op">=</span> <span class="st">"CN"</span>,
@@ -211,6 +213,8 @@ names in *_layer arguments.</p></dd>
 <dt>isveg</dt>
 <dd><p>Logical. If TRUE, understory vegetation tables are extracted
 from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).</p></dd>
+<dt>isdwm</dt>
+<dd><p>Logical. If TRUE, down woody material are extracted.</p></dd>
 <dt>plot_layer</dt>
 <dd><p>String. Name of layer in database of file name of FIA plot
 table.</p></dd>
@@ -232,6 +236,9 @@ P2VEG_SUBP_STRUCTURE table if isveg=TRUE.</p></dd>
 <dt>invsubp_layer</dt>
 <dd><p>String. Name of layer in database of file name of FIA
 INVASIVE_SUBPLOT_SPP table if isveg=TRUE.</p></dd>
+<dt>dwm_layer</dt>
+<dd><p>String. Name of layer in database of file name of FIA
+COND_DWM_CALC table if isdwm=TRUE.</p></dd>
 <dt>ppsa_layer</dt>
 <dd><p>String. Name of layer in database of file name of FIA
 pop_plot_stratum_assgn table, if using evaluations.</p></dd>

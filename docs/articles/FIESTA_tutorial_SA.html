@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
       </span>
     </div>
 
@@ -273,8 +273,6 @@ and derive new predictor layers using the <code>raster</code>
 package.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># File names for external spatial data</span>
-<span class="va">FIAplotsfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"FIApublic_M331B.db"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span>
-<span class="va">FIAplotsfn</span> <span class="op">&lt;-</span> <span class="st">"C:/_tsf/_GitHub/FIESTA/inst/extdata/FIA_data/FIApublic_M331B.db"</span>
 
 <span class="va">WYbhfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_adminbnd.shp"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span>
 <span class="va">WYbhdistfn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"sp_data/WYbighorn_districtbnd.shp"</span>, package<span class="op">=</span><span class="st">"FIESTA"</span><span class="op">)</span>
@@ -400,16 +398,16 @@ further information on this function.</p>
 <details><summary>
 output
 </summary><pre><code><span class="co">## List of 12</span>
-<span class="co">##  $ pltassgn      :'data.frame':  56 obs. of  26 variables:</span>
 <span class="co">##  $ unitvar       : chr "DISTRICTNA"</span>
+<span class="co">##  $ pltassgn      :'data.frame':  56 obs. of  26 variables:</span>
 <span class="co">##  $ pltassgnid    : chr "CN"</span>
 <span class="co">##  $ unitarea      :'data.frame':  3 obs. of  2 variables:</span>
 <span class="co">##  $ areavar       : chr "ACRES_GIS"</span>
 <span class="co">##  $ unitzonal     :'data.frame':  3 obs. of  8 variables:</span>
-<span class="co">##  $ inputdf       :Classes 'data.table' and 'data.frame': 4 obs. of  7 variables:</span>
+<span class="co">##  $ inputdf       :Classes 'data.table' and 'data.frame': 5 obs. of  7 variables:</span>
 <span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="co">##  $ prednames     : chr [1:5] "dem" "slp" "asp_cos" "asp_sin" ...</span>
-<span class="co">##  $ zonalnames    : chr [1:6] "dem" "slp" "asp_cos" "asp_sin" ...</span>
+<span class="co">##  $ zonalnames    : chr [1:7] "dem" "slp" "asp_cos" "asp_sin" ...</span>
 <span class="co">##  $ predfac       : chr "fornf"</span>
 <span class="co">##  $ npixelvar     : chr "npixels"</span>
 <span class="co">##  $ predfac.levels:List of 1</span></code></pre>
@@ -451,7 +449,7 @@ list includes we can use the <code>str</code> function:</p>
 <details><summary>
 output
 </summary><pre><code><span class="co">## List of 24</span>
-<span class="co">##  $ smallbnd       : chr "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/Rtmpbmge0I/temp_libpath9d155a15ac8c/FIESTA/extdata/sp_"| __truncated__</span>
+<span class="co">##  $ smallbnd       : chr "/private/var/folders/c6/3mlbrgp57ls3_xf43cjzfp0c0000gn/T/RtmpMopLAs/temp_libpath3607689532b6/FIESTA/extdata/sp_"| __truncated__</span>
 <span class="co">##  $ smallbnd.domain: chr "DISTRICTNA"</span>
 <span class="co">##  $ condx          :'data.frame': 66 obs. of  13 variables:</span>
 <span class="co">##  $ pltcondx       :'data.frame': 66 obs. of  43 variables:</span>
@@ -465,18 +463,10 @@ output
 <span class="co">##  $ dunitlut       :'data.frame': 3 obs. of  8 variables:</span>
 <span class="co">##  $ prednames      : chr [1:5] "dem" "slp" "asp_cos" "asp_sin" ...</span>
 <span class="co">##  $ predfac        : chr "fornf"</span>
-<span class="co">##  $ plotsampcnt    :Classes 'data.table' and 'data.frame':    2 obs. of  3 variables:</span>
-<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="co">##   ..- attr(*, "sorted")= chr "PLOT_STATUS_CD"</span>
-<span class="co">##  $ condsampcnt    :Classes 'data.table' and 'data.frame':    4 obs. of  3 variables:</span>
-<span class="co">##   ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="co">##   ..- attr(*, "sorted")= chr "COND_STATUS_CD"</span>
+<span class="co">##  $ plotsampcnt    :'data.frame': 2 obs. of  3 variables:</span>
+<span class="co">##  $ condsampcnt    :'data.frame': 4 obs. of  3 variables:</span>
 <span class="co">##  $ states         : chr "Wyoming"</span>
 <span class="co">##  $ invyrs         :List of 1</span>
-<span class="co">##   ..- attr(*, "dim")= int 1</span>
-<span class="co">##   ..- attr(*, "dimnames")=List of 1</span>
-<span class="co">##   ..- attr(*, "call")= language by.default(data = invyrtab$INVYR, INDICES = invyrtab$STATECD, FUN = I)</span>
-<span class="co">##   ..- attr(*, "class")= chr "by"</span>
 <span class="co">##  $ estvar.area    : chr "CONDPROP_ADJ"</span>
 <span class="co">##  $ adj            : chr "plot"</span>
 <span class="co">##  $ treex          :'data.frame': 1691 obs. of  21 variables:</span>
@@ -499,7 +489,7 @@ estimation.</p>
 View Example
 </summary><p>First, we can set up our predictors as a vector:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">all_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"dem"</span>, <span class="st">"asp_cos"</span>, <span class="st">"asp_sin"</span>, <span class="st">"fornf2"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">all_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"slp"</span>, <span class="st">"dem"</span>, <span class="st">"asp_cos"</span>, <span class="st">"asp_sin"</span>, <span class="st">"fornf"</span><span class="op">)</span></code></pre></div>
 <p>Next, we fit the unit-level EBLUP with the <code>JoSAE</code> R
 package.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">

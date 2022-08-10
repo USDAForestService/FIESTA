@@ -18,7 +18,7 @@ tables to be supplied to *pop functions."><!-- mathjax --><script src="https://c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
       </span>
     </div>
 
@@ -94,6 +94,7 @@ tables to be supplied to *pop functions.</p>
   subplot <span class="op">=</span> <span class="cn">NULL</span>,
   subp_cond <span class="op">=</span> <span class="cn">NULL</span>,
   lulc <span class="op">=</span> <span class="cn">NULL</span>,
+  cond_dwm_calc <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -141,6 +142,9 @@ dsn. Subplot condition-level data with one record for each species
 <dt>lulc</dt>
 <dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
 Land use/Land cover data with current and previous observations.</p></dd>
+<dt>cond_dwm_calc</dt>
+<dd><p>DF/DT, R object, comma-delimited file(*.csv), or layer 
+in dsn. Calculated down woody material.</p></dd>
 <dt>...</dt>
 <dd><p>For extendibility.</p></dd>
 </dl></div>
@@ -19527,6 +19531,9 @@ Land use/Land cover data with current and previous observations.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $lulc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $cond_dwm_calc</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>

@@ -18,7 +18,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FIESTA</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
       </span>
     </div>
 
@@ -287,8 +287,8 @@ of options. Only used when savedata = TRUE. If out_layer = NULL,</p></dd>
 <dd><p>Vector. Input state(s) (full state names: Arizona).</p></dd>
 <dt>tabs</dt>
 <dd><p>List. A list of data frames from FIA database, including 
-plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), vsubpspp,
-vsubpstr, and invsubp (if isveg=TRUE), lulc (if islulc=TRUE). See below 
+plt and cond; and tree (if istree=TRUE); seed (if isseed=TRUE), p2veg_subplot_spp,
+p2veg_subp_structure, and invsubp (if isveg=TRUE), lulc (if islulc=TRUE). See below 
 'Output Tables - FIA Table Names' for reference to FIA database tables. 
 See FIESTA:ref_* for variable descriptions (e.g., FIESTA::ref_tree). 
 If istree and the number of states &gt; 3, tree data are saved to outfolder 
@@ -316,7 +316,7 @@ are used to extract data from database, return the POP_PLOT_STRATUM_ASSGN
 table or, if more than one evalType and savePOP=FALSE. If more than one
 evalType, only the records for the evalTypes are returned, otherwise all
 evalTypes for the state evaluation are returned.</p></dd>
-</dl><p>*Output Tables - FIA Table Names*<br></p><table class="table table"><tr><td></td><td><b>tab</b></td><td><b>FIA Table</b></td></tr><tr><td></td><td>plt</td><td>plot</td></tr><tr><td></td><td>cond</td><td>cond</td></tr><tr><td></td><td>tree</td><td>tree</td></tr><tr><td></td><td>vsubpspp</td><td>P2VEG_SUBPLOT_SPP</td></tr><tr><td></td><td>vsubpstr</td><td>P2VEG_SUBP_STRUCTURE</td></tr><tr><td></td><td>invsubp</td><td>INVASIVE_SUBPLOT_SPP</td></tr><tr><td></td><td>subplot</td><td>SUBPLOT</td></tr><tr><td></td><td>subp_cond</td><td>SUBP_COND</td></tr><tr><td></td><td>dwm</td><td>COND_DWM_CALC</td></tr><tr><td></td><td>grm</td><td>TREE_GRM_COMPONENT</td></tr><tr><td></td><td>issccm</td><td>SUBP_COND_CHNG_MTRX</td></tr></table><p>#' Outputs to outfolder (if savedata=TRUE):</p><table class="table table"><tr><td></td><td>- If saveqry=TRUE, text file(s) of SQL queries used to extract data 
+</dl><p>*Output Tables - FIA Table Names*<br></p><table class="table table"><tr><td></td><td><b>tab</b></td><td><b>FIA Table</b></td></tr><tr><td></td><td>plt</td><td>plot</td></tr><tr><td></td><td>cond</td><td>cond</td></tr><tr><td></td><td>tree</td><td>tree</td></tr><tr><td></td><td>p2veg_subplot_spp</td><td>P2VEG_SUBPLOT_SPP</td></tr><tr><td></td><td>p2veg_subp_structure</td><td>P2VEG_SUBP_STRUCTURE</td></tr><tr><td></td><td>invsubp</td><td>INVASIVE_SUBPLOT_SPP</td></tr><tr><td></td><td>subplot</td><td>SUBPLOT</td></tr><tr><td></td><td>subp_cond</td><td>SUBP_COND</td></tr><tr><td></td><td>dwm</td><td>COND_DWM_CALC</td></tr><tr><td></td><td>grm</td><td>TREE_GRM_COMPONENT</td></tr><tr><td></td><td>issccm</td><td>SUBP_COND_CHNG_MTRX</td></tr></table><p>#' Outputs to outfolder (if savedata=TRUE):</p><table class="table table"><tr><td></td><td>- If saveqry=TRUE, text file(s) of SQL queries used to extract data 
 from database (_.txt). Note: one query is used for extracting both plt
 and cond (pltcondqry*.txt).</td></tr><tr><td></td><td>- CSV file of plot and condition counts (pltcnt*.txt).</td></tr><tr><td></td><td>- Layers in a database or CSV files of output tables.</td></tr><tr><td></td><td>- If issp=TRUE, a feature class or ESRI shapefile of plot-level 
 level attributes. If shapefile (.shp), variable names are truncated to 
@@ -333,7 +333,7 @@ had such tree cover and that will be naturally or artificially regenerated.
 To qualify, the area must be &gt;= 1.0 acre in size and 120.0 feet wide (See
 Burrill et al. 2018).</p>
 <p>*ACI (All Condition Inventory)*<br> RMRS National Forest plots. For nonforest
-conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 1),
+conditions that have been visited in the field (NF_SAMPLING_STATUS_CD = 
 if trees exist on the condition, the data exist in the tree table. If you do
 not want these trees included, ACI=FALSE. This will filter the data to only
 forested conditions (COND_STATUS_CD = 1)</p>
