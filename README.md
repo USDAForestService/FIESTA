@@ -17,7 +17,7 @@ population boundaries, different evaluation time periods, customized
 stratification schemes, non-standard variance equations, integration of
 multi-scale remotely-sensed data and other auxiliary information, and
 interaction with other modeling and estimation tools from CRAN’s library
-of packages. `FIESTA` contains a collection of functions that can access
+of packages. `FIESTA` contains a collection of functions that can query
 FIA databases, summarize and compile plot and spatial data, and generate
 estimates with associated sampling errors.
 
@@ -128,53 +128,28 @@ License is GPL-3.
 
 ### Vignettes
 
-To see a list of vignette tutorials from `FIESTA`, you can run the
-following code:
-
-``` r
-vignette(package = "FIESTA")
-```
-
-These vignettes are split up into a few groups:
-
-#### General Manuals
-
-``` r
-# Estimation manual
-vignette("FIESTA_manual_mod_est", package = "FIESTA")
-
-# Population data manual
-vignette("FIESTA_manual_mod_pop", package = "FIESTA")
-```
-
-#### Core functions
-
-``` r
-# Data tools
-vignette("FIESTA_tutorial_dat", package = "FIESTA")
-
-# Database tools
-vignette("FIESTA_tutorial_DB", package = "FIESTA")
-
-# Spatial tools
-vignette("FIESTA_tutorial_sp", package = "FIESTA")
-```
-
-#### Estimation Modules
-
-``` r
-# Green-Book estimation
-vignette("FIESTA_tutorial_GB", package = "FIESTA")
-
-# Model-assisted estimation
-vignette("FIESTA_tutorial_MA", package = "FIESTA")
-
-# Small area estimation
-vignette("FIESTA_tutorial_SA", package = "FIESTA")
-
-# Photo-based estimation
-vignette("FIESTA_tutorial_PB", package = "FIESTA")
-```
+The vignette tutorials from `FIESTA` can be accessed from [the package
+website](https://usdaforestservice.github.io/FIESTA/articles/). The
+vignettes are split up into a few groups: general manuals ([Module
+Estimates](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_manual_mod_est.html)
+and [Population
+Data](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_manual_mod_pop.html)),
+core functions ([Database
+Tools](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_DB.html),
+[Data
+Tools](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_dat.html),
+and [Spatial
+Tools](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_sp.html)),
+and estimation modules ([Green-book
+Estimators](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_GB.html),
+[Model-Assisted
+Estimators](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_MA.html),
+[Small Area
+Estimators](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_SA.html),
+and [Photo-Based
+Module](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_PB.html)).
+We suggest you read the general manuals first if you are new to
+`FIESTA`.
 
 ### External Data
 
@@ -230,12 +205,13 @@ summary(GBpopdat)
 #> strvar       1     -none-     character
 #> strwtvar     1     -none-     character
 #> expcondtab  12     data.table list     
-#> plotsampcnt  3     data.table list     
-#> condsampcnt  3     data.table list     
+#> plotsampcnt  3     data.frame list     
+#> condsampcnt  3     data.frame list     
 #> states       1     -none-     character
-#> invyrs       1     by         list     
+#> invyrs       1     -none-     list     
 #> estvar.area  1     -none-     character
 #> adj          1     -none-     character
+#> areawt       1     -none-     character
 #> treex       21     data.table list     
 #> tuniqueid    1     -none-     character
 #> adjtree      1     -none-     logical
@@ -323,13 +299,13 @@ str(MAest, max.level = 2)
 #> List of 4
 #>  $ est    :Classes 'data.table' and 'data.frame':    23 obs. of  3 variables:
 #>   ..$ ESTN_UNIT             : int [1:23] 1 3 5 7 9 11 13 15 17 19 ...
-#>   ..$ Estimate              : num [1:23] 34769303 28493559 8260491 69278394 23200459 ...
+#>   ..$ Estimate              : num [1:23] 34769303 28493559 8260491 69278394 23200460 ...
 #>   ..$ Percent Sampling Error: num [1:23] 8.7 19.8 25.69 9.23 20.17 ...
 #>   ..- attr(*, ".internal.selfref")=<externalptr> 
 #>   ..- attr(*, "sorted")= chr "ESTN_UNIT"
 #>  $ raw    :List of 13
 #>   ..$ unit_totest  :'data.frame':    23 obs. of  18 variables:
-#>   ..$ domdat       :'data.frame':    3210 obs. of  17 variables:
+#>   ..$ domdat       :'data.frame':    3210 obs. of  14 variables:
 #>   ..$ plotweights  :List of 1
 #>   ..$ estvar       : chr "BA"
 #>   ..$ estvar.filter: chr "STATUSCD == 1"

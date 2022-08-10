@@ -93,50 +93,7 @@ License is GPL-3.
 
 ### Vignettes
 
-To see a list of vignette tutorials from `FIESTA`, you can run the following code: 
-
-```{r, eval = F}
-vignette(package = "FIESTA")
-```
-
-These vignettes are split up into a few groups:
-
-#### General Manuals
-
-```{r, eval = F}
-# Estimation manual
-vignette("FIESTA_manual_mod_est", package = "FIESTA")
-
-# Population data manual
-vignette("FIESTA_manual_mod_pop", package = "FIESTA")
-```
-
-#### Core functions
-```{r, eval = F}
-# Data tools
-vignette("FIESTA_tutorial_dat", package = "FIESTA")
-
-# Database tools
-vignette("FIESTA_tutorial_DB", package = "FIESTA")
-
-# Spatial tools
-vignette("FIESTA_tutorial_sp", package = "FIESTA")
-```
-
-#### Estimation Modules
-```{r, eval = F}
-# Green-Book estimation
-vignette("FIESTA_tutorial_GB", package = "FIESTA")
-
-# Model-assisted estimation
-vignette("FIESTA_tutorial_MA", package = "FIESTA")
-
-# Small area estimation
-vignette("FIESTA_tutorial_SA", package = "FIESTA")
-
-# Photo-based estimation
-vignette("FIESTA_tutorial_PB", package = "FIESTA")
-```
+The vignette tutorials from `FIESTA` can be accessed from [the package website](https://usdaforestservice.github.io/FIESTA/articles/). The vignettes are split up into a few groups: general manuals ([Module Estimates](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_manual_mod_est.html) and [Population Data](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_manual_mod_pop.html)), core functions ([Database Tools](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_DB.html), [Data Tools](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_dat.html), and [Spatial Tools](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_sp.html)), and estimation modules ([Green-book Estimators](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_GB.html), [Model-Assisted Estimators](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_MA.html), [Small Area Estimators](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_SA.html), and [Photo-Based Module](https://usdaforestservice.github.io/FIESTA/articles/FIESTA_tutorial_PB.html)). We suggest you read the general manuals first if you are new to `FIESTA`. 
 
 ### External Data
 
