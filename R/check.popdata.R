@@ -943,21 +943,21 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         stop("must include PLOT_STATUS_CD")
       }
 
-      P2POINTCNT <- setDF(merge(P2POINTCNT, nonresplut, all.x=TRUE))
-      P2POINTCNT[is.na(P2POINTCNT$n.nonresp), "n.nonresp"] <- 0
+      P2POINTCNTNR <- setDF(merge(P2POINTCNT, nonresplut, all.x=TRUE))
+      P2POINTCNTNR[is.na(P2POINTCNTNR$n.nonresp), "n.nonresp"] <- 0
 
-      P2POINTCNT$n.resp <- P2POINTCNT$P2POINTCNT - P2POINTCNT$n.nonresp
+      P2POINTCNTNR$n.resp <- P2POINTCNTNR$P2POINTCNT - P2POINTCNTNR$n.nonresp
 
       ## Subset strata from FIADB that have number of plots less than nonresp.minplotnum
       appendltmin <- FALSE
-      if (any(P2POINTCNT$n.resp <= nonresp.minplotnum)) {
+      if (any(P2POINTCNTNR$n.resp <= nonresp.minplotnum)) {
         appendltmin <- TRUE
-        unit.ltmin <- P2POINTCNT[P2POINTCNT$n.resp <= nonresp.minplotnum, unitvars]
+        unit.ltmin <- P2POINTCNTNR[P2POINTCNTNR$n.resp <= nonresp.minplotnum, unitvars]
       } 
 
 #      ## Check - Get number of plots by estimation unit (maybe take out)
-      unit.N <- setDT(P2POINTCNT)[, list(Nstrata =.N), by=c(unitvars)]
-#      strata.N <- merge(P2POINTCNT[, c(unitvars, strvar, "P2POINTCNT"), with=FALSE],
+      unit.N <- setDT(P2POINTCNTNR)[, list(Nstrata =.N), by=c(unitvars)]
+#      strata.N <- merge(P2POINTCNTNR[, c(unitvars, strvar, "P2POINTCNT"), with=FALSE],
 #		unit.N, by=unitvars)
 #      if (any(strata.N$P2POINTCNT < 10 & strata.N$n.strata > 1)) {
 #         message("there are estimation units with > 1 strata and has strata with less than 10 plots")
@@ -1041,9 +1041,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 					"E")))))
 
 
-        ## Sum n.resp to new strata groups
-        RHGgrp1 <- RHGgrp[RHGgrp$RHG != "A", lapply(.SD, sum, na.rm=TRUE), 
-				by=c(unitvars, strvar, "SAMP_METHOD_CD", "RHG"), .SDcols=c("n.resp")]
+        ## Sum n.resp to new strata groups (removing RHGgrp = A)
+ #       RHGgrp <- RHGgrp[RHGgrp$RHG != "A", lapply(.SD, sum, na.rm=TRUE), 
+ #				by=c(unitvars, strvar, "SAMP_METHOD_CD", "RHG"), .SDcols=c("n.resp")]
 
         ###########################################################################
 
@@ -1070,11 +1070,10 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         RHGlut <- merge(RHGgrp, nonresplut[, c(unitvars, strvar, "n.nonresp"), with=FALSE], 
 				by=c(unitvars, strvar), all.x=TRUE, all.y=TRUE)
         #dim(test)
-        RHGlut[, SAMP_METHOD_CD := NULL,]
+        #RHGlut[, SAMP_METHOD_CD := NULL,]
         RHGlut[is.na(RHGlut$n.nonresp), "n.nonresp"] <- 0
         #data.frame(test)
         pvars2keep <- c(pvars2keep, "RHG")
-        P2POINTCNT <- RHGlut
 
       } else {
         stop("must include SAMP_METHOD_CD")
@@ -1708,7 +1707,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     returnlst$stratalut <- stratalut
   }
   if (nonresp) {
-    returnlst$substrvar <- "RHG"
     #returnlst$nonresplut <- nonresplut
     #returnlst$RHGgrp <- RHGgrp
     returnlst$RHGlut <- RHGlut

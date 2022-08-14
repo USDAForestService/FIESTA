@@ -680,13 +680,10 @@ modGBpop <- function(popType = "VOL",
     #cwdcols <- names(cond_dwm_calcf)[grepl(dwmtype, names(cond_dwm_calcf), ignore.case=TRUE)]
     #areawt <- names(condx)[grepl(dwmtype, names(condx), ignore.case=TRUE)]
   }
+ 
   if (nonresp) {
-    substrvar <- popcheck$substrvar
-    stratalut <- popcheck$RHGlut
-    getwt <- TRUE
-    getwtvar <- "n.resp"
+    RHGlut <- popcheck$RHGlut
     nonresplut <- popcheck$nonresplut
-    P2POINTCNT <- NULL
   }
 
   ###################################################################################
@@ -704,7 +701,7 @@ modGBpop <- function(popType = "VOL",
                     unitarea=popcheck$unitarea, areavar=areavar, 
                     minplotnum.unit=minplotnum.unit, unit.action=unit.action, 
                     strata=strata, auxlut=stratalut, strvar=strvar, 
-                    nonresp=nonresp, substrvar=substrvar, 
+                    nonresp=nonresp, RHGlut=RHGlut, 
                     stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
                     removeifnostrata=TRUE, getwt=getwt, 
                     getwtvar=getwtvar, strwtvar=strwtvar, P2POINTCNT=P2POINTCNT,
@@ -724,7 +721,7 @@ modGBpop <- function(popType = "VOL",
   strunitvars <- c(unitvar, strvar)
   if (nonresp) {
     adj <- "none"
-    strunitvars <- c(unitvar, strvar, "RHG")    
+    RHGlut <- auxdat$RHGlut
   }
 
   ###################################################################################
@@ -833,7 +830,7 @@ modGBpop <- function(popType = "VOL",
   }
   if (nonresp) {
     returnlst$nonresplut <- nonresplut
-    returnlst$substrvar <- "RHG"
+    returnlst$RHGlut <- RHGlut
   }
 
   ###################################################################################
@@ -959,6 +956,18 @@ modGBpop <- function(popType = "VOL",
 		                          overwrite_layer=overwrite_layer,
 		                          append_layer=append_layer,
 		                          add_layer=TRUE))
+    if (nonresp) {
+      datExportData(RHGlut, 
+          savedata_opts=list(outfolder=outfolder, 
+                              out_fmt=out_fmt, 
+		                          out_dsn=out_dsn, 
+		                          out_layer="RHGlut",
+		                          outfn.pre=outfn.pre, 
+		                          outfn.date=outfn.date, 
+		                          overwrite_layer=overwrite_layer,
+		                          append_layer=append_layer,
+		                          add_layer=TRUE))
+    }
   }
 
   return(returnlst)
