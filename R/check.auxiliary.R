@@ -263,6 +263,12 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       unitarea[[unitvar12]] <- paste(unitarea[[unitvar2]], unitarea[[unitvar]], sep="-")
       unitarea[, c(unitvar, unitvar2) := NULL]
     }
+  
+    if (!is.null(RHGlut)) {
+      RHGlut[[unitvar12]] <- paste(RHGlut[[unitvar2]], RHGlut[[unitvar]], sep="-")
+      RHGlut[, c(unitvar, unitvar2) := NULL]
+    }
+ 
     strunitvars <- unique(replace(strunitvars, which(strunitvars %in% c(unitvar, unitvar2)), unitvar12))
     unitvar <- unitvar12
   }
@@ -468,6 +474,7 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
       }
       getwtvar <- NULL
     }
+
   } else {
     if ("n.strata" %in% auxlut) {
       auxlut[["n.strata"]] <- NULL
@@ -477,6 +484,14 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
   ## Set key to strlut and unitarea
   setkeyv(auxlut, strunitvars)
   setkeyv(pltx, puniqueid)
+
+  ## Set column order
+  if (length(unitvars) > 1) {
+    setcolorder(auxlut, c(unitvars, strunitvars, 
+			names(auxlut)[!names(auxlut) %in% c(unitvars, strunitvars)]))
+  } else {
+    setcolorder(auxlut, c(strunitvars, names(auxlut)[!names(auxlut) %in% strunitvars]))
+  }
 
   returnlst <- list(pltx=as.data.table(pltx),
 		auxlut=as.data.table(auxlut),
@@ -509,14 +524,16 @@ check.auxiliary <- function(pltx, puniqueid, module="GB", strata=FALSE,
     if (nonresp) {
 
       ## Check that the class of c(unitvars, strvars) in RHGlut match auxlut
-      matchcl <- check.matchclass(tab1=auxlut, tab2=RHGlut, matchcol=c(unitvars, strvars),
+      matchcl <- check.matchclass(tab1=auxlut, tab2=RHGlut, matchcol=c(unitvar, strvars),
 		tab1txt=auxtext, tab2txt="RHGlut")
       auxlut <- matchcl$tab1
       RHGlut <- matchcl$tab2
 
       ## Check that th2 values of c(unitvars, strvars) in RHGlut match auxlut
-      RHGlut <- check.matchval(tab1=RHGlut, tab2=auxlut, var1=c(unitvars, strvars),
+      RHGlut <- check.matchval(tab1=RHGlut, tab2=auxlut, var1=c(unitvar, strvars),
 		tab1txt="RHGlut", tab2txt=auxtext, stopifmiss=FALSE)
+      setcolorder(RHGlut, c(strunitvars, names(RHGlut)[!names(RHGlut) %in% strunitvars]))
+      setkeyv(RHGlut, strunitvars)
 
       returnlst$RHGlut <- RHGlut
       returnlst$nonsampplots <- nonsampplots

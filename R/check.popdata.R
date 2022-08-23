@@ -988,8 +988,17 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         RHGlut[, Nsampmeth := .N, by=c(unitvars, strvar)]
 
         if (appendltmin) {
-          RHGlut.ltmin <- RHGlut[RHGlut[[unitvars]] %in% unit.ltmin, ]
-          RHGlut <- RHGlut[!RHGlut[[unitvars]] %in% unit.ltmin, ] 
+          if (length(unitvars) > 1) {
+            RHGlut[, TESTVAR := do.call(paste, .SD), .SDcols=unitvars]
+            setDT(unit.ltmin)[, TESTVAR := do.call(paste, .SD), .SDcols=unitvars]
+            RHGlut.ltmin <- RHGlut[RHGlut$TESTVAR %in% unit.ltmin$TESTVAR, ]
+            RHGlut <- RHGlut[!RHGlut$TESTVAR %in% unit.ltmin$TESTVAR, ]
+            RHGlut.ltmin[, TESTVAR := NULL] 
+            RHGlut[, TESTVAR := NULL] 
+          } else {
+            RHGlut.ltmin <- RHGlut[RHGlut[[unitvars]] %in% unit.ltmin, ]
+            RHGlut <- RHGlut[!RHGlut[[unitvars]] %in% unit.ltmin, ] 
+          }
         }
 
         ## Group SAMP_METHOD_CD with n.resp less than or equal to nonresp.minplotnum
@@ -1012,7 +1021,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         ## 4) Else, RHG = E.
         ###########################################################################
         RHGgrp <- RHGlut[, groupStrata(.SD, minplotnum=nonresp.minplotnum, nvar="n.resp"), 
-			by=c(unitvar, strvar)]
+			by=c(unitvars, strvar)]
 
         if (appendltmin) {
           ## Group strata with n.resp less than 2
@@ -1058,7 +1067,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         ## Then merge RHGgrp to pltassgn to append RHG substrata variable 
         ## Note: kicks out nonsampled plots
         #pltassgnx <- merge(pltassgnx, unique(pltcondx[, c(cuniqueid, "SAMP_METHOD_CD"), with=FALSE]))
-        pltcondx <- merge(pltcondx, RHGgrp1[, c(unitvars, strvar, "SAMP_METHOD_CD", "RHG"), with=FALSE], 
+        pltcondx <- merge(pltcondx, RHGgrp[, c(unitvars, strvar, "SAMP_METHOD_CD", "RHG"), with=FALSE], 
 			by=c(unitvars, strvar, "SAMP_METHOD_CD"), all.x=TRUE)
         setkeyv(pltcondx, c(cuniqueid, condid))
         pltcondx[is.na(RHG), RHG := "A"]
@@ -1069,6 +1078,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
         RHGlut <- merge(RHGgrp, nonresplut[, c(unitvars, strvar, "n.nonresp"), with=FALSE], 
 				by=c(unitvars, strvar), all.x=TRUE, all.y=TRUE)
+        RHGlut[RHGlut$RHG == "O", "n.nonresp"] <- 0
         #dim(test)
         #RHGlut[, SAMP_METHOD_CD := NULL,]
         RHGlut[is.na(RHGlut$n.nonresp), "n.nonresp"] <- 0

@@ -725,7 +725,7 @@ modGBratio <- function(GBpopdat,
     if (!is.null(tdomvar)) {
       if (!is.null(tdomvar2)) {
         tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]    
+		          by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]    
       } else {
         if (tdomvar == rowvar) {
           tdomdatsum <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
@@ -751,7 +751,7 @@ modGBratio <- function(GBpopdat,
       }
     } else {
       tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
+		        by=c(strunitvars, cuniqueid, rowvar), .SDcols=c(estvarn.name, estvard.name)]
     }
 
     #tdomdatsum <- tdomdatsum[!is.na(tdomdatsum[[rowvar]]),]
