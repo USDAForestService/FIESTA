@@ -697,15 +697,15 @@ DBgetPlots <- function (states = NULL,
   ## Note: Periodic data in database includes forested plots >= 5% cover 
   ## Note: Annual data in database includes forested plots >=10% cover
 
-  if (isdwm) {
-    evalType <- c(evalType, "DWM")
-  }
+#  if (isdwm) {
+#    evalType <- c(evalType, "DWM")
+#  }
 #  if (isveg) {
 #    evalType <- c(evalType, "P2VEG")
 #  }
-  if (isgrm || issccm) {
-    evalType <- c(evalType, "CHNG")
-  }
+#  if (isgrm || issccm) {
+#    evalType <- c(evalType, "CHNG")
+#  }
  
   ## Get states, Evalid and/or invyrs info
   evalInfo <- DBgetEvalid(states=states, RS=RS, 
@@ -1259,6 +1259,7 @@ DBgetPlots <- function (states = NULL,
   filtervarlst <- c(pltvarlst, condvarlst)
   spcoords <- "PUBLIC"
   spcoordslst <- "PUBLIC"
+  othertables2 <- othertables
 
   if (returndata) {
     plt=cond=pltcond=tree=seed=spconddat <- {}
@@ -1271,7 +1272,6 @@ DBgetPlots <- function (states = NULL,
     if(savePOP || iseval) ppsa <- {}  
 
     if (!is.null(othertables)) {
-      othertables2 <- othertables
       for (i in 1:length(othertables)) 
         assign(paste0("other", i), {})
     }    
@@ -1333,16 +1333,20 @@ DBgetPlots <- function (states = NULL,
       } else {
         evalFilter.veg <- evalFilter
       }
-      if (isdwm) {
+      if (any(evalType == "DWM")) {
         evalid.dwm <- evalid[endsWith(as.character(evalid), "07")]
         if (length(evalid.dwm) == 0) stop("must include evaluation ending in 07")
         evalFilter.dwm <- paste("ppsa.EVALID =", evalid.dwm)
-      } 
-      if (isgrm) {
+      } else {
+        evalFilter.dwm <- evalFilter
+      }
+      if (any(evalType == "GRM")) {
         evalid.grm <- evalid[endsWith(as.character(evalid), "03")]
         if (length(evalid.grm) == 0) stop("must include evaluation ending in 03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
-      } 
+      } else {
+        evalFilter.grm <- evalFilter
+      }
     } else {
       evalFilter <- stFilter 
       if (length(invyrs) > 0){
@@ -2372,7 +2376,7 @@ DBgetPlots <- function (states = NULL,
       message(paste("\n",
       "## STATUS: GETTING POP_PLOT_STRATUM_ASSGN DATA (", stabbr, ")...", "\n"))
     
-      ppsavars <- toString(c("PLT_CN", "EVALID", "STATECD", "ESTN_UNIT", "STRATUMCD"))
+      ppsavars <- toString(c("PLT_CN", "STRATUM_CN", "EVALID", "STATECD", "ESTN_UNIT", "STRATUMCD"))
       ppsaqry <- paste("select", ppsavars, "from", ppsafromqry, "where statecd =", stcd)
 
       if (iseval) {
