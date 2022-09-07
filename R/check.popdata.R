@@ -79,7 +79,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
 	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD=
 	SUBPCOND_PROP=MACRCOND_PROP=tpropvars=vcondsppf=vcondstrf=
-     Nsampmeth=Nstrata=strat=RHG=SAMP_METHOD_CD <- NULL
+     Nsampmeth=Nstrata=strat=RHG=SAMP_METHOD_CD=dbqueries=TESTVAR=treex=grm <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -108,11 +108,11 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   ########################################################
   #evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "GRM", "DWM")
   DWM_types <- c("CWD", "FWD_SM", "FWD_LG", "DUFF")
-  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "GRM")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
 		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
 
-  plt=cond=tree=seed=vsubpstr=vsubpspp=subplot=subp_cond=lulc=whereqry.DWM <- NULL
+  plt=cond=tree=seed=vsubpstr=vsubpspp=subplot=subp_cond=cond_pcond=sccm=lulc=whereqry.DWM <- NULL
   ## Get tables from tabs
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])
@@ -125,6 +125,8 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   vsubpsppid <- tabIDs[["vsubpspp"]]
   subplotid <- tabIDs[["subplot"]]
   subp_condid <- tabIDs[["subp_cond"]]
+  cond_chngid <- tabIDs[["cond_pcond"]]
+  sccmid <- tabIDs[["sccm"]]
   subpuniqueid <- subplotid
   lulcid <- "PLT_CN"
 
@@ -216,10 +218,11 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   ###################################################################################
   if (!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg")) {
     datindb <- TRUE
-    dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE)
+    dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
     SCHEMA.=ppsanm=pltassgnqry <- NULL
+    dbqueries <- list()
 
     ## Filter for population data
     if (!is.null(evalid) && !is.data.frame(pltassgn)) {
@@ -280,29 +283,102 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     }
 
     if (!is.null(pfromqry)) {
-      plotqry <- paste("select distinct", paste0(palias, ".*"), "from", pfromqry, whereqry)
+      plotvars <-  DBvars.default()$pltvarlst
+
+      if (popType %in% c("GRM", "CHNG", "LULC")) {
+        plotqry <- paste("select distinct", toString(paste0(palias, ".", plotvars)), "from", 
+			paste0(pfromqry, " JOIN ", SCHEMA., 
+				"plot pplot ON(", palias, ".prev_plt_cn = pplot.cn)"), whereqry)
+      } else {
+        plotqry <- paste("select distinct", toString(paste0(palias, ".", plotvars)), "from", 
+			pfromqry, whereqry)
+      }
+      dbqueries$plot <- plotqry
     }
- 
-    if (!is.null(cond) && is.character(cond) && cond %in% tablst) {
-      if (is.null(plotqry)) {
+
+    if (all(!is.null(cond), is.character(cond), cond %in% tablst)) {
+      condvars <-  DBvars.default()$condvarlst
+
+      if (is.null(pfromqry)) {
         cfromqry <- paste0(SCHEMA., cond, " c")
       } else {
         cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., cond,
-				" c ON (c.PLT_CN = ", palias, ".", pjoinid, ")")
+				" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")")
       }
-      condqry <- paste("select distinct c.* from", cfromqry, whereqry)
+      if (popType %in% c("LULC", "CHNG", "GRM")) {
+        cfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., cond, 
+			" pcond ON(pcond.", cuniqueid, " = ", palias, ".PREV_PLT_CN)")
+      }
+      condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
+				"from", cfromqry, whereqry)
+      dbqueries$cond <- condqry
+    
+
+      if (popType %in% c("LULC", "CHNG", "GRM")) {
+        if (is.null(cond_pcond)) {
+          ## Query SUBP_COND_CHNG_MTRX table for proportion of change
+          ## This is used for calculation of adjustment factors
+          if (is.null(whereqry)) {
+            chgwhereqry <- "WHERE COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
+                    	 	   and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0"
+          } else {
+            chgwhereqry <- paste(whereqry, 
+				"and COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
+                    	 and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0")
+          }
+
+          cond_pcondqry <- paste("select distinct", toString(paste0("c.", condvars)), 
+					"from", cfromqry, chgwhereqry,
+			  "UNION select distinct", toString(paste0("pcond.", condvars)), 
+					"from", cfromqry, chgwhereqry)
+          dbqueries$cond_pcond <- cond_pcondqry
+        }
+
+        if (all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
+
+          sccm_condqry <- paste0("SELECT sccm.plt_cn, p.prev_plt_cn, sccm.condid, 
+                 sum(sccm.SUBPTYP_PROP_CHNG * 
+                     (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS CONDPROP_UNADJ,
+                 sum(sccm.SUBPTYP_PROP_CHNG * 
+                     (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS SUBPPROP_UNADJ,
+                 sum(sccm.SUBPTYP_PROP_CHNG * 
+                     (CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 end)/4) AS MICRPROP_UNADJ,
+                 sum(sccm.SUBPTYP_PROP_CHNG * 
+                     (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 end)/4) AS MACRPROP_UNADJ
+                       FROM ", cfromqry,  
+                 " JOIN ", SCHEMA., sccm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
+                              " and sccm.prev_plt_cn = pcond.", cuniqueid,
+                              " and sccm.", condid, " = c.", condid, 
+                              " and sccm.prevcond = pcond.", condid, ") ", 
+                    chgwhereqry, 
+                 " GROUP BY sccm.plt_cn, p.prev_plt_cn, sccm.condid")
+          dbqueries$sccm_cond <- sccm_condqry
+
+        } else {
+          stop("need SUBP_COND_CHNG_MTRX table to calculate GRM estimates")
+        }
+      }
     }
 
-    if (!is.null(tree) && is.character(tree) && tree %in% tablst) {
-      if (!is.null(pfromqry)) {
+    if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
+      if (popType == "GRM") {
+        tfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., tree,
+				" t ON(t.", tuniqueid, " = c.", cuniqueid, " and t.", 
+						condid, " = c.", condid, " and t.prevcond = pcond.", condid, ")
+				LEFT JOIN ", SCHEMA., tree, " ptree ON(ptree.cn = t.prev_tre_cn)")
+        grmfromqry <- paste0(tfromqry, " LEFT JOIN ", SCHEMA., 
+						"tree_grm_component grm on(grm.tre_cn = t.cn)")
+        grmqry <- paste("select distinct grm.* from", grmfromqry, whereqry)
+      } else if (!is.null(pfromqry)) {
         tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
 				" t ON (t.PLT_CN = ", palias, ".", pjoinid, ")")
       } else {
         tfromqry <- paste(tree, "t")
       }
       treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
+      dbqueries$tree <- treeqry
     }
-    if (!is.null(tree) && is.character(tree) && tree %in% tablst) {
+    if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
       if (!is.null(pfromqry)) {
         sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., seed,
 				" s ON (s.PLT_CN = ", palias, ".", pjoinid, ")")
@@ -310,8 +386,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         sfromqry <- paste(seed, "s")
       }
       seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
+      dbqueries$seed <- seedqry
     }
-    if (!is.null(vsubpspp) && is.character(vsubpspp) && vsubpspp %in% tablst) {
+    if (all(!is.null(vsubpspp), is.character(vsubpspp), vsubpspp %in% tablst)) {
       if (!is.null(pfromqry)) {
         vsubpspp.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vsubpspp,
 				" vsubpspp ON (vsubpspp.PLT_CN = ", palias, ".", pjoinid, ")")
@@ -319,8 +396,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         vsubpspp.fromqry <- paste(vsubpspp, "vsubpspp")
       }
       vsubpsppqry <- paste("select distinct vsubpspp.* from", vsubpspp.fromqry, whereqry)
+      dbqueries$vsubpspp <- vsubpsppqry
     }
-    if (!is.null(vsubpstr) && is.character(vsubpstr) && vsubpstr %in% tablst) {
+    if (all(!is.null(vsubpstr), is.character(vsubpstr), vsubpstr %in% tablst)) {
       if (!is.null(pfromqry)) {
         vsubpstr.fromqry <- paste0(pfromqry, " JOIN ", SCHEMA., vsubpstr,
 				" vsubpstr ON (vsubpstr.PLT_CN = ", palias, ".", pjoinid, ")")
@@ -328,25 +406,22 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         vsubpstr.fromqry <- paste(vsubpspp, "vsubpstr")
       }
       vsubpstrqry <- paste("select distinct vsubpstr.* from", vsubpstr.fromqry, whereqry)
+      dbqueries$vsubpstr <- vsubpstrqry
     }
-    if (!is.null(subplot) && is.character(subplot) && subplot %in% tablst) {
+    if (all(!is.null(subplot), is.character(subplot), subplot %in% tablst)) {
       subpfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., subplot,
 				" subp ON (subp.PLT_CN = ", palias, ".", pjoinid, ")")
       subplotqry <- paste("select distinct subp.* from", subpfromqry, whereqry)
+      dbqueries$subplot <- subplotqry
     }
-    if (!is.null(subp_cond) && is.character(subp_cond) && subp_cond %in% tablst) {
+    if (all(!is.null(subp_cond), is.character(subp_cond), subp_cond %in% tablst)) {
       subpcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., subp_cond,
 				" subpc ON (subpc.PLT_CN = ", palias, ".", pjoinid, ")")
       subp_condqry <- paste("select distinct subpc.* from", subpcfromqry, whereqry)
-    }
-    if (popType == "LULC" &&
-		!is.null(lulc) && is.character(lulc) && lulc %in% tablst) {
-      lulcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., lulc,
-				" ON (lulc.PLT_CN = ", palias, ".", pjoinid, ")")
-      lulcqry <- paste("select distinct lulc.* from", lulcfromqry, whereqry)
+      dbqueries$subp_cond <- subp_condqry
     }
     if (popType == "DWM" && 
-      	!is.null(cond_dwm_calc) && is.character(cond_dwm_calc) && cond_dwm_calc %in% tablst) {
+      	all(!is.null(cond_dwm_calc), is.character(cond_dwm_calc), cond_dwm_calc %in% tablst)) {
       dwmfromqry <- paste0(SCHEMA., cond_dwm_calc)
       dwmqry <- paste("select distinct * from", dwmfromqry, whereqry.DWM)
     }
@@ -385,28 +460,71 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   pltassgnx <- suppressMessages(pcheck.table(pltassgn, tab_dsn=dsn, 
            tabnm="pltassgn", caption="plot assignments?", 
            nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE))
-  if (popType != "LULC" && (is.null(condx) && is.null(pltx) && is.null(pltassgnx))) {
+  if (is.null(condx) && is.null(pltx) && is.null(pltassgnx)) {
     stop("must include plt or cond table")
   }
-  treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
+  if (popType %in% c("VOL", "GRM")) {
+    treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
            tabnm="tree", caption="Tree table?",
 		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE))
-  vsubpsppx <- suppressMessages(pcheck.table(vsubpspp, tab_dsn=dsn, 
+  }
+  if (popType == "P2VEG") {
+    vsubpsppx <- suppressMessages(pcheck.table(vsubpspp, tab_dsn=dsn, 
            tabnm="vsubpspp", caption="Veg Species table?", 
            nullcheck=nullcheck, gui=gui, tabqry=vsubpsppqry, returnsf=FALSE))
-  vsubpstrx <- suppressMessages(pcheck.table(vsubpstr, tab_dsn=dsn, 
+    vsubpstrx <- suppressMessages(pcheck.table(vsubpstr, tab_dsn=dsn, 
            tabnm="vsubpstr", caption="Veg Structure table?", 
            nullcheck=nullcheck, gui=gui, tabqry=vsubpstrqry, returnsf=FALSE))
-  subplotx <- suppressMessages(pcheck.table(subplot, tab_dsn=dsn, 
+    subplotx <- suppressMessages(pcheck.table(subplot, tab_dsn=dsn, 
            tabnm="subplot", caption="subplot table?", 
            nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE))
-  subp_condx <- suppressMessages(pcheck.table(subp_cond, tab_dsn=dsn, 
+    subp_condx <- suppressMessages(pcheck.table(subp_cond, tab_dsn=dsn, 
            tabnm="subp_cond", caption="subp_cond table?", 
            nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE))
-  if (popType == "LULC") {
-    lulcx <- suppressMessages(pcheck.table(lulc, tab_dsn=dsn, 
-           tabnm="lulc", caption="lulc table?",
-		nullcheck=nullcheck, tabqry=lulcqry, returnsf=FALSE))
+  }
+  if (popType %in% c("GRM", "CHNG", "LULC")) {
+    sccm_condx <- suppressMessages(pcheck.table(sccm, tab_dsn=dsn, 
+           tabnm="sccm", caption="sccm table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=sccm_condqry, returnsf=FALSE))
+    setkeyv(sccm_condx, c(cuniqueid, condid))
+ 
+    ## FOR GRM, replace CONDPROP* variables with change matrix CONDPROP* variables
+    condx <- merge(condx[, c(cuniqueid, condid, 
+			names(condx)[!names(condx) %in% names(sccm_condx)]), with=FALSE],
+				sccm_condx)
+    if (is.null(cond_pcond)) {
+      cond_pcondx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
+           tabnm="cond", caption="subp_cond_chng_mtrx table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=cond_pcondqry, returnsf=FALSE))
+    } 
+ 
+    if (popType == "GRM") {
+      grmx <- suppressMessages(pcheck.table(grm, tab_dsn=dsn, 
+           tabnm="grm", caption="tree_grm_component table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=grmqry, returnsf=FALSE))
+    }
+    if (popType == "LULC") {
+
+      lulcqry <- 
+		"SELECT distinct c.PLT_CN, c.CONDID, 
+			pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD, 
+			pcond.LAND_COVER_CLASS_CD PREV_LAND_COVER_CLASS_CD, c.LAND_COVER_CLASS_CD, 
+			pcond.PRESNFCD PREV_PRESNFCD, c.PRESNFCD,
+			case when pcond.PRESNFCD is null 
+				then pcond.COND_STATUS_CD 
+				else pcond.PRESNFCD end as PREV_LANDUSECD,
+			case when c.PRESNFCD is null 
+				then c.COND_STATUS_CD 
+				else c.PRESNFCD end as LANDUSECD, chg.*
+		FROM pltx p
+                JOIN cond_pcondx c ON (c.PLT_CN = p.CN) 
+                JOIN cond_pcondx pcond ON (pcond.PLT_CN = p.PREV_PLT_CN) 
+                JOIN sccm_condx chg ON(chg.PLT_CN = c.PLT_CN and chg.CONDID = c.CONDID)
+           WHERE COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
+				AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0" 
+
+      lulcx <- sqldf::sqldf(lulcqry)
+    }
   }
   if (popType == "DWM") {
     cond_dwm_calcx <- suppressMessages(pcheck.table(cond_dwm_calc, tab_dsn=dsn, 
@@ -604,39 +722,39 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       }
       setkeyv(condx, c(cuniqueid, condid))
 
-      ## Check and append lulcx if popType='LULC'
-      #####################################################
-      if (popType == "LULC" && !is.null(lulcx)) {
-        if (!cuniqueid %in% names(lulcx)) {
-          stop(cuniqueid, " must be in lulc")
-        }
-        if (!condid %in% names(lulcx)) {
-          if (nrow(lulcx) == length(unique(lulcx[[cuniqueid]]))) {
-            lulcx[, (condid) := 1]
-          }
-        }
-
-        ## Check if class of puniqueid in lulcx matches class of cuniqueid in condx
-        tabchk <- check.matchclass(lulcx, condx, cuniqueid, cuniqueid)
-        lulcx <- tabchk$tab1
-        condx <- tabchk$tab2
-
-        ## Check for matching unique identifiers of lulcx and condx
-        lulcx <- check.matchval(lulcx, condx, cuniqueid, cuniqueid, tab1txt="lulc",
-			tab2txt="cond", subsetrows=TRUE)
-        setkeyv(lulcx, c(cuniqueid, condid))
-
-        ## Get columns in condx that are not in lulcx
-        condcols <- unique(c(cuniqueid, condid, names(condx)[!names(condx) %in% names(lulcx)]))
-
-        ## Merge lulcx and condx (Note: inner join to use only lulc conditions)
-        #condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx), all.x=TRUE)
-        condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx))
-
-        ## Add PROP_CHNG (sum(SCCM.SUBPTYP_PROP_CHNG) / 4) to cvars2keep
-        cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
-        areawt <- "PROP_CHNG"
-      }
+#      ## Check and append lulcx if popType='LULC'
+#      #####################################################
+#      if (popType == "LULC" && !is.null(lulcx)) {
+#        if (!cuniqueid %in% names(lulcx)) {
+#          stop(cuniqueid, " must be in lulc")
+#        }
+#        if (!condid %in% names(lulcx)) {
+#          if (nrow(lulcx) == length(unique(lulcx[[cuniqueid]]))) {
+#            lulcx[, (condid) := 1]
+#          }
+#        }
+#
+#        ## Check if class of puniqueid in lulcx matches class of cuniqueid in condx
+#        tabchk <- check.matchclass(lulcx, condx, cuniqueid, cuniqueid)
+#        lulcx <- tabchk$tab1
+#        condx <- tabchk$tab2
+#
+#        ## Check for matching unique identifiers of lulcx and condx
+#        lulcx <- check.matchval(lulcx, condx, cuniqueid, cuniqueid, tab1txt="lulc",
+#			tab2txt="cond", subsetrows=TRUE)
+#        setkeyv(lulcx, c(cuniqueid, condid))
+#
+#        ## Get columns in condx that are not in lulcx
+#        condcols <- unique(c(cuniqueid, condid, names(condx)[!names(condx) %in% names(lulcx)]))
+#
+#        ## Merge lulcx and condx (Note: inner join to use only lulc conditions)
+#        #condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx), all.x=TRUE)
+#        condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx))
+#
+#        ## Add PROP_CHNG (sum(SCCM.SUBPTYP_PROP_CHNG) / 4) to cvars2keep
+#        cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
+#        areawt <- "PROP_CHNG"
+#      }
 
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
       tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
@@ -770,10 +888,14 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       ## Only adjust plots when DESIGNCD=1. Cannot have more than 1 DESIGNCD.
       ##################################################################################
       designcd <- unique(na.omit(pltcondx[["DESIGNCD"]]))
-      if (length(designcd) != 1) {
-        warning("more than 1 plot design, calculate separate estimates by design")
-      } else if (adj == "samp" && !designcd %in% c(1, 501:505, 230:242, 328)) {
-        message("samp adjustment for trees is only for annual inventory")
+      if (length(designcd) > 1) {
+        if (any(!designcd %in% c(1, 501:505, 230:242, 328))) {
+          if (adj == "samp") {
+            message("samp adjustment for trees is only for annual inventory")
+          } else {
+            warning("more than 1 plot design, calculate separate estimates by design")
+          }
+        }
       }
     }
 
@@ -1210,13 +1332,14 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       nonsamp.cfilter <- "COND_STATUS_CD != 5"
       nonsampn <- sum(pltcondx$COND_STATUS_CD == 5, na.rm=TRUE)
       if (length(nonsampn) > 0) {
-        message("removing ", nonsampn, " nonsampled forest conditions")
+        message("For FIA estimation, adjustment factors are calculated to account for plots with partial nonresponse.")
+        message("...there are ", nonsampn, " nonsampled forest conditions in the dataset.")
       }
     }
     if (ACI && "NF_COND_STATUS_CD" %in% pltcondnmlst) {
       nonsamp.cfilter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
-      message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE),
-		" nonsampled nonforest conditions")
+      message("...there are ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE),
+		" nonsampled nonforest conditions in the dataset.")
       if (!is.null(nonsamp.cfilter)) {
         nonsamp.cfilter <- paste(nonsamp.cfilter, "&", nonsamp.cfilter.ACI)
       }
@@ -1700,6 +1823,16 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       returnlst$vcondstrid <- vsubpstrid
     }
   }
+
+  if (popType %in% c("GRM", "CHNG", "LULC")) {
+    returnlst$sccm_condx <- sccm_condx
+    returnlst$cond_pcondx <- cond_pcondx
+  }
+
+  if (popType == "LULC") {
+    returnlst$lulcx <- lulcx
+  }
+
   if (popType == "DWM") {
     returnlst$condx <- dwmcondx
     returnlst$cond_dwm_calcf <- cond_dwm_calcf

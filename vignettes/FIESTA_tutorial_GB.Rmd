@@ -296,12 +296,18 @@ One may also want to compare `FIESTA` output with FIADB pop_stratum table for WY
 qry <- "select estn_unit, stratumcd, p1pointcnt, p2pointcnt, expns, 
           adj_factor_macr, adj_factor_subp, adj_factor_micr from pop_stratum 
         where evalid = 561301 order by estn_unit, stratumcd"
-pop_stratum <- DBqryCSV(
+pop_stratum <- tryCatch(
+        DBqryCSV(
                   qry, 
                   states="Wyoming",
                   sqltables="pop_stratum"
-                  )
-head(pop_stratum)
+                  ),
+     	 	error=function(e) {
+			return(NULL) })
+
+if (!is.null(pop_stratum)) {
+  head(pop_stratum)
+}
 head(GBpopdat$stratalut)
 ```
 
@@ -830,7 +836,7 @@ area4.1 <- modGBarea(
     GBpopdat = GBpopdat.RI,        # pop - population calculations for Bighorn NF, post-stratification
     landarea = "FOREST",           # est - forest land filter
     sumunits = TRUE,               # est - sum estimation units to population
-    rowvar = "FORTYPGRPCD",        # est - row domain
+    rowvar = "FORTYPCD",        # est - row domain
     colvar = "STDSZCD",            # est - column domain
     returntitle = TRUE,            # out - return title information
     table_opts = list(   

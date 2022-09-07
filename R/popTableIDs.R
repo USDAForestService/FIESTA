@@ -13,7 +13,8 @@
 #' @param vsubpstr String.
 #' @param subplot String.
 #' @param subp_cond String. 
-#' @param lulc String. 
+#' @param cond_pcond String. 
+#' @param sccm String. 
 #' @param cond_dwm_calc String. 
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
@@ -25,8 +26,8 @@
 
 popTableIDs <- function(cond="PLT_CN", plt="CN", tree="PLT_CN", seed="PLT_CN",
                         vsubpspp="PLT_CN", vsubpstr="PLT_CN", subplot="PLT_CN",
-                        subp_cond="PLT_CN", lulc="PLT_CN", 
-                        cond_dwm_calc="PLT_CN", ...) {
+                        subp_cond="PLT_CN", cond_pcond="PLT_CN",
+                        sccm="PLT_CN", cond_dwm_calc="PLT_CN", ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(popTableIDs)))

@@ -37,6 +37,11 @@ DBgetSQLite <- function (states = NULL,
   ## Stop if no arguments passed. No GUI available for this function
   if (nargs() == 0) stop("must include states")
 
+  ## Set options
+  opts <- options()
+  options(timeout = max(2500, getOption("timeout")))
+  on.exit(options(opts))
+
   ## Set URL where data files are
   downloadfn <- "https://apps.fs.usda.gov/fia/datamart/Databases"
 
@@ -62,7 +67,10 @@ DBgetSQLite <- function (states = NULL,
     message(paste("downloading SQLite database for", st, "..."))
 
     outfn <- paste0(outfolder, "/SQLite_FIADB_", st, ".zip")
-    utils::download.file(fn, outfn, mode="wb")
+    tryCatch(utils::download.file(fn, outfn, mode="wb"),
+			error=function(e) {
+                stop(e) })
     filenm <- utils::unzip(outfn, exdir=outfolder)
   }
+  return(filenm)
 }

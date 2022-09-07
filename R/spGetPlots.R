@@ -309,7 +309,7 @@ spGetPlots <- function(bnd = NULL,
       }
     }
   }
- 
+
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################
@@ -830,6 +830,20 @@ spGetPlots <- function(bnd = NULL,
         stcd <- pcheck.states(state, statereturn="VALUE")
         stabbr <- pcheck.states(stcd, statereturn="ABBR") 
         message(paste0("\n", state, "..."))
+
+        if ("STATECD" %in% names(pltids)) {
+          stpltids <- pltids[pltids$STATECD == stcd, ]
+          if (!is.null(measEndyr.filter)) {
+            stpltids1 <- pltids1[pltids1$STATECD == stcd, ]
+            stpltids2 <- pltids2[pltids2$STATECD == stcd, ]
+          }
+        } else {
+          stpltids <- pltids
+          if (!is.null(measEndyr.filter)) {
+            stpltids1 <- pltids1
+            stpltids2 <- pltids2
+          }
+        }
   
         if (!is.null(evalid)) {
           evalidst <- evalid[unique(as.numeric(substr(evalid, nchar(evalid)-6, 
@@ -919,8 +933,8 @@ spGetPlots <- function(bnd = NULL,
               PLOT1 <- PLOT1[, head(.SD, 1), by=pjoinid]
             }
   
-            ## Subset plot data to pltids1 
-            plt1 <- PLOT1[PLOT1[[pjoinid]] %in% pltids1[[xyjoinid]], ]
+            ## Subset plot data to stpltids1 
+            plt1 <- PLOT1[PLOT1[[pjoinid]] %in% stpltids1[[xyjoinid]], ]
             pltids1 <- plt1[[puniqueid]]
   
             cond1 <- cond[cond[["PLT_CN"]] %in% pltids1, ]
@@ -980,8 +994,8 @@ spGetPlots <- function(bnd = NULL,
               PLOT2 <- PLOT2[, head(.SD, 1), by=pjoinid]
             } 
           
-            ## Subset plot data to pltids2 
-            plt2 <- PLOT2[PLOT2[[pjoinid]] %in% pltids2[[xyjoinid]], ]
+            ## Subset plot data to stpltids2 
+            plt2 <- PLOT2[PLOT2[[pjoinid]] %in% stpltids2[[xyjoinid]], ]
             pltids2 <- plt2[[puniqueid]]
   
             cond2 <- cond[cond[[cuniqueid]] %in% pltids2, ]
@@ -1038,8 +1052,8 @@ spGetPlots <- function(bnd = NULL,
         } else {    ## measEndyr.filter = NULL
   
           if (!is.null(pltids) && !is.null(nrow(pltids)) && nrow(pltids) > 0) {
-            ## Subset data to pltids
-            plt <- PLOT[PLOT[[pjoinid]] %in% pltids[[xyjoinid]], ]
+            ## Subset data to stpltids
+            plt <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]], ]
             pltids1 <- plt[[puniqueid]]
   
             cond <- cond[cond[["PLT_CN"]] %in% pltids1, ]
@@ -1214,6 +1228,20 @@ spGetPlots <- function(bnd = NULL,
       state <- pcheck.states(stcd) 
       message(paste0("\n", state, "..."))
 
+      if ("STATECD" %in% names(pltids)) {
+        stpltids <- pltids[pltids$STATECD == stcd, ]
+        if (!is.null(measEndyr.filter)) {
+          stpltids1 <- pltids1[pltids1$STATECD == stcd, ]
+          stpltids2 <- pltids2[pltids2$STATECD == stcd, ]
+        }
+      } else {
+        stpltids <- pltids
+        if (!is.null(measEndyr.filter)) {
+          stpltids1 <- pltids1
+          stpltids2 <- pltids2
+        }
+      }
+
       ## Check for counties
       if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
         countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
@@ -1248,7 +1276,7 @@ spGetPlots <- function(bnd = NULL,
       }
 
       ## Print stfilter
-      message(stfilter)
+      message("state filter: ", stfilter)
  
       ## get pfromqry
       pfromqry <- getpfromqry(dsn=data_dsn, evalid=evalidst, plotCur=measCur, 
@@ -1319,9 +1347,9 @@ spGetPlots <- function(bnd = NULL,
         ################################################
         ## Subset FIA plot data to pltids1 
         ################################################
-        if (nbrxy > 0) {
+        if (nbrxy > 0 && nrow(stpltids2) > 0) {
 
-          plt1 <- plt[plt[[pjoinid]] %in% pltids1[[xyjoinid]], ]
+          plt1 <- plt[plt[[pjoinid]] %in% stpltids1[[xyjoinid]], ]
           xyids1 <- plt1[[puniqueid]]
           cond1.qry <- paste0("select cond.* from ", p2fromqry,
 			                        " join ", cond_layer, " cond on(cond.PLT_CN = p.CN) where ", 
@@ -1430,7 +1458,7 @@ spGetPlots <- function(bnd = NULL,
         ################################################
         ## Subset FIA plot data to pltids1 
         ################################################
-        if (nrow(pltids2) > 0) {
+        if (nrow(stpltids2) > 0) {
 
           ## Get most current evalid
           if (evalCur) {
@@ -1476,7 +1504,7 @@ spGetPlots <- function(bnd = NULL,
             plt2 <- plt2[, head(.SD, 1), by=pjoinid]
           }
 
-          plt2 <- plt2[plt2[[pjoinid]] %in% pltids2[[xyjoinid]], ]
+          plt2 <- plt2[plt2[[pjoinid]] %in% stpltids2[[xyjoinid]], ]
           xyids2 <- plt2[[puniqueid]]
 
           cond2.qry <- paste0("select cond.* from ", p2fromqry,
@@ -1609,10 +1637,10 @@ spGetPlots <- function(bnd = NULL,
         }
       } else {    ## measEndyr.filter = NULL
 
-        if (nrow(pltids) > 0) {
-          plt <- plt[plt[[pjoinid]] %in% pltids[[xyjoinid]], ]
-          if (nrow(pltids) > nrow(plt)) {
-            message("number of plots in database is less than XY plots: ", nrow(pltids) - nrow(plt))
+        if (nrow(stpltids) > 0) {
+          plt <- plt[plt[[pjoinid]] %in% stpltids[[xyjoinid]], ]
+          if (nrow(stpltids) > nrow(plt)) {
+            message("number of plots in database is less than XY plots: ", nrow(stpltids) - nrow(plt))
           }
           xyids <- plt[[puniqueid]]
 

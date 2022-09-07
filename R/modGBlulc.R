@@ -36,7 +36,7 @@ modGBlulc <- function(GBpopdat,
   ONEUNIT=n.total=n.strata=strwt=TOTAL=rowvar.filter=colvar.filter <- NULL
   
   
- ## Set parameters
+  ## Set parameters
   esttype <- "LULC"
   parameters <- FALSE
   returnlst <- list()
@@ -161,6 +161,8 @@ modGBlulc <- function(GBpopdat,
   getwtvar <- GBpopdat$getwtvar
   adj <- GBpopdat$adj
   strunitvars <- c(unitvar, strvar)
+
+pltcondx=lulcx
  
   ###################################################################################
   ## Check parameters and apply plot and condition filters

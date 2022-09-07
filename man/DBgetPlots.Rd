@@ -7,6 +7,7 @@
 DBgetPlots(
   states = NULL,
   datsource = "datamart",
+  datamartType = "CSV",
   data_dsn = NULL,
   RS = NULL,
   invtype = "ANNUAL",
@@ -26,6 +27,7 @@ DBgetPlots(
   isseed = FALSE,
   isveg = FALSE,
   issubp = FALSE,
+  isgrm = FALSE,
   islulc = FALSE,
   isdwm = FALSE,
   plotgeom = FALSE,
@@ -56,6 +58,8 @@ FIA Research Station is desired, set states=NULL and use RS argument to
 define RS.}
 
 \item{datsource}{String. Source of data ('datamart', 'sqlite').}
+
+\item{datamartType}{String. Datamart file type ('CSV', 'SQLITE').}
 
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}
@@ -128,6 +132,10 @@ from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP
 
 \item{issubp}{Logical. If TRUE, subplot tables are extracted from FIA
 database (SUBPLOT, SUBP_COND).}
+
+\item{isgrm}{Logical. If TRUE, cond_pcond table is returned that includes 
+current and previous conditions. Also, sccm (SUBP_COND_CHNG_MTRX) is 
+returned with change condition proportions from previous to current.}
 
 \item{islulc}{Logical. If TRUE, condition-level land use/land cover data are
 for current and previous years are extracted from FIA database.}

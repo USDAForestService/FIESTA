@@ -13,7 +13,8 @@ popTableIDs(
   vsubpstr = "PLT_CN",
   subplot = "PLT_CN",
   subp_cond = "PLT_CN",
-  lulc = "PLT_CN",
+  cond_pcond = "PLT_CN",
+  sccm = "PLT_CN",
   cond_dwm_calc = "PLT_CN",
   ...
 )
@@ -35,7 +36,9 @@ popTableIDs(
 
 \item{subp_cond}{String.}
 
-\item{lulc}{String.}
+\item{cond_pcond}{String.}
+
+\item{sccm}{String.}
 
 \item{cond_dwm_calc}{String.}
 

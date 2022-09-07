@@ -295,7 +295,7 @@ modGBpop <- function(popType = "VOL",
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-    treef=seedf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx <- NULL
+    treef=seedf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut <- NULL
   condid <- "CONDID"
   
   
@@ -589,9 +589,6 @@ modGBpop <- function(popType = "VOL",
   }
 
   list.items <- {}
-  if (popType == "LULC") {
-    list.items <- c(list.items, "lulcx")
-  }
   if (popType == "P2VEG") {
     list.items <- c(list.items, "vsubpstr", "subplot", "subp_cond")
   }
@@ -679,6 +676,15 @@ modGBpop <- function(popType = "VOL",
     dwmpropvars <- names(cond_dwm_calcf)[grepl("CONDPROP", names(cond_dwm_calcf), ignore.case=TRUE)]
     #cwdcols <- names(cond_dwm_calcf)[grepl(dwmtype, names(cond_dwm_calcf), ignore.case=TRUE)]
     #areawt <- names(condx)[grepl(dwmtype, names(condx), ignore.case=TRUE)]
+  }
+
+  if (popType %in% c("GRM", "CHNG", "LULC")) {
+    sccm_condx <- popcheck$sccm_condx
+    cond_pcondx <- popcheck$cond_pcondx
+  }
+
+  if (popType == "LULC") {
+    lulcx <- popcheck$lulcx
   }
  
   if (nonresp) {
@@ -827,6 +833,14 @@ modGBpop <- function(popType = "VOL",
   if ("P2VEG" %in% popType) {
     returnlst$vcondsppx <- vcondsppf
     returnlst$vcondstrx <- vcondstrf
+  }
+  if (popType %in% c("GRM", "CHNG", "LULC")) {
+    returnlst$sccm_condx <- sccm_condx
+    returnlst$cond_pcondx <- cond_pcondx
+  }
+
+  if ("LULC" %in% popType) {
+    returnlst$lulcx <- lulcx
   }
   if (nonresp) {
     returnlst$nonresplut <- nonresplut

@@ -14,7 +14,8 @@ popTables(
   invsubp = NULL,
   subplot = NULL,
   subp_cond = NULL,
-  lulc = NULL,
+  cond_pcond = NULL,
+  sccm = NULL,
   cond_dwm_calc = NULL,
   ...
 )
@@ -58,8 +59,11 @@ dsn. Subplot-level data with one record for each species (SUBPLOT).}
 dsn. Subplot condition-level data with one record for each species
 (SUBP_COND).}
 
-\item{lulc}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
-Land use/Land cover data with current and previous observations.}
+\item{cond_pcond}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Condition-level data with previous and current plots.}
+
+\item{sccm}{DF/DT, R object, comma-delimited file(*.csv), or layer in dsn.
+Subplot-level data (SUBP_COND_CHNG_MTRX).}
 
 \item{cond_dwm_calc}{DF/DT, R object, comma-delimited file(*.csv), or layer 
 in dsn. Calculated down woody material.}
