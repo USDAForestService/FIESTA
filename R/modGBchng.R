@@ -515,57 +515,6 @@ modGBchng <- function(GBpopdat,
   setkeyv(condx, c(cuniqueid, condid))
   setkeyv(condf, c(cuniqueid, condid))
 
-
-  condf_chng.qry <- paste0("SELECT ", toString(c(paste0("sccm.", cuniqueid), 
-			paste0("c.", c(condid, rowvar, colvar)),
-			paste0("pcond.", condid, " AS ", "PREV_", condid), 
-			paste0("pcond.", rowvar, " AS ", "PREV_", rowvar),
-			paste0("pcond.", colvar, " AS ", "PREV_", colvar))),
-                ", SUM(sccm.SUBPTYP_PROP_CHNG / 4) PROP_CHNG
-		FROM sccmx sccm
-		JOIN condf c on(c.", cuniqueid, " = sccm.", cuniqueid, " and c.", condid, " = sccm.", condid, ")",
-           " JOIN condf pcond on(pcond.", cuniqueid, " = sccm.prev_plt_cn and pcond.", condid, " = sccm.prevcond)
-            GROUP BY c.PLT_CN, c.condid")
-
-pltx <- unique(pltcondx[, c("PLT_CN", "PREV_PLT_CN")])
-
-condf_chng.qry <- "SELECT c.PLT_CN, c.CONDID, c.FORTYPCD, c.STDSZCD, 
-				SUM(sccm.SUBPTYP_PROP_CHNG / 4) PROP_CHNG
-			FROM pltx p 
-			JOIN cond_pcondx c on(c.PLT_CN = p.PLT_CN) 
-			JOIN cond_pcondx pcond on(pcond.PLT_CN = p.PREV_PLT_CN) 
-                JOIN sccmx sccm on(sccm.PLT_CN = c.PLT_CN and sccm.PREV_PLT_CN = pcond.PLT_CN 
-						and sccm.CONDID = c.CONDID and sccm.PREVCOND = pcond.CONDID)
-                WHERE sccm.subptyp == 1
-				AND COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0 
-				AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0 
-				AND (c.COND_STATUS_CD = 1 AND pcond.COND_STATUS_CD = 1)
-			GROUP BY c.PLT_CN, c.condid, c.FORTYPCD, c.STDSZCD"
-  condf_chng <- data.table(sqldf::sqldf(condf_chng.qry))
-head(condf_chng)
-
-
-condf <- pltcondf[, c("PLT_CN", "CONDID", "COND_STATUS_CD", "FORTYPCD", "STDSZCD")]
-condf$TOTAL <- "TOTAL"
-setkeyv(condf, c(cuniqueid, condid))
-
-  condf_chng.qry <- paste0("SELECT ", toString(c(paste0("sccm.", cuniqueid), 
-			paste0("c.", c(condid, "COND_STATUS_CD", rowvar, colvar)),
-			paste0("pcond.", condid, " AS ", "PREV_", condid), 
-			paste0("pcond.", "COND_STATUS_CD", " AS ", "PREV_", "COND_STATUS_CD"), 
-			paste0("pcond.", rowvar, " AS ", "PREV_", rowvar),
-			paste0("pcond.", colvar, " AS ", "PREV_", colvar))),
-		" FROM sccm_condx sccm
-		JOIN condf c on(c.", cuniqueid, " = sccm.", cuniqueid, " and c.", condid, " = sccm.", condid, ")",
-           " JOIN condf pcond on(pcond.", cuniqueid, " = sccm.prev_plt_cn)
-            WHERE (c.cond_status_cd = 1 and pcond.cond_status_cd) 
-            GROUP BY c.PLT_CN, c.condid")
-  condf_chng <- data.table(sqldf::sqldf(condf_chng.qry))
-head(condf_chng)
-dim(condf_chng)
-
-
-##NEW
   condf_chng.qry <- paste0("SELECT ", toString(c(paste0("sccm.", cuniqueid), 
 			paste0("c.", c(condid, rowvar, colvar)),
 			paste0("pcond.", condid, " AS ", "PREV_", condid), 
@@ -577,18 +526,11 @@ dim(condf_chng)
            " JOIN condf pcond on(pcond.", cuniqueid, " = sccm.prev_plt_cn)
             GROUP BY c.PLT_CN, c.condid")
   condf_chng <- data.table(sqldf::sqldf(condf_chng.qry))
-head(condf_chng)
-dim(condf_chng)
-
-
   setkeyv(condf_chng, c(cuniqueid, condid))  
 
   cdomdat <- condx[condf_chng]
-#cdomdat = data.table(condf_chng)
   cdomdat$TOTAL <- "TOTAL"
 
-id <- 449071873489998
-cdomdat[cdomdat$PLT_CN == id & cdomdat$FORTYPCD == 513,]
 
   ###################################################################################
   ### Get titles for output tables
