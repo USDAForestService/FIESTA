@@ -679,6 +679,7 @@ modGBpop <- function(popType = "VOL",
   }
 
   if (popType %in% c("GRM", "CHNG", "LULC")) {
+    sccmx <- popcheck$sccmx
     sccm_condx <- popcheck$sccm_condx
     cond_pcondx <- popcheck$cond_pcondx
   }
@@ -835,6 +836,7 @@ modGBpop <- function(popType = "VOL",
     returnlst$vcondstrx <- vcondstrf
   }
   if (popType %in% c("GRM", "CHNG", "LULC")) {
+    returnlst$sccmx <- sccmx
     returnlst$sccm_condx <- sccm_condx
     returnlst$cond_pcondx <- cond_pcondx
   }

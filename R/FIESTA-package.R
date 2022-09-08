@@ -242,6 +242,18 @@ NULL
 NULL
 
 
+#' Reference table - popType codes.
+#' 
+#' Table with population type (popType) and associated evaluation code (EVAL_TYP_CD).
+#' 
+#' 
+#' @name ref_popType
+#' @docType data
+#' @format A dataframe with 2 columns, VARNM and TITLE.
+#' @source Comma-delimited file.
+#' @keywords datasets
+NULL
+
 
 #' Reference table - Metadata for tree default variables output from
 #' DBgetPlots()

@@ -252,6 +252,7 @@ pltcondx=lulcx
   setkeyv(condx, c(cuniqueid, condid))
   setkeyv(condf, c(cuniqueid, condid))
   cdomdat <- condx[condf]
+  cdomdat$TOTAL <- "TOTAL"
 
   #####################################################################################
   ### Get titles for output tables

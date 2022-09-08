@@ -111,7 +111,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
   popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
 		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
-
+  popevalid <- as.character(evalid)
+  if (!is.null(evalid)) {
+    substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
+		ref_popType[ref_popType$popType %in% popType, "EVAL_TYP_CD"]
+  } 
+ 
   plt=cond=tree=seed=vsubpstr=vsubpspp=subplot=subp_cond=cond_pcond=sccm=lulc=whereqry.DWM <- NULL
   ## Get tables from tabs
   for (tabnm in names(tabs)) {
@@ -236,21 +241,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         pjoinid <- pltassgnid
       } else {
         palias <- "p"
-        pfromqry <- getpfromqry(evalid, dsn=dsn, ppsanm=ppsanm, ppsaid=pltassgnid)
+        pfromqry <- getpfromqry(popevalid, dsn=dsn, ppsanm=ppsanm, ppsaid=pltassgnid)
       }
-      whereqry <- paste0("where ppsa.EVALID in(", toString(evalid), ")")
+      whereqry <- paste0("where ppsa.EVALID in(", toString(popevalid), ")")
       if (popType == "DWM") {
-        if (any(substr(evalid, nchar(evalid)-1, nchar(evalid)) != "07")) {
-
-          evalid[substr(evalid, nchar(evalid)-1, nchar(evalid)) != "07"] <- 
-            sapply(evalid[substr(evalid, nchar(evalid)-1, nchar(evalid)) != "07"], 
-			function(x) 
-			  {x <- as.character(x)
-             	    substr(x, nchar(x)-1, nchar(x)) <- "07"
-             	    return(x)})
-        }
         pfromqry.DWM <- ""
-        whereqry.DWM <- paste0("where EVALID in(", toString(evalid), ")")
+        whereqry.DWM <- paste0("where EVALID in(", toString(popevalid), ")")
       }
       pltassgnqry <- paste("select distinct ppsa.* from", pfromqry, whereqry)
     } else if (measCur) {
@@ -283,21 +279,20 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     }
 
     if (!is.null(pfromqry)) {
-      plotvars <-  DBvars.default()$pltvarlst
+      #plotvars <-  DBvars.default()$pltvarlst
 
       if (popType %in% c("GRM", "CHNG", "LULC")) {
-        plotqry <- paste("select distinct", toString(paste0(palias, ".", plotvars)), "from", 
+        plotqry <- paste("select distinct", palias, ".* from", 
 			paste0(pfromqry, " JOIN ", SCHEMA., 
 				"plot pplot ON(", palias, ".prev_plt_cn = pplot.cn)"), whereqry)
       } else {
-        plotqry <- paste("select distinct", toString(paste0(palias, ".", plotvars)), "from", 
-			pfromqry, whereqry)
+        plotqry <- paste("select distinct", palias, ".* from", pfromqry, whereqry)
       }
       dbqueries$plot <- plotqry
     }
 
     if (all(!is.null(cond), is.character(cond), cond %in% tablst)) {
-      condvars <-  DBvars.default()$condvarlst
+      #condvars <-  DBvars.default()$condvarlst
 
       if (is.null(pfromqry)) {
         cfromqry <- paste0(SCHEMA., cond, " c")
@@ -309,8 +304,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         cfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., cond, 
 			" pcond ON(pcond.", cuniqueid, " = ", palias, ".PREV_PLT_CN)")
       }
-      condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
-				"from", cfromqry, whereqry)
+#      condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
+#				"from", cfromqry, whereqry)
+      condqry <- paste("select distinct c.* from", cfromqry, whereqry)
       dbqueries$cond <- condqry
     
 
@@ -327,14 +323,22 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
                     	 and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0")
           }
 
-          cond_pcondqry <- paste("select distinct", toString(paste0("c.", condvars)), 
+          cond_pcondqry <- paste("select distinct", toString(paste0("c.", "*")), 
 					"from", cfromqry, chgwhereqry,
-			  "UNION select distinct", toString(paste0("pcond.", condvars)), 
+			  "UNION select distinct", toString(paste0("pcond.", "*")), 
 					"from", cfromqry, chgwhereqry)
           dbqueries$cond_pcond <- cond_pcondqry
         }
 
         if (all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
+
+          sccmqry <- paste0("SELECT sccm.*
+                       FROM ", cfromqry,  
+                 " JOIN ", SCHEMA., sccm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
+                              " and sccm.prev_plt_cn = pcond.", cuniqueid,
+                              " and sccm.", condid, " = c.", condid, 
+                              " and sccm.prevcond = pcond.", condid, ") ", 
+                    chgwhereqry) 
 
           sccm_condqry <- paste0("SELECT sccm.plt_cn, p.prev_plt_cn, sccm.condid, 
                  sum(sccm.SUBPTYP_PROP_CHNG * 
@@ -431,7 +435,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       unitarea_layer <- chkdbtab(tablst, unitarea)
       unitareaqry <- paste("select * from", unitarea_layer)
       if (!is.null(evalid)) {
-        unitareaqry <- paste(unitareaqry, "where evalid in(", toString(evalid), ")")
+        unitareaqry <- paste(unitareaqry, "where evalid in(", toString(popevalid), ")")
       }
       unitarea <- suppressMessages(pcheck.table(unitarea, tab_dsn=dsn, 
            tabnm="unitarea", caption="unitarea?",
@@ -443,7 +447,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       stratalut_layer <- chkdbtab(tablst, stratalut)
       stratalutqry <- paste("select * from", stratalut_layer)
       if (!is.null(evalid)) {
-        stratalutqry <- paste(stratalutqry, "where evalid in(", toString(evalid), ")")
+        stratalutqry <- paste(stratalutqry, "where evalid in(", toString(popevalid), ")")
       }
     }
   }
@@ -483,6 +487,11 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
            nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE))
   }
   if (popType %in% c("GRM", "CHNG", "LULC")) {
+    sccmx <- suppressMessages(pcheck.table(sccm, tab_dsn=dsn, 
+           tabnm="sccm", caption="sccm table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=sccmqry, returnsf=FALSE))
+    setkeyv(sccmx, c(cuniqueid, condid))
+
     sccm_condx <- suppressMessages(pcheck.table(sccm, tab_dsn=dsn, 
            tabnm="sccm", caption="sccm table?", 
            nullcheck=nullcheck, gui=gui, tabqry=sccm_condqry, returnsf=FALSE))
@@ -573,14 +582,14 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
       if (!datindb && !is.null(evalid) && !is.null(chkdbtab(names(pltassgnx), "EVALID"))) {
         evalidnm <- chkdbtab(names(pltassgnx), "EVALID")
-        evalid <- unlist(evalid)
+        popevalid <- unlist(popevalid)
         if (!all(evalid %in% unique(pltassgnx[[evalidnm]]))) {
           evalid.miss <- evalid[which(!evalid %in% unique(pltassgnx[["EVALID"]]))]
           message("evalid not in dataset: ", paste(evalid.miss, collapse=", "))
           if (length(evalid.miss) == length(evalid)) stop("")
           evalid <- evalid[!evalid %in% evalid.miss]
         }
-        pltassgnx <- datFilter(pltassgnx, getfilter("EVALID", evalid, syntax="R"))$xf
+        pltassgnx <- datFilter(pltassgnx, getfilter("EVALID", popevalid, syntax="R"))$xf
         if (nrow(pltassgnx) == 0) {
           stop("evalid removed all records")
         }
@@ -998,6 +1007,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   if (module == "SA" && "AOI" %in% names(unitarea)) {
     vars2keep <- "AOI"
   }
+
   removeunits <- ifelse(unit.action == "remove", TRUE, FALSE)
   unitdat <- check.unitarea(unitarea=unitarea, pltx=pltcondx,
 	unitvars=c(unitvar, unitvar2), areavar=areavar, areaunits=areaunits,
@@ -1010,9 +1020,9 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   if (!unitindb && !is.null(evalid)) {
     ecol <- pcheck.varchar("EVALID", checklst=names(unitarea), stopifinvalid=FALSE)
     if (!is.null(ecol)) {
-      unitarea <- unitarea[unitarea[[ecol]] %in% evalid,]
+      unitarea <- unitarea[unitarea[[ecol]] %in% popevalid,]
       if (nrow(unitarea) == 0) {
-        stop("evalid in unitarea does not match evalid")
+        stop("evalid in unitarea does not match popevalid")
       }
     }
   }
@@ -1027,7 +1037,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     if (!stratindb && !is.null(evalid)) {
       ecol <- pcheck.varchar("EVALID", checklst=names(stratalut), stopifinvalid=FALSE)
       if (!is.null(ecol)) {
-        stratalut <- stratalut[stratalut[[ecol]] %in% evalid,]
+        stratalut <- stratalut[stratalut[[ecol]] %in% popevalid,]
         if (nrow(stratalut) == 0) {
           stop("evalid in stratalut does not match evalid")
         }
@@ -1825,6 +1835,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   }
 
   if (popType %in% c("GRM", "CHNG", "LULC")) {
+    returnlst$sccmx <- sccmx
     returnlst$sccm_condx <- sccm_condx
     returnlst$cond_pcondx <- cond_pcondx
   }
