@@ -510,7 +510,7 @@ spGetSAdoms <- function(smallbnd,
     largebnd.unique <- pcheck.varchar(var2check=largebnd.unique, 
 		varnm="largebnd.unique", gui=gui, checklst=names(largebndx), 
 		caption="max areas attribute", 
-		warn=paste(largebnd.unique, "not in largebnd"), stopifnull=TRUE)
+		warn=paste(largebnd.unique, "not in largebnd"), stopifnull=FALSE)
   
     ## Apply largebnd.filter
     if (!is.null(largebndx) && !is.null(largebnd.filter)) {
@@ -708,13 +708,12 @@ spGetSAdoms <- function(smallbnd,
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					largebndx[, largebnd.unique], largest=TRUE))
     }
-
+ 
     if (addstate) {
       ## Check projections (reproject largebndx to projection of helperbndx
       prjdat <- crsCompare(SAdomslst[[i]], stunitco, nolonglat=TRUE)
       SAdomslst[[i]] <- prjdat$x
       stunitco <- prjdat$ycrs
-
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					stunitco[, "STATECD"], largest=TRUE))
     }
@@ -730,15 +729,16 @@ spGetSAdoms <- function(smallbnd,
         SAdoms_layer <- paste0(SAdoms_layer, i)
         smallbnd_layer <- paste0(smallbnd_layer, i)
       }
+
       spExportSpatial(SAdomslst[[i]], 
           savedata_opts=list(outfolder=outfolder, 
-                              out_fmt=out_fmt, 
+                              outsp_fmt=outsp_fmt, 
                               out_dsn=out_dsn, 
                               out_layer=SAdoms_layer,
                               outfn.pre=outfn.pre, 
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
-                              append_layer=TRUE, 
+                              append_layer=append_layer, 
                               add_layer=TRUE))
       
       spExportSpatial(smallbndxlst[[i]], 
@@ -749,7 +749,7 @@ spGetSAdoms <- function(smallbnd,
                               outfn.pre=outfn.pre, 
                               outfn.date=outfn.date, 
                               overwrite_layer=overwrite_layer,
-                              append_layer=TRUE, 
+                              append_layer=append_layer, 
                               add_layer=TRUE))
     }
 
