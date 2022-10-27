@@ -408,7 +408,6 @@ modGBchng <- function(GBpopdat,
   strata <- GBpopdat$strata
 
   sccmx <- GBpopdat$sccmx
-  sccm_condx <- GBpopdat$sccm_condx
   cond_pcondx <- GBpopdat$cond_pcondx
 
 
@@ -515,16 +514,79 @@ modGBchng <- function(GBpopdat,
   setkeyv(condx, c(cuniqueid, condid))
   setkeyv(condf, c(cuniqueid, condid))
 
+
+  if (rowvar == "TOTAL" || colvar == "NONE") {
+    stop("must include a rowvar and a colvar for area change estimates")
+  }
+
+  condf_chng.qry <- paste0("SELECT c.", cuniqueid) 
+  
+  if (rowvar != "TOTAL") {
+    condf_chng.qry <- paste0(condf_chng.qry, ", pcond.", rowvar, " AS PREV_", rowvar)
+    if (colvar != "NONE") {
+      condf_chng.qry <- paste0(condf_chng.qry, ", c.", colvar, " AS ", colvar)
+    }
+  }
+
+  condf_chng.qry <- paste0(condf_chng.qry, ", 
+			sum(sccm.SUBPTYP_PROP_CHNG / 4 * pop.ADJ_FACTOR_COND) AS CONDPROP_ADJ
+			FROM 
+
+
+                     FROM plt00 p
+                     JOIN cond00u c ON (c.PLT_CN = p.CN) 
+                     JOIN cond00u pcond ON (pcond.PLT_CN = p.PREV_PLT_CN) 
+                     JOIN sccm00 sccm ON (sccm.plt_cn = c.plt_cn 
+                                          AND sccm.prev_plt_cn = pcond.plt_cn 
+                                          AND sccm.condid = c.condid 
+                                          AND sccm.prevcond = pcond.condid)
+                     JOIN pltassgn ppsa ON(ppsa.PLT_CN = p.CN)
+                     JOIN stratdat5 pop ON(pop.estn_unit = ppsa.estn_unit AND pop.stratumcd = ppsa.stratumcd)
+                     WHERE c.CONDPROP_UNADJ IS NOT NULL 
+	                      AND ((sccm.SUBPTYP = 3 AND c.PROP_BASIS = 'MACR') OR 
+	                              (sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP'))
+                        AND COALESCE(c.cond_nonsample_reasn_cd, 0) = 0    
+                    	  AND COALESCE(pcond.cond_nonsample_reasn_cd, 0) = 0
+                    	  AND p.remper is not null
+                    	  AND (c.COND_STATUS_CD = 1 AND pcond.COND_STATUS_CD = 1)
+                     GROUP BY c.PLT_CN, PREV_FORTYPCD, c.FORTYPCD") 
+
+			paste0("c.", c(condid, rowvar, colvar)),
+			paste0("pcond.", condid, " AS ", "PREV_", condid), 
+			paste0("pcond.", rowvar, " AS ", "PREV_", rowvar),
+			paste0("pcond.", colvar, " AS ", "PREV_", colvar))),
+		" FROM sccm_condx sccm
+		JOIN condf c on(c.", cuniqueid, " = sccm.", cuniqueid, 
+			" and c.", condid, " = sccm.", condid, ")",
+           " JOIN condf pcond on(pcond.", cuniqueid, " = sccm.prev_plt_cn)
+            GROUP BY c.PLT_CN, c.condid")
+
+
   condf_chng.qry <- paste0("SELECT ", toString(c(paste0("sccm.", cuniqueid), 
 			paste0("c.", c(condid, rowvar, colvar)),
 			paste0("pcond.", condid, " AS ", "PREV_", condid), 
 			paste0("pcond.", rowvar, " AS ", "PREV_", rowvar),
-			paste0("pcond.", colvar, " AS ", "PREV_", colvar),
-			paste0("sccm.", areawt))),
+			paste0("pcond.", colvar, " AS ", "PREV_", colvar))),
 		" FROM sccm_condx sccm
-		JOIN condf c on(c.", cuniqueid, " = sccm.", cuniqueid, " and c.", condid, " = sccm.", condid, ")",
+		JOIN condf c on(c.", cuniqueid, " = sccm.", cuniqueid, 
+			" and c.", condid, " = sccm.", condid, ")",
            " JOIN condf pcond on(pcond.", cuniqueid, " = sccm.prev_plt_cn)
             GROUP BY c.PLT_CN, c.condid")
+
+
+## condf_chng.qry
+condf_chng.qry <- 
+"SELECT c.PLT_CN, c.CONDID, c.FORTYPCD, c.STDSZCD, 
+	pcond.CONDID AS PREV_CONDID, 
+	pcond.FORTYPCD AS PREV_FORTYPCD, pcond.STDSZCD AS PREV_STDSZCD 
+FROM condx cx
+	JOIN condf c on(c.plt_cn = cx.plt_cn and c.condid = cx.condid) 
+	JOIN condf pcond on(pcond.PLT_CN = cx.prev_plt_cn)
+GROUP BY c.PLT_CN, c.condid"
+
+head(condx)
+head(condf)
+
   condf_chng <- data.table(sqldf::sqldf(condf_chng.qry))
   setkeyv(condf_chng, c(cuniqueid, condid))  
 
@@ -767,6 +829,7 @@ modGBchng <- function(GBpopdat,
  
   est2return <- tabs$tabest
   pse2return <- tabs$tabpse
+est2return
 
   if (!is.null(est2return)) {
     returnlst$est <- setDF(est2return)
