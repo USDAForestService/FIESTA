@@ -385,9 +385,9 @@ DBgetStrata <- function(dat = NULL,
       stop("POP_ESTN_UNIT not in database")
     }
     POP_STRATUM <- DBI::dbReadTable(dbconn, "POP_STRATUM")
-    POP_STRATUM <- changeclass(POP_STRATUM)
+    POP_STRATUM <- FIESTA:::changeclass(POP_STRATUM)
     POP_ESTN_UNIT <- DBI::dbReadTable(dbconn, "POP_ESTN_UNIT")
-    POP_ESTN_UNIT <- changeclass(POP_ESTN_UNIT)
+    POP_ESTN_UNIT <- FIESTA:::changeclass(POP_ESTN_UNIT)
   }
  
   if (getassgn) {
@@ -417,7 +417,7 @@ DBgetStrata <- function(dat = NULL,
           stop("POP_PLOT_STRATUM_ASSGN not in database")
         } 
         POP_PLOT_STRATUM_ASSGN <- DBI::dbReadTable(dbconn, "POP_PLOT_STRATUM_ASSGN")
-        POP_PLOT_STRATUM_ASSGN <- changeclass(POP_PLOT_STRATUM_ASSGN) 
+        POP_PLOT_STRATUM_ASSGN <- FIESTA:::changeclass(POP_PLOT_STRATUM_ASSGN) 
         DBI::dbDisconnect(dbconn)
       }      
     } else {

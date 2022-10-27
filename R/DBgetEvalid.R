@@ -203,7 +203,6 @@ DBgetEvalid <- function(states = NULL,
   invtype <- pcheck.varchar(var2check=invtype, varnm="invtype", 
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
   ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
-
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
@@ -218,8 +217,11 @@ DBgetEvalid <- function(states = NULL,
       STATECD <- chkdbtab(ppsaflds, "STATECD", stopifnull=TRUE)
     }
     plotnm <- chkdbtab(dbtablst, "plot")
+    if (is.null(states)) {
+      states <- DBI::dbGetQuery(dbconn, 
+				paste("select distinct", STATECD, "from", plotnm))
+    }
   }
-  
   ## If evalid is not NULL, get state
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
@@ -228,15 +230,27 @@ DBgetEvalid <- function(states = NULL,
       stop("invalid evalid")
     }
     stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
+    if (length(states) != length(stcdlst)) {
+      statechk <- pcheck.states(states, "VALUE")
+      stcdlst <- stcdlst[stcdlst %in% statechk]
+      if (length(states) != length(stcdlst)) {
+        if (length(statechk) > 0) {
+          stop("invalid states: ", toString(statechk[!statechk %in% stcdlst]))
+        } else {
+          stop("invalid states")
+        }
+      }
+    }
     states <- pcheck.states(stcdlst, "MEANING")
   } else if (!is.null(invyrtab)) {
     if (!all(class(invyrtab) %in% c("data.frame", "data.table"))) {
       stop("invyrtab must be a data frame or data table") 
     }
-    if (!"STATECD" %in% names(invyrtab)) {
+    statenm <- findnm("STATECD", names(invyrtab), returnNULL=FALSE) 
+    if (!is.null(statenm)) {
       stop("STATECD must be in invyrtab")
     } else {
-      stcdlst <- unique(invyrtab[["STATECD"]])
+      stcdlst <- unique(invyrtab[[statenm]])
       states <- pcheck.states(stcdlst, "MEANING")
     }
   } else {
@@ -275,7 +289,6 @@ DBgetEvalid <- function(states = NULL,
 
 
 ############ SQLite only
-
   if (datsource == "sqlite") {
     if ("SURVEY" %in% dbtablst) {
       survey.qry <- 
@@ -329,8 +342,9 @@ DBgetEvalid <- function(states = NULL,
       message("no data in database for ", toString(states))
       return(NULL)
     } else {
-      if (!all(stcdlst %in% unique(POP_EVAL$STATECD))) {
-        miss <- stcdlst[!stcdlst %in% unique(POP_EVAL$STATECD)]
+      statenm <- findnm("STATECD", names(POP_EVAL), returnNULL=FALSE)
+      if (!all(stcdlst %in% unique(POP_EVAL[[statenm]]))) {
+        miss <- stcdlst[!stcdlst %in% unique(POP_EVAL[[statenm]])]
         message("no data in database for ", toString(miss))
         stcdlst <- stcdlst[!stcdlst %in% miss]
         states <- pcheck.states(stcdlst, "MEANING")
@@ -341,11 +355,27 @@ DBgetEvalid <- function(states = NULL,
     if (nrow(POP_EVAL_TYP) == 0) return(NULL)
 
     SURVEY <- DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
-    SURVEY <- SURVEY[SURVEY$ANN_INVENTORY == ann_inv, ]
+    ann_inventorynm <- findnm("ANN_INVENTORY", names(SURVEY), returnNULL=FALSE)
+    SURVEY <- SURVEY[SURVEY[[ann_inventorynm]] == ann_inv, ]
     if (nrow(SURVEY) == 0) return(NULL)
   }
- 
+  if (!is.null(SURVEY)) {
+    names(SURVEY) <- toupper(names(SURVEY))
+  }
+  if (!is.null(POP_EVAL)) {
+    names(POP_EVAL) <- toupper(names(POP_EVAL))
+  }
+  if (!is.null(POP_EVAL_GRP)) {
+    names(POP_EVAL_GRP) <- toupper(names(POP_EVAL_GRP))
+  }
+  if (!is.null(POP_EVAL_TYP)) {
+    names(POP_EVAL_TYP) <- toupper(names(POP_EVAL_TYP))
+  }
+
   if (all(!is.null(POP_EVAL) && !is.null(POP_EVAL_TYP) && !is.null(POP_EVAL_GRP))) {
+    evalidnm <- findnm("EVALID", names(POP_EVAL))
+    eval_grpnm <- findnm("EVAL_GRP", names(POP_EVAL_GRP))
+
     ## Define query POP_EVAL, POP_EVAL_TYP table
     popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", 
 		"START_INVYR", "END_INVYR", "LOCATION_NM")
@@ -353,15 +383,15 @@ DBgetEvalid <- function(states = NULL,
 		pet.eval_typ from ", SCHEMA., "POP_EVAL_TYP pet join ", SCHEMA., 
 		"POP_EVAL pev on (pev.cn = pet.eval_cn) ",
 		"where pev.STATECD ", paste0("in(", toString(stcdlst), ")"))
-
+    popevalvars <- sapply(popevalvars, findnm, xvect=names(POP_EVAL), returnNULL=TRUE)
     popevalvar <- popevalvars[popevalvars %in% names(POP_EVAL)]
 
     ## Query POP_EVAL
     POP_EVAL <- setDT(sqldf::sqldf(popevalTypeqry))
 
     ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
-    POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP$EVAL_GRP, 
-		nchar(POP_EVAL_GRP$EVAL_GRP) - 3, nchar(POP_EVAL_GRP$EVAL_GRP)))]
+    POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP[[eval_grpnm]], 
+		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
   }
 
 ############ End CSV only
@@ -371,8 +401,8 @@ DBgetEvalid <- function(states = NULL,
   ## Check if evalid is valid. If valid, get invyrtab invyrs, evalidlist, and invtype
   if (!is.null(evalid) && !nopoptables) {
     ## Check if evalid is valid
-    if (!all(evalid %in% POP_EVAL$EVALID)) {
-      notin <- evalid[!evalid %in% POP_EVAL$EVALID]
+    if (!all(evalid %in% POP_EVAL[[evalidnm]])) {
+      notin <- evalid[!evalid %in% POP_EVAL[[evalidnm]]]
       stop("invalid EVALID: ", toString(notin))
     } else {
       ## Create table of state, inventory year, and cycle
@@ -385,14 +415,14 @@ DBgetEvalid <- function(states = NULL,
 		pet.eval_typ from ", SCHEMA., "POP_EVAL_TYP pet join ", SCHEMA., 
 		"POP_EVAL pev on (pev.cn = pet.eval_cn) ",
 		"where pev.STATECD ", paste0("in(", toString(stcdlst), ")"))
-        popevalvar <- popevalvars[popevalvars %in% names(POP_EVAL)]
 
         ## Query POP_EVAL
         POP_EVAL <- setDT(sqldf::sqldf(popevalTypeqry))
 
         ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
-        POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP$EVAL_GRP, 
-		nchar(POP_EVAL_GRP$EVAL_GRP) - 3, nchar(POP_EVAL_GRP$EVAL_GRP)))]
+        eval_grpnm <- findnm("EVAL_GRP", names(POP_EVAL_GRP))
+        POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP[[eval_grpnm]], 
+		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
 
         invyrs <- list()
         evalidlist <- list()
@@ -403,7 +433,7 @@ DBgetEvalid <- function(states = NULL,
           st <- substr(eval, 1, nchar(eval)-4)
           etypcd <- substr(eval, nchar(eval)-1, nchar(eval))
           state <- pcheck.states(st, "MEANING")
-          pop_eval <- POP_EVAL[POP_EVAL$EVALID == eval,]
+          pop_eval <- POP_EVAL[POP_EVAL[[evalidnm]] == eval,]
           startyr <- unique(min(pop_eval$START_INVYR))
           endyr <- unique(min(pop_eval$END_INVYR))
           ann_inventory <- SURVEY[SURVEY$STATECD == st & SURVEY$INVYR == endyr, 

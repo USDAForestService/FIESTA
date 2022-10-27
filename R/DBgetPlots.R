@@ -298,6 +298,8 @@
 #' for current and previous years are extracted from FIA database.
 #' @param isdwm Logical. If TRUE, summarized condition-level down woody debris
 #' data are extracted from FIA database (COND_DWM_CALC).
+#' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
+#' @param greenwt Logical. If TRUE, green weight biomass is calculated.
 #' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
 #' appended to the plot table.
 #' @param othertables String Vector. Name of other table(s) in FIADB to include
@@ -497,9 +499,12 @@ DBgetPlots <- function (states = NULL,
                         isseed = FALSE, 
                         isveg = FALSE, 
                         issubp = FALSE, 
+                        ischng = FALSE,
                         isgrm = FALSE, 
                         islulc = FALSE,
                         isdwm = FALSE, 
+                        biojenk = FALSE,
+                        greenwt = TRUE,
                         plotgeom = FALSE, 
                         othertables = NULL, 
                         issp = FALSE, 
@@ -553,7 +558,7 @@ DBgetPlots <- function (states = NULL,
 	SITECLCD=RESERVCD=JENKINS_TOTAL_B1=JENKINS_TOTAL_B2=POP_PLOT_STRATUM_ASSGN=
 	NF_SAMPLING_STATUS_CD=NF_COND_STATUS_CD=ACI_NFS=OWNCD=OWNGRPCD=INVYR=
 	FORNONSAMP=PLOT_ID=sppvarsnew=STATECD=UNITCD=COUNTYCD=SEEDSUBP6=
-	PREV_PLT_CN=dbqueries <- NULL
+	PREV_PLT_CN=dbqueries=REF_SPECIES <- NULL
 
 
 
@@ -608,8 +613,6 @@ DBgetPlots <- function (states = NULL,
   xycoords = c("LON_PUBLIC", "LAT_PUBLIC")
   coords <- "PUBLIC"
   parameters <- FALSE
-  biojenk <- FALSE 
-  greenwt <- TRUE
   issccm=islulc <- FALSE
 
   ## Define layers in SQLite
@@ -618,6 +621,7 @@ DBgetPlots <- function (states = NULL,
   tree_layer <- "TREE" 
   seed_layer <- "SEED"
   ppsa_layer <- "POP_PLOT_STRATUM_ASSGN"
+  sccm_layer <- "SUBP_COND_CHNG_MTRX"
 
 
   ########################################################################
@@ -682,6 +686,7 @@ DBgetPlots <- function (states = NULL,
     isdwm <- ifelse(any(datatabs == "dwm"), TRUE, FALSE)
     isgrm <- ifelse(any(datatabs == "grm"), TRUE, FALSE)
     islulc <- ifelse(any(datatabs == "lulc"), TRUE, FALSE)
+    ischng <- ifelse(any(datatabs == "chng"), TRUE, FALSE)
   } else {
     istree <- pcheck.logical(istree, varnm="istree", 
 		title="Tree variables?", first="YES", gui=gui)
@@ -704,14 +709,28 @@ DBgetPlots <- function (states = NULL,
     }
     isdwm <- pcheck.logical(isdwm, varnm="isdwm", 
 		title="DWM variables?", first="YES", gui=gui)
+    isgrm <- pcheck.logical(isgrm, varnm="isgrm", 
+		title="GRM variables?", first="YES", gui=gui)
     islulc <- pcheck.logical(islulc, varnm="islulc", 
 		title="Land Use/Land Cover variables?", first="YES", gui=gui)
+    ischng <- pcheck.logical(ischng, varnm="ischng", 
+		title="Area Change?", first="YES", gui=gui)
   }
 
-  if (isgrm) {
-    islulc <- TRUE
+  if (isgrm || islulc) {
+    ischng <- TRUE
   }
 
+
+  biojenk <- pcheck.logical(biojenk, varnm="biojenk", 
+		title="Jenkins biomass?", first="NO", gui=gui)
+
+  greenwt <- pcheck.logical(greenwt, varnm="greenwt", 
+		title="Green weight?", first="NO", gui=gui)
+
+  if ((biojenk || greenwt) && !istree) {
+    istree <- TRUE
+  }
 
   ########################################################################
   ### DBgetEvalid()
@@ -1223,9 +1242,9 @@ DBgetPlots <- function (states = NULL,
 				dwm_layer, " d ON (d.PLT_CN = p.CN)")
   }
 
-  ## lulc query
+  ## Change query
   ################################################
-  if (islulc) {
+  if (ischng) {
     sccm_layer <- "SUBP_COND_CHNG_MTRX"
     if (datsource == "sqlite") {
       sccm_layer <- chkdbtab(dbtablst, sccm_layer)
@@ -1233,14 +1252,10 @@ DBgetPlots <- function (states = NULL,
         islulc=isgrm <- FALSE
       }
     }
-    chgfromqry <- paste0(pcfromqry, 
+    sccmfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
+				sccm_layer, " sccm ON sccm.PLT_CN = p.CN")
+    chgfromqry <- paste0(pcfromqry,
 		" JOIN ", SCHEMA., cond_layer, " pcond ON (pcond.PLT_CN = p.PREV_PLT_CN)")
-
-    sccmfromqry <- paste(chgfromqry, 
-		" JOIN ", SCHEMA., sccm_layer, " SCCM ON (SCCM.PLT_CN = c.PLT_CN 
-                         AND SCCM.PREV_PLT_CN = PCOND.PLT_CN 
-                         AND SCCM.CONDID = c.CONDID 
-                         AND SCCM.PREVCOND = PCOND.CONDID)")
   }
  
   ## GRM query
@@ -1300,7 +1315,7 @@ DBgetPlots <- function (states = NULL,
     if(isveg) { p2veg_subplot_spp=p2veg_subp_structure=invasive_subplot_spp <- {} }
     if(issubp) { subp=subpc <- {} }
     if(isdwm) { dwm <- {} }
-    if(any(isgrm, islulc)) { cond_pcond=sccm <- {} }
+    if(ischng) { cond_pcond=sccm <- {} }
     if(savePOP || iseval) ppsa <- {}  
 
     if (!is.null(othertables)) {
@@ -1372,7 +1387,7 @@ DBgetPlots <- function (states = NULL,
       } else {
         evalFilter.dwm <- evalFilter
       }
-      if (any(evalType == "GRM")) {
+      if (any(evalType %in% c("CHNG", "GRM"))) {
         evalid.grm <- evalid[endsWith(as.character(evalid), "03")]
         if (length(evalid.grm) == 0) stop("must include evaluation ending in 03")
         evalFilter.grm <- paste("ppsa.EVALID =", evalid.grm)
@@ -1460,7 +1475,7 @@ DBgetPlots <- function (states = NULL,
 		      stopifnull=FALSE)
       }
       ## LULC data (and GRM)
-      if (islulc) {
+      if (ischng) {
         ## Area change matrix table
         SUBP_COND_CHNG_MTRX <- DBgetCSV("SUBP_COND_CHNG_MTRX", stabbr, 
 		      returnDT=TRUE, stopifnull=FALSE)
@@ -1755,7 +1770,7 @@ DBgetPlots <- function (states = NULL,
 
         ## FORTYPGRP: condition level variable grouping FORTYPCD
         cndnames <- names(condx)
-        if ("FORTYPCD" %in% names(condx)) {
+        if ("FORTYPCD" %in% cndnames) {
           condx <- merge(condx, ref_fortypgrp[,c("VALUE", "GROUPCD")],
         		by.x="FORTYPCD", by.y="VALUE", all.x=TRUE)
           setnames(condx, "GROUPCD", "FORTYPGRPCD")
@@ -1764,7 +1779,7 @@ DBgetPlots <- function (states = NULL,
           condvarlst2 <- c(condvarlst2, "FORTYPGRPCD")
         }
         ## FLDTYPGRP: condition level variable grouping FLDTYPGRP
-        if ("FLDTYPCD" %in% names(condx)) {
+        if ("FLDTYPCD" %in% cndnames) {
           condx <- merge(condx, ref_fortypgrp[,c("VALUE", "GROUPCD")], 
                by.x="FLDTYPCD", by.y="VALUE", all.x=TRUE)
           setnames(condx, "GROUPCD", "FLDTYPGRPCD")
@@ -1775,7 +1790,7 @@ DBgetPlots <- function (states = NULL,
         setkey(condx, PLT_CN, CONDID)
 
         ## TIMBERCD condition level variable defining TIMBERLAND conditions
-        if ("SITECLCD" %in% names(condx)) {
+        if ("SITECLCD" %in% cndnames) {
           condx[COND_STATUS_CD == 1, TIMBERCD := 2]
           condx[SITECLCD %in% 1:6, TIMBERCD := 1]
 
@@ -1784,8 +1799,10 @@ DBgetPlots <- function (states = NULL,
 
         ## LANDUSECD
         ## A combination of PRESNFCD and COND_STATUS_CD
-        if (all(c("PRESNFCD", "COND_STATUS_CD") %in% names(condx))) {
+        if (all(c("PRESNFCD", "COND_STATUS_CD") %in% cndnames)) {
           condx$LANDUSECD <- with(condx, ifelse(is.na(PRESNFCD), COND_STATUS_CD, PRESNFCD))
+
+          condvarlst2 <- c(condvarlst2, "LANDUSECD")
         }
       }   ##  End (defaultVars)
       
@@ -1797,58 +1814,64 @@ DBgetPlots <- function (states = NULL,
     ## Create combined unique identifier to subset other tables
     pcondID <- condx[, paste(PLT_CN, CONDID)]
 
-    if (all(islulc, !is.null(pltx))) {
-      chgvars <- c("PLT_CN", "CONDID", "COND_STATUS_CD", "COND_NONSAMPLE_REASN_CD", 
-			"RESERVCD", "SITECLCD")
-      chgwhereqry <- "COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
-                      AND COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0"
-    
-      cond_chngqry <- paste("select distinct", toString(paste0("c.", chgvars)), 
-					"from", chgfromqry, "where", xfilter, "and", chgwhereqry,
-			"UNION select distinct", toString(paste0("pcond.", chgvars)), 
-					"from", chgfromqry, "where", xfilter, "and", chgwhereqry)
+    if (all(ischng, !is.null(pltx))) {
+
+      ## Unioned condition table
+      conduqrya <- paste("select distinct", toString(paste0("c.", condvarlst)),
+			"from", chgfromqry, "where", 
+			paste0(evalFilter.grm, stateFilters))
+      conduqryb <- paste("select distinct", toString(paste0("pcond.", condvarlst)),
+			"from", chgfromqry, "where", 
+			paste0(evalFilter.grm, stateFilters))
+      conduqry <- paste(conduqrya, "UNION", conduqryb)
+
       if (datsource == "sqlite") {
-        cond_chngx <- DBI::dbGetQuery(dbconn, cond_chngqry)
+        cond_pcondx <- setDT(DBI::dbGetQuery(dbconn, conduqry))
       } else {
-        cond_chngx <- setDT(sqldf::sqldf(cond_chngqry, stringsAsFactors=FALSE))
+        cond_pcondx <- setDT(sqldf::sqldf(conduqry, stringsAsFactors=FALSE))
       }
 
+      ## FORTYPGRP: condition level variable grouping FORTYPCD
+      pcndnames <- names(cond_pcondx)
+      if ("FORTYPCD" %in% pcndnames) {
+        cond_pcondx <- merge(cond_pcondx, ref_fortypgrp[,c("VALUE", "GROUPCD")],
+        		by.x="FORTYPCD", by.y="VALUE", all.x=TRUE)
+        setnames(cond_pcondx, "GROUPCD", "FORTYPGRPCD")
+        setcolorder(cond_pcondx, c(cndnames, "FORTYPGRPCD"))       
+      }
+      ## FLDTYPGRP: condition level variable grouping FLDTYPGRP
+      if ("FLDTYPCD" %in% pcndnames) {
+        cond_pcondx <- merge(cond_pcondx, ref_fortypgrp[,c("VALUE", "GROUPCD")], 
+               by.x="FLDTYPCD", by.y="VALUE", all.x=TRUE)
+        setnames(cond_pcondx, "GROUPCD", "FLDTYPGRPCD")
+        setcolorder(cond_pcondx, c(cndnames, "FLDTYPGRPCD"))
+      }
+      setkey(cond_pcondx, PLT_CN, CONDID)
+
+      ## TIMBERCD condition level variable defining TIMBERLAND conditions
+      if ("SITECLCD" %in% pcndnames) {
+        cond_pcondx[COND_STATUS_CD == 1, TIMBERCD := 2]
+        cond_pcondx[SITECLCD %in% 1:6, TIMBERCD := 1]
+      }
+
+      ## LANDUSECD
+      ## A combination of PRESNFCD and COND_STATUS_CD
+      if (all(c("PRESNFCD", "COND_STATUS_CD") %in% pcndnames)) {
+        cond_pcondx$LANDUSECD <- with(cond_pcondx, 
+				ifelse(is.na(PRESNFCD), COND_STATUS_CD, PRESNFCD))
+      }
+
+
+      ## SUBP_COND_CHNG_MTRX table
       sccmvars <- c("PLT_CN", "PREV_PLT_CN", "SUBP", "SUBPTYP",
                          "CONDID", "PREVCOND", "SUBPTYP_PROP_CHNG")
 
-#      sccmqry <- paste0("SELECT ", toString(paste0("sccm.", sccmvars)), 
-#		    " FROM ", chgfromqry,  
-#               " JOIN ", SCHEMA., sccm_layer, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
-#                    " and sccm.prev_plt_cn = pcond.", cuniqueid,
-#                    " and sccm.", condid, " = c.", condid, 
-#                    " and sccm.prevcond = pcond.", condid, ") ", 
-#             "where ", xfilter, " and ", chgwhereqry)
-
-      sccmqry <- paste0("SELECT c.plt_cn, c.condid, 
-             sum(sccm.SUBPTYP_PROP_CHNG * 
-                 (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS CONDPROP_UNADJ,
-             sum(sccm.SUBPTYP_PROP_CHNG * 
-                 (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS SUBPPROP_UNADJ,
-             sum(sccm.SUBPTYP_PROP_CHNG * 
-                 (CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 end)/4) AS MICRPROP_UNADJ,
-             sum(sccm.SUBPTYP_PROP_CHNG * 
-                 (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 end)/4) AS MACRPROP_UNADJ 
-		     FROM ", chgfromqry,  
-               " JOIN ", SCHEMA., sccm_layer, " sccm ON (sccm.PLT_CN = c.PLT_CN 
-                    	and sccm.prev_plt_cn = pcond.PLT_CN
-                      and sccm.CONDID = c.CONDID 
-                      and sccm.prevcond = pcond.CONDID) 
-             WHERE ", xfilter, " and ", chgwhereqry,
-             " GROUP BY c.plt_cn, c.condid")
+      sccmqry <- paste0("SELECT ", toString(paste0("sccm.", sccmvars)), 
+		    " FROM ", sccmfromqry, 
+             " where ", paste0(evalFilter.grm, stateFilters))
 
       if (datsource == "sqlite") {
-        sccmx <- DBI::dbGetQuery(dbconn, sccmqry)
-      } else {
-        sccmx <- setDT(sqldf::sqldf(sccmqry, stringsAsFactors=FALSE))
-      }
-
-      if (datsource == "sqlite") {
-        sccmx <- DBI::dbGetQuery(dbconn, sccmqry)
+        sccmx <- data.table(DBI::dbGetQuery(dbconn, sccmqry))
       } else {
         sccmx <- setDT(sqldf::sqldf(sccmqry, stringsAsFactors=FALSE))
       }
@@ -1881,6 +1904,9 @@ DBgetPlots <- function (states = NULL,
 
         if (datsource == "sqlite") {
           treex <- DBI::dbGetQuery(dbconn, treeqry)
+          if ("REF_SPECIES" %in% dbtablst) { 
+            REF_SPECIES <- DBI::dbReadTable(dbconn, "REF_SPECIES")
+          } 
         } else {
           treex <- sqldf::sqldf(treeqry, stringsAsFactors=FALSE)
         }
@@ -2701,6 +2727,39 @@ DBgetPlots <- function (states = NULL,
                                 add_layer=TRUE)) 
       } 
 
+      if (savedata && !is.null(sccmx)) {
+        index.unique.sccmx <- NULL
+        if (!append_layer) index.unique.sccmx <- c("PLT_CN", "CONDID")
+        datExportData(sccmx, 
+            index.unique = index.unique.sccmx,
+            savedata_opts = list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="sccm",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE)) 
+      }
+
+      if (savedata && !is.null(cond_pcondx)) {
+        index.unique.cond_pcondx <- NULL
+        if (!append_layer) index.unique.cond_pcondx <- c("PLT_CN", "CONDID")
+        datExportData(cond_pcondx, 
+            index.unique = index.unique.cond_pcondx,
+            savedata_opts = list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="cond_pcond",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE)) 
+      } 
+ 
+
       if (savedata && !is.null(othertables)) {
         for (j in 1:length(othertables)) {
           othertable <- othertables[j]
@@ -2867,7 +2926,7 @@ DBgetPlots <- function (states = NULL,
       tabs$seed <- setDF(seed)
       tabIDs$seed <- "PLT_CN"
     }
-    if (any(isgrm, islulc)) { 
+    if (ischng) { 
       if (!is.null(sccm)) {
         tabs$sccm <- setDF(sccm)
         tabIDs$sccm <- "PLT_CN"
