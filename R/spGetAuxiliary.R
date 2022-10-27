@@ -166,7 +166,7 @@
 #'                                          yvar = "LAT_PUBLIC"))
 #' }
 #' @export spGetAuxiliary
-spGetAuxiliary <- function(xyplt, 
+spGetAuxiliary <- function(xyplt = NULL, 
                            xyplt_dsn = NULL, 
                            uniqueid = "PLT_CN", 
                            unittype = "POLY", 
@@ -311,10 +311,14 @@ spGetAuxiliary <- function(xyplt,
   ## Spatial points for data extraction.. 
   ##################################################################################
   sppltx <- pcheck.table(tab=xyplt, tab_dsn=xyplt_dsn, tabnm="xyplt", 
-			caption="XY coordinates?", stopifnull=TRUE)
-  sppltx.names <- names(sf::st_drop_geometry(sppltx))
+			caption="XY coordinates?", stopifnull=FALSE)
+  if (is.null(sppltx) && extract) {
+    stop("xyplt is null and extract = TRUE")
+  }
 
   if (extract) {
+    sppltx.names <- names(sf::st_drop_geometry(sppltx))
+
     if (!"sf" %in% class(sppltx)) { 
       ## Create spatial object from xyplt coordinates
       sppltx <- spMakeSpatialPoints(xyplt=sppltx, 
@@ -550,27 +554,29 @@ spGetAuxiliary <- function(xyplt,
   unitarea <- NULL
   polyvarlst <- unique(c(unitvar, vars2keep))[!unique(c(unitvar, vars2keep)) %in% names(sppltx)]
 
-  if (!unitvar %in% names(sppltx)) { 
+  if (extract) {
+    if (!unitvar %in% names(sppltx)) { 
       ## Extract values of polygon layer to points
-    extpoly <- tryCatch(spExtractPoly(xyplt=sppltx,
+      extpoly <- tryCatch(spExtractPoly(xyplt=sppltx,
                                       polyvlst=unit_layerx, 
                                       xy.uniqueid=uniqueid, 
                                       polyvarlst=polyvarlst, 
                                       keepNA=keepNA, 
                                       exportNA=exportNA),
-     	 error=function(e) {
+     	   error=function(e) {
 			message(e, "\n")
 			return(NULL) })
-    if (is.null(extpoly)) {
-      return(NULL)
-      stop()
-    }
-    sppltx <- unique(extpoly$spxyext)
+      if (is.null(extpoly)) {
+        return(NULL)
+        stop()
+      }
+      sppltx <- unique(extpoly$spxyext)
 
-    rm(extpoly)
-    gc()
-  } else {
-    message(unitvar, " already in spplt... not extracting from unit_layer")
+      rm(extpoly)
+      gc()
+    } else {
+      message(unitvar, " already in spplt... not extracting from unit_layer")
+    }
   }
 
 
@@ -584,7 +590,7 @@ spGetAuxiliary <- function(xyplt,
   inputdf <- {}
   zonalnames <- {}
 
-  if (addN) {
+  if (extract && addN) {
     ## Get plot counts by domain unit
     ##########################################################################
     pltcnt <- data.table::data.table(sf::st_drop_geometry((sppltx)))
@@ -907,13 +913,15 @@ spGetAuxiliary <- function(xyplt,
 
   ## Write data frames to CSV files
   #######################################
-  pltassgn <- sf::st_drop_geometry(sppltx)
-  spxy <- sppltx
-
   if (savedata) {
-    ## Export to shapefile
-    if (exportsp && returnxy) {
-      spExportSpatial(spxy, 
+
+    if (extract) {
+      pltassgn <- sf::st_drop_geometry(sppltx)
+      spxy <- sppltx
+
+      ## Export to shapefile
+      if (exportsp && returnxy) {
+        spExportSpatial(spxy, 
             savedata_opts=list(outfolder=outfolder, 
                                 out_fmt=out_fmt, 
                                 out_dsn=out_dsn, 
@@ -923,10 +931,10 @@ spGetAuxiliary <- function(xyplt,
                                 overwrite_layer=overwrite_layer,
                                 append_layer=append_layer, 
                                 add_layer=TRUE)
-      )
-    }    
-    datExportData(pltassgn, 
-      savedata_opts=list(outfolder=outfolder, 
+        )
+      }    
+      datExportData(pltassgn, 
+        savedata_opts=list(outfolder=outfolder, 
                           out_fmt=out_fmt, 
                           out_dsn=out_dsn, 
                           out_layer="pltassgn",
@@ -935,6 +943,7 @@ spGetAuxiliary <- function(xyplt,
                           overwrite_layer=overwrite_layer,
                           append_layer=append_layer,
                           add_layer=TRUE))
+    }
  
     if (!noaux) {
       datExportData(unitzonal, 
@@ -964,8 +973,10 @@ spGetAuxiliary <- function(xyplt,
     
   returnlst <- list(unitvar=unitvar)
 
-  returnlst$pltassgn <- pltassgn
-  returnlst$pltassgnid <- uniqueid
+  if (extract) {
+    returnlst$pltassgn <- pltassgn
+    returnlst$pltassgnid <- uniqueid
+  }
 
   if (areacalc) {
     returnlst$unitarea <- unitarea
@@ -984,7 +995,7 @@ spGetAuxiliary <- function(xyplt,
   }
 
   ## Returnxy
-  if (returnxy) {
+  if (extract && returnxy) {
     ## Add coordinate variables
     #xyplt <- data.frame(sf::st_coordinates(sppltx))
     #names(xy.coords) <- c(x,y)
