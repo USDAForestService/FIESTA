@@ -87,10 +87,10 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   if (!"sf" %in% class(sfobj)) {
     stop("the object must be of class sf")
   }
-
+ 
   ## Check out_fmt
   ###########################################################
-  outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=out_fmt, 
+  outlst <- pcheck.output(out_dsn=out_dsn, out_fmt=outsp_fmt, 
                 outfolder=outfolder, outfn.pre=outfn.pre, outfn.date=outfn.date, 
                 overwrite_dsn=overwrite_dsn, overwrite_layer=overwrite_layer, 
                 add_layer=add_layer, append_layer=append_layer,
@@ -103,8 +103,6 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
   append_layer <- outlst$append_layer
   outfn.date <- outlst$outfn.date
   outfn.pre <- outlst$outfn.pre
-
-  out_fmt <- ifelse(out_fmt == "csv", "shp", out_fmt)
 
   ## Check out_layer
   if (is.null(out_layer)) {
@@ -193,8 +191,8 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
     ########################################################
     if (is.null(out_dsn) || !file.exists(out_dsn)) {
       out_dsn <- getoutfn(outfn=out_layer, outfolder=outfolder,
-		outfn.pre=outfn.pre, outfn.date=outfn.date, ext=out_fmt,
-		overwrite=overwrite_layer, append=append_layer)
+		outfn.pre=outfn.pre, outfn.date=outfn.date, ext=outsp_fmt,
+		overwrite=FALSE, append=append_layer)
     }
     ## Get out_layer
     out_layer <- basename.NoExt(out_dsn)
@@ -205,11 +203,15 @@ spExportSpatial <- function(sfobj, savedata_opts=NULL) {
     newnms <- sfobjdat$newnms
 
     delete_layer <- ifelse(append_layer, FALSE, TRUE)
-    suppressWarnings(sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, 
-		driver="ESRI Shapefile", append=append_layer, delete_dsn=FALSE,
- 		delete_layer=delete_layer, quiet=FALSE))
+    writechk <- tryCatch(suppressWarnings(sf::st_write(sfobj, dsn=out_dsn, layer=out_layer, 
+		driver="ESRI Shapefile", append=append_layer, delete_dsn=overwrite_layer,
+ 		delete_layer=overwrite_layer, quiet=FALSE)),
+     	 	error=function(e) {
+			return(NULL) })
+    if (is.null(writechk)) {
+      stop("try removing file or changing name")
+    }
 
- 
     ## Write new names to *.csv file
     if (!is.null(newnms)) {    
       suppressWarnings(write2csv(newnms, outfolder=normalizePath(dirname(out_dsn)), 
