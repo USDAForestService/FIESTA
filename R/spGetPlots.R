@@ -628,12 +628,6 @@ spGetPlots <- function(bnd = NULL,
 			return(NULL) })
     if (!is.null(pop_plot_stratum_assgnx)) {
       if (savePOP) {
-        if (!is.null(pop_plot_stratum_assgnx)) {
-          tabs2save <- c(tabs2save, "pop_plot_stratum_assgnx")
-        }
-      }
-    } else {
-      if (savePOP) {
         stop("ppsa_layer is invalid")
       }
     }
@@ -807,7 +801,6 @@ spGetPlots <- function(bnd = NULL,
     message(paste(msg, "\n"))
     if (savePOP) {
       pop_plot_stratum_assgnx <- {} 
-      tabs2save <- c(tabs2save, "pop_plot_stratum_assgnx")
     }
 
     ## Check measEndyr.filter
@@ -1150,37 +1143,47 @@ spGetPlots <- function(bnd = NULL,
     if (istree) {
       tree_layer <- chkdbtab(tablst, tree_layer, stopifnull=TRUE)
     }
-
     if (isseed) {
+      if (is.null(seed_layer)) {
+        isseed <- FALSE
+        seed <- NULL
+        tabs2save <- tabs2save[tabs2save != "seedx"]
+      }        
       seedchk <- chkdbtab(tablst, seed_layer)
-      if (is.null(seedchk) && seed_layer == "seed") {
+      if (is.null(seedchk)) {
         seedchk <- chkdbtab(tablst, "seedling")
+        if (is.null(seedchk)) {
+          seedchk <- chkdbtab(tablst, "seed")
+        }
         if (is.null(seedchk)) {
           message("no seedling data in database...")
           isseed <- FALSE
+          tabs2save <- tabs2save[tabs2save != "seedx"]
         } else {
           seed_layer <- seedchk
-        }
-      } else {
-        seed_layer <- seedchk
-      }
+        }         
+      }      
     }
- 
     if (isveg) {
       vsubpsppchk <- chkdbtab(tablst, vsubpspp_layer)
-      if (is.null(vsubpsppchk) && vsubpspp_layer == "p2veg_subplot_spp") {
-        message("no vsubpspp data in database...")
-      } else {
-        vsubpspp_layer <- vsubpsppchk
-      }
+      if (is.null(vsubpsppchk)) {
+        vsubpsppchk <- chkdbtab(tablst, "p2veg_subplot_spp")
+        if (is.null(vsubpsppchk)) {
+          message("no vsubpspp data in database...")
+        } else {
+          vsubpspp_layer <- vsubpsppchk
+        }         
+      }      
       vsubpstrchk <- chkdbtab(tablst, vsubpstr_layer)
-      if (is.null(vsubpstrchk) && vsubpstr_layer == "p2veg_subp_structure") {
-        message("no vsubpstr data in database...")
-        isveg <- FALSE
-      } else {
-        vsubpstr_layer <- vsubpstrchk
-      }
-      invsubpchk <- chkdbtab(tablst, invsubp_layer)
+      if (is.null(vsubpstrchk)) {
+        vsubpstrchk <- chkdbtab(tablst, "p2veg_subp_structure")
+        if (is.null(vsubpstrchk)) {
+          message("no vsubpstr data in database...")
+          isveg <- FALSE
+        } else {
+          vsubpstr_layer <- vsubpstrchk
+        }         
+      }      
       if (is.null(invsubpchk) && invsubp_layer == "invasive_subplot_spp") {
         message("no invsubp data in database...")
       } else {
@@ -1677,7 +1680,6 @@ spGetPlots <- function(bnd = NULL,
             tree <- tree[tree[[tuniqueid]] %in% xyids, ]
             DBI::dbClearResult(rs)
           }
-
           if (isseed) {
             seed.qry <- paste0("select distinct seed.* from ", p2fromqry, 
                                " join ", seed_layer, " seed on(seed.PLT_CN = p.CN) where ", stfilter, 
@@ -1770,7 +1772,6 @@ spGetPlots <- function(bnd = NULL,
         }
       }  ## if measEndyr.filter is not NULL
 
-
       ###############################################################################
       ## SAVE data
       ###############################################################################
@@ -1835,7 +1836,6 @@ spGetPlots <- function(bnd = NULL,
           rm(tree)
           gc()
         } 
-
         if (isseed && !is.null(seed)) {
           index.seed <- NULL
           if (!append_layer) index.seed <- c("PLT_CN", "CONDID", "SUBP")
@@ -1981,10 +1981,26 @@ spGetPlots <- function(bnd = NULL,
                                     add_layer=TRUE))
             }
           }
-        }  
+        } 
+        if (savePOP && !is.null(pop_plot_stratum_assgn)) {
+          index.unique.ppsa <- NULL
+          if (!append_layer) index.unique.ppsa <- "PLT_CN"
+          datExportData(pop_plot_stratum_assgn, 
+              index.unique = index.unique.ppsa,
+              savedata_opts = list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="pop_plot_stratum_assgn",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE)) 
+          rm(pop_plot_stratum_assgn)
+          gc()
+        } 
 
       } else {
-
         pltx <- rbind(pltx, plt)
         condx <- rbind(condx, cond)
 
