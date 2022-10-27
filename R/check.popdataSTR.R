@@ -1,4 +1,4 @@
-check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE,
+check.popdata <- function(module="GB", popType="CHG", tabs, tabIDs, strata=FALSE,
 	pltassgn=NULL, pltassgnid="CN", dsn=NULL, pjoinid="CN", condid="CONDID",
 	areawt="CONDPROP_UNADJ", evalid=NULL, measCur=FALSE, measEndyr=NULL,
 	measEndyr.filter=NULL, invyrs=NULL, intensity=NULL, adj="samp",
@@ -79,7 +79,8 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 	plotqry=condqry=treeqry=pfromqry=pltassgnqry=cfromqry=tfromqry=
 	vsubpsppqry=subplotqry=subp_condqry=unitareaqry=stratalutqry=NF_SUBP_STATUS_CD=
 	SUBPCOND_PROP=MACRCOND_PROP=tpropvars=vcondsppf=vcondstrf=
-     Nsampmeth=Nstrata=strat=RHG=SAMP_METHOD_CD=dbqueries=TESTVAR=treex=grm <- NULL
+     Nsampmeth=Nstrata=strat=RHG=SAMP_METHOD_CD=dbqueries=TESTVAR=treex=
+	plot_pplotx=sccmx=grm <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -130,7 +131,7 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   vsubpsppid <- tabIDs[["vsubpspp"]]
   subplotid <- tabIDs[["subplot"]]
   subp_condid <- tabIDs[["subp_cond"]]
-  cond_chngid <- tabIDs[["cond_pcond"]]
+  cond_pcondid <- tabIDs[["cond_pcond"]]
   sccmid <- tabIDs[["sccm"]]
   subpuniqueid <- subplotid
   lulcid <- "PLT_CN"
@@ -300,10 +301,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         cfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., cond,
 				" c ON (c.", cuniqueid, " = ", palias, ".", pjoinid, ")")
       }
-      if (popType %in% c("LULC", "CHNG", "GRM")) {
-        cfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., cond, 
-			" pcond ON(pcond.", cuniqueid, " = ", palias, ".PREV_PLT_CN)")
-      }
 #      condqry <- paste("select distinct", toString(paste0("c.", condvars)), 
 #				"from", cfromqry, whereqry)
       condqry <- paste("select distinct c.* from", cfromqry, whereqry)
@@ -311,45 +308,69 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     
 
       if (popType %in% c("LULC", "CHNG", "GRM")) {
-        if (is.null(cond_pcond)) {
-          ## Query SUBP_COND_CHNG_MTRX table for proportion of change
-          ## This is used for calculation of adjustment factors
-          if (is.null(whereqry)) {
-            chgwhereqry <- "WHERE COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
-                    	 	   and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0"
-          } else {
-            chgwhereqry <- paste(whereqry, 
-				"and COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
-                    	 and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0")
-          }
+        chgpfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., plt, 
+			" pplot ON(pplot.", puniqueid, " = ", palias, ".PREV_PLT_CN)")
+        chgcfromqry <- paste0(cfromqry, " JOIN ", SCHEMA., cond, 
+			" pcond ON(pcond.", cuniqueid, " = ", palias, ".PREV_PLT_CN)")
 
-          cond_pcondqry <- paste("select distinct", toString(paste0("c.", "*")), 
-					"from", cfromqry, chgwhereqry,
-			  "UNION select distinct", toString(paste0("pcond.", "*")), 
-					"from", cfromqry, chgwhereqry)
+        pchgwhere <- paste0(palias, ".REMPER > 0") 
+        if (is.null(whereqry)) {
+          pchgwhereqry <- paste("WHERE", pchgwhere)
+        } else {
+          pchgwhereqry <- paste(whereqry, "and", pchgwhere)
+        }
+
+        if (is.null(plot_pplot)) {
+          ## This query unions the current and remeasured previous conditions
+          plot_pplotqry <- paste("select distinct", 
+				toString(paste0("p.", "*")), 
+					"from", chgpfromqry, pchgwhereqry,
+			  "UNION select distinct", 
+				toString(paste0("pplot.", "*")), 
+					"from", chgpfromqry, pchgwhereqry)
+          dbqueries$plot_pplot <- plot_pplotqry
+        }
+        if (is.null(cond_pcond)) {
+          ## This query unions the current and remeasured previous conditions
+          cond_pcondqry <- paste("select distinct", 
+				toString(paste0("c.", "*")), 
+					"from", chgcfromqry, whereqry,
+			  "UNION select distinct", 
+				toString(paste0("pcond.", "*")), 
+					"from", chgcfromqry, whereqry)
           dbqueries$cond_pcond <- cond_pcondqry
         }
 
         if (all(!is.null(sccm), is.character(sccm), sccm %in% tablst)) {
 
-          sccmqry <- paste0("SELECT sccm.*
-                       FROM ", cfromqry,  
-                 " JOIN ", SCHEMA., sccm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
-                              " and sccm.prev_plt_cn = pcond.", cuniqueid,
-                              " and sccm.", condid, " = c.", condid, 
-                              " and sccm.prevcond = pcond.", condid, ") ", 
-                    chgwhereqry) 
+          ## Query SUBP_COND_CHNG_MTRX table for proportion of change
+          ## This is used for calculation of adjustment factors
+          chgwhere <- "c.CONDPROP_UNADJ IS NOT NULL 
+			 		and COALESCE(c.COND_NONSAMPLE_REASN_CD, 0) = 0    
+                    		and COALESCE(pcond.COND_NONSAMPLE_REASN_CD, 0) = 0"
+          if (is.null(whereqry)) {
+            chgwhereqry <- paste("WHERE", chgwhere)
+          } else {
+            chgwhereqry <- paste(whereqry, "and", chgwhere)
+          }
 
-          sccm_condqry <- paste0("SELECT sccm.plt_cn, p.prev_plt_cn, sccm.condid, 
-                 sum(sccm.SUBPTYP_PROP_CHNG * 
-                     (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS CONDPROP_UNADJ,
-                 sum(sccm.SUBPTYP_PROP_CHNG * 
+          sccmqry <- paste0("SELECT sccm.* FROM ", pfromqry,  
+                 	" JOIN ", SCHEMA., sccm, 
+				" sccm ON (sccm.", sccmid, " = p.", puniqueid, ") ", whereqry) 
+
+          sccm_condqry <- paste0("SELECT sccm.PLT_CN, pcond.CONDID PREV_CONDID, c.CONDID,
+                 pcond.COND_STATUS_CD PREV_COND_STATUS_CD, c.COND_STATUS_CD,
+                 SUM(sccm.SUBPTYP_PROP_CHNG * 
+                     (CASE WHEN ((sccm.SUBPTYP = 3 and c.PROP_BASIS = 'MACR') or
+						(sccm.SUBPTYP = 1 AND c.PROP_BASIS = 'SUBP')) 
+					THEN 1 ELSE 0 end)/4) AS CONDPROP_UNADJ,
+                 SUM(sccm.SUBPTYP_PROP_CHNG * 
                      (CASE WHEN sccm.SUBPTYP = 1 THEN 1 ELSE 0 end)/4) AS SUBPPROP_UNADJ,
-                 sum(sccm.SUBPTYP_PROP_CHNG * 
+                 SUM(sccm.SUBPTYP_PROP_CHNG * 
                      (CASE WHEN sccm.SUBPTYP = 2 THEN 1 ELSE 0 end)/4) AS MICRPROP_UNADJ,
-                 sum(sccm.SUBPTYP_PROP_CHNG * 
+                 SUM(sccm.SUBPTYP_PROP_CHNG * 
                      (CASE WHEN sccm.SUBPTYP = 3 THEN 1 ELSE 0 end)/4) AS MACRPROP_UNADJ
-                       FROM ", cfromqry,  
+                       FROM ", chgfromqry,  
                  " JOIN ", SCHEMA., sccm, " sccm ON (sccm.", sccmid, " = c.", cuniqueid, 
                               " and sccm.prev_plt_cn = pcond.", cuniqueid,
                               " and sccm.", condid, " = c.", condid, 
@@ -357,7 +378,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
                     chgwhereqry, 
                  " GROUP BY sccm.plt_cn, p.prev_plt_cn, sccm.condid")
           dbqueries$sccm_cond <- sccm_condqry
-
         } else {
           stop("need SUBP_COND_CHNG_MTRX table to calculate GRM estimates")
         }
@@ -455,58 +475,50 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   ###################################################################################
   ## Import tables
   ###################################################################################
-  condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
-           tabnm="cond", caption="cond table?",
-		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE))
   pltx <- suppressMessages(pcheck.table(plt, tab_dsn=dsn, 
            tabnm="plt", caption="plot table?",
 		nullcheck=nullcheck, tabqry=plotqry, returnsf=FALSE))
   pltassgnx <- suppressMessages(pcheck.table(pltassgn, tab_dsn=dsn, 
            tabnm="pltassgn", caption="plot assignments?", 
            nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE))
+  
   if (is.null(condx) && is.null(pltx) && is.null(pltassgnx)) {
     stop("must include plt or cond table")
   }
-  if (popType %in% c("VOL", "GRM")) {
-    treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
-           tabnm="tree", caption="Tree table?",
-		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE))
-  }
-  if (popType == "P2VEG") {
-    vsubpsppx <- suppressMessages(pcheck.table(vsubpspp, tab_dsn=dsn, 
-           tabnm="vsubpspp", caption="Veg Species table?", 
-           nullcheck=nullcheck, gui=gui, tabqry=vsubpsppqry, returnsf=FALSE))
-    vsubpstrx <- suppressMessages(pcheck.table(vsubpstr, tab_dsn=dsn, 
-           tabnm="vsubpstr", caption="Veg Structure table?", 
-           nullcheck=nullcheck, gui=gui, tabqry=vsubpstrqry, returnsf=FALSE))
-    subplotx <- suppressMessages(pcheck.table(subplot, tab_dsn=dsn, 
-           tabnm="subplot", caption="subplot table?", 
-           nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE))
-    subp_condx <- suppressMessages(pcheck.table(subp_cond, tab_dsn=dsn, 
-           tabnm="subp_cond", caption="subp_cond table?", 
-           nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE))
-  }
-  if (popType %in% c("GRM", "CHNG", "LULC")) {
+  if (!popType %in% c("GRM", "CHNG", "LULC")) {
+    condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
+           tabnm="cond", caption="cond table?",
+		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE))
+  } else {
+    condx <- NULL
+    pvars2keep <- c(pvars2keep, "PREV_PLT_CN")
+
+    ## Get remeasured condition data
+    if (is.null(cond_pcond)) {
+      cond_pcondx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
+           tabnm="cond_pcond", caption="Remeasured condition data?", 
+           nullcheck=nullcheck, gui=gui, tabqry=cond_pcondqry, returnsf=FALSE))
+    } 
+    ## Get remeasured plot data
+    if (is.null(plot_pplot)) {
+      plot_pplotx <- suppressMessages(pcheck.table(plt, tab_dsn=dsn, 
+           tabnm="plot_pplot", caption="Remeasured plot data?", 
+           nullcheck=nullcheck, gui=gui, tabqry=plot_pplotqry, returnsf=FALSE))
+    } 
+
+    ## Get subplot matrix data for generating estimates
     sccmx <- suppressMessages(pcheck.table(sccm, tab_dsn=dsn, 
            tabnm="sccm", caption="sccm table?", 
            nullcheck=nullcheck, gui=gui, tabqry=sccmqry, returnsf=FALSE))
     setkeyv(sccmx, c(cuniqueid, condid))
 
+    ## Get subplot matrix condition-level data for generating adjustment factors,
+    ## and with area weight variable (SUBPTYP_PROP_CHNG).
     sccm_condx <- suppressMessages(pcheck.table(sccm, tab_dsn=dsn, 
            tabnm="sccm", caption="sccm table?", 
            nullcheck=nullcheck, gui=gui, tabqry=sccm_condqry, returnsf=FALSE))
     setkeyv(sccm_condx, c(cuniqueid, condid))
- 
-    ## FOR GRM, replace CONDPROP* variables with change matrix CONDPROP* variables
-    condx <- merge(condx[, c(cuniqueid, condid, 
-			names(condx)[!names(condx) %in% names(sccm_condx)]), with=FALSE],
-				sccm_condx)
-    if (is.null(cond_pcond)) {
-      cond_pcondx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
-           tabnm="cond", caption="subp_cond_chng_mtrx table?", 
-           nullcheck=nullcheck, gui=gui, tabqry=cond_pcondqry, returnsf=FALSE))
-    } 
- 
+  
     if (popType == "GRM") {
       grmx <- suppressMessages(pcheck.table(grm, tab_dsn=dsn, 
            tabnm="grm", caption="tree_grm_component table?", 
@@ -534,6 +546,25 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
 
       lulcx <- sqldf::sqldf(lulcqry)
     }
+  }
+  if (popType %in% c("VOL", "GRM")) {
+    treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
+           tabnm="tree", caption="Tree table?",
+		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE))
+  }
+  if (popType == "P2VEG") {
+    vsubpsppx <- suppressMessages(pcheck.table(vsubpspp, tab_dsn=dsn, 
+           tabnm="vsubpspp", caption="Veg Species table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=vsubpsppqry, returnsf=FALSE))
+    vsubpstrx <- suppressMessages(pcheck.table(vsubpstr, tab_dsn=dsn, 
+           tabnm="vsubpstr", caption="Veg Structure table?", 
+           nullcheck=nullcheck, gui=gui, tabqry=vsubpstrqry, returnsf=FALSE))
+    subplotx <- suppressMessages(pcheck.table(subplot, tab_dsn=dsn, 
+           tabnm="subplot", caption="subplot table?", 
+           nullcheck=nullcheck, tabqry=subplotqry, returnsf=FALSE))
+    subp_condx <- suppressMessages(pcheck.table(subp_cond, tab_dsn=dsn, 
+           tabnm="subp_cond", caption="subp_cond table?", 
+           nullcheck=nullcheck, tabqry=subp_condqry, returnsf=FALSE))
   }
   if (popType == "DWM") {
     cond_dwm_calcx <- suppressMessages(pcheck.table(cond_dwm_calc, tab_dsn=dsn, 
@@ -692,10 +723,125 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
         }
       }
     }
- 
-    ## Merge plot data to cond (and lulc to cond)
-    #########################################################
-    if (!is.null(condx)) {
+
+    if (popType %in% c("GRM", "LULC", "CHNG")) { 
+
+      ## Remove plots that have no remeasurement data
+      pltx <- pltx[!is.na(pltx$REMPER), ]
+
+      ## Set as a placeholder for plot-level data checks
+      pltcondx <- pltx
+      if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
+        setnames(pltcondx, "CN", cuniqueid)
+      }
+      if (!cuniqueid %in% names(pltcondx) && puniqueid %in% names(pltcondx)) {
+        setnames(pltcondx, puniqueid, cuniqueid)
+      }
+      setkeyv(pltcondx, cuniqueid)
+
+
+      if (!is.null(plot_pplotx)) {
+        pltnmlst <- names(plot_pplotx)
+        puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui,
+		checklst=names(plot_pplotx), caption="UniqueID variable of plot",
+		warn=paste(puniqueid, "not in plot_pplot table"), stopifnull=TRUE)
+        if (any(duplicated(plot_pplotx[[puniqueid]]))) {
+          dups <- plot_pplotx[[puniqueid]][duplicated(plot_pplotx[[puniqueid]])]
+          warning(paste("plot_pplot records are not unique in: plot_pplot:", toString(dups)))
+        }
+
+        ## Check for NA values in necessary variables in plt table
+        pltx.na <- sum(is.na(plot_pplotx[[puniqueid]]))
+        if (pltx.na > 0) stop("NA values in ", puniqueid)
+
+        ## Remove plots that have no remeasurement data
+        plot_pplot_doms <- names(plot_pplotx)[names(plot_pplotx) %in% pdoms2keep]
+        plot_pplotx <- plot_pplotx[!is.na(plot_pplotx$REMPER), plot_pplot_doms, with=FALSE]
+
+        ## Set key
+        setkeyv(plot_pplotx, puniqueid)
+      }
+
+      cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui,
+		checklst=names(cond_pcondx), caption="Unique identifier of plot",
+		warn=paste(cuniqueid, "not in cond table"), stopifnull=TRUE)
+      setkeyv(cond_pcondx, cuniqueid)
+
+      ## Check for NA values in necessary variables in cond table
+      condx.na <- sum(is.na(cond_pcondx[[cuniqueid]]))
+      if (condx.na > 0) stop("NA values in ", cuniqueid)
+
+      condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui,
+		checklst=names(cond_pcondx), caption="Unique identifier of plot",
+		warn=paste(condid, "not in cond table"), stopifinvalid=FALSE)
+      if (is.null(condid)) {
+        if (nrow(cond_pcondx) == length(unique(cond_pcondx[[cuniqueid]]))) {
+          cond_pcondx[, CONDID := 1]
+          condid <- "CONDID"
+        } else {
+          stop("there is more than 1 record per plot... must include valid CONDID")
+        }
+      }
+      ## Check for NA values in necessary variables in cond table
+      condx.na <- sum(is.na(cond_pcondx[[condid]]))
+      if (condx.na > 0) stop("NA values in ", condid)
+
+      if (!is.null(plot_pplotx)) {
+        ## Check for matching unique identifiers of condx and pltx
+        cond_pcondx <- check.matchval(cond_pcondx, plot_pplotx, cuniqueid, puniqueid,
+			tab1txt=paste0("cond-", cuniqueid),
+			tab2txt=paste0("plt-", puniqueid), subsetrows=subsetrows)
+
+
+        ## Merge cond_pcondx to plot_pplotx 
+        cond_pcondx <- tryCatch(merge(plot_pplotx, cond_pcondx,
+				by.x=puniqueid, by.y=cuniqueid),
+     	 	error=function(e) {
+			return(NULL) })
+      }
+
+      if ("CN" %in% names(cond_pcondx) && !"PLT_CN" %in% names(cond_pcondx)) {
+        setnames(pltcondx, "CN", cuniqueid)
+      }
+      if (!cuniqueid %in% names(cond_pcondx) && puniqueid %in% names(cond_pcondx)) {
+        setnames(cond_pcondx, puniqueid, cuniqueid)
+      }
+      setkeyv(cond_pcondx, c(cuniqueid, condid))
+
+    } else if (popType == "LULC" && !is.null(lulcx)) {
+      condx <- lulcx
+      if ("PROP_CHNG" %in% names(condx)) {
+        areawt <- "PROP_CHNG"
+        cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
+      }
+      cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui,
+		checklst=names(condx), caption="Unique identifier of plot",
+		warn=paste(cuniqueid, "not in cond table"), stopifnull=TRUE)
+      setkeyv(condx, cuniqueid)
+
+      ## Check if class of puniqueid in pltx matches class of puniqueid in condx
+      tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
+      condx <- tabchk$tab1
+      pltx <- tabchk$tab2
+
+      ## Check for matching unique identifiers of condx and pltx
+      condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, tab1txt="cond",
+			tab2txt="plt", subsetrows=TRUE)
+
+      nrow.before <- nrow(pltx)
+
+      pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
+#      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
+#				by.x=cuniqueid, by.y=puniqueid)
+      pltcondx <- merge(pltx[, pltcols, with=FALSE], condx,
+				by.x=puniqueid, by.y=cuniqueid)
+      setnames(pltcondx, "CN", "PLT_CN")
+
+      nrow.after <- length(unique(pltcondx[[cuniqueid]]))
+      if (nrow.after < nrow.before) {
+        message(abs(nrow.after - nrow.before), " plots were removed from population")
+      }
+    } else if (!is.null(condx)) {
       cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui,
 		checklst=names(condx), caption="Unique identifier of plot",
 		warn=paste(cuniqueid, "not in cond table"), stopifnull=TRUE)
@@ -731,122 +877,42 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       }
       setkeyv(condx, c(cuniqueid, condid))
 
-#      ## Check and append lulcx if popType='LULC'
-#      #####################################################
-#      if (popType == "LULC" && !is.null(lulcx)) {
-#        if (!cuniqueid %in% names(lulcx)) {
-#          stop(cuniqueid, " must be in lulc")
-#        }
-#        if (!condid %in% names(lulcx)) {
-#          if (nrow(lulcx) == length(unique(lulcx[[cuniqueid]]))) {
-#            lulcx[, (condid) := 1]
-#          }
-#        }
-#
-#        ## Check if class of puniqueid in lulcx matches class of cuniqueid in condx
-#        tabchk <- check.matchclass(lulcx, condx, cuniqueid, cuniqueid)
-#        lulcx <- tabchk$tab1
-#        condx <- tabchk$tab2
-#
-#        ## Check for matching unique identifiers of lulcx and condx
-#        lulcx <- check.matchval(lulcx, condx, cuniqueid, cuniqueid, tab1txt="lulc",
-#			tab2txt="cond", subsetrows=TRUE)
-#        setkeyv(lulcx, c(cuniqueid, condid))
-#
-#        ## Get columns in condx that are not in lulcx
-#        condcols <- unique(c(cuniqueid, condid, names(condx)[!names(condx) %in% names(lulcx)]))
-#
-#        ## Merge lulcx and condx (Note: inner join to use only lulc conditions)
-#        #condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx), all.x=TRUE)
-#        condx <- merge(condx[, condcols, with=FALSE], lulcx, by=key(condx))
-#
-#        ## Add PROP_CHNG (sum(SCCM.SUBPTYP_PROP_CHNG) / 4) to cvars2keep
-#        cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
-#        areawt <- "PROP_CHNG"
-#      }
-
       ## Check if class of puniqueid in pltx matches class of puniqueid in condx
       tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
       condx <- tabchk$tab1
       pltx <- tabchk$tab2
 
       ## Check for matching unique identifiers of condx and pltx
+      subsetrows <- ifelse(popType %in% c("GRM", "CHNG", "LULC"), FALSE, TRUE)
       condx <- check.matchval(condx, pltx, cuniqueid, puniqueid,
 			tab1txt=paste0("cond-", cuniqueid),
-			tab2txt=paste0("plt-", puniqueid), subsetrows=TRUE)
+			tab2txt=paste0("plt-", puniqueid), subsetrows=subsetrows)
 
       nrow.before <- nrow(pltx)
 
-       ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
-#      if (keepplots) {
-#        condcols <- unique(c(cuniqueid, names(condx)[!names(condx) %in% names(pltx)]))
-#        pltcondx <- merge(pltx, condx[, condcols, with=FALSE],
-#				by.x=puniqueid, by.y=cuniqueid, all.x=TRUE)
-#        if (cuniqueid != puniqueid) {
-#          setnames(pltcondx, puniqueid, cuniqueid)
-#        }
-#      } else {
-        pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-#        pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
-#				by.x=cuniqueid, by.y=puniqueid)
-
-        pltcondx <- tryCatch(merge(pltx[, pltcols, with=FALSE], condx,
+      ## Merge cond to plt (Note: inner join to use only plots with sampled conditions)
+      pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
+      pltcondx <- tryCatch(merge(pltx[, pltcols, with=FALSE], condx,
 				by.x=puniqueid, by.y=cuniqueid),
      	 	error=function(e) {
 			return(NULL) })
-        if (is.null(pltcondx)) {
-          stop("invalid dataset")
-        }
+      if (is.null(pltcondx)) {
+        stop("invalid dataset")
+      }
 
-        if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
-          setnames(pltcondx, "CN", cuniqueid)
-        }
-        if (!cuniqueid %in% names(pltcondx) && puniqueid %in% names(pltcondx)) {
-          setnames(pltcondx, puniqueid, cuniqueid)
-        }
-        setkeyv(pltcondx, c(cuniqueid, condid))
-#      }
+      if ("CN" %in% names(pltcondx) && !"PLT_CN" %in% names(pltcondx)) {
+        setnames(pltcondx, "CN", cuniqueid)
+      }
+      if (!cuniqueid %in% names(pltcondx) && puniqueid %in% names(pltcondx)) {
+        setnames(pltcondx, puniqueid, cuniqueid)
+      }
+      setkeyv(pltcondx, c(cuniqueid, condid))
 
       nrow.after <- length(unique(pltcondx[[cuniqueid]]))
       if (nrow.after < nrow.before) {
         message(abs(nrow.after - nrow.before), " plots were removed from population")
       }
-    } else if (popType == "LULC" && !is.null(lulcx)) {
-      condx <- lulcx
-      if ("PROP_CHNG" %in% names(condx)) {
-        areawt <- "PROP_CHNG"
-        cvars2keep <- unique(c(cvars2keep, "PROP_CHNG"))
-      }
-      cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", gui=gui,
-		checklst=names(condx), caption="Unique identifier of plot",
-		warn=paste(cuniqueid, "not in cond table"), stopifnull=TRUE)
-      setkeyv(condx, cuniqueid)
-
-      ## Check if class of puniqueid in pltx matches class of puniqueid in condx
-      tabchk <- check.matchclass(condx, pltx, cuniqueid, puniqueid)
-      condx <- tabchk$tab1
-      pltx <- tabchk$tab2
-
-      ## Check for matching unique identifiers of condx and pltx
-      condx <- check.matchval(condx, pltx, cuniqueid, puniqueid, tab1txt="cond",
-			tab2txt="plt", subsetrows=TRUE)
-
-      nrow.before <- nrow(pltx)
-
-      pltcols <- unique(c(puniqueid, names(pltx)[!names(pltx) %in% names(condx)]))
-#      pltcondx <- merge(condx, pltx[, pltcols, with=FALSE],
-#				by.x=cuniqueid, by.y=puniqueid)
-      pltcondx <- merge(pltx[, pltcols, with=FALSE], condx,
-				by.x=puniqueid, by.y=cuniqueid)
-      setnames(pltcondx, "CN", "PLT_CN")
-
-      nrow.after <- length(unique(pltcondx[[cuniqueid]]))
-      if (nrow.after < nrow.before) {
-        message(abs(nrow.after - nrow.before), " plots were removed from population")
-      }
-    }
- 
-    if (is.null(condx)) {
+    } else if (is.null(condx)) {
       pltcondx <- pltx
       cuniqueid <- puniqueid
       condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui,
@@ -979,12 +1045,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       plotsampcnt <- nfplotsampcnt
     }
   }
-
-  ## Remove plots that have not been remeasured
-  if (popType == "GRM") {
-    pltcondx <- pltcondx[!is.na(pltcondx$REMPER), ]
-  }
-
 
   ######################################################################################
   ## Check unitvar - if NULL, add unitvar=ONEUNIT to pltcondx
@@ -1247,7 +1307,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       return(NULL)
     }
   }
-
   ## Check for NA values in pvars2keep variables
   pvars.na <- sapply(pvars2keep, function(x, pltcondx){
 					sum(is.na(pltcondx[, x, with=FALSE])) }, 
@@ -1269,23 +1328,13 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
   ## Check condition data
   ###################################################################################
   ###################################################################################
-
-  #############################################################################
-  ## Check for necessary cond variables in cond table
-  #############################################################################
-  ## If areawt not in cond table and only 1 condition per plot,
-  ## 	add areawt and set = 1 (100 percent)
-  if (is.null(areawt) || is.na(areawt) || !areawt %in% pltcondnmlst) {
-    ## If only 1 condition, check CONDPROP_UNADJ
-    if (nrow(pltcondx) == length(unique(pltcondx[[cuniqueid]]))) {
-      message("CONDPROP_UNADJ not in dataset.. assuming CONDPROP_UNADJ = 1")
-      pltcondx[, CONDPROP_UNADJ := 1]
-      areawt <- "CONDPROP_UNADJ"
-    } else {
-      stop("areawt is invalid...")
-    }
+  if (popType %in% c("GRM", "LULC", "CHNG")) {
+    if (is.null(sccmx) || is.null(cond_pcondx)) {
+      stop("invalid tables")
+    } 
+    pltcondx <- cond_pcondx
+    pltcondnmlst <- names(pltcondx)
   }
-  pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
 
   ## Check for COND_STATUS_CD and create ACI filter
   #############################################################################
@@ -1370,6 +1419,29 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
       message(paste(nonsamp.cfilter, "removed all records"))
       return(NULL)
     }
+  }
+
+
+  ###################################################################################
+  ## Check area weight 
+  ###################################################################################
+  if (popType %in% c("GRM", "LULC", "CHNG")) {
+    areawt <- "SUBPTYP_PROP_CHNG"
+    sccmx[[areawt]] <- check.numeric(sccmx[[areawt]])
+  } else {
+    ## If areawt not in cond table and only 1 condition per plot,
+    ## 	add areawt and set = 1 (100 percent)
+    if (is.null(areawt) || is.na(areawt) || !areawt %in% pltcondnmlst) {
+      ## If only 1 condition, check CONDPROP_UNADJ
+      if (nrow(pltcondx) == length(unique(pltcondx[[cuniqueid]]))) {
+        message("CONDPROP_UNADJ not in dataset.. assuming CONDPROP_UNADJ = 1")
+        pltcondx[, CONDPROP_UNADJ := 1]
+        areawt <- "CONDPROP_UNADJ"
+      } else {
+        stop("areawt is invalid...")
+      }
+    }
+    pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
   }
 
   ###################################################################################
@@ -1525,11 +1597,29 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     }
   }
 
-  ############################################################################
-  ## Subset variables for pltassgnx, condx, and pltcondx
-  ############################################################################
+  ########################################################################
+  ## Separate tables for estimation
+  ########################################################################
+#  if ("STATECD" %in% pvars2keep) {
+#    pvars2keep <- pvars2keep[pvars2keep != "STATECD"]
+#  }
+  cvars2keep <- cvars2keep[cvars2keep %in% names(pltcondx)]
+  pltcondx[, (pvars2keep) := NULL]
+  condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
+  pltcondx[, (cvars2keep) := NULL]
+ 
+
+  ###################################################################################
+  ###################################################################################
+  ## Check P2VEG, subplot and sub_cond data
+  ###################################################################################
+  ###################################################################################
   pltassgnvars <- c(cuniqueid, pvars2keep)
-  if (popType == "P2VEG") {
+
+  if ("P2VEG" %in% popType) {
+
+    ## Subset variables for pltassgnx, condx, and pltcondx
+    ############################################################################
     if ("P2VEG_SAMPLING_STATUS_CD" %in% names(pltcondx)) {
       pltassgnvars <- c(pltassgnvars, "P2VEG_SAMPLING_STATUS_CD")
     }
@@ -1538,25 +1628,10 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     } else {
       message("removing nonresponse from field-visited and remotely-sensed plots")
     }
-  }
-  pltassgnx <- unique(pltcondx[, pltassgnvars, with=FALSE])
-  pltassgnid <- cuniqueid
+    pltassgnx <- unique(pltcondx[, pltassgnvars, with=FALSE])
+    pltassgnid <- cuniqueid
 
-  if ("STATECD" %in% pvars2keep) {
-    pvars2keep <- pvars2keep[pvars2keep != "STATECD"]
-  }
-
-  cvars2keep <- cvars2keep[cvars2keep %in% names(pltcondx)]
-  pltcondx[, (pvars2keep) := NULL]
-  condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
-  pltcondx[, (cvars2keep) := NULL]
- 
-  ###################################################################################
-  ###################################################################################
-  ## Check subplot and sub_cond data
-  ###################################################################################
-  ###################################################################################
-  if ("P2VEG" %in% popType) {
+    ## Define subplot ids
     subpuniqueid <- "PLT_CN"
     subpid <- "SUBP"
 
@@ -1700,7 +1775,6 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     #############################################################################
     ## Check veg profile data (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE)
     #############################################################################
-
     if (!is.null(vsubpsppx) && nrow(vsubpsppx) > 0) {
       ## Define necessary variable for tree table
       vsubpsppnmlst <- names(vsubpsppx)
@@ -1780,6 +1854,12 @@ check.popdata <- function(module="GB", popType="VOL", tabs, tabIDs, strata=FALSE
     #vpltcondx <- merge(pltcondx, vsubpstrf, all.x=TRUE)
   }
 
+
+  ###################################################################################
+  ###################################################################################
+  ## Check DWM data
+  ###################################################################################
+  ###################################################################################
   if (popType == "DWM") {
     areawtvars <- c("CONDPROP_CWD", "CONDPROP_FWD_SM", "CONDPROP_FWD_LG", 
                           "CONDPROP_DUFF", "CONDPROP_PILE")
