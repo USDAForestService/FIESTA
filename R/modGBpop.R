@@ -735,16 +735,16 @@ modGBpop <- function(popType = "VOL",
     dwmpropvars <- popcheck$dwmpropvars
   }
 
-  if (popType %in% c("GRM", "CHNG", "LULC")) {
-    sccmx <- popcheck$sccmx
-    condx <- popcheck$sccm_condx
-    cond_pcondx <- popcheck$cond_pcondx
-    tpropvars <- list(SUBP="SUBPPROP_UNADJ", MICR="MICRPROP_UNADJ", MACR="MACRPROP_UNADJ")
-  }
+#  if (popType %in% c("GRM", "CHNG", "LULC")) {
+#    sccmx <- popcheck$sccmx
+#    condx <- popcheck$sccm_condx
+#    cond_pcondx <- popcheck$cond_pcondx
+#    tpropvars <- list(SUBP="SUBPPROP_UNADJ", MICR="MICRPROP_UNADJ", MACR="MACRPROP_UNADJ")
+#  }
 
-  if (popType == "LULC") {
-    lulcx <- popcheck$lulcx
-  }
+#  if (popType == "LULC") {
+#    lulcx <- popcheck$lulcx
+#  }
 
   ###################################################################################
   ## CHECK STRATA

@@ -618,6 +618,7 @@ modSApop <- function(popType="VOL",
       stratalut <- adjfacdata$unitlut
       expcondtab <- adjfacdata$expcondtab
     }
+  }
  
   if (!is.null(SAdoms)) {
     returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)
