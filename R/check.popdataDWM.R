@@ -1,15 +1,15 @@
-check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
+check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 	pfromqry, palias, pjoinid, whereqry, adj, ACI, pltx=NULL, puniqueid="CN", 
-	dsn=NULL, dbconn=NULL, condid="CONDID", areawt="CONDPROP_UNADJ", 
-	MICRO_BREAKPOINT_DIA=5, MACRO_BREAKPOINT_DIA=NULL, diavar="DIA",
-	areawt_micr="MICRPROP_UNADJ", areawt_subp="SUBPPROP_UNADJ", areawt_macr="MACRPROP_UNADJ",
-	nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, gui=FALSE){
+	dsn=NULL, condid="CONDID", areawt="CONDPROP_UNADJ",
+	nonsamp.cfilter=NULL, nullcheck=FALSE, cvars2keep=NULL, 
+	dwmvars2keep=NULL, gui=FALSE){
 
   ###################################################################################
-  ## DESCRIPTION: Checks data inputs for AREA/VOL estimation
+  ## DESCRIPTION: Checks data inputs for DWM estimation
   ## Define necessary plot and condition-level variables:
   ## - cond (cvars2keep) - areawt
-  ## Import and check cond, plt, pltassgn tables
+  ## - dwm variables (dwmvars2keep)
+  ## Import and check cond, cond_dwm_calc, plt, pltassgn tables
   ## Merge cond and pltx
   ## Check condition data
   ## - Check condid (NA values and duplicate records (cuniqueid, condid)
@@ -20,63 +20,54 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## - IF ACI=FALSE, create ACI.filter="COND_STATUS_CD == 1"
   ## - Generate and apply cond.nonsample filter for condx ("COND_STATUS_CD != 5")
   ## - If ACI, add "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
-  ## Check tree data (if tree is not NULL)
-  ## - Define necessary tree-level variables (tvars2keep)
-  ## - Import tree table and check unique identifier (tuniqueid)
-  ## - Check for condid in tree... if no condid, add CONDID=1
-  ## - Check if class of tuniqueid matches class of cuniqueid in cond
-  ## - Check if all values of tree are in cond and subset rows to match cond
-  ## - Check for missing tvars2keep and NA values in tvars2keep
-  ## - Add necessary variables to cvars2keep depending on data in tree
-  ##   If trees in subplot (TPA_UNADJ > 5 & < 10), add SUBPPROP_UNADJ to cvars2keep
-  ##     If no SUBPPROP_UNADJ in cond, add a variable SUBPROP_UNADJ=1 (100%)
-  ##   If trees in microplot (TPA_UNADJ > 50), add MICRPROP_UNADJ to cvars2keep
-  ##     If no MICRPROP_UNADJ in cond, add a variable MICRPROP_UNADJ=1 (100%)
-  ##   If trees in macroplot (TPA_UNADJ > 0 & < 5), add MACRPROP_UNADJ to cvars2keep
-  ##     If no MACRPROP_UNADJ in cond, add a variable MACRPROP_UNADJ=1 (100%)
+  ## Check cond_dwm_calc data
+  ## - Import cond_dwm_calc table and check unique identifier (duniqueid)
+  ## - Check for condid in cond_dwm_calc... if no condid, add CONDID=1
+  ## - Check if class of duniqueid matches class of cuniqueid in cond
+  ## - Check if all values of cond_dwm_calc are in cond and subset rows to match cond
+  ## - Check for missing dwmvars2keep and NA values in dwmvars2keep
   ## Subset variables for pltassgnx, condx, and pltcondx
   ###################################################################################
 
   ## Set global variables
   COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
 	STATECD=cndnmlst=PROP_BASIS=ACI.filter=condsampcnt=
-	NF_COND_STATUS_CD=TPA_UNADJ=condqry=treeqry=cfromqry=tfromqry=
-	tpropvars=treex <- NULL
+	NF_COND_STATUS_CD=condqry=cfromqry=dwmqry=cwdvars2keep <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
   ###################################################################################
   cvars2keep <- unique(c(cvars2keep, areawt, "PROP_BASIS"))
-  pdoms2keep <- c("INVYR", "STATECD", "UNITCD", "COUNTYCD", "PLOT_STATUS_CD", 
-			"MEASYEAR", "RDISTCD", "WATERCD", "ECOSUBCD", "CONGCD", "ELEV")
 
+  cwdvars2keep <- c("CWD_LPA_UNADJ", "CWD_VOLCF_UNADJ", "CWD_DRYBIO_UNADJ",
+				"CWD_CARBON_UNADJ")
+  fwdvars2keep <- c("FWD_SM_VOLCF_UNADJ", "FWD_SM_DRYBIO_UNADJ", "FWD_SM_CARBON_UNADJ",
+				"FWD_MD_VOLCF_UNADJ", "FWD_MD_DRYBIO_UNADJ", "FWD_MD_CARBON_UNADJ",
+				"FWD_LG_VOLCF_UNADJ", "FWD_LG_DRYBIO_UNADJ", "FWD_LG_CARBON_UNADJ")
+  pilevars2keep <- c("PILE_VOLCF_UNADJ", "PILE_DRYBIO_UNADJ", "PILE_CARBON_UNADJ")
+  duffvars2keep <- c("DUFF_VOLCF_UNADJ", "DUFF_DRYBIO_UNADJ", "DUFF_CARBON_UNADJ")
+  dwmdoms2keep <- c(cwdvars2keep, fwdvars2keep)
   datindb <- FALSE
 
   ## Get tables from tabs
   ########################################################## 
-  plt=cond=tree=seed <- NULL
+  plt=cond=cond_dwm_calc <- NULL
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])
   }
   cuniqueid <- tabIDs[["cond"]]
-  tuniqueid <- tabIDs[["tree"]]
-  suniqueid <- tabIDs[["seed"]]
+  duniqueid <- tabIDs[["cond_dwm_calc"]]
 
 
+  ## Check dsn and create queries to get population subset from database
   ###################################################################################
-  ## Database queries
-  ###################################################################################
-  if (!is.null(dbconn) || 
-	(!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg"))) {
+  if (!is.null(dsn) && getext(dsn) %in% c("sqlite", "db", "db3", "sqlite3", "gpkg")) {
     datindb <- TRUE
-    if (is.null(dbconn)) {
-      dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
-    }
+    dbconn <- DBtestSQLite(dsn, dbconnopen=TRUE, showlist=FALSE)
     tablst <- DBI::dbListTables(dbconn)
     chk <- TRUE
-    SCHEMA.<- NULL
+    SCHEMA. <- NULL
     dbqueries <- list()
-
 
     ## Create query for cond
     #########################################
@@ -95,30 +86,11 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
       dbqueries$cond <- condqry   
     }
 
-    ## Create query for tree
+    ## Create query for dwm
     #########################################
-    if (all(!is.null(tree), is.character(tree), tree %in% tablst)) {
-      if (!is.null(pfromqry)) {
-        tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., tree,
-				" t ON (t.PLT_CN = ", palias, ".", pjoinid, ")")
-      } else {
-        tfromqry <- paste(tree, "t")
-      }
-      treeqry <- paste("select distinct t.* from", tfromqry, whereqry)
-      dbqueries$tree <- treeqry
-    }
-
-    ## Create query for seed
-    #########################################
-    if (all(!is.null(seed), is.character(seed), seed %in% tablst)) {
-      if (!is.null(pfromqry)) {
-        sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., seed,
-				" s ON (s.PLT_CN = ", palias, ".", pjoinid, ")")
-      } else {
-        sfromqry <- paste(seed, "s")
-      }
-      seedqry <- paste("select distinct s.* from", sfromqry, whereqry)
-      dbqueries$seed <- seedqry
+    if (all(!is.null(cond_dwm_calc), is.character(cond_dwm_calc), cond_dwm_calc %in% tablst)) {
+      dwmfromqry <- paste0(SCHEMA., cond_dwm_calc)
+      dwmqry <- paste("select distinct * from", dwmfromqry, whereqry)
     }
   }
  
@@ -131,9 +103,9 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   condx <- suppressMessages(pcheck.table(cond, tab_dsn=dsn, 
            tabnm="cond", caption="cond table?",
 		nullcheck=nullcheck, tabqry=condqry, returnsf=FALSE))
-  treex <- suppressMessages(pcheck.table(tree, tab_dsn=dsn, 
-           tabnm="tree", caption="Tree table?",
-		nullcheck=nullcheck, gui=gui, tabqry=treeqry, returnsf=FALSE))
+  cond_dwm_calcx <- suppressMessages(pcheck.table(cond_dwm_calc, tab_dsn=dsn, 
+           tabnm="cond_dwm_calc", caption="lulc table?", 
+           nullcheck=nullcheck, tabqry=dwmqry, returnsf=FALSE))
  
   ## Define cdoms2keep
   cdoms2keep <- names(condx)
@@ -178,26 +150,11 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   setkeyv(condx, c(cuniqueid, condid))
 
 
-  ## Merge pltx with condx
-  ###########################################################
+  ## Merge pltx to condx
+  ###################################################################
   if (!is.null(pltx)) {
 
-    pltnmlst <- names(pltx)
-    puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui,
-		checklst=pltnmlst, caption="UniqueID variable of plot",
-		warn=paste(puniqueid, "not in plot_pplot table"), stopifnull=TRUE)
-    if (any(duplicated(pltx[[puniqueid]]))) {
-      dups <- pltx[[puniqueid]][duplicated(pltx[[puniqueid]])]
-      warning(paste("plt records are not unique in: plt:", toString(dups)))
-    }
-
-    ## Check for NA values in necessary variables in plt table
-    pltx.na <- sum(is.na(pltx[[puniqueid]]))
-    if (pltx.na > 0) stop("NA values in ", puniqueid)
-
-    ## Subset plot columns and remove plots that have no remeasurement data
-    pvars <- unique(c(puniqueid, pltnmlst[pltnmlst %in% pdoms2keep]))
-    pltx <- pltx[, pvars, with=FALSE]
+    ## Set key
     setkeyv(pltx, puniqueid)
 
     ## Subset condition columns
@@ -247,7 +204,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     pltcondx <- check.matchval(pltcondx, pltassgnx, cuniqueid, pltassgnid, 
 			tab1txt="cond", tab2txt="pltassgn", subsetrows=TRUE)
   }
-
 
   ###################################################################################
   ## Check condition data
@@ -346,159 +302,89 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
 
 
+
   ###################################################################################
   ###################################################################################
-  ## Check tree data
+  ## Check cond_dwm_calc
   ###################################################################################
   ###################################################################################
-  if (!is.null(treex)) {
-    ## Define necessary variable for tree table
-    tvars2keep <- {}
-    treenmlst <- names(treex)
+  dwmnmlst <- names(cond_dwm_calcx)
+  dwmpropvars <- dwmnmlst[grepl("CONDPROP", dwmnmlst, ignore.case=TRUE)]
+  dwmvars2keep <- c(dwmvars2keep, dwmpropvars)
 
-    ## Check unique identifiers
-    tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
-		checklst=treenmlst, caption="UniqueID variable of plot",
-		warn=paste(tuniqueid, "not in tree"), stopifnull=TRUE)
+  duniqueid <- pcheck.varchar(var2check=duniqueid, varnm="duniqueid", gui=gui,
+		checklst=dwmnmlst, caption="Unique identifier of plot",
+		warn=paste(duniqueid, "not in cond table"), stopifnull=TRUE)
+  setkeyv(cond_dwm_calcx, duniqueid)
 
-    ## Check for NA values in necessary variables in tree table
-    treex.na <- sum(is.na(treex[[tuniqueid]]))
-    if (treex.na > 0) stop("NA values in ", tuniqueid)
+  ## Check for NA values in necessary variables in cond_dwm_calc table
+  cond_dwm_calcx.na <- sum(is.na(cond_dwm_calcx[[duniqueid]]))
+  if (cond_dwm_calcx.na > 0) stop("NA values in ", duniqueid)
 
-    if (tuniqueid %in% pltcondnmlst) {
-      idplace <- which(pltcondnmlst %in% tuniqueid)
-      if (idplace != 1) {
-	  pltcondnmlst <- c(tuniqueid, pltcondnmlst)
-	  pltcondnmlst <- pltcondnmlst[-(idplace + 1)]
-      }
-    }
-
-    ## Check for condid in tree
-    if (!condid %in% names(treex)) {
-      message("CONDID not in tree table... appending CONDID = 1")
-      treex[, CONDID := 1]
+  condid <- pcheck.varchar(var2check=condid, varnm="condid", gui=gui,
+		checklst=dwmnmlst, caption="Unique identifier of plot",
+		warn=paste(condid, "not in cond table"), stopifinvalid=FALSE)
+  if (is.null(condid)) {
+    if (nrow(cond_dwm_calcx) == length(unique(cond_dwm_calcx[[duniqueid]]))) {
+      cond_dwm_calcx[, CONDID := 1]
+      condid <- "CONDID"
     } else {
-      ## Check for NA values in condid
-      treex.na <- sum(is.na(treex[, condid, with=FALSE]))
-      if (treex.na > 0) stop("NA values in ", condid)
-    }
-    setkeyv(treex, c(tuniqueid, condid))
-
-    ## Check if class of tuniqueid in treex matches class of cuniqueid in condx
-    tabchk <- check.matchclass(pltcondx, treex, key(pltcondx), key(treex))
-    pltcondx <- tabchk$tab1
-    treex <- tabchk$tab2
-
-    ## Check for missing tvars2keep
-    tmissvars <- tvars2keep[which(!tvars2keep %in% treenmlst)]
-    if (length(tmissvars) > 0) {
-      stop("missing necessary variables from tree: ", paste(tmissvars, collapse=", "))
-    }
-
-    ## Check for NA values in tvars2keep variables
-    ## TPA_UNADJ=NA, but trees have a DIA
-    ## these are down dead trees that only count in growth and mortality,
-    ## but wouldn't be measured if they hadn't been alive at the previous inventory
-
-    if (length(tvars2keep) > 0) {
-      tvars.na <- sapply(c(tuniqueid, condid, tvars2keep),
-		function(x, treex){ sum(is.na(treex[,x, with=FALSE])) }, treex)
-      if (any(tvars.na) > 0) {
-        stop(tvars.na[tvars.na > 0], " NA values in variable: ",
-		paste(names(tvars.na[tvars.na > 0]), collapse=", "))
-      }
-    }
-
-    ## Add necessary variables to cvars2keep depending on data in tree
-    ###################################################################
-    ## If trees with DIA less than MICRO_BREAKPOINT_DIA exist in database
-    ##   and there is no areawt_micr defined, the areawt will be used.
-    ## If trees with DIA greater than MACRO_BREAKPOINT_DIA exist in database
-    ##    and there is no areawt_macr defined, the areawt will be used.
-    if (adj != "none") {
-
-      ## Check for condition proportion variables
-      propchk <- check.PROP(treex, pltcondx, cuniqueid=cuniqueid, checkNA=FALSE,
-		areawt=areawt, diavar=diavar, MICRO_BREAKPOINT_DIA=MICRO_BREAKPOINT_DIA,
-		MACRO_BREAKPOINT_DIA=MACRO_BREAKPOINT_DIA,
-		areawt_micr=areawt_micr, areawt_subp=areawt_subp, areawt_macr=areawt_macr)
-      tpropvars <- propchk$tpropvars
-      treex <- propchk$treex
-      pltcondx <- propchk$condx
-      cvars2keep <- unique(c(cvars2keep, unlist(tpropvars)))
+      stop("there is more than 1 record per plot... must include valid CONDID")
     }
   }
+  ## Check for NA values in necessary variables in cond table
+  cond_dwm_calcx.na <- sum(is.na(cond_dwm_calcx[[condid]]))
+  if (cond_dwm_calcx.na > 0) stop("NA values in ", condid)
 
+  ## Check if 1 plot-condition per record in cond
+  ######################################################
+  condid.dupid <- condx[duplicated(cond_dwm_calcx, by=c(duniqueid, condid))][[duniqueid]]
 
-  ###################################################################################
-  ## Check seedling data
-  ###################################################################################
-  seedx <- pcheck.table(seed, tab_dsn=dsn, tabnm="seed", caption="Seedling table?",
-		nullcheck=nullcheck, gui=gui, tabqry=seedqry, returnsf=FALSE)
-  if (!is.null(seedx)) {
-    ## Define necessary variable for tree table
-    svars2keep <- {}
-    if (adj != "none") svars2keep <- "TPA_UNADJ"
-    seednmlst <- names(seedx)
-
-    ## Check unique identifiers
-    tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
-		checklst=treenmlst, caption="UniqueID variable of plot",
-		warn=paste(tuniqueid, "not in tree"), stopifnull=TRUE)
-
-    ## Check for NA values in necessary variables in tree table
-    seedx.na <- sum(is.na(seedx[[tuniqueid]]))
-    if (seedx.na > 0) stop("NA values in ", tuniqueid)
-
-    if (tuniqueid %in% pltcondnmlst) {
-      idplace <- which(pltcondnmlst %in% tuniqueid)
-      if (idplace != 1) {
-	  pltcondnmlst <- c(tuniqueid, pltcondnmlst)
-	  pltcondnmlst <- pltcondnmlst[-(idplace + 1)]
-      }
-    }
-
-    ## Check for condid in tree
-    if (!condid %in% names(treex)) {
-      if (nrow(seedx) == length(unique(seedx[[tuniqueid]]))) {
-        seedx[, CONDID := 1]
-      } else {
-        stop("only 1 record for each tuniqueid allowed")
-      }
-    } else {
-      ## Check for NA values in condid
-      seedx.na <- sum(is.na(seedx[, tuniqueid, with=FALSE]))
-      if (seedx.na > 0) stop("NA values in ", tuniqueid)
-    }
-    setkeyv(seedx, c(tuniqueid, condid))
-
-    ## Check if class of tuniqueid in seedx matches class of cuniqueid in condx
-    tabchk <- check.matchclass(pltcondx, seedx, cuniqueid, tuniqueid)
-    pltcondx <- tabchk$tab1
-    seedx <- tabchk$tab2
-
-    ## Check for missing tvars2keep
-    smissvars <- svars2keep[which(!svars2keep %in% seednmlst)]
-    if (length(smissvars) > 0)
-      stop("missing necessary variables from seed: ", paste(smissvars, collapse=", "))
-
-    ## Check for NA values in svars2keep variables
-    ## TPA_UNADJ=NA, but trees have a DIA
-    ## these are down dead trees that only count in growth and mortality,
-    ## but wouldn't be measured if they hadn't been alive at the previous inventory
-
-    svars2keep2 <- svars2keep[svars2keep != "TPA_UNADJ"]
-    if (length(svars2keep) > 0) {
-      svars.na <- sapply(c(tuniqueid, condid, svars2keep2),
-		function(x, seedx){ sum(is.na(seedx[,x, with=FALSE])) }, seedx)
-      if (any(svars.na) > 0)
-        stop(svars.na[svars.na > 0], " NA values in variable: ",
-		paste(names(svars.na[svars.na > 0]), collapse=", "))
-    }
+  if (length(condid.dupid) > 0) {
+    msg <- paste("check cuniqueid/condid... duplicate records")
+    if (length(condid.dupid) < 20) print(condid.dupid)
+    stop(msg)
   }
+  setkeyv(cond_dwm_calcx, c(duniqueid, condid))
+
+
+  ## Check if class of duniqueid in cond_dwm_calcx matches class of duniqueid in condx
+  tabchk <- check.matchclass(condx, cond_dwm_calcx, cuniqueid, duniqueid)
+  condx <- tabchk$tab1
+  cond_dwm_calcx <- tabchk$tab2
+
+  ## Check for matching unique identifiers of condx and pltx
+  condx <- check.matchval(condx, cond_dwm_calcx, cuniqueid, duniqueid,
+			tab1txt=paste0("cond-", cuniqueid),
+			tab2txt=paste0("cond_dwm_calc-", duniqueid), subsetrows=TRUE)
+
+
+  ## Check for missing dwmvars2keep
+  ######################################################
+  dwmmissvars <- dwmvars2keep[which(!dwmvars2keep %in% dwmnmlst)]
+  if (length(dwmmissvars) > 0) {
+    if (length(dwmmissvars) == length(dwmvars2keep)) {
+      stop("missing all necessary variables from cond_dwm_calc: ", 
+			paste(dwmmissvars, collapse=", "))
+    } else {
+      message("missing necessary variables from cond_dwm_calc: ", 
+			paste(dwmmissvars, collapse=", "))
+      dwmvars2keep <- dwmvars2keep[!dwmvars2keep %in% dwmmissvars]
+    } 
+  }
+
+  ## Check for NA values in dwmvars2keep variables
+  dwmvars.na <- sapply(c(duniqueid, condid, dwmvars2keep),
+		function(x, cond_dwm_calcx){ sum(is.na(cond_dwm_calcx[,x, with=FALSE])) }, 
+			cond_dwm_calcx)
+  if (any(dwmvars.na) > 0) {
+    stop(dwmvars.na[dwmvars.na > 0], " NA values in variable: ",
+		paste(names(dwmvars.na[dwmvars.na > 0]), collapse=", "))
+  }
+
 
   ########################################################################
-  ## Separate tables for estimation
+  ## Separate and merge tables for estimation
   ########################################################################
 #  if ("STATECD" %in% pvars2keep) {
 #    pvars2keep <- pvars2keep[pvars2keep != "STATECD"]
@@ -506,34 +392,26 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   cvars2keep <- cvars2keep[cvars2keep %in% names(pltcondx)]
   condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
   pltcondx[, (cvars2keep) := NULL]
- 
- 
+
+
+  ## Merge condx to cond_dwm_calcx to get variables for summed condition proportions
+  condx <- merge(condx, cond_dwm_calcx[, c(duniqueid, condid, dwmvars2keep), with=FALSE])
+
+
+  ## Merge condx to cond_dwm_calcx to get variables for summed condition proportions
+  pltcondx <- merge(pltcondx, cond_dwm_calcx[, c(duniqueid, condid, dwmdoms2keep), with=FALSE])
+
+
   ## Set up list of variables to return
   ######################################################################################
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
 	condid=condid, condsampcnt=as.data.frame(condsampcnt),
-	ACI.filter=ACI.filter, areawt=areawt)
+	ACI.filter=ACI.filter, areawt=areawt, dwmpropvars=dwmpropvars)
 
-  if (!is.null(treex)) {
-    ## Check that the values of tuniqueid in treex are all in cuniqueid in pltcondx
-    treef <- check.matchval(treex, pltcondx, tuniqueid, cuniqueid, tab1txt="tree",
-		tab2txt="cond", subsetrows=TRUE)
-    returnlst$treef <- treef
-    returnlst$tuniqueid <- tuniqueid
-  }
-  if (!is.null(seedx)) {
-    ## Check that the values of tuniqueid in seedx are all in cuniqueid in pltcondx
-    seedf <- check.matchval(seedx, pltcondx, tuniqueid, cuniqueid, tab1txt="seed",
-		tab2txt="cond", subsetrows=TRUE)
-    returnlst$seedf <- seedf
-  }
- 
   if (ACI) {
     returnlst$nfplotsampcnt <- nfplotsampcnt
-  }   
-  if (adj != "none") {
-    returnlst$tpropvars <- tpropvars
   }
+
 
   return(returnlst)
 }

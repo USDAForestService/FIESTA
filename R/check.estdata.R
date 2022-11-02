@@ -38,7 +38,7 @@ check.estdata <- function(esttype, totals=TRUE, pltcondf=NULL, cuniqueid="PLT_CN
   #############################################################################
   ## Check esttype
   #############################################################################
-  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC", "P2VEG")
+  esttypelst <- c("AREA", "TREE", "RATIO", "SEED", "LULC", "P2VEG", "DWM")
   esttype <- pcheck.varchar(var2check=esttype, varnm="esttype", gui=gui,
 	checklst=esttypelst, caption="Esttype?")
 

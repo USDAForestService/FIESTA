@@ -475,11 +475,11 @@ modGBratio <- function(GBpopdat,
                 cuniqueid=cuniqueid, condid=condid, 
                 treex=treex, seedx=seedx, estseed=estseed, sumunits=sumunits, 
                 landarea=landarea, ACI.filter=ACI.filter, pcfilter=pcfilter, 
-	              allin1=allin1, estround=estround, pseround=pseround, 
+                allin1=allin1, estround=estround, pseround=pseround, 
                 divideby=divideby, addtitle=addtitle, returntitle=returntitle, 
                 rawdata=rawdata, rawonly=rawonly, savedata=savedata, 
                 outfolder=outfolder, overwrite_dsn=overwrite_dsn, 
-	              overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
+                overwrite_layer=overwrite_layer, outfn.pre=outfn.pre, 
                 outfn.date=outfn.date, append_layer=append_layer, 
                 raw_fmt=raw_fmt, raw_dsn=raw_dsn, gui=gui)
   if (is.null(estdat)) return(NULL)
@@ -517,7 +517,7 @@ modGBratio <- function(GBpopdat,
   ### Check row and column data
   ###################################################################################
   rowcolinfo <- check.rowcol(gui=gui, esttype=esttype, 
-                  treef=treef, seedf=seedf,
+                     treef=treef, seedf=seedf,
 	                condf=pltcondf, cuniqueid=cuniqueid, 
 	                tuniqueid=tuniqueid, estseed=estseed, 
 	                rowvar=rowvar, rowvar.filter=rowvar.filter, 
@@ -664,7 +664,6 @@ modGBratio <- function(GBpopdat,
   unit_totest=unit_grpest=unit_rowest=unit_colest=unit_grpest=rowunit=totunit <- NULL
   addtotal <- ifelse(((rowvar == "TOTAL" || length(unique(tdomdat[[rowvar]])) > 1) ||
 		(!is.null(tdomvarlstn) && length(tdomvarlstn) > 1)), TRUE, FALSE)
-  stratalut <- setDT(stratalut)
 
   ## Transpose rows if tdomvar2 is not NULL
   if (!is.null(tdomvar2)) {

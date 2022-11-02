@@ -117,9 +117,10 @@ check.PROP <- function(treex, condx, cuniqueid="PLT_CN", checkNA=TRUE,
   } else {
     areawt_macr <- findnm(areawt_macr, names(condx), returnNULL=TRUE)
     if (!is.null(areawt_macr)) {
-      if ((is.null(MACRO_BREAKPOINT_DIA) || is.na(MACRO_BREAKPOINT_DIA)) &&
-		!all(is.na(condx[[areawt_macr]]))) {
-        message(areawt_macr, " exists but no MACRO_BREAKPOINT_DIA provided")
+      if ((is.null(MACRO_BREAKPOINT_DIA) || is.na(MACRO_BREAKPOINT_DIA)) && !all(is.na(condx[[areawt_macr]]))) {
+        if (sum(condx[[areawt_macr]]) != 0) {
+          message(areawt_macr, " exists but no MACRO_BREAKPOINT_DIA provided")
+        }
       }
       propvars <- c(propvars, areawt_macr)
       tpropnames <- c(tpropnames, "MACR")

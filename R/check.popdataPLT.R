@@ -55,9 +55,10 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
    
   ## Define plt variables
   #########################################################################
-  pdoms2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "INVYR",
-	"MEASYEAR", "PLOT_STATUS_CD", "PSTATUSCD", "RDDISTCD", "WATERCD", "ELEV",
-	"ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "INTENSITY", "DESIGNCD"))
+  pvars2keep <- unique(pvars2keep) 
+  pdoms2keep <- c("STATECD", "UNITCD", "COUNTYCD", "INVYR", "PLOT_STATUS_CD", 
+	"PLOT_NONSAMPLE_REASN_CD", "PSTATUSCD", "INTENSITY", "MEASYEAR", "RDDISTCD", 
+	"WATERCD", "ELEV", "ELEV_PUBLIC", "ECOSUBCD", "CONGCD", "DESIGNCD", "EMAP_HEX")
 
   ## Get tables from tabs
   ########################################################
@@ -82,6 +83,10 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   ## Check ACI (if ACI=FALSE, need to filter COND_STATUS_CD == 1)
   ###################################################################################
   ACI <- pcheck.logical(ACI, varnm="ACI", title="ACI?", first="NO", gui=gui)
+  if (ACI) {
+    pvars2keep <- c(pvars2keep, "NF_SAMPLING_STATUS_CD", "NF_PLOT_STATUS_CD")
+  }
+
 
   ## Check unit.action
   ########################################################
@@ -94,7 +99,14 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   #####################################################################################
   if (popType %in% c("GRM", "CHNG", "LULC")) {
     pvars2keep <- unique(c(pvars2keep, c("PREV_PLT_CN", "REMPER")))
-  }
+  } else if (popType == "P2VEG") {
+    pvars2keep <- c(pvars2keep, "P2VEG_SAMPLING_STATUS_CD", "P2VEG_SAMPLING_LEVEL_DETAIL_CD",
+	"SAMP_METHOD_CD")
+  } else if (popType == "INV") {
+    pvars2keep <- c(pvars2keep, "INVASIVE_SAMPLING_STATUS_CD", "INVASIVE_SPECIMEN_RULE_CD")
+  }  
+
+
 
   ## Check strata, strvars
   ###################################################################################
@@ -438,7 +450,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       names(invyrs) <- pcheck.states(names(invyrs))
     }
   }
-
+ 
   ## Generate table of sampled/nonsampled plots (if ACI, nonforest status included)
   ######################################################################################
   if (any(c("PLOT_STATUS_CD", "PSTATUSCD") %in% pltnmlst)) {
@@ -639,7 +651,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   if (nonresp) {
     returnlst$RHGlut <- RHGlut
     returnlst$nonresplut <- nonresplut
-  }
+  }    
 
   return(returnlst)
 }

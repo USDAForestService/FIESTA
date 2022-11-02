@@ -705,31 +705,35 @@ modMApop <- function(popType="VOL",
   if (!is.null(unitvar2)) {
     condx[, (unitvars) := tstrsplit(get(unitvar), "-", fixed=TRUE)]
   }
-  if (adj == "samp") {
-    bycond <- TRUE
-    adjtree <- TRUE
-    adjfacdata <- getadjfactorGB(treex=treef, seedx=seedf, condx=condx, 
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, condid=condid, unitlut=unitlut, 
-		unitvars=unitvar, strvars=strvar, unitarea=unitarea, areavar=areavar, 
-		cvars2keep=cvars2keep)
-    condx <- adjfacdata$condx
-    unitlut <- adjfacdata$unitlut
-    treef <- adjfacdata$treex
-    seedf <- adjfacdata$seedx
-    expcondtab <- adjfacdata$expcondtab
- 
-  } else if (adj == "plot") {
-    adjtree <- TRUE
-    bycond <- FALSE
-    adjfacdata <- getadjfactorPLOT(treex=treef, condx=condx, seedx=seedf,
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
-    condx <- adjfacdata$condx
-    treef <- adjfacdata$treex
-    seedf <- adjfacdata$seedx
 
-  } else {
+  if (adj == "none") {
     setkeyv(condx, c(cuniqueid, condid))
+  } else {
+    
+    if (popType %in% c("ALL", "VOL", "CURR")) {
+      adjfacdata <- getadjfactorVOL(adj=adj, 
+                        condx = condx, 
+                        treex = treef, 
+                        seedx = seedf, 
+                        cuniqueid = cuniqueid, 
+                        condid = condid,
+                        unitlut = stratalut, 
+                        unitvars = unitvar,
+                        strvars = strvar,
+                        unitarea = unitarea,
+                        areavar = areavar, 
+                        areawt = areawt
+                        )
+      condx <- adjfacdata$condx
+      treef <- adjfacdata$treex
+      seedf <- adjfacdata$seedx
+      varadjlst <- adjfacdata$varadjlst
+      areawtnm <- adjfacdata$areawtnm
+      stratalut <- adjfacdata$unitlut
+      expcondtab <- adjfacdata$expcondtab
+    }
   }
+
  
   ###################################################################################
   ## Return population data objects

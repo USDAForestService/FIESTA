@@ -592,17 +592,32 @@ modSApop <- function(popType="VOL",
   condx <- condx[pltassgnx[, c(pltassgnid, dunitvar, prednames), with=FALSE]]
   setkeyv(condx, c(cuniqueid, condid))
 
-  if (adj == "plot") {
-    adjtree <- TRUE
-    bycond <- FALSE
-
-    adjfacdata <- getadjfactorPLOT(condx=condx, treex=treef, seedx=seedf, 
-				cuniqueid=cuniqueid, tuniqueid=tuniqueid, areawt=areawt,
-				tpropvars=tpropvars)
-    condx <- adjfacdata$condx
-    treef <- adjfacdata$treex
-    seedf <- adjfacdata$seedx
-  }
+  if (adj == "none") {
+    setkeyv(condx, c(cuniqueid, condid))
+  } else {
+    
+    if (popType %in% c("ALL", "VOL", "CURR")) {
+      adjfacdata <- getadjfactorVOL(adj="plot", 
+                        condx = condx, 
+                        treex = treef, 
+                        seedx = seedf, 
+                        cuniqueid = cuniqueid, 
+                        condid = condid,
+                        unitlut = stratalut, 
+                        unitvars = unitvar,
+                        strvars = strvar,
+                        unitarea = unitarea,
+                        areavar = areavar, 
+                        areawt = areawt
+                        )
+      condx <- adjfacdata$condx
+      treef <- adjfacdata$treex
+      seedf <- adjfacdata$seedx
+      varadjlst <- adjfacdata$varadjlst
+      areawtnm <- adjfacdata$areawtnm
+      stratalut <- adjfacdata$unitlut
+      expcondtab <- adjfacdata$expcondtab
+    }
  
   if (!is.null(SAdoms)) {
     returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)

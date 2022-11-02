@@ -138,7 +138,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
 		max(nchar(na.omit(round(unit_grpest[[psenm]], pseround)))))
     }
   }
- 
+
   if (sumunits) {
     ## Group estimates
     if (!is.null(uniquerow))
