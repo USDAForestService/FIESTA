@@ -549,12 +549,12 @@ modGBchng <- function(GBpopdat,
                     	  AND COALESCE(pcond.cond_nonsample_reasn_cd, 0) = 0
                     	  AND p.remper is not null
                     	  AND (c.COND_STATUS_CD = 1 AND pcond.COND_STATUS_CD = 1)
-                     GROUP BY c.PLT_CN, PREV_FORTYPCD, c.FORTYPCD") 
+                     GROUP BY c.PLT_CN, PREV_FORTYPCD, c.FORTYPCD", 
 
 			paste0("c.", c(condid, rowvar, colvar)),
 			paste0("pcond.", condid, " AS ", "PREV_", condid), 
 			paste0("pcond.", rowvar, " AS ", "PREV_", rowvar),
-			paste0("pcond.", colvar, " AS ", "PREV_", colvar))),
+			paste0("pcond.", colvar, " AS ", "PREV_", colvar),
 		" FROM sccm_condx sccm
 		JOIN condf c on(c.", cuniqueid, " = sccm.", cuniqueid, 
 			" and c.", condid, " = sccm.", condid, ")",
