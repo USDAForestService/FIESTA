@@ -153,6 +153,7 @@ DBgetCSV <- function(DBtable,
   if (is.null(csvtable)) {
     return(NULL)
   }
+  names(csvtable) <- toupper(names(csvtable))
   if (!returnDT) {
     csvtable <- data.frame(csvtable, stringsAsFactors=FALSE)
   }
