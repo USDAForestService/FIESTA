@@ -27,9 +27,12 @@ DBgetPlots(
   isseed = FALSE,
   isveg = FALSE,
   issubp = FALSE,
+  ischng = FALSE,
   isgrm = FALSE,
   islulc = FALSE,
   isdwm = FALSE,
+  biojenk = FALSE,
+  greenwt = TRUE,
   plotgeom = FALSE,
   othertables = NULL,
   issp = FALSE,
@@ -142,6 +145,10 @@ for current and previous years are extracted from FIA database.}
 
 \item{isdwm}{Logical. If TRUE, summarized condition-level down woody debris
 data are extracted from FIA database (COND_DWM_CALC).}
+
+\item{biojenk}{Logical. If TRUE, Jenkins biomass is calculated.}
+
+\item{greenwt}{Logical. If TRUE, green weight biomass is calculated.}
 
 \item{plotgeom}{Logical. If TRUE, variables from the PLOTGEOM table are
 appended to the plot table.}

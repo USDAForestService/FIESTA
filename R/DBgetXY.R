@@ -277,11 +277,15 @@ DBgetXY <- function (states = NULL,
     allyrs <- evalchk$allyrs
     invyrs <- evalchk$invyrs
     measyrs <- evalchk$measyrs
-    intensity <- evalchk$intensity
   } else {
     allyrs <- FALSE
   }
- 
+
+  ## Check intensity1
+  ###########################################################
+  intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
+		title="Single intensity?", first="YES", gui=gui)
+
   ## Check savedata
   ###########################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 

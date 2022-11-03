@@ -7,6 +7,10 @@
 DBgetXY(
   states = NULL,
   RS = NULL,
+  datsource = "datamart",
+  dsn = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE,
   invtype = "ANNUAL",
   evalid = NULL,
   evalCur = FALSE,
@@ -35,6 +39,15 @@ define RS.}
 \item{RS}{String vector. Name of research station(s) to get public XY
 coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 is populated. See FIESTA::ref_statecd for reference to RS and states.}
+
+\item{datsource}{Source of data ('datamart', 'sqlite').}
+
+\item{dsn}{If datsource='sqlite', the file name (data source name) of
+the sqlite database (*.sqlite).}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}

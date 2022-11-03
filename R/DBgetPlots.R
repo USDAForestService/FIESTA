@@ -799,8 +799,7 @@ DBgetPlots <- function (states = NULL,
                     measEndyr.filter = measEndyr.filter, 
                     allyrs = allyrs, 
                     invyrs = invyrs, 
-                    measyrs = measyrs, 
-                    intensity = intensity)
+                    measyrs = measyrs)
     measCur <- evalchk$measCur
     measEndyr <- evalchk$measEndyr
     measEndyr.filter <- evalchk$measEndyr.filter
@@ -808,6 +807,20 @@ DBgetPlots <- function (states = NULL,
     invyrs <- evalchk$invyrs
     measyrs <- evalchk$measyrs
     intensity <- evalchk$intensity
+
+    ## Check intensity1
+    ###########################################################
+    ## For periodic data, the INTENSITY variable does not equal 1
+    if (invtype == "ANNUAL") {
+      intensity1 <- pcheck.logical(intensity1, 
+                            varnm = "intensity1",
+                            title = "Intensity = 1?", 
+                            first = "YES", 
+                            gui = gui)
+    } else {
+      message("note: periodic data includes forested plots >= 5% cover")
+      intensity1 <- FALSE
+    }
 
 
     ## Check subcycle99

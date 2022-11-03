@@ -11,6 +11,8 @@ DBgetEvalid(
   RS = NULL,
   datsource = "datamart",
   data_dsn = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE,
   invtype = "ANNUAL",
   evalCur = TRUE,
   evalEndyr = NULL,
@@ -35,6 +37,10 @@ define RS.}
 
 \item{data_dsn}{If datsource='sqlite', the file name (data source name) of
 the sqlite database (*.sqlite).}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
 \item{invtype}{String. The type of FIA data to extract ('PERIODIC',
 'ANNUAL').  See further details below.}

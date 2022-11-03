@@ -6,7 +6,7 @@
 boundary.}
 \usage{
 spGetAuxiliary(
-  xyplt,
+  xyplt = NULL,
   xyplt_dsn = NULL,
   uniqueid = "PLT_CN",
   unittype = "POLY",

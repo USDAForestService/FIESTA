@@ -7,6 +7,7 @@
 modGBp2veg(
   GBpopdat = NULL,
   p2vegtype = "str",
+  peracre = FALSE,
   landarea = "FOREST",
   pcfilter = NULL,
   vfilter = NULL,
@@ -26,6 +27,8 @@ modGBp2veg(
 \item{GBpopdat}{List. Population data objects returned from modGBpop().}
 
 \item{p2vegtype}{String. Type of p2veg estimate ('spp', 'str').}
+
+\item{peracre}{Logical. If TRUE, generates per-acre estimates.}
 
 \item{landarea}{String. The sample area filter for estimates ("ALL",
 "FOREST", "TIMBERLAND").  If landarea=FOREST, filtered to COND_STATUS_CD =
