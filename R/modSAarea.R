@@ -380,8 +380,8 @@ modSAarea <- function(SApopdatlst = NULL,
     }  
 
     if (inherits(SApopdatlst, "list")) {
-      list.items <- c("condx", "pltcondx", "treex", "cuniqueid", "condid", 
-		"tuniqueid", "ACI.filter", "dunitarea", "dunitvar", "dunitlut",
+      list.items <- c("condx", "pltcondx", "cuniqueid", "condid", 
+		"ACI.filter", "dunitarea", "dunitvar", "dunitlut",
 		"prednames", "plotsampcnt", "condsampcnt")
       popchk <- tryCatch(pcheck.object(SApopdatlst, list.items=list.items),
      	 	error=function(e) {
@@ -597,14 +597,12 @@ modSAarea <- function(SApopdatlst = NULL,
     ###################################################################################
     ## Check filter parameters and apply plot and condition filters
     ###################################################################################
-    estdat <- check.estfilters(esttype=esttype, 
-                               pltcondf=pltcondx, 
-                               cuniqueid=cuniqueid, 
-                               treex=treex, seedx=seedx, 
-                               estseed=estseed, 
-                               landarea=landarea, 
-                               ACI.filter=ACI.filter, 
-                               pcfilter=pcfilter)
+    estdat <- check.estfilters(esttype = esttype, 
+                               pltcondf = pltcondx, 
+                               cuniqueid = cuniqueid, 
+                               landarea = landarea, 
+                               ACI.filter = ACI.filter, 
+                               pcfilter = pcfilter)
     if (is.null(estdat)) return(NULL)
     pltcondf <- estdat$pltcondf
     landarea <- estdat$landarea

@@ -189,7 +189,7 @@ DBgetEvalid <- function(states = NULL,
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
   ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
 
-  if (!is.null(dbconn) && dbIsValid(dbconn)) {
+  if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
     datsource == "sqlite"
     dbtablst <- DBI::dbListTables(dbconn)
     if (length(dbtablst) == 0) {
@@ -374,7 +374,7 @@ DBgetEvalid <- function(states = NULL,
     POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP[[eval_grpnm]], 
 		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
   }
-  if (all(is.null(popevalnm) && is.null(popevaltyp) && is.null(popevalgrp))) {
+  if (all(is.null(popevalnm) && is.null(popevaltypnm) && is.null(popevalgrpnm))) {
     nopoptables <- TRUE
     stcdlstdb <- DBI::dbGetQuery(dbconn, 
 		paste("select distinct statecd from", ppsanm))[[1]]

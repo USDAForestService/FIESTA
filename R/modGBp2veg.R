@@ -241,7 +241,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   ## If gui.. set variables to NULL
   if (gui) { 
     landarea=strvar=areavar=sumunits=adj=strata=getwt=cuniqueid=ACI=
-      puniqueid=savedata=addtitle=returntitle=rawdata=unitvar <- NULL
+      puniqueid=savedata=addtitle=returntitle=rawdata=unitvar=variable <- NULL
     #if (!row.FIAname) row.FIAname <- NULL
     #if (!col.FIAname) col.FIAname <- NULL
   }
@@ -547,18 +547,17 @@ modGBp2veg <- function(GBpopdat = NULL,
   }
 
   if (peracre) {
-    estvarn.filter <- treedat$estvarn.filter
-    tdomvarlstn <- treedat$tdomvarlstn
+    estvar.filter <- treedat$estvarn.filter
+    tdomvarlst <- treedat$tdomvarlstn
     estunitsn <- "percent"
     estvarn.name <- treedat$estvarn.name
 
     esttype <- "RATIO"
-    estvard.name <- estvar.area
-    tdomvarlstd <- NULL
+    estvard.name <- areaunits
     estunitsd <- areaunits
   } else {
-    estvarn.filter <- treedat$estvar.filter
-    tdomvarlstn <- treedat$tdomvarlst
+    estvar.filter <- treedat$estvar.filter
+    tdomvarlst <- treedat$tdomvarlst
     estunitsn <- "percent"
     estvarn.name <- treedat$estvar.name
   }
@@ -598,9 +597,9 @@ modGBp2veg <- function(GBpopdat = NULL,
   if (!is.null(tdomvar2)) {
     ddomvar <- "TOTAL"
     tdomdat <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlstn]
-    tdomdat <- FIESTA:::transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid, ddomvar),
- 		tvars=tdomvarlstn)
+		by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlst]
+    tdomdat <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid, ddomvar),
+ 		tvars=tdomvarlst)
     setnames(tdomdat, "value", estvarn.name)
     suppressWarnings(tdomdat[, (grpvar) := tstrsplit(variable, "#")])[, variable := NULL]
 
@@ -651,8 +650,8 @@ modGBp2veg <- function(GBpopdat = NULL,
 		          by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]    
       } else {
         if (tdomvar == rowvar) {
-          tdomdatsum <- FIESTA:::transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
- 			        tvars=tdomvarlstn)
+          tdomdatsum <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
+ 			        tvars=tdomvarlst)
           setnames(tdomdatsum, c("variable", "value"), c(rowvar, estvarn.name))
           tdomdatsum <- tdomdatsum[, lapply(.SD, sum, na.rm=TRUE), 
               by=c(strunitvars, cuniqueid, rowvar), .SDcols=estvarn.name]
@@ -692,8 +691,8 @@ modGBp2veg <- function(GBpopdat = NULL,
                   by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]    
         } else {
           if (tdomvar == colvar) {
-            tdomdatsum <- FIESTA:::transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
-                  tvars=tdomvarlstn)
+            tdomdatsum <- transpose2row(tdomdat, uniqueid=c(strunitvars, cuniqueid),
+                  tvars=tdomvarlst)
             setnames(tdomdatsum, c("variable", "value"), c(colvar, estvarn.name))
             tdomdatsum <- tdomdatsum[, lapply(.SD, sum, na.rm=TRUE), 
                   by=c(strunitvars, cuniqueid, colvar), .SDcols=estvarn.name]
@@ -732,10 +731,10 @@ modGBp2veg <- function(GBpopdat = NULL,
         } else {
           ddomvar <- grpvar[grpvar != tdomvar]
           tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-              by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlstn]
-          tdomdatsum <- FIESTA:::transpose2row(tdomdatsum, 
+              by=c(strunitvars, cuniqueid, ddomvar), .SDcols=tdomvarlst]
+          tdomdatsum <- transpose2row(tdomdatsum, 
                                       uniqueid=c(strunitvars, cuniqueid, ddomvar), 
-                                      tvars=tdomvarlstn)
+                                      tvars=tdomvarlst)
           setnames(tdomdatsum, c("variable", "value"), c(tdomvar, estvarn.name))      
 
           if (any(grpvar %in% names(cdomdat))) {
@@ -842,7 +841,7 @@ modGBp2veg <- function(GBpopdat = NULL,
 
     ## Calculate unit totals for rowvar
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, vuniqueid, rowvar), .SDcols=estvar.name]
+		by=c(strunitvars2, vuniqueid, rowvar), .SDcols=estvarn.name]
     rowunit <- GBest.pbar(sumyn = estvarn.name, 
                           sumyd = estvard.name, 
                           ysum = tdomdatsum,
@@ -869,7 +868,7 @@ modGBp2veg <- function(GBpopdat = NULL,
 
     ## Calculate grand total for all units
     tdomdatsum <- tdomdat[, lapply(.SD, sum, na.rm=TRUE), 
-		by=c(strunitvars2, vuniqueid, "TOTAL"), .SDcols=estvar.name]
+		by=c(strunitvars2, vuniqueid, "TOTAL"), .SDcols=estvarn.name]
     totunit <- GBest.pbar(sumyn = estvarn.name,
                           sumyd = estvard.name, 
                           ysum = tdomdatsum, 
@@ -928,7 +927,7 @@ modGBp2veg <- function(GBpopdat = NULL,
   if (rawdata) {
     rawdat <- tabs$rawdat
     rawdat$domdat <- setDF(tdomdat) 
-    rawdat$estvar <- estvar.name
+    rawdat$estvar <- estvarn.name
     rawdat$estvar.filter <- estvar.filter
     if (savedata) {
       if (!is.null(title.estpse)) {
@@ -960,13 +959,14 @@ modGBp2veg <- function(GBpopdat = NULL,
         }
       }
     }
+
     rawdat$esttype <- "P2VEG"
-    rawdat$estvar <- estvar
-    rawdat$estvar.filter <- estvar.filter
+    rawdat$p2vegtype = p2vegtype
+    rawdat$estvar.filter <- vfilter
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits
-    rawdat$estunits <- estunits
+    rawdat$estunits <- "percent"
     returnlst$raw <- rawdat
   }
   if (returnGBpopdat) {

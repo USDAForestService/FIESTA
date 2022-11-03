@@ -54,7 +54,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
   ## Get tables from tabs
   ########################################################## 
-  plt=cond=tree=seed <- NULL
+  cond=tree=seed <- NULL
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])
   }
@@ -528,9 +528,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     returnlst$seedf <- seedf
   }
  
-  if (ACI) {
-    returnlst$nfplotsampcnt <- nfplotsampcnt
-  }   
   if (adj != "none") {
     returnlst$tpropvars <- tpropvars
   }

@@ -363,6 +363,19 @@ modSApop <- function(popType="VOL",
   }
 
 
+  ## Check popType
+  ########################################################
+  #evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "GRM", "DWM")
+  DWM_types <- c("CWD", "FWD_SM", "FWD_LG", "DUFF")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
+  popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
+		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
+  popevalid <- as.character(evalid)
+  if (!is.null(evalid)) {
+    substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
+		FIESTA::ref_popType[FIESTA::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
+  } 
+
   ###################################################################################
   ## Load data
   ###################################################################################
@@ -492,50 +505,77 @@ modSApop <- function(popType="VOL",
   if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {
     stop("invalid SAdoms")
   }
-  
+
+
   ###################################################################################
-  ## CHECK PARAMETERS AND DATA
+  ## CHECK PLOT PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
-  ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
-  ## Applies plot and condition filters
+  ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
+  ## Applies plot filters
   ###################################################################################
-  popcheck <- check.popdata(gui=gui, module="SA", popType=popType, 
-                  tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
-                  pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
-                  evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
-                  intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
-                  nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
-                  unitarea=dunitarea, unitvar=dunitvar,  
-                  unitvar2=unitvar2, areavar=areavar, unit.action=unit.action,
-                  areaunits=areaunits, prednames=prednames, predfac=predfac, 
-                  pvars2keep=pvars2keep, cvars2keep="AOI")
-  condx <- popcheck$condx	
-  pltcondx <- popcheck$pltcondx
-  treef <- popcheck$treef
-  seedf <- popcheck$seedf
-  pltassgnx <- popcheck$pltassgnx
-  cuniqueid <- popcheck$cuniqueid
-  condid <- popcheck$condid
-  tuniqueid <- popcheck$tuniqueid
-  pltassgnid <- popcheck$pltassgnid
-  ACI.filter <- popcheck$ACI.filter
-  adj <- popcheck$adj
-  dunitvar <- popcheck$unitvar
-  dunitvar2 <- popcheck$unitvar2
-  dunitarea <- popcheck$unitarea
-  areavar <- popcheck$areavar
-  areaunits <- popcheck$areaunits
-  dunit.action <- popcheck$unit.action
+  pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
+      pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
+      module="GB", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
+      evalid=evalid, measCur=measCur, measEndyr=measEndyr, 
+      measEndyr.filter=measEndyr.filter, invyrs=invyrs, intensity=intensity,
+      nonsamp.pfilter=nonsamp.pfilter, unitarea=dunitarea, areavar=areavar, 
+      unitvar=dunitvar, unitvar2=dunitvar2, areaunits=areaunits, 
+      unit.action=dunit.action, strata=strata, stratalut=stratalut, 
+      strvar=strvar, pivot=pivot, nonresp=nonresp)
+  if (is.null(pltcheck)) return(NULL)
+  pltassgnx <- pltcheck$pltassgnx
+  pltassgnid <- pltcheck$pltassgnid
+  pfromqry <- pltcheck$pfromqry
+  palias <- pltcheck$palias
+  pjoinid <- pltcheck$pjoinid
+  whereqry <- pltcheck$whereqry
+  ACI <- pltcheck$ACI
+  pltx <- pltcheck$pltx
+  puniqueid <- pltcheck$puniqueid
+  dunitvar <- pltcheck$unitvar
+  dunitvar2 <- pltcheck$unitvar2
+  dunitarea <- pltcheck$unitarea
+  areavar <- pltcheck$areavar
+  areaunits <- pltcheck$areaunits
+  dunit.action <- pltcheck$unit.action
   prednames <- popcheck$prednames
   predfac <- popcheck$predfac
-  plotsampcnt <- popcheck$plotsampcnt
-  condsampcnt <- popcheck$condsampcnt
-  states <- popcheck$states
-  invyrs <- popcheck$invyrs
-  cvars2keep <- popcheck$cvars2keep
-  areawt <- popcheck$areawt
-  tpropvars <- popcheck$tpropvars
+  plotsampcnt <- pltcheck$plotsampcnt
+  states <- pltcheck$states
+  invyrs <- pltcheck$invyrs
+  dbconn <- pltcheck$dbconn
 
+  if (nonresp) {
+    RHGlut <- pltcheck$RHGlut
+    nonresplut <- pltcheck$nonresplut
+  }
+  if (ACI) {
+    nfplotsampcnt <- pltcheck$nfplotsampcnt
+  }
+
+  if (popType %in% c("ALL", "AREA", "VOL")) {
+    ###################################################################################
+    ## Check parameters and data for popType AREA/VOL
+    ###################################################################################
+    popcheck <- check.popdataVOL(gui=gui, 
+               tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
+               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
+               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+    if (is.null(popcheck)) return(NULL)
+    condx <- popcheck$condx
+    pltcondx <- popcheck$pltcondx
+    treef <- popcheck$treef
+    seedf <- popcheck$seedf
+    cuniqueid <- popcheck$cuniqueid
+    condid <- popcheck$condid
+    tuniqueid <- popcheck$tuniqueid
+    ACI.filter <- popcheck$ACI.filter
+    condsampcnt <- popcheck$condsampcnt
+    areawt <- popcheck$areawt
+    tpropvars <- popcheck$tpropvars
+  }
+  
   if (is.null(treef) && is.null(seedf)) {
     stop("must include tree data")
   }
@@ -606,7 +646,7 @@ modSApop <- function(popType="VOL",
                         unitlut = stratalut, 
                         unitvars = unitvar,
                         strvars = strvar,
-                        unitarea = unitarea,
+                        unitarea = dunitarea,
                         areavar = areavar, 
                         areawt = areawt
                         )

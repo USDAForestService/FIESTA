@@ -51,7 +51,7 @@ check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
   ## Get tables from tabs
   ########################################################## 
-  plt=cond=cond_dwm_calc <- NULL
+  cond=cond_dwm_calc <- NULL
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])
   }
@@ -407,10 +407,6 @@ check.popdataDWM <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   returnlst <- list(condx=condx, pltcondx=pltcondx, cuniqueid=cuniqueid, 
 	condid=condid, condsampcnt=as.data.frame(condsampcnt),
 	ACI.filter=ACI.filter, areawt=areawt, dwmpropvars=dwmpropvars)
-
-  if (ACI) {
-    returnlst$nfplotsampcnt <- nfplotsampcnt
-  }
 
 
   return(returnlst)

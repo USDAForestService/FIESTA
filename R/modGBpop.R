@@ -295,7 +295,8 @@ modGBpop <- function(popType = "VOL",
   
   ## Set global variables
   ONEUNIT=n.total=n.strata=strwt=expcondtab=V1=SUBPCOND_PROP=SUBPCOND_PROP_UNADJ=
-    treef=seedf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut <- NULL
+    	treef=seedf=vcondsppf=vcondstrf=cond_dwm_calcf=bndx=RHGlut=
+	sccmx=cond_pcondx=lulcx <- NULL
   condid <- "CONDID"
   
   
@@ -717,6 +718,7 @@ modGBpop <- function(popType = "VOL",
     vcondstrf <- popcheck$vcondstrf
     areawt <- popcheck$areawt
     vareawt <- popcheck$vareawt
+    vuniqueid <- popcheck$vcondstrid
   }
   if (popType == "DWM") {
     popcheck <- check.popdataDWM(gui=gui, 
@@ -900,7 +902,7 @@ modGBpop <- function(popType = "VOL",
       vcondstrf <- adjfacdataP2VEG$vcondstrx
       varadjP2VEG <- adjfacdataP2VEG$varadjlst
 
-      stratalut <- merge(stratalut1, stratalut2[, c(key(stratalut2), varadjlst2), with=FALSE])
+      stratalut <- merge(stratalut1, stratalut2[, c(key(stratalut2), varadjP2VEG), with=FALSE])
     }
   }
 
@@ -948,11 +950,11 @@ modGBpop <- function(popType = "VOL",
     returnlst$vcondstrx <- vcondstrf
     returnlst$varadjP2VEG <- varadjP2VEG
   }
-  if (popType %in% c("GRM", "CHNG", "LULC")) {
-    returnlst$sccmx <- sccmx
-    #returnlst$sccm_condx <- sccm_condx
-    returnlst$cond_pcondx <- cond_pcondx
-  }
+#  if (popType %in% c("GRM", "CHNG", "LULC")) {
+#    returnlst$sccmx <- sccmx
+#    #returnlst$sccm_condx <- sccm_condx
+#    returnlst$cond_pcondx <- cond_pcondx
+#  }
 
   if (popType == "LULC") {
     returnlst$lulcx <- lulcx

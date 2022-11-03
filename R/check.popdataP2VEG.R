@@ -32,9 +32,9 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
   ## Set global variables
   COND_STATUS_CD=CONDID=CONDPROP_UNADJ=SUBPPROP_UNADJ=MICRPROP_UNADJ=MACRPROP_UNADJ=
-	STATECD=cndnmlst=PROP_BASIS=ACI.filter=condsampcnt=
+	STATECD=cndnmlst=PROP_BASIS=ACI.filter=condsampcnt=P2VEG_SAMPLING_STATUS_CD=
 	NF_COND_STATUS_CD=condqry=cfromqry=vsubpsppqry=subplotqry=subp_condqry=
-	vcondsppf=vcondstrf <- NULL
+	vcondsppf=vcondstrf=MACRCOND_PROP=SUBPCOND_PROP <- NULL
 
   ###################################################################################
   ## Define necessary plot and condition level variables
@@ -43,7 +43,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   subpvars2keep <- c("SUBP_STATUS_CD", "P2VEG_SUBP_STATUS_CD", 
 			"MICRCOND_PROP", "SUBPCOND_PROP", "MACRCOND_PROP")
   datindb <- FALSE
-
+  nonsamp.vfilter.fixed <- TRUE
 
   ###################################################################################
   ## Check module, adj
@@ -57,7 +57,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
   ## Get tables from tabs
   ##########################################################  
-  plt=cond=vsubpstr=vsubpspp=subplot=subp_cond <- NULL
+  cond=vsubpstr=vsubpspp=subplot=subp_cond <- NULL
   ## Get tables from tabs
   for (tabnm in names(tabs)) {
     assign(tabnm, tabs[[tabnm]])
@@ -372,11 +372,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ########################################################################
   ## Separate tables for estimation
   ########################################################################
-#  if ("STATECD" %in% pvars2keep) {
-#    pvars2keep <- pvars2keep[pvars2keep != "STATECD"]
-#  }
   cvars2keep <- cvars2keep[cvars2keep %in% names(pltcondx)]
-  #pltcondx[, (pvars2keep) := NULL]
   condx <- unique(pltcondx[, c(cuniqueid, condid, cvars2keep), with=FALSE])
   pltcondx[, (cvars2keep) := NULL]
  
@@ -386,7 +382,7 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Check P2VEG, subplot and sub_cond data
   ###################################################################################
   ###################################################################################
-  pltassgnvars <- c(cuniqueid, pvars2keep)
+  pltassgnvars <- cuniqueid
 
 
   ## Subset variables for pltassgnx, condx, and pltcondx
@@ -621,9 +617,5 @@ check.popdataP2VEG <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     returnlst$vcondstrid <- vsubpstrid
   }
     
-  if (ACI) {
-    returnlst$nfplotsampcnt <- nfplotsampcnt
-  }
-
   return(returnlst)
 }

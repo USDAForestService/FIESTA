@@ -178,7 +178,7 @@ DBgetXY <- function (states = NULL,
   ########################################################################
   iseval <- FALSE
 
-  if (!is.null(dbconn) && dbIsValid(dbconn)) {
+  if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
     datsource == "sqlite"
     dbtablst <- DBI::dbListTables(dbconn)
     if (length(dbtablst) == 0) {
@@ -229,7 +229,7 @@ DBgetXY <- function (states = NULL,
   evalInfo <- DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource,
-                          data_dsn = data_dsn,
+                          data_dsn = dsn,
                           dbconn = dbconn,
                           invtype = invtype, 
                           evalid = evalid, 

@@ -2,7 +2,7 @@ getRHG <- function(pltx, puniqueid, unitvars, strvar, nonresp.minplotnum=5) {
   ## DESCRIPTION: Get Response Homogeneity Groups (RHG) 
 
   ## Set global variables
-  RHG=TESTVAR <- NULL
+  RHG=TESTVAR=PLOT_STATUS_CD=Nsampmeth=strat <- NULL
 
 
   ## Get plot column names

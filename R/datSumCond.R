@@ -259,7 +259,7 @@ datSumCond <- function(cond = NULL,
     } else {
       message("assuming no nonsampled condition in dataset")
     }
-    adjfacdata <- getadjfactorPLOT(condx=condx, cuniqueid=cuniqueid)
+    adjfacdata <- getadjfactorVOL(condx=condx, cuniqueid=cuniqueid, adj="plot")
     condx <- adjfacdata$condx
   }
 

@@ -291,6 +291,8 @@
 #' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).
 #' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
 #' database (SUBPLOT, SUBP_COND).
+#' @param ischng Logical. If TRUE, sccm (SUBP_COND_CHNG_MTRX) table is returned 
+#' that includes current and previous conditions. 
 #' @param isgrm Logical. If TRUE, cond_pcond table is returned that includes 
 #' current and previous conditions. Also, sccm (SUBP_COND_CHNG_MTRX) is 
 #' returned with change condition proportions from previous to current.

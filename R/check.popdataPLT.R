@@ -42,7 +42,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   STATECD=PLOT_STATUS_CD=PSTATUSCD=plotsampcnt=nfplotsampcnt=INVYR=
 	NF_PLOT_STATUS_CD=NF_COND_STATUS_CD=TPA_UNADJ=methodlst=nonresplut=
 	plotqry=pfromqry=pltassgnqry=unitareaqry=stratalutqry=whereqry=palias=
-	P2POINTCNT <- NULL
+	P2POINTCNT=plt <- NULL
 
 
   ###################################################################################

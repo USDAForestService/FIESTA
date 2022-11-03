@@ -774,8 +774,8 @@ datSumTree <- function(tree = NULL,
     treex <- tabs$tab1
     condx <- tabs$tab2
 
-    adjfacdata <- getadjfactorPLOT(treex=treef, seedx=seedf, condx=condx, 
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid)
+    adjfacdata <- getadjfactorVOL(treex=treef, seedx=seedf, condx=condx, 
+		tuniqueid=tuniqueid, cuniqueid=cuniqueid, adj="plot")
     condx <- adjfacdata$condx
     varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
     if (any(varadjlst %in% names(condx))) {

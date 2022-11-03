@@ -1196,7 +1196,8 @@ spGetPlots <- function(bnd = NULL,
         } else {
           vsubpstr_layer <- vsubpstrchk
         }         
-      }      
+      } 
+      invsubpchk <- chkdbtab(tablst, invsubp_layer)     
       if (is.null(invsubpchk) && invsubp_layer == "invasive_subplot_spp") {
         message("no invsubp data in database...")
       } else {

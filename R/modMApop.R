@@ -456,6 +456,20 @@ modMApop <- function(popType="VOL",
 		overwrite=overwrite_layer, outfn.pre=outfn.pre, outfn.date=outfn.date)
   }
 
+
+  ## Check popType
+  ########################################################
+  #evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "GRM", "DWM")
+  DWM_types <- c("CWD", "FWD_SM", "FWD_LG", "DUFF")
+  evalTyplst <- c("ALL", "CURR", "VOL", "LULC", "P2VEG", "INV", "DWM", "CHNG", "GRM")
+  popType <- pcheck.varchar(var2check=popType, varnm="popType", gui=gui,
+		checklst=evalTyplst, caption="popType", multiple=FALSE, stopifnull=TRUE)
+  popevalid <- as.character(evalid)
+  if (!is.null(evalid)) {
+    substr(popevalid, nchar(popevalid)-1, nchar(popevalid)) <- 
+		FIESTA::ref_popType[FIESTA::ref_popType$popType %in% popType, "EVAL_TYP_CD"]
+  } 
+
  
   ###################################################################################
   ## Load data
@@ -590,52 +604,78 @@ modMApop <- function(popType="VOL",
   }
 
   ###################################################################################
-  ## CHECK PARAMETERS AND DATA
+  ## CHECK PLOT PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
-  ## Remove nonsampled plots and conditions (if nonsamp.filter != "NONE")
-  ## Applies plot and condition filters
+  ## Remove nonsampled plots (if nonsamp.pfilter != "NONE")
+  ## Applies plot filters
   ###################################################################################
-  popcheck <- check.popdata(gui=gui, module="MA", popType=popType, 
-                    tabs=popTabs, tabIDs=popTabIDs, pltassgn=pltassgn, dsn=dsn, 
-                    pltassgnid=pltassgnid, pjoinid=pjoinid, condid="CONDID", 
-                    evalid=evalid, invyrs=invyrs, measCur=measCur, measEndyr=measEndyr, 
-                    intensity=intensity, ACI=ACI, areawt=areawt, adj=adj, 
-                    nonsamp.pfilter=nonsamp.pfilter, nonsamp.cfilter=nonsamp.cfilter, 
-                    unitarea=unitarea, unitvar=unitvar, unitvar2=unitvar2, areavar=areavar, 
-                    areaunits=areaunits, unit.action=unit.action, strata=strata, 
-                    stratalut=stratalut, strvar=strvar, stratcombine=stratcombine, 
-                    prednames=prednames, predfac=predfac)
-  if (is.null(popcheck)) return(NULL)
-  condx <- popcheck$condx
-  pltcondx <- popcheck$pltcondx
-  treef <- popcheck$treef
-  seedf <- popcheck$seedf
-  pltassgnx <- popcheck$pltassgnx
-  cuniqueid <- popcheck$cuniqueid
-  condid <- popcheck$condid
-  tuniqueid <- popcheck$tuniqueid
-  pltassgnid <- popcheck$pltassgnid
-  ACI.filter <- popcheck$ACI.filter
-  adj <- popcheck$adj
-  unitvar <- popcheck$unitvar
-  unitvar2 <- popcheck$unitvar2
-  unitarea <- popcheck$unitarea
-  areavar <- popcheck$areavar
-  areaunits <- popcheck$areaunits
-  unit.action <- popcheck$unit.action
-  strata <- popcheck$strata
-  stratalut <- popcheck$stratalut
-  stratcombine <- popcheck$stratcombine
-  strvar <- popcheck$strvar
-  prednames <- popcheck$prednames
-  predfac <- popcheck$predfac
-  P2POINTCNT <- popcheck$P2POINTCNT 
-  plotsampcnt <- popcheck$plotsampcnt
-  condsampcnt <- popcheck$condsampcnt
-  states <- popcheck$states
-  invyrs <- popcheck$invyrs
-  cvars2keep <- popcheck$cvars2keep
-  pvars2keep <- popcheck$pvars2keep
+  pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
+      pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
+      module="GB", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
+      evalid=evalid, measCur=measCur, measEndyr=measEndyr, 
+      measEndyr.filter=measEndyr.filter, invyrs=invyrs, intensity=intensity,
+      nonsamp.pfilter=nonsamp.pfilter, unitarea=unitarea, areavar=areavar, 
+      unitvar=unitvar, unitvar2=unitvar2, areaunits=areaunits, 
+      unit.action=unit.action, strata=strata, stratalut=stratalut, 
+      strvar=strvar, pivot=pivot, nonresp=nonresp)
+  if (is.null(pltcheck)) return(NULL)
+  pltassgnx <- pltcheck$pltassgnx
+  pltassgnid <- pltcheck$pltassgnid
+  pfromqry <- pltcheck$pfromqry
+  palias <- pltcheck$palias
+  pjoinid <- pltcheck$pjoinid
+  whereqry <- pltcheck$whereqry
+  ACI <- pltcheck$ACI
+  pltx <- pltcheck$pltx
+  puniqueid <- pltcheck$puniqueid
+  unitvar <- pltcheck$unitvar
+  unitvar2 <- pltcheck$unitvar2
+  unitarea <- pltcheck$unitarea
+  areavar <- pltcheck$areavar
+  areaunits <- pltcheck$areaunits
+  unit.action <- pltcheck$unit.action
+  stratcombine <- pltcheck$stratcombine
+  strata <- pltcheck$strata
+  stratalut <- pltcheck$stratalut
+  strvar <- pltcheck$strvar
+  nonresp <- pltcheck$nonresp
+  P2POINTCNT <- pltcheck$P2POINTCNT 
+  plotsampcnt <- pltcheck$plotsampcnt
+  states <- pltcheck$states
+  invyrs <- pltcheck$invyrs
+  dbconn <- pltcheck$dbconn
+
+  if (nonresp) {
+    RHGlut <- pltcheck$RHGlut
+    nonresplut <- pltcheck$nonresplut
+  }
+  if (ACI) {
+    nfplotsampcnt <- pltcheck$nfplotsampcnt
+  }
+
+
+  if (popType %in% c("ALL", "AREA", "VOL")) {
+    ###################################################################################
+    ## Check parameters and data for popType AREA/VOL
+    ###################################################################################
+    popcheck <- check.popdataVOL(gui=gui, 
+               tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
+               pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
+               adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
+               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+    if (is.null(popcheck)) return(NULL)
+    condx <- popcheck$condx
+    pltcondx <- popcheck$pltcondx
+    treef <- popcheck$treef
+    seedf <- popcheck$seedf
+    cuniqueid <- popcheck$cuniqueid
+    condid <- popcheck$condid
+    tuniqueid <- popcheck$tuniqueid
+    ACI.filter <- popcheck$ACI.filter
+    condsampcnt <- popcheck$condsampcnt
+    areawt <- popcheck$areawt
+    tpropvars <- popcheck$tpropvars
+  }
 
 
   ###################################################################################

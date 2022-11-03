@@ -394,6 +394,10 @@ modGBdwm <- function(GBpopdat = NULL,
   estvar_unadj <- paste0(dwmtype, "_", dwmvar, "_UNADJ")
   estvar.name <- paste0(dwmtype, "_", dwmvar, "_ADJ")
 
+  ## Define estimation units for response
+  estunits <- ifelse(dwmvar == "VOLCF", "cubic feet", 
+			ifelse(dwmvar %in% c("DRYBIO", "CARBON"), "pounds"))
+
   ## Merge estvar_unadj to condx
   condx <- merge(condx, pltcondx[, c(cuniqueid, condid, estvar_unadj), with=FALSE])
 
@@ -514,7 +518,7 @@ modGBdwm <- function(GBpopdat = NULL,
                   sumunits=sumunits, title.main=title.main, title.ref=title.ref, 
                   title.rowvar=title.rowvar, title.rowgrp=title.rowgrp, 
                   title.colvar=title.colvar, title.unitvar=title.unitvar, 
-                  title.filter=title.filter, title.unitsn=areaunits, 
+                  title.filter=title.filter, title.unitsn=estunits, 
                   unitvar=unitvar, rowvar=rowvar, colvar=colvar, 
                   addtitle=addtitle, returntitle=returntitle, 
                   rawdata=rawdata, states=states, invyrs=invyrs, 
@@ -793,9 +797,8 @@ modGBdwm <- function(GBpopdat = NULL,
  
   if (rawdata) {
     rawdat <- tabs$rawdat
-    rawdat$domdat <- setDF(tdomdat) 
+    rawdat$domdat <- setDF(cdomdat) 
     rawdat$estvar <- estvar.name
-    rawdat$estvar.filter <- estvar.filter
     if (savedata) {
       if (!is.null(title.estpse)) {
         title.raw <- paste(title.estpse, title.ref)
@@ -827,8 +830,8 @@ modGBdwm <- function(GBpopdat = NULL,
       }
     }
     rawdat$esttype <- "P2VEG"
-    rawdat$estvar <- estvar
-    rawdat$estvar.filter <- estvar.filter
+    rawdat$dwmtype <- dwmtype
+    rawdat$dwmvar <- dwmvar
     if (!is.null(rowvar)) rawdat$rowvar <- rowvar
     if (!is.null(colvar)) rawdat$colvar <- colvar
     rawdat$areaunits <- areaunits
