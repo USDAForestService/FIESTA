@@ -428,189 +428,21 @@ spGetXY <- function(bnd,
       spxy <- pcheck.spatial(xy)
     }
   } else {			## xy_datsource in('datamart', 'sqlite')
-    if (xy_datsource == "datamart") {
-      spxy <- DBgetXY(states=stcds, 
-                          evalid=evalid, 
-                          evalCur=evalCur, 
-                          evalEndyr=evalEndyr, 
-                          measCur=measCur, 
-                          measEndyr=measEndyr, 
-                          allyrs=allyrs, 
-                          invyrs=invyrs, 
-                          measyrs=measyrs, 
-                          intensity1=intensity1, 
-                          issp=TRUE)[[1]]
-      xy.uniqueid <- "PLT_CN"
-      xyjoinid <- "PLT_CN"
-  
-    } else if (xy_datsource == "sqlite") {
-
-      ####################################################################
-      ## 1) Check if data for all states is in database
-      ## 1) Get most current plots from xy database that intersect state
-      ## 2) Clip xy (for state) to boundary
-      ## 3) Subset other data with clipped xy joinid
-      ####################################################################
-      xyindb <- FALSE
-      plot_layer <- NULL
-
-      ## Check for data tables in database
-      ###########################################################
-      dbconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, 
-			showlist=FALSE, createnew=FALSE, stopifnull=TRUE)
-      tablst <- DBI::dbListTables(dbconn)
-
-      if (is.null(xy)) {
-        xytabs <- tablst[grepl("xy", tablst)]
-        if (length(xytabs) == 0) {
-          stop("no xy in ", xy_dsn)
-        }
-        if (length(findnm("ACTUAL", xytabs, returnNULL=TRUE)) == 1) {
-          xy <- xytabs[grepl("ACTUAL", xytabs)]
-          message("xy is NULL...  using ", xy)
-        } else if (length(findnm("PUBLIC", xytabs, returnNULL=TRUE)) == 1) {
-          xy <- xytabs[grepl("PUBLIC", xytabs)]
-          message("xy is NULL...  using ", xy)
-        } else {
-          plot_layer <- findnm("plot", xytabs, returnNULL=TRUE)
-          if (!is.null(plot_layer) && length(plot_layer) == 1) {
-            message("xy is NULL...  using ", plot_layer, " table")
-            xy <- plot_layer
-            pfields <- DBI::dbListFields(dbconn, xy)
-            if ("LON_PUBLIC" %in% pfields) {
-              xvar <- "LON_PUBLIC"
-              if ("LAT_PUBLIC" %in% pfields) {
-                yvar <- "LAT_PUBLIC"
-              }
-            }
-          } else {
-            stop(xy, " not in ", xy_dsn) 
-          }
-        } 
-      } else if (!is.character(xy)) {
-        stop("invalid xy")
-      } else {
-        if (!xy %in% tablst) {
-          stop(xy, " not in database")
-        }
-      }
-      xyfields <- DBI::dbListFields(dbconn, xy)
-      xystatenm <- findnm("STATECD", xyfields, returnNULL=TRUE)
- 
-      if (is.null(xvar) || !xvar %in% names(xyfields)) {
-        if (grepl("ACTUAL", xy)) {
-          xvar <- "LON_ACTUAL"
-          yvar <- "LAT_ACTUAL"
-        } else if (grepl("PUBLIC", xy)) {
-          xvar <- "LON_PUBLIC"
-          yvar <- "LAT_PUBLIC"
-        }
-      }
-
-      ## Check xvar
-      if (!is.null(xvar) && !xvar %in% xyfields) {
-        stop(xvar, " is not in table")
-      }
-      ## Check yvar
-      if (!is.null(yvar) && !yvar %in% xyfields) {
-        stop(yvar, " is not in table")
-      }
- 
-      ## check xy.uniqueid (unique identifier of xy)
-      xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", 
-		gui=gui, checklst=xyfields, caption="xy uniqueid", stopifnull = FALSE)
-
-      ## check xyjoinid (variable to join to plot table)
-      xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
-		      gui=gui, checklst=xyfields, caption="xyjoinid", stopifnull = FALSE)
-      if (is.null(xyjoinid)) {
-        xyjoinid <- xy.uniqueid
-      }
-      if (intensity1) {
-        intensitynm <- findnm("INTENSITY", xyfields, returnNULL=TRUE)
-      }
-
-      if (!is.null(xystatenm) && !intensity1) {
-        stfilter <- paste("where ", xystatenm, " IN(", toString(stcds), ")")
-
-        sql <- paste0("select * from ", xy, " where ", xystatenm, " IN(", 
-			    toString(stcds), ")")
-        xyplt <- suppressMessages(pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql))
-
-        ## Make spatial
-        spxy <- spMakeSpatialPoints(xyplt=xyplt, 
-                                    xy.uniqueid=xy.uniqueid, 
-                                    xvar=xvar, 
-                                    yvar=yvar, 
-                                    xy.crs=xy.crs) 
-      } else {
-
-        plot_layer <- findnm("plot", tablst, returnNULL=TRUE)
-        if (!is.null(plot_layer) && length(plot_layer) == 1) {
-          pltfields <- DBI::dbListFields(dbconn, plot_layer)
-          pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
-			      gui=gui, checklst=pltfields, caption="plot joinid")
-          if (is.null(pjoinid)) {
-            if (xyjoinid %in% pltfields) {
-              pjoinid <- xyjoinid
-            } else if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
-              pjoinid <- "CN"
-            } else {
-              stop("invalid pjoinid")
-            }
-          }
- 
-          pstatenm <- findnm("STATECD", pltfields, returnNULL=TRUE)
-          if (!is.null(pstatenm)) {
-            stfilter <- paste0("p.", pstatenm, " IN(", toString(stcds), ")")
-            xyfromqry <- getpfromqry(plotCur=measCur, 
-                                     invyrs=invyrs, 
-                                     allyrs=allyrs, 
-                                     intensity1=intensity1, 
-                                     syntax="R", 
-                                     plotnm=plot_layer)
-            sql <- paste0("select xy.* from ", xyfromqry, 
-				" JOIN ", xy, " xy ON (p.", pjoinid, " = xy.", xyjoinid, ")",
-				" where ", stfilter) 
-#            sql <- paste0("select xy.* from ", xy, " xy join ", 
-#			plot_layer, " p ON(xy.", xyjoinid, " = p.", pjoinid, ") where p.", 
-#			pstatenm, " IN(", toString(stcds), ")")
-
-            xyplt <- pcheck.table(xy, tab_dsn=xy_dsn, tabqry=sql)
-            if (nrow(xyplt) == 0) {
-              if (!is.null(xyjoinid) && pjoinid != xyjoinid) {
-                message("check if xyjoinid (", xyjoinid, ") in ", xy, 
-				" matches pjoinid (", pjoinid, ") in ", plot_layer)
-              }     
-              stop("invalid xy query")
-            }
- 
-            ## Make spatial
-            spxy <- spMakeSpatialPoints(xyplt=xyplt, 
-                                        xy.uniqueid=xy.uniqueid, 
-                                        xvar=xvar, 
-                                        yvar=yvar, 
-                                        xy.crs=xy.crs)            
-          } else {
-            stop("STATECD not in tables")
-          }
-        } else {
-          message("no plot layer in database")
-          spxy <- pcheck.spatial(xy, dsn=xy_dsn)
-        }
-      } 
-      
-      # Do intensity 1?
-      if (intensity1) {
-        if ("INTENSITY" %in% names(spxy)) {
-          spxy <- spxy[spxy$INTENSITY == 1, ]
-        }
-      }
-
-      if (!is.null(dbconn)) {
-        DBI::dbDisconnect(dbconn)
-      }
-    }   # xy_datsource == "sqlite"
+    spxy <- DBgetXY(states = stcds,
+                      datsource = xy_datsource,
+                      dsn = xy_dsn,
+                      evalid = evalid,
+                      evalCur = evalCur,
+                      evalEndyr = evalEndyr,
+                      measCur = measCur,
+                      measEndyr = measEndyr,
+                      allyrs = allyrs,
+                      invyrs = invyrs,
+                      measyrs = measyrs,
+                      intensity1 = intensity1,
+                      issp = TRUE)[[1]]
+    xy.uniqueid <- "PLT_CN"
+    xyjoinid <- "PLT_CN"  
   }
 
   if (clipxy) {

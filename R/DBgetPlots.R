@@ -791,143 +791,28 @@ DBgetPlots <- function (states = NULL,
 
   ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
   if (!iseval) {  
-    ### Check measCur
-    ###########################################################
-    measCur <- pcheck.logical(measCur, varnm="measCur", 
-		title="Current measyear?", first="YES", gui=gui)
+    ## Check custom Evaluation data
+    #############################################
+    evalchk <- customEvalchk(states = states, 
+                    measCur = measCur, 
+                    measEndyr = measEndyr, 
+                    measEndyr.filter = measEndyr.filter, 
+                    allyrs = allyrs, 
+                    invyrs = invyrs, 
+                    measyrs = measyrs, 
+                    intensity = intensity)
+    measCur <- evalchk$measCur
+    measEndyr <- evalchk$measEndyr
+    measEndyr.filter <- evalchk$measEndyr.filter
+    allyrs <- evalchk$allyrs
+    invyrs <- evalchk$invyrs
+    measyrs <- evalchk$measyrs
+    intensity <- evalchk$intensity
 
-    ### Check measEndyr
-    ###########################################################
-    measEndyr.filter <- NULL
-    if (!is.null(measEndyr)) {
-      if (!is.null(invyrtab)) {
-        minyr <- min(invyrtab$INVYR)
-        if (!is.numeric(measEndyr) || measEndyr < minyr)
-          stop("measEndyr must be yyyy format and greater than minimum inventory year: ", 
-			minyr)
-        measCur <- TRUE
-        measEndyr.filter <- paste0(" and MEASYEAR < ", measEndyr)
-      }
-    }
-    if (measCur) {
-      xymeasCur <- TRUE
-      allyrs <- FALSE
-    }
-
-    ## Check allyrs
-    ###########################################################
-    allyrs <- pcheck.logical(allyrs, varnm="allyrs", title="All years?", 
-		first="YES", gui=gui)
-    if (allyrs) {
-      ## xymeasCur
-      xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
-		      title="Most current XY?", first="YES", gui=gui)
-      measCur <- FALSE
-      measEndyr=measEndyr.filter <- NULL
-    }
-
-    ## Check INVYR(S) of MEASYR(S)
-    ###########################################################
-    if (!measCur) {
-      if ((is.null(invyrs) || length(invyrs) == 0) && 
-		(is.null(measyrs) || length(measyrs) == 0)) {
-        if (is.null(invyrtab)) {
-          stop("must include INVYR in plot")
-        } 
-        invyrs <- sapply(states, function(x) NULL)
-        for (state in states) { 
-          stabbr <- pcheck.states(state, "ABBR")
-          stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
-
-          if (allyrs) {
-            invyr <- stinvyrlst
-          } else {
-            if (!gui) stop("need to specify a timeframe for plot data")
-
-            ## GET INVENTORY YEAR(S) FROM USER
-            invyr <- select.list(as.character(stinvyrlst), 
-                                 title=paste("Inventory year(s) -", stabbr), 
-                                 multiple=TRUE)
-            if (length(invyr) == 0) stop("")
-          }
-          invyrs[[state]] <- as.numeric(invyr)
-        }
-      } else if (!is.null(invyrs)) {
-        if (!is(invyrs, "list")) {
-          if (is.vector(invyrs) && is.numeric(invyrs)) {
-            invyrs <- list(invyrs)
-            if (length(states) == 1) {
-              names(invyrs) <- states
-            } else {
-              message("using specified invyrs for all states")
-              yrs <- invyrs
-              invyrs <- sapply(states, function(x) NULL)
-              for (st in states) invyrs[st] <- yrs
-            } 
-          }
-        } else if (length(invyrs) != length(states)) {
-          stop("check invyrs list.. does not match number of states")
-        }
-        ## Check inventory years
-        for (state in states) {
-          stcd <- pcheck.states(state, "VALUE")
-          if ("STATENM" %in% names(invyrtab)) {
-            stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
-          } else if ("STATECD" %in% names(invyrtab)) {
-            stinvyrlst <- sort(invyrtab[invyrtab$STATECD == stcd, "INVYR"])
-          } else {
-            stop("invyrtab is invalid")
-          }
-          if (!all(invyrs[[state]] %in% stinvyrlst)) {
-            invyrs[[state]] <- invyrs[[state]][invyrs[[state]] %in% stinvyrlst]
-            missyr <- invyrs[[state]][!invyrs[[state]] %in% stinvyrlst]
-            message(state, " missing following inventory years: ", toString(missyr))
-          }
-        }
-      } else if (!is.null(measyrs)) {
-        if (!is(measyrs, "list")) {
-          if (is.vector(measyrs) && is.numeric(measyrs)) {
-            measyrs <- list(measyrs)
-            if (length(states) == 1) {
-              names(measyrs) <- states
-            } else {
-              message("using specified measurement year for all states")
-              yrs <- measyrs
-              measyrs <- sapply(states, function(x) NULL)
-              for (st in states) measyrs[st] <- yrs
-            } 
-          }
-        } else if (length(measyrs) != length(states)) {
-          stop("check measyrs list.. does not match number of states")
-        }
-        ## Check inventory years
-        for (state in states) {
-          stcd <- pcheck.states(state, "VALUE")
-          if ("STATENM" %in% names(invyrtab)) {
-            stinvyrlst <- sort(invyrtab[invyrtab$STATENM == state, "INVYR"])
-          } else if ("STATECD" %in% names(invyrtab)) {
-            stinvyrlst <- sort(invyrtab[invyrtab$STATECD == stcd, "INVYR"])
-          } else {
-            stop("invyrtab is invalid")
-          }
-          if (!all(measyrs[[state]] %in% stinvyrlst)) {
-            measyrs[[state]] <- measyrs[[state]][measyrs[[state]] %in% stinvyrlst]
-            missyr <- measyrs[[state]][!measyrs[[state]] %in% stinvyrlst]
-            message(state, " missing following inventory years: ", toString(missyr))
-          }
-        }
-      }
-    }
 
     ## Check subcycle99
     subcycle99 <- pcheck.logical(subcycle99, varnm="subcycle99", 
 		title="Keep SUBCYCLE 99?", first="NO", gui=gui)
-
-    ## For periodic data, the INTENSITY variable does not equal 1
-    if (!invtype == "ANNUAL") {
-      message("note: periodic data includes forested plots >= 5% cover")
-      #intensity1 <- FALSE
-    }
 
     ## Check ACI
     ACI <- pcheck.logical(ACI, varnm="ACI", 
@@ -960,12 +845,7 @@ DBgetPlots <- function (states = NULL,
   ## (used to determine size of tree data)
   #nbrinvyrs <- length(unique(unlist(invyrs)))
   
-  
-  ## Check intensity1
-  intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
-                               title="Intensity = 1?", 
-                               first="YES", gui=gui)
-  
+    
   ## Check defaultVars
   defaultVars <- pcheck.logical(defaultVars, varnm="defaultVars", 
                                 title="Default variables?", 

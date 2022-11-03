@@ -37,6 +37,8 @@
 #' @param datsource Source of data ('datamart', 'sqlite').
 #' @param data_dsn If datsource='sqlite', the file name (data source name) of
 #' the sqlite database (*.sqlite).
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
 #' @param invtype String. The type of FIA data to extract ('PERIODIC',
 #' 'ANNUAL').  See further details below.
 #' @param evalCur Logical. If TRUE, the most current evalidation is extracted
@@ -98,6 +100,8 @@ DBgetEvalid <- function(states = NULL,
                         RS = NULL, 
                         datsource = "datamart", 
                         data_dsn = NULL, 
+                        dbconn = NULL,
+                        dbconnopen = FALSE,
                         invtype = "ANNUAL", 
                         evalCur = TRUE, 
                         evalEndyr = NULL, 
@@ -143,8 +147,9 @@ DBgetEvalid <- function(states = NULL,
   SCHEMA. <- ""
 
   ## Set global variables
+  surveynm=popevalnm=popevalgrpnm <- NULL
 
-  ## Define evalTypee choices
+  ## Define evalType choices
   evalTypelst <- c("ALL", "CURR", "VOL", "GRM", "P2VEG", "INV", "DWM", "CHNG")
 #  evalTypelst <- c("ALL", "CURR", "VOL", "CHNG", "DWM", "GROW", "MORT", "REMV", 
 #		"CRWN", "INV", "P2VEG")
@@ -158,31 +163,6 @@ DBgetEvalid <- function(states = NULL,
   if (!all(input.params %in% names(formals(DBgetEvalid)))) {
     miss <- input.params[!input.params %in% formals(DBgetEvalid)]
     stop("invalid parameter: ", toString(miss))
-  }
-
-  ## Define function
-  getdbtab <- function(tabnm, evalvar="STATECD", evallst, stopifnull=FALSE) {
-    ## DESCRIPTION: get table from database based on state or evalid query
-    ## evalvar - evaluation variable ('STATECD', 'EVALID')
-    ## evallst - evaluation variable filter values (e.g, stcdlst)
-
-    tabnm <- chkdbtab(dbtablst, tabnm)
-    if (is.null(tabnm)) {
-      if (stopifnull) {
-        stop(tabnm, " is not in database")
-      }
-      return(NULL)
-    }
-
-    tabflds <- DBI::dbListFields(dbconn, tabnm)
-    if (!evalvar %in% tabflds) {
-      stop(evalvar, " not in table")
-      #qry <- paste("select distinct ", evalvar, "from", tabnm)
-      #tabvals <- DBI::dbGetQuery(dbconn, qry)[[1]]    
-    }
-    tab.qry <- paste("select * from", tabnm, "where", evalvar, 
-			paste0("in(", toString(evallst), ")"))
-    tab <- DBI::dbGetQuery(dbconn, tab.qry)
   }
 
   getlistfromdt <- function(dt, x, xnm="STATECD") {
@@ -199,17 +179,37 @@ DBgetEvalid <- function(states = NULL,
      return(dtlst)
   }
 
-  invtypelst <- c("ANNUAL", "PERIODIC")
-  invtype <- pcheck.varchar(var2check=invtype, varnm="invtype", 
-		gui=gui, checklst=invtypelst, caption="Inventory type?")
-  ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
   
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-  if (datsource == "sqlite" && !is.null(data_dsn)) {
-    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+
+  invtypelst <- c("ANNUAL", "PERIODIC")
+  invtype <- pcheck.varchar(var2check=invtype, varnm="invtype", 
+		gui=gui, checklst=invtypelst, caption="Inventory type?")
+  ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
+
+  if (!is.null(dbconn) && dbIsValid(dbconn)) {
+    datsource == "sqlite"
     dbtablst <- DBI::dbListTables(dbconn)
+    if (length(dbtablst) == 0) {
+      stop("no data in database")
+    }
+  } else {
+    datsourcelst <- c("sqlite", "datamart")
+    datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
+		gui=gui, checklst=datsourcelst, caption="Data source?")
+
+    if (datsource == "sqlite" && !is.null(data_dsn)) {
+      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+      dbtablst <- DBI::dbListTables(dbconn)
+      if (length(dbtablst) == 0) {
+        stop("no data in database")
+      }
+    }
+  }
+
+  if (datsource == "sqlite") {
     ppsanm <- chkdbtab(dbtablst, ppsanm)
     if (!is.null(ppsanm)) {
       ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
@@ -219,7 +219,7 @@ DBgetEvalid <- function(states = NULL,
     plotnm <- chkdbtab(dbtablst, "plot")
     if (is.null(states)) {
       states <- DBI::dbGetQuery(dbconn, 
-				paste("select distinct", STATECD, "from", plotnm))
+		paste("select distinct", STATECD, "from", plotnm))[[1]]
     }
   }
   ## If evalid is not NULL, get state
@@ -287,143 +287,123 @@ DBgetEvalid <- function(states = NULL,
   ## Get database tables - POP_EVAL, POP_EVAL_TYPE, SURVEY
   #########################################################################
 
-
-############ SQLite only
   if (datsource == "sqlite") {
-    if ("SURVEY" %in% dbtablst) {
-      survey.qry <- 
-		paste0("select * from SURVEY
-      	where ann_inventory = '", ann_inv, 
-		"' and statecd in(", toString(stcdlst), ")")
-      SURVEY <- DBI::dbGetQuery(dbconn, survey.qry) 
-    }   
-    if ("POP_EVAL" %in% dbtablst) {
-      POP_EVAL <- setDT(getdbtab("pop_eval", evalvar="STATECD", evallst=stcdlst))
-    }   
-    if ("POP_EVAL_GRP" %in% dbtablst) { 
-      POP_EVAL_GRP <- setDT(getdbtab("pop_eval_grp", evalvar="STATECD", evallst=stcdlst))
-    }
-    if ("POP_EVAL_TYP" %in% dbtablst) {
-      pop_eval_typ_qry <-
-		paste0("select ptyp.* from POP_EVAL_TYP ptyp
-		join POP_EVAL_GRP pgrp on(pgrp.CN = ptyp.EVAL_GRP_CN)
-		where pgrp.statecd in(", toString(stcdlst), ")")
-      POP_EVAL_TYP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_typ_qry))
+    stcdlstdb <- DBI::dbGetQuery(dbconn, 
+		paste("select distinct statecd from", plotnm))[[1]]
+    if (!all(stcdlst %in% stcdlstdb)) {
+      stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
+      message("statecds missing in database: ", toString(stcdmiss))
     }
 
-    if (all(is.null(POP_EVAL) && is.null(POP_EVAL_TYP) && is.null(POP_EVAL_GRP))) {
-      nopoptables <- TRUE
-      ppsanm <- findnm(ppsanm, dbtablst, returnNULL=TRUE)
-      if (is.null(ppsanm)) {
-        stop(ppsanm, " not in database")
-      } 
-        
-      stcdlstdb <- DBI::dbGetQuery(dbconn, 
-		paste("select distinct statecd from", ppsanm))[[1]]
-      if (!all(stcdlst %in% stcdlstdb)) {
-        stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
-        message("statecds missing in database: ", toString(stcdmiss))
-      }
-    } else {
-      nopoptables <- FALSE
+    surveynm <- chkdbtab(dbtablst, "SURVEY")
+    popevalnm <- chkdbtab(dbtablst, "POP_EVAL")
+    popevalgrpnm <- chkdbtab(dbtablst, "POP_EVAL_GRP")
+    popevaltypnm <- chkdbtab(dbtablst, "POP_EVAL_TYP")
+  } else {
+    SURVEY <- DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    if (!is.null(SURVEY)) {
+      surveynm <- "SURVEY"
+    }
+    POP_EVAL <- DBgetCSV("POP_EVAL", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    if (!is.null(POP_EVAL)) {
+      popevalnm <- "POP_EVAL"
+    }
+    POP_EVAL_GRP <- DBgetCSV("POP_EVAL_GRP", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    if (!is.null(POP_EVAL_GRP)) {
+      popevalgrpnm <- "POP_EVAL_GRP"
+    }
+    POP_EVAL_TYP <- DBgetCSV("POP_EVAL_TYP", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    if (!is.null(POP_EVAL_TYP)) {
+      popevaltypnm <- "POP_EVAL_TYP"
     }
   }
-  ## create state filter
-  stfilter <- getfilter("STATECD", stcdlst, syntax='sql')
-
-############ CSV only
-
-  if (datsource == "datamart") {
-    nopoptables <- FALSE
-    POP_EVAL_GRP <- DBgetCSV("POP_EVAL_GRP", stcdlst, stopifnull=FALSE, 
-		returnDT=TRUE)
-    POP_EVAL <- DBgetCSV("POP_EVAL", stcdlst, stopifnull=FALSE, returnDT=TRUE)
-    if (nrow(POP_EVAL) == 0) {
-      message("no data in database for ", toString(states))
-      return(NULL)
+  ## Get SURVEY table
+  if (!is.null(surveynm)) {
+    survey.qry <- paste0("select * from ", surveynm, 
+      	" where ann_inventory = '", ann_inv, 
+		"' and statecd in(", toString(stcdlst), ")")
+    if (datsource == "sqlite") {
+      SURVEY <- setDT(DBI::dbGetQuery(dbconn, survey.qry)) 
     } else {
-      statenm <- findnm("STATECD", names(POP_EVAL), returnNULL=FALSE)
-      if (!all(stcdlst %in% unique(POP_EVAL[[statenm]]))) {
-        miss <- stcdlst[!stcdlst %in% unique(POP_EVAL[[statenm]])]
-        message("no data in database for ", toString(miss))
-        stcdlst <- stcdlst[!stcdlst %in% miss]
-        states <- pcheck.states(stcdlst, "MEANING")
-      }
-    }    
-
-    POP_EVAL_TYP <- DBgetCSV("POP_EVAL_TYP", stcdlst, stopifnull=FALSE)
-    if (nrow(POP_EVAL_TYP) == 0) return(NULL)
-
-    SURVEY <- DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
-    ann_inventorynm <- findnm("ANN_INVENTORY", names(SURVEY), returnNULL=FALSE)
-    SURVEY <- SURVEY[SURVEY[[ann_inventorynm]] == ann_inv, ]
+      SURVEY <- setDT(sqldf::sqldf(survey.qry)) 
+    }
     if (nrow(SURVEY) == 0) return(NULL)
   }
-  if (!is.null(SURVEY)) {
-    names(SURVEY) <- toupper(names(SURVEY))
-  }
-  if (!is.null(POP_EVAL)) {
-    names(POP_EVAL) <- toupper(names(POP_EVAL))
-  }
-  if (!is.null(POP_EVAL_GRP)) {
-    names(POP_EVAL_GRP) <- toupper(names(POP_EVAL_GRP))
-  }
-  if (!is.null(POP_EVAL_TYP)) {
-    names(POP_EVAL_TYP) <- toupper(names(POP_EVAL_TYP))
-  }
 
-  if (all(!is.null(POP_EVAL) && !is.null(POP_EVAL_TYP) && !is.null(POP_EVAL_GRP))) {
-    evalidnm <- findnm("EVALID", names(POP_EVAL))
-    eval_grpnm <- findnm("EVAL_GRP", names(POP_EVAL_GRP))
-
-    ## Define query POP_EVAL, POP_EVAL_TYP table
-    popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", 
-		"START_INVYR", "END_INVYR", "LOCATION_NM")
-    popevalTypeqry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", 
-		pet.eval_typ from ", SCHEMA., "POP_EVAL_TYP pet join ", SCHEMA., 
-		"POP_EVAL pev on (pev.cn = pet.eval_cn) ",
+  if (!is.null(popevaltypnm) && !is.null(popevalgrpnm)) {
+    pop_eval_typ_qry <- paste0("select ptyp.* 
+           		FROM POP_EVAL_TYP ptyp
+				JOIN POP_EVAL_GRP pgrp ON(pgrp.CN = ptyp.EVAL_GRP_CN)
+				WHERE pgrp.statecd in(", toString(stcdlst), ")")
+    if (datsource == "sqlite") {
+      POP_EVAL_TYP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_typ_qry)) 
+    } else {
+      POP_EVAL_TYP <- setDT(sqldf::sqldf(pop_eval_typ_qry)) 
+    }
+  }
+  if (!is.null(popevalnm)) {
+    if (!is.null(popevaltypnm)) {
+      ## Define query POP_EVAL, POP_EVAL_TYP table
+      popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", 
+		"EVAL_DESCR", "STATECD", "START_INVYR", "END_INVYR", "LOCATION_NM")
+      pop_eval_qry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", 
+		pet.eval_typ from ", popevaltypnm, " pet join ", SCHEMA., 
+		popevalnm, " pev on (pev.cn = pet.eval_cn) ",
 		"where pev.STATECD ", paste0("in(", toString(stcdlst), ")"))
-    popevalvars <- sapply(popevalvars, findnm, xvect=names(POP_EVAL), returnNULL=TRUE)
-    popevalvar <- popevalvars[popevalvars %in% names(POP_EVAL)]
-
-    ## Query POP_EVAL
-    POP_EVAL <- setDT(sqldf::sqldf(popevalTypeqry))
+    } else {
+      pop_eval_qry <- paste0("select * from POP_EVAL
+					WHERE statecd in(", toString(stcdlst), ")")
+    }
+    if (datsource == "sqlite") {
+      POP_EVAL <- setDT(DBI::dbGetQuery(dbconn, pop_eval_qry)) 
+    } else {
+      POP_EVAL <- setDT(sqldf::sqldf(pop_eval_qry)) 
+    }
+  }
+  if (!is.null(popevalgrpnm)) {
+    pop_eval_grp_qry <- paste0("select * from POP_EVAL_GRP
+					WHERE statecd in(", toString(stcdlst), ")")
+    if (datsource == "sqlite") {
+      POP_EVAL_GRP <- setDT(DBI::dbGetQuery(dbconn, pop_eval_grp_qry)) 
+    } else {
+      POP_EVAL_GRP <- setDT(sqldf::sqldf(pop_eval_grp_qry)) 
+    }
 
     ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
+    eval_grpnm <- findnm("EVAL_GRP", names(POP_EVAL_GRP))
     POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP[[eval_grpnm]], 
 		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
   }
+  if (all(is.null(popevalnm) && is.null(popevaltyp) && is.null(popevalgrp))) {
+    nopoptables <- TRUE
+    stcdlstdb <- DBI::dbGetQuery(dbconn, 
+		paste("select distinct statecd from", ppsanm))[[1]]
+    if (!all(stcdlst %in% stcdlstdb)) {
+      stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
+      message("statecds missing in database: ", toString(stcdmiss))
+    }
+  } else {
+    nopoptables <- FALSE
+  }
 
-############ End CSV only
+  ## Create state filter
+  stfilter <- getfilter("STATECD", stcdlst, syntax='sql')
+
 
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
 
   ## Check if evalid is valid. If valid, get invyrtab invyrs, evalidlist, and invtype
   if (!is.null(evalid) && !nopoptables) {
+    evalidnm <- findnm("EVALID", names(POP_EVAL))
+
     ## Check if evalid is valid
     if (!all(evalid %in% POP_EVAL[[evalidnm]])) {
       notin <- evalid[!evalid %in% POP_EVAL[[evalidnm]]]
       stop("invalid EVALID: ", toString(notin))
     } else {
       ## Create table of state, inventory year, and cycle
-      if (!is.null(SURVEY) && 
-		all(!is.null(POP_EVAL) && !is.null(POP_EVAL_TYP) && !is.null(POP_EVAL_GRP))) {
-        ## Define query POP_EVAL, POP_EVAL_TYP table
-        popevalvars <- c("CN", "EVAL_GRP_CN", "RSCD", "EVALID", "EVAL_DESCR", "STATECD", 
-		"START_INVYR", "END_INVYR", "LOCATION_NM")
-        popevalTypeqry <- paste0("select ", toString(paste0("pev.", popevalvars)), ", 
-		pet.eval_typ from ", SCHEMA., "POP_EVAL_TYP pet join ", SCHEMA., 
-		"POP_EVAL pev on (pev.cn = pet.eval_cn) ",
-		"where pev.STATECD ", paste0("in(", toString(stcdlst), ")"))
-
-        ## Query POP_EVAL
-        POP_EVAL <- setDT(sqldf::sqldf(popevalTypeqry))
-
-        ## Add a parsed EVAL_GRP endyr to POP_EVAL_GRP
-        eval_grpnm <- findnm("EVAL_GRP", names(POP_EVAL_GRP))
-        POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP[[eval_grpnm]], 
-		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
-
+      if (!is.null(surveynm) && 
+		all(!is.null(popevalnm) && !is.null(popevaltypnm) && !is.null(popevalgrpnm))) {
         invyrs <- list()
         evalidlist <- list()
         evalTypelist <- list()
@@ -852,7 +832,7 @@ DBgetEvalid <- function(states = NULL,
   }
   }  ## returnevalid
  
-  if (datsource == "sqlite") {
+  if (datsource == "sqlite" && !dbconnopen) {
     DBI::dbDisconnect(dbconn)
   }
 

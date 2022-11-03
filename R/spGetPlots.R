@@ -405,20 +405,29 @@ spGetPlots <- function(bnd = NULL,
         if (is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
-        xydat <- spGetXY(bnd=bndx, 
-                         states=states, RS=RS, 
-                         xy=xy, xy_dsn=xy_dsn, 
-                         xy.uniqueid=xy.uniqueid, 
-                         xvar=xvar, yvar=yvar, xy.crs=xy.crs, 
-                         xyjoinid=xyjoinid, pjoinid=pjoinid, 
-                         xy_datsource=xy_datsource, 
-                         clipxy=clipxy, evalid=evalid, 
-                         evalCur=evalCur, evalEndyr=evalEndyr, 
-                         measCur=measCur, measEndyr=measEndyr, 
-                         measEndyr.filter=measEndyr.filter, 
-                         invyrs=invyrs, measyrs=measyrs, allyrs=allyrs, 
-                         intensity1=intensity1, showsteps=showsteps, 
-                         returnxy=TRUE)
+        xydat <- spGetXY(bnd = bndx, 
+                         states = states, RS = RS, 
+                         xy = xy, 
+                         xy_dsn = xy_dsn, 
+                         xy.uniqueid = xy.uniqueid, 
+                         xvar = xvar, yvar = yvar, 
+                         xy.crs = xy.crs, 
+                         xyjoinid = xyjoinid, 
+                         pjoinid = pjoinid, 
+                         xy_datsource = xy_datsource, 
+                         clipxy = clipxy, 
+                         evalid = evalid, 
+                         evalCur = evalCur, 
+                         evalEndyr = evalEndyr, 
+                         measCur = measCur, 
+                         measEndyr = measEndyr, 
+                         measEndyr.filter = measEndyr.filter, 
+                         invyrs = invyrs, 
+                         measyrs = measyrs, 
+                         allyrs = allyrs, 
+                         intensity1 = intensity1, 
+                         showsteps = showsteps, 
+                         returnxy = TRUE)
 
         spxy <- xydat$spxy
         pltids <- xydat$pltids
@@ -464,8 +473,10 @@ spGetPlots <- function(bnd = NULL,
 
         ## Get intersecting states
         statedat <- spGetStates(bndx,
-			        	stbnd.att="COUNTYFIPS", 
-					RS=RS, states=states, showsteps=showsteps)
+			        	stbnd.att = "COUNTYFIPS", 
+					RS = RS, 
+                           states = states, 
+                           showsteps = showsteps)
         bndx <- statedat$bndx
         stbnd.att <- statedat$stbnd.att
         statenames <- statedat$statenames
@@ -844,7 +855,7 @@ spGetPlots <- function(bnd = NULL,
         }
   
         ## Check for counties
-        if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS" && !is.null(countyfips)) {
+        if (!is.null(countyfips)) {
           countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
           stcnty <- countyfips[startsWith(countyfips, formatC(stcd, width=2, flag="0"))]
           countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
@@ -853,12 +864,14 @@ spGetPlots <- function(bnd = NULL,
         ## Get plot data
         ###############################
         if (measCur && !is.null(measEndyr) && !is.null(measEndyr.filter)) {
-          dat <- DBgetPlots(states=stcd, datsource="datamart", 
+          dat <- DBgetPlots(states=stcd, datsource=datsource, 
+                            data_dsn=data_dsn, 
                             stateFilter=stateFilter, allyrs=TRUE, 
                             istree=istree, isseed=isseed, othertables=other_layers, 
                             intensity1=intensity1, savePOP=savePOP)
         } else {
-          dat <- DBgetPlots(states=stcd, datsource="datamart", 
+          dat <- DBgetPlots(states=stcd, datsource=datsource,
+                            data_dsn=data_dsn, 
                             stateFilter=stateFilter, allyrs=allyrs, 
                             evalid=evalid, evalCur=evalCur, 
                             evalEndyr=evalEndyr, evalType=evalType, 
