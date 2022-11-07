@@ -166,7 +166,7 @@ spGetXY <- function(bnd,
   
 
   ## Set eval_options defaults
-  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
+  eval_defaults_list <- formals(FIESTAutils::eval_options)[-length(formals(FIESTAutils::eval_options))]
   
   for (i in 1:length(eval_defaults_list)) {
     assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
@@ -182,7 +182,7 @@ spGetXY <- function(bnd,
       }
     }
     ## Append eval_options defaults not specified to pass on to DBgetXY()
-    if (any(names(xy_defaults_list) %in% names(eval_opts))) {
+    if (any(names(eval_defaults_list) %in% names(eval_opts))) {
       eval_opts <- append(eval_opts, 
 		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
     }
@@ -194,7 +194,7 @@ spGetXY <- function(bnd,
 
 
   ## Set xy_options defaults
-  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]
+  xy_defaults_list <- formals(FIESTAutils::xy_options)[-length(formals(FIESTAutils::xy_options))]
   
   for (i in 1:length(xy_defaults_list)) {
     assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
@@ -279,11 +279,7 @@ spGetXY <- function(bnd,
       stop("must include xy_datsource")
     }
   } 
- 
-  ## Check measEndyr.filter
-  #############################################################################
-  measEndyr.filter <- check.logic(bnd, measEndyr.filter)
-  
+   
   ## Check intensity1
   #############################################################################
   intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
@@ -495,18 +491,6 @@ spGetXY <- function(bnd,
   ## Subset columns of spxy
   #spxy <- spxy[, unique(c(xy.uniqueid, xyjoinid, stunitco.names))]
 
-
-  #############################################################################
-  ## measEndyr.filter
-  #############################################################################
-  if (!is.null(measEndyr.filter)) {
-    filternames <- check.logic(bnd, measEndyr.filter, returnvar=TRUE)
-    if (length(filternames) > 0) {
-      spxy <- spExtractPoly(spxy, polyvlst=bndx, polyvarlst=filternames)$spxyext
-    } else {
-      spxy <- spExtractPoly(spxy, polyvlst=bndx)$spxyext
-    }
-  }
 
   #############################################################################
   ## Save tables

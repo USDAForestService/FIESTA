@@ -226,9 +226,8 @@ spGetPlots <- function(bnd = NULL,
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts)
 
-
   ## Set dbTables defaults
-  dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
+  dbTables_defaults_list <- formals(FIESTA::dbTables)[-length(formals(FIESTA::dbTables))]
   
   for (i in 1:length(dbTables_defaults_list)) {
     assign(names(dbTables_defaults_list)[[i]], dbTables_defaults_list[[i]])
@@ -245,9 +244,8 @@ spGetPlots <- function(bnd = NULL,
     }
   }
 
-
   ## Set eval_options defaults
-  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
+  eval_defaults_list <- formals(FIESTAutils::eval_options)[-length(formals(FIESTAutils::eval_options))]
 
   ## Set user-supplied eval_opts values
   if (length(eval_opts) > 0) {
@@ -271,7 +269,7 @@ spGetPlots <- function(bnd = NULL,
 
 
   ## Set xy_options defaults
-  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]
+  xy_defaults_list <- formals(FIESTAutils::xy_options)[-length(formals(FIESTAutils::xy_options))]
   
   for (i in 1:length(xy_defaults_list)) {
     assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
@@ -313,7 +311,7 @@ spGetPlots <- function(bnd = NULL,
       }
     }
   }
-
+ 
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################      
@@ -399,7 +397,6 @@ spGetPlots <- function(bnd = NULL,
       }
 
     } else { 	## is.null(pltids)
-
       if (!is.null(measEndyr.filter)) {
         if (!is.null(measEndyr.filter)) {
           if (is.null(measEndyr) && is.null(evalEndyr)) {
@@ -418,7 +415,7 @@ spGetPlots <- function(bnd = NULL,
           }
         }
       } 
-
+ 
       ## Import boundary
       bndx <- pcheck.spatial(layer=bnd, dsn=bnd_dsn, caption="boundary")
       if (!is.null(bndx)) {
@@ -437,7 +434,7 @@ spGetPlots <- function(bnd = NULL,
           stop("invalid measEndyr.filter: ", measEndyr.filter) 
         }
       }
-
+ 
       ## Check states
       if (!is.null(states)) {
         if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) stop("states is invalid")
@@ -477,7 +474,6 @@ spGetPlots <- function(bnd = NULL,
           stbnd.att <- xydat1$stbnd.att
           xy.uniqueid <- xydat1$xy.uniqueid
           bndx1 <- xydat1$bndx
-
 
           ## Get plots outside filter
           #######################################
@@ -909,11 +905,11 @@ spGetPlots <- function(bnd = NULL,
         evalidst <- evalid[unique(as.numeric(substr(evalid, nchar(evalid)-6, 
   					nchar(evalid)-4))) == stcd]
       } 
-        
+ 
       ## Get plot data
       ###############################
       if (!is.null(measEndyr.filter)) {
-
+ 
         ## Get plots inside filter
         #######################################
         if (!is.null(countyfips1)) {
