@@ -384,7 +384,7 @@ spExtractPoly <- function(xyplt,
     ######################################################## 
     geocol <- attr(polyv, "sf_column")
     polyvcols <- names(polyv)[names(polyv) != geocol]
-    sppltout <- spxyext[apply(st_drop_geometry(spxyext[, polyvcols]), 1, 
+    sppltout <- spxyext[apply(sf::st_drop_geometry(spxyext[, polyvcols]), 1, 
 				function(x) all(is.na(x))),]
     nulln <- nrow(sppltout)
 
@@ -409,7 +409,7 @@ spExtractPoly <- function(xyplt,
  
     if (!keepNA) {
       ## Subset points inside boundary
-      spxyext <- spxyext[!apply(st_drop_geometry(spxyext[, polyvcols]), 1, 
+      spxyext <- spxyext[!apply(sf::st_drop_geometry(spxyext[, polyvcols]), 1, 
 		function(x) all(is.na(x))),]
     }
   }

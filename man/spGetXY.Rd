@@ -10,26 +10,13 @@ spGetXY(
   bnd.filter = NULL,
   states = NULL,
   RS = NULL,
+  eval_opts = eval_options(),
   xy_datsource = "datamart",
-  xy = NULL,
   xy_dsn = NULL,
-  xy.uniqueid = "PLT_CN",
-  xvar = NULL,
-  yvar = NULL,
-  xy.crs = 4269,
-  xyjoinid = NULL,
+  xy_opts = list(xy = "PLOT", xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
   pjoinid = "CN",
   clipxy = TRUE,
   plot_layer = "plot",
-  evalid = NULL,
-  evalCur = FALSE,
-  evalEndyr = NULL,
-  measCur = FALSE,
-  measEndyr = NULL,
-  measEndyr.filter = NULL,
-  invyrs = NULL,
-  measyrs = NULL,
-  allyrs = FALSE,
   intensity1 = FALSE,
   showsteps = FALSE,
   returnxy = TRUE,
@@ -55,30 +42,17 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 included.}
 
+\item{eval_opts}{List of evaluation options to determine the set of data.
+returned. See help(eval_options) for a list of options.}
+
 \item{xy_datsource}{String. Source of XY data ("obj", "csv", "datamart",
 "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 datsource.}
 
-\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
-polygon object, data frame, full pathname to a shapefile, or name of a layer
-within a database.}
+\item{xy_dsn}{String. Data source name (dsn; i.e., pathname or database)}
 
-\item{xy_dsn}{String. Data source name (dsn; i.e., pathname or database
-name) of xy. The dsn varies by driver. See gdal OGR vector formats
-(https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R
-object.}
-
-\item{xy.uniqueid}{String. Unique identifier of xy.}
-
-\item{xvar}{String. Name of variable in xyplt defining x coordinate.}
-
-\item{yvar}{String. Name of variable in xyplt defining y coordinate.}
-
-\item{xy.crs}{PROJ.4 String or CRS object or Integer EPSG code defining
-Coordinate Reference System.}
-
-\item{xyjoinid}{String. Variable in xy to join to plot data. If NULL,
-xyjoinid=xy.uniqueid.}
+\item{xy_opts}{List of xy data options to specify. See xy_options.
+(e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').}
 
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
@@ -87,33 +61,6 @@ be unique. If using most current XY coordinates, use identifier for a plot
 \item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 
 \item{plot_layer}{String. Name of plot_layer in database.}
-
-\item{evalid}{Integer. To extract data for a specific evaluation period. See
-notes for more information about FIA Evaluations.}
-
-\item{evalCur}{Logical. If TRUE, extract plots with most current FIA
-Evalidation for state(s).}
-
-\item{evalEndyr}{Integer. Defining end year of Evaluation (yyyy).}
-
-\item{measCur}{Logical. If TRUE, extract plots with most current measurement
-for state(s).}
-
-\item{measEndyr}{Integer year (YYYY). If measCur=TRUE, extract plots with
-most current measurement for state(s) for years measured before measEndyr.}
-
-\item{measEndyr.filter}{Filter. If measCur=TRUE and measEndyr != NULL, a
-filter for bnd to identify and area to use measEndyr, such as disturbed
-areas where you want to exclude plots measured after disturbance.}
-
-\item{invyrs}{Integer vector. Defining specific inventory years of data
-(e.g., 2010:2015).}
-
-\item{measyrs}{Integer vector. Defining specific measurement years of data
-(e.g., 2010:2015).}
-
-\item{allyrs}{Logical. If TRUE, selects all years (annual inventory) in
-database.}
 
 \item{intensity1}{Logical. If TRUE, include only single intensity plots
 (i.e., INTENSITY = 1).}
@@ -130,6 +77,10 @@ if TRUE, exports XY data as spatial data.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
+
+\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
+polygon object, data frame, full pathname to a shapefile, or name of a layer
+within a database.}
 }
 \value{
 \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }

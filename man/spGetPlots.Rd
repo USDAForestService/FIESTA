@@ -12,13 +12,10 @@ spGetPlots(
   RS = NULL,
   pltids = NULL,
   xy_datsource = NULL,
-  xy = NULL,
   xy_dsn = NULL,
-  xy.uniqueid = "PLT_CN",
-  xvar = NULL,
-  yvar = NULL,
-  xy.crs = 4269,
-  xyjoinid = NULL,
+  xy_opts = xy_options(),
+  eval_opts = eval_options(),
+  measEndyr.filter = NULL,
   pjoinid = NULL,
   clipxy = TRUE,
   datsource = NULL,
@@ -27,29 +24,11 @@ spGetPlots(
   isseed = FALSE,
   isveg = FALSE,
   isdwm = FALSE,
-  plot_layer = "plot",
-  cond_layer = "cond",
-  tree_layer = "tree",
-  seed_layer = "seedling",
-  vsubpspp_layer = "p2veg_subplot_spp",
-  vsubpstr_layer = "p2veg_subp_structure",
-  invsubp_layer = "invasive_subplot_spp",
-  dwm_layer = "cond_dwm_calc",
-  ppsa_layer = "pop_plot_stratum_assgn",
+  dbTabs = dbTables(),
   other_layers = NULL,
   puniqueid = "CN",
   pltassgnid = "PLT_CN",
   savePOP = FALSE,
-  evalid = NULL,
-  evalCur = FALSE,
-  evalEndyr = NULL,
-  evalType = "VOL",
-  measCur = FALSE,
-  measEndyr = NULL,
-  measEndyr.filter = NULL,
-  invyrs = NULL,
-  measyrs = NULL,
-  allyrs = FALSE,
   intensity1 = FALSE,
   showsteps = FALSE,
   returndata = TRUE,
@@ -84,26 +63,20 @@ included.}
 "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 datsource.}
 
-\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
-polygon object, data frame, full pathname to a shapefile, or name of a layer
-within a database.}
-
 \item{xy_dsn}{String. Data source name (dsn; i.e., pathname or database
 name) of xy. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R
 object.}
 
-\item{xy.uniqueid}{String. Unique identifier of xy.}
+\item{xy_opts}{List of xy data options to specify. See xy_options.
+(e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').}
 
-\item{xvar}{String. Name of variable in xyplt defining x coordinate.}
+\item{eval_opts}{List of evaluation options to determine the set of data.
+returned. See help(eval_options) for a list of options.}
 
-\item{yvar}{String. Name of variable in xyplt defining y coordinate.}
-
-\item{xy.crs}{PROJ.4 String or CRS object or Integer EPSG code defining
-Coordinate Reference System.}
-
-\item{xyjoinid}{String. Variable in xy to join to plot data. If NULL,
-xyjoinid=xy.uniqueid.}
+\item{measEndyr.filter}{Filter. If measCur=TRUE and measEndyr != NULL, a
+filter for bnd to identify and area to use measEndyr, such as disturbed
+areas where you want to exclude plots measured after disturbance.}
 
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
@@ -130,32 +103,8 @@ from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP
 
 \item{isdwm}{Logical. If TRUE, down woody material are extracted.}
 
-\item{plot_layer}{String. Name of layer in database of file name of FIA plot
-table.}
-
-\item{cond_layer}{String. Name of layer in database of file name of FIA cond
-table.}
-
-\item{tree_layer}{String. Name of layer in database of file name of FIA tree
-table if istree=TRUE.}
-
-\item{seed_layer}{String. Name of layer in database of file name of FIA
-seedling table if isseed=TRUE.}
-
-\item{vsubpspp_layer}{String. Name of layer in database of file name of FIA
-P2VEG_SUBPLOT_SPP table if isveg=TRUE.}
-
-\item{vsubpstr_layer}{String. Name of layer in database of file name of FIA
-P2VEG_SUBP_STRUCTURE table if isveg=TRUE.}
-
-\item{invsubp_layer}{String. Name of layer in database of file name of FIA
-INVASIVE_SUBPLOT_SPP table if isveg=TRUE.}
-
-\item{dwm_layer}{String. Name of layer in database of file name of FIA
-COND_DWM_CALC table if isdwm=TRUE.}
-
-\item{ppsa_layer}{String. Name of layer in database of file name of FIA
-pop_plot_stratum_assgn table, if using evaluations.}
+\item{dbTabs}{List of database tables the user would like returned.
+See help(dbTables) for a list of options.}
 
 \item{other_layers}{String. Other layer(s) in database to clip and/or
 extract from database (Note: must include PLT_CN variable as unique
@@ -167,41 +116,6 @@ identifier).}
 
 \item{savePOP}{Logical. If TRUE, returns and/or saves POP_PLOT_STRATUM_ASSGN
 table.}
-
-\item{evalid}{Integer. To extract data for a specific evaluation period. See
-notes for more information about FIA Evaluations.}
-
-\item{evalCur}{Logical. If TRUE, extract plots with most current FIA
-Evalidation for state(s).}
-
-\item{evalEndyr}{Integer. Defining end year of Evaluation (yyyy).}
-
-\item{evalType}{String vector. The type(s) of evaluation of interest ('ALL',
-'AREAVOL', 'GRM', 'P2VEG', 'DWM', 'INV', 'REGEN', 'CRWN').  The evalType
-'ALL' includes nonsampled plots; 'AREAVOL' includes plots used for area or
-tree estimates (eval_typ %in% c(CURR, VOL)); The evalType 'GRM' includes
-plots used for growth, removals, mortality, and change estimates (eval_typ
-%in% c(GROW, MORT, REMV, CHNG)). Multiple types are accepted.  See FIA
-database manual for regional availability and/or differences.}
-
-\item{measCur}{Logical. If TRUE, extract plots with most current measurement
-for state(s).}
-
-\item{measEndyr}{Integer year (YYYY). If measCur=TRUE, extract plots with
-most current measurement for state(s) for years measured before measEndyr.}
-
-\item{measEndyr.filter}{Filter. If measCur=TRUE and measEndyr != NULL, a
-filter for bnd to identify and area to use measEndyr, such as disturbed
-areas where you want to exclude plots measured after disturbance.}
-
-\item{invyrs}{Integer vector. Defining specific inventory years of data
-(e.g., 2010:2015).}
-
-\item{measyrs}{Integer vector. Defining specific measurement years of data
-(e.g., 2010:2015).}
-
-\item{allyrs}{Logical. If TRUE, selects all years (annual inventory) in
-database.}
 
 \item{intensity1}{Logical. If TRUE, include only single intensity plots
 (i.e., INTENSITY = 1).}

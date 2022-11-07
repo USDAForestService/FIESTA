@@ -37,8 +37,6 @@
 #' @param datsource Source of data ('datamart', 'sqlite').
 #' @param data_dsn If datsource='sqlite', the file name (data source name) of
 #' the sqlite database (*.sqlite).
-#' @param dbconn Open database connection.
-#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
 #' @param invtype String. The type of FIA data to extract ('PERIODIC',
 #' 'ANNUAL').  See further details below.
 #' @param evalCur Logical. If TRUE, the most current evalidation is extracted
@@ -61,6 +59,8 @@
 #' If NULL, it is generated from SURVEY table from FIA database based on states
 #' and invtype.
 #' @param ppsanm String. Name of pop_plot_assgn_layer in database.
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
 #' @param gui Logical. If TRUE, gui windows pop up for parameter selection.
 #' @return A list of the following objects: \item{states}{ String vector. State
 #' names. } \item{rslst}{ String vector. FIA research station names included in
@@ -100,8 +100,6 @@ DBgetEvalid <- function(states = NULL,
                         RS = NULL, 
                         datsource = "datamart", 
                         data_dsn = NULL, 
-                        dbconn = NULL,
-                        dbconnopen = FALSE,
                         invtype = "ANNUAL", 
                         evalCur = TRUE, 
                         evalEndyr = NULL, 
@@ -110,6 +108,8 @@ DBgetEvalid <- function(states = NULL,
                         evalType = "VOL", 
                         invyrtab = NULL, 
                         ppsanm = "pop_plot_stratum_assgn", 
+                        dbconn = NULL,
+                        dbconnopen = FALSE,
                         gui = FALSE) {
   ###############################################################################
   ## DESCRIPTION: Get or check evalid from FIA database.
@@ -189,6 +189,8 @@ DBgetEvalid <- function(states = NULL,
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
   ann_inv <- ifelse (invtype == "ANNUAL", "Y", "N")
 
+  ## Check database connection
+  ######################################################
   if (!is.null(dbconn) && DBI::dbIsValid(dbconn)) {
     datsource == "sqlite"
     dbtablst <- DBI::dbListTables(dbconn)
@@ -209,20 +211,8 @@ DBgetEvalid <- function(states = NULL,
     }
   }
 
-  if (datsource == "sqlite") {
-    ppsanm <- chkdbtab(dbtablst, ppsanm)
-    if (!is.null(ppsanm)) {
-      ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
-      EVALID <- chkdbtab(ppsaflds, "EVALID", stopifnull=TRUE)
-      STATECD <- chkdbtab(ppsaflds, "STATECD", stopifnull=TRUE)
-    }
-    plotnm <- chkdbtab(dbtablst, "plot")
-    if (is.null(states)) {
-      states <- DBI::dbGetQuery(dbconn, 
-		paste("select distinct", STATECD, "from", plotnm))[[1]]
-    }
-  }
-  ## If evalid is not NULL, get state
+  ## Check evalid, invyrtab, and state/RS parameters
+  ######################################################
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
   if (!is.null(evalid)) {
     evalid <- unique(unlist(evalid)) 
@@ -230,17 +220,6 @@ DBgetEvalid <- function(states = NULL,
       stop("invalid evalid")
     }
     stcdlst <- unique(substr(evalid, 1, nchar(evalid)-4))
-    if (length(states) != length(stcdlst)) {
-      statechk <- pcheck.states(states, "VALUE")
-      stcdlst <- stcdlst[stcdlst %in% statechk]
-      if (length(states) != length(stcdlst)) {
-        if (length(statechk) > 0) {
-          stop("invalid states: ", toString(statechk[!statechk %in% stcdlst]))
-        } else {
-          stop("invalid states")
-        }
-      }
-    }
     states <- pcheck.states(stcdlst, "MEANING")
   } else if (!is.null(invyrtab)) {
     if (!all(class(invyrtab) %in% c("data.frame", "data.table"))) {
@@ -254,6 +233,8 @@ DBgetEvalid <- function(states = NULL,
       states <- pcheck.states(stcdlst, "MEANING")
     }
   } else {
+    ## Check RS states
+    #####################################################
     RS <- pcheck.varchar(var2check=RS, varnm="RS", 
 		checklst=rslst, caption="Research Unit?", gui=gui, multiple=TRUE)
     if (!is.null(RS) && !is.null(states)) {     
@@ -288,13 +269,22 @@ DBgetEvalid <- function(states = NULL,
   #########################################################################
 
   if (datsource == "sqlite") {
+    ## Check states in database
+    ###############################################
+    plotnm <- chkdbtab(dbtablst, "plot")
     stcdlstdb <- DBI::dbGetQuery(dbconn, 
 		paste("select distinct statecd from", plotnm))[[1]]
     if (!all(stcdlst %in% stcdlstdb)) {
       stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
       message("statecds missing in database: ", toString(stcdmiss))
+      stcdlsttmp <- stcdlst[stcdlst %in% stcdlstdb]
+      if (length(stcdlsttmp) == 0) {
+        stop("no data in database for: ", toString(stcdlst), "\n")
+      } else {
+        stcdlst <- stcdlsttmp
+      }
+      message("states in database: ", toString(stcdlst))
     }
-
     surveynm <- chkdbtab(dbtablst, "SURVEY")
     popevalnm <- chkdbtab(dbtablst, "POP_EVAL")
     popevalgrpnm <- chkdbtab(dbtablst, "POP_EVAL_GRP")
@@ -435,19 +425,44 @@ DBgetEvalid <- function(states = NULL,
       } else if (datsource == "sqlite") {
         message("no SURVEY table in database... assuming ANNUAL inventory plots")
         invtype <- "ANNUAL"
+        ppsanm <- chkdbtab(dbtablst, ppsanm)
         if (is.null(ppsanm)) {
           message("there is no pop_plot_stratum_assgn table in database")
-          return(NULL)
         }
-        if ("INVYR" %in% ppsaflds) {
-          invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", ppsanm, 
-			"where evalid in(", evalid, ") group by statecd, invyr")    
-        } else if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
-          invqry <- paste("select p.statecd, p.invyr, count(*) from", ppsanm, "ppsa",
-			"join", plotnm, "p on(CN = ppsa.PLT_CN) where evalid in(", evalid, 
-			") group by p.statecd, p.invyr")
+
+        if (!is.null(ppsanm)) {
+          ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
+          invyrnm <- findnm("INVYR", ppsaflds)       
+          if (!is.null(invyrnm)) {
+            invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", ppsanm, 
+			"where evalid in(", toString(evalid), ") group by statecd, invyr") 
+            invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+          } else {
+            if (!is.null(plotnm)) {
+              pltflds <- DBI::dbListFields(dbconn, plotnm)
+              invyrnm <- findnm("INVYR", pltflds)  
+              if (!is.null(invyrnm)) {     
+                invqry <- paste("select p.statecd, p.invyr, count(*) from", 
+				ppsanm, "ppsa", "join", plotnm, 
+				"p on(p.CN = ppsa.PLT_CN) where evalid in(", toString(evalid), 
+				") group by p.statecd, p.invyr")
+                invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+              }
+            }
+          }
+        } else {
+          message("there is no pop_plot_stratum_assgn table in database")
+          if (!is.null(plotnm)) {
+            pltflds <- DBI::dbListFields(dbconn, plotnm)
+            invyrnm <- findnm("INVYR", pltflds)  
+            if (!is.null(invyrnm)) {     
+              invqry <- paste("select statecd, invyr, count(*) from", 
+				plotnm, "where statecd in(", toString(stcdlst), 
+				") group by statecd, invyr")
+              invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+            }
+          }
         }
-        invyrtab <- DBI::dbGetQuery(dbconn, invqry)
       }
     }
   }
@@ -482,9 +497,9 @@ DBgetEvalid <- function(states = NULL,
       ## Create table of all inventory years in database
       invdbtab <- NULL
       if (!is.null(plotnm) && "INVYR" %in% DBI::dbListFields(dbconn, plotnm)) {
-        invqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", plotnm, 
+        invyrqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", plotnm, 
 			"where", stfilter, "group by statecd, invyr order by statecd, invyr")   
-        invyrtab <- DBI::dbGetQuery(dbconn, invqry)
+        invyrtab <- DBI::dbGetQuery(dbconn, invyrqry)
       }
     }
   } else {
@@ -506,7 +521,7 @@ DBgetEvalid <- function(states = NULL,
       } 
     }  
   }
-
+ 
   if (!is.null(invyrtab)) {
     ## Get possible range of inventory years from invyrtab
     stinvyr.vals <- as.list(by(invyrtab$INVYR, invyrtab$STATECD, range))
@@ -556,12 +571,19 @@ DBgetEvalid <- function(states = NULL,
         #return(list(states=states, rslst=rslst, evalidlist=NULL, 
 	#		invtype=invtype, invyrtab=invyrtab, SURVEY=SURVEY))
 
-        return(returnlst <- list(states=states, rslst=rslst, 
+
+        returnlst <- list(states=states, rslst=rslst, 
                                  evalidlist=NULL, 
                                  invtype=invtype, 
                                  invyrtab=invyrtab, 
                                  evalType=evalTypelist, 
-                                 SURVEY=SURVEY))
+                                 SURVEY=SURVEY)
+        if (datsource == "sqlite" && !dbconnopen) {
+          DBI::dbDisconnect(dbconn)
+        } else {
+          returnlst$dbconn <- dbconn
+        }
+        return(returnlst)
       }
     }
   }
@@ -832,9 +854,6 @@ DBgetEvalid <- function(states = NULL,
   }
   }  ## returnevalid
  
-  if (datsource == "sqlite" && !dbconnopen) {
-    DBI::dbDisconnect(dbconn)
-  }
 
   returnlst <- list(states=states, rslst=rslst, 
                     evalidlist=evalidlist, 
@@ -845,7 +864,14 @@ DBgetEvalid <- function(states = NULL,
 
   ## Return population information
   returnlst$SURVEY <- SURVEY
+  returnlst$ppsanm <- ppsanm
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
+
+  if (datsource == "sqlite" && !dbconnopen) {
+    DBI::dbDisconnect(dbconn)
+  } else {
+    returnlst$dbconn <- dbconn
+  }
 
   return(returnlst)
 }

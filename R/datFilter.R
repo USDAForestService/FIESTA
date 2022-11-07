@@ -90,7 +90,7 @@ datFilter <- function(x,
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
   }
-
+ 
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)
 

@@ -11,11 +11,14 @@
 #' @param seed String.
 #' @param vsubpspp String.
 #' @param vsubpstr String.
+#' @param invsubp String.
 #' @param subplot String.
 #' @param subp_cond String. 
-#' @param cond_pcond String. 
-#' @param sccm String. 
 #' @param cond_dwm_calc String. 
+#' @param sccm String. 
+#' @param grm String. 
+#' @param plot_pplot String. 
+#' @param cond_pcond String. 
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Grayson W. White
@@ -24,10 +27,21 @@
 #' popTableIDs(cond = "my_unique_id", tree = "my_tree_id")
 #' @export popTableIDs
 
-popTableIDs <- function(cond="PLT_CN", plt="CN", tree="PLT_CN", seed="PLT_CN",
-                        vsubpspp="PLT_CN", vsubpstr="PLT_CN", subplot="PLT_CN",
-                        subp_cond="PLT_CN", cond_pcond="PLT_CN",
-                        sccm="PLT_CN", cond_dwm_calc="PLT_CN", ...) {
+popTableIDs <- function(cond = "PLT_CN", 
+                        plt = "CN", 
+                        tree = "PLT_CN", 
+                        seed = "PLT_CN",
+                        vsubpspp = "PLT_CN", 
+                        vsubpstr = "PLT_CN",
+                        invsubp = "PLT_CN", 
+                        subplot = "PLT_CN",
+                        subp_cond = "PLT_CN", 
+                        cond_dwm_calc = "PLT_CN",
+                        sccm = "PLT_CN", 
+                        grm = "PLT_CN",
+                        plot_pplot = "PLT_CN", 
+                        cond_pcond = "PLT_CN",
+                        ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]
   formallst <- c(names(formals(popTableIDs)))

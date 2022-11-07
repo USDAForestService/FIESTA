@@ -70,7 +70,7 @@ DBgetCSV <- function(DBtable,
   if (!is.vector(DBtable) || !is.character(DBtable) || !length(DBtable) == 1) {
     stop("DBtable must be a character vector of length 1")
   }
-
+ 
   ## Check states and get in proper format (abbr)
   stabbrs <- pcheck.states(states, "ABBR")
 

@@ -911,14 +911,16 @@ spGetAuxiliary <- function(xyplt = NULL,
     names(unitarea) <- c(unitvar, vars2keep, areavar)
   }
 
+  if (extract) {
+    pltassgn <- sf::st_drop_geometry(sppltx)
+    spxy <- sppltx
+  }
+ 
   ## Write data frames to CSV files
   #######################################
   if (savedata) {
 
     if (extract) {
-      pltassgn <- sf::st_drop_geometry(sppltx)
-      spxy <- sppltx
-
       ## Export to shapefile
       if (exportsp && returnxy) {
         spExportSpatial(spxy, 
@@ -970,7 +972,7 @@ spGetAuxiliary <- function(xyplt = NULL,
                             add_layer=TRUE)) 
     }
   }
-    
+
   returnlst <- list(unitvar=unitvar)
 
   if (extract) {

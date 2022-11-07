@@ -117,29 +117,15 @@
 #' == 1" . } 
 #' \item{unitarea}{ String. Returned table of area by estimation unit. } 
 #' \item{unitvar}{ String. Variable name for estimation unit. }
-#' \item{strlut}{ String. Strata-level table with pixel counts by strata
-#' (P1POINTCNT), strata weights (strwt), number of plots by strata (n.strata),
-#' total number of plots in estimation unit (n.total), sum of condition
-#' proportions (_UNADJ_SUM), area adjustments (*_ADJFAC), total area, and area
-#' expansion by strata (EXPNS). } 
-#' \item{strvar}{ String. Variable name for strata. If strata=FALSE, 
-#' strvar="ONESTRAT". } 
 #' \item{expcondtab}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1". } 
 #' \item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. } 
 #' \item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. } 
 #' \item{states}{ String. State names in dataset. } 
 #' \item{invyrs}{ String. Range of inventory years in dataset. }
 #' 
-#' \item{stratdat}{ Data frame. Strata information by estimation unit. }
 #' \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description}\cr 
 #' \tab unitvar \tab estimation unit \cr 
-#' \tab strvar \tab stratum value \cr 
-#' \tab strwtvar \tab number of pixels by strata and estimation unit \cr 
-#' \tab n.strata \tab number of plots in strata (after totally nonsampled 
-#' plots removed) \cr 
 #' \tab n.total \tab number of plots for estimation unit \cr 
-#' \tab strwt \tab proportion of area (or plots) by strata and estimation unit 
-#' (i.e., strata weight) \cr 
 #' \tab CONDPROP_UNADJ_SUM \tab summed condition proportion by strata and 
 #' estimation unit \cr 
 #' \tab CONDPROP_ADJFAC \tab adjusted condition proportion by strata after 
@@ -401,14 +387,26 @@ modMApop <- function(popType="VOL",
     if (names(popTableIDs_defaults_list)[[i]] == "vsubpstr") {
       assign("vstruniqueid", popTableIDs_defaults_list[[i]])
     }
+    if (names(popTableIDs_defaults_list)[[i]] == "invsubp") {
+      assign("invuniqueid", popTableIDs_defaults_list[[i]])
+    }
     if (names(popTableIDs_defaults_list)[[i]] == "subplot") {
       assign("subpuniqueid", popTableIDs_defaults_list[[i]])
     }
     if (names(popTableIDs_defaults_list)[[i]] == "subp_cond") {
       assign("subcuniqueid", popTableIDs_defaults_list[[i]])
     }
-    if (names(popTableIDs_defaults_list)[[i]] == "lulc") {
-      assign("lulcuniqueid", popTableIDs_defaults_list[[i]])
+    if (names(popTableIDs_defaults_list)[[i]] == "cond_dwm_calc") {
+      assign("dwmuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "grm") {
+      assign("grmuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "plot_pplot") {
+      assign("pplotuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "cond_pcond") {
+      assign("pconduniqueid", popTableIDs_defaults_list[[i]])
     }
   }
   
@@ -540,30 +538,6 @@ modMApop <- function(popType="VOL",
     }
   } 
 
-  if (strata) {
-    if (is.null(strvar)) {    
-      if (!is.null(predfac) && length(predfac) == 1) {
-        strvar <- predfac
-      } else {
-        stop("must include strvar if strata=TRUE")
-      }
-    } else {
-      if (!strvar %in% predfac) {
-        stop("strvar must be included in predfac")
-      }
-    } 
-    if (is.null(strwtvar)) {
-      strwtvar <- "Prop"
-    }
-    prednames <- NULL
-    pivotvars <- c(unitvar, unitvar2, "AOI", "npixels")
-    unitvars <- pivotvars[pivotvars %in% names(unitzonal)]
-    if (is.null(stratalut)) {
-      stratalut <- strat.pivot(unitzonal, strvar, unitvars=unitvars, 
-		strwtvar=strwtvar)
-    }
-  }
-
   ## Set user-supplied popTable values 
   popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
   if (length(popTabs) > 0) {
@@ -611,13 +585,12 @@ modMApop <- function(popType="VOL",
   ###################################################################################
   pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
       pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-      module="GB", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
+      module="MA", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
       evalid=evalid, measCur=measCur, measEndyr=measEndyr, 
       measEndyr.filter=measEndyr.filter, invyrs=invyrs, intensity=intensity,
       nonsamp.pfilter=nonsamp.pfilter, unitarea=unitarea, areavar=areavar, 
       unitvar=unitvar, unitvar2=unitvar2, areaunits=areaunits, 
-      unit.action=unit.action, strata=strata, stratalut=stratalut, 
-      strvar=strvar, pivot=pivot, nonresp=nonresp)
+      unit.action=unit.action, prednames=prednames, predfac=predfac)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -634,21 +607,14 @@ modMApop <- function(popType="VOL",
   areavar <- pltcheck$areavar
   areaunits <- pltcheck$areaunits
   unit.action <- pltcheck$unit.action
-  stratcombine <- pltcheck$stratcombine
-  strata <- pltcheck$strata
-  stratalut <- pltcheck$stratalut
-  strvar <- pltcheck$strvar
-  nonresp <- pltcheck$nonresp
+  prednames <- pltcheck$prednames
+  predfac <- pltcheck$predfac
   P2POINTCNT <- pltcheck$P2POINTCNT 
   plotsampcnt <- pltcheck$plotsampcnt
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
 
-  if (nonresp) {
-    RHGlut <- pltcheck$RHGlut
-    nonresplut <- pltcheck$nonresplut
-  }
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
@@ -679,28 +645,24 @@ modMApop <- function(popType="VOL",
 
 
   ###################################################################################
-  ## CHECK ESTIMATION UNIT or STRATA
+  ## Check auxiliary data
   ###################################################################################
-  ## If strata=TRUE, check strata variables and number of plots by estimation unit
-  ## - if < 2 plots, an error occurs, must collapse plots.
-  ## - if 2-10 plots, a warning is displayed, with suggestion to collapse plots. 
-  ## - if stratcombine=TRUE, combines strata classes to reach minplotnum.strat. 
-  ## - if unit.action='combine', combines estimation units to reach minplotnum.unit.
-  ###################################################################################
-  if (strata) {
-      auxlut <- stratalut
-      makedummy <- FALSE
-  } else {
-      auxlut <- unitzonal
-      makedummy <- TRUE
-  }
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, 
-                  module="MA", strata=strata, unitvar=unitvar, unitvar2=unitvar2, 
-                  unitarea=unitarea, areavar=areavar, minplotnum.unit=minplotnum.unit, 
-                  unit.action=unit.action, auxlut=auxlut, prednames=prednames, 
-                  strvar=strvar, predfac=predfac, makedummy=makedummy, npixelvar=npixelvar, 
-                  strwtvar="Prop", stratcombine=stratcombine, minplotnum.strat=minplotnum.strat, 
-                  removeifnostrata=TRUE, standardize=standardize)
+  auxlut <- unitzonal
+  makedummy <- TRUE
+  auxdat <- check.auxiliary(module = "MA", 
+                  pltx = pltassgnx, puniqueid = pltassgnid, 
+                  unitvar = unitvar, unitvar2 = unitvar2, 
+                  unitarea = unitarea, 
+                  areavar = areavar, 
+                  minplotnum.unit = minplotnum.unit, 
+                  unit.action = unit.action, 
+                  auxlut = auxlut, 
+                  prednames = prednames, 
+                  predfac = predfac, 
+                  makedummy = makedummy, 
+                  npixelvar = npixelvar, 
+                  standardize = standardize,
+                  auxtext = "unitlut", removetext = "unitarea", )
   pltassgnx <- setDT(auxdat$pltx)
   unitarea <- auxdat$unitarea
   unitvar <- auxdat$unitvar
@@ -709,8 +671,6 @@ modMApop <- function(popType="VOL",
   prednames <- auxdat$prednames
   predfac <- auxdat$predfac
   npixels <- auxdat$npixels
-  stratcombinelut <- auxdat$unitstrgrplut
-  strvar <- auxdat$strvar
   unitNA <- auxdat$unitNA
   if (is.null(key(pltassgnx))) setkeyv(pltassgnx, pltassgnid)
 
@@ -738,7 +698,7 @@ modMApop <- function(popType="VOL",
   ###################################################################################
   ## Merge plot strata info to condx
   if (is.null(key(condx))) setkeyv(condx, c(cuniqueid, condid))
-  condx <- condx[pltassgnx[,c(pltassgnid, unitvar, strvar, prednames), with=FALSE]]
+  condx <- condx[pltassgnx[,c(pltassgnid, unitvar, prednames), with=FALSE]]
 
   ## If more than one unitvar, 
   ## split the concatenated unitvar variable to keep original columns
@@ -757,12 +717,12 @@ modMApop <- function(popType="VOL",
                         seedx = seedf, 
                         cuniqueid = cuniqueid, 
                         condid = condid,
-                        unitlut = stratalut, 
+                        unitlut = unitlut, 
                         unitvars = unitvar,
-                        strvars = strvar,
                         unitarea = unitarea,
                         areavar = areavar, 
-                        areawt = areawt
+                        areawt = areawt,
+                        tpropvars = tpropvars
                         )
       condx <- adjfacdata$condx
       treef <- adjfacdata$treex
@@ -787,12 +747,12 @@ modMApop <- function(popType="VOL",
      setkeyv(unitarea, unitvar)
   }
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
-	      cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
-	      unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
-	      unitvar=unitvar, unitvars=unitvars, 
-	      unitlut=unitlut, npixels=npixels, npixelvar=npixelvar, prednames=prednames, 
-	      expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-	      states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+             cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter,
+             unitarea=unitarea, areavar=areavar, areaunits=areaunits,
+             unitvar=unitvar, unitvars=unitvars, unitlut=unitlut, 
+             plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+             npixels=npixels, npixelvar=npixelvar,
+             states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- treef
@@ -804,15 +764,6 @@ modMApop <- function(popType="VOL",
   }
   returnlst$prednames <- prednames
   returnlst$predfac <- predfac
-
-  if (strata) {
-    setkeyv(unitlut, c(unitvar, unitvar2, strvar))
-    returnlst$unitlut <- unitlut
-    returnlst$strvar <- strvar
-    if (!is.null(stratcombinelut)) {
-      returnlst$stratcombinelut <- stratcombinelut
-    }
-  }
 
 
   ###################################################################################

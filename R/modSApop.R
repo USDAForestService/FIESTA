@@ -463,41 +463,50 @@ modSApop <- function(popType="VOL",
   ## Set user-supplied popTabIDs values
   ### Check for invalid parameters first
   popTableIDs_defaults_list <- formals(popTableIDs)[-length(formals(popTableIDs))]
-  for (i in 1:length(popTabIDs)) {
-    if (!(names(popTabIDs)[[i]] %in% names(popTableIDs_defaults_list))) {
-      stop(paste("Invalid parameter: ", names(popTabIDs)[[i]]))
+  #for (i in 1:length(popTabIDs)) {
+  #  if (!(names(popTabIDs)[[i]] %in% names(popTableIDs_defaults_list))) {
+  #    stop(paste("Invalid parameter: ", names(popTabIDs)[[i]]))
+  #  }
+  #}
+  for (i in 1:length(popTableIDs_defaults_list)) {
+    if (names(popTableIDs_defaults_list)[[i]] == "cond") {
+      assign("cuniqueid", popTableIDs_defaults_list[[i]])
     }
-  }
-  ### Then set
-  if (length(popTabIDs) > 0) {
-    for (i in 1:length(popTabIDs)) {
-      if (names(popTabIDs)[[i]] == "cond") {
-        assign("cuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "plt") {
-        assign("puniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "tree") {
-        assign("tuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "seed") {
-        assign("suniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpspp") {
-        assign("vsppuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "vsubpstr") {
-        assign("vstruniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subplot") {
-        assign("subpuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "subp_cond") {
-        assign("subcuniqueid", popTabIDs[[i]])
-      }
-      if (names(popTabIDs)[[i]] == "lulc") {
-        assign("lulcuniqueid", popTabIDs[[i]])
-      }
+    if (names(popTableIDs_defaults_list)[[i]] == "plt") {
+      assign("puniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "tree") {
+      assign("tuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "seed") {
+      assign("suniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "vsubpspp") {
+      assign("vsppuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "vsubpstr") {
+      assign("vstruniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "invsubp") {
+      assign("invuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "subplot") {
+      assign("subpuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "subp_cond") {
+      assign("subcuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "cond_dwm_calc") {
+      assign("dwmuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "grm") {
+      assign("grmuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "plot_pplot") {
+      assign("pplotuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "cond_pcond") {
+      assign("pconduniqueid", popTableIDs_defaults_list[[i]])
     }
   }
 
@@ -505,7 +514,6 @@ modSApop <- function(popType="VOL",
   if (!is.null(SAdoms) && !"sf" %in% class(SAdoms)) {
     stop("invalid SAdoms")
   }
-
 
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
@@ -515,13 +523,12 @@ modSApop <- function(popType="VOL",
   ###################################################################################
   pltcheck <- check.popdataPLT(dsn=dsn, tabs=popTabs, tabIDs=popTabIDs, 
       pltassgn=pltassgn, pltassgnid=pltassgnid, pjoinid=pjoinid, 
-      module="GB", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
+      module="SA", popType=popType, popevalid=popevalid, adj=adj, ACI=ACI, 
       evalid=evalid, measCur=measCur, measEndyr=measEndyr, 
       measEndyr.filter=measEndyr.filter, invyrs=invyrs, intensity=intensity,
       nonsamp.pfilter=nonsamp.pfilter, unitarea=dunitarea, areavar=areavar, 
       unitvar=dunitvar, unitvar2=dunitvar2, areaunits=areaunits, 
-      unit.action=dunit.action, strata=strata, stratalut=stratalut, 
-      strvar=strvar, pivot=pivot, nonresp=nonresp)
+      unit.action=unit.action, prednames=prednames, predfac=predfac)
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -538,17 +545,13 @@ modSApop <- function(popType="VOL",
   areavar <- pltcheck$areavar
   areaunits <- pltcheck$areaunits
   dunit.action <- pltcheck$unit.action
-  prednames <- popcheck$prednames
-  predfac <- popcheck$predfac
+  prednames <- pltcheck$prednames
+  predfac <- pltcheck$predfac
   plotsampcnt <- pltcheck$plotsampcnt
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
 
-  if (nonresp) {
-    RHGlut <- pltcheck$RHGlut
-    nonresplut <- pltcheck$nonresplut
-  }
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
   }
@@ -581,19 +584,21 @@ modSApop <- function(popType="VOL",
   }
 
   ###################################################################################
-  ## CHECK STRATA
+  ## Check auxiliary data
   ###################################################################################
-  ## If strata=TRUE, check strata variables and number of plots by estimation unit
-  ## - if < 2 plots, an error occurs, must collapse plots.
-  ## - if 2-10 plots, a warning is displayed, with suggestion to collapse plots. 
-  ## - if stratcombine=TRUE, combines strata classes to reach minplotnum.strat. 
-  ## - if dunit.action='combine', combines estimation units to reach minplotnum.unit.
-  ###################################################################################
-  auxdat <- check.auxiliary(pltx=pltassgnx, puniqueid=pltassgnid, module="SA", 
-                    auxlut=dunitzonal, prednames=prednames, predfac=predfac, makedummy=TRUE, 
-                    unitarea=dunitarea, unitvar=dunitvar, areavar=areavar, 
-                    minplotnum.unit=minplotnum.unit, unit.action=dunit.action, 
-                    auxtext="dunitlut", removetext="dunitarea", standardize=TRUE)  
+  auxdat <- check.auxiliary(module = "SA",
+                    pltx = pltassgnx, puniqueid = pltassgnid, 
+                    unitvar = dunitvar, 
+                    unitarea = dunitarea, 
+                    areavar = areavar, 
+                    minplotnum.unit = minplotnum.unit, 
+                    unit.action=dunit.action,
+                    auxlut = dunitzonal, 
+                    prednames = prednames, 
+                    predfac = predfac, 
+                    makedummy = TRUE,  
+                    standardize = TRUE,                 
+                    auxtext = "dunitlut", removetext = "dunitarea")  
   pltassgnx <- setDT(auxdat$pltx)
   dunitarea <- auxdat$unitarea
   dunitvar <- auxdat$unitvar
@@ -643,20 +648,15 @@ modSApop <- function(popType="VOL",
                         seedx = seedf, 
                         cuniqueid = cuniqueid, 
                         condid = condid,
-                        unitlut = stratalut, 
-                        unitvars = unitvar,
-                        strvars = strvar,
-                        unitarea = dunitarea,
                         areavar = areavar, 
-                        areawt = areawt
+                        areawt = areawt,
+                        tpropvars = tpropvars
                         )
       condx <- adjfacdata$condx
       treef <- adjfacdata$treex
       seedf <- adjfacdata$seedx
       varadjlst <- adjfacdata$varadjlst
       areawtnm <- adjfacdata$areawtnm
-      stratalut <- adjfacdata$unitlut
-      expcondtab <- adjfacdata$expcondtab
     }
   }
  
@@ -664,6 +664,7 @@ modSApop <- function(popType="VOL",
     returnlst$SAdomsdf <- sf::st_drop_geometry(SAdoms)
   }
   if (!is.null(smallbnd)) {
+    smallbnd <- pcheck.spatial(layer=smallbnd, caption="smallbnd")
     if (is.null(smallbnd.domain)) {
       if ("DOMAIN" %in% names(smallbnd)) {
         smallbnd.domain <- "DOMAIN"
@@ -678,14 +679,12 @@ modSApop <- function(popType="VOL",
   }
 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
-  returnlst <- append(returnlst, list(condx=as.data.frame(condx), 
-		  pltcondx=as.data.frame(pltcondx), cuniqueid=cuniqueid, 
-		  condid=condid, ACI.filter=ACI.filter, 
-		  dunitarea=as.data.frame(dunitarea), areavar=areavar, areaunits=areaunits, 
-		  dunitvar=dunitvar, dunitlut=as.data.frame(dunitlut), 
-		  prednames=prednames, predfac=predfac, 
-		  plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-		  states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
+  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
+             cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+             dunitarea=dunitarea, areavar=areavar, areaunits=areaunits, 
+             dunitvar=dunitvar, dunitlut=dunitlut, 
+             plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+             states=states, invyrs=invyrs, estvar.area=estvar.area, adj=adj))
 
   if (!is.null(treef)) {
     returnlst$treex <- as.data.frame(treef)
@@ -695,6 +694,8 @@ modSApop <- function(popType="VOL",
   if (!is.null(seedf)) {
     returnlst$seedx <- as.data.frame(seedf)
   }
+  returnlst$prednames <- prednames
+  returnlst$predfac <- predfac
 
 
   ## Save list object

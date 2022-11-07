@@ -37,46 +37,22 @@
 #' @param RS String. Name of FIA research station to restrict states to
 #' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 #' included.
+#' @param eval_opts List of evaluation options to determine the set of data.
+#'  returned. See help(eval_options) for a list of options.
 #' @param xy_datsource String. Source of XY data ("obj", "csv", "datamart",
 #' "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 #' datsource.
 #' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
 #' polygon object, data frame, full pathname to a shapefile, or name of a layer
 #' within a database.
-#' @param xy_dsn String. Data source name (dsn; i.e., pathname or database
-#' name) of xy. The dsn varies by driver. See gdal OGR vector formats
-#' (https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R
-#' object.
-#' @param xy.uniqueid String. Unique identifier of xy.
-#' @param xvar String. Name of variable in xyplt defining x coordinate.
-#' @param yvar String. Name of variable in xyplt defining y coordinate.
-#' @param xy.crs PROJ.4 String or CRS object or Integer EPSG code defining
-#' Coordinate Reference System.
-#' @param xyjoinid String. Variable in xy to join to plot data. If NULL,
-#' xyjoinid=xy.uniqueid.
+#' @param xy_dsn String. Data source name (dsn; i.e., pathname or database)
+#' @param xy_opts List of xy data options to specify. See xy_options.
+#'  (e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').
 #' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
 #' be unique. If using most current XY coordinates, use identifier for a plot
 #' (e.g., PLOT_ID).
 #' @param clipxy Logical. If TRUE, clips xy data to bnd.
 #' @param plot_layer String. Name of plot_layer in database.
-#' @param evalid Integer. To extract data for a specific evaluation period. See
-#' notes for more information about FIA Evaluations.
-#' @param evalCur Logical. If TRUE, extract plots with most current FIA
-#' Evalidation for state(s).
-#' @param evalEndyr Integer. Defining end year of Evaluation (yyyy).
-#' @param measCur Logical. If TRUE, extract plots with most current measurement
-#' for state(s).
-#' @param measEndyr Integer year (YYYY). If measCur=TRUE, extract plots with
-#' most current measurement for state(s) for years measured before measEndyr.
-#' @param measEndyr.filter Filter. If measCur=TRUE and measEndyr != NULL, a
-#' filter for bnd to identify and area to use measEndyr, such as disturbed
-#' areas where you want to exclude plots measured after disturbance.
-#' @param invyrs Integer vector. Defining specific inventory years of data
-#' (e.g., 2010:2015).
-#' @param measyrs Integer vector. Defining specific measurement years of data
-#' (e.g., 2010:2015).
-#' @param allyrs Logical. If TRUE, selects all years (annual inventory) in
-#' database.
 #' @param intensity1 Logical. If TRUE, include only single intensity plots
 #' (i.e., INTENSITY = 1).
 #' @param showsteps Logical. If TRUE, display data in device window.
@@ -137,26 +113,14 @@ spGetXY <- function(bnd,
                     bnd.filter = NULL, 
                     states = NULL, 
                     RS = NULL, 
+                    eval_opts = eval_options(),
                     xy_datsource = "datamart", 
-                    xy = NULL, 
                     xy_dsn = NULL, 
-                    xy.uniqueid = "PLT_CN", 
-                    xvar = NULL, 
-                    yvar = NULL, 
-                    xy.crs = 4269, 
-                    xyjoinid = NULL, 
+                    xy_opts = list(xy="PLOT", xy.uniqueid="CN", 
+ 	                               xvar="LON", yvar="LAT"),
                     pjoinid = "CN", 
                     clipxy = TRUE, 
                     plot_layer = "plot",
-                    evalid = NULL, 
-                    evalCur = FALSE, 
-                    evalEndyr = NULL, 
-                    measCur = FALSE, 
-                    measEndyr = NULL, 
-                    measEndyr.filter = NULL, 
-                    invyrs = NULL, 
-                    measyrs = NULL, 
-                    allyrs = FALSE, 
                     intensity1 = FALSE, 
                     showsteps = FALSE, 
                     returnxy = TRUE, 
@@ -198,8 +162,60 @@ spGetXY <- function(bnd,
   
   
   ## Check parameter lists
-  pcheck.params(input.params, savedata_opts=savedata_opts)
+  pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts)
   
+
+  ## Set eval_options defaults
+  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
+  
+  for (i in 1:length(eval_defaults_list)) {
+    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
+  }
+  
+  ## Set user-supplied eval_opts values
+  if (length(eval_opts) > 0) {
+    for (i in 1:length(eval_opts)) {
+      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
+        assign(names(eval_opts)[[i]], eval_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
+      }
+    }
+    ## Append eval_options defaults not specified to pass on to DBgetXY()
+    if (any(names(xy_defaults_list) %in% names(eval_opts))) {
+      eval_opts <- append(eval_opts, 
+		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
+    }
+
+  } else {
+    stop("must specify an evaluation timeframe for data extraction... \n", 
+	"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
+  }
+
+
+  ## Set xy_options defaults
+  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]
+  
+  for (i in 1:length(xy_defaults_list)) {
+    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
+  }
+
+  ## Set user-supplied xy_opts values
+  if (length(xy_opts) > 0) {
+    for (i in 1:length(xy_opts)) {
+      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
+        assign(names(xy_opts)[[i]], xy_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
+      }
+    }
+    ## Append xy_options defaults not specified to pass on to DBgetXY()
+    if (any(names(xy_defaults_list) %in% names(xy_opts))) {
+      xy_opts <- append(xy_opts, 
+		xy_defaults_list[!names(xy_defaults_list) %in% names(xy_opts)])
+    }
+  } 
+
   ## Set savedata defaults
   savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
   
@@ -325,6 +341,7 @@ spGetXY <- function(bnd,
     stcds <- pcheck.states(states, "VALUE")
 
   } else if (!is.null(bndx)) {
+ 
     ## Get intersecting states
     statedat <- spGetStates(bndx, 
                             stbnd.att="COUNTYFIPS", 
@@ -334,6 +351,7 @@ spGetXY <- function(bnd,
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att
     statenames <- statedat$statenames
+ 
     if (!is.null(stbnd.att) && stbnd.att == "COUNTYFIPS") {
       countyfips <- statedat$states
       countyfips <- formatC(as.numeric(countyfips), width=5, digits=5, flag="0")
@@ -428,23 +446,21 @@ spGetXY <- function(bnd,
       spxy <- pcheck.spatial(xy)
     }
   } else {			## xy_datsource in('datamart', 'sqlite')
-    spxy <- DBgetXY(states = stcds,
+
+    xydat <- DBgetXY(states = stcds,
                       datsource = xy_datsource,
                       dsn = xy_dsn,
-                      evalid = evalid,
-                      evalCur = evalCur,
-                      evalEndyr = evalEndyr,
-                      measCur = measCur,
-                      measEndyr = measEndyr,
-                      allyrs = allyrs,
-                      invyrs = invyrs,
-                      measyrs = measyrs,
+                      eval_opts = eval_opts,
+                      xy_opts = xy_opts,
                       intensity1 = intensity1,
-                      issp = TRUE)[[1]]
+                      issp = TRUE)
+    spxy <- xydat$spxy
     xy.uniqueid <- "PLT_CN"
-    xyjoinid <- "PLT_CN"  
+    xyjoinid <- "PLT_CN"
+    evalInfo <- xydat$evalInfo
+    evalchk <- xydat$evalchk  
   }
-
+ 
   if (clipxy) {
     xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
 		checklst=names(spxy), caption="UniqueID variable of xy data", 
@@ -456,8 +472,8 @@ spGetXY <- function(bnd,
     bndx <- clipdat$clip_polyv
 
     if (showsteps) {
-      plot(st_geometry(bndx), border="black")
-      plot(st_geometry(spxy), add=TRUE, col="blue")
+      plot(sf::st_geometry(bndx), border="black")
+      plot(sf::st_geometry(spxy), add=TRUE, col="blue")
     }
   } 
  
@@ -545,7 +561,7 @@ spGetXY <- function(bnd,
 
     plot(sf::st_geometry(spxy), col="blue", cex=.5)
     if (!is.null(bndx)) {
-      plot(st_geometry(bndx), add=TRUE, border="black", lwd=0.75)
+      plot(sf::st_geometry(bndx), add=TRUE, border="black", lwd=0.75)
     }
     #par(mar=mar)
   }
@@ -553,6 +569,12 @@ spGetXY <- function(bnd,
   if (returnxy) {
     returnlst$spxy <- spxy
   } 
+  if (!is.null(evalInfo)) {
+    returnlst$evalInfo <- evalInfo
+  }
+  if (!is.null(evalchk)) {
+    returnlst$evalchk <- evalchk
+  }     
   returnlst$pltids <- pltids
   returnlst$bndx <- bndx
   returnlst$xy.uniqueid <- xy.uniqueid

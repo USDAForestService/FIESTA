@@ -9,25 +9,20 @@ DBgetXY(
   RS = NULL,
   datsource = "datamart",
   dsn = NULL,
-  dbconn = NULL,
-  dbconnopen = FALSE,
+  eval_opts = eval_options(),
+  xy_opts = xy_options(xy = "PLOT", xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
   invtype = "ANNUAL",
-  evalid = NULL,
-  evalCur = FALSE,
-  evalEndyr = NULL,
-  evalAll = FALSE,
-  evalType = "ALL",
-  measCur = FALSE,
-  measEndyr = NULL,
-  allyrs = FALSE,
-  invyrs = NULL,
-  measyrs = NULL,
   intensity1 = FALSE,
   issp = FALSE,
   returndata = TRUE,
+  addINTENSITY = TRUE,
+  addINVYR = TRUE,
+  addMEASYEAR = FALSE,
   savedata = FALSE,
   exportsp = FALSE,
-  savedata_opts = NULL
+  savedata_opts = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE
 )
 }
 \arguments{
@@ -45,12 +40,43 @@ is populated. See FIESTA::ref_statecd for reference to RS and states.}
 \item{dsn}{If datsource='sqlite', the file name (data source name) of
 the sqlite database (*.sqlite).}
 
-\item{dbconn}{Open database connection.}
+\item{eval_opts}{List of evaluation options to determine the set of data.
+ returned (e.g., eval_opts = eval_options(measCur=TRUE) or 
+eval_opts = list(evalCur=TRUE, evalType='VOL')). See help(eval_options) 
+for a list of options.}
 
-\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+\item{xy_opts}{List of xy data options to specify. See xy_options.
+(e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').}
 
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
+
+\item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
+INTENSITY = 1 (FIA base grid).}
+
+\item{issp}{Logical. If TRUE, returns spatial XY data as a list object with
+query.}
+
+\item{returndata}{Logical. If TRUE, returns XY data as a list object with
+query.}
+
+\item{addINTENSITY}{Logical. If TRUE, appends INTENSITY variable to dataframe.}
+
+\item{addINVYR}{Logical. If TRUE, appends INVYR variable to dataframe.}
+
+\item{addMEASYEAR}{Logical. If TRUE, appends INTENSITY variable to dataframe.}
+
+\item{savedata}{Logical. If TRUE, saves XY data to outfolder as comma-delimited
+file (*.csv).}
+
+\item{exportsp}{Logical. If TRUE, exports data as spatial.}
+
+\item{savedata_opts}{List. See help(savedata_options()) for a list
+of options. Only used when savedata = TRUE.}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
 \item{evalid}{Integer. Inventory span defining variable. Extract public 
 XY coordinates for a specific FIA Evaluation (See details for more 
@@ -98,23 +124,6 @@ public XY coordinates by state for the specified measurement year(s)
 (e.g., c(2000, 2001, 2002)). If more than one state and different 
 measurement years are desired, input a named list object with years labeled 
 by state (e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
-
-\item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
-INTENSITY = 1 (FIA base grid).}
-
-\item{issp}{Logical. If TRUE, returns spatial XY data as a list object with
-query.}
-
-\item{returndata}{Logical. If TRUE, returns XY data as a list object with
-query.}
-
-\item{savedata}{Logical. If TRUE, saves XY data to outfolder as comma-delimited
-file (*.csv).}
-
-\item{exportsp}{Logical. If TRUE, exports data as spatial.}
-
-\item{savedata_opts}{List. See help(savedata_options()) for a list
-of options. Only used when savedata = TRUE.}
 }
 \value{
 if returndata=TRUE, a list of the following objects: 
@@ -142,7 +151,7 @@ parameters, the default parameter values are used for those not specified.
 \dontrun{
 # Most current evaluation and shapefile with public coordinates
 COxylst <- DBgetXY(states = "Colorado",
-                   measCur = TRUE)
+                   eval_opts=eval_options(measCur = TRUE))
 names(COxylst)
 
 head(COxylst$xyCur_ACTUAL)

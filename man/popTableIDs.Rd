@@ -11,11 +11,14 @@ popTableIDs(
   seed = "PLT_CN",
   vsubpspp = "PLT_CN",
   vsubpstr = "PLT_CN",
+  invsubp = "PLT_CN",
   subplot = "PLT_CN",
   subp_cond = "PLT_CN",
-  cond_pcond = "PLT_CN",
-  sccm = "PLT_CN",
   cond_dwm_calc = "PLT_CN",
+  sccm = "PLT_CN",
+  grm = "PLT_CN",
+  plot_pplot = "PLT_CN",
+  cond_pcond = "PLT_CN",
   ...
 )
 }
@@ -32,15 +35,21 @@ popTableIDs(
 
 \item{vsubpstr}{String.}
 
+\item{invsubp}{String.}
+
 \item{subplot}{String.}
 
 \item{subp_cond}{String.}
 
-\item{cond_pcond}{String.}
+\item{cond_dwm_calc}{String.}
 
 \item{sccm}{String.}
 
-\item{cond_dwm_calc}{String.}
+\item{grm}{String.}
+
+\item{plot_pplot}{String.}
+
+\item{cond_pcond}{String.}
 
 \item{...}{For extendibility.}
 }

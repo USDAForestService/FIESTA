@@ -435,7 +435,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   }
   #pdoms2keep <- unique(pdoms2keep[which(!pdoms2keep %in% pmissvars)])
 
-
   ## Get state(s) and inventory year(s) (for titles)
   ############################################################
   states <- NULL
@@ -627,15 +626,28 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   pltx <- data.table(pltx[, unique(c(puniqueid, pdoms2keep, pvars2keep)), with=FALSE])
   setkeyv(pltx, puniqueid)
 
-
-  returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx, pfromqry=pfromqry, 
-		whereqry=whereqry, palias=palias, puniqueid=puniqueid, pjoinid=pjoinid,
+  returnlst <- list(pltassgnx=pltassgnx, pltassgnid=pltassgnid, pltx=pltx, 
+           pfromqry=pfromqry, whereqry=whereqry, palias=palias, 
+           puniqueid=puniqueid, pjoinid=pjoinid, popevalid=popevalid, 
 		unitvar=unitvar, unitarea=unitarea, unitvar2=unitvar2, areavar=areavar, 
-		areaunits=areaunits, unit.action=unit.action, ACI=ACI, strata=strata,
- 		stratcombine=stratcombine, P2POINTCNT=as.data.frame(P2POINTCNT), 
+		areaunits=areaunits, unit.action=unit.action, ACI=ACI, 
+ 		P2POINTCNT=as.data.frame(P2POINTCNT), 
 		plotsampcnt=as.data.frame(plotsampcnt), pdoms2keep=pdoms2keep, 
-		popevalid=popevalid, states=states, invyrs=lapply(invyrs,I), dbconn=dbconn)
+		states=states, invyrs=lapply(invyrs,I), dbconn=dbconn)
 
+  if (module == "GB") {
+    returnlst$strata <- strata
+    if (strata) {
+      returnlst$stratcombine <- stratcombine 
+      returnlst$stratalut <- stratalut
+      returnlst$strvar <- strvar
+      returnlst$nonresp <- nonresp
+    }
+    if (nonresp) {
+      returnlst$RHGlut <- RHGlut
+      returnlst$nonresplut <- nonresplut
+    }  
+  } 
   if (module %in% c("MA", "SA")) {
     returnlst$prednames <- prednames
     returnlst$predfac <- predfac
@@ -643,15 +655,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   if (ACI) {
     returnlst$nfplotsampcnt <- nfplotsampcnt
   }
-  if (strata) {
-    returnlst$stratalut <- stratalut
-    returnlst$strvar <- strvar
-    returnlst$nonresp <- nonresp
-  }
-  if (nonresp) {
-    returnlst$RHGlut <- RHGlut
-    returnlst$nonresplut <- nonresplut
-  }    
 
   return(returnlst)
 }

@@ -11,8 +11,6 @@ DBgetEvalid(
   RS = NULL,
   datsource = "datamart",
   data_dsn = NULL,
-  dbconn = NULL,
-  dbconnopen = FALSE,
   invtype = "ANNUAL",
   evalCur = TRUE,
   evalEndyr = NULL,
@@ -21,6 +19,8 @@ DBgetEvalid(
   evalType = "VOL",
   invyrtab = NULL,
   ppsanm = "pop_plot_stratum_assgn",
+  dbconn = NULL,
+  dbconnopen = FALSE,
   gui = FALSE
 )
 }
@@ -37,10 +37,6 @@ define RS.}
 
 \item{data_dsn}{If datsource='sqlite', the file name (data source name) of
 the sqlite database (*.sqlite).}
-
-\item{dbconn}{Open database connection.}
-
-\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
 \item{invtype}{String. The type of FIA data to extract ('PERIODIC',
 'ANNUAL').  See further details below.}
@@ -71,6 +67,10 @@ If NULL, it is generated from SURVEY table from FIA database based on states
 and invtype.}
 
 \item{ppsanm}{String. Name of pop_plot_assgn_layer in database.}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
 \item{gui}{Logical. If TRUE, gui windows pop up for parameter selection.}
 }

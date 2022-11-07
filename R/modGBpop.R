@@ -82,7 +82,6 @@
 #' assignments, use identifier for plot (e.g., PLOT_ID).
 #' @param areawt String. Name of variable for summarizing area weights (e.g.,
 #' CONDPROP_UNADJ).
-#' @param nonsamp.vfilter.fixed Logical. Temporary parameter for vegetation data fix. 
 #' @param adj String. How to calculate adjustment factors for nonsampled
 #' (nonresponse) conditions based on summed proportions for by plot ('samp',
 #' 'plot').  'samp' - adjustments are calculated at strata/estimation unit
@@ -245,7 +244,6 @@ modGBpop <- function(popType = "VOL",
                      dsn = NULL, 
                      pjoinid = "CN", 
                      areawt = "CONDPROP_UNADJ", 
-                     nonsamp.vfilter.fixed = TRUE,
                      adj = "samp", 
                      unitvar = NULL, 
                      unitarea = NULL, 
@@ -380,7 +378,7 @@ modGBpop <- function(popType = "VOL",
   for (i in 1:length(strata_defaults_list)) {
     assign(names(strata_defaults_list)[[i]], strata_defaults_list[[i]])
   }
-  
+
   ## Set popTables defaults
   popTables_defaults_list <- formals(popTables)[-length(formals(popTables))]
   
@@ -410,14 +408,26 @@ modGBpop <- function(popType = "VOL",
     if (names(popTableIDs_defaults_list)[[i]] == "vsubpstr") {
       assign("vstruniqueid", popTableIDs_defaults_list[[i]])
     }
+    if (names(popTableIDs_defaults_list)[[i]] == "invsubp") {
+      assign("invuniqueid", popTableIDs_defaults_list[[i]])
+    }
     if (names(popTableIDs_defaults_list)[[i]] == "subplot") {
       assign("subpuniqueid", popTableIDs_defaults_list[[i]])
     }
     if (names(popTableIDs_defaults_list)[[i]] == "subp_cond") {
       assign("subcuniqueid", popTableIDs_defaults_list[[i]])
     }
-    if (names(popTableIDs_defaults_list)[[i]] == "lulc") {
-      assign("lulcuniqueid", popTableIDs_defaults_list[[i]])
+    if (names(popTableIDs_defaults_list)[[i]] == "cond_dwm_calc") {
+      assign("dwmuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "grm") {
+      assign("grmuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "plot_pplot") {
+      assign("pplotuniqueid", popTableIDs_defaults_list[[i]])
+    }
+    if (names(popTableIDs_defaults_list)[[i]] == "cond_pcond") {
+      assign("pconduniqueid", popTableIDs_defaults_list[[i]])
     }
   }
 
@@ -629,7 +639,6 @@ modGBpop <- function(popType = "VOL",
     }
   }
 
- 
   ###################################################################################
   ## CHECK PLOT PARAMETERS AND DATA
   ## Generate table of sampled/nonsampled plots and conditions
@@ -665,16 +674,18 @@ modGBpop <- function(popType = "VOL",
   strata <- pltcheck$strata
   stratalut <- pltcheck$stratalut
   strvar <- pltcheck$strvar
-  nonresp <- pltcheck$nonresp
   P2POINTCNT <- pltcheck$P2POINTCNT 
   plotsampcnt <- pltcheck$plotsampcnt
   states <- pltcheck$states
   invyrs <- pltcheck$invyrs
   dbconn <- pltcheck$dbconn
 
-  if (nonresp) {
-    RHGlut <- pltcheck$RHGlut
-    nonresplut <- pltcheck$nonresplut
+  if (strata) {
+    nonresp <- pltcheck$nonresp
+    if (nonresp) {
+      RHGlut <- pltcheck$RHGlut
+      nonresplut <- pltcheck$nonresplut
+    }
   }
   if (ACI) {
     nfplotsampcnt <- pltcheck$nfplotsampcnt
@@ -917,13 +928,14 @@ modGBpop <- function(popType = "VOL",
   if (is.null(key(unitarea))) {
      setkeyv(unitarea, unitvar)
   }
-  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx,
-	      cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
-	      unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
-	      unitvar=unitvar, unitvars=unitvars, 
-	      strata=strata, stratalut=stratalut, strvar=strvar, strwtvar=strwtvar, 
-	      expcondtab=expcondtab, plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
-	      states=states, invyrs=invyrs, estvar.area=estvar.area, 
+  returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
+            cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 
+            unitarea=unitarea, areavar=areavar, areaunits=areaunits, 
+            unitvar=unitvar, unitvars=unitvars, 
+            strata=strata, stratalut=stratalut, 
+            strvar=strvar, strwtvar=strwtvar, expcondtab=expcondtab, 
+            plotsampcnt=plotsampcnt, condsampcnt=condsampcnt, 
+            states=states, invyrs=invyrs, estvar.area=estvar.area, 
             adj=adj, areawt=areawt, P2POINTCNT=P2POINTCNT))
 
   if (popType == "VOL") {

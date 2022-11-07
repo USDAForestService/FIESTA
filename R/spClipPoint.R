@@ -270,7 +270,7 @@ spClipPoint <- function(xyplt,
  
 
   ## Clip points that intersect polygon
-  injoin <- sf::st_join(sppntx, clippolyvx, join=st_intersects, left=FALSE)
+  injoin <- sf::st_join(sppntx, clippolyvx, join=sf::st_intersects, left=FALSE)
   inpnts <- sppntx[sppntx[[uniqueid]] %in% injoin[[uniqueid]],]
 
   if (showext) {

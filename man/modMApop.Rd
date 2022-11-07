@@ -131,29 +131,15 @@ treex. }
 == 1" . } 
 \item{unitarea}{ String. Returned table of area by estimation unit. } 
 \item{unitvar}{ String. Variable name for estimation unit. }
-\item{strlut}{ String. Strata-level table with pixel counts by strata
-(P1POINTCNT), strata weights (strwt), number of plots by strata (n.strata),
-total number of plots in estimation unit (n.total), sum of condition
-proportions (_UNADJ_SUM), area adjustments (*_ADJFAC), total area, and area
-expansion by strata (EXPNS). } 
-\item{strvar}{ String. Variable name for strata. If strata=FALSE, 
-strvar="ONESTRAT". } 
 \item{expcondtab}{ String. If ACI=FALSE, ACI.filter="COND_STATUS_CD == 1". } 
 \item{plotsampcnt}{ Data frame. Number of plots by PLOT_STATUS_CD. } 
 \item{condsampcnt}{ Data frame. Number of conditions by COND_STATUS_CD. } 
 \item{states}{ String. State names in dataset. } 
 \item{invyrs}{ String. Range of inventory years in dataset. }
 
-\item{stratdat}{ Data frame. Strata information by estimation unit. }
 \tabular{lll}{ \tab \bold{Variable} \tab \bold{Description}\cr 
 \tab unitvar \tab estimation unit \cr 
-\tab strvar \tab stratum value \cr 
-\tab strwtvar \tab number of pixels by strata and estimation unit \cr 
-\tab n.strata \tab number of plots in strata (after totally nonsampled 
-plots removed) \cr 
 \tab n.total \tab number of plots for estimation unit \cr 
-\tab strwt \tab proportion of area (or plots) by strata and estimation unit 
-(i.e., strata weight) \cr 
 \tab CONDPROP_UNADJ_SUM \tab summed condition proportion by strata and 
 estimation unit \cr 
 \tab CONDPROP_ADJFAC \tab adjusted condition proportion by strata after 
