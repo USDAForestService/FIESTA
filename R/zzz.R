@@ -8,5 +8,8 @@ utils::globalVariables(names(formals(popFilters)[1:(length(formals(popFilters))-
 utils::globalVariables(names(formals(popTableIDs)[1:(length(formals(popTableIDs))-1)]))
 utils::globalVariables(names(formals(popTables)[1:(length(formals(popTables))-1)]))
 utils::globalVariables(names(formals(spMakeSpatial_options)[1:(length(formals(spMakeSpatial_options))-1)]))
+utils::globalVariables(names(formals(dbTables)[1:(length(formals(dbTables))-1)]))
+utils::globalVariables(names(formals(xy_options)[1:(length(formals(xy_options))-1)]))
+utils::globalVariables(names(formals(eval_options)[1:(length(formals(eval_options))-1)]))
 utils::globalVariables(c("count", "vcondsppid", "vcondstrid",
                          "zone_ds", ".cl_ds"))
