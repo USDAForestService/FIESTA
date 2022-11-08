@@ -30,56 +30,56 @@ dbTables(
 )
 }
 \arguments{
+\item{plot_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Plot-level data.}
+
+\item{cond_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Condition-level data.}
+
+\item{tree_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Tree-level data.}
+
+\item{seed_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Seedling data.}
+
+\item{plotgeom_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Plot-level GIS extracted data.}
+
+\item{vsubpspp_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Understory vegetation species data.}
+
+\item{vsubpstr_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Understory vegetation structure data.}
+
+\item{invsubp_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Understory vegetation invasives data.}
+
+\item{subplot_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Subplot-level data.}
+
+\item{subpc_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Subplot condition-level data.}
+
+\item{dwm_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Down wood material data.}
+
+\item{sccm_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Subplot-level change matrix data.}
+
+\item{grm_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Tree growth, removal, mortality data.}
+
+\item{survey_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Population survey data.}
+
+\item{ppsa_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Population plot stratum assignment data.}
+
 \item{other_layers}{String. Other layer(s) in database to clip and/or
 extract from database (Note: must include PLT_CN variable as unique
 identifier).}
 
 \item{...}{For extendibility.}
-
-\item{plot_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Plot-level data.}
-
-\item{cond_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Condition-level data.}
-
-\item{seed_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Seedling data.}
-
-\item{plotgeom_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Plot-level GIS extracted data.}
-
-\item{vsubpspp_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Understory vegetation species data.}
-
-\item{vsubpstr_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Understory vegetation structure data.}
-
-\item{invsubp_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Understory vegetation invasives data.}
-
-\item{subplot.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Subplot-level data.}
-
-\item{subpc_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Subplot condition-level data.}
-
-\item{dwm_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Down wood material data.}
-
-\item{sccm_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Subplot-level change matrix data.}
-
-\item{grm_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Tree growth, removal, mortality data.}
-
-\item{survey_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Population survey data.}
-
-\item{ppsa_layer.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Population plot stratum assignment data.}
-
-\item{other_layers.}{R object, comma-delimited file(*.csv), or name of
-layer in database. Other layers to extract from database.}
 }
 \value{
 A list of user-supplied parameters and parameter values for strata.
@@ -92,7 +92,7 @@ tables to be supplied to *DB functions.
 If no parameters, an empty list is returned.
 }
 \examples{
-dbTables(sccm_layer)
+dbTables(plot_layer = FIESTA::WYplt)
 }
 \author{
 Tracey S. Frescino

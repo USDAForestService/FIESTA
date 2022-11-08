@@ -5,35 +5,37 @@
 #' 
 #' If no parameters, an empty list is returned.
 #' 
-#' @param plot_layer. R object, comma-delimited file(*.csv), or name of
+#' @param plot_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Plot-level data. 
-#' @param cond_layer. R object, comma-delimited file(*.csv), or name of
+#' @param cond_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Condition-level data. 
-#' @param seed_layer. R object, comma-delimited file(*.csv), or name of
+#' @param seed_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Seedling data. 
-#' @param plotgeom_layer. R object, comma-delimited file(*.csv), or name of
+#' @param tree_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Tree-level data. 
+#' @param plotgeom_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Plot-level GIS extracted data. 
-#' @param vsubpspp_layer. R object, comma-delimited file(*.csv), or name of
+#' @param vsubpspp_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Understory vegetation species data. 
-#' @param vsubpstr_layer. R object, comma-delimited file(*.csv), or name of
+#' @param vsubpstr_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Understory vegetation structure data. 
-#' @param invsubp_layer. R object, comma-delimited file(*.csv), or name of
+#' @param invsubp_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Understory vegetation invasives data. 
-#' @param subplot. R object, comma-delimited file(*.csv), or name of
+#' @param subplot_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Subplot-level data. 
-#' @param subpc_layer. R object, comma-delimited file(*.csv), or name of
+#' @param subpc_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Subplot condition-level data. 
-#' @param dwm_layer. R object, comma-delimited file(*.csv), or name of
+#' @param dwm_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Down wood material data. 
-#' @param sccm_layer. R object, comma-delimited file(*.csv), or name of
+#' @param sccm_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Subplot-level change matrix data. 
-#' @param grm_layer. R object, comma-delimited file(*.csv), or name of
+#' @param grm_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Tree growth, removal, mortality data. 
-#' @param survey_layer. R object, comma-delimited file(*.csv), or name of
+#' @param survey_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Population survey data. 
-#' @param ppsa_layer. R object, comma-delimited file(*.csv), or name of
+#' @param ppsa_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Population plot stratum assignment data. 
-#' @param other_layers. R object, comma-delimited file(*.csv), or name of
+#' @param other_layers R object, comma-delimited file(*.csv), or name of
 #' layer in database. Other layers to extract from database. 
 #' @param other_layers String. Other layer(s) in database to clip and/or
 #' extract from database (Note: must include PLT_CN variable as unique
@@ -43,7 +45,7 @@
 #' @author Tracey S. Frescino
 #' @keywords list
 #' @examples
-#' dbTables(sccm_layer)
+#' dbTables(plot_layer = FIESTA::WYplt)
 #' @export dbTables
 
 dbTables <- function(plot_layer = "PLOT",
