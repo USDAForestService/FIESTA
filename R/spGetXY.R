@@ -194,6 +194,54 @@ spGetXY <- function(bnd,
     }
   }
   
+  ## Set eval_options defaults
+  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
+  for (i in 1:length(eval_defaults_list)) {
+    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
+  }
+  ## Set user-supplied eval_opts values
+  if (length(eval_opts) > 0) {
+    for (i in 1:length(eval_opts)) {
+      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
+        assign(names(eval_opts)[[i]], eval_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
+      }
+    }
+    ## Append eval_options defaults not specified to pass on to DBgetXY()
+    if (any(names(eval_defaults_list) %in% names(eval_opts))) {
+      eval_opts <- append(eval_opts, 
+                          eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
+    }
+  } else {
+    message("no evaluation timeframe specified... using all data in database...\n")
+    eval_opts$allyrs <- TRUE
+    
+    #    stop("must specify an evaluation timeframe for data extraction... \n", 
+    #	"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
+  }
+  
+  ## Set xy_options defaults
+  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]  
+  for (i in 1:length(xy_defaults_list)) {
+    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
+  }
+  ## Set user-supplied xy_opts values
+  if (length(xy_opts) > 0) {
+    for (i in 1:length(xy_opts)) {
+      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
+        assign(names(xy_opts)[[i]], xy_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
+      }
+    }
+    ## Append xy_options defaults not specified to pass on to DBgetXY()
+    if (any(names(xy_defaults_list) %in% names(xy_opts))) {
+      xy_opts <- append(xy_opts, 
+                        xy_defaults_list[!names(xy_defaults_list) %in% names(xy_opts)])
+    }
+  } 
+  
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################
