@@ -35,6 +35,9 @@
 #' layer in database. Population plot stratum assignment data. 
 #' @param other_layers. R object, comma-delimited file(*.csv), or name of
 #' layer in database. Other layers to extract from database. 
+#' @param other_layers String. Other layer(s) in database to clip and/or
+#' extract from database (Note: must include PLT_CN variable as unique
+#' identifier).
 #' @param ... For extendibility.
 #' @return A list of user-supplied parameters and parameter values for strata.
 #' @author Tracey S. Frescino
@@ -57,7 +60,13 @@ dbTables <- function(plot_layer = "PLOT",
                      sccm_layer = "SUBP_COND_CHNG_MTRX",
                      grm_layer = "TREE_GRM_COMPONENT",
                      survey_layer = "SURVEY",
+                     popeval_layer = "POP_EVAL",
+                     popevalgrp_layer = "POP_EVAL_GRP",
+                     popevaltyp_layer = "POP_EVAL_TYP",
+                     popstratum_layer = "POP_STRATUM",
+                     popestnunit_layer = "POP_ESTN_UNIT",
                      ppsa_layer = "POP_PLOT_STRATUM_ASSGN",
+                     other_layers = NULL,
                      ...) {
   # Check input parameters
   input.params <- names(as.list(match.call()))[-1]

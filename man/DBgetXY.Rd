@@ -9,15 +9,19 @@ DBgetXY(
   RS = NULL,
   datsource = "datamart",
   dsn = NULL,
-  eval_opts = eval_options(),
-  xy_opts = xy_options(xy = "PLOT", xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  xy = "PLOT",
+  xy_opts = xy_options(xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  eval = "FIA",
+  eval_opts = NULL,
+  dbTabs = dbTables(),
+  pjoinid = "CN",
   invtype = "ANNUAL",
   intensity1 = FALSE,
   issp = FALSE,
-  returndata = TRUE,
   addINTENSITY = TRUE,
   addINVYR = TRUE,
   addMEASYEAR = FALSE,
+  returndata = TRUE,
   savedata = FALSE,
   exportsp = FALSE,
   savedata_opts = NULL,
@@ -40,13 +44,26 @@ is populated. See FIESTA::ref_statecd for reference to RS and states.}
 \item{dsn}{If datsource='sqlite', the file name (data source name) of
 the sqlite database (*.sqlite).}
 
-\item{eval_opts}{List of evaluation options to determine the set of data.
- returned (e.g., eval_opts = eval_options(measCur=TRUE) or 
-eval_opts = list(evalCur=TRUE, evalType='VOL')). See help(eval_options) 
+\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
+polygon object, data frame, full pathname to a shapefile, or name of a layer
+within a database.}
+
+\item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
+See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
+
+\item{eval}{String. Type of evaluation time frame for data extraction 
+('FIA', 'custom'). See eval_opts for more further options.}
+
+\item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
+evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.}
 
-\item{xy_opts}{List of xy data options to specify. See xy_options.
-(e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').}
+\item{dbTabs}{List of database tables the user would like returned.
+See help(dbTables) for a list of options.}
+
+\item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
+be unique. If using most current XY coordinates, use identifier for a plot
+(e.g., PLOT_ID).}
 
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
@@ -57,14 +74,14 @@ INTENSITY = 1 (FIA base grid).}
 \item{issp}{Logical. If TRUE, returns spatial XY data as a list object with
 query.}
 
-\item{returndata}{Logical. If TRUE, returns XY data as a list object with
-query.}
-
 \item{addINTENSITY}{Logical. If TRUE, appends INTENSITY variable to dataframe.}
 
 \item{addINVYR}{Logical. If TRUE, appends INVYR variable to dataframe.}
 
 \item{addMEASYEAR}{Logical. If TRUE, appends INTENSITY variable to dataframe.}
+
+\item{returndata}{Logical. If TRUE, returns XY data as a list object with
+query.}
 
 \item{savedata}{Logical. If TRUE, saves XY data to outfolder as comma-delimited
 file (*.csv).}
@@ -77,53 +94,6 @@ of options. Only used when savedata = TRUE.}
 \item{dbconn}{Open database connection.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
-
-\item{evalid}{Integer. Inventory span defining variable. Extract public 
-XY coordinates for a specific FIA Evaluation (See details for more 
-information about FIA Evaluations).}
-
-\item{evalCur}{Logical. Inventory span defining variable. If TRUE, extract
-public XY coordinates for the most current FIA Evaluation for each state.}
-
-\item{evalEndyr}{YYYY. Inventory span defining variable. Extract public XY 
-coordinates for the FIA Evaluation(s) ending in the specified evalEndyr(s). 
-If more than one state and different Evaluations by state are desired, 
-input a named list object with evalEndyr by state (e.g., list(Utah=2014, 
-Colorado=2013).}
-
-\item{evalAll}{Logical. Inventory span defining variable. If TRUE, extract
-public XY coordinates for all FIA Evaluations for each state.}
-
-\item{evalType}{String vector. The type(s) of FIA Evaluation of interest 
-('ALL', 'CURR', VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN'). 
-The evalType 'ALL' includes nonsampled plot coordinates; 'CURR' includes 
-plot coordinates used for area estimates; 'VOL' includes plot coordinates 
-used for area and/or tree estimates; 'GRM' includes plot coordinates used 
-for growth, removals, mortality, and change estimates (evalType %in% 
-c(GROW, MORT, REMV, CHNG)). Multiple types are accepted. See details below 
-and FIA database manual for regional availability and/or differences.}
-
-\item{measCur}{Logical. Inventory span defining variable. If TRUE, extract
-public XY coordinates with most current sampled measurement for state(s).}
-
-\item{measEndyr}{Logical. Inventory span defining variable. If TRUE, extract
-XY public coordinates with most current sampled measurement for state(s) 
-for years measured in or before measEndyr.}
-
-\item{allyrs}{Logical. Inventory span defining variable. If TRUE, extract
-all annual inventory years in database for each state.}
-
-\item{invyrs}{YYYY vector. Inventory span defining variable. Extract public
-XY coordinates by state for the specified inventory year(s) (e.g., 
-c(2000, 2001, 2002)). If more than one state and different inventory years 
-are desired, input a named list object with years labeled by state 
-(e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
-
-\item{measyrs}{YYYY vector. Measurement year span defining variable. Extract
-public XY coordinates by state for the specified measurement year(s) 
-(e.g., c(2000, 2001, 2002)). If more than one state and different 
-measurement years are desired, input a named list object with years labeled 
-by state (e.g., list(Utah=2000:2009, Colorado=c(2002,2003,2005)).}
 }
 \value{
 if returndata=TRUE, a list of the following objects: 

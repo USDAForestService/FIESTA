@@ -13,23 +13,23 @@ spGetPlots(
   pltids = NULL,
   xy_datsource = NULL,
   xy_dsn = NULL,
-  xy_opts = xy_options(),
-  eval_opts = eval_options(),
-  measEndyr.filter = NULL,
-  pjoinid = NULL,
-  clipxy = TRUE,
+  xy = "PLOT",
+  xy_opts = NULL,
   datsource = NULL,
   data_dsn = NULL,
+  dbTabs = dbTables(),
+  eval = "FIA",
+  eval_opts = NULL,
+  invtype = "ANNUAL",
+  intensity1 = FALSE,
+  puniqueid = "CN",
+  pjoinid = NULL,
+  clipxy = TRUE,
   istree = FALSE,
   isseed = FALSE,
   isveg = FALSE,
   isdwm = FALSE,
-  dbTabs = dbTables(),
-  other_layers = NULL,
-  puniqueid = "CN",
-  pltassgnid = "PLT_CN",
   savePOP = FALSE,
-  intensity1 = FALSE,
   showsteps = FALSE,
   returndata = TRUE,
   savedata = FALSE,
@@ -68,21 +68,12 @@ name) of xy. The dsn varies by driver. See gdal OGR vector formats
 (https://www.gdal.org/ogr_formats.html). Optional if bnd_layer is an R
 object.}
 
-\item{xy_opts}{List of xy data options to specify. See xy_options.
-(e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').}
+\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
+polygon object, data frame, full pathname to a shapefile, or name of a layer
+within a database.}
 
-\item{eval_opts}{List of evaluation options to determine the set of data.
-returned. See help(eval_options) for a list of options.}
-
-\item{measEndyr.filter}{Filter. If measCur=TRUE and measEndyr != NULL, a
-filter for bnd to identify and area to use measEndyr, such as disturbed
-areas where you want to exclude plots measured after disturbance.}
-
-\item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
-be unique. If using most current XY coordinates, use identifier for a plot
-(e.g., PLOT_ID).}
-
-\item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
+\item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
+See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
 
 \item{datsource}{String. Source of FIA data ("obj", "csv", "datamart",
 "sqlite").  If datsource="sqlite", specify database name in data_dsn and
@@ -94,6 +85,30 @@ names in *_layer arguments.}
 
 \item{data_dsn}{String. Name of database where *_layers reside.}
 
+\item{dbTabs}{List of database tables the user would like returned.
+See help(dbTables) for a list of options.}
+
+\item{eval}{String. Type of evaluation time frame for data extraction 
+('FIA', 'custom'). See eval_opts for more further options.}
+
+\item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
+evaluations to determine the set of data returned. See help(eval_options)
+for a list of options.}
+
+\item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
+'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
+
+\item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
+INTENSITY = 1 (FIA base grid).}
+
+\item{puniqueid}{String. Name of unique identifier of plt.}
+
+\item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
+be unique. If using most current XY coordinates, use identifier for a plot
+(e.g., PLOT_ID).}
+
+\item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
+
 \item{istree}{Logical. If TRUE, extract tree data from FIA database.}
 
 \item{isseed}{Logical. If TRUE, extract seedling data from FIA database.}
@@ -103,22 +118,8 @@ from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP
 
 \item{isdwm}{Logical. If TRUE, down woody material are extracted.}
 
-\item{dbTabs}{List of database tables the user would like returned.
-See help(dbTables) for a list of options.}
-
-\item{other_layers}{String. Other layer(s) in database to clip and/or
-extract from database (Note: must include PLT_CN variable as unique
-identifier).}
-
-\item{puniqueid}{String. Name of unique identifier of plt.}
-
-\item{pltassgnid}{String. Name of unique identifier of pop_plot_stratum_assgn.}
-
 \item{savePOP}{Logical. If TRUE, returns and/or saves POP_PLOT_STRATUM_ASSGN
-table.}
-
-\item{intensity1}{Logical. If TRUE, include only single intensity plots
-(i.e., INTENSITY = 1).}
+table. Note: check name in dbtables().}
 
 \item{showsteps}{Logical. If TRUE, display data in device window.}
 

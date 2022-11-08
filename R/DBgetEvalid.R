@@ -58,7 +58,8 @@
 #' @param invyrtab Data frame. A data frame including inventory years by state.
 #' If NULL, it is generated from SURVEY table from FIA database based on states
 #' and invtype.
-#' @param ppsanm String. Name of pop_plot_assgn_layer in database.
+#' @param dbTabs List of database tables the user would like returned.
+#'  See help(dbTables) for a list of options.
 #' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed.
 #' @param gui Logical. If TRUE, gui windows pop up for parameter selection.
@@ -107,7 +108,7 @@ DBgetEvalid <- function(states = NULL,
                         evalAll = FALSE, 
                         evalType = "VOL", 
                         invyrtab = NULL, 
-                        ppsanm = "pop_plot_stratum_assgn", 
+                        dbTabs = dbTables(),
                         dbconn = NULL,
                         dbconnopen = FALSE,
                         gui = FALSE) {
@@ -157,7 +158,7 @@ DBgetEvalid <- function(states = NULL,
 
   
   ##################################################################
-  ## CHECK PARAMETER NAMES
+  ## CHECK INPUT PARAMETERS
   ##################################################################
   input.params <- names(as.list(match.call()))[-1]
   if (!all(input.params %in% names(formals(DBgetEvalid)))) {
@@ -165,6 +166,26 @@ DBgetEvalid <- function(states = NULL,
     stop("invalid parameter: ", toString(miss))
   }
 
+  ## Set dbTables defaults
+  dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
+  for (i in 1:length(dbTables_defaults_list)) {
+    assign(names(dbTables_defaults_list)[[i]], dbTables_defaults_list[[i]])
+  } 
+  ## Set user-supplied dbTables values
+  if (length(dbTabs) > 0) {
+    for (i in 1:length(dbTabs)) {
+      if (names(dbTabs)[[i]] %in% names(dbTables_defaults_list)) {
+        assign(names(dbTabs)[[i]], dbTabs[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(dbTabs)[[i]]))
+      }
+    }
+  }
+
+  
+  ##################################################################
+  ## CHECK PARAMETER NAMES
+  ##################################################################
   getlistfromdt <- function(dt, x, xnm="STATECD") {
      ## DESCRIPTION: generates a list of 1 or more values from a data table
      dtunique <- dt[, lapply(get(x), unique), by=xnm]
@@ -184,6 +205,8 @@ DBgetEvalid <- function(states = NULL,
   ## CHECK PARAMETER INPUTS
   ##################################################################
 
+  ## Check invtyp
+  #####################################################
   invtypelst <- c("ANNUAL", "PERIODIC")
   invtype <- pcheck.varchar(var2check=invtype, varnm="invtype", 
 		gui=gui, checklst=invtypelst, caption="Inventory type?")
@@ -198,7 +221,7 @@ DBgetEvalid <- function(states = NULL,
       stop("no data in database")
     }
   } else {
-    datsourcelst <- c("sqlite", "datamart")
+    datsourcelst <- c("sqlite", "datamart", "csv")
     datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		gui=gui, checklst=datsourcelst, caption="Data source?")
 
@@ -210,7 +233,7 @@ DBgetEvalid <- function(states = NULL,
       }
     }
   }
-
+ 
   ## Check evalid, invyrtab, and state/RS parameters
   ######################################################
   rslst <- c("RMRS","SRS","NCRS","NERS","PNWRS")
@@ -262,7 +285,6 @@ DBgetEvalid <- function(states = NULL,
 		"RS"])
   rslst[rslst %in% c("NERS", "NCRS")] <- "NRS"
   rslst <- unique(rslst)
-
  
   #########################################################################
   ## Get database tables - POP_EVAL, POP_EVAL_TYPE, SURVEY
@@ -271,7 +293,7 @@ DBgetEvalid <- function(states = NULL,
   if (datsource == "sqlite") {
     ## Check states in database
     ###############################################
-    plotnm <- chkdbtab(dbtablst, "plot")
+    plotnm <- chkdbtab(dbtablst, plot_layer)
     stcdlstdb <- DBI::dbGetQuery(dbconn, 
 		paste("select distinct statecd from", plotnm))[[1]]
     if (!all(stcdlst %in% stcdlstdb)) {
@@ -289,20 +311,54 @@ DBgetEvalid <- function(states = NULL,
     popevalnm <- chkdbtab(dbtablst, "POP_EVAL")
     popevalgrpnm <- chkdbtab(dbtablst, "POP_EVAL_GRP")
     popevaltypnm <- chkdbtab(dbtablst, "POP_EVAL_TYP")
-  } else {
-    SURVEY <- DBgetCSV("SURVEY", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+
+  } else if (datsource == "datamart") {
+    SURVEY <- DBgetCSV("SURVEY", stcdlst, 
+                       returnDT=TRUE, stopifnull=FALSE)
     if (!is.null(SURVEY)) {
       surveynm <- "SURVEY"
     }
-    POP_EVAL <- DBgetCSV("POP_EVAL", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    POP_EVAL <- DBgetCSV("POP_EVAL", stcdlst, 
+                          returnDT=TRUE, stopifnull=FALSE)
     if (!is.null(POP_EVAL)) {
       popevalnm <- "POP_EVAL"
     }
-    POP_EVAL_GRP <- DBgetCSV("POP_EVAL_GRP", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    POP_EVAL_GRP <- DBgetCSV("POP_EVAL_GRP", stcdlst, 
+                              returnDT=TRUE, stopifnull=FALSE)
     if (!is.null(POP_EVAL_GRP)) {
       popevalgrpnm <- "POP_EVAL_GRP"
     }
-    POP_EVAL_TYP <- DBgetCSV("POP_EVAL_TYP", stcdlst, returnDT=TRUE, stopifnull=FALSE)
+    POP_EVAL_TYP <- DBgetCSV("POP_EVAL_TYP", stcdlst, 
+                              returnDT=TRUE, stopifnull=FALSE)
+    if (!is.null(POP_EVAL_TYP)) {
+      popevaltypnm <- "POP_EVAL_TYP"
+    }
+  } else {
+    SURVEY <- tryCatch( pcheck.table(survey_layer),
+			error = function(e) {
+                  message(e)
+                  return(NULL) })
+    if (!is.null(SURVEY)) {
+      surveynm <- "SURVEY"
+    }
+    POP_EVAL <- tryCatch( pcheck.table(popeval_layer),
+			error = function(e) {
+                  message(e)
+                  return(NULL) })
+    if (!is.null(POP_EVAL)) {
+      popevalnm <- "POP_EVAL"
+    }
+    POP_EVAL_GRP <- tryCatch( pcheck.table(popevalgrp_layer),
+			error = function(e) {
+                  message(e)
+                  return(NULL) })
+    if (!is.null(POP_EVAL_GRP)) {
+      popevalgrpnm <- "POP_EVAL_GRP"
+    }
+    POP_EVAL_TYP <- tryCatch( pcheck.table(popevaltyp_layer),
+			error = function(e) {
+                  message(e)
+                  return(NULL) })
     if (!is.null(POP_EVAL_TYP)) {
       popevaltypnm <- "POP_EVAL_TYP"
     }
@@ -319,7 +375,6 @@ DBgetEvalid <- function(states = NULL,
     }
     if (nrow(SURVEY) == 0) return(NULL)
   }
-
   if (!is.null(popevaltypnm) && !is.null(popevalgrpnm)) {
     pop_eval_typ_qry <- paste0("select ptyp.* 
            		FROM POP_EVAL_TYP ptyp
@@ -364,13 +419,19 @@ DBgetEvalid <- function(states = NULL,
     POP_EVAL_GRP[, EVAL_GRP_Endyr := as.numeric(substr(POP_EVAL_GRP[[eval_grpnm]], 
 		nchar(POP_EVAL_GRP[[eval_grpnm]]) - 3, nchar(POP_EVAL_GRP[[eval_grpnm]])))]
   }
+ 
   if (all(is.null(popevalnm) && is.null(popevaltypnm) && is.null(popevalgrpnm))) {
     nopoptables <- TRUE
-    stcdlstdb <- DBI::dbGetQuery(dbconn, 
-		paste("select distinct statecd from", ppsanm))[[1]]
-    if (!all(stcdlst %in% stcdlstdb)) {
+ 
+    stcdlstdb <- tryCatch( DBI::dbGetQuery(dbconn, 
+		paste("select distinct statecd from", plotnm))[[1]],
+			error = function(e) {
+                  return(NULL) })
+    if (!is.null(stcdlstdb) && !all(stcdlst %in% stcdlstdb)) {
       stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
       message("statecds missing in database: ", toString(stcdmiss))
+    } else {
+      message("using all states in database")
     }
   } else {
     nopoptables <- FALSE
@@ -378,7 +439,6 @@ DBgetEvalid <- function(states = NULL,
 
   ## Create state filter
   stfilter <- getfilter("STATECD", stcdlst, syntax='sql')
-
 
   ## In POP_EVAL table, Texas has several evaluations based on East, West, Texas
 
@@ -425,7 +485,7 @@ DBgetEvalid <- function(states = NULL,
       } else if (datsource == "sqlite") {
         message("no SURVEY table in database... assuming ANNUAL inventory plots")
         invtype <- "ANNUAL"
-        ppsanm <- chkdbtab(dbtablst, ppsanm)
+        ppsanm <- chkdbtab(dbtablst, ppsa_layer)
         if (is.null(ppsanm)) {
           message("there is no pop_plot_stratum_assgn table in database")
         }
@@ -471,7 +531,7 @@ DBgetEvalid <- function(states = NULL,
 
   ## Check invyrtab. Data frame with inventory years by state
   if (is.null(invyrtab)) {
-    if (datsource == "datamart") {
+    if (datsource %in% c("datamart", "csv")) {
       ## GET invtype & ann_inventory
       ###########################################################
       invlst <- c("ANNUAL", "PERIODIC")
@@ -623,6 +683,13 @@ DBgetEvalid <- function(states = NULL,
     }
  
     if (datsource == "sqlite" && nopoptables) {
+      ppsanm <- chkdbtab(dbtablst, ppsanm)
+      if (is.null(ppsanm)) {
+        message("need to include pop_plot_stratum_assgn table in database to extract an FIA evaluation\n")
+        message("database tables: ", toString(dbtablst))
+        stop()
+      }
+
       ## Create lookup and get code for evalType
       evalCode <- c("00","01","01","03")
       names(evalCode) <- c("ALL", "CURR", "VOL", "CHNG")  
@@ -722,7 +789,7 @@ DBgetEvalid <- function(states = NULL,
       } else {
         invyrtab <- NULL
       }
-    } else {    ## datsource="datamart" or datsource="sqlite" & poptables
+    } else {    ## datsource="datamart" or datsource="csv" & poptables
       invyrs <- list()
       evalidlist <- sapply(states, function(x) NULL)
       evalEndyrlist <- sapply(states, function(x) NULL)

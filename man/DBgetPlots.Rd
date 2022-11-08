@@ -8,14 +8,13 @@ DBgetPlots(
   states = NULL,
   RS = NULL,
   datsource = "datamart",
-  datamartType = "CSV",
   data_dsn = NULL,
+  eval = "FIA",
+  eval_opts = NULL,
   dbTabs = dbTables(),
-  eval_opts = eval_options(),
+  puniqueid = "CN",
   invtype = "ANNUAL",
-  getxy = TRUE,
-  xy_opts = xy_options(xy = "PLOT", xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
-  xymeasCur = FALSE,
+  intensity1 = FALSE,
   istree = FALSE,
   isseed = FALSE,
   isveg = FALSE,
@@ -26,6 +25,11 @@ DBgetPlots(
   greenwt = FALSE,
   plotgeom = FALSE,
   othertables = NULL,
+  getxy = TRUE,
+  xy = "PLOT",
+  xy_opts = xy_options(xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  xymeasCur = FALSE,
+  pjoinid = NULL,
   issp = FALSE,
   spcond = FALSE,
   spcondid1 = FALSE,
@@ -34,7 +38,6 @@ DBgetPlots(
   regionVarsRS = "RMRS",
   ACI = FALSE,
   subcycle99 = FALSE,
-  intensity1 = FALSE,
   stateFilter = NULL,
   allFilter = NULL,
   alltFilter = NULL,
@@ -59,27 +62,25 @@ is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
 \item{datsource}{String. Source of data ('datamart', 'sqlite').}
 
-\item{datamartType}{String. Datamart file type ('CSV', 'SQLITE').}
-
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}
+
+\item{eval}{String. Type of evaluation time frame for data extraction 
+('FIA', 'custom'). See eval_opts for more further options.}
+
+\item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
+evaluations to determine the set of data returned. See help(eval_options)
+for a list of options.}
 
 \item{dbTabs}{List of database tables the user would like returned.
 See help(dbTables) for a list of options.}
 
-\item{eval_opts}{List of evaluation options to determine the set of data.
-returned. See help(eval_options) for a list of options.}
+\item{puniqueid}{String. Name of unique identifier in plot_layer in dbTabs.}
 
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
 
-\item{getxy}{Logical. If TRUE, gets separate XY table.}
-
-\item{xy_opts}{List of xy data options to specify. See xy_options.
-(e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').}
-
-\item{xymeasCur}{Logical. If TRUE, include XY coordinates from the most 
-current sampled measurement of each plot.}
+\item{intensity1}{Logical. If TRUE, includes only plots where INTENSITY = 1.}
 
 \item{istree}{Logical. If TRUE, tree data are extracted from TREE table in
 database.}
@@ -109,6 +110,22 @@ appended to the plot table.}
 \item{othertables}{String Vector. Name of other table(s) in FIADB to include
 in output. The table must have PLT_CN as unique identifier of a plot.}
 
+\item{getxy}{Logical. If TRUE, gets separate XY table.}
+
+\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
+polygon object, data frame, full pathname to a shapefile, or name of a layer
+within a database.}
+
+\item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
+See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
+
+\item{xymeasCur}{Logical. If TRUE, include XY coordinates from the most 
+current sampled measurement of each plot.}
+
+\item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
+be unique. If using most current XY coordinates, use identifier for a plot
+(e.g., PLOT_ID).}
+
 \item{issp}{Logical. If TRUE, an sf spatial object is generated from the
 public X/Y coordinates in the plot table.}
 
@@ -136,8 +153,6 @@ details.}
 \item{subcycle99}{Logical. If TRUE, excludes plots with SUBCYCLE = 99. These
 plots are plots that are measured more than once and are not included in the
 estimation process.}
-
-\item{intensity1}{Logical. If TRUE, includes only plots where INTENSITY = 1.}
 
 \item{stateFilter}{Character string or Named list. Logical statement to use
 as plot and filter in sql query. Must include plot alias ('p.') and be sql

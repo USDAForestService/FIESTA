@@ -97,6 +97,9 @@ DBgetCSV <- function(DBtable,
   			  return(NULL)
              }
       )
+      if (nrow(tab) == 0) {
+        stop("invalid table in datamart")
+      }
       tab <- changeclass(tab)
       return(tab)
     }
@@ -127,6 +130,9 @@ DBgetCSV <- function(DBtable,
 
       filenm <- utils::unzip(temp, exdir=tempdir)
       tab <- fread(filenm, integer64="character")
+      if (nrow(tab) == 0) {
+        stop("invalid table in datamart")
+      }
       tab <- changeclass(tab)
 
       unlink(temp)

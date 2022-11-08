@@ -240,20 +240,20 @@
 #' coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 #' is populated. See FIESTA::ref_statecd for reference to RS and states.
 #' @param datsource String. Source of data ('datamart', 'sqlite').
-#' @param datamartType String. Datamart file type ('CSV', 'SQLITE').
 #' @param data_dsn String. If datsource='sqlite', the name of SQLite database
 #' (*.sqlite).
 #' @param dbTabs List of database tables the user would like returned.
 #'  See help(dbTables) for a list of options.
-#' @param eval_opts List of evaluation options to determine the set of data.
-#'  returned. See help(eval_options) for a list of options.
+#' @param puniqueid String. Name of unique identifier in plot_layer in dbTabs.
+#' @param eval String. Type of evaluation time frame for data extraction 
+#' ('FIA', 'custom'). See eval_opts for more further options. 
+#' @param eval_opts List of evaluation options for 'FIA' or 'custom'
+#' evaluations to determine the set of data returned. See help(eval_options)
+#' for a list of options.
 #' @param invtype String. Type of FIA inventory to extract ('PERIODIC',
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
-#' @param getxy Logical. If TRUE, gets separate XY table.
-#' @param xy_opts List of xy data options to specify. See xy_options.
-#'  (e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').
-#' @param xymeasCur Logical. If TRUE, include XY coordinates from the most 
-#' current sampled measurement of each plot.
+#' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
+#' INTENSITY = 1 (FIA base grid).
 #' @param istree Logical. If TRUE, tree data are extracted from TREE table in
 #' database.
 #' @param isseed Logical. If TRUE, seedling data are extracted from SEEDLING
@@ -272,6 +272,17 @@
 #' appended to the plot table.
 #' @param othertables String Vector. Name of other table(s) in FIADB to include
 #' in output. The table must have PLT_CN as unique identifier of a plot.
+#' @param getxy Logical. If TRUE, gets separate XY table.
+#' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
+#' polygon object, data frame, full pathname to a shapefile, or name of a layer
+#' within a database.
+#' @param xy_opts List of xy data options to specify if xy is NOT NULL. 
+#' See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').
+#' @param xymeasCur Logical. If TRUE, include XY coordinates from the most 
+#' current sampled measurement of each plot.
+#' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
+#' be unique. If using most current XY coordinates, use identifier for a plot
+#' (e.g., PLOT_ID).
 #' @param issp Logical. If TRUE, an sf spatial object is generated from the
 #' public X/Y coordinates in the plot table.
 #' @param spcond Logical. If TRUE, a set of condition-level attributes (e.g.,
@@ -450,15 +461,13 @@
 DBgetPlots <- function (states = NULL, 
                         RS = NULL,
                         datsource = "datamart",
-                        datamartType = "CSV", 
                         data_dsn = NULL,
+                        eval = "FIA",
+                        eval_opts = NULL,
                         dbTabs = dbTables(), 
-                        eval_opts = eval_options(),
+                        puniqueid = "CN", 
                         invtype = "ANNUAL", 
-                        getxy = TRUE,
-                        xy_opts = xy_options(xy="PLOT", xy.uniqueid="CN", 
- 	                               xvar="LON", yvar="LAT"),
-                        xymeasCur = FALSE, 
+                        intensity1 = FALSE, 
                         istree = FALSE, 
                         isseed = FALSE, 
                         isveg = FALSE, 
@@ -469,6 +478,12 @@ DBgetPlots <- function (states = NULL,
                         greenwt = FALSE,
                         plotgeom = FALSE, 
                         othertables = NULL, 
+                        getxy = TRUE,
+                        xy = "PLOT",
+                        xy_opts = xy_options(xy.uniqueid="CN", 
+ 	                               xvar="LON", yvar="LAT"),
+                        xymeasCur = FALSE, 
+                        pjoinid = NULL, 
                         issp = FALSE, 
                         spcond = FALSE, 
                         spcondid1 = FALSE, 
@@ -477,7 +492,6 @@ DBgetPlots <- function (states = NULL,
                         regionVarsRS = "RMRS", 
                         ACI = FALSE, 
                         subcycle99 = FALSE, 
-                        intensity1 = FALSE, 
                         stateFilter = NULL, 
                         allFilter = NULL, 
                         alltFilter = NULL,
@@ -547,13 +561,62 @@ DBgetPlots <- function (states = NULL,
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts,
 				xy_opts=xy_opts)
  
+  ## Set eval_options defaults
+  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))] 
+  for (i in 1:length(eval_defaults_list)) {
+    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
+  } 
+  ## Set user-supplied eval_opts values
+  if (length(eval_opts) > 0) {
+    for (i in 1:length(eval_opts)) {
+      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
+        assign(names(eval_opts)[[i]], eval_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
+      }
+    }
+  } else {
+    stop("must specify an evaluation timeframe for data extraction... \n", 
+	"...see eval_opts parameter, (e.g., eval_opts=list(Cur=TRUE))")
+  }
+
+  ## Set xy_options defaults
+  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]
+  for (i in 1:length(xy_defaults_list)) {
+    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
+  }
+  ## Set user-supplied xy_opts values
+  if (length(xy_opts) > 0) {
+    for (i in 1:length(xy_opts)) {
+      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
+        assign(names(xy_opts)[[i]], xy_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
+      }
+    }
+  } 
+
+  ## Set dbTables defaults
+  dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
+  for (i in 1:length(dbTables_defaults_list)) {
+    assign(names(dbTables_defaults_list)[[i]], dbTables_defaults_list[[i]])
+  }
+  ## Set user-supplied dbTables values
+  if (length(dbTabs) > 0) {
+    for (i in 1:length(dbTabs)) {
+      if (names(dbTabs)[[i]] %in% names(dbTables_defaults_list)) {
+        assign(names(dbTabs)[[i]], dbTabs[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(dbTabs)[[i]]))
+      }
+    }
+  }
+
   ## Set savedata defaults
   savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
+  } 
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
     if (!savedata) {
@@ -568,59 +631,6 @@ DBgetPlots <- function (states = NULL,
     }
   }
 
-  ## Set dbTables defaults
-  dbTables_defaults_list <- formals(dbTables)[-length(formals(dbTables))]
-  
-  for (i in 1:length(dbTables_defaults_list)) {
-    assign(names(dbTables_defaults_list)[[i]], dbTables_defaults_list[[i]])
-  }
-
-
-  ## Set eval_options defaults
-  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
-  
-  for (i in 1:length(eval_defaults_list)) {
-    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied dbTables values
-  if (length(eval_opts) > 0) {
-    for (i in 1:length(eval_opts)) {
-      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
-        assign(names(eval_opts)[[i]], eval_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
-      }
-    }
-    ## Append eval_option defaults not specified to pass on to DBgetXY()
-    if (any(names(eval_defaults_list) %in% names(eval_opts))) {
-      eval_opts <- append(eval_opts, 
-		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
-    }
-  }
-
-  ## Set xy_options defaults
-  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]
-  
-  for (i in 1:length(xy_defaults_list)) {
-    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
-  }
-
-  ## Set user-supplied xy_opts values
-  if (length(xy_opts) > 0) {
-    for (i in 1:length(xy_opts)) {
-      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
-        assign(names(xy_opts)[[i]], xy_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
-      }
-    }
-    ## Append xy_option defaults not specified to pass on to DBgetXY()
-    if (any(names(xy_defaults_list) %in% names(xy_opts))) {
-      xy_opts <- append(xy_opts, 
-		xy_defaults_list[!names(xy_defaults_list) %in% names(xy_opts)])
-    }
-  } 
 
   ## Define variables
   actual=getinvyr <- FALSE
@@ -631,7 +641,7 @@ DBgetPlots <- function (states = NULL,
   coords <- "PUBLIC"
   parameters <- FALSE
   islulc=isgrm <- FALSE
-
+  datamartType = "CSV" 
 
   ########################################################################
   ### GET PARAMETER INPUTS
@@ -647,7 +657,7 @@ DBgetPlots <- function (states = NULL,
   #############################################################################
   ## Set datsource
   ########################################################
-  datsourcelst <- c("datamart", "sqlite")
+  datsourcelst <- c("datamart", "sqlite", "csv")
   datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		checklst=datsourcelst, gui=gui, caption="Data source?") 
   #if (datsource %in% c("sqlite", "gdb")) {
@@ -741,6 +751,10 @@ DBgetPlots <- function (states = NULL,
     istree <- TRUE
   }
 
+  ## Check intensity1
+  intensity1 <- pcheck.logical(intensity1, varnm="intensity1",
+                               title="Intensity = 1?", first="YES", gui=gui)
+
   ########################################################################
   ### DBgetEvalid()
   ########################################################################
@@ -759,32 +773,55 @@ DBgetPlots <- function (states = NULL,
 #    evalType <- c(evalType, "CHNG")
 #  }
  
+  ## Get DBgetEvalid parameters from eval_opts
+  ################################################
+  if (eval == "FIA") {
+    evalCur <- ifelse (Cur, TRUE, FALSE) 
+    evalAll <- ifelse (All, TRUE, FALSE) 
+    evalEndyr <- Endyr
+  } else {
+    measCur <- ifelse (Cur, TRUE, FALSE) 
+    measAll <- ifelse (All, TRUE, FALSE) 
+    if (length(Endyr) > 1) {
+      stop("only one Endyr allowed for custom estimations")
+    }
+    measEndyr <- Endyr
+  }
+
   ## Get states, Evalid and/or invyrs info
-  evalInfo <- DBgetEvalid(states = states, 
+  ##########################################################
+  evalInfo <- tryCatch( DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource, 
                           data_dsn = data_dsn, 
+                          dbconn = dbconn,
+                          dbconnopen = TRUE,
                           invtype = invtype, 
                           evalid = evalid, 
                           evalCur = evalCur, 
                           evalEndyr = evalEndyr, 
                           evalAll = evalAll, 
                           evalType = evalType, 
-                          gui = gui)
-  if (is.null(evalInfo)) return(NULL)
-  states <- evalInfo$states
-  rslst <- evalInfo$rslst
-  evalidlist <- evalInfo$evalidlist
-  invtype <- evalInfo$invtype
-  invyrtab <- evalInfo$invyrtab
-  SURVEY <- evalInfo$SURVEY
-  if (length(evalidlist) > 0) {
-    invyrs <- evalInfo$invyrs
-    iseval <- TRUE
-    if (!savePOP && (any(lapply(evalInfo$evalTypelist, length) > 1) || 
-		any(lapply(evalInfo$evalidlist, length) > 1))) {
-      savePOP <- TRUE
+                          dbTabs = dbTabs,
+                          gui = gui),
+			error = function(e) {
+                  message(e)
+                  return(NULL) })
+  if (is.null(evalInfo)) {
+    iseval <- FALSE
+  } else {
+    if (is.null(evalInfo)) stop("no data to return")
+    states <- evalInfo$states
+    rslst <- evalInfo$rslst
+    evalidlist <- evalInfo$evalidlist
+    invtype <- evalInfo$invtype
+    invyrtab <- evalInfo$invyrtab
+    if (length(evalidlist) > 0) {
+      invyrs <- evalInfo$invyrs
+      iseval <- TRUE
     }
+    ppsanm <- evalInfo$ppsanm
+    dbconn <- evalInfo$dbconn
   }
 
   ### GET RS & rscd
@@ -812,7 +849,8 @@ DBgetPlots <- function (states = NULL,
                     measyrs = measyrs,
                     invyrtab = invyrtab)
     if (is.null(evalchk)) {
-      stop("must specify an evaluation timeframe for data extraction... see eval_opts parameter")
+      stop("must specify an evaluation timeframe for data extraction... \n", 
+		"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
     }
     measCur <- evalchk$measCur
     measEndyr <- evalchk$measEndyr
@@ -868,10 +906,6 @@ DBgetPlots <- function (states = NULL,
   ## (used to determine size of tree data)
   #nbrinvyrs <- length(unique(unlist(invyrs)))
     
-  ## Check intensity1
-  intensity1 <- pcheck.logical(intensity1, varnm="intensity1",
-                               title="Intensity = 1?", first="YES", gui=gui)
-
   ## Check defaultVars
   defaultVars <- pcheck.logical(defaultVars, varnm="defaultVars", 
                                 title="Default variables?", 
@@ -1039,7 +1073,7 @@ DBgetPlots <- function (states = NULL,
   ################################################
   if (iseval) {
     pfromqry <- paste0(ppsafromqry, " JOIN ", SCHEMA., 
-			plot_layer, " p ON (p.CN = ppsa.PLT_CN)")
+			plot_layer, " p ON (p.", puniqueid, " = ppsa.PLT_CN)")
   } else if (measCur) {
     popSURVEY <- TRUE
     if (datsource == "sqlite") {
@@ -1057,7 +1091,7 @@ DBgetPlots <- function (states = NULL,
   ## PLOT/COND from/join query
   ################################################
   pcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				cond_layer, " c ON (c.PLT_CN = p.CN)")
+				cond_layer, " c ON (c.PLT_CN = p.", puniqueid, ")")
   if (plotgeom) {
     plotgeom_layer <- plotgeom_layer
     if (datsource == "sqlite") {
@@ -1067,7 +1101,7 @@ DBgetPlots <- function (states = NULL,
       }
     }
     pcgeomfromqry <- paste0(pcfromqry, " JOIN ", SCHEMA., 
-				plotgeom_layer, " pg ON (pg.CN = p.CN)")
+				plotgeom_layer, " pg ON (pg.CN = p.", puniqueid, ")")
   }
   ## TREE query
   ################################################
@@ -1079,7 +1113,7 @@ DBgetPlots <- function (states = NULL,
       }
     }
     tfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				tree_layer, " t ON (t.PLT_CN = p.CN)")
+				tree_layer, " t ON (t.PLT_CN = p.", puniqueid, ")")
   }
   ## SEED query
   ################################################
@@ -1096,7 +1130,7 @@ DBgetPlots <- function (states = NULL,
       }
     }
     sfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				seed_layer, " s ON (s.PLT_CN = p.CN)")
+				seed_layer, " s ON (s.PLT_CN = p.", puniqueid, ")")
   } 
   ## VEG query
   ################################################
@@ -1110,11 +1144,11 @@ DBgetPlots <- function (states = NULL,
       invsubp_layer <- chkdbtab(dbtablst, invsubp_layer)
     }
     vsppfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				vsubpspp_layer, " v ON v.PLT_CN = p.CN")
+				vsubpspp_layer, " v ON v.PLT_CN = p.", puniqueid)
     vstrfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				vsubpstr_layer, " v ON v.PLT_CN = p.CN")
+				vsubpstr_layer, " v ON v.PLT_CN = p.", puniqueid)
     invfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				invsubp_layer, " v ON v.PLT_CN = p.CN")
+				invsubp_layer, " v ON v.PLT_CN = p.", puniqueid)
   }
   ## SUBP query
   ################################################
@@ -1130,9 +1164,9 @@ DBgetPlots <- function (states = NULL,
       }
     }
     subpfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				subplot_layer, " subp ON subp.PLT_CN = p.CN")
+				subplot_layer, " subp ON subp.PLT_CN = p.", puniqueid)
     subpcfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				subpc_layer, " subpc ON subpc.PLT_CN = p.CN")
+				subpc_layer, " subpc ON subpc.PLT_CN = p.", puniqueid)
   }
   ## DWM query
   ################################################
@@ -1144,7 +1178,7 @@ DBgetPlots <- function (states = NULL,
       }
     }
     dfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				dwm_layer, " d ON (d.PLT_CN = p.CN)")
+				dwm_layer, " d ON (d.PLT_CN = p.", puniqueid, ")")
   }
   ## Change query
   ################################################
@@ -1156,9 +1190,9 @@ DBgetPlots <- function (states = NULL,
       }
     }
     sccmfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				sccm_layer, " sccm ON sccm.PLT_CN = p.CN")
+				sccm_layer, " sccm ON sccm.PLT_CN = p.", puniqueid)
     pchgfromqry <- paste0(pfromqry, 
-		" JOIN ", SCHEMA., plot_layer, " pplot ON (pplot.CN = p.PREV_PLT_CN)")		
+		" JOIN ", SCHEMA., plot_layer, " pplot ON (pplot.", puniqueid, " = p.PREV_PLT_CN)")		
     chgfromqry <- paste0(pcfromqry,
 		" JOIN ", SCHEMA., cond_layer, " pcond ON (pcond.PLT_CN = p.PREV_PLT_CN)")
   }
@@ -1172,7 +1206,7 @@ DBgetPlots <- function (states = NULL,
       }
     }
     grmfromqry <- paste0(pfromqry, " JOIN ", SCHEMA.,
-				"TREE_GRM_COMPONENT grm ON (grm.PLT_CN = p.CN)")
+				"TREE_GRM_COMPONENT grm ON (grm.PLT_CN = p.", puniqueid, ")")
   }
 
   ## XY
@@ -1188,7 +1222,7 @@ DBgetPlots <- function (states = NULL,
       xyfromqry <- pfromqry 
     } else {
       xyfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				xy, " xy ON (xy.PLT_CN = p.CN)")
+				xy, " xy ON (xy.PLT_CN = p.", puniqueid, ")")
     }
   }
 
@@ -1205,9 +1239,9 @@ DBgetPlots <- function (states = NULL,
       }
     }
     xfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				"SUBX x ON (x.PLT_CN = p.CN)")
+				"SUBX x ON (x.PLT_CN = p.", puniqueid, ")")
     xfromqry_plotgeom <- paste0(pfromqry, " JOIN ", SCHEMA., 
-				"SUBX x ON (x.CN = p.CN)")
+				"SUBX x ON (x.CN = p.", puniqueid, ")")
     xfromqry2 <- paste0(pfromqry, " JOIN ", SCHEMA., 
 				"SUBX x ON (x.STATECD = p.STATECD
 						and x.UNITCD = p.UNITCD
@@ -1362,7 +1396,29 @@ DBgetPlots <- function (states = NULL,
  		        DBgetCSV(othertable, stabbr, returnDT=TRUE, stopifnull=FALSE))
         }
       }
-    } 
+    } else if (datsource == "csv") {
+
+      PLOT <- tryCatch( pcheck.table(plot_layer),
+			error = function(e) {
+                  message(e)
+                  stop() })
+
+      COND <- tryCatch( pcheck.table(cond_layer),
+			error = function(e) {
+                  message(e)
+                  stop() })
+
+      if (iseval || savePOP) {
+        ## POP_PLOT_STRATUM_ASSGN table - 
+        ## To get estimation unit & stratum assignment for each plot. 
+        POP_PLOT_STRATUM_ASSGN <- tryCatch( pcheck.table(ppsa_layer),
+			error = function(e) {
+                  message(e)
+                  stop() })
+      }   
+    }
+
+
 ############ End CSV only        
 
     ####################################################################################
@@ -1862,6 +1918,11 @@ DBgetPlots <- function (states = NULL,
         if (!is.null(sppvars)) {
           REF_SPECIES <- DBgetCSV("REF_SPECIES", returnDT=TRUE, stopifnull=FALSE)
         }
+      } else if (datsource == "csv") {
+        TREE <- tryCatch( pcheck.table(tree_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
       }
 
       message("\n",
@@ -2040,6 +2101,10 @@ DBgetPlots <- function (states = NULL,
       #xyx <- pltx[, c("CN", getcoords(coords), "PLOT_ID"), with=FALSE]
       if (getxy) {
 
+        ## Check xymeasCur
+        xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
+                             title="Most current XY?", first="YES", gui=gui)
+
         if (xymeasCur) {
           xydat <- DBgetXY(states = state,
                           datsource = datsource,
@@ -2076,6 +2141,11 @@ DBgetPlots <- function (states = NULL,
         if (datsource == "datamart") {
           SEEDLING <- DBgetCSV("SEEDLING", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
+        } else if (datsource == "csv") {
+          SEEDLING <- tryCatch( pcheck.table(seed_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
         }
 
         if (defaultVars) {
@@ -2197,6 +2267,20 @@ DBgetPlots <- function (states = NULL,
         INVASIVE_SUBPLOT_SPP <- 
 		      DBgetCSV("INVASIVE_SUBPLOT_SPP", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
+
+        P2VEG_SUBPLOT_SPP <- tryCatch( pcheck.table(vsubpspp_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
+        P2VEG_SUBP_STRUCTURE <- tryCatch( pcheck.table(vsubpstr_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
+        INVASIVE_SUBPLOT_SPP <- tryCatch( pcheck.table(invsubp_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
+
       }
 
       if (defaultVars) {
@@ -2405,6 +2489,15 @@ DBgetPlots <- function (states = NULL,
       if (datsource == "datamart") {
         SUBPLOT <- DBgetCSV("SUBPLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
         SUBP_COND <- DBgetCSV("SUBP_COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
+      } else if (datsource == "csv") {
+        SUBPLOT <- tryCatch( pcheck.table(subplot_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
+        SUBP_COND <- tryCatch( pcheck.table(subpcond_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
       }
 
       ## Check variables in database
@@ -2550,6 +2643,11 @@ DBgetPlots <- function (states = NULL,
       if (datsource == "datamart") {
         COND_DWM_CALC <- DBgetCSV("COND_DWM_CALC", stabbr, returnDT=TRUE, 
 		      stopifnull=FALSE)
+      } else if (datsource == "csv") {
+        COND_DWM_CALC <- tryCatch( pcheck.table(dwm_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
       }
 
       ## Check variables in database
@@ -2636,6 +2734,11 @@ DBgetPlots <- function (states = NULL,
       if (datsource == "datamart") {
         SUBP_COND_CHNG_MTRX <- DBgetCSV("SUBP_COND_CHNG_MTRX", stabbr, 
 		      returnDT=TRUE, stopifnull=FALSE)
+      } else if (datsource == "csv") {
+        SUBP_COND_CHNG_MTRX <- tryCatch( pcheck.table(sccm_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
       }
 
       ## SUBP_COND_CHNG_MTRX table
@@ -2707,8 +2810,12 @@ DBgetPlots <- function (states = NULL,
       if (datsource == "datamart") {
         TREE_GRM_COMPONENT <- DBgetCSV("TREE_GRM_COMPONENT", stabbr, 
 		      returnDT=TRUE, stopifnull=FALSE)
+      } else if (datsource == "csv") {
+        TREE_GRM_COMPONENT <- tryCatch( pcheck.table(grm_layer),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) })
       }
-
       if (is.null(grmvarlst)) {
         grmx <- NULL
         #isgrm <- NULL
@@ -2774,6 +2881,22 @@ DBgetPlots <- function (states = NULL,
     ## Other tables
     ##############################################################
     if (!is.null(othertables) && length(othertables2) > 0 && !is.null(pltx)) {
+
+      ## Other tables
+      if (!is.null(othertables)) {
+        for (othertable in othertables) {
+          if (datsource == "datamart") {
+            assign(othertable, 
+ 	       	DBgetCSV(othertable, stabbr, returnDT=TRUE, stopifnull=FALSE))
+          } else if (datsource == "csv") {
+            assign(othertable, tryCatch( pcheck.table(othertable),
+			error = function(e) {
+                  message(e, "\n")
+                  return(NULL) }))
+          }
+        }
+      }
+
       for (j in 1:length(othertables2)) {
         isref <- FALSE
         othertable <- othertables[j]

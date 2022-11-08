@@ -19,11 +19,21 @@ dbTables(
   sccm_layer = "SUBP_COND_CHNG_MTRX",
   grm_layer = "TREE_GRM_COMPONENT",
   survey_layer = "SURVEY",
+  popeval_layer = "POP_EVAL",
+  popevalgrp_layer = "POP_EVAL_GRP",
+  popevaltyp_layer = "POP_EVAL_TYP",
+  popstratum_layer = "POP_STRATUM",
+  popestnunit_layer = "POP_ESTN_UNIT",
   ppsa_layer = "POP_PLOT_STRATUM_ASSGN",
+  other_layers = NULL,
   ...
 )
 }
 \arguments{
+\item{other_layers}{String. Other layer(s) in database to clip and/or
+extract from database (Note: must include PLT_CN variable as unique
+identifier).}
+
 \item{...}{For extendibility.}
 
 \item{plot_layer.}{R object, comma-delimited file(*.csv), or name of

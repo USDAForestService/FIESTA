@@ -145,23 +145,20 @@ Next, we can get our FIA plot data and set up our auxiliary data. We can get our
 
 ```{r}
 SApltdat <- spGetPlots(bnd = WYbhdistfn,
-                     xy_datsource = "obj",
-                     xy = WYplt,
-                     xy.uniqueid = "CN",
-                     xvar = "LON_PUBLIC",
-                     yvar = "LAT_PUBLIC",
-                     xy.crs = 4269, 
-                     datsource = "obj",
-                     istree = TRUE,
-                     isseed = TRUE,
-                     plot_layer = WYplt,
-                     cond_layer = WYcond,
-                     tree_layer = WYtree,
-                     seed_layer = WYseed,
-                     invyrs = 2011:2013,
-                     showsteps = TRUE,
-                     returnxy=TRUE,
-                     savedata_opts = savedata_options(outfolder = outfolder))
+                       xy_datsource = "obj",
+                       xy = WYplt,
+                       xy_opts = list(xy.uniqueid = "CN", xvar = "LON_PUBLIC", 
+                                    yvar = "LAT_PUBLIC", xy.crs = 4269),
+                       datsource = "obj",
+                       istree = TRUE,
+                       isseed = TRUE,
+                       dbTabs = list(plot_layer = WYplt, cond_layer = WYcond,
+                                   tree_layer = WYtree, seed_layer = WYseed),
+                       eval = "custom",
+                       eval_opts = list(invyrs = 2011:2013),
+                       showsteps = TRUE,
+                       returnxy = TRUE,
+                       savedata_opts = savedata_options(outfolder = outfolder))
 ```
 
 ```{r}

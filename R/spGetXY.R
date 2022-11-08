@@ -37,8 +37,6 @@
 #' @param RS String. Name of FIA research station to restrict states to
 #' ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 #' included.
-#' @param eval_opts List of evaluation options to determine the set of data.
-#'  returned. See help(eval_options) for a list of options.
 #' @param xy_datsource String. Source of XY data ("obj", "csv", "datamart",
 #' "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 #' datsource.
@@ -46,15 +44,24 @@
 #' polygon object, data frame, full pathname to a shapefile, or name of a layer
 #' within a database.
 #' @param xy_dsn String. Data source name (dsn; i.e., pathname or database)
-#' @param xy_opts List of xy data options to specify. See xy_options.
-#'  (e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').
+#' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
+#' polygon object, data frame, full pathname to a shapefile, or name of a layer
+#' within a database.
+#' @param xy_opts List of xy data options to specify if xy is NOT NULL. 
+#' See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').
+#' @param eval String. Type of evaluation time frame for data extraction 
+#' ('FIA', 'custom'). See eval_opts for more further options. 
+#' @param eval_opts List of evaluation options for 'FIA' or 'custom'
+#' evaluations to determine the set of data returned. See help(eval_options)
+#' for a list of options.
 #' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
 #' be unique. If using most current XY coordinates, use identifier for a plot
 #' (e.g., PLOT_ID).
+#' @param invtype String. Type of FIA inventory to extract ('PERIODIC',
+#' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
+#' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
+#' INTENSITY = 1 (FIA base grid).
 #' @param clipxy Logical. If TRUE, clips xy data to bnd.
-#' @param plot_layer String. Name of plot_layer in database.
-#' @param intensity1 Logical. If TRUE, include only single intensity plots
-#' (i.e., INTENSITY = 1).
 #' @param showsteps Logical. If TRUE, display data in device window.
 #' @param returnxy Logical. If TRUE, returns XY coordinates.
 #' @param savedata Logical. If TRUE, saves data to outfolder. Note:
@@ -113,15 +120,18 @@ spGetXY <- function(bnd,
                     bnd.filter = NULL, 
                     states = NULL, 
                     RS = NULL, 
-                    eval_opts = eval_options(),
                     xy_datsource = "datamart", 
                     xy_dsn = NULL, 
+                    xy = "PLOT",
                     xy_opts = list(xy="PLOT", xy.uniqueid="CN", 
  	                               xvar="LON", yvar="LAT"),
-                    pjoinid = "CN", 
+                    eval = "FIA",
+                    eval_opts = NULL,
+                    dbTabs = dbTables(),
+                    pjoinid = "CN",
+                    invtype = "ANNUAL", 
+                    intensity1 = FALSE,  
                     clipxy = TRUE, 
-                    plot_layer = "plot",
-                    intensity1 = FALSE, 
                     showsteps = FALSE, 
                     returnxy = TRUE, 
                     savedata = FALSE, 
@@ -165,64 +175,11 @@ spGetXY <- function(bnd,
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts)
   
 
-  ## Set eval_options defaults
-  eval_defaults_list <- formals(FIESTAutils::eval_options)[-length(formals(FIESTAutils::eval_options))]
-  
-  for (i in 1:length(eval_defaults_list)) {
-    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
-  }
-  
-  ## Set user-supplied eval_opts values
-  if (length(eval_opts) > 0) {
-    for (i in 1:length(eval_opts)) {
-      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
-        assign(names(eval_opts)[[i]], eval_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
-      }
-    }
-    ## Append eval_options defaults not specified to pass on to DBgetXY()
-    if (any(names(eval_defaults_list) %in% names(eval_opts))) {
-      eval_opts <- append(eval_opts, 
-		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
-    }
-
-  } else {
-    stop("must specify an evaluation timeframe for data extraction... \n", 
-	"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
-  }
-
-
-  ## Set xy_options defaults
-  xy_defaults_list <- formals(FIESTAutils::xy_options)[-length(formals(FIESTAutils::xy_options))]
-  
-  for (i in 1:length(xy_defaults_list)) {
-    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
-  }
-
-  ## Set user-supplied xy_opts values
-  if (length(xy_opts) > 0) {
-    for (i in 1:length(xy_opts)) {
-      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
-        assign(names(xy_opts)[[i]], xy_opts[[i]])
-      } else {
-        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
-      }
-    }
-    ## Append xy_options defaults not specified to pass on to DBgetXY()
-    if (any(names(xy_defaults_list) %in% names(xy_opts))) {
-      xy_opts <- append(xy_opts, 
-		xy_defaults_list[!names(xy_defaults_list) %in% names(xy_opts)])
-    }
-  } 
-
   ## Set savedata defaults
   savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
-  
   for (i in 1:length(savedata_defaults_list)) {
     assign(names(savedata_defaults_list)[[i]], savedata_defaults_list[[i]])
-  }
-  
+  } 
   ## Set user-supplied savedata values
   if (length(savedata_opts) > 0) {
     if (!savedata) {
@@ -299,7 +256,6 @@ spGetXY <- function(bnd,
   #############################################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
                              title="Save data?", first="NO", gui=gui) 
- 
   if (savedata && returnxy) {
     ## Check exportsp
     exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
@@ -391,70 +347,23 @@ spGetXY <- function(bnd,
 #                                  xy.crs=xy.crs)
 #    }
 
-  } else if (xy_datsource %in% c("obj", "csv")) {
-
-    ####################################################################
-    ## 1) Import file(s)
-    ## 2) Clip xy (for all states) to boundary
-    ####################################################################
-
-    ## Check xy table
-    xyplt <- pcheck.table(xy)
-
-    ## Subset if STATECD in table
-    statenm <- findnm("STATECD", names(xyplt), returnNULL=TRUE)
-    if (!is.null(statenm)) {
-      xyplt <- datFilter(xyplt, getfilter(statenm, stcds))$xf
-    }
-    
-    # Do intensity 1?
-    if (intensity1) {
-      if ("INTENSITY" %in% names(xyplt)) {
-        xyplt <- xyplt[xyplt$INTENSITY == 1, ]
-      }
-    }
-    
-    ## Make spatial
-    if (!"sf" %in% class(xyplt)) {
-      spxy <- spMakeSpatialPoints(xyplt=xyplt, xy.uniqueid=xy.uniqueid, 
-		xvar=xvar, yvar=yvar, xy.crs=xy.crs)
-    }
-
-  } else if (xy_datsource == "shp") {
-    #sqlatt <- paste("select * from ", basename.NoExt(xy), "limit 0")
-
-    if (!is.na(getext(xy)) && getext(xy) == "shp" && 
-		"STATECD" %in% names(st_read(xy, quiet=TRUE))) {
-      #where <- getfilter("STATECD", stcds, syntax="sql")
-      #sql <- paste("select * from", basename.NoExt(xy), "where", where)
-      #spxy <- pcheck.spatial(xy, sql=sql)
-      spxy <- pcheck.spatial(xy)
-      spxy <- spxy[spxy$STATECD %in% stcds, ]
-      
-      # Do intensity 1?
-      if (intensity1) {
-        if ("INTENSITY" %in% names(spxy)) {
-          spxy <- spxy[spxy$INTENSITY == 1, ]
-        }
-      }
-
-    } else {
-      spxy <- pcheck.spatial(xy)
-    }
-  } else {			## xy_datsource in('datamart', 'sqlite')
-
+  } else { 
     xydat <- DBgetXY(states = stcds,
                       datsource = xy_datsource,
                       dsn = xy_dsn,
-                      eval_opts = eval_opts,
+                      xy = xy,
                       xy_opts = xy_opts,
+                      eval = eval,
+                      eval_opts = eval_opts,
+                      dbTabs = dbTabs,
+                      pjoinid = pjoinid,
+                      invtype = invtype,
                       intensity1 = intensity1,
                       issp = TRUE)
     spxy <- xydat$spxy
     xy.uniqueid <- "PLT_CN"
     xyjoinid <- "PLT_CN"
-    evalInfo <- xydat$evalInfo
-    evalchk <- xydat$evalchk  
+    pjoinid <- xydat$pjoinid 
   }
  
   if (clipxy) {
@@ -553,15 +462,16 @@ spGetXY <- function(bnd,
   if (returnxy) {
     returnlst$spxy <- spxy
   } 
-  if (!is.null(evalInfo)) {
-    returnlst$evalInfo <- evalInfo
-  }
-  if (!is.null(evalchk)) {
-    returnlst$evalchk <- evalchk
-  }     
+#  if (!is.null(evalInfo)) {
+#    returnlst$evalInfo <- evalInfo
+#  }
+#  if (!is.null(evalchk)) {
+#    returnlst$evalchk <- evalchk
+#  }     
   returnlst$pltids <- pltids
   returnlst$bndx <- bndx
   returnlst$xy.uniqueid <- xy.uniqueid
+  returnlst$pjoinid <- pjoinid
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
   return(returnlst)

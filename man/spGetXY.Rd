@@ -10,14 +10,17 @@ spGetXY(
   bnd.filter = NULL,
   states = NULL,
   RS = NULL,
-  eval_opts = eval_options(),
   xy_datsource = "datamart",
   xy_dsn = NULL,
+  xy = "PLOT",
   xy_opts = list(xy = "PLOT", xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  eval = "FIA",
+  eval_opts = NULL,
+  dbTabs = dbTables(),
   pjoinid = "CN",
-  clipxy = TRUE,
-  plot_layer = "plot",
+  invtype = "ANNUAL",
   intensity1 = FALSE,
+  clipxy = TRUE,
   showsteps = FALSE,
   returnxy = TRUE,
   savedata = FALSE,
@@ -42,28 +45,37 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 included.}
 
-\item{eval_opts}{List of evaluation options to determine the set of data.
-returned. See help(eval_options) for a list of options.}
-
 \item{xy_datsource}{String. Source of XY data ("obj", "csv", "datamart",
 "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 datsource.}
 
 \item{xy_dsn}{String. Data source name (dsn; i.e., pathname or database)}
 
-\item{xy_opts}{List of xy data options to specify. See xy_options.
-(e.g., xy_opts = list(xy='PLOT', xvar='LON', yvar='LAT').}
+\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
+polygon object, data frame, full pathname to a shapefile, or name of a layer
+within a database.}
+
+\item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
+See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
+
+\item{eval}{String. Type of evaluation time frame for data extraction 
+('FIA', 'custom'). See eval_opts for more further options.}
+
+\item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
+evaluations to determine the set of data returned. See help(eval_options)
+for a list of options.}
 
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
 (e.g., PLOT_ID).}
 
+\item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
+'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
+
+\item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
+INTENSITY = 1 (FIA base grid).}
+
 \item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
-
-\item{plot_layer}{String. Name of plot_layer in database.}
-
-\item{intensity1}{Logical. If TRUE, include only single intensity plots
-(i.e., INTENSITY = 1).}
 
 \item{showsteps}{Logical. If TRUE, display data in device window.}
 
@@ -77,10 +89,6 @@ if TRUE, exports XY data as spatial data.}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
-
-\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
-polygon object, data frame, full pathname to a shapefile, or name of a layer
-within a database.}
 }
 \value{
 \item{spxy}{ sf. If returnxy=TRUE, spatial xy point data. }
