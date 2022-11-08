@@ -224,7 +224,7 @@ DBgetXY <- function (states = NULL,
       stop("no data in database")
     }
   } else {
-    datsourcelst <- c("sqlite", "datamart", "csv")
+    datsourcelst <- c("obj", "sqlite", "datamart", "csv")
     datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		gui=gui, checklst=datsourcelst, caption="Data source?")
 
