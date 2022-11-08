@@ -19,13 +19,13 @@
 #' within a database.
 #' @param xy_opts List of xy data options to specify if xy is NOT NULL. 
 #' See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').
+#' @param dbTabs List of database tables the user would like returned.
+#'  See help(dbTables) for a list of options.
 #' @param eval String. Type of evaluation time frame for data extraction 
 #' ('FIA', 'custom'). See eval_opts for more further options. 
 #' @param eval_opts List of evaluation options for 'FIA' or 'custom'
 #' evaluations to determine the set of data returned. See help(eval_options)
 #' for a list of options.
-#' @param dbTabs List of database tables the user would like returned.
-#'  See help(dbTables) for a list of options.
 #' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
 #' be unique. If using most current XY coordinates, use identifier for a plot
 #' (e.g., PLOT_ID).
@@ -85,9 +85,9 @@ DBgetXY <- function (states = NULL,
                      xy = "PLOT", 
                      xy_opts = xy_options(xy.uniqueid="CN", 
  	                               xvar="LON", yvar="LAT"),
-                     eval = "FIA",
-                     eval_opts = NULL,
                      dbTabs = dbTables(),
+                     eval = "FIA",
+                     eval_opts = eval_options(),
                      pjoinid = "CN", 
                      invtype = "ANNUAL", 
                      intensity1 = FALSE, 
@@ -107,8 +107,7 @@ DBgetXY <- function (states = NULL,
   
   gui <- FALSE
   if (gui) {
-    evalCur=evalAll=measCur=allyrs=intensity1=
-	savedata=parameters=out_fmt=overwrite <- NULL
+    intensity1=savedata=parameters=out_fmt=overwrite <- NULL
   }
     
   
@@ -262,13 +261,17 @@ DBgetXY <- function (states = NULL,
     evalCur <- ifelse (Cur, TRUE, FALSE) 
     evalAll <- ifelse (All, TRUE, FALSE) 
     evalEndyr <- Endyr
+    measCur=allyrs <- FALSE
+    measEndyr <- NULL
   } else {
     measCur <- ifelse (Cur, TRUE, FALSE) 
-    measAll <- ifelse (All, TRUE, FALSE) 
+    allyrs <- ifelse (All, TRUE, FALSE) 
     if (length(Endyr) > 1) {
       stop("only one Endyr allowed for custom estimations")
     }
     measEndyr <- Endyr
+    evalCur=evalAll <- FALSE
+    evalEndyr <- NULL
   }
  
   ## Get states, Evalid and/or invyrs info

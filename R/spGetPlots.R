@@ -57,32 +57,48 @@
 #' information about plot coordinates.  If datsource="csv", specify *.csv file
 #' names in *_layer arguments.
 #' @param data_dsn String. Name of database where *_layers reside.
+#' @param dbTabs List of database tables the user would like returned.
+#'  See help(dbTables) for a list of options.
 #' @param eval String. Type of evaluation time frame for data extraction 
 #' ('FIA', 'custom'). See eval_opts for more further options. 
 #' @param eval_opts List of evaluation options for 'FIA' or 'custom'
 #' evaluations to determine the set of data returned. See help(eval_options)
 #' for a list of options.
-#' @param dbTabs List of database tables the user would like returned.
-#'  See help(dbTables) for a list of options.
+#' @param puniqueid String. Name of unique identifier of plt.
 #' @param invtype String. Type of FIA inventory to extract ('PERIODIC',
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
-#' @param puniqueid String. Name of unique identifier of plt.
+#' @param istree Logical. If TRUE, tree data are extracted from TREE table in
+#' database.
+#' @param isseed Logical. If TRUE, seedling data are extracted from SEEDLING
+#' table in database.
+#' @param isveg Logical. If TRUE, understory vegetation tables are extracted
+#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).
+#' @param issubp Logical. If TRUE, subplot tables are extracted from FIA
+#' database (SUBPLOT, SUBP_COND).
+#' @param ischng Logical. If TRUE, sccm (SUBP_COND_CHNG_MTRX) table is returned 
+#' that includes current and previous conditions. 
+#' @param isdwm Logical. If TRUE, summarized condition-level down woody debris
+#' data are extracted from FIA database (COND_DWM_CALC).
+#' @param biojenk Logical. If TRUE, Jenkins biomass is calculated.
+#' @param greenwt Logical. If TRUE, green weight biomass is calculated.
+#' @param plotgeom Logical. If TRUE, variables from the PLOTGEOM table are
+#' appended to the plot table.
+#' @param othertables String Vector. Name of other table(s) in FIADB to include
+#' in output. The table must have PLT_CN as unique identifier of a plot.
+#' @param ACI Logical. If TRUE, the data from All Condition Inventories (ACI)
+#' are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
+#' details.
+#' @param clipxy Logical. If TRUE, clips xy data to bnd.
 #' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
 #' be unique. If using most current XY coordinates, use identifier for a plot
 #' (e.g., PLOT_ID).
-#' @param clipxy Logical. If TRUE, clips xy data to bnd.
-#' @param istree Logical. If TRUE, extract tree data from FIA database.
-#' @param isseed Logical. If TRUE, extract seedling data from FIA database.
-#' @param isveg Logical. If TRUE, understory vegetation tables are extracted
-#' from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).
-#' @param isdwm Logical. If TRUE, down woody material are extracted.
-#' @param savePOP Logical. If TRUE, returns and/or saves POP_PLOT_STRATUM_ASSGN
-#' table. Note: check name in dbtables().
 #' @param showsteps Logical. If TRUE, display data in device window.
 #' @param returndata Logical. If TRUE, returns data objects.
 #' @param savedata Logical. If TRUE, saves data to outfolder.
+#' @param savePOP Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
+#' table.
 #' @param savebnd Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 #' SpatiaLite database.
 #' @param returnxy Logical. If TRUE, save xy coordinates to outfolder.
@@ -92,6 +108,7 @@
 #' of options. Only used when savedata = TRUE. 
 #' @param spXYdat R list object. Output from spGetXY().
 #' @param gui Logical. If TRUE, uses gui interface. 
+#' @param ... parameters passed to DBgetPlot().
 #' 
 #' @return \item{xypltx}{ sf object. Input xy data clipped to boundary. }
 #' \item{bndx}{ sf object. Input bnd. } \item{tabs}{ list object. List of input
@@ -126,6 +143,8 @@
 #' # Extract data from FIA datamart for measurement years 2013 thru 2015
 #' dat <- spGetPlots(bnd = WYbhfn,
 #'                   datsource = "datamart",
+#'                   eval = "custom",
+#'                   eval_opts = list("
 #'                   measyrs = 2013:2015)
 #' names(dat)
 #' tabs <- dat$tabs
@@ -161,25 +180,33 @@ spGetPlots <- function(bnd = NULL,
                        dbTabs = dbTables(),
                        eval = "FIA",
                        eval_opts = NULL,
+                       puniqueid = "CN", 
                        invtype = "ANNUAL", 
                        intensity1 = FALSE, 
-                       puniqueid = "CN", 
-                       pjoinid = NULL, 
-                       clipxy = TRUE, 
                        istree = FALSE, 
                        isseed = FALSE, 
-                       isveg = FALSE,
-                       isdwm = FALSE,
-                       savePOP = FALSE,
+                       isveg = FALSE, 
+                       issubp = FALSE, 
+                       ischng = FALSE,
+                       isdwm = FALSE, 
+                       biojenk = FALSE,
+                       greenwt = FALSE,
+                       plotgeom = FALSE, 
+                       othertables = NULL, 
+                       ACI = FALSE, 
+                       clipxy = TRUE, 
+                       pjoinid = NULL, 
                        showsteps = FALSE, 
                        returndata = TRUE,
-                       savedata = FALSE, 
+                       savedata = FALSE,
+                       savePOP = FALSE, 
                        savebnd = FALSE, 
                        returnxy = TRUE, 
                        exportsp = FALSE, 
                        savedata_opts = NULL,
                        spXYdat = NULL,
-                       gui = FALSE) {
+                       gui = FALSE,
+                       ...) {
 
   ##############################################################################
   ## DESCRIPTION
@@ -217,8 +244,8 @@ spGetPlots <- function(bnd = NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- c(names(formals(spGetPlots)), 
-		names(formals(spGetPlots)))
+  formallst <- unique(c(names(formals(spGetPlots)), 
+		names(formals(DBgetPlots))))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -329,13 +356,17 @@ spGetPlots <- function(bnd = NULL,
     evalCur <- ifelse (Cur, TRUE, FALSE) 
     evalAll <- ifelse (All, TRUE, FALSE) 
     evalEndyr <- Endyr
+    measCur=allyrs <- FALSE
+    measEndyr <- NULL
   } else {
     measCur <- ifelse (Cur, TRUE, FALSE) 
-    measAll <- ifelse (All, TRUE, FALSE) 
+    allyrs <- ifelse (All, TRUE, FALSE) 
     if (length(Endyr) > 1) {
       stop("only one Endyr allowed for custom estimations")
     }
     measEndyr <- Endyr
+    evalCur=evalAll <- FALSE
+    evalEndyr <- NULL
   }
 
  
@@ -347,6 +378,7 @@ spGetPlots <- function(bnd = NULL,
     countyfips <- spXYdat$countyfips
     stbnd.att <- spXYdat$stbnd.att
     xy.uniqueid <- spXYdat$xy.uniqueid
+    pjoinid <- spXYdat$pjoinid
     bndx <- spXYdat$bndx
     stcds <- pcheck.states(states, statereturn="VALUE")
     if (is.null(pltids) && (is.null(spxy) || nrow(spxy)) == 0) {
@@ -771,17 +803,27 @@ spGetPlots <- function(bnd = NULL,
         countycds1 <- sort(as.numeric(unique(substr(stcnty1, 3, 5))))
         stateFilter1 <- paste("p.countycd IN(", toString(countycds1), ")")
       }
-      dat1 <- DBgetPlots(states=stcd, datsource=datsource, 
-                         data_dsn=data_dsn, 
-                         stateFilter=stateFilter1, eval_opts=eval_opts1,
-                         istree=istree, isseed=isseed, othertables=other_layers, 
-                         intensity1=intensity1, savePOP=savePOP)
+      dat1 <- DBgetPlots(states = stcd, 
+                         datsource = datsource,
+                         data_dsn = data_dsn, 
+                         dbTabs = dbTabs,
+                         eval = eval,
+                         eval_opts = eval_opts1,
+                         invtype = invtype, 
+                         intensity1 = intensity1, 
+                         puniqueid = puniqueid, 
+                         stateFilter = stateFilter1, 
+                         returndata = returndata,
+                         ...)
       tabs1 <- dat1$tabs
       tabIDs <- dat1$tabIDs
       PLOT1 <- tabs1$plt
       pop_plot_stratum_assgn1 <- tabs1$pop_plot_stratum_assgn
+      puniqueid <- dat1$puniqueid
+      dbqueries <- dat1$dbqueries
 
       ## Check pjoinid
+      ##############################################
       pltfields <- names(PLOT1)
       pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
   		                  checklst=pltfields, gui=gui, caption="Joinid in plot?")  
@@ -789,7 +831,9 @@ spGetPlots <- function(bnd = NULL,
         if (xyjoinid %in% pltfields) {
           pjoinid  <- xyjoinid
         } else {
-          if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
+          if (puniqueid %in% names(pltids)) {
+            pjoinid <- pjoinid
+          } else if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
             pjoinid <- "CN"
           } else {
             stop(xyjoinid, " not in plt")
@@ -830,11 +874,18 @@ spGetPlots <- function(bnd = NULL,
         countycds2 <- sort(as.numeric(unique(substr(stcnty2, 3, 5))))
         stateFilter2 <- paste("p.countycd IN(", toString(countycds2), ")")
       }
-      dat2 <- DBgetPlots(states=stcd, datsource=datsource, 
-                         data_dsn=data_dsn, 
-                         stateFilter=stateFilter2, eval_opts=eval_opts2,
-                         istree=istree, isseed=isseed, othertables=other_layers, 
-                         intensity1=intensity1, savePOP=savePOP)
+      dat2 <- DBgetPlots(states = stcd, 
+                         datsource = datsource,
+                         data_dsn = data_dsn, 
+                         dbTabs = dbTabs,
+                         eval = eval,
+                         eval_opts = eval_opts2,
+                         invtype = invtype, 
+                         intensity1 = intensity1, 
+                         puniqueid = puniqueid, 
+                         stateFilter = stateFilter2, 
+                         returndata = returndata,
+                         ...)
       tabs2 <- dat2$tabs
       PLOT2 <- tabs2$plt
       pop_plot_stratum_assgn2 <- tabs2$pop_plot_stratum_assgn
@@ -874,14 +925,24 @@ spGetPlots <- function(bnd = NULL,
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
       }
-      dat <- DBgetPlots(states=stcd, datsource=datsource, 
-                         data_dsn=data_dsn, 
-                         stateFilter=stateFilter1, eval_opts=eval_opts,
-                         istree=istree, isseed=isseed, othertables=other_layers, 
-                         intensity1=intensity1, savePOP=savePOP)
+      dat <- DBgetPlots(states = stcd, 
+                         datsource = datsource,
+                         data_dsn = data_dsn, 
+                         dbTabs = dbTabs,
+                         eval = eval,
+                         eval_opts = eval_opts,
+                         invtype = invtype, 
+                         intensity1 = intensity1, 
+                         puniqueid = puniqueid, 
+                         stateFilter = stateFilter, 
+                         returndata = returndata,
+                         ...)
       tabs <- dat$tabs
       tabIDs <- dat$tabIDs
       pop_plot_stratum_assgn <- tabs$pop_plot_stratum_assgn
+      puniqueid <- dat$puniqueid
+      dbqueries <- dat1$dbqueries
+
       
       ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
       if (nrow(PLOT) > length(unique(PLOT[[puniqueid]]))) {
@@ -894,6 +955,7 @@ spGetPlots <- function(bnd = NULL,
       }
 
       ## Check pjoinid
+      ##############################################
       pltfields <- names(PLOT1)
       pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
   		                  checklst=pltfields, gui=gui, caption="Joinid in plot?")  
@@ -901,7 +963,9 @@ spGetPlots <- function(bnd = NULL,
         if (xyjoinid %in% pltfields) {
           pjoinid  <- xyjoinid
         } else {
-          if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
+          if (puniqueid %in% names(pltids)) {
+            pjoinid <- pjoinid
+          } else if (xyjoinid == "PLT_CN" && "CN" %in% pltfields) {
             pjoinid <- "CN"
           } else {
             stop(xyjoinid, " not in plt")

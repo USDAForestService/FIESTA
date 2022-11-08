@@ -25,11 +25,6 @@ spGetPlots(
   puniqueid = "CN",
   pjoinid = NULL,
   clipxy = TRUE,
-  istree = FALSE,
-  isseed = FALSE,
-  isveg = FALSE,
-  isdwm = FALSE,
-  savePOP = FALSE,
   showsteps = FALSE,
   returndata = TRUE,
   savedata = FALSE,
@@ -38,7 +33,8 @@ spGetPlots(
   exportsp = FALSE,
   savedata_opts = NULL,
   spXYdat = NULL,
-  gui = FALSE
+  gui = FALSE,
+  ...
 )
 }
 \arguments{
@@ -109,18 +105,6 @@ be unique. If using most current XY coordinates, use identifier for a plot
 
 \item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 
-\item{istree}{Logical. If TRUE, extract tree data from FIA database.}
-
-\item{isseed}{Logical. If TRUE, extract seedling data from FIA database.}
-
-\item{isveg}{Logical. If TRUE, understory vegetation tables are extracted
-from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).}
-
-\item{isdwm}{Logical. If TRUE, down woody material are extracted.}
-
-\item{savePOP}{Logical. If TRUE, returns and/or saves POP_PLOT_STRATUM_ASSGN
-table. Note: check name in dbtables().}
-
 \item{showsteps}{Logical. If TRUE, display data in device window.}
 
 \item{returndata}{Logical. If TRUE, returns data objects.}
@@ -141,6 +125,8 @@ of options. Only used when savedata = TRUE.}
 \item{spXYdat}{R list object. Output from spGetXY().}
 
 \item{gui}{Logical. If TRUE, uses gui interface.}
+
+\item{...}{parameters passed to DBgetPlot().}
 }
 \value{
 \item{xypltx}{ sf object. Input xy data clipped to boundary. }

@@ -135,7 +135,7 @@ DBgetEvalid <- function(states = NULL,
   
   ## Set global variables
   EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR=POP_EVAL=POP_EVAL_GRP=
-		POP_EVAL_TYP=SURVEY=evaltyp <- NULL
+		POP_EVAL_TYP=SURVEY=POP_PLOT_STRATUM_ASSGN=evaltyp <- NULL
   EVALID=evalidlist=evalTypelist=invyrs <- NULL
   #evalresp <- TRUE
   evalresp <- FALSE
@@ -683,7 +683,7 @@ DBgetEvalid <- function(states = NULL,
     }
  
     if (datsource == "sqlite" && nopoptables) {
-      ppsanm <- chkdbtab(dbtablst, ppsanm)
+      ppsanm <- chkdbtab(dbtablst, ppsa_layer)
       if (is.null(ppsanm)) {
         message("need to include pop_plot_stratum_assgn table in database to extract an FIA evaluation\n")
         message("database tables: ", toString(dbtablst))
@@ -713,7 +713,7 @@ DBgetEvalid <- function(states = NULL,
       if (is.null(evaldt)) {
         return(NULL)
       }
-
+ 
       if (!"STATECD" %in% names(evaldt)) {
         evaldt[, STATECD := substr(EVALID, nchar(EVALID) - 5, nchar(EVALID)-4)]
         evaldt <- evaldt[evaldt$STATECD %in% as.character(stcdlst),]
@@ -931,7 +931,9 @@ DBgetEvalid <- function(states = NULL,
 
   ## Return population information
   returnlst$SURVEY <- SURVEY
-  returnlst$ppsanm <- ppsanm
+  if (is.null(POP_PLOT_STRATUM_ASSGN)) {
+    returnlst$POP_PLOT_STRATUM_ASSGN <- POP_PLOT_STRATUM_ASSGN
+  }
   #returnlst$POP_EVAL <- POP_EVAL[EVALID %in% unlist(evalidlist),]
 
   if (datsource == "sqlite" && !dbconnopen) {

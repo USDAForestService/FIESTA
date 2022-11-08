@@ -9,9 +9,9 @@ DBgetPlots(
   RS = NULL,
   datsource = "datamart",
   data_dsn = NULL,
+  dbTabs = dbTables(),
   eval = "FIA",
   eval_opts = NULL,
-  dbTabs = dbTables(),
   puniqueid = "CN",
   invtype = "ANNUAL",
   intensity1 = FALSE,
@@ -65,15 +65,15 @@ is populated. See FIESTA::ref_statecd for reference to RS and states.}
 \item{data_dsn}{String. If datsource='sqlite', the name of SQLite database
 (*.sqlite).}
 
+\item{dbTabs}{List of database tables the user would like returned.
+See help(dbTables) for a list of options.}
+
 \item{eval}{String. Type of evaluation time frame for data extraction 
 ('FIA', 'custom'). See eval_opts for more further options.}
 
 \item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
 evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.}
-
-\item{dbTabs}{List of database tables the user would like returned.
-See help(dbTables) for a list of options.}
 
 \item{puniqueid}{String. Name of unique identifier in plot_layer in dbTabs.}
 

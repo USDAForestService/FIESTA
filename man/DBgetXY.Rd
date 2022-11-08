@@ -11,9 +11,9 @@ DBgetXY(
   dsn = NULL,
   xy = "PLOT",
   xy_opts = xy_options(xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
-  eval = "FIA",
-  eval_opts = NULL,
   dbTabs = dbTables(),
+  eval = "FIA",
+  eval_opts = eval_options(),
   pjoinid = "CN",
   invtype = "ANNUAL",
   intensity1 = FALSE,
@@ -51,15 +51,15 @@ within a database.}
 \item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
 See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
 
+\item{dbTabs}{List of database tables the user would like returned.
+See help(dbTables) for a list of options.}
+
 \item{eval}{String. Type of evaluation time frame for data extraction 
 ('FIA', 'custom'). See eval_opts for more further options.}
 
 \item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
 evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.}
-
-\item{dbTabs}{List of database tables the user would like returned.
-See help(dbTables) for a list of options.}
 
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot

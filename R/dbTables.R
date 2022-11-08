@@ -6,35 +6,51 @@
 #' If no parameters, an empty list is returned.
 #' 
 #' @param plot_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Plot-level data. 
+#' layer in database. Plot-level data (PLOT). 
 #' @param cond_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Condition-level data. 
+#' layer in database. Condition-level data (COND). 
 #' @param seed_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Seedling data. 
+#' layer in database. Seedling data (SEEDLING). 
 #' @param tree_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Tree-level data. 
+#' layer in database. Tree-level data (TREE). 
 #' @param plotgeom_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Plot-level GIS extracted data. 
+#' layer in database. Plot-level GIS extracted data (PLOTGEOM). 
 #' @param vsubpspp_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Understory vegetation species data. 
+#' layer in database. Understory vegetation species data 
+#' (P2VEG_SUBPLOT_SPP). 
 #' @param vsubpstr_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Understory vegetation structure data. 
+#' layer in database. Understory vegetation structure data 
+#' (P2VEG_SUBP_STRUCTURE). 
 #' @param invsubp_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Understory vegetation invasives data. 
+#' layer in database. Understory vegetation invasives data 
+#' (INVASIVE_SUBPLOT_SPP). 
 #' @param subplot_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Subplot-level data. 
-#' @param subpc_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Subplot condition-level data. 
+#' layer in database. Subplot-level data (SUBPLOT). 
+#' @param subpcond_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Subplot condition-level data (SUBP_COND). 
 #' @param dwm_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Down wood material data. 
+#' layer in database. Down wood material data (COND_DWM_CALC)
 #' @param sccm_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Subplot-level change matrix data. 
+#' layer in database. Subplot-level change matrix data
+#' (SUBP_COND_CHNG_MTRX). 
 #' @param grm_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Tree growth, removal, mortality data. 
+#' layer in database. Tree growth, removal, mortality data 
+#' (TREE_GRM_COMPONENT). 
 #' @param survey_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Population survey data. 
+#' layer in database. Population survey (SURVEY) data. 
+#' @param popeval_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Population evaluation (POP_EVAL) data. 
+#' @param popevalgrp_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Population evaluation group data (POP_EVAL_GRP). 
+#' @param popevaltyp_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Population evaluation type data (POP_EVAL_TYP). 
+#' @param popstratum_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Population stratum data (POP_STRATUM). 
+#' @param popestnunit_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Population estimation unit data (POP_ESTN_UNIT).
 #' @param ppsa_layer R object, comma-delimited file(*.csv), or name of
-#' layer in database. Population plot stratum assignment data. 
+#' layer in database. Population plot stratum assignment data (
+#' (POP_PLOT_STRATUM_ASSGN). 
 #' @param other_layers R object, comma-delimited file(*.csv), or name of
 #' layer in database. Other layers to extract from database. 
 #' @param other_layers String. Other layer(s) in database to clip and/or
@@ -57,7 +73,7 @@ dbTables <- function(plot_layer = "PLOT",
                      vsubpstr_layer = "P2VEG_SUBP_STRUCTURE",
                      invsubp_layer = "INVASIVE_SUBPLOT_SPP",
                      subplot_layer = "SUBPLOT",
-                     subpc_layer = "SUBP_COND",
+                     subpcond_layer = "SUBP_COND",
                      dwm_layer = "COND_DWM_CALC",
                      sccm_layer = "SUBP_COND_CHNG_MTRX",
                      grm_layer = "TREE_GRM_COMPONENT",

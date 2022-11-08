@@ -244,12 +244,12 @@
 #' (*.sqlite).
 #' @param dbTabs List of database tables the user would like returned.
 #'  See help(dbTables) for a list of options.
-#' @param puniqueid String. Name of unique identifier in plot_layer in dbTabs.
 #' @param eval String. Type of evaluation time frame for data extraction 
 #' ('FIA', 'custom'). See eval_opts for more further options. 
 #' @param eval_opts List of evaluation options for 'FIA' or 'custom'
 #' evaluations to determine the set of data returned. See help(eval_options)
 #' for a list of options.
+#' @param puniqueid String. Name of unique identifier in plot_layer in dbTabs.
 #' @param invtype String. Type of FIA inventory to extract ('PERIODIC',
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
@@ -462,9 +462,9 @@ DBgetPlots <- function (states = NULL,
                         RS = NULL,
                         datsource = "datamart",
                         data_dsn = NULL,
+                        dbTabs = dbTables(), 
                         eval = "FIA",
                         eval_opts = NULL,
-                        dbTabs = dbTables(), 
                         puniqueid = "CN", 
                         invtype = "ANNUAL", 
                         intensity1 = FALSE, 
@@ -779,13 +779,17 @@ DBgetPlots <- function (states = NULL,
     evalCur <- ifelse (Cur, TRUE, FALSE) 
     evalAll <- ifelse (All, TRUE, FALSE) 
     evalEndyr <- Endyr
+    measCur=allyrs <- FALSE
+    measEndyr <- NULL
   } else {
     measCur <- ifelse (Cur, TRUE, FALSE) 
-    measAll <- ifelse (All, TRUE, FALSE) 
+    allyrs <- ifelse (All, TRUE, FALSE) 
     if (length(Endyr) > 1) {
       stop("only one Endyr allowed for custom estimations")
     }
     measEndyr <- Endyr
+    evalCur=evalAll <- FALSE
+    evalEndyr <- NULL
   }
 
   ## Get states, Evalid and/or invyrs info
@@ -2621,7 +2625,7 @@ DBgetPlots <- function (states = NULL,
                                 append_layer=append_layer,
                                 outfn.date=outfn.date, 
                                 add_layer=TRUE)) 
-          rm(subp_condx)
+          rm(subpcx)
           gc() 
         } 
       }
@@ -3310,6 +3314,7 @@ DBgetPlots <- function (states = NULL,
     returnlst$tabs <- tabs
     returnlst$tabIDs <- tabIDs
     returnlst$dbqueries <- dbqueries
+    returnlst$puniqueid <- puniqueid
 
     if (getxy && issp) {
       xycoords <- getcoords(coords)

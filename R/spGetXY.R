@@ -49,6 +49,8 @@
 #' within a database.
 #' @param xy_opts List of xy data options to specify if xy is NOT NULL. 
 #' See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').
+#' @param dbTabs List of database tables the user would like returned.
+#'  See help(dbTables) for a list of options.
 #' @param eval String. Type of evaluation time frame for data extraction 
 #' ('FIA', 'custom'). See eval_opts for more further options. 
 #' @param eval_opts List of evaluation options for 'FIA' or 'custom'
@@ -125,9 +127,9 @@ spGetXY <- function(bnd,
                     xy = "PLOT",
                     xy_opts = list(xy="PLOT", xy.uniqueid="CN", 
  	                               xvar="LON", yvar="LAT"),
+                    dbTabs = dbTables(),
                     eval = "FIA",
                     eval_opts = NULL,
-                    dbTabs = dbTables(),
                     pjoinid = "CN",
                     invtype = "ANNUAL", 
                     intensity1 = FALSE,  
@@ -174,6 +176,54 @@ spGetXY <- function(bnd,
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts, eval_opts=eval_opts)
   
+
+  ## Set eval_options defaults
+  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
+  for (i in 1:length(eval_defaults_list)) {
+    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
+  }
+  ## Set user-supplied eval_opts values
+  if (length(eval_opts) > 0) {
+    for (i in 1:length(eval_opts)) {
+      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
+        assign(names(eval_opts)[[i]], eval_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
+      }
+    }
+    ## Append eval_options defaults not specified to pass on to DBgetXY()
+    if (any(names(eval_defaults_list) %in% names(eval_opts))) {
+      eval_opts <- append(eval_opts, 
+		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
+    }
+  } else {
+    message("no evaluation timeframe specified... using all data in database...\n")
+    eval_opts$allyrs <- TRUE
+
+#    stop("must specify an evaluation timeframe for data extraction... \n", 
+#	"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
+  }
+
+  ## Set xy_options defaults
+  xy_defaults_list <- formals(xy_options)[-length(formals(xy_options))]  
+  for (i in 1:length(xy_defaults_list)) {
+    assign(names(xy_defaults_list)[[i]], xy_defaults_list[[i]])
+  }
+  ## Set user-supplied xy_opts values
+  if (length(xy_opts) > 0) {
+    for (i in 1:length(xy_opts)) {
+      if (names(xy_opts)[[i]] %in% names(xy_defaults_list)) {
+        assign(names(xy_opts)[[i]], xy_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(xy_opts)[[i]]))
+      }
+    }
+    ## Append xy_options defaults not specified to pass on to DBgetXY()
+    if (any(names(xy_defaults_list) %in% names(xy_opts))) {
+      xy_opts <- append(xy_opts, 
+		xy_defaults_list[!names(xy_defaults_list) %in% names(xy_opts)])
+    }
+  } 
 
   ## Set savedata defaults
   savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
@@ -371,7 +421,9 @@ spGetXY <- function(bnd,
 		checklst=names(spxy), caption="UniqueID variable of xy data", 
 		warn=paste(xy.uniqueid, "not in xy data"), stopifnull=TRUE)
 
-    clipdat <- spClipPoint(spxy, clippolyv=bndx, uniqueid=xy.uniqueid)
+    clipdat <- spClipPoint(spxy, 
+                           clippolyv = bndx, 
+                           uniqueid = xy.uniqueid)
     spxy <- clipdat$clip_xyplt 
     if (length(spxy) == 0) stop("xy does not overlap bndx")
     bndx <- clipdat$clip_polyv
@@ -387,9 +439,9 @@ spGetXY <- function(bnd,
   statevars <- stunitco.names[!stunitco.names %in% names(spxy)]
   if (length(statevars) > 0) {
     spxy <- spExtractPoly(spxy, 
-                          xy.uniqueid=xy.uniqueid, 
-                          polyvlst=FIESTAutils::stunitco, 
-                          polyvarlst=statevars)$spxyext
+                          xy.uniqueid = xy.uniqueid, 
+                          polyvlst = FIESTAutils::stunitco, 
+                          polyvarlst = statevars)$spxyext
 
     ## Check projections of inlayer point layer vs. polygon layer. 
     ## If different, reproject sppltx to polygon projection.
