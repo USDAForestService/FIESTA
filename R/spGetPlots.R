@@ -246,6 +246,9 @@ spGetPlots <- function(bnd = NULL,
 
   ## Set eval_options defaults
   eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))]
+  for (i in 1:length(eval_defaults_list)) {
+    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
+  }
   ## Set user-supplied eval_opts values
   if (length(eval_opts) > 0) {
     for (i in 1:length(eval_opts)) {
