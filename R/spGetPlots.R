@@ -144,8 +144,7 @@
 #' dat <- spGetPlots(bnd = WYbhfn,
 #'                   datsource = "datamart",
 #'                   eval = "custom",
-#'                   eval_opts = list("
-#'                   measyrs = 2013:2015)
+#'                   eval_opts = list(measyrs = 2013:2015))
 #' names(dat)
 #' tabs <- dat$tabs
 #' names(tabs)
@@ -156,7 +155,8 @@
 #' # Extract data from FIA datamart for most current evaluation
 #' datCur <- spGetPlots(bnd = WYbhfn,
 #'                      datsource = "datamart",
-#'                      evalCur = TRUE)
+#'                        eval = "FIA",
+#'                      eval_opts = list(Cur = TRUE))
 #' names(datCur)
 #' tabsCur <- datCur$tabs
 #' names(tabsCur)
@@ -497,7 +497,7 @@ spGetPlots <- function(bnd = NULL,
         if (is.null(xy_dsn)) {
           xy_dsn <- data_dsn
         } 
-
+ 
         if (!is.null(Endyr.filter)) {
 
           ## Get XY data inside filter
@@ -507,6 +507,7 @@ spGetPlots <- function(bnd = NULL,
                          RS = RS, 
                          xy_datsource = xy_datsource, 
                          xy_dsn = xy_dsn, 
+                         xy = xy,
                          xy_opts = xy_opts,
                          eval_opts = eval_opts1,
                          dbTabs = dbTabs,
@@ -532,6 +533,7 @@ spGetPlots <- function(bnd = NULL,
                          RS = RS, 
                          xy_datsource = xy_datsource, 
                          xy_dsn = xy_dsn, 
+                         xy = xy,
                          xy_opts = xy_opts,
                          eval_opts = eval_opts2,
                          dbTabs = dbTabs,
@@ -560,6 +562,7 @@ spGetPlots <- function(bnd = NULL,
                          RS = RS, 
                          xy_datsource = xy_datsource, 
                          xy_dsn = xy_dsn, 
+                         xy = xy,
                          xy_opts = xy_opts,
                          eval_opts = eval_opts,
                          dbTabs = dbTabs,
@@ -642,7 +645,7 @@ spGetPlots <- function(bnd = NULL,
       message("pltids have duplicate xyjoinids")
     }
   }
-
+ 
   #############################################################################
   ## Set datsource
   ########################################################
@@ -809,12 +812,23 @@ spGetPlots <- function(bnd = NULL,
                          dbTabs = dbTabs,
                          eval = eval,
                          eval_opts = eval_opts1,
+                         puniqueid = puniqueid, 
                          invtype = invtype, 
                          intensity1 = intensity1, 
-                         puniqueid = puniqueid, 
+                         pjoinid = pjoinid, 
+                         istree = istree,
+                         isseed = isseed,
+                         isveg = isveg,
+                         isdwm = isdwm,
+                         plotgeom = plotgeom, 
+                         othertables = othertables, 
+                         ACI = ACI, 
+                         biojenk = biojenk,
+                         greenwt = greenwt,
+                         savePOP = savePOP,
                          stateFilter = stateFilter1, 
-                         returndata = returndata,
-                         ...)
+                         returndata = returndata
+                         )
       tabs1 <- dat1$tabs
       tabIDs <- dat1$tabIDs
       PLOT1 <- tabs1$plt
@@ -880,15 +894,26 @@ spGetPlots <- function(bnd = NULL,
                          dbTabs = dbTabs,
                          eval = eval,
                          eval_opts = eval_opts2,
+                         puniqueid = puniqueid,
                          invtype = invtype, 
                          intensity1 = intensity1, 
-                         puniqueid = puniqueid, 
+                         pjoinid = pjoinid, 
+                         istree = istree,
+                         isseed = isseed,
+                         isveg = isveg,
+                         isdwm = isdwm,
+                         plotgeom = plotgeom, 
+                         othertables = othertables, 
+                         ACI = ACI, 
+                         biojenk = biojenk,
+                         greenwt = greenwt,
+                         savePOP = savePOP,
                          stateFilter = stateFilter2, 
-                         returndata = returndata,
-                         ...)
+                         returndata = returndata
+                         )
       tabs2 <- dat2$tabs
-      PLOT2 <- tabs2$plt
       pop_plot_stratum_assgn2 <- tabs2$pop_plot_stratum_assgn
+      PLOT2 <- tabs2$plt
 
       if (nrow(PLOT2) > length(unique(PLOT2[[puniqueid]]))) {
         if ("INVYR" %in% names(PLOT2)) {
@@ -925,23 +950,36 @@ spGetPlots <- function(bnd = NULL,
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
       }
+ 
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
                          dbTabs = dbTabs,
                          eval = eval,
                          eval_opts = eval_opts,
+                         puniqueid = puniqueid, 
                          invtype = invtype, 
                          intensity1 = intensity1, 
-                         puniqueid = puniqueid, 
+                         pjoinid = pjoinid, 
+                         istree = istree,
+                         isseed = isseed,
+                         isveg = isveg,
+                         isdwm = isdwm,
+                         plotgeom = plotgeom, 
+                         othertables = othertables, 
+                         ACI = ACI, 
+                         biojenk = biojenk,
+                         greenwt = greenwt,
+                         savePOP = savePOP,
                          stateFilter = stateFilter, 
-                         returndata = returndata,
-                         ...)
+                         returndata = returndata
+                         )
       tabs <- dat$tabs
       tabIDs <- dat$tabIDs
       pop_plot_stratum_assgn <- tabs$pop_plot_stratum_assgn
+      PLOT <- tabs$plt
       puniqueid <- dat$puniqueid
-      dbqueries <- dat1$dbqueries
+      dbqueries <- dat$dbqueries
 
       
       ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
@@ -956,7 +994,7 @@ spGetPlots <- function(bnd = NULL,
 
       ## Check pjoinid
       ##############################################
-      pltfields <- names(PLOT1)
+      pltfields <- names(PLOT)
       pjoinid <- pcheck.varchar(var2check=pjoinid, varnm="pjoinid", 
   		                  checklst=pltfields, gui=gui, caption="Joinid in plot?")  
       if (is.null(pjoinid)) {
@@ -976,7 +1014,7 @@ spGetPlots <- function(bnd = NULL,
       if (nrow(stpltids) > 0) {
 
         ## Subset data to stpltids
-        plt1 <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]],]
+        plt <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]],]
         if (nrow(plt) != nrow(stpltids)) {
           message("plots where ", Endyr.filter, " do not match pltids")
         }

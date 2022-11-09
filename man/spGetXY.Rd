@@ -159,7 +159,8 @@ WYbhfn <- system.file("extdata",
 # Use spGetXY
 WYbhxy <- spGetXY(bnd = WYbhfn,
                   xy_datsource = "datamart",
-                  evalCur = TRUE,
+                  eval = "custom",
+                  eval_opts = list(Cur = TRUE),
                   returnxy = TRUE)
 }
 }

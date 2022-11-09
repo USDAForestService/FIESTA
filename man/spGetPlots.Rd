@@ -20,14 +20,26 @@ spGetPlots(
   dbTabs = dbTables(),
   eval = "FIA",
   eval_opts = NULL,
+  puniqueid = "CN",
   invtype = "ANNUAL",
   intensity1 = FALSE,
-  puniqueid = "CN",
-  pjoinid = NULL,
+  istree = FALSE,
+  isseed = FALSE,
+  isveg = FALSE,
+  issubp = FALSE,
+  ischng = FALSE,
+  isdwm = FALSE,
+  biojenk = FALSE,
+  greenwt = FALSE,
+  plotgeom = FALSE,
+  othertables = NULL,
+  ACI = FALSE,
   clipxy = TRUE,
+  pjoinid = NULL,
   showsteps = FALSE,
   returndata = TRUE,
   savedata = FALSE,
+  savePOP = FALSE,
   savebnd = FALSE,
   returnxy = TRUE,
   exportsp = FALSE,
@@ -91,25 +103,60 @@ See help(dbTables) for a list of options.}
 evaluations to determine the set of data returned. See help(eval_options)
 for a list of options.}
 
+\item{puniqueid}{String. Name of unique identifier of plt.}
+
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
 
 \item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
 INTENSITY = 1 (FIA base grid).}
 
-\item{puniqueid}{String. Name of unique identifier of plt.}
+\item{istree}{Logical. If TRUE, tree data are extracted from TREE table in
+database.}
+
+\item{isseed}{Logical. If TRUE, seedling data are extracted from SEEDLING
+table in database.}
+
+\item{isveg}{Logical. If TRUE, understory vegetation tables are extracted
+from FIA database (P2VEG_SUBPLOT_SPP, P2VEG_SUBP_STRUCTURE, INVASIVE_SUBPLOT_SPP).}
+
+\item{issubp}{Logical. If TRUE, subplot tables are extracted from FIA
+database (SUBPLOT, SUBP_COND).}
+
+\item{ischng}{Logical. If TRUE, sccm (SUBP_COND_CHNG_MTRX) table is returned 
+that includes current and previous conditions.}
+
+\item{isdwm}{Logical. If TRUE, summarized condition-level down woody debris
+data are extracted from FIA database (COND_DWM_CALC).}
+
+\item{biojenk}{Logical. If TRUE, Jenkins biomass is calculated.}
+
+\item{greenwt}{Logical. If TRUE, green weight biomass is calculated.}
+
+\item{plotgeom}{Logical. If TRUE, variables from the PLOTGEOM table are
+appended to the plot table.}
+
+\item{othertables}{String Vector. Name of other table(s) in FIADB to include
+in output. The table must have PLT_CN as unique identifier of a plot.}
+
+\item{ACI}{Logical. If TRUE, the data from All Condition Inventories (ACI)
+are included in dataset (NF_SAMPLING_STATUS_CD = 1). See below for more
+details.}
+
+\item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
 (e.g., PLOT_ID).}
-
-\item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 
 \item{showsteps}{Logical. If TRUE, display data in device window.}
 
 \item{returndata}{Logical. If TRUE, returns data objects.}
 
 \item{savedata}{Logical. If TRUE, saves data to outfolder.}
+
+\item{savePOP}{Logical. If TRUE, save and return the POP_PLOT_STRATUM_ASSGN
+table.}
 
 \item{savebnd}{Logical. If TRUE, saves bnd. If out_fmt='sqlite', saves to a
 SpatiaLite database.}
@@ -188,7 +235,8 @@ WYbhfn <- system.file("extdata",
 # Extract data from FIA datamart for measurement years 2013 thru 2015
 dat <- spGetPlots(bnd = WYbhfn,
                   datsource = "datamart",
-                  measyrs = 2013:2015)
+                  eval = "custom",
+                  eval_opts = list(measyrs = 2013:2015))
 names(dat)
 tabs <- dat$tabs
 names(tabs)
@@ -199,7 +247,8 @@ table(tabs$pltx$MEASYEAR)
 # Extract data from FIA datamart for most current evaluation
 datCur <- spGetPlots(bnd = WYbhfn,
                      datsource = "datamart",
-                     evalCur = TRUE)
+                       eval = "FIA",
+                     eval_opts = list(Cur = TRUE))
 names(datCur)
 tabsCur <- datCur$tabs
 names(tabsCur)

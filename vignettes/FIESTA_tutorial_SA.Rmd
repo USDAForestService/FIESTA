@@ -159,6 +159,7 @@ SApltdat <- spGetPlots(bnd = WYbhdistfn,
                        showsteps = TRUE,
                        returnxy = TRUE,
                        savedata_opts = savedata_options(outfolder = outfolder))
+
 ```
 
 ```{r}
