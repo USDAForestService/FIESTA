@@ -47,9 +47,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Define necessary plot and condition level variables
   ###################################################################################
   cvars2keep <- unique(c(cvars2keep, areawt, "PROP_BASIS"))
-  pdoms2keep <- c("INVYR", "STATECD", "UNITCD", "COUNTYCD", "PLOT_STATUS_CD", 
-			"MEASYEAR", "RDISTCD", "WATERCD", "ECOSUBCD", "CONGCD", "ELEV")
-
   datindb <- FALSE
 
   ## Get tables from tabs
@@ -181,7 +178,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   ## Merge pltx with condx
   ###########################################################
   if (!is.null(pltx)) {
-
     pltnmlst <- names(pltx)
     puniqueid <- pcheck.varchar(var2check=puniqueid, varnm="puniqueid", gui=gui,
 		checklst=pltnmlst, caption="UniqueID variable of plot",
@@ -195,9 +191,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     pltx.na <- sum(is.na(pltx[[puniqueid]]))
     if (pltx.na > 0) stop("NA values in ", puniqueid)
 
-    ## Subset plot columns and remove plots that have no remeasurement data
-    pvars <- unique(c(puniqueid, pltnmlst[pltnmlst %in% pdoms2keep]))
-    pltx <- pltx[, pvars, with=FALSE]
+    ## Set key
     setkeyv(pltx, puniqueid)
 
     ## Subset condition columns
@@ -247,7 +241,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     pltcondx <- check.matchval(pltcondx, pltassgnx, cuniqueid, pltassgnid, 
 			tab1txt="cond", tab2txt="pltassgn", subsetrows=TRUE)
   }
-
 
   ###################################################################################
   ## Check condition data

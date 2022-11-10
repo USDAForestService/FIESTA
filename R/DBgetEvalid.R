@@ -432,16 +432,14 @@ DBgetEvalid <- function(states = NULL,
       stcdlstdb <- tryCatch( sqldf::sqldf(state.qry)[[1]],
 				error = function(e) {
                   	return(NULL) })
-    }      
-    if (!is.null(stcdlstdb) && !all(stcdlst %in% stcdlstdb)) {
-      stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
-      message("statecds missing in database: ", toString(stcdmiss))
-    } else {
-      if (datsource == "sqlite") {
-        message("using all states in database")
-      } else {
-        message("using all states in table")
-      }
+    }  
+
+    ## Check if given states are in the database
+    if (!is.null(stcdlstdb)) {
+      if (!all(stcdlst %in% stcdlstdb)) {
+        stcdmiss <- stcdlst[!stcdlst %in% stcdlstdb]
+        message("statecds missing in database: ", toString(stcdmiss))
+      } 
     }
   } else {
     nopoptables <- FALSE

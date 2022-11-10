@@ -179,7 +179,7 @@ unitvar <- "DISTRICTNA"
 
 auxdat <- spGetAuxiliary(
   xyplt = SApltdat$spxy,
-  uniqueid = "CN",
+  uniqueid = "PLT_CN",
   unit_layer = unit_layer,
   unitvar = "DISTRICTNA",
   rastlst.cont = rastlst.cont,

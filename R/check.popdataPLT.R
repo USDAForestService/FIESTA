@@ -242,7 +242,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   pltassgnx <- suppressMessages(pcheck.table(pltassgn, tab_dsn=dsn, 
            tabnm="pltassgn", caption="plot assignments?", 
            nullcheck=nullcheck, tabqry=pltassgnqry, returnsf=FALSE))
-
+ 
   ###################################################################################
   ## Check and merge plt, pltassgn, cond
   ###################################################################################
@@ -322,9 +322,11 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       ## Subset pltx to pltassgnx ids
       pltx <- check.matchval(pltx, pltassgnx, pjoinid, pltassgnid, tab1txt="plt",
 			tab2txt="pltassgn", subsetrows=TRUE)
+      pltxvars <- names(pltx)[!names(pltx) %in% names(pltassgnx)]
 
       ## Merge pltx and pltassgnx (Note: inner join)
-      pltx <- merge(pltassgnx, pltx, by.x=pltassgnid, by.y=pjoinid)
+      pltx <- merge(pltassgnx, pltx[, unique(c(pjoinid, pltxvars)), with=FALSE], 
+				by.x=pltassgnid, by.y=pjoinid)
       #pltx <- merge(pltx, pltassgnx, by.x=pjoinid, by.y=pltassgnid)
       puniqueid <- pltassgnid
 
@@ -381,7 +383,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       }
     }
   }
-
+ 
   ######################################################################################
   ## Check for missing plot variables
   ######################################################################################

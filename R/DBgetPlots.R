@@ -853,15 +853,15 @@ DBgetPlots <- function (states = NULL,
     ## Check custom Evaluation data
     #############################################
     evalchk <- customEvalchk(states = states, 
-                    measCur = measCur, 
-                    measEndyr = measEndyr, 
-                    allyrs = allyrs, 
-                    invyrs = invyrs, 
-                    measyrs = measyrs,
-                    invyrtab = invyrtab)
+                             measCur = measCur, 
+                             measEndyr = measEndyr, 
+                             allyrs = allyrs, 
+                             invyrs = invyrs, 
+                             measyrs = measyrs,
+                             invyrtab = invyrtab)
     if (is.null(evalchk)) {
       stop("must specify an evaluation timeframe for data extraction... \n", 
-		"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
+		"...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
     }
     measCur <- evalchk$measCur
     measEndyr <- evalchk$measEndyr
@@ -1006,14 +1006,14 @@ DBgetPlots <- function (states = NULL,
   ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
   if (savedata | saveqry | parameters | !treeReturn | !returndata) {
-    outlst <- pcheck.output(out_dsn=out_dsn, 
-                            out_fmt=out_fmt, 
-                            outfolder=outfolder, 
-                            outfn.pre=outfn.pre, 
-                            outfn.date=outfn.date, 
-                            overwrite_dsn=overwrite_dsn, 
-                            append_layer=append_layer, 
-                            gui=gui)
+    outlst <- pcheck.output(out_dsn = out_dsn, 
+                            out_fmt = out_fmt, 
+                            outfolder = outfolder, 
+                            outfn.pre = outfn.pre, 
+                            outfn.date = outfn.date, 
+                            overwrite_dsn = overwrite_dsn, 
+                            append_layer = append_layer, 
+                            gui = gui)
     outfolder <- outlst$outfolder
     out_dsn <- outlst$out_dsn
     out_fmt <- outlst$out_fmt
@@ -1119,7 +1119,7 @@ DBgetPlots <- function (states = NULL,
           ppsaflds <- DBI::dbListFields(dbconn, ppsanm)
         }
       }           
-      if (iseval && measCur && is.null(surveynm)) {
+      if ((iseval || measCur) && is.null(surveynm)) {
         surveynm <- chkdbtab(dbtablst, survey_layer)
       }
 
@@ -1768,15 +1768,15 @@ DBgetPlots <- function (states = NULL,
           if (!append_layer) index.unique.plot_pplotx <- c("PLT_CN", "CONDID")
           datExportData(cond_pcondx, 
               index.unique = index.unique.plot_pplotx,
-              savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="plot_pplot",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE))
+              savedata_opts = list(outfolder =outfolder, 
+                                   out_fmt = out_fmt, 
+                                   out_dsn = out_dsn, 
+                                   out_layer = "plot_pplot",
+                                   outfn.pre = outfn.pre, 
+                                   overwrite_layer = overwrite_layer,
+                                   append_layer = append_layer,
+                                   outfn.date = outfn.date, 
+                                   add_layer = TRUE))
           rm(plot_pplotx)
           gc()   
         } 
@@ -1825,15 +1825,15 @@ DBgetPlots <- function (states = NULL,
           if (!append_layer) index.unique.cond_pcondx <- c("PLT_CN", "CONDID")
           datExportData(cond_pcondx, 
               index.unique = index.unique.cond_pcondx,
-              savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="cond_pcond",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE))
+              savedata_opts = list(outfolder = outfolder, 
+                                   out_fmt = out_fmt, 
+                                   out_dsn = out_dsn, 
+                                   out_layer = "cond_pcond",
+                                   outfn.pre = outfn.pre, 
+                                   overwrite_layer = overwrite_layer,
+                                   append_layer = append_layer,
+                                   outfn.date = outfn.date, 
+                                   add_layer = TRUE))
           rm(cond_pcondx)
           gc()   
         } 
@@ -1845,7 +1845,7 @@ DBgetPlots <- function (states = NULL,
         gc()
       }
     }
-
+ 
     ##############################################################
     ## Tree data
     ##############################################################
@@ -1911,6 +1911,7 @@ DBgetPlots <- function (states = NULL,
             }
         }
       }
+ 
       message("\n",
       	"## STATUS: Getting tree data from TREE (", stabbr, ") ...", "\n")
       if (is.null(treenm) || (is.null(treevarlst) && is.null(tsumvarlst))) {
@@ -1950,20 +1951,19 @@ DBgetPlots <- function (states = NULL,
         dbqueries$tree <- treeqry
 
         ## Run tree query
-        if (!is.null(sppvars)) {
-          if (datsource == "sqlite") {
-            treex <- tryCatch( DBI::dbGetQuery(dbconn, treeqry),
+        if (datsource == "sqlite") {
+          treex <- tryCatch( DBI::dbGetQuery(dbconn, treeqry),
 			error=function(e) {
                     message("TREE query is invalid\n")
                     return(NULL) })
-          } else {
-            treex <- tryCatch( sqldf::sqldf(treeqry, stringsAsFactors=FALSE),
+        } else {
+          treex <- tryCatch( sqldf::sqldf(treeqry, stringsAsFactors=FALSE),
 			error=function(e) {
                     message("TREE query is invalid")
                     return(NULL) })
-          }
         }
-        if (!is.null(treex) && (treex) != 0) {
+ 
+        if (!is.null(treex) && nrow(treex) != 0) {
           treex <- setDT(treex)
           treex[, PLT_CN := as.character(PLT_CN)]
           setkey(treex, PLT_CN, CONDID)
@@ -2026,8 +2026,8 @@ DBgetPlots <- function (states = NULL,
                 sppvarsnew <- c(sppvars, "BIOJENK_kg", "BIOJENK_lb")
               }
               setcolorder(treex, c(treenames, sppvarsnew)) 
-            }  
-
+            } 
+ 
             ## Append data
             if (treeReturn && returndata) {
               tabs$tree <- rbind(tabs$tree, data.frame(treex))
@@ -2038,15 +2038,15 @@ DBgetPlots <- function (states = NULL,
               if (!append_layer) index.unique.treex <- c("PLT_CN", "CONDID", "SUBP", "TREE")
               datExportData(treex, 
                    index.unique = index.unique.treex,
-                   savedata_opts = list(outfolder=outfolder, 
-                                out_fmt=out_fmt, 
-                                out_dsn=out_dsn, 
-                                out_layer="tree",
-                                outfn.pre=outfn.pre, 
-                                overwrite_layer=overwrite_layer,
-                                append_layer=append_layer,
-                                outfn.date=outfn.date, 
-                                add_layer=TRUE)) 
+                   savedata_opts = list(outfolder = outfolder, 
+                                        out_fmt = out_fmt, 
+                                        out_dsn = out_dsn, 
+                                        out_layer = "tree",
+                                        outfn.pre = outfn.pre, 
+                                        overwrite_layer = overwrite_layer,
+                                        append_layer = append_layer,
+                                        outfn.date = outfn.date, 
+                                        add_layer = TRUE)) 
               rm(treex)
               gc()
             }
@@ -2088,30 +2088,30 @@ DBgetPlots <- function (states = NULL,
         if (is.null(pjoinid)) pjoinid <- puniqueid
         if (xymeasCur) {
           xydat <- DBgetXY(states = state,
-                          datsource = datsource,
-                          dsn = data_dsn,
-                          xy = xy,
-                          xy_opts = xy_opts,
-                          dbTabs = dbTabs,
-                          eval = eval,
-                          eval_opts = eval_options(Cur = TRUE),
-                          pjoinid = pjoinid,
-                          intensity1 = intensity1,
-                          POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
+                           datsource = datsource,
+                           dsn = data_dsn,
+                           xy = xy,
+                           xy_opts = xy_opts,
+                           dbTabs = dbTabs,
+                           eval = eval,
+                           eval_opts = eval_options(Cur = TRUE),
+                           pjoinid = pjoinid,
+                           intensity1 = intensity1,
+                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
           assign(paste0("xyCur_", coords), 
 				  rbind(get(paste0("xyCur_", coords)), xydat[[1]])) 
         } else {
           xydat <- DBgetXY(states = state,
-                          datsource = datsource,
-                          dsn = data_dsn,
-                          xy = xy,
-                          xy_opts = xy_opts,
-                          dbTabs = dbTabs,
-                          eval = eval,
-                          eval_opts = eval_opts,
-                          pjoinid = pjoinid,
-                          intensity1 = intensity1,
-                          POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)  
+                           datsource = datsource,
+                           dsn = data_dsn,
+                           xy = xy,
+                           xy_opts = xy_opts,
+                           dbTabs = dbTabs,
+                           eval = eval,
+                           eval_opts = eval_opts,
+                           pjoinid = pjoinid,
+                           intensity1 = intensity1,
+                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)  
           assign(paste0("xy_", coords), 
 				  rbind(get(paste0("xy_", coords)), xydat[[1]])) 
         }
@@ -3584,8 +3584,11 @@ DBgetPlots <- function (states = NULL,
     }
   }
  
-  if (length(evalidlist) > 0) returnlst$evalid <- evalidlist
+  if (length(evalidlist) > 0) {
+    returnlst$evalid <- evalidlist
+  }
   returnlst$pltcnt <- pltcnt
+  returnlst$invyrs <- invyrs
 
   if (!is.null(evalidlist)) {
     evaliddf <- data.frame(do.call(rbind, evalidlist))

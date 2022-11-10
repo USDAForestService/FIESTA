@@ -292,7 +292,7 @@ spGetXY <- function(bnd,
                         xy_defaults_list[!names(xy_defaults_list) %in% names(xy_opts)])
     }
   } 
-  
+ 
   ##################################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################################
@@ -395,10 +395,10 @@ spGetXY <- function(bnd,
  
     ## Get intersecting states
     statedat <- spGetStates(bndx, 
-                            stbnd.att="COUNTYFIPS", 
-                            RS=RS, 
-                            states=states, 
-                            showsteps=showsteps)
+                            stbnd.att = "COUNTYFIPS", 
+                            RS = RS, 
+                            states = states, 
+                            showsteps = showsteps)
     bndx <- statedat$bndx
     stbnd.att <- statedat$stbnd.att
     statenames <- statedat$statenames
@@ -448,23 +448,23 @@ spGetXY <- function(bnd,
 
   } else { 
     xydat <- DBgetXY(states = stcds,
-                      datsource = xy_datsource,
-                      dsn = xy_dsn,
-                      xy = xy,
-                      xy_opts = xy_opts,
-                      eval = eval,
-                      eval_opts = eval_opts,
-                      dbTabs = dbTabs,
-                      pjoinid = pjoinid,
-                      invtype = invtype,
-                      intensity1 = intensity1,
-                      issp = TRUE)
+                     datsource = xy_datsource,
+                     dsn = xy_dsn,
+                     xy = xy,
+                     xy_opts = xy_opts,
+                     eval = eval,
+                     eval_opts = eval_opts,
+                     dbTabs = dbTabs,
+                     pjoinid = pjoinid,
+                     invtype = invtype,
+                     intensity1 = intensity1,
+                     issp = TRUE)
     spxy <- xydat$spxy
     xy.uniqueid <- "PLT_CN"
-    xyjoinid <- "PLT_CN"
+    xyjoinid <- xydat$xyjoinid
     pjoinid <- xydat$pjoinid 
   }
- 
+
   if (clipxy) {
     xy.uniqueid <- pcheck.varchar(var2check=xy.uniqueid, varnm="xy.uniqueid", gui=gui, 
 		checklst=names(spxy), caption="UniqueID variable of xy data", 
@@ -573,6 +573,7 @@ spGetXY <- function(bnd,
   returnlst$bndx <- bndx
   returnlst$xy.uniqueid <- xy.uniqueid
   returnlst$pjoinid <- pjoinid
+  returnlst$xyjoinid <- xyjoinid
   returnlst$states <- statenames
   returnlst$countyfips <- countyfips
   return(returnlst)

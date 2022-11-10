@@ -140,6 +140,7 @@ DBgetXY <- function (states = NULL,
   for (i in 1:length(eval_defaults_list)) {
     assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
   } 
+ 
   ## Set user-supplied eval_opts values
   if (length(eval_opts) > 0) {
     for (i in 1:length(eval_opts)) {
@@ -266,6 +267,7 @@ DBgetXY <- function (states = NULL,
     evalEndyr <- Endyr
     measCur=allyrs <- FALSE
     measEndyr <- NULL
+
   } else {
     measCur <- ifelse (Cur, TRUE, FALSE) 
     allyrs <- ifelse (All, TRUE, FALSE) 
@@ -310,15 +312,41 @@ DBgetXY <- function (states = NULL,
       iseval <- TRUE
     }
     SURVEY <- evalInfo$SURVEY
+    surveynm <- evalInfo$surveynm
     POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
     dbconn <- evalInfo$dbconn
+  }
+
+  ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
+  if (!iseval) {
+  
+    ## Check custom Evaluation data
+    #############################################
+    evalchk <- customEvalchk(states = states, 
+                             measCur = measCur, 
+                             measEndyr = measEndyr, 
+                             allyrs = allyrs, 
+                             invyrs = invyrs, 
+                             measyrs = measyrs,
+                             invyrtab = invyrtab)
+    if (is.null(evalchk)) {
+      stop("must specify an evaluation timeframe for data extraction... \n", 
+		"...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
+    }
+    measCur <- evalchk$measCur
+    measEndyr <- evalchk$measEndyr
+    allyrs <- evalchk$allyrs
+    invyrs <- evalchk$invyrs
+    measyrs <- evalchk$measyrs
   }
  
   ## Check plot_layer
   #####################################################
   if (datsource == "datamart") {
-    PLOT <- tryCatch( DBgetCSV(plot_layer, stabbrlst, 
-                      returnDT=TRUE, stopifnull=FALSE),
+    PLOT <- tryCatch( DBgetCSV(plot_layer, 
+                               stabbrlst,
+                               returnDT = TRUE, 
+                               stopifnull = FALSE),
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
@@ -342,28 +370,51 @@ DBgetXY <- function (states = NULL,
     if (!is.null(PLOT) && nrow(PLOT) > 0) {
       plotnm <- "PLOT"
       pltflds <- names(PLOT)
-      pjoinid <- findnm(pjoinid, pltflds, returnNULL=TRUE)
-      if (is.null(pjoinid)) {
-        if (xy.uniqueid %in% pltflds) {
-          pjoinid <- xy.uniqueid
-        }
-      }
     } else {
       plotnm <- NULL
     }
   }
  
+  ## Check pjoinid
+  #####################################################
+  pjoinidtmp <- findnm(pjoinid, pltflds, returnNULL=TRUE)
+  if (is.null(pjoinidtmp)) {
+    if (is.null(pjoinid)) {
+      message("pjoinid is null")
+    } else {
+      message("pjoinid does not exist in data table")
+    }
+ 
+    if (xy.uniqueid %in% pltflds) {
+      pjoinid <- xy.uniqueid
+      message("...using the xy.uniqueid as the plot joinid: ", xy.uniqueid, "\n")
+    } else {
+      if (xy.uniqueid == "PLT_CN" && "CN" %in% pltflds) {
+        pjoinid <- "CN"
+        message("...using CN as the plot joinid", "\n")
+      } else if (xy.uniqueid == "CN" && "PLT_CN" %in% pltflds) {
+        pjoinid <- "PLT_CN"
+        message("...using PLT_CN as the plot joinid", "\n")
+      } else {
+        stop("pjoinid is invalid")
+      }
+    }        
+  } else {
+    stop("pjoinid is invalid")
+  }
+
   ## Check xy
   #####################################################
-   xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
-
+  xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
   if (xyisplot) {
     xyflds <- pltflds
     xynm <- plotnm
   } else {
     if (datsource == "datamart") {
-      XY <- tryCatch( DBgetCSV(xy, stabbrlst, 
-                      returnDT=TRUE, stopifnull=FALSE),
+      XY <- tryCatch( DBgetCSV(xy, 
+                               stabbrlst,
+                               returnDT = TRUE, 
+                               stopifnull = FALSE),
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
@@ -389,6 +440,7 @@ DBgetXY <- function (states = NULL,
   } else {
     xyjoinid <- findnm(xyjoinid, xyflds, returnNULL=FALSE)
   }
+
  
   ## If using EVALID, you don't need to get INVYRS, intensity
   if (!iseval) { 
@@ -396,16 +448,16 @@ DBgetXY <- function (states = NULL,
     ## Check custom Evaluation data
     ##########################################################
     evalchk <- customEvalchk(states = states, 
-                    measCur = measCur, 
-                    measEndyr = measEndyr, 
-                    allyrs = allyrs, 
-                    invyrs = invyrs, 
-                    measyrs = measyrs,
-                    invyrtab = invyrtab)
+                             measCur = measCur, 
+                             measEndyr = measEndyr, 
+                             allyrs = allyrs, 
+                             invyrs = invyrs, 
+                             measyrs = measyrs,
+                             invyrtab = invyrtab)
 
     if (is.null(evalchk)) {
       stop("must specify an evaluation timeframe for data extraction... \n", 
-		"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
+		"...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
     }
     measCur <- evalchk$measCur
     measEndyr <- evalchk$measEndyr
@@ -503,7 +555,6 @@ DBgetXY <- function (states = NULL,
         }
       }
     }       
-
     pfromqry <- paste0(SCHEMA., ppsanm, " ppsa")
     if (!is.null(plotnm) && !xyisplot) {
       xyfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., plotnm, 
@@ -543,6 +594,10 @@ DBgetXY <- function (states = NULL,
                                popSURVEY = popSURVEY, 
                                plotnm = plotnm,
                                surveynm = "SURVEY")
+      if (!xyisplot) {
+        xyfromqry <- paste0(xyfromqry, 
+                 " JOIN ", SCHEMA., xynm, " xy ON(xy.", xyjoinid, " = p.", pjoinid, ")")
+      }
     } else {
       plotfromnm <- ifelse(is.null(plotnm), xynm, plotnm)
       xyfromqry <- paste0(SCHEMA., plotfromnm, " p")
@@ -557,7 +612,7 @@ DBgetXY <- function (states = NULL,
   ##################################################################################
   ## Generate queries
   ##################################################################################
-  XYvarlst <- c(xy.uniqueid, xvar, yvar)
+  XYvarlst <- unique(c(xy.uniqueid, xyjoinid, xvar, yvar))
   pvarlst <- c("STATECD", "UNITCD", "COUNTYCD", "PLOT")
   if (addINTENSITY) { 
     pvarlst <- c(pvarlst, "INTENSITY")
@@ -569,7 +624,6 @@ DBgetXY <- function (states = NULL,
     pvarlst <- c(pvarlst, "MEASYEAR")
   }
   xyvars <- c(XYvarlst, pvarlst)
-
   if (is.null(plotnm) || xyisplot) {
     if (!all(xyvars %in% pltflds)) {
       xypmiss <- xyvars[!xyvars %in% pltflds]
@@ -577,7 +631,12 @@ DBgetXY <- function (states = NULL,
         xymiss <- xypmiss[xypmiss %in% XYvarlst]
         stop("xy table is missing essential variables: ", toString(xymiss))
       } else if (length(xypmiss) > 0) {
-        message("missing plot variables: ", toString(xypmiss))
+        if (any(xypmiss == "PLT_CN")) {
+          xypmiss <- xypmiss[xypmiss != "PLT_CN"]
+          if (length(xypmiss) > 0) {
+            message("missing plot variables: ", toString(xypmiss))
+          }
+        }
         xyvars <- xyvars[xyvars %in% pltflds]
       }
     }
@@ -589,24 +648,37 @@ DBgetXY <- function (states = NULL,
         xymiss <- xypmiss[xypmiss %in% XYvarlst]
         stop("xy table is missing essential variables: ", toString(xymiss))
       } else if (length(xypmiss) > 0) {
-        message("missing xy variables: ", toString(xypmiss))
+        if (any(xypmiss == "PLT_CN")) {
+          xypmiss <- xypmiss[xypmiss != "PLT_CN"]
+          if (length(xypmiss) > 0) {
+            message("missing plot variables: ", toString(xypmiss))
+          }
+        }
         xyvars <- xyvars[xyvars %in% xyflds]
       }
       varsA <- paste0("xy.", xyvars)
       pltvars <- xyvars
       pmiss <- pltvars[!pltvars %in% pltflds]
       if (length(pmiss) > 0) {
-        message("missing plot variables: ", toString(pmiss))
+        if (any(pmiss == "PLT_CN")) {
+          pmiss <- pmiss[pmiss != "PLT_CN"]
+          if (length(pmiss) > 0) {
+            message("missing plot variables: ", toString(pmiss))
+          }
+        }
         pltvars <- pltvars[pltvars %in% pltflds]
       }
       if (length(pltvars) > 0) {
-        varsA <- toString(c(varsA, paste0("p.", pltvars)))
+        pltvars <- pltvars[!pltvars %in% xyvars]
+        if (length(pltvars) > 0) {
+          varsA <- toString(c(varsA, paste0("p.", pltvars)))
+        }
       }
     } else {
       varsA <- toString(paste0("xy.", xyvars))
     }    
   }
-
+ 
   ## Create xy query
   ###########################################################
   if (iseval) {
@@ -657,7 +729,8 @@ DBgetXY <- function (states = NULL,
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) }) 
-    }      
+    } 
+    xyx <- setDT(xyx)     
   }
   if (is.null(xyx) || nrow(xyx) == 0) {
     message("invalid xy query\n")
@@ -665,15 +738,26 @@ DBgetXY <- function (states = NULL,
     stop()
   }
 
-  xyx <- xyx[!xyx$CN %in% FIESTAutils::kindcd3old$CN, ]
-  setnames(xyx, "CN", "PLT_CN")
-    
+  ## Change CN to PLT_CN if exists
+  if ("CN" %in% names(xyx) && !"PLT_CN" %in% names(xyx)) {
+    setnames(xyx, "CN", "PLT_CN")
+    xy.uniqueid <- "PLT_CN"
+    xyjoinid <- "PLT_CN"
+  }
+
+  ## Remove KNOWN plots that are no longer in inventory
+  if (measCur || !is.null(measEndyr)) {
+    xyx <- xyx[!xyx$PLT_CN %in% FIESTAutils::kindcd3old$CN, ]
+  }
+   
   if (all(c("STATECD", "UNITCD", "COUNTYCD", "PLOT") %in% names(xyx))) {
     xyx[["PLOT_ID"]] <- paste0("ID", 
 		formatC(xyx$STATECD, width=2, digits=2, flag=0), 
           	formatC(xyx$UNITCD, width=2, digits=2, flag=0),
           	formatC(xyx$COUNTYCD, width=3, digits=3, flag=0),
           	formatC(xyx$PLOT, width=5, digits=5, flag=0)) 
+
+    ## Change names of X/Y variables to *_PUBLIC
     setnames(xyx, c("LON", "LAT"), c("LON_PUBLIC", "LAT_PUBLIC"), skip_absent=TRUE)
   }
   if (all(c("STATECD", "COUNTYCD") %in% names(xyx))) {
@@ -742,6 +826,7 @@ DBgetXY <- function (states = NULL,
     returnlst$xvar <- "LON_PUBLIC"
     returnlst$yvar <- "LAT_PUBLIC"
     returnlst$xy.uniqueid <- xy.uniqueid
+    returnlst$xyjoinid <- xyjoinid
     returnlst$pjoinid <- pjoinid
     
     if (dbconnopen) {

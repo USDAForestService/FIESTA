@@ -677,7 +677,7 @@ modSApop <- function(popType="VOL",
     returnlst$smallbnd <- smallbnd
     returnlst$smallbnd.domain <- smallbnd.domain
   }
-
+ 
   estvar.area <- ifelse(adj == "none", "CONDPROP_UNADJ", "CONDPROP_ADJ")
   returnlst <- append(returnlst, list(condx=condx, pltcondx=pltcondx, 
              cuniqueid=cuniqueid, condid=condid, ACI.filter=ACI.filter, 

@@ -295,7 +295,7 @@ spGetPlots <- function(bnd = NULL,
     eval_opts$allyrs <- TRUE
 
 #    stop("must specify an evaluation timeframe for data extraction... \n", 
-#	"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
+#	"...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
   }
 
   ## Set xy_options defaults
@@ -509,6 +509,7 @@ spGetPlots <- function(bnd = NULL,
                          xy_dsn = xy_dsn, 
                          xy = xy,
                          xy_opts = xy_opts,
+                         eval = eval,
                          eval_opts = eval_opts1,
                          dbTabs = dbTabs,
                          pjoinid = pjoinid,
@@ -523,7 +524,8 @@ spGetPlots <- function(bnd = NULL,
           countyfips1 <- xydat1$countyfips
           stbnd.att <- xydat1$stbnd.att
           xy.uniqueid <- xydat1$xy.uniqueid
-          pjoinid = xydat1$pjoinid        
+          pjoinid = xydat1$pjoinid 
+          xyjoinid = xydat1$xyjoinid       
           bndx1 <- xydat1$bndx
 
           ## Get plots outside filter
@@ -535,6 +537,7 @@ spGetPlots <- function(bnd = NULL,
                          xy_dsn = xy_dsn, 
                          xy = xy,
                          xy_opts = xy_opts,
+                         eval = eval,
                          eval_opts = eval_opts2,
                          dbTabs = dbTabs,
                          pjoinid = pjoinid,
@@ -564,6 +567,7 @@ spGetPlots <- function(bnd = NULL,
                          xy_dsn = xy_dsn, 
                          xy = xy,
                          xy_opts = xy_opts,
+                         eval = eval,
                          eval_opts = eval_opts,
                          dbTabs = dbTabs,
                          pjoinid = pjoinid,
@@ -579,10 +583,10 @@ spGetPlots <- function(bnd = NULL,
           stbnd.att <- xydat$stbnd.att
           bndx <- xydat$bndx
           xy.uniqueid <- xydat$xy.uniqueid
-          pjoinid = xydat$pjoinid        
+          pjoinid = xydat$pjoinid 
+          xyjoinid = xydat$xyjoinid              
         }
-print("TEST")
-print(head(spxy))
+ 
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 	            checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
@@ -984,7 +988,6 @@ print(head(spxy))
       PLOT <- tabs$plt
       puniqueid <- dat$puniqueid
       dbqueries <- dat$dbqueries
-
       
       ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
       if (nrow(PLOT) > length(unique(PLOT[[puniqueid]]))) {
@@ -1190,6 +1193,18 @@ print(head(spxy))
     returnlst$xy.uniqueid <- xyjoinid
     returnlst$pjoinid <- pjoinid
     returnlst$states <- states
+
+    if ("plt" %in% names(tabs2save) && "INVYR" %in% names(tabs2save$plt)) {
+      invyrnm <- findnm("INVYR", names(tabs2save$plt), returnNULL=TRUE)
+      if (!is.null(invyrnm)) {
+        returnlst$invyrs <- sort(unique(tabs2save$plt$INVYR))
+      } else {
+        invyrnm <- findnm("INVYR", names(pltids), returnNULL=TRUE)
+        if (!is.null(invyrnm)) {
+          returnlst$invyrs <- sort(unique(pltids$INVYR))
+        }
+      }
+    }
 
     if (savePOP) {
       returnlst$pop_plot_stratum_assgn <- pop_plot_stratum_assgn
