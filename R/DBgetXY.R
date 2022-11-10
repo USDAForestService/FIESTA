@@ -44,7 +44,9 @@
 #' file (*.csv).
 #' @param exportsp Logical. If TRUE, exports data as spatial. 
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options. Only used when savedata = TRUE. 
+#' of options. Only used when savedata = TRUE.
+#' @param POP_PLOT_STRATUM_ASSGN Data frame. The POP_PLOT_STRATUM_ASSGN table
+#' if already downloaded. 
 #' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
 #'
@@ -378,7 +380,7 @@ DBgetXY <- function (states = NULL,
     } else {
       if (!is.null(XY)) {
         xynm <- "XY"
-        name(XY) <- toupper(names(XY))
+        names(XY) <- toupper(names(XY))
         xyflds <- names(XY)
       }
     }

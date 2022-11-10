@@ -2010,7 +2010,7 @@ DBgetPlots <- function (states = NULL,
             ## Create new biomass variables
             if (!is.null(sppvars)) {
               treenames <- names(treex)
-              treex <- merge(treex, ref_spp, by="SPCD")
+              treex <- merge(treex, refspp, by="SPCD")
               if (biojenk) {
                 treex[, BIOJENK_kg := exp(JENKINS_TOTAL_B1 + JENKINS_TOTAL_B2 * log(DIA * 2.54))]
                 treex[, BIOJENK_lb := BIOJENK_kg * 2.2046]		## Converts back to tons
@@ -2088,7 +2088,8 @@ DBgetPlots <- function (states = NULL,
                           eval = eval,
                           eval_opts = eval_options(Cur = TRUE),
                           pjoinid = pjoinid,
-                          intensity1 = intensity1) 
+                          intensity1 = intensity1,
+                          POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
           assign(paste0("xyCur_", coords), 
 				  rbind(get(paste0("xyCur_", coords)), xydat[[1]])) 
         } else {
@@ -2101,7 +2102,8 @@ DBgetPlots <- function (states = NULL,
                           eval = eval,
                           eval_opts = eval_opts,
                           pjoinid = pjoinid,
-                          intensity1 = intensity1) 
+                          intensity1 = intensity1,
+                          POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)  
           assign(paste0("xy_", coords), 
 				  rbind(get(paste0("xy_", coords)), xydat[[1]])) 
         }
@@ -3094,8 +3096,8 @@ DBgetPlots <- function (states = NULL,
           if (datsource == "sqlite") {
             othertabnm <- chkdbtab(dbtablst, othertable)
             if (is.null(othertabnm)) {
-              message(othertab, " does not exist in database")
-              othertables <- othertables[othertables != othertab]
+              message(othertable, " does not exist in database")
+              othertables <- othertables[othertables != othertable]
             }
           } else if (datsource == "datamart") {
             assign(othertable, 

@@ -92,6 +92,9 @@ file (*.csv).}
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
 
+\item{POP_PLOT_STRATUM_ASSGN}{Data frame. The POP_PLOT_STRATUM_ASSGN table
+if already downloaded.}
+
 \item{dbconn}{Open database connection.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
