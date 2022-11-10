@@ -581,7 +581,8 @@ spGetPlots <- function(bnd = NULL,
           xy.uniqueid <- xydat$xy.uniqueid
           pjoinid = xydat$pjoinid        
         }
-
+print("TEST")
+print(head(spxy))
         ## Check xyjoinid
         xyjoinid <- pcheck.varchar(var2check=xyjoinid, varnm="xyjoinid", 
 	            checklst=names(pltids), gui=gui, caption="JoinID in pltids?", 
@@ -822,6 +823,7 @@ spGetPlots <- function(bnd = NULL,
                          isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
+                         getxy = FALSE,
                          ACI = ACI, 
                          biojenk = biojenk,
                          greenwt = greenwt,
@@ -904,6 +906,7 @@ spGetPlots <- function(bnd = NULL,
                          isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
+                         getxy = FALSE,
                          ACI = ACI, 
                          biojenk = biojenk,
                          greenwt = greenwt,
@@ -967,6 +970,7 @@ spGetPlots <- function(bnd = NULL,
                          isdwm = isdwm,
                          plotgeom = plotgeom, 
                          othertables = othertables, 
+                         getxy = FALSE,
                          ACI = ACI, 
                          biojenk = biojenk,
                          greenwt = greenwt,
