@@ -25,6 +25,7 @@ dbTables(
   popstratum_layer = "POP_STRATUM",
   popestnunit_layer = "POP_ESTN_UNIT",
   ppsa_layer = "POP_PLOT_STRATUM_ASSGN",
+  refspp_layer = "REF_SPECIES",
   other_layers = NULL,
   ...
 )
@@ -95,6 +96,9 @@ layer in database. Population estimation unit data (POP_ESTN_UNIT).}
 \item{ppsa_layer}{R object, comma-delimited file(*.csv), or name of
 layer in database. Population plot stratum assignment data (
 (POP_PLOT_STRATUM_ASSGN).}
+
+\item{refspp_layer}{R object, comma-delimited file(*.csv), or name of
+layer in database. Reference table for species (REF_SPECIES).}
 
 \item{other_layers}{String. Other layer(s) in database to clip and/or
 extract from database (Note: must include PLT_CN variable as unique

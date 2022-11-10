@@ -99,6 +99,7 @@ DBgetXY <- function (states = NULL,
                      savedata = FALSE, 
                      exportsp = FALSE,
                      savedata_opts = NULL,
+                     POP_PLOT_STRATUM_ASSGN = NULL,
                      dbconn = NULL, 
                      dbconnopen = FALSE
                      ) {
@@ -310,7 +311,7 @@ DBgetXY <- function (states = NULL,
     POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
     dbconn <- evalInfo$dbconn
   }
-
+ 
   ## Check plot_layer
   #####################################################
   PLOT <- pcheck.table(plot_layer, tab_dsn=dsn)
@@ -350,14 +351,14 @@ DBgetXY <- function (states = NULL,
       plotnm <- NULL
     }
   }
-
+ 
   ## Check xy
   #####################################################
-  XY <- pcheck.table(xy, tab_dsn=dsn)
-  xyisplot <- ifelse (identical(xy_layer, plot_layer), TRUE, FALSE)
+   xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
 
   if (xyisplot) {
     xyflds <- pltflds
+    xynm <- plotnm
   } else {
     if (datsource == "datamart") {
       XY <- tryCatch( DBgetCSV(xy, stabbrlst, 
@@ -377,6 +378,7 @@ DBgetXY <- function (states = NULL,
     } else {
       if (!is.null(XY)) {
         xynm <- "XY"
+        name(XY) <- toupper(names(XY))
         xyflds <- names(XY)
       }
     }
@@ -471,7 +473,7 @@ DBgetXY <- function (states = NULL,
         ## Check evalids 
         evalid.qry <- paste("select distinct evalid from ", ppsanm) 
         if (datsource == "sqlite") {
-          evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)
+          evalidindb <- DBI::dbGetQuery(dbconn, evalid.qry)[[1]]
         } else {
           evalidindb <- sqldf::sqldf(evalid.qry)
         }
@@ -505,7 +507,7 @@ DBgetXY <- function (states = NULL,
     pfromqry <- paste0(SCHEMA., ppsanm, " ppsa")
     if (!is.null(plotnm) && !xyisplot) {
       xyfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., plotnm, 
-			" p ON (p.", puniqueid, " = ppsa.PLT_CN)")
+			" p ON (p.", pjoinid, " = ppsa.PLT_CN)")
     } else {
       xyfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., xynm, 
 			" p ON (p.", xy.uniqueid, " = ppsa.PLT_CN)")

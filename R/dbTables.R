@@ -51,6 +51,8 @@
 #' @param ppsa_layer R object, comma-delimited file(*.csv), or name of
 #' layer in database. Population plot stratum assignment data (
 #' (POP_PLOT_STRATUM_ASSGN). 
+#' @param refspp_layer R object, comma-delimited file(*.csv), or name of
+#' layer in database. Reference table for species (REF_SPECIES). 
 #' @param other_layers R object, comma-delimited file(*.csv), or name of
 #' layer in database. Other layers to extract from database. 
 #' @param other_layers String. Other layer(s) in database to clip and/or
@@ -84,6 +86,7 @@ dbTables <- function(plot_layer = "PLOT",
                      popstratum_layer = "POP_STRATUM",
                      popestnunit_layer = "POP_ESTN_UNIT",
                      ppsa_layer = "POP_PLOT_STRATUM_ASSGN",
+                     refspp_layer = "REF_SPECIES",
                      other_layers = NULL,
                      ...) {
   # Check input parameters
