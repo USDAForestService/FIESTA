@@ -316,8 +316,6 @@ DBgetXY <- function (states = NULL,
  
   ## Check plot_layer
   #####################################################
-  PLOT <- pcheck.table(plot_layer, tab_dsn=dsn)
-
   if (datsource == "datamart") {
     PLOT <- tryCatch( DBgetCSV(plot_layer, stabbrlst, 
                       returnDT=TRUE, stopifnull=FALSE),
@@ -334,6 +332,7 @@ DBgetXY <- function (states = NULL,
       pltflds <- DBI::dbListFields(dbconn, plotnm)
     }
   } else {
+    PLOT <- pcheck.table(plot_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(PLOT)) {
       plotnm <- "PLOT"
       pltflds <- names(PLOT)
@@ -378,11 +377,10 @@ DBgetXY <- function (states = NULL,
         xyflds <- DBI::dbListFields(dbconn, xynm)
       }
     } else {
-      if (!is.null(XY)) {
-        xynm <- "XY"
-        names(XY) <- toupper(names(XY))
-        xyflds <- names(XY)
-      }
+      XY <- pcheck.table(xy, stopifnull=TRUE, stopifinvalid=TRUE)
+      xynm <- "XY"
+      names(XY) <- toupper(names(XY))
+      xyflds <- names(XY)
     }
   }
   xy.uniqueid <- findnm(xy.uniqueid, xyflds, returnNULL=FALSE)

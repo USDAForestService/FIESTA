@@ -1424,6 +1424,7 @@ DBgetPlots <- function (states = NULL,
     xfilter <- paste0(evalFilter, stateFilters)
     message(paste(stcd, "-", xfilter))
 
+
     #####################################################################################
     ###################################    RUN QUERIES   ################################
     #####################################################################################
@@ -1440,6 +1441,14 @@ DBgetPlots <- function (states = NULL,
 
       if (defaultVars) {
         ## Check variables in database
+
+        if (is.null(chkdbtab(pltcondflds, "LON")) && !is.null(chkdbtab(pltcondflds, "LON_PUBLIC"))) {
+          pltvarlst <- sub("LON", "LON_PUBLIC", pltvarlst)
+          pltvarlst <- sub("LAT", "LAT_PUBLIC", pltvarlst)
+        }
+        if (is.null(chkdbtab(pltcondflds, "ELEV")) && !is.null(chkdbtab(pltcondflds, "ELEV_PUBLIC"))) {
+          pltvarlst <- sub("ELEV", "ELEV_PUBLIC", pltvarlst)
+        }
         pltvarlst <- pltvarlst[pltvarlst %in% pltcondflds]
         condvarlst <- condvarlst[condvarlst %in% pltcondflds]
 
@@ -1483,7 +1492,6 @@ DBgetPlots <- function (states = NULL,
         tryCatch( pltcondx <- setDT(sqldf::sqldf(pltcond.qry, stringsAsFactors=FALSE)),
 			error=function(e) message("pltcond query is invalid"))
       }
-  
       ## Write query to outfolder
       if (saveqry) {
         pltcondqryfn <- DBgetfn("pltcond", invtype, outfn.pre, stabbr, 
