@@ -620,6 +620,7 @@ modMApop <- function(popType="VOL",
   }
 
   if (popType %in% c("ALL", "AREA", "VOL")) {
+ 
     ###################################################################################
     ## Check parameters and data for popType AREA/VOL
     ###################################################################################
@@ -707,7 +708,6 @@ modMApop <- function(popType="VOL",
   if (adj == "none") {
     setkeyv(condx, c(cuniqueid, condid))
   } else {
-    
     if (popType %in% c("ALL", "VOL", "CURR")) {
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 

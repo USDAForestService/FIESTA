@@ -56,8 +56,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     assign(tabnm, tabs[[tabnm]])
   }
   cuniqueid <- tabIDs[["cond"]]
-  tuniqueid <- tabIDs[["tree"]]
-  suniqueid <- tabIDs[["seed"]]
 
 
   ###################################################################################
@@ -338,13 +336,14 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   }
   pltcondx[[areawt]] <- check.numeric(pltcondx[[areawt]])
 
-
   ###################################################################################
   ###################################################################################
   ## Check tree data
   ###################################################################################
   ###################################################################################
   if (!is.null(treex)) {
+    tuniqueid <- tabIDs[["tree"]]
+
     ## Define necessary variable for tree table
     tvars2keep <- {}
     treenmlst <- names(treex)
@@ -429,44 +428,46 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   seedx <- pcheck.table(seed, tab_dsn=dsn, tabnm="seed", caption="Seedling table?",
 		nullcheck=nullcheck, gui=gui, tabqry=seedqry, returnsf=FALSE)
   if (!is.null(seedx)) {
+    suniqueid <- tabIDs[["seed"]]
+
     ## Define necessary variable for tree table
     svars2keep <- {}
     if (adj != "none") svars2keep <- "TPA_UNADJ"
     seednmlst <- names(seedx)
 
     ## Check unique identifiers
-    tuniqueid <- pcheck.varchar(var2check=tuniqueid, varnm="tuniqueid", gui=gui,
-		checklst=treenmlst, caption="UniqueID variable of plot",
-		warn=paste(tuniqueid, "not in tree"), stopifnull=TRUE)
+    suniqueid <- pcheck.varchar(var2check=suniqueid, varnm="suniqueid", gui=gui,
+		checklst=seednmlst, caption="UniqueID variable of plot",
+		warn=paste(suniqueid, "not in seed"), stopifnull=TRUE)
 
     ## Check for NA values in necessary variables in tree table
-    seedx.na <- sum(is.na(seedx[[tuniqueid]]))
-    if (seedx.na > 0) stop("NA values in ", tuniqueid)
+    seedx.na <- sum(is.na(seedx[[suniqueid]]))
+    if (seedx.na > 0) stop("NA values in ", suniqueid)
 
-    if (tuniqueid %in% pltcondnmlst) {
-      idplace <- which(pltcondnmlst %in% tuniqueid)
+    if (suniqueid %in% pltcondnmlst) {
+      idplace <- which(pltcondnmlst %in% suniqueid)
       if (idplace != 1) {
-	  pltcondnmlst <- c(tuniqueid, pltcondnmlst)
+	  pltcondnmlst <- c(suniqueid, pltcondnmlst)
 	  pltcondnmlst <- pltcondnmlst[-(idplace + 1)]
       }
     }
 
-    ## Check for condid in tree
-    if (!condid %in% names(treex)) {
-      if (nrow(seedx) == length(unique(seedx[[tuniqueid]]))) {
+    ## Check for condid in seed
+    if (!condid %in% names(seedx)) {
+      if (nrow(seedx) == length(unique(seedx[[suniqueid]]))) {
         seedx[, CONDID := 1]
       } else {
         stop("only 1 record for each tuniqueid allowed")
       }
     } else {
       ## Check for NA values in condid
-      seedx.na <- sum(is.na(seedx[, tuniqueid, with=FALSE]))
-      if (seedx.na > 0) stop("NA values in ", tuniqueid)
+      seedx.na <- sum(is.na(seedx[, suniqueid, with=FALSE]))
+      if (seedx.na > 0) stop("NA values in ", suniqueid)
     }
-    setkeyv(seedx, c(tuniqueid, condid))
+    setkeyv(seedx, c(suniqueid, condid))
 
-    ## Check if class of tuniqueid in seedx matches class of cuniqueid in condx
-    tabchk <- check.matchclass(pltcondx, seedx, cuniqueid, tuniqueid)
+    ## Check if class of suniqueid in seedx matches class of cuniqueid in condx
+    tabchk <- check.matchclass(pltcondx, seedx, cuniqueid, suniqueid)
     pltcondx <- tabchk$tab1
     seedx <- tabchk$tab2
 
@@ -482,7 +483,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
 
     svars2keep2 <- svars2keep[svars2keep != "TPA_UNADJ"]
     if (length(svars2keep) > 0) {
-      svars.na <- sapply(c(tuniqueid, condid, svars2keep2),
+      svars.na <- sapply(c(suniqueid, condid, svars2keep2),
 		function(x, seedx){ sum(is.na(seedx[,x, with=FALSE])) }, seedx)
       if (any(svars.na) > 0)
         stop(svars.na[svars.na > 0], " NA values in variable: ",
@@ -516,7 +517,7 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
   }
   if (!is.null(seedx)) {
     ## Check that the values of tuniqueid in seedx are all in cuniqueid in pltcondx
-    seedf <- check.matchval(seedx, pltcondx, tuniqueid, cuniqueid, tab1txt="seed",
+    seedf <- check.matchval(seedx, pltcondx, suniqueid, cuniqueid, tab1txt="seed",
 		tab2txt="cond", subsetrows=TRUE)
     returnlst$seedf <- seedf
   }

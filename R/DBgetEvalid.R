@@ -339,7 +339,7 @@ DBgetEvalid <- function(states = NULL,
     if (!is.null(PLOT)) {
       plotnm <- "PLOT"
       pltflds <- names(PLOT)
-    }
+    } 
   } else {
     SURVEY <- pcheck.table(survey_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(SURVEY)) {
@@ -363,6 +363,7 @@ DBgetEvalid <- function(states = NULL,
       pltflds <- names(PLOT)
     }
   }
+ 
   ## Get SURVEY table
   if (!is.null(surveynm)) {
     survey.qry <- paste0("select * from ", surveynm, 
@@ -619,15 +620,17 @@ DBgetEvalid <- function(states = NULL,
       } else {
         ## Create table of all inventory years in database
         invdbtab <- NULL
-        invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE) 
-
-        if (!is.null(plotnm) && !is.null(invyrnm)) {
-          invyrqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", plotnm, 
+        if (!is.null(plotnm)) {
+          invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE) 
+        
+          if (!is.null(invyrnm)) {
+            invyrqry <- paste("select statecd, invyr, count(*) NBRPLOTS from", plotnm, 
 			"where", stfilter, "group by statecd, invyr order by statecd, invyr")   
-          if (datsource == "sqlite") {
-            invyrtab <- DBI::dbGetQuery(dbconn, invyrqry)
-          } else {
-            invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
+            if (datsource == "sqlite") {
+              invyrtab <- DBI::dbGetQuery(dbconn, invyrqry)
+            } else {
+              invyrtab <- sqldf::sqldf(invyrqry, stringsAsFactors=FALSE)
+            }
           }
         }
       }

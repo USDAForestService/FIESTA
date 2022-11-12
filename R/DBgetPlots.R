@@ -1158,6 +1158,13 @@ DBgetPlots <- function (states = NULL,
       ## COND table 
       COND <- DBgetCSV("COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
       condnm <- "COND"
+
+      ## Get pltcondflds
+      if (!is.null(plotnm)) {
+        pltcondflds <- unique(c(names(PLOT), names(COND)))
+      } else {
+        pltcondflds <- names(COND)
+      }
  
       if (iseval || savePOP) {
         ## POP_PLOT_STRATUM_ASSGN table (ZIP FILE) - 
@@ -2179,17 +2186,18 @@ DBgetPlots <- function (states = NULL,
 
         ## Create seedling query
         seedqry <- paste("select distinct", ssvars, "from", sfromqry, "where", xfilter)
-
         ## Run seedling query
         if (datsource == "sqlite") {
           seedx <- tryCatch( DBI::dbGetQuery(dbconn, seedqry),
 			error=function(e) {
-                    message("seed query is invalid")
+                    message("seed query is invalid\n")
+                    message(seedqry)
                     return(NULL) })
         } else {
           seedx <- tryCatch( sqldf::sqldf(seedqry, stringsAsFactors=FALSE),
 			error=function(e) {
-                    message("seed query is invalid")
+                    message("seed query is invalid\n")
+                    message(seedqry)
                     return(NULL) })
         }
         if (!is.null(seedx) && nrow(seedx) != 0 && length(scols) > 0) {

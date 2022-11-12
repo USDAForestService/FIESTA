@@ -360,12 +360,16 @@ DBgetXY <- function (states = NULL,
       pltflds <- DBI::dbListFields(dbconn, plotnm)
     }
   } else {
+ 
     PLOT <- pcheck.table(plot_layer, stopifnull=FALSE, stopifinvalid=FALSE)
     if (!is.null(PLOT)) {
       plotnm <- "PLOT"
       pltflds <- names(PLOT)
+    } else {
+      plotnm <- NULL
     }
   }
+ 
   if (datsource != "sqlite") {
     if (!is.null(PLOT) && nrow(PLOT) > 0) {
       plotnm <- "PLOT"
@@ -374,39 +378,42 @@ DBgetXY <- function (states = NULL,
       plotnm <- NULL
     }
   }
- 
+
   ## Check pjoinid
   #####################################################
-  pjoinidtmp <- findnm(pjoinid, pltflds, returnNULL=TRUE)
-  if (is.null(pjoinidtmp)) {
-    if (is.null(pjoinid)) {
-      message("pjoinid is null")
-    } else {
-      message("pjoinid does not exist in data table")
-    }
- 
-    if (xy.uniqueid %in% pltflds) {
-      pjoinid <- xy.uniqueid
-      message("...using the xy.uniqueid as the plot joinid: ", xy.uniqueid, "\n")
-    } else {
-      if (xy.uniqueid == "PLT_CN" && "CN" %in% pltflds) {
-        pjoinid <- "CN"
-        message("...using CN as the plot joinid", "\n")
-      } else if (xy.uniqueid == "CN" && "PLT_CN" %in% pltflds) {
-        pjoinid <- "PLT_CN"
-        message("...using PLT_CN as the plot joinid", "\n")
+  if (!is.null(plotnm)) {
+    pjoinidtmp <- findnm(pjoinid, pltflds, returnNULL=TRUE)
+    if (is.null(pjoinidtmp)) {
+      if (is.null(pjoinid)) {
+        message("pjoinid is null")
       } else {
-        stop("pjoinid is invalid")
+        message("pjoinid does not exist in data table")
       }
-    }        
-  } else {
-    stop("pjoinid is invalid")
+ 
+      if (xy.uniqueid %in% pltflds) {
+        pjoinid <- xy.uniqueid
+        message("...using the xy.uniqueid as the plot joinid: ", xy.uniqueid, "\n")
+      } else {
+        if (xy.uniqueid == "PLT_CN" && "CN" %in% pltflds) {
+          pjoinid <- "CN"
+          message("...using CN as the plot joinid", "\n")
+        } else if (xy.uniqueid == "CN" && "PLT_CN" %in% pltflds) {
+          pjoinid <- "PLT_CN"
+          message("...using PLT_CN as the plot joinid", "\n")
+        } else {
+          stop("pjoinid is invalid")
+        }
+      }        
+    } else {
+      stop("pjoinid is invalid")
+    }
   }
 
   ## Check xy
   #####################################################
   xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
-  if (xyisplot) {
+
+  if (xyisplot && !is.null(plotnm)) {
     xyflds <- pltflds
     xynm <- plotnm
   } else {
@@ -511,8 +518,20 @@ DBgetXY <- function (states = NULL,
 
   ## PLOT from/join query
   if (iseval) {
-    ## Check if evalid in plot table
-    evalidnm <- findnm("EVALID", pltflds, returnNULL=TRUE)
+    if (!is.null(plotnm)) {
+      ## Check if evalid in plot table
+      evalidnm <- findnm("EVALID", pltflds, returnNULL=TRUE)
+      if (is.null(evalidnm)) {
+        evalidnm <- findnm("EVALID", xyflds, returnNULL=TRUE)
+        if (is.null(evalidnm)) {
+          message("no evalid in xy fields... assuming one evaluation")
+          iseval <- FALSE
+        }
+      }
+    }
+  }
+ 
+  if (iseval) {
     evalid <- unlist(evalidlist) 
 
     if (is.null(POP_PLOT_STRATUM_ASSGN) && is.null(evalidnm)) {
@@ -625,8 +644,8 @@ DBgetXY <- function (states = NULL,
   }
   xyvars <- c(XYvarlst, pvarlst)
   if (is.null(plotnm) || xyisplot) {
-    if (!all(xyvars %in% pltflds)) {
-      xypmiss <- xyvars[!xyvars %in% pltflds]
+    if (!all(xyvars %in% xyflds)) {
+      xypmiss <- xyvars[!xyvars %in% xyflds]
       if (length(xypmiss) > 0 && any(xypmiss %in% XYvarlst)) {
         xymiss <- xypmiss[xypmiss %in% XYvarlst]
         stop("xy table is missing essential variables: ", toString(xymiss))
@@ -637,7 +656,7 @@ DBgetXY <- function (states = NULL,
             message("missing plot variables: ", toString(xypmiss))
           }
         }
-        xyvars <- xyvars[xyvars %in% pltflds]
+        xyvars <- xyvars[xyvars %in% xyflds]
       }
     }
     varsA <- paste0("p.", xyvars)
@@ -695,10 +714,16 @@ DBgetXY <- function (states = NULL,
 
   ## Create invyrtab query 
   ###########################################################
+  invyrtab.qry <- NULL
   if (!iseval) {
     yrvar <- ifelse(!is.null(invyrs), "INVYR", "MEASYEAR")
-    yrvarnm <- findnm(yrvar, pltflds, returnNULL=TRUE)
-    stcdnm <- findnm("STATECD", pltflds, returnNULL=TRUE)
+    if (!is.null(plotnm)) {
+      yrvarnm <- findnm(yrvar, pltflds, returnNULL=TRUE)
+      stcdnm <- findnm("STATECD", pltflds, returnNULL=TRUE)
+    } else {
+      yrvarnm <- findnm(yrvar, xyflds, returnNULL=TRUE)
+      stcdnm <- findnm("STATECD", xyflds, returnNULL=TRUE)
+    }
     if (!is.null(yrvarnm) && !is.null(stcdnm)) {
       invarsA <- toString(paste0("p.", c(stcdnm, yrvarnm)))
       invyrtab.qry <- paste0("SELECT ", invarsA, ", COUNT(*)", 
@@ -707,13 +732,13 @@ DBgetXY <- function (states = NULL,
 				" ORDER BY statecd, ", yrvar) 
     }
   }
-
+ 
   if (datsource == "sqlite") {
     xyx <- tryCatch( DBI::dbGetQuery(dbconn, xycoords.qry),
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
-    if (!iseval && is.null(invyrtab)) {
+    if (!iseval && is.null(invyrtab) && !is.null(invyrtab.qry)) {
       invyrtab <- tryCatch( DBI::dbGetQuery(dbconn, invyrtab.qry),
 			error = function(e) {
                   message(e, "\n")
@@ -724,7 +749,7 @@ DBgetXY <- function (states = NULL,
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
-    if (!iseval && is.null(invyrtab)) {
+    if (!iseval && is.null(invyrtab) && !is.null(invyrtab.qry)) {
       invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, stringsAsFactors = FALSE),
 			error = function(e) {
                   message(e, "\n")
@@ -778,11 +803,11 @@ DBgetXY <- function (states = NULL,
   if (issp) {
     spxyoutnm <- paste0("sp", xyoutnm)
      
-    if (all(c("LON_PUBLIC", "LAT_PUBLIC") %in% names(xyx))) {
+    if (all(c(xvar, yvar) %in% names(xyx))) {
 
       ## Generate shapefile
-      assign(spxyoutnm, spMakeSpatialPoints(xyplt=xyx, xvar="LON_PUBLIC", 
-		        yvar="LAT_PUBLIC", xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE, 
+      assign(spxyoutnm, spMakeSpatialPoints(xyplt=xyx, xvar=xvar, 
+		        yvar=yvar, xy.uniqueid=xy.uniqueid, xy.crs=4269, addxy=TRUE, 
 		        exportsp=exportsp, 
 		        savedata_opts=list(out_dsn=out_dsn, 
                                out_fmt=outsp_fmt,
@@ -799,7 +824,7 @@ DBgetXY <- function (states = NULL,
   ## SAVE data
   ###############################################################################
   if (savedata) {
-    index.unique.xyplt <- "PLT_CN"
+    index.unique.xyplt <- xy.uniqueid
     
     datExportData(get(xyoutnm),  
           index.unique = index.unique.xyplt,

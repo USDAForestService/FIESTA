@@ -486,7 +486,7 @@ spGetPlots <- function(bnd = NULL,
       if (!is.null(states)) {
         if (!all(states %in% FIESTAutils::ref_statecd$MEANING)) stop("states is invalid")
       }
-
+  
       if (clipxy) {
         ###########################################################################
         ## Get XY
