@@ -4,7 +4,7 @@ FIESTA 3.5
 - fixed functions for accessing new CSV files on FIA Datamart.
 - grouped parameters in DBgetPlots and spGetPlots for database layer names (dbTables)
 - grouped parameters in the following functions for database evaluation selection, with no change in defaults.
-  DBgetPlots, DBgetXY, spGetPlots, spGetXY
+  DBgetPlots, DBgetXY, spGetPlots, spGetXY (xy_opts, dbTabs, eval_opts) 
 
 
 
