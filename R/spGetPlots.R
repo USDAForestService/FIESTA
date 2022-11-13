@@ -237,7 +237,6 @@ spGetPlots <- function(bnd = NULL,
   evalresp <- FALSE 
   pltassgnid = "PLT_CN"
 
-  
   ##################################################################
   ## CHECK PARAMETER NAMES
   ##################################################################
@@ -957,7 +956,7 @@ spGetPlots <- function(bnd = NULL,
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
       }
- 
+
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 

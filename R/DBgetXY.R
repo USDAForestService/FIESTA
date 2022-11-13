@@ -378,7 +378,7 @@ DBgetXY <- function (states = NULL,
       plotnm <- NULL
     }
   }
-
+ 
   ## Check pjoinid
   #####################################################
   if (!is.null(plotnm)) {
@@ -447,7 +447,6 @@ DBgetXY <- function (states = NULL,
   } else {
     xyjoinid <- findnm(xyjoinid, xyflds, returnNULL=FALSE)
   }
-
  
   ## If using EVALID, you don't need to get INVYRS, intensity
   if (!iseval) { 
@@ -605,14 +604,16 @@ DBgetXY <- function (states = NULL,
     evalFilter <- paste0(stFilter, " and p.MEASYEAR IN(", toString(unlist(measyrs)), ")")
 
   } else {
-    if (measCur && !is.null(plotnm)) {
-      popSURVEY <- ifelse(is.null(SURVEY), FALSE, TRUE)
-      xyfromqry <- getpfromqry(Endyr = measEndyr, 
+    if (!is.null(plotnm)) {
+      if (measCur) {
+        popSURVEY <- ifelse(is.null(SURVEY), FALSE, TRUE)
+        xyfromqry <- getpfromqry(Endyr = measEndyr, 
                                SCHEMA. = SCHEMA., 
                                intensity1 = intensity1, 
                                popSURVEY = popSURVEY, 
                                plotnm = plotnm,
                                surveynm = "SURVEY")
+      }
       if (!xyisplot) {
         xyfromqry <- paste0(xyfromqry, 
                  " JOIN ", SCHEMA., xynm, " xy ON(xy.", xyjoinid, " = p.", pjoinid, ")")
@@ -697,7 +698,7 @@ DBgetXY <- function (states = NULL,
       varsA <- toString(paste0("xy.", xyvars))
     }    
   }
- 
+
   ## Create xy query
   ###########################################################
   if (iseval) {
@@ -732,7 +733,7 @@ DBgetXY <- function (states = NULL,
 				" ORDER BY statecd, ", yrvar) 
     }
   }
- 
+
   if (datsource == "sqlite") {
     xyx <- tryCatch( DBI::dbGetQuery(dbconn, xycoords.qry),
 			error = function(e) {
@@ -784,6 +785,8 @@ DBgetXY <- function (states = NULL,
 
     ## Change names of X/Y variables to *_PUBLIC
     setnames(xyx, c("LON", "LAT"), c("LON_PUBLIC", "LAT_PUBLIC"), skip_absent=TRUE)
+    xvar <- "LON_PUBLIC"
+    yvar <- "LAT_PUBLIC"
   }
   if (all(c("STATECD", "COUNTYCD") %in% names(xyx))) {
     xyx$COUNTYFIPS <- paste0(formatC(xyx$STATECD, width=2, digits=2, flag=0), 
@@ -799,7 +802,7 @@ DBgetXY <- function (states = NULL,
   if (is.null(out_layer)) {
     out_layer <- xyoutnm
   }
- 
+
   if (issp) {
     spxyoutnm <- paste0("sp", xyoutnm)
      
@@ -816,7 +819,7 @@ DBgetXY <- function (states = NULL,
                                overwrite_layer=overwrite_layer, 
 		                    append_layer=append_layer, outfn.pre=outfn.pre) ))
     } else { 
-      message("need LON_PUBLIC and LAT_PUBLIC variables to generate spatial xy")
+      message("need ", xvar, " and ", yvar, " variables to generate spatial xy")
     }
   }
      
@@ -848,8 +851,8 @@ DBgetXY <- function (states = NULL,
     } 
     returnlst[[xyoutnm]] <- get(xyoutnm)
     returnlst[["xyqry"]] <- xycoords.qry
-    returnlst$xvar <- "LON_PUBLIC"
-    returnlst$yvar <- "LAT_PUBLIC"
+    returnlst$xvar <- xvar
+    returnlst$yvar <- yvar
     returnlst$xy.uniqueid <- xy.uniqueid
     returnlst$xyjoinid <- xyjoinid
     returnlst$pjoinid <- pjoinid
