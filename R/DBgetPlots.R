@@ -273,6 +273,9 @@
 #' @param othertables String Vector. Name of other table(s) in FIADB to include
 #' in output. The table must have PLT_CN as unique identifier of a plot.
 #' @param getxy Logical. If TRUE, gets separate XY table.
+#' @param xy_datsource Source of XY data ('obj', 'csv', 'datamart', 'sqlite').
+#' @param xy_dsn If datsource='sqlite', the file name (data source name) of
+#' the sqlite database (*.sqlite) where XY data are.
 #' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
 #' polygon object, data frame, full pathname to a shapefile, or name of a layer
 #' within a database.
@@ -479,6 +482,8 @@ DBgetPlots <- function (states = NULL,
                         plotgeom = FALSE, 
                         othertables = NULL, 
                         getxy = TRUE,
+                        xy_datsource = NULL, 
+                        xy_dsn = NULL, 
                         xy = "PLOT",
                         xy_opts = xy_options(xy.uniqueid="CN", 
  	                               xvar="LON", yvar="LAT"),
@@ -1499,6 +1504,8 @@ DBgetPlots <- function (states = NULL,
         tryCatch( pltcondx <- setDT(sqldf::sqldf(pltcond.qry, stringsAsFactors=FALSE)),
 			error=function(e) message("pltcond query is invalid"))
       }
+      message(pltcond.qry)
+
       ## Write query to outfolder
       if (saveqry) {
         pltcondqryfn <- DBgetfn("pltcond", invtype, outfn.pre, stabbr, 
@@ -1712,11 +1719,12 @@ DBgetPlots <- function (states = NULL,
       
       setnames(pltx, "PLT_CN", "CN")
       setkeyv(pltx, "CN")
-    }
-    pltx <- pltx[, pltvarlst2, with=FALSE]
+
+      pltx <- pltx[, pltvarlst2, with=FALSE]
  
-    ## Create combined unique identifier to subset other tables
-    pcondID <- condx[, paste(PLT_CN, CONDID)]
+      ## Create combined unique identifier to subset other tables
+      pcondID <- condx[, paste(PLT_CN, CONDID)]
+    }
 
     ###############################################################
     ## Get unioned change tables 
@@ -2093,12 +2101,18 @@ DBgetPlots <- function (states = NULL,
       #xyx <- pltx[, c("CN", getcoords(coords), "PLOT_ID"), with=FALSE]
       if (getxy) {
         if (is.null(pjoinid)) pjoinid <- puniqueid
+        if (is.null(xy_datsource)) {
+          xy_datsource <- datsource
+          xy_dsn <- data_dsn
+        }
         if (xymeasCur) {
           xydat <- DBgetXY(states = state,
-                           datsource = datsource,
-                           dsn = data_dsn,
+                           xy_datsource = xy_datsource,
+                           xy_dsn = xy_dsn,
                            xy = xy,
                            xy_opts = xy_opts,
+                           datsource = datsource,
+                           data_dsn = data_dsn,
                            dbTabs = dbTabs,
                            eval = eval,
                            eval_opts = eval_options(Cur = TRUE),
@@ -2109,10 +2123,12 @@ DBgetPlots <- function (states = NULL,
 				  rbind(get(paste0("xyCur_", coords)), xydat[[1]])) 
         } else {
           xydat <- DBgetXY(states = state,
-                           datsource = datsource,
-                           dsn = data_dsn,
+                           xy_datsource = xy_datsource,
+                           xy_dsn = xy_dsn,
                            xy = xy,
                            xy_opts = xy_opts,
+                           datsource = datsource,
+                           data_dsn = data_dsn,
                            dbTabs = dbTabs,
                            eval = eval,
                            eval_opts = eval_opts,

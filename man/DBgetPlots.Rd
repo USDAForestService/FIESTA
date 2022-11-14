@@ -26,6 +26,8 @@ DBgetPlots(
   plotgeom = FALSE,
   othertables = NULL,
   getxy = TRUE,
+  xy_datsource = NULL,
+  xy_dsn = NULL,
   xy = "PLOT",
   xy_opts = xy_options(xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
   xymeasCur = FALSE,
@@ -111,6 +113,11 @@ appended to the plot table.}
 in output. The table must have PLT_CN as unique identifier of a plot.}
 
 \item{getxy}{Logical. If TRUE, gets separate XY table.}
+
+\item{xy_datsource}{Source of XY data ('obj', 'csv', 'datamart', 'sqlite').}
+
+\item{xy_dsn}{If datsource='sqlite', the file name (data source name) of
+the sqlite database (*.sqlite) where XY data are.}
 
 \item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
 polygon object, data frame, full pathname to a shapefile, or name of a layer

@@ -14,6 +14,8 @@ spGetXY(
   xy_dsn = NULL,
   xy = "PLOT",
   xy_opts = list(xy = "PLOT", xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  datsource = NULL,
+  data_dsn = NULL,
   dbTabs = dbTables(),
   eval = "FIA",
   eval_opts = NULL,
@@ -57,6 +59,16 @@ within a database.}
 
 \item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
 See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
+
+\item{datsource}{String. Source of FIA data ("obj", "csv", "datamart",
+"sqlite").  If datsource="sqlite", specify database name in data_dsn and
+layers in *_layer arguments.  If datsource="datamart", files are downloaded
+and extracted from FIA DataMart
+(http://apps.fs.usda.gov/fia/datamart/datamart.html). See details for more
+information about plot coordinates.  If datsource="csv", specify *.csv file
+names in *_layer arguments.}
+
+\item{data_dsn}{String. Name of database where *_layers reside.}
 
 \item{dbTabs}{List of database tables the user would like returned.
 See help(dbTables) for a list of options.}

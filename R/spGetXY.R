@@ -40,15 +40,20 @@
 #' @param xy_datsource String. Source of XY data ("obj", "csv", "datamart",
 #' "sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
 #' datsource.
-#' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
-#' polygon object, data frame, full pathname to a shapefile, or name of a layer
-#' within a database.
 #' @param xy_dsn String. Data source name (dsn; i.e., pathname or database)
 #' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
 #' polygon object, data frame, full pathname to a shapefile, or name of a layer
 #' within a database.
 #' @param xy_opts List of xy data options to specify if xy is NOT NULL. 
 #' See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').
+#' @param datsource String. Source of FIA data ("obj", "csv", "datamart",
+#' "sqlite").  If datsource="sqlite", specify database name in data_dsn and
+#' layers in *_layer arguments.  If datsource="datamart", files are downloaded
+#' and extracted from FIA DataMart
+#' (http://apps.fs.usda.gov/fia/datamart/datamart.html). See details for more
+#' information about plot coordinates.  If datsource="csv", specify *.csv file
+#' names in *_layer arguments.
+#' @param data_dsn String. Name of database where *_layers reside.
 #' @param dbTabs List of database tables the user would like returned.
 #'  See help(dbTables) for a list of options.
 #' @param eval String. Type of evaluation time frame for data extraction 
@@ -128,6 +133,8 @@ spGetXY <- function(bnd,
                     xy = "PLOT",
                     xy_opts = list(xy="PLOT", xy.uniqueid="CN", 
  	                               xvar="LON", yvar="LAT"),
+                    datsource = NULL,
+                    data_dsn =NULL, 
                     dbTabs = dbTables(),
                     eval = "FIA",
                     eval_opts = NULL,
@@ -308,34 +315,7 @@ spGetXY <- function(bnd,
   } else {
     clipxy <- FALSE
   }
- 
-  ## Set xy_datsource
-  ########################################################
-  datsourcelst <- c("obj", "csv", "datamart", "sqlite", "shp", "gdb")
-  xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
-		checklst=datsourcelst, gui=gui, caption="Data source?") 
-  if (is.null(xy_datsource)) {
-    if (!is.null(xy) && "sf" %in% class(xy)) {
-      xy_datsource <- "obj"
-    } else if (!is.null(xy_dsn)) {
-      dsn.ext <- getext(xy_dsn)
-      if (!is.na(dsn.ext) && dsn.ext != "") {
-        xy_datsource <- ifelse(dsn.ext == "gdb", "gdb", 
-		ifelse(dsn.ext %in% c("db", "db3", "sqlite", "sqlite3"), "sqlite", 
-             ifelse(dsn.ext == "csv", "csv",
-			ifelse(dsn.ext == "shp", "shp", "datamart")))) 
-      }
-    } else if (!is.null(xy)) {
-      xy.ext <- getext(xy)
-      if (!is.na(xy.ext) && xy.ext != "") {
-        xy_datsource <- ifelse(xy.ext == "shp", "shp", 
-             ifelse(xy.ext == "csv", "csv", "datamart")) 
-      }
-    } else {
-      stop("must include xy_datsource")
-    }
-  } 
-   
+    
   ## Check intensity1
   #############################################################################
   intensity1 <- pcheck.logical(intensity1, varnm="intensity1", 
@@ -448,12 +428,14 @@ spGetXY <- function(bnd,
 
   } else { 
     xydat <- DBgetXY(states = stcds,
-                     datsource = xy_datsource,
-                     dsn = xy_dsn,
+                     xy_datsource = xy_datsource,
+                     xy_dsn = xy_dsn,
                      xy = xy,
                      xy_opts = xy_opts,
                      eval = eval,
                      eval_opts = eval_opts,
+                     datsource = datsource,
+                     data_dsn = data_dsn,
                      dbTabs = dbTabs,
                      pjoinid = pjoinid,
                      invtype = invtype,

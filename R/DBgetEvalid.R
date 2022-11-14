@@ -203,7 +203,7 @@ DBgetEvalid <- function(states = NULL,
   ##################################################################
   ## CHECK PARAMETER INPUTS
   ##################################################################
-
+ 
   ## Check invtyp
   #####################################################
   invtypelst <- c("ANNUAL", "PERIODIC")
@@ -222,7 +222,8 @@ DBgetEvalid <- function(states = NULL,
   } else {
     datsourcelst <- c("sqlite", "datamart", "csv", "obj")
     datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		gui=gui, checklst=datsourcelst, caption="Data source?")
+		gui=gui, checklst=datsourcelst, caption="Data source?",
+           stopifnull=TRUE, stopifinvalid=TRUE)
 
     if (datsource == "sqlite" && !is.null(data_dsn)) {
       dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)

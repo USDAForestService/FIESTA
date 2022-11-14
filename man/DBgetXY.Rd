@@ -7,10 +7,12 @@
 DBgetXY(
   states = NULL,
   RS = NULL,
-  datsource = "datamart",
-  dsn = NULL,
+  xy_datsource = "datamart",
+  xy_dsn = NULL,
   xy = "PLOT",
   xy_opts = xy_options(xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  datsource = NULL,
+  data_dsn = NULL,
   dbTabs = dbTables(),
   eval = "FIA",
   eval_opts = eval_options(),
@@ -26,7 +28,6 @@ DBgetXY(
   exportsp = FALSE,
   savedata_opts = NULL,
   POP_PLOT_STRATUM_ASSGN = NULL,
-  dbconn = NULL,
   dbconnopen = FALSE
 )
 }
@@ -40,10 +41,10 @@ define RS.}
 coordinates for ('RMRS','SRS','NCRS','NERS','PNWRS'). Do not use if states 
 is populated. See FIESTA::ref_statecd for reference to RS and states.}
 
-\item{datsource}{Source of data ('datamart', 'sqlite').}
+\item{xy_datsource}{Source of XY data ('obj', 'csv', 'datamart', 'sqlite').}
 
-\item{dsn}{If datsource='sqlite', the file name (data source name) of
-the sqlite database (*.sqlite).}
+\item{xy_dsn}{If datsource='sqlite', the file name (data source name) of
+the sqlite database (*.sqlite) where XY data are.}
 
 \item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
 polygon object, data frame, full pathname to a shapefile, or name of a layer
@@ -51,6 +52,16 @@ within a database.}
 
 \item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
 See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
+
+\item{datsource}{String. Source of FIA data ("obj", "csv", "datamart",
+"sqlite").  If datsource="sqlite", specify database name in data_dsn and
+layers in *_layer arguments.  If datsource="datamart", files are downloaded
+and extracted from FIA DataMart
+(http://apps.fs.usda.gov/fia/datamart/datamart.html). See details for more
+information about plot coordinates.  If datsource="csv", specify *.csv file
+names in *_layer arguments.}
+
+\item{data_dsn}{String. Name of database where *_layers reside.}
 
 \item{dbTabs}{List of database tables the user would like returned.
 See help(dbTables) for a list of options.}
@@ -95,8 +106,6 @@ of options. Only used when savedata = TRUE.}
 \item{POP_PLOT_STRATUM_ASSGN}{Data frame. The POP_PLOT_STRATUM_ASSGN table
 if already downloaded.}
 
-\item{dbconn}{Open database connection.}
-
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 }
 \value{
@@ -125,7 +134,8 @@ parameters, the default parameter values are used for those not specified.
 \dontrun{
 # Most current evaluation and shapefile with public coordinates
 COxylst <- DBgetXY(states = "Colorado",
-                   eval_opts=eval_options(measCur = TRUE))
+                   eval = "FIA",
+                   eval_opts=eval_options(Endyr = 2019))
 names(COxylst)
 
 head(COxylst$xyCur_ACTUAL)
