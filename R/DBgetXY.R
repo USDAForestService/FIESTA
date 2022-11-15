@@ -400,7 +400,7 @@ DBgetXY <- function (states = NULL,
 
   ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
   if (!iseval) {
- 
+
     ## Check custom Evaluation data
     #############################################
     evalchk <- customEvalchk(states = states, 
@@ -479,7 +479,6 @@ DBgetXY <- function (states = NULL,
     }
     xyvars <- xyvars[!xyvars %in% xypmiss]
   }
-
 
   ###########################################################################
   ###########################################################################
@@ -562,10 +561,21 @@ DBgetXY <- function (states = NULL,
   ###########################################################################
   ## Create filter for state
   stcds <- pcheck.states(states, "VALUE")
-  stFilter <- paste0("p.STATECD IN(", toString(stcds), ")")
+  statecdnm <- findnm("STATECD", xyflds, returnNULL=TRUE)
+  if (!is.null(statecdnm)) {
+    statecdA <- paste0("xy.", statecdnm)  
+  } else if (!is.null(plotnm)) {
+    statecdnm <- findnm("STATECD", pltflds, returnNULL=TRUE)
+    if (is.null(statecdnm)) {
+      stop("STATECD is missing from xy and plot data tables")
+    } else {
+      statecdA <- paste0("p.", statecdnm)
+    }
+  }
+  stFilter <- paste0(statecdA, " IN(", toString(stcds), ")")
+
   evalFilter=xyfromqry <- NULL
   stabbr <- pcheck.states(states, "ABBR")
-
 
   ## If iseval = TRUE 
   if (iseval) {
@@ -624,20 +634,46 @@ DBgetXY <- function (states = NULL,
     evalFilter <- paste0("ppsa.EVALID IN(", toString(unlist(evalidlist)), ")")
 
   } else if (length(unlist(invyrs)) > 1) {
+
+    invyrnm <- findnm("INVYR", xyflds, returnNULL=TRUE)
+    if (!is.null(invyrnm)) {
+      invyrA <- paste0("xy.", invyrnm)  
+    } else if (!is.null(plotnm)) {
+      invyrnm <- findnm("INVYR", pltflds, returnNULL=TRUE)
+      if (is.null(invyrnm)) {
+        stop("INVYR is missing from xy and plot data tables")
+      } else {
+        invyrA <- paste0("p.", invyrnm)
+      }
+    }
+
     xyfromqry <- paste0(SCHEMA., xynm, " xy")
     if (!is.null(plotnm) && !xyisplot) {
       xyfromqry <- paste0(xyfromqry, " JOIN ", SCHEMA., plotnm, 
 			" p ON (p.", pjoinid, " = xy.", xy.uniqueid, ")")
     } 
-    evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(unlist(invyrs)), ")")
+    evalFilter <- paste0(stFilter, " and ", invyrA, " IN(", toString(unlist(invyrs)), ")")
 
   } else if (length(unlist(measyrs)) > 1) {
+
+    measyearnm <- findnm("MEASYEAR", xyflds, returnNULL=TRUE)
+    if (!is.null(measyearnm)) {
+      measyearA <- paste0("xy.", measyearnm)  
+    } else if (!is.null(plotnm)) {
+      measyearnm <- findnm("MEASYEAR", pltflds, returnNULL=TRUE)
+      if (is.null(measyearnm)) {
+        stop("MEASYEAR is missing from xy and plot data tables")
+      } else {
+        measyearA <- paste0("p.", measyearnm)
+      }
+    }
+
     xyfromqry <- paste0(SCHEMA., xynm, " xy")
     if (!is.null(plotnm) && !xyisplot) {
       xyfromqry <- paste0(xyfromqry, " JOIN ", SCHEMA., plotnm, 
 			" p ON (p.", pjoinid, " = xy.", xy.uniqueid, ")")
     }
-    evalFilter <- paste0(stFilter, " and p.MEASYEAR IN(", toString(unlist(measyrs)), ")")
+    evalFilter <- paste0(stFilter, " and ", measyearA, " IN(", toString(unlist(measyrs)), ")")
 
   } else {
     if (!is.null(plotnm)) {
