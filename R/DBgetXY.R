@@ -126,7 +126,7 @@ DBgetXY <- function (states = NULL,
   ## Set global variables
   parameters <- FALSE
   coords <- "PUBLIC"
-  SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=pvars <- NULL
+  SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=pvars=dbconn <- NULL
   
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -260,35 +260,25 @@ DBgetXY <- function (states = NULL,
       datsource <- xy_datsource
       data_dsn <- xy_dsn
     } else if (!identical(xy_datsource, datsource) || !identical(xy_dsn, data_dsn)) {
- 
       ## Check database connection - data_dsn
       ########################################################
       datsourcelst <- c("sqlite", "datamart", "csv", "obj")
       datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		gui=gui, checklst=datsourcelst, caption="Plot data source?",
            stopifnull=TRUE, stopifinvalid=TRUE)
-
-      if (datsource == "sqlite" && !is.null(data_dsn)) {
-        dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-        dbtablst <- DBI::dbListTables(dbconn)
-        if (length(dbtablst) == 0) {
-          stop("no data in ", datsource)
-        }
-      }
     } else {
       datsource <- xy_datsource
       data_dsn <- xy_dsn
-
-      if (datsource == "sqlite" && !is.null(data_dsn)) {
-        dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-        dbtablst <- DBI::dbListTables(dbconn)
-        if (length(dbtablst) == 0) {
-          stop("no data in ", datsource)
-        }
-      }
     }
   }
- 
+  if (datsource == "sqlite" && !is.null(data_dsn)) {
+    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+    dbtablst <- DBI::dbListTables(dbconn)
+    if (length(dbtablst) == 0) {
+      stop("no data in ", datsource)
+    }
+  }
+
   ## Check eval
   ###########################################################
   evallst <- c('FIA', 'custom')
@@ -311,6 +301,15 @@ DBgetXY <- function (states = NULL,
   ###########################################################
   savedata <- pcheck.logical(savedata, varnm="savedata", 
 		title="Save data to outfolder?", first="YES", gui=gui)
+
+  ## Check exportsp
+  ###########################################################
+  exportsp <- pcheck.logical(exportsp, varnm="exportsp", 
+		title="Export spatial?", first="YES", gui=gui)
+  if (exportsp) {
+    issp <- TRUE
+  }
+
 
   ## Check outfolder, outfn.date, overwrite_dsn
   ###########################################################
@@ -401,7 +400,7 @@ DBgetXY <- function (states = NULL,
 
   ## If using EVALID, you don't need to get INVYRS, intensity, or subcycle
   if (!iseval) {
-  
+ 
     ## Check custom Evaluation data
     #############################################
     evalchk <- customEvalchk(states = states, 
@@ -420,8 +419,10 @@ DBgetXY <- function (states = NULL,
     allyrs <- evalchk$allyrs
     invyrs <- evalchk$invyrs
     measyrs <- evalchk$measyrs
+    invyrlst <- evalchk$invyrlst
+    measyrlst <- evalchk$measyrlst
   }
-
+ 
   ## Check xy table
   ########################################################
   if (xy_datsource == "datamart") {
@@ -440,6 +441,8 @@ DBgetXY <- function (states = NULL,
     xynm <- chkdbtab(xytablst, xy, stopifnull=FALSE)
     if (!is.null(xynm)) {
       xyflds <- DBI::dbListFields(xyconn, xynm)
+    } else {
+      stop(xynm, "does not exist in database")
     }
   } else {
     XY <- pcheck.table(xy, stopifnull=TRUE, stopifinvalid=TRUE)
@@ -484,19 +487,6 @@ DBgetXY <- function (states = NULL,
   ###########################################################################
   ###########################################################################
   if (!is.null(pvars)) {    
-    ## Check database connection - data_dsn
-    ########################################################
-    datsourcelst <- c("sqlite", "datamart", "csv", "obj")
-    datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		gui=gui, checklst=datsourcelst, caption="Plot data source?")
-
-    if (datsource == "sqlite" && !is.null(data_dsn)) {
-      dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
-      dbtablst <- DBI::dbListTables(dbconn)
-      if (length(dbtablst) == 0) {
-        stop("no data in ", datsource)
-      }
-    }
 
     ## Check plot table
     ########################################################
@@ -610,6 +600,7 @@ DBgetXY <- function (states = NULL,
           stop("evalid not in POP_PLOT_STRATUM_ASSGN: ", toString(sort(evalid)))
         }
         ppsanm <- "POP_PLOT_STRATUM_ASSGN"
+        ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
 
       } else {
         POP_PLOT_STRATUM_ASSGN <- pcheck.table(ppsa_layer, stopifnull=TRUE, stopifinvalid=TRUE)
@@ -619,6 +610,7 @@ DBgetXY <- function (states = NULL,
 				unique(POP_PLOT_STRATUM_ASSGN[[evalidnm]])])
           stop("evalid not in POP_PLOT_STRATUM_ASSGN: ", toString(sort(evalid)))
         }
+        ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
       }
     }       
     pfromqry <- paste0(SCHEMA., ppsanm, " ppsa")
@@ -648,7 +640,6 @@ DBgetXY <- function (states = NULL,
     evalFilter <- paste0(stFilter, " and p.MEASYEAR IN(", toString(unlist(measyrs)), ")")
 
   } else {
- 
     if (!is.null(plotnm)) {
       if (measCur) {
         popSURVEY <- ifelse(is.null(SURVEY), FALSE, TRUE)
@@ -806,8 +797,12 @@ DBgetXY <- function (states = NULL,
     xyoutnm <- paste0("xy_", coords)
     assign(xyoutnm, xyx)
   } 
+
   if (is.null(out_layer)) {
     out_layer <- xyoutnm
+    if (issp) {
+      outsp_layer <- paste0("sp", xyoutnm)
+    }
   }
 
   if (issp) {
@@ -821,7 +816,7 @@ DBgetXY <- function (states = NULL,
 		        exportsp=exportsp, 
 		        savedata_opts=list(out_dsn=out_dsn, 
                                out_fmt=outsp_fmt,
-                               outfolder=outfolder, out_layer=spxyoutnm, 
+                               outfolder=outfolder, out_layer=out_layer, 
 		                    outfn.date=outfn.date, 
                                overwrite_layer=overwrite_layer, 
 		                    append_layer=append_layer, outfn.pre=outfn.pre) ))

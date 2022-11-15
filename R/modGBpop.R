@@ -823,7 +823,6 @@ modGBpop <- function(popType = "VOL",
   if (adj == "none") {
     setkeyv(condx, c(cuniqueid, condid))
   } else {
-    
     if (popType %in% c("ALL", "VOL", "CURR")) {
       adjfacdata <- getadjfactorVOL(adj=adj, 
                         condx = condx, 

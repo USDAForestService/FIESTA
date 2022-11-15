@@ -76,7 +76,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   adjlst <- c("samp", "plot", "none")
   adj <- pcheck.varchar(var2check=adj, varnm="adj", gui=gui,
 		checklst=adjlst, caption="adj", multiple=FALSE, stopifnull=TRUE)
-  if (adj == "plot") {
+  if (adj == "plot" && module == "GB") {
     message("adj='plot' is not typical for GA modules")
   }
 

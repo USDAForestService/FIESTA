@@ -502,7 +502,7 @@ modSAarea <- function(SApopdatlst = NULL,
     }
   }
     
- 
+  largebnd.unique2 <- largebnd.unique
   for (i in 1:length(SApopdatlst)) {
     SApopdatnm <- names(SApopdatlst)[i]
     if (is.null(SApopdatnm)) {
@@ -685,25 +685,23 @@ modSAarea <- function(SApopdatlst = NULL,
  
     ## check largebnd.unique
     ########################################################
-    if (!is.null(largebnd.unique) && !is.null(SAdomsdf)) {
+    if (!is.null(largebnd.unique2) && !is.null(SAdomsdf)) {
       cdomdat <- merge(cdomdat, 
 		        unique(setDT(SAdomsdf)[, c(smallbnd.dom, largebnd.unique), with=FALSE]),
  		        by=smallbnd.dom)
       #addSAdomsdf <- TRUE
       #SAdomvars <- unique(c(SAdomvars, largebnd.unique))
-      lunique <- largebnd.unique
+      largebnd.unique <- largebnd.unique2
     } else {
       cdomdat$LARGEBND <- 1
-      lunique <- "LARGEBND"
       largebnd.unique <- "LARGEBND"
+      cdomdat$LARGEBND <- 1
     }
-    cdomdat$LARGEBND <- 1
-    lunique <- "LARGEBND"
 
 
     ## get unique largebnd values
-    largebnd.vals <- sort(unique(cdomdat[[lunique]]))
-    largebnd.vals <- largebnd.vals[table(cdomdat[[lunique]]) > 30]
+    largebnd.vals <- sort(unique(cdomdat[[largebnd.unique]]))
+    largebnd.vals <- largebnd.vals[table(cdomdat[[largebnd.unique]]) > 30]
 
 
     ## Add AOI if not in data
@@ -717,7 +715,7 @@ modSAarea <- function(SApopdatlst = NULL,
     ######################################
     ## Sum estvar.name by dunitvar (DOMAIN), plot, domain
     tdomdattot <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-                            by=c(lunique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames), 
+                            by=c(largebnd.unique, dunitvar, "AOI", cuniqueid, "TOTAL", prednames), 
                             .SDcols=estvar.name]
 
     ## get estimate by domain, by largebnd value
@@ -727,7 +725,7 @@ modSAarea <- function(SApopdatlst = NULL,
 #dat=tdomdattot
 #largebnd.val=largebnd.vals
 #domain="TOTAL"
-#largebnd.unique=lunique
+#largebnd.unique=largebnd.unique
 
     if (!"DOMAIN" %in% names(tdomdattot)) {
       tdomdattot$DOMAIN <- tdomdattot[[dunitvar]]
@@ -744,7 +742,7 @@ modSAarea <- function(SApopdatlst = NULL,
 	tryCatch(
 		lapply(largebnd.vals, SAest.large, 
 			    dat=tdomdattot, 
-			    cuniqueid=cuniqueid, largebnd.unique=lunique, 
+			    cuniqueid=cuniqueid, largebnd.unique=largebnd.unique, 
 			    dunitlut=dunitlut, dunitvar="DOMAIN",
 			    prednames=prednames, domain="TOTAL", response=response, 
 			    showsteps=showsteps, savesteps=savesteps,
@@ -810,7 +808,7 @@ modSAarea <- function(SApopdatlst = NULL,
  
     if (rowcolinfo$rowvar != "TOTAL") {
       cdomdatsum <- setDT(cdomdat)[, lapply(.SD, sum, na.rm=TRUE), 
-                    by=c(lunique, dunitvar, cuniqueid, rowcolinfo$rowvar, prednames), 
+                    by=c(largebnd.unique, dunitvar, cuniqueid, rowcolinfo$rowvar, prednames), 
                     .SDcols=estvar.name]
       
       if (!"DOMAIN" %in% names(cdomdatsum)) {
@@ -825,13 +823,13 @@ modSAarea <- function(SApopdatlst = NULL,
 #dat=cdomdatsum 
 #largebnd.val=largebnd.vals
 #domain=rowcolinfo$rowvar
-#largebnd.unique=lunique
+#largebnd.unique=largebnd.unique
      
       dunit_estlst_row <- 
 		tryCatch(
 			lapply(largebnd.vals, SAest.large, 
 				    dat=cdomdatsum, 
-				    cuniqueid=cuniqueid, largebnd.unique=lunique, 
+				    cuniqueid=cuniqueid, largebnd.unique=largebnd.unique, 
 				    dunitlut=dunitlut, dunitvar="DOMAIN", 
 				    prednames=prednames, domain=rowcolinfo$rowvar, response=response, 
 				    showsteps=showsteps, savesteps=savesteps, 

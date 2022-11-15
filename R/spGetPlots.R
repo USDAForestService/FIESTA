@@ -226,7 +226,7 @@ spGetPlots <- function(bnd = NULL,
 
   ## Set global variables
   xydat=stateFilter=countyfips=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
-	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc <- NULL
+	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn <- NULL
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
   returnlst <- list()
@@ -348,6 +348,44 @@ spGetPlots <- function(bnd = NULL,
   ## Check clipxy
   clipxy <- pcheck.logical(clipxy, varnm="clipxy", 
                             title="Clip xy?", first="NO", gui=gui)  
+
+
+
+  ## Check database connection - xy_dsn
+  ########################################################
+  xy_datsourcelst <- c("sqlite", "datamart", "csv", "obj")
+  xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
+		gui=gui, checklst=xy_datsourcelst, caption="XY data source?")
+
+  if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
+    xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE)
+    xytablst <- DBI::dbListTables(xyconn)
+    if (length(xytablst) == 0) {
+      stop("no data in ", xy_datsource)
+    }
+  }
+
+  ## Check database connection - data_dsn
+  ########################################################
+  if (is.null(datsource)) {
+    datsource <- xy_datsource
+  } 
+  if (is.null(data_dsn)) {
+    data_dsn <- xy_dsn
+  } 
+
+  datsourcelst <- c("sqlite", "datamart", "csv", "obj")
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
+		gui=gui, checklst=datsourcelst, caption="Plot data source?",
+           stopifnull=TRUE, stopifinvalid=TRUE)
+  if (datsource == "sqlite" && !is.null(data_dsn)) {
+    dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
+    dbtablst <- DBI::dbListTables(dbconn)
+    if (length(dbtablst) == 0) {
+      stop("no data in ", datsource)
+    }
+  }
+
 
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
@@ -490,12 +528,6 @@ spGetPlots <- function(bnd = NULL,
         ###########################################################################
         ## Get XY
         ###########################################################################
-        if (is.null(xy_datsource)) {
-          xy_datsource <- datsource
-        } 
-        if (is.null(xy_dsn)) {
-          xy_dsn <- data_dsn
-        } 
  
         if (!is.null(Endyr.filter)) {
 
@@ -1027,7 +1059,9 @@ spGetPlots <- function(bnd = NULL,
         ## Subset data to stpltids
         plt <- PLOT[PLOT[[pjoinid]] %in% stpltids[[xyjoinid]],]
         if (nrow(plt) != nrow(stpltids)) {
-          message("plots where ", Endyr.filter, " do not match pltids")
+          message("there are ", abs(nrow(plt) - nrow(stpltids)), 
+			" plots in ", state, " that do not match pltids")
+          #spxy[!spxy[[xyjoinid]] %in% plt[[pjoinid]],] 
         }
         pids <- plt[[puniqueid]]
 

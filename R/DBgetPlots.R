@@ -873,6 +873,8 @@ DBgetPlots <- function (states = NULL,
     allyrs <- evalchk$allyrs
     invyrs <- evalchk$invyrs
     measyrs <- evalchk$measyrs
+    invyrlst <- evalchk$invyrlst
+    measyrlst <- evalchk$measyrlst
 
     ## Check intensity1
     ###########################################################
@@ -964,6 +966,10 @@ DBgetPlots <- function (states = NULL,
     ## Check xymeasCur
     xymeasCur <- pcheck.logical(xymeasCur, varnm="xymeasCur", 
                          title="Most current XY?", first="YES", gui=gui)
+    if (measCur && !xymeasCur) {
+      message("getting most current data for XY")
+      xymeasCur <- TRUE
+    }
   }
   
   ## Check issp
@@ -1329,11 +1335,11 @@ DBgetPlots <- function (states = NULL,
     } else {
       evalFilter <- stFilter 
       if (length(invyrs) > 0){
-        invyr <- invyrs[[state]]
+        invyr <- invyrlst[[state]]
         evalFilter <- paste0(stFilter, " and p.INVYR IN(", toString(invyr), ")")
 
       } else if (length(measyrs) > 0) {
-        measyr <- measyrs[[state]]
+        measyr <- measyrlst[[state]]
         evalFilter <- paste0(stFilter, " and p.MEASYEAR IN(", toString(measyr), ")")
       }
       if (!subcycle99) {
@@ -1565,12 +1571,12 @@ DBgetPlots <- function (states = NULL,
       if ("LON" %in% names(pltx)) {
         setnames(pltx, "LON", "LON_PUBLIC")
         pltvarlst2[pltvarlst2 == "LON"] <- "LON_PUBLIC"
-        xy_opts$xvar <- "LON_PUBLIC"
+        #xy_opts$xvar <- "LON_PUBLIC"
       }
       if ("LAT" %in% names(pltx)) {
         setnames(pltx, "LAT", "LAT_PUBLIC")
         pltvarlst2[pltvarlst2 == "LAT"] <- "LAT_PUBLIC"
-        xy_opts$xvar <- "LON_PUBLIC"
+        #xy_opts$xvar <- "LON_PUBLIC"
       }
       if ("ELEV" %in% names(pltx)) {
         setnames(pltx, "ELEV", "ELEV_PUBLIC")
@@ -2118,9 +2124,11 @@ DBgetPlots <- function (states = NULL,
                            eval_opts = eval_options(Cur = TRUE),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
-                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
-          assign(paste0("xyCur_", coords), 
-				  rbind(get(paste0("xyCur_", coords)), xydat[[1]])) 
+                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
+          if (returndata) { 
+            assign(paste0("xyCur_", coords), 
+				  rbind(get(paste0("xyCur_", coords)), xydat[[1]]))
+          } 
         } else {
           xydat <- DBgetXY(states = state,
                            xy_datsource = xy_datsource,
@@ -2131,12 +2139,14 @@ DBgetPlots <- function (states = NULL,
                            data_dsn = data_dsn,
                            dbTabs = dbTabs,
                            eval = eval,
-                           eval_opts = eval_opts,
+                           eval_opts = eval_options(All = TRUE),
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
-                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)  
-          assign(paste0("xy_", coords), 
-				  rbind(get(paste0("xy_", coords)), xydat[[1]])) 
+                           POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
+          if (returndata) { 
+            assign(paste0("xy_", coords), 
+				  rbind(get(paste0("xy_", coords)), xydat[[1]]))
+          } 
         }
         dbqueries$xy <- xydat$xyqry
       }
@@ -3532,7 +3542,7 @@ DBgetPlots <- function (states = NULL,
 
     cat(  "fiadat <- DBgetPlots(states=states, RS=RS, invtype=invtype, evalid=evalid, 
 	evalCur=evalCur, evalEndyr=evalEndyr, evalAll=evalAll, evalType=evalType, 
-	measCur=measCur, measEndyr=measEndyr, allyrs=allyrs, invyrs=invyrs, istree=istree, 
+	measCur=measCur, measEndyr=measEndyr, allyrs=allyrs, invyrs=invyrlst, istree=istree, 
 	isseed=isseed, isveg=isveg, issubp=issubp, isdwm=isdwm, 
 	issp=issp, spcondid1=spcondid1, defaultVars=defaultVars, regionVars=regionVars, 
 	ACI=ACI, subcycle99=FALSE, intensity1=TRUE, allFilter=allFilter, 
@@ -3558,7 +3568,6 @@ DBgetPlots <- function (states = NULL,
                             add_layer=TRUE)) 
   }
 
-
   ## GENERATE RETURN LIST
   if (returndata) {
     returnlst <- list(states=states)
@@ -3567,36 +3576,38 @@ DBgetPlots <- function (states = NULL,
     returnlst$dbqueries <- dbqueries
     returnlst$puniqueid <- puniqueid
 
-    if (getxy && issp) {
-      xycoords <- getcoords(coords)
-      if (xymeasCur) {
-        #spxyCurnm <- paste0("spxyCur_", coords)
-        spxyCurnm <- paste0("xyCur_", coords)
+    if (getxy) {
+      if (issp) {
+        xycoords <- getcoords(coords)
+        if (xymeasCur) {
+          #spxyCurnm <- paste0("spxyCur_", coords)
+          spxyCurnm <- paste0("xyCur_", coords)
         
-        assign(spxyCurnm, 
+          assign(spxyCurnm, 
 		        spMakeSpatialPoints(xyplt=get(paste0("xyCur_", coords)), 
 		              xvar=xycoords[1], yvar=xycoords[2], 
 		              xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE))
-        returnlst[[spxyCurnm]] <- get(spxyCurnm)
-      } else {  
-        #spxynm <- paste0("spxy_", coords)
-        spxynm <- paste0("xy_", coords)
-        assign(spxynm, 
+          returnlst[[spxyCurnm]] <- get(spxyCurnm)
+        } else {  
+          #spxynm <- paste0("spxy_", coords)
+          spxynm <- paste0("xy_", coords)
+          assign(spxynm, 
 		        spMakeSpatialPoints(xyplt=get(paste0("xy_", coords)), 
 		              xvar=xycoords[1], yvar=xycoords[2], 
 		              xy.uniqueid="PLT_CN", xy.crs=4269, addxy=TRUE))
-        returnlst[[spxynm]] <- get(spxynm)
-      }
-    } else {
-      xycoords <- getcoords(coords)
-      if (xymeasCur) {
-        xyCurnm <- paste0("xyCur_", coords)
-        #assign(xyCurnm, get(paste0("xyCur_", coords))) 
-        returnlst[[xyCurnm]] <- get(paste0("xyCur_", coords))
+          returnlst[[spxynm]] <- get(spxynm)
+        }
       } else {
-        xynm <- paste0("xy_", coords)
-        #assign(xynm, get(paste0("xy_", coords))) 
-        returnlst[[xynm]] <- get(paste0("xy_", coords))
+        xycoords <- getcoords(coords)
+        if (xymeasCur) {
+          xyCurnm <- paste0("xyCur_", coords)
+          #assign(xyCurnm, get(paste0("xyCur_", coords))) 
+          returnlst[[xyCurnm]] <- get(paste0("xyCur_", coords))
+        } else {
+          xynm <- paste0("xy_", coords)
+          #assign(xynm, get(paste0("xy_", coords))) 
+          returnlst[[xynm]] <- get(paste0("xy_", coords))
+        }  
       }
     }
 
@@ -3606,15 +3617,15 @@ DBgetPlots <- function (states = NULL,
     if (savePOP || (iseval && length(evalidlist) > 1) && !is.null(ppsa)) {
       returnlst$pop_plot_stratum_assgn <- setDF(ppsa)
     }
-  }
  
-  if (length(evalidlist) > 0) {
-    returnlst$evalid <- evalidlist
+    if (length(evalidlist) > 0) {
+      returnlst$evalid <- evalidlist
+    }
+    returnlst$pltcnt <- pltcnt
+    returnlst$invyrs <- invyrs
   }
-  returnlst$pltcnt <- pltcnt
-  returnlst$invyrs <- invyrs
 
-  if (!is.null(evalidlist)) {
+  if (returndata && !is.null(evalidlist)) {
     evaliddf <- data.frame(do.call(rbind, evalidlist))
     stcds <- pcheck.states(row.names(evaliddf), "VALUE")
     evaliddf <- data.frame(stcds, row.names(evaliddf), evaliddf, row.names=NULL)
@@ -3635,6 +3646,8 @@ DBgetPlots <- function (states = NULL,
 
 
   ## Return data list
-  return(returnlst)
+  if (returndata) {
+    return(returnlst)
+  }
 }
 

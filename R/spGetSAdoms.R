@@ -667,8 +667,9 @@ spGetSAdoms <- function(smallbnd,
   ###########################################################################
   ## Aggregate (dissolve) polygons on DOMAIN and calculate area on dissolved polygons
   ###########################################################################
-  SAdomslst <- lapply(SAdomslst, sf_dissolve, c("DOMAIN", "AOI"))
-  #SAdomslst <- lapply(SAdomslst, sf_dissolve, "DOMAIN")
+  SAcols <- unique(c("DOMAIN", "AOI", largebnd.unique, maxbnd.unique))
+  SAcols <- SAcols[SAcols %in% names(SAdomslst[[1]])]
+  SAdomslst <- lapply(SAdomslst, sf_dissolve, SAcols)
 
   if (showsteps) {
     ## Retain par parameters
@@ -685,6 +686,7 @@ spGetSAdoms <- function(smallbnd,
     if (any(table(SAdomslst[[i]]$DOMAIN) > 1)) {
       stop("check smallbnd.domain.. may not be unique")
     } 
+
     ## Merge other attributes (smallbnd.domain) to SAdoms
     smallbndvars <- unique(c(smallbnd.domain, 
 		names(smallbndxlst[[i]])[!names(smallbndxlst[[i]]) %in% names(SAdomslst[[i]])]))
@@ -698,16 +700,6 @@ spGetSAdoms <- function(smallbnd,
 #		sf::st_drop_geometry(smallbndx[, c(smallbnd.unique, smallbnd.domain)]), 
 #		by.x="DOMAIN", by.y=smallbnd.unique, all.x=TRUE)
 
-    ## Join maxbndx and largebndx attributes (using largest overlap)
-    if (maxislarge && !is.null(maxbndx) && !maxbnd.unique %in% names(SAdomslst[[i]])) {
-      SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
-					maxbndx[, maxbnd.unique], largest=TRUE))
-    }
-
-    if (!largeishelper && !is.null(largebndx) && !largebnd.unique %in% names(SAdomslst[[i]])) {
-      SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
-					largebndx[, largebnd.unique], largest=TRUE))
-    }
  
     if (addstate) {
       ## Check projections (reproject largebndx to projection of helperbndx
@@ -717,7 +709,7 @@ spGetSAdoms <- function(smallbnd,
       SAdomslst[[i]] <- suppressWarnings(sf::st_join(SAdomslst[[i]], 
 					stunitco[, "STATECD"], largest=TRUE))
     }
-
+ 
     if (showsteps) {
       plot(sf::st_geometry(SAdomslst[[i]]), border="dark grey")
       plot(sf::st_geometry(smallbndxlst[[i]]), add=TRUE, border="red", lwd=1, color="translucent")

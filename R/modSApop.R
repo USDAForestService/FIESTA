@@ -528,7 +528,7 @@ modSApop <- function(popType="VOL",
       measEndyr.filter=measEndyr.filter, invyrs=invyrs, intensity=intensity,
       nonsamp.pfilter=nonsamp.pfilter, unitarea=dunitarea, areavar=areavar, 
       unitvar=dunitvar, unitvar2=dunitvar2, areaunits=areaunits, 
-      unit.action=unit.action, prednames=prednames, predfac=predfac)
+      unit.action=unit.action, prednames=prednames, predfac=predfac, pvars2keep="AOI")
   if (is.null(pltcheck)) return(NULL)
   pltassgnx <- pltcheck$pltassgnx
   pltassgnid <- pltcheck$pltassgnid
@@ -564,7 +564,7 @@ modSApop <- function(popType="VOL",
                tabs=popTabs, tabIDs=popTabIDs, pltassgnx=pltassgnx, 
                pfromqry=pfromqry, palias=palias, pjoinid=pjoinid, whereqry=whereqry, 
                adj=adj, ACI=ACI, pltx=pltx, puniqueid=puniqueid, dsn=dsn, dbconn=dbconn,
-               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter)
+               condid="CONDID", nonsamp.cfilter=nonsamp.cfilter, cvars2keep="AOI")
     if (is.null(popcheck)) return(NULL)
     condx <- popcheck$condx
     pltcondx <- popcheck$pltcondx
@@ -582,7 +582,7 @@ modSApop <- function(popType="VOL",
   if (is.null(treef) && is.null(seedf)) {
     stop("must include tree data")
   }
-
+ 
   ###################################################################################
   ## Check auxiliary data
   ###################################################################################
