@@ -437,7 +437,6 @@ DBgetXY <- function (states = NULL,
     measyrlst <- evalchk$measyrlst
   }
 
-
   ## Define variables
   ###########################################################
   XYvarlst <- unique(c(xy.uniqueid, xyjoinid, xvar, yvar))
@@ -488,8 +487,6 @@ DBgetXY <- function (states = NULL,
   xyvars <- unique(c(XYvarlst, pvars2keep))
   if (!all(xyvars %in% xyflds)) {
     xypmiss <- xyvars[!xyvars %in% xyflds]
-print("TESTSETEST")
-print(xypmiss)
     if (length(xypmiss) > 0) {
       pvars2keep <- xypmiss
     } else {
@@ -695,7 +692,6 @@ print(xypmiss)
         invyrA <- paste0("p.", invyrnm)
       }
     }
-
     xyfromqry <- paste0(SCHEMA., xynm, " xy")
     if (!is.null(plotnm) && !xyisplot) {
       xyfromqry <- paste0(xyfromqry, " JOIN ", SCHEMA., plotnm, 
@@ -733,7 +729,6 @@ print(xypmiss)
         pnm <- plotnm
         pid <- xyjoinid
       }
-
       popSURVEY <- ifelse(is.null(SURVEY), FALSE, TRUE)
       pfromqry <- getpfromqry(Endyr = measEndyr, 
                             SCHEMA. = SCHEMA., 
@@ -828,7 +823,7 @@ print(xypmiss)
 		" from ", xyfromqry,
 		" where ", evalFilter)
 
-  if (datsource == "sqlite") {
+  if (xy_datsource == "sqlite") {
     xyx <- tryCatch( DBI::dbGetQuery(dbconn, xycoords.qry),
 			error = function(e) {
                   message(e, "\n")
@@ -840,14 +835,12 @@ print(xypmiss)
                   return(NULL) }) 
     }      
   } else {
-    xyx <- tryCatch( sqldf::sqldf(xycoords.qry, stringsAsFactors = FALSE), 
+    xyx <- tryCatch( sqldf::sqldf(xycoords.qry, envir=.GlobalEnv, stringsAsFactors = FALSE), 
 			error = function(e) {
-                  message(e, "\n")
                   return(NULL) })
     if (!iseval && is.null(invyrtab) && !is.null(invyrtab.qry)) {
-      invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, stringsAsFactors = FALSE),
+      invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, envir=.GlobalEnv, stringsAsFactors = FALSE),
 			error = function(e) {
-                  message(e, "\n")
                   return(NULL) }) 
     } 
     xyx <- setDT(xyx)     

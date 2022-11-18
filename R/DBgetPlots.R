@@ -1278,9 +1278,13 @@ DBgetPlots <- function (states = NULL,
       popSURVEY <- ifelse(is.null(surveynm), FALSE, TRUE)
       subcycle99 <- ifelse(is.null(subcyclenm), FALSE, TRUE)
       intensity1 <- ifelse(is.null(intensitynm), FALSE, TRUE)
-      pfromqry <- getpfromqry(Endyr=measEndyr, SCHEMA.=SCHEMA., allyrs=allyrs,
-			subcycle99=subcycle99, intensity1=intensity1, popSURVEY=popSURVEY,
-			plotnm=plotnm, surveynm=surveynm)
+      pfromqry <- getpfromqry(Endyr = measEndyr, SCHEMA. = SCHEMA., 
+                              allyrs = allyrs,
+                              subcycle99 = subcycle99, 
+                              intensity1 = intensity1, 
+                              popSURVEY = popSURVEY,
+                              plotnm = plotnm, 
+                              surveynm = surveynm)
     } else {
       if (is.null(plotnm)) {
         pfromqry <- paste(SCHEMA., "COND p")
