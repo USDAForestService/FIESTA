@@ -16,9 +16,10 @@
 #' @param xy_datsource Source of XY data ('datamart', 'sqlite', 'obj', 'csv').
 #' @param xy_dsn If datsource='sqlite', the file name (data source name) of
 #' the sqlite database (*.db) where XY data reside.
-#' @param xy sf R object or String. Table with xy coordinates. Can be a spatial
-#' polygon object, data frame, full pathname to a shapefile, or name of a layer
-#' within a database.
+#' @param xy sf R object or String. If xy_dsn = 'datamart', name of xy table 
+#' in FIA DataMart. If xy_dsn = 'sqlite', name of xy layer in database. If 
+#' datsource = 'csv', full pathname of xy CSV file(s). If datsource = 'obj', 
+#' name of xy R object. If datsource = 'shp', full pathname of shapefile.
 #' @param xy_opts List of xy data options for xy (e.g., xy_opts = list(xvar='LON', 
 #' yvar='LAT'). See xy_options() for more options and defaults.
 #' @param datsource String. Source of FIA data for defining FIA evalutions or 
@@ -28,12 +29,13 @@
 #' If datsource='sqlite', specify database name(s) in data_dsn and table name(s) 
 #' in dbTabs() argument. If datsource = ('obj','csv'), specify *.csv file name in 
 #' dbTabs argument.
-#' @param data_dsn String. Name of database where plt layer resides.
-#' @param dbTabs Name of table(s) or layer(s) in database with plot data and 
-#' other tables.
-#' @param pjoinid String. Variable in plt to join to XY data. Not necessary to
-#' be unique. If using most current XY coordinates, use identifier for a plot
-#' (e.g., PLOT_ID).
+#' @param data_dsn String. Name of database with plot_layer and/or ppsa_layer.
+#' @param dbTabs String or R Object. If data_dsn = 'datamart', name of table(s) 
+#' in FIA DataMart. If data_dsn = 'sqlite', name of layer(s) in database. If 
+#' datsource = 'csv', name of CSV file(s). If datsource = 'obj', name of R object.
+#' @param pjoinid String. Variable in plot table to join to XY data, if 
+#' plot_layer is not NULL. Not necessary to be unique. If using most current 
+#' XY coordinates, use identifier for a plot (e.g., PLOT_ID).
 #' @param eval String. Type of evaluation time frame for data extraction 
 #' ('FIA', 'custom'). See eval_opts for more further options. 
 #' @param eval_opts List of evaluation options for 'FIA' or 'custom'
@@ -45,7 +47,8 @@
 #' used for the output name.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
-#' @param pvars2keep String vector. One or more variables in pltTab to append to output.
+#' @param pvars2keep String vector. One or more variables in plot_layer to append 
+#' to output.
 #' @param issp Logical. If TRUE, returns spatial XY data as a list object with
 #' query.
 #' @param returndata Logical. If TRUE, returns XY data as a list object with
@@ -62,9 +65,9 @@
 #' @return if returndata=TRUE, a list of the following objects: 
 #' \item{xy}{ Data frame. XY data from database. The output name is based on
 #' coordType parameter (e.g., xy_PUBLIC). the data frame include xy.uniqueid,
-#' xvar, yvar and appended plot variables in pvars2keep if pltTab is not NULL.
-#' The default plot variables included are 'STATECD', 'UNITCD', 'COUNTYCD',
-#' 'PLOT', 'PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT), 'COUNTYFIPS'. 
+#' xvar, yvar and appended plot variables in pvars2keep if plot_layer is not 
+#' NULL. The default plot variables included are 'STATECD','UNITCD','COUNTYCD',
+#' 'PLOT','PLOT_ID' (ID+STATECD+UNTCD+COUNTYCD+PLOT), 'COUNTYFIPS'. 
 #' If issp=TRUE, returns an sf object. }
 #' \item{xyqry}{ String. Query to extract coordinates. }
 #' \item{xvar}{ String. Name of X variable in xy*. }
@@ -249,12 +252,13 @@ DBgetXY <- function (states = NULL,
 
   ## Check xy database
   ####################################################################
-  if (all(list(class(xy), class(plot_layer)) == "character")) {
+  if (all(list(class(xy), class(plot_layer)) == "character") && 
+		(is.null(datsource) || xy_datsource == datsource)) {
     xyisplot <- ifelse (identical(tolower(xy), tolower(plot_layer)), TRUE, FALSE)
   } else {
     xyisplot <- ifelse (identical(xy, plot_layer), TRUE, FALSE)
   }
- 
+
   ###########################################################################
   ## Check plot database (if xyisplot = FALSE)
   ###########################################################################
@@ -268,7 +272,7 @@ DBgetXY <- function (states = NULL,
     } else if (!identical(xy_datsource, datsource) || !identical(xy_dsn, data_dsn)) {
       ## Check database connection - data_dsn
       ########################################################
-      datsourcelst <- c("datamart", "sqlite", "csv", "obj")
+      datsourcelst <- c("datamart", "sqlite", "csv", "obj", "shp")
       datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		gui=gui, checklst=datsourcelst, caption="Plot data source?",
            stopifnull=TRUE, stopifinvalid=TRUE)
@@ -376,7 +380,7 @@ DBgetXY <- function (states = NULL,
                           RS = RS, 
                           datsource = datsource,
                           data_dsn = data_dsn,
-                          dbTabs = list(plot_layer=pltTab),
+                          dbTabs = list(plot_layer=plot_layer),
                           dbconn = dbconn,
                           dbconnopen = TRUE,
                           invtype = invtype, 
@@ -434,7 +438,6 @@ DBgetXY <- function (states = NULL,
   }
 
 
-
   ## Define variables
   ###########################################################
   XYvarlst <- unique(c(xy.uniqueid, xyjoinid, xvar, yvar))
@@ -451,7 +454,6 @@ DBgetXY <- function (states = NULL,
     XYvarlst <- unique(c(XYvarlst, "INTENSITY")) 
   }
  
-
   ####################################################################
   ## Check xy table
   ####################################################################
@@ -486,10 +488,16 @@ DBgetXY <- function (states = NULL,
   xyvars <- unique(c(XYvarlst, pvars2keep))
   if (!all(xyvars %in% xyflds)) {
     xypmiss <- xyvars[!xyvars %in% xyflds]
+print("TESTSETEST")
+print(xypmiss)
     if (length(xypmiss) > 0) {
       pvars2keep <- xypmiss
+    } else {
+      pvars2keep <- NULL
     }
     xyvars <- xyvars[!xyvars %in% xypmiss]
+  } else {
+    pvars2keep <- NULL
   }
 
   ####################################################################
@@ -500,6 +508,19 @@ DBgetXY <- function (states = NULL,
     ## Check plot table
     ########################################################
     if (datsource == "datamart") {
+      if (xy_datsource == "sqlite") {
+        statenm <- findnm("STATECD", xyflds, returnNULL=TRUE)
+        if (is.null(statenm)) {
+          stop("must include STATECD in xy dataset")
+        } else {
+          xy.qry <- paste("select", toString(xyvars), "from", xy, 
+				"where STATECD in(", toString(stcdlst), ")")
+          XY <- DBI::dbGetQuery(xyconn, xy.qry)
+          xynm <- "XY"
+          xy_datsource <- "datamart"
+        }
+      }
+ 
       PLOT <- tryCatch( DBgetCSV("PLOT", 
                              stabbrlst,
                              returnDT = TRUE, 
@@ -511,7 +532,7 @@ DBgetXY <- function (states = NULL,
         plotnm <- "PLOT"
         pltflds <- names(PLOT)
       }
-    } else if (xy_datsource == "sqlite") {
+    } else if (datsource == "sqlite") {
       plotnm <- chkdbtab(dbtablst, plot_layer, stopifnull=FALSE)
       if (!is.null(plotnm)) {
         pltflds <- DBI::dbListFields(dbconn, plotnm)
@@ -586,12 +607,10 @@ DBgetXY <- function (states = NULL,
   stcds <- pcheck.states(states, "VALUE")
   statecdnm <- findnm("STATECD", xyvars, returnNULL=TRUE)
   if (!is.null(statecdnm)) {
-    if (xyisplot) {
-      if (measCur) {
-        statecdA <- paste0("p.", statecdnm)
-      } else {
-        statecdA <- paste0("xy.", statecdnm)
-      }
+    if (measCur) {
+      statecdA <- paste0("p.", statecdnm)
+    } else {
+      statecdA <- paste0("xy.", statecdnm)
     }
   } else if (!is.null(plotnm)) {
     statecdnm <- findnm("STATECD", pvars, returnNULL=TRUE)
@@ -651,7 +670,8 @@ DBgetXY <- function (states = NULL,
         }
         ppsaflds <- names(POP_PLOT_STRATUM_ASSGN)
       }
-    }       
+    } 
+    
     pfromqry <- paste0(SCHEMA., ppsanm, " ppsa")
     xyfromqry <- paste0(pfromqry, " JOIN ", SCHEMA., xynm, 
 			" xy ON (xy.", xy.uniqueid, " = ppsa.PLT_CN)")
@@ -705,29 +725,29 @@ DBgetXY <- function (states = NULL,
     evalFilter <- paste0(stFilter, " and ", measyearA, " IN(", toString(unlist(measyrs)), ")")
 
   } else {
-    if (!is.null(plotnm) || xyisplot) {
-      if (xyisplot) {
+    if (measCur) {
+      if (xyisplot || is.null(plotnm)) {
         pnm <- xynm
         pid <- xy.uniqueid
       } else {
         pnm <- plotnm
         pid <- xyjoinid
       }
-      if (measCur) {
-        popSURVEY <- ifelse(is.null(SURVEY), FALSE, TRUE)
-        pfromqry <- getpfromqry(Endyr = measEndyr, 
-                               SCHEMA. = SCHEMA., 
-                               intensity1 = intensity1, 
-                               popSURVEY = popSURVEY, 
-                               plotnm = pnm,
-                               pjoinid = pid,
-                               surveynm = "SURVEY")
-      }         
-      if (!xyisplot) {
+
+      popSURVEY <- ifelse(is.null(SURVEY), FALSE, TRUE)
+      pfromqry <- getpfromqry(Endyr = measEndyr, 
+                            SCHEMA. = SCHEMA., 
+                            intensity1 = intensity1, 
+                            popSURVEY = popSURVEY, 
+                            plotnm = pnm,
+                            pjoinid = pid,
+                            surveynm = "SURVEY")
+
+      if (xyisplot || is.null(plotnm)) {
+        xyfromqry <- pfromqry
+      } else {
         xyfromqry <- paste0(pfromqry, 
             " JOIN ", SCHEMA., xynm, " xy ON(xy.", xyjoinid, " = p.", pjoinid, ")")
-      } else {
-        xyfromqry <- pfromqry
       }
     } else {
       xyfromqry <- paste0(SCHEMA., xynm, " xy")
@@ -738,12 +758,10 @@ DBgetXY <- function (states = NULL,
   if (intensity1) {
     intensitynm <- findnm("INTENSITY", xyvars, returnNULL=TRUE)
     if (!is.null(intensitynm)) {
-      if (xyisplot) {
-        if (measCur) {
-          intensityA <- paste0("p.", intensitynm)
-        } else {
-          intensityA <- paste0("xy.", intensitynm)
-        }
+      if (measCur) {
+        intensityA <- paste0("p.", intensitynm)
+      } else {
+        intensityA <- paste0("xy.", intensitynm)
       }
     } else if (!is.null(plotnm)) {
       intensitynm <- findnm("INTENSITY", pvars, returnNULL=TRUE)
