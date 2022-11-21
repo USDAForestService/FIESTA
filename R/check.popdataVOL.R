@@ -408,7 +408,6 @@ check.popdataVOL <- function(tabs, tabIDs, pltassgnx, pltassgnid,
     ## If trees with DIA greater than MACRO_BREAKPOINT_DIA exist in database
     ##    and there is no areawt_macr defined, the areawt will be used.
     if (adj != "none") {
-
       ## Check for condition proportion variables
       propchk <- check.PROP(treex, pltcondx, cuniqueid=cuniqueid, checkNA=FALSE,
 		areawt=areawt, diavar=diavar, MICRO_BREAKPOINT_DIA=MICRO_BREAKPOINT_DIA,

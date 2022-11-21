@@ -79,6 +79,9 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   if (adj == "plot" && module == "GB") {
     message("adj='plot' is not typical for GA modules")
   }
+  if (adj != "none") {
+    pvars2keep <- c(pvars2keep, "MACRO_BREAKPOINT_DIA")
+  }
 
   ## Check ACI (if ACI=FALSE, need to filter COND_STATUS_CD == 1)
   ###################################################################################
@@ -393,7 +396,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
   if (length(pvarsmiss) > 0) {
     stop("missing variables: ", paste(pvarsmiss, collapse=", "))
   }
-  
+ 
   ## Check missing pdoms2keep variables in pltx
   ###########################################################################
   pmissvars <- pdoms2keep[which(!pdoms2keep %in% pltnmlst)]
