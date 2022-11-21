@@ -14,7 +14,7 @@ spGetPlots(
   xy_datsource = NULL,
   xy_dsn = NULL,
   xy = "PLOT",
-  xy_opts = NULL,
+  xy_opts = xy_options(),
   datsource = NULL,
   data_dsn = NULL,
   dbTabs = dbTables(),

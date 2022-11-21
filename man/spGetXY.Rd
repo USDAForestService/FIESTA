@@ -22,6 +22,7 @@ spGetXY(
   pjoinid = "CN",
   invtype = "ANNUAL",
   intensity1 = FALSE,
+  pvars2keep = NULL,
   clipxy = TRUE,
   showsteps = FALSE,
   returnxy = TRUE,
@@ -47,31 +48,32 @@ pathname) of bnd. The dsn varies by driver. See gdal OGR vector formats
 ('RMRS','SRS','NCRS','NERS','PNWRS'). If NULL, all research stations are
 included.}
 
-\item{xy_datsource}{String. Source of XY data ("obj", "csv", "datamart",
-"sqlite").  If datsource=NULL, checks extension of xy_dsn or xy to identify
-datsource.}
+\item{xy_datsource}{Source of XY data ('datamart', 'sqlite', 'obj', 'csv').}
 
-\item{xy_dsn}{String. Data source name (dsn; i.e., pathname or database)}
+\item{xy_dsn}{If datsource='sqlite', the file name (data source name) of
+the sqlite database (*.db) where XY data reside.}
 
-\item{xy}{sf R object or String. Table with xy coordinates. Can be a spatial
-polygon object, data frame, full pathname to a shapefile, or name of a layer
-within a database.}
+\item{xy}{sf R object or String. If xy_dsn = 'datamart', name of xy table 
+in FIA DataMart. If xy_dsn = 'sqlite', name of xy layer in database. If 
+datsource = 'csv', full pathname of xy CSV file(s). If datsource = 'obj', 
+name of xy R object. If datsource = 'shp', full pathname of shapefile.}
 
-\item{xy_opts}{List of xy data options to specify if xy is NOT NULL. 
-See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
+\item{xy_opts}{List of xy data options for xy (e.g., xy_opts = list(xvar='LON', 
+yvar='LAT'). See xy_options() for more options and defaults.}
 
-\item{datsource}{String. Source of FIA data ("obj", "csv", "datamart",
-"sqlite").  If datsource="sqlite", specify database name in data_dsn and
-layers in *_layer arguments.  If datsource="datamart", files are downloaded
-and extracted from FIA DataMart
-(http://apps.fs.usda.gov/fia/datamart/datamart.html). See details for more
-information about plot coordinates.  If datsource="csv", specify *.csv file
-names in *_layer arguments.}
+\item{datsource}{String. Source of FIA data for defining FIA evalutions or 
+appending variables ('datamart', 'sqlite', 'obj', 'csv'). If datsource = NULL, 
+datsource = xy_datsource. If datsource = 'datamart', data are downloaded
+extracted from FIA DataMart (http://apps.fs.usda.gov/fia/datamart/datamart.html). 
+If datsource='sqlite', specify database name(s) in data_dsn and table name(s) 
+in dbTabs() argument. If datsource = ('obj','csv'), specify *.csv file name in 
+dbTabs argument.}
 
-\item{data_dsn}{String. Name of database where *_layers reside.}
+\item{data_dsn}{String. Name of database with plot_layer and/or ppsa_layer.}
 
-\item{dbTabs}{List of database tables the user would like returned.
-See help(dbTables) for a list of options.}
+\item{dbTabs}{String or R Object. If data_dsn = 'datamart', name of table(s) 
+in FIA DataMart. If data_dsn = 'sqlite', name of layer(s) in database. If 
+datsource = 'csv', name of CSV file(s). If datsource = 'obj', name of R object.}
 
 \item{eval}{String. Type of evaluation time frame for data extraction 
 ('FIA', 'custom'). See eval_opts for more further options.}
@@ -89,6 +91,8 @@ be unique. If using most current XY coordinates, use identifier for a plot
 
 \item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
 INTENSITY = 1 (FIA base grid).}
+
+\item{pvars2keep}{String vector. One or more variables in pltTab to append to output.}
 
 \item{clipxy}{Logical. If TRUE, clips xy data to bnd.}
 

@@ -288,7 +288,7 @@ DBgetXY <- function (states = NULL,
       stop("no data in ", datsource)
     }
   }
-
+ 
   ## Check eval
   ####################################################################
   evallst <- c('FIA', 'custom')
@@ -412,7 +412,6 @@ DBgetXY <- function (states = NULL,
     dbconn <- evalInfo$dbconn
   }
 
-
   ####################################################################
   ## Check custom Evaluation data
   ####################################################################
@@ -496,11 +495,24 @@ DBgetXY <- function (states = NULL,
   } else {
     pvars2keep <- NULL
   }
-
+ 
   ####################################################################
   ## Check plot table
   ####################################################################
-  if (!xyisplot && !is.null(pvars2keep)) {    
+  if (xyisplot && !is.null(pvars2keep)) {
+    pmiss <- pvars2keep[!pvars2keep %in% xyflds]
+    if (any(pmiss %in% XYvarlst)) {
+      xymiss <- pmiss[pmiss %in% XYvarlst]
+      if (length(xymiss) > 0) {
+        stop("missing essential variables: ", toString(xymiss))
+      } else {
+        message("missing plot variables: ", toString(pmiss))
+      }
+      if (length(pmiss) < length(pvars2keep)) {
+        pvars <- pvars2keep[!pvars2keep %in% pmiss]
+      }
+    }
+  } else if (!xyisplot && !is.null(pvars2keep)) {    
 
     ## Check plot table
     ########################################################
@@ -559,7 +571,6 @@ DBgetXY <- function (states = NULL,
     } else {
       pvars <- pvars2keep
     }
-
     if (!is.null(plotnm) && length(pvars) > 0) {
       ## Check xyjoinid
       xyjoinid <- findnm(xyjoinid, xyflds, returnNULL=TRUE)
@@ -736,8 +747,8 @@ DBgetXY <- function (states = NULL,
                             popSURVEY = popSURVEY, 
                             plotnm = pnm,
                             pjoinid = pid,
-                            surveynm = "SURVEY")
-
+                            surveynm = "SURVEY",
+                            plotobj = get(pnm))
       if (xyisplot || is.null(plotnm)) {
         xyfromqry <- pfromqry
       } else {
@@ -749,6 +760,7 @@ DBgetXY <- function (states = NULL,
     }
     evalFilter <- stFilter 
   }
+ 
 
   if (intensity1) {
     intensitynm <- findnm("INTENSITY", xyvars, returnNULL=TRUE)
@@ -764,11 +776,13 @@ DBgetXY <- function (states = NULL,
     } else {
       message("the INTENSITY variable is not in dataset... ",
               "assuming plots are single intensity")
+      intensity1 <- FALSE
     }
     if (!is.null(intensitynm)) {
       evalFilter <- paste(evalFilter, "and", intensityA, "= '1'")
     }
   } 
+
 
   ##################################################################################
   ##################################################################################
@@ -835,11 +849,13 @@ DBgetXY <- function (states = NULL,
                   return(NULL) }) 
     }      
   } else {
-    xyx <- tryCatch( sqldf::sqldf(xycoords.qry, envir=.GlobalEnv, stringsAsFactors = FALSE), 
+    xyx <- tryCatch( sqldf::sqldf(xycoords.qry, envir=environment(), 
+						stringsAsFactors = FALSE), 
 			error = function(e) {
                   return(NULL) })
     if (!iseval && is.null(invyrtab) && !is.null(invyrtab.qry)) {
-      invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, envir=.GlobalEnv, stringsAsFactors = FALSE),
+      invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, envir=environment(), 
+						stringsAsFactors = FALSE),
 			error = function(e) {
                   return(NULL) }) 
     } 

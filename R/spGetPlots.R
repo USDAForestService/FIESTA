@@ -243,8 +243,7 @@ spGetPlots <- function(bnd = NULL,
 
   ## Check input parameters
   input.params <- names(as.list(match.call()))[-1]
-  formallst <- unique(c(names(formals(spGetPlots)), 
-		names(formals(DBgetPlots))))
+  formallst <- unique(names(formals(spGetPlots)))
   if (!all(input.params %in% formallst)) {
     miss <- input.params[!input.params %in% formallst]
     stop("invalid parameter: ", toString(miss))
@@ -355,7 +354,8 @@ spGetPlots <- function(bnd = NULL,
   ########################################################
   xy_datsourcelst <- c("sqlite", "datamart", "csv", "obj")
   xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
-		gui=gui, checklst=xy_datsourcelst, caption="XY data source?")
+		gui=gui, checklst=xy_datsourcelst, caption="XY data source?",
+           stopifnull=TRUE, stopifinvalid=TRUE)
 
   if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
     xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE)
@@ -364,7 +364,7 @@ spGetPlots <- function(bnd = NULL,
       stop("no data in ", xy_datsource)
     }
   }
-
+ 
   ## Check database connection - data_dsn
   ########################################################
   if (is.null(datsource)) {
@@ -377,7 +377,7 @@ spGetPlots <- function(bnd = NULL,
   datsourcelst <- c("sqlite", "datamart", "csv", "obj")
   datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
 		gui=gui, checklst=datsourcelst, caption="Plot data source?",
-           stopifnull=TRUE, stopifinvalid=TRUE)
+           stopifinvalid=TRUE)
   if (datsource == "sqlite" && !is.null(data_dsn)) {
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     dbtablst <- DBI::dbListTables(dbconn)
@@ -481,6 +481,7 @@ spGetPlots <- function(bnd = NULL,
       }
 
     } else { 	## is.null(pltids)
+
       if (!is.null(Endyr.filter)) {
         if (!is.null(Endyr.filter)) {
           if (is.null(measEndyr) && is.null(evalEndyr)) {
@@ -1024,7 +1025,7 @@ spGetPlots <- function(bnd = NULL,
       PLOT <- tabs$plt
       puniqueid <- dat$puniqueid
       dbqueries <- dat$dbqueries
-      
+
       ## If duplicate plots, sort descending based on INVYR or CN and select 1st row
       if (nrow(PLOT) > length(unique(PLOT[[puniqueid]]))) {
         if ("INVYR" %in% names(PLOT)) {

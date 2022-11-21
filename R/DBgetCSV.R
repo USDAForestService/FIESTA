@@ -37,6 +37,12 @@ DBgetCSV <- function(DBtable,
                      noIDate = TRUE) {
   # DESCRIPTION: Import data tables from FIA Datamart
 
+
+  ## Set options
+  opts <- options()
+  options(timeout = max(3000, getOption("timeout")))
+  on.exit(options(opts))
+
   # Stop if no arguments passed. No GUI available for this function
   if (nargs() == 0) {
     stop("must include DBtable")

@@ -1067,18 +1067,20 @@ DBgetPlots <- function (states = NULL,
     if(savePOP || iseval) ppsa <- {}  
 
     ## Create empty object for each spcoords
-    for (coords in spcoordslst) {
-      if (xymeasCur) {
-        assign(paste0("xyCur_", coords), {})
-      } else {
-        assign(paste0("xy_", coords), {})
-      }
-
-      if (issp) {
+    if (getxy) {
+      for (coords in spcoordslst) {
         if (xymeasCur) {
-          assign(paste0("spxyCur_", coords), {})
+          assign(paste0("xyCur_", coords), {})
         } else {
-          assign(paste0("spxy_", coords), {})
+          assign(paste0("xy_", coords), {})
+        }
+
+        if (issp) {
+          if (xymeasCur) {
+            assign(paste0("spxyCur_", coords), {})
+          } else {
+            assign(paste0("spxy_", coords), {})
+          }
         }
       } 
     }
@@ -1904,7 +1906,7 @@ DBgetPlots <- function (states = NULL,
         if (istree || !is.null(alltFilter)) {
           TREE <- DBgetCSV("TREE", stabbr, returnDT=TRUE, stopifnull=FALSE)
           if (is.null(TREE)) {
-            message("there is no TREE table in datamart")
+            stop("there is no TREE table in datamart")
           } else {
             treenm <- "TREE"
             treeflds <- names(TREE)
@@ -2052,7 +2054,6 @@ DBgetPlots <- function (states = NULL,
               }
               setcolorder(treex, c(treenames, sppvarsnew)) 
             } 
- 
             ## Append data
             if (treeReturn && returndata) {
               tabs$tree <- rbind(tabs$tree, data.frame(treex))
@@ -2129,9 +2130,10 @@ DBgetPlots <- function (states = NULL,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN)
+          assign(paste0("xyCurx_", coords), xydat[[1]])
           if (returndata) { 
             assign(paste0("xyCur_", coords), 
-				  rbind(get(paste0("xyCur_", coords)), xydat[[1]]))
+				  rbind(get(paste0("xyCur_", coords)), get(paste0("xyCurx_", coords))))
           } 
         } else {
           xydat <- DBgetXY(states = state,
@@ -2147,9 +2149,10 @@ DBgetPlots <- function (states = NULL,
                            pjoinid = pjoinid,
                            intensity1 = intensity1,
                            POP_PLOT_STRATUM_ASSGN = POP_PLOT_STRATUM_ASSGN) 
+          assign(paste0("xyx_", coords), xydat[[1]])
           if (returndata) { 
             assign(paste0("xy_", coords), 
-				  rbind(get(paste0("xy_", coords)), xydat[[1]]))
+				  rbind(get(paste0("xyCur_", coords)), get(paste0("xyx_", coords))))
           } 
         }
         dbqueries$xy <- xydat$xyqry
@@ -2300,7 +2303,7 @@ DBgetPlots <- function (states = NULL,
         gc()
       }
     }
- 
+
     ##############################################################
     ## Understory vegetation data (P2VEG_SUBPLOT_SPP/P2VEG_SUBP_STRUCTURE
     ##############################################################
