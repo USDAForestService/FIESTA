@@ -73,8 +73,7 @@ The parameters for FIESTA modules are organized by different categories based on
 Filters subset the area of the sample population for the desired output. Filters do no change the population data used for estimate (e.g., number of plots, strata weights). Some filters are defined internally, depending on the dataset, such as land area of interest (landarea) or inclusion of ACI (All Condition Inventory) data. Others are specified according to the input table, such as pfilter or cfilter. The nonsamp.filter is for removing nonsampled conditions and is applied, internally, unless otherwise stated. *All filter expressions must be in R syntax*.
 
 * **landarea**       - A predefined cond filter depending on desired sample land area {ALL, FOREST (COND_STATUS_CD=1), TIMBERLAND (SITECLCD in(1:6) & RESERVCD=0)}.
-* **pfilter**    - Plot-level filter.
-* **cfilter**    - Condition-level filter.
+* **pcfilter**    - Plot/Condition-level filter.
 
 
 <a name="tree"></a>

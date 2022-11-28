@@ -144,6 +144,7 @@ smallbnd.domain <- "DISTRICTNA"
 Next, we can get our FIA plot data and set up our auxiliary data. We can get our FIA plot data with the `spGetPlots` function from `FIESTA`, which accesses data through [FIA's DataMart](https://apps.fs.usda.gov/fia/datamart/datamart.html). Here, data are downloaded for all states intersecting boundary, then subset to boundary. 
 
 ```{r}
+
 SApltdat <- spGetPlots(bnd = WYbhdistfn,
                        xy_datsource = "obj",
                        xy = WYplt,
