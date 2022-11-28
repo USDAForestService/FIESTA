@@ -81,6 +81,9 @@ for a list of options.}
 \item{invtype}{String. Type of FIA inventory to extract ('PERIODIC',
 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.}
 
+\item{coordType}{String. c('PUBLIC', 'ACTUAL'). Defines type of coordinates and is
+used for the output name.}
+
 \item{intensity1}{Logical. If TRUE, includes only XY coordinates where 
 INTENSITY = 1 (FIA base grid).}
 

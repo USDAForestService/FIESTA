@@ -386,16 +386,16 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       }
     }
   }
- 
+
   ######################################################################################
   ## Check for missing plot variables
   ######################################################################################
   pltnmlst <- names(pltx)
   pltvars <- unique(c(pltassgnvars, pstratvars, pvars2keep))
   pvarsmiss <- pltvars[which(!pltvars %in% pltnmlst)]
-  if (length(pvarsmiss) > 0) {
-    stop("missing variables: ", paste(pvarsmiss, collapse=", "))
-  }
+#  if (length(pvarsmiss) > 0) {
+#    stop("missing variables: ", paste(pvarsmiss, collapse=", "))
+#  }
  
   ## Check missing pdoms2keep variables in pltx
   ###########################################################################

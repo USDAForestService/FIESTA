@@ -43,7 +43,7 @@
 #' for a list of options.
 #' @param invtype String. Type of FIA inventory to extract ('PERIODIC',
 #' 'ANNUAL').  Only one inventory type (PERIODIC/ANNUAL) at a time.
-#' @coordType String. c('PUBLIC', 'ACTUAL'). Defines type of coordinates and is
+#' @param coordType String. c('PUBLIC', 'ACTUAL'). Defines type of coordinates and is
 #' used for the output name.
 #' @param intensity1 Logical. If TRUE, includes only XY coordinates where 
 #' INTENSITY = 1 (FIA base grid).
@@ -456,16 +456,16 @@ DBgetXY <- function (states = NULL,
   ## Check xy table
   ####################################################################
   if (xy_datsource == "datamart") {
-    XY <- tryCatch( DBgetCSV(xy, 
+    XYdf <- tryCatch( DBgetCSV(xy, 
                              stabbrlst,
                              returnDT = TRUE, 
                              stopifnull = FALSE),
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
-    if (!is.null(XY)) {
-      xynm <- "XY"
-      xyflds <- names(XY)
+    if (!is.null(XYdf)) {
+      xynm <- "XYdf"
+      xyflds <- names(XYdf)
     }
   } else if (xy_datsource == "sqlite") {
     xynm <- chkdbtab(xytablst, xy, stopifnull=FALSE)
@@ -475,13 +475,13 @@ DBgetXY <- function (states = NULL,
       stop(xy, " does not exist in database")
     }
   } else {
-    XY <- pcheck.table(xy, stopifnull=TRUE, stopifinvalid=TRUE)
-    xynm <- "XY"
-    names(XY) <- toupper(names(XY))
-    xyflds <- names(XY)
+    XYdf <- pcheck.table(xy, stopifnull=TRUE, stopifinvalid=TRUE)
+    xynm <- "XYdf"
+    names(XYdf) <- toupper(names(XYdf))
+    xyflds <- names(XYdf)
   }
 
-  ## Check XY variables
+  ## Check XYdf variables
   ####################################################################
   xyvars <- unique(c(XYvarlst, pvars2keep))
   if (!all(xyvars %in% xyflds)) {
@@ -495,7 +495,7 @@ DBgetXY <- function (states = NULL,
   } else {
     pvars2keep <- NULL
   }
- 
+
   ####################################################################
   ## Check plot table
   ####################################################################
@@ -524,8 +524,8 @@ DBgetXY <- function (states = NULL,
         } else {
           xy.qry <- paste("select", toString(xyvars), "from", xy, 
 				"where STATECD in(", toString(stcdlst), ")")
-          XY <- DBI::dbGetQuery(xyconn, xy.qry)
-          xynm <- "XY"
+          XYdf <- DBI::dbGetQuery(xyconn, xy.qry)
+          xynm <- "XYdf"
           xy_datsource <- "datamart"
         }
       }
@@ -757,6 +757,10 @@ DBgetXY <- function (states = NULL,
       }
     } else {
       xyfromqry <- paste0(SCHEMA., xynm, " xy")
+      if (!xyisplot && !is.null(plotnm)) {
+        xyfromqry <- paste0(xyfromqry, 
+		 " JOIN ", SCHEMA., plotnm, " p ON(xy.", xyjoinid, " = p.", pjoinid, ")")
+      }
     }
     evalFilter <- stFilter 
   }
@@ -830,7 +834,6 @@ DBgetXY <- function (states = NULL,
 				" ORDER BY statecd, ", yrvar) 
   }
 
-
   ## Create invyrtab query 
   ###########################################################
   xycoords.qry <- paste0("select ", toString(xyvarsA), 
@@ -849,12 +852,14 @@ DBgetXY <- function (states = NULL,
                   return(NULL) }) 
     }      
   } else {
-    xyx <- tryCatch( sqldf::sqldf(xycoords.qry, envir=environment(), 
+    xyx <- tryCatch( sqldf::sqldf(xycoords.qry, 
 						stringsAsFactors = FALSE), 
 			error = function(e) {
+                  message(e)
                   return(NULL) })
+
     if (!iseval && is.null(invyrtab) && !is.null(invyrtab.qry)) {
-      invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, envir=environment(), 
+      invyrtab <- tryCatch( sqldf::sqldf(invyrtab.qry, 
 						stringsAsFactors = FALSE),
 			error = function(e) {
                   return(NULL) }) 
