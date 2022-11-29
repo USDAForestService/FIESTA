@@ -49,7 +49,8 @@ DBgetPlots(
   savePOP = FALSE,
   savedata_opts = NULL,
   dbconn = NULL,
-  dbconnopen = FALSE
+  dbconnopen = FALSE,
+  evalInfo = NULL
 )
 }
 \arguments{
@@ -191,6 +192,8 @@ of options. Only used when savedata = TRUE. If out_layer = NULL,}
 \item{dbconn}{Open database connection.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+
+\item{evalInfo}{List. List object output from DBgetXY().}
 }
 \value{
 if returndata=TRUE, a list of the following objects: 

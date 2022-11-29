@@ -390,13 +390,14 @@ spGetPlots <- function(bnd = NULL,
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
   if (eval == "FIA") {
-    evalCur <- ifelse (Cur, TRUE, FALSE) 
+    evalCur <- ifelse (Cur || !is.null(Endyr), TRUE, FALSE) 
     evalAll <- ifelse (All, TRUE, FALSE) 
     evalEndyr <- Endyr
     measCur=allyrs <- FALSE
     measEndyr <- NULL
+
   } else {
-    measCur <- ifelse (Cur, TRUE, FALSE) 
+    measCur <- ifelse (Cur || !is.null(Endyr), TRUE, FALSE) 
     allyrs <- ifelse (All, TRUE, FALSE) 
     if (length(Endyr) > 1) {
       stop("only one Endyr allowed for custom estimations")
@@ -561,6 +562,7 @@ spGetPlots <- function(bnd = NULL,
           pjoinid = xydat1$pjoinid 
           xyjoinid = xydat1$xyjoinid       
           bndx1 <- xydat1$bndx
+          evalInfo1 <- xydat1$evalInfo
 
           ## Get plots outside filter
           #######################################
@@ -587,6 +589,7 @@ spGetPlots <- function(bnd = NULL,
           states2 <- xydat2$states
           countyfips2 <- xydat2$countyfips
           bndx2 <- xydat2$bndx
+          evalInfo2 <- xydat2$evalInfo
 
           ## Combine XYdata inside and outside filter
           spxy <- rbind(spxy1, spxy2)
@@ -622,7 +625,8 @@ spGetPlots <- function(bnd = NULL,
           bndx <- xydat$bndx
           xy.uniqueid <- xydat$xy.uniqueid
           pjoinid = xydat$pjoinid 
-          xyjoinid = xydat$xyjoinid              
+          xyjoinid = xydat$xyjoinid 
+          evalInfo <- xydat$evalInfo             
         }
  
         ## Check xyjoinid
@@ -795,9 +799,10 @@ spGetPlots <- function(bnd = NULL,
   } else if (evalCur) {
     evalresp=savePOP <- TRUE
     msg <- paste0(msg, "for most current evaluation")
-  } else if (!is.null(evalEndyr)) {
-    evalresp=savePOP <- TRUE
-    msg <- paste0("ending in ", evalEndyr)
+    if (!is.null(evalEndyr)) {
+      evalresp=savePOP <- TRUE
+      msg <- paste0(msg, ", ending in ", evalEndyr)
+    }
   } else if (!is.null(invyrs)) {
     msg <- paste0(msg, "for inventory years ", min(invyrs), " to ", max(invyrs))
   } else if (!is.null(measyrs)) {
@@ -849,6 +854,52 @@ spGetPlots <- function(bnd = NULL,
         countycds1 <- sort(as.numeric(unique(substr(stcnty1, 3, 5))))
         stateFilter1 <- paste("p.countycd IN(", toString(countycds1), ")")
       }
+
+      ## Subset evalInfo
+      #######################################
+      evalInfo1st=evalInfo2st <- NULL
+      if (!is.null(evalInfo1)) {
+        evalInfo1st <- evalInfo1
+        if (!state %in% evalInfo1st$states) {
+          stop("invalid evalInfo")
+        }
+        evalInfo1st$states <- state
+        if (!is.null(evalInfo1st$evalidlist)) {
+          evalInfo1st$evalidlist <- evalInfo1st$evalidlist[names(evalInfo1st$evalidlist) == state]
+        }        
+        if (!is.null(evalInfo1st$invyrtab)) {
+          if ("STATECD" %in% names(evalInfo1st$invyrtab)) {
+            evalInfo1st$invyrtab <- evalInfo1st$invyrtab[evalInfo1st$invyrtab$STATECD == stcd,]
+          } else if ("STATENM" %in% names(evalInfo1st$invyrtab)) {
+            evalInfo1st$invyrtab <- evalInfo1st$invyrtab[evalInfo1st$invyrtab$STATECD == state,]
+          }
+        }
+        if (!is.null(evalInfo1st$SURVEY)) {
+          evalInfo1st$SURVEY <- evalInfo1st$SURVEY[evalInfo1st$SURVEY$STATECD == stcd,]
+        }
+      }
+      if (!is.null(evalInfo2)) {
+        evalInfo2st <- evalInfo2
+        if (!state %in% evalInfo2st$states) {
+          stop("invalid evalInfo")
+        }
+        evalInfo2st$states <- state
+        if (!is.null(evalInfo2st$evalidlist)) {
+          evalInfo2st$evalidlist <- evalInfo2st$evalidlist[names(evalInfo2st$evalidlist) == state]
+        }        
+        if (!is.null(evalInfo2st$invyrtab)) {
+          if ("STATECD" %in% names(evalInfo2st$invyrtab)) {
+            evalInfo2st$invyrtab <- evalInfo2st$invyrtab[evalInfo2st$invyrtab$STATECD == stcd,]
+          } else if ("STATENM" %in% names(evalInfo2st$invyrtab)) {
+            evalInfo2st$invyrtab <- evalInfo2st$invyrtab[evalInfo2st$invyrtab$STATECD == state,]
+          }
+        }
+        if (!is.null(evalInfo2st$SURVEY)) {
+          evalInfo2st$SURVEY <- evalInfo2st$SURVEY[evalInfo2st$SURVEY$STATECD == stcd,]
+        }
+      }
+
+
       dat1 <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -871,7 +922,8 @@ spGetPlots <- function(bnd = NULL,
                          greenwt = greenwt,
                          savePOP = savePOP,
                          stateFilter = stateFilter1, 
-                         returndata = returndata
+                         returndata = returndata,
+                         evalInfo = evalInfo1st
                          )
       tabs1 <- dat1$tabs
       tabIDs <- dat1$tabIDs
@@ -954,7 +1006,8 @@ spGetPlots <- function(bnd = NULL,
                          greenwt = greenwt,
                          savePOP = savePOP,
                          stateFilter = stateFilter2, 
-                         returndata = returndata
+                         returndata = returndata,
+                         evalInfo = evalInfo2st
                          )
       tabs2 <- dat2$tabs
       pop_plot_stratum_assgn2 <- tabs2$pop_plot_stratum_assgn
@@ -995,6 +1048,28 @@ spGetPlots <- function(bnd = NULL,
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
       }
+
+      if (!is.null(evalInfo)) {
+        evalInfost <- evalInfo
+        if (!state %in% evalInfost$states) {
+          stop("invalid evalInfo")
+        }
+        evalInfost$states <- state
+        if (!is.null(evalInfost$evalidlist)) {
+          evalInfost$evalidlist <- evalInfost$evalidlist[names(evalInfost$evalidlist) == state]
+        }        
+        if (!is.null(evalInfost$invyrtab)) {
+          if ("STATECD" %in% names(evalInfost$invyrtab)) {
+            evalInfost$invyrtab <- evalInfost$invyrtab[evalInfost$invyrtab$STATECD == stcd,]
+          } else if ("STATENM" %in% names(evalInfost$invyrtab)) {
+            evalInfost$invyrtab <- evalInfost$invyrtab[evalInfost$invyrtab$STATECD == state,]
+          }
+        }
+        if (!is.null(evalInfost$SURVEY)) {
+          evalInfost$SURVEY <- evalInfost$SURVEY[evalInfost$SURVEY$STATECD == stcd,]
+        }
+      }
+
       dat <- DBgetPlots(states = stcd, 
                          datsource = datsource,
                          data_dsn = data_dsn, 
@@ -1017,7 +1092,8 @@ spGetPlots <- function(bnd = NULL,
                          greenwt = greenwt,
                          savePOP = savePOP,
                          stateFilter = stateFilter, 
-                         returndata = returndata
+                         returndata = returndata,
+                         evalInfo = evalInfost
                          )
       tabs <- dat$tabs
       tabIDs <- dat$tabIDs

@@ -328,6 +328,7 @@
 #' of options. Only used when savedata = TRUE. If out_layer = NULL,
 #' @param dbconn Open database connection.
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
+#' @param evalInfo List. List object output from DBgetXY(). 
 #' 
 #' @return if returndata=TRUE, a list of the following objects: 
 #' \item{states}{ Vector. Input state(s) (full state names: Arizona). } 
@@ -506,7 +507,8 @@ DBgetPlots <- function (states = NULL,
                         savePOP = FALSE,
                         savedata_opts = NULL,
                         dbconn = NULL,
-                        dbconnopen = FALSE
+                        dbconnopen = FALSE,
+                        evalInfo = NULL
                         ) {
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
@@ -727,7 +729,7 @@ DBgetPlots <- function (states = NULL,
       message("understory vegetation data only available for annual data\n")
       isveg <- FALSE
     }
-    #if (all(!rslst %in% c("RMRS", "PNWRS"))) isveg <- FALSE
+ 
     if (isveg) {
       issubp <- TRUE
     } else {
@@ -801,7 +803,12 @@ DBgetPlots <- function (states = NULL,
 
   ## Get states, Evalid and/or invyrs info
   ##########################################################
-  evalInfo <- tryCatch( DBgetEvalid(states = states, 
+  if (is.null(evalInfo)) {
+
+    list.items <- c("states", "evalidlist", "invtype", "invyrtab")
+    evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
+
+    evalInfo <- tryCatch( DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource, 
                           data_dsn = data_dsn, 
@@ -818,31 +825,30 @@ DBgetPlots <- function (states = NULL,
 			error = function(e) {
                   message(e)
                   return(NULL) })
-  if (is.null(evalInfo)) {
-    iseval <- FALSE
-  } else {
-    if (is.null(evalInfo)) stop("no data to return")
-    states <- evalInfo$states
-    rslst <- evalInfo$rslst
-    evalidlist <- evalInfo$evalidlist
-    invtype <- evalInfo$invtype
-    invyrtab <- evalInfo$invyrtab
-    if (length(evalidlist) > 0) {
-      invyrs <- evalInfo$invyrs
-      iseval <- TRUE
+    if (is.null(evalInfo)) {
+      iseval <- FALSE
     }
-    ppsanm <- evalInfo$ppsanm
-    dbconn <- evalInfo$dbconn
-    SURVEY <- evalInfo$SURVEY
-    POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
-    if (!is.null(SURVEY)) {
-      surveynm <- "SURVEY"
-    }
+  }
+  if (is.null(evalInfo)) stop("no data to return")
+  states <- evalInfo$states
+  evalidlist <- evalInfo$evalidlist
+  invtype <- evalInfo$invtype
+  invyrtab <- evalInfo$invyrtab
+  if (length(evalidlist) > 0) {
+    invyrs <- evalInfo$invyrs
+    iseval <- TRUE
+  }
+  ppsanm <- evalInfo$ppsanm
+  dbconn <- evalInfo$dbconn
+  SURVEY <- evalInfo$SURVEY
+  POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
+  if (!is.null(SURVEY)) {
+    surveynm <- "SURVEY"
   }
 
   ### GET RS & rscd
   ###########################################################
-  isRMRS <- ifelse(length(rslst) == 1 && rslst == "RMRS", TRUE, FALSE) 
+  #isRMRS <- ifelse(length(rslst) == 1 && rslst == "RMRS", TRUE, FALSE) 
      
   ## Get state abbreviations and codes 
   ###########################################################
@@ -1254,7 +1260,7 @@ DBgetPlots <- function (states = NULL,
         }
       }
     }
-   
+
     ###########################################################################
     ## From query
     ###########################################################################
@@ -1280,13 +1286,16 @@ DBgetPlots <- function (states = NULL,
       popSURVEY <- ifelse(is.null(surveynm), FALSE, TRUE)
       subcycle99 <- ifelse(is.null(subcyclenm), FALSE, TRUE)
       intensity1 <- ifelse(is.null(intensitynm), FALSE, TRUE)
+
       pfromqry <- getpfromqry(Endyr = measEndyr, SCHEMA. = SCHEMA., 
                               allyrs = allyrs,
                               subcycle99 = subcycle99, 
                               intensity1 = intensity1, 
                               popSURVEY = popSURVEY,
                               plotnm = plotnm, 
-                              surveynm = surveynm)
+                              surveynm = surveynm,
+                              plotobj = get(plotnm))
+
     } else {
       if (is.null(plotnm)) {
         pfromqry <- paste(SCHEMA., "COND p")

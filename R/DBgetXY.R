@@ -356,14 +356,14 @@ DBgetXY <- function (states = NULL,
   ## Get DBgetEvalid parameters from eval_opts
   ####################################################################
   if (eval == "FIA") {
-    evalCur <- ifelse (Cur, TRUE, FALSE) 
+    evalCur <- ifelse (Cur || !is.null(Endyr), TRUE, FALSE) 
     evalAll <- ifelse (All, TRUE, FALSE) 
     evalEndyr <- Endyr
     measCur=allyrs <- FALSE
     measEndyr <- NULL
 
   } else {
-    measCur <- ifelse (Cur, TRUE, FALSE) 
+    measCur <- ifelse (Cur || !is.null(Endyr), TRUE, FALSE) 
     allyrs <- ifelse (All, TRUE, FALSE) 
     if (length(Endyr) > 1) {
       stop("only one Endyr allowed for custom estimations")
@@ -634,10 +634,6 @@ DBgetXY <- function (states = NULL,
         } else {
           xyvarsA <- paste0("xy.", unique(xyvars)) 
         }
-      } else if (datsource == "sqlite" && !is.null(XYdf)) {
-
-
-
       } else {
         ## Add alias to variables
         xyvarsA <- paste0("xy.", unique(c(xyjoinid, xyvars))) 
@@ -782,6 +778,7 @@ DBgetXY <- function (states = NULL,
     evalFilter <- paste0(stFilter, " and ", measyearA, " IN(", toString(unlist(measyrs)), ")")
 
   } else {
+
     if (measCur) {
       if (xyisplot || is.null(plotnm)) {
         pnm <- xynm
@@ -835,7 +832,6 @@ DBgetXY <- function (states = NULL,
       evalFilter <- paste(evalFilter, "and", intensityA, "= '1'")
     }
   } 
-
 
   ##################################################################################
   ##################################################################################
@@ -1025,6 +1021,7 @@ DBgetXY <- function (states = NULL,
     if (dbconnopen) {
       returnlst$dbconn <- dbconn
     }
+    returnlst$evalInfo <- evalInfo
 
     ## Return data list
     return(returnlst)

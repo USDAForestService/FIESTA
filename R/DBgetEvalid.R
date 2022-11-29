@@ -961,9 +961,9 @@ DBgetEvalid <- function(states = NULL,
                     toString(evalType.chklst))
               evalTypelist[[state]] <- evalTypelist[[state]][!evalTypelist[[state]] %in% eType.invalid]
             }
-            evalidall <- popevaltab$EVALID[!is.na(popevaltab$EVALID)]
+            evalidall <- unique(popevaltab$EVALID[!is.na(popevaltab$EVALID)])
             evalidlist[[state]] <- 
-              sort(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]])
+              sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))
             invyrs[[state]] <- 
               min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
           } else {
@@ -974,7 +974,7 @@ DBgetEvalid <- function(states = NULL,
               message(paste("invalid evalType for", state, "...using", evalTypelist[[state]]))
             }
             evalidlist[[state]] <- 
-              popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]
+              sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))
             invyrs[[state]]  <- ifelse (any(is.na(popevaltab$END_INVYR)), 
                                       unique(as.numeric(popevaltab$REPORT_YEAR_NM)), 
                                       min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE))

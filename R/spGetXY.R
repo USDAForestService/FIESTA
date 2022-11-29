@@ -448,6 +448,7 @@ spGetXY <- function(bnd,
     xy.uniqueid <- "PLT_CN"
     xyjoinid <- xydat$xyjoinid
     pjoinid <- xydat$pjoinid 
+    evalInfo <- xydat$evalInfo
   }
 
   if (clipxy) {
@@ -548,9 +549,9 @@ spGetXY <- function(bnd,
   if (returnxy) {
     returnlst$spxy <- spxy
   } 
-#  if (!is.null(evalInfo)) {
-#    returnlst$evalInfo <- evalInfo
-#  }
+  if (!is.null(evalInfo)) {
+    returnlst$evalInfo <- evalInfo
+  }
 #  if (!is.null(evalchk)) {
 #    returnlst$evalchk <- evalchk
 #  }     
