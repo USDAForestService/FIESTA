@@ -129,7 +129,7 @@ DBgetXY <- function (states = NULL,
   
   ## Set global variables
   parameters <- FALSE
-  SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=pvars=dbconn <- NULL
+  SCHEMA.=invyrtab=evalEndyr=plotnm=ppsanm=pvars=dbconn=XYdf <- NULL
 
   
   ##################################################################
@@ -442,14 +442,14 @@ DBgetXY <- function (states = NULL,
   pvars2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "PLOT", 
 					pvars2keep))
 
-  if (!is.null(measyrs)) {
+  if (!is.null(measyrs) || measCur) {
     XYvarlst <- unique(c(XYvarlst, "MEASYEAR")) 
   }
   if (!is.null(invyrs)) {
     XYvarlst <- unique(c(XYvarlst, "INVYR")) 
   }
   if (intensity1) {
-    XYvarlst <- unique(c(XYvarlst, "INTENSITY")) 
+    XYvarlst <- unique(c(XYvarlst, "INTENSITY", "PLOT_STATUS_CD")) 
   }
  
   ####################################################################
@@ -589,14 +589,64 @@ DBgetXY <- function (states = NULL,
           stop("pjoinid is invalid")
         }
       }
+      if (datsource == "sqlite") {
+        if ("STATECD" %in% pltflds) {
+          plot.qry <- paste("select", toString(unique(c(pjoinid, pvars))), 
+				"from", plotnm, 
+				"where STATECD in(", toString(stcdlst), ")")
+        } else {
+          plot.qry <- paste("select", toString(unique(c(pjoinid, pvars))), 
+				"from", plotnm)
+        }
+        PLOT <- DBI::dbGetQuery(dbconn, plot.qry)
+        plotnm <- "PLOT"
+        datsource <- "datamart"
 
-      ## Add alias to variables
-      xyvarsA <- paste0("xy.", unique(c(xyjoinid, xyvars))) 
-      if (!all(pvars2keep == pjoinid)) {
-        pvarsA <- paste0("p.", unique(pvars)) 
-        xyvarsA <- toString(c(xyvarsA, pvarsA))
+        if (xy_datsource == "sqlite" && is.null(XYdf)) {
+          if ("STATECD" %in% xyflds) {
+            xy.qry <- paste("select", toString(unique(c(xyjoinid, xyvars))), 
+				"from", xynm, 
+				"where STATECD in(", toString(stcdlst), ")")
+          } else {
+            xy.qry <- paste("select", toString(unique(c(xyjoinid, xyvars))), 
+				"from", xynm)
+          }
+          XYdf <- DBI::dbGetQuery(dbconn, xy.qry)
+          xynm <- "XYdf"
+          xy_datsource <- "datamart"
+        }
+
+        ## Check if class of xyjoinid in XYdf matches class of pjoinid in PLOT
+        tabchk <- check.matchclass(XYdf, PLOT, xyjoinid, pjoinid)
+        XYdf <- tabchk$tab1
+        PLOT <- tabchk$tab2
+
+        XYPLOT <- merge(XYdf, PLOT, by.x=xyjoinid, by.y=pjoinid)
+        if (length(XYPLOT) == 0) {
+          message("invalid join... check xyjoinid and pjoinid") 
+        }
+        xyisplot <- TRUE
+        xyvars <- unique(c(xyvars, pvars))
+        xynm <- "XYPLOT"
+        pvars=plotnm <- NULL
+        if (measCur) {
+          xyvarsA <- paste0("p.", unique(xyvars)) 
+        } else {
+          xyvarsA <- paste0("xy.", unique(xyvars)) 
+        }
+      } else if (datsource == "sqlite" && !is.null(XYdf)) {
+
+
+
       } else {
-        plotnm <- NULL
+        ## Add alias to variables
+        xyvarsA <- paste0("xy.", unique(c(xyjoinid, xyvars))) 
+        if (!all(pvars == pjoinid)) {
+          pvarsA <- paste0("p.", unique(pvars)) 
+          xyvarsA <- toString(c(xyvarsA, pvarsA))
+        } else {
+          plotnm <- NULL
+        }
       }
     }
   } else {
@@ -764,7 +814,6 @@ DBgetXY <- function (states = NULL,
     }
     evalFilter <- stFilter 
   }
- 
 
   if (intensity1) {
     intensitynm <- findnm("INTENSITY", xyvars, returnNULL=TRUE)
