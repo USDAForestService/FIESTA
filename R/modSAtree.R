@@ -494,8 +494,12 @@ modSAtree <- function(SApopdatlst = NULL,
   ## Define empty lists
   estlst <- list()
   predselectlst <- list()
-  predselectlst.unit <- list()
-  predselectlst.area <- list()
+  if (multest || SAmethod == "unit") {
+    predselectlst.unit <- list()
+  }
+  if (multest || SAmethod == "area") {
+    predselectlst.area <- list()
+  }
   SAobjlst <- list()
   dunitareabind <- {}
   if (addSAdomsdf) {
@@ -508,8 +512,13 @@ modSAtree <- function(SApopdatlst = NULL,
 
   if (!is.null(rowvar)) {
     estlst_row <- list()
-    predselectlst_row <- list()
-    SAobjslt_row <- list()
+    if (multest || SAmethod == "unit") {
+      predselectlst.unit_row <- list()
+    }
+    if (multest || SAmethod == "area") {
+      predselectlst.area_row <- list()
+    }
+    SAobjlst_row <- list()
     if (save4testing) {
       pdomdatlst_row <- list()
       dunitlutlst_row <- list()

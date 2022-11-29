@@ -480,8 +480,12 @@ modSAarea <- function(SApopdatlst = NULL,
 
   ## Define empty lists
   estlst <- list()
-  predselectlst.unit <- list()
-  predselectlst.area <- list()
+  if (multest || SAmethod == "unit") {
+    predselectlst.unit <- list()
+  }
+  if (multest || SAmethod == "area") {
+    predselectlst.area <- list()
+  }
   SAobjlst <- list()
   dunitareabind <- {}
   if (addSAdomsdf) {
@@ -494,7 +498,12 @@ modSAarea <- function(SApopdatlst = NULL,
 
   if (!is.null(rowvar)) {
     estlst_row <- list()
-    predselectlst_row <- list()
+    if (multest || SAmethod == "unit") {
+      predselectlst.unit_row <- list()
+    }
+    if (multest || SAmethod == "area") {
+      predselectlst.area_row <- list()
+    }
     SAobjlst_row <- list()
     if (save4testing) {
       pdomdatlst_row <- list()
@@ -867,7 +876,6 @@ modSAarea <- function(SApopdatlst = NULL,
         }
         SAobjlst_row[[SApopdatnm]] <- do.call(rbind, dunit_estlst_row)[,"SAobjlst.dom"]$SAobjlst.dom
       }
-
       if (multest || SAmethod == "unit") {
         predselectlst.unit_row[[SApopdatnm]] <- predselect.unit_row
       }
