@@ -155,7 +155,7 @@ DBgetCSV <- function(DBtable,
     csvtable <- gettab(DBtable=DBtable)
   } else {
     csvtable <- tryCatch(
-      do.call(rbindlist, list(lapply(stabbrs, gettab, DBtable))),
+      do.call(rbind, lapply(stabbrs, gettab, DBtable)),
 		    error=function(e) {
  		    message(e, "\n")
 		    return(NULL)
