@@ -923,7 +923,7 @@ DBgetEvalid <- function(states = NULL,
             if (!all(Endyr %in% POP_EVAL_endyrs)) {
               missEndyr <- Endyr[!Endyr %in% POP_EVAL_endyrs]
               stop(paste0(toString(missEndyr), " data are not in ", 
-                        stabbr, "_", "POP_EVAL table"))
+                        stabbr, "_", "POP_EVAL: ", toString(POP_EVAL_endyrs)))
             }  
           } else {   ## is.null(evalEndyr)
             if (evalCur) {

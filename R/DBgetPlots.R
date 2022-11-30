@@ -823,7 +823,7 @@ DBgetPlots <- function (states = NULL,
                           dbTabs = dbTabs,
                           gui = gui),
 			error = function(e) {
-                  message(e)
+                  message(e,"\n")
                   return(NULL) })
     if (is.null(evalInfo)) {
       iseval <- FALSE

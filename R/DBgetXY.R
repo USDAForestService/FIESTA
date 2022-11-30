@@ -391,12 +391,11 @@ DBgetXY <- function (states = NULL,
                           evalType = evalType,
                           gui = gui),
 			error = function(e) {
-                  message(e)
+                  message(e,"\n")
                   return(NULL) })
   if (is.null(evalInfo)) {
     iseval <- FALSE
   } else {
-    if (is.null(evalInfo)) stop("no data to return")
     states <- evalInfo$states
     rslst <- evalInfo$rslst
     evalidlist <- evalInfo$evalidlist
