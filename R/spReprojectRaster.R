@@ -309,7 +309,7 @@ spReprojectRaster <- function(rastfn,
                   ot = ot, 
                   r = r, 
                   co = co, 
-                  dstnodata = dstnodata, 
+                  dstnodata = dstnodata[1], 
                   addOptions = c("-ovr", "NONE"))
 
   return(outfilenm)
