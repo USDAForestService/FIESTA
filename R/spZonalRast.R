@@ -256,7 +256,7 @@ spZonalRast <- function(polyv,
   dtype <- rasterInfo(rastfn)$datatype
   NODATAval <- rasterInfo(rastfn)$nodata_value
   if (is.null(rast.NODATA) || is.na(rast.NODATA)) {
-    rast.NODATA <- NODATAval
+    rast.NODATA <- NODATAval[1]
   }
   if (is.na(rast.NODATA)) {
     rast.NODATA <- NULL

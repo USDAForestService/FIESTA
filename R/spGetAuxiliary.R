@@ -629,7 +629,6 @@ spGetAuxiliary <- function(xyplt = NULL,
                               savedata_opts = list(outfolder=outfolder, 
                                       overwrite_layer=overwrite_layer)
                               )
-
       sppltx <- unique(extdat.rast.cont$spplt)
       prednames.cont <- extdat.rast.cont$outnames
       inputdf.cont <- extdat.rast.cont$inputdf
