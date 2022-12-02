@@ -226,7 +226,8 @@ spGetPlots <- function(bnd = NULL,
 
   ## Set global variables
   xydat=stateFilter=countyfips=xypltx=tabs2save=evalidst=PLOT_ID=INVYR=
-	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn <- NULL
+	othertabnms=stcds=spxy=stbnd=invasive_subplot_spp=subp=subpc=dbconn=
+	bndx=evalInfo <- NULL
   cuniqueid=tuniqueid=duniqueid <- "PLT_CN"
   stbnd.att <- "COUNTYFIPS"
   returnlst <- list()
@@ -289,11 +290,9 @@ spGetPlots <- function(bnd = NULL,
 		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
     }
   } else {
-    message("no evaluation timeframe specified... using all data in database...\n")
-    eval_opts$allyrs <- TRUE
-
-#    stop("must specify an evaluation timeframe for data extraction... \n", 
-#	"...see eval_opts parameter, (e.g., eval_opts=eval_options(Cur=TRUE))")
+    message("no evaluation timeframe specified...")
+    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
+    stop()
   }
 
   ## Set xy_options defaults
@@ -350,13 +349,48 @@ spGetPlots <- function(bnd = NULL,
 
 
 
+  ## Check xy_datsource and datsource
+  ########################################################
+  datsourcelst <- c("sqlite", "datamart", "csv", "obj")
+  xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
+		gui=gui, checklst=datsourcelst, caption="XY data source?",
+           stopifinvalid=TRUE)
+
+  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
+		gui=gui, checklst=datsourcelst, caption="Plot data source?",
+           stopifinvalid=TRUE)
+
+  if (is.null(xy_datsource) && is.null(datsource)) {
+    stop("xy_datsource and/or datsource are invalid")
+  } else if (is.null(xy_datsource)) {
+    xy_datsource <- datsource
+    xy_dsn <- data_dsn
+  } else if (is.null(datsource)) {
+    datsource <- xy_datsource
+    data_dsn <- xy_dsn
+  }
+ 
+  ## Check xy_dsn
+  if (xy_datsource %in% c("sqlite", "gdb")) {
+    if (is.null(xy_dsn)) {
+      stop("xy_dsn is NULL")
+    }
+    if (!file.exists(data_dsn)) {
+      stop(xy_dsn, " is invalid")
+    }
+  }
+  ## Check data_dsn
+  if (datsource %in% c("sqlite", "gdb")) {
+    if (is.null(data_dsn)) {
+      stop("data_dsn is NULL")
+    }
+    if (!file.exists(data_dsn)) {
+      stop(data_dsn, " is invalid")
+    }
+  }
+
   ## Check database connection - xy_dsn
   ########################################################
-  xy_datsourcelst <- c("sqlite", "datamart", "csv", "obj")
-  xy_datsource <- pcheck.varchar(var2check=xy_datsource, varnm="xy_datsource", 
-		gui=gui, checklst=xy_datsourcelst, caption="XY data source?",
-           stopifnull=TRUE, stopifinvalid=TRUE)
-
   if (xy_datsource == "sqlite" && !is.null(xy_dsn)) {
     xyconn <- DBtestSQLite(xy_dsn, dbconnopen=TRUE, showlist=FALSE)
     xytablst <- DBI::dbListTables(xyconn)
@@ -367,17 +401,6 @@ spGetPlots <- function(bnd = NULL,
  
   ## Check database connection - data_dsn
   ########################################################
-  if (is.null(datsource)) {
-    datsource <- xy_datsource
-  } 
-  if (is.null(data_dsn)) {
-    data_dsn <- xy_dsn
-  } 
-
-  datsourcelst <- c("sqlite", "datamart", "csv", "obj")
-  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		gui=gui, checklst=datsourcelst, caption="Plot data source?",
-           stopifinvalid=TRUE)
   if (datsource == "sqlite" && !is.null(data_dsn)) {
     dbconn <- DBtestSQLite(data_dsn, dbconnopen=TRUE, showlist=FALSE)
     dbtablst <- DBI::dbListTables(dbconn)
@@ -385,7 +408,6 @@ spGetPlots <- function(bnd = NULL,
       stop("no data in ", datsource)
     }
   }
-
 
   ## Get DBgetEvalid parameters from eval_opts
   ################################################
@@ -406,7 +428,6 @@ spGetPlots <- function(bnd = NULL,
     evalCur=evalAll <- FALSE
     evalEndyr <- NULL
   }
-
  
   ## Check spXYdat
   if (!is.null(spXYdat)) {
@@ -532,7 +553,6 @@ spGetPlots <- function(bnd = NULL,
         ###########################################################################
  
         if (!is.null(Endyr.filter)) {
-
           ## Get XY data inside filter
           #######################################
           xydat1 <- spGetXY(bnd = bndx1, 
@@ -599,6 +619,7 @@ spGetPlots <- function(bnd = NULL,
           bndx <- rbind(bndx1, bndx2)
 
         } else {
+
           xydat <- spGetXY(bnd = bndx, 
                          states = states, 
                          RS = RS, 
@@ -693,37 +714,6 @@ spGetPlots <- function(bnd = NULL,
     }
   }
  
-  #############################################################################
-  ## Set datsource
-  ########################################################
-  datsourcelst <- c("obj", "csv", "datamart", "sqlite", "gdb")
-  datsource <- pcheck.varchar(var2check=datsource, varnm="datsource", 
-		checklst=datsourcelst, gui=gui, caption="Data source?") 
-  if (is.null(datsource)) {
-    if (!is.null(data_dsn) && file.exists(data_dsn)) {
-      dsn.ext <- getext(data_dsn)
-      if (!is.na(dsn.ext) && dsn.ext != "") {
-        datsource <- ifelse(dsn.ext == "gdb", "gdb", 
-		ifelse(dsn.ext %in% c("db", "db3", "sqlite", "sqlite3"), "sqlite", 
-             ifelse(dsn.ext == "csv", "csv",
-			ifelse(dsn.ext == "shp", "shp", "datamart"))))
-      } 
-    } else {
-      stop("datsource is invalid")
-    }
-  }
-  if (!is.null(xy_datsource) && datsource != xy_datsource) {
-    message("datsource is not the same as xy_datsource")
-  }
-  if (datsource %in% c("sqlite", "gdb")) {
-    if (is.null(data_dsn)) {
-      stop("data_dsn is NULL")
-    }
-    if (!file.exists(data_dsn)) {
-      stop(data_dsn, " is invalid")
-    }
-  }
-
   ## Check showsteps
   #############################################################################
   showsteps <- pcheck.logical(showsteps, varnm="showsteps", 
@@ -815,7 +805,7 @@ spGetPlots <- function(bnd = NULL,
   if (savePOP) {
     pop_plot_stratum_assgnx <- {} 
   }
-  
+ 
   for (i in 1:length(states)) { 
     stcliptabs <- list()
     state <- states[i]
@@ -877,6 +867,8 @@ spGetPlots <- function(bnd = NULL,
         if (!is.null(evalInfo1st$SURVEY)) {
           evalInfo1st$SURVEY <- evalInfo1st$SURVEY[evalInfo1st$SURVEY$STATECD == stcd,]
         }
+      } else {
+        evalInfo1st <- NULL
       }
       if (!is.null(evalInfo2)) {
         evalInfo2st <- evalInfo2
@@ -897,8 +889,9 @@ spGetPlots <- function(bnd = NULL,
         if (!is.null(evalInfo2st$SURVEY)) {
           evalInfo2st$SURVEY <- evalInfo2st$SURVEY[evalInfo2st$SURVEY$STATECD == stcd,]
         }
+      } else {
+        evalInfo2st <- NULL
       }
-
 
       dat1 <- DBgetPlots(states = stcd, 
                          datsource = datsource,
@@ -1048,7 +1041,7 @@ spGetPlots <- function(bnd = NULL,
         countycds <- sort(as.numeric(unique(substr(stcnty, 3, 5))))
         stateFilter <- paste("p.countycd IN(", toString(countycds), ")")
       }
-
+ 
       if (!is.null(evalInfo)) {
         evalInfost <- evalInfo
         if (!state %in% evalInfost$states) {
@@ -1068,6 +1061,8 @@ spGetPlots <- function(bnd = NULL,
         if (!is.null(evalInfost$SURVEY)) {
           evalInfost$SURVEY <- evalInfost$SURVEY[evalInfost$SURVEY$STATECD == stcd,]
         }
+      } else {
+        evalInfost <- NULL
       }
 
       dat <- DBgetPlots(states = stcd, 

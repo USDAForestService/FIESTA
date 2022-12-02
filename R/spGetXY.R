@@ -133,8 +133,7 @@ spGetXY <- function(bnd,
                     xy_datsource = "datamart", 
                     xy_dsn = NULL, 
                     xy = "PLOT",
-                    xy_opts = list(xy="PLOT", xy.uniqueid="CN", 
- 	                               xvar="LON", yvar="LAT"),
+                    xy_opts = xy_options(),
                     datsource = NULL,
                     data_dsn =NULL, 
                     dbTabs = dbTables(),
@@ -208,11 +207,9 @@ spGetXY <- function(bnd,
 		eval_defaults_list[!names(eval_defaults_list) %in% names(eval_opts)])
     }
   } else {
-    message("no evaluation timeframe specified... using all data in database...\n")
-    eval_opts$allyrs <- TRUE
-
-#    stop("must specify an evaluation timeframe for data extraction... \n", 
-#	"...see eval_opts parameter, (e.g., eval_opts=eval_options(evalCur=TRUE))")
+    message("no evaluation timeframe specified...")
+    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
+    stop()
   }
 
   ## Set xy_options defaults

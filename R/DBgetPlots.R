@@ -486,8 +486,7 @@ DBgetPlots <- function (states = NULL,
                         xy_datsource = NULL, 
                         xy_dsn = NULL, 
                         xy = "PLOT",
-                        xy_opts = xy_options(xy.uniqueid="CN", 
- 	                               xvar="LON", yvar="LAT"),
+                        xy_opts = xy_options(),
                         xymeasCur = FALSE, 
                         pjoinid = NULL, 
                         issp = FALSE, 
@@ -513,6 +512,7 @@ DBgetPlots <- function (states = NULL,
 
   ## IF NO ARGUMENTS SPECIFIED, ASSUME GUI=TRUE
   gui <- ifelse(nargs() == 0, TRUE, FALSE)
+  saveSURVEY <- FALSE
 
   other_tables <- c("BOUNDARY", "COND_DWM_CALC", "COUNTY", "DWM_COARSE_WOODY_DEBRIS", 
 	"DWM_DUFF_LITTER_FUEL", "DWM_FINE_WOODY_DEBRIS", "DWM_MICROPLOT_FUEL", 
@@ -585,8 +585,9 @@ DBgetPlots <- function (states = NULL,
       }
     }
   } else {
-    stop("must specify an evaluation timeframe for data extraction... \n", 
-	"...see eval_opts parameter, (e.g., eval_opts=list(Cur=TRUE))")
+    message("no evaluation timeframe specified...")
+    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
+    stop()
   }
 
   ## Set xy_options defaults
@@ -801,6 +802,10 @@ DBgetPlots <- function (states = NULL,
     evalEndyr <- NULL
   }
 
+  if (allyrs) {
+    saveSURVEY <- TRUE
+  }
+
   ## Get states, Evalid and/or invyrs info
   ##########################################################
   if (is.null(evalInfo)) {
@@ -841,6 +846,7 @@ DBgetPlots <- function (states = NULL,
   ppsanm <- evalInfo$ppsanm
   dbconn <- evalInfo$dbconn
   SURVEY <- evalInfo$SURVEY
+  PLOT <- evalInfo$PLOT
   POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
   if (!is.null(SURVEY)) {
     surveynm <- "SURVEY"
@@ -1155,8 +1161,10 @@ DBgetPlots <- function (states = NULL,
     } else if (datsource == "datamart") {
 
       ## PLOT table
-      if (datamartType == "CSV") {  
-        PLOT <- DBgetCSV("PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
+      if (datamartType == "CSV") { 
+        if (is.null(PLOT)) { 
+          PLOT <- DBgetCSV("PLOT", stabbr, returnDT=TRUE, stopifnull=FALSE)
+        }
         if (is.null(PLOT)) {
           message("there is no PLOT table in datamart")
         } else {
@@ -1285,7 +1293,6 @@ DBgetPlots <- function (states = NULL,
     } else if (measCur) {
       popSURVEY <- ifelse(is.null(surveynm), FALSE, TRUE)
       subcycle99 <- ifelse(is.null(subcyclenm), FALSE, TRUE)
-      intensity1 <- ifelse(is.null(intensitynm), FALSE, TRUE)
 
       pfromqry <- getpfromqry(Endyr = measEndyr, SCHEMA. = SCHEMA., 
                               allyrs = allyrs,
@@ -3502,6 +3509,20 @@ DBgetPlots <- function (states = NULL,
     }
   } ## end loop for states
 
+
+  if (savedata && saveSURVEY) {
+    datExportData(SURVEY, 
+        savedata_opts=list(outfolder=outfolder, 
+                                out_fmt=out_fmt, 
+                                out_dsn=out_dsn, 
+                                out_layer="survey",
+                                outfn.pre=outfn.pre, 
+                                overwrite_layer=overwrite_layer,
+                                append_layer=append_layer,
+                                outfn.date=outfn.date, 
+                                add_layer=TRUE)) 
+  }
+
   if (parameters) {
     ## OUTPUTS A TEXTFILE OF INPUT PARAMETERS TO OUTFOLDER
     ###########################################################
@@ -3632,6 +3653,9 @@ DBgetPlots <- function (states = NULL,
     }
     if (savePOP || (iseval && length(evalidlist) > 1) && !is.null(ppsa)) {
       returnlst$pop_plot_stratum_assgn <- setDF(ppsa)
+    }
+    if (saveSURVEY) {
+      returnlst$SURVEY <- setDF(SURVEY)
     }
  
     if (length(evalidlist) > 0) {

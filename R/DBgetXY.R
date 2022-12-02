@@ -116,6 +116,7 @@ DBgetXY <- function (states = NULL,
                      exportsp = FALSE,
                      savedata_opts = NULL,
                      POP_PLOT_STRATUM_ASSGN = NULL,
+                     SURVEY = NULL,
                      dbconnopen = FALSE
                      ) {
 
@@ -164,8 +165,9 @@ DBgetXY <- function (states = NULL,
       }
     }
   } else {
-    stop("must specify an evaluation timeframe for data extraction... \n", 
-	"...see eval_opts parameter, (e.g., eval_opts=list(Cur=TRUE))")
+    message("no evaluation timeframe specified...")
+    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
+    stop()
   }
 
   ## Set xy_options defaults
@@ -442,13 +444,13 @@ DBgetXY <- function (states = NULL,
 					pvars2keep))
 
   if (!is.null(measyrs) || measCur) {
-    XYvarlst <- unique(c(XYvarlst, "MEASYEAR")) 
+    XYvarlst <- unique(c(XYvarlst, "MEASYEAR", "PLOT_STATUS_CD", "INVYR")) 
   }
   if (!is.null(invyrs)) {
     XYvarlst <- unique(c(XYvarlst, "INVYR")) 
   }
   if (intensity1) {
-    XYvarlst <- unique(c(XYvarlst, "INTENSITY", "PLOT_STATUS_CD")) 
+    XYvarlst <- unique(c(XYvarlst, "INTENSITY")) 
   }
  
   ####################################################################
