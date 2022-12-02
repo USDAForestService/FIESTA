@@ -165,7 +165,6 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
     tablst <- DBI::dbListTables(dbconn)
     ppsanm=pltassgnqry <- NULL
 
-
     ## Filter for population data
     if (!is.null(evalid) && !is.data.frame(pltassgn)) {
       ppsanm <- chkdbtab(tablst, pltassgn, stopifnull=TRUE)
@@ -179,7 +178,7 @@ check.popdataPLT <- function(dsn, tabs, tabIDs, pltassgn, pltassgnid,
       } else {
         palias <- "p"
         pfromqry <- suppressMessages(getpfromqry(popevalid, dsn=dsn, 
-				ppsanm=ppsanm, ppsaid=pltassgnid))
+				ppsanm=ppsanm, ppsaid=pltassgnid, pjoinid=pjoinid))
       }
       whereqry <- paste0("where evalid in(", toString(evalid), ")")
       pltassgnqry <- paste("select distinct ppsa.* from", pfromqry, whereqry)
