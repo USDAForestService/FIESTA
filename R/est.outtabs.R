@@ -65,7 +65,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
   ## Set up lists
   returnlst <- list()
   titlelst <- list()
-
+ 
   ## sumunits = FALSE
   if (!is.null(unit_totest)) {
     if (esttype == "RATIO") {
@@ -80,7 +80,7 @@ est.outtabs <- function(esttype, phototype="PCT", photoratio=FALSE, sumunits=FAL
       unit_totest[[psenm]] <- unit_totest[[psenm]]
     }
     if (allin1) {
-      char.width <- max(nchar(na.omit(round(unit_totest[[psenm]], pseround))))
+      char.width <- suppressWarnings(max(nchar(na.omit(round(unit_totest[[psenm]], pseround)))))
       if (!is.null(char.width) && char.width == -Inf) char.width <- 0
     }
   }
