@@ -13,7 +13,7 @@ spGetXY(
   xy_datsource = "datamart",
   xy_dsn = NULL,
   xy = "PLOT",
-  xy_opts = list(xy = "PLOT", xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  xy_opts = xy_options(),
   datsource = NULL,
   data_dsn = NULL,
   dbTabs = dbTables(),

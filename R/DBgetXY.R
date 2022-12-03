@@ -58,9 +58,14 @@
 #' @param exportsp Logical. If TRUE, exports data as spatial. 
 #' @param savedata_opts List. See help(savedata_options()) for a list
 #' of options. Only used when savedata = TRUE or exportsp = TRUE.
+#' @param SURVEY Data frame. The name of the SURVEY data frame object
+#' if it has been already downloaded and stored in environment.
 #' @param POP_PLOT_STRATUM_ASSGN Data frame. The name of the 
-#' POP_PLOT_STRATUM_ASSGN table if already downloaded and stored in environment. 
+#' POP_PLOT_STRATUM_ASSGN data frame object if it is already downloaded 
+#' and stored in environment. 
 #' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
+#' @param evalInfo List. List object output from DBgetEvalid or DBgetXY 
+#' FIESTA functions. 
 #'
 #' @return if returndata=TRUE, a list of the following objects: 
 #' \item{xy}{ Data frame. XY data from database. The output name is based on
@@ -117,7 +122,8 @@ DBgetXY <- function (states = NULL,
                      savedata_opts = NULL,
                      POP_PLOT_STRATUM_ASSGN = NULL,
                      SURVEY = NULL,
-                     dbconnopen = FALSE
+                     dbconnopen = FALSE,
+                     evalInfo = NULL
                      ) {
 
   ## DESCRIPTION: Get the most current coordinates in the FIA database
@@ -378,7 +384,8 @@ DBgetXY <- function (states = NULL,
   ####################################################################
   ## Get states, Evalid and/or invyrs info
   ####################################################################
-  evalInfo <- tryCatch( DBgetEvalid(states = states, 
+  if (is.null(evalInfo)) {
+    evalInfo <- tryCatch( DBgetEvalid(states = states, 
                           RS = RS, 
                           datsource = datsource,
                           data_dsn = data_dsn,
@@ -395,22 +402,30 @@ DBgetXY <- function (states = NULL,
 			error = function(e) {
                   message(e,"\n")
                   return(NULL) })
-  if (is.null(evalInfo)) {
-    iseval <- FALSE
-  } else {
-    states <- evalInfo$states
-    rslst <- evalInfo$rslst
-    evalidlist <- evalInfo$evalidlist
-    invtype <- evalInfo$invtype
-    invyrtab <- evalInfo$invyrtab
-    if (length(evalidlist) > 0) {
-      invyrlst <- evalInfo$invyrs
-      iseval <- TRUE
+    if (is.null(evalInfo)) {
+      iseval <- FALSE
     }
-    SURVEY <- evalInfo$SURVEY
-    surveynm <- evalInfo$surveynm
-    POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
-    dbconn <- evalInfo$dbconn
+  }
+  if (is.null(evalInfo)) stop("no data to return")
+  states <- evalInfo$states
+  rslst <- evalInfo$rslst
+  evalidlist <- evalInfo$evalidlist
+  invtype <- evalInfo$invtype
+  invyrtab <- evalInfo$invyrtab
+  if (length(evalidlist) > 0) {
+    invyrlst <- evalInfo$invyrs
+    iseval <- TRUE
+  }
+  ppsanm <- evalInfo$ppsanm
+  dbconn <- evalInfo$dbconn
+  SURVEY <- evalInfo$SURVEY
+  PLOT <- evalInfo$PLOT
+  POP_PLOT_STRATUM_ASSGN <- evalInfo$POP_PLOT_STRATUM_ASSGN
+  if (!is.null(SURVEY)) {
+    surveynm <- "SURVEY"
+  }
+  if (!is.null(PLOT)) {
+    plotnm <- "PLOT"
   }
 
   ####################################################################
@@ -457,13 +472,16 @@ DBgetXY <- function (states = NULL,
   ## Check xy table
   ####################################################################
   if (xy_datsource == "datamart") {
-    XYdf <- tryCatch( DBgetCSV(xy, 
+    XYdf <- pcheck.table(xy, stopifnull=FALSE)
+    if (is.null(XYdf)) {
+      XYdf <- tryCatch( DBgetCSV(xy, 
                              stabbrlst,
                              returnDT = TRUE, 
                              stopifnull = FALSE),
 			error = function(e) {
                   message(e, "\n")
                   return(NULL) })
+    }
     if (!is.null(XYdf)) {
       xynm <- "XYdf"
       xyflds <- names(XYdf)

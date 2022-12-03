@@ -29,8 +29,9 @@ DBgetPlots(
   xy_datsource = NULL,
   xy_dsn = NULL,
   xy = "PLOT",
-  xy_opts = xy_options(xy.uniqueid = "CN", xvar = "LON", yvar = "LAT"),
+  xy_opts = xy_options(),
   xymeasCur = FALSE,
+  coordType = "PUBLIC",
   pjoinid = NULL,
   issp = FALSE,
   spcond = FALSE,
@@ -130,6 +131,8 @@ See xy_options (e.g., xy_opts = list(xvar='LON', yvar='LAT').}
 \item{xymeasCur}{Logical. If TRUE, include XY coordinates from the most 
 current sampled measurement of each plot.}
 
+\item{coordType}{String. Type of xy coordinates using ('PUBLIC', 'ACTUAL')}
+
 \item{pjoinid}{String. Variable in plt to join to XY data. Not necessary to
 be unique. If using most current XY coordinates, use identifier for a plot
 (e.g., PLOT_ID).}
@@ -193,7 +196,8 @@ of options. Only used when savedata = TRUE. If out_layer = NULL,}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
 
-\item{evalInfo}{List. List object output from DBgetXY().}
+\item{evalInfo}{List. List object output from DBgetEvalid or DBgetXY 
+FIESTA functions.}
 }
 \value{
 if returndata=TRUE, a list of the following objects: 

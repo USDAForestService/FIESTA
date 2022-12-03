@@ -137,7 +137,7 @@ DBgetEvalid <- function(states = NULL,
   EVAL_GRP_Endyr=STATECD=START_INVYR=END_INVYR=POP_EVAL=POP_EVAL_GRP=
 		POP_EVAL_TYP=SURVEY=POP_PLOT_STRATUM_ASSGN=evaltyp <- NULL
   EVALID=evalidlist=evalTypelist=invyrs <- NULL
-  surveynm=popevalnm=popevalgrpnm=popevaltypnm=ppsanm=plotnm <- NULL
+  surveynm=popevalnm=popevalgrpnm=popevaltypnm=ppsanm=plotnm=PLOT <- NULL
 
   #evalresp <- TRUE
   evalresp <- FALSE
@@ -710,7 +710,8 @@ DBgetEvalid <- function(states = NULL,
                                  invtype=invtype, 
                                  invyrtab=invyrtab, 
                                  evalType=evalTypelist, 
-                                 SURVEY=SURVEY)
+                                 SURVEY=SURVEY,
+                                 PLOT=PLOT)
           if (datsource == "sqlite" && !dbconnopen) {
             DBI::dbDisconnect(dbconn)
           } else {
@@ -720,7 +721,7 @@ DBgetEvalid <- function(states = NULL,
         }
       }
     }
- 
+
     ## Check evalEndyr
     if (!is.null(evalEndyr)) {
       evalresp <- TRUE

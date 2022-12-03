@@ -27,7 +27,9 @@ DBgetXY(
   exportsp = FALSE,
   savedata_opts = NULL,
   POP_PLOT_STRATUM_ASSGN = NULL,
-  dbconnopen = FALSE
+  SURVEY = NULL,
+  dbconnopen = FALSE,
+  evalInfo = NULL
 )
 }
 \arguments{
@@ -105,9 +107,16 @@ format using savedata_opts.}
 of options. Only used when savedata = TRUE or exportsp = TRUE.}
 
 \item{POP_PLOT_STRATUM_ASSGN}{Data frame. The name of the 
-POP_PLOT_STRATUM_ASSGN table if already downloaded and stored in environment.}
+POP_PLOT_STRATUM_ASSGN data frame object if it is already downloaded 
+and stored in environment.}
+
+\item{SURVEY}{Data frame. The name of the SURVEY data frame object
+if it has been already downloaded and stored in environment.}
 
 \item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+
+\item{evalInfo}{List. List object output from DBgetEvalid or DBgetXY 
+FIESTA functions.}
 }
 \value{
 if returndata=TRUE, a list of the following objects: 

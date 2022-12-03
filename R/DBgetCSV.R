@@ -40,7 +40,7 @@ DBgetCSV <- function(DBtable,
 
   ## Set options
   opts <- options()
-  options(timeout = max(3000, getOption("timeout")))
+  options(timeout = max(5000, getOption("timeout")))
   on.exit(options(opts))
 
   # Stop if no arguments passed. No GUI available for this function

@@ -39,7 +39,7 @@ DBgetSQLite <- function (states = NULL,
 
   ## Set options
   opts <- options()
-  options(timeout = max(2500, getOption("timeout")))
+  options(timeout = max(5000, getOption("timeout")))
   on.exit(options(opts))
 
   ## Set URL where data files are
