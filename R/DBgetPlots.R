@@ -2645,14 +2645,14 @@ DBgetPlots <- function (states = NULL,
         } else {
           subplotnm <- "SUBPLOT"
           names(SUBPLOT) <- toupper(names(SUBPLOT))
-          ssubpflds <- names(SUBPLOT)
+          subpflds <- names(SUBPLOT)
         }
         SUBP_COND <- DBgetCSV("SUBP_COND", stabbr, returnDT=TRUE, stopifnull=FALSE)
         if (is.null(SUBP_COND)) {
           message("there is no SUBP_COND table in datamart")
         } else {
           subpcondnm <- "SUBP_COND"
-          ssubpcflds <- names(SUBP_COND)
+          subpcflds <- names(SUBP_COND)
         }
       } else if (datsource %in% c("csv", "obj")) {
         SUBPLOT <- pcheck.table(subplot_layer, 
@@ -2662,7 +2662,7 @@ DBgetPlots <- function (states = NULL,
         } else {
           subplotnm <- "SUBPLOT"
           names(SUBPLOT) <- toupper(names(SUBPLOT))
-          ssubpflds <- names(SUBPLOT)
+          subpflds <- names(SUBPLOT)
         }
         SUBP_COND <- pcheck.table(subpcond_layer, 
 					stopifnull=TRUE, stopifinvalid=TRUE)
@@ -2671,7 +2671,7 @@ DBgetPlots <- function (states = NULL,
         } else {
           subpcondnm <- "SUBP_COND"
           names(SUBP_COND) <- toupper(names(SUBP_COND))
-          ssubpcflds <- names(SUBP_COND)
+          subpcflds <- names(SUBP_COND)
         }
       }
 
