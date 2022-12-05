@@ -31,6 +31,12 @@ FIESTAutils::DBtestPostgreSQL
 #' @export
 FIESTAutils::DBtestSQLite
 
+#' @export
+FIESTAutils::eval_options
+
+#' @export
+FIESTAutils::xy_options
+
 #' @inherit FIESTAutils::DEFAULT_NODATA source title
 #' @export
 DEFAULT_NODATA <- FIESTAutils::DEFAULT_NODATA

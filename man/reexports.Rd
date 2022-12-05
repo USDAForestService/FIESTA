@@ -14,6 +14,8 @@
 \alias{DBcreateSQLite}
 \alias{DBtestPostgreSQL}
 \alias{DBtestSQLite}
+\alias{eval_options}
+\alias{xy_options}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -21,6 +23,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{FIESTAutils}{\code{\link[FIESTAutils]{datExportData}}, \code{\link[FIESTAutils:internal_desc]{DBcreateSQLite}}, \code{\link[FIESTAutils]{DBtestPostgreSQL}}, \code{\link[FIESTAutils]{DBtestSQLite}}, \code{\link[FIESTAutils]{multest_options}}, \code{\link[FIESTAutils]{savedata_options}}, \code{\link[FIESTAutils]{spMakeSpatial_options}}, \code{\link[FIESTAutils]{strata_options}}, \code{\link[FIESTAutils]{table_options}}, \code{\link[FIESTAutils]{title_options}}, \code{\link[FIESTAutils]{unit_options}}}
+  \item{FIESTAutils}{\code{\link[FIESTAutils]{datExportData}}, \code{\link[FIESTAutils:internal_desc]{DBcreateSQLite}}, \code{\link[FIESTAutils]{DBtestPostgreSQL}}, \code{\link[FIESTAutils]{DBtestSQLite}}, \code{\link[FIESTAutils]{eval_options}}, \code{\link[FIESTAutils]{multest_options}}, \code{\link[FIESTAutils]{savedata_options}}, \code{\link[FIESTAutils]{spMakeSpatial_options}}, \code{\link[FIESTAutils]{strata_options}}, \code{\link[FIESTAutils]{table_options}}, \code{\link[FIESTAutils]{title_options}}, \code{\link[FIESTAutils]{unit_options}}, \code{\link[FIESTAutils]{xy_options}}}
 }}
 
