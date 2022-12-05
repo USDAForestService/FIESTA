@@ -3674,7 +3674,7 @@ DBgetPlots <- function (states = NULL,
     if (savePOP || (iseval && length(evalidlist) > 1) && !is.null(ppsa)) {
       returnlst$pop_plot_stratum_assgn <- setDF(ppsa)
     }
-    if (saveSURVEY) {
+    if (saveSURVEY && !is.null(SURVEY)) {
       returnlst$SURVEY <- setDF(SURVEY)
     }
  
