@@ -730,6 +730,10 @@ DBgetEvalid <- function(states = NULL,
           stop("invalid evalEndyr")
         }
         evalEndyr <- sapply(states, function(x) list(evalEndyr))
+      } else {
+        if (length(evalEndyr) > 1 && is.null(names(evalEndyr))) {
+          stop("invalid evalEndyr... names do not match states")
+        }
       }
       if (!is.null(invyrtab)) {
         for (st in names(evalEndyr)) {
@@ -912,7 +916,6 @@ DBgetEvalid <- function(states = NULL,
 #          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN,]
           popevalgrptab <- POP_EVAL_GRPstcd[POP_EVAL_GRPstcd$EVAL_GRP_Endyr %in% invtype.invyrs,]
           popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% popevalgrptab$CN,]
-        
 #          popevaltab <- POP_EVAL[POP_EVAL$EVAL_GRP_CN %in% POP_EVAL_GRPstcd$CN &
 #		  POP_EVAL$EVAL_TYP %in% evalTypelist[[state]],]
 #          popevaltab <- POP_EVAL[POP_EVAL_GRPstcd[, c("CN", "EVAL_GRP_Endyr")]]
@@ -967,6 +970,7 @@ DBgetEvalid <- function(states = NULL,
               sort(unique(popevaltab$EVALID[popevaltab$EVAL_TYP %in% evalTypelist[[state]]]))
             invyrs[[state]] <- 
               min(popevaltab$START_INVYR, na.rm=TRUE):max(popevaltab$END_INVYR, na.rm=TRUE)
+
           } else {
             if (!all(evalTypelist[[state]] %in% evalType.chklst)) { 
               evalid.min <- min(popevaltab$EVALID)

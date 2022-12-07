@@ -372,6 +372,7 @@ spGetSAdoms <- function(smallbnd,
   if (any(table(smallbndx[[smallbnd.unique]])) > 1) {
     message("smallbnd.unique is not unique")
   }
+
   ## Apply smallbnd.filter
   ####################################################################
   if (!is.null(smallbnd.filter))  {
@@ -385,7 +386,17 @@ spGetSAdoms <- function(smallbnd,
     smallbnd.unique <- "ONEDOM"
     smallbnd.domain <- "ONEDOM"
   } else {
-   smallbndx <- sf_dissolve(smallbndx, unique(c(smallbnd.unique, smallbnd.domain)))
+    ## Aggregate if smallbnd.domain is different than smallbnd.unique
+    if (smallbnd.domain != smallbnd.unique) {
+      if (length(unique(smallbndx[[smallbnd.domain]])) < length(unique(smallbndx[[smallbnd.unique]]))) {
+        smallbndx <- sf_dissolve(smallbndx, col=smallbnd.domain)
+        smallbnd.unique <- smallbnd.domain
+      } else {
+        smallbndx <- sf_dissolve(smallbndx, unique(c(smallbnd.unique, smallbnd.domain)))
+      }
+    } else {
+      smallbndx <- sf_dissolve(smallbndx, unique(c(smallbnd.unique, smallbnd.domain)))
+    }
   }
  
   ## Apply smallbnd.stfilter (Just state)
