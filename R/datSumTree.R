@@ -163,6 +163,7 @@ datSumTree <- function(tree = NULL,
   ## Set global variables  
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
 	seedf=TREECOUNT_CALC=estunits=fname <- NULL
+  subpuniqueid <- "PLT_CN"
 
 
   ## If gui.. set variables to NULL
@@ -173,6 +174,12 @@ datSumTree <- function(tree = NULL,
   checkNAtvars <- {}
   seedonly=parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
+  subplot=subpcond <- NULL
+
+  ## For documentation
+  # subplot Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
+  # The subplot-level table with SUBP_STATUS_CD variable for calculating
+  # adjustment factors by subplot.
 
 
   ## SET VARIABLE LISTS
@@ -298,6 +305,16 @@ datSumTree <- function(tree = NULL,
   bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
+  if (bysubp) {
+    ## Check subplot
+    subplotx <- pcheck.table(subplot, tab_dsn=data_dsn, tabnm="subplot", gui=gui, 
+			caption="Subplot table?")
+
+    ## Check subplot
+    subpcondx <- pcheck.table(subpcond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
+			caption="Subpcond table?")
+  }
+
   ## Check checkNA
   ###################################################################################
   NAto0 <- pcheck.logical(NAto0, varnm="NAto0", title="Convert NA to 0?", 
@@ -415,7 +432,7 @@ datSumTree <- function(tree = NULL,
     noplt <- TRUE
     nocond <- TRUE
 
-    ## Check condid in tree table and setkey to tuniqueid, condid
+    ## Check subpdid in tree table and setkey to tuniqueid, condid
     subpid <- pcheck.varchar(var2check=subpid, varnm="subpid", 
 		checklst=names(treex), caption="subplot ID - tree", 
 		warn=paste(subpid, "not in tree table"))
@@ -444,6 +461,7 @@ datSumTree <- function(tree = NULL,
       setkeyv(seedx, tsumuniqueid)
     }
   } 
+
   pltx <- pcheck.table(plt, tab_dsn=plt_dsn, gui=gui, tabnm="plt", 
 			caption="Plot table?")
  
@@ -546,9 +564,6 @@ datSumTree <- function(tree = NULL,
   ## Check getadjplot
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
 		title="Get plot adjustment?", first="NO", gui=gui)
-  if (getadjplot && is.null(condx)) {
-    stop("must include condx to adjust to plot")
-  }
 
   ## Check adjtree
   adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
@@ -558,6 +573,23 @@ datSumTree <- function(tree = NULL,
     message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
     adjtree <- TRUE
   }
+  if (adjtree && !getadjplot && !adjvar %in% names(treex)) {
+    message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
+    getadjplot <- TRUE
+  }
+  if (getadjplot) {
+    if (bysubp) {
+      stop("not available yet")
+      if (is.null(subplotx) || is.null(subpcondx)) {
+        stop("must include subplotx and subpcondx to adjust to subplot")
+      }
+    } else {
+      if (is.null(condx)) {
+        stop("must include condx to adjust to plot")
+      }
+    }
+  }
+
       
   ###########################################################  
   ### Check tsumvarlst
@@ -733,56 +765,148 @@ datSumTree <- function(tree = NULL,
   ################################################################################  
 
   if (getadjplot) {
-    ## Remove nonsampled plots 
-    if ("COND_STATUS_CD" %in% names(condx)) {
-      cond.nonsamp.filter <- "COND_STATUS_CD != 5"
-      nonsampn <- sum(condx[["COND_STATUS_CD"]] == 5, na.rm=TRUE)
-      if (length(nonsampn) > 0) {
-        message("removing ", nonsampn, " nonsampled forest conditions")
+
+    ## Remove nonsampled conditions by subplot
+    if (bysubp) {
+      stop("not figured out yet")
+
+      if ("SUBP_STATUS_CD" %in% names(subplotx)) {
+        subp.nonsamp.filter <- "SUBP_STATUS_CD != 3"
+        nonsampn <- sum(subplotx[["SUBP_STATUS_CD"]] == 3, na.rm=TRUE)
+        if (length(nonsampn) > 0) {
+          message("removing ", nonsampn, " nonsampled forest conditions")
+        } else {
+          message("assuming all sampled conditions in subplot")
+        }
+      } else {
+        message("assuming all sampled conditions in subplot")
+      }
+      
+      if (ACI && "NF_COND_STATUS_CD" %in% names(subplotx)) {
+        subp.nonsamp.filter.ACI <- "(is.na(NF_SUBP_STATUS_CD) | NF_SUBP_STATUS_CD != 3)"
+        message("removing ", sum(is.na(NF_SUBP_STATUS_CD) & NF_SUBP_STATUS_CD == 3, na.rm=TRUE), 
+		" nonsampled nonforest conditions")
+        if (!is.null(subp.nonsamp.filter)) {
+          subp.nonsamp.filter <- paste(subp.nonsamp.filter, "&", subp.nonsamp.filter.ACI)
+        }
+      }
+      subplotx <- datFilter(x=subplotx, xfilter=subp.nonsamp.filter, 
+		title.filter="subp.nonsamp.filter")$xf
+
+
+      ## Check subpuniqueid and subpid in subplot table
+      subpuniqueid <- pcheck.varchar(var2check=subpuniqueid, varnm="subpuniqueid", 
+		checklst=names(subplotx), caption="Plot ID - subplot", 
+		warn=paste(subpid, "not in tree table"))
+      subpid <- pcheck.varchar(var2check=subpid, varnm="subpid", 
+		checklst=names(subplotx), caption="subplot ID - subplot", 
+		warn=paste(subpid, "not in tree table"))
+      setkeyv(subplotx, c(subpuniqueid, subpid))
+
+      ## Check subpuniqueid and subpid in subpcond table
+      if (!all(c(subpuniqueid, subpid) %in% names(subpcondx))) {
+        stop("need ", subpuniqueid, " and ", subpid, " variables in subpcond")
+      }
+      setkeyv(subpcondx, c(subpuniqueid, subpid))
+
+
+      if (!is.null(condx)) {
+        if ("SUBP_STATUS_CD" %in% names(subpcondx) && "COND_STATUS_CD" %in% names(condx)) {
+          sumcprop.qry <- paste0("SELECT subp.", subpuniqueid, ", subp.", subpid,  
+                    ", SUM(COALESCE(subc.SUBPCOND_PROP,0)) / 4 AS SUBPPROP_UNADJ,
+                    SUM(COALESCE(subc.MICRCOND_PROP,0)) / 4 AS MICRPROP_UNADJ,
+                    SUM(COALESCE(subc.MACRCOND_PROP,0)) / 4 AS MACRPROP_UNADJ
+                FROM condx c
+                JOIN subplotx subp ON(subp.", subpuniqueid, " = c.", cuniqueid, ")
+                JOIN subpcondx subc ON(subc.", subpuniqueid, " = c.", cuniqueid, " and subc.CONDID=c.CONDID)
+                                  and subc.", subpid, " = subp.", subpid, ")
+        		WHERE subp.SUBP_STATUS_CD < 3 AND c.COND_STATUS_CD <> 5
+        		GROUP BY subp.PLT_CN")
+        } else {
+          message("need to include SUBP_STATUS_CD and COND_STATUS_CD")
+        }
+      } else {
+        if ("SUBP_STATUS_CD" %in% names(subpcondx)) {
+          sumcprop.qry <- paste0("SELECT subp.", subpuniqueid, ", subp.", subpid,  
+                    ", SUM(COALESCE(subc.SUBPCOND_PROP,0)) / 4 AS SUBPPROP_UNADJ,
+                    SUM(COALESCE(subc.MICRCOND_PROP,0)) / 4 AS MICRPROP_UNADJ,
+                    SUM(COALESCE(subc.MACRCOND_PROP,0)) / 4 AS MACRPROP_UNADJ
+                FROM subplotx subp 
+                JOIN subpcondx subc ON(subc.", subpuniqueid, " = subp.", subpuniqueid, ")
+                                   and subc.", subpid, " = subp.", subpid, ")
+        		WHERE subp.SUBP_STATUS_CD < 3 AND c.COND_STATUS_CD <> 5
+        		GROUP BY subp.PLT_CN")
+        } else {
+          message("need to include SUBP_STATUS_CD")
+        }
+      }
+      subpcx <- data.table(sqldf::sqldf(sumcprop.qry))
+      subpcx[, CONDPROP_UNADJ := ifelse(MACRPROP_UNADJ > 0, MACRPROP_UNADJ, SUBPPROP_UNADJ)]
+
+    
+      ## Check if class of tuniqueid matches class of cuniqueid
+      tabs <- check.matchclass(treex, subpx, c(tuniqueid, subpid), c(subpuniqueid, subpid))
+      treex <- tabs$tab1
+      subpcondx <- tabs$tab2
+
+      adjfacdata <- getadjfactorVOL(treex=treef, seedx=seedf, condx=subpcx, 
+		tuniqueid=c(tuniqueid, subpid), cuniqueid=c(subpuniqueid, subpid), adj="plot",
+		areawt="CONDPROP_UNADJ")
+    
+
+    } else {
+      ## Remove nonsampled conditions  
+      if ("COND_STATUS_CD" %in% names(condx)) {
+        cond.nonsamp.filter <- "COND_STATUS_CD != 5"
+        nonsampn <- sum(condx[["COND_STATUS_CD"]] == 5, na.rm=TRUE)
+        if (length(nonsampn) > 0) {
+          message("removing ", nonsampn, " nonsampled forest conditions")
+        } else {
+          message("assuming all sampled conditions in cond")
+        }
       } else {
         message("assuming all sampled conditions in cond")
       }
-    } else {
-      message("assuming all sampled conditions in cond")
-    }
-    if (ACI && "NF_COND_STATUS_CD" %in% names(condx)) {
-      cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
-      message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
+      if (ACI && "NF_COND_STATUS_CD" %in% names(condx)) {
+        cond.nonsamp.filter.ACI <- "(is.na(NF_COND_STATUS_CD) | NF_COND_STATUS_CD != 5)"
+        message("removing ", sum(is.na(NF_COND_STATUS_CD) & NF_COND_STATUS_CD == 5, na.rm=TRUE), 
 		" nonsampled nonforest conditions")
-      if (!is.null(cond.nonsamp.filter)) 
-        cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
-    }
-    condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
+        if (!is.null(cond.nonsamp.filter)) {
+          cond.nonsamp.filter <- paste(cond.nonsamp.filter, "&", cond.nonsamp.filter.ACI)
+        }
+      }
+      condx <- datFilter(x=condx, xfilter=cond.nonsamp.filter, 
 		title.filter="cond.nonsamp.filter")$xf
     
-    ## Check cuniqueid and condid in cond table
-    condnmlst <- names(condx)
-    cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
+      ## Check cuniqueid and condid in cond table
+      condnmlst <- names(condx)
+      cuniqueid <- pcheck.varchar(var2check=cuniqueid, varnm="cuniqueid", 
                                 checklst=condnmlst, caption="UniqueID variable - cond", 
                                 warn=paste(cuniqueid, "not in cond table"))
     
-    if (is.null(cuniqueid)) {
-      if (tuniqueid %in% condnmlst) {
-        cuniqueid <- tuniqueid
-      } else {
-        stop("cuniqueid is invalid")
+      if (is.null(cuniqueid)) {
+        if (tuniqueid %in% condnmlst) {
+          cuniqueid <- tuniqueid
+        } else {
+          stop("cuniqueid is invalid")
+        }
+      }
+    
+      ## Check if class of tuniqueid matches class of cuniqueid
+      tabs <- check.matchclass(treex, condx, tuniqueid, cuniqueid)
+      treex <- tabs$tab1
+      condx <- tabs$tab2
+
+      adjfacdata <- getadjfactorVOL(treex=treef, seedx=seedf, condx=condx, 
+		tuniqueid=tuniqueid, cuniqueid=cuniqueid, adj="plot")
+      condx <- adjfacdata$condx
+      varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
+      if (any(varadjlst %in% names(condx))) {
+        varadjlst <- varadjlst[varadjlst %in% names(condx)]
+        condx[, (varadjlst) := NULL]
       }
     }
-    
-    ## Check if class of tuniqueid matches class of cuniqueid
-    tabs <- check.matchclass(treex, condx, tuniqueid, cuniqueid)
-    treex <- tabs$tab1
-    condx <- tabs$tab2
-
-    adjfacdata <- getadjfactorVOL(treex=treef, seedx=seedf, condx=condx, 
-		tuniqueid=tuniqueid, cuniqueid=cuniqueid, adj="plot")
-    condx <- adjfacdata$condx
-    varadjlst <- c("ADJ_FACTOR_COND", "ADJ_FACTOR_SUBP", "ADJ_FACTOR_MICR", "ADJ_FACTOR_MACR")
-    if (any(varadjlst %in% names(condx))) {
-      varadjlst <- varadjlst[varadjlst %in% names(condx)]
-      condx[, (varadjlst) := NULL]
-    }
-      
+       
     treef <- adjfacdata$treex
     if (addseed) {
       seedf <- adjfacdata$seedx

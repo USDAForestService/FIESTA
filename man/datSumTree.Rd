@@ -8,6 +8,8 @@ datSumTree(
   tree = NULL,
   seed = NULL,
   cond = NULL,
+  subplot = NULL,
+  subpcond = NULL,
   datsource = "obj",
   data_dsn = NULL,
   plt = NULL,
@@ -50,6 +52,10 @@ datSumTree(
 to join the aggregated tree data to, if bycond=TRUE. This table also may be
 used for condition proportion or strata variables used if adjcond or
 adjstrata = TRUE (See details below).  This table is optional.}
+
+\item{subplot}{Dataframe or comma-delimited file (*.csv). If getadjplot=TRUE, 
+The subplot-level table with SUBP_STATUS_CD variable for calculating
+adjustment factors by subplot.}
 
 \item{datsource}{String. Source of data ('obj', 'csv', 'sqlite', 'gdb').}
 

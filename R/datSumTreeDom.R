@@ -403,6 +403,16 @@ datSumTreeDom <- function(tree = NULL,
   bysubp <- pcheck.logical(bysubp, varnm="bysubp", title="By subplot?", 
 		first="YES", gui=gui, stopifnull=TRUE)
 
+  if (bysubp) {
+    ## Check subplot
+    subplotx <- pcheck.table(subplot, tab_dsn=data_dsn, tabnm="subplot", gui=gui, 
+			caption="Subplot table?")
+
+    ## Check subplot
+    subpcondx <- pcheck.table(subpcond, tab_dsn=data_dsn, tabnm="subp_cond", gui=gui, 
+			caption="Subpcond table?")
+  }
+
   ## Check lbs2tons
   ###################################################################################
   lbs2tons <- pcheck.logical(lbs2tons, varnm="lbs2tons", title="Pounds to tons?", 
@@ -659,17 +669,32 @@ datSumTreeDom <- function(tree = NULL,
   ## Check getadjplot
   getadjplot <- pcheck.logical(getadjplot, varnm="getadjplot", 
 		title="Get plot adjustment?", first="NO", gui=gui)
-  if (getadjplot && is.null(condx)) 
-    stop("must include condx to adjust to plot")
 
   ## Check adjtree
-  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Area adjustment", 
+  adjtree <- pcheck.logical(adjtree, varnm="adjtree", title="Adjust trees", 
 		first="NO", gui=gui)
   if (is.null(adjtree)) adjtree <- FALSE
   if (getadjplot && !adjtree) {
     message("getadjplot=TRUE, and adjtree=FALSE... setting adjtree=TRUE")
     adjtree <- TRUE
   }
+  if (adjtree && !getadjplot && !adjvar %in% names(treex)) {
+    message(adjvar, " variable not in tree table... setting getadjplot=TRUE")
+    getadjplot <- TRUE
+  }
+  if (getadjplot) {
+    if (bysubp) {
+      stop("not available yet")
+      if (is.null(subplotx) || is.null(subpcondx)) {
+        stop("must include subplotx and subpcondx to adjust to subplot")
+      }
+    } else {
+      if (is.null(condx)) {
+        stop("must include condx to adjust to plot")
+      }
+    }
+  }
+
 
   ###########################################################  
   ### Check tsumvar 
