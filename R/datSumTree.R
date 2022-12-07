@@ -162,7 +162,8 @@ datSumTree <- function(tree = NULL,
 
   ## Set global variables  
   COND_STATUS_CD=PLOT_STATUS_CD=COUNT=plts=SUBP=NF_COND_STATUS_CD=
-	seedf=TREECOUNT_CALC=estunits=fname <- NULL
+	seedf=TREECOUNT_CALC=estunits=fname=NF_SUBP_STATUS_CD=
+	CONDPROP_UNADJ=MACRPROP_UNADJ=SUBPPROP_UNADJ <- NULL
   subpuniqueid <- "PLT_CN"
 
 
@@ -845,7 +846,7 @@ datSumTree <- function(tree = NULL,
 
     
       ## Check if class of tuniqueid matches class of cuniqueid
-      tabs <- check.matchclass(treex, subpx, c(tuniqueid, subpid), c(subpuniqueid, subpid))
+      tabs <- check.matchclass(treex, subpcx, c(tuniqueid, subpid), c(subpuniqueid, subpid))
       treex <- tabs$tab1
       subpcondx <- tabs$tab2
 

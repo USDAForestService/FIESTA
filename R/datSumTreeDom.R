@@ -268,6 +268,7 @@ datSumTreeDom <- function(tree = NULL,
   seedclnm <- "<1"
   seedonly=parameters <- FALSE
   ref_estvar <- FIESTAutils::ref_estvar
+  subplot=subpcond <- NULL
 
   ## If gui.. set variables to NULL
   if (gui) bycond=tuniqueid=puniqueid=cuniqueid=ACI=TPA=tfun=tdomvar=tdomlst=
