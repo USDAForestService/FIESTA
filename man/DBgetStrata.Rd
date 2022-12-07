@@ -10,15 +10,14 @@ DBgetStrata(
   datsource = "datamart",
   data_dsn = NULL,
   states = NULL,
-  evalid = NULL,
-  evalCur = TRUE,
-  evalEndyr = NULL,
-  evalAll = FALSE,
-  evalType = "VOL",
+  eval_opts = eval_options(Cur = TRUE),
   savedata = FALSE,
   getassgn = TRUE,
   pop_plot_stratum_assgn = NULL,
-  savedata_opts = NULL
+  savedata_opts = NULL,
+  dbconn = NULL,
+  dbconnopen = FALSE,
+  evalInfo = NULL
 )
 }
 \arguments{
@@ -36,24 +35,9 @@ details for necessary variables.}
 \item{states}{String or numeric vector. Name(s) (e.g., 'Arizona','New
 Mexico') or code(s) (e.g., 4, 35) of states for strata if dat=NULL.}
 
-\item{evalid}{Integer. The evaluation if dat=NULL.}
-
-\item{evalCur}{Logical. If TRUE, the most current evalidation for state(s).}
-
-\item{evalEndyr}{Number. The end year of evalidation time period for
-state(s).}
-
-\item{evalAll}{Logical. If TRUE, gets all EVALIDs for invtype.}
-
-\item{evalType}{String vector. The type(s) of evaluation of interest ('ALL',
-'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
-'ALL' includes nonsampled plots; 'CURR' includes plots used for area
-estimates; 'VOL' includes plots used for area and/or tree estimates; The
-evalType 'GRM' includes plots used for growth, removals, mortality, and
-change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
-are accepted. See details below and FIA database manual for regional
-availability and/or differences. Note: do not use if EVALID is specified.
-See notes for more information on evalType.}
+\item{eval_opts}{List of evaluation options for 'FIA' or 'custom'
+evaluations to determine the set of data returned. See help(eval_options)
+for a list of options.}
 
 \item{savedata}{Logical. If TRUE, writes output to outfolder.}
 
@@ -65,6 +49,13 @@ state(s).}
 
 \item{savedata_opts}{List. See help(savedata_options()) for a list
 of options. Only used when savedata = TRUE.}
+
+\item{dbconn}{Open database connection.}
+
+\item{dbconnopen}{Logical. If TRUE, the dbconn connection is not closed.}
+
+\item{evalInfo}{List. List object output from DBgetEvalid or DBgetXY 
+FIESTA functions.}
 }
 \value{
 FIAstrata - a list of the following objects: \item{pltassgn}{ Data
@@ -142,7 +133,7 @@ evaluation occurring in the database.
 \dontrun{
 # Get strata for the most current evaluation of a state (ex. Wyoming)
 WYstrat1 <- DBgetStrata(states = "Wyoming",
-                        evalCur = TRUE)
+                        eval_opts = list(Cur = TRUE))
 names(WYstrat1)
 
 head(WYstrat1$pltassgn)

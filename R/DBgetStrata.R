@@ -31,27 +31,20 @@
 #' (*.sqlite).
 #' @param states String or numeric vector. Name(s) (e.g., 'Arizona','New
 #' Mexico') or code(s) (e.g., 4, 35) of states for strata if dat=NULL.
-#' @param evalid Integer. The evaluation if dat=NULL.
-#' @param evalCur Logical. If TRUE, the most current evalidation for state(s).
-#' @param evalEndyr Number. The end year of evalidation time period for
-#' state(s).
-#' @param evalAll Logical. If TRUE, gets all EVALIDs for invtype.
-#' @param evalType String vector. The type(s) of evaluation of interest ('ALL',
-#' 'CURR', 'VOL', 'GRM', 'P2VEG', 'DWM", 'INV', 'REGEN', 'CRWN').  The evalType
-#' 'ALL' includes nonsampled plots; 'CURR' includes plots used for area
-#' estimates; 'VOL' includes plots used for area and/or tree estimates; The
-#' evalType 'GRM' includes plots used for growth, removals, mortality, and
-#' change estimates (eval_typ %in% c(GROW, MORT, REMV, CHNG)).  Multiple types
-#' are accepted. See details below and FIA database manual for regional
-#' availability and/or differences. Note: do not use if EVALID is specified.
-#' See notes for more information on evalType.
+#' @param eval_opts List of evaluation options for 'FIA' or 'custom'
+#' evaluations to determine the set of data returned. See help(eval_options)
+#' for a list of options.
 #' @param getassgn Logical. If TRUE, extracts plot assignments from
 #' pop_plot_stratum_assgn table in database.
 #' @param pop_plot_stratum_assgn Data frame. The pop_plot_stratum_assgn for
 #' state(s).
 #' @param savedata Logical. If TRUE, writes output to outfolder.
 #' @param savedata_opts List. See help(savedata_options()) for a list
-#' of options. Only used when savedata = TRUE.  
+#' of options. Only used when savedata = TRUE.
+#' @param dbconn Open database connection.
+#' @param dbconnopen Logical. If TRUE, the dbconn connection is not closed. 
+#' @param evalInfo List. List object output from DBgetEvalid or DBgetXY 
+#' FIESTA functions.   
 #' 
 #' @return FIAstrata - a list of the following objects: \item{pltassgn}{ Data
 #' frame. Plot-level strata/estimation unit assignment.  If dat is not NULL,
@@ -103,7 +96,7 @@
 #' \dontrun{
 #' # Get strata for the most current evaluation of a state (ex. Wyoming)
 #' WYstrat1 <- DBgetStrata(states = "Wyoming",
-#'                         evalCur = TRUE)
+#'                         eval_opts = list(Cur = TRUE))
 #' names(WYstrat1)
 #' 
 #' head(WYstrat1$pltassgn)
@@ -126,16 +119,16 @@ DBgetStrata <- function(dat = NULL,
                         uniqueid = "CN", 
                         datsource = "datamart", 
                         data_dsn = NULL, 
-                        states = NULL, 
-                        evalid = NULL, 
-                        evalCur = TRUE, 
-                        evalEndyr = NULL, 
-                        evalAll = FALSE, 
-                        evalType = "VOL", 
+                        states = NULL,
+                        eval_opts = eval_options(Cur=TRUE),
                         savedata = FALSE, 
                         getassgn = TRUE, 
                         pop_plot_stratum_assgn = NULL,
-                        savedata_opts = NULL){
+                        savedata_opts = NULL,
+                        dbconn = NULL,
+                        dbconnopen = FALSE,
+                        evalInfo = NULL
+                        ){
   ######################################################################################
   ## DESCRIPTION: This function gets the strata info and area by estimation unit from 
   ##		FIA Database, extracts and merges plot-level assignments to data file, and 
@@ -164,7 +157,7 @@ DBgetStrata <- function(dat = NULL,
   SCHEMA. <- ""
   parameters <- FALSE
   PLTdups <- FALSE
-
+  eval <- "FIA"
 
   ##################################################################
   ## CHECK INPUT PARAMETERS
@@ -179,6 +172,28 @@ DBgetStrata <- function(dat = NULL,
  
   ## Check parameter lists
   pcheck.params(input.params, savedata_opts=savedata_opts)
+
+
+  ## Set eval_options defaults
+  eval_defaults_list <- formals(eval_options)[-length(formals(eval_options))] 
+  for (i in 1:length(eval_defaults_list)) {
+    assign(names(eval_defaults_list)[[i]], eval_defaults_list[[i]])
+  } 
+  ## Set user-supplied eval_opts values
+  if (length(eval_opts) > 0) {
+    for (i in 1:length(eval_opts)) {
+      if (names(eval_opts)[[i]] %in% names(eval_defaults_list)) {
+        assign(names(eval_opts)[[i]], eval_opts[[i]])
+      } else {
+        stop(paste("Invalid parameter: ", names(eval_opts)[[i]]))
+      }
+    }
+  } else {
+    message("no evaluation timeframe specified...")
+    message("see eval and eval_opts parameters (e.g., eval='custom', eval_opts=eval_options(Cur=TRUE))\n")
+    stop()
+  }
+
   
   ## Set savedata defaults
   savedata_defaults_list <- formals(savedata_options)[-length(formals(savedata_options))]
@@ -303,13 +318,56 @@ DBgetStrata <- function(dat = NULL,
     evalid <- sort(unique(POP_PLOT_STRATUM_ASSGN[[evalidnm]]))
   }
 
+  ## Get DBgetEvalid parameters from eval_opts
+  ################################################
+  if (eval == "FIA") {
+    evalCur <- ifelse (Cur, TRUE, FALSE) 
+    evalAll <- ifelse (All, TRUE, FALSE) 
+    evalEndyr <- Endyr
+    measCur=allyrs <- FALSE
+    measEndyr <- NULL
+  } else {
+    measCur <- ifelse (Cur, TRUE, FALSE) 
+    allyrs <- ifelse (All, TRUE, FALSE) 
+    if (length(Endyr) > 1) {
+      stop("only one Endyr allowed for custom estimations")
+    }
+    measEndyr <- Endyr
+    evalCur=evalAll <- FALSE
+    evalEndyr <- NULL
+  }
+
+  if (allyrs) {
+    saveSURVEY <- TRUE
+  }
+
+
   ## Get Evalid
-  evalInfo <- DBgetEvalid(states=states, 
-                          datsource=datsource,
-                          data_dsn=data_dsn,
-                          invyrtab=invyrtab, evalid=evalid, 
-                          evalCur=evalCur, evalEndyr=evalEndyr, 
-                          evalAll=evalAll, evalType=evalType, gui=gui)
+  ##########################################################
+  if (is.null(evalInfo)) {
+
+    list.items <- c("states", "evalidlist", "invtype", "invyrtab")
+    evalInfo <- pcheck.object(evalInfo, "evalInfo", list.items=list.items)
+    evalInfo <- tryCatch( DBgetEvalid(states = states, 
+                          datsource = datsource, 
+                          data_dsn = data_dsn, 
+                          dbconn = dbconn,
+                          dbconnopen = TRUE,
+                          invyrtab = invyrtab, 
+                          evalid = evalid, 
+                          evalCur = evalCur, 
+                          evalEndyr = evalEndyr, 
+                          evalAll = evalAll, 
+                          evalType = evalType, 
+                          gui = gui),
+			error = function(e) {
+                  message(e,"\n")
+                  return(NULL) })
+    if (is.null(evalInfo)) {
+      iseval <- FALSE
+    }
+  }
+  if (is.null(evalInfo)) stop("no data to return")
   states <- evalInfo$states
   rslst <- evalInfo$rslst
   evalidlist <- evalInfo$evalidlist
