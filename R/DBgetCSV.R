@@ -22,9 +22,6 @@
 #' @author Tracey S. Frescino
 #' @examples
 #' \dontrun{
-#' # Get reference table for FIA research stations
-#' DBgetCSV(DBtable="ref_research_station")
-#' 
 #' # Get plot data for multiple states
 #' FIAplots <- DBgetCSV("PLOT", c("Georgia", "Utah"))
 #' table(FIAplots$STATECD)

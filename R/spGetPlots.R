@@ -148,9 +148,9 @@
 #' names(dat)
 #' tabs <- dat$tabs
 #' names(tabs)
-#' head(tabs$pltx)
+#' head(tabs$plt)
 #' 
-#' table(tabs$pltx$MEASYEAR)
+#' table(tabs$plt$MEASYEAR)
 #' 
 #' # Extract data from FIA datamart for most current evaluation
 #' datCur <- spGetPlots(bnd = WYbhfn,
@@ -160,9 +160,9 @@
 #' names(datCur)
 #' tabsCur <- datCur$tabs
 #' names(tabsCur)
-#' head(tabsCur$pltx)
+#' head(tabsCur$plt)
 #' 
-#' table(tabsCur$pltx$MEASYEAR)
+#' table(tabsCur$plt$MEASYEAR)
 #' } 
 #' @export spGetPlots
 spGetPlots <- function(bnd = NULL, 

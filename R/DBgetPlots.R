@@ -431,7 +431,8 @@
 #' \dontrun{
 #' # Extract the most current evaluation of data for Utah
 #' UTdat <- DBgetPlots(states = "Utah", 
-#'                     evalCur = TRUE)
+#'                     eval = "FIA",
+#'                     eval_opts = list(Cur = TRUE))
 #' names(UTdat)
 #' head(UTdat$plt)
 #' UTdat$pltcnt
@@ -445,14 +446,16 @@
 #' 
 #' # Extract specified inventory years 2012:2014 and spatial information
 #' UTdat2 <- DBgetPlots(states = "Utah",
-#'                      invyrs = 2012:2014, 
+#'                      eval = "custom",
+#'                      eval_opts = list(invyrs = 2012:2014), 
 #'                      issp = TRUE)
 #' names(UTdat2)
 #' UTdat2$pltcnt
-#' UTdat2$spxy_PUBLIC
+#' UTdat2$xy_PUBLIC
 #'
 #' # Extract and display plots with aspen forest type
 #' UTdat3 <- DBgetPlots(states = "Utah",
+#'                      eval = "custom",
 #'                      eval_opts = eval_options(invyrs = 2012:2014),
 #'                      issp = TRUE,
 #'                      allFilter = "FORTYPCD == 901")
