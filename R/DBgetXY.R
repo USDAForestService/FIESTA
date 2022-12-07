@@ -455,6 +455,10 @@ DBgetXY <- function (states = NULL,
   ## Define variables
   ###########################################################
   XYvarlst <- unique(c(xy.uniqueid, xyjoinid, xvar, yvar))
+  if (any(XYvarlst %in% "")) {
+    XYempty <- XYvarlst[XYvarlst %in% ""] 
+    XYvarlst <- XYvarlst[!XYvarlst %in% XYempty]
+  }
   pvars2keep <- unique(c("STATECD", "UNITCD", "COUNTYCD", "PLOT", 
 					pvars2keep))
 
@@ -523,14 +527,25 @@ DBgetXY <- function (states = NULL,
     if (any(pmiss %in% XYvarlst)) {
       xymiss <- pmiss[pmiss %in% XYvarlst]
       if (length(xymiss) > 0) {
-        stop("missing essential variables: ", toString(xymiss))
+        if (all(c("LON", "LAT") %in% xymiss) && all(c("LON_PUBLIC", "LAT_PUBLIC") %in% xyflds)) {
+          xyvars <- c(xyvars[!xyvars %in% c("LON", "LAT")], "LON_PUBLIC", "LAT_PUBLIC")
+          xymiss <- xymiss[!xymiss %in% c("LON", "LAT")]
+          xvar <- "LON_PUBLIC"
+          yvar <- "LAT_PUBLIC"
+        } 
+        if (length(xymiss) > 0) {
+          stop("missing essential variables: ", toString(xymiss))
+        }
       } else {
         message("missing plot variables: ", toString(pmiss))
       }
-      if (length(pmiss) < length(pvars2keep)) {
-        pvars <- pvars2keep[!pvars2keep %in% pmiss]
-      }
     }
+    if (measCur) {
+      xyvarsA <- paste0("p.", unique(xyvars)) 
+    } else {
+      xyvarsA <- paste0("xy.", unique(xyvars)) 
+    }
+
   } else if (!xyisplot && !is.null(pvars2keep)) {    
 
     ## Check plot table
@@ -903,6 +918,7 @@ DBgetXY <- function (states = NULL,
   xycoords.qry <- paste0("select ", toString(xyvarsA), 
 		" from ", xyfromqry,
 		" where ", evalFilter)
+  message(xycoords.qry)
 
   if (xy_datsource == "sqlite") {
     xyx <- tryCatch( DBI::dbGetQuery(dbconn, xycoords.qry),
